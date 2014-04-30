@@ -377,7 +377,7 @@ Variant ArrayIter::second() {
   }
   switch (getCollectionType()) {
     case Collection::VectorType: {
-      c_Vector* vec = getVector();
+      auto* vec = getVector();
       if (UNLIKELY(m_version != vec->getVersion())) {
         throw_collection_modified();
       }
@@ -441,7 +441,7 @@ const Variant& ArrayIter::secondRefPlus() {
   }
   switch (getCollectionType()) {
     case Collection::VectorType: {
-      c_Vector* vec = getVector();
+      auto* vec = getVector();
       if (UNLIKELY(m_version != vec->getVersion())) {
         throw_collection_modified();
       }

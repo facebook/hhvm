@@ -58,9 +58,9 @@ inline size_t getCollectionSize(const ObjectData* od) {
 /**
  * Called by the JIT on an emitVectorSet().
  */
+class c_Vector;
 void triggerCow(c_Vector* vec);
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz);
-TypedValue* cvarToCell(const Variant* v);
 
 using ExtCollectionObjectData = ExtObjectDataFlags<
   ObjectData::IsCppBuiltin |
@@ -89,8 +89,6 @@ class BaseVector : public ExtCollectionObjectData {
 
   // ConstIndexAccess
   bool containskey(const Variant& key);
-  Variant at(const Variant& key);
-  Variant get(const Variant& key);
 
   // KeyedIterable
   Object getiterator();
@@ -143,7 +141,6 @@ class BaseVector : public ExtCollectionObjectData {
   void keys(BaseVector* bvec);
 
   // Others
-  void construct(const Variant& iterable = null_variant);
   Object lazy();
   Array toarray();
   Array tokeysarray();
@@ -185,13 +182,11 @@ class BaseVector : public ExtCollectionObjectData {
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
   Array toArrayImpl() const;
   void init(const Variant& t);
-
-  // Try to get the compiler to inline these.
 
   TypedValue* at(int64_t key) {
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
@@ -200,12 +195,39 @@ class BaseVector : public ExtCollectionObjectData {
     }
     return &m_data[key];
   }
+  TypedValue* at(const TypedValue* key) {
+    assert(key->m_type != KindOfRef);
+    if (LIKELY(key->m_type == KindOfInt64)) {
+      return at(key->m_data.num);
+    }
+    throwBadKeyType();
+  }
+  const Variant& at(const Variant& key) {
+    return tvAsCVarRef(at(key.asCell()));
+  }
 
   TypedValue* get(int64_t key) {
     if ((uint64_t)key >= (uint64_t)m_size) {
       return nullptr;
     }
     return &m_data[key];
+  }
+  TypedValue* get(const TypedValue* key) {
+    assert(key->m_type != KindOfRef);
+    if (LIKELY(key->m_type == KindOfInt64)) {
+      return get(key->m_data.num);
+    }
+    throwBadKeyType();
+  }
+  const Variant& get(const Variant& key) {
+    const auto* k = key.asCell();
+    if (LIKELY(k->m_type == KindOfInt64)) {
+      if ((uint64_t)k->m_data.num >= (uint64_t)m_size) {
+        return null_variant;
+      }
+      return tvAsCVarRef(&m_data[k->m_data.num]);
+    }
+    throwBadKeyType();
   }
 
   bool contains(int64_t key) const {
@@ -228,12 +250,9 @@ class BaseVector : public ExtCollectionObjectData {
 
   static size_t sizeOffset() { return offsetof(BaseVector, m_size); }
   static size_t dataOffset() { return offsetof(BaseVector, m_data); }
+  static size_t immCopyOffset() { return offsetof(BaseVector, m_immCopy); }
 
-  static size_t immCopyOffset() {
-    return offsetof(BaseVector, m_immCopy);
-  }
-
-  void addFront(TypedValue* val);
+  void addFront(const TypedValue* val);
 
   Variant popFront();
 
@@ -248,31 +267,89 @@ class BaseVector : public ExtCollectionObjectData {
     return std::numeric_limits<decltype(m_capacity)>::max();
   }
 
-  void add(TypedValue* val) {
+  template <bool raw>
+  ALWAYS_INLINE
+  void addImpl(const TypedValue* val) {
     assert(val->m_type != KindOfRef);
-
-    ++m_version;
-    mutate();
     if (m_capacity <= m_size) {
       grow();
     }
-
+    if (!raw) {
+      mutate();
+      ++m_version;
+    }
+    assert(!hasImmutableBuffer());
     cellDup(*val, m_data[m_size]);
     ++m_size;
   }
 
- public:
-  bool hasImmutableBuffer() const {
-    return !m_immCopy.isNull();
+  // addRaw() adds a new element to this Vector but doesn't check for an
+  // immutable buffer and doesn't increment m_version, so it's only safe
+  // to use in some cases. If you're not sure, use add() instead.
+  void addRaw(const TypedValue* val) { addImpl<true>(val); }
+  void addRaw(const Variant& val) { addRaw(val.asCell()); }
+
+  void add(const TypedValue* val) { addImpl<false>(val); }
+  void add(const Variant& val) { add(val.asCell()); }
+
+  // setRaw() assigns a value to the specified key in this Vector but
+  // doesn't increment m_version, so it's only safe to use in some cases.
+  // If you're not sure, use set() instead.
+  void setRaw(int64_t key, const TypedValue* val) {
+    assert(val->m_type != KindOfRef);
+    assert(!hasImmutableBuffer());
+    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
+      throwOOB(key);
+      return;
+    }
+    TypedValue* tv = &m_data[key];
+    DataType oldType = tv->m_type;
+    uint64_t oldDatum = tv->m_data.num;
+    cellDup(*val, *tv);
+    if (IS_REFCOUNTED_TYPE(oldType)) {
+      tvDecRefHelper(oldType, oldDatum);
+    }
   }
+  void setRaw(int64_t key, const Variant& val) {
+    setRaw(key, val.asCell());
+  }
+  void setRaw(const TypedValue* key, const TypedValue* val) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type != KindOfInt64) {
+      throwBadKeyType();
+    }
+    setRaw(key->m_data.num, val);
+  }
+  void setRaw(const Variant& key, const Variant& val) {
+    setRaw(key.asCell(), val.asCell());
+  }
+
+  void set(int64_t key, const TypedValue* val) {
+    mutate();
+    setRaw(key, val);
+  }
+  void set(int64_t key, const Variant& val) {
+    set(key, val.asCell());
+  }
+  void set(const TypedValue* key, const TypedValue* val) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type != KindOfInt64) {
+      throwBadKeyType();
+    }
+    set(key->m_data.num, val);
+  }
+  void set(const Variant& key, const Variant& val) {
+    set(key.asCell(), val.asCell());
+  }
+
+ public:
+  bool hasImmutableBuffer() const { return !m_immCopy.isNull(); }
 
   /**
    * Should be called by any operation that mutates the vector, since
    * we might need to to trigger COW.
    */
-  void mutate() {
-    if (hasImmutableBuffer()) cow();
-  }
+  void mutate() { if (hasImmutableBuffer()) cow(); }
 
  protected:
   /**
@@ -325,7 +402,6 @@ class c_Vector : public BaseVector {
   DECLARE_CLASS_NO_SWEEP(Vector)
 
  public:
-
   explicit c_Vector(Class* cls = c_Vector::classof());
 
   void t___construct(const Variant& iterable = null_variant);
@@ -381,21 +457,6 @@ class c_Vector : public BaseVector {
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
-  void set(int64_t key, TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
-      throwOOB(key);
-      return;
-    }
-    mutate();
-    tvRefcountedIncRef(val);
-    TypedValue* tv = &m_data[key];
-    tvRefcountedDecRef(tv);
-    tvCopy(*val, *tv);
-  }
-
-  void resize(int64_t sz, TypedValue* val);
-
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
   void sort(int sort_flags, bool ascending);
@@ -406,7 +467,7 @@ class c_Vector : public BaseVector {
   }
 
   static void OffsetSet(ObjectData* obj, const TypedValue* key,
-                        TypedValue* val);
+                        const TypedValue* val);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -418,7 +479,10 @@ class c_Vector : public BaseVector {
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc);
 
+ protected:
   Object getImmutableCopy();
+
+ private:
   int64_t checkRequestedCapacity(const Variant& sz);
 
   // Friends
@@ -461,10 +525,10 @@ class c_VectorIterator : public ExtObjectData {
 
 FORWARD_DECLARE_CLASS(ImmVector);
 class c_ImmVector : public BaseVector {
-public:
+ public:
   DECLARE_CLASS_NO_SWEEP(ImmVector)
 
-public:
+ public:
   // The methods that implement the ConstVector interface simply forward
   // invocations to the implementations in BaseVector. Unfortunately, we need
   // to explicitly declare them so that the code automatically generated from
@@ -518,8 +582,7 @@ public:
 
   DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
 
-public:
-
+ public:
   explicit c_ImmVector(Class* cls = c_ImmVector::classof());
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -673,15 +736,25 @@ class BaseMap : public ExtCollectionObjectData {
   TypedValue* at(StringData* key) const;
   TypedValue* get(int64_t key) const;
   TypedValue* get(StringData* key) const;
-  void set(int64_t key, TypedValue* val) {
+  void set(int64_t key, const TypedValue* val) {
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
-  void set(StringData* key, TypedValue* val) {
+  void set(StringData* key, const TypedValue* val) {
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
-  void add(TypedValue* val);
+  void set(const TypedValue* key, const TypedValue* val) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type == KindOfInt64) {
+      set(key->m_data.num, val);
+    } else if (IS_STRING_TYPE(key->m_type)) {
+      set(key->m_data.pstr, val);
+    } else {
+      throwBadKeyType();
+    }
+  }
+  void add(const TypedValue* val);
   Variant pop();
   Variant popFront();
   void remove(int64_t key);
@@ -713,10 +786,10 @@ class BaseMap : public ExtCollectionObjectData {
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
   static void OffsetSet(ObjectData* obj, const TypedValue* key,
-                        TypedValue* val);
+                        const TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   enum EqualityFlavor { OrderMatters, OrderIrrelevant };
@@ -1515,7 +1588,7 @@ class BaseSet : public ExtCollectionObjectData {
  public:
   void init(const Variant& t);
 
-  void add(TypedValue* val) {
+  void add(const TypedValue* val) {
     if (val->m_type == KindOfInt64) {
       add(val->m_data.num);
     } else if (IS_STRING_TYPE(val->m_type)) {
@@ -1528,7 +1601,7 @@ class BaseSet : public ExtCollectionObjectData {
   void add(int64_t h);
   void add(StringData* key);
 
-  void addFront(TypedValue* val) {
+  void addFront(const TypedValue* val) {
     if (val->m_type == KindOfInt64) {
       addFront(val->m_data.num);
     } else if (IS_STRING_TYPE(val->m_type)) {
@@ -1586,7 +1659,7 @@ protected:
   void    php_construct(const Variant& iterable = null_variant);
 
   Object  php_add(const Variant& val) {
-    TypedValue* tv = cvarToCell(&val);
+    const TypedValue* tv = val.asCell();
     add(tv);
     return this;
   }
@@ -1935,6 +2008,9 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
     cellDup(*val, getElms()[m_size]);
     ++m_size;
   }
+  void initAdd(const Variant& val) {
+    initAdd(val.asCell());
+  }
   bool contains(int64_t key) const {
     assert(isFullyConstructed());
     return (uint64_t(key) < uint64_t(2));
@@ -1948,7 +2024,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -1969,13 +2045,10 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   TypedValue elm0;
   TypedValue elm1;
 
-  TypedValue* getElms() const {
-    return (TypedValue*)(&elm0);
-  }
+  TypedValue* getElms() { return &elm0; }
+  const TypedValue* getElms() const { return &elm0; }
 
-  int getVersion() const {
-    return 0;
-  }
+  int getVersion() const { return 0; }
 
   friend ObjectData* collectionDeepCopyPair(c_Pair* pair);
   friend class c_PairIterator;
@@ -2022,7 +2095,8 @@ TypedValue* collectionAt(ObjectData* obj, const TypedValue* key);
 TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key);
 TypedValue* collectionAtRw(ObjectData* obj, const TypedValue* key);
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key);
-void collectionSet(ObjectData* obj, const TypedValue* key, TypedValue* val);
+void collectionSet(ObjectData* obj, const TypedValue* key,
+                   const TypedValue* val);
 // used for collection literal syntax only
 void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val);
 bool collectionIsset(ObjectData* obj, TypedValue* key);
@@ -2049,10 +2123,6 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair);
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-inline TypedValue* cvarToCell(const Variant* v) {
-  return const_cast<TypedValue*>(v->asCell());
-}
 
 inline bool isOptimizableCollectionClass(const Class* klass) {
   return klass == c_Vector::classof() || klass == c_Map::classof() ||

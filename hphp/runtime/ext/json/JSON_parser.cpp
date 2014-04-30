@@ -515,7 +515,7 @@ static void object_set(Variant &var,
   } else {
     if (collections) {
       auto keyTV = make_tv<KindOfString>(key.get());
-      collectionSet(var.getObjectData(), &keyTV, cvarToCell(&value));
+      collectionSet(var.getObjectData(), &keyTV, value.asCell());
     } else {
       forceToArray(var).set(key, value);
     }

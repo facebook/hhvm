@@ -67,6 +67,8 @@ namespace HPHP {
 struct Variant : private TypedValue {
   enum class NullInit {};
   enum class NoInit {};
+  enum class CellCopy {};
+  enum class CellDup {};
   enum class ArrayInitCtor {};
 
   Variant() { m_type = KindOfUninit; }
@@ -141,6 +143,19 @@ struct Variant : private TypedValue {
    */
 
   Variant(const Variant& v);
+
+  Variant(const Variant& v, CellCopy) {
+    m_type = v.m_type;
+    m_data = v.m_data;
+  }
+
+  Variant(const Variant& v, CellDup) {
+    m_type = v.m_type;
+    m_data = v.m_data;
+    if (IS_REFCOUNTED_TYPE(m_type)) {
+      m_data.pstr->incRefCount();
+    }
+  }
 
   Variant& operator=(const Variant& v) {
     return assign(v);
@@ -444,7 +459,13 @@ struct Variant : private TypedValue {
   bool isString() const {
     return IS_STRING_TYPE(getType());
   }
-  bool isInteger() const;
+  bool isInteger() const {
+    return getType() == KindOfInt64;
+  }
+  bool isResource() const {
+    return getType() == KindOfResource;
+  }
+
   bool isNumeric(bool checkString = false) const;
   DataType toNumeric(int64_t &ival, double &dval, bool checkString = false)
     const;
@@ -475,7 +496,6 @@ struct Variant : private TypedValue {
   bool isAllowedAsConstantValue() const {
     return (m_type & kNotConstantValueTypeMask) == 0;
   }
-  bool isResource() const;
 
   /**
    * Whether or not there are at least two variables that are strongly bound.

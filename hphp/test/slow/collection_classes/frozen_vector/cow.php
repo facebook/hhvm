@@ -4,32 +4,31 @@
 
 function main() {
 
-  // $cb is a lambda that expects a vector (reference) and mutates it
-  // in some way. That should trigger COW, which we'll be able to
-  // observe by var_dumping both $v and $fv.
-  $mv = function($op, $cb) {
+  // $cb is a lambda that expects a Vector and mutates it in some way.
+  // That should trigger COW, which we'll be able to observe by dumping
+  // both $v and $iv.
+  $test = function($op, $cb) {
     echo "------ " . $op . " -------\n";
     $v = Vector {1, 2, 3};
-    $fv = $v->toImmVector();
+    $iv = $v->toImmVector();
     $cb($v);
-    var_dump($v, $fv);
+    var_dump($v, $iv);
   };
 
 
-  $mv("ArraySet", function (&$v) { $v[0] = 42; });
-  $mv("ArrayAppend", function (&$v) { $v[] = 42; });
-  $mv("add", function (&$v) { $v->add(42); });
-  $mv("append", function (&$v) { $v->append(42); });
-  $mv("addAll", function (&$v) { $v->addAll(Vector {42}); });
-  $mv("pop", function (&$v) { $v->pop(); });
-  $mv("resize", function (&$v) { $v->resize(0, 0); });
-  $mv("clear", function (&$v) { $v->clear(); });
-  $mv("set", function (&$v) { $v->set(0, 42); });
-  $mv("setAll", function (&$v) { $v->setAll(Vector {42}); });
-  $mv("removeKey", function (&$v) { $v->removeKey(0); });
-  $mv("reverse", function (&$v) { $v->reverse(); });
-  $mv("splice", function (&$v) { $v->splice(0, 1); });
-  //$mv("shuffle", function (&$v) { $v->shuffle(); });
+  $test("ArraySet", function ($v) { $v[0] = 42; });
+  $test("ArrayAppend", function ($v) { $v[] = 42; });
+  $test("add", function ($v) { $v->add(42); });
+  $test("append", function ($v) { $v->append(42); });
+  $test("addAll", function ($v) { $v->addAll(Vector {42}); });
+  $test("pop", function ($v) { $v->pop(); });
+  $test("resize", function ($v) { $v->resize(0, 0); });
+  $test("clear", function ($v) { $v->clear(); });
+  $test("set", function ($v) { $v->set(0, 42); });
+  $test("setAll", function ($v) { $v->setAll(Vector {42}); });
+  $test("removeKey", function ($v) { $v->removeKey(0); });
+  $test("reverse", function ($v) { $v->reverse(); });
+  $test("splice", function ($v) { $v->splice(0, 1); });
 }
 
 main();

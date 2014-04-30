@@ -71,7 +71,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
        deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {
 
-    Cell* current = tvAssertCell(deps->iter_value(iter_pos));
+    auto* current = tvAssertCell(deps->iter_value(iter_pos));
     if (UNLIKELY(!c_WaitHandle::fromCell(current))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected dependencies to be a map of WaitHandle instances"));
@@ -84,13 +84,14 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
        deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {
 
-    Cell* current = tvAssertCell(deps->iter_value(iter_pos));
+    auto* current = tvAssertCell(deps->iter_value(iter_pos));
     assert(current->m_type == KindOfObject);
     assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      cellSet(child->getResult(), *current);
+      auto k = deps->iter_key(iter_pos);
+      deps->set(k.asCell(), &child->getResult());
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
@@ -144,13 +145,14 @@ void c_GenMapWaitHandle::onUnblocked() {
        m_deps->iter_valid(m_iterPos);
        m_iterPos = m_deps->iter_next(m_iterPos)) {
 
-    Cell* current = tvAssertCell(m_deps->iter_value(m_iterPos));
+    auto* current = tvAssertCell(m_deps->iter_value(m_iterPos));
     assert(current->m_type == KindOfObject);
     assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      cellSet(child->getResult(), *current);
+      auto k = m_deps->iter_key(m_iterPos);
+      m_deps->set(k.asCell(), &child->getResult());
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {
@@ -199,7 +201,7 @@ void c_GenMapWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   // recursively import current child
   {
     assert(m_iterPos);
-    Cell* current = tvAssertCell(m_deps->iter_value(m_iterPos));
+    auto* current = tvAssertCell(m_deps->iter_value(m_iterPos));
 
     assert(current->m_type == KindOfObject);
     assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
@@ -216,7 +218,7 @@ void c_GenMapWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
          m_deps->iter_valid(iter_pos);
          iter_pos = m_deps->iter_next(iter_pos)) {
 
-      Cell* current = tvAssertCell(m_deps->iter_value(iter_pos));
+      auto* current = tvAssertCell(m_deps->iter_value(iter_pos));
       assert(current->m_type == KindOfObject);
       assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
       auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);

@@ -90,7 +90,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     return offsetof(c_WaitHandle, m_resultOrException);
   }
 
-  static c_WaitHandle* fromCell(Cell* cell) {
+  static c_WaitHandle* fromCell(const Cell* cell) {
     return (
         cell->m_type == KindOfObject &&
         cell->m_data.pobj->getAttribute(ObjectData::IsWaitHandle)

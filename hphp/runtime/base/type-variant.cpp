@@ -348,18 +348,6 @@ int Variant::getRefCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 
-bool Variant::isInteger() const {
-  switch (m_type) {
-    case KindOfInt64:
-      return true;
-    case KindOfRef:
-      return m_data.pref->var()->isInteger();
-    default:
-      break;
-  }
-  return false;
-}
-
 bool Variant::isNumeric(bool checkString /* = false */) const {
   int64_t ival;
   double dval;
@@ -402,11 +390,6 @@ bool Variant::isScalar() const {
     break;
   }
   return true;
-}
-
-bool Variant::isResource() const {
-  auto const cell = asCell();
-  return (cell->m_type == KindOfResource);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

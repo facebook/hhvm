@@ -36,7 +36,7 @@ namespace HPHP {
  * This template provides a default implementation.
  */
 template<typename TCollection>
-inline static Object materializeDefaultImpl(ObjectData* obj) {
+inline static Object materializeImpl(ObjectData* obj) {
   auto* col = NEWOBJ(TCollection)();
   Object o = col;
   col->init(VarNR(obj));
@@ -110,25 +110,41 @@ ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
 
 void triggerCow(c_Vector* vec) {
   assert(vec->hasImmutableBuffer()); // Should've been checked by the JIT.
-  vec->mutate();
+  vec->cow();
+}
+
+static inline bool
+invokeAndCastToBool(const CallCtx& ctx, int argc,
+                    const TypedValue* argv) {
+  Variant ret;
+  g_context->invokeFuncFew(ret.asTypedValue(), ctx, argc, argv);
+  return ret.toBoolean();
 }
 
 namespace {
 
-ALWAYS_INLINE
-void* reallocHelper(void* ptr, size_t oldSize, size_t newSize) {
-  assert(oldSize > 0 || !ptr);
-  assert(newSize > 0);
-
-  auto retptr = MM().objMallocLogged(newSize);
-
+ALWAYS_INLINE void*
+reallocBuffer(void* ptr, size_t oldCapBytes, size_t newCapBytes) {
+  assert(oldCapBytes > 0 || !ptr);
+  assert(newCapBytes > 0);
+  auto retptr = MM().objMallocLogged(newCapBytes);
   if (ptr) {
-    auto const copySize = std::min(oldSize, newSize);
-    retptr = memcpy(retptr, ptr, copySize);
-    MM().objFreeLogged(ptr, oldSize);
+    auto const copyBytes = std::min(oldCapBytes, newCapBytes);
+    retptr = memcpy(retptr, ptr, copyBytes);
+    MM().objFreeLogged(ptr, oldCapBytes);
   }
-
   return retptr;
+}
+
+ALWAYS_INLINE TypedValue*
+dupAllocVecBuffer(TypedValue* oldData, size_t sizeCells, size_t newCapBytes) {
+  assert(oldData != nullptr || sizeCells == 0);
+  auto* newData = (TypedValue*)MM().objMallocLogged(newCapBytes);
+  assert(newData);
+  for (int i = 0; i < sizeCells; ++i) {
+    cellDup(oldData[i], newData[i]);
+  }
+  return newData;
 }
 
 }
@@ -155,27 +171,6 @@ bool BaseVector::containskey(const Variant& key) {
   }
   throwBadKeyType();
   return false;
-}
-
-Variant BaseVector::at(const Variant& key) {
-  if (key.isInteger()) {
-    return tvAsCVarRef(at(key.toInt64()));
-  }
-  throwBadKeyType();
-  return uninit_null();
-}
-
-Variant BaseVector::get(const Variant& key) {
-  if (key.isInteger()) {
-    TypedValue* tv = get(key.toInt64());
-    if (tv) {
-      return tvAsCVarRef(tv);
-    } else {
-      return uninit_null();
-    }
-  }
-  throwBadKeyType();
-  return uninit_null();
 }
 
 // KeyedIterable
@@ -218,9 +213,9 @@ BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) {
   TVector* nv = NEWOBJ(TVector);
   uint sz = m_size;
   nv->reserve(sz);
+  int32_t version = m_version;
   for (uint i = 0; i < sz; ++i) {
     TypedValue* tv = &nv->m_data[i];
-    int32_t version = m_version;
     auto args = makeArgs(m_data[i], i);
     g_context->invokeFuncFew(tv, ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
@@ -245,17 +240,17 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) {
     throw e;
   }
   TVector* nv = NEWOBJ(TVector);
+  assert(!nv->hasImmutableBuffer());
   uint sz = m_size;
+  int32_t version = m_version;
   for (uint i = 0; i < sz; ++i) {
-    Variant ret;
-    int32_t version = m_version;
     auto args = makeArgs(m_data[i], i);
-    g_context->invokeFuncFew(ret.asTypedValue(), ctx, args.size(), &args[0]);
+    bool b = invokeAndCastToBool(ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    if (ret.toBoolean()) {
-      nv->add(&m_data[i]);
+    if (b) {
+      nv->addRaw(&m_data[i]);
     }
   }
   return nv;
@@ -299,20 +294,21 @@ BaseVector::php_takeWhile(const Variant& fn) {
     throw e;
   }
   auto* vec = NEWOBJ(TVector)();
+  assert(!vec->hasImmutableBuffer());
   Object obj = vec;
+  int32_t version UNUSED;
+  if (checkVersion) {
+    version = m_version;
+  }
   for (uint i = 0; i < m_size; ++i) {
-    Variant retval;
+    bool b = invokeAndCastToBool(ctx, 1, &m_data[i]);
     if (checkVersion) {
-      int32_t version = m_version;
-      g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &m_data[i]);
       if (UNLIKELY(version != m_version)) {
         throw_collection_modified();
       }
-    } else {
-      g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &m_data[i]);
     }
-    if (!retval.toBoolean()) break;
-    vec->add(&m_data[i]);
+    if (!b) break;
+    vec->addRaw(&m_data[i]);
   }
   return obj;
 }
@@ -354,23 +350,24 @@ BaseVector::php_skipWhile(const Variant& fn) {
     throw e;
   }
   auto* vec = NEWOBJ(TVector)();
+  assert(!vec->hasImmutableBuffer());
   Object obj = vec;
   uint i = 0;
+  int32_t version UNUSED;
+  if (checkVersion) {
+    version = m_version;
+  }
   for (; i < m_size; ++i) {
-    Variant retval;
+    bool b = invokeAndCastToBool(ctx, 1, &m_data[i]);
     if (checkVersion) {
-      int32_t version = m_version;
-      g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &m_data[i]);
       if (UNLIKELY(version != m_version)) {
         throw_collection_modified();
       }
-    } else {
-      g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &m_data[i]);
     }
-    if (!retval.toBoolean()) break;
+    if (!b) break;
   }
   for (; i < m_size; ++i) {
-    vec->add(&m_data[i]);
+    vec->addRaw(&m_data[i]);
   }
   return obj;
 }
@@ -420,7 +417,7 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->initAdd(&m_data[i]);
-    pair->initAdd(cvarToCell(&v));
+    pair->initAdd(v);
     bvec->m_data[i].m_data.pobj = pair;
     bvec->m_data[i].m_type = KindOfObject;
     ++bvec->m_size;
@@ -437,11 +434,6 @@ void BaseVector::keys(BaseVector* bvec) {
 }
 
 // Others
-
-void BaseVector::construct(const Variant& iterable /* = null_variant */) {
-  if (iterable.isNull()) return;
-  init(iterable);
-}
 
 Object BaseVector::lazy() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
@@ -500,7 +492,7 @@ bool BaseVector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   return result ? !cellToBool(*result) : true;
 }
 
-bool BaseVector::OffsetContains(ObjectData* obj, TypedValue* key) {
+bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto vec = static_cast<BaseVector*>(obj);
   if (key->m_type == KindOfInt64) {
@@ -573,30 +565,37 @@ Array BaseVector::toArrayImpl() const {
   return ai.toArray();
 }
 
+NEVER_INLINE
 void BaseVector::grow() {
-  mutate();
-
   if (m_capacity == MaxCapacity()) {
     return;
   }
 
-  auto const oldSize = m_capacity * sizeof(TypedValue);
+  auto const oldCapBytes = m_capacity * sizeof(TypedValue);
   if (m_capacity) {
     m_capacity = std::min(uint64_t(m_capacity) * 2, MaxCapacity());
   } else {
     m_capacity = 8;
   }
-  m_data = (TypedValue*)reallocHelper(m_data, oldSize,
-                                      m_capacity * sizeof(TypedValue));
+
+  if (!hasImmutableBuffer()) {
+    m_data = (TypedValue*)reallocBuffer(m_data, oldCapBytes,
+                                        m_capacity * sizeof(TypedValue));
+  } else {
+    m_data = dupAllocVecBuffer(m_data, m_size, m_capacity * sizeof(TypedValue));
+    m_immCopy.reset();
+  }
 }
 
-void BaseVector::addFront(TypedValue* val) {
+void BaseVector::addFront(const TypedValue* val) {
   assert(val->m_type != KindOfRef);
-  ++m_version;
-  mutate();
   if (m_capacity <= m_size) {
     grow();
+  } else {
+    mutate();
   }
+  assert(!hasImmutableBuffer());
+  ++m_version;
   memmove(m_data+1, m_data, m_size * sizeof(TypedValue));
   cellDup(*val, m_data[0]);
   ++m_size;
@@ -604,10 +603,9 @@ void BaseVector::addFront(TypedValue* val) {
 
 Variant BaseVector::popFront() {
   if (m_size) {
-    ++m_version;
     mutate();
-    Variant ret = tvAsCVarRef(&m_data[0]);
-    tvRefcountedDecRef(&m_data[0]);
+    ++m_version;
+    Variant ret(tvAsCVarRef(&m_data[0]), Variant::CellCopy());
     --m_size;
     memmove(m_data, m_data+1, m_size * sizeof(TypedValue));
     return ret;
@@ -623,18 +621,21 @@ void BaseVector::reserve(int64_t sz) {
 
   if (m_capacity < sz) {
     ++m_version;
-    mutate();
-
-    m_data = (TypedValue*)reallocHelper(m_data, m_capacity * sizeof(TypedValue),
-                                        sz * sizeof(TypedValue));
+    if (!hasImmutableBuffer()) {
+      m_data =
+        (TypedValue*)reallocBuffer(m_data, m_capacity * sizeof(TypedValue),
+                                   sz * sizeof(TypedValue));
+    } else {
+      m_data = dupAllocVecBuffer(m_data, m_size, sz * sizeof(TypedValue));
+      m_immCopy.reset();
+    }
     m_capacity = sz;
   }
 }
 
 BaseVector::BaseVector(Class* cls)
     : ExtCollectionObjectData(cls)
-    , m_size(0), m_data(nullptr), m_capacity(0)
-    , m_version(0), m_immCopy(nullptr) {
+    , m_size(0), m_data(nullptr), m_capacity(0), m_version(0) {
 }
 
 /**
@@ -655,6 +656,7 @@ BaseVector::~BaseVector() {
   }
 }
 
+NEVER_INLINE
 void BaseVector::throwBadKeyType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
              "Only integer keys may be used with Vectors"));
@@ -667,10 +669,20 @@ void BaseVector::init(const Variant& t) {
   if (sz) {
     reserve(sz);
   }
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    add(tv);
+  if (LIKELY(!iter.hasIteratorObj())) {
+    if (iter) {
+      mutate();
+      ++m_version;
+      do {
+        addRaw(iter.secondRefPlus());
+        ++iter;
+      } while (iter);
+    }
+  } else {
+    for (; iter; ++iter) {
+      auto v = iter.second();
+      add(v.asCell());
+    }
   }
 }
 
@@ -682,20 +694,9 @@ void BaseVector::cow() {
     m_immCopy.reset();
     return;
   }
-
-  TypedValue* newData =
-    (TypedValue*)MM().objMallocLogged(m_capacity * sizeof(TypedValue));
-
-  assert(newData);
-
-  for (uint i = 0; i < m_size; i++) {
-    cellDup(m_data[i], newData[i]);
-  }
-
-  m_data = newData;
+  m_data = dupAllocVecBuffer(m_data, m_size, m_capacity * sizeof(TypedValue));
   m_immCopy.reset();
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -704,37 +705,12 @@ c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
 }
 
 void c_Vector::t___construct(const Variant& iterable /* = null_variant */) {
-  BaseVector::construct(iterable);
-}
-
-void c_Vector::resize(int64_t sz, TypedValue* val) {
-  assert(val && val->m_type != KindOfRef);
-  ++m_version;
-  mutate();
-
-  assert(sz >= 0);
-  uint requestedSize = (uint)sz;
-  if (m_capacity < requestedSize) {
-    m_data = (TypedValue*)
-      reallocHelper(m_data, m_capacity * sizeof(TypedValue),
-                    requestedSize * sizeof(TypedValue));
-    m_capacity = requestedSize;
-  }
-  if (m_size > requestedSize) {
-    do {
-      --m_size;
-      tvRefcountedDecRef(&m_data[m_size]);
-    } while (m_size > requestedSize);
-  } else {
-    for (; m_size < requestedSize; ++m_size) {
-      cellDup(*val, m_data[m_size]);
-    }
-  }
+  if (iterable.isNull()) return;
+  init(iterable);
 }
 
 Object c_Vector::t_add(const Variant& val) {
-  TypedValue* tv = cvarToCell(&val);
-  add(tv);
+  add(val.asCell());
   return this;
 }
 
@@ -745,28 +721,35 @@ Object c_Vector::t_addall(const Variant& iterable) {
   if (sz) {
     reserve(m_size + sz);
   }
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    add(tv);
+  if (LIKELY(!iter.hasIteratorObj())) {
+    if (iter) {
+      mutate();
+      ++m_version;
+      do {
+        addRaw(iter.secondRefPlus());
+        ++iter;
+      } while (iter);
+    }
+  } else {
+    for (; iter; ++iter) {
+      auto v = iter.second();
+      add(v.asCell());
+    }
   }
   return this;
 }
 
 Object c_Vector::t_append(const Variant& val) {
-  TypedValue* tv = cvarToCell(&val);
-  add(tv);
+  add(val.asCell());
   return this;
 }
 
 Variant c_Vector::t_pop() {
   if (m_size) {
-    ++m_version;
     mutate();
+    ++m_version;
     --m_size;
-    Variant ret = tvAsCVarRef(&m_data[m_size]);
-    tvRefcountedDecRef(&m_data[m_size]);
-    return ret;
+    return Variant(tvAsCVarRef(&m_data[m_size]), Variant::CellCopy());
   } else {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Cannot pop empty Vector"));
@@ -800,8 +783,29 @@ int64_t c_Vector::checkRequestedCapacity(const Variant& sz) {
 
 void c_Vector::t_resize(const Variant& sz, const Variant& value) {
   auto intSz = checkRequestedCapacity(sz);
-  TypedValue* val = cvarToCell(&value);
-  resize(intSz, val);
+  const auto* val = value.asCell();
+  assert(intSz >= 0);
+  if (intSz == m_size) {
+    return;
+  }
+  if (intSz > (int64_t)m_capacity) {
+    reserve(intSz);
+  } else {
+    mutate();
+  }
+  ++m_version;
+  assert(!hasImmutableBuffer());
+  uint requestedSize = (uint)intSz;
+  if (m_size > requestedSize) {
+    do {
+      --m_size;
+      tvRefcountedDecRef(&m_data[m_size]);
+    } while (m_size > requestedSize);
+  } else {
+    for (; m_size < requestedSize; ++m_size) {
+      cellDup(*val, m_data[m_size]);
+    }
+  }
 }
 
 void c_Vector::t_reserve(const Variant& sz) {
@@ -811,14 +815,16 @@ void c_Vector::t_reserve(const Variant& sz) {
 
 Object c_Vector::t_clear() {
   ++m_version;
-  mutate();
-
-  uint sz = m_size;
-  for (int i = 0; i < sz; ++i) {
-    tvRefcountedDecRef(&m_data[i]);
-  }
-  if (m_data) {
-    MM().objFreeLogged(m_data, m_capacity * sizeof(TypedValue));
+  if (!hasImmutableBuffer()) {
+    uint sz = m_size;
+    for (int i = 0; i < sz; ++i) {
+      tvRefcountedDecRef(&m_data[i]);
+    }
+    if (m_data) {
+      MM().objFreeLogged(m_data, m_capacity * sizeof(TypedValue));
+    }
+  } else {
+    m_immCopy.reset();
   }
   m_data = nullptr;
   m_size = 0;
@@ -858,7 +864,7 @@ Variant c_Vector::t_at(const Variant& key) {
 }
 
 Variant c_Vector::t_get(const Variant& key) {
-  return BaseVector::get(key);
+  return Variant(get(key), Variant::CellDup());
 }
 
 bool c_Vector::t_contains(const Variant& key) {
@@ -878,6 +884,7 @@ Object c_Vector::t_removekey(const Variant& key) {
     return this;
   }
   mutate();
+  ++m_version;
   uint64_t datum = m_data[k].m_data.num;
   DataType t = m_data[k].m_type;
   if (k+1 < m_size) {
@@ -904,6 +911,7 @@ Array c_Vector::t_tovaluesarray() {
 void c_Vector::t_reverse() {
   if (m_size <= 1) return;
   mutate();
+  ++m_version;
   TypedValue* start = m_data;
   TypedValue* end = m_data + m_size - 1;
   for (; start < end; ++start, --end) {
@@ -929,7 +937,6 @@ void c_Vector::t_splice(const Variant& offset, const Variant& len /* = null */,
       "Vector::splice does not support replacement parameter"));
     throw e;
   }
-  mutate();
   int64_t sz = m_size;
   int64_t startPos = offset.toInt64();
   if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
@@ -961,6 +968,8 @@ void c_Vector::t_splice(const Variant& offset, const Variant& len /* = null */,
   } else {
     endPos = sz;
   }
+  mutate();
+  ++m_version;
   // Null out each element before decreffing it. We need to do this in case
   // a __destruct method reenters and accesses this Vector object.
   for (int64_t i = startPos; i < endPos; ++i) {
@@ -982,7 +991,11 @@ int64_t c_Vector::t_linearsearch(const Variant& search_value) {
 }
 
 void c_Vector::t_shuffle() {
+  if (m_size <= 1) {
+    return;
+  }
   mutate();
+  ++m_version;
   for (uint i = 1; i < m_size; ++i) {
     uint j = f_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
@@ -1084,9 +1097,7 @@ BaseVector::php_concat(const Variant& iterable) {
     cellDup(m_data[i], vec->m_data[i]);
   }
   for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = v.asCell();
-    vec->add(tv);
+    vec->addRaw(iter.second());
   }
   return obj;
 }
@@ -1144,12 +1155,7 @@ Variant BaseVector::php_lastKey() {
 }
 
 Object c_Vector::t_set(const Variant& key, const Variant& value) {
-  if (key.isInteger()) {
-    TypedValue* tv = cvarToCell(&value);
-    set(key.toInt64(), tv);
-    return this;
-  }
-  throwBadKeyType();
+  set(key, value);
   return this;
 }
 
@@ -1158,14 +1164,7 @@ Object c_Vector::t_setall(const Variant& iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tvKey = cvarToCell(&k);
-    TypedValue* tvVal = cvarToCell(&v);
-    if (tvKey->m_type != KindOfInt64) {
-      throwBadKeyType();
-    }
-    set(tvKey->m_data.num, tvVal);
+    set(iter.first(), iter.second());
   }
   return this;
 }
@@ -1177,9 +1176,7 @@ Object c_Vector::ti_fromitems(const Variant& iterable) {
   auto* target = NEWOBJ(c_Vector)();
   Object ret = target;
   for (uint i = 0; iter; ++i, ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = v.asCell();
-    target->add(tv);
+    target->addRaw(iter.second());
   }
   return ret;
 }
@@ -1192,19 +1189,18 @@ Object c_Vector::ti_fromarray(const Variant& arr) {
   }
   auto* target = NEWOBJ(c_Vector)();
   Object ret = target;
-  ArrayData* ad = arr.getArrayData();
+  auto* ad = arr.getArrayData();
   uint sz = ad->size();
   if (!sz) {
     return ret;
   }
-  target->m_capacity = target->m_size = sz;
-  TypedValue* data;
-  target->m_data = data =
-    (TypedValue*)MM().objMallocLogged(size_t(sz) * sizeof(TypedValue));
+  target->reserve(sz);
+  target->m_size = sz;
+  auto* data = target->m_data;
   ssize_t pos = ad->iter_begin();
   for (uint i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     assert(pos != ArrayData::invalid_index);
-    cellDup(*cvarToCell(&ad->getValueRef(pos)), data[i]);
+    cellDup(*(ad->getValueRef(pos).asCell()), data[i]);
   }
   return ret;
 }
@@ -1273,10 +1269,11 @@ c_Vector::SortFlavor c_Vector::preSort(const AccessorT& acc) {
   }
 
 void c_Vector::sort(int sort_flags, bool ascending) {
-  mutate();
-  if (!m_size) {
+  if (m_size <= 1) {
     return;
   }
+  mutate();
+  ++m_version;
   SortFlavor flav = preSort<VectorValAccessor>(VectorValAccessor());
   CALL_SORT(VectorValAccessor);
 }
@@ -1286,9 +1283,11 @@ void c_Vector::sort(int sort_flags, bool ascending) {
 #undef CALL_SORT
 
 bool c_Vector::usort(const Variant& cmp_function) {
-  if (!m_size) {
+  if (m_size <= 1) {
     return true;
   }
+  mutate();
+  ++m_version;
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
   JIT::CallerFrame cf;
@@ -1302,15 +1301,8 @@ bool c_Vector::usort(const Variant& cmp_function) {
 }
 
 void c_Vector::OffsetSet(ObjectData* obj, const TypedValue* key,
-                         TypedValue* val) {
-  assert(key->m_type != KindOfRef);
-  assert(val->m_type != KindOfRef);
-  auto vec = static_cast<c_Vector*>(obj);
-  if (key->m_type == KindOfInt64) {
-    vec->set(key->m_data.num, val);
-    return;
-  }
-  throwBadKeyType();
+                         const TypedValue* val) {
+  static_cast<c_Vector*>(obj)->set(key, val);
 }
 
 void c_Vector::OffsetUnset(ObjectData* obj, const TypedValue* key) {
@@ -1334,33 +1326,21 @@ Object c_Vector::getImmutableCopy() {
   return m_immCopy;
 }
 
-Object c_Vector::t_tovector() {
-  return materializeDefaultImpl<c_Vector>(this);
-}
+Object c_Vector::t_tovector() { return Object::attach(c_Vector::Clone(this)); }
+Object c_Vector::t_toimmvector() { return getImmutableCopy(); }
+Object c_Vector::t_tomap() { return materializeImpl<c_Map>(this); }
+Object c_Vector::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
+Object c_Vector::t_toset() { return materializeImpl<c_Set>(this); }
+Object c_Vector::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
+Object c_Vector::t_immutable() { return getImmutableCopy(); }
 
-Object c_Vector::t_toset() {
-  return materializeDefaultImpl<c_Set>(this);
-}
-
-Object c_Vector::t_toimmvector() {
-  return getImmutableCopy();
-}
-
-Object c_Vector::t_immutable() {
-  return getImmutableCopy();
-}
-
-Object c_Vector::t_tomap() {
-  return materializeDefaultImpl<c_Map>(this);
-}
-
-Object c_Vector::t_toimmmap() {
-  return materializeDefaultImpl<c_ImmMap>(this);
-}
-
-Object c_Vector::t_toimmset() {
-  return materializeDefaultImpl<c_ImmSet>(this);
-}
+Object c_ImmVector::t_tovector() { return materializeImpl<c_Vector>(this); }
+Object c_ImmVector::t_toimmvector() { return this; }
+Object c_ImmVector::t_tomap() { return materializeImpl<c_Map>(this); }
+Object c_ImmVector::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
+Object c_ImmVector::t_toset() { return materializeImpl<c_Set>(this); }
+Object c_ImmVector::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
+Object c_ImmVector::t_immutable() { return this; }
 
 c_VectorIterator::c_VectorIterator(Class* cls
     /*= c_VectorIterator::classof()*/) : ExtObjectData(cls) {
@@ -1433,7 +1413,7 @@ Variant c_ImmVector::t_at(const Variant& key) {
 }
 
 Variant c_ImmVector::t_get(const Variant& key) {
-  return BaseVector::get(key);
+  return Variant(get(key), Variant::CellDup());
 }
 
 // KeyedIterable
@@ -1475,7 +1455,8 @@ Object c_ImmVector::t_keys() {
 // Others
 
 void c_ImmVector::t___construct(const Variant& iterable /* = null_variant */) {
-  BaseVector::construct(iterable);
+  if (iterable.isNull()) return;
+  init(iterable);
 }
 
 Object c_ImmVector::t_lazy() {
@@ -1500,10 +1481,6 @@ int64_t c_ImmVector::t_linearsearch(const Variant& search_value) {
 
 Object c_ImmVector::t_values() {
   return Object::attach(BaseVector::Clone<c_ImmVector>(this));
-}
-
-Object c_ImmVector::t_immutable() {
-  return this;
 }
 
 // Non PHP methods.
@@ -1636,7 +1613,7 @@ void BaseMap::init(const Variant& t) {
 }
 
 Object BaseMap::php_add(const Variant& val) {
-  TypedValue* tv = cvarToCell(&val);
+  auto* tv = val.asCell();
   add(tv);
   return this;
 }
@@ -1650,7 +1627,7 @@ Object BaseMap::php_addAll(const Variant& iterable) {
   reserve(std::max(sz, size_t(m_size)));
   for (; iter; ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
+    auto* tv = v.asCell();
     add(tv);
   }
   return this;
@@ -1757,7 +1734,7 @@ Variant c_ImmMap::t_get(const Variant& key) { return php_get(key); }
 Variant c_Map::t_get(const Variant& key) { return php_get(key); }
 
 Object BaseMap::php_set(const Variant& key, const Variant& value) {
-  TypedValue* val = cvarToCell(&value);
+  auto* val = value.asCell();
   if (key.isInteger()) {
     update(key.toInt64(), val);
   } else if (key.isString()) {
@@ -1779,8 +1756,8 @@ Object BaseMap::php_setAll(const Variant& iterable) {
   for (; iter; ++iter) {
     Variant k = iter.first();
     Variant v = iter.second();
-    TypedValue* tvKey = cvarToCell(&k);
-    TypedValue* tvVal = cvarToCell(&v);
+    auto* tvKey = k.asCell();
+    auto* tvVal = v.asCell();
     if (tvKey->m_type == KindOfInt64) {
       set(tvKey->m_data.num, tvVal);
     } else if (IS_STRING_TYPE(tvKey->m_type)) {
@@ -2159,7 +2136,7 @@ BaseMap::php_zip(const Variant& iterable) const {
     auto* pair = NEWOBJ(c_Pair)();
     Object pairObj = pair;
     pair->initAdd(&e.data);
-    pair->initAdd(cvarToCell(&v));
+    pair->initAdd(v.asCell());
     TypedValue tv;
     tv.m_data.pobj = pair;
     tv.m_type = KindOfObject;
@@ -2599,7 +2576,7 @@ BaseMap::php_mapFromArray(const Variant& arr) {
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
-    TypedValue* tv = cvarToCell(&ad->getValueRef(pos));
+    auto* tv = ad->getValueRef(pos).asCell();
     if (k.isInteger()) {
       mp->update(k.toInt64(), tv);
     } else {
@@ -2718,7 +2695,7 @@ TypedValue* BaseMap::get(StringData* key) const {
   return (TypedValue*)&fetchElm(data(), p)->data;
 }
 
-void BaseMap::add(TypedValue* val) {
+void BaseMap::add(const TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
                val->m_data.pobj->getVMClass() != c_Pair::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -3328,7 +3305,7 @@ TypedValue* BaseMap::OffsetAt(ObjectData* obj, const TypedValue* key) {
 }
 
 void BaseMap::OffsetSet(ObjectData* obj, const TypedValue* key,
-                        TypedValue* val) {
+                        const TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
   auto mp = static_cast<BaseMap*>(obj);
@@ -3373,7 +3350,7 @@ bool BaseMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   return result ? !cellToBool(*result) : true;
 }
 
-bool BaseMap::OffsetContains(ObjectData* obj, TypedValue* key) {
+bool BaseMap::OffsetContains(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto mp = static_cast<BaseMap*>(obj);
   if (key->m_type == KindOfInt64) {
@@ -3971,8 +3948,7 @@ Object BaseSet::php_addAll(const Variant& iterable) {
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    add(tv);
+    add(v.asCell());
   }
   return this;
 }
@@ -5118,34 +5094,34 @@ Object c_Pair::t_lazy() {
 
 Variant c_Pair::t_at(const Variant& key) {
   assert(isFullyConstructed());
-  if (key.isInteger()) {
-    return tvAsCVarRef(at(key.toInt64()));
+  auto* k = key.asCell();
+  if (k->m_type == KindOfInt64) {
+    return Variant(tvAsCVarRef(at(k->m_data.num)), Variant::CellCopy());
   }
   throwBadKeyType();
-  return init_null_variant;
 }
 
 Variant c_Pair::t_get(const Variant& key) {
   assert(isFullyConstructed());
-  if (key.isInteger()) {
-    TypedValue* tv = get(key.toInt64());
+  auto* k = key.asCell();
+  if (k->m_type == KindOfInt64) {
+    TypedValue* tv = get(k->m_data.num);
     if (tv) {
-      return tvAsCVarRef(tv);
+      return Variant(tvAsCVarRef(tv), Variant::CellDup());
     } else {
-      return init_null_variant;
+      return Variant();
     }
   }
   throwBadKeyType();
-  return init_null_variant;
 }
 
 bool c_Pair::t_containskey(const Variant& key) {
   assert(isFullyConstructed());
-  if (key.isInteger()) {
-    return contains(key.toInt64());
+  auto* k = key.asCell();
+  if (k->m_type == KindOfInt64) {
+    return contains(k->m_data.num);
   }
   throwBadKeyType();
-  return false;
 }
 
 Array c_Pair::t_toarray() {
@@ -5225,10 +5201,8 @@ Object c_Pair::t_filter(const Variant& callback) {
   auto* vec = NEWOBJ(c_ImmVector)();
   Object obj = vec;
   for (uint64_t i = 0; i < 2; ++i) {
-    Variant ret;
-    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &getElms()[i]);
-    if (ret.toBoolean()) {
-      vec->add(&getElms()[i]);
+    if (invokeAndCastToBool(ctx, 1, &getElms()[i])) {
+      vec->addRaw(&getElms()[i]);
     }
   }
   return obj;
@@ -5246,11 +5220,9 @@ Object c_Pair::t_filterwithkey(const Variant& callback) {
   auto* vec = NEWOBJ(c_ImmVector)();
   Object obj = vec;
   for (uint64_t i = 0; i < 2; ++i) {
-    Variant ret;
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
-    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
-    if (ret.toBoolean()) {
-      vec->add(&getElms()[i]);
+    if (invokeAndCastToBool(ctx, 2, args)) {
+      vec->addRaw(&getElms()[i]);
     }
   }
   return obj;
@@ -5271,16 +5243,12 @@ Object c_Pair::t_zip(const Variant& iterable) {
     auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->initAdd(&getElms()[i]);
-    pair->initAdd(cvarToCell(&v));
+    pair->initAdd(v);
     vec->m_data[i].m_data.pobj = pair;
     vec->m_data[i].m_type = KindOfObject;
     ++vec->m_size;
   }
   return obj;
-}
-
-Object c_Pair::t_immutable() {
-  return this;
 }
 
 Object c_Pair::t_take(const Variant& n) {
@@ -5315,10 +5283,8 @@ Object c_Pair::t_takewhile(const Variant& callback) {
   auto* vec = NEWOBJ(c_Vector)();
   Object obj = vec;
   for (uint i = 0; i < 2; ++i) {
-    Variant retval;
-    g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &getElms()[i]);
-    if (!retval.toBoolean()) break;
-    vec->add(&getElms()[i]);
+    if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
+    vec->addRaw(&getElms()[i]);
   }
   return obj;
 }
@@ -5355,12 +5321,10 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
   Object obj = vec;
   uint i = 0;
   for (; i < 2; ++i) {
-    Variant retval;
-    g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &getElms()[i]);
-    if (!retval.toBoolean()) break;
+    if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
   }
   for (; i < 2; ++i) {
-    vec->add(&getElms()[i]);
+    vec->addRaw(&getElms()[i]);
   }
   return obj;
 }
@@ -5402,9 +5366,7 @@ Object c_Pair::t_concat(const Variant& iterable) {
     cellDup(getElms()[i], vec->m_data[i]);
   }
   for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = v.asCell();
-    vec->add(tv);
+    vec->addRaw(iter.second());
   }
   return obj;
 }
@@ -5483,7 +5445,7 @@ bool c_Pair::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   return result ? !cellToBool(*result) : true;
 }
 
-bool c_Pair::OffsetContains(ObjectData* obj, TypedValue* key) {
+bool c_Pair::OffsetContains(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto pair = static_cast<c_Pair*>(obj);
   assert(pair->isFullyConstructed());
@@ -5520,6 +5482,14 @@ void c_Pair::Unserialize(ObjectData* obj,
   tvAsVariant(&pair->elm0).unserialize(uns, Uns::Mode::ColValue);
   tvAsVariant(&pair->elm1).unserialize(uns, Uns::Mode::ColValue);
 }
+
+Object c_Pair::t_tovector() { return materializeImpl<c_Vector>(this); }
+Object c_Pair::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
+Object c_Pair::t_tomap() { return materializeImpl<c_Map>(this); }
+Object c_Pair::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
+Object c_Pair::t_toset() { return materializeImpl<c_Set>(this); }
+Object c_Pair::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
+Object c_Pair::t_immutable() { return this; }
 
 c_PairIterator::c_PairIterator(Class* cb) :
     ExtObjectData(cb) {
@@ -5634,8 +5604,6 @@ KEYEDITERABLE_MATERIALIZE_METHODS(Map)
 KEYEDITERABLE_MATERIALIZE_METHODS(ImmMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
 ITERABLE_MATERIALIZE_METHODS(ImmSet)
-KEYEDITERABLE_MATERIALIZE_METHODS(Pair)
-KEYEDITERABLE_MATERIALIZE_METHODS(ImmVector)
 
 #undef ITERABLE_MATERIALIZE_METHODS
 #undef KEYEDITERABLE_MATERIALIZE_METHODS
@@ -5752,6 +5720,7 @@ template<typename TVector>
 ObjectData* collectionDeepCopyBaseVector(TVector *vec) {
   vec = TVector::Clone(vec);
   Object o = Object::attach(vec);
+  assert(!vec->hasImmutableBuffer());
   size_t sz = vec->m_size;
   for (size_t i = 0; i < sz; ++i) {
     collectionDeepCopyTV(&vec->m_data[i]);
@@ -5924,7 +5893,8 @@ void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   BaseMap::OffsetSet(obj, key, val);
 }
 
-void collectionSet(ObjectData* obj, const TypedValue* key, TypedValue* val) {
+void collectionSet(ObjectData* obj, const TypedValue* key,
+                   const TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
@@ -6061,7 +6031,7 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
 }
 
 bool collectionContains(ObjectData* obj, const Variant& offset) {
-  TypedValue* key = cvarToCell(&offset);
+  auto* key = offset.asCell();
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
     case Collection::ImmVectorType:

@@ -32,7 +32,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TypedValue;
-class c_Vector;
+class BaseVector;
 class BaseMap;
 class c_Set;
 class c_Pair;
@@ -318,9 +318,11 @@ private:
 
   void destruct();
 
-  c_Vector* getVector() {
-    assert(hasCollection() && getCollectionType() == Collection::VectorType);
-    return (c_Vector*)((intptr_t)m_obj & ~1);
+  BaseVector* getVector() {
+    assert(hasCollection());
+    assert(getCollectionType() == Collection::VectorType ||
+           getCollectionType() == Collection::ImmVectorType);
+    return (BaseVector*)((intptr_t)m_obj & ~1);
   }
   BaseMap* getMappish() {
     assert(hasCollection());

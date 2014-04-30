@@ -916,10 +916,10 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
       if (!_argv.empty()) {
         for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
              pos = _argv->iter_rewind(pos)) {
-          vec->addFront(cvarToCell(&_argv->getValueRef(pos)));
+          vec->addFront(_argv->getValueRef(pos).asCell());
         }
       }
-      vec->addFront(cvarToCell(&var));
+      vec->addFront(var.asCell());
       return vec->size();
     }
     case Collection::SetType: {
@@ -927,10 +927,10 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
       if (!_argv.empty()) {
         for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
              pos = _argv->iter_rewind(pos)) {
-          st->addFront(cvarToCell(&_argv->getValueRef(pos)));
+          st->addFront(_argv->getValueRef(pos).asCell());
         }
       }
-      st->addFront(cvarToCell(&var));
+      st->addFront(var.asCell());
       return st->size();
     }
     default: {

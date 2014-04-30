@@ -36,9 +36,9 @@ namespace HPHP { namespace InstanceBits {
 namespace {
 
 typedef tbb::concurrent_hash_map<
-  const StringData*, uint64_t, pointer_hash<StringData>> InstanceCounts;
+  const StringData*, uint64_t, StringDataHashICompare> InstanceCounts;
 typedef hphp_hash_map<const StringData*, unsigned,
-                      pointer_hash<StringData>> InstanceBitsMap;
+                      string_data_hash, string_data_isame> InstanceBitsMap;
 
 InstanceCounts s_instanceCounts;
 ReadWriteMutex s_instanceCountsLock(RankInstanceCounts);

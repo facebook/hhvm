@@ -48,9 +48,9 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.191 2013/02/26 21:02:48 christos Exp $")
 #endif
 
 #ifdef PHP_WIN32
-#include "win32/unistd.h"
+#include "win32/unistd.h" // @nolint
 #if _MSC_VER <= 1300
-# include "win32/php_strtoi64.h"
+# include "win32/php_strtoi64.h" // @nolint
 #endif
 #define strtoull _strtoui64
 #else
@@ -945,7 +945,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 
   ms->file = fn;
   auto wrapper = HPHP::Stream::getWrapperFromURI(fn);
-  stream = wrapper->open(fn, "rb", 0, HPHP::Variant());
+  stream = wrapper ? wrapper->open(fn, "rb", 0, HPHP::Variant()) : nullptr;
 
   if (stream == NULL) {
     if (errno != ENOENT)
@@ -1163,13 +1163,16 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
   /* FIXME: Read file names and sort them to prevent
      non-determinism. See Debian bug #488562. */
   auto w = HPHP::Stream::getWrapperFromURI(fn);
+  if (!w) {
+    errs++;
+    goto out;
+  }
   if (w->stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
     int mflen;
     char mfn[MAXPATHLEN];
 
     HPHP::Stream::Wrapper* w = HPHP::Stream::getWrapperFromURI(fn);
-    dir = w->opendir(fn);
-    if (!dir) {
+    if (!w || !(dir = w->opendir(fn))) {
       errs++;
       goto out;
     }
@@ -2625,6 +2628,9 @@ apprentice_map(struct magic_set *ms, const char *fn)
     goto error;
 
   wrapper = HPHP::Stream::getWrapperFromURI(fn);
+  if (!wrapper) {
+    goto error;
+  }
   stream = wrapper->open(fn, "rb", 0, HPHP::Variant());
 
   if (!stream) {
@@ -2759,7 +2765,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 
 /* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
   wrapper = HPHP::Stream::getWrapperFromURI(fn);
-  stream = wrapper->open(fn, "wb+", 0, HPHP::Variant());
+  stream = wrapper ? wrapper->open(fn, "wb+", 0, HPHP::Variant()) : nullptr;
 
   if (!stream) {
     file_error(ms, errno, "cannot open `%s'", dbname);

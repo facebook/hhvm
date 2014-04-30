@@ -33,8 +33,9 @@ bool disableWrapper(const String& scheme);
 bool restoreWrapper(const String& scheme);
 bool registerRequestWrapper(const String& scheme, std::unique_ptr<Wrapper> wrapper);
 Array enumWrappers();
-Wrapper* getWrapper(const String& scheme);
-Wrapper* getWrapperFromURI(const String& uri, int* pathIndex = nullptr);
+Wrapper* getWrapper(const String& scheme, bool warn = true);
+Wrapper* getWrapperFromURI(const String& uri,
+                           int* pathIndex = nullptr, bool warn = true);
 
 /* Called during process init to register core wrappers */
 void RegisterCoreWrappers();

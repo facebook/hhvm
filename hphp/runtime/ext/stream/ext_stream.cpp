@@ -314,7 +314,7 @@ Array f_stream_get_wrappers() {
 bool f_stream_is_local(const Variant& stream_or_url) {
   if (stream_or_url.isString()) {
     auto wrapper = Stream::getWrapperFromURI(stream_or_url.asCStrRef());
-    return wrapper->m_isLocal;
+    return wrapper ? wrapper->m_isLocal : false;
 
   } else if (stream_or_url.isResource()) {
     File* file = dynamic_cast<File*>(stream_or_url.asCResRef().get());

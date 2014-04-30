@@ -196,6 +196,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       );
     }
     Stream::Wrapper* w = Stream::getWrapperFromURI(name);
+    if (!w) return nullptr;
     File* f = w->open(name, "r", 0, null_variant);
     if (!f) return nullptr;
     StringBuffer sb;
@@ -523,7 +524,7 @@ static bool findFileWrapper(const String& file, void* ctx) {
   assert(context->path.isNull());
 
   Stream::Wrapper* w = Stream::getWrapperFromURI(file);
-  if (!dynamic_cast<FileStreamWrapper*>(w)) {
+  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
     if (w->stat(file, context->s) == 0) {
       context->path = file;
       return true;
@@ -534,6 +535,8 @@ static bool findFileWrapper(const String& file, void* ctx) {
   if (file.substr(0, 7) == s_file_url) {
     return findFileWrapper(file.substr(7), ctx);
   }
+
+  if (!w) return false;
 
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.

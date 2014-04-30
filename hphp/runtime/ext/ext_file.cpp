@@ -114,6 +114,7 @@ static int accessSyscall(
     int mode,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (!w) return -1;
   if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
     return ::access(File::TranslatePathWithFileCache(path).data(), mode);
   }
@@ -127,6 +128,7 @@ static int statSyscall(
   bool isRelative = path.charAt(0) != '/';
   int pathIndex = 0;
   Stream::Wrapper* w = Stream::getWrapperFromURI(path, &pathIndex);
+  if (!w) return -1;
   bool isFileStream = dynamic_cast<FileStreamWrapper*>(w);
   auto canUseFileCache = useFileCache && isFileStream;
   if (isRelative && !pathIndex) {
@@ -154,6 +156,7 @@ static int lstatSyscall(
     struct stat* buf,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (!w) return -1;
   if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
     return ::lstat(File::TranslatePathWithFileCache(path).data(), buf);
   }
@@ -930,7 +933,7 @@ Variant f_realpath(const String& path) {
   }
   // Zend doesn't support streams in realpath
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (!dynamic_cast<FileStreamWrapper*>(w)) {
+  if (!w || !dynamic_cast<FileStreamWrapper*>(w)) {
     return false;
   }
   char resolved_path[PATH_MAX];
@@ -1156,6 +1159,7 @@ bool f_copy(const String& source, const String& dest,
 bool f_rename(const String& oldname, const String& newname,
               const Variant& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(oldname);
+  if (!w) return false;
   if (w != Stream::getWrapperFromURI(newname)) {
     raise_warning("Can't rename a file on different streams");
     return false;
@@ -1176,6 +1180,7 @@ int64_t f_umask(const Variant& mask /* = null_variant */) {
 
 bool f_unlink(const String& filename, const Variant& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  if (!w) return false;
   CHECK_SYSTEM(w->unlink(filename));
   return true;
 }
@@ -1352,6 +1357,7 @@ Variant f_tmpfile() {
 bool f_mkdir(const String& pathname, int64_t mode /* = 0777 */,
              bool recursive /* = false */, const Variant& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
+  if (!w) return false;
   int options = recursive ? k_STREAM_MKDIR_RECURSIVE : 0;
   CHECK_SYSTEM(w->mkdir(pathname, mode, options));
   return true;
@@ -1359,6 +1365,7 @@ bool f_mkdir(const String& pathname, int64_t mode /* = 0777 */,
 
 bool f_rmdir(const String& dirname, const Variant& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
+  if (!w) return false;
   int options = 0;
   CHECK_SYSTEM(w->rmdir(dirname, options));
   return true;
@@ -1440,6 +1447,7 @@ Variant f_dir(const String& directory) {
 
 Variant f_opendir(const String& path, const Variant& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (!w) return false;
   Directory *p = w->opendir(path);
   if (!p) {
     return false;
@@ -1475,6 +1483,7 @@ static bool StringAscending(const String& s1, const String& s2) {
 Variant f_scandir(const String& directory, bool descending /* = false */,
                   const Variant& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(directory);
+  if (!w) return false;
   Directory *dir = w->opendir(directory);
   if (!dir) {
     return false;

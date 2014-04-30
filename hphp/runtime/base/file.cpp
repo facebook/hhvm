@@ -145,6 +145,7 @@ Resource File::Open(const String& filename, const String& mode,
                     int options /* = 0 */,
                     const Variant& context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
+  if (!wrapper) return Resource();
   Resource rcontext =
     context.isNull() ? g_context->getStreamContext() : context.toResource();
   File *file = wrapper->open(filename, mode, options, rcontext);

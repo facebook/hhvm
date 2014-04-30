@@ -18,7 +18,7 @@
    |          Jim Winstead <jimw@php.net>                                 |
    +----------------------------------------------------------------------+
  */
-
+/* @nolint */
 /* $Id$ */
 
 #include "php.h"
@@ -164,7 +164,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
   // kinda weird this is on the wrapper not the file
   auto path = stream->hphp_file->getName();
   auto w = HPHP::Stream::getWrapperFromURI(path);
-  return w->stat(path, &ssb->sb);
+  return w ? w->stat(path, &ssb->sb) : -1;
 }
 
 /* If buf == NULL, the buffer will be allocated automatically and will be of an
@@ -284,6 +284,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) {
   HPHP::Stream::Wrapper* w = HPHP::Stream::getWrapperFromURI(path);
+  if (!w) return nullptr;
   HPHP::File* file = w->open(path, mode, options, context);
   if (!file) {
     return nullptr;

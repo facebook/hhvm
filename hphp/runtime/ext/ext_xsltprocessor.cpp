@@ -408,6 +408,7 @@ bool c_XSLTProcessor::t_setprofiling(const String& filename) {
   if (filename.length() > 0) {
     String translated = File::TranslatePath(filename);
     Stream::Wrapper* w = Stream::getWrapperFromURI(translated);
+    if (!w) return false;
     if (w->access(translated, W_OK)) {
       m_profile = translated;
       return true;

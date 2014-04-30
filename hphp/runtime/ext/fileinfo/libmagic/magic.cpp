@@ -31,11 +31,11 @@
 FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
 #endif  /* lint */
 
-#include "magic.h"
+#include "magic.h" // @nolint
 
 #include <stdlib.h>
 #ifdef PHP_WIN32
-#include "win32/unistd.h"
+#include "win32/unistd.h" // @nolint
 #else
 #include <unistd.h>
 #endif
@@ -378,7 +378,8 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
   if (!stream && inname) {
     no_in_stream = 1;
     auto wrapper = HPHP::Stream::getWrapperFromURI(inname);
-    stream = wrapper->open(inname, "rb", 0, HPHP::Variant());
+    stream = wrapper ? wrapper->open(inname, "rb", 0, HPHP::Variant())
+                     : nullptr;
   }
 
   if (!stream) {

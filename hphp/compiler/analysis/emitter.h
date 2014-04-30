@@ -644,7 +644,7 @@ private:
   int m_actualStackHighWater;
   int m_fdescHighWater;
   typedef tbb::concurrent_hash_map<const StringData*, int,
-                                   StringDataHashCompare> EmittedClosures;
+                                   StringDataHashICompare> EmittedClosures;
   static EmittedClosures s_emittedClosures;
   std::deque<Funclet*> m_funclets;
   std::map<StatementPtr, Funclet*> m_memoizedFunclets;

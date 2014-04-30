@@ -702,7 +702,7 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     switch (call.kind()) {
     case CppCall::Kind::Indirect:
       if (args[i].dstReg() == call.reg()) {
-        // an indirect call uses an argumnet register for the func ptr.
+        // an indirect call uses an argument register for the func ptr.
         // Use rax instead and update the CppCall
         moves[reg::rax] = call.reg();
         call.updateCallIndirect(reg::rax);
@@ -710,6 +710,7 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
       break;
     case CppCall::Kind::Direct:
     case CppCall::Kind::Virtual:
+    case CppCall::Kind::ArrayVirt:
       break;
     }
   }

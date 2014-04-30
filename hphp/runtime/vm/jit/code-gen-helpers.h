@@ -46,6 +46,13 @@ struct CppCall {
      * Calls through a register.
      */
     Indirect,
+    /*
+     * Call through the "rotated" ArrayData vtable.  This is used to
+     * call ArrayData apis by loading a function pointer out of
+     * g_array_funcs at an offset for the supplied function, indexing
+     * by array kind.
+     */
+    ArrayVirt,
   };
 
   CppCall() = delete;
@@ -77,6 +84,21 @@ struct CppCall {
   template<class Ret, class Cls, class... Args>
   static CppCall method(Ret (Cls::*fp)(Args...) const) {
     return CppCall { Kind::Direct, getMethodPtr(fp) };
+  }
+
+  /*
+   * Call an array function.  Takes a pointer to an array of function
+   * pointers to use for the particular entry point.  For example,
+   *
+   *   CppCall::array(&g_array_funcs.nvGetInt)
+   *
+   * The call mechanism assumes that the first argument to the
+   * function is an ArrayData*, and loads the kind from there.
+   */
+  template<class Ret, class... Args>
+  static CppCall array(Ret (*const (*p)[ArrayData::kNumKinds])(Args...)) {
+    const void* vp = p;
+    return CppCall { Kind::ArrayVirt, const_cast<void*>(vp) };
   }
 
   /*
@@ -113,6 +135,10 @@ struct CppCall {
   PhysReg reg() const {
     assert(m_kind == Kind::Indirect);
     return m_u.reg;
+  }
+  void* arrayTable() const {
+    assert(kind() == Kind::ArrayVirt);
+    return m_u.fptr;
   }
 
   /*

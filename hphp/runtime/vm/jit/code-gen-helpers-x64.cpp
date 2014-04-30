@@ -272,11 +272,23 @@ void emitCall(Asm& a, CppCall call) {
     // Virtual call.
     // Load method's address from proper offset off of object in rdi,
     // using rax as scratch.
-    a.  loadq  (*rdi, rax);
-    a.  call   (rax[call.vtableOffset()]);
+    a.  loadq   (*rdi, rax);
+    a.  call    (rax[call.vtableOffset()]);
     return;
   case CppCall::Kind::Indirect:
-    a.  call   (call.reg());
+    a.  call    (call.reg());
+    return;
+  case CppCall::Kind::ArrayVirt:
+    {
+      auto const addr = reinterpret_cast<intptr_t>(call.arrayTable());
+      always_assert_flog(
+        deltaFits(addr, sz::dword),
+        "Array data vtables are expected to be in the data "
+        "segment, with addresses less than 2^31"
+      );
+      a.    loadzbl (rdi[ArrayData::offsetofKind()], eax);
+      a.    call    (baseless(rax*8 + addr));
+    }
     return;
   }
   not_reached();

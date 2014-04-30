@@ -55,6 +55,11 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
     // call indirect currently not implemented. It'll be somthing like
     // a.Br(x2a(call.getReg()))
     not_implemented();
+    always_assert(0);
+    break;
+  case CppCall::Kind::ArrayVirt:
+    not_implemented();
+    always_assert(0);
     break;
   }
 

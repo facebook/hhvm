@@ -64,6 +64,19 @@ struct FuncPtr {
     , call(CppCall::method(fp))
   {}
 
+  /*
+   * Create FuncPtrs to array data "rotated" vtables.  For example, in
+   * native-calls.cpp:
+   *
+   *   {NvGetInt, &g_array_funcs.nvGetInt, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+   *
+   */
+  template<class Ret, class... Args>
+  /* implicit */ FuncPtr(Ret (*const (*p)[ArrayData::kNumKinds])(Args...))
+    : type(FuncType::Call)
+    , call(CppCall::array(p))
+  {}
+
   FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) {
     assert(t == FuncType::SSA);
   }

@@ -999,6 +999,10 @@ struct Parser : ParserBase {
     return ns;
   }
 
+  void onUseFunction(const std::string &fn, const std::string &as) {
+    // TODO
+  }
+
   void onNewLabelScope(bool fresh) {}
   void onScopeLabel(const Token& stmt, const Token& label) {}
   void onCompleteLabelScope(bool fresh) {}

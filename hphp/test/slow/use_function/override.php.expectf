@@ -1,0 +1,2 @@
+
+Fatal error: Cannot use function foo\bar as bar because the name is already in use in %s/hphp/test/slow/use_function/override.php on line 16

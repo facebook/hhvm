@@ -776,6 +776,8 @@ top_statement:
   | T_NAMESPACE '{'                    { _p->onNamespaceStart("");}
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $4;}
   | T_USE use_declarations ';'         { _p->nns(); $$.reset();}
+  | T_USE T_FUNCTION
+    use_fn_declarations ';'            { _p->nns(); $$.reset();}
   | constant_declaration ';'           { _p->nns();
                                          _p->finishStatement($$, $1); $$ = 1;}
 ;
@@ -808,12 +810,27 @@ use_declarations:
     use_declaration                    { }
   | use_declaration                    { }
 ;
+
+use_fn_declarations:
+    use_fn_declaration ','
+    use_fn_declaration                 { }
+  | use_fn_declaration                 { }
+;
+
 use_declaration:
     namespace_name                     { _p->onUse($1.text(),"");}
   | T_NS_SEPARATOR namespace_name      { _p->onUse($2.text(),"");}
   | namespace_name T_AS ident          { _p->onUse($1.text(),$3.text());}
   | T_NS_SEPARATOR namespace_name
     T_AS ident                         { _p->onUse($2.text(),$4.text());}
+;
+
+use_fn_declaration:
+    namespace_name                     { _p->onUseFunction($1.text(),"");}
+  | T_NS_SEPARATOR namespace_name      { _p->onUseFunction($2.text(),"");}
+  | namespace_name T_AS ident          { _p->onUseFunction($1.text(),$3.text());}
+  | T_NS_SEPARATOR namespace_name
+    T_AS ident                         { _p->onUseFunction($2.text(),$4.text());}
 ;
 
 namespace_name:

@@ -165,7 +165,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
       m_closureGenerator(false), m_nsState(SeenNothing),
-      m_aliasTable(getAutoAliasedClasses(), [&] { return isAutoAliasOn(); }) {
+      m_nsAliasTable(getAutoAliasedClasses(), [&] { return isAutoAliasOn(); }) {
   string md5str = Eval::FileRepository::unitMd5(scanner.getMd5());
   MD5 md5 = MD5(md5str.c_str());
 
@@ -440,9 +440,9 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     string funcName = name.text();
     // strip out namespaces for func_get_args and friends check
     size_t lastBackslash = funcName.find_last_of(NAMESPACE_SEP);
-    const string stripped = lastBackslash == string::npos
-                            ? funcName
-                            : funcName.substr(lastBackslash+1);
+    string stripped = lastBackslash == string::npos
+                      ? funcName
+                      : funcName.substr(lastBackslash+1);
     bool hadBackslash = name->num() & 2;
 
     if (!cls && !hadBackslash) {
@@ -455,6 +455,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
         }
       }
       // Auto import a few functions from the HH namespace
+      // TODO(#4245628): merge those into m_fnAliasTable
       if (isAutoAliasOn() &&
           (stripped == "fun" ||
            stripped == "meth_caller" ||
@@ -467,6 +468,11 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "xenon_get_data"
           )) {
         funcName = "HH\\" + stripped;
+      }
+
+      auto alias = m_fnAliasTable.find(stripped);
+      if (alias != m_fnAliasTable.end()) {
+        funcName = alias->second;
       }
     }
 
@@ -992,8 +998,12 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
   if (type == FunctionType::Closure && !modifiersExp->validForClosure()) {
     PARSE_ERROR("Invalid modifier on closure funciton.");
   }
-  if (type == FunctionType::Function && !modifiersExp->validForFunction()) {
-    PARSE_ERROR("Invalid modifier on function %s.", name->text().c_str());
+  if (type == FunctionType::Function) {
+    if (!modifiersExp->validForFunction()) {
+      PARSE_ERROR("Invalid modifier on function %s.", name->text().c_str());
+    }
+
+    m_fnTable.insert(name->text());
   }
 
   StatementListPtr stmts = stmt->stmt || stmt->num() != 1 ?
@@ -2204,7 +2214,8 @@ void Parser::onNamespaceStart(const std::string &ns,
   m_nsFileScope = file_scope;
   pushComment();
   m_namespace = ns;
-  m_aliasTable.clear();
+  m_nsAliasTable.clear();
+  m_fnAliasTable.clear();
 }
 
 void Parser::onNamespaceEnd() {
@@ -2225,13 +2236,13 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
   // It's not an error if the alias already exists but is auto-imported.
   // In that case, it gets replaced. It prompts an error if it is not
   // auto-imported and 'use' statement is trying to replace it.
-  if (m_aliasTable.isUseType(key)) {
+  if (m_nsAliasTable.isUseType(key)) {
     error("Cannot use %s as %s because the name is already in use: %s",
           ns.c_str(), key.c_str(), getMessage().c_str());
     return;
   }
-  if (m_aliasTable.isDefType(key)) {
-    auto defName = m_aliasTable.getDefName(key);
+  if (m_nsAliasTable.isDefType(key)) {
+    auto defName = m_nsAliasTable.getDefName(key);
     if (strcasecmp(defName.c_str(), ns.c_str())) {
       error("Cannot use %s as %s because the name is already in use: %s",
             ns.c_str(), key.c_str(), getMessage().c_str());
@@ -2239,7 +2250,27 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
     }
   }
 
-  m_aliasTable.set(key, ns, AliasTable::AliasType::USE);
+  m_nsAliasTable.set(key, ns, AliasTable::AliasType::USE);
+}
+
+void Parser::onUseFunction(const std::string &fn, const std::string &as) {
+  string key = as;
+  if (key.empty()) {
+    size_t pos = fn.rfind(NAMESPACE_SEP);
+    if (pos == string::npos) {
+      key = fn;
+    } else {
+      key = fn.substr(pos + 1);
+    }
+  }
+
+  if (m_fnTable.count(key) || m_fnAliasTable.count(key)) {
+    error(
+      "Cannot use function %s as %s because the name is already in use in %s",
+      fn.c_str(), key.c_str(), getMessage().c_str());
+  }
+
+  m_fnAliasTable[key] = fn;
 }
 
 std::string Parser::nsDecl(const std::string &name) {
@@ -2258,8 +2289,8 @@ std::string Parser::resolve(const std::string &ns, bool cls) {
     return ns;
   }
 
-  if (m_aliasTable.isAliased(alias)) {
-    auto name = m_aliasTable.getName(alias);
+  if (m_nsAliasTable.isAliased(alias)) {
+    auto name = m_nsAliasTable.getName(alias);
     // Was it a namespace alias?
     if (pos != string::npos) {
       return name + ns.substr(pos);
@@ -2331,15 +2362,15 @@ void Parser::registerAlias(std::string name) {
   size_t pos = name.rfind(NAMESPACE_SEP);
   if (pos != string::npos) {
     string key = name.substr(pos + 1);
-    if (m_aliasTable.isUseType(key)) {
-      auto useName = m_aliasTable.getUseName(key);
+    if (m_nsAliasTable.isUseType(key)) {
+      auto useName = m_nsAliasTable.getUseName(key);
       if (strcasecmp(useName.c_str(), name.c_str())) {
         error("Cannot declare class %s because the name is already in use: %s",
               name.c_str(), getMessage().c_str());
         return;
       }
     } else {
-      m_aliasTable.set(key, name, AliasTable::AliasType::DEF);
+      m_nsAliasTable.set(key, name, AliasTable::AliasType::DEF);
     }
   }
 }

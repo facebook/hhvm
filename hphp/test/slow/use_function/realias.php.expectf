@@ -1,0 +1,3 @@
+string(7) "foo\bar"
+
+Fatal error: Call to undefined function foobar() in %s/use_function/realias.php on line 14

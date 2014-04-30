@@ -1,0 +1,5 @@
+string(7) "baz\bar"
+string(8) "fizz\baz"
+string(7) "foo\bar"
+string(8) "fizz\baz"
+string(7) "baz\baz"

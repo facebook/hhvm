@@ -1148,8 +1148,10 @@ X(BareThisOp)
 
 bool instrIsNonCallControlFlow(Op opcode) {
   if (!instrIsControlFlow(opcode) || isFCallStar(opcode)) return false;
+
   switch (opcode) {
     case OpContEnter:
+    case OpContRaise:
     case OpFCallBuiltin:
     case OpIncl:
     case OpInclOnce:

@@ -5667,15 +5667,33 @@ SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id,
                                        Block* catchBlock /* = nullptr */) {
   if (!catchBlock) catchBlock = makeCatch();
   auto const locVal = ldLocInner(id, ldrefExit, ldgblExit, constraint);
+  auto const varName = curFunc()->localVarName(id);
 
-  m_irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
-  if (locVal->type() <= Type::Uninit) {
-    // local might be unnamed
-    auto const varName = curFunc()->localVarName(id);
+  auto warnUninit = [&] {
     if (varName != nullptr) {
       gen(RaiseUninitLoc, catchBlock, cns(varName));
     }
     return cns(Type::InitNull);
+  };
+
+  m_irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
+  if (locVal->type() <= Type::Uninit) {
+    return warnUninit();
+  }
+
+  if (locVal->type().maybe(Type::Uninit)) {
+    // The local might be Uninit so we have to check at runtime.
+    return m_irb->cond(
+      0,
+      [&](Block* taken) {
+        gen(CheckInit, taken, locVal);
+      },
+      [&] { // Next: local is Init
+        return locVal;
+      },
+      [&] { // Taken: local is Uninit
+        return warnUninit();
+      });
   }
 
   return locVal;

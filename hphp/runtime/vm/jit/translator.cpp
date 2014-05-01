@@ -1541,10 +1541,6 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
   return doPrediction;
 }
 
-static bool isTypeAssert(Op op) {
-  return op == Op::AssertRATL || op == Op::AssertRATStk;
-}
-
 static bool isNullableSpecializedObj(RepoAuthType rat) {
   switch (rat.tag()) {
   case RepoAuthType::Tag::OptExactObj:

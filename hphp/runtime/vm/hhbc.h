@@ -1081,6 +1081,17 @@ inline bool isSwitch(Op op) {
   }
 }
 
+inline bool isTypeAssert(Op op) {
+  switch (op) {
+    case OpAssertRATL:
+    case OpAssertRATStk:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 template<typename Out, typename In>
 Out& readData(In*& it) {
   Out& r = *(Out*)it;

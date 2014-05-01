@@ -1,2 +1,2 @@
 
-Fatal error: Cannot mix 'return' and 'yield' in the same function in %s on line 7
+Fatal error: Generators cannot return values using "return" in %s on line 7

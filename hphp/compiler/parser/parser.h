@@ -339,18 +339,18 @@ public:
 private:
   struct FunctionContext {
     FunctionContext()
-      : hasReturn(false)
+      : hasNonEmptyReturn(false)
       , isGenerator(false)
       , isAsync(false)
     {}
 
     void checkFinalAssertions() {
-      assert(!isGenerator || (!isAsync && !hasReturn));
+      assert(!isGenerator || (!isAsync && !hasNonEmptyReturn));
     }
 
-    bool hasReturn;       // function contains a return statement
-    bool isGenerator;     // function determined to be a generator
-    bool isAsync;         // function determined to be async
+    bool hasNonEmptyReturn; // function contains a non-empty return statement
+    bool isGenerator;       // function determined to be a generator
+    bool isAsync;           // function determined to be async
   };
 
   enum class FunctionType {
@@ -386,6 +386,8 @@ private:
 
   void newScope();
   void completeScope(BlockScopePtr inner);
+
+  void setHasNonEmptyReturn(ConstructPtr blame);
 
   void invalidYield();
   bool setIsGenerator();

@@ -1540,21 +1540,25 @@ void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
   }
 }
 
+void Parser::setHasNonEmptyReturn(ConstructPtr blame) {
+  if (m_funcContexts.empty()) {
+    return;
+  }
+
+  FunctionContext& fc = m_funcContexts.back();
+  if (fc.isGenerator) {
+    Compiler::Error(Compiler::InvalidYield, blame);
+    PARSE_ERROR("Generators cannot return values using \"return\"");
+    return;
+  }
+
+  fc.hasNonEmptyReturn = true;
+}
+
 void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
-  // When HipHopSyntax is enabled, "yield break" is the only supported method
-  // for early termination of a generator.
-  if (!m_funcContexts.empty() &&
-      (expr || (Scanner::AllowHipHopSyntax & Option::GetScannerType()))) {
-    FunctionContext& fc = m_funcContexts.back();
-    if (fc.isGenerator) {
-      Compiler::Error(InvalidYield, out->stmt);
-      PARSE_ERROR((Scanner::AllowHipHopSyntax & Option::GetScannerType()) ?
-        "Cannot mix 'return' and 'yield' in the same function" :
-        "Generators cannot return values using \"return\"");
-      return;
-    }
-    fc.hasReturn = true;
+  if (expr) {
+    setHasNonEmptyReturn(out->stmt);
   }
 }
 
@@ -1600,11 +1604,9 @@ bool Parser::setIsGenerator() {
   }
 
   FunctionContext& fc = m_funcContexts.back();
-  if (fc.hasReturn) {
+  if (fc.hasNonEmptyReturn) {
     invalidYield();
-    PARSE_ERROR((Scanner::AllowHipHopSyntax & Option::GetScannerType()) ?
-      "Cannot mix 'return' and 'yield' in the same function" :
-      "Generators cannot return values using \"return\"");
+    PARSE_ERROR("Generators cannot return values using \"return\"");
     return false;
   }
   if (fc.isAsync) {
@@ -1612,8 +1614,6 @@ bool Parser::setIsGenerator() {
     PARSE_ERROR("'yield' is not allowed in async functions.");
     return false;
   }
-  fc.isGenerator = true;
-
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
     invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
@@ -1621,6 +1621,7 @@ bool Parser::setIsGenerator() {
     return false;
   }
 
+  fc.isGenerator = true;
   return true;
 }
 
@@ -1665,14 +1666,13 @@ bool Parser::setIsAsync() {
     PARSE_ERROR("'await' is not allowed in generators.");
     return false;
   }
-  fc.isAsync = true;
-
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
     invalidAwait();
     PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
                     "magic methods.");
   }
 
+  fc.isAsync = true;
   return true;
 }
 

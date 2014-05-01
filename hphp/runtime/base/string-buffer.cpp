@@ -36,7 +36,7 @@ StringBuffer::StringBuffer(int initialSize /* = SmallStringReserve */)
   , m_maxBytes(kDefaultOutputLimit)
   , m_len(0)
 {
-  assert(initialSize > 0);
+  assert(initialSize >= 0);
   m_str = StringData::Make(initialSize);
   auto const s = m_str->bufferSlice();
   m_buffer = s.ptr;

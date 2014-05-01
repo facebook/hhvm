@@ -145,6 +145,14 @@ struct StringBuffer {
   char* appendCursor(int additionalBytes);
 
   /*
+   * Mutate a character in existing buffer.
+   */
+  void set(int offset, char c) {
+    assert(offset < m_len);
+    m_buffer[offset] = c;
+  }
+
+  /*
    * Append various types of things to this string.
    */
   void append(char c) {

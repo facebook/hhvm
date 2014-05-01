@@ -76,6 +76,7 @@ public:
   static bool SetThreadLog(const char *file);
   static void ClearThreadLog();
   static void SetNewOutput(FILE *output);
+  static void UnlimitThreadMessages();
 
   typedef void (*PFUNC_LOG)(const char *header, const char *msg,
                             const char *ending, void *data);

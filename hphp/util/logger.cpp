@@ -145,7 +145,8 @@ void Logger::log(LogLevelType level, const std::string &msg,
   assert(!escapeMore || escape);
 
   ThreadData *threadData = s_threadData.get();
-  if (++threadData->message > MaxMessagesPerRequest &&
+  if (threadData->message != -1 &&
+      ++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {
     return;
   }
@@ -227,7 +228,8 @@ std::string Logger::GetHeader() {
            snow,
            (unsigned long long)pid,
            (unsigned long long)Process::GetThreadId(),
-           threadData->request, threadData->message,
+           threadData->request,
+           (threadData->message == -1 ? 0 : threadData->message),
            ExtraHeader.c_str());
   return header;
 }
@@ -288,6 +290,11 @@ void Logger::SetNewOutput(FILE *output) {
     if (Output) fclose(Output);
     Output = output;
   }
+}
+
+void Logger::UnlimitThreadMessages() {
+  ThreadData *threadData = s_threadData.get();
+  threadData->message = -1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

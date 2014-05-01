@@ -102,7 +102,8 @@ void ExtendedLogger::Log(LogLevelType level, const Array& stackTrace,
                          bool escapeMore /* = false */) {
   assert(!escapeMore || escape);
   ThreadData *threadData = s_threadData.get();
-  if (++threadData->message > MaxMessagesPerRequest &&
+  if (threadData->message != -1 &&
+      ++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {
     return;
   }

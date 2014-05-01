@@ -541,8 +541,6 @@ bool FunctionScope::mayUseVV() const {
   VariableTableConstPtr variables = getVariables();
   return (inPseudoMain() ||
           isVariableArgument() ||
-          isGenerator() ||
-          isAsync() ||
           variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
           variables->getAttribute(VariableTable::ContainsExtract) ||
           variables->getAttribute(VariableTable::ContainsCompact) ||

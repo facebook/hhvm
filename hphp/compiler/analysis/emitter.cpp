@@ -8229,7 +8229,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
                                    ContinuationMethod m) {
   static const StringData* valStr = makeStaticString("value");
 
-  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrMayUseVV);
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, empty_string.get());
   switch (m) {
     case METH_SEND:

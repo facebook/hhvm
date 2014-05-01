@@ -1528,7 +1528,9 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
   auto const ldgblExit = makeExit();
 
-  gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
+  if (curFunc()->attrs() & AttrMayUseVV) {
+    gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
+  }
 
   // Create the Continuation object.
   auto const func = curFunc();
@@ -1770,7 +1772,7 @@ void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
 
   auto const child = popC();
   gen(JmpZero, exitSlow, gen(IsWaitHandle, child));
-  if (!resumed()) {
+  if ((curFunc()->attrs() & AttrMayUseVV) && !resumed()) {
     gen(ExitOnVarEnv, exitSlow, m_irb->fp());
   }
 

@@ -436,7 +436,7 @@ extern const ArrayFunctions g_array_funcs = {
   /*
    * ArrayData* Copy(const ArrayData*)
    *
-   *   Explicitly request that an array be copyied.  This API does
+   *   Explicitly request that an array be copied.  This API does
    *   /not/ actually guarantee a copy occurs.
    *
    *   (E.g. NameValueTableWrapper doesn't copy here.)

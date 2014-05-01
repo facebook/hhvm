@@ -344,11 +344,22 @@ ArrayData* EmptyArray::PlusEq(ArrayData*, const ArrayData* elems) {
 }
 
 ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
-  // TODO(#4049965): can this just copy elems and then renumber?
-  auto const ret = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
-  auto const tmp = MixedArray::Merge(ret, elems);
-  ret->release();
-  return tmp;
+  // Packed arrays don't need renumbering, so don't make a copy.
+  if (elems->isPacked()) {
+    elems->incRefCount();
+    return const_cast<ArrayData*>(elems);
+  }
+  // Fast path the common case that elems is mixed.
+  if (elems->isMixed()) {
+    auto const copy = MixedArray::Copy(elems);
+    copy->incRefCount();
+    MixedArray::Renumber(copy);
+    return copy;
+  }
+  auto copy = elems->copy();
+  copy->incRefCount();
+  copy->renumber();
+  return copy;
 }
 
 ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {

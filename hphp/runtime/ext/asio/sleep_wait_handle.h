@@ -19,8 +19,8 @@
 #define incl_HPHP_EXT_ASIO_SLEEP_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,12 +30,12 @@ namespace HPHP {
  * A wait handle that sleeps until a give time passes.
  */
 FORWARD_DECLARE_CLASS(SleepWaitHandle);
-class c_SleepWaitHandle : public c_SessionScopedWaitHandle {
+class c_SleepWaitHandle : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(SleepWaitHandle);
 
   explicit c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof())
-    : c_SessionScopedWaitHandle(cls)
+    : c_WaitableWaitHandle(cls)
   {}
   ~c_SleepWaitHandle() {}
   void t___construct();
@@ -44,6 +44,8 @@ class c_SleepWaitHandle : public c_SessionScopedWaitHandle {
  public:
   void process();
   String getName();
+  void enterContextImpl(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
   AsioSession::TimePoint getWakeTime() const { return m_waketime; };
 
   void setIndex(uint32_t ev_idx) {
@@ -51,16 +53,16 @@ class c_SleepWaitHandle : public c_SessionScopedWaitHandle {
     m_index = ev_idx;
   }
 
- protected:
-  void registerToContext();
-  void unregisterFromContext();
-
  private:
   void setState(uint8_t state) { setKindState(Kind::Sleep, state); }
   void initialize(int64_t usecs);
+  void registerToContext();
+  void unregisterFromContext();
 
   AsioSession::TimePoint m_waketime;
   uint32_t m_index;
+
+  static const int8_t STATE_WAITING = 2;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

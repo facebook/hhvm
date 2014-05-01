@@ -190,14 +190,14 @@ const StaticString
   s_ancestors("ancestors");
 
 // Add location information for the given continuation to the given frame.
-void addContinuationLocation(Array& frameData,
-                             c_AsyncFunctionWaitHandle& contWh) {
-  // A running continuation is active on the normal stack, and we
-  // cannot compute the location just by inspecting the continuation
-  // alone.
-  if (contWh.isRunning()) return;
-  frameData.set(s_file, contWh.getFileName(), true);
-  frameData.set(s_line, contWh.getLineNumber(), true);
+void addAsyncFunctionLocation(Array& frameData,
+                              c_AsyncFunctionWaitHandle& wh) {
+  // A running async function is active on the normal stack, and we
+  // cannot compute the location just by inspecting the async function
+  // wait handle alone.
+  if (wh.isRunning()) return;
+  frameData.set(s_file, wh.getFileName(), true);
+  frameData.set(s_line, wh.getLineNumber(), true);
 }
 
 // Form a trace of the async stack starting with the currently running
@@ -227,9 +227,11 @@ static Array createAsyncStacktrace() {
       frameData.set(s_function, wh->t_getname(), true);
       frameData.set(s_id, wh->t_getid(), true);
       frameData.set(s_ancestors, ancestors, true);
-      // Continuation wait handles may have a source location to add.
-      auto contWh = dynamic_cast<c_AsyncFunctionWaitHandle*>(wh);
-      if (contWh != nullptr) addContinuationLocation(frameData, *contWh);
+      // Async function wait handles may have a source location to add.
+      if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction) {
+        auto afwh = static_cast<c_AsyncFunctionWaitHandle*>(wh);
+        addAsyncFunctionLocation(frameData, *afwh);
+      }
       trace.append(frameData);
     }
   }

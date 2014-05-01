@@ -5632,8 +5632,7 @@ void CodeGenerator::cgLdWHResult(IRInstruction* inst) {
 void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
   auto const dest = dstLoc(0).reg();
   auto const base = srcLoc(0).reg();
-  auto asyncArOffset = c_AsyncFunctionWaitHandle::arOff()
-                     - c_AsyncFunctionWaitHandle::objOff();
+  auto asyncArOffset = c_AsyncFunctionWaitHandle::arOff();
   m_as.lea (base[asyncArOffset], dest);
 }
 

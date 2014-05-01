@@ -47,10 +47,8 @@ class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
   static Object ti_create(const Variant& dependencies);
 
  public:
-  String getName();
-
- protected:
   void onUnblocked();
+  String getName();
   c_WaitableWaitHandle* getChild();
   void enterContextImpl(context_idx_t ctx_idx);
 

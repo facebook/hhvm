@@ -266,11 +266,13 @@ Array XenonRequestLocalData::logAsyncStack() {
     } else {
       auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
       frameData.set(s_function, wh->t_getname(), true);
-      // Continuation wait handles may have a source location to add.
-      auto contWh = dynamic_cast<c_AsyncFunctionWaitHandle*>(wh);
-      if (contWh != nullptr  && !contWh->isRunning()) {
-        frameData.set(s_file, contWh->getFileName(), true);
-        frameData.set(s_line, contWh->getLineNumber(), true);
+      // Async function wait handles may have a source location to add.
+      if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction) {
+        auto afwh = static_cast<c_AsyncFunctionWaitHandle*>(wh);
+        if (!afwh->isRunning()) {
+          frameData.set(s_file, afwh->getFileName(), true);
+          frameData.set(s_line, afwh->getLineNumber(), true);
+        }
       }
     }
     bt.append(frameData);

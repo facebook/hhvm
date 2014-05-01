@@ -20,6 +20,13 @@
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
+#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
+#include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
+#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
+#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
@@ -113,11 +120,85 @@ void c_WaitableWaitHandle::join() {
   assert(isFinished());
 }
 
+String c_WaitableWaitHandle::getName() {
+  switch (getKind()) {
+    case Kind::Static:
+      not_reached();
+    case Kind::AsyncFunction:
+      return static_cast<c_AsyncFunctionWaitHandle*>(this)->getName();
+    case Kind::GenArray:
+      return static_cast<c_GenArrayWaitHandle*>(this)->getName();
+    case Kind::GenMap:
+      return static_cast<c_GenMapWaitHandle*>(this)->getName();
+    case Kind::GenVector:
+      return static_cast<c_GenVectorWaitHandle*>(this)->getName();
+    case Kind::SetResultToRef:
+      return static_cast<c_SetResultToRefWaitHandle*>(this)->getName();
+    case Kind::Reschedule:
+      return static_cast<c_RescheduleWaitHandle*>(this)->getName();
+    case Kind::Sleep:
+      return static_cast<c_SleepWaitHandle*>(this)->getName();
+    case Kind::ExternalThreadEvent:
+      return static_cast<c_ExternalThreadEventWaitHandle*>(this)->getName();
+  }
+  not_reached();
+}
+
 c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
   assert(!isFinished());
 
-  // waitable wait handle does not have any child
-  return nullptr;
+  switch (getKind()) {
+    case Kind::Static:
+      not_reached();
+    case Kind::AsyncFunction:
+      return static_cast<c_AsyncFunctionWaitHandle*>(this)->getChild();
+    case Kind::GenArray:
+      return static_cast<c_GenArrayWaitHandle*>(this)->getChild();
+    case Kind::GenMap:
+      return static_cast<c_GenMapWaitHandle*>(this)->getChild();
+    case Kind::GenVector:
+      return static_cast<c_GenVectorWaitHandle*>(this)->getChild();
+    case Kind::SetResultToRef:
+      return static_cast<c_SetResultToRefWaitHandle*>(this)->getChild();
+    case Kind::Reschedule:
+    case Kind::Sleep:
+    case Kind::ExternalThreadEvent:
+      return nullptr;
+  }
+  not_reached();
+}
+
+void c_WaitableWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
+  switch (getKind()) {
+    case Kind::Static:
+      not_reached();
+    case Kind::AsyncFunction:
+      static_cast<c_AsyncFunctionWaitHandle*>(this)->enterContextImpl(ctx_idx);
+      return;
+    case Kind::GenArray:
+      static_cast<c_GenArrayWaitHandle*>(this)->enterContextImpl(ctx_idx);
+      return;
+    case Kind::GenMap:
+      static_cast<c_GenMapWaitHandle*>(this)->enterContextImpl(ctx_idx);
+      return;
+    case Kind::GenVector:
+      static_cast<c_GenVectorWaitHandle*>(this)->enterContextImpl(ctx_idx);
+      return;
+    case Kind::SetResultToRef:
+      static_cast<c_SetResultToRefWaitHandle*>(this)->enterContextImpl(ctx_idx);
+      return;
+    case Kind::Reschedule:
+      static_cast<c_RescheduleWaitHandle*>(this)->enterContextImpl(ctx_idx);
+      return;
+    case Kind::Sleep:
+      static_cast<c_SleepWaitHandle*>(this)->enterContextImpl(ctx_idx);
+      return;
+    case Kind::ExternalThreadEvent:
+      static_cast<c_ExternalThreadEventWaitHandle*>(this)->enterContextImpl(
+        ctx_idx);
+      return;
+  }
+  not_reached();
 }
 
 bool

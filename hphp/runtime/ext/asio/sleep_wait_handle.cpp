@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
 
@@ -75,6 +76,36 @@ void c_SleepWaitHandle::process() {
 
 String c_SleepWaitHandle::getName() {
   return s_sleep;
+}
+
+void c_SleepWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
+  assert(getState() == STATE_WAITING);
+
+  if (isInContext()) {
+    unregisterFromContext();
+  }
+
+  setContextIdx(ctx_idx);
+  registerToContext();
+}
+
+void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
+  assert(AsioSession::Get()->getContext(ctx_idx));
+  assert(getContextIdx() == ctx_idx);
+  assert(getState() == STATE_WAITING);
+
+  // Move us to the parent context.
+  setContextIdx(getContextIdx() - 1);
+
+  // Re-register if still in a context.
+  if (isInContext()) {
+    registerToContext();
+  }
+
+  // Recursively move all wait handles blocked by us.
+  for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
+    pwh->exitContextBlocked(ctx_idx);
+  }
 }
 
 void c_SleepWaitHandle::registerToContext() {

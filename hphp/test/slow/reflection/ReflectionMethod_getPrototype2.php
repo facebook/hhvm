@@ -12,7 +12,7 @@ function outputPrototype($rf) {
   }
 }
 
-class SessionScopedWaitHandleSubClass extends SessionScopedWaitHandle {
+class BlockableWaitHandleSubClass extends BlockableWaitHandle {
   public function getWaitHandle() {
   }
   public function getContextIdx() {
@@ -23,9 +23,9 @@ function main() {
   $tests = array(
     array("WaitHandle", "getWaitHandle"),
     array("Continuation", "next"),
-    array("SessionScopedWaitHandle", "getContextIdx"),
-    array("SessionScopedWaitHandleSubClass", "getWaitHandle"),
-    array("SessionScopedWaitHandleSubClass", "getContextIdx"),
+    array("BlockableWaitHandle", "getContextIdx"),
+    array("BlockableWaitHandleSubClass", "getWaitHandle"),
+    array("BlockableWaitHandleSubClass", "getContextIdx"),
   );
 
   foreach ($tests as $test) {

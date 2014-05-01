@@ -51,10 +51,8 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
  public:
   void run();
   String getName();
-  void exitContext(context_idx_t ctx_idx);
-
- protected:
   void enterContextImpl(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
 
  private:
   void setState(uint8_t state) { setKindState(Kind::Reschedule, state); }

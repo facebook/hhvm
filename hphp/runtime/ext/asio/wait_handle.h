@@ -39,9 +39,8 @@ namespace HPHP {
  *       GenVectorWaitHandle      - wait handle representing an Vector of WHs
  *       SetResultToRefWaitHandle - wait handle that sets result to reference
  *     RescheduleWaitHandle       - wait handle that reschedules execution
- *     SessionScopedWaitHandle    - wait handle with session-managed execution
- *       SleepWaitHandle          - wait handle that finishes after a timeout
- *       ExternalThreadEventWaitHandle  - thread-powered asynchronous execution
+ *     SleepWaitHandle            - wait handle that finishes after a timeout
+ *     ExternalThreadEventWaitHandle  - thread-powered asynchronous execution
  *
  * A wait handle can be either synchronously joined (waited for the operation
  * to finish) or passed in various contexts as a dependency and waited for
@@ -84,6 +83,13 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   Object t_getexceptioniffailed();
 
  public:
+  static constexpr ptrdiff_t stateOff() {
+    return offsetof(c_WaitHandle, o_subclassData.u8[0]);
+  }
+  static constexpr ptrdiff_t resultOff() {
+    return offsetof(c_WaitHandle, m_resultOrException);
+  }
+
   static c_WaitHandle* fromCell(Cell* cell) {
     return (
         cell->m_type == KindOfObject &&
@@ -110,10 +116,6 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   }
   void setKindState(Kind kind, uint8_t state) {
     o_subclassData.u8[0] = toKindState(kind, state);
-  }
-
-  static constexpr ptrdiff_t resultOff() {
-    return offsetof(c_WaitHandle, m_resultOrException);
   }
 
   // The code in the TC will depend on the values of these constants.

@@ -748,33 +748,8 @@
             ]
         },
         {
-            "name": "SessionScopedWaitHandle",
-            "parent": "WaitableWaitHandle",
-            "desc": "A wait handle whose execution is session-managed",
-            "flags": [
-                "IsAbstract",
-                "IsCppAbstract",
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                }
-            ],
-            "consts": [
-            ]
-        },
-        {
             "name": "SleepWaitHandle",
-            "parent": "SessionScopedWaitHandle",
+            "parent": "WaitableWaitHandle",
             "desc": "A wait handle that succeeds with null after the desired timeout expires",
             "flags": [
                 "IsFinal",
@@ -816,7 +791,7 @@
         },
         {
             "name": "ExternalThreadEventWaitHandle",
-            "parent": "SessionScopedWaitHandle",
+            "parent": "WaitableWaitHandle",
             "desc": "A wait handle that synchronizes against C++ operation in external thread",
             "bases": [
                 "Sweepable"

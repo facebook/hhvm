@@ -126,7 +126,7 @@ void checkCreateErrors(c_WaitableWaitHandle* child) {
 
 }
 
-ObjectData*
+c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   JIT::TCA resumeAddr,
                                   Offset resumeOffset,

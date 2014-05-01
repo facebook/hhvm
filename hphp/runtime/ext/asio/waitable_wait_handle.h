@@ -58,7 +58,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
   void enterContext(context_idx_t ctx_idx);
   void join();
-  virtual String getName() = 0;
+  String getName();
 
  protected:
   void done();
@@ -69,9 +69,9 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
   c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
 
-  virtual c_WaitableWaitHandle* getChild();
-  virtual void enterContextImpl(context_idx_t ctx_idx) = 0;
+  c_WaitableWaitHandle* getChild();
   bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;
+  void enterContextImpl(context_idx_t ctx_idx);
 
  private:
   c_BlockableWaitHandle* m_firstParent;

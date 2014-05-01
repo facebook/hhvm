@@ -1,5 +1,5 @@
 Awaitable::getWaitHandle
 HH\Iterator::next
-Method SessionScopedWaitHandle::getContextIdx does not have a prototype
+Method BlockableWaitHandle::getContextIdx does not have a prototype
 Awaitable::getWaitHandle
 WaitableWaitHandle::getContextIdx

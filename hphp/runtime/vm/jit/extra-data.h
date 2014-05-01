@@ -705,9 +705,9 @@ struct NewStructData : IRExtraData {
 
 struct RawMemData : IRExtraData {
 # define RAW_MEM_DATA_TYPES                     \
+  RAW_TYPE(AsyncState)                          \
   RAW_TYPE(AsyncResumeAddr)                     \
   RAW_TYPE(AsyncResumeOffset)                   \
-  RAW_TYPE(AsyncState)                          \
   RAW_TYPE(AsyncChild)                          \
   RAW_TYPE(ContResumeAddr)                      \
   RAW_TYPE(ContResumeOffset)                    \

@@ -60,25 +60,19 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   static constexpr ptrdiff_t resumeOffsetOff() {
     return resumableOff() + Resumable::resumeOffsetOff();
   }
-  static constexpr ptrdiff_t objOff() {
-    return resultOff() - c_WaitHandle::resultOff();
-  }
-  static constexpr ptrdiff_t stateOff() {
-    return offsetof(c_AsyncFunctionWaitHandle, o_subclassData.u8[0]);
-  }
-  static constexpr ptrdiff_t resultOff() {
-    return offsetof(c_AsyncFunctionWaitHandle, m_resultOrException);
-  }
   static constexpr ptrdiff_t childOff() {
     return offsetof(c_AsyncFunctionWaitHandle, m_child);
   }
-  static ObjectData* Create(const ActRec* origFp,
-                            JIT::TCA resumeAddr,
-                            Offset resumeOffset,
-                            ObjectData* child);
+  static c_AsyncFunctionWaitHandle* Create(const ActRec* origFp,
+                                           JIT::TCA resumeAddr,
+                                           Offset resumeOffset,
+                                           ObjectData* child);
   void run();
+  void onUnblocked();
   void ret(Cell& result);
   String getName();
+  c_WaitableWaitHandle* getChild();
+  void enterContextImpl(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
   void suspend(JIT::TCA resumeAddr, Offset resumeOffset,
@@ -96,23 +90,14 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
     return resumable()->actRec();
   }
 
- protected:
-  void onUnblocked();
-  c_WaitableWaitHandle* getChild();
-  void enterContextImpl(context_idx_t ctx_idx);
-
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncFunction, state); }
   void initialize(c_WaitableWaitHandle* child);
   void markAsSucceeded();
   void markAsFailed(const Object& exception);
-  c_WaitableWaitHandle* child() {
-    assert(m_child->instanceof(c_WaitableWaitHandle::classof()));
-    return static_cast<c_WaitableWaitHandle*>(m_child);
-  }
+  c_WaitableWaitHandle* child() { return m_child; }
 
-  // m_child is always WaitableWaitHandle, but needs to be non-virtual (JIT)
-  c_WaitHandle* m_child;
+  c_WaitableWaitHandle* m_child;
   Object m_privData;
 
   static const int8_t STATE_SCHEDULED = 3;

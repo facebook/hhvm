@@ -37,7 +37,6 @@ c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
   // parent B. Fortunately, parent's context is always equal or smaller, so
   // the condition above handles !isFinished() case.
   assert(!isFinished());
-
   enterContextImpl(ctx_idx);
 }
 

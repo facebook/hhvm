@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_ASIO_EXTERNAL_THREAD_EVENT_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,13 +33,13 @@ namespace HPHP {
 class AsioExternalThreadEvent;
 FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 class c_ExternalThreadEventWaitHandle
-  : public c_SessionScopedWaitHandle, public Sweepable {
+  : public c_WaitableWaitHandle, public Sweepable {
  public:
   DECLARE_CLASS(ExternalThreadEventWaitHandle)
 
   explicit c_ExternalThreadEventWaitHandle(Class* cls =
       c_ExternalThreadEventWaitHandle::classof())
-    : c_SessionScopedWaitHandle(cls)
+    : c_WaitableWaitHandle(cls)
   {}
   ~c_ExternalThreadEventWaitHandle() {}
 
@@ -66,22 +66,22 @@ class c_ExternalThreadEventWaitHandle
   void abandon(bool sweeping);
   void process();
   String getName();
-
- protected:
-  void registerToContext();
-  void unregisterFromContext();
+  void enterContextImpl(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
 
  private:
   void setState(uint8_t s) { setKindState(Kind::ExternalThreadEvent, s); }
   void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
   void destroyEvent(bool sweeping = false);
+  void registerToContext();
+  void unregisterFromContext();
 
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
   AsioExternalThreadEvent* m_event;
   Object m_privData;
   uint32_t m_index;
 
-  static const uint8_t STATE_WAITING  = 2;
+  static const uint8_t STATE_WAITING = 2;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

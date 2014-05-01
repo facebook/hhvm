@@ -858,7 +858,7 @@ bool Func::shouldPGO() const {
   // about the current execution mode is lost.
   //
   // TODO(#3880036): remove this once SrcKey contains execution mode bit
-  if (isAsync() || isGenerator()) return false;
+  if (isResumable()) return false;
 
   // Cloned closures use the func prologue tables to hold the
   // addresses of the DV funclets, and not real prologues.  The

@@ -594,7 +594,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (callee->attrs() & AttrMayUseVV) {
     return refuse("may use dynamic environment");
   }
-  if (callee->isAsync() || callee->isGenerator()) {
+  if (callee->isResumable()) {
     return refuse("resumables");
   }
   if (callee->numSlotsInFrame() + callee->maxStackCells() >=

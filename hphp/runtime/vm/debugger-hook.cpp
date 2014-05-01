@@ -170,7 +170,9 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
 
 static void addBreakPointFuncEntry(const Func* f) {
   // we are in a generator, skip CreateCont / RetC / PopC opcodes
-  auto base = f->isGenerator() ? c_Continuation::userBase(f) : f->base();
+  auto base = f->isGenerator()
+    ? (f->isAsync() ? bad_value<Offset>() : c_Continuation::userBase(f))
+    : f->base();
   auto pc = f->unit()->at(base);
 
   TRACE(5, "func() break %s : unit %p offset %d ==> pc %p)\n",

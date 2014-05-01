@@ -133,7 +133,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   ObjectData* child) {
   assert(fp);
   assert(!fp->resumed());
-  assert(fp->func()->isAsync());
+  assert(fp->func()->isAsyncFunction());
   assert(child);
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
 

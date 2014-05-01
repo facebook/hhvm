@@ -835,13 +835,13 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
     // that becomes part of the generator's stack. So we find the caller's FP,
     // compensate for its locals and iterators, and then we've found the base
     // of the generator's stack.
-    assert(fp->func()->isGenerator());
+    assert(fp->func()->isNonAsyncGenerator());
     return (TypedValue*)sfp - sfp->func()->numSlotsInFrame();
   } else {
     // The reentrant case occurs when asio scheduler resumes an async function.
     // We simply use the top of stack of the previous VM frame (since the
     // ActRec, locals, and iters for this frame do not reside on the VM stack).
-    assert(fp->func()->isAsync());
+    assert(fp->func()->isAsyncFunction());
     return g_context.getNoCheck()->m_nestedVMs.back().sp;
   }
 }
@@ -1683,7 +1683,7 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr,
                                           Resumable* resumable,
                                           ObjectData* exception) {
   assert(enterFnAr);
-  assert(enterFnAr->func()->isAsync());
+  assert(enterFnAr->func()->isAsyncFunction());
   assert(enterFnAr->resumed());
   assert(resumable);
 
@@ -2107,7 +2107,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   if (LIKELY(prevFp != nullptr)) {
     if (prevSp) {
       if (UNLIKELY(fp->resumed())) {
-        assert(fp->func()->isGenerator());
+        assert(fp->func()->isNonAsyncGenerator());
         *prevSp = (TypedValue*)prevFp - prevFp->func()->numSlotsInFrame();
       } else {
         *prevSp = (TypedValue*)(fp + 1);
@@ -4470,7 +4470,7 @@ OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   // If in an eagerly executed async function, wrap the return value
   // into succeeded StaticWaitHandle.
-  if (UNLIKELY(!m_fp->resumed() && m_fp->func()->isAsync())) {
+  if (UNLIKELY(!m_fp->resumed() && m_fp->func()->isAsyncFunction())) {
     auto const top = m_stack.topC();
     top->m_data.pobj = c_StaticWaitHandle::CreateSucceededVM(*top);
     top->m_type = KindOfObject;
@@ -4500,11 +4500,11 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     m_stack.ret();
     *m_stack.topTV() = retval;
     assert(m_stack.topTV() == &m_fp->m_r);
-  } else if (m_fp->func()->isAsync()) {
+  } else if (m_fp->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assert(!sfp);
     frame_afwh(m_fp)->ret(retval);
-  } else if (m_fp->func()->isGenerator()) {
+  } else if (m_fp->func()->isNonAsyncGenerator()) {
     // Mark the generator as finished and store the return value.
     assert(IS_NULL_TYPE(retval.m_type));
     frame_continuation(m_fp)->finish();
@@ -4525,7 +4525,7 @@ OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopRetV(IOP_ARGS) {
   NEXT();
   assert(!m_fp->resumed());
-  assert(!m_fp->func()->isAsync());
+  assert(!m_fp->func()->isResumable());
   ret(IOP_PASS_ARGS);
 }
 

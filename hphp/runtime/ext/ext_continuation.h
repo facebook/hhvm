@@ -81,7 +81,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   static c_Continuation* Create(const ActRec* fp, JIT::TCA resumeAddr,
                                 Offset resumeOffset) {
     assert(fp);
-    assert(fp->func()->isGenerator());
+    assert(fp->func()->isNonAsyncGenerator());
     void* obj = Resumable::Create(fp, resumeAddr, resumeOffset,
                                   sizeof(c_Continuation));
     auto const cont = new (obj) c_Continuation();
@@ -97,7 +97,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
    * Skips CreateCont and PopC opcodes.
    */
   static Offset userBase(const Func* func) {
-    assert(func->isGenerator());
+    assert(func->isNonAsyncGenerator());
     auto base = func->base();
 
     DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));

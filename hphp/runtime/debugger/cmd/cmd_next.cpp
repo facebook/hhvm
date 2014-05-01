@@ -202,45 +202,40 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // and end up at the caller of ASIO or send(). For async functions
   // stepping over an await, we land on the next statement.
   auto op = *reinterpret_cast<const Op*>(pc);
-  if (fp->func()->isAsync()) {
-    if (op == OpAwait) {
-      auto wh = c_WaitHandle::fromCell(g_context->getStack().topC());
-      if (wh && !wh->isFinished()) {
-        TRACE(2, "CmdNext: encountered blocking await from async function\n");
-        if (fp->resumed()) {
-          setupStepSuspend(fp, pc);
-          removeLocationFilter();
-        } else {
-          // We need to step over this opcode, then grab the created
-          // AsyncFunctionWaitHandle and setup stepping like we do for
-          // OpAwait.
-          m_skippingAwait = true;
-          m_needsVMInterrupt = true;
-          removeLocationFilter();
-        }
-        return;
+  if (op == OpAwait) {
+    assert(fp->func()->isAsync());
+    auto wh = c_WaitHandle::fromCell(g_context->getStack().topC());
+    if (wh && !wh->isFinished()) {
+      TRACE(2, "CmdNext: encountered blocking await\n");
+      if (fp->resumed()) {
+        setupStepSuspend(fp, pc);
+        removeLocationFilter();
+      } else {
+        // Eager execution is supported only by async functions.
+        // We need to step over this opcode, then grab the created
+        // AsyncFunctionWaitHandle and setup stepping like we do for
+        // OpAwait.
+        assert(fp->func()->isAsyncFunction());
+        m_skippingAwait = true;
+        m_needsVMInterrupt = true;
+        removeLocationFilter();
       }
-    } else if (fp->resumed() && op == OpRetC) {
-      TRACE(2, "CmdNext: encountered return from resumed async function\n");
-      setupStepOuts();
-      removeLocationFilter();
       return;
     }
-  } else if (fp->func()->isGenerator()) {
-    if (op == OpYield || op == OpYieldK) {
-      TRACE(2, "CmdNext: encountered yield from generator\n");
-      assert(fp->resumed());
-      setupStepOuts();
-      setupStepSuspend(fp, pc);
-      removeLocationFilter();
-      return;
-    } else if (op == OpRetC) {
-      TRACE(2, "CmdNext: encountered return from generator\n");
-      assert(fp->resumed());
-      setupStepOuts();
-      removeLocationFilter();
-      return;
-    }
+  } else if (op == OpYield || op == OpYieldK) {
+    assert(fp->resumed());
+    assert(fp->func()->isGenerator());
+    TRACE(2, "CmdNext: encountered yield from generator\n");
+    setupStepOuts();
+    setupStepSuspend(fp, pc);
+    removeLocationFilter();
+    return;
+  } else if (op == OpRetC && fp->resumed()) {
+    assert(fp->func()->isResumable());
+    TRACE(2, "CmdNext: encountered return from resumed resumable\n");
+    setupStepOuts();
+    removeLocationFilter();
+    return;
   }
 
   installLocationFilterForLine(interrupt.getSite());
@@ -308,7 +303,7 @@ void CmdNext::cleanupStepResumable() {
 // will remain alive.
 void* CmdNext::getResumableId(ActRec* fp) {
   assert(fp->resumed());
-  assert(fp->func()->isAsync() || fp->func()->isGenerator());
+  assert(fp->func()->isResumable());
   TRACE(2, "CmdNext: continuation tag %p for %s\n", fp,
         fp->func()->name()->data());
   return fp;

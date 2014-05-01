@@ -107,15 +107,15 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
     }
   }
   auto func = unit->getFunc(site->getCurOffset());
-  if (func->isAsync() || func->isGenerator()) {
-    auto excludeContinuationReturns = [] (Op op) {
+  if (func->isResumable()) {
+    auto excludeResumableReturns = [] (Op op) {
       return (op != OpYield) &&
              (op != OpYieldK) &&
              (op != OpAwait) &&
              (op != OpRetC);
     };
     g_context->m_lastLocFilter->addRanges(unit, ranges,
-                                            excludeContinuationReturns);
+                                          excludeResumableReturns);
   } else {
     g_context->m_lastLocFilter->addRanges(unit, ranges);
   }

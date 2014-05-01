@@ -60,7 +60,7 @@ struct Resumable {
     assert(fp);
     auto const func = fp->func();
     assert(func);
-    assert(func->isAsync() || func->isGenerator());
+    assert(func->isResumable());
     assert(func->contains(resumeOffset));
 
     // Allocate memory.
@@ -101,7 +101,7 @@ struct Resumable {
 
 private:
   static ptrdiff_t sizeForFunc(const Func* func) {
-    assert(func->isAsync() || func->isGenerator());
+    assert(func->isResumable());
     return sizeof(Iter) * func->numIterators() +
            sizeof(TypedValue) * func->numLocals() +
            sizeof(Resumable);

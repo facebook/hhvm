@@ -377,14 +377,18 @@ struct Func {
   const StringData* docComment() const { return shared()->m_docComment; }
   bool isClosureBody() const { return shared()->m_isClosureBody; }
   bool isClonedClosure() const;
+  bool isAsync() const { return shared()->m_isAsync; }
   bool isGenerator() const { return shared()->m_isGenerator; }
   bool isPairGenerator() const { return shared()->m_isPairGenerator; }
+  bool isAsyncFunction() const { return isAsync() && !isGenerator(); }
+  bool isAsyncGenerator() const { return isAsync() && isGenerator(); }
+  bool isNonAsyncGenerator() const { return !isAsync() && isGenerator(); }
+  bool isResumable() const { return isAsync() || isGenerator(); }
 
   /**
    * Was this generated specially by the compiler to aide the runtime?
    */
   bool isGenerated() const { return shared()->m_isGenerated; }
-  bool isAsync() const { return shared()->m_isAsync; }
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
   const ClassInfo::MethodInfo* methInfo() const { return shared()->m_info; }

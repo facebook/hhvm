@@ -203,9 +203,11 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
     // Free ActRec.
     stack.ndiscard(func->numSlotsInFrame());
     stack.discardAR();
-  } else if (fp->func()->isAsync()) {
+  } else if (fp->func()->isAsyncFunction()) {
     // Do nothing. AsyncFunctionWaitHandle will handle the exception.
-  } else if (fp->func()->isGenerator()) {
+  } else if (fp->func()->isAsyncGenerator()) {
+    // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
+  } else if (fp->func()->isNonAsyncGenerator()) {
     // Mark the generator as finished.
     frame_continuation(fp)->finish();
   } else {
@@ -231,7 +233,7 @@ void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
   auto const prevFp = fp->sfp();
   auto const soff = fp->m_soff;
   assert(!fp->resumed());
-  assert(func->isAsync());
+  assert(func->isAsyncFunction());
   assert(*reinterpret_cast<const Op*>(pc) != OpRetC);
 
   FTRACE(1, "tearDownAsyncFrame: {} ({})\n  fp {} prevFp {}\n",
@@ -428,7 +430,7 @@ UnwindAction unwind(ActRec*& fp,
 
     // If in an eagerly executed async function, wrap the user exception
     // into a failed StaticWaitHandle and return it to the caller.
-    if (!fp->resumed() && fp->m_func->isAsync() &&
+    if (!fp->resumed() && fp->m_func->isAsyncFunction() &&
         fault.m_faultType == Fault::Type::UserException) {
       tearDownEagerAsyncFrame(fp, stack, pc, fault.m_userException);
       g_context->m_faults.pop_back();

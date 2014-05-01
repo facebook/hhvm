@@ -1524,7 +1524,7 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
 
 void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   assert(!resumed());
-  assert(curFunc()->isGenerator());
+  assert(curFunc()->isNonAsyncGenerator());
 
   auto const ldgblExit = makeExit();
 
@@ -3288,7 +3288,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
 
   // In async function, wrap the return value into succeeded StaticWaitHandle.
-  if (!resumed() && func->isAsync()) {
+  if (!resumed() && func->isAsyncFunction()) {
     push(gen(CreateSSWH, pop(type, DataTypeGeneric)));
   }
 
@@ -3330,7 +3330,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
     // Free ActRec.
     sp = gen(RetAdjustStack, m_irb->fp());
-  } else if (func->isAsync()) {
+  } else if (func->isAsyncFunction()) {
     // Mark the async function as succeeded.
     auto succeeded = c_WaitHandle::toKindState(
         c_WaitHandle::Kind::AsyncFunction, c_WaitHandle::STATE_SUCCEEDED);
@@ -3342,7 +3342,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
     // Sync SP.
     sp = spillStack();
-  } else if (func->isGenerator()) {
+  } else if (func->isNonAsyncGenerator()) {
     assert(retVal->type() <= Type::Null);
 
     // Clear generator's key and value.
@@ -3384,7 +3384,7 @@ void HhbcTranslator::emitRetC(bool freeInline) {
 
 void HhbcTranslator::emitRetV(bool freeInline) {
   assert(!resumed());
-  assert(!curFunc()->isAsync());
+  assert(!curFunc()->isResumable());
   if (isInlining()) {
     emitRetFromInlined(Type::BoxedCell);
   } else {

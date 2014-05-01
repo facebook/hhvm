@@ -61,8 +61,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   virtual String getName() = 0;
 
  protected:
-  void setResult(const Cell& result);
-  void setException(ObjectData* exception);
   void done();
 
   void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
@@ -74,8 +72,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   virtual c_WaitableWaitHandle* getChild();
   virtual void enterContextImpl(context_idx_t ctx_idx) = 0;
   bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;
-
-  static const int8_t STATE_NEW       = 2;
 
  private:
   c_BlockableWaitHandle* m_firstParent;

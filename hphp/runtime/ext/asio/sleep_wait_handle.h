@@ -56,6 +56,7 @@ class c_SleepWaitHandle : public c_SessionScopedWaitHandle {
   void unregisterFromContext();
 
  private:
+  void setState(uint8_t state) { setKindState(Kind::Sleep, state); }
   void initialize(int64_t usecs);
 
   AsioSession::TimePoint m_waketime;

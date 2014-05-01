@@ -3330,7 +3330,8 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     sp = gen(RetAdjustStack, m_irb->fp());
   } else if (func->isAsync()) {
     // Mark the async function as succeeded.
-    auto succeeded = c_AsyncFunctionWaitHandle::STATE_SUCCEEDED;
+    auto succeeded = c_WaitHandle::toKindState(
+        c_WaitHandle::Kind::AsyncFunction, c_WaitHandle::STATE_SUCCEEDED);
     gen(StAsyncArRaw, RawMemData{RawMemData::AsyncState}, m_irb->fp(),
         cns(succeeded));
 

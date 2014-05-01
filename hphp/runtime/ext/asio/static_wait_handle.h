@@ -49,6 +49,9 @@ class c_StaticWaitHandle : public c_WaitHandle {
   static c_StaticWaitHandle* CreateSucceeded(const Cell& result);
   static c_StaticWaitHandle* CreateSucceededVM(const Cell result);
   static c_StaticWaitHandle* CreateFailed(ObjectData* exception);
+
+ private:
+  void setState(uint8_t state) { setKindState(Kind::Static, state); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -60,12 +60,13 @@ c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(AsioExt
 }
 
 void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event, ObjectData* priv_data) {
-  // this wait handle is owned by existence of unprocessed event
-  incRefCount();
+  setState(STATE_WAITING);
   m_event = event;
   m_privData = priv_data;
 
-  setState(STATE_WAITING);
+  // this wait handle is owned by existence of unprocessed event
+  incRefCount();
+
   if (isInContext()) {
     registerToContext();
   }
@@ -112,16 +113,23 @@ void c_ExternalThreadEventWaitHandle::process() {
   try {
     m_event->unserialize(result);
   } catch (const Object& exception) {
-    setException(exception.get());
+    assert(exception->instanceof(SystemLib::s_ExceptionClass));
+    setState(STATE_FAILED);
+    tvWriteObject(exception.get(), &m_resultOrException);
+    done();
     return;
   } catch (...) {
-    setException(AsioSession::Get()->getAbruptInterruptException().get());
+    setState(STATE_FAILED);
+    tvWriteObject(AsioSession::Get()->getAbruptInterruptException().get(),
+                  &m_resultOrException);
+    done();
     throw;
   }
 
   assert(cellIsPlausible(result));
-  setResult(result);
-  tvRefcountedDecRefCell(&result);
+  setState(STATE_SUCCEEDED);
+  cellCopy(result, m_resultOrException);
+  done();
 }
 
 String c_ExternalThreadEventWaitHandle::getName() {

@@ -53,6 +53,18 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
 
+  enum class Kind : uint8_t {
+    Static              = 0,
+    AsyncFunction       = 1,
+    GenArray            = 2,
+    GenMap              = 3,
+    GenVector           = 4,
+    SetResultToRef      = 5,
+    Reschedule          = 6,
+    Sleep               = 7,
+    ExternalThreadEvent = 8,
+  };
+
   explicit c_WaitHandle(Class* cls = c_WaitHandle::classof())
     : ExtObjectDataFlags(cls)
     , m_resultOrException(make_tv<KindOfNull>())
@@ -78,27 +90,34 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
         cell->m_data.pobj->getAttribute(ObjectData::IsWaitHandle)
       ) ? static_cast<c_WaitHandle*>(cell->m_data.pobj) : nullptr;
   }
-  bool isFinished() { return getState() <= STATE_FAILED; }
-  bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
-  bool isFailed() { return getState() == STATE_FAILED; }
-  Cell& getResult() {
+  bool isFinished() const { return getState() <= STATE_FAILED; }
+  bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }
+  bool isFailed() const { return getState() == STATE_FAILED; }
+  const Cell& getResult() const {
     assert(isSucceeded());
     return m_resultOrException;
   }
-  ObjectData* getException() {
+  ObjectData* getException() const {
     assert(isFailed());
     return m_resultOrException.m_data.pobj;
   }
 
-  uint8_t getState() { return o_subclassData.u8[0]; }
-  void setState(uint8_t state) { o_subclassData.u8[0] = state; }
+  Kind getKind() const { return static_cast<Kind>(o_subclassData.u8[0] >> 4); }
+  uint8_t getState() const { return o_subclassData.u8[0] & 0x0F; }
+  static uint8_t toKindState(Kind kind, uint8_t state) {
+    assert((uint8_t)kind < 0x10 && state < 0x10);
+    return ((uint8_t)kind << 4) | state;
+  }
+  void setKindState(Kind kind, uint8_t state) {
+    o_subclassData.u8[0] = toKindState(kind, state);
+  }
 
   static constexpr ptrdiff_t resultOff() {
     return offsetof(c_WaitHandle, m_resultOrException);
   }
 
   // The code in the TC will depend on the values of these constants.
-  // See emitAsyncAwait().
+  // See emitAwait().
   static const int8_t STATE_SUCCEEDED = 0;
   static const int8_t STATE_FAILED    = 1;
 

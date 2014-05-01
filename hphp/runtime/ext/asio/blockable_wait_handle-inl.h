@@ -24,8 +24,6 @@ namespace HPHP {
 
 inline void
 c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
-  setState(STATE_BLOCKED);
-
   assert(!child->isFinished());
   assert(getChild() == child);
   assert(getContextIdx() <= child->getContextIdx());

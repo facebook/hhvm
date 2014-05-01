@@ -141,6 +141,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
 }
 
 void c_GenArrayWaitHandle::initialize(const Object& exception, const Array& deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+  setState(STATE_BLOCKED);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
@@ -160,6 +161,7 @@ void c_GenArrayWaitHandle::initialize(const Object& exception, const Array& deps
 }
 
 void c_GenArrayWaitHandle::onUnblocked() {
+  assert(getState() == STATE_BLOCKED);
   MixedArray::ValIter arrIter(m_deps.get(), m_iterPos);
 
   for (; !arrIter.empty(); arrIter.advance()) {
@@ -196,13 +198,16 @@ void c_GenArrayWaitHandle::onUnblocked() {
   m_iterPos = arrIter.currentPos();
 
   if (m_exception.isNull()) {
-    setResult(make_tv<KindOfArray>(m_deps.get()));
-    m_deps = nullptr;
+    setState(STATE_SUCCEEDED);
+    cellDup(make_tv<KindOfArray>(m_deps.get()), m_resultOrException);
   } else {
-    setException(m_exception.get());
+    setState(STATE_FAILED);
+    tvWriteObject(m_exception.get(), &m_resultOrException);
     m_exception = nullptr;
-    m_deps = nullptr;
   }
+
+  m_deps = nullptr;
+  done();
 }
 
 String c_GenArrayWaitHandle::getName() {

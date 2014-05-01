@@ -112,6 +112,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
 }
 
 void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child) {
+  setState(STATE_BLOCKED);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
@@ -131,6 +132,8 @@ void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, 
 }
 
 void c_GenVectorWaitHandle::onUnblocked() {
+  assert(getState() == STATE_BLOCKED);
+
   for (; m_iterPos < m_deps->size(); ++m_iterPos) {
 
     Cell* current = tvAssertCell(m_deps->at(m_iterPos));
@@ -160,13 +163,16 @@ void c_GenVectorWaitHandle::onUnblocked() {
   }
 
   if (m_exception.isNull()) {
-    setResult(make_tv<KindOfObject>(m_deps.get()));
-    m_deps = nullptr;
+    setState(STATE_SUCCEEDED);
+    tvWriteObject(m_deps.get(), &m_resultOrException);
   } else {
-    setException(m_exception.get());
+    setState(STATE_FAILED);
+    tvWriteObject(m_exception.get(), &m_resultOrException);
     m_exception = nullptr;
-    m_deps = nullptr;
   }
+
+  m_deps = nullptr;
+  done();
 }
 
 String c_GenVectorWaitHandle::getName() {

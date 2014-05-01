@@ -49,7 +49,7 @@ class c_SessionScopedWaitHandle : public c_WaitableWaitHandle {
   virtual void registerToContext() = 0;
   virtual void unregisterFromContext() = 0;
 
-  static const int8_t STATE_WAITING = 3;
+  static const int8_t STATE_WAITING = 2;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

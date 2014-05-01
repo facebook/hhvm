@@ -98,9 +98,11 @@ Object c_SetResultToRefWaitHandle::ti_create(const Object& wait_handle, VRefPara
 }
 
 void c_SetResultToRefWaitHandle::initialize(c_WaitableWaitHandle* child, RefData* ref) {
+  setState(STATE_BLOCKED);
   m_child = child;
   m_ref = ref;
   m_ref->incRefCount();
+
   blockOn(child);
 }
 
@@ -125,8 +127,10 @@ void c_SetResultToRefWaitHandle::markAsSucceeded(const Cell& result) {
   cellSet(result, *ref->tv());
   decRefRef(ref);
 
-  setResult(result);
+  setState(STATE_SUCCEEDED);
+  cellDup(result, m_resultOrException);
   m_child = nullptr;
+  done();
 }
 
 void c_SetResultToRefWaitHandle::markAsFailed(const Object& exception) {
@@ -136,8 +140,10 @@ void c_SetResultToRefWaitHandle::markAsFailed(const Object& exception) {
   tvSetIgnoreRef(make_tv<KindOfNull>(), *ref->tv());
   decRefRef(ref);
 
-  setException(exception.get());
+  setState(STATE_FAILED);
+  tvWriteObject(exception.get(), &m_resultOrException);
   m_child = nullptr;
+  done();
 }
 
 String c_SetResultToRefWaitHandle::getName() {

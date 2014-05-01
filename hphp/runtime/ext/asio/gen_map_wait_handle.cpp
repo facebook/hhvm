@@ -118,6 +118,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
 }
 
 void c_GenMapWaitHandle::initialize(const Object& exception, c_Map* deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+  setState(STATE_BLOCKED);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
@@ -137,6 +138,8 @@ void c_GenMapWaitHandle::initialize(const Object& exception, c_Map* deps, ssize_
 }
 
 void c_GenMapWaitHandle::onUnblocked() {
+  assert(getState() == STATE_BLOCKED);
+
   for (;
        m_deps->iter_valid(m_iterPos);
        m_iterPos = m_deps->iter_next(m_iterPos)) {
@@ -168,13 +171,16 @@ void c_GenMapWaitHandle::onUnblocked() {
   }
 
   if (m_exception.isNull()) {
-    setResult(make_tv<KindOfObject>(m_deps.get()));
-    m_deps = nullptr;
+    setState(STATE_SUCCEEDED);
+    tvWriteObject(m_deps.get(), &m_resultOrException);
   } else {
-    setException(m_exception.get());
+    setState(STATE_FAILED);
+    tvWriteObject(m_exception.get(), &m_resultOrException);
     m_exception = nullptr;
-    m_deps = nullptr;
   }
+
+  m_deps = nullptr;
+  done();
 }
 
 String c_GenMapWaitHandle::getName() {

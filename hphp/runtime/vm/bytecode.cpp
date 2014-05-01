@@ -2040,7 +2040,7 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
                                        ObjectData* freeObj,
-                                       Cell& awaitResult) {
+                                       const Cell& awaitResult) {
   assert(tl_regState == VMRegState::CLEAN);
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
@@ -4503,9 +4503,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   } else if (m_fp->func()->isAsync()) {
     // Mark the async function as succeeded and store the return value.
     assert(!sfp);
-    auto waitHandle = frame_afwh(m_fp);
-    waitHandle->setState(c_AsyncFunctionWaitHandle::STATE_SUCCEEDED);
-    cellCopy(retval, waitHandle->getResult());
+    frame_afwh(m_fp)->ret(retval);
   } else if (m_fp->func()->isGenerator()) {
     // Mark the generator as finished and store the return value.
     assert(IS_NULL_TYPE(retval.m_type));

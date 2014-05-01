@@ -152,13 +152,14 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
 }
 
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
-  auto session = AsioSession::Get();
-
+  setState(STATE_BLOCKED);
   m_child = child;
   m_privData = nullptr;
+
   blockOn(child);
 
   // needs to be called with non-zero refcnt
+  auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnAsyncFunctionCreateCallback())) {
     session->onAsyncFunctionCreate(this, child);
   }
@@ -220,6 +221,7 @@ void c_AsyncFunctionWaitHandle::run() {
     }
 
     // set up dependency
+    setState(STATE_BLOCKED);
     blockOn(child());
   } catch (const Object& exception) {
     // process exception thrown by the async function
@@ -240,6 +242,11 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
   }
 }
 
+void c_AsyncFunctionWaitHandle::ret(Cell& result) {
+  setState(STATE_SUCCEEDED);
+  cellCopy(result, m_resultOrException);
+}
+
 void c_AsyncFunctionWaitHandle::markAsSucceeded() {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnAsyncFunctionSuccessCallback())) {
@@ -255,7 +262,9 @@ void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
     session->onAsyncFunctionFail(this, exception);
   }
 
-  setException(exception.get());
+  setState(STATE_FAILED);
+  tvWriteObject(exception.get(), &m_resultOrException);
+  done();
 }
 
 void

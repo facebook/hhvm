@@ -77,6 +77,7 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
                             Offset resumeOffset,
                             ObjectData* child);
   void run();
+  void ret(Cell& result);
   String getName();
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
@@ -101,6 +102,7 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
+  void setState(uint8_t state) { setKindState(Kind::AsyncFunction, state); }
   void initialize(c_WaitableWaitHandle* child);
   void markAsSucceeded();
   void markAsFailed(const Object& exception);
@@ -113,8 +115,8 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   c_WaitHandle* m_child;
   Object m_privData;
 
-  static const int8_t STATE_SCHEDULED = 4;
-  static const int8_t STATE_RUNNING   = 5;
+  static const int8_t STATE_SCHEDULED = 3;
+  static const int8_t STATE_RUNNING   = 4;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

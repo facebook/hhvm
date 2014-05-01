@@ -5621,6 +5621,7 @@ void CodeGenerator::cgLdWHState(IRInstruction* inst) {
   auto const rdst = dstLoc(0).reg();
   auto& a = m_as;
   a.    loadzbl (robj[ObjectData::whStateOffset()], r32(rdst));
+  a.    andb    ((int8_t)0x0F, rbyte(rdst));
 }
 
 void CodeGenerator::cgLdWHResult(IRInstruction* inst) {

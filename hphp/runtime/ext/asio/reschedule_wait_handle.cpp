@@ -61,10 +61,10 @@ Object c_RescheduleWaitHandle::ti_create(int64_t queue, int priority) {
 }
 
 void c_RescheduleWaitHandle::initialize(uint32_t queue, uint32_t priority) {
+  setState(STATE_SCHEDULED);
   m_queue = queue;
   m_priority = priority;
 
-  setState(STATE_SCHEDULED);
   if (isInContext()) {
     getContext()->schedule(this, m_queue, m_priority);
   }
@@ -76,7 +76,9 @@ void c_RescheduleWaitHandle::run() {
     return;
   }
 
-  setResult(make_tv<KindOfNull>());
+  setState(STATE_SUCCEEDED);
+  tvWriteNull(&m_resultOrException);
+  done();
 }
 
 String c_RescheduleWaitHandle::getName() {

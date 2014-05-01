@@ -72,6 +72,7 @@ class c_ExternalThreadEventWaitHandle
   void unregisterFromContext();
 
  private:
+  void setState(uint8_t s) { setKindState(Kind::ExternalThreadEvent, s); }
   void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
   void destroyEvent(bool sweeping = false);
 
@@ -80,7 +81,7 @@ class c_ExternalThreadEventWaitHandle
   Object m_privData;
   uint32_t m_index;
 
-  static const uint8_t STATE_WAITING  = 3;
+  static const uint8_t STATE_WAITING  = 2;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

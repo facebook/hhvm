@@ -674,7 +674,7 @@ public:
                   ctx.invName, argc, argv);
   }
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
-                       Cell& awaitResult);
+                       const Cell& awaitResult);
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 

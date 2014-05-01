@@ -30,7 +30,6 @@ namespace HPHP {
 c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb)
     : c_WaitHandle(cb)
     , m_firstParent(nullptr) {
-  setState(STATE_NEW);
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());
 }
 
@@ -73,23 +72,6 @@ Array c_WaitableWaitHandle::t_getparents() {
   }
 
   return result;
-}
-
-void c_WaitableWaitHandle::setResult(const Cell& result) {
-  assert(cellIsPlausible(result));
-
-  setState(STATE_SUCCEEDED);
-  cellDup(result, m_resultOrException);
-  done();
-}
-
-void c_WaitableWaitHandle::setException(ObjectData* exception) {
-  assert(exception);
-  assert(exception->instanceof(SystemLib::s_ExceptionClass));
-
-  setState(STATE_FAILED);
-  tvWriteObject(exception, &m_resultOrException);
-  done();
 }
 
 void c_WaitableWaitHandle::done() {

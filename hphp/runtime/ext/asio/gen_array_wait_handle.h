@@ -54,6 +54,7 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
+  void setState(uint8_t state) { setKindState(Kind::GenArray, state); }
   void initialize(const Object& exception, const Array& deps,
                   ssize_t iter_pos, c_WaitableWaitHandle* child);
 

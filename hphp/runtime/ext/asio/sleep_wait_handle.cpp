@@ -48,6 +48,7 @@ Object c_SleepWaitHandle::ti_create(int64_t usecs) {
 }
 
 void c_SleepWaitHandle::initialize(int64_t usecs) {
+  setState(STATE_WAITING);
   m_waketime =
     AsioSession::TimePoint::clock::now() +
     std::chrono::microseconds(usecs);
@@ -55,7 +56,6 @@ void c_SleepWaitHandle::initialize(int64_t usecs) {
   incRefCount();
   AsioSession::Get()->getSleepEventQueue().push(this);
 
-  setState(STATE_WAITING);
   if (isInContext()) {
     registerToContext();
   }
@@ -68,7 +68,9 @@ void c_SleepWaitHandle::process() {
     unregisterFromContext();
   }
 
-  setResult(make_tv<KindOfNull>());
+  setState(STATE_SUCCEEDED);
+  tvWriteNull(&m_resultOrException);
+  done();
 }
 
 String c_SleepWaitHandle::getName() {

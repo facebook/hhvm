@@ -44,7 +44,8 @@ void emitBindJ(CodeBlock& cb, CodeBlock& unused, SrcKey dest,
 
   TCA sr = (req == JIT::REQ_BIND_JMP
             ? emitEphemeralServiceReq(unused,
-                                      mcg->getFreeStub(unused),
+                                      mcg->getFreeStub(unused,
+                                                       &mcg->cgFixups()),
                                       req, toSmash, dest.toAtomicInt())
             : emitServiceReq(unused, req, toSmash,
                              dest.toAtomicInt()));

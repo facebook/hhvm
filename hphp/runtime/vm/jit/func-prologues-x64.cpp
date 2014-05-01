@@ -354,6 +354,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   auto& unusedCode = mcg->code.unused();
   Asm a { mainCode };
   TCA start = mainCode.frontier();
+  assert(mcg->cgFixups().empty());
   if (dvs.size() == 1) {
     a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndFlags)]);
     emitBindJcc(mainCode, unusedCode, CC_LE,
@@ -368,6 +369,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
     }
     emitBindJmp(mainCode, unusedCode, SrcKey(func, func->base(), false));
   }
+  mcg->cgFixups().process();
   return start;
 }
 

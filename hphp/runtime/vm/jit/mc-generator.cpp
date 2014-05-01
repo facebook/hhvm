@@ -44,6 +44,7 @@
 #include "folly/String.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/disasm.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/maphuge.h"
@@ -485,6 +486,7 @@ MCGenerator::translate(const TranslArgs& args) {
   }
   SKTRACE(1, args.m_sk, "translate moved head from %p to %p\n",
           getTopTranslation(args.m_sk), start);
+
   return start;
 }
 
@@ -919,8 +921,10 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
     return tDest;
   }
 
-  TCA stub = emitEphemeralServiceReq(code.unused(), getFreeStub(code.unused()),
-                                     REQ_BIND_JMPCC_SECOND, toSmash,
+  TCA stub = emitEphemeralServiceReq(code.unused(),
+                                     getFreeStub(code.unused(), nullptr),
+                                     REQ_BIND_JMPCC_SECOND,
+                                     RipRelative(toSmash),
                                      offWillDefer, cc);
 
   smashed = true;
@@ -1176,6 +1180,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
         if (!isImmutable) dest = backEnd().funcPrologueToGuard(dest, func);
 
         if (backEnd().callTarget(toSmash) != dest) {
+          assert(backEnd().callTarget(toSmash));
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
           backEnd().smashCall(toSmash, dest);
           smashed = true;
@@ -1344,6 +1349,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     not_reached();
   }
 
+  assert(start != TCA(0xbee5face));
   if (smashed && info.stubAddr) {
     Treadmill::enqueue(FreeRequestStubTrigger(info.stubAddr));
   }
@@ -1394,13 +1400,16 @@ MCGenerator::freeRequestStub(TCA stub) {
   return true;
 }
 
-TCA MCGenerator::getFreeStub(CodeBlock& unused) {
+TCA MCGenerator::getFreeStub(CodeBlock& unused, CodeGenFixups* fixups) {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
     Stats::inc(Stats::Astubs_Reused);
     always_assert(m_freeStubs.m_list == nullptr ||
-                  code.unused().contains(TCA(m_freeStubs.m_list)));
+                  code.isValidCodeAddress(TCA(m_freeStubs.m_list)));
     TRACE(1, "recycle stub %p\n", ret);
+    if (fixups) {
+      fixups->m_reusedStubs.emplace_back(ret);
+    }
   } else {
     ret = unused.frontier();
     Stats::inc(Stats::Astubs_New);
@@ -1681,19 +1690,36 @@ CodeGenFixups::process() {
     mcg->getJmpToTransIDMap().insert(elm);
   }
   m_pendingJmpTransIDs.clear();
+  /*
+   * Currently reusedStubs, addressImmediates, and
+   * codePointers are only used for relocation at the
+   * end of code gen.
+   *
+   * Once we try to relocate live code, we'll need to
+   * store compact forms of these for later.
+   */
+  m_reusedStubs.clear();
+  m_addressImmediates.clear();
+  m_codePointers.clear();
 }
 
 void CodeGenFixups::clear() {
   m_pendingFixups.clear();
   m_pendingCatchTraces.clear();
   m_pendingJmpTransIDs.clear();
+  m_reusedStubs.clear();
+  m_addressImmediates.clear();
+  m_codePointers.clear();
 }
 
 bool CodeGenFixups::empty() const {
   return
     m_pendingFixups.empty() &&
     m_pendingCatchTraces.empty() &&
-    m_pendingJmpTransIDs.empty();
+    m_pendingJmpTransIDs.empty() &&
+    m_reusedStubs.empty() &&
+    m_addressImmediates.empty() &&
+    m_codePointers.empty();
 }
 
 void
@@ -1941,7 +1967,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
   HhbcTranslator& ht = m_tx.irTrans()->hhbcTrans();
   bool profilingFunc = false;
 
-  assert(srcRec.inProgressTailJumps().size() == 0);
+  assert(srcRec.inProgressTailJumps().empty());
   try {
     emitResolvedDeps(t.m_resolvedDeps);
     {
@@ -2500,6 +2526,14 @@ void MCGenerator::setJmpTransID(TCA jmp) {
   TransID transId = m_tx.profData()->curTransID();
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
   m_fixups.m_pendingJmpTransIDs.emplace_back(jmp, transId);
+}
+
+TCA RelocationInfo::adjustedAddress(TCA addr) const {
+  if (size_t(addr - m_start) > size_t(m_end - m_start)) {
+    return nullptr;
+  }
+
+  return addr + (m_dest - m_start);
 }
 
 void

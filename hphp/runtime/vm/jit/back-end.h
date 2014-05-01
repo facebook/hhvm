@@ -31,6 +31,9 @@ struct Constraint;
 struct IRInstruction;
 struct IRUnit;
 struct PhysReg;
+struct RelocationInfo;
+struct CodeGenFixups;
+struct AsmInfo;
 
 /*
  * This module supports both X64 and ARM behind a platform-agnostic interface.
@@ -156,6 +159,35 @@ class BackEnd {
   virtual void streamPhysReg(std::ostream& os, PhysReg& reg) = 0;
   virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
                            TCA begin, TCA end) = 0;
+
+  virtual bool supportsRelocation() const { return false; }
+
+  /*
+   * Relocate the code block described by rel to its ultimate destination,
+   * and return the size of the relocated code (which may be different
+   * due to alignment padding, or shrinking branches etc
+   */
+  virtual size_t relocate(RelocationInfo& rel, CodeGenFixups& fixups) {
+    always_assert(false);
+  }
+  /*
+   * Adjust the offsets/immediates for any instructions in the range start, end
+   * based on the relocation already performed on rel.
+   * Explicit pc-relative offsets, and immediates identified by
+   * fixups.m_addressImmediates will be adjusted.
+   */
+  virtual void adjustForRelocation(TCA start, TCA end,
+                                   RelocationInfo& rel, CodeGenFixups& fixups) {
+    always_assert(false);
+  }
+  /*
+   * Adjust the contents of fixups, sr, and asmInfo based on the relocation
+   * already performed on rel.
+   */
+  virtual void adjustForRelocation(SrcRec* sr, AsmInfo* asmInfo,
+                                   RelocationInfo& rel, CodeGenFixups& fixups) {
+    always_assert(false);
+  }
 };
 
 }}

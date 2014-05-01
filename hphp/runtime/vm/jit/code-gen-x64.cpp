@@ -485,9 +485,9 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   auto const patchAddr = a.frontier();
   auto const jccStub =
     emitEphemeralServiceReq(m_unusedCode,
-                            mcg->getFreeStub(m_unusedCode),
+                            mcg->getFreeStub(m_unusedCode, &mcg->cgFixups()),
                             REQ_BIND_JMPCC_FIRST,
-                            patchAddr,
+                            RipRelative(patchAddr),
                             extra->taken,
                             extra->notTaken,
                             cc,
@@ -2583,6 +2583,7 @@ void CodeGenerator::emitReqBindAddr(TCA& dest,
 
   dest = emitServiceReq(m_unusedCode, REQ_BIND_ADDR,
                         &dest, sk.toAtomicInt());
+  mcg->cgFixups().m_codePointers.insert(&dest);
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
@@ -2622,9 +2623,9 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       mcg->backEnd().prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
         m_unusedCode,
-        mcg->getFreeStub(m_unusedCode),
+        mcg->getFreeStub(m_unusedCode, &mcg->cgFixups()),
         REQ_BIND_JMPCC_SECOND,
-        m_as.frontier(),
+        RipRelative(m_as.frontier()),
         data->defaultOff,
         CC_AE);
       mcg->setJmpTransID(m_as.frontier());

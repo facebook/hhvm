@@ -257,6 +257,184 @@ struct BackEnd : public JIT::BackEnd {
     }
   }
 
+  bool supportsRelocation() const override {
+    return true;
+  }
+
+  size_t relocate(RelocationInfo& rel, CodeGenFixups& fixups) override {
+    TCA src = rel.start();
+    TCA dest = rel.dest();
+    size_t range = rel.end() - src;
+
+    while (src != rel.end()) {
+      assert(src < rel.end());
+      DecodedInstruction di(src);
+
+      memcpy(dest, src, di.size());
+
+      if (di.hasPicOffset()) {
+        /*
+         * Rip-relative offsets that point outside the range
+         * being moved need to be adjusted so they continue
+         * to point at the right thing
+         */
+        if (size_t(di.picAddress() - rel.start()) > range) {
+          DecodedInstruction d2(dest);
+          bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
+          assert(success);
+        }
+      }
+      if (di.hasImmediate() && !fixups.m_addressImmediates.count(src)) {
+        /*
+         * An immediate that points into the range being moved, but which
+         * isn't tagged as an addressImmediate, is most likely a bug
+         * and its instruction's address needs to be put into
+         * fixups.m_addressImmediates. But it could just happen by bad
+         * luck, so just log it.
+         */
+        if (size_t(di.immediate() - (uint64_t)rel.start()) <= range) {
+          FTRACE(3,
+                 "relocate: instruction at {} has immediate 0x{:x}"
+                 "which looks like an address that needs relocating\n",
+                 src, di.immediate());
+        }
+      }
+
+      src += di.size();
+      dest += di.size();
+    }
+
+    rel.setDestEnd(dest);
+
+    return rel.destSize();
+  }
+
+  void adjustForRelocation(TCA start, TCA end,
+                           RelocationInfo& rel,
+                           CodeGenFixups& fixups) override {
+    assert(rel.relocated());
+    while (start != end) {
+      assert(start < end);
+      DecodedInstruction di(start);
+
+      if (di.hasPicOffset()) {
+        /*
+         * A pointer into something that has been relocated needs to be
+         * updated.
+         */
+        if (TCA adjusted = rel.adjustedAddress(di.picAddress())) {
+          di.setPicAddress(adjusted);
+        }
+      }
+
+      if (di.hasImmediate()) {
+        /*
+         * Similarly for addressImmediates - and see comment above
+         * for non-address immediates.
+         */
+        if (TCA adjusted = rel.adjustedAddress((TCA)di.immediate())) {
+          if (fixups.m_addressImmediates.count(start)) {
+            di.setImmediate((int64_t)adjusted);
+          } else {
+            FTRACE(3,
+                   "relocate: instruction at {} has immediate 0x{:x}"
+                   "which looks like an address that needs relocating\n",
+                   start, di.immediate());
+          }
+        }
+      }
+
+      start += di.size();
+    }
+  }
+
+  template <typename T>
+  void fixupStateVector(StateVector<T, TcaRange>& sv, RelocationInfo& rel) {
+    for (auto& ii : sv) {
+      if (!ii.empty()) {
+        auto s = rel.adjustedAddress(ii.begin());
+        auto e = rel.adjustedAddress(ii.end());
+        if (e || s) {
+          if (!s) s = ii.begin();
+          if (!e) e = ii.end();
+          ii = TcaRange(s, e);
+        }
+      }
+    }
+  }
+
+  void adjustForRelocation(SrcRec* sr, AsmInfo* asmInfo,
+                           RelocationInfo& rel,
+                           CodeGenFixups& fixups) override {
+    assert(rel.relocated());
+
+    auto& ip = sr->inProgressTailJumps();
+    for (size_t i = 0; i < ip.size(); ++i) {
+      IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
+      if (TCA adjusted = rel.adjustedAddress(ib.toSmash())) {
+        ib.adjust(adjusted);
+      }
+    }
+
+    for (auto& fixup : fixups.m_pendingFixups) {
+      if (TCA adjusted = rel.adjustedAddress(fixup.m_tca)) {
+        fixup.m_tca = adjusted;
+      }
+    }
+
+    for (auto& ct : fixups.m_pendingCatchTraces) {
+      if (CTCA adjusted = rel.adjustedAddress(ct.first)) {
+        ct.first = adjusted;
+      }
+      if (TCA adjusted = rel.adjustedAddress(ct.second)) {
+        ct.second = adjusted;
+      }
+    }
+
+    for (auto& jt : fixups.m_pendingJmpTransIDs) {
+      if (TCA adjusted = rel.adjustedAddress(jt.first)) {
+        jt.first = adjusted;
+      }
+    }
+
+    for (auto addr : fixups.m_reusedStubs) {
+      /*
+       * The stubs are terminated by a ud2. Check for it.
+       */
+      while (addr[0] != 0x0f || addr[1] != 0x0b) {
+        DecodedInstruction di(addr);
+        if (di.hasPicOffset()) {
+          if (TCA adjusted = rel.adjustedAddress(di.picAddress())) {
+            di.setPicAddress(adjusted);
+          }
+        }
+        addr += di.size();
+      }
+    }
+
+    std::set<TCA> updated;
+    for (auto addrImm : fixups.m_addressImmediates) {
+      if (TCA adjusted = rel.adjustedAddress(addrImm)) {
+        updated.insert(adjusted);
+      } else {
+        updated.insert(addrImm);
+      }
+    }
+    updated.swap(fixups.m_addressImmediates);
+
+    for (auto codePtr : fixups.m_codePointers) {
+      if (TCA adjusted = rel.adjustedAddress(*codePtr)) {
+        *codePtr = adjusted;
+      }
+    }
+
+    if (asmInfo) {
+      fixupStateVector(asmInfo->instRanges, rel);
+      fixupStateVector(asmInfo->asmRanges, rel);
+      fixupStateVector(asmInfo->astubRanges, rel);
+    }
+  }
+
  private:
   void smashJmpOrCall(TCA addr, TCA dest, bool isCall) {
     // Unconditional rip-relative jmps can also be encoded with an EB as the

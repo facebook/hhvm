@@ -228,6 +228,7 @@ CodeBlock& CodeCache::stubs() {
 }
 
 CodeBlock& CodeCache::unused() {
+  always_assert(!m_lock);
   return m_unused.capacity() != 0 ? m_unused : m_stubs;
 }
 

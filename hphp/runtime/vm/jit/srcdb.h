@@ -124,7 +124,9 @@ struct IncomingBranch {
 
   Tag type()        const { return static_cast<Tag>(m_ptr.size()); }
   TCA toSmash()     const { return TCA(m_ptr.ptr()); }
-
+  void adjust(TCA addr) {
+    m_ptr.set(m_ptr.size(), addr);
+  }
 private:
   explicit IncomingBranch(Tag type, TCA toSmash) {
     m_ptr.set((uint32_t)type, toSmash);

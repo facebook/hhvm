@@ -2294,6 +2294,77 @@ CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {
 
 //////////////////////////////////////////////////////////////////////
 
+struct DecodedInstruction {
+  explicit DecodedInstruction(uint8_t* ip) { decode(ip); }
+  std::string toString();
+  size_t size() { return m_size; }
+
+  bool hasPicOffset() const { return m_flags.picOff; }
+  uint8_t* picAddress() const;
+  bool setPicAddress(uint8_t* target);
+
+  bool hasImmediate() const { return m_immSz; }
+  int64_t immediate() const;
+  bool setImmediate(int64_t value);
+private:
+  void decode(uint8_t* ip);
+  bool decodePrefix(uint8_t* ip);
+  int decodeRexVexXop(uint8_t* ip);
+  int decodeOpcode(uint8_t* ip);
+  void determineOperandsMap0(uint8_t* ip);
+  void determineOperandsMap1(uint8_t* ip);
+  void determineOperandsMap2(uint8_t* ip);
+  void determineOperandsMap3(uint8_t* ip);
+  int decodeModRm(uint8_t* ip);
+  int decodeImm(uint8_t* ip);
+
+  uint8_t*   m_ip{nullptr};
+  uint32_t   m_size{0};
+
+  union {
+    uint32_t m_flagsVal;
+    struct {
+      uint32_t lock      : 1;
+      uint32_t repNE     : 1;
+      uint32_t rep       : 1;
+
+      uint32_t cs        : 1;
+      uint32_t ss        : 1;
+      uint32_t ds        : 1;
+      uint32_t es        : 1;
+      uint32_t fs        : 1;
+      uint32_t gs        : 1;
+      uint32_t bTaken    : 1;
+      uint32_t bNotTaken : 1;
+
+      uint32_t opndSzOvr : 1;
+      uint32_t addrSzOvr : 1;
+
+      uint32_t rex       : 1;
+      uint32_t vex       : 1;
+      uint32_t xop       : 1;
+
+      uint32_t w         : 1;
+      uint32_t r         : 1;
+      uint32_t x         : 1;
+      uint32_t b         : 1;
+      uint32_t l         : 1;
+
+      uint32_t def64     : 1;
+      uint32_t immIsAddr : 1;
+      uint32_t picOff    : 1;
+      uint32_t hasModRm  : 1;
+      uint32_t hasSib    : 1;
+    } m_flags;
+  };
+
+  uint8_t       m_map_select{0};
+  uint8_t       m_xtra_op{0};
+  uint8_t       m_opcode{0};
+  uint8_t       m_immSz{sz::nosize};
+  uint8_t       m_offSz{sz::nosize};
+};
+
 #undef TRACEMOD
 #undef logical_const
 #undef CCS

@@ -32,6 +32,7 @@
 
 namespace HPHP { namespace JIT { namespace X64 {
 
+using JIT::reg::rip;
 
 TRACE_SET_MOD(servicereq);
 
@@ -56,6 +57,7 @@ StoreImmPatcher::StoreImmPatcher(CodeBlock& cb, uint64_t initial,
                                  int32_t offset, RegNumber base) {
   X64Assembler as { cb };
   m_is32 = deltaFits(initial, sz::dword);
+  mcg->cgFixups().m_addressImmediates.insert(cb.frontier());
   if (m_is32) {
     as.storeq(int32_t(initial), r64(base)[offset]);
     m_addr = cb.frontier() - 4;
@@ -92,9 +94,12 @@ void emitBindJ(CodeBlock& cb, CodeBlock& unused,
   mcg->setJmpTransID(toSmash);
 
   TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(unused, mcg->getFreeStub(unused),
-                                      req, toSmash, dest.toAtomicInt())
-            : emitServiceReq(unused, req, toSmash,
+            ? emitEphemeralServiceReq(unused,
+                                      mcg->getFreeStub(unused,
+                                                       &mcg->cgFixups()),
+                                      req, RipRelative(toSmash),
+                                      dest.toAtomicInt())
+            : emitServiceReq(unused, req, RipRelative(toSmash),
                              dest.toAtomicInt()));
 
   Asm a { cb };
@@ -189,6 +194,7 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& unusedCode,
 
   TRACE(1, "will bind static call: tca %p, funcd %p, astubs %p\n",
         toSmash, funcd, unusedCode.frontier());
+  mcg->cgFixups().m_codePointers.insert(&req->m_toSmash);
   req->m_toSmash = toSmash;
   req->m_nArgs = numArgs;
   req->m_sourceInstr = srcKey;
@@ -200,19 +206,10 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& unusedCode,
 //////////////////////////////////////////////////////////////////////
 
 TCA
-emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+emitServiceReqWork(CodeBlock& cbIn, TCA start, bool persist, SRFlags flags,
                    ServiceRequest req, const ServiceReqArgVec& argv) {
   assert(start);
   const bool align = flags & SRFlags::Align;
-  Asm as { cb };
-
-  /*
-   * Remember previous state of the code cache.
-   */
-  folly::Optional<CodeCursor> maybeCc = folly::none;
-  if (start != as.frontier()) {
-    maybeCc.emplace(cb, start);
-  }
 
   /* max space for moving to align, saving VM regs plus emitting args */
   static const int
@@ -221,6 +218,11 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
     kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
     kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
       kNumServiceRegs * kMovSize;
+
+  CodeBlock cb;
+  cb.init(start, kMaxStubSpace, "stubTemp");
+  Asm as { cb };
+
   if (align) {
     moveToAlign(cb);
   }
@@ -239,6 +241,10 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
         TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
         as.    emitImmReg(argInfo.m_imm, reg);
       } break;
+      case ServiceReqArgInfo::RipRelative: {
+        TRACE(3, "$rip(%" PRIx64 "), ", argInfo.m_imm);
+        as.    lea(rip[argInfo.m_imm], reg);
+      } break;
       case ServiceReqArgInfo::CondCode: {
         // Already set before VM reg save.
         DEBUG_ONLY TCA start = as.frontier();
@@ -253,7 +259,7 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   if (persist) {
     as.  emitImmReg(0, JIT::X64::rAsm);
   } else {
-    as.  emitImmReg((uint64_t)start, JIT::X64::rAsm);
+    as.  lea(rip[(int64_t)start], JIT::X64::rAsm);
   }
   TRACE(3, ")\n");
   as.    emitImmReg(req, JIT::reg::rdi);
@@ -273,8 +279,12 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
     as.  ret();
   }
 
-  if (debug) {
-    // not reached
+  if (debug || !persist) {
+    /*
+     * not reached.
+     * For re-usable stubs, used to mark the
+     * end of the code, for the relocator's benefit.
+     */
     as.ud2();
   }
 
@@ -286,6 +296,10 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
     assert(as.frontier() - start <= kMaxStubSpace);
     as.emitNop(start + kMaxStubSpace - as.frontier());
     assert(as.frontier() - start == kMaxStubSpace);
+  }
+
+  if (start == cbIn.frontier()) {
+    cbIn.skip(cb.frontier() - start);
   }
   return retval;
 }

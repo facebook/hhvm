@@ -76,7 +76,6 @@ TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
   assert(sr == REQ_BIND_JMPCC_FIRST ||
          sr == REQ_BIND_JMPCC_SECOND ||
          sr == REQ_BIND_JMP);
-  assert(cb.contains(start));
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);

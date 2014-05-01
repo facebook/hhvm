@@ -333,7 +333,7 @@ void emitRB(X64Assembler& a,
 void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
   Asm a { cb };
   // call to a trace function
-  a.    movq   (a.frontier(), rcx);
+  a.    lea    (rip[(int64_t)a.frontier()], rcx);
   a.    movq   (rVmFp, rdi);
   a.    movq   (rVmSp, rsi);
   a.    movq   (pcOff, rdx);

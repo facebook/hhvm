@@ -46,6 +46,7 @@ typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
 struct TReqInfo;
 struct Label;
 struct MCGenerator;
+struct AsmInfo;
 
 extern MCGenerator* mcg;
 extern void* interpOneEntryPoints[];
@@ -85,9 +86,34 @@ struct CodeGenFixups {
   std::vector<PendingFixup> m_pendingFixups;
   std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
   std::vector<std::pair<TCA,TransID>> m_pendingJmpTransIDs;
+  std::vector<TCA> m_reusedStubs;
+  std::set<TCA> m_addressImmediates;
+  std::set<TCA*> m_codePointers;
+
   void process();
   bool empty() const;
   void clear();
+};
+
+struct RelocationInfo {
+  RelocationInfo(TCA start, TCA end, TCA dest) :
+      m_start(start), m_end(end), m_dest(dest) {}
+
+  TCA start() const { return m_start; }
+  TCA end() const { return m_end; }
+  TCA dest() const { return m_dest; }
+  bool relocated() { return m_destSize != size_t(-1); }
+  size_t destSize() const { return m_destSize; }
+  void setDestEnd(TCA destEnd) { m_destSize = destEnd - m_dest; }
+  TCA adjustedAddress(TCA addr) const;
+  CTCA adjustedAddress(CTCA addr) const {
+    return adjustedAddress(const_cast<TCA>(addr));
+  }
+ private:
+  TCA m_start;
+  TCA m_end;
+  TCA m_dest;
+  size_t m_destSize{size_t(-1)};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -120,6 +146,7 @@ public:
    */
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
+  CodeGenFixups& cgFixups() { return m_fixups; }
   void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
 
   DataBlock& globalData() { return code.data(); }
@@ -198,7 +225,7 @@ public:
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset, bool resumed);
   bool freeRequestStub(TCA stub);
-  TCA getFreeStub(CodeBlock& unused);
+  TCA getFreeStub(CodeBlock& unused, CodeGenFixups* fixups);
   void registerCatchBlock(CTCA ip, TCA block);
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
@@ -227,7 +254,8 @@ public:
    * in bytes. Note that the code may have been emitted by other threads.
    */
   void codeEmittedThisRequest(size_t& requestEntry, size_t& now) const;
-
+  void fixupRange(TCA start, TCA end, RelocationInfo& rel);
+  void fixupMeta(SrcRec* sr, AsmInfo* asmInfo, RelocationInfo& rel);
 public:
   CodeCache code;
 

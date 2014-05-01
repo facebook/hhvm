@@ -386,8 +386,9 @@ public:
   F(uint64_t, JitAProfSize,            64 << 20)                        \
   F(uint64_t, JitAStubsSize,           64 << 20)                        \
   F(uint64_t, JitAColdSize,            24 << 20)                        \
-  F(uint64_t, JitAFrozenSize,          40 << 20)                       \
+  F(uint64_t, JitAFrozenSize,          40 << 20)                        \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
+  F(uint64_t, JitRelocationSize,       1 << 20)                         \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:
      0 - no checks or enforcement

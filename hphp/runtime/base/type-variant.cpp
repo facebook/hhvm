@@ -274,25 +274,23 @@ Variant& Variant::setWithRef(const Variant& v) {
   return *this;
 }
 
-#define IMPLEMENT_SET_IMPL(name, argType, argName, setOp, returnStmt)   \
-  Variant::name(argType argName) {                                      \
-    if (isPrimitive()) {                                                \
-      setOp;                                                            \
-    } else if (m_type == KindOfRef) {                                   \
-      m_data.pref->var()->name(argName);                                \
-      returnStmt;                                                       \
-    } else {                                                            \
-      auto const d = m_data.num;                                        \
-      auto const t = m_type;                                            \
-      setOp;                                                            \
-      tvDecRefHelper(t, d);                                             \
-    }                                                                   \
-    returnStmt;                                                         \
+#define IMPLEMENT_SET_IMPL(name, argType, argName, setOp) \
+  void Variant::name(argType argName) {                   \
+    if (isPrimitive()) {                                  \
+      setOp;                                              \
+    } else if (m_type == KindOfRef) {                     \
+      m_data.pref->var()->name(argName);                  \
+    } else {                                              \
+      auto const d = m_data.num;                          \
+      auto const t = m_type;                              \
+      setOp;                                              \
+      tvDecRefHelper(t, d);                               \
+    }                                                     \
   }
 #define IMPLEMENT_VOID_SET(name, setOp) \
-  void IMPLEMENT_SET_IMPL(name, , , setOp, return)
+  IMPLEMENT_SET_IMPL(name, , , setOp)
 #define IMPLEMENT_SET(argType, setOp) \
-  const Variant& IMPLEMENT_SET_IMPL(set, argType, v, setOp, return *this)
+  IMPLEMENT_SET_IMPL(set, argType, v, setOp)
 
 IMPLEMENT_VOID_SET(setNull, m_type = KindOfNull)
 IMPLEMENT_SET(bool, m_type = KindOfBoolean; m_data.num = v)
@@ -311,7 +309,7 @@ IMPLEMENT_SET(const StaticString&,
 #undef IMPLEMENT_SET
 
 #define IMPLEMENT_PTR_SET(ptr, member, dtype)                           \
-  const Variant& Variant::set(ptr *v) {                                        \
+  void Variant::set(ptr *v) {                                           \
     Variant *self = m_type == KindOfRef ? m_data.pref->var() : this;    \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
@@ -323,7 +321,6 @@ IMPLEMENT_SET(const StaticString&,
       self->m_data.member = v;                                          \
       tvRefcountedDecRefHelper(t, d);                                   \
     }                                                                   \
-    return *this;                                                       \
   }
 
 IMPLEMENT_PTR_SET(StringData, pstr,

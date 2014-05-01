@@ -187,7 +187,6 @@ private:
 
   // Should be called outside m_lock
   void purgeExpired();
-
   void addToExpirationQueue(const char* key, int64_t etime);
 
   bool handleUpdate(const String& key, APCHandle* svar);

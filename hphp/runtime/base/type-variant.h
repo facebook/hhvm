@@ -754,36 +754,36 @@ struct Variant : private TypedValue {
       (IS_STRING_TYPE(m_type) && m_data.pstr->empty());
   }
 
-  const Variant& set(bool    v);
-  const Variant& set(int     v);
-  const Variant& set(int64_t   v);
-  const Variant& set(double  v);
-  const Variant& set(litstr  v) = delete;
-  const Variant& set(const std::string & v) {
+  void set(bool    v);
+  void set(int     v);
+  void set(int64_t   v);
+  void set(double  v);
+  void set(litstr  v) = delete;
+  void set(const std::string & v) {
     return set(String(v));
   }
-  const Variant& set(StringData  *v);
-  const Variant& set(ArrayData   *v);
-  const Variant& set(ObjectData  *v);
-  const Variant& set(ResourceData  *v);
-  const Variant& set(const StringData  *v) = delete;
-  const Variant& set(const ArrayData   *v) = delete;
-  const Variant& set(const ObjectData  *v) = delete;
-  const Variant& set(const ResourceData  *v) = delete;
+  void set(StringData  *v);
+  void set(ArrayData   *v);
+  void set(ObjectData  *v);
+  void set(ResourceData  *v);
+  void set(const StringData  *v) = delete;
+  void set(const ArrayData   *v) = delete;
+  void set(const ObjectData  *v) = delete;
+  void set(const ResourceData  *v) = delete;
 
-  const Variant& set(const String& v) { return set(v.get()); }
-  const Variant& set(const StaticString & v);
-  const Variant& set(const Array& v) { return set(v.get()); }
-  const Variant& set(const Object& v) { return set(v.get()); }
-  const Variant& set(const Resource& v) { return set(v.get()); }
+  void set(const String& v) { return set(v.get()); }
+  void set(const StaticString & v);
+  void set(const Array& v) { return set(v.get()); }
+  void set(const Object& v) { return set(v.get()); }
+  void set(const Resource& v) { return set(v.get()); }
 
   template<typename T>
-  const Variant& set(const SmartObject<T> &v) {
+  void set(const SmartObject<T> &v) {
     return set(v.get());
   }
 
   template<typename T>
-  const Variant& set(const SmartResource<T> &v) {
+  void set(const SmartResource<T> &v) {
     return set(v.get());
   }
 

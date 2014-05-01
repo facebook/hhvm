@@ -260,6 +260,7 @@ Variant f_date_create(const String& time = null_string,
 void f_date_date_set(const Object& object, int year, int month, int day);
 void f_date_isodate_set(const Object& object, int year, int week,
                         int day = 1);
+String f_date_format(const Object& object, const String& format);
 Array f_date_get_last_errors();
 Object f_date_interval_create_from_date_string(const String& time);
 String f_date_interval_format(const Object& interval, const String& format_spec);

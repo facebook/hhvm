@@ -597,7 +597,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
 ///////////////////////////////////////////////////////////////////////////////
 
 void Transport::prepareHeaders(bool compressed, bool chunked,
-    const String &response, const String& orig_response) {
+    const StringHolder &response, const StringHolder& orig_response) {
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
     const std::vector<std::string> &values = iter->second;
@@ -628,14 +628,14 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
       } else {
         std::string cur_md5 = it->second[0];
         String expected_md5 = StringUtil::Base64Encode(StringUtil::MD5(
-          orig_response, true));
+          orig_response.data(), orig_response.size(), true));
         // Can never trust these PHP people...
         if (expected_md5.c_str() != cur_md5) {
           raise_warning("Content-MD5 mismatch. Expected: %s, Got: %s",
             expected_md5.c_str(), cur_md5.c_str());
         }
         addHeaderImpl("Content-MD5", StringUtil::Base64Encode(StringUtil::MD5(
-          response, true)).c_str());
+          response.data(), response.size(), true)).c_str());
       }
     }
   }
@@ -703,9 +703,9 @@ void LogException(const char* msg) {
 
 }
 
-String Transport::prepareResponse(const void *data, int size, bool &compressed,
-                                  bool last) {
-  String response((const char *)data, size, CopyString);
+StringHolder Transport::prepareResponse(const void *data, int size,
+                                        bool &compressed, bool last) {
+  StringHolder response((const char *)data, size);
 
   // we don't use chunk encoding to send anything pre-compressed
   assert(!compressed || !m_chunkedEncoding);
@@ -715,7 +715,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   }
   if (compressed || !isCompressionEnabled() ||
       m_compressionDecision == CompressionDecision::ShouldNot) {
-    return response;
+    return std::move(response);
   }
 
 #ifdef FACEBOOK
@@ -732,15 +732,12 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
       std::unique_ptr<folly::IOBuf> output = bufQueue.move();
       output->coalesce();
 
-      String concatenated((const char*)output->data(), output->length(),
-              CopyString);
-
+      response.set(output.release());
       okToFail = false;
-      response = concatenated;
 
       // overriding the data pointer
       data = response.data();
-      size = response.length();
+      size = response.size();
 
       replaceHeader("Content-Type", "application/channeled-json");
     } catch (...) {
@@ -763,10 +760,10 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
     char *compressedData =
       m_compressor->compress((const char*)data, len, last);
     if (compressedData) {
-      String deleter(compressedData, len, AttachString);
+      StringHolder deleter(compressedData, len, true);
       if (m_chunkedEncoding || len < size ||
           m_compressionDecision == CompressionDecision::HasTo) {
-        response = deleter;
+        response = std::move(deleter);
         compressed = true;
       }
     } else {
@@ -775,7 +772,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
     }
   }
 
-  return response;
+  return std::move(response);
 }
 
 bool Transport::setHeaderCallback(const Variant& callback) {
@@ -825,7 +822,7 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
 
   // compression handling
   ServerStatsHelper ssh("send");
-  String response = prepareResponse(data, size, compressed, !chunked);
+  StringHolder response = prepareResponse(data, size, compressed, !chunked);
 
   if (m_responseCode < 0) {
     m_responseCode = code;
@@ -834,8 +831,7 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
 
   // HTTP header handling
   if (!m_headerSent) {
-    String orig_response((const char *)data, size, CopyString);
-    prepareHeaders(compressed, chunked, response, orig_response);
+    prepareHeaders(compressed, chunked, response, response);
     m_headerSent = true;
   }
 
@@ -862,7 +858,7 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
 void Transport::onSendEnd() {
   if (m_compressor && m_chunkedEncoding) {
     bool compressed = false;
-    String response = prepareResponse("", 0, compressed, true);
+    StringHolder response = prepareResponse("", 0, compressed, true);
     sendImpl(response.data(), response.size(), m_responseCode, true);
   }
   auto httpResponseStats = ServiceData::createTimeseries(

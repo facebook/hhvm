@@ -427,14 +427,19 @@ String StringUtil::Crypt(const String& input, const char *salt /* = "" */) {
   return String(string_crypt(input.c_str(), salt), AttachString);
 }
 
-String StringUtil::MD5(const String& input, bool raw /* = false */) {
-  Md5Digest md5(input.data(), input.size());
+String StringUtil::MD5(const char *data, uint32_t size,
+                       bool raw /* = false */) {
+  Md5Digest md5(data, size);
   auto const rawLen = sizeof(md5.digest);
   if (raw) return String((char*)md5.digest, rawLen, CopyString);
   auto const hexLen = rawLen * 2;
   String hex(hexLen, ReserveString);
   string_bin2hex((char*)md5.digest, rawLen, hex.bufferSlice().ptr);
   return hex.setSize(hexLen);
+}
+
+String StringUtil::MD5(const String& input, bool raw /* = false */) {
+  return MD5(input.data(), input.length(), raw);
 }
 
 String StringUtil::SHA1(const String& input, bool raw /* = false */) {

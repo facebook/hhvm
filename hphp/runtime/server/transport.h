@@ -24,6 +24,7 @@
 #include "hphp/util/functional.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/string-holder.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/runtime-option.h"
 
@@ -461,12 +462,12 @@ protected:
   static void urlUnescape(char *value);
   bool splitHeader(const String& header, String &name, const char *&value);
 
-  String prepareResponse(const void *data, int size, bool &compressed,
-                         bool last);
+  StringHolder prepareResponse(const void *data, int size, bool &compressed,
+                               bool last);
 
 private:
-  void prepareHeaders(bool compressed, bool chunked, const String &response,
-    const String& orig_response);
+  void prepareHeaders(bool compressed, bool chunked,
+    const StringHolder &response, const StringHolder& orig_response);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

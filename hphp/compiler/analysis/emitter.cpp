@@ -6351,15 +6351,6 @@ void EmitterVisitor::emitPostponedMeths() {
           folly::format("86static_{}", sv.name->data()).str());
         fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
                                &uninit, RepoAuthType{});
-        if (m_curFunc != fe && !fe->isAsync()) {
-          // In the case of a generator (these func emitters will be
-          // different), we need to propagate the information about
-          // static locals from the generator implementation function
-          // to the generator creation function.  (This is necessary
-          // for the runtime to know how many of the properties on a
-          // closure are for static locals vs. use vars.)
-          fe->addStaticVar(sv);
-        }
       }
     }
 

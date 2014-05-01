@@ -605,7 +605,15 @@ class Redis {
     return $this->doEval('EVAL', $script, $args, $numKeys);
   }
 
+  public function evaluate($script, array $args = null, $numKeys = 0) {
+    return $this->doEval('EVAL', $script, $args, $numKeys);
+  }
+
   public function evalSha($sha, array $args = null, $numKeys = 0) {
+    return $this->doEval('EVALSHA', $sha, $args, $numKeys);
+  }
+
+  public function evaluateSha($sha, array $args = null, $numKeys = 0) {
     return $this->doEval('EVALSHA', $sha, $args, $numKeys);
   }
 

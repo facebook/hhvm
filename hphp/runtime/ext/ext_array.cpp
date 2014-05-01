@@ -388,11 +388,20 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
       }
     }
     ArrayInit ret(getContainerSize(cell_arr1), ArrayInit::Map{});
+    bool keyConverted = (cell_arr1.m_type == KindOfArray);
+    if (!keyConverted) {
+      auto col_type = cell_arr1.m_data.pobj->getCollectionType();
+      assert(col_type != Collection::Type::InvalidType);
+      keyConverted = !Collection::isTypeWithPossibleIntStringKeys(col_type);
+    }
     for (ArrayIter iter(arr1); iter; ++iter) {
       Variant result;
       g_context->invokeFuncFew((TypedValue*)&result, ctx, 1,
                                iter.secondRefPlus().asCell());
-      ret.add(iter.first(), result, true);
+      // if keyConverted is false, it's possible that ret will have fewer
+      // elements than cell_arr1; keys int(1) and string('1') may both be
+      // present
+      ret.add(iter.first(), result, keyConverted);
     }
     return ret.toArray();
   }

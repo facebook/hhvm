@@ -176,6 +176,10 @@ inline bool isImmutableType(Collection::Type ctype) {
   return !isMutableType(ctype);
 }
 
+inline bool isTypeWithPossibleIntStringKeys(Collection::Type ctype) {
+  return Collection::isSetType(ctype) || Collection::isMapType(ctype);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////

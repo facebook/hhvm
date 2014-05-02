@@ -1382,6 +1382,8 @@ JCategoriesTest::testGet
 S
 JCategoriesTest::testGetInstance
 .
+JCategoryNodeTest::testSetParent
+F
 JClientFtpTest::testChdir
 I
 JClientFtpTest::testChmod
@@ -2826,7 +2828,7 @@ JDateTest::testFormat with data set "mmddyyGMT"
 .
 JDateTest::testGetInstance
 .
-JDateTest::testGetOffsetFromGMT with data set "	/Hours"
+JDateTest::testGetOffsetFromGMT with data set " /Hours"
 .
 JDateTest::testGetOffsetFromGMT with data set "Atlantic/Azores"
 .
@@ -2974,6 +2976,8 @@ JDocumentJSONTest::testGetAndSetName
 .
 JDocumentJSONTest::testRender
 .
+JDocumentOpensearchTest::testRender
+F
 JDocumentRAWTest::testRender
 .
 JDocumentRendererAtomTest::testRender
@@ -6484,102 +6488,6 @@ JGoogleDataCalendarTest::testRemoveCalendar
 .
 JGoogleDataCalendarTest::testSetOption
 .
-JGoogleDataPicasaAlbumTest::testAuth
-.
-JGoogleDataPicasaAlbumTest::testDelete
-.
-JGoogleDataPicasaAlbumTest::testExceptions
-E
-JGoogleDataPicasaAlbumTest::testFalse
-.
-JGoogleDataPicasaAlbumTest::testGetAccess
-.
-JGoogleDataPicasaAlbumTest::testGetLink
-.
-JGoogleDataPicasaAlbumTest::testGetLocation
-.
-JGoogleDataPicasaAlbumTest::testGetOption
-.
-JGoogleDataPicasaAlbumTest::testGetSummary
-.
-JGoogleDataPicasaAlbumTest::testGetTime
-.
-JGoogleDataPicasaAlbumTest::testGetTitle
-.
-JGoogleDataPicasaAlbumTest::testIsAuth
-.
-JGoogleDataPicasaAlbumTest::testListPhotos
-.
-JGoogleDataPicasaAlbumTest::testListPhotosException
-F
-JGoogleDataPicasaAlbumTest::testRefresh
-E
-JGoogleDataPicasaAlbumTest::testSave
-E
-JGoogleDataPicasaAlbumTest::testSetAccess
-.
-JGoogleDataPicasaAlbumTest::testSetLocation
-.
-JGoogleDataPicasaAlbumTest::testSetOption
-.
-JGoogleDataPicasaAlbumTest::testSetSummary
-.
-JGoogleDataPicasaAlbumTest::testSetTime
-.
-JGoogleDataPicasaAlbumTest::testSetTitle
-.
-JGoogleDataPicasaAlbumTest::testUpload
-.
-JGoogleDataPicasaAlbumTest::testUploadFake
-.
-JGoogleDataPicasaAlbumTest::testUploadUnknown
-.
-JGoogleDataPicasaPhotoTest::testAuth
-.
-JGoogleDataPicasaPhotoTest::testDelete
-E
-JGoogleDataPicasaPhotoTest::testExceptions
-E
-JGoogleDataPicasaPhotoTest::testFalse
-.
-JGoogleDataPicasaPhotoTest::testGetAccess
-.
-JGoogleDataPicasaPhotoTest::testGetHeight
-.
-JGoogleDataPicasaPhotoTest::testGetLink
-.
-JGoogleDataPicasaPhotoTest::testGetOption
-.
-JGoogleDataPicasaPhotoTest::testGetSize
-.
-JGoogleDataPicasaPhotoTest::testGetSummary
-.
-JGoogleDataPicasaPhotoTest::testGetThumbnails
-.
-JGoogleDataPicasaPhotoTest::testGetTime
-.
-JGoogleDataPicasaPhotoTest::testGetTitle
-.
-JGoogleDataPicasaPhotoTest::testGetURL
-.
-JGoogleDataPicasaPhotoTest::testGetWidth
-.
-JGoogleDataPicasaPhotoTest::testIsAuth
-.
-JGoogleDataPicasaPhotoTest::testRefresh
-.
-JGoogleDataPicasaPhotoTest::testSave
-.
-JGoogleDataPicasaPhotoTest::testSetAccess
-.
-JGoogleDataPicasaPhotoTest::testSetOption
-.
-JGoogleDataPicasaPhotoTest::testSetSummary
-.
-JGoogleDataPicasaPhotoTest::testSetTime
-.
-JGoogleDataPicasaPhotoTest::testSetTitle
-.
 JGoogleDataPicasaTest::testAuth
 .
 JGoogleDataPicasaTest::testCreateAlbum
@@ -7086,6 +6994,8 @@ JHtmlGridTest::testSort
 I
 JHtmlGridTest::testState
 I
+JHtmlIconsTest::testButtons
+F
 JHtmlJGridTest::testCheckedout
 I
 JHtmlJGridTest::testPublished
@@ -7309,7 +7219,7 @@ JHtmlTest::testLink with data set #1
 JHtmlTest::testRegister
 .
 JHtmlTest::testScript
-E
+.
 JHtmlTest::testSetFormatOptions
 I
 JHtmlTest::testStylesheet
@@ -8880,6 +8790,26 @@ JPaginationObjectTest::testConstructor with data set #0
 .
 JPaginationObjectTest::testConstructor with data set #1
 .
+JPaginationTest::testConstructor with data set #0
+.
+JPaginationTest::testConstructor with data set #1
+.
+JPaginationTest::testConstructor with data set #2
+.
+JPaginationTest::testConstructor with data set #3
+.
+JPaginationTest::testConstructor with data set #4
+.
+JPaginationTest::testGetAdditionalUrlParam
+.
+JPaginationTest::testGetData with data set #0
+F
+JPaginationTest::testGetRowOffset
+.
+JPaginationTest::testSetAdditionalUrlParam
+.
+JPaginationTest::testSetEmptyAdditionalUrlParam
+.
 JPathTest::testCanChmod
 I
 JPathTest::testCheck
@@ -9899,7 +9829,7 @@ JTableNestedTest::test_getNode
 JTableNestedTest::test_getTreeRepositionData
 .
 JTableNestedTest::test_runQuery
-E
+.
 JTableSessionTest::testDelete
 I
 JTableSessionTest::testDestroy

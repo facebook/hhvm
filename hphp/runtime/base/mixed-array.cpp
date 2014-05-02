@@ -733,7 +733,6 @@ int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
   size_t tableMask = m_tableMask;
   auto* elms = data();
   auto* hashtable = hashTab();
-  int32_t* ret = nullptr;
   for (size_t probeIndex = h0, i = 1;; ++i) {
     auto ei = &hashtable[probeIndex & tableMask];
     ssize_t pos = *ei;
@@ -741,11 +740,8 @@ int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
       if (hit(elms[pos])) {
         return ei;
       }
-    } else {
-      if (!ret) ret = ei;
-      if (pos == Empty) {
-        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
-      }
+    } else if (pos == Empty) {
+        return LIKELY(i <= 100) ? ei : warnUnbalanced(i, ei);
     }
     probeIndex += i;
     assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);

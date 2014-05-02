@@ -70,6 +70,12 @@ function ezc_hash_get(mixed $table, string $key): mixed;
 <<__Native("ZendCompat")>>
 function ezc_hash_append(mixed $table, string $value): mixed;
 
+/* Set an element of an array by modifying the data pointer returned by
+ * zend_hash_find()
+ */
+<<__Native("ZendCompat")>>
+function ezc_array_val_set(array $a, mixed $key, mixed $value): mixed;
+
 <<__NativeData("ZendCompat")>> class EzcTestCloneable {}
 <<__NativeData("ZendCompat")>> class EzcTestUncloneable1 {}
 <<__NativeData("ZendCompat")>> class EzcTestUncloneable2 {}

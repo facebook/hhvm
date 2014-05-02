@@ -401,10 +401,14 @@ private:
   /**
    * findForNewInsert() CANNOT be used unless the caller can guarantee that
    * the relevant key is not already present in the array. Otherwise this can
-   * put the array into a bad state; use with caution.
+   * put the array into a bad state; use with caution. The *CheckUnbalanced
+   * version checks for the array becoming too unbalanced because of hash
+   * collisions, and is only called when an array Grow()s.
    */
   int32_t* findForNewInsert(size_t h0) const;
   int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
+  int32_t* findForNewInsertCheckUnbalanced(int32_t* table,
+                                           size_t mask, size_t h0) const;
 
   bool nextInsert(const Variant& data);
   ArrayData* nextInsertRef(Variant& data);
@@ -443,6 +447,14 @@ private:
   ArrayData* zInitVal(TypedValue& tv, RefData* v);
   ArrayData* zSetVal(TypedValue& tv, RefData* v);
 
+  /*
+   * Helper routine for inserting elements into a new array
+   * when Grow()ing the array, that also checks for potentially
+   * unbalanced entries because of hash collision.
+   */
+  static void InsertCheckUnbalanced(MixedArray* ad, int32_t* table,
+                                    uint32_t mask,
+                                    Elm* iter, Elm* stop);
   /*
    * grow() increases the hash table size and the number of slots for
    * elements by a factor of 2. grow() rebuilds the hash table, but it

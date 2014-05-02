@@ -741,7 +741,7 @@ int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
         return ei;
       }
     } else if (pos == Empty) {
-        return LIKELY(i <= 100) ? ei : warnUnbalanced(i, ei);
+        return ei;
     }
     probeIndex += i;
     assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
@@ -960,6 +960,21 @@ NEVER_INLINE MixedArray* MixedArray::resize() {
   return this;
 }
 
+void NEVER_INLINE
+MixedArray::InsertCheckUnbalanced(MixedArray* ad,
+                                  int32_t* table,
+                                  uint32_t mask,
+                                  Elm* iter,
+                                  Elm* stop) {
+  for (uint32_t i = 0; iter != stop; ++iter, ++i) {
+    auto& e = *iter;
+    if (isTombstone(e.data.m_type)) continue;
+    *ad->findForNewInsertCheckUnbalanced(table, mask,
+                                         e.hasIntKey() ? e.ikey : e.hash())
+      = i;
+  }
+}
+
 MixedArray* MixedArray::Grow(MixedArray* old) {
   assert(!old->isPacked());
   assert(old->m_tableMask <= 0x7fffffffU);
@@ -993,10 +1008,14 @@ MixedArray* MixedArray::Grow(MixedArray* old) {
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
   assert(mask == ad->m_tableMask);
-  for (uint32_t i = 0; iter != stop; ++iter, ++i) {
-    auto& e = *iter;
-    if (isTombstone(e.data.m_type)) continue;
-    *ad->findForNewInsert(table, mask, e.hasIntKey() ? e.ikey : e.hash()) = i;
+  if (UNLIKELY(oldUsed >= 2000)) {
+    InsertCheckUnbalanced(ad, table, mask, iter, stop);
+  } else {
+    for (uint32_t i = 0; iter != stop; ++iter, ++i) {
+      auto& e = *iter;
+      if (isTombstone(e.data.m_type)) continue;
+      *ad->findForNewInsert(table, mask, e.hasIntKey() ? e.ikey : e.hash()) = i;
+    }
   }
 
   old->m_used = -uint32_t{1};

@@ -63,6 +63,23 @@ MixedArray::copyElms(Elm* to, const Elm* from, size_t count) {
   return wordcpy(to, from, count);
 }
 
+extern int32_t* warnUnbalanced(size_t n, int32_t* ei);
+
+ALWAYS_INLINE int32_t*
+MixedArray::findForNewInsertCheckUnbalanced(int32_t* table, size_t mask,
+                                            size_t h0) const {
+  assert(!isPacked());
+  size_t balanceLimit = size_t(RuntimeOption::MaxArrayChain);
+  for (size_t i = 1, probe = h0;; ++i) {
+    auto ei = &table[probe & mask];
+    if (!validPos(*ei)) {
+      return LIKELY(i <= balanceLimit) ? ei : warnUnbalanced(i, ei);
+    }
+    probe += i;
+    assert(i <= mask && probe == h0 + ((i + i * i) / 2));
+  }
+}
+
 ALWAYS_INLINE int32_t*
 MixedArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
   assert(!isPacked());

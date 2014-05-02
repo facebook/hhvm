@@ -15,7 +15,7 @@ SRC= json.ml \
 
 INCLUDEDIRS=
 
-COBJS=nproc.o realpath.o
+COBJS=nproc.o realpath.o get_build_id.o get_build_id.gen.o
 
 # because we need C code
 OCAMLMKLIB=ocamlmklib
@@ -44,5 +44,6 @@ $(TARGET).cmxa: $(OBJS:.cmo=.cmx) $(LIBS:.cma=.cmxa) $(COBJS)
 	$(OCAMLMKLIB) -o $(TARGET) $^
 
 # Create the build stamp if it's not already there
-build_id.ml:
-	echo 'let build_id_ohai = "${DATE}-${SHA}"' > build_id.ml
+get_build_id.gen.c:
+	echo 'const char* const BuildInfo_kRevision = "${SHA}";' > get_build_id.gen.c
+	echo 'const char* const BuildInfo_kTimeISO8601 = "${DATE}";' >> get_build_id.gen.c

@@ -164,8 +164,8 @@ bin:
 endif
 
 stamp:
-	rm -f utils/build_id.ml
-	$(MAKE) -C utils build_id.ml
+	rm -f utils/get_build_id.gen.c
+	$(MAKE) -C utils get_build_id.gen.c
 
 deploy:
 	$(MAKE) stamp
@@ -188,8 +188,8 @@ test:
 	ocamlyacc -v parsing/parser.mly 2>&1 | grep -L conflict | grep -q .
 	rm -f parsing/parser.mli parsing/parser.ml
 	# Run tests
-	../test/typecheck/verify_quick_hack
-	../test/suggest/verify_quick_hack
+	../test/typecheck/verify_quick_hack ../bin/hh_single_type_check
+	../test/suggest/verify_quick_hack ../bin/hh_single_type_check
 
 wwwtest:
 	../bin/hh_server --check /var/www

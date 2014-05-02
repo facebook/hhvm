@@ -42,7 +42,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -1303,7 +1303,7 @@ static const struct {
   { OpAssertRATStk,{None,             None,         OutNone,           0 }},
   { OpBreakTraceHint,{None,           None,         OutNone,           0 }},
 
-  /*** 14. Continuation instructions ***/
+  /*** 14. Generator instructions ***/
 
   { OpCreateCont,  {None,             Stack1,       OutNull,           1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},

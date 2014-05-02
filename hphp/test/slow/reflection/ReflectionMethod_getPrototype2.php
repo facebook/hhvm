@@ -22,7 +22,7 @@ class BlockableWaitHandleSubClass extends BlockableWaitHandle {
 function main() {
   $tests = array(
     array("WaitHandle", "getWaitHandle"),
-    array("Continuation", "next"),
+    array("Generator", "next"),
     array("BlockableWaitHandle", "getContextIdx"),
     array("BlockableWaitHandleSubClass", "getWaitHandle"),
     array("BlockableWaitHandleSubClass", "getContextIdx"),

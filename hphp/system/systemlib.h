@@ -50,7 +50,7 @@ namespace Eval {
   x(PDOException)                               \
   x(SoapFault)                                  \
   x(Closure)                                    \
-  x(Continuation)                               \
+  x(Generator)                                  \
   x(Serializable)                               \
   x(ArrayAccess)                                \
   x(ArrayObject)                                \

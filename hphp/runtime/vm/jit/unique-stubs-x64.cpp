@@ -60,11 +60,11 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   moveToAlign(mcg->code.stubs());
   auto const ret = a.frontier();
 
-  // We have to get the Continuation object from the current AR's $this, then
+  // We have to get the Generator object from the current AR's $this, then
   // find where its embedded AR is.
   PhysReg rContAR = serviceReqArgRegs[0];
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
-  a.    lea  (rContAR[c_Continuation::arOff()], rContAR);
+  a.    lea  (rContAR[c_Generator::arOff()], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
   emitServiceReq(mcg->code.stubs(), SRFlags::JmpInsteadOfRet,
                  REQ_POST_INTERP_RET);

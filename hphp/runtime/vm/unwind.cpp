@@ -21,7 +21,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
@@ -209,7 +209,7 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
     // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
   } else if (fp->func()->isNonAsyncGenerator()) {
     // Mark the generator as finished.
-    frame_continuation(fp)->finish();
+    frame_generator(fp)->finish();
   } else {
     not_reached();
   }

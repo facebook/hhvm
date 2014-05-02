@@ -672,7 +672,7 @@ void print_unit(Output& out, const Unit* unit) {
  * - .line/.srcpos directives
  *
  * - need support for $ and :: in identifiers for traits and
- *   continuations to work properly
+ *   generators to work properly
  *
  * - Unnamed locals.
  *

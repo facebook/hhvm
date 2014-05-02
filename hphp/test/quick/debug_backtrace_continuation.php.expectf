@@ -16,9 +16,9 @@ array(3) {
     ["function"]=>
     string(4) "send"
     ["class"]=>
-    string(12) "Continuation"
+    string(9) "Generator"
     ["object"]=>
-    object(Continuation)#1 (0) {
+    object(Generator)#1 (0) {
     }
     ["type"]=>
     string(2) "->"
@@ -63,9 +63,9 @@ array(3) {
     ["function"]=>
     string(4) "send"
     ["class"]=>
-    string(12) "Continuation"
+    string(9) "Generator"
     ["object"]=>
-    object(Continuation)#1 (0) {
+    object(Generator)#1 (0) {
     }
     ["type"]=>
     string(2) "->"

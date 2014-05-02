@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_CONTINUATION_H_
-#define incl_HPHP_EXT_CONTINUATION_H_
+#ifndef incl_HPHP_EXT_GENERATOR_H_
+#define incl_HPHP_EXT_GENERATOR_H_
 
 
 #include "hphp/runtime/base/base-includes.h"
@@ -28,12 +28,26 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FORWARD_DECLARE_CLASS(Continuation);
+FORWARD_DECLARE_CLASS(Generator);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
 
-struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
+class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
+ public:
   DECLARE_CLASS_NO_SWEEP(Continuation)
+
+  explicit c_Continuation(Class* cls = c_Continuation::classof())
+    : ExtObjectDataFlags(cls) {}
+  ~c_Continuation() {}
+  void t___construct() {}
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class Generator
+
+struct c_Generator : c_Continuation {
+  DECLARE_CLASS_NO_SWEEP(Generator)
 
   static constexpr ptrdiff_t resumableOff() { return -sizeof(Resumable); }
   static constexpr ptrdiff_t arOff() {
@@ -46,7 +60,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     return resumableOff() + Resumable::resumeOffsetOff();
   }
   static constexpr ptrdiff_t stateOff() {
-    return offsetof(c_Continuation, o_subclassData.u8[0]);
+    return offsetof(c_Generator, o_subclassData.u8[0]);
   }
 
   enum GeneratorState : uint8_t {
@@ -76,15 +90,15 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   String t_getorigfuncname();
   String t_getcalledclass();
 
-  static c_Continuation* Clone(ObjectData* obj);
+  static c_Generator* Clone(ObjectData* obj);
 
-  static c_Continuation* Create(const ActRec* fp, JIT::TCA resumeAddr,
+  static c_Generator* Create(const ActRec* fp, JIT::TCA resumeAddr,
                                 Offset resumeOffset) {
     assert(fp);
     assert(fp->func()->isNonAsyncGenerator());
     void* obj = Resumable::Create(fp, resumeAddr, resumeOffset,
-                                  sizeof(c_Continuation));
-    auto const cont = new (obj) c_Continuation();
+                                  sizeof(c_Generator));
+    auto const cont = new (obj) c_Generator();
     cont->incRefCount();
     cont->setNoDestruct();
     cont->setState(Created);
@@ -138,10 +152,10 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   }
 
 private:
-  explicit c_Continuation(Class* cls = c_Continuation::classof());
-  ~c_Continuation();
+  explicit c_Generator(Class* cls = c_Generator::classof());
+  ~c_Generator();
 
-  void copyContinuationVars(ActRec *fp);
+  void copyVars(ActRec *fp);
 
 public:
   int64_t m_index;
@@ -161,4 +175,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_CONTINUATION_H_
+#endif // incl_HPHP_EXT_GENERATOR_H_

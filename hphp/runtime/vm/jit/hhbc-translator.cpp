@@ -22,7 +22,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/base/stats.h"
@@ -1532,13 +1532,13 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
     gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
   }
 
-  // Create the Continuation object.
+  // Create the Generator object.
   auto const func = curFunc();
   auto const resumeSk = SrcKey(func, resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
   auto const cont = gen(CreateCont, m_irb->fp(), resumeAddr, cns(resumeOffset));
 
-  // Teleport local variables into the Continuation.
+  // Teleport local variables into the generator.
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
   for (int i = 0; i < func->numLocals(); ++i) {
     auto const loc = ldLoc(i, ldgblExit, DataTypeGeneric);
@@ -1563,7 +1563,7 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
 void HhbcTranslator::emitContEnter(Offset returnOffset) {
   assert(curClass());
-  assert(curClass()->classof(c_Continuation::classof()));
+  assert(curClass()->classof(c_Generator::classof()));
   assert(curFunc()->contains(returnOffset));
 
   // Load generator's FP and resume address.
@@ -1617,7 +1617,7 @@ void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
 
   // Set state from Running to Started.
   gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-      cns(c_Continuation::Started));
+      cns(c_Generator::Started));
 }
 
 void HhbcTranslator::emitYield(Offset resumeOffset) {
@@ -3356,7 +3356,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
     // Mark generator as finished.
     gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-        cns(c_Continuation::Done));
+        cns(c_Generator::Done));
 
     // Sync SP.
     sp = spillStack();

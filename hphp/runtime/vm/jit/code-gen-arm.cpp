@@ -19,7 +19,7 @@
 
 #include "folly/Optional.h"
 
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
@@ -1863,7 +1863,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  emitLdRaw(inst, -c_Continuation::arOff());
+  emitLdRaw(inst, -c_Generator::arOff());
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {

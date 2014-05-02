@@ -1477,7 +1477,7 @@ D:StkPtr = DefSP<stackOff> S0:StkPtr
 
   Creates a temporary D representing the current vm stack pointer. S0 is a
   pointer to the current frame. The 'stackOff' is the logical offset between S0
-  and the stack pointer, but in the case of continuations this is not the
+  and the stack pointer, but in the case of generators this is not the
   physical offset at runtime.
 
   This instruction is used at the beginning of tracelets to represent the state
@@ -1720,7 +1720,7 @@ Shuffle<d...> S...
   hold different variables at different positions.
 
 
-16. Continuations & Closures
+16. Generators & Closures
 
 
 D:Obj = CreateCl S0:ConstCls S1:ConstInt S2:FramePtr S3:StkPtr
@@ -1745,9 +1745,9 @@ StClosureArg<offsetBytes> S0:Obj<Closure> S1:Gen
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.
 
-D:Obj<Continuation> = CreateCont S0:FramePtr S1:{TCA,Nullptr} S2:Int
+D:Obj<Generator> = CreateCont S0:FramePtr S1:{TCA,Nullptr} S2:Int
 
-  Create a Continuation object and suspend the ActRec provided by S0 into
+  Create a Generator object and suspend the ActRec provided by S0 into
   its embedded ActRec. Set the native resume address to S1 and resume offset
   to S2.
 
@@ -1762,66 +1762,66 @@ ContEnter S0:StkPtr S1:FramePtr S2:FramePtr S3:TCA S4:ConstInt
 
   Enters a generator body. S0 is the current stack pointer pointing to fully
   spilled stack, S1 is the current frame pointer, S2 is the generator frame
-  pointer embedded in the Continuation object, S3 is the address to jump to,
+  pointer embedded in the Generator object, S3 is the address to jump to,
   and S4 is the bytecode offset in the caller to return to when the generator
   suspends or returns.
 
 ContPreNext S0:Obj S1:Bool -> B
 
-  Performs operations needed for the next() method of Continuation object S0.
+  Performs operations needed for the next() method of Generator object S0.
   If the generator is already running or finished, or it was not started yet
   and the S1 check-started flag is set, the branch B is taken. Otherwise,
   the generator is marked as running.
 
 ContStartedCheck S0:Obj -> B
 
-  Checks if the continuation object S0 has started, and if not branches to
+  Checks if the Generator object S0 has started, and if not branches to
   block B.
 
 ContArIncKey S0:FramePtr
 
-  Special-case key update for continuation, ActRec of which is S0, which
-  increments the key of a continuation if that continuation's key is an Int.
-  This will cause undefined behavior if the continuation's key is not an Int.
+  Special-case key update for generator, ActRec of which is S0, which
+  increments the key of a generator if that generator's key is an Int.
+  This will cause undefined behavior if the generator's key is not an Int.
 
 ContArUpdateIdx S0:FramePtr S1:Int
 
-  Updates the internal index of continuation with S1 if necessary, i.e. if S1
+  Updates the internal index of generator with S1 if necessary, i.e. if S1
   is larger than the index. S0 is the pointer to the embedded ActRec.
 
 D:FramePtr LdContActRec S0:PtrToGen
 
-  Loads the Continuation object's ActRec, given a pointer to the continuation
+  Loads the Generator object's ActRec, given a pointer to the generator
   object in S0.
 
 D:T LdContArRaw<T> S0:FramePtr S1:ConstInt
 
-  Loads raw data from the Continuation object ActRec of which is S0. S1 is a
+  Loads raw data from the Generator object ActRec of which is S0. S1 is a
   constant from the RawMemSlot::Kind enum, which describes the offset from the
-  continuation base, and the size.
+  generator base, and the size.
 
 StContArRaw S0:FramePtr S1:ConstInt S2:{Int,TCA,Nullptr}
 
-  Stores raw data into the Continuation object ActRec of which is S0. S1 is a
+  Stores raw data into the Generator object ActRec of which is S0. S1 is a
   constant from the RawMemSlow::Kind enum, which describes the offset from the
-  Continuation base, and the size. S2 is the value.
+  Generator base, and the size. S2 is the value.
 
 D:Cell LdContArValue S0:FramePtr
 
-  Loads 'value' from the Continuation object ActRec of which is S0.
+  Loads 'value' from the Generator object ActRec of which is S0.
 
 StContArValue S0:FramePtr S1:Cell
 
-  Stores 'value' into the Continuation object ActRec of which is S0. S1 is the
+  Stores 'value' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
 D:Cell LdContArKey S0:FramePtr
 
-  Loads 'key' from the Continuation object ActRec of which is S0.
+  Loads 'key' from the Generator object ActRec of which is S0.
 
 StContArKey S0:FramePtr S1:Cell
 
-  Stores 'key' into the Continuation object ActRec of which is S0. S1 is the
+  Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
 StAsyncArRaw S0:FramePtr S1:ConstInt S2:{Int,Obj,TCA,Nullptr}
@@ -1971,7 +1971,7 @@ CIterFree<IterId> S0:FramePtr
 
 IterCopy S0:FramePtr S1:ConstInt S2:PtrToGen S3:ConstInt
 
-  Copy iterator from stack frame S0 at offset S1 to the continuation frame
+  Copy iterator from stack frame S0 at offset S1 to the resumable frame
   given by S2 at offset S3. Used for copying iterators in CreateAsync.
 
 

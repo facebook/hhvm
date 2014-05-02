@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/runtime/ext/ext_spl.h"
@@ -29,25 +29,25 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void delete_Continuation(ObjectData* od, const Class*) {
-  auto const cont = static_cast<c_Continuation*>(od);
+void delete_Generator(ObjectData* od, const Class*) {
+  auto const cont = static_cast<c_Generator*>(od);
   auto const size = cont->resumable()->size();
   auto const base = (char*)(cont + 1) - size;
-  cont->~c_Continuation();
+  cont->~c_Generator();
   MM().objFreeLogged(base, size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Continuation::c_Continuation(Class* cb)
-  : ExtObjectDataFlags(cb)
+c_Generator::c_Generator(Class* cb)
+  : c_Continuation(cb)
   , m_index(-1LL)
   , m_key(make_tv<KindOfInt64>(-1LL))
   , m_value(make_tv<KindOfNull>())
 {
 }
 
-c_Continuation::~c_Continuation() {
+c_Generator::~c_Generator() {
   if (LIKELY(getState() == Done)) {
     return;
   }
@@ -56,7 +56,7 @@ c_Continuation::~c_Continuation() {
   tvRefcountedDecRef(m_value);
 
   // Free locals, but don't trigger the EventHook for FunctionExit
-  // since the continuation function has already been exited. We
+  // since the generator has already been exited. We
   // don't want redundant calls.
   ActRec* ar = actRec();
   frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
@@ -64,9 +64,9 @@ c_Continuation::~c_Continuation() {
 
 //////////////////////////////////////////////////////////////////////
 
-void c_Continuation::t___construct() {}
+void c_Generator::t___construct() {}
 
-void c_Continuation::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
+void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
                              const Cell& value) {
   assert(getState() == Running);
   resumable()->setResumeAddr(resumeAddr, resumeOffset);
@@ -75,7 +75,7 @@ void c_Continuation::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
   setState(Started);
 }
 
-void c_Continuation::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
+void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
                              const Cell& key, const Cell& value) {
   assert(getState() == Running);
   resumable()->setResumeAddr(resumeAddr, resumeOffset);
@@ -89,20 +89,20 @@ void c_Continuation::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
 }
 
 // Functions with native implementation.
-void c_Continuation::t_next() { const_assert(false); }
-void c_Continuation::t_send(const Variant& v) { const_assert(false); }
-void c_Continuation::t_raise(const Variant& v) { const_assert(false); }
-bool c_Continuation::t_valid() { const_assert(false); }
-Variant c_Continuation::t_current() { const_assert(false); }
-Variant c_Continuation::t_key() { const_assert(false); }
+void c_Generator::t_next() { const_assert(false); }
+void c_Generator::t_send(const Variant& v) { const_assert(false); }
+void c_Generator::t_raise(const Variant& v) { const_assert(false); }
+bool c_Generator::t_valid() { const_assert(false); }
+Variant c_Generator::t_current() { const_assert(false); }
+Variant c_Generator::t_key() { const_assert(false); }
 
 const StaticString s_next("next");
-void c_Continuation::t_rewind() {
+void c_Generator::t_rewind() {
   this->o_invoke_few_args(s_next, 0);
 }
 
 const StaticString s__closure_("{closure}");
-String c_Continuation::t_getorigfuncname() {
+String c_Generator::t_getorigfuncname() {
   const Func* origFunc = actRec()->func();
   auto const origName = origFunc->isClosureBody() ? s__closure_.get()
                                                   : origFunc->name();
@@ -110,7 +110,7 @@ String c_Continuation::t_getorigfuncname() {
   return String(const_cast<StringData*>(origName));
 }
 
-String c_Continuation::t_getcalledclass() {
+String c_Generator::t_getcalledclass() {
   String called_class;
 
   if (actRec()->hasThis()) {
@@ -124,7 +124,7 @@ String c_Continuation::t_getcalledclass() {
   return called_class;
 }
 
-void c_Continuation::copyContinuationVars(ActRec* srcFp) {
+void c_Generator::copyVars(ActRec* srcFp) {
   const auto dstFp = actRec();
   const auto func = dstFp->func();
   assert(srcFp->func() == dstFp->func());
@@ -149,13 +149,13 @@ void c_Continuation::copyContinuationVars(ActRec* srcFp) {
   }
 }
 
-c_Continuation *c_Continuation::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_Continuation*>(obj);
+c_Generator *c_Generator::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Generator*>(obj);
   auto fp = thiz->actRec();
 
-  c_Continuation* cont = Create(fp, thiz->resumable()->resumeAddr(),
+  c_Generator* cont = Create(fp, thiz->resumable()->resumeAddr(),
                                     thiz->resumable()->resumeOffset());
-  cont->copyContinuationVars(fp);
+  cont->copyVars(fp);
   cont->setState(thiz->getState());
   cont->m_index  = thiz->m_index;
   cellSet(thiz->m_key, cont->m_key);

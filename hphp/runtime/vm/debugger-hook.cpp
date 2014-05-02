@@ -20,7 +20,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -171,7 +171,7 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
 static void addBreakPointFuncEntry(const Func* f) {
   // we are in a generator, skip CreateCont / RetC / PopC opcodes
   auto base = f->isGenerator()
-    ? (f->isAsync() ? bad_value<Offset>() : c_Continuation::userBase(f))
+    ? (f->isAsync() ? bad_value<Offset>() : c_Generator::userBase(f))
     : f->base();
   auto pc = f->unit()->at(base);
 

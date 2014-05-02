@@ -556,7 +556,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
   // fix return type for generators and async functions here, keep the
   // infered return type in function scope to allow further optimizations
   if (func->isGenerator()) {
-    frt = Type::GetType(Type::KindOfObject, "Continuation");
+    frt = Type::GetType(Type::KindOfObject, "Generator");
   } else if (func->isAsync()) {
     frt = Type::GetType(Type::KindOfObject, "WaitHandle");
   }

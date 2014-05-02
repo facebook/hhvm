@@ -17,7 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_next.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 
 namespace HPHP { namespace Eval {
@@ -104,9 +104,9 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     } else if (atStepResumableOffset(unit, offset)) {
       if (m_stepResumableId != getResumableId(fp)) return;
       TRACE(2, "CmdNext: hit step-cont\n");
-      // We're in the continuation we expect. This may be at a
+      // We're in the resumable we expect. This may be at a
       // different stack depth, though, especially if we've moved from
-      // the original function to the continuation. Update the depth
+      // the original function to the resumable. Update the depth
       // accordingly.
       if (!originalDepth) {
         m_vmDepth = currentVMDepth;
@@ -122,8 +122,8 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
         return;
       }
       // For step-conts, we ignore handlers at the original level if we're not
-      // in the original continuation. We don't care about exception handlers
-      // in continuations being driven at the same level.
+      // in the original resumable. We don't care about exception handlers
+      // in resumables being driven at the same level.
       if (hasStepResumable() && originalDepth &&
           (m_stepResumableId != getResumableId(fp))) {
         TRACE(2, "CmdNext: exception handler, original depth, wrong cont\n");
@@ -296,15 +296,15 @@ void CmdNext::cleanupStepResumable() {
   }
 }
 
-// Use the address of the c_Continuation object as a tag for this stepping
-// operation, to ensure we only stop once we're back to the same continuation.
+// Use the address of the c_Generator object as a tag for this stepping
+// operation, to ensure we only stop once we're back to the same resumable.
 // Since we'll either stop when we get out of whatever is driving this
-// continuation, or we'll stop when we get back into it, we know the object
+// resumable, or we'll stop when we get back into it, we know the object
 // will remain alive.
 void* CmdNext::getResumableId(ActRec* fp) {
   assert(fp->resumed());
   assert(fp->func()->isResumable());
-  TRACE(2, "CmdNext: continuation tag %p for %s\n", fp,
+  TRACE(2, "CmdNext: resumable tag %p for %s\n", fp,
         fp->func()->name()->data());
   return fp;
 }

@@ -31,7 +31,7 @@
 
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
@@ -846,8 +846,8 @@ ObjectData* ObjectData::clone() {
       }
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
-    } else if (instanceof(c_Continuation::classof())) {
-      return c_Continuation::Clone(this);
+    } else if (instanceof(c_Generator::classof())) {
+      return c_Generator::Clone(this);
     } else if (instanceof(c_DateTime::classof())) {
       return c_DateTime::Clone(this);
     } else if (instanceof(c_DateTimeZone::classof())) {

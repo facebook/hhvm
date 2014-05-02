@@ -115,7 +115,7 @@ array(12) {
   ["e"]=>
   int(3126047761)
   ["c"]=>
-  object(Continuation)#5 (0) {
+  object(Generator)#5 (0) {
   }
   ["j"]=>
   int(10)

@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_VM_RUNTIME_H_
 #define incl_HPHP_VM_RUNTIME_H_
 
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
@@ -82,12 +82,12 @@ frame_afwh(const ActRec* fp) {
   return waitHandle;
 }
 
-inline c_Continuation*
-frame_continuation(const ActRec* fp) {
+inline c_Generator*
+frame_generator(const ActRec* fp) {
   auto resumable = frame_resumable(fp);
-  auto obj = (ObjectData*)((char*)resumable - c_Continuation::resumableOff());
-  assert(obj->getVMClass() == c_Continuation::classof());
-  return static_cast<c_Continuation*>(obj);
+  auto obj = (ObjectData*)((char*)resumable - c_Generator::resumableOff());
+  assert(obj->getVMClass() == c_Generator::classof());
+  return static_cast<c_Generator*>(obj);
 }
 
 /*

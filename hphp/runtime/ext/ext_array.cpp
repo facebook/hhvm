@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-collator.h"

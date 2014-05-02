@@ -243,8 +243,8 @@ static CallMap s_callMap {
     {LdSwitchObjIndex,   switchObjHelper, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
-    /* Continuation support helpers */
-    {CreateCont,         &c_Continuation::Create, DSSA, SNone,
+    /* Generator support helpers */
+    {CreateCont,         &c_Generator::Create, DSSA, SNone,
                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Async function support helpers */

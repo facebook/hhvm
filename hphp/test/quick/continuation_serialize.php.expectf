@@ -9,5 +9,5 @@ string(2) "N;"
 NULL
 NULL
 
-Notice: Unable to unserialize: [O:12:"Continuation":0:{}]. A null object pointer was used.. in %s/continuation_serialize.php on line 44
+Notice: Unable to unserialize: [O:9:"Generator":0:{}]. A null object pointer was used.. in %s/continuation_serialize.php on line 44
 bool(false)

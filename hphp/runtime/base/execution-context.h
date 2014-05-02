@@ -388,7 +388,7 @@ public:
   void requestInit();
   void requestExit();
 
-  static void fillContinuationVars(const Func* func, ActRec* origFp,
+  static void fillResumableVars(const Func* func, ActRec* origFp,
                                    ActRec* genFp);
   void pushLocalsAndIterators(const Func* f, int nparams = 0);
   void enqueueAPCHandle(APCHandle* handle);

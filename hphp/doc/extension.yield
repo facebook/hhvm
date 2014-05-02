@@ -51,7 +51,7 @@ generator.
   }
 
 From outside the generator, instead of resuming the generator with
-Continuation::next(), one can call Continuation::send() to pass a value, which
+Generator::next(), one can call Generator::send() to pass a value, which
 will be assigned to $a, back into the generator.
 
 Note that the yield expression in the above example is not really an expression;

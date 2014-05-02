@@ -4785,7 +4785,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         visit(y->getValueExpression());
         emitConvertToCell(e);
 
-        // suspend continuation
+        // suspend generator
         if (keyExp) {
           assert(m_evalStack.size() == 2);
           e.YieldK();
@@ -6324,7 +6324,7 @@ void EmitterVisitor::emitPostponedMeths() {
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitMethod(meth);
     } else if (funcScope->isAsync()) {
-      // emit the outer function (which creates continuation if blocked)
+      // emit the outer function (which creates wait handle if blocked)
       m_curFunc = fe;
       fe->setIsAsync(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
@@ -8214,7 +8214,7 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   return ue;
 }
 
-enum ContinuationMethod {
+enum GeneratorMethod {
   METH_NEXT,
   METH_SEND,
   METH_RAISE,
@@ -8222,11 +8222,11 @@ enum ContinuationMethod {
   METH_CURRENT,
   METH_KEY,
 };
-typedef hphp_hash_map<const StringData*, ContinuationMethod,
+typedef hphp_hash_map<const StringData*, GeneratorMethod,
                       string_data_hash, string_data_same> ContMethMap;
 
-static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
-                                   ContinuationMethod m) {
+static void emitGeneratorMethod(UnitEmitter& ue, FuncEmitter* fe,
+                                GeneratorMethod m) {
   static const StringData* valStr = makeStaticString("value");
 
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
@@ -8241,7 +8241,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       // translations
       fe->setAttrs(Attr(fe->attrs() | AttrClone));
 
-      // check continuation status; send()/raise() also checks started
+      // check generator status; send()/raise() also checks started
       ue.emitOp(OpContCheck);
       ue.emitIVA(m == METH_SEND || m == METH_RAISE);
 
@@ -8382,17 +8382,16 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
-      static const StringData* continuationCls =
-        makeStaticString("continuation");
+      static const StringData* generatorCls = makeStaticString("generator");
       StringData* methName = makeStaticString(methodInfo->m_name);
-      ContinuationMethod* cmeth;
+      GeneratorMethod* cmeth;
 
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
-      if (e.name->isame(continuationCls) &&
+      if (e.name->isame(generatorCls) &&
           (cmeth = folly::get_ptr(contMethods, methName))) {
         auto methCpy = *cmeth;
-        emitContinuationMethod(*ue, fe, methCpy);
+        emitGeneratorMethod(*ue, fe, methCpy);
       } else {
         if (e.name->isame(s_construct.get())) {
           hasCtor = true;

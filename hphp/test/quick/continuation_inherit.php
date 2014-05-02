@@ -1,10 +1,10 @@
 <?
 
 function derp() {
-  class HerpDerp extends Continuation {}
+  class HerpDerp extends Generator {}
 }
 
-$rc = new ReflectionClass('Continuation');
+$rc = new ReflectionClass('Generator');
 var_dump($rc->isFinal());
 
 derp();

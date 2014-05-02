@@ -34,7 +34,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
@@ -5434,24 +5434,24 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg      = srcLoc(0).reg();
   auto checkStarted = inst->src(1)->boolVal();
-  auto stateOff     = c_Continuation::stateOff();
+  auto stateOff     = c_Generator::stateOff();
 
-  static_assert(c_Continuation::Created == 0, "used below");
-  static_assert(c_Continuation::Started == 1, "used below");
+  static_assert(c_Generator::Created == 0, "used below");
+  static_assert(c_Generator::Started == 1, "used below");
 
   // Take exit if state != 1 (checkStarted) or state > 1 (!checkStarted).
   m_as.cmpb(1, contReg[stateOff]);
   emitFwdJcc(checkStarted ? CC_NE : CC_A, inst->taken());
 
   // Set generator state as Running.
-  m_as.storeb(c_Continuation::Running, contReg[stateOff]);
+  m_as.storeb(c_Generator::Running, contReg[stateOff]);
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   auto contReg  = srcLoc(0).reg();
-  auto stateOff = c_Continuation::stateOff();
+  auto stateOff = c_Generator::stateOff();
 
-  static_assert(c_Continuation::Created == 0, "used below");
+  static_assert(c_Generator::Created == 0, "used below");
 
   // Take exit if state == 0.
   m_as.testb(int8_t(0xff), contReg[stateOff]);
@@ -5461,10 +5461,10 @@ void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
 void CodeGenerator::cgContValid(IRInstruction* inst) {
   auto contReg  = srcLoc(0).reg();
   auto dstReg   = dstLoc(0).reg();
-  auto stateOff = c_Continuation::stateOff();
+  auto stateOff = c_Generator::stateOff();
 
   // Return 1 if generator state is not Done.
-  m_as.cmpb(c_Continuation::Done, contReg[stateOff]);
+  m_as.cmpb(c_Generator::Done, contReg[stateOff]);
   m_as.setne(rbyte(dstReg));
   m_as.movzbl(rbyte(dstReg), r32(dstReg));
 }
@@ -5472,12 +5472,12 @@ void CodeGenerator::cgContValid(IRInstruction* inst) {
 void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
   m_as.incq(contArReg[CONTOFF(m_key) + TVOFF(m_data) -
-                      c_Continuation::arOff()]);
+                      c_Generator::arOff()]);
 }
 
 void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
-  int64_t off = CONTOFF(m_index) - c_Continuation::arOff();
+  int64_t off = CONTOFF(m_index) - c_Generator::arOff();
   auto newIdx = inst->src(1);
   auto newIdxReg = srcLoc(1).reg();
 
@@ -5498,7 +5498,7 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
 void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
   auto dest = dstLoc(0).reg();
   auto base = srcLoc(0).reg();
-  ptrdiff_t offset = c_Continuation::arOff();
+  ptrdiff_t offset = c_Generator::arOff();
 
   m_as.lea (base[offset], dest) ;
 }
@@ -5527,7 +5527,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  emitLdRaw(inst, -c_Continuation::arOff());
+  emitLdRaw(inst, -c_Generator::arOff());
 }
 
 void CodeGenerator::emitStRaw(IRInstruction* inst, size_t extraOff) {
@@ -5560,13 +5560,13 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
-  emitStRaw(inst, -c_Continuation::arOff());
+  emitStRaw(inst, -c_Generator::arOff());
 }
 
 void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
   const int64_t valueOff = CONTOFF(m_value);
-  int64_t off = valueOff - c_Continuation::arOff();
+  int64_t off = valueOff - c_Generator::arOff();
   cgLoad(inst->dst(), dstLoc(0), contArReg[off], inst->taken());
 }
 
@@ -5575,14 +5575,14 @@ void CodeGenerator::cgStContArValue(IRInstruction* inst) {
   auto value = inst->src(1);
   auto valueLoc = srcLoc(1);
   const int64_t valueOff = CONTOFF(m_value);
-  int64_t off = valueOff - c_Continuation::arOff();
+  int64_t off = valueOff - c_Generator::arOff();
   cgStore(contArReg[off], value, valueLoc, Width::Full);
 }
 
 void CodeGenerator::cgLdContArKey(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
   const int64_t keyOff = CONTOFF(m_key);
-  int64_t off = keyOff - c_Continuation::arOff();
+  int64_t off = keyOff - c_Generator::arOff();
   cgLoad(inst->dst(), dstLoc(0), contArReg[off], inst->taken());
 }
 
@@ -5592,7 +5592,7 @@ void CodeGenerator::cgStContArKey(IRInstruction* inst) {
   auto valueLoc = srcLoc(1);
 
   const int64_t keyOff = CONTOFF(m_key);
-  int64_t off = keyOff - c_Continuation::arOff();
+  int64_t off = keyOff - c_Generator::arOff();
   cgStore(contArReg[off], value, valueLoc, Width::Full);
 }
 

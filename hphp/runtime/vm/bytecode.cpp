@@ -73,7 +73,7 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
@@ -4507,7 +4507,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   } else if (m_fp->func()->isNonAsyncGenerator()) {
     // Mark the generator as finished and store the return value.
     assert(IS_NULL_TYPE(retval.m_type));
-    frame_continuation(m_fp)->finish();
+    frame_generator(m_fp)->finish();
   } else {
     not_reached();
   }
@@ -6889,7 +6889,7 @@ const StaticString s_this("this");
 // The variable environment, extra args and all locals are teleported
 // from the ActRec on the evaluation stack to the suspended ActRec
 // on the heap.
-void ExecutionContext::fillContinuationVars(const Func* func,
+void ExecutionContext::fillResumableVars(const Func* func,
                                             ActRec* origFp,
                                             ActRec* genFp) {
   for (Id i = 0; i < func->numLocals(); ++i) {
@@ -6911,13 +6911,13 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   const auto func = m_fp->func();
   const auto resumeOffset = m_fp->func()->unit()->offsetOf(pc);
 
-  // Create the Continuation object.
-  auto cont = c_Continuation::Create(m_fp, nullptr, resumeOffset);
+  // Create the Generator object.
+  auto cont = c_Generator::Create(m_fp, nullptr, resumeOffset);
 
-  // Teleport local variables into the Continuation.
-  fillContinuationVars(func, m_fp, cont->actRec());
+  // Teleport local variables into the generator.
+  fillResumableVars(func, m_fp, cont->actRec());
 
-  // Call the FunctionExit hook. Keep the Continuation on the stack so that
+  // Call the FunctionExit hook. Keep the generator on the stack so that
   // the unwinder could free it if the hook fails.
   m_stack.pushObjectNoRc(cont);
   EventHook::FunctionExit(m_fp, m_stack.top());
@@ -6938,10 +6938,10 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   pc = LIKELY(m_fp != nullptr) ? m_fp->func()->getEntry() + soff : nullptr;
 }
 
-static inline c_Continuation* this_continuation(const ActRec* fp) {
+static inline c_Generator* this_generator(const ActRec* fp) {
   ObjectData* obj = fp->getThis();
-  assert(obj->instanceof(c_Continuation::classof()));
-  return static_cast<c_Continuation*>(obj);
+  assert(obj->instanceof(c_Generator::classof()));
+  return static_cast<c_Generator*>(obj);
 }
 
 OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
@@ -6951,10 +6951,10 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   assert(m_stack.top() + 1 ==
          (TypedValue*)m_fp - m_fp->m_func->numSlotsInFrame());
 
-  // Do linkage of the continuation's AR.
+  // Do linkage of the generator's AR.
   assert(m_fp->hasThis());
-  c_Continuation* cont = this_continuation(m_fp);
-  assert(cont->getState() == c_Continuation::Running);
+  c_Generator* cont = this_generator(m_fp);
+  assert(cont->getState() == c_Generator::Running);
   ActRec* contAR = cont->actRec();
   contAR->setReturn(m_fp, pc, tx->uniqueStubs.genRetHelper);
 
@@ -6986,7 +6986,7 @@ OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
   NEXT();
 
-  auto cont = frame_continuation(m_fp);
+  auto cont = frame_generator(m_fp);
   auto resumeOffset = m_fp->func()->unit()->offsetOf(pc);
   cont->suspend(nullptr, resumeOffset, *m_stack.topC());
   m_stack.popTV();
@@ -7003,7 +7003,7 @@ OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   NEXT();
 
-  auto cont = frame_continuation(m_fp);
+  auto cont = frame_generator(m_fp);
   auto resumeOffset = m_fp->func()->unit()->offsetOf(pc);
   cont->suspend(nullptr, resumeOffset, *m_stack.indC(1), *m_stack.topC());
   m_stack.popTV();
@@ -7021,26 +7021,26 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
   NEXT();
   DECODE_IVA(checkStarted);
-  this_continuation(m_fp)->preNext(checkStarted);
+  this_generator(m_fp)->preNext(checkStarted);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContValid(IOP_ARGS) {
   NEXT();
   TypedValue* tv = m_stack.allocTV();
   tvWriteUninit(tv);
-  tvAsVariant(tv) = this_continuation(m_fp)->getState() != c_Continuation::Done;
+  tvAsVariant(tv) = this_generator(m_fp)->getState() != c_Generator::Done;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContKey(IOP_ARGS) {
   NEXT();
-  c_Continuation* cont = this_continuation(m_fp);
+  c_Generator* cont = this_generator(m_fp);
   cont->startedCheck();
   cellDup(cont->m_key, *m_stack.allocC());
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContCurrent(IOP_ARGS) {
   NEXT();
-  c_Continuation* cont = this_continuation(m_fp);
+  c_Generator* cont = this_generator(m_fp);
   cont->startedCheck();
   cellDup(cont->m_value, *m_stack.allocC());
 }
@@ -7065,7 +7065,7 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
     c_AsyncFunctionWaitHandle::Create(m_fp, nullptr, resumeOffset, child));
 
   // Teleport local variables into the AsyncFunctionWaitHandle.
-  fillContinuationVars(func, m_fp, waitHandle->actRec());
+  fillResumableVars(func, m_fp, waitHandle->actRec());
 
   // Teleport iterators into the AsyncFunctionWaitHandle.
   memcpy(frame_iter(waitHandle->actRec(), iters - 1),

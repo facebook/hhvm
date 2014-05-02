@@ -1007,7 +1007,7 @@ visitStackElems(const ActRec* const fp,
       if (!fp->resumed()) {
         ar = arAtOffset(fp, -fe->m_fpOff);
       } else {
-        // fp is pointing into the continuation object. Since fpOff is
+        // fp is pointing into the Resumable struct. Since fpOff is
         // given as an offset from the frame pointer as if it were in
         // the normal place on the main stack, we have to reconstruct
         // that "normal place".

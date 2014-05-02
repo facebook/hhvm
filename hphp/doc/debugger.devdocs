@@ -528,7 +528,7 @@ then continue try to interpret off of it. If execution ends up
 shallower on the stack, then we have stepped over a return and are
 done as well.
 
-There is extra logic to support stepping within continuations, so that
+There is extra logic to support stepping within generators, so that
 a 'next' executed on a source line with a 'yield' on it will step over
 the yield. Thus CmdNext looks at the opcodes it is stepping over, and
 upon recognizing CONTEXIT or CONTRETC will setup its own internal

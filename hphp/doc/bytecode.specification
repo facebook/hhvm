@@ -208,21 +208,21 @@ opcode below lists the requirements for a closure subclass to be usable with
 it.
 
 
-Continuations
--------------
+Generators
+----------
 
-The basic compilation strategy for continuations is to create bytecode functions
+The basic compilation strategy for generators is to create bytecode functions
 consisting of two parts.
 
-The first part, executed when the continuation function is called, must consist
+The first part, executed when the generator function is called, must consist
 of a CreateCont, which is responsible for suspending execution state into a new 
-Continuation object (includes resume offset pointing to the start of the second
+Generator object (includes resume offset pointing to the start of the second
 part of the function) and returning it back to the caller.
 
 The second part is where the real user-level code of the generator should be
-placed. ContEnter and ContRaise opcodes used in Continuation's next(), send()
+placed. ContEnter and ContRaise opcodes used in Generator's next(), send()
 and raise() methods resume execution and transfer control to the resume offset
-stored in the Continuation object. The user-level code yields values using
+stored in the Generator object. The user-level code yields values using
 Yield and YieldK opcodes and returns using RetC opcode.
 
 
@@ -949,7 +949,8 @@ The instruction set is organized into the following sections:
   11. Iterator instructions
   12. Include, eval, and define instructions
   13. Miscellaneous instructions
-  14. Continuation creation and execution
+  14. Generator creation and execution
+  15. Async functions
 
 
 1. Basic instructions
@@ -1445,7 +1446,7 @@ RetC    [C]  ->  []
   return. In a "resumed execution" mode, the control is given back to the
   scheduler and it is informed that the async function has finished.
 
-  If used in a generator, the Continuation object is marked as finished and
+  If used in a generator, the Generator object is marked as finished and
   the control is given back to the next instruction after ContEnter or
   ContRaise instruction in a previous frame. The $1 must be Null.
 
@@ -4056,37 +4057,37 @@ BreakTraceHint   []  ->  []
   front of it. In HHVM, this is used to tell the JIT to break a Tracelet when
   it sees this opcode.
 
-14. Continuation creation and execution
+14. Generator creation and execution
 ---------------------------------------
 
 CreateCont   []  ->  [C:Null]
 
-  This instruction may only appear in bodies of continuations. Creates a new
-  Continuation object, moves all local variables from the current frame into
+  This instruction may only appear in bodies of generators. Creates a new
+  Generator object, moves all local variables from the current frame into
   the object, sets resume offset at the next opcode and suspends execution by
-  transferring control flow back to the caller, returning the Continuation
+  transferring control flow back to the caller, returning the Generator
   object. Once the execution is resumed, the Null value sent by ContEnter
   becomes available on the stack. It is illegal to resume newly constructed
-  Continuation using ContEnter with a non-null value or ContRaise opcodes.
+  Generator using ContEnter with a non-null value or ContRaise opcodes.
 
 ContEnter   [C]  ->  []
 
-  This instruction may only appear in non-static methods of the Continuation
+  This instruction may only appear in non-static methods of the Generator
   class. It transfers control flow to the saved resume offset of a function
-  associated with $this Continuation object. The $1 will remain available
+  associated with $this Generator object. The $1 will remain available
   on the stack after the control is transferred.
  
 ContRaise   [C:Obj]  ->  []
 
-  This instruction may only appear in non-static methods of the Continuation
+  This instruction may only appear in non-static methods of the Generator
   class. It transfers control flow to the saved resume offset of a function
-  associated with $this Continuation object. The Exception stored at $1 is
+  associated with $this Generator object. The Exception stored at $1 is
   raised instead of invoking code at the resume offset.
 
 Yield   [C]  ->  [C]
 
-  This instruction may only appear in bodies of continuations. Stores $1 
-  in the continuation as the result of the current iteration, sets resume 
+  This instruction may only appear in bodies of generators. Stores $1 
+  in the generator as the result of the current iteration, sets resume 
   offset at the next opcode and suspends execution by transferring control 
   flow back to the ContEnter or ContRaise. Once the execution is resumed, 
   the value sent by ContEnter becomes available on the stack, or 
@@ -4094,8 +4095,8 @@ Yield   [C]  ->  [C]
 
 YieldK   [C C]  ->  [C]
 
-  This instruction may only appear in bodies of continuations. Stores $1
-  in the continuation as the result and $2 as the key of the current
+  This instruction may only appear in bodies of generators. Stores $1
+  in the generator as the result and $2 as the key of the current
   iteration, sets resume offset at the next opcode and suspends execution 
   by transferring control flow back to the ContEnter or ContRaise. Once 
   the execution is resumed, the value sent by ContEnter becomes available
@@ -4103,24 +4104,24 @@ YieldK   [C C]  ->  [C]
 
 ContCheck <check started>    []  ->  []
 
-  Check whether continuation can be iterated. $this must be a Continuation
-  object. If the continuation is finished, already running, or not yet started
+  Check whether generator can be iterated. $this must be a Generator
+  object. If the generator is finished, already running, or not yet started
   and <check started> is enabled, an exception will be thrown.
 
 ContValid    []  ->  [C:Bool]
 
-  Check continuation validity. $this must be a Continuation object. Pushes true
-  onto the stack if the continuation can be iterated further, false otherwise.
+  Check generator validity. $this must be a Generator object. Pushes true
+  onto the stack if the generator can be iterated further, false otherwise.
 
 ContKey    []  ->  [C]
 
-  Get continuation key. $this must be a Continuation object. Pushes the most
-  recently yielded key from the continuation onto the stack.
+  Get generator key. $this must be a Generator object. Pushes the most
+  recently yielded key from the generator onto the stack.
 
 ContCurrent    []  ->  [C]
 
-  Get continuation value. $this must be a Continuation object. Pushes the most
-  recently yielded value from the continuation onto the stack.
+  Get generator value. $this must be a Generator object. Pushes the most
+  recently yielded value from the generator onto the stack.
 
 15. Async functions
 -------------------

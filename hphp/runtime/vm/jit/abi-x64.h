@@ -239,7 +239,7 @@ const int kNumServiceReqArgRegs =
 #define TVOFF(nm) int(offsetof(TypedValue, nm))
 #define AROFF(nm) int(offsetof(ActRec, nm))
 #define AFWHOFF(nm) int(offsetof(c_AsyncFunctionWaitHandle, nm))
-#define CONTOFF(nm) int(offsetof(c_Continuation, nm))
+#define CONTOFF(nm) int(offsetof(c_Generator, nm))
 
 UNUSED const Abi abi {
   kGPUnreserved,  // gpUnreserved

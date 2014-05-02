@@ -642,7 +642,7 @@ array(3) {
   [2]=>
   array(1) {
     ["return"]=>
-    object(Continuation)#2 (0) {
+    object(Generator)#2 (0) {
     }
   }
 }
@@ -650,7 +650,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(20) "Continuation::rewind"
+  string(17) "Generator::rewind"
   [2]=>
   array(1) {
     ["args"]=>
@@ -662,7 +662,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(18) "Continuation::next"
+  string(15) "Generator::next"
   [2]=>
   array(1) {
     ["args"]=>
@@ -694,7 +694,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(18) "Continuation::next"
+  string(15) "Generator::next"
   [2]=>
   array(1) {
     ["return"]=>
@@ -705,7 +705,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(20) "Continuation::rewind"
+  string(17) "Generator::rewind"
   [2]=>
   array(1) {
     ["return"]=>
@@ -716,7 +716,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(19) "Continuation::valid"
+  string(16) "Generator::valid"
   [2]=>
   array(1) {
     ["args"]=>
@@ -728,7 +728,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(19) "Continuation::valid"
+  string(16) "Generator::valid"
   [2]=>
   array(1) {
     ["return"]=>
@@ -739,7 +739,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(21) "Continuation::current"
+  string(18) "Generator::current"
   [2]=>
   array(1) {
     ["args"]=>
@@ -751,7 +751,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(21) "Continuation::current"
+  string(18) "Generator::current"
   [2]=>
   array(1) {
     ["return"]=>
@@ -762,7 +762,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(18) "Continuation::next"
+  string(15) "Generator::next"
   [2]=>
   array(1) {
     ["args"]=>
@@ -794,7 +794,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(18) "Continuation::next"
+  string(15) "Generator::next"
   [2]=>
   array(1) {
     ["return"]=>
@@ -805,7 +805,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(19) "Continuation::valid"
+  string(16) "Generator::valid"
   [2]=>
   array(1) {
     ["args"]=>
@@ -817,7 +817,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(19) "Continuation::valid"
+  string(16) "Generator::valid"
   [2]=>
   array(1) {
     ["return"]=>
@@ -828,7 +828,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(21) "Continuation::current"
+  string(18) "Generator::current"
   [2]=>
   array(1) {
     ["args"]=>
@@ -840,7 +840,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(21) "Continuation::current"
+  string(18) "Generator::current"
   [2]=>
   array(1) {
     ["return"]=>
@@ -851,7 +851,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(18) "Continuation::next"
+  string(15) "Generator::next"
   [2]=>
   array(1) {
     ["args"]=>
@@ -883,7 +883,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(18) "Continuation::next"
+  string(15) "Generator::next"
   [2]=>
   array(1) {
     ["return"]=>
@@ -894,7 +894,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(19) "Continuation::valid"
+  string(16) "Generator::valid"
   [2]=>
   array(1) {
     ["args"]=>
@@ -906,7 +906,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(19) "Continuation::valid"
+  string(16) "Generator::valid"
   [2]=>
   array(1) {
     ["return"]=>

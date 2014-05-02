@@ -98,7 +98,7 @@ struct NameValueTable : private boost::noncopyable {
   ~NameValueTable();
 
   /**
-   * Suspend locals into an in-continuation ActRec.
+   * Suspend locals into an in-resumable ActRec.
    */
   void suspend(ActRec* oldFP, ActRec* newFP);
 

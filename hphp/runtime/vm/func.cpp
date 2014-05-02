@@ -178,7 +178,7 @@ void Func::setFullName() {
     int numPre = isClosureBody() ? 1 : 0;
     char* from = (char*)this - numPre * sizeof(Func);
 
-    int maxNumPrologues = Func::getMaxNumPrologues(m_numParams);
+    int maxNumPrologues = Func::getMaxNumPrologues(numParams());
     int numPrologues = maxNumPrologues > kNumFixedPrologues ?
       maxNumPrologues : kNumFixedPrologues;
     char* to = (char*)(m_prologueTable + numPrologues);
@@ -357,7 +357,7 @@ void Func::destroy(Func* func) {
        * They're not real prologs, and they shouldn't be
        * smashed, so clear them out here.
        */
-      f->initPrologues(f->m_numParams);
+      f->initPrologues(f->numParams());
       Func::destroy(f);
     }
   }
@@ -370,13 +370,14 @@ void Func::destroy(Func* func) {
 }
 
 Func* Func::clone(Class* cls) const {
+  auto numParams = this->numParams();
   Func* f = new (allocFuncMem(
                    m_name,
-                   m_numParams,
+                   numParams,
                    isClosureBody(),
                    cls || !preClass())) Func(*this);
 
-  f->initPrologues(m_numParams);
+  f->initPrologues(numParams);
   f->m_funcId = InvalidFuncId;
   if (cls != f->m_cls) {
     f->m_cls = cls;
@@ -522,7 +523,7 @@ bool Func::byRef(int32_t arg) const {
   if (UNLIKELY(arg >= kBitsPerQword)) {
     // Super special case. A handful of builtins are varargs functions where the
     // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
-    if (arg >= m_numParams) {
+    if (arg >= numParams()) {
       return m_attrs & AttrVariadicByRef;
     }
     ref = &shared()->m_refBitPtr[(uint32_t)arg / kBitsPerQword - 1];
@@ -543,7 +544,7 @@ bool Func::mustBeRef(int32_t arg) const {
     }
   }
   return
-    arg < m_numParams ||
+    arg < numParams() ||
     !(m_attrs & AttrVariadicByRef) ||
     !methInfo() ||
     !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
@@ -551,9 +552,13 @@ bool Func::mustBeRef(int32_t arg) const {
 
 void Func::appendParam(bool ref, const Func::ParamInfo& info,
                        std::vector<ParamInfo>& pBuilder) {
-  int qword = m_numParams / kBitsPerQword;
-  int bit   = m_numParams % kBitsPerQword;
-  m_numParams++;
+  auto numParams = pBuilder.size();
+
+  // When called by FuncEmitter, the least significant bit of m_paramCounts
+  // are not yet being used as a variadic flag, so numParams() cannot be
+  // used
+  int qword = numParams / kBitsPerQword;
+  int bit   = numParams % kBitsPerQword;
   assert(!info.isVariadic() || (m_attrs & AttrVariadicParam));
   uint64_t* refBits = &m_refBitVal;
   // Grow args, if necessary.
@@ -576,6 +581,26 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
   *refBits &= ~(1ull << bit);
   *refBits |= uint64_t(ref) << bit;
   pBuilder.push_back(info);
+}
+
+/* This function is expected to be called after all calls to appendParam
+ * are complete. After, m_paramCounts is initialized such that the least
+ * significant bit of this->m_paramCounts indicates whether the last param
+ * is (non)variadic; and the rest of the bits are the number of params.
+ */
+void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
+  assert(m_paramCounts == 0);
+  if (!fParams.size()) {
+    assert(!m_refBitVal && !shared()->m_refBitPtr);
+    m_refBitVal = attrs() & AttrVariadicByRef ? -1uLL : 0uLL;
+  }
+
+  shared()->m_params = fParams;
+  m_paramCounts = fParams.size() << 1;
+  if (!(m_attrs & AttrVariadicParam)) {
+    m_paramCounts |= 1;
+  }
+  assert(numParams() == fParams.size());
 }
 
 Id Func::lookupVarId(const StringData* name) const {
@@ -704,7 +729,8 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
       mi->docComment = docComment()->data();
     }
     // Get the parameter info
-    for (unsigned i = 0; i < unsigned(m_numParams); ++i) {
+    auto limit = numParams();
+    for (unsigned i = 0; i < limit; ++i) {
       ClassInfo::ParameterInfo* pi = new ClassInfo::ParameterInfo;
       attr = 0;
       if (byRef(i)) {
@@ -1271,19 +1297,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     pi.setVariadic(m_params[i].isVariadic());
     f->appendParam(m_params[i].ref(), pi, fParams);
   }
-  assert(f->m_numParams == m_params.size());
-  if (!m_params.size()) {
-    assert(!f->m_refBitVal && !f->shared()->m_refBitPtr);
-    f->m_refBitVal = attrs & AttrVariadicByRef ? -1uLL : 0uLL;
-  }
 
-  f->shared()->m_params = fParams;
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = m_maxStackCells;
-  f->m_numNonVariadicParams = (attrs & AttrVariadicParam)
-    ? (f->m_numParams - 1) : f->m_numParams;
   f->shared()->m_staticVars = m_staticVars;
   f->shared()->m_ehtab = m_ehtab;
   f->shared()->m_fpitab = m_fpitab;
@@ -1298,6 +1316,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_retUserType = m_retUserType;
   f->shared()->m_originalFilename = m_originalFilename;
   f->shared()->m_isGenerated = isGenerated;
+
+  f->finishedEmittingParams(fParams);
 
   if (attrs & AttrNative) {
     auto nif = Native::GetBuiltinFunction(m_name,

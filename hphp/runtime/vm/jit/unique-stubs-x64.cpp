@@ -248,7 +248,9 @@ void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
   a.    loadq  (rStashedAR[AROFF(m_func)], rax);
   a.    loadl  (rStashedAR[AROFF(m_numArgsAndFlags)], edx);
   a.    andl   (0x1fffffff, edx);
-  a.    loadl  (rax[Func::numParamsOff()], ecx);
+  a.    loadl  (rax[Func::paramCountsOff()], ecx);
+  // see Func::finishedEmittingParams and Func::numParams for rationale
+  a.    shrl   (0x1, ecx);
 
   // If we passed more args than declared, jump to the numParamsCheck.
   a.    cmpl   (edx, ecx);
@@ -495,4 +497,3 @@ UniqueStubs emitUniqueStubs() {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

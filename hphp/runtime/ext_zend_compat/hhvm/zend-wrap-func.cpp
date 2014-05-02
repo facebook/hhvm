@@ -28,7 +28,7 @@ void zPrepArgs(ActRec* ar) {
   // If you call a function with too few params, zend_parse_parameters will
   // reject it, but we don't want this function boxing random slots from the
   // stack
-  int32_t numArgs = std::min(ar->numArgs(), ar->m_func->numParams());
+  int32_t numArgs = std::min(ar->numArgs(), int(ar->m_func->numParams()));
   TypedValue* args = (TypedValue*)ar - 1;
   for (int32_t i = 0; i < numArgs; ++i) {
     TypedValue* arg = args-i;
@@ -117,4 +117,3 @@ TypedValue* zend_wrap_func(ActRec* ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -46,6 +46,13 @@ void* reader(void* that) {
   // ar2: a mock actrec, requires a Func, which can't be builtin.
   Unit u;
   Func f(u, 1, nullptr, 1, 1, 0, 0, sd, AttrNone, true, nullptr, 0);
+  { // Avoiding using FRIEND_TEST; instead, breaking encapsulation like the
+    // JIT does in order to say: f.m_paramCounts |= 1 (non-variadic)
+    auto paramCounts = reinterpret_cast<uint32_t*>(
+      reinterpret_cast<char*>(&f) + Func::paramCountsOff());
+    *paramCounts |= 1;
+  }
+
   ActRec ar2;
   ar2.m_sfp = nullptr;
   ar2.m_savedRip = 0xdeadbeef;

@@ -187,7 +187,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       a.    subq   (int(sizeof(Cell)), rVmSp);
       a.    incl   (eax);
       emitStoreUninitNull(a, 0, rVmSp);
-      a.    cmpl   (numNonVariadicParams, eax);
+      a.    cmpl   (int(numNonVariadicParams), eax);
       a.    jl8    (loopTop);
       if (func->hasVariadicCaptureParam()) {
         emitStoreTVType(a, KindOfArray, rVmSp[-sizeof(Cell) + TVOFF(m_type)]);

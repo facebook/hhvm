@@ -5510,7 +5510,13 @@ void CodeGenerator::emitLdRaw(IRInstruction* inst, size_t extraOff) {
 
   switch (inst->extra<RawMemData>()->info().size) {
     case sz::byte:  m_as.loadzbl(src, r32(destReg)); break;
-    case sz::dword: m_as.loadl(src, r32(destReg)); break;
+    case sz::dword:
+      m_as.loadl(src, r32(destReg));
+      if (inst->extra<RawMemData>()->type == RawMemData::FuncNumParams) {
+        // See Func::finishedEmittingParams and Func::numParams for rationale
+        m_as.shrl(0x1, r32(destReg));
+      }
+      break;
     case sz::qword: m_as.loadq(src, destReg); break;
     default:        not_implemented();
   }

@@ -51,7 +51,7 @@ const RawMemData::Info& RawMemData::info() const {
     {c_Continuation::stateOff(),  sz::byte,  JIT::Type::Int},
     {CONTOFF(m_index),            sz::qword, JIT::Type::Int},
     {StringData::sizeOff(),       sz::dword, JIT::Type::Int},
-    {Func::numParamsOff(),        sz::dword, JIT::Type::Int},
+    {Func::paramCountsOff(),      sz::dword, JIT::Type::Int},
   };
   static_assert(sizeof infos / sizeof infos[0] == kNumTypes,
                 "Incorrect size of infos array");

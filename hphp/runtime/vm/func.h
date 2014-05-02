@@ -220,7 +220,7 @@ struct Func {
 
   bool hasVariadicCaptureParam() const {
 #ifdef DEBUG
-    assert(((bool) (m_attrs & AttrVariadicParam)) ==
+    assert(bool(m_attrs & AttrVariadicParam) ==
            (numParams() && params()[numParams() - 1].isVariadic()));
 #endif
     return m_attrs & AttrVariadicParam;
@@ -334,12 +334,16 @@ struct Func {
     return offsetof(SharedData, m_base);
   }
   char &maybeIntercepted() const { return m_maybeIntercepted; }
-  int numParams() const { return m_numParams; }
+  uint32_t numParams() const {
+    assert(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
+    assert((m_paramCounts >> 1) == params().size());
+    return (m_paramCounts) >> 1;
+  }
 
-  int numNonVariadicParams() const {
-    assert(m_numNonVariadicParams ==
-           (hasVariadicCaptureParam() ? (m_numParams - 1) : (m_numParams)));
-    return m_numNonVariadicParams;
+  uint32_t numNonVariadicParams() const {
+    assert(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
+    assert((m_paramCounts >> 1) == params().size());
+    return (m_paramCounts - 1) >> 1;
   }
   const ParamInfoVec& params() const { return shared()->m_params; }
   int numLocals() const { return shared()->m_numLocals; }
@@ -438,7 +442,7 @@ struct Func {
     return m_prologueTable[index];
   }
   int numPrologues() const {
-    return getMaxNumPrologues(m_numParams);
+    return getMaxNumPrologues(numParams());
   }
   static int getMaxNumPrologues(int numParams) {
     // maximum number of prologues is numParams+2. The extra 2 are for
@@ -451,7 +455,7 @@ struct Func {
   void resetPrologues() {
     // Useful when killing code; forget what we've learned about the contents
     // of the translation cache.
-    initPrologues(m_numParams);
+    initPrologues(numParams());
   }
 
   const NamedEntity* getNamedEntity() const {
@@ -483,7 +487,7 @@ public: // Offset accessors for the translator.
   X(attrs);
   X(unit);
   X(cls);
-  X(numParams);
+  X(paramCounts);
   X(refBitVal);
   X(fullName);
   X(prologueTable);
@@ -549,6 +553,7 @@ private:
   void initPrologues(int numParams);
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
+  void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
   void allocVarId(const StringData* name);
   const SharedData* shared() const { return m_shared.get(); }
   SharedData* shared() { return m_shared.get(); }
@@ -588,8 +593,10 @@ private:
   uint64_t m_refBitVal{0};
   Unit* m_unit;
   SharedDataPtr m_shared;
-  int m_numParams{0};
-  int m_numNonVariadicParams{0};
+  // Initialized by Func::finishedEmittingParams, the least significant bit
+  // is 1 if the last param is not variadic; the 31 most significant bits
+  // are the total number of params (including the variadic param)
+  uint32_t m_paramCounts{0};
   Attr m_attrs;
   // This must be the last field declared in this structure
   // and the Func class should not be inherited from.

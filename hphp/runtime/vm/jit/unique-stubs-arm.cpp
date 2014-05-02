@@ -129,7 +129,9 @@ void emitFuncPrologueRedispatch(UniqueStubs& us) {
   a.  Ldr  (x0, rStashedAR[AROFF(m_func)]);
   a.  Ldr  (w1, rStashedAR[AROFF(m_numArgsAndFlags)]);
   a.  And  (w1, w1, 0x1fffffff);
-  a.  Ldr  (w2, x0[Func::numParamsOff()]);
+  a.  Ldr  (w2, x0[Func::paramCountsOff()]);
+  // See Func::finishedEmittingParams and Func::numParams for rationale
+  a.  Lsr  (w2, w2, 0x1);
 
   // If we passed more args than declared, jump to the numParamsCheck.
   a.  Cmp  (w2, w1);

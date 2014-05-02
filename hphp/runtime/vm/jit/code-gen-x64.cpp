@@ -471,7 +471,7 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                                         TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
-    emitEphemeralServiceReq(mcg->code.stubs(),
+    emitEphemeralServiceReq(m_stubsCode,
                             mcg->getFreeStub(),
                             REQ_BIND_JMPCC_FIRST,
                             patchAddr,
@@ -1917,7 +1917,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
     [&](ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
       auto const destSR = m_mcg->tx().getSrcRec(destSK);
-      destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
+      destSR->emitFallbackJump(m_mainCode, ccNegate(cc));
     });
 }
 
@@ -2575,7 +2575,7 @@ void CodeGenerator::emitReqBindAddr(TCA& dest,
                                     SrcKey sk) {
   mcg->setJmpTransID((TCA)&dest);
 
-  dest = emitServiceReq(mcg->code.stubs(), REQ_BIND_ADDR,
+  dest = emitServiceReq(m_stubsCode, REQ_BIND_ADDR,
                         &dest, sk.toAtomicInt());
 }
 
@@ -2617,7 +2617,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    cmpq(data->cases - 2, indexReg);
       mcg->backEnd().prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
-        mcg->code.stubs(),
+        m_stubsCode,
         mcg->getFreeStub(),
         REQ_BIND_JMPCC_SECOND,
         m_as.frontier(),
@@ -2943,7 +2943,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
 
-  emitServiceReq(mcg->code.stubs(), REQ_RETRANSLATE_OPT,
+  emitServiceReq(m_mainCode, REQ_RETRANSLATE_OPT,
                  SrcKey(curFunc(), extra->offset, resumed()).toAtomicInt(),
                  extra->transId);
 }
@@ -3637,8 +3637,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = m_curInst->marker().sk();
   bool isImmutable = func->isConst(Type::Func);
   const Func* funcd = isImmutable ? func->funcVal() : nullptr;
-  assert(m_as.base() == m_mcg->code.main().base());
-  int32_t adjust = emitBindCall(m_mcg->code.main(), m_mcg->code.stubs(),
+  assert(m_as.base() == m_mainCode.base());
+  int32_t adjust = emitBindCall(m_mainCode, m_stubsCode,
                                 srcKey, funcd, numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);
@@ -4492,7 +4492,7 @@ void CodeGenerator::emitSideExitGuard(Type type,
     type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken, resumed());
-      emitBindSideExit(this->m_mainCode, this->m_stubsCode, ccNegate(cc), sk);
+      emitBindSideExit(m_mainCode, m_stubsCode, ccNegate(cc), sk);
     });
 }
 

@@ -11,7 +11,7 @@ SRC= json.ml \
      printSignal.ml ttyColor.ml \
      utils.ml \
      lock.ml wwwroot.ml \
-     pidLog.ml fork.ml
+     pidLog.ml fork.ml trie.ml \
 
 INCLUDEDIRS=
 

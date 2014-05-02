@@ -158,6 +158,12 @@ let rec main args retries =
         let ic, oc = connect args.root in
         ServerMsg.cmd_to_channel oc (ServerMsg.SHOW classname);
         print_all ic
+    | MODE_SEARCH query ->
+        let ic, oc = connect args.root in
+        ServerMsg.cmd_to_channel oc (ServerMsg.SEARCH query);
+        let results = Marshal.from_channel ic in
+        ClientSearch.go results args.output_json;
+        exit 0
     | MODE_UNSPECIFIED -> assert false
   with
   | Server_initializing ->

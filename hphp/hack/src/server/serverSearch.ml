@@ -7,16 +7,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
+
 open Utils
 
-val empty_file_info: FileInfo.t
-
-val go:
-  Worker.t list option ->
-  bool ->
-  FileInfo.t SMap.t ->
-  get_next:(unit -> string list) ->
-  FileInfo.t SMap.t * Utils.error list * SSet.t
-
-(* used by hack build *)
-val legacy_php_file_info: (string -> FileInfo.t) ref
+let go query oc =
+  let results = SearchService.MasterApi.query query in
+  Marshal.to_channel oc results [];
+  flush oc

@@ -14,7 +14,7 @@ SRC= serverArgs.ml serverEnv.ml \
  serverAutoComplete.ml serverEnvBuild.ml serverHealth.ml serverSign.ml \
  serverInit.ml serverConvert.ml findRefsService.ml serverFindRefs.ml \
  serverRefactor.ml serverInferType.ml \
- fileOutline.ml serverFileOutline.ml
+ fileOutline.ml serverFileOutline.ml serverSearch.ml
 
 
 INCLUDEDIRS=$(TOP)/utils \

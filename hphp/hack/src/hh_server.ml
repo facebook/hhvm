@@ -253,6 +253,8 @@ end = struct
        *)
       output_string oc ("PROLOG_READY:" ^path);
       flush oc
+    | ServerMsg.SEARCH query ->
+        ServerSearch.go query oc
 end
 
 (*****************************************************************************)

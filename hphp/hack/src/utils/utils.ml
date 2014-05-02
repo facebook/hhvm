@@ -382,3 +382,10 @@ let cat_no_fail filename =
 let nl_regexp = Str.regexp "[\r\n]"
 let split_lines = Str.split nl_regexp
 
+let str_starts_with long short =
+  try
+    let long = String.sub long 0 (String.length short) in
+    long = short
+  with Invalid_argument _ ->
+    false
+

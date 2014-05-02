@@ -7,7 +7,7 @@ TARGET=lib
 SRC= ast.ml \
   namespace_env.ml namespaces.ml \
   lexing_modes.ml preprocessor.ml parser_heap.ml \
-	lexer_hack.ml parser_hack.ml \
+	lexer_hack.ml parser_hack.ml searchService.ml \
   parsing_service.ml
 
 INCLUDEDIRS= $(TOP)/utils \

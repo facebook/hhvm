@@ -26,3 +26,9 @@ val from_file : string -> Ast.program
 
 (* Same as from_file, but returns the list of comments as well as the tree *)
 val from_file_with_comments : string -> comments * Ast.program
+
+(*
+ * Same as from file with comments, except returns errors instead of
+ * throwing an exception
+ *)
+val from_file_with_errors : string -> comments * Ast.program * (Pos.t * string) list

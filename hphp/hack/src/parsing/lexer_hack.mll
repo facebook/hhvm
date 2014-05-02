@@ -470,6 +470,7 @@ and header = parse
   | "<?hh"                      { `default_mode }
   | "<?hh" ws* "//"             { `explicit_mode }
   | "<?php" ws* "//" ws* "decl" { `php_decl_mode }
+  | "<?php"                     { `php_mode }
   | _                           { `error }
 
 and ignore_body = parse

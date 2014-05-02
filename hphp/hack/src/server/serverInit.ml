@@ -13,13 +13,14 @@ open ServerEnv
 
 (* Initialization of the server *)
 let init_hack genv env get_next =
-  let files_info, errorl1, failed1 =
-    Parsing_service.go genv.workers env.files_info ~get_next in
-
   let is_check_mode =
     ServerArgs.check_mode genv.options &&
     ServerArgs.convert genv.options = None
   in
+  
+  let files_info, errorl1, failed1 =
+    Parsing_service.go genv.workers is_check_mode env.files_info ~get_next in
+
   if not is_check_mode then begin
     Typing_deps.update_files genv.workers files_info;
   end;

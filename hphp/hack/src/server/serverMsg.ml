@@ -74,6 +74,7 @@ type command =
 | OUTLINE of string
 | INFER_TYPE of string * int * int (* filename, line, char *)
 | REFACTOR of refactor_action
+| SEARCH of string
 
 let cmd_to_channel (oc:out_channel) (cmd:command): unit =
   Printf.fprintf oc "%s\n" Build_id.build_id_ohai;

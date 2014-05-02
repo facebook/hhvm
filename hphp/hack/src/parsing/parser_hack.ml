@@ -388,50 +388,53 @@ let rec entry ~fail content =
   let env = init_env lb in
   let ast = header env in
   if fail && !(env.errors) <> []
-  then raise (Utils.Error (filter_duplicate_errors [] !(env.errors)));
-  if not !is_hh_file
-  then raise (Utils.Error [Pos.none, "PHP FILE"]);
+  then (env.errors := (filter_duplicate_errors [] !(env.errors)))
+  else if not !is_hh_file
+  then env.errors := [Pos.none, "PHP FILE"];
   let comments = !L.comment_list in
   L.comment_list := [];
-  comments, ast
+  comments, ast, !(env.errors)
 
 (*****************************************************************************)
 (* Hack headers (strict, decl, partial) *)
 (*****************************************************************************)
 
 and header env =
-  match get_header env with
-  | None ->
-      []
-  | Some Ast.Mdecl ->
+  let file_type, head = get_header env in
+  match file_type, head with
+  | Ast.PhpFile, _
+  | _, Some Ast.Mdecl ->
       let env = { env with mode = Ast.Mdecl } in
       let attr = SMap.empty in
       let result = ignore_toplevel ~attr [] env (fun x -> x = Teof) in
       expect env Teof;
-      is_hh_file := true;
+      if head = Some Ast.Mdecl then is_hh_file := true;
       result
-  | Some mode ->
+  | _, Some mode ->
       let result = toplevel [] { env with mode = mode } (fun x -> x = Teof) in
       expect env Teof;
       is_hh_file := true;
       result
+  | _ ->
+      []
 
 and get_header env =
   match L.header env.lb with
-  | `error -> None
-  | `default_mode -> Some Ast.Mpartial
-  | `php_decl_mode -> Some Ast.Mdecl
+  | `error -> Ast.HhFile, None
+  | `default_mode -> Ast.HhFile, Some Ast.Mpartial
+  | `php_decl_mode -> Ast.PhpFile, Some Ast.Mdecl
+  | `php_mode -> Ast.PhpFile, None
   | `explicit_mode ->
       let _token = L.token env.lb in
       (match Lexing.lexeme env.lb with
-      | "strict" when !(Silent.is_silent_mode) || !(Ide.is_ide_mode) -> Some Ast.Mpartial
-      | "strict" -> Some Ast.Mstrict
-      | ("decl"|"only-headers") -> Some Ast.Mdecl
-      | "partial" -> Some Ast.Mpartial
+      | "strict" when !(Silent.is_silent_mode) || !(Ide.is_ide_mode) -> Ast.HhFile, Some Ast.Mpartial
+      | "strict" -> Ast.HhFile, Some Ast.Mstrict
+      | ("decl"|"only-headers") -> Ast.HhFile, Some Ast.Mdecl
+      | "partial" -> Ast.HhFile, Some Ast.Mpartial
       | _ ->
           error env
  "Incorrect comment; possible values include strict, decl, partial or empty";
-          Some Ast.Mdecl
+          Ast.HhFile, Some Ast.Mdecl
       )
 
 (*****************************************************************************)
@@ -3304,12 +3307,24 @@ and namespace_use_list env acc =
 (* Helper *)
 (*****************************************************************************)
 
-let program ?(fail=true) content =
-  snd (entry ~fail content)
+let ensure_no_errors errors =
+  if errors <> []
+  then raise (Utils.Error errors)
+  else ()
 
-let from_file_with_comments filename =
+let program ?(fail=true) content =
+  let _, ast, errors = (entry ~fail content) in
+  ensure_no_errors errors;
+  ast 
+
+let from_file_with_errors filename =
   let content = Utils.cat filename in
   entry ~fail:true content
+
+let from_file_with_comments filename =
+  let comments, ast, errors = from_file_with_errors filename in
+  ensure_no_errors errors;
+  comments, ast
 
 let from_file filename =
   snd (from_file_with_comments filename)

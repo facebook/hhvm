@@ -95,7 +95,7 @@ let get_defs ast =
     | Ast.Stmt _ -> acc1, acc2, acc3, acc4
   end ([], [], [], []) ast
 
-let parse_file fn =
+let parse_file check_mode fn =
   let content = hh_read_file fn in
   if String.length content = 0
   then begin
@@ -108,8 +108,11 @@ let parse_file fn =
       Ast.mtime := (Unix.stat fn).Unix.st_mtime;
       Ast.mode := Ast.Mstrict;
       Parser_hack.is_hh_file := false;
-      let comments, ast = Parser_hack.from_file_with_comments fn in
+      let comments, ast, errors = Parser_hack.from_file_with_errors fn in
       let ast = Namespaces.elaborate_defs ast in
+      if not check_mode then SearchService.WorkerApi.update fn ast;
+      if errors <> []
+      then raise (Utils.Error errors);
       AddDeps.program ast;
       let funs, classes, types, consts = get_defs ast in
       Parser_heap.ParserHeap.add fn ast;
@@ -130,9 +133,9 @@ let legacy_php_file_info = ref (fun fn ->
  * errorl is a list of errors
  * error_files is SSet.t of files that we failed to parse
  *)
-let parse (acc, errorl, error_files, php_files) fn =
+let parse check_mode (acc, errorl, error_files, php_files) fn =
   try
-    let defs = parse_file fn in
+    let defs = parse_file check_mode fn in
     let acc = SMap.add fn defs acc in
     acc, errorl, error_files, php_files
   with
@@ -165,13 +168,13 @@ let merge_parse
   SSet.union files1 files2,
   SSet.union pfiles1 pfiles2
 
-let parse_files acc fnl =
-  List.fold_left parse acc fnl
+let parse_files check_mode acc fnl =
+  List.fold_left (parse check_mode) acc fnl
 
-let parse_parallel workers get_next =
+let parse_parallel workers check_mode get_next =
   MultiWorker.call
       workers
-      ~job:parse_files
+      ~job:(parse_files check_mode)
       ~neutral:neutral
       ~merge:merge_parse
       ~next:get_next
@@ -180,12 +183,14 @@ let parse_parallel workers get_next =
 (* Main entry points *)
 (*****************************************************************************)
 
-let go workers files ~get_next =
+let go workers check_mode files ~get_next =
   let fast, errorl, failed_parsing, php_files =
-    parse_parallel workers get_next in
+    parse_parallel workers check_mode get_next in
   let fast = SSet.fold begin fun fn acc ->
     if SMap.mem fn files
     then SMap.add fn empty_file_info acc
     else acc
   end php_files fast in
+  if not check_mode
+  then SearchService.MasterApi.update_search_index (SMap.keys fast) php_files;
   fast, errorl, failed_parsing

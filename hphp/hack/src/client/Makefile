@@ -9,7 +9,7 @@ SRC= clientEnv.ml clientExceptions.ml  clientUtils.ml colorFile.ml \
   clientArgs.ml \
   clientBuild.ml clientProlog.ml clientStatus.ml clientCheckStatus.ml \
   clientRestart.ml clientFindRefs.ml clientOutline.ml clientRefactor.ml \
-  clientCheck.ml
+  clientSearch.ml clientCheck.ml
 
 
 INCLUDEDIRS=$(TOP)/utils \

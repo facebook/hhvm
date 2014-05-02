@@ -24,6 +24,10 @@ let mtime = ref 0.0
 (* Parsing modes *)
 (*****************************************************************************)
 
+type file_type =
+  | PhpFile
+  | HhFile
+
 type mode =
   | Mdecl    (* just declare signatures, don't check anything *)
   | Mstrict  (* check everthing! *)

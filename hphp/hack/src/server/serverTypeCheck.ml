@@ -160,9 +160,11 @@ let remove_failed fast failed =
 
 let rec parsing genv env =
   Parser_heap.ParserHeap.remove_batch env.failed_parsing;
+  SearchService.SearchUpdates.remove_batch env.failed_parsing;
+  SearchService.SearchKeys.remove_batch env.failed_parsing;
   SharedMem.collect();
   let get_next = Bucket.make (SSet.elements env.failed_parsing) in
-  Parsing_service.go genv.workers env.files_info ~get_next
+  Parsing_service.go genv.workers false env.files_info ~get_next
 
 (*****************************************************************************)
 (* At any given point in time, we want to know what each file defines.

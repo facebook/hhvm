@@ -353,7 +353,7 @@
 #define ENABLE_CHROOT_FUNC 1
 
 /* */
-/* #undef ENABLE_GD_TTF */
+#define ENABLE_GD_TTF 1
 
 /* */
 /* #undef ENCHANT_VERSION_STRING */
@@ -711,19 +711,19 @@
 #define HAVE_GCVT 1
 
 /* */
-/* #undef HAVE_GD_BUNDLED */
-
+#define HAVE_GD_BUNDLED 1
+ 
 /* */
-/* #undef HAVE_GD_CACHE_CREATE */
-
+#define HAVE_GD_CACHE_CREATE 1
+ 
 /* */
-/* #undef HAVE_GD_FREETYPE */
-
+#define HAVE_GD_FREETYPE 1
+ 
 /* */
-/* #undef HAVE_GD_JPG */
-
+#define HAVE_GD_JPG 1
+ 
 /* */
-/* #undef HAVE_GD_PNG */
+#define HAVE_GD_PNG 1
 
 /* */
 /* #undef HAVE_GD_WEBP */

@@ -61,7 +61,13 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 #else
 
 #include "gdcache.h"
+
+#ifdef __APPLE__
 #include <freetype/config/ftheader.h>
+#else
+#include <freetype2/config/ftheader.h>
+#endif
+
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
@@ -338,7 +344,7 @@ static int fontTest (void *element, void *key)
 {
 	font_t *a = (font_t *) element;
 	fontkey_t *b = (fontkey_t *) key;
-	
+
 	if (strcmp (a->fontlist, b->fontlist) == 0) {
 		switch (b->preferred_map) {
 			case gdFTEX_Unicode:

@@ -192,12 +192,6 @@ struct ArrayIter {
     return ad->getValueRef(m_pos).asTypedValue();
   }
 
-  /*
-   * Used by the ext_zend_compat layer.
-   * Identical to nvSecond but the output is boxed.
-   */
-  RefData* zSecond();
-
   bool hasArrayData() const {
     return !((intptr_t)m_data & 1);
   }

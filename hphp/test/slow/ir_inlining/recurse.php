@@ -1,7 +1,7 @@
 <?php
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function fun($x) {
-  fun($x);
+function f($x) {
+  f($x);
 }
-fun(0);
+f(0);

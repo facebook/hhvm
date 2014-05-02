@@ -216,21 +216,27 @@ struct ArrayInit {
   ArrayData *create() {
     ArrayData *ret = m_data;
     m_data = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return ret;
   }
 
   Array toArray() {
     auto ptr = m_data;
     m_data = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
   Variant toVariant() {
     auto ptr = m_data;
     m_data = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return Variant(ptr, Variant::ArrayInitCtor{});
   }
 
@@ -324,21 +330,27 @@ public:
   Variant toVariant() {
     auto ptr = m_vec;
     m_vec = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return Variant(ptr, Variant::ArrayInitCtor{});
   }
 
   Array toArray() {
     ArrayData* ptr = m_vec;
     m_vec = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
   ArrayData *create() {
     auto ptr = m_vec;
     m_vec = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return ptr;
   }
 

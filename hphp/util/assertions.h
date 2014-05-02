@@ -147,27 +147,28 @@ class FailedAssertion : public std::exception {
   assert_log_impl(e, assert_throw_fail_impl(e), l)
 
 #undef assert
-#ifndef NDEBUG
+#if defined(ALWAYS_ASSERT) || !defined(NDEBUG)
 #define assert(e) always_assert(e)
 #define assert_log(e, l) always_assert_log(e, l)
 #define assert_flog(e, ...) always_assert_flog(e, __VA_ARGS__)
 #define assert_throw(e) always_assert_throw(e)
 #define assert_throw_log(e, l) always_assert_throw_log(e, l)
+const bool do_assert = true;
 #else
 #define assert(e) static_cast<void>(0)
 #define assert_log(e, l) static_cast<void>(0)
 #define assert_flog(e, ...) static_cast<void>(0)
 #define assert_throw(e) static_cast<void>(0)
 #define assert_throw_log(e, l) static_cast<void>(0)
+const bool do_assert = false;
 #endif
 
-const bool do_assert =
-#ifdef NDEBUG
-  false
+// debug_assert() is for assertions that should only be done in debug mode
+#ifdef DEBUG
+#define debug_assert(e) assert(e)
 #else
-  true
+#define debug_assert(e) static_cast<void>(0)
 #endif
-  ;
 
 //////////////////////////////////////////////////////////////////////
 

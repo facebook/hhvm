@@ -80,7 +80,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   assert(ad->m_count == 0);
   assert(ad->m_used == oldSize);
   assert(ad->m_cap == cap);
-  assert(ad->m_tableMask = mask);
+  assert(ad->m_tableMask == mask);
   assert(ad->m_hLoad == oldSize);
   assert(ad->m_nextKI == oldSize);
   // Can't checkInvariants yet, since we haven't populated the payload.

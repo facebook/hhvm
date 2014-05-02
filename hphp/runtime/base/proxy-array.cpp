@@ -24,7 +24,14 @@
 // FIXME: get this from the proper header.
 // We need to move proxy-array.cpp to ext_zend_compat/hhvm before the Zend headers
 // can be included.
+#undef ZVAL_PTR_DTOR
+#ifdef DEBUG
 extern "C" void _zval_ptr_dtor_wrapper(HPHP::RefData **zval_ptr);
+#define ZVAL_PTR_DTOR _zval_ptr_dtor_wrapper
+#else
+extern "C" void _zval_ptr_dtor(HPHP::RefData **zval_ptr);
+#define  ZVAL_PTR_DTOR _zval_ptr_dtor
+#endif
 
 namespace HPHP {
 
@@ -33,7 +40,7 @@ namespace HPHP {
 // can give conflicting declaration warnings when it is included from a file
 // which also includes zend_variables.h.
 ProxyArray::DtorFunc ProxyArray::ZvalPtrDtor =
-  (ProxyArray::DtorFunc)_zval_ptr_dtor_wrapper;
+  (ProxyArray::DtorFunc)ZVAL_PTR_DTOR;
 
 //////////////////////////////////////////////////////////////////////
 

@@ -283,7 +283,7 @@ void APCLocalArray::NvGetKey(const ArrayData* ad,
 
 ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad) {
   auto a = asSharedArray(ad);
-  auto ret = a->loadElems();
+  auto ret = a->loadElems()->escalateForSort();
   assert(!ret->isStatic());
   return ret;
 }

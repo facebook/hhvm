@@ -3477,7 +3477,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
               throwUnknownInput();
             }
           }
-          if ((m_mode == TransKind::Profile || m_mode == TransKind::Optimize) &&
+          if ((m_mode == TransKind::Profile ||
+               m_mode == TransKind::Optimize) &&
               t.m_numOpcodes > 0) {
             // We want to break blocks at every instrution that consumes a ref,
             // so that we avoid side exits.  Therefore, instructions consume ref
@@ -3760,8 +3761,7 @@ bool instrMustInterp(const NormalizedInstruction& inst) {
   }
 }
 
-void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
-                            bool resumed, const Func* func) {
+void Translator::traceStart(TransContext context) {
   assert(!m_irTrans);
 
   FTRACE(1, "{}{:-^40}{}\n",
@@ -3769,7 +3769,7 @@ void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
          " HHIR during translation ",
          color(ANSI_COLOR_END));
 
-  m_irTrans.reset(new IRTranslator(initBcOffset, initSpOffset, resumed, func));
+  m_irTrans.reset(new IRTranslator(context));
 }
 
 void Translator::traceEnd() {
@@ -3898,7 +3898,7 @@ Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
                             RegionBlacklist& toInterp) {
-  Timer _t(Timer::translateRegion);
+  const Timer translateRegionTimer(Timer::translateRegion);
 
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
@@ -3916,14 +3916,16 @@ Translator::translateRegion(const RegionDesc& region,
 
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   for (auto b = 0; b < region.blocks.size(); b++) {
-    auto const& block = region.blocks[b];
-    RegionDesc::BlockId blockId = block->id();
-    SrcKey sk = block->start();
+    auto const& block  = region.blocks[b];
+    auto const blockId = block->id();
+    auto sk            = block->start();
+    auto typePreds     = makeMapWalker(block->typePreds());
+    auto byRefs        = makeMapWalker(block->paramByRefs());
+    auto refPreds      = makeMapWalker(block->reffinessPreds());
+    auto knownFuncs    = makeMapWalker(block->knownFuncs());
+
     const Func* topFunc = nullptr;
-    auto typePreds  = makeMapWalker(block->typePreds());
-    auto byRefs     = makeMapWalker(block->paramByRefs());
-    auto refPreds   = makeMapWalker(block->reffinessPreds());
-    auto knownFuncs = makeMapWalker(block->knownFuncs());
+    ht.setProfTransID(getTransId(blockId));
 
     OffsetSet succOffsets;
     if (ht.genMode() == IRGenMode::CFG) {

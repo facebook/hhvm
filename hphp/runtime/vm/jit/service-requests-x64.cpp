@@ -273,8 +273,6 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
     as.  ret();
   }
 
-  // TODO(2796856): we should record an OpServiceRequest pseudo-bytecode here.
-
   if (debug) {
     // not reached
     as.ud2();

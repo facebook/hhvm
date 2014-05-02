@@ -23,11 +23,12 @@
 
 #include "folly/ScopeGuard.h"
 #include "hphp/util/arena.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/base/memory-manager.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -178,7 +179,7 @@ class IRUnit {
   TRACE_SET_MOD(hhir);
 
 public:
-  explicit IRUnit(Offset initialBcOffset);
+  explicit IRUnit(TransContext context);
 
   /*
    * Create an IRInstruction with lifetime equivalent to this IRUnit.
@@ -293,12 +294,13 @@ public:
    */
   IRInstruction* mov(SSATmp* dst, SSATmp* src, BCMarker marker);
 
-  Arena&   arena()               { return m_arena; }
-  uint32_t numTmps() const       { return m_nextOpndId; }
-  uint32_t numBlocks() const     { return m_nextBlockId; }
-  uint32_t numInsts() const      { return m_nextInstId; }
-  CSEHash& constTable()          { return m_constTable; }
-  uint32_t bcOff() const         { return m_bcOff; }
+  const TransContext& context() const { return m_context; }
+  Arena&   arena()                    { return m_arena; }
+  uint32_t numTmps() const            { return m_nextOpndId; }
+  uint32_t numBlocks() const          { return m_nextBlockId; }
+  uint32_t numInsts() const           { return m_nextInstId; }
+  CSEHash& constTable()               { return m_constTable; }
+  uint32_t bcOff() const              { return m_context.initBcOffset; }
 
   // This should return a const Block*. t3538578
   Block*   entry() const         { return m_entry; }
@@ -318,10 +320,10 @@ private:
 private:
   Arena m_arena; // contains Block, IRInstruction, and SSATmp objects
   CSEHash m_constTable; // DefConst's for each unique constant in this IR
-  uint32_t m_nextBlockId;
-  uint32_t m_nextOpndId;
-  uint32_t m_nextInstId;
-  uint32_t m_bcOff; // bytecode offset where this unit starts
+  TransContext const m_context;
+  uint32_t m_nextBlockId{0};
+  uint32_t m_nextOpndId{0};
+  uint32_t m_nextInstId{0};
   Block* m_entry; // entry point
 
   // Information collected for optimization passes

@@ -72,10 +72,7 @@ namespace HPHP {  namespace JIT {
  * reoptimize() entry point.
  */
 struct IRBuilder {
-  IRBuilder(Offset initialBcOffset,
-            Offset initialSpOffsetFromFp,
-            IRUnit&,
-            const Func* func);
+  IRBuilder(Offset initialSpOffsetFromFp, IRUnit&, const Func*);
   ~IRBuilder();
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
@@ -83,6 +80,7 @@ struct IRBuilder {
 
   IRUnit& unit() const { return m_unit; }
   FrameState& state() { return m_state; }
+  BCMarker marker() const { return m_state.marker(); }
   const Func* curFunc() const { return m_state.func(); }
   int32_t spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }

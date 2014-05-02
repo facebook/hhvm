@@ -79,11 +79,9 @@ TRACE_SET_MOD(hhir);
     }                                                   \
   } while (0)
 
-IRTranslator::IRTranslator(Offset bcOff, Offset spOff, bool resumed,
-                           const Func* curFunc)
-  : m_hhbcTrans(bcOff, spOff, resumed, curFunc)
-{
-}
+IRTranslator::IRTranslator(TransContext context)
+  : m_hhbcTrans{context}
+{}
 
 void IRTranslator::checkType(const JIT::Location& l,
                              const JIT::RuntimeType& rtt,

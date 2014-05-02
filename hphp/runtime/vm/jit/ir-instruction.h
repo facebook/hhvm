@@ -24,37 +24,40 @@
 namespace HPHP { namespace JIT {
 
 /*
- * BCMarker holds the location of a specific bytecode instruction, along with
- * the offset from vmfp to vmsp at the beginning of the instruction. Every
- * IRInstruction has one to keep track of which bytecode instruction it came
- * from.
+ * BCMarker holds the location of a specific bytecode instruction,
+ * along with the offset from vmfp to vmsp at the beginning of the
+ * instruction.  Every IRInstruction has a marker to keep track of
+ * which bytecode instruction it came from.  If we're doing an
+ * optimized translation, it also holds the TransID for the profiling
+ * translation associated with this piece of code.
  */
 struct BCMarker {
   SrcKey      m_sk;
-  int32_t     m_spOff;
+  int32_t     m_spOff{0};
+  TransID     m_profTransID{kInvalidTransID};
 
   /*
    * This is for use by test code that needs to provide BCMarkers but is not
    * deriving them from an actual bytecode region. It is always valid().
    */
   static BCMarker Dummy() {
-    return BCMarker(SrcKey(DummyFuncId, 0, false), 0);
+    return BCMarker{SrcKey(DummyFuncId, 0, false), 0, kInvalidTransID};
   }
 
-  BCMarker()
-    : m_sk()
-    , m_spOff(0)
-  {}
+  explicit BCMarker() = default;
 
-  BCMarker(SrcKey sk, int32_t sp)
+  explicit BCMarker(SrcKey sk, int32_t sp, TransID tid)
     : m_sk(sk)
-    , m_spOff(sp)
+    , m_spOff{sp}
+    , m_profTransID{tid}
   {
     assert(valid());
   }
 
   bool operator==(BCMarker b) const {
-    return b.m_sk == m_sk && b.m_spOff == m_spOff;
+    return b.m_sk == m_sk &&
+           b.m_spOff == m_spOff &&
+           b.m_profTransID == m_profTransID;
   }
   bool operator!=(BCMarker b) const { return !operator==(b); }
 

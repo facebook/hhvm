@@ -126,7 +126,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
                              TransIDVec* selectedVec) {
   auto region = std::make_shared<RegionDesc>();
   TransID tid    = triggerId;
-  TransID prevId = InvalidID;
+  TransID prevId = kInvalidTransID;
   selectedSet.clear();
   if (selectedVec) selectedVec->clear();
 
@@ -138,7 +138,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     if (blockRegion == nullptr) break;
 
     // If the debugger is attached, only allow single-block regions.
-    if (prevId != InvalidID && isDebuggerAttachedProcess()) {
+    if (prevId != kInvalidTransID && isDebuggerAttachedProcess()) {
       FTRACE(2, "selectHotTrace: breaking region at Translation {} "
              "because of debugger is attached\n", tid);
       break;
@@ -146,7 +146,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
 
     // Break if block is not the first and requires reffiness checks.
     // Task #2589970: fix translateRegion to support mid-region reffiness checks
-    if (prevId != InvalidID) {
+    if (prevId != kInvalidTransID) {
       auto nRefDeps = blockRegion->blocks[0]->reffinessPreds().size();
       if (nRefDeps > 0) {
         FTRACE(2, "selectHotTrace: breaking region because of refDeps ({}) at "
@@ -159,7 +159,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     // function body entry.  This is to prevent creating multiple
     // large regions containing the function body (starting at various
     // DV funclets).
-    if (prevId != InvalidID) {
+    if (prevId != kInvalidTransID) {
       const Func* func = profData->transFunc(tid);
       Offset  bcOffset = profData->transStartBcOff(tid);
       if (func->base() == bcOffset) {
@@ -170,7 +170,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       }
     }
 
-    if (prevId != InvalidID) {
+    if (prevId != kInvalidTransID) {
       auto sk = profData->transSrcKey(tid);
       if (profData->optimized(sk)) {
         FTRACE(2, "selectHotTrace: breaking region because next sk already "
@@ -183,7 +183,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     // the entire translation prevId.  This can only happen if the
     // execution of prevId takes a side exit that leads to the
     // execution of tid.
-    if (prevId != InvalidID) {
+    if (prevId != kInvalidTransID) {
       Op* lastInstr = profData->transLastInstr(prevId);
       const Unit* unit = profData->transFunc(prevId)->unit();
       OffsetSet succOffs = findSuccOffsets(lastInstr, unit);

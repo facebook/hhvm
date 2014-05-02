@@ -107,7 +107,7 @@ void RegionDesc::addArc(BlockId src, BlockId dst) {
 RegionDesc::BlockId RegionDesc::Block::s_nextId = -1;
 
 TransID getTransId(RegionDesc::BlockId blockId) {
-  return blockId >= 0 ? blockId : InvalidID;
+  return blockId >= 0 ? blockId : kInvalidTransID;
 }
 
 bool hasTransId(RegionDesc::BlockId blockId) {

@@ -105,8 +105,7 @@ void genCode(CodeBlock&              mainCode,
              const RegAllocInfo&     regs);
 
 struct CodeGenerator {
-  virtual ~CodeGenerator() {
-  }
+  virtual ~CodeGenerator() {}
   virtual Address cgInst(IRInstruction* inst) = 0;
 };
 

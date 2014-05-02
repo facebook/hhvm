@@ -425,7 +425,8 @@ void regionizeFunc(const Func*  func,
 void diffRegions(const RegionDesc& a, const RegionDesc& b);
 
 /*
- * Functions to map BlockIds to TransIDs.
+ * Functions to map BlockIds to the TransIDs used when the block was
+ * profiled.
  */
 bool    hasTransId(RegionDesc::BlockId blockId);
 TransID getTransId(RegionDesc::BlockId blockId);

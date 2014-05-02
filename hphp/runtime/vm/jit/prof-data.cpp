@@ -90,7 +90,7 @@ void PrologueToTransMap::add(FuncId funcId, int numArgs, TransID transId) {
 
 TransID PrologueToTransMap::get(FuncId funcId, int numArgs) const {
   auto pid = PrologueID(funcId, numArgs);
-  return folly::get_default(m_prologueIdToTransId, pid, InvalidID);
+  return folly::get_default(m_prologueIdToTransId, pid, kInvalidTransID);
 }
 
 
@@ -361,7 +361,7 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
     // in hhas (e.g. array_map) have complex DV funclets that get
     // retranslated for different types.  For those functions,
     // m_dvFuncletDB keeps the TransID for their first translation.
-    if (m_dvFuncletDB.get(funcId, nParams) == InvalidID) {
+    if (m_dvFuncletDB.get(funcId, nParams) == kInvalidTransID) {
       m_dvFuncletDB.add(funcId, nParams, transId);
     }
   }
@@ -393,7 +393,7 @@ TransID ProfData::addTransNonProf(TransKind kind, const SrcKey& sk) {
 PrologueCallersRec* ProfData::findPrologueCallersRec(const Func* func,
                                                      int nArgs) const {
   TransID tid = prologueTransId(func, nArgs);
-  if (tid == InvalidID) {
+  if (tid == kInvalidTransID) {
     assert(RuntimeOption::EvalJitPGOHotOnly && !(func->attrs() & AttrHot));
     return nullptr;
   }

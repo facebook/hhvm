@@ -219,13 +219,13 @@ static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *      2.2) select a region starting at this node and mark nodes/arcs as
  *           covered appropriately
  */
-void regionizeFunc(const Func*       func,
+void regionizeFunc(const Func* func,
                    MCGenerator* mcg,
-                   RegionVec&        regions) {
-  Timer _t(Timer::regionizeFunc);
+                   RegionVec& regions) {
+  const Timer rf_timer(Timer::regionizeFunc);
   assert(RuntimeOption::EvalJitPGO);
-  FuncId funcId = func->getFuncId();
-  ProfData* profData = mcg->tx().profData();
+  auto const funcId = func->getFuncId();
+  auto const profData = mcg->tx().profData();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
                mcg->getJmpToTransIDMap());
 
@@ -237,8 +237,8 @@ void regionizeFunc(const Func*       func,
            funcId, dotFileName);
   }
 
-  TransCFG::ArcPtrVec arcs = cfg.arcs();
-  std::vector<TransID>    nodes = cfg.nodes();
+  TransCFG::ArcPtrVec   arcs = cfg.arcs();
+  std::vector<TransID> nodes = cfg.nodes();
 
   std::sort(nodes.begin(), nodes.end(),
             [&](TransID tid1, TransID tid2) -> bool {

@@ -65,17 +65,21 @@ enum class IRGenMode {
  * made at this level.
  */
 struct HhbcTranslator {
-  HhbcTranslator(Offset startOffset,
-                 uint32_t initialSpOffsetFromFp,
-                 bool resumed,
-                 const Func* func);
+  explicit HhbcTranslator(TransContext context);
 
   // Accessors.
   IRBuilder& irBuilder() const { return *m_irb.get(); }
   IRUnit& unit() { return m_unit; }
 
-  // In between each emit* call, irtranslator indicates the new
-  // bytecode offset (or whether we're finished) using this API.
+  /*
+   * In between each emit* call, irtranslator indicates the new
+   * bytecode offset (or whether we're finished) using this API.
+   *
+   * Also updated is the id of the profiling translation for the code
+   * we're about to generate next, if there was one.  (Otherwise,
+   * kInvalidTransID.)
+   */
+  void setProfTransID(TransID);
   void setBcOff(Offset newOff, bool lastBcOff);
 
   void      setGenMode(IRGenMode mode);
@@ -252,6 +256,11 @@ struct HhbcTranslator {
                                 int32_t numParams,
                                 bool shouldFatal,
                                 SSATmp* extraSpill = nullptr);
+  void fpushObjMethodUnknown(SSATmp* obj,
+                             const StringData* methodName,
+                             int32_t numParams,
+                             bool shouldFatal,
+                             SSATmp* extraSpill);
   void emitFPushClsMethodF(int32_t numParams);
   SSATmp* emitAllocObjFast(const Class* cls);
   void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
@@ -909,13 +918,14 @@ private:
   };
 
 private:
+  const TransContext m_context;
   IRUnit m_unit;
   std::unique_ptr<IRBuilder> const m_irb;
-
   std::vector<BcState> m_bcStateStack;
 
-  // The first HHBC offset for this tracelet
-  const Offset m_startBcOff;
+  // The id of the profiling translation for the code we're currently
+  // generating, if there was one, otherwise kInvalidTransID.
+  TransID m_profTransID{kInvalidTransID};
 
   // True if we're on the last HHBC opcode that will be emitted for
   // this tracelet.

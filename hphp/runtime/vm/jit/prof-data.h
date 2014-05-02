@@ -28,9 +28,9 @@
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
 
+//////////////////////////////////////////////////////////////////////
 
 /**
  * A simple class of a growable number of profiling counters with
@@ -232,6 +232,8 @@ private:
                                          //                      TransID
 };
 
-} }
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

@@ -33,10 +33,10 @@ static TransIDSet findPredTrans(const SrcRec* sr,
 
   for (auto& inBr : sr->incomingBranches()) {
     TransID srcId = folly::get_default(jmpToTransID, inBr.toSmash(),
-      InvalidID);
+      kInvalidTransID);
     FTRACE(5, "findPredTrans: toSmash = {}   srcId = {}\n",
            inBr.toSmash(), srcId);
-    if (srcId != InvalidID) {
+    if (srcId != kInvalidTransID) {
       predSet.insert(srcId);
     }
   }

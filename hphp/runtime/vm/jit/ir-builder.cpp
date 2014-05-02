@@ -45,8 +45,7 @@ using Trace::Indent;
 
 TRACE_SET_MOD(hhir);
 
-IRBuilder::IRBuilder(Offset initialBcOffset,
-                     Offset initialSpOffsetFromFp,
+IRBuilder::IRBuilder(Offset initialSpOffsetFromFp,
                      IRUnit& unit,
                      const Func* func)
   : m_unit(unit)

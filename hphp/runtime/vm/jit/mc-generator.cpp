@@ -241,7 +241,8 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
   }
   SKTRACE(1, args.m_sk, "retranslate\n");
 
-  m_tx.setMode(profileSrcKey(args.m_sk) ? TransKind::Profile : TransKind::Live);
+  m_tx.setMode(profileSrcKey(args.m_sk) ? TransKind::Profile
+                                        : TransKind::Live);
   SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
   return translate(args);
@@ -254,7 +255,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
 
-  SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
+  SCOPE_EXIT { m_tx.setMode(TransKind::Invalid); };
 
   always_assert(m_tx.profData()->transRegion(transId) != nullptr);
 
@@ -764,7 +765,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
       m_tx.setMode(TransKind::Optimize);
       SrcKey  funcletSK(func, paramInfo.funcletOff(), false);
       TransID funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
-      if (funcletTransId != InvalidID) {
+      if (funcletTransId != kInvalidTransID) {
         invalidateSrcKey(funcletSK);
         TCA dvStart = translate(TranslArgs(funcletSK, false).
                                 transId(funcletTransId));
@@ -801,7 +802,7 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
   auto const limit = func->numNonVariadicParams() + 1;
   for (int nArgs = 0; nArgs <= limit; nArgs++) {
     TransID tid = m_tx.profData()->prologueTransId(func, nArgs);
-    if (tid != InvalidID) {
+    if (tid != kInvalidTransID) {
       prologTransIDs.push_back(tid);
     }
   }
@@ -1695,10 +1696,10 @@ MCGenerator::translateWork(const TranslArgs& args) {
   SKTRACE(1, sk, "translateWork\n");
   assert(m_tx.getSrcDB().find(sk));
 
-  TCA        start = code.main().frontier();
-  TCA        stubStart = code.stubs().frontier();
-  SrcRec&    srcRec = *m_tx.getSrcRec(sk);
-  TransKind  transKind = TransKind::Interp;
+  TCA        start             = code.main().frontier();
+  TCA        stubStart         = code.stubs().frontier();
+  SrcRec&    srcRec            = *m_tx.getSrcRec(sk);
+  TransKind  transKindToRecord = TransKind::Interp;
   UndoMarker undoA(code.main());
   UndoMarker undoAstubs(code.stubs());
   UndoMarker undoGlobalData(code.data());
@@ -1733,7 +1734,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         assert(region->blocks.size() > 0);
       } else {
         TransID transId = args.m_transId;
-        assert(transId != InvalidID);
+        assert(transId != kInvalidTransID);
         region = selectHotRegion(transId, this);
         assert(region);
         if (region && region->blocks.size() == 0) region = nullptr;
@@ -1767,13 +1768,24 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
     Translator::TranslateResult result = Translator::Retry;
     Translator::RegionBlacklist regionInterps;
-    Offset initSpOffset = region ? region->blocks[0]->initialSpOffset()
-                                 : liveSpOff();
+    Offset const initSpOffset = region ? region->blocks[0]->initialSpOffset()
+                                       : liveSpOff();
     bool bcControlFlow = RuntimeOption::EvalHHIRBytecodeControlFlow;
+
+    auto const transContext = TransContext {
+      RuntimeOption::EvalJitPGO
+        ? m_tx.profData()->curTransID()
+        : kInvalidTransID,
+      sk.offset(),
+      initSpOffset,
+      // TODO(#4150507): use sk.resumed() instead of liveResumed()?
+      liveResumed(),
+      sk.func()
+    };
 
     while (result == Translator::Retry) {
       // TODO(#4150507): use sk.resumed() instead of liveResumed()?
-      m_tx.traceStart(sk.offset(), initSpOffset, liveResumed(), sk.func());
+      m_tx.traceStart(transContext);
 
       // Try translating a region if we have one, then fall back to using the
       // Tracelet.
@@ -1806,7 +1818,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         if (result == Translator::Failure) {
           m_tx.traceFree();
           // TODO(#4150507): use sk.resumed() instead of liveResumed()?
-          m_tx.traceStart(sk.offset(), liveSpOff(), liveResumed(), sk.func());
+          m_tx.traceStart(transContext);
           resetState();
         }
       }
@@ -1853,7 +1865,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
       assert(m_tx.mode() == TransKind::Live    ||
              m_tx.mode() == TransKind::Profile ||
              m_tx.mode() == TransKind::Optimize);
-      transKind = m_tx.mode();
+      transKindToRecord = m_tx.mode();
     }
   }
 
@@ -1862,7 +1874,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     return;
   }
 
-  if (transKind == TransKind::Interp) {
+  if (transKindToRecord == TransKind::Interp) {
     assertCleanState();
     auto interpOps = tp ? tp->m_numOpcodes : 1;
     FTRACE(1, "emitting {}-instr interp request for failed translation\n",
@@ -1874,7 +1886,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
   m_fixupMap.processPendingFixups();
   processPendingCatchTraces();
 
-  TransRec tr(sk, sk.unit()->md5(), transKind, tp.get(), start,
+  TransRec tr(sk, sk.unit()->md5(), transKindToRecord, tp.get(), start,
               code.main().frontier() - start, stubStart,
               code.stubs().frontier() - stubStart,
               m_bcMap);
@@ -1889,14 +1901,14 @@ MCGenerator::translateWork(const TranslArgs& args) {
   recordGdbTranslation(sk, sk.func(), code.stubs(), stubStart,
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
-    if (transKind == TransKind::Profile) {
+    if (transKindToRecord == TransKind::Profile) {
       if (!region) {
         assert(tp);
         region = selectTraceletLegacy(liveSpOff(), *tp);
       }
       m_tx.profData()->addTransProfile(region, pconds);
     } else {
-      m_tx.profData()->addTransNonProf(transKind, sk);
+      m_tx.profData()->addTransNonProf(transKindToRecord, sk);
     }
   }
   // SrcRec::newTranslation() makes this code reachable. Do this last;
@@ -2300,6 +2312,8 @@ std::string MCGenerator::getUsage() {
   });
   addRow("data", code.data().used(), code.data().capacity());
   addRow("RDS", RDS::usedBytes(),
+         RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
+  addRow("RDS", RDS::usedLocalBytes(),
          RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
   addRow("persistentRDS", RDS::usedPersistentBytes(),
          RuntimeOption::EvalJitTargetCacheSize / 4);

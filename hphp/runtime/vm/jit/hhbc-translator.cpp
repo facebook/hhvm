@@ -36,15 +36,14 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(hhir);
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -70,24 +69,20 @@ bool classIsUniqueInterface(const Class* cls) {
 
 //////////////////////////////////////////////////////////////////////
 
-HhbcTranslator::HhbcTranslator(Offset startOffset,
-                               uint32_t initialSpOffsetFromFp,
-                               bool resumed,
-                               const Func* func)
-  : m_unit(startOffset)
-  , m_irb(new IRBuilder(startOffset,
-                        initialSpOffsetFromFp,
-                        m_unit,
-                        func))
-  , m_bcStateStack {BcState(startOffset, resumed, func)}
-  , m_startBcOff(startOffset)
-  , m_lastBcOff(false)
-  , m_hasExit(false)
-  , m_mode(IRGenMode::Trace)
+HhbcTranslator::HhbcTranslator(TransContext context)
+  : m_context(context)
+  , m_unit(context)
+  , m_irb(new IRBuilder(context.initSpOffset, m_unit, context.func))
+  , m_bcStateStack { BcState(context.initBcOffset,
+                             context.resumed,
+                             context.func) }
+  , m_lastBcOff{false}
+  , m_hasExit{false}
+  , m_mode{IRGenMode::Trace}
 {
   updateMarker();
   auto const fp = gen(DefFP);
-  gen(DefSP, StackOffset(initialSpOffsetFromFp), fp);
+  gen(DefSP, StackOffset{context.initSpOffset}, fp);
 }
 
 void HhbcTranslator::setGenMode(IRGenMode mode) {
@@ -375,7 +370,11 @@ BCMarker HhbcTranslator::makeMarker(Offset bcOff) {
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc()->fullName()->data());
 
-  return BCMarker{ SrcKey{ curFunc(), bcOff, resumed() }, stackOff };
+  return BCMarker {
+    SrcKey { curFunc(), bcOff, resumed() },
+    stackOff,
+    m_profTransID
+  };
 }
 
 void HhbcTranslator::updateMarker() {
@@ -422,13 +421,18 @@ void HhbcTranslator::profileFailedInlShape(const std::string& str) {
   );
 }
 
+void HhbcTranslator::setProfTransID(TransID id) {
+  m_profTransID = id;
+}
+
 void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
   always_assert_log(
     IMPLIES(isInlining(), !lastBcOff),
     [&] {
       return folly::format("Tried to end trace while inlining:\n{}",
                            unit()).str();
-    });
+    }
+  );
 
   m_bcStateStack.back().bcOff = newOff;
   updateMarker();
@@ -2817,45 +2821,56 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
                     objOrCls,
                     numParams,
                     magicCall ? methodName : nullptr);
-  } else {
-    spillStack();
-    emitFPushActRec(cns(Type::Nullptr),  // Will be set by LdObjClass
-                    obj,
-                    numParams,
-                    nullptr);
-    auto const actRec = spillStack();
-    auto const objCls = gen(LdObjClass, obj);
-
-    // This is special. We need to move the stackpointer incase LdObjMethod
-    // calls a destructor. Otherwise it would clobber the ActRec we just pushed.
-    updateMarker();
-    Block* catchBlock;
-    if (extraSpill) {
-      /*
-       * If LdObjMethod throws, it nulls out the ActRec (since the unwinder
-       * will attempt to destroy it as if it were cells), and then writes
-       * obj into the last entry, since we need it to be destroyed.
-       * If we have another object to destroy, we should write it in
-       * the first - so pop 1 cell, then push extraSpill.
-       */
-      std::vector<SSATmp*> spill{extraSpill};
-      catchBlock = makeCatch(spill, 1);
-    } else {
-      catchBlock = makeCatchNoSpill();
-    }
-    gen(LdObjMethod,
-        LdObjMethodData { methodName, shouldFatal },
-        catchBlock,
-        objCls,
-        actRec);
+    return;
   }
+
+  fpushObjMethodUnknown(obj, methodName, numParams, shouldFatal, extraSpill);
+}
+
+// Pushing for object method when we don't know the Func* statically.
+void HhbcTranslator::fpushObjMethodUnknown(SSATmp* obj,
+                                           const StringData* methodName,
+                                           int32_t numParams,
+                                           bool shouldFatal,
+                                           SSATmp* extraSpill) {
+  spillStack();
+  emitFPushActRec(cns(Type::Nullptr),  // Will be set by LdObjMethod
+                  obj,
+                  numParams,
+                  nullptr);
+  auto const actRec = spillStack();
+  auto const objCls = gen(LdObjClass, obj);
+
+  // This is special. We need to move the stackpointer in case
+  // LdObjMethod calls a destructor. Otherwise it would clobber the
+  // ActRec we just pushed.
+  updateMarker();
+  Block* catchBlock;
+  if (extraSpill) {
+    /*
+     * If LdObjMethod throws, it nulls out the ActRec (since the unwinder
+     * will attempt to destroy it as if it were cells), and then writes
+     * obj into the last entry, since we need it to be destroyed.
+     * If we have another object to destroy, we should write it in
+     * the first - so pop 1 cell, then push extraSpill.
+     */
+    std::vector<SSATmp*> spill{extraSpill};
+    catchBlock = makeCatch(spill, 1);
+  } else {
+    catchBlock = makeCatchNoSpill();
+  }
+  gen(LdObjMethod,
+      LdObjMethodData { methodName, shouldFatal },
+      catchBlock,
+      objCls,
+      actRec);
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
                                          int32_t methodNameStrId) {
-  SSATmp* obj = popC();
+  auto const obj = popC();
   if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
-  const StringData* methodName = lookupStringId(methodNameStrId);
+  auto const methodName = lookupStringId(methodNameStrId);
   emitFPushObjMethodCommon(obj, methodName, numParams, true /* shouldFatal */);
 }
 
@@ -5353,11 +5368,11 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
   Offset targetBcOff = bcOff();
   auto const exit = m_irb->makeExit();
 
-  BCMarker exitMarker{
+  BCMarker exitMarker {
     SrcKey{ curFunc(), targetBcOff, resumed() },
-    int32_t(m_irb->spOffset()
-            + m_irb->evalStack().size()
-            - m_irb->stackDeficit())
+    static_cast<int32_t>(m_irb->spOffset() +
+                           m_irb->evalStack().size() - m_irb->stackDeficit()),
+    m_profTransID
   };
 
   BlockPusher blockPusher(*m_irb, exitMarker, exit);
@@ -5442,12 +5457,12 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   }
 
   if (!isInlining() &&
-      curBcOff == m_startBcOff &&
-      targetBcOff == m_startBcOff) {
-    // Note that if we're inlining, then targetBcOff is in the inlined func,
-    // while m_startBcOff is in the outer func, so bindJmp will always work
-    // (and there's no guarantee that there is an anchor translation, so we
-    // must not use ReqRetranslate).
+      curBcOff == m_context.initBcOffset &&
+      targetBcOff == m_context.initBcOffset) {
+    // Note that if we're inlining, then targetBcOff is in the inlined
+    // func, while context.initBcOffset is in the outer func, so
+    // bindJmp will always work (and there's no guarantee that there
+    // is an anchor translation, so we must not use ReqRetranslate).
     gen(ReqRetranslate);
   } else {
     gen(ReqBindJmp, BCOffset(targetBcOff));
@@ -5815,4 +5830,4 @@ bool HhbcTranslator::inPseudoMain() const {
   return Translator::liveFrameIsPseudoMain();
 }
 
-}} // namespace HPHP::JIT
+}}

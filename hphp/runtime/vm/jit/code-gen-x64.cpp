@@ -2432,7 +2432,7 @@ void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
   emitLdObjClass(m_as, objReg, dstReg);
 }
 
-void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
+void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   using namespace MethodCache;
 
   auto const clsReg    = srcLoc(0).reg();
@@ -2462,23 +2462,27 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   Label slow_path;
   Label done;
 
-  // Inline cache: we "prime" the cache across requests by smashing
-  // this immediate to hold a Func* in the upper 32 bits, and a Class*
-  // in the lower 32 bits.  (If both are low-malloced pointers can
-  // fit.)  See pmethodCacheMissPath.
+  /*
+   * Inline cache: we "prime" the cache across requests by smashing
+   * this immediate to hold a Func* in the upper 32 bits, and a Class*
+   * in the lower 32 bits.  (If both are low-malloced pointers can
+   * fit.)  See pmethodCacheMissPath.
+   */
   mcg->backEnd().prepareForSmash(a.code(), kMovLen);
   auto const movAddr = a.frontier();
   a.    movq   (0x8000000000000000u, rAsm);
   assert(a.frontier() - kMovLen == movAddr);
 
-  // For the first time through, set the cache to hold the pointer to the
-  // SmashTarget, so handlePreCacheMiss can use that information to know how
-  // to smash things.
-  //
-  // We set the low bit for two reasons: the Class* will never be a valid
-  // Class*, so we'll always miss the inline check before it's smashed, and
-  // handlePreCacheMiss can tell it's not been smashed yet and is therefore a
-  // valid PrimeData*.
+  /*
+   * For the first time through, set the cache to hold the pointer to the
+   * SmashTarget, so handlePreCacheMiss can use that information to know how
+   * to smash things.
+   *
+   * We set the low bit for two reasons: the Class* will never be a valid
+   * Class*, so we'll always miss the inline check before it's smashed, and
+   * handlePreCacheMiss can tell it's not been smashed yet and is therefore a
+   * valid PrimeData*.
+   */
   *reinterpret_cast<uintptr_t*>(movAddr + kMovImmOff) =
     reinterpret_cast<uintptr_t>(smashTarget) | 1;
 

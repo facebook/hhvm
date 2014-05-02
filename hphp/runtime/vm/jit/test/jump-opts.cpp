@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/vm/jit/test/match.h"
+#include "hphp/runtime/vm/jit/test/test-context.h"
 
 #include <gtest/gtest.h>
 
@@ -29,7 +30,7 @@ TEST(JumpOpts, eliminateTrivial) {
 
   // Trivial jumps are eliminated
   {
-    IRUnit unit{0};
+    IRUnit unit{test_context};
 
     Block* entry = unit.entry();
     Block* second = unit.defBlock();
@@ -49,7 +50,7 @@ TEST(JumpOpts, eliminateTrivial) {
 
   // Jumps with arguments are also eliminated
   {
-    IRUnit unit{0};
+    IRUnit unit{test_context};
 
     Block* entry = unit.entry();
     Block* second = unit.defBlock();
@@ -69,7 +70,7 @@ TEST(JumpOpts, eliminateTrivial) {
 
   // Jumps to blocks with other predecessors are not eliminated
   {
-    IRUnit unit{0};
+    IRUnit unit{test_context};
 
     Block* pred1 = unit.entry();
     Block* pred2 = unit.defBlock();
@@ -93,7 +94,7 @@ TEST(JumpOpts, eliminateTrivial) {
 TEST(JumpOpts, optimizeCondTraceExit) {
   BCMarker marker = BCMarker::Dummy();
 
-  IRUnit unit{0};
+  IRUnit unit{test_context};
 
   Block* entry = unit.entry();
   Block* taken = unit.defBlock();
@@ -132,7 +133,7 @@ TEST(JumpOpts, optimizeCondTraceExit) {
 
 TEST(JumpOpts, optimizeSideExitJcc) {
   BCMarker marker = BCMarker::Dummy();
-  IRUnit unit{0};
+  IRUnit unit{test_context};
 
   Block* entry = unit.entry();
   Block* taken = unit.defBlock();
@@ -169,7 +170,7 @@ TEST(JumpOpts, optimizeSideExitJcc) {
 
 TEST(JumpOpts, optimizeSideExitCheck) {
   BCMarker marker = BCMarker::Dummy();
-  IRUnit unit{0};
+  IRUnit unit{test_context};
 
   Block* entry = unit.entry();
   Block* taken = unit.defBlock();

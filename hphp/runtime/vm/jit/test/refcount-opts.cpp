@@ -13,6 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <gtest/gtest.h>
+
+#include "hphp/util/asm-x64.h"
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/check.h"
@@ -20,15 +23,13 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/opt.h"
 
-#include "hphp/util/asm-x64.h"
-
-#include <gtest/gtest.h>
+#include "hphp/runtime/vm/jit/test/test-context.h"
 
 namespace HPHP { namespace JIT {
 
 TEST(RefcountOpts, trivial) {
   BCMarker dummy = BCMarker::Dummy();
-  IRUnit unit(0);
+  IRUnit unit(test_context);
   Block* b = unit.entry();
   FrameState fs{unit, 0, nullptr, 0};
 

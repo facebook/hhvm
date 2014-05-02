@@ -17,6 +17,7 @@
 #define incl_HPHP_IRTRANSLATOR_H_
 
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 
 namespace HPHP {
@@ -53,7 +54,7 @@ bool shouldIRInline(const Func* caller, const Func* callee,
  * bytecode.
  */
 struct IRTranslator {
-  IRTranslator(Offset bcOff, Offset spOff, bool resumed, const Func* curFunc);
+  explicit IRTranslator(TransContext context);
 
   void translateInstr(const NormalizedInstruction& i);
   void checkType(const JIT::Location& l, const JIT::RuntimeType& rtt,

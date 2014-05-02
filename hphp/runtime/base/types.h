@@ -264,6 +264,16 @@ typedef const unsigned char* PC;
 typedef int Id;
 const Id kInvalidId = Id(-1);
 
+/*
+ * Translation IDs.
+ *
+ * These represent compilation units for the JIT, and are used to key
+ * into several runtime structures for finding profiling data or
+ * tracking translation information.
+ */
+using TransID = uint32_t;
+constexpr TransID kInvalidTransID = -1u;
+
 // Bytecode offsets.  Used for both absolute offsets and relative
 // offsets.
 typedef int32_t Offset;

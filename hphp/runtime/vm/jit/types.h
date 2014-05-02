@@ -22,13 +22,14 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map-typedefs.h"
 
-namespace HPHP {
-namespace JIT {
+#include "hphp/runtime/base/types.h"
+
+namespace HPHP { namespace JIT {
 
 /*
  * Core types.
  */
-typedef unsigned char* TCA; // "Translation cache adddress."
+typedef unsigned char* TCA; // "Translation cache address."
 typedef const unsigned char* CTCA;
 
 struct ctca_identity_hash {
@@ -42,11 +43,8 @@ struct ctca_identity_hash {
   }
 };
 
-typedef uint32_t               TransID;
 typedef hphp_hash_set<TransID> TransIDSet;
 typedef std::vector<TransID>   TransIDVec;
-
-const TransID InvalidID = -1LL;
 
 /**
  * The different kinds of translations that the JIT generates:

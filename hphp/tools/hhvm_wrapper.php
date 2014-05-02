@@ -27,6 +27,7 @@ function my_option_map(): OptionInfoMap {
 'region-mode:'    => Pair { '',
                             'Which region selector to use (e.g \'method\')' },
 'no-pgo'          => Pair { '', 'Diable PGO' },
+'pgo-threshold:'  => Pair { '', 'PGO threshold to use' },
 'no-obj-destruct' => Pair { '',
                             'Disable global object destructors in CLI mode' },
 'zend'            => Pair { '',  'Enable ZendCompat functions and classes' },
@@ -81,9 +82,15 @@ function determine_flags(OptionMap $opts): string {
     'no-obj-destruct' => '-v Eval.EnableObjDestructCall=0 ',
     'zend'            => '-v Eval.EnableZendCompat=1 ',
     'hphpd'           => '-m debug ',
-    'server'          => '-m server ',
+    'server'          => '-v Eval.JitPGOHotOnly=0 -m server ',
     'arm'             => '-v Eval.SimulateARM=1 ',
   };
+
+  if ($opts->containsKey('pgo-threshold')) {
+    $flags .=
+      '-v Eval.JitPGOThreshold='.$opts['pgo-threshold'].' '.
+      '';
+  }
 
   foreach ($simple_args as $k => $v) {
     if ($opts->containsKey($k)) {

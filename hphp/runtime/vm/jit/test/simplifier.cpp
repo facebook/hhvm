@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <gtest/gtest.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 
 #include "hphp/runtime/vm/jit/test/match.h"
-
-#include <gtest/gtest.h>
+#include "hphp/runtime/vm/jit/test/test-context.h"
 
 #define EXPECT_SINGLE_OP(result, opc) \
   EXPECT_EQ(nullptr, (result).dst); \
@@ -56,7 +56,7 @@ struct OptionSetter {
 
 TEST(Simplifier, JumpConstFold) {
   BCMarker dummy = BCMarker::Dummy();
-  IRUnit unit(0);
+  IRUnit unit(test_context);
   Simplifier sim(unit);
 
   // Folding JmpZero and JmpNZero.
@@ -91,7 +91,7 @@ TEST(Simplifier, JumpConstFold) {
 }
 
 TEST(Simplifier, CondJmp) {
-  IRUnit unit{0};
+  IRUnit unit{test_context};
   Simplifier sim{unit};
   BCMarker marker = BCMarker::Dummy();
 
@@ -124,7 +124,7 @@ TEST(Simplifier, CondJmp) {
 
 TEST(Simplifier, JumpFuse) {
   BCMarker dummy = BCMarker::Dummy();
-  IRUnit unit(0);
+  IRUnit unit(test_context);
   Simplifier sim(unit);
 
   {

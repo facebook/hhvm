@@ -114,13 +114,16 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
   , m_curBlock(m_region->addBlock(ctx.func, m_sk.resumed(), m_sk.offset(), 0,
                                   ctx.spOffset))
   , m_blockFinished(false)
-  , m_irTrans(ctx.bcOffset, ctx.spOffset, ctx.resumed, ctx.func)
+  , m_irTrans(TransContext { kInvalidTransID,
+                             ctx.bcOffset,
+                             ctx.spOffset,
+                             ctx.resumed,
+                             ctx.func })
   , m_ht(m_irTrans.hhbcTrans())
   , m_arStates(1)
   , m_inlineDepth(inlineDepth)
   , m_profiling(profiling)
-{
-}
+{}
 
 const Func* RegionFormer::curFunc() const {
   return m_ht.curFunc();

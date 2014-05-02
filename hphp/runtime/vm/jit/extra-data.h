@@ -155,6 +155,18 @@ struct IterData : IRExtraData {
   uint32_t valId;
 };
 
+struct RDSHandleData : IRExtraData {
+  explicit RDSHandleData(RDS::Handle handle)
+    : handle(handle)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(handle);
+  }
+
+  RDS::Handle handle;
+};
+
 struct ClassData : IRExtraData {
   explicit ClassData(const Class* cls) : cls(cls) {}
   std::string show() const {
@@ -312,22 +324,22 @@ struct BCOffset : IRExtraData {
  * Translation IDs.
  */
 struct TransIDData : IRExtraData {
-  explicit TransIDData(JIT::TransID transId) : transId(transId) {}
+  explicit TransIDData(TransID transId) : transId(transId) {}
   std::string show() const { return folly::to<std::string>(transId); }
-  JIT::TransID transId;
+  TransID transId;
 };
 
 /*
  * Information needed to generate a REQ_RETRANSLATE_OPT service request.
  */
 struct ReqRetransOptData : IRExtraData {
-  explicit ReqRetransOptData(JIT::TransID transId, Offset offset)
+  explicit ReqRetransOptData(TransID transId, Offset offset)
       : transId(transId)
       , offset(offset) {}
   std::string show() const {
     return folly::to<std::string>(transId, ", ", offset);
   }
-  JIT::TransID transId;
+  TransID transId;
   Offset offset;
 };
 
@@ -668,16 +680,16 @@ struct ReDefSPData : IRExtraData {
 };
 
 struct RBTraceData : IRExtraData {
-  RBTraceData(Trace::RingBufferType t, SrcKey sk_)
+  RBTraceData(Trace::RingBufferType t, SrcKey sk)
     : type(t)
-    , sk(sk_)
+    , sk(sk)
     , msg(nullptr)
   {}
 
-  RBTraceData(Trace::RingBufferType t, const StringData* msg_)
+  RBTraceData(Trace::RingBufferType t, const StringData* msg)
     : type(t)
     , sk()
-    , msg(msg_)
+    , msg(msg)
   {
     assert(msg->isStatic());
   }

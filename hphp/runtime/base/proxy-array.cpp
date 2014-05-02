@@ -361,7 +361,7 @@ void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest)
 {
   ArrayData * r;
   if (hasZvalValues()) {
-    assert(data_size = sizeof(void*));
+    assert(data_size == sizeof(void*));
     int64_t k = 0;
     r = m_ad->zAppend(*(RefData**)data, &k);
     if (dest) {

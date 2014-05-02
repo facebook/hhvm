@@ -204,7 +204,7 @@ void ProxyArray::proxySet(K k,
 {
   ArrayData * r;
   if (hasZvalValues()) {
-    assert(data_size = sizeof(void*));
+    assert(data_size == sizeof(void*));
     r = m_ad->zSet(k, *(RefData**)data);
     if (dest) {
       *dest = (void*)(&m_ad->nvGet(k)->m_data.pref);

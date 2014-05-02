@@ -131,7 +131,7 @@ Builder::packed(RepoAuthType::Array::Empty emptiness,
     types.size()
   );
 
-  auto elems = arr->m_types;
+  auto elems = arr->types();
   for (auto& t : types) {
     *elems++ = t;
   }
@@ -154,7 +154,7 @@ Builder::packedn(RepoAuthType::Array::Empty emptiness, RepoAuthType elemTy) {
     emptiness,
     std::numeric_limits<uint32_t>::max()
   );
-  arr->m_types[0] = elemTy;
+  arr->types()[0] = elemTy;
 
   auto const ret = insert(arr);
   if (arr != ret) {

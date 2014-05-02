@@ -148,7 +148,7 @@ struct RepoAuthType::Array {
   RepoAuthType packedElem(uint32_t idx) const {
     assert(tag() == Tag::Packed);
     assert(idx < size());
-    return m_types[idx];
+    return types()[idx];
   }
 
   /*
@@ -158,7 +158,7 @@ struct RepoAuthType::Array {
    */
   RepoAuthType elemType() const {
     assert(tag() == Tag::PackedN);
-    return m_types[0];
+    return types()[0];
   }
 
 private:
@@ -170,6 +170,13 @@ private:
   {}
   ~Array() {}
 
+  RepoAuthType* types() {
+    return reinterpret_cast<RepoAuthType*>(this + 1);
+  }
+  const RepoAuthType* types() const {
+    return reinterpret_cast<const RepoAuthType*>(this + 1);
+  }
+
 private:
   friend struct ArrayTypeTable::Builder;
 
@@ -178,7 +185,6 @@ private:
   Empty m_emptiness;
   uint32_t m_id;
   uint32_t m_size;
-  RepoAuthType m_types[];
 };
 
 //////////////////////////////////////////////////////////////////////

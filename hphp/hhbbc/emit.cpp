@@ -880,7 +880,7 @@ void emit_class(EmitUnitState& state,
   auto const privateProps   = state.index.lookup_private_props(&cls);
   auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
-    auto const repoTy = [&] (const PropState& ps) {
+    auto const repoTy = [&] (const PropState& ps) -> RepoAuthType {
       // TODO(#3599292): we don't currently infer closure use var types.
       if (is_closure(cls)) return RepoAuthType{};
       auto it = ps.find(prop.name);

@@ -61,8 +61,8 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     break;
   case SpillFrame:
     if (i == 1) return true; // func
-    if (i == 2 && type <= Type::Cls) return true; // objOrCls is Cls
-    if (i == 2 && type <= Type::InitNull) return true; // objOrCls is null
+    if (i == 2 && type <= Type::Cls) return true;     // objOrCls is Cls
+    if (i == 2 && type <= Type::Nullptr) return true; // objOrCls is null
     break;
   case StRetVal:
     if (i == 1) return okStore(cint); // value->cgStore

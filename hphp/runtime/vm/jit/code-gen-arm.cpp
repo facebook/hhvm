@@ -1566,15 +1566,12 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   } else if (objOrCls->isA(Type::Obj) || objOrCls->isA(Type::Ctx)) {
     m_as.  Str  (objClsReg, spReg[spOff + AROFF(m_this)]);
   } else {
-    assert(objOrCls->isA(Type::InitNull));
+    assert(objOrCls->isA(Type::Nullptr));
     m_as.Str  (vixl::xzr, spReg[spOff + AROFF(m_this)]);
   }
 
   // Now set func, and possibly this/cls
-  if (func->isA(Type::Null)) {
-    // Do nothing
-    assert(func->isConst());
-  } else {
+  if (!func->isA(Type::Nullptr)) {
     auto reg0 = x2a(funcLoc.reg(0));
     m_as.  Str  (reg0, spReg[spOff + AROFF(m_func)]);
   }

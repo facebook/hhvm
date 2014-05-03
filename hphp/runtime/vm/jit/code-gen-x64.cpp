@@ -3411,7 +3411,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     Reg64 objOrClsPtrReg = srcLoc(2/*objOrCls*/).reg();
     a.     storeq (objOrClsPtrReg, spReg[spOffset + int(AROFF(m_this))]);
   } else {
-    assert(objOrCls->isA(Type::InitNull));
+    assert(objOrCls->isA(Type::Nullptr));
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + int(AROFF(m_this));
     a.     storeq (0, spReg[offset_m_this]);
@@ -3425,8 +3425,9 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   emitImmStoreq(a, invName, spReg[spOffset + int(AROFF(m_invName))]);
   // actRec->m_func  and possibly actRec->m_cls
   // Note m_cls is unioned with m_this and may overwrite previous value
-  if (func->isA(Type::Null)) {
-    assert(func->isConst());
+  if (func->isA(Type::Nullptr)) {
+    // No need to store the null---we're always about to run another
+    // instruction that will populate the Func.
   } else if (func->isConst()) {
     const Func* f = func->funcVal();
     emitImmStoreq(a, intptr_t(f), spReg[spOffset + int(AROFF(m_func))]);

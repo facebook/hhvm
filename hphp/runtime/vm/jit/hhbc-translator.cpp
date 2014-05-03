@@ -2353,8 +2353,8 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
   popC();
 
   emitFPushActRec(
-    cns(Type::InitNull),
-    cns(Type::InitNull),
+    cns(Type::Nullptr),
+    cns(Type::Nullptr),
     numParams,
     nullptr
   );
@@ -2405,7 +2405,7 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
       ctx = genClsMethodCtx(callee, cls);
     }
   } else {
-    ctx = cns(Type::InitNull);
+    ctx = cns(Type::Nullptr);
     if (!RDS::isPersistentHandle(callee->funcHandle())) {
       // The miss path is complicated and rare. Punt for now.
       func = gen(
@@ -2473,10 +2473,8 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
                                          const Func* func,
                                          int32_t numParams) {
   push(obj);
-  SSATmp* fn = nullptr;
-  if (func) {
-    fn = cns(func);
-  } else {
+  auto const fn = [&] {
+    if (func) return cns(func);
     /*
       Without the updateMarker, the catch trace will write
       obj onto the stack, but the VMRegAnchor will setup the
@@ -2484,8 +2482,8 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
       FPushCtorD at least) won't include obj
     */
     updateMarker();
-    fn = gen(LdClsCtor, makeCatch(), cls);
-  }
+    return gen(LdClsCtor, makeCatch(), cls);
+  }();
   gen(IncRef, obj);
   auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
   emitFPushActRec(fn, obj, numArgsAndFlags, nullptr);
@@ -2654,7 +2652,7 @@ void HhbcTranslator::emitFPushFuncCommon(const Func* func,
     func->validate();
     if (func->isNameBindingImmutable(curUnit())) {
       emitFPushActRec(cns(func),
-                      cns(Type::InitNull),
+                      cns(Type::Nullptr),
                       numParams,
                       nullptr);
       return;
@@ -2671,7 +2669,7 @@ void HhbcTranslator::emitFPushFuncCommon(const Func* func,
           LdFuncCachedData { name },
           catchBlock);
   emitFPushActRec(ssaFunc,
-                  cns(Type::InitNull),
+                  cns(Type::Nullptr),
                   numParams,
                   nullptr);
 }
@@ -2710,7 +2708,7 @@ void HhbcTranslator::emitFPushFunc(int32_t numParams) {
   auto const catchBlock = makeCatch();
   auto const funcName = popC();
   emitFPushActRec(gen(LdFunc, catchBlock, funcName),
-                  cns(Type::InitNull),
+                  cns(Type::Nullptr),
                   numParams,
                   nullptr);
 }
@@ -2728,8 +2726,8 @@ void HhbcTranslator::emitFPushFuncArr(int32_t numParams) {
 
   auto const arr    = popC();
   emitFPushActRec(
-    cns(Type::InitNull),
-    cns(Type::InitNull),
+    cns(Type::Nullptr),
+    cns(Type::Nullptr),
     numParams,
     nullptr);
   auto const actRec = spillStack();
@@ -2786,8 +2784,8 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
          *     the Object and the method slot, which is the same as func's.
          */
         if (!(func->attrs() & AttrPrivate)) {
-          SSATmp* clsTmp = gen(LdObjClass, obj);
-          auto funcTmp = gen(
+          auto const clsTmp = gen(LdObjClass, obj);
+          auto const funcTmp = gen(
             LdClsMethod, clsTmp, cns(-(func->methodSlot() + 1))
           );
           if (res == LookupResult::MethodFoundNoThis) {
@@ -2821,7 +2819,7 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
                     magicCall ? methodName : nullptr);
   } else {
     spillStack();
-    emitFPushActRec(cns(Type::InitNull),
+    emitFPushActRec(cns(Type::Nullptr),  // Will be set by LdObjClass
                     obj,
                     numParams,
                     nullptr);
@@ -2901,50 +2899,51 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                                          int32_t methodNameStrId,
                                          int32_t clssNamedEntityPairId) {
 
-  const StringData* methodName = lookupStringId(methodNameStrId);
-  const NamedEntityPair& np = lookupNamedEntityPairId(clssNamedEntityPairId);
-  const StringData* className = np.first;
-  const Class* baseClass = Unit::lookupUniqueClass(np.second);
-  bool magicCall = false;
-  const Func* func = HPHP::JIT::lookupImmutableMethod(baseClass,
-                                                             methodName,
-                                                             magicCall,
-                                                         /* staticLookup: */
-                                                             true,
-                                                             curClass());
-  if (func) {
-    SSATmp* objOrCls = genClsMethodCtx(func, baseClass);
+  auto const methodName = lookupStringId(methodNameStrId);
+  auto const& np        = lookupNamedEntityPairId(clssNamedEntityPairId);
+  auto const className  = np.first;
+  auto const baseClass  = Unit::lookupUniqueClass(np.second);
+  bool magicCall        = false;
+
+  if (auto const func = lookupImmutableMethod(baseClass,
+                                              methodName,
+                                              magicCall,
+                                              true /* staticLookup */,
+                                              curClass())) {
+    auto const objOrCls = genClsMethodCtx(func, baseClass);
     emitFPushActRec(cns(func),
                     objOrCls,
                     numParams,
                     func && magicCall ? methodName : nullptr);
-  } else {
-    auto slowExit = makeExitSlow();
-    auto const data = ClsMethodData{className, methodName, np.second};
-
-    // Look up the Func* in the targetcache. If it's not there, try the slow
-    // path. If that fails, slow exit.
-    auto func = m_irb->cond(
-      0,
-      [&](Block* taken) {
-        return gen(CheckNonNull, taken, gen(LdClsMethodCacheFunc, data));
-      },
-      [&](SSATmp* func) { // next
-        return func;
-      },
-      [&] { // taken
-        m_irb->hint(Block::Hint::Unlikely);
-        auto result = gen(LookupClsMethodCache, makeCatch(), data,
-                          m_irb->fp());
-        return gen(CheckNonNull, slowExit, result);
-      });
-    auto clsCtx = gen(LdClsMethodCacheCls, data);
-
-    emitFPushActRec(func,
-                    clsCtx,
-                    numParams,
-                    nullptr);
+    return;
   }
+
+  auto const slowExit = makeExitSlow();
+  auto const data = ClsMethodData{className, methodName, np.second};
+
+  // Look up the Func* in the targetcache. If it's not there, try the slow
+  // path. If that fails, slow exit.
+  auto const func = m_irb->cond(
+    0,
+    [&] (Block* taken) {
+      return gen(CheckNonNull, taken, gen(LdClsMethodCacheFunc, data));
+    },
+    [&] (SSATmp* func) { // next
+      return func;
+    },
+    [&] { // taken
+      m_irb->hint(Block::Hint::Unlikely);
+      auto result = gen(LookupClsMethodCache, makeCatch(), data,
+                        m_irb->fp());
+      return gen(CheckNonNull, slowExit, result);
+    }
+  );
+  auto const clsCtx = gen(LdClsMethodCacheCls, data);
+
+  emitFPushActRec(func,
+                  clsCtx,
+                  numParams,
+                  nullptr);
 }
 
 void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
@@ -2981,8 +2980,8 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
     }
   }
 
-  emitFPushActRec(cns(Type::InitNull),
-                  cns(Type::InitNull),
+  emitFPushActRec(cns(Type::Nullptr),
+                  cns(Type::Nullptr),
                   numParams,
                   nullptr);
   auto const actRec = spillStack();
@@ -2999,7 +2998,7 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
 }
 
 void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
-  Block* exitBlock = makeExitSlow();
+  auto const exitBlock = makeExitSlow();
 
   auto classTmp = top(Type::Cls);
   auto methodTmp = topC(1, DataTypeGeneric);
@@ -3013,43 +3012,45 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   auto const methName = methodTmp->strVal();
 
   bool magicCall = false;
-  const Func* func = lookupImmutableMethod(cls, methName, magicCall,
-                                           true /* staticLookup */,
-                                           curClass());
-  auto catchBlock = func ? nullptr : makeCatch();
+  auto const vmfunc = lookupImmutableMethod(cls,
+                                            methName,
+                                            magicCall,
+                                            true /* staticLookup */,
+                                            curClass());
+  auto const catchBlock = vmfunc ? nullptr : makeCatch();
   discard(2);
 
-  SSATmp* curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
-  if (func) {
-    SSATmp*   funcTmp = cns(func);
-    SSATmp* newCtxTmp = gen(GetCtxFwdCall, curCtxTmp, funcTmp);
-
+  auto const curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+  if (vmfunc) {
+    auto const funcTmp = cns(vmfunc);
+    auto const newCtxTmp = gen(GetCtxFwdCall, curCtxTmp, funcTmp);
     emitFPushActRec(funcTmp, newCtxTmp, numParams,
                     (magicCall ? methName : nullptr));
-
-  } else {
-    auto const data = ClsMethodData{cls->name(), methName};
-    auto func = m_irb->cond(
-      0,
-      [&](Block* taken) {
-        return gen(CheckNonNull, taken, gen(LdClsMethodFCacheFunc, data));
-      },
-      [&](SSATmp* func) { // next
-        return func;
-      },
-      [&] { // taken
-        m_irb->hint(Block::Hint::Unlikely);
-        auto result = gen(LookupClsMethodFCache, catchBlock, data,
-                          cns(cls), m_irb->fp());
-        return gen(CheckNonNull, exitBlock, result);
-      });
-    auto ctx = gen(GetCtxFwdCallDyn, data, curCtxTmp);
-
-    emitFPushActRec(func,
-                    ctx,
-                    numParams,
-                    (magicCall ? methName : nullptr));
+    return;
   }
+
+  auto const data = ClsMethodData{cls->name(), methName};
+  auto const funcTmp = m_irb->cond(
+    0,
+    [&](Block* taken) {
+      return gen(CheckNonNull, taken, gen(LdClsMethodFCacheFunc, data));
+    },
+    [&](SSATmp* func) { // next
+      return func;
+    },
+    [&] { // taken
+      m_irb->hint(Block::Hint::Unlikely);
+      auto result = gen(LookupClsMethodFCache, catchBlock, data,
+                        cns(cls), m_irb->fp());
+      return gen(CheckNonNull, exitBlock, result);
+    }
+  );
+  auto const ctx = gen(GetCtxFwdCallDyn, data, curCtxTmp);
+
+  emitFPushActRec(funcTmp,
+                  ctx,
+                  numParams,
+                  magicCall ? methName : nullptr);
 }
 
 void HhbcTranslator::emitFCallArray(const Offset pcOffset,

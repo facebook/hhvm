@@ -1134,15 +1134,15 @@ D:Obj = Clone S0:Obj
 
 
 D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
-                                       S1:{Func|InitNull}
-                                       S2:{Ctx|Class|InitNull}
+                                       S1:{Func|Nullptr}
+                                       S2:{Ctx|Class|Nullptr}
 
   Operands:
 
      S0 - caller stack pointer
-     S1 - callee Func or null
-     S2 - object (for FPushObjMethod*), class (for FPushClsMethod*), or null
-          (for FPushFunc*).
+     S1 - callee Func or nullptr
+     S2 - object (for FPushObjMethod*), class (for FPushClsMethod*), context
+          (for FPushClsMethodF), or nullptr (for FPushFunc*).
 
   Defines the fields for an activation record and writes them to the stack
   pointed to by S1.

@@ -649,8 +649,8 @@ JmpNInstanceOfBitmask
   Fused jump instructions. These all operate exactly as their corresponding
   query op, but also take a label to jump to when the condition is true.
 
-D:None = JmpZero S0:{Bool|Int} L:Label
-D:None = JmpNZero S0:{Bool|Int} L:Label
+JmpZero S0:{Bool|Int} L:Label
+JmpNZero S0:{Bool|Int} L:Label
 
   Conditionally jump to L based on S0.
 
@@ -1692,11 +1692,11 @@ D:StkPtr InterpOne<T, bcOff, numPopped, numPushed> S0:StkPtr S1:FramePtr
 
   Call the interpreter implementation function for one opcode. S0 and S1 are,
   respectively, the VM stack and frame pointers before this instruction. T is
-  the type of the top stack element after the call, or None if it pushes
-  nothing. bcOff is the bytecode offset. numPopped is the number of stack cells
-  consumed by the instruction, and numPushed is the number of stack cells
-  produced by the instruction. This instruction returns the updated VM stack
-  pointer.
+  only present if the instruction pushes to the stack, in which case it is the
+  type of the top stack element after the call. `bcOff' is the bytecode
+  offset. `numPopped' is the number of stack cells consumed by the instruction,
+  and `numPushed' is the number of stack cells produced by the
+  instruction. This instruction returns the updated VM stack pointer.
 
 D:StkPtr InterpOneCF<T, bcOff, numPopped, numPushed> S0:StkPtr S1:FramePtr
 

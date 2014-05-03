@@ -459,14 +459,17 @@ struct LdFuncCachedData : IRExtraData {
 };
 
 struct LdObjMethodData : IRExtraData {
-  explicit LdObjMethodData(bool fatal)
-    : fatal(fatal)
+  explicit LdObjMethodData(const StringData* method, bool fatal)
+    : method(method)
+    , fatal(fatal)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(fatal ? "fatal" : "warn");
+    return folly::to<std::string>(method->data(), ',',
+      fatal ? "fatal" : "warn");
   }
 
+  const StringData* method;
   bool fatal;
 };
 

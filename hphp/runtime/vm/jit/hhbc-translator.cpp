@@ -2846,12 +2846,10 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
       catchBlock = makeCatchNoSpill();
     }
     gen(LdObjMethod,
-        LdObjMethodData(shouldFatal),
+        LdObjMethodData { methodName, shouldFatal },
         catchBlock,
         objCls,
-        cns(methodName),
-        actRec,
-        cns(curFunc()->cls()));
+        actRec);
   }
 }
 

@@ -1001,13 +1001,15 @@ D:PtrToGen = LdClsPropAddrOrRaise S0:Cls S1:Str S2:ConstCls
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, throw a fatal error.
 
-LdObjMethod S0:Cls S1:ConstStr S2:StkPtr S3:Cls
+LdObjMethod<methodName,fatal> S0:Cls S1:StkPtr
 
   Stores a pointer to an object's method into an activation record. S0 points
-  to the object's class, S1 is the method name, S2 points to the activation
-  record, and S3, a compile time constant, points to the current context class.
-  Caches the mapping in the target cache. Fatals if the class does not have
-  an accessible method with the given name and does not have a __call method.
+  to the object's class, S1 points to the pre-live activation record.  Caches
+  the mapping in the target cache. If `fatal' is true, raises a fatal if the
+  class does not have an accessible method with the given name and does not
+  have a __call method; otherwise (if `fatal' is false), raises a warning and
+  puts func that does nothing and returns null (SystemLib::s_nullFunc) on the
+  activation record.
 
 D:Func = LdObjInvoke S0:Cls -> B
 

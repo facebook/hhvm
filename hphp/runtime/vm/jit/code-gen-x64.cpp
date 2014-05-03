@@ -2435,25 +2435,29 @@ void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
 void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   using namespace MethodCache;
 
-  auto clsReg    = srcLoc(0).reg();
-  auto actRecReg = srcLoc(2).reg();
+  auto const clsReg    = srcLoc(0).reg();
+  auto const actRecReg = srcLoc(1).reg();
+  auto const extra     = inst->extra<LdObjMethodData>();
   auto& a = m_as;
 
   auto const handle = RDS::alloc<Entry, sizeof(Entry)>().handle();
   if (RuntimeOption::EvalPerfDataMap) {
+    auto const caddr_hand = reinterpret_cast<char*>(
+      static_cast<intptr_t>(handle)
+    );
     Debug::DebugInfo::recordDataMap(
-      (char*)(intptr_t)handle,
-      (char*)(intptr_t)handle + sizeof(TypedValue),
-      folly::format("rds+MethodCache-{}", curFunc()->fullName()->data()).str());
+      caddr_hand,
+      caddr_hand + sizeof(TypedValue),
+      folly::format("rds+MethodCache-{}",
+        curFunc()->fullName()->data()).str());
   }
 
-  auto smashTarget = static_cast<SmashTarget*>(
+  auto const smashTarget = static_cast<SmashTarget*>(
     std::malloc(sizeof(SmashTarget))
   );
 
-  auto mcHandler = inst->extra<LdObjMethodData>()->fatal ?
-    handlePrimeCacheInit<true> :
-    handlePrimeCacheInit<false>;
+  auto const mcHandler = extra->fatal ? handlePrimeCacheInit<true>
+                                      : handlePrimeCacheInit<false>;
 
   Label slow_path;
   Label done;
@@ -2493,10 +2497,10 @@ asm_label(a, slow_path);
     SyncOptions::kSmashableAndSyncPoint,
     argGroup()
       .addr(rVmTl, safe_cast<int32_t>(handle))
-      .ssa(2/*actRec*/)
-      .ssa(1/*name*/)
+      .ssa(1/*actRec*/)
+      .immPtr(extra->method)
       .ssa(0/*cls*/)
-      .ssa(3/*ctx*/)
+      .immPtr(curClass())
       // The scratch reg contains the prime data before we've smashed the call
       // to handleSlowPath.  After, it contains the primed Class/Func pair.
       .reg(m_rScratch)

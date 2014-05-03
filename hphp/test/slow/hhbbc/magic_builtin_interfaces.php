@@ -5,12 +5,23 @@ function instance_of_test(array $x) {
   var_dump($x instanceof \HH\Traversable);
   var_dump($x instanceof Traversable); // false without
                                        // EnableHipHopSyntax or <?hh
+  var_dump($x instanceof \HH\Container);
+  var_dump($x instanceof Container);   // false without
+                                       // EnableHipHopSyntax or <?hh
   var_dump($x instanceof XHPChild);
   var_dump($x instanceof Indexish);
   var_dump($x instanceof Stringish);
   var_dump($x instanceof \HH\KeyedTraversable);
   var_dump($x instanceof KeyedTraversable); // false without
                                             // EnableHipHopSyntax or <?hh
+  var_dump($x instanceof \HH\KeyedContainer);
+  var_dump($x instanceof KeyedContainer);   // false without
+                                            // EnableHipHopSyntax or <?hh
+}
+
+function type_hint_container(\HH\KeyedContainer $x) {
+  echo '==================== ', __FUNCTION__,' ====================', "\n";
+  var_dump(is_array($x));
 }
 
 function type_hint_traversable(\HH\KeyedTraversable $x) {
@@ -33,6 +44,7 @@ class C {
 function main() {
   instance_of_test(array(1,2,3));
   type_hint_traversable(array(1,2,3));
+  type_hint_container(array(1,2,3));
 
   $c = new C();
   type_hint_stringish($c);

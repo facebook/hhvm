@@ -139,7 +139,7 @@ function prepare(Set $available_frameworks, Set $framework_class_overrides,
   return $frameworks;
 }
 
-function fork_buckets(Traversable $data, Callable $callback): int {
+function fork_buckets(Traversable $data, callable $callback): int {
   $num_threads = min(count($data), num_cpus() + 1);
   if (Options::$num_threads !== -1) {
     $num_threads = min(count($data), Options::$num_threads);

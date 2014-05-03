@@ -270,21 +270,27 @@ void defClsHelper(PreClass* preClass) {
 const StaticString
   s_HH_Traversable("HH\\Traversable"),
   s_HH_KeyedTraversable("HH\\KeyedTraversable"),
+  s_HH_Container("HH\\Container"),
+  s_HH_KeyedContainer("HH\\KeyedContainer"),
   s_Indexish("Indexish"),
   s_XHPChild("XHPChild"),
   s_Stringish("Stringish");
 
 bool interface_supports_non_objects(const StringData* s) {
-  return s->isame(s_HH_Traversable.get()) ||
-         s->isame(s_HH_KeyedTraversable.get()) ||
-         s->isame(s_Indexish.get()) ||
-         s->isame(s_XHPChild.get()) ||
-         s->isame(s_Stringish.get());
+  return (s->isame(s_HH_Traversable.get()) ||
+          s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_Container.get()) ||
+          s->isame(s_HH_KeyedContainer.get()) ||
+          s->isame(s_Indexish.get()) ||
+          s->isame(s_XHPChild.get()) ||
+          s->isame(s_Stringish.get()));
 }
 
 bool interface_supports_array(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_Container.get()) ||
+          s->isame(s_HH_KeyedContainer.get()) ||
           s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
 }
@@ -293,6 +299,8 @@ bool interface_supports_array(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
           (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
           (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }

@@ -1,6 +1,8 @@
 bool(true)
 bool(true)
 bool(true)
+bool(true)
+bool(true)
 bool(false)
 Traversable
 array(0) {
@@ -8,8 +10,14 @@ array(0) {
 KeyedTraversable
 array(0) {
 }
+Container
+array(0) {
+}
+KeyedContainer
+array(0) {
+}
 Indexish
 array(0) {
 }
 
-Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s on line 20
+Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s on line 28

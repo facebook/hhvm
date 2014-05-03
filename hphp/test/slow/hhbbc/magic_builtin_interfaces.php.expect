@@ -2,11 +2,17 @@
 bool(true)
 bool(false)
 bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
 bool(true)
 bool(false)
 bool(true)
 bool(false)
 ==================== type_hint_traversable ====================
+bool(true)
+==================== type_hint_container ====================
 bool(true)
 ==================== type_hint_stringish ====================
 bool(true)

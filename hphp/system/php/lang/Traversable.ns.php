@@ -31,8 +31,13 @@ namespace HH {
 interface Traversable {
 }
 
+interface Container extends \HH\Traversable {
+}
+
 interface KeyedTraversable extends \HH\Traversable {
 }
 
+interface KeyedContainer extends \HH\Container, \HH\KeyedTraversable {
 }
 
+}

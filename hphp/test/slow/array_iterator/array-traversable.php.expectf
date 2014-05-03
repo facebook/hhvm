@@ -1,15 +1,23 @@
 bool(true)
 bool(true)
 bool(true)
+bool(true)
+bool(true)
 bool(false)
-Traversable Array 
+Traversable Array
 array(0) {
 }
-KeyedTraversable Array 
+KeyedTraversable Array
 array(0) {
 }
-Indexish Array 
+Container Array
+array(0) {
+}
+KeyedContainer Array
+array(0) {
+}
+Indexish Array
 array(0) {
 }
 
-Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s/test/slow/array_iterator/array-traversable.php on line 23
+Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s/test/slow/array_iterator/array-traversable.php on line 31

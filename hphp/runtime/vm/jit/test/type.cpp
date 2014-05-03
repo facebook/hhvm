@@ -155,7 +155,7 @@ TEST(Type, RuntimeType) {
   EXPECT_FALSE(t.subtypeOf(Type::Dbl));
 
   rt = HPHP::JIT::RuntimeType(DataType::KindOfObject,
-                                 DataType::KindOfInvalid);
+                              DataType::KindOfInvalid);
   rt = rt.setKnownClass(SystemLib::s_TraversableClass);
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Obj));

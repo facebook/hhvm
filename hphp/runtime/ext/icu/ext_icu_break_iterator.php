@@ -1,7 +1,7 @@
 <?hh
 
 /**
- * A “break iterator” is an ICU object that exposes methods for locating
+ * A "break iterator" is an ICU object that exposes methods for locating
  * boundaries in text (e.g. word or sentence boundaries). The PHP
  * IntlBreakIterator serves as the the base class for all types of ICU break
  * iterators. Where extra functionality is available, the intl extension may
@@ -11,10 +11,10 @@
  * integer values representing the successive locations of the text
  * boundaries, expressed as UTF-8 code units (byte) counts, taken from the
  * beggining of the text (which has the location 0). The keys yielded by the
- * iterator simply form the sequence of natural numbers {0, 1, 2, …}.
+ * iterator simply form the sequence of natural numbers {0, 1, 2, ...}.
  */
 <<__NativeData("IntlBreakIterator")>>
-class IntlBreakIterator implements \Traversable, \Iterator {
+class IntlBreakIterator implements \HH\Iterator {
   /**
    * Private constructor for disallowing instantiation
    */
@@ -22,7 +22,7 @@ class IntlBreakIterator implements \Traversable, \Iterator {
 
   /**
    * Create break iterator for boundaries of combining character sequences
-   *  
+   *
    *
    * @param string $locale - Text locale or NULL for default_locale
    *
@@ -41,7 +41,7 @@ class IntlBreakIterator implements \Traversable, \Iterator {
 
   /**
    * Create break iterator for logically possible line breaks
-   *  
+   *
    * @param string $locale - Text locale or NULL for default_locale
    *
    * @return IntlBreakIterator
@@ -176,7 +176,7 @@ class IntlBreakIterator implements \Traversable, \Iterator {
   public function getText(): mixed;
 
   /**
-   * Tell whether an offset is a boundaryʼs offset
+   * Tell whether an offset is a boundary's offset
    *
    * @param int $offset
    *

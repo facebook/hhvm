@@ -180,7 +180,8 @@ and sub_type env ty1 ty2 =
     end
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
-  | (_, Tapply ((_, "\\Traversable"), [ty2])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, "\\Traversable"), [ty2])), (r, Tarray (_, ty3, ty4))
+  | (_, Tapply ((_, "\\Container"), [ty2])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3, ty4 with
       | None, _ -> env
       | Some ty3, None ->
@@ -190,7 +191,8 @@ and sub_type env ty1 ty2 =
           let env, _ = Unify.unify env ty2 ty4 in
           env
       )
-  | (_, Tapply ((_, "\\KeyedTraversable"), [ty1; ty2])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, "\\KeyedTraversable"), [ty1; ty2])), (r, Tarray (_, ty3, ty4))
+  | (_, Tapply ((_, "\\KeyedContainer"), [ty1; ty2])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3 with
       | None -> env
       | Some ty3 ->

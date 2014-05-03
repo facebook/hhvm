@@ -27,6 +27,8 @@ module SSet = Utils.SSet
 let autoimport_classes = [
   "Traversable";
   "KeyedTraversable";
+  "Container";
+  "KeyedContainer";
   "Iterator";
   "KeyedIterator";
   "Iterable";

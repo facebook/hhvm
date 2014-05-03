@@ -42,18 +42,18 @@ function gzencode(string $data, int $level = -1): mixed;
 function gzinflate(string $data, int $length = 0): mixed;
 function gzuncompress(string $data, int $length = 0): mixed;
 
-function sort<Tv>(Traversable<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
-function rsort<Tv>(Traversable<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
-function asort<Tk,Tv>(KeyedTraversable<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
-function arsort<Tk,Tv>(KeyedTraversable<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
-function ksort<Tk,Tv>(KeyedTraversable<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
-function krsort<Tk,Tv>(KeyedTraversable<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
+function sort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+function rsort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+function asort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+function arsort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+function ksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
+function krsort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
-function usort<Tv>(Traversable<Tv> &$arg, mixed $c): bool;
+function usort<Tv>(Container<Tv> &$arg, mixed $c): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
-function uasort<Tk,Tv>(KeyedTraversable<Tk, Tv> &$arg, mixed $c): bool;
+function uasort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 // $c is a callable of type (function(Tk,Tk): bool)
-function uksort<Tk,Tv>(KeyedTraversable<Tk, Tv> &$arg, mixed $c): bool;
+function uksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 
 function intval($v, $base = 10): int;
 function doubleval($v): float;

@@ -19,7 +19,11 @@ interface Traversable<Tv> {}
 
 interface KeyedTraversable<Tk, Tv> extends Traversable<Tv> {}
 
-interface Indexish<Tk, Tv> extends KeyedTraversable<Tk, Tv> {}
+interface Container<Tv> extends Traversable<Tv> {}
+
+interface KeyedContainer<Tk, Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+
+interface Indexish<Tk, Tv> extends KeyedContainer<Tk, Tv> {}
 
 interface Iterator<Tv> extends Traversable<Tv> {
   public function current(): Tv;
@@ -265,6 +269,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
 
 interface ConstSet<Tv> extends ConstCollection<Tv>,
                                ConstSetAccess<Tv>,
+                               Container<Tv>,
                                Iterable<Tv> {
   public function values(): ConstVector<Tv>;
   public function map<Tu>((function(Tv): Tu) $fn): ConstSet<Tu>;
@@ -322,5 +327,5 @@ interface XHPChild {}
  * objects: that is, objects that provide the __toString method
  */
 interface Stringish {
-  public function __toString();
+  public function __toString(): string;
 }

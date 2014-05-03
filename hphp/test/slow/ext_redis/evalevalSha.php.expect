@@ -1,0 +1,121 @@
+_eval
+int(42)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  array(3) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+    [2]=>
+    array(2) {
+      [0]=>
+      string(1) "a"
+      [1]=>
+      string(1) "b"
+    }
+  }
+}
+string(2) "OK"
+array(4) {
+  [0]=>
+  string(24) "ext_redis_eval_test:key1"
+  [1]=>
+  string(24) "ext_redis_eval_test:key2"
+  [2]=>
+  string(5) "first"
+  [3]=>
+  string(6) "second"
+}
+eval
+int(42)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  array(3) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+    [2]=>
+    array(2) {
+      [0]=>
+      string(1) "a"
+      [1]=>
+      string(1) "b"
+    }
+  }
+}
+string(2) "OK"
+array(4) {
+  [0]=>
+  string(24) "ext_redis_eval_test:key1"
+  [1]=>
+  string(24) "ext_redis_eval_test:key2"
+  [2]=>
+  string(5) "first"
+  [3]=>
+  string(6) "second"
+}
+evaluate
+int(42)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  array(3) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+    [2]=>
+    array(2) {
+      [0]=>
+      string(1) "a"
+      [1]=>
+      string(1) "b"
+    }
+  }
+}
+string(2) "OK"
+array(4) {
+  [0]=>
+  string(24) "ext_redis_eval_test:key1"
+  [1]=>
+  string(24) "ext_redis_eval_test:key2"
+  [2]=>
+  string(5) "first"
+  [3]=>
+  string(6) "second"
+}
+_evalSha
+int(42)
+string(2) "OK"
+string(45) "NOSCRIPT No matching script. Please use EVAL."
+evalSha
+int(42)
+string(2) "OK"
+string(45) "NOSCRIPT No matching script. Please use EVAL."
+evaluateSha
+int(42)
+string(2) "OK"
+string(45) "NOSCRIPT No matching script. Please use EVAL."
+script
+string(40) "1fa00e76656cc152ad327c13fe365858fd7be306"
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+string(2) "OK"
+string(42) "NOTBUSY No scripts in execution right now."

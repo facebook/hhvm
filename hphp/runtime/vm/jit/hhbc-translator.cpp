@@ -3056,43 +3056,45 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
 void HhbcTranslator::emitFCallArray(const Offset pcOffset,
                                     const Offset after,
                                     bool destroyLocals) {
-  SSATmp* stack = spillStack();
-  gen(CallArray, CallArrayData(pcOffset, after, destroyLocals), stack);
+  auto const stack = spillStack();
+  gen(CallArray, CallArrayData { pcOffset, after, destroyLocals }, stack);
 }
 
 void HhbcTranslator::emitFCall(uint32_t numParams,
                                Offset returnBcOffset,
                                const Func* callee,
                                bool destroyLocals) {
-  SSATmp* params[numParams + 4];
+  SSATmp* params[numParams + 2];
   std::memset(params, 0, sizeof params);
   for (uint32_t i = 0; i < numParams; i++) {
     // DataTypeGeneric is used because the Call instruction just spills the
     // values to the stack unmodified.
-    params[numParams + 4 - i - 1] = popF(DataTypeGeneric);
+    params[numParams + 2 - i - 1] = popF(DataTypeGeneric);
   }
 
   params[0] = spillStack();
   params[1] = m_irb->fp();
-  params[2] = cns(returnBcOffset);
-  params[3] = callee ? cns(callee) : cns(Type::InitNull);
 
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     for (uint32_t i = 0; i < numParams; i++) {
       if (callee != nullptr &&
-          params[numParams + 4 - i - 1]) {
+          params[numParams + 2 - i - 1]) {
         gen(TypeProfileFunc, TypeProfileData(i),
-            params[numParams + 4 - i - 1], cns(callee));
+            params[numParams + 2 - i - 1], cns(callee));
       } else  {
-        SSATmp* func = gen(LdARFuncPtr, m_irb->sp(), cns(0));
+        auto const func = gen(LdARFuncPtr, m_irb->sp(), cns(0));
         gen(TypeProfileFunc, TypeProfileData(i),
-            params[numParams + 4 - i - 1], func);
+            params[numParams + 2 - i - 1], func);
       }
     }
   }
 
   SSATmp** decayedPtr = params;
-  gen(Call, CallData(destroyLocals), std::make_pair(numParams + 4, decayedPtr));
+  gen(
+    Call,
+    CallData { returnBcOffset, callee, destroyLocals },
+    std::make_pair(numParams + 2, decayedPtr)
+  );
   if (!m_fpiStack.empty()) {
     m_fpiStack.pop();
   }
@@ -3184,7 +3186,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   auto const ret = gen(
     CallBuiltin,
     retType,
-    CallData(destroyLocals),
+    CallBuiltinData { destroyLocals },
     makeCatch(),
     std::make_pair(argsSize, (SSATmp**)&args)
   );

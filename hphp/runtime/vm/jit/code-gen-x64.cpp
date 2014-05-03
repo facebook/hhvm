@@ -3618,20 +3618,20 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
-  auto spReg = srcLoc(0).reg();
-  auto fpReg = srcLoc(1).reg();
-  SSATmp* returnBcOffset = inst->src(2);
-  SSATmp* func           = inst->src(3);
-  SrcRange args          = inst->srcs().subpiece(4);
-  int numArgs            = args.size();
+  auto const extra   = inst->extra<Call>();
+  auto const spReg   = srcLoc(0).reg();
+  auto const fpReg   = srcLoc(1).reg();
+  auto const args    = inst->srcs().subpiece(2);
+  auto const numArgs = args.size();
 
   // put all outgoing arguments onto the VM stack
   int adjustment = -numArgs * sizeof(Cell);
   for (int i = 0; i < numArgs; i++) {
-    cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i], srcLoc(i+4), Width::Full);
+    cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i],
+      srcLoc(i + 2), Width::Full);
   }
   // store the return bytecode offset into the outgoing actrec
-  auto returnBc = safe_cast<int32_t>(returnBcOffset->intVal());
+  auto returnBc = safe_cast<int32_t>(extra->after);
   m_as.storeq(fpReg, spReg[AROFF(m_sfp)]);
   m_as.storel(returnBc, spReg[AROFF(m_soff)]);
   if (adjustment != 0) {
@@ -3639,12 +3639,13 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   }
 
   assert(m_curInst->marker().valid());
-  SrcKey srcKey = m_curInst->marker().sk();
-  bool isImmutable = func->isConst(Type::Func);
-  const Func* funcd = isImmutable ? func->funcVal() : nullptr;
+  auto const srcKey = m_curInst->marker().sk();
   assert(m_as.base() == m_mainCode.base());
-  int32_t adjust = emitBindCall(m_mainCode, m_stubsCode,
-                                srcKey, funcd, numArgs);
+  int32_t adjust = emitBindCall(m_mainCode,
+                                m_stubsCode,
+                                srcKey,
+                                extra->callee,
+                                numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);
   }

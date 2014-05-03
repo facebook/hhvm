@@ -196,8 +196,9 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
   };
 
   auto killedCallLocals = false;
-  if ((inst->is(CallArray) && inst->extra<CallArrayData>()->destroyLocals) ||
-      (inst->is(Call, CallBuiltin) && inst->extra<CallData>()->destroyLocals)) {
+  if ((inst->is(CallArray) && inst->extra<CallArray>()->destroyLocals) ||
+      (inst->is(Call) && inst->extra<Call>()->destroyLocals) ||
+      (inst->is(CallBuiltin) && inst->extra<CallBuiltin>()->destroyLocals)) {
     clearLocals(hook);
     killedCallLocals = true;
   }

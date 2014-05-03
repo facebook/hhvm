@@ -360,34 +360,56 @@ struct DefInlineFPData : IRExtraData {
   Type retTypePred;
 };
 
-/*
- * FCallArray offsets
- */
 struct CallArrayData : IRExtraData {
-  explicit CallArrayData(Offset pcOffset, Offset aft, bool destroyLocals)
+  explicit CallArrayData(Offset pcOffset, Offset after, bool destroyLocals)
     : pc(pcOffset)
-    , after(aft)
+    , after(after)
     , destroyLocals(destroyLocals)
   {}
 
   std::string show() const {
     return folly::to<std::string>(pc, ",", after,
-                                  destroyLocals ? " destroy locals" : "");
+                                  destroyLocals ? ",destroyLocals" : "");
   }
 
-  Offset pc, after;
+  Offset pc;                    // XXX why isn't this available in the marker?
+  Offset after;
+  bool destroyLocals;
+};
+
+struct CallBuiltinData : IRExtraData {
+  explicit CallBuiltinData(bool destroyLocals)
+    : destroyLocals(destroyLocals)
+  {}
+
+  std::string show() const {
+    return destroyLocals ? "destroyLocals" : "";
+  }
+
   bool destroyLocals;
 };
 
 struct CallData : IRExtraData {
-  explicit CallData(bool destroy)
-    : destroyLocals(destroy)
+  explicit CallData(Offset after,
+                    const Func* callee,
+                    bool destroy)
+    : after(after)
+    , callee(callee)
+    , destroyLocals(destroy)
   {}
 
   std::string show() const {
-    return destroyLocals ? "destroy locals" : "";
+    return folly::to<std::string>(
+      after,
+      callee
+        ? folly::format(",{}", callee->fullName()->data()).str()
+        : std::string{},
+      destroyLocals ? ",destroyLocals" : ""
+    );
   }
 
+  Offset after;
+  const Func* callee;  // nullptr if not statically known
   bool destroyLocals;
 };
 
@@ -807,7 +829,7 @@ X(ReqRetranslateOpt,            ReqRetransOptData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
 X(Call,                         CallData);
-X(CallBuiltin,                  CallData);
+X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
 X(FunctionExitSurpriseHook,     RetCtrlData);

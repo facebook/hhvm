@@ -127,8 +127,8 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 2;
 
     case Call:
-      // Inputs 3+ are arguments to the function
-      return srcNo >= 4;
+      // Inputs past 2 are arguments to the function
+      return srcNo >= 2;
 
     case ColAddElemC:
       // value at index 2

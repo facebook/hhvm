@@ -1671,29 +1671,29 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
-  auto spReg = x2a(srcLoc(0).reg());
-  auto fpReg = x2a(srcLoc(1).reg());
-  auto* returnBcOffset = inst->src(2);
-  auto* func = inst->src(3);
-  SrcRange args = inst->srcs().subpiece(4);
+  auto const spReg = x2a(srcLoc(0).reg());
+  auto const fpReg = x2a(srcLoc(1).reg());
+  auto const extra = inst->extra<Call>();
+  SrcRange args = inst->srcs().subpiece(2);
   int32_t numArgs = args.size();
 
   int64_t adjustment = cellsToBytes((int64_t)-numArgs);
   for (int32_t i = 0; i < numArgs; ++i) {
-    emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 4));
+    emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 2));
   }
 
   m_as.  Str  (fpReg, spReg[AROFF(m_sfp)]);
-  m_as.  Mov  (rAsm.W(), returnBcOffset->intVal());
+  m_as.  Mov  (rAsm.W(), extra->after);
   m_as.  Str  (rAsm.W(), spReg[AROFF(m_soff)]);
   emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);
 
   assert(m_curInst->marker().valid());
-  SrcKey srcKey = m_curInst->marker().sk();
-  bool isImmutable = func->isConst() && !func->isA(Type::Null);
-  const Func* funcd = isImmutable ? func->funcVal() : nullptr;
-  int32_t adjust  = emitBindCall(mcg->code.main(), mcg->code.stubs(),
-                                 srcKey, funcd, numArgs);
+  auto const srcKey = m_curInst->marker().sk();
+  int32_t adjust = emitBindCall(mcg->code.main(),
+                                mcg->code.stubs(),
+                                srcKey,
+                                extra->callee,
+                                numArgs);
 
   emitRegGetsRegPlusImm(m_as, rVmSp, rVmSp, adjust);
 }

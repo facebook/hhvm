@@ -89,8 +89,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i == 1) return okStore(cint);
     break;
   case Call:
-    if (i == 3) return true; // func
-    if (i >= 4) return okStore(cint);
+    if (i >= 2) return okStore(cint);
     break;
   case CallBuiltin:
     if (i >= 2) return true; // args -> ArgGroup.ssa()
@@ -285,7 +284,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
       return srcIdx >= 2 && srcIdx < inst.numSrcs();
 
     case Call:
-      return srcIdx >= 4 && srcIdx < inst.numSrcs();
+      return srcIdx >= 2 && srcIdx < inst.numSrcs();
 
     case CallBuiltin:
       return srcIdx >= 1 && srcIdx < inst.numSrcs();

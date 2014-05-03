@@ -168,6 +168,7 @@ class Redis {
   }
 
   public function client($cmd, $arg = '') {
+    $cmd = strtolower($cmd);
     if (func_num_args() == 2) {
       $this->processCommand('CLIENT', $cmd, $arg);
     } else {

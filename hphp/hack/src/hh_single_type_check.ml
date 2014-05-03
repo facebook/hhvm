@@ -21,49 +21,49 @@ type options = {
   rest : string list
 }
 
-let builtins =
-  "<?hh // decl\n"^
-  "class Object {"^
-  "  public function get_class(): string {} "^
-  "  public function get_parent_class(): ?string {} "^
-  "}"^
-  "interface Traversable<Tv> {}"^
-  "interface Container<Tv> extends Traversable<Tv> {}"^
-  "interface Iterator<Tv> extends Traversable<Tv> {}"^
-  "interface Iterable<Tv> extends Traversable<Tv> {}"^
-  "interface KeyedTraversable<Tk, Tv> extends Traversable<Tv> {}"^
-  "interface KeyedContainer<Tk, Tv> extends Container<Tv>, KeyedTraversable<Tk,Tv> {}"^
-  "interface Indexish<Tk, Tv> extends KeyedContainer<Tk, Tv> {}"^
-  "interface KeyedIterator<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterator<Tv> {}"^
-  "interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}"^
-  "interface Awaitable<T> {}"^
-  "interface WaitHandle<T> extends Awaitable<T> {}"^
-  "interface ConstVector<Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{}"^
-  "interface ConstSet<Tv> extends Iterable<Tv>, Container<Tv>{}"^
-  "interface ConstMap<Tk, Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{}"^
-  "final class Vector<Tv> implements ConstVector<Tv>{"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;"^
-  "  public function filter((function(Tv): bool) $callback): Vector<Tv>;"^
-  "}"^
-  "final class ImmVector<Tv> implements ConstVector<Tv> {}"^
-  "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {}"^
-  "final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>{}"^
-  "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {}"^
-  "final class Set<Tv> extends ConstSet<Tv> {}"^
-  "final class ImmSet<Tv> extends ConstSet<Tv> {}"^
-  "class Exception { public function __construct(string $x) {} }"^
-  "interface Continuation<Tv> implements Iterator<Tv> { "^
-  "  public function next(): void;"^
-  "  public function current(): Tv;"^
-  "  public function key(): int;"^
-  "  public function rewind(): void;"^
-  "  public function valid(): bool;"^
-  "}"^
-  "final class Pair<Tk, Tv> extends Indexish<int,mixed> {public function isEmpty(): bool {}}"^
-  "interface Stringish {public function __toString(): string {}}"^
-  "interface XHPChild {}"^
-  "function hh_show($val) {}"^
-  "interface Countable { public function count(): int; }"
+let builtins_filename = "builtins.hhi"
+let builtins = "<?hh // decl\n"^
+  "class Object {\n"^
+  "  public function get_class(): string {} \n"^
+  "  public function get_parent_class(): ?string {} \n"^
+  "}\n"^
+  "interface Traversable<Tv> {}\n"^
+  "interface Container<Tv> extends Traversable<Tv> {}\n"^
+  "interface Iterator<Tv> extends Traversable<Tv> {}\n"^
+  "interface Iterable<Tv> extends Traversable<Tv> {}\n"^
+  "interface KeyedTraversable<Tk, Tv> extends Traversable<Tv> {}\n"^
+  "interface KeyedContainer<Tk, Tv> extends Container<Tv>, KeyedTraversable<Tk,Tv> {}\n"^
+  "interface Indexish<Tk, Tv> extends KeyedContainer<Tk, Tv> {}\n"^
+  "interface KeyedIterator<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterator<Tv> {}\n"^
+  "interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}\n"^
+  "interface Awaitable<T> {}\n"^
+  "interface WaitHandle<T> extends Awaitable<T> {}\n"^
+  "interface ConstVector<Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{}\n"^
+  "interface ConstSet<Tv> extends Iterable<Tv>, Container<Tv>{}\n"^
+  "interface ConstMap<Tk, Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{}\n"^
+  "final class Vector<Tv> implements ConstVector<Tv>{\n"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;\n"^
+  "  public function filter((function(Tv): bool) $callback): Vector<Tv>;\n"^
+  "}\n"^
+  "final class ImmVector<Tv> implements ConstVector<Tv> {}\n"^
+  "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^
+  "final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>{}\n"^
+  "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^
+  "final class Set<Tv> extends ConstSet<Tv> {}\n"^
+  "final class ImmSet<Tv> extends ConstSet<Tv> {}\n"^
+  "class Exception { public function __construct(string $x) {} }\n"^
+  "interface Continuation<Tv> implements Iterator<Tv> { \n"^
+  "  public function next(): void;\n"^
+  "  public function current(): Tv;\n"^
+  "  public function key(): int;\n"^
+  "  public function rewind(): void;\n"^
+  "  public function valid(): bool;\n"^
+  "}\n"^
+  "final class Pair<Tk, Tv> extends Indexish<int,mixed> {public function isEmpty(): bool {}}\n"^
+  "interface Stringish {public function __toString(): string {}}\n"^
+  "interface XHPChild {}\n"^
+  "function hh_show($val) {}\n"^
+  "interface Countable { public function count(): int; }\n"
 
 (*****************************************************************************)
 (* Helpers *)
@@ -76,7 +76,6 @@ let die str =
   exit 2
 
 let error l = die (Utils.pmsg_l l)
-
 
 let parse_options () =
   let fn_ref = ref None in
@@ -177,11 +176,11 @@ let main_hack { filename; suggest } =
   SharedMem.init();
   Typing.debug := true;
   try
-    Pos.file := filename;
-    (* FIXME: builtins should be considered separately as a builtins.php *)
+    Pos.file := builtins_filename;
     let ast_builtins = Parser_hack.program builtins in
-    let ast = ast_builtins @ parse_file filename in
-    let ast = Namespaces.elaborate_defs ast in
+    Pos.file := filename;
+    let ast_file = parse_file filename in
+    let ast = Namespaces.elaborate_defs (ast_builtins @ ast_file) in
     Parser_heap.ParserHeap.add filename ast;
     let funs, classes, typedefs, consts = collect_defs ast in
     let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in

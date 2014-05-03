@@ -911,9 +911,10 @@ static bool HHVM_FUNCTION(putenv, const String& setting) {
     String name = setting.substr(0, pos);
     String value = setting.substr(pos + 1);
     g_context->setenv(name, value);
-    return true;
+  } else {
+    g_context->unsetenv(setting);
   }
-  return false;
+  return true;
 }
 
 static bool HHVM_FUNCTION(set_magic_quotes_runtime, bool new_setting) {

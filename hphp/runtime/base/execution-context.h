@@ -291,6 +291,7 @@ public:
    */
   String getenv(const String& name) const;
   void setenv(const String& name, const String& value);
+  void unsetenv(const String& name);
   Array getEnvs() const { return m_envs; }
 
   String getTimeZone() const { return m_timezone;}

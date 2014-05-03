@@ -1194,12 +1194,12 @@ D:StkPtr = CallArray S0:StkPtr
   arguments is pushed. CallArray pops the array off the stack, pushes the
   elements of the array as arguments, and invokes the function in the ActRec.
 
-D:StkPtr = Call<returnOff,funcd,destroyLocals> S0:StkPtr S1:FramePtr [S2...SN]
+D:StkPtr = Call<numParams,returnOff,funcd,destroyLocals> S0:StkPtr S1:FramePtr
 
-  Transfer control to a callee, based on the pre-live activation record pointed
-  to by S0.  S1 is the current caller frame pointer, and a variadic list of
-  SSATmps is passed for the arguments. The `funcd' in the extra data is a Func*
-  for the callee if we know the callee statically.
+  Transfer control to a callee, based on the pre-live activation record and set
+  of args on the stack pointed to by S0. S1 is the current caller frame
+  pointer. The `funcd' in the extra data is a Func* for the callee if we know
+  the callee statically.
 
 NativeImpl = S0:ConstFunc S1:FramePtr
 

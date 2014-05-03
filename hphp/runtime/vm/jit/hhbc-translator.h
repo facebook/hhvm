@@ -832,6 +832,9 @@ private:
   SSATmp* topC(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
     return top(Type::Cell, i, tc);
   }
+  SSATmp* topF(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
+    return top(Type::Gen, i, tc);
+  }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
   SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
   std::vector<SSATmp*> peekSpillValues() const;

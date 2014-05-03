@@ -390,16 +390,20 @@ struct CallBuiltinData : IRExtraData {
 };
 
 struct CallData : IRExtraData {
-  explicit CallData(Offset after,
+  explicit CallData(uint32_t numParams,
+                    Offset after,
                     const Func* callee,
                     bool destroy)
-    : after(after)
+    : numParams(numParams)
+    , after(after)
     , callee(callee)
     , destroyLocals(destroy)
   {}
 
   std::string show() const {
     return folly::to<std::string>(
+      numParams,
+      ',',
       after,
       callee
         ? folly::format(",{}", callee->fullName()->data()).str()
@@ -408,6 +412,7 @@ struct CallData : IRExtraData {
     );
   }
 
+  uint32_t numParams;
   Offset after;
   const Func* callee;  // nullptr if not statically known
   bool destroyLocals;

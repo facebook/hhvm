@@ -513,9 +513,7 @@ O(Clone,                        D(Obj), S(Obj),                   N|E|PRc|Er) \
 O(LdRaw,                        DLdRaw, S(Str,Obj,Func),                  NF) \
 O(FreeActRec,              D(FramePtr), S(FramePtr),                      NF) \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(Call,                      D(StkPtr), S(StkPtr)                             \
-                                          S(FramePtr)                         \
-                                          SSpills,                     E|CRc) \
+O(Call,                      D(StkPtr), S(StkPtr) S(FramePtr),             E) \
 O(CallArray,                 D(StkPtr), S(StkPtr),                   E|N|CRc) \
 O(CallBuiltin,                DBuiltin, SUnk,                     E|Er|N|PRc) \
 O(NativeImpl,                       ND, C(Func) S(FramePtr),             E|N) \

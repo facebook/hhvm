@@ -3618,36 +3618,24 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
-  auto const extra   = inst->extra<Call>();
-  auto const spReg   = srcLoc(0).reg();
-  auto const fpReg   = srcLoc(1).reg();
-  auto const args    = inst->srcs().subpiece(2);
-  auto const numArgs = args.size();
+  auto const extra = inst->extra<Call>();
+  auto const rSP   = srcLoc(0).reg();
+  auto const rFP   = srcLoc(1).reg();
+  auto& a = m_as;
 
-  // put all outgoing arguments onto the VM stack
-  int adjustment = -numArgs * sizeof(Cell);
-  for (int i = 0; i < numArgs; i++) {
-    cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i],
-      srcLoc(i + 2), Width::Full);
-  }
-  // store the return bytecode offset into the outgoing actrec
-  auto returnBc = safe_cast<int32_t>(extra->after);
-  m_as.storeq(fpReg, spReg[AROFF(m_sfp)]);
-  m_as.storel(returnBc, spReg[AROFF(m_soff)]);
-  if (adjustment != 0) {
-    m_as.addq(adjustment, spReg);
-  }
+  auto const ar = extra->numParams * sizeof(TypedValue);
+  a.    storeq (rFP,                              rSP[ar + AROFF(m_sfp)]);
+  a.    storel (safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]);
 
-  assert(m_curInst->marker().valid());
   auto const srcKey = m_curInst->marker().sk();
-  assert(m_as.base() == m_mainCode.base());
-  int32_t adjust = emitBindCall(m_mainCode,
-                                m_stubsCode,
-                                srcKey,
-                                extra->callee,
-                                numArgs);
+  auto const adjust = emitBindCall(m_mainCode,
+                                   m_stubsCode,
+                                   srcKey,
+                                   extra->callee,
+                                   extra->numParams);
+  assert(dstLoc(0).reg() == rVmSp);
   if (adjust) {
-    m_as.addq (adjust, rVmSp);
+    a.  addq   (adjust, rVmSp);
   }
 }
 

@@ -118,9 +118,12 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       return StackValueInfo { inst, Type::Gen };
     }
     auto info =
-      getStackValue(inst->src(0),
-                    index -
-                    (1 /* pushed */ - kNumActRecCells /* popped */));
+      getStackValue(
+        inst->src(0),
+        index - (1 /* pushed */ -
+                 (kNumActRecCells +
+                   inst->extra<Call>()->numParams) /* popped */)
+      );
     info.spansCall = true;
     return info;
   }

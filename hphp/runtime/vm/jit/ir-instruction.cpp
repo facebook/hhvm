@@ -126,10 +126,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
       // Consumes the $this/Class field of the ActRec
       return srcNo == 2;
 
-    case Call:
-      // Inputs past 2 are arguments to the function
-      return srcNo >= 2;
-
     case ColAddElemC:
       // value at index 2
       return srcNo == 2;

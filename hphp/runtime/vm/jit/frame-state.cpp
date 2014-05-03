@@ -74,8 +74,9 @@ void FrameState::update(const IRInstruction* inst) {
   case Call:
     m_spValue = inst->dst();
     m_frameSpansCall = true;
-    // A call pops the ActRec and pushes a return value.
-    m_spOffset -= kNumActRecCells;
+    // A call pops the ActRec and the arguments, and then pushes a
+    // return value.
+    m_spOffset -= kNumActRecCells + inst->extra<Call>()->numParams;
     m_spOffset += 1;
     assert(m_spOffset >= 0);
     clearCse();

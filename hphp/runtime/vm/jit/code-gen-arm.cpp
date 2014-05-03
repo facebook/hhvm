@@ -1671,31 +1671,24 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
-  auto const spReg = x2a(srcLoc(0).reg());
-  auto const fpReg = x2a(srcLoc(1).reg());
   auto const extra = inst->extra<Call>();
-  SrcRange args = inst->srcs().subpiece(2);
-  int32_t numArgs = args.size();
+  auto const rSP   = x2a(srcLoc(0).reg());
+  auto const rFP   = x2a(srcLoc(1).reg());
+  auto& a = m_as;
 
-  int64_t adjustment = cellsToBytes((int64_t)-numArgs);
-  for (int32_t i = 0; i < numArgs; ++i) {
-    emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 2));
-  }
+  auto const ar = extra->numParams * sizeof(TypedValue);
+  a.    Str  (rFP, rSP[ar + AROFF(m_sfp)]);
+  a.    Mov  (rAsm.W(), extra->after);
+  a.    Str  (rAsm.W(), rSP[ar + AROFF(m_soff)]);
 
-  m_as.  Str  (fpReg, spReg[AROFF(m_sfp)]);
-  m_as.  Mov  (rAsm.W(), extra->after);
-  m_as.  Str  (rAsm.W(), spReg[AROFF(m_soff)]);
-  emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);
-
-  assert(m_curInst->marker().valid());
   auto const srcKey = m_curInst->marker().sk();
-  int32_t adjust = emitBindCall(mcg->code.main(),
-                                mcg->code.stubs(),
-                                srcKey,
-                                extra->callee,
-                                numArgs);
-
-  emitRegGetsRegPlusImm(m_as, rVmSp, rVmSp, adjust);
+  auto const adjust = emitBindCall(m_mainCode,
+                                   m_stubsCode,
+                                   srcKey,
+                                   extra->callee,
+                                   extra->numParams);
+  assert(dstLoc(0).reg() == rVmSp);
+  emitRegGetsRegPlusImm(a, rVmSp, rVmSp, adjust);
 }
 
 //////////////////////////////////////////////////////////////////////

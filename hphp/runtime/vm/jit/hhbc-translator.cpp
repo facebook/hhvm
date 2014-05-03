@@ -3064,36 +3064,23 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
                                Offset returnBcOffset,
                                const Func* callee,
                                bool destroyLocals) {
-  SSATmp* params[numParams + 2];
-  std::memset(params, 0, sizeof params);
-  for (uint32_t i = 0; i < numParams; i++) {
-    // DataTypeGeneric is used because the Call instruction just spills the
-    // values to the stack unmodified.
-    params[numParams + 2 - i - 1] = popF(DataTypeGeneric);
-  }
-
-  params[0] = spillStack();
-  params[1] = m_irb->fp();
-
   if (RuntimeOption::EvalRuntimeTypeProfile) {
-    for (uint32_t i = 0; i < numParams; i++) {
-      if (callee != nullptr &&
-          params[numParams + 2 - i - 1]) {
-        gen(TypeProfileFunc, TypeProfileData(i),
-            params[numParams + 2 - i - 1], cns(callee));
+    for (auto i = uint32_t{0}; i < numParams; ++i) {
+      auto const val = topF(numParams - i - 1);
+      if (callee != nullptr) {
+        gen(TypeProfileFunc, TypeProfileData(i), val, cns(callee));
       } else  {
         auto const func = gen(LdARFuncPtr, m_irb->sp(), cns(0));
-        gen(TypeProfileFunc, TypeProfileData(i),
-            params[numParams + 2 - i - 1], func);
+        gen(TypeProfileFunc, TypeProfileData(i), val, func);
       }
     }
   }
 
-  SSATmp** decayedPtr = params;
+  auto const sp = spillStack();
   gen(
     Call,
-    CallData { returnBcOffset, callee, destroyLocals },
-    std::make_pair(numParams + 2, decayedPtr)
+    CallData { numParams, returnBcOffset, callee, destroyLocals },
+    sp, m_irb->fp()
   );
   if (!m_fpiStack.empty()) {
     m_fpiStack.pop();

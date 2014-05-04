@@ -479,7 +479,7 @@ std::string IRUnit::toString() const {
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
-void dumpTrace(int level, const IRUnit& unit, const char* caption,
+void printUnit(int level, const IRUnit& unit, const char* caption,
                const RegAllocInfo* regs, AsmInfo* ai,
                const GuardConstraints* guards) {
   if (dumpIREnabled(level)) {

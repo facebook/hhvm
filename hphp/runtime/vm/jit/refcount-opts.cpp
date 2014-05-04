@@ -1750,7 +1750,7 @@ void optimizeRefcounts(IRUnit& unit, FrameState&& fs) {
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
   auto const changed = splitCriticalEdges(unit);
   if (changed) {
-    dumpTrace(6, unit, "after splitting critical edges for refcount opts");
+    printUnit(6, unit, "after splitting critical edges for refcount opts");
   }
 
   auto const blocks = rpoSortCfg(unit);
@@ -1774,7 +1774,7 @@ void optimizeRefcounts(IRUnit& unit, FrameState&& fs) {
     BlockMap after;
     getRefDeltas(unit, after);
     if (!validateDeltas(before, after)) {
-      dumpTrace(0, unit, "after refcount optimization");
+      printUnit(0, unit, "after refcount optimization");
       always_assert(false && "refcount validation failed");
     }
   }

@@ -109,7 +109,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   Timer _t(Timer::optimize);
 
   auto finishPass = [&](const char* msg) {
-    dumpTrace(6, unit, folly::format("after {}", msg).str().c_str());
+    printUnit(6, unit, folly::format("after {}", msg).str().c_str());
     assert(checkCfg(unit));
     assert(checkTmpsSpanningCalls(unit));
     if (debug) {

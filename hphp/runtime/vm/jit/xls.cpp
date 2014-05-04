@@ -1374,7 +1374,7 @@ RegAllocInfo allocateRegs(IRUnit& unit) {
   XLS xls(unit, regs, abi);
   xls.allocate();
   if (dumpIREnabled()) {
-    dumpTrace(kRegAllocLevel, unit, " after extended alloc ", &regs,
+    printUnit(kRegAllocLevel, unit, " after extended alloc ", &regs,
               nullptr, nullptr);
   }
   return regs;

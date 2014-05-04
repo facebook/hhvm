@@ -194,7 +194,7 @@ void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
     genCodeImpl(main, stubs, unit, bcMap, mcg, regs, &ai);
-    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
+    printUnit(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
   } else {
     genCodeImpl(main, stubs, unit, bcMap, mcg, regs, nullptr);
   }

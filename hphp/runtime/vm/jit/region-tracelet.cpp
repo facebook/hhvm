@@ -238,7 +238,7 @@ RegionDescPtr RegionFormer::go() {
     }
   }
 
-  dumpTrace(2, m_ht.unit(), " after tracelet formation ",
+  printUnit(2, m_ht.unit(), " after tracelet formation ",
             nullptr, nullptr, m_ht.irBuilder().guards());
 
   if (m_region && !m_region->blocks.empty()) {
@@ -564,7 +564,7 @@ void RegionFormer::recordDependencies() {
     firstBlock.addPredicted(blockStart, pred);
   });
   if (changed) {
-    dumpTrace(3, unit, " after guard relaxation ",
+    printUnit(3, unit, " after guard relaxation ",
               nullptr, nullptr, m_ht.irBuilder().guards());
   }
 

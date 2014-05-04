@@ -592,21 +592,22 @@ class Redis {
   /* Scripting ----------------------------------------------------------- */
 
   protected function doEval($cmd, $script, array $args, $numKeys) {
+    $keyNo = $numKeys;
     foreach($args as &$arg) {
-      if ($numKeys-- <= 0) break;
+      if ($keyNo-- <= 0) break;
       $arg = $this->prefix($arg);
     }
-    array_unshift($args, $script);
+    array_unshift($args, $script, $numKeys);
     $this->processArrayCommand($cmd, $args);
     return $this->processVariantResponse();
   }
 
-  public function _eval($script, array $args = null, $numKeys = 0) {
-    return $this->doEval('EVAL', $script, $args, $numKeys);
+  public function evaluate($script, array $args = null, $numKeys = 0) {
+    return $this->doEval('EVAL', $script, $args ?: [], $numKeys);
   }
 
-  public function evalSha($sha, array $args = null, $numKeys = 0) {
-    return $this->doEval('EVALSHA', $sha, $args, $numKeys);
+  public function evaluateSha($sha, array $args = null, $numKeys = 0) {
+    return $this->doEval('EVALSHA', $sha, $args ?: [], $numKeys);
   }
 
   public function script($subcmd/* ... */) {
@@ -682,7 +683,7 @@ class Redis {
   /* Standard Function Map ----------------------------------------------- */
 
   /**
-   * The majority of the Redis API is implemnted by __call
+   * The majority of the Redis API is implemented by __call
    * which references this list for how the individual command
    * should be handled.
    *
@@ -876,6 +877,10 @@ class Redis {
     'mget' => [ 'vararg' => self::VAR_KEY_ALL,
                 'return' => 'Vector', 'retargs' => [1] ],
     'getmultiple' => [ 'alias' => 'mget' ],
+
+    // Eval
+    'eval' => [ 'alias' => 'evaluate' ],
+    'evalsha' => [ 'alias' => 'evaluateSha' ],
   ];
 
 
@@ -1126,14 +1131,37 @@ class Redis {
   }
 
   protected function processVariantResponse() {
-    if ($this->mode === self::ATOMIC) {
-      return $this->sockReadData($type);
+    if ($this->mode !== self::ATOMIC) {
+      $this->multiHandler[] = [ 'cb' => [$this,'processVariantResponse'] ];
+      if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
+        return false;
+      }
+      return $this;
     }
-    $this->multiHandler[] = [ 'cb' => [$this,'processVariantResponse'] ];
-    if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
-      return false;
+
+    return $this->doProcessVariantResponse();
+  }
+
+  private function doProcessVariantResponse()
+  {
+    $resp = $this->sockReadData($type);
+
+    if ($type === self::TYPE_INT) {
+      return (int) $resp;
     }
-    return $this;
+
+    if ($type === self::TYPE_MULTIBULK) {
+      $ret = [];
+      $lineNo = 0;
+      $count = (int) $resp;
+      while($count--) {
+        $lineNo++;
+        $ret[] = $this->doProcessVariantResponse();
+      }
+      return $ret;
+    }
+
+    return $resp;
   }
 
   protected function processClientListResponse() {
@@ -1423,7 +1451,7 @@ class Redis {
         $fname = $func['alias'];
         $func = self::$map[$fname];
       } else {
-        return call_user_func_array([$this,$func['alias']],func_get_args());
+        return call_user_func_array([$this,$func['alias']],$args);
       }
     }
     if (empty($func['format'])) {

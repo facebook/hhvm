@@ -17,10 +17,12 @@
 #ifndef incl_HPHP_PREG_H_
 #define incl_HPHP_PREG_H_
 
+#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/type-string.h"
 
 #include <cstdint>
 #include <cstddef>
+#include <pcre.h>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2
@@ -49,10 +51,30 @@ namespace HPHP {
 class Array;
 struct Variant;
 
-struct PCREglobals {
+class pcre_cache_entry {
+  pcre_cache_entry(const pcre_cache_entry&);
+  pcre_cache_entry& operator=(const pcre_cache_entry&);
+
+public:
+  pcre_cache_entry() {}
+  ~pcre_cache_entry();
+
+  pcre *re;
+  pcre_extra *extra; // Holds results of studying
+  int preg_options;
+  int compile_options;
+};
+
+class PCREglobals {
+public:
+  PCREglobals() { }
+  ~PCREglobals();
+  void cleanupOnRequestEnd(const pcre_cache_entry* ent);
   // pcre ini_settings
   int64_t m_preg_backtrace_limit;
   int64_t m_preg_recursion_limit;
+private:
+  smart::vector<const pcre_cache_entry*> m_overflow;
 };
 
 Variant preg_grep(const String& pattern, const Array& input, int flags = 0);

@@ -602,11 +602,11 @@ class Redis {
     return $this->processVariantResponse();
   }
 
-  public function _eval($script, array $args = null, $numKeys = 0) {
+  public function evaluate($script, array $args = null, $numKeys = 0) {
     return $this->doEval('EVAL', $script, $args ?: [], $numKeys);
   }
 
-  public function evalSha($sha, array $args = null, $numKeys = 0) {
+  public function evaluateSha($sha, array $args = null, $numKeys = 0) {
     return $this->doEval('EVALSHA', $sha, $args ?: [], $numKeys);
   }
 
@@ -879,9 +879,8 @@ class Redis {
     'getmultiple' => [ 'alias' => 'mget' ],
 
     // Eval
-    'eval' => [ 'alias' => '_eval' ],
-    'evaluate' => [ 'alias' => '_eval' ],
-    'evaluatesha' => [ 'alias' => 'evalSha' ],
+    'eval' => [ 'alias' => 'evaluate' ],
+    'evalsha' => [ 'alias' => 'evaluateSha' ],
   ];
 
 

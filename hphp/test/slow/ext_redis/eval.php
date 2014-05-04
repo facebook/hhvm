@@ -6,7 +6,7 @@ $r = NewRedisTestInstance();
 $prefix = GetTestKeyName(__FILE__).':';
 $r->setOption(Redis::OPT_PREFIX, $prefix);
 
-foreach (['_eval', 'eval', 'evaluate'] as $method) {
+foreach (['eval', 'evaluate'] as $method) {
     var_dump($r->$method('return 42'));
     var_dump($r->$method('return {1,2,{3,4,{"a","b"}}}'));
     var_dump($r->$method('return redis.call("set", KEYS[1], "bar")', ['foo'], 1));

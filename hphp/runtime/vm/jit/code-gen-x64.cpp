@@ -2295,10 +2295,10 @@ void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
   // cvtsi2sd doesn't modify the high bits of its target, which can
   // cause false dependencies to prevent register renaming from kicking
   // in. Break the dependency chain by zeroing out the XMM reg.
+  zeroExtendIfBool(m_as, src, srcReg);
   PhysReg xmmReg = dstReg.isSIMD() ? dstReg : PhysReg(rCgXMM0);
   m_as.pxor(xmmReg, xmmReg);
   m_as.cvtsi2sd(srcReg, xmmReg);
-  zeroExtendIfBool(m_as, src, srcReg);
   emitMovRegReg(m_as, xmmReg, dstReg);
 }
 

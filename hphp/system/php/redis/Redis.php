@@ -613,7 +613,7 @@ class Redis {
   }
 
   public function script($subcmd/* ... */) {
-    switch ($subcmd) {
+    switch (strtolower($subcmd)) {
       case 'flush':
       case 'kill':
         $this->processCommand('SCRIPT', $subcmd);

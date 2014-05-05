@@ -1165,6 +1165,7 @@ class Redis {
     }
 
     if ($type === self::TYPE_ERR) {
+      $this->lastError = $resp;
       return null;
     }
 

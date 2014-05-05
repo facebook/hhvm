@@ -1,7 +1,3 @@
-test/more_tests/*.diff
-test/more_tests/*.out
-test/suggest/*.diff
-test/suggest/*.out
 bin/
 src/inotify-1.0/
 src/_build/

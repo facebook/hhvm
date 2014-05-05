@@ -13,10 +13,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-cd ../test/suggest
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
-./verify \
-    $* \
-    --hh-single-type-check "../../bin/hh_single_type_check --suggest" \
-    --hh-preprocessor ../../bin/hh_preprocessor \
-    *.php
+
+
+CHECKER_CMD="../../bin/hh_single_type_check"
+PROCESSOR_CMD="../../bin/hh_preprocessor"
+
+if hash "$CHECKER_CMD" 2>/dev/null; then
+    ../verify \
+        $* \
+        --hh-single-type-check "$CHECKER_CMD --suggest" \
+        --hh-preprocessor "$PROCESSOR_CMD" \
+        *.php
+else
+    echo >2 "Both '$CHECKER_CMD' and '$PROCESSOR_CMD' should be executables"
+    exit 1
+fi

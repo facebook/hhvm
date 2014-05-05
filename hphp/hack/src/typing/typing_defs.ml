@@ -83,7 +83,7 @@ and ty_ =
    * array operations (since a class might implement ArrayAccess), but not with
    * array type hints.
    *
-   * Tobject is currently used to type code like: ../test/more_tests/return_unknown_class.php
+   * Tobject is currently used to type code like: ../test/typecheck/return_unknown_class.php
    *)
   | Tobject
   | Tshape of ty SMap.t

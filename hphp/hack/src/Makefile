@@ -188,7 +188,7 @@ test:
 	ocamlyacc -v parsing/parser.mly 2>&1 | grep -L conflict | grep -q .
 	rm -f parsing/parser.mli parsing/parser.ml
 	# Run tests
-	../test/more_tests/verify_quick_hack
+	../test/typecheck/verify_quick_hack
 	../test/suggest/verify_quick_hack
 
 wwwtest:
@@ -203,7 +203,7 @@ debug:
 else
 debug:
 	$(info Set the TEST env variable to the test you want to debug)
-	$(info For example: export TEST=../test/more_tests/my_test.php)
+	$(info For example: export TEST=../test/typecheck/my_test.php)
 endif
 
 debug_client:

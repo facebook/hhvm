@@ -129,7 +129,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   Asm a { mcg->code.main() };
 
-  if (tx->mode() == TransProflogue) {
+  if (tx->mode() == TransKind::Proflogue) {
     assert(func->shouldPGO());
     TransID transId  = tx->profData()->curTransID();
     auto counterAddr = tx->profData()->transCounterAddr(transId);

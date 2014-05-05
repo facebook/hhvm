@@ -170,9 +170,9 @@ static bool isMainExit(const Block* b) {
  */
 std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() {
   // This function is only correct when given a single-exit region, as
-  // in TransProfile.  Furthermore, its output is only used to guide
-  // formation of profile-driven regions.
-  assert(tx->mode() == TransProfile);
+  // in TransKind::Profile.  Furthermore, its output is only used to
+  // guide formation of profile-driven regions.
+  assert(tx->mode() == TransKind::Profile);
 
   // We want the state for the last block on the "main trace".  Figure
   // out which that is.

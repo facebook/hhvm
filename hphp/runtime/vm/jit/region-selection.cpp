@@ -437,13 +437,15 @@ RegionDescPtr selectRegion(const RegionContext& context,
   auto region = [&]{
     try {
       switch (mode) {
-        case RegionMode::None:     return RegionDescPtr{nullptr};
-        case RegionMode::Method:   return selectMethod(context);
-        case RegionMode::Tracelet: return selectTracelet(context, 0,
-                                                         kind == TransProfile);
+        case RegionMode::None:
+          return RegionDescPtr{nullptr};
+        case RegionMode::Method:
+          return selectMethod(context);
+        case RegionMode::Tracelet:
+          return selectTracelet(context, 0, kind == TransKind::Profile);
         case RegionMode::Legacy:
-                 always_assert(t); return selectTraceletLegacy(context.spOffset,
-                                                               *t);
+          always_assert(t);
+          return selectTraceletLegacy(context.spOffset, *t);
       }
       not_reached();
     } catch (const std::exception& e) {

@@ -71,8 +71,8 @@ const TransID InvalidID = -1LL;
     DO(Proflogue)   \
     DO(Invalid)     \
 
-enum TransKind {
-#define DO(KIND) Trans##KIND,
+enum class TransKind {
+#define DO(KIND) KIND,
   TRANS_KINDS
 #undef DO
 };
@@ -84,11 +84,9 @@ constexpr size_t NumTransKinds =
   ;
 
 inline std::string show(TransKind k) {
-  switch (k) {
-#   define DO(name) case Trans##name: return "Trans" #name;
-TRANS_KINDS
-#   undef DO
-  }
+#define DO(name) case TransKind::name: return "Trans" #name;
+  switch (k) { TRANS_KINDS }
+#undef DO
   not_reached();
 }
 

@@ -799,7 +799,7 @@ getDynLocType(const SrcKey startSk,
     } // Fall through
     case OutPred: {
       // In TransProfile mode, disable type prediction to avoid side exits.
-      auto dt = mode == TransProfile ? KindOfAny : predictOutputs(ni);
+      auto dt = mode == TransKind::Profile ? KindOfAny : predictOutputs(ni);
       if (dt != KindOfAny) ni->outputPredicted = true;
       return RuntimeType(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     }
@@ -2468,7 +2468,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      const bool specialize = tx->mode() == TransLive &&
+      const bool specialize = tx->mode() == TransKind::Live &&
         (RuntimeOption::EvalHHBCRelaxGuards ||
          RuntimeOption::EvalHHIRRelaxGuards);
 
@@ -3477,7 +3477,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
               throwUnknownInput();
             }
           }
-          if ((m_mode == TransProfile || m_mode == TransOptimize) &&
+          if ((m_mode == TransKind::Profile || m_mode == TransKind::Optimize) &&
               t.m_numOpcodes > 0) {
             // We want to break blocks at every instrution that consumes a ref,
             // so that we avoid side exits.  Therefore, instructions consume ref
@@ -3586,7 +3586,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       tas.recordDelete(l);
     }
 
-    if (m_mode == TransProfile && instrBreaksProfileBB(ni)) {
+    if (m_mode == TransKind::Profile && instrBreaksProfileBB(ni)) {
       SKTRACE(1, sk, "Profiling BB broken\n");
       sk.advance(unit);
       goto breakBB;
@@ -3599,7 +3599,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     if (isUnconditionalJmp(ni->op()) &&
         ni->imm[0].u_BA > 0 &&
         tas.m_numJmps < MaxJmpsTracedThrough &&
-        m_mode != TransProfile) {
+        m_mode != TransKind::Profile) {
       // Continue tracing through jumps. To prevent pathologies, only trace
       // through a finite number of forward jumps.
       SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
@@ -3639,7 +3639,7 @@ breakBB:
     }
   }
 
-  if (RuntimeOption::EvalHHBCRelaxGuards && m_mode == TransLive) {
+  if (RuntimeOption::EvalHHBCRelaxGuards && m_mode == TransKind::Live) {
     relaxDeps(t, tas);
   } else {
     FTRACE(3, "Not relaxing deps. HHBCRelax: {}, mode: {}\n",
@@ -3665,7 +3665,7 @@ breakBB:
 Translator::Translator()
   : uniqueStubs{}
   , m_createdTime(HPHP::Timer::GetCurrentTimeMicros())
-  , m_mode(TransInvalid)
+  , m_mode(TransKind::Invalid)
   , m_profData(nullptr)
   , m_analysisDepth(0)
   , m_useAHot(RuntimeOption::RepoAuthoritative &&
@@ -3953,7 +3953,7 @@ Translator::translateRegion(const RegionDesc& region,
           assert(loc.tag() == RegionDesc::Location::Tag::Stack);
           ht.assertType(loc, type);
         } else if (isFirstRegionInstr) {
-          bool checkOuterTypeOnly = m_mode != TransProfile;
+          bool checkOuterTypeOnly = m_mode != TransKind::Profile;
           ht.guardTypeLocation(loc, type, checkOuterTypeOnly);
         } else {
           ht.checkType(loc, type, sk.offset());
@@ -3973,7 +3973,7 @@ Translator::translateRegion(const RegionDesc& region,
           ht.emitIncTransCounter();
         }
 
-        if (m_mode == TransProfile) {
+        if (m_mode == TransKind::Profile) {
           if (block->func()->isEntry(block->start().offset())) {
             ht.emitCheckCold(m_profData->curTransID());
             profilingFunc = true;
@@ -4041,16 +4041,21 @@ Translator::translateRegion(const RegionDesc& region,
         inst.preppedByRef = byRefs.next();
       }
 
-      // Check for a type prediction. Put it in the NormalizedInstruction so
-      // the emit* method can use it if needed.
-      // In PGO mode, we don't really need the values coming from the
-      // interpreter type profiler.  TransProfile translations end whenever
-      // there's a side-exit, and type predictions incur side-exits.  And when
-      // we stitch multiple TransProfile translations together to form a
-      // larger region (in TransOptimize mode), the guard for the top of the
-      // stack essentially does the role of type prediction.  And, if the value
-      // is also inferred, then the guard is omitted.
-      auto const doPrediction = mode() == TransLive && outputIsPredicted(inst);
+      /*
+       * Check for a type prediction. Put it in the
+       * NormalizedInstruction so the emit* method can use it if
+       * needed.  In PGO mode, we don't really need the values coming
+       * from the interpreter type profiler.  TransKind::Profile
+       * translations end whenever there's a side-exit, and type
+       * predictions incur side-exits.  And when we stitch multiple
+       * TransKind::Profile translations together to form a larger
+       * region (in TransKind::Optimize mode), the guard for the top
+       * of the stack essentially does the role of type prediction.
+       * And, if the value is also inferred, then the guard is
+       * omitted.
+       */
+      auto const doPrediction = mode() == TransKind::Live &&
+                                  outputIsPredicted(inst);
 
       // If this block ends with an inlined FCall, we don't emit anything for
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
@@ -4228,17 +4233,6 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
 
 }
 
-static const char *transKindStr[] = {
-#define DO(KIND) #KIND,
-  TRANS_KINDS
-#undef DO
-};
-
-const char *getTransKindName(TransKind kind) {
-  assert(kind >= 0 && kind < TransInvalid);
-  return transKindStr[kind];
-}
-
 TransRec::TransRec(SrcKey                   s,
                    MD5                      _md5,
                    TransKind                _kind,
@@ -4287,7 +4281,7 @@ TransRec::print(uint64_t profCount) const {
            "  aLen = {:#x}\n"
            "  stubStart = {}\n"
            "  stubLen = {:#x}\n",
-           static_cast<uint32_t>(kind), getTransKindName(kind),
+           static_cast<uint32_t>(kind), show(kind),
            aStart, aLen, astubsStart, astubsLen).str();
 
   ret += folly::format(

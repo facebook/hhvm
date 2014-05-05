@@ -237,10 +237,6 @@ typedef hphp_hash_map<RegionDesc::BlockId, Block*> BlockIdToIRBlockMap;
 typedef hphp_hash_map<RegionDesc::BlockId,
                       RegionDesc::Block*> BlockIdToRegionBlockMap;
 
-
-
-const char* getTransKindName(TransKind kind);
-
 /*
  * Used to maintain a mapping from the bytecode to its corresponding x86.
  */

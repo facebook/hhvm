@@ -140,11 +140,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
      *        PostCond: Loc0: Uncounted // post-conds are accurate
      *    B2: TypePred: Loc0: Int       // this will always fail
      */
-    const bool relax = kind != TransProfile ||
+    const bool relax = kind != TransKind::Profile ||
                        RuntimeOption::EvalJitRegionSelector == "tracelet";
     if (relax) {
       Timer _t(Timer::optimize_relaxGuards);
-      const bool simple = kind == TransProfile &&
+      const bool simple = kind == TransKind::Profile &&
                           RuntimeOption::EvalJitRegionSelector == "tracelet";
       auto changed = relaxGuards(unit, *irBuilder.guards(), simple);
       if (changed) finishPass("guard relaxation");

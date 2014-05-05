@@ -118,8 +118,8 @@ ProfTransRec::ProfTransRec(TransID       id,
     , m_lastBcOff(-1)
     , m_region(nullptr)
     , m_sk(sk) {
-  assert(kind == TransAnchor || kind == TransOptimize ||
-         kind == TransInterp || kind == TransLive);
+  assert(kind == TransKind::Anchor || kind == TransKind::Optimize ||
+         kind == TransKind::Interp || kind == TransKind::Live);
 }
 
 ProfTransRec::ProfTransRec(TransID       id,
@@ -131,8 +131,8 @@ ProfTransRec::ProfTransRec(TransID       id,
     , m_prologueArgs(nArgs)
     , m_region(nullptr)
     , m_sk(sk) {
-  assert(kind == TransPrologue || kind == TransProflogue);
-  if (kind == TransProflogue) {
+  assert(kind == TransKind::Prologue || kind == TransKind::Proflogue);
+  if (kind == TransKind::Proflogue) {
     // we only need to keep track of the callers for Proflogues
     m_prologueCallers = folly::make_unique<PrologueCallersRec>();
   }
@@ -155,12 +155,12 @@ Offset ProfTransRec::startBcOff() const {
 }
 
 Offset ProfTransRec::lastBcOff() const {
-  assert(m_kind == TransProfile);
+  assert(m_kind == TransKind::Profile);
   return m_lastBcOff;
 }
 
 int ProfTransRec::prologueArgs() const {
-  assert(m_kind == TransProflogue);
+  assert(m_kind == TransKind::Proflogue);
   return m_prologueArgs;
 }
 
@@ -173,12 +173,12 @@ FuncId ProfTransRec::funcId() const {
 }
 
 RegionDescPtr ProfTransRec::region() const {
-  assert(kind() == TransProfile);
+  assert(kind() == TransKind::Profile);
   return m_region;
 }
 
 PrologueCallersRec* ProfTransRec::prologueCallers() const {
-  assert(kind() == TransProflogue);
+  assert(kind() == TransKind::Proflogue);
   return m_prologueCallers.get();
 }
 
@@ -343,8 +343,11 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
 
   region->blocks.back()->setPostConditions(pconds);
   auto const startSk = region->blocks.front()->start();
-  m_transRecs.emplace_back(new ProfTransRec(transId, TransProfile, lastBcOff,
-                                            startSk, region));
+  m_transRecs.emplace_back(new ProfTransRec(transId,
+                                            TransKind::Profile,
+                                            lastBcOff,
+                                            startSk,
+                                            region));
 
   // If the translation corresponds to a DV Funclet, then add an entry
   // into dvFuncletDB.
@@ -369,10 +372,10 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
 
 TransID ProfData::addTransPrologue(TransKind kind, const SrcKey& sk,
                                    int nArgs) {
-  assert(kind == TransPrologue || kind == TransProflogue);
+  assert(kind == TransKind::Prologue || kind == TransKind::Proflogue);
   TransID transId = m_numTrans++;
   m_transRecs.emplace_back(new ProfTransRec(transId, kind, sk, nArgs));
-  if (kind == TransProflogue) {
+  if (kind == TransKind::Proflogue) {
     // only Proflogue translations need an entry in the m_prologueDB
     m_prologueDB.add(sk.getFuncId(), nArgs, transId);
   }
@@ -380,8 +383,8 @@ TransID ProfData::addTransPrologue(TransKind kind, const SrcKey& sk,
 }
 
 TransID ProfData::addTransNonProf(TransKind kind, const SrcKey& sk) {
-  assert(kind == TransAnchor || kind == TransInterp ||
-         kind == TransLive   || kind == TransOptimize);
+  assert(kind == TransKind::Anchor || kind == TransKind::Interp ||
+         kind == TransKind::Live   || kind == TransKind::Optimize);
   TransID transId = m_numTrans++;
   m_transRecs.emplace_back(new ProfTransRec(transId, kind, sk));
   return transId;
@@ -394,7 +397,7 @@ PrologueCallersRec* ProfData::findPrologueCallersRec(const Func* func,
     assert(RuntimeOption::EvalJitPGOHotOnly && !(func->attrs() & AttrHot));
     return nullptr;
   }
-  assert(transKind(tid) == TransProflogue);
+  assert(transKind(tid) == TransKind::Proflogue);
   PrologueCallersRec* prologueCallers = m_transRecs[tid]->prologueCallers();
   assert(prologueCallers);
   return prologueCallers;

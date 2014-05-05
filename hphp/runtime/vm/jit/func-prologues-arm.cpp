@@ -81,7 +81,7 @@ constexpr auto kLocalsToInitializeInline = 9;
 SrcKey emitPrologueWork(Func* func, int nPassed) {
   vixl::MacroAssembler a { mcg->code.main() };
 
-  if (tx->mode() == TransProflogue) {
+  if (tx->mode() == TransKind::Proflogue) {
     not_implemented();
   }
 

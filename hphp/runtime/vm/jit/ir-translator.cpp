@@ -1100,7 +1100,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
                                          ni.offset(), ni.toString(),
                                          ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(IMPLIES(JIT::tx->mode() == TransProfile, !ni.outputPredicted));
+  assert(IMPLIES(JIT::tx->mode() == TransKind::Profile, !ni.outputPredicted));
 
   if (ni.guardedThis) {
     // Task #2067635: This should really generate an AssertThis

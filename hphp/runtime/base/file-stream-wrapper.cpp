@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/system/constants.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include <memory>
 
 namespace HPHP {

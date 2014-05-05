@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 
 #include <vector>
 #include <fstream>
@@ -451,11 +451,12 @@ std::string FileUtil::relativePath(const std::string& fromDir,
   return std::string(path);
 }
 
-std::string FileUtil::canonicalize(const std::string &path) {
-  auto const r = canonicalize(path.c_str(), path.size());
-  SCOPE_EXIT { free(r); };
-  std::string res(r);
-  return res;
+String FileUtil::canonicalize(const String &path) {
+  return canonicalize(path.data(), path.size());
+}
+
+String FileUtil::canonicalize(const std::string &path) {
+  return canonicalize(path.c_str(), path.size());
 }
 
 /* Licensed to the Apache Software Foundation (ASF) under one or more
@@ -474,8 +475,8 @@ std::string FileUtil::canonicalize(const std::string &path) {
  * limitations under the License.
  */
 
-char* FileUtil::canonicalize(const char *addpath, size_t addlen,
-                             bool collapse_slashes /* = true */) {
+String FileUtil::canonicalize(const char *addpath, size_t addlen,
+                              bool collapse_slashes /* = true */) {
   assert(strlen(addpath) == addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null
@@ -488,7 +489,8 @@ char* FileUtil::canonicalize(const char *addpath, size_t addlen,
   if (!addpath)
     addpath = "";
 
-  char *path = (char *)malloc(maxlen);
+  String ret(maxlen-1, ReserveString);
+  char *path = ret.bufferSlice().ptr;
 
   if (addpath[0] == '/' && collapse_slashes) {
     /* Ignore the given root path, strip off leading
@@ -552,12 +554,18 @@ char* FileUtil::canonicalize(const char *addpath, size_t addlen,
 
     addpath = next;
   }
-  path[pathlen] = '\0';
-  return path;
+  ret.setSize(pathlen);
+  return ret;
 }
 
 std::string FileUtil::normalizeDir(const std::string &dirname) {
-  string ret = FileUtil::canonicalize(dirname);
+  /*
+   * normalizeDir may be called before very early one, such as
+   * in Runtime option parsing, when MemoryManager may not have been
+   * initialized
+   */
+  MemoryManager::TlsWrapper::getCheck();
+  string ret = FileUtil::canonicalize(dirname).toCppString();
   if (!ret.empty() && ret[ret.length() - 1] != '/') {
     ret += '/';
   }

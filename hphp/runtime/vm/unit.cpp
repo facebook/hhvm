@@ -40,7 +40,7 @@
 #include "hphp/runtime/vm/verifier/check.h"
 
 #include "hphp/util/atomic.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/read-only-arena.h"
 

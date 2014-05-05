@@ -16,7 +16,7 @@
 
 #include "hphp/test/ext/test_util.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -100,21 +100,24 @@ bool TestUtil::TestSharedString() {
 }
 
 bool TestUtil::TestCanonicalize() {
-  VERIFY(FileUtil::canonicalize("foo") == "foo");
-  VERIFY(FileUtil::canonicalize("/foo") == "/foo");
-  VERIFY(FileUtil::canonicalize("./foo") == "foo");
-  VERIFY(FileUtil::canonicalize("foo/bar") == "foo/bar");
-  VERIFY(FileUtil::canonicalize("foo/////bar") == "foo/bar");
-  VERIFY(FileUtil::canonicalize("foo/bar/") == "foo/bar/");
-  VERIFY(FileUtil::canonicalize("foo/../bar") == "bar");
-  VERIFY(FileUtil::canonicalize("./foo/../bar") == "bar");
-  VERIFY(FileUtil::canonicalize(".////foo/xyz////..////../bar") == "bar");
-  VERIFY(FileUtil::canonicalize("a/foo../bar") == "a/foo../bar");
-  VERIFY(FileUtil::canonicalize("a./foo/./bar") == "a./foo/bar");
-  VERIFY(FileUtil::canonicalize("////a/foo") == "/a/foo");
-  VERIFY(FileUtil::canonicalize("../foo") == "../foo");
-  VERIFY(FileUtil::canonicalize("foo/../../bar") == "../bar");
-  VERIFY(FileUtil::canonicalize("./../../") == "../../");
+  VERIFY(FileUtil::canonicalize(String("foo")) == String("foo"));
+  VERIFY(FileUtil::canonicalize(String("/foo")) == String("/foo"));
+  VERIFY(FileUtil::canonicalize(String("./foo")) == String("foo"));
+  VERIFY(FileUtil::canonicalize(String("foo/bar")) == String("foo/bar"));
+  VERIFY(FileUtil::canonicalize(String("foo/////bar")) == String("foo/bar"));
+  VERIFY(FileUtil::canonicalize(String("foo/bar/")) == String("foo/bar/"));
+  VERIFY(FileUtil::canonicalize(String("foo/../bar")) == String("bar"));
+  VERIFY(FileUtil::canonicalize(String("./foo/../bar")) == String("bar"));
+  VERIFY(FileUtil::canonicalize(String(".////foo/xyz////..////../bar"))
+         == String("bar"));
+  VERIFY(FileUtil::canonicalize(String("a/foo../bar"))
+         == String("a/foo../bar"));
+  VERIFY(FileUtil::canonicalize(String("a./foo/./bar"))
+         == String("a./foo/bar"));
+  VERIFY(FileUtil::canonicalize(String("////a/foo")) == String("/a/foo"));
+  VERIFY(FileUtil::canonicalize(String("../foo")) == String("../foo"));
+  VERIFY(FileUtil::canonicalize(String("foo/../../bar")) == String("../bar"));
+  VERIFY(FileUtil::canonicalize(String("./../../")) == String("../../"));
   return Count(true);
 }
 

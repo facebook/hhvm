@@ -77,7 +77,7 @@
 #endif
 /* }}} */
 
-#include "hphp/util/file-util.cpp"
+#include "hphp/runtime/base/file-util.h"
 
 PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC) {
   // we don't support openbasedir so you can access anything
@@ -112,7 +112,8 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 		return NULL;
 	}
 
-	HPHP::String canonicalized(HPHP::FileUtil::canonicalize(filepath, strlen(filepath)), HPHP::AttachString);
+	HPHP::String canonicalized =
+          HPHP::FileUtil::canonicalize(filepath, strlen(filepath));
     if (canonicalized.charAt(0) != '/') {
 		if (relative_to) {
 			canonicalized = HPHP::String(relative_to, HPHP::CopyString) + "/" + canonicalized;

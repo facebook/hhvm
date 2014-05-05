@@ -43,7 +43,7 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/service-data.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
@@ -1457,7 +1457,7 @@ static int execute_program_impl(int argc, char** argv) {
 }
 
 String canonicalize_path(const String& p, const char* root, int rootLen) {
-  String path(FileUtil::canonicalize(p.c_str(), p.size()), AttachString);
+  String path = FileUtil::canonicalize(p);
   if (path.charAt(0) == '/') {
     const string &sourceRoot = RuntimeOption::SourceRoot;
     int len = sourceRoot.size();

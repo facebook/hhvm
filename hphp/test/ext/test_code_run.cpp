@@ -21,7 +21,7 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/type.h"
 #include "hphp/util/process.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/ext_file.h"

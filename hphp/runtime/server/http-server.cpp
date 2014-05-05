@@ -39,7 +39,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 
 #include <sys/types.h>
 #include <signal.h>

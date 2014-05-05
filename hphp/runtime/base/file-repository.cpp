@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"

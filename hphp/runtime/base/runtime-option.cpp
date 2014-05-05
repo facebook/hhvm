@@ -36,7 +36,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
 #include "hphp/util/log-file-flusher.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 
 #include "hphp/parser/scanner.h"
 

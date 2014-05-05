@@ -39,7 +39,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "folly/String.h"
 #include <dirent.h>
 #include <glob.h>

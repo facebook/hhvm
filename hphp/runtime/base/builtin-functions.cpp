@@ -42,8 +42,8 @@
 #include "hphp/system/systemlib.h"
 #include "folly/Format.h"
 #include "hphp/util/text-util.h"
-#include "hphp/util/file-util.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/request-injection-data.h"
 
@@ -897,8 +897,7 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else if (c_file[0] == '/') {
-    String can_path(FileUtil::canonicalize(file.c_str(), file.size()),
-                    AttachString);
+    String can_path = FileUtil::canonicalize(file);
 
     if (tryFile(can_path, ctx)) {
       return can_path;
@@ -908,8 +907,7 @@ String resolve_include(const String& file, const char* currentDir,
     c_file[1] == '.' && c_file[2] == '/')))) {
 
     String path(String(g_context->getCwd() + "/" + file));
-    String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
-                    AttachString);
+    String can_path = FileUtil::canonicalize(path);
 
     if (tryFile(can_path, ctx)) {
       return can_path;
@@ -935,8 +933,7 @@ String resolve_include(const String& file, const char* currentDir,
       }
 
       path += file;
-      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
-                      AttachString);
+      String can_path = FileUtil::canonicalize(path);
 
       if (tryFile(can_path, ctx)) {
         return can_path;
@@ -947,16 +944,14 @@ String resolve_include(const String& file, const char* currentDir,
       String path(currentDir);
       path += "/";
       path += file;
-      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
-                      AttachString);
+      String can_path = FileUtil::canonicalize(path);
 
       if (tryFile(can_path, ctx)) {
         return can_path;
       }
     } else {
       String path(g_context->getCwd() + "/" + currentDir + file);
-      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
-                      AttachString);
+      String can_path = FileUtil::canonicalize(path);
 
       if (tryFile(can_path, ctx)) {
         return can_path;

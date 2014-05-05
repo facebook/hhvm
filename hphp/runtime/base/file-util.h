@@ -19,6 +19,7 @@
 #ifndef incl_HPHP_FILE_UTIL_H_
 #define incl_HPHP_FILE_UTIL_H_
 
+#include "hphp/runtime/base/type-string.h"
 #include <vector>
 #include <string>
 #include <set>
@@ -73,9 +74,10 @@ std::string relativePath(const std::string& fromDir, const std::string& toFile);
 /**
  * Canonicalize path to remove "..", "." and "\/", etc..
  */
-std::string canonicalize(const std::string& path);
-char* canonicalize(const char* path, size_t len,
-                   bool collapse_slashes = true);
+String canonicalize(const String& path);
+String canonicalize(const std::string& path);
+String canonicalize(const char* path, size_t len,
+                    bool collapse_slashes = true);
 
 /**
  * Makes sure there is ending slash by changing "path/name" to "path/name/".

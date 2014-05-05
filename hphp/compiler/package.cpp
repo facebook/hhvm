@@ -37,7 +37,7 @@
 #include "hphp/util/db-query.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/job-queue.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/execution-context.h"
 
 using namespace HPHP;
@@ -225,7 +225,8 @@ public:
 void Package::addSourceFile(const char *fileName, bool check /* = false */) {
   if (fileName && *fileName) {
     Lock lock(m_mutex);
-    auto canonFileName = FileUtil::canonicalize(fileName);
+    auto canonFileName =
+      FileUtil::canonicalize(String(fileName)).toCppString();
     bool inserted = m_filesToParse.insert(canonFileName).second;
     if (inserted && m_dispatcher) {
       ((JobQueueDispatcher<ParserWorker>*)m_dispatcher)->enqueue(

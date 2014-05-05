@@ -36,7 +36,7 @@
 
 #include "hphp/system/constants.h"
 
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 
@@ -56,12 +56,8 @@ IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
 const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const String& filename) {
-  String canonicalized(
-    FileUtil::canonicalize(
-      filename.data(),
-      strlen(filename.data()) // canonicalize asserts that we don't have nulls
-    ),
-    AttachString);
+  // canonicalize asserts that we don't have nulls
+  String canonicalized = FileUtil::canonicalize(filename);
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
     auto const& allowedDirectories = ThreadInfo::s_threadInfo->
       m_reqInjectionData.getAllowedDirectories();
@@ -108,12 +104,8 @@ String File::TranslatePath(const String& filename) {
 }
 
 String File::TranslatePathWithFileCache(const String& filename) {
-  String canonicalized(
-    FileUtil::canonicalize(
-      filename.data(),
-      strlen(filename.data()) // canonicalize asserts that we don't have nulls
-    ),
-    AttachString);
+  // canonicalize asserts that we don't have nulls
+  String canonicalized = FileUtil::canonicalize(filename);
   String translated = TranslatePath(canonicalized);
   if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
       StaticContentCache::TheFileCache) {

@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/hooks.h"
 #include "hphp/util/text-util.h"
-#include "hphp/util/file-util.h"
+#include "hphp/runtime/base/file-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -510,9 +510,9 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
 }
 
 bool StatCache::mergePath(const std::string& path, bool follow) {
-  std::string canonicalPath = FileUtil::canonicalize(path);
+  String canonicalPath = FileUtil::canonicalize(path);
   std::vector<std::string> pvec;
-  split('/', canonicalPath.c_str(), pvec);
+  split('/', canonicalPath.data(), pvec);
   assert((pvec[0].size() == 0)); // path should be absolute.
   // Lazily initialize so that if StatCache never gets used, no kernel
   // resources are consumed.

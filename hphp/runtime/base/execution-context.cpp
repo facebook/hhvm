@@ -771,6 +771,10 @@ void ExecutionContext::setenv(const String& name, const String& value) {
   m_envs.set(name, value);
 }
 
+void ExecutionContext::unsetenv(const String& name) {
+  m_envs.remove(name);
+}
+
 String ExecutionContext::getenv(const String& name) const {
   if (m_envs.exists(name)) {
     return m_envs[name].toString();

@@ -1164,6 +1164,10 @@ class Redis {
       return $ret;
     }
 
+    if ($type === self::TYPE_ERR) {
+      return null;
+    }
+
     return $resp;
   }
 

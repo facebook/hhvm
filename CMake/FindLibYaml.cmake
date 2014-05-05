@@ -7,7 +7,7 @@ find_library (LibYaml_LIBRARIES NAMES yaml)
 
 include (FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibYaml DEFAULT_MSG
-    LibYaml_LIBRARIES
-    LibYaml_INCLUDE_DIRS)
+  LibYaml_LIBRARIES
+  LibYaml_INCLUDE_DIRS)
 
 mark_as_advanced(LibYaml_INCLUDE_DIRS LibYaml_LIBRARIES)

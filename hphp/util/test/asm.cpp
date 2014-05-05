@@ -816,4 +816,30 @@ callq 0x700(,%rbx,2)
 )");
 }
 
+TEST(Asm, IncDecIndexedMemoryRef) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+
+  a.   incw  (rax[rdi*2 + 0x10]);
+  a.   incw  (rax[rsi*4 + 0x15]);
+  a.   decw  (rbp[r15*2 + 0x12]);
+  a.   incl  (rax[rdi*2 + 0x10]);
+  a.   incl  (rax[rsi*4 + 0x15]);
+  a.   decl  (rbp[r15*2 + 0x12]);
+  a.   incq  (rax[rdi*2 + 0x10]);
+  a.   incq  (rax[rsi*4 + 0x15]);
+  a.   decq  (rbp[r15*2 + 0x12]);
+  expect_asm(a, R"(
+incw 0x10(%rax,%rdi,2)
+incw 0x15(%rax,%rsi,4)
+decw 0x12(%rbp,%r15,2)
+incl 0x10(%rax,%rdi,2)
+incl 0x15(%rax,%rsi,4)
+decl 0x12(%rbp,%r15,2)
+incq 0x10(%rax,%rdi,2)
+incq 0x15(%rax,%rsi,4)
+decq 0x12(%rbp,%r15,2)
+)");
+}
+
 }}

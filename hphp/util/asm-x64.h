@@ -955,6 +955,13 @@ public:
   void decl(MemoryRef m) { instrM32(instr_dec, m); }
   void decw(MemoryRef m) { instrM16(instr_dec, m); }
 
+  void incq(IndexedMemoryRef m) { instrM(instr_inc,  m); }
+  void incl(IndexedMemoryRef m) { instrM32(instr_inc, m); }
+  void incw(IndexedMemoryRef m) { instrM16(instr_inc, m); }
+  void decq(IndexedMemoryRef m) { instrM(instr_dec,  m); }
+  void decl(IndexedMemoryRef m) { instrM32(instr_dec, m); }
+  void decw(IndexedMemoryRef m) { instrM16(instr_dec, m); }
+
   void movdqu(RegXMM x, MemoryRef m)        { instrRM(instr_movdqu, x, m); }
   void movdqu(RegXMM x, IndexedMemoryRef m) { instrRM(instr_movdqu, x, m); }
   void movdqu(MemoryRef m, RegXMM x)        { instrMR(instr_movdqu, m, x); }
@@ -2020,7 +2027,9 @@ private:
   void instrM(X64Instr   op, MemoryRef m)        { emitM(op,    UMR(m));       }
   void instrM(X64Instr   op, IndexedMemoryRef m) { emitM(op,    UIMR(m));      }
   void instrM32(X64Instr op, MemoryRef m)        { emitM32(op,  UMR(m));       }
+  void instrM32(X64Instr op, IndexedMemoryRef m) { emitM32(op,  UIMR(m));      }
   void instrM16(X64Instr op, MemoryRef m)        { emitM16(op,  UMR(m));       }
+  void instrM16(X64Instr op, IndexedMemoryRef m) { emitM16(op,  UIMR(m));      }
 
   void instrRM(X64Instr op,
                Reg64 r,

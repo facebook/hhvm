@@ -1,51 +1,6 @@
 array(1) {
   [0]=>
-  object(ReflectionMethod)#2 (4) {
-    ["name"]=>
-    string(8) "fetchAll"
-    ["class"]=>
-    string(1) "A"
-    ["originalClass"]=>
-    string(1) "A"
-    ["info"]=>
-    array(16) {
-      ["name"]=>
-      string(8) "fetchAll"
-      ["access"]=>
-      string(6) "public"
-      ["accessible"]=>
-      bool(true)
-      ["modifiers"]=>
-      int(256)
-      ["class"]=>
-      string(1) "A"
-      ["return_type"]=>
-      bool(false)
-      ["doc"]=>
-      bool(false)
-      ["params"]=>
-      array(0) {
-      }
-      ["static_variables"]=>
-      array(0) {
-      }
-      ["attributes"]=>
-      array(0) {
-      }
-      ["is_async"]=>
-      bool(false)
-      ["is_closure"]=>
-      bool(false)
-      ["is_generator"]=>
-      bool(false)
-      ["file"]=>
-      string(%d) "%s/hphp/test/slow/reflection/class_get_methods.php"
-      ["line1"]=>
-      int(3)
-      ["line2"]=>
-      int(4)
-    }
-  }
+  string(11) "A::fetchAll"
 }
 array(1) {
   [0]=>

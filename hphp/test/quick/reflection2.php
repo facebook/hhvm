@@ -22,7 +22,24 @@ class my_child extends my_class {
 }
 
 $rc = new ReflectionClass('my_child');
-var_dump($rc->getMethods());
+foreach ($rc->getMethods() as $ix => $meth) {
+  echo $ix, ': ', $meth->getName(), "\n";
+  echo 'modifiers: ';   var_dump($meth->getModifiers());
+  echo 'isFinal: ';     var_dump($meth->isFinal());
+  echo 'isAbstract: ';  var_dump($meth->isAbstract());
+  echo 'isPublic: ';    var_dump($meth->isPublic());
+  echo 'isProtected: '; var_dump($meth->isProtected());
+  echo 'isPrivate: ';   var_dump($meth->isPrivate());
+  echo 'isStatic: ';    var_dump($meth->isStatic());
+  var_dump($meth->getParameters());
+
+  try {
+    $proto = $meth->getPrototype();
+    echo 'Prototype: ', $proto->class, '::', $proto->name, "\n";
+  } catch (ReflectionException $re) {
+    echo get_class($re), ': ', $re->getMessage(), "\n";
+  }
+}
 
 function __autoload($cls) {
   if ($cls == "MyClass") {

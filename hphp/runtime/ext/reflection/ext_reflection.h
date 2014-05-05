@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_REFLECTION_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,6 +51,47 @@ class Reflection {
  public:
   static HPHP::Class* s_ReflectionExceptionClass;
   static ObjectData* AllocReflectionExceptionObject(const Variant& message);
+};
+
+
+/* A ReflectionFuncHandle is a NativeData object wrapping a Func*
+ * for the purposes of ReflectionFunction and ReflectionMethod. */
+extern const StaticString s_ReflectionFuncHandle;
+class ReflectionFuncHandle {
+ public:
+  ReflectionFuncHandle(): m_func(nullptr) {}
+  explicit ReflectionFuncHandle(const Func* func): m_func(func) {};
+  ReflectionFuncHandle(const ReflectionFuncHandle&) = delete;
+  ReflectionFuncHandle& operator=(const ReflectionFuncHandle& other) {
+    m_func = other.m_func;
+    return *this;
+  }
+  ~ReflectionFuncHandle() {}
+
+  static ReflectionFuncHandle* Get(Object obj) {
+    if (obj.isNull()) {
+      raise_error("NULL object passed");
+      return nullptr;
+    }
+    auto ret = Native::data<ReflectionFuncHandle>(obj.get());
+    return ret;
+  }
+
+  static const Func* GetFuncFor(Object obj) {
+    auto handle = ReflectionFuncHandle::Get(obj);
+    assert(handle);
+    return handle->getFunc();
+  }
+
+  const Func* getFunc() { return m_func; }
+  void setFunc(const Func* func) {
+    assert(func != nullptr);
+    assert(m_func == nullptr);
+    m_func = func;
+  }
+
+ private:
+  const Func* m_func{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

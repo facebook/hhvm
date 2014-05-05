@@ -678,7 +678,7 @@ class Redis {
   }
 
   public function clearLastError() {
-    $this->lastError = '';
+    $this->lastError = null;
     return true;
   }
 
@@ -898,7 +898,7 @@ class Redis {
   protected $retry_interval = 0;
   protected $persistent = false;
   protected $connection = null;
-  protected $lastError = '';
+  protected $lastError = null;
 
   protected $timeout_connect = 0;
   protected $timeout_seconds = 0;

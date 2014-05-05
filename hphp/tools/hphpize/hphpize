@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ ! -f "config.cmake" ]; then
   echo "config.cmake not found" >&2

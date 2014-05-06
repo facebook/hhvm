@@ -515,9 +515,8 @@ void HhbcTranslator::MInstrTranslator::constrainBase(TypeConstraint tc,
   // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
   auto baseType = value->type().derefIfPtr();
-  assert(baseType == Type::Gen || baseType.isBoxed() || baseType.notBoxed());
 
-  if (baseType.isBoxed()) {
+  if (baseType.maybeBoxed()) {
     tc.innerCat = tc.category;
     tc.category = DataTypeCountness;
   }

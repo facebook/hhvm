@@ -134,5 +134,9 @@ Example unsupported case: phpt...bug24403
 
 Under HipHop VM, this is not allowed or not working at present.
 
-(6) All fatals prevent further PHP code from executing, including __destruct
+(6) Converting $GLOBALS to bool will always evaluate to true, even if $GLOBALS
+is empty. Converting to bool can mean an explicit cast, or an implicit
+conversion inside the condition of an if statement or similar.
+
+(7) All fatals prevent further PHP code from executing, including __destruct
 methods. N.B.: exit() is a fatal.

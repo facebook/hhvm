@@ -2215,21 +2215,11 @@ void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
 void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   auto srcReg = srcLoc(0).reg();
-  // This is a handwritten copy of ArrayData::size().
+
+  // This will incorrectly result in "true" for a NameValueTableWrapper that is
+  // empty. You can only get such a thing through very contrived PHP, so the
+  // savings of a branch and a block of cold code outweights the edge-case bug.
   m_as.    cmpl  (0, srcReg[ArrayData::offsetofSize()]);
-  unlikelyIfBlock(
-    CC_L,
-    [&] (Asm& as) {
-      cgCallHelper(
-        as,
-        CppCall::direct(arrayVsize),
-        callDest(inst),
-        SyncOptions::kNoSyncPoint,
-        argGroup().ssa(0)
-      );
-      as.  testl (r32(dstReg), r32(dstReg));
-    }
-  );
   m_as.    setcc (CC_NZ, rbyte(dstReg));
 }
 

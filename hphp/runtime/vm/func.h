@@ -144,7 +144,7 @@ struct Func {
   ~Func();
   static void destroy(Func* func);
 
-  Func* clone(Class* cls) const;
+  Func* clone(Class* cls, const StringData* name = nullptr) const;
   Func* cloneAndSetClass(Class* cls) const;
 
   void validate() const {
@@ -280,10 +280,6 @@ struct Func {
   Unit* unit() const { return m_unit; }
   PreClass* preClass() const { return shared()->m_preClass; }
   Class* cls() const { return m_cls; }
-  void setName(const StringData* name) {
-    m_name = name;
-    setFullName();
-  }
   Class* baseCls() const { return m_baseCls; }
   void setBaseCls(Class* baseCls) { m_baseCls = baseCls; }
   bool hasPrivateAncestor() const { return m_hasPrivateAncestor; }
@@ -548,7 +544,7 @@ private:
   static const int kMagic = 0xba5eba11;
 
 private:
-  void setFullName();
+  void setFullName(int numParams);
   void init(int numParams);
   void initPrologues(int numParams);
   void appendParam(bool ref, const ParamInfo& info,

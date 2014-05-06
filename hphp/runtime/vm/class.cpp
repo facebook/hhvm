@@ -1150,9 +1150,8 @@ void Class::importTraitMethod(const TraitMethod&  traitMethod,
     }
     parentMethod = existingMethod;
   }
-  Func* f = method->clone(this);
+  Func* f = method->clone(this, methName);
   f->setNewFuncId();
-  f->setName(methName);
   f->setAttrs(modifiers);
   if (!parentMethod) {
     // New method

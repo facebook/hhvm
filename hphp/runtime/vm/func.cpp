@@ -165,7 +165,7 @@ bool Func::isFuncIdValid(FuncId id) {
   return s_funcVec.get(id) != nullptr;
 }
 
-void Func::setFullName() {
+void Func::setFullName(int numParams) {
   assert(m_name->isStatic());
   if (m_cls) {
     m_fullName = makeStaticString(
@@ -178,12 +178,15 @@ void Func::setFullName() {
     int numPre = isClosureBody() ? 1 : 0;
     char* from = (char*)this - numPre * sizeof(Func);
 
-    int maxNumPrologues = Func::getMaxNumPrologues(numParams());
+    int maxNumPrologues = Func::getMaxNumPrologues(numParams);
     int numPrologues = maxNumPrologues > kNumFixedPrologues ?
       maxNumPrologues : kNumFixedPrologues;
     char* to = (char*)(m_prologueTable + numPrologues);
     Debug::DebugInfo::recordDataMap(
-      from, to, folly::format("Func-{}-{}", numPre, m_fullName->data()).str());
+      from, to, folly::format("Func-{}-{}", numPre,
+                              (isPseudoMain() ?
+                               m_unit->filepath()->data() :
+                               m_fullName->data())).str());
   }
   if (RuntimeOption::DynamicInvokeFunctions.size()) {
     if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
@@ -249,7 +252,7 @@ void Func::init(int numParams) {
   m_maybeIntercepted = -1;
   if (!preClass()) {
     setNewFuncId();
-    setFullName();
+    setFullName(numParams);
   } else {
     m_fullName = nullptr;
   }
@@ -369,7 +372,7 @@ void Func::destroy(Func* func) {
   }
 }
 
-Func* Func::clone(Class* cls) const {
+Func* Func::clone(Class* cls, const StringData* name) const {
   auto numParams = this->numParams();
   Func* f = new (allocFuncMem(
                    m_name,
@@ -379,10 +382,13 @@ Func* Func::clone(Class* cls) const {
 
   f->initPrologues(numParams);
   f->m_funcId = InvalidFuncId;
+  if (name) {
+    f->m_name = name;
+  }
   if (cls != f->m_cls) {
     f->m_cls = cls;
-    f->setFullName();
   }
+  f->setFullName(numParams);
   f->m_profCounter = 0;
   return f;
 }
@@ -425,7 +431,7 @@ Func* Func::findCachedClone(Class* cls) const {
 
 void Func::rename(const StringData* name) {
   m_name = name;
-  setFullName();
+  setFullName(numParams());
   // load the renamed function
   Unit::loadFunc(this);
 }

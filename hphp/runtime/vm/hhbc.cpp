@@ -1095,6 +1095,12 @@ static const char* BareThisOp_names[] = {
 #undef BARETHIS_OP
 };
 
+static const char* SilenceOp_names[] = {
+#define SILENCE_OP(x) #x,
+  SILENCE_OPS
+#undef SILENCE_OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1141,6 +1147,7 @@ X(FatalOp)
 X(SetOpOp)
 X(IncDecOp)
 X(BareThisOp)
+X(SilenceOp)
 
 #undef X
 
@@ -1335,4 +1342,3 @@ const MInstrInfo& getMInstrInfo(Op op) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

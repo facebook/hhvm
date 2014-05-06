@@ -3522,24 +3522,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         Id oldErrorLevelLoc = -1;
         Offset start = InvalidAbsoluteOffset;
         if (op == '@') {
-          // XXX This ends up generating two boatloads of instructions; we may
-          // be better off introducing new instructions for the silencer
           oldErrorLevelLoc = m_curFunc->allocUnnamedLocal();
-          // Call error_reporting(0), and stash the return in an unnamed local
           emitVirtualLocal(oldErrorLevelLoc);
-          static const StringData* s_error_reporting =
-            makeStaticString("error_reporting");
-          Offset fpiStart = m_ue.bcPos();
-          e.FPushFuncD(1, s_error_reporting);
-          {
-            FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-            e.Int(0);
-            e.FPassC(0);
-          }
-          e.FCall(1);
-          e.UnboxR();
-          emitSet(e); // set $oldErrorLevelLoc
-          e.PopC();
+          auto idx = m_evalStack.size() - 1;
+          e.Silence(m_evalStack.getLoc(idx), SilenceOp::Start);
           start = m_ue.bcPos();
         }
 
@@ -7794,38 +7780,9 @@ void EmitterVisitor::emitForeach(Emitter& e,
  *     error_reporting(oldvalue)
  */
 void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
-  static const StringData* funcName = makeStaticString("error_reporting");
-  Label dontRollback;
-  // Optimistically call with the old value.  If this returns nonzero, call it
-  // again with that return value.
   emitVirtualLocal(oldLevelLoc);
-  Offset fpiStart = m_ue.bcPos();
-  e.FPushFuncD(1, funcName);
-  {
-    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    emitVirtualLocal(oldLevelLoc);
-    emitCGet(e);
-    e.FPassC(0);
-  }
-  e.FCall(1);
-  e.UnboxR();
-  // stack is now: ...[Loc oldLevelLoc][return value]
-  // save the return value in local, and leave it on the stack
-  emitSet(e);
-  e.Int(0);
-  e.Eq();
-  e.JmpNZ(dontRollback);
-  fpiStart = m_ue.bcPos();
-  e.FPushFuncD(1, funcName);
-  {
-    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    emitVirtualLocal(oldLevelLoc);
-    emitCGet(e);
-    e.FPassC(0);
-  }
-  e.FCall(1);
-  e.PopR();
-  dontRollback.set(e);
+  auto idx = m_evalStack.size() - 1;
+  e.Silence(m_evalStack.getLoc(idx), SilenceOp::End);
 }
 
 void EmitterVisitor::emitMakeUnitFatal(Emitter& e,

@@ -312,6 +312,7 @@ struct HhbcTranslator {
   void emitInitProp(Id propId, InitPropOp op);
   void emitAssertRATL(int32_t loc, RepoAuthType rat);
   void emitAssertRATStk(int32_t offset, RepoAuthType rat);
+  void emitSilence(Id localId, unsigned char subop);
 
   // arithmetic ops
   void emitAdd();

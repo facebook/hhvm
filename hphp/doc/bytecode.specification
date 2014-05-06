@@ -215,7 +215,7 @@ The basic compilation strategy for generators is to create bytecode functions
 consisting of two parts.
 
 The first part, executed when the generator function is called, must consist
-of a CreateCont, which is responsible for suspending execution state into a new 
+of a CreateCont, which is responsible for suspending execution state into a new
 Generator object (includes resume offset pointing to the start of the second
 part of the function) and returning it back to the caller.
 
@@ -4057,6 +4057,17 @@ BreakTraceHint   []  ->  []
   front of it. In HHVM, this is used to tell the JIT to break a Tracelet when
   it sees this opcode.
 
+Silence  <local id> <Start|End>   []  ->  []
+
+  With %2 = Start, sets the error reporting level to 0 and stores the previous
+  one in the local variable %1. The local variable will be overwritten without
+  reference counting.
+
+  With %2 = End, if the error reporting level is 0, restores the error
+  reporting level to the previous value (stored in local variable %1); if the
+  error reporting level is not 0, does nothing.
+
+
 14. Generator creation and execution
 ---------------------------------------
 
@@ -4076,7 +4087,7 @@ ContEnter   [C]  ->  []
   class. It transfers control flow to the saved resume offset of a function
   associated with $this Generator object. The $1 will remain available
   on the stack after the control is transferred.
- 
+
 ContRaise   [C:Obj]  ->  []
 
   This instruction may only appear in non-static methods of the Generator
@@ -4086,19 +4097,19 @@ ContRaise   [C:Obj]  ->  []
 
 Yield   [C]  ->  [C]
 
-  This instruction may only appear in bodies of generators. Stores $1 
-  in the generator as the result of the current iteration, sets resume 
-  offset at the next opcode and suspends execution by transferring control 
-  flow back to the ContEnter or ContRaise. Once the execution is resumed, 
-  the value sent by ContEnter becomes available on the stack, or 
+  This instruction may only appear in bodies of generators. Stores $1
+  in the generator as the result of the current iteration, sets resume
+  offset at the next opcode and suspends execution by transferring control
+  flow back to the ContEnter or ContRaise. Once the execution is resumed,
+  the value sent by ContEnter becomes available on the stack, or
   an exception sent by ContRaise is thrown.
 
 YieldK   [C C]  ->  [C]
 
   This instruction may only appear in bodies of generators. Stores $1
   in the generator as the result and $2 as the key of the current
-  iteration, sets resume offset at the next opcode and suspends execution 
-  by transferring control flow back to the ContEnter or ContRaise. Once 
+  iteration, sets resume offset at the next opcode and suspends execution
+  by transferring control flow back to the ContEnter or ContRaise. Once
   the execution is resumed, the value sent by ContEnter becomes available
   on the stack, or an exception sent by ContRaise is thrown.
 
@@ -4148,7 +4159,7 @@ Await  <number of iterators>   [C:Obj]  ->  [C]
   the next opcode, marks the AsyncFunctionWaitHandle as blocked on the
   WaitHandle provided by $1 and suspends execution by transferring control
   flow back to the scheduler.
-  
+
   Once the execution is resumed, the result of the WaitHandle provided by $1
   becomes available on the stack.
 

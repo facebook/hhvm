@@ -565,8 +565,14 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         error("invalid error kind for Fatal: %d\n", op);
         ok = false;
         break;
+      case OpSilence:
+#define SILENCE_OP(x) if (op == static_cast<uint8_t>(SilenceOp::x)) break;
+        SILENCE_OPS
+#undef SILENCE_OP
+        error("invalid operation for Silence: %d\n", op);
+        ok = false;
+        break;
       }
-      break;
     }
     case RATA:
       // Nothing to check at the moment.

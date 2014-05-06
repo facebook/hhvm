@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -262,6 +263,9 @@ bool interface_supports_array(std::string const&);
 bool interface_supports_string(std::string const&);
 bool interface_supports_int(std::string const&);
 bool interface_supports_double(std::string const&);
+
+int64_t zero_error_level();
+void restore_error_level(int64_t oldLevel);
 
 }
 #endif

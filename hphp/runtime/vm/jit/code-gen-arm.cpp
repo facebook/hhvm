@@ -199,6 +199,8 @@ CALL_OPCODE(CreateAFWH)
 CALL_OPCODE(CreateSSWH)
 CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(IncStatGrouped)
+CALL_OPCODE(ZeroErrorLevel)
+CALL_OPCODE(RestoreErrorLevel)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,

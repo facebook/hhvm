@@ -1707,6 +1707,16 @@ D:Bool = ThingExists<class|interface|trait> S0:Str
   Returns a bool indicating whether the class, interface, or trait named by S0
   exists. Invokes autoload if it doesn't exist.
 
+D:Int = GetErrorLevel
+
+  Returns the current error reporting level (equivalent to calling
+  error_reporting() in PHP).
+
+D:Int = SetErrorLevel S0:Int
+
+  Sets the current error reporting level, and returns the previous one.
+  Equivalent to calling error_reporting(S0) in PHP.
+
 
 15. Register allocation
 

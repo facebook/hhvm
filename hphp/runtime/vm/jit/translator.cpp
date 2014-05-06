@@ -1299,6 +1299,8 @@ static const struct {
   { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean,        1 }},
   { OpInitProp,    {Stack1,           None,         OutNone,          -1 }},
+  { OpSilence,     {Local|DontGuardAny,
+                                      Local,        OutNone,           0 }},
   { OpAssertRATL,  {None,             None,         OutNone,           0 }},
   { OpAssertRATStk,{None,             None,         OutNone,           0 }},
   { OpBreakTraceHint,{None,           None,         OutNone,           0 }},
@@ -2189,7 +2191,22 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpWIterInit || op == OpWIterInitK ||
                                op == OpIterNext || op == OpIterNextK ||
                                op == OpMIterNext || op == OpMIterNextK ||
-                               op == OpWIterNext || op == OpWIterNextK);
+                               op == OpWIterNext || op == OpWIterNextK ||
+                               op == OpSilence);
+        if (op == OpSilence) {
+          switch (static_cast<SilenceOp>(ni->imm[0].u_OA)) {
+            case SilenceOp::Start: {
+              Location loc{Location::Local, ni->imm[0].u_LA};
+              RuntimeType newType = RuntimeType(KindOfInt64);
+              ni->outLocal = t.newDynLocation(loc, newType);
+              break;
+            }
+            case SilenceOp::End:
+              ni->outLocal = ni->inputs[0];
+              break;
+          }
+          continue;
+        }
         if (op == OpFPassM && !ni->preppedByRef) {
           // Equivalent to CGetM. Won't mutate the base.
           continue;

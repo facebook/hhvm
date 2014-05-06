@@ -348,6 +348,10 @@ static CallMap s_callMap {
     {SurpriseHook, &EventHook::CheckSurprise, DNone, SSync, {}},
     {FunctionExitSurpriseHook, &EventHook::onFunctionExitJit, DNone, SSync,
                                {{SSA, 0}, {TV, 1}}},
+
+    /* silence operator support */
+    {ZeroErrorLevel, &zero_error_level, DSSA, SNone, {}},
+    {RestoreErrorLevel, &restore_error_level, DNone, SNone, {{SSA, 0}}},
 };
 
 ArgGroup CallInfo::toArgGroup(const RegAllocInfo& regs,

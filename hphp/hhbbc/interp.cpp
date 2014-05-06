@@ -1950,6 +1950,17 @@ void in(ISS& env, const bc::InitProp& op) {
   }
 }
 
+void in(ISS& env, const bc::Silence& op) {
+  nothrow(env);
+  switch (op.subop) {
+    case SilenceOp::Start:
+      setLoc(env, op.loc1, TInt);
+      break;
+    case SilenceOp::End:
+      break;
+  }
+}
+
 void in(ISS& env, const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
 void in(ISS& env, const bc::HighInvalid&) { always_assert(!"HighInvalid"); }
 

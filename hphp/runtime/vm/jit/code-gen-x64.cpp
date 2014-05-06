@@ -302,6 +302,9 @@ CALL_OPCODE(InterfaceSupportsStr)
 CALL_OPCODE(InterfaceSupportsInt)
 CALL_OPCODE(InterfaceSupportsDbl)
 
+CALL_OPCODE(ZeroErrorLevel)
+CALL_OPCODE(RestoreErrorLevel)
+
 CALL_OPCODE(SurpriseHook)
 CALL_OPCODE(FunctionExitSurpriseHook)
 

@@ -4498,6 +4498,26 @@ void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
   gen(StElem, base, cns(idx * sizeof(TypedValue)), val);
 }
 
+void HhbcTranslator::emitSilence(Id localId, unsigned char ucsubop) {
+  SilenceOp subop = static_cast<SilenceOp>(ucsubop);
+  switch (subop) {
+    case SilenceOp::Start: {
+      // We assume that whatever is in the local is dead and doesn't need to be
+      // refcounted before being overwritten.
+      gen(AssertLoc, Type::Uncounted, LocalId(localId), m_irb->fp());
+      auto level = gen(ZeroErrorLevel);
+      gen(StLoc, LocalId(localId), m_irb->fp(), level);
+      break;
+    }
+    case SilenceOp::End: {
+      gen(AssertLoc, Type::Int, LocalId(localId), m_irb->fp());
+      auto level = ldLoc(localId, makeExit(), DataTypeGeneric);
+      gen(RestoreErrorLevel, level);
+      break;
+    }
+  }
+}
+
 
 /*
  * Note: this is currently separate from convertToType(RepoAuthType)
@@ -5159,6 +5179,12 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       }
       break;
     }
+
+    case OpSilence:
+      if (static_cast<SilenceOp>(inst.imm[0].u_OA) == SilenceOp::Start) {
+        setImmLocType(inst.imm[0].u_LA, Type::Int);
+      }
+      break;
 
     default:
       not_reached();

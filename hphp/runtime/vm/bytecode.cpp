@@ -7252,6 +7252,28 @@ OPTBLD_INLINE void ExecutionContext::iopTraitExists(IOP_ARGS) {
   classExistsImpl(IOP_PASS_ARGS, AttrTrait);
 }
 
+OPTBLD_INLINE void ExecutionContext::iopSilence(IOP_ARGS) {
+  NEXT();
+  DECODE_LA(localId);
+  DECODE_OA(SilenceOp, subop);
+
+  switch (subop) {
+    case SilenceOp::Start: {
+      auto level = zero_error_level();
+      TypedValue* local = frame_local(m_fp, localId);
+      local->m_type = KindOfInt64;
+      local->m_data.num = level;
+      break;
+    }
+    case SilenceOp::End: {
+      TypedValue* oldTV = frame_local(m_fp, localId);
+      assert(oldTV->m_type == KindOfInt64);
+      restore_error_level(oldTV->m_data.num);
+      break;
+    }
+  }
+}
+
 string
 ExecutionContext::prettyStack(const string& prefix) const {
   if (!getFP()) {

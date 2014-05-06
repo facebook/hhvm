@@ -179,6 +179,7 @@
   CASE(SetS) \
   CASE(Shl) \
   CASE(Shr) \
+  CASE(Silence) \
   CASE(Sqrt) \
   CASE(StaticLoc) \
   CASE(StaticLocInit) \

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -332,6 +333,22 @@ bool interface_supports_double(const StringData* s) {
 bool interface_supports_double(const std::string& n) {
   const char *s = n.c_str();
   return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int64_t zero_error_level() {
+  auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto level = id.getErrorReportingLevel();
+  id.setErrorReportingLevel(0);
+  return level;
+}
+
+void restore_error_level(int64_t oldLevel) {
+  auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  if (id.getErrorReportingLevel() == 0) {
+    id.setErrorReportingLevel(oldLevel);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

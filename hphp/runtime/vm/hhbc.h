@@ -431,6 +431,16 @@ enum class BareThisOp : uint8_t {
 #undef BARETHIS_OP
 };
 
+#define SILENCE_OPS \
+  SILENCE_OP(Start) \
+  SILENCE_OP(End)
+
+enum class SilenceOp : uint8_t {
+#define SILENCE_OP(x) x,
+  SILENCE_OPS
+#undef SILENCE_OP
+};
+
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \
   O(LowInvalid,      NA,               NOV,             NOV,        NF) \
@@ -682,6 +692,8 @@ enum class BareThisOp : uint8_t {
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(InitProp,        TWO(SA,                                            \
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \
+  O(Silence,         TWO(LA,OA(SilenceOp)),                          \
+                                       NOV,             NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
 enum class Op : uint8_t {
@@ -907,6 +919,7 @@ const char* subopToName(FatalOp);
 const char* subopToName(SetOpOp);
 const char* subopToName(IncDecOp);
 const char* subopToName(BareThisOp);
+const char* subopToName(SilenceOp);
 
 /*
  * Try to parse a string into a subop name of a given type.

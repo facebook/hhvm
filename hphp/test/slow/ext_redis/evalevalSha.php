@@ -30,9 +30,17 @@ var_dump($r->evaluateSha($sha));
 foreach (['_evalSha', 'evalSha', 'evaluateSha'] as $method) {
     echo $method . "\n";
     var_dump($r->$method($sha)); // Return integer -> 42
-    // SHA1SUM of with parameters -> OK
-    var_dump($r->evalSha("c686f316aaf1eb01d5a4de1b0b63cd233010e63d",
-                         [$key, 'bar'], 1));
-    // No SHA1SUM -> NOSCRIPT error
-    var_dump($r->$method("ffffffffffffffffffffffffffffffffffffffff"));
+    var_dump($r->$method("c686f316aaf1eb01d5a4de1b0b63cd233010e63d", [$key, 'bar'], 1)); // SHA1SUM of with parameters -> OK
+    $r->clearLastError();
+    var_dump($r->$method("ffffffffffffffffffffffffffffffffffffffff")); // No SHA1SUM -> NOSCRIPT error
+    var_dump(gettype($r->getLastError()));
 }
+
+echo "script\n";
+var_dump($r->script('load','return 42'));
+var_dump($r->script('exists','1fa00e76656cc152ad327c13fe365858fd7be306','ffffffffffffffffffffffffffffffffffffffff'));
+var_dump($r->script('flush'));
+var_dump($r->script('kill'));
+var_dump(gettype($r->getLastError()));
+$r->clearLastError();
+var_dump(gettype($r->getLastError()));

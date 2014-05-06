@@ -101,14 +101,17 @@ _evalSha
 int(42)
 string(2) "OK"
 NULL
+string(6) "string"
 evalSha
 int(42)
 string(2) "OK"
 NULL
+string(6) "string"
 evaluateSha
 int(42)
 string(2) "OK"
 NULL
+string(6) "string"
 script
 string(40) "1fa00e76656cc152ad327c13fe365858fd7be306"
 array(2) {
@@ -119,3 +122,5 @@ array(2) {
 }
 string(2) "OK"
 NULL
+string(6) "string"
+string(4) "NULL"

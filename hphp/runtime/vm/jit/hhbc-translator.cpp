@@ -3648,31 +3648,6 @@ void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
   }
 }
 
-void HhbcTranslator::assertClass(const RegionDesc::Location& loc,
-                                 const Class* cls) {
-  Type curType;
-  typedef RegionDesc::Location::Tag T;
-  switch (loc.tag()) {
-    case T::Stack:
-      curType = topType(loc.stackOffset(), DataTypeSpecific);
-      break;
-
-    case T::Local:
-      curType = m_irb->localType(loc.localId(), DataTypeSpecific);
-      break;
-  }
-  assert(curType.isBoxed() || curType.notBoxed());
-
-  // We drop the |InitNull for boxed types because the inner type is just a
-  // hint and will be verified later.
-  Type newType =
-    (curType.isBoxed() ? Type::BoxedObj : (Type::Obj | Type::InitNull))
-    .specialize(cls);
-  FTRACE(1, "assertClass({}): curType = {}  =>  newType = {}\n",
-         show(loc), curType, newType);
-  assertType(loc, newType);
-}
-
 /*
  * Creates a RuntimeType struct from a program location. This needs access to
  * more than just the location's type because RuntimeType includes known

@@ -103,10 +103,7 @@ struct HhbcTranslator {
   void checkTypeStack(uint32_t idx, Type type, Offset dest);
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void assertType(const RegionDesc::Location& loc, Type type);
-  void checkType(const RegionDesc::Location& loc, Type type,
-                         Offset dest);
-  void assertClass(const RegionDesc::Location& loc, const Class* cls);
-
+  void checkType(const RegionDesc::Location& loc, Type type, Offset dest);
   RuntimeType rttFromLocation(const Location& loc);
 
   // Inlining-related functions.

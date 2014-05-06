@@ -592,20 +592,22 @@ class Redis {
   /* Scripting ----------------------------------------------------------- */
 
   protected function doEval($cmd, $script, array $args, $numKeys) {
+    $keyCount = $numKeys;
     foreach($args as &$arg) {
-      if ($numKeys-- <= 0) break;
+      if ($keyCount-- <= 0) break;
       $arg = $this->prefix($arg);
     }
+    array_unshift($args, $numKeys);
     array_unshift($args, $script);
     $this->processArrayCommand($cmd, $args);
     return $this->processVariantResponse();
   }
 
-  public function _eval($script, array $args = null, $numKeys = 0) {
+  public function _eval($script, array $args = array(), $numKeys = 0) {
     return $this->doEval('EVAL', $script, $args, $numKeys);
   }
 
-  public function evalSha($sha, array $args = null, $numKeys = 0) {
+  public function _evalSha($sha, array $args = array(), $numKeys = 0) {
     return $this->doEval('EVALSHA', $sha, $args, $numKeys);
   }
 
@@ -876,6 +878,12 @@ class Redis {
     'mget' => [ 'vararg' => self::VAR_KEY_ALL,
                 'return' => 'Vector', 'retargs' => [1] ],
     'getmultiple' => [ 'alias' => 'mget' ],
+
+    // Eval
+    'eval' => [ 'alias' => '_eval' ],
+    'evalSha' => [ 'alias' => '_evalSha' ],
+    'evaluate' => [ 'alias' => '_eval' ],
+    'evaluateSha' => [ 'alias'=> '_evalSha' ],
   ];
 
 
@@ -1126,41 +1134,36 @@ class Redis {
   }
 
   protected function processVariantResponse() {
-    if ($this->mode === self::ATOMIC) {
-      return $this->sockReadData($type);
-    }
-    $this->multiHandler[] = [ 'cb' => [$this,'processVariantResponse'] ];
-    if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
-      return false;
-    }
-    return $this;
-  }
-
-  protected function processClientListResponse() {
     if ($this->mode !== self::ATOMIC) {
-      $this->multiHandler[] = [ 'cb' => [$this,'processClientListResponse'] ];
+      $this->multiHandler[] = [ 'cb' => [$this,'processVariantResponse'] ];
       if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
         return false;
       }
       return $this;
     }
+
+    return $this->doProcessVariantResponse();
+  }
+
+  private function doProcessVariantResponse() {
     $resp = $this->sockReadData($type);
-    if (($type !== self::TYPE_LINE) AND
-        ($type !== self::TYPE_BULK)) {
-      return null;
+
+    if ($type === self::TYPE_INT) {
+      return (int) $resp;
     }
-    $ret = [];
-    $pairs = explode(' ', trim($resp));
-    foreach ($pairs as $pair) {
-      $kv = explode('=', $pair, 2);
-      if (count($kv) == 1) {
-        $ret[] = $pair;
-      } else {
-        list($k, $v) = $kv;
-        $ret[$k] = $v;
+
+    if ($type === self::TYPE_MULTIBULK) {
+      $ret = [];
+      $lineNo = 0;
+      $count = (int) $resp;
+      while($count--) {
+        $lineNo++;
+        $ret[] = $this->doProcessVariantResponse();
       }
+      return $ret;
     }
-    return $ret;
+
+    return $resp;
   }
 
   protected function processSerializedResponse() {
@@ -1423,7 +1426,7 @@ class Redis {
         $fname = $func['alias'];
         $func = self::$map[$fname];
       } else {
-        return call_user_func_array([$this,$func['alias']],func_get_args());
+        return call_user_func_array([$this,$func['alias']],$args);
       }
     }
     if (empty($func['format'])) {

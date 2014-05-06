@@ -28,7 +28,7 @@ class Yii extends Framework {
     convertWarningsToExceptions="true"
     stopOnFailure="false">
 <testsuites>
-  <testsuite name="yii">
+  <testsuite name="yiitestsuite">
     <directory suffix="Test.php">./</directory>
   </testsuite>
 </testsuites>

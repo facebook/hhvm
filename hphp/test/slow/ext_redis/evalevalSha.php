@@ -38,6 +38,7 @@ foreach (['_evalSha', 'evalSha', 'evaluateSha'] as $method) {
 
 echo "script\n";
 var_dump($r->script('load','return 42'));
+var_dump($r->script('load','bad script'));
 var_dump($r->script('exists','1fa00e76656cc152ad327c13fe365858fd7be306','ffffffffffffffffffffffffffffffffffffffff'));
 var_dump($r->script('flush'));
 var_dump($r->script('kill'));

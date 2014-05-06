@@ -114,13 +114,14 @@ NULL
 string(6) "string"
 script
 string(40) "1fa00e76656cc152ad327c13fe365858fd7be306"
+bool(false)
 array(2) {
   [0]=>
   int(1)
   [1]=>
   int(0)
 }
-string(2) "OK"
-NULL
+bool(true)
+bool(false)
 string(6) "string"
 string(4) "NULL"

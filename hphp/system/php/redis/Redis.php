@@ -617,7 +617,8 @@ class Redis {
       case 'flush':
       case 'kill':
         $this->processCommand('SCRIPT', $subcmd);
-        return $this->processVariantResponse();
+        $response = $this->processVariantResponse();
+        return ($response !== NULL) ? true : false;
       case 'load':
         if (func_num_args() < 2) {
           return false;
@@ -627,7 +628,8 @@ class Redis {
           return false;
         }
         $this->processCommand('SCRIPT', 'load', $script);
-        return $this->processVariantResponse();
+        $response = $this->processVariantResponse();
+        return ($response !== NULL) ? $response : false;
       case 'exists':
         $args = func_get_args();
         $args[0] = 'EXISTS';

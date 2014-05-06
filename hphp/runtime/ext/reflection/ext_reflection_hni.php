@@ -195,9 +195,9 @@ abstract class ReflectionFunctionAbstract {
     if (!is_string($str)) return $str;
     return str_ireplace(
       array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
-            'HH\\resource', 'HH\\void'),
+            'HH\\resource', 'HH\\void', 'HH\\this'),
       array('bool',     'int',     'float',     'string',     'num',
-            'resource',     'void'),
+            'resource',     'void',    'this'),
       $str
     );
   }

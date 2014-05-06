@@ -360,8 +360,11 @@ struct IRBuilder {
     DisableCseGuard guard(*this);
     branch(taken_block);
     Block* last = m_curBlock;
-    assert(!last->next());
-    last->back().setNext(done_block);
+    if (last->empty() || !last->back().isBlockEnd()) {
+      gen(Jmp, done_block);
+    } else if (!last->back().isTerminal()) {
+      last->back().setNext(done_block);
+    }
     appendBlock(taken_block);
     taken();
     // patch the last block added by the Taken lambda to jump to

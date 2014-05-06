@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/min-max-macros.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/runtime/ext/gd/libgd/gdfontt.h"  /* 1 Tiny font */
 #include "hphp/runtime/ext/gd/libgd/gdfonts.h"  /* 2 Small font */
@@ -2260,6 +2261,7 @@ static gdImagePtr _php_image_create_from(const String& filename,
                                          int image_type, char *tn,
                                          gdImagePtr(*func_p)(),
                                          gdImagePtr(*ioctx_func_p)()) {
+JIT::VMRegAnchor _;
   gdImagePtr im = NULL;
 #ifdef HAVE_GD_JPG
   // long ignore_warning;

@@ -25,7 +25,10 @@
 // We need to move proxy-array.cpp to ext_zend_compat/hhvm before the Zend headers
 // can be included.
 #undef ZVAL_PTR_DTOR
-#ifdef DEBUG
+#if !defined(ENABLE_ZEND_COMPAT)
+namespace HPHP { void zval_ptr_dtor_dummy(HPHP::RefData **zval_ptr) {} }
+#define ZVAL_PTR_DTOR HPHP::zval_ptr_dtor_dummy
+#elif defined(DEBUG)
 extern "C" void _zval_ptr_dtor_wrapper(HPHP::RefData **zval_ptr);
 #define ZVAL_PTR_DTOR _zval_ptr_dtor_wrapper
 #else

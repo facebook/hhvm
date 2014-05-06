@@ -12,34 +12,6 @@
 function hphp_get_extension_info(string $name): array<string, mixed>;
 
 /**
- * hphp_get_method_info() - Internally used by ReflectionClass for getting a
- *                          method's information.
- *
- * @param mixed $cls   - The class which has the method, either the name or an
- *                       instance of the class.
- * @param string $name - The name of the method.
- * @return array - A map containing the method's name, access flags, modifiers,
- *                 type flags, the class name, the doc comment, the parameters,
- *                 the static variables, attributes, location in source file and
- *                 the class and method names of its prototype.
- */
-<<__Native("NoInjection"), __HipHopSpecific>>
-function hphp_get_method_info(mixed $cls, string $name): array<string, mixed>;
-
-/**
- * hphp_get_closure_info() - Internally used by ReflectionFunction for getting
- *                           a closure's information.
- *
- * @param Closure $closure - The closure to get the information of.
- * @return array - A map containing the closure's name, closure object,
- *                 static variables, class scope and the information for the
- *                 __invoke method excluding the access flags, modifiers
- *                 and class name.
- */
-<<__Native("NoInjection"), __HipHopSpecific>>
-function hphp_get_closure_info(Closure $closure): array<string, mixed>;
-
-/**
  * hphp_get_class_info() - Internally used by ReflectionClass for getting a
  *                         class's information.
  *
@@ -52,18 +24,6 @@ function hphp_get_closure_info(Closure $closure): array<string, mixed>;
  */
 <<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_get_class_info(mixed $name): array<string, mixed>;
-
-/**
- * hphp_get_function_info() - Internally used by ReflectionFuncion for getting a
- *                            function's information.
- *
- * @param string $name - The name of the function
- * @return array - A map containing the function's name, attributes,
- *                 doc comment, parameters, static variables, user attributes
- *                 and source location.
- */
-<<__Native("NoInjection"), __HipHopSpecific>>
-function hphp_get_function_info(string $name): array<string, mixed>;
 
 /**
  * hphp_invoke() - Used by ReflectionFunction to invoke a function.

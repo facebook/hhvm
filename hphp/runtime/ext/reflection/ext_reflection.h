@@ -24,11 +24,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+Array debugger_reflection_get_function_info(const String& name);
+
 Array HHVM_FUNCTION(hphp_get_extension_info, const String& name);
-Array HHVM_FUNCTION(hphp_get_method_info, const Variant& cls, const String& name);
-Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure);
 Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name);
-Array HHVM_FUNCTION(hphp_get_function_info, const String& name);
 Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params);
 Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj, const String& cls,
                                           const String& name, const Variant& params);

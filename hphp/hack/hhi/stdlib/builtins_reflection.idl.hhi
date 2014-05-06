@@ -9,11 +9,8 @@
  *
  */
 function hphp_get_extension_info($name) { }
-function hphp_get_method_info($cname, $name) { }
-function hphp_get_closure_info($closure) { }
 function hphp_get_class_constant($cls, $name) { }
 function hphp_get_class_info($name) { }
-function hphp_get_function_info($name) { }
 function hphp_invoke($name, $params) { }
 function hphp_invoke_method($obj, $cls, $name, $params) { }
 function hphp_instanceof($obj, $name) { }

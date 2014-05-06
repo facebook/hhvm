@@ -93,12 +93,10 @@ const StaticString
   s_trait_aliases("trait_aliases"),
   s_varg("varg"),
   s___invoke("__invoke"),
-  s_closure_in_braces("{closure}"),
   s_return_type("return_type"),
   s_type_hint("type_hint"),
   s_type_profiling("type_profiling"),
   s_accessible("accessible"),
-  s_closure_scope_class("closure_scope_class"),
   s_reflectionexception("ReflectionException");
 
 static Class* get_cls(const Variant& class_or_object) {
@@ -470,7 +468,7 @@ static const Class* get_prototype_class_from_interfaces(const Class *cls,
   return nullptr;
 }
 
-static void set_method_prototype_info(Array &ret, const Func *func) {
+static void set_debugger_reflection_method_prototype_info(Array &ret, const Func *func) {
   const Class *prototypeCls = nullptr;
   if (func->baseCls() != nullptr && func->baseCls() != func->cls()) {
     prototypeCls = func->baseCls();
@@ -489,7 +487,7 @@ static void set_method_prototype_info(Array &ret, const Func *func) {
   }
 }
 
-static void set_method_info(Array &ret, const Func* func, const Class* cls) {
+static void set_debugger_reflection_method_info(Array &ret, const Func* func, const Class* cls) {
   if (RuntimeOption::EvalRuntimeTypeProfile && !ret.exists(s_type_profiling)) {
     ret.set(s_type_profiling, Array());
   }
@@ -511,76 +509,7 @@ static void set_method_info(Array &ret, const Func* func, const Class* cls) {
   set_function_info(ret, resolved_func);
   set_source_info(ret, func->unit()->filepath()->data(),
                   func->line1(), func->line2());
-  set_method_prototype_info(ret, resolved_func);
-}
-
-Array HHVM_FUNCTION(hphp_get_method_info, const Variant& class_or_object,
-                    const String &meth_name) {
-  auto const cls = get_cls(class_or_object);
-  if (!cls) return Array();
-  const Func* func = cls->lookupMethod(meth_name.get());
-  if (!func) {
-    if ((cls->attrs() & AttrAbstract) || (cls->attrs() & AttrInterface)) {
-      const Class::InterfaceMap& ifaces = cls->allInterfaces();
-      for (int i = 0, size = ifaces.size(); i < size; i++) {
-        func = ifaces[i]->lookupMethod(meth_name.get());
-        if (func) break;
-      }
-    }
-    if (!func) return Array();
-  }
-  Array ret;
-  set_method_info(ret, func, cls);
-  return ret;
-}
-
-Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure) {
-  Array mi = HHVM_FN(hphp_get_method_info)(
-      VarNR(closure->o_getClassName()), s___invoke);
-  mi.set(s_name, s_closure_in_braces);
-  mi.remove(s_access);
-  mi.remove(s_accessible);
-  mi.remove(s_modifiers);
-  mi.remove(s_class);
-
-  // grab the use variables and their values
-  auto const cls = get_cls(closure);
-  Array static_vars = Array::Create();
-  for (Slot i = 0; i < cls->numDeclProperties(); ++i) {
-    auto const& prop = cls->declProperties()[i];
-    auto val = closure.o_get(StrNR(prop.m_name), false /* error */,
-                             cls->nameStr());
-
-    // Closure static locals are represented as special instance
-    // properties with a mangled name.
-    if (prop.m_name->data()[0] == '8') {
-      static const char prefix[] = "86static_";
-      assert(!strncmp(prop.m_name->data(), prefix, sizeof prefix - 1));
-      String strippedName(prop.m_name->data() + sizeof prefix - 1,
-                          prop.m_name->size() - sizeof prefix + 1,
-                          CopyString);
-      static_vars.set(VarNR(strippedName), val);
-    } else {
-      static_vars.set(VarNR(prop.m_name), val);
-    }
-  }
-  mi.set(s_static_variables, static_vars);
-
-  auto clos = closure.getTyped<c_Closure>();
-  if (auto const cls = clos->getClass()) {
-    mi.set(s_closure_scope_class, VarNR(cls->name()));
-  } else if (auto const thiz = clos->getThis()) {
-    mi.set(s_closure_scope_class, VarNR(thiz->o_getClassName()));
-  } else {
-    mi.set(s_closure_scope_class, null_variant);
-  }
-
-  Array &params = mi.lvalAt(s_params).asArrRef();
-  for (int i = 0; i < params.size(); i++) {
-    params.lvalAt(i).asArrRef().remove(s_class);
-  }
-
-  return mi;
+  set_debugger_reflection_method_prototype_info(ret, resolved_func);
 }
 
 Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
@@ -673,7 +602,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
       if (RuntimeOption::EvalRuntimeTypeProfile) {
         set_type_profiling_info(info, cls, m);
       }
-      set_method_info(info, m, cls);
+      set_debugger_reflection_method_info(info, m, cls);
       arr.set(f_strtolower(m->nameStr()), VarNR(info));
     }
 
@@ -683,7 +612,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
       const Func* m = cls->getMethod(i);
       if (m->isGenerated()) continue;
       Array info = Array::Create();
-      set_method_info(info, m, cls);
+      set_debugger_reflection_method_info(info, m, cls);
       arr.set(f_strtolower(m->nameStr()), VarNR(info));
     }
     ret.set(s_methods, VarNR(arr));
@@ -797,7 +726,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
   return ret;
 }
 
-Array HHVM_FUNCTION(hphp_get_function_info, const String& name) {
+Array debugger_reflection_get_function_info(const String& name) {
   Array ret;
   if (name.get() == nullptr) return ret;
   const Func* func = Unit::loadFunc(name.get());
@@ -1329,10 +1258,7 @@ class ReflectionExtension : public Extension {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);
     HHVM_FE(hphp_get_class_info);
-    HHVM_FE(hphp_get_closure_info);
     HHVM_FE(hphp_get_extension_info);
-    HHVM_FE(hphp_get_function_info);
-    HHVM_FE(hphp_get_method_info);
     HHVM_FE(hphp_get_original_class_name);
     HHVM_FE(hphp_get_property);
     HHVM_FE(hphp_get_static_property);

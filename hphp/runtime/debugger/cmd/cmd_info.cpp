@@ -277,7 +277,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
   }
   if (m_type == KindOfUnknown || m_type == KindOfFunction) {
     try {
-      Array ret = HHVM_FN(hphp_get_function_info)(m_symbol);
+      Array ret = debugger_reflection_get_function_info(m_symbol);
       if (!ret.empty()) {
         m_info.append(ret);
       }

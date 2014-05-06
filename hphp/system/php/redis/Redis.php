@@ -1134,6 +1134,32 @@ class Redis {
     }
   }
 
+  protected function processClientListResponse() {
+    if ($this->mode !== self::ATOMIC) {
+      $this->multiHandler[] = [ 'cb' => [$this,'processClientListResponse'] ];
+      if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
+        return false;
+      }
+      return $this;
+    }
+    $resp = $this->sockReadData($type);
+    if (($type !== self::TYPE_LINE) AND ($type !== self::TYPE_BULK)) {
+      return null;
+    }
+    $ret = [];
+    $pairs = explode(' ', trim($resp));
+    foreach ($pairs as $pair) {
+      $kv = explode('=', $pair, 2);
+      if (count($kv) == 1) {
+        $ret[] = $pair;
+      } else {
+        list($k, $v) = $kv;
+        $ret[$k] = $v;
+      }
+    }
+    return $ret;
+  }
+
   protected function processVariantResponse() {
     if ($this->mode !== self::ATOMIC) {
       $this->multiHandler[] = [ 'cb' => [$this,'processVariantResponse'] ];

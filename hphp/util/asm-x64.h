@@ -1012,6 +1012,7 @@ public:
   void jmp(IndexedMemoryRef m) { instrM(instr_jmp, m); }
   void call(Reg64 r)           { instrR(instr_call, r); }
   void call(MemoryRef m)       { instrM(instr_call, m); }
+  void call(RIPRelativeRef m)  { instrM(instr_call, m); }
   void call(IndexedMemoryRef m){ instrM(instr_call, m); }
 
   void jmp8(CodeAddress dest)  { emitJ8(instr_jmp, ssize_t(dest)); }
@@ -1852,8 +1853,9 @@ public:
 
   ALWAYS_INLINE
   void emitM(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
-             int opSz = sz::qword) {
-    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false, opSz);
+             int opSz = sz::qword, bool ripRelative = false) {
+    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false, opSz,
+            ripRelative);
   }
 
   ALWAYS_INLINE
@@ -2026,6 +2028,8 @@ private:
   void instrRR(X64Instr  op, RegXMM x, RegXMM y) { emitRR(op,   rn(x), rn(y)); }
   void instrM(X64Instr   op, MemoryRef m)        { emitM(op,    UMR(m));       }
   void instrM(X64Instr   op, IndexedMemoryRef m) { emitM(op,    UIMR(m));      }
+  void instrM(X64Instr   op, RIPRelativeRef m)   { emitM(op,    URIP(m),
+                                                         sz::qword, true);     }
   void instrM32(X64Instr op, MemoryRef m)        { emitM32(op,  UMR(m));       }
   void instrM32(X64Instr op, IndexedMemoryRef m) { emitM32(op,  UIMR(m));      }
   void instrM16(X64Instr op, MemoryRef m)        { emitM16(op,  UMR(m));       }

@@ -1507,7 +1507,6 @@ MCGenerator::emitNativeTrampoline(TCA helperAddr) {
     // helper address and emitCall will the emit the right sequence
     // to call it indirectly
     TRACE(1, "Ran out of space to emit a trampoline for %p\n", helperAddr);
-    always_assert(false);
     return helperAddr;
   }
 
@@ -1527,8 +1526,13 @@ MCGenerator::emitNativeTrampoline(TCA helperAddr) {
   }
 
   Asm a { trampolines };
-  a.    jmp    (helperAddr);
-  a.    ud2    ();
+  // Move the 64-bit immediate address to rax, then jmp. If clobbering
+  // rax is a problem, we could do an rip-relative call with the address
+  // stored in the data section with no extra registers; but it has
+  // worse memory locality.
+  a.    emitImmReg(helperAddr, rax);
+  a.    jmp    (rax);
+  a.    ud2(); // hint that the jump doesn't go here.
 
   m_trampolineMap[helperAddr] = trampAddr;
   recordBCInstr(OpNativeTrampoline, trampolines, trampAddr);

@@ -970,9 +970,12 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 
   // do the call; may use a trampoline
   if (sync == SyncOptions::kSmashableAndSyncPoint) {
+    assert(call.kind() == CppCall::Kind::Direct);
     mcg->backEnd().prepareForSmash(a.code(), kCallLen);
+    a.call((TCA)call.address());
+  } else {
+    emitCall(a, call);
   }
-  emitCall(a, call);
   ret.returnAddress = a.frontier();
   if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
     // if we are profiling the heap, we always need to sync because
@@ -3854,7 +3857,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   if (FixupMap::eagerRecord(fn)) {
     emitEagerSyncPoint(m_as, reinterpret_cast<const Op*>(fn->getEntry()));
   }
-  m_as.call((TCA)builtinFuncPtr);
+  emitCall(m_as, (TCA)builtinFuncPtr);
   recordSyncPoint(m_as);
 }
 

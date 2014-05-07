@@ -260,7 +260,21 @@ void emitCall(Asm& a, TCA dest) {
   if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
     a.    call(dest);
   } else {
-    a.    call(mcg->getNativeTrampoline(dest));
+    dest = mcg->getNativeTrampoline(dest);
+    if (a.jmpDeltaFits(dest)) {
+      a.call(dest);
+    } else {
+      // can't do a near call; store address in data section.
+      // call by loading the address using rip-relative addressing.  This
+      // assumes the data section is near the current code section.  Since
+      // this sequence is directly in-line, rip-relative like this is
+      // more compact than loading a 64-bit immediate.
+      TCA* addr = mcg->allocData<TCA>(sizeof(TCA), 1);
+      *addr = dest;
+      TCA after = a.frontier() + 6; // 0xff,modrm,disp32
+      a.call(rip[(TCA)addr - after]);
+      assert(after == a.frontier());
+    }
   }
 }
 

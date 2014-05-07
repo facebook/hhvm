@@ -618,7 +618,7 @@ class Redis {
       case 'kill':
         $this->processCommand('SCRIPT', $subcmd);
         $response = $this->processVariantResponse();
-        return ($response !== NULL) ? true : false;
+        return $response !== NULL;
       case 'load':
         if (func_num_args() < 2) {
           return false;
@@ -1240,7 +1240,8 @@ class Redis {
   protected function processDoubleResponse() {
     if ($this->mode === self::ATOMIC) {
       $resp = $this->sockReadData($type);
-      return ($type === self::TYPE_INT OR $type === self::TYPE_BLUK) ? ((float)$resp) : null;
+      return ($type === self::TYPE_INT OR $type === self::TYPE_BLUK)
+             ? ((float)$resp) : null;
     }
     $this->multiHandler[] = [ 'cb' => [$this,'processDoubleResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {

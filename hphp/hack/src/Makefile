@@ -54,7 +54,7 @@ ifeq ($(OS), Linux)
 endif
 
 LIBS=$(INOTIFYLIB) \
- utils/lib.cma \
+ utils/utils.cma \
  avl/lib.cma \
  dfind/lib.cma \
  globals/lib.cma \

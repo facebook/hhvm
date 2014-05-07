@@ -14,7 +14,7 @@ type path = {
   path: string;
 }
 
-external realpath: string -> string option = "caml_realpath"
+external realpath: string -> string option = "hh_realpath"
 
 let dummy_path: path = { is_normalized = true; path = ""; }
 

@@ -2,7 +2,7 @@ TOP=..
 ##############################################################################
 # Variables
 ##############################################################################
-TARGET=lib
+TARGET=utils
 
 SRC= json.ml \
      path.ml pos.ml \
@@ -38,10 +38,10 @@ all.opt:: $(TARGET).cmxa
 # need to use ocamlmklib, otherwise with ocamlc or ocamlopt get some
 # pbs with realpath.c at some point
 $(TARGET).cma: $(OBJS) $(COBJS)
-	$(OCAMLMKLIB) -o lib $^
+	$(OCAMLMKLIB) -o $(TARGET) $^
 
 $(TARGET).cmxa: $(OBJS:.cmo=.cmx) $(LIBS:.cma=.cmxa) $(COBJS)
-	$(OCAMLMKLIB) -o lib $^
+	$(OCAMLMKLIB) -o $(TARGET) $^
 
 # Create the build stamp if it's not already there
 build_id.ml:

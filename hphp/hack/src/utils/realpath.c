@@ -26,7 +26,7 @@ Val_some( value v )
 }
 
 CAMLprim value
-caml_realpath(value v) {
+hh_realpath(value v) {
   char *input;
   char output[PATH_MAX];
   char *result;

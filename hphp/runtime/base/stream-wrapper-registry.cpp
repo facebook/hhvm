@@ -197,7 +197,18 @@ Wrapper* getWrapperFromURI(const String& uri,
     return getWrapper(s_data, warn);
   }
 
-  const char *colon = strstr(uri_string, "://");
+  int n = 0;
+  const char* p = uri_string;
+  while (*p && (isalnum((unsigned char)*p) ||
+         *p == '+' || *p == '-' || *p == '.')) {
+    n++;
+    p++;
+  }
+  const char* colon = nullptr;
+  if (*p == ':' && n > 1 && (!strncmp("//", p + 1, 2))) {
+    colon = p;
+  }
+
   if (!colon) {
     return getWrapper(s_file, warn);
   }

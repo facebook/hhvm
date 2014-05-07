@@ -1,0 +1,8 @@
+Warning: Unknown URI scheme "this+is-a.valid123scheme" in %s/test/slow/streams/scheme_chars.php on line 4
+bool(false)
+bool(false)
+bool(false)
+
+Warning: Unknown URI scheme "this.is.a.valid.scheme" in %s/test/slow/streams/scheme_chars.php on line 7
+bool(false)
+bool(false)

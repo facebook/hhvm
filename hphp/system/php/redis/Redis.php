@@ -133,12 +133,12 @@ class Redis {
     if ($op == 'GET') {
       $this->processCommand('CONFIG', 'GET', $key);
       return $this->processMapResponse(false, false);
-    } else if ($op == 'SET') {
+    }
+    if ($op == 'SET') {
       $this->processCommand('CONFIG', 'SET', $key, $val);
       return $this->processBooleanResponse();
-    } else {
-      throw new RedisException('First arg must be GET or SET');
     }
+    throw new RedisException('First arg must be GET or SET');
   }
 
   public function info($option = '') {
@@ -175,9 +175,8 @@ class Redis {
     }
     if ($cmd == 'list') {
       return $this->processClientListResponse();
-    } else {
-      return $this->processVariantResponse();
     }
+    return $this->processVariantResponse();
   }
 
   /* Strings ------------------------------------------------------------- */
@@ -268,9 +267,8 @@ class Redis {
     $this->processArrayCommand('SORT', $args);
     if ($using_store) {
       return $this->processVectorResponse(true);
-    } else {
-      return $this->processLongResponse();
     }
+    return $this->processLongResponse();
   }
 
   public function sortAsc($key,
@@ -442,9 +440,8 @@ class Redis {
     $this->processArrayCommand('ZRANGE', $args);
     if ($withscores) {
       return $this->processMapResponse(true, false);
-    } else {
-      return $this->processVectorResponse(true);
     }
+    return $this->processVectorResponse(true);
   }
 
   protected function zRangeByScoreImpl($cmd,
@@ -467,9 +464,8 @@ class Redis {
     $this->processArrayCommand($cmd, $args);
     if (!empty($opts['withscores'])) {
       return $this->processMapResponse(true, false);
-    } else {
-      return $this->processVectorResponse(true);
     }
+    return $this->processVectorResponse(true);
   }
 
   public function zRangeByScore($key, $start, $end, array $opts = null) {
@@ -494,9 +490,8 @@ class Redis {
     $this->processArrayCommand('ZREVRANGE', $args);
     if ($withscores) {
       return $this->processMapResponse(true, false);
-    } else {
-      return $this->processVectorResponse(true);
     }
+    return $this->processVectorResponse(true);
   }
 
   /* Multi --------------------------------------------------------------- */
@@ -534,7 +529,8 @@ class Redis {
       $this->mode = self::ATOMIC;
       $this->processCommand('EXEC');
       return $this->flushCallbacks();
-    } else if ($this->mode === self::PIPELINE) {
+    }
+    if ($this->mode === self::PIPELINE) {
       $this->mode = self::ATOMIC;
       foreach ($this->commands as $cmd) {
         $this->processArrayCommand($cmd['cmd'], $cmd['args']);
@@ -603,11 +599,11 @@ class Redis {
     return $this->processVariantResponse();
   }
 
-  public function _eval($script, array $args = array(), $numKeys = 0) {
+  public function evaluate($script, array $args = [], $numKeys = 0) {
     return $this->doEval('EVAL', $script, $args, $numKeys);
   }
 
-  public function _evalSha($sha, array $args = array(), $numKeys = 0) {
+  public function evaluateSha($sha, array $args = [], $numKeys = 0) {
     return $this->doEval('EVALSHA', $sha, $args, $numKeys);
   }
 
@@ -684,7 +680,7 @@ class Redis {
   /* Standard Function Map ----------------------------------------------- */
 
   /**
-   * The majority of the Redis API is implemnted by __call
+   * The majority of the Redis API is implemented by __call
    * which references this list for how the individual command
    * should be handled.
    *
@@ -880,10 +876,8 @@ class Redis {
     'getmultiple' => [ 'alias' => 'mget' ],
 
     // Eval
-    'eval' => [ 'alias' => '_eval' ],
-    'evalSha' => [ 'alias' => '_evalSha' ],
-    'evaluate' => [ 'alias' => '_eval' ],
-    'evaluateSha' => [ 'alias'=> '_evalSha' ],
+    'eval' => [ 'alias' => 'evaluate' ],
+    'evalsha' => [ 'alias' => 'evaluateSha' ],
   ];
 
 

@@ -1,36 +1,3 @@
-_eval
-int(42)
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  array(3) {
-    [0]=>
-    int(3)
-    [1]=>
-    int(4)
-    [2]=>
-    array(2) {
-      [0]=>
-      string(1) "a"
-      [1]=>
-      string(1) "b"
-    }
-  }
-}
-string(2) "OK"
-array(4) {
-  [0]=>
-  string(24) "ext_redis_eval_test:key1"
-  [1]=>
-  string(24) "ext_redis_eval_test:key2"
-  [2]=>
-  string(5) "first"
-  [3]=>
-  string(6) "second"
-}
 eval
 int(42)
 array(3) {
@@ -97,10 +64,6 @@ array(4) {
   [3]=>
   string(6) "second"
 }
-_evalSha
-int(42)
-string(2) "OK"
-string(45) "NOSCRIPT No matching script. Please use EVAL."
 evalSha
 int(42)
 string(2) "OK"

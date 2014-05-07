@@ -8,10 +8,10 @@ $prefix = $key . ':';
 $r->delete($key);
 $r->setOption(Redis::OPT_PREFIX, $prefix);
 
-foreach (['_eval', 'eval', 'evaluate'] as $method) {
+foreach (['eval', 'evaluate'] as $method) {
     echo $method . "\n";
     var_dump($r->$method('return 42')); // Return integer -> 42
-    // Return resutls as array()
+    // Return results as array()
     var_dump($r->$method('return {1,2,{3,4,{"a","b"}}}'));
     // Script with parameters -> OK
     var_dump($r->eval("return redis.call('set',KEYS[1],ARGV[1])",
@@ -24,10 +24,7 @@ foreach (['_eval', 'eval', 'evaluate'] as $method) {
 }
 
 $sha = $r->script('load', 'return 42');
-var_dump($r->evalSha($sha));
-var_dump($r->evaluateSha($sha));
-
-foreach (['_evalSha', 'evalSha', 'evaluateSha'] as $method) {
+foreach (['evalSha', 'evaluateSha'] as $method) {
     echo $method . "\n";
     var_dump($r->$method($sha)); // Return integer -> 42
     // SHA1SUM of with parameters -> OK

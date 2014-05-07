@@ -243,12 +243,11 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#20 (2) {
-  ["name"]=>
-  string(1) "A"
+object(ReflectionClass)#20 (1) {
   ["obj":"ReflectionClass":private]=>
   NULL
 }
+string(1) "A"
 
 --- getProperties() ---
 

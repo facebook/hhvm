@@ -1,0 +1,17 @@
+= reflect_method =
+string(9) "hasMethod"
+string(15) "ReflectionClass"
+Exception: E_*NOTICE: Undefined property ReflectionMethod::dynamic
+string(7) "dynamic"
+ReflectionException: Cannot set read-only property ReflectionMethod::name
+ReflectionException: Cannot set read-only property ReflectionMethod::class
+= reflect_func =
+string(7) "implode"
+Exception: E_*NOTICE: Undefined property ReflectionFunction::dynamic
+string(7) "dynamic"
+ReflectionException: Cannot set read-only property ReflectionFunction::name
+= reflect_class =
+string(15) "ReflectionClass"
+Exception: E_*NOTICE: Undefined property ReflectionClass::dynamic
+string(7) "dynamic"
+ReflectionException: Cannot set read-only property ReflectionClass::name

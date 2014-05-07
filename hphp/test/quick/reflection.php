@@ -215,6 +215,7 @@ print "\n";
 
 print "--- getParentClass() ---\n";
 var_dump($rb->getParentClass());
+var_dump($rb->getParentClass()->getName());
 print "\n";
 
 print "--- getProperties() ---\n";

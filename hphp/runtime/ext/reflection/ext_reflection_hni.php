@@ -301,7 +301,7 @@ class ReflectionFunction
 extends ReflectionFunctionAbstract
 implements Reflector {
 
-  public string $name;
+  /* public readonly string $name; */
   private ?Closure $closure = null;
 
   /**
@@ -329,8 +329,13 @@ implements Reflector {
                 __METHOD__, gettype($name_or_closure))
       );
     }
-    $this->name = $this->getName();
   }
+
+  <<__Native>>
+  private function __initClosure(object $closure): void;
+
+  <<__Native>>
+  private function __initName(string $name): bool;
 
   /**
    * (excerpt from
@@ -345,11 +350,35 @@ implements Reflector {
     return ($this->closure) ? '{closure}' : parent::getName();
   }
 
-  <<__Native>>
-  private function __initClosure(object $closure): void;
+  // __get and __set are used to maintain read-only $this->name
+  final public function __get(string $name): ?string {
+    // $name is a read-only property
+    if ($name === 'name') {
+      return $this->getName();
+    }
+    $static_cls = get_class($this);
+    if (property_exists($static_cls, $name)) {
+      // __get is called if an existing property is inaccessible
+      trigger_error("Cannot access property $static_cls::$name", E_USER_ERROR);
+    }
+    trigger_error("Undefined property $static_cls::$name", E_USER_NOTICE);
+    return null;
+  }
 
-  <<__Native>>
-  private function __initName(string $name): bool;
+  // __get and __set are used to maintain read-only $this->name
+  final public function __set(string $name, $value): void {
+    // $name is a read-only property
+    if ($name === 'name') {
+      throw new ReflectionException(
+        'Cannot set read-only property '.__CLASS__.'::'.$name);
+    }
+    if (property_exists(get_class($this), $name)) {
+      // __set is called if the property is inaccessible
+      trigger_error(
+        'Cannot access property '.get_class($this).'::'.$name, E_USER_ERROR);
+    }
+    $this->{$name} = $value;
+  }
 
   public function getClosure() {
     return $this->closure ?:
@@ -483,8 +512,8 @@ class ReflectionMethod
   extends ReflectionFunctionAbstract
   implements Reflector {
 
-  public string $name;
-  public string $class;
+  /* public readonly string $name; */
+  /* public readonly string $class; */
 
   private /*string*/ $originalClass;
   private /*bool*/ $forcedAccessible = false;
@@ -513,12 +542,41 @@ class ReflectionMethod
       $classname = is_object($cls) ? get_class($cls) : $cls;
     }
 
+    $this->originalClass = $classname;
     if (!$this->__init($cls, $name)) {
       throw new ReflectionException("Method $classname::$name does not exist");
     }
-    $this->originalClass = $classname;
-    $this->name = $this->getName(); // $name might not have right caps
-    $this->class = $this->getDeclaringClassname();
+  }
+
+  // __get and __set are used to maintain read-only $this->name, $this->class
+  final public function __get(string $name): ?string {
+    if ($name === 'name') { // $name is a read-only property
+      return $this->getName();
+    } else if ($name === 'class') { // ... as is $class
+      return $this->getDeclaringClassname();
+    }
+    $static_cls = get_class($this);
+    if (property_exists($static_cls, $name)) {
+      // __get is called if an existing property is inaccessible
+      trigger_error("Cannot access property $static_cls::$name", E_USER_ERROR);
+    }
+    trigger_error("Undefined property $static_cls::$name", E_USER_NOTICE);
+    return null;
+  }
+
+  // __get and __set are used to maintain read-only $this->name, $this->class
+  final public function __set(string $name, $value): void {
+    // $name and $class are read-only properties
+    if ($name === 'name' || $name === 'class') {
+      throw new ReflectionException(
+        'Cannot set read-only property '.__CLASS__.'::'.$name);
+    }
+    if (property_exists(get_class($this), $name)) {
+      // __set is called if the property is inaccessible
+      trigger_error(
+        'Cannot access property '.get_class($this).'::'.$name, E_USER_ERROR);
+    }
+    $this->{$name} = $value;
   }
 
   /**
@@ -584,7 +642,7 @@ class ReflectionMethod
         sprintf(
           'Trying to invoke %s method %s::%s() from scope ReflectionMethod',
           ($this->isProtected() ? 'protected' : 'private'),
-          $this->class, $this->name,
+          $this->getDeclaringClassname(), $this->getName(),
         )
       );
     }
@@ -592,7 +650,8 @@ class ReflectionMethod
       // Docs says to pass null, but Zend completely ignores the argument
       $obj = null;
     }
-    return hphp_invoke_method($obj, $this->originalClass, $this->name, $args);
+    return hphp_invoke_method($obj, $this->originalClass,
+                              $this->getName(), $args);
   }
 
   /**
@@ -610,7 +669,7 @@ class ReflectionMethod
    */
   public function invokeArgs($obj, $args): mixed {
     // XXX: is array_values necessary here?
-    return hphp_invoke_method($obj, $this->originalClass, $this->name,
+    return hphp_invoke_method($obj, $this->originalClass, $this->getName(),
                               array_values($args));
   }
 
@@ -757,10 +816,11 @@ class ReflectionMethod
           . ' to be object, ' . gettype($object) . ' given', E_USER_WARNING);
         return null;
       }
-      if (!($object instanceof $this->class)) {
+      $cls_name = $this->getDeclaringClassname();
+      if (!($object instanceof $cls_name)) {
         throw new ReflectionException(
           'Given object is not an instance of the class this method was '.
-          'declared in' // mention $this->class / $this->originalClass here ?
+          'declared in' // mention declaringClassname / originalClass here ?
         );
       }
     }
@@ -815,12 +875,11 @@ class ReflectionMethod
     if (isset($attrs[$name])) {
       return $attrs[$name];
     }
-    // XXX: could be more efficient using getPrototypeClassname?
-    $p = get_parent_class($this->class);
+    $p = get_parent_class($this->getDeclaringClassname());
     if ($p === false) {
       return null;
     }
-    $rm = new ReflectionMethod($p, $this->name);
+    $rm = new ReflectionMethod($p, $this->getName());
     if ($rm->isPrivate()) {
       return null;
     }
@@ -829,10 +888,9 @@ class ReflectionMethod
 
   public function getAttributesRecursive(): array {
     $attrs = $this->getAttributes();
-    // XXX: could be more efficient using getPrototypeClassname?
-    $p = get_parent_class($this->class);
+    $p = get_parent_class($this->getDeclaringClassname());
     if ($p !== false) {
-      $rm = new ReflectionMethod($p, $this->name);
+      $rm = new ReflectionMethod($p, $this->getName());
       if (!$rm->isPrivate()) {
         $attrs += $rm->getAttributesRecursive();
       }
@@ -852,7 +910,7 @@ class ReflectionClass implements Reflector {
   const int IS_EXPLICIT_ABSTRACT = 32;
   const int IS_FINAL = 64;
 
-  public $name;
+  /* public readonly string $name; */
   private $obj = null;
 
   /**
@@ -874,7 +932,6 @@ class ReflectionClass implements Reflector {
     if (!$this->__init($classname)) {
       throw new ReflectionException("Class $classname does not exist");
     }
-    $this->name = $this->getName();
   }
 
   <<__Native>>
@@ -918,6 +975,36 @@ class ReflectionClass implements Reflector {
 
   <<__Native>>
   public function getName(): string;
+
+  // __get and __set are used to maintain read-only $this->name
+  final public function __get(string $name): ?string {
+    // $name is a read-only property
+    if ($name === 'name') {
+      return $this->getName();
+    }
+    $static_cls = get_class($this);
+    if (property_exists($static_cls, $name)) {
+      // __get is called if an existing property is inaccessible
+      trigger_error("Cannot access property $static_cls::$name", E_USER_ERROR);
+    }
+    trigger_error("Undefined property $static_cls::$name", E_USER_NOTICE);
+    return null;
+  }
+
+  // __get and __set are used to maintain read-only $this->name
+  final public function __set(string $name, $value): void {
+    // $name is a read-only property
+    if ($name === 'name') {
+      throw new ReflectionException(
+        'Cannot set read-only property '.__CLASS__.'::'.$name);
+    }
+    if (property_exists(get_class($this), $name)) {
+      // __set is called if the property is inaccessible
+      trigger_error(
+        'Cannot access property '.get_class($this).'::'.$name, E_USER_ERROR);
+    }
+    $this->{$name} = $value;
+  }
 
   <<__Native>>
   private function getParentName(): string;
@@ -1458,7 +1545,7 @@ class ReflectionClass implements Reflector {
   public function getStaticProperties(): array<string, ReflectionProperty> {
     $ret = array();
     foreach ($this->getProperties(ReflectionProperty::IS_STATIC) as $prop) {
-      $val = hphp_get_static_property($this->name, $prop->name, true);
+      $val = hphp_get_static_property($this->getName(), $prop->name, true);
       $ret[$prop->name] = $val;
     }
     return $ret;
@@ -1479,7 +1566,7 @@ class ReflectionClass implements Reflector {
   public function getStaticPropertyValue($name, $default = null) {
     if ($this->hasProperty($name) &&
         $this->getProperty($name)->isStatic()) {
-      return hphp_get_static_property($this->name, $name, false);
+      return hphp_get_static_property($this->getName(), $name, false);
     }
     return $default;
   }

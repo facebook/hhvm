@@ -267,6 +267,8 @@ struct Link {
    */
   Handle handle() const;
 
+  bool isPersistent() const;
+
   /*
    * For access from the JIT only.
    */

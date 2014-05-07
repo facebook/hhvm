@@ -671,13 +671,12 @@ void Class::initSProps() const {
   if (!numStaticProperties()) return;
 
   initSPropHandles();
-  *m_sPropCacheInit = true;
 
   // Perform scalar inits.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
     auto const& sProp = m_staticProperties[slot];
 
-    if (sProp.m_class == this) {
+    if (sProp.m_class == this && !m_sPropCache[slot].isPersistent()) {
       *m_sPropCache[slot] = sProp.m_val;
     }
   }
@@ -694,6 +693,8 @@ void Class::initSProps() const {
       assert(retval.m_type == KindOfNull);
     }
   }
+
+  *m_sPropCacheInit = true;
 }
 
 Slot Class::findSProp(Class* ctx, const StringData* sPropName,
@@ -2589,30 +2590,54 @@ bool Class::needsInitSProps() const {
 void Class::initSPropHandles() const {
   if (m_sPropCacheInit.bound()) return;
 
+  bool usePersistentHandles = m_cachedClass.isPersistent();
+  bool allPersistentHandles = usePersistentHandles;
+
   // Propagate to parents so we can link inherited static props.
   Class* parent = this->parent();
-  if (parent) parent->initSPropHandles();
+  if (parent) {
+    parent->initSPropHandles();
+  }
 
   // Bind all the static prop handles.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
-    if (m_sPropCache[slot].bound()) continue;
+    auto& propHandle = m_sPropCache[slot];
+    if (!propHandle.bound()) {
 
-    auto const& sProp = m_staticProperties[slot];
+      auto const& sProp = m_staticProperties[slot];
 
-    if (sProp.m_class == this) {
-      m_sPropCache[slot].bind();
+      if (sProp.m_class == this) {
+        if (usePersistentHandles && (sProp.m_attrs & AttrPersistent)) {
+          RDS::Link<TypedValue> tmp{RDS::kInvalidHandle};
+          tmp.bind(RDS::Mode::Persistent);
+          *tmp = sProp.m_val;
+          propHandle = tmp;
+        } else {
+          propHandle.bind(RDS::Mode::Local);
+        }
 
-      auto msg = name()->toCppString() + "::" + sProp.m_name->toCppString();
-      RDS::recordRds(m_sPropCache[slot].handle(),
-                     sizeof(TypedValue), "SPropCache", msg);
-    } else {
-      auto realSlot = sProp.m_class->lookupSProp(sProp.m_name);
-      m_sPropCache[slot] = sProp.m_class->m_sPropCache[realSlot];
+        auto msg = name()->toCppString() + "::" + sProp.m_name->toCppString();
+        RDS::recordRds(propHandle.handle(),
+                       sizeof(TypedValue), "SPropCache", msg);
+      } else {
+        auto realSlot = sProp.m_class->lookupSProp(sProp.m_name);
+        propHandle = sProp.m_class->m_sPropCache[realSlot];
+      }
+    }
+    if (!propHandle.isPersistent()) {
+      allPersistentHandles = false;
     }
   }
 
   // Bind the init handle; this indicates that all handles are bound.
-  m_sPropCacheInit.bind();
+  if (allPersistentHandles) {
+    RDS::Link<bool> tmp{RDS::kInvalidHandle};
+    tmp.bind(RDS::Mode::Persistent);
+    *tmp = true;
+    m_sPropCacheInit = tmp;
+  } else {
+    m_sPropCacheInit.bind();
+  }
   RDS::recordRds(m_sPropCacheInit.handle(),
                  sizeof(bool), "SPropCacheInit", name()->data());
 }

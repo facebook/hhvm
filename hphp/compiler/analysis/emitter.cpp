@@ -7434,6 +7434,7 @@ void EmitterVisitor::emitClass(Emitter& e,
             var = static_pointer_cast<SimpleVariable>(exp);
           }
 
+          auto sym = var->getSymbol();
           /*
            * Translate what hphpc can infer about a property type into
            * a RepoAuthType for the runtime.  The type hphpc has
@@ -7443,9 +7444,11 @@ void EmitterVisitor::emitClass(Emitter& e,
            * imply the type is unboxed, either.
            */
           auto const hphpcType = repoAuthTypeForHphpcType(
-            var->getSymbol()
-              ? var->getSymbol()->getFinalType()->getDataType()
-              : KindOfInvalid);
+            sym ? sym->getFinalType()->getDataType() : KindOfInvalid);
+
+          bool maybePersistent = Option::WholeProgram &&
+            pce->attrs() & AttrPersistent &&
+            sym && !sym->isIndirectAltered() && sym->isStatic();
 
           auto const propName = makeStaticString(var->getName());
           auto const propDoc = Option::GenerateDocComments ?
@@ -7461,6 +7464,7 @@ void EmitterVisitor::emitClass(Emitter& e,
             if (vNode->isScalar()) {
               initScalar(tvVal, vNode);
             } else {
+              maybePersistent = false;
               tvWriteUninit(&tvVal);
               if (!(declAttrs & AttrStatic)) {
                 if (requiresDeepInit(vNode)) {
@@ -7480,6 +7484,7 @@ void EmitterVisitor::emitClass(Emitter& e,
           } else {
             tvWriteNull(&tvVal);
           }
+          if (maybePersistent) propAttrs = propAttrs | AttrPersistent;
           bool added UNUSED =
             pce->addProperty(propName, propAttrs, typeConstraint,
                              propDoc, &tvVal, hphpcType);

@@ -67,6 +67,11 @@ Handle Link<T>::handle() const {
 }
 
 template<class T>
+bool Link<T>::isPersistent() const {
+  return isPersistentHandle(handle());
+}
+
+template<class T>
 template<size_t Align>
 void Link<T>::bind(Mode mode) {
   if (LIKELY(bound())) return;

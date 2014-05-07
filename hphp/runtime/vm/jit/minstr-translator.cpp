@@ -2146,27 +2146,47 @@ void HhbcTranslator::MInstrTranslator::emitEmptyElem() {
   emitIssetEmptyElem(true);
 }
 
-static inline ArrayData* checkedSet(ArrayData* a, StringData* key,
-                                    const Variant& value, bool copy) {
-  int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ? a->set(i, value, copy)
-                                             : a->set(key, value, copy);
+static inline ArrayData* uncheckedSet(ArrayData* a,
+                                      StringData* key,
+                                      Cell value,
+                                      bool copy) {
+  return g_array_funcs.setStr[a->kind()](a, key, value, copy);
 }
 
-static inline ArrayData* checkedSet(ArrayData* a, int64_t key,
-                                    const Variant& value, bool copy) {
+static inline ArrayData* uncheckedSet(ArrayData* a,
+                                      int64_t key,
+                                      Cell value,
+                                      bool copy) {
+  return g_array_funcs.setInt[a->kind()](a, key, value, copy);
+}
+
+static inline ArrayData* checkedSet(ArrayData* a,
+                                    StringData* key,
+                                    Cell value,
+                                    bool copy) {
+  int64_t i;
+  return UNLIKELY(key->isStrictlyInteger(i))
+    ? uncheckedSet(a, i, value, copy)
+    : uncheckedSet(a, key, value, copy);
+}
+
+static inline ArrayData* checkedSet(ArrayData* a,
+                                    int64_t key,
+                                    Cell value,
+                                    bool copy) {
   not_reached();
 }
 
 template<KeyType keyType, bool checkForInt, bool setRef>
 static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
     ArrayData* a, key_type<keyType> key,
-    const Variant& value, RefData* ref) {
+    Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
+  assert(cellIsPlausible(value));
   const bool copy = a->hasMultipleRefs();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
-                               : a->set(key, value, copy);
+                               : uncheckedSet(a, key, value, copy);
 
   return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);
 }
@@ -2180,11 +2200,11 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
   m(arraySetSiR, KeyType::Str,    true,      true)         \
   m(arraySetIR,  KeyType::Int,   false,      true)
 
-#define ELEM(nm, keyType, checkForInt, setRef)                          \
-  typename ShuffleReturn<setRef>::return_type                           \
-  nm(ArrayData* a, key_type<keyType> key, TypedValue value, RefData* ref) { \
-    return arraySetImpl<keyType, checkForInt, setRef>(                  \
-      a, key, tvAsCVarRef(&value), ref);                                \
+#define ELEM(nm, keyType, checkForInt, setRef)                        \
+  typename ShuffleReturn<setRef>::return_type                         \
+  nm(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) { \
+    return arraySetImpl<keyType, checkForInt, setRef>(                \
+      a, key, value, ref);                                            \
   }
 namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
@@ -2215,24 +2235,26 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
     gen(ArraySetRef, cns((TCA)opFunc), m_base, key, value, box);
     // Unlike the non-ref case, we don't need to do anything to the stack
     // because any load of the box will be guarded.
-  } else {
-    SSATmp* newArr = gen(ArraySet, makeCatch(), cns((TCA)opFunc), m_base, key,
-                         value);
+    m_result = value;
+    return;
+  }
 
-    // Update the base's value with the new array
-    if (base.location.space == Location::Local) {
-      // We know it's not boxed (setRef above handles that), and
-      // newArr has already been incref'd in the helper.
-      gen(StLoc, LocalId(base.location.offset), m_irb.fp(), newArr);
-    } else if (base.location.space == Location::Stack) {
-      MInstrEffects effects(newArr->inst());
-      assert(effects.baseValChanged);
-      assert(effects.baseType <= Type::Arr);
-      m_ht.extendStack(baseStkIdx, Type::Gen);
-      m_ht.replace(baseStkIdx, newArr);
-    } else {
-      not_reached();
-    }
+  SSATmp* newArr = gen(ArraySet, makeCatch(), cns((TCA)opFunc), m_base, key,
+                       value);
+
+  // Update the base's value with the new array
+  if (base.location.space == Location::Local) {
+    // We know it's not boxed (setRef above handles that), and
+    // newArr has already been incref'd in the helper.
+    gen(StLoc, LocalId(base.location.offset), m_irb.fp(), newArr);
+  } else if (base.location.space == Location::Stack) {
+    MInstrEffects effects(newArr->inst());
+    assert(effects.baseValChanged);
+    assert(effects.baseType <= Type::Arr);
+    m_ht.extendStack(baseStkIdx, Type::Gen);
+    m_ht.replace(baseStkIdx, newArr);
+  } else {
+    not_reached();
   }
 
   m_result = value;

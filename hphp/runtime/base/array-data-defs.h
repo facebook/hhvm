@@ -79,7 +79,8 @@ inline ArrayData* ArrayData::lval(const Variant& k, Variant *&ret, bool copy) {
                         : lval(getStringKey(cell), ret, copy);
 }
 
-inline ArrayData* ArrayData::set(const String& k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::set(const String& k, const Variant& v,
+                                 bool copy) {
   assert(IsValidKey(k));
   return set(k.get(), v, copy);
 }
@@ -168,11 +169,11 @@ inline void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) const {
 }
 
 inline ArrayData* ArrayData::set(int64_t k, const Variant& v, bool copy) {
-  return g_array_funcs.setInt[m_kind](this, k, v, copy);
+  return g_array_funcs.setInt[m_kind](this, k, *v.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::set(StringData* k, const Variant& v, bool copy) {
-  return g_array_funcs.setStr[m_kind](this, k, v, copy);
+  return g_array_funcs.setStr[m_kind](this, k, *v.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::zSet(int64_t k, RefData* v) {
@@ -233,11 +234,11 @@ inline ArrayData* ArrayData::setRef(StringData* k, Variant& v, bool copy) {
 }
 
 inline ArrayData* ArrayData::add(int64_t k, const Variant& v, bool copy) {
-  return g_array_funcs.addInt[m_kind](this, k, v, copy);
+  return g_array_funcs.addInt[m_kind](this, k, *v.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::add(StringData* k, const Variant& v, bool copy) {
-  return g_array_funcs.addStr[m_kind](this, k, v, copy);
+  return g_array_funcs.addStr[m_kind](this, k, *v.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::remove(int64_t k, bool copy) {

@@ -171,15 +171,15 @@ ArrayData *APCLocalArray::LvalNew(ArrayData* ad, Variant *&ret, bool copy) {
 }
 
 ArrayData*
-APCLocalArray::SetInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
+APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
   ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->set(k, v, false));
+  return releaseIfCopied(escalated, escalated->set(k, tvAsCVarRef(&v), false));
 }
 
 ArrayData*
-APCLocalArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
+APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
   ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->set(k, v, false));
+  return releaseIfCopied(escalated, escalated->set(k, tvAsCVarRef(&v), false));
 }
 
 ArrayData*

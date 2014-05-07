@@ -58,8 +58,8 @@ public: // ArrayData implementation
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
 
-  static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v, bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);

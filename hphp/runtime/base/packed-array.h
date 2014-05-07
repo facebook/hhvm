@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <sys/types.h>
 
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-common.h"
 
 namespace HPHP {
@@ -30,7 +31,6 @@ struct Variant;
 struct RefData;
 struct ArrayData;
 struct StringData;
-struct TypedValue;
 struct MArrayIter;
 struct MixedArray;
 
@@ -56,9 +56,8 @@ struct PackedArray {
     return nullptr;
   }
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
-  static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v,
-    bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {

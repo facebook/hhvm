@@ -117,15 +117,19 @@ NameValueTableWrapper::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   return ad;
 }
 
-ArrayData* NameValueTableWrapper::SetInt(ArrayData* ad, int64_t k,
-                                         const Variant& v, bool copy) {
+ArrayData* NameValueTableWrapper::SetInt(ArrayData* ad,
+                                         int64_t k,
+                                         Cell v,
+                                         bool copy) {
   return SetStr(ad, String(k).get(), v, copy);
 }
 
-ArrayData* NameValueTableWrapper::SetStr(ArrayData* ad, StringData* k,
-                                         const Variant& v, bool copy) {
+ArrayData* NameValueTableWrapper::SetStr(ArrayData* ad,
+                                         StringData* k,
+                                         Cell v,
+                                         bool copy) {
   auto a = asNVTW(ad);
-  tvAsVariant(a->m_tab->lookupAdd(k)).assign(v);
+  cellSet(v, *tvToCell(a->m_tab->lookupAdd(k)));
   return a;
 }
 

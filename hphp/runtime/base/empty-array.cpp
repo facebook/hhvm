@@ -253,8 +253,7 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, const Variant& v, bool) {
-  auto c = *v.asCell();
+ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell c, bool) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (c.m_type == KindOfUninit) c.m_type = KindOfNull;
   tvRefcountedIncRef(&c);
@@ -265,9 +264,8 @@ ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, const Variant& v, bool) {
 
 ArrayData* EmptyArray::SetStr(ArrayData*,
                               StringData* k,
-                              const Variant& v,
+                              Cell val,
                               bool copy) {
-  auto val = *v.asCell();
   tvRefcountedIncRef(&val);
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (val.m_type == KindOfUninit) val.m_type = KindOfNull;

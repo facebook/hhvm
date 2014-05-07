@@ -169,7 +169,7 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetKey)
 
   /*
-   * ArrayData* SetInt(ArrayData*, int64_t key, const Variant& v, bool copy)
+   * ArrayData* SetInt(ArrayData*, int64_t key, Cell v, bool copy)
    *
    *   Set a value in the array for an integer key.  This function has
    *   copy/grow semantics.
@@ -177,7 +177,7 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(SetInt)
 
   /*
-   * ArrayData* SetStr(ArrayData*, StringData*, const Variant& v, bool copy)
+   * ArrayData* SetStr(ArrayData*, StringData*, Cell v, bool copy)
    *
    *   Set a value in the array for a string key.  The string must not
    *   be an integer-like string.  This function has copy/grow
@@ -284,8 +284,8 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(SetRefStr)
 
   /*
-   * ArrayData* AddInt(ArrayData*, int64_t key, const Variant&, bool copy)
-   * ArrayData* AddStr(ArrayData*, StringData* key, const Variant&, bool copy)
+   * ArrayData* AddInt(ArrayData*, int64_t key, Cell, bool copy)
+   * ArrayData* AddStr(ArrayData*, StringData* key, Cell, bool copy)
    *
    *   These functions have the same effects as SetInt and SetStr,
    *   respectively, except that the array may assume that it does not

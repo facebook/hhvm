@@ -22,6 +22,7 @@
 #include <sys/types.h>
 
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 
@@ -31,7 +32,6 @@ struct Variant;
 struct ArrayData;
 struct RefData;
 struct StringData;
-struct TypedValue;
 struct MArrayIter;
 
 //////////////////////////////////////////////////////////////////////
@@ -51,9 +51,8 @@ struct EmptyArray {
     return nullptr;
   }
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
-  static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v,
-    bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData* ad, int64_t, bool) {
     return ad;
   }

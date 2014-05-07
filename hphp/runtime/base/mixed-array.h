@@ -211,17 +211,16 @@ public:
   static ArrayData* LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
-  static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v, bool copy);
-
+  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData* ad, RefData* v);
   static ArrayData* SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData* ad, StringData* k, Variant& v,
                               bool copy);
-  static ArrayData* AddInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* AddStr(ArrayData*, StringData* k, const Variant& v, bool copy);
+  static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
+  static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
   static ArrayData* Copy(const ArrayData*);
@@ -413,11 +412,11 @@ private:
   bool nextInsert(const Variant& data);
   ArrayData* nextInsertRef(Variant& data);
   ArrayData* nextInsertWithRef(const Variant& data);
-  ArrayData* addVal(int64_t ki, const Variant& data);
-  ArrayData* addVal(StringData* key, const Variant& data);
+  ArrayData* addVal(int64_t ki, Cell data);
+  ArrayData* addVal(StringData* key, Cell data);
 
   template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
-  template <class K> ArrayData* update(K k, const Variant& data);
+  template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateRef(K k, Variant& data);
 
   template <class K> ArrayData* zSetImpl(K k, RefData* data);
@@ -436,9 +435,9 @@ private:
 
   Elm& allocElm(int32_t* ei);
 
-  MixedArray* setVal(TypedValue& tv, const Variant& v);
+  MixedArray* setVal(TypedValue& tv, Cell v);
   MixedArray* getLval(TypedValue& tv, Variant*& ret);
-  MixedArray* initVal(TypedValue& tv, const Variant& v);
+  MixedArray* initVal(TypedValue& tv, Cell v);
   MixedArray* initRef(TypedValue& tv, Variant& v);
   MixedArray* initLval(TypedValue& tv, Variant*& ret);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);

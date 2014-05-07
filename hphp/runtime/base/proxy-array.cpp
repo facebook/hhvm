@@ -124,18 +124,24 @@ ProxyArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   return reseatable(ad, r);
 }
 
-ArrayData* ProxyArray::SetInt(ArrayData* ad, int64_t k,
-                                         const Variant& v, bool copy) {
+ArrayData* ProxyArray::SetInt(ArrayData* ad,
+                              int64_t k,
+                              Cell v,
+                              bool copy) {
   ad = copy ? Make(innerArr(ad)) : ad;
-  auto r = innerArr(ad)->set(k, v, innerArr(ad)->hasMultipleRefs());
+  auto r = innerArr(ad)->set(k,
+    tvAsCVarRef(&v), innerArr(ad)->hasMultipleRefs());
   assert(!copy);
   return reseatable(ad, r);
 }
 
-ArrayData* ProxyArray::SetStr(ArrayData* ad, StringData* k,
-                                         const Variant& v, bool copy) {
+ArrayData* ProxyArray::SetStr(ArrayData* ad,
+                              StringData* k,
+                              Cell v,
+                              bool copy) {
   ad = copy ? Make(innerArr(ad)) : ad;
-  auto r = innerArr(ad)->set(k, v, innerArr(ad)->hasMultipleRefs());
+  auto r = innerArr(ad)->set(k,
+    tvAsCVarRef(&v), innerArr(ad)->hasMultipleRefs());
   assert(!copy);
   return reseatable(ad, r);
 }

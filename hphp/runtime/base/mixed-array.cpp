@@ -865,8 +865,13 @@ bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 // Append/insert/update.
 
 ALWAYS_INLINE
-MixedArray* MixedArray::initVal(TypedValue& tv, const Variant& v) {
-  tvAsUninitializedVariant(&tv).constructValHelper(v);
+MixedArray* MixedArray::initVal(TypedValue& tv, Cell v) {
+  cellDup(v, tv);
+  // TODO(#3888164): we should restructure things so we don't have to
+  // check KindOfUninit here.
+  if (UNLIKELY(tv.m_type == KindOfUninit)) {
+    tv.m_type = KindOfNull;
+  }
   return this;
 }
 
@@ -904,13 +909,12 @@ MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
 }
 
 ALWAYS_INLINE
-MixedArray* MixedArray::setVal(TypedValue& tv, const Variant& v) {
-  auto const src = v.asCell();
+MixedArray* MixedArray::setVal(TypedValue& tv, Cell src) {
   auto const dst = tvToCell(&tv);
-  cellSet(*src, *dst);
+  cellSet(src, *dst);
   // TODO(#3888164): we should restructure things so we don't have to
   // check KindOfUninit here.
-  if (UNLIKELY(src->m_type == KindOfUninit)) {
+  if (UNLIKELY(src.m_type == KindOfUninit)) {
     dst->m_type = KindOfNull;
   }
   return this;
@@ -1141,7 +1145,7 @@ bool MixedArray::nextInsert(const Variant& data) {
   auto& e = allocElm(ei);
   e.setIntKey(ki);
   m_nextKI = ki + 1; // Update next free element.
-  initVal(e.data, data);
+  initVal(e.data, *data.asCell());
   return true;
 }
 
@@ -1176,7 +1180,7 @@ ArrayData* MixedArray::nextInsertWithRef(const Variant& data) {
 }
 
 template <class K> ALWAYS_INLINE
-ArrayData* MixedArray::update(K k, const Variant& data) {
+ArrayData* MixedArray::update(K k, Cell data) {
   assert(!isPacked());
   assert(!isFull());
   auto p = insert(k);
@@ -1253,7 +1257,7 @@ ArrayData* MixedArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   return a;
 }
 
-ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, const Variant& v,
+ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v,
                               bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
@@ -1262,7 +1266,7 @@ ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, const Variant& v,
 }
 
 ArrayData*
-MixedArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
+MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1286,7 +1290,7 @@ MixedArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
 }
 
 ArrayData*
-MixedArray::AddInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
+MixedArray::AddInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
   assert(!ad->exists(k));
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
@@ -1295,7 +1299,7 @@ MixedArray::AddInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
 }
 
 ArrayData*
-MixedArray::AddStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
+MixedArray::AddStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
   assert(!ad->exists(k));
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
@@ -1773,7 +1777,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
   ++a->m_size;
   auto& e = elms[0];
   e.setIntKey(0);
-  a->initVal(e.data, v);
+  a->initVal(e.data, *v.asCell());
 
   // Renumber.
   a->compact(true);

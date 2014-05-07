@@ -476,7 +476,7 @@ ArrayData* PackedArray::LvalNew(ArrayData* adIn, Variant*& ret, bool copy) {
 }
 
 ArrayData*
-PackedArray::SetInt(ArrayData* adIn, int64_t k, const Variant& v, bool copy) {
+PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
   assert(checkInvariants(adIn));
 
   // Right now SetInt is used for the AddInt entry point also. This
@@ -485,7 +485,7 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, const Variant& v, bool copy) {
   if (size_t(k) < adIn->m_size) {
     auto const ad = copy ? Copy(adIn) : adIn;
     auto& dst = *tvToCell(&packedData(ad)[k]);
-    cellSet(*v.asCell(), dst);
+    cellSet(v, dst);
     // TODO(#3888164): we should restructure things so we don't have to
     // check KindOfUninit here.
     if (UNLIKELY(dst.m_type == KindOfUninit)) {
@@ -496,7 +496,7 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, const Variant& v, bool copy) {
 
   // Setting the int at the size of the array can keep it in packed
   // mode---it's the same as an append.
-  if (size_t(k) == adIn->m_size) return Append(adIn, v, copy);
+  if (size_t(k) == adIn->m_size) return Append(adIn, tvAsCVarRef(&v), copy);
 
   // On the promote-to-mixed path, we can use addVal since we know the
   // key can't exist.
@@ -506,7 +506,7 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, const Variant& v, bool copy) {
 
 ArrayData* PackedArray::SetStr(ArrayData* adIn,
                                StringData* k,
-                               const Variant& v,
+                               Cell v,
                                bool copy) {
   // We must convert to mixed, but can call addVal since the key must
   // not exist.

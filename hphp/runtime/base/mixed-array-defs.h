@@ -183,7 +183,7 @@ inline size_t MixedArray::computeDataSize(uint32_t tableMask) {
          computeMaxElms(tableMask) * sizeof(Elm);
 }
 
-inline ArrayData* MixedArray::addVal(int64_t ki, const Variant& data) {
+inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   assert(!exists(ki));
   assert(!isPacked());
   assert(!isFull());
@@ -191,12 +191,15 @@ inline ArrayData* MixedArray::addVal(int64_t ki, const Variant& data) {
   auto& e = allocElm(ei);
   e.setIntKey(ki);
   if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  // TODO(#3888164): constructValHelper is making KindOfUninit checks.
-  tvAsUninitializedVariant(&e.data).constructValHelper(data);
+  cellDup(data, e.data);
+  // TODO(#3888164): should avoid needing these KindOfUninit checks.
+  if (UNLIKELY(e.data.m_type == KindOfUninit)) {
+    e.data.m_type = KindOfNull;
+  }
   return this;
 }
 
-inline ArrayData* MixedArray::addVal(StringData* key, const Variant& data) {
+inline ArrayData* MixedArray::addVal(StringData* key, Cell data) {
   assert(!exists(key));
   assert(!isPacked());
   assert(!isFull());
@@ -204,8 +207,11 @@ inline ArrayData* MixedArray::addVal(StringData* key, const Variant& data) {
   auto ei = findForNewInsert(h);
   auto& e = allocElm(ei);
   e.setStrKey(key, h);
-  // TODO(#3888164): constructValHelper is making KindOfUninit checks.
-  tvAsUninitializedVariant(&e.data).constructValHelper(data);
+  cellDup(data, e.data);
+ // TODO(#3888164): should refactor to avoid making KindOfUninit checks.
+ if (UNLIKELY(e.data.m_type == KindOfUninit)) {
+    e.data.m_type = KindOfNull;
+  }
   return this;
 }
 

@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -465,8 +466,9 @@ struct ArrayFunctions {
   const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
-  ArrayData* (*setInt[NK])(ArrayData*, int64_t k, const Variant& v, bool copy);
-  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);
+  ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
+  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
+                           bool copy);
   size_t (*vsize[NK])(const ArrayData*);
   const Variant& (*getValueRef[NK])(const ArrayData*, ssize_t pos);
   bool (*isVectorData[NK])(const ArrayData*);
@@ -479,8 +481,8 @@ struct ArrayFunctions {
   ArrayData* (*lvalNew[NK])(ArrayData*, Variant *&ret, bool copy);
   ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, Variant& v, bool copy);
-  ArrayData* (*addInt[NK])(ArrayData*, int64_t k, const Variant& v, bool copy);
-  ArrayData* (*addStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);
+  ArrayData* (*addInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
+  ArrayData* (*addStr[NK])(ArrayData*, StringData* k, Cell v, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k, bool copy);
   ssize_t (*iterBegin[NK])(const ArrayData*);

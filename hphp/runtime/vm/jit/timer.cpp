@@ -81,6 +81,10 @@ Timer::CounterVec Timer::Counters() {
   return ret;
 }
 
+Timer::Counter Timer::CounterValue(Timer::Name name) {
+  return s_counters[name];
+}
+
 void Timer::RequestInit() {
   memset(&s_counters, 0, sizeof(s_counters));
 }

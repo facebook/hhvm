@@ -175,6 +175,17 @@ CodeBlock& CodeCache::blockFor(CodeAddress addr) {
                               m_main, m_hot, m_prof, m_stubs, m_trampolines);
 }
 
+size_t CodeCache::totalUsed() const {
+  size_t ret = 0;
+  forEachBlock([&ret](const char*, const CodeBlock& b) {
+    // A thread with the write lease may be modifying b.m_frontier while we
+    // call b.used() but it should never modify b.m_base. This means that at
+    // worst b.used() will return a slightly stale value.
+    ret += b.used();
+  });
+  return ret;
+}
+
 bool CodeCache::isValidCodeAddress(CodeAddress addr) const {
     return addr >= m_base && addr < m_base + m_codeSize;
 }

@@ -132,6 +132,8 @@ enum TransPerfCounter {
 static __thread int64_t s_perfCounters[tpc_num_counters];
 #define INC_TPC(n) ++s_perfCounters[tpc_ ## n];
 
+static __thread size_t s_initialTCSize;
+
 // The global MCGenerator object.
 MCGenerator* mcg;
 
@@ -2153,6 +2155,12 @@ folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
   return folly::none;
 }
 
+void MCGenerator::codeEmittedThisRequest(size_t& requestEntry,
+                                         size_t& now) const {
+  requestEntry = s_initialTCSize;
+  now = code.totalUsed();
+}
+
 void MCGenerator::requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
@@ -2161,6 +2169,7 @@ void MCGenerator::requestInit() {
   Treadmill::startRequest();
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
   Stats::init();
+  s_initialTCSize = code.totalUsed();
 }
 
 void MCGenerator::requestExit() {

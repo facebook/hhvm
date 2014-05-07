@@ -49,6 +49,10 @@ struct CodeCache {
 
   size_t codeSize() const { return m_codeSize; }
 
+  // Returns the total amount of code emitted to all blocks. Not synchronized,
+  // so the value may be stale by the time this function returns.
+  size_t totalUsed() const;
+
   CodeAddress base() const { return m_base; }
   bool isValidCodeAddress(CodeAddress addr) const;
 

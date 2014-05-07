@@ -85,6 +85,7 @@ struct Timer {
 
   typedef std::vector<std::pair<const char*, Counter>> CounterVec;
   static CounterVec Counters();
+  static Counter CounterValue(Name name);
   static void RequestInit();
   static void RequestExit();
   static void Dump();

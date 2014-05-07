@@ -215,6 +215,12 @@ public:
   std::string getUsage();
   std::string getTCAddrs();
 
+  /*
+   * Returns the total size of the TC now and at the beginning of this request,
+   * in bytes. Note that the code may have been emitted by other threads.
+   */
+  void codeEmittedThisRequest(size_t& requestEntry, size_t& now) const;
+
 public:
   CodeCache code;
 

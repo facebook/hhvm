@@ -26,8 +26,11 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/constants.h"
@@ -43,6 +46,35 @@ IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
 
 const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
+
+static String HHVM_FUNCTION(server_warmup_status) {
+  // Fail if we jitted more than 25kb of code.
+  size_t begin, end;
+  JIT::mcg->codeEmittedThisRequest(begin, end);
+  auto const diff = end - begin;
+  auto constexpr kMaxTCBytes = 25 << 10;
+  if (diff > kMaxTCBytes) {
+    return folly::format("Translation cache grew by {} bytes to {} bytes.",
+                         diff, begin).str();
+  }
+
+  // Fail if we spent more than 0.5ms in the JIT.
+  auto const jittime = JIT::Timer::CounterValue(JIT::Timer::translate);
+  auto constexpr kMaxJitTimeNS = 500000;
+  if (jittime.total > kMaxJitTimeNS) {
+    return folly::format("Spent {}us in the JIT.", jittime.total / 1000).str();
+  }
+
+  if (shouldProfile()) {
+    return "Warmup profiling is still enabled.";
+  }
+
+  if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {
+    return "PGO profiling translations are still enabled.";
+  }
+
+  return "";
+}
 
 static class MiscExtension : public Extension {
 public:
@@ -94,6 +126,10 @@ public:
     );
   }
 
+  virtual void moduleInit() override {
+    HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
+    loadSystemlib();
+  }
 } s_misc_extension;
 
 using JIT::CallerFrame;

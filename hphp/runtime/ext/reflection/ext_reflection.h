@@ -136,7 +136,7 @@ Array get_class_info(const String& name);
 
 // These helpers are shared by an FB-specific extension.
 Class* get_cls(const Variant& class_or_object);
-const Func* get_func(Class* cls, const String& meth_name);
+const Func* get_method_func(const Class* cls, const String& meth_name);
 Variant default_arg_from_php_code(const Func::ParamInfo& fpi, const Func* func);
 bool resolveDefaultParameterConstant(const char *value, int64_t valueLen,
                                      Variant &cns);

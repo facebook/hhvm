@@ -701,16 +701,12 @@ ssize_t MixedArray::findImpl(size_t h0, Hit hit) const {
 }
 
 ssize_t MixedArray::find(int64_t ki) const {
-  // all vector methods should work w/out touching the hashtable
-  assert(!isPacked());
   return findImpl(ki, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
 }
 
 ssize_t MixedArray::find(const StringData* s, strhash_t prehash) const {
-  // all vector methods should work w/out touching the hashtable
-  assert(!isPacked());
   auto h = prehash | STRHASH_MSB;
   return findImpl(prehash, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);

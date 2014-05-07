@@ -48,11 +48,12 @@ class Framework {
     // Get framework information and set all needed properties. Beyond
     // the install root, git info, test roots, etc., the other
     // properties are optional and may or may not be set
-    if (!array_key_exists("install_root", Options::$framework_info[$name]) ||
+    if (!array_key_exists("do_not_install", Options::$framework_info[$name]) &&
+        (!array_key_exists("install_root", Options::$framework_info[$name]) ||
         !array_key_exists("test_root", Options::$framework_info[$name]) ||
         !array_key_exists('url', Options::$framework_info[$name]) ||
         !array_key_exists('commit', Options::$framework_info[$name]) ||
-        !array_key_exists('branch', Options::$framework_info[$name])) {
+        !array_key_exists('branch', Options::$framework_info[$name]))) {
       throw new Exception("Provide install, git and test file search info");
     }
 
@@ -60,12 +61,14 @@ class Framework {
       $this->parallel = false;
     }
 
-    // Set Framework information for install. These are the five necessary
-    // properties for a proper install, with pull_requests being optional.
-    $this->setInstallRoot(Options::$framework_info[$name]["install_root"]);
-    $this->setGitPath(Options::$framework_info[$name]['url']);
-    $this->setGitCommit(Options::$framework_info[$name]['commit']);
-    $this->setGitBranch(Options::$framework_info[$name]['branch']);
+    if (!array_key_exists('do_not_install', Options::$framework_info[$name])) {
+      // Set Framework information for install. These are the five necessary
+      // properties for a proper install, with pull_requests being optional.
+      $this->setInstallRoot(Options::$framework_info[$name]["install_root"]);
+      $this->setGitPath(Options::$framework_info[$name]['url']);
+      $this->setGitCommit(Options::$framework_info[$name]['commit']);
+      $this->setGitBranch(Options::$framework_info[$name]['branch']);
+    }
     $this->setTestPath(Options::$framework_info[$name]["test_root"]);
     $this->setPullRequests(Options::getFrameworkInfo($name, "pull_requests"));
     $this->setBlacklist(Options::getFrameworkInfo($name, "blacklist"));
@@ -78,7 +81,8 @@ class Framework {
     $this->prepareOutputFiles();
 
     // Install if not already installed using the properties set above.
-    if (!$this->isInstalled()) {
+    if (!array_key_exists('do_not_install', Options::$framework_info[$name])
+        && !$this->isInstalled()) {
       // This will disable tests too upon install.
       $this->install();
     } else {

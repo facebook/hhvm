@@ -109,6 +109,9 @@
     commit: c1cf6c8630b71fa7c9b8f7e769758bb1d9147dae
     install_root: guzzle4
     test_root: guzzle4
+  hhvmquickinterp:
+    do_not_install: true
+    test_root: ../hhvm/quick_interp
   idiorm:
     url: https://github.com/j4mie/idiorm.git
     branch: v1.4.1

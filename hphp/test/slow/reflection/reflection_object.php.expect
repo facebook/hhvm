@@ -1,0 +1,3 @@
+array(0) {
+}
+ReflectionException: ReflectionObject expects to be constructed with an object, got string

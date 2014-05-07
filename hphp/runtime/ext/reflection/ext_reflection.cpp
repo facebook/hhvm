@@ -1565,7 +1565,7 @@ Array get_function_info(const String& name) {
   // setting parameters and static variables
   set_debugger_function_info(ret, func);
   set_debugger_source_info(ret, func->unit()->filepath()->data(),
-                  func->line1(), func->line2());
+                           func->line1(), func->line2());
   return ret;
 }
 

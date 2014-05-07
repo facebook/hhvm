@@ -1796,6 +1796,22 @@ class ReflectionClass implements Reflector {
 class ReflectionObject extends ReflectionClass {
 
   /**
+   * ( excerpt from http://www.php.net/manual/en/reflectionobject.construct.php
+   * )
+   *
+   *  Constructs a ReflectionObject.
+   */
+  public function __construct($argument) {
+    if (!is_object($argument)) {
+      throw new ReflectionException(
+        __CLASS__.' expects to be constructed with an object, got '
+        .gettype($argument)
+      );
+    }
+    parent::__construct($argument);
+  }
+
+  /**
    * ( excerpt from http://php.net/manual/en/reflectionobject.export.php )
    *
    * Exports a reflection. Warning: This function is currently not

@@ -40,7 +40,7 @@ std::string TypeAnnotation::vanillaName() const {
     return "";
   }
   if (!strcasecmp(m_name.c_str(), "HH\\mixed") ||
-      !strcasecmp(m_name.c_str(), "this")) {
+      !strcasecmp(m_name.c_str(), "HH\\this")) {
     return "";
   }
   return m_name;

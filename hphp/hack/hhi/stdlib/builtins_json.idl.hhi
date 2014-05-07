@@ -22,3 +22,4 @@ define('JSON_FB_EXTRA_ESCAPES', 0);
 define('JSON_FB_COLLECTIONS', 0);
 function json_encode($value, $options = 0) { }
 function json_decode($json, $assoc = false, $depth = 512, $options = 0) { }
+function json_last_error() { }

@@ -512,7 +512,7 @@ static void set_debugger_reflection_method_info(Array &ret, const Func* func, co
   set_debugger_reflection_method_prototype_info(ret, resolved_func);
 }
 
-Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
+static Array get_class_info_array(const Variant& name, bool forDebugger) {
   auto cls = get_cls(name);
   if (!cls) return Array();
 
@@ -598,22 +598,31 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
       const Func* m = methods[i];
       if (m->isGenerated()) continue;
 
-      Array info = Array::Create();
-      if (RuntimeOption::EvalRuntimeTypeProfile) {
-        set_type_profiling_info(info, cls, m);
+      auto lowerName = f_strtolower(m->nameStr());
+      if (forDebugger) {
+        Array info = Array::Create();
+        if (RuntimeOption::EvalRuntimeTypeProfile) {
+          set_type_profiling_info(info, cls, m);
+        }
+        set_debugger_reflection_method_info(info, m, cls);
+        arr.set(lowerName, VarNR(info));
+      } else {
+        arr.set(lowerName, lowerName);
       }
-      set_debugger_reflection_method_info(info, m, cls);
-      arr.set(f_strtolower(m->nameStr()), VarNR(info));
     }
 
-    for (Slot i = cls->traitsBeginIdx();
-         i < cls->traitsEndIdx();
-         ++i) {
+    for (Slot i = cls->traitsBeginIdx(); i < cls->traitsEndIdx(); ++i) {
       const Func* m = cls->getMethod(i);
       if (m->isGenerated()) continue;
-      Array info = Array::Create();
-      set_debugger_reflection_method_info(info, m, cls);
-      arr.set(f_strtolower(m->nameStr()), VarNR(info));
+
+      auto lowerName = f_strtolower(m->nameStr());
+      if (forDebugger) {
+        Array info = Array::Create();
+        set_debugger_reflection_method_info(info, m, cls);
+        arr.set(lowerName, VarNR(info));
+      } else {
+        arr.set(lowerName, lowerName);
+      }
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -726,21 +735,8 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
   return ret;
 }
 
-Array debugger_reflection_get_function_info(const String& name) {
-  Array ret;
-  if (name.get() == nullptr) return ret;
-  const Func* func = Unit::loadFunc(name.get());
-  if (!func) return ret;
-  ret.set(s_name,       VarNR(func->name()));
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    ret.set(s_type_profiling, getPercentParamInfoArray(func));
-  }
-
-  // setting parameters and static variables
-  set_function_info(ret, func);
-  set_source_info(ret, func->unit()->filepath()->data(),
-                  func->line1(), func->line2());
-  return ret;
+Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
+  return get_class_info_array(name, false);
 }
 
 Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params) {
@@ -1312,6 +1308,33 @@ class ReflectionExtension : public Extension {
         Unit::lookupClass(s_reflectionexception.get());
   }
 } s_reflection_extension;
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace DebuggerReflection {
+
+Array get_function_info(const String& name) {
+  Array ret;
+  if (name.get() == nullptr) return ret;
+  const Func* func = Unit::loadFunc(name.get());
+  if (!func) return ret;
+  ret.set(s_name,       VarNR(func->name()));
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    ret.set(s_type_profiling, getPercentParamInfoArray(func));
+  }
+
+  // setting parameters and static variables
+  set_function_info(ret, func);
+  set_source_info(ret, func->unit()->filepath()->data(),
+                  func->line1(), func->line2());
+  return ret;
+}
+
+Array get_class_info(const Variant& name) {
+  return get_class_info_array(name, true);
+}
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -24,8 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array debugger_reflection_get_function_info(const String& name);
-
 Array HHVM_FUNCTION(hphp_get_extension_info, const String& name);
 Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name);
 Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params);
@@ -92,6 +90,11 @@ class ReflectionFuncHandle {
  private:
   const Func* m_func{nullptr};
 };
+
+namespace DebuggerReflection {
+Array get_function_info(const String& name);
+Array get_class_info(const Variant& name);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

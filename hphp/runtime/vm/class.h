@@ -681,7 +681,7 @@ struct Class : AtomicCountable {
   const std::vector<ClassPtr>& usedTraitClasses() const {
     return m_usedTraits;
   }
-  const TraitAliasVec& traitAliases();
+  const TraitAliasVec& traitAliases(); // not const for memoization
   const InitVec& pinitVec() const { return m_pinitVec; }
   const PropInitVec& declPropInit() const { return m_declPropInit; }
 

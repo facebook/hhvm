@@ -91,6 +91,46 @@ class ReflectionFuncHandle {
   const Func* m_func{nullptr};
 };
 
+/* A ReflectionClassHandle is a NativeData object wrapping a Class* for the
+ * purposes of ReflectionClass. */
+extern const StaticString s_ReflectionClassHandle;
+class ReflectionClassHandle {
+ public:
+  ReflectionClassHandle(): m_cls(nullptr) {}
+  explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {};
+  ReflectionClassHandle(const ReflectionClassHandle&) = delete;
+  ReflectionClassHandle& operator=(const ReflectionClassHandle& that_) {
+    m_cls = that_.m_cls;
+    return *this;
+  }
+  ~ReflectionClassHandle() {}
+
+  static ReflectionClassHandle* Get(Object obj) {
+    if (obj.isNull()) {
+      raise_error("NULL object passed");
+      return nullptr;
+    }
+    auto ret = Native::data<ReflectionClassHandle>(obj.get());
+    return ret;
+  }
+
+  static const Class* GetClassFor(Object obj) {
+    auto handle = ReflectionClassHandle::Get(obj);
+    assert(handle);
+    return handle->getClass();
+  }
+
+  const Class* getClass() { return m_cls; }
+  void setClass(const Class* cls) {
+    assert(cls != nullptr);
+    assert(m_cls == nullptr);
+    m_cls = cls;
+  }
+
+ private:
+  const Class* m_cls{nullptr};
+};
+
 namespace DebuggerReflection {
 Array get_function_info(const String& name);
 Array get_class_info(const String& name);

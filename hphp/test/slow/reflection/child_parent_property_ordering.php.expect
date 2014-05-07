@@ -30,7 +30,7 @@ array(4) {
     bool(false)
   }
   [1]=>
-  object(ReflectionProperty)#5 (4) {
+  object(ReflectionProperty)#4 (4) {
     ["info"]=>
     array(9) {
       ["name"]=>
@@ -61,7 +61,7 @@ array(4) {
     bool(false)
   }
   [2]=>
-  object(ReflectionProperty)#7 (4) {
+  object(ReflectionProperty)#5 (4) {
     ["info"]=>
     array(9) {
       ["name"]=>
@@ -91,7 +91,7 @@ array(4) {
     bool(false)
   }
   [3]=>
-  object(ReflectionProperty)#9 (4) {
+  object(ReflectionProperty)#6 (4) {
     ["info"]=>
     array(9) {
       ["name"]=>

@@ -243,11 +243,9 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#22 (3) {
+object(ReflectionClass)#20 (2) {
   ["name"]=>
   string(1) "A"
-  ["info":"ReflectionClass":private]=>
-  NULL
   ["obj":"ReflectionClass":private]=>
   NULL
 }
@@ -311,7 +309,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#50 (4) {
+object(B)#33 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -323,7 +321,7 @@ object(B)#50 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#50 (4) {
+object(B)#33 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

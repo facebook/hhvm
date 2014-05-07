@@ -1,0 +1,20 @@
+interfaces:hhvm differs slightly from PHP5 slightly here
+Array
+(
+    [0] => J
+    [1] => X
+    [2] => I
+)
+constants:
+Array
+(
+    [ABS] => const from Abs
+    [J] => const from J
+    [I] => const from I
+    [X] => const from X
+)
+methods:
+fromAbs
+fromJ
+fromI
+fromX

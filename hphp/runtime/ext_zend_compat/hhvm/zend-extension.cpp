@@ -38,9 +38,6 @@ ZendExtension::ZendExtension(const char* name) : HPHP::Extension(name) {
       APPROXIMATE_STATIC_ZEND_MODULES
     );
   }
-  zend_module_entry* module = this->getEntry();
-  module->module_number = s_zend_next_module++;
-  s_zend_extensions->insert(module->module_number, this);
 }
 
 ZendExtension* ZendExtension::GetByModuleNumber(int module_number) {
@@ -56,16 +53,20 @@ void ZendExtension::moduleInit() {
   if (!HPHP::RuntimeOption::EnableZendCompat) {
     return;
   }
+  // Give it a module number
+  zend_module_entry* module = getEntry();
+  module->module_number = s_zend_next_module++;
+  s_zend_extensions->insert(module->module_number, this);
+
   HPHP::ZendObject::registerNativeData();
   // Allocate globals
-  zend_module_entry* entry = getEntry();
-  if (entry->globals_size) {
-    ts_allocate_id(entry->globals_id_ptr, entry->globals_size,
-        (ts_allocate_ctor) entry->globals_ctor,
-        (ts_allocate_dtor) entry->globals_dtor);
+  if (module->globals_size) {
+    ts_allocate_id(module->globals_id_ptr, module->globals_size,
+        (ts_allocate_ctor) module->globals_ctor,
+        (ts_allocate_dtor) module->globals_dtor);
   }
   // Register global functions
-  const zend_function_entry * fe = entry->functions;
+  const zend_function_entry * fe = module->functions;
   while (fe->fname) {
     assert(fe->handler);
     HPHP::Native::registerBuiltinFunction(HPHP::makeStaticString(fe->fname),
@@ -73,9 +74,9 @@ void ZendExtension::moduleInit() {
     fe++;
   }
   // Call MINIT
-  if (entry->module_startup_func) {
+  if (module->module_startup_func) {
     TSRMLS_FETCH();
-    entry->module_startup_func(1, entry->module_number TSRMLS_CC);
+    module->module_startup_func(1, module->module_number TSRMLS_CC);
   }
   // The systemlib name must match the name used by the build process. For
   // in-tree builds this is the directory name, which is typically the same

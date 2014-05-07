@@ -1883,11 +1883,11 @@ void getInputsImpl(SrcKey startSk,
   const SrcKey& sk = ni->source;
 #endif
   assert(inputs.empty());
-  if (debug && !instrInfo.count(ni->op())) {
-    fprintf(stderr, "Translator does not understand "
-      "instruction %s\n", opcodeToName(ni->op()));
-    assert(false);
-  }
+  always_assert_flog(
+    instrInfo.count(ni->op()),
+    "Invalid opcode in getInputsImpl: {}\n",
+    opcodeToName(ni->op())
+  );
   const InstrInfo& info = instrInfo[ni->op()];
   Operands input = info.in;
   if (input & FuncdRef) {

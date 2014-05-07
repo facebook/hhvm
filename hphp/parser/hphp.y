@@ -137,22 +137,6 @@ static void scalar_line(Parser *_p, Token &out) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// converting constant declaration to "define(name, value);"
-// TODO: get rid of this, or pass in more info, task 3491019.
-
-static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
-  Token sname;   _p->onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
-
-  Token fname;   fname.setText("define");
-  Token params1; _p->onCallParam(params1, NULL, sname, 0);
-  Token params2; _p->onCallParam(params2, &params1, value, 0);
-  Token call;    _p->onCall(call, 0, fname, params2, 0);
-  Token expr;    _p->onExpStatement(expr, call);
-
-  _p->addTopStatement(expr);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 static void constant_ae(Parser *_p, Token &out, Token &value) {
   const std::string& valueStr = value.text();
@@ -777,6 +761,8 @@ top_statement:
   | T_USE use_declarations ';'         { _p->nns(); $$.reset();}
   | T_USE T_FUNCTION
     use_fn_declarations ';'            { _p->nns(); $$.reset();}
+  | T_USE T_CONST
+    use_const_declarations ';'         { _p->nns(); $$.reset();}
   | constant_declaration ';'           { _p->nns();
                                          _p->finishStatement($$, $1); $$ = 1;}
 ;
@@ -815,6 +801,12 @@ use_fn_declarations:
   | use_fn_declaration                 { }
 ;
 
+use_const_declarations:
+    use_const_declaration ','
+    use_const_declaration              { }
+  | use_const_declaration              { }
+;
+
 use_declaration:
     namespace_name                     { _p->onUse($1.text(),"");}
   | T_NS_SEPARATOR namespace_name      { _p->onUse($2.text(),"");}
@@ -829,6 +821,14 @@ use_fn_declaration:
   | namespace_name T_AS ident          { _p->onUseFunction($1.text(),$3.text());}
   | T_NS_SEPARATOR namespace_name
     T_AS ident                         { _p->onUseFunction($2.text(),$4.text());}
+;
+
+use_const_declaration:
+    namespace_name                     { _p->onUseConst($1.text(),"");}
+  | T_NS_SEPARATOR namespace_name      { _p->onUseConst($2.text(),"");}
+  | namespace_name T_AS ident          { _p->onUseConst($1.text(),$3.text());}
+  | T_NS_SEPARATOR namespace_name
+    T_AS ident                         { _p->onUseConst($2.text(),$4.text());}
 ;
 
 namespace_name:
@@ -866,10 +866,10 @@ constant_declaration:
     constant_declaration ','
     hh_name_with_type
     '=' static_scalar                  { $3.setText(_p->nsDecl($3.text()));
-                                         on_constant(_p,$$,$3,$5);}
+                                         _p->onConst($$,$3,$5);}
   | T_CONST hh_name_with_type '='
     static_scalar                      { $2.setText(_p->nsDecl($2.text()));
-                                         on_constant(_p,$$,$2,$4);}
+                                         _p->onConst($$,$2,$4);}
 ;
 
 inner_statement_list:

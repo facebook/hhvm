@@ -1,0 +1,2 @@
+
+Fatal error: Cannot use const const_case\lower as lower because the name is already in use in %s/constant/casing.php on line 15

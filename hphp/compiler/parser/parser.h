@@ -158,6 +158,7 @@ public:
   void encapRefDim(Token &out, Token &var, Token &offset);
   void encapObjProp(Token &out, Token &var, Token &name);
   void encapArray(Token &out, Token &var, Token &expr);
+  void onConst(Token &out, Token &name, Token &value);
   void onConstantValue(Token &out, Token &constant);
   void onScalar(Token &out, int type, Token &scalar);
   void onExprListElem(Token &out, Token *exprs, Token &expr);
@@ -298,6 +299,7 @@ public:
 
   void onUse(const std::string &ns, const std::string &as);
   void onUseFunction(const std::string &fn, const std::string &as);
+  void onUseConst(const std::string &cnst, const std::string &as);
 
   /*
    * Get the current label scope. A new label scope is demarcated by
@@ -475,8 +477,13 @@ private:
   std::string m_namespace; // current namespace
   AliasTable m_nsAliasTable;
 
+  // Function aliases
   hphp_string_iset m_fnTable;
   hphp_string_imap<std::string> m_fnAliasTable;
+
+  // Constant aliases
+  hphp_string_set m_cnstTable;
+  hphp_string_map<std::string> m_cnstAliasTable;
 
   void registerAlias(std::string name);
   bool isAutoAliasOn();

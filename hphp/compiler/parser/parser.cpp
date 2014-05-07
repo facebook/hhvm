@@ -137,6 +137,21 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
       name, hadBackslash, params, cls));
 }
 
+static std::string fully_qualified_name_as_alias_key(const std::string &fqn,
+                                                     const std::string &as) {
+  string key = as;
+  if (key.empty()) {
+    size_t pos = fqn.rfind(NAMESPACE_SEP);
+    if (pos == string::npos) {
+      key = fqn;
+    } else {
+      key = fqn.substr(pos + 1);
+    }
+  }
+
+  return key;
+}
+
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -580,6 +595,11 @@ void Parser::encapArray(Token &out, Token &var, Token &expr) {
 // expressions
 
 void Parser::onConstantValue(Token &out, Token &constant) {
+  const auto& alias = m_cnstAliasTable.find(constant.text());
+  if (alias != m_cnstAliasTable.end()) {
+    constant.setText(alias->second);
+  }
+
   ConstantExpressionPtr con = NEW_EXP(ConstantExpression, constant->text(),
       constant->num() & 2);
   con->onParse(m_ar, m_file);
@@ -814,6 +834,21 @@ void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
   }
   expList->addElement(NEW_EXP(UserAttribute, name->text(), value->exp));
   out->exp = expList;
+}
+
+void Parser::onConst(Token &out, Token &name, Token &value) {
+  // Convert to a define call
+  Token sname;   onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
+
+  Token fname;   fname.setText("define");
+  Token params1; onCallParam(params1, nullptr, sname, 0);
+  Token params2; onCallParam(params2, &params1, value, 0);
+  Token call;    onCall(call, 0, fname, params2, 0);
+  Token expr;    onExpStatement(expr, call);
+
+  addTopStatement(expr);
+
+  m_cnstTable.insert(name.text());
 }
 
 void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
@@ -2215,6 +2250,7 @@ void Parser::onNamespaceStart(const std::string &ns,
   m_namespace = ns;
   m_nsAliasTable.clear();
   m_fnAliasTable.clear();
+  m_cnstAliasTable.clear();
 }
 
 void Parser::onNamespaceEnd() {
@@ -2222,15 +2258,7 @@ void Parser::onNamespaceEnd() {
 }
 
 void Parser::onUse(const std::string &ns, const std::string &as) {
-  string key = as;
-  if (key.empty()) {
-    size_t pos = ns.rfind(NAMESPACE_SEP);
-    if (pos == string::npos) {
-      key = ns;
-    } else {
-      key = ns.substr(pos + 1);
-    }
-  }
+  string key = fully_qualified_name_as_alias_key(ns, as);
 
   // It's not an error if the alias already exists but is auto-imported.
   // In that case, it gets replaced. It prompts an error if it is not
@@ -2253,15 +2281,7 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
 }
 
 void Parser::onUseFunction(const std::string &fn, const std::string &as) {
-  string key = as;
-  if (key.empty()) {
-    size_t pos = fn.rfind(NAMESPACE_SEP);
-    if (pos == string::npos) {
-      key = fn;
-    } else {
-      key = fn.substr(pos + 1);
-    }
-  }
+  string key = fully_qualified_name_as_alias_key(fn, as);
 
   if (m_fnTable.count(key) || m_fnAliasTable.count(key)) {
     error(
@@ -2270,6 +2290,18 @@ void Parser::onUseFunction(const std::string &fn, const std::string &as) {
   }
 
   m_fnAliasTable[key] = fn;
+}
+
+void Parser::onUseConst(const std::string &cnst, const std::string &as) {
+  string key = fully_qualified_name_as_alias_key(cnst, as);
+
+  if (m_cnstTable.count(key) || m_cnstAliasTable.count(key)) {
+    error(
+      "Cannot use const %s as %s because the name is already in use in %s",
+      cnst.c_str(), key.c_str(), getMessage().c_str());
+  }
+
+  m_cnstAliasTable[key] = cnst;
 }
 
 std::string Parser::nsDecl(const std::string &name) {

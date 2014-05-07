@@ -548,6 +548,10 @@ struct Parser : ParserBase {
     out.setNodeType(ONCONSTANTVALUE).appendChild(&constant);
   }
 
+  void onConst(Token &out, Token &name, Token &value) {
+    // TODO
+  }
+
   void onScalar(Token &out, int type, Token &scalar) {
     out.setNodeType(ONSCALAR).appendChild(&scalar)
       .setExtra(new OnScalarEI(type));
@@ -1000,6 +1004,10 @@ struct Parser : ParserBase {
   }
 
   void onUseFunction(const std::string &fn, const std::string &as) {
+    // TODO
+  }
+
+  void onUseConst(const std::string &cnst, const std::string &as) {
     // TODO
   }
 

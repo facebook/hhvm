@@ -340,7 +340,6 @@ bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableObjDestructCall = false;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
-bool RuntimeOption::EnableInstructionCounts = false;
 bool RuntimeOption::CheckSymLink = true;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -1213,7 +1212,6 @@ void RuntimeOption::Load(Hdf &config,
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(true);
     EnableEmitterStats = eval["EnableEmitterStats"].getBool(EnableEmitterStats);
-    EnableInstructionCounts = eval["EnableInstructionCounts"].getBool(false);
     RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();
     if (EvalJit && RecordCodeCoverage) {
       throw InvalidArgumentException(

@@ -19,8 +19,6 @@
 #define O(name, u0, u1, u2, u3) \
   STAT(Instr_InterpOne ## name) \
   STAT(Instr_InterpBB ## name) \
-  STAT(Instr_TranslIRPre ## name) \
-  STAT(Instr_TranslIRPost ## name) \
   STAT(Instr_Transl ## name)
 
-#define STATS_PER_OPCODE        5
+#define STATS_PER_OPCODE        3

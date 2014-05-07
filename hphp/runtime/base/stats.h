@@ -230,16 +230,6 @@ inline StatCounter opcodeToTranslStatCounter(Op opc) {
                      STATS_PER_OPCODE * uint8_t(opc));
 }
 
-inline StatCounter opcodeToIRPreStatCounter(Op opc) {
-  return StatCounter(Instr_TranslIRPreLowInvalid +
-                     STATS_PER_OPCODE * uint8_t(opc));
-}
-
-inline StatCounter opcodeToIRPostStatCounter(Op opc) {
-  return StatCounter(Instr_TranslIRPostLowInvalid +
-                     STATS_PER_OPCODE * uint8_t(opc));
-}
-
 extern void init();
 extern void dump();
 extern void clear();

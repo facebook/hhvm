@@ -117,14 +117,9 @@ using std::max;
   TPC(enter_tc) \
   TPC(service_req)
 
-static const char* const kInstrCountMCGName = "instr_mcg";
-static const char* const kInstrCountIRName = "instr_hhir";
-
 #define TPC(n) "jit_" #n,
 static const char* const kPerfCounterNames[] = {
   TRANS_PERF_COUNTERS
-  kInstrCountMCGName,
-  kInstrCountIRName,
 };
 #undef TPC
 
@@ -2211,22 +2206,6 @@ MCGenerator::getPerfCounters(Array& ret) {
     // look more like reasonable hardware counter values.
     ret.set(String::FromCStr(kPerfCounterNames[i]),
             s_perfCounters[i] * 1000);
-  }
-
-  if (RuntimeOption::EnableInstructionCounts) {
-    auto doCounts = [&](unsigned begin, const char* const name) {
-      int64_t count = 0;
-      for (; begin < Stats::Instr_InterpOneHighInvalid;
-           begin += STATS_PER_OPCODE) {
-        count += Stats::tl_counters[Stats::StatCounter(begin)];
-      }
-      ret.set(String::FromCStr(name), count);
-    };
-
-    doCounts(Stats::Instr_TranslLowInvalid + STATS_PER_OPCODE,
-             kInstrCountMCGName);
-    doCounts(Stats::Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE,
-             kInstrCountIRName);
   }
 
   for (auto const& pair : Timer::Counters()) {

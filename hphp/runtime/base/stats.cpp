@@ -114,7 +114,7 @@ void dump() {
 }
 
 void clear() {
-  if (!RuntimeOption::EnableInstructionCounts && !enabledAny()) return;
+  if (!enabledAny()) return;
   ++epoch;
   memset(&tl_counters[0], 0, sizeof(tl_counters));
   memset(&tl_helper_counters[0], 0, sizeof(tl_helper_counters));

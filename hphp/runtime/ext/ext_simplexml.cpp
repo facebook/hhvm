@@ -1613,10 +1613,6 @@ Array c_SimpleXMLElement::ToArray(const ObjectData* obj) {
   return properties;
 }
 
-Array c_SimpleXMLElement::ToIterArray(const ObjectData* obj) {
-  return ToArray(obj);
-}
-
 Variant c_SimpleXMLElement::t_getiterator() {
   Object obj = create_object(c_SimpleXMLElementIterator::classof()->nameStr(),
                              Array(), false);

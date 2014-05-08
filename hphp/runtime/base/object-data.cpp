@@ -423,13 +423,6 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
 
 Array ObjectData::o_toIterArray(const String& context,
                                 bool getRef /* = false */) {
-  if (UNLIKELY(getAttribute(CallToImpl))) {
-    // If we end up with other classes that need special behavior, turn the
-    // assert into an if and add cases.
-    assert(instanceof(c_SimpleXMLElement::classof()));
-    return c_SimpleXMLElement::ToIterArray(this);
-  }
-
   Array* dynProps = nullptr;
   size_t size = m_cls->declPropNumAccessible();
   if (getAttribute(HasDynPropArr)) {

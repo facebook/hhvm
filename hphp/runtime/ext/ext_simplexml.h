@@ -93,7 +93,6 @@ class c_SimpleXMLElement :
   static int64_t ToInt64(const ObjectData* obj) noexcept;
   static double  ToDouble(const ObjectData* obj) noexcept;
   static Array   ToArray(const ObjectData* obj);
-  static Array   ToIterArray(const ObjectData* obj);
 
   Resource   document;
   xmlNodePtr node;

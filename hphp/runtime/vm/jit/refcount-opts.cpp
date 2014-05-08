@@ -879,6 +879,11 @@ struct SinkPointAnalyzer : private LocalStateHook {
       defineOutputs();
     } else if (m_inst->is(DecRefLoc)) {
       consumeLocal(m_inst->extra<DecRefLoc>()->locId);
+    } else if (m_inst->is(DecRefThis)) {
+      // This only happens during a RetC, and it happens instead of a normal
+      // DecRef on $this.
+      auto frame = frameRoot(m_inst->src(0)->inst());
+      consumeFrame(m_state.frames.live.at(frame));
     } else {
       // All other instructions take the generic path.
       consumeInputs();
@@ -1061,12 +1066,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     // If we have no prelive frames the FPush* was in a different trace.
     if (m_state.frames.preLive.empty()) return;
 
-    auto& frame = m_state.frames.preLive.back();
-    if (frame.currentThis) {
-      consumeValue(frame.currentThis);
-    } else if (frame.mainThis) {
-      consumeValueEraseOnly(frame.mainThis);
-    }
+    consumeFrame(m_state.frames.preLive.back());
     m_state.frames.preLive.pop_back();
   }
 
@@ -1094,16 +1094,26 @@ struct SinkPointAnalyzer : private LocalStateHook {
   }
 
   /*
+   * Consume the $this pointer for a Frame, if it has one. If currentThis is
+   * nullptr but mainThis exists we use an "erase-only" sink point, which means
+   * it's not safe to actually sink the IncRef but it's safe to erase the
+   * IncRef/DecRef pair (usually because the value has been smashed by a Call).
+   */
+  void consumeFrame(Frame& f) {
+    if (f.currentThis) {
+      consumeValue(f.currentThis);
+    } else if (f.mainThis) {
+      consumeValueEraseOnly(f.mainThis);
+    }
+  }
+
+  /*
    * When we leave a trace, we have to account for all the references we're
    * tracking in pre-live frames and inlined frames.
    */
   void consumeAllFrames() {
     forEachFrame([this](Frame& f) {
-      if (f.currentThis) {
-        consumeValue(f.currentThis);
-      } else if (f.mainThis) {
-        consumeValueEraseOnly(f.mainThis);
-      }
+      consumeFrame(f);
     });
   }
 

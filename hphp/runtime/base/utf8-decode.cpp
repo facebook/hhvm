@@ -62,7 +62,7 @@ get(json_utf8_decode *utf8)
 {
     int c;
     if (utf8->the_index >= utf8->the_length) {
-        return UTF8_END;
+        return utf8->the_index == utf8->the_length ? UTF8_END : UTF8_ERROR;
     }
     c = utf8->the_input[utf8->the_index] & 0xFF;
     utf8->the_index += 1;
@@ -91,8 +91,6 @@ utf8_decode_init(json_utf8_decode *utf8, const char *p, int length)
     utf8->the_index = 0;
     utf8->the_input = p;
     utf8->the_length = length;
-    utf8->the_char = 0;
-    utf8->the_byte = 0;
 }
 
 /*
@@ -107,12 +105,10 @@ utf8_decode_next(json_utf8_decode *utf8)
     int c;  /* the first byte of the character */
     int r;  /* the result */
 
-    if (utf8->the_index >= utf8->the_length) {
-        return utf8->the_index == utf8->the_length ? UTF8_END : UTF8_ERROR;
-    }
-    utf8->the_byte = utf8->the_index;
-    utf8->the_char += 1;
     c = get(utf8);
+    if (c < 0) {
+      return c;
+    }
 /*
     Zero continuation (0 to 127)
 */
@@ -171,25 +167,43 @@ int UTF8To16Decoder::decode() {
     m_low_surrogate = 0;
     return ret;
   } else {
-    int c = utf8_decode_next(&m_decode);
-    if (c < 0) {
-    /*** BEGIN Facebook: json_utf8_loose ***/
-      if (c == UTF8_END) {
-        return UTF8_END;
-      }
-      if (m_loose) {
-        return '?';
-      } else {
-        return UTF8_ERROR;
-      }
-    /*** END Facebook: json_utf8_loose ***/
-    } else if (c < 0x10000) {
+    int c = getNext();
+    if (c < 0x10000) {
       return c;
     } else {
       c -= 0x10000;
       m_low_surrogate = (0xDC00 | (c & 0x3FF));
       return (0xD800 | (c >> 10));
     }
+  }
+}
+
+int UTF8To16Decoder::decodeAsUTF8() {
+  if (m_index == m_decode.the_index) {
+    // validate the next char
+    int c = getNext();
+    if (c < 0) {
+      return c;
+    }
+  }
+  return m_decode.the_input[m_index++] & 0xFF;
+}
+
+int UTF8To16Decoder::getNext() {
+  int c = utf8_decode_next(&m_decode);
+  if (c < 0) {
+  /*** BEGIN Facebook: json_utf8_loose ***/
+    if (c == UTF8_END) {
+      return UTF8_END;
+    }
+    if (m_loose) {
+      return '?';
+    } else {
+      return UTF8_ERROR;
+    }
+  /*** END Facebook: json_utf8_loose ***/
+  } else {
+    return c;
   }
 }
 

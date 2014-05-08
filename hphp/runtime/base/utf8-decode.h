@@ -29,19 +29,22 @@ struct json_utf8_decode {
   int the_index;
   const char *the_input;
   int the_length;
-  int the_char;
-  int the_byte;
 };
 
 class UTF8To16Decoder {
 public:
   UTF8To16Decoder(const char *utf8, int length, bool loose);
   int decode();
+  int decodeAsUTF8();
 
 private:
+  int getNext();
   json_utf8_decode m_decode;
   int m_loose; // Faceook: json_utf8_loose
-  int m_low_surrogate;
+  union {
+    int m_low_surrogate; // used for decode
+    int m_index; // used for decodeAsUTF8
+  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

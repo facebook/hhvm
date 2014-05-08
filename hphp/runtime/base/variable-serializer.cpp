@@ -289,7 +289,8 @@ static void appendJsonEscape(StringBuffer& sb,
 
   UTF8To16Decoder decoder(s, len, options & k_JSON_FB_LOOSE);
   for (;;) {
-    int c = decoder.decode();
+    int c = options & k_JSON_UNESCAPED_UNICODE ? decoder.decodeAsUTF8()
+                                               : decoder.decode();
     if (c == UTF8_END) {
       sb.append('"');
       break;
@@ -367,9 +368,8 @@ static void appendJsonEscape(StringBuffer& sb,
       }
       break;
     default:
-      if (us >= ' ' && options & k_JSON_UNESCAPED_UNICODE) {
-        utf16_to_utf8(sb, us);
-      } else if (us >= ' ' && (us & 127) == us) {
+      if (us >= ' ' &&
+          ((options & k_JSON_UNESCAPED_UNICODE) || (us & 127) == us)) {
         sb.append((char)us);
       } else {
         sb.append("\\u", 2);

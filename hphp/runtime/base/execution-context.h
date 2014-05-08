@@ -697,18 +697,12 @@ public:
 OPCODES
 #undef O
   enum DispatchFlags {
-    LimitInstrs = 1 << 0,
-    BreakOnCtlFlow = 1 << 1,
-    Profile = 1 << 2
+    BreakOnCtlFlow = 1 << 0,
+    Profile        = 1 << 1
   };
   template <int dispatchFlags>
-  void dispatchImpl(int numInstrs);
+  void dispatchImpl();
   void dispatch();
-  // dispatchN() runs numInstrs instructions, or to program termination,
-  // whichever comes first. If the program terminates during execution, m_pc is
-  // set to null.
-  void dispatchN(int numInstrs);
-
   // dispatchBB() tries to run until a control-flow instruction has been run.
   void dispatchBB();
 

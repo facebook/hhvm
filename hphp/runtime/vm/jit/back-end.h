@@ -105,7 +105,7 @@ class BackEnd {
                                  SRFlags flags, ServiceRequest req,
                                  const ServiceReqArgVec& argv) = 0;
   virtual void emitInterpReq(CodeBlock& mainCode, CodeBlock& stubsCode,
-                             const SrcKey& sk, int numInstrs) = 0;
+                             const SrcKey& sk) = 0;
   virtual bool funcPrologueHasGuard(TCA prologue, const Func* func) = 0;
   virtual TCA funcPrologueToGuard(TCA prologue, const Func* func) = 0;
   virtual SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,

@@ -176,7 +176,7 @@ struct BackEnd : public JIT::BackEnd {
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& stubsCode,
-                     const SrcKey& sk, int numInstrs) override {
+                     const SrcKey& sk) override {
     if (RuntimeOption::EvalJitTransCounters) {
       vixl::MacroAssembler a { mainCode };
       ARM::emitTransCounterInc(a);
@@ -185,7 +185,7 @@ struct BackEnd : public JIT::BackEnd {
     // sequence.
     mcg->backEnd().emitSmashableJump(
       mainCode,
-      emitServiceReq(stubsCode, REQ_INTERPRET, sk.offset(), numInstrs),
+      emitServiceReq(stubsCode, REQ_INTERPRET, sk.offset()),
       CC_None
     );
   }
@@ -458,7 +458,7 @@ struct BackEnd : public JIT::BackEnd {
     }
     a.   bind (&interpReqAddr);
     TCA interpReq =
-      emitServiceReq(codeStubs, REQ_INTERPRET, sk.offset(), 0);
+      emitServiceReq(codeStubs, REQ_INTERPRET, sk.offset());
     a.   dc64 (interpReq);
     a.   bind (&after);
   }

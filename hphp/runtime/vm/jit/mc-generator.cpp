@@ -1296,23 +1296,16 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
 
   case REQ_INTERPRET: {
     Offset off = args[0];
-    int numInstrs = args[1];
     g_context->m_pc = liveUnit()->at(off);
     /*
      * We know the compilation unit has not changed; basic blocks do
      * not span files. I claim even exceptions do not violate this
      * axiom.
      */
-    assert(numInstrs >= 0);
     SKTRACE(5, SrcKey(liveFunc(), off, liveResumed()), "interp: enter\n");
-    if (numInstrs) {
-      s_perfCounters[tpc_interp_instr] += numInstrs;
-      g_context->dispatchN(numInstrs);
-    } else {
-      // numInstrs == 0 means it wants to dispatch until BB ends
-      INC_TPC(interp_bb);
-      g_context->dispatchBB();
-    }
+    // dispatch until BB ends
+    INC_TPC(interp_bb);
+    g_context->dispatchBB();
     PC newPc = g_context->getPC();
     if (!newPc) { g_context->m_fp = 0; return false; }
     SrcKey newSk(liveFunc(), newPc, liveResumed());
@@ -1876,10 +1869,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   if (transKindToRecord == TransKind::Interp) {
     assertCleanState();
-    auto interpOps = tp ? tp->m_numOpcodes : 1;
-    FTRACE(1, "emitting {}-instr interp request for failed translation\n",
-           interpOps);
-    mcg->backEnd().emitInterpReq(code.main(), code.stubs(), sk, interpOps);
+    FTRACE(1, "emitting dispatchBB interp request for failed translation\n");
+    mcg->backEnd().emitInterpReq(code.main(), code.stubs(), sk);
     // Fall through.
   }
 

@@ -143,13 +143,13 @@ struct BackEnd : public JIT::BackEnd {
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& stubsCode,
-                     const SrcKey& sk, int numInstrs) override {
+                     const SrcKey& sk) override {
     Asm a { mainCode };
     // Add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {
       X64::emitTransCounterInc(a);
     }
-    a.    jmp(emitServiceReq(stubsCode, REQ_INTERPRET, sk.offset(), numInstrs));
+    a.    jmp(emitServiceReq(stubsCode, REQ_INTERPRET, sk.offset()));
   }
 
   bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
@@ -344,7 +344,7 @@ struct BackEnd : public JIT::BackEnd {
 
     // Branch to a special REQ_INTERPRET if attached
     auto const fallback =
-      emitServiceReq(codeStubs, REQ_INTERPRET, sk.offset(), 0);
+      emitServiceReq(codeStubs, REQ_INTERPRET, sk.offset());
     a.   jnz    (fallback);
   }
 

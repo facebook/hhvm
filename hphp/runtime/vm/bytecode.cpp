@@ -7353,8 +7353,7 @@ profileReturnValue(const DataType dt) {
 }
 
 template <int dispatchFlags>
-inline void ExecutionContext::dispatchImpl(int numInstrs) {
-  static const bool limInstrs = dispatchFlags & LimitInstrs;
+inline void ExecutionContext::dispatchImpl() {
   static const bool breakOnCtlFlow = dispatchFlags & BreakOnCtlFlow;
   static const bool profile = dispatchFlags & Profile;
   static const void *optabDirect[] = {
@@ -7398,8 +7397,7 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
   bool isCtlFlow = false;
 
 #define DISPATCH() do {                                                 \
-    if ((breakOnCtlFlow && isCtlFlow) ||                                \
-        (limInstrs && UNLIKELY(numInstrs-- == 0))) {                    \
+    if (breakOnCtlFlow && isCtlFlow) {                                  \
       ONTRACE(1,                                                        \
               Trace::trace("dispatch: Halt ExecutionContext::dispatch(%p)\n", \
                            m_fp));                                      \
@@ -7454,9 +7452,9 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
 
 void ExecutionContext::dispatch() {
   if (shouldProfile()) {
-    dispatchImpl<Profile>(0);
+    dispatchImpl<Profile>();
   } else {
-    dispatchImpl<0>(0);
+    dispatchImpl<0>();
   }
 }
 
@@ -7469,20 +7467,6 @@ void ExecutionContext::switchModeForDebugger() {
   }
 }
 
-void ExecutionContext::dispatchN(int numInstrs) {
-  if (Trace::moduleEnabled(Trace::dispatchN)) {
-    auto cat = makeStaticString("dispatchN");
-    auto name = makeStaticString(
-      folly::format("{} ops @ {}",
-                    numInstrs, show(SrcKey(m_fp->func(), m_pc,
-                                           m_fp->resumed()))).str());
-    Stats::incStatGrouped(cat, name, 1);
-  }
-
-  dispatchImpl<LimitInstrs | BreakOnCtlFlow>(numInstrs);
-  switchModeForDebugger();
-}
-
 void ExecutionContext::dispatchBB() {
   if (Trace::moduleEnabled(Trace::dispatchBB)) {
     auto cat = makeStaticString("dispatchBB");
@@ -7491,7 +7475,7 @@ void ExecutionContext::dispatchBB() {
     Stats::incStatGrouped(cat, name, 1);
   }
 
-  dispatchImpl<BreakOnCtlFlow>(0);
+  dispatchImpl<BreakOnCtlFlow>();
   switchModeForDebugger();
 }
 

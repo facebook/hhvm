@@ -93,8 +93,7 @@ class Init {
         }
         if (mod == Trace::minstr ||
             mod == Trace::interpOne ||
-            mod == Trace::dispatchBB ||
-            mod == Trace::dispatchN) {
+            mod == Trace::dispatchBB) {
           levels[Trace::statgroups] = std::max(levels[Trace::statgroups], 1);
         }
       }
@@ -173,4 +172,3 @@ std::string prettyNode(const char* name, const std::string& s) {
 }
 
 } } // HPHP::Trace
-

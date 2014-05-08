@@ -76,7 +76,7 @@ void annotate(NormalizedInstruction* i) {
           : lookupDirectFunc(i->source, funcName, clsName, isStatic);
 
       if (func) {
-        FTRACE(1, "found direct func (%s) for FCallD\n",
+        FTRACE(1, "found direct func ({}) for FCallD\n",
           func->fullName()->data());
         i->funcd = func;
       }

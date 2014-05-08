@@ -678,9 +678,7 @@ void IRBuilder::reoptimize() {
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_state.enableCse() && !m_enableSimplification) return;
   setConstrainGuards(false);
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
-    m_state.setBuilding(false);
-  }
+  m_state.setBuilding(false);
 
   auto blocksIds = rpoSortCfgWithIds(m_unit);
   auto const idoms = findDominators(m_unit, blocksIds);

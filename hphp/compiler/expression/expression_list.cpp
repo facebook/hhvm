@@ -205,14 +205,14 @@ bool ExpressionList::getScalarValue(Variant &value) {
           Variant v;
           bool ret = val->getScalarValue(v);
           if (!ret) assert(false);
-          init.set(v);
+          init.append(v);
         } else {
           Variant n;
           Variant v;
           bool ret1 = name->getScalarValue(n);
           bool ret2 = val->getScalarValue(v);
           if (!(ret1 && ret2)) return false;
-          init.set(n, v);
+          init.setKeyUnconverted(n, v);
         }
       }
       value = Array(init.create());

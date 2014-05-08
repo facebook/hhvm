@@ -91,7 +91,7 @@ struct VariantController {
   }
   template <typename Key>
   static void mapSet(ArrayInit& map, Key&& k, VariantType&& v) {
-    map.set(std::move(k), std::move(v), /* key converted */ true);
+    map.set(std::move(k), std::move(v));
   }
   static int64_t mapSize(const MapType& map) { return map.size(); }
   static ArrayIter mapIterator(const MapType& map) {

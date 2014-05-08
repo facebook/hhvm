@@ -162,7 +162,7 @@ bool TestExtCurl::test_curl_setopt_array() {
   HHVM_FN(curl_setopt_array)
     (c.toResource(),
      make_map_array(k_CURLOPT_URL, String(get_request_uri()),
-                 k_CURLOPT_RETURNTRANSFER, true));
+                    k_CURLOPT_RETURNTRANSFER, true));
   Variant res = HHVM_FN(curl_exec)(c.toResource());
   VS(res, "OK");
   return Count(true);

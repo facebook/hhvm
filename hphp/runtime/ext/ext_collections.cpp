@@ -1541,7 +1541,7 @@ Array BaseMap::php_toArray() const {
     if (e->hasIntKey()) {
       ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
     } else {
-      ai.set(StrNR(e->skey), tvAsCVarRef(&e->data));
+      ai.set(String(StrNR(e->skey)).toKey(), tvAsCVarRef(&e->data));
     }
   }
   return ai.toArray();
@@ -4564,7 +4564,7 @@ Array BaseSet::toArrayImpl() const {
       ai.set(e->data.m_data.num, tvAsCVarRef(&e->data));
     } else {
       assert(e->hasStr());
-      ai.set(e->data.m_data.pstr, tvAsCVarRef(&e->data));
+      ai.setKeyUnconverted(e->data.m_data.pstr, tvAsCVarRef(&e->data));
     }
   }
 

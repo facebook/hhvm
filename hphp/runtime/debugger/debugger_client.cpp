@@ -2429,7 +2429,7 @@ void DebuggerClient::loadConfig() {
           ret_cmds.append(cmd);
         }
         ret_macro.set(s_cmds, ret_cmds.toArray());
-        ret.set(ret_macro.toArray());
+        ret.append(ret_macro.toArray());
       }
       return ret.toArray();
     }

@@ -2196,11 +2196,11 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
         Offset off = pc;
 
         ArrayInit frame(parserFrame ? 4 : 2, ArrayInit::Map{});
-        frame.set(s_file, filename, true);
-        frame.set(s_line, unit->getLineNumber(off), true);
+        frame.set(s_file, filename);
+        frame.set(s_line, unit->getLineNumber(off));
         if (parserFrame) {
-          frame.set(s_function, s_include, true);
-          frame.set(s_args, Array::Create(parserFrame->filename), true);
+          frame.set(s_function, s_include);
+          frame.set(s_args, Array::Create(parserFrame->filename));
         }
         bt.append(frame.toVariant());
         depth++;
@@ -2234,7 +2234,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
         prevFile = prevFp->m_func->originalFilename();
       }
       assert(prevFile);
-      frame.set(s_file, const_cast<StringData*>(prevFile), true);
+      frame.set(s_file, const_cast<StringData*>(prevFile));
 
       // In the normal method case, the "saved pc" for line number printing is
       // pointing at the cell conversion (Unbox/Pop) instruction, not the call
@@ -2251,8 +2251,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
         pcAdjust = 1;
       }
       frame.set(s_line,
-                prevFp->m_func->unit()->getLineNumber(prevPc - pcAdjust),
-                true);
+                prevFp->m_func->unit()->getLineNumber(prevPc - pcAdjust));
     }
 
     // check for include
@@ -2269,20 +2268,20 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       funcname = s_include;
     }
 
-    frame.set(s_function, funcname, true);
+    frame.set(s_function, funcname);
 
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context
       Class* ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->m_func->isClosureBody()) {
-        frame.set(s_class, ctx->name()->data(), true);
+        frame.set(s_class, ctx->name()->data());
         if (fp->hasThis() && !isReturning) {
           if (withThis) {
-            frame.set(s_object, Object(fp->getThis()), true);
+            frame.set(s_object, Object(fp->getThis()));
           }
-          frame.set(s_type, "->", true);
+          frame.set(s_type, "->");
         } else {
-          frame.set(s_type, "::", true);
+          frame.set(s_type, "::");
         }
       }
     }
@@ -2293,11 +2292,11 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     } else if (funcname.same(s_include)) {
       if (depth) {
         args.append(const_cast<StringData*>(curUnit->filepath()));
-        frame.set(s_args, args, true);
+        frame.set(s_args, args);
       }
     } else if (!RuntimeOption::EnableArgsInBacktraces || isReturning) {
       // Provide an empty 'args' array to be consistent with hphpc
-      frame.set(s_args, args, true);
+      frame.set(s_args, args);
     } else {
       const int nparams = fp->m_func->numNonVariadicParams();
       int nargs = fp->numArgs();
@@ -2326,7 +2325,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
           args.append(tvAsVariant(arg));
         }
       }
-      frame.set(s_args, args, true);
+      frame.set(s_args, args);
     }
 
     bt.append(frame.toVariant());

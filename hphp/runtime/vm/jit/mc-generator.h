@@ -61,18 +61,6 @@ constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
 
 //////////////////////////////////////////////////////////////////////
 
-struct TraceletCounters {
-  uint64_t m_numEntered, m_numExecuted;
-};
-
-struct TraceletCountersVec {
-  int64_t m_size;
-  TraceletCounters *m_elms;
-  Mutex m_lock;
-
-  TraceletCountersVec() : m_size(0), m_elms(nullptr), m_lock() { }
-};
-
 struct FreeStubList {
   struct StubNode {
     StubNode* m_next;

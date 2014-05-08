@@ -687,7 +687,8 @@ void Variant::setEvalScalar() {
 
 void Variant::serialize(VariableSerializer *serializer,
                         bool isArrayKey /* = false */,
-                        bool skipNestCheck /* = false */) const {
+                        bool skipNestCheck /* = false */,
+                        bool noQuotes /* = false */) const {
   if (m_type == KindOfRef) {
     // Ugly, but behavior is different for serialize
     if (serializer->getType() == VariableSerializer::Type::Serialize ||
@@ -721,7 +722,7 @@ void Variant::serialize(VariableSerializer *serializer,
   case KindOfStaticString:
   case KindOfString:
     serializer->write(m_data.pstr->data(),
-                      m_data.pstr->size(), isArrayKey);
+                      m_data.pstr->size(), isArrayKey, noQuotes);
     break;
   case KindOfArray:
     assert(!isArrayKey);

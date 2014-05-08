@@ -803,7 +803,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         Variant* debugDispVal = const_cast<ObjectData*>(this)->  // XXX
           o_realProp(s_PHP_DebugDisplay, 0);
         if (debugDispVal) {
-          debugDispVal->serialize(serializer);
+          debugDispVal->serialize(serializer, false, false, true);
           return;
         }
       }

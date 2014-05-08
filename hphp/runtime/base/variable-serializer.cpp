@@ -385,7 +385,8 @@ static void appendJsonEscape(StringBuffer& sb,
 }
 
 void VariableSerializer::write(const char *v, int len /* = -1 */,
-                               bool isArrayKey /* = false */) {
+                               bool isArrayKey /* = false */,
+                               bool noQuotes /* = false */) {
   if (v == nullptr) v = "";
   if (len < 0) len = strlen(v);
 
@@ -452,7 +453,8 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   }
   case Type::DebuggerDump:
   case Type::PHPOutput: {
-    m_buf->append('"');
+    if (!noQuotes)
+      m_buf->append('"');
     for (int i = 0; i < len; ++i) {
       const unsigned char c = v[i];
       switch (c) {
@@ -475,7 +477,8 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
         }
       }
     }
-    m_buf->append('"');
+    if (!noQuotes)
+      m_buf->append('"');
     break;
   }
   default:

@@ -724,8 +724,33 @@ void Unit::defTypeAlias(Id id) {
     return;
   }
 
-  auto targetNameList = GetNamedEntity(typeName);
-  if (auto targetTd = getTypeAliasWithAutoload(targetNameList, typeName)) {
+  /*
+   * If the right hand side is already defined, don't invoke the
+   * autoloader at all, this means we have to check for both a type
+   * alias and a class before attempting to load them via the
+   * autoloader.
+   *
+   * While normal autoloaders are fine, the "failure" entry in the
+   * map passed to `HH\set_autoload_paths` is called for all failed
+   * lookups. The failure function can do anything, including something
+   * like like raising an error or rebuilding the map. We don't want to
+   * send speculative (or worse, repeat) requests to the autoloader, so
+   * do our due diligence here.
+   */
+
+  auto targetNE = GetNamedEntity(typeName);
+
+  if (auto klass = Unit::lookupClass(targetNE)) {
+    nameList->setCachedTypeAlias(
+      TypeAliasReq { KindOfObject,
+                     thisType->nullable,
+                     klass,
+                     thisType->name }
+    );
+    return;
+  }
+
+  if (auto targetTd = targetNE->getCachedTypeAlias()) {
     nameList->setCachedTypeAlias(
       TypeAliasReq { targetTd->kind,
                      thisType->nullable || targetTd->nullable,
@@ -734,11 +759,22 @@ void Unit::defTypeAlias(Id id) {
     );
     return;
   }
+
   if (auto klass = Unit::loadClass(typeName)) {
     nameList->setCachedTypeAlias(
       TypeAliasReq { KindOfObject,
                      thisType->nullable,
                      klass,
+                     thisType->name }
+    );
+    return;
+  }
+
+  if (auto targetTd = getTypeAliasWithAutoload(targetNE, typeName)) {
+    nameList->setCachedTypeAlias(
+      TypeAliasReq { targetTd->kind,
+                     thisType->nullable || targetTd->nullable,
+                     targetTd->klass,
                      thisType->name }
     );
     return;

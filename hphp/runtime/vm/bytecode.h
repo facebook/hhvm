@@ -373,71 +373,72 @@ struct ActRec {
    * accessors.
    */
 
-#define UNION_FIELD_ACCESSORS2(name1, type1, field1, name2, type2, field2) \
-  inline bool has##name1() const { \
-    return field1 && !(intptr_t(field1) & 1LL); \
-  } \
-  inline bool has##name2() const { \
-    return bool(intptr_t(field2) & 1LL); \
-  } \
-  inline type1 get##name1() const { \
-    assert(has##name1()); \
-    return field1; \
-  } \
-  inline type2 get##name2() const { \
-    assert(has##name2()); \
-    return (type2)(intptr_t(field2) & ~1LL); \
-  } \
-  inline void set##name1(type1 val) { \
-    field1 = val; \
-  } \
-  inline void set##name2(type2 val) { \
-    field2 = (type2)(intptr_t(val) | 1LL); \
-  } \
+  static constexpr int8_t kHasClassBit = 0x1;
+  static constexpr int8_t kClassMask   = ~kHasClassBit;
 
-#define UNION_FIELD_ACCESSORS3(name1, type1, field1, name2, type2, field2, name3, type3, field3) \
-  inline bool has##name1() const { \
-    return field1 && !(intptr_t(field1) & 3LL); \
-  } \
-  inline bool has##name2() const { \
-    return bool(intptr_t(field2) & 1LL); \
-  } \
-  inline bool has##name3() const { \
-    return bool(intptr_t(field3) & 2LL); \
-  } \
-  inline type1 get##name1() const { \
-    assert(has##name1()); \
-    return field1; \
-  } \
-  inline type2 get##name2() const { \
-    assert(has##name2()); \
-    return (type2)(intptr_t(field2) & ~1LL); \
-  } \
-  inline type3 get##name3() const { \
-    return (type3)(intptr_t(field3) & ~2LL); \
-  } \
-  inline void set##name1(type1 val) { \
-    field1 = val; \
-  } \
-  inline void set##name2(type2 val) { \
-    field2 = (type2)(intptr_t(val) | 1LL); \
-  } \
-  inline void set##name3(type3 val) { \
-    field3 = (type3)(intptr_t(val) | 2LL); \
+  inline bool hasThis() const {
+    return m_this && !(reinterpret_cast<intptr_t>(m_this) & kHasClassBit);
+  }
+  inline ObjectData* getThis() const {
+    assert(hasThis());
+    return m_this;
+  }
+  inline void setThis(ObjectData* val) {
+    m_this = val;
+  }
+  inline bool hasClass() const {
+    return reinterpret_cast<intptr_t>(m_cls) & kHasClassBit;
+  }
+  inline Class* getClass() const {
+    assert(hasClass());
+    return reinterpret_cast<Class*>(
+      reinterpret_cast<intptr_t>(m_cls) & kClassMask);
+  }
+  inline void setClass(Class* val) {
+    m_cls = reinterpret_cast<Class*>(
+      reinterpret_cast<intptr_t>(val) | kHasClassBit);
   }
 
-  // Note that reordering these is likely to require changes to the
-  // translator.
-  UNION_FIELD_ACCESSORS2(This, ObjectData*, m_this, \
-                         Class, Class*, m_cls)
-  static const int8_t kInvNameBit   = 0x1;
-  static const int8_t kExtraArgsBit = 0x2;
-  UNION_FIELD_ACCESSORS3(VarEnv, VarEnv*, m_varEnv, \
-                         InvName, StringData*, m_invName, \
-                         ExtraArgs, ExtraArgs*, m_extraArgs)
+  // Note that reordering these is likely to require changes to the translator.
+  static constexpr int8_t kInvNameBit    = 0x1;
+  static constexpr int8_t kInvNameMask   = ~kInvNameBit;
+  static constexpr int8_t kExtraArgsBit  = 0x2;
+  static constexpr int8_t kExtraArgsMask = ~kExtraArgsBit;
 
-#undef UNION_FIELD_ACCESSORS2
-#undef UNION_FIELD_ACCESSORS3
+  inline bool hasVarEnv() const {
+    return m_varEnv &&
+      !(reinterpret_cast<intptr_t>(m_varEnv) & (kInvNameBit | kExtraArgsBit));
+  }
+  inline bool hasInvName() const {
+    return reinterpret_cast<intptr_t>(m_invName) & kInvNameBit;
+  }
+  inline bool hasExtraArgs() const {
+    return reinterpret_cast<intptr_t>(m_extraArgs) & kExtraArgsBit;
+  }
+  inline VarEnv* getVarEnv() const {
+    assert(hasVarEnv());
+    return m_varEnv;
+  }
+  inline StringData* getInvName() const {
+    assert(hasInvName());
+    return reinterpret_cast<StringData*>(
+      reinterpret_cast<intptr_t>(m_invName) & kInvNameMask);
+  }
+  inline ExtraArgs* getExtraArgs() const {
+    return reinterpret_cast<ExtraArgs*>(
+      reinterpret_cast<intptr_t>(m_extraArgs) & kExtraArgsMask);
+  }
+  inline void setVarEnv(VarEnv* val) {
+    m_varEnv = val;
+  }
+  inline void setInvName(StringData* val) {
+    m_invName = reinterpret_cast<StringData*>(
+      reinterpret_cast<intptr_t>(val) | kInvNameBit);
+  }
+  inline void setExtraArgs(ExtraArgs* val) {
+    m_extraArgs = reinterpret_cast<ExtraArgs*>(
+      reinterpret_cast<intptr_t>(val) | kExtraArgsBit);
+  }
 
   // Accessors for extra arg queries.
   TypedValue* getExtraArg(unsigned ind) const {

@@ -9,6 +9,9 @@ list(APPEND CXX_SOURCES ${files})
 auto_sources(files "*.c" "${SOURCE_SUBDIRS}")
 list(APPEND C_SOURCES ${files})
 
+auto_sources(files "*.h" "{$SOURCE_SUBDIRS}")
+HHVM_PUBLIC_HEADERS(compiler ${files})
+
 set(ERROR_INC "analysis/core_code_error.inc")
 
 set(ERROR_INC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/analysis/code_error.inc")

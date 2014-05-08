@@ -41,3 +41,6 @@ add_library(hphp_util STATIC ${CXX_SOURCES}
 #if (LIBNUMA_LIBRARIES)
 #  target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 #endif()
+
+auto_sources(files "*.h" "RECURSE")
+HHVM_PUBLIC_HEADERS(util ${files})

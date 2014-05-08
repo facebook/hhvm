@@ -422,7 +422,8 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   size_t stubsize = code.stubs().frontier() - stubstart;
   assert(asize == 0);
   if (stubsize && RuntimeOption::EvalDumpTCAnchors) {
-    TransRec tr(sk, sk.unit()->md5(), TransKind::Anchor,
+    TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),
+                TransKind::Anchor,
                 astart, asize, stubstart, stubsize);
     m_tx.addTranslation(tr);
     if (RuntimeOption::EvalJitUseVtuneAPI) {
@@ -699,6 +700,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   assert(m_tx.mode() == TransKind::Prologue ||
          m_tx.mode() == TransKind::Proflogue);
   TransRec tr(skFuncBody, func->unit()->md5(),
+              skFuncBody.func()->fullName()->data(),
               m_tx.mode(), aStart, code.main().frontier() - aStart,
               stubStart, code.stubs().frontier() - stubStart);
   m_tx.addTranslation(tr);
@@ -1874,7 +1876,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
   m_fixupMap.processPendingFixups();
   processPendingCatchTraces();
 
-  TransRec tr(sk, sk.unit()->md5(), transKindToRecord, tp.get(), start,
+  TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),
+              transKindToRecord, tp.get(), start,
               code.main().frontier() - start, stubStart,
               code.stubs().frontier() - stubStart,
               m_bcMap);

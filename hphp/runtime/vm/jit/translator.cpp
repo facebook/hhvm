@@ -4237,6 +4237,7 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
 
 TransRec::TransRec(SrcKey                   s,
                    MD5                      _md5,
+                   std::string              _funcName,
                    TransKind                _kind,
                    const Tracelet*          t,
                    TCA                      _aStart,
@@ -4248,6 +4249,7 @@ TransRec::TransRec(SrcKey                   s,
     , kind(_kind)
     , src(s)
     , md5(_md5)
+    , funcName(_funcName)
     , bcStopOffset(t ? t->nextSk().offset() : 0)
     , aStart(_aStart)
     , aLen(_aLen)
@@ -4271,10 +4273,13 @@ TransRec::print(uint64_t profCount) const {
            "Translation {} {{\n"
            "  src.md5 = {}\n"
            "  src.funcId = {}\n"
+           "  src.funcName = {}\n"
            "  src.startOffset = {}\n"
            "  src.stopOffset = {}\n"
            "  src.resumed = {}\n",
-           id, md5, src.getFuncId(), src.offset(), bcStopOffset,
+           id, md5, src.getFuncId(),
+           funcName.empty() ? "Pseudo-main" : funcName,
+           src.offset(), bcStopOffset,
            (int32_t)src.resumed()).str();
 
   ret += folly::format(

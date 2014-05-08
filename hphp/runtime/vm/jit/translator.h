@@ -255,6 +255,7 @@ struct TransRec {
   TransKind              kind;
   SrcKey                 src;
   MD5                    md5;
+  std::string            funcName;
   Offset                 bcStopOffset;
   std::vector<DynLocation>
                          dependencies;
@@ -267,20 +268,29 @@ struct TransRec {
 
   TransRec() {}
 
-  TransRec(SrcKey    s,
-           MD5       _md5,
-           TransKind _kind,
-           TCA       _aStart = 0,
-           uint32_t  _aLen = 0,
-           TCA       _astubsStart = 0,
-           uint32_t  _astubsLen = 0) :
-      id(0), kind(_kind), src(s), md5(_md5), bcStopOffset(0),
-      aStart(_aStart), aLen(_aLen),
-      astubsStart(_astubsStart), astubsLen(_astubsLen)
+  TransRec(SrcKey      s,
+           MD5         _md5,
+           std::string _funcName,
+           TransKind   _kind,
+           TCA         _aStart = 0,
+           uint32_t    _aLen = 0,
+           TCA         _astubsStart = 0,
+           uint32_t    _astubsLen = 0)
+      : id(0)
+      , kind(_kind)
+      , src(s)
+      , md5(_md5)
+      , funcName(_funcName)
+      , bcStopOffset(0)
+      , aStart(_aStart)
+      , aLen(_aLen)
+      , astubsStart(_astubsStart)
+      , astubsLen(_astubsLen)
     { }
 
   TransRec(SrcKey                   s,
            MD5                      _md5,
+           std::string              _funcName,
            TransKind                _kind,
            const Tracelet*          t,
            TCA                      _aStart = 0,

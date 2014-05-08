@@ -54,6 +54,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <fnmatch.h>
+#include <boost/algorithm/string/predicate.hpp>
 #include <vector>
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
@@ -110,15 +111,20 @@ static bool check_error(const char *function, int line, bool ret) {
 }
 
 static int accessSyscall(
-    const String& path,
+    const String& uri_or_path,
     int mode,
     bool useFileCache = false) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  Stream::Wrapper* w = Stream::getWrapperFromURI(uri_or_path);
   if (!w) return -1;
+
   if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
+    String path(uri_or_path);
+    if (UNLIKELY(boost::istarts_with(uri_or_path.data(), "file://"))) {
+      path = uri_or_path.substr(sizeof("file://") - 1);
+    }
     return ::access(File::TranslatePathWithFileCache(path).data(), mode);
   }
-  return w->access(path, mode);
+  return w->access(uri_or_path, mode);
 }
 
 static int statSyscall(

@@ -439,7 +439,7 @@ Mustache_Test_Loader_CascadingLoaderTest::testMissingTemplatesThrowExceptions
 Mustache_Test_Loader_FilesystemLoaderTest::testConstructor
 .
 Mustache_Test_Loader_FilesystemLoaderTest::testConstructorWithProtocol
-E
+.
 Mustache_Test_Loader_FilesystemLoaderTest::testEmptyExtensionString
 .
 Mustache_Test_Loader_FilesystemLoaderTest::testLoadTemplates

@@ -382,7 +382,9 @@ private:
   friend std::string show(Type);
   friend struct ArrKey disect_key(const Type&);
   friend Type array_elem(const Type&, const Type&);
+  friend Type arrayN_set(Type, const Type&, const Type&);
   friend Type array_set(Type, const Type&, const Type&);
+  friend std::pair<Type,Type> arrayN_newelem_key(const Type&, const Type&);
   friend std::pair<Type,Type> array_newelem_key(const Type&, const Type&);
   friend std::pair<Type,Type> iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,

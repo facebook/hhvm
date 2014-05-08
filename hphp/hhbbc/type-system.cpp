@@ -2016,14 +2016,10 @@ Type array_elem(const Type& arr, const Type& undisectedKey) {
  * remain empty.
  */
 
-Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
-  assert(arr.subtypeOf(TArr));
-
-  // Unless you know an array can't cow, you don't know if the TRef
-  // will stay a TRef or turn back into a TInitCell.  Generally you
-  // want a TInitGen.
-  always_assert(!val.subtypeOf(TRef) &&
-         "You probably don't want to put Ref types into arrays ...");
+// Do the effects of array_set but without handling possibly emptiness
+// of `arr'.
+Type arrayN_set(Type arr, const Type& undisectedKey, const Type& val) {
+  auto const key = disect_key(undisectedKey);
 
   auto ensure_counted = [&] {
     // TODO(#3696042): this same logic should be in loosen_statics.
@@ -2036,20 +2032,6 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
       arr.m_bits = combine_arr_bits(arr.m_bits, BCArr);
     }
   };
-
-  auto const key = disect_key(undisectedKey);
-
-  if (arr.subtypeOf(TArrE)) {
-    if (key.s && !key.i) {
-      auto map = StructMap{};
-      map[*key.s] = val;
-      return arr_struct(std::move(map));
-    }
-    if (key.i && *key.i == 0) return arr_packed({val});
-    // Keeping the ArrE for now just because we need to check the
-    // key.type is not an invalid key (array or object).
-    return union_of(arr_mapn(key.type, val), arr);
-  }
 
   switch (arr.m_dataTag) {
   case DataTag::Str:
@@ -2064,18 +2046,19 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
     return arr;
 
   case DataTag::ArrVal:
-    if (auto d = toDArrStruct(arr.m_data.aval)) {
-      return array_set(arr_struct(std::move(d->map)), undisectedKey, val);
-    }
-    if (auto d = toDArrPacked(arr.m_data.aval)) {
-      return array_set(arr_packed(std::move(d->elems)), undisectedKey, val);
-    }
-    if (auto d = toDArrPackedN(arr.m_data.aval)) {
-      return array_set(arr_packedn(d->type), undisectedKey, val);
-    }
     {
+      if (auto d = toDArrStruct(arr.m_data.aval)) {
+        return arrayN_set(arr_struct(std::move(d->map)), undisectedKey, val);
+      }
+      if (auto d = toDArrPacked(arr.m_data.aval)) {
+        return arrayN_set(arr_packed(std::move(d->elems)), undisectedKey,
+                          val);
+      }
+      if (auto d = toDArrPackedN(arr.m_data.aval)) {
+        return arrayN_set(arr_packedn(d->type), undisectedKey, val);
+      }
       auto d = toDArrMapN(arr.m_data.aval);
-      return array_set(arr_mapn(d.key, d.val), undisectedKey, val);
+      return arrayN_set(arr_mapn(d.key, d.val), undisectedKey, val);
     }
 
   case DataTag::ArrPacked:
@@ -2129,7 +2112,7 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
   not_reached();
 }
 
-std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
+Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
   assert(arr.subtypeOf(TArr));
 
   // Unless you know an array can't cow, you don't know if the TRef
@@ -2138,9 +2121,34 @@ std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
   always_assert(!val.subtypeOf(TRef) &&
          "You probably don't want to put Ref types into arrays ...");
 
-  // Inserting in an empty array creates a packed array of size one.
-  if (arr.subtypeOf(TArrE)) return { arr_packed({val}), ival(0) };
+  auto nonEmptyPart =
+    arr.couldBe(TArrN) ? arrayN_set(arr, undisectedKey, val)
+                       : TBottom;
+  if (!arr.couldBe(TArrE)) {
+    assert(nonEmptyPart != TBottom);
+    return nonEmptyPart;
+  }
 
+  // Union in the effects of doing the set if the array was empty.
+  auto const key = disect_key(undisectedKey);
+  auto emptyPart = [&] {
+    if (key.s && !key.i) {
+      auto map = StructMap{};
+      map[*key.s] = val;
+      return arr_struct(std::move(map));
+    }
+    if (key.i && *key.i == 0) return arr_packed({val});
+    // Keeping the ArrE for now just because we would need to check
+    // the key.type is not an invalid key (array or object) to prove
+    // it's non-empty now.
+    return union_of(arr_mapn(key.type, val), arr);
+  }();
+  return union_of(std::move(nonEmptyPart), std::move(emptyPart));
+}
+
+// Do the same as array_newelem_key, but ignoring possible emptiness
+// of `arr'.
+std::pair<Type,Type> arrayN_newelem_key(const Type& arr, const Type& val) {
   switch (arr.m_dataTag) {
   case DataTag::Str:
   case DataTag::Obj:
@@ -2153,16 +2161,16 @@ std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
     return { TArrN, TInt };
 
   case DataTag::ArrVal:
-    if (auto d = toDArrStruct(arr.m_data.aval)) {
-      return array_newelem_key(arr_struct(std::move(d->map)), val);
-    }
-    if (auto d = toDArrPacked(arr.m_data.aval)) {
-      return array_newelem_key(arr_packed(std::move(d->elems)), val);
-    }
-    if (auto d = toDArrPackedN(arr.m_data.aval)) {
-      return array_newelem_key(arr_packedn(d->type), val);
-    }
     {
+      if (auto d = toDArrStruct(arr.m_data.aval)) {
+        return array_newelem_key(arr_struct(std::move(d->map)), val);
+      }
+      if (auto d = toDArrPacked(arr.m_data.aval)) {
+        return array_newelem_key(arr_packed(std::move(d->elems)), val);
+      }
+      if (auto d = toDArrPackedN(arr.m_data.aval)) {
+        return array_newelem_key(arr_packedn(d->type), val);
+      }
       auto d = toDArrMapN(arr.m_data.aval);
       return array_newelem_key(arr_mapn(d.key, d.val), val);
     }
@@ -2189,6 +2197,30 @@ std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
   }
 
   not_reached();
+}
+
+std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
+  assert(arr.subtypeOf(TArr));
+
+  // Unless you know an array can't cow, you don't know if the TRef
+  // will stay a TRef or turn back into a TInitCell.  Generally you
+  // want a TInitGen.
+  always_assert(!val.subtypeOf(TRef) &&
+         "You probably don't want to put Ref types into arrays ...");
+
+  // Inserting in an empty array creates a packed array of size one.
+  auto emptyPart = arr.couldBe(TArrE)
+    ? std::make_pair(arr_packed({val}), ival(0))
+    : std::make_pair(TBottom, TBottom);
+
+  auto nonEmptyPart = arr.couldBe(TArrN)
+    ? arrayN_newelem_key(arr, val)
+    : std::make_pair(TBottom, TBottom);
+
+  return {
+    union_of(std::move(emptyPart.first), std::move(nonEmptyPart.first)),
+    union_of(std::move(emptyPart.second), std::move(nonEmptyPart.second))
+  };
 }
 
 Type array_newelem(const Type& arr, const Type& val) {

@@ -453,8 +453,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    *
    * @return     mixed   Returns the result of the invoked function call.
    */
-  public function invoke() {
-    $args = func_get_args();
+  public function invoke(...$args) {
     if ($this->closure) {
       return hphp_invoke_method($this->closure, get_class($this->closure),
                                 '__invoke', $args);
@@ -631,8 +630,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     mixed   Returns the method result.
    */
-  public function invoke($obj): mixed {
-    $args = array_slice(func_get_args(), 1);
+  public function invoke($obj, ...$args): mixed {
     if (!$this->isAccessible()) {
       throw new ReflectionException(
         sprintf(
@@ -1371,8 +1369,7 @@ class ReflectionClass implements Reflector {
    * Creates a new instance of the class. The given arguments are passed to
    * the class constructor.
    */
-  public function newInstance() {
-    $args = func_get_args();
+  public function newInstance(...$args) {
     if ($args && !$this->getConstructorName()) {
       // consistent with reference, but perhaps not particularly useful
       throw new ReflectionException(

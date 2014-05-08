@@ -26,11 +26,9 @@ function call_user_method_array(string $method_name,
  * @return mixed -
  */
 function call_user_method(Stringish $method_name,
-                          mixed &$obj, ...): mixed {
-  $args = func_get_args();
-  array_shift($args);
-  array_shift($args);
-  return call_user_method_array($method_name, $obj, $args);
+                          mixed &$obj,
+                          ...$args): mixed {
+  return call_user_method_array((string)$method_name, $obj, $args);
 }
 
 /**

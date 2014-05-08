@@ -1,0 +1,96 @@
+FastRoute\Dispatcher\GroupCountBasedTest::testDuplicateStaticRoute
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testDuplicateVariableNameError
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testDuplicateVariableRoute
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #0
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #1
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #10
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #2
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #3
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #4
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #5
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #6
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #7
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #8
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testFoundDispatches with data set #9
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testMethodNotAllowedDispatches with data set #0
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testMethodNotAllowedDispatches with data set #1
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testMethodNotAllowedDispatches with data set #2
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testNotFoundDispatches with data set #0
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testNotFoundDispatches with data set #1
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testNotFoundDispatches with data set #2
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testNotFoundDispatches with data set #3
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testNotFoundDispatches with data set #4
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testNotFoundDispatches with data set #5
+.
+FastRoute\Dispatcher\GroupCountBasedTest::testShadowedStaticRoute
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testDuplicateStaticRoute
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testDuplicateVariableNameError
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testDuplicateVariableRoute
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #0
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #1
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #10
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #2
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #3
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #4
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #5
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #6
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #7
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #8
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testFoundDispatches with data set #9
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testMethodNotAllowedDispatches with data set #0
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testMethodNotAllowedDispatches with data set #1
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testMethodNotAllowedDispatches with data set #2
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testNotFoundDispatches with data set #0
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testNotFoundDispatches with data set #1
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testNotFoundDispatches with data set #2
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testNotFoundDispatches with data set #3
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testNotFoundDispatches with data set #4
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testNotFoundDispatches with data set #5
+.
+FastRoute\Dispatcher\GroupPosBasedTest::testShadowedStaticRoute
+.

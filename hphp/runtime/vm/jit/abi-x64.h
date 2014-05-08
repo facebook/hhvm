@@ -68,8 +68,8 @@ constexpr Reg64 rAsm         = reg::r10;
  * Reserved for CodeGenerator.
  */
 constexpr Reg64 rCgGP        = reg::r11;
-constexpr RegXMM rCgXMM0     = reg::xmm0;
-constexpr RegXMM rCgXMM1     = reg::xmm1;
+constexpr RegXMM rCgXMM0     = reg::xmm6;
+constexpr RegXMM rCgXMM1     = reg::xmm7;
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -116,12 +116,14 @@ const RegSet kGPRegs = RegSet()
   ;
 
 const RegSet kXMMCallerSaved = RegSet()
+  | RegSet(reg::xmm0)
+  | RegSet(reg::xmm1)
   | RegSet(reg::xmm2)
   | RegSet(reg::xmm3)
   | RegSet(reg::xmm4)
   | RegSet(reg::xmm5)
-  | RegSet(reg::xmm6)
-  | RegSet(reg::xmm7)
+  //| RegSet(reg::xmm6) rCgXMM0
+  //| RegSet(reg::xmm7) rCgXMM1
   | RegSet(reg::xmm8)
   | RegSet(reg::xmm9)
   | RegSet(reg::xmm10)

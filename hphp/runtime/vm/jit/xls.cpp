@@ -50,11 +50,11 @@ struct RegPositions;
 
 typedef StateVector<SSATmp, Interval*> Intervals;
 typedef IdSet<SSATmp> LiveSet;
-typedef std::pair<PhysReg,PhysReg> RegPair;
 
 // A Use refers to the position where an interval is read or written.
 struct Use {
   unsigned pos;
+  RegPair hint;
 };
 
 // A LiveRange is an open-ended range of positions where an interval is live.
@@ -97,7 +97,7 @@ struct Interval {
   unsigned firstUse() const;
   // mutators
   void add(LiveRange r);
-  void addUse(unsigned pos) { uses.push_back(Use{pos}); }
+  void addUse(Use u) { uses.push_back(u); }
   Interval* split(unsigned pos, bool keep_uses = false);
   // register/spill assignment
   RegPair regs() const;
@@ -453,6 +453,7 @@ void dstConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
 // they use/define tmps in the expected locations.
 void XLS::buildIntervals() {
   unsigned min_need = 0;
+  auto& backend = mcg->backEnd();
   for (auto blockIt = m_blocks.end(); blockIt != m_blocks.begin();) {
     auto block = *--blockIt;
     // compute initial live set from liveIn[succsessors]
@@ -495,7 +496,7 @@ void XLS::buildIntervals() {
           live.erase(d);
         }
         dst_need += dest->need;
-        dest->addUse(pos);
+        dest->addUse({pos, backend.precolorDst(inst, i)});
         dstConstraints(dest, m_abi, constraint);
       }
       min_need = std::max(min_need, dst_need);
@@ -532,7 +533,7 @@ void XLS::buildIntervals() {
         auto src = m_intervals[s];
         if (!src) m_intervals[s] = src = smart_new<Interval>();
         src->add(LiveRange(blockStart, pos));
-        src->addUse(pos);
+        src->addUse({pos, backend.precolorSrc(inst, i)});
         if (!src->tmp) {
           src->tmp = s;
           src->need = need;
@@ -694,9 +695,11 @@ RegPositions::find(Interval* ivl, RegSet allow, RegPair& regs) const {
   return ivl->need == 1 ? find1(allow, regs) : find2(allow, regs);
 }
 
+// Return the [lowest] position of the registers in regs
 unsigned RegPositions::getPos(Interval* ivl, RegPair regs) const {
   return ivl->need == 1 ? posns[regs.first] :
-         regs.second != regs.first ? posns[regs.second] : 0;
+         regs.first == regs.second ? 0 : // only found one register
+         std::min(posns[regs.first], posns[regs.second]);
 }
 
 // Update the position associated with the registers assigned to ivl,
@@ -716,6 +719,15 @@ unsigned RegPositions::setPos(Interval* ivl, unsigned pos) {
 // return the closest valid split position on or before pos.
 unsigned nearestSplitBefore(unsigned pos) {
   return pos == 0 || pos % 2 == 1 ? pos : pos - 1;
+}
+
+// Return the first hint from all the uses in this interval.
+RegPair firstHint(Interval* ivl) {
+  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
+  for (auto u : ivl->uses) {
+    if (u.hint.first != InvalidReg) return u.hint;
+  }
+  return InvalidRegPair;
 }
 
 // Allocate one register for the current interval.
@@ -756,7 +768,30 @@ void XLS::allocOne(Interval* current) {
       until2.setPos(ivl, pos);
     }
   }
-  // Try to get a preferred-non scratch register first
+
+  // in order to use a hint, it needs enough registers and they
+  // need to be in the allow set.
+  auto hintOk = [&](RegPair hint) {
+    if (current->need == 1) {
+      return hint.first != InvalidReg && current->allow.contains(hint.first);
+    }
+    return hint.first != InvalidReg && hint.second != InvalidReg &&
+           current->allow.contains(hint.first) &&
+           current->allow.contains(hint.second);
+  };
+
+  // Try to get a hinted register
+  auto hint = firstHint(current);
+  if (hintOk(hint)) {
+    // if the hinted register is available for all of current (and not
+    // clobbered by a call), then use it
+    auto until_pos = until2.getPos(current, hint);
+    if (until_pos >= current->end()) {
+      return assignReg(current, hint);
+    }
+  }
+
+  // Try to get a preferred-non scratch register
   RegPair r;
   auto until_pos = until2.find(current, current->prefer, r);
   if (until_pos >= current->end()) {
@@ -1327,6 +1362,12 @@ std::string Interval::toString() {
   delim = "";
   for (auto u : uses) {
     out << delim << u.pos;
+    if (u.hint.first != InvalidReg) {
+      mcg->backEnd().streamPhysReg(out, u.hint.first);
+      if (u.hint.second != InvalidReg) {
+        mcg->backEnd().streamPhysReg(out, u.hint.second);
+      }
+    }
     delim = ",";
   }
   out << "}";

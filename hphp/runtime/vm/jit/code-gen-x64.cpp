@@ -787,10 +787,12 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
   }
 
   // Execute the plan
+  int num_moves = 0;
   auto const howTo = doRegMoves(moves, rTmp);
   for (auto& how : howTo) {
     switch (how.m_kind) {
       case MoveInfo::Kind::Move: {
+        num_moves++;
         if (how.m_dst == rTmp) {
           emitMovRegReg(a, how.m_src, how.m_dst);
         } else {
@@ -822,11 +824,15 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
         break;
       }
     case MoveInfo::Kind::Xchg:
+      num_moves++;
       assert(how.m_src.isGP());
       assert(how.m_dst.isGP());
       a.    xchgq  (how.m_src, how.m_dst);
       break;
     }
+  }
+  if (num_moves > 0) {
+    TRACE(2, "arg-moves %d\n", num_moves);
   }
 
   // Handle const-to-register moves, type shifting,
@@ -899,6 +905,7 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
       case DestType::None:  return kVoidDest;
       case DestType::TV:    return callDestTV(inst);
       case DestType::SSA:   return callDest(inst);
+      case DestType::Dbl:   return callDestDbl(inst);
     }
     not_reached();
   }();
@@ -921,6 +928,12 @@ CallDest CodeGenerator::callDestTV(const IRInstruction* inst) const {
   if (!inst->numDsts()) return kVoidDest;
   auto loc = dstLoc(0);
   return { DestType::TV, loc.reg(0), loc.reg(1) };
+}
+
+CallDest CodeGenerator::callDestDbl(const IRInstruction* inst) const {
+  if (!inst->numDsts()) return kVoidDest;
+  auto loc = dstLoc(0);
+  return { DestType::Dbl, loc.reg(0), loc.reg(1) };
 }
 
 CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
@@ -1028,6 +1041,11 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
   case DestType::None:
     // void return type, no registers have values
     assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
+    break;
+  case DestType::Dbl:
+    // copy the single-register result to dstReg0
+    assert(dstReg1 == InvalidReg);
+    if (dstReg0 != InvalidReg) emitMovRegReg(a, reg::xmm0, dstReg0);
     break;
   }
   return ret;
@@ -3857,24 +3875,19 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   // If the return value is returned by reference, we don't need the
   // return value from this call since we know where the value is.
+  auto dest = isCppByRef(funcReturnType) ? kVoidDest :
+              funcReturnType == KindOfDouble ? callDestDbl(inst) :
+              callDest(inst);
   cgCallHelper(m_as, CppCall::direct(callee->nativeFuncPtr()),
-               isCppByRef(funcReturnType) ? kVoidDest : callDest(dstReg),
-               SyncOptions::kSyncPoint, callArgs);
+               dest, SyncOptions::kSyncPoint, callArgs);
 
-  // Load return value from builtin
-
-  // For primitive SSE return types (double), the return value
-  // is in xmm0 which typically won't be the requested destination register.
-  if (funcReturnType == KindOfDouble) {
-    emitMovRegReg(m_as, reg::xmm0, dstReg);
-    return;
-  }
-  // For primitive INTEGER return types (int, bool), the return value
-  // is already in dstReg (the builtin call returns in rax).
+  // For primitive return types (int, bool, double), the return value
+  // is already in dstReg (the builtin call returns in rax or xmm0).
   // For void return types, there is no return value, so just exit.
   if (dstReg == InvalidReg || returnType.isSimpleType()) {
     return;
   }
+
   // after the call, RSP is back pointing to MInstrState and rSratch
   // has been clobberred.
   misReg = rsp;

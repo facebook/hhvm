@@ -18,7 +18,6 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
-
 #include "hphp/vixl/a64/assembler-a64.h"
 
 namespace HPHP { namespace JIT {
@@ -350,6 +349,16 @@ private:
   uint64_t m_bits;
   static_assert(sizeof(m_bits) * 8 >= PhysReg::kMaxRegs, "");
 };
+
+// this could be a std::pair<PhysReg> but initializing them using
+// Reg64, e.g. {rax,rdx} causes an internal error in gcc-4.7.1.
+struct RegPair {
+  RegPair() {}
+  explicit RegPair(PhysReg r) : first(r) {}
+  RegPair(PhysReg r0, PhysReg r1) : first(r0), second(r1) {}
+  PhysReg first, second;
+};
+const RegPair InvalidRegPair; // {InvalidReg,InvalidReg}
 
 static_assert(boost::has_trivial_destructor<RegSet>::value,
               "RegSet must have a trivial destructor");

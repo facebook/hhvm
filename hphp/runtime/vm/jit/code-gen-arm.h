@@ -82,6 +82,7 @@ struct CodeGenerator : public JIT::CodeGenerator {
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
+  CallDest callDestDbl(const IRInstruction*) const;
 
   void cgCallNative(vixl::MacroAssembler& as, IRInstruction* inst);
   void cgCallHelper(vixl::MacroAssembler& a,

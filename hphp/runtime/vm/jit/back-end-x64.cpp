@@ -79,6 +79,9 @@ struct BackEnd : public JIT::BackEnd {
     return X64::dstConstraint(inst, i);
   }
 
+  RegPair precolorSrc(const IRInstruction& inst, unsigned i) override;
+  RegPair precolorDst(const IRInstruction& inst, unsigned i) override;
+
   /*
    * enterTCHelper does not save callee-saved registers except %rbp. This means
    * when we call it from C++, we have to tell gcc to clobber all the other
@@ -365,6 +368,135 @@ struct BackEnd : public JIT::BackEnd {
 
 std::unique_ptr<JIT::BackEnd> newBackEnd() {
   return std::unique_ptr<JIT::BackEnd>{ folly::make_unique<BackEnd>() };
+}
+
+using NativeCalls::CallMap;
+using NativeCalls::Arg;
+using NativeCalls::ArgType;
+
+// return the number of registers needed to pass this arg
+int argSize(const Arg& arg, const IRInstruction& inst) {
+  switch (arg.type) {
+    case ArgType::SSA:
+    case ArgType::Imm:
+    case ArgType::ExtraImm:
+      return 1;
+    case ArgType::TV:
+      return 2;
+    case ArgType::MemberKeyS:
+      return inst.src(arg.ival)->isA(Type::Str) ? 1 : 2;
+    case ArgType::MemberKeyIS:
+      return inst.src(arg.ival)->isA(Type::Str) ? 1 :
+             inst.src(arg.ival)->isA(Type::Int) ? 1 : 2;
+  }
+  return 1;
+}
+
+// Return the argument-register hint for a native-call opcode.
+RegPair hintNativeCallSrc(const IRInstruction& inst, unsigned i) {
+  auto const& args = CallMap::info(inst.op()).args;
+  auto pos = 0;
+  for (auto& arg : args) {
+    if (argSize(arg, inst) == 1) {
+      if (arg.ival == i && pos < kNumRegisterArgs) {
+        return {argNumToRegName[pos], InvalidReg};
+      }
+      pos++;
+    } else {
+      if (arg.ival == i && pos + 1 < kNumRegisterArgs) {
+        return {argNumToRegName[pos], argNumToRegName[pos + 1]};
+      }
+      pos += 2;
+    }
+  }
+  return InvalidRegPair;
+}
+
+// return the return-value register hint for a NativeCall opcode.
+RegPair hintNativeCallDst(const IRInstruction& inst, unsigned i) {
+  if (i != 0) return InvalidRegPair;
+  auto const& info = CallMap::info(inst.op());
+  switch (info.dest) {
+    case DestType::SSA:
+      return {rax, InvalidReg};
+    case DestType::Dbl:
+      return {xmm0, InvalidReg};
+    case DestType::TV:
+      return {rax, rdx};
+    case DestType::None:
+      return InvalidRegPair;
+  }
+  return InvalidRegPair;
+}
+
+// return the arg-register hint for a CallBuiltin instruction
+RegPair hintCallBuiltinSrc(const IRInstruction& inst, unsigned srcNum) {
+  auto callee = inst.extra<CallBuiltin>()->callee;
+  auto args = inst.srcs();
+  auto ipos = 0, dpos = 0;
+  if (isCppByRef(callee->returnType())) {
+    ipos++; // first C++ arg is ptr to return-value storage
+  }
+  for (int i = 0, n = args.size(); i < n; ++i) {
+    auto& pi = callee->params()[i];
+    if (pi.builtinType() == KindOfDouble) {
+      if (srcNum == i && dpos < kNumSIMDRegisterArgs) {
+        return { argNumToSIMDRegName[dpos], InvalidReg };
+      }
+      dpos++;
+    } else {
+      if (srcNum == i && ipos < kNumRegisterArgs) {
+        return { argNumToRegName[ipos], InvalidReg };
+      }
+      ipos++;
+    }
+  }
+  return InvalidRegPair;
+}
+
+// return the return-register hint for a CallBuiltin instruction
+RegPair hintCallBuiltinDst(const IRInstruction& inst, unsigned i) {
+  // the decision logic here is distilled from CodeGenerator::cgCallBuiltin()
+  if (i != 0) return InvalidRegPair;
+  auto returnType = inst.typeParam();
+  if (returnType <= Type::Dbl) {
+    return {xmm0, InvalidReg};
+  }
+  if (returnType.isSimpleType()) {
+    return {rax, InvalidReg};
+  }
+  // other return types are passed via stack; generated code reloads
+  // them, so using the ABI assigned registers doesn't matter.
+  return InvalidRegPair;
+}
+
+RegPair BackEnd::precolorSrc(const IRInstruction& inst, unsigned i) {
+  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
+  if (CallMap::hasInfo(inst.op())) {
+    return hintNativeCallSrc(inst, i);
+  }
+  switch (inst.op()) {
+    case CallBuiltin:
+      return hintCallBuiltinSrc(inst, i);
+    case Shl:
+    case Shr:
+      if (i == 1) return {PhysReg(rcx), InvalidReg};
+      break;
+    default:
+      break;
+  }
+  return InvalidRegPair;
+}
+
+RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
+  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
+  if (CallMap::hasInfo(inst.op())) {
+    return hintNativeCallDst(inst, i);
+  }
+  if (inst.op() == CallBuiltin) {
+    return hintCallBuiltinDst(inst, i);
+  }
+  return InvalidRegPair;
 }
 
 }}}

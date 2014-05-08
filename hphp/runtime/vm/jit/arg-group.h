@@ -30,7 +30,8 @@ struct IRInstruction;
 enum class DestType : unsigned {
   None,  // return void (no valid registers)
   SSA,   // return a single-register value
-  TV     // return a TypedValue packed in two registers
+  TV,    // return a TypedValue packed in two registers
+  Dbl,   // return scalar double in a single FP register
 };
 
 /*

@@ -1205,9 +1205,9 @@ NativeImpl = S0:ConstFunc S1:FramePtr
 
   Execute a call to the native builtin specified by the func in S0.
 
-D:T = CallBuiltin<T> S0...SN
+D:T = CallBuiltin<T> S0...SN-1
 
-  Call builtin function with N-1 arguments.
+  Call builtin function with N arguments.
 
   The source and destination types correspond to C++ parameter and return types
   as follows:

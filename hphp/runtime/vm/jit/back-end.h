@@ -90,6 +90,8 @@ class BackEnd {
   virtual PhysReg rVmFp() = 0;
   virtual Constraint srcConstraint(const IRInstruction& inst, unsigned i) = 0;
   virtual Constraint dstConstraint(const IRInstruction& inst, unsigned i) = 0;
+  virtual RegPair precolorSrc(const IRInstruction& inst, unsigned i) = 0;
+  virtual RegPair precolorDst(const IRInstruction& inst, unsigned i) = 0;
 
   virtual void enterTCHelper(TCA start, TReqInfo& info) = 0;
   virtual CodeGenerator* newCodeGenerator(const IRUnit& unit,

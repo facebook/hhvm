@@ -182,18 +182,16 @@
       - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleUrlTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
-    branch: "3.2.2"
-    commit: 07d6712836c4520963e78b9fda14b14d13ff000c
+    branch: "3.3-dev"
+    commit: 11b927eb40b6646733ead7a9e3cd5f2e68a289b8
     install_root: joomla-cms
     test_root: joomla-cms
     clowns:
-      - joomla-cms/tests/unit/suites/libraries/cms/pagination/JPaginationTest.php
       - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/html/JHtmlIconsTest.php
-      - joomla-cms/tests/unit/suites/libraries/legacy/categories/JCategoryNodeTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/document/opensearch/JDocumentOpensearchTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/cache/storage/JCacheStorageMainTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPicasaAlbumTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPicasaPhotoTest.php
       # Intermittently hang:
       - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldCaptchaTest.php
       - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldChromestyleTest.php

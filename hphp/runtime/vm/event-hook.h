@@ -71,7 +71,6 @@ class EventHook {
    * unwinder itself will call the function exit hooks and swallow
    * exceptions.
    */
-  static void onFunctionExit(const ActRec* ar, TypedValue* retval);
   static void onFunctionExitJit(ActRec* ar, TypedValue retval) {
     try {
       onFunctionExit(ar, retval.m_type == KindOfUninit ? nullptr : &retval);
@@ -100,6 +99,8 @@ private:
     ProfileEnter,
     ProfileExit,
   };
+
+  static void onFunctionExit(ActRec* ar, TypedValue* retval);
 
   static bool RunInterceptHandler(ActRec* ar);
   static const char* GetFunctionNameForProfiler(const Func* func,

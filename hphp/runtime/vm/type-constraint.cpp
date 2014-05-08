@@ -279,7 +279,7 @@ TypeConstraint::checkPrimitive(DataType dt) const {
 static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
   tv = tvToCell(tv);
   switch (tv->m_type) {
-    case KindOfUninit:
+    case KindOfUninit:        return "undefined variable";
     case KindOfNull:          return "null";
     case KindOfBoolean:       return "bool";
     case KindOfInt64:         return "int";

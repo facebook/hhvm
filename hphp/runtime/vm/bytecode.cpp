@@ -4928,10 +4928,15 @@ OPTBLD_INLINE void ExecutionContext::iopAssertRATL(IOP_ARGS) {
   if (debug) {
     auto const rat = decodeRAT(m_fp->m_func->unit(), pc);
     auto const tv = *frame_local(m_fp, localId);
+    auto const func = m_fp->func();
     always_assert_flog(
       tvMatchesRepoAuthType(tv, rat),
-      "failed assert RATL on local {}, expected {}, got {}",
+      "failed assert RATL on local {}: ${} in {}:{}, expected {}, got {}",
       localId,
+      localId < func->numNamedLocals() ? func->localNames()[localId]->data()
+                                       : "<unnamed>",
+      getContainingFileName().data(),
+      getLine(),
       show(rat),
       tv.pretty()
     );
@@ -4948,8 +4953,10 @@ OPTBLD_INLINE void ExecutionContext::iopAssertRATStk(IOP_ARGS) {
     auto const tv = *m_stack.indTV(stkSlot);
     always_assert_flog(
       tvMatchesRepoAuthType(tv, rat),
-      "failed assert RATStk {}, expected {}, got {}",
+      "failed assert RATStk {} in {}:{}, expected {}, got {}",
       stkSlot,
+      getContainingFileName().data(),
+      getLine(),
       show(rat),
       tv.pretty()
     );

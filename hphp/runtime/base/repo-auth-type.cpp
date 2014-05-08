@@ -246,7 +246,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
       return false;
     }
     if (auto const arr = ty.array()) {
-      assert(tvMatchesArrayType(tv, arr));
+      if (!tvMatchesArrayType(tv, arr)) return false;
     }
     return true;
 
@@ -256,7 +256,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::Arr:
     if (tv.m_type != KindOfArray) return false;
     if (auto const arr = ty.array()) {
-      assert(tvMatchesArrayType(tv, arr));
+      if (!tvMatchesArrayType(tv, arr)) return false;
     }
     return true;
 

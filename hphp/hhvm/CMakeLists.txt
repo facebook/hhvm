@@ -8,3 +8,6 @@ embed_all_systemlibs(hhvm "${CMAKE_CURRENT_SOURCE_DIR}/hhvm")
 add_dependencies(hhvm systemlib)
 
 HHVM_INSTALL(hhvm bin)
+
+auto_sources(files "*.h" "")
+HHVM_PUBLIC_HEADERS(hhvm ${files})

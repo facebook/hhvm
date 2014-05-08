@@ -60,3 +60,5 @@ if (ZEND_COMPAT_LINK_LIBRARIES)
   target_link_libraries(hphp_ext_zend_compat ${ZEND_COMPAT_LINK_LIBRARIES})
 endif()
 hphp_link(hphp_ext_zend_compat)
+
+HHVM_PUBLIC_HEADERS(ext_zend_compat ${HEADER_SOURCES})

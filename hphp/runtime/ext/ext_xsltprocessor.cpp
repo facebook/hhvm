@@ -238,6 +238,7 @@ c_XSLTProcessor::c_XSLTProcessor(Class *cb) :
   m_registerPhpFunctions(0) {
   xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);
   exsltRegisterAll();
+  php_libxml_set_entity_loader();
 }
 
 c_XSLTProcessor::~c_XSLTProcessor() {
@@ -286,8 +287,9 @@ bool c_XSLTProcessor::t_hasexsltsupport() {
 }
 
 void c_XSLTProcessor::t_importstylesheet(const Object& stylesheet) {
-  xmlDocPtr doc = nullptr;
+  SYNC_VM_REGS_SCOPED();
 
+  xmlDocPtr doc = nullptr;
   if (stylesheet.instanceof(c_DOMDocument::classof())) {
     c_DOMDocument *domdoc = stylesheet.getTyped<c_DOMDocument>();
     // This doc will be freed by xsltFreeStylesheet.
@@ -312,6 +314,7 @@ void c_XSLTProcessor::t_importstylesheet(const Object& stylesheet) {
   if (doc) {
     m_stylesheet = xsltParseStylesheetDoc(doc);
     if (m_stylesheet == nullptr) {
+      xmlFreeDoc(doc);
       raise_error("Unable to import stylesheet");
     }
   }

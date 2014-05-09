@@ -1055,6 +1055,20 @@ void find_magic_methods(IndexData& index) {
   }
 }
 
+void mark_no_override(IndexData& index) {
+  for (auto& cinfo : index.allClassInfos) {
+    if (cinfo->subclassList.size() == 1 &&
+        !(cinfo->cls->attrs & AttrInterface)) {
+      assert(cinfo->subclassList.front() == borrow(cinfo));
+      if (!(cinfo->cls->attrs & AttrNoOverride)) {
+        FTRACE(1, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
+      }
+      const_cast<borrowed_ptr<php::Class>>(cinfo->cls)->attrs =
+        cinfo->cls->attrs | AttrNoOverride;
+    }
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
@@ -1172,6 +1186,8 @@ Index::Index(borrowed_ptr<php::Program> program)
   define_func_families(*m_data);
   find_magic_methods(*m_data);
   check_invariants(*m_data);
+
+  mark_no_override(*m_data);
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr

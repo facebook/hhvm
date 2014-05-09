@@ -604,6 +604,9 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
       kStackCheckLeafPadding) {
     return refuse("function stack depth too deep");
   }
+  if (callee->isMethod() && callee->cls() == c_Generator::classof()) {
+    return refuse("Generator member function");
+  }
 
   ////////////
 

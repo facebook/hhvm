@@ -8118,11 +8118,13 @@ struct Entry {
 const StaticString s_systemlibNativeFunc("/:systemlib.nativefunc");
 const StaticString s_systemlibNativeCls("/:systemlib.nativecls");
 
+const MD5 s_nativeFuncMD5("11111111111111111111111111111111");
+const MD5 s_nativeClassMD5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+
 static std::unique_ptr<UnitEmitter>
 emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
                        ssize_t numBuiltinFuncs) {
-  MD5 md5("11111111111111111111111111111111");
-  auto ue = folly::make_unique<UnitEmitter>(md5);
+  auto ue = folly::make_unique<UnitEmitter>(s_nativeFuncMD5);
   ue->setFilepath(s_systemlibNativeFunc.get());
   ue->addTrivialPseudoMain();
 
@@ -8250,8 +8252,7 @@ StaticString s_construct("__construct");
 static std::unique_ptr<UnitEmitter>
 emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                         ssize_t numBuiltinClasses) {
-  MD5 md5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-  auto ue = folly::make_unique<UnitEmitter>(md5);
+  auto ue = folly::make_unique<UnitEmitter>(s_nativeClassMD5);
   ue->setFilepath(s_systemlibNativeCls.get());
   ue->addTrivialPseudoMain();
 
@@ -8617,8 +8618,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   assert(Option::UseHHBBC || ues.empty());
 
   // We need to put the native func units in the repo so hhbbc can
-  // find them, even though they won't be used at runtime.  (We just
-  // regenerate them during process init.)
+  // find them.
   auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
   auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
                                        hhbc_ext_class_count);
@@ -8758,7 +8758,60 @@ Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
 
 Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                                    ssize_t numBuiltinClasses) {
-  return emitHHBCNativeClassUnit(builtinClasses, numBuiltinClasses)->create();
+  auto const ue = emitHHBCNativeClassUnit(builtinClasses, numBuiltinClasses);
+
+  /*
+   * In RepoAuthoritative mode, we may have serialized additional
+   * information in attr bits about the native units.  We still
+   * rebuild it, but we'll clobber attr bits with what static analysis
+   * thought.
+   *
+   * Note: this is a bit of a short-term hack that we won't need once
+   * HNI conversion is completed.  We only pull things out of the repo
+   * here that we've explicitly decided we want.
+   */
+  if (!RuntimeOption::RepoAuthoritative) return ue->create();
+  auto const staticAnalysisUnit = Repo::get().urp().loadEmitter(
+    "/:systemlib:static_analysis",
+    s_nativeClassMD5
+  );
+  if (!staticAnalysisUnit) return ue->create();
+
+  // Make a map of the preclasses in `ue', so we can find them.
+  std::map<const StringData*,PreClassEmitter*> uePreClasses;
+  for (auto id = Id{0}; id < ue->numPreClasses(); ++id) {
+    auto const pce = ue->pce(id);
+    always_assert_flog(
+      !uePreClasses.count(pce->name()),
+      "IDL-based native class unit is expected to only have unique "
+      "classes.  {} was non-unique.",
+      pce->name()->data()
+    );
+    uePreClasses[pce->name()] = pce;
+  }
+
+  always_assert_flog(
+    staticAnalysisUnit->numPreClasses() == uePreClasses.size(),
+    "Static analysis unit didn't have the same number of classes as "
+    "our native class unit; repo probably build with a different hhvm build."
+  );
+
+  // Right now, the only thing we do here is clobber all the Attr bits
+  // with the ones we found from static analysis.  (To get things like
+  // AttrNoOverride.)
+  for (auto id = Id{0}; id < staticAnalysisUnit->numPreClasses(); ++id) {
+    auto const staticAnalysisPce = staticAnalysisUnit->pce(id);
+    auto const uePce = uePreClasses[staticAnalysisPce->name()];
+    always_assert_flog(
+      uePce != nullptr,
+      "Static analysis unit had a PreClass we don't have at runtime ({}); "
+      "repo probably was built with a different hhvm build.",
+      staticAnalysisPce->name()->data()
+    );
+    uePce->setAttrs(staticAnalysisPce->attrs());
+  }
+
+  return ue->create();
 }
 
 } // extern "C"

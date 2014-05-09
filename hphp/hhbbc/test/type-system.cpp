@@ -122,11 +122,21 @@ std::unique_ptr<php::Unit> make_test_unit() {
       .default_ctor;
     }
 
+    # Make sure BAA doesn't get AttrNoOverride:
+    .class [unique] BAADeriver extends BAA {
+      .default_ctor;
+    }
+
     .class [no_override unique] C extends B implements (IA) {
       .default_ctor;
     }
 
     .class [unique] TestClass {
+      .default_ctor;
+    }
+
+    # Make sure TestClass doesn't get AttrNoOverride:
+    .class [unique] TestClassDeriver extends TestClass {
       .default_ctor;
     }
 

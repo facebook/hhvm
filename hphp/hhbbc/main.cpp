@@ -243,13 +243,16 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoLocalMode     = "--";
   RuntimeOption::RepoJournal       = "memory";
   RuntimeOption::RepoCommit        = false;
-  RuntimeOption::RepoAuthoritative = true;
 
   register_process_init();
   initialize_repo();
   Repo::shutdown();
 
   hphp_process_init();
+
+  // We only need to set this flag so Repo::global will let us access
+  // it.
+  RuntimeOption::RepoAuthoritative = true;
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
   compile_repo();

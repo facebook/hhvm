@@ -130,7 +130,7 @@ function argv_for_shell(): string {
   return $ret;
 }
 
-function compile_a_repo(bool $unoptimized): string {
+function compile_a_repo(bool $unoptimized, bool $echo_command): string {
   echo "Compiling with hphp...";
 
   $hphp_out='/tmp/hphp_out'.posix_getpid();
@@ -141,6 +141,9 @@ function compile_a_repo(bool $unoptimized): string {
     '-t hhbc -k1 -l3 '.
     argv_for_shell().
     " >$hphp_out 2>&1";
+  if ($echo_command) {
+    echo "\n", $cmd, "\n";
+  }
   system($cmd);
   echo "done.\n";
 
@@ -167,12 +170,12 @@ function repo_auth_flags(string $flags, string $repo): string {
     '--file ';
 }
 
-function compile_with_hphp(string $flags): string {
-  return repo_auth_flags($flags, compile_a_repo(false));
+function compile_with_hphp(string $flags, bool $print): string {
+  return repo_auth_flags($flags, compile_a_repo(false, $print));
 }
 
 function create_repo(): void {
-  $repo = compile_a_repo(true);
+  $repo = compile_a_repo(true, false);
   system("cp $repo ./hhvm.hhbc");
 }
 
@@ -185,7 +188,7 @@ function run_hhvm(OptionMap $opts): void {
   if ($opts->containsKey('repo')) {
     $flags = repo_auth_flags($flags, $opts['repo']);
   } else if ($opts->containsKey('compile')) {
-    $flags = compile_with_hphp($flags);
+    $flags = compile_with_hphp($flags, $opts->containsKey('print-command'));
   }
 
   $pfx = determine_env($opts);

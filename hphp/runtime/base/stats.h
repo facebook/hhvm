@@ -136,6 +136,13 @@ namespace Stats {
   STAT(TC_CatchSideExit) \
   STAT(TC_SetMStrGuess_Hit) \
   STAT(TC_SetMStrGuess_Miss) \
+  STAT(TC_DecRef_NZ) \
+  STAT(TC_DecRef_Normal_Decl) \
+  STAT(TC_DecRef_Normal_Destroy) \
+  STAT(TC_DecRef_Likely_Decl) \
+  STAT(TC_DecRef_Likely_Destroy) \
+  STAT(TC_DecRef_Profiled_100) \
+  STAT(TC_DecRef_Profiled_0) \
   /* Fixup */ \
   STAT(Fixup_Find) \
   STAT(Fixup_Probe) \

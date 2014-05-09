@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 
 namespace HPHP { namespace JIT { namespace X64 {
 
@@ -201,6 +202,7 @@ private:
   void emitTraceRet(Asm& as);
   void emitInitObjProps(PhysReg dstReg, const Class* cls, size_t nProps);
 
+  bool decRefDestroyIsUnlikely(OptDecRefProfile& profile, Type type);
   template <typename F>
   Address cgCheckStaticBitAndDecRef(Type type,
                                     PhysReg dataReg,
@@ -247,6 +249,20 @@ private:
   void emitStRaw(IRInstruction* inst, size_t extraOff);
 
   /*
+   * Execute the code emitted by 'taken' only if the given condition code is
+   * true.
+   */
+  template <class Block>
+  void ifBlock(ConditionCode cc, Block taken, bool unlikely = false) {
+    if (unlikely) return unlikelyIfBlock(cc, taken);
+
+    Label done;
+    m_as.jcc(ccNegate(cc), done);
+    taken(m_as);
+    asm_label(m_as, done);
+  }
+
+  /*
    * Generate an if-block that branches around some unlikely code, handling
    * the cases when a == astubs and a != astubs.  cc is the branch condition
    * to run the unlikely block.
@@ -275,16 +291,19 @@ private:
   void ifThenElse(Asm& a, ConditionCode cc, Then thenBlock, Else elseBlock) {
     Label elseLabel, done;
     a.jcc8(ccNegate(cc), elseLabel);
-    thenBlock();
+    thenBlock(a);
     a.jmp8(done);
     asm_label(a, elseLabel);
-    elseBlock();
+    elseBlock(a);
     asm_label(a, done);
   }
 
   // Generate an if-then-else block into m_as.
   template <class Then, class Else>
-  void ifThenElse(ConditionCode cc, Then thenBlock, Else elseBlock) {
+  void ifThenElse(ConditionCode cc, Then thenBlock, Else elseBlock,
+                  bool unlikely = false) {
+    if (unlikely) return unlikelyIfThenElse(cc, thenBlock, elseBlock);
+
     ifThenElse(m_as, cc, thenBlock, elseBlock);
   }
 

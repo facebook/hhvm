@@ -100,12 +100,12 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
       helperAddr = rip + *reinterpret_cast<int32_t*>(callAddr + 1);
     }
 
-    always_assert_log(false,
-      [&] {
-        return folly::format("Translated call to {} threw without catch block, "
-                             "return address: {}\n",
-                             getNativeFunctionName(helperAddr), rip).str();
-      });
+    always_assert_flog(false,
+                       "Translated call to {} threw '{}' without "
+                       "catch block, return address: {}\n",
+                       getNativeFunctionName(helperAddr),
+                       exceptionFromUnwindException(exn)->what(),
+                       rip);
     return false;
   }
 

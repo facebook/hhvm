@@ -462,6 +462,7 @@ public:
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \
+  F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, HotFuncThreshold,        40)                              \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
@@ -487,9 +488,6 @@ public:
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
-  F(bool, DecRefUsePlainDecl,          true)                            \
-  F(bool, DecRefUsePlainDeclWithDestroy,true)                           \
-  F(bool, DecRefUseScratch,            false)                           \
   /* */
 
 private:

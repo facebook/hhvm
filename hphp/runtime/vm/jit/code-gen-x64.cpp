@@ -56,6 +56,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
@@ -2076,10 +2077,10 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
 
   a.     testq   (testReg, testReg);
   ifThenElse(a, CC_NZ,
-    [&] {
+    [&](Asm& a) {
       cgCallNative(a, inst);
     },
-    [&] {
+    [&](Asm& a) {
       // testReg == 0, set dest to false (0)
       emitMovRegReg(a, testReg, destReg);
     }
@@ -2167,11 +2168,11 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
       ifThen(a, CC_NP, [&] {
         emitLoadImm(a, maxULongAsDouble, rCgXMM1);
         a.   ucomisd    (rCgXMM1, srcReg);
-        ifThenElse(a, CC_B, [&] {
+        ifThenElse(a, CC_B, [&](Asm& a) {
           // src0 > ULONG_MAX
           a.    xorq    (dstReg, dstReg);
 
-        }, [&] {
+        }, [&](Asm& a) {
           // 0 < src0 <= ULONG_MAX
           emitLoadImm(a, maxLongAsDouble, rCgXMM1);
           emitMovRegReg(a, srcReg, rCgXMM0);
@@ -2257,11 +2258,11 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
       ifThenElse(
         a,
         CC_NZ,
-        [&] { // srcReg points to native collection
+        [&](Asm& a) { // srcReg points to native collection
           a.cmpl(0, srcReg[sizeOff]);
           a.setne(rbyte(dstReg)); // truthy iff size not zero
         },
-        [&] { // srcReg is not a native collection
+        [&](Asm& a) { // srcReg is not a native collection
           cgCallHelper(
             a,
             CppCall::method(&ObjectData::o_toBoolean),
@@ -3061,6 +3062,57 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   recordSyncPoint(a);
 }
 
+/*
+ * Depending on the current translation kind, do nothing, profile, or collect
+ * profiling data for the current DecRef* instruction
+ *
+ * Returns true iff the release path for this DecRef should be put in stubs
+ * code.
+ */
+bool CodeGenerator::decRefDestroyIsUnlikely(OptDecRefProfile& profile,
+                                            Type type) {
+  auto const kind = m_mcg->tx().mode();
+  if (kind != TransKind::Profile && kind != TransKind::Optimize) return true;
+
+  // For a profiling key, we use:
+  // "DecRefProfile-{opcode name}-{stack/local id if present}-{type}"
+  // This gives good uniqueness within a bytecode without requiring us to track
+  // more complex things like "this is the 3rd DecRef in this bytecode".
+  const int32_t profileId =
+    m_curInst->is(DecRefLoc) ? m_curInst->extra<DecRefLoc>()->locId
+  : m_curInst->is(DecRefStack) ? m_curInst->extra<DecRefStack>()->offset
+  : 0;
+  auto const profileKey =
+    makeStaticString(folly::to<std::string>("DecRefProfile-",
+                                            opcodeName(m_curInst->op()),
+                                            '-',
+                                            profileId,
+                                            '-',
+                                            type.toString()));
+  profile.emplace(m_unit.context(), m_curInst->marker(), profileKey);
+
+  if (profile->profiling()) {
+    m_as.incw (rVmTl[profile->handle() + offsetof(DecRefProfile, decrement)]);
+  } else if (profile->optimizing()) {
+    auto const data = profile->data(DecRefProfile::reduce);
+    if (data.hitRate() != 0 && data.hitRate() != 100) {
+      // These are the only interesting cases where we could be doing better.
+      FTRACE(5, "DecRefProfile: {}: {} {}\n",
+             data, m_curInst->marker().show(), profileKey->data());
+    }
+
+    if (data.hitRate() == 0) {
+      emitIncStat(m_mainCode, Stats::TC_DecRef_Profiled_0);
+    } else if (data.hitRate() == 100) {
+      emitIncStat(m_mainCode, Stats::TC_DecRef_Profiled_100);
+    }
+
+    return data.hitRate() < RuntimeOption::EvalJitUnlikelyDecRefPercent;
+  }
+
+  return true;
+}
+
 namespace {
 template <typename T>
 struct CheckValid {
@@ -3079,33 +3131,53 @@ struct CheckValid<void(*)(Asm&)> {
 // NOTE: the flags are left with the result of the DecRef's subtraction,
 //       which can then be tested immediately after this.
 //
+// We've tried a variety of tweaks to this and found the current state of
+// things optimal, at least when the measurements were made:
+// - whether to load the count into a register (if one is available)
+// - whether to use if (!--count) release(); if we don't need a static check
+// - whether to skip using the register and just emit --count if we know
+//   its not static, and can't hit zero.
+//
 // Return value: the address to be patched if a RefCountedStaticValue check is
 //               emitted; NULL otherwise.
 //
 template <typename F>
 Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
                                                  PhysReg dataReg,
-                                                 F destroy) {
-  assert(type.maybeCounted());
+                                                 F destroyImpl) {
+  always_assert(type.maybeCounted());
+  bool hasDestroy = CheckValid<F>::valid(destroyImpl);
 
-  bool hasDestroy = CheckValid<F>::valid(destroy);
-  if (!type.needsStaticBitCheck() &&
-      (RuntimeOption::EvalDecRefUsePlainDeclWithDestroy ||
-       (RuntimeOption::EvalDecRefUsePlainDecl && !hasDestroy))) {
+  OptDecRefProfile profile;
+  auto const unlikelyDestroy =
+    hasDestroy ? decRefDestroyIsUnlikely(profile, type) : false;
+
+  if (hasDestroy) {
+    emitIncStat(m_mainCode, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
+                                            : Stats::TC_DecRef_Likely_Decl);
+  } else {
+    emitIncStat(m_mainCode, Stats::TC_DecRef_NZ);
+  }
+
+  auto destroy = [&](Asm& a) {
+    emitIncStat(a.code(), unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy
+                                          : Stats::TC_DecRef_Likely_Destroy);
+    if (profile && profile->profiling()) {
+      a.incw (rVmTl[profile->handle() + offsetof(DecRefProfile, destroy)]);
+    }
+    destroyImpl(a);
+  };
+
+  if (!type.needsStaticBitCheck()) {
     m_as.decl(dataReg[FAST_REFCOUNT_OFFSET]);
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
       emitAssertFlagsNonNegative(m_as);
     }
-    if (hasDestroy) {
-      unlikelyIfBlock(CC_E, destroy);
-    }
+
+    if (hasDestroy) ifBlock(CC_E, destroy, unlikelyDestroy);
     return nullptr;
   }
-
-  const auto scratchReg = r32(m_rScratch);
-  bool canUseScratch =
-    dataReg != m_rScratch && RuntimeOption::EvalDecRefUseScratch;
 
   Address addrToPatch = nullptr;
   auto static_check_and_decl = [&](Asm& as) {
@@ -3118,12 +3190,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
     }
 
     // Decrement _count
-    if (canUseScratch) {
-      as.decl(scratchReg);
-      as.storel(scratchReg, dataReg[FAST_REFCOUNT_OFFSET]);
-    } else {
-      as.decl(dataReg[FAST_REFCOUNT_OFFSET]);
-    }
+    as.decl(dataReg[FAST_REFCOUNT_OFFSET]);
 
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
@@ -3131,24 +3198,12 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
     }
   };
 
-  if (canUseScratch) {
-    m_as.loadl(dataReg[FAST_REFCOUNT_OFFSET], scratchReg);
-  }
-
   if (hasDestroy) {
-    if (canUseScratch) {
-      m_as.cmpl(1, scratchReg);
-    } else {
-      m_as.cmpl(1, dataReg[FAST_REFCOUNT_OFFSET]);
-    }
-    unlikelyIfThenElse(CC_E, destroy, static_check_and_decl);
+    m_as.cmpl(1, dataReg[FAST_REFCOUNT_OFFSET]);
+    ifThenElse(CC_E, destroy, static_check_and_decl, unlikelyDestroy);
     return addrToPatch;
   } else if (type.needsStaticBitCheck()) {
-    if (canUseScratch) {
-      m_as.testl(scratchReg, scratchReg);
-    } else {
-      m_as.cmpl(0, dataReg[FAST_REFCOUNT_OFFSET]);
-    }
+    m_as.cmpl(0, dataReg[FAST_REFCOUNT_OFFSET]);
   }
 
   static_check_and_decl(m_as);
@@ -3873,8 +3928,8 @@ void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
   // Context could be either a this object or a class ptr
   m_as.   testb(1, rbyte(srcReg));
   ifThenElse(CC_NZ,
-             [&] { emitLdClsCctx(m_as, srcReg, dstReg);  }, // ctx is a class
-             [&] { emitLdObjClass(m_as, srcReg, dstReg); }  // ctx is this ptr
+             [&](Asm& a) { emitLdClsCctx(a, srcReg, dstReg);  }, // ctx is class
+             [&](Asm& a) { emitLdObjClass(a, srcReg, dstReg); }  // ctx is $this
             );
 }
 
@@ -4654,7 +4709,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
   auto const destSR = m_mcg->tx().getSrcRec(destSK);
 
-  auto thenBody = [&] {
+  auto thenBody = [&](Asm& a) {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
     auto cond = CC_NE;
     auto bitsPtrReg = m_rScratch;
@@ -4663,7 +4718,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       bitsOff = Func::refBitValOff();
       bitsPtrReg = funcPtrReg;
     } else {
-      m_as.loadq(funcPtrReg[Func::sharedOff()], bitsPtrReg);
+      a.loadq(funcPtrReg[Func::sharedOff()], bitsPtrReg);
       bitsOff -= sizeof(uint64_t);
     }
 
@@ -4672,37 +4727,37 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       // bit, we can get away with a single test,
       // rather than mask-and-compare
       if (mask64Reg != InvalidReg) {
-        m_as.testq  (mask64Reg, bitsPtrReg[bitsOff]);
+        a.testq  (mask64Reg, bitsPtrReg[bitsOff]);
       } else {
         if (mask64 < 256) {
-          m_as.testb((int8_t)mask64, bitsPtrReg[bitsOff]);
+          a.testb((int8_t)mask64, bitsPtrReg[bitsOff]);
         } else {
-          m_as.testl((int32_t)mask64, bitsPtrReg[bitsOff]);
+          a.testl((int32_t)mask64, bitsPtrReg[bitsOff]);
         }
       }
       if (vals64) cond = CC_E;
     } else {
       auto bitsValReg = m_rScratch;
-      m_as.  loadq  (bitsPtrReg[bitsOff], bitsValReg);
+      a.  loadq  (bitsPtrReg[bitsOff], bitsValReg);
       if (debug) bitsPtrReg = InvalidReg;
 
       //     bitsValReg <- bitsValReg & mask64
       if (mask64Reg != InvalidReg) {
-        m_as.  andq   (mask64Reg, bitsValReg);
+        a.  andq   (mask64Reg, bitsValReg);
       } else if (mask64 < 256) {
-        m_as.  andb   ((int8_t)mask64, rbyte(bitsValReg));
+        a.  andb   ((int8_t)mask64, rbyte(bitsValReg));
       } else {
-        m_as.  andl   ((int32_t)mask64, r32(bitsValReg));
+        a.  andl   ((int32_t)mask64, r32(bitsValReg));
       }
 
       //   If bitsValReg != vals64, then goto Exit
       if (vals64Reg != InvalidReg) {
-        m_as.  cmpq   (vals64Reg, bitsValReg);
+        a.  cmpq   (vals64Reg, bitsValReg);
       } else if (mask64 < 256) {
         assert(vals64 < 256);
-        m_as.  cmpb   ((int8_t)vals64, rbyte(bitsValReg));
+        a.  cmpb   ((int8_t)vals64, rbyte(bitsValReg));
       } else {
-        m_as.  cmpl   ((int32_t)vals64, r32(bitsValReg));
+        a.  cmpl   ((int32_t)vals64, r32(bitsValReg));
       }
     }
     destSR->emitFallbackJump(m_mainCode, cond);
@@ -4712,7 +4767,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
     assert(nParamsReg == InvalidReg);
     // This is the first 64 bits. No need to check
     // nParams.
-    thenBody();
+    thenBody(m_as);
   } else {
     assert(nParamsReg != InvalidReg);
     // Check number of args...
@@ -4724,11 +4779,11 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       // isn't 0 and isnt mask64, there's no possibility of
       // a match
       destSR->emitFallbackJump(m_mainCode, CC_LE);
-      thenBody();
+      thenBody(m_as);
     } else {
-      ifThenElse(CC_NLE, thenBody, /* else */ [&] {
+      ifThenElse(CC_NLE, thenBody, /* else */ [&](Asm& a) {
           //   If not special builtin...
-          m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
+          a.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
           destSR->emitFallbackJump(m_mainCode, vals64 ? CC_Z : CC_NZ);
         });
     }

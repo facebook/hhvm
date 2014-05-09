@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_TARGET_PROFILE_H_
 #define incl_HPHP_TARGET_PROFILE_H_
 
+#include "folly/Optional.h"
+
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/rds.h"
@@ -64,18 +66,17 @@ template<class T>
 struct TargetProfile {
   explicit TargetProfile(const TransContext& context,
                          BCMarker marker,
-                         const StaticString& name)
-    : m_profiling(tx->mode() == TransKind::Profile)
-    , m_link(createLink(context, marker, name))
+                         const StringData* name)
+    : m_link(createLink(context, marker, name))
   {}
 
   /*
    * Access the data we collected during profiling.
    *
-   * ReduceFn is used to fold the data from each local RDS slot.  It
-   * must have the signature void(T&, const T&), and should assume the
-   * second argument might be concurrently written to by other threads
-   * running in the translation cache.
+   * ReduceFn is used to fold the data from each local RDS slot.  It must have
+   * the signature void(T&, const T&), and should assume the second argument
+   * might be concurrently written to by other threads running in the
+   * translation cache.
    *
    * Pre: optimizing()
    */
@@ -91,47 +92,53 @@ struct TargetProfile {
   }
 
   /*
-   * Query whether this is set up to profile or optimize.  It's
-   * possible neither is true (e.g. if we're producing a
-   * TransKind::Live translation).
+   * Query whether this is set up to profile or optimize.  It's possible
+   * neither is true (e.g. if we're producing a TransKind::Live translation or
+   * we're producing a TransKind::Optimize translation and the link couldn't be
+   * attached for some reason.).
    */
-  bool profiling() const { return m_profiling; }
-  bool optimizing() const { return !m_profiling && m_link.bound(); }
+  bool profiling() const {
+    return tx->mode() == TransKind::Profile;
+  }
+  bool optimizing() const {
+    return tx->mode() == TransKind::Optimize && m_link.bound();
+  }
 
   /*
-   * Access the handle to the link.  You generally should only need to
-   * do this if profiling().
+   * Access the handle to the link.  You generally should only need to do this
+   * if profiling().
    */
   RDS::Handle handle() const { return m_link.handle(); }
 
 private:
-  static RDS::Link<T> createLink(TransContext context,
+  RDS::Link<T> link() {
+    if (!m_link) m_link = createLink();
+    return *m_link;
+  }
+
+  static RDS::Link<T> createLink(const TransContext& context,
                                  BCMarker marker,
-                                 const StaticString& name) {
+                                 const StringData* name) {
     switch (tx->mode()) {
     case TransKind::Profile:
       return RDS::bind<T>(
         RDS::Profile {
           context.transID,
           marker.bcOff(),
-          name.get()
+          name
         },
         RDS::Mode::Local
       );
+
     case TransKind::Optimize:
       if (marker.m_profTransID != kInvalidTransID) {
-        auto const link = RDS::attach<T>(
+        return RDS::attach<T>(
           RDS::Profile {
             marker.m_profTransID, // transId from profiling translation
             marker.bcOff(),
-            name.get()
+            name
           }
         );
-        // The link must already have been created during a
-        // TransKind::Profile, so this attach should always
-        // succeed.
-        assert(link.bound());
-        return link;
       }
       // fallthrough
     case TransKind::Anchor:
@@ -146,11 +153,40 @@ private:
   }
 
 private:
-  bool const m_profiling;
   RDS::Link<T> const m_link;
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * DecRefProfile is used to track which DecRef instructions are likely to go to
+ * zero. During an optimized translation, the release path will be put in
+ * astubs if it rarely went to zero during profiling.
+ */
+struct DecRefProfile {
+  uint16_t decrement;
+  uint16_t destroy;
+
+  int hitRate() const {
+    return decrement ? destroy * 100 / decrement : 0;
+  }
+
+  std::string toString() const {
+    return folly::format("decl: {:3}, destroy: {:3} ({:3}%)",
+                         decrement, destroy, hitRate()).str();
+  }
+
+  static void reduce(DecRefProfile& a, const DecRefProfile& b) {
+    // This is slightly racy but missing a few either way isn't a
+    // disaster. It's already racy at profiling time because the two values
+    // aren't updated atomically.
+    auto const bDecrement = b.decrement;
+    auto const bDestroy = b.destroy;
+    a.decrement += bDecrement;
+    a.destroy += bDestroy;
+  }
+};
+typedef folly::Optional<TargetProfile<DecRefProfile>> OptDecRefProfile;
 
 }}
 

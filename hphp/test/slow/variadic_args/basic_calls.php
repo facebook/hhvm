@@ -3,12 +3,6 @@
 error_reporting(-1);
 require_once __DIR__.'/variadic_funcs.inc';
 
-// TODO: async functions (allowed?)
-
-// TODO: continuations (allowed?)
-
-// TODO: closures (allowed?)
-
 function test_standard_calls() {
   echo '========= ', __FUNCTION__, ' ==========', "\n";
   variadic_only_no_vv('a', 'b', 'c');

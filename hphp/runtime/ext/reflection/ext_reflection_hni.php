@@ -114,6 +114,15 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isAsync(): bool;
 
   /**
+   * Indicates whether the function has ...$varargs as its last parameter
+   * to capture variadic arguments.
+   *
+   * @return     bool   TRUE if the function is variadic, otherwise FALSE
+   */
+  <<__Native>>
+  public function isVariadic(): bool;
+
+  /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.isuserdefined.php )
    *
@@ -126,7 +135,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isUserDefined(): bool {
     return !$this->isInternal();
   }
-
 
   /**
    * ( excerpt from

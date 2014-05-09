@@ -65,6 +65,7 @@ const StaticString
   s_nullable("nullable"),
   s_msg("msg"),
   s_is_optional("is_optional"),
+  s_is_variadic("is_variadic"),
   s_default("default"),
   s_defaultValue("defaultValue"),
   s_defaultText("defaultText"),
@@ -542,6 +543,11 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, isAsync) {
   return func->isAsync();
 }
 
+static bool HHVM_METHOD(ReflectionFunctionAbstract, isVariadic) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return func->hasVariadicCaptureParam();
+}
+
 static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReference) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return func->attrs() & AttrReference;
@@ -616,6 +622,9 @@ static Array get_function_param_info(const Func* func) {
 
     if (func->byRef(i)) {
       param.set(s_ref, true_varNR);
+    }
+    if (fpi.isVariadic()) {
+      param.set(s_is_variadic, true_varNR);
     }
     {
       Array userAttrs = Array::Create();
@@ -1256,6 +1265,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionFunctionAbstract, isInternal);
     HHVM_ME(ReflectionFunctionAbstract, isGenerator);
     HHVM_ME(ReflectionFunctionAbstract, isAsync);
+    HHVM_ME(ReflectionFunctionAbstract, isVariadic);
     HHVM_ME(ReflectionFunctionAbstract, getFileName);
     HHVM_ME(ReflectionFunctionAbstract, getStartLine);
     HHVM_ME(ReflectionFunctionAbstract, getEndLine);

@@ -795,7 +795,7 @@ O(ArraySetRef,                      ND, C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
                                           S(Cell)                             \
-                                          S(BoxedArr),             E|N|CRc|K) \
+                                          S(BoxedArr),          E|N|CRc|K|Er) \
 O_STK(SetElem,                DSetElem, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \

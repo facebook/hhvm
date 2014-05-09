@@ -2233,7 +2233,7 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
     assert(base.location.space == Location::Local ||
            base.location.space == Location::Stack);
     SSATmp* box = getInput(baseStkIdx, DataTypeSpecific);
-    gen(ArraySetRef, cns((TCA)opFunc), m_base, key, value, box);
+    gen(ArraySetRef, makeCatch(), cns((TCA)opFunc), m_base, key, value, box);
     // Unlike the non-ref case, we don't need to do anything to the stack
     // because any load of the box will be guarded.
     m_result = value;

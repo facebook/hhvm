@@ -19,10 +19,16 @@
 
 #include "hphp/util/assertions.h"
 
+#include "folly/CPortability.h" // FOLLY_SANITIZE_ADDRESS
+
 #include <cstddef>
 #include <cstdint>
 #include <algorithm>
 #include <utility>
+
+#ifdef FOLLY_SANITIZE_ADDRESS
+#undef USE_LOWPTR
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

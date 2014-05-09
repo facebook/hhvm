@@ -1281,6 +1281,14 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // already been tracked in setLocalValue().
       return;
     } else if (m_inst->is(LdThis)) {
+      if (!m_inst->marker().func()->mayHaveThis()) {
+        // If this function can't have a $this pointer everything after the
+        // LdThis is unreachable. More importantly, we aren't going to decref
+        // the non-existent $this pointer in RetC, so don't track a reference
+        // to it.
+        return;
+      }
+
       auto* fpInst = frameRoot(m_inst->src(0)->inst());
       assert(m_state.frames.live.count(fpInst));
       auto& frame = m_state.frames.live[fpInst];

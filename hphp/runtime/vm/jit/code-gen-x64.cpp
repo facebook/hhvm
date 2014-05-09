@@ -660,10 +660,6 @@ void CodeGenerator::cgSideExitJmpNeqInt(IRInstruction* i) { cgExitJccInt(i); }
 
 //////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::cgConjure(IRInstruction* inst) {
-  always_assert(false);
-}
-
 void CodeGenerator::cgHalt(IRInstruction* inst) {
   m_as.ud2();
 }
@@ -3858,20 +3854,16 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
   Block* label  = inst->taken();
   auto dstReg = dstLoc(0).reg();
 
-  // the destination of LdThis could be dead but the instruction
-  // itself still useful because of the checks that it does (if it has
-  // a label).  So we need to make sure there is a dstReg for this
-  // instruction.
-  if (dstReg != InvalidReg) {
-    // instruction's result is not dead
-    m_as.loadq(srcLoc(0).reg()[AROFF(m_this)], dstReg);
-  }
+  m_as.loadq(srcLoc(0).reg()[AROFF(m_this)], dstReg);
   if (label == NULL) return;  // no need to perform its checks
-  if (dstReg != InvalidReg) {
-    m_as.testb(1, rbyte(dstReg));
-  } else {
-    m_as.testb(1, srcLoc(0).reg()[AROFF(m_this)]);
+
+  if (curFunc()->isPseudoMain() || !curFunc()->mayHaveThis()) {
+    // Check for a null $this pointer first.
+    m_as.testq(dstReg, dstReg);
+    emitFwdJcc(CC_Z, label);
   }
+
+  m_as.testb(1, rbyte(dstReg));
   emitFwdJcc(CC_NZ, label);
 }
 
@@ -5985,6 +5977,10 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   m_as.  loadl(clsReg[offset], r32(dstReg));
   m_as.  loadq(rVmTl[dstReg], dstReg);
   m_as.  loadq(dstReg[Class::PropInitVec::dataOff()], dstReg);
+}
+
+void CodeGenerator::cgConjure(IRInstruction* inst) {
+  m_as.ud2();
 }
 
 void CodeGenerator::print() const {

@@ -231,13 +231,11 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
 
   if (oldType.not(typeParam)) {
     /* This check will always fail. It's probably due to an incorrect
-     * prediction. Generate a Jmp, and return src because following
-     * instructions may depend on the output of CheckType (they'll be DCEd
-     * later). Note that we can't use convertToJmp because the return value
-     * isn't nullptr, so the original instruction won't be inserted into the
-     * stream. */
+     * prediction. Generate a Jmp and return the src. The fact that the type
+     * will be slightly off is ok because all the code after the Jmp is
+     * unreachable. */
     gen(Jmp, inst->taken());
-    return src;
+    return inst->src(0);
   }
 
   auto const newType = refineType(oldType, inst->typeParam());
@@ -361,6 +359,18 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeLdThis(IRInstruction* inst) {
+  if (!curFunc()->mayHaveThis()) {
+    if (!inst->taken()) {
+      // No taken branch. This code had better be unreachable.
+      return nullptr;
+    }
+
+    // The instruction will always branch but we still need to produce a value
+    // for code that's generated after it.
+    gen(Jmp, inst->taken());
+    return gen(Conjure, Type::Obj);
+  }
+
   if (m_state.thisAvailable()) {
     auto fpInst = frameRoot(inst->src(0)->inst());
 

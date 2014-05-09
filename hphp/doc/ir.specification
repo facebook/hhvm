@@ -840,8 +840,8 @@ D:ConstT = DefConst<T>
 
 D:T = Conjure<T>
 
-  Define a value of type T. This is meant to be used in tests, to create a
-  non-constant value as an opaque input to other instructions.
+  Define a value of type T. This instruction aborts at runtime; it is meant to
+  be used in tests or code that is known to be unreachable.
 
 D:Cls = LdCls S0:Str S1:ConstCls
 

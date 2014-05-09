@@ -709,6 +709,8 @@ private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);
   Block* makeExitWarn(Offset targetBcOff, std::vector<SSATmp*>& spillValues,
                       const StringData* warning);
+  Block* makeExitError(SSATmp* msg, Block* catchBlock);
+  Block* makeExitNullThis();
 
   SSATmp* promoteBool(SSATmp* src);
   Opcode promoteBinaryDoubles(Op op, SSATmp*& src1, SSATmp*& src2);

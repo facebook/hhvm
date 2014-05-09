@@ -229,7 +229,6 @@ bool loadsCell(Opcode op) {
     case LdElem:
     case LdPackedArrayElem:
     case LdRef:
-    case LdThis:
     case LdStaticLocCached:
     case LookupCns:
     case LookupClsCns:
@@ -329,7 +328,6 @@ bool needsUnusedReg(const IRInstruction& inst, unsigned dst) {
 
   // These are optional branches, so DCE may not remove them, and use
   // cgLoad, which checks for InvalidReg
-  case LdThis:
   case LdRef:
   case LdMem:
      break;

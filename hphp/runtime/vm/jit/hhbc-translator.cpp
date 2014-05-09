@@ -483,19 +483,11 @@ void HhbcTranslator::emitUnboxR() {
 }
 
 void HhbcTranslator::emitThis() {
-  if (!curClass()) {
-    emitInterpOne(Type::Obj, 0); // will throw a fatal
-    return;
-  }
-  pushIncRef(gen(LdThis, makeExitSlow(), m_irb->fp()));
+  pushIncRef(gen(LdThis, makeExitNullThis(), m_irb->fp()));
 }
 
 void HhbcTranslator::emitCheckThis() {
-  if (!curClass()) {
-    emitInterpOne(0); // will throw a fatal
-    return;
-  }
-  gen(LdThis, makeExitSlow(), m_irb->fp());
+  gen(LdThis, makeExitNullThis(), m_irb->fp());
 }
 
 void HhbcTranslator::emitRB(Trace::RingBufferType t, SrcKey sk, int level) {
@@ -5423,6 +5415,18 @@ Block* HhbcTranslator::makeExitWarn(Offset targetBcOff,
       return nullptr;
     }
   );
+}
+
+Block* HhbcTranslator::makeExitError(SSATmp* msg, Block* catchBlock) {
+  auto exit = m_irb->makeExit();
+  BlockPusher bp(*m_irb, m_irb->marker(), exit);
+  gen(RaiseError, catchBlock, msg);
+  return exit;
+}
+
+Block* HhbcTranslator::makeExitNullThis() {
+  return makeExitError(cns(makeStaticString(Strings::FATAL_NULL_THIS)),
+                       makeCatch());
 }
 
 template<class ExitLambda>

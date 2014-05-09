@@ -99,7 +99,7 @@ const StaticString
   s_accessible("accessible"),
   s_reflectionexception("ReflectionException");
 
-static Class* get_cls(const Variant& class_or_object) {
+Class* get_cls(const Variant& class_or_object) {
   Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
@@ -108,6 +108,39 @@ static Class* get_cls(const Variant& class_or_object) {
     cls = Unit::loadClass(class_or_object.toString().get());
   }
   return cls;
+}
+
+const Func* get_func(Class* cls, const String& meth_name) {
+  auto func = cls->lookupMethod(meth_name.get());
+  if (!func) {
+    if ((cls->attrs() & AttrAbstract) || (cls->attrs() & AttrInterface)) {
+      const Class::InterfaceMap& ifaces = cls->allInterfaces();
+      for (int i = 0, size = ifaces.size(); i < size; i++) {
+        func = ifaces[i]->lookupMethod(meth_name.get());
+        if (func) break;
+      }
+    }
+  }
+  return func;
+}
+
+Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
+                                  const Func* func) {
+  assert(fpi.hasDefaultValue());
+  if (fpi.hasScalarDefaultValue()) {
+    // Most of the time the default value is scalar, so we can
+    // avoid evaling in the common case
+    return tvAsVariant((TypedValue*)&fpi.defaultValue());
+  } else {
+    // Eval PHP code to get default value. Note that access of
+    // undefined class constants can cause the eval() to
+    // fatal. Zend lets such fatals propagate, so don't bother catching
+    // exceptions here.
+    return g_context->getEvaledArg(
+      fpi.phpCode(),
+      func->cls() ? func->cls()->nameStr() : func->nameStr()
+    );
+  }
 }
 
 Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
@@ -263,9 +296,8 @@ static bool resolveConstant(const char *p, int64_t len, Variant &cns) {
   return true;
 }
 
-static bool resolveDefaultParameterConstant(const char *value,
-                                            int64_t valueLen,
-                                            Variant &cns) {
+bool resolveDefaultParameterConstant(const char *value, int64_t valueLen,
+                                     Variant &cns) {
   const char *p = value;
   const char *e = value + valueLen;
   const char *s;
@@ -334,22 +366,8 @@ static void set_function_info(Array &ret, const Func* func) {
       }
 
       if (fpi.phpCode()) {
-        assert(fpi.hasDefaultValue());
-        if (fpi.hasScalarDefaultValue()) {
-          // Most of the time the default value is scalar, so we can
-          // avoid evaling in the common case
-          param.set(s_default, tvAsVariant((TypedValue*)&fpi.defaultValue()));
-        } else {
-          // Eval PHP code to get default value. Note that access of
-          // undefined class constants can cause the eval() to
-          // fatal. Zend lets such fatals propagate, so don't bother catching
-          // exceptions here.
-          const Variant& v = g_context->getEvaledArg(
-            fpi.phpCode(),
-            func->cls() ? func->cls()->nameStr() : func->nameStr()
-          );
-          param.set(s_default, v);
-        }
+        Variant v = default_arg_from_php_code(fpi, func);
+        param.set(s_default, v);
         param.set(s_defaultText, VarNR(fpi.phpCode()));
       } else if (auto mi = func->methInfo()) {
         auto p = mi->parameters[i];
@@ -1085,19 +1103,10 @@ static bool HHVM_METHOD(ReflectionMethod, __init,
     // caller raises exception
     return false;
   }
-  const Func* func = cls->lookupMethod(meth_name.get());
+  auto const func = get_func(cls, meth_name);
   if (!func) {
-    if (cls->attrs() & (AttrInterface | AttrAbstract)) {
-      const Class::InterfaceMap& ifaces = cls->allInterfaces();
-      for (int i = 0, size = ifaces.size(); i < size; i++) {
-        func = ifaces[i]->lookupMethod(meth_name.get());
-        if (func) { break; }
-      }
-    }
-    if (!func) {
-      // caller raises exception
-      return false;
-    }
+    // caller raises exception
+    return false;
   }
   assert(func->cls());
   ReflectionFuncHandle::Get(this_)->setFunc(func);

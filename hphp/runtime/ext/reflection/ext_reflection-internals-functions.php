@@ -12,20 +12,6 @@
 function hphp_get_extension_info(string $name): array<string, mixed>;
 
 /**
- * hphp_get_class_info() - Internally used by ReflectionClass for getting a
- *                         class's information.
- *
- * @param mixed $name - Either an instance or the name of the class.
- * @return array - A map containing the class's name, the extension it's from,
- *                 the name of its parent, the interfaces it implements, the
- *                 traits it uses, trait aliases, attributes, methods,
- *                 properties, constants, source information and user
- *                 attributes.
- */
-<<__Native("NoInjection"), __HipHopSpecific>>
-function hphp_get_class_info(mixed $name): array<string, mixed>;
-
-/**
  * hphp_invoke() - Used by ReflectionFunction to invoke a function.
  *
  * @param string $name        - The name of the function.
@@ -132,17 +118,6 @@ function hphp_get_static_property(string $cls, string $prop,
 <<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_set_static_property(string $cls, string $prop, mixed $value,
                                   bool $force): void;
-
-/**
- * hphp_get_original_class_name() - Internally used by ReflectionClass for
- *                                  getting a class's declared name.
- *
- * @param string $name - The given name of the class.
- * @return string - The declared name of the class or the empty string if it
- *                  doesn't exist.
- */
-<<__Native("NoInjection"), __HipHopSpecific>>
-function hphp_get_original_class_name(string $name): string;
 
 /**
  * hphp_scalar_typehints_enabled() - Internally used by ReflectionClass for

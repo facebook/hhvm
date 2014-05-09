@@ -239,7 +239,6 @@ function method_exists(mixed $object,
 
 /**
  * Checks if the object or class has a property
- *  
  *
  * @param mixed $class - The class name or an object of the class to test
  *   for

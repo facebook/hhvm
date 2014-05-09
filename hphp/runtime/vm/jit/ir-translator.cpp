@@ -563,6 +563,51 @@ IRTranslator::translateFCallBuiltin(const NormalizedInstruction& i) {
             JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
+static bool isInlinableCPPBuiltin(const Func* f) {
+  if (f->attrs() & (AttrNoFCallBuiltin|AttrStatic) ||
+      f->numParams() > Native::maxFCallBuiltinArgs() ||
+      !f->nativeFuncPtr()) {
+    return false;
+  }
+  if (f->returnType() == KindOfDouble && !Native::allowFCallBuiltinDoubles()) {
+    return false;
+  }
+  if (!f->methInfo()) {
+    // TODO(#4313939): hni builtins
+    return false;
+  }
+  auto const info = f->methInfo();
+  if (info->attribute & (ClassInfo::NoFCallBuiltin |
+                         ClassInfo::VariableArguments |
+                         ClassInfo::RefVariableArguments |
+                         ClassInfo::MixedVariableArguments)) {
+    return false;
+  }
+
+  // Don't do this for things which require this pointer adjustments
+  // for now.
+  if (f->cls() && f->cls()->preClass()->builtinODOffset() != 0) {
+    return false;
+  }
+
+  /*
+   * Right now the IR isn't prepared to do parameter coercing during
+   * an inlining of NativeImpl for any of our param modes.  We'll want
+   * to expand this in the short term, but for now we're targeting
+   * collection member functions, which are a) idl-based (so no hni
+   * support here yet), and b) take const Variant&'s for every param.
+   *
+   * So for now, we only inline cases where the params are Variants.
+   */
+  for (auto i = uint32_t{0}; i < f->numParams(); ++i) {
+    if (f->params()[i].builtinType() != KindOfUnknown) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
@@ -588,6 +633,14 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     return true;
   };
 
+  if (callee->isCPPBuiltin() &&
+      static_cast<Op>(*callee->getEntry()) == Op::NativeImpl) {
+    if (isInlinableCPPBuiltin(callee)) {
+      return accept("inlinable CPP builtin");
+    }
+    return refuse("non-inlinable CPP builtin");
+  }
+
   if (callee->numIterators() != 0) {
     return refuse("iterators");
   }
@@ -611,13 +664,13 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   ////////////
 
   assert(!iter.finished() && "shouldIRInline given empty region");
-  bool hotCallingCold = !(callee->attrs() & AttrHot) &&
-                         (caller->attrs() & AttrHot);
+  const bool hotCallingCold = !(callee->attrs() & AttrHot) &&
+                               (caller->attrs() & AttrHot);
   uint64_t cost = 0;
   int inlineDepth = 0;
-  Op op = OpLowInvalid;
+  auto op = Op::LowInvalid;
   smart::vector<const Func*> funcs;
-  const Func* func = callee;
+  auto func = callee;
   funcs.push_back(func);
 
   for (; !iter.finished(); iter.advance()) {
@@ -733,7 +786,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
     if (!i.calleeTrace->m_inliningFailed) {
       assert(shouldIRInline(m_hhbcTrans.curFunc(), i.funcd, *i.calleeTrace));
 
-      m_hhbcTrans.beginInlining(numArgs, i.funcd, returnBcOffset);
+      m_hhbcTrans.beginInlining(numArgs, i.funcd, returnBcOffset, Type::Gen);
       static const bool shapeStats = Stats::enabledAny() &&
                                      getenv("HHVM_STATS_INLINESHAPE");
       if (shapeStats) {

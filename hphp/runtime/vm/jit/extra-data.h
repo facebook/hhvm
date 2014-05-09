@@ -275,6 +275,12 @@ struct ActRecInfo : IRExtraData {
   const StringData* invName;  // may be nullptr
   int32_t numArgs;
 
+  bool isFromFPushCtor() const {
+    ActRec ar;
+    ar.m_numArgsAndFlags = numArgs;
+    return ar.isFromFPushCtor();
+  }
+
   std::string show() const {
     ActRec ar;
     ar.m_numArgsAndFlags = numArgs;

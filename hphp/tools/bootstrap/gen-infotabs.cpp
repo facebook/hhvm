@@ -108,9 +108,10 @@ int main(int argc, const char* argv[]) {
   cpp << "\n};\n\n";
 
   for (auto const& klass : classes) {
-    cpp << "static const long long hhbc_ext_method_count_" << klass.getCppName()
-        << " = " << klass.numMethods() << ";\n";
-    cpp << "static const HhbcExtMethodInfo hhbc_ext_methods_"
+    cpp << "static const long long hhbc_ext_method_count_"
+        << klass.getCppName() << " = " << klass.numMethods()
+        << ";\n"
+        << "static const HhbcExtMethodInfo hhbc_ext_methods_"
         << klass.getCppName() << "[] = {\n  ";
     first = true;
     for (auto const& method : klass.methods()) {
@@ -120,7 +121,9 @@ int main(int argc, const char* argv[]) {
       first = false;
 
       auto name = method.getUniqueName();
-      cpp << "{ \"" << method.getCppName() << "\", tg_" << name << " }";
+      cpp << "{ \"" << method.getCppName() << "\", "
+          << "tg_" << name << ", "
+          << "(void*)&th_" << name << " }";
     }
     cpp << "\n};\n\n";
   }

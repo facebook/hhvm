@@ -153,7 +153,6 @@ tc_unwind_personality(int version,
       exceptionFromUnwindException(exceptionObj));
   }
 
-
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
     DEBUG_ONLY auto const* unwindType =
       (actions & _UA_SEARCH_PHASE) ? "search" : "cleanup";

@@ -2455,6 +2455,8 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
 }
 
 void HhbcTranslator::emitNativeImpl() {
+  if (isInlining()) return emitNativeImplInlined();
+
   gen(NativeImpl, m_irb->fp());
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
@@ -3237,23 +3239,16 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   push(ret);
 }
 
-void HhbcTranslator::emitRetFromInlined(Type type) {
-  SSATmp* retVal = pop(type, DataTypeGeneric);
-
-  assert(!(curFunc()->attrs() & AttrMayUseVV));
-  assert(!curFunc()->isPseudoMain());
+void HhbcTranslator::emitEndInlinedCommon() {
   assert(!m_fpiActiveStack.empty());
+  assert(!curFunc()->isPseudoMain());
+  assert(!(curFunc()->attrs() & AttrMayUseVV) || curFunc()->isCPPBuiltin());
 
   if (curFunc()->mayHaveThis()) {
     gen(DecRefThis, m_irb->fp());
   }
 
   emitDecRefLocalsInline();
-
-  // Before we leave the inlined frame, grab a type prediction from our
-  // DefInlineFP.
-  auto retPred = frameRoot(
-    m_irb->fp()->inst())->extra<DefInlineFP>()->retTypePred;
 
   /*
    * Pop the ActRec and restore the stack and frame pointers.  It's
@@ -3286,17 +3281,203 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 
   /*
    * After the end of inlining, we are restoring to a previously
-   * defined stack that we know is entirely materialized.  TODO:
-   * explain this better.
+   * defined stack that we know is entirely materialized (i.e. in
+   * memory), so stackDeficit needs to be slammed to zero.
    *
-   * The push of the return value below is not yet materialized.
+   * The push of the return value in the caller of this function is
+   * not yet materialized.
    */
   assert(m_irb->evalStack().numCells() == 0);
   m_irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
+}
+
+/*
+ * When we're inlining a NativeImpl opcode, we know this is the only
+ * opcode in the callee method body (bytecode invariant).  So in
+ * order to make sure we can eliminate the SpillFrame, we do the
+ * CallBuiltin instruction after we've left the inlined frame.
+ *
+ * We may need to pass some arguments to the builtin through the
+ * stack (e.g. if it takes const Variant&'s)---these are spilled to
+ * the stack after leaving the callee.
+ *
+ * To make this work, we need to do some weird things in the catch
+ * trace.  ;)
+ */
+void HhbcTranslator::emitNativeImplInlined() {
+  auto const callee = curFunc();
+  assert(callee->nativeFuncPtr());
+
+  // Figure out if this inlined function was for an FPushCtor.  We'll
+  // need this creating the unwind block blow.
+  auto const wasInliningConstructor = [&]() -> bool {
+    auto const sframe = findSpillFrame(m_irb->sp());
+    assert(sframe);
+    return sframe->extra<ActRecInfo>()->isFromFPushCtor();
+  }();
+
+  // Collect the parameter locals---we'll need them later.  Also
+  // determine which ones will need to be passed through the eval
+  // stack.
+  auto const numArgs = callee->numParams();
+  auto const paramThis = callee->isMethod() ? gen(LdThis, m_irb->fp())
+                                            : nullptr;
+  SSATmp* paramSSAs[numArgs];
+  bool paramThroughStack[numArgs];
+  auto numParamsThroughStack = uint32_t{0};
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    paramSSAs[i] = ldLoc(i, nullptr, DataTypeSpecific);
+    // These increfs must be "inside" the callee: the inline return is
+    // going to decref them, and the callee may own the only reference
+    // to these tmps.  In the normal situation these increfs should
+    // cancel with the DecRefs.
+    gen(IncRef, paramSSAs[i]);
+
+    auto const& pi = callee->params()[i];
+    switch (pi.builtinType()) {
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+      paramThroughStack[i] = false;
+      break;
+    default:
+      ++numParamsThroughStack;
+      paramThroughStack[i] = true;
+      break;
+    }
+  }
+
+  // For the same reason that we have to IncRef the locals above, we
+  // need to grab one on the $this.
+  if (paramThis) gen(IncRef, paramThis);
+
+  emitEndInlinedCommon();  /////// leaving inlined function
+
+  /*
+   * Everything that needs to be on the stack gets spilled now.
+   *
+   * Note: right here we should eventually be handling the possibility
+   * that we need to coerce parameters.  But right now any situation
+   * requiring that is disabled in shouldIRInline.
+   */
+  if (numParamsThroughStack != 0) {
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      if (paramThroughStack[i]) {
+        push(paramSSAs[i]);
+      }
+    }
+    // We're going to do ldStackAddrs on these, so the stack must be
+    // materialized:
+    spillStack();
+    // This marker update is to make sure rbx points to the bottom of
+    // our stack when we enter our catch trace.  The catch trace
+    // twiddles the VM registers directly on the execution context to
+    // make the unwinder understand the situation, however.
+    updateMarker();
+  }
+
+  /*
+   * Prepare the actual arguments to the CallBuiltin instruction.
+   */
+  auto const cbNumArgs = numArgs + (callee->isMethod() ? 1 : 0);
+  SSATmp* args[cbNumArgs];
+
+  auto argIdx   = uint32_t{0};
+  auto stackIdx = uint32_t{0};
+
+  if (paramThis) args[argIdx++] = paramThis;
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    if (!paramThroughStack[i]) {
+      args[argIdx++] = paramSSAs[i];
+      continue;
+    }
+
+    args[argIdx++] = ldStackAddr(
+      numParamsThroughStack - stackIdx - 1,
+      DataTypeSpecific
+    );
+    ++stackIdx;
+  }
+
+  assert(stackIdx == numParamsThroughStack);
+  assert(argIdx == cbNumArgs);
+
+  auto const retType = [&] {
+    auto const retDt = callee->returnType();
+    auto const ret = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
+    return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
+  }();
+
+  /*
+   * We have an unusual situation if we raise an exception:
+   *
+   * The unwinder is going to see our PC as equal to the FCallD for
+   * the call to this NativeImpl instruction.  This means the PC will
+   * be inside the FPI region for the call, so it'll try to pop an
+   * ActRec.
+   *
+   * Meanwhile, we've just exited the inlined callee (and its frame
+   * was hopefully removed by dce), and then pushed any of our
+   * by-reference arguments on the eval stack.  So, if we throw, we
+   * need to pop anything we pushed, put down a fake ActRec, and then
+   * eagerly sync VM regs to represent that stack depth.
+   */
+  auto const unusualCatch = makeCatchImpl([&] {
+    // TODO(#4323657): this is generating generic DecRefs at the time
+    // of this writing---probably we're not handling the stack chain
+    // correctly in a catch block.
+    for (auto i = uint32_t{0}; i < numParamsThroughStack; ++i) {
+      popDecRef(Type::Gen);
+    }
+    emitFPushActRec(cns(callee),
+                    paramThis ? paramThis : cns(Type::Nullptr),
+                    ActRec::encodeNumArgs(numArgs,
+                                          false /* localsDecRefd */,
+                                          false /* resumed */,
+                                          wasInliningConstructor),
+                    nullptr);
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      // TODO(#4313939): it's not actually necessary to push these
+      // nulls.
+      push(cns(Type::InitNull));
+    }
+    auto const stack = spillStack();
+    gen(SyncABIRegs, m_irb->fp(), stack);
+    gen(EagerSyncVMRegs, m_irb->fp(), stack);
+    return stack;
+  });
+
+  SSATmp** decayedPtr = &args[0];
+  auto const ret = gen(
+    CallBuiltin,
+    retType,
+    CallBuiltinData { callee, false /* destroyLocals */ },
+    unusualCatch,
+    std::make_pair(cbNumArgs, decayedPtr)
+  );
+
+  // Pop the stack params, decref this, and push the return value.
+  if (paramThis) gen(DecRef, paramThis);
+  for (auto i = uint32_t{0}; i < numParamsThroughStack; ++i) {
+    popDecRef(Type::Gen);
+  }
+  push(ret);
+}
+
+void HhbcTranslator::emitRetFromInlined(Type type) {
+  auto const retVal = pop(type, DataTypeGeneric);
+  // Before we leave the inlined frame, grab a type prediction from
+  // our DefInlineFP.
+  auto const retPred = frameRoot(
+    m_irb->fp()->inst())->extra<DefInlineFP>()->retTypePred;
+  emitEndInlinedCommon();
   push(retVal);
-  if (retPred < retVal->type()) {
+  if (retPred < retVal->type()) { // TODO: this if statement shouldn't
+                                  // be here, because check type
+                                  // resolves to the intersection of
+                                  // the two types
     // If we had a predicted output type that's useful, check that here.
     checkTypeStack(0, retPred, curSrcKey().advanced().offset());
   }

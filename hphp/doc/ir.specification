@@ -1336,6 +1336,11 @@ SyncABIRegs S0:FramePtr S1:StkPtr
   In practice this instruction currently doesn't do anything except act as an
   essential instruction that prevents the current stack from being dce'd.
 
+EagerSyncVMRegs S0:FramePtr S1:StkPtr
+
+  Modify the vm register state for m_fp and m_sp in ExecutionContext to match
+  S0 and S1.
+
 ReqBindJmp<bcOff>
 
   Emit a jump to a REQ_BIND_JMP service request to the target offset bcOff.

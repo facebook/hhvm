@@ -35,6 +35,7 @@ struct HhbcExtFuncInfo {
 struct HhbcExtMethodInfo {
   const char* m_name;
   TypedValue* (*m_pGenericMethod)(ActRec* ar);
+  void* m_nativeFunc;
 };
 
 struct HhbcExtClassInfo {

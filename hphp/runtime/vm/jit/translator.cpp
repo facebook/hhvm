@@ -3139,10 +3139,6 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
     FTRACE(1, "analyzeCallee: target func not known\n");
     return false;
   }
-  if (target->isCPPBuiltin()) {
-    FTRACE(1, "analyzeCallee: target func is a builtin\n");
-    return false;
-  }
 
   if (depth + 1 > RuntimeOption::EvalHHIRInliningMaxDepth) {
     FTRACE(1, "analyzeCallee: max inlining depth reached\n");
@@ -3303,11 +3299,12 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * no business doing anything based on it right now.
    */
   if (!subTrace->m_instrStream.last ||
-      (subTrace->m_instrStream.last->op() != OpRetC &&
-       subTrace->m_instrStream.last->op() != OpRetV &&
-       subTrace->m_instrStream.last->op() != OpCreateCont &&
-       subTrace->m_instrStream.last->op() != OpAwait)) {
-    FTRACE(1, "analyzeCallee: callee did not end in a return\n");
+      (subTrace->m_instrStream.last->op() != Op::RetC &&
+       subTrace->m_instrStream.last->op() != Op::RetV &&
+       subTrace->m_instrStream.last->op() != Op::CreateCont &&
+       subTrace->m_instrStream.last->op() != Op::Await &&
+       subTrace->m_instrStream.last->op() != Op::NativeImpl)) {
+    FTRACE(1, "analyzeCallee: callee did not end in a supported way\n");
     return;
   }
 
@@ -3339,21 +3336,23 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * inside the callee.  This means we would need to check the return
    * value in the caller still as if it were a predicted return type.
    */
-  Location retVal(Location::Stack, 0);
-  auto it = subTrace->m_changes.find(retVal);
-  assert(it != subTrace->m_changes.end());
-  FTRACE(1, "subtrace return: {}\n", it->second->pretty());
-  if (false) {
-    if (!it->second->rtt.isVagueValue() && !it->second->rtt.isRef()) {
-      FTRACE(1, "changing callee's return type from {} to {}\n",
-                fcall->outStack->rtt.pretty(),
-                it->second->pretty());
+  if (!target->isCPPBuiltin()) {
+    Location retVal(Location::Stack, 0);
+    auto it = subTrace->m_changes.find(retVal);
+    assert(it != subTrace->m_changes.end());
+    FTRACE(1, "subtrace return: {}\n", it->second->pretty());
+    if (false) {
+      if (!it->second->rtt.isVagueValue() && !it->second->rtt.isRef()) {
+        FTRACE(1, "changing callee's return type from {} to {}\n",
+                  fcall->outStack->rtt.pretty(),
+                  it->second->pretty());
 
-      fcall->outputPredicted = true;
-      fcall->outputPredictionStatic = false;
-      fcall->outStack = parent.newDynLocation(fcall->outStack->location,
-                                              it->second->rtt);
-      tas.recordWrite(fcall->outStack);
+        fcall->outputPredicted = true;
+        fcall->outputPredictionStatic = false;
+        fcall->outStack = parent.newDynLocation(fcall->outStack->location,
+                                                it->second->rtt);
+        tas.recordWrite(fcall->outStack);
+      }
     }
   }
 

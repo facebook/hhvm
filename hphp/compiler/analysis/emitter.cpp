@@ -6966,6 +6966,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   if (!f ||
       (f->attrs() & AttrNoFCallBuiltin) ||
       !f->nativeFuncPtr() ||
+      f->isMethod() ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
       (numParams > f->numParams())) return nullptr;
 
@@ -8359,10 +8360,15 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 
         // Build the function
         BuiltinFunction bcf = (BuiltinFunction)methodInfo->m_pGenericMethod;
+        auto nativeFunc = methodInfo->m_nativeFunc;
         const ClassInfo::MethodInfo* mi =
           e.ci->getMethodInfo(std::string(methodInfo->m_name));
         Offset base = ue->bcPos();
-        fe->setBuiltinFunc(mi, bcf, nullptr, base);
+        fe->setBuiltinFunc(mi,
+          bcf,
+          reinterpret_cast<BuiltinFunction>(nativeFunc),
+          base
+        );
         ue->emitOp(OpNativeImpl);
       }
       Offset past = ue->bcPos();

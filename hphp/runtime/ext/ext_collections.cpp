@@ -1296,7 +1296,7 @@ bool c_Vector::usort(const Variant& cmp_function) {
     return false;
   }
   comp.ctx = &ctx;
-  HPHP::Sort::sort(m_data, m_data + m_size, comp);
+  Sort::sort(m_data, m_data + m_size, comp);
   return true;
 }
 

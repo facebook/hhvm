@@ -633,9 +633,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 
   std::ostringstream decl;
   emitRemappedFuncDecl(func, symbol, declPrefix, decl);
-  if (!isMethod) {
-    header << decl.str();
-  }
+  header << decl.str();
   cpp << decl.str();
 
   if (func.numTypeChecks() > 0) {

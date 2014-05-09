@@ -574,6 +574,7 @@ PUNT_OPCODE(DbgAssertType)
 PUNT_OPCODE(AddIntO)
 PUNT_OPCODE(SubIntO)
 PUNT_OPCODE(MulIntO)
+PUNT_OPCODE(EagerSyncVMRegs)
 
 #undef PUNT_OPCODE
 
@@ -1608,12 +1609,17 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     callArgs.addr(misReg, returnOffset);
   }
 
-  for (int i = 0; i < numArgs; ++i) {
+  auto srcNum = uint32_t{0};
+  if (func->isMethod()) {
+    callArgs.ssa(srcNum);
+    ++srcNum;
+  }
+  for (auto i = uint32_t{0}; i < numArgs; ++i, ++srcNum) {
     auto const& pi = func->params()[i];
     if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
-      callArgs.addr(srcLoc(i).reg(), TVOFF(m_data));
+      callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
-      callArgs.ssa(i);
+      callArgs.ssa(srcNum);
     }
   }
 

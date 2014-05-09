@@ -2930,6 +2930,17 @@ void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
   emitMovRegReg(m_as, srcLoc(1).reg(), rVmSp);
 }
 
+void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
+  always_assert(
+    srcLoc(0).reg() == rVmFp &&
+    srcLoc(1).reg() == rVmSp
+  );
+  emitEagerSyncPoint(
+    m_as,
+    reinterpret_cast<const Op*>(inst->marker().sk().pc())
+  );
+}
+
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   emitBindJmp(
     m_mainCode,
@@ -3804,13 +3815,22 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // holding the value, so expect PtrToT types for these.
   // Pointers to smartptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
-  for (int i = 0; i < numArgs; i++) {
+  auto srcNum = uint32_t{0};
+  if (callee->isMethod()) {
+    // Note, we don't support objects with vtables here (if they may
+    // need a this pointer adjustment).  This should be filtered out
+    // earlier right now.
+    callArgs.ssa(srcNum);
+    ++srcNum;
+  }
+  for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
     if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
-      assert(inst->src(i)->type().isPtr() && srcLoc(i).reg() != InvalidReg);
-      callArgs.addr(srcLoc(i).reg(), TVOFF(m_data));
+      assert(inst->src(srcNum)->type().isPtr() &&
+             srcLoc(srcNum).reg() != InvalidReg);
+      callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
-      callArgs.ssa(i, pi.builtinType() == KindOfDouble);
+      callArgs.ssa(srcNum, pi.builtinType() == KindOfDouble);
     }
   }
 

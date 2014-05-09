@@ -129,7 +129,7 @@ interface ConstCollection<Te> extends Countable {
 
 interface OutputCollection<Te> {
   public function add(Te $e): this;
-  public function addAll(Traversable<Te> $traversable): this;
+  public function addAll(?Traversable<Te> $traversable): this;
 }
 
 interface Collection<Te> extends ConstCollection<Te>,
@@ -153,7 +153,7 @@ interface ConstIndexAccess<Tk, Tv> {
 
 interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
   public function set(Tk $k, Tv $v): this;
-  public function setAll(KeyedTraversable<Tk, Tv> $traversable): this;
+  public function setAll(?KeyedTraversable<Tk, Tv> $traversable): this;
   public function removeKey(Tk $k): this;
 }
 

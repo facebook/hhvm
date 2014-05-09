@@ -54,12 +54,6 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   public function getIterator(): SetIterator<Tv>;
 
   /**
-   * Returns the index of the first element that matches the search value.
-   * If no element matches the search value, this function returns -1.
-   */
-  public function linearSearch(Tv $search_value): int;
-
-  /**
    * Returns an ImmSet containing the values from the specified array.
    */
   public static function fromArray(array $arr): ImmSet<Tv>;

@@ -259,14 +259,19 @@ let parse_status_args () =
       Sys.argv.(0) in
   let root = ref None in
   let user = ref None in
+  let output_json = ref false in
   let options = [
     "--root", Arg.String (fun x -> root := Some (Path.mk_path x)),
     " --root /some/path/www only shows servers for /some/path/www";
     "--user", Arg.String (fun x -> user := Some x),
     " --user billy only shows servers for the user \"billy\"";
+    "--json", Arg.Set output_json,
+      " output json for machine consumption. (default: false)";
   ] in
   let _ = parse_without_command options usage "status" in
-  CStatus {ClientStatus.root = !root; ClientStatus.user = !user }
+  CStatus {ClientStatus.root = !root;
+           ClientStatus.user = !user;
+           ClientStatus.output_json = !output_json }
 
 let parse_build_args () =
   let usage =

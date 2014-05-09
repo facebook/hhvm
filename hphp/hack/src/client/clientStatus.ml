@@ -12,6 +12,7 @@ open Format
 type env = {
   root: Path.path option;
   user: string option;
+  output_json: bool;
 }
 
 let get_running_servers env = 
@@ -37,13 +38,11 @@ let get_running_servers env =
     | e -> (user, root)::acc
   end [] locks
 
-let main env =
-  let all_servers = get_running_servers env in
+let print_readable all_servers =
   if List.length all_servers = 0 
   then begin
-    Printf.printf "No running servers found!\n%!";
-    exit 0
-  end else
+    Printf.printf "No running servers found!\n%!"
+  end else begin
     open_tbox ();
     set_tab ();
     printf "USER";
@@ -56,5 +55,20 @@ let main env =
       print_tbreak 0 16;
       printf "%s" (Path.string_of_path root);
     ) all_servers;
-    print_newline();
-    exit 0
+    print_newline()
+  end
+
+let print_json all_servers =
+  let all_servers = List.map begin fun (user, root) ->
+    Json.JAssoc [ "user", Json.JString user;
+                  "path", Json.JString (Path.string_of_path root);
+                ]
+  end all_servers in
+  print_endline (Json.json_to_string (Json.JList all_servers))
+
+let main env =
+  let all_servers = get_running_servers env in
+  if env.output_json
+  then print_json all_servers
+  else print_readable all_servers;
+  exit 0

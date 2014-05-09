@@ -219,7 +219,7 @@ module MakeWorker = struct
        * of the time.
        *)
       let gc = Gc.get() in
-      Gc.set { gc with Gc.minor_heap_size = 64_000_000 };
+      Gc.set { gc with Gc.minor_heap_size = 8_000_000 };
       while true do
         (* This is a trick to use less memory and to be faster.
          * If we fork now, the heap is very small, because no job

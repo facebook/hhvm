@@ -93,7 +93,7 @@ class ReflectionFuncHandle {
 
 namespace DebuggerReflection {
 Array get_function_info(const String& name);
-Array get_class_info(const Variant& name);
+Array get_class_info(const String& name);
 }
 
 // These helpers are shared by an FB-specific extension.

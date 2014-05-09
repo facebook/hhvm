@@ -1,5 +1,12 @@
 <?hh
 
+/**
+ * ( excerpt from
+ * http://php.net/manual/en/class.reflectionfunctionabstract.php )
+ *
+ * A parent class to ReflectionFunction and ParentMethod. Read their
+ * descriptions for details.
+ */
 <<__NativeData('ReflectionFuncHandle')>>
 abstract class ReflectionFunctionAbstract {
 
@@ -280,7 +287,12 @@ abstract class ReflectionFunctionAbstract {
   }
 }
 
-final class ReflectionFunction
+/**
+ * ( excerpt from http://php.net/manual/en/class.reflectionfunction.php )
+ *
+ * The ReflectionFunction class reports information about a function.
+ */
+class ReflectionFunction
 extends ReflectionFunctionAbstract
 implements Reflector {
 
@@ -458,15 +470,20 @@ implements Reflector {
   }
 }
 
-final class ReflectionMethod
+/**
+ * ( excerpt from http://php.net/manual/en/class.reflectionmethod.php )
+ *
+ * The ReflectionMethod class reports information about a method.
+ */
+class ReflectionMethod
   extends ReflectionFunctionAbstract
   implements Reflector {
 
   public string $name;
   public string $class;
 
-  private $originalClass;
-  private bool $forcedAccessible = false;
+  private /*string*/ $originalClass;
+  private /*bool*/ $forcedAccessible = false;
 
   <<__Native>>
   private function __init(mixed $cls_or_obj, string $meth): bool;

@@ -1339,7 +1339,7 @@ Array get_function_info(const String& name) {
   return ret;
 }
 
-Array get_class_info(const Variant& name) {
+Array get_class_info(const String& name) {
   return get_class_info_array(name, true);
 }
 

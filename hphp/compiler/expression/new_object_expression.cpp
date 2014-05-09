@@ -128,7 +128,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     } else {
       if (func != prev) func->addNewObjCaller(getScope());
       m_extraArg = func->inferParamTypes(ar, self, m_params, valid);
-      m_variableArgument = func->isVariableArgument();
+      m_variableArgument = func->allowsVariableArguments();
     }
     if (valid) {
       m_classScope = cls;

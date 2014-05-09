@@ -588,7 +588,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
   } else {
     m_extraArg = func->inferParamTypes(ar, self, m_params, m_valid);
   }
-  m_variableArgument = func->isVariableArgument();
+  m_variableArgument = func->allowsVariableArguments();
   if (m_valid) {
     m_implementedType.reset();
   } else {

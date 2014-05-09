@@ -51,22 +51,23 @@ class FileScope : public BlockScope,
                   public JSON::DocTarget::ISerializable {
 public:
   enum Attribute {
-    ContainsDynamicVariable   = 0x001,
-    ContainsLDynamicVariable  = 0x002,
-    VariableArgument          = 0x004,
-    ContainsExtract           = 0x008, // contains call to extract()
-    ContainsCompact           = 0x010, // contains call to compact()
-    ContainsReference         = 0x020, // returns ref or has ref parameters
-    ReferenceVariableArgument = 0x040, // like sscanf or fscanf
-    ContainsUnset             = 0x080, // need special handling
-    NoEffect                  = 0x100, // does not side effect
-    HelperFunction            = 0x200, // runtime helper function
-    ContainsGetDefinedVars    = 0x400, // need VariableTable with getDefinedVars
-    MixedVariableArgument     = 0x800, // variable args, may or may not be ref'd
-    IsFoldable                = 0x1000,// function can be constant folded
-    NoFCallBuiltin            = 0x2000,// function should not use FCallBuiltin
-    AllowOverride             = 0x4000,// allow override of systemlib or builtin
-    NeedsFinallyLocals        = 0x8000,
+    ContainsDynamicVariable  = 0x0001,
+    ContainsLDynamicVariable = 0x0002,
+    VariableArgument         = 0x0004,
+    ContainsExtract          = 0x0008, // contains call to extract()
+    ContainsCompact          = 0x0010, // contains call to compact()
+    ContainsReference        = 0x0020, // returns ref or has ref parameters
+    ReferenceVariableArgument = 0x0040, // like sscanf or fscanf
+    ContainsUnset            = 0x0080, // need special handling
+    NoEffect                 = 0x0100, // does not side effect
+    HelperFunction           = 0x0200, // runtime helper function
+    ContainsGetDefinedVars   = 0x0400, // need VariableTable with getDefinedVars
+    MixedVariableArgument    = 0x0800, // variable args, may or may not be ref'd
+    IsFoldable               = 0x01000,// function can be constant folded
+    NoFCallBuiltin           = 0x02000,// function should not use FCallBuiltin
+    AllowOverride            = 0x04000,// allow override of systemlib or builtin
+    NeedsFinallyLocals       = 0x08000,
+    VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;

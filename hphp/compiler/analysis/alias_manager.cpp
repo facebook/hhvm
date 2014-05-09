@@ -2489,7 +2489,7 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
   if (m_inlineAsExpr) {
     if (cost > Option::AutoInline ||
-        func->isVariableArgument() ||
+        func->allowsVariableArguments() ||
         m_variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
         m_variables->getAttribute(VariableTable::ContainsExtract) ||
         m_variables->getAttribute(VariableTable::ContainsCompact) ||

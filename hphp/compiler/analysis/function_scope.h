@@ -84,7 +84,8 @@ public:
    * System functions.
    */
   FunctionScope(bool method, const std::string &name, bool reference);
-  void setParamCounts(AnalysisResultConstPtr ar, int minParam, int maxParam);
+  void setParamCounts(AnalysisResultConstPtr ar,
+                      int minParam, int numDeclParam);
   void setParamSpecs(AnalysisResultPtr ar);
   void setParamName(int index, const std::string &name);
   void setParamDefault(int index, const char* value, int64_t len,
@@ -198,7 +199,9 @@ public:
   /**
    * Whether this function can take variable number of arguments.
    */
-  bool isVariableArgument() const;
+  bool allowsVariableArguments() const;
+  bool hasVariadicParam() const;
+  bool usesVariableArgumentFunc() const;
   bool isReferenceVariableArgument() const;
   void setVariableArgument(int reference);
   bool isMixedVariableArgument() const;
@@ -250,9 +253,12 @@ public:
   /**
    * How many parameters a caller should provide.
    */
-  int getMinParamCount() const { return m_minParam;}
-  int getMaxParamCount() const { return m_maxParam;}
-  int getOptionalParamCount() const { return m_maxParam - m_minParam;}
+  int getMinParamCount() const { return m_minParam; }
+  int getDeclParamCount() const { return m_numDeclParams; }
+  int getMaxParamCount() const {
+    return hasVariadicParam() ? (m_numDeclParams-1) : m_numDeclParams;
+  }
+  int getOptionalParamCount() const { return getMaxParamCount() - m_minParam;}
 
   /**
    * What is the inferred type of this function's return.
@@ -433,7 +439,7 @@ private:
   static StringToFunctionInfoPtrMap s_refParamInfo;
 
   int m_minParam;
-  int m_maxParam;
+  int m_numDeclParams;
   int m_attribute;
   std::vector<std::string> m_paramNames;
   TypePtrVec m_paramTypes;

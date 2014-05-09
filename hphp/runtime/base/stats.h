@@ -186,6 +186,12 @@ namespace Stats {
   STAT(vixl_SimulatedInstr) \
   STAT(vixl_SimulatedLoad) \
   STAT(vixl_SimulatedStore) \
+  /* ArrayGet */ \
+  STAT(ArrayGet_Total) \
+  STAT(ArrayGet_Opt) \
+  STAT(ArrayGet_Mono) \
+  STAT(ArrayGet_Packed) \
+  STAT(ArrayGet_Mixed) \
 
 enum StatCounter {
 #define STAT(name) \

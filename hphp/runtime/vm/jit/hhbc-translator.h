@@ -495,9 +495,11 @@ private:
     void emitIncDecNewElem();
     void emitBindNewElem();
     void emitArraySet(SSATmp* key, SSATmp* value);
-    void emitArrayGet(SSATmp* key);
+    SSATmp* emitArrayGet(SSATmp* key);
+    void emitProfiledArrayGet(SSATmp* key);
     void emitArrayIsset();
-    void emitPackedArrayGet(SSATmp* key);
+    SSATmp* emitPackedArrayGet(SSATmp* base, SSATmp* key,
+                               bool profiled = false);
     void emitPackedArrayIsset();
     void emitStringGet(SSATmp* key);
     void emitStringIsset();
@@ -578,6 +580,8 @@ private:
       None,
       // simple opcode on Array
       Array,
+      // simple opcode on Profiled Array,
+      ProfiledArray,
       // simple opcode on Packed Array
       PackedArray,
       // simple opcode on String

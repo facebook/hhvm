@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 
 // These files do ugly things with macros so include them last
 #include "hphp/util/assert-throw.h"
@@ -662,8 +663,9 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
       if (mcodeIsElem(m_ni.immVecM[0])) {
         SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
         if (key->isA(Type::Int) || key->isA(Type::Str)) {
-          if (isPacked && readInst && key->isA(Type::Int)) {
-            return SimpleOp::PackedArray;
+          if (readInst && key->isA(Type::Int)) {
+            return isPacked ? SimpleOp::PackedArray
+                            : SimpleOp::ProfiledArray;
           }
           return SimpleOp::Array;
         }
@@ -716,6 +718,7 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
       return;
 
     case SimpleOp::Array:
+    case SimpleOp::ProfiledArray:
     case SimpleOp::String:
       m_irb.constrainValue(m_base, DataTypeSpecific);
       return;
@@ -1661,17 +1664,22 @@ static TypedValue arrayGetNotFound(const StringData* k) {
   return v;
 }
 
-void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
-  assert(m_base->isA(Type::Arr) &&
-         m_base->type().getArrayKind() == ArrayData::kPackedKind);
+SSATmp* HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* base,
+                                                             SSATmp* key,
+                                                             bool profiled
+                                                             /* = false*/) {
+  // We can call emitPackedArrayGet on arrays for which we do not statically
+  // know that they are packed, if we have profile information for the array.
+  assert(base->isA(Type::Arr) &&
+         (profiled || base->type().getArrayKind() == ArrayData::kPackedKind));
 
-  m_result = m_irb.cond(
+  return m_irb.cond(
     1,
     [&] (Block* taken) {
-      gen(CheckPackedArrayBounds, taken, m_base, key);
+      gen(CheckPackedArrayBounds, taken, base, key);
     },
     [&] { // Next:
-      auto res = gen(LdPackedArrayElem, m_base, key);
+      auto res = gen(LdPackedArrayElem, base, key);
       auto unboxed = m_ht.unbox(res, nullptr);
       gen(IncRef, unboxed);
       return unboxed;
@@ -1710,7 +1718,7 @@ HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
+SSATmp* HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
   KeyType keyType;
   bool checkForInt;
   m_ht.checkStrictlyInteger(key, keyType, checkForInt);
@@ -1718,9 +1726,51 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
   typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
-  m_result = gen(ArrayGet, makeCatch(), cns((TCA)opFunc), m_base, key);
+  return gen(ArrayGet, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
+
+const StaticString s_PackedArray("PackedArray");
+
+void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
+  TargetProfile<NonPackedArrayProfile> prof(m_ht.m_context,
+                                            m_irb.state().marker(),
+                                            s_PackedArray.get());
+  if (prof.profiling()) {
+    gen(ProfileArray, RDSHandleData { prof.handle() }, m_base);
+    m_result = emitArrayGet(key);
+    return;
+  }
+
+  m_ht.emitIncStat(Stats::ArrayGet_Total, 1, false);
+  if (prof.optimizing()) {
+    m_ht.emitIncStat(Stats::ArrayGet_Opt, 1, false);
+    auto const data = prof.data(NonPackedArrayProfile::reduce);
+    // NonPackedArrayProfile data counts how many times a non-packed
+    // array was observed.
+    if (data.count == 0) {
+      m_ht.emitIncStat(Stats::ArrayGet_Mono, 1, false);
+      m_result = m_irb.cond(
+        1,
+        [&] (Block* taken) {
+          return gen(CheckType, Type::Arr.specialize(ArrayData::kPackedKind),
+                     taken, m_base);
+        },
+        [&] (SSATmp* base) { // Next
+          m_ht.emitIncStat(Stats::ArrayGet_Packed, 1, false);
+          return emitPackedArrayGet(base, key, true);
+        },
+        [&] { // Taken
+          m_irb.hint(Block::Hint::Unlikely);
+          m_ht.emitIncStat(Stats::ArrayGet_Mixed, 1, false);
+          return emitArrayGet(key);
+        }
+      );
+      return;
+    }
+  }
+  m_result = emitArrayGet(key);
+}
 
 namespace MInstrHelpers {
 StringData* stringGetI(StringData* str, uint64_t x) {
@@ -1839,10 +1889,13 @@ void HhbcTranslator::MInstrTranslator::emitCGetElem() {
   SimpleOp simpleOpType = simpleCollectionOp();
   switch (simpleOpType) {
   case SimpleOp::Array:
-    emitArrayGet(key);
+    m_result = emitArrayGet(key);
     break;
   case SimpleOp::PackedArray:
-    emitPackedArrayGet(key);
+    m_result = emitPackedArrayGet(m_base, key);
+    break;
+  case SimpleOp::ProfiledArray:
+    emitProfiledArrayGet(key);
     break;
   case SimpleOp::String:
     emitStringGet(key);
@@ -2065,6 +2118,7 @@ void HhbcTranslator::MInstrTranslator::emitIssetElem() {
   SimpleOp simpleOpType = simpleCollectionOp();
   switch (simpleOpType) {
   case SimpleOp::Array:
+  case SimpleOp::ProfiledArray:
     emitArrayIsset();
     break;
   case SimpleOp::PackedArray:
@@ -2338,6 +2392,7 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
   assert(simpleOpType != SimpleOp::PackedArray);
   switch (simpleOpType) {
   case SimpleOp::Array:
+  case SimpleOp::ProfiledArray:
     emitArraySet(key, value);
     break;
   case SimpleOp::PackedArray:

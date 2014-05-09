@@ -2256,6 +2256,10 @@ CheckBounds S0:Int S1:Int
   Checks that the index in S0 is between 0 (included) and the values in S1
   (excluded). Throws if out of bounds.
 
+ProfileArray S0:Arr
+
+  Profile type of array S0 (i.e. whether it is packed or mixed).
+
 CheckPackedArrayBounds S0:Arr S1:Int -> B
 
   Checks that the index in S1 is within the bounds of the packed array in S0.

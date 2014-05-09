@@ -251,6 +251,7 @@ PUNT_OPCODE(ConvObjToStr)
 PUNT_OPCODE(ConvResToStr)
 PUNT_OPCODE(ConvCellToStr)
 
+PUNT_OPCODE(ProfileArray)
 PUNT_OPCODE(CheckTypeMem)
 PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)

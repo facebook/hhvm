@@ -63,6 +63,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 
 using HPHP::JIT::TCA;
 
@@ -4209,9 +4210,22 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   m_as.setnbe(rbyte(dstReg));
 }
 
+void CodeGenerator::cgProfileArray(IRInstruction* inst) {
+  auto baseReg = srcLoc(0).reg();
+  auto handle  = inst->extra<ProfileArray>()->handle;
+
+  // If kPackedKind changes to a value that is not 0, change
+  // this to a conditional add.
+  static_assert(ArrayData::ArrayKind::kPackedKind == 0, "kPackedKind changed");
+  m_as.  loadzbl(baseReg[ArrayData::offsetofKind()], r32(m_rScratch));
+  m_as.  addl(r32(m_rScratch),
+              rVmTl[handle + offsetof(NonPackedArrayProfile, count)]);
+}
+
 void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   static_assert(ArrayData::sizeofSize() == 4, "");
-  assert(inst->src(0)->type().getArrayKind() == ArrayData::kPackedKind);
+  // We may check packed array bounds on profiled arrays for which
+  // we do not statically know that they are of kPackedKind.
   assert(inst->taken());
   auto arrReg = srcLoc(0).reg();
   auto idxReg = srcLoc(1).reg();

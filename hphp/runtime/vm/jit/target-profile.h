@@ -188,6 +188,18 @@ struct DecRefProfile {
 };
 typedef folly::Optional<TargetProfile<DecRefProfile>> OptDecRefProfile;
 
+/*
+ * Record profiling information about non-packed arrays. This counts the
+ * number of times a non-packed array was used as the base of a CGetElem
+ * operation.
+ */
+struct NonPackedArrayProfile {
+  int32_t count;
+  static void reduce(NonPackedArrayProfile& a, const NonPackedArrayProfile& b) {
+    a.count += b.count;
+  }
+};
+
 }}
 
 #endif

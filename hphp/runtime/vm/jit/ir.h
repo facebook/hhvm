@@ -843,6 +843,7 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
                                           S(PtrToCell),               E|N|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),             E) \
 O(TypeProfileFunc,                  ND, S(Gen) S(Func),                  E|N) \
+O(ProfileArray,                     ND, S(Arr),                            E) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),                E|N) \
 O(RBTrace,                          ND, NA,                              E|N) \
 O(IncTransCounter,                  ND, NA,                                E) \

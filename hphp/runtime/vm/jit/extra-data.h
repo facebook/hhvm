@@ -921,6 +921,7 @@ X(StRaw,                        RawMemData);
 X(StAsyncArRaw,                 RawMemData);
 X(LdContArRaw,                  RawMemData);
 X(StContArRaw,                  RawMemData);
+X(ProfileArray,                 RDSHandleData);
 
 #undef X
 

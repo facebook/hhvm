@@ -14,7 +14,7 @@ Our [FAQ](https://github.com/facebook/hhvm/wiki/FAQ) has answers to many common 
 
 ## Installing
 
-You can install a [prebuilt package](https://github.com/facebook/hhvm/wiki#installing-pre-built-packages-for-hhvm) or [compile from source](https://github.com/facebook/hhvm/wiki#building-hhvm).
+You can install a [prebuilt package](https://github.com/facebook/hhvm/wiki/Prebuilt%20Packages%20for%20HHVM) or [compile from source](https://github.com/facebook/hhvm/wiki/Building%20and%20Installing%20HHVM).
 
 
 ## Running

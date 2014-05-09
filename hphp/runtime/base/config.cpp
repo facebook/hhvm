@@ -79,6 +79,7 @@ const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
   return config.configGet(defValue);
 }
 
+// The HDF wins because the -v options are still done via HDF
 #define GET_BODY(T, METHOD) \
 T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
                       const T defValue) { \
@@ -86,7 +87,7 @@ T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
   if (value && value->isString()) { \
     T ret; \
     ini_on_update(value->data(), ret); \
-    return ret; \
+    return config.configGet##METHOD(ret); \
   } \
   return config.configGet##METHOD(defValue); \
 }

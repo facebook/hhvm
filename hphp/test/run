@@ -331,7 +331,7 @@ function hhvm_path() {
 function hhvm_cmd_impl($options, $config /*, $extra_args... */) {
   $args = array(
     hhvm_path(),
-    '--config',
+    '-c',
     $config,
     '-vEval.EnableArgsInBacktraces=true',
     mode_cmd($options),
@@ -356,7 +356,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
   }
   $cmd = hhvm_cmd_impl(
     $options,
-    find_test_ext($test, 'hdf'),
+    find_test_ext($test, 'ini'),
     find_debug_config($test, 'hphpd.ini'),
     read_file(find_test_ext($test, 'opts')),
     '-vResourceLimit.CoreFileSize=0',
@@ -389,7 +389,7 @@ function hphp_cmd($options, $test) {
     hhvm_path(),
     '--hphp',
     '--config',
-    find_file($test, 'hphp_config.hdf'),
+    find_file($test, 'hphp_config.ini'),
     read_file("$test.hphp_opts"),
     "-thhbc -l0 -k1 -o $test.repo $test",
   ));
@@ -610,7 +610,7 @@ function run_config_server($options, $test) {
     return null;
   }
 
-  $config = find_file_for_dir(dirname($test), 'config.hdf');
+  $config = find_file_for_dir(dirname($test), 'config.ini');
   $port = $options['servers']['configs'][$config]['port'];
   $ch = curl_init("localhost:$port/$test");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1241,7 +1241,7 @@ function main($argv) {
      * found. */
     foreach ($tests as $test) {
       if (!can_run_server_test($test)) continue;
-      $config = find_file_for_dir(dirname($test), 'config.hdf');
+      $config = find_file_for_dir(dirname($test), 'config.ini');
       if (!$config) {
         error("Couldn't find config file for $test");
       }

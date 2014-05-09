@@ -234,7 +234,6 @@ function get_runtime_build(bool $use_php = false): string {
       $repo_loc = tempnam('/tmp', 'framework-test');
       $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
       $build .= $repo_args.
-        " --config ".__DIR__."/config.hdf".
         " --config ".__DIR__."/php.ini";
     }
   }

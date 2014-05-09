@@ -3855,19 +3855,16 @@ void CodeGenerator::emitAdjustSp(PhysReg spReg, PhysReg dstReg,
 }
 
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
-  SSATmp* func  = inst->src(0);
+  auto const func = curFunc();
+  auto const builtinFuncPtr = func->builtinFuncPtr();
+  auto& a = m_as;
 
-  assert(func->isConst());
-  assert(func->type() <= Type::Func);
-  const Func* fn = func->funcVal();
-
-  BuiltinFunction builtinFuncPtr = fn->builtinFuncPtr();
-  emitMovRegReg(m_as, srcLoc(1).reg(), argNumToRegName[0]);
-  if (FixupMap::eagerRecord(fn)) {
-    emitEagerSyncPoint(m_as, reinterpret_cast<const Op*>(fn->getEntry()));
+  emitMovRegReg(a, srcLoc(0).reg(), argNumToRegName[0]);
+  if (FixupMap::eagerRecord(func)) {
+    emitEagerSyncPoint(m_as, reinterpret_cast<const Op*>(func->getEntry()));
   }
-  emitCall(m_as, (TCA)builtinFuncPtr);
-  recordSyncPoint(m_as);
+  emitCall(a, CppCall::direct(builtinFuncPtr));
+  recordSyncPoint(a);
 }
 
 void CodeGenerator::cgLdThis(IRInstruction* inst) {

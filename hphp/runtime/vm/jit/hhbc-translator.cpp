@@ -2429,7 +2429,7 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
 }
 
 void HhbcTranslator::emitNativeImpl() {
-  gen(NativeImpl, cns(curFunc()), m_irb->fp());
+  gen(NativeImpl, m_irb->fp());
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());

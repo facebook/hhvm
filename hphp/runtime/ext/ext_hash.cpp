@@ -46,7 +46,7 @@ namespace HPHP {
 static class HashExtension : public Extension {
  public:
   HashExtension() : Extension("hash", "1.0") { }
-  virtual void moduleLoad(Hdf config) {
+  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
     HHVM_FE(hash);
     HHVM_FE(hash_algos);
     HHVM_FE(hash_file);

@@ -40,7 +40,7 @@ class Object;
  *   }
  *
  * Then register it from your Extension's moduleLoad() hook:
- *   virtual moduleLoad(Hdf config) {
+ *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
  *     HHVM_FE(sum);
  *   }
  *
@@ -72,12 +72,12 @@ class Object;
  *   }
  *
  * In which case you will need to use a different macro in moduleLoad()
- *   virtual moduleLoad(Hdf config) {
+ *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
  *     HHVM_NAME_FE(sum, my_sum_function)
  *   }
  * Or an explicit call to registerBuildinFunction()
  *   static const StaticString s_sum("sum");
- *   virtual moduleLoad(Hdf config) {
+ *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
  *     Native::registerBuiltinFunction(s_sum.get(), (void*)my_sum_function);
  *   }
  */

@@ -585,6 +585,7 @@ bool TestCppBase::TestIpBlockMap() {
   IpBlockMap::BinaryPrefixTrie::InsertNewPrefix(&root, value, 128, true);
   VERIFY(root.isAllowed(value));
 
+  IniSetting::Map ini = IniSetting::Map::object;
   Hdf hdf;
   hdf.fromString(
     "  0 {\n"
@@ -602,7 +603,7 @@ bool TestCppBase::TestIpBlockMap() {
     "  }\n"
   );
 
-  IpBlockMap ibm(hdf);
+  IpBlockMap ibm(ini, hdf);
   VERIFY(!ibm.isBlocking("test/blah.php", "127.0.0.1"));
   VERIFY(ibm.isBlocking("test/blah.php", "8.32.0.104"));
   VERIFY(ibm.isBlocking("test/blah.php",

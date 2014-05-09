@@ -40,8 +40,9 @@ bool DebuggerServer::Start() {
 
       // Some server commands pre-formatted texts with color for clients.
       // Loading a set of default colors for better display.
+      IniSetting::Map ini = IniSetting::Map::object;
       Hdf hdf;
-      DebuggerClient::LoadColors(hdf);
+      DebuggerClient::LoadColors(ini, hdf);
     }
 
     return s_debugger_server.start();

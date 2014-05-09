@@ -128,16 +128,17 @@ void SourceRootInfo::createFromUserConfig() {
 
   std::string confpath = std::string(homePath.c_str()) +
     RuntimeOption::SandboxConfFile;
+  IniSetting::Map ini = IniSetting::Map::object;
   Hdf config, serverVars;
   String sp, lp, alp, userOverride;
   try {
-    config.open(confpath);
-    userOverride = Config::Get(config["user_override"]);
+  Config::Parse(confpath, ini, config);
+    userOverride = Config::Get(ini, config["user_override"]);
     Hdf sboxConf = config[m_sandbox.c_str()];
     if (sboxConf.exists()) {
-      sp = Config::Get(sboxConf["path"]);
-      lp = Config::Get(sboxConf["log"]);
-      alp = Config::Get(sboxConf["accesslog"]);
+      sp = Config::Get(ini, sboxConf["path"]);
+      lp = Config::Get(ini, sboxConf["log"]);
+      alp = Config::Get(ini, sboxConf["accesslog"]);
       serverVars = sboxConf["ServerVars"];
     }
   } catch (HdfException &e) {
@@ -146,7 +147,7 @@ void SourceRootInfo::createFromUserConfig() {
   }
   if (serverVars.exists()) {
     for (Hdf hdf = serverVars.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      m_serverVars.set(String(hdf.getName()), String(Config::GetString(hdf)));
+      m_serverVars.set(String(hdf.getName()), String(Config::GetString(ini, hdf)));
     }
   }
   if (!userOverride.empty()) {

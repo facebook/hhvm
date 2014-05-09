@@ -24,9 +24,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FilesMatch::FilesMatch(Hdf vh) {
-  m_pattern = format_pattern(Config::Get(vh["pattern"], ""), true);
-  Config::Get(vh["headers"], m_headers);
+FilesMatch::FilesMatch(const IniSetting::Map& ini, Hdf vh) {
+  m_pattern = format_pattern(Config::Get(ini, vh["pattern"], ""), true);
+  Config::Get(ini, vh["headers"], m_headers);
 }
 
 bool FilesMatch::match(const std::string &filename) const {

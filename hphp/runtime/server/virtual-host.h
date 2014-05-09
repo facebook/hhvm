@@ -20,6 +20,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/server/ip-block-map.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,9 +37,9 @@ public:
   static void SortAllowedDirectories(std::vector<std::string>& dirs);
 public:
   VirtualHost();
-  explicit VirtualHost(Hdf vh);
+  explicit VirtualHost(const IniSetting::Map& ini, Hdf vh);
 
-  void init(Hdf vh);
+  void init(const IniSetting::Map& ini, Hdf vh);
   void addAllowedDirectories(const std::vector<std::string>& dirs);
   int getRequestTimeoutSeconds(int defaultTimeout) const;
 
@@ -103,7 +104,7 @@ private:
     std::vector<std::string> allowedDirectories;
   };
 
-  void initRuntimeOption(Hdf overwrite);
+  void initRuntimeOption(const IniSetting::Map& ini, Hdf overwrite);
   bool m_disabled = false;
   bool m_checkExistenceBeforeRewrite = true;
   std::string m_name;

@@ -130,12 +130,13 @@ bool TestUtil::TestHDF() {
   }
 
   {
+    IniSetting::Map ini = IniSetting::Map::object;
     Hdf doc;
     doc.fromString(
       "node.* {\n"
       "  name = value\n"
       "}");
-    VS(Config::GetString(doc["node"][0]["name"]), "value");
+    VS(Config::GetString(ini, doc["node"][0]["name"]), "value");
   }
 
   return Count(true);

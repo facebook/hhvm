@@ -20,6 +20,7 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +33,7 @@ namespace HPHP {
  */
 class ReplayTransport : public Transport {
 public:
-  ReplayTransport() : m_code(0) {}
+  ReplayTransport() : m_ini(IniSetting::Map::object), m_code(0) {}
 
   void recordInput(Transport* transport, const char *filename);
   void replayInput(const char *filename);
@@ -57,6 +58,7 @@ public:
 
 private:
   Hdf m_hdf;
+  IniSetting::Map m_ini;
   std::string m_postData;
   HeaderMap m_requestHeaders;
   HeaderMap m_responseHeaders;

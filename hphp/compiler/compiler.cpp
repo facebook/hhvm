@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
@@ -152,7 +153,8 @@ extern "C" void compiler_hook_initialize();
 int compiler_main(int argc, char **argv) {
   try {
     Hdf empty;
-    RuntimeOption::Load(empty);
+    IniSetting::Map ini = IniSetting::Map::object;
+    RuntimeOption::Load(ini, empty);
     initialize_repo();
 
     // we need to initialize pcre cache table very early
@@ -381,15 +383,15 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
+  IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
-  for (vector<string>::const_iterator it = po.config.begin();
-       it != po.config.end(); ++it) {
-    config.append(*it);
+  for (auto& c : po.config) {
+    Config::Parse(c, ini, config);
   }
   for (unsigned int i = 0; i < po.confStrings.size(); i++) {
     config.fromString(po.confStrings[i].c_str());
   }
-  Option::Load(config);
+  Option::Load(ini, config);
   vector<string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {

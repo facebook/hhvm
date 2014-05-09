@@ -17,12 +17,13 @@
 #ifndef incl_HPHP_RUNTIME_OPTION_H_
 #define incl_HPHP_RUNTIME_OPTION_H_
 
+#include "folly/dynamic.h"
+
 #include <unordered_map>
 #include <vector>
 #include <string>
 #include <map>
 #include <set>
-
 #include <boost/container/flat_set.hpp>
 #include <memory>
 
@@ -38,6 +39,8 @@ struct IpBlockMap;
 struct SatelliteServerInfo;
 struct FilesMatch;
 struct Hdf;
+// Can we make sure this equals IniSetting::Map?
+typedef folly::dynamic IniSettingMap;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
@@ -47,7 +50,8 @@ constexpr int kDefaultInitialStaticStringTableSize = 500000;
  */
 class RuntimeOption {
 public:
-  static void Load(Hdf& config,
+  static void Load(const IniSettingMap &ini,
+                   Hdf& config,
                    std::vector<std::string>* overwrites = nullptr,
                    bool empty = false);
 

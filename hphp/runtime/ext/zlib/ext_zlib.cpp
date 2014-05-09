@@ -782,7 +782,7 @@ const StaticString s_FORCE_DEFLATE("FORCE_DEFLATE");
 class ZlibExtension : public Extension {
  public:
   ZlibExtension() : Extension("zlib", "2.0") {}
-  virtual void moduleLoad(Hdf hdf) {
+  virtual void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
     s_zlib_stream_wrapper.registerAs("compress.zlib");
   }
   virtual void moduleInit() {

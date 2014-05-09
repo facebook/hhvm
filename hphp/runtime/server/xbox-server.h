@@ -68,7 +68,7 @@ public:
 
 class XboxServerInfo : public SatelliteServerInfo {
 public:
-  XboxServerInfo() : SatelliteServerInfo(Hdf()) {
+  XboxServerInfo() : SatelliteServerInfo(IniSetting::Map::object, Hdf()) {
     m_type = SatelliteServer::Type::KindOfXboxServer;
     m_name = "xbox";
     reload();

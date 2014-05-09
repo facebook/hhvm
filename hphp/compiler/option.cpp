@@ -19,6 +19,7 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/db-query.h"
@@ -161,45 +162,46 @@ bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
 
-void Option::LoadRootHdf(const Hdf &roots, map<string, string> &map) {
+void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots,
+                         map<string, string> &map) {
   if (roots.exists()) {
     for (Hdf hdf = roots.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      map[Config::Get(hdf["root"])] = Config::Get(hdf["path"]);
+      map[Config::Get(ini, hdf["root"])] = Config::Get(ini, hdf["path"]);
     }
   }
 }
 
-void Option::LoadRootHdf(const Hdf &roots, vector<string> &vec) {
+void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots, vector<string> &vec) {
   if (roots.exists()) {
     for (Hdf hdf = roots.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      vec.push_back(Config::GetString(hdf,""));
+      vec.push_back(Config::GetString(ini, hdf,""));
     }
   }
 }
 
-void Option::Load(Hdf &config) {
-  LoadRootHdf(config["IncludeRoots"], IncludeRoots);
-  LoadRootHdf(config["AutoloadRoots"], AutoloadRoots);
+void Option::Load(const IniSetting::Map& ini, Hdf &config) {
+  LoadRootHdf(ini, config["IncludeRoots"], IncludeRoots);
+  LoadRootHdf(ini, config["AutoloadRoots"], AutoloadRoots);
 
-  Config::Get(config["PackageFiles"], PackageFiles);
-  Config::Get(config["IncludeSearchPaths"], IncludeSearchPaths);
-  Config::Get(config["PackageDirectories"], PackageDirectories);
-  Config::Get(config["PackageExcludeDirs"], PackageExcludeDirs);
-  Config::Get(config["PackageExcludeFiles"], PackageExcludeFiles);
-  Config::Get(config["PackageExcludePatterns"], PackageExcludePatterns);
-  Config::Get(config["PackageExcludeStaticDirs"], PackageExcludeStaticDirs);
-  Config::Get(config["PackageExcludeStaticFiles"], PackageExcludeStaticFiles);
-  Config::Get(config["PackageExcludeStaticPatterns"], PackageExcludeStaticPatterns);
-  CachePHPFile = Config::GetBool(config["CachePHPFile"]);
+  Config::Get(ini, config["PackageFiles"], PackageFiles);
+  Config::Get(ini, config["IncludeSearchPaths"], IncludeSearchPaths);
+  Config::Get(ini, config["PackageDirectories"], PackageDirectories);
+  Config::Get(ini, config["PackageExcludeDirs"], PackageExcludeDirs);
+  Config::Get(ini, config["PackageExcludeFiles"], PackageExcludeFiles);
+  Config::Get(ini, config["PackageExcludePatterns"], PackageExcludePatterns);
+  Config::Get(ini, config["PackageExcludeStaticDirs"], PackageExcludeStaticDirs);
+  Config::Get(ini, config["PackageExcludeStaticFiles"], PackageExcludeStaticFiles);
+  Config::Get(ini, config["PackageExcludeStaticPatterns"], PackageExcludeStaticPatterns);
+  CachePHPFile = Config::GetBool(ini, config["CachePHPFile"]);
 
-  Config::Get(config["ParseOnDemandDirs"], ParseOnDemandDirs);
+  Config::Get(ini, config["ParseOnDemandDirs"], ParseOnDemandDirs);
 
   {
     Hdf cg = config["CodeGeneration"];
     string tmp;
 
 #define READ_CG_OPTION(name)                    \
-    tmp = Config::GetString(cg[#name]);         \
+    tmp = Config::GetString(ini, cg[#name]);         \
     if (!tmp.empty()) {                         \
       name = OptionStrings.add(tmp.c_str());    \
     }
@@ -208,18 +210,18 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(LambdaPrefix);
   }
 
-  Config::Get(config["DynamicFunctionPrefix"], DynamicFunctionPrefixes);
-  Config::Get(config["DynamicFunctionPostfix"], DynamicFunctionPostfixes);
-  Config::Get(config["DynamicMethodPrefix"], DynamicMethodPrefixes);
-  Config::Get(config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
-  Config::Get(config["VolatileClasses"], VolatileClasses);
+  Config::Get(ini, config["DynamicFunctionPrefix"], DynamicFunctionPrefixes);
+  Config::Get(ini, config["DynamicFunctionPostfix"], DynamicFunctionPostfixes);
+  Config::Get(ini, config["DynamicMethodPrefix"], DynamicMethodPrefixes);
+  Config::Get(ini, config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
+  Config::Get(ini, config["VolatileClasses"], VolatileClasses);
 
   // build map from function names to sections
   for (Hdf hdf = config["FunctionSections"].firstChild(); hdf.exists();
        hdf = hdf.next()) {
     for (Hdf hdfFunc = hdf.firstChild(); hdfFunc.exists();
          hdfFunc = hdfFunc.next()) {
-           FunctionSections[Config::GetString(hdfFunc)] = hdf.getName();
+           FunctionSections[Config::GetString(ini, hdfFunc)] = hdf.getName();
     }
   }
 
@@ -227,35 +229,35 @@ void Option::Load(Hdf &config) {
     Hdf repo = config["Repo"];
     {
       Hdf repoCentral = repo["Central"];
-      RepoCentralPath = Config::GetString(repoCentral["Path"]);
+      RepoCentralPath = Config::GetString(ini, repoCentral["Path"]);
     }
-    RepoDebugInfo = Config::GetBool(repo["DebugInfo"], false);
+    RepoDebugInfo = Config::GetBool(ini, repo["DebugInfo"], false);
   }
 
   {
     Hdf autoloadMap = config["AutoloadMap"];
-    Config::Get(autoloadMap["class"], AutoloadClassMap);
-    Config::Get(autoloadMap["function"], AutoloadFuncMap);
-    Config::Get(autoloadMap["constant"], AutoloadConstMap);
-    AutoloadRoot = Config::GetString(autoloadMap["root"]);
+    Config::Get(ini, autoloadMap["class"], AutoloadClassMap);
+    Config::Get(ini, autoloadMap["function"], AutoloadFuncMap);
+    Config::Get(ini, autoloadMap["constant"], AutoloadConstMap);
+    AutoloadRoot = Config::GetString(ini, autoloadMap["root"]);
   }
 
-  HardTypeHints = Config::GetBool(config["HardTypeHints"], true);
-  HardConstProp = Config::GetBool(config["HardConstProp"], true);
+  HardTypeHints = Config::GetBool(ini, config["HardTypeHints"], true);
+  HardConstProp = Config::GetBool(ini, config["HardConstProp"], true);
 
-  EnableHipHopSyntax = Config::GetBool(config["EnableHipHopSyntax"]);
-  EnableZendCompat = Config::GetBool(config["EnableZendCompat"]);
-  JitEnableRenameFunction = Config::GetBool(config["JitEnableRenameFunction"]);
+  EnableHipHopSyntax = Config::GetBool(ini, config["EnableHipHopSyntax"]);
+  EnableZendCompat = Config::GetBool(ini, config["EnableZendCompat"]);
+  JitEnableRenameFunction = Config::GetBool(ini, config["JitEnableRenameFunction"]);
   EnableHipHopExperimentalSyntax =
-    Config::GetBool(config["EnableHipHopExperimentalSyntax"]);
-  EnableShortTags = Config::GetBool(config["EnableShortTags"], true);
+    Config::GetBool(ini, config["EnableHipHopExperimentalSyntax"]);
+  EnableShortTags = Config::GetBool(ini, config["EnableShortTags"], true);
 
   IntsOverflowToInts =
-    Config::GetBool(config["Hack"]["Lang"]["IntsOverflowToInts"], EnableHipHopSyntax);
+    Config::GetBool(ini, config["Hack"]["Lang"]["IntsOverflowToInts"], EnableHipHopSyntax);
 
-  EnableAspTags = Config::GetBool(config["EnableAspTags"]);
+  EnableAspTags = Config::GetBool(ini, config["EnableAspTags"]);
 
-  EnableXHP = Config::GetBool(config["EnableXHP"], false);
+  EnableXHP = Config::GetBool(ini, config["EnableXHP"], false);
 
   if (EnableHipHopSyntax) {
     // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -263,30 +265,30 @@ void Option::Load(Hdf &config) {
     EnableXHP = true;
   }
 
-  ParserThreadCount = Config::GetInt32(config["ParserThreadCount"], 0);
+  ParserThreadCount = Config::GetInt32(ini, config["ParserThreadCount"], 0);
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
 
-  EnableEval = (EvalLevel) Config::GetByte(config["EnableEval"], 0);
-  AllDynamic = Config::GetBool(config["AllDynamic"], true);
-  AllVolatile = Config::GetBool(config["AllVolatile"]);
+  EnableEval = (EvalLevel) Config::GetByte(ini, config["EnableEval"], 0);
+  AllDynamic = Config::GetBool(ini, config["AllDynamic"], true);
+  AllVolatile = Config::GetBool(ini, config["AllVolatile"]);
 
-  GenerateDocComments      = Config::GetBool(config["GenerateDocComments"], true);
-  EliminateDeadCode        = Config::GetBool(config["EliminateDeadCode"], true);
-  CopyProp                 = Config::GetBool(config["CopyProp"], false);
-  LocalCopyProp            = Config::GetBool(config["LocalCopyProp"], true);
-  StringLoopOpts           = Config::GetBool(config["StringLoopOpts"], true);
-  AutoInline               = Config::GetInt32(config["AutoInline"], 0);
-  ControlFlow              = Config::GetBool(config["ControlFlow"], true);
-  VariableCoalescing       = Config::GetBool(config["VariableCoalescing"], false);
-  ArrayAccessIdempotent    = Config::GetBool(config["ArrayAccessIdempotent"], false);
-  DumpAst                  = Config::GetBool(config["DumpAst"], false);
-  WholeProgram             = Config::GetBool(config["WholeProgram"], true);
-  UseHHBBC                 = Config::GetBool(config["UseHHBBC"], UseHHBBC);
+  GenerateDocComments      = Config::GetBool(ini, config["GenerateDocComments"], true);
+  EliminateDeadCode        = Config::GetBool(ini, config["EliminateDeadCode"], true);
+  CopyProp                 = Config::GetBool(ini, config["CopyProp"], false);
+  LocalCopyProp            = Config::GetBool(ini, config["LocalCopyProp"], true);
+  StringLoopOpts           = Config::GetBool(ini, config["StringLoopOpts"], true);
+  AutoInline               = Config::GetInt32(ini, config["AutoInline"], 0);
+  ControlFlow              = Config::GetBool(ini, config["ControlFlow"], true);
+  VariableCoalescing       = Config::GetBool(ini, config["VariableCoalescing"], false);
+  ArrayAccessIdempotent    = Config::GetBool(ini, config["ArrayAccessIdempotent"], false);
+  DumpAst                  = Config::GetBool(ini, config["DumpAst"], false);
+  WholeProgram             = Config::GetBool(ini, config["WholeProgram"], true);
+  UseHHBBC                 = Config::GetBool(ini, config["UseHHBBC"], UseHHBBC);
 
   // Temporary, during file-cache migration.
-  FileCache::UseNewCache   = Config::GetBool(config["UseNewCache"], false);
+  FileCache::UseNewCache   = Config::GetBool(ini, config["UseNewCache"], false);
 
   OnLoad();
 }

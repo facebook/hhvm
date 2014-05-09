@@ -33,30 +33,30 @@ namespace HPHP {
 std::set<std::string> SatelliteServerInfo::InternalURLs;
 int SatelliteServerInfo::DanglingServerPort = 0;
 
-SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
+SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf) {
   m_name = hdf.getName();
-  m_port = Config::GetUInt16(hdf["Port"], 0);
-  m_threadCount = Config::GetInt32(hdf["ThreadCount"], 5);
-  m_maxRequest = Config::GetInt32(hdf["MaxRequest"], 500);
-  m_maxDuration = Config::GetInt32(hdf["MaxDuration"], 120);
+  m_port = Config::GetUInt16(ini, hdf["Port"], 0);
+  m_threadCount = Config::GetInt32(ini, hdf["ThreadCount"], 5);
+  m_maxRequest = Config::GetInt32(ini, hdf["MaxRequest"], 500);
+  m_maxDuration = Config::GetInt32(ini, hdf["MaxDuration"], 120);
   m_timeoutSeconds = std::chrono::seconds(
-    Config::GetInt32(hdf["TimeoutSeconds"],
+    Config::GetInt32(ini, hdf["TimeoutSeconds"],
                       RuntimeOption::RequestTimeoutSeconds));
-  m_reqInitFunc = Config::GetString(hdf["RequestInitFunction"], "");
-  m_reqInitDoc = Config::GetString(hdf["RequestInitDocument"], "");
-  m_password = Config::GetString(hdf["Password"], "");
-  Config::Get(hdf["Passwords"], m_passwords);
-  m_alwaysReset = Config::GetBool(hdf["AlwaysReset"], false);
+  m_reqInitFunc = Config::GetString(ini, hdf["RequestInitFunction"], "");
+  m_reqInitDoc = Config::GetString(ini, hdf["RequestInitDocument"], "");
+  m_password = Config::GetString(ini, hdf["Password"], "");
+  Config::Get(ini, hdf["Passwords"], m_passwords);
+  m_alwaysReset = Config::GetBool(ini, hdf["AlwaysReset"], false);
 
-  std::string type = Config::GetString(hdf["Type"]);
+  std::string type = Config::GetString(ini, hdf["Type"]);
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
     std::vector<std::string> urls;
-    Config::Get(hdf["URLs"], urls);
+    Config::Get(ini, hdf["URLs"], urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(format_pattern(urls[i], true));
     }
-    if (Config::GetBool(hdf["BlockMainServer"], true)) {
+    if (Config::GetBool(ini, hdf["BlockMainServer"], true)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
     }
   } else if (type == "DanglingPageServer") {

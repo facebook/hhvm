@@ -47,48 +47,55 @@ extern void const_load();
 typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 
-void apcExtension::moduleLoad(Hdf config) {
+void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Hdf apc = config["Server"]["APC"];
 
-  Enable = Config::GetBool(apc["EnableApc"], true);
-  EnableConstLoad = Config::GetBool(apc["EnableConstLoad"], false);
-  ForceConstLoadToAPC = Config::GetBool(apc["ForceConstLoadToAPC"], true);
-  PrimeLibrary = Config::GetString(apc["PrimeLibrary"]);
-  LoadThread = Config::GetInt16(apc["LoadThread"], 2);
-  Config::Get(apc["CompletionKeys"], CompletionKeys);
-  std::string tblType = Config::GetString(apc["TableType"], "concurrent");
+  Enable = Config::GetBool(ini, apc["EnableApc"], true);
+  EnableConstLoad = Config::GetBool(ini, apc["EnableConstLoad"], false);
+  ForceConstLoadToAPC = Config::GetBool(ini, apc["ForceConstLoadToAPC"], true);
+  PrimeLibrary = Config::GetString(ini, apc["PrimeLibrary"]);
+  LoadThread = Config::GetInt16(ini, apc["LoadThread"], 2);
+  Config::Get(ini, apc["CompletionKeys"], CompletionKeys);
+  std::string tblType = Config::GetString(ini, apc["TableType"], "concurrent");
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
     TableType = TableTypes::ConcurrentTable;
   } else {
     throw InvalidArgumentException("apc table type", "Invalid table type");
   }
-  EnableApcSerialize = Config::GetBool(apc["EnableApcSerialize"], true);
-  ExpireOnSets = Config::GetBool(apc["ExpireOnSets"]);
-  PurgeFrequency = Config::GetInt32(apc["PurgeFrequency"], 4096);
-  PurgeRate = Config::GetInt32(apc["PurgeRate"], -1);
+  EnableApcSerialize = Config::GetBool(ini, apc["EnableApcSerialize"], true);
+  ExpireOnSets = Config::GetBool(ini, apc["ExpireOnSets"]);
+  PurgeFrequency = Config::GetInt32(ini, apc["PurgeFrequency"], 4096);
+  PurgeRate = Config::GetInt32(ini, apc["PurgeRate"], -1);
 
-  AllowObj = Config::GetBool(apc["AllowObject"]);
-  TTLLimit = Config::GetInt32(apc["TTLLimit"], -1);
+  AllowObj = Config::GetBool(ini, apc["AllowObject"]);
+  TTLLimit = Config::GetInt32(ini, apc["TTLLimit"], -1);
 
   Hdf fileStorage = apc["FileStorage"];
+  UseFileStorage = Config::GetBool(ini, fileStorage["Enable"]);
+  FileStorageChunkSize = Config::GetInt64(ini, fileStorage["ChunkSize"],
+                                          1LL << 29);
+  FileStorageMaxSize = Config::GetInt64(ini, fileStorage["MaxSize"], 1LL << 32);
+  FileStoragePrefix = Config::GetString(ini, fileStorage["Prefix"],
+                                        "/tmp/apc_store");
+  FileStorageFlagKey = Config::GetString(ini, fileStorage["FlagKey"],
+                                         "_madvise_out");
+  FileStorageAdviseOutPeriod =
+    Config::GetInt32(ini, fileStorage["AdviseOutPeriod"], 1800);
+  FileStorageKeepFileLinked =
+    Config::GetBool(ini, fileStorage["KeepFileLinked"]);
 
-  UseFileStorage = Config::GetBool(fileStorage["Enable"]);
-  FileStorageChunkSize = Config::GetInt64(fileStorage["ChunkSize"], 1LL << 29);
-  FileStorageMaxSize = Config::GetInt64(fileStorage["MaxSize"], 1LL << 32);
-  FileStoragePrefix = Config::GetString(fileStorage["Prefix"], "/tmp/apc_store");
-  FileStorageFlagKey = Config::GetString(fileStorage["FlagKey"], "_madvise_out");
-  FileStorageAdviseOutPeriod = Config::GetInt32(fileStorage["AdviseOutPeriod"], 1800);
-  FileStorageKeepFileLinked = Config::GetBool(fileStorage["KeepFileLinked"]);
+  ConcurrentTableLockFree =
+    Config::GetBool(ini, apc["ConcurrentTableLockFree"], false);
+  KeyMaturityThreshold = Config::GetInt32(ini, apc["KeyMaturityThreshold"], 20);
+  MaximumCapacity = Config::GetInt64(ini, apc["MaximumCapacity"], 0);
+  KeyFrequencyUpdatePeriod =
+    Config::GetInt32(ini, apc["KeyFrequencyUpdatePeriod"], 1000);
 
-  ConcurrentTableLockFree = Config::GetBool(apc["ConcurrentTableLockFree"], false);
-  KeyMaturityThreshold = Config::GetInt32(apc["KeyMaturityThreshold"], 20);
-  MaximumCapacity = Config::GetInt64(apc["MaximumCapacity"], 0);
-  KeyFrequencyUpdatePeriod = Config::GetInt32(apc["KeyFrequencyUpdatePeriod"], 1000);
+  Config::Get(ini, apc["NoTTLPrefix"], NoTTLPrefix);
 
-  Config::Get(apc["NoTTLPrefix"], NoTTLPrefix);
-
-  UseUncounted = Config::GetBool(apc["MemModelTreadmill"], RuntimeOption::ServerExecutionMode());
-  InnerUncounted = Config::GetBool(apc["InnerUncounted"], false);
+  UseUncounted = Config::GetBool(ini, apc["MemModelTreadmill"],
+                                 RuntimeOption::ServerExecutionMode());
+  InnerUncounted = Config::GetBool(ini, apc["InnerUncounted"], false);
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
@@ -147,7 +154,8 @@ bool apcExtension::EnableCLI = true;
 static apcExtension s_apc_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
-Variant f_apc_store(const Variant& key_or_array, const Variant& var /* = null_variant */,
+Variant f_apc_store(const Variant& key_or_array,
+                    const Variant& var /* = null_variant */,
                     int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -200,7 +208,8 @@ bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var,
   return s_apc_store[cache_id].store(key, var, 0, true, false);
 }
 
-Variant f_apc_add(const Variant& key_or_array, const Variant& var /* = null_variant */,
+Variant f_apc_add(const Variant& key_or_array,
+                  const Variant& var /* = null_variant */,
                   int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 

@@ -26,43 +26,85 @@ namespace HPHP {
 typedef folly::dynamic IniSettingMap;
 
 struct Config {
-  static bool GetBool(/* const IniSettingMap &ini, */const Hdf& config,
+
+  static void Parse(const std::string &config, IniSettingMap &ini, Hdf &hdf);
+
+  static bool GetBool(const IniSettingMap &ini, const Hdf& config,
                       const bool defValue = false);
-  static const char *Get(/* const IniSettingMap &ini, */const Hdf& config,
+  static const char *Get(const IniSettingMap &ini, const Hdf& config,
                          const char *defValue = nullptr);
-  static std::string GetString(/* const IniSettingMap &ini, */const Hdf& config,
+  static std::string GetString(const IniSettingMap &ini, const Hdf& config,
                                const std::string defValue = "");
-  static char GetByte(/* const IniSettingMap &ini, */const Hdf& config,
+  static char GetByte(const IniSettingMap &ini, const Hdf& config,
                       const char defValue = 0);
-  static unsigned char GetUByte(/* const IniSettingMap &ini, */const Hdf& config,
+  static unsigned char GetUByte(const IniSettingMap &ini, const Hdf& config,
                                 const unsigned char defValue = 0);
-  static int16_t GetInt16(/* const IniSettingMap &ini, */const Hdf& config,
+  static int16_t GetInt16(const IniSettingMap &ini, const Hdf& config,
                           const int16_t defValue = 0);
-  static uint16_t GetUInt16(/* const IniSettingMap &ini, */const Hdf& config,
+  static uint16_t GetUInt16(const IniSettingMap &ini, const Hdf& config,
                             const uint16_t defValue = 0);
-  static int32_t GetInt32(/* const IniSettingMap &ini, */const Hdf& config,
+  static int32_t GetInt32(const IniSettingMap &ini, const Hdf& config,
                           const int32_t defValue = 0);
-  static uint32_t GetUInt32(/* const IniSettingMap &ini, */const Hdf& config,
+  static uint32_t GetUInt32(const IniSettingMap &ini, const Hdf& config,
                             const uint32_t defValue = 0);
-  static int64_t GetInt64(/* const IniSettingMap &ini, */const Hdf& config,
+  static int64_t GetInt64(const IniSettingMap &ini, const Hdf& config,
                           const int64_t defValue = 0);
-  static uint64_t GetUInt64(/* const IniSettingMap &ini, */const Hdf& config,
+  static uint64_t GetUInt64(const IniSettingMap &ini, const Hdf& config,
                             const uint64_t defValue = 0);
-  static double GetDouble(/* const IniSettingMap &ini, */const Hdf& config,
+  static double GetDouble(const IniSettingMap &ini, const Hdf& config,
                           const double defValue = 0);
 
-  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
-                  std::vector<std::string> &values);
-  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
-                  std::set<std::string> &values);
-  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
-                  std::set<std::string, stdltistr> &values);
-  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
-                  boost::container::flat_set<std::string> &values);
-  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
-                  std::map<std::string, std::string> &values);
-  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
-                  hphp_string_imap<std::string> &values);
+  template<class T>
+  static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {
+    config.configGet(data);
+    if (!data.empty()) {
+      return;
+    }
+    auto key = IniName(config);
+    auto* value = ini.get_ptr(key);
+    if (!value || !value->isArray()) {
+      return;
+    }
+    for (auto &pair : value->items()) {
+      StringInsert(data, pair.first.asString().toStdString(),
+                         pair.second.asString().toStdString());
+    }
+  }
+
+  private:
+
+  static std::string IniName(const Hdf& config);
+
+  static void StringInsert(std::vector<std::string> &values,
+                           const std::string &key,
+                           const std::string &value) {
+    values.push_back(value);
+  }
+  static void StringInsert(boost::container::flat_set<std::string> &values,
+                           const std::string &key,
+                           const std::string &value) {
+    values.insert(value);
+  }
+  static void StringInsert(std::set<std::string, stdltistr> &values,
+                           const std::string &key,
+                           const std::string &value) {
+    values.insert(value);
+  }
+  static void StringInsert(std::set<std::string> &values,
+                           const std::string &key,
+                           const std::string &value) {
+    values.insert(value);
+  }
+  static void StringInsert(std::map<std::string, std::string> &values,
+                           const std::string &key,
+                           const std::string &value) {
+    values[key] = value;
+  }
+  static void StringInsert(hphp_string_imap<std::string> &values,
+                           const std::string &key,
+                           const std::string &value) {
+    values[key] = value;
+  }
 };
 
 }

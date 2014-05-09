@@ -225,7 +225,7 @@ public:
   unsigned int m_index; // currently playing position
 
   std::string desc(const char *indent);
-  void load(Hdf node);
+  void load(const IniSetting::Map& ini, Hdf node);
   void save(std::ostream &stream, int key);
 };
 

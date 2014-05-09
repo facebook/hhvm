@@ -15,12 +15,15 @@
 */
 
 #include "hphp/runtime/base/config.h"
+
+#include <boost/algorithm/string.hpp>
+#include <fstream>
+
 #include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
 static std::string normalize(const std::string &name) {
   std::string out = "";
   bool start = true;
@@ -48,33 +51,43 @@ static std::string normalize(const std::string &name) {
   return out;
 }
 
-static std::string ini_name(const Hdf& config) {
+std::string Config::IniName(const Hdf& config) {
   return "hhvm" + normalize(config.getFullPath());
 }
-*/
 
-const char *Config::Get(/* const IniSetting::Map &ini, */const Hdf& config,
-                        const char *defValue /* = nullptr */) {
-/*
-  auto* value = ini.get_ptr(ini_name(config));
+void Config::Parse(const std::string &config, IniSetting::Map &ini, Hdf &hdf) {
+  if (boost::ends_with(config, "ini")) {
+    std::ifstream ifs(config);
+    const std::string str((std::istreambuf_iterator<char>(ifs)),
+                          std::istreambuf_iterator<char>());
+    auto parsed_ini = IniSetting::FromStringAsMap(str, config);
+    for (auto &pair : parsed_ini.items()) {
+      ini[pair.first] = pair.second;
+    }
+  } else {
+    hdf.append(config);
+  }
+}
+
+
+const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
+                         const char *defValue /* = nullptr */) {
+  auto* value = ini.get_ptr(IniName(config));
   if (value && value->isString()) {
     return value->data();
   }
-  */
   return config.configGet(defValue);
 }
 
-/* The macro will soon contain
-auto* value = ini.get_ptr(ini_name(config)); \
-if (value && value->isString()) { \
-  T ret; \
-  ini_on_update(value->data(), ret); \
-  return ret; \
-} \
-*/
 #define GET_BODY(T, METHOD) \
-T Config::Get##METHOD(/* const IniSetting::Map &ini, */ const Hdf& config, \
+T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
                       const T defValue) { \
+  auto* value = ini.get_ptr(IniName(config)); \
+  if (value && value->isString()) { \
+    T ret; \
+    ini_on_update(value->data(), ret); \
+    return ret; \
+  } \
   return config.configGet##METHOD(defValue); \
 }
 
@@ -89,19 +102,5 @@ GET_BODY(uint32_t, UInt32)
 GET_BODY(int64_t, Int64)
 GET_BODY(uint64_t, UInt64)
 GET_BODY(double, Double)
-
-#define GET_BYREF_BODY(T) \
-void Config::Get(/* const IniSetting::Map &ini, */ const Hdf& config, \
-                 T& values) { \
-  config.configGet(values); \
-}
-
-#define COMMA ,
-GET_BYREF_BODY(std::vector<std::string>)
-GET_BYREF_BODY(std::set<std::string>)
-GET_BYREF_BODY(std::set<std::string COMMA stdltistr>)
-GET_BYREF_BODY(boost::container::flat_set<std::string>)
-GET_BYREF_BODY(std::map<std::string COMMA std::string>)
-GET_BYREF_BODY(hphp_string_imap<std::string>)
 
 }

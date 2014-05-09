@@ -71,10 +71,13 @@ public:
   static const int MinPrintLevel = 1;
 
 public:
-  static void LoadColors(Hdf hdf);
-  static const char *LoadColor(Hdf hdf, const char *defaultName);
-  static const char *LoadBgColor(Hdf hdf, const char *defaultName);
-  static void LoadCodeColor(CodeColor index, Hdf hdf, const char *defaultName);
+  static void LoadColors(const IniSetting::Map& ini, Hdf hdf);
+  static const char *LoadColor(const IniSetting::Map& ini, Hdf hdf,
+                               const char *defaultName);
+  static const char *LoadBgColor(const IniSetting::Map& ini, Hdf hdf,
+                                 const char *defaultName);
+  static void LoadCodeColor(CodeColor index, const IniSetting::Map& ini,
+                            Hdf hdf, const char *defaultName);
 
   /**
    * Starts/stops a debugger client.

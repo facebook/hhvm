@@ -18,6 +18,7 @@
 #define incl_HPHP_SATELLITE_SERVER_H_
 
 #include "hphp/util/hdf.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 #include <chrono>
 
@@ -73,7 +74,7 @@ public:
   static bool checkMainURL(const std::string& path);
 
 public:
-  explicit SatelliteServerInfo(Hdf hdf);
+  explicit SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf);
 
   const std::string &getName() const { return m_name;}
   SatelliteServer::Type getType() const { return m_type;}

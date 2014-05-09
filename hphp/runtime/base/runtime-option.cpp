@@ -514,11 +514,12 @@ int RuntimeOption::EnableAlternative = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void setResourceLimit(int resource, Hdf rlimit, const char *nodeName) {
-  if (!Config::GetString(rlimit[nodeName]).empty()) {
+static void setResourceLimit(int resource, const IniSetting::Map& ini,
+                             Hdf rlimit, const char *nodeName) {
+  if (!Config::GetString(ini, rlimit[nodeName]).empty()) {
     struct rlimit rl;
     getrlimit(resource, &rl);
-    rl.rlim_cur = Config::GetInt64(rlimit[nodeName]);
+    rl.rlim_cur = Config::GetInt64(ini, rlimit[nodeName]);
     if (rl.rlim_max < rl.rlim_cur) {
       rl.rlim_max = rl.rlim_cur;
     }
@@ -542,8 +543,8 @@ static void normalizePath(std::string &path) {
   }
 }
 
-static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
-  string pattern = Config::GetString(hdfPattern);
+static bool matchHdfPattern(const std::string &value, const IniSetting::Map& ini, Hdf hdfPattern) {
+  string pattern = Config::GetString(ini, hdfPattern);
   if (!pattern.empty()) {
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
                                     CopyString),
@@ -556,8 +557,9 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
   return true;
 }
 
-void RuntimeOption::Load(Hdf &config,
-                         std::vector<std::string> *overwrites /* = NULL */,
+void RuntimeOption::Load(const IniSetting::Map& ini,
+                         Hdf& config,
+                         std::vector<std::string> *overwrites /* = nullptr */,
                          bool empty /* = false */) {
   if (overwrites) {
     // Do these first, mainly so we can override Tier.*.machine,
@@ -575,14 +577,14 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf machine = config["Machine"];
 
-    hostname = Config::GetString(machine["name"]);
+    hostname = Config::GetString(ini, machine["name"]);
     if (hostname.empty()) {
       hostname = Process::GetHostName();
     }
 
-    tier = Config::GetString(machine["tier"]);
+    tier = Config::GetString(ini, machine["tier"]);
 
-    cpu = Config::GetString(machine["cpu"]);
+    cpu = Config::GetString(ini, machine["cpu"]);
     if (cpu.empty()) {
       cpu = Process::GetCPUModel();
     }
@@ -592,9 +594,9 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf tiers = config["Tiers"];
     for (Hdf hdf = tiers.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      if (matchHdfPattern(hostname, hdf["machine"]) &&
-          matchHdfPattern(tier, hdf["tier"]) &&
-          matchHdfPattern(cpu, hdf["cpu"])) {
+      if (matchHdfPattern(hostname, ini, hdf["machine"]) &&
+          matchHdfPattern(tier, ini, hdf["tier"]) &&
+          matchHdfPattern(cpu, ini, hdf["cpu"])) {
         Tier = hdf.getName();
         config.copy(hdf["overwrite"]);
         // no break here, so we can continue to match more overwrites
@@ -611,9 +613,9 @@ void RuntimeOption::Load(Hdf &config,
     }
   }
 
-  PidFile = Config::GetString(config["PidFile"], "www.pid");
+  PidFile = Config::GetString(ini, config["PidFile"], "www.pid");
 
-  Config::Get(config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
+  Config::Get(ini, config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
 
   {
     Hdf logger = config["Log"];
@@ -663,29 +665,29 @@ void RuntimeOption::Load(Hdf &config,
       }
     ));
 
-    Logger::LogHeader = Config::GetBool(logger["Header"]);
-    bool logInjectedStackTrace = Config::GetBool(logger["InjectedStackTrace"]);
+    Logger::LogHeader = Config::GetBool(ini, logger["Header"]);
+    bool logInjectedStackTrace = Config::GetBool(ini, logger["InjectedStackTrace"]);
     if (logInjectedStackTrace) {
       Logger::SetTheLogger(new ExtendedLogger());
       ExtendedLogger::EnabledByDefault = true;
     }
-    Logger::LogNativeStackTrace = Config::GetBool(logger["NativeStackTrace"], true);
+    Logger::LogNativeStackTrace = Config::GetBool(ini, logger["NativeStackTrace"], true);
     Logger::MaxMessagesPerRequest =
-      Config::GetInt32(logger["MaxMessagesPerRequest"], -1);
+      Config::GetInt32(ini, logger["MaxMessagesPerRequest"], -1);
 
-    Logger::UseSyslog = Config::GetBool(logger["UseSyslog"], false);
-    Logger::UseLogFile = Config::GetBool(logger["UseLogFile"], true);
+    Logger::UseSyslog = Config::GetBool(ini, logger["UseSyslog"], false);
+    Logger::UseLogFile = Config::GetBool(ini, logger["UseLogFile"], true);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.log.use_log_file", &Logger::UseLogFile);
-    Logger::UseCronolog = Config::GetBool(logger["UseCronolog"], false);
-    Logger::UseRequestLog = Config::GetBool(logger["UseRequestLog"], false);
+    Logger::UseCronolog = Config::GetBool(ini, logger["UseCronolog"], false);
+    Logger::UseRequestLog = Config::GetBool(ini, logger["UseRequestLog"], false);
     if (Logger::UseLogFile) {
-      LogFile = Config::GetString(logger["File"]);
+      LogFile = Config::GetString(ini, logger["File"]);
       if (!RuntimeOption::ServerExecutionMode()) {
         LogFile.clear();
       }
       if (LogFile[0] == '|') Logger::IsPipeOutput = true;
-      LogFileSymLink = Config::GetString(logger["SymLink"]);
+      LogFileSymLink = Config::GetString(ini, logger["SymLink"]);
     }
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.log.file", IniSetting::SetAndGet<std::string>(
@@ -701,289 +703,291 @@ void RuntimeOption::Load(Hdf &config,
       }
     ));
     LogFileFlusher::DropCacheChunkSize =
-      Config::GetInt32(logger["DropCacheChunkSize"], 1 << 20);
-    AlwaysEscapeLog = Config::GetBool(logger["AlwaysEscapeLog"], false);
-    RuntimeOption::LogHeaderMangle = Config::GetInt32(logger["HeaderMangle"], 0);
+      Config::GetInt32(ini, logger["DropCacheChunkSize"], 1 << 20);
+    AlwaysEscapeLog = Config::GetBool(ini, logger["AlwaysEscapeLog"], false);
+    RuntimeOption::LogHeaderMangle = Config::GetInt32(ini, logger["HeaderMangle"], 0);
 
     AlwaysLogUnhandledExceptions =
-      Config::GetBool(logger["AlwaysLogUnhandledExceptions"], true);
-    NoSilencer = Config::GetBool(logger["NoSilencer"]);
+      Config::GetBool(ini, logger["AlwaysLogUnhandledExceptions"], true);
+    NoSilencer = Config::GetBool(ini, logger["NoSilencer"]);
     RuntimeErrorReportingLevel =
-      Config::GetInt32(logger["RuntimeErrorReportingLevel"],
+      Config::GetInt32(ini, logger["RuntimeErrorReportingLevel"],
                        static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
 
-    AccessLogDefaultFormat = Config::GetString(logger["AccessLogDefaultFormat"],
+    AccessLogDefaultFormat = Config::GetString(ini, logger["AccessLogDefaultFormat"],
                                                "%h %l %u %t \"%r\" %>s %b");
     {
       Hdf access = logger["Access"];
       for (Hdf hdf = access.firstChild(); hdf.exists();
            hdf = hdf.next()) {
-        string fname = Config::GetString(hdf["File"]);
+        string fname = Config::GetString(ini, hdf["File"]);
         if (fname.empty()) {
           continue;
         }
-        string symLink = Config::GetString(hdf["SymLink"]);
+        string symLink = Config::GetString(ini, hdf["SymLink"]);
         AccessLogs.push_back(AccessLogFileData(fname, symLink,
-          Config::GetString(hdf["Format"], AccessLogDefaultFormat)));
+          Config::GetString(ini, hdf["Format"], AccessLogDefaultFormat)));
       }
     }
 
-    AdminLogFormat = Config::GetString(logger["AdminLog.Format"], "%h %t %s %U");
-    AdminLogFile = Config::GetString(logger["AdminLog.File"]);
-    AdminLogSymLink = Config::GetString(logger["AdminLog.SymLink"]);
+    AdminLogFormat = Config::GetString(ini, logger["AdminLog.Format"], "%h %t %s %U");
+    AdminLogFile = Config::GetString(ini, logger["AdminLog.File"]);
+    AdminLogSymLink = Config::GetString(ini, logger["AdminLog.SymLink"]);
   }
   {
     Hdf error = config["ErrorHandling"];
 
     /* Remove this, once its removed from production configs */
-    (void)Config::GetBool(error["NoInfiniteLoopDetection"]);
+    (void)Config::GetBool(ini, error["NoInfiniteLoopDetection"]);
 
     MaxSerializedStringSize =
-      Config::GetInt32(error["MaxSerializedStringSize"], 64 * 1024 * 1024);
-    CallUserHandlerOnFatals = Config::GetBool(error["CallUserHandlerOnFatals"], true);
+      Config::GetInt32(ini, error["MaxSerializedStringSize"], 64 * 1024 * 1024);
+    CallUserHandlerOnFatals = Config::GetBool(ini, error["CallUserHandlerOnFatals"], true);
     ThrowExceptionOnBadMethodCall =
-      Config::GetBool(error["ThrowExceptionOnBadMethodCall"], true);
-    MaxLoopCount = Config::GetInt32(error["MaxLoopCount"], 0);
+      Config::GetBool(ini, error["ThrowExceptionOnBadMethodCall"], true);
+    MaxLoopCount = Config::GetInt32(ini, error["MaxLoopCount"], 0);
     NoInfiniteRecursionDetection =
-      Config::GetBool(error["NoInfiniteRecursionDetection"]);
-    ThrowBadTypeExceptions = Config::GetBool(error["ThrowBadTypeExceptions"]);
-    ThrowTooManyArguments = Config::GetBool(error["ThrowTooManyArguments"]);
-    WarnTooManyArguments = Config::GetBool(error["WarnTooManyArguments"]);
-    ThrowMissingArguments = Config::GetBool(error["ThrowMissingArguments"]);
-    ThrowInvalidArguments = Config::GetBool(error["ThrowInvalidArguments"]);
-    EnableHipHopErrors = Config::GetBool(error["EnableHipHopErrors"], true);
-    AssertActive = Config::GetBool(error["AssertActive"]);
-    AssertWarning = Config::GetBool(error["AssertWarning"]);
-    NoticeFrequency = Config::GetInt64(error["NoticeFrequency"], 1);
-    WarningFrequency = Config::GetInt64(error["WarningFrequency"], 1);
+      Config::GetBool(ini, error["NoInfiniteRecursionDetection"]);
+    ThrowBadTypeExceptions = Config::GetBool(ini, error["ThrowBadTypeExceptions"]);
+    ThrowTooManyArguments = Config::GetBool(ini, error["ThrowTooManyArguments"]);
+    WarnTooManyArguments = Config::GetBool(ini, error["WarnTooManyArguments"]);
+    ThrowMissingArguments = Config::GetBool(ini, error["ThrowMissingArguments"]);
+    ThrowInvalidArguments = Config::GetBool(ini, error["ThrowInvalidArguments"]);
+    EnableHipHopErrors = Config::GetBool(ini, error["EnableHipHopErrors"], true);
+    AssertActive = Config::GetBool(ini, error["AssertActive"]);
+    AssertWarning = Config::GetBool(ini, error["AssertWarning"]);
+    NoticeFrequency = Config::GetInt64(ini, error["NoticeFrequency"], 1);
+    WarningFrequency = Config::GetInt64(ini, error["WarningFrequency"], 1);
   }
   {
     Hdf rlimit = config["ResourceLimit"];
-    if (Config::GetInt64(rlimit["CoreFileSizeOverride"])) {
-      setResourceLimit(RLIMIT_CORE,   rlimit, "CoreFileSizeOverride");
+    if (Config::GetInt64(ini, rlimit["CoreFileSizeOverride"])) {
+      setResourceLimit(RLIMIT_CORE, ini, rlimit, "CoreFileSizeOverride");
     } else {
-      setResourceLimit(RLIMIT_CORE,   rlimit, "CoreFileSize");
+      setResourceLimit(RLIMIT_CORE, ini, rlimit, "CoreFileSize");
     }
-    setResourceLimit(RLIMIT_NOFILE, rlimit, "MaxSocket");
-    setResourceLimit(RLIMIT_DATA,   rlimit, "RSS");
-    MaxRSS = Config::GetInt64(rlimit["MaxRSS"], 0);
-    SocketDefaultTimeout = Config::GetInt64(rlimit["SocketDefaultTimeout"], 5);
-    MaxRSSPollingCycle = Config::GetInt64(rlimit["MaxRSSPollingCycle"], 0);
-    DropCacheCycle = Config::GetInt64(rlimit["DropCacheCycle"], 0);
-    MaxSQLRowCount = Config::GetInt64(rlimit["MaxSQLRowCount"], 0);
-    MaxMemcacheKeyCount = Config::GetInt64(rlimit["MaxMemcacheKeyCount"], 0);
+    setResourceLimit(RLIMIT_NOFILE, ini, rlimit, "MaxSocket");
+    setResourceLimit(RLIMIT_DATA, ini, rlimit, "RSS");
+    MaxRSS = Config::GetInt64(ini, rlimit["MaxRSS"], 0);
+    SocketDefaultTimeout = Config::GetInt64(ini, rlimit["SocketDefaultTimeout"], 5);
+    MaxRSSPollingCycle = Config::GetInt64(ini, rlimit["MaxRSSPollingCycle"], 0);
+    DropCacheCycle = Config::GetInt64(ini, rlimit["DropCacheCycle"], 0);
+    MaxSQLRowCount = Config::GetInt64(ini, rlimit["MaxSQLRowCount"], 0);
+    MaxMemcacheKeyCount = Config::GetInt64(ini, rlimit["MaxMemcacheKeyCount"], 0);
     SerializationSizeLimit =
-      Config::GetInt64(rlimit["SerializationSizeLimit"], StringData::MaxSize);
-    StringOffsetLimit = Config::GetInt64(rlimit["StringOffsetLimit"], 10 * 1024 * 1024);
+      Config::GetInt64(ini, rlimit["SerializationSizeLimit"], StringData::MaxSize);
+    StringOffsetLimit = Config::GetInt64(ini, rlimit["StringOffsetLimit"], 10 * 1024 * 1024);
   }
   {
     Hdf server = config["Server"];
-    Host = Config::GetString(server["Host"]);
-    DefaultServerNameSuffix = Config::GetString(server["DefaultServerNameSuffix"]);
-    ServerType = Config::GetString(server["Type"], ServerType);
+    Host = Config::GetString(ini, server["Host"]);
+    DefaultServerNameSuffix = Config::GetString(ini, server["DefaultServerNameSuffix"]);
+    ServerType = Config::GetString(ini, server["Type"], ServerType);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.server.type", &ServerType);
-    ServerIP = Config::GetString(server["IP"]);
-    ServerFileSocket = Config::GetString(server["FileSocket"]);
+    ServerIP = Config::GetString(ini, server["IP"]);
+    ServerFileSocket = Config::GetString(ini, server["FileSocket"]);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.server.file_socket", &ServerFileSocket);
     ServerPrimaryIP = GetPrimaryIP();
-    ServerPort = Config::GetUInt16(server["Port"], 80);
+    ServerPort = Config::GetUInt16(ini, server["Port"], 80);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.server.port", &ServerPort);
-    ServerBacklog = Config::GetInt16(server["Backlog"], 128);
-    ServerConnectionLimit = Config::GetInt16(server["ConnectionLimit"], 0);
-    ServerThreadCount = Config::GetInt32(server["ThreadCount"], 50);
-    ServerThreadRoundRobin = Config::GetBool(server["ThreadRoundRobin"]);
+    ServerBacklog = Config::GetInt16(ini, server["Backlog"], 128);
+    ServerConnectionLimit = Config::GetInt16(ini, server["ConnectionLimit"], 0);
+    ServerThreadCount = Config::GetInt32(ini, server["ThreadCount"], 50);
+    ServerThreadRoundRobin = Config::GetBool(ini, server["ThreadRoundRobin"]);
     ServerWarmupThrottleRequestCount =
-      Config::GetInt32(server["WarmupThrottleRequestCount"],
+      Config::GetInt32(ini, server["WarmupThrottleRequestCount"],
                        ServerWarmupThrottleRequestCount);
     ServerThreadDropCacheTimeoutSeconds =
-      Config::GetInt32(server["ThreadDropCacheTimeoutSeconds"], 0);
-    if (Config::GetBool((server["ThreadJobLIFO"]))) {
+      Config::GetInt32(ini, server["ThreadDropCacheTimeoutSeconds"], 0);
+    if (Config::GetBool(ini, server["ThreadJobLIFO"])) {
       ServerThreadJobLIFOSwitchThreshold = 0;
     }
     ServerThreadJobLIFOSwitchThreshold =
-      Config::GetInt32(server["ThreadJobLIFOSwitchThreshold"],
+      Config::GetInt32(ini, server["ThreadJobLIFOSwitchThreshold"],
                        ServerThreadJobLIFOSwitchThreshold);
     ServerThreadJobMaxQueuingMilliSeconds =
-      Config::GetInt16(server["ThreadJobMaxQueuingMilliSeconds"], -1);
-    ServerThreadDropStack = Config::GetBool(server["ThreadDropStack"]);
-    ServerHttpSafeMode = Config::GetBool(server["HttpSafeMode"]);
-    ServerStatCache = Config::GetBool(server["StatCache"], false);
-    Config::Get(server["WarmupRequests"], ServerWarmupRequests);
-    Config::Get(server["HighPriorityEndPoints"], ServerHighPriorityEndPoints);
-    ServerExitOnBindFail = Config::GetBool(server["ExitOnBindFail"], false);
+      Config::GetInt16(ini, server["ThreadJobMaxQueuingMilliSeconds"], -1);
+    ServerThreadDropStack = Config::GetBool(ini, server["ThreadDropStack"]);
+    ServerHttpSafeMode = Config::GetBool(ini, server["HttpSafeMode"]);
+    ServerStatCache = Config::GetBool(ini, server["StatCache"], false);
+    Config::Get(ini, server["WarmupRequests"], ServerWarmupRequests);
+    Config::Get(ini, server["HighPriorityEndPoints"], ServerHighPriorityEndPoints);
+    ServerExitOnBindFail = Config::GetBool(ini, server["ExitOnBindFail"], false);
 
-    RequestTimeoutSeconds = Config::GetInt32(server["RequestTimeoutSeconds"], 0);
-    PspTimeoutSeconds = Config::GetInt32(server["PspTimeoutSeconds"], 0);
-    ServerMemoryHeadRoom = Config::GetInt64(server["MemoryHeadRoom"], 0);
-    RequestMemoryMaxBytes = Config::GetInt64(server["RequestMemoryMaxBytes"], std::numeric_limits<int64_t>::max());
-    ResponseQueueCount = Config::GetInt32(server["ResponseQueueCount"], 0);
+    RequestTimeoutSeconds = Config::GetInt32(ini, server["RequestTimeoutSeconds"], 0);
+    PspTimeoutSeconds = Config::GetInt32(ini, server["PspTimeoutSeconds"], 0);
+    ServerMemoryHeadRoom = Config::GetInt64(ini, server["MemoryHeadRoom"], 0);
+    RequestMemoryMaxBytes =
+      Config::GetInt64(ini, server["RequestMemoryMaxBytes"],
+                       std::numeric_limits<int64_t>::max());
+    ResponseQueueCount = Config::GetInt32(ini, server["ResponseQueueCount"], 0);
     if (ResponseQueueCount <= 0) {
       ResponseQueueCount = ServerThreadCount / 10;
       if (ResponseQueueCount <= 0) ResponseQueueCount = 1;
     }
-    ServerGracefulShutdownWait = Config::GetInt16(server["GracefulShutdownWait"], 0);
-    ServerHarshShutdown = Config::GetBool(server["HarshShutdown"], true);
-    ServerEvilShutdown = Config::GetBool(server["EvilShutdown"], true);
-    ServerDanglingWait = Config::GetInt16(server["DanglingWait"], 0);
-    ServerShutdownListenWait = Config::GetInt16(server["ShutdownListenWait"], 0);
-    ServerShutdownListenNoWork = Config::GetInt16(server["ShutdownListenNoWork"], -1);
-    Config::Get(server["SSLNextProtocols"], ServerNextProtocols);
+    ServerGracefulShutdownWait = Config::GetInt16(ini, server["GracefulShutdownWait"], 0);
+    ServerHarshShutdown = Config::GetBool(ini, server["HarshShutdown"], true);
+    ServerEvilShutdown = Config::GetBool(ini, server["EvilShutdown"], true);
+    ServerDanglingWait = Config::GetInt16(ini, server["DanglingWait"], 0);
+    ServerShutdownListenWait = Config::GetInt16(ini, server["ShutdownListenWait"], 0);
+    ServerShutdownListenNoWork = Config::GetInt16(ini, server["ShutdownListenNoWork"], -1);
+    Config::Get(ini, server["SSLNextProtocols"], ServerNextProtocols);
     if (ServerGracefulShutdownWait < ServerDanglingWait) {
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
-    GzipCompressionLevel = Config::GetInt16(server["GzipCompressionLevel"], 3);
-    EnableChanneledJson = Config::GetBool(server["EnableChanneledJson"], true);
+    GzipCompressionLevel = Config::GetInt16(ini, server["GzipCompressionLevel"], 3);
+    EnableChanneledJson = Config::GetBool(ini, server["EnableChanneledJson"], true);
 
-    ForceCompressionURL    = Config::GetString(server["ForceCompression"]["URL"]);
-    ForceCompressionCookie = Config::GetString(server["ForceCompression"]["Cookie"]);
-    ForceCompressionParam  = Config::GetString(server["ForceCompression"]["Param"]);
+    ForceCompressionURL    = Config::GetString(ini, server["ForceCompression"]["URL"]);
+    ForceCompressionCookie = Config::GetString(ini, server["ForceCompression"]["Cookie"]);
+    ForceCompressionParam  = Config::GetString(ini, server["ForceCompression"]["Param"]);
 
-    EnableMagicQuotesGpc = Config::GetBool(server["EnableMagicQuotesGpc"]);
-    EnableKeepAlive = Config::GetBool(server["EnableKeepAlive"], true);
-    ExposeHPHP = Config::GetBool(server["ExposeHPHP"], true);
-    ExposeXFBServer = Config::GetBool(server["ExposeXFBServer"], false);
-    ExposeXFBDebug = Config::GetBool(server["ExposeXFBDebug"], false);
-    XFBDebugSSLKey = Config::GetString(server["XFBDebugSSLKey"], "");
-    ConnectionTimeoutSeconds = Config::GetInt16(server["ConnectionTimeoutSeconds"], -1);
-    EnableOutputBuffering = Config::GetBool(server["EnableOutputBuffering"]);
-    OutputHandler = Config::GetString(server["OutputHandler"]);
-    ImplicitFlush = Config::GetBool(server["ImplicitFlush"]);
-    EnableEarlyFlush = Config::GetBool(server["EnableEarlyFlush"], true);
-    ForceChunkedEncoding = Config::GetBool(server["ForceChunkedEncoding"]);
-    MaxPostSize = Config::GetInt32(server["MaxPostSize"], 100) * (1LL << 20);
+    EnableMagicQuotesGpc = Config::GetBool(ini, server["EnableMagicQuotesGpc"]);
+    EnableKeepAlive = Config::GetBool(ini, server["EnableKeepAlive"], true);
+    ExposeHPHP = Config::GetBool(ini, server["ExposeHPHP"], true);
+    ExposeXFBServer = Config::GetBool(ini, server["ExposeXFBServer"], false);
+    ExposeXFBDebug = Config::GetBool(ini, server["ExposeXFBDebug"], false);
+    XFBDebugSSLKey = Config::GetString(ini, server["XFBDebugSSLKey"], "");
+    ConnectionTimeoutSeconds = Config::GetInt16(ini, server["ConnectionTimeoutSeconds"], -1);
+    EnableOutputBuffering = Config::GetBool(ini, server["EnableOutputBuffering"]);
+    OutputHandler = Config::GetString(ini, server["OutputHandler"]);
+    ImplicitFlush = Config::GetBool(ini, server["ImplicitFlush"]);
+    EnableEarlyFlush = Config::GetBool(ini, server["EnableEarlyFlush"], true);
+    ForceChunkedEncoding = Config::GetBool(ini, server["ForceChunkedEncoding"]);
+    MaxPostSize = Config::GetInt32(ini, server["MaxPostSize"], 100) * (1LL << 20);
     AlwaysPopulateRawPostData =
-      Config::GetBool(server["AlwaysPopulateRawPostData"], true);
-    LibEventSyncSend = Config::GetBool(server["LibEventSyncSend"], true);
-    TakeoverFilename = Config::GetString(server["TakeoverFilename"]);
-    ExpiresActive = Config::GetBool(server["ExpiresActive"], true);
-    ExpiresDefault = Config::GetInt32(server["ExpiresDefault"], 2592000);
+      Config::GetBool(ini, server["AlwaysPopulateRawPostData"], true);
+    LibEventSyncSend = Config::GetBool(ini, server["LibEventSyncSend"], true);
+    TakeoverFilename = Config::GetString(ini, server["TakeoverFilename"]);
+    ExpiresActive = Config::GetBool(ini, server["ExpiresActive"], true);
+    ExpiresDefault = Config::GetInt32(ini, server["ExpiresDefault"], 2592000);
     if (ExpiresDefault < 0) ExpiresDefault = 2592000;
-    DefaultCharsetName = Config::GetString(server["DefaultCharsetName"], "utf-8");
+    DefaultCharsetName = Config::GetString(ini, server["DefaultCharsetName"], "utf-8");
 
-    RequestBodyReadLimit = Config::GetInt32(server["RequestBodyReadLimit"], -1);
+    RequestBodyReadLimit = Config::GetInt32(ini, server["RequestBodyReadLimit"], -1);
 
-    EnableSSL = Config::GetBool(server["EnableSSL"]);
-    SSLPort = Config::GetUInt16(server["SSLPort"], 443);
-    SSLCertificateFile = Config::GetString(server["SSLCertificateFile"]);
-    SSLCertificateKeyFile = Config::GetString(server["SSLCertificateKeyFile"]);
-    SSLCertificateDir = Config::GetString(server["SSLCertificateDir"]);
-    TLSDisableTLS1_2 = Config::GetBool(server["TLSDisableTLS1_2"], false);
-    TLSClientCipherSpec = Config::GetString(server["TLSClientCipherSpec"]);
+    EnableSSL = Config::GetBool(ini, server["EnableSSL"]);
+    SSLPort = Config::GetUInt16(ini, server["SSLPort"], 443);
+    SSLCertificateFile = Config::GetString(ini, server["SSLCertificateFile"]);
+    SSLCertificateKeyFile = Config::GetString(ini, server["SSLCertificateKeyFile"]);
+    SSLCertificateDir = Config::GetString(ini, server["SSLCertificateDir"]);
+    TLSDisableTLS1_2 = Config::GetBool(ini, server["TLSDisableTLS1_2"], false);
+    TLSClientCipherSpec = Config::GetString(ini, server["TLSClientCipherSpec"]);
 
-    string srcRoot = FileUtil::normalizeDir(Config::GetString(server["SourceRoot"]));
+    string srcRoot = FileUtil::normalizeDir(Config::GetString(ini, server["SourceRoot"]));
     if (!srcRoot.empty()) SourceRoot = srcRoot;
     FileCache::SourceRoot = SourceRoot;
 
-    Config::Get(server["IncludeSearchPaths"], IncludeSearchPaths);
+    Config::Get(ini, server["IncludeSearchPaths"], IncludeSearchPaths);
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
       IncludeSearchPaths[i] = FileUtil::normalizeDir(IncludeSearchPaths[i]);
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
-    FileCache = Config::GetString(server["FileCache"]);
-    DefaultDocument = Config::GetString(server["DefaultDocument"]);
+    FileCache = Config::GetString(ini, server["FileCache"]);
+    DefaultDocument = Config::GetString(ini, server["DefaultDocument"]);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.server.default_document", &DefaultDocument);
-    ErrorDocument404 = Config::GetString(server["ErrorDocument404"]);
+    ErrorDocument404 = Config::GetString(ini, server["ErrorDocument404"]);
     normalizePath(ErrorDocument404);
-    ForbiddenAs404 = Config::GetBool(server["ForbiddenAs404"]);
-    ErrorDocument500 = Config::GetString(server["ErrorDocument500"]);
+    ForbiddenAs404 = Config::GetBool(ini, server["ForbiddenAs404"]);
+    ErrorDocument500 = Config::GetString(ini, server["ErrorDocument500"]);
     normalizePath(ErrorDocument500);
-    FatalErrorMessage = Config::GetString(server["FatalErrorMessage"]);
-    FontPath = FileUtil::normalizeDir(Config::GetString(server["FontPath"]));
+    FatalErrorMessage = Config::GetString(ini, server["FatalErrorMessage"]);
+    FontPath = FileUtil::normalizeDir(Config::GetString(ini, server["FontPath"]));
     EnableStaticContentFromDisk =
-      Config::GetBool(server["EnableStaticContentFromDisk"], true);
+      Config::GetBool(ini, server["EnableStaticContentFromDisk"], true);
     EnableOnDemandUncompress =
-      Config::GetBool(server["EnableOnDemandUncompress"], true);
+      Config::GetBool(ini, server["EnableOnDemandUncompress"], true);
     EnableStaticContentMMap =
-      Config::GetBool(server["EnableStaticContentMMap"], true);
+      Config::GetBool(ini, server["EnableStaticContentMMap"], true);
     if (EnableStaticContentMMap) {
       EnableOnDemandUncompress = true;
     }
-    Utf8izeReplace = Config::GetBool(server["Utf8izeReplace"], true);
+    Utf8izeReplace = Config::GetBool(ini, server["Utf8izeReplace"], true);
 
-    StartupDocument = Config::GetString(server["StartupDocument"]);
+    StartupDocument = Config::GetString(ini, server["StartupDocument"]);
     normalizePath(StartupDocument);
-    WarmupDocument = Config::GetString(server["WarmupDocument"]);
-    RequestInitFunction = Config::GetString(server["RequestInitFunction"]);
-    RequestInitDocument = Config::GetString(server["RequestInitDocument"]);
-    Config::Get(server["ThreadDocuments"], ThreadDocuments);
+    WarmupDocument = Config::GetString(ini, server["WarmupDocument"]);
+    RequestInitFunction = Config::GetString(ini, server["RequestInitFunction"]);
+    RequestInitDocument = Config::GetString(ini, server["RequestInitDocument"]);
+    Config::Get(ini, server["ThreadDocuments"], ThreadDocuments);
     for (unsigned int i = 0; i < ThreadDocuments.size(); i++) {
       normalizePath(ThreadDocuments[i]);
     }
-    Config::Get(server["ThreadLoopDocuments"], ThreadLoopDocuments);
+    Config::Get(ini, server["ThreadLoopDocuments"], ThreadLoopDocuments);
     for (unsigned int i = 0; i < ThreadLoopDocuments.size(); i++) {
       normalizePath(ThreadLoopDocuments[i]);
     }
 
-    SafeFileAccess = Config::GetBool(server["SafeFileAccess"]);
-    Config::Get(server["AllowedDirectories"], AllowedDirectories);
+    SafeFileAccess = Config::GetBool(ini, server["SafeFileAccess"]);
+    Config::Get(ini, server["AllowedDirectories"], AllowedDirectories);
 
-    WhitelistExec = Config::GetBool(server["WhitelistExec"]);
-    WhitelistExecWarningOnly = Config::GetBool(server["WhitelistExecWarningOnly"]);
-    Config::Get(server["AllowedExecCmds"], AllowedExecCmds);
+    WhitelistExec = Config::GetBool(ini, server["WhitelistExec"]);
+    WhitelistExecWarningOnly = Config::GetBool(ini, server["WhitelistExecWarningOnly"]);
+    Config::Get(ini, server["AllowedExecCmds"], AllowedExecCmds);
 
     UnserializationWhitelistCheck =
-      Config::GetBool(server["UnserializationWhitelistCheck"], false);
+      Config::GetBool(ini, server["UnserializationWhitelistCheck"], false);
     UnserializationWhitelistCheckWarningOnly =
-      Config::GetBool(server["UnserializationWhitelistCheckWarningOnly"], true);
+      Config::GetBool(ini, server["UnserializationWhitelistCheckWarningOnly"], true);
 
-    Config::Get(server["AllowedFiles"], AllowedFiles);
+    Config::Get(ini, server["AllowedFiles"], AllowedFiles);
 
-    Config::Get(server["ForbiddenFileExtensions"], ForbiddenFileExtensions);
+    Config::Get(ini, server["ForbiddenFileExtensions"], ForbiddenFileExtensions);
 
-    LockCodeMemory = Config::GetBool(server["LockCodeMemory"], false);
-    MaxArrayChain = Config::GetInt32(server["MaxArrayChain"], INT_MAX);
+    LockCodeMemory = Config::GetBool(ini, server["LockCodeMemory"], false);
+    MaxArrayChain = Config::GetInt32(ini, server["MaxArrayChain"], INT_MAX);
     if (MaxArrayChain != INT_MAX) {
       // MixedArray needs a higher threshold to avoid false-positives.
       // (and we always use MixedArray)
       MaxArrayChain *= 2;
     }
 
-    WarnOnCollectionToArray = Config::GetBool(server["WarnOnCollectionToArray"], false);
-    UseDirectCopy = Config::GetBool(server["UseDirectCopy"], false);
-    AlwaysUseRelativePath = Config::GetBool(server["AlwaysUseRelativePath"], false);
+    WarnOnCollectionToArray = Config::GetBool(ini, server["WarnOnCollectionToArray"], false);
+    UseDirectCopy = Config::GetBool(ini, server["UseDirectCopy"], false);
+    AlwaysUseRelativePath = Config::GetBool(ini, server["AlwaysUseRelativePath"], false);
 
     Hdf dns = server["DnsCache"];
-    EnableDnsCache = Config::GetBool(dns["Enable"]);
-    DnsCacheTTL = Config::GetInt32(dns["TTL"], 600); // 10 minutes
-    DnsCacheKeyMaturityThreshold = Config::GetInt32(dns["KeyMaturityThreshold"], 20);
-    DnsCacheMaximumCapacity = Config::GetInt64(dns["MaximumCapacity"], 0);
-    DnsCacheKeyFrequencyUpdatePeriod = Config::GetInt32(dns["KeyFrequencyUpdatePeriod"], 1000);
+    EnableDnsCache = Config::GetBool(ini, dns["Enable"]);
+    DnsCacheTTL = Config::GetInt32(ini, dns["TTL"], 600); // 10 minutes
+    DnsCacheKeyMaturityThreshold = Config::GetInt32(ini, dns["KeyMaturityThreshold"], 20);
+    DnsCacheMaximumCapacity = Config::GetInt64(ini, dns["MaximumCapacity"], 0);
+    DnsCacheKeyFrequencyUpdatePeriod = Config::GetInt32(ini, dns["KeyFrequencyUpdatePeriod"], 1000);
 
     Hdf upload = server["Upload"];
-    UploadMaxFileSize = Config::GetInt32(upload["UploadMaxFileSize"], 100)
+    UploadMaxFileSize = Config::GetInt32(ini, upload["UploadMaxFileSize"], 100)
       * (1LL << 20);
 
-    UploadTmpDir = Config::GetString(upload["UploadTmpDir"], "/tmp");
-    EnableFileUploads = Config::GetBool(upload["EnableFileUploads"], true);
-    EnableUploadProgress = Config::GetBool(upload["EnableUploadProgress"]);
-    Rfc1867Freq = Config::GetInt32(upload["Rfc1867Freq"], 256 * 1024);
+    UploadTmpDir = Config::GetString(ini, upload["UploadTmpDir"], "/tmp");
+    EnableFileUploads = Config::GetBool(ini, upload["EnableFileUploads"], true);
+    EnableUploadProgress = Config::GetBool(ini, upload["EnableUploadProgress"]);
+    Rfc1867Freq = Config::GetInt32(ini, upload["Rfc1867Freq"], 256 * 1024);
     if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;
-    Rfc1867Prefix = Config::GetString(upload["Rfc1867Prefix"], "vupload_");
-    Rfc1867Name = Config::GetString(upload["Rfc1867Name"], "video_ptoken");
+    Rfc1867Prefix = Config::GetString(ini, upload["Rfc1867Prefix"], "vupload_");
+    Rfc1867Name = Config::GetString(ini, upload["Rfc1867Name"], "video_ptoken");
 
-    ImageMemoryMaxBytes = Config::GetInt64(server["ImageMemoryMaxBytes"], 0);
+    ImageMemoryMaxBytes = Config::GetInt64(ini, server["ImageMemoryMaxBytes"], 0);
     if (ImageMemoryMaxBytes == 0) {
       ImageMemoryMaxBytes = UploadMaxFileSize * 2;
     }
 
     LightProcessFilePrefix =
-      Config::GetString(server["LightProcessFilePrefix"], "./lightprocess");
-    LightProcessCount = Config::GetInt32(server["LightProcessCount"], 0);
+      Config::GetString(ini, server["LightProcessFilePrefix"], "./lightprocess");
+    LightProcessCount = Config::GetInt32(ini, server["LightProcessCount"], 0);
 
-    InjectedStackTrace = Config::GetBool(server["InjectedStackTrace"], true);
-    InjectedStackTraceLimit = Config::GetInt32(server["InjectedStackTraceLimit"], -1);
+    InjectedStackTrace = Config::GetBool(ini, server["InjectedStackTrace"], true);
+    InjectedStackTraceLimit = Config::GetInt32(ini, server["InjectedStackTraceLimit"], -1);
 
-    ForceServerNameToHeader = Config::GetBool(server["ForceServerNameToHeader"]);
+    ForceServerNameToHeader = Config::GetBool(ini, server["ForceServerNameToHeader"]);
 
-    EnableCufAsync = Config::GetBool(server["EnableCufAsync"], false);
-    PathDebug = Config::GetBool(server["PathDebug"], false);
+    EnableCufAsync = Config::GetBool(ini, server["EnableCufAsync"], false);
+    PathDebug = Config::GetBool(ini, server["PathDebug"], false);
 
-    ServerUser = Config::GetString(server["User"], "");
+    ServerUser = Config::GetString(ini, server["User"], "");
   }
 
   VirtualHost::SortAllowedDirectories(AllowedDirectories);
@@ -992,10 +996,10 @@ void RuntimeOption::Load(Hdf &config,
     if (hosts.exists()) {
       for (Hdf hdf = hosts.firstChild(); hdf.exists(); hdf = hdf.next()) {
         if (hdf.getName() == "default") {
-          VirtualHost::GetDefault().init(hdf);
+          VirtualHost::GetDefault().init(ini, hdf);
           VirtualHost::GetDefault().addAllowedDirectories(AllowedDirectories);
         } else {
-          auto host = std::make_shared<VirtualHost>(hdf);
+          auto host = std::make_shared<VirtualHost>(ini, hdf);
           host->addAllowedDirectories(AllowedDirectories);
           VirtualHosts.push_back(host);
         }
@@ -1010,13 +1014,13 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf ipblocks = config["IpBlockMap"];
-    IpBlocks = std::make_shared<IpBlockMap>(ipblocks);
+    IpBlocks = std::make_shared<IpBlockMap>(ini, ipblocks);
   }
   {
     Hdf satellites = config["Satellites"];
     if (satellites.exists()) {
       for (Hdf hdf = satellites.firstChild(); hdf.exists(); hdf = hdf.next()) {
-        auto satellite = std::make_shared<SatelliteServerInfo>(hdf);
+        auto satellite = std::make_shared<SatelliteServerInfo>(ini, hdf);
         SatelliteServerInfos.push_back(satellite);
         if (satellite->getType() == SatelliteServer::Type::KindOfRPCServer) {
           XboxPassword = satellite->getPassword();
@@ -1027,147 +1031,147 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf xbox = config["Xbox"];
-    XboxServerThreadCount = Config::GetInt32(xbox["ServerInfo.ThreadCount"], 10);
+    XboxServerThreadCount = Config::GetInt32(ini, xbox["ServerInfo.ThreadCount"], 10);
     XboxServerMaxQueueLength =
-      Config::GetInt32(xbox["ServerInfo.MaxQueueLength"], INT_MAX);
+      Config::GetInt32(ini, xbox["ServerInfo.MaxQueueLength"], INT_MAX);
     if (XboxServerMaxQueueLength < 0) XboxServerMaxQueueLength = INT_MAX;
-    XboxServerPort = Config::GetInt32(xbox["ServerInfo.Port"], 0);
+    XboxServerPort = Config::GetInt32(ini, xbox["ServerInfo.Port"], 0);
     XboxDefaultLocalTimeoutMilliSeconds =
-      Config::GetInt32(xbox["DefaultLocalTimeoutMilliSeconds"], 500);
+      Config::GetInt32(ini, xbox["DefaultLocalTimeoutMilliSeconds"], 500);
     XboxDefaultRemoteTimeoutSeconds =
-      Config::GetInt32(xbox["DefaultRemoteTimeoutSeconds"], 5);
-    XboxServerInfoMaxRequest = Config::GetInt32(xbox["ServerInfo.MaxRequest"], 500);
-    XboxServerInfoDuration = Config::GetInt32(xbox["ServerInfo.MaxDuration"], 120);
-    XboxServerInfoWarmupDoc = Config::Get(xbox["ServerInfo.WarmupDocument"], "");
-    XboxServerInfoReqInitFunc = Config::Get(xbox["ServerInfo.RequestInitFunction"], "");
-    XboxServerInfoReqInitDoc = Config::Get(xbox["ServerInfo.RequestInitDocument"], "");
-    XboxServerInfoAlwaysReset = Config::GetBool(xbox["ServerInfo.AlwaysReset"], false);
-    XboxServerLogInfo = Config::GetBool(xbox["ServerInfo.LogInfo"], false);
+      Config::GetInt32(ini, xbox["DefaultRemoteTimeoutSeconds"], 5);
+    XboxServerInfoMaxRequest = Config::GetInt32(ini, xbox["ServerInfo.MaxRequest"], 500);
+    XboxServerInfoDuration = Config::GetInt32(ini, xbox["ServerInfo.MaxDuration"], 120);
+    XboxServerInfoWarmupDoc = Config::Get(ini, xbox["ServerInfo.WarmupDocument"], "");
+    XboxServerInfoReqInitFunc = Config::Get(ini, xbox["ServerInfo.RequestInitFunction"], "");
+    XboxServerInfoReqInitDoc = Config::Get(ini, xbox["ServerInfo.RequestInitDocument"], "");
+    XboxServerInfoAlwaysReset = Config::GetBool(ini, xbox["ServerInfo.AlwaysReset"], false);
+    XboxServerLogInfo = Config::GetBool(ini, xbox["ServerInfo.LogInfo"], false);
     XboxProcessMessageFunc =
-      Config::Get(xbox["ProcessMessageFunc"], "xbox_process_message");
+      Config::Get(ini, xbox["ProcessMessageFunc"], "xbox_process_message");
   }
   {
     Hdf pagelet = config["PageletServer"];
-    PageletServerThreadCount = Config::GetInt32(pagelet["ThreadCount"], 0);
-    PageletServerThreadRoundRobin = Config::GetBool(pagelet["ThreadRoundRobin"]);
-    PageletServerThreadDropStack = Config::GetBool(pagelet["ThreadDropStack"]);
+    PageletServerThreadCount = Config::GetInt32(ini, pagelet["ThreadCount"], 0);
+    PageletServerThreadRoundRobin = Config::GetBool(ini, pagelet["ThreadRoundRobin"]);
+    PageletServerThreadDropStack = Config::GetBool(ini, pagelet["ThreadDropStack"]);
     PageletServerThreadDropCacheTimeoutSeconds =
-      Config::GetInt32(pagelet["ThreadDropCacheTimeoutSeconds"], 0);
-    PageletServerQueueLimit = Config::GetInt32(pagelet["QueueLimit"], 0);
+      Config::GetInt32(ini, pagelet["ThreadDropCacheTimeoutSeconds"], 0);
+    PageletServerQueueLimit = Config::GetInt32(ini, pagelet["QueueLimit"], 0);
   }
   {
-    FiberCount = Config::GetInt32(config["Fiber.ThreadCount"], Process::GetCPUCount());
+    FiberCount = Config::GetInt32(ini, config["Fiber.ThreadCount"], Process::GetCPUCount());
   }
   {
     Hdf content = config["StaticFile"];
-    Config::Get(content["Extensions"], StaticFileExtensions);
-    Config::Get(content["Generators"], StaticFileGenerators);
+    Config::Get(ini, content["Extensions"], StaticFileExtensions);
+    Config::Get(ini, content["Generators"], StaticFileGenerators);
 
     Hdf matches = content["FilesMatch"];
     if (matches.exists()) {
       for (Hdf hdf = matches.firstChild(); hdf.exists(); hdf = hdf.next()) {
-        FilesMatches.push_back(std::make_shared<FilesMatch>(hdf));
+        FilesMatches.push_back(std::make_shared<FilesMatch>(ini, hdf));
       }
     }
   }
   {
     Hdf phpfile = config["PhpFile"];
-    Config::Get(phpfile["Extensions"], PhpFileExtensions);
+    Config::Get(ini, phpfile["Extensions"], PhpFileExtensions);
   }
   {
     Hdf admin = config["AdminServer"];
-    AdminServerPort = Config::GetUInt16(admin["Port"], 0);
-    AdminThreadCount = Config::GetInt32(admin["ThreadCount"], 1);
-    AdminPassword = Config::GetString(admin["Password"]);
-    Config::Get(admin["Passwords"], AdminPasswords);
+    AdminServerPort = Config::GetUInt16(ini, admin["Port"], 0);
+    AdminThreadCount = Config::GetInt32(ini, admin["ThreadCount"], 1);
+    AdminPassword = Config::GetString(ini, admin["Password"]);
+    Config::Get(ini, admin["Passwords"], AdminPasswords);
   }
   {
     Hdf proxy = config["Proxy"];
-    ProxyOrigin = Config::GetString(proxy["Origin"]);
-    ProxyRetry = Config::GetInt16(proxy["Retry"], 3);
-    UseServeURLs = Config::GetBool(proxy["ServeURLs"]);
-    Config::Get(proxy["ServeURLs"], ServeURLs);
-    UseProxyURLs = Config::GetBool(proxy["ProxyURLs"]);
-    ProxyPercentage = Config::GetByte(proxy["Percentage"], 0);
-    Config::Get(proxy["ProxyURLs"], ProxyURLs);
-    Config::Get(proxy["ProxyPatterns"], ProxyPatterns);
+    ProxyOrigin = Config::GetString(ini, proxy["Origin"]);
+    ProxyRetry = Config::GetInt16(ini, proxy["Retry"], 3);
+    UseServeURLs = Config::GetBool(ini, proxy["ServeURLs"]);
+    Config::Get(ini, proxy["ServeURLs"], ServeURLs);
+    UseProxyURLs = Config::GetBool(ini, proxy["ProxyURLs"]);
+    ProxyPercentage = Config::GetByte(ini, proxy["Percentage"], 0);
+    Config::Get(ini, proxy["ProxyURLs"], ProxyURLs);
+    Config::Get(ini, proxy["ProxyPatterns"], ProxyPatterns);
   }
   {
     Hdf http = config["Http"];
-    HttpDefaultTimeout = Config::GetInt32(http["DefaultTimeout"], 30);
-    HttpSlowQueryThreshold = Config::GetInt32(http["SlowQueryThreshold"], 5000);
+    HttpDefaultTimeout = Config::GetInt32(ini, http["DefaultTimeout"], 30);
+    HttpSlowQueryThreshold = Config::GetInt32(ini, http["SlowQueryThreshold"], 5000);
   }
   {
     Hdf debug = config["Debug"];
-    NativeStackTrace = Config::GetBool(debug["NativeStackTrace"]);
+    NativeStackTrace = Config::GetBool(ini, debug["NativeStackTrace"]);
     StackTrace::Enabled = NativeStackTrace;
-    TranslateLeakStackTrace = Config::GetBool(debug["TranslateLeakStackTrace"]);
-    FullBacktrace = Config::GetBool(debug["FullBacktrace"]);
-    ServerStackTrace = Config::GetBool(debug["ServerStackTrace"]);
-    ServerErrorMessage = Config::GetBool(debug["ServerErrorMessage"]);
-    TranslateSource = Config::GetBool(debug["TranslateSource"]);
-    RecordInput = Config::GetBool(debug["RecordInput"]);
-    ClearInputOnSuccess = Config::GetBool(debug["ClearInputOnSuccess"], true);
-    ProfilerOutputDir = Config::GetString(debug["ProfilerOutputDir"], "/tmp");
-    CoreDumpEmail = Config::GetString(debug["CoreDumpEmail"]);
-    CoreDumpReport = Config::GetBool(debug["CoreDumpReport"], true);
+    TranslateLeakStackTrace = Config::GetBool(ini, debug["TranslateLeakStackTrace"]);
+    FullBacktrace = Config::GetBool(ini, debug["FullBacktrace"]);
+    ServerStackTrace = Config::GetBool(ini, debug["ServerStackTrace"]);
+    ServerErrorMessage = Config::GetBool(ini, debug["ServerErrorMessage"]);
+    TranslateSource = Config::GetBool(ini, debug["TranslateSource"]);
+    RecordInput = Config::GetBool(ini, debug["RecordInput"]);
+    ClearInputOnSuccess = Config::GetBool(ini, debug["ClearInputOnSuccess"], true);
+    ProfilerOutputDir = Config::GetString(ini, debug["ProfilerOutputDir"], "/tmp");
+    CoreDumpEmail = Config::GetString(ini, debug["CoreDumpEmail"]);
+    CoreDumpReport = Config::GetBool(ini, debug["CoreDumpReport"], true);
     if (CoreDumpReport) {
       install_crash_reporter();
     }
     CoreDumpReportDirectory =
-      Config::GetString(debug["CoreDumpReportDirectory"], CoreDumpReportDirectory);
-    LocalMemcache = Config::GetBool(debug["LocalMemcache"]);
-    MemcacheReadOnly = Config::GetBool(debug["MemcacheReadOnly"]);
+      Config::GetString(ini, debug["CoreDumpReportDirectory"], CoreDumpReportDirectory);
+    LocalMemcache = Config::GetBool(ini, debug["LocalMemcache"]);
+    MemcacheReadOnly = Config::GetBool(ini, debug["MemcacheReadOnly"]);
 
     {
       Hdf simpleCounter = debug["SimpleCounter"];
       SimpleCounter::SampleStackCount =
-        Config::GetInt32(simpleCounter["SampleStackCount"], 0);
+        Config::GetInt32(ini, simpleCounter["SampleStackCount"], 0);
       SimpleCounter::SampleStackDepth =
-        Config::GetInt32(simpleCounter["SampleStackDepth"], 5);
+        Config::GetInt32(ini, simpleCounter["SampleStackDepth"], 5);
     }
   }
   {
     Hdf stats = config["Stats"];
-    EnableStats = Config::GetBool(stats); // main switch
+    EnableStats = Config::GetBool(ini, stats); // main switch
 
-    EnableAPCStats = Config::GetBool(stats["APC"], false);
-    EnableWebStats = Config::GetBool(stats["Web"]);
-    EnableMemoryStats = Config::GetBool(stats["Memory"]);
-    EnableMemcacheStats = Config::GetBool(stats["Memcache"]);
-    EnableMemcacheKeyStats = Config::GetBool(stats["MemcacheKey"]);
-    EnableSQLStats = Config::GetBool(stats["SQL"]);
-    EnableSQLTableStats = Config::GetBool(stats["SQLTable"]);
-    EnableNetworkIOStatus = Config::GetBool(stats["NetworkIO"]);
+    EnableAPCStats = Config::GetBool(ini, stats["APC"], false);
+    EnableWebStats = Config::GetBool(ini, stats["Web"]);
+    EnableMemoryStats = Config::GetBool(ini, stats["Memory"]);
+    EnableMemcacheStats = Config::GetBool(ini, stats["Memcache"]);
+    EnableMemcacheKeyStats = Config::GetBool(ini, stats["MemcacheKey"]);
+    EnableSQLStats = Config::GetBool(ini, stats["SQL"]);
+    EnableSQLTableStats = Config::GetBool(ini, stats["SQLTable"]);
+    EnableNetworkIOStatus = Config::GetBool(ini, stats["NetworkIO"]);
 
-    StatsXSL = Config::GetString(stats["XSL"]);
-    StatsXSLProxy = Config::GetString(stats["XSLProxy"]);
+    StatsXSL = Config::GetString(ini, stats["XSL"]);
+    StatsXSLProxy = Config::GetString(ini, stats["XSLProxy"]);
 
-    StatsSlotDuration = Config::GetInt32(stats["SlotDuration"], 10 * 60); // 10 minutes
-    StatsMaxSlot = Config::GetInt32(stats["MaxSlot"], 12 * 6); // 12 hours
+    StatsSlotDuration = Config::GetInt32(ini, stats["SlotDuration"], 10 * 60); // 10 minutes
+    StatsMaxSlot = Config::GetInt32(ini, stats["MaxSlot"], 12 * 6); // 12 hours
 
-    EnableHotProfiler = Config::GetBool(stats["EnableHotProfiler"], true);
-    ProfilerTraceBuffer = Config::GetInt32(stats["ProfilerTraceBuffer"], 2000000);
-    ProfilerTraceExpansion = Config::GetDouble(stats["ProfilerTraceExpansion"], 1.2);
-    ProfilerMaxTraceBuffer = Config::GetInt32(stats["ProfilerMaxTraceBuffer"], 0);
+    EnableHotProfiler = Config::GetBool(ini, stats["EnableHotProfiler"], true);
+    ProfilerTraceBuffer = Config::GetInt32(ini, stats["ProfilerTraceBuffer"], 2000000);
+    ProfilerTraceExpansion = Config::GetDouble(ini, stats["ProfilerTraceExpansion"], 1.2);
+    ProfilerMaxTraceBuffer = Config::GetInt32(ini, stats["ProfilerMaxTraceBuffer"], 0);
   }
   {
-    Config::Get(config["ServerVariables"], ServerVariables);
-    Config::Get(config["EnvVariables"], EnvVariables);
+    Config::Get(ini, config["ServerVariables"], ServerVariables);
+    Config::Get(ini, config["EnvVariables"], EnvVariables);
   }
   {
     Hdf eval = config["Eval"];
-    EnableHipHopSyntax = Config::GetBool(eval["EnableHipHopSyntax"]);
+    EnableHipHopSyntax = Config::GetBool(ini, eval["EnableHipHopSyntax"]);
     EnableHipHopExperimentalSyntax =
-      Config::GetBool(eval["EnableHipHopExperimentalSyntax"]);
-    EnableShortTags= Config::GetBool(eval["EnableShortTags"], true);
-    EnableAspTags = Config::GetBool(eval["EnableAspTags"]);
-    EnableXHP = Config::GetBool(eval["EnableXHP"], false);
+      Config::GetBool(ini, eval["EnableHipHopExperimentalSyntax"]);
+    EnableShortTags= Config::GetBool(ini, eval["EnableShortTags"], true);
+    EnableAspTags = Config::GetBool(ini, eval["EnableAspTags"]);
+    EnableXHP = Config::GetBool(ini, eval["EnableXHP"], false);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.eval.enable_xhp", &EnableXHP);
-    EnableZendCompat = Config::GetBool(eval["EnableZendCompat"], false);
-    TimeoutsUseWallTime = Config::GetBool(eval["TimeoutsUseWallTime"], true);
-    CheckFlushOnUserClose = Config::GetBool(eval["CheckFlushOnUserClose"], true);
+    EnableZendCompat = Config::GetBool(ini, eval["EnableZendCompat"], false);
+    TimeoutsUseWallTime = Config::GetBool(ini, eval["TimeoutsUseWallTime"], true);
+    CheckFlushOnUserClose = Config::GetBool(ini, eval["CheckFlushOnUserClose"], true);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -1175,11 +1179,11 @@ void RuntimeOption::Load(Hdf &config,
       EnableXHP = true;
     }
 
-    EnableObjDestructCall = Config::GetBool(eval["EnableObjDestructCall"], false);
-    MaxUserFunctionId = Config::GetInt32(eval["MaxUserFunctionId"], 2 * 65536);
-    CheckSymLink = Config::GetBool(eval["CheckSymLink"], true);
+    EnableObjDestructCall = Config::GetBool(ini, eval["EnableObjDestructCall"], false);
+    MaxUserFunctionId = Config::GetInt32(ini, eval["MaxUserFunctionId"], 2 * 65536);
+    CheckSymLink = Config::GetBool(ini, eval["CheckSymLink"], true);
 
-    EnableAlternative = Config::GetInt32(eval["EnableAlternative"], 0);
+    EnableAlternative = Config::GetInt32(ini, eval["EnableAlternative"], 0);
 
 #define get_double GetDouble
 #define get_bool GetBool
@@ -1194,7 +1198,7 @@ void RuntimeOption::Load(Hdf &config,
 #define get_uint64 GetUInt64
 #define get_uint64_t GetUInt64
 #define F(type, name, defaultVal) \
-    Eval ## name = Config::get_ ##type(eval[#name], defaultVal);
+    Eval ## name = Config::get_ ##type(ini, eval[#name], defaultVal);
     EVALFLAGS()
 #undef F
 #undef get_double
@@ -1208,44 +1212,44 @@ void RuntimeOption::Load(Hdf &config,
 #undef get_uint32_t
 #undef get_uint64
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
-    EnableEmitSwitch = Config::GetBool(eval["EnableEmitSwitch"], true);
-    EnableEmitterStats = Config::GetBool(eval["EnableEmitterStats"], EnableEmitterStats);
-    RecordCodeCoverage = Config::GetBool(eval["RecordCodeCoverage"]);
+    EnableEmitSwitch = Config::GetBool(ini, eval["EnableEmitSwitch"], true);
+    EnableEmitterStats = Config::GetBool(ini, eval["EnableEmitterStats"], EnableEmitterStats);
+    RecordCodeCoverage = Config::GetBool(ini, eval["RecordCodeCoverage"]);
     if (EvalJit && RecordCodeCoverage) {
       throw InvalidArgumentException(
         "code coverage", "Code coverage is not supported for Eval.Jit=true");
     }
     if (RecordCodeCoverage) CheckSymLink = true;
-    CodeCoverageOutputFile = Config::GetString(eval["CodeCoverageOutputFile"]);
+    CodeCoverageOutputFile = Config::GetString(ini, eval["CodeCoverageOutputFile"]);
     {
       Hdf debugger = eval["Debugger"];
-      EnableDebugger = Config::GetBool(debugger["EnableDebugger"]);
-      EnableDebuggerColor = Config::GetBool(debugger["EnableDebuggerColor"], true);
-      EnableDebuggerPrompt = Config::GetBool(debugger["EnableDebuggerPrompt"], true);
-      EnableDebuggerServer = Config::GetBool(debugger["EnableDebuggerServer"]);
-      EnableDebuggerUsageLog = Config::GetBool(debugger["EnableDebuggerUsageLog"]);
-      DebuggerServerPort = Config::GetUInt16(debugger["Port"], 8089);
-      DebuggerDisableIPv6 = Config::GetBool(debugger["DisableIPv6"], false);
-      DebuggerDefaultSandboxPath = Config::GetString(debugger["DefaultSandboxPath"]);
-      DebuggerStartupDocument = Config::GetString(debugger["StartupDocument"]);
-      DebuggerSignalTimeout = Config::GetInt32(debugger["SignalTimeout"], 1);
+      EnableDebugger = Config::GetBool(ini, debugger["EnableDebugger"]);
+      EnableDebuggerColor = Config::GetBool(ini, debugger["EnableDebuggerColor"], true);
+      EnableDebuggerPrompt = Config::GetBool(ini, debugger["EnableDebuggerPrompt"], true);
+      EnableDebuggerServer = Config::GetBool(ini, debugger["EnableDebuggerServer"]);
+      EnableDebuggerUsageLog = Config::GetBool(ini, debugger["EnableDebuggerUsageLog"]);
+      DebuggerServerPort = Config::GetUInt16(ini, debugger["Port"], 8089);
+      DebuggerDisableIPv6 = Config::GetBool(ini, debugger["DisableIPv6"], false);
+      DebuggerDefaultSandboxPath = Config::GetString(ini, debugger["DefaultSandboxPath"]);
+      DebuggerStartupDocument = Config::GetString(ini, debugger["StartupDocument"]);
+      DebuggerSignalTimeout = Config::GetInt32(ini, debugger["SignalTimeout"], 1);
 
-      DebuggerDefaultRpcPort = Config::GetUInt16(debugger["RPC.DefaultPort"], 8083);
-      DebuggerDefaultRpcAuth = Config::GetString(debugger["RPC.DefaultAuth"]);
-      DebuggerRpcHostDomain = Config::GetString(debugger["RPC.HostDomain"]);
-      DebuggerDefaultRpcTimeout = Config::GetInt32(debugger["RPC.DefaultTimeout"], 30);
+      DebuggerDefaultRpcPort = Config::GetUInt16(ini, debugger["RPC.DefaultPort"], 8083);
+      DebuggerDefaultRpcAuth = Config::GetString(ini, debugger["RPC.DefaultAuth"]);
+      DebuggerRpcHostDomain = Config::GetString(ini, debugger["RPC.HostDomain"]);
+      DebuggerDefaultRpcTimeout = Config::GetInt32(ini, debugger["RPC.DefaultTimeout"], 30);
     }
     {
       Hdf lang = config["Hack"]["Lang"];
       IntsOverflowToInts =
-        Config::GetBool(lang["IntsOverflowToInts"], EnableHipHopSyntax);
+        Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
     }
     {
       Hdf repo = config["Repo"];
       {
         Hdf repoLocal = repo["Local"];
         // Repo.Local.Mode.
-        RepoLocalMode = Config::GetString(repoLocal["Mode"]);
+        RepoLocalMode = Config::GetString(ini, repoLocal["Mode"]);
         if (!empty && RepoLocalMode.empty()) {
           const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
           if (HHVM_REPO_LOCAL_MODE != nullptr) {
@@ -1263,7 +1267,7 @@ void RuntimeOption::Load(Hdf &config,
           RepoLocalMode = "rw";
         }
         // Repo.Local.Path.
-        RepoLocalPath = Config::GetString(repoLocal["Path"]);
+        RepoLocalPath = Config::GetString(ini, repoLocal["Path"]);
         if (!empty && RepoLocalPath.empty()) {
           const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
           if (HHVM_REPO_LOCAL_PATH != nullptr) {
@@ -1274,14 +1278,14 @@ void RuntimeOption::Load(Hdf &config,
       {
         Hdf repoCentral = repo["Central"];
         // Repo.Central.Path.
-        RepoCentralPath = Config::GetString(repoCentral["Path"]);
+        RepoCentralPath = Config::GetString(ini, repoCentral["Path"]);
         IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                          "hhvm.repo.central.path", &RepoCentralPath);
       }
       {
         Hdf repoEval = repo["Eval"];
         // Repo.Eval.Mode.
-        RepoEvalMode = Config::GetString(repoEval["Mode"]);
+        RepoEvalMode = Config::GetString(ini, repoEval["Mode"]);
         if (RepoEvalMode.empty()) {
           RepoEvalMode = "readonly";
         } else if (RepoEvalMode.compare("local")
@@ -1292,80 +1296,80 @@ void RuntimeOption::Load(Hdf &config,
           RepoEvalMode = "readonly";
         }
       }
-      RepoJournal = Config::GetString(repo["Journal"], "delete");
-      RepoCommit = Config::GetBool(repo["Commit"], true);
-      RepoDebugInfo = Config::GetBool(repo["DebugInfo"], true);
-      RepoAuthoritative = Config::GetBool(repo["Authoritative"], false);
+      RepoJournal = Config::GetString(ini, repo["Journal"], "delete");
+      RepoCommit = Config::GetBool(ini, repo["Commit"], true);
+      RepoDebugInfo = Config::GetBool(ini, repo["DebugInfo"], true);
+      RepoAuthoritative = Config::GetBool(ini, repo["Authoritative"], false);
     }
 
     // NB: after we know the value of RepoAuthoritative.
     EnableArgsInBacktraces =
-      Config::GetBool(eval["EnableArgsInBacktraces"], !RepoAuthoritative);
+      Config::GetBool(ini, eval["EnableArgsInBacktraces"], !RepoAuthoritative);
     EvalAuthoritativeMode =
-      Config::GetBool(eval["AuthoritativeMode"], false) || RepoAuthoritative;
+      Config::GetBool(ini, eval["AuthoritativeMode"], false) || RepoAuthoritative;
   }
   {
     Hdf sandbox = config["Sandbox"];
-    SandboxMode = Config::GetBool(sandbox["SandboxMode"]);
-    SandboxPattern = format_pattern(Config::GetString(sandbox["Pattern"]), true);
-    SandboxHome = Config::GetString(sandbox["Home"]);
-    SandboxFallback = Config::GetString(sandbox["Fallback"]);
-    SandboxConfFile = Config::GetString(sandbox["ConfFile"]);
-    SandboxFromCommonRoot = Config::GetBool(sandbox["FromCommonRoot"]);
-    SandboxDirectoriesRoot = Config::GetString(sandbox["DirectoriesRoot"]);
-    SandboxLogsRoot = Config::GetString(sandbox["LogsRoot"]);
-    Config::Get(sandbox["ServerVariables"], SandboxServerVariables);
+    SandboxMode = Config::GetBool(ini, sandbox["SandboxMode"]);
+    SandboxPattern = format_pattern(Config::GetString(ini, sandbox["Pattern"]), true);
+    SandboxHome = Config::GetString(ini, sandbox["Home"]);
+    SandboxFallback = Config::GetString(ini, sandbox["Fallback"]);
+    SandboxConfFile = Config::GetString(ini, sandbox["ConfFile"]);
+    SandboxFromCommonRoot = Config::GetBool(ini, sandbox["FromCommonRoot"]);
+    SandboxDirectoriesRoot = Config::GetString(ini, sandbox["DirectoriesRoot"]);
+    SandboxLogsRoot = Config::GetString(ini, sandbox["LogsRoot"]);
+    Config::Get(ini, sandbox["ServerVariables"], SandboxServerVariables);
   }
   {
     Hdf mail = config["Mail"];
-    SendmailPath = Config::GetString(mail["SendmailPath"], "sendmail -t -i");
-    MailForceExtraParameters = Config::GetString(mail["ForceExtraParameters"]);
+    SendmailPath = Config::GetString(ini, mail["SendmailPath"], "sendmail -t -i");
+    MailForceExtraParameters = Config::GetString(ini, mail["ForceExtraParameters"]);
   }
   {
     Hdf preg = config["Preg"];
-    PregBacktraceLimit = Config::GetInt64(preg["BacktraceLimit"], 1000000);
-    PregRecursionLimit = Config::GetInt64(preg["RecursionLimit"], 100000);
-    EnablePregErrorLog = Config::GetBool(preg["ErrorLog"], true);
+    PregBacktraceLimit = Config::GetInt64(ini, preg["BacktraceLimit"], 1000000);
+    PregRecursionLimit = Config::GetInt64(ini, preg["RecursionLimit"], 100000);
+    EnablePregErrorLog = Config::GetBool(ini, preg["ErrorLog"], true);
   }
   {
     Hdf hhprofServer = config["HHProfServer"];
-    HHProfServerEnabled = Config::GetBool(hhprofServer["Enabled"], false);
-    HHProfServerPort = Config::GetUInt16(hhprofServer["Port"], 4327);
-    HHProfServerThreads = Config::GetInt16(hhprofServer["Threads"], 2);
+    HHProfServerEnabled = Config::GetBool(ini, hhprofServer["Enabled"], false);
+    HHProfServerPort = Config::GetUInt16(ini, hhprofServer["Port"], 4327);
+    HHProfServerThreads = Config::GetInt16(ini, hhprofServer["Threads"], 2);
     HHProfServerTimeoutSeconds =
-      Config::GetInt64(hhprofServer["TimeoutSeconds"], 30);
+      Config::GetInt64(ini, hhprofServer["TimeoutSeconds"], 30);
     HHProfServerProfileClientMode =
-      Config::GetBool(hhprofServer["ProfileClientMode"], true);
+      Config::GetBool(ini, hhprofServer["ProfileClientMode"], true);
     HHProfServerAllocationProfile =
-      Config::GetBool(hhprofServer["AllocationProfile"], false);
+      Config::GetBool(ini, hhprofServer["AllocationProfile"], false);
 
     // HHProfServer.Filter.*
     Hdf hhprofFilter = hhprofServer["Filter"];
     HHProfServerFilterMinAllocPerReq =
-      Config::GetInt64(hhprofFilter["MinAllocPerReq"], 2);
+      Config::GetInt64(ini, hhprofFilter["MinAllocPerReq"], 2);
     HHProfServerFilterMinBytesPerReq =
-      Config::GetInt64(hhprofFilter["MinBytesPerReq"], 128);
+      Config::GetInt64(ini, hhprofFilter["MinBytesPerReq"], 128);
   }
   {
     Hdf simplexml = config["SimpleXML"];
     SimpleXMLEmptyNamespaceMatchesAll =
-      Config::GetBool(simplexml["EmptyNamespaceMatchesAll"], false);
+      Config::GetBool(ini, simplexml["EmptyNamespaceMatchesAll"], false);
   }
 #ifdef FACEBOOK
   {
     Hdf fb303Server = config["Fb303Server"];
-    EnableFb303Server = Config::GetBool(fb303Server["Enable"], true);
-    Fb303ServerPort = Config::GetUInt16(fb303Server["Port"], 0);
-    Fb303ServerThreadStackSizeMb = Config::GetInt16(fb303Server["ThreadStackSizeMb"], 8);
-    Fb303ServerWorkerThreads = Config::GetInt16(fb303Server["WorkerThreads"], 1);
-    Fb303ServerPoolThreads = Config::GetInt16(fb303Server["PoolThreads"], 1);
+    EnableFb303Server = Config::GetBool(ini, fb303Server["Enable"], true);
+    Fb303ServerPort = Config::GetUInt16(ini, fb303Server["Port"], 0);
+    Fb303ServerThreadStackSizeMb = Config::GetInt16(ini, fb303Server["ThreadStackSizeMb"], 8);
+    Fb303ServerWorkerThreads = Config::GetInt16(ini, fb303Server["WorkerThreads"], 1);
+    Fb303ServerPoolThreads = Config::GetInt16(ini, fb303Server["PoolThreads"], 1);
   }
 #endif
 
   {
     Hdf hhprofServer = config["Xenon"];
-    XenonPeriodSeconds = Config::GetDouble(hhprofServer["Period"], 0.0);
-    XenonForceAlwaysOn = Config::GetBool(hhprofServer["ForceAlwaysOn"], false);
+    XenonPeriodSeconds = Config::GetDouble(ini, hhprofServer["Period"], 0.0);
+    XenonForceAlwaysOn = Config::GetBool(ini, hhprofServer["ForceAlwaysOn"], false);
   }
 
   refineStaticStringTableSize();
@@ -1464,7 +1468,7 @@ void RuntimeOption::Load(Hdf &config,
                    "warning_frequency",
                    &RuntimeOption::WarningFrequency);
 
-  Extension::LoadModules(config);
+  Extension::LoadModules(ini, config);
   SharedStores::Create();
   if (overwrites) Loaded = true;
 }

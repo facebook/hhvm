@@ -19,6 +19,7 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include <netinet/in.h>
 
 namespace HPHP {
@@ -37,7 +38,7 @@ public:
                               int &significant_bits);
 
 public:
-  explicit IpBlockMap(Hdf config);
+  explicit IpBlockMap(const IniSetting::Map& ini, Hdf config);
 
   bool isBlocking(const std::string &command, const std::string &ip) const;
 
@@ -82,7 +83,8 @@ private:
   };
   hphp_string_hash_map<std::shared_ptr<Acl>,Acl> m_acls; // location => acl
 
-  static void LoadIpList(std::shared_ptr<Acl> acl, Hdf hdf, bool allow);
+  static void LoadIpList(std::shared_ptr<Acl> acl, const IniSetting::Map& ini,
+                         Hdf hdf, bool allow);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

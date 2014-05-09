@@ -68,21 +68,21 @@ public:
   static std::string Socket;
   static bool TypedResults;
 
-  virtual void moduleLoad(Hdf config) {
+  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
     Hdf mysql = config["MySQL"];
-    ReadOnly = Config::GetBool(mysql["ReadOnly"]);
+    ReadOnly = Config::GetBool(ini, mysql["ReadOnly"]);
 #ifdef FACEBOOK
-    Localize = Config::GetBool(mysql["Localize"]);
+    Localize = Config::GetBool(ini, mysql["Localize"]);
 #endif
-    ConnectTimeout = Config::GetInt32(mysql["ConnectTimeout"], 1000);
-    ReadTimeout = Config::GetInt32(mysql["ReadTimeout"], 60000);
-    WaitTimeout = Config::GetInt32(mysql["WaitTimeout"], -1);
-    SlowQueryThreshold = Config::GetInt32(mysql["SlowQueryThreshold"], 1000);
-    KillOnTimeout = Config::GetBool(mysql["KillOnTimeout"]);
-    MaxRetryOpenOnFail = Config::GetInt32(mysql["MaxRetryOpenOnFail"], 1);
-    MaxRetryQueryOnFail = Config::GetInt32(mysql["MaxRetryQueryOnFail"], 1);
-    Socket = Config::GetString(mysql["Socket"]);
-    TypedResults = Config::GetBool(mysql["TypedResults"], true);
+    ConnectTimeout = Config::GetInt32(ini, mysql["ConnectTimeout"], 1000);
+    ReadTimeout = Config::GetInt32(ini, mysql["ReadTimeout"], 60000);
+    WaitTimeout = Config::GetInt32(ini, mysql["WaitTimeout"], -1);
+    SlowQueryThreshold = Config::GetInt32(ini, mysql["SlowQueryThreshold"], 1000);
+    KillOnTimeout = Config::GetBool(ini, mysql["KillOnTimeout"]);
+    MaxRetryOpenOnFail = Config::GetInt32(ini, mysql["MaxRetryOpenOnFail"], 1);
+    MaxRetryQueryOnFail = Config::GetInt32(ini, mysql["MaxRetryQueryOnFail"], 1);
+    Socket = Config::GetString(ini, mysql["Socket"]);
+    TypedResults = Config::GetBool(ini, mysql["TypedResults"], true);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.mysql.typed_results", &TypedResults);
   }

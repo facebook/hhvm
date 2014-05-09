@@ -33,6 +33,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/runtime/base/config.h"
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -301,7 +302,7 @@ void DebuggerClient::LoadColors(Hdf hdf) {
 
 const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
   TRACE(2, "DebuggerClient::LoadColor\n");
-  const char *name = hdf.get(defaultName);
+  const char *name = Config::Get(hdf, defaultName);
   hdf = name;  // for starter
   const char *color = get_color_by_name(name);
   if (color == nullptr) {
@@ -313,7 +314,7 @@ const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
 
 const char *DebuggerClient::LoadBgColor(Hdf hdf, const char *defaultName) {
   TRACE(2, "DebuggerClient::LoadBgColor\n");
-  const char *name = hdf.get(defaultName);
+  const char *name = Config::Get(hdf, defaultName);
   hdf = name;  // for starter
   const char *color = get_bgcolor_by_name(name);
   if (color == nullptr) {
@@ -2317,25 +2318,25 @@ void DebuggerClient::loadConfig() {
 
   m_neverSaveConfigOverride = true; // Prevent saving config while reading it
 
-  s_use_utf8 = config["UTF8"].getBool(true);
+  s_use_utf8 = Config::GetBool(config["UTF8"], true);
   config["UTF8"] = s_use_utf8; // for starter
   BIND(utf8, &s_use_utf8);
 
   Hdf color = config["Color"];
-  UseColor = color.getBool(true);
+  UseColor = Config::GetBool(color, true);
   color = UseColor; // for starter
   BIND(color, &UseColor);
   if (UseColor && RuntimeOption::EnableDebuggerColor) {
     LoadColors(color);
   }
 
-  m_tutorial = config["Tutorial"].getInt32(0);
+  m_tutorial = Config::GetInt32(config["Tutorial"], 0);
   BIND(tutorial, &m_tutorial);
 
-  m_scriptMode = config["ScriptMode"].getBool();
+  m_scriptMode = Config::GetBool(config["ScriptMode"]);
   BIND(script_mode, &m_scriptMode);
 
-  setDebuggerClientSmallStep(config["SmallStep"].getBool());
+  setDebuggerClientSmallStep(Config::GetBool(config["SmallStep"]));
   BIND(small_step, IniSetting::SetAndGet<bool>(
        [this](const bool& v) {
          setDebuggerClientSmallStep(v);
@@ -2344,7 +2345,7 @@ void DebuggerClient::loadConfig() {
        [this]() { return getDebuggerClientSmallStep(); }
   ));
 
-  setDebuggerClientMaxCodeLines(config["MaxCodeLines"].getInt16(-1));
+  setDebuggerClientMaxCodeLines(Config::GetInt16(config["MaxCodeLines"], -1));
   BIND(max_code_lines, IniSetting::SetAndGet<short>(
        [this](const short& v) {
          setDebuggerClientMaxCodeLines(v);
@@ -2353,13 +2354,13 @@ void DebuggerClient::loadConfig() {
        [this]() { return getDebuggerClientMaxCodeLines(); }
   ));
 
-  setDebuggerClientBypassCheck(config["BypassAccessCheck"].getBool());
+  setDebuggerClientBypassCheck(Config::GetBool(config["BypassAccessCheck"]));
   BIND(bypass_access_check, IniSetting::SetAndGet<bool>(
        [this](const bool& v) { setDebuggerClientBypassCheck(v); return true; },
        [this]() { return getDebuggerClientBypassCheck(); }
   ));
 
-  int printLevel = config["PrintLevel"].getInt16(5);
+  int printLevel = Config::GetInt16(config["PrintLevel"], 5);
   if (printLevel > 0 && printLevel < MinPrintLevel) {
     printLevel = MinPrintLevel;
   }
@@ -2378,14 +2379,14 @@ void DebuggerClient::loadConfig() {
        [this]() { return getDebuggerClientPrintLevel(); }
   ));
 
-  setDebuggerClientStackArgs(config["StackArgs"].getBool(true));
+  setDebuggerClientStackArgs(Config::GetBool(config["StackArgs"], true));
   BIND(stack_args, IniSetting::SetAndGet<bool>(
        [this](const bool& v) { setDebuggerClientStackArgs(v); return true; },
        [this]() { return getDebuggerClientStackArgs(); }
   ));
 
   setDebuggerClientShortPrintCharCount(
-    config["ShortPrintCharCount"].getInt16(200));
+    Config::GetInt16(config["ShortPrintCharCount"], 200));
   BIND(short_print_char_count, IniSetting::SetAndGet<short>(
        [this](const short& v) {
          setDebuggerClientShortPrintCharCount(v); return true;
@@ -2393,7 +2394,7 @@ void DebuggerClient::loadConfig() {
        [this]() { return getDebuggerClientShortPrintCharCount(); }
   ));
 
-  config["Tutorial"]["Visited"].get(m_tutorialVisited);
+  Config::Get(config["Tutorial"]["Visited"], m_tutorialVisited);
   BIND(tutorial.visited, &m_tutorialVisited);
 
   for (Hdf node = config["Macros"].firstChild(); node.exists();
@@ -2431,13 +2432,13 @@ void DebuggerClient::loadConfig() {
     }
   ));
 
-  m_sourceRoot = config["SourceRoot"].getString();
+  m_sourceRoot = Config::GetString(config["SourceRoot"]);
   BIND(source_root, &m_sourceRoot);
 
-  m_zendExe = config["ZendExecutable"].getString("php");
+  m_zendExe = Config::GetString(config["ZendExecutable"], "php");
   BIND(zend_executable, &m_zendExe);
 
-  m_neverSaveConfig = config["NeverSaveConfig"].getBool(false);
+  m_neverSaveConfig = Config::GetBool(config["NeverSaveConfig"], false);
   BIND(never_save_config, &m_neverSaveConfig);
 
   IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;

@@ -35,9 +35,11 @@ class String;
 
 bool ini_on_update(const folly::dynamic& value, bool& p);
 bool ini_on_update(const folly::dynamic& value, double& p);
+bool ini_on_update(const folly::dynamic& value, char& p);
 bool ini_on_update(const folly::dynamic& value, int16_t& p);
 bool ini_on_update(const folly::dynamic& value, int32_t& p);
 bool ini_on_update(const folly::dynamic& value, int64_t& p);
+bool ini_on_update(const folly::dynamic& value, unsigned char& p);
 bool ini_on_update(const folly::dynamic& value, uint16_t& p);
 bool ini_on_update(const folly::dynamic& value, uint32_t& p);
 bool ini_on_update(const folly::dynamic& value, uint64_t& p);

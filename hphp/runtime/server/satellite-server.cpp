@@ -20,6 +20,7 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/config.h"
 #include "hphp/util/text-util.h"
 #include "folly/Memory.h"
 
@@ -34,27 +35,28 @@ int SatelliteServerInfo::DanglingServerPort = 0;
 
 SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_name = hdf.getName();
-  m_port = hdf["Port"].getUInt16(0);
-  m_threadCount = hdf["ThreadCount"].getInt32(5);
-  m_maxRequest = hdf["MaxRequest"].getInt32(500);
-  m_maxDuration = hdf["MaxDuration"].getInt32(120);
-  m_timeoutSeconds = std::chrono::seconds
-    (hdf["TimeoutSeconds"].getInt32(RuntimeOption::RequestTimeoutSeconds));
-  m_reqInitFunc = hdf["RequestInitFunction"].getString("");
-  m_reqInitDoc = hdf["RequestInitDocument"].getString("");
-  m_password = hdf["Password"].getString("");
-  hdf["Passwords"].get(m_passwords);
-  m_alwaysReset = hdf["AlwaysReset"].getBool(false);
+  m_port = Config::GetUInt16(hdf["Port"], 0);
+  m_threadCount = Config::GetInt32(hdf["ThreadCount"], 5);
+  m_maxRequest = Config::GetInt32(hdf["MaxRequest"], 500);
+  m_maxDuration = Config::GetInt32(hdf["MaxDuration"], 120);
+  m_timeoutSeconds = std::chrono::seconds(
+    Config::GetInt32(hdf["TimeoutSeconds"],
+                      RuntimeOption::RequestTimeoutSeconds));
+  m_reqInitFunc = Config::GetString(hdf["RequestInitFunction"], "");
+  m_reqInitDoc = Config::GetString(hdf["RequestInitDocument"], "");
+  m_password = Config::GetString(hdf["Password"], "");
+  Config::Get(hdf["Passwords"], m_passwords);
+  m_alwaysReset = Config::GetBool(hdf["AlwaysReset"], false);
 
-  std::string type = hdf["Type"].getString();
+  std::string type = Config::GetString(hdf["Type"]);
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
     std::vector<std::string> urls;
-    hdf["URLs"].get(urls);
+    Config::Get(hdf["URLs"], urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(format_pattern(urls[i], true));
     }
-    if (hdf["BlockMainServer"].getBool(true)) {
+    if (Config::GetBool(hdf["BlockMainServer"], true)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
     }
   } else if (type == "DanglingPageServer") {

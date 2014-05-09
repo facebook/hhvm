@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/config.h"
 
 #define VERIFY_DUMP(map, exp)                                           \
   if (!(exp)) {                                                         \
@@ -134,7 +135,7 @@ bool TestUtil::TestHDF() {
       "node.* {\n"
       "  name = value\n"
       "}");
-    VS(doc["node"][0]["name"].getString(), "value");
+    VS(Config::GetString(doc["node"][0]["name"]), "value");
   }
 
   return Count(true);

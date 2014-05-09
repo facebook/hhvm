@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
@@ -112,10 +113,10 @@ Extension::Extension(litstr name, const char *version /* = "" */)
 
 void Extension::LoadModules(Hdf hdf) {
   // Load up any dynamic extensions
-  std::string path = hdf["DynamicExtensionPath"].getString(".");
+  std::string path = Config::GetString(hdf["DynamicExtensionPath"], ".");
   for (Hdf ext = hdf["DynamicExtensions"].firstChild();
        ext.exists(); ext = ext.next()) {
-    std::string extLoc = ext.getString();
+    std::string extLoc = Config::GetString(ext);
     if (extLoc.empty()) {
       continue;
     }

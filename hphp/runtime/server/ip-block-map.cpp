@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/runtime/base/config.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,7 +153,7 @@ bool IpBlockMap::ReadIPv6Address(const char *text,
 
 void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl, Hdf hdf, bool allow) {
   for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
-    std::string ip = child.getString();
+    std::string ip = Config::GetString(child);
 
     int bits;
     struct in6_addr address;
@@ -171,7 +172,7 @@ IpBlockMap::IpBlockMap(Hdf config) {
     // sgrimm note: not sure AllowFirst is relevant with my implementation
     // since we always search for the narrowest matching rule -- it really
     // just sets whether we deny or allow by default, I think.
-    bool allow = hdf["AllowFirst"].getBool(false);
+    bool allow = Config::GetBool(hdf["AllowFirst"], false);
     if (allow) {
       acl->m_networks.setAllowed(true);
       LoadIpList(acl, hdf["Ip.Deny"], false);
@@ -182,7 +183,7 @@ IpBlockMap::IpBlockMap(Hdf config) {
       LoadIpList(acl, hdf["Ip.Deny"], false);
     }
 
-    std::string location = hdf["Location"].getString();
+    std::string location = Config::GetString(hdf["Location"]);
     if (!location.empty() && location[0] == '/') {
       location = location.substr(1);
     }

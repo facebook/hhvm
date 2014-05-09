@@ -35,6 +35,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/config.h"
 
 using HPHP::ScopedMem;
 
@@ -49,45 +50,45 @@ typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 void apcExtension::moduleLoad(Hdf config) {
   Hdf apc = config["Server"]["APC"];
 
-  Enable = apc["EnableApc"].getBool(true);
-  EnableConstLoad = apc["EnableConstLoad"].getBool(false);
-  ForceConstLoadToAPC = apc["ForceConstLoadToAPC"].getBool(true);
-  PrimeLibrary = apc["PrimeLibrary"].getString();
-  LoadThread = apc["LoadThread"].getInt16(2);
-  apc["CompletionKeys"].get(CompletionKeys);
-  std::string tblType = apc["TableType"].getString("concurrent");
+  Enable = Config::GetBool(apc["EnableApc"], true);
+  EnableConstLoad = Config::GetBool(apc["EnableConstLoad"], false);
+  ForceConstLoadToAPC = Config::GetBool(apc["ForceConstLoadToAPC"], true);
+  PrimeLibrary = Config::GetString(apc["PrimeLibrary"]);
+  LoadThread = Config::GetInt16(apc["LoadThread"], 2);
+  Config::Get(apc["CompletionKeys"], CompletionKeys);
+  std::string tblType = Config::GetString(apc["TableType"], "concurrent");
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
     TableType = TableTypes::ConcurrentTable;
   } else {
     throw InvalidArgumentException("apc table type", "Invalid table type");
   }
-  EnableApcSerialize = apc["EnableApcSerialize"].getBool(true);
-  ExpireOnSets = apc["ExpireOnSets"].getBool();
-  PurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
-  PurgeRate = apc["PurgeRate"].getInt32(-1);
+  EnableApcSerialize = Config::GetBool(apc["EnableApcSerialize"], true);
+  ExpireOnSets = Config::GetBool(apc["ExpireOnSets"]);
+  PurgeFrequency = Config::GetInt32(apc["PurgeFrequency"], 4096);
+  PurgeRate = Config::GetInt32(apc["PurgeRate"], -1);
 
-  AllowObj = apc["AllowObject"].getBool();
-  TTLLimit = apc["TTLLimit"].getInt32(-1);
+  AllowObj = Config::GetBool(apc["AllowObject"]);
+  TTLLimit = Config::GetInt32(apc["TTLLimit"], -1);
 
   Hdf fileStorage = apc["FileStorage"];
-  UseFileStorage = fileStorage["Enable"].getBool();
-  FileStorageChunkSize = fileStorage["ChunkSize"].getInt64(1LL << 29);
-  FileStorageMaxSize = fileStorage["MaxSize"].getInt64(1LL << 32);
-  FileStoragePrefix = fileStorage["Prefix"].getString("/tmp/apc_store");
-  FileStorageFlagKey = fileStorage["FlagKey"].getString("_madvise_out");
-  FileStorageAdviseOutPeriod = fileStorage["AdviseOutPeriod"].getInt32(1800);
-  FileStorageKeepFileLinked = fileStorage["KeepFileLinked"].getBool();
 
-  ConcurrentTableLockFree = apc["ConcurrentTableLockFree"].getBool(false);
-  KeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
-  MaximumCapacity = apc["MaximumCapacity"].getInt64(0);
-  KeyFrequencyUpdatePeriod = apc["KeyFrequencyUpdatePeriod"].getInt32(1000);
+  UseFileStorage = Config::GetBool(fileStorage["Enable"]);
+  FileStorageChunkSize = Config::GetInt64(fileStorage["ChunkSize"], 1LL << 29);
+  FileStorageMaxSize = Config::GetInt64(fileStorage["MaxSize"], 1LL << 32);
+  FileStoragePrefix = Config::GetString(fileStorage["Prefix"], "/tmp/apc_store");
+  FileStorageFlagKey = Config::GetString(fileStorage["FlagKey"], "_madvise_out");
+  FileStorageAdviseOutPeriod = Config::GetInt32(fileStorage["AdviseOutPeriod"], 1800);
+  FileStorageKeepFileLinked = Config::GetBool(fileStorage["KeepFileLinked"]);
 
-  apc["NoTTLPrefix"].get(NoTTLPrefix);
+  ConcurrentTableLockFree = Config::GetBool(apc["ConcurrentTableLockFree"], false);
+  KeyMaturityThreshold = Config::GetInt32(apc["KeyMaturityThreshold"], 20);
+  MaximumCapacity = Config::GetInt64(apc["MaximumCapacity"], 0);
+  KeyFrequencyUpdatePeriod = Config::GetInt32(apc["KeyFrequencyUpdatePeriod"], 1000);
 
-  UseUncounted = apc["MemModelTreadmill"].getBool(
-      RuntimeOption::ServerExecutionMode());
-  InnerUncounted = apc["InnerUncounted"].getBool(false);
+  Config::Get(apc["NoTTLPrefix"], NoTTLPrefix);
+
+  UseUncounted = Config::GetBool(apc["MemModelTreadmill"], RuntimeOption::ServerExecutionMode());
+  InnerUncounted = Config::GetBool(apc["InnerUncounted"], false);
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",

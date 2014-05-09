@@ -24,6 +24,7 @@
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/util/text-util.h"
+#include "hphp/runtime/base/config.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,8 +208,8 @@ std::string Macro::desc(const char *indent) {
 
 void Macro::load(Hdf node) {
   TRACE(2, "Macro::load\n");
-  m_name = node["name"].getString();
-  node["cmds"].get(m_cmds);
+  m_name = Config::GetString(node["name"]);
+  Config::Get(node["cmds"], m_cmds);
 }
 
 void Macro::save(std::ostream &stream, int key) {

@@ -122,25 +122,25 @@ public:
    * any values that are not entirely parsable to be a number, it will return
    * default value instead.
    */
-  bool getBool(bool defValue = false) const;
-  const char *get(const char *defValue = nullptr) const;
-  std::string getString(const std::string &defValue = "") const;
-  char   getByte  (char   defValue = 0) const;
-  unsigned char  getUByte (unsigned char  defValue = 0) const;
-  int16_t  getInt16 (int16_t  defValue = 0) const;
-  uint16_t getUInt16(uint16_t defValue = 0) const;
-  int32_t  getInt32 (int32_t  defValue = 0) const;
-  uint32_t getUInt32(uint32_t defValue = 0) const;
-  int64_t  getInt64 (int64_t  defValue = 0) const;
-  uint64_t getUInt64(uint64_t defValue = 0) const;
-  double getDouble(double defValue = 0) const;
+  bool configGetBool(bool defValue = false) const;
+  const char *configGet(const char *defValue = nullptr) const;
+  std::string configGetString(const std::string &defValue = "") const;
+  char configGetByte(char defValue = 0) const;
+  unsigned char configGetUByte (unsigned char defValue = 0) const;
+  int16_t configGetInt16(int16_t  defValue = 0) const;
+  uint16_t configGetUInt16(uint16_t defValue = 0) const;
+  int32_t configGetInt32(int32_t  defValue = 0) const;
+  uint32_t configGetUInt32(uint32_t defValue = 0) const;
+  int64_t configGetInt64(int64_t  defValue = 0) const;
+  uint64_t configGetUInt64(uint64_t defValue = 0) const;
+  double configGetDouble(double defValue = 0) const;
 
-  void get(std::vector<std::string> &values) const;
-  void get(std::set<std::string> &values) const;
-  void get(std::set<std::string, stdltistr> &values) const;
-  void get(boost::container::flat_set<std::string> &values) const;
-  void get(std::map<std::string, std::string> &values) const;
-  void get(hphp_string_imap<std::string> &values) const;
+  void configGet(std::vector<std::string> &values) const;
+  void configGet(std::set<std::string> &values) const;
+  void configGet(std::set<std::string, stdltistr> &values) const;
+  void configGet(boost::container::flat_set<std::string> &values) const;
+  void configGet(std::map<std::string, std::string> &values) const;
+  void configGet(hphp_string_imap<std::string> &values) const;
 
   /**
    * Set this node's value.
@@ -207,7 +207,7 @@ public:
   /**
    * Note that this is NOT testing existence, but reading a boolean value.
    */
-  bool operator!() const { return !getBool();}
+  bool operator!() const { return !configGetBool();}
 
   /**
    * Removes a sub-node from parent.
@@ -390,7 +390,7 @@ class HdfDataValueException : public HdfException {
 public:
   explicit HdfDataValueException(const Hdf *hdf, const char *expected = "")
     : HdfException("HDF node [%s]'s value \"%s\" is not expected %s",
-                   hdf->getFullPath().c_str(), hdf->get(""), expected) {
+                   hdf->getFullPath().c_str(), hdf->configGet(""), expected) {
   }
   EXCEPTION_COMMON_IMPL(HdfDataValueException);
 };

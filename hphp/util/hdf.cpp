@@ -212,7 +212,7 @@ void Hdf::lint(std::vector<std::string> &names,
   if (excludePatternNode && *excludePatternNode) {
     for (Hdf hdf = operator[](excludePatternNode).firstChild();
          hdf.exists(); hdf = hdf.next()) {
-      std::string value = hdf.getString();
+      std::string value = hdf.configGetString();
       if (!value.empty()) {
         patterns.push_back(value);
       }
@@ -232,21 +232,21 @@ void Hdf::setVisited(bool visited /* = true */) {
 ///////////////////////////////////////////////////////////////////////////////
 // gets
 
-const char *Hdf::get(const char *defValue /* = NULL */) const {
+const char *Hdf::configGet(const char *defValue /* = NULL */) const {
   HDF *hdf = getRaw();
   const char *v = hdf_obj_value(hdf);
   hdf_set_visited(hdf, 1);
   return v ? v : defValue;
 }
 
-std::string Hdf::getString(const std::string &defValue /* = "" */) const {
-  const char *v = get();
+std::string Hdf::configGetString(const std::string &defValue /* = "" */) const {
+  const char *v = configGet();
   if (v == nullptr) return defValue;
   return v;
 }
 
-bool Hdf::getBool(bool defValue /* = false */) const {
-  const char *v = get();
+bool Hdf::configGetBool(bool defValue /* = false */) const {
+  const char *v = configGet();
   if (v == nullptr) return defValue;
 
   return *v && strcmp(v, "0") &&
@@ -254,7 +254,7 @@ bool Hdf::getBool(bool defValue /* = false */) const {
 }
 
 int64_t Hdf::getInt(int64_t defValue, const char *type, int64_t maxValue) const {
-  const char *v = get();
+  const char *v = configGet();
   if (v == nullptr) return defValue;
 
   char *endptr = nullptr;
@@ -267,24 +267,24 @@ int64_t Hdf::getInt(int64_t defValue, const char *type, int64_t maxValue) const 
   return n;
 }
 
-char Hdf::getByte(char defValue /* = 0 */) const {
+char Hdf::configGetByte(char defValue /* = 0 */) const {
   return getInt(defValue, "byte", 0x7FL);
 }
 
-int16_t Hdf::getInt16(int16_t defValue /* = 0 */) const {
+int16_t Hdf::configGetInt16(int16_t defValue /* = 0 */) const {
   return getInt(defValue, "int16", 0x7FFFL);
 }
 
-int32_t Hdf::getInt32(int32_t defValue /* = 0 */) const {
+int32_t Hdf::configGetInt32(int32_t defValue /* = 0 */) const {
   return getInt(defValue, "int32", 0x7FFFFFFFL);
 }
 
-int64_t Hdf::getInt64(int64_t defValue /* = 0 */) const {
+int64_t Hdf::configGetInt64(int64_t defValue /* = 0 */) const {
   return getInt(defValue, "int64", 0);
 }
 
 uint64_t Hdf::getUInt(uint64_t defValue, const char *type, uint64_t mask) const {
-  const char *v = get();
+  const char *v = configGet();
   if (v == nullptr) return defValue;
 
   char *endptr = nullptr;
@@ -296,24 +296,24 @@ uint64_t Hdf::getUInt(uint64_t defValue, const char *type, uint64_t mask) const 
   return n;
 }
 
-unsigned char Hdf::getUByte(unsigned char defValue /* = 0 */) const {
+unsigned char Hdf::configGetUByte(unsigned char defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned byte", ~0xFFUL);
 }
 
-uint16_t Hdf::getUInt16(uint16_t defValue /* = 0 */) const {
+uint16_t Hdf::configGetUInt16(uint16_t defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned int16", ~0xFFFFUL);
 }
 
-uint32_t Hdf::getUInt32(uint32_t defValue /* = 0 */) const {
+uint32_t Hdf::configGetUInt32(uint32_t defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned int32", ~0xFFFFFFFFUL);
 }
 
-uint64_t Hdf::getUInt64(uint64_t defValue /* = 0 */) const {
+uint64_t Hdf::configGetUInt64(uint64_t defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned int64", 0);
 }
 
-double Hdf::getDouble(double defValue /* = 0 */) const {
-  const char *v = get();
+double Hdf::configGetDouble(double defValue /* = 0 */) const {
+  const char *v = configGet();
   if (v == nullptr) return defValue;
 
   char *endptr = nullptr;
@@ -325,50 +325,50 @@ double Hdf::getDouble(double defValue /* = 0 */) const {
   return n;
 }
 
-void Hdf::get(std::vector<std::string> &values) const {
+void Hdf::configGet(std::vector<std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values.push_back(hdf.getString(""));
+    values.push_back(hdf.configGetString(""));
   }
 }
 
-void Hdf::get(std::set<std::string> &values) const {
+void Hdf::configGet(std::set<std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values.insert(hdf.getString(""));
+    values.insert(hdf.configGetString(""));
   }
 }
 
-void Hdf::get(boost::container::flat_set<std::string> &values) const {
+void Hdf::configGet(boost::container::flat_set<std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values.insert(hdf.getString(""));
+    values.insert(hdf.configGetString(""));
   }
 }
 
-void Hdf::get(std::set<std::string, stdltistr> &values) const {
+void Hdf::configGet(std::set<std::string, stdltistr> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values.insert(hdf.getString(""));
+    values.insert(hdf.configGetString(""));
   }
 }
 
-void Hdf::get(std::map<std::string, std::string> &values) const {
+void Hdf::configGet(std::map<std::string, std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values[hdf.getName()] = hdf.getString("");
+    values[hdf.getName()] = hdf.configGetString("");
   }
 }
 
-void Hdf::get(hphp_string_imap<std::string> &values) const {
+void Hdf::configGet(hphp_string_imap<std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values[hdf.getName()] = hdf.getString("");
+    values[hdf.getName()] = hdf.configGetString("");
   }
 }
 
 int Hdf::compare(const char *v2) const {
-  const char *v1 = get();
+  const char *v1 = configGet();
   if (v1 == nullptr && v2 == nullptr) return 0;
   if (v1 == nullptr) return -1;
   if (v2 == nullptr) return 1;
@@ -376,60 +376,60 @@ int Hdf::compare(const char *v2) const {
 }
 
 int Hdf::compare(const std::string &v2) const {
-  std::string v1 = getString();
+  std::string v1 = configGetString();
   return strcmp(v1.c_str(), v2.c_str());
 }
 
 int Hdf::compare(char v2) const {
-  char v1 = getByte();
+  char v1 = configGetByte();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
 int Hdf::compare(unsigned char v2) const {
-  unsigned char v1 = getUByte();
+  unsigned char v1 = configGetUByte();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
 int Hdf::compare(int16_t v2) const {
-  int16_t v1 = getInt16();
+  int16_t v1 = configGetInt16();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
 int Hdf::compare(uint16_t v2) const {
-  uint16_t v1 = getUInt16();
+  uint16_t v1 = configGetUInt16();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
 int Hdf::compare(int32_t v2) const {
-  int32_t v1 = getInt32();
+  int32_t v1 = configGetInt32();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
 int Hdf::compare(uint32_t v2) const {
-  uint32_t v1 = getUInt32();
+  uint32_t v1 = configGetUInt32();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
 int Hdf::compare(int64_t v2) const {
-  int64_t v1 = getInt64();
+  int64_t v1 = configGetInt64();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
 int Hdf::compare(uint64_t v2) const {
-  uint64_t v1 = getUInt64();
+  uint64_t v1 = configGetUInt64();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
 int Hdf::compare(double v2) const {
-  double v1 = getDouble();
+  double v1 = configGetDouble();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }

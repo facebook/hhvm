@@ -164,6 +164,17 @@ bool ini_on_update(const folly::dynamic& value, double& p) {
   return true;
 }
 
+bool ini_on_update(const folly::dynamic& value, char& p) {
+  INI_ASSERT_STR(value);
+  auto n = convert_bytes_to_long(str);
+  auto maxValue = 0x7FL;
+  if (n > maxValue || n < (- maxValue - 1)) {
+    return false;
+  }
+  p = n;
+  return true;
+}
+
 bool ini_on_update(const folly::dynamic& value, int16_t& p) {
   INI_ASSERT_STR(value);
   auto n = convert_bytes_to_long(str);
@@ -189,6 +200,17 @@ bool ini_on_update(const folly::dynamic& value, int32_t& p) {
 bool ini_on_update(const folly::dynamic& value, int64_t& p) {
   INI_ASSERT_STR(value);
   p = convert_bytes_to_long(str);
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value, unsigned char& p) {
+  INI_ASSERT_STR(value);
+  auto n = convert_bytes_to_long(str);
+  auto mask = ~0xFFUL;
+  if (((uint64_t)n & mask)) {
+    return false;
+  }
+  p = n;
   return true;
 }
 

@@ -30,6 +30,7 @@
 #include <set>
 #include <vector>
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/config.h"
 
 namespace HPHP {
 
@@ -163,7 +164,7 @@ bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
 void Option::LoadRootHdf(const Hdf &roots, map<string, string> &map) {
   if (roots.exists()) {
     for (Hdf hdf = roots.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      map[hdf["root"].get()] = hdf["path"].get();
+      map[Config::Get(hdf["root"])] = Config::Get(hdf["path"]);
     }
   }
 }
@@ -171,7 +172,7 @@ void Option::LoadRootHdf(const Hdf &roots, map<string, string> &map) {
 void Option::LoadRootHdf(const Hdf &roots, vector<string> &vec) {
   if (roots.exists()) {
     for (Hdf hdf = roots.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      vec.push_back(hdf.getString(""));
+      vec.push_back(Config::GetString(hdf,""));
     }
   }
 }
@@ -180,25 +181,25 @@ void Option::Load(Hdf &config) {
   LoadRootHdf(config["IncludeRoots"], IncludeRoots);
   LoadRootHdf(config["AutoloadRoots"], AutoloadRoots);
 
-  config["PackageFiles"].get(PackageFiles);
-  config["IncludeSearchPaths"].get(IncludeSearchPaths);
-  config["PackageDirectories"].get(PackageDirectories);
-  config["PackageExcludeDirs"].get(PackageExcludeDirs);
-  config["PackageExcludeFiles"].get(PackageExcludeFiles);
-  config["PackageExcludePatterns"].get(PackageExcludePatterns);
-  config["PackageExcludeStaticDirs"].get(PackageExcludeStaticDirs);
-  config["PackageExcludeStaticFiles"].get(PackageExcludeStaticFiles);
-  config["PackageExcludeStaticPatterns"].get(PackageExcludeStaticPatterns);
-  CachePHPFile = config["CachePHPFile"].getBool();
+  Config::Get(config["PackageFiles"], PackageFiles);
+  Config::Get(config["IncludeSearchPaths"], IncludeSearchPaths);
+  Config::Get(config["PackageDirectories"], PackageDirectories);
+  Config::Get(config["PackageExcludeDirs"], PackageExcludeDirs);
+  Config::Get(config["PackageExcludeFiles"], PackageExcludeFiles);
+  Config::Get(config["PackageExcludePatterns"], PackageExcludePatterns);
+  Config::Get(config["PackageExcludeStaticDirs"], PackageExcludeStaticDirs);
+  Config::Get(config["PackageExcludeStaticFiles"], PackageExcludeStaticFiles);
+  Config::Get(config["PackageExcludeStaticPatterns"], PackageExcludeStaticPatterns);
+  CachePHPFile = Config::GetBool(config["CachePHPFile"]);
 
-  config["ParseOnDemandDirs"].get(ParseOnDemandDirs);
+  Config::Get(config["ParseOnDemandDirs"], ParseOnDemandDirs);
 
   {
     Hdf cg = config["CodeGeneration"];
     string tmp;
 
 #define READ_CG_OPTION(name)                    \
-    tmp = cg[#name].getString();                \
+    tmp = Config::GetString(cg[#name]);         \
     if (!tmp.empty()) {                         \
       name = OptionStrings.add(tmp.c_str());    \
     }
@@ -207,18 +208,18 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(LambdaPrefix);
   }
 
-  config["DynamicFunctionPrefix"].get(DynamicFunctionPrefixes);
-  config["DynamicFunctionPostfix"].get(DynamicFunctionPostfixes);
-  config["DynamicMethodPrefix"].get(DynamicMethodPrefixes);
-  config["DynamicInvokeFunctions"].get(DynamicInvokeFunctions);
-  config["VolatileClasses"].get(VolatileClasses);
+  Config::Get(config["DynamicFunctionPrefix"], DynamicFunctionPrefixes);
+  Config::Get(config["DynamicFunctionPostfix"], DynamicFunctionPostfixes);
+  Config::Get(config["DynamicMethodPrefix"], DynamicMethodPrefixes);
+  Config::Get(config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
+  Config::Get(config["VolatileClasses"], VolatileClasses);
 
   // build map from function names to sections
   for (Hdf hdf = config["FunctionSections"].firstChild(); hdf.exists();
        hdf = hdf.next()) {
     for (Hdf hdfFunc = hdf.firstChild(); hdfFunc.exists();
          hdfFunc = hdfFunc.next()) {
-           FunctionSections[hdfFunc.getString()] = hdf.getName();
+           FunctionSections[Config::GetString(hdfFunc)] = hdf.getName();
     }
   }
 
@@ -226,35 +227,35 @@ void Option::Load(Hdf &config) {
     Hdf repo = config["Repo"];
     {
       Hdf repoCentral = repo["Central"];
-      RepoCentralPath = repoCentral["Path"].getString();
+      RepoCentralPath = Config::GetString(repoCentral["Path"]);
     }
-    RepoDebugInfo = repo["DebugInfo"].getBool(false);
+    RepoDebugInfo = Config::GetBool(repo["DebugInfo"], false);
   }
 
   {
     Hdf autoloadMap = config["AutoloadMap"];
-    autoloadMap["class"].get(AutoloadClassMap);
-    autoloadMap["function"].get(AutoloadFuncMap);
-    autoloadMap["constant"].get(AutoloadConstMap);
-    AutoloadRoot = autoloadMap["root"].getString();
+    Config::Get(autoloadMap["class"], AutoloadClassMap);
+    Config::Get(autoloadMap["function"], AutoloadFuncMap);
+    Config::Get(autoloadMap["constant"], AutoloadConstMap);
+    AutoloadRoot = Config::GetString(autoloadMap["root"]);
   }
 
-  HardTypeHints = config["HardTypeHints"].getBool(true);
-  HardConstProp = config["HardConstProp"].getBool(true);
+  HardTypeHints = Config::GetBool(config["HardTypeHints"], true);
+  HardConstProp = Config::GetBool(config["HardConstProp"], true);
 
-  EnableHipHopSyntax = config["EnableHipHopSyntax"].getBool();
-  EnableZendCompat = config["EnableZendCompat"].getBool();
-  JitEnableRenameFunction = config["JitEnableRenameFunction"].getBool();
+  EnableHipHopSyntax = Config::GetBool(config["EnableHipHopSyntax"]);
+  EnableZendCompat = Config::GetBool(config["EnableZendCompat"]);
+  JitEnableRenameFunction = Config::GetBool(config["JitEnableRenameFunction"]);
   EnableHipHopExperimentalSyntax =
-    config["EnableHipHopExperimentalSyntax"].getBool();
-  EnableShortTags = config["EnableShortTags"].getBool(true);
+    Config::GetBool(config["EnableHipHopExperimentalSyntax"]);
+  EnableShortTags = Config::GetBool(config["EnableShortTags"], true);
 
   IntsOverflowToInts =
-    config["Hack"]["Lang"]["IntsOverflowToInts"].getBool(EnableHipHopSyntax);
+    Config::GetBool(config["Hack"]["Lang"]["IntsOverflowToInts"], EnableHipHopSyntax);
 
-  EnableAspTags = config["EnableAspTags"].getBool();
+  EnableAspTags = Config::GetBool(config["EnableAspTags"]);
 
-  EnableXHP = config["EnableXHP"].getBool(false);
+  EnableXHP = Config::GetBool(config["EnableXHP"], false);
 
   if (EnableHipHopSyntax) {
     // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -262,30 +263,30 @@ void Option::Load(Hdf &config) {
     EnableXHP = true;
   }
 
-  ParserThreadCount = config["ParserThreadCount"].getInt32(0);
+  ParserThreadCount = Config::GetInt32(config["ParserThreadCount"], 0);
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
 
-  EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
-  AllDynamic = config["AllDynamic"].getBool(true);
-  AllVolatile = config["AllVolatile"].getBool();
+  EnableEval = (EvalLevel) Config::GetByte(config["EnableEval"], 0);
+  AllDynamic = Config::GetBool(config["AllDynamic"], true);
+  AllVolatile = Config::GetBool(config["AllVolatile"]);
 
-  GenerateDocComments      = config["GenerateDocComments"].getBool(true);
-  EliminateDeadCode        = config["EliminateDeadCode"].getBool(true);
-  CopyProp                 = config["CopyProp"].getBool(false);
-  LocalCopyProp            = config["LocalCopyProp"].getBool(true);
-  StringLoopOpts           = config["StringLoopOpts"].getBool(true);
-  AutoInline               = config["AutoInline"].getInt32(0);
-  ControlFlow              = config["ControlFlow"].getBool(true);
-  VariableCoalescing       = config["VariableCoalescing"].getBool(false);
-  ArrayAccessIdempotent    = config["ArrayAccessIdempotent"].getBool(false);
-  DumpAst                  = config["DumpAst"].getBool(false);
-  WholeProgram             = config["WholeProgram"].getBool(true);
-  UseHHBBC                 = config["UseHHBBC"].getBool(UseHHBBC);
+  GenerateDocComments      = Config::GetBool(config["GenerateDocComments"], true);
+  EliminateDeadCode        = Config::GetBool(config["EliminateDeadCode"], true);
+  CopyProp                 = Config::GetBool(config["CopyProp"], false);
+  LocalCopyProp            = Config::GetBool(config["LocalCopyProp"], true);
+  StringLoopOpts           = Config::GetBool(config["StringLoopOpts"], true);
+  AutoInline               = Config::GetInt32(config["AutoInline"], 0);
+  ControlFlow              = Config::GetBool(config["ControlFlow"], true);
+  VariableCoalescing       = Config::GetBool(config["VariableCoalescing"], false);
+  ArrayAccessIdempotent    = Config::GetBool(config["ArrayAccessIdempotent"], false);
+  DumpAst                  = Config::GetBool(config["DumpAst"], false);
+  WholeProgram             = Config::GetBool(config["WholeProgram"], true);
+  UseHHBBC                 = Config::GetBool(config["UseHHBBC"], UseHHBBC);
 
   // Temporary, during file-cache migration.
-  FileCache::UseNewCache   = config["UseNewCache"].getBool(false);
+  FileCache::UseNewCache   = Config::GetBool(config["UseNewCache"], false);
 
   OnLoad();
 }

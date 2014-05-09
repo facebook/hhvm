@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/config.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -105,15 +106,14 @@ void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
 
 void VirtualHost::initRuntimeOption(Hdf overwrite) {
   int requestTimeoutSeconds =
-    overwrite["Server.RequestTimeoutSeconds"].getInt32(-1);
+    Config::GetInt32(overwrite["Server.RequestTimeoutSeconds"], -1);
   int64_t maxPostSize =
-    overwrite["Server.MaxPostSize"].getInt32(-1);
+    Config::GetInt32(overwrite["Server.MaxPostSize"], -1);
   if (maxPostSize != -1) maxPostSize *= (1LL << 20);
   int64_t uploadMaxFileSize =
-    overwrite["Server.Upload.UploadMaxFileSize"].getInt32(-1);
+    Config::GetInt32(overwrite["Server.Upload.UploadMaxFileSize"], -1);
   if (uploadMaxFileSize != -1) uploadMaxFileSize *= (1LL << 20);
-  overwrite["Server.AllowedDirectories"].
-    get(m_runtimeOption.allowedDirectories);
+  Config::Get(overwrite["Server.AllowedDirectories"], m_runtimeOption.allowedDirectories);
   m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
   m_runtimeOption.maxPostSize = maxPostSize;
   m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
@@ -151,9 +151,9 @@ VirtualHost::VirtualHost(Hdf vh) : m_disabled(false) {
 void VirtualHost::init(Hdf vh) {
   m_name = vh.getName();
 
-  const char *prefix = vh["Prefix"].get("");
-  const char *pattern = vh["Pattern"].get("");
-  const char *pathTranslation = vh["PathTranslation"].get("");
+  const char *prefix = Config::Get(vh["Prefix"], "");
+  const char *pattern = Config::Get(vh["Pattern"], "");
+  const char *pathTranslation = Config::Get(vh["PathTranslation"], "");
   Hdf overwrite = vh["overwrite"];
 
   if (prefix) m_prefix = prefix;
@@ -172,21 +172,21 @@ void VirtualHost::init(Hdf vh) {
   }
   initRuntimeOption(overwrite);
 
-  m_disabled = vh["Disabled"].getBool(false);
+  m_disabled = Config::GetBool(vh["Disabled"], false);
 
   m_checkExistenceBeforeRewrite =
-    vh["CheckExistenceBeforeRewrite"].getBool(true);
+    Config::GetBool(vh["CheckExistenceBeforeRewrite"], true);
 
   Hdf rewriteRules = vh["RewriteRules"];
   for (Hdf hdf = rewriteRules.firstChild(); hdf.exists(); hdf = hdf.next()) {
     RewriteRule dummy;
     m_rewriteRules.push_back(dummy);
     RewriteRule &rule = m_rewriteRules.back();
-    rule.pattern = format_pattern(hdf["pattern"].getString(""), true);
-    rule.to = hdf["to"].getString("");
-    rule.qsa = hdf["qsa"].getBool(false);
-    rule.redirect = hdf["redirect"].getInt16(0);
-    rule.encode_backrefs = hdf["encode_backrefs"].getBool(false);
+    rule.pattern = format_pattern(Config::GetString(hdf["pattern"], ""), true);
+    rule.to = Config::GetString(hdf["to"], "");
+    rule.qsa = Config::GetBool(hdf["qsa"], false);
+    rule.redirect = Config::GetInt16(hdf["redirect"], 0);
+    rule.encode_backrefs = Config::GetBool(hdf["encode_backrefs"], false);
 
     if (rule.pattern.empty() || rule.to.empty()) {
       throw InvalidArgumentException("rewrite rule", "(empty pattern or to)");
@@ -197,11 +197,11 @@ void VirtualHost::init(Hdf vh) {
       RewriteCond dummy;
       rule.rewriteConds.push_back(dummy);
       RewriteCond &cond = rule.rewriteConds.back();
-      cond.pattern = format_pattern(chdf["pattern"].getString(""), true);
+      cond.pattern = format_pattern(Config::GetString(chdf["pattern"], ""), true);
       if (cond.pattern.empty()) {
         throw InvalidArgumentException("rewrite rule", "(empty cond pattern)");
       }
-      const char *type = chdf["type"].get();
+      const char *type = Config::Get(chdf["type"]);
       if (type) {
         if (strcasecmp(type, "host") == 0) {
           cond.type = RewriteCond::Type::Host;
@@ -214,7 +214,7 @@ void VirtualHost::init(Hdf vh) {
       } else {
         cond.type = RewriteCond::Type::Request;
       }
-      cond.negate = chdf["negate"].getBool(false);
+      cond.negate = Config::GetBool(chdf["negate"], false);
     }
 
   }
@@ -227,13 +227,13 @@ void VirtualHost::init(Hdf vh) {
   Hdf logFilters = vh["LogFilters"];
   for (Hdf hdf = logFilters.firstChild(); hdf.exists(); hdf = hdf.next()) {
     QueryStringFilter filter;
-    filter.urlPattern = format_pattern(hdf["url"].getString(""), true);
-    filter.replaceWith = hdf["value"].getString("");
+    filter.urlPattern = format_pattern(Config::GetString(hdf["url"], ""), true);
+    filter.replaceWith = Config::GetString(hdf["value"], "");
     filter.replaceWith = "\\1=" + filter.replaceWith;
 
-    std::string pattern = hdf["pattern"].getString("");
+    std::string pattern = Config::GetString(hdf["pattern"], "");
     std::vector<std::string> names;
-    hdf["params"].get(names);
+    Config::Get(hdf["params"], names);
 
     if (pattern.empty()) {
       for (unsigned int i = 0; i < names.size(); i++) {
@@ -257,8 +257,8 @@ void VirtualHost::init(Hdf vh) {
     m_queryStringFilters.push_back(filter);
   }
 
-  vh["ServerVariables"].get(m_serverVars);
-  m_serverName = vh["ServerName"].getString();
+  Config::Get(vh["ServerVariables"], m_serverVars);
+  m_serverName = Config::GetString(vh["ServerName"]);
 }
 
 bool VirtualHost::match(const std::string &host) const {

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/config.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
@@ -77,24 +78,26 @@ void ReplayTransport::replayInput(Hdf hdf) {
 }
 
 void ReplayTransport::replayInputImpl() {
-  String postData = StringUtil::UUDecode(m_hdf["post"].get(""));
+  String postData = StringUtil::UUDecode(Config::Get(m_hdf["post"], ""));
   m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();
   for (Hdf hdf = m_hdf["headers"].firstChild(); hdf.exists();
        hdf = hdf.next()) {
-    m_requestHeaders[hdf["name"].get("")].push_back(hdf["value"].get(""));
+    m_requestHeaders[Config::Get(hdf["name"], "")].push_back(
+      Config::Get(hdf["value"], "")
+    );
   }
 }
 
 const char *ReplayTransport::getUrl() {
-  return m_hdf["url"].get("");
+  return Config::Get(m_hdf["url"], "");
 }
 
 const char *ReplayTransport::getRemoteHost() {
-  return m_hdf["remote_host"].get("");
+  return Config::Get(m_hdf["remote_host"], "");
 }
 uint16_t ReplayTransport::getRemotePort() {
-  return m_hdf["remote_port"].getUInt16(0);
+  return Config::GetUInt16(m_hdf["remote_port"], 0);
 }
 
 const void *ReplayTransport::getPostData(int &size) {
@@ -103,7 +106,7 @@ const void *ReplayTransport::getPostData(int &size) {
 }
 
 Transport::Method ReplayTransport::getMethod() {
-  return (Transport::Method)m_hdf["cmd"].getInt32();
+  return (Transport::Method)Config::GetInt32(m_hdf["cmd"]);
 }
 
 std::string ReplayTransport::getHeader(const char *name) {

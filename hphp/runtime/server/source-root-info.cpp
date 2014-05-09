@@ -22,6 +22,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/config.h"
 
 using std::map;
 
@@ -131,12 +132,12 @@ void SourceRootInfo::createFromUserConfig() {
   String sp, lp, alp, userOverride;
   try {
     config.open(confpath);
-    userOverride = config["user_override"].get();
+    userOverride = Config::Get(config["user_override"]);
     Hdf sboxConf = config[m_sandbox.c_str()];
     if (sboxConf.exists()) {
-      sp = sboxConf["path"].get();
-      lp = sboxConf["log"].get();
-      alp = sboxConf["accesslog"].get();
+      sp = Config::Get(sboxConf["path"]);
+      lp = Config::Get(sboxConf["log"]);
+      alp = Config::Get(sboxConf["accesslog"]);
       serverVars = sboxConf["ServerVars"];
     }
   } catch (HdfException &e) {
@@ -145,7 +146,7 @@ void SourceRootInfo::createFromUserConfig() {
   }
   if (serverVars.exists()) {
     for (Hdf hdf = serverVars.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      m_serverVars.set(String(hdf.getName()), String(hdf.getString()));
+      m_serverVars.set(String(hdf.getName()), String(Config::GetString(hdf)));
     }
   }
   if (!userOverride.empty()) {

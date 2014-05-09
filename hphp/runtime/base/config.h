@@ -1,0 +1,70 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
+#ifndef incl_HPHP_CONFIG_H_
+#define incl_HPHP_CONFIG_H_
+
+#include "folly/dynamic.h"
+#include "hphp/util/hdf.h"
+
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+typedef folly::dynamic IniSettingMap;
+
+struct Config {
+  static bool GetBool(/* const IniSettingMap &ini, */const Hdf& config,
+                      const bool defValue = false);
+  static const char *Get(/* const IniSettingMap &ini, */const Hdf& config,
+                         const char *defValue = nullptr);
+  static std::string GetString(/* const IniSettingMap &ini, */const Hdf& config,
+                               const std::string defValue = "");
+  static char GetByte(/* const IniSettingMap &ini, */const Hdf& config,
+                      const char defValue = 0);
+  static unsigned char GetUByte(/* const IniSettingMap &ini, */const Hdf& config,
+                                const unsigned char defValue = 0);
+  static int16_t GetInt16(/* const IniSettingMap &ini, */const Hdf& config,
+                          const int16_t defValue = 0);
+  static uint16_t GetUInt16(/* const IniSettingMap &ini, */const Hdf& config,
+                            const uint16_t defValue = 0);
+  static int32_t GetInt32(/* const IniSettingMap &ini, */const Hdf& config,
+                          const int32_t defValue = 0);
+  static uint32_t GetUInt32(/* const IniSettingMap &ini, */const Hdf& config,
+                            const uint32_t defValue = 0);
+  static int64_t GetInt64(/* const IniSettingMap &ini, */const Hdf& config,
+                          const int64_t defValue = 0);
+  static uint64_t GetUInt64(/* const IniSettingMap &ini, */const Hdf& config,
+                            const uint64_t defValue = 0);
+  static double GetDouble(/* const IniSettingMap &ini, */const Hdf& config,
+                          const double defValue = 0);
+
+  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
+                  std::vector<std::string> &values);
+  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
+                  std::set<std::string> &values);
+  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
+                  std::set<std::string, stdltistr> &values);
+  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
+                  boost::container::flat_set<std::string> &values);
+  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
+                  std::map<std::string, std::string> &values);
+  static void Get(/* const IniSettingMap (ini, */const Hdf& config,
+                  hphp_string_imap<std::string> &values);
+};
+
+}
+
+#endif /* incl_HPHP_CONFIG_H_ */

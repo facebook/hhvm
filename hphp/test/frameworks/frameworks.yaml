@@ -505,22 +505,11 @@
   typo3:
     url: git://github.com/TYPO3/TYPO3.CMS.git
     branch: master
-    commit: 9991d2c4bd03f35157686306f4456476f2d48f20
+    commit: ad213706b90180e3fe3b16fbfc8e54cb49c3fd1f
     install_root: typo3
     test_root: typo3/typo3/sysext/core/Build
     config_file: typo3/typo3/sysext/core/Build/UnitTests.xml
     bootstrap_file: typo3/typo3/sysext/core/Build/UnitTestsBootstrap.php
-    # some tests are crashing because of https://github.com/facebook/hhvm/issues/2527
-    blacklist:
-      - typo3/typo3/sysext/core/Tests/Unit/Package/PackageManagerTest.php
-      - typo3/typo3/sysext/core/Tests/Unit/Package/PackageTest.php
-      - typo3/typo3/sysext/core/Tests/Unit/Package/DependencyResolverTest.php
-    #needed until https://review.typo3.org/#/c/29508/ is accepted
-    pull_requests:
-      - pull_dir: typo3
-        pull_repo: git://git.typo3.org/Packages/TYPO3.CMS
-        git_commit: refs/changes/08/29508/2
-        type: pull
   vfsstream:
     url: https://github.com/mikey179/vfsStream.git
     branch: v1.2.0

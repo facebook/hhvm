@@ -79,4 +79,5 @@ let make_next_files_with_find filter root =
         !result
           
 let make_next_files_php = make_next_files_with_find is_php_path
-let make_next_files_js = make_next_files_with_find is_js_path
+let make_next_files_js ~filter =
+  make_next_files_with_find (fun x -> is_js_path x && filter x)

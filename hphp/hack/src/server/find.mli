@@ -17,4 +17,5 @@ val make_next_files_with_find:
 val make_next_files_php: 
   Path.path (* root directory *) -> string MultiWorker.nextlist
 val make_next_files_js:
+  filter:(string -> bool) ->
   Path.path (* root directory *) -> string MultiWorker.nextlist

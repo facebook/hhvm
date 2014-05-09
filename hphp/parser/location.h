@@ -25,7 +25,9 @@ namespace HPHP {
 
 class Location {
 public:
-  Location() : file(""), line0(1), char0(1), line1(1), char1(1), cursor(0) {}
+  Location() : Location(1, 1, 1, 1) {}
+  Location(int l0, int c0, int l1, int c1)
+    : file(""), line0(l0), char0(c0), line1(l1), char1(c1), cursor(0) {}
 
   const char *file;
   int line0;

@@ -35,18 +35,30 @@ if [ $? -ne 0 ] ; then
   exit 1
 fi
 
-# Do a bunch of replacements on the generated files. We need to find the min and
-# max token numbers and define them in the header, so we convert the yytokentype
-# enum to a series of macro invocations, and then find the first and last macro
-# invocations.
-$SED -i -r -e 's/(T_\w+) = ([0-9]+)\s*,?/YYTOKEN(\2, \1)/g' \
-     -e "s/   enum yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num,\n#endif\n   YYTOKEN_MAP/" \
+# Lots of our logic relies on knowing the shape of the token table. Sadly it is 
+# an enum without introspection, so instead make it macros so we can control its
+# shape on re-requires of the .hpp file
+$SED -i -r \
+     -e 's/(T_\w+)\s+=\s+([0-9]+)\s*,?/YYTOKEN(\2, \1)/g' \
+     -e "s/\s+enum\s+yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num,\n#endif\n   YYTOKEN_MAP/" \
+     -e "s/#ifndef YY_COMPILER_H.*//g" \
+     -e "s/# define YY_COMPILER_H.*//g" \
     ${OUTHEADER}
 
-cat ${OUTHEADER} | grep "     YYTOKEN(" | head -n 1 | \
-    $SED -r -e 's/     YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \1\n#endif/' >> ${OUTHEADER}
-cat ${OUTHEADER} | grep "     YYTOKEN(" | tail -n 1 | \
-    $SED -r -e 's/     YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MAX\n#define YYTOKEN_MAX \1\n#endif/' >> ${OUTHEADER}
+# remove the include guard's #endif (-e doesn't work for this)
+$SED -i '$ d' ${OUTHEADER}
+
+# We don't want to rely on the grammar to have a fixed start and end token, so
+# lets parse the file and make two macros for the min and max
+cat ${OUTHEADER} | grep "^\s\+YYTOKEN(" | head -n 1 | \
+    $SED -r -e 's/\s+YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \1\n#endif/' >> ${OUTHEADER}
+cat ${OUTHEADER} | grep "^\s\+YYTOKEN(" | tail -n 1 | \
+    $SED -r -e 's/\s+YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MAX\n#define YYTOKEN_MAX \1\n#endif/' >> ${OUTHEADER}
+
+# Why this is in the .hpp in bison 3 is anybody's guess...
+$SED -i \
+     -e 's@int Compilerparse.*@@' \
+     ${OUTHEADER}
 
 # Renaming some stuff in the cpp file
 $SED -i \

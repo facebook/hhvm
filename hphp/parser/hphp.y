@@ -28,14 +28,14 @@
 #define YYRHSLOC(Rhs, K) ((Rhs)[K])
 #define YYLLOC_DEFAULT(Current, Rhs, N)                                 \
   do                                                                    \
-    if (YYID (N)) {                                                     \
+    if (N) {                                                            \
       (Current).first(YYRHSLOC (Rhs, 1));                               \
       (Current).last (YYRHSLOC (Rhs, N));                               \
     } else {                                                            \
       (Current).line0 = (Current).line1 = YYRHSLOC (Rhs, 0).line1;      \
       (Current).char0 = (Current).char1 = YYRHSLOC (Rhs, 0).char1;      \
     }                                                                   \
-  while (YYID (0));                                                     \
+  while (0);                                                            \
   _p->setRuleLocation(&Current);
 
 #define YYCOPY(To, From, Count)                  \
@@ -48,7 +48,7 @@
       YYSTACK_FREE (From);                       \
     }                                            \
   }                                              \
-  while (YYID (0))
+  while (0)
 
 #define YYCOPY_RESET(To, From, Count)           \
   do                                            \
@@ -62,7 +62,7 @@
         YYSTACK_FREE (From);                    \
       }                                         \
     }                                           \
-  while (YYID (0))
+  while (0)
 
 #define YYTOKEN_RESET(From, Count)              \
   do                                            \
@@ -75,7 +75,7 @@
         YYSTACK_FREE (From);                    \
       }                                         \
     }                                           \
-  while (YYID (0))
+  while (0)
 
 # define YYSTACK_RELOCATE_RESET(Stack_alloc, Stack)                     \
   do                                                                    \
@@ -86,7 +86,7 @@
       yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
       yyptr += yynewbytes / sizeof (*yyptr);                            \
     }                                                                   \
-  while (YYID (0))
+  while (0)
 
 #define YYSTACK_CLEANUP                         \
   YYTOKEN_RESET (yyvs, yystacksize);            \
@@ -565,6 +565,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 
 %expect 2
 %define api.pure
+%lex-param {HPHP::HPHP_PARSER_NS::Parser *_p}
 %parse-param {HPHP::HPHP_PARSER_NS::Parser *_p}
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE

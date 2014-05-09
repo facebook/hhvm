@@ -244,7 +244,6 @@ typedef struct YYLTYPE
 #endif
 
 
-
 #ifndef YYTOKEN_MIN
 #define YYTOKEN_MIN 258
 #endif

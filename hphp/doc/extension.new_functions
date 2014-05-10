@@ -21,7 +21,6 @@ testing and some alternative PHP implementation.
 - hphpd_break
 
 - register_postsend_function
-- register_cleanup_function
 
 - clock_getres
 - clock_gettime

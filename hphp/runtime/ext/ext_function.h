@@ -67,8 +67,6 @@ void f_register_postsend_function(
   int _argc, const Variant& function, const Array& _argv = null_array);
 void f_register_shutdown_function(
   int _argc, const Variant& function, const Array& _argv = null_array);
-void f_register_cleanup_function(
-  int _argc, const Variant& function, const Array& _argv = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

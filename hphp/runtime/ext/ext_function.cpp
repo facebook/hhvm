@@ -297,10 +297,5 @@ void f_register_shutdown_function(int _argc, const Variant& function, const Arra
                                       ExecutionContext::ShutDown);
 }
 
-void f_register_cleanup_function(int _argc, const Variant& function, const Array& _argv /* = null_array */) {
-  g_context->registerShutdownFunction(function, _argv,
-                                      ExecutionContext::CleanUp);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

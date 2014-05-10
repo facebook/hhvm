@@ -275,24 +275,6 @@
                     "desc": "The shutdown function to register.\n\nThe shutdown functions are called as the part of the request so that it's possible to send the output from them. There is currently no way to process the data with output buffering functions in the shutdown function.\n\nShutdown functions are called after closing all opened output buffers thus, for example, its output will not be compressed if zlib.output_compression is enabled."
                 }
             ]
-        },
-        {
-            "name": "register_cleanup_function",
-            "desc": "Registers functions to call at very end of a web page to clean up and free system resources.",
-            "flags": [
-                "HipHopSpecific",
-                "VariableArguments"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-                {
-                    "name": "function",
-                    "type": "Variant",
-                    "desc": "The callback to register."
-                }
-            ]
         }
     ],
     "classes": [

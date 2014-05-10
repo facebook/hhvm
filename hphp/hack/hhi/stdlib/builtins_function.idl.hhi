@@ -25,6 +25,5 @@ function func_get_arg($arg_num) { }
 function func_num_args() { }
 function register_postsend_function($function, ...) { }
 function register_shutdown_function($function, ...) { }
-function register_cleanup_function($function, ...) { }
 function register_tick_function($function, ...) { }
 function unregister_tick_function($function_name) { }

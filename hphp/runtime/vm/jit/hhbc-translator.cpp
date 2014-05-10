@@ -2808,12 +2808,19 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
   }
 
   if (func != nullptr) {
-    if (func->attrs() & AttrStatic) {
-      assert(baseClass);  // This assert may be too strong, but be aggressive
-      // static function: store base class into this slot instead of obj
-      // and decref the obj that was pushed as the this pointer since
-      // the obj won't be in the actrec and thus MethodCache::lookup won't
-      // decref it
+    /*
+     * static function: store base class into this slot instead of obj
+     * and decref the obj that was pushed as the this pointer since
+     * the obj won't be in the actrec and thus MethodCache::lookup won't
+     * decref it
+     *
+     * static closure body: we still need to pass the object instance
+     * for the closure prologue to properly do its dispatch (and
+     * extract use vars).  It will decref it and put the class on the
+     * actrec before entering the "real" cloned closure body.
+     */
+    if (func->attrs() & AttrStatic && !func->isClosureBody()) {
+      assert(baseClass);
       gen(DecRef, obj);
       objOrCls = cns(baseClass);
     }

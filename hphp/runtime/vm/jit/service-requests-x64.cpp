@@ -326,7 +326,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
   }
 
   Asm a { mainCode };
-  if (debug) {
+  if (debug && RuntimeOption::EvalHHIRGenerateAsserts) {
     auto off = cellsToBytes(numArgs) + AROFF(m_savedRip);
     emitImmStoreq(a, kUninitializedRIP, rVmSp[off]);
   }

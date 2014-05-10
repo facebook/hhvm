@@ -228,7 +228,6 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       a.shrq(1, rAsm);
       ifThen(a, CC_NBE, [&] {
         a.shlq(1, rAsm);
-        // XXX can objects be static?
         emitIncRefCheckNonStatic(a, rAsm, KindOfObject);
       });
     }

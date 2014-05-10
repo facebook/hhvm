@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_URL_FILE_H_
 #define incl_HPHP_URL_FILE_H_
 
+#include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/string-buffer.h"
 
@@ -31,7 +32,8 @@ public:
   DECLARE_RESOURCE_ALLOCATION(UrlFile);
 
   explicit UrlFile(const char *method = "GET", const Array& headers = null_array,
-                   const String& postData = null_string, int maxRedirect = 20,
+                   const String& postData = null_string,
+                   int maxRedirect = HttpClient::defaultMaxRedirect,
                    int timeout = -1, bool ignoreErrors = false);
 
   // overriding ResourceData

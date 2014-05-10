@@ -69,6 +69,8 @@ public:
 
   std::string getLastError() const { return m_error;}
 
+  static const int defaultMaxRedirect = 20;
+
 private:
   int m_timeout;
   int m_maxRedirect;

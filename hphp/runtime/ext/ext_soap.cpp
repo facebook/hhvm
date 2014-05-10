@@ -2347,7 +2347,7 @@ c_SoapClient::c_SoapClient(Class* cb) :
     m_authentication(SOAP_AUTHENTICATION_BASIC),
     m_proxy_port(0),
     m_connection_timeout(0),
-    m_max_redirect(0),
+    m_max_redirect(HttpClient::defaultMaxRedirect),
     m_use11(true),
     m_compression(false),
     m_exceptions(true),

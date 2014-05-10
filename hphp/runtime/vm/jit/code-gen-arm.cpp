@@ -1585,12 +1585,10 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
-  auto func = inst->src(0)->funcVal();
-  auto args = inst->srcs().subpiece(2);
-  auto numArgs = args.size();
-
-  DataType funcReturnType = func->returnType();
-  int returnOffset = MISOFF(tvBuiltinReturn);
+  auto const func           = inst->extra<CallBuiltinData>()->callee;
+  auto const numArgs        = func->numParams();
+  auto const funcReturnType = func->returnType();
+  int returnOffset          = MISOFF(tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
@@ -1618,9 +1616,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   for (int i = 0; i < numArgs; ++i) {
     auto const& pi = func->params()[i];
     if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
-      callArgs.addr(srcLoc(i + 2).reg(), TVOFF(m_data));
+      callArgs.addr(srcLoc(i).reg(), TVOFF(m_data));
     } else {
-      callArgs.ssa(i + 2);
+      callArgs.ssa(i);
     }
   }
 

@@ -962,10 +962,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
       callPreLiveFrame();
     } else if (m_inst->is(ContEnter)) {
       resolveAllFrames();
-    } else if (m_inst->is(CallBuiltin) &&
-               !strcasecmp(m_inst->src(0)->funcVal()->fullName()->data(),
-                           "get_defined_vars")) {
-      observeLocalRefs();
+    } else if (m_inst->is(CallBuiltin)) {
+      if (!strcasecmp(
+          m_inst->extra<CallBuiltinData>()->callee->fullName()->data(),
+          "get_defined_vars")) {
+        observeLocalRefs();
+      }
     } else if (m_inst->is(InterpOne, InterpOneCF)) {
       // InterpOne can push and pop ActRecs.
       auto const op = m_inst->extra<InterpOneData>()->opcode;

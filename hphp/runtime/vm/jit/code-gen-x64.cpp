@@ -3721,31 +3721,29 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
 }
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
-  auto f                = inst->src(0);
-  auto args             = inst->srcs().subpiece(2);
-  int32_t numArgs       = args.size();
-  auto dst              = dstLoc(0);
-  auto dstReg           = dst.reg(0);
-  auto dstType          = dst.reg(1);
-  Type returnType       = inst->typeParam();
+  auto const dst            = dstLoc(0);
+  auto const dstReg         = dst.reg(0);
+  auto const dstType        = dst.reg(1);
+  auto const callee         = inst->extra<CallBuiltin>()->callee;
+  auto const numArgs        = callee->numParams();
+  auto const returnType     = inst->typeParam();
+  auto const funcReturnType = callee->returnType();
 
-  const Func* func = f->funcVal();
-  DataType funcReturnType = func->returnType();
   int returnOffset = MISOFF(tvBuiltinReturn);
 
-  if (FixupMap::eagerRecord(func)) {
-    const auto* pc = curUnit()->entry() + m_curInst->marker().bcOff();
+  if (FixupMap::eagerRecord(callee)) {
+    auto const pc = curUnit()->entry() + m_curInst->marker().bcOff();
     // we have spilled all args to stack, so spDiff is 0
     emitEagerSyncPoint(m_as, reinterpret_cast<const Op*>(pc));
   }
-  // RSP points to the MInstrState we need to use.
-  // workaround the fact that rsp moves when we spill registers around call
+  // RSP points to the MInstrState we need to use.  Workaround the
+  // fact that rsp moves when we spill registers around call
   PhysReg misReg = m_rScratch;
   emitMovRegReg(m_as, reg::rsp, misReg);
 
   auto callArgs = argGroup();
   if (isCppByRef(funcReturnType)) {
-    // first arg is pointer to storage for that return value
+    // First arg is pointer to storage for that return value
     if (isSmartPtrRef(funcReturnType)) {
       returnOffset += TVOFF(m_data);
     }
@@ -3755,29 +3753,28 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     callArgs.addr(misReg, returnOffset); // &misReg[returnOffset]
   }
 
-  // non-pointer args are plain values passed by value.  String, Array,
+  // Non-pointer args are plain values passed by value.  String, Array,
   // Object, and Variant are passed by const&, ie a pointer to stack memory
   // holding the value, so expect PtrToT types for these.
   // Pointers to smartptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
   for (int i = 0; i < numArgs; i++) {
-    const Func::ParamInfo& pi = func->params()[i];
-    auto srcNum = i + 2;
+    auto const& pi = callee->params()[i];
     if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
-      assert(args[i]->type().isPtr() && srcLoc(srcNum).reg() != InvalidReg);
-      callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
+      assert(inst->src(i)->type().isPtr() && srcLoc(i).reg() != InvalidReg);
+      callArgs.addr(srcLoc(i).reg(), TVOFF(m_data));
     } else {
-      callArgs.ssa(srcNum, pi.builtinType() == KindOfDouble);
+      callArgs.ssa(i, pi.builtinType() == KindOfDouble);
     }
   }
 
-  // if the return value is returned by reference, we don't need the
+  // If the return value is returned by reference, we don't need the
   // return value from this call since we know where the value is.
-  cgCallHelper(m_as, CppCall::direct(func->nativeFuncPtr()),
+  cgCallHelper(m_as, CppCall::direct(callee->nativeFuncPtr()),
                isCppByRef(funcReturnType) ? kVoidDest : callDest(dstReg),
                SyncOptions::kSyncPoint, callArgs);
 
-  // load return value from builtin
+  // Load return value from builtin
 
   // For primitive SSE return types (double), the return value
   // is in xmm0 which typically won't be the requested destination register.

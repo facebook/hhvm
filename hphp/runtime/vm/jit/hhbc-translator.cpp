@@ -3118,72 +3118,71 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
 
   callee->validate();
 
-  // spill args to stack. We need to spill these for two resons:
-  // 1. some of the arguments may be passed by reference, for which
-  //    case we will pass a stack address.
-  // 2. type conversions of the arguments (using tvCast* helpers)
-  //    may throw an exception, so we either need to have the VM stack
-  //    in a clean state at that point or give each helper a catch
-  //    trace. Since we have to spillstack anyway, the catch trace
-  //    would be overkill.
+  /*
+   * Spill args to stack.  Some of the arguments may be passed by
+   * reference, for which case we will pass a stack address.
+   *
+   * The CallBuiltin instruction itself doesn't depend on the stack
+   * pointer, but if any of its args were passed via pointers to the
+   * stack it will indirectly depend on it.
+   */
   spillStack();
 
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {
-    const Func::ParamInfo& pi = callee->params()[i];
+    auto const& pi = callee->params()[i];
     switch (pi.builtinType()) {
-      case KindOfBoolean:
-      case KindOfInt64:
-      case KindOfDouble:
-      case KindOfArray:
-      case KindOfObject:
-      case KindOfResource:
-      case KindOfString:
-        if (callee->isParamCoerceMode()) {
-          gen(CoerceStk,
-              Type(pi.builtinType()),
-              StackOffset(numArgs - i - 1),
-              makeExitSlow(),
-              m_irb->sp());
-        } else {
-          // cpi.value/valueLen contain the default values for C++ built-ins,
-          // as serialize()'d data. It's generally unneccessary to populate
-          // Func::ParamInfo default values, as the C++ code sets them up,
-          // but here we need to check if there /is/ a default.
-          Type t(pi.builtinType());;
-          if (UNLIKELY(pi.builtinType() == KindOfObject
-              && callee->methInfo()->parameters[i]->valueLen > 0)) {
-            t = Type::NullableObj;
-          }
-          gen(CastStk,
-              makeCatch(),
-              t,
-              StackOffset(numArgs - i - 1),
-              m_irb->sp());
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfString:
+      if (callee->isParamCoerceMode()) {
+        gen(CoerceStk,
+            Type(pi.builtinType()),
+            StackOffset(numArgs - i - 1),
+            makeExitSlow(),
+            m_irb->sp());
+      } else {
+        // cpi.value/valueLen contain the default values for C++ built-ins,
+        // as serialize()'d data. It's generally unneccessary to populate
+        // Func::ParamInfo default values, as the C++ code sets them up,
+        // but here we need to check if there /is/ a default.
+        Type t(pi.builtinType());
+        if (UNLIKELY(pi.builtinType() == KindOfObject &&
+                     callee->methInfo()->parameters[i]->valueLen > 0)) {
+          t = Type::NullableObj;
         }
-        break;
-      case KindOfUnknown: break;
-      default:            not_reached();
+        gen(CastStk,
+            makeCatch(),
+            t,
+            StackOffset(numArgs - i - 1),
+            m_irb->sp());
+      }
+      break;
+    case KindOfUnknown:
+      break;
+    default:
+      not_reached();
     }
   }
 
   // Pass arguments for CallBuiltin.
-  const int argsSize = numArgs + 2;
-  SSATmp* args[argsSize];
-  args[0] = cns(callee);
-  args[1] = m_irb->sp();
+  SSATmp* args[numArgs];
   for (int i = numArgs - 1; i >= 0; i--) {
-    const Func::ParamInfo& pi = callee->params()[i];
+    auto const& pi = callee->params()[i];
     switch (pi.builtinType()) {
-      case KindOfBoolean:
-      case KindOfInt64:
-      case KindOfDouble:
-        args[i + 2] = top(Type(pi.builtinType()),
-                          numArgs - i - 1);
-        break;
-      default:
-        args[i + 2] = ldStackAddr(numArgs - i - 1, DataTypeSpecific);
-        break;
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+      args[i] = top(Type(pi.builtinType()),
+                        numArgs - i - 1);
+      break;
+    default:
+      args[i] = ldStackAddr(numArgs - i - 1, DataTypeSpecific);
+      break;
     }
   }
 
@@ -3192,12 +3191,13 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   auto retType = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
   if (callee->attrs() & ClassInfo::IsReference) retType = retType.box();
 
+  SSATmp** const decayedPtr = &args[0];
   auto const ret = gen(
     CallBuiltin,
     retType,
-    CallBuiltinData { destroyLocals },
+    CallBuiltinData { callee, destroyLocals },
     makeCatch(),
-    std::make_pair(argsSize, (SSATmp**)&args)
+    std::make_pair(numArgs, decayedPtr)
   );
 
   // Decref and free args
@@ -5584,9 +5584,9 @@ void HhbcTranslator::exceptionBarrier() {
 }
 
 SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
+  m_irb->constrainStack(offset, tc);
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in m_irb->evalStack().
-  m_irb->constrainStack(offset, tc);
   assert(offset >= (int32_t)m_irb->evalStack().numCells());
   return gen(
     LdStackAddr,

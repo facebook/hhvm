@@ -124,7 +124,6 @@ bool mustUseConst(const IRInstruction& inst, int i) {
   // handle special cases we can't derive from IR_OPCODES macro
   switch (inst.op()) {
   case LdAddr: return check(i == 1); // offset
-  case CallBuiltin: return check(i == 0); // f
   default: break;
   }
   return check(g_const_table.mustBeConst(int(inst.op()), i));

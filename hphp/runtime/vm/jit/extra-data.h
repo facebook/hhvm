@@ -390,14 +390,19 @@ struct CallArrayData : IRExtraData {
 };
 
 struct CallBuiltinData : IRExtraData {
-  explicit CallBuiltinData(bool destroyLocals)
-    : destroyLocals(destroyLocals)
+  explicit CallBuiltinData(const Func* callee, bool destroyLocals)
+    : callee{callee}
+    , destroyLocals{destroyLocals}
   {}
 
   std::string show() const {
-    return destroyLocals ? "destroyLocals" : "";
+    return folly::to<std::string>(
+      callee->fullName()->data(),
+      destroyLocals ? ",destroyLocals" : ""
+    );
   }
 
+  const Func* callee;
   bool destroyLocals;
 };
 

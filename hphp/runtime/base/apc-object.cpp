@@ -77,7 +77,7 @@ APCHandle* APCObject::Construct(ObjectData* objectData) {
     const Variant& value = it.secondRef();
     APCHandle *val = nullptr;
     if (!value.isNull()) {
-      val = APCHandle::Create(value, false, true, true);
+      val = APCHandle::Create(value, true, true);
     }
 
     const String& keySD = key.asCStrRef();
@@ -111,7 +111,7 @@ APCHandle* APCObject::Construct(ObjectData* objectData) {
 ALWAYS_INLINE
 APCObject::~APCObject() {
   for (auto i = uint32_t{0}; i < m_propCount; ++i) {
-    if (props()[i].val) props()[i].val->unreference();
+    if (props()[i].val) props()[i].val->unreferenceRoot();
     assert(props()[i].name->isStatic());
   }
 }
@@ -143,7 +143,7 @@ APCHandle* APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
       features.hasSerializableReference()) {
     return nullptr;
   }
-  APCHandle* tmp = APCHandle::Create(value, false, true, true);
+  APCHandle* tmp = APCHandle::Create(value, true, true);
   tmp->setObjAttempted();
   return tmp;
 }

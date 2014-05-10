@@ -87,6 +87,7 @@ void apcExtension::moduleLoad(Hdf config) {
 
   UseUncounted = apc["MemModelTreadmill"].getBool(
       RuntimeOption::ServerExecutionMode());
+  InnerUncounted = apc["InnerUncounted"].getBool(false);
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
@@ -137,6 +138,7 @@ bool apcExtension::ConcurrentTableLockFree = false;
 bool apcExtension::FileStorageKeepFileLinked = false;
 std::vector<std::string> apcExtension::NoTTLPrefix;
 bool apcExtension::UseUncounted = false;
+bool apcExtension::InnerUncounted = false;
 bool apcExtension::Stat = true;
 // Different from zend default but matches what we've been returning for years
 bool apcExtension::EnableCLI = true;

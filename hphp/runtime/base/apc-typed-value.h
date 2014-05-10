@@ -113,8 +113,8 @@ public:
   const Variant& asCVarRef() const {
     // Must be non-refcounted types
     assert(m_handle.m_shouldCache == false);
-    assert(m_handle.m_flags == 0);
-    assert(!IS_REFCOUNTED_TYPE(m_handle.m_type));
+    assert(m_handle.m_flags == 0 || m_handle.getUncounted());
+    assert(!m_handle.isRefCountedHandle());
     return tvAsCVarRef(reinterpret_cast<const TypedValue*>(this));
   }
 

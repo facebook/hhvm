@@ -65,8 +65,8 @@ static void on_kill(int sig) {
   // program-functions.cpp, but it can only happen if we get a signal while
   // shutting down.  The fix is to add a lock to HttpServer::Server but it seems
   // like overkill.
-  if (HttpServer::Server) {
-    HttpServer::Server->stopOnSignal();
+  if (HttpServer::Server && sig != SIGTERM) {
+    HttpServer::Server->gracefulStop();
   }
   raise(sig);
 }
@@ -152,6 +152,7 @@ HttpServer::HttpServer()
 
   signal(SIGTERM, on_kill);
   signal(SIGUSR1, on_kill);
+  signal(SIGHUP, on_kill);
 
   if (!RuntimeOption::StartupDocument.empty()) {
     Hdf hdf;
@@ -401,7 +402,8 @@ void HttpServer::abortServers() {
   }
 }
 
-void HttpServer::stopOnSignal() {
+void HttpServer::gracefulStop() {
+  // NOTE: Server->stop does a graceful stop by design.
   if (m_pageServer) {
     m_pageServer->stop();
   }

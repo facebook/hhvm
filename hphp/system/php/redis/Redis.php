@@ -1206,7 +1206,11 @@ class Redis {
   protected function processDoubleResponse() {
     if ($this->mode === self::ATOMIC) {
       $resp = $this->sockReadData($type);
-      return ($type === self::TYPE_INT) ? ((float)$resp) : null;
+      if (($type === self::TYPE_INT) ||
+          ($type === self::TYPE_BULK && is_numeric($resp))) {
+        return (float)$resp;
+      }
+      return null;
     }
     $this->multiHandler[] = [ 'cb' => [$this,'processDoubleResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {

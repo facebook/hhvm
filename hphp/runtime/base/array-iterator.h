@@ -295,7 +295,8 @@ private:
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
   template<bool withRef>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
-    TypedValue*);
+                                    TypedValue*);
+
   void arrInit(const ArrayData* arr);
 
   template <bool incRef>

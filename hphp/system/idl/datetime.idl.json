@@ -235,6 +235,24 @@
             ]
         },
         {
+            "name": "date_format",
+            "flags": [
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "datetime",
+                    "type": "Object"
+                },
+                {
+                    "name": "format",
+                    "type": "String"
+                }
+            ]
+        },
+        {
             "name": "date_modify",
             "flags": [
             ],

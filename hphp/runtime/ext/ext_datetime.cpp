@@ -721,7 +721,8 @@ void f_date_isodate_set(const Object& object, int year, int week,
 }
 
 String f_date_format(const Object& object, const String& format) {
-  return object.getTyped<c_DateTime>()->t_format(format);
+  return c_DateTime::unwrap(object.getTyped<c_DateTime>())->
+                            toString(format, false);
 }
 
 Array f_date_get_last_errors() {

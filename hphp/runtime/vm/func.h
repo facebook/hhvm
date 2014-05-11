@@ -437,9 +437,7 @@ struct Func {
   unsigned char* getPrologue(int index) const {
     return m_prologueTable[index];
   }
-  int numPrologues() const {
-    return getMaxNumPrologues(numParams());
-  }
+  int numPrologues() const;
   static int getMaxNumPrologues(int numParams) {
     // maximum number of prologues is numParams+2. The extra 2 are for
     // the case where the number of actual params equals numParams and

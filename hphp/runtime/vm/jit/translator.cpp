@@ -3976,9 +3976,9 @@ Translator::translateRegion(const RegionDesc& region,
         }
 
         if (m_mode == TransKind::Profile) {
+          profilingFunc = true;
           if (block->func()->isEntry(block->start().offset())) {
             ht.emitCheckCold(m_profData->curTransID());
-            profilingFunc = true;
           } else {
             ht.emitIncProfCounter(m_profData->curTransID());
           }

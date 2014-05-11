@@ -218,6 +218,13 @@ bool Func::anyBlockEndsAt(Offset off) const {
   return m_shared->m_blockEnds.count(off) != 0;
 }
 
+int Func::numPrologues() const {
+  int maxNumPrologues = Func::getMaxNumPrologues(numParams());
+  int nPrologues = maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
+                                                        : kNumFixedPrologues;
+  return nPrologues;
+}
+
 void Func::resetPrologue(int numParams) {
   auto const& stubs = tx->uniqueStubs;
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
@@ -892,13 +899,14 @@ bool Func::shouldPGO() const {
   // TODO(#3880036): remove this once SrcKey contains execution mode bit
   if (isResumable()) return false;
 
+  // Task #4314804: Add support for closures in PGO mode.
   // Cloned closures use the func prologue tables to hold the
   // addresses of the DV funclets, and not real prologues.  The
   // mechanism to retranslate prologues currently assumes that the
   // prologue tables contain real prologues, so it doesn't properly
   // handle cloned closures for now.  So don't profile & retranslate
   // them for now.
-  if (isClonedClosure()) return false;
+  if (isClosureBody()) return false;
 
   if (!RuntimeOption::EvalJitPGOHotOnly) return true;
   return attrs() & AttrHot;

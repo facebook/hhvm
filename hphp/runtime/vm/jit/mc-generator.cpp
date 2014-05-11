@@ -160,45 +160,9 @@ CppCall MCGenerator::getDtorCall(DataType type) {
 
 bool MCGenerator::profileSrcKey(const SrcKey& sk) const {
   if (!sk.func()->shouldPGO()) return false;
-
   if (m_tx.profData()->optimized(sk.getFuncId())) return false;
-
-  // If we've hit EvalJitProfileRequests, then don't emit profiling
-  // translations that would trigger an optimizing retranslation.
-  // This limits the duration of profiling.  For
-  // non-retranslate-triggering SrcKeys, whose profiling translations
-  // only increment a counter, it's OK to emit them past the
-  // EvalJitProfileRequests threshold as long as we're already
-  // profiling this function (next check below) but haven't
-  // retranslated this function yet (checked above).
-  bool triggersRetrans = sk.func()->isEntry(sk.offset());
-  if (triggersRetrans &&
-      requestCount() > RuntimeOption::EvalJitProfileRequests) {
-    return false;
-  }
-
-  // For translations that don't trigger a retranslation, only emit
-  // them if we've already generated a retranslation-triggering
-  // translation for its function.
-  if (!triggersRetrans &&
-      !m_tx.profData()->profiling(sk.getFuncId())) {
-    return false;
-  }
-
-  return true;
-}
-
-bool MCGenerator::profilePrologue(const SrcKey& sk) const {
-  if (!sk.func()->shouldPGO()) return false;
-
-  if (m_tx.profData()->optimized(sk.getFuncId())) return false;
-
-  // Proflogues don't trigger retranslation, so only emit them if
-  // we've already generated a retranslation-triggering translation
-  // for its function or if we're about to generate one (which
-  // requires depends on requestCount(), see profileSrcKey()).
-  return m_tx.profData()->profiling(sk.getFuncId()) ||
-         requestCount() <= RuntimeOption::EvalJitProfileRequests;
+  if (m_tx.profData()->profiling(sk.getFuncId())) return true;
+  return requestCount() <= RuntimeOption::EvalJitProfileRequests;
 }
 
 /*
@@ -662,7 +626,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   // profiling if we haven't optimized the function entry yet.
   assert(m_tx.mode() == TransKind::Invalid ||
          m_tx.mode() == TransKind::Prologue);
-  if (m_tx.mode() == TransKind::Invalid && profilePrologue(funcBody)) {
+  if (m_tx.mode() == TransKind::Invalid && profileSrcKey(funcBody)) {
     m_tx.setMode(TransKind::Proflogue);
   } else {
     m_tx.setMode(TransKind::Prologue);
@@ -798,8 +762,7 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
   TCA triggerStart = nullptr;
   std::vector<TransID> prologTransIDs;
 
-  auto const limit = func->numNonVariadicParams() + 1;
-  for (int nArgs = 0; nArgs <= limit; nArgs++) {
+  for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
     TransID tid = m_tx.profData()->prologueTransId(func, nArgs);
     if (tid != kInvalidTransID) {
       prologTransIDs.push_back(tid);
@@ -1949,9 +1912,9 @@ MCGenerator::translateTracelet(Tracelet& t) {
       }
 
       if (m_tx.mode() == TransKind::Profile) {
+        profilingFunc = true;
         if (t.func()->isEntry(sk.offset())) {
           ht.emitCheckCold(m_tx.profData()->curTransID());
-          profilingFunc = true;
         } else {
           ht.emitIncProfCounter(m_tx.profData()->curTransID());
         }

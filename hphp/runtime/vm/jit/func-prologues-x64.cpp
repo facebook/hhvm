@@ -135,6 +135,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     auto counterAddr = tx->profData()->transCounterAddr(transId);
     a.movq(counterAddr, rAsm);
     a.decq(rAsm[0]);
+    tx->profData()->setProfiling(func->getFuncId());
   }
 
   // Note: you're not allowed to use rVmSp around here for anything in

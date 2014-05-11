@@ -197,7 +197,6 @@ public:
   TCA getTranslatedCaller() const;
   void setJmpTransID(TCA jmp);
   bool profileSrcKey(const SrcKey& sk) const;
-  bool profilePrologue(const SrcKey& sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
   Translator::TranslateResult translateTracelet(Tracelet& t);

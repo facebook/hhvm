@@ -428,12 +428,39 @@ void Transport::getResponseHeaders(HeaderMap &headers) {
 }
 
 bool Transport::acceptEncoding(const char *encoding) {
+  // Examples of valid encodings that we want to accept
+  // gzip;q=1.0, identity; q=0.5, *;q=0
+  // compress;q=0.5, gzip;q=1.0
+  // For now, we don't care about the qvalue
+
   assert(encoding && *encoding);
   std::string header = getHeader("Accept-Encoding");
 
-  // This is testing a substring than a word match, but in practice, this
-  // always works.
-  return strcasestr(header.c_str(), encoding) != nullptr;
+  // Handle leading and trailing quotes
+  size_t len = header.length();
+  if (len >= 2
+      && ((header[0] == '"' && header[len-1] == '"')
+      || (header[0] == '\'' && header[len-1] == '\''))) {
+    header = header.substr(1, len - 2);
+  }
+
+ // Split the header by ','
+  std::vector<std::string> cTokens;
+  split(',', header.c_str(), cTokens);
+  for (size_t i = 0; i < cTokens.size(); ++i) {
+    // Then split by ';'
+    std::string& cToken = cTokens[i];
+    std::vector<std::string> scTokens;
+    split(';', cToken.c_str(), scTokens);
+    assert(scTokens.size() > 0);
+    // lhs contains the encoding
+    // rhs, if it exists, contains the qvalue
+    std::string& lhs = scTokens[0];
+    if (strcasecmp(lhs.c_str(), encoding) == 0) {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool Transport::cookieExists(const char *name) {

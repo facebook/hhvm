@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/ext/ext_datetime.h"
 
 #include <unicode/uloc.h>
 
@@ -169,7 +170,12 @@ double VariantToMilliseconds(const Variant& arg) {
   if (arg.isNumeric(true)) {
     return U_MILLIS_PER_SECOND * arg.toDouble();
   }
-  // TODO: Handle object IntlCalendar and DateTime
+  if (arg.isObject() &&
+      arg.toObject()->instanceof(SystemLib::s_DateTimeInterfaceClass)) {
+    return U_MILLIS_PER_SECOND *
+           (double) c_DateTime::GetTimestamp(arg.toObject());
+  }
+  // TODO: Handle object IntlCalendar
   return NAN;
 }
 

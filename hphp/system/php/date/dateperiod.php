@@ -26,7 +26,7 @@ class DatePeriod implements Iterator {
       // $end is really $recurrances
       $this->recurrances = $end;
       $end_date = clone $start;
-      for ($i = 0; $i < $this->recurrances; $i++) {
+      for ($i = 0; $i <= $this->recurrances; $i++) {
         // add the interval to the start date 'n' times
         $end_date->add($interval);
       }
@@ -66,6 +66,6 @@ class DatePeriod implements Iterator {
   }
 
   function valid() {
-    return ($this->current >= $this->start && $this->current <= $this->end);
+    return ($this->current >= $this->start && $this->current < $this->end);
   }
 }

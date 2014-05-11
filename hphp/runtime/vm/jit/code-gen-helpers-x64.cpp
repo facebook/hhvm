@@ -371,6 +371,33 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   astubs.  jmp   (mainCode.frontier());
 }
 
+template<class Mem>
+void emitCmpClass(Asm& as, Reg64 reg, Mem mem) {
+  auto size = sizeof(LowClassPtr);
+
+  if (size == 8) {
+    as.   cmpq    (reg, mem);
+  } else if (size == 4) {
+    as.   cmpl    (r32(reg), mem);
+  } else {
+    not_implemented();
+  }
+}
+
+template void emitCmpClass<MemoryRef>(Asm& as, Reg64 reg, MemoryRef mem);
+
+void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2) {
+  auto size = sizeof(LowClassPtr);
+
+  if (size == 8) {
+    as.   cmpq    (reg1, reg2);
+  } else if (size == 4) {
+    as.   cmpl    (r32(reg1), r32(reg2));
+  } else {
+    not_implemented();
+  }
+}
+
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   if (s0 == InvalidReg && s1 == InvalidReg &&
       d0 == InvalidReg && d1 == InvalidReg) return;

@@ -2120,7 +2120,13 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   // Test if it is the exact same class.  TODO(#2044801): we should be
   // doing this control flow at the IR level.
   if (!(testClass->attrs() & AttrAbstract)) {
-    a.    cmpq   (rTestClass, rObjClass);
+    emitCmpClass(a, rTestClass, rObjClass);
+    // If the test class cannot be extended, we only need to do the
+    // exact check.
+    if (testClass->attrs() & AttrNoOverride) {
+      a.  sete(rdst);
+      return;
+    }
     a.    jne8   (notExact);
     a.    movb   (1, rdst);
     a.    jmp8   (out);

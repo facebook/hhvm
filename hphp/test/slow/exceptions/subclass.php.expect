@@ -1,0 +1,49 @@
+Exception is not a subclass of Exception
+Exception is not a subclass of RuntimeException
+Exception is not a subclass of InvalidArgumentException
+Exception is not a subclass of BadMethodCallException
+Exception is not a subclass of OutOfBoundsException
+Exception is not a subclass of DOMException
+Exception is not a subclass of PDOException
+RuntimeException is a subclass of Exception
+RuntimeException is not a subclass of RuntimeException
+RuntimeException is not a subclass of InvalidArgumentException
+RuntimeException is not a subclass of BadMethodCallException
+RuntimeException is not a subclass of OutOfBoundsException
+RuntimeException is not a subclass of DOMException
+RuntimeException is not a subclass of PDOException
+InvalidArgumentException is a subclass of Exception
+InvalidArgumentException is not a subclass of RuntimeException
+InvalidArgumentException is not a subclass of InvalidArgumentException
+InvalidArgumentException is not a subclass of BadMethodCallException
+InvalidArgumentException is not a subclass of OutOfBoundsException
+InvalidArgumentException is not a subclass of DOMException
+InvalidArgumentException is not a subclass of PDOException
+BadMethodCallException is a subclass of Exception
+BadMethodCallException is not a subclass of RuntimeException
+BadMethodCallException is not a subclass of InvalidArgumentException
+BadMethodCallException is not a subclass of BadMethodCallException
+BadMethodCallException is not a subclass of OutOfBoundsException
+BadMethodCallException is not a subclass of DOMException
+BadMethodCallException is not a subclass of PDOException
+OutOfBoundsException is a subclass of Exception
+OutOfBoundsException is a subclass of RuntimeException
+OutOfBoundsException is not a subclass of InvalidArgumentException
+OutOfBoundsException is not a subclass of BadMethodCallException
+OutOfBoundsException is not a subclass of OutOfBoundsException
+OutOfBoundsException is not a subclass of DOMException
+OutOfBoundsException is not a subclass of PDOException
+DOMException is a subclass of Exception
+DOMException is not a subclass of RuntimeException
+DOMException is not a subclass of InvalidArgumentException
+DOMException is not a subclass of BadMethodCallException
+DOMException is not a subclass of OutOfBoundsException
+DOMException is not a subclass of DOMException
+DOMException is not a subclass of PDOException
+PDOException is a subclass of Exception
+PDOException is a subclass of RuntimeException
+PDOException is not a subclass of InvalidArgumentException
+PDOException is not a subclass of BadMethodCallException
+PDOException is not a subclass of OutOfBoundsException
+PDOException is not a subclass of DOMException
+PDOException is not a subclass of PDOException

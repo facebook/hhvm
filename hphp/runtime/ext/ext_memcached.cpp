@@ -593,8 +593,13 @@ Variant c_Memcached::incDecOperationImpl(IncDecOperation op, const String& key,
 
 bool c_Memcached::t_addserver(const String& host, int port, int weight /*= 0*/) {
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
-  return handleError(memcached_server_add_with_weight(&m_impl->memcached,
-      host.c_str(), port, weight));
+  if (!host.empty() && host[0] == '/') {
+    return handleError(memcached_server_add_unix_socket_with_weight(&m_impl->memcached,
+        host.c_str(), weight));
+  } else {
+    return handleError(memcached_server_add_with_weight(&m_impl->memcached,
+        host.c_str(), port, weight));
+  }
 }
 
 bool c_Memcached::t_addservers(const Array& servers) {
@@ -626,8 +631,16 @@ bool c_Memcached::t_addservers(const Array& servers) {
       weight = entryIter.second().toInt32(10);
     }
 
-    if (!handleError(memcached_server_add_with_weight(&m_impl->memcached,
-          host.c_str(), port, weight))) {
+    memcached_return status;
+    if (!host.empty() && host[0] == '/') {
+      status = memcached_server_add_unix_socket_with_weight(&m_impl->memcached,
+                                                            host.c_str(),
+                                                            weight);
+    } else {
+      status = memcached_server_add_with_weight(&m_impl->memcached,
+                                                host.c_str(), port, weight);
+    }
+    if (!handleError(status)) {
       raise_warning("could not add entry #%d to the server list", i);
     }
   }

@@ -549,13 +549,15 @@ void FunctionScope::addNewObjCaller(BlockScopePtr caller) {
 
 bool FunctionScope::mayUseVV() const {
   VariableTableConstPtr variables = getVariables();
-  return (inPseudoMain() ||
-          usesVariableArgumentFunc() ||
-          variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
-          variables->getAttribute(VariableTable::ContainsExtract) ||
-          variables->getAttribute(VariableTable::ContainsCompact) ||
-          variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
-          variables->getAttribute(VariableTable::ContainsDynamicFunctionCall));
+  return
+    (inPseudoMain() ||
+     usesVariableArgumentFunc() ||
+     variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
+     variables->getAttribute(VariableTable::ContainsExtract) ||
+     variables->getAttribute(VariableTable::ContainsCompact) ||
+     variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
+     (!Option::EnableHipHopSyntax &&
+      variables->getAttribute(VariableTable::ContainsDynamicFunctionCall)));
 }
 
 bool FunctionScope::matchParams(FunctionScopePtr func) {

@@ -392,6 +392,7 @@ void initialize_hhbbc_options() {
   HHBBC::options.InterceptableFunctions = Option::DynamicInvokeFunctions;
   HHBBC::options.HardConstProp          = Option::HardConstProp;
   HHBBC::options.HardTypeHints          = Option::HardTypeHints;
+  HHBBC::options.DisallowDynamicVarEnvFuncs   = Option::EnableHipHopSyntax;
 }
 
 //////////////////////////////////////////////////////////////////////

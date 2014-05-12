@@ -171,7 +171,8 @@ String f_create_function(const String& args, const String& code) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_func_get_arg(int arg_num) {
+ALWAYS_INLINE
+static Variant func_get_arg_impl(int arg_num) {
   CallerFrame cf;
   ActRec* ar = cf.actRecForArgs();
 
@@ -219,6 +220,15 @@ Variant f_func_get_arg(int arg_num) {
   return false;
 }
 
+Variant f_func_get_arg(int arg_num) {
+  raise_disallowed_dynamic_call(
+    "func_get_arg should not be called dynamically");
+  return func_get_arg_impl(arg_num);
+}
+Variant f_func_get_arg_sl(int arg_num) {
+  return func_get_arg_impl(arg_num);
+}
+
 Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   if (ar == NULL) {
     return Array();
@@ -259,6 +269,12 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
 } while(0)
 
 Variant f_func_get_args() {
+  raise_disallowed_dynamic_call(
+    "func_get_args should not be called dynamically");
+  FUNC_GET_ARGS_IMPL(0);
+}
+// __SystemLib\func_get_args
+Variant f_func_get_args_sl() {
   FUNC_GET_ARGS_IMPL(0);
 }
 
@@ -270,7 +286,8 @@ Variant f_func_slice_args(int offset) {
   FUNC_GET_ARGS_IMPL(offset);
 }
 
-int64_t f_func_num_args() {
+ALWAYS_INLINE
+static int64_t func_num_args_impl() {
   EagerCallerFrame cf;
   ActRec* ar = cf.actRecForArgs();
   if (ar == NULL) {
@@ -283,6 +300,15 @@ int64_t f_func_num_args() {
     return -1;
   }
   return ar->numArgs();
+}
+
+int64_t f_func_num_args() {
+  raise_disallowed_dynamic_call(
+    "func_num_args should not be called dynamically");
+  return func_num_args_impl();
+}
+int64_t f_func_num_arg_() {
+  return func_num_args_impl();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

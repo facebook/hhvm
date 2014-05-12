@@ -439,6 +439,9 @@ Point idForEdge(const Block* from, const Block* to, const IdMap& ids) {
   }
 }
 
+const StaticString s_get_defined_vars("get_defined_vars"),
+  s_get_defined_vars_SystemLib("__SystemLib\\get_defined_vars");
+
 /*
  * SinkPointAnalyzer is responsible for inspecting a trace and determining two
  * things: the latest safe point to sink each IncRef to, and which DecRefs
@@ -968,9 +971,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(ContEnter)) {
       resolveAllFrames();
     } else if (m_inst->is(CallBuiltin)) {
-      if (!strcasecmp(
-          m_inst->extra<CallBuiltinData>()->callee->fullName()->data(),
-          "get_defined_vars")) {
+      const auto callee = m_inst->extra<CallBuiltinData>()->callee->fullName();
+      if (callee->isame(s_get_defined_vars.get()) ||
+          callee->isame(s_get_defined_vars_SystemLib.get())) {
         observeLocalRefs();
       }
     } else if (m_inst->is(InterpOne, InterpOneCF)) {

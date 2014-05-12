@@ -73,6 +73,13 @@ void raise_typehint_error(const std::string& msg) {
   }
 }
 
+void raise_disallowed_dynamic_call(const std::string& msg) {
+  if ((RuntimeOption::RepoAuthoritative && Repo::global().DisallowDynamicVarEnvFuncs)
+      || RuntimeOption::EnableHipHopSyntax) {
+    raise_error(msg);
+  }
+}
+
 void raise_recoverable_error(const char *fmt, ...) {
   std::string msg;
   va_list ap;
@@ -293,4 +300,3 @@ void raise_message(ErrorConstants::ErrorModes mode, const std::string &msg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

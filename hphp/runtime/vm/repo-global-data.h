@@ -54,11 +54,19 @@ struct Repo::GlobalData {
    */
   ArrayTypeTable arrayTypeTable;
 
+  /*
+   * Indicates whether the repo was compiled with DisallowDynamicVarEnvFuncs. If
+   * so, we assume that '$f()' doesn't read or write over locals (that
+   * haven't been passed).
+   */
+  bool DisallowDynamicVarEnvFuncs = false;
+
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
       (HardTypeHints)
       (HardPrivatePropInference)
       (arrayTypeTable)
+      (DisallowDynamicVarEnvFuncs)
       ;
   }
 };

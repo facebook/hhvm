@@ -1,4 +1,4 @@
-<?hh
+<?php
 
 class kls { public static function meth() { echo "heh\n"; } }
 
@@ -19,7 +19,9 @@ function foo() {
    */
   for ($i = 0; $i < 2; ++$i) {
     $x(mt_rand() ? get_bad_stuff() : array('y' => array()));
-    $x = "extract"; // bad times
+    // Note that dynamically calling extract is not allowed with the
+    // DisallowDynamicVarEnvFuncs option
+    $x = 'extract'; // bad times
   }
   return $y;
 }

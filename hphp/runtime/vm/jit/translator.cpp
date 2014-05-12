@@ -3054,6 +3054,7 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
 
 const StaticString s_http_response_header("http_response_header");
 const StaticString s_extract("extract");
+const StaticString s_extractNative("__SystemLib\\extract");
 
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
@@ -3066,7 +3067,8 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
 
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {
-    return unit->lookupLitstrId(id)->isame(s_extract.get());
+    return unit->lookupLitstrId(id)->isame(s_extract.get())
+    || unit->lookupLitstrId(id)->isame(s_extractNative.get());
   };
 
   if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);

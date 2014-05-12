@@ -932,6 +932,24 @@
             ]
         },
         {
+            "name": "__SystemLib\\compact_sl",
+            "desc": "Creates an array containing variables and their values.\n\nFor each of these, compact() looks for a variable with that name in the current symbol table and adds it to the output array such that the variable name becomes the key and the contents of the variable become the value for that key. In short, it does the opposite of extract().\n\nAny strings that are not set will simply be skipped.",
+            "flags": [
+                "VariableArguments"
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Returns the output array with all the variables added to it."
+            },
+            "args": [
+                {
+                    "name": "varname",
+                    "type": "Variant",
+                    "desc": "compact() takes a variable number of parameters. Each parameter can be either a string containing the name of the variable, or an array of variable names. The array can contain other arrays of variable names inside it; compact() handles it recursively."
+                }
+            ]
+        },
+        {
             "name": "shuffle",
             "desc": "This function shuffles (randomizes the order of the elements in) an array.",
             "flags": [

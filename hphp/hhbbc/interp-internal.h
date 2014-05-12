@@ -32,8 +32,12 @@ namespace HPHP { namespace HHBBC {
 TRACE_SET_MOD(hhbbc);
 
 const StaticString s_extract("extract");
+const StaticString s_extract_sl("__SystemLib\\extract");
 const StaticString s_compact("compact");
+const StaticString s_compact_sl("__SystemLib\\compact_sl");
 const StaticString s_get_defined_vars("get_defined_vars");
+const StaticString s_get_defined_vars_sl("__SystemLib\\get_defined_vars");
+
 const StaticString s_http_response_header("http_response_header");
 
 //////////////////////////////////////////////////////////////////////
@@ -121,7 +125,8 @@ void unsetUnknownLocal(ISS& env) {
 
 void specialFunctionEffects(ISS& env, SString name) {
   // extract() trashes the local variable environment.
-  if (name->isame(s_extract.get())) {
+  if (name->isame(s_extract_sl.get())
+      || (!options.DisallowDynamicVarEnvFuncs && name->isame(s_extract.get()))) {
     readUnknownLocals(env);
     killLocals(env);
     return;
@@ -129,8 +134,11 @@ void specialFunctionEffects(ISS& env, SString name) {
   // compact() and get_defined_vars() read the local variable
   // environment.  We could check which locals for compact, but for
   // now we just include them all.
-  if (name->isame(s_compact.get()) ||
-      name->isame(s_get_defined_vars.get())) {
+  if (name->isame(s_get_defined_vars_sl.get()) ||
+      name->isame(s_compact_sl.get()) ||
+      (!options.DisallowDynamicVarEnvFuncs && name->isame(s_compact.get())) ||
+      (!options.DisallowDynamicVarEnvFuncs && name->isame(s_get_defined_vars.get()))
+     ) {
     readUnknownLocals(env);
     return;
   }
@@ -141,10 +149,11 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
   case FPIKind::Unknown:
     // fallthrough
   case FPIKind::Func:
-    // Could be a dynamic call to extract, get_defined_vars, etc:
     if (!ar.func) {
-      readUnknownLocals(env);
-      killLocals(env);
+      if (!options.DisallowDynamicVarEnvFuncs) {
+        readUnknownLocals(env);
+        killLocals(env);
+      }
       return;
     }
     specialFunctionEffects(env, ar.func->name());

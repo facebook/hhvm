@@ -95,8 +95,9 @@ void raise_param_type_warning(
  */
 void raise_typehint_error(const std::string& msg);
 
+void raise_disallowed_dynamic_call(const std::string& msg);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_RUNTIME_ERROR_H_
-

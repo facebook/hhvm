@@ -4106,6 +4106,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               return true;
             }
           }
+        } else if (emitSystemLibVarEnvFunc(e, call)) {
+          return true;
         } else if (call->isCallToFunction("array_slice") &&
                    params && params->getCount() == 2 &&
                    !Option::JitEnableRenameFunction) {
@@ -6879,6 +6881,36 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     m_evalStack.setString(
       makeStaticString(node->getOriginalClassName()));
   }
+}
+
+bool EmitterVisitor::emitSystemLibVarEnvFunc(Emitter& e,
+                                             SimpleFunctionCallPtr call) {
+  if (call->isCallToFunction("extract")) {
+    emitFuncCall(e, call,
+                 "__SystemLib\\extract", call->getParams());
+    return true;
+  } else if (call->isCallToFunction("compact")) {
+    emitFuncCall(e, call,
+                 "__SystemLib\\compact_sl", call->getParams());
+    return true;
+  } else if (call->isCallToFunction("get_defined_vars")) {
+    emitFuncCall(e, call,
+                 "__SystemLib\\get_defined_vars", call->getParams());
+    return true;
+  } else if (call->isCallToFunction("func_get_args")) {
+    emitFuncCall(e, call,
+                 "__SystemLib\\func_get_args_sl", call->getParams());
+    return true;
+  } else if (call->isCallToFunction("func_get_arg")) {
+    emitFuncCall(e, call,
+                 "__SystemLib\\func_get_arg_sl", call->getParams());
+    return true;
+  } else if (call->isCallToFunction("func_num_args")) {
+    emitFuncCall(e, call,
+                 "__SystemLib\\func_num_arg_", call->getParams());
+    return true;
+  }
+  return false;
 }
 
 bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {

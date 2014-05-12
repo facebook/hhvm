@@ -114,7 +114,11 @@ bool f_array_walk_recursive(VRefParam input, const Variant& funcname,
 bool f_array_walk(VRefParam input, const Variant& funcname,
                   const Variant& userdata = null_variant);
 
-Array f_compact(int _argc, const Variant& varname, const Array& _argv = null_array);
+Array f_compact(int _argc, const Variant& varname,
+                const Array& _argv = null_array);
+// __SystemLib\\compact_sl
+Array f_compact_sl(int _argc, const Variant& varname,
+                  const Array& _argv = null_array);
 
 bool f_shuffle(VRefParam array);
 int64_t f_count(const Variant& var, int64_t mode = 0);

@@ -1039,8 +1039,22 @@ static void compact(VarEnv* v, Array &ret, const Variant& var) {
   }
 }
 
-Array f_compact(int _argc, const Variant& varname, const Array& _argv /* = null_array */) {
-  Array ret = Array::Create();
+Array f_compact(int _argc, const Variant& varname,
+                const Array& _argv /* = null_array */) {
+  raise_disallowed_dynamic_call("compact should not be called dynamically");
+  Array ret = Array::attach(MixedArray::MakeReserve(_argv.size() + 1));
+  VarEnv* v = g_context->getVarEnv();
+  if (v) {
+    compact(v, ret, varname);
+    compact(v, ret, _argv);
+  }
+  return ret;
+}
+
+// __SystemLib\\compact_sl
+Array f_compact_sl(int _argc, const Variant& varname,
+                  const Array& _argv /* = null_array */) {
+  Array ret = Array::attach(MixedArray::MakeReserve(_argv.size() + 1));
   VarEnv* v = g_context->getVarEnv();
   if (v) {
     compact(v, ret, varname);

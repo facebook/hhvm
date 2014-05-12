@@ -1476,7 +1476,7 @@ void f_parse_str(const String& str, VRefParam arr /* = null */) {
   Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
   if (!arr.isReferenced()) {
-    HHVM_FN(extract)(result);
+    HHVM_FN(__SystemLib_extract)(result);
     return;
   }
   arr = result;

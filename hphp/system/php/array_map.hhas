@@ -6,7 +6,7 @@
 
 call_cpp_impl:
           FPushFuncD   1   "__builtin_array_map"
-          FCallBuiltin 0 0 "func_get_args"
+          FCallBuiltin 0 0 "__SystemLib\\func_get_args_sl"
           UnboxR
           FPassC       0
           FCallArray

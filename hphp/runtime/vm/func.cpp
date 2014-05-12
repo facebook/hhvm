@@ -546,6 +546,7 @@ bool Func::byRef(int32_t arg) const {
 }
 
 const StaticString s_extract("extract");
+const StaticString s_extractNative("__SystemLib\\extract");
 
 bool Func::mustBeRef(int32_t arg) const {
   if (!byRef(arg)) return false;
@@ -554,6 +555,7 @@ bool Func::mustBeRef(int32_t arg) const {
       // Extract is special (in more ways than one)---here it needs
       // to be able to take its first argument by ref or not by ref.
       if (name() == s_extract.get() && !cls()) return false;
+      if (name() == s_extractNative.get() && !cls()) return false;
     }
   }
   return

@@ -190,6 +190,13 @@ struct Options {
    * inferred, we'll raise a notice and unserialize() returns false.
    */
   bool HardPrivatePropInference = true;
+
+  /**
+   * If true, we'll assume that dynamic function calls (like '$f()') do not
+   * have effects on unknown locals (i.e. are not extract / compact /...).
+   * See, e.g. __SystemLib\\extract vs extract.
+   */
+  bool DisallowDynamicVarEnvFuncs = true;
 };
 extern Options options;
 

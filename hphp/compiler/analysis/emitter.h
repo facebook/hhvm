@@ -770,6 +770,7 @@ public:
     CallUserFuncForwardArray = CallUserFuncForward | CallUserFuncArray
   };
 
+  bool emitSystemLibVarEnvFunc(Emitter& e, SimpleFunctionCallPtr node);
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
   Func* canEmitBuiltinCall(const std::string& name, int numParams);
   void emitFuncCall(Emitter& e, FunctionCallPtr node,

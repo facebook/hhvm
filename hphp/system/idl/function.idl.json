@@ -198,7 +198,37 @@
             ]
         },
         {
+            "name": "__SystemLib\\func_get_arg_sl",
+            "desc": "Gets the specified argument from a user-defined function's argument list.\n\nThis function may be used in conjunction with func_get_args() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the specified argument, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "arg_num",
+                    "type": "Int32",
+                    "desc": "The argument offset. Function arguments are counted starting from zero."
+                }
+            ]
+        },
+        {
             "name": "func_get_args",
+            "desc": "Gets an array of the function's argument list.\n\nThis function may be used in conjunction with func_get_arg() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array in which each element is a copy of the corresponding member of the current user-defined function's argument list.",
+                "predicted_type": 10
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "__SystemLib\\func_get_args_sl",
             "desc": "Gets an array of the function's argument list.\n\nThis function may be used in conjunction with func_get_arg() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
             "flags": [
             ],
@@ -230,6 +260,18 @@
         },
         {
             "name": "func_num_args",
+            "desc": "Gets the number of arguments passed to the function.\n\nThis function may be used in conjunction with func_get_arg() and func_get_args() to allow user-defined functions to accept variable-length argument lists.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the number of arguments passed into the current user-defined function."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "__SystemLib\\func_num_arg_",
             "desc": "Gets the number of arguments passed to the function.\n\nThis function may be used in conjunction with func_get_arg() and func_get_args() to allow user-defined functions to accept variable-length argument lists.",
             "flags": [
             ],

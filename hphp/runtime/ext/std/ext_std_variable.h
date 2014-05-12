@@ -59,6 +59,8 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
 // variable table
 
 Array HHVM_FUNCTION(get_defined_vars);
+// accessible as __SystemLib\\get_defined_vars
+Array HHVM_FUNCTION(__SystemLib_get_defined_vars);
 
 int64_t constexpr EXTR_OVERWRITE        = 0;
 int64_t constexpr EXTR_SKIP             = 1;
@@ -70,8 +72,13 @@ int64_t constexpr EXTR_IF_EXISTS        = 6;
 int64_t constexpr EXTR_REFS             = 0x100;
 
 int64_t HHVM_FUNCTION(extract, VRefParam vref_array,
-                               int extract_type = EXTR_OVERWRITE,
-                               const String& prefix = empty_string);
+                      int64_t extract_type = EXTR_OVERWRITE,
+                      const String& prefix = empty_string);
+
+// accessible as __SystemLib\\extract
+int64_t HHVM_FUNCTION(__SystemLib_extract, VRefParam vref_array,
+                      int64_t extract_type = EXTR_OVERWRITE,
+                      const String& prefix = empty_string);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

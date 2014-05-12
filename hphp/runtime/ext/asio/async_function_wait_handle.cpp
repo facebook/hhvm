@@ -289,9 +289,15 @@ String c_AsyncFunctionWaitHandle::getName() {
 
       String clsName;
       if (actRec()->hasThis()) {
+        // use get_class($this) if we have $this
         clsName = actRec()->getThis()->getVMClass()->name()->data();
       } else if (actRec()->hasClass()) {
+        // use get_called_class() if we have class context
         clsName = actRec()->getClass()->name()->data();
+      } else if (actRec()->func()->isMethod()) {
+        // use __CLASS__ if we are in a method, but context was wiped
+        // (by onFunctionExit or by unwinder)
+        clsName = actRec()->func()->cls()->name()->data();
       } else {
         return funcName;
       }

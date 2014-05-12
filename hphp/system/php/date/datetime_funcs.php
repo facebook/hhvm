@@ -8,13 +8,6 @@ function date_diff(
   return $datetime->diff($datetime2, $absolute);
 }
 
-function date_format(
-  DateTimeInterface $datetime,
-  string $format
-) {
-  return $datetime->format($format);
-}
-
 function date_timezone_get(DateTimeInterface $datetime) {
   return $datetime->getTimezone();
 }

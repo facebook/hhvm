@@ -34,6 +34,9 @@ enum json_error_codes {
   JSON_ERROR_CTRL_CHAR,
   JSON_ERROR_SYNTAX,
   JSON_ERROR_UTF8,
+  JSON_ERROR_RECURSION,
+  JSON_ERROR_INF_OR_NAN,
+  JSON_ERROR_UNSUPPORTED_TYPE
 };
 
 json_error_codes json_get_last_error_code();

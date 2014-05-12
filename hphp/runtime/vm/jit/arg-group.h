@@ -30,7 +30,6 @@ struct IRInstruction;
 enum class DestType : unsigned {
   None,  // return void (no valid registers)
   SSA,   // return a single-register value
-  SSA2,  // return a two-register value (pair)
   TV     // return a TypedValue packed in two registers
 };
 

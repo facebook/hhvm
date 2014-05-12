@@ -80,7 +80,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
  *
  * Dest
  *   DSSA  - The helper returns a single-register value
- *   DSSA2 - The helper returns a two-register value
  *   DTV   - The helper returns a TypedValue in two registers
  *   DNone - The helper does not return a value
  *

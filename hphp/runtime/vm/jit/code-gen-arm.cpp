@@ -1111,7 +1111,6 @@ void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
       case DestType::None:  return kVoidDest;
       case DestType::TV:    return callDestTV(inst);
       case DestType::SSA:   return callDest(inst);
-      case DestType::SSA2:  return callDest2(inst);
     }
     not_reached();
   }();
@@ -1170,7 +1169,6 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
         emitRegRegMove(a, armDst0, vixl::x0);
       }
       break;
-    case DestType::SSA2: not_implemented();
     case DestType::None:
       assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
       break;
@@ -1205,12 +1203,6 @@ CallDest CodeGenerator::callDestTV(const IRInstruction* inst) const {
   if (!inst->numDsts()) return kVoidDest;
   auto loc = dstLoc(0);
   return { DestType::TV, loc.reg(0), loc.reg(1) };
-}
-
-CallDest CodeGenerator::callDest2(const IRInstruction* inst) const {
-  if (!inst->numDsts()) return kVoidDest;
-  auto loc = dstLoc(0);
-  return { DestType::SSA2, loc.reg(0), loc.reg(1) };
 }
 
 //////////////////////////////////////////////////////////////////////

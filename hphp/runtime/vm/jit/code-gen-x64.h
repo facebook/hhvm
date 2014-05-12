@@ -71,7 +71,6 @@ private:
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
-  CallDest callDest2(const IRInstruction*) const;
 
   // Main call helper:
   CallHelperInfo cgCallHelper(Asm& a,

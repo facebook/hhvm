@@ -42,7 +42,7 @@ using apache::thrift::transport::TTransportException;
 
 const int FastCGIAcceptor::k_maxConns = 50;
 const int FastCGIAcceptor::k_maxRequests = 1000;
-const TSocketAddress FastCGIAcceptor::s_unknownSocketAddress("0.0.0.0", 0);
+const TSocketAddress FastCGIAcceptor::s_unknownSocketAddress("127.0.0.1", 0);
 
 bool FastCGIAcceptor::canAccept(const TSocketAddress& address) {
   // TODO: Support server IP whitelist.

@@ -24,15 +24,16 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // json_encode() options
-const int64_t k_JSON_HEX_TAG           = 1<<0;
-const int64_t k_JSON_HEX_AMP           = 1<<1;
-const int64_t k_JSON_HEX_APOS          = 1<<2;
-const int64_t k_JSON_HEX_QUOT          = 1<<3;
-const int64_t k_JSON_FORCE_OBJECT      = 1<<4;
-const int64_t k_JSON_NUMERIC_CHECK     = 1<<5;
-const int64_t k_JSON_UNESCAPED_SLASHES = 1<<6;
-const int64_t k_JSON_PRETTY_PRINT      = 1<<7;
-const int64_t k_JSON_UNESCAPED_UNICODE = 1<<8;
+const int64_t k_JSON_HEX_TAG                 = 1<<0;
+const int64_t k_JSON_HEX_AMP                 = 1<<1;
+const int64_t k_JSON_HEX_APOS                = 1<<2;
+const int64_t k_JSON_HEX_QUOT                = 1<<3;
+const int64_t k_JSON_FORCE_OBJECT            = 1<<4;
+const int64_t k_JSON_NUMERIC_CHECK           = 1<<5;
+const int64_t k_JSON_UNESCAPED_SLASHES       = 1<<6;
+const int64_t k_JSON_PRETTY_PRINT            = 1<<7;
+const int64_t k_JSON_UNESCAPED_UNICODE       = 1<<8;
+const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
 
 // json_decode() options
 const int64_t k_JSON_BIGINT_AS_STRING  = 1<<0;
@@ -57,6 +58,12 @@ const int64_t k_JSON_ERROR_SYNTAX
   = json_error_codes::JSON_ERROR_SYNTAX;
 const int64_t k_JSON_ERROR_UTF8
   = json_error_codes::JSON_ERROR_UTF8;
+const int64_t k_JSON_ERROR_RECURSION
+  = json_error_codes::JSON_ERROR_RECURSION;
+const int64_t k_JSON_ERROR_INF_OR_NAN
+  = json_error_codes::JSON_ERROR_INF_OR_NAN;
+const int64_t k_JSON_ERROR_UNSUPPORTED_TYPE
+  = json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE;
 
 ///////////////////////////////////////////////////////////////////////////////
 int64_t HHVM_FUNCTION(json_last_error) {
@@ -67,7 +74,8 @@ String HHVM_FUNCTION(json_last_error_msg) {
   return json_get_last_error_msg();
 }
 
-String HHVM_FUNCTION(json_encode, const Variant& value, int64_t options /* = 0 */,
+String HHVM_FUNCTION(json_encode, const Variant& value,
+                                  int64_t options /* = 0 */,
                                   int64_t depth /* = 512 */) {
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
@@ -155,27 +163,32 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_JSON_HEX_TAG("JSON_HEX_TAG");
-const StaticString s_JSON_HEX_AMP("JSON_HEX_AMP");
-const StaticString s_JSON_HEX_APOS("JSON_HEX_APOS");
-const StaticString s_JSON_HEX_QUOT("JSON_HEX_QUOT");
-const StaticString s_JSON_FORCE_OBJECT("JSON_FORCE_OBJECT");
-const StaticString s_JSON_NUMERIC_CHECK("JSON_NUMERIC_CHECK");
-const StaticString s_JSON_UNESCAPED_SLASHES("JSON_UNESCAPED_SLASHES");
-const StaticString s_JSON_PRETTY_PRINT("JSON_PRETTY_PRINT");
-const StaticString s_JSON_UNESCAPED_UNICODE("JSON_UNESCAPED_UNICODE");
-const StaticString s_JSON_BIGINT_AS_STRING("JSON_BIGINT_AS_STRING");
-const StaticString s_JSON_FB_LOOSE("JSON_FB_LOOSE");
-const StaticString s_JSON_FB_UNLIMITED("JSON_FB_UNLIMITED");
-const StaticString s_JSON_FB_EXTRA_ESCAPES("JSON_FB_EXTRA_ESCAPES");
-const StaticString s_JSON_FB_COLLECTIONS("JSON_FB_COLLECTIONS");
-const StaticString s_JSON_FB_STABLE_MAPS("JSON_FB_STABLE_MAPS");
-const StaticString s_JSON_ERROR_NONE("JSON_ERROR_NONE");
-const StaticString s_JSON_ERROR_DEPTH("JSON_ERROR_DEPTH");
-const StaticString s_JSON_ERROR_STATE_MISMATCH("JSON_ERROR_STATE_MISMATCH");
-const StaticString s_JSON_ERROR_CTRL_CHAR("JSON_ERROR_CTRL_CHAR");
-const StaticString s_JSON_ERROR_SYNTAX("JSON_ERROR_SYNTAX");
-const StaticString s_JSON_ERROR_UTF8("JSON_ERROR_UTF8");
+const StaticString
+  s_JSON_HEX_TAG("JSON_HEX_TAG"),
+  s_JSON_HEX_AMP("JSON_HEX_AMP"),
+  s_JSON_HEX_APOS("JSON_HEX_APOS"),
+  s_JSON_HEX_QUOT("JSON_HEX_QUOT"),
+  s_JSON_FORCE_OBJECT("JSON_FORCE_OBJECT"),
+  s_JSON_NUMERIC_CHECK("JSON_NUMERIC_CHECK"),
+  s_JSON_UNESCAPED_SLASHES("JSON_UNESCAPED_SLASHES"),
+  s_JSON_PRETTY_PRINT("JSON_PRETTY_PRINT"),
+  s_JSON_UNESCAPED_UNICODE("JSON_UNESCAPED_UNICODE"),
+  s_JSON_PARTIAL_OUTPUT_ON_ERROR("JSON_PARTIAL_OUTPUT_ON_ERROR"),
+  s_JSON_BIGINT_AS_STRING("JSON_BIGINT_AS_STRING"),
+  s_JSON_FB_LOOSE("JSON_FB_LOOSE"),
+  s_JSON_FB_UNLIMITED("JSON_FB_UNLIMITED"),
+  s_JSON_FB_EXTRA_ESCAPES("JSON_FB_EXTRA_ESCAPES"),
+  s_JSON_FB_COLLECTIONS("JSON_FB_COLLECTIONS"),
+  s_JSON_FB_STABLE_MAPS("JSON_FB_STABLE_MAPS"),
+  s_JSON_ERROR_NONE("JSON_ERROR_NONE"),
+  s_JSON_ERROR_DEPTH("JSON_ERROR_DEPTH"),
+  s_JSON_ERROR_STATE_MISMATCH("JSON_ERROR_STATE_MISMATCH"),
+  s_JSON_ERROR_CTRL_CHAR("JSON_ERROR_CTRL_CHAR"),
+  s_JSON_ERROR_SYNTAX("JSON_ERROR_SYNTAX"),
+  s_JSON_ERROR_UTF8("JSON_ERROR_UTF8"),
+  s_JSON_ERROR_RECURSION("JSON_ERROR_RECURSION"),
+  s_JSON_ERROR_INF_OR_NAN("JSON_ERROR_INF_OR_NAN"),
+  s_JSON_ERROR_UNSUPPORTED_TYPE("JSON_ERROR_UNSUPPORTED_TYPE");
 
 class JsonExtension : public Extension {
  public:
@@ -207,6 +220,9 @@ class JsonExtension : public Extension {
     );
     Native::registerConstant<KindOfInt64>(
       s_JSON_UNESCAPED_UNICODE.get(), k_JSON_UNESCAPED_UNICODE
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_JSON_PARTIAL_OUTPUT_ON_ERROR.get(), k_JSON_PARTIAL_OUTPUT_ON_ERROR
     );
     Native::registerConstant<KindOfInt64>(
       s_JSON_BIGINT_AS_STRING.get(), k_JSON_BIGINT_AS_STRING
@@ -244,6 +260,15 @@ class JsonExtension : public Extension {
     Native::registerConstant<KindOfInt64>(
       s_JSON_ERROR_UTF8.get(), k_JSON_ERROR_UTF8
     );
+  Native::registerConstant<KindOfInt64>(
+    s_JSON_ERROR_RECURSION.get(), k_JSON_ERROR_RECURSION
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_JSON_ERROR_INF_OR_NAN.get(), k_JSON_ERROR_INF_OR_NAN
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_JSON_ERROR_UNSUPPORTED_TYPE.get(), k_JSON_ERROR_UNSUPPORTED_TYPE
+  );
 
     HHVM_FE(json_last_error);
     HHVM_FE(json_last_error_msg);

@@ -26,6 +26,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// If we have json-c then don't use this library since that one has a more
+// permissive licence
+#ifndef HAVE_JSONC
 
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include <vector>
@@ -955,3 +958,5 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
 }
 
 }
+
+#endif /* HAVE_JSONC */

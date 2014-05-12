@@ -52,6 +52,11 @@ if (LIBINOTIFY_INCLUDE_DIR)
 	include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
+find_package(Libjsonc)
+if (LIBJSONC_INCLUDE_DIR)
+	include_directories(${LIBJSONC_INCLUDE_DIR})
+endif()
+
 # iconv checks
 find_package(Libiconv REQUIRED)
 include_directories(${LIBICONV_INCLUDE_DIR})
@@ -403,6 +408,9 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
+if (LIBJSONC_LIBRARY)
+	target_link_libraries(${target} ${LIBJSONC_LIBRARY})
+endif()
 
 if (LibXed_LIBRARY)
 	target_link_libraries(${target} ${LibXed_LIBRARY})

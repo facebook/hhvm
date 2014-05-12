@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/config.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <fstream>
 
 #include "hphp/runtime/base/ini-setting.h"
@@ -48,6 +49,9 @@ static std::string normalize(const std::string &name) {
       supress_next_underscore = false;
     }
   }
+  boost::replace_first(out, ".eval.", ".");
+  boost::replace_first(out, ".my_sql.", ".mysql.");
+  boost::replace_first(out, ".enable_hip_hop_syntax", ".force_hh");
   return out;
 }
 

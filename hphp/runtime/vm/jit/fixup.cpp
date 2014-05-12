@@ -60,9 +60,13 @@ FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
 }
 
 namespace {
+
+// If this function asserts or crashes, it is usually because VMRegAnchor was
+// not used to force a sync prior to calling a runtime function.
 bool isVMFrame(const ExecutionContext* ec, const ActRec* ar) {
-  // If this assert is failing, you may have forgotten a sync point somewhere
   assert(ar);
+  // Determine whether the frame pointer is outside the native stack, cleverly
+  // using a single unsigned comparison to do both halves of the bounds check.
   bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
   assert(!ret ||
          (ar >= ec->m_stack.getStackLowAddress() &&

@@ -1,6 +1,7 @@
 set(CXX_SOURCES)
 set(C_SOURCES)
 set(ASM_SOURCES)
+set(HEADER_SOURCES)
 
 # Pick up all files in the base ext/ folder unconditionally
 auto_sources(files "*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -9,6 +10,8 @@ auto_sources(files "*.c" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND C_SOURCES ${files})
 auto_sources(files "*.S" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND ASM_SOURCES ${files})
+auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND HEADER_SOURCES ${files})
 
 set(HRE_LIBARIES)
 include(EXTFunctions)
@@ -36,3 +39,5 @@ ADD_LIBRARY(hphp_runtime_ext STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 target_link_libraries(hphp_runtime_ext ${HRE_LIBRARIES})
 hphp_link(hphp_runtime_ext)
+
+HHVM_PUBLIC_HEADERS(ext ${HEADER_SOURCES})

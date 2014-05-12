@@ -3945,6 +3945,10 @@ OPTBLD_INLINE void ExecutionContext::iopDiv(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellDiv);
 }
 
+OPTBLD_INLINE void ExecutionContext::iopPow(IOP_ARGS) {
+  implCellBinOp(IOP_PASS_ARGS, cellPow);
+}
+
 OPTBLD_INLINE void ExecutionContext::iopMod(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellMod);
 }

@@ -121,6 +121,11 @@ Type typeMod(Type t1, Type t2) {
   return TInitCell;
 }
 
+Type typePow(Type t1, Type t2) {
+  if (auto t = eval_const(t1, t2, cellPow)) return *t;
+  return TNum;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 Type typeBitAnd(Type t1, Type t2) {

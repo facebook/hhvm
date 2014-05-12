@@ -428,6 +428,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"-="                 { RETSTEP(T_MINUS_EQUAL);}
 <ST_IN_SCRIPTING>"*="                 { RETSTEP(T_MUL_EQUAL);}
 <ST_IN_SCRIPTING>"/="                 { RETSTEP(T_DIV_EQUAL);}
+<ST_IN_SCRIPTING>"**"                 { RETSTEP(T_POW);}
+<ST_IN_SCRIPTING>"**="                { RETSTEP(T_POW_EQUAL);}
 <ST_IN_SCRIPTING>".="                 { RETSTEP(T_CONCAT_EQUAL);}
 <ST_IN_SCRIPTING>"%="                 { RETSTEP(T_MOD_EQUAL);}
 <ST_IN_SCRIPTING>"<<="                { RETSTEP(T_SL_EQUAL);}

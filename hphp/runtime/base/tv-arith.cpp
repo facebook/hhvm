@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/util/overflow.h"
 
 namespace HPHP {
@@ -490,6 +491,10 @@ Cell cellDiv(Cell c1, Cell c2) {
   return cellArith(Div(), c1, c2);
 }
 
+Cell cellPow(Cell c1, Cell c2) {
+  return *f_pow(tvAsVariant(&c1), tvAsVariant(&c2)).asCell();
+}
+
 Cell cellMod(Cell c1, Cell c2) {
   auto const i1 = cellToInt(c1);
   auto const i2 = cellToInt(c2);
@@ -548,8 +553,12 @@ void cellDivEq(Cell& c1, Cell c2) {
   cellCopy(cellDiv(c1, c2), c1);
 }
 
+void cellPowEq(Cell& c1, Cell c2) {
+  cellSet(cellPow(c1, c2), c1);
+}
+
 void cellModEq(Cell& c1, Cell c2) {
-  cellCopy(cellMod(c1, c2), c1);
+  cellSet(cellMod(c1, c2), c1);
 }
 
 void cellBitAndEq(Cell& c1, Cell c2) {

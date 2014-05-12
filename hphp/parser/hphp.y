@@ -576,7 +576,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left T_LOGICAL_XOR
 %left T_LOGICAL_AND
 %right T_PRINT
-%left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL
+%left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
 %left '?' ':'
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND
@@ -591,6 +591,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %right '!'
 %nonassoc T_INSTANCEOF
 %right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%right T_POW
 %right '['
 
 %nonassoc T_NEW T_CLONE
@@ -1710,6 +1711,7 @@ expr_no_variable:
   | variable T_XOR_EQUAL expr          { BEXP($$,$1,$3,T_XOR_EQUAL);}
   | variable T_SL_EQUAL expr           { BEXP($$,$1,$3,T_SL_EQUAL);}
   | variable T_SR_EQUAL expr           { BEXP($$,$1,$3,T_SR_EQUAL);}
+  | variable T_POW_EQUAL expr          { BEXP($$,$1,$3,T_POW_EQUAL);}
   | variable T_INC                     { UEXP($$,$1,T_INC,0);}
   | T_INC variable                     { UEXP($$,$2,T_INC,1);}
   | variable T_DEC                     { UEXP($$,$1,T_DEC,0);}
@@ -1727,6 +1729,7 @@ expr_no_variable:
   | expr '-' expr                      { BEXP($$,$1,$3,'-');}
   | expr '*' expr                      { BEXP($$,$1,$3,'*');}
   | expr '/' expr                      { BEXP($$,$1,$3,'/');}
+  | expr T_POW expr                    { BEXP($$,$1,$3,T_POW);}
   | expr '%' expr                      { BEXP($$,$1,$3,'%');}
   | expr T_SL expr                     { BEXP($$,$1,$3,T_SL);}
   | expr T_SR expr                     { BEXP($$,$1,$3,T_SR);}

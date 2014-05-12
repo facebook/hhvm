@@ -699,6 +699,7 @@ static int getOpForAssignmentOp(int op) {
   case T_XOR_EQUAL: return '^';
   case T_SL_EQUAL: return T_SL;
   case T_SR_EQUAL: return T_SR;
+  case T_POW_EQUAL: return T_POW;
   default: return 0;
   }
 }
@@ -1256,6 +1257,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                     break;
                   case T_MINUS_EQUAL:
                   case T_MUL_EQUAL:
+                  case T_POW_EQUAL:
                   case T_DIV_EQUAL:
                   case T_CONCAT_EQUAL:
                   case T_MOD_EQUAL:

@@ -159,6 +159,7 @@
   CASE(LateBoundCls) \
   CASE(MIterFree) \
   CASE(Mod) \
+  CASE(Pow) \
   CASE(NativeImpl) \
   CASE(NewArray) \
   CASE(NewCol) \

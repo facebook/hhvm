@@ -62,6 +62,13 @@ Cell cellDiv(Cell, Cell);
 Cell cellMod(Cell, Cell);
 
 /*
+ * PHP Operator **.
+ *
+ * Always returns a TypedNum.
+ */
+Cell cellPow(Cell, Cell);
+
+/*
  * PHP operators &, |, and ^.
  *
  * These functions return a KindOfInt64, unless both arguments are
@@ -114,6 +121,14 @@ void cellMulEqO(Cell& c1, Cell c2);
  */
 void cellDivEq(Cell& c1, Cell);
 void cellModEq(Cell& c1, Cell);
+
+/*
+ * PHP operator **=.
+ *
+ * Mutates the first argument in place, by combining the second
+ * argument with it in the of php operator **=.
+ */
+void cellPowEq(Cell& c1, Cell);
 
 /*
  * PHP operators &=, |=, and ^=.

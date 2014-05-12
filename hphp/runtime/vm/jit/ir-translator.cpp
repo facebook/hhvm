@@ -476,6 +476,7 @@ IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
     case SetOpOp::DivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
     case SetOpOp::ConcatEqual: return Op::Concat;
     case SetOpOp::ModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
+    case SetOpOp::PowEqual:    HHIR_UNIMPLEMENTED(SetOpL_Pow);;
     case SetOpOp::AndEqual:    return Op::BitAnd;
     case SetOpOp::OrEqual:     return Op::BitOr;
     case SetOpOp::XorEqual:    return Op::BitXor;

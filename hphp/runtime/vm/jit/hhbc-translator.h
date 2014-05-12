@@ -325,6 +325,7 @@ struct HhbcTranslator {
   void emitAbs();
   void emitMod();
   void emitDiv();
+  void emitPow();
   void emitSqrt();
   void emitShl();
   void emitShr();

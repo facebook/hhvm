@@ -404,6 +404,7 @@ enum class FatalOp : uint8_t {
   SETOP_OP(MulEqual,    OpMul) \
   SETOP_OP(ConcatEqual, OpConcat) \
   SETOP_OP(DivEqual,    OpDiv) \
+  SETOP_OP(PowEqual,    OpPow) \
   SETOP_OP(ModEqual,    OpMod) \
   SETOP_OP(AndEqual,    OpBitAnd) \
   SETOP_OP(OrEqual,     OpBitOr) \
@@ -412,7 +413,7 @@ enum class FatalOp : uint8_t {
   SETOP_OP(SrEqual,     OpShr)  \
   SETOP_OP(PlusEqualO,  OpAddO) \
   SETOP_OP(MinusEqualO, OpSubO) \
-  SETOP_OP(MulEqualO,   OpMulO)
+  SETOP_OP(MulEqualO,   OpMulO) \
 
 enum class SetOpOp : uint8_t {
 #define SETOP_OP(setOpOp, bcOp) setOpOp,
@@ -492,6 +493,7 @@ enum class SilenceOp : uint8_t {
   O(MulO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(Pow,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Sqrt,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(Xor,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Not,             NA,               ONE(CV),         ONE(CV),    NF) \

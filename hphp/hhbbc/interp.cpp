@@ -347,6 +347,7 @@ void in(ISS& env, const bc::Sub& op)    { arithImpl(env, op, typeSub); }
 void in(ISS& env, const bc::Mul& op)    { arithImpl(env, op, typeMul); }
 void in(ISS& env, const bc::Div& op)    { arithImpl(env, op, typeDiv); }
 void in(ISS& env, const bc::Mod& op)    { arithImpl(env, op, typeMod); }
+void in(ISS& env, const bc::Pow& op)    { arithImpl(env, op, typePow); }
 void in(ISS& env, const bc::BitAnd& op) { arithImpl(env, op, typeBitAnd); }
 void in(ISS& env, const bc::BitOr& op)  { arithImpl(env, op, typeBitOr); }
 void in(ISS& env, const bc::BitXor& op) { arithImpl(env, op, typeBitXor); }

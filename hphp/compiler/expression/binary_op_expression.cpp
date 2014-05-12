@@ -50,6 +50,7 @@ BinaryOpExpression::BinaryOpExpression
   case T_MINUS_EQUAL:
   case T_MUL_EQUAL:
   case T_DIV_EQUAL:
+  case T_POW_EQUAL:
   case T_CONCAT_EQUAL:
   case T_MOD_EQUAL:
   case T_AND_EQUAL:
@@ -756,6 +757,8 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_MUL_EQUAL:
   case '/':
   case T_DIV_EQUAL:
+  case T_POW:
+  case T_POW_EQUAL:
     et1 = Type::Numeric;
     et2 = Type::Numeric;
     rt  = Type::Numeric;

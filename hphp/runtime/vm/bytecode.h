@@ -54,6 +54,7 @@ void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
   case SetOpOp::MinusEqual:     cellSubEq(*lhs, *rhs); return;
   case SetOpOp::MulEqual:       cellMulEq(*lhs, *rhs); return;
   case SetOpOp::DivEqual:       cellDivEq(*lhs, *rhs); return;
+  case SetOpOp::PowEqual:       cellPowEq(*lhs, *rhs); return;
   case SetOpOp::ModEqual:       cellModEq(*lhs, *rhs); return;
   case SetOpOp::ConcatEqual:
     concat_assign(tvAsVariant(lhs), cellAsCVarRef(*rhs).toString());

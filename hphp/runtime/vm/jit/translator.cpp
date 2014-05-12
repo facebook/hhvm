@@ -587,6 +587,26 @@ predictOutputs(const NormalizedInstruction* ni) {
     return KindOfInt64;
   }
 
+  if (ni->op() == OpPow) {
+    // int ** int => int, unless result > 2 ** 52, then it's a double
+    // anything ** double => double
+    // double ** anything => double
+    // anything ** anything => int
+    auto lhs = ni->inputs[0];
+    auto rhs = ni->inputs[1];
+
+    if (lhs->valueType() == KindOfInt64 && rhs->valueType() == KindOfInt64) {
+      // Best guess, since overflowing isn't common
+      return KindOfInt64;
+    }
+
+    if (lhs->valueType() == KindOfDouble || rhs->valueType() == KindOfDouble) {
+      return KindOfDouble;
+    }
+
+    return KindOfInt64;
+  }
+
   if (ni->op() == OpSqrt) {
     // sqrt returns a double, unless you pass something nasty to it.
     return KindOfDouble;
@@ -749,6 +769,7 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
   }
   case SetOpOp::ConcatEqual: return RuntimeType(KindOfString);
   case SetOpOp::DivEqual:
+  case SetOpOp::PowEqual:
   case SetOpOp::ModEqual:    return RuntimeType(KindOfAny);
   case SetOpOp::AndEqual:
   case SetOpOp::OrEqual:
@@ -1043,6 +1064,7 @@ static const struct {
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
+  { OpPow,         {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpSqrt,        {Stack1,           Stack1,       OutPred,           0 }},
   /* Logical ops */
   { OpXor,         {StackTop2,        Stack1,       OutBoolean,       -1 }},

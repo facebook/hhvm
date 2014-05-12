@@ -5058,6 +5058,14 @@
             "type": "Int64"
         },
         {
+            "name": "T_POW",
+            "type": "Int64"
+        },
+        {
+            "name": "T_POW_EQUAL",
+            "type": "Int64"
+        },
+        {
             "name": "T_PRINT",
             "type": "Int64"
         },

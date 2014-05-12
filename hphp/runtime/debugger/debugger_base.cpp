@@ -326,6 +326,7 @@ static void get_color(int tokid, int prev, int next,
     COLOR_ENTRY(T_AND_EQUAL,                None        );
     COLOR_ENTRY(T_MOD_EQUAL,                None        );
     COLOR_ENTRY(T_CONCAT_EQUAL,             None        );
+    COLOR_ENTRY(T_POW_EQUAL,                None        );
     COLOR_ENTRY(T_DIV_EQUAL,                None        );
     COLOR_ENTRY(T_MUL_EQUAL,                None        );
     COLOR_ENTRY(T_MINUS_EQUAL,              None        );

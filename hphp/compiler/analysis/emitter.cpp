@@ -3807,6 +3807,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case T_IS_SMALLER_OR_EQUAL: e.Lte(); break;
           case '>': e.Gt(); break;
           case T_IS_GREATER_OR_EQUAL: e.Gte(); break;
+          case T_POW: e.Pow(); break;
           default: assert(false);
         }
         return true;
@@ -5577,6 +5578,7 @@ void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
       return ifIntOverflow(SetOpOp::MinusEqual, SetOpOp::MinusEqualO);
     case T_MUL_EQUAL:
       return ifIntOverflow(SetOpOp::MulEqual, SetOpOp::MulEqualO);
+    case T_POW_EQUAL:    return SetOpOp::PowEqual;
     case T_DIV_EQUAL:    return SetOpOp::DivEqual;
     case T_CONCAT_EQUAL: return SetOpOp::ConcatEqual;
     case T_MOD_EQUAL:    return SetOpOp::ModEqual;

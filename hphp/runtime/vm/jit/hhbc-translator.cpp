@@ -4799,6 +4799,10 @@ void HhbcTranslator::emitMod() {
   push(res);
 }
 
+void HhbcTranslator::emitPow() {
+  emitInterpOne(Type::UncountedInit, 2);
+}
+
 void HhbcTranslator::emitSqrt() {
   auto const srcType = topC()->type();
   if (srcType <= Type::Int) {
@@ -4914,6 +4918,7 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   case SetOpOp::MinusEqualO:
   case SetOpOp::MulEqualO:   return arithOpOverResult(locType.unbox(), valType);
   case SetOpOp::ConcatEqual: return Type::Str;
+  case SetOpOp::PowEqual:
   case SetOpOp::DivEqual:
   case SetOpOp::ModEqual:    return Type::UncountedInit;
   case SetOpOp::AndEqual:

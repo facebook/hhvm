@@ -11,6 +11,7 @@ Eval {
 
 MySQL {
   ReadTimeout = 5000
+  SlowQueryThreshold = 0
 }
 
 EnvVariables {

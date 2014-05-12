@@ -5,6 +5,7 @@ Eval {
 
 MySQL {
  TypedResults = false
+  SlowQueryThreshold = 0
 }
 
 Http {

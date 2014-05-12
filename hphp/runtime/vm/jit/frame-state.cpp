@@ -550,7 +550,19 @@ void FrameState::merge(Snapshot& state) {
     // preserve local values if they're the same in both states,
     // This would be the place to insert phi nodes (jmps+deflabels) if we want
     // to avoid clearing state, which triggers a downstream reload.
-    if (local.value != m_locals[i].value) local.value = nullptr;
+    if (local.value != m_locals[i].value) {
+      // try to merge SSATmps for the local if one of them came from
+      // a passthrough instruction with the other as the source.
+      auto isParent = [](SSATmp* parent, SSATmp* child) -> bool {
+        return child && child->inst()->isPassthrough() &&
+               child->inst()->getPassthroughValue() == parent;
+      };
+      if (isParent(m_locals[i].value, local.value)) {
+        local.value = m_locals[i].value;
+      } else if (!isParent(local.value, m_locals[i].value)) {
+        local.value = nullptr;
+      }
+    }
     if (local.typeSource != m_locals[i].typeSource) local.typeSource = nullptr;
 
     local.type = Type::unionOf(local.type, m_locals[i].type);

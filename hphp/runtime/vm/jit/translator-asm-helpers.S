@@ -35,7 +35,7 @@
 #if defined(__x86_64__)
   .byte 0
   ETCH_ALIGNMENT
-  ETCH_SECTION
+  .section .text.enterTCHelper
   .globl ETCH_NAME(enterTCHelper)
 ETCH_NAME(enterTCHelper:)
   // Prologue
@@ -125,6 +125,7 @@ ETCH_LABEL(enterTCHelper$copyReqArgs:)
   CFI2(adjust_cfa_offset, -8)
   ret
   CFI(endproc)
+  .size enterTCHelper, .-enterTCHelper
 ///////////////////////////////////////////////////////////////////////////////
 #elif defined(__AARCH64EL__)
   .globl enterTCHelper

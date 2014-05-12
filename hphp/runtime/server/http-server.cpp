@@ -60,7 +60,6 @@ time_t HttpServer::StartTime;
 const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
 
 static void on_kill(int sig) {
-  signal(sig, SIG_DFL);
   // There is a small race condition here with HttpServer::reset in
   // program-functions.cpp, but it can only happen if we get a signal while
   // shutting down.  The fix is to add a lock to HttpServer::Server but it seems
@@ -68,6 +67,7 @@ static void on_kill(int sig) {
   if (HttpServer::Server && sig != SIGTERM) {
     HttpServer::Server->gracefulStop();
   }
+  signal(sig, SIG_DFL);
   raise(sig);
 }
 
@@ -403,6 +403,11 @@ void HttpServer::abortServers() {
 }
 
 void HttpServer::gracefulStop() {
+  if (RuntimeOption::ServerGracefulShutdownWait) {
+    signal(SIGALRM, exit_on_timeout);
+    alarm(RuntimeOption::ServerGracefulShutdownWait);
+  }
+
   // NOTE: Server->stop does a graceful stop by design.
   if (m_pageServer) {
     m_pageServer->stop();

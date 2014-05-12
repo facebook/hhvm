@@ -43,9 +43,10 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
   mcg->setJmpTransID(toSmash);
 
   TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(mcg->code.stubs(), mcg->getFreeStub(),
+            ? emitEphemeralServiceReq(stubs,
+                                      mcg->getFreeStub(stubs),
                                       req, toSmash, dest.toAtomicInt())
-            : emitServiceReq(mcg->code.stubs(), req, toSmash,
+            : emitServiceReq(stubs, req, toSmash,
                              dest.toAtomicInt()));
 
   MacroAssembler a { cb };

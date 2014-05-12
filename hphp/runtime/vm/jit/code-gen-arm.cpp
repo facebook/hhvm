@@ -627,7 +627,7 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {
-  emitJumpToBlock(m_mcg->code.main(), inst->taken(), CC_None);
+  emitJumpToBlock(m_mainCode, inst->taken(), CC_None);
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
@@ -1314,7 +1314,7 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
     rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      emitJumpToBlock(m_mcg->code.main(), inst->taken(), ccNegate(cc));
+      emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc));
     }
   );
 }
@@ -1347,7 +1347,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   };
 
   auto doJcc = [&] (ConditionCode cc) {
-    emitJumpToBlock(m_mcg->code.main(), inst->taken(), ccNegate(cc));
+    emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc));
   };
 
   Type typeParam = inst->typeParam();
@@ -1358,7 +1358,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     return;
   }
   if (srcType.not(typeParam)) {
-    emitJumpToBlock(m_mcg->code.main(), inst->taken(), CC_None);
+    emitJumpToBlock(m_mainCode, inst->taken(), CC_None);
     return;
   }
 
@@ -1939,7 +1939,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.   Ldr   (rVmSp, rReturnReg[offsetof(ExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
 
-  emitServiceReq(mcg->code.main(), REQ_RESUME);
+  emitServiceReq(m_mainCode, REQ_RESUME);
 }
 
 //////////////////////////////////////////////////////////////////////

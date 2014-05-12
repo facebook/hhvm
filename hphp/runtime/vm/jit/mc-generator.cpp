@@ -354,7 +354,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
    */
   auto sk = args.m_sk;
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer) return nullptr;
+  if (!writer || !shouldTranslate()) return nullptr;
 
   if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
     TCA tca = sr->getTopTranslation();
@@ -908,7 +908,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
     return tDest;
   }
 
-  TCA stub = emitEphemeralServiceReq(code.stubs(), getFreeStub(),
+  TCA stub = emitEphemeralServiceReq(code.stubs(), getFreeStub(code.stubs()),
                                      REQ_BIND_JMPCC_SECOND, toSmash,
                                      offWillDefer, cc);
 
@@ -1383,15 +1383,15 @@ MCGenerator::freeRequestStub(TCA stub) {
   return true;
 }
 
-TCA MCGenerator::getFreeStub() {
+TCA MCGenerator::getFreeStub(CodeBlock& stubs) {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
     Stats::inc(Stats::Astubs_Reused);
-    assert(m_freeStubs.m_list == nullptr ||
-           code.stubs().contains(TCA(m_freeStubs.m_list)));
+    always_assert(m_freeStubs.m_list == nullptr ||
+                  code.isValidCodeAddress(TCA(m_freeStubs.m_list)));
     TRACE(1, "recycle stub %p\n", ret);
   } else {
-    ret = code.stubs().frontier();
+    ret = stubs.frontier();
     Stats::inc(Stats::Astubs_New);
     TRACE(1, "alloc new stub %p\n", ret);
   }

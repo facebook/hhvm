@@ -52,6 +52,7 @@ CodeCache::Selector::~Selector() {
 
 CodeCache::CodeCache()
   : m_selection(Selection::Default)
+  , m_lock(false)
 {
   static const size_t kRoundUp = 2 << 20;
 
@@ -171,6 +172,7 @@ CodeCache::~CodeCache() {
 }
 
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
+  always_assert(!m_lock);
   return JIT::codeBlockChoose(addr,
                               m_main, m_hot, m_prof, m_stubs, m_trampolines);
 }
@@ -199,6 +201,7 @@ void CodeCache::unprotect() {
 }
 
 CodeBlock& CodeCache::main() {
+  always_assert(!m_lock);
     switch (m_selection) {
       case Selection::Default: return m_main;
       case Selection::Hot:     return m_hot;
@@ -208,6 +211,7 @@ CodeBlock& CodeCache::main() {
 }
 
 CodeBlock& CodeCache::stubs() {
+  always_assert(!m_lock);
   switch (m_selection) {
     case Selection::Default:
     case Selection::Hot:

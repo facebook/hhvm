@@ -179,7 +179,7 @@ public:
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset, bool resumed);
   bool freeRequestStub(TCA stub);
-  TCA getFreeStub();
+  TCA getFreeStub(CodeBlock& stubs);
   void registerCatchBlock(CTCA ip, TCA block);
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
   TCA getTranslatedCaller() const;
@@ -246,7 +246,7 @@ private:
   void checkRefs(SrcKey, const RefDeps&, SrcRec&);
 
   bool shouldTranslate() const {
-    return code.main().used() < RuntimeOption::EvalJitAMaxUsage;
+    return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage;
   }
 
   TCA getTopTranslation(SrcKey sk) {

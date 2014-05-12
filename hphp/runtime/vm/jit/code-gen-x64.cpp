@@ -479,7 +479,7 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   auto const patchAddr = a.frontier();
   auto const jccStub =
     emitEphemeralServiceReq(m_stubsCode,
-                            mcg->getFreeStub(),
+                            mcg->getFreeStub(m_stubsCode),
                             REQ_BIND_JMPCC_FIRST,
                             patchAddr,
                             extra->taken,
@@ -2616,7 +2616,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       mcg->backEnd().prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
         m_stubsCode,
-        mcg->getFreeStub(),
+        mcg->getFreeStub(m_stubsCode),
         REQ_BIND_JMPCC_SECOND,
         m_as.frontier(),
         data->defaultOff,
@@ -2941,9 +2941,13 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
 
-  emitServiceReq(m_mainCode, REQ_RETRANSLATE_OPT,
-                 SrcKey(curFunc(), extra->offset, resumed()).toAtomicInt(),
-                 extra->transId);
+  TCA sr = emitServiceReq(
+    m_stubsCode, REQ_RETRANSLATE_OPT,
+    SrcKey(curFunc(), extra->offset, resumed()).toAtomicInt(),
+    extra->transId);
+  if (m_mainCode.frontier() != m_stubsCode.frontier()) {
+    m_as.jmp(sr);
+  }
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {

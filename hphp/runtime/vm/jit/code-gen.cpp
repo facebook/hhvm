@@ -120,6 +120,9 @@ void genCodeImpl(CodeBlock& mainCode,
     return state.addresses[block];
   };
 
+  mcg->code.lock();
+  SCOPE_EXIT { mcg->code.unlock(); };
+
   /*
    * Emit the given block on the supplied assembler.  The `nextLinear'
    * is the next block that will be emitted on this assembler.  If is

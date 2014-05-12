@@ -18,7 +18,8 @@
 #define CFI2(x, y)     .cfi_##x y
 #define CFI3C(x, y, z) .cfi_##x y##, z
 #define ETCH_ALIGNMENT .align 16
-#define ETCH_SECTION   .section .text
+#define ETCH_SECTION   .section .text.enterTCHelper
+#define ETCH_SIZE      .size enterTCHelper, .-enterTCHelper
 #define ETCH_NAME(x)   x
 #define ETCH_LABEL(x)  .L##x
 #else
@@ -27,6 +28,7 @@
 #define CFI3C(x, y, z) /* not used on OSX */
 #define ETCH_ALIGNMENT .align 4 // on OSX this is 2^value
 #define ETCH_SECTION   .section .text,
+#define ETCH_SIZE      /* not used on OSX */
 #define ETCH_NAME(x)   _##x
 #define ETCH_LABEL(x)  .L##_##x
 #endif
@@ -35,7 +37,7 @@
 #if defined(__x86_64__)
   .byte 0
   ETCH_ALIGNMENT
-  .section .text.enterTCHelper
+  ETCH_SECTION
   .globl ETCH_NAME(enterTCHelper)
 ETCH_NAME(enterTCHelper:)
   // Prologue
@@ -125,7 +127,7 @@ ETCH_LABEL(enterTCHelper$copyReqArgs:)
   CFI2(adjust_cfa_offset, -8)
   ret
   CFI(endproc)
-  .size enterTCHelper, .-enterTCHelper
+  ETCH_SIZE
 ///////////////////////////////////////////////////////////////////////////////
 #elif defined(__AARCH64EL__)
   .globl enterTCHelper

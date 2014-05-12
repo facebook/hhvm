@@ -74,6 +74,23 @@ inline void assert_native_stack_aligned() {
 #endif
 }
 
+/**
+ * This class is used as a scoped guard around code that is called from the JIT
+ * which needs the VM to be in a consistent state. JIT helpers use it to guard
+ * calls into HHVM's runtime. It is used like this:
+ *
+ *   void helperFunction() {
+ *      JIT::VMRegAnchor _;
+ *      runtimeCall();
+ *   }
+ *
+ * VMRegAnchor should also be used before entering a C library compiled with
+ * -fomit-frame-pointer which will call back into HHVM. If VMRegAnchor is not
+ * used, HHVM's runtime will attempt to traverse the native stack, and will
+ * assert or crash if it attempts to parse a part of the stack with no frame
+ * pointers. VMRegAnchor forces the stack traversal to be done when it is
+ * constructed.
+ */
 struct VMRegAnchor : private boost::noncopyable {
   VMRegState m_old;
   VMRegAnchor() {
@@ -101,6 +118,12 @@ struct VMRegAnchor : private boost::noncopyable {
   }
 };
 
+/**
+ * This class is used as an invocation guard equivalent to VMRegAnchor, except
+ * the sync is assumed to have already been done. This was part of a
+ * project aimed at improving performance by doing the fixup in advance, i.e.
+ * eagerly -- the benefits turned out to be marginal or negative in most cases.
+ */
 struct EagerVMRegAnchor {
   VMRegState m_old;
   EagerVMRegAnchor() {

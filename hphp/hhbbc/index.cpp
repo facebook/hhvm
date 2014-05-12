@@ -1322,7 +1322,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
     // We can use any representative ClassInfo for the context class
     // to check this, since the private method list cannot change
     // for different realizations of the class.
-    auto const range   = find_range(m_data->classInfo, ctx.cls->name);
+    auto const range = find_range(m_data->classInfo, ctx.cls->name);
     if (begin(range) == end(range)) {
       // This class had no pre-resolved ClassInfos, which means it
       // always fatals in any way it could be defined, so it doesn't
@@ -1473,10 +1473,11 @@ res::Func
 Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
   auto name_only = [&] { return res::Func { this, name }; };
 
+  if (begin(funcs) == end(funcs))              return name_only();
   if (boost::next(begin(funcs)) != end(funcs)) return name_only();
   auto const func = begin(funcs)->second;
-  if (!(func->attrs & AttrUnique)) return name_only();
-  if (func->attrs & AttrInterceptable) return name_only();
+  if (!(func->attrs & AttrUnique))             return name_only();
+  if (func->attrs & AttrInterceptable)         return name_only();
 
   return do_resolve(func);
 }
@@ -1484,9 +1485,6 @@ Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
 res::Func Index::resolve_func(Context ctx, SString name) const {
   name = normalizeNS(name);
   auto const funcs = find_range(m_data->funcs, name);
-  if (begin(funcs) == end(funcs)) {
-    return res::Func { this, name };
-  }
   return resolve_func_helper(funcs, name);
 }
 

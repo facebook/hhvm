@@ -31,6 +31,12 @@ let desc_string_from_type result_type =
     | SS.Typedef -> "typedef"
     | SS.Constant -> "constant"
 
+let scope_string_from_type result_type =
+  match result_type with
+    | SS.Method (_, scope)
+    | SS.ClassVar (_, scope) -> scope
+    | _ -> ""
+
 let print_results results =
   List.iter begin fun res ->
     let pos_string = Pos.string res.SS.pos in
@@ -41,16 +47,18 @@ let print_results results =
 
 let result_to_json res =
   let desc_string = desc_string_from_type res.SS.result_type in
+  let scope_string = scope_string_from_type res.SS.result_type in
   let p = res.SS.pos in
   let fn = Pos.filename p in
   let line, start, end_ = Pos.info_pos p in
   Json.JAssoc [ "name", Json.JString (Utils.strip_ns res.SS.name);
-              "filename",  Json.JString fn;
-              "desc",  Json.JString desc_string;
-              "line",  Json.JInt line;
-              "char_start", Json.JInt start;
-              "char_end",Json.JInt end_;
-            ]
+                "filename",  Json.JString fn;
+                "desc",  Json.JString desc_string;
+                "line",  Json.JInt line;
+                "char_start", Json.JInt start;
+                "char_end", Json.JInt end_;
+                "scope", Json.JString scope_string;
+              ]
 
 let print_results_json results =
   let results = Json.JList (List.map result_to_json results) in

@@ -379,9 +379,10 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   Returns string on success or NULL on failure.
    */
   public function getDefaultValueConstantName() {
-    if (isset($this->info['defaultText'])) {
+    if (array_key_exists('defaultText', $this->info)) {
       return $this->info['defaultText'];
     }
+
     return '';
   }
 

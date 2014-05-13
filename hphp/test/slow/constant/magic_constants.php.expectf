@@ -1,0 +1,3 @@
+string(%d) "%s/hphp/test/slow/constant/magic_constants.php:4"
+string(11) "NS\NS\Foo!!"
+string(15) "NS\Foo:::NS\Foo"

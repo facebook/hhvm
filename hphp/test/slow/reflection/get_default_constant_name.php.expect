@@ -1,0 +1,6 @@
+int(1)
+string(3) "ONE"
+int(4)
+string(9) "TWO * TWO"
+int(10)
+string(7) "TWO * 5"

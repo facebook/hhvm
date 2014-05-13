@@ -827,11 +827,8 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
     1,
     args
   );
-  assert(isUncounted(ret));
 
   clsCnsData.set(StrNR(clsCnsName), cellAsCVarRef(ret), true /* isKey */);
-
-  assert(cellIsPlausible(ret));
   return ret;
 }
 

@@ -881,7 +881,6 @@ Cell lookupClassConstantTv(TypedValue* cache,
                            const StringData* cls,
                            const StringData* cns) {
   Cell clsCns = g_context->lookupClsCns(ne, cls, cns);
-  assert(isUncounted(clsCns));
   cellDup(clsCns, *cache);
   return clsCns;
 }

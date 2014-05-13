@@ -290,18 +290,18 @@ void in(ISS& env, const bc::ClsCns& op) {
     }
   }
   popA(env);
-  push(env, TInitUnc);
+  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::ClsCnsD& op) {
-  if (!options.HardConstProp) return push(env, TInitUnc);
+  if (!options.HardConstProp) return push(env, TInitCell);
   if (auto const rcls = env.index.resolve_class(env.ctx, op.str2)) {
     auto const t = env.index.lookup_class_constant(env.ctx, *rcls, op.str1);
     constprop(env);
     push(env, t);
     return;
   }
-  push(env, TInitUnc);
+  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::File&)  { nothrow(env); push(env, TSStr); }

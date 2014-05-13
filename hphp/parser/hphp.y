@@ -867,10 +867,10 @@ class_namespace_string_typeargs:
 constant_declaration:
     constant_declaration ','
     hh_name_with_type
-    '=' static_scalar                  { $3.setText(_p->nsDecl($3.text()));
+    '=' static_expr                    { $3.setText(_p->nsDecl($3.text()));
                                          _p->onConst($$,$3,$5);}
   | T_CONST hh_name_with_type '='
-    static_scalar                      { $2.setText(_p->nsDecl($2.text()));
+    static_expr                        { $2.setText(_p->nsDecl($2.text()));
                                          _p->onConst($$,$2,$4);}
 ;
 
@@ -1198,9 +1198,9 @@ declare_statement:
 ;
 
 declare_list:
-    ident '=' static_scalar
+    ident '=' static_expr
   | declare_list ','
-    ident '=' static_scalar
+    ident '=' static_expr
 ;
 
 switch_case_list:
@@ -1284,12 +1284,12 @@ non_empty_method_parameter_list:
   | optional_user_attributes
     parameter_modifiers
     hh_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$3,$5,1,
+    '=' static_expr                    { _p->onParam($$,NULL,$3,$5,1,
                                                      &$7,&$1,&$2);}
   | optional_user_attributes
     parameter_modifiers
     hh_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$3,$4,0,
+    '=' static_expr                    { _p->onParam($$,NULL,$3,$4,0,
                                                      &$6,&$1,&$2);}
   | non_empty_method_parameter_list ','
     optional_user_attributes
@@ -1305,13 +1305,13 @@ non_empty_method_parameter_list:
     optional_user_attributes
     parameter_modifiers
     hh_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$5,$7,1,
+    '=' static_expr                    { _p->onParam($$,&$1,$5,$7,1,
                                                      &$9,&$3,&$4);}
   | non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
     hh_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$5,$6,0,
+    '=' static_expr                    { _p->onParam($$,&$1,$5,$6,0,
                                                      &$8,&$3,&$4);}
 ;
 
@@ -1350,11 +1350,11 @@ non_empty_parameter_list:
                                                      NULL,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$2,$4,true,
+    '=' static_expr                    { _p->onParam($$,NULL,$2,$4,true,
                                                      &$6,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$2,$3,false,
+    '=' static_expr                    { _p->onParam($$,NULL,$2,$3,false,
                                                      &$5,&$1,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
@@ -1367,12 +1367,12 @@ non_empty_parameter_list:
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$4,$6,true,
+    '=' static_expr                    { _p->onParam($$,&$1,$4,$6,true,
                                                      &$8,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$4,$5,false,
+    '=' static_expr                    { _p->onParam($$,&$1,$4,$5,false,
                                                      &$7,&$3,NULL); }
 ;
 
@@ -1403,9 +1403,9 @@ global_var:
 static_var_list:
     static_var_list ',' T_VARIABLE     { _p->onStaticVariable($$,&$1,$3,0);}
   | static_var_list ',' T_VARIABLE
-    '=' static_scalar                  { _p->onStaticVariable($$,&$1,$3,&$5);}
+    '=' static_expr                    { _p->onStaticVariable($$,&$1,$3,&$5);}
   | T_VARIABLE                         { _p->onStaticVariable($$,0,$1,0);}
-  | T_VARIABLE '=' static_scalar       { _p->onStaticVariable($$,0,$1,&$3);}
+  | T_VARIABLE '=' static_expr         { _p->onStaticVariable($$,0,$1,&$3);}
 ;
 
 class_statement_list:
@@ -1527,7 +1527,7 @@ xhp_attribute_enum:
 ;
 
 xhp_attribute_default:
-    '=' static_scalar                  { $$ = $2;}
+    '=' static_expr                    { $$ = $2;}
   |                                    { scalar_null(_p, $$);}
 ;
 
@@ -1628,14 +1628,15 @@ class_variable_declaration:
     class_variable_declaration ','
     T_VARIABLE                         { _p->onClassVariable($$,&$1,$3,0);}
   | class_variable_declaration ','
-    T_VARIABLE '=' static_scalar       { _p->onClassVariable($$,&$1,$3,&$5);}
+    T_VARIABLE '=' static_expr         { _p->onClassVariable($$,&$1,$3,&$5);}
   | T_VARIABLE                         { _p->onClassVariable($$,0,$1,0);}
-  | T_VARIABLE '=' static_scalar       { _p->onClassVariable($$,0,$1,&$3);}
+  | T_VARIABLE '=' static_expr         { _p->onClassVariable($$,0,$1,&$3);}
 ;
 class_constant_declaration:
     class_constant_declaration ','
-    hh_name_with_type '=' static_scalar { _p->onClassConstant($$,&$1,$3,$5);}
-  | T_CONST hh_name_with_type '=' static_scalar { _p->onClassConstant($$,0,$2,$4);}
+    hh_name_with_type '=' static_expr   { _p->onClassConstant($$,&$1,$3,$5);}
+  | T_CONST hh_name_with_type '='
+    static_expr                         { _p->onClassConstant($$,0,$2,$4);}
 ;
 
 expr_with_parens:
@@ -1868,10 +1869,10 @@ non_empty_static_shape_pair_list:
     non_empty_static_shape_pair_list ','
       shape_keyname
       T_DOUBLE_ARROW
-      static_scalar                   { _p->onArrayPair($$,&$1,&$3,$5,0); }
+      static_expr                     { _p->onArrayPair($$,&$1,&$3,$5,0); }
   | shape_keyname
       T_DOUBLE_ARROW
-      static_scalar                   { _p->onArrayPair($$,  0,&$1,$3,0); }
+      static_expr                     { _p->onArrayPair($$,  0,&$1,$3,0); }
 ;
 
 shape_pair_list:
@@ -2253,6 +2254,54 @@ static_scalar:
   | static_collection_literal          { $$ = $1;}
 ;
 
+static_expr:
+    static_scalar                      { $$ = $1;}
+  | '(' static_expr ')'                { $$ = $2;}
+  | static_expr T_BOOLEAN_OR
+    static_expr                        { BEXP($$,$1,$3,T_BOOLEAN_OR);}
+  | static_expr T_BOOLEAN_AND
+    static_expr                        { BEXP($$,$1,$3,T_BOOLEAN_AND);}
+  | static_expr T_LOGICAL_OR
+    static_expr                        { BEXP($$,$1,$3,T_LOGICAL_OR);}
+  | static_expr T_LOGICAL_AND
+    static_expr                        { BEXP($$,$1,$3,T_LOGICAL_AND);}
+  | static_expr T_LOGICAL_XOR
+    static_expr                        { BEXP($$,$1,$3,T_LOGICAL_XOR);}
+  | static_expr '|' static_expr        { BEXP($$,$1,$3,'|');}
+  | static_expr '&' static_expr        { BEXP($$,$1,$3,'&');}
+  | static_expr '^' static_expr        { BEXP($$,$1,$3,'^');}
+  | static_expr '.' static_expr        { BEXP($$,$1,$3,'.');}
+  | static_expr '+' static_expr        { BEXP($$,$1,$3,'+');}
+  | static_expr '-' static_expr        { BEXP($$,$1,$3,'-');}
+  | static_expr '*' static_expr        { BEXP($$,$1,$3,'*');}
+  | static_expr '/' static_expr        { BEXP($$,$1,$3,'/');}
+  | static_expr '%' static_expr        { BEXP($$,$1,$3,'%');}
+  | static_expr T_SL static_expr       { BEXP($$,$1,$3,T_SL);}
+  | static_expr T_SR static_expr       { BEXP($$,$1,$3,T_SR);}
+  | '!' static_expr                    { UEXP($$,$2,'!',1);}
+  | '~' static_expr                    { UEXP($$,$2,'~',1);}
+  | static_expr T_IS_IDENTICAL
+    static_expr                        { BEXP($$,$1,$3,T_IS_IDENTICAL);}
+  | static_expr T_IS_NOT_IDENTICAL
+    static_expr                        { BEXP($$,$1,$3,T_IS_NOT_IDENTICAL);}
+  | static_expr T_IS_EQUAL
+    static_expr                        { BEXP($$,$1,$3,T_IS_EQUAL);}
+  | static_expr T_IS_NOT_EQUAL
+    static_expr                        { BEXP($$,$1,$3,T_IS_NOT_EQUAL);}
+  | static_expr '<' static_scalar      { BEXP($$,$1,$3,'<');}
+  | static_expr T_IS_SMALLER_OR_EQUAL
+    static_expr                        { BEXP($$,$1,$3,
+                                              T_IS_SMALLER_OR_EQUAL);}
+  | static_expr '>' static_scalar      { BEXP($$,$1,$3,'>');}
+  | static_expr
+    T_IS_GREATER_OR_EQUAL
+    static_expr                        { BEXP($$,$1,$3,
+                                              T_IS_GREATER_OR_EQUAL);}
+  | static_expr '?' static_expr ':'
+    static_expr                        { _p->onQOp($$, $1, &$3, $5);}
+  | static_expr '?' ':' static_expr    { _p->onQOp($$, $1,   0, $4);}
+;
+
 static_class_constant:
     class_namespace_string_typeargs
     T_DOUBLE_COLON
@@ -2293,13 +2342,13 @@ hh_possible_comma:
 
 non_empty_static_array_pair_list:
     non_empty_static_array_pair_list
-    ',' static_scalar T_DOUBLE_ARROW
-    static_scalar                      { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    ',' static_expr T_DOUBLE_ARROW
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
   | non_empty_static_array_pair_list
-    ',' static_scalar                  { _p->onArrayPair($$,&$1,  0,$3,0);}
-  | static_scalar T_DOUBLE_ARROW
-    static_scalar                      { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | static_scalar                      { _p->onArrayPair($$,  0,  0,$1,0);}
+    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,$3,0);}
+  | static_expr T_DOUBLE_ARROW
+    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
+  | static_expr                        { _p->onArrayPair($$,  0,  0,$1,0);}
 ;
 
 common_scalar_ae:
@@ -2600,13 +2649,13 @@ static_collection_init:
 ;
 non_empty_static_collection_init:
     non_empty_static_collection_init
-    ',' static_scalar T_DOUBLE_ARROW
-    static_scalar                      { _p->onCollectionPair($$,&$1,&$3,$5);}
+    ',' static_expr T_DOUBLE_ARROW
+    static_expr                        { _p->onCollectionPair($$,&$1,&$3,$5);}
   | non_empty_static_collection_init
-    ',' static_scalar                  { _p->onCollectionPair($$,&$1,  0,$3);}
-  | static_scalar T_DOUBLE_ARROW
-    static_scalar                      { _p->onCollectionPair($$,  0,&$1,$3);}
-  | static_scalar                      { _p->onCollectionPair($$,  0,  0,$1);}
+    ',' static_expr                    { _p->onCollectionPair($$,&$1,  0,$3);}
+  | static_expr T_DOUBLE_ARROW
+    static_expr                        { _p->onCollectionPair($$,  0,&$1,$3);}
+  | static_expr                        { _p->onCollectionPair($$,  0,  0,$1);}
 ;
 
 encaps_list:

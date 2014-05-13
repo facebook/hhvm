@@ -1,0 +1,1 @@
+extension_loaded.php

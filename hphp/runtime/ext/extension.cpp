@@ -216,11 +216,15 @@ void Extension::ShutdownModules() {
   s_registered_extensions->clear();
 }
 
-const StaticString s_apc("apc");
+const StaticString
+  s_apc("apc"),
+  s_xhp("xhp");
 
 bool Extension::IsLoaded(const String& name) {
   if (name == s_apc) {
     return apcExtension::Enable;
+  } else if (name == s_xhp) {
+    return RuntimeOption::EnableXHP;
   }
   assert(s_registered_extensions);
   return s_registered_extensions->find(name.data()) !=
@@ -241,6 +245,9 @@ Array Extension::GetLoadedExtensions() {
   Array ret = Array::Create();
   for (auto& kv : *s_registered_extensions) {
     if (!apcExtension::Enable && kv.second->m_name == s_apc) {
+      continue;
+    }
+    if (!RuntimeOption::EnableXHP && kv.second->m_name == s_xhp) {
       continue;
     }
     ret.append(kv.second->m_name);

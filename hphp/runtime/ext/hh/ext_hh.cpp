@@ -45,5 +45,10 @@ static class HHExtension : public Extension {
   }
 } s_hh_extension;
 
+static class XHPExtension : public Extension {
+ public:
+  XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET) { }
+} s_xhp_extension;
+
 ///////////////////////////////////////////////////////////////////////////////
 }

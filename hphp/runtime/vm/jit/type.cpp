@@ -1024,10 +1024,10 @@ void assertOperandTypes(const IRInstruction* inst) {
     }
   };
 
-  auto checkSpills = [&] {
+  auto checkVariadic = [&] (Type super) {
     for (; curSrc < inst->numSrcs(); ++curSrc) {
-      auto const valid = (inst->src(curSrc)->type() <= Type::StackElem);
-      check(valid, Type(), "Gen|Cls");
+      auto const valid = (inst->src(curSrc)->type() <= super);
+      check(valid, Type(), nullptr);
     }
   };
 
@@ -1035,20 +1035,19 @@ void assertOperandTypes(const IRInstruction* inst) {
   IR_TYPES
 #undef IRT
 
-#define NA       return checkNoArgs();
-#define S(...)   {                                        \
-                   Type t = buildUnion(__VA_ARGS__);      \
-                   check(src()->isA(t), t, nullptr);      \
-                   ++curSrc;                              \
-                 }
-#define C(type)  check(src()->isConst() &&          \
-                       src()->isA(type),            \
-                       Type(),                      \
-                       "constant " #type);          \
-                  ++curSrc;
-#define CStr     C(StaticStr)
-#define SUnk     return;
-#define SSpills  checkSpills();
+#define NA            return checkNoArgs();
+#define S(...)        {                                   \
+                        Type t = buildUnion(__VA_ARGS__); \
+                        check(src()->isA(t), t, nullptr); \
+                        ++curSrc;                         \
+                      }
+#define C(type)       check(src()->isConst() && \
+                            src()->isA(type),   \
+                            Type(),             \
+                            "constant " #type); \
+                      ++curSrc;
+#define CStr          C(StaticStr)
+#define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
 #define ND
 #define DMulti
 #define DStk(...)
@@ -1089,8 +1088,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef S
 #undef C
 #undef CStr
-#undef SUnk
-#undef SSpills
+#undef SVar
 
 #undef ND
 #undef D

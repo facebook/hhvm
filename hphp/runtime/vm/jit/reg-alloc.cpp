@@ -82,13 +82,12 @@ struct ConstSrcTable {
     int i;
 
 #define NA
-#define S(...)   i++;
-#define C(type)  table[op][i++] = true;
-#define CStr     table[op][i++] = true;
-#define SNumInt  i++;
-#define SNum     i++;
-#define SUnk     i++;
-#define SSpills
+#define S(...)       i++;
+#define C(type)      table[op][i++] = true;
+#define CStr         table[op][i++] = true;
+#define SNumInt      i++;
+#define SNum         i++;
+#define SVar(...)
 #define O(opcode, dstinfo, srcinfo, flags) \
     i = 0; \
     srcinfo \
@@ -103,8 +102,7 @@ struct ConstSrcTable {
 #undef C
 #undef CStr
 #undef SNum
-#undef SUnk
-#undef SSpills
+#undef SVar
 
   }
   bool mustBeConst(int op, int i) const {
@@ -113,20 +111,12 @@ struct ConstSrcTable {
 };
 const ConstSrcTable g_const_table;
 
-// Return true if the ith source operand must be a constant.  Most
-// of this information comes from the table above, but a few instructions
-// have complex signatures, so we handle them individually.
+// Return true if the ith source operand must be a constant.  This
+// information comes from the table above.
 bool mustUseConst(const IRInstruction& inst, int i) {
-  auto check = [&](bool b) {
-    assert(!b || inst.src(i)->isConst());
-    return b;
-  };
-  // handle special cases we can't derive from IR_OPCODES macro
-  switch (inst.op()) {
-  case LdAddr: return check(i == 1); // offset
-  default: break;
-  }
-  return check(g_const_table.mustBeConst(int(inst.op()), i));
+  bool b = g_const_table.mustBeConst(static_cast<int>(inst.op()), i);
+  assert(!b || inst.src(i)->isConst());
+  return b;
 }
 }
 

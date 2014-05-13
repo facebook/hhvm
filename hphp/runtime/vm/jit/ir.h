@@ -167,12 +167,11 @@ class FailedCodeGen : public std::runtime_error {
  *
  *   Contains a series of tests on the source parameters in order.
  *
- *     NA            instruction takes no sources
- *     SUnk          intructions sources are not yet documented/checked
- *     S(t1,...,tn)  source must be a subtype of {t1|..|tn}
- *     C(type)       source must be a constant, and subtype of type
- *     CStr          same as C(StaticStr)
- *     SSpills       SpillStack's variadic source list
+ *     NA               instruction takes no sources
+ *     S(t1,...,tn)     source must be a subtype of {t1|..|tn}
+ *     C(type)          source must be a constant, and subtype of type
+ *     CStr             same as C(StaticStr)
+ *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
  *
  * flags:
  *
@@ -346,7 +345,7 @@ O(JmpNInstanceOfBitmask,            ND, S(Cls) CStr,                     B|E) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpZero,                          ND, S(Int,Bool),                     B|E) \
 O(JmpNZero,                         ND, S(Int,Bool),                     B|E) \
-O(Jmp,                              ND, SUnk,                          B|T|E) \
+O(Jmp,                              ND, SVar(Top),                     B|T|E) \
 O(ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E) \
@@ -515,7 +514,7 @@ O(FreeActRec,              D(FramePtr), S(FramePtr),                      NF) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(Call,                      D(StkPtr), S(StkPtr) S(FramePtr),             E) \
 O(CallArray,                 D(StkPtr), S(StkPtr),                   E|N|CRc) \
-O(CallBuiltin,                DBuiltin, SUnk,                     E|Er|N|PRc) \
+O(CallBuiltin,                DBuiltin, SVar(PtrToGen,Gen),       E|Er|N|PRc) \
 O(NativeImpl,                       ND, S(FramePtr),                     E|N) \
 O(Halt,                             ND, NA,                              T|E) \
 O(RetCtrl,                          ND, S(StkPtr)                             \
@@ -541,7 +540,9 @@ O(ClosureStaticLocInit,   D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \
                                           S(Cell),                       E|N) \
 O(StaticLocInitCached,              ND, S(BoxedCell) S(Cell),              E) \
-O(SpillStack,                D(StkPtr), S(StkPtr) C(Int) SSpills,        CRc) \
+O(SpillStack,                D(StkPtr), S(StkPtr)                             \
+                                          C(Int)                              \
+                                          SVar(StackElem),               CRc) \
 O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(Func,Nullptr)                     \
                                           S(Ctx,Cls,Nullptr),            CRc) \
@@ -553,8 +554,8 @@ O(ReqRetranslateOpt,                ND, NA,                              T|E) \
 O(ReqRetranslate,                   ND, NA,                              T|E) \
 O(SyncABIRegs,                      ND, S(FramePtr) S(StkPtr),             E) \
 O(EagerSyncVMRegs,                  ND, S(FramePtr) S(StkPtr),             E) \
-O(Mov,                         DofS(0), SUnk,                            C|P) \
-O(LdAddr,                      DofS(0), SUnk,                              C) \
+O(Mov,                         DofS(0), S(Top),                          C|P) \
+O(LdMIStateAddr,               DofS(0), S(PtrToGen) C(Int),                C) \
 O(IncRef,                           ND, S(Gen),                            E) \
 O(TakeStack,                        ND, S(StackElem),                      E) \
 O(IncRefCtx,                        ND, S(Ctx),                            E) \
@@ -602,7 +603,7 @@ O(AddElemStrKey,                D(Arr), S(Arr)                                \
 O(AddElemIntKey,                D(Arr), S(Arr)                                \
                                           S(Int)                              \
                                           S(Cell),                 N|CRc|PRc) \
-O(AddNewElem,                   D(Arr), SUnk,                      N|CRc|PRc) \
+O(AddNewElem,                   D(Arr), S(Arr) S(Cell),            N|CRc|PRc) \
 O(ColAddElemC,                  D(Obj), S(Obj)                                \
                                          S(Cell)                              \
                                          S(Cell),                 N|Er|CRc|P) \
@@ -623,7 +624,7 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                       E|N|Er) \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
-O(Shuffle,                          ND, SUnk,                             NF) \
+O(Shuffle,                          ND, SVar(Top),                        NF) \
 O(CreateCont,                   D(Obj), S(FramePtr)                           \
                                           S(TCA,Nullptr) C(Int),     E|N|PRc) \
 O(ContEnter,                        ND, S(StkPtr)                             \

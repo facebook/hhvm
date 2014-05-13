@@ -260,7 +260,7 @@ void HhbcTranslator::MInstrTranslator::emit() {
 // a null pointer if it's not needed.
 SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
   if (m_needMIS) {
-    return gen(LdAddr, m_misBase, cns(kReservedRSPSpillSpace));
+    return gen(LdMIStateAddr, m_misBase, cns(kReservedRSPSpillSpace));
   } else {
     return cns(Type::cns(nullptr, Type::PtrToUninit));
   }
@@ -1258,7 +1258,7 @@ void HhbcTranslator::MInstrTranslator::emitRatchetRefs() {
 
       // Adjust base pointer.
       assert(m_base->type().isPtr());
-      return gen(LdAddr, m_misBase, cns(MISOFF(tvRef2)));
+      return gen(LdMIStateAddr, m_misBase, cns(MISOFF(tvRef2)));
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
       return m_base;

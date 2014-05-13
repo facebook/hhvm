@@ -4474,7 +4474,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
   m_mcg->fixupMap().recordSyncPoint(as.frontier(), pcOff, stackOff);
 }
 
-void CodeGenerator::cgLdAddr(IRInstruction* inst) {
+void CodeGenerator::cgLdMIStateAddr(IRInstruction* inst) {
   auto base = srcLoc(0).reg();
   int64_t offset = inst->src(1)->intVal();
   m_as.lea (base[offset], dstLoc(0).reg());

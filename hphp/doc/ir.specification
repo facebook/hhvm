@@ -1422,9 +1422,10 @@ TrackLoc<localId> S0:T
   is used by the translator to track values that are stored in locals. It can
   be thought of as a store (which does not physically store anything).
 
-D:T* = LdAddr S0:T* S1:ConstInt
+D:T* = LdMIStateAddr S0:T* S1:ConstInt
 
-  Load address. Returns a pointer to (S0 + S1) with the same type as S0.
+  Load an MInstrState address. Returns a pointer to (S0 + S1) with the same
+  type as S0. S0 must be the output of a DefMIStateBase.
 
 IncRef S0:Gen
 
@@ -1657,9 +1658,12 @@ D:Arr = AddElemIntKey S0:Arr S1:Int S2:Cell
 
   Add S2 to the array S0 for the key S1, and return the resulting array.
 
-D:Arr = AddNewElem S0:Arr S1:Gen
+D:Arr = AddNewElem S0:Arr S1:Cell
 
-  Add S1 as a new element to the array S0. TODO(#2437059): this is broken.
+  Add S1 as a new element to the array S0.  (Note: S1 must actually be a
+  subtype of InitCell for array invariants, but we can't assert this yet in the
+  IR because many eval stack slots are not entirely typed wrt initness right
+  now.)
 
 D:Arr = ArrayAdd S0:Arr S1:Arr
 

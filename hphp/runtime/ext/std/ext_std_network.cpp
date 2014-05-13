@@ -1003,6 +1003,8 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
     file = String(transport->getFirstHeaderFile());
     line = transport->getFirstHeaderLine();
     return transport->headersSent();
+  } else {
+    return g_context->getStdoutBytesWritten() > 0;
   }
   return false;
 }

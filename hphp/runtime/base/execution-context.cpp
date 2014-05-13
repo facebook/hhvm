@@ -64,6 +64,7 @@ ExecutionContext::ExecutionContext()
   , m_protectedLevel(0)
   , m_stdout(nullptr)
   , m_stdoutData(nullptr)
+  , m_stdoutBytesWritten(0)
   , m_errorState(ExecutionContext::ErrorState::NoError)
   , m_lastErrorNum(0)
   , m_throwAllErrors(false)
@@ -201,9 +202,14 @@ void ExecutionContext::writeStdout(const char *s, int len) {
     } else {
       safe_stdout(s, len);
     }
+    m_stdoutBytesWritten += len;
   } else {
     m_stdout(s, len, m_stdoutData);
   }
+}
+
+size_t ExecutionContext::getStdoutBytesWritten() const {
+  return m_stdoutBytesWritten;
 }
 
 void ExecutionContext::write(const char *s, int len) {

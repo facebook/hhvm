@@ -155,6 +155,7 @@ private:
 static void throw_soap_server_fault(litstr code, litstr fault);
 static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
                             int level);
+static void header_if_not_sent(const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 // client helpers
@@ -609,14 +610,24 @@ static encodeMap *soap_create_typemap(sdl *sdl, Array &ht) {
 
 static void output_xml_header(int soap_version) {
   if (soap_version == SOAP_1_2) {
-    HHVM_FN(header)("Content-Type: application/soap+xml; charset=utf-8");
+    header_if_not_sent("Content-Type: application/soap+xml; charset=utf-8");
   } else {
-    HHVM_FN(header)("Content-Type: text/xml; charset=utf-8");
+    header_if_not_sent("Content-Type: text/xml; charset=utf-8");
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // server helpers
+
+/**
+ * The PHP5 extension uses SAPI to set known headers; unlike header(), this
+ * silently fails if headers_sent(). We need to do the same.
+ */
+static void header_if_not_sent(const String& str) {
+  if (!HHVM_FN(headers_sent)()) {
+    HHVM_FN(header)(str);
+  }
+}
 
 static void deserialize_parameters(xmlNodePtr params, sdlFunction *function,
                                    Array &parameters) {
@@ -1790,7 +1801,7 @@ static void send_soap_server_fault(
     use_http_error_status = false;
   }
   if (use_http_error_status) {
-    HHVM_FN(header)("HTTP/1.1 500 Internal Service Error");
+    header_if_not_sent("HTTP/1.1 500 Internal Service Error");
   }
   output_xml_header(SOAP_GLOBAL(soap_version));
 
@@ -2102,7 +2113,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
       throw_soap_server_fault("Server", "WSDL generation is not supported");
     }
 
-    HHVM_FN(header)("Content-Type: text/xml; charset=utf-8");
+    header_if_not_sent("Content-Type: text/xml; charset=utf-8");
     Variant ret = f_readfile(m_sdl->source.c_str());
     if (same(ret, false)) {
       throw_soap_server_fault("Server", "Couldn't find WSDL");
@@ -2277,8 +2288,8 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
 
   // 8. special case
   if (doc_return == NULL) {
-    HHVM_FN(header)("HTTP/1.1 202 Accepted");
-    HHVM_FN(header)("Content-Length: 0");
+    header_if_not_sent("HTTP/1.1 202 Accepted");
+    header_if_not_sent("Content-Length: 0");
     return;
   }
 

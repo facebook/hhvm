@@ -216,6 +216,7 @@ public:
   void write(const char *s, int len);
   void write(const char *s) { write(s, strlen(s));}
   void writeStdout(const char *s, int len);
+  size_t getStdoutBytesWritten() const;
 
   typedef void (*PFUNC_STDOUT)(const char *s, int len, void *data);
   void setStdout(PFUNC_STDOUT func, void *data);
@@ -337,6 +338,7 @@ private:
   int m_protectedLevel;
   PFUNC_STDOUT m_stdout;
   void *m_stdoutData;
+  size_t m_stdoutBytesWritten;
   String m_rawPostData;
 
   // request handlers

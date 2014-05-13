@@ -262,7 +262,15 @@ SSATmp* canonical(SSATmp* value) {
 IRInstruction* findSpillFrame(SSATmp* sp) {
   auto inst = sp->inst();
   while (!inst->is(SpillFrame)) {
-    assert(inst->dst()->isA(Type::StkPtr));
+    if (debug) {
+      [&] {
+        for (auto const& dst : inst->dsts()) {
+          if (dst.isA(Type::StkPtr)) return;
+        }
+        assert(false);
+      }();
+    }
+
     assert(!inst->is(RetAdjustStack));
     if (inst->is(DefSP)) return nullptr;
     if (inst->is(InterpOne) && isFPush(inst->extra<InterpOne>()->opcode)) {

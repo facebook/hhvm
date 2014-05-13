@@ -34,7 +34,7 @@ namespace HPHP {
 namespace JIT {
 namespace {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir_dce);
 
 /* DceFlags tracks the state of one instruction during dead code analysis. */
 struct DceFlags {
@@ -197,8 +197,10 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
   FTRACE(3, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   if (do_assert) {
     for (UNUSED auto const& pair : uses) {
-      assert(pair.first->isA(Type::FramePtr));
-      assert(pair.first->inst()->is(DefInlineFP));
+      assert((pair.first->isA(Type::FramePtr) &&
+              pair.first->inst()->is(DefInlineFP)) ||
+             (pair.first->isA(Type::StkPtr) &&
+              pair.first->inst()->is(SpillFrame)));
     }
   }
 
@@ -254,12 +256,22 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       case InlineReturn: {
         auto* frameInst = frameRoot(inst->src(0)->inst());
         assert(frameInst->is(DefInlineFP));
+        auto spillInst = findSpillFrame(frameInst->src(0));
+        assert(spillInst);
+
         auto frameUses = folly::get_default(uses, frameInst->dst(), 0);
+        auto spillUses = uses.find(spillInst->dst())->second;
+        assert(spillUses >= 2);
 
         auto weakUses = state[frameInst].weakUseCount();
         // We haven't counted this InlineReturn as a weak use yet,
-        // which is where this '1' comes from.
-        if (frameUses - weakUses == 1) {
+        // which is where the '1' comes from.
+        //
+        // The '2' means that the SpillFrame is used only by the
+        // DefInlineFP and its corresponding DefInlineSP. We cannot
+        // safely eliminate a DefInlineFP whose SpillFrame is still
+        // used elsewhere.
+        if (frameUses - weakUses == 1 && spillUses == 2) {
           ITRACE(4, "killing frame {}\n", *frameInst);
           killedFrames = true;
 
@@ -270,8 +282,8 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
           unit.replace(frameInst, PassFP, frameInst->src(2));
           inst->convertToNop();
         } else {
-          ITRACE(3, "not killing frame {}, weak/strong {}/{}\n",
-                 *frameInst, weakUses, frameUses);
+          ITRACE(3, "not killing frame {}, weak/strong {}/{}, SpillFrame used "
+                 "{} times\n", *frameInst, weakUses, frameUses, spillUses);
         }
         break;
       }
@@ -465,12 +477,20 @@ void eliminateDeadCode(IRUnit& unit) {
         continue;
       }
 
-      if (RuntimeOption::EvalHHIRInlineFrameOpts &&
-          src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
-        auto* root = frameRoot(srcInst);
-        if (root->is(DefInlineFP)) {
-          FTRACE(4, "adding use to {} from {}\n", *src, *inst);
-          ++uses[root->dst()];
+      if (RuntimeOption::EvalHHIRInlineFrameOpts) {
+        if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
+          auto* root = frameRoot(srcInst);
+          if (root->is(DefInlineFP)) {
+            FTRACE(4, "adding use to {} from {}\n", *src, *inst);
+            ++uses[root->dst()];
+          }
+        }
+        if (src->isA(Type::StkPtr) && !srcInst->is(RetAdjustStack)) {
+          auto root = findSpillFrame(src);
+          if (root) {
+            FTRACE(4, "adding use to {} from {}\n", *src, *inst);
+            ++uses[root->dst()];
+          }
         }
       }
 

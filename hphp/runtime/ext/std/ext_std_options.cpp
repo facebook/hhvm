@@ -522,7 +522,7 @@ static int parse_opts(const char * opts, int opts_len, opt_struct **result) {
     }
   }
 
-  opt_struct *paras = (opt_struct *)malloc(sizeof(opt_struct) * count);
+  opt_struct *paras = (opt_struct *)smart_malloc(sizeof(opt_struct) * count);
   memset(paras, 0, sizeof(opt_struct) * count);
   *result = paras;
   while ((*opts >= 48 && *opts <= 57) ||  /* 0 - 9 */
@@ -554,7 +554,8 @@ static Array HHVM_FUNCTION(getopt, const String& options,
 
     /* the first <len> slots are filled by the one short ops
      * we now extend our array and jump to the new added structs */
-    opts = (opt_struct *)realloc(opts, sizeof(opt_struct) * (len + count + 1));
+    opts = (opt_struct *)smart_realloc(
+      opts, sizeof(opt_struct) * (len + count + 1));
     orig_opts = opts;
     opts += len;
 
@@ -578,7 +579,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       opts++;
     }
   } else {
-    opts = (opt_struct*) realloc(opts, sizeof(opt_struct) * (len + 1));
+    opts = (opt_struct*) smart_realloc(opts, sizeof(opt_struct) * (len + 1));
     orig_opts = opts;
     opts += len;
   }
@@ -591,7 +592,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
   static const StaticString s_argv("argv");
   Array vargv = php_global(s_argv).toArray();
   int argc = vargv.size();
-  char **argv = (char **)malloc((argc+1) * sizeof(char*));
+  char **argv = (char **)smart_malloc((argc+1) * sizeof(char*));
   std::vector<String> holders;
   int index = 0;
   for (ArrayIter iter(vargv); iter; ++iter) {
@@ -610,8 +611,8 @@ static Array HHVM_FUNCTION(getopt, const String& options,
 
   SCOPE_EXIT {
     free_longopts(orig_opts);
-    free(orig_opts);
-    free(argv);
+    smart_free(orig_opts);
+    smart_free(argv);
   };
 
   Array ret = Array::Create();

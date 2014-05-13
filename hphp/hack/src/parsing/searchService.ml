@@ -38,9 +38,6 @@ module SearchKeys = SharedMem.NoCache(struct
   let prefix = Prefix.make()
 end)
 
-let result_compare a b =
-  String.compare (fst a) (fst b)
-
 (* function that shortens the keys stored in the trie to make things faster *)
 let simplify_key key =
   let key =
@@ -58,6 +55,58 @@ let simplify_key key =
     String.sub key 0 i
   with Not_found ->
     key
+
+(* Module used to rank results. Provides a comparison function for sorting *)
+module Ranking = struct
+
+  (* Class and functions are the most interesting results, so move them
+   * to the top. Then, typedefs. Methods and constants are last *)
+  let search_result_type_compare a b =
+    let rank_search_result_type type_ = match type_ with
+      | Class _
+      | Function -> 4
+      | Typedef -> 3
+      | _ -> 2 in
+    (rank_search_result_type b) - (rank_search_result_type a)
+  
+  (* look for results that exactly match the query *)
+  let search_result_name_compare query a_name b_name =
+    let a_name = Utils.strip_ns a_name in
+    let b_name = Utils.strip_ns b_name in
+    if a_name <> b_name
+    then begin
+      if a_name = query then -1
+      else if b_name = query then 1
+      else 0
+    end else
+    0
+  
+  let result_compare query a b =
+    (* First compare the result to the query to move any exact match
+     * to the top *)
+    let name_compare =
+      search_result_name_compare query (snd a).name (snd b).name in
+    if name_compare <> 0
+    then name_compare
+    else
+      (* case insensitive comparison of result name to query *)
+      let lower_name_compare =
+        search_result_name_compare query
+          (String.lowercase (snd a).name)
+          (String.lowercase (snd b).name)
+      in
+      if lower_name_compare <> 0
+      then lower_name_compare
+      else
+        (* rank based on the result type *)
+        let type_compare =
+          search_result_type_compare (snd a).result_type (snd b).result_type in
+        if type_compare <> 0
+        then type_compare
+        else
+          (* finally, just string compare the keys *)
+          String.compare (fst a) (fst b)
+end
 
 module WorkerApi = struct
 
@@ -229,8 +278,8 @@ module MasterApi = struct
      * about the string->keys list shared memory because it's uncached *)
     SharedMem.invalidate_caches()
   
-  let query str =
-    let str = String.lowercase (Utils.strip_ns str) in
+  let query input =
+    let str = String.lowercase (Utils.strip_ns input) in
     let short_key = simplify_key str in
     (* get all the keys beneath short_key in the trie *)
     let keys =
@@ -261,7 +310,7 @@ module MasterApi = struct
         results := (key, res) :: !results
       end defs
     end files;
-    let res = List.sort result_compare !results in
+    let res = List.sort (Ranking.result_compare input) !results in
     let res = Utils.cut_after 50 res in
     List.map snd res
 end

@@ -32,9 +32,6 @@
 // TODO
 //  - #3098109 dests of branch instructions start in next block
 //  - #3098509 streamline code, vectors vs linked lists, etc
-//  - #3098661 generate spill stats so we can compare side/by/side
-//  - #3098678 EvalHHIREnablePreColoring
-//  - #3098685 EvalHHIREnableCoalescing, by using hints
 //  - #3409409 Enable use of SIMD at least for doubles, for packed_tv
 //  - #3098685 Optimize lifetime splitting
 //  - #3098712 reuse spill slots
@@ -52,9 +49,39 @@ typedef StateVector<SSATmp, Interval*> Intervals;
 typedef IdSet<SSATmp> LiveSet;
 
 // A Use refers to the position where an interval is read or written.
+// The hint is used by firstHint() to try picking a good register.
 struct Use {
+  enum Kind {
+    kNone,   // ordinary use or def, but no hints
+    kReg,    // precoloring hint in regHint
+    kCopy,   // this use is a copy dest; srcId is copy src
+    kPhiSrc, // this use is a Jmp src; phiIndex is which src
+    kPhiDst  // this use is a DefLabel dst; phiIndex is which dest
+  };
+  Use(){}
+  explicit Use(unsigned pos) : pos(pos), kind(kNone) {}
+  Use(unsigned pos, RegPair regs)
+    : pos(pos)
+    , kind(regs.first != InvalidReg ? kReg : kNone)
+    , regHint(regs)
+  {}
+  Use(unsigned pos, SSATmp* s)
+    : pos(pos)
+    , kind(kCopy)
+    , srcId(s->id())
+  {}
+  Use(unsigned pos, Kind k, unsigned i)
+    : pos(pos)
+    , kind(k)
+    , phiIndex(i)
+  {}
   unsigned pos;
-  RegPair hint;
+  Kind kind;
+  union {
+    RegPair regHint;   // precoloring hint
+    uint32_t srcId;    // ssatmp id of related copy
+    unsigned phiIndex; // which jmp src or deflabel dest
+  };
 };
 
 // A LiveRange is an open-ended range of positions where an interval is live.
@@ -151,6 +178,9 @@ struct XLS {
   void insertSpill(Interval* ivl);
   void resolveFlow(Interval* ivl, Block* pred, Block* succ,
                    unsigned pos1, unsigned pos2);
+  Use coalesceSrc(unsigned pos, const IRInstruction&, unsigned i);
+  Use coalesceDst(unsigned pos, const IRInstruction&, unsigned i);
+  RegPair firstHint(Interval*, const RegPositions&);
   // debugging
   void print(const char* caption);
   void dumpIntervals();
@@ -448,6 +478,28 @@ void dstConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
   }
 }
 
+// if this use is an input to a jump (phi), provide a hint to encourage
+// using the same register as the corresponding phi dest.
+Use XLS::coalesceSrc(unsigned pos, const IRInstruction& inst, unsigned i) {
+  if (inst.is(Jmp)) {
+    return Use{pos, Use::kPhiSrc, i};
+  }
+  return Use{pos};
+}
+
+// return the ssatmp to use to use for a copy hint
+Use XLS::coalesceDst(unsigned pos, const IRInstruction& inst, unsigned i) {
+  if (inst.isPassthrough()) {
+    // this use is a copy def; the hint is the the src
+    return Use{pos, inst.getPassthroughValue()};
+  }
+  if (inst.is(DefLabel)) {
+    // this use is a phi dest; the hint lets find each of the srcs
+    return Use{pos, Use::kPhiDst, i};
+  }
+  return Use{pos};
+}
+
 // build intervals in one pass by walking the block list backwards.
 // no special handling is needed for goto/label (phi) instructions because
 // they use/define tmps in the expected locations.
@@ -496,7 +548,14 @@ void XLS::buildIntervals() {
           live.erase(d);
         }
         dst_need += dest->need;
-        dest->addUse({pos, backend.precolorDst(inst, i)});
+        auto hint = backend.precolorDst(inst, i);
+        if (hint.first != InvalidReg) {
+          dest->addUse({pos, hint});
+        } else if (RuntimeOption::EvalHHIREnableCoalescing) {
+          dest->addUse(coalesceDst(pos, inst, i));
+        } else {
+          dest->addUse(Use{pos});
+        }
         dstConstraints(dest, m_abi, constraint);
       }
       min_need = std::max(min_need, dst_need);
@@ -537,7 +596,14 @@ void XLS::buildIntervals() {
         auto src = m_intervals[s];
         if (!src) m_intervals[s] = src = smart_new<Interval>();
         src->add(LiveRange(blockStart, pos));
-        src->addUse({pos, backend.precolorSrc(inst, i)});
+        auto hint = backend.precolorSrc(inst, i);
+        if (hint.first != InvalidReg) {
+          src->addUse({pos, hint});
+        } else if (RuntimeOption::EvalHHIREnableCoalescing) {
+          src->addUse(coalesceSrc(pos, inst, i));
+        } else {
+          src->addUse(Use{pos});
+        }
         if (!src->tmp) {
           src->tmp = s;
           src->need = need;
@@ -720,16 +786,74 @@ unsigned RegPositions::setPos(Interval* ivl, unsigned pos) {
   return minpos;
 }
 
-// return the closest valid split position on or before pos.
+// Return the closest valid split position on or before pos.
 unsigned nearestSplitBefore(unsigned pos) {
   return pos == 0 || pos % 2 == 1 ? pos : pos - 1;
 }
 
-// Return the first hint from all the uses in this interval.
-RegPair firstHint(Interval* ivl) {
-  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
-  for (auto u : ivl->uses) {
-    if (u.hint.first != InvalidReg) return u.hint;
+// In order to use a hint, it needs enough registers, in the allow set,
+// which are free for the whole lifetime of current.
+bool isUsable(RegPair hint, Interval* current, const RegPositions& free_until) {
+  if (current->need == 1) {
+    if (hint.first == InvalidReg || !current->allow.contains(hint.first)) {
+      return false;
+    }
+  } else {
+    if (hint.first == InvalidReg || hint.second == InvalidReg ||
+        !current->allow.contains(hint.first) ||
+        !current->allow.contains(hint.second)) {
+      return false;
+    }
+  }
+  auto until_pos = free_until.getPos(current, hint);
+  return until_pos >= current->end();
+}
+
+// Return the first usable hint from all the uses in this interval.
+// If we can't use the first one, keep looking; a later one might
+// not be as good, but still could be better than giving up.
+RegPair XLS::firstHint(Interval* current, const RegPositions& free_until) {
+  if (!RuntimeOption::EvalHHIREnablePreColoring &&
+      !RuntimeOption::EvalHHIREnableCoalescing) return InvalidRegPair;
+  // search the copy interval for a register hint at pos
+  auto search = [&](Interval* copy, unsigned pos) {
+    for (auto ivl = copy; ivl; ivl = ivl->next) {
+      if (pos == ivl->end() && ivl->loc.hasReg(0)) {
+        return ivl->loc.pair();
+      }
+    }
+    return InvalidRegPair;
+  };
+  auto searchPreds = [&](Block* block, unsigned index) {
+    auto hint = InvalidRegPair;
+    block->forEachSrc(index, [&](IRInstruction* jmp, SSATmp* src) {
+      if (!isUsable(hint, current, free_until)) {
+        hint = search(m_intervals[src], m_posns[jmp]);
+      }
+    });
+    return hint;
+  };
+  for (auto u : current->uses) {
+    auto hint = InvalidRegPair;
+    switch (u.kind) {
+      case Use::kNone:
+        continue;
+      case Use::kReg:
+        hint = u.regHint;
+        break;
+      case Use::kCopy:
+        hint = search(m_intervals[u.srcId], u.pos);
+        break;
+      case Use::kPhiSrc:
+        hint = searchPreds(m_insts[u.pos]->taken(), u.phiIndex);
+        break;
+      case Use::kPhiDst:
+        hint = searchPreds(m_insts[u.pos]->block(), u.phiIndex);
+        break;
+    }
+    if (isUsable(hint, current, free_until)) {
+      return hint;
+    }
   }
   return InvalidRegPair;
 }
@@ -773,26 +897,11 @@ void XLS::allocOne(Interval* current) {
     }
   }
 
-  // in order to use a hint, it needs enough registers and they
-  // need to be in the allow set.
-  auto hintOk = [&](RegPair hint) {
-    if (current->need == 1) {
-      return hint.first != InvalidReg && current->allow.contains(hint.first);
-    }
-    return hint.first != InvalidReg && hint.second != InvalidReg &&
-           current->allow.contains(hint.first) &&
-           current->allow.contains(hint.second);
-  };
-
   // Try to get a hinted register
-  auto hint = firstHint(current);
-  if (hintOk(hint)) {
-    // if the hinted register is available for all of current (and not
-    // clobbered by a call), then use it
-    auto until_pos = until2.getPos(current, hint);
-    if (until_pos >= current->end()) {
-      return assignReg(current, hint);
-    }
+  auto hint = firstHint(current, until2);
+  if (hint.first != InvalidReg) {
+    assert(isUsable(hint, current, until2));
+    return assignReg(current, hint);
   }
 
   // Try to get a preferred-non scratch register
@@ -1374,11 +1483,21 @@ std::string Interval::toString() {
   delim = "";
   for (auto u : uses) {
     out << delim << u.pos;
-    if (u.hint.first != InvalidReg) {
-      mcg->backEnd().streamPhysReg(out, u.hint.first);
-      if (u.hint.second != InvalidReg) {
-        mcg->backEnd().streamPhysReg(out, u.hint.second);
-      }
+    switch (u.kind) {
+      case Use::kNone: break;
+      case Use::kReg:
+        mcg->backEnd().streamPhysReg(out, u.regHint.first);
+        if (u.regHint.second != InvalidReg) {
+          mcg->backEnd().streamPhysReg(out, u.regHint.second);
+        }
+        break;
+      case Use::kCopy:
+        out << 't' << u.srcId;
+        break;
+      case Use::kPhiSrc:
+      case Use::kPhiDst:
+        out << "\u03C6" << u.phiIndex;
+        break;
     }
     delim = ",";
   }

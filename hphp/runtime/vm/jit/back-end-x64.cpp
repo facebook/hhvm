@@ -472,6 +472,7 @@ RegPair hintCallBuiltinSrc(const IRInstruction& inst, unsigned srcNum) {
 // return the return-register hint for a CallBuiltin instruction
 RegPair hintCallBuiltinDst(const IRInstruction& inst, unsigned i) {
   // the decision logic here is distilled from CodeGenerator::cgCallBuiltin()
+  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
   if (i != 0) return InvalidRegPair;
   auto returnType = inst.typeParam();
   if (returnType <= Type::Dbl) {

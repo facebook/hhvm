@@ -294,11 +294,10 @@
     install_root: lessphp
     test_root: lessphp
   magento2:
-    # Until PHPUnit 3.8 pull request is accepted
-    url: https://github.com/JoelMarcey/magento2.git
+    url: https://github.com/magento/magento2.git
     # Master is the only branch
     branch: master
-    commit: 389668bca115e0fed4353664bd8c93d46a69da9e
+    commit: 75b30dbc1ca0a41926784bd4d13fc889914aaa16
     install_root: magento2
     test_root: magento2/dev/tests/unit
   mediawiki:

@@ -8,7 +8,7 @@
  * descriptions for details.
  */
 <<__NativeData('ReflectionFuncHandle')>>
-abstract class ReflectionFunctionAbstract {
+abstract class ReflectionFunctionAbstract implements Reflector {
 
   const IS_STATIC    = 1;
   const IS_PUBLIC    = 256;
@@ -297,9 +297,7 @@ abstract class ReflectionFunctionAbstract {
  *
  * The ReflectionFunction class reports information about a function.
  */
-class ReflectionFunction
-extends ReflectionFunctionAbstract
-implements Reflector {
+class ReflectionFunction extends ReflectionFunctionAbstract {
 
   /* public readonly string $name; */
   private ?Closure $closure = null;
@@ -508,9 +506,7 @@ implements Reflector {
  *
  * The ReflectionMethod class reports information about a method.
  */
-class ReflectionMethod
-  extends ReflectionFunctionAbstract
-  implements Reflector {
+class ReflectionMethod extends ReflectionFunctionAbstract {
 
   /* public readonly string $name; */
   /* public readonly string $class; */

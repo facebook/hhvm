@@ -24,3 +24,4 @@
 (define-key input-decode-map "\e\eOB" [(meta down)])
 (global-set-key [(meta up)] 'next-error)
 (global-set-key [(meta down)] 'previous-error)
+(provide 'hack-for-hiphop)

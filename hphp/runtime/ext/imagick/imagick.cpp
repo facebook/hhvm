@@ -2470,7 +2470,9 @@ static bool HHVM_METHOD(Imagick, readImageBlob,
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to read image blob");
   }
-  MagickSetImageFilename(wand->getWand(), filename.c_str());
+  if (!filename.empty()) {
+    MagickSetImageFilename(wand->getWand(), filename.c_str());
+  }
   MagickSetLastIterator(wand->getWand());
   return true;
 }

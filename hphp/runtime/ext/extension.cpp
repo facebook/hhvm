@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -217,10 +218,14 @@ void Extension::ShutdownModules() {
 }
 
 const StaticString
+  s_apache("apache"),
   s_apc("apc"),
   s_xhp("xhp");
 
 bool Extension::IsLoaded(const String& name) {
+  if (name == s_apache) {
+    return ApacheExtension::Enable;
+  }
   if (name == s_apc) {
     return apcExtension::Enable;
   } else if (name == s_xhp) {

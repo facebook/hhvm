@@ -15,7 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-note.h"
@@ -100,10 +102,14 @@ Array HHVM_FUNCTION(apache_get_config) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ApacheExtension : public Extension {
- public:
-  ApacheExtension() : Extension("apache") {}
-  virtual void moduleInit() {
+bool ApacheExtension::Enable(true);
+
+ApacheExtension::ApacheExtension() : Extension("apache") {}
+
+ApacheExtension::~ApacheExtension() {}
+
+void ApacheExtension::moduleInit() {
+  if (Enable) {
     HHVM_FE(apache_note);
     HHVM_FE(apache_request_headers);
     HHVM_FE(apache_response_headers);
@@ -113,7 +119,17 @@ class ApacheExtension : public Extension {
 
     loadSystemlib();
   }
-} s_apache_extension;
+}
+
+void ApacheExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
+  Hdf apache = config["Apache"];
+  Enable = RuntimeOption::ServerExecutionMode() ||
+           Config::GetBool(ini,
+                           config["Apache"]["EnableInCLI"],
+                           RuntimeOption::EnableHipHopSyntax);
+}
+
+static ApacheExtension s_apache_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

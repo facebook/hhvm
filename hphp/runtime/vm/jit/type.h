@@ -646,6 +646,11 @@ public:
     return m_hasConstVal ? m_arrVal->kind() : kind(m_arrayInfo);
   }
 
+  folly::Optional<ArrayData::ArrayKind> getOptArrayKind() const {
+    if (hasArrayKind()) return getArrayKind();
+    return folly::none;
+  }
+
   const RepoAuthType::Array* getArrayType() const {
     assert(canSpecializeArray());
     return m_hasConstVal ? nullptr : arrayType(m_arrayInfo);
@@ -667,31 +672,7 @@ public:
   /*
    * Returns true iff this represents a non-strict subset of t2.
    */
-  bool subtypeOf(Type t2) const {
-    // First, check for any members in m_bits that aren't in t2.m_bits.
-    if ((m_bits & t2.m_bits) != m_bits) return false;
-
-    // If t2 is a constant, we must be the same constant or Bottom.
-    if (t2.m_hasConstVal) {
-      assert(!t2.isUnion());
-      return m_bits == kBottom || (m_hasConstVal && m_extra == t2.m_extra);
-    }
-
-    // If t2 is specialized, we must either not be eligible for the same kind
-    // of specialization (Int <= {Int|Arr<Packed>}) or have a specialization
-    // that is a subtype of t2's specialization.
-    if (t2.isSpecialized()) {
-      if (t2.canSpecializeClass()) {
-        return !canSpecializeClass() ||
-          (m_class != nullptr && m_class->classof(t2.m_class));
-      }
-
-      if (!canSpecializeArray()) return true;
-      return m_arrayInfo == t2.m_arrayInfo;
-    }
-
-    return true;
-  }
+  bool subtypeOf(Type t2) const;
 
   template<typename... Types>
   bool subtypeOfAny(Type t2, Types... ts) const {

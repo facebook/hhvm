@@ -600,6 +600,65 @@ Type Type::operator-(Type other) const {
   return Type(newBits & ~kAnyArr);
 }
 
+bool Type::subtypeOf(Type t2) const {
+  // First, check for any members in m_bits that aren't in t2.m_bits.
+  if ((m_bits & t2.m_bits) != m_bits) return false;
+
+  // If t2 is a constant, we must be the same constant or Bottom.
+  if (t2.m_hasConstVal) {
+    assert(!t2.isUnion());
+    return m_bits == kBottom || (m_hasConstVal && m_extra == t2.m_extra);
+  }
+
+  // If t2 is specialized, we must either not be eligible for the same kind of
+  // specialization (Int <= {Int|Arr<Packed>}) or have a specialization that is
+  // a subtype of t2's specialization.
+  if (t2.isSpecialized()) {
+    if (t2.canSpecializeClass()) {
+      return !canSpecializeClass() ||
+        (m_class != nullptr && m_class->classof(t2.m_class));
+    }
+
+    assert(t2.canSpecializeArray());
+    if (!canSpecializeArray()) return true;
+    if (!isSpecialized()) return false;
+
+    // Both types are specialized Arr types. "Specialized" in this context
+    // means it has at least one of a RepoAuthType::Array* or (const ArrayData*
+    // or ArrayData::ArrayKind). We may return false erroneously in cases where
+    // a 100% accurate comparison of the specializations would be prohibitively
+    // expensive.
+    if (m_arrayInfo == t2.m_arrayInfo) return true;
+    auto rat1 = getArrayType();
+    auto rat2 = t2.getArrayType();
+
+    if (rat1 != rat2 && !(rat1 && !rat2)) {
+      // Different rats are only ok if rat1 is present and rat2 isn't. It's
+      // possible for one rat to be a subtype of another rat or array kind, but
+      // checking that can be very expensive.
+      return false;
+    }
+
+    auto kind1 = getOptArrayKind();
+    auto kind2 = t2.getOptArrayKind();
+    assert(kind1 || kind2);
+    if (kind1 && !kind2) return true;
+    if (kind2 && !kind1) return false;
+    if (*kind1 != *kind2) return false;
+
+    // Same kinds but we still have to check for const arrays. a <= b iff they
+    // have the same const array or a has a const array and b doesn't. If they
+    // have the same non-nullptr const array the m_arrayInfo check up above
+    // should've triggered.
+    auto const1 = isConst() ? arrVal() : nullptr;
+    auto const2 = t2.isConst() ? t2.arrVal() : nullptr;
+    assert((!const1 && !const2) || const1 != const2);
+    return const1 == const2 || (const1 && !const2);
+  }
+
+  return true;
+}
+
 Type liveTVType(const TypedValue* tv) {
   assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
 

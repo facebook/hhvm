@@ -19,6 +19,8 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -323,6 +325,44 @@ TEST(Type, Const) {
   EXPECT_FALSE(Type::Null.isConst());
   EXPECT_FALSE((Type::Uninit | Type::Bool).isConst());
   EXPECT_FALSE(Type::Int.isConst());
+
+  auto array = make_packed_array(1, 2, 3, 4);
+  auto arrData = ArrayData::GetScalarArray(array.get());
+  auto constArray = Type::cns(arrData);
+  auto packedArray = Type::Arr.specialize(ArrayData::kPackedKind);
+  auto mixedArray = Type::Arr.specialize(ArrayData::kMixedKind);
+
+  EXPECT_TRUE(constArray <= packedArray);
+  EXPECT_TRUE(constArray < packedArray);
+  EXPECT_FALSE(packedArray <= constArray);
+  EXPECT_TRUE(constArray <= constArray);
+  EXPECT_FALSE(packedArray <= mixedArray);
+  EXPECT_FALSE(mixedArray <= packedArray);
+  EXPECT_FALSE(constArray <= mixedArray);
+  EXPECT_EQ(constArray, constArray & packedArray);
+
+  ArrayTypeTable::Builder ratBuilder;
+  auto rat1 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+                                 RepoAuthType(RepoAuthType::Tag::Str));
+  auto ratArray1 = Type::Arr.specialize(rat1);
+  auto rat2 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+                                 RepoAuthType(RepoAuthType::Tag::Int));
+  auto ratArray2 = Type::Arr.specialize(rat2);
+  EXPECT_EQ(Type::Arr, ratArray1 & ratArray2);
+  EXPECT_TRUE(ratArray1 < Type::Arr);
+  EXPECT_TRUE(ratArray1 <= ratArray1);
+  EXPECT_TRUE(ratArray1 < (Type::Arr|Type::Obj));
+  EXPECT_FALSE(ratArray1 < ratArray2);
+  EXPECT_NE(ratArray1, ratArray2);
+
+  auto packedRat = packedArray & ratArray1;
+  EXPECT_EQ("Arr<PackedKind:N([Str])>", packedRat.toString());
+  EXPECT_TRUE(packedRat <= packedArray);
+  EXPECT_TRUE(packedRat < packedArray);
+  EXPECT_TRUE(packedRat <= ratArray1);
+  EXPECT_TRUE(packedRat < ratArray1);
+  EXPECT_EQ(packedRat, packedRat & packedArray);
+  EXPECT_EQ(packedRat, packedRat & ratArray1);
 }
 
 } }

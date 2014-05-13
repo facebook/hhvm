@@ -205,8 +205,8 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
   return false;
 }
 
-static Variant get_icu_display_value(const String &locale,
-                                     const String &disp_locale,
+static Variant get_icu_display_value(const String& locale,
+                                     const String& disp_locale,
                                      LocaleTag tag) {
   String locname(locale);
   if (tag != LOC_DISPLAY) {
@@ -219,6 +219,10 @@ static Variant get_icu_display_value(const String &locale,
       }
     }
   }
+
+  // Hack around buffer overflow in libicu. ures_getByKeyWithFallback is a
+  // silly function.
+  if (locname.size() >= 255 || disp_locale.size() >= 255) return false;
 
   int32_t (*ulocfunc)(const char *loc, const char *dloc,
                       UChar *dest, int32_t destcap, UErrorCode *err);

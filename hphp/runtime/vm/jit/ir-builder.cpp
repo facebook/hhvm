@@ -87,6 +87,8 @@ SSATmp* IRBuilder::genPtrToUninit() {
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
+  FTRACE(1, "  append {}\n", inst->toString());
+
   if (shouldConstrainGuards()) {
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
@@ -546,6 +548,8 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   if (debug) ++instNest;
   SCOPE_EXIT { if (debug) --instNest; };
   DEBUG_ONLY auto indent = [&] { return std::string(instNest * 2, ' '); };
+
+  FTRACE(1, "optimize: {}\n", inst->toString());
 
   auto doCse = [&] (IRInstruction* cseInput) -> SSATmp* {
     if (m_state.enableCse() && cseInput->canCSE()) {

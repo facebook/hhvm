@@ -136,7 +136,10 @@ namespace detail {
       m_visitor(block);
     }
   private:
-    static bool cold(Block* b) { return b->hint() == Block::Hint::Unlikely; }
+    static bool cold(Block* b) {
+      return b->hint() == Block::Hint::Unlikely ||
+             b->hint() == Block::Hint::Unused;
+    }
   private:
     boost::dynamic_bitset<> m_visited;
     Visitor &m_visitor;

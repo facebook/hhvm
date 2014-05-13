@@ -158,6 +158,7 @@ void IRBuilder::appendBlock(Block* block) {
 
 static bool isMainExit(const Block* b) {
   if (b->hint() == Block::Hint::Unlikely) return false;
+  if (b->hint() == Block::Hint::Unused) return false;
   if (b->next()) return false;
   // The Await bytecode instruction does a RetCtrl to the scheduler,
   // which is in a likely block.  We don't want to consider this as

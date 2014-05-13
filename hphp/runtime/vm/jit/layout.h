@@ -36,6 +36,7 @@ class IRUnit;
 struct LayoutInfo {
   BlockList blocks;
   BlockList::iterator astubsIt;
+  BlockList::iterator aunusedIt;
 };
 
 /*

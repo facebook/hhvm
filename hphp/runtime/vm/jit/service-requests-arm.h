@@ -24,13 +24,14 @@ namespace HPHP { namespace JIT { namespace ARM {
 
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
-void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest);
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
+void emitBindJmp(CodeBlock& cb, CodeBlock& unused, SrcKey dest);
+void emitBindJcc(CodeBlock& cb, CodeBlock& unused, JIT::ConditionCode cc,
                  SrcKey dest);
-void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
+void emitBindSideExit(CodeBlock& cb, CodeBlock& unused, SrcKey dest,
                       JIT::ConditionCode cc);
 int32_t emitBindCall(CodeBlock& cb, CodeBlock& stubs,
-                     SrcKey srcKey, const Func* funcd, int numArgs);
+                     CodeBlock& unused, SrcKey srcKey,
+                     const Func* funcd, int numArgs);
 
 }}}
 

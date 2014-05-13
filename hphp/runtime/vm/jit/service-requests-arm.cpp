@@ -31,11 +31,11 @@ using namespace vixl;
 
 namespace {
 
-void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
+void emitBindJ(CodeBlock& cb, CodeBlock& unused, SrcKey dest,
                JIT::ConditionCode cc, ServiceRequest req) {
 
   TCA toSmash = cb.frontier();
-  if (cb.base() == stubs.base()) {
+  if (cb.base() == unused.base()) {
     // This is just to reserve space. We'll overwrite with the real dest later.
     mcg->backEnd().emitSmashableJump(cb, toSmash, cc);
   }
@@ -43,14 +43,14 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
   mcg->setJmpTransID(toSmash);
 
   TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(stubs,
-                                      mcg->getFreeStub(stubs),
+            ? emitEphemeralServiceReq(unused,
+                                      mcg->getFreeStub(unused),
                                       req, toSmash, dest.toAtomicInt())
-            : emitServiceReq(stubs, req, toSmash,
+            : emitServiceReq(unused, req, toSmash,
                              dest.toAtomicInt()));
 
   MacroAssembler a { cb };
-  if (cb.base() == stubs.base()) {
+  if (cb.base() == unused.base()) {
     UndoMarker um {cb};
     cb.setFrontier(toSmash);
     mcg->backEnd().emitSmashableJump(cb, sr, cc);
@@ -124,18 +124,18 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   return start;
 }
 
-void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest) {
-  emitBindJ(cb, stubs, dest, JIT::CC_None, REQ_BIND_JMP);
+void emitBindJmp(CodeBlock& cb, CodeBlock& unused, SrcKey dest) {
+  emitBindJ(cb, unused, dest, JIT::CC_None, REQ_BIND_JMP);
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& unused, JIT::ConditionCode cc,
                  SrcKey dest) {
-  emitBindJ(cb, stubs, dest, cc, REQ_BIND_JCC);
+  emitBindJ(cb, unused, dest, cc, REQ_BIND_JCC);
 }
 
-void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
+void emitBindSideExit(CodeBlock& cb, CodeBlock& unused, SrcKey dest,
                       JIT::ConditionCode cc) {
-  emitBindJ(cb, stubs, dest, cc, REQ_BIND_SIDE_EXIT);
+  emitBindJ(cb, unused, dest, cc, REQ_BIND_SIDE_EXIT);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -166,7 +166,8 @@ int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
 }
 
 int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
-                  SrcKey srcKey, const Func* funcd, int numArgs) {
+                     CodeBlock& unusedCode, SrcKey srcKey,
+                     const Func* funcd, int numArgs) {
   if (isNativeImplCall(funcd, numArgs)) {
     MacroAssembler a { mainCode };
 
@@ -199,14 +200,14 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
   ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
 
   auto toSmash = mainCode.frontier();
-  mcg->backEnd().emitSmashableCall(mainCode, stubsCode.frontier());
+  mcg->backEnd().emitSmashableCall(mainCode, unusedCode.frontier());
 
-  MacroAssembler astubs { stubsCode };
-  astubs.  Mov  (serviceReqArgReg(1), rStashedAR);
+  MacroAssembler aunused { unusedCode };
+  aunused.  Mov  (serviceReqArgReg(1), rStashedAR);
   // Put return address into pre-live ActRec, and restore the saved one.
-  emitStoreRetIntoActRec(astubs);
+  emitStoreRetIntoActRec(aunused);
 
-  emitServiceReq(stubsCode, REQ_BIND_CALL, req);
+  emitServiceReq(unusedCode, REQ_BIND_CALL, req);
 
   req->m_toSmash = toSmash;
   req->m_nArgs = numArgs;

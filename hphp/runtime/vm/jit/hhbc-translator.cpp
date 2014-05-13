@@ -5848,7 +5848,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
  */
 template<typename Body>
 Block* HhbcTranslator::makeCatchImpl(Body body) {
-  auto exit = m_irb->makeExit();
+  auto exit = m_irb->makeExit(Block::Hint::Unused);
 
   BlockPusher bp(*m_irb, makeMarker(bcOff()), exit);
   gen(BeginCatch);

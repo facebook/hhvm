@@ -272,7 +272,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.   Ldr   (rAsm, rAsm[Func::prologueTableOff() + sizeof(TCA)*entry]);
     a.   Br    (rAsm);
   } else {
-    emitBindJmp(mcg->code.main(), mcg->code.stubs(), funcBody);
+    emitBindJmp(mcg->code.main(), mcg->code.unused(), funcBody);
   }
   return funcBody;
 }
@@ -335,16 +335,17 @@ int shuffleArgsForMagicCall(ActRec* ar) {
 
 TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   auto& mainCode = mcg->code.main();
-  auto& stubsCode = mcg->code.stubs();
+  auto& unusedCode = mcg->code.unused();
   vixl::MacroAssembler a { mainCode };
-  vixl::MacroAssembler astubs { stubsCode };
+  vixl::MacroAssembler aunused { unusedCode };
   TCA start = mainCode.frontier();
   a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndFlags)]);
   for (auto i = 0; i < dvs.size(); ++i) {
     a. Cmp   (rAsm.W(), dvs[i].first);
-    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second, false));
+    emitBindJcc(mainCode, unusedCode, CC_LE,
+                SrcKey(func, dvs[i].second, false));
   }
-  emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base(), false));
+  emitBindJmp(mainCode, unusedCode, SrcKey(func, func->base(), false));
   return start;
 }
 

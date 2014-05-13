@@ -110,10 +110,14 @@ struct BackEnd : public JIT::BackEnd {
     CALLEE_SAVED_BARRIER();
   }
 
-  JIT::CodeGenerator* newCodeGenerator(const IRUnit& unit, CodeBlock& mainCode,
-                                       CodeBlock& stubsCode, MCGenerator* mcg,
+  JIT::CodeGenerator* newCodeGenerator(const IRUnit& unit,
+                                       CodeBlock& mainCode,
+                                       CodeBlock& stubsCode,
+                                       CodeBlock& unusedCode,
+                                       MCGenerator* mcg,
                                        CodegenState& state) override {
-    return new X64::CodeGenerator(unit, mainCode, stubsCode, mcg, state);
+    return new X64::CodeGenerator(unit, mainCode, stubsCode,
+                                  unusedCode, mcg, state);
   }
 
   void moveToAlign(CodeBlock& cb,

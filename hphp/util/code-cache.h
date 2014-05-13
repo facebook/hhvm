@@ -45,6 +45,7 @@ struct CodeCache {
     body("prof", m_prof);
     body("stubs", m_stubs);
     body("trampolines", m_trampolines);
+    body("unused", m_unused);
   }
 
   size_t codeSize() const { return m_codeSize; }
@@ -71,6 +72,11 @@ struct CodeCache {
   CodeBlock& trampolines()             { return m_trampolines; }
   const CodeBlock& trampolines() const { return m_trampolines; }
 
+  CodeBlock& unused();
+  const CodeBlock& unused() const {
+    return const_cast<CodeCache&>(*this).unused();
+  }
+
   DataBlock& data() { return m_data; }
 
   // Read-only access for MCGenerator::dumpTCCode()
@@ -86,11 +92,30 @@ private:
   size_t m_totalSize;
   Selection m_selection;
 
+  /*
+   * Code blocks for emitting different kinds of code.
+   *
+   * See comment in runtime/vm/jit/block.h to see the meanings of different
+   * Block Hints.
+   *
+   * Code blocks with either a 'Likely' or 'Neither' Block Hint are emitted
+   * in m_main. Code blocks with an 'Unlikely' Block Hint are emitted in
+   * m_stubs (except for profiling translations, see below). Code blocks
+   * with an 'Unused' Block Hint are emitted in m_unused.
+   *
+   * The m_hot section is used for emitting optimzed translations of
+   * 'Hot' functions (functions marked with AttrHot). The m_prof is used
+   * for emitting profiling translations of Hot functions. Also, for profiling
+   * translations, the m_unused section is used for 'Unlikely' blocks instead
+   * of m_stubs.
+   *
+   */
   CodeBlock m_main;        // used for hot code of non-AttrHot functions
   CodeBlock m_stubs;       // used for cold or one time use code
   CodeBlock m_hot;         // used for hot code of AttrHot functions
   CodeBlock m_prof;        // used for hot code of profiling translations
   CodeBlock m_trampolines; // used to enable static calls to distant code
+  CodeBlock m_unused;      // used for code that is (almost) never used
   DataBlock m_data;        // data to be used by translated code
   bool      m_lock;        // don't allow access to main() or stubs()
 };

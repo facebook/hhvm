@@ -58,14 +58,17 @@ CodeCache::CodeCache()
 
   auto ru = [=] (size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
 
-  const size_t kAHotSize   = ru(RuntimeOption::RepoAuthoritative ?
-                                RuntimeOption::EvalJitAHotSize : 0);
-  const size_t kASize      = ru(RuntimeOption::EvalJitASize);
-  const size_t kAProfSize  = ru(RuntimeOption::EvalJitPGO ?
-                                RuntimeOption::EvalJitAProfSize : 0);
-  const size_t kAStubsSize = ru(RuntimeOption::EvalJitAStubsSize);
+  const size_t kAHotSize    = ru(RuntimeOption::RepoAuthoritative ?
+                                 RuntimeOption::EvalJitAHotSize : 0);
+  const size_t kASize       = ru(RuntimeOption::EvalJitASize);
+  const size_t kAProfSize   = ru(RuntimeOption::EvalJitPGO ?
+                                 RuntimeOption::EvalJitAProfSize : 0);
+  const size_t kAStubsSize  = ru(RuntimeOption::EvalJitAColdSize);
+  const size_t kAUnusedSize = ru(RuntimeOption::EvalJitAFrozenSize);
+
   const size_t kGDataSize  = ru(RuntimeOption::EvalJitGlobalDataSize);
-  m_totalSize = kAHotSize + kASize + kAStubsSize + kAProfSize + kGDataSize;
+  m_totalSize = kAHotSize + kASize + kAStubsSize + kAProfSize +
+                kAUnusedSize + kGDataSize;
   m_codeSize = m_totalSize - kGDataSize;
 
   if ((kASize < (10 << 20)) ||
@@ -156,6 +159,10 @@ CodeCache::CodeCache()
   enhugen(base, RuntimeOption::EvalTCNumHugeColdMB);
   base += kAStubsSize;
 
+  TRACE(1, "init aunused @%p\n", base);
+  m_unused.init(base, kAUnusedSize, "aunused");
+  base += kAUnusedSize;
+
   TRACE(1, "init gdata @%p\n", base);
   m_data.init(base, kGDataSize, "gdata");
   base += kGDataSize;
@@ -173,8 +180,8 @@ CodeCache::~CodeCache() {
 
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
   always_assert(!m_lock);
-  return JIT::codeBlockChoose(addr,
-                              m_main, m_hot, m_prof, m_stubs, m_trampolines);
+  return JIT::codeBlockChoose(addr, m_main, m_hot, m_prof,
+                              m_stubs, m_trampolines, m_unused);
 }
 
 size_t CodeCache::totalUsed() const {
@@ -214,10 +221,14 @@ CodeBlock& CodeCache::stubs() {
   always_assert(!m_lock);
   switch (m_selection) {
     case Selection::Default:
-    case Selection::Hot:
-    case Selection::Profile: return m_stubs;
+    case Selection::Hot:     return m_stubs;
+    case Selection::Profile: return unused();
   }
   always_assert(false && "Invalid Selection");
+}
+
+CodeBlock& CodeCache::unused() {
+  return m_unused.capacity() != 0 ? m_unused : m_stubs;
 }
 
 }

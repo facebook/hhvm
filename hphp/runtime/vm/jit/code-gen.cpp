@@ -76,11 +76,13 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
 }
 
 static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& stubsCode,
-                     MCGenerator* mcg, CodegenState& state, Block* block,
+                     CodeBlock& unusedCode, MCGenerator* mcg,
+                     CodegenState& state, Block* block,
                      std::vector<TransBCMapping>* bcMap) {
   FTRACE(6, "genBlock: {}\n", block->id());
   std::unique_ptr<CodeGenerator> cg(mcg->backEnd().newCodeGenerator(unit, cb,
                                                                     stubsCode,
+                                                                    unusedCode,
                                                                     mcg,
                                                                     state));
 
@@ -105,9 +107,7 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& stubsCode,
   }
 }
 
-void genCodeImpl(CodeBlock& mainCode,
-                 CodeBlock& stubsCode,
-                 IRUnit& unit,
+void genCodeImpl(IRUnit& unit,
                  std::vector<TransBCMapping>* bcMap,
                  JIT::MCGenerator* mcg,
                  const RegAllocInfo& regs,
@@ -120,6 +120,9 @@ void genCodeImpl(CodeBlock& mainCode,
     return state.addresses[block];
   };
 
+  CodeBlock& mainCode   = mcg->code.main();
+  CodeBlock& stubsCode  = mcg->code.stubs();
+  CodeBlock& unusedCode = mcg->code.unused();
   mcg->code.lock();
   SCOPE_EXIT { mcg->code.unlock(); };
 
@@ -149,7 +152,7 @@ void genCodeImpl(CodeBlock& mainCode,
       state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
     }
 
-    genBlock(unit, cb, stubsCode, mcg, state, block, bcMap);
+    genBlock(unit, cb, stubsCode, unusedCode, mcg, state, block, bcMap);
     auto nextFlow = block->next();
     if (nextFlow && nextFlow != nextLinear) {
       mcg->backEnd().emitFwdJmp(cb, nextFlow, state);
@@ -175,10 +178,15 @@ void genCodeImpl(CodeBlock& mainCode,
       ? *boost::next(it) : nullptr;
     emitBlock(mainCode, *it, nextLinear);
   }
-  for (auto it = linfo.astubsIt; it != linfo.blocks.end(); ++it) {
-    Block* nextLinear = boost::next(it) != linfo.blocks.end()
+  for (auto it = linfo.astubsIt; it != linfo.aunusedIt; ++it) {
+    Block* nextLinear = boost::next(it) != linfo.aunusedIt
       ? *boost::next(it) : nullptr;
     emitBlock(stubsCode, *it, nextLinear);
+  }
+  for (auto it = linfo.aunusedIt; it != linfo.blocks.end(); ++it) {
+    Block* nextLinear = boost::next(it) != linfo.blocks.end()
+      ? *boost::next(it) : nullptr;
+    emitBlock(unusedCode, *it, nextLinear);
   }
 
   if (debug) {
@@ -188,18 +196,17 @@ void genCodeImpl(CodeBlock& mainCode,
   }
 }
 
-void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
-             std::vector<TransBCMapping>* bcMap,
+void genCode(IRUnit& unit, std::vector<TransBCMapping>* bcMap,
              JIT::MCGenerator* mcg,
              const RegAllocInfo& regs) {
   Timer _t(Timer::codeGen);
 
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    genCodeImpl(main, stubs, unit, bcMap, mcg, regs, &ai);
+    genCodeImpl(unit, bcMap, mcg, regs, &ai);
     printUnit(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
   } else {
-    genCodeImpl(main, stubs, unit, bcMap, mcg, regs, nullptr);
+    genCodeImpl(unit, bcMap, mcg, regs, nullptr);
   }
 }
 

@@ -33,10 +33,12 @@ struct CodeGenerator : public JIT::CodeGenerator {
   typedef JIT::X64Assembler Asm;
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                JIT::MCGenerator* mcg, CodegenState& state)
+                CodeBlock& unusedCode, JIT::MCGenerator* mcg,
+                CodegenState& state)
     : m_unit(unit)
     , m_mainCode(mainCode)
     , m_stubsCode(stubsCode)
+    , m_unusedCode(unusedCode)
     , m_as(mainCode)
     , m_astubs(stubsCode)
     , m_mcg(mcg)
@@ -339,6 +341,7 @@ private:
   const IRUnit&       m_unit;
   CodeBlock&          m_mainCode;
   CodeBlock&          m_stubsCode;
+  CodeBlock&          m_unusedCode;
   Asm                 m_as;  // current "main" assembler
   Asm                 m_astubs; // for stubs and other cold code
   MCGenerator*        m_mcg;

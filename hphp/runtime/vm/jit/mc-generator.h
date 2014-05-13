@@ -190,7 +190,7 @@ public:
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset, bool resumed);
   bool freeRequestStub(TCA stub);
-  TCA getFreeStub(CodeBlock& stubs);
+  TCA getFreeStub(CodeBlock& unused);
   void registerCatchBlock(CTCA ip, TCA block);
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
   TCA getTranslatedCaller() const;

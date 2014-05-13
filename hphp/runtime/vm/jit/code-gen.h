@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/util/code-cache.h"
 
 namespace HPHP { namespace JIT {
 
@@ -97,9 +98,7 @@ const Func* loadClassCtor(Class* cls);
 
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);
 
-void genCode(CodeBlock&              mainCode,
-             CodeBlock&              stubsCode,
-             IRUnit&                 unit,
+void genCode(IRUnit&                 unit,
              std::vector<TransBCMapping>* bcMap,
              MCGenerator*            mcg,
              const RegAllocInfo&     regs);

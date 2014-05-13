@@ -49,8 +49,14 @@ extern const int64_t k_PHP_ROUND_HALF_ODD;
 
 double f_pi();
 
-Variant f_min(int _argc, const Variant& value, const Array& _argv = null_array);
-Variant f_max(int _argc, const Variant& value, const Array& _argv = null_array);
+// min() and max() have a second parameter before argv to avoid allocating an
+// argv array in the common case where they're called with 2 args
+Variant f_min(int _argc, const Variant& value,
+              const Variant& second = null_variant,
+              const Array& _argv = null_array);
+Variant f_max(int _argc, const Variant& value,
+              const Variant& second = null_variant,
+              const Array& _argv = null_array);
 Variant f_abs(const Variant& number);
 
 bool f_is_finite(double val);

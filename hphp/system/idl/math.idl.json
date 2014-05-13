@@ -49,6 +49,12 @@
                     "name": "value",
                     "type": "Variant",
                     "desc": "An array containing the values."
+                },
+                {
+                    "name": "second",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "A second value to compare."
                 }
             ]
         },
@@ -67,6 +73,12 @@
                     "name": "value",
                     "type": "Variant",
                     "desc": "An array containing the values."
+                },
+                {
+                    "name": "second",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "A second value to compare."
                 }
             ]
         },

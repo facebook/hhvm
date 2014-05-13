@@ -265,7 +265,7 @@ void emitBuildExtraArgs(const PhpFunc& func, std::ostream& out,
   out << folly::format(
     R"(
 {0}Array extraArgs;
-{0}{{
+{0}if (count > {1}) {{
 {0}  ArrayInit ai((size_t)count-{1}, ArrayInit::Mixed{{}});
 {0}  for (int32_t i = {1}; i < count; ++i) {{
 {0}    TypedValue* extraArg = ar->getExtraArg(i-{1});

@@ -31,8 +31,10 @@ const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
 
 double f_pi() { return k_M_PI;}
 
-Variant f_min(int _argc, const Variant& value, const Array& _argv /* = null_array */) {
-  if (_argv.empty()) {
+Variant f_min(int _argc, const Variant& value,
+              const Variant& second /* = null_variant */,
+              const Array& _argv /* = null_array */) {
+  if (_argc == 1) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
       return value;
@@ -51,9 +53,11 @@ Variant f_min(int _argc, const Variant& value, const Array& _argv /* = null_arra
       }
     }
     return ret;
+  } else if (_argc == 2) {
+    return less(second, value) ? second : value;
   }
 
-  Variant ret = value;
+  Variant ret = less(second, value) ? second : value;
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant currVal = iter.secondRef();
     if (less(currVal, ret)) {
@@ -63,8 +67,10 @@ Variant f_min(int _argc, const Variant& value, const Array& _argv /* = null_arra
   return ret;
 }
 
-Variant f_max(int _argc, const Variant& value, const Array& _argv /* = null_array */) {
-  if (_argv.empty()) {
+Variant f_max(int _argc, const Variant& value,
+              const Variant& second /* = null_variant */,
+              const Array& _argv /* = null_array */) {
+  if (_argc == 1) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
       return value;
@@ -83,9 +89,11 @@ Variant f_max(int _argc, const Variant& value, const Array& _argv /* = null_arra
       }
     }
     return ret;
+  } else if (_argc == 2) {
+    return more(second, value) ? second : value;
   }
 
-  Variant ret = value;
+  Variant ret = more(second, value) ? second : value;
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant currVal = iter.secondRef();
     if (more(currVal, ret)) {

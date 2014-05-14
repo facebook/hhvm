@@ -519,9 +519,6 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
          * to take the write lease here.
          * In all other cases, Funcs are destroyed via a delayed path
          * (treadmill) and the rank violation isn't an issue.
-         *
-         * Also note that we only need the write lease because we
-         * mprotect the translation cache in debug builds.
          */
         if (!writer) {
           writer.reset(new LeaseHolder(Translator::WriteLease(),

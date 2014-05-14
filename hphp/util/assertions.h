@@ -61,8 +61,8 @@ T bad_value() {
 #define not_implemented() do {                   \
   fprintf(stderr, "not implemented: %s:%d %s\n", \
           __FILE__, __LINE__, __FUNCTION__);     \
-  not_reached();                                 \
-} while(0)
+  always_assert(0);                              \
+} while (0)
 
 #define assert_not_implemented(pred) do {        \
   if (! (pred) ) {                               \

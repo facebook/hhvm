@@ -802,6 +802,8 @@ enum OutTypeConstraints {
   OutFPushCufSafe,      // FPushCufSafe pushes two values of different
                         // types and an ActRec
 
+  OutIsTypeL,           // output for IsTypeL instructions
+
   OutNone,
 };
 

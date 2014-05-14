@@ -298,9 +298,9 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
                                    const Tracelet& tlet) {
   typedef RegionDesc::Block Block;
 
-  auto region = std::make_shared<RegionDesc>();
+  auto const region = std::make_shared<RegionDesc>();
   SrcKey sk(tlet.m_sk);
-  auto unit = tlet.func()->unit();
+  auto const unit = tlet.func()->unit();
 
   const Func* topFunc = nullptr;
   Block* curBlock = nullptr;
@@ -338,11 +338,26 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
       auto const& callee = *ni->calleeTrace;
       curBlock->setInlinedCallee(ni->funcd);
       SrcKey cSk = callee.m_sk;
-      Unit* cUnit = callee.func()->unit();
+      auto const cUnit = callee.func()->unit();
 
-      newBlock(cSk, curSpOffset);
+      // Note: the offsets of the inlined blocks aren't currently read
+      // for anything, so it's unclear whether they should be relative
+      // to the main function entry or the inlined function.  We're
+      // just doing this for now.
+      auto const initInliningSpOffset = curSpOffset;
+      newBlock(cSk,
+               initInliningSpOffset + callee.m_instrStream.first->stackOffset);
 
       for (auto cni = callee.m_instrStream.first; cni; cni = cni->next) {
+        // Sometimes inlined callees trace through jumps that have a
+        // known taken/non-taken state based on the calling context:
+        if (cni->nextOffset != kInvalidOffset) {
+          curBlock->addInstruction();
+          cSk.setOffset(cni->nextOffset);
+          newBlock(cSk, initInliningSpOffset + ni->stackOffset);
+          continue;
+        }
+
         assert(cSk == cni->source);
         assert(cni->op() == OpRetC ||
                cni->op() == OpRetV ||

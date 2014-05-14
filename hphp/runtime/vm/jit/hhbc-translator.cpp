@@ -3243,7 +3243,6 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
 void HhbcTranslator::emitEndInlinedCommon() {
   assert(!m_fpiActiveStack.empty());
   assert(!curFunc()->isPseudoMain());
-  assert(!(curFunc()->attrs() & AttrMayUseVV) || curFunc()->isCPPBuiltin());
 
   if (curFunc()->mayHaveThis()) {
     gen(DecRefThis, m_irb->fp());
@@ -5201,6 +5200,7 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
     case OutString:      return Type::Str;
     case OutStringImm:   return Type::StaticStr;
     case OutDouble:      return Type::Dbl;
+    case OutIsTypeL:
     case OutBoolean:
     case OutBooleanImm:  return Type::Bool;
     case OutInt64:       return Type::Int;

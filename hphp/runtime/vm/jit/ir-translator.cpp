@@ -608,6 +608,33 @@ static bool isInlinableCPPBuiltin(const Func* f) {
   return true;
 }
 
+// Conservative whitelist for hhbc opcodes we know are safe to inline,
+// even if the entire callee body required a AttrMayUseVV.  This
+// affects cases where we're able to eliminate control flow while
+// inlining due to the parameter types, and the AttrMayUseVV flag was
+// due to something happening in a block we won't inline.
+static bool isInliningVVSafe(Op op) {
+  switch (op) {
+  case Op::Null:
+  case Op::AssertRATL:
+  case Op::AssertRATStk:
+  case Op::SetL:
+  case Op::CGetL:
+  case Op::PopC:
+  case Op::JmpNS:
+  case Op::JmpNZ:
+  case Op::JmpZ:
+  case Op::VerifyParamType:
+  case Op::VerifyRetTypeC:
+  case Op::IsTypeL:
+  case Op::RetC:
+    return true;
+  default:
+    break;
+  }
+  return false;
+}
+
 bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
@@ -641,14 +668,16 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     return refuse("non-inlinable CPP builtin");
   }
 
+  // If the function may use a varenv or may be variadic, we only
+  // support certain whitelisted instructions which we know won't
+  // actually require this.
+  bool const needCheckVVSafe = callee->attrs() & AttrMayUseVV;
+
   if (callee->numIterators() != 0) {
     return refuse("iterators");
   }
   if (callee->isMagic() || Func::isSpecial(callee->name())) {
     return refuse("special or magic function");
-  }
-  if (callee->attrs() & AttrMayUseVV) {
-    return refuse("may use dynamic environment");
   }
   if (callee->isResumable()) {
     return refuse("resumables");
@@ -693,6 +722,11 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     op = iter.sk().op();
     func = iter.sk().func();
 
+    if (needCheckVVSafe && !isInliningVVSafe(op)) {
+      FTRACE(2, "shouldIRInline: {} is not VV safe\n", opcodeToName(op));
+      return refuse("may use dynamic environment");
+    }
+
     // If we hit a RetC/V while inlining, leave that level and
     // continue. Otherwise, accept the tracelet.
     if (isRet(op)) {
@@ -732,10 +766,6 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     if (cost > RuntimeOption::EvalHHIRAlwaysInlineMaxCost &&
         hotCallingCold) {
       return refuse("inlining sizeable cold func into hot func");
-    }
-
-    if (JIT::opcodeBreaksBB(op)) {
-      return refuse("breaks tracelet");
     }
   }
 

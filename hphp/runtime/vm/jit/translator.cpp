@@ -781,7 +781,8 @@ static RuntimeType
 getDynLocType(const SrcKey startSk,
               NormalizedInstruction* ni,
               InstrFlags::OutTypeConstraints constraint,
-              TransKind mode) {
+              TransKind mode,
+              int analysisDepth) {
   using namespace InstrFlags;
   auto const& inputs = ni->inputs;
   assert(constraint != OutFInputL);
@@ -801,6 +802,34 @@ getDynLocType(const SrcKey startSk,
     CS(OutObject,      KindOfObject);
     CS(OutResource,    KindOfResource);
 #undef CS
+
+    case OutIsTypeL: {
+      assert(ni->op() == Op::IsTypeL);
+      auto const rtt = ni->inputs[0]->rtt;
+      if (rtt.isVagueValue() || !rtt.isValue() || analysisDepth == 0) {
+        /*
+         * Right now we do the same as KindOfBoolean when we're not
+         * inlining, because we want to not change tracelet shapes in
+         * that case.  (This is part of an optimization to inline
+         * functions when can fold control flow.)
+         */
+        return RuntimeType(KindOfBoolean);
+      }
+      auto const retVal = [&]() -> folly::Optional<bool> {
+        switch (static_cast<IsTypeOp>(ni->imm[1].u_OA)) {
+        case IsTypeOp::Null:     return rtt.isNull();
+        case IsTypeOp::Bool:     return rtt.isBoolean();
+        case IsTypeOp::Int:      return rtt.isInt();
+        case IsTypeOp::Dbl:      return rtt.isDouble();
+        case IsTypeOp::Str:      return rtt.isString();
+        case IsTypeOp::Arr:      return rtt.isArray();
+        case IsTypeOp::Obj:      return rtt.isObject();
+        case IsTypeOp::Scalar:   return folly::none;
+        }
+        not_reached();
+      }();
+      return !retVal ? RuntimeType(KindOfBoolean) : RuntimeType(*retVal);
+    }
 
     case OutCns: {
       // If it's a system constant, burn in its type. Otherwise we have
@@ -1155,7 +1184,7 @@ static const struct {
   { OpEmptyM,      {MVector,          Stack1,       OutBoolean,        1 }},
   { OpIsTypeC,     {Stack1|
                     DontGuardStack1,  Stack1,       OutBoolean,        0 }},
-  { OpIsTypeL,     {Local,            Stack1,       OutBoolean,        1 }},
+  { OpIsTypeL,     {Local,            Stack1,       OutIsTypeL,        1 }},
 
   /*** 7. Mutator instructions ***/
 
@@ -2065,6 +2094,12 @@ bool outputDependsOnInput(const Op instr) {
     case OutNone:
       return false;
 
+    // NB: this sounds like it should have the output depend on the
+    // input, but it behaves the same as OutBoolean unless we are
+    // inlining, and in that case we don't relaxDeps.
+    case OutIsTypeL:
+      return false;
+
     case OutFDesc:
     case OutSameAsInput:
     case OutCInput:
@@ -2459,7 +2494,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
     }
     DynLocation* dl = t.newDynLocation();
     dl->location = loc;
-    dl->rtt = getDynLocType(t.m_sk, ni, typeInfo, m_mode);
+    dl->rtt = getDynLocType(t.m_sk, ni, typeInfo, m_mode, analysisDepth());
     SKTRACE(2, ni->source, "recording output t(%d->%d) #(%s, %" PRId64 ")\n",
             dl->rtt.outerType(), dl->rtt.innerType(),
             dl->location.spaceName(), dl->location.offset);
@@ -3101,6 +3136,8 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
 /*
  * Check whether the a given FCall should be analyzed for possible
  * inlining or not.
+ *
+ * TODO(2716400): support __call and friends?
  */
 bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
                          const FPIEnt* fpi,
@@ -3134,16 +3171,17 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
     return false;
   }
 
-  // TODO(2716400): support __call and friends
-  if (numArgs != target->numParams()) {
-    FTRACE(1, "analyzeCallee: param count mismatch {} != {}\n",
-           numArgs, target->numParams());
-    return false;
-  }
-
   if (pushOp == OpFPushClsMethodD && target->mayHaveThis()) {
     FTRACE(1, "analyzeCallee: not inlining static calls which may have a "
               "this pointer\n");
+    return false;
+  }
+
+  if (numArgs > target->numParams()) {
+    FTRACE(1, "analyzeCallee: excessive parameters passed "
+              "(passed={}, expected={})\n",
+              numArgs,
+              target->numParams());
     return false;
   }
 
@@ -3188,6 +3226,39 @@ void Translator::analyzeCallee(TraceletContext& tas,
 
   auto const numArgs     = fcall->imm[0].u_IVA;
   auto const target      = fcall->funcd;
+
+  /*
+   * If the argument count isn't exact, we need to figure out if we
+   * can handle the DV init situation before proceeding.
+   *
+   * If we don't have a dv-init entry point for every argument that
+   * isn't passed, we are supposed to raise a warning for the missing
+   * arguments.  Since this will involve a catch trace in the IR that
+   * keeps the frame alive, just give up if that's going to happen.
+   */
+  auto const entryOffset = [&]() -> Offset {
+    auto const numParams = target->numParams();
+    if (numArgs == numParams) return target->base();
+    assert(numArgs < numParams);
+    auto ret = Offset{kInvalidOffset};
+    for (auto i = numArgs; i < numParams; ++i) {
+      auto const& param = target->params()[i];
+      if (param.hasDefaultValue()) {
+        if (ret == kInvalidOffset) {
+          ret = param.funcletOff();
+        }
+      } else {
+        FTRACE(1, "analyzeCallee: refusing because we would "
+                  "need to emit missing argument warnings");
+        return kInvalidOffset;
+      }
+    }
+    return ret;
+  }();
+  if (entryOffset == kInvalidOffset) return;
+  if (entryOffset != target->base()) {
+    FTRACE(1, "analyzeCallee: using dvInit at {}\n", entryOffset);
+  }
 
   /*
    * Prepare a map for all the known information about the argument
@@ -3276,11 +3347,12 @@ void Translator::analyzeCallee(TraceletContext& tas,
     FTRACE(1, "finished sub trace ===================================\n");
   };
 
-  auto subTrace = analyze(SrcKey(target, target->base(), false), initialMap);
+  auto subTrace = analyze(SrcKey(target, entryOffset, false), initialMap);
 
   /*
-   * Verify the target trace actually ended with a return, or we have
-   * no business doing anything based on it right now.
+   * Verify the target trace actually ended with something we
+   * understand, or we have no business doing anything based on it
+   * right now.
    */
   if (!subTrace->m_instrStream.last ||
       (subTrace->m_instrStream.last->op() != Op::RetC &&
@@ -3345,8 +3417,9 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * potentially have depended on here, we need to ensure that the
    * call instruction depends on all the inputs we've used.
    *
-   * (We could do better by letting relaxDeps look through the
-   * callee.)
+   * (We could do better by letting relaxDeps look through the callee.
+   * But we won't, because eventually we'll handle it in IR guard
+   * relaxation and/or PGO.)
    */
   restoreFrame();
   for (auto& loc : callerArgLocs) {
@@ -3608,14 +3681,16 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       tas.recordDelete(l);
     }
 
-    if (m_mode == TransKind::Profile && instrBreaksProfileBB(ni)) {
+    if (analysisDepth() == 0 &&
+        m_mode == TransKind::Profile &&
+        instrBreaksProfileBB(ni)) {
       SKTRACE(1, sk, "Profiling BB broken\n");
       sk.advance(unit);
       goto breakBB;
     }
 
-    // Check if we need to break the tracelet.
-    //
+    // Check if we need to break the tracelet.  ///////////
+
     // If we've gotten this far, it mostly boils down to control-flow
     // instructions. However, we'll trace through a few unconditional jmps.
     if (isUnconditionalJmp(ni->op()) &&
@@ -3625,16 +3700,61 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       // Continue tracing through jumps. To prevent pathologies, only trace
       // through a finite number of forward jumps.
       SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
-              tas.m_numJmps, ni->imm[0].u_IA);
+              tas.m_numJmps, ni->imm[0].u_BA);
       tas.recordJmp();
-      sk = SrcKey(func, sk.offset() + ni->imm[0].u_IA, resumed);
+      sk = SrcKey(func, sk.offset() + ni->imm[0].u_BA, resumed);
       goto head; // don't advance sk
-    } else if (opcodeBreaksBB(ni->op()) ||
-               (dontGuardAnyInputs(ni->op()) && opcodeChangesPC(ni->op()))) {
+    }
+
+    /*
+     * If we're analyzing for purposes of possibly inlining the
+     * callee, there's a few cases where we trace through more jumps.
+     * We'll limit the size with the inlining heuristics later (in
+     * shouldIRInline), so we might as well understand as much as we
+     * can now.  There is still a limit to avoid non-termination on a
+     * while (true) or similar situation.
+     *
+     * This includes any normally-conditional jumps that we've
+     * determined are going to be unconditionally (not-)taken based on
+     * knowing the arguments at the caller.
+     */
+    if (analysisDepth() != 0 && tas.m_numJmps < MaxJmpsTracedThrough) {
+      if (isUnconditionalJmp(ni->op()) || ni->op() == Op::JmpNS) {
+        SKTRACE(1, sk, "continuing through inlined jump + %d\n",
+                ni->imm[0].u_BA);
+        tas.recordJmp();
+        ni->nextOffset = sk.offset() + ni->imm[0].u_BA;
+        sk = SrcKey(func, ni->nextOffset, resumed);
+        goto head; // don't advance sk
+      }
+
+      if (ni->op() == Op::JmpNZ || ni->op() == Op::JmpZ) {
+        bool const jmpnz = ni->op() == Op::JmpNZ;
+        auto const inTy = ni->inputs[0]->rtt;
+        if (inTy.isBoolean() && inTy.valueBoolean() != -1) {
+          auto const taken = inTy.valueBoolean() == jmpnz;
+          auto const offset = taken ? sk.offset() + ni->imm[0].u_BA
+                                    : sk.advanced(unit).offset();
+          SKTRACE(1, sk,
+                  "continuing on inlined conditional jump known "
+                  "%staken + %d\n",
+                  taken ? "" : "not ",
+                  offset);
+          ni->nextOffset = offset;
+          tas.recordJmp();
+          sk = SrcKey(func, offset, resumed);
+          goto head; // don't advance sk
+        }
+      }
+    }
+
+    if (opcodeBreaksBB(ni->op()) ||
+        (dontGuardAnyInputs(ni->op()) && opcodeChangesPC(ni->op()))) {
       SKTRACE(1, sk, "BB broken\n");
       sk.advance(unit);
       goto breakBB;
     }
+
     postAnalyze(ni, sk, t, tas);
   }
 breakBB:

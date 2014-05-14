@@ -725,9 +725,7 @@ char *string_html_encode(const char *input, int &len,
           entity[2] = '\0';
         } else if (c < 0xf0) {
           UTF8_ERROR_IF(avail < 3);
-          for (int i = 1; i < 3; ++i) {
-            UTF8_ERROR_IF(!utf8_trail(*(p + i)));
-          }
+          UTF8_ERROR_IF(!utf8_trail(*(p + 1)) || !utf8_trail(*(p + 2)));
 
           uint32_t tc = ((c & 0x0f) << 12) |
                         ((*(p+1) & 0x3f) << 6) |
@@ -742,9 +740,9 @@ char *string_html_encode(const char *input, int &len,
           entity[3] = '\0';
         } else if (c < 0xf5) {
           UTF8_ERROR_IF(avail < 4);
-          for (int i = 1; i < 4; ++i) {
-            UTF8_ERROR_IF(!utf8_trail(*(p + i)));
-          }
+          UTF8_ERROR_IF(!utf8_trail(*(p + 1)));
+          UTF8_ERROR_IF(!utf8_trail(*(p + 2)));
+          UTF8_ERROR_IF(!utf8_trail(*(p + 3)));
 
           uint32_t tc = ((c & 0x07) << 18) |
                         ((*(p+1) & 0x3f) << 12) |

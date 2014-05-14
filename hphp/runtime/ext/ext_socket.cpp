@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/persistent-resource-store.h"
+#include "hphp/runtime/base/zend-php-config.h"
 #include "hphp/util/logger.h"
 
 #define PHP_NORMAL_READ 0x0001
@@ -116,6 +117,7 @@ static bool php_set_inet6_addr(struct sockaddr_in6 *sin6, const char *address,
     hints.ai_family = PF_INET6;
     getaddrinfo(address, NULL, &hints, &addrinfo);
     if (!addrinfo) {
+      // 10000 is a magic value to indicate a host error.
       SOCKET_ERROR(sock, "Host lookup failed", (-10000 - h_errno));
       return false;
     }
@@ -1026,6 +1028,19 @@ void f_socket_close(const Resource& socket) {
 }
 
 String f_socket_strerror(int errnum) {
+  /*
+   * PHP5 encodes both the h_errno and errno values into a single int:
+   * < -10000: transformed h_errno value
+   * >= -10000: errno value
+   */
+  if (errnum < -10000) {
+    errnum = (-errnum) - 10000;
+#ifdef HAVE_HSTRERROR
+    return String(hstrerror(errnum), CopyString);
+#endif
+    return folly::format("Host lookup error {}", errnum).str();
+  }
+
   return String(folly::errnoStr(errnum).toStdString());
 }
 

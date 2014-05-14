@@ -83,7 +83,6 @@ struct TraceletContext {
   TraceletContext(Tracelet* t, const TypeMap& initialTypes)
     : m_t(t)
     , m_numJmps(0)
-    , m_aliasTaint(false)
     , m_varEnvTaint(false)
   {
     for (auto& kv : initialTypes) {
@@ -100,7 +99,6 @@ struct TraceletContext {
   LocationSet m_changeSet;
   LocationSet m_deletedSet;
   int         m_numJmps;
-  bool        m_aliasTaint;
   bool        m_varEnvTaint;
 
   RuntimeType currentType(const Location& l) const;
@@ -109,7 +107,6 @@ struct TraceletContext {
   void recordWrite(DynLocation* dl);
   void recordDelete(const Location& l);
   void recordJmp();
-  void aliasTaint();
   void varEnvTaint();
 };
 
@@ -2526,8 +2523,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
       if (!l.isLiteral()) {
         if (m_varEnvTaint && dl->isValue() && dl->isLocal()) {
           dl->rtt = RuntimeType(KindOfAny);
-        } else if ((m_aliasTaint && dl->canBeAliased()) ||
-                   (rtt.isValue() && rtt.isRef() && ii.dontGuardInner)) {
+        } else if (rtt.isValue() && rtt.isRef() && ii.dontGuardInner) {
           dl->rtt = rtt.setValueType(KindOfAny);
         }
         // Record that we depend on the live type of the specified location
@@ -2557,20 +2553,6 @@ void TraceletContext::recordDelete(const Location& l) {
   m_currentMap.erase(l);
   m_changeSet.erase(l);
   m_deletedSet.insert(l);
-}
-
-void TraceletContext::aliasTaint() {
-  m_aliasTaint = true;
-  for (ChangeMap::iterator it = m_currentMap.begin();
-       it != m_currentMap.end(); ++it) {
-    DynLocation* dl = it->second;
-    if (dl->canBeAliased()) {
-      TRACE(1, "(%s, %" PRId64 ") <- inner type invalidated\n",
-            it->first.spaceName(), it->first.offset);
-      RuntimeType newRtt = dl->rtt.setValueType(KindOfAny);
-      it->second = m_t->newDynLocation(dl->location, newRtt);
-    }
-  }
 }
 
 void TraceletContext::varEnvTaint() {

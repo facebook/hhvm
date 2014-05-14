@@ -669,6 +669,12 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptDbl, union_of(opt(dval(2.0)), opt(dval(3.0))));
   EXPECT_EQ(TOptNum, union_of(TInitNull, TNum));
   EXPECT_EQ(TOptNum, union_of(TInitNull, union_of(dval(1), ival(0))));
+
+  auto const program = make_program();
+  Index index { borrow(program) };
+  auto const rcls = index.builtin_class(s_WaitHandle.get());
+
+  EXPECT_TRUE(union_of(TObj, opt(objExact(rcls))) == TOptObj);
 }
 
 TEST(Type, OptTV) {

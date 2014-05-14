@@ -1,160 +1,22 @@
-1	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 6
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 9
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 14
-YY	nullptr >= true	
-2	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 21
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 24
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 29
-YY	nullptr >= false	
-3	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 36
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 39
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 44
-NN	nullptr >= 1	
-4	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 51
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 54
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 59
-YY	nullptr >= 0	
-5	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 66
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 69
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 74
-YY	nullptr >= -1	
-6	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 81
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 84
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 89
-YY	nullptr >= '1'	
-7	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 96
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 99
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 104
-YY	nullptr >= '0'	
-8	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 111
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 114
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 119
-YY	nullptr >= '-1'	
-9	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 126
-
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 126
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 129
-
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 130
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 133
-
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 134
-YY	nullptr >= nullptr	
-10	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 141
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 144
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 149
-NN	nullptr >= array()	
-11	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 156
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 159
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 164
-NN	nullptr >= array(1)	
-12	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 171
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 174
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 179
-NN	nullptr >= array(2)	
-13	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 186
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 189
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 194
-NN	nullptr >= array('1')	
-14	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 201
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 204
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 209
-NN	nullptr >= array('0' => '1')	
-15	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 216
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 219
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 224
-NN	nullptr >= array('a')	
-16	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 231
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 234
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 239
-NN	nullptr >= array('a' => 1)	
-17	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 246
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 249
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 254
-NN	nullptr >= array('b' => 1)	
-18	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 261
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 264
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 269
-NN	nullptr >= array('a' => 1, 'b' => 2)	
-19	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 276
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 279
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 284
-NN	nullptr >= array(array('a' => 1))	
-20	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 291
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 294
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 299
-NN	nullptr >= array(array('b' => 1))	
-21	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 306
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 309
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 314
-NN	nullptr >= 'php'	
-22	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 321
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 324
-Y
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/1036.php on line 329
-YY	nullptr >= ''	
+1	NNNN	null >= true	
+2	YYYY	null >= false	
+3	NNNN	null >= 1	
+4	YYYY	null >= 0	
+5	NNNN	null >= -1	
+6	NNNN	null >= '1'	
+7	NNNN	null >= '0'	
+8	NNNN	null >= '-1'	
+9	YYYY	null >= null	
+10	YYYY	null >= array()	
+11	NNNN	null >= array(1)	
+12	NNNN	null >= array(2)	
+13	NNNN	null >= array('1')	
+14	NNNN	null >= array('0' => '1')	
+15	NNNN	null >= array('a')	
+16	NNNN	null >= array('a' => 1)	
+17	NNNN	null >= array('b' => 1)	
+18	NNNN	null >= array('a' => 1, 'b' => 2)	
+19	NNNN	null >= array(array('a' => 1))	
+20	NNNN	null >= array(array('b' => 1))	
+21	NNNN	null >= 'php'	
+22	YYYY	null >= ''

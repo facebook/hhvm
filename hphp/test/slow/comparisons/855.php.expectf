@@ -6,13 +6,7 @@
 6	NNNN	array(2) == '1'	
 7	NNNN	array(2) == '0'	
 8	NNNN	array(2) == '-1'	
-9	
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/855.php on line 126
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/855.php on line 130
-N
-Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/855.php on line 133
-NN	array(2) == nullptr	
+9	NNNN	array(2) == null	
 10	NNNN	array(2) == array()	
 11	NNNN	array(2) == array(1)	
 12	YYYY	array(2) == array(2)	
@@ -25,4 +19,4 @@ NN	array(2) == nullptr
 19	NNNN	array(2) == array(array('a' => 1))	
 20	NNNN	array(2) == array(array('b' => 1))	
 21	NNNN	array(2) == 'php'	
-22	NNNN	array(2) == ''	
+22	NNNN	array(2) == ''

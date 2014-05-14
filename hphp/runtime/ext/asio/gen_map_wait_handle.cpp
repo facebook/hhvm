@@ -200,7 +200,6 @@ void c_GenMapWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
 
   // recursively import current child
   {
-    assert(m_iterPos);
     auto* current = tvAssertCell(m_deps->iter_value(m_iterPos));
 
     assert(current->m_type == KindOfObject);

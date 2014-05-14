@@ -349,6 +349,7 @@ static Variant HHVM_FUNCTION(grapheme_strlen, const String& str) {
 static Variant HHVM_FUNCTION(grapheme_strpos, const String& haystack,
                                               const String& needle,
                                               int64_t offset /* = 0 */) {
+  offset = offset >= 0 ? offset : 0;
   return grapheme_do_strpos(haystack, needle, offset, false, false);
 }
 

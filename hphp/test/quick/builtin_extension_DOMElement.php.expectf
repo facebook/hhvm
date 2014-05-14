@@ -3,10 +3,9 @@ DOMElement
 Warning: DOMElement::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(DOMElement)#1 (0) {
 }
-
-Warning: Attempted to serialize unserializable builtin class DOMElement in %s/builtin_extensions.inc on line 8
-string(2) "N;"
-NULL
+string(22) "O:10:"DOMElement":0:{}"
+object(DOMElement)#2 (0) {
+}
 array(39) {
   [0]=>
   string(11) "__construct"
@@ -91,14 +90,15 @@ array(39) {
 A_DOMElement
 
 Warning: DOMElement::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
-object(A_DOMElement)#2 (1) {
+object(A_DOMElement)#3 (1) {
   ["___x"]=>
   NULL
 }
-
-Warning: Attempted to serialize unserializable builtin class A_DOMElement in %s/builtin_extensions.inc on line 26
-string(2) "N;"
-NULL
+string(37) "O:12:"A_DOMElement":1:{s:4:"___x";N;}"
+object(A_DOMElement)#4 (1) {
+  ["___x"]=>
+  NULL
+}
 array(39) {
   [0]=>
   string(11) "__construct"

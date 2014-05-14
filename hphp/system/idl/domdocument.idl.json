@@ -3021,7 +3021,8 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
-                "NoDefaultSweep"
+                "NoDefaultSweep",
+                "IsCppSerializable"
             ],
             "funcs": [
                 {

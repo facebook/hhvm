@@ -302,8 +302,14 @@ struct Index {
    * closure.  This function should only be used with class names are
    * guaranteed to be closures (for example, the name supplied to a
    * CreateCl opcode).
+   *
+   * TODO(#3363851): logically this function should never fail to
+   * resolve, but there's a bug somewhere upstream where a closure
+   * class appears more than once but still has AttrUnique.  For now
+   * we handle this case by just returning a vector of all the
+   * possible closures.
    */
-  std::pair<res::Class,borrowed_ptr<php::Class>>
+  std::pair<res::Class,std::vector<borrowed_ptr<php::Class>>>
     resolve_closure_class(Context ctx, SString name) const;
 
   /*

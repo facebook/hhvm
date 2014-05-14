@@ -525,6 +525,7 @@ O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),               E|CRc) \
 O(StProp,                           ND, S(Obj) C(Int) S(Gen),          E|CRc) \
+O(StCell,                           ND, S(PtrToGen) S(Gen),            E|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StGbl,                            ND, S(FramePtr) S(Gen),            E|CRc) \
@@ -533,7 +534,6 @@ O(StRaw,                            ND, S(Obj) S(Int),                     E) \
 O(StElem,                           ND, S(PtrToCell)                          \
                                           S(Int)                              \
                                           S(Cell),                     E|CRc) \
-O(IterCopy,                         ND, S(FramePtr) S(PtrToGen) S(Int),    E) \
 O(LdStaticLocCached,      D(BoxedCell), NA,                               NF) \
 O(CheckStaticLocInit,               ND, S(BoxedCell),                      B) \
 O(ClosureStaticLocInit,   D(BoxedCell), CStr                                  \
@@ -652,6 +652,7 @@ O(StAsyncArResult,                  ND, S(FramePtr) S(Cell),           E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
+O(CopyCells,                       ND, S(FramePtr) S(PtrToGen),            E) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           S(TCA,Nullptr)                      \
                                           C(Int)                              \

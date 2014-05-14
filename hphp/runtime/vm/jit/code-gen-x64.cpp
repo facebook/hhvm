@@ -2926,6 +2926,13 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgStCell(IRInstruction* inst) {
+  auto const offset  = inst->extra<StCell>()->offset;
+  auto const asyncAR = srcLoc(0).reg();
+
+  cgStore(asyncAR[offset], inst->src(1), srcLoc(1), Width::Full);
+}
+
 void CodeGenerator::cgStProp(IRInstruction* inst) {
   auto objReg = srcLoc(0).reg();
   auto propOff  = inst->src(1)->intVal();
@@ -5768,6 +5775,23 @@ void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
   m_as.lea (base[asyncArOffset], dest);
 }
 
+void CodeGenerator::cgCopyCells(IRInstruction* inst) {
+  auto const fpReg    = srcLoc(0).reg();
+  auto const numCells = inst->extra<CopyCells>()->locId;
+  auto const asyncAR  = srcLoc(1).reg();
+  auto const cellSize = sizeof(Cell);
+
+  if (!numCells) return;
+  m_as.   movq(int32_t(-(numCells * cellSize)), rAsm);
+
+  Label loopHead;
+asm_label(m_as, loopHead);
+  m_as.   movdqu(fpReg[rAsm], rCgXMM0);
+  m_as.   movdqu(rCgXMM0, asyncAR[rAsm]);
+  m_as.   addq(int32_t(cellSize), rAsm);
+  m_as.   jnz8(loopHead);
+}
+
 void CodeGenerator::cgIterInit(IRInstruction* inst) {
   cgIterInitCommon(inst);
 }
@@ -5940,16 +5964,6 @@ void CodeGenerator::cgMIterNextCommon(IRInstruction* inst) {
   }
   cgCallHelper(m_as, CppCall::direct(miter_next_key), callDest(inst),
                SyncOptions::kSyncPoint, args);
-}
-
-void CodeGenerator::cgIterCopy(IRInstruction* inst) {
-  auto fromReg = srcLoc(0).reg();
-  auto toReg = srcLoc(1).reg();
-  auto offset = inst->src(2)->intVal();
-  for (int i = 0; i < sizeof(Iter); i += 8) {
-    m_as.loadq(fromReg[-offset+i], m_rScratch);
-    m_as.storeq(m_rScratch, toReg[-offset+i]);
-  }
 }
 
 void CodeGenerator::cgIterFree(IRInstruction* inst) {

@@ -1728,8 +1728,7 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
   assert(curFunc()->isAsync());
   assert(!resumed());
   assert(child->isA(Type::Obj));
-
-  auto const ldgblExit = makeExit();
+  auto const kMaxCellStores = 3;
 
   // Create the AsyncFunctionWaitHandle object.
   auto const func = curFunc();
@@ -1741,15 +1740,17 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
 
   // Teleport local variables into the AsyncFunctionWaitHandle.
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
-  for (int i = 0; i < func->numLocals(); ++i) {
-    auto const loc = ldLoc(i, ldgblExit, DataTypeGeneric);
-    gen(StMem, asyncAR, cns(-cellsToBytes(i + 1)), loc);
-  }
 
-  // Teleport iterators into the AsyncFunctionWaitHandle.
-  for (int i = 0; i < numIters; ++i) {
-    gen(IterCopy, m_irb->fp(), asyncAR,
-        cns(func->numLocals() * sizeof(TypedValue) + (i + 1) * sizeof(Iter)));
+  static_assert(sizeof(Iter) % sizeof(TypedValue) == 0, "Iter size changed");
+  auto const numCells = func->numLocals() +
+                        numIters * sizeof(Iter) / sizeof(TypedValue);
+  if (numIters == 0 && func->numLocals() <= kMaxCellStores) {
+    for (int i = 0; i < func->numLocals(); ++i) {
+      auto const loc = ldLoc(i, nullptr, DataTypeGeneric);
+      gen(StCell, LocalOffset(localOffset(i)), asyncAR, loc);
+    }
+  } else {
+    gen(CopyCells, LocalId(numCells), m_irb->fp(), asyncAR);
   }
 
   // Call the FunctionExit hook and put the AsyncFunctionWaitHandle

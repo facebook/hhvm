@@ -1274,6 +1274,10 @@ StProp S0:Obj S1:Int S2:Gen
 
   Store S2 into the location S0 + S1 (in bytes).
 
+StCell<offset> S0:PtrToGen S1:Gen
+
+  Store S1 into the location S0 + offset (in bytes).
+
 StElem S0:PtrToCell S1:Int S2:Cell
 
   Store S2 into the location given by the index S1 from base pointer S0. The
@@ -1872,6 +1876,10 @@ D:Cell = LdWHResult S0:Obj
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
 
+CopyCells<numCells> S0:FramePtr S1:PtrToGen
+
+  Copy numCells cells from frame S0 to the same slot offsets in S1.
+
 
 17. Debugging, instrumentation, and profiling
 
@@ -1994,11 +2002,6 @@ CIterFree<IterId> S0:FramePtr
 
   Free the iterator variable whose index is given by IterId in the stack frame
   pointed to by S0.
-
-IterCopy S0:FramePtr S1:ConstInt S2:PtrToGen S3:ConstInt
-
-  Copy iterator from stack frame S0 at offset S1 to the resumable frame
-  given by S2 at offset S3. Used for copying iterators in CreateAsync.
 
 
 19. Member instruction support

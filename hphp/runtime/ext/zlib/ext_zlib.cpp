@@ -730,8 +730,8 @@ class __SystemLib_ChunkedInflator {
     unsigned int maxfactor = 16;
     do {
       int buffer_length = chunk.length() * (1 << factor);
-      String buffer(SmallStringReserve, ReserveString);
-      char* raw = buffer.reserve(buffer_length).ptr;
+      String buffer(buffer_length, ReserveString);
+      char* raw = buffer.bufferSlice().ptr;
       m_zstream.next_out = (Bytef*) raw;
       m_zstream.avail_out = buffer_length;
 

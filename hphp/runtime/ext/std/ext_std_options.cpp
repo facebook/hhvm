@@ -229,15 +229,15 @@ static String HHVM_FUNCTION(get_current_user) {
   if (pwbuflen < 1) {
     return "";
   }
-  char *pwbuf = (char*)malloc(pwbuflen);
+  char *pwbuf = (char*)smart_malloc(pwbuflen);
   struct passwd pw;
   struct passwd *retpwptr = NULL;
   if (getpwuid_r(getuid(), &pw, pwbuf, pwbuflen, &retpwptr) != 0) {
-    free(pwbuf);
+    smart_free(pwbuf);
     return "";
   }
   String ret(pw.pw_name, CopyString);
-  free(pwbuf);
+  smart_free(pwbuf);
   return ret;
 }
 

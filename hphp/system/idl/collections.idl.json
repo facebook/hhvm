@@ -790,6 +790,22 @@
                     ]
                 },
                 {
+                    "name": "fromKeysOf",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Vector built from the keys of the specified container.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "container",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "fromArray",
                     "flags": [
                         "IsStatic"
@@ -834,6 +850,22 @@
                         "name": "iterable",
                         "type": "Variant",
                         "value": "null"
+                    }
+                ]
+            },
+            {
+                "name": "fromKeysOf",
+                "flags": [
+                    "IsStatic"
+                ],
+                "desc": "Returns a ImmVector built from the keys of the specified container.",
+                "return": {
+                    "type": "Object"
+                },
+                "args": [
+                    {
+                        "name": "container",
+                        "type": "Variant"
                     }
                 ]
             },

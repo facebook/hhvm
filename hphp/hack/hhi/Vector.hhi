@@ -216,6 +216,13 @@ final class Vector<Tv> implements MutableVector<Tv> {
 
   public static function fromItems(?Traversable<Tv> $items): Vector<Tv>;
 
+  /**
+   * Returns a Vector built from the keys of the specified container.
+   */
+  public static function fromKeysOf<Tk,Tv2>(
+    ?KeyedContainer<Tk,Tv2> $container
+  ): Vector<Tk>;
+
   public function __toString(): string;
 
   public function items(): Iterable<Tv>;

@@ -137,6 +137,11 @@ class BaseVector : public ExtCollectionObjectData {
   Variant php_lastValue();
   Variant php_lastKey();
 
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  static php_fromKeysOf(const Variant& container);
+
   void zip(BaseVector* bvec, const Variant& iterable);
   void keys(BaseVector* bvec);
 
@@ -453,6 +458,7 @@ class c_Vector : public BaseVector {
   Variant t_lastkey();
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
+  static Object ti_fromkeysof(const Variant& container);
   static Object ti_fromarray(const Variant& arr); // deprecated
   Object t_immutable();
 
@@ -580,6 +586,7 @@ class c_ImmVector : public BaseVector {
   }
 
   DECLARE_COLLECTION_MAGIC_METHODS();
+  static Object ti_fromkeysof(const Variant& container);
 
   DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
 

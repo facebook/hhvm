@@ -1,3 +1,5 @@
+
+values...
 object(HH\ImmVector)#2 (3) {
   [0]=>
   int(1)
@@ -6,6 +8,8 @@ object(HH\ImmVector)#2 (3) {
   [2]=>
   int(3)
 }
+
+toArray...
 array(3) {
   [0]=>
   int(1)
@@ -14,6 +18,8 @@ array(3) {
   [2]=>
   int(3)
 }
+
+toKeysArray...
 array(3) {
   [0]=>
   int(0)
@@ -22,6 +28,8 @@ array(3) {
   [2]=>
   int(2)
 }
+
+toValuesArray...
 array(3) {
   [0]=>
   int(1)
@@ -30,5 +38,56 @@ array(3) {
   [2]=>
   int(3)
 }
+
+toSet...
+object(HH\Set)#2 (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+toImmSet...
+object(HH\ImmSet)#2 (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+toVector...
+object(HH\Vector)#2 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+linearSearch...
 int(1)
 int(-1)
+
+fromKeysOf...
+---- HH\ImmVector ----
+int(0)
+int(1)
+int(2)
+----
+---- HH\ImmVector ----
+int(0)
+int(1)
+int(2)
+----
+---- HH\ImmVector ----
+string(1) "a"
+string(1) "b"
+----
+---- HH\ImmVector ----
+string(1) "a"
+string(1) "b"
+----
+---- HH\ImmVector ----
+int(4)
+int(5)
+int(6)
+----

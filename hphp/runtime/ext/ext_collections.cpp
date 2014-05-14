@@ -199,6 +199,29 @@ static std::array<TypedValue, 2> makeArgsFromVectorKeyAndValue(
   }};
 }
 
+template<class TVector>
+ALWAYS_INLINE
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_fromKeysOf(const Variant& container) {
+  if (container.isNull()) { return NEWOBJ(TVector)(); }
+
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a container (array or collection)"));
+    throw e;
+  }
+
+  ArrayIter iter(cellContainer);
+  auto* target = NEWOBJ(TVector)();
+  assert(!target->hasImmutableBuffer());
+  target->reserve(getContainerSize(cellContainer));
+  Object ret = target;
+  for (; iter; ++iter) { target->addRaw(iter.first()); }
+  return ret;
+}
+
 template<class TVector, class MakeArgs>
 ALWAYS_INLINE
 typename std::enable_if<
@@ -1173,6 +1196,14 @@ Object c_Vector::ti_fromitems(const Variant& iterable) {
     target->addRaw(iter.second());
   }
   return ret;
+}
+
+Object c_Vector::ti_fromkeysof(const Variant& container) {
+  return BaseVector::php_fromKeysOf<c_Vector>(container);
+}
+
+Object c_ImmVector::ti_fromkeysof(const Variant& container) {
+  return BaseVector::php_fromKeysOf<c_ImmVector>(container);
 }
 
 Object c_Vector::ti_fromarray(const Variant& arr) {

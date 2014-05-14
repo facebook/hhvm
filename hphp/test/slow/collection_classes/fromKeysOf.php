@@ -1,7 +1,7 @@
 <?hh
 
 function show_elems($fs) {
-  echo "----\n";
+  echo '---- ', get_class($fs), ' ----', "\n";
   foreach ($fs as $e) {
     var_dump($e);
   }
@@ -17,7 +17,17 @@ function set_from_keys() {
   show_elems(Set::fromKeysOf(Set {4, 5, 6}));
 }
 
+function vector_from_keys() {
+  echo "\nVector::fromKeysOf...\n";
+  show_elems(Vector::fromKeysOf(Vector {1, 2, 3}));
+  show_elems(Vector::fromKeysOf(['a', 'b', 'c']));
+  show_elems(Vector::fromKeysOf(Map {'a' => 1, 'b' => 2}));
+  show_elems(Vector::fromKeysOf(['a' => 1, 'b' => 2]));
+  show_elems(Vector::fromKeysOf(Set {4, 5, 6}));
+}
+
 function main() {
   set_from_keys();
+  vector_from_keys();
 }
 main();

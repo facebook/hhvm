@@ -1,5 +1,7 @@
 NEXT
- - Set improvements: Sets::fromKeysOf
+ - Map: reserve()
+ - Set: retain() and reserve()
+ - {Set|ImmSet|Vector|ImmVector}::fromKeysOf()
 
 "Kanye West"
   - Interfaces {Keyed}Container match arrays *and* collections, not iterables

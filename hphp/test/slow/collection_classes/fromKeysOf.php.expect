@@ -1,24 +1,49 @@
 
 Set::fromKeysOf...
-----
+---- HH\Set ----
 int(0)
 int(1)
 int(2)
 ----
-----
+---- HH\Set ----
 int(0)
 int(1)
 int(2)
 ----
-----
+---- HH\Set ----
 string(1) "a"
 string(1) "b"
 ----
-----
+---- HH\Set ----
 string(1) "a"
 string(1) "b"
 ----
+---- HH\Set ----
+int(4)
+int(5)
+int(6)
 ----
+
+Vector::fromKeysOf...
+---- HH\Vector ----
+int(0)
+int(1)
+int(2)
+----
+---- HH\Vector ----
+int(0)
+int(1)
+int(2)
+----
+---- HH\Vector ----
+string(1) "a"
+string(1) "b"
+----
+---- HH\Vector ----
+string(1) "a"
+string(1) "b"
+----
+---- HH\Vector ----
 int(4)
 int(5)
 int(6)

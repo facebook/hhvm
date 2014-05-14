@@ -1139,8 +1139,11 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   }
 
   if (retval != 0) {
-    errnum = sock->getError();
-    errstr = String(folly::errnoStr(sock->getError()).toStdString());
+    errnum = sock->getLastError();
+    errstr = String(folly::errnoStr(sock->getLastError()).toStdString());
+	std::string msg = "unable to connect to ";
+	msg += hosturl.getHostURL();
+	SOCKET_ERROR(sock, msg.c_str(), sock->getLastError());
     return false;
   }
 

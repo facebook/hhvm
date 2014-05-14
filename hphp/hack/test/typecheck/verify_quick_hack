@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-CHECKER_CMD=`realpath $1`
+CHECKER_CMD=`readlink -m $1`
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 

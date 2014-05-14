@@ -503,10 +503,17 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
 }
 
 Variant f_array_merge(int _argc, const Variant& array1,
+                      const Variant& array2 /* = null_variant */,
                       const Array& _argv /* = null_array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
   php_array_merge(ret, arr_array1);
+
+  if (UNLIKELY(_argc < 2)) return ret;
+
+  getCheckedArray(array2);
+  php_array_merge(ret, arr_array2);
+
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
@@ -520,12 +527,20 @@ Variant f_array_merge(int _argc, const Variant& array1,
 }
 
 Variant f_array_merge_recursive(int _argc, const Variant& array1,
+                                const Variant& array2 /* = null_variant */,
                                 const Array& _argv /* = null_array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
   PointerSet seen;
   php_array_merge_recursive(seen, false, ret, arr_array1);
   assert(seen.empty());
+
+  if (UNLIKELY(_argc < 2)) return ret;
+
+  getCheckedArray(array2);
+  php_array_merge_recursive(seen, false, ret, arr_array2);
+  assert(seen.empty());
+
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
@@ -582,10 +597,17 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
 }
 
 Variant f_array_replace(int _argc, const Variant& array1,
+                        const Variant& array2 /* = null_variant */,
                         const Array& _argv /* = null_array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
   php_array_replace(ret, arr_array1);
+
+  if (UNLIKELY(_argc < 2)) return ret;
+
+  getCheckedArray(array2);
+  php_array_replace(ret, arr_array2);
+
   for (ArrayIter iter(_argv); iter; ++iter) {
     const Variant& v = iter.secondRef();
     getCheckedArray(v);
@@ -595,12 +617,20 @@ Variant f_array_replace(int _argc, const Variant& array1,
 }
 
 Variant f_array_replace_recursive(int _argc, const Variant& array1,
+                                  const Variant& array2 /* = null_variant */,
                                   const Array& _argv /* = null_array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
   PointerSet seen;
   php_array_replace_recursive(seen, false, ret, arr_array1);
   assert(seen.empty());
+
+  if (UNLIKELY(_argc < 2)) return ret;
+
+  getCheckedArray(array2);
+  php_array_replace_recursive(seen, false, ret, arr_array2);
+  assert(seen.empty());
+
   for (ArrayIter iter(_argv); iter; ++iter) {
     const Variant& v = iter.secondRef();
     getCheckedArray(v);

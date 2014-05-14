@@ -389,6 +389,12 @@
                     "name": "array1",
                     "type": "Variant",
                     "desc": "Initial array to merge."
+                },
+                {
+                    "name": "array2",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "Second array to merge."
                 }
             ]
         },
@@ -408,6 +414,12 @@
                     "name": "array1",
                     "type": "Variant",
                     "desc": "Initial array to merge."
+                },
+                {
+                    "name": "array2",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "Second array to merge."
                 }
             ]
         },
@@ -427,6 +439,12 @@
                     "name": "array1",
                     "type": "Variant",
                     "desc": "The array in which elements are replaced."
+                },
+                {
+                    "name": "array2",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The first array from which to replace values."
                 }
             ]
         },
@@ -446,6 +464,12 @@
                     "name": "array1",
                     "type": "Variant",
                     "desc": "The array in which elements are replaced."
+                },
+                {
+                    "name": "array2",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The first array from which to replace values."
                 }
             ]
         },

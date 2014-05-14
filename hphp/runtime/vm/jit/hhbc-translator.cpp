@@ -3846,6 +3846,19 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
   }
   // If val is not an object, it still might pass the type constraint
   // if the constraint is a typedef. For now we just interp that case.
+  auto const typeName = tc.typeName();
+  if (valType <= Type::Arr && interface_supports_array(typeName)) {
+    return;
+  }
+  if (valType <= Type::Str && interface_supports_string(typeName)) {
+    return;
+  }
+  if (valType <= Type::Int && interface_supports_int(typeName)) {
+    return;
+  }
+  if (valType <= Type::Dbl && interface_supports_double(typeName)) {
+    return;
+  }
   if (!(valType <= Type::Obj)) {
     emitInterpOne(0);
     return;

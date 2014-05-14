@@ -811,7 +811,7 @@
             "args": [
                 {
                     "name": "str",
-                    "type": "String",
+                    "type": "Variant",
                     "desc": "The string being converted."
                 },
                 {

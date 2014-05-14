@@ -1353,13 +1353,19 @@ String f_htmlspecialchars_decode(const String& str,
                                 "UTF-8", false);
 }
 
-String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
+String f_htmlspecialchars(const Variant& str, int flags /* = k_ENT_COMPAT */,
                           const String& charset /* = "UTF-8" */,
                           bool double_encode /* = true */) {
+  // Warn if incorrect type supplied, rather than cast.
+  if (!str.isString()) {
+    raise_warning("htmlspecialchars() expects parameter 1 to be string");
+    return null_string;
+  }
+
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
-  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
+  return StringUtil::HtmlEncode(str.toString(), StringUtil::toQuoteStyleBitmask(flags),
                                 scharset, double_encode, false);
 }
 

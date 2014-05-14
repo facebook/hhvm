@@ -1647,11 +1647,27 @@ Object c_Map::t_addall(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  reserve(std::max(sz, size_t(m_size)));
+  reserve(m_size + sz); // presume minimum key collisions
   for (; iter; ++iter) {
     add(iter.second());
   }
+  compactIfNecessary(); // ... and compact back if that was incorrect
   return this;
+}
+
+void c_Map::t_reserve(const Variant& sz) {
+  if (UNLIKELY(!sz.isInteger())) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  int64_t intSz = sz.toInt64();
+  if (UNLIKELY(intSz < 0)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  reserve(intSz); // checks for intSz > MaxReserveSize
 }
 
 Object c_Map::t_clear() {
@@ -4869,6 +4885,21 @@ Object c_Set::t_add(const Variant& val) {
 Object c_Set::t_addall(const Variant& iterable) {
   addAll(iterable);
   return this;
+}
+
+void c_Set::t_reserve(const Variant& sz) {
+  if (UNLIKELY(!sz.isInteger())) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  int64_t intSz = sz.toInt64();
+  if (UNLIKELY(intSz < 0)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  reserve(intSz); // checks for intSz > MaxReserveSize
 }
 
 Object c_Set::t_clear() {

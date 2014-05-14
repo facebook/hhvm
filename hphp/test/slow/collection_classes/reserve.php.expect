@@ -1,0 +1,36 @@
+------------------------------------------------------------
+InvalidArgumentException: Parameter sz must be a non-negative integer
+Reserved at least 3 for a HH\Set of size 0
+InvalidOperationException: Set does not support reserving room for more than 1610612736 elements
+Reserved at least 100 for a HH\Set of size 0
+Reserved at least 15 for a HH\Set of size 0
+------------------------------------------------------------
+InvalidArgumentException: Parameter sz must be a non-negative integer
+Reserved at least 3 for a HH\Map of size 0
+InvalidOperationException: Map does not support reserving room for more than 1610612736 elements
+Reserved at least 100 for a HH\Map of size 0
+Reserved at least 15 for a HH\Map of size 0
+------------------------------------------------------------
+InvalidArgumentException: Parameter sz must be a non-negative integer
+Reserved at least 3 for a HH\Vector of size 0
+InvalidArgumentException: Parameter sz must be at most 4294967295; 9223372036854775807 passed
+Reserved at least 100 for a HH\Vector of size 0
+Reserved at least 15 for a HH\Vector of size 0
+------------------------------------------------------------
+InvalidArgumentException: Parameter sz must be a non-negative integer
+Reserved at least 3 for a HH\Set of size 6
+InvalidOperationException: Set does not support reserving room for more than 1610612736 elements
+Reserved at least 100 for a HH\Set of size 6
+Reserved at least 15 for a HH\Set of size 6
+------------------------------------------------------------
+InvalidArgumentException: Parameter sz must be a non-negative integer
+Reserved at least 3 for a HH\Map of size 6
+InvalidOperationException: Map does not support reserving room for more than 1610612736 elements
+Reserved at least 100 for a HH\Map of size 6
+Reserved at least 15 for a HH\Map of size 6
+------------------------------------------------------------
+InvalidArgumentException: Parameter sz must be a non-negative integer
+Reserved at least 3 for a HH\Vector of size 6
+InvalidArgumentException: Parameter sz must be at most 4294967295; 9223372036854775807 passed
+Reserved at least 100 for a HH\Vector of size 6
+Reserved at least 15 for a HH\Vector of size 6

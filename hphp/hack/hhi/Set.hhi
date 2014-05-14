@@ -115,6 +115,12 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function addAll(?Traversable<Tv> $it): Set<Tv>;
 
   /**
+   * Reserves enough memory to accomodate 'sz' elements. If 'sz' is less
+   * than or equal to the current capacity of this Set, does nothing.
+   */
+  public function reserve(int $sz): void;
+
+  /**
    * Removes the specified value from this Set and returns itself.
    */
   public function remove(Tv $v): Set<Tv>;

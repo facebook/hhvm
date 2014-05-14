@@ -176,8 +176,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function resize(int $sz, Tv $value): void;
 
   /**
-   * Reserve memory for 'sz' elements. If 'sz' is smaller than the current
-   * size of this Vector or 'sz' is zero, do nothing.
+   * Reserves enough memory to accomodate 'sz' elements. If 'sz' is less than or
+   * equal to the current capacity of this Vector, does nothing.
    */
   public function reserve(int $sz): void;
 

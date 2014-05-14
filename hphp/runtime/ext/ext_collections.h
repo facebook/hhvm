@@ -1235,6 +1235,7 @@ class c_Map : public BaseMap {
   void t___construct(const Variant& iterable = null_variant);
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
+  void t_reserve(const Variant& sz);
   Object t_clear();
   bool t_isempty();
   int64_t t_count();
@@ -1935,6 +1936,7 @@ class c_Set : public BaseSet {
   void t___construct(const Variant& iterable = null_variant);
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
+  void t_reserve(const Variant& sz);
   Object t_clear();
   bool t_isempty();
   int64_t t_count();

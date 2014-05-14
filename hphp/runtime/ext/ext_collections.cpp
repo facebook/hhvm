@@ -3059,11 +3059,12 @@ void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   m_data = data;
   m_hash = table;
   m_tableMask = newMask;
+  auto oldUsed DEBUG_ONLY = m_used;
   m_capAndUsed = (uint64_t(newCap) << 32) | uint64_t(m_size);
   initHash(table, newHashSize);
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
     while (isTombstone(frPos, oldData)) {
-      assert(frPos + 1 < m_used);
+      assert(frPos + 1 < oldUsed);
       ++frPos;
     }
     copyElm(oldData[frPos], data[toPos]);

@@ -969,8 +969,6 @@ bool Type::equivData(const Type& o) const {
     return m_data.dval == o.m_data.dval ||
            (std::isnan(m_data.dval) && std::isnan(o.m_data.dval));
   case DataTag::Obj:
-    assert(!m_data.dobj.whType);
-    assert(!o.m_data.dobj.whType);
     return m_data.dobj.type == o.m_data.dobj.type &&
            m_data.dobj.cls.same(o.m_data.dobj.cls);
   case DataTag::Cls:
@@ -1090,17 +1088,6 @@ bool Type::couldBeData(const Type& o) const {
 bool Type::operator==(const Type& o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
-
-  if (is_specialized_wait_handle(*this)) {
-    if (is_specialized_wait_handle(o)) {
-      return wait_handle_inner(*this) == wait_handle_inner(o);
-    }
-    return false;
-  }
-  if (is_specialized_wait_handle(o)) {
-    return false;
-  }
-
   if (m_bits != o.m_bits) return false;
   if (hasData() != o.hasData()) return false;
   if (!hasData() && !o.hasData()) return true;

@@ -4236,6 +4236,46 @@ BaseSet::php_zip(const Variant& iterable) {
   return obj;
 }
 
+ALWAYS_INLINE
+Object BaseSet::php_retain(const Variant& callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto size = m_size;
+  if (!size) { return this; }
+  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
+    int32_t version = m_version;
+    auto* e = iter_elm(ipos);
+    bool b = invokeAndCastToBool(ctx, 1, &e->data);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+    if (b) { continue; }
+    mutateAndBump();
+    version = m_version;
+    e = iter_elm(ipos);
+    int32_t* pp;
+    if (e->hasInt()) {
+      pp = findForInsert(e->data.m_data.num);
+    } else {
+      assert(e->hasStr());
+      auto const sd = e->data.m_data.pstr;
+      pp = findForInsert(sd, sd->hash());
+    }
+    eraseNoCompact(pp);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+  }
+  assert(m_size <= size);
+  compactIfNecessary();
+  return this;
+}
+
 template<class TSet>
 ALWAYS_INLINE
 typename std::enable_if<
@@ -4896,6 +4936,10 @@ Object c_Set::t_map(const Variant& callback) {
 
 Object c_Set::t_filter(const Variant& callback) {
   return BaseSet::php_filter<c_Set>(callback);
+}
+
+Object c_Set::t_retain(const Variant& callback) {
+  return php_retain(callback);
 }
 
 Object c_Set::t_zip(const Variant& iterable) {

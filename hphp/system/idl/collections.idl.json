@@ -3147,6 +3147,21 @@
                     ]
                 },
                 {
+                    "name": "retain",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this Set contains only values for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "zip",
                     "flags": [
                     ],

@@ -1826,6 +1826,8 @@ class BaseSet : public ExtCollectionObjectData {
     std::is_base_of<BaseSet, TSet>::value, Object>::type
   php_filter(const Variant& callback);
 
+  Object php_retain(const Variant& callback);
+
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
@@ -1948,6 +1950,7 @@ class c_Set : public BaseSet {
   Object t_getiterator();
   Object t_map(const Variant& callback);
   Object t_filter(const Variant& callback);
+  Object t_retain(const Variant& callback);
   Object t_zip(const Variant& iterable);
   Object t_take(const Variant& n);
   Object t_takewhile(const Variant& callback);

@@ -69,6 +69,13 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function values(): Vector<Tv>;
   public function map<Tu>((function(Tv): Tu) $callback): Set<Tu>;
   public function filter((function(Tv): bool) $callback): Set<Tv>;
+
+  /**
+   * Ensures that this Set contains only members for which
+   * the $callback returns a truthy result.
+   */
+  public function retain((function(Tv): bool) $callback): Set<Tv>;
+
   public function zip<Tu>(Traversable<Tu> $traversable): Set<Pair<Tv, Tu>>;
   public function take(int $n): Set<Tv>;
   public function takeWhile((function(Tv): bool) $fn): Set<Tv>;

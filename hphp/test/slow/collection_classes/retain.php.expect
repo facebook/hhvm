@@ -22,3 +22,27 @@ HH\Map[
 a => 1
 c => 3
 ]
+******** Set ********
+callback(a)
+callback(b)
+callback(c)
+callback(d)
+========
+bool(true)
+HH\Set[
+a => a
+b => b
+c => c
+d => d
+]
+========
+callback(a)
+callback(b)
+callback(c)
+callback(d)
+========
+bool(true)
+HH\Set[
+a => a
+c => c
+]

@@ -285,13 +285,16 @@ let parse_build_args () =
   let test_dir = ref None in
   let grade = ref true in
   let list_classes = ref false in
+  let clean = ref false in
   (* todo: for now better to default to true here, but this is temporary! *)
-  let clean = ref true in
+  let clean_before_build = ref true in
   let run_scripts = ref true in
   let options = [
     "--steps", Arg.String (fun x ->
       steps := Some (Str.split (Str.regexp ",") x)),
     " comma-separated list of build steps to run";
+    "--no-run-scripts", Arg.Clear run_scripts,
+    " don't run unported arc build scripts";
     "--serial", Arg.Set serial,
     " run without parallel worker processes";
     "--test-dir", Arg.String (fun x -> test_dir := Some x),
@@ -301,11 +304,11 @@ let parse_build_args () =
     "--list-classes", Arg.Set list_classes,
     " generate files listing subclasses used in analysis";
     "--clean", Arg.Set clean,
-    " erase all previously generated files before building";
-    "--no-clean", Arg.Clear clean,
-    " guess what";
-    "--no-run-scripts", Arg.Clear run_scripts,
-    " don't run unported arc build scripts";
+    " erase all previously generated files";
+    "--clean-before-build", Arg.Set clean_before_build,
+    " erase previously generated files before building (default)";
+    "--no-clean-before-build", Arg.Clear clean_before_build,
+    " do not erase previously generated files before building";
     "--verbose", Arg.Set verbose,
     " guess what";
   ] in
@@ -318,12 +321,13 @@ let parse_build_args () =
   CBuild { ServerMsg.
            root = root;
            steps = !steps;
+           run_scripts = !run_scripts;
            serial = !serial;
            test_dir = !test_dir;
            grade = !grade;
            list_classes = !list_classes;
            clean = !clean;
-           run_scripts = !run_scripts;
+           clean_before_build = !clean_before_build;
            verbose = !verbose;
          }
 

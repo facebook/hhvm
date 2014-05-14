@@ -23,15 +23,16 @@ type build_opts = {
   root: Path.path;
   steps: string list option; (* steps for hack build to run.
                                  None means 'all' *)
+  run_scripts: bool; (* when true, run remaining arc build steps
+                     that we haven't figured out how to port yet*)
   serial: bool; (* when true, don't use parallel workers *)
   test_dir: string option; (* test dir to generate into *)
   grade: bool; (* when true, diff test output against www and print
                   some stats *)
   list_classes: bool; (* when true, generate class list files for
                          traversed classes *)
-  clean: bool; (* when true, do a clean build *)
-  run_scripts: bool; (* when true, run remaining arc build steps
-                     that we haven't figured out how to port yet*)
+  clean_before_build: bool; (* when true, do a clean build *)
+  clean: bool; (* when true just clean all generated files *)
   verbose: bool;
 }
 

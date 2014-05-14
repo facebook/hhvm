@@ -520,6 +520,15 @@ static void CopyServerInfo(Array& server,
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
   server.set(s_SERVER_ADMIN, empty_string);
   server.set(s_SERVER_SIGNATURE, empty_string);
+
+  // Do this last so it can overwrite all the previous settings
+  HeaderMap transportParams;
+  transport->getTransportParams(transportParams);
+  for (auto const& header : transportParams) {
+    String key(header.first);
+    String value(header.second.back());
+    server.set(key, value);
+  }
 }
 
 static void CopyRemoteInfo(Array& server, Transport *transport) {

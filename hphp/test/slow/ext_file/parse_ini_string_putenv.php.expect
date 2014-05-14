@@ -1,0 +1,5 @@
+bool(false)
+array(1) {
+  ["foo"]=>
+  string(4) "derp"
+}

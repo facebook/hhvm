@@ -402,9 +402,9 @@ void IniSetting::ParserCallback::onVar(std::string &result,
     result = curval;
     return;
   }
-  char *value = getenv(name.data());
-  if (value) {
-    result = std::string(value);
+  String value = g_context->getenv(name);
+  if (!value.isNull()) {
+    result = value.toCppString();
     return;
   }
   result.clear();

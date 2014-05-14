@@ -298,7 +298,7 @@ Variant HHVM_FUNCTION(get_parent_class,
     return false;
   }
 
-  const Class* cls = Unit::lookupClass(class_name.toString().get());
+  const Class* cls = Unit::loadClass(class_name.toString().get());
   if (cls) {
     auto parentClass = cls->parentStr();
     if (!parentClass.empty()) {

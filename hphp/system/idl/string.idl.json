@@ -631,6 +631,7 @@
             "name": "substr",
             "desc": "Returns the portion of string specified by the start and length parameters.",
             "flags": [
+                "ParamCoerceModeNull"
             ],
             "return": {
                 "type": "Variant",

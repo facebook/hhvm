@@ -1,0 +1,2 @@
+Warning: substr() expects parameter 1 to be string, array given in %s/test/slow/ext_string/substr_parammode.php on line 2
+NULL

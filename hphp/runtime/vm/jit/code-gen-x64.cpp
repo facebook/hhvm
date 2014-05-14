@@ -6115,6 +6115,36 @@ void CodeGenerator::cgConjure(IRInstruction* inst) {
   m_as.ud2();
 }
 
+void CodeGenerator::cgProfileStr(IRInstruction* inst) {
+  TargetProfile<StrProfile> profile(m_unit.context(), inst->marker(),
+                                    inst->extra<ProfileStrData>()->key);
+  assert(profile.profiling());
+  auto const ch = profile.handle();
+
+  auto ptrReg = srcLoc(0).reg();
+  emitCmpTVType(m_as, KindOfStaticString, ptrReg[TVOFF(m_type)]);
+  ifThenElse(
+    m_as, CC_E,
+    [&](Asm& a) { // m_type == KindOfStaticString
+      a.incl(rVmTl[ch + offsetof(StrProfile, staticStr)]);
+    },
+    [&](Asm& a) { // m_type == KindOfString
+      a.loadq(ptrReg[TVOFF(m_data)], m_rScratch);
+      a.cmpl(StaticValue, m_rScratch[FAST_REFCOUNT_OFFSET]);
+
+      ifThenElse(
+        a, CC_E,
+        [&](Asm& a) { // _count == StaticValue
+          a.incl(rVmTl[ch + offsetof(StrProfile, strStatic)]);
+        },
+        [&](Asm& a) {
+          a.incl(rVmTl[ch + offsetof(StrProfile, str)]);
+        }
+      );
+    }
+  );
+}
+
 void CodeGenerator::print() const {
   JIT::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
 }

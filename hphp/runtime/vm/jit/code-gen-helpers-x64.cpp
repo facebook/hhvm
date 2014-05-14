@@ -349,7 +349,6 @@ void emitTestSurpriseFlags(Asm& a) {
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
-                                 bool inTracelet, FixupMap& fixupMap,
                                  Fixup fixup) {
   Asm a { mainCode };
   Asm astubs { stubsCode };
@@ -359,15 +358,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 
   astubs.  movq  (rVmFp, argNumToRegName[0]);
   emitCall(astubs, tx->uniqueStubs.functionEnterHelper);
-  if (inTracelet) {
-    fixupMap.recordSyncPoint(stubsCode.frontier(),
-                             fixup.m_pcOffset, fixup.m_spOffset);
-  } else {
-    // If we're being called while generating a func prologue, we
-    // have to record the fixup directly in the fixup map instead of
-    // going through the pending fixup path like normal.
-    fixupMap.recordFixup(stubsCode.frontier(), fixup);
-  }
+  mcg->recordSyncPoint(stubsCode.frontier(),
+                       fixup.m_pcOffset, fixup.m_spOffset);
   astubs.  jmp   (mainCode.frontier());
 }
 

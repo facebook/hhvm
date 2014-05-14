@@ -253,7 +253,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  Mov  (argReg(1), i);
         auto fixupAddr = emitCall(a,
           CppCall::direct(JIT::raiseMissingArgument));
-        mcg->fixupMap().recordFixup(fixupAddr, fixup);
+        mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
         break;
       }
     }
@@ -262,8 +262,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.stubs(), false,
-                              mcg->fixupMap(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.stubs(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams
@@ -388,10 +387,9 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
     a.   Mov   (argReg(0), rStashedAR);
     auto fixupAddr = emitCall(a, CppCall::direct(shuffleArgsForMagicCall));
     if (RuntimeOption::HHProfServerEnabled) {
-      mcg->fixupMap().recordFixup(
-        fixupAddr,
-        Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())
-      );
+      mcg->recordSyncPoint(fixupAddr,
+                           skFuncBody.offset() - func->base(),
+                           func->numSlotsInFrame());
     }
 
     if (nPassed == 2) {

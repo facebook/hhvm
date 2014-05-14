@@ -4505,7 +4505,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
 
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.frontier(), pcOff,
          stackOff);
-  m_mcg->fixupMap().recordSyncPoint(as.frontier(), pcOff, stackOff);
+  m_mcg->recordSyncPoint(as.frontier(), pcOff, stackOff);
 }
 
 void CodeGenerator::cgLdMIStateAddr(IRInstruction* inst) {

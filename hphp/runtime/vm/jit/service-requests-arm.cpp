@@ -157,7 +157,7 @@ int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
 
   Offset pcOffset = 0;
   Offset stackOff = func->numLocals();
-  mcg->fixupMap().recordSyncPoint(syncPoint, pcOffset, stackOff);
+  mcg->recordSyncPoint(syncPoint, pcOffset, stackOff);
 
   int nLocalCells = func->numSlotsInFrame();
   a.  Ldr  (rVmFp, rVmFp[AROFF(m_sfp)]);
@@ -178,8 +178,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
     a.    Str  (rAsm, rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
 
     emitRegGetsRegPlusImm(a, rVmFp, rVmSp, cellsToBytes(numArgs));
-    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, mcg->fixupMap(),
-                                Fixup(0, numArgs));
+    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals other than
     // the arguments passed.
 

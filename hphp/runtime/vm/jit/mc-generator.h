@@ -73,6 +73,14 @@ struct FreeStubList {
   void push(TCA stub);
 };
 
+struct PendingFixup {
+  TCA m_tca;
+  Fixup m_fixup;
+  PendingFixup() { }
+  PendingFixup(TCA tca, Fixup fixup) :
+    m_tca(tca), m_fixup(fixup) { }
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -103,6 +111,9 @@ public:
    */
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
+  void processPendingFixups();
+  void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
+
   DataBlock& globalData() { return code.data(); }
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
   BackEnd& backEnd() { return *m_backEnd; }
@@ -295,6 +306,7 @@ private:
   uint64_t           m_numHHIRTrans;
   FixupMap           m_fixupMap;
   UnwindInfoHandle   m_unwindRegistrar;
+  std::vector<PendingFixup> m_pendingFixups;
   std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
   CatchTraceMap      m_catchTraceMap;
   std::vector<TransBCMapping> m_bcMap;

@@ -69,7 +69,6 @@ void emitRegRegMove(vixl::MacroAssembler& a,
  * Check the surprise flags. If surprised, call functionEnterHelper.
  */
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
-                                 bool inTracelet, JIT::FixupMap& fixupMap,
                                  JIT::Fixup fixup);
 
 /*

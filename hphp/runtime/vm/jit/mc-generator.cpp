@@ -639,9 +639,9 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
 
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
-  if (((uintptr_t)code.main().frontier() & mcg->backEnd().cacheLineMask()) >=
-      (mcg->backEnd().cacheLineSize() / 2)) {
-    mcg->backEnd().moveToAlign(code.main(), MoveToAlignFlags::kCacheLineAlign);
+  if (((uintptr_t)code.main().frontier() & backEnd().cacheLineMask()) >=
+      (backEnd().cacheLineSize() / 2)) {
+    backEnd().moveToAlign(code.main(), MoveToAlignFlags::kCacheLineAlign);
   }
 
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
@@ -651,8 +651,12 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   TCA stubStart = code.stubs().frontier();
 
   auto const skFuncBody = [&] {
-    return mcg->backEnd().emitFuncPrologue(code.main(), code.stubs(), func,
-                                           funcIsMagic, nPassed, start, aStart);
+    assert(m_pendingFixups.empty());
+    auto ret = backEnd().emitFuncPrologue(code.main(), code.stubs(), func,
+                                          funcIsMagic, nPassed,
+                                          start, aStart);
+    processPendingFixups();
+    return ret;
   }();
 
   assert(backEnd().funcPrologueHasGuard(start, func));
@@ -1647,6 +1651,22 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 }
 
 void
+MCGenerator::recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff) {
+  m_pendingFixups.push_back(PendingFixup(frontier, Fixup(pcOff, spOff)));
+}
+
+void
+MCGenerator::processPendingFixups() {
+  for (uint i = 0; i < m_pendingFixups.size(); i++) {
+    TCA tca = m_pendingFixups[i].m_tca;
+    assert(isValidCodeAddress(tca));
+    m_fixupMap.recordFixup(tca, m_pendingFixups[i].m_fixup);
+  }
+  m_pendingFixups.clear();
+}
+
+
+void
 MCGenerator::translateWork(const TranslArgs& args) {
   Timer _t(Timer::translate);
   auto sk = args.m_sk;
@@ -1667,7 +1687,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     undoA.undo();
     undoAstubs.undo();
     undoGlobalData.undo();
-    m_fixupMap.clearPendingFixups();
+    m_pendingFixups.clear();
     m_pendingCatchTraces.clear();
     m_bcMap.clear();
     srcRec.clearInProgressTailJumps();
@@ -1676,7 +1696,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
   auto assertCleanState = [&] {
     assert(code.main().frontier() == start);
     assert(code.stubs().frontier() == stubStart);
-    assert(m_fixupMap.pendingFixupsEmpty());
+    assert(m_pendingFixups.empty());
     assert(m_pendingCatchTraces.empty());
     assert(m_bcMap.empty());
     assert(srcRec.inProgressTailJumps().empty());
@@ -1840,7 +1860,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     // Fall through.
   }
 
-  m_fixupMap.processPendingFixups();
+  processPendingFixups();
   processPendingCatchTraces();
 
   TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),

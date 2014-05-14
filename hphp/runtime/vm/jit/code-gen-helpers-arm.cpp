@@ -119,7 +119,6 @@ void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
-                                 bool inTracelet, JIT::FixupMap& fixupMap,
                                  JIT::Fixup fixup) {
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler astubs { stubsCode };
@@ -131,15 +130,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 
   auto fixupAddr =
     emitCallWithinTC(astubs, tx->uniqueStubs.functionEnterHelper);
-  if (inTracelet) {
-    fixupMap.recordSyncPoint(fixupAddr,
-                             fixup.m_pcOffset, fixup.m_spOffset);
-  } else {
-    // If we're being called while generating a func prologue, we
-    // have to record the fixup directly in the fixup map instead of
-    // going through the pending fixup path like normal.
-    fixupMap.recordFixup(fixupAddr, fixup);
-  }
+  mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
   mcg->backEnd().emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
 }
 

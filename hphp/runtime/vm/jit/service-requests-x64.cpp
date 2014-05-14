@@ -147,7 +147,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   Offset pcOffset = 0;  // NativeImpl is the only instruction in the func
   Offset stackOff = func->numLocals(); // Builtin stubs have no
                                        // non-arg locals
-  mcg->fixupMap().recordSyncPoint(mainCode.frontier(), pcOffset, stackOff);
+  mcg->recordSyncPoint(mainCode.frontier(), pcOffset, stackOff);
 
   /*
    * The native implementation already put the return value on the
@@ -316,8 +316,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
     assert(funcd->numIterators() == 0);
     Asm a { mainCode };
     emitLea(a, rVmSp[cellsToBytes(numArgs)], rVmFp);
-    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, mcg->fixupMap(),
-                                Fixup(0, numArgs));
+    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals
     // other than the arguments passed.
     auto retval = emitNativeImpl(mainCode, funcd);

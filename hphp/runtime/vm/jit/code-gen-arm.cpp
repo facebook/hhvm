@@ -614,7 +614,7 @@ void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
                                             TCA tca) {
   auto stackOff = m_curInst->marker().spOff();
   auto pcOff = m_curInst->marker().bcOff() - m_curInst->marker().func()->base();
-  m_mcg->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
+  m_mcg->recordSyncPoint(tca, pcOff, stackOff);
 }
 
 //////////////////////////////////////////////////////////////////////

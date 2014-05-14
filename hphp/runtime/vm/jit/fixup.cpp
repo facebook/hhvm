@@ -50,11 +50,6 @@ FixupMap::getFrameRegs(const ActRec* ar, const ActRec* prevAr,
 }
 
 void
-FixupMap::recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff) {
-  m_pendingFixups.push_back(PendingFixup(frontier, Fixup(pcOff, spOff)));
-}
-
-void
 FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
   recordIndirectFixup(frontier, IndirectFixup((2 + dwordsPushed) * 8));
 }
@@ -184,16 +179,6 @@ FixupMap::fixup(ExecutionContext* ec) const {
     DECLARE_FRAME_POINTER(framePtr);
     fixupWork(ec, framePtr);
   }
-}
-
-void
-FixupMap::processPendingFixups() {
-  for (uint i = 0; i < m_pendingFixups.size(); i++) {
-    TCA tca = m_pendingFixups[i].m_tca;
-    assert(mcg->isValidCodeAddress(tca));
-    recordFixup(tca, m_pendingFixups[i].m_fixup);
-  }
-  m_pendingFixups.clear();
 }
 
 /* This is somewhat hacky. It decides which helpers/builtins should

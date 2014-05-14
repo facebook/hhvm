@@ -51,6 +51,7 @@ bool mayHaveData(trep bits) {
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
+  case BRef:
     return true;
 
   case BBottom:
@@ -62,7 +63,6 @@ bool mayHaveData(trep bits) {
   case BSArrE:
   case BCArrE:
   case BRes:
-  case BRef:
   case BNull:
   case BNum:
   case BBool:
@@ -784,6 +784,9 @@ Type::Type(const Type& o) noexcept
   case DataTag::Dbl:    m_data.dval = o.m_data.dval; return;
   case DataTag::Obj:    new (&m_data.dobj) DObj(o.m_data.dobj); return;
   case DataTag::Cls:    new (&m_data.dcls) DCls(o.m_data.dcls); return;
+  case DataTag::RefInner:
+    new (&m_data.inner) copy_ptr<Type>(o.m_data.inner);
+    return;
   case DataTag::ArrPacked:
     new (&m_data.apacked) copy_ptr<DArrPacked>(o.m_data.apacked);
     return;
@@ -816,6 +819,9 @@ Type::Type(Type&& o) noexcept
   case DataTag::Dbl:    m_data.dval = o.m_data.dval; return;
   case DataTag::Obj:    new (&m_data.dobj) DObj(move(o.m_data.dobj)); return;
   case DataTag::Cls:    new (&m_data.dcls) DCls(move(o.m_data.dcls)); return;
+  case DataTag::RefInner:
+    new (&m_data.inner) copy_ptr<Type>(move(o.m_data.inner));
+    return;
   case DataTag::ArrPacked:
     new (&m_data.apacked) copy_ptr<DArrPacked>(move(o.m_data.apacked));
     return;
@@ -856,6 +862,9 @@ Type::~Type() noexcept {
   case DataTag::ArrVal:
   case DataTag::Int:
   case DataTag::Dbl:
+    return;
+  case DataTag::RefInner:
+    m_data.inner.~copy_ptr<Type>();
     return;
   case DataTag::Obj:
     m_data.dobj.~DObj();
@@ -906,6 +915,7 @@ Ret Type::dj2nd(const Type& o, DJHelperFn<Ret,T,Function> f) const {
   case DataTag::Int:        return f();
   case DataTag::Dbl:        return f();
   case DataTag::Cls:        return f();
+  case DataTag::RefInner:   return f();
   case DataTag::ArrVal:     return f(o.m_data.aval);
   case DataTag::ArrPacked:  return f(*o.m_data.apacked);
   case DataTag::ArrPackedN: return f(*o.m_data.apackedn);
@@ -935,6 +945,7 @@ Type::disjointDataFn(const Type& o, Function f) const {
   case DataTag::Int:        return f();
   case DataTag::Dbl:        return f();
   case DataTag::Cls:        return f();
+  case DataTag::RefInner:   return f();
   case DataTag::ArrVal:     return dj2nd(o, djbind<R>(f, m_data.aval));
   case DataTag::ArrPacked:  return dj2nd(o, djbind<R>(f, *m_data.apacked));
   case DataTag::ArrPackedN: return dj2nd(o, djbind<R>(f, *m_data.apackedn));
@@ -974,6 +985,8 @@ bool Type::equivData(const Type& o) const {
   case DataTag::Cls:
     return m_data.dcls.type == o.m_data.dcls.type &&
            m_data.dcls.cls.same(o.m_data.dcls.cls);
+  case DataTag::RefInner:
+    return *m_data.inner == *o.m_data.inner;
   case DataTag::ArrPacked:
     return m_data.apacked->elems == o.m_data.apacked->elems;
   case DataTag::ArrPackedN:
@@ -1019,6 +1032,8 @@ bool Type::subtypeData(const Type& o) const {
   case DataTag::Dbl:
   case DataTag::None:
     return equivData(o);
+  case DataTag::RefInner:
+    return m_data.inner->subtypeOf(*o.m_data.inner);
   case DataTag::ArrPacked:
     return subtypePacked(*m_data.apacked, *o.m_data.apacked);
   case DataTag::ArrPackedN:
@@ -1064,6 +1079,8 @@ bool Type::couldBeData(const Type& o) const {
                                      o.m_data.dcls.type);
     }
     return false;
+  case DataTag::RefInner:
+    return m_data.inner->couldBe(*o.m_data.inner);
   case DataTag::ArrVal:
     return m_data.aval == o.m_data.aval;
   case DataTag::Str:
@@ -1196,6 +1213,10 @@ bool Type::checkInvariants() const {
   case DataTag::Str:    assert(m_data.sval->isStatic()); break;
   case DataTag::Dbl:    break;
   case DataTag::Int:    break;
+  case DataTag::RefInner:
+    m_data.inner->checkInvariants();
+    assert(!m_data.inner->couldBe(TRef));
+    break;
   case DataTag::Cls:    break;
   case DataTag::Obj:
     if (auto t = m_data.dobj.whType.get()) {
@@ -1327,6 +1348,19 @@ Type clsExact(res::Class val) {
   return r;
 }
 
+
+Type ref_to(Type t) {
+  assert(t.subtypeOf(TInitCell));
+  auto r = Type{BRef};
+  new (&r.m_data.inner) copy_ptr<Type> {make_copy_ptr<Type>(std::move(t))};
+  r.m_dataTag = DataTag::RefInner;
+  return r;
+}
+
+bool is_ref_with_inner(const Type& t) {
+  return t.m_dataTag == DataTag::RefInner;
+}
+
 bool is_specialized_array(const Type& t) {
   switch (t.m_dataTag) {
   case DataTag::None:
@@ -1335,6 +1369,7 @@ bool is_specialized_array(const Type& t) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::RefInner:
     return false;
   case DataTag::ArrVal:
   case DataTag::ArrPacked:
@@ -1498,6 +1533,7 @@ folly::Optional<Cell> tv(Type t) {
       // we check if a whole specialized array is constants, and if it
       // can't be empty.
       break;
+    case DataTag::RefInner:
     case DataTag::ArrPackedN:
     case DataTag::ArrMapN:
     case DataTag::Obj:
@@ -1631,6 +1667,7 @@ Type Type::unionArr(const Type& a, const Type& b) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::RefInner:
     not_reached();
   case DataTag::ArrVal:
     {
@@ -1734,6 +1771,10 @@ Type union_of(Type a, Type b) {
       // Flip args and do the above.
       return union_of(b, a);
     }
+  }
+
+  if (is_ref_with_inner(a) && is_ref_with_inner(b)) {
+    return ref_to(union_of(*a.m_data.inner, *b.m_data.inner));
   }
 
 #define X(y) if (a.subtypeOf(y) && b.subtypeOf(y)) return y;
@@ -1946,6 +1987,7 @@ Type array_elem(const Type& arr, const Type& undisectedKey) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::RefInner:
       not_reached();
 
     case DataTag::None:
@@ -2045,6 +2087,7 @@ Type arrayN_set(Type arr, const Type& undisectedKey, const Type& val) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::RefInner:
     not_reached();
 
   case DataTag::None:
@@ -2161,6 +2204,7 @@ std::pair<Type,Type> arrayN_newelem_key(const Type& arr, const Type& val) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::RefInner:
     not_reached();
 
   case DataTag::None:
@@ -2253,6 +2297,7 @@ std::pair<Type,Type> iter_types(const Type& iterable) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::RefInner:
     always_assert(0);
   case DataTag::ArrVal:
     {
@@ -2287,6 +2332,7 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::RefInner:
     case DataTag::ArrVal:
     case DataTag::ArrStruct:
     case DataTag::ArrMapN:

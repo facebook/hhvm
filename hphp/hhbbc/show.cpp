@@ -485,6 +485,7 @@ std::string show(Type t) {
     return ret;
   case DataTag::Obj:
   case DataTag::Cls:
+  case DataTag::RefInner:
   case DataTag::ArrPacked:
   case DataTag::ArrPackedN:
   case DataTag::ArrStruct:
@@ -526,6 +527,9 @@ std::string show(Type t) {
       folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
       break;
     }
+    break;
+  case DataTag::RefInner:
+    folly::toAppend("(", show(*t.m_data.inner), ")", &ret);
     break;
   case DataTag::None:
     break;

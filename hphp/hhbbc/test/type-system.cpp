@@ -749,6 +749,29 @@ TEST(Type, OptCouldBe) {
   }
 }
 
+TEST(Type, Ref) {
+  EXPECT_TRUE(TRef == TRef);
+  EXPECT_TRUE(TRef != ref_to(TInt));
+  EXPECT_TRUE(ref_to(TInt) == ref_to(TInt));
+  EXPECT_TRUE(ref_to(TInt) != ref_to(TOptInt));
+
+  EXPECT_TRUE(TRef.couldBe(ref_to(TInt)));
+  EXPECT_TRUE(ref_to(TInt).couldBe(TRef));
+  EXPECT_TRUE(!ref_to(TInt).couldBe(ref_to(TObj)));
+  EXPECT_TRUE(ref_to(TOptInt).couldBe(ref_to(TInt)));
+
+  EXPECT_TRUE(!TRef.subtypeOf(ref_to(TInt)));
+  EXPECT_TRUE(ref_to(TInt).subtypeOf(TRef));
+  EXPECT_TRUE(ref_to(TInt).subtypeOf(ref_to(TOptInt)));
+  EXPECT_TRUE(!ref_to(TOptInt).subtypeOf(ref_to(TInt)));
+  EXPECT_TRUE(!ref_to(TObj).subtypeOf(ref_to(TInt)));
+  EXPECT_TRUE(!ref_to(TInt).subtypeOf(ref_to(TObj)));
+
+  EXPECT_TRUE(union_of(TRef, ref_to(TInt)) == TRef);
+  EXPECT_TRUE(union_of(ref_to(TInt), ref_to(TObj)) == ref_to(TInitCell));
+  EXPECT_TRUE(union_of(ref_to(TInitNull), ref_to(TObj)) == ref_to(TOptObj));
+}
+
 TEST(Type, SpecificExamples) {
   // Random examples to stress option types, values, etc:
 

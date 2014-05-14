@@ -251,6 +251,7 @@ enum class DataTag : uint8_t {
   Int,
   Dbl,
   Cls,
+  RefInner,
   ArrVal,
   ArrPacked,
   ArrPackedN,
@@ -354,6 +355,7 @@ private:
   friend Type wait_handle(const Index&, Type);
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array(const Type&);
+  friend bool is_ref_with_inner(const Type&);
   friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
   friend Type ival(int64_t);
@@ -363,6 +365,7 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
+  friend Type ref_to(Type);
   friend Type arr_packed(std::vector<Type>);
   friend Type sarr_packed(std::vector<Type>);
   friend Type carr_packed(std::vector<Type>);
@@ -405,6 +408,7 @@ private:
     SArray aval;
     DObj dobj;
     DCls dcls;
+    copy_ptr<Type> inner;
     copy_ptr<DArrPacked> apacked;
     copy_ptr<DArrPackedN> apackedn;
     copy_ptr<DArrStruct> astruct;

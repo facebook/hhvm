@@ -5178,6 +5178,46 @@
             "type": "Int64"
         },
         {
+            "name": "T_XHP_ATTRIBUTE",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_CATEGORY",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_CATEGORY_LABEL",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_CHILDREN",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_ENUM",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_LABEL",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_REQUIRED",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_TAG_LT",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_TAG_GT",
+            "type": "Int64"
+        },
+        {
+            "name": "T_XHP_TEXT",
+            "type": "Int64"
+        },
+        {
             "name": "T_XOR_EQUAL",
             "type": "Int64"
         },

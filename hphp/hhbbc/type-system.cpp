@@ -1775,6 +1775,7 @@ Type union_of(Type a, Type b) {
   X(TOptSArr)
   X(TOptCArr)
   X(TOptArr)
+  X(TOptObj)
 
   X(TInitPrim)
   X(TPrim)

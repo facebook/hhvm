@@ -19,37 +19,37 @@ if (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
 endif (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
 
 find_path (LIBELF_INCLUDE_DIRS
-    NAMES
-      libelf.h
-    PATHS
-      /usr/include
-      /usr/include/libelf
-      /usr/local/include
-      /usr/local/include/libelf
-      /opt/local/include
-      /opt/local/include/libelf
-      /sw/include
-      /sw/include/libelf
-      ENV CPATH)
+  NAMES
+    libelf.h
+  PATHS
+    /usr/include
+    /usr/include/libelf
+    /usr/local/include
+    /usr/local/include/libelf
+    /opt/local/include
+    /opt/local/include/libelf
+    /sw/include
+    /sw/include/libelf
+    ENV CPATH)
 
 find_library (LIBELF_LIBRARIES
-    NAMES
-      elf
-    PATHS
-      /usr/lib
-      /usr/local/lib
-      /opt/local/lib
-      /sw/lib
-      ENV LIBRARY_PATH
-      ENV LD_LIBRARY_PATH)
+  NAMES
+    elf
+  PATHS
+    /usr/lib
+    /usr/local/lib
+    /opt/local/lib
+    /sw/lib
+    ENV LIBRARY_PATH
+    ENV LD_LIBRARY_PATH)
 
 include (FindPackageHandleStandardArgs)
 
 
 # handle the QUIETLY and REQUIRED arguments and set LIBELF_FOUND to TRUE if all listed variables are TRUE
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibElf DEFAULT_MSG
-    LIBELF_LIBRARIES
-    LIBELF_INCLUDE_DIRS)
+  LIBELF_LIBRARIES
+  LIBELF_INCLUDE_DIRS)
 
 SET(CMAKE_REQUIRED_LIBRARIES elf)
 INCLUDE(CheckCXXSourceCompiles)

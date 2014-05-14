@@ -6,8 +6,8 @@
 
 set(LibEvent_EXTRA_PREFIXES /usr/local /opt/local "$ENV{HOME}")
 foreach(prefix ${LibEvent_EXTRA_PREFIXES})
-	list(APPEND LibEvent_INCLUDE_PATHS "${prefix}/include")
-	list(APPEND LibEvent_LIB_PATHS "${prefix}/lib")
+  list(APPEND LibEvent_INCLUDE_PATHS "${prefix}/include")
+  list(APPEND LibEvent_LIB_PATHS "${prefix}/lib")
 endforeach()
 
 find_path(LIBEVENT_INCLUDE_DIR event.h PATHS ${LibEvent_INCLUDE_PATHS})
@@ -25,10 +25,10 @@ if (LibEvent_FOUND)
     message(STATUS "Found libevent: ${LIBEVENT_LIB}")
   endif ()
 else ()
-    if (LibEvent_FIND_REQUIRED)
-        message(FATAL_ERROR "Could NOT find libevent.")
-    endif ()
-    message(STATUS "libevent NOT found.")
+  if (LibEvent_FIND_REQUIRED)
+    message(FATAL_ERROR "Could NOT find libevent.")
+  endif ()
+  message(STATUS "libevent NOT found.")
 endif ()
 
 mark_as_advanced(

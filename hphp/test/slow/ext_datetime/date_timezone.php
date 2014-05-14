@@ -46,5 +46,11 @@ var_dump($transitions[0]['offset']);
 var_dump($transitions[0]['isdst']);
 var_dump($transitions[0]['abbr']);
 
-var_dump((bool)timezone_version_get());
+$tz = timezone_open("EDT");
+var_dump(timezone_name_get($tz));
+$tz = timezone_open("PST");
+var_dump(timezone_name_get($tz));
+$tz = timezone_open("CHAST");
+var_dump(timezone_name_get($tz));
 
+var_dump((bool)timezone_version_get());

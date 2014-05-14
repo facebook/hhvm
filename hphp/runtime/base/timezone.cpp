@@ -95,6 +95,13 @@ TimeZoneInfo TimeZone::GetTimeZoneInfo(char* name, const timelib_tzdb* db) {
   }
 
   TimeZoneInfo tzi(timelib_parse_tzfile(name, db), tzinfo_deleter());
+  if (!tzi) {
+    char* tzid = timelib_timezone_id_from_abbr(name, -1, 0);
+    if (tzid) {
+      tzi = TimeZoneInfo(timelib_parse_tzfile(tzid, db), tzinfo_deleter());
+    }
+  }
+
   if (tzi) {
     Cache[name] = tzi;
   }

@@ -16,4 +16,7 @@ int(-1693706400)
 int(7200)
 bool(true)
 string(4) "CEST"
+string(16) "America/New_York"
+string(19) "America/Los_Angeles"
+string(15) "Pacific/Chatham"
 bool(true)

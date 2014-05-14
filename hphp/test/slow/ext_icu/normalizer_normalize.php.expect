@@ -1,2 +1,4 @@
 string(6) "%C3%85"
 string(6) "%C3%85"
+bool(false)
+string(55) "Error converting string to UTF-16: U_INVALID_CHAR_FOUND"

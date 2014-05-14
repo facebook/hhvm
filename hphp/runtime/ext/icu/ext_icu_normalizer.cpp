@@ -70,8 +70,8 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString uinput(u16(input, error));
   if (U_FAILURE(error)) {
-    s_intl_error->setError(error, "Error converting string to UTF-16.");
-    return uninit_null();
+    s_intl_error->setError(error, "Error converting string to UTF-16");
+    return false;
   }
 
   icu::UnicodeString dest;

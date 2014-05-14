@@ -16,6 +16,9 @@ function main() {
 
   var_dump(urlencode($char_1));
   var_dump(urlencode($char_2));
+
+  var_dump(normalizer_normalize("\xE9 invalid UTF8"));
+  var_dump(intl_get_error_message());
 }
 
 main();

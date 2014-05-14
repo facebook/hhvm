@@ -46,5 +46,8 @@ var_dump($transitions[0]['offset']);
 var_dump($transitions[0]['isdst']);
 var_dump($transitions[0]['abbr']);
 
+$tz = timezone_open("EDT");
+var_dump(timezone_name_get($tz));
+
 var_dump((bool)timezone_version_get());
 

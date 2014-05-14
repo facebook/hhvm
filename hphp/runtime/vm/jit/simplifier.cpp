@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/util/overflow.h"
 
 namespace HPHP {
@@ -429,6 +430,7 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case ConvCellToStr: return simplifyConvCellToStr(inst);
     case ConvCellToInt: return simplifyConvCellToInt(inst);
     case ConvCellToDbl: return simplifyConvCellToDbl(inst);
+    case ConvObjToBool: return simplifyConvObjToBool(inst);
     case Floor:         return simplifyFloor(inst);
     case Ceil:          return simplifyCeil(inst);
     case UnboxPtr:      return simplifyUnboxPtr(inst);
@@ -483,6 +485,8 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
 
     case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
     case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
+
+    case CallBuiltin: return simplifyCallBuiltin(inst);
 
     default:
       return nullptr;
@@ -978,6 +982,11 @@ SSATmp* Simplifier::simplifyXorTrue(SSATmp* src) {
   case XorBool:
     if (inst->src(1)->isConst(true)) return inst->src(0);
     return nullptr;
+
+  case ColIsNEmpty:
+    return gen(ColIsEmpty, inst->src(0));
+  case ColIsEmpty:
+    return gen(ColIsNEmpty, inst->src(0));
 
   // !(X cmp Y) --> X opposite_cmp Y
   case Lt:
@@ -1677,6 +1686,14 @@ SSATmp* Simplifier::simplifyConvCellToDbl(const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* Simplifier::simplifyConvObjToBool(const IRInstruction* inst) {
+  auto const ty = inst->src(0)->type();
+  if (ty < Type::Obj && ty.getClass() && ty.getClass()->isCollectionClass()) {
+    return gen(ColIsNEmpty, inst->src(0));
+  }
+  return nullptr;
+}
+
 template<class Oper>
 SSATmp* Simplifier::simplifyRoundCommon(const IRInstruction* inst, Oper op) {
   auto const src  = inst->src(0);
@@ -2010,6 +2027,30 @@ SSATmp* Simplifier::simplifyLdPackedArrayElem(const IRInstruction* inst) {
 
     if (value->m_type == KindOfRef) value = value->m_data.pref->tv();
     return cns(*value);
+  }
+
+  return nullptr;
+}
+
+const StaticString s_isEmpty("isEmpty");
+
+SSATmp* Simplifier::simplifyCallBuiltin(const IRInstruction* inst) {
+  auto const callee = inst->extra<CallBuiltin>()->callee;
+  auto const args = inst->srcs();
+
+  bool const arg0Collection = args.size() >= 1 &&
+                              args[0]->type() < Type::Obj &&
+                              args[0]->type().getClass() &&
+                              args[0]->type().getClass()->isCollectionClass();
+
+  switch (args.size()) {
+  case 1:
+    if (arg0Collection && callee->name()->isame(s_isEmpty.get())) {
+      return gen(ColIsEmpty, args[0]);
+    }
+    break;
+  default:
+    break;
   }
 
   return nullptr;

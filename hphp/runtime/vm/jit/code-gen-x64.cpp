@@ -2243,27 +2243,46 @@ void testimm(Asm& as, uint32_t val, const M& mr) {
   }
 }
 
+void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
+  DEBUG_ONLY auto const ty = inst->src(0)->type();
+  assert(ty < Type::Obj &&
+         ty.getClass() &&
+         ty.getClass()->isCollectionClass());
+  auto& a = m_as;
+  a.    cmpl   (0, srcLoc(0).reg()[FAST_COLLECTION_SIZE_OFFSET]);
+  a.    sete   (rbyte(dstLoc(0).reg()));
+}
+
+void CodeGenerator::cgColIsNEmpty(IRInstruction* inst) {
+  DEBUG_ONLY auto const ty = inst->src(0)->type();
+  assert(ty < Type::Obj &&
+         ty.getClass() &&
+         ty.getClass()->isCollectionClass());
+  auto& a = m_as;
+  a.    cmpl   (0, srcLoc(0).reg()[FAST_COLLECTION_SIZE_OFFSET]);
+  a.    setne  (rbyte(dstLoc(0).reg()));
+}
+
 void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
-  const size_t sizeOff = FAST_COLLECTION_SIZE_OFFSET;
+  auto const rdst = dstLoc(0).reg();
+  auto const rsrc = srcLoc(0).reg();
+  auto& a = m_as;
 
-  auto dstReg = dstLoc(0).reg();
-  auto srcReg = srcLoc(0).reg();
-
-  testimm(m_as, ObjectData::CallToImpl, srcReg[ObjectData::attributeOff()]);
+  testimm(a, ObjectData::CallToImpl, rsrc[ObjectData::attributeOff()]);
   unlikelyIfThenElse(
     CC_NZ,
     [&] (Asm& a) {
       testimm(a,
               ObjectData::IsCollection,
-              srcReg[ObjectData::attributeOff()]);
+              rsrc[ObjectData::attributeOff()]);
       ifThenElse(
         a,
         CC_NZ,
-        [&](Asm& a) { // srcReg points to native collection
-          a.cmpl(0, srcReg[sizeOff]);
-          a.setne(rbyte(dstReg)); // truthy iff size not zero
+        [&] (Asm& a) { // rsrc points to native collection
+          a.cmpl(0, rsrc[FAST_COLLECTION_SIZE_OFFSET]);
+          a.setne(rbyte(rdst)); // true iff size not zero
         },
-        [&](Asm& a) { // srcReg is not a native collection
+        [&] (Asm& a) { // rsrc is not a native collection
           cgCallHelper(
             a,
             CppCall::method(&ObjectData::o_toBoolean),
@@ -2272,9 +2291,11 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
             argGroup().ssa(0));
         }
       );
-    }, [&] (Asm& a) {
-      a.movb(1, rbyte(dstReg));
-    });
+    },
+    [&] (Asm& a) {
+      a.    movb  (1, rbyte(rdst));
+    }
+  );
 }
 
 void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {

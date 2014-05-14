@@ -608,6 +608,8 @@ O(ColAddElemC,                  D(Obj), S(Obj)                                \
                                          S(Cell)                              \
                                          S(Cell),                 N|Er|CRc|P) \
 O(ColAddNewElemC,               D(Obj), S(Obj) S(Cell),           N|Er|CRc|P) \
+O(ColIsEmpty,                  D(Bool), S(Obj),                           NF) \
+O(ColIsNEmpty,                 D(Bool), S(Obj),                           NF) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(ConcatStrStr,                 D(Str), S(Str) S(Str),          Er|N|CRc|PRc) \
 O(ConcatIntStr,                 D(Str), S(Int) S(Str),              Er|N|PRc) \

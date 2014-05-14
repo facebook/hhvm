@@ -1826,11 +1826,15 @@ void in(ISS& env, const bc::CreateCl& op) {
     for (auto i = uint32_t{0}; i < nargs; ++i) {
       usedVars[nargs - i - 1] = popT(env);
     }
-    merge_closure_use_vars_into(
-      env.collect.closureUseTypes,
-      clsPair.second,
-      usedVars
-    );
+
+    // TODO(#3363851): this shouldn't be a loop
+    for (auto& c : clsPair.second) {
+      merge_closure_use_vars_into(
+        env.collect.closureUseTypes,
+        c,
+        usedVars
+      );
+    }
   }
 
   return push(env, objExact(clsPair.first));

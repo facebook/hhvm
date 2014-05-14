@@ -1238,9 +1238,11 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   return name_only();
 }
 
-std::pair<res::Class,borrowed_ptr<php::Class>>
+std::pair<res::Class,std::vector<borrowed_ptr<php::Class>>>
 Index::resolve_closure_class(Context ctx, SString name) const {
   auto const rcls = resolve_class(ctx, name);
+
+#if 0  // Disabled because of TODO(#3363851)
 
   // Closure classes must be unique and defined in the unit that uses
   // the CreateCl opcode, so resolution must succeed.
@@ -1254,6 +1256,27 @@ Index::resolve_closure_class(Context ctx, SString name) const {
     *rcls,
     const_cast<borrowed_ptr<php::Class>>(rcls->val.right()->cls)
   };
+
+#else
+
+  if (rcls.hasValue() && rcls->val.right()) {
+    // This is the expected case.
+    return {
+      *rcls, { const_cast<borrowed_ptr<php::Class>>(rcls->val.right()->cls) }
+    };
+  }
+
+  std::fprintf(stderr,
+    "A Closure class (%s) failed to resolve normally---this is "
+    "a bug but we're tolerating it for now.\n", name->data());
+
+  auto ret = std::make_pair(*rcls, std::vector<borrowed_ptr<php::Class>>{});
+  for (auto& c : find_range(m_data->classInfo, name)) {
+    ret.second.push_back(const_cast<borrowed_ptr<php::Class>>(c.second->cls));
+  }
+  return ret;
+
+#endif
 }
 
 res::Class Index::builtin_class(SString name) const {

@@ -17,38 +17,38 @@ if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
 endif (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
 
 find_path (DWARF_INCLUDE_DIR
-    NAMES
-      libdwarf.h dwarf.h
-    PATHS
-      /usr/include
-      /usr/include/libdwarf
-      /usr/local/include
-      /opt/local/include
-      /sw/include
-      ENV CPATH) # PATH and INCLUDE will also work
+  NAMES
+    libdwarf.h dwarf.h
+  PATHS
+    /usr/include
+    /usr/include/libdwarf
+    /usr/local/include
+    /opt/local/include
+    /sw/include
+    ENV CPATH) # PATH and INCLUDE will also work
 
 if (DWARF_INCLUDE_DIR)
-    set (LIBDWARF_INCLUDE_DIRS  ${DWARF_INCLUDE_DIR})
+  set (LIBDWARF_INCLUDE_DIRS  ${DWARF_INCLUDE_DIR})
 endif ()
 
 find_library (LIBDWARF_LIBRARIES
-    NAMES
-      dwarf
-    PATHS
-      /usr/lib
-      /usr/local/lib
-      /opt/local/lib
-      /sw/lib
-      ENV LIBRARY_PATH   # PATH and LIB will also work
-      ENV LD_LIBRARY_PATH)
+  NAMES
+    dwarf
+  PATHS
+    /usr/lib
+    /usr/local/lib
+    /opt/local/lib
+    /sw/lib
+    ENV LIBRARY_PATH   # PATH and LIB will also work
+    ENV LD_LIBRARY_PATH)
 include (FindPackageHandleStandardArgs)
 
 
 # handle the QUIETLY and REQUIRED arguments and set LIBDWARF_FOUND to TRUE
 # if all listed variables are TRUE
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibDwarf DEFAULT_MSG
-    LIBDWARF_LIBRARIES
-    LIBDWARF_INCLUDE_DIRS)
+  LIBDWARF_LIBRARIES
+  LIBDWARF_INCLUDE_DIRS)
 
 if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
   set(CMAKE_REQUIRED_INCLUDES ${LIBDWARF_INCLUDE_DIRS})

@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/container-functions.h"
 
 #include <folly/ScopeGuard.h>
 #include <algorithm>
@@ -4445,6 +4446,29 @@ template<class TSet>
 ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_fromKeysOf(const Variant& container) {
+  if (container.isNull()) { return NEWOBJ(TSet)(); }
+
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a container (array or collection)"));
+    throw e;
+  }
+
+  ArrayIter iter(cellContainer);
+  auto* target = NEWOBJ(TSet)();
+  assert(!target->hasImmutableBuffer());
+  target->reserve(getContainerSize(cellContainer));
+  Object ret = target;
+  for (; iter; ++iter) { target->addRaw(iter.first()); }
+  return ret;
+}
+
+template<class TSet>
+ALWAYS_INLINE
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArray(const Variant& arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -5002,6 +5026,10 @@ Object c_Set::ti_fromitems(const Variant& iterable) {
   return BaseSet::php_fromItems<c_Set>(iterable);
 }
 
+Object c_Set::ti_fromkeysof(const Variant& container) {
+  return BaseSet::php_fromKeysOf<c_Set>(container);
+}
+
 Object c_Set::ti_fromarray(const Variant& arr) {
   return BaseSet::php_fromArray<c_Set>(arr);
 }
@@ -5082,6 +5110,10 @@ Object c_ImmSet::t_zip(const Variant& iterable) {
 
 Object c_ImmSet::ti_fromitems(const Variant& iterable) {
   return BaseSet::php_fromItems<c_ImmSet>(iterable);
+}
+
+Object c_ImmSet::ti_fromkeysof(const Variant& container) {
+  return BaseSet::php_fromKeysOf<c_ImmSet>(container);
 }
 
 Object c_ImmSet::ti_fromarrays(int _argc, const Array& _argv) {

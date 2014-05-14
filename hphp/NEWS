@@ -1,4 +1,7 @@
 NEXT
+ - Set improvements: Sets::fromKeysOf
+
+"Kanye West"
   - Interfaces {Keyed}Container match arrays *and* collections, not iterables
 
 "Jay-Z"

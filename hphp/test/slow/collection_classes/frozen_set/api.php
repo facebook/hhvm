@@ -111,6 +111,13 @@ function static_methods() {
   show_elems(ImmSet::fromItems((Vector {1, 2, 3})->items()));
   show_elems(ImmSet::fromItems(Set {4, 5, 6}));
 
+  echo "\nfromKeysOf...\n";
+  show_elems(ImmSet::fromKeysOf(Vector {1, 2, 3}));
+  show_elems(ImmSet::fromKeysOf(['a', 'b', 'c']));
+  show_elems(ImmSet::fromKeysOf(Map {'a' => 1, 'b' => 2}));
+  show_elems(ImmSet::fromKeysOf(['a' => 1, 'b' => 2]));
+  show_elems(ImmSet::fromKeysOf(Set {4, 5, 6}));
+
   echo "\nfromArrays...\n";
   show_elems(ImmSet::fromArrays(array(), array(1, 2, 3), array(4, 5, 6)));
 }

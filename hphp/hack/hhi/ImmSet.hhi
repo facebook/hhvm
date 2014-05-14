@@ -62,6 +62,13 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
 
   public static function fromArrays(...): ImmSet<Tv>;
 
+  /**
+   * Returns a ImmSet built from the keys of the specified container.
+   */
+  public static function fromKeysOf<Tk, Tv2>(
+    ?KeyedContainer<Tk,Tv2> $container
+  ): ImmSet<Tk>;
+
   public function __toString(): string;
 
   /**

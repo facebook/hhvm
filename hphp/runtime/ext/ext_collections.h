@@ -1871,6 +1871,11 @@ class BaseSet : public ExtCollectionObjectData {
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
+  static php_fromKeysOf(const Variant& container);
+
+  template<class TSet>
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
   static php_fromArray(const Variant& arr);
 
   template<class TSet>
@@ -1955,6 +1960,7 @@ class c_Set : public BaseSet {
   Object t_difference(const Variant& iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
+  static Object ti_fromkeysof(const Variant& container);
   static Object ti_fromarray(const Variant& arr); // deprecated
   static Object ti_fromarrays(int _argc, const Array& _argv = null_array);
   Object t_immutable();
@@ -2013,6 +2019,7 @@ class c_ImmSet : public BaseSet {
 
   // Static methods.
   static Object ti_fromitems(const Variant& iterable);
+  static Object ti_fromkeysof(const Variant& container);
   static Object ti_fromarrays(int _argc, const Array& _argv = null_array);
 
   Object t_immutable();

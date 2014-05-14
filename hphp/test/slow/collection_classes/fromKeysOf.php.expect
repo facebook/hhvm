@@ -1,0 +1,25 @@
+
+Set::fromKeysOf...
+----
+int(0)
+int(1)
+int(2)
+----
+----
+int(0)
+int(1)
+int(2)
+----
+----
+string(1) "a"
+string(1) "b"
+----
+----
+string(1) "a"
+string(1) "b"
+----
+----
+int(4)
+int(5)
+int(6)
+----

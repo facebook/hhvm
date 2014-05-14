@@ -16,9 +16,3 @@ object(HH\Vector)#9 (1) {
 }
 string(18) "LazyValuesIterable"
 string(18) "LazyValuesIterable"
-object(HH\Vector)#12 (1) {
-  [0]=>
-  string(3) "abc"
-}
-string(18) "LazyValuesIterable"
-string(18) "LazyValuesIterable"

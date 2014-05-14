@@ -126,7 +126,14 @@ final class Set<Tv> implements MutableSet<Tv> {
 
   public static function fromArrays(...): Set<Tv>;
 
-  public static function fromItems(?Traversable<Tv> $items): Set<Tv>;
+  public static function fromItems<Tv2>(?Traversable<Tv2> $items): Set<Tv2>;
+
+  /**
+   * Returns a Set built from the keys of the specified container.
+   */
+  public static function fromKeysOf<Tk, Tv2>(
+    ?KeyedContainer<Tk,Tv2> $container,
+  ): Set<Tk>;
 
   public function __toString(): string;
 

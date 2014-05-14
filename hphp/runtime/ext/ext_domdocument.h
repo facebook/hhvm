@@ -590,16 +590,16 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
   public: Variant t_rewind();
   public: Variant t_valid();
 
-
-
 public:
   void reset_iterator();
   void set_iterator(ObjectData* o, dom_iterable *objmap);
+  void setKeyIsNamed() { m_keyIsNamed = true; }
 
   Object m_o;
   dom_iterable *m_objmap;
   ArrayIter m_iter;
   int m_index;
+  bool m_keyIsNamed = false;
   Object m_curobj;
 };
 

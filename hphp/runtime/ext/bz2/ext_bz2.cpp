@@ -160,14 +160,13 @@ Variant HHVM_FUNCTION(bzcompress, const String& source, int blocksize /* = 4 */,
 }
 
 Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
-  char *dest;
   int source_len = source.length();
   int error;
   uint64_t size = 0;
   bz_stream bzs;
 
-  bzs.bzalloc = NULL;
-  bzs.bzfree = NULL;
+  bzs.bzalloc = nullptr;
+  bzs.bzfree = nullptr;
 
   if (BZ2_bzDecompressInit(&bzs, 0, small) != BZ_OK) {
     return false;
@@ -179,28 +178,22 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
   // in most cases bz2 offers at least 2:1 compression, so we use that as our
   // base
   bzs.avail_out = source_len * 2;
-  bzs.next_out = dest = (char *) malloc(bzs.avail_out + 1);
-  if (!dest) {
-    return BZ_MEM_ERROR;
-  }
+  String ret(bzs.avail_out, ReserveString);
+  bzs.next_out = ret.bufferSlice().ptr;
 
   while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
     /* compression is better then 2:1, need to allocate more memory */
     bzs.avail_out = source_len;
     size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-    dest = (char *) safe_realloc(dest, size + bzs.avail_out + 1);
-    bzs.next_out = dest + size;
+    ret.setSize(size); // needs to be null-terminated before the reserve call
+    bzs.next_out = ret.reserve(size + bzs.avail_out).ptr + size;
   }
 
   if (error == BZ_STREAM_END || error == BZ_OK) {
     size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-    dest = (char *)safe_realloc(dest, size + 1);
-    dest[size] = '\0';
-    String ret = String(dest, size, AttachString);
     BZ2_bzDecompressEnd(&bzs);
-    return ret;
+    return ret.shrink(size);
   } else {
-    free(dest);
     BZ2_bzDecompressEnd(&bzs);
     return error;
   }

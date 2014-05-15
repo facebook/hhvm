@@ -979,6 +979,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
           } else {
             ctx.sdl->functions[tmp] = function;
           }
+          ctx.sdl->functionsOrder.push_back(tmp);
           if (function->requestName != function->functionName) {
             ctx.sdl->requests[toLower(function->requestName)] = function;
           }

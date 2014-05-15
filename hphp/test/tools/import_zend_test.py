@@ -671,9 +671,12 @@ other_files = (
     '/ext/soap/tests/bugs/bug27722.wsdl',
     '/ext/soap/tests/bugs/bug28985.wsdl',
     '/ext/soap/tests/bugs/bug29109.wsdl',
+    '/ext/soap/tests/bugs/bug29236.wsdl',
     '/ext/soap/tests/bugs/bug29795.wsdl',
+    '/ext/soap/tests/bugs/bug30106.wsdl',
     '/ext/soap/tests/bugs/bug30175.wsdl',
     '/ext/soap/tests/bugs/bug30928.wsdl',
+    '/ext/soap/tests/bugs/bug34643.wsdl',
     '/ext/soap/tests/bugs/bug36614.wsdl',
     '/ext/soap/tests/bugs/bug36999.wsdl',
     '/ext/soap/tests/bugs/bug37083.wsdl',
@@ -683,6 +686,7 @@ other_files = (
     '/ext/soap/tests/bugs/bug38536.wsdl',
     '/ext/soap/tests/bugs/bug41337.wsdl',
     '/ext/soap/tests/bugs/bug42692.wsdl',
+    '/ext/soap/tests/bugs/skipif.inc',
     '/ext/soap/tests/classmap.wsdl',
     '/ext/soap/tests/interop/Round3/GroupF/round3_groupF_extreq.wsdl',
     '/ext/soap/tests/schema/test_schema.inc',
@@ -1348,7 +1352,7 @@ def should_import(filename):
     return True
 
 script_dir = os.path.dirname(__file__)
-all_dir = os.path.join(script_dir, '../test/zend/all')
+all_dir = os.path.join(script_dir, '../zend/all')
 
 for root, dirs, files in os.walk(args.zend_path):
     for filename in files:
@@ -1382,7 +1386,7 @@ else:
 
 stdout = subprocess.Popen(
     [
-        os.path.join(script_dir, '../test/run'),
+        os.path.join(script_dir, '../run'),
         '--fbmake',
         '-m',
         'interp',

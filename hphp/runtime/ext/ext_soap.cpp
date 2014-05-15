@@ -2670,10 +2670,9 @@ Variant c_SoapClient::t___getfunctions() {
 
   if (m_sdl) {
     Array ret = Array::Create();
-    for (sdlFunctionMap::iterator iter = m_sdl->functions.begin();
-         iter != m_sdl->functions.end(); ++iter) {
+    for (auto& func: m_sdl->functionsOrder) {
       StringBuffer sb;
-      function_to_string(iter->second, sb);
+      function_to_string(m_sdl->functions[func], sb);
       ret.append(sb.detach());
     }
     return ret;

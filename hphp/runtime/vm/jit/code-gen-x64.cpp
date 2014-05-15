@@ -5415,22 +5415,45 @@ void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   emitFwdJcc(CC_LE, label);
 }
 
+static const StringData* s_ReleaseVV = makeStaticString("ReleaseVV");
+
 void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   auto* const label = inst->taken();
   auto const rFp = srcLoc(0).reg();
 
-  m_as.    cmpq   (0, rFp[AROFF(m_varEnv)]);
-  unlikelyIfBlock(CC_NZ, [&] (Asm& a) {
-    a.    testl  (ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)]);
-    emitFwdJcc(a, CC_Z, label);
-    cgCallHelper(
-      a,
-      CppCall::direct(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
-      kVoidDest,
-      SyncOptions::kSyncPoint,
-      argGroup().reg(rFp)
-    );
-  });
+  TargetProfile<ReleaseVVProfile> profile(m_unit.context(), m_curInst->marker(),
+                                          s_ReleaseVV);
+  if (profile.profiling()) {
+    m_as.incw(rVmTl[profile.handle() + offsetof(ReleaseVVProfile, executed)]);
+  }
+
+  m_as.cmpq(0, rFp[AROFF(m_varEnv)]);
+
+  bool releaseUnlikely = true;
+  if (profile.optimizing()) {
+    auto const data = profile.data(ReleaseVVProfile::reduce);
+    FTRACE(3, "cgReleaseVVOrExit({}): percentReleased = {}\n",
+           inst->toString(), data.percentReleased());
+    if (data.percentReleased() >= RuntimeOption::EvalJitPGOReleaseVVMinPercent)
+    {
+      releaseUnlikely = false;
+    }
+  }
+  ifBlock(CC_NZ, [&] (Asm& a) {
+      if (profile.profiling()) {
+        a.incw(rVmTl[profile.handle() + offsetof(ReleaseVVProfile, released)]);
+      }
+      a.testl(ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)]);
+      emitFwdJcc(a, CC_Z, label);
+      cgCallHelper(
+        a,
+        CppCall::direct(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
+        kVoidDest,
+        SyncOptions::kSyncPoint,
+        argGroup().reg(rFp)
+      );
+    },
+    releaseUnlikely);
 }
 
 void CodeGenerator::cgBoxPtr(IRInstruction* inst) {

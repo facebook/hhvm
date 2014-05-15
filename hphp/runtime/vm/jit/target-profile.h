@@ -180,13 +180,13 @@ struct DecRefProfile {
     // This is slightly racy but missing a few either way isn't a
     // disaster. It's already racy at profiling time because the two values
     // aren't updated atomically.
-    auto const bDecrement = b.decrement;
-    auto const bDestroy = b.destroy;
-    a.decrement += bDecrement;
-    a.destroy += bDestroy;
+    a.decrement += b.decrement;
+    a.destroy   += b.destroy;
   }
 };
 typedef folly::Optional<TargetProfile<DecRefProfile>> OptDecRefProfile;
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Record profiling information about non-packed arrays. This counts the
@@ -197,6 +197,23 @@ struct NonPackedArrayProfile {
   int32_t count;
   static void reduce(NonPackedArrayProfile& a, const NonPackedArrayProfile& b) {
     a.count += b.count;
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct ReleaseVVProfile {
+  uint16_t executed;
+  uint16_t released;
+
+  int percentReleased() const {
+    return executed ? (100 * released / executed) : 0;
+  };
+
+  static void reduce(ReleaseVVProfile& a, const ReleaseVVProfile& b) {
+    // Racy but OK -- just used for profiling to trigger optimization.
+    a.executed += b.executed;
+    a.released += b.released;
   }
 };
 

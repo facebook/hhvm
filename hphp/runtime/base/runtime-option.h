@@ -463,6 +463,7 @@ public:
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
+  F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
   F(uint32_t, HotFuncThreshold,        40)                              \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \

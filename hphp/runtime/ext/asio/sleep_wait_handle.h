@@ -38,7 +38,6 @@ class c_SleepWaitHandle : public c_WaitableWaitHandle {
     : c_WaitableWaitHandle(cls)
   {}
   ~c_SleepWaitHandle() {}
-  void t___construct();
   static Object ti_create(int64_t usecs);
 
  public:

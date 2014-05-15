@@ -51,10 +51,6 @@ c_WaitableWaitHandle::~c_WaitableWaitHandle() {
   }
 }
 
-void c_WaitableWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
 int c_WaitableWaitHandle::t_getcontextidx() {
   return getContextIdx();
 }

@@ -42,7 +42,6 @@ class c_GenMapWaitHandle : public c_BlockableWaitHandle {
   {}
   ~c_GenMapWaitHandle() {}
 
-  void t___construct();
   static void ti_setoncreatecallback(const Variant& callback);
   static Object ti_create(const Variant& dependencies);
 

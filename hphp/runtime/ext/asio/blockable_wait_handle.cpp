@@ -29,10 +29,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void c_BlockableWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
 c_BlockableWaitHandle* c_BlockableWaitHandle::unblock() {
   c_BlockableWaitHandle* next = m_nextParent;
 

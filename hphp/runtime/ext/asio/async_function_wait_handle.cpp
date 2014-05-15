@@ -55,12 +55,6 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   }
 }
 
-void c_AsyncFunctionWaitHandle::t___construct() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Define an async functions instead of using this constructor"));
-  throw e;
-}
-
 void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(const Variant& callback) {
   if (!callback.isNull() &&
       (!callback.isObject() ||

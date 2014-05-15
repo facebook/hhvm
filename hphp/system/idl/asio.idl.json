@@ -232,17 +232,6 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "getContextIdx",
                     "desc": "Get index of the scheduler context this wait handle operates in",
                     "flags": [
@@ -304,17 +293,6 @@
                 "NoDefaultSweep"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                }
             ],
             "consts": [
             ]
@@ -329,17 +307,6 @@
                 "CppCustomDelete"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
                 {
                     "name": "setOnCreateCallback",
                     "desc": "Set callback to be called when an AsyncFunctionWaitHandle is created",
@@ -454,17 +421,6 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "create",
                     "desc": "Create a wait handle that waits for a given array of dependencies",
                     "flags": [
@@ -513,17 +469,6 @@
                 "NoDefaultSweep"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
                 {
                     "name": "create",
                     "desc": "Create a wait handle that waits for a given map of dependencies",
@@ -574,17 +519,6 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "create",
                     "desc": "Create a wait handle that waits for a given vector of dependencies",
                     "flags": [
@@ -634,17 +568,6 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "create",
                     "desc": "Create a wait handle that succeeds once desired scheduling priority is eligible for execution",
                     "flags": [
@@ -690,17 +613,6 @@
                 "NoDefaultSweep"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
                 {
                     "name": "create",
                     "desc": "Create a wait handle that succeeds after the desired timeout expires",

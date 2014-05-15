@@ -23,8 +23,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void c_StaticWaitHandle::t___construct() {
-  throw Object(SystemLib::AllocInvalidOperationExceptionObject(
-        "Use async functions instead of this constructor"));
+  // gen-ext-hhvm requires at least one declared method in the class to work
+  not_reached();
 }
 
 c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell& result) {

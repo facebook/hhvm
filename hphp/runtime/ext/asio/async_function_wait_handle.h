@@ -41,7 +41,6 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   explicit c_AsyncFunctionWaitHandle(
     Class* cls = c_AsyncFunctionWaitHandle::classof());
   ~c_AsyncFunctionWaitHandle();
-  void t___construct();
   static void ti_setoncreatecallback(const Variant& callback);
   static void ti_setonawaitcallback(const Variant& callback);
   static void ti_setonsuccesscallback(const Variant& callback);

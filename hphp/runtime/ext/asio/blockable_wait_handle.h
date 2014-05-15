@@ -42,8 +42,6 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   {}
   ~c_BlockableWaitHandle() {}
 
-  void t___construct();
-
  public:
   c_BlockableWaitHandle* getNextParent() { return m_nextParent; }
   c_BlockableWaitHandle* unblock();

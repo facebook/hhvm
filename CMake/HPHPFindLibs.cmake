@@ -52,11 +52,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
 	include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-find_package(Libjsonc)
-if (LIBJSONC_INCLUDE_DIR)
-	include_directories(${LIBJSONC_INCLUDE_DIR})
-endif()
-
 # iconv checks
 find_package(Libiconv REQUIRED)
 include_directories(${LIBICONV_INCLUDE_DIR})

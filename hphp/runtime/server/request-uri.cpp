@@ -73,13 +73,21 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
   m_rewritten = false;
 
-  auto pathTranslated = transport->getPathTranslated();
-  if (!pathTranslated.empty()) {
+  auto scriptFilename = transport->getScriptFilename();
+  if (!scriptFilename.empty()) {
     // The transport is overriding everything and just handing us the filename
-    m_originalURL = pathTranslated;
+    m_originalURL = scriptFilename;
     if (!resolveURL(vhost, pathTranslation, sourceRoot)) {
       return false;
     }
+    // PATH_INFO wasn't filled by resolveURL() because m_originalURL
+    // didn't contain it. We set it now, based on PATH_TRANSLATED.
+    m_origPathInfo = transport->getPathTranslated();
+    if (!m_origPathInfo.empty() &&
+        m_origPathInfo.charAt(0) != '/') {
+      m_origPathInfo = "/" + m_origPathInfo;
+    }
+    m_pathInfo = m_origPathInfo;
     return true;
   }
 

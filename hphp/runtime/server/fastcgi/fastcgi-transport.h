@@ -21,10 +21,10 @@
 #include "hphp/runtime/server/fastcgi/protocol-session-handler.h"
 #include "folly/io/IOBuf.h"
 #include "folly/io/IOBufQueue.h"
-#include "thrift/lib/cpp/async/TAsyncTransport.h"
-#include "thrift/lib/cpp/async/TAsyncTimeout.h"
-#include "thrift/lib/cpp/transport/TSocketAddress.h"
-#include "thrift/lib/cpp/concurrency/Monitor.h"
+#include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
+#include "thrift/lib/cpp/async/TAsyncTimeout.h" // @nolint
+#include "thrift/lib/cpp/transport/TSocketAddress.h" // @nolint
+#include "thrift/lib/cpp/concurrency/Monitor.h" // @nolint
 
 #include <map>
 #include <vector>
@@ -49,6 +49,7 @@ public:
   virtual const char *getRemoteHost() override;
   virtual const char *getRemoteAddr() override;
   virtual uint16_t getRemotePort() override;
+  virtual const std::string getScriptFilename() override;
   virtual const std::string getPathTranslated() override;
   virtual const std::string getDocumentRoot() override;
   virtual const char *getServerName() override;
@@ -114,6 +115,7 @@ private:
   folly::IOBufQueue m_bodyQueue;
   std::unique_ptr<folly::IOBuf> m_currBody;
   std::unordered_map<std::string, std::string> m_requestHeaders;
+  std::string m_scriptFilename;
   std::string m_pathTranslated;
   std::string m_requestURI;
   std::string m_documentRoot;

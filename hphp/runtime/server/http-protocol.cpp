@@ -634,6 +634,10 @@ static void CopyPathInfo(Array& server,
     // fix it so it is settable, so I'll leave this for now
     documentRoot = vhost->getDocumentRoot();
   }
+  if (documentRoot != s_forwardslash &&
+      documentRoot[documentRoot.length() - 1] == '/') {
+    documentRoot = documentRoot.substr(0, documentRoot.length() - 1);
+  }
   server.set(s_DOCUMENT_ROOT, documentRoot);
   server.set(s_SCRIPT_FILENAME, r.absolutePath());
 
@@ -651,7 +655,7 @@ static void CopyPathInfo(Array& server,
       } else {
         server.set(s_PATH_TRANSLATED,
                    String(server[s_DOCUMENT_ROOT].toCStrRef() +
-                          pathTranslated));
+                          s_forwardslash + pathTranslated));
       }
     } else {
       server.set(s_PATH_TRANSLATED,

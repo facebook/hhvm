@@ -521,7 +521,7 @@ void LightProcess::runShadow(int fdin, int fdout) {
     if (pfd[0].revents & POLLIN) {
       lwp_read(fin, buf);
       if (buf == "exit") {
-        Logger::Info("LightProcess exiting upon request");
+        Logger::Verbose("LightProcess exiting upon request");
         break;
       } else if (buf == "popen") {
         do_popen(fin, fout, m_afdt_fd);

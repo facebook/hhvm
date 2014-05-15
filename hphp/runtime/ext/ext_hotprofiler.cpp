@@ -471,6 +471,9 @@ enum Flag {
   MeasureXhprofDisable  = 0x20,
   Unused                = 0x40,
   TrackMalloc           = 0x80,
+  // Allows profiling of multiple threads at the same time with TraceProfiler.
+  // Requires a lot of memory.
+  IHaveInfiniteMemory   = 0x100,
 };
 
 const StaticString
@@ -1005,7 +1008,7 @@ class TraceProfiler : public Profiler {
     , m_overflowCalls(0)
     , m_flags(flags)
   {
-    if (pthread_mutex_trylock(&s_inUse)) {
+    if (!(m_flags & IHaveInfiniteMemory) && pthread_mutex_trylock(&s_inUse)) {
       // This profiler uses a very large amount of memory. Only allow
       // one in the process at any time.
       m_successful = false;
@@ -1796,6 +1799,7 @@ const int64_t k_XHPROF_FLAGS_VTSC = TrackVtsc;
 const int64_t k_XHPROF_FLAGS_TRACE = XhpTrace;
 const int64_t k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE = MeasureXhprofDisable;
 const int64_t k_XHPROF_FLAGS_MALLOC = TrackMalloc;
+const int64_t k_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY = IHaveInfiniteMemory;
 
 ///////////////////////////////////////////////////////////////////////////////
 // injected code

@@ -44,6 +44,10 @@
         {
             "name": "XHPROF_FLAGS_MALLOC",
             "type": "Int64"
+        },
+        {
+            "name": "XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY",
+            "type": "Int64"
         }
     ],
     "funcs": [

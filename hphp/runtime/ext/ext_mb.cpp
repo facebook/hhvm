@@ -786,7 +786,7 @@ static char *php_unicode_convert_case(int case_mode, const char *srcstr,
       for (i = 0; i < unicode_len; i+=4) {
         int res = php_unicode_is_prop
           (BE_ARY_TO_UINT32(&unicode_ptr[i]),
-           UC_MN|UC_ME|UC_CF|UC_LM|UC_SK|UC_LU|UC_LL|UC_LT, 0);
+           UC_MN|UC_ME|UC_CF|UC_LM|UC_SK|UC_LU|UC_LL|UC_LT|UC_PO|UC_OS, 0);
         if (mode) {
           if (res) {
             UINT32_TO_BE_ARY
@@ -1185,7 +1185,7 @@ bool f_mb_check_encoding(const String& var /* = null_string */,
 }
 
 Variant f_mb_convert_case(const String& str, int mode,
-                         const String& encoding /* = null_string */) {
+                          const String& encoding /* = null_string */) {
   const char *enc = NULL;
   if (encoding.empty()) {
     enc = mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));

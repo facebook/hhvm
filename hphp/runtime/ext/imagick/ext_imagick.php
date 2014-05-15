@@ -2472,7 +2472,7 @@ class Imagick implements Countable, Iterator {
    */
   <<__Native>>
   function readImageBlob(string $image,
-                         string $filename): bool;
+                         string $filename = ''): bool;
 
   /**
    * Reads image from open filehandle

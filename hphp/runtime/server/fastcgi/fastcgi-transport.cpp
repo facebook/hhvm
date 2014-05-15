@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "folly/io/IOBuf.h"
@@ -279,6 +280,7 @@ void FastCGITransport::removeHeaderImpl(const char* name) {
 
 static const std::string
   s_status("Status: "),
+  s_space(" "),
   s_colon(": "),
   s_newline("\r\n");
 
@@ -289,6 +291,12 @@ void FastCGITransport::sendResponseHeaders(IOBufQueue& queue, int code) {
   if (code != 200) {
     queue.append(s_status);
     queue.append(std::to_string(code));
+    auto reasonStr = getResponseInfo();
+    if (reasonStr.empty()) {
+      reasonStr = HttpProtocol::GetReasonString(code);
+    }
+    queue.append(s_space);
+    queue.append(reasonStr);
     queue.append(s_newline);
   }
 

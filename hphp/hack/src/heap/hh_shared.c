@@ -79,7 +79,7 @@
 #define HASHTBL_SIZE_B  (HASHTBL_SIZE * sizeof(helt_t))
 
 /* Size of where we allocate shared objects. */
-#define HEAP_SIZE       (8 * GIG)
+#define HEAP_SIZE       (16 * GIG)
 #define Get_size(x)     (((size_t*)(x))[-1])
 #define Get_buf_size(x) (((size_t*)(x))[-1] + sizeof(size_t))
 #define Get_buf(x)      (x - sizeof(size_t))

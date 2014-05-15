@@ -46,7 +46,12 @@ else()
     # TODO: This should really only be set on X86/X64
     set(GNUCC_PLAT_OPT "-mcrc32")
   endif()
-  set(CMAKE_C_FLAGS "-w")
+# Define compiler flags for compatibility with Fedora packaging standards
+  if("${CMAKE_SYSTEM_VERSION}" MATCHES "fc[0-9][0-9]") 
+    set(CMAKE_C_FLAGS "-w -fPIC")
+  else()
+    set(CMAKE_C_FLAGS "-w")
+  endif()
   set(CMAKE_CXX_FLAGS "-fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -std=gnu++11 -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized ${GNUCC_PLAT_OPT} ${GNUCC_48_OPT}")
 endif()
 

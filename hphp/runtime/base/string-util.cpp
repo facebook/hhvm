@@ -361,8 +361,7 @@ String StringUtil::Base64Encode(const String& input) {
 String StringUtil::Base64Decode(const String& input,
                                 bool strict /* = false */) {
   int len = input.size();
-  char *ret = string_base64_decode(input.data(), len, strict);
-  return String(ret, len, AttachString);
+  return string_base64_decode(input.data(), len, strict);
 }
 
 String StringUtil::UrlEncode(const String& input,

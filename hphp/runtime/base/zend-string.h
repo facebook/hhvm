@@ -216,7 +216,7 @@ String string_quoted_printable_decode(const char *input, int len, bool is_q);
 String string_uuencode(const char *src, int src_len);
 String string_uudecode(const char *src, int src_len);
 String string_base64_encode(const char *input, int len);
-char *string_base64_decode(const char *input, int &len, bool strict);
+String string_base64_decode(const char *input, int len, bool strict);
 String string_escape_shell_arg(const char *str);
 String string_escape_shell_cmd(const char *str);
 
@@ -252,7 +252,7 @@ int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
                        int cost_ins, int cost_rep, int cost_del);
 int string_similar_text(const char *t1, int len1,
                         const char *t2, int len2, float *percent);
-char *string_soundex(const char *str);
+String string_soundex(const String& str);
 
 String string_metaphone(const char *input, int word_len, long max_phonemes,
                         int traditional);
@@ -260,8 +260,7 @@ String string_metaphone(const char *input, int word_len, long max_phonemes,
 /**
  * Locale strings.
  */
-char *string_convert_cyrillic_string(const char *input, int length,
-                                     char from, char to);
+String string_convert_cyrillic_string(const String& input, char from, char to);
 String string_convert_hebrew_string(const String& str, int max_chars_per_line,
                                     int convert_newlines);
 

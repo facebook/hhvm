@@ -1322,7 +1322,7 @@ int64_t f_similar_text(const String& first, const String& second,
 
 Variant f_soundex(const String& str) {
   if (str.empty()) return false;
-  return String(string_soundex(str.c_str()), AttachString);
+  return string_soundex(str);
 }
 
 Variant f_metaphone(const String& str, int phones /* = 0 */) {
@@ -1598,11 +1598,7 @@ String f_nl_langinfo(int item) {
 }
 
 String f_convert_cyr_string(const String& str, const String& from, const String& to) {
-  char ch_from = from[0];
-  char ch_to = to[0];
-  char *ret = string_convert_cyrillic_string(str.data(), str.size(),
-                                             ch_from, ch_to);
-  return String(ret, str.size(), AttachString);
+  return string_convert_cyrillic_string(str, from[0], to[0]);
 }
 
 

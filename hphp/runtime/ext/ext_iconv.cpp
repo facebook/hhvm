@@ -1077,8 +1077,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
         case PHP_ICONV_ENC_SCHEME_BASE64:
           {
             int len = encoded_text_len;
-            char *ret = string_base64_decode(encoded_text, len, false);
-            decoded = String(ret, len, AttachString);
+            decoded = string_base64_decode(encoded_text, len, false);
           }
           break;
         case PHP_ICONV_ENC_SCHEME_QPRINT:

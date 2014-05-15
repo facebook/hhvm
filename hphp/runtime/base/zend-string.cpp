@@ -1434,15 +1434,13 @@ static String php_base64_encode(const unsigned char *str, int length) {
   return ret;
 }
 
-static unsigned char *php_base64_decode(const unsigned char *str,
-                                        int length, int *ret_length,
-                                        bool strict) {
-  const unsigned char *current = str;
+static String php_base64_decode(const char *str, int length, bool strict) {
+  const unsigned char *current = (unsigned char*)str;
   int ch, i = 0, j = 0, k;
   /* this sucks for threaded environments */
-  unsigned char *result;
 
-  result = (unsigned char *)malloc(length + 1);
+  String retString(length, ReserveString);
+  unsigned char* result = (unsigned char*)retString.bufferSlice().ptr;
 
   /* run through the whole string, converting as we go */
   while ((ch = *current++) != '\0' && length-- > 0) {
@@ -1456,8 +1454,7 @@ static unsigned char *php_base64_decode(const unsigned char *str,
             continue;
           }
         }
-        free(result);
-        return nullptr;
+        return null_string;
       }
       continue;
     }
@@ -1467,8 +1464,7 @@ static unsigned char *php_base64_decode(const unsigned char *str,
       /* a space or some other separator character, we simply skip over */
       continue;
     } else if (ch == -2) {
-      free(result);
-      return nullptr;
+      return null_string;
     }
 
     switch(i % 4) {
@@ -1495,27 +1491,22 @@ static unsigned char *php_base64_decode(const unsigned char *str,
   if (ch == base64_pad) {
     switch(i % 4) {
     case 1:
-      free(result);
-      return nullptr;
+      return null_string;
     case 2:
       k++;
     case 3:
       result[k] = 0;
     }
   }
-  if (ret_length) {
-    *ret_length = j;
-  }
-  result[j] = '\0';
-  return result;
+  return retString.setSize(j);
 }
 
 String string_base64_encode(const char *input, int len) {
   return php_base64_encode((unsigned char *)input, len);
 }
 
-char *string_base64_decode(const char *input, int &len, bool strict) {
-  return (char *)php_base64_decode((unsigned char *)input, len, &len, strict);
+String string_base64_decode(const char *input, int len, bool strict) {
+  return php_base64_decode(input, len, strict);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1844,11 +1835,11 @@ String string_number_format(double d, int dec, char dec_point,
 // soundex
 
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
-char *string_soundex(const char *str) {
-  assert(str);
-
+String string_soundex(const String& str) {
+  assert(!str.empty());
   int _small, code, last;
-  char soundex[4 + 1];
+  String retString(4, ReserveString);
+  char* soundex = retString.bufferSlice().ptr;
 
   static char soundex_table[26] = {
     0,              /* A */
@@ -1879,13 +1870,9 @@ char *string_soundex(const char *str) {
     '2'             /* Z */
   };
 
-  if (!*str) {
-    return nullptr;
-  }
-
   /* build soundex string */
   last = -1;
-  const char *p = str;
+  const char *p = str.slice().ptr;
   for (_small = 0; *p && _small < 4; p++) {
     /* convert chars to upper case and strip non-letter chars */
     /* BUG: should also map here accented letters used in non */
@@ -1915,8 +1902,7 @@ char *string_soundex(const char *str) {
   while (_small < 4) {
     soundex[_small++] = '0';
   }
-  soundex[_small] = '\0';
-  return strdup(soundex);
+  return retString.setSize(4);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2478,12 +2464,12 @@ static const _cyr_charset_table _cyr_mac = {
  *    d - x-cp866
  *    m - x-mac-cyrillic
  */
-char *string_convert_cyrillic_string(const char *input, int length,
-                                     char from, char to) {
-  assert(input);
+String string_convert_cyrillic_string(const String& input, char from, char to) {
   const unsigned char *from_table, *to_table;
   unsigned char tmp;
-  unsigned char *str = (unsigned char *)string_duplicate(input, length);
+  const unsigned char *uinput = (unsigned char *)input.slice().ptr;
+  String retString(input.size(), ReserveString);
+  unsigned char *str = (unsigned char *)retString.bufferSlice().ptr;
 
   from_table = nullptr;
   to_table   = nullptr;
@@ -2514,15 +2500,11 @@ char *string_convert_cyrillic_string(const char *input, int length,
     break;
   }
 
-  if (!str) {
-    return (char *)str;
+  for (int i = 0; i < input.size(); i++) {
+    tmp = from_table == nullptr ? uinput[i] : from_table[uinput[i]];
+    str[i] = to_table == nullptr ? tmp : to_table[tmp + 256];
   }
-
-  for (int i = 0; i<length; i++) {
-    tmp = (from_table == nullptr)? str[i] : from_table[ str[i] ];
-    str[i] = (to_table == nullptr) ? tmp : to_table[tmp + 256];
-  }
-  return (char *)str;
+  return retString.setSize(input.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

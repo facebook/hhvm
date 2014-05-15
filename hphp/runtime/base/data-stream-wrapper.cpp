@@ -13,11 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/data-stream-wrapper.h"
+
 #include <memory>
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/base/data-stream-wrapper.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -116,25 +117,21 @@ File* DataStreamWrapper::open(const String& filename, const String& mode,
   data = comma + 1;
   data_len -= 1;
   std::unique_ptr<MemFile> file;
-  int len = data_len;
-  char* decoded = nullptr;
-
-  SCOPE_EXIT {
-    if (decoded) {
-      free(decoded);
-    }
-  };
+  String decoded;
 
   if (base64) {
-    decoded = string_base64_decode(data, len, true);
-    if (!decoded) {
+    decoded = string_base64_decode(data, data_len, true);
+    if (decoded.isNull()) {
       raise_warning("unable to decode base64 data");
       return nullptr;
     }
   } else {
-    decoded = url_decode(data, len);
+    int len = data_len;
+    char* decoded_temp = url_decode(data, len);
+    decoded = String(decoded_temp, len, AttachString);
   }
-  file = std::unique_ptr<MemFile>(NEWOBJ(MemFile)(decoded, len));
+  file =
+    std::unique_ptr<MemFile>(NEWOBJ(MemFile)(decoded.data(), decoded.size()));
   return file.release();
 }
 

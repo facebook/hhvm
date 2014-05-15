@@ -1,0 +1,22 @@
+array(10) {
+  ["some_callable"]=>
+  int(9)
+  ["some_float"]=>
+  int(8)
+  ["some_enum"]=>
+  int(7)
+  ["some_var"]=>
+  int(6)
+  ["some_mixed"]=>
+  int(6)
+  ["some_object"]=>
+  int(5)
+  ["some_array"]=>
+  int(4)
+  ["some_int"]=>
+  int(3)
+  ["some_bool"]=>
+  int(2)
+  ["some_string"]=>
+  int(1)
+}

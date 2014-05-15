@@ -1518,6 +1518,7 @@ xhp_attribute_decl_type:
   | T_VAR                              { $$ = 6;}
   | T_XHP_ENUM '{'
     xhp_attribute_enum '}'             { $$ = $3; $$ = 7;}
+  | T_CALLABLE                         { $$ = 9; }
 ;
 
 xhp_attribute_enum:

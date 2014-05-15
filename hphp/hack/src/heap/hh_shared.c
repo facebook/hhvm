@@ -27,9 +27,11 @@
  *
  * II) The dependency table. It's a hashtable that contains all the
  *    dependencies between Hack objects. It is filled concurrently by
- *    the workers.
+ *    the workers. The dependency table is made of 2 hashtables, one that
+ *    can is used to quickly answer if a dependency exists. The other one
+ *    to retrieve the list of dependencies associated with an object.
  *
- * II) The Hashtable.
+ * III) The Hashtable.
  *     The operations implemented, and their limitations:
  *
  *    -) Concurrent writes: SUPPORTED
@@ -69,7 +71,7 @@
 #define GLOBAL_SIZE_B   GIG
 
 /* Used for the dependency hashtable */
-#define DEP_POW         23
+#define DEP_POW         24
 #define DEP_SIZE        (1 << DEP_POW)
 #define DEP_SIZE_B      (DEP_SIZE * sizeof(value))
 
@@ -87,8 +89,8 @@
 /* The total size of the shared memory.
  * Most of it is going to remain virtual.
  */
-#define SHARED_MEM_SIZE (GLOBAL_SIZE_B + DEP_SIZE_B + HASHTBL_SIZE_B +\
-                         HEAP_SIZE)
+#define SHARED_MEM_SIZE (GLOBAL_SIZE_B + 2 * DEP_SIZE_B + \
+                         HASHTBL_SIZE_B + HEAP_SIZE)
 
 /* Too lazy to use getconf */
 #define CACHE_LINE_SIZE (1 << 6)
@@ -122,6 +124,7 @@ static value* global_storage;
  * The next 31 bits encode the key the lower 31 bits the value.
  */
 static uint64_t* deptbl;
+static uint64_t* deptbl_bindings;
 
 /* The hashtable containing the shared values. */
 static helt_t* hashtbl;
@@ -187,6 +190,9 @@ static void init_shared_globals(char* mem) {
 
   /* Dependencies */
   deptbl = (uint64_t*)mem;
+  mem += DEP_SIZE_B;
+
+  deptbl_bindings = (uint64_t*)mem;
   mem += DEP_SIZE_B;
 
   /* Hashtable */
@@ -364,35 +370,44 @@ void hh_shared_clear() {
  */
 /*****************************************************************************/
 
-void hh_add_dep(value ocaml_dep) {
-  unsigned long dep  = Long_val(ocaml_dep);
-  unsigned long hash = dep >> 31;
+static int htable_add(int64_t* table, unsigned long hash, int64_t value) {
   unsigned long slot = hash & (DEP_SIZE - 1);
 
   while(1) {
     /* It considerably speeds things up to do a normal load before trying using
      * an atomic operation.
      */
-    uint64_t slot_val = deptbl[slot];
+    uint64_t slot_val = table[slot];
 
     // The binding exists, done!
-    if(slot_val == dep)
-      return;
+    if(slot_val == value)
+      return 0;
 
     // The slot is free, let's try to take it.
     if(slot_val == 0) {
       // See comments in hh_add about its similar construction here.
-      if(__sync_bool_compare_and_swap(&deptbl[slot], 0, dep)) {
-        return;
+      if(__sync_bool_compare_and_swap(&table[slot], 0, value)) {
+        return 1;
       }
 
-      if(deptbl[slot] == dep) {
-        return;
+      if(table[slot] == value) {
+        return 0;
       }
     }
 
     slot = (slot + 1) & (DEP_SIZE - 1);
   }
+}
+
+void hh_add_dep(value ocaml_dep) {
+  unsigned long dep  = Long_val(ocaml_dep);
+  unsigned long hash = (dep >> 31) * (dep & ((1l << 31) - 1));
+
+  if(!htable_add(deptbl_bindings, hash, hash)) {
+    return;
+  }
+
+  htable_add(deptbl, dep >> 31, dep);
 }
 
 /* Given a key, returns the list of values bound to it. */

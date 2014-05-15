@@ -1312,6 +1312,7 @@ function main($argv) {
     return 0;
   }
 
+  $return_value = 0;
   while (count($children) && $printer_pid != 0) {
     $pid = pcntl_wait($status);
     if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {

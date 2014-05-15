@@ -1,0 +1,54 @@
+incr/decr Atomic
+int(1)
+int(3)
+int(6)
+int(5)
+int(3)
+int(0)
+incr/decr Multi
+array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(3)
+  [2]=>
+  int(6)
+  [3]=>
+  int(5)
+  [4]=>
+  int(3)
+  [5]=>
+  int(0)
+}
+incr/decr Pipeline
+array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(3)
+  [2]=>
+  int(6)
+  [3]=>
+  int(5)
+  [4]=>
+  int(3)
+  [5]=>
+  int(0)
+}
+incrByFloat Atomic
+float(1.5)
+float(0)
+incrByFloat Multi
+array(2) {
+  [0]=>
+  float(1.5)
+  [1]=>
+  float(0)
+}
+incrByFloat Pipeline
+array(2) {
+  [0]=>
+  float(1.5)
+  [1]=>
+  float(0)
+}

@@ -13,3 +13,5 @@ int(2)
 string(11) "easy as 123"
 string(5) "apple"
 string(11) "easy as 123"
+bool(true)
+bool(true)

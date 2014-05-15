@@ -100,12 +100,28 @@ array(4) {
 _evalSha
 int(42)
 string(2) "OK"
-string(45) "NOSCRIPT No matching script. Please use EVAL."
+NULL
+string(6) "string"
 evalSha
 int(42)
 string(2) "OK"
-string(45) "NOSCRIPT No matching script. Please use EVAL."
+NULL
+string(6) "string"
 evaluateSha
 int(42)
 string(2) "OK"
-string(45) "NOSCRIPT No matching script. Please use EVAL."
+NULL
+string(6) "string"
+script
+string(40) "1fa00e76656cc152ad327c13fe365858fd7be306"
+bool(false)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+bool(true)
+bool(false)
+string(6) "string"
+string(4) "NULL"

@@ -168,6 +168,7 @@ class Redis {
   }
 
   public function client($cmd, $arg = '') {
+    $cmd = strtolower($cmd);
     if (func_num_args() == 2) {
       $this->processCommand('CLIENT', $cmd, $arg);
     } else {
@@ -612,11 +613,12 @@ class Redis {
   }
 
   public function script($subcmd/* ... */) {
-    switch ($subcmd) {
+    switch (strtolower($subcmd)) {
       case 'flush':
       case 'kill':
         $this->processCommand('SCRIPT', $subcmd);
-        return $this->processVariantResponse();
+        $response = $this->processVariantResponse();
+        return ($response !== NULL) ? true : false;
       case 'load':
         if (func_num_args() < 2) {
           return false;
@@ -626,7 +628,8 @@ class Redis {
           return false;
         }
         $this->processCommand('SCRIPT', 'load', $script);
-        return $this->processVariantResponse();
+        $response = $this->processVariantResponse();
+        return ($response !== NULL) ? $response : false;
       case 'exists':
         $args = func_get_args();
         $args[0] = 'EXISTS';
@@ -677,7 +680,7 @@ class Redis {
   }
 
   public function clearLastError() {
-    $this->lastError = '';
+    $this->lastError = null;
     return true;
   }
 
@@ -897,7 +900,7 @@ class Redis {
   protected $retry_interval = 0;
   protected $persistent = false;
   protected $connection = null;
-  protected $lastError = '';
+  protected $lastError = null;
 
   protected $timeout_connect = 0;
   protected $timeout_seconds = 0;
@@ -1133,6 +1136,32 @@ class Redis {
     }
   }
 
+  protected function processClientListResponse() {
+    if ($this->mode !== self::ATOMIC) {
+      $this->multiHandler[] = [ 'cb' => [$this,'processClientListResponse'] ];
+      if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
+        return false;
+      }
+      return $this;
+    }
+    $resp = $this->sockReadData($type);
+    if (($type !== self::TYPE_LINE) AND ($type !== self::TYPE_BULK)) {
+      return null;
+    }
+    $ret = [];
+    $pairs = explode(' ', trim($resp));
+    foreach ($pairs as $pair) {
+      $kv = explode('=', $pair, 2);
+      if (count($kv) == 1) {
+        $ret[] = $pair;
+      } else {
+        list($k, $v) = $kv;
+        $ret[$k] = $v;
+      }
+    }
+    return $ret;
+  }
+
   protected function processVariantResponse() {
     if ($this->mode !== self::ATOMIC) {
       $this->multiHandler[] = [ 'cb' => [$this,'processVariantResponse'] ];
@@ -1161,6 +1190,11 @@ class Redis {
         $ret[] = $this->doProcessVariantResponse();
       }
       return $ret;
+    }
+
+    if ($type === self::TYPE_ERR) {
+      $this->lastError = $resp;
+      return null;
     }
 
     return $resp;

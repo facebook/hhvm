@@ -1,23 +1,29 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5 FATAL_ERROR)
 PROJECT(hphp C CXX ASM)
 
-set(HPHP_HOME "@HPHP_HOME@")
-set(CMAKE_MODULE_PATH
-    "${HPHP_HOME}/CMake"
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_MODULE_PATH})
 set(HHVM_INCLUDE_DIRS "@HHVM_INCLUDE_DIRS@")
 set(HHVM_DEFINITIONS "@HHVM_DEFINITIONS@")
+set(HHVM_API_VERSION "@HHVM_API_VERSION@")
+set(CMAKE_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
+set(CMAKE_MODULE_PATH
+  "${CMAKE_INSTALL_PREFIX}/lib/hphp/CMake"
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_MODULE_PATH})
+set(CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@")
+set(ENABLE_ZEND_COMPAT "@ENABLE_ZEND_COMPAT@")
+
+message(STATUS "Configuring for HHVM API version ${HHVM_API_VERSION}")
+
 include(HPHPFunctions)
 include(HPHPIZEFunctions)
 include(HPHPCompiler)
 include(config)
 
 foreach (dir ${HHVM_INCLUDE_DIRS})
-	include_directories(${dir})
+  include_directories(${dir})
 endforeach()
 
 add_definitions("-DHHVM_BUILD_DSO")
 foreach (def ${HHVM_DEFINITIONS})
-	add_definitions("-D${def}")
+  add_definitions("-D${def}")
 endforeach()

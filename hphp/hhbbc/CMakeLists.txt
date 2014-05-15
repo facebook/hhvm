@@ -2,6 +2,10 @@ set(CXX_SOURCES)
 auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND CXX_SOURCES ${files})
 
+auto_sources(files "*.h" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
+HHVM_PUBLIC_HEADERS(hhbc ${files})
+
+
 # remove anything in a test folder
 foreach (file ${CXX_SOURCES})
   if (${file} MATCHES "/test/")

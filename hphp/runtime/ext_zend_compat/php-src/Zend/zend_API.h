@@ -134,10 +134,17 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals TSRMLS_DC)
 #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals TSRMLS_DC)
 
+#ifdef HHVM
+#define ZEND_GET_MODULE(module_name) \
+  extern "C" HPHP::Extension * getModule() { \
+    return &module_name##_module_entry.name; \
+  }
+#else
 #define ZEND_GET_MODULE(name) \
     BEGIN_EXTERN_C()\
   ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }\
     END_EXTERN_C()
+#endif
 
 #define ZEND_BEGIN_MODULE_GLOBALS(module_name)    \
   typedef struct _zend_##module_name##_globals {

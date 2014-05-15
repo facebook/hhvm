@@ -57,6 +57,12 @@ macro(HHVM_SELECT_SOURCES DIR)
       list(APPEND ASM_SOURCES ${f})
     endif()
   endforeach()
+  auto_sources(files "*.h" "RECURSE" "${DIR}")
+  foreach(f ${files})
+    if (NOT (${f} MATCHES "(/(old-)?tests?/)"))
+      list(APPEND HEADER_SOURCES ${f})
+    endif()
+  endforeach()
 endmacro(HHVM_SELECT_SOURCES)
 
 function(CONTAINS_STRING FILE SEARCH RETURN_VALUE)
@@ -148,6 +154,36 @@ function(HHVM_INSTALL TARGET DEST)
   endif()
   install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${DEST}\" TYPE ${TY} FILES \"${LOC}\")")
 endfunction(HHVM_INSTALL)
+
+function(HHVM_PUBLIC_HEADERS TARGET)
+  install(
+    CODE "INCLUDE(\"${HPHP_HOME}/CMake/HPHPFunctions.cmake\")
+      HHVM_INSTALL_HEADERS(${TARGET} ${HPHP_HOME}
+      \"${CMAKE_INSTALL_PREFIX}/include\" ${ARGN})"
+    COMPONENT dev)
+endfunction()
+
+function(HHVM_INSTALL_HEADERS TARGET SRCROOT DEST)
+  message(STATUS "Installing header files for ${TARGET}")
+  foreach(src_rel ${ARGN})
+    # Determine the relative directory name so that we can mirror the
+    # directory structure in the output
+    file(RELATIVE_PATH dest_rel ${SRCROOT} ${src_rel})
+    if (IS_ABSOLUTE ${dest_rel})
+      message(WARNING "${TARGET}: Header file ${dest_rel} is not inside ${SRCROOT}")
+    else()
+      string(FIND ${dest_rel} / slash_pos REVERSE)
+      if(slash_pos EQUAL -1)
+        set(dest_rel)
+      else()
+        string(SUBSTRING ${dest_rel} 0 ${slash_pos} dest_rel)
+      endif()
+      file(COPY ${src_rel}
+        DESTINATION "${DEST}/${dest_rel}"
+        NO_SOURCE_PERMISSIONS)
+    endif()
+  endforeach()
+endfunction()
 
 macro(HHVM_EXT_OPTION EXTNAME PACKAGENAME)
   if (NOT DEFINED EXT_${EXTNAME})

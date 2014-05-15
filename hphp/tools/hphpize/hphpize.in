@@ -1,0 +1,13 @@
+#!/bin/sh
+
+HHVM_INSTALL_PREFIX="@CMAKE_INSTALL_PREFIX@"
+HHVM_LIB="$HHVM_INSTALL_PREFIX/lib/hphp"
+
+if [ ! -f "config.cmake" ]; then
+  echo "config.cmake not found" >&2
+  exit 1
+fi
+
+cp "$HHVM_LIB/hphpize/hphpize.cmake" CMakeLists.txt
+
+echo "** hphpize complete, now run \`cmake . && make\` to build"

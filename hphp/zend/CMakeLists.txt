@@ -6,3 +6,6 @@ auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND CXX_SOURCES ${files})
 
 add_library(hphp_zend STATIC ${C_SOURCES} ${CXX_SOURCES})
+
+auto_sources(files "*.h" "RECURSE")
+HHVM_PUBLIC_HEADERS(zend ${files})

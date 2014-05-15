@@ -3,11 +3,15 @@ set(files)
 set(CXX_SOURCES)
 set(C_SOURCES)
 
-auto_sources(files "*.cpp" "${SOURCE_SUBDIRS}") 
+auto_sources(files "*.cpp" "${SOURCE_SUBDIRS}")
 list(APPEND CXX_SOURCES ${files})
 
 auto_sources(files "*.c" "${SOURCE_SUBDIRS}")
 list(APPEND C_SOURCES ${files})
+
+auto_sources(files "*.h" "{$SOURCE_SUBDIRS}")
+HHVM_PUBLIC_HEADERS(compiler ${files})
+
 
 set(ERROR_INC "analysis/core_code_error.inc")
 

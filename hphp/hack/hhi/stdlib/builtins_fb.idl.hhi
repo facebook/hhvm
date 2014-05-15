@@ -19,6 +19,7 @@ define('XHPROF_FLAGS_VTSC', 0);
 define('XHPROF_FLAGS_TRACE', 0);
 define('XHPROF_FLAGS_MEASURE_XHPROF_DISABLE', 0);
 define('XHPROF_FLAGS_MALLOC', 0);
+define('XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY', 0);
 function fb_thrift_serialize($thing) { }
 function fb_thrift_unserialize($thing, &$success, &$errcode = null_variant) { }
 function fb_serialize($thing) { }

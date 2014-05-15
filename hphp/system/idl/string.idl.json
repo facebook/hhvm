@@ -803,6 +803,7 @@
             "name": "htmlspecialchars",
             "desc": "Certain characters have special significance in HTML, and should be represented by HTML entities if they are to preserve their meanings. This function returns a string with some of these conversions made; the translations made are those most useful for everyday web programming. If you require all HTML character entities to be translated, use htmlentities() instead. This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application.\n\nThe translations performed are: '&' (ampersand) becomes '&amp;' '\"' (double quote) becomes '&quot;' when ENT_NOQUOTES is not set. ''' (single quote) becomes '&#039;' only when ENT_QUOTES is set. '<' (less than) becomes '&lt;' '>' (greater than) becomes '&gt;'",
             "flags": [
+                "ParamCoerceModeNull"
             ],
             "return": {
                 "type": "String",
@@ -811,7 +812,7 @@
             "args": [
                 {
                     "name": "str",
-                    "type": "Variant",
+                    "type": "String",
                     "desc": "The string being converted."
                 },
                 {

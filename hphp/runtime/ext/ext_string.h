@@ -86,7 +86,7 @@ String f_htmlentities(const String& str, int quote_style = k_ENT_COMPAT,
                       bool double_encode = true);
 String f_htmlspecialchars_decode(const String& str,
                                  int quote_style = k_ENT_COMPAT);
-String f_htmlspecialchars(const Variant& str, int quote_style = k_ENT_COMPAT,
+String f_htmlspecialchars(const String& str, int quote_style = k_ENT_COMPAT,
                           const String& charset = "UTF-8",
                           bool double_encode = true);
 String f_fb_htmlspecialchars(const String& str, int quote_style = k_ENT_COMPAT,

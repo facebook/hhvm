@@ -4832,7 +4832,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         e.JmpNZ(resume);
 
         if (!isKnownWaitHandle) {
+          Label likely;
+          StringData* nWaitHandle = makeStaticString("WaitHandle");
+
+          e.Dup();
+          e.InstanceOfD(nWaitHandle);
+          e.JmpNZ(likely);
           emitConstMethodCallNoParams(e, "getWaitHandle");
+          likely.set(e);
         }
         assert(m_evalStack.size() == 1);
 

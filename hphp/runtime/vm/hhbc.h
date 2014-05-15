@@ -977,6 +977,14 @@ constexpr inline bool isUnconditionalJmp(Op opcode) {
   return opcode == Op::Jmp || opcode == Op::JmpNS;
 }
 
+constexpr inline bool isConditionalJmp(Op opcode) {
+  return opcode == Op::JmpZ || opcode == Op::JmpNZ;
+}
+
+constexpr inline bool isJmp(Op opcode) {
+  return opcode >= Op::Jmp && opcode <= Op::JmpNZ;
+}
+
 inline bool isFPush(Op opcode) {
   return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;
 }

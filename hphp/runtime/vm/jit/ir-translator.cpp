@@ -236,18 +236,22 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
 
   if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
     if (op == OpJmpZ) {
-      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, i.includeBothPaths);
+      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, i.includeBothPaths,
+                i.breaksTracelet);
     } else {
-      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, i.includeBothPaths);
+      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, i.includeBothPaths,
+                i.breaksTracelet);
     }
     return;
   }
   assert(i.nextOffset == takenOffset);
   // invert the branch
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, i.includeBothPaths);
+    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, i.includeBothPaths,
+              i.breaksTracelet);
   } else {
-    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, i.includeBothPaths);
+    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, i.includeBothPaths,
+              i.breaksTracelet);
   }
 }
 

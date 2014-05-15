@@ -2069,8 +2069,11 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
                                    int32_t next,
                                    bool negate,
                                    bool bothPaths,
+                                   bool breaksTracelet,
                                    SSATmp* src) {
-  spillStack();
+  if (breaksTracelet) {
+    spillStack();
+  }
   if (genMode() == IRGenMode::CFG) {
     // Before jumping to a merge point we have to ensure that the
     // stack pointer is sync'ed.  Without an ExceptionBarrier the
@@ -2095,14 +2098,16 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
   }
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken, Offset next, bool bothPaths) {
+void HhbcTranslator::emitJmpZ(Offset taken, Offset next, bool bothPaths,
+                              bool breaksTracelet) {
   auto const src = popC();
-  emitJmpHelper(taken, next, true, bothPaths, src);
+  emitJmpHelper(taken, next, true, bothPaths, breaksTracelet, src);
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, bool bothPaths) {
+void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, bool bothPaths,
+                               bool breaksTracelet) {
   auto const src = popC();
-  emitJmpHelper(taken, next, false, bothPaths, src);
+  emitJmpHelper(taken, next, false, bothPaths, breaksTracelet, src);
 }
 
 /*
@@ -4205,6 +4210,8 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   emitVerifyTypeImpl(paramId);
 }
 
+const StaticString s_WaitHandle("WaitHandle");
+
 void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
   const StringData* className = lookupStringId(classNameStrId);
   SSATmp* src = popC();
@@ -4225,6 +4232,12 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
       (src->isA(Type::Int) && interface_supports_int(className)) ||
       (src->isA(Type::Dbl) && interface_supports_double(className));
     push(cns(res));
+    gen(DecRef, src);
+    return;
+  }
+
+  if (s_WaitHandle.get()->isame(className)) {
+    push(gen(IsWaitHandle, src));
     gen(DecRef, src);
     return;
   }
@@ -5271,6 +5284,7 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
     case OutDouble:      return Type::Dbl;
     case OutIsTypeL:
     case OutBoolean:
+    case OutPredBool:
     case OutBooleanImm:  return Type::Bool;
     case OutInt64:       return Type::Int;
     case OutArray:       return Type::Arr;

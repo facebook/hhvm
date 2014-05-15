@@ -216,8 +216,9 @@ struct HhbcTranslator {
   void emitPopR();
   void emitDup();
   void emitUnboxR();
-  void emitJmpZ(Offset taken, Offset next, bool bothPaths);
-  void emitJmpNZ(Offset taken, Offset next, bool bothPaths);
+  void emitJmpZ(Offset taken, Offset next, bool bothPaths, bool breaksTracelet);
+  void emitJmpNZ(Offset taken, Offset next, bool bothPaths,
+                 bool breaksTracelet);
   void emitJmp(int32_t offset, bool breakTracelet, Block* catchBlock);
   void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise) {
     emitJmp(offset, breakTracelet, noSurprise ? nullptr : makeCatch());
@@ -695,7 +696,7 @@ private:
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   void emitJmpHelper(int32_t taken, int32_t next, bool negate,
-                     bool bothPaths, SSATmp* src);
+                     bool bothPaths, bool breaksTracelet, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);

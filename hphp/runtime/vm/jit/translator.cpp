@@ -777,6 +777,8 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
   not_reached();
 }
 
+const StaticString s_wait_handle("WaitHandle");
+
 static RuntimeType
 getDynLocType(const SrcKey startSk,
               NormalizedInstruction* ni,
@@ -849,6 +851,16 @@ getDynLocType(const SrcKey startSk,
       auto dt = mode == TransKind::Profile ? KindOfAny : predictOutputs(ni);
       if (dt != KindOfAny) ni->outputPredicted = true;
       return RuntimeType(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
+    }
+
+    case OutPredBool: {
+      assert(ni->op() == OpInstanceOfD);
+      StringData* name = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
+      assert(name);
+      if (s_wait_handle.get()->isame(name)) {
+        return RuntimeType(true);
+      }
+      return RuntimeType(KindOfBoolean);
     }
 
     case OutClassRef: {
@@ -1119,7 +1131,7 @@ static const struct {
   { OpCastArray,   {Stack1,           Stack1,       OutArray,          0 }},
   { OpCastObject,  {Stack1,           Stack1,       OutObject,         0 }},
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean,       -1 }},
-  { OpInstanceOfD, {Stack1,           Stack1,       OutBoolean,        0 }},
+  { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool,       0 }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64,          0 }},
   { OpClone,       {Stack1,           Stack1,       OutObject,         0 }},
   { OpExit,        {Stack1,           Stack1,       OutNull,           0 }},
@@ -2079,6 +2091,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutDouble:
     case OutBoolean:
     case OutBooleanImm:
+    case OutPredBool:
     case OutInt64:
     case OutArray:
     case OutArrayImm:
@@ -3716,52 +3729,35 @@ Translator::analyze(SrcKey sk,
 
     // If we've gotten this far, it mostly boils down to control-flow
     // instructions. However, we'll trace through a few unconditional jmps.
-    if (isUnconditionalJmp(ni->op()) &&
-        ni->imm[0].u_BA > 0 &&
-        tas.m_numJmps < MaxJmpsTracedThrough &&
+    if (tas.m_numJmps < MaxJmpsTracedThrough &&
         m_mode != TransKind::Profile) {
       // Continue tracing through jumps. To prevent pathologies, only trace
       // through a finite number of forward jumps.
-      SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
-              tas.m_numJmps, ni->imm[0].u_BA);
-      tas.recordJmp();
-      sk = SrcKey(func, sk.offset() + ni->imm[0].u_BA, resumed);
-      goto head; // don't advance sk
-    }
-
-    /*
-     * If we're analyzing for purposes of possibly inlining the
-     * callee, there's a few cases where we trace through more jumps.
-     * We'll limit the size with the inlining heuristics later (in
-     * shouldIRInline), so we might as well understand as much as we
-     * can now.  There is still a limit to avoid non-termination on a
-     * while (true) or similar situation.
-     *
-     * This includes any normally-conditional jumps that we've
-     * determined are going to be unconditionally (not-)taken based on
-     * knowing the arguments at the caller.
-     */
-    if (analysisDepth() != 0 && tas.m_numJmps < MaxJmpsTracedThrough) {
-      if (isUnconditionalJmp(ni->op()) || ni->op() == Op::JmpNS) {
-        SKTRACE(1, sk, "continuing through inlined jump + %d\n",
-                ni->imm[0].u_BA);
+      if (isUnconditionalJmp(ni->op()) &&
+          ni->imm[0].u_BA > 0) {
+        // Continue tracing through jumps. To prevent pathologies, only trace
+        // through a finite number of forward jumps.
+        SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
+                tas.m_numJmps, ni->imm[0].u_IA);
         tas.recordJmp();
-        ni->nextOffset = sk.offset() + ni->imm[0].u_BA;
+        ni->nextOffset = sk.offset() + ni->imm[0].u_IA;
         sk = SrcKey(func, ni->nextOffset, resumed);
         goto head; // don't advance sk
       }
 
-      if (ni->op() == Op::JmpNZ || ni->op() == Op::JmpZ) {
-        bool const jmpnz = ni->op() == Op::JmpNZ;
-        auto const inTy = ni->inputs[0]->rtt;
-        if (inTy.isBoolean() && inTy.valueBoolean() != -1) {
-          auto const taken = inTy.valueBoolean() == jmpnz;
+      // If there is a Boolean value on stack with a predicted value,
+      // trace through JmpZ/JmpNZ to take the likely branch.
+      if (isConditionalJmp(ni->op()) && ni->imm[0].u_BA > 0) {
+        auto const inputType = ni->inputs[0]->rtt;
+        if (inputType.isBoolean() && inputType.valueBoolean() != -1) {
+          bool const jmpnz = ni->op() == Op::JmpNZ;
+          auto const taken = inputType.valueBoolean() == jmpnz;
           auto const offset = taken ? sk.offset() + ni->imm[0].u_BA
                                     : sk.advanced(unit).offset();
-          SKTRACE(1, sk,
-                  "continuing on inlined conditional jump known "
-                  "%staken + %d\n",
-                  taken ? "" : "not ",
+
+          SKTRACE(1, sk, "continuing through conditional jmp on branch "
+                  "%s to %d\n",
+                  taken ? "taken" : "next",
                   offset);
           ni->nextOffset = offset;
           tas.recordJmp();

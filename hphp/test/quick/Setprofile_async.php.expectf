@@ -15,8 +15,6 @@ int(43)
 ** exit var_dump
 ** enter RescheduleWaitHandle::create
 ** exit RescheduleWaitHandle::create
-** enter WaitHandle::getWaitHandle
-** exit WaitHandle::getWaitHandle
 ** exit genBar
 ** enter genBar
 ** enter error_log
@@ -27,8 +25,6 @@ int(44)
 ** exit var_dump
 ** enter RescheduleWaitHandle::create
 ** exit RescheduleWaitHandle::create
-** enter WaitHandle::getWaitHandle
-** exit WaitHandle::getWaitHandle
 ** exit genBar
 ** enter gen2
 ** enter error_log
@@ -36,13 +32,9 @@ In gen2
 ** exit error_log
 ** enter RescheduleWaitHandle::create
 ** exit RescheduleWaitHandle::create
-** enter WaitHandle::getWaitHandle
-** exit WaitHandle::getWaitHandle
 ** exit gen2
 ** enter GenArrayWaitHandle::create
 ** exit GenArrayWaitHandle::create
-** enter WaitHandle::getWaitHandle
-** exit WaitHandle::getWaitHandle
 ** exit genFoo
 ** enter WaitHandle::join
 ** enter Exception::__init__
@@ -87,8 +79,6 @@ Finished in gen1
 ** exit error_log
 ** enter RescheduleWaitHandle::create
 ** exit RescheduleWaitHandle::create
-** enter WaitHandle::getWaitHandle
-** exit WaitHandle::getWaitHandle
 ** exit gen1
 ** enter WaitHandle::join
 ** enter gen1

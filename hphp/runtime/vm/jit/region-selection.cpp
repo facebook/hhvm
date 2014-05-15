@@ -389,14 +389,23 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
       curBlock->setParamByRef(sk, ni->preppedByRef);
     }
 
-    if (ni->next && isUnconditionalJmp(ni->op())) {
-      // A Jmp that isn't the final instruction in a Tracelet means we traced
-      // through a forward jump in analyze. Update sk to point to the next NI
-      // in the stream.
-      auto dest = ni->offset() + ni->imm[0].u_BA;
-      assert(dest > sk.offset()); // We only trace for forward Jmps for now.
-      sk.setOffset(dest);
+    if (ni->next && isJmp(ni->op())) {
+      Offset dest;
+      if (isUnconditionalJmp(ni->op())) {
+        // A Jmp that isn't the final instruction in a Tracelet means we traced
+        // through a forward jump in analyze. Update sk to point to the next NI
+        // in the stream.
+        dest = ni->offset() + ni->imm[0].u_BA;
+        assert(dest > sk.offset()); // We only trace for forward Jmps for now.
+      } else if (isConditionalJmp(ni->op())) {
+        // When tracing through a conditional jump, the next SrcKey offset
+        // is given by ni->nextOffset.
+        dest = ni->nextOffset;
+      } else {
+        not_reached();
+      }
 
+      sk.setOffset(dest);
       // The Jmp terminates this block.
       newBlock(sk, curSpOffset);
     } else {

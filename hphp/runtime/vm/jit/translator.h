@@ -782,6 +782,7 @@ enum OutTypeConstraints {
 
   OutUnknown,           // Not known at tracelet compile-time
   OutPred,              // Unknown, but give prediction a whirl.
+  OutPredBool,          // Boolean value predicted to be True or False
   OutCns,               // Constant; may be known at compile-time
   OutVUnknown,          // type is V(unknown)
 

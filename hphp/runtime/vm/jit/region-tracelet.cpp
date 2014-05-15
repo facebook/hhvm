@@ -301,7 +301,7 @@ bool RegionFormer::prepareInstruction() {
 
   // This reads valueClass from the inputs so it used to need to
   // happen after readMetaData.  But now readMetaData is gone ...
-  if (inliningDepth() == 0) annotate(&m_inst);
+  annotate(&m_inst);
 
   // Check all the inputs for unknown values.
   assert(inputInfos.size() == m_inst.inputs.size());

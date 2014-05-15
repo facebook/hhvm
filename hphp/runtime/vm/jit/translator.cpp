@@ -3593,17 +3593,10 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     ++t.m_numOpcodes;
 
     /*
-     * The annotation step attempts to track Func*'s associated with
-     * given FCalls when the FPush is in a different tracelet.
-     *
-     * When we're analyzing a callee, we can't do this because we may
-     * have class information in some of our RuntimeTypes that is only
-     * true because of who the caller was.  (Normally it is only there
-     * if it came from static analysis.)
+     * The historically named annotation step attempts to find direct Func*'s
+     * for FCallD calls.
      */
-    if (analysisDepth() == 0) {
-      annotate(ni);
-    }
+    annotate(ni);
 
     if (ni->op() == Op::FCall || ni->op() == Op::FCallD) {
       analyzeCallee(tas, t, ni);

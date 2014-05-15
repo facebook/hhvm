@@ -1,6 +1,6 @@
 <?hh
 
-// Test that COW makes materializing an ImmMap is an O(1) operation.
+// Test that COW makes materializing an ImmMap an O(1) operation.
 
 function main() {
   $m = Map {};

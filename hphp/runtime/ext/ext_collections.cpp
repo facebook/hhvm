@@ -603,8 +603,7 @@ void BaseVector::addFront(const TypedValue* val) {
 
 Variant BaseVector::popFront() {
   if (m_size) {
-    mutate();
-    ++m_version;
+    mutateAndBump();
     Variant ret(tvAsCVarRef(&m_data[0]), Variant::CellCopy());
     --m_size;
     memmove(m_data, m_data+1, m_size * sizeof(TypedValue));
@@ -671,8 +670,7 @@ void BaseVector::init(const Variant& t) {
   }
   if (LIKELY(!iter.hasIteratorObj())) {
     if (iter) {
-      mutate();
-      ++m_version;
+      mutateAndBump();
       do {
         addRaw(iter.secondRefPlus());
         ++iter;
@@ -715,6 +713,7 @@ Object c_Vector::t_add(const Variant& val) {
 }
 
 Object c_Vector::t_addall(const Variant& iterable) {
+  // TODO Task# 4324040: Refactor this logic with init()
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -723,8 +722,7 @@ Object c_Vector::t_addall(const Variant& iterable) {
   }
   if (LIKELY(!iter.hasIteratorObj())) {
     if (iter) {
-      mutate();
-      ++m_version;
+      mutateAndBump();
       do {
         addRaw(iter.secondRefPlus());
         ++iter;
@@ -746,8 +744,7 @@ Object c_Vector::t_append(const Variant& val) {
 
 Variant c_Vector::t_pop() {
   if (m_size) {
-    mutate();
-    ++m_version;
+    mutateAndBump();
     --m_size;
     return Variant(tvAsCVarRef(&m_data[m_size]), Variant::CellCopy());
   } else {
@@ -793,8 +790,8 @@ void c_Vector::t_resize(const Variant& sz, const Variant& value) {
   } else {
     mutate();
   }
-  ++m_version;
   assert(!hasImmutableBuffer());
+  ++m_version;
   uint requestedSize = (uint)intSz;
   if (m_size > requestedSize) {
     do {
@@ -883,8 +880,7 @@ Object c_Vector::t_removekey(const Variant& key) {
   if (!contains(k)) {
     return this;
   }
-  mutate();
-  ++m_version;
+  mutateAndBump();
   uint64_t datum = m_data[k].m_data.num;
   DataType t = m_data[k].m_type;
   if (k+1 < m_size) {
@@ -910,8 +906,7 @@ Array c_Vector::t_tovaluesarray() {
 
 void c_Vector::t_reverse() {
   if (m_size <= 1) return;
-  mutate();
-  ++m_version;
+  mutateAndBump();
   TypedValue* start = m_data;
   TypedValue* end = m_data + m_size - 1;
   for (; start < end; ++start, --end) {
@@ -968,8 +963,7 @@ void c_Vector::t_splice(const Variant& offset, const Variant& len /* = null */,
   } else {
     endPos = sz;
   }
-  mutate();
-  ++m_version;
+  mutateAndBump();
   // Null out each element before decreffing it. We need to do this in case
   // a __destruct method reenters and accesses this Vector object.
   for (int64_t i = startPos; i < endPos; ++i) {
@@ -994,8 +988,7 @@ void c_Vector::t_shuffle() {
   if (m_size <= 1) {
     return;
   }
-  mutate();
-  ++m_version;
+  mutateAndBump();
   for (uint i = 1; i < m_size; ++i) {
     uint j = f_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
@@ -1272,8 +1265,7 @@ void c_Vector::sort(int sort_flags, bool ascending) {
   if (m_size <= 1) {
     return;
   }
-  mutate();
-  ++m_version;
+  mutateAndBump();
   SortFlavor flav = preSort<VectorValAccessor>(VectorValAccessor());
   CALL_SORT(VectorValAccessor);
 }
@@ -1286,8 +1278,7 @@ bool c_Vector::usort(const Variant& cmp_function) {
   if (m_size <= 1) {
     return true;
   }
-  mutate();
-  ++m_version;
+  mutateAndBump();
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
   JIT::CallerFrame cf;
@@ -1633,8 +1624,7 @@ void BaseMap::init(const Variant& t) {
   }
   if (LIKELY(!iter.hasIteratorObj() && !m_size)) {
     if (iter) {
-      mutate();
-      ++m_version;
+      mutateAndBump();
       do {
         setRaw(iter.first(), iter.secondRefPlus());
         ++iter;
@@ -1769,6 +1759,7 @@ Object c_Map::t_set(const Variant& key, const Variant& value) {
 }
 
 Object c_Map::t_setall(const Variant& iterable) {
+  // TODO Task# 4324040: Refactor this logic with init()
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -2083,8 +2074,7 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
     if (b) {
       continue;
     }
-    mutate();
-    ++m_version;
+    mutateAndBump();
     version = m_version;
     e = iter_elm(ipos);
     int32_t* pp = (e->hasIntKey()
@@ -2694,8 +2684,7 @@ void BaseMap::add(const TypedValue* val) {
 
 Variant BaseMap::pop() {
   if (m_size) {
-    mutate();
-    ++m_version;
+    mutateAndBump();
     auto* e = elmLimit() - 1;
     for (;; --e) {
       assert(e >= data());
@@ -2720,8 +2709,7 @@ Variant BaseMap::pop() {
 
 Variant BaseMap::popFront() {
   if (m_size) {
-    mutate();
-    ++m_version;
+    mutateAndBump();
     auto* e = data();
     for (;; ++e) {
       assert(e != elmLimit());
@@ -2745,8 +2733,7 @@ Variant BaseMap::popFront() {
 }
 
 void BaseMap::remove(int64_t key) {
-  mutate();
-  ++m_version;
+  mutateAndBump();
   auto* p = findForInsert(key);
   if (validPos(*p)) {
     erase(p);
@@ -2754,8 +2741,7 @@ void BaseMap::remove(int64_t key) {
 }
 
 void BaseMap::remove(StringData* key) {
-  mutate();
-  ++m_version;
+  mutateAndBump();
   auto* p = findForInsert(key, key->hash());
   if (validPos(*p)) {
     erase(p);
@@ -3271,15 +3257,13 @@ void BaseMap::postSort() {
 
 void BaseMap::asort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
-  mutate();
-  ++m_version;
+  mutateAndBump();
   SORT_BODY(MapValAccessor);
 }
 
 void BaseMap::ksort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
-  mutate();
-  ++m_version;
+  mutateAndBump();
   SORT_BODY(MapKeyAccessor);
 }
 
@@ -3309,15 +3293,13 @@ void BaseMap::ksort(int sort_flags, bool ascending) {
 
 bool BaseMap::uasort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
-  mutate();
-  ++m_version;
+  mutateAndBump();
   USER_SORT_BODY(MapValAccessor);
 }
 
 bool BaseMap::uksort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
-  mutate();
-  ++m_version;
+  mutateAndBump();
   USER_SORT_BODY(MapKeyAccessor);
 }
 
@@ -3623,22 +3605,62 @@ c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
 
 // Public
 
+void BaseSet::cow() {
+  assert(hasImmutableBuffer());
+  if (!m_size) {
+    uint32_t used = 0;
+    uint32_t cap = 0;
+    m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
+    m_tableMask = 0;
+    m_data = nullptr;
+    m_hash = &empty_map_hash_slot;
+    m_immCopy.reset();
+    return;
+  }
+  auto needed = size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t);
+  auto* newData = (Elm*)MM().objMallocLogged(needed);
+  assert(newData);
+  auto* newHash = (int32_t*)(newData + m_cap);
+  assert(newHash);
+  wordcpy(newHash, m_hash, hashSize());
+  auto* eLimit = elmLimit();
+  auto* te = newData;
+  for (auto* e = firstElm(); e != eLimit; ++e, ++te) {
+    if (isTombstone(e)) {
+      te->data.m_type = e->data.m_type;
+    } else {
+      dupElm(*e, *te);
+    }
+  }
+  m_data = newData;
+  m_hash = newHash;
+  m_immCopy.reset();
+}
+
 void BaseSet::init(const Variant& t) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    if (v.isInteger()) {
-      add(v.toInt64());
-    } else if (v.isString()) {
-      add(v.getStringData());
-    } else {
-      throwBadValueType();
+  if (LIKELY(!iter.hasIteratorObj() && !m_size)) {
+    if (iter) {
+      mutateAndBump();
+      do {
+        addRaw(iter.secondRefPlus());
+        ++iter;
+      } while (iter);
+    }
+  } else {
+    for (; iter; ++iter) {
+      add(iter.second());
     }
   }
 }
 
-void BaseSet::add(int64_t h) {
+template<bool raw>
+ALWAYS_INLINE
+void BaseSet::addImpl(int64_t h) {
+  if (!raw) {
+    mutate();
+  }
   auto* p = findForInsert(h);
   assert(p);
   if (validPos(*p)) {
@@ -3655,10 +3677,17 @@ void BaseSet::add(int64_t h) {
   }
   auto& e = allocElm(p);
   e.setInt(h);
-  ++m_version;
+  if (!raw) {
+    ++m_version;
+  }
 }
 
-void BaseSet::add(StringData *key) {
+template<bool raw>
+ALWAYS_INLINE
+void BaseSet::addImpl(StringData *key) {
+  if (!raw) {
+    mutate();
+  }
   strhash_t h = key->hash();
   auto* p = findForInsert(key, h);
   assert(p);
@@ -3671,7 +3700,25 @@ void BaseSet::add(StringData *key) {
   }
   auto& e = allocElm(p);
   e.setStr(key, h);
-  ++m_version;
+  if (!raw) {
+    ++m_version;
+  }
+}
+
+void BaseSet::addRaw(int64_t h) {
+  addImpl<true>(h);
+}
+
+void BaseSet::addRaw(StringData *key) {
+  addImpl<true>(key);
+}
+
+void BaseSet::add(int64_t h) {
+  addImpl<false>(h);
+}
+
+void BaseSet::add(StringData *key) {
+  addImpl<false>(key);
 }
 
 BaseSet::Elm& BaseSet::allocElmFront(int32_t* ei) {
@@ -3696,6 +3743,7 @@ BaseSet::Elm& BaseSet::allocElmFront(int32_t* ei) {
 }
 
 void BaseSet::addFront(int64_t h) {
+  mutate();
   auto* p = findForInsert(h);
   assert(p);
   if (validPos(*p)) {
@@ -3716,6 +3764,7 @@ void BaseSet::addFront(int64_t h) {
 }
 
 void BaseSet::addFront(StringData *key) {
+  mutate();
   strhash_t h = key->hash();
   auto* p = findForInsert(key, h);
   assert(p);
@@ -3733,7 +3782,7 @@ void BaseSet::addFront(StringData *key) {
 
 Variant BaseSet::pop() {
   if (m_size) {
-    ++m_version;
+    mutateAndBump();
     auto* e = elmLimit() - 1;
     for (;; --e) {
       assert(e >= data());
@@ -3758,7 +3807,7 @@ Variant BaseSet::pop() {
 
 Variant BaseSet::popFront() {
   if (m_size) {
-    ++m_version;
+    mutateAndBump();
     auto* e = data();
     for (;; ++e) {
       assert(e != elmLimit());
@@ -3781,6 +3830,22 @@ Variant BaseSet::popFront() {
   }
 }
 
+void BaseSet::remove(int64_t key) {
+  mutateAndBump();
+  auto* p = findForInsert(key);
+  if (validPos(*p)) {
+    erase(p);
+  }
+}
+
+void BaseSet::remove(StringData* key) {
+  mutateAndBump();
+  auto* p = findForInsert(key, key->hash());
+  if (validPos(*p)) {
+    erase(p);
+  }
+}
+
 void BaseSet::throwOOB(int64_t val) {
   throwIntOOB(val);
 }
@@ -3797,18 +3862,19 @@ void BaseSet::throwNoIndexAccess() {
 
 NEVER_INLINE void BaseSet::makeRoom() {
   assert(isFull());
-  // erase() guarantees that element density will never drop below ~50%,
-  // so we always grow to make room here.
-  assert(!isDensityTooLow());
-  if (UNLIKELY(m_cap == MaxSize)) {
-    throwTooLarge();
+  if (LIKELY(!isDensityTooLow())) {
+    if (UNLIKELY(m_cap == MaxSize)) {
+      throwTooLarge();
+    }
+    grow(m_cap ? m_cap*2 : SmallSize, m_cap ? m_tableMask*2+1 : SmallMask);
+  } else {
+    compact();
   }
-  // Double the current capacity
-  grow(m_cap ? m_cap*2 : SmallSize, m_cap ? m_tableMask*2+1 : SmallMask);
+  assert(!isFull());
 }
 
 NEVER_INLINE void BaseSet::reserve(int64_t sz) {
-  assert(m_size <= m_used && m_used <= m_cap && !isDensityTooLow());
+  assert(m_size <= m_used && m_used <= m_cap);
   uint32_t newCap, newMask;
   if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
     throwReserveTooLarge();
@@ -3839,37 +3905,49 @@ NEVER_INLINE void BaseSet::reserve(int64_t sz) {
 
 void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
   assert(m_size <= m_used && m_used <= m_cap);
+  assert(newCap >= SmallSize && newMask >= SmallMask);
   size_t newHashSize = size_t(newMask) + 1;
   assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
   auto oldHashSize = oldData ? hashSize() : 0;
+  auto oldCap = m_cap;
   auto needed = size_t(newCap) * sizeof(Elm) + newHashSize * sizeof(int32_t);
   auto* data = (Elm*)MM().objMallocLogged(needed);
   auto* table = (int32_t*)(data + size_t(newCap));
   m_data = data;
   m_hash = table;
   m_tableMask = newMask;
+  auto oldUsed DEBUG_ONLY = m_used;
+  m_capAndUsed = (uint64_t(newCap) << 32) | uint64_t(m_size);
   initHash(table, newHashSize);
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
     while (isTombstone(frPos, oldData)) {
-      assert(frPos + 1 < m_used);
+      assert(frPos + 1 < oldUsed);
       ++frPos;
     }
-    auto& toE = data[toPos];
-    copyElm(oldData[frPos], toE);
-    *findForNewInsert(table, newMask, toE.probe()) = toPos;
+    copyElm(oldData[frPos], data[toPos]);
+    *findForNewInsert(table, newMask, data[toPos].probe()) = toPos;
   }
-  if (oldData) {
-    MM().objFreeLogged(
-      oldData, size_t(m_cap) * sizeof(Elm) + oldHashSize * sizeof(int32_t));
+  if (!hasImmutableBuffer()) {
+    if (oldData) {
+      MM().objFreeLogged(
+        oldData, size_t(oldCap) * sizeof(Elm) + oldHashSize * sizeof(int32_t));
+    }
+  } else {
+    // In this case we don't own the oldData buffer, so we don't free
+    // it and we incRef all of the elements
+    for (uint32_t toPos = 0; toPos < m_size; ++toPos) {
+      tvRefcountedIncRef(&data[toPos].data);
+    }
+    m_immCopy.reset();
   }
-  m_cap = newCap;
-  m_used = m_size;
+  assert(!hasImmutableBuffer());
 }
 
-void BaseSet::compactIfNecessary() {
-  if (!isDensityTooLow()) { return; }
+void BaseSet::compact() {
+  assert(!hasImmutableBuffer());
+  assert(isDensityTooLow());
   auto* elms = data();
   assert(elms);
   auto mask = m_tableMask;
@@ -3897,6 +3975,24 @@ Array BaseSet::ToArray(const ObjectData* obj) {
 
 bool BaseSet::ToBool(const ObjectData* obj) {
   return static_cast<const BaseSet*>(obj)->toBoolImpl();
+}
+
+// This function will create a immutable copy of this Set (if it doesn't
+// already exist) and then return it
+Object c_Set::getImmutableCopy() {
+  if (!hasImmutableBuffer()) {
+    assert(m_immCopy.isNull());
+    auto* st = NEWOBJ(c_ImmSet)();
+    m_immCopy = st;
+    st->m_data = m_data;
+    st->m_hash = m_hash;
+    st->m_size = m_size;
+    st->m_used = m_used;
+    st->m_cap = m_cap;
+    st->m_tableMask = m_tableMask;
+    st->m_version = m_version;
+  }
+  return m_immCopy;
 }
 
 bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
@@ -3983,7 +4079,7 @@ BaseSet::Clone(ObjectData* obj) {
   target->m_hash = (int32_t*)(target->m_data + target->m_cap);
   wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
 
-  for (ssize_t i = 0; i < thiz->iterLimit(); ++i) {
+  for (ssize_t i = 0; i < thiz->posLimit(); ++i) {
     Elm& e = thiz->data()[i];
     Elm& te = target->data()[i];
     if (isTombstone(&e)) {
@@ -3996,38 +4092,7 @@ BaseSet::Clone(ObjectData* obj) {
   return target;
 }
 
-void BaseSet::php_construct(const Variant& iterable /* = null_variant */) {
-  if (iterable.isNull()) return;
-  init(iterable);
-}
-
-Object BaseSet::php_addAll(const Variant& iterable) {
-  if (iterable.isNull()) return this;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    add(v.asCell());
-  }
-  return this;
-}
-
 static int32_t empty_set_hash_slot = BaseSet::Empty;
-
-Object BaseSet::php_clear() {
-  deleteElms();
-  freeData();
-  uint32_t used = 0;
-  uint32_t cap = 0;
-  uint32_t tableMask = 0;
-  int32_t version = m_version + 1;
-  m_size = 0;
-  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
-  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
-  m_data = nullptr;
-  m_hash = &empty_set_hash_slot;
-  return this;
-}
 
 bool BaseSet::php_contains(const Variant& key) {
   DataType t = key.getType();
@@ -4041,7 +4106,7 @@ bool BaseSet::php_contains(const Variant& key) {
   return false;
 }
 
-Object BaseSet::php_remove(const Variant& key) {
+Object c_Set::t_remove(const Variant& key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -4083,17 +4148,18 @@ BaseSet::php_map(const Variant& callback) {
     throw e;
   }
   auto* st = NEWOBJ(TSet)();
+  assert(!st->hasImmutableBuffer());
   Object obj = st;
   if (!m_size) return obj;
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
+    auto* e = iter_elm(ipos);
     TypedValue tvCbRet;
     int32_t pVer = m_version;
     g_context->invokeFuncFew(&tvCbRet, ctx, 1, &e->data);
     // Now that tvCbRet is live, make sure to decref even if we throw.
     SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
-    st->add(&tvCbRet);
+    st->addRaw(&tvCbRet);
   }
   return obj;
 }
@@ -4111,22 +4177,23 @@ BaseSet::php_filter(const Variant& callback) {
     throw e;
   }
   auto* st = NEWOBJ(TSet)();
+  assert(!st->hasImmutableBuffer());
   Object obj = st;
   if (!m_size) return obj;
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    Variant ret;
-    int32_t version = m_version;
-    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e->data);
+  int32_t version = m_version;
+  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
+    auto* e = iter_elm(ipos);
+    bool b = invokeAndCastToBool(ctx, 1, &e->data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    if (!ret.toBoolean()) continue;
+    if (!b) continue;
+    e = iter_elm(ipos);
     if (e->hasInt()) {
-      st->add(e->data.m_data.num);
+      st->addRaw(e->data.m_data.num);
     } else {
       assert(e->hasStr());
-      st->add(e->data.m_data.pstr);
+      st->addRaw(e->data.m_data.pstr);
     }
   }
   return obj;
@@ -4202,28 +4269,30 @@ BaseSet::php_takeWhile(const Variant& fn) {
     throw e;
   }
   auto* st = NEWOBJ(TSet);
+  assert(!st->hasImmutableBuffer());
   Object obj = st;
   if (!m_size) return obj;
-  uint32_t used = iterLimit();
+  uint32_t used = posLimit();
+  int32_t version UNUSED;
+  if (checkVersion) {
+    version = m_version;
+  }
   for (uint i = 0; i < used; ++i) {
     if (isTombstone(i)) continue;
-    Elm& e = data()[i];
-    Variant ret;
+    Elm* e = &data()[i];
+    bool b = invokeAndCastToBool(ctx, 1, &e->data);
     if (checkVersion) {
-      int32_t version = m_version;
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e.data);
       if (UNLIKELY(version != m_version)) {
         throw_collection_modified();
       }
-    } else {
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e.data);
     }
-    if (!ret.toBoolean()) continue;
-    if (e.hasInt()) {
-      st->add(e.data.m_data.num);
+    if (!b) continue;
+    e = &data()[i];
+    if (e->hasInt()) {
+      st->addRaw(e->data.m_data.num);
     } else {
-      assert(e.hasStr());
-      st->add(e.data.m_data.pstr);
+      assert(e->hasStr());
+      st->addRaw(e->data.m_data.pstr);
     }
   }
   return obj;
@@ -4284,33 +4353,34 @@ BaseSet::php_skipWhile(const Variant& fn) {
     throw e;
   }
   auto* st = NEWOBJ(TSet)();
+  assert(!st->hasImmutableBuffer());
   Object obj = st;
   if (!m_size) return obj;
-  uint32_t used = iterLimit();
+  uint32_t used = posLimit();
   uint i = 0;
+  int32_t version UNUSED;
+  if (checkVersion) {
+    version = m_version;
+  }
   for (; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm& e = data()[i];
-    Variant ret;
+    bool b = invokeAndCastToBool(ctx, 1, &e.data);
     if (checkVersion) {
-      int32_t version = m_version;
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e.data);
       if (UNLIKELY(version != m_version)) {
         throw_collection_modified();
       }
-    } else {
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e.data);
     }
-    if (!ret.toBoolean()) break;
+    if (!b) break;
   }
   for (; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm& e = data()[i];
     if (e.hasInt()) {
-      st->add(e.data.m_data.num);
+      st->addRaw(e.data.m_data.num);
     } else {
       assert(e.hasStr());
-      st->add(e.data.m_data.pstr);
+      st->addRaw(e.data.m_data.pstr);
     }
   }
   return obj;
@@ -4363,16 +4433,10 @@ BaseSet::php_fromItems(const Variant& iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   auto* target = NEWOBJ(TSet)();
+  assert(!target->hasImmutableBuffer());
   Object ret = target;
   for (; iter; ++iter) {
-    Variant v = iter.second();
-    if (v.isInteger()) {
-      target->add(v.toInt64());
-    } else if (v.isString()) {
-      target->add(v.getStringData());
-    } else {
-      throwBadValueType();
-    }
+    target->addRaw(iter.second());
   }
   return ret;
 }
@@ -4388,18 +4452,12 @@ BaseSet::php_fromArray(const Variant& arr) {
     throw e;
   }
   auto* st = NEWOBJ(TSet)();
+  assert(!st->hasImmutableBuffer());
   Object ret = st;
   ArrayData* ad = arr.getArrayData();
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
-    const Variant& v = ad->getValueRef(pos);
-    if (v.isInteger()) {
-      st->add(v.toInt64());
-    } else if (v.isString()) {
-      st->add(v.getStringData());
-    } else {
-      throwBadValueType();
-    }
+    st->addRaw(ad->getValueRef(pos));
   }
   return ret;
 }
@@ -4410,6 +4468,7 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
   auto* st = NEWOBJ(TSet)();
+  assert(!st->hasImmutableBuffer());
   Object ret = st;
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant arr = iter.second();
@@ -4421,7 +4480,7 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
     ArrayData* ad = arr.getArrayData();
     for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
          pos = ad->iter_advance(pos)) {
-      st->php_add(ad->getValueRef(pos));
+      st->addRaw(ad->getValueRef(pos));
     }
   }
   return ret;
@@ -4442,8 +4501,11 @@ BaseSet::BaseSet(Class* cls) : ExtCollectionObjectData(cls) {
 }
 
 BaseSet::~BaseSet() {
-  deleteElms();
-  freeData();
+  if (!hasImmutableBuffer() && m_data) {
+    assert(m_immCopy.isNull());
+    deleteElms();
+    freeData();
+  }
 }
 
 void BaseSet::freeData() {
@@ -4669,6 +4731,7 @@ int32_t* BaseSet::findForNewInsert(size_t h0) const {
 }
 
 void BaseSet::eraseNoCompact(int32_t* pos) {
+  assert(!hasImmutableBuffer());
   assert(validPos(*pos) && !isTombstone(*pos));
   assert(data());
   auto* elms = data();
@@ -4690,10 +4753,10 @@ void BaseSet::eraseNoCompact(int32_t* pos) {
 }
 
 void BaseSet::erase(int32_t* pos) {
+  assert(!hasImmutableBuffer());
   eraseNoCompact(pos);
-  // Compact in order to keep elms from being overly sparse. Other parts
-  // of Set's implementation rely on the fact that erase() does not allow
-  // the Elm density to drop below ~50%.
+  // Compact in order to keep elms from being overly sparse. In general,
+  // Set's implement tries to avoid letting Elm density drop below 50%.
   compactIfNecessary();
 }
 
@@ -4711,19 +4774,43 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
 }
 
 void c_Set::t___construct(const Variant& iterable /* = null_variant */) {
-  BaseSet::php_construct(iterable);
+  if (iterable.isNull()) return;
+  init(iterable);
 }
 
 Object c_Set::t_add(const Variant& val) {
-  return BaseSet::php_add(val);
+  add(val);
+  return this;
 }
 
 Object c_Set::t_addall(const Variant& iterable) {
-  return BaseSet::php_addAll(iterable);
+  // TODO Task# 4324040: Refactor this logic with init()
+  if (iterable.isNull()) return this;
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  for (; iter; ++iter) {
+    add(iter.second());
+  }
+  return this;
 }
 
 Object c_Set::t_clear() {
-  return BaseSet::php_clear();
+  if (!hasImmutableBuffer()) {
+    deleteElms();
+    freeData();
+  } else {
+    m_immCopy.reset();
+  }
+  uint32_t used = 0;
+  uint32_t cap = 0;
+  uint32_t tableMask = 0;
+  int32_t version = m_version + 1;
+  m_size = 0;
+  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
+  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
+  m_data = nullptr;
+  m_hash = &empty_set_hash_slot;
+  return this;
 }
 
 bool c_Set::t_isempty() {
@@ -4748,10 +4835,6 @@ Object c_Set::t_lazy() {
 
 bool c_Set::t_contains(const Variant& key) {
   return BaseSet::php_contains(key);
-}
-
-Object c_Set::t_remove(const Variant& key) {
-  return BaseSet::php_remove(key);
 }
 
 Array c_Set::t_toarray() {
@@ -4843,7 +4926,7 @@ BaseSet::php_concat(const Variant& iterable) {
   vec->reserve((size_t)sz + itSize);
   vec->m_size = sz;
 
-  uint32_t used = iterLimit();
+  uint32_t used = posLimit();
   for (uint32_t i = 0, j = 0; i < used; ++i) {
     if (isTombstone(i)) {
       continue;
@@ -4852,9 +4935,7 @@ BaseSet::php_concat(const Variant& iterable) {
     ++j;
   }
   for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = v.asCell();
-    vec->add(tv);
+    vec->addRaw(iter.second());
   }
   return obj;
 }
@@ -4888,7 +4969,7 @@ Variant BaseSet::php_lastValue() {
   // walk backward from the end when n > m_size/2, then
   // we could use that here instead of having to use a
   // manual while loop.
-  uint32_t pos = iterLimit() - 1;
+  uint32_t pos = posLimit() - 1;
   while (isTombstone(pos)) {
     assert(pos > 0);
     --pos;
@@ -4901,7 +4982,14 @@ Object c_Set::t_removeall(const Variant& iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
-    php_remove(iter.second());
+    Variant v = iter.second();
+    if (v.isInteger()) {
+      remove(v.toInt64());
+    } else if (v.isString()) {
+      remove(v.getStringData());
+    } else {
+      throwBadValueType();
+    }
   }
   return this;
 }
@@ -4932,18 +5020,12 @@ c_Set* c_Set::Clone(ObjectData* obj) {
   return BaseSet::Clone<c_Set>(obj);
 }
 
-Object c_Set::t_immutable() {
-  auto* st = NEWOBJ(c_ImmSet)();
-  Object o = st;
-  st->init(VarNR(this));
-  return o;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // ImmSet
 
 void c_ImmSet::t___construct(const Variant& iterable /* = null_variant */) {
-  BaseSet::php_construct(iterable);
+  if (iterable.isNull()) return;
+  init(iterable);
 }
 
 bool c_ImmSet::t_isempty() {
@@ -5019,9 +5101,17 @@ c_ImmSet* c_ImmSet::Clone(ObjectData* obj) {
   return BaseSet::Clone<c_ImmSet>(obj);
 }
 
-Object c_ImmSet::t_immutable() {
-  return this;
-}
+Object c_Set::t_tovector() { return materializeImpl<c_Vector>(this); }
+Object c_Set::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
+Object c_Set::t_toset() { return Object::attach(c_Set::Clone(this)); }
+Object c_Set::t_toimmset() { return getImmutableCopy(); }
+Object c_Set::t_immutable() { return getImmutableCopy(); }
+
+Object c_ImmSet::t_tovector() { return materializeImpl<c_Vector>(this); }
+Object c_ImmSet::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
+Object c_ImmSet::t_toset() { return materializeImpl<c_Set>(this); }
+Object c_ImmSet::t_toimmset() { return this; }
+Object c_ImmSet::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -5039,7 +5129,7 @@ Variant c_SetIterator::t_current() {
   if (UNLIKELY(m_version != st->getVersion())) {
     throw_collection_modified();
   }
-  if (!m_pos) {
+  if (!st->iter_valid(m_pos)) {
     throw_iterator_not_valid();
   }
   return tvAsCVarRef(st->iter_value(m_pos));
@@ -5050,7 +5140,8 @@ Variant c_SetIterator::t_key() {
 }
 
 bool c_SetIterator::t_valid() {
-  return m_pos != 0;
+  auto const st = m_obj.get();
+  return st->iter_valid(m_pos);
 }
 
 void c_SetIterator::t_next() {
@@ -5618,37 +5709,6 @@ COLLECTION_MAGIC_METHODS(ImmSet)
 COLLECTION_MAGIC_METHODS(Pair)
 
 #undef COLLECTION_MAGIC_METHODS
-
-#define ITERABLE_MATERIALIZE_METHODS(cls) \
-  Object c_##cls::t_tovector() { \
-    auto* vec = NEWOBJ(c_Vector)(); \
-    Object o = vec; \
-    vec->init(VarNR(this)); \
-    return o; \
-  } \
-  Object c_##cls::t_toimmvector() { \
-    auto* vec = NEWOBJ(c_ImmVector)(); \
-    Object o = vec; \
-    vec->init(VarNR(this)); \
-    return o; \
-  } \
-  Object c_##cls::t_toset() { \
-    auto* st = NEWOBJ(c_Set)(); \
-    Object o = st; \
-    st->init(VarNR(this)); \
-    return o; \
-  } \
-  Object c_##cls::t_toimmset() { \
-    auto* st = NEWOBJ(c_ImmSet)(); \
-    Object o = st; \
-    st->init(VarNR(this)); \
-    return o; \
-  }
-
-ITERABLE_MATERIALIZE_METHODS(Set)
-ITERABLE_MATERIALIZE_METHODS(ImmSet)
-
-#undef ITERABLE_MATERIALIZE_METHODS
 
 static inline bool isKeylessCollectionType(Collection::Type ctype) {
   return Collection::isSetType(ctype);

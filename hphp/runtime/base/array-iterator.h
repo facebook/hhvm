@@ -34,7 +34,7 @@ namespace HPHP {
 struct TypedValue;
 class BaseVector;
 class BaseMap;
-class c_Set;
+class BaseSet;
 class c_ImmVector;
 class c_ImmSet;
 class c_Pair;
@@ -49,6 +49,7 @@ enum class IterNextIndex : uint16_t {
   Map,
   ImmMap,
   Set,
+  ImmSet,
   Pair,
   Object,
 };
@@ -330,9 +331,11 @@ private:
     assert(Collection::isMapType(getCollectionType()));
     return (BaseMap*)((intptr_t)m_obj & ~1);
   }
-  c_Set* getSet() {
-    assert(hasCollection() && getCollectionType() == Collection::SetType);
-    return (c_Set*)((intptr_t)m_obj & ~1);
+  BaseSet* getSet() {
+    assert(hasCollection());
+    assert(getCollectionType() == Collection::SetType ||
+           getCollectionType() == Collection::ImmSetType);
+    return (BaseSet*)((intptr_t)m_obj & ~1);
   }
   c_Pair* getPair() {
     assert(hasCollection() && getCollectionType() == Collection::PairType);

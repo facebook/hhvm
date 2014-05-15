@@ -275,8 +275,7 @@ class BaseVector : public ExtCollectionObjectData {
       grow();
     }
     if (!raw) {
-      mutate();
-      ++m_version;
+      mutateAndBump();
     }
     assert(!hasImmutableBuffer());
     cellDup(*val, m_data[m_size]);
@@ -350,6 +349,8 @@ class BaseVector : public ExtCollectionObjectData {
    * we might need to to trigger COW.
    */
   void mutate() { if (hasImmutableBuffer()) cow(); }
+
+  void mutateAndBump() { mutate(); ++m_version; }
 
  protected:
   /**
@@ -1009,32 +1010,27 @@ class BaseMap : public ExtCollectionObjectData {
   ssize_t iter_begin() const {
     ssize_t limit = iter_limit();
     ssize_t ipos = 0;
-    while (ipos != limit) {
+    for (; ipos != limit; ipos += sizeof(Elm)) {
       auto* e = iter_elm(ipos);
       if (!isTombstone(e)) break;
-      ipos += sizeof(Elm);
     }
     return ipos;
   }
 
   ssize_t iter_next(ssize_t ipos) const {
     ssize_t limit = iter_limit();
-    ipos += sizeof(Elm);
-    while (ipos < limit) {
+    for (ipos += sizeof(Elm); ipos < limit; ipos += sizeof(Elm)) {
       auto* e = iter_elm(ipos);
       if (!isTombstone(e)) return ipos;
-      ipos += sizeof(Elm);
     }
     return limit;
   }
 
   ssize_t iter_prev(ssize_t ipos) const {
     ssize_t orig_ipos = ipos;
-    ipos -= sizeof(Elm);
-    while (ipos >= 0) {
+    for (ipos -= sizeof(Elm); ipos >= 0; ipos -= sizeof(Elm)) {
       auto* e = iter_elm(ipos);
       if (!isTombstone(e)) return ipos;
-      ipos -= sizeof(Elm);
     }
     return orig_ipos;
   }
@@ -1106,6 +1102,8 @@ class BaseMap : public ExtCollectionObjectData {
    * we might need to to trigger COW.
    */
   void mutate() { if (hasImmutableBuffer()) cow(); }
+
+  void mutateAndBump() { mutate(); ++m_version; }
 
  protected:
   /**
@@ -1379,7 +1377,6 @@ class c_MapIterator : public ExtObjectData {
  * we decide when to grow or shrink the table.
  */
 class BaseSet : public ExtCollectionObjectData {
-
  public:
   struct Elm {
     // data.m_type == KindOfInvalid if this is an empty slot in the
@@ -1430,9 +1427,10 @@ class BaseSet : public ExtCollectionObjectData {
   };
   Elm* m_data;              // Elm store.
   int32_t* m_hash;          // Hash table.
+  // A pointer to a ImmSet which with it shares the buffer.
+  Object m_immCopy;
 
  public:
-
   static const int32_t Empty      = -1;
   static const int32_t Tombstone  = -2;
 
@@ -1456,14 +1454,13 @@ class BaseSet : public ExtCollectionObjectData {
   Elm* data() { return m_data; }
   const Elm* data() const { return m_data; }
   int32_t* hashTab() const { return (int32_t*)m_hash; }
-  uint32_t iterLimit() const { return m_used; }
+  uint32_t posLimit() const { return m_used; }
 
   static void throwTooLarge() ATTRIBUTE_NORETURN;
   static void throwReserveTooLarge() ATTRIBUTE_NORETURN;
   static int32_t* warnUnbalanced(size_t n, int32_t* ei);
 
  public:
-
   int getVersion() const {
     return m_version;
   }
@@ -1499,10 +1496,10 @@ class BaseSet : public ExtCollectionObjectData {
   }
 
   inline Elm* elmLimit() {
-    return data() + iterLimit();
+    return data() + posLimit();
   }
   inline const Elm* elmLimit() const {
-    return data() + iterLimit();
+    return data() + posLimit();
   }
 
   inline static Elm* nextElm(Elm* e, Elm* eLimit) {
@@ -1560,24 +1557,35 @@ class BaseSet : public ExtCollectionObjectData {
   int32_t* findForNewInsert(size_t h0) const;
   int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
-  void erase(int32_t* pos);
+  // eraseNoCompact removes the specified element, but doesn't check for an
+  // immutable buffer, doesn't increment m_version, and doesn't perform
+  // compaction, so callers need to take care of these things.
   void eraseNoCompact(int32_t* pos);
 
+  // erase removes the specified element, but doesn't check for an
+  // immutable buffer and doesn't increment m_version, so callers need
+  // to take care of these things.
+  void erase(int32_t* pos);
+
   bool isFull() { return m_used == m_cap; }
-  bool isDensityTooLow() const { return (m_size < m_used / 2); }
+
+  bool isDensityTooLow() const {
+    bool b = (m_size < m_used / 2);
+    assert(IMPLIES(m_data == nullptr, !b));
+    assert(IMPLIES(m_cap == 0, !b));
+    return b;
+  }
 
   // This method will grow or compact as needed to make room to add
   // one new element.
   void makeRoom();
 
-  // This method will grow or compact as needed in preparation for
-  // repeatedly adding new elements until m_size >= sz.
-  void reserve(int64_t sz);
-
   void grow(uint32_t newCap, uint32_t newMask);
-  void compactIfNecessary();
+  void compact();
+  void compactIfNecessary() { if (isDensityTooLow()) compact(); }
 
   BaseSet::Elm& allocElm(int32_t* ei) {
+    assert(!hasImmutableBuffer());
     assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
     size_t i = m_used;
     (*ei) = i;
@@ -1587,6 +1595,11 @@ class BaseSet : public ExtCollectionObjectData {
   }
 
   BaseSet::Elm& allocElmFront(int32_t* ei);
+
+ public:
+  // This method will grow or compact as needed in preparation for
+  // repeatedly adding new elements until m_size >= sz.
+  void reserve(int64_t sz);
 
   static void copyElm(const Elm& frE, Elm& toE) {
     memcpy(&toE, &frE, sizeof(Elm));
@@ -1598,48 +1611,66 @@ class BaseSet : public ExtCollectionObjectData {
     tvRefcountedIncRef(&toE.data);
   }
 
- public:
+  // The iter functions below facilitate iteration over Sets and ImmSets.
+  // Iterators cannot store Elm pointers (because it's possible for m_data
+  // to change without bumping m_version in some cases). Iterators track
+  // their position in terms of _bytes_ from the beginning of the buffer
+  // since it requires less computation overall.
+
+  ssize_t iter_limit() const {
+    assert(sizeof(Elm) == 16);
+    return (ssize_t)m_used << 4;
+  }
+
+  bool iter_valid(ssize_t ipos) const {
+    return ipos != iter_limit();
+  }
+
+  bool iter_valid(ssize_t ipos, ssize_t limit) const {
+    assert(limit == iter_limit());
+    return ipos != limit;
+  }
+
+  const Elm* iter_elm(ssize_t ipos) const {
+    assert(iter_valid(ipos));
+    return (const Elm*)((ssize_t)data() + ipos);
+  }
+
   ssize_t iter_begin() const {
-    const Elm* p = firstElm();
-    auto* pLimit = elmLimit();
-    if (p != pLimit) {
-      return ssize_t(p);
+    ssize_t limit = iter_limit();
+    ssize_t ipos = 0;
+    for (; ipos != limit; ipos += sizeof(Elm)) {
+      auto* e = iter_elm(ipos);
+      if (!isTombstone(e)) break;
     }
-    return 0;
+    return ipos;
   }
 
-  ssize_t iter_next(ssize_t pos) const {
-    if (!iter_valid(pos)) return pos;
-    auto* pLimit = elmLimit();
-    auto* p = nextElm((Elm*)pos, pLimit);
-    if (p != pLimit) {
-      return ssize_t(p);
+  ssize_t iter_next(ssize_t ipos) const {
+    ssize_t limit = iter_limit();
+    for (ipos += sizeof(Elm); ipos < limit; ipos += sizeof(Elm)) {
+      auto* e = iter_elm(ipos);
+      if (!isTombstone(e)) return ipos;
     }
-    return 0;
+    return limit;
   }
 
-  ssize_t iter_prev(ssize_t pos) const {
-    if (!iter_valid(pos)) return pos;
-    auto* p = (Elm*)pos;
-    auto* pFirst = data();
-    for (--p; p >= pFirst; --p) {
-      if (LIKELY(!isTombstone(p))) return ssize_t(p);
+  ssize_t iter_prev(ssize_t ipos) const {
+    ssize_t orig_ipos = ipos;
+    for (ipos -= sizeof(Elm); ipos >= 0; ipos -= sizeof(Elm)) {
+      auto* e = iter_elm(ipos);
+      if (!isTombstone(e)) return ipos;
     }
-    return 0;
+    return orig_ipos;
   }
 
-  Variant iter_key(ssize_t pos) const {
-    return tvAsCVarRef(iter_value(pos));
+  Variant iter_key(ssize_t ipos) const {
+    return tvAsCVarRef(iter_value(ipos));
   }
 
-  TypedValue* iter_value(ssize_t pos) const {
-    assert(iter_valid(pos));
-    auto* p = (Elm*)pos;
-    return &p->data;
-  }
-
-  bool iter_valid(ssize_t pos) const {
-    return pos != 0;
+  const TypedValue* iter_value(ssize_t ipos) const {
+    assert(iter_valid(ipos));
+    return &iter_elm(ipos)->data;
   }
 
   uint32_t nthElmPos(size_t n) {
@@ -1669,10 +1700,33 @@ class BaseSet : public ExtCollectionObjectData {
     return pos;
   }
 
- public:
   void init(const Variant& t);
 
+  template <bool raw>
+  void addImpl(int64_t h);
+  template <bool raw>
+  void addImpl(StringData* key);
+
+  void addRaw(int64_t h);
+  void addRaw(StringData* key);
+  void addRaw(const TypedValue* val) {
+    assert(val->m_type != KindOfRef);
+    if (val->m_type == KindOfInt64) {
+      addRaw(val->m_data.num);
+    } else if (IS_STRING_TYPE(val->m_type)) {
+      addRaw(val->m_data.pstr);
+    } else {
+      throwBadValueType();
+    }
+  }
+  void addRaw(const Variant& val) {
+    addRaw(val.asCell());
+  }
+
+  void add(int64_t h);
+  void add(StringData* key);
   void add(const TypedValue* val) {
+    assert(val->m_type != KindOfRef);
     if (val->m_type == KindOfInt64) {
       add(val->m_data.num);
     } else if (IS_STRING_TYPE(val->m_type)) {
@@ -1681,10 +1735,12 @@ class BaseSet : public ExtCollectionObjectData {
       throwBadValueType();
     }
   }
+  void add(const Variant& val) {
+    add(val.asCell());
+  }
 
-  void add(int64_t h);
-  void add(StringData* key);
-
+  void addFront(int64_t h);
+  void addFront(StringData* key);
   void addFront(const TypedValue* val) {
     if (val->m_type == KindOfInt64) {
       addFront(val->m_data.num);
@@ -1694,27 +1750,12 @@ class BaseSet : public ExtCollectionObjectData {
       throwBadValueType();
     }
   }
-  void addFront(int64_t h);
-  void addFront(StringData* key);
 
   Variant pop();
   Variant popFront();
 
-  void remove(int64_t key) {
-    ++m_version;
-    auto* p = findForInsert(key);
-    if (validPos(*p)) {
-      erase(p);
-    }
-  }
-
-  void remove(StringData* key) {
-    ++m_version;
-    auto* p = findForInsert(key, key->hash());
-    if (validPos(*p)) {
-      erase(p);
-    }
-  }
+  void remove(int64_t key);
+  void remove(StringData* key);
 
   bool contains(int64_t key) const;
   bool contains(StringData* key) const;
@@ -1737,20 +1778,23 @@ class BaseSet : public ExtCollectionObjectData {
   static void Unserialize(const char* setType, ObjectData* obj,
                           VariableUnserializer* uns, int64_t sz, char type);
 
-protected:
+  bool hasImmutableBuffer() const { return !m_immCopy.isNull(); }
+
+  /**
+   * Should be called by any operation that mutates the vector, since
+   * we might need to to trigger COW.
+   */
+  void mutate() { if (hasImmutableBuffer()) cow(); }
+
+  void mutateAndBump() { mutate(); ++m_version; }
+
+ protected:
+  /**
+   * Copy-On-Write the buffer and reset the immutable copy.
+   */
+  void cow();
+
   // PHP-land methods exported by child classes.
-
-  void    php_construct(const Variant& iterable = null_variant);
-
-  Object  php_add(const Variant& val) {
-    const TypedValue* tv = val.asCell();
-    add(tv);
-    return this;
-  }
-
-  Object  php_addAll(const Variant& val);
-
-  Object  php_clear();
 
   bool    php_isEmpty() { return !toBoolImpl(); }
   int64_t php_count() { return m_size; }
@@ -1766,7 +1810,6 @@ protected:
 
   Object  php_lazy() { return SystemLib::AllocLazyIterableViewObject(this); }
   bool    php_contains(const Variant& key);
-  Object  php_remove(const Variant& key);
   Array   php_toArray() { return toArrayImpl(); }
   Array   php_toKeysArray() { return php_toValuesArray(); }
   Array   php_toValuesArray();
@@ -1835,13 +1878,12 @@ protected:
     std::is_base_of<BaseSet, TSet>::value, Object>::type
   static php_fromArrays(int _argc, const Array& _argv = null_array);
 
-protected:
+ protected:
   // BaseSet is an abstract class.
-
   explicit BaseSet(Class* cls);
   /* virtual */ ~BaseSet();
 
-private:
+ private:
   // Helpers
 
   /**
@@ -1875,7 +1917,6 @@ private:
 
 FORWARD_DECLARE_CLASS(Set);
 class c_Set : public BaseSet {
-
  public:
   DECLARE_CLASS_NO_SWEEP(Set)
 
@@ -1919,11 +1960,13 @@ class c_Set : public BaseSet {
   Object t_immutable();
 
  public:
-
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
   static c_Set* Clone(ObjectData* obj);
+
+ protected:
+  Object getImmutableCopy();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1931,7 +1974,6 @@ class c_Set : public BaseSet {
 
 FORWARD_DECLARE_CLASS(ImmSet);
 class c_ImmSet : public BaseSet {
-
  public:
   DECLARE_CLASS_NO_SWEEP(ImmSet)
 

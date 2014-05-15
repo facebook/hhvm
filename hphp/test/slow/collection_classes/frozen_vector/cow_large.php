@@ -1,6 +1,6 @@
 <?hh
 
-// Test that COW makes materializing an ImmVector is an O(1) operation.
+// Test that COW makes materializing an ImmVector an O(1) operation.
 
 function main() {
   $v = Vector {};

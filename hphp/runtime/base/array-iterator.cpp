@@ -157,6 +157,8 @@ IterNextIndex ArrayIter::getNextHelperIdx(ObjectData* obj) {
     return IterNextIndex::ImmVector;
   } else if (cls == c_ImmMap::classof()) {
     return IterNextIndex::ImmMap;
+  } else if (cls == c_ImmSet::classof()) {
+    return IterNextIndex::ImmSet;
   } else if (cls == c_Pair::classof()) {
     return IterNextIndex::Pair;
   } else {
@@ -269,7 +271,7 @@ bool ArrayIter::endHelper() {
     }
     case Collection::SetType:
     case Collection::ImmSetType: {
-      return m_pos == 0;
+      return !getSet()->iter_valid(m_pos);
     }
     case Collection::PairType: {
       return m_pos >= getPair()->size();
@@ -301,7 +303,7 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::SetType: {
-      c_Set* st = getSet();
+      BaseSet* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
@@ -317,7 +319,6 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::ImmSetType: {
-      assert(m_pos != 0);
       c_ImmSet* st = getImmSet();
       assert(m_version == st->getVersion());
       m_pos = st->iter_next(m_pos);
@@ -344,7 +345,7 @@ Variant ArrayIter::firstHelper() {
       return mp->iter_key(m_pos);
     }
     case Collection::SetType: {
-      c_Set* st = getSet();
+      BaseSet* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
@@ -394,7 +395,7 @@ Variant ArrayIter::second() {
       return tvAsCVarRef(mp->iter_value(m_pos));
     }
     case Collection::SetType: {
-      c_Set* st = getSet();
+      BaseSet* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
@@ -458,7 +459,7 @@ const Variant& ArrayIter::secondRefPlus() {
       return tvAsCVarRef(mp->iter_value(m_pos));
     }
     case Collection::SetType: {
-      c_Set* st = getSet();
+      BaseSet* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
@@ -1931,6 +1932,16 @@ int64_t iterNextSet(Iter* it, TypedValue* valOut) {
   return iterNext<c_Set, ArrayIter::VersionableSparse>(iter, valOut, nullptr);
 }
 
+int64_t iterNextImmSet(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextImmSet: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return
+    iterNext<c_ImmSet, ArrayIter::VersionableSparse>(iter, valOut, nullptr);
+}
+
 int64_t iterNextKSet(Iter* it,
                      TypedValue* valOut,
                      TypedValue* keyOut) {
@@ -1940,6 +1951,17 @@ int64_t iterNextKSet(Iter* it,
 
   auto const iter = &it->arr();
   return iterNext<c_Set, ArrayIter::VersionableSparse>(iter, valOut, keyOut);
+}
+
+int64_t iterNextKImmSet(Iter* it,
+                        TypedValue* valOut,
+                        TypedValue* keyOut) {
+  TRACE(2, "iterNextKImmSet: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_ImmSet, ArrayIter::VersionableSparse>(iter, valOut, keyOut);
 }
 
 int64_t iterNextPair(Iter* it, TypedValue* valOut) {
@@ -1982,6 +2004,7 @@ const IterNextHelper g_iterNextHelpers[] = {
   &iterNextMap,
   &iterNextImmMap,
   &iterNextSet,
+  &iterNextImmSet,
   &iterNextPair,
   &iterNextObject,
 };
@@ -1995,6 +2018,7 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKMap,
   &iterNextKImmMap,
   &iterNextKSet,
+  &iterNextKImmSet,
   &iterNextKPair,
   &iter_next_cold<false>, // iterNextKObject
 };

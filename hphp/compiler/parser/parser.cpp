@@ -2192,6 +2192,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"KeyedTraversable", "HH\\KeyedTraversable"},
     (AliasEntry){"KeyedContainer", "HH\\KeyedContainer"},
     (AliasEntry){"Iterator", "HH\\Iterator"},
+    (AliasEntry){"AsyncIterator", "HH\\AsyncIterator"},
     (AliasEntry){"KeyedIterator", "HH\\KeyedIterator"},
     (AliasEntry){"Iterable", "HH\\Iterable"},
     (AliasEntry){"KeyedIterable", "HH\\KeyedIterable"},

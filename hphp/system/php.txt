@@ -9,6 +9,7 @@ hphp/system/php/lang/resource.php
 hphp/system/php/lang/Traversable.ns.php
 hphp/system/php/lang/Iterator.ns.php
 hphp/system/php/lang/IteratorAggregate.ns.php
+hphp/system/php/lang/AsyncIterator.ns.php
 hphp/system/php/lang/KeyedIterator.ns.php
 hphp/system/php/lang/KeyedIterable.ns.php
 hphp/system/php/lang/Exception.php

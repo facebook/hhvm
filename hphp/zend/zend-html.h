@@ -67,6 +67,8 @@ enum class EntBitmask {
   ENT_BM_DOUBLE = 2,     /* escape double quotes only */
   ENT_BM_IGNORE = 4,     /* silently discard invalid chars */
   ENT_BM_SUBSTITUTE = 8, /* replace invalid chars with U+FFFD */
+  ENT_BM_XML1 = 16,      /* XML1 mode*/
+  ENT_BM_XHTML = 32,     /* XHTML mode */
 };
 
 namespace entity_charset_enum {

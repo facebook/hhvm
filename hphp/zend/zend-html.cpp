@@ -618,7 +618,13 @@ char *string_html_encode(const char *input, int &len,
       break;
     case '\'':
       if (qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_SINGLE)) {
-        *q++ = '&'; *q++ = '#'; *q++ = '0'; *q++ = '3'; *q++ = '9'; *q++ = ';';
+        *q++ = '&';
+        if ((qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_XML1))) {
+          *q++ = 'a'; *q++ = 'p'; *q++ = 'o'; *q++ = 's';
+        } else {
+          *q++ = '#'; *q++ = '0'; *q++ = '3'; *q++ = '9';
+        }
+        *q++ = ';';
       } else {
         *q++ = c;
       }

@@ -6292,15 +6292,20 @@ void EmitterVisitor::emitPostponedMeths() {
 
     if (!fe) {
       assert(p.m_top);
-      if (!m_topMethodEmitted.insert(meth->getOriginalName()).second) {
+      const StringData* methName = makeStaticString(meth->getOriginalName());
+      fe = new FuncEmitter(m_ue, -1, -1, methName);
+      auto oldFunc = m_topMethodEmitted.find(meth->getOriginalName());
+      if (oldFunc != m_topMethodEmitted.end()) {
         throw IncludeTimeFatalException(
           meth,
-          "Function already defined: %s",
-          meth->getOriginalName().c_str());
+          "Cannot redeclare %s() (previously declared in %s:%d)",
+          meth->getOriginalName().c_str(),
+          oldFunc->second->ue().getFilepath()->data(),
+          oldFunc->second->getLocation().second);
       }
+      m_topMethodEmitted.emplace(meth->getOriginalName(), fe);
 
-      const StringData* methName = makeStaticString(meth->getOriginalName());
-      p.m_fe = fe = new FuncEmitter(m_ue, -1, -1, methName);
+      p.m_fe = fe;
       top_fes.push_back(fe);
     }
 

@@ -637,7 +637,7 @@ private:
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
   PendingIterVec m_pendingIters;
-  hphp_hash_set<std::string> m_topMethodEmitted;
+  hphp_hash_map<std::string, FuncEmitter*> m_topMethodEmitted;
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;

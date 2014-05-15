@@ -1,2 +1,1 @@
-
-Fatal error: Function already defined: f in %s on line 6
+Fatal error: Cannot redeclare f() (previously declared in %s/test/quick/redeclared_function.php:4) in %s/test/quick/redeclared_function.php on line 6

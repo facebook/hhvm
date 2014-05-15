@@ -298,8 +298,22 @@
             ]
         },
         {
-            "name": "AsyncFunctionWaitHandle",
+            "name": "ResumableWaitHandle",
             "parent": "BlockableWaitHandle",
+            "desc": "A wait handle that can resume execution of PHP code",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "AsyncFunctionWaitHandle",
+            "parent": "ResumableWaitHandle",
             "desc": "A wait handle representing asynchronous execution of async function",
             "flags": [
                 "IsFinal",

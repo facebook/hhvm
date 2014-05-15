@@ -20,10 +20,11 @@
 
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
 #include "hphp/runtime/ext/asio/sleep_wait_handle.h"
 #include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
+#include "hphp/runtime/ext/asio/resumable_wait_handle.h"
+#include "hphp/runtime/ext/asio/resumable_wait_handle-defs.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
@@ -72,7 +73,7 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   exitContextVector<false>(ctx_idx, m_externalThreadEvents);
 }
 
-void AsioContext::schedule(c_AsyncFunctionWaitHandle* wait_handle) {
+void AsioContext::schedule(c_ResumableWaitHandle* wait_handle) {
   m_runnableQueue.push(wait_handle);
   wait_handle->incRefCount();
 }
@@ -127,7 +128,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
         decRefObj(current);
       });
 
-      m_current->run();
+      m_current->resume();
       continue;
     }
 

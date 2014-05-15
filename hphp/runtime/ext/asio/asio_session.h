@@ -30,6 +30,7 @@ FORWARD_DECLARE_CLASS(WaitHandle);
 FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
+FORWARD_DECLARE_CLASS(ResumableWaitHandle);
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 
 class AsioSession {
@@ -63,7 +64,7 @@ class AsioSession {
       return static_cast<context_idx_t>(m_contexts.size());
     }
 
-    c_AsyncFunctionWaitHandle* getCurrentWaitHandle() {
+    c_ResumableWaitHandle* getCurrentWaitHandle() {
       assert(!isInContext() || getCurrentContext()->isRunning());
       return isInContext() ? getCurrentContext()->getCurrent() : nullptr;
     }

@@ -27,7 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FORWARD_DECLARE_CLASS(WaitableWaitHandle);
-FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
+FORWARD_DECLARE_CLASS(ResumableWaitHandle);
 FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
 FORWARD_DECLARE_CLASS(SleepWaitHandle);
 FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
@@ -43,9 +43,9 @@ class AsioContext {
     void exit(context_idx_t ctx_idx);
 
     bool isRunning() { return m_current; }
-    c_AsyncFunctionWaitHandle* getCurrent() { return m_current; }
+    c_ResumableWaitHandle* getCurrent() { return m_current; }
 
-    void schedule(c_AsyncFunctionWaitHandle* wait_handle);
+    void schedule(c_ResumableWaitHandle* wait_handle);
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
 
     template <class TWaitHandle>
@@ -72,10 +72,10 @@ class AsioContext {
 
     bool runSingle(reschedule_priority_queue_t& queue);
 
-    c_AsyncFunctionWaitHandle* m_current;
+    c_ResumableWaitHandle* m_current;
 
-    // queue of AsyncFunctionWaitHandles ready for immediate execution
-    smart::queue<c_AsyncFunctionWaitHandle*> m_runnableQueue;
+    // queue of ResumableWaitHandles ready for immediate execution
+    smart::queue<c_ResumableWaitHandle*> m_runnableQueue;
 
     // queue of RescheduleWaitHandles scheduled in default mode
     reschedule_priority_queue_t m_priorityQueueDefault;

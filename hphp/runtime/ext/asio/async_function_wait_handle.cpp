@@ -40,7 +40,7 @@ void delete_AsyncFunctionWaitHandle(ObjectData* od, const Class*) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_AsyncFunctionWaitHandle::c_AsyncFunctionWaitHandle(Class* cb)
-    : c_BlockableWaitHandle(cb), m_child(nullptr), m_privData() {
+    : c_ResumableWaitHandle(cb), m_child(nullptr), m_privData() {
 }
 
 c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
@@ -160,7 +160,7 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   }
 }
 
-void c_AsyncFunctionWaitHandle::run() {
+void c_AsyncFunctionWaitHandle::resume() {
   // may happen if scheduled in multiple contexts
   if (getState() != STATE_SCHEDULED) {
     return;

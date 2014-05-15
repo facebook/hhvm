@@ -1,7 +1,9 @@
 <?hh
 
 namespace {
-$map = ['function' => [], 'failure' => function () { var_dump(func_get_args()); }];
+	$map = ['function' => [], 'failure' => function ($kind, $name) {
+		echo "Autoload $kind $name\n";
+}];
 HH\autoload_set_paths($map, '');
 }
 

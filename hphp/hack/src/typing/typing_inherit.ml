@@ -133,6 +133,35 @@ let constructor env subst = function
     env, Some {ce with ce_type = ty}
 
 (*****************************************************************************)
+(* Code filtering the private members (useful for inheritance) *)
+(*****************************************************************************)
+
+let filter_private x =
+  SMap.fold begin fun name class_elt acc ->
+    match class_elt.ce_visibility with
+    | Vprivate _ -> acc
+    | Vpublic | Vprotected _ -> SMap.add name class_elt acc
+  end x SMap.empty
+
+let chown_private owner =
+  SMap.map begin fun class_elt ->
+    match class_elt.ce_visibility with 
+      | Vprivate _ -> {class_elt with ce_visibility = Vprivate owner}
+      | _ -> class_elt end
+
+let apply_fn_to_class_elts fn class_type = {
+  class_type with
+  tc_consts = fn class_type.tc_consts;
+  tc_cvars = fn class_type.tc_cvars;
+  tc_scvars = fn class_type.tc_scvars;
+  tc_methods = fn class_type.tc_methods;
+  tc_smethods = fn class_type.tc_smethods;
+}
+
+let filter_privates = apply_fn_to_class_elts filter_private
+let chown_privates owner = apply_fn_to_class_elts (chown_private owner)
+
+(*****************************************************************************)
 (* Builds the inherited type when the class lives in Hack *)
 (*****************************************************************************)
 

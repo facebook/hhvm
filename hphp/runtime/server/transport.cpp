@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/system/constants.h"
@@ -33,15 +34,8 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
-#ifdef FACEBOOK
-#include "hphp/util/channeled-json-compressor.h"
-#include <memory>
-#endif
 #include "hphp/runtime/base/hardware-counter.h"
 #include "folly/String.h"
-#include <stdio.h>
-#include <fstream>
-#include "hphp/runtime/base/type-conversions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -749,35 +743,6 @@ StringHolder Transport::prepareResponse(const void *data, int size,
       m_compressionDecision == CompressionDecision::ShouldNot) {
     return std::move(response);
   }
-
-#ifdef FACEBOOK
-  if (RuntimeOption::EnableChanneledJson &&
-      (strstr(getHeader("X-FB-Channeled-Json").c_str(), "true") != nullptr) &&
-      (size > ChanneledJsonCompressor::MIN_LENGTH_TO_CHANNEL_JSON) &&
-      (m_compressor == nullptr) && (last) && (!m_headerSent)) {
-    bool okToFail = true;
-    try {
-      ChanneledJsonCompressor channeledJsonCompressor;
-      channeledJsonCompressor.processJson((const char*)data, size);
-      folly::IOBufQueue bufQueue;
-      channeledJsonCompressor.finalize(bufQueue);
-      std::unique_ptr<folly::IOBuf> output = bufQueue.move();
-      output->coalesce();
-
-      response.set(output.release());
-      okToFail = false;
-
-      // overriding the data pointer
-      data = response.data();
-      size = response.size();
-
-      replaceHeader("Content-Type", "application/channeled-json");
-    } catch (...) {
-      if (!okToFail) throw;
-      LogException("ChanneledJsonCompressor");
-    }
-  }
-#endif
 
   // There isn't that much need to gzip response, when it can fit into one
   // Ethernet packet (1500 bytes), unless we are doing chunked encoding,

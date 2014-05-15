@@ -152,7 +152,6 @@ int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 int RuntimeOption::GzipCompressionLevel = 3;
-bool RuntimeOption::EnableChanneledJson = true;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
 std::string RuntimeOption::ForceCompressionParam;
@@ -839,7 +838,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
     GzipCompressionLevel = Config::GetInt16(ini, server["GzipCompressionLevel"], 3);
-    EnableChanneledJson = Config::GetBool(ini, server["EnableChanneledJson"], true);
 
     ForceCompressionURL    = Config::GetString(ini, server["ForceCompression"]["URL"]);
     ForceCompressionCookie = Config::GetString(ini, server["ForceCompression"]["Cookie"]);

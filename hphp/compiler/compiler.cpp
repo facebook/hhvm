@@ -152,14 +152,6 @@ extern "C" void compiler_hook_initialize();
 
 int compiler_main(int argc, char **argv) {
   try {
-    Hdf empty;
-    IniSetting::Map ini = IniSetting::Map::object;
-    RuntimeOption::Load(ini, empty);
-    initialize_repo();
-
-    // we need to initialize pcre cache table very early
-    pcre_init();
-
     CompilerOptions po;
 #ifdef FACEBOOK
     compiler_hook_initialize();
@@ -392,11 +384,19 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     config.fromString(po.confStrings[i].c_str());
   }
   Option::Load(ini, config);
+  IniSetting::Map iniR = IniSetting::Map::object;
+  Hdf runtime = config["Runtime"];
+  RuntimeOption::Load(iniR, runtime);
+  initialize_repo();
+
   vector<string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
+
+  // we need to initialize pcre cache table very early
+  pcre_init();
 
   if (po.dump) Option::DumpAst = true;
 

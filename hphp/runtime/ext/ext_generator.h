@@ -79,7 +79,6 @@ struct c_Generator : c_Continuation {
   void suspend(JIT::TCA resumeAddr, Offset resumeOffset, const Cell& value);
   void suspend(JIT::TCA resumeAddr, Offset resumeOffset, const Cell& value,
                const Cell& key);
-  Object t_getwaithandle();
   Variant t_current();
   Variant t_key();
   void t_next();

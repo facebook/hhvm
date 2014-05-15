@@ -8254,6 +8254,13 @@ static void emitGeneratorMethod(UnitEmitter& ue, FuncEmitter* fe,
   }
 }
 
+static void emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
+  fe->init(0, 0, ue.bcPos(), attrs, false, empty_string.get());
+  ue.emitOp(OpThis);
+  ue.emitOp(OpRetC);
+}
+
 StaticString s_construct("__construct");
 static std::unique_ptr<UnitEmitter>
 emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
@@ -8349,6 +8356,8 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
       static const StringData* generatorCls = makeStaticString("generator");
+      static const StringData* waitHandleCls = makeStaticString("waithandle");
+      static const StringData* gwhMeth = makeStaticString("getwaithandle");
       StringData* methName = makeStaticString(methodInfo->m_name);
       GeneratorMethod* cmeth;
 
@@ -8358,6 +8367,8 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           (cmeth = folly::get_ptr(contMethods, methName))) {
         auto methCpy = *cmeth;
         emitGeneratorMethod(*ue, fe, methCpy);
+      } else if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
+        emitGetWaitHandleMethod(*ue, fe);
       } else {
         if (e.name->isame(s_construct.get())) {
           hasCtor = true;

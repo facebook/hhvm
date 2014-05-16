@@ -1,0 +1,1 @@
+Fatal error: Argument 1 passed to Bar::baz() must implement interface Foo, string given in %s/test/slow/types/interface_typehint_fail.php on line 8

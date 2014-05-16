@@ -32,7 +32,7 @@ true, true, object(CThruTrait)#3 (0) {
 ********** null **********
 false, false, NULL
 
-Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, null given
+Handled 4096: Argument 1 passed to f2() must implement interface Stringish, null given
 false, false, NULL
 
 ********** array **********
@@ -46,7 +46,7 @@ false, false, array(3) {
   int(3)
 }
 
-Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, array given
+Handled 4096: Argument 1 passed to f2() must implement interface Stringish, array given
 false, false, array(3) {
   [0]=>
   int(1)
@@ -60,13 +60,13 @@ false, false, array(3) {
 Handled 4096: Argument 1 to f1() must be of type ?Stringish, int given
 false, false, int(10)
 
-Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, int given
+Handled 4096: Argument 1 passed to f2() must implement interface Stringish, int given
 false, false, int(10)
 
 Handled 4096: Argument 1 to f1() must be of type ?Stringish, float given
 false, false, float(-4.2)
 
-Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, float given
+Handled 4096: Argument 1 passed to f2() must implement interface Stringish, float given
 false, false, float(-4.2)
 
 

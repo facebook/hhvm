@@ -366,20 +366,6 @@ String string_pad(const char *input, int len, int pad_length,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char *string_substr(const char *s, int &len, int start, int length,
-                    bool nullable) {
-  assert(s);
-  if (string_substr_check(len, start, length)) {
-    len = length;
-    return string_duplicate(s + start, length);
-  }
-  len = 0;
-  if (nullable) {
-    return nullptr;
-  }
-  return string_duplicate("", 0);
-}
-
 int string_find(const char *input, int len, char ch, int pos,
                 bool case_sensitive) {
   assert(input);

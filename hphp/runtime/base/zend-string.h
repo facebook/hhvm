@@ -127,13 +127,6 @@ String string_pad(const char *input, int len, int pad_length,
                  const char *pad_string, int pad_str_len, int pad_type);
 
 /**
- * Get a substring of input from "start" position with specified length.
- * "start" and "length" can be negative and refer to PHP's doc for meanings.
- */
-char *string_substr(const char *s, int &len, int start, int length,
-                    bool nullable);
-
-/**
  * Find a character or substring and return it's position (or -1 if not found).
  */
 int string_find(const char *input, int len, char ch, int pos,

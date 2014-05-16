@@ -759,25 +759,21 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
   last_value:
     if ((val = (const char *)memchr(s, '=', (p - s)))) {
       int len = val - s;
-      char *name = url_decode(s, len);
-      String sname(name, len, AttachString);
+      String sname = url_decode(s, len);
 
       val++;
       len = p - val;
-      char *value = url_decode(val, len);
+      String value = url_decode(val, len);
       if (RuntimeOption::EnableMagicQuotesGpc) {
-        char *slashedvalue = string_addslashes(value, len);
-        free(value);
-        value = slashedvalue;
+        char *slashedvalue = string_addslashes(value.data(), len);
+        value = String(slashedvalue, len, AttachString);
       }
-      String svalue(value, len, AttachString);
 
-      register_variable(variables, (char*)sname.data(), svalue);
+      register_variable(variables, (char*)sname.data(), value);
     } else if (!post) {
       int len = p - s;
-      char *name = url_decode(s, len);
-      String sname(name, len, AttachString);
-      register_variable(variables, (char*)sname.data(), "");
+      String sname = url_decode(s, len);
+      register_variable(variables, (char*)sname.data(), empty_string);
     }
     s = p + 1;
   }
@@ -804,26 +800,22 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
     if (var != val && *var != '\0') {
       if (val) { /* have a value */
         int len = val - var;
-        char *name = url_decode(var, len);
-        String sname(name, len, AttachString);
+        String sname = url_decode(var, len);
 
         ++val;
         len = strlen(val);
-        char *value = url_decode(val, len);
+        String value = url_decode(val, len);
         if (RuntimeOption::EnableMagicQuotesGpc) {
-          char *slashedvalue = string_addslashes(value, len);
-          free(value);
-          value = slashedvalue;
+          char *slashedvalue = string_addslashes(value.data(), len);
+          value = String(slashedvalue, len, AttachString);
         }
-        String svalue(value, len, AttachString);
 
-        register_variable(variables, (char*)sname.data(), svalue, false);
+        register_variable(variables, (char*)sname.data(), value, false);
       } else {
         int len = strlen(var);
-        char *name = url_decode(var, len);
-        String sname(name, len, AttachString);
+        String sname = url_decode(var, len);
 
-        register_variable(variables, (char*)sname.data(), "", false);
+        register_variable(variables, (char*)sname.data(), empty_string, false);
       }
     }
 

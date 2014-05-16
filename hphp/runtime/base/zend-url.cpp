@@ -336,14 +336,15 @@ static int php_htoi(char *s) {
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
-char *url_encode(const char *s, int &len) {
+String url_encode(const char *s, int len) {
+  String retString(safe_address(len, 3, 1), ReserveString);
   register unsigned char c;
   unsigned char *to, *start;
   unsigned char const *from, *end;
 
   from = (unsigned char const *)s;
   end = (unsigned char const *)s + len;
-  start = to = (unsigned char *)malloc(safe_address(len,  3, 1));
+  start = to = (unsigned char *)retString.bufferSlice().ptr;
 
   while (from < end) {
     c = *from++;
@@ -362,13 +363,12 @@ char *url_encode(const char *s, int &len) {
       *to++ = c;
     }
   }
-  *to = 0;
-  len = to - start;
-  return (char *) start;
+  return retString.setSize(to - start);
 }
 
-char *url_decode(const char *s, int &len) {
-  char *str = string_duplicate(s, len);
+String url_decode(const char *s, int len) {
+  String retString(s, len, CopyString);
+  char *str = retString.bufferSlice().ptr;
   char *dest = str;
   char *data = str;
 
@@ -387,9 +387,7 @@ char *url_decode(const char *s, int &len) {
     data++;
     dest++;
   }
-  *dest = '\0';
-  len = dest - str;
-  return str;
+  return retString.setSize(dest - str);
 }
 
 // copied and re-factored from clearsilver-0.10.5/cgi/cgi.c
@@ -445,11 +443,11 @@ int url_decode_ex(char *value, int len) {
   return o;
 }
 
-char *url_raw_encode(const char *s, int &len) {
+String url_raw_encode(const char *s, int len) {
+  String retString(safe_address(len, 3, 1), ReserveString);
   register int x, y;
-  unsigned char *str;
+  unsigned char *str = (unsigned char *)retString.bufferSlice().ptr;
 
-  str = (unsigned char *)malloc(safe_address(len, 3, 1));
   for (x = 0, y = 0; len--; x++, y++) {
     str[y] = (unsigned char) s[x];
     if ((str[y] < '0' && str[y] != '-' && str[y] != '.') ||
@@ -461,13 +459,12 @@ char *url_raw_encode(const char *s, int &len) {
       str[y] = hexchars[(unsigned char) s[x] & 15];
     }
   }
-  str[y] = '\0';
-  len = y;
-  return ((char *)str);
+  return retString.setSize(y);
 }
 
-char *url_raw_decode(const char *s, int &len) {
-  char *str = string_duplicate(s, len);
+String url_raw_decode(const char *s, int len) {
+  String retString(s, len, CopyString);
+  char *str = retString.bufferSlice().ptr;
   char *dest = str;
   char *data = str;
 
@@ -483,9 +480,7 @@ char *url_raw_decode(const char *s, int &len) {
     data++;
     dest++;
   }
-  *dest = '\0';
-  len = dest - str;
-  return str;
+  return retString.setSize(dest - str);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

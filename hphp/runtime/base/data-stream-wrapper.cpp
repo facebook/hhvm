@@ -126,9 +126,7 @@ File* DataStreamWrapper::open(const String& filename, const String& mode,
       return nullptr;
     }
   } else {
-    int len = data_len;
-    char* decoded_temp = url_decode(data, len);
-    decoded = String(decoded_temp, len, AttachString);
+    decoded = url_decode(data, data_len);
   }
   file =
     std::unique_ptr<MemFile>(NEWOBJ(MemFile)(decoded.data(), decoded.size()));

@@ -350,7 +350,7 @@ String StringUtil::UUDecode(const String& input) {
   if (!input.empty()) {
     return string_uudecode(input.data(), input.size());
   }
-  return String();
+  return null_string;
 }
 
 String StringUtil::Base64Encode(const String& input) {
@@ -366,26 +366,16 @@ String StringUtil::Base64Decode(const String& input,
 
 String StringUtil::UrlEncode(const String& input,
                              bool encodePlus /* = true */) {
-  int len = input.size();
-  char *ret;
-  if (encodePlus) {
-    ret = url_encode(input.data(), len);
-  } else {
-    ret = url_raw_encode(input.data(), len);
-  }
-  return String(ret, len, AttachString);
+  return encodePlus ?
+    url_encode(input.data(), input.size()) :
+    url_raw_encode(input.data(), input.size());
 }
 
 String StringUtil::UrlDecode(const String& input,
                              bool decodePlus /* = true */) {
-  int len = input.size();
-  char *ret;
-  if (decodePlus) {
-    ret = url_decode(input.data(), len);
-  } else {
-    ret = url_raw_decode(input.data(), len);
-  }
-  return String(ret, len, AttachString);
+  return decodePlus ?
+    url_decode(input.data(), input.size()) :
+    url_raw_decode(input.data(), input.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

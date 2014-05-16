@@ -55,19 +55,19 @@ public:
   static void GetPerfEvents(Array& ret);
   static void ClearPerfEvents();
 
+  static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
+  bool m_countersSet;
+private:
   void reset();
   int64_t getInstructionCount();
   int64_t getLoadCount();
   int64_t getStoreCount();
-  bool eventExists(char* event);
-  bool addPerfEvent(char* event);
+  bool eventExists(const char* event);
+  bool addPerfEvent(const String& event);
   bool setPerfEvents(const String& events);
   void getPerfEvents(Array& ret);
   void clearPerfEvents();
 
-  static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
-  bool m_countersSet;
-private:
   InstructionCounter* m_instructionCounter;
   LoadCounter* m_loadCounter;
   StoreCounter* m_storeCounter;
@@ -86,27 +86,13 @@ public:
   HardwareCounter() : m_countersSet(false) { }
   ~HardwareCounter() { }
 
-  static void Reset() { s_counter.reset(); }
-  static int64_t GetInstructionCount() {
-    return s_counter.getInstructionCount();
-  }
-  static int64_t GetLoadCount() { return s_counter.getLoadCount(); }
-  static int64_t GetStoreCount() { return s_counter.getStoreCount(); }
-  static bool SetPerfEvents(const String& events) {
-    return s_counter.setPerfEvents(events);
-  }
-  static void GetPerfEvents(Array& ret) { s_counter.getPerfEvents(ret); }
-  static void ClearPerfEvents() { s_counter.clearPerfEvents(); }
-
-  void reset() { }
-  int64_t getInstructionCount() { return 0; }
-  int64_t getLoadCount() { return 0; }
-  int64_t getStoreCount() { return 0; }
-  bool eventExists(char* event) { return false; }
-  bool addPerfEvent(char* event) { return false; }
-  bool setPerfEvents(const String& events) { return false; }
-  void getPerfEvents(Array& ret) { }
-  void clearPerfEvents() { }
+  static void Reset() { }
+  static int64_t GetInstructionCount() { return 0; }
+  static int64_t GetLoadCount() { return 0; }
+  static int64_t GetStoreCount() { return 0; }
+  static bool SetPerfEvents(const String& events) { return false; }
+  static void GetPerfEvents(Array& ret) { }
+  static void ClearPerfEvents() { }
 
   // Normally exposed by DECLARE_THREAD_LOCAL_NO_CHECK
   void getCheck() { }

@@ -552,15 +552,12 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
     return false;
   }
 
-  char *encoded_value = nullptr;
+  String encoded_value;
   int len = 0;
-  if (!value.empty() && encode_url) {
-    int encoded_value_len = value.size();
-    encoded_value = url_encode(value.data(), encoded_value_len);
-    len += encoded_value_len;
-  } else if (!value.empty()) {
-    encoded_value = strdup(value.data());
-    len += value.size();
+  if (!value.empty()) {
+    encoded_value = encode_url ? url_encode(value.data(), value.size())
+                               : value;
+    len += encoded_value.size();
   }
   len += path.size();
   len += domain.size();
@@ -581,7 +578,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
   } else {
     cookie += name.data();
     cookie += "=";
-    cookie += encoded_value ? encoded_value : "";
+    cookie += encoded_value.isNull() ? "" : encoded_value.data();
     if (expire > 0) {
       if (expire > 253402300799LL) {
         raise_warning("Expiry date cannot have a year greater than 9999");
@@ -595,10 +592,6 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
       String sdelta = toString( expire - time(0) );
       cookie += sdelta.data();
     }
-  }
-
-  if (encoded_value) {
-    free(encoded_value);
   }
 
   if (!path.empty()) {

@@ -275,7 +275,7 @@ struct PerfTable perfTable[] = {
   { "prefetch-misses",     PCCO(PREFETCH, MISS)    }
 };
 
-static int findEvent(char *event, struct PerfTable *t,
+static int findEvent(const char *event, struct PerfTable *t,
                      int len, int *match_len) {
   int i;
 
@@ -305,7 +305,7 @@ static bool isIntelE5_2670() {
 #endif
 }
 
-static void checkLLCHack(char* event, uint32_t& type, uint64_t& config) {
+static void checkLLCHack(const char* event, uint32_t& type, uint64_t& config) {
   if (!strncmp(event, "LLC-load", 8) && isIntelE5_2670()) {
     type = PERF_TYPE_RAW;
     if (!strncmp(&event[4], "loads", 5)) {
@@ -316,12 +316,12 @@ static void checkLLCHack(char* event, uint32_t& type, uint64_t& config) {
   }
 }
 
-bool HardwareCounter::addPerfEvent(char *event) {
+bool HardwareCounter::addPerfEvent(const String& event) {
   uint32_t type = 0;
   uint64_t config = 0;
   int i, match_len;
   bool found = false;
-  char *ev = event;
+  const char *ev = event.data();
   HardwareCounterImpl* hwc;
 
   while ((i = findEvent(ev, perfTable,
@@ -334,15 +334,15 @@ bool HardwareCounter::addPerfEvent(char *event) {
     ev = &ev[match_len];
   }
 
-  checkLLCHack(event, type, config);
+  checkLLCHack(event.data(), type, config);
 
   if (!found) {
-    Logger::Warning("failed to find perf event: %s", event);
+    Logger::Warning("failed to find perf event: %s", event.data());
     return false;
   }
-  hwc = new HardwareCounterImpl(type, config, event);
+  hwc = new HardwareCounterImpl(type, config, event.data());
   if (hwc->m_err) {
-    Logger::Warning("failed to set perf event: %s", event);
+    Logger::Warning("failed to set perf event: %s", event.data());
     delete hwc;
     return false;
   }
@@ -358,7 +358,7 @@ bool HardwareCounter::addPerfEvent(char *event) {
   return true;
 }
 
-bool HardwareCounter::eventExists(char *event) {
+bool HardwareCounter::eventExists(const char *event) {
   // hopefully m_counters set is small, so a linear scan does not hurt
   for(unsigned i = 0; i < m_counters.size(); i++) {
     if (!strcmp(event, m_counters[i]->m_desc.c_str())) {
@@ -380,9 +380,9 @@ bool HardwareCounter::setPerfEvents(const String& events) {
   char* s = strtok_r(sevents_buf, ",", &strtok_buf);
   while (s) {
     int len = strlen(s);
-    char* event = url_decode(s, len);
-    bool isPseudoEvent = JIT::MCGenerator::isPseudoEvent(event);
-    if (!isPseudoEvent && !eventExists(event) && !addPerfEvent(event)) {
+    String event = url_decode(s, len);
+    bool isPseudoEvent = JIT::MCGenerator::isPseudoEvent(event.data());
+    if (!isPseudoEvent && !eventExists(event.data()) && !addPerfEvent(event)) {
       return false;
     }
     s = strtok_r(nullptr, ",", &strtok_buf);

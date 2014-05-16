@@ -668,6 +668,9 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << std::endl;
     }
   }
+  out << "maxStackCells: " << maxStackCells() << '\n'
+      << "numLocals: " << numLocals() << '\n'
+      << "numIterators: " << numIterators() << '\n';
 
   const EHEntVec& ehtab = shared()->m_ehtab;
   size_t ehId = 0;
@@ -684,8 +687,9 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     }
     if (catcher) {
       out << std::endl;
-      for (EHEnt::CatchVec::const_iterator it2 = it->m_catches.begin();
-           it2 != it->m_catches.end(); ++it2) {
+      for (auto it2 = it->m_catches.begin();
+          it2 != it->m_catches.end();
+          ++it2) {
         out << "  Handle " << m_unit->lookupLitstrId(it2->first)->data()
           << " at " << it2->second;
       }

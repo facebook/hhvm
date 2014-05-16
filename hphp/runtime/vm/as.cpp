@@ -687,7 +687,12 @@ struct AsmState : private boost::noncopyable {
     // Stack depth should be 0 at the end of a function body
     enforceStackDepth(0);
 
-    fe->setMaxStackCells(stackHighWater + kNumActRecCells + fdescHighWater);
+    fe->setMaxStackCells(
+      fe->numLocals() +
+        fe->numIterators() * kNumIterCells +
+        stackHighWater +
+        fdescHighWater /* in units of cells already */
+    );
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);
 
@@ -2175,7 +2180,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
     ue->emitOp(OpFatal);
     ue->emitByte(static_cast<uint8_t>(FatalOp::Runtime));
     FuncEmitter* fe = ue->getMain();
-    fe->setMaxStackCells(kNumActRecCells + 1);
+    fe->setMaxStackCells(1);
     // XXX line numbers are bogus
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);

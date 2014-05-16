@@ -307,15 +307,15 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
    * enclosing frame elided.
    */
   smart::hash_map<Block*, uint32_t> frameDepths;
-  auto depth = [](const Func* func) {
-    return func->numSlotsInFrame() + func->maxStackCells();
-  };
   frameDepths[blocks.front()] = 0;
 
   // We limit the total stack depth during inlining, so this is the deepest
   // we'll ever have to worry about.
-  auto* outerFunc = blocks.front()->front().marker().func();
-  auto const maxDepth = depth(outerFunc) + kStackCheckLeafPadding;
+  auto const outerFunc = blocks.front()->front().marker().func();
+  auto const maxDepth = outerFunc->maxStackCells() + kStackCheckLeafPadding;
+  ITRACE(3, "maxdepth: {}, outerFunc depth: {}\n",
+         maxDepth,
+         outerFunc->maxStackCells());
 
   ITRACE(3, "Killed some frames. Iterating over blocks for fixups.\n");
   for (auto* block : blocks) {
@@ -331,19 +331,26 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         case DefInlineFP: {
           auto* spillInst = findSpillFrame(inst.src(0));
           assert(spillInst);
-          curDepth += depth(spillInst->marker().func());
-          ITRACE(4, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
+          ITRACE(4, "DefInlineFP ({}): weak/strong uses: {}/{}: "
+                 "depth: {} += {}\n",
                  inst, state[inst].weakUseCount(),
-                 folly::get_default(uses, inst.dst(), 0));
+                 folly::get_default(uses, inst.dst(), 0),
+                 curDepth,
+                 spillInst->marker().func()->maxStackCells());
+          curDepth += spillInst->marker().func()->maxStackCells();
           break;
         }
 
         case InlineReturn: {
-          auto* fpInst = frameRoot(inst.src(0)->inst());
+          auto const fpInst = frameRoot(inst.src(0)->inst());
           assert(fpInst->is(DefInlineFP));
-          auto* spillInst = findSpillFrame(fpInst->src(0));
+          auto const spillInst = findSpillFrame(fpInst->src(0));
           assert(spillInst);
-          curDepth -= depth(spillInst->marker().func());
+          ITRACE(4, "InlineReturn ({}): depth {} -= {}\n",
+                 inst,
+                 curDepth,
+                 spillInst->marker().func()->maxStackCells());
+          curDepth -= spillInst->marker().func()->maxStackCells();
           assert(findPassFP(inst.src(0)->inst()) == nullptr &&
                  "Eliminated DefInlineFP but left its InlineReturn");
           break;
@@ -378,9 +385,9 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         case DecRefMem: {
           DEBUG_ONLY auto spOff = inst.marker().spOff();
           auto newDepth = int32_t(maxDepth - curDepth);
-          assert(spOff <= newDepth);
           ITRACE(4, "adjusting marker spOff for {} from {} to {}\n",
                  inst, spOff, newDepth);
+          assert(spOff <= newDepth);
           inst.marker().setSpOff(newDepth);
           break;
         }

@@ -2152,7 +2152,7 @@ UnitEmitter::~UnitEmitter() {
 
 void UnitEmitter::addTrivialPseudoMain() {
   initMain(0, 0);
-  FuncEmitter* mfe = getMain();
+  auto const mfe = getMain();
   emitOp(OpInt);
   emitInt64(1);
   emitOp(OpRetC);

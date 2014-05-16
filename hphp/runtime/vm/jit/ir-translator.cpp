@@ -682,8 +682,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (callee->isResumable()) {
     return refuse("resumables");
   }
-  if (callee->numSlotsInFrame() + callee->maxStackCells() >=
-      kStackCheckLeafPadding) {
+  if (callee->maxStackCells() >= kStackCheckLeafPadding) {
     return refuse("function stack depth too deep");
   }
   if (callee->isMethod() && callee->cls() == c_Generator::classof()) {
@@ -711,7 +710,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
         funcs.push_back(iter.sk().func());
         int totalDepth = 0;
         for (auto* f : funcs) {
-          totalDepth += f->numSlotsInFrame() + f->maxStackCells();
+          totalDepth += f->maxStackCells();
         }
         if (totalDepth >= kStackCheckLeafPadding) {
           return refuse("stack too deep after nested inlining");

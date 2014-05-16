@@ -732,10 +732,6 @@ void emit_ehent_tree(FuncEmitter& fe,
 void emit_finish_func(const php::Func& func,
                       FuncEmitter& fe,
                       const EmitBcInfo& info) {
-  fe.setMaxStackCells(
-    info.maxStackDepth + fe.numLocals() +
-      info.maxFpiDepth * kNumActRecCells
-  );
   if (info.containsCalls) fe.setContainsCalls();
 
   for (auto& fpi : info.fpiRegions) {
@@ -759,6 +755,13 @@ void emit_finish_func(const php::Func& func,
     fe.setReturnType(func.nativeInfo->returnType);
   }
   fe.setReturnTypeConstraint(func.retTypeConstraint);
+
+  fe.setMaxStackCells(
+    info.maxStackDepth +
+      fe.numLocals() +
+      fe.numIterators() * kNumIterCells +
+      info.maxFpiDepth * kNumActRecCells
+  );
 
   fe.finish(fe.ue().bcPos(), false /* load */);
   fe.ue().recordFunction(&fe);

@@ -6418,7 +6418,6 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   fe->setDocComment(
     Option::GenerateDocComments ? meth->getDocComment().c_str() : "");
   fe->setReturnType(meth->retTypeAnnotation()->dataType());
-  fe->setMaxStackCells(kNumActRecCells + 1);
   fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
 
   FunctionScopePtr funcScope = meth->getFunctionScope();
@@ -6655,7 +6654,6 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
 void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
                                               MethodStatementPtr& meth,
                                               Label& topOfBody) {
-  // Default value initializers
   bool hasOptional = false;
   ExpressionListPtr params = meth->getParams();
   int numParam = params ? params->getCount() : 0;
@@ -7952,11 +7950,8 @@ void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {
 }
 
 void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe) {
-  // Max stack cells is used for stack overflow checks.  We need to
-  // count all the locals, and all cells due to ActRecs.  We don't
-  // need to count this function's own ActRec because whoever called
-  // it already included it in its "max stack cells".
   fe->setMaxStackCells(m_actualStackHighWater +
+                       fe->numIterators() * kNumIterCells +
                        fe->numLocals() +
                        m_fdescHighWater);
   m_actualStackHighWater = 0;
@@ -8209,7 +8204,8 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);
     ue->emitOp(OpNativeImpl);
-    fe->setMaxStackCells(kNumActRecCells + 1);
+    assert(!fe->numIterators());
+    fe->setMaxStackCells(fe->numLocals());
     fe->setAttrs(fe->attrs() | attrs);
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);
@@ -8229,8 +8225,9 @@ enum GeneratorMethod {
 typedef hphp_hash_map<const StringData*, GeneratorMethod,
                       string_data_hash, string_data_same> ContMethMap;
 
-static void emitGeneratorMethod(UnitEmitter& ue, FuncEmitter* fe,
-                                GeneratorMethod m) {
+static int32_t emitGeneratorMethod(UnitEmitter& ue,
+                                   FuncEmitter* fe,
+                                   GeneratorMethod m) {
   static const StringData* valStr = makeStaticString("value");
 
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
@@ -8289,13 +8286,16 @@ static void emitGeneratorMethod(UnitEmitter& ue, FuncEmitter* fe,
     default:
       not_reached();
   }
+
+  return 1;  // Above cases push at most one stack cell.
 }
 
-static void emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
+static int32_t emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, empty_string.get());
   ue.emitOp(OpThis);
   ue.emitOp(OpRetC);
+  return 1;  // we use one stack slot
 }
 
 StaticString s_construct("__construct");
@@ -8400,12 +8400,13 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
+      auto stackPad = int32_t{0};
       if (e.name->isame(generatorCls) &&
           (cmeth = folly::get_ptr(contMethods, methName))) {
         auto methCpy = *cmeth;
-        emitGeneratorMethod(*ue, fe, methCpy);
+        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
       } else if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
-        emitGetWaitHandleMethod(*ue, fe);
+        stackPad = emitGetWaitHandleMethod(*ue, fe);
       } else {
         if (e.name->isame(s_construct.get())) {
           hasCtor = true;
@@ -8425,7 +8426,8 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         ue->emitOp(OpNativeImpl);
       }
       Offset past = ue->bcPos();
-      fe->setMaxStackCells(kNumActRecCells + 1);
+      assert(!fe->numIterators());
+      fe->setMaxStackCells(fe->numLocals() + stackPad);
       fe->finish(past, false);
       ue->recordFunction(fe);
     }

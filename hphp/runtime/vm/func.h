@@ -196,6 +196,22 @@ struct Func {
   // making assumptions about where function calls will go.
   bool isNameBindingImmutable(const Unit* fromUnit) const;
 
+  /*
+   * Access to the maximum stack cells this function can use.  This is
+   * used for stack overflow checks.
+   *
+   * The maximum cells for a function includes all its locals, all
+   * cells for its iterators, all temporary eval stack slots, and all
+   * cells it pushes for ActRecs in FPI regions.  It does not include
+   * its own ActRec, because whoever called it must have(+) included
+   * the size of the ActRec in an FPI region for itself.  The reason
+   * it must still count its parameter locals is that the caller may
+   * or may not pass any of the parameters, regardless of how many are
+   * declared.
+   *
+   *   + Except in a re-entry situation.  That must be handled
+   *     specially in bytecode.cpp.
+   */
   void setMaxStackCells(int cells) { m_maxStackCells = cells; }
   int maxStackCells() const { return m_maxStackCells; }
 

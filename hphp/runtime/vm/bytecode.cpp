@@ -1378,7 +1378,7 @@ void ExecutionContext::shuffleMagicArgs(ActRec* ar) {
 
 // This helper only does a stack overflow check for the native stack
 static inline void checkNativeStack() {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  auto const info = ThreadInfo::s_threadInfo.getNoCheck();
   // Check whether func's maximum stack usage would overflow the stack.
   // Both native and VM stack overflows are independently possible.
   if (!stack_in_bounds(info)) {
@@ -1387,14 +1387,28 @@ static inline void checkNativeStack() {
   }
 }
 
-// This helper does a stack overflow check on *both* the native stack
-// and the VM stack.
-static inline void checkStack(Stack& stk, const Func* f) {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  // Check whether func's maximum stack usage would overflow the stack.
-  // Both native and VM stack overflows are independently possible.
-  if (!stack_in_bounds(info) ||
-      stk.wouldOverflow(f->maxStackCells() + kStackCheckPadding)) {
+/*
+ * This helper does a stack overflow check on *both* the native stack
+ * and the VM stack.
+ *
+ * In some cases for re-entry, we're checking for space other than
+ * just the callee, and `extraCells' may need to be passed with a
+ * non-zero value.  (We over-check in these situations, but it's fine.)
+ */
+ALWAYS_INLINE
+static void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
+  auto const info = ThreadInfo::s_threadInfo.getNoCheck();
+  /*
+   * Check whether func's maximum stack usage would overflow the stack.
+   * Both native and VM stack overflows are independently possible.
+   *
+   * All stack checks are inflated by kStackCheckPadding to ensure
+   * there is space both for calling leaf functions /and/ for
+   * re-entry.  (See kStackCheckReenterPadding and
+   * kStackCheckLeafPadding.)
+   */
+  auto limit = f->maxStackCells() + kStackCheckPadding + extraCells;
+  if (!stack_in_bounds(info) || stk.wouldOverflow(limit)) {
     TRACE(1, "Maximum stack depth exceeded.\n");
     raise_error("Stack overflow");
   }
@@ -1732,7 +1746,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
 
   prepareFuncEntry(enterFnAr, m_pc, stk);
   if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
-  checkStack(m_stack, enterFnAr->m_func);
+  checkStack(m_stack, enterFnAr->m_func, 0);
   assert(m_fp->func()->contains(m_pc));
 
   if (useJit) {
@@ -1880,13 +1894,18 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     this_->incRefCount();
   }
 
+  // We must do a stack overflow check for leaf functions on re-entry,
+  // because we won't have checked that the stack is deep enough for a
+  // leaf function /after/ re-entry, and the prologue for the leaf
+  // function will not make a check.
   if (f->attrs() & AttrPhpLeafFn ||
-      f->numParams() > kStackCheckReenterPadding - kNumActRecCells) {
-    // Check both the native stack and VM stack for overflow
-    checkStack(m_stack, f);
+      !(f->numParams() + kNumActRecCells <= kStackCheckReenterPadding)) {
+    // Check both the native stack and VM stack for overflow.
+    checkStack(m_stack, f,
+      kNumActRecCells /* numParams is included in f->maxStackCells */);
   } else {
     // invokeFunc() must always check the native stack for overflow no
-    // matter what
+    // matter what.
     checkNativeStack();
   }
 
@@ -1980,18 +1999,20 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
   VMRegAnchor _;
   DEBUG_ONLY Cell* reentrySP = m_stack.top();
 
-  if (ObjectData* thiz = ActRec::decodeThis(thisOrCls)) {
-    thiz->incRefCount();
-  }
-
+  // See similar block of code above for why this is needed on
+  // AttrPhpLeafFn.
   if (f->attrs() & AttrPhpLeafFn ||
-      argc > kStackCheckReenterPadding - kNumActRecCells) {
+      !(argc + kNumActRecCells <= kStackCheckReenterPadding)) {
     // Check both the native stack and VM stack for overflow
-    checkStack(m_stack, f);
+    checkStack(m_stack, f, argc + kNumActRecCells);
   } else {
     // invokeFuncFew() must always check the native stack for overflow
     // no matter what
     checkNativeStack();
+  }
+
+  if (ObjectData* thiz = ActRec::decodeThis(thisOrCls)) {
+    thiz->incRefCount();
   }
 
   ActRec* ar = m_stack.allocA();
@@ -2046,7 +2067,9 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
 
   auto fp = resumable->actRec();
   fp->setReturnVMExit();
-  checkStack(m_stack, fp->func());
+  // We don't need to check for space for the ActRec (unlike generally
+  // in normal re-entry), because the ActRec isn't on the stack.
+  checkStack(m_stack, fp->func(), 0);
 
   Cell* savedSP = m_stack.top();
   cellDup(awaitResult, *m_stack.allocC());
@@ -2070,7 +2093,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
 
   auto fp = resumable->actRec();
   fp->setReturnVMExit();
-  checkStack(m_stack, fp->func());
+  checkStack(m_stack, fp->func(), 0);
 
   // decref after we hold reference to the exception
   Object e(exception);
@@ -2623,7 +2646,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   SYNC();
   bool ret = EventHook::FunctionEnter(m_fp, funcType);
   pc = m_pc;
-  checkStack(m_stack, func);
+  checkStack(m_stack, func, 0);
   return ret;
 }
 
@@ -6196,7 +6219,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCall(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   assert(numArgs == ar->numArgs());
-  checkStack(m_stack, ar->m_func);
+  checkStack(m_stack, ar->m_func, 0);
   ar->setReturn(m_fp, pc, tx->uniqueStubs.retHelper);
   doFCall(ar, pc);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
@@ -6217,7 +6240,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
     assert(ar->m_func->name()->isame(funcName));
   }
   assert(numArgs == ar->numArgs());
-  checkStack(m_stack, ar->m_func);
+  checkStack(m_stack, ar->m_func, 0);
   ar->setReturn(m_fp, pc, tx->uniqueStubs.retHelper);
   doFCall(ar, pc);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
@@ -6282,7 +6305,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
     Cell args = *c1;
     m_stack.discard(); // prepareArrayArgs will push arguments onto the stack
     SCOPE_EXIT { tvRefcountedDecRef(&args); };
-    checkStack(m_stack, func);
+    checkStack(m_stack, func, 0);
 
     assert(!ar->resumed());
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,

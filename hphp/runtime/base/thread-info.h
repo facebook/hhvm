@@ -90,12 +90,11 @@ inline void* stack_top_ptr() {
   return sp;
 }
 
-inline bool stack_in_bounds(ThreadInfo*& info) {
+inline bool stack_in_bounds(const ThreadInfo* info) {
   return stack_top_ptr() >= info->m_stacklimit;
 }
 
-// The ThreadInfo pointer itself must be from the current stack frame.
-inline void check_recursion(ThreadInfo*& info) {
+inline void check_recursion(const ThreadInfo* info) {
   extern void throw_infinite_recursion_exception();
   if (!stack_in_bounds(info)) {
     throw_infinite_recursion_exception();

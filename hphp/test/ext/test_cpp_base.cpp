@@ -213,16 +213,6 @@ bool TestCppBase::TestArray() {
     }
     VERIFY(i == 2);
   }
-  /* TODO: fix this
-  {
-    Variant arr = make_map_array("n1", "v1", "n2", "v2");
-    arr.escalate();
-    for (ArrayIter iter = arr.begin(arr, true); !iter->end(); iter->next()) {
-      arr.lvalAt(iter->first()).reset();
-    }
-    VS(arr, Array::Create());
-  }
-  */
 
   static const StaticString s_Array("Array");
 

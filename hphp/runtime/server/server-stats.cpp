@@ -999,7 +999,7 @@ Array ServerStats::EndNetworkProfile() {
          iter != status.end(); ++iter) {
       ret.set(String(iter->first),
               make_map_array(s_ct, iter->second.count,
-                          s_wt, iter->second.wall_time));
+                             s_wt, iter->second.wall_time));
     }
     status.clear();
   }
@@ -1252,7 +1252,7 @@ Array ServerStats::getThreadIOStatuses() {
        iter != status.end(); ++iter) {
     ret.set(String(iter->first),
             make_map_array(s_ct, iter->second.count,
-                        s_wt, iter->second.wall_time));
+                           s_wt, iter->second.wall_time));
   }
   status.clear();
   return ret;

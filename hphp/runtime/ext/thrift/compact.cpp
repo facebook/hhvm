@@ -906,7 +906,7 @@ class CompactReader {
         ArrayInit ainit(size, ArrayInit::Mixed{});
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
-          ainit.set(value, true);
+          ainit.setKeyUnconverted(value, true);
         }
         ret = ainit.toArray();
       }

@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_ARRAY_INIT_H_
 #define incl_HPHP_ARRAY_INIT_H_
 
+#include <type_traits>
+
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -48,13 +50,13 @@ struct ArrayInit {
 
   ArrayInit(ArrayInit&& other)
     : m_data(other.m_data)
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     other.m_data = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -63,76 +65,94 @@ struct ArrayInit {
   ArrayInit& operator=(const ArrayInit&) = delete;
 
   ~ArrayInit() {
-    // In case an exception interrupts the initialization.
-    if (m_data) m_data->release();
+    if (m_data) MixedArray::Release(m_data);
   }
 
-  ArrayInit& set(const Variant& v) {
-    performOp([&]{ return m_data->append(v, false); });
+  ArrayInit& set(const Variant& v) = delete;
+
+  ArrayInit& append(const Variant& v) {
+    performOp([&]{
+      return MixedArray::Append(m_data, v, false);
+    });
     return *this;
   }
 
-  ArrayInit& set(CVarWithRefBind v) {
-    performOp([&]{ return m_data->appendWithRef(variant(v), false); });
+  ArrayInit& set(CVarWithRefBind v) = delete;
+
+  ArrayInit& setRef(Variant& v) = delete;
+  ArrayInit& appendRef(Variant& v) {
+    performOp([&]{ return MixedArray::AppendRef(m_data, v, false); });
     return *this;
   }
 
-  ArrayInit& setRef(Variant& v) {
-    performOp([&]{ return m_data->appendRef(v, false); });
+  ArrayInit& set(int64_t name, const Variant& v,
+                 bool keyConverted) = delete;
+  ArrayInit& set(int64_t name, const Variant& v) {
+    performOp([&]{
+      return MixedArray::SetInt(m_data, name, v.asInitCellTmp(), false);
+    });
     return *this;
   }
 
-  ArrayInit& set(int64_t name, const Variant& v, bool keyConverted = false) {
+  // set(const char*) deprecated.  Use set(CStrRef) with a
+  // StaticString, if you have a literal, or String otherwise.  Also
+  // don't try to pass a bool.
+  ArrayInit& set(const char*, const Variant& v, bool keyConverted) = delete;
+  ArrayInit& set(const String& name, const Variant& v,
+                 bool keyConverted) = delete;
+
+  ArrayInit& set(const String& name, const Variant& v) {
+    performOp([&]{
+      return MixedArray::SetStr(m_data, name.get(), v.asInitCellTmp(), false);
+    });
+    return *this;
+  }
+
+  ArrayInit& set(const Variant& name, const Variant& v,
+                 bool keyConverted) = delete;
+  ArrayInit& set(const Variant& name, const Variant& v) {
     performOp([&]{ return m_data->set(name, v, false); });
     return *this;
   }
 
-  // set(const char*) deprecated.  Use set(CStrRef) with a StaticString,
-  // if you have a literal, or String otherwise.
-  ArrayInit& set(const char*, const Variant& v, bool keyConverted = false) = delete;
-
-  ArrayInit& set(const String& name, const Variant& v, bool keyConverted = false) {
-    if (keyConverted) {
-      performOp([&]{ return m_data->set(name, v, false); });
-    } else if (!name.isNull()) {
-      performOp([&]{ return m_data->set(name.toKey(), v, false); });
-    }
+  /*
+   * This function is deprecated and exists for backward compatibility
+   * with the ArrayInit api.  Generally you should be able to figure
+   * out if your key is a pure string (not-integer-like) or not when
+   * using ArrayInit, and if not you should probably use toKey
+   * yourself.
+   */
+  ArrayInit& setKeyUnconverted(const Variant& name, const Variant& v) {
+    VarNR k(name.toKey());
+    // XXX: the old semantics of ArrayInit used to check if k.isNull
+    // and do nothing, but that's not php semantics so we're not doing
+    // that anymore.
+    performOp([&]{ return m_data->set(k, v, false); });
     return *this;
   }
 
-  ArrayInit& set(const Variant& name, const Variant& v, bool keyConverted = false) {
-    if (keyConverted) {
-      performOp([&]{ return m_data->set(name, v, false); });
-    } else {
-      VarNR k(name.toKey());
-      if (!k.isNull()) {
-        performOp([&]{ return m_data->set(k, v, false); });
-      }
-    }
-    return *this;
-  }
+  template<class T>
+  ArrayInit& set(const T& name, const Variant& v, bool) = delete;
 
-  template<typename T>
-  ArrayInit& set(const T &name, const Variant& v, bool keyConverted = false) {
-    if (keyConverted) {
-      performOp([&]{ return m_data->set(name, v, false); });
-    } else {
-      VarNR k(Variant(name).toKey());
-      if (!k.isNull()) {
-        performOp([&]{ return m_data->set(k, v, false); });
-      }
-    }
+  template<class T>
+  ArrayInit& set(const T& name, const Variant& v) {
+    performOp([&]{ return m_data->set(name, v, false); });
     return *this;
   }
 
   ArrayInit& add(int64_t name, const Variant& v, bool keyConverted = false) {
-    performOp([&]{ return m_data->add(name, v, false); });
+    performOp([&]{
+      return MixedArray::AddInt(m_data, name, v.asInitCellTmp(), false);
+    });
     return *this;
   }
 
   ArrayInit& add(const String& name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_data->add(name, v, false); });
+      performOp([&]{
+        return MixedArray::AddStr(m_data, name.get(),
+          v.asInitCellTmp(), false);
+      });
     } else if (!name.isNull()) {
       performOp([&]{ return m_data->add(name.toKey(), v, false); });
     }
@@ -167,7 +187,7 @@ struct ArrayInit {
   ArrayInit& setRef(int64_t name,
                     Variant& v,
                     bool keyConverted = false) {
-    performOp([&]{ return m_data->setRef(name, v, false); });
+    performOp([&]{ return MixedArray::SetRefInt(m_data, name, v, false); });
     return *this;
   }
 
@@ -175,7 +195,9 @@ struct ArrayInit {
                     Variant& v,
                     bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_data->setRef(name, v, false); });
+      performOp([&]{
+        return MixedArray::SetRefStr(m_data, name.get(), v, false);
+      });
     } else {
       performOp([&]{ return m_data->setRef(name.toKey(), v, false); });
     }
@@ -213,24 +235,30 @@ struct ArrayInit {
 
   // Prefer toArray() in new code---it can save a null check when the
   // compiler can't prove m_data hasn't changed.
-  ArrayData *create() {
-    ArrayData *ret = m_data;
+  ArrayData* create() {
+    auto const ret = m_data;
     m_data = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return ret;
   }
 
   Array toArray() {
     auto ptr = m_data;
     m_data = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
   Variant toVariant() {
     auto ptr = m_data;
     m_data = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return Variant(ptr, Variant::ArrayInitCtor{});
   }
 
@@ -247,7 +275,7 @@ private:
 
 private:
   ArrayData* m_data;
-#ifdef DEBUG
+#ifndef NDEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif

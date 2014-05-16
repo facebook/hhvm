@@ -767,6 +767,21 @@ struct Variant : private TypedValue {
         Cell* asCell()       { return tvToCell(asTypedValue()); }
 
   /*
+   * Read this Variant as an InitCell, without incrementing the
+   * reference count.  I.e. unbox if it is boxed, and turn
+   * KindOfUninit into KindOfNull.
+   */
+  Cell asInitCellTmp() const {
+    TypedValue tv = *this;
+    if (UNLIKELY(tv.m_type == KindOfRef)) {
+      tv.m_data = tv.m_data.pref->tv()->m_data;
+      return tv;
+    }
+    if (tv.m_type == KindOfUninit) tv.m_type = KindOfNull;
+    return tv;
+  }
+
+  /*
    * Access this Variant as a Ref, converting it to a Ref it isn't
    * one.
    */

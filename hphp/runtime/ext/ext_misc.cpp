@@ -351,7 +351,7 @@ Variant f_time_nanosleep(int seconds, int nanoseconds) {
   recordNanosleepTime(req, &rem);
   if (errno == EINTR) {
     return make_map_array(s_seconds, (int64_t)rem.tv_sec,
-                       s_nanoseconds, (int64_t)rem.tv_nsec);
+                          s_nanoseconds, (int64_t)rem.tv_nsec);
   }
   return false;
 }

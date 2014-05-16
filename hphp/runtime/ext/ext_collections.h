@@ -1700,6 +1700,7 @@ class BaseSet : public ExtCollectionObjectData {
     return pos;
   }
 
+  void addAll(const Variant& t);
   void init(const Variant& t);
 
   template <bool raw>

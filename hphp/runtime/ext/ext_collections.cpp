@@ -37,7 +37,8 @@ namespace HPHP {
  * This template provides a default implementation.
  */
 template<typename TCollection>
-inline static Object materializeImpl(ObjectData* obj) {
+ALWAYS_INLINE
+static Object materializeImpl(ObjectData* obj) {
   auto* col = NEWOBJ(TCollection)();
   Object o = col;
   col->init(VarNR(obj));
@@ -666,9 +667,8 @@ void BaseVector::throwBadKeyType() {
 void BaseVector::init(const Variant& t) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
-  if (sz) {
-    reserve(sz);
-  }
+  if (sz) { reserve(sz); }
+
   if (LIKELY(!iter.hasIteratorObj())) {
     if (iter) {
       mutateAndBump();
@@ -3638,22 +3638,38 @@ void BaseSet::cow() {
   m_immCopy.reset();
 }
 
-void BaseSet::init(const Variant& t) {
+void BaseSet::addAll(const Variant& t) {
+  if (t.isNull()) { return; } // nothing to do
+
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
-  if (LIKELY(!iter.hasIteratorObj() && !m_size)) {
-    if (iter) {
-      mutateAndBump();
-      do {
-        addRaw(iter.secondRefPlus());
-        ++iter;
-      } while (iter);
-    }
+  if (!iter) { return; }
+
+  mutateAndBump();
+  // In theory we could be deferring the version bump above for the
+  // container case because all the elements of iter could already be
+  // present in the set: there's no destructor invocations because Sets are
+  // int/string only. We can save m_size and version bump after the
+  // insertion loop only if the size has increased. However, as presently
+  // constituted, such an ->addAll() call is a time bomb and a no-op,
+  if (LIKELY(!iter.hasIteratorObj())) {
+    reserve(m_size + sz);  // presume that iter is not one value sz times ...
+    do {
+      addRaw(iter.secondRefPlus());
+      ++iter;
+    } while (iter);
+    compactIfNecessary(); // ... and compact back if we're wrong
   } else {
-    for (; iter; ++iter) {
+    assert(sz == 0); // iter is an Iterable with unknown number of elements
+    do {
       add(iter.second());
-    }
+      ++iter;
+    } while (iter);
   }
+}
+
+void BaseSet::init(const Variant& t) {
+  addAll(t);
 }
 
 template<bool raw>
@@ -4152,6 +4168,7 @@ BaseSet::php_map(const Variant& callback) {
   assert(!st->hasImmutableBuffer());
   Object obj = st;
   if (!m_size) return obj;
+  st->reserve(posLimit()); // presume callback maintains size ...
   for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
     auto* e = iter_elm(ipos);
     TypedValue tvCbRet;
@@ -4162,6 +4179,7 @@ BaseSet::php_map(const Variant& callback) {
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
     st->addRaw(&tvCbRet);
   }
+  st->compactIfNecessary(); // ... and compact if we were wrong
   return obj;
 }
 
@@ -4181,6 +4199,7 @@ BaseSet::php_filter(const Variant& callback) {
   assert(!st->hasImmutableBuffer());
   Object obj = st;
   if (!m_size) return obj;
+  // we don't st->reserve, because we don't know how selective callback will be
   int32_t version = m_version;
   for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
     auto* e = iter_elm(ipos);
@@ -4358,6 +4377,7 @@ BaseSet::php_skipWhile(const Variant& fn) {
   Object obj = st;
   if (!m_size) return obj;
   uint32_t used = posLimit();
+  // we don't st->reserve(), because we don't know how selective fn will be
   uint i = 0;
   int32_t version UNUSED;
   if (checkVersion) {
@@ -4430,15 +4450,10 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromItems(const Variant& iterable) {
-  if (iterable.isNull()) return NEWOBJ(TSet)();
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* target = NEWOBJ(TSet)();
-  assert(!target->hasImmutableBuffer());
-  Object ret = target;
-  for (; iter; ++iter) {
-    target->addRaw(iter.second());
-  }
+  auto* st = NEWOBJ(TSet)();
+  Object ret = st;
+  assert(!st->hasImmutableBuffer());
+  st->addAll(iterable);
   return ret;
 }
 
@@ -4479,10 +4494,12 @@ BaseSet::php_fromArray(const Variant& arr) {
   assert(!st->hasImmutableBuffer());
   Object ret = st;
   ArrayData* ad = arr.getArrayData();
+  st->reserve(ad->size()); // presume that ad is not one value repeated ...
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     st->addRaw(ad->getValueRef(pos));
   }
+  st->compactIfNecessary(); // ... and compact if we were wrong
   return ret;
 }
 
@@ -4502,11 +4519,14 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
       throw e;
     }
     ArrayData* ad = arr.getArrayData();
+    // if needed, the correct size can be calculated in a separate loop
+    st->reserve(st->size() + ad->size());
     for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
          pos = ad->iter_advance(pos)) {
       st->addRaw(ad->getValueRef(pos));
     }
   }
+  st->compactIfNecessary(); // all arrays could contain one value ... repeated
   return ret;
 }
 
@@ -4798,8 +4818,7 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
 }
 
 void c_Set::t___construct(const Variant& iterable /* = null_variant */) {
-  if (iterable.isNull()) return;
-  init(iterable);
+  addAll(iterable);
 }
 
 Object c_Set::t_add(const Variant& val) {
@@ -4808,13 +4827,7 @@ Object c_Set::t_add(const Variant& val) {
 }
 
 Object c_Set::t_addall(const Variant& iterable) {
-  // TODO Task# 4324040: Refactor this logic with init()
-  if (iterable.isNull()) return this;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  for (; iter; ++iter) {
-    add(iter.second());
-  }
+  addAll(iterable);
   return this;
 }
 
@@ -5052,8 +5065,7 @@ c_Set* c_Set::Clone(ObjectData* obj) {
 // ImmSet
 
 void c_ImmSet::t___construct(const Variant& iterable /* = null_variant */) {
-  if (iterable.isNull()) return;
-  init(iterable);
+  addAll(iterable);
 }
 
 bool c_ImmSet::t_isempty() {

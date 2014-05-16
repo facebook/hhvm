@@ -1196,7 +1196,7 @@ ArrayData* MixedArray::zSetImpl(K k, RefData* data) {
 }
 
 ALWAYS_INLINE
-ArrayData* MixedArray::zAppendImpl(RefData* data) {
+ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t * key_ptr) {
   if (UNLIKELY(m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
@@ -1208,6 +1208,7 @@ ArrayData* MixedArray::zAppendImpl(RefData* data) {
   auto& e = allocElm(ei);
   e.setIntKey(ki);
   m_nextKI = ki + 1;
+  *key_ptr = ki;
   return zInitVal(e.data, data);
 }
 
@@ -1318,10 +1319,10 @@ MixedArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
 }
 
 ArrayData*
-MixedArray::ZAppend(ArrayData* ad, RefData* v) {
+MixedArray::ZAppend(ArrayData* ad, RefData* v, int64_t * key_ptr) {
   auto a = asMixed(ad);
   a = a->resizeIfNeeded();
-  return a->zAppendImpl(v);
+  return a->zAppendImpl(v, key_ptr);
 }
 
 //=============================================================================

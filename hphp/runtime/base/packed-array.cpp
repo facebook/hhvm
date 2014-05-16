@@ -831,9 +831,9 @@ ArrayData* PackedArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
   return MixedArray::ZSetStr(ToMixedCopy(ad), k, v);
 }
 
-ArrayData* PackedArray::ZAppend(ArrayData* ad, RefData* v) {
+ArrayData* PackedArray::ZAppend(ArrayData* ad, RefData* v, int64_t * key_ptr) {
   assert(checkInvariants(ad));
-  return MixedArray::ZAppend(ToMixedCopy(ad), v);
+  return MixedArray::ZAppend(ToMixedCopy(ad), v, key_ptr);
 }
 
 //////////////////////////////////////////////////////////////////////

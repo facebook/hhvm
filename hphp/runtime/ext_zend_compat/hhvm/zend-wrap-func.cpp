@@ -18,6 +18,7 @@
 #include <algorithm>
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +48,13 @@ void zBoxAndProxy(TypedValue* arg) {
 }
 
 TypedValue* zend_wrap_func(ActRec* ar) {
+  // Sync the translator state.
+  // We need to do this before a native function calls into a C library
+  // compiled with -fomit-frame-pointer with the intention of having it call
+  // back. Normal HHVM extensions have the luxury of only when such a thing
+  // will be attempted, but we have no way to know in advance.
+  JIT::VMRegAnchor _;
+
   TSRMLS_FETCH();
   zend_ext_func native_func = reinterpret_cast<zend_ext_func>(ar->func()->nativeFuncPtr());
 

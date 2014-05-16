@@ -86,7 +86,7 @@ static ArrayData* ZSetStrThrow(ArrayData* ad, StringData* k, RefData* v) {
   throw FatalErrorException("Unimplemented ArrayData::ZSetStr");
 }
 
-static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v) {
+static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t * key_ptr) {
   throw FatalErrorException("Unimplemented ArrayData::ZAppend");
 }
 

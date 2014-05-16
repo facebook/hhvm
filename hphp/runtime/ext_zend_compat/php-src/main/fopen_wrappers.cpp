@@ -53,7 +53,7 @@
 #endif
 
 #ifndef S_ISREG
-#define S_ISREG(mode)	(((mode) & S_IFMT) == S_IFREG)
+#define S_ISREG(mode)    (((mode) & S_IFMT) == S_IFREG)
 #endif
 
 #ifdef PHP_WIN32
@@ -88,7 +88,7 @@ PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC) {
  *  */
 PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC)
 {
-      return expand_filepath_ex(filepath, real_path, NULL, 0 TSRMLS_CC);
+  return expand_filepath_ex(filepath, real_path, NULL, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -96,40 +96,40 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC)
  *  */
 PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len TSRMLS_DC)
 {
-      return expand_filepath_with_mode(filepath, real_path, relative_to, relative_to_len, CWD_FILEPATH TSRMLS_CC);
+  return expand_filepath_with_mode(filepath, real_path, relative_to, relative_to_len, CWD_FILEPATH TSRMLS_CC);
 }
 /* }}} */
 
 PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len, int realpath_mode TSRMLS_DC)
 {
-	// This part is basically the same as File::TranslatePath(), except relative_to is
-	// optionally a parameter instead of coming from g_context
-	assert(realpath_mode != CWD_FILEPATH); // not implemented
-	if (realpath_mode == CWD_FILEPATH) {
-		realpath_mode = CWD_REALPATH;
-	}
-	if (!filepath[0]) {
-		return NULL;
-	}
+  // This part is basically the same as File::TranslatePath(), except relative_to is
+  // optionally a parameter instead of coming from g_context
+  assert(realpath_mode != CWD_FILEPATH); // not implemented
+  if (realpath_mode == CWD_FILEPATH) {
+    realpath_mode = CWD_REALPATH;
+  }
+  if (!filepath[0]) {
+    return NULL;
+  }
 
-	HPHP::String canonicalized =
-          HPHP::FileUtil::canonicalize(filepath, strlen(filepath));
-    if (canonicalized.charAt(0) != '/') {
-		if (relative_to) {
-			canonicalized = HPHP::String(relative_to, HPHP::CopyString) + "/" + canonicalized;
-		} else {
-			canonicalized = HPHP::g_context->getCwd() + "/" + canonicalized;
-		}
-	}
-	
-	if (real_path) {
-		int copy_len;
-		copy_len = canonicalized.size() > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : canonicalized.size();
-		memcpy(real_path, canonicalized.data(), copy_len);
-		real_path[copy_len] = '\0';
-	} else {
-		real_path = estrndup(canonicalized.data(), canonicalized.size());
-	}
+  HPHP::String canonicalized =
+    HPHP::FileUtil::canonicalize(filepath, strlen(filepath));
+  if (canonicalized.charAt(0) != '/') {
+    if (relative_to) {
+      canonicalized = HPHP::String(relative_to, HPHP::CopyString) + "/" + canonicalized;
+    } else {
+      canonicalized = HPHP::g_context->getCwd() + "/" + canonicalized;
+    }
+  }
 
-	return real_path;
+  if (real_path) {
+    int copy_len;
+    copy_len = canonicalized.size() > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : canonicalized.size();
+    memcpy(real_path, canonicalized.data(), copy_len);
+    real_path[copy_len] = '\0';
+  } else {
+    real_path = estrndup(canonicalized.data(), canonicalized.size());
+  }
+
+  return real_path;
 }

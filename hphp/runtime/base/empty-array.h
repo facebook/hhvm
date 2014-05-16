@@ -111,7 +111,7 @@ struct EmptyArray {
   static ArrayData* NonSmartCopy(const ArrayData*);
   static ArrayData* ZSetInt(ArrayData* ad, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData* ad, RefData* v);
+  static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t * key_ptr);
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);

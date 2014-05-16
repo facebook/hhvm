@@ -97,7 +97,7 @@ struct PackedArray {
   static bool Uasort(ArrayData*, const Variant&);
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData*, RefData* v);
+  static ArrayData* ZAppend(ArrayData*, RefData* v, int64_t * key_ptr);
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);

@@ -63,8 +63,15 @@ TypedValue* zend_wrap_func(ActRec* ar);
 ///////////////////////////////////////////////////////////////////////////////
 }
 #else
-# include "hphp/runtime/vm/native.h"
-# define zend_wrap_func Native::unimplementedWrapper
+
+namespace HPHP {
+  inline void zBoxAndProxy(TypedValue* arg) {}
+  inline void zBoxAndProxy(const TypedValue* arg) {}
+}
+
+#include "hphp/runtime/vm/native.h"
+#define zend_wrap_func Native::unimplementedWrapper
+
 #endif // ENABLE_ZEND_COMPAT
 
 #endif // incl_HPHP_EXT_ZEND_COMPAT_H_

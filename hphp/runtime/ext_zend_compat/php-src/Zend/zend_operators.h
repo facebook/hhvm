@@ -517,8 +517,18 @@ inline ZArrVal zval_get_arrval(const zval &z) {
 #define Z_OBJ_HANDLE(zval)  (Z_OBJVAL(zval)->o_getId())
 #define Z_OBJ_HT(zval)      (bad_value<zend_object_handlers*>())
 #define Z_OBJCE(zval)       (zend_get_class_entry(&(zval) TSRMLS_CC))
-// TODO the .detach is leaking here
-#define Z_OBJPROP(zval)     (Z_OBJVAL((zval))->o_toArray().detach())
+
+// TODO: this is a memory leak, since the caller doesn't know it owns the
+// ProxyArray. Perhaps we could register it in a request-local map, like we do
+// for zend_class_entry?
+//
+// Note: modifying Z_OBJPROP(z) with zend_hash_update() etc. will not actually
+// update the object's properties as it will in Zend. But zend_update_property()
+// etc. will work, and which is the preferred method for updating properties in
+// Zend anyway.
+#define Z_OBJPROP(zval) \
+  ((HashTable*)HPHP::ProxyArray::Make(Z_OBJVAL((zval))->o_toArray().detach()))
+
 #define Z_OBJ_HANDLER(zval, hf)  (Z_OBJ_HT((zval))->hf)
 #define Z_RESVAL(zval)      (zval_get_resource_id(zval))
 #define Z_OBJDEBUG(zval,is_tmp)  ((Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&is_tmp TSRMLS_CC):(is_tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL)))

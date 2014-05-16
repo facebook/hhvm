@@ -270,7 +270,7 @@ Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */,
       String strKey = k.toString();
       if (s_apc_store[cache_id].get(strKey, v)) {
         tmp = true;
-        init.set(strKey, v);
+        init.set(strKey, v, true);
       }
     }
     success = tmp;

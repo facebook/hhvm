@@ -185,7 +185,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
         value = cls->clsCnsGet(consts[i].m_name);
       }
       assert(value.m_type != KindOfUninit);
-      arrayInit.set(name, cellAsCVarRef(value));
+      arrayInit.set(name, cellAsCVarRef(value), true /* isKey */);
     }
   }
 
@@ -225,7 +225,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     assert(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
       const TypedValue* value = &((*propVals)[i]);
-      arr.set(name, tvAsCVarRef(value));
+      arr.set(name, tvAsCVarRef(value), true /* isKey */);
     }
   }
 
@@ -234,7 +234,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
     if (access) {
       arr.set(const_cast<StringData*>(sPropInfo[i].m_name.get()),
-        tvAsCVarRef(value));
+        tvAsCVarRef(value), true /* isKey */);
     }
   }
 

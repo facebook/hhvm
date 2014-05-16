@@ -507,11 +507,11 @@ static Array get_function_static_variables(const Func* func) {
     const Func::SVInfo &sv = staticVars[i];
     auto const refData = RDS::bindStaticLocal(func, sv.name);
     // FIXME: this should not require variant hops
-    ai.setKeyUnconverted(
+    ai.set(
       VarNR(sv.name),
       refData->isUninitializedInRDS()
-        ? null_variant
-        : tvAsCVarRef(refData.get()->tv())
+      ? null_variant
+      : tvAsCVarRef(refData.get()->tv())
     );
   }
   return ai.toArray();
@@ -674,7 +674,7 @@ static Array get_function_user_attributes(const Func* func) {
 
   ArrayInit ai(userAttrs.size(), ArrayInit::Mixed{});
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    ai.set(String(StrNR(it->first)).toKey(), tvAsCVarRef(&it->second));
+    ai.set(StrNR(it->first), tvAsCVarRef(&it->second));
   }
   return ai.toArray();
 }
@@ -837,9 +837,9 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
       String strippedName(prop.m_name->data() + sizeof prefix - 1,
                           prop.m_name->size() - sizeof prefix + 1,
                           CopyString);
-      ai.setKeyUnconverted(VarNR(strippedName), val);
+      ai.set(VarNR(strippedName), val);
     } else {
-      ai.setKeyUnconverted(VarNR(prop.m_name), val);
+      ai.set(VarNR(prop.m_name), val);
     }
   }
   return ai.toArray();

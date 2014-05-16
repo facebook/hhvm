@@ -626,7 +626,7 @@ ArrayData *ArrayData::Create(const Variant& value) {
 ArrayData *ArrayData::Create(const Variant& name, const Variant& value) {
   ArrayInit init(1, ArrayInit::Map{});
   // There is no toKey() call on name.
-  init.set(name, value);
+  init.set(name, value, true);
   return init.create();
 }
 

@@ -186,19 +186,19 @@ const StaticString
 
 Array stat_impl(struct stat *stat_sb) {
   ArrayInit ret(26, ArrayInit::Mixed{});
-  ret.append((int64_t)stat_sb->st_dev);
-  ret.append((int64_t)stat_sb->st_ino);
-  ret.append((int64_t)stat_sb->st_mode);
-  ret.append((int64_t)stat_sb->st_nlink);
-  ret.append((int64_t)stat_sb->st_uid);
-  ret.append((int64_t)stat_sb->st_gid);
-  ret.append((int64_t)stat_sb->st_rdev);
-  ret.append((int64_t)stat_sb->st_size);
-  ret.append((int64_t)stat_sb->st_atime);
-  ret.append((int64_t)stat_sb->st_mtime);
-  ret.append((int64_t)stat_sb->st_ctime);
-  ret.append((int64_t)stat_sb->st_blksize);
-  ret.append((int64_t)stat_sb->st_blocks);
+  ret.set((int64_t)stat_sb->st_dev);
+  ret.set((int64_t)stat_sb->st_ino);
+  ret.set((int64_t)stat_sb->st_mode);
+  ret.set((int64_t)stat_sb->st_nlink);
+  ret.set((int64_t)stat_sb->st_uid);
+  ret.set((int64_t)stat_sb->st_gid);
+  ret.set((int64_t)stat_sb->st_rdev);
+  ret.set((int64_t)stat_sb->st_size);
+  ret.set((int64_t)stat_sb->st_atime);
+  ret.set((int64_t)stat_sb->st_mtime);
+  ret.set((int64_t)stat_sb->st_ctime);
+  ret.set((int64_t)stat_sb->st_blksize);
+  ret.set((int64_t)stat_sb->st_blocks);
   ret.set(s_dev,     (int64_t)stat_sb->st_dev);
   ret.set(s_ino,     (int64_t)stat_sb->st_ino);
   ret.set(s_mode,    (int64_t)stat_sb->st_mode);

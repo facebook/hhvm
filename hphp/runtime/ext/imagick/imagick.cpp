@@ -1484,9 +1484,8 @@ static Array HHVM_METHOD(Imagick, getImageProfiles,
   if (with_values) {
     ArrayInit ret(count, ArrayInit::Map{});
     for (size_t i = 0; i < count; ++i) {
-      ret.setKeyUnconverted(
-        String(profiles[i]),
-        magickGetImageProfile(wand->getWand(), profiles[i]));
+      ret.set(String(profiles[i]),
+              magickGetImageProfile(wand->getWand(), profiles[i]));
     }
     freeMagickMemory(profiles);
     return ret.toArray();
@@ -1513,9 +1512,8 @@ static Array HHVM_METHOD(Imagick, getImageProperties,
   if (with_values) {
     ArrayInit ret(count, ArrayInit::Map{});
     for (size_t i = 0; i < count; ++i) {
-      ret.setKeyUnconverted(
-        String(properties[i]),
-        magickGetImageProperty(wand->getWand(), properties[i]));
+      ret.set(String(properties[i]),
+              magickGetImageProperty(wand->getWand(), properties[i]));
     }
     freeMagickMemory(properties);
     return ret.toArray();
@@ -1826,7 +1824,7 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
   ret.set(s_mimetype, mimetype.empty() ? s_unknown.get() : mimetype);
 
   for (const auto& i: parsedIdentify) {
-    ret.setKeyUnconverted(i.first, i.second);
+    ret.set(i.first, i.second);
   }
 
   ret.set(s_geometry, ImageGeometry(wand->getWand()).toArray());
@@ -2402,10 +2400,10 @@ static Array HHVM_METHOD(Imagick, queryFontMetrics,
     for (size_t i = 0; i < size; ++i) {
       if (keys[i] == s_boundingBox) {
         ret.set(s_boundingBox, make_map_array(
-                s_x1, metrics[boundingBoxOffset + 0],
-                s_y1, metrics[boundingBoxOffset + 1],
-                s_x2, metrics[boundingBoxOffset + 2],
-                s_y2, metrics[boundingBoxOffset + 3]));
+            s_x1, metrics[boundingBoxOffset + 0],
+            s_y1, metrics[boundingBoxOffset + 1],
+            s_x2, metrics[boundingBoxOffset + 2],
+            s_y2, metrics[boundingBoxOffset + 3]));
       } else if (!keys[i].empty()) {
         ret.set(keys[i], metrics[i]);
       }

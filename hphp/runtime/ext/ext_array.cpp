@@ -188,11 +188,11 @@ Variant f_array_column(const Variant& input, const Variant& val_key,
     }
 
     if (idx.isNull() || !sub.exists(idx)) {
-      ret.append(elem);
+      ret.set(elem);
     } else if (sub[idx].isObject()) {
-      ret.setKeyUnconverted(sub[idx].toString(), elem);
+      ret.set(sub[idx].toString(), elem);
     } else {
-      ret.setKeyUnconverted(sub[idx], elem);
+      ret.set(sub[idx], elem);
     }
   }
   return ret.toArray();
@@ -247,14 +247,14 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
     // This is intentionally different to the $foo[$invalid_key] coercion.
     // See tests/slow/ext_array/array_fill_keys_tostring.php for examples.
     if (LIKELY(key.isInteger() || key.isString())) {
-      ai.setKeyUnconverted(key, value);
+      ai.set(key, value);
     } else if (RuntimeOption::EnableHipHopSyntax) {
       // @todo (fredemmott): Use the Zend toString() behavior, but retain the
       // warning/error behind a separate config setting
       raise_warning("array_fill_keys: keys must be ints or strings");
-      ai.setKeyUnconverted(key, value);
+      ai.set(key, value);
     } else {
-      ai.setKeyUnconverted(key.toString(), value);
+      ai.set(key.toString(), value);
     }
   }
   return ai.create();
@@ -276,7 +276,7 @@ Variant f_array_fill(int start_index, int num, const Variant& value) {
     ArrayInit ret(num, ArrayInit::Mixed{});
     ret.set(start_index, value);
     for (int i = num - 1; i > 0; i--) {
-      ret.append(value);
+      ret.set(value);
     }
     return ret.toVariant();
   }
@@ -294,7 +294,7 @@ Variant f_array_flip(const Variant& trans) {
   for (ArrayIter iter(transCell); iter; ++iter) {
     const Variant& value(iter.secondRefPlus());
     if (value.isString() || value.isInteger()) {
-      ret.setKeyUnconverted(value, iter.first());
+      ret.set(value, iter.first());
     } else {
       raise_warning("Can only flip STRING and INTEGER values!");
     }

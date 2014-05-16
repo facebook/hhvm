@@ -661,11 +661,11 @@ memcached_return_t doServerListCallback(const memcached_st *ptr,
   in_port_t port = LMCD_SERVER_PORT(server);
 #ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
   returnValue->append(make_map_array(s_host, String(hostname, CopyString),
-                                     s_port, (int32_t)port,
-                                     s_weight, (int32_t)server->weight));
+                                  s_port, (int32_t)port,
+                                  s_weight, (int32_t)server->weight));
 #else
   returnValue->append(make_map_array(s_host, String(hostname, CopyString),
-                                     s_port, (int32_t)port));
+                                  s_port, (int32_t)port));
 #endif
   return MEMCACHED_SUCCESS;
 }
@@ -697,11 +697,11 @@ Variant c_Memcached::t_getserverbykey(const String& server_key) {
   in_port_t port = LMCD_SERVER_PORT(server);
 #ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
   Array returnValue = make_map_array(s_host, String(hostname, CopyString),
-                                     s_port, (int32_t)port,
-                                     s_weight, (int32_t)server->weight);
+                                  s_port, (int32_t)port,
+                                  s_weight, (int32_t)server->weight);
 #else
   Array returnValue = make_map_array(s_host, String(hostname, CopyString),
-                                     s_port, (int32_t)port);
+                                  s_port, (int32_t)port);
 #endif
   return returnValue;
 }

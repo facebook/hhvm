@@ -31,6 +31,7 @@ type build_opts = {
                   some stats *)
   list_classes: bool; (* when true, generate class list files for
                          traversed classes *)
+  check: bool; (* some sanity checking *)
   clean_before_build: bool; (* when true, do a clean build *)
   clean: bool; (* when true just clean all generated files *)
   verbose: bool;

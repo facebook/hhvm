@@ -285,6 +285,7 @@ let parse_build_args () =
   let test_dir = ref None in
   let grade = ref true in
   let list_classes = ref false in
+  let check = ref false in
   let clean = ref false in
   (* todo: for now better to default to true here, but this is temporary! *)
   let clean_before_build = ref true in
@@ -303,6 +304,8 @@ let parse_build_args () =
     " skip full comparison with root";
     "--list-classes", Arg.Set list_classes,
     " generate files listing subclasses used in analysis";
+    "--check", Arg.Set check,
+    " run some sanity checks on the server state";
     "--clean", Arg.Set clean,
     " erase all previously generated files";
     "--clean-before-build", Arg.Set clean_before_build,
@@ -328,6 +331,7 @@ let parse_build_args () =
            list_classes = !list_classes;
            clean = !clean;
            clean_before_build = !clean_before_build;
+           check = !check;
            verbose = !verbose;
          }
 

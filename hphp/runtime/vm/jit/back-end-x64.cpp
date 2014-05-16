@@ -429,26 +429,37 @@ RegPair hintNativeCallDst(const IRInstruction& inst, unsigned i) {
   return InvalidRegPair;
 }
 
-// return the arg-register hint for a CallBuiltin instruction
+// Return the arg-register hint for a CallBuiltin instruction.
 RegPair hintCallBuiltinSrc(const IRInstruction& inst, unsigned srcNum) {
   auto callee = inst.extra<CallBuiltin>()->callee;
-  auto args = inst.srcs();
-  auto ipos = 0, dpos = 0;
+  auto ipos = 0, dpos = 0, spos = 0;
   if (isCppByRef(callee->returnType())) {
-    ipos++; // first C++ arg is ptr to return-value storage
+    if (srcNum == 0) {
+      return {argNumToRegName[0], InvalidReg};
+    }
+    ipos = spos = 1;
   }
-  for (int i = 0, n = args.size(); i < n; ++i) {
-    auto& pi = callee->params()[i];
-    if (pi.builtinType() == KindOfDouble) {
-      if (srcNum == i && dpos < kNumSIMDRegisterArgs) {
-        return { argNumToSIMDRegName[dpos], InvalidReg };
-      }
+  // Iterate through the builtin params, keeping track of the HHIR src
+  // pos (spos) and the corresponding int (ipos) and double (dpos)
+  // register argument positions.  When spos == srcNum, return a hint.
+  auto& params = callee->params();
+  int i = 0, n = callee->numParams();
+  for (; i < n && spos < srcNum; ++i, ++spos) {
+    if (params[i].builtinType() == KindOfDouble) {
       dpos++;
     } else {
-      if (srcNum == i && ipos < kNumRegisterArgs) {
-        return { argNumToRegName[ipos], InvalidReg };
-      }
       ipos++;
+    }
+  }
+  if (i < n && spos == srcNum) {
+    if (params[i].builtinType() == KindOfDouble) {
+      if (dpos < kNumSIMDRegisterArgs) {
+        return {argNumToSIMDRegName[dpos], InvalidReg};
+      }
+    } else {
+      if (ipos < kNumRegisterArgs) {
+        return {argNumToRegName[ipos], InvalidReg};
+      }
     }
   }
   return InvalidRegPair;

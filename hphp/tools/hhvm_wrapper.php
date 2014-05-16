@@ -153,11 +153,13 @@ function compile_a_repo(bool $unoptimized, bool $echo_command): string {
   ));
   $repo=$compile_dir.'/hhvm.hhbc';
   system("rm -f $hphp_out");
-  register_shutdown_function(
-    function() use ($compile_dir) {
-      system("rm -fr $compile_dir");
-    },
-  );
+  if ($echo_command !== true) {
+    register_shutdown_function(
+      function() use ($compile_dir) {
+        system("rm -fr $compile_dir");
+      },
+    );
+  }
 
   return $repo;
 }

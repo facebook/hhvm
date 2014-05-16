@@ -387,10 +387,13 @@ let rec entry ~fail content =
   let lb = Lexing.from_string content in
   let env = init_env lb in
   let ast = header env in
-  if fail && !(env.errors) <> []
-  then (env.errors := (filter_duplicate_errors [] !(env.errors)))
-  else if not !is_hh_file
-  then env.errors := [Pos.none, "PHP FILE"];
+  if fail then begin
+    if !(env.errors) <> [] then
+      (env.errors := (filter_duplicate_errors [] !(env.errors)))
+    else if not !is_hh_file then
+      env.errors := [Pos.none, "PHP FILE"];
+  end else
+    env.errors := [];
   let comments = !L.comment_list in
   L.comment_list := [];
   comments, ast, !(env.errors)

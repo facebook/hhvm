@@ -196,6 +196,14 @@ emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  cmpb(src, toByte(tvOp));
 }
 
+inline void emitCmpTVType(X64::Vout& v, Immed s0, X64::Vptr s1) {
+  v << X64::cmpbim{s0, s1};
+}
+
+inline void emitCmpTVType(X64::Vout& v, Immed s0, X64::Vreg s1) {
+  v << X64::cmpbi{s0, s1};
+}
+
 template<typename DestType, typename OpndType>
 static inline void
 emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {

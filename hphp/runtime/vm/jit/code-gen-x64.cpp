@@ -114,6 +114,31 @@ void CodeGenerator::ifBlock(ConditionCode cc, Block taken,
   ifThen(m_as, cc, taken);
 }
 
+template <class Then>
+void CodeGenerator::unlikelyIfBlock(Vout& v, Vout& vcold,
+                                    ConditionCode cc, Then then) {
+  auto unlikely = vcold.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {done, unlikely}};
+  vcold = unlikely;
+  then(vcold);
+  if (!vcold.closed()) vcold << jmp{done};
+  v = done;
+}
+
+template <class Block>
+void CodeGenerator::ifBlock(Vout& v, Vout& vcold, ConditionCode cc,
+                            Block taken, bool unlikely) {
+  if (unlikely) return unlikelyIfBlock(v, vcold, cc, taken);
+  auto takenLabel = v.makeBlock();
+  auto doneLabel = v.makeBlock();
+  v << jcc{cc, {doneLabel, takenLabel}};
+  v = takenLabel;
+  taken(v);
+  if (!v.closed()) v << jmp{doneLabel};
+  v = doneLabel;
+}
+
 template <class Block>
 void CodeGenerator::unlikelyIfBlock(ConditionCode cc, Block unlikely) {
   if (m_as.base() == m_acold.base()) {
@@ -126,17 +151,6 @@ void CodeGenerator::unlikelyIfBlock(ConditionCode cc, Block unlikely) {
     m_acold.jmp(done);
     asm_label(m_as, done);
   }
-}
-
-template <class Then>
-void unlikelyIfThen(Vout& vmain, Vout& vcold, ConditionCode cc, Then then) {
-  auto unlikely = vcold.makeBlock();
-  auto done = vmain.makeBlock();
-  vmain << jcc{cc, {done, unlikely}};
-  vcold = unlikely;
-  then(vcold);
-  if (!vcold.closed()) vcold << jmp{done};
-  vmain = done;
 }
 
 // Generate an if-then-else block
@@ -197,6 +211,29 @@ void CodeGenerator::unlikelyIfThenElse(ConditionCode cc, Then unlikely,
   }
 }
 
+template <class Then, class Else>
+void CodeGenerator::ifThenElse(Vout& v, Vout& vcold, ConditionCode cc,
+                               Then thenBlock, Else elseBlock, bool unlikely) {
+  if (unlikely) return unlikelyIfThenElse(v, vcold, cc, thenBlock, elseBlock);
+  ifThenElse(v, cc, thenBlock, elseBlock);
+}
+
+template <class Then, class Else>
+void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
+                                       Then unlikelyBlock, Else elseBlock) {
+  auto elseLabel = v.makeBlock();
+  auto unlikelyLabel = vcold.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {elseLabel, unlikelyLabel}};
+  v = elseLabel;
+  elseBlock(v);
+  if (!v.closed()) v << jmp{done};
+  vcold = unlikelyLabel;
+  unlikelyBlock(vcold);
+  if (!vcold.closed()) vcold << jmp{done};
+  v = done;
+}
+
 /*
  * Select a scratch register to use in the given instruction, prefering the
  * lower registers which don't require a REX prefix.  The selected register
@@ -252,7 +289,7 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
   void CodeGenerator::cg##opcode(IRInstruction*) {}
 
 #define CALL_OPCODE(opcode) \
-  void CodeGenerator::cg##opcode(IRInstruction* i) { cgCallNative(m_as, i); }
+  void CodeGenerator::cg##opcode(IRInstruction* i) { cgCallNative(vmain(), i); }
 
 #define CALL_STK_OPCODE(opcode) \
   CALL_OPCODE(opcode)           \
@@ -680,15 +717,16 @@ void CodeGenerator::cgEndCatch(IRInstruction* inst) {
 void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
   auto& v = vmain();
   v << cmpbim{0, rVmTl[unwinderSideExitOff()]};
-  unlikelyIfThen(v, vcold(), CC_E, callUnwindResumeHelper);
+  unlikelyIfBlock(v, vcold(), CC_E, callUnwindResumeHelper);
 
   // doSideExit == true, so fall through to the side exit code
   v << incstat{Stats::TC_CatchSideExit};
 }
 
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
-  m_as.loadq(rVmTl[unwinderScratchOff()], rdi);
-  m_as.call ((TCA)_Unwind_DeleteException);
+  auto& v = vmain();
+  v << loadq{rVmTl[unwinderScratchOff()], rdi};
+  v << call{(TCA)_Unwind_DeleteException};
 }
 
 void CodeGenerator::cgJcc(IRInstruction* inst) {
@@ -995,7 +1033,7 @@ static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
   return args.numStackArgs() * sizeof(int64_t);
 }
 
-void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
+void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
   using namespace NativeCalls;
 
   Opcode opc = inst->op();
@@ -1025,7 +1063,7 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
     not_reached();
   }();
 
-  cgCallHelper(a, call, dest, info.sync, argGroup);
+  cgCallHelper(v, call, dest, info.sync, argGroup);
 }
 
 CallDest CodeGenerator::callDest(PhysReg reg0,
@@ -1202,14 +1240,28 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
 
 template<class OpInstr>
 void CodeGenerator::cgUnaryIntOp(PhysLoc dst_loc,
-                                 SSATmp* src, PhysLoc src_loc,
-                                 OpInstr instr) {
+                                 SSATmp* src, PhysLoc src_loc) {
   assert(src->isA(Type::Int));
   assert(dst_loc.reg() != InvalidReg);
   assert(src_loc.reg() != InvalidReg);
   auto dstReg = dst_loc.reg();
   auto srcReg = src_loc.reg();
-  auto& a = m_as;
+  auto& v = vmain();
+
+  // Integer operations require 64-bit representations
+  zeroExtendIfBool(v, src, srcReg);
+  v << copy{srcReg, dstReg};
+  v << OpInstr{dstReg, dstReg};
+}
+
+template<class OpInstr>
+void cgUnaryIntOp(Asm& a, PhysLoc dst_loc, SSATmp* src, PhysLoc src_loc,
+                  OpInstr instr) {
+  assert(src->isA(Type::Int));
+  assert(dst_loc.reg() != InvalidReg);
+  assert(src_loc.reg() != InvalidReg);
+  auto dstReg = dst_loc.reg();
+  auto srcReg = src_loc.reg();
 
   // Integer operations require 64-bit representations
   zeroExtendIfBool(a, src, srcReg);
@@ -1221,68 +1273,61 @@ void CodeGenerator::cgUnaryIntOp(PhysLoc dst_loc,
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
-  auto resReg = dstReg.isSIMD() ? dstReg : PhysReg(rCgXMM0);
-
-  emitMovRegReg(m_as, srcReg, resReg);
+  auto& v = vmain();
 
   // clear the high bit
-  m_as.    psllq  (1, resReg);
-  m_as.    psrlq  (1, resReg);
-
-  emitMovRegReg(m_as, resReg, dstReg);
+  auto resReg = dstReg.isSIMD() ? Vreg(dstReg) : v.makeReg();
+  Vreg tmp_src;
+  if (srcReg.isSIMD()) {
+    tmp_src = srcReg;
+  } else {
+    tmp_src = v.makeReg();
+    v << copy{srcReg, tmp_src};
+  }
+  auto tmp1 = v.makeReg();
+  v << psllq{1, tmp_src, tmp1};
+  v << psrlq{1, tmp1, resReg};
+  if (resReg != Vreg(dstReg)) v << copy{resReg, dstReg};
 }
-
-inline static Reg8 convertToReg8(PhysReg reg) { return rbyte(reg); }
-inline static Reg64 convertToReg64(PhysReg reg) { return reg; }
 
 typedef void (Asm::*AsmInstrIR)(Immed, Reg64);
 
-template<class RegType>
 void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
-                                  void (Asm::*instrIR)(Immed, RegType),
-                                  void (Asm::*instrRR)(RegType, RegType),
-                                  void (Asm::*movInstr)(RegType, RegType),
-                                  RegType (*convertReg)(PhysReg),
+                                  void (Asm::*instrIR)(Immed, Reg64),
+                                  void (Asm::*instrRR)(Reg64, Reg64),
                                   Commutativity commuteFlag) {
   assert(m_curInst == inst); // could remove the inst param
-  const SSATmp* src1  = inst->src(0);
-  const SSATmp* src2  = inst->src(1);
+  const SSATmp* src0  = inst->src(0);
+  const SSATmp* src1  = inst->src(1);
 
   // inputs must be ints, or a (bool,bool) operation that ends up behaving
   // like an int anyway (e.g. XorBool)
-  assert((src1->isA(Type::Int) && src2->isA(Type::Int)) ||
-         (src1->isA(Type::Bool) && src2->isA(Type::Bool)));
+  assert((src0->isA(Type::Int) && src1->isA(Type::Int)));
 
-  bool const commutative = commuteFlag == Commutative;
   auto const dstReg      = dstLoc(0).reg();
-  auto const src1Reg     = srcLoc(0).reg();
-  auto const src2Reg     = srcLoc(1).reg();
+  auto const src0Reg     = srcLoc(0).reg();
+  auto const src1Reg     = srcLoc(1).reg();
   auto& a                = m_as;
 
-  auto const dstOpReg    = convertReg(dstReg);
-  auto const src1OpReg   = convertReg(src1Reg);
-  auto const src2OpReg   = convertReg(src2Reg);
-  auto const rOpScratch  = convertReg(m_rScratch);
-
   auto opWithScratch = [&]() {
-    (a.*movInstr)(src1OpReg, rOpScratch);
-    (a.*instrRR) (src2OpReg, rOpScratch);
-    (a.*movInstr)(rOpScratch, dstOpReg);
+    a.movq(src0Reg, m_rScratch);
+    (a.*instrRR) (src1Reg, m_rScratch);
+    a.movq(m_rScratch, dstReg);
   };
 
   // Two registers.
-  if (src1Reg != InvalidReg && src2Reg != InvalidReg) {
-    if (dstReg == src1Reg) {
-      (a.*instrRR)  (src2OpReg, dstOpReg);
-    } else if (dstReg == src2Reg) {
-      if (commutative) {
-        (a.*instrRR) (src1OpReg, dstOpReg);
+  if (src0Reg != InvalidReg && src1Reg != InvalidReg) {
+    if (dstReg == src0Reg) {
+      (a.*instrRR)  (src1Reg, dstReg);
+    } else if (dstReg == src1Reg) {
+      if (commuteFlag == Commutative) {
+        (a.*instrRR) (src0Reg, dstReg);
       } else {
         opWithScratch();
       }
     } else {
-      emitMovRegReg(a, src1Reg, dstReg);
-      (a.*instrRR) (src2OpReg, dstOpReg);
+      emitMovRegReg(a, src0Reg, dstReg);
+      (a.*instrRR) (src1Reg, dstReg);
     }
     return;
   }
@@ -1293,77 +1338,153 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   };
 
   // One register, and one immediate.
-  if (commutative) {
+  if (commuteFlag == Commutative) {
     assert(instrIR);
-    auto imm = intVal(src2Reg == InvalidReg ? src2 : src1);
-    auto srcReg = srcLoc(src2Reg == InvalidReg ? 0 : 1).reg();
+    auto imm = intVal(src1Reg == InvalidReg ? src1 : src0);
+    auto srcReg = srcLoc(src1Reg == InvalidReg ? 0 : 1).reg();
     if (srcReg == dstReg) {
-      (a.*instrIR) (imm, dstOpReg);
+      (a.*instrIR) (imm, dstReg);
     } else {
       a. emitImmReg(imm, dstReg);
-      (a.*instrRR) (convertReg(srcReg), dstOpReg);
+      (a.*instrRR) (srcReg, dstReg);
     }
     return;
   }
 
   // NonCommutative:
-  if (src1Reg == InvalidReg) {
-    if (dstReg == src2Reg) {
-      emitLoadImm(a, intVal(src1), m_rScratch);
-      (a.*instrRR) (src2OpReg, rOpScratch);
-      (a.*movInstr)(rOpScratch, dstOpReg);
+  if (src0Reg == InvalidReg) {
+    if (dstReg == src1Reg) {
+      emitLoadImm(a, intVal(src0), m_rScratch);
+      (a.*instrRR) (src1Reg, m_rScratch);
+      a.movq(m_rScratch, dstReg);
     } else {
-      emitLoadImm(a, intVal(src1), dstReg);
-      (a.*instrRR) (src2OpReg, dstOpReg);
+      emitLoadImm(a, intVal(src0), dstReg);
+      (a.*instrRR) (src1Reg, dstReg);
     }
     return;
   }
 
-  assert(src2Reg == InvalidReg);
-  emitMovRegReg(a, src1Reg, dstReg);
-  (a.*instrIR) (intVal(src2), dstOpReg);
+  assert(src1Reg == InvalidReg);
+  emitMovRegReg(a, src0Reg, dstReg);
+  (a.*instrIR) (intVal(src1), dstReg);
 }
 
-void CodeGenerator::cgBinaryDblOp(IRInstruction* inst,
-                                  void (Asm::*fpInstr)(RegXMM, RegXMM)) {
+template<class Op, class Opi>
+void CodeGenerator::cgBinaryIntOp(IRInstruction* inst) {
+  assert(m_curInst == inst); // could remove the inst param
+  UNUSED const SSATmp* src0  = inst->src(0);
+  UNUSED const SSATmp* src1  = inst->src(1);
+
+  // inputs must be ints, or a (bool,bool) operation that ends up behaving
+  // like an int anyway (e.g. XorBool)
+  assert((src0->isA(Type::Int) && src1->isA(Type::Int)) ||
+         (src0->isA(Type::Bool) && src1->isA(Type::Bool)));
+
+  auto const dstReg      = dstLoc(0).reg();
+  auto const src0Reg     = srcLoc(0).reg();
+  auto const src1Reg     = srcLoc(1).reg();
+  auto& v                = vmain();
+
+  // LHS must always be assigned a register.
+  assert(src0Reg != InvalidReg);
+
+  if (src1Reg != InvalidReg) {
+    // Two registers
+    v << Op{src1Reg, src0Reg, dstReg};
+  } else {
+    // One register, one immediate
+    auto imm = src1->isA(Type::Int) ? safe_cast<int32_t>(src1->intVal()) :
+               int32_t(src1->boolVal());
+    v << Opi{imm, src0Reg, dstReg};
+  }
+}
+
+template<class Emit>
+void CodeGenerator::cgBinaryDblOp(IRInstruction* inst, Emit emit) {
   assert(inst == m_curInst);
-  const SSATmp* src1  = inst->src(0);
-  const SSATmp* src2  = inst->src(1);
-  auto loc1 = srcLoc(0);
-  auto loc2 = srcLoc(1);
-  assert(src1->isA(Type::Dbl) && src2->isA(Type::Dbl));
+  const SSATmp* src0  = inst->src(0);
+  const SSATmp* src1  = inst->src(1);
+  auto loc0 = srcLoc(0);
+  auto loc1 = srcLoc(1);
+  assert(src0->isA(Type::Dbl) && src1->isA(Type::Dbl));
 
-  PhysReg dstReg  = dstLoc(0).reg();
-  PhysReg resReg  = dstReg.isSIMD() && dstReg != loc2.reg() ?
-                    dstReg : PhysReg(rCgXMM0);
-  assert(resReg.isSIMD());
+  auto& v = vmain();
+  auto dstReg = dstLoc(0).reg();
+  auto resReg = dstReg.isSIMD() && dstReg != loc1.reg() ? Vreg(dstReg) :
+                v.makeReg();
+  assert(resReg.isVirt() || resReg.isSIMD());
 
-  PhysReg srcReg1 = prepXMMReg(m_as, src1, loc1, resReg);
-  PhysReg srcReg2 = prepXMMReg(m_as, src2, loc2, rCgXMM1);
-  assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
+  auto srcReg0 = prepXMM(v, src0, loc0);
+  auto srcReg1 = prepXMM(v, src1, loc1);
 
-  emitMovRegReg(m_as, srcReg1, resReg);
+  emit(v, srcReg1, srcReg0, resReg);
+  if (resReg != Vreg(dstReg)) v << copy{resReg, dstReg};
+}
 
-  (m_as.*fpInstr)(srcReg2, resReg);
-
-  emitMovRegReg(m_as, resReg, dstReg);
+/*
+ * If src2 is 1, this generates dst = src1 - 1 or src1 + 1 using the inc
+ * or dec x86 instructions. The return value is whether or not the
+ * instruction could be generated.
+ */
+bool emitIncDecHelper(Asm& as, PhysLoc dst, SSATmp* src1, PhysLoc loc1,
+                      SSATmp* src2, PhysLoc loc2,
+                      void(Asm::*emitFunc)(Reg64)) {
+  if (loc1.reg() != InvalidReg && loc2.reg() != InvalidReg &&
+      src2->isConst(1)) {
+    emitMovRegReg(as, loc1.reg(), dst.reg());
+    (as.*emitFunc)(dst.reg());
+    return true;
+  }
+  return false;
 }
 
 void CodeGenerator::cgAddIntO(IRInstruction* inst) {
-  cgAddInt(inst);
   assert(inst->taken() != nullptr);
+  SSATmp* src1 = inst->src(0);
+  SSATmp* src2 = inst->src(1);
+  auto loc1 = srcLoc(0);
+  auto loc2 = srcLoc(1);
+  auto dst = dstLoc(0);
+
+  // Special cases: x = y + 1, x = 1 + y
+  if (!emitIncDecHelper(m_as, dst, src1, loc1, src2, loc2, &Asm::incq) &&
+      !emitIncDecHelper(m_as, dst, src2, loc2, src1, loc1, &Asm::incq)) {
+    cgBinaryIntOp(inst, &Asm::addq, &Asm::addq, Commutative);
+  }
   emitFwdJcc(m_as, CC_O, inst->taken());
 }
 
+// r1 = r0 - r1
+// r1 = -r1 + r0
+
 void CodeGenerator::cgSubIntO(IRInstruction* inst) {
-  cgSubInt(inst);
   assert(inst->taken() != nullptr);
+  auto src1 = inst->src(0);
+  auto src2 = inst->src(1);
+  auto loc1 = srcLoc(0);
+  auto loc2 = srcLoc(1);
+  auto dst = dstLoc(0);
+
+  if (src1->isConst(0)) {
+    // There is no unary negate HHIR instruction, so handle that here.
+    X64::cgUnaryIntOp(m_as, dst, src2, loc2, &Asm::neg);
+  } else if (!emitIncDecHelper(m_as, dst, src1, loc1, src2, loc2, &Asm::decq)) {
+    cgBinaryIntOp(inst, &Asm::subq, &Asm::subq, NonCommutative);
+  }
   emitFwdJcc(m_as, CC_O, inst->taken());
 }
 
 void CodeGenerator::cgMulIntO(IRInstruction* inst) {
-  cgMulInt(inst);
   assert(inst->taken() != nullptr);
+  auto src0Reg = srcLoc(0).reg();
+  auto src1Reg = srcLoc(1).reg();
+  auto dstReg = dstLoc(0).reg();
+  if (dstReg != src0Reg && dstReg == src1Reg) {
+    m_as.imul(src0Reg, dstReg);
+  } else {
+    emitMovRegReg(m_as, src0Reg, dstReg);
+    m_as.imul(src1Reg, dstReg);
+  }
   emitFwdJcc(m_as, CC_O, inst->taken());
 }
 
@@ -1372,13 +1493,14 @@ void CodeGenerator::cgMulIntO(IRInstruction* inst) {
  * or dec x86 instructions. The return value is whether or not the
  * instruction could be generated.
  */
-bool CodeGenerator::emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-                                     SSATmp* src2, PhysLoc loc2,
-                                     void(Asm::*emitFunc)(Reg64)) {
+template<class Inst>
+bool CodeGenerator::emitIncDec(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
+                               SSATmp* src2, PhysLoc loc2) {
+  auto& v = vmain();
   if (loc1.reg() != InvalidReg && loc2.reg() != InvalidReg &&
       src2->isConst(1)) {
-    emitMovRegReg(m_as, loc1.reg(), dst.reg());
-    (m_as.*emitFunc)(dst.reg());
+    v << copy{loc1.reg(), dst.reg()};
+    v << Inst{dst.reg(), dst.reg()};
     return true;
   }
   return false;
@@ -1386,13 +1508,12 @@ bool CodeGenerator::emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
 
 void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
   auto src = inst->src(0);
-
   auto dstReg = dstLoc(0).reg();
-  auto inReg  = prepXMMReg(m_as, src, srcLoc(0), rCgXMM0);
-  auto outReg = dstReg.isSIMD() ? dstReg : PhysReg(rCgXMM1);
-
-  m_as.   roundsd   (dir, inReg, outReg);
-  emitMovRegReg(m_as, outReg, dstReg);
+  auto& v = vmain();
+  auto inReg  = prepXMM(v, src, srcLoc(0));
+  auto outReg = dstReg.isSIMD() ? Vreg(dstReg) : v.makeReg();
+  v << roundsd{dir, inReg, outReg};
+  v << copy{outReg, dstReg};
 }
 
 void CodeGenerator::cgFloor(IRInstruction* inst) {
@@ -1404,74 +1525,84 @@ void CodeGenerator::cgCeil(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAddInt(IRInstruction* inst) {
-  SSATmp* src1 = inst->src(0);
-  SSATmp* src2 = inst->src(1);
-  auto loc1 = srcLoc(0);
-  auto loc2 = srcLoc(1);
+  SSATmp* src0 = inst->src(0);
+  SSATmp* src1 = inst->src(1);
+  auto loc0 = srcLoc(0);
+  auto loc1 = srcLoc(1);
   auto dst = dstLoc(0);
 
   // Special cases: x = y + 1, x = 1 + y
-  if (emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::incq) ||
-      emitIncDecHelper(dst, src2, loc2, src1, loc1, &Asm::incq)) {
+  if (emitIncDec<incq>(dst, src0, loc0, src1, loc1) ||
+      emitIncDec<incq>(dst, src1, loc1, src0, loc1)) {
     return;
   }
 
-  cgBinaryIntOp(
-    inst,
-    &Asm::addq,
-    &Asm::addq,
-    &Asm::movq,
-    &convertToReg64,
-    Commutative
-  );
+  cgBinaryIntOp<addq,addqi>(inst);
 }
 
 void CodeGenerator::cgSubInt(IRInstruction* inst) {
-  auto src1 = inst->src(0);
-  auto src2 = inst->src(1);
-  auto loc1 = srcLoc(0);
-  auto loc2 = srcLoc(1);
+  auto src0 = inst->src(0);
+  auto src1 = inst->src(1);
+  auto loc0 = srcLoc(0);
+  auto loc1 = srcLoc(1);
   auto dst = dstLoc(0);
 
-  if (emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::decq)) return;
+  if (emitIncDec<decq>(dst, src0, loc0, src1, loc1)) return;
 
-  if (src1->isConst(0)) {
+  if (src0->isConst(0)) {
     // There is no unary negate HHIR instruction, so handle that here.
-    cgUnaryIntOp(dst, src2, loc2, &Asm::neg);
+    cgUnaryIntOp<neg>(dst, src1, loc1);
     return;
   }
 
-  cgBinaryIntOp(
-    inst,
-    &Asm::subq,
-    &Asm::subq,
-    &Asm::movq,
-    &convertToReg64,
-    NonCommutative
-  );
+  // not using cgBinaryIntOp because sub is not commutative, and we can do
+  // r1=r0-r1 by doing neg r1; addq r1+=r0 without a scratch register.
+  auto s0 = loc0.reg();
+  auto s1 = loc1.reg();
+  auto d = dst.reg();
+  assert(s0 != InvalidReg && d != InvalidReg);
+  auto& v = vmain();
+  if (s1 == d) {
+    v << neg{s1, d};
+    v << addq{s0, s1, d};
+  } else if (s1 == InvalidReg) {
+    auto imm = src1->isA(Type::Int) ? safe_cast<int32_t>(src1->intVal()) :
+               int32_t(src1->boolVal());
+    v << subqi{imm, s0, d};
+  } else {
+    v << subq{s1, s0, d};
+  }
 }
 
 void CodeGenerator::cgMulInt(IRInstruction* inst) {
-  cgBinaryIntOp(
-    inst,
-    (AsmInstrIR)nullptr, // there is no imul-immediate instruction
-    &Asm::imul,
-    &Asm::movq,
-    &convertToReg64,
-    Commutative
-  );
+  // not using cgBinaryIntOp() here because x64 imul does not have
+  // an immediate form. This means we can't provide a well-formed
+  // Op class, and most of the complicated logic in cgBinaryIntOp
+  // isn't necessary anyway.
+  auto src0 = srcLoc(0).reg();
+  auto src1 = srcLoc(1).reg();
+  auto dst = dstLoc(0).reg();
+  auto& v = vmain();
+  assert(src0 != InvalidReg && src1 != InvalidReg && dst != InvalidReg);
+  v << imul{src1, src0, dst};
 }
 
 void CodeGenerator::cgAddDbl(IRInstruction* inst) {
-  cgBinaryDblOp(inst, &Asm::addsd);
+  cgBinaryDblOp(inst, [&](Vout& v, VregXMM s0, VregXMM s1, VregXMM res) {
+    v << addsd{s0, s1, res};
+  });
 }
 
 void CodeGenerator::cgSubDbl(IRInstruction* inst) {
-  cgBinaryDblOp(inst, &Asm::subsd);
+  cgBinaryDblOp(inst, [&](Vout& v, VregXMM s0, VregXMM s1, VregXMM res) {
+    v << subsd{s0, s1, res};
+  });
 }
 
 void CodeGenerator::cgMulDbl(IRInstruction* inst) {
-  cgBinaryDblOp(inst, &Asm::mulsd);
+  cgBinaryDblOp(inst, [&](Vout& v, VregXMM s0, VregXMM s1, VregXMM res) {
+    v << mulsd{s0, s1, res};
+  });
 }
 
 void CodeGenerator::cgDivDbl(IRInstruction* inst) {
@@ -1507,42 +1638,22 @@ void CodeGenerator::cgDivDbl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAndInt(IRInstruction* inst) {
-  cgBinaryIntOp(inst,
-                &Asm::andq,
-                &Asm::andq,
-                &Asm::movq,
-                &convertToReg64,
-                Commutative);
+  cgBinaryIntOp<andq,andqi>(inst);
 }
 
 void CodeGenerator::cgOrInt(IRInstruction* inst) {
-  cgBinaryIntOp(inst,
-                &Asm::orq,
-                &Asm::orq,
-                &Asm::movq,
-                &convertToReg64,
-                Commutative);
+  cgBinaryIntOp<orq,orqi>(inst);
 }
 
 void CodeGenerator::cgXorInt(IRInstruction* inst) {
   if (inst->src(1)->isConst(-1)) {
-    return cgUnaryIntOp(dstLoc(0), inst->src(0), srcLoc(0), &Asm::not);
+    return cgUnaryIntOp<not>(dstLoc(0), inst->src(0), srcLoc(0));
   }
-  cgBinaryIntOp(inst,
-                &Asm::xorq,
-                &Asm::xorq,
-                &Asm::movq,
-                &convertToReg64,
-                Commutative);
+  cgBinaryIntOp<xorq,xorqi>(inst);
 }
 
 void CodeGenerator::cgXorBool(IRInstruction* inst) {
-  cgBinaryIntOp(inst,
-                &Asm::xorb,
-                &Asm::xorb,
-                &Asm::movb,
-                &convertToReg8,
-                Commutative);
+  cgBinaryIntOp<xorb,xorbi>(inst);
 }
 
 void CodeGenerator::cgMod(IRInstruction* inst) {
@@ -1550,47 +1661,49 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
   auto const dstReg = dstLoc(0).reg();
   auto const reg0 = srcLoc(0).reg();
   auto const reg1 = srcLoc(1).reg();
-  auto& a = m_as;
+  auto& v = vmain();
 
   // spill rax and/or rdx
   bool spillRax = dstReg != rax;
   bool spillRdx = dstReg != rdx;
-  if (spillRax) a.  push   (rax);
-  if (spillRdx) a.  push   (rdx);
+  if (spillRax) v << push{rax};
+  if (spillRdx) v << push{rdx};
   // put divisor in rCgGP if it would get clobbered
   auto divisor = reg1 != rax && reg1 != rdx ? reg1 : PhysReg(rCgGP);
-  emitMovRegReg(a, reg1, divisor);
+  v << copy{reg1, divisor};
   // put dividend in rax
-  emitMovRegReg(a, reg0, rax);
-  a.    cqo    ();        // sign-extend rax => rdx:rax
-  a.    idiv   (divisor); // rdx:rax/divisor => quot:rax, rem:rdx
-  emitMovRegReg(a, rdx, dstReg);
+  v << copy{reg0, rax};
+  v << cqo{};            // sign-extend rax => rdx:rax
+  v << idiv{divisor};    // rdx:rax/divisor => quot:rax, rem:rdx
+  v << copy{rdx, dstReg};
   // restore rax and/or rdx
-  if (spillRdx) a.  pop    (reg::rdx);
-  if (spillRax) a.  pop    (reg::rax);
+  if (spillRdx) v << pop{rdx};
+  if (spillRax) v << pop{rax};
 }
 
 void CodeGenerator::cgSqrt(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
-  auto resReg = dstReg.isSIMD() ? dstReg : PhysReg(rCgXMM0);
-  emitMovRegReg(m_as, srcReg, resReg);
-  m_as.  sqrtsd  (resReg, resReg);
-  emitMovRegReg  (m_as, resReg, dstReg);
+  auto& v = vmain();
+  auto tmp1 = srcReg.isSIMD() ? Vreg(srcReg) : v.makeReg();
+  auto tmp2 = dstReg.isSIMD() ? Vreg(dstReg) : v.makeReg();
+  v << copy{srcReg, tmp1};
+  v << sqrtsd{tmp1, tmp2};
+  v << copy{tmp2, dstReg};
 }
 
-void CodeGenerator::cgShiftCommon(IRInstruction* inst,
-                                  void (Asm::*instrIR)(Immed, Reg64),
-                                  void (Asm::*instrR)(Reg64)) {
+template<class Op, class Opi>
+void CodeGenerator::cgShiftCommon(IRInstruction* inst) {
   auto const srcReg0 = srcLoc(0).reg();
   auto const srcReg1 = srcLoc(1).reg();
   auto const dstReg  = dstLoc(0).reg();
   assert(srcReg0 != InvalidReg);
+  auto& v = vmain();
 
   // one immediate (right hand side)
   if (srcReg1 == InvalidReg) {
-    emitMovRegReg(m_as, srcReg0, dstReg);
-    (m_as.*instrIR)(safe_cast<int32_t>(inst->src(1)->intVal()), dstReg);
+    v << copy{srcReg0, dstReg};
+    v << Opi{safe_cast<int32_t>(inst->src(1)->intVal()), dstReg, dstReg};
     return;
   }
 
@@ -1613,11 +1726,11 @@ void CodeGenerator::cgShiftCommon(IRInstruction* inst,
 
   // we use srcReg1 as a scratch for whatever is in rcx
   if (swapRCX) {
-    m_as.   xchgq(reg::rcx, srcReg1);
+    v << copy2{reg::rcx, srcReg1, srcReg1, reg::rcx}; // emits xchgq
   }
 
-  emitMovRegReg(m_as, regLeft, resReg);
-  (m_as.*instrR)(resReg);
+  v << copy{regLeft, resReg};
+  v << Op{resReg, resReg};
 
   if (resReg == dstReg && srcReg1 == dstReg) {
     // If we get here it means that m_rScratch was rcx and we shouldn't do any
@@ -1626,22 +1739,22 @@ void CodeGenerator::cgShiftCommon(IRInstruction* inst,
   }
 
   if (swapRCX) {
-    m_as.   xchgq(reg::rcx, srcReg1);
+    v << copy2{reg::rcx, srcReg1, srcReg1, reg::rcx};
   }
 
   // if resReg == srcReg1 then dstReg must have been rcx and the above swap
   // already repaired the situation
   if (resReg != srcReg1) {
-    emitMovRegReg(m_as, resReg, dstReg);
+    v << copy{resReg, dstReg};
   }
 }
 
 void CodeGenerator::cgShl(IRInstruction* inst) {
-  cgShiftCommon(inst, &Asm::shlq, &Asm::shlq);
+  cgShiftCommon<shlq,shlqi>(inst);
 }
 
 void CodeGenerator::cgShr(IRInstruction* inst) {
-  cgShiftCommon(inst, &Asm::sarq, &Asm::sarq);
+  cgShiftCommon<sarq,sarqi>(inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1693,9 +1806,7 @@ static bool typeIsSON(Type t) {
   return t.subtypeOfAny(Type::Str, Type::Obj, Type::Int, Type::Dbl);
 }
 
-void CodeGenerator::cgCmpHelper(
-          IRInstruction* inst,
-          ConditionCode cc,
+void CodeGenerator::cgCmpHelper(IRInstruction* inst, ConditionCode cc,
           int64_t (*str_cmp_str)(StringData*, StringData*),
           int64_t (*str_cmp_int)(StringData*, int64_t),
           int64_t (*str_cmp_obj)(StringData*, ObjectData*),
@@ -1715,6 +1826,7 @@ void CodeGenerator::cgCmpHelper(
   auto src1Reg = loc1.reg();
   auto src2Reg = loc2.reg();
   auto dstReg  = dstLoc(0).reg();
+  auto& v = vmain();
 
   // It is possible that some pass has been done after simplification; if such
   // a pass invalidates our invariants, then just punt.
@@ -1732,7 +1844,7 @@ void CodeGenerator::cgCmpHelper(
   // case 1: null/string cmp string
   // simplifyCmp has converted the null to ""
   if (type1 <= Type::Str && type2 <= Type::Str) {
-    cgCallHelper(m_as, CppCall::direct(str_cmp_str), callDest(inst),
+    cgCallHelper(v, CppCall::direct(str_cmp_str), callDest(inst),
       SyncOptions::kSyncPoint, argGroup().ssa(0).ssa(1));
   }
 
@@ -1741,11 +1853,11 @@ void CodeGenerator::cgCmpHelper(
   // simplifyCmp has converted all args to bool
   else if (type1 <= Type::Bool && type2 <= Type::Bool) {
     if (src2->isConst()) {
-      m_as.    cmpb (src2->boolVal(), rbyte(src1Reg));
+      v << cmpbi{src2->boolVal(), src1Reg};
     } else {
-      m_as.    cmpb (rbyte(src2Reg), rbyte(src1Reg));
+      v << cmpb{src2Reg, src1Reg};
     }
-    m_as.setcc(cc, rbyte(dstReg));
+    v << setcc{cc, dstReg};
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1759,10 +1871,10 @@ void CodeGenerator::cgCmpHelper(
       // string cmp double is punted above
 
       if (type2 <= Type::Int) {
-        cgCallHelper(m_as, CppCall::direct(str_cmp_int), callDest(inst),
+        cgCallHelper(v, CppCall::direct(str_cmp_int), callDest(inst),
                      SyncOptions::kSyncPoint, argGroup().ssa(0).ssa(1));
       } else if (type2 <= Type::Obj) {
-        cgCallHelper(m_as, CppCall::direct(str_cmp_obj), callDest(inst),
+        cgCallHelper(v, CppCall::direct(str_cmp_obj), callDest(inst),
                      SyncOptions::kSyncPoint, argGroup().ssa(0).ssa(1));
       } else {
         CG_PUNT(cgOpCmpHelper_sx);
@@ -1774,10 +1886,10 @@ void CodeGenerator::cgCmpHelper(
       // object cmp double is punted above
 
       if (type2 <= Type::Obj) {
-        cgCallHelper(m_as, CppCall::direct(obj_cmp_obj), callDest(inst),
+        cgCallHelper(v, CppCall::direct(obj_cmp_obj), callDest(inst),
                      SyncOptions::kSyncPoint, argGroup().ssa(0).ssa(1));
       } else if (type2 <= Type::Int) {
-        cgCallHelper(m_as, CppCall::direct(obj_cmp_int), callDest(inst),
+        cgCallHelper(v, CppCall::direct(obj_cmp_int), callDest(inst),
                      SyncOptions::kSyncPoint, argGroup().ssa(0).ssa(1));
       } else {
         CG_PUNT(cgOpCmpHelper_ox);
@@ -1791,7 +1903,7 @@ void CodeGenerator::cgCmpHelper(
   /////////////////////////////////////////////////////////////////////////////
   // case 5: array cmp array
   else if (type1 <= Type::Arr && type2 <= Type::Arr) {
-    cgCallHelper(m_as, CppCall::direct(arr_cmp_arr),
+    cgCallHelper(v, CppCall::direct(arr_cmp_arr),
       callDest(inst), SyncOptions::kSyncPoint, argGroup().ssa(0).ssa(1));
   }
 
@@ -2233,23 +2345,23 @@ void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
   auto testReg = srcLoc(1).reg();
   auto destReg = dstLoc(0).reg();
-  auto& a = m_as;
+  auto& v = vmain();
 
   if (testReg == InvalidReg) {
     // Don't need to do the null check when the class is const.
     assert(inst->src(1)->clsVal() != nullptr);
-    cgCallNative(a, inst);
+    cgCallNative(v, inst);
     return;
   }
 
-  a.     testq   (testReg, testReg);
-  ifThenElse(a, CC_NZ,
-    [&](Asm& a) {
-      cgCallNative(a, inst);
+  v << testq{testReg, testReg};
+  ifThenElse(v, CC_NZ,
+    [&](Vout& v) {
+      cgCallNative(v, inst);
     },
-    [&](Asm& a) {
+    [&](Vout& v) {
       // testReg == 0, set dest to false (0)
-      emitMovRegReg(a, testReg, destReg);
+      v << copy{testReg, destReg};
     }
   );
 }
@@ -2316,39 +2428,41 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   Vout& vcold = this->vcold();
 
   auto src = inst->src(0);
-  auto srcReg = prepXMMReg(vmain, src, srcLoc(0), rCgXMM0);
+  auto srcReg = prepXMM(vmain, src, srcLoc(0));
   auto dstReg = dstLoc(0).reg();
 
   constexpr uint64_t maxULongAsDouble  = 0x43F0000000000000LL;
   constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
 
-  auto rIndef = m_rScratch;
+  auto rIndef = vmain.makeReg();
   vmain << ldimm{0x8000000000000000LL, rIndef};
   vmain << cvttsd2siq{srcReg, dstReg};
   vmain << cmpq{rIndef, dstReg};
 
-  unlikelyIfThen(vmain, vcold, CC_E, [&] (Vout& v) {
+  unlikelyIfBlock(vmain, vcold, CC_E, [&] (Vout& v) {
     // result > max signed int or unordered
-    v << ldimm{0, rCgXMM1};
-    v << ucomisd{rCgXMM1, srcReg};
-
+    auto tmp = v.makeReg();
+    v << ldimm{0, tmp};
+    v << ucomisd{tmp, srcReg};
     ifThen(v, CC_B, [&](Vout& v) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
       ifThen(v, CC_NP, [&](Vout& v) {
-        v << ldimm{maxULongAsDouble, rCgXMM1};
-        v << ucomisd{rCgXMM1, srcReg};
+        auto max_ulong = v.makeReg();
+        v << ldimm{maxULongAsDouble, max_ulong};
+        v << ucomisd{max_ulong, srcReg};
         ifThenElse(v, CC_B, [&](Vout& v) {
           // src0 > ULONG_MAX
           v << ldimm{0, dstReg};
         }, [&](Vout& v) {
           // 0 < src0 <= ULONG_MAX
-          v << ldimm{maxLongAsDouble, rCgXMM1};
-          v << copy{srcReg, rCgXMM0};
+          auto max_long = v.makeReg();
+          v << ldimm{maxLongAsDouble, max_long};
 
           // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
           // 0 < src0 - ULONG_MAX <= LONG_MAX
-          v << subsd{rCgXMM1, rCgXMM0, rCgXMM0};
-          v << cvttsd2siq{rCgXMM0, dstReg};
+          auto tmp_sub = v.makeReg();
+          v << subsd{max_long, srcReg, tmp_sub};
+          v << cvttsd2siq{tmp_sub, dstReg};
 
           // We want to simulate integer overflow so we take the resulting
           // integer and flip its sign bit (NB: we don't use orq here
@@ -2472,11 +2586,11 @@ void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
   // cvtsi2sd doesn't modify the high bits of its target, which can
   // cause false dependencies to prevent register renaming from kicking
   // in. Break the dependency chain by zeroing out the XMM reg.
-  zeroExtendIfBool(m_as, src, srcReg);
-  PhysReg xmmReg = dstReg.isSIMD() ? dstReg : PhysReg(rCgXMM0);
-  m_as.pxor(xmmReg, xmmReg);
-  m_as.cvtsi2sd(srcReg, xmmReg);
-  emitMovRegReg(m_as, xmmReg, dstReg);
+  auto& v = vmain();
+  zeroExtendIfBool(v, src, srcReg);
+  auto tmp_dbl = v.makeReg();
+  v << cvtsi2sd{srcReg, tmp_dbl};
+  v << copy{tmp_dbl, dstReg};
 }
 
 void CodeGenerator::cgConvBoolToDbl(IRInstruction* inst) {
@@ -3165,13 +3279,14 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   auto scratchReg = m_rScratch;
 
   // Load AR->m_this into m_rScratch
-  m_as.loadq(fpReg[AROFF(m_this)], scratchReg);
+  auto& v = vmain();
+  v << loadq{fpReg[AROFF(m_this)], scratchReg};
 
-  auto decrefIfAvailable = [&](Asm& a) {
+  auto decrefIfAvailable = [&](Vout& v) {
     // Check if this is available and we're not in a static context instead
-    a.testb(1, rbyte(scratchReg));
-    ifThen(a, CC_Z, [&](Asm& a) {
-      cgDecRefStaticType(a,
+    v << testbi{1, Vreg{scratchReg}};
+    ifThen(v, CC_Z, [&](Vout& v) {
+      cgDecRefStaticType(v,
         Type::Obj,
         scratchReg,
         true /* genZeroCheck */
@@ -3181,10 +3296,10 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 
   if (curFunc()->isPseudoMain()) {
     // In pseudo-mains, emit check for presence of m_this
-    m_as.testq(scratchReg, scratchReg);
-    ifThen(m_as, CC_NZ, [&](Asm& a) { decrefIfAvailable(a); });
+    v << testq{scratchReg, scratchReg};
+    ifThen(v, CC_NZ, [&](Vout& v) { decrefIfAvailable(v); });
   } else {
-    decrefIfAvailable(m_as);
+    decrefIfAvailable(v);
   }
 }
 
@@ -3250,8 +3365,9 @@ bool CodeGenerator::decRefDestroyIsUnlikely(OptDecRefProfile& profile,
                                             type.toString()));
   profile.emplace(m_unit.context(), m_curInst->marker(), profileKey);
 
+  auto& v = vmain();
   if (profile->profiling()) {
-    m_as.incw (rVmTl[profile->handle() + offsetof(DecRefProfile, decrement)]);
+    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, decrement)]};
   } else if (profile->optimizing()) {
     auto const data = profile->data(DecRefProfile::reduce);
     if (data.hitRate() != 0 && data.hitRate() != 100) {
@@ -3259,13 +3375,11 @@ bool CodeGenerator::decRefDestroyIsUnlikely(OptDecRefProfile& profile,
       FTRACE(5, "DecRefProfile: {}: {} {}\n",
              data, m_curInst->marker().show(), profileKey->data());
     }
-
     if (data.hitRate() == 0) {
-      emitIncStat(m_mainCode, Stats::TC_DecRef_Profiled_0);
+      v << incstat{Stats::TC_DecRef_Profiled_0};
     } else if (data.hitRate() == 100) {
-      emitIncStat(m_mainCode, Stats::TC_DecRef_Profiled_100);
+      v << incstat{Stats::TC_DecRef_Profiled_100};
     }
-
     return data.hitRate() < RuntimeOption::EvalJitUnlikelyDecRefPercent;
   }
 
@@ -3280,7 +3394,11 @@ struct CheckValid {
 
 template <>
 struct CheckValid<void(*)(Asm&)> {
-  static bool valid(void (*f)(Asm&)) { return f; }
+  static bool valid(void (*f)(Asm&)) { return f != nullptr; }
+};
+template <>
+struct CheckValid<void(*)(Vout&)> {
+  static bool valid(void (*f)(Vout&)) { return f != nullptr; }
 };
 }
 
@@ -3301,9 +3419,9 @@ struct CheckValid<void(*)(Asm&)> {
 //               emitted; NULL otherwise.
 //
 template <typename F>
-Address CodeGenerator::cgCheckStaticBitAndDecRef(Asm& a, Type type,
-                                                 PhysReg dataReg,
-                                                 F destroyImpl) {
+void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done,
+                                              Type type, PhysReg dataReg,
+                                               F destroyImpl) {
   always_assert(type.maybeCounted());
   bool hasDestroy = CheckValid<F>::valid(destroyImpl);
 
@@ -3312,93 +3430,96 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Asm& a, Type type,
     hasDestroy ? decRefDestroyIsUnlikely(profile, type) : false;
 
   if (hasDestroy) {
-    emitIncStat(a.code(), unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
-                                          : Stats::TC_DecRef_Likely_Decl);
+    v << incstat{unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl :
+                 Stats::TC_DecRef_Likely_Decl};
   } else {
-    emitIncStat(a.code(), Stats::TC_DecRef_NZ);
+    v << incstat{Stats::TC_DecRef_NZ};
   }
 
-  auto destroy = [&](Asm& a) {
-    emitIncStat(a.code(), unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy
-                                          : Stats::TC_DecRef_Likely_Destroy);
+  auto destroy = [&](Vout& v) {
+    v << incstat{unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy :
+                 Stats::TC_DecRef_Likely_Destroy};
     if (profile && profile->profiling()) {
-      a.incw (rVmTl[profile->handle() + offsetof(DecRefProfile, destroy)]);
+      v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, destroy)]};
     }
-    destroyImpl(a);
+    destroyImpl(v);
   };
 
   if (!type.needsStaticBitCheck()) {
-    a.decl(dataReg[FAST_REFCOUNT_OFFSET]);
+    v << declm{dataReg[FAST_REFCOUNT_OFFSET]};
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(a);
+      emitAssertFlagsNonNegative(v);
     }
 
-    if (hasDestroy) ifBlock(CC_E, destroy, unlikelyDestroy);
-    return nullptr;
+    if (hasDestroy) {
+      ifBlock(v, vcold(), CC_E, destroy, unlikelyDestroy);
+    }
+    return;
   }
 
-  Address addrToPatch = nullptr;
-  auto static_check_and_decl = [&](Asm& as) {
+  auto static_check_and_decl = [&](Vout& v) {
     static_assert(UncountedValue == UNCOUNTED, "");
     static_assert(StaticValue == STATIC, "");
 
     if (type.needsStaticBitCheck()) {
-      addrToPatch = as.frontier();
-      as.jcc8(CC_L, addrToPatch);
+      auto next = v.makeBlock();
+      v << jcc{CC_L, {next, done}};
+      v = next;
     }
 
     // Decrement _count
-    as.decl(dataReg[FAST_REFCOUNT_OFFSET]);
-
+    v << declm{dataReg[FAST_REFCOUNT_OFFSET]};
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(as);
+      emitAssertFlagsNonNegative(v);
     }
   };
 
   if (hasDestroy) {
-    a.cmpl(1, dataReg[FAST_REFCOUNT_OFFSET]);
-    ifThenElse(CC_E, destroy, static_check_and_decl, unlikelyDestroy);
-    return addrToPatch;
+    v << cmplim{1, dataReg[FAST_REFCOUNT_OFFSET]};
+    ifThenElse(v, vcold(), CC_E, destroy, static_check_and_decl,
+               unlikelyDestroy);
+    return;
   }
   if (type.needsStaticBitCheck()) {
-    a.cmpl(0, dataReg[FAST_REFCOUNT_OFFSET]);
+    v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET]};
   }
 
-  static_check_and_decl(a);
-
-  return addrToPatch;
+  static_check_and_decl(v);
 }
 
-Address CodeGenerator::cgCheckStaticBitAndDecRef(Asm& a, Type type,
-                                                 PhysReg dataReg) {
-  return cgCheckStaticBitAndDecRef(a, type, dataReg, (void (*)(Asm&))nullptr);
+void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done,
+                                              Type type, PhysReg dataReg) {
+  return cgCheckStaticBitAndDecRef(v, done, type, dataReg,
+                                   (void (*)(Vout&))nullptr);
 }
 
 //
 // Returns the address to be patched with the address to jump to in case
 // the type is not ref-counted.
 //
-Address CodeGenerator::cgCheckRefCountedType(PhysReg typeReg) {
-  emitCmpTVType(m_as, KindOfRefCountThreshold, typeReg);
-  Address addrToPatch = m_as.frontier();
-  m_as.jcc8(CC_LE, addrToPatch);
-  return addrToPatch;
+void CodeGenerator::cgCheckRefCountedType(PhysReg typeReg, Vlabel done) {
+  auto& v = vmain();
+  auto next = v.makeBlock();
+  emitCmpTVType(v, KindOfRefCountThreshold, typeReg);
+  v << jcc{CC_LE, {next, done}};
+  v = next;
 }
 
-Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg, int64_t offset) {
-  emitCmpTVType(m_as, KindOfRefCountThreshold, baseReg[offset + TVOFF(m_type)]);
-  Address addrToPatch = m_as.frontier();
-  m_as.jcc8(CC_LE, addrToPatch);
-  return addrToPatch;
+void CodeGenerator::cgCheckRefCountedType(PhysReg baseReg, int64_t offset,
+                                          Vlabel done) {
+  auto& v = vmain();
+  auto next = v.makeBlock();
+  emitCmpTVType(v, KindOfRefCountThreshold, baseReg[offset + TVOFF(m_type)]);
+  v << jcc{CC_LE, {next, done}};
+  v = next;
 }
 
 //
 // Generates dec-ref of a typed value with statically known type.
 //
-void CodeGenerator::cgDecRefStaticType(Asm& a, Type type,
-                                       PhysReg dataReg,
+void CodeGenerator::cgDecRefStaticType(Vout& v, Type type, PhysReg dataReg,
                                        bool genZeroCheck) {
   assert(type != Type::Cell && type != Type::Gen);
   assert(type.isKnownDataType());
@@ -3408,12 +3529,11 @@ void CodeGenerator::cgDecRefStaticType(Asm& a, Type type,
   // Check for UncountedValue or StaticValue if needed,
   // do the actual DecRef, and leave flags set based on the subtract result,
   // which is tested below
-  Address patchStaticCheck = nullptr;
+  auto done = v.makeBlock();
   if (genZeroCheck) {
-    patchStaticCheck = cgCheckStaticBitAndDecRef(a,
-      type, dataReg, [&] (Asm& a) {
+    cgCheckStaticBitAndDecRef(v, done, type, dataReg, [&] (Vout& v) {
         // Emit the call to release in m_acold
-        cgCallHelper(a,
+        cgCallHelper(v,
                      mcg->getDtorCall(type.toDataType()),
                      kVoidDest,
                      SyncOptions::kSyncPoint,
@@ -3421,12 +3541,10 @@ void CodeGenerator::cgDecRefStaticType(Asm& a, Type type,
                      .reg(dataReg));
       });
   } else {
-    patchStaticCheck = cgCheckStaticBitAndDecRef(a, type, dataReg);
+    cgCheckStaticBitAndDecRef(v, done, type, dataReg);
   }
-
-  if (patchStaticCheck) {
-    a.patchJcc8(patchStaticCheck, a.frontier());
-  }
+  if (!v.closed()) v << jmp{done};
+  v = done;
 }
 
 //
@@ -3437,19 +3555,17 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
                                         PhysReg dataReg,
                                         bool genZeroCheck) {
   // Emit check for ref-counted type
-  Address patchTypeCheck = cgCheckRefCountedType(typeReg);
+  auto& v = vmain();
+  auto done = v.makeBlock();
+  cgCheckRefCountedType(typeReg, done);
 
   // Emit check for UncountedValue or StaticValue and the actual DecRef
-  Address patchStaticCheck;
   if (genZeroCheck) {
-    patchStaticCheck =
-      cgCheckStaticBitAndDecRef(m_as,
-        Type::Cell, dataReg,
-        [&] (Asm& a) {
+      cgCheckStaticBitAndDecRef(v, done, Type::Cell, dataReg, [&] (Vout& v) {
           // load destructor fptr
-          loadDestructorFunc(a, typeReg, m_rScratch);
+          loadDestructorFunc(v, typeReg, m_rScratch);
           // Emit call to release in m_acold
-          cgCallHelper(a,
+          cgCallHelper(v,
                        CppCall::indirect(m_rScratch),
                        kVoidDest,
                        SyncOptions::kSyncPoint,
@@ -3457,12 +3573,10 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
                        .reg(dataReg));
         });
   } else {
-    patchStaticCheck = cgCheckStaticBitAndDecRef(m_as, Type::Cell, dataReg);
+    cgCheckStaticBitAndDecRef(v, done, Type::Cell, dataReg);
   }
-
-  // Patch checks to jump around the DecRef
-  if (patchTypeCheck)   m_as.patchJcc8(patchTypeCheck,   m_as.frontier());
-  if (patchStaticCheck) m_as.patchJcc8(patchStaticCheck, m_as.frontier());
+  if (!v.closed()) v << jmp{done};
+  v = done;
 }
 
 //
@@ -3474,29 +3588,27 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
 void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
                                            int64_t offset) {
   auto scratchReg = m_rScratch;
-
   assert(baseReg != scratchReg);
+  auto& v = vmain();
+  auto done = v.makeBlock();
 
   // Emit check for ref-counted type
-  Address patchTypeCheck = cgCheckRefCountedType(baseReg, offset);
+  cgCheckRefCountedType(baseReg, offset, done);
 
-  m_as.loadq(baseReg[offset + TVOFF(m_data)], scratchReg);
+  v << loadq{baseReg[offset + TVOFF(m_data)], scratchReg};
 
   // Emit check for UncountedValue or StaticValue and the actual DecRef
-  Address patchStaticCheck =
-      cgCheckStaticBitAndDecRef(m_as, Type::Cell, scratchReg, [&](Asm& a) {
-        // Emit call to release in m_acold
-        a.lea(baseReg[offset], scratchReg);
-        cgCallHelper(a,
-                     CppCall::direct(tv_release_generic),
-                     kVoidDest,
-                     SyncOptions::kSyncPoint,
-                     argGroup().reg(scratchReg));
-      });
+  cgCheckStaticBitAndDecRef(v, done, Type::Cell, scratchReg, [&](Vout& v) {
+    // Emit call to release in m_acold
+    v << lea{baseReg[offset], scratchReg};
+    cgCallHelper(v, CppCall::direct(tv_release_generic),
+                 kVoidDest,
+                 SyncOptions::kSyncPoint,
+                 argGroup().reg(scratchReg));
+  });
 
-  // Patch checks to jump around the DecRef
-  if (patchTypeCheck)   m_as.patchJcc8(patchTypeCheck,   m_as.frontier());
-  if (patchStaticCheck) m_as.patchJcc8(patchStaticCheck, m_as.frontier());
+  if (!v.closed()) v << jmp{done};
+  v = done;
 }
 
 //
@@ -3510,14 +3622,14 @@ void CodeGenerator::cgDecRefMem(Type type,
 
   auto scratchReg = m_rScratch;
   assert(baseReg != scratchReg);
-
+  auto& v = vmain();
   if (type.needsReg()) {
     // The type is dynamic, but we don't have two registers available
     // to load the type and the data.
     cgDecRefDynamicTypeMem(baseReg, offset);
   } else if (type.maybeCounted()) {
-    m_as.loadq(baseReg[offset + TVOFF(m_data)], scratchReg);
-    cgDecRefStaticType(m_as, type, scratchReg, true);
+    v << loadq{baseReg[offset + TVOFF(m_data)], scratchReg};
+    cgDecRefStaticType(v, type, scratchReg, true);
   }
 }
 
@@ -3533,7 +3645,7 @@ void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   if (!isRefCounted(src)) return;
   Type type = src->type();
   if (type.isKnownDataType()) {
-    cgDecRefStaticType(m_as, type, srcLoc(0).reg(), genZeroCheck);
+    cgDecRefStaticType(vmain(), type, srcLoc(0).reg(), genZeroCheck);
   } else {
     cgDecRefDynamicType(srcLoc(0).reg(1), srcLoc(0).reg(0), genZeroCheck);
   }
@@ -6203,39 +6315,42 @@ void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
   auto const constraint = inst->src(1);
   auto const constraintReg = srcLoc(1).reg();
 
+  auto& v = vmain();
   if (constraintReg == InvalidReg) {
     if (objClassReg != InvalidReg) {
       auto constraintCls = constraint->clsVal();
       auto constraintImm = Immed64(constraintCls);
       if (constraintImm.fits(sz::dword)) {
-        m_as.cmpq(constraintImm.l(), objClassReg);
+        v << cmpqi{constraintImm.l(), objClassReg};
       } else {
-        m_as.emitImmReg(constraintCls, m_rScratch);
-        m_as.cmpq(m_rScratch, objClassReg);
+        auto constraintTmp = v.makeReg();
+        v << ldimm{constraintCls, constraintTmp};
+        v << cmpq{constraintTmp, objClassReg};
       }
     } else {
       // Both constant.
       if (objClass->clsVal() == constraint->clsVal()) return;
-      return cgCallNative(m_as, inst);
+      return cgCallNative(v, inst);
     }
   } else if (objClassReg != InvalidReg) {
-    m_as.cmpq(constraintReg, objClassReg);
+    v << cmpq{constraintReg, objClassReg};
   } else {
     // Reverse the args because cmpq can only have a constant in the LHS.
     auto objCls = objClass->clsVal();
     auto objImm = Immed64(objCls);
     if (objImm.fits(sz::dword)) {
-      m_as.cmpq(objImm.l(), constraintReg);
+      v << cmpqi{objImm.l(), constraintReg};
     } else {
-      m_as.emitImmReg(objCls, m_rScratch);
-      m_as.cmpq(m_rScratch, constraintReg);
+      auto objTmp = v.makeReg();
+      v << ldimm{objCls, objTmp};
+      v << cmpq{objTmp, constraintReg};
     }
   }
 
   // The native call for this instruction is the slow path that does
   // proper subtype checking. The comparison above is just to
   // short-circuit the overhead when the Classes are an exact match.
-  ifThen(m_as, CC_NE, [&](Asm& a){ cgCallNative(a, inst); });
+  ifThen(v, CC_NE, [&](Vout& v){ cgCallNative(v, inst); });
 }
 
 void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
@@ -6320,12 +6435,16 @@ void CodeGenerator::cgProfileStr(IRInstruction* inst) {
 void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto const baseReg = srcLoc(0).reg();
   auto const dstReg  = dstLoc(0).reg();
+  auto& v = vmain();
 
-  m_as. cmpb(ArrayData::kNvtwKind, baseReg[ArrayData::offsetofKind()]);
-
-  unlikelyIfThenElse(CC_Z,
-    [&](Asm& a) { cgCallNative(a, inst); },
-    [&](Asm& a) { a.  loadl(baseReg[ArrayData::offsetofSize()], r32(dstReg)); }
+  v << cmpbim{ArrayData::kNvtwKind, baseReg[ArrayData::offsetofKind()]};
+  unlikelyIfThenElse(v, vcold(), CC_Z,
+    [&](Vout& v) {
+      cgCallNative(v, inst);
+    },
+    [&](Vout& v) {
+      v << loadl{baseReg[ArrayData::offsetofSize()], dstReg};
+    }
   );
 }
 

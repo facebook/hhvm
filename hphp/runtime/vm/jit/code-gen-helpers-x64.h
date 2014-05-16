@@ -59,6 +59,7 @@ void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);
 void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg);
 
 void emitAssertFlagsNonNegative(Asm& as);
+void emitAssertFlagsNonNegative(Vout&);
 void emitAssertRefCount(Asm& as, PhysReg base);
 
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
@@ -216,9 +217,7 @@ inline void jumpDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
   a.    jmp    (lookupDestructor(a, typeReg, scratch));
 }
 
-inline void loadDestructorFunc(X64Assembler& a,
-                               PhysReg typeReg,
-                               PhysReg dstReg) {
+inline void loadDestructorFunc(Vout& v, PhysReg typeReg, PhysReg dstReg) {
   static_assert((KindOfString        >> kShiftDataTypeToDestrIndex == 1) &&
                 (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
                 (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
@@ -226,10 +225,10 @@ inline void loadDestructorFunc(X64Assembler& a,
                 (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
                 "lookup of destructors depends on KindOf* values");
 
-  a.    movsbl (rbyte(typeReg), r32(typeReg));
-  a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
-  a.    movq   (&g_destructors, dstReg);
-  a.    loadq  (dstReg[typeReg * 8], dstReg);
+  v << movsbl{typeReg, typeReg};
+  v << shrli{kShiftDataTypeToDestrIndex, typeReg, typeReg};
+  v << ldimm{&g_destructors, dstReg}; // XXX can this use baseless?
+  v << loadq{dstReg[typeReg * 8], dstReg};
 }
 
 

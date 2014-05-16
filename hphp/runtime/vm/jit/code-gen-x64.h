@@ -68,7 +68,7 @@ private:
   IR_OPCODES
 #undef O
 
-  void cgCallNative(Asm& a, IRInstruction* inst);
+  void cgCallNative(Vout&, IRInstruction* inst);
 
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(const IRInstruction*) const;
@@ -122,25 +122,20 @@ private:
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
   template<class OpInstr>
-  void cgUnaryIntOp(PhysLoc dst, SSATmp* src, PhysLoc src_loc, OpInstr);
+  void cgUnaryIntOp(PhysLoc dst, SSATmp* src, PhysLoc src_loc);
 
   enum Commutativity { Commutative, NonCommutative };
 
   void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
-  template<class RegType>
   void cgBinaryIntOp(IRInstruction*,
-                     void (Asm::*intImm)(Immed, RegType),
-                     void (Asm::*intRR)(RegType, RegType),
-                     void (Asm::*mov)(RegType, RegType),
-                     RegType (*conv)(PhysReg),
+                     void (Asm::*intImm)(Immed, Reg64),
+                     void (Asm::*intRR)(Reg64, Reg64),
                      Commutativity);
-  void cgBinaryDblOp(IRInstruction*,
-                     void (Asm::*fpRR)(RegXMM, RegXMM));
-
-  void cgShiftCommon(IRInstruction* inst,
-                     void (Asm::*instrIR)(Immed, Reg64),
-                     void (Asm::*instrR)(Reg64));
+  template<class Op, class Opi>
+  void cgBinaryIntOp(IRInstruction*);
+  template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
+  template<class Op, class Opi> void cgShiftCommon(IRInstruction*);
 
   void emitVerifyCls(IRInstruction* inst);
 
@@ -179,9 +174,9 @@ private:
   void emitCompareInt(Vout&, IRInstruction* inst);
   void emitTestZero(SSATmp*, PhysLoc);
   void emitTestZero(Vout&, SSATmp*, PhysLoc);
-  bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-                        SSATmp* src2, PhysLoc loc2,
-                        void(Asm::*emitFunc)(Reg64));
+  template<class Inst>
+  bool emitIncDec(PhysLoc dst, SSATmp* src0, PhysLoc loc0,
+                  SSATmp* src1, PhysLoc loc1);
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
@@ -204,25 +199,16 @@ private:
 
   bool decRefDestroyIsUnlikely(OptDecRefProfile& profile, Type type);
   template <typename F>
-  Address cgCheckStaticBitAndDecRef(Asm& a, Type type,
-                                    PhysReg dataReg,
-                                    F destroy);
-  Address cgCheckStaticBitAndDecRef(Asm& a, Type type,
-                                    PhysReg dataReg);
-  Address cgCheckRefCountedType(PhysReg typeReg);
-  Address cgCheckRefCountedType(PhysReg baseReg,
-                                int64_t offset);
-  void cgDecRefStaticType(Asm& a, Type type,
-                          PhysReg dataReg,
-                          bool genZeroCheck);
-  void cgDecRefDynamicType(PhysReg typeReg,
-                           PhysReg dataReg,
-                           bool genZeroCheck);
-  void cgDecRefDynamicTypeMem(PhysReg baseReg,
-                              int64_t offset);
-  void cgDecRefMem(Type type,
-                   PhysReg baseReg,
-                   int64_t offset);
+  void cgCheckStaticBitAndDecRef(Vout&, Vlabel done, Type type,
+                                 PhysReg dataReg, F destroyImpl);
+  void cgCheckStaticBitAndDecRef(Vout&, Vlabel done, Type type,
+                                 PhysReg dataReg);
+  void cgCheckRefCountedType(PhysReg typeReg, Vlabel done);
+  void cgCheckRefCountedType(PhysReg baseReg, int64_t offset, Vlabel done);
+  void cgDecRefStaticType(Vout&, Type type, PhysReg dataReg, bool genZeroCheck);
+  void cgDecRefDynamicType(PhysReg typeReg, PhysReg dataReg, bool genZeroCheck);
+  void cgDecRefDynamicTypeMem(PhysReg baseReg, int64_t offset);
+  void cgDecRefMem(Type type, PhysReg baseReg, int64_t offset);
 
   void cgIterNextCommon(IRInstruction* inst);
   void cgIterInitCommon(IRInstruction* inst);
@@ -255,6 +241,9 @@ private:
    */
   template <class Block>
   void ifBlock(ConditionCode cc, Block taken, bool unlikely = false);
+  template <class Block>
+  void ifBlock(Vout& v, Vout& vcold, ConditionCode cc, Block taken,
+             bool unlikely = false);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling
@@ -265,25 +254,31 @@ private:
    */
   template <class Block>
   void unlikelyIfBlock(ConditionCode cc, Block unlikely);
-  template <class Block>
-  void unlikelyIfBlock(Vout&, Vout&, ConditionCode cc, Block unlikely);
+  template <class Then>
+  void unlikelyIfBlock(Vout& v, Vout& vcold, ConditionCode cc, Then then);
 
   // Generate an if-then-else block
   template <class Then, class Else>
   void ifThenElse(Asm& a, ConditionCode cc, Then thenBlock, Else elseBlock);
   template <class Then, class Else>
-  void ifThenElse(Vout&, ConditionCode cc, Then thenBlock, Else elseBlock);
+  void ifThenElse(Vout& v, ConditionCode cc, Then thenBlock, Else elseBlock);
 
   // Generate an if-then-else block into m_as.
   template <class Then, class Else>
   void ifThenElse(ConditionCode cc, Then thenBlock, Else elseBlock,
                   bool unlikely = false);
+  template <class Then, class Else>
+  void ifThenElse(Vout& v, Vout& vcold, ConditionCode cc, Then thenBlock,
+                  Else elseBlock, bool unlikely = false);
 
   /*
    * Same as ifThenElse except the first block is off in acold
    */
   template <class Then, class Else>
   void unlikelyIfThenElse(ConditionCode cc, Then unlikely, Else elseBlock);
+  template <class Then, class Else>
+  void unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
+                          Then unlikelyBlock, Else elseBlock);
 
   // This is for printing partially-generated traces when debugging
   void print() const;

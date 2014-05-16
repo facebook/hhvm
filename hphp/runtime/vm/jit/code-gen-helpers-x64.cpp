@@ -189,7 +189,11 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
 }
 
 void emitAssertFlagsNonNegative(Asm& as) {
-  ifThen(as, CC_NGE, [&](Asm& a) { a.ud2(); });
+  emitAssertFlagsNonNegative(Vauto().main(as));
+}
+
+void emitAssertFlagsNonNegative(Vout& v) {
+  ifThen(v, CC_NGE, [&](Vout& v) { v << ud2{}; });
 }
 
 void emitAssertRefCount(Asm& as, PhysReg base) {

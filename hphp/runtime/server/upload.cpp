@@ -1053,7 +1053,7 @@ void rfc1867PostHandler(Transport* transport,
 
       Array globals = php_globals_as_array();
       if (!is_anonymous) {
-        if (s && s > filename) {
+        if (s) {
           String val(s+1, strlen(s+1), CopyString);
           safe_php_register_variable(lbuf, val, globals, 0);
         } else {
@@ -1069,7 +1069,7 @@ void rfc1867PostHandler(Transport* transport,
       } else {
         snprintf(lbuf, llen, "%s[name]", param);
       }
-      if (s && s > filename) {
+      if (s) {
         String val(s+1, strlen(s+1), CopyString);
         safe_php_register_variable(lbuf, val, files, 0);
       } else {

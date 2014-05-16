@@ -74,8 +74,14 @@ let main_action files_or_dirs =
 (* Regression testing *)
 let test dir =
   let suite = Unit_hackificator.unittest dir in
-  OUnit.run_test_tt suite +> ignore;
-  ()
+  let results = OUnit.run_test_tt suite in
+  let has_an_error =
+    results +> List.exists (function
+    | OUnit.RFailure _ | OUnit.RError _ -> true
+    | _ -> false
+    )
+  in
+  exit (if has_an_error then 1 else 0)
 
 
 let extra_actions () = [

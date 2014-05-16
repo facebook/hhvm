@@ -117,6 +117,27 @@ let visit ast =
         ii.PI.transfo <- PI.AddAfter (PI.AddStr "()");
       | _ -> k x
     );
+
+    V.kclass_stmt = (fun (k, _) x ->
+      match x with
+      (* Methods without modifiers, we'll give a "public" modifier. *)
+      | Method (method_def) -> (
+          let visibility_modifiers =
+            [Ast_php.Public; Ast_php.Private; Ast_php.Protected] in
+          let is_visibility_modifier =
+            fun x -> List.mem (unwrap x) visibility_modifiers in
+          let has_visibility_modifier =
+            List.exists is_visibility_modifier method_def.f_modifiers in
+          if not has_visibility_modifier then begin
+            let ii = match method_def.f_modifiers with
+              | (_, ii)::_ -> ii
+              | [] -> method_def.f_tok in
+            ii.PI.transfo <- PI.AddBefore (PI.AddStr "public ");
+          end;
+          k x
+      )
+      | _ -> k x
+    );
   }
   in
   visitor (Program ast)

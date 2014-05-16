@@ -478,6 +478,10 @@ static Variant HHVM_METHOD(ZipArchive, getProperty, int64_t property) {
 }
 
 static bool HHVM_METHOD(ZipArchive, addEmptyDir, const String& dirname) {
+  if (dirname.empty()) {
+    return false;
+  }
+
   auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
 
   FAIL_IF_INVALID_ZIPARCHIVE(addEmptyDir, zipDir);

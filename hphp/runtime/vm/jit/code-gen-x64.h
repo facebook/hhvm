@@ -21,9 +21,9 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP { namespace JIT { namespace X64 {
-struct Vout;
 
 // Cache alignment is required for mutable instructions to make sure
 // mutations don't "tear" on remote cpus.
@@ -183,6 +183,7 @@ private:
                      RegXMM rXMMScratch);
   PhysReg prepXMMReg(Vout&, const SSATmp* src, const PhysLoc& srcLoc,
                      RegXMM rXMMScratch);
+  VregXMM prepXMM(Vout&, const SSATmp* src, const PhysLoc& srcLoc);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
@@ -229,6 +230,7 @@ private:
   const Unit* curUnit() const { return curFunc()->unit(); }
   bool resumed() const { return m_curInst->marker().resumed(); };
   void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
+  void recordSyncPoint(Vout&, SyncOptions sync = SyncOptions::kSyncPoint);
   int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);
   void emitReqBindAddr(TCA& dest, SrcKey sk);

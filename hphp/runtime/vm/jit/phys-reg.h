@@ -361,11 +361,17 @@ static_assert(std::is_trivially_destructible<RegSet>::value,
 
 //////////////////////////////////////////////////////////////////////
 
+namespace X64 {
+struct Vout;
+}
+
 struct PhysRegSaverParity {
   PhysRegSaverParity(int parity, X64Assembler& as, RegSet regs);
+  PhysRegSaverParity(int parity, X64::Vout& as, RegSet regs);
   ~PhysRegSaverParity();
 
   static void emitPops(X64Assembler& as, RegSet regs);
+  static void emitPops(X64::Vout&, RegSet regs);
 
   PhysRegSaverParity(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity(PhysRegSaverParity&&) noexcept = default;
@@ -377,7 +383,8 @@ struct PhysRegSaverParity {
   void bytesPushed(int bytes);
 
 private:
-  X64Assembler& m_as;
+  X64Assembler* m_as;
+  X64::Vout* m_v;
   RegSet m_regs;
   int m_adjust;
 };
@@ -386,11 +393,17 @@ struct PhysRegSaverStub : public PhysRegSaverParity {
   PhysRegSaverStub(X64Assembler& as, RegSet regs)
       : PhysRegSaverParity(0, as, regs)
   {}
+  PhysRegSaverStub(X64::Vout& v, RegSet regs)
+      : PhysRegSaverParity(0, v, regs)
+  {}
 };
 
 struct PhysRegSaver : public PhysRegSaverParity {
   PhysRegSaver(X64Assembler& as, RegSet regs)
       : PhysRegSaverParity(1, as, regs)
+  {}
+  PhysRegSaver(X64::Vout& v, RegSet regs)
+      : PhysRegSaverParity(1, v, regs)
   {}
 };
 

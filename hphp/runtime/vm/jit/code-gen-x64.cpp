@@ -498,6 +498,31 @@ PhysReg CodeGenerator::prepXMMReg(Vout& v, const SSATmp* src,
   return rtmp;
 }
 
+VregXMM CodeGenerator::prepXMM(Vout& v, const SSATmp* src,
+                               const PhysLoc& srcLoc) {
+  assert(src->isA(Type::Bool) || src->isA(Type::Int) || src->isA(Type::Dbl));
+  always_assert(srcLoc.reg() != InvalidReg);
+  auto rsrc = srcLoc.reg();
+
+  // Case 1: src is already in a XMM register
+  if (rsrc.isSIMD()) {
+    return rsrc;
+  }
+
+  // Case 2: src Dbl stored in GP reg
+  if (src->isA(Type::Dbl)) {
+    auto rtmp = v.makeReg();
+    v << copy{rsrc, rtmp};
+    return rtmp;
+  }
+
+  // Case 2.b: Bool or Int stored in GP reg
+  zeroExtendIfBool(v, src, rsrc);
+  auto rtmp = v.makeReg();
+  v << cvtsi2sd{rsrc, rtmp};
+  return rtmp;
+}
+
 PhysReg CodeGenerator::prepXMMReg(Asm& a, const SSATmp* src,
                                   const PhysLoc& srcLoc, RegXMM rtmp) {
   return prepXMMReg(Vauto().main(a), src, srcLoc, rtmp);
@@ -776,7 +801,7 @@ static bool shuffleArgsPlanningHelper(PhysReg::Map<PhysReg>& moves,
   return false;
 }
 
-static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
+static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
   // Compute the move/shuffle plan.
   PhysReg::Map<PhysReg> moves;
   PhysReg::Map<ArgDesc*> argDescs;
@@ -805,11 +830,6 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     shuffleArgsPlanningHelper(moves, argDescs, args.simdArg(i));
   }
 
-  // The caller may be using rCgGP directly, or indirectly via m_rScratch.
-  // Carefully avoid using any Assembler macro-instruction that would
-  // clobber rAsm.
-  auto rTmp = rAsm;
-
   // Store any arguments past the initial 6 to the stack. This has to happen
   // before the shuffles below in case the shuffles would clobber any of the
   // srcRegs here.
@@ -819,16 +839,17 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     assert(arg.dstReg() == InvalidReg);
     switch (arg.kind()) {
       case ArgDesc::Kind::Reg:
-        always_assert(srcReg != rTmp);
         if (arg.isZeroExtend()) {
-          a.  movzbl(rbyte(srcReg), r32(rTmp));
-          a.  push(rTmp);
+          auto tmp = v.makeReg();
+          v << movzbl{srcReg, tmp};
+          v << push{tmp};
         } else {
           if (srcReg.isSIMD()) {
-            emitMovRegReg(a, srcReg, rTmp);
-            a.push(rTmp);
+            auto tmp = v.makeReg();
+            v << copy{srcReg, tmp};
+            v << push{tmp};
           } else {
-            a.push(srcReg);
+            v << push{srcReg};
           }
         }
         break;
@@ -836,40 +857,47 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
       case ArgDesc::Kind::TypeReg:
         static_assert(kTypeWordOffset == 0 || kTypeWordOffset == 1,
                       "kTypeWordOffset value not supported");
-        always_assert(srcReg != rTmp);
         assert(srcReg.isGP());
         // x86 stacks grow down, so push higher offset items first
         if (kTypeWordOffset == 0) {
-          a.  push (srcReg);
+          v << push{srcReg};
         } else {
           // 4 bytes of garbage:
-          a.  pushl(eax);
+          v << pushl{eax};
           // get the type in the right place in rTmp before pushing it
-          a.  movb (rbyte(srcReg), rbyte(rTmp));
-          a.  shll (CHAR_BIT, r32(rTmp));
-          a.  pushl(r32(rTmp));
+          auto tmp1 = v.makeReg();
+          v << movb{srcReg, tmp1};
+          auto tmp2 = v.makeReg();
+          v << shlli{CHAR_BIT, tmp1, tmp2};
+          v << pushl{tmp2};
         }
         break;
 
-      case ArgDesc::Kind::Imm:
-        a.    emitImmReg(arg.imm(), rTmp);
-        a.    push(rTmp);
+      case ArgDesc::Kind::Imm: {
+        auto tmp = v.makeReg();
+        v << ldimm{arg.imm(), tmp};
+        v << push{tmp};
         break;
+      }
 
-      case ArgDesc::Kind::Addr:
-        a.    lea (arg.srcReg()[arg.disp().l()], rTmp);
-        a.    push(rTmp);
+      case ArgDesc::Kind::Addr: {
+        auto tmp = v.makeReg();
+        v << lea{arg.srcReg()[arg.disp().l()], tmp};
+        v << push{tmp};
         break;
+      }
 
-      case ArgDesc::Kind::IpRel:
-        a.    lea (rip[arg.imm().q()], rTmp);
-        a.    push(rTmp);
+      case ArgDesc::Kind::IpRel: {
+        auto tmp = v.makeReg();
+        v << leap{rip[arg.imm().q()], tmp};
+        v << push{tmp};
         break;
+      }
 
       case ArgDesc::Kind::None:
-        a.    push(rax);
+        v << push{rax};
         if (RuntimeOption::EvalHHIRGenerateAsserts) {
-          emitImmStoreq(a, 0xbadbadbadbadbad, *rsp);
+          emitImmStoreq(v, 0xbadbadbadbadbad, *rsp);
         }
         break;
     }
@@ -877,33 +905,34 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
 
   // Execute the plan
   int num_moves = 0;
+  auto rTmp = rAsm;
   auto const howTo = doRegMoves(moves, rTmp);
   for (auto& how : howTo) {
     switch (how.m_kind) {
       case MoveInfo::Kind::Move: {
         num_moves++;
         if (how.m_dst == rTmp) {
-          emitMovRegReg(a, how.m_src, how.m_dst);
+          v << copy{how.m_src, how.m_dst};
         } else {
           ArgDesc* argDesc = argDescs[how.m_dst];
           if (argDesc == nullptr) {
             // when no ArgDesc is available is a straight reg to reg copy
-            emitMovRegReg(a, how.m_src, how.m_dst);
+            v << copy{how.m_src, how.m_dst};
           } else {
             ArgDesc::Kind kind = argDesc->kind();
             if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
               if (argDesc->isZeroExtend()) {
                 assert(how.m_src.isGP());
                 assert(how.m_dst.isGP());
-                a. movzbl (rbyte(how.m_src), r32(how.m_dst));
+                v << movzbl{how.m_src, how.m_dst};
               } else {
-                emitMovRegReg(a, how.m_src, how.m_dst);
+                v << copy{how.m_src, how.m_dst};
               }
             } else {
               assert(kind == ArgDesc::Kind::Addr);
               assert(how.m_src.isGP());
               assert(how.m_dst.isGP());
-              a. lea (how.m_src[argDesc->disp().l()], how.m_dst);
+              v << lea{how.m_src[argDesc->disp().l()], how.m_dst};
             }
             if (kind != ArgDesc::Kind::TypeReg) {
               argDesc->markDone();
@@ -916,7 +945,7 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
       num_moves++;
       assert(how.m_src.isGP());
       assert(how.m_dst.isGP());
-      a.    xchgq  (how.m_src, how.m_dst);
+      v << copy2{how.m_src, how.m_dst, how.m_dst, how.m_src};
       break;
     }
   }
@@ -935,20 +964,20 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     PhysReg dst = arg.dstReg();
     assert(dst.isGP());
     if (kind == ArgDesc::Kind::Imm) {
-      a.emitImmReg(arg.imm().q(), dst);
+      v << ldimm{arg.imm().q(), dst};
     } else if (kind == ArgDesc::Kind::TypeReg) {
       if (kTypeShiftBits > 0) {
-        a.    shlq   (kTypeShiftBits, dst);
+        v << shlqi{kTypeShiftBits, dst, dst};
       }
     } else if (kind == ArgDesc::Kind::Addr) {
-      a.    addq   (arg.disp(), dst);
+      v << addqi{arg.disp(), dst, dst};
     } else if (kind == ArgDesc::Kind::IpRel) {
-      a.    lea (rip[arg.imm().q()], dst);
+      v << leap{rip[arg.imm().q()], dst};
     } else if (arg.isZeroExtend()) {
-      a.    movzbl (rbyte(dst), r32(dst));
+      v << movzbl{dst, dst};
     } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
                kind == ArgDesc::Kind::None) {
-      a.emitImmReg(0xbadbadbadbadbad, dst);
+      v << ldimm{0xbadbadbadbadbad, dst};
     }
   }
 
@@ -959,16 +988,18 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     auto dst = arg.dstReg();
     assert(dst.isSIMD());
     if (kind == ArgDesc::Kind::Imm) {
-      a.emitImmReg(arg.imm().q(), rTmp);
-      a.movq_rx(rTmp, dst);
+      v << ldimm{arg.imm().q(), dst};
     } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
                kind == ArgDesc::Kind::None) {
-      a.emitImmReg(0xbadbadbadbadbad, rTmp);
-      a.movq_rx(rTmp, dst);
+      v << ldimm{0xbadbadbadbadbad, dst};
     }
   }
 
   return args.numStackArgs() * sizeof(int64_t);
+}
+
+static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
+  return shuffleArgs(Vauto().main(a), args, call);
 }
 
 void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
@@ -3171,7 +3202,8 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = srcLoc(0).reg();
   auto const numLocals = curFunc()->numLocals();
-  auto& a = m_as;
+  Vauto vasm;
+  auto& v = vasm.main(m_as);
 
   assert(rFp == rVmFp &&
          "free locals helper assumes the frame pointer is rVmFp");
@@ -3184,15 +3216,15 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   // and use PhysRegSaverStub which assumes the odd stack parity.
   auto toSave = m_state.liveRegs[inst] &
                 (kCallerSaved | RegSet(r14) | RegSet(r15));
-  PhysRegSaverStub saver(a, toSave);
+  PhysRegSaverStub saver(v, toSave);
 
   auto const target = numLocals > kNumFreeLocalsHelpers
     ? mcg->tx().uniqueStubs.freeManyLocalsHelper
     : mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
-  a.lea(rFp[-numLocals * sizeof(TypedValue)], r14);
-  a.call(target);
-  recordSyncPoint(a);
+  v << lea{rFp[-numLocals * sizeof(TypedValue)], r14};
+  v << call{target};
+  recordSyncPoint(v);
 }
 
 /*
@@ -4582,7 +4614,7 @@ void CodeGenerator::cgStElem(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::recordSyncPoint(Asm& as,
+void CodeGenerator::recordSyncPoint(Vout& v,
                                     SyncOptions sync /* = kSyncPoint */) {
   auto const marker = m_curInst->marker();
   assert(m_curInst->marker().valid());
@@ -4602,10 +4634,11 @@ void CodeGenerator::recordSyncPoint(Asm& as,
   }
 
   Offset pcOff = marker.bcOff() - marker.func()->base();
+  v << syncpoint{Fixup{pcOff, stackOff}};
+}
 
-  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.frontier(), pcOff,
-         stackOff);
-  mcg->recordSyncPoint(as.frontier(), pcOff, stackOff);
+void CodeGenerator::recordSyncPoint(Asm& as, SyncOptions sync) {
+  recordSyncPoint(Vauto().main(as), sync);
 }
 
 void CodeGenerator::cgLdMIStateAddr(IRInstruction* inst) {

@@ -69,11 +69,14 @@ void moveToAlign(CodeBlock& cb,
   }
 }
 
+void emitEagerSyncPoint(Vout& v, const Op* pc) {
+  v << storeq{rVmFp, rVmTl[RDS::kVmfpOff]};
+  v << storeq{rVmSp, rVmTl[RDS::kVmspOff]};
+  emitImmStoreq(v, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
+}
+
 void emitEagerSyncPoint(Asm& as, const Op* pc) {
-  // we can use rAsm because we don't clobber it in X64Assembler
-  as.  storeq(rVmFp, rVmTl[RDS::kVmfpOff]);
-  as.  storeq(rVmSp, rVmTl[RDS::kVmspOff]);
-  emitImmStoreq(as, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
+  emitEagerSyncPoint(Vauto().main(as), pc);
 }
 
 // emitEagerVMRegSave --
@@ -107,8 +110,12 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
   }
 }
 
+void emitGetGContext(Vout& v, Vreg dest) {
+  emitTLSLoad<ExecutionContext>(v, g_context, dest);
+}
+
 void emitGetGContext(Asm& as, PhysReg dest) {
-  emitTLSLoad<ExecutionContext>(as, g_context, dest);
+  emitGetGContext(Vauto().main(as), dest);
 }
 
 // IfCountNotStatic --
@@ -285,13 +292,17 @@ void emitCall(Asm& a, CppCall call) {
   not_reached();
 }
 
-void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref) {
+void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   if (imm.fits(sz::dword)) {
-    as.storeq(imm.l(), ref); // sign-extend to 64-bit then storeq
+    v << storeqim{imm.l(), ref};
   } else {
-    as.storel(int32_t(imm.q()), ref);
-    as.storel(int32_t(imm.q() >> 32), MemoryRef(ref.r + 4));
+    v << storelim{int32_t(imm.q()), ref};
+    v << storelim{int32_t(imm.q() >> 32), ref + 4};
   }
+}
+
+void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref) {
+  emitImmStoreq(Vauto().main(as), imm, ref);
 }
 
 void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
@@ -420,7 +431,7 @@ void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2) {
   }
 }
 
-void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
+void shuffle2(Vout& v, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   if (s0 == InvalidReg && s1 == InvalidReg &&
       d0 == InvalidReg && d1 == InvalidReg) return;
   assert(s0 != s1);
@@ -428,22 +439,22 @@ void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   assert(!d0.isSIMD() || d1 == InvalidReg); // never 2 XMMs
   if (d0 == s1 && d1 != InvalidReg) {
     assert(d0 != d1);
-    if (d1 == s0) {
-      as.   xchgq (s1, s0);
-    } else {
-      as.   movq (s1, d1); // save s1 first; d1 != s0
-      as.   movq (s0, d0);
-    }
+    v << copy2{s0, s1, d0, d1};
   } else if (d0.isSIMD() && s0.isGP() && s1.isGP()) {
     // move 2 gpr to 1 xmm
     assert(d0 != rCgXMM0); // xmm0 is reserved for scratch
-    as.   movq_rx(s0, d0);
-    as.   movq_rx(s1, rCgXMM0);
-    as.   unpcklpd(rCgXMM0, d0); // s1 -> d0[1]
+    auto x = v.makeReg();
+    v << copy{s0, d0};
+    v << copy{s1, x};
+    v << unpcklpd{x, d0, d0}; // s1 -> d0[1]
   } else {
-    if (d0 != InvalidReg) emitMovRegReg(as, s0, d0); // d0 != s1
-    if (d1 != InvalidReg) emitMovRegReg(as, s1, d1);
+    if (d0 != InvalidReg) v << copy{s0, d0}; // d0 != s1
+    if (d1 != InvalidReg) v << copy{s1, d1};
   }
+}
+
+void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
+  shuffle2(Vauto().main(as), s0, s1, d0, d1);
 }
 
 void zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {

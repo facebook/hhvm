@@ -46,8 +46,11 @@ constexpr size_t kJmpTargetAlign = 16;
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
 void emitEagerSyncPoint(Asm& as, const Op* pc);
+void emitEagerSyncPoint(Vout&, const Op* pc);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
+void emitEagerVMRegSave(Vout&, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
+void emitGetGContext(Vout& as, Vreg dest);
 
 void emitTransCounterInc(Asm& a);
 
@@ -69,6 +72,7 @@ void emitCall(Asm& as, CppCall call);
 
 // store imm to the 8-byte memory location at ref. Warning: don't use this
 // if you wanted an atomic store; large imms cause two stores.
+void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
 void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
@@ -109,9 +113,17 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
  */
 template<typename T>
 inline void
-emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
+emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg reg) {
   uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
-  a.    fs().loadq(baseless(virtualAddress), dest);
+  Vptr addr{baseless(virtualAddress), Vptr::FS};
+  v << load{addr, reg};
+}
+
+template<typename T>
+inline void
+emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 reg) {
+  uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
+  a.fs().loadq(baseless(virtualAddress), reg);
 }
 
 #else // USE_GCC_FAST_TLS
@@ -146,6 +158,7 @@ void emitCmpClass(Asm& as, Reg64 reg, MemoryRef mem);
 void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2);
 
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
+void shuffle2(Vout&, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
 
 void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);
 void zeroExtendIfBool(Vout& as, const SSATmp* src, Vreg reg);

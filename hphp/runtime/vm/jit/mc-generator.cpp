@@ -2262,7 +2262,7 @@ std::string MCGenerator::getUsage() {
   addRow("data", code.data().used(), code.data().capacity());
   addRow("RDS", RDS::usedBytes(),
          RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
-  addRow("RDS", RDS::usedLocalBytes(),
+  addRow("RDSLocal", RDS::usedLocalBytes(),
          RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
   addRow("persistentRDS", RDS::usedPersistentBytes(),
          RuntimeOption::EvalJitTargetCacheSize / 4);

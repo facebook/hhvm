@@ -347,7 +347,6 @@ const StaticString
 Array ExecutionContext::obGetStatus(bool full) {
   Array ret = Array::Create();
   std::list<OutputBuffer*>::const_iterator iter = m_buffers.begin();
-  ++iter; // skip over the fake outermost buffer
   int level = 0;
   for (; iter != m_buffers.end(); ++iter, ++level) {
     Array status;

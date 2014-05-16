@@ -15,7 +15,7 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </env:Envelope>";	
 
 function book_to_xml($book) {
-	throw new SoapFault("Server", "Conversion Fault");
+	return '<book xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><a xsi:type="xsd:string">'.$book->a.'!</a><b xsi:type="xsd:string">'.$book->b.'!</b></book>';
 }
 
 class test{
@@ -23,7 +23,7 @@ class test{
 		$book = new book;
 		$book->a = "foo";
 		$book->b = "bar";
-		return $book;
+		return new SoapVar($book, null, "book", "http://schemas.nothing.com");
 	}	
 }
 
@@ -34,13 +34,14 @@ class book{
 }
 
 $options=Array(
-		'actor'   =>'http://schemas.nothing.com',
+		'uri'     => "http://schemas.nothing.com",
+		'actor'   => 'http://schemas.nothing.com',
 		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
 		                         "type_name" => "book",
 		                         "to_xml"    => "book_to_xml"))
 		);
 
-$server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
+$server = new SoapServer(NULL,$options);
 $server->setClass("test");
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";

@@ -2267,7 +2267,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
           }
         }
         set_ns_prop(xmlParam, SOAP_1_2_ENC_NAMESPACE, "itemType",
-                    replaced.c_str());
+                    array_type.c_str());
         set_ns_prop(xmlParam, SOAP_1_2_ENC_NAMESPACE, "arraySize",
                     replaced.c_str());
       }

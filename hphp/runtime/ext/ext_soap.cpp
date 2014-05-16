@@ -2082,8 +2082,10 @@ Variant c_SoapServer::t_getfunctions() {
 static bool valid_function(c_SoapServer *server, Object &soap_obj,
                            const String& fn_name) {
   HPHP::Class* cls = nullptr;
-  if (server->m_type == SOAP_OBJECT || server->m_type == SOAP_CLASS) {
+  if (server->m_type == SOAP_OBJECT) {
     cls = server->m_soap_object->getVMClass();
+  } else if (server->m_type == SOAP_CLASS) {
+    cls = soap_obj->getVMClass();
   } else if (server->m_soap_functions.functions_all) {
     return f_function_exists(fn_name);
   } else if (!server->m_soap_functions.ft.empty()) {
@@ -2277,6 +2279,12 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
     doc_return = serialize_response_call(function, response_name.data(),
                                          m_uri.c_str(), retval, m_soap_headers,
                                          soap_version);
+  } catch (Object &e) {
+    if (e->o_instanceof("SoapFault")) {
+      send_soap_server_fault(function, e, nullptr);
+      return;
+    }
+    throw e;
   } catch (Exception &e) {
     send_soap_server_fault(function, e, NULL);
     return;

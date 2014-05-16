@@ -7,28 +7,20 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 	xmlns:ns1=\"http://schemas.nothing.com\"
 >
   <env:Body>
- <ns1:dotest>
+ <dotest>
   <book xsi:type=\"ns1:book\">
-    <a xsi:type=\"xsd:string\">foo</a>
-    <b xsi:type=\"xsd:string\">bar</b>
+    <a xsi:type=\"xsd:string\">Blaat</a>
+    <b xsi:type=\"xsd:string\">aap</b>
 </book>
-</ns1:dotest>
+</dotest>
  </env:Body>
 <env:Header/>
 </env:Envelope>";	
 
-function book_from_xml($xml) {
-	$sxe = simplexml_load_string($xml);
-	$obj = new book;
-	$obj->a = (string)$sxe->a;
-	$obj->b = (string)$sxe->b;
-	return $obj;
-}
-
 class test{
-	function dotest($book){
+	function dotest(book $book){
 		$classname=get_class($book);
-		return "Object: ".$classname. "(".$book->a.",".$book->b.")";
+		return "Classname: ".$classname;
 	}	
 }
 
@@ -38,14 +30,12 @@ class book{
 		
 }
 $options=Array(
-		'actor'   =>'http://schemas.nothing.com',
-		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
-		                         "type_name" => "book",
-		                         "from_xml"  => "book_from_xml"))
+		'actor' =>'http://schema.nothing.com',
+		'classmap' => array('book'=>'book', 'wsdltype2'=>'classname2')
 		);
 
 $server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
 $server->setClass("test");
-$server->handle($HTTP_RAW_POST_DATA);
+$server->handle($GLOBALS['HTTP_RAW_POST_DATA']);
 echo "ok\n";
 ?>

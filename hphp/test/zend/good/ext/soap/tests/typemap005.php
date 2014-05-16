@@ -7,23 +7,28 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 	xmlns:ns1=\"http://schemas.nothing.com\"
 >
   <env:Body>
-<ns1:dotest2>
-<dotest2 xsi:type=\"xsd:string\">???</dotest2>
-</ns1:dotest2>
+ <ns1:dotest>
+  <book xsi:type=\"ns1:book\">
+    <a xsi:type=\"xsd:string\">foo</a>
+    <b xsi:type=\"xsd:string\">bar</b>
+</book>
+</ns1:dotest>
  </env:Body>
 <env:Header/>
 </env:Envelope>";	
 
-function book_to_xml($book) {
-	return '<book xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><a xsi:type="xsd:string">'.$book->a.'!</a><b xsi:type="xsd:string">'.$book->b.'!</b></book>';
+function book_from_xml($xml) {
+	$sxe = simplexml_load_string($xml);
+	$obj = new book;
+	$obj->a = (string)$sxe->a;
+	$obj->b = (string)$sxe->b;
+	return $obj;
 }
 
 class test{
-	function dotest2($str){
-		$book = new book;
-		$book->a = "foo";
-		$book->b = "bar";
-		return new SoapVar($book, null, "book", "http://schemas.nothing.com");
+	function dotest($book){
+		$classname=get_class($book);
+		return "Object: ".$classname. "(".$book->a.",".$book->b.")";
 	}	
 }
 
@@ -32,13 +37,12 @@ class book{
 	public $b="c";
 		
 }
-
 $options=Array(
 		'uri'     => "http://schemas.nothing.com",
 		'actor'   => 'http://schemas.nothing.com',
 		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
 		                         "type_name" => "book",
-		                         "to_xml"    => "book_to_xml"))
+		                         "from_xml"  => "book_from_xml"))
 		);
 
 $server = new SoapServer(NULL,$options);

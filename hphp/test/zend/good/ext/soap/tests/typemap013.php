@@ -15,7 +15,7 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </env:Envelope>";	
 
 function book_to_xml($book) {
-	return '<book xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><a xsi:type="xsd:string">'.$book->a.'!</a><b xsi:type="xsd:string">'.$book->b.'!</b></book>';
+	return '<book xmlns="http://schemas.nothing.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><a xsi:type="xsd:string">'.$book->a.'!</a><b xsi:type="xsd:string">'.$book->b.'!</b></book>';
 }
 
 class test{

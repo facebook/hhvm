@@ -38,14 +38,13 @@ class book{
 		
 }
 $options=Array(
-		'uri'     => "http://schemas.nothing.com",
-		'actor'   => 'http://schemas.nothing.com',
+		'actor'   =>'http://schemas.nothing.com',
 		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
 		                         "type_name" => "book",
 		                         "from_xml"  => "book_from_xml"))
 		);
 
-$server = new SoapServer(NULL,$options);
+$server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
 $server->setClass("test");
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";

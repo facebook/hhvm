@@ -7,20 +7,23 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 	xmlns:ns1=\"http://schemas.nothing.com\"
 >
   <env:Body>
- <dotest>
-  <book xsi:type=\"ns1:book\">
-    <a xsi:type=\"xsd:string\">Blaat</a>
-    <b xsi:type=\"xsd:string\">aap</b>
-</book>
-</dotest>
+<ns1:dotest2>
+<dotest2 xsi:type=\"xsd:string\">???</dotest2>
+</ns1:dotest2>
  </env:Body>
 <env:Header/>
 </env:Envelope>";	
 
+function book_to_xml($book) {
+	throw new SoapFault("Server", "Conversion Fault");
+}
+
 class test{
-	function dotest(book $book){
-		$classname=get_class($book);
-		return "Classname: ".$classname;
+	function dotest2($str){
+		$book = new book;
+		$book->a = "foo";
+		$book->b = "bar";
+		return $book;
 	}	
 }
 
@@ -29,13 +32,16 @@ class book{
 	public $b="c";
 		
 }
+
 $options=Array(
-		'actor' =>'http://schema.nothing.com',
-		'classmap' => array('book'=>'book', 'wsdltype2'=>'classname2')
+		'actor'   =>'http://schemas.nothing.com',
+		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
+		                         "type_name" => "book",
+		                         "to_xml"    => "book_to_xml"))
 		);
 
 $server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
 $server->setClass("test");
-$server->handle($GLOBALS['HTTP_RAW_POST_DATA']);
+$server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
 ?>

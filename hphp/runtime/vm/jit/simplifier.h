@@ -158,6 +158,7 @@ private:
   SSATmp* simplifyAssertNonNull(const IRInstruction*);
   SSATmp* simplifyCallBuiltin(const IRInstruction*);
   SSATmp* simplifyConvObjToBool(const IRInstruction*);
+  SSATmp* simplifyIsWaitHandle(const IRInstruction*);
 
   template <class Oper>
   SSATmp* simplifyConst(SSATmp* src1, SSATmp* src2, Oper op);

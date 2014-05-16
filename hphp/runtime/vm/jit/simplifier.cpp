@@ -485,6 +485,7 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
 
     case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
     case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
+    case IsWaitHandle:           return simplifyIsWaitHandle(inst);
 
     case CallBuiltin: return simplifyCallBuiltin(inst);
 
@@ -2053,6 +2054,16 @@ SSATmp* Simplifier::simplifyCallBuiltin(const IRInstruction* inst) {
     break;
   }
 
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyIsWaitHandle(const IRInstruction* inst) {
+  if (inst->src(0)->type() < Type::Obj) {
+    auto const cls = inst->src(0)->type().getClass();
+    if (cls && cls->classof(c_WaitHandle::classof())) {
+      return cns(true);
+    }
+  }
   return nullptr;
 }
 

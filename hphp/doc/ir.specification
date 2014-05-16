@@ -2307,6 +2307,12 @@ D:Obj = ColAddElemC S0:Obj S1:Cell S2:Cell
   Adds item to collection. Inserts item S2 into collection S0 at key S1.
   Throws a fatal error if S0 is not a collection. Returns S0.
 
+D:Bool = ColIsEmpty S0:Obj
+D:Bool = ColIsNEmpty S0:Obj
+
+  Returns whether a collection instance is empty or not.  S0 must be known to
+  be an instance of a collection class at compile time.
+
 20. Exception/unwinding support
 
 BeginCatch

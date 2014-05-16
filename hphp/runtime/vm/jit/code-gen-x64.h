@@ -76,10 +76,14 @@ private:
   CallDest callDestDbl(const IRInstruction*) const;
 
   // Main call helper:
+  void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
+                    SyncOptions sync, ArgGroup& args, RegSet toSave);
   void cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
                     SyncOptions sync, ArgGroup& args, RegSet toSave);
 
   // Overload to make the toSave RegSet optional:
+  void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
+                    SyncOptions sync, ArgGroup& args);
   void cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
                     SyncOptions sync, ArgGroup& args);
 
@@ -167,11 +171,14 @@ private:
   template<class Loc>
   void emitSideExitGuard(Type type, Loc typeLoc,
                          Loc dataLoc, Offset taken);
-  void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
+  void emitReqBindJcc(Vout&, ConditionCode cc, const ReqBindJccData*);
 
   void emitCompare(IRInstruction* inst);
+  void emitCompare(Vout&, IRInstruction* inst);
   void emitCompareInt(IRInstruction* inst);
+  void emitCompareInt(Vout&, IRInstruction* inst);
   void emitTestZero(SSATmp*, PhysLoc);
+  void emitTestZero(Vout&, SSATmp*, PhysLoc);
   bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                         SSATmp* src2, PhysLoc loc2,
                         void(Asm::*emitFunc)(Reg64));
@@ -191,6 +198,7 @@ private:
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceBitmaskCheck(IRInstruction*);
+  void emitInstanceBitmaskCheck(Vout&, IRInstruction*);
   void emitTraceRet(Asm& as);
   void emitInitObjProps(PhysReg dstReg, const Class* cls, size_t nProps);
 

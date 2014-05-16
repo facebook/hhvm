@@ -248,47 +248,39 @@ void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {
 }
 
 void emitCall(Asm& a, TCA dest) {
-  if (a.jmpDeltaFits(dest)) {
-    a.    call(dest);
-  } else {
-    // can't do a near call; store address in data section.
-    // call by loading the address using rip-relative addressing.  This
-    // assumes the data section is near the current code section.  Since
-    // this sequence is directly in-line, rip-relative like this is
-    // more compact than loading a 64-bit immediate.
-    auto addr = mcg->allocLiteral((uint64_t)dest);
-    a.call(rip[(intptr_t)addr]);
-    assert(((int32_t*)a.frontier())[-1] + a.frontier() == (TCA)addr);
-  }
+  Vauto().main(a) << call{dest};
 }
 
 void emitCall(Asm& a, CppCall call) {
-  switch (call.kind()) {
+  emitCall(Vauto().main(a), call);
+}
+
+void emitCall(Vout& v, CppCall target) {
+  switch (target.kind()) {
   case CppCall::Kind::Direct:
-    return emitCall(a, static_cast<TCA>(call.address()));
+    v << call{static_cast<TCA>(target.address())};
+    return;
   case CppCall::Kind::Virtual:
     // Virtual call.
     // Load method's address from proper offset off of object in rdi,
     // using rax as scratch.
-    a.  loadq   (*rdi, rax);
-    a.  call    (rax[call.vtableOffset()]);
+    v << loadq{*rdi, rax};
+    v << callm{rax[target.vtableOffset()]};
     return;
   case CppCall::Kind::Indirect:
-    a.  call    (call.reg());
+    v << callr{target.reg()};
     return;
-  case CppCall::Kind::ArrayVirt:
-    {
-      auto const addr = reinterpret_cast<intptr_t>(call.arrayTable());
-      always_assert_flog(
-        deltaFits(addr, sz::dword),
-        "Array data vtables are expected to be in the data "
-        "segment, with addresses less than 2^31"
-      );
-      a.    loadzbl (rdi[ArrayData::offsetofKind()], eax);
-      a.    call    (baseless(rax*8 + addr));
-    }
+  case CppCall::Kind::ArrayVirt: {
+    auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
+    always_assert_flog(
+      deltaFits(addr, sz::dword),
+      "Array data vtables are expected to be in the data "
+      "segment, with addresses less than 2^31"
+    );
+    v << loadzbl{rdi[ArrayData::offsetofKind()], eax};
+    v << callm{baseless(rax*8 + addr)};
     return;
-  }
+  }}
   not_reached();
 }
 

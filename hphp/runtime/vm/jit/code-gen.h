@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/code-cache.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 namespace HPHP { namespace JIT {
 
@@ -109,6 +110,9 @@ struct CodegenState {
   // Used to pass information about the state of the world at native
   // calls between cgCallHelper and cgBeginCatch.
   StateVector<Block, CatchInfo> catches;
+
+  // Postponed code "points" can obtain code addresses after Vasm::finish().
+  Vmeta meta;
 
   // Have we progressed past the guards? Used to suppress TransBCMappings until
   // we're translating code that can properly be attributed to specific

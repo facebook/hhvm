@@ -69,6 +69,7 @@ void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg);
 
 void emitCall(Asm& as, TCA dest);
 void emitCall(Asm& as, CppCall call);
+void emitCall(Vout&, CppCall call);
 
 // store imm to the 8-byte memory location at ref. Warning: don't use this
 // if you wanted an atomic store; large imms cause two stores.
@@ -157,7 +158,6 @@ void emitCmpClass(Asm& as, const Class* c, MemoryRef mem);
 void emitCmpClass(Asm& as, Reg64 reg, MemoryRef mem);
 void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2);
 
-void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
 void shuffle2(Vout&, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
 
 void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);

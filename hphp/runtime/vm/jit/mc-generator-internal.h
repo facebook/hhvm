@@ -178,9 +178,16 @@ static inline void verifyTVOff(MemoryRef mr) {
 }
 
 template<typename SrcType, typename OpndType>
-static inline void
-emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
+void emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  testb(src, toByte(tvOp));
+}
+
+inline void emitTestTVType(X64::Vout& v, Immed s0, X64::Vreg s1) {
+  v << X64::testbi{s0, s1};
+}
+
+inline void emitTestTVType(X64::Vout& v, Immed s0, X64::Vptr s1) {
+  v << X64::testbim{s0, s1};
 }
 
 template<typename SrcType, typename OpndType>
@@ -190,9 +197,12 @@ emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  loadzbl(src, toReg32(tvOp));
 }
 
+inline void emitLoadTVType(X64::Vout& v, X64::Vptr mem, X64::Vreg d) {
+  v << X64::loadzbl{mem, d};
+}
+
 template<typename SrcType, typename OpndType>
-static inline void
-emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
+void emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  cmpb(src, toByte(tvOp));
 }
 
@@ -205,9 +215,17 @@ inline void emitCmpTVType(X64::Vout& v, Immed s0, X64::Vreg s1) {
 }
 
 template<typename DestType, typename OpndType>
-static inline void
-emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
+void emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
   a.  storeb(toByte(tvOp), dest);
+}
+
+inline void emitStoreTVType(X64::Vout& v, X64::Vreg src, X64::Vptr dest) {
+  v << X64::storeb{src, dest};
+}
+
+inline void
+emitStoreTVType(X64::Vout& v, DataType src, MemoryRef dest) {
+  v << X64::storebim{src, dest};
 }
 
 // emitDeref --
@@ -224,17 +242,20 @@ emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
   a.    loadq (src[TVOFF(m_data)], dest);
 }
 
-static inline void
-emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
-  emitCmpTVType(a, KindOfRef, reg[TVOFF(m_type)]);
+inline void emitDerefIfVariant(X64::Vout& v, X64::Vreg reg) {
+  emitCmpTVType(v, KindOfRef, reg[TVOFF(m_type)]);
   if (RefData::tvOffset() == 0) {
-    a.    cload_reg64_disp_reg64(CC_E, reg, TVOFF(m_data), reg);
+    v << X64::cloadq{CC_E, reg[TVOFF(m_data)], reg};
   } else {
-    ifThen(a, CC_E, [&](X64Assembler& a) {
-      a.  loadq(reg[TVOFF(m_data)], reg);
-      a.  addq(RefData::tvOffset(), reg);
+    ifThen(v, CC_E, [&](X64::Vout& v) {
+      v << X64::loadq{reg[TVOFF(m_data)], reg};
+      v << X64::addqi{RefData::tvOffset(), reg, reg};
     });
   }
+}
+
+inline void emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
+  emitDerefIfVariant(X64::Vauto().main(a), reg);
 }
 
 // NB: leaves count field unmodified. Does not store to m_data if type

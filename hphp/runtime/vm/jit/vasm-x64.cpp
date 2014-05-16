@@ -142,8 +142,6 @@ private:
   void emit(ldimm& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
-  void emit(fixupcatch& i);
-  void emit(fixup& i);
   void emit(incstat& i) { emitIncStat(a->code(), i.stat, i.n, i.force); }
   void emit(kpcall& i);
   void emit(ldpoint& i);
@@ -499,21 +497,12 @@ void Vgen::emit(fallbackcc i) {
   }
 }
 
-void Vgen::emit(fixupcatch& i) {
-  mcg->registerCatchBlock(meta->points[i.afterCall],
-                          meta->points[i.catchStart]);
-}
-
 void Vgen::emit(kpcall& i) {
   backend.prepareForSmash(a->code(), kCallLen);
   mcg->tx().profData()->addPrologueMainCaller(i.callee, i.prologIndex,
                                               a->frontier());
   always_assert(backend.isSmashable(a->frontier(), kCallLen));
   a->call(i.target);
-}
-
-void Vgen::emit(fixup& i) {
-  mcg->fixupMap().recordFixup(a->frontier(), i.fix);
 }
 
 void Vgen::emit(ldimm& i) {

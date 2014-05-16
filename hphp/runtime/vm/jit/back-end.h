@@ -34,6 +34,7 @@ struct IRUnit;
 struct PhysReg;
 struct RelocationInfo;
 struct CodeGenFixups;
+struct RegAllocInfo;
 struct AsmInfo;
 
 /*
@@ -194,6 +195,8 @@ class BackEnd {
                                    AsmInfo* asmInfo, CodeGenFixups& fixups) {
     always_assert(false);
   }
+
+  virtual void genCodeImpl(IRUnit& unit, AsmInfo*);
 };
 
 }}

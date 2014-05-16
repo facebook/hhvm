@@ -33,14 +33,12 @@ constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 struct CodeGenerator : public JIT::CodeGenerator {
   typedef JIT::X64Assembler Asm;
 
-  CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& coldCode,
-                CodeBlock& frozenCode, CodegenState& state)
+  CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold, Vout& frozen,
+                CodegenState& state)
     : m_unit(unit)
-    , m_mainCode(mainCode)
-    , m_coldCode(coldCode)
-    , m_frozenCode(frozenCode)
-    , m_as(mainCode)
-    , m_acold(coldCode)
+    , m_vmain(main)
+    , m_vcold(cold)
+    , m_vfrozen(frozen)
     , m_state(state)
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
@@ -78,15 +76,9 @@ private:
   // Main call helper:
   void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
                     SyncOptions sync, ArgGroup& args, RegSet toSave);
-  void cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
-                    SyncOptions sync, ArgGroup& args, RegSet toSave);
-
   // Overload to make the toSave RegSet optional:
   void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
                     SyncOptions sync, ArgGroup& args);
-  void cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
-                    SyncOptions sync, ArgGroup& args);
-
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };
@@ -128,10 +120,6 @@ private:
 
   void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
-  void cgBinaryIntOp(IRInstruction*,
-                     void (Asm::*intImm)(Immed, Reg64),
-                     void (Asm::*intRR)(Reg64, Reg64),
-                     Commutativity);
   template<class Op, class Opi>
   void cgBinaryIntOp(IRInstruction*);
   template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
@@ -168,11 +156,8 @@ private:
                          Loc dataLoc, Offset taken);
   void emitReqBindJcc(Vout&, ConditionCode cc, const ReqBindJccData*);
 
-  void emitCompare(IRInstruction* inst);
   void emitCompare(Vout&, IRInstruction* inst);
-  void emitCompareInt(IRInstruction* inst);
   void emitCompareInt(Vout&, IRInstruction* inst);
-  void emitTestZero(SSATmp*, PhysLoc);
   void emitTestZero(Vout&, SSATmp*, PhysLoc);
   template<class Inst>
   bool emitIncDec(PhysLoc dst, SSATmp* src0, PhysLoc loc0,
@@ -180,9 +165,7 @@ private:
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
-  void emitLoadImm(Asm& as, int64_t val, PhysReg dstReg);
-  PhysReg prepXMMReg(Asm& as, const SSATmp* src, const PhysLoc& srcLoc,
-                     RegXMM rXMMScratch);
+  RegSet findFreeRegs(IRInstruction* inst);
   PhysReg prepXMMReg(Vout&, const SSATmp* src, const PhysLoc& srcLoc,
                      RegXMM rXMMScratch);
   VregXMM prepXMM(Vout&, const SSATmp* src, const PhysLoc& srcLoc);
@@ -190,11 +173,9 @@ private:
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
-  void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
-  void emitInstanceBitmaskCheck(IRInstruction*);
   void emitInstanceBitmaskCheck(Vout&, IRInstruction*);
-  void emitTraceRet(Asm& as);
+  void emitTraceRet(Vout&);
   void emitInitObjProps(PhysReg dstReg, const Class* cls, size_t nProps);
 
   bool decRefDestroyIsUnlikely(OptDecRefProfile& profile, Type type);
@@ -205,7 +186,7 @@ private:
                                  PhysReg dataReg);
   void cgCheckRefCountedType(PhysReg typeReg, Vlabel done);
   void cgCheckRefCountedType(PhysReg baseReg, int64_t offset, Vlabel done);
-  void cgDecRefStaticType(Vout&, Type type, PhysReg dataReg, bool genZeroCheck);
+  void cgDecRefStaticType(Vout&, Type type, Vreg dataReg, bool genZeroCheck);
   void cgDecRefDynamicType(PhysReg typeReg, PhysReg dataReg, bool genZeroCheck);
   void cgDecRefDynamicTypeMem(PhysReg baseReg, int64_t offset);
   void cgDecRefMem(Type type, PhysReg baseReg, int64_t offset);
@@ -217,17 +198,15 @@ private:
   void cgLdFuncCachedCommon(IRInstruction* inst);
   void cgLookupCnsCommon(IRInstruction* inst);
   RDS::Handle cgLdClsCachedCommon(IRInstruction* inst);
-  void emitFwdJcc(ConditionCode cc, Block* target);
-  void emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
+  Vlabel label(Block*);
+  void emitFwdJcc(Vout&, ConditionCode cc, Block* target);
   const Func* curFunc() const { return m_curInst->marker().func(); };
   const Class* curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   bool resumed() const { return m_curInst->marker().resumed(); };
-  void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
   void recordSyncPoint(Vout&, SyncOptions sync = SyncOptions::kSyncPoint);
   int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);
-  void emitReqBindAddr(TCA& dest, SrcKey sk);
 
   void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
@@ -240,8 +219,6 @@ private:
    * true.
    */
   template <class Block>
-  void ifBlock(ConditionCode cc, Block taken, bool unlikely = false);
-  template <class Block>
   void ifBlock(Vout& v, Vout& vcold, ConditionCode cc, Block taken,
              bool unlikely = false);
 
@@ -252,21 +229,14 @@ private:
    *
    * Passes the proper assembler to use to the unlikely function.
    */
-  template <class Block>
-  void unlikelyIfBlock(ConditionCode cc, Block unlikely);
   template <class Then>
   void unlikelyIfBlock(Vout& v, Vout& vcold, ConditionCode cc, Then then);
 
   // Generate an if-then-else block
   template <class Then, class Else>
-  void ifThenElse(Asm& a, ConditionCode cc, Then thenBlock, Else elseBlock);
-  template <class Then, class Else>
   void ifThenElse(Vout& v, ConditionCode cc, Then thenBlock, Else elseBlock);
 
   // Generate an if-then-else block into m_as.
-  template <class Then, class Else>
-  void ifThenElse(ConditionCode cc, Then thenBlock, Else elseBlock,
-                  bool unlikely = false);
   template <class Then, class Else>
   void ifThenElse(Vout& v, Vout& vcold, ConditionCode cc, Then thenBlock,
                   Else elseBlock, bool unlikely = false);
@@ -275,35 +245,26 @@ private:
    * Same as ifThenElse except the first block is off in acold
    */
   template <class Then, class Else>
-  void unlikelyIfThenElse(ConditionCode cc, Then unlikely, Else elseBlock);
-  template <class Then, class Else>
   void unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
                           Then unlikelyBlock, Else elseBlock);
 
   // This is for printing partially-generated traces when debugging
   void print() const;
 
-  Vout& vmain() { return *m_vmain; }
-  Vout& vcold() { return *m_vcold; }
-  Vout& vfrozen() { return *m_vfrozen; }
+  Vout& vmain() { return m_vmain; }
+  Vout& vcold() { return m_vcold; }
+  Vout& vfrozen() { return m_vfrozen; }
 
 private:
   const IRUnit&       m_unit;
-  CodeBlock&          m_mainCode;
-  CodeBlock&          m_coldCode;
-  CodeBlock&          m_frozenCode;
-  Asm                 m_as;  // current "main" assembler
-  Asm                 m_acold; // for cold code
+  Vout&               m_vmain;
+  Vout&               m_vcold;
+  Vout&               m_vfrozen;
   CodegenState&       m_state;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
   const RegAllocInfo::RegMap* m_instRegs; // registers for current m_curInst.
-  Vout*               m_vmain{nullptr};
-  Vout*               m_vcold{nullptr};
-  Vout*               m_vfrozen{nullptr};
 };
-
-void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state);
 
 // Helpers to compute a reference to a TypedValue type and data
 inline MemoryRef refTVType(PhysReg reg) {

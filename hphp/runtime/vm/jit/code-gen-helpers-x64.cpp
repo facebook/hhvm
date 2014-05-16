@@ -149,25 +149,30 @@ struct IfCountNotStatic {
   }
 };
 
+void emitTransCounterInc(Vout& v) {
+  if (!mcg->tx().isTransDBEnabled()) return;
+  v << ldimm{mcg->tx().getTransCounterAddr(), rAsm};
+  v << incqmlock{*rAsm};
+}
 
 void emitTransCounterInc(Asm& a) {
-  if (!mcg->tx().isTransDBEnabled()) return;
+  emitTransCounterInc(Vauto().main(a));
+}
 
-  a.    movq (mcg->tx().getTransCounterAddr(), rAsm);
-  a.    lock ();
-  a.    incq (*rAsm);
+void emitIncRef(Vout& v, Vreg base) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitAssertRefCount(v, base);
+  }
+  // emit incref
+  v << inclm{base[FAST_REFCOUNT_OFFSET]};
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // Assert that the ref count is greater than zero
+    emitAssertFlagsNonNegative(v);
+  }
 }
 
 void emitIncRef(Asm& as, PhysReg base) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitAssertRefCount(as, base);
-  }
-  // emit incref
-  as.incl(base[FAST_REFCOUNT_OFFSET]);
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(as);
-  }
+  emitIncRef(Vauto().main(as), base);
 }
 
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype) {
@@ -196,12 +201,16 @@ void emitAssertFlagsNonNegative(Vout& v) {
   ifThen(v, CC_NGE, [&](Vout& v) { v << ud2{}; });
 }
 
-void emitAssertRefCount(Asm& as, PhysReg base) {
-  as.cmpl(HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NLE, [&](Asm& a) {
-    a.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
-    ifThen(a, CC_NBE, [&](Asm& a) { a.ud2(); });
+void emitAssertRefCount(Vout& v, Vreg base) {
+  v << cmplim{HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]};
+  ifThen(v, CC_NLE, [&](Vout& v) {
+    v << cmplim{HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]};
+    ifThen(v, CC_NBE, [&](Vout& v) { v << ud2{}; });
   });
+}
+
+void emitAssertRefCount(Asm& as, PhysReg base) {
+  emitAssertRefCount(Vauto().main(as), base);
 }
 
 // Logical register move: ensures the value in src will be in dest
@@ -241,14 +250,22 @@ void emitLea(Asm& as, MemoryRef mr, PhysReg dst) {
   }
 }
 
-void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg) {
-  emitLdLowPtr(as, objReg[ObjectData::getVMClassOffset()],
+void emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
+  emitLdLowPtr(v, objReg[ObjectData::getVMClassOffset()],
                dstReg, sizeof(LowClassPtr));
 }
 
+void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg) {
+  emitLdObjClass(Vauto().main(as), objReg, dstReg);
+}
+
+void emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
+  v << copy{srcReg, dstReg};
+  v << decq{dstReg, dstReg};
+}
+
 void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {
-  emitMovRegReg(as, srcReg, dstReg);
-  as.   decq(dstReg);
+  emitLdClsCctx(Vauto().main(as), srcReg, dstReg);
 }
 
 void emitCall(Asm& a, TCA dest) {
@@ -373,73 +390,71 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
   v = done;
 }
 
-void emitLoadReg(Asm& as, MemoryRef mem, PhysReg reg) {
-  assert(reg != InvalidReg);
-  if (reg.isGP()) {
-    as. loadq(mem, reg);
-  } else {
-    as. movsd(mem, reg);
-  }
-}
-
-void emitStoreReg(Asm& as, PhysReg reg, MemoryRef mem) {
-  assert(reg != InvalidReg);
-  if (reg.isGP()) {
-    as. storeq(reg, mem);
-  } else {
-    as. movsd(reg, mem);
-  }
-}
-
 void emitLdLowPtr(Asm& as, MemoryRef mem, PhysReg reg, size_t size) {
   assert(reg != InvalidReg && reg.isGP());
+  return emitLdLowPtr(Vauto().main(as), mem, reg, size);
+}
+
+void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
+  assert(reg.isValid() && reg.isGP());
   if (size == 8) {
-    as.loadq(mem, reg);
+    v << loadq{mem, reg};
   } else if (size == 4) {
-    as.loadl(mem, r32(reg));
+    v << loadl{mem, reg};
+  } else {
+    not_implemented();
+  }
+}
+
+void emitCmpClass(Vout& v, const Class* c, Vptr mem) {
+  auto size = sizeof(LowClassPtr);
+  auto imm = Immed64(c);
+
+  if (size == 8) {
+    if (imm.fits(sz::dword)) {
+      v << cmpqim{imm.l(), mem};
+    } else {
+      // Use a scratch.  We could do this without rAsm using two immediate
+      // 32-bit compares (and two branches).
+      v << ldimm{imm, rAsm};
+      v << cmpqm{rAsm, mem};
+    }
+  } else if (size == 4) {
+    v << cmplim{imm.l(), mem};
   } else {
     not_implemented();
   }
 }
 
 void emitCmpClass(Asm& as, const Class* c, MemoryRef mem) {
-  auto size = sizeof(LowClassPtr);
-  auto imm = Immed64(c);
-
-  if (size == 8) {
-    if (imm.fits(sz::dword)) {
-      as.cmpq(imm.l(), mem);
-    } else {
-      // Use a scratch.  We could do this without rAsm using two immediate
-      // 32-bit compares (and two branches).
-      as.emitImmReg(imm, rAsm);
-      as.cmpq(rAsm, mem);
-    }
-  } else if (size == 4) {
-    as.cmpl(imm.l(), mem);
-  } else {
-    not_implemented();
-  }
+  emitCmpClass(Vauto().main(as), c, mem);
 }
 
 void emitCmpClass(Asm& as, Reg64 reg, MemoryRef mem) {
+  emitCmpClass(Vauto().main(as), reg, mem);
+}
+
+void emitCmpClass(Vout& v, Vreg reg, Vptr mem) {
   auto size = sizeof(LowClassPtr);
   if (size == 8) {
-    as.   cmpq    (reg, mem);
+    v << cmpqm{reg, mem};
   } else if (size == 4) {
-    as.   cmpl    (r32(reg), mem);
+    v << cmplm{reg, mem};
   } else {
     not_implemented();
   }
 }
 
 void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2) {
-  auto size = sizeof(LowClassPtr);
+  emitCmpClass(Vauto().main(as), reg1, reg2);
+}
 
+void emitCmpClass(Vout& v, Vreg reg1, Vreg reg2) {
+  auto size = sizeof(LowClassPtr);
   if (size == 8) {
-    as.   cmpq    (reg1, reg2);
+    v << cmpq{reg1, reg2};
   } else if (size == 4) {
-    as.   cmpl    (r32(reg1), r32(reg2));
+    v << cmpl{reg1, reg2};
   } else {
     not_implemented();
   }
@@ -456,7 +471,7 @@ void shuffle2(Vout& v, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
     v << copy2{s0, s1, d0, d1};
   } else if (d0.isSIMD() && s0.isGP() && s1.isGP()) {
     // move 2 gpr to 1 xmm
-    assert(d0 != rCgXMM0); // xmm0 is reserved for scratch
+    assert(d0 != rCgXMM0); // CgXMM0 is reserved for scratch
     auto x = v.makeReg();
     v << copy{s0, d0};
     v << copy{s1, x};

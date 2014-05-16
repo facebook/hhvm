@@ -42,19 +42,19 @@ struct AsmInfo {
     , acoldRanges(unit, TcaRange(nullptr, nullptr))
     , afrozenRanges(unit, TcaRange(nullptr, nullptr))
   {}
+  void updateForInstruction(IRInstruction* inst, TCA start, TCA end);
 
   // Asm address info for each instruction and block
   StateVector<IRInstruction,TcaRange> instRanges;
   StateVector<Block,TcaRange> asmRanges;
   StateVector<Block,TcaRange> acoldRanges;
   StateVector<Block,TcaRange> afrozenRanges;
-
-  void updateForInstruction(IRInstruction* inst, TCA start, TCA end);
 };
 
 typedef StateVector<IRInstruction, RegSet> LiveRegs;
 
 struct CatchInfo {
+  bool valid;
   /* afterCall is the address after the call instruction that this catch trace
    * belongs to. It's the key used to look up catch traces by the
    * unwinder, since it's the value of %rip during unwinding. */
@@ -85,6 +85,7 @@ struct CodegenState {
     , asmInfo(asmInfo)
     , catches(unit, CatchInfo())
     , pastGuards(false)
+    , labels(unit, Vlabel())
   {}
 
   // Each block has a list of addresses to patch, and an address if
@@ -111,13 +112,16 @@ struct CodegenState {
   // calls between cgCallHelper and cgBeginCatch.
   StateVector<Block, CatchInfo> catches;
 
-  // Postponed code "points" can obtain code addresses after Vasm::finish().
-  Vmeta meta;
-
   // Have we progressed past the guards? Used to suppress TransBCMappings until
   // we're translating code that can properly be attributed to specific
   // bytecode.
   bool pastGuards;
+
+  // Postponed code "points" can obtain code addresses after Vasm::finish().
+  Vmeta meta;
+
+  // vasm block labels, one for each hhir block
+  StateVector<Block,Vlabel> labels;
 };
 
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);

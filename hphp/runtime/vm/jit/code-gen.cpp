@@ -65,7 +65,7 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
   return live_regs;
 }
 
-static size_t genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
+static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
                      CodeBlock& frozenCode,
                      CodegenState& state, Block* block,
                      std::vector<TransBCMapping>* bcMap) {
@@ -74,9 +74,7 @@ static size_t genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
                                                                     coldCode,
                                                                     frozenCode,
                                                                     state));
-  size_t hhir_count{0};
   for (IRInstruction& instr : *block) {
-    hhir_count++;
     IRInstruction* inst = &instr;
 
     if (instr.is(EndGuards)) state.pastGuards = true;
@@ -101,10 +99,9 @@ static size_t genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
       state.asmInfo->updateForInstruction(inst, start, cb.frontier());
     }
   }
-  return hhir_count;
 }
 
-static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
+void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
   Timer _t(Timer::codeGen);
@@ -122,50 +119,22 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   CodeBlock mainCode;
   CodeBlock coldCode;
-  bool relocate = false;
-  if (RuntimeOption::EvalJitRelocationSize &&
-      mcg->backEnd().supportsRelocation() &&
-      coldCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
-    /*
-     * This is mainly to exercise the relocator, and ensure that its
-     * not broken by new non-relocatable code. Later, it will be
-     * used to do some peephole optimizations, such as reducing branch
-     * sizes.
-     * Allocate enough space that the relocated cold code doesn't
-     * overlap the emitted cold code.
-     */
-
-    static unsigned seed = 42;
-    auto off = rand_r(&seed) & (mcg->backEnd().cacheLineSize() - 1);
-    coldCode.init(coldCodeIn.frontier() +
-                   RuntimeOption::EvalJitRelocationSize + off,
-                   RuntimeOption::EvalJitRelocationSize - off, "cgRelocCold");
-
-    mainCode.init(coldCode.frontier() +
-                  RuntimeOption::EvalJitRelocationSize + off,
-                  RuntimeOption::EvalJitRelocationSize - off, "cgRelocMain");
-
-    relocate = true;
-  } else {
-    /*
-     * Use separate code blocks, so that attempts to use the mcg's
-     * code blocks directly will fail (eg by overwriting the same
-     * memory being written through these locals).
-     */
-    coldCode.init(coldCodeIn.frontier(), coldCodeIn.available(),
-                  coldCodeIn.name().c_str());
-    mainCode.init(mainCodeIn.frontier(), mainCodeIn.available(),
-                  mainCodeIn.name().c_str());
-  }
+  /*
+   * Use separate code blocks, so that attempts to use the mcg's
+   * code blocks directly will fail (eg by overwriting the same
+   * memory being written through these locals).
+   */
+  coldCode.init(coldCodeIn.frontier(), coldCodeIn.available(),
+                coldCodeIn.name().c_str());
+  mainCode.init(mainCodeIn.frontier(), mainCodeIn.available(),
+                mainCodeIn.name().c_str());
 
   if (frozenCode == &coldCodeIn) {
     frozenCode = &coldCode;
   }
-  auto frozenStart = frozenCode->frontier();
   auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
   auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
   auto bcMap = &mcg->cgFixups().m_bcMap;
-  size_t hhir_count{0};
   {
     mcg->code.lock();
     mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
@@ -202,8 +171,7 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
         state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
       }
 
-      auto hhir_count = genBlock(unit, cb, coldCode, *frozenCode, state,
-                                 block, bcMap);
+      genBlock(unit, cb, coldCode, *frozenCode, state, block, bcMap);
       auto nextFlow = block->next();
       if (nextFlow && nextFlow != nextLinear) {
         mcg->backEnd().emitFwdJmp(cb, nextFlow, state);
@@ -220,7 +188,6 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
                                                         frozenCode->frontier());
         }
       }
-      return hhir_count;
     };
 
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -232,17 +199,17 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     for (auto it = linfo.blocks.begin(); it != linfo.acoldIt; ++it) {
       Block* nextLinear = boost::next(it) != linfo.acoldIt
         ? *boost::next(it) : nullptr;
-      hhir_count += emitBlock(mainCode, *it, nextLinear);
+      emitBlock(mainCode, *it, nextLinear);
     }
     for (auto it = linfo.acoldIt; it != linfo.afrozenIt; ++it) {
       Block* nextLinear = boost::next(it) != linfo.afrozenIt
         ? *boost::next(it) : nullptr;
-      hhir_count += emitBlock(coldCode, *it, nextLinear);
+      emitBlock(coldCode, *it, nextLinear);
     }
     for (auto it = linfo.afrozenIt; it != linfo.blocks.end(); ++it) {
       Block* nextLinear = boost::next(it) != linfo.blocks.end()
         ? *boost::next(it) : nullptr;
-      hhir_count += emitBlock(*frozenCode, *it, nextLinear);
+      emitBlock(*frozenCode, *it, nextLinear);
     }
 
     if (debug) {
@@ -254,63 +221,8 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   assert(coldCodeIn.frontier() == coldStart);
   assert(mainCodeIn.frontier() == mainStart);
-
-  if (relocate) {
-    if (asmInfo) {
-      printUnit(kRelocationLevel, unit, " before relocation ", &regs, asmInfo);
-    }
-
-    auto& be = mcg->backEnd();
-    RelocationInfo rel;
-    size_t asm_count{0};
-    asm_count += be.relocate(rel, mainCodeIn,
-                mainCode.base(), mainCode.frontier(),
-                mcg->cgFixups());
-
-    asm_count += be.relocate(rel, coldCodeIn,
-                coldCode.base(), coldCode.frontier(),
-                mcg->cgFixups());
-    TRACE(1, "hhir-inst-count %ld asm %ld\n", hhir_count, asm_count);
-
-    if (frozenCode != &coldCode) {
-      rel.recordRange(frozenStart, frozenCode->frontier(),
-                      frozenStart, frozenCode->frontier());
-    }
-    be.adjustForRelocation(rel, mcg->cgFixups());
-    be.adjustForRelocation(rel, asmInfo, mcg->cgFixups());
-
-    if (asmInfo) {
-      static int64_t mainDeltaTot = 0, coldDeltaTot = 0;
-      int64_t mainDelta =
-        (mainCodeIn.frontier() - mainStart) -
-        (mainCode.frontier() - mainCode.base());
-      int64_t coldDelta =
-        (coldCodeIn.frontier() - coldStart) -
-        (coldCode.frontier() - coldCode.base());
-
-      mainDeltaTot += mainDelta;
-      HPHP::Trace::traceRelease("main delta after relocation: %" PRId64
-                                " (%" PRId64 ")\n",
-                                mainDelta, mainDeltaTot);
-      coldDeltaTot += coldDelta;
-      HPHP::Trace::traceRelease("cold delta after relocation: %" PRId64
-                                " (%" PRId64 ")\n",
-                                coldDelta, coldDeltaTot);
-    }
-#ifndef NDEBUG
-    auto& ip = mcg->cgFixups().m_inProgressTailJumps;
-    for (size_t i = 0; i < ip.size(); ++i) {
-      const auto& ib = ip[i];
-      assert(!mainCode.contains(ib.toSmash()));
-      assert(!coldCode.contains(ib.toSmash()));
-    }
-    memset(mainCode.base(), 0xcc, mainCode.frontier() - mainCode.base());
-    memset(coldCode.base(), 0xcc, coldCode.frontier() - coldCode.base());
-#endif
-  } else {
-    coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
-    mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
-  }
+  coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
+  mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
   if (asmInfo) {
     printUnit(kCodeGenLevel, unit, " after code gen ", &regs, asmInfo);
   }
@@ -319,9 +231,9 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 void genCode(IRUnit& unit) {
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    genCodeImpl(unit, &ai);
+    mcg->backEnd().genCodeImpl(unit, &ai);
   } else {
-    genCodeImpl(unit, nullptr);
+    mcg->backEnd().genCodeImpl(unit, nullptr);
   }
 }
 

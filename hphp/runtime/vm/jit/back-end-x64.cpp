@@ -31,6 +31,10 @@
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
+#include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/print.h"
 
 namespace HPHP { namespace JIT {
 
@@ -117,8 +121,7 @@ struct BackEnd : public JIT::BackEnd {
                                        CodeBlock& coldCode,
                                        CodeBlock& frozenCode,
                                        CodegenState& state) override {
-    return new X64::CodeGenerator(unit, mainCode, coldCode,
-                                  frozenCode, state);
+    always_assert(false);
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -198,7 +201,7 @@ struct BackEnd : public JIT::BackEnd {
   }
 
   void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) override {
-    X64::emitFwdJmp(cb, target, state);
+    always_assert(false);
   }
 
   void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) override {
@@ -656,6 +659,8 @@ struct BackEnd : public JIT::BackEnd {
                   .color(color(ANSI_COLOR_BROWN)));
     disasm.disasm(os, begin, end);
   }
+
+  virtual void genCodeImpl(IRUnit& unit, AsmInfo*);
 };
 
 std::unique_ptr<JIT::BackEnd> newBackEnd() {
@@ -811,6 +816,219 @@ RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
       break;
   }
   return InvalidRegPair;
+}
+
+static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
+                     CodegenState& state, Block* block) {
+  FTRACE(6, "genBlock: {}\n", block->id());
+  CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
+  size_t hhir_count{0};
+  for (IRInstruction& instr : *block) {
+    if (instr.op() != Shuffle) hhir_count++;
+    IRInstruction* inst = &instr;
+
+    if (instr.is(EndGuards)) state.pastGuards = true;
+    if (state.pastGuards &&
+        (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI)) {
+      SrcKey sk = inst->marker().sk();
+      vasm.main().setSrcKey(sk);
+      vasm.cold().setSrcKey(sk);
+      vasm.frozen().setSrcKey(sk);
+    }
+    cg.cgInst(inst);
+  }
+  return hhir_count;
+}
+
+static size_t ctr;
+const char* area_names[] = { "main", "cold", "frozen" };
+
+void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
+  ctr++;
+  auto regs = allocateRegs(unit);
+  assert(checkRegisters(unit, regs)); // calls checkCfg internally.
+  Timer _t(Timer::codeGen);
+  LiveRegs live_regs = computeLiveRegs(unit, regs);
+  CodegenState state(unit, regs, live_regs, asmInfo);
+
+  CodeBlock& mainCodeIn   = mcg->code.main();
+  CodeBlock& coldCodeIn   = mcg->code.cold();
+  CodeBlock* frozenCode   = &mcg->code.frozen();
+
+  CodeBlock mainCode;
+  CodeBlock coldCode;
+  bool relocate = false;
+  if (RuntimeOption::EvalJitRelocationSize &&
+      supportsRelocation() &&
+      coldCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
+    /*
+     * This is mainly to exercise the relocator, and ensure that its
+     * not broken by new non-relocatable code. Later, it will be
+     * used to do some peephole optimizations, such as reducing branch
+     * sizes.
+     * Allocate enough space that the relocated cold code doesn't
+     * overlap the emitted cold code.
+     */
+
+    static unsigned seed = 42;
+    auto off = rand_r(&seed) & (cacheLineSize() - 1);
+    coldCode.init(coldCodeIn.frontier() +
+                   RuntimeOption::EvalJitRelocationSize + off,
+                   RuntimeOption::EvalJitRelocationSize - off, "cgRelocCold");
+
+    mainCode.init(coldCode.frontier() +
+                  RuntimeOption::EvalJitRelocationSize + off,
+                  RuntimeOption::EvalJitRelocationSize - off, "cgRelocMain");
+
+    relocate = true;
+  } else {
+    /*
+     * Use separate code blocks, so that attempts to use the mcg's
+     * code blocks directly will fail (eg by overwriting the same
+     * memory being written through these locals).
+     */
+    coldCode.init(coldCodeIn.frontier(), coldCodeIn.available(),
+                  coldCodeIn.name().c_str());
+    mainCode.init(mainCodeIn.frontier(), mainCodeIn.available(),
+                  mainCodeIn.name().c_str());
+  }
+
+  if (frozenCode == &coldCodeIn) {
+    frozenCode = &coldCode;
+  }
+  auto frozenStart = frozenCode->frontier();
+  auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
+  auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
+  size_t hhir_count{0};
+  {
+    mcg->code.lock();
+    mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
+
+    SCOPE_EXIT {
+      mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
+      mcg->code.unlock();
+    };
+
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitTraceCall(mainCode, unit.bcOff());
+    }
+
+    auto const linfo = layoutBlocks(unit);
+    auto main_start = mainCode.frontier();
+    auto cold_start = coldCode.frontier();
+    auto frozen_start = frozenCode->frontier();
+    Vasm vasm(&state.meta);
+    auto& vunit = vasm.unit();
+    // create the initial set of vasm numbered the same as hhir blocks.
+    for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
+      state.labels[i] = vunit.makeBlock(AreaIndex::Main);
+    }
+    vunit.roots.push_back(state.labels[unit.entry()]);
+    vasm.main(mainCode);
+    vasm.cold(coldCode);
+    vasm.frozen(*frozenCode);
+    for (auto it = linfo.blocks.begin(); it != linfo.blocks.end(); ++it) {
+      auto block = *it;
+      auto v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
+               block->hint() == Block::Hint::Unused ? vasm.frozen() :
+               vasm.main();
+      FTRACE(6, "genBlock {} on {}\n", block->id(),
+             area_names[(unsigned)v.area()]);
+      auto b = state.labels[block];
+      vunit.blocks[b].area = v.area();
+      v.use(b);
+      hhir_count += genBlock(unit, v, vasm, state, block);
+      assert(v.closed());
+      assert(vasm.main().empty() || vasm.main().closed());
+      assert(vasm.cold().empty() || vasm.cold().closed());
+      assert(vasm.frozen().empty() || vasm.frozen().closed());
+    }
+    printUnit("after code-gen", vasm.unit());
+    vasm.finish(vasm_abi);
+    if (state.asmInfo) {
+      auto block = unit.entry();
+      state.asmInfo->asmRanges[block] = {main_start, mainCode.frontier()};
+      if (mainCode.base() != coldCode.base() && frozenCode != &coldCode) {
+        state.asmInfo->acoldRanges[block] = {cold_start, coldCode.frontier()};
+      }
+      if (mainCode.base() != frozenCode->base()) {
+        state.asmInfo->afrozenRanges[block] = {frozen_start,
+                                               frozenCode->frontier()};
+      }
+    }
+  }
+  auto bcMap = &mcg->cgFixups().m_bcMap;
+  if (!bcMap->empty()) {
+    TRACE(1, "BCMAPS before relocation\n");
+    for (UNUSED auto& map : *bcMap) {
+      TRACE(1, "%s %-6d %p %p %p\n", map.md5.toString().c_str(),
+             map.bcStart, map.aStart, map.acoldStart, map.afrozenStart);
+    }
+  }
+
+  assert(coldCodeIn.frontier() == coldStart);
+  assert(mainCodeIn.frontier() == mainStart);
+
+  if (relocate) {
+    if (asmInfo) {
+      printUnit(kRelocationLevel, unit, " before relocation ", &regs, asmInfo);
+    }
+
+    auto& be = mcg->backEnd();
+    RelocationInfo rel;
+    size_t asm_count{0};
+    asm_count += be.relocate(rel, mainCodeIn,
+                mainCode.base(), mainCode.frontier(),
+                mcg->cgFixups());
+
+    asm_count += be.relocate(rel, coldCodeIn,
+                coldCode.base(), coldCode.frontier(),
+                mcg->cgFixups());
+    TRACE(1, "hhir-inst-count %ld asm %ld\n", hhir_count, asm_count);
+
+    if (frozenCode != &coldCode) {
+      rel.recordRange(frozenStart, frozenCode->frontier(),
+                      frozenStart, frozenCode->frontier());
+    }
+    be.adjustForRelocation(rel, mcg->cgFixups());
+    be.adjustForRelocation(rel, asmInfo, mcg->cgFixups());
+
+    if (asmInfo) {
+      static int64_t mainDeltaTot = 0, coldDeltaTot = 0;
+      int64_t mainDelta =
+        (mainCodeIn.frontier() - mainStart) -
+        (mainCode.frontier() - mainCode.base());
+      int64_t coldDelta =
+        (coldCodeIn.frontier() - coldStart) -
+        (coldCode.frontier() - coldCode.base());
+
+      mainDeltaTot += mainDelta;
+      HPHP::Trace::traceRelease("main delta after relocation: %" PRId64
+                                " (%" PRId64 ")\n",
+                                mainDelta, mainDeltaTot);
+      coldDeltaTot += coldDelta;
+      HPHP::Trace::traceRelease("cold delta after relocation: %" PRId64
+                                " (%" PRId64 ")\n",
+                                coldDelta, coldDeltaTot);
+    }
+#ifndef NDEBUG
+    auto& ip = mcg->cgFixups().m_inProgressTailJumps;
+    for (size_t i = 0; i < ip.size(); ++i) {
+      const auto& ib = ip[i];
+      assert(!mainCode.contains(ib.toSmash()));
+      assert(!coldCode.contains(ib.toSmash()));
+    }
+    memset(mainCode.base(), 0xcc, mainCode.frontier() - mainCode.base());
+    memset(coldCode.base(), 0xcc, coldCode.frontier() - coldCode.base());
+#endif
+  } else {
+    coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
+    mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
+  }
+
+  if (asmInfo) {
+    printUnit(kCodeGenLevel, unit, " after code gen ", &regs, asmInfo);
+  }
 }
 
 }}}

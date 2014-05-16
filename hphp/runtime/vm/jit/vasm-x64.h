@@ -325,7 +325,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
 }
 
 #define X64_OPCODES\
-  /*intrinsics*/\
+  /* intrinsics */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(sk) I(callee) I(argc), Un, Dn)\
   O(bindexit, I(cc) I(target), Un, Dn)\
@@ -342,8 +342,6 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(ldimm, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), Un, Dn)\
   O(fallbackcc, I(cc) I(dest), Un, Dn)\
-  O(fixupcatch, I(afterCall) I(catchStart), Un, Dn)\
-  O(fixup, I(fix), Un, Dn)\
   O(incstat, I(stat) I(n) I(force), Un, Dn)\
   O(kpcall, I(target) I(callee) I(prologIndex), Un, Dn)\
   O(ldpoint, I(s), Un, D(d))\
@@ -360,7 +358,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(store, Inone, U(s) U(d), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
-  /*instructions*/\
+  /* x64 instructions */\
   O(andb, Inone, U(s0) U(s1), D(d)) \
   O(andbi, I(s0), U(s1), D(d)) \
   O(andbim, I(s), U(m), Dn) \
@@ -500,8 +498,6 @@ struct copyargs { Vtuple s, d; };
 struct eagersync { const Op* pc; };
 struct end {};
 struct ldimm { Immed64 s; Vreg d; bool saveflags; };
-struct fixup { Fixup fix; };
-struct fixupcatch { Vpoint afterCall; Vpoint catchStart; };
 struct fallback { SrcKey dest; TransFlags trflags; };
 struct fallbackcc { ConditionCode cc; SrcKey dest; TransFlags trflags; };
 struct incstat { Stats::StatCounter stat; int n; bool force; };
@@ -521,7 +517,7 @@ struct store { Vreg s; Vptr d; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 
-// ATT style operand order.  for binary ops:
+// ATT style operand order. for binary ops:
 // op   s0 s1 d:  d = s1 op s0    =>   d=s1; d op= s0
 // op   imm s1 d: d = s1 op imm   =>   d=s1; d op= imm
 // cmp  s0 s1:    s1 cmp s0
@@ -535,7 +531,7 @@ struct unwind { Vlabel targets[2]; };
 //  m   Vptr
 //  p   RIPRelativeRef
 
-// instructions
+// x64 instructions
 struct andb  { Vreg8 s0, s1, d; };
 struct andbi { Immed s0; Vreg8 s1, d; };
 struct andbim { Immed s; Vptr m; };

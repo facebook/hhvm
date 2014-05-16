@@ -1,2 +1,2 @@
-%unicode|string%(%d) "%r(Couldn't resolve host|Could not resolve host:)%r %Swww.%s"
+%unicode|string%(%d) "%r(Could not resolve:)%r %Swww.%s"
 int(6)

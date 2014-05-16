@@ -1,6 +1,13 @@
 bool(true)
+bool(true)
+bool(true)
+bool(true)
 string(8) "function"
 string(3) "foo"
+bool(false)
+string(8) "function"
+string(3) "foo"
+bool(false)
 bool(false)
 bool(false)
 string(8) "constant"

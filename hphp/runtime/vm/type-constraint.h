@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/functional.h"
 
@@ -202,9 +203,23 @@ struct TypeConstraint {
        */
       return true;
     }
-    return (m_typeName == other.m_typeName
-            || (m_typeName != nullptr && other.m_typeName != nullptr
-                && m_typeName->isame(other.m_typeName)));
+
+    if (m_typeName == other.m_typeName) {
+      return true;
+    }
+
+    if (m_typeName && other.m_typeName) {
+      if (m_typeName->isame(other.m_typeName)) {
+        return true;
+      }
+
+      const Class* cls = Unit::lookupClass(m_typeName);
+      const Class* otherCls = Unit::lookupClass(other.m_typeName);
+
+      return cls && otherCls && cls == otherCls;
+    }
+
+    return false;
   }
 
   // General check for any constraint.

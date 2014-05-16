@@ -186,11 +186,6 @@ let parse_parallel workers check_mode get_next =
 let go workers check_mode files ~get_next =
   let fast, errorl, failed_parsing, php_files =
     parse_parallel workers check_mode get_next in
-  let fast = SSet.fold begin fun fn acc ->
-    if SMap.mem fn files
-    then SMap.add fn empty_file_info acc
-    else acc
-  end php_files fast in
   if not check_mode
   then SearchService.MasterApi.update_search_index (SMap.keys fast) php_files;
   fast, errorl, failed_parsing

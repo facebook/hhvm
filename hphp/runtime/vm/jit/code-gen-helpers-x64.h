@@ -87,7 +87,9 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff);
  * before a jnz to surprise handling code.
  */
 void emitTestSurpriseFlags(Asm& as);
+void emitTestSurpriseFlags(Vout&);
 
+void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Fixup fixup);
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  Fixup fixup);
 

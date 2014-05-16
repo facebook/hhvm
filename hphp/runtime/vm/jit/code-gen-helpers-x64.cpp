@@ -331,24 +331,35 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff) {
 }
 
 void emitTestSurpriseFlags(Asm& a) {
+  emitTestSurpriseFlags(Vauto().main(a));
+}
+
+void emitTestSurpriseFlags(Vout& v) {
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.    testl((int32_t)0xffffffff, rVmTl[RDS::kConditionFlagsOff]);
+  v << testlim{-1, rVmTl[RDS::kConditionFlagsOff]};
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  Fixup fixup) {
-  Asm a { mainCode };
-  Asm acold { coldCode };
+  Vauto vasm;
+  auto& v = vasm.main(mainCode);
+  auto& vc = vasm.cold(coldCode);
+  emitCheckSurpriseFlagsEnter(v, vc, fixup);
+}
 
-  emitTestSurpriseFlags(a);
-  a.  jnz  (coldCode.frontier());
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
+  auto cold = vcold.makeBlock();
+  auto done = v.makeBlock();
+  emitTestSurpriseFlags(v);
+  v << jcc{CC_NZ, {done, cold}};
 
-  acold.  movq  (rVmFp, argNumToRegName[0]);
-  emitCall(acold, mcg->tx().uniqueStubs.functionEnterHelper);
-  mcg->recordSyncPoint(coldCode.frontier(),
-                       fixup.m_pcOffset, fixup.m_spOffset);
-  acold.  jmp   (mainCode.frontier());
+  vcold = cold;
+  vcold << movq{rVmFp, argNumToRegName[0]};
+  vcold << call{mcg->tx().uniqueStubs.functionEnterHelper};
+  vcold << syncpoint{Fixup{fixup.m_pcOffset, fixup.m_spOffset}};
+  vcold << jmp{done};
+  v = done;
 }
 
 void emitLoadReg(Asm& as, MemoryRef mem, PhysReg reg) {

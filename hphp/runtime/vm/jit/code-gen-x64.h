@@ -288,6 +288,10 @@ private:
   // This is for printing partially-generated traces when debugging
   void print() const;
 
+  Vout& vmain() { return *m_vmain; }
+  Vout& vcold() { return *m_vcold; }
+  Vout& vfrozen() { return *m_vfrozen; }
+
 private:
   const IRUnit&       m_unit;
   CodeBlock&          m_mainCode;
@@ -299,6 +303,9 @@ private:
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
   const RegAllocInfo::RegMap* m_instRegs; // registers for current m_curInst.
+  Vout*               m_vmain{nullptr};
+  Vout*               m_vcold{nullptr};
+  Vout*               m_vfrozen{nullptr};
 };
 
 void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state);

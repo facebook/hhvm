@@ -156,8 +156,23 @@ template <class Then, class Else>
 void CodeGenerator::ifThenElse(ConditionCode cc, Then thenBlock,
                                Else elseBlock, bool unlikely) {
   if (unlikely) return unlikelyIfThenElse(cc, thenBlock, elseBlock);
-
   ifThenElse(m_as, cc, thenBlock, elseBlock);
+}
+
+template <class Then, class Else>
+void CodeGenerator::ifThenElse(Vout& v, ConditionCode cc,
+                               Then thenBlock, Else elseBlock) {
+  auto thenLabel = v.makeBlock();
+  auto elseLabel = v.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {elseLabel, thenLabel}};
+  v = thenLabel;
+  thenBlock(v);
+  if (!v.closed()) v << jmp{done};
+  v = elseLabel;
+  elseBlock(v);
+  if (!v.closed()) v << jmp{done};
+  v = done;
 }
 
 template <class Then, class Else>
@@ -207,40 +222,29 @@ PhysReg CodeGenerator::selectScratchReg(IRInstruction* inst) {
   return rCgGP;
 }
 
-// Generate an if-then-else block
-template <class Then, class Else>
-void CodeGenerator::ifThenElse(Vout& v, ConditionCode cc,
-                               Then thenBlock, Else elseBlock) {
-  auto thenLabel = v.makeBlock();
-  auto elseLabel = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, {elseLabel, thenLabel}};
-  v = thenLabel;
-  thenBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = elseLabel;
-  elseBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
 void CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->op();
   m_curInst = inst;
   m_instRegs = &m_state.regs[inst];
   m_rScratch = selectScratchReg(inst);
   SCOPE_EXIT { m_curInst = nullptr; };
-
-  switch (opc) {
+  {
+    Vauto vasm(&m_state.meta);
+    m_vmain = &vasm.main(m_mainCode);
+    m_vcold = &vasm.cold(m_coldCode);
+    m_vfrozen = &vasm.frozen(m_frozenCode);
+    SCOPE_EXIT { m_vmain = m_vcold = m_vfrozen = nullptr; };
+    switch (opc) {
 #define O(name, dsts, srcs, flags)                                \
-  case name: FTRACE(7, "cg" #name "\n");                          \
+      case name: FTRACE(7, "cg" #name "\n");                          \
              cg ## name (inst);                                   \
              return;
-  IR_OPCODES
+      IR_OPCODES
 #undef O
 
-  default:
-    always_assert(false);
+      default:
+        always_assert(false);
+    }
   }
 }
 
@@ -618,21 +622,22 @@ void CodeGenerator::cgCheckNonNull(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
+  auto& v = vmain();
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    m_as.testq (srcReg, srcReg);
-    ifThen(m_as, CC_Z, [&](Asm& a) {
-      a.ud2();
+    v << testq{srcReg, srcReg};
+    ifThen(v, CC_Z, [&](Vout& v) {
+      v << ud2{};
     });
   }
-  emitMovRegReg(m_as, srcReg, dstReg);
+  v << copy{srcReg, dstReg};
 }
 
 void CodeGenerator::cgAssertType(IRInstruction* inst) {
   auto const srcRegs = srcLoc(0);
   auto const dstRegs = dstLoc(0);
-  shuffle2(Vauto().main(m_as), srcRegs.reg(0), srcRegs.reg(1),
+  shuffle2(vmain(), srcRegs.reg(0), srcRegs.reg(1),
            dstRegs.reg(0), dstRegs.reg(1));
 }
 
@@ -642,8 +647,7 @@ void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
-  Vauto vasm(&m_state.meta);
-  auto& v = vasm.main(m_as);
+  auto& v = vmain();
   auto catchStart = v.makePoint();
   v << point{catchStart};
   v << fixupcatch{Vpoint{size_t(info.afterCall)}, catchStart};
@@ -663,22 +667,23 @@ static void unwindResumeHelper(_Unwind_Exception* data) {
   _Unwind_Resume(data);
 }
 
-static void callUnwindResumeHelper(Asm& as) {
-  as.loadq(rVmTl[unwinderScratchOff()], rdi);
-  as.call ((TCA)unwindResumeHelper); // pass control back to the unwinder
-  as.ud2();
+static void callUnwindResumeHelper(Vout& v) {
+  v << loadq{rVmTl[unwinderScratchOff()], rdi};
+  v << call{(TCA)unwindResumeHelper}; // pass control back to the unwinder
+  v << ud2{};
 }
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  callUnwindResumeHelper(m_as);
+  callUnwindResumeHelper(vmain());
 }
 
 void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
-  m_as.cmpb (0, rVmTl[unwinderSideExitOff()]);
-  unlikelyIfBlock(CC_E, callUnwindResumeHelper);
+  auto& v = vmain();
+  v << cmpbim{0, rVmTl[unwinderSideExitOff()]};
+  unlikelyIfThen(v, vcold(), CC_E, callUnwindResumeHelper);
 
   // doSideExit == true, so fall through to the side exit code
-  emitIncStat(m_mainCode, Stats::TC_CatchSideExit);
+  v << incstat{Stats::TC_CatchSideExit};
 }
 
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
@@ -698,10 +703,7 @@ void CodeGenerator::cgJccInt(IRInstruction* inst) {
 
 void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitCompare(v, inst);
   emitReqBindJcc(v, opToConditionCode(inst->op()),
                  inst->extra<ReqBindJccData>());
@@ -709,10 +711,7 @@ void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
 
 void CodeGenerator::cgReqBindJccInt(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitCompareInt(v, inst);
   emitReqBindJcc(v, opToConditionCode(inst->op()),
                  inst->extra<ReqBindJccData>());
@@ -2180,15 +2179,13 @@ void CodeGenerator::emitInstanceBitmaskCheck(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInstanceOfBitmask(IRInstruction* inst) {
-  Vauto vasm;
-  auto& v = vasm.main(m_as);
+  auto& v = vmain();
   emitInstanceBitmaskCheck(v, inst);
   v << setcc{CC_NZ, dstLoc(0).reg()};
 }
 
 void CodeGenerator::cgNInstanceOfBitmask(IRInstruction* inst) {
-  Vauto vasm;
-  auto& v = vasm.main(m_as);
+  auto& v = vmain();
   emitInstanceBitmaskCheck(v, inst);
   v << setcc{CC_Z, dstLoc(0).reg()};
 }
@@ -2204,16 +2201,14 @@ void CodeGenerator::cgJmpNInstanceOfBitmask(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqBindJmpInstanceOfBitmask(IRInstruction* inst) {
-  Vauto vasm;
-  auto& v = vasm.main(m_as);
+  auto& v = vmain();
   emitInstanceBitmaskCheck(v, inst);
   emitReqBindJcc(v, opToConditionCode(inst->op()),
                  inst->extra<ReqBindJccData>());
 }
 
 void CodeGenerator::cgReqBindJmpNInstanceOfBitmask(IRInstruction* inst) {
-  Vauto vasm;
-  auto& v = vasm.main(m_as);
+  auto& v = vmain();
   emitInstanceBitmaskCheck(v, inst);
   emitReqBindJcc(v, opToConditionCode(inst->op()),
                  inst->extra<ReqBindJccData>());
@@ -2222,10 +2217,7 @@ void CodeGenerator::cgReqBindJmpNInstanceOfBitmask(IRInstruction* inst) {
 void CodeGenerator::cgSideExitJmpInstanceOfBitmask(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitInstanceBitmaskCheck(v, inst);
   v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
 }
@@ -2233,10 +2225,7 @@ void CodeGenerator::cgSideExitJmpInstanceOfBitmask(IRInstruction* inst) {
 void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitInstanceBitmaskCheck(v, inst);
   v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
 }
@@ -2323,10 +2312,8 @@ asm_label(a, out);
 }
 
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
-  Vauto vasm;
-  Vout& vmain = vasm.main(m_mainCode);
-  Vout& vcold = vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  Vout& vmain = this->vmain();
+  Vout& vcold = this->vcold();
 
   auto src = inst->src(0);
   auto srcReg = prepXMMReg(vmain, src, srcLoc(0), rCgXMM0);
@@ -2625,8 +2612,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   auto const clsReg    = srcLoc(0).reg();
   auto const actRecReg = srcLoc(1).reg();
   auto const extra     = inst->extra<LdObjMethodData>();
-  Vauto vasm(&m_state.meta);
-  auto& v = vasm.main(m_as);
+  auto& v = vmain();
 
   auto const handle = RDS::alloc<Entry, sizeof(Entry)>().handle();
   if (RuntimeOption::EvalPerfDataMap) {
@@ -3211,8 +3197,7 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = srcLoc(0).reg();
   auto const numLocals = curFunc()->numLocals();
-  Vauto vasm;
-  auto& v = vasm.main(m_as);
+  auto& v = vmain();
 
   assert(rFp == rVmFp &&
          "free locals helper assumes the frame pointer is rVmFp");
@@ -4095,14 +4080,14 @@ void CodeGenerator::emitAdjustSp(PhysReg spReg, PhysReg dstReg,
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   auto const func = curFunc();
   auto const builtinFuncPtr = func->builtinFuncPtr();
-  auto& a = m_as;
+  auto& v = vmain();
 
-  emitMovRegReg(a, srcLoc(0).reg(), argNumToRegName[0]);
+  v << copy{srcLoc(0).reg(), argNumToRegName[0]};
   if (FixupMap::eagerRecord(func)) {
-    emitEagerSyncPoint(m_as, reinterpret_cast<const Op*>(func->getEntry()));
+    emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()));
   }
-  emitCall(a, CppCall::direct(builtinFuncPtr));
-  recordSyncPoint(a);
+  v << call{(TCA)builtinFuncPtr};
+  recordSyncPoint(v);
 }
 
 void CodeGenerator::cgLdThis(IRInstruction* inst) {
@@ -4763,10 +4748,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 void CodeGenerator::cgExitJcc(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitCompare(v, inst);
   v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
 }
@@ -4774,10 +4756,7 @@ void CodeGenerator::cgExitJcc(IRInstruction* inst) {
 void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitCompareInt(v, inst);
   v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
 }
@@ -5460,20 +5439,14 @@ void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
 
 void CodeGenerator::cgReqBindJmpZero(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitTestZero(v, inst->src(0), srcLoc(0));
   emitReqBindJcc(v, CC_Z, inst->extra<ReqBindJmpZero>());
 }
 
 void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitTestZero(v, inst->src(0), srcLoc(0));
   emitReqBindJcc(v, CC_NZ, inst->extra<ReqBindJmpNZero>());
 }
@@ -5481,10 +5454,7 @@ void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
 void CodeGenerator::cgSideExitJmpZero(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitTestZero(v, inst->src(0), srcLoc(0));
   v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
 }
@@ -5492,10 +5462,7 @@ void CodeGenerator::cgSideExitJmpZero(IRInstruction* inst) {
 void CodeGenerator::cgSideExitJmpNZero(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
-  Vauto vasm;
-  auto& v = vasm.main(m_mainCode);
-  vasm.cold(m_coldCode);
-  vasm.frozen(m_frozenCode);
+  auto& v = vmain();
   emitTestZero(v, inst->src(0), srcLoc(0));
   v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
 }
@@ -5507,8 +5474,7 @@ void CodeGenerator::cgJmp(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmpIndirect(IRInstruction* inst) {
-  Vauto vasm;
-  auto& v = vasm.main(m_as);
+  auto& v = vmain();
   v << jmpr{srcLoc(0).reg()};
 }
 
@@ -6218,8 +6184,7 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   // a bytecode's translation, which should never begin with FreeActRec or
   // RetCtrl.
   always_assert(!inst->is(FreeActRec, RetCtrl));
-  Vauto vasm;
-  auto v = vasm.main(m_as);
+  auto v = vmain();
   Immed64 imm = (uintptr_t)enterTCServiceReq;
   if (imm.fits(sz::dword)) {
     v << cmpqim{imm.l(), *rsp};

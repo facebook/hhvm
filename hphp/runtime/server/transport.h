@@ -19,7 +19,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 #include "hphp/util/compression.h"
 #include "hphp/util/functional.h"
@@ -40,7 +39,7 @@ using CaseInsenMap =
   std::unordered_map<std::string, V, string_hashi, string_eqstri>;
 
 using HeaderMap = CaseInsenMap<std::vector<std::string>>;
-using CookieList = std::vector<std::string>;
+using CookieMap = CaseInsenMap<std::string>;
 
 /**
  * A class defining an interface that request handler can use to query
@@ -431,7 +430,7 @@ protected:
   bool m_firstHeaderSet;
   std::string m_firstHeaderFile;
   int m_firstHeaderLine;
-  CookieList m_responseCookies;
+  CookieMap m_responseCookies;
   int m_responseSize;
   int m_responseTotalSize; // including added headers
   int m_responseSentSize;

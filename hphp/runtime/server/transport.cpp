@@ -423,7 +423,7 @@ void Transport::getResponseHeaders(HeaderMap &headers) {
   for (auto iter = m_responseCookies.begin();
        iter != m_responseCookies.end();
        ++iter) {
-    cookies.push_back(*iter);
+    cookies.push_back(iter->second);
   }
 }
 
@@ -583,7 +583,6 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
     cookie += name.data();
     cookie += "=deleted; expires=";
     cookie += sdt.data();
-    cookie += "; Max-Age=0";
   } else {
     cookie += name.data();
     cookie += "=";
@@ -597,9 +596,6 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
       String sdt =
         DateTime(expire, true).toString(DateTime::DateFormat::Cookie);
       cookie += sdt.data();
-      cookie += "; Max-Age=";
-      String sdelta = toString( expire - time(0) );
-      cookie += sdelta.data();
     }
   }
 
@@ -622,7 +618,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
     cookie += "; httponly";
   }
 
-  m_responseCookies.push_back( cookie );
+  m_responseCookies[name.data()] = cookie;
   return true;
 }
 
@@ -638,9 +634,9 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     }
   }
 
-  for (CookieList::const_iterator iter = m_responseCookies.begin();
+  for (CookieMap::const_iterator iter = m_responseCookies.begin();
        iter != m_responseCookies.end(); ++iter) {
-    addHeaderImpl("Set-Cookie", iter->c_str());
+    addHeaderImpl("Set-Cookie", iter->second.c_str());
   }
 
   if (compressed) {

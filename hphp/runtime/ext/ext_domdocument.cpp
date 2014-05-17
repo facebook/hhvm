@@ -3190,8 +3190,7 @@ Variant c_DOMDocument::t_createcdatasection(const String& data) {
 }
 
 Variant c_DOMDocument::t_createcomment(const String& data) {
-  xmlDocPtr docp = (xmlDocPtr)m_node;
-  xmlNode *node = xmlNewCDataBlock(docp, (xmlChar*)data.data(), data.size());
+  xmlNode *node = xmlNewComment((xmlChar*)data.data());
   if (!node) {
     return false;
   }

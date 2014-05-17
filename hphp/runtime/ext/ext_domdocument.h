@@ -245,13 +245,13 @@ class c_DOMCharacterData : public c_DOMNode {
 // class DOMComment
 
 FORWARD_DECLARE_CLASS(DOMComment);
-class c_DOMComment : public c_DOMCharacterData {
+class c_DOMComment : public c_DOMNode {
  public:
   DECLARE_CLASS_NO_SWEEP(DOMComment)
 
   // need to implement
   c_DOMComment(Class* cls = c_DOMComment::classof())
-    : c_DOMCharacterData(cls)
+    : c_DOMNode(cls)
   {}
   ~c_DOMComment() {}
   public: void t___construct(const String& value = null_string);

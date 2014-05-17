@@ -441,9 +441,11 @@ void FastCGITransport::onHeadersComplete() {
     m_httpVersion = Transport::getHTTPVersion();
   }
 
-  if (m_scriptFilename.empty()) {
+  if (m_scriptFilename.empty() || RuntimeOption::ServerFixPathInfo) {
     // According to php-fpm, some servers don't set SCRIPT_FILENAME. In
     // this case, it uses PATH_TRANSLATED.
+    // Added runtime option to change m_scriptFilename to s_pathTranslated
+    // which will allow mod_fastcgi and mod_action to work correctly.
     m_scriptFilename = getRawHeader(s_pathTranslated);
   }
 

@@ -187,13 +187,13 @@ double f_deg2rad(double number) { return number / 180.0 * k_M_PI;}
 double f_rad2deg(double number) { return number / k_M_PI * 180.0;}
 
 String f_decbin(int64_t number) {
-  return String(string_long_to_base(number, 2), AttachString);
+  return string_long_to_base(number, 2);
 }
 String f_dechex(int64_t number) {
-  return String(string_long_to_base(number, 16), AttachString);
+  return string_long_to_base(number, 16);
 }
 String f_decoct(int64_t number) {
-  return String(string_long_to_base(number, 8), AttachString);
+  return string_long_to_base(number, 8);
 }
 Variant f_bindec(const String& binary_string) {
   return string_base_to_numeric(binary_string.data(), binary_string.size(), 2);
@@ -215,7 +215,7 @@ Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
     return false;
   }
   Variant v = string_base_to_numeric(number.data(), number.size(), frombase);
-  return String(string_numeric_to_base(v, tobase), AttachString);
+  return string_numeric_to_base(v, tobase);
 }
 
 Variant f_pow(const Variant& base, const Variant& exp) {

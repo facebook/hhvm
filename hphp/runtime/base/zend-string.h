@@ -192,18 +192,18 @@ inline String string_replace(const String& str, const String& search,
  * Reverse, repeat or shuffle a string.
  */
 String string_chunk_split(const char *src, int srclen, const char *end,
-                         int endlen, int chunklen);
+                          int endlen, int chunklen);
 
 /**
  * Strip HTML and PHP tags.
  */
-char *string_strip_tags(const char *s, int &len, const char *allow,
-                        int allow_len, bool allow_tag_spaces);
+String string_strip_tags(const char *s, int len, const char *allow,
+                         int allow_len, bool allow_tag_spaces);
 
 /**
  * Encoding/decoding strings according to certain formats.
  */
-char *string_addslashes(const char *str, int &length);
+String string_addslashes(const char *str, int length);
 String string_quoted_printable_encode(const char *input, int len);
 String string_quoted_printable_decode(const char *input, int len, bool is_q);
 String string_uuencode(const char *src, int src_len);
@@ -220,8 +220,8 @@ inline bool string_validate_base(int base) {
   return (2 <= base && base <= 36);
 }
 Variant string_base_to_numeric(const char *s, int len, int base);
-char *string_long_to_base(unsigned long value, int base);
-char *string_numeric_to_base(const Variant& value, int base);
+String string_long_to_base(unsigned long value, int base);
+String string_numeric_to_base(const Variant& value, int base);
 
 /**
  * Translates characters in str_from into characters in str_to one by one,

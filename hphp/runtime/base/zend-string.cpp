@@ -691,15 +691,12 @@ static int string_tag_find(const char *tag, int len, char *set) {
  * swm: Added ability to strip <?xml tags without assuming it PHP
  * code.
  */
-static size_t strip_tags_impl(char *rbuf, int len, int *stateptr,
+static size_t strip_tags_impl(char *rbuf, int len,
                               char *allow, int allow_len,
                               bool allow_tag_spaces) {
   char *tbuf, *buf, *p, *tp, *rp, c, lc;
   int br, i=0, depth=0, in_q = 0;
   int state = 0, pos;
-
-  if (stateptr)
-    state = *stateptr;
 
   buf = string_duplicate(rbuf, len);
   c = *buf;
@@ -927,33 +924,34 @@ static size_t strip_tags_impl(char *rbuf, int len, int *stateptr,
   free(buf);
   if (allow)
     smart_free(tbuf);
-  if (stateptr)
-    *stateptr = state;
 
   return (size_t)(rp - rbuf);
 }
 
-char *string_strip_tags(const char *s, int &len, const char *allow,
-                        int allow_len, bool allow_tag_spaces) {
+String string_strip_tags(const char *s, int len, const char *allow,
+                         int allow_len, bool allow_tag_spaces) {
   assert(s);
   assert(allow);
 
-  char *ret = string_duplicate(s, len);
-  char *sallow = string_duplicate(allow, allow_len);
-  len = strip_tags_impl(ret, len, nullptr, sallow, allow_len, allow_tag_spaces);
-  free(sallow);
-  return ret;
+  String retString(s, len, CopyString);
+  String allowString(allow, allow_len, CopyString);
+  len = strip_tags_impl(
+    retString.bufferSlice().ptr, len,
+    allowString.bufferSlice().ptr, allow_len,
+    allow_tag_spaces);
+  return retString.setSize(len);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char *string_addslashes(const char *str, int &length) {
+String string_addslashes(const char *str, int length) {
   assert(str);
   if (length == 0) {
-    return nullptr;
+    return null_string;
   }
 
-  char *new_str = (char *)malloc((length << 1) + 1);
+  String retString((length << 1) + 1, ReserveString);
+  char *new_str = retString.bufferSlice().ptr;
   const char *source = str;
   const char *end = source + length;
   char *target = new_str;
@@ -977,9 +975,7 @@ char *string_addslashes(const char *str, int &length) {
     source++;
   }
 
-  *target = 0;
-  length = target - new_str;
-  return new_str;
+  return retString.setSize(target - new_str);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1161,7 +1157,7 @@ Variant string_base_to_numeric(const char *s, int len, int base) {
   return num;
 }
 
-char *string_long_to_base(unsigned long value, int base) {
+String string_long_to_base(unsigned long value, int base) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
   char buf[(sizeof(unsigned long) << 3) + 1];
   char *ptr, *end;
@@ -1169,22 +1165,21 @@ char *string_long_to_base(unsigned long value, int base) {
   assert(string_validate_base(base));
 
   end = ptr = buf + sizeof(buf) - 1;
-  *ptr = '\0';
 
   do {
     *--ptr = digits[value % base];
     value /= base;
   } while (ptr > buf && value);
 
-  return string_duplicate(ptr, end - ptr);
+  return String(ptr, end - ptr, CopyString);
 }
 
-char *string_numeric_to_base(const Variant& value, int base) {
+String string_numeric_to_base(const Variant& value, int base) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
   assert(string_validate_base(base));
   if ((!value.isInteger() && !value.isDouble())) {
-    return string_duplicate("", 0);
+    return empty_string;
   }
 
   if (value.isDouble()) {
@@ -1195,18 +1190,17 @@ char *string_numeric_to_base(const Variant& value, int base) {
     /* Don't try to convert +/- infinity */
     if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
       raise_warning("Number too large");
-      return string_duplicate("", 0);
+      return empty_string;
     }
 
     end = ptr = buf + sizeof(buf) - 1;
-    *ptr = '\0';
 
     do {
       *--ptr = digits[(int) fmod(fvalue, base)];
       fvalue /= base;
     } while (ptr > buf && fabs(fvalue) >= 1);
 
-    return string_duplicate(ptr, end - ptr);
+    return String(ptr, end - ptr, CopyString);
   }
 
   return string_long_to_base(value.toInt64(), base);

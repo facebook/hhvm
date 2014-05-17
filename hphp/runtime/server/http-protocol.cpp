@@ -765,8 +765,7 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
       len = p - val;
       String value = url_decode(val, len);
       if (RuntimeOption::EnableMagicQuotesGpc) {
-        char *slashedvalue = string_addslashes(value.data(), len);
-        value = String(slashedvalue, len, AttachString);
+        value = string_addslashes(value.data(), len);
       }
 
       register_variable(variables, (char*)sname.data(), value);
@@ -806,8 +805,7 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
         len = strlen(val);
         String value = url_decode(val, len);
         if (RuntimeOption::EnableMagicQuotesGpc) {
-          char *slashedvalue = string_addslashes(value.data(), len);
-          value = String(slashedvalue, len, AttachString);
+          value = string_addslashes(value.data(), len);
         }
 
         register_variable(variables, (char*)sname.data(), value, false);

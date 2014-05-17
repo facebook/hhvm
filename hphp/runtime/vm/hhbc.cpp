@@ -905,9 +905,8 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
         if (memberCodeImmIsString(MemberCode(immVal)) && u) {           \
           const StringData* str = u->lookupLitstrId(imm);               \
           int len = str->size();                                        \
-          char* escaped = string_addslashes(str->data(), len);          \
-          out << '"' << escaped << '"';                                 \
-          free(escaped);                                                \
+          String escaped = string_addslashes(str->data(), len);         \
+          out << '"' << escaped.data() << '"';                          \
         } else {                                                        \
           out << imm;                                                   \
         }                                                               \

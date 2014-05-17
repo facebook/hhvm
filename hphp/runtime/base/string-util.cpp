@@ -40,10 +40,8 @@ String StringUtil::Pad(const String& input, int final_length,
 String StringUtil::StripHTMLTags(const String& input,
                                  const String& allowable_tags /* = "" */) {
   if (input.empty()) return input;
-  int len = input.size();
-  char *ret = string_strip_tags(input.data(), len, allowable_tags.data(),
-                                allowable_tags.size(), false);
-  return String(ret, len, AttachString);
+  return string_strip_tags(input.data(), input.size(),
+                           allowable_tags.data(), allowable_tags.size(), false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

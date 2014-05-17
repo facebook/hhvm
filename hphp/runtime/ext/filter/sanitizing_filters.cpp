@@ -176,20 +176,17 @@ Variant php_filter_string(PHP_INPUT_FILTER_PARAM_DECL) {
 
   String encoded(php_filter_encode_html(stripped, enc));
   int len = encoded.length();
-  char *ret = string_strip_tags(
+  String ret = string_strip_tags(
     encoded.data(), len, empty_string.data(), empty_string.length(), true
   );
 
   if (len == 0) {
     if (flags & k_FILTER_FLAG_EMPTY_STRING_NULL) {
-      free(ret);
       return uninit_null();
     }
-    free(ret);
     return empty_string;
   }
-  // string_strip_tags mallocs this string
-  return String(ret, AttachString);
+  return ret;
 }
 
 Variant php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL) {

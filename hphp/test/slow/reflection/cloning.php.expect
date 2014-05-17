@@ -1,0 +1,6 @@
+BadMethodCallException: Trying to clone an uncloneable object of class ReflectionParameter
+BadMethodCallException: Trying to clone an uncloneable object of class ReflectionProperty
+BadMethodCallException: Trying to clone an uncloneable object of class ReflectionExtension
+BadMethodCallException: Trying to clone an uncloneable object of class ReflectionClass
+BadMethodCallException: Trying to clone an uncloneable object of class ReflectionFunction
+BadMethodCallException: Trying to clone an uncloneable object of class ReflectionMethod

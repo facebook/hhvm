@@ -408,6 +408,13 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     return '';
   }
 
+  // Prevent cloning
+  public function __clone() {
+    throw new BadMethodCallException(
+      'Trying to clone an uncloneable object of class ' . get_class($this),
+    );
+  }
+
   /**
    * ( excerpt from http://php.net/manual/en/reflectionfunction.export.php )
    *
@@ -593,6 +600,13 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   public function __toString(): string {
     // TODO
     return '';
+  }
+
+  // Prevent cloning
+  public function __clone() {
+    throw new BadMethodCallException(
+      'Trying to clone an uncloneable object of class ReflectionMethod'
+    );
   }
 
   /**
@@ -950,6 +964,13 @@ class ReflectionClass implements Reflector {
   public function __toString(): string {
     // TODO
     return '';
+  }
+
+  // Prevent cloning
+  public function __clone() {
+    throw new BadMethodCallException(
+      'Trying to clone an uncloneable object of class ReflectionClass'
+    );
   }
 
   /**

@@ -95,9 +95,9 @@ typedef smart::list<const IRInstruction*> WorkList;
 void removeDeadInstructions(IRUnit& unit, const DceState& state) {
   postorderWalk(unit, [&](Block* block) {
     block->remove_if([&] (const IRInstruction& inst) {
-      ONTRACE(7,
+      ONTRACE(4,
               if (state[inst].isDead()) {
-                FTRACE(3, "Removing dead instruction {}\n", inst.toString());
+                FTRACE(1, "Removing dead instruction {}\n", inst.toString());
               });
 
       // For now, all control flow instructions are essential. If we ever
@@ -124,8 +124,8 @@ bool isUnguardedLoad(IRInstruction* inst) {
 // removeUnreachable erases unreachable blocks from unit, and returns
 // a sorted list of the remaining blocks.
 BlockList prepareBlocks(IRUnit& unit) {
-  FTRACE(5, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(5, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
+  FTRACE(1, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(1, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
 
   BlockList blocks = rpoSortCfg(unit);
   bool needsResort = false;
@@ -146,7 +146,7 @@ BlockList prepareBlocks(IRUnit& unit) {
       // and LdStack instruction that produce Cell types will not
       // generate guards, so remove the label from this instruction so
       // that it's no longer an essential control-flow instruction
-      ITRACE(4, "removing taken branch of unguarded load {}\n",
+      ITRACE(2, "removing taken branch of unguarded load {}\n",
              *inst);
       inst->setTaken(nullptr);
       needsResort = true;
@@ -171,7 +171,7 @@ BlockList prepareBlocks(IRUnit& unit) {
 
 WorkList
 initInstructions(const BlockList& blocks, DceState& state) {
-  TRACE(5, "DCE(initInstructions):vvvvvvvvvvvvvvvvvvvv\n");
+  TRACE(1, "DCE(initInstructions):vvvvvvvvvvvvvvvvvvvv\n");
   // mark reachable, essential, instructions live and enqueue them
   WorkList wl;
   for (Block* block : blocks) {
@@ -182,7 +182,7 @@ initInstructions(const BlockList& blocks, DceState& state) {
       }
     }
   }
-  TRACE(5, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
+  TRACE(1, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
   return wl;
 }
 
@@ -225,7 +225,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       case StLoc: {
         auto const frameInst = frameRoot(inst->src(0)->inst());
         if (frameInst->op() == DefInlineFP) {
-          ITRACE(4, "weak use of {} from {}\n", *frameInst->dst(), *inst);
+          ITRACE(3, "weak use of {} from {}\n", *frameInst->dst(), *inst);
           state[frameInst].incWeakUse();
         }
         break;
@@ -234,7 +234,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       case PassFP: {
         auto frameInst = frameRoot(inst->src(0)->inst());
         if (frameInst->op() == DefInlineFP) {
-          ITRACE(4, "weak use of {} from {}\n", *frameInst->dst(), *inst);
+          ITRACE(3, "weak use of {} from {}\n", *frameInst->dst(), *inst);
           state[frameInst].incWeakUse();
         }
         break;
@@ -243,7 +243,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       case DefInlineFP: {
         auto outerFrame = frameRoot(inst->src(2)->inst());
         if (outerFrame->is(DefInlineFP)) {
-          ITRACE(4, "weak use of {} from {}\n", *outerFrame->dst(), *inst);
+          ITRACE(3, "weak use of {} from {}\n", *outerFrame->dst(), *inst);
           state[outerFrame].incWeakUse();
         }
         break;
@@ -256,15 +256,15 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         auto const weakUses  = state[frameInst].weakUseCount();
         // We haven't counted this InlineReturn as a weak use yet,
         // which is where the '1' comes from.
-        ITRACE(3, "frame {}: weak/strong {}/{}\n",
+        ITRACE(2, "frame {}: weak/strong {}/{}\n",
           *frameInst, weakUses, frameUses);
         if (frameUses - weakUses == 1) {
-          ITRACE(4, "killing frame {}\n", *frameInst);
+          ITRACE(1, "killing frame {}\n", *frameInst);
           killedFrames = true;
 
           Offset retBCOff = frameInst->extra<DefInlineFP>()->retBCOff;
           retFixupMap[frameInst->dst()] = retBCOff;
-          ITRACE(4, "replacing {} with PassFP, removing {}\n",
+          ITRACE(2, "replacing {} with PassFP, removing {}\n",
                  *frameInst, *inst);
           unit.replace(frameInst, PassFP, frameInst->src(2));
           inst->convertToNop();
@@ -301,21 +301,21 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
          maxDepth,
          outerFunc->maxStackCells());
 
-  ITRACE(3, "Killed some frames. Iterating over blocks for fixups.\n");
+  ITRACE(1, "Killed some frames. Iterating over blocks for fixups.\n");
   for (auto* block : blocks) {
-    ITRACE(5, "Visiting block {}\n", block->id());
+    ITRACE(2, "Visiting block {}\n", block->id());
     Indent _i;
     assert(frameDepths.count(block));
     auto curDepth = frameDepths[block];
     frameDepths.erase(block);
-    ITRACE(5, "loaded depth {}\n", curDepth);
+    ITRACE(2, "loaded depth {}\n", curDepth);
 
     for (auto& inst : *block) {
       switch (inst.op()) {
         case DefInlineFP: {
           auto* spillInst = findSpillFrame(inst.src(0));
           assert(spillInst);
-          ITRACE(4, "DefInlineFP ({}): weak/strong uses: {}/{}: "
+          ITRACE(3, "DefInlineFP ({}): weak/strong uses: {}/{}: "
                  "depth: {} += {}\n",
                  inst, state[inst].weakUseCount(),
                  folly::get_default(uses, inst.dst(), 0),
@@ -330,7 +330,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
           assert(fpInst->is(DefInlineFP));
           auto const spillInst = findSpillFrame(fpInst->src(0));
           assert(spillInst);
-          ITRACE(4, "InlineReturn ({}): depth {} -= {}\n",
+          ITRACE(3, "InlineReturn ({}): depth {} -= {}\n",
                  inst,
                  curDepth,
                  spillInst->marker().func()->maxStackCells());
@@ -343,7 +343,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         case StLocNT:
         case StLoc: {
           if (findPassFP(inst.src(0)->inst())) {
-            ITRACE(4, "marking {} as dead\n", inst);
+            ITRACE(3, "marking {} as dead\n", inst);
             state[inst].setDead();
           }
           break;
@@ -361,7 +361,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         case DecRefMem: {
           DEBUG_ONLY auto spOff = inst.marker().spOff();
           auto newDepth = int32_t(maxDepth - curDepth);
-          ITRACE(4, "adjusting marker spOff for {} from {} to {}\n",
+          ITRACE(3, "adjusting marker spOff for {} from {} to {}\n",
                  inst, spOff, newDepth);
           assert(spOff <= newDepth);
           inst.marker().setSpOff(newDepth);
@@ -375,7 +375,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
           auto* realFp = fpInst->dst();
           int32_t offset = 0;
           auto const& extra = *inst.extra<ReDefSP>();
-          ITRACE(4, "calculating new offset for {}\n", inst);
+          ITRACE(3, "calculating new offset for {}\n", inst);
           Indent _i;
 
           for (unsigned i = 0; i < extra.nFrames; ++i) {
@@ -385,7 +385,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
             if (frame.fp == realFp) break;
             assert(i < extra.nFrames - 1);
           }
-          ITRACE(4, "final offset: {}\n", offset);
+          ITRACE(3, "final offset: {}\n", offset);
           inst.extra<ReDefSP>()->spOffset = offset;
           break;
         }
@@ -401,7 +401,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
           if (auto fpInst = findPassFP(inst.src(1)->inst())) {
             always_assert(false); // TODO t3203284
             assert(retFixupMap.count(fpInst->dst()));
-            ITRACE(4, "{} repairing\n", inst);
+            ITRACE(3, "{} repairing\n", inst);
             Offset retBCOff = retFixupMap[fpInst->dst()];
             inst.setSrc(2, unit.cns(retBCOff));
           }
@@ -414,7 +414,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       }
     }
 
-    ITRACE(5, "finishing block B{} with depth {}\n", block->id(), curDepth);
+    ITRACE(2, "finishing block B{} with depth {}\n", block->id(), curDepth);
     if (auto* taken = block->taken()) {
       if (!frameDepths.count(taken)) {
         frameDepths[taken] = curDepth;
@@ -463,7 +463,7 @@ void eliminateDeadCode(IRUnit& unit) {
       if (RuntimeOption::EvalHHIRInlineFrameOpts) {
         if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
           if (srcInst->is(DefInlineFP)) {
-            FTRACE(4, "adding use to {} from {}\n", *src, *inst);
+            FTRACE(3, "adding use to {} from {}\n", *src, *inst);
             ++uses[src];
           }
         }

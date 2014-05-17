@@ -856,6 +856,10 @@ const InstrInfo& getInstrInfo(Op op);
 
 typedef const int COff; // Const offsets
 
+inline bool isNativeImplCall(const Func* funcd, int numArgs) {
+  return funcd && funcd->methInfo() && numArgs == funcd->numParams();
+}
+
 } } // HPHP::JIT
 
 #endif

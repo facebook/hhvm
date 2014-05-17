@@ -440,7 +440,8 @@ struct BackEnd : public JIT::BackEnd {
     // Unconditional rip-relative jmps can also be encoded with an EB as the
     // first byte, but that means the delta is 1 byte, and we shouldn't be
     // encoding smashable jumps that way.
-    assert(isSmashable(addr, X64::kJmpLen));
+    assert(kJmpLen == kCallLen);
+    always_assert(isSmashable(addr, X64::kJmpLen));
 
     auto& cb = mcg->code.blockFor(addr);
     CodeCursor cursor { cb, addr };

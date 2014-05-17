@@ -249,13 +249,13 @@ size_t HhbcTranslator::spOffset() const {
  *     // ... possibly more spillstacks due to argument expressions
  *     sp3   = SpillStack sp2, -argCount
  *     fp2   = DefInlineFP<func,retBC,retSP> sp2 sp1
- *     sp4   = DefInlineSP<numLocals> sp1 fp2
+ *     sp4   = ReDefSP<spOffset,spansCall> sp1 fp2
  *
  *         // ... callee body ...
  *
  *           = InlineReturn fp2
  *
- * [ sp5  = ReDefSP<frameOffset,spOffset,spansCall> sp1 fp0 ]
+ * [ sp5  = ReDefSP<spOffset,spansCall> sp1 fp0 ]
  *
  * The rest of the code then depends on sp5, and not any of the StkPtr
  * tree going through the callee body.  The sp5 tmp has the same view
@@ -263,29 +263,15 @@ size_t HhbcTranslator::spOffset() const {
  * before the return address is pushed but after the activation record
  * is popped.
  *
- * In DCE we attempt to remove the SpillFrame/InlineReturn/DefInlineFP/
- * DefInlineSP instructions if they aren't needed.  DefInlineSP and DefInlineFP
- * become PassSP and PassFP respectively to avoid the need to relabel inlined
- * IR instructions that refer to them.
+ * In DCE we attempt to remove the SpillFrame, InlineReturn, and
+ * DefInlineFP instructions if they aren't needed.
  *
  * ReDefSP takes sp1, the stack pointer from before the inlined frame.
- * While this SSATmp may be dead if an FCall occurs in the
- * inlined frame it is still useful for determining stack types in the
- * simplifier.  Additionally these instructions both take an extradata
- * `spansCall' which is true iff an FCall occurs anywhere between the start and
- * end of the inlined function.  This is information is also used in the
- * simplifier to determine when an SSATmp may be used in lieu of a load from
- * the stack.
- *
- * At this time StLoc, ReDefSP, DefInlineSP, PassSP, SpillFrame, and DefInlineFP
- * are all considered weak references to a frame pointer.  Additionally any
- * instruction which calls native or may raise an error is considered a
- * reference to the FP and prevent it from being elided.  This is done by
- * inserting an InlineFPAnchor instruction when they are encountered.  These
- * instructions are inserted initially by IRBuilder and later removed and
- * re-inserted during the reoptimize pass to ensure that they are not associated
- * with instructions that have been removed in DCE or modified in the
- * simplifier.
+ * This SSATmp may be used for determining stack types in the
+ * simplifier, or stack values if the inlined body doesn't contain a
+ * call---these instructions both take an extradata `spansCall' which
+ * is true iff a Call occured anywhere between the the definition of
+ * its first argument and itself.
  */
 void HhbcTranslator::beginInlining(unsigned numParams,
                                    const Func* target,
@@ -328,7 +314,16 @@ void HhbcTranslator::beginInlining(unsigned numParams,
     });
 
   auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP, m_irb->fp());
-  gen(DefInlineSP, StackOffset(target->numLocals()), m_irb->sp(), m_irb->fp());
+  gen(
+    ReDefSP,
+    ReDefSPData {
+      target->numLocals(),
+      false /* spansCall; calls in FPI regions are not inline
+             * candidates currently */
+    },
+    m_irb->sp(),
+    m_irb->fp()
+  );
 
   profileFunctionEntry("Inline");
 
@@ -3149,11 +3144,48 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
     }
   }
 
+  /*
+   * Figure out if we know where we're going already (if a prologue
+   * was already generated, we don't need to do a whole bind call
+   * thing again).
+   *
+   * We're skipping magic calls right now because 'callee' will be set
+   * to __call in some cases (with 86ctor) where we shouldn't really
+   * call that function (arguable bug in annotation).
+   *
+   * TODO(#4357498): This is currently disabled, because we haven't
+   * set things up properly to be able to eagerly bind.  Because
+   * code-gen can punt, the code there needs to delay adding these
+   * smash locations until after we know the translation isn't punted.
+   */
+  auto const knownPrologue = [&]() -> TCA {
+    if (false) {
+      if (!callee || callee->isMagic()) return nullptr;
+      auto const prologueIndex =
+        numParams <= callee->numNonVariadicParams()
+          ? numParams
+          : callee->numNonVariadicParams() + 1;
+      TCA ret;
+      if (!mcg->checkCachedPrologue(callee, prologueIndex, ret)) {
+        return nullptr;
+      }
+      return ret;
+    }
+    return nullptr;
+  }();
+
   auto const sp = spillStack();
   gen(
     Call,
-    CallData { numParams, returnBcOffset, callee, destroyLocals },
-    sp, m_irb->fp()
+    CallData {
+      numParams,
+      returnBcOffset,
+      callee,
+      destroyLocals,
+      knownPrologue
+    },
+    sp,
+    m_irb->fp()
   );
   if (!m_fpiStack.empty()) {
     m_fpiStack.pop();
@@ -3317,14 +3349,15 @@ void HhbcTranslator::emitEndInlinedCommon() {
   m_fpiActiveStack.pop();
 
   updateMarker();
-  smart::vector<ReDefSPData::Frame> frames;
-  m_irb->state().forEachFrame([&frames](SSATmp* fp, int32_t off) {
-    frames.emplace_back(frameRoot(fp->inst())->dst(), off);
-  });
-  gen(ReDefSP, ReDefSPData(frames.size(), frames.data(),
-                           m_irb->spOffset(),
-                           m_irb->inlinedFrameSpansCall()),
-      m_irb->sp(), m_irb->fp());
+  gen(
+    ReDefSP,
+    ReDefSPData {
+      m_irb->spOffset(),
+      m_irb->inlinedFrameSpansCall()
+    },
+    m_irb->sp(),
+    m_irb->fp()
+  );
 
   /*
    * After the end of inlining, we are restoring to a previously

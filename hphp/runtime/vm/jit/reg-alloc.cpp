@@ -32,8 +32,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   if (tmp.isA(Type::StkPtr)) {
     assert(opc == DefSP ||
            opc == ReDefSP ||
-           opc == PassSP ||
-           opc == DefInlineSP ||
            opc == Call ||
            opc == CallArray ||
            opc == SpillStack ||

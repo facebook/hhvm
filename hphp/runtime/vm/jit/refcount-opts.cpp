@@ -1020,18 +1020,25 @@ struct SinkPointAnalyzer : private LocalStateHook {
     ITRACE(3, "consuming normal inputs\n");
     for (uint32_t i = 0; i < m_inst->numSrcs(); ++i) {
       Indent _i;
-      auto* src = m_inst->src(i);
+      auto src = m_inst->src(i);
 
       if (src->isA(Type::StkPtr) && src->inst()->is(SpillFrame) &&
-                 !m_inst->is(DefInlineFP, DefInlineSP,
-                             Call, CallArray, ContEnter)) {
-        // If the StkPtr being consumed points to a pre-live ActRec, observe
-        // its $this pointer since many of our helper functions decref it.
-        auto* this_ = src->inst()->src(2);
-        if (this_->isA(Type::Obj)) {
-          auto const sinkPoint = SinkPoint(m_ids.before(m_inst), this_, false);
-          this_ = canonical(this_);
-          observeValue(this_, m_state.values[this_], sinkPoint);
+          !m_inst->is(DefInlineFP,
+                      Call,
+                      CallArray,
+                      ContEnter)) {
+        bool const beginInlDefSP = m_inst->is(ReDefSP) &&
+                                     m_inst->src(1)->inst()->is(DefInlineFP);
+        if (!beginInlDefSP) {
+          // If the StkPtr being consumed points to a pre-live ActRec, observe
+          // its $this pointer since many of our helper functions decref it.
+          auto this_ = src->inst()->src(2);
+          if (this_->isA(Type::Obj)) {
+            auto const sinkPoint = SinkPoint(m_ids.before(m_inst), this_,
+              false);
+            this_ = canonical(this_);
+            observeValue(this_, m_state.values[this_], sinkPoint);
+          }
         }
       }
 

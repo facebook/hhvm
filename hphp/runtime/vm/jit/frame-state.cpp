@@ -105,7 +105,6 @@ void FrameState::update(const IRInstruction* inst) {
     m_spOffset = inst->extra<ReDefSP>()->spOffset;
     break;
 
-  case DefInlineSP:
   case DefSP:
     m_spValue = inst->dst();
     m_spOffset = inst->extra<StackOffset>()->offset;

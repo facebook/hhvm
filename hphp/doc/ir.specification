@@ -1417,33 +1417,15 @@ D:StkPtr = ReDefSP<offset,spansCall> S0:StkPtr S1:FramePtr
 
   Re-define a stack in terms of a frame pointer S1 and an offset, putting the
   resulting pointer in D. The resulting stack is assumed to give the same view
-  as S1, which is a previous stack pointer. (I.e. for getStackValue we just
-  chain to S1.)  The S0 stack pointer is only used for analysis.
+  as S0, which is a previous stack pointer. (I.e. for getStackValue we just
+  chain to S0.)
 
   This instruction is used when entering or "returning" from an inlined call.
-  The one used on entry will be DCE'd when the actrec can be eliminated. The
-  one on exit is only needed until TODO(#2288359).
+  The one used on entry will generally be DCE'd when the actrec can be
+  eliminated. The one on exit is only needed until TODO(#2288359).
 
-  The spansCall boolean indicates that the inlined frame spanned a procedure
-  call and that any SSATmps created before inlining are now invalid. This is
-  required for several analysis steps including the simplifier.
-
-D:StkPtr PassSP S0:StkPtr
-
-  Indicates that every use of StkPtr D is actually an alias to S0. This is a
-  hack to make dead code elimination easier when removing callee frames from
-  inlined functions. It is effectively the same as a nop as we currently use a
-  specialized register for every stack pointer (#2288359).
-
-D:FramePtr PassFP S0:FramePtr
-
-  Alias a frame pointer to a different SSATmp (see PassSP).
-
-InlinedFPAnchor S0:FramePtr
-
-  Indicates that an inlined frame cannot be elided during dead code elimination
-  because it is required by a either the VM for its ActRec or the routine
-  itself for local storage. Is semantically equivalent to a Nop.
+  The spansCall boolean is true if there is possibly a Call instructions
+  between the definition of S0 and this instruction.
 
 D:Int = Count S0:Cell
 

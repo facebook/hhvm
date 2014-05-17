@@ -259,12 +259,12 @@ public:
 public:
   CodeCache code;
 
-private:
   /*
    * Check if function prologue already exists.
    */
-  bool checkCachedPrologue(const Func*, int, TCA&) const;
+  bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
+private:
   /*
    * Service request handlers.
    */

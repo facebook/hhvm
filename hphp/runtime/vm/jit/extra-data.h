@@ -440,11 +440,13 @@ struct CallData : IRExtraData {
   explicit CallData(uint32_t numParams,
                     Offset after,
                     const Func* callee,
-                    bool destroy)
+                    bool destroy,
+                    TCA knownPrologue)
     : numParams(numParams)
     , after(after)
     , callee(callee)
     , destroyLocals(destroy)
+    , knownPrologue(knownPrologue)
   {}
 
   std::string show() const {
@@ -455,7 +457,8 @@ struct CallData : IRExtraData {
       callee
         ? folly::format(",{}", callee->fullName()->data()).str()
         : std::string{},
-      destroyLocals ? ",destroyLocals" : ""
+      destroyLocals ? ",destroyLocals" : "",
+      !!knownPrologue ? ",knownPrologue" : ""
     );
   }
 
@@ -463,6 +466,7 @@ struct CallData : IRExtraData {
   Offset after;
   const Func* callee;  // nullptr if not statically known
   bool destroyLocals;
+  TCA knownPrologue;   // nullptr if not statically known
 };
 
 struct RetCtrlData : IRExtraData {
@@ -664,37 +668,18 @@ struct InterpOneData : IRExtraData {
  * frame pointer when one or more enclosing frames have been elided.
  */
 struct ReDefSPData : IRExtraData {
-  struct Frame {
-    explicit Frame(const SSATmp* fp = nullptr, int32_t spOff = 0)
-      : fp(fp)
-      , spOff(spOff)
-    {}
-
-    const SSATmp* fp;
-    int32_t spOff;
-  };
-
-  explicit ReDefSPData(uint32_t nFrames, Frame* frames, int32_t off, bool spans)
-    : frames(frames)
-    , nFrames(nFrames)
-    , spOffset(off)
+  explicit ReDefSPData(int32_t off, bool spans)
+    : spOffset(off)
     , spansCall(spans)
   {}
 
-  ReDefSPData* clone(Arena& arena) const {
-    auto* r = new (arena) ReDefSPData(nFrames, frames, spOffset, spansCall);
-    r->frames = new (arena) Frame[nFrames];
-    std::copy(frames, frames + nFrames, r->frames);
-    return r;
-  }
-
   std::string show() const {
-    return folly::format("spOff:{}{}", spOffset,
-                         spansCall ? ", spans call" : "").str();
+    return folly::format(
+      "{}{}",
+      spOffset,
+      spansCall ? ",spansCall" : ""
+    ).str();
   }
-
-  Frame* frames;
-  uint32_t nFrames;
 
   int32_t spOffset;
   bool spansCall;
@@ -859,7 +844,6 @@ X(CoerceStk,                    StackOffset);
 X(AssertStk,                    StackOffset);
 X(ReDefSP,                      ReDefSPData);
 X(DefSP,                        StackOffset);
-X(DefInlineSP,                  StackOffset);
 X(LdStack,                      StackOffset);
 X(LdStackAddr,                  StackOffset);
 X(DecRefStack,                  StackOffset);

@@ -180,7 +180,7 @@ void MCGenerator::invalidateFuncProfSrcKeys(const Func* func) {
 
 TCA MCGenerator::retranslate(const TranslArgs& args) {
   SrcRec* sr = m_tx.getSrcDB().find(args.m_sk);
-
+  always_assert(sr);
   bool locked = sr->tryLock();
   SCOPE_EXIT {
     if (locked) sr->freeLock();

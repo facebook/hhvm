@@ -169,21 +169,273 @@ BlockList prepareBlocks(IRUnit& unit) {
   return blocks;
 }
 
-WorkList
-initInstructions(const BlockList& blocks, DceState& state) {
+WorkList initInstructions(const BlockList& blocks, DceState& state) {
   TRACE(1, "DCE(initInstructions):vvvvvvvvvvvvvvvvvvvv\n");
-  // mark reachable, essential, instructions live and enqueue them
+  // Mark reachable, essential, instructions live and enqueue them.
   WorkList wl;
-  for (Block* block : blocks) {
-    for (IRInstruction& inst : *block) {
-      if (inst.isEssential()) {
-        state[inst].setLive();
-        wl.push_back(&inst);
+  forEachInst(blocks, [&] (IRInstruction* inst) {
+    if (inst->isEssential()) {
+      state[inst].setLive();
+      wl.push_back(inst);
+    }
+  });
+  TRACE(1, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
+  return wl;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * A use of an inlined frame that can be modified to work without the
+ * frame is called a "weak use" here.  For example, storing to a local
+ * on a frame is weak because if no other uses of the frame are
+ * keeping it alive (for example a load of that same local), we can
+ * just remove the store.
+ *
+ * This routine counts the weak uses of inlined frames and marks them
+ * dead if they have no non-weak uses.  Returns true if any inlined
+ * frames were marked dead.
+ */
+bool findWeakActRecUses(const BlockList& blocks,
+                        DceState& state,
+                        IRUnit& unit,
+                        const UseCounts& uses) {
+  bool killedFrames = false;
+
+  auto const incWeak = [&] (const IRInstruction* inst, const SSATmp* src) {
+    auto const frameInst = frameRoot(src->inst());
+    if (frameInst->op() == DefInlineFP) {
+      ITRACE(3, "weak use of {} from {}\n", *frameInst->dst(), *inst);
+      state[frameInst].incWeakUse();
+    }
+  };
+
+  /*
+   * Maintain a list of the Calls depending on each DefInlineFP.
+   * Calls can count as weak uses as long as there is only one right
+   * now.  The limit to 1 is just because we have tested or
+   * investigated the more-than-one case.
+   */
+  smart::flat_map<const IRInstruction*,uint32_t> callCounts;
+
+  forEachInst(blocks, [&] (IRInstruction* inst) {
+    if (state[inst].isDead()) return;
+
+    switch (inst->op()) {
+    // We don't need to generate stores to a frame if it can be eliminated.
+    case StLocNT:
+    case StLoc:
+      incWeak(inst, inst->src(0));
+      break;
+
+    /*
+     * You can use the stack without using the frame, and we can
+     * adjust the ReDefSP in this situation, but only if we're not in
+     * a resumable.  In a resumable, there is no relation between the
+     * main frame and the stack, so we can't modify this ReDefSP to
+     * work on the outer frame.
+     */
+    case ReDefSP:
+      {
+        auto const fp = inst->src(1)->inst();
+        if (fp->is(DefInlineFP) &&
+            !fp->src(2)->inst()->marker().resumed()) {
+          ITRACE(3, "weak use of {} from {}\n", fp->dst(), *inst);
+          state[fp].incWeakUse();
+        }
+      }
+      break;
+
+    /*
+     * Calls can count as weak frame uses with some restrictions:
+     *
+     *   o We must statically know what we're calling.
+     *
+     *   o The call itself is not protected by an EH region.
+     *
+     *   o We're not calling a native function.
+     *
+     *   o The callee must already have a translation for the prologue
+     *     we need (has knownPrologue).
+     *
+     *   o There's only one Call instruction depending on this frame.
+     *
+     * The reason it is limited to a known prologue is that otherwise
+     * the REQ_BIND_CALL service request could need to enter the
+     * interpreter at the FCall instruction, which means it needs the
+     * ActRec for the function containing that instruction to be on
+     * the stack.  To know this also implies the first requirement.
+     *
+     * Similarly, we can't eliminate the outer frame if we may need it
+     * to enter a catch block that is in the calling function.
+     *
+     * The other limits are just conservative while this was being
+     * developed.
+     *
+     * Important: Right now all of this is disabled in
+     * hhbc-translator, because the knownPrologue mechanism is buggy.
+     * So we'll never have a knownPrologue here.  TODO(#4357498).
+     */
+    case Call:
+      {
+        auto const extra  = inst->extra<Call>();
+        if (!extra->callee ||
+            isNativeImplCall(extra->callee, extra->numParams) ||
+            !inst->extra<Call>()->knownPrologue) {
+          break;
+        }
+        if (inst->marker().func()->findEH(inst->marker().bcOff())) {
+          FTRACE(2, "strong due to EH: {}\n", inst->toString());
+          break;
+        }
+        auto const frameInst = frameRoot(inst->src(1)->inst());
+        if (frameInst->is(DefInlineFP)) {
+          // See above about the limit to 1.
+          if (callCounts[inst->src(1)->inst()]++ < 1) {
+            ITRACE(3, "weak use of {} from {}\n", *frameInst->dst(), *inst);
+            state[frameInst].incWeakUse();
+          }
+        }
+      }
+      break;
+
+    case InlineReturn:
+      {
+        auto const frameInst = frameRoot(inst->src(0)->inst());
+        assert(frameInst->is(DefInlineFP));
+        auto const frameUses = folly::get_default(uses, frameInst->dst(), 0);
+        auto const weakUses  = state[frameInst].weakUseCount();
+        /*
+         * We can kill the frame if all uses of the frame are counted
+         * as weak uses.  Note that this InlineReturn counts as a weak
+         * use, but we haven't incremented for it yet, which is where
+         * the "+ 1" comes from below.
+         */
+        ITRACE(2, "frame {}: weak/strong {}/{}\n",
+          *frameInst, weakUses, frameUses);
+        if (frameUses - (weakUses + 1) == 0) {
+          ITRACE(1, "killing frame {}\n", *frameInst);
+          killedFrames = true;
+          state[inst].setDead();
+          state[frameInst].setDead();
+        }
+      }
+      break;
+
+    default:
+      // Default is conservative: we don't increment a weak use if it
+      // uses the frame (or stack), so they can't be eliminated.
+      break;
+    }
+  });
+
+  return killedFrames;
+}
+
+/*
+ * The first time through, we've counted up weak uses of the frame and
+ * then finally marked it dead.  The instructions in between that were
+ * weak uses may need modifications now that their frame is going
+ * away.
+ *
+ * Also, if we eliminated some frames, DecRef instructions (which can
+ * re-enter the VM without requiring a materialized frame) need to
+ * have stack depths in their markers adjusted so they can't stomp on
+ * parts of the outer function.  We handle this conservatively by just
+ * pushing all DecRef markers where the DecRef is from a function
+ * other than the outer function down to a safe re-entry depth.
+ */
+void performActRecFixups(const BlockList& blocks,
+                         DceState& state,
+                         IRUnit& unit,
+                         const UseCounts& uses) {
+  // We limit the total stack depth during inlining, so this is the deepest
+  // we'll ever have to worry about.
+  auto const outerFunc = blocks.front()->front().marker().func();
+  auto const safeDepth = outerFunc->maxStackCells() + kStackCheckLeafPadding;
+  ITRACE(3, "safeDepth: {}, outerFunc depth: {}\n",
+         safeDepth,
+         outerFunc->maxStackCells());
+
+  for (auto block : blocks) {
+    ITRACE(2, "Visiting block {}\n", block->id());
+    Trace::Indent indenter;
+
+    for (auto& inst : *block) {
+      ITRACE(5, "{}\n", inst.toString());
+
+      switch (inst.op()) {
+      case DefInlineFP:
+        ITRACE(3, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
+             inst, state[inst].weakUseCount(),
+             folly::get_default(uses, inst.dst(), 0));
+        break;
+
+      /*
+       * If we're eliminating a DefInlineFP, the ReDefSP has a
+       * different logical stack depth, and should be done
+       * relative to the frame that enclosed the DefInlineFP.
+       *
+       * Normally this ReDefSP is also going to be dead, so it
+       * wouldn't matter if we fix this up.  The case where it matters
+       * is if eliminated a frame but left something which uses the
+       * stack---for example, a Call instruction that the callee
+       * made---in this case, we still need stack space for the
+       * arguments, and the Call is still using the ReDefSP, so we
+       * need these changes.
+       */
+      case ReDefSP:
+        {
+          auto const fp = inst.src(1)->inst();
+          if (fp->is(DefInlineFP) && state[fp].isDead()) {
+            inst.setSrc(1, fp->src(2));
+            inst.setSrc(0, fp->src(1));
+            inst.extra<ReDefSP>()->spOffset =
+              fp->extra<DefInlineFP>()->retSPOff;
+          }
+        }
+        break;
+
+      case Call:
+        {
+          auto const fp = inst.src(1)->inst();
+          if (state[fp].isDead()) {
+            assert(fp->is(DefInlineFP));
+            inst.setSrc(1, fp->src(2));
+            inst.extra<Call>()->after = fp->extra<DefInlineFP>()->retBCOff;
+          }
+        }
+        break;
+
+      case StLocNT:
+      case StLoc:
+        if (state[inst.src(0)->inst()].isDead()) {
+          ITRACE(3, "marking {} as dead\n", inst);
+          state[inst].setDead();
+        }
+        break;
+
+      /*
+       * DecRef* are special: they're the only instructions that can reenter
+       * but not throw. This means it's safe to elide their inlined frame, as
+       * long as we adjust their markers to a depth that is guaranteed to not
+       * stomp on the caller's frame if it reenters.
+       */
+      case DecRef:
+      case DecRefLoc:
+      case DecRefStack:
+      case DecRefMem:
+        if (inst.marker().func() != outerFunc) {
+          ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
+          inst.marker().setSpOff(safeDepth);
+        }
+        break;
+
+      default:
+        break;
       }
     }
   }
-  TRACE(1, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
-  return wl;
 }
 
 /*
@@ -197,250 +449,41 @@ initInstructions(const BlockList& blocks, DceState& state) {
  * instruction is not necessary and can be removed (if we make the
  * required changes to each instruction that used it weakly).
  */
-void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
+void optimizeActRecs(const BlockList& blocks,
+                     DceState& state,
+                     IRUnit& unit,
                      const UseCounts& uses) {
   FTRACE(1, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(1, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
   if (do_assert) {
     for (UNUSED auto const& pair : uses) {
-      assert((pair.first->isA(Type::FramePtr) &&
-              pair.first->inst()->is(DefInlineFP)) ||
-             (pair.first->isA(Type::StkPtr) &&
-              pair.first->inst()->is(SpillFrame)));
+      assert(pair.first->isA(Type::FramePtr) &&
+             pair.first->inst()->is(DefInlineFP));
     }
   }
 
-  using Trace::Indent;
-  Indent _i;
-
-  bool killedFrames = false;
-
-  smart::hash_map<SSATmp*, Offset> retFixupMap;
-  forEachInst(blocks, [&](IRInstruction* inst) {
-    if (state[inst].isDead()) return;
-
-    switch (inst->op()) {
-      // We don't need to generate stores to a frame if it can be eliminated.
-      case StLocNT:
-      case StLoc: {
-        auto const frameInst = frameRoot(inst->src(0)->inst());
-        if (frameInst->op() == DefInlineFP) {
-          ITRACE(3, "weak use of {} from {}\n", *frameInst->dst(), *inst);
-          state[frameInst].incWeakUse();
-        }
-        break;
-      }
-
-      case PassFP: {
-        auto frameInst = frameRoot(inst->src(0)->inst());
-        if (frameInst->op() == DefInlineFP) {
-          ITRACE(3, "weak use of {} from {}\n", *frameInst->dst(), *inst);
-          state[frameInst].incWeakUse();
-        }
-        break;
-      }
-
-      case DefInlineFP: {
-        auto outerFrame = frameRoot(inst->src(2)->inst());
-        if (outerFrame->is(DefInlineFP)) {
-          ITRACE(3, "weak use of {} from {}\n", *outerFrame->dst(), *inst);
-          state[outerFrame].incWeakUse();
-        }
-        break;
-      }
-
-      case InlineReturn: {
-        auto const frameInst = frameRoot(inst->src(0)->inst());
-        assert(frameInst->is(DefInlineFP));
-        auto const frameUses = folly::get_default(uses, frameInst->dst(), 0);
-        auto const weakUses  = state[frameInst].weakUseCount();
-        // We haven't counted this InlineReturn as a weak use yet,
-        // which is where the '1' comes from.
-        ITRACE(2, "frame {}: weak/strong {}/{}\n",
-          *frameInst, weakUses, frameUses);
-        if (frameUses - weakUses == 1) {
-          ITRACE(1, "killing frame {}\n", *frameInst);
-          killedFrames = true;
-
-          Offset retBCOff = frameInst->extra<DefInlineFP>()->retBCOff;
-          retFixupMap[frameInst->dst()] = retBCOff;
-          ITRACE(2, "replacing {} with PassFP, removing {}\n",
-                 *frameInst, *inst);
-          unit.replace(frameInst, PassFP, frameInst->src(2));
-          inst->convertToNop();
-        }
-        break;
-      }
-
-      default: {
-        break;
-      }
-    }
-  });
-
-  if (!killedFrames) return;
-
-  /*
-   * The first time through, we've counted up weak uses of the frame and then
-   * finally marked it dead.  The instructions in between that were weak uses
-   * may need modifications now that their frame is going away.
-   *
-   * frameDepths is used to keep track of the current maximum distance the
-   * stack could be from the enclosing frame pointer. This is used to update
-   * the BCMarkers of instructions that may be sensitive to having their
-   * enclosing frame elided.
-   */
-  smart::hash_map<Block*, uint32_t> frameDepths;
-  frameDepths[blocks.front()] = 0;
-
-  // We limit the total stack depth during inlining, so this is the deepest
-  // we'll ever have to worry about.
-  auto const outerFunc = blocks.front()->front().marker().func();
-  auto const maxDepth = outerFunc->maxStackCells() + kStackCheckLeafPadding;
-  ITRACE(3, "maxdepth: {}, outerFunc depth: {}\n",
-         maxDepth,
-         outerFunc->maxStackCells());
-
-  ITRACE(1, "Killed some frames. Iterating over blocks for fixups.\n");
-  for (auto* block : blocks) {
-    ITRACE(2, "Visiting block {}\n", block->id());
-    Indent _i;
-    assert(frameDepths.count(block));
-    auto curDepth = frameDepths[block];
-    frameDepths.erase(block);
-    ITRACE(2, "loaded depth {}\n", curDepth);
-
-    for (auto& inst : *block) {
-      switch (inst.op()) {
-        case DefInlineFP: {
-          auto* spillInst = findSpillFrame(inst.src(0));
-          assert(spillInst);
-          ITRACE(3, "DefInlineFP ({}): weak/strong uses: {}/{}: "
-                 "depth: {} += {}\n",
-                 inst, state[inst].weakUseCount(),
-                 folly::get_default(uses, inst.dst(), 0),
-                 curDepth,
-                 spillInst->marker().func()->maxStackCells());
-          curDepth += spillInst->marker().func()->maxStackCells();
-          break;
-        }
-
-        case InlineReturn: {
-          auto const fpInst = frameRoot(inst.src(0)->inst());
-          assert(fpInst->is(DefInlineFP));
-          auto const spillInst = findSpillFrame(fpInst->src(0));
-          assert(spillInst);
-          ITRACE(3, "InlineReturn ({}): depth {} -= {}\n",
-                 inst,
-                 curDepth,
-                 spillInst->marker().func()->maxStackCells());
-          curDepth -= spillInst->marker().func()->maxStackCells();
-          assert(findPassFP(inst.src(0)->inst()) == nullptr &&
-                 "Eliminated DefInlineFP but left its InlineReturn");
-          break;
-        }
-
-        case StLocNT:
-        case StLoc: {
-          if (findPassFP(inst.src(0)->inst())) {
-            ITRACE(3, "marking {} as dead\n", inst);
-            state[inst].setDead();
-          }
-          break;
-        }
-
-        /*
-         * DecRef* are special: they're the only instructions that can reenter
-         * but not throw. This means it's safe to elide their inlined frame, as
-         * long as we adjust their markers to a depth that is guaranteed to not
-         * stomp on the caller's frame if it reenters.
-         */
-        case DecRef:
-        case DecRefLoc:
-        case DecRefStack:
-        case DecRefMem: {
-          DEBUG_ONLY auto spOff = inst.marker().spOff();
-          auto newDepth = int32_t(maxDepth - curDepth);
-          ITRACE(3, "adjusting marker spOff for {} from {} to {}\n",
-                 inst, spOff, newDepth);
-          assert(spOff <= newDepth);
-          inst.marker().setSpOff(newDepth);
-          break;
-        }
-
-        case ReDefSP: {
-          // The first real frame enclosing this ReDefSP may have changed, so
-          // update its frameOffset.
-          auto* fpInst = frameRoot(inst.src(1)->inst());
-          auto* realFp = fpInst->dst();
-          int32_t offset = 0;
-          auto const& extra = *inst.extra<ReDefSP>();
-          ITRACE(3, "calculating new offset for {}\n", inst);
-          Indent _i;
-
-          for (unsigned i = 0; i < extra.nFrames; ++i) {
-            auto& frame = extra.frames[i];
-            ITRACE(4, "adding {} for {}\n", frame.spOff, *frame.fp);
-            offset += frame.spOff;
-            if (frame.fp == realFp) break;
-            assert(i < extra.nFrames - 1);
-          }
-          ITRACE(3, "final offset: {}\n", offset);
-          inst.extra<ReDefSP>()->spOffset = offset;
-          break;
-        }
-
-        /*
-         * When we unroll the stack during an exception the unwinder relies on
-         * m_soff whenever it encounters an ActRec to properly restore the PC
-         * once the frame has been destroyed.  When we elide a frame from the
-         * stack we also update the PC pushed in any ActRec's pushed by a Call
-         * so that they reflect the frame that they logically fall inside of.
-         */
-        case Call: {
-          if (auto fpInst = findPassFP(inst.src(1)->inst())) {
-            always_assert(false); // TODO t3203284
-            assert(retFixupMap.count(fpInst->dst()));
-            ITRACE(3, "{} repairing\n", inst);
-            Offset retBCOff = retFixupMap[fpInst->dst()];
-            inst.setSrc(2, unit.cns(retBCOff));
-          }
-          break;
-        }
-
-        default: {
-          break;
-        }
-      }
-    }
-
-    ITRACE(2, "finishing block B{} with depth {}\n", block->id(), curDepth);
-    if (auto* taken = block->taken()) {
-      if (!frameDepths.count(taken)) {
-        frameDepths[taken] = curDepth;
-      } else {
-        assert(frameDepths[taken] == curDepth);
-      }
-    }
-    if (auto* next = block->next()) {
-      if (!frameDepths.count(next)) {
-        frameDepths[next] = curDepth;
-      } else {
-        assert(frameDepths[next] == curDepth);
-      }
-    }
+  // Make a pass to find if we can kill any of the frames.  If so, we
+  // have to do some fixups.  These two routines are coupled---most
+  // cases in findWeakActRecUses should have a corresponding case in
+  // performActRecFixups to deal with the frame being removed.
+  auto const killedFrames = findWeakActRecUses(blocks, state, unit, uses);
+  if (killedFrames) {
+    ITRACE(1, "Killed some frames. Iterating over blocks for fixups.\n");
+    performActRecFixups(blocks, state, unit, uses);
   }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
 
 // Publicly exported functions:
 
 void eliminateDeadCode(IRUnit& unit) {
-  Timer _t(Timer::optimize_dce);
+  Timer dceTimer(Timer::optimize_dce);
 
   // kill unreachable code and remove any traces that are now empty
-  BlockList blocks = prepareBlocks(unit);
+  auto const blocks = prepareBlocks(unit);
 
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All
@@ -477,11 +520,10 @@ void eliminateDeadCode(IRUnit& unit) {
   }
 
   if (RuntimeOption::EvalHHIRInlineFrameOpts) {
-    // Optimize unused inlined activation records.
     optimizeActRecs(blocks, state, unit, uses);
   }
 
-  // now remove instructions whose id == DEAD
+  // Now remove instructions whose state is DEAD.
   removeDeadInstructions(unit, state);
 }
 

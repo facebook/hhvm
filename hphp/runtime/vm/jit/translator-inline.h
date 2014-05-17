@@ -56,10 +56,6 @@ inline Offset liveSpOff() {
 
 namespace JIT {
 
-inline bool isNativeImplCall(const Func* funcd, int numArgs) {
-  return funcd && funcd->methInfo() && numArgs == funcd->numParams();
-}
-
 inline int cellsToBytes(int nCells) {
   return safe_cast<int32_t>(nCells * ssize_t(sizeof(Cell)));
 }

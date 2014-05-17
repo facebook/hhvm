@@ -189,7 +189,7 @@ bool IRInstruction::isRawLoad() const {
 
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
-  assert(is(IncRef, PassFP, PassSP,
+  assert(is(IncRef,
             CheckType, AssertType, AssertNonNull,
             StRef,
             ColAddElemC, ColAddNewElemC,

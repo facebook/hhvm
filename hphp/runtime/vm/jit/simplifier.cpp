@@ -44,8 +44,12 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   IRInstruction* inst = sp->inst();
 
   switch (inst->op()) {
-  case DefInlineSP:
   case DefSP:
+    // You aren't really allowed to look above your current stack.  We
+    // can't assert fail here if the index is too high right now
+    // though, because it's currently legal to call getStackValue with
+    // invalid stack offsets.  (And this is done in ir-builder; see
+    // TODO(#4355796)).
     return StackValueInfo { inst, Type::StackElem };
 
   case ReDefSP: {
@@ -55,7 +59,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return info;
   }
 
-  case PassSP:
   case ExceptionBarrier:
   case Mov:
     return getStackValue(inst->src(0), index);
@@ -226,13 +229,13 @@ void copyProp(IRInstruction* inst) {
     auto tmp     = inst->src(i);
     auto srcInst = tmp->inst();
 
-    if (srcInst->is(Mov, PassSP, PassFP)) {
+    if (srcInst->is(Mov)) {
       inst->setSrc(i, srcInst->src(0));
     }
 
     // We're assuming that all of our src instructions have already been
     // copyPropped.
-    assert(!inst->src(i)->inst()->is(Mov, PassSP, PassFP));
+    assert(!inst->src(i)->inst()->is(Mov));
   }
 }
 
@@ -275,14 +278,6 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
   }
 
   return inst;
-}
-
-IRInstruction* findPassFP(IRInstruction* fpInst) {
-  while (!fpInst->is(DefFP, DefInlineFP, PassFP)) {
-    assert(fpInst->dst()->isA(Type::FramePtr));
-    fpInst = fpInst->src(0)->inst();
-  }
-  return fpInst->is(PassFP) ? fpInst : nullptr;
 }
 
 const IRInstruction* frameRoot(const IRInstruction* fpInst) {

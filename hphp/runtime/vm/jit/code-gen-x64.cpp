@@ -510,14 +510,6 @@ void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
   emitFwdJcc(CC_NZ, inst->taken());
 }
 
-void CodeGenerator::cgPassFP(IRInstruction* inst) {
-  cgMov(inst);
-}
-
-void CodeGenerator::cgPassSP(IRInstruction* inst) {
-  cgMov(inst);
-}
-
 void CodeGenerator::cgCheckNonNull(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
@@ -2747,13 +2739,6 @@ void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
   m_as.    loadq  (fpReg[AROFF(m_sfp)], rVmFp);
 }
 
-void CodeGenerator::cgDefInlineSP(IRInstruction* inst) {
-  auto fp  = srcLoc(1).reg();
-  auto dst = dstLoc(0).reg();
-  auto off = -inst->extra<StackOffset>()->offset * sizeof(Cell);
-  emitLea(m_as, fp[off], dst);
-}
-
 void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   // TODO(#2288359): this instruction won't be necessary (for
   // non-generator frames) when we don't track rVmSp independently
@@ -3673,6 +3658,38 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const ar = extra->numParams * sizeof(TypedValue);
   a.    storeq (rFP,                              rSP[ar + AROFF(m_sfp)]);
   a.    storel (safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]);
+
+  if (extra->knownPrologue) {
+    assert(extra->callee);
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      auto const off = cellsToBytes(extra->numParams) + AROFF(m_savedRip);
+      emitImmStoreq(a, 0xff00ff00b00b00d0, rSP[off]);
+    }
+    emitLea(a, rSP[cellsToBytes(extra->numParams)], rStashedAR);
+    /*
+     * Normally there's no need to prepare for smash if this is a live
+     * or optimized translation, since we know where we are going.
+     *
+     * However, if we're going to a profiling prologue, we want it to
+     * be smashable later, so we need to tell the profiling module
+     * about this and prepare for smashing the call.
+     */
+    if (mcg->code.prof().contains(extra->knownPrologue)) {
+      auto const calleeNumParams = extra->callee->numNonVariadicParams();
+      auto const prologIndex =
+        extra->numParams <= calleeNumParams ? extra->numParams
+                                            : calleeNumParams + 1;
+      mcg->backEnd().prepareForSmash(a.code(), kCallLen);
+      mcg->tx().profData()->addPrologueMainCaller(
+        extra->callee,
+        prologIndex,
+        a.code().frontier()
+      );
+      always_assert(mcg->backEnd().isSmashable(a.code().frontier(), kCallLen));
+    }
+    a.  call   (extra->knownPrologue);
+    return;
+  }
 
   auto const srcKey = m_curInst->marker().sk();
   auto const adjust = emitBindCall(m_mainCode,

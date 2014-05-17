@@ -30,8 +30,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
 namespace {
 
 TRACE_SET_MOD(hhir_dce);
@@ -191,10 +190,17 @@ initInstructions(const BlockList& blocks, DceState& state) {
  * Look for InlineReturn instructions that are the only "non-weak" use
  * of a DefInlineFP.  In this case we can kill both, which may allow
  * removing a SpillFrame as well.
+ *
+ * Prior to calling this routine, `uses' should contain the direct
+ * (non-transitive) use counts of each DefInlineFP instruction.  If
+ * the weak references are equal to the normal references, the
+ * instruction is not necessary and can be removed (if we make the
+ * required changes to each instruction that used it weakly).
  */
 void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
                      const UseCounts& uses) {
-  FTRACE(3, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
+  FTRACE(1, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(1, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
   if (do_assert) {
     for (UNUSED auto const& pair : uses) {
       assert((pair.first->isA(Type::FramePtr) &&
@@ -204,7 +210,6 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
     }
   }
 
-  SCOPE_EXIT { FTRACE(3, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
   using Trace::Indent;
   Indent _i;
 
@@ -216,6 +221,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
 
     switch (inst->op()) {
       // We don't need to generate stores to a frame if it can be eliminated.
+      case StLocNT:
       case StLoc: {
         auto const frameInst = frameRoot(inst->src(0)->inst());
         if (frameInst->op() == DefInlineFP) {
@@ -243,35 +249,16 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         break;
       }
 
-      case ReDefSP:
-      case DefInlineSP: {
-        auto const frameInst = frameRoot(inst->src(1)->inst());
-        if (frameInst->op() == DefInlineFP) {
-          ITRACE(4, "weak use of {} from {}\n", *frameInst->dst(), *inst);
-          state[frameInst].incWeakUse();
-        }
-        break;
-      }
-
       case InlineReturn: {
-        auto* frameInst = frameRoot(inst->src(0)->inst());
+        auto const frameInst = frameRoot(inst->src(0)->inst());
         assert(frameInst->is(DefInlineFP));
-        auto spillInst = findSpillFrame(frameInst->src(0));
-        assert(spillInst);
-
-        auto frameUses = folly::get_default(uses, frameInst->dst(), 0);
-        auto spillUses = uses.find(spillInst->dst())->second;
-        assert(spillUses >= 2);
-
-        auto weakUses = state[frameInst].weakUseCount();
+        auto const frameUses = folly::get_default(uses, frameInst->dst(), 0);
+        auto const weakUses  = state[frameInst].weakUseCount();
         // We haven't counted this InlineReturn as a weak use yet,
         // which is where the '1' comes from.
-        //
-        // The '2' means that the SpillFrame is used only by the
-        // DefInlineFP and its corresponding DefInlineSP. We cannot
-        // safely eliminate a DefInlineFP whose SpillFrame is still
-        // used elsewhere.
-        if (frameUses - weakUses == 1 && spillUses == 2) {
+        ITRACE(3, "frame {}: weak/strong {}/{}\n",
+          *frameInst, weakUses, frameUses);
+        if (frameUses - weakUses == 1) {
           ITRACE(4, "killing frame {}\n", *frameInst);
           killedFrames = true;
 
@@ -281,9 +268,6 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
                  *frameInst, *inst);
           unit.replace(frameInst, PassFP, frameInst->src(2));
           inst->convertToNop();
-        } else {
-          ITRACE(3, "not killing frame {}, weak/strong {}/{}, SpillFrame used "
-                 "{} times\n", *frameInst, weakUses, frameUses, spillUses);
         }
         break;
       }
@@ -356,15 +340,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
           break;
         }
 
-        case DefInlineSP: {
-          if (findPassFP(inst.src(1)->inst())) {
-            ITRACE(4, "replacing {} with PassSP\n", inst);
-            unit.replace(&inst, PassSP, inst.src(0));
-            break;
-          }
-          break;
-        }
-
+        case StLocNT:
         case StLoc: {
           if (findPassFP(inst.src(0)->inst())) {
             ITRACE(4, "marking {} as dead\n", inst);
@@ -486,17 +462,9 @@ void eliminateDeadCode(IRUnit& unit) {
 
       if (RuntimeOption::EvalHHIRInlineFrameOpts) {
         if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
-          auto* root = frameRoot(srcInst);
-          if (root->is(DefInlineFP)) {
+          if (srcInst->is(DefInlineFP)) {
             FTRACE(4, "adding use to {} from {}\n", *src, *inst);
-            ++uses[root->dst()];
-          }
-        }
-        if (src->isA(Type::StkPtr) && !srcInst->is(RetAdjustStack)) {
-          auto root = findSpillFrame(src);
-          if (root) {
-            FTRACE(4, "adding use to {} from {}\n", *src, *inst);
-            ++uses[root->dst()];
+            ++uses[src];
           }
         }
       }
@@ -517,4 +485,4 @@ void eliminateDeadCode(IRUnit& unit) {
   removeDeadInstructions(unit, state);
 }
 
-} }
+}}

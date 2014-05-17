@@ -572,7 +572,7 @@ O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr) S(FramePtr),  NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
 O(DefFP,                   D(FramePtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
-O(DefInlineSP,               D(StkPtr), S(StkPtr) S(FramePtr),             E) \
+O(DefInlineSP,               D(StkPtr), S(StkPtr) S(FramePtr),            NF) \
 O(ReDefSP,                   D(StkPtr), S(StkPtr) S(FramePtr),            NF) \
 O(PassSP,                    D(StkPtr), S(StkPtr),                         P) \
 O(PassFP,                  D(FramePtr), S(FramePtr),                       P) \

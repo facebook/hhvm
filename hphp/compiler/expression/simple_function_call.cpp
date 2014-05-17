@@ -866,19 +866,8 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
       m_params &&
       (m_type == FunType::Define ?
        unsigned(m_params->getCount() - 2) <= 1u :
-       (m_params->getCount() == 1 || m_params->getCount() == 2))) {
-
+       m_params->getCount() == 1)) {
     ExpressionPtr value = (*m_params)[0];
-    // For the "exists" functions, the optional (*m_params[1]) indicates
-    // whether autoload is supposed to be attempted ("true" if one param
-    // passed). We don't check it, because the optimizations that are
-    // attempted herein don't care about whether autoloading happens or
-    // succeeds; we optimize to "true" only for system builtins; and to
-    // "false" for constructs that don't appear at all in the whole program
-    // (in case of autoloading for user-defined constructs, the latter
-    // behavior is actually unsound if jumping into the autoloader has
-    // has important side effects!).
-
     if (value->isScalar()) {
       ScalarExpressionPtr name = dynamic_pointer_cast<ScalarExpression>(value);
       if (name && name->isLiteralString()) {

@@ -540,7 +540,9 @@ public:
    * XXX The analysis pass will inspect the live state of the VM stack
    * as needed to determine the current types of in-flight values.
    */
-  std::unique_ptr<Tracelet> analyze(SrcKey sk, const TypeMap& = TypeMap());
+  std::unique_ptr<Tracelet> analyze(SrcKey sk,
+                                    const TypeMap& = TypeMap(),
+                                    int32_t stackSlackUsedForInlining = 0);
 
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);

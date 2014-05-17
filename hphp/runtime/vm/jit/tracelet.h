@@ -170,6 +170,16 @@ struct Tracelet : private boost::noncopyable {
    */
   bool           m_inliningFailed;
 
+  /*
+   * A counter that accumulates the worst-possible stack depth we're
+   * causing via nested inlining.  This is used to make sure
+   * multi-level inlining doesn't cause the stack to go deeper than
+   * the kStackCheckLeafPadding threshold, which is necessary for
+   * correctness because we omit stack overflow checks for the inlined
+   * code.
+   */
+  uint32_t       m_stackSlackUsedForInlining{0};
+
   // Track which NormalizedInstructions and DynLocations are owned by this
   // Tracelet; used for cleanup purposes
   boost::ptr_vector<NormalizedInstruction> m_instrs;

@@ -691,6 +691,13 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
 
   ////////////
 
+  /*
+   * Note: this code contains a stack of Func*'s and looks like it's
+   * trying to track multi-level inlining of calls, but it doesn't
+   * ever happen if you are using a Tracelet that came from analyze().
+   *
+   * Don't rely on it for correctness.
+   */
   assert(!iter.finished() && "shouldIRInline given empty region");
   const bool hotCallingCold = !(callee->attrs() & AttrHot) &&
                                (caller->attrs() & AttrHot);
@@ -713,6 +720,10 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
           totalDepth += f->maxStackCells();
         }
         if (totalDepth >= kStackCheckLeafPadding) {
+          // NB: for correctness a situation like this /must/ also be
+          // refused earlier in analyzeCallee if you are using a
+          // Tracelet---this code is not going to run if 'iter' is a
+          // TraceletIter.
           return refuse("stack too deep after nested inlining");
         }
         ++inlineDepth;

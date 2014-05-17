@@ -3139,7 +3139,8 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
  *
  * TODO(2716400): support __call and friends?
  */
-bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
+bool shouldAnalyzeCallee(const Tracelet& tlet,
+                         const NormalizedInstruction* fcall,
                          const FPIEnt* fpi,
                          const Op pushOp,
                          const int depth) {
@@ -3148,9 +3149,11 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
 
   if (!RuntimeOption::RepoAuthoritative) return false;
 
-  if (pushOp != OpFPushFuncD && pushOp != OpFPushObjMethodD
-      && pushOp != OpFPushCtorD && pushOp != OpFPushCtor
-      && pushOp != OpFPushClsMethodD) {
+  if (pushOp != OpFPushFuncD &&
+      pushOp != OpFPushObjMethodD &&
+      pushOp != OpFPushCtorD &&
+      pushOp != OpFPushCtor &&
+      pushOp != OpFPushClsMethodD) {
     FTRACE(1, "analyzeCallee: push op ({}) was not supported\n",
            opcodeToName(pushOp));
     return false;
@@ -3163,6 +3166,15 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
 
   if (depth + 1 > RuntimeOption::EvalHHIRInliningMaxDepth) {
     FTRACE(1, "analyzeCallee: max inlining depth reached\n");
+    return false;
+  }
+
+  if (tlet.m_stackSlackUsedForInlining +
+      target->maxStackCells() > kStackCheckLeafPadding) {
+    FTRACE(1, "analyzeCallee: could exceed leaf padding "
+           "depth (currentUsed={}, needed={})\n",
+           tlet.m_stackSlackUsedForInlining,
+           target->maxStackCells());
     return false;
   }
 
@@ -3222,7 +3234,9 @@ void Translator::analyzeCallee(TraceletContext& tas,
   auto const fpi         = callerFunc->findFPI(fcall->source.offset());
   auto const pushOp      = fcall->m_unit->getOpcode(fpi->m_fpushOff);
 
-  if (!shouldAnalyzeCallee(fcall, fpi, pushOp, analysisDepth())) return;
+  if (!shouldAnalyzeCallee(parent, fcall, fpi, pushOp, analysisDepth())) {
+    return;
+  }
 
   auto const numArgs     = fcall->imm[0].u_IVA;
   auto const target      = fcall->funcd;
@@ -3347,7 +3361,12 @@ void Translator::analyzeCallee(TraceletContext& tas,
     FTRACE(1, "finished sub trace ===================================\n");
   };
 
-  auto subTrace = analyze(SrcKey(target, entryOffset, false), initialMap);
+  FTRACE(2, "analyzeCallee: slack used so far {}\n", target->maxStackCells());
+  auto subTrace = analyze(
+    SrcKey(target, entryOffset, false),
+    initialMap,
+    target->maxStackCells()
+  );
 
   /*
    * Verify the target trace actually ended with something we
@@ -3483,11 +3502,14 @@ bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
  * we store the RuntimeTypes from the TraceletContext right after the
  * instruction executes into the various output fields.
  */
-std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
-                                              const TypeMap& initialTypes) {
+std::unique_ptr<Tracelet>
+Translator::analyze(SrcKey sk,
+                    const TypeMap& initialTypes,
+                    int32_t const stackSlackUsedForInlining) {
   Timer _t(Timer::analyze);
 
   std::unique_ptr<Tracelet> retval(new Tracelet());
+  retval->m_stackSlackUsedForInlining = stackSlackUsedForInlining;
   auto func = sk.func();
   auto unit = sk.unit();
   auto resumed = sk.resumed();
@@ -4627,7 +4649,7 @@ std::string traceletShape(const Tracelet& trace) {
     using folly::toAppend;
 
     toAppend(opcodeToName(ni->op()), &ret);
-    if (ni->immVec.isValid()) {
+    if (hasMVector(ni->op())) {
       toAppend(
         "<",
         locationCodeString(ni->immVec.locationCode()),

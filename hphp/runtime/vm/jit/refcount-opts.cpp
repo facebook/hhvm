@@ -876,9 +876,15 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeAllLocals();
-    } else if (m_inst->is(CreateCont, CreateAFWH)) {
+    } else if (m_inst->is(CreateCont)) {
       consumeAllLocals();
       consumeInputs();
+      defineOutputs();
+    } else if (m_inst->is(CreateAFWH)) {
+      consumeAllLocals();
+      consumeInputs();
+      auto frame = frameRoot(m_inst->src(0)->inst());
+      consumeFrame(m_state.frames.live.at(frame));
       defineOutputs();
     } else if (m_inst->is(DecRefLoc)) {
       consumeLocal(m_inst->extra<DecRefLoc>()->locId);

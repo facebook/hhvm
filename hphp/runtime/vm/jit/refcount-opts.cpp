@@ -39,7 +39,7 @@
 
 namespace HPHP { namespace JIT {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir_refcount);
 
 namespace {
 

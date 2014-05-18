@@ -140,6 +140,7 @@ namespace Trace {
       TM(xls)         \
       TM(rat)         \
       TM(hhir_dce)    \
+      TM(hhir_refcount) \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

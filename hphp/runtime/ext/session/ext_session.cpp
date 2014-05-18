@@ -414,6 +414,7 @@ bool SystemlibSessionModule::close() {
   auto obj = s_obj->getObject();
   if (!obj) {
     // close() can be called twice in some circumstances
+    PS(mod_data) = false;
     return true;
   }
 

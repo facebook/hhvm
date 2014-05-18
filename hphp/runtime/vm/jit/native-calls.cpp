@@ -32,7 +32,6 @@
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 
-
 namespace {
 
 constexpr SyncOptions SNone = SyncOptions::kNoSyncPoint;
@@ -382,34 +381,6 @@ static CallMap s_callMap {
     {CountArray, &ArrayData::size, DSSA, SNone, {{SSA, 0}}},
 };
 
-ArgGroup CallInfo::toArgGroup(const RegAllocInfo& regs,
-                              const IRInstruction* inst) const {
-  ArgGroup argGroup{inst, regs[inst]};
-  for (auto const& arg : args) {
-    switch (arg.type) {
-    case ArgType::SSA:
-      argGroup.ssa(arg.ival);
-      break;
-    case ArgType::TV:
-      argGroup.typedValue(arg.ival);
-      break;
-    case ArgType::MemberKeyS:
-      argGroup.memberKeyS(arg.ival);
-      break;
-    case ArgType::MemberKeyIS:
-      argGroup.memberKeyIS(arg.ival);
-      break;
-    case ArgType::ExtraImm:
-      argGroup.imm(arg.extraFunc(inst));
-      break;
-    case ArgType::Imm:
-      argGroup.imm(arg.ival);
-      break;
-    }
-  }
-  return argGroup;
-}
-
 CallMap::CallMap(CallInfoList infos) {
   for (auto const& info : infos) {
     m_map[info.op] = info;
@@ -436,4 +407,67 @@ const CallInfo& CallMap::info(Opcode op) {
   return it->second;
 }
 
-} } }
+} // NativeCalls
+
+namespace X64 {
+using namespace NativeCalls;
+ArgGroup toArgGroup(const CallInfo& info, const RegAllocInfo& regs,
+                    const IRInstruction* inst) {
+  ArgGroup argGroup{inst, regs[inst]};
+  for (auto const& arg : info.args) {
+    switch (arg.type) {
+    case ArgType::SSA:
+      argGroup.ssa(arg.ival);
+      break;
+    case ArgType::TV:
+      argGroup.typedValue(arg.ival);
+      break;
+    case ArgType::MemberKeyS:
+      argGroup.memberKeyS(arg.ival);
+      break;
+    case ArgType::MemberKeyIS:
+      argGroup.memberKeyIS(arg.ival);
+      break;
+    case ArgType::ExtraImm:
+      argGroup.imm(arg.extraFunc(inst));
+      break;
+    case ArgType::Imm:
+      argGroup.imm(arg.ival);
+      break;
+    }
+  }
+  return argGroup;
+}
+} // X64
+namespace ARM {
+using namespace NativeCalls;
+ArgGroup toArgGroup(const CallInfo& info, const RegAllocInfo& regs,
+                    const IRInstruction* inst) {
+  ArgGroup argGroup{inst, regs[inst]};
+  for (auto const& arg : info.args) {
+    switch (arg.type) {
+    case ArgType::SSA:
+      argGroup.ssa(arg.ival);
+      break;
+    case ArgType::TV:
+      argGroup.typedValue(arg.ival);
+      break;
+    case ArgType::MemberKeyS:
+      argGroup.memberKeyS(arg.ival);
+      break;
+    case ArgType::MemberKeyIS:
+      argGroup.memberKeyIS(arg.ival);
+      break;
+    case ArgType::ExtraImm:
+      argGroup.imm(arg.extraFunc(inst));
+      break;
+    case ArgType::Imm:
+      argGroup.imm(arg.ival);
+      break;
+    }
+  }
+  return argGroup;
+}
+} // ARM
+
+} }

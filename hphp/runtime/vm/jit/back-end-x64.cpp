@@ -717,6 +717,7 @@ RegPair hintNativeCallDst(const IRInstruction& inst, unsigned i) {
     case DestType::SSA:
       return {rax, InvalidReg};
     case DestType::Dbl:
+    case DestType::SIMD:
       return {xmm0, InvalidReg};
     case DestType::TV:
       return {rax, rdx};

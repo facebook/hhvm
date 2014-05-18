@@ -21,26 +21,9 @@
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP { namespace JIT {
-
-struct CycleInfo {
-  PhysReg node;
-  int length;
-};
-
-struct MoveInfo {
-  enum class Kind { Move, Xchg };
-
-  MoveInfo(Kind kind, PhysReg s, PhysReg d):
-    m_kind(kind), m_src(s), m_dst(d) {}
-
-  Kind m_kind;
-  PhysReg m_src, m_dst;
-};
-
-bool cycleHasSIMDReg(const CycleInfo& cycle,
-                     PhysReg::Map<PhysReg>& moves);
 
 // Compute a sequence of moves and swaps that will fill the dest registers in
 // the moves map with their correct source values, even if some sources are
@@ -50,7 +33,21 @@ bool cycleHasSIMDReg(const CycleInfo& cycle,
 // is legal for rTmp to be a source for some other destination. Since rTmp
 // cannot be a destination, it cannot be in a copy-cycle, so its value will
 // be read before we deal with cycles.
+
+struct VMoveInfo {
+  enum class Kind { Move, Xchg };
+  Kind m_kind;
+  X64::Vreg m_src, m_dst;
+};
+
+struct MoveInfo {
+  enum class Kind { Move, Xchg };
+  Kind m_kind;
+  PhysReg m_src, m_dst;
+};
+
 typedef PhysReg::Map<PhysReg> MovePlan;
+smart::vector<VMoveInfo> doVregMoves(X64::Vunit&, MovePlan& moves);
 smart::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 
 }}

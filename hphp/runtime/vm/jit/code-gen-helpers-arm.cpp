@@ -51,7 +51,8 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
     a. Ldr  (rHostCallReg, argReg(0)[0]);
     a. Ldr  (rHostCallReg, rHostCallReg[call.vtableOffset()]);
     break;
-  case CppCall::Kind::Indirect:
+  case CppCall::Kind::IndirectReg:
+  case CppCall::Kind::IndirectVreg:
     // call indirect currently not implemented. It'll be somthing like
     // a.Br(x2a(call.getReg()))
     not_implemented();

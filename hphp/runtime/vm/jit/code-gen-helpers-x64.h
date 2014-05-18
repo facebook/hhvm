@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/phys-loc.h"
 
 namespace HPHP {
 struct Func;
@@ -48,7 +49,6 @@ void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 void emitEagerSyncPoint(Asm& as, const Op* pc);
 void emitEagerSyncPoint(Vout&, const Op* pc);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
-void emitEagerVMRegSave(Vout&, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 void emitGetGContext(Vout& as, Vreg dest);
 
@@ -184,7 +184,8 @@ void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2);
 void emitCmpClass(Vout&, Vreg reg, Vptr mem);
 void emitCmpClass(Vout&, Vreg reg1, Vreg reg2);
 
-void shuffle2(Vout&, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
+void copyTV(Vout&, const PhysLoc& src, const PhysLoc& dst);
+void pack2(Vout&, Vreg s0, Vreg s1, Vreg d0);
 
 void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);
 void zeroExtendIfBool(Vout& as, const SSATmp* src, Vreg reg);

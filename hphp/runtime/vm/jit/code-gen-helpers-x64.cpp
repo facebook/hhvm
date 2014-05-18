@@ -151,8 +151,9 @@ struct IfCountNotStatic {
 
 void emitTransCounterInc(Vout& v) {
   if (!mcg->tx().isTransDBEnabled()) return;
-  v << ldimm{mcg->tx().getTransCounterAddr(), rAsm};
-  v << incqmlock{*rAsm};
+  auto t = v.makeReg();
+  v << ldimm{mcg->tx().getTransCounterAddr(), t};
+  v << incqmlock{*t};
 }
 
 void emitTransCounterInc(Asm& a) {
@@ -288,8 +289,11 @@ void emitCall(Vout& v, CppCall target) {
     v << loadq{*rdi, rax};
     v << callm{rax[target.vtableOffset()]};
     return;
-  case CppCall::Kind::Indirect:
+  case CppCall::Kind::IndirectReg:
     v << callr{target.reg()};
+    return;
+  case CppCall::Kind::IndirectVreg:
+    v << callr{target.vreg()};
     return;
   case CppCall::Kind::ArrayVirt: {
     auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
@@ -460,30 +464,32 @@ void emitCmpClass(Vout& v, Vreg reg1, Vreg reg2) {
   }
 }
 
-void shuffle2(Vout& v, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
-  if (s0 == InvalidReg && s1 == InvalidReg &&
-      d0 == InvalidReg && d1 == InvalidReg) return;
-  assert(s0 != s1);
-  assert(!s0.isSIMD() || s1 == InvalidReg); // never 2 XMMs
-  assert(!d0.isSIMD() || d1 == InvalidReg); // never 2 XMMs
-  if (d0 == s1 && d1 != InvalidReg) {
-    assert(d0 != d1);
-    v << copy2{s0, s1, d0, d1};
-  } else if (d0.isSIMD() && s0.isGP() && s1.isGP()) {
-    // move 2 gpr to 1 xmm
-    assert(d0 != rCgXMM0); // CgXMM0 is reserved for scratch
-    auto x = v.makeReg();
-    v << copy{s0, d0};
-    v << copy{s1, x};
-    v << unpcklpd{x, d0, d0}; // s1 -> d0[1]
-  } else {
-    if (d0 != InvalidReg) v << copy{s0, d0}; // d0 != s1
-    if (d1 != InvalidReg) v << copy{s1, d1};
+void copyTV(Vout& v, const PhysLoc& src, const PhysLoc& dst) {
+  auto src_arity = src.numAllocated();
+  auto dst_arity = dst.numAllocated();
+  if (dst_arity == 0) return;
+  if (dst_arity == 2) {
+    assert(src_arity == 2);
+    v << copy2{src.reg(0), src.reg(1), dst.reg(0), dst.reg(1)};
+    return;
   }
+  assert(dst_arity == 1);
+  if (src_arity == 2 && dst.isFullSIMD()) {
+    pack2(v, src.reg(0), src.reg(1), dst.reg(0));
+    return;
+  }
+  assert(src_arity >= 1);
+  if (dst.reg(0) != InvalidReg) v << copy{src.reg(0), dst.reg(0)};
+  if (dst.reg(1) != InvalidReg) v << copy{src.reg(1), dst.reg(1)};
 }
 
-void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
-  shuffle2(Vauto().main(as), s0, s1, d0, d1);
+// move 2 gpr to 1 xmm
+void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
+  auto t0 = v.makeReg();
+  auto t1 = v.makeReg();
+  v << copy{s0, t0};
+  v << copy{s1, t1};
+  v << unpcklpd{t1, t0, d0}; // s0,s1 -> d0[0],d0[1]
 }
 
 void zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {

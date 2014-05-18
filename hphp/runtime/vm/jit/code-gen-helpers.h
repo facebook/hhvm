@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/util/abi-cxx.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP { namespace JIT {
 
@@ -45,7 +46,8 @@ struct CppCall {
     /*
      * Calls through a register.
      */
-    Indirect,
+    IndirectReg,
+    IndirectVreg,
     /*
      * Call through the "rotated" ArrayData vtable.  This is used to
      * call ArrayData apis by loading a function pointer out of
@@ -117,7 +119,10 @@ struct CppCall {
    * Indirect call through a register.
    */
   static CppCall indirect(PhysReg r) {
-    return CppCall { Kind::Indirect, r };
+    return CppCall { Kind::IndirectReg, r };
+  }
+  static CppCall indirect(X64::Vreg r) {
+    return CppCall { Kind::IndirectVreg, r };
   }
 
   /*
@@ -145,8 +150,12 @@ struct CppCall {
     return m_u.vtableOffset;
   }
   PhysReg reg() const {
-    assert(m_kind == Kind::Indirect || m_kind == Kind::Destructor);
+    assert(m_kind == Kind::IndirectReg || m_kind == Kind::Destructor);
     return m_u.reg;
+  }
+  X64::Vreg vreg() const {
+    assert(m_kind == Kind::IndirectVreg);
+    return m_u.vreg;
   }
   void* arrayTable() const {
     assert(kind() == Kind::ArrayVirt);
@@ -159,7 +168,7 @@ struct CppCall {
    * Pre: kind() == Kind::Indirect
    */
   void updateCallIndirect(PhysReg reg) {
-    assert(m_kind == Kind::Indirect);
+    assert(m_kind == Kind::IndirectReg || m_kind == Kind::IndirectVreg);
     m_u.reg = reg;
   }
 
@@ -168,10 +177,12 @@ private:
     /* implicit */ U(void* fptr)       : fptr(fptr) {}
     /* implicit */ U(int vtableOffset) : vtableOffset(vtableOffset) {}
     /* implicit */ U(PhysReg reg)      : reg(reg) {}
+    /* implicit */ U(X64::Vreg reg)    : vreg(reg) {}
 
     void* fptr;
     int vtableOffset;
     PhysReg reg;
+    X64::Vreg vreg;
   };
 
 private:

@@ -35,8 +35,6 @@ namespace X64 {
 bool okStore(int64_t c) { return true; }
 
 // return true if cgCallHelper and ArgGroup accept c as immediate.
-// passing large immediates as args on the stack will implicitly
-// clobber rCgGP (R11).
 bool okArg(int64_t c) { return true/*isI32(c)*/; }
 
 // return true if CodeGenerator supports this operand as an

@@ -224,7 +224,7 @@ inline void emitStoreTVType(X64::Vout& v, X64::Vreg src, X64::Vptr dest) {
 }
 
 inline void
-emitStoreTVType(X64::Vout& v, DataType src, MemoryRef dest) {
+emitStoreTVType(X64::Vout& v, DataType src, X64::Vptr dest) {
   v << X64::storebim{src, dest};
 }
 

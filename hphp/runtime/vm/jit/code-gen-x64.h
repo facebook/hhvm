@@ -40,7 +40,6 @@ struct CodeGenerator : public JIT::CodeGenerator {
     , m_vcold(cold)
     , m_vfrozen(frozen)
     , m_state(state)
-    , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
   {
   }
@@ -68,7 +67,8 @@ private:
 
   void cgCallNative(Vout&, IRInstruction* inst);
 
-  CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
+  CallDest callDest(Vreg reg0) const;
+  CallDest callDest(Vreg reg0, Vreg reg1) const;
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
   CallDest callDestDbl(const IRInstruction*) const;
@@ -83,21 +83,14 @@ private:
 
   enum class Width { Value, Full };
   void cgStore(MemoryRef dst, SSATmp* src, PhysLoc src_loc, Width);
-  void cgStoreTypedValue(MemoryRef dst, SSATmp* src, PhysLoc src_loc);
+  void cgStoreTypedValue(Vptr dst, SSATmp* src, PhysLoc src_loc);
 
   // helpers to load a value in dst. When label is not null a type check
   // is performed against value to ensure it is of the type expected by dst
-  void cgLoad(SSATmp* dst, PhysLoc dstLoc, MemoryRef value,
+  void cgLoad(SSATmp* dst, PhysLoc dstLoc, Vptr base,
               Block* label = nullptr);
-  void cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc, MemoryRef base,
+  void cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc, Vptr ref,
                         Block* label = nullptr);
-
-  // internal helpers to manage register conflicts from a source to a PhysReg
-  // destination.
-  // If the conflict cannot be resolved the out param isResolved is set to
-  // false and the caller should take proper action
-  MemoryRef resolveRegCollision(PhysReg dst, MemoryRef value,
-                                bool& isResolved);
 
   template<class Loc1, class Loc2, class JmpFn>
   void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc);
@@ -166,8 +159,6 @@ private:
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
   RegSet findFreeRegs(IRInstruction* inst);
-  PhysReg prepXMMReg(Vout&, const SSATmp* src, const PhysLoc& srcLoc,
-                     RegXMM rXMMScratch);
   VregXMM prepXMM(Vout&, const SSATmp* src, const PhysLoc& srcLoc);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
@@ -181,9 +172,9 @@ private:
   bool decRefDestroyIsUnlikely(OptDecRefProfile& profile, Type type);
   template <typename F>
   void cgCheckStaticBitAndDecRef(Vout&, Vlabel done, Type type,
-                                 PhysReg dataReg, F destroyImpl);
+                                 Vreg dataReg, F destroyImpl);
   void cgCheckStaticBitAndDecRef(Vout&, Vlabel done, Type type,
-                                 PhysReg dataReg);
+                                 Vreg dataReg);
   void cgCheckRefCountedType(PhysReg typeReg, Vlabel done);
   void cgCheckRefCountedType(PhysReg baseReg, int64_t offset, Vlabel done);
   void cgDecRefStaticType(Vout&, Type type, Vreg dataReg, bool genZeroCheck);
@@ -261,7 +252,6 @@ private:
   Vout&               m_vcold;
   Vout&               m_vfrozen;
   CodegenState&       m_state;
-  Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
   const RegAllocInfo::RegMap* m_instRegs; // registers for current m_curInst.
 };
@@ -281,6 +271,22 @@ inline MemoryRef refTVType(MemoryRef ref) {
 
 inline MemoryRef refTVData(MemoryRef ref) {
   return *(ref.r + TVOFF(m_data));
+}
+
+inline Vptr refTVType(Vreg reg) {
+  return reg[TVOFF(m_type)];
+}
+
+inline Vptr refTVData(Vreg reg) {
+  return reg[TVOFF(m_data)];
+}
+
+inline Vptr refTVType(Vptr ref) {
+  return ref + TVOFF(m_type);
+}
+
+inline Vptr refTVData(Vptr ref) {
+  return ref + TVOFF(m_data);
 }
 
 }}}

@@ -1049,7 +1049,7 @@ static void shuffleArgs(vixl::MacroAssembler& a,
       argDescs[dstReg] = &arg;
     }
     switch (call.kind()) {
-    case CppCall::Kind::Indirect:
+    case CppCall::Kind::IndirectReg:
       if (dstReg == call.reg()) {
         // an indirect call uses an argument register for the func ptr.
         // Use rAsm2 instead and update the CppCall
@@ -1061,6 +1061,9 @@ static void shuffleArgs(vixl::MacroAssembler& a,
     case CppCall::Kind::Virtual:
     case CppCall::Kind::ArrayVirt:
     case CppCall::Kind::Destructor:
+      break;
+    case CppCall::Kind::IndirectVreg:
+      always_assert(false);
       break;
     }
   }
@@ -1120,7 +1123,7 @@ void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
   always_assert(CallMap::hasInfo(opc));
 
   auto const& info = CallMap::info(opc);
-  ArgGroup argGroup = info.toArgGroup(m_state.regs, inst);
+  ArgGroup argGroup = toArgGroup(info, m_state.regs, inst);
 
   auto call = [&]() -> CppCall {
     switch (info.func.type) {
@@ -1136,7 +1139,8 @@ void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
   auto const dest = [&]() -> CallDest {
     switch (info.dest) {
       case DestType::None:  return kVoidDest;
-      case DestType::TV:    return callDestTV(inst);
+      case DestType::TV:
+      case DestType::SIMD:  return callDestTV(inst);
       case DestType::SSA:   return callDest(inst);
       case DestType::Dbl:   return callDestDbl(inst);
     }
@@ -1191,6 +1195,7 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
 
   switch (dstInfo.type) {
     case DestType::TV: not_implemented();
+    case DestType::SIMD: not_implemented();
     case DestType::SSA:
       assert(dstReg1 == InvalidReg);
       if (armDst0.IsValid() && !armDst0.Is(vixl::x0)) {
@@ -1236,6 +1241,9 @@ CallDest CodeGenerator::callDest(const IRInstruction* inst) const {
 CallDest CodeGenerator::callDestTV(const IRInstruction* inst) const {
   if (!inst->numDsts()) return kVoidDest;
   auto loc = dstLoc(0);
+  if (loc.isFullSIMD()) {
+    return { DestType::SIMD, loc.reg(0), InvalidReg };
+  }
   return { DestType::TV, loc.reg(0), loc.reg(1) };
 }
 

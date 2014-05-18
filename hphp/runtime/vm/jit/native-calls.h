@@ -121,9 +121,6 @@ struct CallInfo {
   DestType dest;
   SyncOptions sync;
   std::vector<Arg> args;
-
-  ArgGroup toArgGroup(const RegAllocInfo &regs,
-                      const IRInstruction* inst) const;
 };
 
 typedef std::initializer_list<CallInfo> CallInfoList;

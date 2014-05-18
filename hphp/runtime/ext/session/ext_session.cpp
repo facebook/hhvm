@@ -402,6 +402,7 @@ bool SystemlibSessionModule::open(const char *save_path,
                              nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
+    PS(mod_data) = true;
     return true;
   }
 

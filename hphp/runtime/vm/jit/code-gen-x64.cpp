@@ -5272,10 +5272,9 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
   SSATmp* arr = inst->src(0);
   SSATmp* key = inst->src(1);
 
-  int64_t (*obj_int_helper)(ObjectData*, int64_t) = &ak_exist_int_obj;
-  int64_t (*obj_str_helper)(ObjectData*, StringData*) = &ak_exist_string_obj;
-  int64_t (*arr_int_helper)(ArrayData*, int64_t) = &ak_exist_int;
-  int64_t (*arr_str_helper)(ArrayData*, StringData*) = &ak_exist_string;
+  bool (*obj_int_helper)(ObjectData*, int64_t) = &ak_exist_int_obj;
+  bool (*obj_str_helper)(ObjectData*, StringData*) = &ak_exist_string_obj;
+  bool (*arr_str_helper)(ArrayData*, StringData*) = &ak_exist_string;
 
   if (key->type() <= Type::Null) {
     if (arr->isA(Type::Arr)) {
@@ -5290,12 +5289,16 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
     return;
   }
 
-  TCA helper_func =  arr->isA(Type::Obj)
-    ? (key->isA(Type::Int) ? (TCA)obj_int_helper : (TCA)obj_str_helper)
-    : (key->isA(Type::Int) ? (TCA)arr_int_helper : (TCA)arr_str_helper);
+  auto helper_func = arr->isA(Type::Obj)
+    ? (key->isA(Type::Int)
+       ? CppCall::direct(obj_int_helper)
+       : CppCall::direct(obj_str_helper))
+    : (key->isA(Type::Int)
+       ? CppCall::array(&g_array_funcs.existsInt)
+       : CppCall::direct(arr_str_helper));
 
   cgCallHelper(m_as,
-               CppCall::direct(reinterpret_cast<void (*)()>(helper_func)),
+               helper_func,
                callDest(inst),
                SyncOptions::kNoSyncPoint,
                argGroup().ssa(0/*arr*/).ssa(1/*key*/));

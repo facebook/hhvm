@@ -1713,14 +1713,19 @@ hphp_libxml_input_buffer(const char *URI, xmlCharEncoding enc);
 class xmlErrorVec : public std::vector<xmlError> {
 public:
   ~xmlErrorVec() {
-    reset();
+    clearErrors();
   }
 
   void reset() {
+    clearErrors();
+    xmlErrorVec().swap(*this);
+  }
+
+private:
+  void clearErrors() {
     for (int64_t i = 0; i < size(); i++) {
       xmlResetError(&at(i));
     }
-    clear();
   }
 };
 

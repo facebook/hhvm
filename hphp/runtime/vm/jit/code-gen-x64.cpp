@@ -1415,50 +1415,27 @@ void CodeGenerator::cgXorBool(IRInstruction* inst) {
 
 void CodeGenerator::cgMod(IRInstruction* inst) {
   static_assert(rCgGP != rax && rCgGP != rdx, "");
-  auto const src0 = inst->src(0);
-  auto const src1 = inst->src(1);
   auto const dstReg = dstLoc(0).reg();
-  auto const loc0 = srcLoc(0);
-  auto const loc1 = srcLoc(1);
+  auto const reg0 = srcLoc(0).reg();
+  auto const reg1 = srcLoc(1).reg();
   auto& a = m_as;
 
   // spill rax and/or rdx
-  bool spillRax = dstReg != reg::rax;
-  bool spillRdx = dstReg != reg::rdx;
-  if (spillRax) {
-    a.  push   (reg::rax);
-  }
-  if (spillRdx) {
-    a.  push   (reg::rdx);
-  }
-  // put divisor in rCgGP
-  if (src1->isConst()) {
-    // TODO: #3626251 would let us avoid this.
-    a.  movq   (src1->intVal(), rCgGP);
-  } else {
-    a.  movq   (loc1.reg(), rCgGP);
-  }
+  bool spillRax = dstReg != rax;
+  bool spillRdx = dstReg != rdx;
+  if (spillRax) a.  push   (rax);
+  if (spillRdx) a.  push   (rdx);
+  // put divisor in rCgGP if it would get clobbered
+  auto divisor = reg1 != rax && reg1 != rdx ? reg1 : PhysReg(rCgGP);
+  emitMovRegReg(a, reg1, divisor);
   // put dividend in rax
-  if (src0->isConst()) {
-    // TODO: #3626251 would let us avoid this.
-    a.  movq   (src0->intVal(), reg::rax);
-  } else if (loc0.reg() != reg::rax) {
-    a.  movq   (loc0.reg(), reg::rax);
-  }
-  // sign-extend rax to rdx:rax
-  a.    cqo    ();
-  // divide
-  a.    idiv   (rCgGP);
-  if (dstReg != reg::rdx) {
-    a.  movq   (reg::rdx, dstReg);
-  }
+  emitMovRegReg(a, reg0, rax);
+  a.    cqo    ();        // sign-extend rax => rdx:rax
+  a.    idiv   (divisor); // rdx:rax/divisor => quot:rax, rem:rdx
+  emitMovRegReg(a, rdx, dstReg);
   // restore rax and/or rdx
-  if (spillRdx) {
-    a.  pop    (reg::rdx);
-  }
-  if (spillRax) {
-    a.  pop    (reg::rax);
-  }
+  if (spillRdx) a.  pop    (reg::rdx);
+  if (spillRax) a.  pop    (reg::rax);
 }
 
 void CodeGenerator::cgSqrt(IRInstruction* inst) {

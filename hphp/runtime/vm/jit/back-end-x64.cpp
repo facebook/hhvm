@@ -493,6 +493,9 @@ RegPair BackEnd::precolorSrc(const IRInstruction& inst, unsigned i) {
     case Shr:
       if (i == 1) return {PhysReg(rcx), InvalidReg};
       break;
+    case Mod:
+      // x86 idiv does: rdx:rax/r => quotent:rax, remainder:rdx
+      if (i == 0) return {PhysReg(rax), InvalidReg};
     default:
       break;
   }
@@ -504,8 +507,15 @@ RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
   if (CallMap::hasInfo(inst.op())) {
     return hintNativeCallDst(inst, i);
   }
-  if (inst.op() == CallBuiltin) {
-    return hintCallBuiltinDst(inst, i);
+  switch (inst.op()) {
+    case CallBuiltin:
+      return hintCallBuiltinDst(inst, i);
+    case Mod:
+      // x86 idiv does: rdx:rax/r => quotent:rax, remainder:rdx
+      if (i == 0) return {PhysReg(rdx), InvalidReg};
+      break;
+    default:
+      break;
   }
   return InvalidRegPair;
 }

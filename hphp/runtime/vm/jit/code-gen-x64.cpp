@@ -4628,6 +4628,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const src   = inst->src(0);
   auto const rData = srcLoc(0).reg(0);
   auto const rType = srcLoc(0).reg(1);
+  assert(rData != InvalidReg);
 
   auto doJcc = [&](ConditionCode cc) {
     emitFwdJcc(ccNegate(cc), inst->taken());
@@ -4638,8 +4639,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     // TODO: #3626251: XLS: Let Uses say whether a constant is
     // allowed, and if not, assign a register.
     if (valDst != InvalidReg) {
-      if (rData != InvalidReg) emitMovRegReg(m_as, rData, valDst);
-      else if (src->isConst()) m_as.emitImmReg(src->rawVal(), valDst);
+      emitMovRegReg(m_as, rData, valDst);
     }
     if (typeDst != InvalidReg) {
       if (rType != InvalidReg) emitMovRegReg(m_as, rType, typeDst);
@@ -4669,13 +4669,6 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     } else if (typeParam.isSpecialized()) {
       // We're just checking the array kind or object class of a value with a
       // mostly-known type.
-      assert(rData != InvalidReg);
-      auto testReg = rData;
-      if (src->isConst()) {
-        // In rare cases we can have a const array src here.
-        m_as.movq(src->rawVal(), m_rScratch);
-        testReg = m_rScratch;
-      }
       emitSpecializedTypeTest(typeParam, rData, doJcc);
     } else if (typeParam <= Type::Uncounted &&
                ((srcType <= Type::Str && typeParam.maybe(Type::StaticStr)) ||
@@ -4683,7 +4676,6 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       // We carry Str and Arr operands around without a type register,
       // even though they're union types.  The static and non-static
       // subtypes are distinguised by the refcount field.
-      assert(rData != InvalidReg);
       m_as.cmpl(0, rData[FAST_REFCOUNT_OFFSET]);
       doJcc(CC_L);
     } else {

@@ -1771,8 +1771,7 @@ static void HHVM_FUNCTION(session_unset) {
   if (PS(session_status) == Session::None) {
     return;
   }
-  GlobalVariables *g = get_global_variables();
-  g->getRef(s__SESSION) = Variant();
+  php_global_set(s__SESSION, Variant());
   return;
 }
 

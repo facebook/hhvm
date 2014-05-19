@@ -467,7 +467,10 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
     const char *s = str.c_str();
     int64_t ret_start = 0, ret_len = 0;
     U8_FWD_N(s, ret_start, str.size(), start_pos);
-    U8_FWD_N(s, ret_len, str.size() - ret_start, end_pos - start_pos);
+    U8_FWD_N(&s[ret_start],
+             ret_len,
+             str.size() - ret_start,
+             end_pos - start_pos);
     return str.substr(ret_start, ret_len);
   }
 }

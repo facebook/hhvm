@@ -446,7 +446,9 @@ module Env = struct
 
   let fun_id (genv, _) x =
     let fq_x = Namespaces.elaborate_id genv.namespace x in
-    let need_fallback = not (String.contains (snd x) '\\') in
+    let need_fallback =
+      genv.namespace.Namespace_env.ns_name <> None &&
+      not (String.contains (snd x) '\\') in
     if need_fallback then begin
       let global_x = (fst x, "\\" ^ (snd x)) in
       (* Explicitly add dependencies on both of the functions we could be

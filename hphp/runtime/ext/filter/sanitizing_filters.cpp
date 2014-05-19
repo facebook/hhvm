@@ -236,7 +236,10 @@ Variant php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL) {
   if (flags != 0 && value.length() > 0) {
     unsigned char enc[256] = {0};
 
-    php_filter_strip(value, flags);
+    auto stripped = php_filter_strip(value, flags);
+    if (!stripped.isString()) {
+      return stripped;
+    }
 
     if (flags & k_FILTER_FLAG_ENCODE_AMP) {
       enc[uc('&')] = 1;
@@ -248,7 +251,7 @@ Variant php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL) {
       memset(enc + 127, 1, sizeof(enc) - 127);
     }
 
-    return php_filter_encode_html(value, enc);
+    return php_filter_encode_html(stripped.toString(), enc);
   } else if (flags & k_FILTER_FLAG_EMPTY_STRING_NULL && value.length() == 0) {
     return uninit_null();
   }

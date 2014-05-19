@@ -91,7 +91,6 @@ let get_ideps x =
 (* Gets ALL the dependencies ... hence the name *)
 let get_bazooka x =
   match x with
-  | Dep.GConst cid
   | Dep.Const (cid, _)
   | Dep.CVar (cid, _)
   | Dep.SCVar (cid, _)
@@ -102,6 +101,7 @@ let get_bazooka x =
   | Dep.Class cid -> get_ideps (Dep.Class cid)
   | Dep.Fun fid -> get_ideps (Dep.Fun fid)
   | Dep.FunName fid -> get_ideps (Dep.FunName fid)
+  | Dep.GConst cid -> get_ideps (Dep.GConst cid)
   | Dep.Injectable -> ISet.empty
 
 (*****************************************************************************)

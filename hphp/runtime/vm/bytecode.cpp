@@ -2137,6 +2137,25 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   return prevFp;
 }
 
+void ExecutionContext::nullOutReturningActRecs() {
+  VMRegAnchor _;
+  ActRec* fp = getFP();
+  if (!fp) return;
+  Offset pc = 0;
+  auto const curOp = *reinterpret_cast<const Op*>(getPC());
+  if (curOp == Op::RetC || curOp == Op::RetV) {
+    fp->setThisOrClassAllowNull(nullptr);
+  }
+  while (ActRec* prevFp = getPrevVMState(fp, &pc)) {
+    auto const curOp =
+      *reinterpret_cast<const Op*>(prevFp->m_func->unit()->at(pc));
+    if (curOp == Op::RetC || curOp == Op::RetV) {
+      prevFp->setThisOrClassAllowNull(nullptr);
+    }
+    fp = prevFp;
+  }
+}
+
 Array ExecutionContext::debugBacktrace(bool skip /* = false */,
                                        bool withSelf /* = false */,
                                        bool withThis /* = false */,

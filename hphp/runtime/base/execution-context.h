@@ -584,6 +584,7 @@ public:
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
                          bool* fromVMEntry = nullptr);
+  void nullOutReturningActRecs();
   Array debugBacktrace(bool skip = false,
                        bool withSelf = false,
                        bool withThis = false,

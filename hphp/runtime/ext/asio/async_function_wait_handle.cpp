@@ -279,25 +279,36 @@ String c_AsyncFunctionWaitHandle::getName() {
     case STATE_BLOCKED:
     case STATE_SCHEDULED:
     case STATE_RUNNING: {
+      auto func = actRec()->func();
+      if (!actRec()->getThisOrClass() ||
+          func->cls()->attrs() & AttrNoOverride) {
+        auto name = func->fullName();
+        if (func->isClosureBody()) {
+          const char* p = strchr(name->data(), ':');
+          if (p) {
+            return
+              concat(String(name->data(), p + 1 - name->data(), CopyString),
+                     s__closure_);
+          } else {
+            return s__closure_;
+          }
+        }
+        return const_cast<StringData*>(name);
+      }
       String funcName;
       if (actRec()->func()->isClosureBody()) {
         // Can we do better than this?
         funcName = s__closure_;
       } else {
-        funcName = actRec()->func()->name()->data();
+        funcName = const_cast<StringData*>(actRec()->func()->name());
       }
 
       String clsName;
       if (actRec()->hasThis()) {
-        // use get_class($this) if we have $this
-        clsName = actRec()->getThis()->getVMClass()->name()->data();
+        clsName = const_cast<StringData*>(actRec()->getThis()->
+                                          getVMClass()->name());
       } else if (actRec()->hasClass()) {
-        // use get_called_class() if we have class context
-        clsName = actRec()->getClass()->name()->data();
-      } else if (actRec()->func()->isMethod()) {
-        // use __CLASS__ if we are in a method, but context was wiped
-        // (by onFunctionExit or by unwinder)
-        clsName = actRec()->func()->cls()->name()->data();
+        clsName = const_cast<StringData*>(actRec()->getClass()->name());
       } else {
         return funcName;
       }

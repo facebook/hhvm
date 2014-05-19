@@ -51,6 +51,7 @@ private:
   bool m_pathTranslation;
   ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
 
+  void handleRequestImpl(Transport *transport);
   bool handleProxyRequest(Transport *transport, bool force);
   void sendStaticContent(Transport *transport, const char *data, int len,
                          time_t mtime, bool compressed,

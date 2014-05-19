@@ -403,7 +403,7 @@ bool f_flock(const Resource& handle, int operation, VRefParam wouldblock /* = nu
   return ret;
 }
 
-// match the behavior of Zend PHP
+// match the behavior of PHP5
 #define FCSV_CHECK_ARG(NAME)                            \
   if (NAME.size() == 0) {                               \
     throw_invalid_argument(#NAME ": %s", NAME.data());  \

@@ -3178,7 +3178,7 @@ void TypeAssertionInserter::BuildAssertionMap() {
     s_type_assertion_map["in_array"]   = PosType(1, Type::Array);
 
     // even though the PHP docs say that in PHP 5.3, this function
-    // only accepts an array for the search, Zend PHP 5.3 still
+    // only accepts an array for the search, PHP 5.3 still
     // accepts objects. Quite a bummer.
     s_type_assertion_map["array_key_exists"] =
       PosType(1,

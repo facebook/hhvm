@@ -56,7 +56,7 @@ void CmdHelp::HelpAll(DebuggerClient &client) {
     "[<?]php",      "starts input of a block of PHP code",
     "?>",           "ends and evaluates a block a PHP code",
     "[a]bort",      "aborts input of a block of PHP code",
-    "[z]end",       "evaluates the last snippet in Zend PHP",
+    "[z]end",       "evaluates the last snippet in PHP5",
 
     "Documentation and Source Code", "",
     "[i]nfo",       "displays documentations and other information",

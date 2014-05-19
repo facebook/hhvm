@@ -58,7 +58,7 @@ echo "array-index\n";
 $array = [0, 1, 2, 3];
 var_dump($array[0b11]);
 
-// Zend PHP does not have "real" runtime support as of 5.5.7
+// PHP5 does not have "real" runtime support as of 5.5.7
 // So the expected behavior is not what you would expect "logically"
 echo "runtime support\n";
 $i = (int)    "0b100";

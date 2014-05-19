@@ -25,7 +25,7 @@ TRACE_SET_MOD(debugger);
 void CmdZend::help(DebuggerClient &client) {
   client.helpTitle("Zend Command");
   client.helpCmds(
-    "[z]end", "running the most recent code snippet in Zend PHP",
+    "[z]end", "running the most recent code snippet in PHP5",
     nullptr
   );
   client.helpBody(

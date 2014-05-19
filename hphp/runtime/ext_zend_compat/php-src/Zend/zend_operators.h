@@ -454,12 +454,12 @@ inline const HPHP::TypedValue& zval_follow_ref(const zval &z) {
 }
 
 /**
- * Zend PHP extensions assume that a zval owns its array exclusively.
+ * PHP5 extensions assume that a zval owns its array exclusively.
  * However, HHVM allows arrays to be shared by multiple things (and it
  * uses refcounting to keep track of how many things own a reference to
  * the array). The purpose of ZArrVal is to give us a way to intercept
  * certain uses Z_ARRVAL so that we can make a copy of the array when
- * appropriate so that Zend PHP extensions work correctly.
+ * appropriate so that PHP5 extensions work correctly.
  */
 class ZArrVal {
 private:

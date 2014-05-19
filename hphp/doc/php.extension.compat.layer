@@ -8,10 +8,10 @@ Introduction
 ------------
 
 HHVM has experimental support for PHP extensions that were originally written
-to target the Zend PHP execution engine.
+to target the PHP5 execution engine.
 
 PHP extensions are written in C and make use of a number of APIs and macros
-provided by the Zend PHP engine to read and manipulate PHP program values.
+provided by the PHP5 engine to read and manipulate PHP program values.
 Documentation for these APIs and macros can be found here:
 
   http://php.net/manual/en/internals2.ze1.zendapi.php
@@ -80,7 +80,7 @@ incremented), and RefData fits in with these assumptions nicely. Of course, it
 is unreasonable to box every program variable in HHVM since this would hurt
 performance. Luckily, it is unnecessary to box all program values; instead we
 can just box program values lazily as needed in the right places to ensure that
-Zend PHP extensions only deal with boxed values.
+PHP5 extensions only deal with boxed values.
 
 
 Dealing with "reffiness"

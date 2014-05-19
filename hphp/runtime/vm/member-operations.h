@@ -1597,7 +1597,7 @@ template <bool useEmpty, KeyType keyType>
 inline bool IssetEmptyElemString(TypedValue& tvScratch, TypedValue* base,
                                  key_type<keyType> key) {
   // TODO Task #2716479: Fix this so that the warnings raised match
-  // Zend PHP.
+  // PHP5.
   TypedValue scratchKey = initScratchKey(key);
   int64_t x;
   if (LIKELY(scratchKey.m_type == KindOfInt64)) {

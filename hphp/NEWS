@@ -115,7 +115,7 @@ NEXT
 "Beastie Boys" 6-Jan-2014
   - Support lex-time binary constants (eg. 0b10111)
   - StreamWrappers now support rmdir, mkdir, rename and unlink
-  - Miscellaneous Zend PHP compatibility fixes
+  - Miscellaneous PHP5 compatibility fixes
   - Default StatCache to off
   - Miscellaneous FastCGI fixes
   - Miscellaneous region compiler fixes

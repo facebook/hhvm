@@ -69,11 +69,11 @@ class C extends B {
    *      behavior. HipHop explicitly lists this in the inconsistencies doc.
    *   2) If the current instance ($this) is non-null, the class of the current
    *      instance must be the same as the current late bound class (aka the
-   *      "called class"). This invariant is stated explicitly in Zend PHP's
+   *      "called class"). This invariant is stated explicitly in PHP5's
    *      documentation: "In non-static contexts, the called class will be the
    *      class of the object instance."
    *   3) Normal style calls and call_user_func style calls should produce
-   *      consistent results aside from any exceptions mentioned in Zend PHP's
+   *      consistent results aside from any exceptions mentioned in PHP5's
    *      documentation. Therefore, "B::meth()" and "call_user_func('B::meth')"
    *      and "call_user_func(array('B', 'meth'))" should all produce consistent
    *      results.

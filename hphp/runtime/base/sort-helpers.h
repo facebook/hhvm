@@ -301,7 +301,7 @@ struct ElmUCompare {
       warned = true;
     }
     if (ret.isBoolean()) {
-      // Match the behavior of Zend PHP for comparators that return
+      // Match the behavior of PHP5 for comparators that return
       // boolean values
       bool b = ret.toBoolean();
       if (b) {

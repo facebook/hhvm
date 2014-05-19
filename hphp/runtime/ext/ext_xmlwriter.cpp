@@ -391,7 +391,7 @@ bool c_XMLWriter::t_startelementns(const Variant& prefix, const String& name,
   }
   int ret = -1;
   if (m_ptr) {
-    // To be consistent with Zend PHP, we need to make a distinction between
+    // To be consistent with PHP5, we need to make a distinction between
     // null strings and empty strings for the prefix. We use const Variant& above
     // because null strings are coerced to empty strings automatically.
     xmlChar * prefixData = prefix.isNull()

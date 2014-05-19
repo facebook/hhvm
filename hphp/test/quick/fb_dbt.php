@@ -29,7 +29,7 @@ function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
     $real = strlen(realpath($_SERVER['PHP_ROOT']).'/');
   }
 
-  if (!$bt) {  // fb_handle_error defaults to array() in Zend PHP
+  if (!$bt) {  // fb_handle_error defaults to array() in PHP5
     $bt = debug_backtrace();
     // Remove fb_debug_backtrace from the backtrace
     array_shift($bt);

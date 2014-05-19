@@ -1195,19 +1195,14 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
 
 void HhbcTranslator::classExistsImpl(ClassKind kind) {
   auto const catchTrace = makeCatch();
-  auto const tAutoload  = topC(0);
-  auto const tCls       = topC(1);
 
-  if (!tCls->isA(Type::Str) ||
-      !tAutoload->isConst() ||
-      !tAutoload->isA(Type::Bool) ||
-      !tAutoload->boolVal()) {
-    return emitInterpOne(Type::Bool, 2);
-  }
+  auto const tAutoload = popC();
+  auto const tCls = popC();
 
-  auto const exists =
-    gen(ThingExists, catchTrace, ClassKindData { kind }, tCls);
-  popC(); popC(); push(exists);
+  assert(tCls->isA(Type::Str)); // result of CastString
+  assert(tAutoload->isA(Type::Bool)); // result of CastBool
+
+  push(gen(OODeclExists, catchTrace, ClassKindData { kind }, tCls, tAutoload));
   gen(DecRef, tCls);
 }
 

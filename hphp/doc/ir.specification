@@ -1720,10 +1720,10 @@ D:StkPtr InterpOneCF<T, bcOff, numPopped, numPushed> S0:StkPtr S1:FramePtr
 
   Similar to InterpOne, but for instructions that may modify vmpc.
 
-D:Bool = ThingExists<class|interface|trait> S0:Str
+D:Bool = OODeclExists<class|interface|trait> S0:Str S1:Bool
 
   Returns a bool indicating whether the class, interface, or trait named by S0
-  exists. Invokes autoload if it doesn't exist.
+  exists. Invokes autoload if S1 is true.
 
 D:Int = GetErrorLevel
 

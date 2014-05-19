@@ -289,7 +289,7 @@ O(ConvCellToStr,                D(Str), S(Cell),                    N|PRc|Er) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(IsWaitHandle,                D(Bool), S(Obj),                            C) \
-O(ThingExists,                 D(Bool), S(Str),                       N|E|Er) \
+O(OODeclExists,                D(Bool), S(Str) S(Bool),               N|E|Er) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                   C|N) \
 O(InstanceOfIface,             D(Bool), S(Cls) CStr,                     C|N) \
 O(InterfaceSupportsArr,        D(Bool), S(Str),                          C|N) \

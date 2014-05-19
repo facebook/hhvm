@@ -4160,6 +4160,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           // Push name
           emitNameString(e, (*params)[0]);
           emitConvertToCell(e);
+          e.CastString();
 
           // Push autoload, defaulting to true
           if (params->getCount() == 1) {
@@ -4167,6 +4168,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           } else {
             visit((*params)[1]);
             emitConvertToCell(e);
+            e.CastBool();
           }
           if (call->isCallToFunction("class_exists")) {
             e.ClassExists();

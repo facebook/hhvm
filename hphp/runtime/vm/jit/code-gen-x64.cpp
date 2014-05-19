@@ -312,6 +312,8 @@ CALL_OPCODE(RestoreErrorLevel)
 CALL_OPCODE(SurpriseHook)
 CALL_OPCODE(FunctionExitSurpriseHook)
 
+CALL_OPCODE(OODeclExists)
+
 #undef NOOP_OPCODE
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
@@ -5112,32 +5114,6 @@ void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
   } else {
     a.    loadq  (rVmTl[srcLoc(0).reg()], dreg);
   }
-}
-
-void CodeGenerator::cgThingExists(IRInstruction* inst) {
-  auto& a = m_as;
-
-  auto const attrs = [&] {
-    switch (inst->extra<ThingExists>()->kind) {
-    case ClassKind::Class:      return AttrNone;
-    case ClassKind::Interface:  return AttrInterface;
-    case ClassKind::Trait:      return AttrTrait;
-    }
-    not_reached();
-  }();
-
-  using Fn = bool (*)(const StringData*, bool, Attr);
-  Fn f = Unit::classExists;
-  cgCallHelper(
-    a,
-    CppCall::direct(f),
-    callDest(inst),
-    SyncOptions::kSyncPoint,
-    argGroup()
-      .ssa(0)
-      .imm(true)
-      .imm(attrs)
-  );
 }
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {

@@ -7307,7 +7307,7 @@ OPTBLD_INLINE void ExecutionContext::iopIncStat(IOP_ARGS) {
   Stats::inc(Stats::StatCounter(counter), value);
 }
 
-void ExecutionContext::classExistsImpl(IOP_ARGS, Attr typeAttr) {
+void ExecutionContext::classExistsImpl(IOP_ARGS, ClassKind kind) {
   NEXT();
   TypedValue* aloadTV = m_stack.topTV();
   tvCastToBooleanInPlace(aloadTV);
@@ -7319,19 +7319,19 @@ void ExecutionContext::classExistsImpl(IOP_ARGS, Attr typeAttr) {
   tvCastToStringInPlace(name);
   assert(IS_STRING_TYPE(name->m_type));
 
-  tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, typeAttr);
+  tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, kind);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopClassExists(IOP_ARGS) {
-  classExistsImpl(IOP_PASS_ARGS, AttrNone);
+  classExistsImpl(IOP_PASS_ARGS, ClassKind::Class);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopInterfaceExists(IOP_ARGS) {
-  classExistsImpl(IOP_PASS_ARGS, AttrInterface);
+  classExistsImpl(IOP_PASS_ARGS, ClassKind::Interface);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopTraitExists(IOP_ARGS) {
-  classExistsImpl(IOP_PASS_ARGS, AttrTrait);
+  classExistsImpl(IOP_PASS_ARGS, ClassKind::Trait);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopSilence(IOP_ARGS) {

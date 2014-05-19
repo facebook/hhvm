@@ -1783,19 +1783,23 @@ void in(ISS& env, const bc::StaticLocInit& op) {
  * This can't trivially check that the class exists (e.g. via
  * resolve_class) without knowing either:
  *
- *    a) autoload is guaranteed to load it and t1 == true, or
- *    b) it's already defined in this unit.
+ *  a) autoload is guaranteed to load it and t1 == true, or
+ *  b) it's already defined in this unit.
  */
-void clsExistsImpl(ISS& env, Attr testAttr) {
+void clsExistsImpl(ISS& env, ClassKind kind) {
   popC(env);
   popC(env);
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::ClassExists&) { clsExistsImpl(env, AttrNone); }
-void in(ISS& env, const bc::TraitExists&) { clsExistsImpl(env, AttrTrait); }
+void in(ISS& env, const bc::ClassExists&) {
+  clsExistsImpl(env, ClassKind::Class);
+}
+void in(ISS& env, const bc::TraitExists&) {
+  clsExistsImpl(env, ClassKind::Trait);
+}
 void in(ISS& env, const bc::InterfaceExists&) {
-  clsExistsImpl(env, AttrInterface);
+  clsExistsImpl(env, ClassKind::Interface);
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {

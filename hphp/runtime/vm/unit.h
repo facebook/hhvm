@@ -513,7 +513,7 @@ struct Unit {
   static Class* getClass(const NamedEntity *ne, const StringData *name,
                          bool tryAutoload);
   static bool classExists(const StringData* name, bool autoload,
-                          Attr typeAttrs);
+                          ClassKind kind);
 
   bool compileTimeFatal(const StringData*& msg, int& line) const;
   bool parseFatal(const StringData*& msg, int& line) const;

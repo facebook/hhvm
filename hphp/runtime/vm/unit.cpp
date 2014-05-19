@@ -837,9 +837,10 @@ Class* Unit::getClass(const NamedEntity* ne,
   return cls;
 }
 
-bool Unit::classExists(const StringData* name, bool autoload, Attr typeAttrs) {
+bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
   Class* cls = Unit::getClass(name, autoload);
-  return cls && (cls->attrs() & (AttrInterface | AttrTrait)) == typeAttrs;
+  return cls &&
+    (cls->attrs() & (AttrInterface | AttrTrait)) == classKindAsAttr(kind);
 }
 
 void Unit::loadFunc(const Func *func) {

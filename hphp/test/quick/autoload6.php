@@ -20,11 +20,13 @@ function my_autoload_func3($cls) {
     }
   }
 }
+
+class C { function __toString() { return 'I'; } }
+
 function main() {
   spl_autoload_register('my_autoload_func1');
   spl_autoload_register('my_autoload_func2');
   spl_autoload_register('my_autoload_func3');
-  var_dump(interface_exists('I'));
+  var_dump(interface_exists(new C));
 }
 main();
-

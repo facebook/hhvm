@@ -78,18 +78,18 @@ bool HHVM_FUNCTION(class_alias, const String& original, const String& alias,
 
 bool HHVM_FUNCTION(class_exists, const String& class_name,
                                  bool autoload /* = true */) {
-  return Unit::classExists(class_name.get(), autoload, AttrNone);
+  return Unit::classExists(class_name.get(), autoload, ClassKind::Class);
 }
 
 bool HHVM_FUNCTION(interface_exists, const String& interface_name,
                                      bool autoload /* = true */) {
-  return Unit::classExists(interface_name.get(), autoload,
-                               AttrInterface);
+  return
+    Unit::classExists(interface_name.get(), autoload, ClassKind::Interface);
 }
 
 bool HHVM_FUNCTION(trait_exists, const String& trait_name,
                                  bool autoload /* = true */) {
-  return Unit::classExists(trait_name.get(), autoload, AttrTrait);
+  return Unit::classExists(trait_name.get(), autoload, ClassKind::Trait);
 }
 
 static void getMethodNamesImpl(const Class* cls,

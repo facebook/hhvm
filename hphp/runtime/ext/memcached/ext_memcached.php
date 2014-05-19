@@ -308,6 +308,13 @@ class Memcached {
     return $this->getByKey('', $key, $cache_cb, $cas_token);
   }
 
+  /* Memcached::getAllKeys() Gets the keys stored on all the servers
+   * @return mixed - Returns the keys stored on all the servers on success or
+   * FALSE on failure.
+   */
+  <<__Native>>
+  function getAllKeys(): mixed;
+
   /**
    * Retrieve an item from a specific server
    *

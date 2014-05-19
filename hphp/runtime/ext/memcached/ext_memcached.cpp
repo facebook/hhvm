@@ -190,6 +190,17 @@ public:
 };
 }
 
+/*
+ * Since libmemcachd is in C, we cannot use lambda functions as lambda functions
+ * are special typed and normally passed by templated types.
+ */
+static memcached_return_t memcached_dump_callback(const memcached_st*,
+                                                  const char* key,
+                                                  size_t len, void* context) {
+  ((Array*)context)->append(makeStaticString(key, len));
+  return MEMCACHED_SUCCESS;
+}
+
 const StaticString s_MemcachedData("MemcachedData");
 
 class MemcachedData {
@@ -462,6 +473,24 @@ void HHVM_METHOD(Memcached, __construct,
   }
 }
 
+Variant HHVM_METHOD(Memcached, getAllKeys) {
+  FETCH_MEMCACHED_DATA(data, this_);
+  memcached_dump_fn callbacks[] = {
+    &memcached_dump_callback,
+  };
+
+  Array allKeys;
+  memcached_return status = memcached_dump(&data->m_impl->memcached, callbacks,
+                                           &allKeys,
+                                           sizeof(callbacks) /
+                                             sizeof(memcached_dump_fn));
+  if (!data->handleError(status)) {
+    return false;
+  }
+
+  return allKeys;
+}
+
 Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
                                          const String& key,
                                          const Variant& cache_cb /*= null*/,
@@ -701,9 +730,14 @@ bool HHVM_METHOD(Memcached, addserver, const String& host, int port,
                                        int weight /*= 0*/) {
   FETCH_MEMCACHED_DATA(data, this_);
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
-  return data->handleError(memcached_server_add_with_weight(
-    &data->m_impl->memcached, host.c_str(), port, weight
-  ));
+  if (!host.empty() && host[0] == '/') {
+    return data->handleError(memcached_server_add_unix_socket_with_weight(
+        &data->m_impl->memcached, host.c_str(), weight));
+  } else {
+    return data->handleError(memcached_server_add_with_weight(
+      &data->m_impl->memcached, host.c_str(), port, weight
+    ));
+  }
 }
 
 namespace {
@@ -720,11 +754,11 @@ memcached_return_t doServerListCallback(const memcached_st *ptr,
   in_port_t port = LMCD_SERVER_PORT(server);
 #ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
   returnValue->append(make_map_array(s_host, String(hostname, CopyString),
-                                  s_port, (int32_t)port,
-                                  s_weight, (int32_t)server->weight));
+                                     s_port, (int32_t)port,
+                                     s_weight, (int32_t)server->weight));
 #else
   returnValue->append(make_map_array(s_host, String(hostname, CopyString),
-                                  s_port, (int32_t)port));
+                                     s_port, (int32_t)port));
 #endif
   return MEMCACHED_SUCCESS;
 }
@@ -758,11 +792,11 @@ Variant HHVM_METHOD(Memcached, getserverbykey, const String& server_key) {
   in_port_t port = LMCD_SERVER_PORT(server);
 #ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
   Array returnValue = make_map_array(s_host, String(hostname, CopyString),
-                                  s_port, (int32_t)port,
-                                  s_weight, (int32_t)server->weight);
+                                     s_port, (int32_t)port,
+                                     s_weight, (int32_t)server->weight);
 #else
   Array returnValue = make_map_array(s_host, String(hostname, CopyString),
-                                  s_port, (int32_t)port);
+                                     s_port, (int32_t)port);
 #endif
   return returnValue;
 }

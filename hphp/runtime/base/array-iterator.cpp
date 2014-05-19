@@ -1263,7 +1263,7 @@ int64_t new_iter_array_key(Iter*       dest,
     aiter.m_pos = mixed->getIterBegin();
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
-    assert(aiter.m_itype = ArrayIter::TypeArray);
+    assert(aiter.m_itype == ArrayIter::TypeArray);
     assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayMixed);
     if (WithRef) {
       mixed->dupArrayElmWithRef(aiter.m_pos, valOut, keyOut);

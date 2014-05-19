@@ -64,7 +64,9 @@ struct RefData {
   void initInRDS() {
     assert(isUninitializedInRDS());
     m_count = 1;
-    assert(static_cast<bool>(m_magic = Magic::kMagic)); // assign magic
+#ifdef DEBUG
+    m_magic = Magic::kMagic;
+#endif
     assert(m_cowAndZ == 0);
   }
 
@@ -109,11 +111,11 @@ struct RefData {
    * Note, despite the name, this can never return a non-Cell.
    */
   const Cell* tv() const {
-    assert(m_magic == Magic::kMagic);
+    debug_assert(m_magic == Magic::kMagic);
     return &m_tv;
   }
   Cell* tv() {
-    assert(m_magic == Magic::kMagic);
+    debug_assert(m_magic == Magic::kMagic);
     return &m_tv;
   }
 
@@ -130,7 +132,7 @@ struct RefData {
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
 
   void assertValid() const {
-    assert(m_magic == Magic::kMagic);
+    debug_assert(m_magic == Magic::kMagic);
   }
 
   int32_t getRealCount() const {
@@ -150,8 +152,9 @@ struct RefData {
   // Default constructor, provided so that the PHP extension compatibility
   // layer can stack-allocate RefDatas when needed
   RefData() {
-    // intentional use of = to only assign in debug builds
-    assert(static_cast<bool>(m_magic = Magic::kMagic));
+#ifdef DEBUG
+    m_magic = Magic::kMagic;
+#endif
     m_tv.m_type = KindOfNull;
     m_count = 0;
     m_cowAndZ = 0;
@@ -242,8 +245,9 @@ struct RefData {
 
 private:
   RefData(DataType t, int64_t datum) {
-    // intentional use of = to only assign in debug builds
-    assert(static_cast<bool>(m_magic = Magic::kMagic));
+#ifdef DEBUG
+    m_magic = Magic::kMagic;
+#endif
     // Initialize this value by laundering uninitNull -> Null.
     m_count = 1;
     m_cowAndZ = 0;

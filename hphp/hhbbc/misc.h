@@ -166,7 +166,12 @@ struct copy_ptr {
     return *this;
   }
 
-  ~copy_ptr() { delete m_p; assert((m_p = nullptr, true)); }
+  ~copy_ptr() {
+    delete m_p;
+#ifdef DEBUG
+    m_p = nullptr;
+#endif
+  }
 
   explicit operator bool() const { return !!m_p; }
 

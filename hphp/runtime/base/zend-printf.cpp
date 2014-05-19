@@ -871,7 +871,7 @@ String string_printf(const char *format, int len, const Array& args) {
           /* space padding, the default */
         } else if (ch == '+') {
           always_sign = 1;
-        } else if (ch == '\'') {
+        } else if (ch == '\'' && inpos != len - 1) {
           padding = format[++inpos];
         } else {
           break;

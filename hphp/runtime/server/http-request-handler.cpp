@@ -118,7 +118,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
   transport->sendRaw((void*)data, len, 200, compressed);
 }
 
-void HttpRequestHandler::handleRequest(Transport *transport) {
+void HttpRequestHandler::handleRequestImpl(Transport *transport) {
   ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
 
   Logger::OnNewRequest();
@@ -291,37 +291,51 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     ret = executePHPRequest(transport, reqURI, sourceRootInfo,
                             cachableDynamicContent);
   } catch (...) {
+    string emsg;
+    string response;
+    int code = 500;
     try {
       throw;
     } catch (const Eval::DebuggerException &e) {
-      transport->sendString(e.what(), 200);
-      transport->onSendEnd();
+      code = 200;
+      response = e.what();
     } catch (Object &e) {
-      string emsg;
       try {
         emsg = e.toString().data();
       } catch (...) {
         emsg = "Unknown";
       }
-      Logger::Error("Unhandled server exception: %s", emsg.c_str());
     } catch (const std::exception &e) {
-      Logger::Error("Unhandled server exception: %s", e.what());
+      emsg = e.what();
     } catch (...) {
-      Logger::Error("Unhandled unknown server exception.");
+      emsg = "Unknown";
     }
     g_context->onShutdownPostSend();
     Eval::Debugger::InterruptPSPEnded(transport->getUrl());
+    if (code != 200) {
+      Logger::Error("Unhandled server exception: %s", emsg.c_str());
+    }
+    transport->sendString(response, code);
+    transport->onSendEnd();
     hphp_context_exit();
   }
   GetAccessLog().log(transport, vhost);
+  HttpProtocol::ClearRecord(ret, tmpfile);
   /*
    * HPHP logs may need to access data in ServerStats, so we have to
    * clear the hashtable after writing the log entry.
    */
   ServerStats::Reset();
-  hphp_session_exit();
+}
 
-  HttpProtocol::ClearRecord(ret, tmpfile);
+void HttpRequestHandler::handleRequest(Transport *transport) {
+  handleRequestImpl(transport);
+  // Don't flatten handleRequestImpl into handleRequest
+  //
+  // We need hphp_session_exit to run after the destructors for
+  // locals in handleRequestImpl have run, because some of them
+  // free smart-allocated memory.
+  hphp_session_exit();
 }
 
 void HttpRequestHandler::abortRequest(Transport *transport) {

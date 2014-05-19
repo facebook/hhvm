@@ -1,11 +1,11 @@
 <?php
-/* Prototype  : string mcrypt_decrypt(string cipher, string key, string data, string mode, string iv)
- * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv 
+/* Prototype  : string mcrypt_cbc(string cipher, string key, string data, int mode, string iv)
+ * Description: CBC crypt/decrypt data using key key with cipher cipher starting with iv 
  * Source code: ext/mcrypt/mcrypt.c
  * Alias to functions: 
  */
 
-echo "*** Testing mcrypt_decrypt() : usage variation ***\n";
+echo "*** Testing mcrypt_cbc() : usage variation ***\n";
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
@@ -17,10 +17,10 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
+$cipher = MCRYPT_TRIPLEDES;
 $key = b'string_val';
 $data = b'string_val';
-$mode = MCRYPT_MODE_ECB;
-$iv = b'string_val';
+$iv = b'01234567';
 
 //get an unset variable
 $unset_var = 10;
@@ -53,12 +53,6 @@ $assoc_array = array ('one' => 1, 'two' => 2);
 //array of values to iterate over
 $inputs = array(
 
-      // int data
-      'int 0' => 0,
-      'int 1' => 1,
-      'int 12345' => 12345,
-      'int -12345' => -2345,
-
       // float data
       'float 10.5' => 10.5,
       'float -10.5' => -10.5,
@@ -86,6 +80,12 @@ $inputs = array(
       'empty string DQ' => "",
       'empty string SQ' => '',
 
+      // string data
+      'string DQ' => "string",
+      'string SQ' => 'string',
+      'mixed case string' => "sTrInG",
+      'heredoc' => $heredoc,
+
       // object data
       'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString(),
@@ -100,11 +100,11 @@ $inputs = array(
       'resource' => $fp      
 );
 
-// loop through each element of the array for cipher
+// loop through each element of the array for mode
 
 foreach($inputs as $valueType =>$value) {
       echo "\n--$valueType--\n";
-      var_dump( mcrypt_decrypt($value, $key, $data, $mode, $iv) );
+      var_dump(bin2hex(mcrypt_cbc($cipher, $key, $data, $value, $iv)));
 };
 
 fclose($fp);

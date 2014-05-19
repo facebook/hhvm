@@ -17,10 +17,10 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
-$cipher = MCRYPT_TRIPLEDES;
 $key = b'string_val';
+$data = b'string_val';
 $mode = MCRYPT_MODE_ECB;
-$iv = b'01234567';
+$iv = b'string_val';
 
 //get an unset variable
 $unset_var = 10;
@@ -30,7 +30,7 @@ unset ($unset_var);
 class classWithToString
 {
 	public function __toString() {
-		return b"Class A object";
+		return "Class A object";
 	}
 }
 
@@ -39,7 +39,7 @@ class classWithoutToString
 }
 
 // heredoc string
-$heredoc = b<<<EOT
+$heredoc = <<<EOT
 hello world
 EOT;
 
@@ -100,11 +100,11 @@ $inputs = array(
       'resource' => $fp      
 );
 
-// loop through each element of the array for data
+// loop through each element of the array for cipher
 
 foreach($inputs as $valueType =>$value) {
       echo "\n--$valueType--\n";
-      var_dump(bin2hex(mcrypt_decrypt($cipher, $key, $value, $mode, $iv)));
+      var_dump( mcrypt_decrypt($value, $key, $data, $mode, $iv) );
 };
 
 fclose($fp);

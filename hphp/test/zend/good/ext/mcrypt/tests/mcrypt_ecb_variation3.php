@@ -1,15 +1,17 @@
 <?php
-/* Prototype  : string mcrypt_encrypt(string cipher, string key, string data, string mode, string iv)
- * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv 
+error_reporting(E_ALL & ~E_DEPRECATED);
+
+/* Prototype  : string mcrypt_ecb(string cipher, string key, string data, int mode, string iv)
+ * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv 
  * Source code: ext/mcrypt/mcrypt.c
  * Alias to functions: 
  */
 
-echo "*** Testing mcrypt_encrypt() : usage variation ***\n";
+echo "*** Testing mcrypt_ecb() : usage variation ***\n";
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
+	if ($err_no & error_reporting()) {
 		// report non-silenced errors
 		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 	}
@@ -17,10 +19,10 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
+$cipher = MCRYPT_TRIPLEDES;
 $key = b'string_val';
-$data = b'string_val';
-$mode = MCRYPT_MODE_ECB;
-$iv = b'string_val';
+$mode = MCRYPT_ENCRYPT;
+$iv = b'01234567';
 
 //get an unset variable
 $unset_var = 10;
@@ -30,7 +32,7 @@ unset ($unset_var);
 class classWithToString
 {
 	public function __toString() {
-		return "Class A object";
+		return b"Class A object";
 	}
 }
 
@@ -39,7 +41,7 @@ class classWithoutToString
 }
 
 // heredoc string
-$heredoc = <<<EOT
+$heredoc = b<<<EOT
 hello world
 EOT;
 
@@ -100,11 +102,11 @@ $inputs = array(
       'resource' => $fp      
 );
 
-// loop through each element of the array for cipher
+// loop through each element of the array for data
 
 foreach($inputs as $valueType =>$value) {
       echo "\n--$valueType--\n";
-      var_dump( mcrypt_encrypt($value, $key, $data, $mode, $iv) );
+      var_dump(bin2hex(mcrypt_ecb($cipher, $key, $value, $mode, $iv)));
 };
 
 fclose($fp);

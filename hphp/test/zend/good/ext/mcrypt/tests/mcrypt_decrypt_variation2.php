@@ -1,11 +1,11 @@
 <?php
-/* Prototype  : string mcrypt_encrypt(string cipher, string key, string data, string mode, string iv)
+/* Prototype  : string mcrypt_decrypt(string cipher, string key, string data, string mode, string iv)
  * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv 
  * Source code: ext/mcrypt/mcrypt.c
  * Alias to functions: 
  */
 
-echo "*** Testing mcrypt_encrypt() : usage variation ***\n";
+echo "*** Testing mcrypt_decrypt() : usage variation ***\n";
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
@@ -104,7 +104,7 @@ $inputs = array(
 
 foreach($inputs as $valueType =>$value) {
       echo "\n--$valueType--\n";
-      var_dump( bin2hex(mcrypt_encrypt($cipher, $value, $data, $mode, $iv) ));
+      var_dump( bin2hex(mcrypt_decrypt($cipher, $value, $data, $mode, $iv)));
 };
 
 fclose($fp);

@@ -142,7 +142,7 @@ public:
   _OutputStream &operator<< (const std::set<T> &v) {
     m_out << "[";
     bool first = true;
-    BOOST_FOREACH(T el, v) {
+    for (T el: v) {
       if (first) {
         first = false;
       } else {

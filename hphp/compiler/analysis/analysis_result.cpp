@@ -230,7 +230,7 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
         // The call to findClass by method name means all these
         // same-named methods should be dynamic since there will
         // be an invoke to call one of them.
-        BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+        for (ClassScopePtr cls: iter->second) {
           FunctionScopePtr func = cls->findFunction(ar, lname, true);
           // Something fishy here
           if (func) {
@@ -587,10 +587,9 @@ void AnalysisResult::addSystemClass(ClassScopeRawPtr cs) {
 
 void AnalysisResult::checkClassDerivations() {
   AnalysisResultPtr ar = shared_from_this();
-  ClassScopePtr cls;
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
-    BOOST_FOREACH(cls, iter->second) {
+    for (ClassScopePtr cls: iter->second) {
       if (Option::WholeProgram) {
         try {
           cls->importUsedTraits(ar);
@@ -723,18 +722,17 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
     The new entries added to m_classDecs are always empty, so it
     doesnt matter that we dont include them in the iteration
   */
-  ClassScopePtr cls;
   std::vector<ClassScopePtr> classes;
   classes.reserve(m_classDecs.size());
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
-    BOOST_FOREACH(cls, iter->second) {
+    for (ClassScopePtr cls: iter->second) {
       classes.push_back(cls);
     }
   }
 
   // Collect methods
-  BOOST_FOREACH(cls, classes) {
+  for (ClassScopePtr cls: classes) {
     if (cls->isRedeclaring()) {
       cls->setStaticDynamic(ar);
     }
@@ -758,8 +756,10 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
     }
   }
 
+  ClassScopePtr cls;
   string cname;
-  BOOST_FOREACH(tie(cname, cls), m_systemClasses) {
+  for (auto& sysclass_cls: m_systemClasses) {
+    tie(cname, cls) = sysclass_cls;
     StringToFunctionScopePtrMap methods;
     cls->collectMethods(ar, methods, true /* include privates */);
     for (StringToFunctionScopePtrMap::const_iterator iterMethod =
@@ -1788,7 +1788,7 @@ AnalysisResult::forceClassVariants(
   AnalysisResultPtr ar = shared_from_this();
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
-    BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+    for (ClassScopePtr cls: iter->second) {
       COND_TRY_LOCK(cls, acquireLocks);
       cls->getVariables()->forceVariants(
         ar, VariableTable::GetVarClassMask(false, doStatic), false);
@@ -1817,7 +1817,7 @@ void AnalysisResult::forceClassVariants(
   AnalysisResultPtr ar = shared_from_this();
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
-    BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+    for (ClassScopePtr cls: iter->second) {
       COND_TRY_LOCK(cls, acquireLocks);
       cls->getVariables()->forceVariant(
         ar, name, VariableTable::GetVarClassMask(false, doStatic));

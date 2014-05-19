@@ -43,7 +43,7 @@ void FunctionContainer::countReturnTypes(
     FunctionScopePtr f = iter->second;
     if (f->isLocalRedeclaring()) {
       always_assert(redec);
-      BOOST_FOREACH(f, redec->find(iter->first)->second) {
+      for (FunctionScopePtr f: redec->find(iter->first)->second) {
         TypePtr type = f->getReturnType();
         if (type) {
           type->count(counts);

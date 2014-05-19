@@ -360,7 +360,7 @@ void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
 
     ms.add("VariableTableFunctions");
     JSON::CodeError::ListStream ls(o);
-    BOOST_FOREACH(const std::string &f, m_ar->m_variableTableFunctions) {
+    for (const std::string &f: m_ar->m_variableTableFunctions) {
       ls << f;
     }
     ls.done();

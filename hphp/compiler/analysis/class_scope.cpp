@@ -99,7 +99,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_volatile(false), m_persistent(false),
     m_derivedByDynamic(false), m_needsCppCtor(false),
     m_needsInit(true), m_knownBases(0) {
-  BOOST_FOREACH(FunctionScopePtr f, methods) {
+  for (FunctionScopePtr f: methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
     else if (f->getName() == "__get")  setAttribute(HasUnknownPropGetter);
@@ -985,7 +985,7 @@ bool ClassScope::needsInvokeParent(AnalysisResultConstPtr ar,
 }
 
 bool ClassScope::derivesDirectlyFrom(const std::string &base) const {
-  BOOST_FOREACH(std::string base_i, m_bases) {
+  for (std::string base_i: m_bases) {
     if (strcasecmp(base_i.c_str(), base.c_str()) == 0) return true;
   }
   return false;
@@ -997,7 +997,7 @@ bool ClassScope::derivesFrom(AnalysisResultConstPtr ar,
 
   if (derivesDirectlyFrom(base)) return true;
 
-  BOOST_FOREACH(std::string base_i, m_bases) {
+  for (std::string base_i: m_bases) {
     ClassScopePtr cl = ar->findClass(base_i);
     if (cl) {
       if (strict && cl->isRedeclaring()) {
@@ -1023,8 +1023,8 @@ ClassScopePtr ClassScope::FindCommonParent(AnalysisResultConstPtr ar,
   if (cls2->derivesFrom(ar, cn1, true, false)) return cls1;
 
   // walk up the class hierarchy.
-  BOOST_FOREACH(const std::string &base1, cls1->m_bases) {
-    BOOST_FOREACH(const std::string &base2, cls2->m_bases) {
+  for (const std::string &base1: cls1->m_bases) {
+    for (const std::string &base2: cls2->m_bases) {
       ClassScopePtr parent = FindCommonParent(ar, base1, base2);
       if (parent) return parent;
     }
@@ -1131,7 +1131,7 @@ void ClassScope::setStaticDynamic(AnalysisResultConstPtr ar) {
   if (!m_parent.empty()) {
     if (derivesFromRedeclaring() == Derivation::Redeclaring) {
       const ClassScopePtrVec &parents = ar->findRedeclaredClasses(m_parent);
-      BOOST_FOREACH(ClassScopePtr cl, parents) {
+      for (ClassScopePtr cl: parents) {
         cl->setStaticDynamic(ar);
       }
     } else {
@@ -1153,7 +1153,7 @@ void ClassScope::setDynamic(AnalysisResultConstPtr ar,
   } else if (!m_parent.empty()) {
     if (derivesFromRedeclaring() == Derivation::Redeclaring) {
       const ClassScopePtrVec &parents = ar->findRedeclaredClasses(m_parent);
-      BOOST_FOREACH(ClassScopePtr cl, parents) {
+      for (ClassScopePtr cl: parents) {
         cl->setDynamic(ar, name);
       }
     } else {
@@ -1272,7 +1272,7 @@ void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
   std::map<string, int> propMap;
   std::set<string> names;
   m_variables->getNames(names);
-  BOOST_FOREACH(string name, names) {
+  for (const string& name: names) {
     int pm = 0;
     if (m_variables->isPublic(name)) pm |= ClassScope::Public;
     else if (m_variables->isPrivate(name)) pm |= ClassScope::Private;
@@ -1295,7 +1295,7 @@ void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
   ms.add("consts");
 
   JSON::CodeError::MapStream cs(out);
-  BOOST_FOREACH(string cname, cnames) {
+  for (const string& cname: cnames) {
     TypePtr type = m_constants->getType(cname);
     if (!type) {
       cs.add(cname, -1);

@@ -38,17 +38,16 @@ let get_path ?user:(user=None) root =
   | Some user -> user
   | None -> Sys.getenv "USER" in
   let root_part = (Path.slash_escaped_string_of_path root) in 
-  Printf.sprintf "%s/%s-%s.sock" tmp_dir user root_part
+  let shortened_root_part = if String.length root_part > 50
+    then begin
+      let len = String.length root_part in
+      let prefix = String.sub root_part 0 5 in
+      let suffix = String.sub root_part (len - 5) 5 in
+      let digest = Digest.to_hex (Digest.string root_part) in
+      prefix ^ "." ^ digest ^ "." ^ suffix
+    end else root_part in
+  print_endline shortened_root_part;
+  Printf.sprintf "%s/%s-%s.sock" tmp_dir user shortened_root_part
 
 let init_unix_socket www_root_path =
   unix_socket (get_path www_root_path)
-
-let init_internal_socket =
-  let counter = ref 0 in
-  fun root ->
-    incr counter;
-    let nbr = string_of_int !counter in
-    let root_part = (Path.slash_escaped_string_of_path root) in
-    let sock_name = Tmp.get_dir()^"/"^root_part^"_data_"^nbr^".sock" in
-    sock_name
-

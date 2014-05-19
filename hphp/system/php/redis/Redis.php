@@ -884,9 +884,9 @@ class Redis {
 
     // Eval
     'eval' => [ 'alias' => '_eval' ],
-    'evalSha' => [ 'alias' => '_evalSha' ],
+    'evalsha' => [ 'alias' => '_evalSha' ],
     'evaluate' => [ 'alias' => '_eval' ],
-    'evaluateSha' => [ 'alias'=> '_evalSha' ],
+    'evaluatesha' => [ 'alias'=> '_evalSha' ],
   ];
 
 

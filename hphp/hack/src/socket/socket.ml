@@ -46,7 +46,6 @@ let get_path ?user:(user=None) root =
       let digest = Digest.to_hex (Digest.string root_part) in
       prefix ^ "." ^ digest ^ "." ^ suffix
     end else root_part in
-  print_endline shortened_root_part;
   Printf.sprintf "%s/%s-%s.sock" tmp_dir user shortened_root_part
 
 let init_unix_socket www_root_path =

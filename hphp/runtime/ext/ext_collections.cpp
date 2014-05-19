@@ -3685,6 +3685,21 @@ void BaseSet::cow() {
   m_immCopy.reset();
 }
 
+void BaseSet::addAllKeysOf(const Cell& container) {
+  assert(isContainer(container));
+
+  auto sz = getContainerSize(container);
+  ArrayIter iter(container);
+  if (!sz || !iter) { return; }
+
+  mutateAndBump();
+  // In theory we could be deferring the version bump above because all the
+  // elements of iter could already be present in the set.
+  reserve(m_size + sz);
+  for (; iter; ++iter) { addRaw(iter.first()); }
+  compactIfNecessary();
+}
+
 void BaseSet::addAll(const Variant& t) {
   if (t.isNull()) { return; } // nothing to do
 
@@ -4544,6 +4559,17 @@ BaseSet::php_fromItems(const Variant& iterable) {
   return ret;
 }
 
+static ALWAYS_INLINE
+const Cell container_as_cell(const Variant& container) {
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a container (array or collection)"));
+    throw e;
+  }
+  return cellContainer;
+}
+
 template<class TSet>
 ALWAYS_INLINE
 typename std::enable_if<
@@ -4551,19 +4577,11 @@ typename std::enable_if<
 BaseSet::php_fromKeysOf(const Variant& container) {
   if (container.isNull()) { return NEWOBJ(TSet)(); }
 
-  const auto& cellContainer = *container.asCell();
-  if (UNLIKELY(!isContainer(cellContainer))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a container (array or collection)"));
-    throw e;
-  }
+  const auto& cellContainer = container_as_cell(container);
 
-  ArrayIter iter(cellContainer);
   auto* target = NEWOBJ(TSet)();
-  assert(!target->hasImmutableBuffer());
-  target->reserve(getContainerSize(cellContainer));
   Object ret = target;
-  for (; iter; ++iter) { target->addRaw(iter.first()); }
+  target->addAllKeysOf(cellContainer);
   return ret;
 }
 
@@ -4915,6 +4933,14 @@ Object c_Set::t_add(const Variant& val) {
 
 Object c_Set::t_addall(const Variant& iterable) {
   addAll(iterable);
+  return this;
+}
+
+Object c_Set::t_addallkeysof(const Variant& container) {
+  if (!container.isNull()) {
+    const auto& containerCell = container_as_cell(container);
+    addAllKeysOf(containerCell);
+  }
   return this;
 }
 

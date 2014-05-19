@@ -115,6 +115,14 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function addAll(?Traversable<Tv> $it): Set<Tv>;
 
   /**
+   * Adds the keys of the specified container to this Set and returns
+   * the Set.
+   */
+  public static function addAllKeysOf<Tv2>(
+    ?KeyedContainer<Tv,Tv2> $container,
+  ): Set<Tv>;
+
+  /**
    * Reserves enough memory to accomodate 'sz' elements. If 'sz' is less
    * than or equal to the current capacity of this Set, does nothing.
    */

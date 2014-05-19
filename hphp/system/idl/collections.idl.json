@@ -3066,6 +3066,21 @@
                     ]
                 },
                 {
+                    "name": "addAllKeysOf",
+                    "flags": [
+                    ],
+                    "desc": "Adds the keys of the specified KeyedContainer to this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "container",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "reserve",
                     "flags": [
                     ],

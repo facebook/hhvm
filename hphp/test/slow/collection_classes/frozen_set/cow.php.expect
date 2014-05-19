@@ -22,6 +22,18 @@ object(HH\ImmSet)#4 (3) {
   int(2)
   int(3)
 }
+------ addAllKeysOf -------
+object(HH\Set)#3 (4) {
+  int(1)
+  int(2)
+  int(3)
+  int(42)
+}
+object(HH\ImmSet)#4 (3) {
+  int(1)
+  int(2)
+  int(3)
+}
 ------ clear -------
 object(HH\Set)#3 (0) {
 }

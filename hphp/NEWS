@@ -1,6 +1,6 @@
 NEXT
  - Map: reserve()
- - Set: retain() and reserve()
+ - Set: retain(), reserve(), addAllKeysOf()
  - {Set|ImmSet|Vector|ImmVector}::fromKeysOf()
 
 "Kanye West"

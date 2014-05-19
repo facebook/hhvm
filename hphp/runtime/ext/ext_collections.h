@@ -1708,6 +1708,7 @@ class BaseSet : public ExtCollectionObjectData {
     return pos;
   }
 
+  void addAllKeysOf(const Cell& container);
   void addAll(const Variant& t);
   void init(const Variant& t);
 
@@ -1943,6 +1944,7 @@ class c_Set : public BaseSet {
   void t___construct(const Variant& iterable = null_variant);
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
+  Object t_addallkeysof(const Variant& val);
   void t_reserve(const Variant& sz);
   Object t_clear();
   bool t_isempty();

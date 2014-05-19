@@ -265,9 +265,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
        IPv6 embedded address */
     p = s;
   } else {
-    /* memrchr is a GNU specific extension
-       Emulate for wide compatibility */
-    for(p = e; *p != ':' && p >= s; p--);
+    p = (const char*)zend_memrchr(s, ':', (e - s + 1));
   }
 
   if (p >= s && *p == ':') {

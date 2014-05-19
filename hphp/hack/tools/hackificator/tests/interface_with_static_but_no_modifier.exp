@@ -1,0 +1,9 @@
+<?hh
+
+interface AnInterface {
+  public static function foo(int $x);
+
+  public static function bar(array $x);
+
+  public function qux(array $x);
+}

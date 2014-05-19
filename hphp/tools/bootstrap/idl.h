@@ -201,6 +201,7 @@ class PhpParam {
   bool isCheckedType() const {
     return !isRef() && (kindOf() != KindOfAny);
   }
+  bool defValueIsNullResource() const;
   bool defValueNeedsVariable() const;
 
   bool isIndirectPass() const { return isKindOfIndirect(kindOf()); }

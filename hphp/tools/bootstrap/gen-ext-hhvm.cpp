@@ -248,6 +248,9 @@ void emitTypechecks(const PhpFunc& func, std::ostream& out, const char* ind) {
       out << "IS_STRING_TYPE((args - " << k << ")->m_type)";
     } else {
       out << "(args - " << k << ")->m_type == KindOf" << kindOfString(kindof);
+      if (param.defValueIsNullResource()) {
+        out << " || (args - " << k << ")->m_type == KindOfNull";
+      }
     }
 
     if (isOptional) {
@@ -322,7 +325,11 @@ void emitCallExpression(const PhpFunc& func, const fbstring& prefix,
     isFirstParam = false;
 
     if (param.hasDefault()) {
-      out << "(count > " << k << ") ? ";
+      out << "(count > " << k << ")";
+      if (param.defValueIsNullResource()) {
+        out << " && (args-" << k << ")->m_type != KindOfNull";
+      }
+      out << " ? ";
     }
 
     if (param.isIndirectPass()) {

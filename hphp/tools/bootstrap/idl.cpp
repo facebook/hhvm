@@ -611,6 +611,10 @@ PhpParam::PhpParam(const folly::dynamic& param,
   m_phpType = phpTypeFromDataType(m_kindOf);
 }
 
+bool PhpParam::defValueIsNullResource() const {
+  return kindOf() == KindOfResource && hasDefault() && getDefault() == "null_resource";
+}
+
 bool PhpParam::defValueNeedsVariable() const {
   DataType cppKindOf = kindOf();
 

@@ -1,0 +1,4 @@
+Autoload function foo\test
+Autoload function test
+
+Fatal error: Call to undefined function foo\test() in %s/hphp/test/slow/autoload/function_autoload_map.php on line 11

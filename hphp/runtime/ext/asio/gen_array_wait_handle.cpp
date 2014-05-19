@@ -67,15 +67,22 @@ static void fail() {
 
 Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
   Array depCopy(inputDependencies->copy());
-  if (UNLIKELY(depCopy->kind() > ArrayData::kMixedKind)) {
-    // The only array kind that can return a non-kPackedKind or
-    // non-kMixedKind from ->copy() is NameValueTableWrapper, which
-    // returns itself.  This is only for $GLOBALS, which is about to
-    // throw anyway since it will fail the WaitHandle checks below.
+  if (UNLIKELY(depCopy->kind() > ArrayData::kMixedKind) &&
+      depCopy->kind() != ArrayData::kEmptyKind) {
+    // The only array kind that can return a non-k{Packed,Mixed,Empty}Kind
+    // from ->copy() is NameValueTableWrapper, which returns itself.
+    // This is only for $GLOBALS, which is about to throw anyway since it
+    // will fail the WaitHandle checks below.
     fail();
   }
   assert(depCopy->kind() == ArrayData::kPackedKind ||
-         depCopy->kind() == ArrayData::kMixedKind);
+         depCopy->kind() == ArrayData::kMixedKind ||
+         depCopy->kind() == ArrayData::kEmptyKind);
+
+  if (depCopy->kind() == ArrayData::kEmptyKind) {
+    auto const empty = make_tv<KindOfArray>(depCopy.get());
+    return c_StaticWaitHandle::CreateSucceeded(empty);
+  }
 
   Object exception;
 

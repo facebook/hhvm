@@ -83,6 +83,9 @@ struct EmptyArray {
   static constexpr auto IterEnd = &ArrayCommon::ReturnInvalidIndex;
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);
+
+  // ValidMArrayIter may be called on this array kind, because Escalate is a
+  // no-op.
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter&) {
     return false;
   }

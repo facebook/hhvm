@@ -94,6 +94,23 @@ cursor) that can be used to iterate over the object's properties. Under HipHop
 VM, objects do not have internal cursors, and the next(), prev(), current(),
 key(), reset(), end(), and each() builtin functions do not support objects.
 
+(6) Supressing errors for params to default constructors
+
+If a class doesn't define a constructor then you construct that object passing
+whatever you want, including things that would fatal the runtime. HHVM doesn't
+allow this, and will always evaluate the args whether the class has a
+constructor or not.
+
+  <?php
+  class A {}
+  var_dump(new A(undefined_function())); // Works in PHP5 but not HHVM
+
+  class B {
+    public function __construct() {
+    }
+  }
+  var_dump(new B(undefined_function())); // Doesn't work in neither HHVM nor PHP5
+
 
 3. Misc
 

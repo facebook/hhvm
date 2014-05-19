@@ -26,18 +26,15 @@ namespace HPHP {
 /**
  * Helper struct storing parsed result from url_parse().
  */
-class Url {
-public:
-  ~Url();
-
-  char *scheme;
-  char *user;
-  char *pass;
-  char *host;
-  unsigned short port;
-  char *path;
-  char *query;
-  char *fragment;
+struct Url {
+  String scheme;
+  String user;
+  String pass;
+  String host;
+  unsigned short port = 0;
+  String path;
+  String query;
+  String fragment;
 };
 
 bool url_parse(Url &output, const char *str, int length);

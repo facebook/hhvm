@@ -380,6 +380,13 @@ Variant php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) {
   return value;
 }
 
+const StaticString
+  s_http("http"),
+  s_https("https"),
+  s_mailto("mailto"),
+  s_news("news"),
+  s_file("file");
+
 Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
   int old_len = value.length();
 
@@ -396,15 +403,15 @@ Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  if (url.scheme != nullptr &&
-      (!strcasecmp(url.scheme, "http") || !strcasecmp(url.scheme, "https"))) {
+  if (!url.scheme.isNull() && (url.scheme.get()->isame(s_http.get()) ||
+                               url.scheme.get()->isame(s_https.get()))) {
 
-    if (url.host == nullptr) {
+    if (url.host.isNull()) {
       goto bad_url;
     }
 
-    char *e = url.host + strlen(url.host);
-    char *s = url.host;
+    const char *s = url.host.data();
+    const char *e = s + url.host.size();
 
     /* First char of hostname must be alphanumeric */
     if (!isalnum((int)*(unsigned char *)s)) {
@@ -424,13 +431,13 @@ Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
   }
 
   if (
-    url.scheme == nullptr ||
+    url.scheme.isNull() ||
     /* some schemas allow the host to be empty */
-    (url.host == nullptr && (strcmp(url.scheme, "mailto") &&
-                          strcmp(url.scheme, "news") &&
-                          strcmp(url.scheme, "file"))) ||
-    ((flags & k_FILTER_FLAG_PATH_REQUIRED) && url.path == nullptr) ||
-    ((flags & k_FILTER_FLAG_QUERY_REQUIRED) && url.query == nullptr)
+    (url.host.isNull() && (!url.scheme.same(s_mailto) &&
+                           !url.scheme.same(s_news) &&
+                           !url.scheme.same(s_file))) ||
+    ((flags & k_FILTER_FLAG_PATH_REQUIRED) && url.path.isNull()) ||
+    ((flags & k_FILTER_FLAG_QUERY_REQUIRED) && url.query.isNull())
   ) {
 bad_url:
     RETURN_VALIDATION_FAILED

@@ -236,16 +236,13 @@ const StaticString
   s_port("port");
 
 #define RETURN_COMPONENT(name)                          \
-  if (resource.name != NULL) {                          \
-    String ret(resource.name, AttachString);            \
-    resource.name = NULL;                               \
-    return ret;                                         \
+  if (!resource.name.isNull()) {                        \
+    return resource.name;                               \
   }                                                     \
 
 #define SET_COMPONENT(name)                                             \
-  if (resource.name != NULL) {                                          \
-    ret.set(s_ ## name, String(resource.name, AttachString));           \
-    resource.name = NULL;                                               \
+  if (!resource.name.isNull()) {                                        \
+    ret.set(s_ ## name, resource.name);                                 \
   }                                                                     \
 
 Variant HHVM_FUNCTION(parse_url, const String& url,

@@ -617,7 +617,7 @@ String string_chunk_split(const char *src, int srclen, const char *end,
  * 0 start tag
  * 1 first non-whitespace char seen
  */
-static int string_tag_find(const char *tag, int len, char *set) {
+static int string_tag_find(const char *tag, int len, const char *set) {
   char c, *n;
   const char *t;
   int state=0, done=0;
@@ -691,26 +691,42 @@ static int string_tag_find(const char *tag, int len, char *set) {
  * swm: Added ability to strip <?xml tags without assuming it PHP
  * code.
  */
-static size_t strip_tags_impl(char *rbuf, int len,
-                              char *allow, int allow_len,
-                              bool allow_tag_spaces) {
-  char *tbuf, *buf, *p, *tp, *rp, c, lc;
+String string_strip_tags(const char *s, const int len,
+                         const char *allow, const int allow_len,
+                         bool allow_tag_spaces) {
+  const char *abuf, *p;
+  char *rbuf, *tbuf, *tp, *rp, c, lc;
+
   int br, i=0, depth=0, in_q = 0;
   int state = 0, pos;
 
-  buf = string_duplicate(rbuf, len);
-  c = *buf;
+  assert(s);
+  assert(allow);
+
+  String retString(s, len, CopyString);
+  rbuf = retString.bufferSlice().ptr;
+  String allowString;
+
+  c = *s;
   lc = '\0';
-  p = buf;
+  p = s;
   rp = rbuf;
   br = 0;
-  if (allow) {
-    for (char *tmp = allow; *tmp; tmp++) {
-      *tmp = tolower((int)*(unsigned char *)tmp);
+  if (allow_len) {
+    assert(allow);
+
+    allowString = String(allow_len, ReserveString);
+    char *atmp = allowString.bufferSlice().ptr;
+    for (const char *tmp = allow; *tmp; tmp++, atmp++) {
+      *atmp = tolower((int)*(const unsigned char *)tmp);
     }
+    allowString.setSize(allow_len);
+    abuf = allowString.data();
+
     tbuf = (char *)smart_malloc(PHP_TAG_BUF_SIZE+1);
     tp = tbuf;
   } else {
+    abuf = nullptr;
     tbuf = tp = nullptr;
   }
 
@@ -733,7 +749,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
       if (state == 0) {
         lc = '<';
         state = 1;
-        if (allow) {
+        if (allow_len) {
           move();
           *(tp++) = '<';
         }
@@ -748,7 +764,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
           lc = '(';
           br++;
         }
-      } else if (allow && state == 1) {
+      } else if (allow_len && state == 1) {
         move();
         *(tp++) = c;
       } else if (state == 0) {
@@ -762,7 +778,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
           lc = ')';
           br--;
         }
-      } else if (allow && state == 1) {
+      } else if (allow_len && state == 1) {
         move();
         *(tp++) = c;
       } else if (state == 0) {
@@ -784,11 +800,11 @@ static size_t strip_tags_impl(char *rbuf, int len,
       case 1: /* HTML/XML */
         lc = '>';
         in_q = state = 0;
-        if (allow) {
+        if (allow_len) {
           move();
           *(tp++) = '>';
           *tp='\0';
-          if (string_tag_find(tbuf, tp-tbuf, allow)) {
+          if (string_tag_find(tbuf, tp-tbuf, abuf)) {
             memcpy(rp, tbuf, tp-tbuf);
             rp += tp-tbuf;
           }
@@ -809,7 +825,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
         break;
 
       case 4: /* JavaScript/CSS/etc... */
-        if (p >= buf + 2 && *(p-1) == '-' && *(p-2) == '-') {
+        if (p >= s + 2 && *(p-1) == '-' && *(p-2) == '-') {
           in_q = state = 0;
           tp = tbuf;
         }
@@ -834,11 +850,11 @@ static size_t strip_tags_impl(char *rbuf, int len,
         }
       } else if (state == 0) {
         *(rp++) = c;
-      } else if (allow && state == 1) {
+      } else if (allow_len && state == 1) {
         move();
         *(tp++) = c;
       }
-      if (state && p != buf && *(p-1) != '\\' && (!in_q || *p == in_q)) {
+      if (state && p != s && *(p-1) != '\\' && (!in_q || *p == in_q)) {
         if (in_q) {
           in_q = 0;
         } else {
@@ -855,7 +871,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
       } else {
         if (state == 0) {
           *(rp++) = c;
-        } else if (allow && state == 1) {
+        } else if (allow_len && state == 1) {
           move();
           *(tp++) = c;
         }
@@ -863,7 +879,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
       break;
 
     case '-':
-      if (state == 3 && p >= buf + 2 && *(p-1) == '-' && *(p-2) == '!') {
+      if (state == 3 && p >= s + 2 && *(p-1) == '-' && *(p-2) == '!') {
         state = 4;
       } else {
         goto reg_char;
@@ -881,7 +897,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
     case 'E':
     case 'e':
       /* !DOCTYPE exception */
-      if (state==3 && p > buf+6
+      if (state==3 && p > s+6
           && tolower(*(p-1)) == 'p'
           && tolower(*(p-2)) == 'y'
           && tolower(*(p-3)) == 't'
@@ -899,7 +915,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
        * state == 2 (PHP). Switch back to HTML.
        */
 
-      if (state == 2 && p > buf+2 && *(p-1) == 'm' && *(p-2) == 'x') {
+      if (state == 2 && p > s+2 && *(p-1) == 'm' && *(p-2) == 'x') {
         state = 1;
         break;
       }
@@ -909,7 +925,7 @@ static size_t strip_tags_impl(char *rbuf, int len,
     reg_char:
       if (state == 0) {
         *(rp++) = c;
-      } else if (allow && state == 1) {
+      } else if (allow_len && state == 1) {
         move();
         *(tp++) = c;
       }
@@ -921,25 +937,11 @@ static size_t strip_tags_impl(char *rbuf, int len,
   if (rp < rbuf + len) {
     *rp = '\0';
   }
-  free(buf);
-  if (allow)
+  if (allow_len) {
     smart_free(tbuf);
+  }
 
-  return (size_t)(rp - rbuf);
-}
-
-String string_strip_tags(const char *s, int len, const char *allow,
-                         int allow_len, bool allow_tag_spaces) {
-  assert(s);
-  assert(allow);
-
-  String retString(s, len, CopyString);
-  String allowString(allow, allow_len, CopyString);
-  len = strip_tags_impl(
-    retString.bufferSlice().ptr, len,
-    allowString.bufferSlice().ptr, allow_len,
-    allow_tag_spaces);
-  return retString.setSize(len);
+  return retString.setSize(rp - rbuf);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

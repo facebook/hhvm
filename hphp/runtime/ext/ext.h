@@ -51,7 +51,6 @@
 #include "hphp/runtime/ext/ext_mailparse.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_mb.h"
-#include "hphp/runtime/ext/ext_mcrypt.h"
 #include "hphp/runtime/ext/ext_memcache.h"
 #include "hphp/runtime/ext/ext_memcached.h"
 #include "hphp/runtime/ext/ext_misc.h"

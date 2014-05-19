@@ -857,6 +857,20 @@ const Func* lookupUnknownFunc(const StringData* name) {
   return func;
 }
 
+const Func* lookupFallbackFunc(const StringData* name, const StringData* fallback) {
+  JIT::VMRegAnchor _;
+  // Try to load the first function
+  auto func = Unit::loadFunc(name);
+  if (LIKELY(!func)) {
+    // Then try to load the fallback function
+    func = Unit::loadFunc(fallback);
+    if (UNLIKELY(!func)) {
+        raise_error("Call to undefined function %s()", name->data());
+    }
+  }
+  return func;
+}
+
 Class* lookupKnownClass(Class** cache, const StringData* clsName) {
   Class* cls = *cache;
   assert(!cls); // the caller should already have checked

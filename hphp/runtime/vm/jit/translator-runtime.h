@@ -196,6 +196,7 @@ void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* lookupUnknownFunc(const StringData*);
+const Func* lookupFallbackFunc(const StringData*, const StringData*);
 
 Class* lookupKnownClass(Class** cache, const StringData* clsName);
 

@@ -37,6 +37,9 @@ add_custom_command(
 add_library(hphp_util STATIC ${CXX_SOURCES}
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp")
+if (ENABLE_COTIRE)
+  cotire(hphp_util)
+endif()
 
 #if (LIBNUMA_LIBRARIES)
 #  target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})

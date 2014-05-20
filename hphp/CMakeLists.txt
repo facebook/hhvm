@@ -28,6 +28,38 @@ endif()
 
 include(HPHPSetup)
 include(FollySetup)
+if (ENABLE_COTIRE)
+  include(cotire)
+  FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)
+
+  # Detect the architecture-specific include directory
+  IF("${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "")
+    # For CentOS/Red Hat where they store it directly in /usr/include
+    SET(ARCH_INCLUDE_PATH "${LIBC_INCLUDE_PATH}/bits")
+  ELSE()
+    FIND_PATH(ARCH_INCLUDE_PATH ${CMAKE_LIBRARY_ARCHITECTURE})
+    SET(ARCH_INCLUDE_PATH "${ARCH_INCLUDE_PATH}/${CMAKE_LIBRARY_ARCHITECTURE}")
+  ENDIF()
+
+  set_property(DIRECTORY
+    PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
+      "${LIBC_INCLUDE_PATH}/stdlib.h"
+      "${LIBC_INCLUDE_PATH}/string.h"
+      "${LIBC_INCLUDE_PATH}/ansidecl.h"
+      "${LIBC_INCLUDE_PATH}/bfd.h"
+      "${LIBC_INCLUDE_PATH}/libelf.h"
+      "${LIBC_INCLUDE_PATH}/elf.h"
+      "${LIBC_INCLUDE_PATH}/gelf.h"
+      "${ARCH_INCLUDE_PATH}"
+      "${CCLIENT_INCLUDE_PATH}"
+      "${JEMALLOC_INCLUDE_DIR}/jemalloc"
+      "${ONIGURUMA_INCLUDE_DIR}/onigposix.h"
+      "${ONIGURUMA_INCLUDE_DIR}/oniguruma.h"
+      "${LIBPNG_INCLUDE_DIRS}/png.h"
+      "${LDAP_INCLUDE_DIR}/ldap.h"
+      "${CMAKE_SOURCE_DIR}"
+      "${CMAKE_BINARY_DIR}")
+endif()
 
 add_definitions("-DHHVM")
 add_definitions("-DUSE_CMAKE")

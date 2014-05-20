@@ -15,6 +15,10 @@ Makefile
 /hphp-build-info.cpp
 /hphp-repo-schema.h
 
+# precompiled headers
+*_cotire.cmake
+cotire
+
 # vim swapfiles
 .*.swp
 .*.swo

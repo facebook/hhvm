@@ -17,3 +17,4 @@ option(USE_GOOGLE_CPU_PROFILER "Use Google cpu profiler" OFF)
 option(DISABLE_HARDWARE_COUNTERS "Disable hardware counters (for XenU systems)" OFF)
 
 option(ENABLE_ZEND_COMPAT "Enable Zend source compatibility" OFF)
+option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)

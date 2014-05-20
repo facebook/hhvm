@@ -15,3 +15,6 @@ endforeach(file ${CXX_SOURCES})
 
 add_library(hphp_hhbbc STATIC ${CXX_SOURCES})
 add_dependencies(hphp_hhbbc hphp_system)
+if (ENABLE_COTIRE)
+  cotire(hphp_hhbbc)
+endif()

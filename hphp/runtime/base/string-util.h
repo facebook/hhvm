@@ -111,7 +111,7 @@ public:
   static Variant Explode(const String& input, const String& delimiter,
                          int limit = 0x7FFFFFFF);
   static String  Implode(const Variant& items, const String& delim); // == Join()
-  static Variant Split(const String& str, int split_length = 1);
+  static Variant Split(const String& str, int64_t split_length = 1);
   static Variant ChunkSplit(
     const String& body, int chunklen = 76,
     const String& end = "\r\n"); // for email (rfc822/2822)

@@ -469,7 +469,7 @@
                 },
                 {
                     "name": "split_length",
-                    "type": "Int32",
+                    "type": "Int64",
                     "value": "1",
                     "desc": "Maximum length of the chunk."
                 }

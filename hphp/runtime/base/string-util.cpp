@@ -153,7 +153,7 @@ String StringUtil::Implode(const Variant& items, const String& delim) {
   return s.setSize(len);
 }
 
-Variant StringUtil::Split(const String& str, int split_length /* = 1 */) {
+Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
   if (split_length <= 0) {
     throw_invalid_argument(
       "The length of each segment must be greater than zero"

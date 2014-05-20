@@ -472,7 +472,7 @@ String f_join(const Variant& glue, const Variant& pieces /* = null_variant */) {
   return f_implode(glue, pieces);
 }
 
-Variant f_str_split(const String& str, int split_length /* = 1 */) {
+Variant f_str_split(const String& str, int64_t split_length /* = 1 */) {
   return StringUtil::Split(str, split_length);
 }
 

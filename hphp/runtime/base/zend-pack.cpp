@@ -153,6 +153,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'A':
     case 'h':
     case 'H':
+    case 'Z':
       if (currentarg >= argc) {
         throw_invalid_argument("Type %c: not enough arguments", code);
         return false;
@@ -222,6 +223,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'c':
     case 'C':
     case 'x':
+    case 'Z':
       INC_OUTPUTPOS(arg,1);    /* 8 bit per arg */
       break;
 
@@ -287,7 +289,8 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     switch ((int) code) {
     case 'a':
     case 'A':
-      memset(&output[outputpos], (code == 'a') ? '\0' : ' ', arg);
+    case 'Z':
+      memset(&output[outputpos], (code != 'A') ? '\0' : ' ', arg);
       val = argv[currentarg++].toString();
       s = val.c_str();
       slen = val.size();
@@ -514,6 +517,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
 
     case 'a':
     case 'A':
+    case 'Z':
       size = arg;
       arg = 1;
       break;
@@ -589,8 +593,9 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
       if ((inputpos + size) <= inputlen) {
         switch ((int) type) {
         case 'a':
-        case 'A': {
-          char pad = (type == 'a') ? '\0' : ' ';
+        case 'A':
+        case 'Z': {
+          char pad = (type != 'A') ? '\0' : ' ';
           int len = inputlen - inputpos; /* Remaining string */
 
           /* If size was given take minimum of len and size */

@@ -1458,6 +1458,18 @@ and array_cow p =
  *)
 (*****************************************************************************)
 and array_get is_lvalue p env ty1 ety1 e2 ty2 =
+  (* This is a little weird -- we enforce the right arity when you use certain
+   * collections, even in partial mode (where normally completely omitting the
+   * type parameter list is admitted). Basically the "omit type parameter"
+   * hole was for compatibility with certain interfaces like ArrayAccess, not
+   * for collections! But it's hard to go back on now, so since we've always
+   * errored (with an inscruitable error message) when you try to actually use
+   * a collection with omitted type parameters, we can continue to error and
+   * give a more useful error message. *)
+  let arity_error (_, name) = error_l [
+    p, "You cannot use this "^(Utils.strip_ns name);
+    Reason.to_pos (fst ty1), "It is missing its type parameters"
+  ] in
   match snd ety1 with
   | Tunresolved tyl ->
       let env, tyl = lfold begin fun env ty1 ->
@@ -1472,38 +1484,53 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       let ty1 = Reason.Ridx (fst e2), Tprim Tint in
       let env, _ = Type.unify p Reason.URarray_get env ty2 ty1 in
       env, ty
-  | Tgeneric (_, Some (_, Tapply ((_, "\\Vector"), [ty])))
-  | Tapply ((_, "\\Vector"), [ty]) ->
+  | Tgeneric (_, Some (_, Tapply ((_, "\\Vector" as n), argl)))
+  | Tapply ((_, "\\Vector" as n), argl) ->
+      let ty = match argl with
+        | [ty] -> ty
+        | _ -> arity_error n in
       let ty1 = Reason.Ridx_vector (fst e2), Tprim Tint in
       let env, _ = Type.unify p Reason.URvector_get env ty2 ty1 in
       env, ty
-  | Tgeneric (_, Some (_, Tapply ((_, "\\Map"), [k; v])))
-  | Tgeneric (_, Some (_, Tapply ((_, "\\StableMap"), [k; v])))
-  | Tapply ((_, "\\Map"), [k; v])
-  | Tapply ((_, "\\StableMap"), [k; v]) ->
+  | Tgeneric (_, Some (_, Tapply ((_, "\\Map" as n), argl)))
+  | Tgeneric (_, Some (_, Tapply ((_, "\\StableMap" as n), argl)))
+  | Tapply ((_, "\\Map" as n), argl)
+  | Tapply ((_, "\\StableMap" as n), argl) ->
+      let (k, v) = match argl with
+        | [k; v] -> (k, v)
+        | _ -> arity_error n in
       let env, ty2 = TUtils.unresolved env ty2 in
       let env, _ = Type.unify p Reason.URmap_get env k ty2 in
       env, v
-  | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstMap" | "\\ImmMap")), [k; v])))
-  | Tapply ((_, ("\\ConstMap" | "\\ImmMap")), [k; v])
+  | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstMap" | "\\ImmMap") as n), argl)))
+  | Tapply ((_, ("\\ConstMap" | "\\ImmMap") as n), argl)
       when not is_lvalue ->
+      let (k, v) = match argl with
+        | [k; v] -> (k, v)
+        | _ -> arity_error n in
       let env, _ = Type.unify p Reason.URmap_get env k ty2 in
       env, v
   | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstMap" | "\\ImmMap")), _)))
   | Tapply ((_, ("\\ConstMap" | "\\ImmMap")), _)
       when is_lvalue -> error_const_mutation p ety1
-  | Tgeneric (_, Some (_, Tapply ((_, "\\Indexish"), [k; v])))
-  | Tapply ((_, "\\Indexish"), [k; v]) ->
+  | Tgeneric (_, Some (_, Tapply ((_, "\\Indexish" as n), argl)))
+  | Tapply ((_, "\\Indexish" as n), argl) ->
+      let (k, v) = match argl with
+        | [k; v] -> (k, v)
+        | _ -> arity_error n in
       let env, _ = Type.unify p Reason.URcontainer_get env k ty2 in
       env, v
-  | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstVector" | "\\ImmVector" as cn)), [ty])))
-  | Tapply ((_, ("\\ConstVector" | "\\ImmVector" as cn)), [ty])
+  | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstVector" | "\\ImmVector") as n), argl)))
+  | Tapply ((_, ("\\ConstVector" | "\\ImmVector") as n), argl)
       when not is_lvalue ->
+      let ty = match argl with
+        | [ty] -> ty
+        | _ -> arity_error n in
       let ty1 = Reason.Ridx (fst e2), Tprim Tint in
-      let ur = (match cn with
+      let ur = (match snd n with
                   "\\ConstVector"   -> Reason.URconst_vector_get
                 | "\\ImmVector"  -> Reason.URimm_vector_get
-                | _  -> failwith ("Unexpected collection name: " ^ cn)) in
+                | _  -> failwith ("Unexpected collection name: " ^ (snd n))) in
       let env, _ = Type.unify p ur env ty2 ty1 in
       env, ty
   | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstVector" | "\\ImmVector")), _)))
@@ -1543,7 +1570,10 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       | p, _ ->
           error p (Reason.string_of_ureason Reason.URtuple_access)
       )
-  | Tapply ((_, "\\Pair"), [ty1; ty2]) ->
+  | Tapply ((_, "\\Pair" as n), argl) ->
+      let (ty1, ty2) = match argl with
+        | [ty1; ty2] -> (ty1, ty2)
+        | _ -> arity_error n in
       (match e2 with
       | p, Int n ->
           (try

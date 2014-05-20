@@ -20,19 +20,14 @@ BUILD_DIRS=stubs
 BUILD_CMAS=stubs/lib.cma
 EXTRA_INCLUDEDIRS=
 FILTER_FROM_INCLUDE=
-ifneq ($(wildcard facebook/Makefile.include),)
-  ifndef CMAKE
-    # None of this stuff can build without some crazy ENV vars. Killing until it is fixed.
-    -include facebook/Makefile.include
 
-    # Want to open source this but no need to force everyone to have js_of_ocaml
-    BUILD_DIRS+=js
-
-    # We filter js/ because it contains an incompatible str.ml file
-    # that would then confuse ocamldepend
-    FILTER_FROM_INCLUDE=js
-  endif
-endif
+# If you want to build the JS typechecker, uncomment these lines. Requires
+# js_of_ocaml, and is kind of slow to build, which is why it's off by default.
+#
+# We filter js/ because it contains an incompatible str.ml file
+# that would then confuse ocamldepend
+#BUILD_DIRS+=js
+#FILTER_FROM_INCLUDE=js
 
 #------------------------------------------------------------------------------
 # Program related variables

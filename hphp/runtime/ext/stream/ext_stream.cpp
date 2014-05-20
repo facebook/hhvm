@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/user-stream-wrapper.h"
@@ -170,19 +171,15 @@ Variant f_stream_copy_to_stream(const Resource& source, const Resource& dest,
   int cbytes = 0;
   if (maxlength == 0) maxlength = INT_MAX;
   while (cbytes < maxlength) {
-    char buf[8193];
     int remaining = maxlength - cbytes;
-    int toread =
-      ((remaining >= (int)sizeof(buf)) ? sizeof(buf) - 1 : remaining);
-    int rbytes = srcFile->readImpl(buf, toread);
-    if (rbytes == 0) break;
-    if (rbytes < 0) return false;
-    buf[rbytes] = '\0';
-    if (destFile->write(String(buf, rbytes, CopyString)) != rbytes) {
+    String buf = srcFile->read(std::min(remaining, File::CHUNK_SIZE));
+    if (buf.size() == 0) break;
+    if (destFile->write(buf) != buf.size()) {
       return false;
     }
-    cbytes += rbytes;
+    cbytes += buf.size();
   }
+
   return cbytes;
 }
 

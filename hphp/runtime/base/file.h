@@ -51,7 +51,7 @@ DECLARE_EXTERN_REQUEST_LOCAL(FileData, s_file_data);
  */
 class File : public SweepableResourceData {
 public:
-  static const int CHUNK_SIZE = 8192;
+  static const int CHUNK_SIZE;
 
   static String TranslatePath(const String& filename);
   // Same as TranslatePath except doesn't make paths absolute

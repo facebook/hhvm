@@ -114,25 +114,59 @@ module WorkerApi = struct
    * user will want to search for xhp classes without typing a : at
    * the start of every search *)
   let clean_key key =
-    let key = String.lowercase (Utils.strip_ns key) in
-    if key.[0] = ':'
-    then String.sub key 1 (String.length key - 1)
+    if (String.length key) > 0
+    then
+      let key = String.lowercase (Utils.strip_ns key) in
+      if (String.length key) > 0 && key.[0] = ':'
+      then String.sub key 1 (String.length key - 1)
+      else key
     else key
 
-  let result_and_key_from_id id res_type =
-    clean_key (snd id),
+  let result_from_id id res_type =
     {
       pos         = fst id;
       name        = snd id;
       result_type = res_type;
     }
 
+  let result_and_key_from_id id res_type =
+    clean_key (snd id), result_from_id id res_type
+
+  let uppercase_filter str =
+    let result = ref [] in
+    String.iter begin fun c ->
+      if Char.lowercase c <> c
+      then result := c :: !result
+    end str;
+    let i = ref (List.length !result) in
+    let filtered_str = String.create !i in
+    List.iter begin fun c ->
+      String.set filtered_str (!i - 1) c;
+      decr i
+    end !result;
+    filtered_str
+
+  let add_cid_result c acc =
+    let name = (snd c.Ast.c_name) in
+    (* camel name is the name filtered for the starting letters of camelcase
+     * For example, FooBarClass's camel name is FBC *)
+    let camel_name = clean_key (uppercase_filter name) in
+    let name = clean_key name in
+    let c_result = result_from_id c.Ast.c_name (Class c.Ast.c_kind) in
+    let acc =
+      (* only add the camel name if this result wouldn't have already
+       * been covered by the normal name *)
+      if camel_name <> "" && not (str_starts_with name camel_name)
+      then (camel_name, c_result) :: acc
+      else acc
+    in
+    (name, c_result) :: acc
+
 (* Unlike anything else, we need to look at the class body to extract it's
  * methods so that they can also be searched for *)
   let update_class c acc =
     let prefix = (snd c.Ast.c_name)^"::" in
-    let acc =
-      (result_and_key_from_id c.Ast.c_name (Class c.Ast.c_kind)) :: acc in
+    let acc = add_cid_result c acc in
     let acc = List.fold_left begin fun acc elt ->
       match elt with
       | Ast.Method m -> let id = m.Ast.m_name in

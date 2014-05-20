@@ -36,8 +36,6 @@
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware-counter.h"
 #include "folly/String.h"
-//#include <stdio.h>
-//#include <fstream>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -576,6 +574,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
     cookie += name.data();
     cookie += "=deleted; expires=";
     cookie += sdt.data();
+    cookie += "; Max-Age=0";
   } else {
     cookie += name.data();
     cookie += "=";
@@ -589,6 +588,9 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
       String sdt =
         DateTime(expire, true).toString(DateTime::DateFormat::Cookie);
       cookie += sdt.data();
+      cookie += "; Max-Age=";
+      String sdelta = toString( expire - time(0) );
+      cookie += sdelta.data();
     }
   }
 
@@ -607,7 +609,14 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
     cookie += "; httponly";
   }
 
-  m_responseCookies[name.data()] = cookie;
+  // PHP5 does not deduplicate cookies. That behavior is preserved when
+  // CookieDeduplicate is not enabled. Otherwise, we will only keep the
+  // last cookie for a given name-domain-path triplet.
+  String dedup_key = RuntimeOption::AllowDuplicateCookies ?
+    cookie :
+    name + "\n" + domain + "\n" + path;
+
+  m_responseCookies[dedup_key.data()] = cookie;
   return true;
 }
 

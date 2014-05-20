@@ -1,0 +1,6 @@
+array(2) {
+  ["multichar"]=>
+  string(14) "1derp234herp57"
+  ["multibyte"]=>
+  string(10) "1×234¡57"
+}

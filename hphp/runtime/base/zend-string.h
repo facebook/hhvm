@@ -235,8 +235,9 @@ void string_translate(char *str, int len, const char *str_from,
  */
 String string_money_format(const char *format, double value);
 
-String string_number_format(double d, int dec, char dec_point,
-                            char thousand_sep);
+String string_number_format(double d, int dec,
+                            const String& dec_point,
+                            const String& thousand_sep);
 
 /**
  * Similarity and other properties of strings.

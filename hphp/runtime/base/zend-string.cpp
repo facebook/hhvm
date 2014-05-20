@@ -1701,8 +1701,9 @@ String string_money_format(const char *format, double value) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String string_number_format(double d, int dec, char dec_point,
-                            char thousand_sep) {
+String string_number_format(double d, int dec,
+                            const String& dec_point,
+                            const String& thousand_sep) {
   char *tmpbuf = nullptr, *resbuf;
   char *s, *t;  /* source, target */
   char *dp;
@@ -1745,8 +1746,8 @@ String string_number_format(double d, int dec, char dec_point,
   }
 
   /* allow for thousand separators */
-  if (thousand_sep) {
-    integral += (integral-1) / 3;
+  if (!thousand_sep.empty()) {
+    integral += ((integral-1) / 3) * thousand_sep.size();
   }
 
   reslen = integral;
@@ -1754,8 +1755,8 @@ String string_number_format(double d, int dec, char dec_point,
   if (dec) {
     reslen += dec;
 
-    if (dec_point) {
-      reslen++;
+    if (!dec_point.empty()) {
+      reslen += dec_point.size();
     }
   }
 
@@ -1791,8 +1792,9 @@ String string_number_format(double d, int dec, char dec_point,
     }
 
     /* add decimal point */
-    if (dec_point) {
-      *t-- = dec_point;
+    if (!dec_point.empty()) {
+      memcpy(t + (1 - dec_point.size()), dec_point.data(), dec_point.size());
+      t -= dec_point.size();
     }
   }
 
@@ -1801,7 +1803,10 @@ String string_number_format(double d, int dec, char dec_point,
   while(s >= tmpbuf) {
     *t-- = *s--;
     if (thousand_sep && (++count%3)==0 && s>=tmpbuf) {
-      *t-- = thousand_sep;
+      memcpy(t + (1 - thousand_sep.size()),
+             thousand_sep.data(),
+             thousand_sep.size());
+      t -= thousand_sep.size();
     }
   }
 

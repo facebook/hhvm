@@ -798,28 +798,19 @@ Variant f_money_format(const String& format, double number) {
 }
 
 String f_number_format(double number, int decimals /* = 0 */,
-                       const Variant& dec_point /* = "." */,
-                       const Variant& thousands_sep /* = "," */) {
-  char ch_dec_point = '.';
-  if (!dec_point.isNull()) {
-    const String& s = dec_point.toString();
-    if (s.size() >= 1) {
-      ch_dec_point = s[0];
-    } else {
-      ch_dec_point = 0;
-    }
+                       const Variant& dec_point_in /* = "." */,
+                       const Variant& thousands_sep_in /* = "," */) {
+
+  String dec_point(".");
+  if (!dec_point_in.isNull()) {
+    dec_point = dec_point_in.toString();
   }
-  char ch_thousands_sep = ',';
-  if (!thousands_sep.isNull()) {
-    const String& s = thousands_sep.toString();
-    if (s.size() >= 1) {
-      ch_thousands_sep = s[0];
-    } else {
-      ch_thousands_sep = 0;
-    }
+  String thousands_sep(",");
+  if (!thousands_sep_in.isNull()) {
+    thousands_sep = thousands_sep_in.toString();
   }
-  return string_number_format(number, decimals, ch_dec_point,
-                               ch_thousands_sep);
+
+  return string_number_format(number, decimals, dec_point, thousands_sep);
 }
 
 int64_t f_strcmp(const String& str1, const String& str2) {

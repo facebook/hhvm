@@ -161,6 +161,10 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
 
       if (arg < 0) {
         arg = argv[currentarg].toString().size();
+        //add one, because Z is always NUL-terminated
+        if (code == 'Z')
+          arg++;
+
       }
 
       currentarg++;
@@ -290,14 +294,16 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'a':
     case 'A':
     case 'Z':
+    {
+      int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
       memset(&output[outputpos], (code != 'A') ? '\0' : ' ', arg);
       val = argv[currentarg++].toString();
       s = val.c_str();
       slen = val.size();
-      memcpy(&output[outputpos], s, (slen < arg) ? slen : arg);
+      memcpy(&output[outputpos], s, (slen < arg_cp) ? slen : arg_cp);
       outputpos += arg;
+    }
       break;
-
     case 'h':
     case 'H': {
       int nibbleshift = (code == 'h') ? 0 : 4;
@@ -595,7 +601,6 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
         case 'a':
         case 'A':
         case 'Z': {
-          char pad = (type != 'A') ? '\0' : ' ';
           int len = inputlen - inputpos; /* Remaining string */
 
           /* If size was given take minimum of len and size */
@@ -605,12 +610,31 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
 
           size = len;
 
-          /* Remove padding chars from unpacked data */
-          while (--len >= 0) {
-            if (input[inputpos + len] != pad)
-              break;
+          /* A will strip any trailing whitespace */
+          if (type=='A')
+          {
+            char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
+            while (--len >= 0) {
+               if (input[inputpos + len] != padn
+                       && input[inputpos + len] != pads
+                       && input[inputpos + len] != padt
+                       && input[inputpos + len] != padc
+                       && input[inputpos + len] != padl
+               )
+                       break;
+            }
           }
-
+          if (type=='Z')
+          {
+            int s;
+            /* Remove everything after the first null */
+            for (s=0 ; s < len ; s++) {
+                     if (input[inputpos + s] == '\0')
+                             break;
+            }
+            /*-1 because the string gets terminated with '\0' otherwise*/
+            len = s-1;
+          }
           ret.set(String(n, CopyString),
                   String(input + inputpos, len + 1, CopyString));
           break;

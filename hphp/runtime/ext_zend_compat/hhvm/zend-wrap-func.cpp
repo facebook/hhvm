@@ -24,20 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO zPrepArgs needs to be updated so take care of
-// boxing varargs
-void zPrepArgs(ActRec* ar) {
-  // If you call a function with too few params, zend_parse_parameters will
-  // reject it, but we don't want this function boxing random slots from the
-  // stack
-  int32_t numArgs = std::min(ar->numArgs(), int(ar->m_func->numParams()));
-  TypedValue* args = (TypedValue*)ar - 1;
-  for (int32_t i = 0; i < numArgs; ++i) {
-    TypedValue* arg = args-i;
-    zBoxAndProxy(arg);
-  }
-}
-
 void zBoxAndProxy(TypedValue* arg) {
   if (arg->m_type != KindOfRef) {
     tvBox(arg);
@@ -51,10 +37,6 @@ void zBoxAndProxy(TypedValue* arg) {
 TypedValue* zend_wrap_func(ActRec* ar) {
   TSRMLS_FETCH();
   zend_ext_func native_func = reinterpret_cast<zend_ext_func>(ar->func()->nativeFuncPtr());
-
-  // Prepare the arguments and return value before they are
-  // exposed to the PHP extension
-  zPrepArgs(ar);
 
   // Using Variant so exceptions will decref them
   Variant return_value_var(Variant::NullInit{});
@@ -78,7 +60,7 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   zend_clear_exception(TSRMLS_C);
 
   // Invoke the PHP extension function/method
-  ZendExecutionStack::pushHHVMStack();
+  ZendExecutionStack::pushHHVMStack((void*)ar);
   try {
     native_func(
       ar->numArgs(),

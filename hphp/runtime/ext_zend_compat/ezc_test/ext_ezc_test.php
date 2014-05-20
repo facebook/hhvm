@@ -41,3 +41,8 @@ function ezc_throw_nonstd(): mixed;
  */
 <<__Native("ZendCompat")>>
 function ezc_realpath(mixed $path): mixed;
+
+/* Varadic argument test, equivalent to min()
+ */
+<<__Native("ZendCompat")>>
+  function ezc_min(): mixed;

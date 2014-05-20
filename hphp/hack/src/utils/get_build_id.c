@@ -3,7 +3,7 @@
 #include <string.h>
 
 extern const char* const BuildInfo_kRevision;
-extern const char* const BuildInfo_kTimeISO8601;
+const char* const build_time = __DATE__ " " __TIME__;
 
 /**
  * Export the constants provided by Facebook's build system to ocaml-land, since
@@ -19,12 +19,12 @@ value hh_get_build_id(void) {
   CAMLlocal1(result);
 
   size_t revlen = strlen(BuildInfo_kRevision);
-  size_t timelen = strlen(BuildInfo_kTimeISO8601);
+  size_t timelen = strlen(build_time);
   result = caml_alloc_string(revlen + timelen + 1);
 
   memcpy(String_val(result), BuildInfo_kRevision, revlen);
-  String_val(result)[revlen] = '-';
-  memcpy(String_val(result) + revlen + 1, BuildInfo_kTimeISO8601, timelen);
+  String_val(result)[revlen] = ' ';
+  memcpy(String_val(result) + revlen + 1, build_time, timelen);
 
   CAMLreturn(result);
 }

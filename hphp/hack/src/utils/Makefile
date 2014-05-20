@@ -46,4 +46,3 @@ $(TARGET).cmxa: $(OBJS:.cmo=.cmx) $(LIBS:.cma=.cmxa) $(COBJS)
 # Create the build stamp if it's not already there
 get_build_id.gen.c:
 	echo 'const char* const BuildInfo_kRevision = "${SHA}";' > get_build_id.gen.c
-	echo 'const char* const BuildInfo_kTimeISO8601 = "${DATE}";' >> get_build_id.gen.c

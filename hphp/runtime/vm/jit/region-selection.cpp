@@ -719,7 +719,8 @@ std::string show(RegionContext::PreLiveAR ar) {
 
 std::string show(const RegionContext& ctx) {
   std::string ret;
-  folly::toAppend(ctx.func->fullName()->data(), "@", ctx.bcOffset, "\n", &ret);
+  folly::toAppend(ctx.func->fullName()->data(), "@", ctx.bcOffset,
+                  ctx.resumed ? "r" : "", "\n", &ret);
   for (auto& t : ctx.liveTypes) folly::toAppend(" ", show(t), "\n", &ret);
   for (auto& ar : ctx.preLiveARs) folly::toAppend(" ", show(ar), "\n", &ret);
 
@@ -729,10 +730,12 @@ std::string show(const RegionContext& ctx) {
 std::string show(const RegionDesc::Block& b) {
   std::string ret{"Block "};
   folly::toAppend(b.id(), ' ',
-    b.func()->fullName()->data(), '@', b.start().offset(),
-    " length ", b.length(), " initSpOff ", b.initialSpOffset(), '\n',
-    &ret
-  );
+                  b.func()->fullName()->data(), '@', b.start().offset(),
+                  b.start().resumed() ? "r" : "",
+                  " length ", b.length(),
+                  " initSpOff ", b.initialSpOffset(), '\n',
+                  &ret
+                 );
 
   auto typePreds = makeMapWalker(b.typePreds());
   auto byRefs    = makeMapWalker(b.paramByRefs());

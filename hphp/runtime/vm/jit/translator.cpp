@@ -3433,6 +3433,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
 bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
   if (instrIsNonCallControlFlow(instr->op()) ||
       instr->outputPredicted ||
+      instr->op() == OpAwait || // may branch to scheduler and suspend execution
       instr->op() == OpClsCnsD) { // side exits if misses in the RDS
     return true;
   }

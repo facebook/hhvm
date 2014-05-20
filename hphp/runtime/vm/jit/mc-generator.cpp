@@ -1719,9 +1719,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
       assert(m_tx.mode() == TransKind::Profile ||
              m_tx.mode() == TransKind::Live);
       tp = m_tx.analyze(sk);
-      // TODO(#4150507): use sk.resumed() instead of liveResumed()?
       RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
-                               liveResumed() };
+                               sk.resumed() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
       region = selectRegion(rContext, tp.get(), m_tx.mode());
@@ -1754,13 +1753,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
         : kInvalidTransID,
       sk.offset(),
       initSpOffset,
-      // TODO(#4150507): use sk.resumed() instead of liveResumed()?
-      liveResumed(),
+      sk.resumed(),
       sk.func()
     };
 
     while (result == Translator::Retry) {
-      // TODO(#4150507): use sk.resumed() instead of liveResumed()?
       m_tx.traceStart(transContext);
 
       // Try translating a region if we have one, then fall back to using the
@@ -1793,7 +1790,6 @@ MCGenerator::translateWork(const TranslArgs& args) {
         }
         if (result == Translator::Failure) {
           m_tx.traceFree();
-          // TODO(#4150507): use sk.resumed() instead of liveResumed()?
           m_tx.traceStart(transContext);
           resetState();
         }
@@ -1806,7 +1802,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
         if (m_tx.mode() == TransKind::Optimize) {
           if (sk.getFuncId() == liveFunc()->getFuncId() &&
               liveUnit()->contains(vmpc()) &&
-              sk.offset() == liveUnit()->offsetOf(vmpc())) {
+              sk.offset() == liveUnit()->offsetOf(vmpc()) &&
+              sk.resumed() == liveResumed()) {
             m_tx.setMode(TransKind::Live);
             tp = m_tx.analyze(sk);
           } else {

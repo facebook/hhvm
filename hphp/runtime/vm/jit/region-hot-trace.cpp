@@ -36,7 +36,6 @@ static bool breaksRegion(Op opc) {
     case OpCreateCont:
     case OpYield:
     case OpYieldK:
-    case OpAwait:
     case OpRetC:
     case OpRetV:
     case OpExit:

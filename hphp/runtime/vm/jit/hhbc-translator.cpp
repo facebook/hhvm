@@ -3560,8 +3560,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     // Sync SP.
     sp = spillStack();
   } else if (func->isNonAsyncGenerator()) {
-    assert(retVal->type() <= Type::Null);
-
     // Clear generator's key and value.
     auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
     gen(StContArKey, m_irb->fp(), cns(Type::InitNull));

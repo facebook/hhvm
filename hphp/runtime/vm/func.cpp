@@ -895,16 +895,6 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
 bool Func::shouldPGO() const {
   if (!RuntimeOption::EvalJitPGO) return false;
 
-  // Async function and generator bodies consist of two types of basic
-  // blocks. One type is executed in non-generator mode (eager execution),
-  // other in generator mode (resumed execution). Translator may emit
-  // the same opcodes in a different way based on the execution mode.
-  // This currently breaks region-based retranslation, as the information
-  // about the current execution mode is lost.
-  //
-  // TODO(#3880036): remove this once SrcKey contains execution mode bit
-  if (isResumable()) return false;
-
   // Task #4314804: Add support for closures in PGO mode.
   // Cloned closures use the func prologue tables to hold the
   // addresses of the DV funclets, and not real prologues.  The

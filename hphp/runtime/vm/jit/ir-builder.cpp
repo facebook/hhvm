@@ -159,6 +159,12 @@ void IRBuilder::appendBlock(Block* block) {
 static bool isMainExit(const Block* b) {
   if (b->hint() == Block::Hint::Unlikely) return false;
   if (b->next()) return false;
+  // The Await bytecode instruction does a RetCtrl to the scheduler,
+  // which is in a likely block.  We don't want to consider this as
+  // the main exit.
+  if (b->back().op() == RetCtrl && b->back().marker().sk().op() == OpAwait) {
+    return false;
+  }
   auto taken = b->taken();
   if (!taken) return true;
   if (taken->isCatch()) return true;

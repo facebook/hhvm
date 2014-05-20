@@ -64,6 +64,7 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
     return offsetof(c_AsyncFunctionWaitHandle, m_child);
   }
   static c_AsyncFunctionWaitHandle* Create(const ActRec* origFp,
+                                           size_t numSlots,
                                            JIT::TCA resumeAddr,
                                            Offset resumeOffset,
                                            ObjectData* child);

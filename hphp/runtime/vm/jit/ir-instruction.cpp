@@ -140,7 +140,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 0;
 
     case CreateAFWH:
-      return srcNo == 2;
+      return srcNo == 3;
 
     default:
       return true;

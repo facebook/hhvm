@@ -55,7 +55,7 @@ struct Resumable {
     return offsetof(Resumable, m_resumeOffset);
   }
 
-  static void* Create(const ActRec* fp, JIT::TCA resumeAddr,
+  static void* Create(const ActRec* fp, size_t numSlots, JIT::TCA resumeAddr,
                       Offset resumeOffset, size_t objSize) {
     assert(fp);
     auto const func = fp->func();
@@ -64,7 +64,7 @@ struct Resumable {
     assert(func->contains(resumeOffset));
 
     // Allocate memory.
-    size_t frameSize = func->numSlotsInFrame() * sizeof(TypedValue);
+    size_t frameSize = numSlots * sizeof(TypedValue);
     size_t totalSize = frameSize + sizeof(Resumable) + objSize;
     void* mem = MM().objMallocLogged(totalSize);
     auto resumable = (Resumable*)((char*)mem + frameSize);

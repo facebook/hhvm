@@ -1566,7 +1566,8 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   auto const func = curFunc();
   auto const resumeSk = SrcKey(func, resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
-  auto const cont = gen(CreateCont, m_irb->fp(), resumeAddr, cns(resumeOffset));
+  auto const cont = gen(CreateCont, m_irb->fp(), cns(func->numSlotsInFrame()),
+                        resumeAddr, cns(resumeOffset));
 
   // Teleport local variables into the generator.
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
@@ -1735,7 +1736,8 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
   auto const resumeSk = SrcKey(func, resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
   auto const waitHandle =
-    gen(CreateAFWH, catchBlock, m_irb->fp(), resumeAddr, cns(resumeOffset),
+    gen(CreateAFWH, catchBlock, m_irb->fp(), cns(func->numSlotsInFrame()),
+        resumeAddr, cns(resumeOffset),
         child);
 
   // Teleport local variables into the AsyncFunctionWaitHandle.

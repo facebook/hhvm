@@ -91,11 +91,11 @@ struct c_Generator : c_Continuation {
 
   static c_Generator* Clone(ObjectData* obj);
 
-  static c_Generator* Create(const ActRec* fp, JIT::TCA resumeAddr,
-                                Offset resumeOffset) {
+  static c_Generator* Create(const ActRec* fp, size_t numSlots,
+                             JIT::TCA resumeAddr, Offset resumeOffset) {
     assert(fp);
     assert(fp->func()->isNonAsyncGenerator());
-    void* obj = Resumable::Create(fp, resumeAddr, resumeOffset,
+    void* obj = Resumable::Create(fp, numSlots, resumeAddr, resumeOffset,
                                   sizeof(c_Generator));
     auto const cont = new (obj) c_Generator();
     cont->incRefCount();

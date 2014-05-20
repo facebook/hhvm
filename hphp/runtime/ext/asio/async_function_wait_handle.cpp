@@ -128,6 +128,7 @@ void checkCreateErrors(c_WaitableWaitHandle* child) {
 
 c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
+                                  size_t numSlots,
                                   JIT::TCA resumeAddr,
                                   Offset resumeOffset,
                                   ObjectData* child) {
@@ -142,7 +143,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
 
   checkCreateErrors(child_wh);
 
-  void* obj = Resumable::Create(fp, resumeAddr, resumeOffset,
+  void* obj = Resumable::Create(fp, numSlots, resumeAddr, resumeOffset,
                                 sizeof(c_AsyncFunctionWaitHandle));
   auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
   waitHandle->incRefCount();

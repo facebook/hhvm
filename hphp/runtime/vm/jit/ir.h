@@ -628,7 +628,7 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
 O(Shuffle,                          ND, SVar(Top),                        NF) \
-O(CreateCont,                   D(Obj), S(FramePtr)                           \
+O(CreateCont,                   D(Obj), S(FramePtr) C(Int)                    \
                                           S(TCA,Nullptr) C(Int),     E|N|PRc) \
 O(ContEnter,                        ND, S(StkPtr)                             \
                                           S(FramePtr)                         \
@@ -655,6 +655,7 @@ O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
 O(CopyCells,                       ND, S(FramePtr) S(PtrToGen),            E) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
+                                          C(Int)                              \
                                           S(TCA,Nullptr)                      \
                                           C(Int)                              \
                                           S(Obj),             E|Er|N|CRc|PRc) \

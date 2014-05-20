@@ -6992,7 +6992,8 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   const auto resumeOffset = m_fp->func()->unit()->offsetOf(pc);
 
   // Create the Generator object.
-  auto cont = c_Generator::Create(m_fp, nullptr, resumeOffset);
+  auto cont = c_Generator::Create(m_fp, m_fp->func()->numSlotsInFrame(),
+                                  nullptr, resumeOffset);
 
   // Teleport local variables into the generator.
   fillResumableVars(func, m_fp, cont->actRec());
@@ -7142,7 +7143,8 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
 
   // Create the AsyncFunctionWaitHandle object.
   auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(
-    c_AsyncFunctionWaitHandle::Create(m_fp, nullptr, resumeOffset, child));
+    c_AsyncFunctionWaitHandle::Create(m_fp, m_fp->func()->numSlotsInFrame(),
+                                      nullptr, resumeOffset, child));
 
   // Teleport local variables into the AsyncFunctionWaitHandle.
   fillResumableVars(func, m_fp, waitHandle->actRec());

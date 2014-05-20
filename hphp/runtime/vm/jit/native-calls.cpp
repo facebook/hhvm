@@ -248,11 +248,11 @@ static CallMap s_callMap {
 
     /* Generator support helpers */
     {CreateCont,         &c_Generator::Create, DSSA, SNone,
-                          {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     /* Async function support helpers */
     {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create, DSSA, SSync,
-                          {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
+      {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
     {CreateSSWH,         &c_StaticWaitHandle::CreateSucceededVM, DSSA, SNone,
                           {{TV, 0}}},
 

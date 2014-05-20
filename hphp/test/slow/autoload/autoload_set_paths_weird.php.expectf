@@ -1,0 +1,3 @@
+Autoload function b
+
+Fatal error: Call to undefined function b() in %s/test/slow/autoload/autoload_set_paths_weird.php on line 15

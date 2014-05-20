@@ -83,7 +83,12 @@ void nothrow(ISS& env) {
 
 void calledNoReturn(ISS& env)    { env.flags.calledNoReturn = true; }
 void constprop(ISS& env)         { env.flags.canConstProp = true; }
-void nofallthrough(ISS& env)     { env.flags.tookBranch = true; }
+void nofallthrough(ISS& env)     {
+  env.flags.jmpFlag = StepFlags::JmpFlags::Taken;
+}
+void never_taken(ISS& env)       {
+  env.flags.jmpFlag = StepFlags::JmpFlags::Fallthrough;
+}
 void readUnknownLocals(ISS& env) { env.flags.mayReadLocalSet.set(); }
 void readAllLocals(ISS& env)     { env.flags.mayReadLocalSet.set(); }
 

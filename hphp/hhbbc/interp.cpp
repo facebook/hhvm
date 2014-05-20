@@ -105,7 +105,7 @@ template<class T, class... Ts>
 void impl(ISS& env, const T& t, Ts&&... ts) {
   impl(env, t);
 
-  assert(!env.flags.tookBranch &&
+  assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
          "you can't use impl with branching opcodes before last position");
   assert(!env.flags.strengthReduced);
 
@@ -539,6 +539,8 @@ void jmpImpl(ISS& env, const Op& op) {
     if (taken) {
       nofallthrough(env);
       env.propagate(*op.target, env.state);
+    } else {
+      never_taken(env);
     }
     return;
   }
@@ -2112,9 +2114,13 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
       FTRACE(2, "  <called function that never returns>\n");
       continue;
     }
-    if (flags.tookBranch) {
+    switch (flags.jmpFlag) {
+    case StepFlags::JmpFlags::Taken:
       FTRACE(2, "  <took branch; no fallthrough>\n");
       return RunFlags {};
+    case StepFlags::JmpFlags::Fallthrough:
+    case StepFlags::JmpFlags::Either:
+      break;
     }
     if (flags.returned) {
       FTRACE(2, "  returned {}\n", show(*flags.returned));

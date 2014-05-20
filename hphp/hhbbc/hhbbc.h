@@ -111,10 +111,10 @@ struct Options {
    * removes unnecessary instructions within a single block, or across
    * blocks, respectively.
    *
-   * Note: this is off for now because it is a bit of a work in
+   * Note: GlobalDCE is off for now because it is a bit of a work in
    * progress (needs more testing).
    */
-  bool LocalDCE = false;
+  bool LocalDCE = true;
   bool GlobalDCE = false;
 
   /*

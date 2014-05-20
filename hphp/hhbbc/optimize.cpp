@@ -400,25 +400,33 @@ void first_pass(const Index& index,
       continue;
     }
 
-    if (options.RemoveDeadBlocks && flags.tookBranch) {
+    if (options.RemoveDeadBlocks &&
+        flags.jmpFlag != StepFlags::JmpFlags::Either) {
       always_assert(!flags.wasPEI);
-      switch (op.op) {
-      case Op::JmpNZ:     blk->fallthrough = op.JmpNZ.target;     break;
-      case Op::JmpZ:      blk->fallthrough = op.JmpZ.target;      break;
-      case Op::IterInit:  blk->fallthrough = op.IterInit.target;  break;
-      case Op::IterInitK: blk->fallthrough = op.IterInitK.target; break;
-      default:
-        // No support for switch, etc, right now.
-        always_assert(0 && "unsupported tookBranch case");
+      switch(flags.jmpFlag) {
+      case StepFlags::JmpFlags::Taken:
+        switch (op.op) {
+        case Op::JmpNZ:     blk->fallthrough = op.JmpNZ.target;     break;
+        case Op::JmpZ:      blk->fallthrough = op.JmpZ.target;      break;
+        case Op::IterInit:  blk->fallthrough = op.IterInit.target;  break;
+        case Op::IterInitK: blk->fallthrough = op.IterInitK.target; break;
+        default:
+          // No support for switch, etc, right now.
+          always_assert(0 && "unsupported tookBranch case");
+        }
+        // fall through to PopC
+      case StepFlags::JmpFlags::Fallthrough:
+        /*
+         * We need to pop the cell that was on the stack for the
+         * conditional jump.  Note: for jumps this also conceptually
+         * needs to execute any side effects a conversion to bool can
+         * have.  (Currently that is none.)
+         */
+        gen(bc::PopC {});
+        continue;
+      case StepFlags::JmpFlags::Either:
+        not_reached();
       }
-      /*
-       * We need to pop the cell that was on the stack for the
-       * conditional jump.  Note: for jumps this also conceptually
-       * needs to execute any side effects a conversion to bool can
-       * have.  (Currently that is none.)
-       */
-      gen(bc::PopC {});
-      continue;
     }
 
     if (options.ConstantProp && flags.canConstProp) {

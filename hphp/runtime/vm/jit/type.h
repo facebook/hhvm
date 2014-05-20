@@ -375,11 +375,12 @@ public:
   }
 
   static Type cns(const TypedValue tv) {
+    if (tv.m_type == KindOfUninit) return Type::Uninit;
+    if (tv.m_type == KindOfNull)   return Type::InitNull;
+
     auto ret = [&] {
       switch (tv.m_type) {
         case KindOfClass:
-        case KindOfUninit:
-        case KindOfNull:
         case KindOfBoolean:
         case KindOfInt64:
         case KindOfDouble:

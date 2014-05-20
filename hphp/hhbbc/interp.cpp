@@ -39,6 +39,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/type-arith.h"
+#include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/analyze.h"
@@ -677,6 +678,12 @@ void in(ISS& env, const bc::Catch&) {
 
 void in(ISS& env, const bc::NativeImpl&) {
   killLocals(env);
+
+  if (is_collection_method_returning_this(env.ctx.cls, env.ctx.func)) {
+    auto const resCls = env.index.builtin_class(env.ctx.cls->name);
+    return doRet(env, objExact(resCls));
+  }
+
   if (env.ctx.func->nativeInfo) {
     auto const dt = env.ctx.func->nativeInfo->returnType;
     if (dt != KindOfInvalid) {

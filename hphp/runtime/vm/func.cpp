@@ -871,6 +871,11 @@ bool Func::isDVEntry(Offset offset) const {
   return false;
 }
 
+int Func::getEntryNumParams(Offset offset) const {
+  if (offset == base()) return numNonVariadicParams();
+  return getDVEntryNumParams(offset);
+}
+
 int Func::getDVEntryNumParams(Offset offset) const {
   auto const nparams = numNonVariadicParams();
   for (int i = 0; i < nparams; i++) {
@@ -895,14 +900,12 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
 bool Func::shouldPGO() const {
   if (!RuntimeOption::EvalJitPGO) return false;
 
-  // Task #4314804: Add support for closures in PGO mode.
-  // Cloned closures use the func prologue tables to hold the
-  // addresses of the DV funclets, and not real prologues.  The
-  // mechanism to retranslate prologues currently assumes that the
-  // prologue tables contain real prologues, so it doesn't properly
-  // handle cloned closures for now.  So don't profile & retranslate
-  // them for now.
-  if (isClosureBody()) return false;
+  // Non-cloned closures simply contain prologues that redispacth to
+  // cloned closures.  They don't contain a translation for the
+  // function entry, which is what triggers an Optimize retranslation.
+  // So don't generate profiling translations for them -- there's not
+  // much to do with PGO anyway here, since they just have prologues.
+  if (isClosureBody() && !isClonedClosure()) return false;
 
   if (!RuntimeOption::EvalJitPGOHotOnly) return true;
   return attrs() & AttrHot;

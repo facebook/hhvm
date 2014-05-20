@@ -255,6 +255,13 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
       assert(regionStart);
       start = regionStart;
     }
+    // Cloned closures' prologue tables point to the corresponding
+    // main/DV entry point.  So update the prologue table when
+    // retranslating their entries.
+    if (func->isClonedClosure() && func->isEntry(regionSk.offset())) {
+      int entryNumParams = func->getEntryNumParams(regionSk.offset());
+      func->setPrologue(entryNumParams, regionStart);
+    }
   }
   assert(start);
   return start;

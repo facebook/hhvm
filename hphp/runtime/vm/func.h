@@ -290,6 +290,7 @@ struct Func {
   DVFuncletsVec getDVFunclets() const;
   bool isEntry(Offset offset) const;
   bool isDVEntry(Offset offset) const;
+  int  getEntryNumParams(Offset offset) const;
   int  getDVEntryNumParams(Offset offset) const;
   Offset getEntryForNumArgs(int numArgsPassed) const;
 

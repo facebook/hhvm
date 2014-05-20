@@ -56,13 +56,15 @@ IF(NOT DEFINED CMAKE_PREFIX_PATH)
 endif()
 
 # Look for the chrpath tool so we can warn if it's not there
-find_program(CHRPATH chrpath)
-IF (CHRPATH STREQUAL "CHRPATH-NOTFOUND")
-  SET(FOUND_CHRPATH OFF)
-  message(WARNING "chrpath not found, rpath will not be stripped from installed binaries")
-else()
-  SET(FOUND_CHRPATH ON)
-endif()
+SET(FOUND_CHRPATH OFF)
+IF(UNIX AND NOT APPLE)
+    find_program(CHRPATH chrpath)
+    IF (NOT CHRPATH STREQUAL "CHRPATH-NOTFOUND")
+        SET(FOUND_CHRPATH ON)
+    else()
+        message(WARNING "chrpath not found, rpath will not be stripped from installed binaries")
+    endif()
+ENDIF(UNIX AND NOT APPLE)
 
 LIST(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
 

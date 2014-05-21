@@ -160,7 +160,7 @@ and unify_ env r1 ty1 r2 ty2 =
       let env, class_ = Env.get_class env x in
       (* For final class C, there is no difference between this<X> and X *)
       let env, ty = (match class_ with
-        | Some {tc_final = true} -> unify env ty (r2, ty2)
+        | Some {tc_final = true; _} -> unify env ty (r2, ty2)
         | _ ->
             (try TUtils.uerror r1 ty1 r2 ty2
             with Error l ->

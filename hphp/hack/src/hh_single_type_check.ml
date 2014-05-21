@@ -172,7 +172,7 @@ let collect_defs ast =
  * a given file. You can then inspect this typing environment, e.g.
  * with 'Typing_env.Classes.get "Foo";;'
  *)
-let main_hack { filename; suggest } =
+let main_hack { filename; suggest; _ } =
   SharedMem.init();
   Typing.debug := true;
   try
@@ -198,7 +198,7 @@ let main_hack { filename; suggest } =
   | Utils.Error l -> error l
 
 (* flow single-file entry point *)
-let main_flow { filename; suggest; rest } =
+let main_flow { filename; suggest; rest; flow } =
   SharedMem.init();
   try
     Flow.main [filename] rest

@@ -7,8 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Common
-
 type mode = Harden | DeleteFromLog
 
 let parse_options () =

@@ -132,7 +132,7 @@ let recheck file_names =
             (try Typing_check_service.type_class (snd c.Ast.c_name)
             with _ -> ())
         | Ast.Stmt _ -> ()
-        | Ast.Typedef { Ast.t_id = (_, tname) } ->
+        | Ast.Typedef { Ast.t_id = (_, tname); _ } ->
             (try Typing_check_service.check_typedef tname
             with _ -> ()
             )

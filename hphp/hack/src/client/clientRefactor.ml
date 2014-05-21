@@ -9,7 +9,6 @@
  *)
 
 open ClientEnv
-open ClientExceptions
 open ClientUtils
 open Utils
 

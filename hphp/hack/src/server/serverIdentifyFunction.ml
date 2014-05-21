@@ -7,7 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Utils
 
 let setup line char =
   Find_refs.find_method_at_cursor_result := None;

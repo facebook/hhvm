@@ -82,7 +82,7 @@ let blacklist = List.map Str.regexp [
   ".*/.hg";
 ]
 
-let rec is_blacklisted path =
+let is_blacklisted path =
   try
     List.iter begin fun re ->
       if Str.string_match re path 0
@@ -122,7 +122,7 @@ and add_new_file links env path =
   let time = Time.get() in
   env.files <- TimeFiles.add (time, path) env.files;
   env.new_files <- SSet.add path env.new_files;
-  call (wrap Unix.lstat) path >>= fun ({ Unix.st_kind = kind } as st) ->
+  call (wrap Unix.lstat) path >>= fun ({ Unix.st_kind = kind; _ } as st) ->
   if ISet.mem st.Unix.st_ino links then return () else
   let links = ISet.add st.Unix.st_ino links in
   match kind with

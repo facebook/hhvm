@@ -1750,7 +1750,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
                 env, (Reason.Rnone, Tany)
               | env, None ->
                 smember_not_found p ~is_const ~is_method env class_ mid
-              | env, Some {ce_visibility = vis; ce_type = (r, Tfun ft)} ->
+              | env, Some {ce_visibility = vis; ce_type = (r, Tfun ft); _} ->
                 check_visibility p env (Reason.to_pos r, vis) (Some cid);
                 (* xxx: is there a need to subst in "this" *)
                 let subst = Inst.make_subst class_.tc_tparams paraml in
@@ -1762,7 +1762,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
                 } in
                 env, (r, Tfun ft)
               | _ -> assert false)
-          | Some { ce_visibility = vis; ce_type = method_ } ->
+          | Some { ce_visibility = vis; ce_type = method_; _ } ->
               check_visibility p env (Reason.to_pos (fst method_), vis) (Some cid);
               let subst = Inst.make_subst class_.tc_tparams paraml in
               let env, method_ = Inst.instantiate subst env method_ in
@@ -1901,7 +1901,7 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                     env, (Reason.Rnone, Tany), None
                   | env, None ->
                     member_not_found p ~is_method env class_ s x
-                  | env, Some {ce_visibility = vis; ce_type = (r, Tfun ft)}  ->
+                  | env, Some {ce_visibility = vis; ce_type = (r, Tfun ft); _}  ->
                     let meth_pos = Reason.to_pos r in
                     check_visibility p env (meth_pos, vis) None;
                     let new_name = "alpha_varied_this" in
@@ -1930,7 +1930,7 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                     env, method_, Some (meth_pos, vis)
                   | _ -> assert false
                 )
-              | Some {ce_visibility = vis; ce_type = method_} ->
+              | Some {ce_visibility = vis; ce_type = method_; _} ->
                 let meth_pos = Reason.to_pos (fst method_) in
                 check_visibility p env (meth_pos, vis) None;
                 let new_name = "alpha_varied_this" in
@@ -2018,7 +2018,7 @@ and trait_most_concrete_req_class trait env =
     else
       let env, class_ = Env.get_class env name in
       (match class_ with
-        | None | Some { tc_kind = Ast.Cinterface } -> acc
+        | None | Some { tc_kind = Ast.Cinterface; _ } -> acc
         | Some c -> assert (c.tc_kind <> Ast.Ctrait); Some c
       )
   ) trait.tc_req_ancestors None
@@ -2027,7 +2027,7 @@ and static_class_id p env = function
   | CIparent ->
     let error_no_self () = error p "parent is undefined outside of a class" in
     (match TUtils.get_self_class env error_no_self with
-      | {tc_kind = Ast.Ctrait; tc_req_ancestors ; tc_name} as trait ->
+      | {tc_kind = Ast.Ctrait; tc_req_ancestors; tc_name; _} as trait ->
         (match trait_most_concrete_req_class trait env with
           | None ->
             error p ("parent:: inside a trait is undefined"
@@ -2083,7 +2083,7 @@ and call_construct p env class_ params el =
         not !is_silent_mode
       then error p "This constructor expects no argument";
       env
-  | Some { ce_visibility = vis; ce_type = m } ->
+  | Some { ce_visibility = vis; ce_type = m; _ } ->
       check_visibility p env (Reason.to_pos (fst m), vis) None;
       let subst = Inst.make_subst class_.tc_tparams params in
       let env, m = Inst.instantiate subst env m in
@@ -2114,7 +2114,7 @@ and is_visible env vis cid =
       | Some CIself -> None
       | Some (CI (_, called_ci)) when x <> self_id ->
           (match Env.get_class env called_ci with
-          | _, Some {tc_kind = Ast.Ctrait} ->
+          | _, Some {tc_kind = Ast.Ctrait; _} ->
               Some ("You cannot access private members"
               ^" using the trait's name (did you mean to use self::?)",
               "This member is private")
@@ -2131,7 +2131,7 @@ and is_visible env vis cid =
     let env, my_class = Env.get_class env self_id in
     let env, their_class = Env.get_class env x in
     match cid, their_class with
-      | Some CI _, Some {tc_kind = Ast.Ctrait} ->
+      | Some CI _, Some {tc_kind = Ast.Ctrait; _} ->
         Some ("You cannot access protected members"
         ^" using the trait's name (did you mean to use static:: or self::?)",
         "This member is protected")

@@ -9,7 +9,6 @@
  *)
 
 open Utils
-open Typing_defs
 open Silent
 
 module Reason  = Typing_reason

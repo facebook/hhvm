@@ -10,7 +10,6 @@
 
 open Utils
 open Typing_defs
-open Silent
 
 module Env    = Typing_env
 module TUtils = Typing_utils

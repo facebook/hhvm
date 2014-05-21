@@ -25,7 +25,7 @@ let add_name acc (_, x) = SSet.add x acc
 
 let get_defs file_map =
   SMap.fold begin fun _filename
-    {FileInfo.funs; classes}
+    {FileInfo.funs; classes; _}
       (all_funs, all_classes) ->
     List.fold_left add_name all_funs funs,
     List.fold_left add_name all_classes classes

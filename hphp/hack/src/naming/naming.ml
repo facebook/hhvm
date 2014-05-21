@@ -838,7 +838,7 @@ let interface c constructor methods smethods =
 (* Checking for collision on method names *)
 (*****************************************************************************)
 
-let check_method acc { N.m_name = (p, x) } =
+let check_method acc { N.m_name = (p, x); _ } =
   if SSet.mem x acc && not !Silent.is_silent_mode
   then error p "Name already bound"
   else SSet.add x acc
@@ -856,7 +856,7 @@ let shadowed_type_param p (pos, name) =
     pos, Printf.sprintf "%s is already bound here" name
   ]
 
-let check_method_tparams class_tparam_names { N.m_tparams = tparams } =
+let check_method_tparams class_tparam_names { N.m_tparams = tparams; _ } =
   List.iter
     (fun ((p,x),_) -> List.iter
        (fun (pc,xc) -> if (x = xc) then shadowed_type_param p (pc, x))
@@ -1807,7 +1807,8 @@ let add_files_to_rename nenv failed defl defs_in_env =
   end failed defl
 
 let ndecl_file fn
-    {FileInfo.funs; classes; types; consts; consider_names_just_for_autoload}
+    {FileInfo.funs;
+     classes; types; consts; consider_names_just_for_autoload; comments}
     (errorl, failed, nenv) = try
   dn ("Naming decl: "^fn);
   let nenv =

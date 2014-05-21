@@ -101,7 +101,7 @@ let elaborate_id nsenv (p, id) =
  * allow us to fix those up during a second pass during naming.
  *)
 module ElaborateDefs = struct
-  let rec hint nsenv = function
+  let hint nsenv = function
     | p, Happly (id, args) ->
         p, Happly (elaborate_id nsenv id, args)
     | other -> other

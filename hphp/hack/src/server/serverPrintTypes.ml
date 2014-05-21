@@ -11,7 +11,6 @@
 (*****************************************************************************)
 (* The code to retrieve type information in a file *)
 (*****************************************************************************)
-open Utils
 module SE = ServerEnv
 
 let go fn genv env ic oc =

@@ -8,8 +8,6 @@
  *
  *)
 
-open Utils
-
 let get_class_summary class_ =
   let class_name = Utils.strip_ns (snd class_.Nast.c_name) in
   let res_list =

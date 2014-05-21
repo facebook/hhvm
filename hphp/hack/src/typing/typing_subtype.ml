@@ -286,7 +286,7 @@ and sub_string p env ty2 =
       | None when Env.is_strict env ->
           raise Ignore
       | None -> env
-      | Some {tc_name = "\\Stringish"} -> env
+      | Some {tc_name = "\\Stringish"; _} -> env
       | Some tc when SMap.mem "\\Stringish" tc.tc_ancestors -> env
       | _ when !is_silent_mode -> env
       | Some _ -> error_l [

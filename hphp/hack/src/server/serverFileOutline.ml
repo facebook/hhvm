@@ -8,8 +8,6 @@
  *
  *)
 
-open Utils
-
 let go content oc =
   let res_list = FileOutline.outline content in
   Marshal.to_channel oc res_list [];

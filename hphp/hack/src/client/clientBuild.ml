@@ -8,8 +8,6 @@
  *
  *)
 
-open ClientExceptions
-
 let num_build_retries = 120
 
 type env = ServerMsg.build_opts

@@ -212,7 +212,7 @@ let rec lfold2 f env l1 l2 =
       let env, rl = lfold2 f env rl1 rl2 in
       env, x :: rl
 
-let rec wlfold2 f env l1 l2 =
+let wlfold2 f env l1 l2 =
   match l1, l2 with
   | [], [] -> env, []
   | [], l | l, [] -> env, l

@@ -22,7 +22,7 @@ let find_child_classes target_class_name files_info files =
   SharedMem.invalidate_caches();
   SSet.fold begin fun fn acc ->
     (try
-      let { FileInfo.classes } = SMap.find_unsafe fn files_info in
+      let { FileInfo.classes; _ } = SMap.find_unsafe fn files_info in
       List.fold_left begin fun acc cid ->
          check_if_extends_class target_class_name (snd cid) acc
         end acc classes

@@ -8,7 +8,6 @@
  *
  *)
 
-open Utils
 module SS = SearchService
 
 let desc_string_from_type result_type =

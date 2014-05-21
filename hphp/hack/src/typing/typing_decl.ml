@@ -322,11 +322,11 @@ and class_decl_ c =
   let env, cstr = constructor_decl env parent_cstr c in
   let need_init = match cstr with
     | None
-    | Some {ce_type = (_, Tfun ({ft_abstract = true}))} -> false
+    | Some {ce_type = (_, Tfun ({ft_abstract = true; _})); _} -> false
     | _ -> true in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
   let impl = match SMap.get "__toString" m with
-    | Some {ce_type = (_, Tfun ft)} when cls_name <> "\\Stringish" ->
+    | Some {ce_type = (_, Tfun ft); _} when cls_name <> "\\Stringish" ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       let pos = ft.ft_pos in
@@ -421,7 +421,7 @@ and trait_exists env acc trait =
       )
     | _ -> false
 
-and check_static_method obj method_name { ce_type = (reason_for_type, _) } =
+and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
   if SMap.mem method_name obj && not !is_silent_mode
   then begin
     let static_position = Reason.to_pos reason_for_type in
@@ -436,7 +436,7 @@ and check_static_method obj method_name { ce_type = (reason_for_type, _) } =
 and constructor_decl env pcstr c =
   match c.c_constructor, pcstr with
     | None, Some cstr -> env, Some cstr
-    | Some m, Some { ce_final = true; ce_type = (r, _) } ->
+    | Some m, Some { ce_final = true; ce_type = (r, _); _ } ->
       error_final ~parent:(Reason.to_pos r) ~child:(fst m.m_name)
     | Some m, _ ->
       let env, ty = method_decl c env m in
@@ -568,7 +568,7 @@ and method_check_override c m acc =
     error pos ((Utils.strip_ns class_id)^"::"^id
                ^": combining private and override is nonsensical");
   match SMap.get id acc with
-    | Some { ce_final = true; ce_type = (r, _) } when not !is_silent_mode ->
+    | Some { ce_final = true; ce_type = (r, _); _ } when not !is_silent_mode ->
       error_final ~parent:(Reason.to_pos r) ~child:pos
     | Some _ -> false
     | None when override && c.c_kind = Ast.Ctrait -> true
@@ -584,7 +584,7 @@ and method_decl_acc c (env, acc) m =
   let _, id = m.m_name in
   let vis =
     match SMap.get id acc, m.m_visibility with
-      | Some { ce_visibility = Vprotected _ as parent_vis }, Protected ->
+      | Some { ce_visibility = Vprotected _ as parent_vis; _ }, Protected ->
         parent_vis
     | _ -> visibility (snd c.c_name) m.m_visibility
   in
@@ -662,7 +662,7 @@ and type_typedef_naming_and_decl nenv tdef =
 (* Global constants *)
 (*****************************************************************************)
 
-let rec iconst_decl nenv cst =
+let iconst_decl nenv cst =
   let cst = Naming.global_const nenv cst in
   let _cst_pos, cst_name = cst.cst_name in
   Naming_heap.ConstHeap.add cst_name cst;

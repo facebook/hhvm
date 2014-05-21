@@ -7,8 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Common
-
 module A = Ast_php
 module PI = Parse_info
 module V = Visitor_php

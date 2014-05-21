@@ -91,7 +91,9 @@ let lookup_magic_type (env:Env.env) (class_:ty) (fname:string) (uniq:int) :
                       ce_type = (_, Tfun {
                                    ft_tparams = tpars;
                                    ft_params = pars;
-                                   ft_ret = ty })
+                                   ft_ret = ty;
+                                   _ });
+                      _
                     } ->
                       let env, pars, tpars = fresh_tvars env tpars pars uniq
                       in env, Some (pars,

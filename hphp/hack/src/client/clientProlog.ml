@@ -8,8 +8,6 @@
  *
  *)
 
-open ClientExceptions
-
 let num_build_retries = 60
 
 type env = {

@@ -445,7 +445,7 @@ module OrderedCache = functor(Config:ConfigType) -> struct
     Queue.clear queue;
     ()
       
-  let rec add x y =
+  let add x y =
     if !size < Config.capacity
     then begin
       incr size;

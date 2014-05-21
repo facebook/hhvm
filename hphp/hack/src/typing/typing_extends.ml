@@ -27,7 +27,7 @@ module Inst = Typing_instantiate
 (*****************************************************************************)
 
 let is_private = function
-  | { ce_visibility = Vprivate _ } -> true
+  | { ce_visibility = Vprivate _; _ } -> true
   | _ -> false
 
 (*****************************************************************************)

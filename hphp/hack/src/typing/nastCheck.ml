@@ -433,8 +433,8 @@ and check_is_interface (env, error_verb) (x : hint) =
           (* in strict mode, we catch the unknown class error before
              even reaching here. *)
           ()
-        | Some { tc_kind = Ast.Cinterface } -> ()
-        | Some { tc_name } ->
+        | Some { tc_kind = Ast.Cinterface; _ } -> ()
+        | Some { tc_name; _ } ->
           Error.non_interface (fst x) tc_name error_verb
       )
     | _ -> failwith "assertion failure: interface isn't a Happly"
@@ -451,9 +451,9 @@ and check_is_class env (x : hint) =
           (* in strict mode, we catch the unknown class error before
              even reaching here. *)
           ()
-        | Some { tc_kind = Ast.Cabstract } -> ()
-        | Some { tc_kind = Ast.Cnormal } -> ()
-        | Some { tc_kind; tc_name } ->
+        | Some { tc_kind = Ast.Cabstract; _ } -> ()
+        | Some { tc_kind = Ast.Cnormal; _ } -> ()
+        | Some { tc_kind; tc_name; _ } ->
           Error.requires_non_class (fst x) tc_name (Ast.string_of_class_kind tc_kind)
       )
     | _ -> failwith "assertion failure: interface isn't a Happly"
@@ -477,10 +477,10 @@ and check_is_trait env (h : hint) =
       (* unit. *)
       | None -> ()
       (* tc_kind is part of the type_info. If we are a trait, all is good *)
-      | Some { tc_kind = Ast.Ctrait } -> ()
+      | Some { tc_kind = Ast.Ctrait; _ } -> ()
       (* Anything other than a trait we are going to throw an error *)
       (* using the tc_kind and tc_name fields of our type_info *)
-      | Some { tc_kind; tc_name } ->
+      | Some { tc_kind; tc_name; _ } ->
         Error.uses_non_trait (fst h) tc_name (Ast.string_of_class_kind tc_kind)
     )
   | _ -> failwith "assertion failure: trait isn't an Happly"

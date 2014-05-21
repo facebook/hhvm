@@ -8,8 +8,6 @@
  *
  *)
 
-open Utils
-
 let to_json input =
   let entries = List.map begin fun (pos, name, type_) ->
     let line, start, end_ = Pos.info_pos pos in

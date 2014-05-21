@@ -8,8 +8,6 @@
  *
  *)
 
-open Utils
-
 let go query oc =
   let results = SearchService.MasterApi.query query in
   Marshal.to_channel oc results [];

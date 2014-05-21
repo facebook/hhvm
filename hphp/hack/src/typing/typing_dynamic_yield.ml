@@ -128,7 +128,7 @@ and add name ce acc =
      * implementations from abstract classes or traits to be allowed to be
      * overwritten (i.e., implemented) by subclasses or including classes. *)
     | None
-    | Some { ce_type = (_, Tfun { ft_abstract = true; _ }) } ->
+    | Some { ce_type = (_, Tfun { ft_abstract = true; _ }); _ } ->
       SMap.add name ce acc
     | _ -> acc
 

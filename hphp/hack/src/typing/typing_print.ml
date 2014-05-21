@@ -286,7 +286,7 @@ module PrintClass = struct
     SMap.fold begin fun field v acc ->
       let sigil, kind = match Typing_env.Classes.get field with
         | None -> "!", ""
-        | Some {tc_members_fully_known; tc_kind} ->
+        | Some {tc_members_fully_known; tc_kind; _} ->
           (if tc_members_fully_known then " " else "~"),
           " ("^class_kind tc_kind^")"
       in

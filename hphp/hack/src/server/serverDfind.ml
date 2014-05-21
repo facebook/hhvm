@@ -13,7 +13,6 @@
 (* dfind is a binary we call whenever we want to know if something changed   *)
 (*****************************************************************************)
 open Utils
-open ServerEnv
 
 
 (*****************************************************************************)
@@ -38,7 +37,7 @@ let dfind_init root =
   dfind_proc := Some proc;
   dfind_pid := Some pid
 
-let rec dfind genv (root:Path.path) retries =
+let dfind genv (root:Path.path) retries =
   (match !dfind_proc with
   | None -> assert false
   | Some x -> 

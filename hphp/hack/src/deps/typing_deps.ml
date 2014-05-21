@@ -125,6 +125,7 @@ let update_files workers fast =
     let {FileInfo.funs; classes; types; 
          consts = _ (* TODO probably a bug #3844332 *);
          comments = _;
+         consider_names_just_for_autoload = _;
         } = info in
     let funs = List.fold_left begin fun acc (_, fun_id) ->
       ISet.add (Dep.make (Dep.Fun fun_id)) acc

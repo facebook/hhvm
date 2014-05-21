@@ -762,7 +762,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           if (type == 'l') {
             ret.set(String(n, CopyString), v);
           } else {
-            uint64_t u64 = int64_t(v);
+            uint64_t u64 = uint32_t(v);
             ret.set(String(n, CopyString), u64);
           }
           break;

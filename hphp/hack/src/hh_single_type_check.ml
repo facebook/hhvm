@@ -17,7 +17,6 @@ open Utils
 type options = {
   filename : string;
   suggest : bool;
-  flow : bool;
   rest : string list
 }
 
@@ -80,7 +79,6 @@ let error l = die (Utils.pmsg_l l)
 let parse_options () =
   let fn_ref = ref None in
   let suggest = ref false in
-  let flow = ref false in
   let rest_options = ref [] in
   let rest x = rest_options := x :: !rest_options in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -88,9 +86,6 @@ let parse_options () =
     "--suggest",
       Arg.Set suggest,
       "Suggest missing typehints";
-    "--flow",
-      Arg.Set flow,
-      "";
     "--",
       Arg.Rest rest,
       "";
@@ -99,7 +94,7 @@ let parse_options () =
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
-  { filename = fn; suggest = !suggest; flow = !flow; rest = !rest_options }
+  { filename = fn; suggest = !suggest; rest = !rest_options }
 
 let suggest_and_print fn funs classes typedefs consts =
   let make_set =
@@ -197,20 +192,10 @@ let main_hack { filename; suggest; _ } =
   with
   | Utils.Error l -> error l
 
-(* flow single-file entry point *)
-let main_flow { filename; suggest; rest; flow } =
-  SharedMem.init();
-  try
-    Flow.main [filename] rest
-  with
-  | Utils.Error l -> error l
-
 (* command line driver *)
 let _ =
   if ! Sys.interactive
   then ()
   else
     let options = parse_options () in
-    if options.flow
-    then main_flow options
-    else main_hack options
+    main_hack options

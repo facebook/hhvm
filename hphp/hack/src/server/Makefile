@@ -14,14 +14,16 @@ SRC= serverArgs.ml serverEnv.ml \
  serverAutoComplete.ml serverEnvBuild.ml serverHealth.ml serverSign.ml \
  serverInit.ml serverConvert.ml findRefsService.ml serverFindRefs.ml \
  serverRefactor.ml serverInferType.ml \
- fileOutline.ml serverFileOutline.ml serverSearch.ml
+ fileOutline.ml serverFileOutline.ml serverSearch.ml \
+ serverFunctors.ml
 
 
 INCLUDEDIRS=$(TOP)/utils \
  $(TOP)/deps $(TOP)/globals \
  $(TOP)/parsing $(TOP)/naming $(TOP)/typing \
  $(TOP)/procs $(TOP)/heap \
- $(TOP)/dfind
+ $(TOP)/dfind $(TOP)/stubs \
+ $(TOP)/socket
 
 
 ##############################################################################

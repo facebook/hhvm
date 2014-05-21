@@ -56,7 +56,6 @@ module Messages = struct
   let from_emacs    = " passed from hh_client"
   let from_hhclient = " passed from hh_client"
   let convert       = " adds type annotations automatically"
-  let flow          = ""
   let rest          = ""
 end
 
@@ -88,7 +87,6 @@ let populate_options () =
   let convert_dir   = ref None  in
   let all           = ref false in
   let cdir          = fun s -> convert_dir := Some s in
-  let flow          = ref false in
   let rest_options  = ref [] in
   let options =
     ["--debug"         , arg debug         , Messages.debug;
@@ -104,7 +102,6 @@ let populate_options () =
      "--from-emacs"    , arg from_emacs    , Messages.from_emacs;
      "--from-hhclient" , arg from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir   , Messages.convert;
-     "--flow"          , arg flow          , Messages.flow;
      "--"              , rest rest_options , Messages.rest;
    ] in
   let options = Arg.align options in
@@ -130,7 +127,7 @@ let populate_options () =
     root          = Path.mk_path !root;
     should_detach = !should_detach;
     convert       = convert;
-    lang          = if !flow then Flow else Hack;
+    lang          = Hack;
     rest          = !rest_options;
   }
 

@@ -11,12 +11,12 @@
 open ClientCommand
 open ClientEnv
 
-let rec guess_root start recursion_limit : Path.path option =
+let rec guess_root config start recursion_limit : Path.path option =
   let fs_root = Path.mk_path "/" in
   if Path.equal start fs_root then None
-  else if Wwwroot.is_www_directory start then Some start
+  else if Wwwroot.is_www_directory ~config start then Some start
   else if recursion_limit <= 0 then None
-  else guess_root (Path.parent start) (recursion_limit - 1)
+  else guess_root config (Path.parent start) (recursion_limit - 1)
 
 let parse_command () =
   if Array.length Sys.argv < 2
@@ -35,22 +35,23 @@ let parse_without_command options usage command =
   let args = ref [] in
   Arg.parse (Arg.align options) (fun x -> args := x::!args) usage;
   match List.rev !args with
-  | x::rest when x = command -> rest
+  | x::rest when (String.lowercase x) = (String.lowercase command) -> rest
   | args -> args
 
-let get_root path_opt =
+let get_root ?(config=".hhconfig") path_opt =
   let root =
     match path_opt with
     | None ->
-      (match guess_root (Path.mk_path ".") 50 with
+      (match guess_root config (Path.mk_path ".") 50 with
       | Some path -> path
       | None ->
         Printf.fprintf stderr
-        "Error: not a www tree (or any of the parent directories): %s\n"
+        "Error: could not find a valid root containing %s in this directory or any of the parent directories: %s\n"
+        config
         (Path.string_of_path (Path.mk_path "."));
         exit 1;)
     | Some p -> Path.mk_path p
-  in Wwwroot.assert_www_directory root;
+  in Wwwroot.assert_www_directory ~config root;
   root
 
 let parse_check_args cmd =
@@ -349,7 +350,7 @@ let parse_prolog_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  CProlog { ClientProlog. 
+  CProlog { ClientProlog.
            root;
          }
 

@@ -568,7 +568,7 @@ IRTranslator::translateFCallBuiltin(const NormalizedInstruction& i) {
 }
 
 static bool isInlinableCPPBuiltin(const Func* f) {
-  if (f->attrs() & (AttrNoFCallBuiltin|AttrStatic) ||
+  if (f->attrs() & AttrNoFCallBuiltin ||
       f->numParams() > Native::maxFCallBuiltinArgs() ||
       !f->nativeFuncPtr()) {
     return false;
@@ -576,16 +576,16 @@ static bool isInlinableCPPBuiltin(const Func* f) {
   if (f->returnType() == KindOfDouble && !Native::allowFCallBuiltinDoubles()) {
     return false;
   }
-  if (!f->methInfo()) {
-    // TODO(#4313939): hni builtins
-    return false;
-  }
-  auto const info = f->methInfo();
-  if (info->attribute & (ClassInfo::NoFCallBuiltin |
-                         ClassInfo::VariableArguments |
-                         ClassInfo::RefVariableArguments |
-                         ClassInfo::MixedVariableArguments)) {
-    return false;
+  if (auto const info = f->methInfo()) {
+    if (info->attribute & (ClassInfo::NoFCallBuiltin |
+                           ClassInfo::VariableArguments |
+                           ClassInfo::RefVariableArguments |
+                           ClassInfo::MixedVariableArguments)) {
+      return false;
+    }
+    // Note: there is no need for a similar-to-the-above check for HNI
+    // builtins---they'll just have a nullptr nativeFuncPtr (if they
+    // were declared as needing an ActRec).
   }
 
   // Don't do this for things which require this pointer adjustments
@@ -605,7 +605,7 @@ static bool isInlinableCPPBuiltin(const Func* f) {
    */
   for (auto i = uint32_t{0}; i < f->numParams(); ++i) {
     if (f->params()[i].builtinType() != KindOfUnknown) {
-      return false;
+      if (f->isParamCoerceMode()) return false;
     }
   }
 

@@ -3365,14 +3365,18 @@ void HhbcTranslator::emitNativeImplInlined() {
     return sframe->extra<ActRecInfo>()->isFromFPushCtor();
   }();
 
+  bool const instanceMethod = callee->isMethod() &&
+                                !(callee->attrs() & AttrStatic);
+
   // Collect the parameter locals---we'll need them later.  Also
   // determine which ones will need to be passed through the eval
   // stack.
   auto const numArgs = callee->numParams();
-  auto const paramThis = callee->isMethod() ? gen(LdThis, m_irb->fp())
-                                            : nullptr;
+  auto const paramThis = instanceMethod ? gen(LdThis, m_irb->fp())
+                                        : nullptr;
   SSATmp* paramSSAs[numArgs];
   bool paramThroughStack[numArgs];
+  bool paramNeedsConversion[numArgs];
   auto numParamsThroughStack = uint32_t{0};
   for (auto i = uint32_t{0}; i < numArgs; ++i) {
     paramSSAs[i] = ldLoc(i, nullptr, DataTypeSpecific);
@@ -3394,6 +3398,10 @@ void HhbcTranslator::emitNativeImplInlined() {
       paramThroughStack[i] = true;
       break;
     }
+
+    paramNeedsConversion[i] =
+      pi.builtinType() != KindOfUnknown &&
+        !(paramSSAs[i]->type() <= Type(pi.builtinType()));
   }
 
   // For the same reason that we have to IncRef the locals above, we
@@ -3426,38 +3434,6 @@ void HhbcTranslator::emitNativeImplInlined() {
   }
 
   /*
-   * Prepare the actual arguments to the CallBuiltin instruction.
-   */
-  auto const cbNumArgs = numArgs + (callee->isMethod() ? 1 : 0);
-  SSATmp* args[cbNumArgs];
-
-  auto argIdx   = uint32_t{0};
-  auto stackIdx = uint32_t{0};
-
-  if (paramThis) args[argIdx++] = paramThis;
-  for (auto i = uint32_t{0}; i < numArgs; ++i) {
-    if (!paramThroughStack[i]) {
-      args[argIdx++] = paramSSAs[i];
-      continue;
-    }
-
-    args[argIdx++] = ldStackAddr(
-      numParamsThroughStack - stackIdx - 1,
-      DataTypeSpecific
-    );
-    ++stackIdx;
-  }
-
-  assert(stackIdx == numParamsThroughStack);
-  assert(argIdx == cbNumArgs);
-
-  auto const retType = [&] {
-    auto const retDt = callee->returnType();
-    auto const ret = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
-    return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
-  }();
-
-  /*
    * We have an unusual situation if we raise an exception:
    *
    * The unwinder is going to see our PC as equal to the FCallD for
@@ -3471,7 +3447,7 @@ void HhbcTranslator::emitNativeImplInlined() {
    * need to pop anything we pushed, put down a fake ActRec, and then
    * eagerly sync VM regs to represent that stack depth.
    */
-  auto const unusualCatch = makeCatchImpl([&] {
+  auto const makeUnusualCatch = [&] { return makeCatchImpl([&] {
     // TODO(#4323657): this is generating generic DecRefs at the time
     // of this writing---probably we're not handling the stack chain
     // correctly in a catch block.
@@ -3494,14 +3470,72 @@ void HhbcTranslator::emitNativeImplInlined() {
     gen(SyncABIRegs, m_irb->fp(), stack);
     gen(EagerSyncVMRegs, m_irb->fp(), stack);
     return stack;
-  });
+  }); };
 
+  /*
+   * Prepare the actual arguments to the CallBuiltin instruction.  If
+   * any of the parameters need type conversions, we need to handle
+   * that too.
+   */
+  auto const cbNumArgs = numArgs + (instanceMethod ? 1 : 0);
+  SSATmp* args[cbNumArgs];
+  {
+    auto argIdx   = uint32_t{0};
+    auto stackIdx = uint32_t{0};
+
+    if (paramThis) args[argIdx++] = paramThis;
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      if (!paramThroughStack[i]) {
+        if (paramNeedsConversion[i]) {
+          auto const ty = Type(callee->params()[i].builtinType());
+          auto const oldVal = paramSSAs[i];
+          paramSSAs[i] = [&] {
+            if (ty <= Type::Int) {
+              return gen(ConvCellToInt, makeUnusualCatch(), oldVal);
+            }
+            if (ty <= Type::Dbl) {
+              return gen(ConvCellToDbl, makeUnusualCatch(), oldVal);
+            }
+            always_assert(ty <= Type::Bool);  // or will be passed by stack
+            return gen(ConvCellToBool, oldVal);
+          }();
+          gen(DecRef, oldVal);
+        }
+        args[argIdx++] = paramSSAs[i];
+        continue;
+      }
+
+      auto const offset = numParamsThroughStack - stackIdx - 1;
+      if (paramNeedsConversion[i]) {
+        gen(CastStk,
+            makeUnusualCatch(),
+            Type(callee->params()[i].builtinType()),
+            StackOffset { static_cast<int32_t>(offset) },
+            m_irb->sp());
+      }
+
+      args[argIdx++] = ldStackAddr(offset, DataTypeSpecific);
+      ++stackIdx;
+    }
+
+    assert(stackIdx == numParamsThroughStack);
+    assert(argIdx == cbNumArgs);
+  }
+
+  /*
+   * Make the actual call.
+   */
+  auto const retType = [&] {
+    auto const retDt = callee->returnType();
+    auto const ret = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
+    return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
+  }();
   SSATmp** decayedPtr = &args[0];
   auto const ret = gen(
     CallBuiltin,
     retType,
     CallBuiltinData { callee, false /* destroyLocals */ },
-    unusualCatch,
+    makeUnusualCatch(),
     std::make_pair(cbNumArgs, decayedPtr)
   );
 

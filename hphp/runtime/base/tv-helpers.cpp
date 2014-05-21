@@ -316,7 +316,7 @@ StringData* tvCastToString(const TypedValue* tv) {
 void tvCastToArrayInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
-  ArrayData * a;
+  ArrayData* a;
   switch (tv->m_type) {
   case KindOfUninit:
   case KindOfNull:    a = ArrayData::Create(); break;

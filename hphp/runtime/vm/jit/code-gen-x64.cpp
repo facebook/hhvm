@@ -3801,7 +3801,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // Pointers to smartptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
   auto srcNum = uint32_t{0};
-  if (callee->isMethod()) {
+  if (callee->isMethod() && !(callee->attrs() & AttrStatic)) {
     // Note, we don't support objects with vtables here (if they may
     // need a this pointer adjustment).  This should be filtered out
     // earlier right now.

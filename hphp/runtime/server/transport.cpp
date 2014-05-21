@@ -680,7 +680,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
   if ((RuntimeOption::ExposeXFBServer || RuntimeOption::ExposeXFBDebug) &&
       !RuntimeOption::XFBDebugSSLKey.empty() &&
       m_responseHeaders.find("X-FB-Debug") == m_responseHeaders.end()) {
-    String ip = RuntimeOption::ServerPrimaryIP;
+    String ip = this->getServerAddr();
     String key = RuntimeOption::XFBDebugSSLKey;
     String cipher("AES-256-CBC");
     int iv_len = HHVM_FN(openssl_cipher_iv_length)(cipher).toInt32();

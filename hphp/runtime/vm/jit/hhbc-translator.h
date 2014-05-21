@@ -710,10 +710,6 @@ private:
   interpOutputLocals(const NormalizedInstruction&, bool& smashAll,
                      folly::Optional<Type> pushedType);
 
-  template<typename G, typename L>
-  void emitProfiledGuard(Type t, const char* location, int32_t id, G doGuard,
-                         L loadAddr);
-
 private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff = -1);
   Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);

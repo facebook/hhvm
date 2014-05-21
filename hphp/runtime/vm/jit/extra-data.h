@@ -340,16 +340,6 @@ struct BCOffset : IRExtraData {
   Offset offset;
 };
 
-struct ProfileStrData : IRExtraData {
-  explicit ProfileStrData(const StringData* key)
-    : key(key)
-  {}
-
-  std::string show() const { return key->data(); }
-
-  const StringData* key;
-};
-
 /*
  * Translation IDs.
  */
@@ -954,7 +944,6 @@ X(StAsyncArRaw,                 RawMemData);
 X(LdContArRaw,                  RawMemData);
 X(StContArRaw,                  RawMemData);
 X(ProfileArray,                 RDSHandleData);
-X(ProfileStr,                   ProfileStrData);
 
 #undef X
 

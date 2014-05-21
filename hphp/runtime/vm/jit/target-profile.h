@@ -189,34 +189,6 @@ typedef folly::Optional<TargetProfile<DecRefProfile>> OptDecRefProfile;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This records the specific types of values that pass KindOfString guards,
- * which fall into one of three categories: KindOfStaticString, KindOfString
- * with a static _count, or KindOfString with a non-static _count. When a guard
- * only sees KindOfStaticString during profiling, we replace it with a
- * KindOfStaticString guard during optimized translations.
- */
-struct StrProfile {
-  uint32_t staticStr; // m_type == KindOfStaticString
-  uint32_t strStatic; // m_type == KindOfString, _count == StaticValue
-  uint32_t str;       // m_type == KindOfString, _count != StaticValue
-
-  std::string toString() const {
-    return folly::format("StaticStr: {:5}, StrStatic: {:5}, Str: {:5}",
-                         staticStr, strStatic, str).str();
-  }
-
-  size_t total() const {
-    return staticStr + strStatic + str;
-  }
-
-  static void reduce(StrProfile& a, const StrProfile& b) {
-    a.staticStr += b.staticStr;
-    a.strStatic += b.strStatic;
-    a.str += b.str;
-  }
-};
-
-/*
  * Record profiling information about non-packed arrays. This counts the
  * number of times a non-packed array was used as the base of a CGetElem
  * operation.

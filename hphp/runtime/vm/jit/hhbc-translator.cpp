@@ -3761,56 +3761,11 @@ void HhbcTranslator::setThisAvailable() {
   m_irb->setThisAvailable();
 }
 
-/*
- * Emit a type guard, possibly using profiling information. Depending on the
- * current translation mode and type to be guarded, this function may emit
- * additional profiling code or modify the guarded type using previously
- * collected profiling information. Str -> StaticStr is the only supported
- * refinement for now.
- *
- * type: The original guard type.
- * location, id: Name and index used in a profile key like "Loc3" or "Stk0".
- * doGuard: Lambda which will be called exactly once to emit the actual guard.
- * loadAddr: Lambda which will be called up to once to get a pointer to the
- *           value being checked.
- */
-template<typename G, typename L>
-void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
-                                       int32_t id, G doGuard, L loadAddr) {
-  // We really do want to check for exact equality here: if type is StaticStr
-  // there's nothing for us to do, and we don't support guarding on CountedStr.
-  if (type != Type::Str ||
-      (tx->mode() != TransKind::Profile && tx->mode() != TransKind::Optimize)) {
-    return doGuard(type);
-  }
-
-  auto profileKey = makeStaticString(folly::to<std::string>(location, id));
-  TargetProfile<StrProfile> profile(m_context, m_irb->marker(), profileKey);
-  if (profile.profiling()) {
-    doGuard(Type::Str);
-    gen(ProfileStr, ProfileStrData(profileKey), loadAddr());
-  } else if (profile.optimizing()) {
-    auto const data = profile.data(StrProfile::reduce);
-    auto const total = data.total();
-
-    if (data.staticStr == total) doGuard(Type::StaticStr);
-    else                         doGuard(Type::Str);
-  } else {
-    doGuard(Type::Str);
-  }
-}
-
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
   auto const ldrefExit = makeExit();
   auto const ldgblExit = makeExit();
 
-  emitProfiledGuard(
-    type, "Loc", locId,
-    [&](Type type) { gen(GuardLoc, type, LocalId(locId), m_irb->fp()); },
-    [&] { return gen(LdLocAddr, Type::PtrToStr, LocalId(locId),
-                     m_irb->fp()); }
-  );
-
+  gen(GuardLoc, type, LocalId(locId), m_irb->fp());
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
     auto const val = ldLoc(locId, ldgblExit, DataTypeSpecific);
     gen(LdRef, type.unbox(), ldrefExit, val);
@@ -3829,14 +3784,7 @@ void HhbcTranslator::guardTypeLocation(const RegionDesc::Location& loc,
 
 void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type,
                                     Offset dest /* = -1 */) {
-  emitProfiledGuard(
-    type, "Loc", locId,
-    [&](Type type) {
-      gen(CheckLoc, type, LocalId(locId), makeExit(dest), m_irb->fp());
-    },
-    [&] { return gen(LdLocAddr, Type::PtrToStr, LocalId(locId),
-                     m_irb->fp()); }
-  );
+  gen(CheckLoc, type, LocalId(locId), makeExit(dest), m_irb->fp());
 }
 
 void HhbcTranslator::assertTypeLocal(uint32_t locId, Type type) {
@@ -3871,13 +3819,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
   // clean stack
   assert(m_irb->stackDeficit() == 0);
   auto stackOff = StackOffset(stackIndex);
-
-  emitProfiledGuard(
-    type, "Stk", stackIndex,
-    [&](Type type) { gen(GuardStk, type, stackOff, m_irb->sp()); },
-    [&] { return gen(LdStackAddr, Type::PtrToStr, stackOff, m_irb->sp()); }
-  );
-
+  gen(GuardStk, type, stackOff, m_irb->sp());
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
     auto stk = gen(LdStack, Type::BoxedCell, stackOff, m_irb->sp());
     m_irb->constrainValue(stk, DataTypeSpecific);
@@ -3900,18 +3842,9 @@ void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
     FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
     // Just like CheckType, CheckStk only cares about its input type if the
     // simplifier does something with it.
-
-    auto const adjustedOffset =
-      StackOffset(idx - m_irb->evalStack().size() + m_irb->stackDeficit());
-    emitProfiledGuard(
-      type, "Stk", idx,
-      [&](Type t) {
-        gen(CheckStk, type, exit, adjustedOffset, m_irb->sp());
-      },
-      [&] {
-        return gen(LdStackAddr, Type::PtrToStr, adjustedOffset, m_irb->sp());
-      }
-    );
+    gen(CheckStk, type, exit,
+        StackOffset(idx - m_irb->evalStack().size() + m_irb->stackDeficit()),
+        m_irb->sp());
   }
 }
 

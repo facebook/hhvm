@@ -235,7 +235,6 @@ PUNT_OPCODE(GenericIdx)
 // End of failing set
 /////////////////////////////////////////////////////////////////////
 
-PUNT_OPCODE(ProfileStr)
 PUNT_OPCODE(ConvArrToBool)
 PUNT_OPCODE(ConvDblToBool)
 PUNT_OPCODE(ConvIntToBool)

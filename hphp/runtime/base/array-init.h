@@ -48,7 +48,7 @@ struct ArrayInit {
    */
   ArrayInit(size_t n, Map);
 
-  ArrayInit(ArrayInit&& other)
+  ArrayInit(ArrayInit&& other) noexcept
     : m_data(other.m_data)
 #ifndef NDEBUG
     , m_addCount(other.m_addCount)
@@ -290,7 +290,7 @@ class PackedArrayInit {
 public:
   explicit PackedArrayInit(size_t n)
     : m_vec(MixedArray::MakeReserve(n))
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif
@@ -298,15 +298,15 @@ public:
     m_vec->setRefCount(0);
   }
 
-  PackedArrayInit(PackedArrayInit&& other)
+  PackedArrayInit(PackedArrayInit&& other) noexcept
     : m_vec(other.m_vec)
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     other.m_vec = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -352,21 +352,27 @@ public:
   Variant toVariant() {
     auto ptr = m_vec;
     m_vec = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return Variant(ptr, Variant::ArrayInitCtor{});
   }
 
   Array toArray() {
     ArrayData* ptr = m_vec;
     m_vec = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
   ArrayData *create() {
     auto ptr = m_vec;
     m_vec = nullptr;
-    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
     return ptr;
   }
 
@@ -383,7 +389,7 @@ private:
 
 private:
   ArrayData* m_vec;
-#ifdef DEBUG
+#ifndef NDEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif

@@ -64,7 +64,9 @@ struct RefData {
   void initInRDS() {
     assert(isUninitializedInRDS());
     m_count = 1;
-    assert(static_cast<bool>(m_magic = Magic::kMagic)); // assign magic
+#ifndef NDEBUG
+    m_magic = Magic::kMagic;
+#endif
     assert(m_cowAndZ == 0);
   }
 
@@ -121,7 +123,7 @@ struct RefData {
   Variant* var() { return reinterpret_cast<Variant*>(tv()); }
 
   static ptrdiff_t magicOffset() {
-#ifdef DEBUG
+#ifndef NDEBUG
     return offsetof(RefData, m_magic);
 #else
     not_reached();
@@ -150,8 +152,9 @@ struct RefData {
   // Default constructor, provided so that the PHP extension compatibility
   // layer can stack-allocate RefDatas when needed
   RefData() {
-    // intentional use of = to only assign in debug builds
-    assert(static_cast<bool>(m_magic = Magic::kMagic));
+#ifndef NDEBUG
+    m_magic = Magic::kMagic;
+#endif
     m_tv.m_type = KindOfNull;
     m_count = 0;
     m_cowAndZ = 0;
@@ -242,8 +245,9 @@ struct RefData {
 
 private:
   RefData(DataType t, int64_t datum) {
-    // intentional use of = to only assign in debug builds
-    assert(static_cast<bool>(m_magic = Magic::kMagic));
+#ifndef NDEBUG
+    m_magic = Magic::kMagic;
+#endif
     // Initialize this value by laundering uninitNull -> Null.
     m_count = 1;
     m_cowAndZ = 0;

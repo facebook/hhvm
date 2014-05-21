@@ -69,7 +69,7 @@ bool cellIsPlausible(const Cell cell) {
     assert(!"KindOfRef found in a Cell");
     break;
   default:
-    not_reached();
+    assert(!"Invalid Cell type");
   }
   return true;
 }

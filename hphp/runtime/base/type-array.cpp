@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/type-array.h"
-
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/ext/ext_iconv.h"
 #include <unicode/coll.h> // icu
 #include <vector>
 #include "hphp/parser/hphp.tab.hpp"

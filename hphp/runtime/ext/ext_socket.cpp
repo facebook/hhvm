@@ -295,7 +295,7 @@ static int php_read(Socket *sock, void *buf, int maxlen, int flags) {
 
 static bool create_new_socket(const HostURL &hosturl,
                               Variant &errnum, Variant &errstr, Resource &ret,
-                              Socket *&sock, double timeout) {
+                              Socket *&sock) {
   int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
   int type = SOCK_STREAM;
   const std::string scheme = hosturl.getScheme();
@@ -307,7 +307,7 @@ static bool create_new_socket(const HostURL &hosturl,
   }
 
   sock = new Socket(socket(domain, type, 0), domain,
-                    hosturl.getHost().c_str(), hosturl.getPort(), timeout);
+                    hosturl.getHost().c_str(), hosturl.getPort());
   ret = Resource(sock);
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
@@ -716,7 +716,7 @@ Variant socket_server_impl(const HostURL &hosturl,
                            VRefParam errstr /* = null */) {
   Resource ret;
   Socket *sock = NULL;
-  if (!create_new_socket(hosturl, errnum, errstr, ret, sock, 0.0)) {
+  if (!create_new_socket(hosturl, errnum, errstr, ret, sock)) {
     return false;
   }
   assert(ret.get() && sock);
@@ -1093,7 +1093,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   if (sslsock) {
     sock = sslsock;
     ret = sock;
-  } else if (!create_new_socket(hosturl, errnum, errstr, ret, sock, timeout)) {
+  } else if (!create_new_socket(hosturl, errnum, errstr, ret, sock)) {
     return false;
   }
   assert(ret.get() && sock);

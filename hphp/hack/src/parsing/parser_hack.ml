@@ -2402,9 +2402,6 @@ and expr_colcol env e1 =
     | (_, Id cname) ->
         (* XYZ::class is OK ... *)
         expr_colcol_remain ~allow_class:true env e1 cname
-    | pos, Lvar cname when env.mode = Ast.Mstrict ->
-        error_at env pos "Don't use dynamic classes";
-        e1
     | pos, Lvar cname  ->
         (* ... but get_class($x) should be used instead of $x::class *)
         expr_colcol_remain ~allow_class:false env e1 cname

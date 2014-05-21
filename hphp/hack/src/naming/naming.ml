@@ -1683,6 +1683,8 @@ and expr_lambda env f =
 and make_class_id env cid =
   no_typedef env cid;
   match snd cid with
+  | x when x.[0] = '$' && (fst env).in_mode = Ast.Mstrict ->
+      error (fst cid) "Don't use dynamic classes"
   | "parent" -> N.CIparent
   | "self" ->  N.CIself
   | "static" -> N.CIstatic

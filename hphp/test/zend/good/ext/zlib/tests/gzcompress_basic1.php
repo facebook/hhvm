@@ -9,7 +9,7 @@
  * add a comment here to say what the test is supposed to do
  */
 
-include(dirname(__FILE__) . '/data.inc');
+include(__DIR__ . '/data.inc');
 
 echo "*** Testing gzcompress() : basic functionality ***\n";
 

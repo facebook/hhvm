@@ -33,6 +33,11 @@ Variant HHVM_FUNCTION(readgzfile, const String& filename,
                                   int64_t use_include_path = 0);
 Variant HHVM_FUNCTION(gzfile, const String& filename,
                               int64_t use_include_path = 0);
+Variant HHVM_FUNCTION(zlib_encode, const String& data,
+                                   int64_t encoding,
+                                   int64_t level = -1);
+Variant HHVM_FUNCTION(zlib_decode, const String& data,
+                                   int64_t maxlen);
 Variant HHVM_FUNCTION(gzcompress, const String& data,
                                   int64_t level = -1);
 Variant HHVM_FUNCTION(gzuncompress, const String& data,

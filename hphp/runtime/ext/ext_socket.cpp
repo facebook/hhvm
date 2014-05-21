@@ -312,7 +312,7 @@ static bool create_new_socket(const HostURL &hosturl,
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
     errnum = sock->getError();
-    errstr = String(folly::errnoStr(sock->getError()).toStdString());
+    errstr = f_socket_strerror(sock->getError());
     return false;
   }
   return true;
@@ -1131,7 +1131,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
             std::string msg = "failed to connect to " + hosturl.getHostURL();
             SOCKET_ERROR(sock, msg.c_str(), valopt);
             errnum = sock->getError();
-            errstr = String(folly::errnoStr(sock->getError()).toStdString());
+            errstr = f_socket_strerror(sock->getError());
             return false;
           } else {
             retval = 0; // success
@@ -1142,7 +1142,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
           msg += " seconds when connecting to " + hosturl.getHostURL();
           SOCKET_ERROR(sock, msg.c_str(), ETIMEDOUT);
           errnum = sock->getError();
-          errstr = String(folly::errnoStr(sock->getError()).toStdString());
+          errstr = f_socket_strerror(sock->getError());
           return false;
         }
       }
@@ -1154,8 +1154,11 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   }
 
   if (retval != 0) {
-    errnum = sock->getError();
-    errstr = String(folly::errnoStr(sock->getError()).toStdString());
+    errnum = sock->getLastError();
+    errstr = f_socket_strerror(sock->getLastError());
+    std::string msg = "unable to connect to ";
+    msg += hosturl.getHostURL();
+    SOCKET_ERROR(sock, msg.c_str(), sock->getLastError());
     return false;
   }
 

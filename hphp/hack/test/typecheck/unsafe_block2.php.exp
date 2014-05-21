@@ -1,0 +1,6 @@
+File "unsafe_block2.php", line 7, characters 10-13:
+Invalid return type
+File "unsafe_block2.php", line 3, characters 15-17:
+This is an int
+File "unsafe_block2.php", line 7, characters 10-13:
+It is incompatible with a string

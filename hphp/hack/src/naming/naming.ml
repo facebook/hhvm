@@ -1239,12 +1239,12 @@ and fun_ genv f =
     } in
   fun_
 
-and flatten_blocks stl =
-  List.fold_right begin fun st acc ->
-    match st with
-    | Block b -> flatten_blocks b @ acc
-    | st -> st :: acc
-  end stl []
+and cut_and_flatten ?(replacement=Noop) = function
+  | [] -> []
+  | Unsafe :: _ -> [replacement]
+  | Block b :: rest ->
+      (cut_and_flatten ~replacement b) @ (cut_and_flatten ~replacement rest)
+  | x :: rest -> x :: (cut_and_flatten ~replacement rest)
 
 and stmt env st =
   match st with
@@ -1366,14 +1366,8 @@ and try_stmt env st b cl fb =
   Env.promote_pending env;
   result
 
-and cut_unsafe ?(replacement=Noop) = function
-  | [] -> []
-  | Unsafe :: _ -> [replacement]
-  | x :: rl -> x :: cut_unsafe ~replacement rl
-
 and block ?(new_scope=true) env stl =
-  let stl = flatten_blocks stl in
-  let stl = cut_unsafe stl in
+  let stl = cut_and_flatten stl in
   if new_scope
   then
     Env.scope env (
@@ -1382,13 +1376,11 @@ and block ?(new_scope=true) env stl =
   else List.map (stmt env) stl
 
 and branch env stmt_l =
-  let stmt_l = flatten_blocks stmt_l in
-  let stmt_l = cut_unsafe stmt_l in
+  let stmt_l = cut_and_flatten stmt_l in
   let genv, lenv = env in
   let lenv_copy = !(lenv.locals) in
   let lenv_all_locals_copy = !(lenv.all_locals) in
   let lenv_pending_copy = !(lenv.pending_locals) in
-  let stmt_l = flatten_blocks stmt_l in
   let res = List.map (stmt env) stmt_l in
   lenv.locals := lenv_copy;
   let lenv_all_locals = !(lenv.all_locals) in
@@ -1687,13 +1679,13 @@ and casel env l =
 
 and case env acc = function
   | Default b ->
-      let b = cut_unsafe ~replacement:Fallthrough b in
+      let b = cut_and_flatten ~replacement:Fallthrough b in
       let all_locals, b = branch env b in
       let acc = SMap.union all_locals acc in
       acc, N.Default b
   | Case (e, b) ->
       let e = expr env e in
-      let b = cut_unsafe ~replacement:Fallthrough b in
+      let b = cut_and_flatten ~replacement:Fallthrough b in
       let all_locals, b = branch env b in
       let acc = SMap.union all_locals acc in
       acc, N.Case (e, b)

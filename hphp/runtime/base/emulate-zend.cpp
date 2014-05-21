@@ -146,6 +146,11 @@ int emulate_zend(int argc, char** argv) {
       cnt += 2;
       continue;
     }
+    if (strcmp(argv[cnt], "-c")  == 0) {
+      cnt++;
+      newargv.push_back("-c");
+      newargv.push_back(argv[cnt++]);
+    }
     if (argv[cnt][0] != '-') {
       if (show) {
         newargv.push_back("-w");

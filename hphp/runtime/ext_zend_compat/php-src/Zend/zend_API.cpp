@@ -21,8 +21,8 @@
 /* $Id$ */
 
 // has to be before zend_API since that defines getThis()
-#include "hphp/runtime/ext/ext_function.h"
 #include "zend_API.h"
+#include "hphp/runtime/ext/ext_function.h"
 #include "zend_constants.h"
 
 #include "hphp/runtime/base/zend-printf.h"
@@ -572,15 +572,25 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
       if (num_varargs > 0) {
         int iv = 0;
-        auto tmp = ZendExecutionStack::getArg(i);
-        zval **p = &tmp;
 
         *n_varargs = num_varargs;
 
-        /* allocate space for array and store args */
-        *varargs = (zval ***) safe_emalloc(num_varargs, sizeof(zval **), 0);
-        while (num_varargs-- > 0) {
-          (*varargs)[iv++] = p++;
+        /* Allocate space for the args. Zend already has single pointers
+         * persistently stored, and only needs to allocate space for the double
+         * pointers, but we need to allocate space for both.
+         *
+         * We need to allocate it in such a way that a single efree(varargs)
+         * in the caller will free all relevant memory. So we allocate a single
+         * block and then split it.
+         */
+        zval *** double_ptrs = (zval***)safe_emalloc(num_varargs * 2,
+                                                     sizeof(void*), 0);
+        *varargs = double_ptrs;
+        zval ** single_ptrs = (zval**)(double_ptrs + num_varargs);
+
+        for (iv = 0; iv < num_varargs; iv++) {
+          double_ptrs[iv] = &single_ptrs[iv];
+          single_ptrs[iv] = ZendExecutionStack::getArg(i + iv);
         }
 
         /* adjust how many args we have left and restart loop */
@@ -625,16 +635,16 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 }
 
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, const char *type_spec, ...) {
-	va_list va;
-	int retval;
+  va_list va;
+  int retval;
 
-	RETURN_IF_ZERO_ARGS(num_args, type_spec, flags & ZEND_PARSE_PARAMS_QUIET);
+  RETURN_IF_ZERO_ARGS(num_args, type_spec, flags & ZEND_PARSE_PARAMS_QUIET);
 
-	va_start(va, type_spec);
-	retval = zend_parse_va_args(num_args, type_spec, &va, flags TSRMLS_CC);
-	va_end(va);
+  va_start(va, type_spec);
+  retval = zend_parse_va_args(num_args, type_spec, &va, flags TSRMLS_CC);
+  va_end(va);
 
-	return retval;
+  return retval;
 }
 
 ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, const char *type_spec, ...) {
@@ -1148,58 +1158,60 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
 {
-	if (fci->params) {
-		if (free_mem) {
-			efree(fci->params);
-			fci->params = NULL;
-		}
-	}
-	fci->param_count = 0;
+  if (fci->params) {
+    if (free_mem) {
+      efree(fci->params);
+      fci->params = nullptr;
+    }
+  }
+  fci->param_count = 0;
 }
 /* }}} */
 
 ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval ****params) /* {{{ */
 {
-	*param_count = fci->param_count;
-	*params = fci->params;
-	fci->param_count = 0;
-	fci->params = NULL;
+  *param_count = fci->param_count;
+  *params = fci->params;
+  fci->param_count = 0;
+  fci->params = nullptr;
 }
 /* }}} */
 
 ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval ***params) /* {{{ */
 {
-	zend_fcall_info_args_clear(fci, 1);
-	fci->param_count = param_count;
-	fci->params = params;
+  zend_fcall_info_args_clear(fci, 1);
+  fci->param_count = param_count;
+  fci->params = params;
 }
 /* }}} */
 
 ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /* {{{ */
 {
-	HashPosition pos;
-	zval **arg, ***params;
+  HashPosition pos;
+  zval **arg, ***params;
 
-	zend_fcall_info_args_clear(fci, !args);
+  zend_fcall_info_args_clear(fci, !args);
 
-	if (!args) {
-		return SUCCESS;
-	}
+  if (!args) {
+    return SUCCESS;
+  }
 
-	if (Z_TYPE_P(args) != IS_ARRAY) {
-		return FAILURE;
-	}
+  if (Z_TYPE_P(args) != IS_ARRAY) {
+    return FAILURE;
+  }
 
-	fci->param_count = zend_hash_num_elements(Z_ARRVAL_P(args));
-	fci->params = params = (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
+  fci->param_count = zend_hash_num_elements(Z_ARRVAL_P(args));
+  fci->params = params =
+    (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **) &arg, &pos) == SUCCESS) {
-		*params++ = arg;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
-	}
+  zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
+  while (zend_hash_get_current_data_ex(Z_ARRVAL_P(args),
+                                      (void **) &arg, &pos) == SUCCESS) {
+    *params++ = arg;
+    zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
+  }
 
-	return SUCCESS;
+  return SUCCESS;
 }
 /* }}} */
 
@@ -1485,73 +1497,73 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 
 ZEND_API int zend_update_static_property_null(zend_class_entry *scope, const char *name, int name_length TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
+  zval *tmp;
 
-	ALLOC_ZVAL(tmp);
-	Z_UNSET_ISREF_P(tmp);
-	Z_SET_REFCOUNT_P(tmp, 0);
-	ZVAL_NULL(tmp);
-	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+  ALLOC_ZVAL(tmp);
+  Z_UNSET_ISREF_P(tmp);
+  Z_SET_REFCOUNT_P(tmp, 0);
+  ZVAL_NULL(tmp);
+  return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
 
 ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, const char *name, int name_length, long value TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
+  zval *tmp;
 
-	ALLOC_ZVAL(tmp);
-	Z_UNSET_ISREF_P(tmp);
-	Z_SET_REFCOUNT_P(tmp, 0);
-	ZVAL_BOOL(tmp, value);
-	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+  ALLOC_ZVAL(tmp);
+  Z_UNSET_ISREF_P(tmp);
+  Z_SET_REFCOUNT_P(tmp, 0);
+  ZVAL_BOOL(tmp, value);
+  return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
 
 ZEND_API int zend_update_static_property_long(zend_class_entry *scope, const char *name, int name_length, long value TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
+  zval *tmp;
 
-	ALLOC_ZVAL(tmp);
-	Z_UNSET_ISREF_P(tmp);
-	Z_SET_REFCOUNT_P(tmp, 0);
-	ZVAL_LONG(tmp, value);
-	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+  ALLOC_ZVAL(tmp);
+  Z_UNSET_ISREF_P(tmp);
+  Z_SET_REFCOUNT_P(tmp, 0);
+  ZVAL_LONG(tmp, value);
+  return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
 
 ZEND_API int zend_update_static_property_double(zend_class_entry *scope, const char *name, int name_length, double value TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
+  zval *tmp;
 
-	ALLOC_ZVAL(tmp);
-	Z_UNSET_ISREF_P(tmp);
-	Z_SET_REFCOUNT_P(tmp, 0);
-	ZVAL_DOUBLE(tmp, value);
-	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+  ALLOC_ZVAL(tmp);
+  Z_UNSET_ISREF_P(tmp);
+  Z_SET_REFCOUNT_P(tmp, 0);
+  ZVAL_DOUBLE(tmp, value);
+  return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
 
 ZEND_API int zend_update_static_property_string(zend_class_entry *scope, const char *name, int name_length, const char *value TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
+  zval *tmp;
 
-	ALLOC_ZVAL(tmp);
-	Z_UNSET_ISREF_P(tmp);
-	Z_SET_REFCOUNT_P(tmp, 0);
-	ZVAL_STRING(tmp, value, 1);
-	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+  ALLOC_ZVAL(tmp);
+  Z_UNSET_ISREF_P(tmp);
+  Z_SET_REFCOUNT_P(tmp, 0);
+  ZVAL_STRING(tmp, value, 1);
+  return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
 
 ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const char *name, int name_length, const char *value, int value_len TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
+  zval *tmp;
 
-	ALLOC_ZVAL(tmp);
-	Z_UNSET_ISREF_P(tmp);
-	Z_SET_REFCOUNT_P(tmp, 0);
-	ZVAL_STRINGL(tmp, value, value_len, 1);
-	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+  ALLOC_ZVAL(tmp);
+  Z_UNSET_ISREF_P(tmp);
+  Z_SET_REFCOUNT_P(tmp, 0);
+  ZVAL_STRINGL(tmp, value, value_len, 1);
+  return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
 

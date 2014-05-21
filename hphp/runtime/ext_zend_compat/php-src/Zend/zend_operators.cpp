@@ -19,10 +19,9 @@
 
 /* $Id$ */
 
-#include <ctype.h>
-
-#include "zend.h"
 #include "zend_operators.h"
+#include <ctype.h>
+#include "zend.h"
 #include "zend_variables.h"
 #include "zend_globals.h"
 #include "zend_list.h"
@@ -31,6 +30,7 @@
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_operators.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
+#include "hphp/runtime/base/comparisons.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -43,57 +43,57 @@ static _locale_t current_locale = NULL;
 
 ZEND_API int zend_atoi(const char *str, int str_len) /* {{{ */
 {
-	int retval;
+  int retval;
 
-	if (!str_len) {
-		str_len = strlen(str);
-	}
-	retval = strtol(str, NULL, 0);
-	if (str_len>0) {
-		switch (str[str_len-1]) {
-			case 'g':
-			case 'G':
-				retval *= 1024;
-				/* break intentionally missing */
-			case 'm':
-			case 'M':
-				retval *= 1024;
-				/* break intentionally missing */
-			case 'k':
-			case 'K':
-				retval *= 1024;
-				break;
-		}
-	}
-	return retval;
+  if (!str_len) {
+    str_len = strlen(str);
+  }
+  retval = strtol(str, nullptr, 0);
+  if (str_len>0) {
+    switch (str[str_len-1]) {
+      case 'g':
+      case 'G':
+        retval *= 1024;
+        /* break intentionally missing */
+      case 'm':
+      case 'M':
+        retval *= 1024;
+        /* break intentionally missing */
+      case 'k':
+      case 'K':
+        retval *= 1024;
+        break;
+    }
+  }
+  return retval;
 }
 /* }}} */
 
 ZEND_API long zend_atol(const char *str, int str_len) /* {{{ */
 {
-	long retval;
+  long retval;
 
-	if (!str_len) {
-		str_len = strlen(str);
-	}
-	retval = strtol(str, NULL, 0);
-	if (str_len>0) {
-		switch (str[str_len-1]) {
-			case 'g':
-			case 'G':
-				retval *= 1024;
-				/* break intentionally missing */
-			case 'm':
-			case 'M':
-				retval *= 1024;
-				/* break intentionally missing */
-			case 'k':
-			case 'K':
-				retval *= 1024;
-				break;
-		}
-	}
-	return retval;
+  if (!str_len) {
+    str_len = strlen(str);
+  }
+  retval = strtol(str, nullptr, 0);
+  if (str_len>0) {
+    switch (str[str_len-1]) {
+      case 'g':
+      case 'G':
+        retval *= 1024;
+        /* break intentionally missing */
+      case 'm':
+      case 'M':
+        retval *= 1024;
+        /* break intentionally missing */
+      case 'k':
+      case 'K':
+        retval *= 1024;
+        break;
+    }
+  }
+  return retval;
 }
 /* }}} */
 
@@ -221,3 +221,63 @@ ZEND_API void convert_to_boolean(zval *op) {
 ZEND_API void convert_to_array(zval *op) {
   tvCastToArrayInPlace(op->tv());
 }
+
+ZEND_API int compare_function(zval *result, zval *op1,
+                              zval *op2 TSRMLS_DC) /* {{{ */
+{
+  HPHP::Variant v1(op1);
+  HPHP::Variant v2(op2);
+  if (HPHP::less(v1, v2)) {
+    ZVAL_LONG(result, -1);
+  } else if (HPHP::equal(v1, v2)) {
+    ZVAL_LONG(result, 0);
+  } else {
+    ZVAL_LONG(result, 1);
+  }
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int is_equal_function(zval *result, zval *op1,
+                               zval *op2 TSRMLS_DC) /* {{{ */
+{
+  if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+    return FAILURE;
+  }
+  ZVAL_BOOL(result, (Z_LVAL_P(result) == 0));
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int is_not_equal_function(zval *result, zval *op1,
+                                   zval *op2 TSRMLS_DC) /* {{{ */
+{
+  if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+    return FAILURE;
+  }
+  ZVAL_BOOL(result, (Z_LVAL_P(result) != 0));
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int is_smaller_function(zval *result, zval *op1,
+                                 zval *op2 TSRMLS_DC) /* {{{ */
+{
+  if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+    return FAILURE;
+  }
+  ZVAL_BOOL(result, (Z_LVAL_P(result) < 0));
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1,
+                                          zval *op2 TSRMLS_DC) /* {{{ */
+{
+  if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+    return FAILURE;
+  }
+  ZVAL_BOOL(result, (Z_LVAL_P(result) <= 0));
+  return SUCCESS;
+}
+/* }}} */

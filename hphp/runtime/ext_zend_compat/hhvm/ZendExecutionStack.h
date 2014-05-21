@@ -38,7 +38,7 @@ struct ZendExecutionStack final : HPHP::RequestEventHandler {
 
   static void push(void* z);
   static void* pop();
-  static void pushHHVMStack();
+  static void pushHHVMStack(void* ar);
   static void popHHVMStack();
 
   // Instance methods
@@ -50,11 +50,16 @@ struct ZendExecutionStack final : HPHP::RequestEventHandler {
   }
 
 private:
-  static std::vector<ZendStackEntry>& getStack();
+  static ZendExecutionStack & getStack();
   void clear() {
     m_stack.clear();
+    if (m_nullArg) {
+      m_nullArg->release();
+      m_nullArg = nullptr;
+    }
   }
   std::vector<ZendStackEntry> m_stack;
+  HPHP::RefData * m_nullArg;
 };
 
 #endif // incl_HPHP_ZEND_EXECUTION_STACK

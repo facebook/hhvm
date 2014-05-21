@@ -16,25 +16,38 @@
 */
 
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include <vector>
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 static __thread HPHP::RequestLocal<ZendExecutionStack> s_stack;
 
-std::vector<ZendStackEntry>& ZendExecutionStack::getStack() {
-  return s_stack.get()->m_stack;
+ZendExecutionStack & ZendExecutionStack::getStack() {
+  return *s_stack.get();
 }
 
 zval* ZendExecutionStack::getArg(int i) {
   auto& stack = getStack();
-  auto& entry = stack.back();
+  auto& entry = stack.m_stack.back();
   switch (entry.mode) {
     case ZendStackMode::HHVM_STACK: {
-      assert(entry.value == nullptr);
-      HPHP::TypedValue *top = HPHP::vmfp() - (i + 1);
-      // zPrepArgs should take care of this for us
-      assert(top->m_type == HPHP::KindOfRef);
-      return top->m_data.pref;
+      HPHP::ActRec* ar = (HPHP::ActRec*)entry.value;
+      const int numNonVaradic = ar->m_func->numNonVariadicParams();
+      HPHP::TypedValue* arg;
+      if (i < numNonVaradic) {
+        arg = (HPHP::TypedValue*)ar - i - 1;
+      } else if (i < ar->numArgs()) {
+        arg = ar->getExtraArg(i - numNonVaradic);
+      } else {
+        if (!stack.m_nullArg) {
+          stack.m_nullArg =
+            HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfNull>());
+        }
+        return stack.m_nullArg;
+      }
+
+      HPHP::zBoxAndProxy(arg);
+      return arg->m_data.pref;
     }
 
     case ZendStackMode::SIDE_STACK: {
@@ -42,7 +55,8 @@ zval* ZendExecutionStack::getArg(int i) {
       int numargs = uintptr_t(entry.value);
       assert(numargs < 4096);
       assert(i < numargs);
-      zval* zv = (zval*) stack[stack.size() - 1 - numargs + i].value;
+      zval* zv =
+        (zval*) stack.m_stack[stack.m_stack.size() - 1 - numargs + i].value;
       zv->assertValid();
       return zv;
     }
@@ -53,10 +67,10 @@ zval* ZendExecutionStack::getArg(int i) {
 
 int32_t ZendExecutionStack::numArgs() {
   auto& stack = getStack();
-  auto& entry = stack.back();
+  auto& entry = stack.m_stack.back();
   switch (entry.mode) {
     case ZendStackMode::HHVM_STACK:
-      return HPHP::liveFrame()->numArgs();
+      return ((HPHP::ActRec*)entry.value)->numArgs();
     case ZendStackMode::SIDE_STACK:
       // Zend puts the number of args as the last thing on the stack
       return uintptr_t(entry.value);
@@ -69,27 +83,27 @@ void ZendExecutionStack::push(void* z) {
   ZendStackEntry entry;
   entry.mode = ZendStackMode::SIDE_STACK;
   entry.value = z;
-  getStack().push_back(entry);
+  getStack().m_stack.push_back(entry);
 }
 
 void* ZendExecutionStack::pop() {
   auto& stack = getStack();
-  auto ret = stack.back();
-  stack.pop_back();
+  auto ret = stack.m_stack.back();
+  stack.m_stack.pop_back();
   assert(ret.mode == ZendStackMode::SIDE_STACK);
   return ret.value;
 }
 
-void ZendExecutionStack::pushHHVMStack() {
+void ZendExecutionStack::pushHHVMStack(void * ar) {
   ZendStackEntry entry;
   entry.mode = ZendStackMode::HHVM_STACK;
-  entry.value = nullptr;
-  getStack().push_back(entry);
+  entry.value = ar;
+  getStack().m_stack.push_back(entry);
 }
 
 void ZendExecutionStack::popHHVMStack() {
   auto& stack = getStack();
-  DEBUG_ONLY auto& entry = stack.back();
+  DEBUG_ONLY auto& entry = stack.m_stack.back();
   assert(entry.mode == ZendStackMode::HHVM_STACK);
-  stack.pop_back();
+  stack.m_stack.pop_back();
 }

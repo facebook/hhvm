@@ -57,7 +57,7 @@ public:
     }
     return ObjectData::newInstance(c_NumberFormatter);
   }
-  static NumberFormatter* Get(Object obj) {
+  static NumberFormatter* Get(ObjectData* obj) {
     return GetData<NumberFormatter>(obj, s_NumberFormatter);
   }
 

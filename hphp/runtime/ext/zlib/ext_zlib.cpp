@@ -749,8 +749,7 @@ class __SystemLib_ChunkedInflator {
 };
 
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
-  assert(!src.isNull()); \
-  auto dest = Native::data<__SystemLib_ChunkedInflator>(src.get());
+  auto dest = Native::data<__SystemLib_ChunkedInflator>(src);
 
 bool HHVM_METHOD(__SystemLib_ChunkedInflator, eof) {
   FETCH_CHUNKED_INFLATOR(data, this_);

@@ -33,7 +33,7 @@ class IntlBreakIterator : public IntlError {
     }
   }
 
-  static IntlBreakIterator* Get(Object obj) {
+  static IntlBreakIterator* Get(ObjectData* obj) {
     return GetData<IntlBreakIterator>(obj, s_IntlBreakIterator);
   }
 

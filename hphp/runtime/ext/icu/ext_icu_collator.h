@@ -28,7 +28,7 @@ class Collator : public IntlError {
   }
   ~Collator() { setCollator(nullptr); }
 
-  static Collator* Get(Object obj) {
+  static Collator* Get(ObjectData* obj) {
     return GetData<Collator>(obj, s_Collator);
   }
 

@@ -355,7 +355,7 @@ static T* getDir(const Object& dir_iter) {
 }
 
 static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
-  auto dir = getDir<Directory>(this_);
+  auto dir = getDir<Directory>(ObjNR(this_).asObject());
 
   if (auto array_dir = dynamic_cast<ArrayDirectory*>(dir)) {
     auto prop = this_->o_realProp("dirName", 0, s_directory_iterator);
@@ -366,7 +366,7 @@ static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
 }
 
 static int64_t HHVM_METHOD(GlobIterator, count) {
-  return getDir<ArrayDirectory>(this_)->size();
+  return getDir<ArrayDirectory>(ObjNR(this_).asObject())->size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

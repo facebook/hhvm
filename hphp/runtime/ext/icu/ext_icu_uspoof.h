@@ -44,7 +44,7 @@ class SpoofChecker : public IntlError {
     }
   }
 
-  static SpoofChecker* Get(Object obj) {
+  static SpoofChecker* Get(ObjectData* obj) {
     return GetData<SpoofChecker>(obj, s_SpoofChecker);
   }
 

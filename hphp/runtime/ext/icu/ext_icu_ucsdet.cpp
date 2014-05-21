@@ -65,7 +65,7 @@ Class* EncodingMatch::c_EncodingMatch = nullptr;
   }
 
 static bool HHVM_METHOD(EncodingMatch, isValid) {
-  auto data = Native::data<EncodingMatch>(this_.get());
+  auto data = Native::data<EncodingMatch>(this_);
   return data && data->isValid();
 }
 

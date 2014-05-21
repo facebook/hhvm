@@ -59,7 +59,7 @@ class IntlDateFormatter : public IntlError {
     }
     return ObjectData::newInstance(c_IntlDateFormatter);
   }
-  static IntlDateFormatter* Get(Object obj) {
+  static IntlDateFormatter* Get(ObjectData* obj) {
     return GetData<IntlDateFormatter>(obj, s_IntlDateFormatter);
   }
 

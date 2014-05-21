@@ -26,7 +26,7 @@ public:
     return m_trans;
   }
 
-  static Transliterator* Get(Object obj) {
+  static Transliterator* Get(ObjectData* obj) {
     return GetData<Transliterator>(obj, s_Transliterator);
   }
 

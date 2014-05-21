@@ -60,7 +60,7 @@ IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
        ((cls != IntlCalendar_Class) && !cls->classof(IntlCalendar_Class))) {
       goto bad_argument;
     }
-    auto data = IntlCalendar::Get(obj);
+    auto data = IntlCalendar::Get(obj.get());
     if (!data) {
       // ::Get raises errors
       return nullptr;
@@ -128,10 +128,10 @@ static bool HHVM_METHOD(IntlCalendar, add, int64_t field, int64_t amount) {
   return true;
 }
 
-static bool intlcal_compare(const Object& this_, const Object& that_,
+static bool intlcal_compare(ObjectData* this_, const Object& that_,
   UBool (icu::Calendar::*func)(const icu::Calendar&, UErrorCode&) const) {
   CAL_FETCH(obj1, this_, false);
-  CAL_FETCH(obj2, that_, false);
+  CAL_FETCH(obj2, that_.get(), false);
   UErrorCode error = U_ZERO_ERROR;
   UBool res = (obj1->calendar()->*func)(*obj2->calendar(), error);
   if (U_FAILURE(error)) {
@@ -202,7 +202,7 @@ static Variant HHVM_METHOD(IntlCalendar, fieldDifference,
 static Variant intlcal_field_method(const Object& obj, int64_t field,
        int32_t (icu::Calendar::*func)(UCalendarDateFields, UErrorCode&) const,
        const char *method_name) {
-  CAL_FETCH(data, obj, false);
+  CAL_FETCH(data, obj.get(), false);
   CAL_CHECK_FIELD(field, method_name);
   UErrorCode error = U_ZERO_ERROR;
   int64_t ret = (data->calendar()->*func)((UCalendarDateFields)field, error);
@@ -216,7 +216,7 @@ static Variant intlcal_field_method(const Object& obj, int64_t field,
 static Variant intlcal_field_method(const Object& obj, int64_t field,
        int32_t (icu::Calendar::*func)(UCalendarDateFields) const,
        const char *method_name) {
-  CAL_FETCH(data, obj, false);
+  CAL_FETCH(data, obj.get(), false);
   CAL_CHECK_FIELD(field, method_name);
   return (data->calendar()->*func)((UCalendarDateFields)field);
 }
@@ -358,7 +358,7 @@ static bool HHVM_METHOD(IntlCalendar, inDaylightTime) {
 
 static bool HHVM_METHOD(IntlCalendar, isEquivalentTo, const Object& other) {
   CAL_FETCH(obj1, this_, false);
-  CAL_FETCH(obj2, other, false);
+  CAL_FETCH(obj2, other.get(), false);
   return obj1->calendar()->isEquivalentTo(*obj2->calendar());
 }
 
@@ -709,7 +709,7 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
   gcal->adoptTimeZone(tz);
 
 success:
-  Native::data<IntlCalendar>(this_.get())->setCalendar(gcal);
+  Native::data<IntlCalendar>(this_)->setCalendar(gcal);
   gcal = nullptr; // prevent SCOPE_EXIT sweeps
 }
 

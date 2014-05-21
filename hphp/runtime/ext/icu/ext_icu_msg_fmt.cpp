@@ -76,7 +76,7 @@ bool MessageFormatter::openFormatter(const String& pattern,
 static void HHVM_METHOD(MessageFormatter, __construct,
                         const String& locale,
                         const String& pattern) {
-  auto data = Native::data<MessageFormatter>(this_.get());
+  auto data = Native::data<MessageFormatter>(this_);
   if (!data->openFormatter(pattern, localeOrDefault(locale))) {
     throw data->getException("%s", data->getErrorMessage().c_str());
   }

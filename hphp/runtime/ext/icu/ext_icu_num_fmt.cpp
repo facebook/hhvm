@@ -190,7 +190,7 @@ static void HHVM_METHOD(NumberFormatter, __construct,
                         const String& locale,
                         int64_t style,
                         const String& pattern) {
-  Native::data<NumberFormatter>(this_.get())->
+  Native::data<NumberFormatter>(this_)->
     setNumberFormatter(locale, style, pattern);
 }
 

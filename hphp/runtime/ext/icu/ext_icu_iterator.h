@@ -60,7 +60,8 @@ public:
     }
     return obj;
   }
-  static IntlIterator* Get(Object obj) {
+
+  static IntlIterator* Get(ObjectData* obj) {
     return GetData<IntlIterator>(obj, s_IntlIterator);
   }
 

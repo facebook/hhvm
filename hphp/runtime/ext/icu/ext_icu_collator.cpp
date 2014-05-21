@@ -21,7 +21,7 @@ const StaticString s_Collator("Collator");
   }
 
 static void HHVM_METHOD(Collator, __construct, const String& locale) {
-  auto data = Native::data<Collator>(this_.get());
+  auto data = Native::data<Collator>(this_);
   data->clearError();
   if (!locale.empty()) {
     UErrorCode error = U_ZERO_ERROR;

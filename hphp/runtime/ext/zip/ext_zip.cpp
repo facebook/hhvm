@@ -368,7 +368,7 @@ const int64_t k_CM_PPMD = 98;
 
 template<class T>
 ALWAYS_INLINE
-static T* getResource(const Object& obj, const char* varName) {
+static T* getResource(ObjectData* obj, const char* varName) {
   auto var = obj->o_get(varName, true, s_ZipArchive.get());
   if (var.getType() == KindOfNull) {
     return nullptr;

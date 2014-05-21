@@ -621,7 +621,7 @@ struct Class : AtomicCountable {
     return false;
   }
   bool ifaceofDirect(const StringData* name) const {
-    return m_interfaces.lookupDefault(name, nullptr) != nullptr;
+    return m_interfaces.contains(name);
   }
 
   /*

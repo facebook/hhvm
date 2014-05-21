@@ -320,6 +320,10 @@ and class_decl_ c =
   SMap.iter (check_static_method m) sm;
   let parent_cstr = inherited.Typing_inherit.ih_cstr in
   let env, cstr = constructor_decl env parent_cstr c in
+  let need_init = match cstr with
+    | None
+    | Some {ce_type = (_, Tfun ({ft_abstract = true}))} -> false
+    | _ -> true in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
   let impl = match SMap.get "__toString" m with
     | Some {ce_type = (_, Tfun ft)} when cls_name <> "\\Stringish" ->
@@ -371,7 +375,7 @@ and class_decl_ c =
   let tc = {
     tc_final = c.c_final;
     tc_abstract = is_abstract;
-    tc_need_init = cstr <> None;
+    tc_need_init = need_init;
     tc_members_init = NastInitCheck.class_decl env c;
     tc_members_fully_known = ext_strict;
     tc_kind = c.c_kind;

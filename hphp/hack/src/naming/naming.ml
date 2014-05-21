@@ -805,14 +805,20 @@ and hintl ~allow_this env l = List.map (hint ~allow_this env) l
  *)
 (*****************************************************************************)
 
-let add_abstractl c methods =
-  List.map (fun x -> { x with N.m_abstract = true }) methods
+let add_abstract m = {m with N.m_abstract = true}
 
-let interface c methods smethods =
-  if c.c_kind <> Cinterface then methods, smethods else
-  let methods  = add_abstractl c methods in
-  let smethods = add_abstractl c smethods in
-  methods, smethods
+let add_abstractl methods = List.map add_abstract methods
+
+let add_abstractopt = function
+  | None -> None
+  | Some m -> Some (add_abstract m)
+
+let interface c constructor methods smethods =
+  if c.c_kind <> Cinterface then constructor, methods, smethods else
+  let constructor = add_abstractopt constructor in
+  let methods  = add_abstractl methods in
+  let smethods = add_abstractl smethods in
+  constructor, methods, smethods
 
 (*****************************************************************************)
 (* Checking for collision on method names *)
@@ -884,7 +890,6 @@ and class_ genv c =
   let parent   = get_class_parent (fst name) parent c in
   let fmethod  = class_method env sm_names v_names in
   let methods  = List.fold_right fmethod c.c_body [] in
-  let methods, smethods = interface c methods smethods in
   let uses     = List.fold_right (class_use env) c.c_body [] in
   let req_implements, req_extends = List.fold_right
     (class_require env) c.c_body ([], []) in
@@ -893,6 +898,8 @@ and class_ genv c =
   List.iter (hint_no_typedef env) c.c_implements;
   let implements  = List.map (hint ~allow_this:true env) c.c_implements in
   let constructor = List.fold_left (constructor env) None c.c_body in
+  let constructor, methods, smethods =
+    interface c constructor methods smethods in
   let class_tparam_names = List.map (fun (x,_) -> x) c.c_tparams in
   check_name_collision methods;
   check_tparams_shadow class_tparam_names methods;

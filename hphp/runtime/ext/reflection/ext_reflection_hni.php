@@ -685,6 +685,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    */
   public function invokeArgs($obj, $args): mixed {
     // XXX: is array_values necessary here?
+    if ($this->isStatic()) {
+      $obj = null;
+    }
     return hphp_invoke_method($obj, $this->originalClass, $this->getName(),
                               array_values($args));
   }

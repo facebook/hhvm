@@ -2639,11 +2639,8 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     }
 
     TCA* table = m_mcg->allocData<TCA>(sizeof(TCA), data->cases);
-    TCA afterLea = m_as.frontier() + kLeaRipLen;
-    ptrdiff_t diff = (TCA)table - afterLea;
-    assert(deltaFits(diff, sz::dword));
-    m_as.   lea(rip[diff], m_rScratch);
-    assert(m_as.frontier() == afterLea);
+    m_as.   lea(rip[(intptr_t)table], m_rScratch);
+    assert(((int32_t*)m_as.frontier())[-1] + m_as.frontier() == (TCA)table);
     m_as.   jmp(m_rScratch[indexReg*8]);
 
     for (int i = 0; i < data->cases; i++) {

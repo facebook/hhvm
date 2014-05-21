@@ -271,9 +271,8 @@ void emitCall(Asm& a, TCA dest) {
       // more compact than loading a 64-bit immediate.
       TCA* addr = mcg->allocData<TCA>(sizeof(TCA), 1);
       *addr = dest;
-      TCA after = a.frontier() + 6; // 0xff,modrm,disp32
-      a.call(rip[(TCA)addr - after]);
-      assert(after == a.frontier());
+      a.call(rip[(intptr_t)addr]);
+      assert(((int32_t*)a.frontier())[-1] + a.frontier() == (TCA)addr);
     }
   }
 }

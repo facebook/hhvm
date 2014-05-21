@@ -1618,7 +1618,7 @@ public:
   //     ir cannot be set to 'sp'
   ALWAYS_INLINE
   void emitCMX(X64Instr op, int jcond, RegNumber brName, RegNumber irName,
-               int s, int disp,
+               int s, int64_t disp,
                RegNumber rName,
                bool reverse = false,
                ssize_t imm = 0,
@@ -1707,7 +1707,7 @@ public:
     if (ir == int(reg::noreg)) ir = 4;
     int dispSize = sz::nosize;
     if (disp != 0) {
-      if (disp <= 127 && disp >= -128) {
+      if (!ripRelative && disp <= 127 && disp >= -128) {
         dispSize = sz::byte;
       } else {
         dispSize = sz::dword;
@@ -1749,6 +1749,9 @@ public:
     }
     // Emit displacement if needed
     if (dispSize == sz::dword) {
+      if (ripRelative) {
+        disp -= (int64_t)codeBlock.frontier() + immSize + dispSize;
+      }
       dword(disp);
     } else if (dispSize == sz::byte) {
       byte(disp & 0xff);
@@ -1816,7 +1819,7 @@ public:
   }
 
   ALWAYS_INLINE
-  void emitMR(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+  void emitMR(X64Instr op, RegNumber br, RegNumber ir, int s, int64_t disp,
               RegNumber r, int opSz = sz::qword, bool ripRelative = false) {
     emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, opSz, ripRelative);
   }
@@ -1852,7 +1855,7 @@ public:
   }
 
   ALWAYS_INLINE
-  void emitM(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+  void emitM(X64Instr op, RegNumber br, RegNumber ir, int s, int64_t disp,
              int opSz = sz::qword, bool ripRelative = false) {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false, opSz,
             ripRelative);

@@ -632,11 +632,13 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
                      if (input[inputpos + s] == '\0')
                              break;
             }
-            /*-1 because the string gets terminated with '\0' otherwise*/
-            len = s-1;
+            len = s;
           }
+          /*A is \0 terminated*/
+          if (type=='A')
+            len++;
           ret.set(String(n, CopyString),
-                  String(input + inputpos, len + 1, CopyString));
+                  String(input + inputpos, len, CopyString));
           break;
         }
 

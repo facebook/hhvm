@@ -787,6 +787,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.server.type", &ServerType);
     ServerIP = Config::GetString(ini, server["IP"]);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.ip", &ServerIP);
     ServerFileSocket = Config::GetString(ini, server["FileSocket"]);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.server.file_socket", &ServerFileSocket);

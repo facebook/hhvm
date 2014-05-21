@@ -66,7 +66,7 @@ class RedisSessionModule implements SessionHandlerInterface {
       }
       if ($args['weight'] < 1) {
         error_log("Invalid weight specified for session.save_path(redis), ".
-                  "assuming 1", E_USER_WARNING);
+                  "assuming 1");
         $args['weight'] = 1;
       }
 

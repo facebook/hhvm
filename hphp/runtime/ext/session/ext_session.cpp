@@ -402,6 +402,7 @@ bool SystemlibSessionModule::open(const char *save_path,
                              nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
+    PS(mod_data) = true;
     return true;
   }
 
@@ -413,6 +414,7 @@ bool SystemlibSessionModule::close() {
   auto obj = s_obj->getObject();
   if (!obj) {
     // close() can be called twice in some circumstances
+    PS(mod_data) = false;
     return true;
   }
 

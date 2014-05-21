@@ -4218,18 +4218,6 @@
             "value": 4
         },
         {
-            "name": "STREAM_FILTER_ALL",
-            "value": 3
-        },
-        {
-            "name": "STREAM_FILTER_READ",
-            "value": 1
-        },
-        {
-            "name": "STREAM_FILTER_WRITE",
-            "value": 2
-        },
-        {
             "name": "STREAM_IGNORE_URL",
             "value": 2
         },

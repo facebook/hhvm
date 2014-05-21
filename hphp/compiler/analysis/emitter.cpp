@@ -3696,15 +3696,32 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               e.InstanceOf();
             } else if (s != "") {
               ClassScopeRawPtr cls = second->getOriginalClass();
-              if (cls) {
+              bool isTrait = cls && cls->isTrait();
+              bool isSelf = s == "self" && notQuoted;
+              bool isParent = s == "parent" && notQuoted;
+
+              if (isTrait && (isSelf || isParent)) {
+                emitConvertToCell(e);
                 if (s == "self" && notQuoted) {
-                  s = cls->getOriginalName();
+                  e.Self();
                 } else if (s == "parent" && notQuoted) {
-                  s = cls->getOriginalParent();
+                  e.Parent();
                 }
+
+                e.NameA();
+                e.InstanceOf();
+              } else {
+                if (cls) {
+                  if (isSelf) {
+                    s = cls->getOriginalName();
+                  } else if (isParent) {
+                    s = cls->getOriginalParent();
+                  }
+                }
+
+                StringData* nLiteral = makeStaticString(s);
+                e.InstanceOfD(nLiteral);
               }
-              StringData* nLiteral = makeStaticString(s);
-              e.InstanceOfD(nLiteral);
             } else {
               visit(b->getExp2());
               emitConvertToCell(e);

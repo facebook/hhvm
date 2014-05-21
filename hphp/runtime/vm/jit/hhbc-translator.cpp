@@ -5811,6 +5811,10 @@ SSATmp* HhbcTranslator::spillStack() {
   return newSp;
 }
 
+void HhbcTranslator::prepareForSideExit() {
+  spillStack();
+}
+
 void HhbcTranslator::exceptionBarrier() {
   auto const sp = spillStack();
   gen(ExceptionBarrier, sp);

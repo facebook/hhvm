@@ -4256,6 +4256,10 @@ Translator::translateRegion(const RegionDesc& region,
       }
     }
 
+    if (b < region.blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
+      ht.prepareForSideExit();
+    }
+
     assert(!typePreds.hasNext());
     assert(!byRefs.hasNext());
     assert(!refPreds.hasNext());

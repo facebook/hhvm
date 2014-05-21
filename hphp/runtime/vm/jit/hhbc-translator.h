@@ -91,6 +91,11 @@ struct HhbcTranslator {
   void end();
   void end(Offset nextPc);
 
+  // Prepare for a possible side exit.  This forces a SpillStack, so
+  // that no instruction is needed in the exit block and thus a branch
+  // in the main block can be smashed.
+  void prepareForSideExit();
+
   // Tracelet guards.
   void guardTypeStack(uint32_t stackIndex, Type type, bool outerOnly);
   void guardTypeLocal(uint32_t locId,      Type type, bool outerOnly);

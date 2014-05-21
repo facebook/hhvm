@@ -102,6 +102,14 @@ void RegionDesc::addArc(BlockId src, BlockId dst) {
   arcs.push_back({src, dst});
 }
 
+void RegionDesc::setSideExitingBlock(BlockId bid) {
+  sideExitingBlocks.insert(bid);
+}
+
+bool RegionDesc::isSideExitingBlock(BlockId bid) const {
+  return sideExitingBlocks.count(bid);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 RegionDesc::BlockId RegionDesc::Block::s_nextId = -1;
@@ -815,8 +823,13 @@ std::string show(const RegionDesc& region) {
       for (auto& b : region.blocks) {
         folly::toAppend(show(*b), &ret);
       }
+      folly::toAppend("Arcs:\n", &ret);
       for (auto& arc : region.arcs) {
         folly::toAppend(show(arc), &ret);
+      }
+      folly::toAppend("Side-exiting Blocks: ", &ret);
+      for (auto b : region.sideExitingBlocks) {
+        folly::toAppend(b, &ret);
       }
       return ret;
     }()

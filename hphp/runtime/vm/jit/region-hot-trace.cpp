@@ -226,6 +226,9 @@ RegionDescPtr selectHotTrace(TransID triggerId,
                           blockRegion->blocks.end());
     region->arcs.insert(region->arcs.end(), blockRegion->arcs.begin(),
                         blockRegion->arcs.end());
+    if (cfg.outArcs(tid).size() > 1) {
+      region->setSideExitingBlock(blockRegion->blocks.front()->id());
+    }
     selectedSet.insert(tid);
     if (selectedVec) selectedVec->push_back(tid);
 

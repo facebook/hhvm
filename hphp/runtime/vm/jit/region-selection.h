@@ -69,6 +69,7 @@ struct RegionDesc {
   //   - Negative numbers are used for other blocks, which correspond
   //     to blocks created by inlining and which don't correspond to
   //     the beginning of a profiling translation.
+  typedef hphp_hash_set<BlockId> BlockIdSet;
 
   template<typename... Args>
   Block* addBlock(Args&&... args) {
@@ -77,8 +78,13 @@ struct RegionDesc {
     return blocks.back().get();
   }
   void addArc(BlockId src, BlockId dst);
+  void setSideExitingBlock(BlockId bid);
+  bool isSideExitingBlock(BlockId bid) const;
   std::vector<BlockPtr> blocks;
   std::vector<Arc>      arcs;
+  // Set of blocks that that can possibly side exit the region. This
+  // is just a hint to the region translator.
+  BlockIdSet            sideExitingBlocks;
 };
 
 typedef std::shared_ptr<RegionDesc>                      RegionDescPtr;

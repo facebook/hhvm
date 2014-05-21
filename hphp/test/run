@@ -302,7 +302,12 @@ function find_debug_config($test, $name) {
 }
 
 function mode_cmd($options) {
-  $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
+  $repo_args = '';
+  if (!isset($options['repo'])) {
+    // Set the non-repo-mode shared repo. 
+    // When in repo mode, we set our own central path.
+    $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
+  }
   $jit_args = "$repo_args -vEval.Jit=true";
   $mode = idx($options, 'mode', '');
   switch ($mode) {
@@ -364,12 +369,20 @@ function hhvm_cmd($options, $test, $test_run = null) {
     escapeshellarg($test_run),
     $use_automain ? escapeshellarg($test) : ''
   );
+
   if (file_exists($test.'.ini')) {
     file_put_contents($test_ini = tempnam('/tmp', $test).'.ini',
                       str_replace('{PWD}', dirname($test),
                                   file_get_contents($test.'.ini')));
     $cmd .= " -c $test_ini";
   }
+
+  if (isset($options['repo'])) {
+    $hhbbc_repo = "$test.repo/hhvm.hhbbc";
+    $cmd .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
+    $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
+  }
+
   $env = $_ENV;
   $in = find_test_ext($test, 'in');
   if ($in !== null) {
@@ -380,6 +393,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     // a wide variety of terminal settings.
     $env["TERM"] = "dumb";
   }
+
   return array($cmd, $env);
 }
 
@@ -813,8 +827,6 @@ function run_test($options, $test) {
       return false;
     }
     shell_exec("$hhbbc 2>&1");
-    $hhvm .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
-    $hhvm .= " -vRepo.Central.Path=$hhbbc_repo";
 
     return run_one_config($options, $test, $hhvm, $hhvm_env);
   }
@@ -866,11 +878,9 @@ function print_commands($tests, $options) {
     }
 
     // How to run it with hhbbc:
-    $hhbbc_hhvm = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbbc",
-                              $command);
     $hhbbc_cmds = hphp_cmd($options, $test)."\n";
     $hhbbc_cmds .= hhbbc_cmd($options, $test)."\n";
-    $hhbbc_cmds .= $hhbbc_hhvm."\n";
+    $hhbbc_cmds .= $command."\n";
     print "$hhbbc_cmds\n";
   }
 }

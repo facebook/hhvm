@@ -1707,7 +1707,8 @@ class ReflectionClass implements Reflector {
     if (!interface_exists($normalized_cls)) {
       throw new ReflectionException("Interface $normalized_cls does not exist");
     }
-    return $this->isSubclassOf($normalized_cls);
+    return $cls == $this->getName() ||
+           $this->isSubclassOf($normalized_cls);
   }
 
   /**

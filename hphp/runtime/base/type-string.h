@@ -39,6 +39,18 @@ enum ReserveStringMode { ReserveString };
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+/*
+ * Don't actually perform a shrink unless the savings meets this
+ * threshold.
+ */
+constexpr int kMinShrinkThreshold = 1024;
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
 StringData* buildStringData(int     n);
 StringData* buildStringData(int64_t   n);
 StringData* buildStringData(double  n);
@@ -127,7 +139,7 @@ public:
   /* implicit */ String(const StringData*) = delete;
 
   // Move ctor
-  /* implicit */ String(String&& str) : StringBase(std::move(str)) {}
+  /* implicit */ String(String&& str) noexcept : StringBase(std::move(str)) {}
   /* implicit */ String(Variant&& src);
   // Move assign
   String& operator=(String&& src) {
@@ -205,7 +217,11 @@ public:
   }
   const String& shrink(int len) {
     assert(m_px);
-    m_px->setSize(len);
+    if (m_px->size() - len > kMinShrinkThreshold) {
+      StringBase::operator=(m_px->shrink(len));
+    } else {
+      m_px->setSize(len);
+    }
     return *this;
   }
   MutableSlice reserve(int size) {

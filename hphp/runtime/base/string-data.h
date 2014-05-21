@@ -230,6 +230,17 @@ struct StringData {
   StringData* reserve(int maxLen);
 
   /*
+   * Shrink a string down to length `len` (not counting null terminator).
+   *
+   * May not be called for strings created with MakeMalloced or
+   * MakeStatic.
+   *
+   * Returns: possibly a new StringData, if we decided to reallocate. The
+   * returned pointer is not yet incref'd.
+   */
+  StringData* shrink(int len);
+
+  /*
    * Returns a slice with extents sized to the *string* that this
    * StringData wraps.  This range does not include a null terminator.
    *

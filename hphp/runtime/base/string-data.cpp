@@ -494,6 +494,27 @@ StringData* StringData::reserve(int cap) {
   return ret;
 }
 
+StringData* StringData::shrink(int len) {
+  assert(!isImmutable() && !hasMultipleRefs() && len >= 0);
+  assert(isFlat());
+  assert(len <= m_len);
+  assert(len < capacity());
+
+  auto const sd = Make(len);
+  auto const src = slice();
+  auto const dst = sd->mutableData();
+  assert(len <= src.len);
+  sd->setSize(len);
+
+  auto const mcret = memcpy(dst, src.ptr, len);
+  auto const ret = static_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
+
+  assert(ret == sd);
+  assert(ret->checkSane());
+  return ret;
+}
+
 // State transition from Mode::Shared to Mode::Flat.
 StringData* StringData::escalate(uint32_t cap) {
   assert(isShared() && !isStatic() && cap >= m_len);

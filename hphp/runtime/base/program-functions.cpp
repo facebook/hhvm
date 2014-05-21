@@ -1040,6 +1040,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("config-value,v", value<std::vector<std::string>>(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
      "name can be any valid configuration for a config file")
+    ("no-config", "don't use the default php.ini")
     ("port,p", value<int>(&po.port)->default_value(-1),
      "start an HTTP server at specified port")
     ("port-fd", value<int>(&po.portfd)->default_value(-1),
@@ -1151,7 +1152,7 @@ static int execute_program_impl(int argc, char** argv) {
       cout << desc << "\n";
       return -1;
     }
-    if (po.config.empty()) {
+    if (po.config.empty() && !vm.count("no-config")) {
       auto default_config_file = "/etc/hhvm/php.ini";
       if (access(default_config_file, R_OK) != -1) {
         Logger::Verbose("Using default config file: %s", default_config_file);

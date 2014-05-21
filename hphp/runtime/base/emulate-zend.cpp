@@ -151,6 +151,10 @@ int emulate_zend(int argc, char** argv) {
       newargv.push_back("-c");
       newargv.push_back(argv[cnt++]);
     }
+    if (strcmp(argv[cnt], "-n")  == 0) {
+      cnt++;
+      newargv.push_back("--no-config");
+    }
     if (argv[cnt][0] != '-') {
       if (show) {
         newargv.push_back("-w");

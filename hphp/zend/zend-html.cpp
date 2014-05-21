@@ -699,6 +699,7 @@ char *string_html_encode(const char *input, int &len,
         qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_SUBSTITUTE);
 
       if (!utf8 && should_skip) {
+        *q++ = c;
         break;
       }
 

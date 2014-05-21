@@ -1775,18 +1775,19 @@ StClosureArg<offsetBytes> S0:Obj<Closure> S1:Gen
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.
 
-D:Obj<Generator> = CreateCont S0:FramePtr S1:{TCA,Nullptr} S2:Int
+D:Obj<Generator> = CreateCont S0:FramePtr S1:Int S2:{TCA,Nullptr} S3:Int
 
-  Create a Generator object and suspend the ActRec provided by S0 into
-  its embedded ActRec. Set the native resume address to S1 and resume offset
-  to S2.
+  Create a Generator object and suspend the ActRec provided by S0 into its
+  embedded ActRec, allocating S1 slots for locals/iterators. Set the native
+  resume address to S2 and resume offset to S3.
 
-D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:{TCA,Nullptr} S2:Int
-                                            S3:Obj<WaitableWaitHandle>
+D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:Int S2:{TCA,Nullptr}
+                                            S3:Int S4:Obj<WaitableWaitHandle>
 
   Create an AsyncFunctionWaitHandle object and suspend the ActRec provided by
-  S0 into its embedded ActRec. Set the native resume address to S1, resume
-  offset to S2, and mark it blocked on non-finished child S3.
+  S0 into its embedded ActRec, allocating S1 slots for locals/iterators.  Set
+  the native resume address to S2, resume offset to S3, and mark it blocked on
+  non-finished child S4.
 
 ContEnter S0:StkPtr S1:FramePtr S2:FramePtr S3:TCA S4:ConstInt
 

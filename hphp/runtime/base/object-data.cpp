@@ -600,6 +600,22 @@ const StaticString
  */
 inline Array getSerializeProps(const ObjectData* obj,
                                VariableSerializer* serializer) {
+  if (serializer->getType() == VariableSerializer::Type::VarExport) {
+    Array props;
+    for (ArrayIter iter(obj->o_toArray()); iter; ++iter) {
+      auto key = iter.first().toString();
+      // Jump over any class attribute mangling
+      if (key[0] == '\0' && key.size() > 0) {
+        int sizeToCut = 0;
+        do {
+          sizeToCut++;
+        } while (key[sizeToCut] != '\0');
+        key = key.substr(sizeToCut+1);
+      }
+      props.setWithRef(key, iter.secondRef());
+    }
+    return props;
+  }
   if ((serializer->getType() != VariableSerializer::Type::PrintR) &&
       (serializer->getType() != VariableSerializer::Type::VarDump)) {
     return obj->o_toArray();

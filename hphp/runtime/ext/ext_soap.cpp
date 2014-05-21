@@ -2778,7 +2778,8 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
       "HTTP", msg));
     return uninit_null();
   }
-  if (code != 200) {
+  if ((code >= 400) &&
+      (m_exceptions || response.empty())) {
     String msg = response.detach();
     if (msg.empty()) {
       msg = HttpProtocol::GetReasonString(code);

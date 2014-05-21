@@ -244,7 +244,7 @@ struct TransBCMapping {
   MD5    md5;
   Offset bcStart;
   TCA    aStart;
-  TCA    astubsStart;
+  TCA    acoldStart;
 };
 
 /*
@@ -261,8 +261,8 @@ struct TransRec {
                          dependencies;
   TCA                    aStart;
   uint32_t               aLen;
-  TCA                    astubsStart;
-  uint32_t               astubsLen;
+  TCA                    acoldStart;
+  uint32_t               acoldLen;
   std::vector<TransBCMapping>
                          bcMapping;
 
@@ -274,8 +274,8 @@ struct TransRec {
            TransKind   _kind,
            TCA         _aStart = 0,
            uint32_t    _aLen = 0,
-           TCA         _astubsStart = 0,
-           uint32_t    _astubsLen = 0)
+           TCA         _acoldStart = 0,
+           uint32_t    _acoldLen = 0)
       : id(0)
       , kind(_kind)
       , src(s)
@@ -284,8 +284,8 @@ struct TransRec {
       , bcStopOffset(0)
       , aStart(_aStart)
       , aLen(_aLen)
-      , astubsStart(_astubsStart)
-      , astubsLen(_astubsLen)
+      , acoldStart(_acoldStart)
+      , acoldLen(_acoldLen)
     { }
 
   TransRec(SrcKey                   s,
@@ -295,8 +295,8 @@ struct TransRec {
            const Tracelet*          t,
            TCA                      _aStart = 0,
            uint32_t                 _aLen = 0,
-           TCA                      _astubsStart = 0,
-           uint32_t                 _astubsLen = 0,
+           TCA                      _acoldStart = 0,
+           uint32_t                 _acoldLen = 0,
            std::vector<TransBCMapping>  _bcMapping =
              std::vector<TransBCMapping>());
 

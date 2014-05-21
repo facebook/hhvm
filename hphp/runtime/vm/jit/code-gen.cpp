@@ -75,14 +75,14 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
   return live_regs;
 }
 
-static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& stubsCode,
-                     CodeBlock& unusedCode, MCGenerator* mcg,
+static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
+                     CodeBlock& frozenCode, MCGenerator* mcg,
                      CodegenState& state, Block* block,
                      std::vector<TransBCMapping>* bcMap) {
   FTRACE(6, "genBlock: {}\n", block->id());
   std::unique_ptr<CodeGenerator> cg(mcg->backEnd().newCodeGenerator(unit, cb,
-                                                                    stubsCode,
-                                                                    unusedCode,
+                                                                    coldCode,
+                                                                    frozenCode,
                                                                     mcg,
                                                                     state));
 
@@ -97,7 +97,7 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& stubsCode,
       bcMap->push_back(TransBCMapping{inst->marker().func()->unit()->md5(),
                                       inst->marker().bcOff(),
                                       cb.frontier(),
-                                      stubsCode.frontier()});
+                                      coldCode.frontier()});
       prevMarker = inst->marker();
     }
     auto* addr = cg->cgInst(inst);
@@ -121,36 +121,36 @@ void genCodeImpl(IRUnit& unit,
   };
 
   CodeBlock& mainCodeIn   = mcg->code.main();
-  CodeBlock& stubsCodeIn  = mcg->code.stubs();
-  CodeBlock* unusedCode   = &mcg->code.unused();
+  CodeBlock& coldCodeIn   = mcg->code.cold();
+  CodeBlock* frozenCode   = &mcg->code.frozen();
 
   CodeBlock mainCode;
-  CodeBlock stubsCode;
+  CodeBlock coldCode;
   bool relocate = false;
   if (RuntimeOption::EvalJitRelocationSize &&
       mcg->backEnd().supportsRelocation() &&
-      stubsCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
+      coldCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
     /*
      * This is mainly to exercise the relocator, and ensure that its
      * not broken by new non-relocatable code. Later, it will be
      * used to do some peephole optimizations, such as reducing branch
      * sizes.
-     * Allocate enough space that the relocated stubs code doesn't
-     * overlap the emitted stubs code.
+     * Allocate enough space that the relocated cold code doesn't
+     * overlap the emitted cold code.
      */
-    stubsCode.init(stubsCodeIn.frontier() +
-                   RuntimeOption::EvalJitRelocationSize,
-                   RuntimeOption::EvalJitRelocationSize, "cgRelocStub");
+    coldCode.init(coldCodeIn.frontier() +
+                  RuntimeOption::EvalJitRelocationSize,
+                  RuntimeOption::EvalJitRelocationSize, "cgRelocStub");
     size_t align = mcg->backEnd().cacheLineSize();
     assert(!(align & (align - 1)));
     size_t delta =
-      (mainCodeIn.frontier() - stubsCode.frontier()) & (align - 1);
-    mainCode.init(stubsCode.frontier() +
+      (mainCodeIn.frontier() - coldCode.frontier()) & (align - 1);
+    mainCode.init(coldCode.frontier() +
                   RuntimeOption::EvalJitRelocationSize + delta,
                   RuntimeOption::EvalJitRelocationSize - delta, "cgRelocMain");
 
     assert(!((mainCode.frontier() - mainCodeIn.frontier()) & (align - 1)));
-    assert(!((stubsCode.frontier() - stubsCodeIn.frontier()) & (align - 1)));
+    assert(!((coldCode.frontier() - coldCodeIn.frontier()) & (align - 1)));
     relocate = true;
   } else {
     /*
@@ -158,17 +158,17 @@ void genCodeImpl(IRUnit& unit,
      * code blocks directly will fail (eg by overwriting the same
      * memory being written through these locals).
      */
-    stubsCode.init(stubsCodeIn.frontier(), stubsCodeIn.available(),
-                   stubsCodeIn.name().c_str());
+    coldCode.init(coldCodeIn.frontier(), coldCodeIn.available(),
+                  coldCodeIn.name().c_str());
     mainCode.init(mainCodeIn.frontier(), mainCodeIn.available(),
                   mainCodeIn.name().c_str());
   }
 
-  if (unusedCode == &stubsCodeIn) {
-    unusedCode = &stubsCode;
+  if (frozenCode == &coldCodeIn) {
+    frozenCode = &coldCode;
   }
-  auto unusedStart = unusedCode->frontier();
-  auto stubsStart DEBUG_ONLY = stubsCodeIn.frontier();
+  auto frozenStart = frozenCode->frontier();
+  auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
   auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
 
   {
@@ -185,10 +185,10 @@ void genCodeImpl(IRUnit& unit,
       assert(!isEmitted(block));
 
       FTRACE(6, "genBlock {} on {}\n", block->id(),
-             cb.base() == stubsCode.base() ? "astubs" : "a");
+             cb.base() == coldCode.base() ? "acold" : "a");
 
       auto const aStart      = cb.frontier();
-      auto const astubsStart = stubsCode.frontier();
+      auto const acoldStart  = coldCode.frontier();
       mcg->backEnd().patchJumps(cb, state, block);
       state.addresses[block] = aStart;
 
@@ -201,7 +201,7 @@ void genCodeImpl(IRUnit& unit,
         state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
       }
 
-      genBlock(unit, cb, stubsCode, *unusedCode, mcg, state, block, bcMap);
+      genBlock(unit, cb, coldCode, *frozenCode, mcg, state, block, bcMap);
       auto nextFlow = block->next();
       if (nextFlow && nextFlow != nextLinear) {
         mcg->backEnd().emitFwdJmp(cb, nextFlow, state);
@@ -209,9 +209,9 @@ void genCodeImpl(IRUnit& unit,
 
       if (state.asmInfo) {
         state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
-        if (cb.base() != stubsCode.base()) {
-          state.asmInfo->astubRanges[block] = TcaRange(astubsStart,
-                                                       stubsCode.frontier());
+        if (cb.base() != coldCode.base()) {
+          state.asmInfo->acoldRanges[block] = TcaRange(acoldStart,
+                                                       coldCode.frontier());
         }
       }
     };
@@ -222,20 +222,20 @@ void genCodeImpl(IRUnit& unit,
 
     auto const linfo = layoutBlocks(unit);
 
-    for (auto it = linfo.blocks.begin(); it != linfo.astubsIt; ++it) {
-      Block* nextLinear = boost::next(it) != linfo.astubsIt
+    for (auto it = linfo.blocks.begin(); it != linfo.acoldIt; ++it) {
+      Block* nextLinear = boost::next(it) != linfo.acoldIt
         ? *boost::next(it) : nullptr;
       emitBlock(mainCode, *it, nextLinear);
     }
-    for (auto it = linfo.astubsIt; it != linfo.aunusedIt; ++it) {
-      Block* nextLinear = boost::next(it) != linfo.aunusedIt
+    for (auto it = linfo.acoldIt; it != linfo.afrozenIt; ++it) {
+      Block* nextLinear = boost::next(it) != linfo.afrozenIt
         ? *boost::next(it) : nullptr;
-      emitBlock(stubsCode, *it, nextLinear);
+      emitBlock(coldCode, *it, nextLinear);
     }
-    for (auto it = linfo.aunusedIt; it != linfo.blocks.end(); ++it) {
+    for (auto it = linfo.afrozenIt; it != linfo.blocks.end(); ++it) {
       Block* nextLinear = boost::next(it) != linfo.blocks.end()
         ? *boost::next(it) : nullptr;
-      emitBlock(*unusedCode, *it, nextLinear);
+      emitBlock(*frozenCode, *it, nextLinear);
     }
 
     if (debug) {
@@ -245,7 +245,7 @@ void genCodeImpl(IRUnit& unit,
     }
   }
 
-  assert(stubsCodeIn.frontier() == stubsStart);
+  assert(coldCodeIn.frontier() == coldStart);
   assert(mainCodeIn.frontier() == mainStart);
 
   if (relocate) {
@@ -261,24 +261,24 @@ void genCodeImpl(IRUnit& unit,
                            mainCodeIn.frontier());
     mainCodeIn.skip(be.relocate(mainRel, mcg->cgFixups()));
 
-    RelocationInfo stubsRel(stubsCode.base(), stubsCode.frontier(),
-                            stubsCodeIn.frontier());
+    RelocationInfo coldRel(coldCode.base(), coldCode.frontier(),
+                           coldCodeIn.frontier());
 
-    stubsCodeIn.skip(be.relocate(stubsRel, mcg->cgFixups()));
+    coldCodeIn.skip(be.relocate(coldRel, mcg->cgFixups()));
 
     be.adjustForRelocation(mainRel.dest(),
                            mainRel.dest() + mainRel.destSize(),
-                           stubsRel, mcg->cgFixups());
-    be.adjustForRelocation(stubsRel.dest(),
-                           stubsRel.dest() + stubsRel.destSize(),
+                           coldRel, mcg->cgFixups());
+    be.adjustForRelocation(coldRel.dest(),
+                           coldRel.dest() + coldRel.destSize(),
                            mainRel, mcg->cgFixups());
-    if (unusedCode != &stubsCode) {
-      be.adjustForRelocation(unusedStart, unusedCode->frontier(),
-                             stubsRel, mcg->cgFixups());
-      be.adjustForRelocation(unusedStart, unusedCode->frontier(),
+    if (frozenCode != &coldCode) {
+      be.adjustForRelocation(frozenStart, frozenCode->frontier(),
+                             coldRel, mcg->cgFixups());
+      be.adjustForRelocation(frozenStart, frozenCode->frontier(),
                              mainRel, mcg->cgFixups());
     }
-    be.adjustForRelocation(sr, asmInfo, stubsRel, mcg->cgFixups());
+    be.adjustForRelocation(sr, asmInfo, coldRel, mcg->cgFixups());
     be.adjustForRelocation(sr, asmInfo, mainRel, mcg->cgFixups());
 
 #ifndef NDEBUG
@@ -286,13 +286,13 @@ void genCodeImpl(IRUnit& unit,
     for (size_t i = 0; i < ip.size(); ++i) {
       const auto& ib = ip[i];
       assert(!mainCode.contains(ib.toSmash()));
-      assert(!stubsCode.contains(ib.toSmash()));
+      assert(!coldCode.contains(ib.toSmash()));
     }
     memset(mainCode.base(), 0xcc, mainCode.frontier() - mainCode.base());
-    memset(stubsCode.base(), 0xcc, stubsCode.frontier() - stubsCode.base());
+    memset(coldCode.base(), 0xcc, coldCode.frontier() - coldCode.base());
 #endif
   } else {
-    stubsCodeIn.skip(stubsCode.frontier() - stubsCodeIn.frontier());
+    coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
     mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
   }
 }

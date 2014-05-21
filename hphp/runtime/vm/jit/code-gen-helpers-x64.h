@@ -90,7 +90,7 @@ void emitTraceCall(CodeBlock& cb, int64_t pcOff);
  */
 void emitTestSurpriseFlags(Asm& as);
 
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  Fixup fixup);
 
 #ifdef USE_GCC_FAST_TLS

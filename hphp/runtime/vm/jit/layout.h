@@ -30,13 +30,14 @@ class IRUnit;
  * Information about where to position the blocks in a trace.
  *
  * The blocks are listed in the order they should be positioned, with
- * astubsIt pointing at the place we've split the blocks between a and
- * astubs.
+ * acoldIt pointing at the place we've split the blocks between a and
+ * acold, and afrozenIt pointing at the place we've split the blocks
+ * between acold and afrozen.
  */
 struct LayoutInfo {
   BlockList blocks;
-  BlockList::iterator astubsIt;
-  BlockList::iterator aunusedIt;
+  BlockList::iterator acoldIt;
+  BlockList::iterator afrozenIt;
 };
 
 /*

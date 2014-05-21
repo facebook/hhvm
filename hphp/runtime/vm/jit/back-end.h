@@ -99,8 +99,8 @@ class BackEnd {
   virtual void enterTCHelper(TCA start, TReqInfo& info) = 0;
   virtual CodeGenerator* newCodeGenerator(const IRUnit& unit,
                                           CodeBlock& mainCode,
-                                          CodeBlock& stubsCode,
-                                          CodeBlock& unusedCode,
+                                          CodeBlock& coldCode,
+                                          CodeBlock& frozenCode,
                                           MCGenerator* mcg,
                                           CodegenState& state) = 0;
   virtual void moveToAlign(CodeBlock& cb,
@@ -110,11 +110,11 @@ class BackEnd {
   virtual TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist,
                                  SRFlags flags, ServiceRequest req,
                                  const ServiceReqArgVec& argv) = 0;
-  virtual void emitInterpReq(CodeBlock& mainCode, CodeBlock& stubsCode,
+  virtual void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
                              const SrcKey& sk) = 0;
   virtual bool funcPrologueHasGuard(TCA prologue, const Func* func) = 0;
   virtual TCA funcPrologueToGuard(TCA prologue, const Func* func) = 0;
-  virtual SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
+  virtual SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode,
                                   Func* func, bool funcIsMagic, int nPassed,
                                   TCA& start, TCA& aStart) = 0;
   virtual TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) = 0;
@@ -153,7 +153,7 @@ class BackEnd {
   virtual TCA jccTarget(TCA jmp) = 0;
   virtual TCA callTarget(TCA call) = 0;
 
-  virtual void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeStubs,
+  virtual void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
                            SrcKey sk, size_t dbgOff) = 0;
 
   virtual void streamPhysReg(std::ostream& os, PhysReg& reg) = 0;

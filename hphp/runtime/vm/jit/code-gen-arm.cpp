@@ -1423,7 +1423,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), extra->taken, resumed());
-      emitBindSideExit(this->m_mainCode, this->m_unusedCode, sk, ccNegate(cc));
+      emitBindSideExit(this->m_mainCode, this->m_frozenCode, sk, ccNegate(cc));
     }
   );
 }
@@ -1538,7 +1538,7 @@ void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   emitBindJmp(
     m_mainCode,
-    m_unusedCode,
+    m_frozenCode,
     SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed())
   );
 }
@@ -1710,8 +1710,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   auto const srcKey = m_curInst->marker().sk();
   auto const adjust = emitBindCall(m_mainCode,
-                                   m_stubsCode,
-                                   m_unusedCode,
+                                   m_coldCode,
+                                   m_frozenCode,
                                    srcKey,
                                    extra->callee,
                                    extra->numParams);

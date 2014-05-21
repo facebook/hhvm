@@ -45,32 +45,32 @@ void reportTraceletToVtune(const Unit* unit,
 
   methodInfo.source_file_name = const_cast<char *>(unit->filepath()->data());
 
-  // aStart field of tr.bcmapping may point to stubs range, so we need to
-  // explicitly form mappings for main code and stubs
+  // aStart field of tr.bcmapping may point to cold range, so we need to
+  // explicitly form mappings for main code and cold
 
   size_t bcSize = tr.bcMapping.size();
-  std::vector<LineNumberInfo> mainLineMap, stubsLineMap;
+  std::vector<LineNumberInfo> mainLineMap, coldLineMap;
 
   for (size_t i = 0; i < bcSize; i++) {
     LineNumberInfo info;
 
     info.LineNumber = unit->getLineNumber(tr.bcMapping[i].bcStart);
 
-    // Note that main code may be generated in the stubs code range (see
+    // Note that main code may be generated in the cold code range (see
     // emitBlock in code-gen-x64 genCodeImpl()) so we need to explicitly check
     // the aStart value.
     if (tr.bcMapping[i].aStart >= tr.aStart &&
         tr.bcMapping[i].aStart < tr.aStart + tr.aLen) {
       info.Offset = tr.bcMapping[i].aStart - tr.aStart;
       mainLineMap.push_back(info);
-    } else if (tr.bcMapping[i].aStart >= tr.astubsStart &&
-               tr.bcMapping[i].aStart < tr.astubsStart + tr.astubsLen) {
-      info.Offset = tr.bcMapping[i].aStart - tr.astubsStart;
-      stubsLineMap.push_back(info);
+    } else if (tr.bcMapping[i].aStart >= tr.acoldStart &&
+               tr.bcMapping[i].aStart < tr.acoldStart + tr.acoldLen) {
+      info.Offset = tr.bcMapping[i].aStart - tr.acoldStart;
+      coldLineMap.push_back(info);
     }
 
-    info.Offset = tr.bcMapping[i].astubsStart - tr.astubsStart;
-    stubsLineMap.push_back(info);
+    info.Offset = tr.bcMapping[i].acoldStart - tr.acoldStart;
+    coldLineMap.push_back(info);
   }
 
   auto infoComp = [&](const LineNumberInfo& a,
@@ -79,7 +79,7 @@ void reportTraceletToVtune(const Unit* unit,
   };
 
   std::sort(mainLineMap.begin(), mainLineMap.end(), infoComp);
-  std::sort(stubsLineMap.begin(), stubsLineMap.end(), infoComp);
+  std::sort(coldLineMap.begin(), coldLineMap.end(), infoComp);
 
   // Note that at this moment LineNumberInfo structures contain pairs of lines
   // and code offset for the start of the corresponding code, while JIT API
@@ -102,7 +102,7 @@ void reportTraceletToVtune(const Unit* unit,
   };
 
   shiftLineMap(mainLineMap, tr.aLen);
-  shiftLineMap(stubsLineMap, tr.astubsLen);
+  shiftLineMap(coldLineMap, tr.acoldLen);
 
   // Report main body
 
@@ -113,12 +113,12 @@ void reportTraceletToVtune(const Unit* unit,
 
   iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, (void *)&methodInfo);
 
-  // Report stubs
+  // Report cold
 
-  methodInfo.method_load_address = tr.astubsStart;
-  methodInfo.method_size = tr.astubsLen;
-  methodInfo.line_number_size = stubsLineMap.size();
-  methodInfo.line_number_table = &stubsLineMap[0];
+  methodInfo.method_load_address = tr.acoldStart;
+  methodInfo.method_size = tr.acoldLen;
+  methodInfo.line_number_size = coldLineMap.size();
+  methodInfo.line_number_table = &coldLineMap[0];
 
   iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, (void *)&methodInfo);
 }

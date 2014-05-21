@@ -329,7 +329,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.stubs(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams
@@ -340,7 +340,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                    rax);
     a.    jmp     (rax);
   } else {
-    emitBindJmp(mcg->code.main(), mcg->code.unused(), funcBody);
+    emitBindJmp(mcg->code.main(), mcg->code.frozen(), funcBody);
   }
   return funcBody;
 }
@@ -351,23 +351,23 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
 TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   auto& mainCode = mcg->code.main();
-  auto& unusedCode = mcg->code.unused();
+  auto& frozenCode = mcg->code.frozen();
   Asm a { mainCode };
   TCA start = mainCode.frontier();
   assert(mcg->cgFixups().empty());
   if (dvs.size() == 1) {
     a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndFlags)]);
-    emitBindJcc(mainCode, unusedCode, CC_LE,
+    emitBindJcc(mainCode, frozenCode, CC_LE,
                 SrcKey(func, dvs[0].second, false));
-    emitBindJmp(mainCode, unusedCode, SrcKey(func, func->base(), false));
+    emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
   } else {
     a.    loadl  (rVmFp[AROFF(m_numArgsAndFlags)], reg::eax);
     for (unsigned i = 0; i < dvs.size(); i++) {
       a.  cmpl   (dvs[i].first, reg::eax);
-      emitBindJcc(mainCode, unusedCode, CC_LE,
+      emitBindJcc(mainCode, frozenCode, CC_LE,
                   SrcKey(func, dvs[i].second, false));
     }
-    emitBindJmp(mainCode, unusedCode, SrcKey(func, func->base(), false));
+    emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
   }
   mcg->cgFixups().process();
   return start;
@@ -407,7 +407,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
    * end will work.
    *
    * This is placed in a ahead of the actual prologue entry point, but
-   * only because emitPrologueWork can't easily go to astubs right now.
+   * only because emitPrologueWork can't easily go to acold right now.
    */
   if (nPassed != 2) {
     asm_label(a, not_magic_call);

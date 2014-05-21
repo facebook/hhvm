@@ -4340,7 +4340,7 @@ void Translator::addTranslation(const TransRec& transRec) {
                           transRec.src.getFuncId(),
                           transRec.src.offset()).str().c_str(),
                         transRec.aLen,
-                        transRec.astubsLen,
+                        transRec.acoldLen,
                         transRec.kind);
   }
 
@@ -4352,8 +4352,8 @@ void Translator::addTranslation(const TransRec& transRec) {
   if (transRec.aLen > 0) {
     m_transDB[transRec.aStart] = id;
   }
-  if (transRec.astubsLen > 0) {
-    m_transDB[transRec.astubsStart] = id;
+  if (transRec.acoldLen > 0) {
+    m_transDB[transRec.acoldStart] = id;
   }
 }
 
@@ -4402,8 +4402,8 @@ TransRec::TransRec(SrcKey                   s,
                    const Tracelet*          t,
                    TCA                      _aStart,
                    uint32_t                 _aLen,
-                   TCA                      _astubsStart,
-                   uint32_t                 _astubsLen,
+                   TCA                      _acoldStart,
+                   uint32_t                 _acoldLen,
                    std::vector<TransBCMapping>   _bcMapping)
     : id(0)
     , kind(_kind)
@@ -4413,8 +4413,8 @@ TransRec::TransRec(SrcKey                   s,
     , bcStopOffset(t ? t->nextSk().offset() : 0)
     , aStart(_aStart)
     , aLen(_aLen)
-    , astubsStart(_astubsStart)
-    , astubsLen(_astubsLen)
+    , acoldStart(_acoldStart)
+    , acoldLen(_acoldLen)
     , bcMapping(_bcMapping) {
   if (t != nullptr) {
     for (auto dep : t->m_dependencies) {
@@ -4449,7 +4449,7 @@ TransRec::print(uint64_t profCount) const {
            "  stubStart = {}\n"
            "  stubLen = {:#x}\n",
            static_cast<uint32_t>(kind), show(kind),
-           aStart, aLen, astubsStart, astubsLen).str();
+           aStart, aLen, acoldStart, acoldLen).str();
 
   ret += folly::format(
            "  profCount = {}\n"
@@ -4460,7 +4460,7 @@ TransRec::print(uint64_t profCount) const {
     ret += folly::format(
       "    {} {} {} {}\n",
       info.md5, info.bcStart,
-      info.aStart, info.astubsStart).str();
+      info.aStart, info.acoldStart).str();
   }
 
   ret += "}\n\n";

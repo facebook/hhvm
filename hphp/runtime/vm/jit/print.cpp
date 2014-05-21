@@ -375,17 +375,17 @@ void print(std::ostream& os, const Block* block,
   if (asmInfo) {
     // print code associated with this block that isn't tied to any
     // instruction.  This includes code after the last isntruction (e.g.
-    // jmp to next block), and AStubs code.
+    // jmp to next block), and ACold code.
     if (!blockRange.empty()) {
       os << std::string(kIndent, ' ') << punc("A:") << "\n";
       disasmRange(os, blockRange.start(), blockRange.end());
     }
-    auto astubRange = asmInfo->astubRanges[block];
-    if (!astubRange.empty()) {
-      os << std::string(kIndent, ' ') << punc("AStubs:") << "\n";
-      disasmRange(os, astubRange.start(), astubRange.end());
+    auto acoldRange = asmInfo->acoldRanges[block];
+    if (!acoldRange.empty()) {
+      os << std::string(kIndent, ' ') << punc("ACold:") << "\n";
+      disasmRange(os, acoldRange.start(), acoldRange.end());
     }
-    if (!blockRange.empty() || !astubRange.empty()) {
+    if (!blockRange.empty() || !acoldRange.empty()) {
       os << '\n';
     }
   }
@@ -461,7 +461,7 @@ void print(std::ostream& os, const IRUnit& unit,
 
   curMarker = BCMarker();
   for (auto it = blocks.begin(); it != blocks.end(); ++it) {
-    if (it == layout.astubsIt) {
+    if (it == layout.acoldIt) {
       os << folly::format("\n{:-^60}", "unlikely blocks");
     }
     print(os, *it, regs, asmInfo, guards, &curMarker);

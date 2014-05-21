@@ -323,7 +323,7 @@ private:
                             bool exit, bool inPrologue);
 
   void recordBCInstr(uint32_t op, const CodeBlock& cb,
-                     const TCA addr, bool stubs);
+                     const TCA addr, bool cold);
 
   /*
    * TC dump helpers
@@ -349,7 +349,7 @@ private:
   FreeStubList       m_freeStubs;
   CodeGenFixups      m_fixups;
 
-  // asize + astubssize + gdatasize + trampolinesblocksize
+  // asize + acoldsize + afrozensize + gdatasize + trampolinesblocksize
   size_t             m_totalSize;
 };
 

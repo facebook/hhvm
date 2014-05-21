@@ -347,19 +347,19 @@ void emitTestSurpriseFlags(Asm& a) {
   a.    testl((int32_t)0xffffffff, rVmTl[RDS::kConditionFlagsOff]);
 }
 
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  Fixup fixup) {
   Asm a { mainCode };
-  Asm astubs { stubsCode };
+  Asm acold { coldCode };
 
   emitTestSurpriseFlags(a);
-  a.  jnz  (stubsCode.frontier());
+  a.  jnz  (coldCode.frontier());
 
-  astubs.  movq  (rVmFp, argNumToRegName[0]);
-  emitCall(astubs, tx->uniqueStubs.functionEnterHelper);
-  mcg->recordSyncPoint(stubsCode.frontier(),
+  acold.  movq  (rVmFp, argNumToRegName[0]);
+  emitCall(acold, tx->uniqueStubs.functionEnterHelper);
+  mcg->recordSyncPoint(coldCode.frontier(),
                        fixup.m_pcOffset, fixup.m_spOffset);
-  astubs.  jmp   (mainCode.frontier());
+  acold.  jmp   (mainCode.frontier());
 }
 
 template<class Mem>

@@ -80,7 +80,7 @@ void emitResumeHelpers(UniqueStubs& us) {
 }
 
 void emitStackOverflowHelper(UniqueStubs& us) {
-  MacroAssembler a { mcg->code.stubs() };
+  MacroAssembler a { mcg->code.cold() };
 
   us.stackOverflowHelper = a.frontier();
   a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
@@ -91,7 +91,7 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
 
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(mcg->code.stubs(), REQ_STACK_OVERFLOW);
+  emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);
 }

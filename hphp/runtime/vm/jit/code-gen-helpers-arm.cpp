@@ -118,20 +118,20 @@ void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
   a.  Tst   (rAsm, 0xffffffff);
 }
 
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  JIT::Fixup fixup) {
   vixl::MacroAssembler a { mainCode };
-  vixl::MacroAssembler astubs { stubsCode };
+  vixl::MacroAssembler acold { coldCode };
 
   emitTestSurpriseFlags(a);
-  mcg->backEnd().emitSmashableJump(mainCode, stubsCode.frontier(), CC_NZ);
+  mcg->backEnd().emitSmashableJump(mainCode, coldCode.frontier(), CC_NZ);
 
-  astubs.  Mov  (argReg(0), rVmFp);
+  acold.  Mov  (argReg(0), rVmFp);
 
   auto fixupAddr =
-    emitCallWithinTC(astubs, tx->uniqueStubs.functionEnterHelper);
+    emitCallWithinTC(acold, tx->uniqueStubs.functionEnterHelper);
   mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
-  mcg->backEnd().emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
+  mcg->backEnd().emitSmashableJump(coldCode, mainCode.frontier(), CC_None);
 }
 
 //////////////////////////////////////////////////////////////////////

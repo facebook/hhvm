@@ -2278,7 +2278,7 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
  *
  * E.g.:
  *
- *   Asm& a = codeBlockChoose(toPatch, a, astubs);
+ *   Asm& a = codeBlockChoose(toPatch, a, acold);
  *   a.patchJmp(...);
  */
 inline CodeBlock& codeBlockChoose(CodeAddress addr) {

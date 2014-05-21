@@ -739,12 +739,12 @@ inline bool isValidOpcode(Op op) {
 
 const MInstrInfo& getMInstrInfo(Op op);
 
-enum AstubsOp {
-  OpAstubStart = Op_count-1,
-#define O(name, imm, pop, push, flags) OpAstub##name,
+enum AcoldOp {
+  OpAcoldStart = Op_count-1,
+#define O(name, imm, pop, push, flags) OpAcold##name,
   OPCODES
 #undef O
-  OpAstubCount
+  OpAcoldCount
 };
 
 #define HIGH_OPCODES \
@@ -753,7 +753,7 @@ enum AstubsOp {
   O(NativeTrampoline)
 
 enum HighOp {
-  OpHighStart = OpAstubCount-1,
+  OpHighStart = OpAcoldCount-1,
 #define O(name) Op##name,
   HIGH_OPCODES
 #undef O

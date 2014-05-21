@@ -175,9 +175,9 @@ namespace Stats {
   STAT(PropAsm_Generic) \
   STAT(PropAsm_Specialized) \
   STAT(PropAsm_GenFinal) \
-  /* astubs stats */ \
-  STAT(Astubs_New) \
-  STAT(Astubs_Reused) \
+  /* acold stats */ \
+  STAT(Acold_New) \
+  STAT(Acold_Reused) \
   /* Switches */ \
   STAT(Switch_Generic) \
   STAT(Switch_Integer) \

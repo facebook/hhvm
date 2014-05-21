@@ -1272,7 +1272,7 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
        * Even though this path is "cold", we're not marking it
        * unlikely because the size of the instructions this will
        * generate is about 10 bytes, which is not much larger than the
-       * 5 byte jump to astubs would be.
+       * 5 byte jump to acold would be.
        *
        * One note about StaticLoc: we're literally always going to
        * generate a fallthrough trace here that is cold (the code that

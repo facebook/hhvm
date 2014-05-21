@@ -65,19 +65,19 @@ extern int g_dwarfCallback(
 
 class TCRange {
   TCA m_start, m_end;
-  bool m_isAstubs;
+  bool m_isAcold;
   void V() const { assert(isValid()); }
  public:
-  TCRange() : m_start(nullptr), m_end(nullptr), m_isAstubs(false) {
+  TCRange() : m_start(nullptr), m_end(nullptr), m_isAcold(false) {
     assert(!isValid());
   }
-  TCRange(const TCA start, const TCA end, bool isAstubs) :
-    m_start(start), m_end(end), m_isAstubs(isAstubs) { V(); }
+  TCRange(const TCA start, const TCA end, bool isAcold) :
+    m_start(start), m_end(end), m_isAcold(isAcold) { V(); }
 
   TCRange& operator=(const TCRange& r) {
     m_start = r.m_start;
     m_end = r.m_end;
-    m_isAstubs = r.m_isAstubs;
+    m_isAcold = r.m_isAcold;
     V();
     return *this;
   }
@@ -88,7 +88,7 @@ class TCRange {
     assert(!m_start || (m_end - m_start) < (1ll << 32));
     return bool(m_start);
   }
-  bool isAstubs() const { return m_isAstubs; }
+  bool isAcold() const { return m_isAcold; }
   TCA begin() const { V(); return m_start; }
   TCA end() const   { V(); return m_end; };
   uint32_t size() const   { V(); return m_end - m_start; }

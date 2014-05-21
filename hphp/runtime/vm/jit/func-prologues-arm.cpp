@@ -39,7 +39,7 @@ void emitStackCheck(int funcDepth, Offset pc) {
   a.   And  (rAsm, rVmSp, stackMask);
   a.   Sub  (rAsm, rAsm, funcDepth + Stack::sSurprisePageSize, vixl::SetFlags);
   // This doesn't need to be smashable, but it is a long jump from mainCode to
-  // stubs, so it can't be direct.
+  // cold, so it can't be direct.
   mcg->backEnd().emitSmashableJump(mcg->code.main(),
                                    tx->uniqueStubs.stackOverflowHelper, CC_L);
 }
@@ -262,7 +262,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.stubs(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams
@@ -272,7 +272,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.   Ldr   (rAsm, rAsm[Func::prologueTableOff() + sizeof(TCA)*entry]);
     a.   Br    (rAsm);
   } else {
-    emitBindJmp(mcg->code.main(), mcg->code.unused(), funcBody);
+    emitBindJmp(mcg->code.main(), mcg->code.frozen(), funcBody);
   }
   return funcBody;
 }
@@ -335,21 +335,21 @@ int shuffleArgsForMagicCall(ActRec* ar) {
 
 TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   auto& mainCode = mcg->code.main();
-  auto& unusedCode = mcg->code.unused();
+  auto& frozenCode = mcg->code.frozen();
   vixl::MacroAssembler a { mainCode };
-  vixl::MacroAssembler aunused { unusedCode };
+  vixl::MacroAssembler afrozen { frozenCode };
   TCA start = mainCode.frontier();
   a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndFlags)]);
   for (auto i = 0; i < dvs.size(); ++i) {
     a. Cmp   (rAsm.W(), dvs[i].first);
-    emitBindJcc(mainCode, unusedCode, CC_LE,
+    emitBindJcc(mainCode, frozenCode, CC_LE,
                 SrcKey(func, dvs[i].second, false));
   }
-  emitBindJmp(mainCode, unusedCode, SrcKey(func, func->base(), false));
+  emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
   return start;
 }
 
-SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
+SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode,
                         Func* func, bool funcIsMagic, int nPassed,
                         TCA& start, TCA& aStart) {
   vixl::MacroAssembler a { mainCode };

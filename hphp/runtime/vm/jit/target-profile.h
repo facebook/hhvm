@@ -161,7 +161,7 @@ private:
 /*
  * DecRefProfile is used to track which DecRef instructions are likely to go to
  * zero. During an optimized translation, the release path will be put in
- * astubs if it rarely went to zero during profiling.
+ * acold if it rarely went to zero during profiling.
  */
 struct DecRefProfile {
   uint16_t decrement;

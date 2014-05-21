@@ -112,12 +112,12 @@ struct BackEnd : public JIT::BackEnd {
 
   JIT::CodeGenerator* newCodeGenerator(const IRUnit& unit,
                                        CodeBlock& mainCode,
-                                       CodeBlock& stubsCode,
-                                       CodeBlock& unusedCode,
+                                       CodeBlock& coldCode,
+                                       CodeBlock& frozenCode,
                                        MCGenerator* mcg,
                                        CodegenState& state) override {
-    return new X64::CodeGenerator(unit, mainCode, stubsCode,
-                                  unusedCode, mcg, state);
+    return new X64::CodeGenerator(unit, mainCode, coldCode,
+                                  frozenCode, mcg, state);
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -149,14 +149,14 @@ struct BackEnd : public JIT::BackEnd {
     return X64::emitServiceReqWork(cb, start, persist, flags, req, argv);
   }
 
-  void emitInterpReq(CodeBlock& mainCode, CodeBlock& stubsCode,
+  void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
                      const SrcKey& sk) override {
     Asm a { mainCode };
     // Add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {
       X64::emitTransCounterInc(a);
     }
-    a.    jmp(emitServiceReq(stubsCode, REQ_INTERPRET, sk.offset()));
+    a.    jmp(emitServiceReq(coldCode, REQ_INTERPRET, sk.offset()));
   }
 
   bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
@@ -167,7 +167,7 @@ struct BackEnd : public JIT::BackEnd {
     return X64::funcPrologueToGuard(prologue, func);
   }
 
-  SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode, Func* func,
+  SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode, Func* func,
                           bool funcIsMagic, int nPassed, TCA& start,
                           TCA& aStart) override {
     return funcIsMagic
@@ -431,7 +431,7 @@ struct BackEnd : public JIT::BackEnd {
     if (asmInfo) {
       fixupStateVector(asmInfo->instRanges, rel);
       fixupStateVector(asmInfo->asmRanges, rel);
-      fixupStateVector(asmInfo->astubRanges, rel);
+      fixupStateVector(asmInfo->acoldRanges, rel);
     }
   }
 
@@ -517,7 +517,7 @@ struct BackEnd : public JIT::BackEnd {
     return call + 5 + ((int32_t*)(call + 5))[-1];
   }
 
-  void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeStubs,
+  void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
                    SrcKey sk, size_t dbgOff) override {
     Asm a { codeMain };
 
@@ -529,7 +529,7 @@ struct BackEnd : public JIT::BackEnd {
 
     // Branch to a special REQ_INTERPRET if attached
     auto const fallback =
-      emitServiceReq(codeStubs, REQ_INTERPRET, sk.offset());
+      emitServiceReq(codeCold, REQ_INTERPRET, sk.offset());
     a.   jnz    (fallback);
   }
 

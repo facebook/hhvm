@@ -37,7 +37,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
   }
   TCA dbgGuard = mcg->code.main().frontier();
 
-  mcg->backEnd().addDbgGuard(mcg->code.main(), mcg->code.stubs(), sk, dbgOff);
+  mcg->backEnd().addDbgGuard(mcg->code.main(), mcg->code.cold(), sk, dbgOff);
 
   // Emit a jump to the actual code
   //

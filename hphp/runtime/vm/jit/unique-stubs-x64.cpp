@@ -43,21 +43,21 @@ TRACE_SET_MOD(ustubs);
 namespace {
 
 TCA emitRetFromInterpretedFrame() {
-  Asm a { mcg->code.stubs() };
-  moveToAlign(mcg->code.stubs());
+  Asm a { mcg->code.cold() };
+  moveToAlign(mcg->code.cold());
   auto const ret = a.frontier();
 
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
   a.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   a.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.stubs(), SRFlags::JmpInsteadOfRet,
+  emitServiceReq(mcg->code.cold(), SRFlags::JmpInsteadOfRet,
                  REQ_POST_INTERP_RET);
   return ret;
 }
 
 TCA emitRetFromInterpretedGeneratorFrame() {
-  Asm a { mcg->code.stubs() };
-  moveToAlign(mcg->code.stubs());
+  Asm a { mcg->code.cold() };
+  moveToAlign(mcg->code.cold());
   auto const ret = a.frontier();
 
   // We have to get the Generator object from the current AR's $this, then
@@ -66,7 +66,7 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
   a.    lea  (rContAR[c_Generator::arOff()], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.stubs(), SRFlags::JmpInsteadOfRet,
+  emitServiceReq(mcg->code.cold(), SRFlags::JmpInsteadOfRet,
                  REQ_POST_INTERP_RET);
   return ret;
 }
@@ -138,9 +138,9 @@ void emitDefClsHelper(UniqueStubs& uniqueStubs) {
 }
 
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.stubs() };
+  Asm a { mcg->code.cold() };
 
-  moveToAlign(mcg->code.stubs());
+  moveToAlign(mcg->code.cold());
   uniqueStubs.stackOverflowHelper = a.frontier();
 
   // We are called from emitStackCheck, with the new stack frame in
@@ -151,7 +151,7 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   a.    loadl  (rax[Func::sharedBaseOffset()], eax);
   a.    addl   (eax, edi);
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(mcg->code.stubs(), REQ_STACK_OVERFLOW);
+  emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
 
   uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
 }

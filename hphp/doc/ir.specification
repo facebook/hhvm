@@ -1855,11 +1855,18 @@ StContArKey S0:FramePtr S1:Cell
   Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-StAsyncArRaw S0:FramePtr S1:ConstInt S2:{Int,Obj,TCA,Nullptr}
+StAsyncArRaw<OffsetData> S0:FramePtr S1:{Int,TCA,Nullptr}
 
-  Stores raw data into the AsyncFunctionWaitHandle object ActRec of which is S0.
-  S1 is a constant from the RawMemSlow::Kind enum, which describes the offset
-  from the AsyncFunctionWaitHandle base, and the size. S2 is the value.
+  Stores raw data into the AsyncFunctionWaitHandle object, whose ActRec is
+  given by S0. OffsetData is a constant from the RawMemSlow::Kind enum, which
+  describes the offset from the AsyncFunctionWaitHandle base, and the size.
+  S1 is the value.
+
+StAsyncArChild S0:FramePtr S1:Obj
+
+  Stores a WaitHandle object S1 into the AsyncFunctionWaitHandle object, whose
+  ActRec is given by S0. The offset into AsyncFunctionWaitHandle at which the
+  WaitHandle object is stored is known statically.
 
 StAsyncArResult S0:FramePtr S1:Cell
 

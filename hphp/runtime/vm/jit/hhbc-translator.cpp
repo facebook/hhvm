@@ -1783,7 +1783,7 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
       resumeAddr);
   gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeOffset}, m_irb->fp(),
       cns(resumeOffset));
-  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncChild}, m_irb->fp(), child);
+  gen(StAsyncArChild, m_irb->fp(), child);
 
   // Transfer control back to the scheduler.
   auto const sp = spillStack();

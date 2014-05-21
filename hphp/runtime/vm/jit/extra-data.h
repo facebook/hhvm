@@ -785,7 +785,6 @@ struct RawMemData : IRExtraData {
   RAW_TYPE(AsyncState)                          \
   RAW_TYPE(AsyncResumeAddr)                     \
   RAW_TYPE(AsyncResumeOffset)                   \
-  RAW_TYPE(AsyncChild)                          \
   RAW_TYPE(ContResumeAddr)                      \
   RAW_TYPE(ContResumeOffset)                    \
   RAW_TYPE(ContState)                           \

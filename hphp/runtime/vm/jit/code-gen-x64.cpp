@@ -5631,12 +5631,10 @@ void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
   emitLdRaw(inst, -c_Generator::arOff());
 }
 
-void CodeGenerator::emitStRaw(IRInstruction* inst, size_t extraOff) {
-  auto offset = inst->extra<RawMemData>()->info().offset;
-  auto dst    = srcLoc(0).reg()[offset + extraOff];
+void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
+  auto dst    = srcLoc(0).reg()[offset];
   auto src    = inst->src(1);
   auto srcReg = srcLoc(1).reg();
-  auto size   = inst->extra<RawMemData>()->info().size;
 
   if (srcReg == InvalidReg) {
     auto val = Immed64(src->type().hasRawVal() ? src->rawVal() : 0);
@@ -5657,11 +5655,13 @@ void CodeGenerator::emitStRaw(IRInstruction* inst, size_t extraOff) {
 }
 
 void CodeGenerator::cgStRaw(IRInstruction* inst) {
-  emitStRaw(inst, 0);
+  auto const info = inst->extra<RawMemData>()->info();
+  emitStRaw(inst, info.offset, info.size);
 }
 
 void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
-  emitStRaw(inst, -c_Generator::arOff());
+  auto const info = inst->extra<RawMemData>()->info();
+  emitStRaw(inst, -c_Generator::arOff() + info.offset, info.size);
 }
 
 void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
@@ -5698,7 +5698,14 @@ void CodeGenerator::cgStContArKey(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStAsyncArRaw(IRInstruction* inst) {
-  emitStRaw(inst, -c_AsyncFunctionWaitHandle::arOff());
+  auto const info = inst->extra<RawMemData>()->info();
+  emitStRaw(inst, -c_AsyncFunctionWaitHandle::arOff() + info.offset,
+            info.size);
+}
+
+void CodeGenerator::cgStAsyncArChild(IRInstruction* inst) {
+  emitStRaw(inst, -c_AsyncFunctionWaitHandle::arOff() +
+            c_AsyncFunctionWaitHandle::childOff(), sz::qword);
 }
 
 void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {

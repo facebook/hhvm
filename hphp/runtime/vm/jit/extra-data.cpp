@@ -42,8 +42,6 @@ const RawMemData::Info& RawMemData::info() const {
                                   sz::qword, JIT::Type::TCA|JIT::Type::Nullptr},
     {c_AsyncFunctionWaitHandle::resumeOffsetOff(),
                                   sz::dword, JIT::Type::Int},
-    {c_AsyncFunctionWaitHandle::childOff(),
-                                  sz::qword, JIT::Type::Obj},
     {c_Generator::resumeAddrOff(),
                                   sz::qword, JIT::Type::TCA|JIT::Type::Nullptr},
     {c_Generator::resumeOffsetOff(),

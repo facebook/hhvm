@@ -247,7 +247,7 @@ private:
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
   void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
-  void emitStRaw(IRInstruction* inst, size_t extraOff);
+  void emitStRaw(IRInstruction* inst, size_t offset, int size);
 
   /*
    * Execute the code emitted by 'taken' only if the given condition code is

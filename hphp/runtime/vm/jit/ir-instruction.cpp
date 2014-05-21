@@ -107,6 +107,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case StRetVal:
     case StLoc:
     case StLocNT:
+    case StAsyncArChild:
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
 

@@ -747,15 +747,22 @@ static bool HHVM_METHOD(ZipArchive, deleteName, const String& name) {
   return true;
 }
 
-static bool extractFileTo(zip* zip, const char* file, std::string& to,
+static bool extractFileTo(zip* zip, const std::string &file, std::string& to,
                           char* buf, size_t len) {
+  auto sep = file.rfind('/');
+  if (sep != std::string::npos) {
+    if (!f_mkdir(to + file.substr(0, sep), 0777, true)) {
+      return false;
+    }
+  }
+
   to.append(file);
   if (to[to.size() - 1] == '/') {
     return f_is_dir(to) || f_mkdir(to);
   }
 
   struct zip_stat zipStat;
-  if (zip_stat(zip, file, 0, &zipStat) != 0) {
+  if (zip_stat(zip, file.c_str(), 0, &zipStat) != 0) {
     return false;
   }
 

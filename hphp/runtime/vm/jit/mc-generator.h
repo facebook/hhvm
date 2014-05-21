@@ -286,7 +286,8 @@ private:
                             const TCA start,
                             bool exit, bool inPrologue);
 
-  void recordBCInstr(uint32_t op, const CodeBlock& cb, const TCA addr);
+  void recordBCInstr(uint32_t op, const CodeBlock& cb,
+                     const TCA addr, bool stubs);
 
   /*
    * TC dump helpers

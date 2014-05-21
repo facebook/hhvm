@@ -687,7 +687,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   recordGdbTranslation(skFuncBody, func,
                        code.main(), aStart,
                        false, true);
-  recordBCInstr(OpFuncPrologue, code.main(), start);
+  recordBCInstr(OpFuncPrologue, code.main(), start, false);
 
   return start;
 }
@@ -1506,7 +1506,7 @@ MCGenerator::emitNativeTrampoline(TCA helperAddr) {
   a.    ud2(); // hint that the jump doesn't go here.
 
   m_trampolineMap[helperAddr] = trampAddr;
-  recordBCInstr(OpNativeTrampoline, trampolines, trampAddr);
+  recordBCInstr(OpNativeTrampoline, trampolines, trampAddr, false);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
   }
@@ -2091,7 +2091,7 @@ void MCGenerator::traceCodeGen() {
   auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
-  recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier());
+  recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier(), false);
   genCode(code.main(), code.stubs(), unit, &m_bcMap, this, regs);
 
   m_numHHIRTrans++;
@@ -2226,10 +2226,11 @@ static Debug::TCRange rangeFrom(const CodeBlock& cb, const TCA addr,
 
 void MCGenerator::recordBCInstr(uint32_t op,
                                 const CodeBlock& cb,
-                                const TCA addr) {
+                                const TCA addr,
+                                bool stubs) {
   if (addr != cb.frontier()) {
     m_debugInfo.recordBCInstr(Debug::TCRange(addr, cb.frontier(),
-                                             &cb == &code.stubs()), op);
+                                             stubs), op);
   }
 }
 

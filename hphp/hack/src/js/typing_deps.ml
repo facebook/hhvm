@@ -17,6 +17,7 @@ open Utils
 module Dep = struct
   type t =
     | GConst of string
+    | GConstName of string
     | Const of string * string
     | Class of string
     | Fun of string
@@ -35,6 +36,7 @@ module Dep = struct
 
   let to_string = function
     | GConst s -> "const:"^s
+    | GConstName s -> "constname:"^s
     | Class s -> "class:"^s
     | Fun s -> "fun:"^s
     | FunName s -> "funname:"^s
@@ -72,6 +74,7 @@ let split_deps deps =
     match x with
     | Dep.Injectable -> funs, classes
     | Dep.GConst s
+    | Dep.GConstName s
     | Dep.Const (s, _)
     | Dep.CVar (s, _)
     | Dep.SCVar (s, _)
@@ -182,6 +185,7 @@ let add_idep root obj =
   | (Dep.FunName _ as x)
   | (Dep.Fun _ as x) -> deps := DSet.add x !deps
   | Dep.GConst s
+  | Dep.GConstName s
   | Dep.Const (s, _)
   | Dep.Class s
   | Dep.CVar (s, _)

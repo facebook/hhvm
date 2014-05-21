@@ -434,17 +434,8 @@ module Env = struct
       | Ast.Mstrict -> raise exn
       | Ast.Mdecl | Ast.Mpartial -> x
 
-  let const (genv, env) x  = get_name genv env.consts x
-
-  let global_const (genv, env) x  =
-    let x = Namespaces.elaborate_id genv.namespace x in
-    get_name genv genv.gconsts x
-
-  let class_name (genv, _) x =
-    let x = Namespaces.elaborate_id genv.namespace x in
-    get_name genv genv.classes x
-
-  let fun_id (genv, _) x =
+  (* For dealing with namespace fallback on functions and constants. *)
+  let elaborate_and_get_name_with_fallback mk_dep genv genv_sect x =
     let fq_x = Namespaces.elaborate_id genv.namespace x in
     let need_fallback =
       genv.namespace.Namespace_env.ns_name <> None &&
@@ -458,24 +449,45 @@ module Env = struct
        * namespaces here, and the fallback behavior of functions means that we
        * might suddenly be referring to a different function without any
        * change to the callsite at all. Adding both dependencies explicitly
-       * captures this action-at-a-distance. Furthermore note that we're adding
-       * a special kind of dependency -- not just Dep.Fun, but Dep.FunName.
-       * This forces an incremental full redeclaration of this class if either
-       * of those names changes, not just a retypecheck -- the name that is
-       * referred to here actually changes as a result of the other file, which
-       * is stronger than just the need to retypecheck. *)
-      Typing_deps.add_idep genv.droot (Typing_deps.Dep.FunName (snd fq_x));
-      Typing_deps.add_idep genv.droot (Typing_deps.Dep.FunName (snd global_x));
-      let mem (_, s) = SMap.mem s !(genv.funs) in
+       * captures this action-at-a-distance. *)
+      Typing_deps.add_idep genv.droot (mk_dep (snd fq_x));
+      Typing_deps.add_idep genv.droot (mk_dep (snd global_x));
+      let mem (_, s) = SMap.mem s !(genv_sect) in
       match mem fq_x, mem global_x with
       (* Found in the current namespace *)
-      | true, _ -> get_name genv genv.funs fq_x
+      | true, _ -> get_name genv genv_sect fq_x
       (* Found in the global namespace *)
-      | _, true -> get_name genv genv.funs global_x
+      | _, true -> get_name genv genv_sect global_x
       (* Not found. Pick the more specific one to error on. *)
-      | false, false -> get_name genv genv.funs fq_x
+      | false, false -> get_name genv genv_sect fq_x
     end else
-      get_name genv genv.funs fq_x
+      get_name genv genv_sect fq_x
+
+  let const (genv, env) x  = get_name genv env.consts x
+
+  let global_const (genv, env) x  =
+    elaborate_and_get_name_with_fallback
+      (* Same idea as Dep.FunName, see below. *)
+      (fun x -> Typing_deps.Dep.GConstName x)
+      genv
+      genv.gconsts
+      x
+
+  let class_name (genv, _) x =
+    let x = Namespaces.elaborate_id genv.namespace x in
+    get_name genv genv.classes x
+
+  let fun_id (genv, _) x =
+    elaborate_and_get_name_with_fallback
+      (* Not just Dep.Fun, but Dep.FunName. This forces an incremental full
+       * redeclaration of this class if the name changes, not just a
+       * retypecheck -- the name that is referred to here actually changes as
+       * a result of what else is defined, which is stronger than just the need
+       * to retypecheck. *)
+      (fun x -> Typing_deps.Dep.FunName x)
+      genv
+      genv.funs
+      x
 
   let new_const (genv, env) x =
     try ignore (new_var env.consts x); x with exn ->

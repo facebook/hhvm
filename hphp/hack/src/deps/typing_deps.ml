@@ -22,6 +22,7 @@ module Dep = struct
      * "define('X', ...)".
      *)
     | GConst of string
+    | GConstName of string
 
     (* Const is used to represent class constants. *)
     | Const of string * string
@@ -102,6 +103,7 @@ let get_bazooka x =
   | Dep.Fun fid -> get_ideps (Dep.Fun fid)
   | Dep.FunName fid -> get_ideps (Dep.FunName fid)
   | Dep.GConst cid -> get_ideps (Dep.GConst cid)
+  | Dep.GConstName cid -> get_ideps (Dep.GConstName cid)
   | Dep.Injectable -> ISet.empty
 
 (*****************************************************************************)

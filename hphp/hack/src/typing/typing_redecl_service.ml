@@ -123,7 +123,8 @@ let compute_types_deps old_types (to_redecl, to_recheck) types =
 (*****************************************************************************)
 
 let compute_gconsts_deps old_gconsts (to_redecl, to_recheck) gconsts =
-  let rdc = Typing_compare.get_gconsts_deps old_gconsts gconsts in
+  let rdd, rdc = Typing_compare.get_gconsts_deps old_gconsts gconsts in
+  let to_redecl = ISet.union rdd to_redecl in
   let to_recheck = ISet.union rdc to_recheck in
   to_redecl, to_recheck
 

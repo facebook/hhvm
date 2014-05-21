@@ -563,24 +563,26 @@ let get_types_deps old_types types =
  * changed.
  *)
 (*****************************************************************************)
-let get_gconst_deps old_gconsts cst_id to_recheck =
+let get_gconst_deps old_gconsts cst_id (to_redecl, to_recheck) =
   match SMap.find_unsafe cst_id old_gconsts, Env.GConsts.get cst_id with
   | None, None ->
-      to_recheck
+      to_redecl, to_recheck
   | None, _ | _, None ->
-      let bazooka = Typing_deps.get_bazooka (Dep.GConst cst_id) in
-      ISet.union bazooka to_recheck
+      let where_const_is_used = Typing_deps.get_bazooka (Dep.GConst cst_id) in
+      let to_recheck = ISet.union where_const_is_used to_recheck in
+      let const_name = Typing_deps.get_bazooka (Dep.GConstName cst_id) in
+      ISet.union const_name to_redecl, ISet.union const_name to_recheck
   | Some cst1, Some cst2 ->
       let is_same_signature = cst1 = cst2 in
       if is_same_signature
-      then to_recheck
+      then to_redecl, to_recheck
       else
         let where_type_is_used = Typing_deps.get_ideps (Dep.GConst cst_id) in
         let to_recheck = ISet.union where_type_is_used to_recheck in
-        to_recheck
+        to_redecl, to_recheck
 
 let get_gconsts_deps old_gconsts gconsts =
-  SSet.fold (get_gconst_deps old_gconsts) gconsts ISet.empty
+  SSet.fold (get_gconst_deps old_gconsts) gconsts (ISet.empty, ISet.empty)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing

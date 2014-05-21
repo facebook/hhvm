@@ -1,0 +1,6 @@
+File "namespace_global_const2.php", line 11, characters 12-18:
+Invalid return type
+File "namespace_global_const2.php", line 10, characters 17-22:
+This is a string
+File "namespace_global_const2.php", line 8, characters 9-11:
+It is incompatible with an int

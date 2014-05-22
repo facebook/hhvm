@@ -828,7 +828,7 @@ Variant f_imap_body(const Resource& imap_stream, int64_t msg_number,
   char *body = mail_fetchtext_full(obj->m_stream, msg_number,
                                    &body_len, (options ? options : NIL));
   if (body_len == 0) {
-    return String("");
+    return empty_string;
   } else {
     return String(body, body_len, CopyString);
   }

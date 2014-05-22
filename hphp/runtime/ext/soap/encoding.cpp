@@ -763,7 +763,7 @@ static Variant to_zval_string(encodeTypePtr type, xmlNodePtr data) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
   } else {
-    ret = String("");
+    ret = empty_string;
   }
   return ret;
 }
@@ -799,7 +799,7 @@ static Variant to_zval_stringr(encodeTypePtr type, xmlNodePtr data) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
   } else {
-    ret = String("");
+    ret = empty_string;
   }
   return ret;
 }
@@ -835,7 +835,7 @@ static Variant to_zval_stringc(encodeTypePtr type, xmlNodePtr data) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
   } else {
-    ret = String("");
+    ret = empty_string;
   }
   return ret;
 }
@@ -865,7 +865,7 @@ static Variant to_zval_base64(encodeTypePtr type, xmlNodePtr data) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
   } else {
-    ret = String("");
+    ret = empty_string;
   }
   return ret;
 }
@@ -888,7 +888,7 @@ static Variant to_zval_hexbin(encodeTypePtr type, xmlNodePtr data) {
     }
     ret = str;
   } else {
-    ret = String("");
+    ret = empty_string;
   }
   return ret;
 }

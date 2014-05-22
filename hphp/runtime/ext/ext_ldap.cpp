@@ -1208,14 +1208,14 @@ bool f_ldap_parse_result(const Resource& link, const Resource& result, VRefParam
   referrals = arr;
 
   if (lerrmsg == NULL) {
-    errmsg = String("");
+    errmsg = empty_string;
   } else {
     errmsg = String(lerrmsg, CopyString);
     ldap_memfree(lerrmsg);
   }
 
   if (lmatcheddn == NULL) {
-    matcheddn = String("");
+    matcheddn = empty_string;
   } else {
     matcheddn = String(lmatcheddn, CopyString);
     ldap_memfree(lmatcheddn);

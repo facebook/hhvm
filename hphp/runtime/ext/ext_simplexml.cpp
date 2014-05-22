@@ -661,7 +661,7 @@ static inline String sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list,
     xmlFree(tmp);
     return ret;
   } else {
-    return String("");
+    return empty_string;
   }
 }
 

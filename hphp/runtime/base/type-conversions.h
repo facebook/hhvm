@@ -108,7 +108,9 @@ inline String toString(int     v) { return (int64_t)v;}
 inline String toString(int64_t   v) { return v;}
 inline String toString(double  v) { return v;}
 inline String toString(litstr  v) = delete;
-inline String toString(StringData *v) { return v ? String(v) : String("");}
+inline String toString(StringData *v) {
+  return v ? String(v) : static_cast<String>(empty_string);
+}
 inline String toString(const String& v) { return toString(v.get());}
 inline String toString(const ArrayData *v) {
   if (v) {
@@ -118,7 +120,7 @@ inline String toString(const ArrayData *v) {
 }
 inline String toString(const Array& v) { return toString(v.get());}
 inline String toString(ObjectData *v) {
-  return v ? v->invokeToString() : String("");
+  return v ? v->invokeToString() : static_cast<String>(empty_string);
 }
 inline String toString(const Object& v) { return toString(v.get());}
 inline String toString(const Variant& v) { return v.toString();}

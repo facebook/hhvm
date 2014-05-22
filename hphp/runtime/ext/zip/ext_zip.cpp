@@ -751,16 +751,17 @@ static bool extractFileTo(zip* zip, const std::string &file, std::string& to,
                           char* buf, size_t len) {
   auto sep = file.rfind('/');
   if (sep != std::string::npos) {
-    if (!f_mkdir(to + file.substr(0, sep), 0777, true)) {
+    auto path = to + file.substr(0, sep);
+    if (!f_is_dir(path) && !f_mkdir(path, 0777, true)) {
       return false;
+    }
+
+    if (sep == file.length() - 1) {
+      return true;
     }
   }
 
   to.append(file);
-  if (to[to.size() - 1] == '/') {
-    return f_is_dir(to) || f_mkdir(to);
-  }
-
   struct zip_stat zipStat;
   if (zip_stat(zip, file.c_str(), 0, &zipStat) != 0) {
     return false;

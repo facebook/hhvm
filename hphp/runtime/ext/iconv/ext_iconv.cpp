@@ -25,7 +25,6 @@
 
 #define ICONV_SUPPORTS_ERRNO 1
 #include <iconv.h>
-#include <stdint.h>
 
 /**
  * libiconv sometimes defines the second parameter of its
@@ -36,6 +35,10 @@
  */
 #ifndef ICONV_CONST
 # define ICONV_CONST
+#endif
+
+#ifndef INT32_MAX
+#define INT32_MAX              (2147483647)
 #endif
 
 namespace HPHP {

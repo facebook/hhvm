@@ -381,6 +381,7 @@ public:
 
 private:
   void serializeImpl(VariableSerializer *serializer) const;
+  friend size_t getMemSize(const ArrayData*);
   static void compileTimeAssertions() {
     static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
@@ -429,9 +430,6 @@ protected:
     };
     uint64_t m_posAndCount;   // be careful, m_pos is signed
   };
-
-private:
-  friend size_t getMemSize(const ArrayData*);
 };
 
 //////////////////////////////////////////////////////////////////////

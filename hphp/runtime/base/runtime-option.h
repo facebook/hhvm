@@ -27,6 +27,7 @@
 #include <boost/container/flat_set.hpp>
 #include <memory>
 
+#include "hphp/runtime/base/config.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"
 

@@ -178,7 +178,7 @@ bool f_uksort(VRefParam array, const Variant& cmp_function);
 Variant f_natsort(VRefParam array);
 Variant f_natcasesort(VRefParam array);
 
-bool f_array_multisort(int _argc, VRefParam ar1, const Array& _argv = null_array);
+bool f_array_multisort(int _argc, VRefParam arr1, const Array& _argv = null_array);
 
 String f_i18n_loc_get_default();
 bool f_i18n_loc_set_default(const String& locale);

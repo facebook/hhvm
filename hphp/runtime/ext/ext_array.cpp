@@ -2287,16 +2287,16 @@ bool f_uksort(VRefParam container, const Variant& cmp_function) {
   return false;
 }
 
-bool f_array_multisort(int _argc, VRefParam ar1,
+bool f_array_multisort(int _argc, VRefParam arr1,
                        const Array& _argv /* = null_array */) {
-  getCheckedArrayRet(ar1, false);
+  getCheckedArrayRet(arr1, false);
   std::vector<Array::SortData> data;
   std::vector<Array> arrays;
   arrays.reserve(1 + _argv.size()); // so no resize would happen
 
   Array::SortData sd;
-  sd.original = &ar1;
-  arrays.push_back(arr_ar1);
+  sd.original = &arr1;
+  arrays.push_back(arr_arr1);
   sd.array = &arrays.back();
   sd.by_key = false;
 

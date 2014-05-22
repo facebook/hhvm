@@ -485,7 +485,7 @@
             },
             "args": [
                 {
-                    "name": "ar1",
+                    "name": "arr1",
                     "type": "Variant",
                     "desc": "An array being sorted.",
                     "ref": true

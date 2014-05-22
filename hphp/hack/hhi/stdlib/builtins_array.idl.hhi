@@ -43,7 +43,7 @@ function array_merge_recursive($array1, ...) { }
 function array_merge($array1, ...) { }
 function array_replace_recursive($array1, ...) { }
 function array_replace($array1, ...) { }
-function array_multisort(&$ar1, ...) { }
+function array_multisort(&$arr1, ...) { }
 function array_pad($input, $pad_size, $pad_value) { }
 function array_pop(&$array) { }
 function array_product($array) { }

@@ -21,7 +21,9 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
 
 namespace HPHP {
 namespace JIT {
@@ -62,7 +64,7 @@ void SrcRec::emitFallbackJump(CodeBlock& cb, ConditionCode cc /* = -1 */) {
   // This is a spurious platform dependency. TODO(2990497)
   mcg->backEnd().prepareForSmash(
     cb,
-    cc == CC_None ? JIT::X64::kJmpLen : JIT::X64::kJmpccLen
+    cc == CC_None ? X64::kJmpLen : X64::kJmpccLen
   );
   auto from = cb.frontier();
 
@@ -74,6 +76,18 @@ void SrcRec::emitFallbackJump(CodeBlock& cb, ConditionCode cc /* = -1 */) {
 
   // We'll need to know the location of this jump later so we can
   // patch it to new translations added to the chain.
+  m_inProgressTailJumps.push_back(incoming);
+}
+
+void SrcRec::emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen,
+                                    SrcKey sk, TransFlags trflags,
+                                    ConditionCode cc) {
+  // Another platform dependency (the same one as above). TODO(2990497)
+  auto toSmash = X64::emitRetranslate(cb, frozen, cc, sk, trflags);
+
+  auto incoming = cc < 0 ? IncomingBranch::jmpFrom(toSmash)
+                         : IncomingBranch::jccFrom(toSmash);
+
   m_inProgressTailJumps.push_back(incoming);
 }
 

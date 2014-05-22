@@ -33,34 +33,35 @@
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
 
-#include "hphp/util/trace.h"
-#include "hphp/util/map-walker.h"
-#include "hphp/util/ringbuffer.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/util/map-walker.h"
+#include "hphp/util/ringbuffer.h"
+#include "hphp/util/trace.h"
 
 #define KindOfUnknown DontUseKindOfUnknownInThisFile
 #define KindOfInvalid DontUseKindOfInvalidInThisFile
@@ -4082,7 +4083,8 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
-                            RegionBlacklist& toInterp) {
+                            RegionBlacklist& toInterp,
+                            TransFlags trflags) {
   const Timer translateRegionTimer(Timer::translateRegion);
 
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
@@ -4108,6 +4110,7 @@ Translator::translateRegion(const RegionDesc& region,
     auto byRefs        = makeMapWalker(block->paramByRefs());
     auto refPreds      = makeMapWalker(block->reffinessPreds());
     auto knownFuncs    = makeMapWalker(block->knownFuncs());
+    auto skipTrans     = false;
 
     const Func* topFunc = nullptr;
     TransID profTransId = getTransId(blockId);
@@ -4263,9 +4266,51 @@ Translator::translateRegion(const RegionDesc& region,
         continue;
       }
 
+      // Singleton inlining optimization.
+      if (RuntimeOption::EvalHHIRInlineSingletons) {
+        bool didInlineSingleton = [&] {
+          if (!RuntimeOption::RepoAuthoritative) return false;
+
+          // I don't really want to inline my arm, thanks.
+          if (arch() != Arch::X64) return false;
+
+          // Don't inline if we're retranslating due to a side-exit from an
+          // inlined call.
+          if (trflags.noinlineSingleton && startSk == inst.source) return false;
+
+          // Bail early if this isn't a push.
+          if (inst.op() != Op::FPushFuncD &&
+              inst.op() != Op::FPushClsMethodD) {
+            return false;
+          }
+
+          // ...and also if this is the end of the block.
+          if (i == block->length() - 1) return false;
+
+          // This is safe to do even if singleton inlining fails; we just won't
+          // change topFunc in the next pass since hasNext() will return false.
+          if (knownFuncs.hasNext(inst.nextSk())) {
+            topFunc = knownFuncs.next();
+
+            // Detect a singleton pattern and inline it if found.
+            return m_irTrans->tryTranslateSingletonInline(inst, topFunc);
+          }
+
+          return false;
+        }();
+
+        // Skip the translation of this instruction (the FPush) -and- the next
+        // instruction (the FCall) if we succeeded at singleton inlining.  We
+        // still want the fallthrough and prediction logic, though.
+        if (didInlineSingleton) {
+          skipTrans = true;
+          continue;
+        }
+      }
+
       // Emit IR for the body of the instruction.
       try {
-        m_irTrans->translateInstr(inst);
+        if (!skipTrans) m_irTrans->translateInstr(inst);
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk{profTransId, sk};
         always_assert_log(
@@ -4279,6 +4324,8 @@ Translator::translateRegion(const RegionDesc& region,
         toInterp.insert(psk);
         return Retry;
       }
+
+      skipTrans = false;
 
       // Insert a fallthrough jump
       if (ht.genMode() == IRGenMode::CFG &&

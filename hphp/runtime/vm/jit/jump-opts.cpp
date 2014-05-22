@@ -207,6 +207,7 @@ void optimizeSideExitJcc(IRUnit& unit, IRInstruction* inst, Block* exitBlock) {
   auto const newOpcode = jmpToSideExitJmp(inst->op());
   SideExitJccData data;
   data.taken = reqBindJmp.extra<ReqBindJmp>()->offset;
+  data.trflags = reqBindJmp.extra<ReqBindJmp>()->trflags;
 
   auto const block = inst->block();
   block->insert(block->iteratorTo(inst),

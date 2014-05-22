@@ -81,7 +81,8 @@ TCA emitServiceReq(CodeBlock& cb, ServiceRequest sr, Arg... a) {
 template<typename... Arg>
 TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
                             Arg... a) {
-  assert(isEphemeralServiceReq(sr));
+  assert(isEphemeralServiceReq(sr) ||
+         sr == REQ_RETRANSLATE);
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);

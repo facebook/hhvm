@@ -376,7 +376,8 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   TCA astart          = code.main().frontier();
   TCA realColdStart   = code.realCold().frontier();
   TCA realFrozenStart = code.realFrozen().frontier();
-  TCA req = emitServiceReq(code.cold(), REQ_RETRANSLATE, sk.offset());
+  TCA req = emitServiceReq(code.cold(), REQ_RETRANSLATE,
+                           sk.offset(), TransFlags().packed);
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
   SrcRec* sr = m_tx.getSrcRec(sk);
@@ -804,12 +805,14 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
  *   u:dest from toSmash.
  */
 TCA
-MCGenerator::bindJmp(TCA toSmash, SrcKey destSk,
-                     ServiceRequest req, bool& smashed) {
-  TCA tDest = getTranslation(TranslArgs(destSk, false));
+MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
+                     TransFlags trflags, bool& smashed) {
+  TCA tDest = getTranslation(TranslArgs(destSk, false).flags(trflags));
   if (!tDest) return nullptr;
+
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return tDest;
+
   SrcRec* sr = m_tx.getSrcRec(destSk);
   // The top translation may have changed while we waited for the
   // write lease, so read it again.  If it was replaced with a new
@@ -1226,10 +1229,12 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     TCA toSmash = (TCA)args[0];
     auto ai = static_cast<SrcKey::AtomicInt>(args[1]);
     sk = SrcKey::fromAtomicInt(ai);
+    TransFlags trflags{args[2]};
+
     if (requestNum == REQ_BIND_SIDE_EXIT) {
       SKTRACE(3, sk, "side exit taken!\n");
     }
-    start = bindJmp(toSmash, sk, requestNum, smashed);
+    start = bindJmp(toSmash, sk, requestNum, trflags, smashed);
   } break;
 
   case REQ_BIND_JMPCC_FIRST: {
@@ -1265,7 +1270,8 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   case REQ_RETRANSLATE: {
     INC_TPC(retranslate);
     sk = SrcKey(liveFunc(), (Offset)args[0], liveResumed());
-    start = retranslate(TranslArgs(sk, true));
+    auto trflags = TransFlags(args[1]);
+    start = retranslate(TranslArgs(sk, true).flags(trflags));
     SKTRACE(2, sk, "retranslated @%p\n", start);
   } break;
 
@@ -1827,7 +1833,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
       if (region) {
         try {
           assertCleanState();
-          result = m_tx.translateRegion(*region, bcControlFlow, regionInterps);
+          result = m_tx.translateRegion(*region,
+              bcControlFlow, regionInterps, args.m_flags);
 
           // If we're profiling, grab the postconditions so we can
           // use them in region selection whenever we decide to retranslate.
@@ -2026,6 +2033,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
+
       ht.setBcOff(ni->source.offset(),
                   ni->breaksTracelet && !ht.isInlining());
       if (isAlwaysNop(ni->op())) ni->noOp = true;

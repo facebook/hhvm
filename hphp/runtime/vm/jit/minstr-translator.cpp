@@ -2675,7 +2675,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
     SSATmp* sp = gen(SpillStack, std::make_pair(args.size(), &args[0]));
     gen(DeleteUnwinderException);
     gen(SyncABIRegs, m_irb.fp(), sp);
-    gen(ReqBindJmp, BCOffset(nextOff));
+    gen(ReqBindJmp, ReqBindJmpData(nextOff));
   }
 
   if (m_strTestResult) {

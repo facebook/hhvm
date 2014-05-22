@@ -57,9 +57,19 @@ struct IRTranslator {
   explicit IRTranslator(TransContext context);
 
   void translateInstr(const NormalizedInstruction& i);
+
   void checkType(const JIT::Location& l, const JIT::RuntimeType& rtt,
                  bool outerOnly);
   void assertType(const JIT::Location&, const JIT::RuntimeType&);
+
+  /**
+   * Check if `i' is an FPush{Func,ClsMethod}D followed by an FCall{,D} to
+   * a function with a singleton pattern, and if so, inline it.  Returns true
+   * if this succeeds, else false.
+   */
+  bool tryTranslateSingletonInline(const NormalizedInstruction& i,
+                                   const Func* funcd);
+
   HhbcTranslator& hhbcTrans() { return m_hhbcTrans; }
 
  private:

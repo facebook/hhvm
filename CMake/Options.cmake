@@ -18,5 +18,6 @@ option(DISABLE_HARDWARE_COUNTERS "Disable hardware counters (for XenU systems)" 
 
 IF (NOT APPLE)
   option(ENABLE_ZEND_COMPAT "Enable Zend source compatibility" ON)
-ENDIF (APPLE)
+ENDIF (NOT APPLE)
+
 option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)

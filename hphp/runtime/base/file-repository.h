@@ -176,7 +176,7 @@ public:
   static PhpFile *readHhbc(const std::string &name, const FileInfo &fileInfo);
   static PhpFile *parseFile(const std::string &name, const FileInfo &fileInfo);
   static String translateFileName(StringData *file);
-  static void onDelete(PhpFile *f);
+  static void onDelete(PhpFile* f);
   static void forEachUnit(UnitVisitor& uit);
   static size_t getLoadedFiles();
   static void enqueueOrphanedUnitForDeletion(HPHP::Unit *u);
@@ -189,7 +189,6 @@ private:
   static UnitVec s_orphanedUnitsToDelete;
 
   static bool fileStat(const std::string &name, struct stat *s);
-  static std::set<std::string> s_names;
 };
 
 String resolveVmInclude(StringData* path, const char* currentDir,

@@ -2494,70 +2494,76 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
                                                      const char* currentDir,
                                                      bool* initial_opt) {
   bool init;
-  bool &initial = initial_opt ? *initial_opt : init;
+  bool& initial = initial_opt ? *initial_opt : init;
   initial = true;
 
   struct stat s;
   String spath = Eval::resolveVmInclude(path, currentDir, &s);
-  if (spath.isNull()) return nullptr;
+  if (spath.isNull()) {
+    return nullptr;
+  }
 
-  // Check if this file has already been included.
-  auto it = m_evaledFiles.find(spath.get());
-  HPHP::Eval::PhpFile* efile = nullptr;
-  if (it != end(m_evaledFiles)) {
-    // We found it! Return the unit.
-    efile = it->second;
+  auto askFRForFile = [&](StringData* path) -> HPHP::Eval::PhpFile* {
+    auto file = Eval::FileRepository::checkoutFile(path, s);
+    // if initial_opt is not set, then we don't record this as a per request
+    // fetch of the file, and just grab it from the FR
+    if (file == nullptr || initial_opt == nullptr) {
+      return file;
+    }
+
+    auto const it = m_evaledFiles.find(path);
+
+    // New file, never included before.
+    if (it == end(m_evaledFiles)) {
+      m_evaledFiles[path] = file;
+      path->incRefCount();
+      m_evaledFilesOrder.push_back(file);
+      DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(file));
+      initial = true;
+      return file;
+    }
+
+    // File has been modified, overwrite the old file in our map.
+    if (it->second != file) {
+      m_evaledFiles[path] = file;
+    }
     initial = false;
-    return efile;
+    return file;
+  };
+
+  auto file = askFRForFile(spath.get());
+  if (file != nullptr) {
+    return file;
   }
-  // We didn't find it, so try the realpath.
-  bool alreadyResolved =
-    RuntimeOption::RepoAuthoritative ||
-    (!RuntimeOption::CheckSymLink && (spath[0] == '/'));
-  bool hasRealpath = false;
-  String rpath;
-  if (!alreadyResolved) {
-    std::string rp = StatCache::realpath(spath.data());
-    if (rp.size() != 0) {
-      rpath = StringData::Make(rp.data(), rp.size(), CopyString);
-      if (!rpath.same(spath)) {
-        hasRealpath = true;
-        it = m_evaledFiles.find(rpath.get());
-        if (it != m_evaledFiles.end()) {
-          // We found it! Update the mapping for spath and
-          // return the unit.
-          efile = it->second;
-          m_evaledFiles[spath.get()] = efile;
-          m_evaledFilesOrder.push_back(efile);
-          spath.get()->incRefCount();
-          initial = false;
-          return efile;
-        }
-      }
-    }
+
+  // Otherwise, try again with the realpath
+  if (RuntimeOption::RepoAuthoritative ||
+      (!RuntimeOption::CheckSymLink && (spath[0] == '/'))) {
+    return nullptr;
   }
-  // This file hasn't been included yet, so we need to parse the file
-  efile = HPHP::Eval::FileRepository::checkoutFile(
-    hasRealpath ? rpath.get() : spath.get(), s);
-  if (efile && initial_opt) {
-    // if initial_opt is not set, this shouldnt be recorded as a
-    // per request fetch of the file.
-    if (RDS::testAndSetBit(efile->getId())) {
-      initial = false;
-    }
-    // if parsing was successful, update the mappings for spath and
-    // rpath (if it exists).
-    m_evaledFilesOrder.push_back(efile);
-    m_evaledFiles[spath.get()] = efile;
-    spath.get()->incRefCount();
-    // Don't incRef efile; checkoutFile() already counted it.
-    if (hasRealpath) {
-      m_evaledFiles[rpath.get()] = efile;
-      rpath.get()->incRefCount();
-    }
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
+
+  std::string rp = StatCache::realpath(spath.data());
+  if (rp.size() == 0) {
+    return nullptr;
   }
-  return efile;
+  String rpath = StringData::Make(rp.data(), rp.size(), CopyString);
+  if (rpath.same(spath)) {
+    return nullptr;
+  }
+
+  file = askFRForFile(rpath.get());
+  if (file == nullptr || initial_opt == nullptr) {
+    return file;
+  }
+
+  if (RDS::testAndSetBit(file->getId())) {
+    initial = false;
+  }
+
+  // also update mapping for spath, as we found the file using rpath
+  m_evaledFiles[spath.get()] = file;
+  spath.get()->incRefCount();
+  return file;
 }
 
 Unit* ExecutionContext::evalInclude(StringData* path,

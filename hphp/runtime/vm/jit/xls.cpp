@@ -949,9 +949,13 @@ void XLS::update(unsigned pos) {
   for (auto i = m_active.begin(); i != m_active.end();) {
     auto ivl = *i;
     if (ivl->end() <= pos) {
-      i = m_active.erase(i); // active is now handled.
+      // done with ivl; remove interval from active list
+      *i = m_active.back();
+      m_active.pop_back();
     } else if (!ivl->covers(pos)) {
-      i = m_active.erase(i);
+      // move ivl from active to inactive
+      *i = m_active.back();
+      m_active.pop_back();
       m_inactive.push_back(ivl);
     } else {
       i++;
@@ -961,9 +965,13 @@ void XLS::update(unsigned pos) {
   for (auto i = m_inactive.begin(); i != m_inactive.end();) {
     auto ivl = *i;
     if (ivl->end() <= pos) {
-      i = m_inactive.erase(i); // inactive is now handled.
+      // done with ivl; remove interval from inactive list
+      *i = m_inactive.back();
+      m_inactive.pop_back();
     } else if (ivl->covers(pos)) {
-      i = m_inactive.erase(i);
+      // move ivl from inactive to active
+      *i = m_inactive.back();
+      m_inactive.pop_back();
       m_active.push_back(ivl);
     } else {
       i++;

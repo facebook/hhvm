@@ -70,7 +70,7 @@ String stringForEach(uint32_t len, const String& str, Op action) {
     *dst = action(*src);
   }
 
-  if (!mutate) ret.get()->setSize(len);
+  if (!mutate) ret.setSize(len);
   return ret;
 }
 
@@ -403,7 +403,7 @@ String f_strip_tags(const String& str, const String& allowable_tags /* = "" */) 
 }
 
 template <bool left, bool right> ALWAYS_INLINE
-String stringTrim(const String& str, const String& charlist) {
+String stringTrim(String& str, const String& charlist) {
   char flags[256];
   string_charmask(charlist.c_str(), charlist.size(), flags);
 
@@ -422,10 +422,10 @@ String stringTrim(const String& str, const String& charlist) {
   if (str.get()->hasExactlyOneRef()) {
     int slen = end - start + 1;
     if (start) {
-      char* sdata = str.get()->mutableData();
+      char* sdata = str.bufferSlice().ptr;
       for (int idx = 0; start < len;) sdata[idx++] = sdata[start++];
     }
-    str.get()->setSize(slen);
+    str.shrink(slen);
     return str;
   }
 
@@ -713,14 +713,14 @@ String f_str_repeat(const String& input, int multiplier) {
   }
 
   if (multiplier == 0) {
-    return String("", CopyString);
+    return empty_string;
   }
 
   if (input.size() == 1) {
-    String ret(input.size() * multiplier, ReserveString);
+    String ret(multiplier, ReserveString);
 
-    memset(ret.get()->mutableData(), *input.data(), multiplier);
-    ret.get()->setSize(multiplier);
+    memset(ret.bufferSlice().ptr, *input.data(), multiplier);
+    ret.setSize(multiplier);
     return ret;
   }
 
@@ -1356,7 +1356,7 @@ String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
 
 String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                              const String& charset /* = "ISO-8859-1" */,
-                             const Array& extra /* = Array() */) {
+                             const Array& extra /* = null_array */) {
   return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
                                      charset.data(), false, extra);
 }

@@ -437,7 +437,8 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     }
   }
 
-  return s.setSize(outputpos);
+  s.setSize(outputpos);
+  return s;
 }
 
 int32_t ZendPack::unpack(const char *data, int size, int issigned, int *map) {

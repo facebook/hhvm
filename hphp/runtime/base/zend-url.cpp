@@ -338,7 +338,8 @@ String url_encode(const char *s, int len) {
       *to++ = c;
     }
   }
-  return retString.setSize(to - start);
+  retString.setSize(to - start);
+  return retString;
 }
 
 String url_decode(const char *s, int len) {
@@ -362,7 +363,8 @@ String url_decode(const char *s, int len) {
     data++;
     dest++;
   }
-  return retString.setSize(dest - str);
+  retString.setSize(dest - str);
+  return retString;
 }
 
 // copied and re-factored from clearsilver-0.10.5/cgi/cgi.c
@@ -434,7 +436,8 @@ String url_raw_encode(const char *s, int len) {
       str[y] = hexchars[(unsigned char) s[x] & 15];
     }
   }
-  return retString.setSize(y);
+  retString.setSize(y);
+  return retString;
 }
 
 String url_raw_decode(const char *s, int len) {
@@ -455,7 +458,8 @@ String url_raw_decode(const char *s, int len) {
     data++;
     dest++;
   }
-  return retString.setSize(dest - str);
+  retString.setSize(dest - str);
+  return retString;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

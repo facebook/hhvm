@@ -177,9 +177,10 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         String s = String(size, ReserveString);
         char* strbuf = s.bufferSlice().ptr;
         transport.readBytes(strbuf, size);
-        return s.setSize(size);
+        s.setSize(size);
+        return s;
       } else {
-        return "";
+        return empty_string;
       }
     }
     case T_MAP: { // array of key -> value

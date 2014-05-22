@@ -2601,7 +2601,8 @@ Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
     return false;
   } else {
     crypto_strong = (bool)crypto_strength;
-    return s.setSize(length);
+    s.setSize(length);
+    return s;
   }
 }
 
@@ -2634,7 +2635,8 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
 
   if (piv.size() <= 0) {
     /* BC behavior */
-    return s.setSize(iv_required_len);
+    s.setSize(iv_required_len);
+    return s;
   }
 
   if (piv.size() < iv_required_len) {
@@ -2642,14 +2644,16 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
                   "expects an IV of precisely %d bytes, padding with \\0",
                   piv.size(), iv_required_len);
     memcpy(iv_new, piv.data(), piv.size());
-    return s.setSize(iv_required_len);
+    s.setSize(iv_required_len);
+    return s;
   }
 
   raise_warning("IV passed is %d bytes long which is longer than the %d "
                 "expected by selected cipher, truncating", piv.size(),
                 iv_required_len);
   memcpy(iv_new, piv.data(), iv_required_len);
-  return s.setSize(iv_required_len);
+  s.setSize(iv_required_len);
+  return s;
 }
 
 Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
@@ -2785,7 +2789,8 @@ Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
                        &result_len)) {
     outlen += result_len;
     EVP_CIPHER_CTX_cleanup(&cipher_ctx);
-    return rv.setSize(outlen);
+    rv.setSize(outlen);
+    return rv;
   } else {
     EVP_CIPHER_CTX_cleanup(&cipher_ctx);
     return false;
@@ -2809,7 +2814,8 @@ Variant HHVM_FUNCTION(openssl_digest, const String& data, const String& method,
   EVP_DigestUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
   if (EVP_DigestFinal(&md_ctx, (unsigned char *)sigbuf, (unsigned int *)&siglen)) {
     if (raw_output) {
-      return rv.setSize(siglen);
+      rv.setSize(siglen);
+      return rv;
     } else {
       char* digest_str = string_bin2hex((char*)sigbuf, siglen);
       return String(digest_str, AttachString);

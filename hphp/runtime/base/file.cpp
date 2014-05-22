@@ -266,7 +266,8 @@ String File::read(int64_t length) {
     return "";
   }
 
-  String s = String(length, ReserveString);
+  auto const allocSize = length;
+  String s = String(allocSize, ReserveString);
   char *ret = s.bufferSlice().ptr;
   int64_t copied = 0;
   int64_t avail = bufferedLen();
@@ -302,7 +303,10 @@ String File::read(int64_t length) {
   }
 
   m_position += copied;
-  return s.setSize(copied);
+
+  assert(copied <= allocSize);
+  s.shrink(copied);
+  return s;
 }
 
 int64_t File::filteredReadToBuffer() {
@@ -690,7 +694,8 @@ String File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
       m_readpos += delimiter.size();
       m_position += delimiter.size();
     }
-    return s.setSize(toread);
+    s.setSize(toread);
+    return s;
   }
 
   return empty_string;

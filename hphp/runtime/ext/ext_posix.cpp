@@ -81,7 +81,8 @@ String f_posix_ctermid() {
   String s = String(L_ctermid, ReserveString);
   char *buffer = s.bufferSlice().ptr;
   ctermid(buffer);
-  return s.setSize(strlen(buffer));
+  s.setSize(strlen(buffer));
+  return s;
 }
 
 int64_t f_posix_get_last_error() {
@@ -94,7 +95,8 @@ String f_posix_getcwd() {
   if (getcwd(buffer, PATH_MAX) == NULL) {
     return "/";
   }
-  return s.setSize(strlen(buffer));
+  s.setSize(strlen(buffer));
+  return s;
 }
 
 int64_t f_posix_getegid() {
@@ -444,7 +446,8 @@ Variant f_posix_ttyname(const Variant& fd) {
   if (ttyname_r(php_posix_get_fd(fd), p, ttyname_maxlen)) {
     return false;
   }
-  return ttyname.setSize(strlen(p));
+  ttyname.setSize(strlen(p));
+  return ttyname;
 }
 
 const StaticString

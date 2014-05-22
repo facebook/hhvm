@@ -360,7 +360,6 @@ String string_pad(const char *input, int len, int pad_length,
     result[result_len++] = pad_string[i % pad_str_len];
   }
   ret.setSize(result_len);
-
   return ret;
 }
 
@@ -501,7 +500,8 @@ String string_replace(const char *s, int len, int start, int length,
     memcpy(ret + ret_len, s + start + length, len);
     ret_len += len;
   }
-  return retString.setSize(ret_len);
+  retString.setSize(ret_len);
+  return retString;
 }
 
 String string_replace(const char *input, int len,
@@ -570,7 +570,8 @@ String string_replace(const char *input, int len,
     memcpy(p, input, n);
     p += n;
   }
-  return retString.setSize(p - ret);
+  retString.setSize(p - ret);
+  return retString;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -941,7 +942,8 @@ String string_strip_tags(const char *s, const int len,
     smart_free(tbuf);
   }
 
-  return retString.setSize(rp - rbuf);
+  retString.setSize(rp - rbuf);
+  return retString;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -977,7 +979,8 @@ String string_addslashes(const char *str, int length) {
     source++;
   }
 
-  return retString.setSize(target - new_str);
+  retString.setSize(target - new_str);
+  return retString;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1338,7 +1341,6 @@ String string_uudecode(const char *src, int src_len) {
   }
 
   ret.setSize(total_len);
-
   return ret;
 
  err:
@@ -1480,7 +1482,8 @@ static String php_base64_decode(const char *str, int length, bool strict) {
       result[k] = 0;
     }
   }
-  return retString.setSize(j);
+  retString.setSize(j);
+  return retString;
 }
 
 String string_base64_encode(const char *input, int len) {
@@ -1769,7 +1772,6 @@ String string_number_format(double d, int dec,
 
   s = tmpbuf+tmplen-1;
   t = resbuf+reslen-1;
-  resstr.setSize(reslen);
 
   /* copy the decimal places.
    * Take care, as the sprintf implementation may return less places than
@@ -1815,6 +1817,7 @@ String string_number_format(double d, int dec,
     *t-- = '-';
   }
 
+  resstr.setSize(reslen);
   return resstr;
 }
 
@@ -1889,7 +1892,8 @@ String string_soundex(const String& str) {
   while (_small < 4) {
     soundex[_small++] = '0';
   }
-  return retString.setSize(4);
+  retString.setSize(4);
+  return retString;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2491,7 +2495,8 @@ String string_convert_cyrillic_string(const String& input, char from, char to) {
     tmp = from_table == nullptr ? uinput[i] : from_table[uinput[i]];
     str[i] = to_table == nullptr ? tmp : to_table[tmp + 256];
   }
-  return retString.setSize(input.size());
+  retString.setSize(input.size());
+  return retString;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2660,7 +2665,8 @@ String string_convert_hebrew_string(const String& inStr,
       return ret;
     }
   }
-  return brokenStr.setSize(str_len);
+  brokenStr.setSize(str_len);
+  return brokenStr;
 }
 
 #if defined(__APPLE__)

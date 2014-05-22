@@ -392,34 +392,6 @@
                             "desc": "A Closure to be called when an async function fails"
                         }
                     ]
-                },
-                {
-                    "name": "getPrivData",
-                    "desc": "Get user's private data",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "Object",
-                        "desc": "An Object with user's private data"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "setPrivData",
-                    "desc": "Set user's private data",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                        {
-                            "name": "data",
-                            "type": "Object",
-                            "desc": "An Object with user's private data"
-                        }
-                    ]
                 }
             ],
             "consts": [

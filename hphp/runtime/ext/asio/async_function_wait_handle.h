@@ -38,15 +38,15 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
 
-  explicit c_AsyncFunctionWaitHandle(
-    Class* cls = c_AsyncFunctionWaitHandle::classof());
+  explicit c_AsyncFunctionWaitHandle(Class* cls =
+      c_AsyncFunctionWaitHandle::classof())
+    : c_ResumableWaitHandle(cls)
+  {}
   ~c_AsyncFunctionWaitHandle();
   static void ti_setoncreatecallback(const Variant& callback);
   static void ti_setonawaitcallback(const Variant& callback);
   static void ti_setonsuccesscallback(const Variant& callback);
   static void ti_setonfailcallback(const Variant& callback);
-  Object t_getprivdata();
-  void t_setprivdata(const Object& data);
 
  public:
   static constexpr ptrdiff_t resumableOff() { return -sizeof(Resumable); }
@@ -99,8 +99,6 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
 
   // valid if STATE_SCHEDULED || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
-
-  Object m_privData;
 
   static const int8_t STATE_SCHEDULED = 3;
   static const int8_t STATE_RUNNING   = 4;

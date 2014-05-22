@@ -235,8 +235,17 @@ end = struct
     | ServerMsg.BUILD build_opts ->
       let build_hook = BuildMain.go build_opts genv env oc in
       ServerTypeCheck.hook_after_parsing := begin fun genv env ->
-        build_hook genv env;
-        close_out oc;
+        (* subtle: an exception there (such as writing on a closed pipe)
+         * will not be catched by handle_connection() because
+         * we have already returned from handle_connection(), hence
+         * this additional try.
+         *)
+        (try 
+           build_hook genv env;
+           close_out oc;
+        with exn -> 
+          Printf.printf "Exn in build_hook: %s" (Printexc.to_string exn);
+        );
         ServerTypeCheck.hook_after_parsing := (fun _ _ -> ())
       end
     | ServerMsg.FIND_REFS find_refs_action ->
@@ -331,6 +340,10 @@ let handle_connection genv env socket =
  *)
 let main options =
   SharedMem.init();
+  (* this is to transform SIGPIPE in an exception. A SIGPIPE can happen when
+   * someone C-c the client.
+   *)
+  Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   let root = ServerArgs.root options in
   EventLogger.init root;
   PidLog.init root;

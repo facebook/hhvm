@@ -32,12 +32,11 @@ BEGIN_EXTERN_C()
 
 #ifdef HHVM
 namespace HPHP {
-  class ZendResourceData : public SweepableResourceData {
+  class ZendResourceData : public ResourceData {
     public:
-      DECLARE_RESOURCE_ALLOCATION(ZendResourceData);
       ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
       ZendResourceData() {}
-      ~ZendResourceData() {}
+      ~ZendResourceData();
       const String& o_getClassNameHook() const;
       void* ptr;
       int type;

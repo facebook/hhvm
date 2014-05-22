@@ -18,8 +18,32 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/zend-custom-element.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
+
+// FIXME: get this from the proper header.
+// We need to move proxy-array.cpp to ext_zend_compat/hhvm before
+// the Zend headers can be included.
+#undef ZVAL_PTR_DTOR
+#if !defined(ENABLE_ZEND_COMPAT)
+namespace HPHP { void zval_ptr_dtor_dummy(HPHP::RefData **zval_ptr) {} }
+#define ZVAL_PTR_DTOR HPHP::zval_ptr_dtor_dummy
+#elif defined(DEBUG)
+extern "C" void _zval_ptr_dtor_wrapper(HPHP::RefData **zval_ptr);
+#define ZVAL_PTR_DTOR _zval_ptr_dtor_wrapper
+#else
+extern "C" void _zval_ptr_dtor(HPHP::RefData **zval_ptr);
+#define  ZVAL_PTR_DTOR _zval_ptr_dtor
+#endif
 
 namespace HPHP {
+
+// We make a static copy of the _zval_ptr_dtor_wrapper function pointer to
+// avoid the need to declare _zval_ptr_dtor_wrapper in proxy-array.h, which
+// can give conflicting declaration warnings when it is included from a file
+// which also includes zend_variables.h.
+ProxyArray::DtorFunc ProxyArray::ZvalPtrDtor =
+  (ProxyArray::DtorFunc)ZVAL_PTR_DTOR;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,8 +72,7 @@ ProxyArray* ProxyArray::Make(ArrayData* ad) {
   ret->m_kind            = kProxyKind;
   ret->m_pos             = ArrayData::invalid_index;
   ret->m_count           = 1;
-
-  ad->incRefCount();
+  ret->m_destructor      = ZvalPtrDtor;
   ret->m_ad = ad;
 
   return ret;
@@ -330,8 +353,8 @@ ArrayData* ProxyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
   return reseatable(ad, r);
 }
 
-ArrayData* ProxyArray::ZAppend(ArrayData* ad, RefData* v) {
-  auto r = innerArr(ad)->zAppend(v);
+ArrayData* ProxyArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
+  auto r = innerArr(ad)->zAppend(v, key_ptr);
   return reseatable(ad, r);
 }
 
@@ -343,6 +366,72 @@ ArrayData* ProxyArray::NonSmartCopy(const ArrayData* ad) {
   return innerArr(ad)->nonSmartCopy();
 }
 
+void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest) {
+  ArrayData * r;
+  if (hasZvalValues()) {
+    assert(data_size == sizeof(void*));
+    int64_t k = 0;
+    r = m_ad->zAppend(*(RefData**)data, &k);
+    if (dest) {
+      *dest = (void*)(&m_ad->nvGet(k)->m_data.pref);
+    }
+  } else {
+    ResourceData * elt = makeElementResource(data, data_size, dest);
+    r = m_ad->append(elt, false);
+  }
+  reseatable(this, r);
+}
+
+void ProxyArray::proxyInit(uint32_t nSize,
+    DtorFunc pDestructor, bool persistent) {
+  if (persistent) {
+    throw FatalErrorException("zend_hash_init: \"persistent\" is \
+                              unimplemented");
+  }
+  if (nSize) {
+    decRefArr(m_ad);
+    m_ad = MixedArray::MakeReserve(nSize);
+  }
+  m_destructor = pDestructor;
+}
+
+ResourceData * ProxyArray::makeElementResource(
+    void *pData, uint nDataSize, void **pDest) const {
+  ZendCustomElement * elt = new ZendCustomElement(pData, nDataSize,
+                                                  pDest, m_destructor);
+  return static_cast<ResourceData*>(elt);
+}
+
+void * ProxyArray::proxyGet(StringData * str) const {
+  // FIXME: const_cast is a bug, may destroy shared data
+  return elementToData(const_cast<TypedValue*>(m_ad->nvGet(str)));
+}
+
+void * ProxyArray::proxyGet(int64_t k) const {
+  // FIXME: const_cast is a bug, may destroy shared data
+  return elementToData(const_cast<TypedValue*>(m_ad->nvGet(k)));
+}
+
+void * ProxyArray::proxyGetValueRef(ssize_t pos) const {
+  auto& val = m_ad->getValueRef(pos);
+  // FIXME: we shouldn't be modifying this TypedValue
+  return elementToData(const_cast<HPHP::TypedValue*>(val.asTypedValue()));
+}
+
+void * ProxyArray::elementToData(TypedValue * tv) const {
+  if (!tv) {
+    return nullptr;
+  }
+  if (hasZvalValues()) {
+    zBoxAndProxy(tv);
+    return (void*)(&tv->m_data.pref);
+  } else {
+    always_assert(tv->m_type == KindOfResource);
+    ZendCustomElement * elt = dynamic_cast<ZendCustomElement*>(tv->m_data.pres);
+    always_assert(elt);
+    return elt->data();
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 

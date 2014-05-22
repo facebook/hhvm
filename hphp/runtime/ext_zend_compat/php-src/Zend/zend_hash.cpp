@@ -29,22 +29,21 @@
 #include "hphp/util/safesort.h"
 #include "hphp/util/assertions.h"
 
-ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
+ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey,
+    uint nKeyLength, void *pData, uint nDataSize, void **pDest,
+    int flag ZEND_FILE_LINE_DC)
+{
   if (nKeyLength <= 0) {
     return FAILURE;
   }
-  assert(nDataSize == sizeof(void*));
   assert(arKey[nKeyLength - 1] == '\0');
-
-  if ((flag & HASH_ADD) && zend_hash_exists(ht, arKey, nKeyLength)) {
+  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
+  if ((flag & HASH_ADD) && ht->exists(key)) {
     return FAILURE;
   }
-  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
-  ht->zSet(key.get(), (*(zval**)pData));
-
-  if (pDest) {
-    *pDest = pData;
-  }
+  always_assert(ht->isProxyArray());
+  HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
+  proxy->proxySet(key.get(), pData, nDataSize, pDest);
   return SUCCESS;
 }
 
@@ -53,63 +52,75 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 }
 
 ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
-  assert(nDataSize == sizeof(void*));
+  always_assert(ht->isProxyArray());
+  HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
   if (flag & HASH_NEXT_INSERT) {
-    ht->zAppend(*(zval**)pData);
+    proxy->proxyAppend(pData, nDataSize, pDest);
     return SUCCESS;
   }
 
-  if (flag & HASH_ADD && zend_hash_index_exists(ht, h)) {
+  if (flag & HASH_ADD && ht->exists(h)) {
     return FAILURE;
   }
 
-  ht->zSet(h, (*(zval**)pData));
+  proxy->proxySet(h, pData, nDataSize, pDest);
   return SUCCESS;
 }
 
 ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * arg TSRMLS_DC) {
-  for (HPHP::ArrayIter it(ht); it; ++it) {
-    zval* data = it.zSecond();
-		int result = apply_func(&data, arg TSRMLS_CC);
+  always_assert(ht->isProxyArray());
+  HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
+  for (auto pos = ht->iter_begin();
+      pos != HPHP::ArrayData::invalid_index;
+      pos = ht->iter_advance(pos))
+  {
+    void * data = proxy->proxyGetValueRef(pos);
+    int result = apply_func(data, arg TSRMLS_CC);
 
-		if (result & ZEND_HASH_APPLY_REMOVE) {
+    if (result & ZEND_HASH_APPLY_REMOVE) {
       not_implemented();
-		}
-		if (result & ZEND_HASH_APPLY_STOP) {
-			break;
-		}
-	}
+    }
+    if (result & ZEND_HASH_APPLY_STOP) {
+      break;
+    }
+  }
 }
 
 ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int num_args, ...) {
-	va_list args;
-	zend_hash_key hash_key;
+  va_list args;
+  zend_hash_key hash_key;
+  always_assert(ht->isProxyArray());
+  HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
 
-  for (HPHP::ArrayIter it(ht); it; ++it) {
-		int result;
-		va_start(args, num_args);
-    if (it.first().isInteger()) {
+  for (auto pos = ht->iter_begin();
+      pos != HPHP::ArrayData::invalid_index;
+      pos = ht->iter_advance(pos))
+  {
+    HPHP::Variant key = ht->getKey(pos);
+    int result;
+    va_start(args, num_args);
+    if (key.isInteger()) {
       hash_key.arKey = "";
       hash_key.nKeyLength = 0;
-      hash_key.h = it.first().asInt64Val();
+      hash_key.h = key.asInt64Val();
     } else {
-      assert(it.first().isString());
-      hash_key.arKey = it.first().asCStrRef().data();
-      hash_key.nKeyLength = it.first().asCStrRef().size() + 1;
+      assert(key.isString());
+      hash_key.arKey = key.asCStrRef().data();
+      hash_key.nKeyLength = key.asCStrRef().size() + 1;
       hash_key.h = 0;
     }
-    zval* data = it.zSecond();
-		result = apply_func(&data TSRMLS_CC, num_args, args, &hash_key);
+    void * data = proxy->proxyGetValueRef(pos);
+    result = apply_func(data TSRMLS_CC, num_args, args, &hash_key);
 
-		if (result & ZEND_HASH_APPLY_REMOVE) {
+    if (result & ZEND_HASH_APPLY_REMOVE) {
       not_implemented();
-		}
-		if (result & ZEND_HASH_APPLY_STOP) {
-			va_end(args);
-			break;
-		}
-		va_end(args);
-	}
+    }
+    if (result & ZEND_HASH_APPLY_STOP) {
+      va_end(args);
+      break;
+    }
+    va_end(args);
+  }
 }
 
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) {
@@ -128,32 +139,19 @@ ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength)
   return zend_inline_hash_func(arKey, nKeyLength);
 }
 
-/**
- * Something to try and keep these TypedValue**s alive.
- */
-class TypedValueHolder {
-  public:
-    HPHP::TypedValue** getNext() {
-      return &m_data[m_pos++ & 15];
-    };
-  private:
-    uint8_t m_pos;
-    HPHP::TypedValue* m_data[16];
-};
-
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) {
   if (nKeyLength <= 0) {
     return FAILURE;
   }
+  always_assert(ht->isProxyArray());
   assert(arKey[nKeyLength - 1] == '\0');
+  const HPHP::ProxyArray * proxy = static_cast<const HPHP::ProxyArray*>(ht);
   HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
-  auto val = const_cast<HPHP::TypedValue*>(ht->nvGet(key.get())); // FIXME
+  void * val = proxy->proxyGet(key.get());
   if (!val) {
     return FAILURE;
   }
-  HPHP::zBoxAndProxy(val);
-  auto p = (zval***)pData;
-  *p = &val->m_data.pref;
+  *pData = val;
   return SUCCESS;
 }
 
@@ -162,13 +160,13 @@ ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint n
 }
 
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) {
-  auto val = const_cast<HPHP::TypedValue*>(ht->nvGet(h)); // FIXME: broken
+  always_assert(ht->isProxyArray());
+  const HPHP::ProxyArray * proxy = static_cast<const HPHP::ProxyArray*>(ht);
+  void * val = proxy->proxyGet(h);
   if (!val) {
     return FAILURE;
   }
-  HPHP::zBoxAndProxy(val);
-  auto p = (zval***)pData;
-  *p = &val->m_data.pref;
+  *pData = val;
   return SUCCESS;
 }
 
@@ -201,10 +199,7 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos) {
   return ht->isInvalid() ? FAILURE : SUCCESS;
 }
 ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos) {
-  HashPosition hp = ht->getPosition();
-  if (pos) {
-    hp = *pos;
-  }
+  HashPosition hp = pos ? *pos : ht->getPosition();
   if (hp == ht->invalid_index) {
     return HASH_KEY_NON_EXISTENT;
   }
@@ -229,10 +224,7 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index,
   return HASH_KEY_IS_LONG;
 }
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos) {
-  HashPosition hp = ht->getPosition();
-  if (pos) {
-    hp = *pos;
-  }
+  HashPosition hp = pos ? *pos : ht->getPosition();
   if (hp == ht->invalid_index) {
     return HASH_KEY_NON_EXISTENT;
   }
@@ -251,20 +243,17 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 }
 
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos) {
-  HashPosition hp = ht->getPosition();
-  if (pos) {
-    hp = *pos;
-  }
+  HashPosition hp = pos ? *pos : ht->getPosition();
   if (hp == ht->invalid_index) {
     return FAILURE;
   }
-  auto& val = ht->getValueRef(hp);
-  // FIXME: we shouldn't be modifying this TypedValue
-  HPHP::zBoxAndProxy(const_cast<HPHP::TypedValue*>(val.asTypedValue()));
-  assert(val.asTypedValue()->m_type == HPHP::KindOfRef);
-  auto p = (zval***)pData;
-  // FIXME: this is broken
-  *p = &const_cast<HPHP::TypedValue*>(val.asTypedValue())->m_data.pref;
+  always_assert(ht->isProxyArray());
+  HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
+  void * val = proxy->proxyGetValueRef(hp);
+  if (!val) {
+    return FAILURE;
+  }
+  *pData = val;
   return SUCCESS;
 }
 
@@ -277,11 +266,16 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 }
 
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
-  target->plusEq(source); // XXX: can this COW?
-  for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
-    auto tv = const_cast<HPHP::TypedValue*>(it.secondRef().asTypedValue());
-    HPHP::zBoxAndProxy(tv);
-    pCopyConstructor((void*)(&tv->m_data.pref));
+  always_assert(source->isProxyArray());
+  HPHP::ProxyArray * proxy_source = static_cast<HPHP::ProxyArray*>(source);
+  target->plusEq(source);
+  if (pCopyConstructor) {
+    for (auto pos = source->iter_begin();
+        pos != HPHP::ArrayData::invalid_index;
+        pos = source->iter_advance(pos))
+    {
+      pCopyConstructor(proxy_source->proxyGetValueRef(pos));
+    }
   }
 }
 
@@ -300,10 +294,16 @@ ZEND_API void zend_hash_clean(HashTable *ht) {
 }
 
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size) {
+  always_assert(source->isProxyArray());
+  HPHP::ProxyArray * source_proxy = static_cast<HPHP::ProxyArray*>(source);
   target->merge(source);
-  for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
-    const void* tv = it.secondRef().asTypedValue();
-    pCopyConstructor(const_cast<void*>(tv));
+  if (pCopyConstructor) {
+    for (auto pos = source->iter_begin();
+        pos != HPHP::ArrayData::invalid_index;
+        pos = source->iter_advance(pos))
+    {
+      pCopyConstructor(source_proxy->proxyGetValueRef(pos));
+    }
   }
 }
 
@@ -320,8 +320,14 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
   return SUCCESS;
 }
 
-ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC) {
-  ht->incRefCount();
+ZEND_API int _zend_hash_init(HashTable *ht, uint nSize,
+    hash_func_t pHashFunction, dtor_func_t pDestructor,
+    zend_bool persistent ZEND_FILE_LINE_DC)
+{
+  always_assert(ht->isProxyArray());
+  HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
+  proxy->proxyInit(nSize, pDestructor, persistent);
+  proxy->incRefCount();
   return SUCCESS;
 }
 

@@ -225,7 +225,7 @@ public:
 
   ArrayData* zSet(int64_t k, RefData* r);
   ArrayData* zSet(StringData* k, RefData* r);
-  ArrayData* zAppend(RefData* r);
+  ArrayData* zAppend(RefData* r, int64_t* key_ptr);
 
   /**
    * The same as set(), but with the precondition that the key does
@@ -514,7 +514,7 @@ struct ArrayFunctions {
   ArrayData* (*escalate[NK])(const ArrayData*);
   ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
   ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
-  ArrayData* (*zAppend[NK])(ArrayData*, RefData* v);
+  ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
 };
 
 extern const ArrayFunctions g_array_funcs;

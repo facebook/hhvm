@@ -215,7 +215,7 @@ public:
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData* ad, RefData* v);
+  static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr);
   static ArrayData* SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData* ad, StringData* k, Variant& v,
                               bool copy);
@@ -420,7 +420,7 @@ private:
   template <class K> ArrayData* updateRef(K k, Variant& data);
 
   template <class K> ArrayData* zSetImpl(K k, RefData* data);
-  ArrayData* zAppendImpl(RefData* data);
+  ArrayData* zAppendImpl(RefData* data, int64_t* key_ptr);
 
   void adjustMArrayIter(ssize_t pos);
   void erase(ssize_t pos);

@@ -377,10 +377,10 @@ ArrayData* EmptyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
   return arr;
 }
 
-ArrayData* EmptyArray::ZAppend(ArrayData* ad, RefData* v) {
+ArrayData* EmptyArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
   auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
   arr->m_count = 0;
-  DEBUG_ONLY auto const tmp = arr->zAppend(v);
+  DEBUG_ONLY auto const tmp = arr->zAppend(v, key_ptr);
   assert(tmp == arr);
   return arr;
 }

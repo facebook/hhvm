@@ -37,7 +37,6 @@ namespace HPHP {
  *       GenArrayWaitHandle       - wait handle representing an array of WHs
  *       GenMapWaitHandle         - wait handle representing an Map of WHs
  *       GenVectorWaitHandle      - wait handle representing an Vector of WHs
- *       SetResultToRefWaitHandle - wait handle that sets result to reference
  *     RescheduleWaitHandle       - wait handle that reschedules execution
  *     SleepWaitHandle            - wait handle that finishes after a timeout
  *     ExternalThreadEventWaitHandle  - thread-powered asynchronous execution
@@ -53,15 +52,14 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
 
   enum class Kind : uint8_t {
-    Static              = 0,
-    AsyncFunction       = 1,
-    GenArray            = 2,
-    GenMap              = 3,
-    GenVector           = 4,
-    SetResultToRef      = 5,
-    Reschedule          = 6,
-    Sleep               = 7,
-    ExternalThreadEvent = 8,
+    Static,
+    AsyncFunction,
+    GenArray,
+    GenMap,
+    GenVector,
+    Reschedule,
+    Sleep,
+    ExternalThreadEvent,
   };
 
   explicit c_WaitHandle(Class* cls = c_WaitHandle::classof())

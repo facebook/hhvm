@@ -23,7 +23,6 @@
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
-#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
 #include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
 #include "hphp/runtime/ext/asio/sleep_wait_handle.h"
 #include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
@@ -132,8 +131,6 @@ String c_WaitableWaitHandle::getName() {
       return static_cast<c_GenMapWaitHandle*>(this)->getName();
     case Kind::GenVector:
       return static_cast<c_GenVectorWaitHandle*>(this)->getName();
-    case Kind::SetResultToRef:
-      return static_cast<c_SetResultToRefWaitHandle*>(this)->getName();
     case Kind::Reschedule:
       return static_cast<c_RescheduleWaitHandle*>(this)->getName();
     case Kind::Sleep:
@@ -158,8 +155,6 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
       return static_cast<c_GenMapWaitHandle*>(this)->getChild();
     case Kind::GenVector:
       return static_cast<c_GenVectorWaitHandle*>(this)->getChild();
-    case Kind::SetResultToRef:
-      return static_cast<c_SetResultToRefWaitHandle*>(this)->getChild();
     case Kind::Reschedule:
     case Kind::Sleep:
     case Kind::ExternalThreadEvent:
@@ -183,9 +178,6 @@ void c_WaitableWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
       return;
     case Kind::GenVector:
       static_cast<c_GenVectorWaitHandle*>(this)->enterContextImpl(ctx_idx);
-      return;
-    case Kind::SetResultToRef:
-      static_cast<c_SetResultToRefWaitHandle*>(this)->enterContextImpl(ctx_idx);
       return;
     case Kind::Reschedule:
       static_cast<c_RescheduleWaitHandle*>(this)->enterContextImpl(ctx_idx);

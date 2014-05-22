@@ -57,9 +57,15 @@ void nativeDataInfoInit(ObjectData* obj) {
 }
 
 template<class T>
-void nativeDataInfoCopy(ObjectData* dest, ObjectData* src) {
+typename std::enable_if<std::is_assignable<T,T>::value,
+void>::type nativeDataInfoCopy(ObjectData* dest, ObjectData* src) {
   *data<T>(dest) = *data<T>(src);
 }
+
+// Dummy copy method for classes where the assignment has been deleted
+template<class T>
+typename std::enable_if<!std::is_assignable<T,T>::value,
+void>::type nativeDataInfoCopy(ObjectData* dest, ObjectData* src) {}
 
 template<class T>
 void nativeDataInfoDestroy(ObjectData* obj) {
@@ -82,13 +88,23 @@ void>::type nativeDataInfoSweep(ObjectData* obj) {
   data<T>(obj)->~T();
 }
 
+enum NDIFlags {
+  NONE           = 0,
+  // Skipping the ctor/dtor is generally a bad idea
+  // since memory props won't get setup/torn-down
+  NO_COPY        = (1<<0),
+  NO_SWEEP       = (1<<1),
+};
+
 template<class T>
-void registerNativeDataInfo(const StringData* name) {
+void registerNativeDataInfo(const StringData* name, int64_t flags = 0) {
   registerNativeDataInfo(name, sizeof(T),
                          &nativeDataInfoInit<T>,
-                         &nativeDataInfoCopy<T>,
+                         (flags & NDIFlags::NO_COPY)
+                           ? nullptr : &nativeDataInfoCopy<T>,
                          &nativeDataInfoDestroy<T>,
-                         &nativeDataInfoSweep<T>);
+                         (flags & NDIFlags::NO_SWEEP)
+                           ? nullptr : &nativeDataInfoSweep<T>);
 }
 
 ObjectData* nativeDataInstanceCtor(Class* cls);

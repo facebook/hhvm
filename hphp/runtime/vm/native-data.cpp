@@ -96,6 +96,7 @@ void sweepNativeData() {
   for (auto node = s_sweep; node;) {
     auto obj = reinterpret_cast<ObjectData*>(node + 1);
     auto ndi = obj->getVMClass()->getNativeDataInfo();
+    assert(ndi->sweep);
     ndi->sweep(obj);
     node = node->next;
     assert(invalidateNativeData(obj, ndi));
@@ -129,8 +130,12 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   void *ptr = MM().objMallocLogged(size);
   auto obj = new (static_cast<char*>(ptr) + nativeDataSize) ObjectData(cls);
   obj->setAttribute(ObjectData::Attribute::HasNativeData);
-  ndi->init(obj);
-  prependSweepNode(getSweepNode(obj));
+  if (ndi->init) {
+    ndi->init(obj);
+  }
+  if (ndi->sweep) {
+    prependSweepNode(getSweepNode(obj));
+  }
   return obj;
 }
 
@@ -138,7 +143,11 @@ void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src) {
   auto ndi = dest->getVMClass()->getNativeDataInfo();
   if (!ndi) return;
   assert(ndi == src->getVMClass()->getNativeDataInfo());
+  if (!ndi->copy) {
+    throw NotImplementedException("NativeDataInfoCopy");
+  }
   ndi->copy(dest, src);
+
   // Already in the sweep list from init call, no need to add again
 }
 
@@ -156,8 +165,12 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
 
   auto ndi = cls->getNativeDataInfo();
   assert(ndi);
-  ndi->destroy(obj);
-  removeSweepNode(getSweepNode(obj));
+  if (ndi->destroy) {
+    ndi->destroy(obj);
+  }
+  if (ndi->sweep) {
+    removeSweepNode(getSweepNode(obj));
+  }
 
   size_t nativeDataSize = alignTypedValue(ndi->sz + sizeof(SweepNode));
   size_t size = ObjectData::sizeForNProps(nProps) + nativeDataSize;

@@ -35,7 +35,7 @@ void ZendObject::registerNativeData() {
         nativeDataCtor,
         Native::nativeDataInfoCopy<ZendObject>,
         Native::nativeDataInfoDestroy<ZendObject>,
-        Native::nativeDataInfoSweep<ZendObject>);
+        nullptr /* sweep */);
   }
 }
 

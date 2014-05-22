@@ -144,6 +144,11 @@ if(DISABLE_HARDWARE_COUNTERS)
   add_definitions(-DNO_HARDWARE_COUNTERS=1)
 endif ()
 
+if(PACKED_TV)
+  # Allows a packed tv build
+  add_definitions(-DPACKED_TV=1)
+endif()
+
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
 

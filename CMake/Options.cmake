@@ -21,3 +21,5 @@ IF (NOT APPLE)
 ENDIF (NOT APPLE)
 
 option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
+
+option(PACKED_TV "Enable packed tv (typed value) compilation" OFF)

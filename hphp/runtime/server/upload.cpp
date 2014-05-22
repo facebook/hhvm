@@ -232,7 +232,7 @@ static uint32_t read_post(multipart_buffer *self, char *buf,
   uint32_t bytes_read = bytes_remaining;
   memcpy(buf, self->cursor, bytes_remaining);
   bytes_to_read -= bytes_remaining;
-  always_assert(self->cursor = (char *)self->post_data +
+  always_assert(self->cursor == (char *)self->post_data +
                         (self->post_size - self->throw_size));
   while (bytes_to_read > 0 && self->transport->hasMorePostData()) {
     int extra_byte_read = 0;

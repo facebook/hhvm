@@ -164,7 +164,6 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
         //add one, because Z is always NUL-terminated
         if (code == 'Z')
           arg++;
-
       }
 
       currentarg++;
@@ -303,7 +302,8 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
       memcpy(&output[outputpos], s, (slen < arg_cp) ? slen : arg_cp);
       outputpos += arg;
     }
-      break;
+    break;
+
     case 'h':
     case 'H': {
       int nibbleshift = (code == 'h') ? 0 : 4;
@@ -624,19 +624,21 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
                        break;
             }
           }
+          /* Remove everything after the first null */
           if (type=='Z')
           {
             int s;
-            /* Remove everything after the first null */
             for (s=0 ; s < len ; s++) {
                      if (input[inputpos + s] == '\0')
                              break;
             }
             len = s;
           }
-          /*A is \0 terminated*/
+
+          /*only A is \0 terminated*/
           if (type=='A')
             len++;
+
           ret.set(String(n, CopyString),
                   String(input + inputpos, len, CopyString));
           break;
@@ -729,8 +731,12 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           }
 
           v |= unpack(&input[inputpos], sizeof(int), issigned, int_map);
-          ret.set(String(n, CopyString), v);
-
+          if (type == 'i') {
+            ret.set(String(n, CopyString), v);
+          } else {
+            uint64_t u64 = uint32_t(v);
+            ret.set(String(n, CopyString), u64);
+          }
           break;
         }
 
@@ -758,7 +764,6 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           }
 
           v |= unpack(&input[inputpos], 4, issigned, map);
-
           if (type == 'l') {
             ret.set(String(n, CopyString), v);
           } else {

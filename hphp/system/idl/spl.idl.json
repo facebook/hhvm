@@ -293,28 +293,6 @@
                     "desc": "The autoload function being unregistered."
                 }
             ]
-        },
-        {
-            "name": "spl_autoload",
-            "desc": "This function is intended to be used as a default implementation for __autoload(). If nothing else is specified and spl_autoload_register() is called without any parameters then this functions will be used for any later call to __autoload().",
-            "flags": [
-            ],
-            "return": {
-                "type": null,
-                "desc": "No value is returned."
-            },
-            "args": [
-                {
-                    "name": "class_name",
-                    "type": "String"
-                },
-                {
-                    "name": "file_extensions",
-                    "type": "String",
-                    "value": "null_string",
-                    "desc": "By default it checks all include paths to contain filenames built up by the lowercase class name appended by the filename extensions .inc and .php."
-                }
-            ]
         }
     ],
     "classes": [

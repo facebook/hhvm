@@ -40,7 +40,6 @@ String f_spl_autoload_extensions(const String& file_extensions = null_string);
 Variant f_spl_autoload_functions();
 bool f_spl_autoload_register(const Variant& autoload_function = null_variant, bool throws = true, bool prepend = false);
 bool f_spl_autoload_unregister(const Variant& autoload_function);
-void f_spl_autoload(const String& class_name, const String& file_extensions = null_string);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

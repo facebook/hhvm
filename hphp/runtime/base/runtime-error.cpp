@@ -74,9 +74,13 @@ void raise_typehint_error(const std::string& msg) {
 }
 
 void raise_disallowed_dynamic_call(const std::string& msg) {
-  if ((RuntimeOption::RepoAuthoritative && Repo::global().DisallowDynamicVarEnvFuncs)
-      || RuntimeOption::EnableHipHopSyntax) {
+  if ((RuntimeOption::RepoAuthoritative &&
+       Repo::global().DisallowDynamicVarEnvFuncs) ||
+      (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ERROR)) {
     raise_error(msg);
+  } else if (
+    RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::WARN) {
+    raise_warning(msg);
   }
 }
 

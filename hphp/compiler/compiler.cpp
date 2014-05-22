@@ -807,6 +807,8 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
   RuntimeOption::IntsOverflowToInts = Option::IntsOverflowToInts;
   RuntimeOption::StrictArrayFillKeys = Option::StrictArrayFillKeys;
+  RuntimeOption::DisallowDynamicVarEnvFuncs =
+    Option::DisallowDynamicVarEnvFuncs;
 
   // Turn off commits, because we don't want systemlib to get included
   RuntimeOption::RepoCommit = false;

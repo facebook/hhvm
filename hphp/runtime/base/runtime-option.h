@@ -356,6 +356,7 @@ public:
   static bool EvalAuthoritativeMode;
   static bool IntsOverflowToInts;
   static HackStrictOption StrictArrayFillKeys;
+  static HackStrictOption DisallowDynamicVarEnvFuncs;
 
   static int GetScannerType();
 

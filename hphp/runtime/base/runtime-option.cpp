@@ -349,8 +349,8 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
-HackStrictOption RuntimeOption::StrictArrayFillKeys
-    = HackStrictOption::OFF;
+HackStrictOption RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
+  RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -869,6 +869,10 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       StrictArrayFillKeys =
         Config::GetHackStrictOption(ini,
                                     lang["StrictArrayFillKeys"],
+                                    EnableHipHopSyntax);
+      DisallowDynamicVarEnvFuncs =
+        Config::GetHackStrictOption(ini,
+                                    lang["DisallowDynamicVarEnvFuncs"],
                                     EnableHipHopSyntax);
     }
     {

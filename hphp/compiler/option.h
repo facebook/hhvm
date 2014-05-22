@@ -235,6 +235,7 @@ public:
   static bool EnableXHP;
   static bool IntsOverflowToInts;
   static HackStrictOption StrictArrayFillKeys;
+  static HackStrictOption DisallowDynamicVarEnvFuncs;
   static int ParserThreadCount;
 
   static int GetScannerType();

@@ -349,7 +349,7 @@ String StringUtil::UUDecode(const String& input) {
   if (!input.empty()) {
     return string_uudecode(input.data(), input.size());
   }
-  return null_string;
+  return String();
 }
 
 String StringUtil::Base64Encode(const String& input) {

@@ -239,7 +239,7 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
   if (Z_OK == status) {
     status = Z_DATA_ERROR;
   }
-  return null_string;
+  return String();
 }
 
 static Variant hhvm_zlib_decode(const String& data,

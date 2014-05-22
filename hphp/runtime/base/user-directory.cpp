@@ -60,7 +60,7 @@ Variant UserDirectory::read() {
   if (!invoked) {
     raise_warning("%s::dir_readdir is not implemented",
                   m_cls->name()->data());
-    return null_string;
+    return String();
   }
   return ret;
 }

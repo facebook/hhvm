@@ -91,7 +91,7 @@ String VariableSerializer::serialize(const Variant& v, bool ret,
     String str = m_buf->detach();
     g_context->write(str);
   }
-  return null_string;
+  return String();
 }
 
 String VariableSerializer::serializeValue(const Variant& v, bool limit) {
@@ -109,7 +109,7 @@ String VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
   if (m_type == Type::Serialize || m_type == Type::JSON ||
       m_type == Type::APCSerialize || m_type == Type::DebuggerSerialize) {
     assert(false);
-    return null_string;
+    return String();
   }
   StringBuffer buf;
   m_buf = &buf;

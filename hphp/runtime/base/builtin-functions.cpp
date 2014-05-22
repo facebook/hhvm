@@ -1211,7 +1211,7 @@ bool AutoloadHandler::invokeHandler(const String& clsName,
 
 Array AutoloadHandler::getHandlers() {
   if (!m_spl_stack_inited) {
-    return null_array;
+    return Array();
   }
 
   PackedArrayInit handlers(m_handlers.size());

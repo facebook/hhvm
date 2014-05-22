@@ -951,7 +951,7 @@ String string_strip_tags(const char *s, const int len,
 String string_addslashes(const char *str, int length) {
   assert(str);
   if (length == 0) {
-    return null_string;
+    return String();
   }
 
   String retString((length << 1) + 1, ReserveString);
@@ -1438,7 +1438,7 @@ static String php_base64_decode(const char *str, int length, bool strict) {
             continue;
           }
         }
-        return null_string;
+        return String();
       }
       continue;
     }
@@ -1448,7 +1448,7 @@ static String php_base64_decode(const char *str, int length, bool strict) {
       /* a space or some other separator character, we simply skip over */
       continue;
     } else if (ch == -2) {
-      return null_string;
+      return String();
     }
 
     switch(i % 4) {
@@ -1475,7 +1475,7 @@ static String php_base64_decode(const char *str, int length, bool strict) {
   if (ch == base64_pad) {
     switch(i % 4) {
     case 1:
-      return null_string;
+      return String();
     case 2:
       k++;
     case 3:

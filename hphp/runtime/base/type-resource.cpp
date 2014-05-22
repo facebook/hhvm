@@ -31,11 +31,11 @@ Resource::~Resource() {
 }
 
 String Resource::toString() const {
-  return m_px ? m_px->o_toString() : null_string;
+  return m_px ? m_px->o_toString() : String();
 }
 
 Array Resource::toArray() const {
-  return m_px ? m_px->o_toArray() : null_array;
+  return m_px ? m_px->o_toArray() : Array();
 }
 
 const char* Resource::classname_cstr() const {

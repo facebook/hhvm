@@ -792,7 +792,7 @@ Array File::readCSV(int64_t length /* = 0 */,
                     const String* input /* = nullptr */) {
   const String& line = (input != nullptr) ? *input : readLine(length);
   if (line.empty()) {
-    return null_array;
+    return Array();
   }
 
   String new_line;

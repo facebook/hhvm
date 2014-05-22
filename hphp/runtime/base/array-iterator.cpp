@@ -1689,6 +1689,20 @@ int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
 namespace {
 
+int64_t iter_next_cold_inc_val(Iter* it,
+                               TypedValue* valOut,
+                               TypedValue* keyOut) {
+  /*
+   * If this function is executing then valOut was already decrefed
+   * during iter_next_mixed_impl.  That decref can't have had side
+   * effects, because iter_next_cold would have been called otherwise.
+   * So it's safe to just bump the refcount back up here, and pretend
+   * like nothing ever happened.
+   */
+  tvRefcountedIncRef(valOut);
+  return iter_next_cold<false>(it, valOut, keyOut);
+}
+
 template<bool HasKey>
 ALWAYS_INLINE
 int64_t iter_next_mixed_impl(Iter* it,
@@ -1712,16 +1726,20 @@ int64_t iter_next_mixed_impl(Iter* it,
     }
   } while (UNLIKELY(arr->isTombstone(pos)));
 
-  if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
-    return iter_next_cold<false>(it, valOut, keyOut);
+
+  if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+    if (UNLIKELY(!valOut->m_data.pstr->hasMultipleRefs())) {
+      return iter_next_cold<false>(it, valOut, keyOut);
+    }
+    valOut->m_data.pstr->decRefCount();
   }
-  if (HasKey && UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
-    return iter_next_cold<false>(it, valOut, keyOut);
+  if (HasKey && IS_REFCOUNTED_TYPE(keyOut->m_type)) {
+    if (UNLIKELY(!keyOut->m_data.pstr->hasMultipleRefs())) {
+      return iter_next_cold_inc_val(it, valOut, keyOut);
+    }
+    keyOut->m_data.pstr->decRefCount();
   }
-  tvDecRefOnly(valOut);
-  if (HasKey) {
-    tvDecRefOnly(keyOut);
-  }
+
   iter.setPos(pos);
   if (HasKey) {
     arr->getArrayElm(pos, valOut, keyOut);

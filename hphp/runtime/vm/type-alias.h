@@ -34,14 +34,16 @@ namespace HPHP {
 struct TypeAlias {
   LowStringPtr name;
   LowStringPtr value;
-  DataType          kind;
-  bool              nullable; // Null is allowed; for ?Foo aliases
+  DataType     kind;
+  bool         nullable; // Null is allowed; for ?Foo aliases
+  Attr         attrs;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(name)
       (value)
       (kind)
       (nullable)
+      (attrs)
       ;
   }
 };

@@ -4115,6 +4115,20 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
     return;
   }
   if (!(valType <= Type::Obj)) {
+    if (tc.isObjectOrTypeAlias()
+        && RuntimeOption::RepoAuthoritative
+        && !tc.isCallable()
+        && tc.isPrecise()) {
+      auto const td = tc.namedEntity()->getCachedTypeAlias();
+      if (tc.namedEntity()->isPersistentTypeAlias() && td) {
+        if ((td->nullable && valType <= Type::Null)
+            || td->kind == KindOfAny
+            || equivDataTypes(td->kind, valType.toDataType())) {
+          m_irb->constrainValue(val, TypeConstraint(DataTypeSpecific));
+          return;
+        }
+      }
+    }
     emitInterpOne(0);
     return;
   }

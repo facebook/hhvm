@@ -7287,6 +7287,7 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   record.value    = value;
   record.kind     = kind;
   record.nullable = nullable;
+  record.attrs    = AttrNone;
   Id id = m_ue.addTypeAlias(record);
   e.DefTypeAlias(id);
 }

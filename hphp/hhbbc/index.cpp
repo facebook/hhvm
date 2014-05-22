@@ -1069,6 +1069,16 @@ void mark_no_override(IndexData& index) {
   }
 }
 
+void mark_unique_type_aliases(IndexData& index) {
+  for (auto& ta : index.typeAliases) {
+    auto& name = ta.first;
+    if (index.typeAliases.count(name) == 1 && index.classes.count(name) == 0) {
+      const_cast<borrowed_ptr<php::TypeAlias>>(ta.second)->attrs
+        = AttrUnique | AttrPersistent;
+    }
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
@@ -1188,6 +1198,7 @@ Index::Index(borrowed_ptr<php::Program> program)
   check_invariants(*m_data);
 
   mark_no_override(*m_data);
+  mark_unique_type_aliases(*m_data);
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr

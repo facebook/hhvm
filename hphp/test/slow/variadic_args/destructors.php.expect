@@ -244,12 +244,12 @@ HasD::__destruct(HasD 18)
 bool(true)
 array(2) {
   [0]=>
-  object(HasD)#9 (1) {
+  object(HasD)#10 (1) {
     ["name":"HasD":private]=>
     string(7) "HasD 19"
   }
   [1]=>
-  object(HasD)#10 (1) {
+  object(HasD)#11 (1) {
     ["name":"HasD":private]=>
     string(7) "HasD 20"
   }
@@ -282,7 +282,7 @@ HasD::__destruct(HasD 20)
 bool(true)
 array(1) {
   [0]=>
-  object(HasD)#10 (1) {
+  object(HasD)#12 (1) {
     ["name":"HasD":private]=>
     string(7) "HasD 21"
   }
@@ -308,12 +308,12 @@ HasD::__destruct(HasD 21)
 bool(true)
 array(2) {
   [0]=>
-  object(HasD)#10 (1) {
+  object(HasD)#13 (1) {
     ["name":"HasD":private]=>
     string(7) "HasD 22"
   }
   [1]=>
-  object(HasD)#11 (1) {
+  object(HasD)#14 (1) {
     ["name":"HasD":private]=>
     string(7) "HasD 23"
   }

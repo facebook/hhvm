@@ -3242,11 +3242,11 @@ void HhbcTranslator::emitEndInlinedCommon() {
   assert(!m_fpiActiveStack.empty());
   assert(!curFunc()->isPseudoMain());
 
+  emitDecRefLocalsInline();
+
   if (curFunc()->mayHaveThis()) {
     gen(DecRefThis, m_irb->fp());
   }
-
-  emitDecRefLocalsInline();
 
   /*
    * Pop the ActRec and restore the stack and frame pointers.  It's
@@ -3513,11 +3513,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   SSATmp* retVal = pop(type, func->isGenerator() ? DataTypeSpecific
                                                  : DataTypeGeneric);
 
-  // Free $this.
-  if (func->mayHaveThis()) {
-    gen(DecRefThis, m_irb->fp());
-  }
-
   // Free local variables.
   if (freeInline) {
     emitDecRefLocalsInline();
@@ -3529,6 +3524,11 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
 
   // Call the FunctionExit hook and put the return value on the stack so that
+  // Free $this.
+  if (func->mayHaveThis()) {
+    gen(DecRefThis, m_irb->fp());
+  }
+
   // the unwinder would decref it.
   emitRetSurpriseCheck(resumed() ? cns(Type::Uninit) : retVal,
                        catchBlock, false);

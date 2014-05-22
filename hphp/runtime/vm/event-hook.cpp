@@ -268,6 +268,19 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(ActRec* ar, TypedValue* retval) {
+  // Null out $this for the exiting function, it has been decref'd so it's
+  // garbage.
+  //
+  // NB: This function is also run on async functions that are suspending, so
+  // we need to check that the function is actually returning.
+  JIT::VMRegAnchor _;
+  switch (static_cast<Op>(*g_context->getPC())) {
+    case OpRetC:
+    case OpRetV:
+      ar->setThisOrClassAllowNull(nullptr);
+    default: break;
+  }
+
   auto const inlinedRip = JIT::tx->uniqueStubs.retInlHelper;
   if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
     // Inlined calls normally skip the function enter and exit events. If we

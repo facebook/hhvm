@@ -43,10 +43,7 @@ $excluded = array(
 );
 
 $files_external_party = array(
-  'runtime/ext/ext_memcached.h' => 'hyves',
-  'runtime/ext/ext_memcached.cpp' => 'hyves',
-  'test/test_ext_memcached.h' => 'hyves',
-  'test/test_ext_memcached.cpp' => 'hyves',
+  'runtime/ext/memcached/ext_memcached.cpp'=> 'hyves',
 );
 
 $files_zend = array(

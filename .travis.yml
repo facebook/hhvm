@@ -3,6 +3,9 @@ language: cpp
 compiler:
   - gcc
 
+services:
+  - memcached
+
 before_script:
   - time TRAVIS=1 ./configure_generic.sh
 # for some tests

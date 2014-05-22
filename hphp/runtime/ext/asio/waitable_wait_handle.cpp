@@ -213,7 +213,6 @@ c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
 }
 
 Array c_WaitableWaitHandle::t_getdependencystack() {
-  g_context->nullOutReturningActRecs();
   Array result = Array::Create();
   if (isFinished()) return result;
   hphp_hash_set<int64_t> visited;

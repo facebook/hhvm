@@ -3218,11 +3218,11 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   assert(!curFunc()->isPseudoMain());
   assert(!m_fpiActiveStack.empty());
 
+  emitDecRefLocalsInline();
+
   if (curFunc()->mayHaveThis()) {
     gen(DecRefThis, m_irb->fp());
   }
-
-  emitDecRefLocalsInline();
 
   // Before we leave the inlined frame, grab a type prediction from our
   // DefInlineFP.
@@ -3308,11 +3308,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   SSATmp* retVal = pop(type, func->isGenerator() ? DataTypeSpecific
                                                  : DataTypeGeneric);
 
-  // Free $this.
-  if (func->mayHaveThis()) {
-    gen(DecRefThis, m_irb->fp());
-  }
-
   // Free local variables.
   if (freeInline) {
     emitDecRefLocalsInline();
@@ -3324,6 +3319,11 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
 
   // Call the FunctionExit hook and put the return value on the stack so that
+  // Free $this.
+  if (func->mayHaveThis()) {
+    gen(DecRefThis, m_irb->fp());
+  }
+
   // the unwinder would decref it.
   emitRetSurpriseCheck(resumed() ? cns(Type::Uninit) : retVal,
                        catchBlock, false);

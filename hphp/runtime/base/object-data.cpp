@@ -975,7 +975,6 @@ void ObjectData::DeleteObject(ObjectData* objectData) {
 
   assert(!cls->preClass()->builtinObjSize());
   assert(!cls->preClass()->builtinODOffset());
-  objectData->~ObjectData();
 
   // ObjectData subobject is logically destructed now---don't access
   // objectData->foo for anything.
@@ -986,6 +985,8 @@ void ObjectData::DeleteObject(ObjectData* objectData) {
   for (; prop != stop; ++prop) {
     tvRefcountedDecRef(prop);
   }
+
+  objectData->~ObjectData();
 
   auto const size = sizeForNProps(nProps);
   if (LIKELY(size <= kMaxSmartSize)) {

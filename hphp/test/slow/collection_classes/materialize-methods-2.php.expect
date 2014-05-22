@@ -24,21 +24,21 @@ object(HH\Vector)#11 (1) {
   [0]=>
   string(3) "abc"
 }
-object(HH\ImmVector)#15 (1) {
+object(HH\ImmVector)#14 (1) {
   [0]=>
   string(3) "abc"
 }
-object(HH\Map)#19 (1) {
+object(HH\Map)#16 (1) {
   [123]=>
   string(3) "abc"
 }
-object(HH\ImmMap)#23 (1) {
+object(HH\ImmMap)#18 (1) {
   [123]=>
   string(3) "abc"
 }
-object(HH\Set)#27 (1) {
+object(HH\Set)#20 (1) {
   string(3) "abc"
 }
-object(HH\ImmSet)#31 (1) {
+object(HH\ImmSet)#22 (1) {
   string(3) "abc"
 }

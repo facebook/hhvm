@@ -219,9 +219,7 @@ bool hasObviousStackOutput(Op op) {
   case Op::EmptyM:
   case Op::IsTypeC:
   case Op::IsTypeL:
-  case Op::ClassExists:
-  case Op::InterfaceExists:
-  case Op::TraitExists:
+  case Op::OODeclExists:
   case Op::Floor:
   case Op::Ceil:
     return true;

@@ -1193,7 +1193,8 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   PUNT(SetOpL);
 }
 
-void HhbcTranslator::classExistsImpl(ClassKind kind) {
+void HhbcTranslator::emitOODeclExists(unsigned char ucsubop) {
+  auto const subop = static_cast<OODeclExistsOp>(ucsubop);
   auto const catchTrace = makeCatch();
 
   auto const tAutoload = popC();
@@ -1202,20 +1203,15 @@ void HhbcTranslator::classExistsImpl(ClassKind kind) {
   assert(tCls->isA(Type::Str)); // result of CastString
   assert(tAutoload->isA(Type::Bool)); // result of CastBool
 
+  ClassKind kind;
+  switch (subop) {
+    case OODeclExistsOp::Class : kind = ClassKind::Class; break;
+    case OODeclExistsOp::Trait : kind = ClassKind::Trait; break;
+    case OODeclExistsOp::Interface : kind = ClassKind::Interface; break;
+  }
+
   push(gen(OODeclExists, catchTrace, ClassKindData { kind }, tCls, tAutoload));
   gen(DecRef, tCls);
-}
-
-void HhbcTranslator::emitClassExists() {
-  classExistsImpl(ClassKind::Class);
-}
-
-void HhbcTranslator::emitInterfaceExists() {
-  classExistsImpl(ClassKind::Interface);
-}
-
-void HhbcTranslator::emitTraitExists() {
-  classExistsImpl(ClassKind::Trait);
 }
 
 void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {

@@ -3942,9 +3942,7 @@ Catch    []  ->  [C:Obj]
   The exception object must be a subclass of the builtin Exception class. This
   instruction may only be used at the beginning of a catch entry point.
 
-ClassExists        [C C]  ->  [C:Bool]
-InterfaceExists    [C C]  ->  [C:Bool]
-TraitExists        [C C]  ->  [C:Bool]
+OODeclExists <Class|Interface|Trait> [C C]  ->  [C:Bool]
 
   Check for class/interface/trait existence. If $1 cannot be cast to a bool or
   $2 cannot be cast to a string, this instruction will throw a fatal error.

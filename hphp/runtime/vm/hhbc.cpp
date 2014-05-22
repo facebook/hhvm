@@ -1100,6 +1100,12 @@ static const char* SilenceOp_names[] = {
 #undef SILENCE_OP
 };
 
+static const char* OODeclExistsOp_names[] = {
+#define OO_DECL_EXISTS_OP(x) #x,
+  OO_DECL_EXISTS_OPS
+#undef OO_DECL_EXISTS_OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1147,6 +1153,7 @@ X(SetOpOp)
 X(IncDecOp)
 X(BareThisOp)
 X(SilenceOp)
+X(OODeclExistsOp)
 
 #undef X
 

@@ -4155,8 +4155,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         } else if ((call->isCallToFunction("class_exists") ||
                     call->isCallToFunction("interface_exists") ||
-                    call->isCallToFunction("trait_exists")) && params &&
-                   (params->getCount() == 1 || params->getCount() == 2)) {
+                    call->isCallToFunction("trait_exists"))
+                   && params
+                   && (params->getCount() == 1 || params->getCount() == 2)) {
           // Push name
           emitNameString(e, (*params)[0]);
           emitConvertToCell(e);
@@ -4171,12 +4172,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.CastBool();
           }
           if (call->isCallToFunction("class_exists")) {
-            e.ClassExists();
+            e.OODeclExists(OODeclExistsOp::Class);
           } else if (call->isCallToFunction("interface_exists")) {
-            e.InterfaceExists();
+            e.OODeclExists(OODeclExistsOp::Interface);
           } else {
             assert(call->isCallToFunction("trait_exists"));
-            e.TraitExists();
+            e.OODeclExists(OODeclExistsOp::Trait);
           }
           return true;
         } else if (call->isCallToFunction("get_class") &&

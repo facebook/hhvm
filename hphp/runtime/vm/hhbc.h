@@ -442,6 +442,17 @@ enum class SilenceOp : uint8_t {
 #undef SILENCE_OP
 };
 
+#define OO_DECL_EXISTS_OPS                             \
+  OO_DECL_EXISTS_OP(Class)                             \
+  OO_DECL_EXISTS_OP(Interface)                         \
+  OO_DECL_EXISTS_OP(Trait)
+
+enum class OODeclExistsOp : uint8_t {
+#define OO_DECL_EXISTS_OP(x) x,
+  OO_DECL_EXISTS_OPS
+#undef OO_DECL_EXISTS_OP
+};
+
 constexpr int32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -666,9 +677,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(StaticLoc,       TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
   O(StaticLocInit,   TWO(IVA,SA),      ONE(CV),         NOV,        NF) \
   O(Catch,           NA,               NOV,             ONE(CV),    NF) \
-  O(ClassExists,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(InterfaceExists, NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(TraitExists,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(OODeclExists,    ONE(OA(OODeclExistsOp)),                           \
+                                       TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyParamType, ONE(IVA),         NOV,             NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeV,  NA,               ONE(VV),         ONE(VV),    NF) \
@@ -925,6 +935,7 @@ const char* subopToName(SetOpOp);
 const char* subopToName(IncDecOp);
 const char* subopToName(BareThisOp);
 const char* subopToName(SilenceOp);
+const char* subopToName(OODeclExistsOp);
 
 /*
  * Try to parse a string into a subop name of a given type.

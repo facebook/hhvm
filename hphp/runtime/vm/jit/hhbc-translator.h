@@ -343,11 +343,9 @@ struct HhbcTranslator {
   // boolean ops
   void emitXor();
   void emitNot();
-  void emitNativeImpl();
 
-  void emitClassExists();
-  void emitInterfaceExists();
-  void emitTraitExists();
+  void emitNativeImpl();
+  void emitOODeclExists(unsigned char subop);
 
   void emitStaticLocInit(uint32_t varId, uint32_t litStrId);
   void emitStaticLoc(uint32_t varId, uint32_t litStrId);

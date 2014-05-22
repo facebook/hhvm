@@ -1780,26 +1780,18 @@ void in(ISS& env, const bc::StaticLocInit& op) {
 }
 
 /*
- * This can't trivially check that the class exists (e.g. via
- * resolve_class) without knowing either:
+ * This can't trivially check that the class/trait/interface exists
+ * (e.g. via resolve_class) without knowing either:
  *
  *  a) autoload is guaranteed to load it and t1 == true, or
  *  b) it's already defined in this unit.
+ *
+ * op.subop (OODeclExistsOp) would be useful with resolution of the class
  */
-void clsExistsImpl(ISS& env, ClassKind kind) {
+void in(ISS& env, const bc::OODeclExists& op) {
   popC(env);
   popC(env);
   push(env, TBool);
-}
-
-void in(ISS& env, const bc::ClassExists&) {
-  clsExistsImpl(env, ClassKind::Class);
-}
-void in(ISS& env, const bc::TraitExists&) {
-  clsExistsImpl(env, ClassKind::Trait);
-}
-void in(ISS& env, const bc::InterfaceExists&) {
-  clsExistsImpl(env, ClassKind::Interface);
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {

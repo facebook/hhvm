@@ -1085,6 +1085,7 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
   }
 
   // Save info to support ReflectionClass::getTraitAliases
+  traitName = traitCls->name();
   addTraitAlias(traitName, origMethName, newMethName);
 
   Func* traitMeth = traitCls->lookupMethod(origMethName);

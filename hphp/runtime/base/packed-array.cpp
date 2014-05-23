@@ -559,10 +559,9 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
 }
 
 ArrayData*
-PackedArray::RemoveStr(ArrayData* adIn, const StringData* key, bool copy) {
+PackedArray::RemoveStr(ArrayData* adIn, const StringData*, bool) {
   assert(checkInvariants(adIn));
-  // TODO(#3986711): can this avoid the copy?
-  return copy ? Copy(adIn) : adIn;
+  return adIn;
 }
 
 ssize_t PackedArray::IterBegin(const ArrayData* ad) {

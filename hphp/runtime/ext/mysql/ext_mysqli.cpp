@@ -389,7 +389,7 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option, const Variant& value
     }
   }
 
-  return !mysql_options(conn->get(), (mysql_option)option, value_ptr);
+  return !mysql_options(conn->get(), (mysql_option)option, (const char*)value_ptr);
 }
 
 //static int64_t HHVM_STATIC_METHOD(mysqli, poll, VRefParam read,

@@ -354,10 +354,11 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    */
   public function getName(): string {
     if ($this->closure) {
-      $closureScopeClass = $this->getClosureScopeClass();
-      return $closureScopeClass && $closureScopeClass->getNamespaceName()
-        ? $closureScopeClass->getNamespaceName() . '\{closure}'
-        : '{closure}';
+      $clsname = $this->getClosureScopeClassname($this->closure);
+      $pos = $clsname ? strrpos($clsname, '\\') : false;
+      return ($pos === false)
+        ? '{closure}'
+        : substr($clsname, 0, $pos + 1).'{closure}';
     }
     return parent::getName();
   }

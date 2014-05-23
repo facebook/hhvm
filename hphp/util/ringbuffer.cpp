@@ -34,8 +34,7 @@ namespace Trace {
  */
 static const int kMaxRBBytes = 1 << 19; // 512KB
 __thread int  tl_rbPtr;
-__thread char tl_ring[kMaxRBBytes];
-UNUSED __thread const char _unused[] = "\n----END OF RINGBUFFER---\n";
+__thread char* tl_ring_ptr;
 
 const char* ringbufferName(RingBufferType t) {
   switch (t) {
@@ -53,8 +52,11 @@ void vtraceRingbuffer(const char* fmt, va_list ap) {
   // Silently truncate long inputs.
   int msgBytes = std::min(int(sizeof(buf)) - 1,
                           vsnprintf(buf, sizeof(buf) - 1, fmt, ap));
+  if (UNLIKELY(!tl_ring_ptr)) {
+    tl_ring_ptr = (char*)calloc(kMaxRBBytes, 1);
+  }
   // Remember these for the binary ringbuffer.
-  char* start = &tl_ring[tl_rbPtr];
+  char* start = &tl_ring_ptr[tl_rbPtr];
   int totalLen = msgBytes;
   // Include the nulls; we will sometimes include these strings
   // by reference from the global ringbuffer.
@@ -62,7 +64,7 @@ void vtraceRingbuffer(const char* fmt, va_list ap) {
   while(msgBytes) {
     int leftInCurPiece = kMaxRBBytes - tl_rbPtr;
     int toWrite = std::min(msgBytes, leftInCurPiece);
-    memcpy(&tl_ring[tl_rbPtr], bufP, toWrite);
+    memcpy(&tl_ring_ptr[tl_rbPtr], bufP, toWrite);
     msgBytes -= toWrite;
     bufP += toWrite;
     tl_rbPtr = (tl_rbPtr + toWrite) % kMaxRBBytes;
@@ -73,11 +75,13 @@ void vtraceRingbuffer(const char* fmt, va_list ap) {
 // From GDB:
 //  (gdb) call HPHP::Trace::dumpRingBuffer()
 void dumpRingbuffer() {
-  write(1, tl_ring + tl_rbPtr, kMaxRBBytes - tl_rbPtr);
-  write(1, tl_ring, tl_rbPtr);
+  if (tl_ring_ptr) {
+    write(1, tl_ring_ptr + tl_rbPtr, kMaxRBBytes - tl_rbPtr);
+    write(1, tl_ring_ptr, tl_rbPtr);
+  }
 }
 
-RingBufferEntry g_ring[kMaxRBEntries];
+RingBufferEntry* g_ring_ptr;
 std::atomic<int> g_ringIdx(0);
 std::atomic<uint32_t> g_seqnum(0);
 
@@ -86,9 +90,18 @@ allocEntry(RingBufferType t) {
   assert(folly::isPowTwo(kMaxRBEntries));
   RingBufferEntry* rb;
   int newRingPos, oldRingPos;
+  if (UNLIKELY(!g_ring_ptr)) {
+    static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&mtx);
+    if (!g_ring_ptr) {
+      g_ring_ptr = (RingBufferEntry*)calloc(sizeof(RingBufferEntry),
+                                            kMaxRBEntries);
+    }
+    pthread_mutex_unlock(&mtx);
+  }
   do {
     oldRingPos = g_ringIdx.load(std::memory_order_acquire);
-    rb = &g_ring[oldRingPos];
+    rb = &g_ring_ptr[oldRingPos];
     newRingPos = (oldRingPos + 1) % kMaxRBEntries;
   } while (!g_ringIdx.compare_exchange_weak(oldRingPos, newRingPos,
                                             std::memory_order_acq_rel));

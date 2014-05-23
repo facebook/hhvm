@@ -122,7 +122,8 @@ void flush() {
 
 void vtrace(const char *fmt, va_list ap) {
   static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
-  if (getenv("HPHP_TRACE_RINGBUFFER")) {
+  static bool hphp_trace_ringbuffer = getenv("HPHP_TRACE_RINGBUFFER");
+  if (hphp_trace_ringbuffer) {
     vtraceRingbuffer(fmt, ap);
   } else {
     ONTRACE(1, pthread_mutex_lock(&mtx));

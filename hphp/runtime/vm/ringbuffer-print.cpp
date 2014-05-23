@@ -81,6 +81,7 @@ void dumpEntry(const RingBufferEntry* e) {
 //    (gdb) call HPHP::Trace::dumpRingBufferMasked(100,
 //       (1 << HPHP::Trace::RBTypeFuncEntry))
 void dumpRingBufferMasked(int numEntries, uint32_t types) {
+  if (!g_ring_ptr) return;
   int startIdx = (g_ringIdx.load() - numEntries) % kMaxRBEntries;
   while (startIdx < 0) {
     startIdx += kMaxRBEntries;
@@ -88,7 +89,7 @@ void dumpRingBufferMasked(int numEntries, uint32_t types) {
   assert(startIdx >= 0 && startIdx < kMaxRBEntries);
   int numDumped = 0;
   for (int i = 0; i < kMaxRBEntries && numDumped < numEntries; i++) {
-    RingBufferEntry* rb = &g_ring[(startIdx + i) % kMaxRBEntries];
+    RingBufferEntry* rb = &g_ring_ptr[(startIdx + i) % kMaxRBEntries];
     if ((1 << rb->m_type) & types) {
       numDumped++;
       dumpEntry(rb);

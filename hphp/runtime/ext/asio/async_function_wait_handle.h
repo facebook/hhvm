@@ -97,7 +97,9 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
   void markAsFailed(const Object& exception);
   c_WaitableWaitHandle* child() { return m_child; }
 
+  // valid if STATE_SCHEDULED || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
+
   Object m_privData;
 
   static const int8_t STATE_SCHEDULED = 3;

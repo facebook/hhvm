@@ -24,7 +24,7 @@
 #include "zend.h"
 #include "zend_list.h"
 // has to be before zend_API since that defines getThis()
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendRequestLocal.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-request-local.h"
 #include "zend_API.h"
 #include "php.h"
 #include "php_streams.h"
@@ -55,11 +55,13 @@ namespace HPHP {
   }
 }
 
-ZEND_REQUEST_LOCAL_LIST(zend_rsrc_list_entry*, s_regular_list);
-typedef ZendRequestLocalList<zend_rsrc_list_entry*>::list zend_rsrc_list;
+ZEND_REQUEST_LOCAL_VECTOR(zend_rsrc_list_entry*, tl_regular_list);
+typedef HPHP::ZendRequestLocalVector<zend_rsrc_list_entry*>::container zend_rsrc_list;
 
-zend_rsrc_list& RL() {
-  return s_regular_list.get()->get();
+namespace {
+  zend_rsrc_list& RL() {
+    return tl_regular_list.get()->get();
+  }
 }
 
 static zend_rsrc_list_entry *zend_list_id_to_entry(int id TSRMLS_DC) {

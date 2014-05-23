@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-execution-stack.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native.h"
@@ -43,7 +43,7 @@ ZEND_API const char *zend_zval_type_name(const zval *arg) {
 
 ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) {
   auto* hphp_class = Z_OBJVAL_P(zobject)->getVMClass();
-  return zend_hphp_class_to_class_entry(hphp_class);
+  return HPHP::zend_hphp_class_to_class_entry(hphp_class);
 }
 
 static int parse_arg_object_to_string(zval **arg, const char **p, int *pl, int type TSRMLS_DC) {
@@ -548,7 +548,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
     return FAILURE;
   }
 
-  arg_count = ZendExecutionStack::numArgs();
+  arg_count = HPHP::ZendExecutionStack::numArgs();
 
   if (num_args > arg_count) {
     zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -590,7 +590,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
         for (iv = 0; iv < num_varargs; iv++) {
           double_ptrs[iv] = &single_ptrs[iv];
-          single_ptrs[iv] = ZendExecutionStack::getArg(i + iv);
+          single_ptrs[iv] = HPHP::ZendExecutionStack::getArg(i + iv);
         }
 
         /* adjust how many args we have left and restart loop */
@@ -603,7 +603,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
       }
     }
 
-    auto tmp = ZendExecutionStack::getArg(i);
+    auto tmp = HPHP::ZendExecutionStack::getArg(i);
     arg = &tmp;
 
     if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
@@ -1480,7 +1480,7 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const 
 }
 
 ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *name, int name_length, zval *value TSRMLS_DC) {
-  HPHP::Class * cls = zend_hphp_class_entry_to_class(scope);
+  HPHP::Class * cls = HPHP::zend_hphp_class_entry_to_class(scope);
   if (!cls) {
     return FAILURE;
   }
@@ -1491,7 +1491,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
   if (!tv) {
     return FAILURE;
   }
-  tvSetZval(value, tv);
+  HPHP::tvSetZval(value, tv);
   return SUCCESS;
 }
 
@@ -1575,10 +1575,10 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
   HPHP::StringData * sd = HPHP::makeStaticString(oce->name, oce->name_length);
   HPHP::Class * cls = HPHP::Unit::lookupClass(sd);
   if (cls) {
-    ce = zend_hphp_class_to_class_entry(cls);
+    ce = HPHP::zend_hphp_class_to_class_entry(cls);
   } else {
     // System library not loaded yet -- defer initialisation of ce->hphp_class
-    ce = zend_hphp_register_internal_class_entry(sd);
+    ce = HPHP::zend_hphp_register_internal_class_entry(sd);
   }
   ce->create_object = oce->create_object;
 
@@ -1618,7 +1618,7 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC) {
   assert(properties == 0);
   // Why is there no ZVAL_OBJVAL?
-  HPHP::Class * cls = zend_hphp_class_entry_to_class(class_type);
+  HPHP::Class * cls = HPHP::zend_hphp_class_entry_to_class(class_type);
   if (!cls) {
     // You can't call this function from MINIT, sorry
     HPHP::raise_error("cannot create object of class %s. "
@@ -1650,7 +1650,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 }
 
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, int name_length, zend_bool silent TSRMLS_DC) {
-  HPHP::Class * cls = zend_hphp_class_entry_to_class(scope);
+  HPHP::Class * cls = HPHP::zend_hphp_class_entry_to_class(scope);
   if (!cls) {
     // You can't call this function from MINIT, sorry
     HPHP::raise_error("cannot read property of class %s. "

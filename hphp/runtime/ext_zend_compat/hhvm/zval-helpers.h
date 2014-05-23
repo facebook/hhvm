@@ -19,9 +19,11 @@
 
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
 
+namespace HPHP {
+
 // Assumes 'tv' is dead
-inline void tvWriteZval(zval* pref, HPHP::TypedValue* tv) {
-  tv->m_type = HPHP::KindOfRef;
+inline void tvWriteZval(zval* pref, TypedValue* tv) {
+  tv->m_type = KindOfRef;
   tv->m_data.pref = pref;
   // including zend.h is suicide in here, so just inline zval_addref_p
   pref->zAddRef();
@@ -29,12 +31,14 @@ inline void tvWriteZval(zval* pref, HPHP::TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-inline void tvSetZval(zval* pref, HPHP::TypedValue* tv) {
+inline void tvSetZval(zval* pref, TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   auto const oldType = tv->m_type;
   auto const oldDatum = tv->m_data.num;
   tvWriteZval(pref, tv);
   tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
 }
 
 #endif // incl_ZVAL_HELPERS_H_

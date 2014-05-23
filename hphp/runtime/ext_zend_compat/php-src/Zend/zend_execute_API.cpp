@@ -38,7 +38,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendExceptionStore.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-exception-store.h"
 namespace HPHP {
   void zBoxAndProxy(TypedValue* arg);
 }
@@ -125,33 +125,35 @@ ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, 
   return zend_call_function(&fci, NULL TSRMLS_CC);
 }
 
-static void zend_handle_cpp_exception(TSRMLS_D)
-{
-  ZendExceptionStore::getInstance().setPointer(std::current_exception());
+namespace {
+  static void zend_handle_cpp_exception(TSRMLS_D)
+  {
+    HPHP::ZendExceptionStore::getInstance().setPointer(std::current_exception());
 
-  try {
-    throw;
-  }
+    try {
+      throw;
+    }
 
-  catch (HPHP::Object& e) {
-    HPHP::TypedValue tv = HPHP::make_tv<HPHP::KindOfObject>(e.get());
-    EG(exception) = HPHP::RefData::Make(tv);
-  }
+    catch (HPHP::Object& e) {
+      HPHP::TypedValue tv = HPHP::make_tv<HPHP::KindOfObject>(e.get());
+      EG(exception) = HPHP::RefData::Make(tv);
+    }
 
-  catch (std::exception& e) {
-    std::string message(typeid(e).name());
-    message += ": ";
-    message += e.what();
-    EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
-        HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
-  }
+    catch (std::exception& e) {
+      std::string message(typeid(e).name());
+      message += ": ";
+      message += e.what();
+      EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
+          HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
+    }
 
-  catch (...) {
-    std::string message("unexpected C++ exception");
-    EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
-        HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
+    catch (...) {
+      std::string message("unexpected C++ exception");
+      EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
+          HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
+    }
+    tvIncRef(EG(exception)->tv());
   }
-  tvIncRef(EG(exception)->tv());
 }
 
 int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC) /* {{{ */
@@ -216,7 +218,7 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(
     return NULL;
   }
   HPHP::StringData * sd = HPHP::makeStaticString(class_name, class_name_len);
-  zend_class_entry * zce = zend_hphp_get_internal_class_entry(sd);
+  zend_class_entry * zce = HPHP::zend_hphp_get_internal_class_entry(sd);
   if (zce) {
     return zce;
   }
@@ -235,6 +237,6 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(
     }
     return NULL;
   }
-  return zend_hphp_class_to_class_entry(cls);
+  return HPHP::zend_hphp_class_to_class_entry(cls);
 }
 

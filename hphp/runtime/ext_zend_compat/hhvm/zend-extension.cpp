@@ -25,12 +25,14 @@
 
 #include <atomic>
 
+namespace HPHP {
+
 // Initial size of the map
 #define APPROXIMATE_STATIC_ZEND_MODULES 10
 static std::atomic_int s_zend_next_module(1);
 static folly::AtomicHashMap<int, ZendExtension*> *s_zend_extensions;
 
-ZendExtension::ZendExtension(const char* name) : HPHP::Extension(name) {
+ZendExtension::ZendExtension(const char* name) : Extension(name) {
   if (!s_zend_extensions) {
     // No need to worry about races, this all happens during pre-main
     // initialization
@@ -50,7 +52,7 @@ ZendExtension* ZendExtension::GetByModuleNumber(int module_number) {
 }
 
 void ZendExtension::moduleInit() {
-  if (!HPHP::RuntimeOption::EnableZendCompat) {
+  if (!RuntimeOption::EnableZendCompat) {
     return;
   }
   // Give it a module number
@@ -58,7 +60,7 @@ void ZendExtension::moduleInit() {
   module->module_number = s_zend_next_module++;
   s_zend_extensions->insert(module->module_number, this);
 
-  HPHP::ZendObject::registerNativeData();
+  ZendObject::registerNativeData();
   // Allocate globals
   if (module->globals_size) {
     ts_allocate_id(module->globals_id_ptr, module->globals_size,
@@ -69,7 +71,7 @@ void ZendExtension::moduleInit() {
   const zend_function_entry * fe = module->functions;
   while (fe->fname) {
     assert(fe->handler);
-    HPHP::Native::registerBuiltinFunction(HPHP::makeStaticString(fe->fname),
+    Native::registerBuiltinFunction(makeStaticString(fe->fname),
                                           fe->handler);
     fe++;
   }
@@ -81,6 +83,8 @@ void ZendExtension::moduleInit() {
   // The systemlib name must match the name used by the build process. For
   // in-tree builds this is the directory name, which is typically the same
   // as the extension name converted to lower case.
-  std::string slName = HPHP::toLower(std::string(getName()));
+  std::string slName = toLower(std::string(getName()));
   loadSystemlib(slName);
+}
+
 }

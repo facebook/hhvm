@@ -353,7 +353,13 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    * @return     string   The name of the function.
    */
   public function getName(): string {
-    return ($this->closure) ? '{closure}' : parent::getName();
+    if ($this->closure) {
+      $closureScopeClass = $this->getClosureScopeClass();
+      return $closureScopeClass && $closureScopeClass->getNamespaceName()
+        ? $closureScopeClass->getNamespaceName() . '\{closure}'
+        : '{closure}';
+    }
+    return parent::getName();
   }
 
   // __get and __set are used to maintain read-only $this->name

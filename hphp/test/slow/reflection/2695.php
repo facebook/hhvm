@@ -1,5 +1,15 @@
 <?php
 
+namespace NamespaceFoo {
+  class Bar {
+    function createClosure() {
+      return function() {};
+    }
+  }
+}
+
+namespace {
+
 interface IFoo {
 
   function foo();
@@ -54,6 +64,12 @@ abstract class Baz2 extends Bar2 {
   }
 }
 
+class Baz3 {
+  function createClosure() {
+    return function() {};
+  }
+}
+
 function test_class_reflector() {
   $ifoo_reflector = new ReflectionClass("IFoo");
   foreach ($ifoo_reflector->getMethods() as $method) {
@@ -97,6 +113,22 @@ function test_method_reflector() {
   var_dump($baz2__foobar2_reflector->isAbstract());
 }
 
+function test_function_reflector() {
+  $foo__bar = new NamespaceFoo\Bar();
+  $foo__bar_reflector = new ReflectionFunction($foo__bar->createClosure());
+  var_dump($foo__bar_reflector->getName());
+
+  $baz3 = new Baz3();
+  $baz3_reflector = new ReflectionFunction($baz3->createCLosure());
+  var_dump($baz3_reflector->getName());
+
+  $closure = function() {};
+  $closure_reflector = new ReflectionFunction($closure);
+  var_dump($closure_reflector->getName());
+}
+
 test_class_reflector();
 test_method_reflector();
+test_function_reflector();
 
+}

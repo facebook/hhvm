@@ -123,7 +123,7 @@ function parse_php_methods(string $file):
     return ImmMap {};
   }
 
-  static $class_regex = "#class ([^\\s{]+)[^{]*\\{(.*?)\n\\}#ms";
+  static $class_regex = "#class ([^\\s{]+)[^{]*\\{(.*?)\n\\}#msi";
   static $method_regex =
     "#<<[^>]*__Native([^>]*)>>\n\\s*.*?function +([^(]*)\(([^)]*)\) *: *(.+?);#m";
 

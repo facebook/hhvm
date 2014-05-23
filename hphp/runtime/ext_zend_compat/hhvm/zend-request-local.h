@@ -22,38 +22,42 @@
 #include <vector>
 #include "hphp/runtime/base/request-event-handler.h"
 
-#define ZEND_REQUEST_LOCAL_LIST(T, N) static __thread HPHP::RequestLocal<ZendRequestLocalList<T> > N;
+namespace HPHP {
+
+#define ZEND_REQUEST_LOCAL_VECTOR(T, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalVector<T> > N;
 template <class T>
-class ZendRequestLocalList final : public HPHP::RequestEventHandler {
+class ZendRequestLocalVector final : public RequestEventHandler {
   private:
     void clear() {
-      m_list.clear();
-      m_list.push_back(nullptr); // don't give out id 0
+      m_container.clear();
+      m_container.push_back(nullptr); // don't give out id 0
     }
   public:
-    typedef std::vector<T> list;
+    typedef std::vector<T> container;
     virtual void requestInit() {
       clear();
     }
     virtual void requestShutdown() {
       clear();
     }
-    list& get() {
-      return m_list;
+    container& get() {
+      return m_container;
     }
   private:
-    list m_list;
+    container m_container;
 };
 
-#define ZEND_REQUEST_LOCAL_MAP(K, V, N) static __thread HPHP::RequestLocal<ZendRequestLocalMap<K,V> > N;
+#define ZEND_REQUEST_LOCAL_MAP(K, V, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalMap<K,V> > N;
 template <class K, class V>
-struct ZendRequestLocalMap final : HPHP::RequestEventHandler {
-  typedef std::unordered_map<K, V> list;
+struct ZendRequestLocalMap final : RequestEventHandler {
+  typedef std::unordered_map<K, V> container;
   void requestInit() override { m_map.clear(); }
   void requestShutdown() override { m_map.clear(); }
-  list& get() { return m_map; }
+  container& get() { return m_map; }
 private:
-  list m_map;
+  container m_map;
 };
+
+}
 
 #endif // incl_HPHP_ZEND_REQUEST_LOCAL

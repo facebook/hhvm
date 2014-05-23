@@ -6,7 +6,9 @@
 typedef struct _zend_module_entry zend_module_entry;
 struct _zend_module_entry;
 
-class ZendExtension : public HPHP::Extension {
+namespace HPHP {
+
+class ZendExtension : public Extension {
 private:
   zend_module_entry *getEntry();
 public:
@@ -19,4 +21,5 @@ public:
   static ZendExtension* GetByModuleNumber(int module_number);
 };
 
+}
 #endif

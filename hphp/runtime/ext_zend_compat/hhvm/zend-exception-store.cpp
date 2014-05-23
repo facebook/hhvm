@@ -14,12 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendExceptionStore.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-exception-store.h"
 
-static __thread HPHP::RequestLocal<ZendExceptionStore> s_exceptionStore;
+namespace HPHP {
+
+static __thread RequestLocal<ZendExceptionStore> tl_exceptionStore;
 
 ZendExceptionStore& ZendExceptionStore::getInstance() {
-  return *s_exceptionStore;
+  return *tl_exceptionStore;
 }
 
-
+}

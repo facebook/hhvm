@@ -15,15 +15,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-execution-stack.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include <vector>
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-static __thread HPHP::RequestLocal<ZendExecutionStack> s_stack;
+namespace HPHP {
+
+static __thread RequestLocal<ZendExecutionStack> tl_stack;
 
 ZendExecutionStack & ZendExecutionStack::getStack() {
-  return *s_stack.get();
+  return *tl_stack.get();
 }
 
 zval* ZendExecutionStack::getArg(int i) {
@@ -31,22 +33,21 @@ zval* ZendExecutionStack::getArg(int i) {
   auto& entry = stack.m_stack.back();
   switch (entry.mode) {
     case ZendStackMode::HHVM_STACK: {
-      HPHP::ActRec* ar = (HPHP::ActRec*)entry.value;
+      ActRec* ar = (ActRec*)entry.value;
       const int numNonVaradic = ar->m_func->numNonVariadicParams();
-      HPHP::TypedValue* arg;
+      TypedValue* arg;
       if (i < numNonVaradic) {
-        arg = (HPHP::TypedValue*)ar - i - 1;
+        arg = (TypedValue*)ar - i - 1;
       } else if (i < ar->numArgs()) {
         arg = ar->getExtraArg(i - numNonVaradic);
       } else {
         if (!stack.m_nullArg) {
-          stack.m_nullArg =
-            HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfNull>());
+          stack.m_nullArg = RefData::Make(make_tv<KindOfNull>());
         }
         return stack.m_nullArg;
       }
 
-      HPHP::zBoxAndProxy(arg);
+      zBoxAndProxy(arg);
       return arg->m_data.pref;
     }
 
@@ -70,7 +71,7 @@ int32_t ZendExecutionStack::numArgs() {
   auto& entry = stack.m_stack.back();
   switch (entry.mode) {
     case ZendStackMode::HHVM_STACK:
-      return ((HPHP::ActRec*)entry.value)->numArgs();
+      return ((ActRec*)entry.value)->numArgs();
     case ZendStackMode::SIDE_STACK:
       // Zend puts the number of args as the last thing on the stack
       return uintptr_t(entry.value);
@@ -106,4 +107,6 @@ void ZendExecutionStack::popHHVMStack() {
   DEBUG_ONLY auto& entry = stack.m_stack.back();
   assert(entry.mode == ZendStackMode::HHVM_STACK);
   stack.m_stack.pop_back();
+}
+
 }

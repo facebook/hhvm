@@ -30,7 +30,7 @@
 #include "spprintf.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendExceptionStore.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-exception-store.h"
 
 ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
@@ -76,7 +76,7 @@ ZEND_API void zend_clear_exception(TSRMLS_D) /* {{{ */
   zval_ptr_dtor(&EG(exception));
   EG(exception) = NULL;
   // don't rethrow
-  ZendExceptionStore::getInstance().clear();
+  HPHP::ZendExceptionStore::getInstance().clear();
 }
 /* }}} */
 
@@ -85,7 +85,7 @@ void zend_register_default_exception(TSRMLS_D) {
 
 ZEND_API zend_class_entry *zend_exception_get_default(TSRMLS_D) {
   // TODO request-local cache to avoid hashtable lookup
-  return zend_hphp_class_to_class_entry(HPHP::SystemLib::s_ExceptionClass);
+  return HPHP::zend_hphp_class_to_class_entry(HPHP::SystemLib::s_ExceptionClass);
 }
 
 ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC) /* {{{ */
@@ -116,7 +116,8 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
     EG(exception) = exception;
   }
   if (EG(exception) != NULL) {
-    ZendExceptionStore::getInstance().set(HPHP::Object(Z_OBJVAL_P(EG(exception))));
+    HPHP::ZendExceptionStore::getInstance().set(
+        HPHP::Object(Z_OBJVAL_P(EG(exception))));
   }
 }
 /* }}} */

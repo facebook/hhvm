@@ -16,17 +16,19 @@
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendRequestLocal.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-request-local.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend.h"
 
 #include <unordered_map>
 
-static std::unordered_map<const HPHP::StringData*, zend_class_entry> s_internal_class_entries;
-ZEND_REQUEST_LOCAL_MAP(HPHP::Class*, zend_class_entry, s_class_cache);
+namespace HPHP {
 
-zend_class_entry* zend_hphp_class_to_class_entry(HPHP::Class* cls) {
+static std::unordered_map<const StringData*, zend_class_entry> s_internal_class_entries;
+ZEND_REQUEST_LOCAL_MAP(Class*, zend_class_entry, tl_class_cache);
+
+zend_class_entry* zend_hphp_class_to_class_entry(Class* cls) {
   // Check to see if it is in the request-local cache
-  auto & cache = s_class_cache.get()->get();
+  auto & cache = tl_class_cache.get()->get();
   zend_class_entry * ce;
   auto cacheIter = cache.find(cls);
   if (cacheIter != cache.end()) {
@@ -49,13 +51,13 @@ zend_class_entry* zend_hphp_class_to_class_entry(HPHP::Class* cls) {
   return ce;
 }
 
-HPHP::Class * zend_hphp_class_entry_to_class(const zend_class_entry * ce)
+Class * zend_hphp_class_entry_to_class(const zend_class_entry * ce)
 {
   if (ce->hphp_class) {
     return ce->hphp_class;
   }
-  const HPHP::StringData * sd = HPHP::makeStaticString(ce->name, ce->name_length);
-  HPHP::Class * cls = HPHP::Unit::lookupClass(sd);
+  const StringData * sd = makeStaticString(ce->name, ce->name_length);
+  Class * cls = Unit::lookupClass(sd);
   if (!cls) {
     return nullptr;
   }
@@ -63,7 +65,7 @@ HPHP::Class * zend_hphp_class_entry_to_class(const zend_class_entry * ce)
   return cls;
 }
 
-zend_class_entry* zend_hphp_get_internal_class_entry(const HPHP::StringData* name)
+zend_class_entry* zend_hphp_get_internal_class_entry(const StringData* name)
 {
   auto it = s_internal_class_entries.find(name);
   if (it == s_internal_class_entries.end()) {
@@ -73,7 +75,7 @@ zend_class_entry* zend_hphp_get_internal_class_entry(const HPHP::StringData* nam
   }
 }
 
-zend_class_entry* zend_hphp_register_internal_class_entry(HPHP::StringData* name)
+zend_class_entry* zend_hphp_register_internal_class_entry(StringData* name)
 {
   zend_class_entry * ce = &s_internal_class_entries[name];
   ce->hphp_class = nullptr;
@@ -82,16 +84,17 @@ zend_class_entry* zend_hphp_register_internal_class_entry(HPHP::StringData* name
   return ce;
 }
 
-const HPHP::Class::SProp* zce_find_static_prop(const zend_class_entry* ce,
+const Class::SProp* zce_find_static_prop(const zend_class_entry* ce,
                                                const char* name,
                                                size_t len) {
   auto const* sprops = ce->hphp_class->staticProperties();
   for (size_t i = 0; i < ce->hphp_class->numStaticProperties(); ++i) {
     auto const* sprop = &sprops[i];
-    if (sprop->m_name->isame(
-          HPHP::StringData::Make(name, len, HPHP::CopyString))) {
+    if (sprop->m_name->isame(StringData::Make(name, len, CopyString))) {
       return sprop;
     }
   }
   return nullptr;
+}
+
 }

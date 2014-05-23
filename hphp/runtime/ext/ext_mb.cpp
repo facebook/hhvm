@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/system/constants.h"
 
 extern "C" {
 #include <mbfl/mbfl_convert.h>
@@ -1923,7 +1924,7 @@ String f_mb_output_handler(const String& contents, int status) {
   mbfl_no_encoding encoding = MBSTRG(current_http_output_encoding);
 
   /* start phase only */
-  if (status & PHP_OUTPUT_HANDLER_START) {
+  if (status & k_PHP_OUTPUT_HANDLER_START) {
     /* delete the converter just in case. */
     if (MBSTRG(outconv)) {
       MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
@@ -1953,7 +1954,7 @@ String f_mb_output_handler(const String& contents, int status) {
   }
 
   /* flag */
-  last_feed = ((status & PHP_OUTPUT_HANDLER_END) != 0);
+  last_feed = ((status & k_PHP_OUTPUT_HANDLER_END) != 0);
   /* mode */
   mbfl_buffer_converter_illegal_mode
     (MBSTRG(outconv), MBSTRG(current_filter_illegal_mode));

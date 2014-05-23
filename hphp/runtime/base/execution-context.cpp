@@ -49,6 +49,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -274,7 +275,7 @@ bool ExecutionContext::obFlush() {
   if ((int)m_buffers.size() > m_protectedLevel) {
     std::list<OutputBuffer*>::const_iterator iter = m_buffers.end();
     OutputBuffer *last = *(--iter);
-    const int flag = PHP_OUTPUT_HANDLER_START | PHP_OUTPUT_HANDLER_END;
+    const int flag = k_PHP_OUTPUT_HANDLER_START | k_PHP_OUTPUT_HANDLER_END;
     if (iter != m_buffers.begin()) {
       OutputBuffer *prev = *(--iter);
       if (last->handler.isNull()) {

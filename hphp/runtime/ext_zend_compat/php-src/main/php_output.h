@@ -24,17 +24,14 @@
 #define PHP_OUTPUT_NEWAPI 1
 
 /* handler ops */
+// defined in execution-context.h
 #define PHP_OUTPUT_HANDLER_WRITE  0x00  /* standard passthru */
-#ifndef HHVM
 #define PHP_OUTPUT_HANDLER_START  0x01  /* start */
-#endif
 #define PHP_OUTPUT_HANDLER_CLEAN  0x02  /* restart */
 #define PHP_OUTPUT_HANDLER_FLUSH  0x04  /* pass along as much as possible */
 #define PHP_OUTPUT_HANDLER_FINAL  0x08  /* finalize */
-#ifndef HHVM
 #define PHP_OUTPUT_HANDLER_CONT    PHP_OUTPUT_HANDLER_WRITE
 #define PHP_OUTPUT_HANDLER_END    PHP_OUTPUT_HANDLER_FINAL
-#endif
 
 /* handler types */
 #define PHP_OUTPUT_HANDLER_INTERNAL    0x0000

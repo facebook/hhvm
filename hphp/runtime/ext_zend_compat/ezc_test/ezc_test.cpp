@@ -15,6 +15,27 @@ static int le_ezc_test_hash;
 
 static void ezc_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void ezc_hash_element_dtor(void * data);
+static zend_object_value EzcTestCloneable_create_object(zend_class_entry *ce TSRMLS_DC);
+static void EzcTestCloneable_free_storage(void *object TSRMLS_DC);
+static void EzcTestCloneable_clone_obj(void *object, void **object_clone TSRMLS_DC);
+
+static zend_object_value EzcTestUncloneable1_create_object(zend_class_entry *ce TSRMLS_DC);
+static zend_object_value EzcTestUncloneable2_create_object(zend_class_entry *ce TSRMLS_DC);
+
+zend_object_handlers EzcTestCloneable_handlers;
+zend_object_handlers EzcTestUncloneable1_handlers;
+zend_object_handlers EzcTestUncloneable2_handlers;
+
+zend_class_entry * EzcTestCloneable_ce;
+zend_class_entry * EzcTestUncloneable1_ce;
+zend_class_entry * EzcTestUncloneable2_ce;
+
+/* {{{ EzcTestCloneable methods
+ */
+const zend_function_entry ezc_empty_methods[] = {
+  ZEND_FE_END
+};
+/* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(ezc_test)
 /* {{{ PHP_INI
@@ -32,6 +53,28 @@ PHP_MINIT_FUNCTION(ezc_test)
   REGISTER_INI_ENTRIES();
   le_ezc_test_hash = zend_register_list_destructors_ex(
       ezc_hash_dtor, NULL, le_ezc_test_hash_name, module_number);
+
+  zend_class_entry ce;
+  INIT_CLASS_ENTRY(ce, "EzcTestCloneable", ezc_empty_methods);
+  EzcTestCloneable_ce = zend_register_internal_class(&ce TSRMLS_CC);
+  EzcTestCloneable_ce->create_object = EzcTestCloneable_create_object;
+
+  memcpy(&EzcTestCloneable_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+  EzcTestCloneable_handlers.clone_obj = zend_objects_store_clone_obj;
+
+  INIT_CLASS_ENTRY(ce, "EzcTestUncloneable1", ezc_empty_methods);
+  EzcTestUncloneable1_ce = zend_register_internal_class(&ce TSRMLS_CC);
+  EzcTestUncloneable1_ce->create_object = EzcTestUncloneable1_create_object;
+
+  memcpy(&EzcTestUncloneable1_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+  EzcTestUncloneable1_handlers.clone_obj = NULL;
+
+  INIT_CLASS_ENTRY(ce, "EzcTestUncloneable2", ezc_empty_methods);
+  EzcTestUncloneable2_ce = zend_register_internal_class(&ce TSRMLS_CC);
+  EzcTestUncloneable2_ce->create_object = EzcTestUncloneable2_create_object;
+
+  memcpy(&EzcTestUncloneable2_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+  EzcTestUncloneable2_handlers.clone_obj = zend_objects_store_clone_obj;
 
   return SUCCESS;
 }
@@ -415,6 +458,78 @@ static void ezc_hash_element_dtor(void * data) /* {{{ */
   TSRMLS_FETCH();
   char * value = (char*)data;
   php_write(value, strlen(value) TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ EzcTestCloneable_create_object */
+static zend_object_value EzcTestCloneable_create_object(zend_class_entry *ce TSRMLS_DC)
+{
+  php_ezctest_obj * obj = (php_ezctest_obj*)emalloc(sizeof(php_ezctest_obj));
+  zend_object_value retval;
+  memset(obj, 0, sizeof(php_ezctest_obj));
+  zend_object_std_init(&obj->std, ce TSRMLS_CC);
+  object_properties_init(&obj->std, ce);
+  obj->clone_count = 0;
+  retval.handle = zend_objects_store_put(
+      obj,
+      (zend_objects_store_dtor_t) NULL,
+      EzcTestCloneable_free_storage,
+      EzcTestCloneable_clone_obj
+      TSRMLS_CC);
+  retval.handlers = &EzcTestCloneable_handlers;
+  return retval;
+}
+/* }}} */
+
+/* {{{ EzcTestCloneable_free_storage */
+static void EzcTestCloneable_free_storage(void *object TSRMLS_DC)
+{
+  php_ezctest_obj * eobj = (php_ezctest_obj*)object;
+  php_printf("EzcTestCloneable free_storage (clone %d)\n", eobj->clone_count);
+  zend_object_std_dtor(&eobj->std TSRMLS_CC);
+  efree(object);
+}
+/* }}} */
+
+/* {{{ EzcTestCloneable_clone_obj */
+static void EzcTestCloneable_clone_obj(void *object, void **object_clone TSRMLS_DC)
+{
+  php_ezctest_obj * srcobj = (php_ezctest_obj*)object;
+  php_ezctest_obj * clone = (php_ezctest_obj*)emalloc(sizeof(php_ezctest_obj));
+  memset(clone, 0, sizeof(php_ezctest_obj));
+  zend_object_std_init(&clone->std, srcobj->std.ce TSRMLS_CC);
+  object_properties_init(&clone->std, srcobj->std.ce);
+  clone->clone_count = srcobj->clone_count + 1;
+  *object_clone = (void*)clone;
+}
+/* }}} */
+
+/* {{{ EzcTestUncloneable1_create_object */
+static zend_object_value EzcTestUncloneable1_create_object(zend_class_entry *ce TSRMLS_DC)
+{
+  zend_object * obj;
+  zend_object_value retval = zend_objects_new(&obj, ce TSRMLS_CC);
+  retval.handlers = &EzcTestUncloneable1_handlers;
+  return retval;
+}
+/* }}} */
+
+/* {{{ EzcTestUncloneable2_create_object */
+static zend_object_value EzcTestUncloneable2_create_object(zend_class_entry *ce TSRMLS_DC)
+{
+  zend_object * obj = (zend_object*)emalloc(sizeof(zend_object));
+  zend_object_value retval;
+  memset(obj, 0, sizeof(zend_object));
+  zend_object_std_init(obj, ce TSRMLS_CC);
+  object_properties_init(obj, ce);
+  retval.handle = zend_objects_store_put(
+      obj,
+      (zend_objects_store_dtor_t) zend_objects_destroy_object,
+      (zend_objects_free_object_storage_t) zend_objects_free_object_storage,
+      NULL // clone
+      TSRMLS_CC);
+  retval.handlers = &EzcTestUncloneable2_handlers;
+  return retval;
 }
 /* }}} */
 

@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-object.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-object-store.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_objects.h"
@@ -33,8 +34,8 @@ void ZendObject::registerNativeData() {
         s_ZendCompat.get(),
         sizeof(ZendObject),
         nativeDataCtor,
-        Native::nativeDataInfoCopy<ZendObject>,
-        Native::nativeDataInfoDestroy<ZendObject>,
+        nativeDataCopy,
+        nativeDataDtor,
         nullptr /* sweep */);
   }
 }
@@ -42,6 +43,36 @@ void ZendObject::registerNativeData() {
 void ZendObject::nativeDataCtor(ObjectData* obj) {
   Native::nativeDataInfoInit<ZendObject>(obj);
   Native::data<ZendObject>(obj)->initZendObject(obj->getVMClass());
+}
+
+/* Copy the native data. This is called on clone, so we treat it like how Zend
+ * would treat a clone, following zend_objects_store_clone_obj(). A new
+ * underlying object is created, with a new handle.
+ */
+void ZendObject::nativeDataCopy(ObjectData* dest, ObjectData* src) {
+  ZendObject * zop_dest = Native::data<ZendObject>(dest);
+  ZendObject * zop_src = Native::data<ZendObject>(src);
+  TSRMLS_FETCH();
+
+  // Call the object's clone handler, like what the PHP VM's
+  // ZEND_CLONE handler does
+  zend_object_clone_obj_t clone_call = zop_src->getHandlers()->clone_obj;
+  if (clone_call == nullptr) {
+    raise_error("Trying to clone uncloneable object of class %s",
+        src->getVMClass()->name()->data());
+  }
+  TypedValue tv_src = make_tv<KindOfObject>(src);
+  tvBox(&tv_src);
+  zend_object_value ov = clone_call(tv_src.m_data.pref TSRMLS_CC);
+
+  zop_dest->setHandle(ov.handle);
+  zop_dest->setHandlers(ov.handlers);
+}
+
+void ZendObject::nativeDataDtor(ObjectData* obj) {
+  ZendObjectStore::getInstance().freeObject(
+    Native::data<ZendObject>(obj)->getHandle());
+  Native::nativeDataInfoDestroy<ZendObject>(obj);
 }
 
 void ZendObject::initZendObject(Class * cls) {
@@ -67,6 +98,15 @@ void ZendObject::initZendObject(Class * cls) {
     ov = zend_objects_new(&object, ce TSRMLS_CC);
   }
   setHandle(ov.handle);
+  setHandlers(ov.handlers);
+}
+
+/* Call the free_storage handler, invalidate the bucket and reuse its handle.
+ * This is equivalent to Zend's zend_objects_store_del_ref_by_handle_ex()
+ * in the case where the object is deleted.
+ */
+void ZendObject::destroyZendObject() {
+  ZendObjectStore::getInstance().freeObject(m_handle);
 }
 
 }

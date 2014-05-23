@@ -80,6 +80,7 @@
 #include "hphp/util/text-util.h"
 
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/zend-printf.h"
 
 PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...)
 {
@@ -104,4 +105,21 @@ PHPAPI int php_write(void *buf, uint size TSRMLS_DC)
   always_assert(size < INT_MAX);
   HPHP::g_context->write((const char*)buf, size);
   return (int)size;
+}
+
+PHPAPI int php_printf(const char *format, ...)
+{
+  va_list args;
+  int ret;
+  char *buffer;
+  int size;
+  TSRMLS_FETCH();
+
+  va_start(args, format);
+  size = HPHP::vspprintf_ap(&buffer, 0, format, args);
+  ret = php_write(buffer, size TSRMLS_CC);
+  free(buffer);
+  va_end(args);
+
+  return ret;
 }

@@ -277,9 +277,6 @@ else()
   message(FATAL_ERROR "Could not find Readline or Editline")
 endif()
 
-find_package(CClient REQUIRED)
-include_directories(${CCLIENT_INCLUDE_PATH})
-
 find_package(LibDwarf REQUIRED)
 include_directories(${LIBDWARF_INCLUDE_DIRS})
 if (LIBDWARF_HAVE_ENCODE_LEB128)
@@ -292,36 +289,9 @@ if (ELF_GETSHDRSTRNDX)
   add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
 endif()
 
-CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/utf8.h" U8T_DECOMPOSE RECENT_CCLIENT)
-if (NOT RECENT_CCLIENT)
-  unset(RECENT_CCLIENT CACHE)
-  message(FATAL_ERROR "Your version of c-client is too old, you need 2007")
-endif()
-
-
-if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
-  CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" auth_gss CCLIENT_HAS_GSS)
-elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
-  CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_HAS_GSS)
-endif()
-
 find_package(Libpam)
 if (PAM_INCLUDE_PATH)
   include_directories(${PAM_INCLUDE_PATH})
-endif()
-
-if (NOT CCLIENT_HAS_GSS)
-  add_definitions(-DSKIP_IMAP_GSS=1)
-endif()
-
-if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
-  CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" ssl_onceonlyinit CCLIENT_HAS_SSL)
-elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
-  CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" ssl_onceonlyinit CCLIENT_HAS_SSL)
-endif()
-
-if (NOT CCLIENT_HAS_SSL)
-  add_definitions(-DSKIP_IMAP_SSL=1)
 endif()
 
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
@@ -484,8 +454,6 @@ macro(hphp_link target)
   elseif (EDITLINE_LIBRARIES)
     target_link_libraries(${target} ${EDITLINE_LIBRARIES})
   endif()
-
-  target_link_libraries(${target} ${CCLIENT_LIBRARY})
 
   if (PAM_LIBRARY)
     target_link_libraries(${target} ${PAM_LIBRARY})

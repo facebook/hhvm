@@ -960,22 +960,6 @@
             "value": 17
         },
         {
-            "name": "IMAP_CLOSETIMEOUT",
-            "value": 4
-        },
-        {
-            "name": "IMAP_OPENTIMEOUT",
-            "value": 1
-        },
-        {
-            "name": "IMAP_READTIMEOUT",
-            "value": 2
-        },
-        {
-            "name": "IMAP_WRITETIMEOUT",
-            "value": 3
-        },
-        {
             "name": "IMG_ARC_CHORD",
             "value": 1
         },

@@ -220,7 +220,7 @@ Interval::Interval(Interval* parent)
 
 // Add r to this interval, merging r with any existing overlapping ranges
 void Interval::add(LiveRange r) {
-  assert(r.start < r.end); // not empty
+  assert(blocked || scratch || r.start < r.end);
   while (!ranges.empty() && r.contains(ranges.back())) {
     ranges.pop_back();
   }
@@ -504,7 +504,11 @@ void XLS::buildIntervals() {
         if (RuntimeOption::EvalHHIREnableCalleeSavedOpt) {
           auto scratch = m_abi.gpUnreserved - m_abi.calleeSaved;
           scratch.forEach([&](PhysReg r) {
-            m_scratch[r].add(LiveRange(pos, pos + 1));
+            // Add an empty range to caller-saved intervals that will
+            // intersect with ordinary intervals that span calls,
+            // causing them to prefer callee-saved registers.  This is
+            // the only situation where an empty range is valid.
+            m_scratch[r].add(LiveRange(pos, pos));
           });
         }
       }

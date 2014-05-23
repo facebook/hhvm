@@ -21,7 +21,6 @@
 #include "hphp/runtime/ext/libmemcached_portability.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include <libmemcached/memcached.h>
 #include <map>
 #include <memory>
 #include <vector>

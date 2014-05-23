@@ -18,6 +18,8 @@
 #ifndef incl_HPHP_EXT_LIBMEMCACHED_PORTABILITY_H_
 #define incl_HPHP_EXT_LIBMEMCACHED_PORTABILITY_H_
 
+#include <libmemcached/memcached.h>
+
 #if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000017
 
 #define LMCD_SERVER_BY_KEY_INSTANCE_TYPE   const memcached_instance_st*

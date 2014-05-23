@@ -514,6 +514,17 @@
     commit: 1fb5784662f438d7d96a541e305e28b812e2eeed
     install_root: twig
     test_root: twig
+  typo3:
+    url: git://github.com/TYPO3/TYPO3.CMS.git
+    branch: master
+    commit: 30b091ae307f55581e7e1418891d0e81cf85ccee
+    install_root: typo3
+    test_root: typo3/typo3/sysext/core/Build
+    config_file: typo3/typo3/sysext/core/Build/UnitTests.xml
+    bootstrap_file: typo3/typo3/sysext/core/Build/UnitTestsBootstrap.php
+    blacklist:
+      #fatals because of https://github.com/facebook/hhvm/issues/2740
+      - typo3/typo3/sysext/extbase/Tests/Unit/Mvc/Cli/CommandTest.php
   vfsstream:
     url: https://github.com/mikey179/vfsStream.git
     branch: v1.2.0

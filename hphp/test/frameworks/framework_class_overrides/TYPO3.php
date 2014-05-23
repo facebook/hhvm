@@ -8,9 +8,7 @@ class Typo3 extends Framework {
   public function __construct(string $name) {
     $typo3path = Options::$frameworks_root . '/typo3';
     $env_vars = Map { "TYPO3_PATH_WEB" =>  $typo3path };
-    $tc = get_runtime_build().' '.__DIR__.
-      '/../framework_downloads/typo3/bin/phpunit';
-    parent::__construct($name, $tc, $env_vars, null,
+    parent::__construct($name, null, $env_vars, null,
                         false, TestFindModes::TOKEN);
   }
 

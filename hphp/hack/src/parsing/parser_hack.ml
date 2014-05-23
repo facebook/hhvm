@@ -1583,14 +1583,6 @@ and statement_word env = function
           "Parse error: declarations are not supported outside global scope";
       ignore (ignore_toplevel SMap.empty [] env (fun _ -> true));
       Noop
-  | "require" | "require_once" ->
-      if env.mode = Ast.Mstrict
-      then
-        error env
-          "Parse error: require_once is not supported outside global scope";
-      let _ = expr env in
-      expect env Tsc;
-      Noop
   | x ->
       L.back env.lb;
       let e = expr env in
@@ -2339,6 +2331,14 @@ and expr_atomic_word ~allow_class env pos = function
       expr_clone env pos
   | "list" ->
       expr_php_list env pos
+  | "require" | "require_once" ->
+      if env.mode = Ast.Mstrict
+      then
+        error env
+          ("Parse error: require_once is supported only as a toplevel "^
+          "declaration");
+      let _ = expr env in
+      pos, Null
   | x ->
       pos, Id (pos, x)
 

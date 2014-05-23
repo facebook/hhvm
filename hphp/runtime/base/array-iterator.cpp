@@ -582,15 +582,6 @@ Variant ArrayIter::iterValue(VersionableSparse) {
   return tvAsCVarRef(static_cast<Mappish*>(getObject())->iter_value(m_pos));
 }
 
-RefData* ArrayIter::zSecond() {
-  auto tv = nvSecond();
-  if (tv->m_type != KindOfRef) {
-    // FIXME: this is not allowed.
-    tvBox(const_cast<TypedValue*>(tv));
-  }
-  return tv->m_data.pref;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 namespace {

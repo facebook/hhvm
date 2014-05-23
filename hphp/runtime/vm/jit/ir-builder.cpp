@@ -53,7 +53,7 @@ IRBuilder::IRBuilder(Offset initialSpOffsetFromFp,
   , m_state(unit, initialSpOffsetFromFp, func, func->numLocals())
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
-  , m_constrainGuards(RuntimeOption::EvalHHIRRelaxGuards)
+  , m_constrainGuards(shouldHHIRRelaxGuards())
 {
   m_state.setBuilding(true);
   if (RuntimeOption::EvalHHIRGenOpts) {

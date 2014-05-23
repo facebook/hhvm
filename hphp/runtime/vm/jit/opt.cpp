@@ -128,7 +128,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
-  if (RuntimeOption::EvalHHIRRelaxGuards) {
+  if (shouldHHIRRelaxGuards()) {
     /*
      * In TransProfile mode, we can only relax the guards in tracelet
      * region mode.  If the region came from analyze() and we relax the

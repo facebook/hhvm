@@ -224,7 +224,7 @@ public:
   String obCopyContents();
   String obDetachContents();
   int obGetContentLength();
-  void obClean();
+  void obClean(int handler_flag);
   bool obFlush();
   void obFlushAll();
   bool obEnd();

@@ -264,9 +264,14 @@ int ExecutionContext::obGetContentLength() {
   return m_buffers.back()->oss.size();
 }
 
-void ExecutionContext::obClean() {
+void ExecutionContext::obClean(int handler_flag) {
   if (!m_buffers.empty()) {
-    m_buffers.back()->oss.clear();
+    OutputBuffer *last = m_buffers.back();
+    if (!last->handler.isNull()) {
+      vm_call_user_func(last->handler,
+                        make_packed_array(last->oss.detach(), handler_flag));
+    }
+    last->oss.clear();
   }
 }
 

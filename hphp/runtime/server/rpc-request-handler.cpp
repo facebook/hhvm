@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/server/satellite-server.h"
+#include "hphp/system/constants.h"
 
 #include "folly/ScopeGuard.h"
 
@@ -359,7 +360,11 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   ServerStats::LogPage(isFile ? rpcFile : rpcFunc, code);
 
   m_context->onShutdownPostSend();
-  m_context->obClean(); // in case postsend/cleanup output something
+  // in case postsend/cleanup output something
+  // PHP5 always provides _START.
+  m_context->obClean(k_PHP_OUTPUT_HANDLER_START |
+                     k_PHP_OUTPUT_HANDLER_CLEAN |
+                     k_PHP_OUTPUT_HANDLER_END);
   m_context->restoreSession();
   return !error;
 }

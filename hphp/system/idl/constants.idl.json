@@ -14,11 +14,6 @@
             "value": null
         },
         {
-            "name": "SID",
-            "type": "String",
-            "desc": "Dynamic constant: session_id()"
-        },
-        {
             "name": "PHP_SAPI",
             "type": "String",
             "desc": "Dynamic constant: php_sapi_name()"

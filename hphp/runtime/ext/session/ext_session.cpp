@@ -44,6 +44,7 @@
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -1334,15 +1335,24 @@ static void php_session_reset_id() {
     PS(send_cookie) = 0;
   }
 
-  EnvConstants *g = get_env_constants();
   if (PS(define_sid)) {
     StringBuffer var;
     var.append(String(PS(session_name)));
     var.append('=');
     var.append(PS(id));
-    g->k_SID = var.detach();
-  } else {
-    g->k_SID = empty_string;
+    Variant v = var.detach();
+
+    static const auto s_SID = makeStaticString("SID");
+    auto const handle = lookupCnsHandle(s_SID);
+    if (handle == 0) {
+      f_define(s_SID, v);
+    } else {
+      TypedValue* cns = &RDS::handleToRef<TypedValue>(handle);
+
+      v.setEvalScalar();
+      cns->m_data = v.asTypedValue()->m_data;
+      cns->m_type = v.asTypedValue()->m_type;
+    }
   }
 
   // hzhao: not sure how to support this yet

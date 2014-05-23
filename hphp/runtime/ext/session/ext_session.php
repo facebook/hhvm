@@ -86,7 +86,7 @@ class SessionHandler implements SessionHandlerInterface {
 
 
   <<__Native, __HipHopSpecific>>
-  private function hhread(string $session_id): string;
+  private function hhread(string $session_id): ?string;
 
   /**
    * Read session data

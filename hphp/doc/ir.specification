@@ -1729,6 +1729,16 @@ D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:Int S2:{TCA,Nullptr}
   the native resume address to S2, resume offset to S3, and mark it blocked on
   non-finished child S4.
 
+AFWHPrepareChild S0:FramePtr S1:Obj
+
+  Prepare unfinished WaitableWaitHandle object specified by S1 for getting
+  awaited by an AsyncFunctionWaitHandle object specified by its ActRec
+  provided by S0.
+
+  Injects S1 into the currently running scheduler instance and performs
+  cross-scheduler and intra-scheduler cycle detection. Throws if the
+  dependency cannot be established.
+
 ContEnter S0:StkPtr S1:FramePtr S2:FramePtr S3:TCA S4:ConstInt
 
   Enters a generator body. S0 is the current stack pointer pointing to fully

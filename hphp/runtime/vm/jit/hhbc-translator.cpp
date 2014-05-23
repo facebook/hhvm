@@ -1762,10 +1762,13 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
 }
 
 void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
-                                Offset resumeOffset) {
+                                Block* catchBlockNoSpill, Offset resumeOffset) {
   assert(curFunc()->isAsync());
   assert(resumed());
   assert(child->isA(Type::Obj));
+
+  // Prepare child for establishing dependency.
+  gen(AFWHPrepareChild, catchBlock, m_irb->fp(), child);
 
   // Store child and offset.
   auto const resumeSk = SrcKey(curFunc(), resumeOffset, true);
@@ -1778,7 +1781,7 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
 
   // Transfer control back to the scheduler.
   auto const sp = spillStack();
-  emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlock, true);
+  emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlockNoSpill, true);
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
@@ -1789,7 +1792,8 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
 void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
   assert(curFunc()->isAsync());
 
-  auto const catchBlock = resumed() ? makeCatchNoSpill() : makeCatch();
+  auto const catchBlock = makeCatch();
+  auto const catchBlockNoSpill = resumed() ? makeCatchNoSpill() : nullptr;
   auto const exitSlow   = makeExitSlow();
 
   if (!topC()->isA(Type::Obj)) PUNT(Await-NonObject);
@@ -1813,7 +1817,7 @@ void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
     },
     [&] { // Next: the wait handle is not finished, we need to suspend
       if (resumed()) {
-        emitAwaitR(child, catchBlock, resumeOffset);
+        emitAwaitR(child, catchBlock, catchBlockNoSpill, resumeOffset);
       } else {
         emitAwaitE(child, catchBlock, resumeOffset, numIters);
       }

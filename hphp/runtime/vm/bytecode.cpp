@@ -7160,13 +7160,15 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   assert(m_fp->func()->isAsync());
   assert(!m_fp->sfp());
 
-  // Suspend the async function.
+  // Obtain child.
   Cell& value = *m_stack.topC();
   assert(value.m_type == KindOfObject);
   assert(value.m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
-  auto const resumeOffset = m_fp->func()->unit()->offsetOf(pc);
   auto const child = static_cast<c_WaitableWaitHandle*>(value.m_data.pobj);
-  frame_afwh(m_fp)->suspend(nullptr, resumeOffset, child);
+
+  // Await child and suspend the async function. May throw.
+  auto const resumeOffset = m_fp->func()->unit()->offsetOf(pc);
+  frame_afwh(m_fp)->await(resumeOffset, child);
   m_stack.discard();
 
   // Call the FunctionSuspend hook.

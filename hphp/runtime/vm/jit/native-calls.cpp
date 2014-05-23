@@ -260,6 +260,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
     {CreateSSWH,         &c_StaticWaitHandle::CreateSucceededVM, DSSA, SNone,
                            {{TV, 0}}},
+    {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}}},
 
     /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},

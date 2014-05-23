@@ -111,25 +111,28 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
                                   JIT::TCA resumeAddr,
                                   Offset resumeOffset,
-                                  ObjectData* child) {
+                                  c_WaitableWaitHandle* child) {
   assert(fp);
   assert(!fp->resumed());
   assert(fp->func()->isAsyncFunction());
   assert(child);
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
+  assert(!child->isFinished());
 
-  auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
-  assert(!child_wh->isFinished());
-
-  checkCreateErrors(child_wh);
+  checkCreateErrors(child);
 
   void* obj = Resumable::Create(fp, numSlots, resumeAddr, resumeOffset,
                                 sizeof(c_AsyncFunctionWaitHandle));
   auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
   waitHandle->incRefCount();
   waitHandle->setNoDestruct();
-  waitHandle->initialize(child_wh);
+  waitHandle->initialize(child);
   return waitHandle;
+}
+
+void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
+                                             c_WaitableWaitHandle* child) {
+  frame_afwh(fp)->prepareChild(child);
 }
 
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
@@ -161,7 +164,6 @@ void c_AsyncFunctionWaitHandle::resume() {
           "Invariant violation: child neither succeeded nor failed");
     }
 
-  retry:
     // async function reached RetC, which already set m_resultOrException
     if (isSucceeded()) {
       done();
@@ -172,24 +174,9 @@ void c_AsyncFunctionWaitHandle::resume() {
     assert(!m_child->isFinished());
     assert(m_child->instanceof(c_WaitableWaitHandle::classof()));
 
-    // import child into the current context, detect cross-context cycles
-    try {
-      child()->enterContext(getContextIdx());
-    } catch (Object& e) {
-      g_context->resumeAsyncFuncThrow(resumable(), m_child, e.get());
-      goto retry;
-    }
-
-    // detect cycles
-    if (UNLIKELY(isDescendantOf(child()))) {
-      Object e(createCycleException(child()));
-      g_context->resumeAsyncFuncThrow(resumable(), m_child, e.get());
-      goto retry;
-    }
-
     // set up dependency
     setState(STATE_BLOCKED);
-    blockOn(child());
+    blockOn(m_child);
   } catch (const Object& exception) {
     // process exception thrown by the async function
     markAsFailed(exception);
@@ -200,11 +187,35 @@ void c_AsyncFunctionWaitHandle::resume() {
   }
 }
 
+void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
+  assert(!child->isFinished());
+
+  // import child into the current context, throw on cross-context cycles
+  child->enterContext(getContextIdx());
+
+  // detect cycles
+  if (UNLIKELY(isDescendantOf(child))) {
+    Object e(createCycleException(child));
+    throw e;
+  }
+}
+
 void c_AsyncFunctionWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
   if (isInContext()) {
     getContext()->schedule(this);
   }
+}
+
+void
+c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
+                                 c_WaitableWaitHandle* child) {
+  // Prepare child for establishing dependency. May throw.
+  prepareChild(child);
+
+  // Suspend the async function.
+  resumable()->setResumeAddr(nullptr, resumeOffset);
+  m_child = child;
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
@@ -221,13 +232,6 @@ void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
   setState(STATE_FAILED);
   tvWriteObject(exception.get(), &m_resultOrException);
   done();
-}
-
-void
-c_AsyncFunctionWaitHandle::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
-                                   c_WaitableWaitHandle* child) {
-  resumable()->setResumeAddr(resumeAddr, resumeOffset);
-  m_child = child;
 }
 
 String c_AsyncFunctionWaitHandle::getName() {
@@ -281,7 +285,7 @@ String c_AsyncFunctionWaitHandle::getName() {
 c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
     assert(m_child);
-    return child();
+    return m_child;
   } else {
     assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
     return nullptr;
@@ -293,7 +297,7 @@ void c_AsyncFunctionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
     case STATE_BLOCKED:
       // enter child into new context recursively
       assert(m_child);
-      child()->enterContext(ctx_idx);
+      m_child->enterContext(ctx_idx);
       setContextIdx(ctx_idx);
       break;
 

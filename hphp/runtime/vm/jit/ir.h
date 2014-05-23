@@ -664,6 +664,7 @@ O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           C(Int)                              \
                                           S(Obj),             E|Er|N|CRc|PRc) \
 O(CreateSSWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
+O(AFWHPrepareChild,                 ND, S(FramePtr) S(Obj),           E|Er|N) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr),            Er|E|N|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \

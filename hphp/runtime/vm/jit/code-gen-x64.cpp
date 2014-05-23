@@ -1873,8 +1873,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
   if (src->isA(Type::PtrToGen)) {
     PhysReg base = loc.reg();
     emitTypeTest(inst->typeParam(), base[TVOFF(m_type)],
-                 base[TVOFF(m_data)],
-      [&](ConditionCode cc) { doJcc(cc); });
+                 base[TVOFF(m_data)], doJcc);
     return;
   }
   assert(src->isA(Type::Gen));
@@ -1886,8 +1885,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
     CG_PUNT(IsType-KnownType);
   }
   PhysReg dataSrcReg = loc.reg(0); // data register
-  emitTypeTest(inst->typeParam(), typeSrcReg, dataSrcReg,
-    [&](ConditionCode cc) { doJcc(cc); });
+  emitTypeTest(inst->typeParam(), typeSrcReg, dataSrcReg, doJcc);
 }
 
 template<class Loc>

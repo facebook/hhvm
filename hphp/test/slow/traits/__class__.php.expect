@@ -1,0 +1,14 @@
+string(0) ""
+string(0) ""
+string(3) "bar"
+string(3) "foo"
+array(1) {
+  ["foo"]=>
+  string(3) "foo"
+}
+string(3) "bar"
+string(3) "foo"
+array(1) {
+  ["foo"]=>
+  string(3) "foo"
+}

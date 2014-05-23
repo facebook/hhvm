@@ -4177,6 +4177,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.TraitExists();
           }
           return true;
+        } else if (call->isCallToFunction("get_class") &&
+                   !params &&
+                   call->getClassScope() &&
+                   !call->getClassScope()->isTrait()) {
+          StringData* name =
+            makeStaticString(call->getClassScope()->getOriginalName());
+          e.String(name);
+          return true;
         }
 #define TYPE_CONVERT_INSTR(what, What)                                 \
         else if (call->isCallToFunction(#what"val") &&                 \
@@ -4513,26 +4521,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case KindOfString:
           case KindOfStaticString:
           {
-            ScalarExpressionPtr
-              scalarExp(static_pointer_cast<ScalarExpression>(node));
-            // Inside traits, __class__ cannot be resolved yet,
-            // so emit call to get_class.
-            if (scalarExp->getType() == T_CLASS_C &&
-                ex->getFunctionScope()->getContainingClass() &&
-                ex->getFunctionScope()->getContainingClass()->isTrait()) {
-              static const StringData* fname =
-                makeStaticString("get_class");
-              Offset fpiStart = m_ue.bcPos();
-              e.FPushFuncD(0, fname);
-              {
-                FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-              }
-              e.FCall(0);
-              e.UnboxR();
-            } else {
-              StringData* nValue = makeStaticString(v.getStringData());
-              e.String(nValue);
-            }
+            StringData* nValue = makeStaticString(v.getStringData());
+            e.String(nValue);
             break;
           }
           case KindOfInt64:

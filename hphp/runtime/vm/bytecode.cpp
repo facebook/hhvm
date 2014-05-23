@@ -2540,7 +2540,7 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
   efile = HPHP::Eval::FileRepository::checkoutFile(
     hasRealpath ? rpath.get() : spath.get(), s);
   if (efile && initial_opt) {
-    // if initial_opt is not set, this shouldnt be recorded as a
+    // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
     if (RDS::testAndSetBit(efile->getId())) {
       initial = false;

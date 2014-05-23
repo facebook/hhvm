@@ -2,18 +2,19 @@ TOP=..
 ##############################################################################
 # Variables
 ##############################################################################
-TARGET=lib
+# do not call it lib, because it contains some c code and it confuses
+# the linker
+TARGET=hhi
 
-SRC= nast.ml nastVisitor.ml \
- naming_error.ml naming_heap.ml \
- naming_ast_helpers.ml naming.ml
+SRC= hhi.ml
 
+INCLUDEDIRS=$(TOP)/utils
 
-INCLUDEDIRS=$(TOP)/utils \
-  $(TOP)/globals \
-  $(TOP)/hhi \
-  $(TOP)/deps $(TOP)/parsing \
-  $(TOP)/heap
+COBJS=hhi_elf.o
+
+# because we need C code
+OCAMLMKLIB=ocamlmklib
+CC=gcc
 
 ##############################################################################
 # Generic variables
@@ -27,9 +28,10 @@ INCLUDEDIRS=$(TOP)/utils \
 all:: $(TARGET).cma
 all.opt:: $(TARGET).cmxa
 
-$(TARGET).cma: $(OBJS)
-	$(OCAMLC) -a -o $@ $^
+# need to use ocamlmklib, otherwise with ocamlc or ocamlopt get some
+# pbs with realpath.c at some point
+$(TARGET).cma: $(OBJS) $(COBJS)
+	$(OCAMLMKLIB) -o $(TARGET) $^
 
-$(TARGET).cmxa: $(OBJS:.cmo=.cmx) $(LIBS:.cma=.cmxa)
-	$(OCAMLOPT) -a -o $@ $^
-
+$(TARGET).cmxa: $(OBJS:.cmo=.cmx) $(LIBS:.cma=.cmxa) $(COBJS)
+	$(OCAMLMKLIB) -o $(TARGET) $^

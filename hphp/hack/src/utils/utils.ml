@@ -15,6 +15,7 @@ type error = (Pos.t * string) list
 
 exception Error of error
 
+let () = Random.self_init ()
 
 let to_json (e : error) : json =
   let elts = List.map (fun (p, w) ->

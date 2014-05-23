@@ -14,6 +14,14 @@ exception Error of error
 
 open Hh_json
 
+(* Silly stubs. *)
+module Hhi = struct
+  let get_hhi_root () = Some "hhi-root"
+end
+module Path = struct
+  let string_of_path x = x
+end
+
 let to_json (e : error) : json =
   let elts = List.map (fun (p, w) ->
                         let line, scol, ecol = Pos.info_pos p in
@@ -344,3 +352,9 @@ let strip_ns s =
 
 let cat fn = failwith "Cannot use cat in JS"
 
+let str_starts_with long short =
+  try
+    let long = String.sub long 0 (String.length short) in
+    long = short
+  with Invalid_argument _ ->
+    false

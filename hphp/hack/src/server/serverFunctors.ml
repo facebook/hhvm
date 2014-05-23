@@ -36,7 +36,15 @@ end
 
 module HackProgram : SERVER_PROGRAM = struct
   let init genv env root =
-    let next_files = Find.make_next_files_php root in
+    let next_files_hhi =
+      match Hhi.get_hhi_root () with
+      | Some hhi_root -> Find.make_next_files_php hhi_root
+      | None -> print_endline "Could not locate hhi files"; exit 1 in
+    let next_files_root = Find.make_next_files_php root in
+    let next_files = fun () ->
+      match next_files_hhi () with
+      | [] -> next_files_root ()
+      | x -> x in
     match ServerArgs.convert genv.options with
     | None ->
         let env = ServerInit.init genv env next_files in

@@ -303,6 +303,29 @@ module Env = struct
     let env  = genv, lenv in
     env
 
+  let error_name_already_bound x p1 p2 =
+    let x = Utils.strip_ns x in
+    let errs = [
+      p1, "Name already bound: "^x;
+      p2, "Previous definition is here"
+    ] in
+    let hhi_msg =
+      "This appears to be defined in an hhi file included in your project "^
+      "root. The hhi files for the standard library are now a part of the "^
+      "typechecker and must be removed from your project. Typically, you can "^
+      "do this by deleting the \"hhi\" directory you copied into your "^
+      "project when first starting with Hack." in
+    (* unsafe_opt since init stack will refuse to continue if we don't have an
+     * hhi root. *)
+    let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
+    let errs =
+      if str_starts_with p1.Pos.pos_file hhi_root
+        then errs @ [p2, hhi_msg]
+      else if str_starts_with p2.Pos.pos_file hhi_root
+        then errs @ [p1, hhi_msg]
+      else errs in
+    error_l errs
+
 (* Helper used to write in different environments
  * consts, fun_names, class_names
  *)
@@ -310,8 +333,7 @@ module Env = struct
     if SMap.mem x !env && not !Silent.is_silent_mode
     then
       let p', y = SMap.find_unsafe x !env in
-      error_l [p, "Name already bound: "^x;
-               p', "Previous definition is here"]
+      error_name_already_bound x p p'
     else
       let y = p, Ident.make x in
       env := SMap.add x y !env;
@@ -502,8 +524,7 @@ module Env = struct
       if Pos.compare p p' = 0 then (p, y)
       else if not !Silent.is_silent_mode
       then
-        error_l [p, "Name already bound: "^(Utils.strip_ns x);
-                 p', "Previous definition is here"]
+        error_name_already_bound x p p'
       else
         let y = p, Ident.make x in
         env := SMap.add x y !env;

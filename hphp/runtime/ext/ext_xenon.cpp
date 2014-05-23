@@ -336,7 +336,7 @@ static Array HHVM_FUNCTION(xenon_get_data, void) {
     TRACE(1, "xenon_get_data\n");
     return s_xenonData->createResponse();
   }
-  return Array::Create();
+  return empty_array;
 }
 
 class xenonExtension : public Extension {

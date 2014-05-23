@@ -613,7 +613,7 @@ void StreamContext::setOption(const String& wrapper,
 
 Array StreamContext::getOptions() const {
   if (m_options.isNull()) {
-    return Array::Create();
+    return empty_array;
   }
   return m_options;
 }

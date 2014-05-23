@@ -553,7 +553,7 @@ Variant f_mysql_async_fetch_array(const Variant& result, int result_type /* = 1 
 Variant f_mysql_async_wait_actionable(const Variant& items, double timeout) {
   size_t count = items.toArray().size();
   if (count == 0 || timeout < 0) {
-    return Array::Create();
+    return empty_array;
   }
 
   struct pollfd* fds = (struct pollfd*)calloc(count, sizeof(struct pollfd));
@@ -568,7 +568,7 @@ Variant f_mysql_async_wait_actionable(const Variant& items, double timeout) {
     if (entry.size() < 1) {
       raise_warning("element %d did not have at least one entry",
                    nfds);
-      return Array::Create();
+      return empty_array;
     }
 
     MySQL* mySQL = entry.rvalAt(0).toResource().getTyped<MySQL>();
@@ -576,7 +576,7 @@ Variant f_mysql_async_wait_actionable(const Variant& items, double timeout) {
     if (conn->async_op_status == ASYNC_OP_UNSET) {
       raise_warning("runtime/ext_mysql: no pending async operation in "
                     "progress");
-      return Array::Create();
+      return empty_array;
     }
 
     pollfd* fd = &fds[nfds++];
@@ -596,7 +596,7 @@ Variant f_mysql_async_wait_actionable(const Variant& items, double timeout) {
   if (res == -1) {
     raise_warning("unable to poll [%d]: %s", errno,
                   folly::errnoStr(errno).c_str());
-    return Array::Create();
+    return empty_array;
   }
 
   // Now just find the ones that are ready, and copy the corresponding
@@ -608,7 +608,7 @@ Variant f_mysql_async_wait_actionable(const Variant& items, double timeout) {
     if (entry.size() < 1) {
       raise_warning("element %d did not have at least one entry",
                    nfds);
-      return Array::Create();
+      return empty_array;
     }
     MySQL* mySQL = entry.rvalAt(0).toResource().getTyped<MySQL>();
     MYSQL* conn = mySQL->get();

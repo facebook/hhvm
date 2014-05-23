@@ -399,7 +399,7 @@ Variant f_apc_cache_info(int64_t cache_id /* = 0 */,
 }
 
 Array f_apc_sma_info(bool limited /* = false */) {
-  return Array::Create();
+  return empty_array;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

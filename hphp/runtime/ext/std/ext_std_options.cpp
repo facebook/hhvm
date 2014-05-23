@@ -274,7 +274,7 @@ static Array HHVM_FUNCTION(get_included_files) {
 
 static Array HHVM_FUNCTION(inclued_get_data) {
   // TODO: Clearly this is not implemented...
-  return Array::Create();
+  return empty_array;
 }
 
 static int64_t HHVM_FUNCTION(get_magic_quotes_gpc) {

@@ -1273,7 +1273,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
     fp = getPrevVMState(fp);
   }
   if (!fp) {
-    return Array::Create();
+    return empty_array;
   }
   assert(!fp->hasInvName());
   if (fp->hasVarEnv()) {

@@ -46,6 +46,7 @@ const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_Generator("Generator");
 const StaticString s_http_response_header("http_response_header");
+const StaticString s_php_errormsg("php_errormsg");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -87,10 +88,11 @@ State entry_state(const Index& index,
     auto name = ctx.func->locals[locId]->name;
 
     /*
-     * `http_response_header' can be set by various builtin calls, so
-     * we never try to track its type.
+     * These can be set by various builtin calls, so
+     * we never try to track their type.
      */
-    if (name && name->isame(s_http_response_header.get())) {
+    if (name && (name->isame(s_http_response_header.get()) ||
+                 name->isame(s_php_errormsg.get()))) {
       ret.locals[locId] = TGen;
       continue;
     }

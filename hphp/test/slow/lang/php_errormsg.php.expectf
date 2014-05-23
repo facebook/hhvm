@@ -1,0 +1,16 @@
+NULL
+string(32) "Undefined variable: php_errormsg"
+string(46) "strchr() expects exactly 2 parameters, 0 given"
+
+Warning: strpos() expects at least 2 parameters, 0 given in %s/test/slow/lang/php_errormsg.php on line 18
+string(47) "strpos() expects at least 2 parameters, 0 given"
+string(47) "strstr() expects at least 2 parameters, 0 given"
+int(42)
+bool(false)
+bool(true)
+bool(false)
+string(45) "strlen() expects exactly 1 parameter, 0 given"
+string(5) "Array"
+string(26) "Array to string conversion"
+int(42)
+int(42)

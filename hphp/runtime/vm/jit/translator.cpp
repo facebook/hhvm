@@ -3101,6 +3101,7 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
 }
 
 const StaticString s_http_response_header("http_response_header");
+const StaticString s_php_errormsg("php_errormsg");
 const StaticString s_extract("extract");
 const StaticString s_extractNative("__SystemLib\\extract");
 
@@ -3108,7 +3109,8 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
   auto locals = caller->localNames();
   for (int i = 0; i < caller->numNamedLocals(); ++i) {
-    if (locals[i]->same(s_http_response_header.get())) {
+    if (locals[i]->same(s_http_response_header.get()) ||
+        locals[i]->same(s_php_errormsg.get())) {
       return true;
     }
   }

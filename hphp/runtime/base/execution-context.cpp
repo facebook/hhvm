@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -560,7 +561,8 @@ bool ExecutionContext::errorNeedsHandling(int errnum,
   if (m_throwAllErrors) {
     throw errnum;
   }
-  if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum)) {
+  if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum) ||
+      ThreadInfo::s_threadInfo->m_reqInjectionData.hasTrackErrors()) {
     return true;
   }
   if (callUserHandler) {
@@ -596,7 +598,8 @@ private:
 
 const StaticString
   s_file("file"),
-  s_line("line");
+  s_line("line"),
+  s_php_errormsg("php_errormsg");
 
 void ExecutionContext::handleError(const std::string& msg,
                                        int errnum,
@@ -634,19 +637,43 @@ void ExecutionContext::handleError(const std::string& msg,
     exn.setSilent(!errorNeedsLogging(errnum));
     throw exn;
   }
-  if (!handled && errorNeedsLogging(errnum)) {
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee.getMessage()));
-    String file = empty_string;
-    int line = 0;
-    if (RuntimeOption::InjectedStackTrace) {
-      Array bt = ee.getBackTrace();
-      if (!bt.empty()) {
-        Array top = bt.rvalAt(0).toArray();
-        if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-        if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
+  if (!handled) {
+    if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasTrackErrors()) {
+      // Set $php_errormsg in the parent scope
+      Variant varFrom(ee.getMessage());
+      const auto tvFrom(varFrom.asTypedValue());
+      JIT::VMRegAnchor _;
+      auto fp = getFP();
+      if (fp->func()->isBuiltin()) {
+        fp = getPrevVMState(fp);
+      }
+      assert(fp);
+      auto id = fp->func()->lookupVarId(s_php_errormsg.get());
+      if (id != kInvalidId) {
+        auto tvTo = frame_local(fp, id);
+        if (tvTo->m_type == KindOfRef) {
+          tvTo = tvTo->m_data.pref->tv();
+        }
+        tvDup(*tvFrom, *tvTo);
+      } else if (fp->hasVarEnv()) {
+        g_context->setVar(s_php_errormsg.get(), tvFrom);
       }
     }
-    Logger::Log(Logger::LogError, prefix.c_str(), ee, file.c_str(), line);
+
+    if (errorNeedsLogging(errnum)) {
+      DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee.getMessage()));
+      String file = empty_string;
+      int line = 0;
+      if (RuntimeOption::InjectedStackTrace) {
+        Array bt = ee.getBackTrace();
+        if (!bt.empty()) {
+          Array top = bt.rvalAt(0).toArray();
+          if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
+          if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
+        }
+      }
+      Logger::Log(Logger::LogError, prefix.c_str(), ee, file.c_str(), line);
+    }
   }
 }
 

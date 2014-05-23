@@ -178,9 +178,6 @@ bad_tests = (
     # flaky: t3396095
     '/ext/standard/tests/file/file_exists_variation1.php',
 
-    # flaky: t3552849
-    '/ext/session',
-
     # XSL
     '/ext/xsl/tests/bug49634.php',
     '/ext/xsl/tests/bug54446_with_ini.php',
@@ -666,6 +663,7 @@ other_files = (
     '/ext/phar/tests/files/phar_test.inc',
     '/ext/phar/tests/tar/files/P1-1.0.0.tgz',
     '/ext/session/tests/save_handler.inc',
+    '/ext/session/tests/skipif.inc',
     '/ext/simplexml/tests/book.xml',
     '/ext/simplexml/tests/bug24392.xml',
     '/ext/soap/tests/bugs/bug27722.wsdl',
@@ -915,6 +913,7 @@ def walk(filename, dest_subdir):
                     '\nWarning: '+match_rest_of_line, exp)
             exp = re.sub(r'Notice\\?:.*',
                     '\nNotice: '+match_rest_of_line, exp)
+            exp = re.sub(r'object\((\w+)\)#\d+', 'object(\\1)#%d', exp)
 
             sections[key] = exp
 

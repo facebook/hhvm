@@ -1,6 +1,11 @@
-<?php
+<?hh
 
-namespace __SystemLib {
+namespace __SystemLib;
+
+<<__Native("NoInjection"), __HipHopSpecific>>
+function session_set_save_handler(
+  \SessionHandlerInterface $sessionhandler,
+  bool $register_shutdown = true) : bool;
 
 class SessionForwardingHandler implements \SessionHandlerInterface {
   private $open;
@@ -60,22 +65,4 @@ class SessionForwardingHandler implements \SessionHandlerInterface {
     }
     return $func;
   }
-}
-
-}
-
-namespace {
-
-function session_set_save_handler(
-    $open,
-    $close = null, $read = null, $write = null, $destroy = null, $gc = null) {
-  if ($open instanceof SessionHandlerInterface) {
-    return \__SystemLib\session_set_save_handler($open, $close);
-  }
-  return \__SystemLib\session_set_save_handler(
-    new \__SystemLib\SessionForwardingHandler($open, $close, $read, $write, $destroy, $gc),
-    false
-  );
-}
-
 }

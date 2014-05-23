@@ -115,7 +115,7 @@ string(12) "Hello World!"
 string(7) "Nothing"
 
 -- Iteration 21 --
-object(classA)#1 (0) {
+object(classA)#%d (0) {
 }
 string(12) "Hello World!"
 
@@ -134,6 +134,6 @@ string(12) "Hello World!"
 -- Iteration 24 --
 
 Warning: %s
-resource(5) of type (stream)
+resource(%d) of type (stream)
 NULL
 Done

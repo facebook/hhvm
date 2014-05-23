@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_imap.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -151,58 +151,6 @@ struct ImapRequestData final : RequestEventHandler {
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(ImapRequestData, s_imap_data);
 #define IMAPG(name) s_imap_data->m_ ## name
-
-///////////////////////////////////////////////////////////////////////////////
-
-static class imapExtension : public Extension {
-public:
-  imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
-
-  virtual void moduleInit() {
-    mail_link(&unixdriver);   /* link in the unix driver */
-    mail_link(&mhdriver);     /* link in the mh driver */
-    /* According to c-client docs (internal.txt) this shouldn't be used. */
-    /* mail_link(&mxdriver); */
-    mail_link(&mmdfdriver);   /* link in the mmdf driver */
-    mail_link(&newsdriver);   /* link in the news driver */
-    mail_link(&philedriver);  /* link in the phile driver */
-
-    mail_link(&imapdriver);   /* link in the imap driver */
-    mail_link(&nntpdriver);   /* link in the nntp driver */
-    mail_link(&pop3driver);   /* link in the pop3 driver */
-    mail_link(&mbxdriver);    /* link in the mbx driver */
-    mail_link(&tenexdriver);  /* link in the tenex driver */
-    mail_link(&mtxdriver);    /* link in the mtx driver */
-    mail_link(&dummydriver);  /* link in the dummy driver */
-
-    auth_link(&auth_log);     /* link in the log authenticator */
-    auth_link(&auth_md5);     /* link in the cram-md5 authenticator */
-
-#ifndef SKIP_IMAP_GSS
-    auth_link(&auth_gss);     /* link in the gss authenticator */
-#endif
-
-    auth_link(&auth_pla);     /* link in the plain authenticator */
-
-#ifndef SKIP_IMAP_SSL
-    ssl_onceonlyinit();
-#endif
-
-    /* plug in our gets */
-    mail_parameters(NIL, SET_GETS, (void *) NIL);
-
-    /* set default timeout values */
-    void *timeout = reinterpret_cast<void *>(
-      ThreadInfo::s_threadInfo.getNoCheck()->
-        m_reqInjectionData.getSocketDefaultTimeout());
-
-    mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);
-    mail_parameters(NIL, SET_READTIMEOUT,  timeout);
-    mail_parameters(NIL, SET_WRITETIMEOUT, timeout);
-    mail_parameters(NIL, SET_CLOSETIMEOUT, timeout);
-  }
-
-} s_imap_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -743,7 +691,7 @@ void mm_fatal(char *str) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_imap_8bit(const String& str) {
+static Variant HHVM_FUNCTION(imap_8bit, const String& str) {
   unsigned long newlength;
 
   char *decode = (char *)rfc822_8bit((unsigned char *) str.data(),
@@ -757,7 +705,7 @@ Variant f_imap_8bit(const String& str) {
   return ret;
 }
 
-Variant f_imap_alerts() {
+static Variant HHVM_FUNCTION(imap_alerts) {
   if (IMAPG(alertstack) == NIL) {
     return false;
   }
@@ -773,7 +721,7 @@ Variant f_imap_alerts() {
   return ret;
 }
 
-Variant f_imap_base64(const String& text) {
+static Variant HHVM_FUNCTION(imap_base64, const String& text) {
   unsigned long newlength;
 
   char *decode = (char *)rfc822_base64((unsigned char *) text.data(),
@@ -787,7 +735,7 @@ Variant f_imap_base64(const String& text) {
   return ret;
 }
 
-Variant f_imap_binary(const String& str) {
+static Variant HHVM_FUNCTION(imap_binary, const String& str) {
   unsigned long newlength;
 
   char *decode = (char *)rfc822_binary((unsigned char *) str.data(),
@@ -801,8 +749,8 @@ Variant f_imap_binary(const String& str) {
   return ret;
 }
 
-Variant f_imap_body(const Resource& imap_stream, int64_t msg_number,
-                    int64_t options /* = 0 */) {
+static Variant HHVM_FUNCTION(imap_body, const Resource& imap_stream,
+                             int64_t msg_number, int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
     raise_warning("invalid value for the options parameter");
     return false;
@@ -834,8 +782,8 @@ Variant f_imap_body(const Resource& imap_stream, int64_t msg_number,
   }
 }
 
-Variant f_imap_bodystruct(const Resource& imap_stream, int64_t msg_number,
-                          const String& section) {
+static Variant HHVM_FUNCTION(imap_bodystruct, const Resource& imap_stream,
+                             int64_t msg_number, const String& section) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (!obj->checkMsgNumber(msg_number)) {
     return false;
@@ -852,7 +800,7 @@ Variant f_imap_bodystruct(const Resource& imap_stream, int64_t msg_number,
   return ret;
 }
 
-Variant f_imap_check(const Resource& imap_stream) {
+static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_ping(obj->m_stream) == NIL) {
     return false;
@@ -871,16 +819,17 @@ Variant f_imap_check(const Resource& imap_stream) {
   return false;
 }
 
-bool f_imap_clearflag_full(const Resource& imap_stream, const String& sequence,
-                           const String& flag,
-                           int64_t options /* = 0 */) {
+static bool HHVM_FUNCTION(imap_clearflag_full, const Resource& imap_stream,
+                          const String& sequence, const String& flag,
+                          int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_clearflag_full(obj->m_stream, (char *)sequence.data(),
                       (char *)flag.data(), (options ? options : NIL));
   return true;
 }
 
-bool f_imap_close(const Resource& imap_stream, int64_t flag /* = 0 */) {
+static bool HHVM_FUNCTION(imap_close, const Resource& imap_stream,
+                          int64_t flag /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (flag) {
     if (flag != PHP_EXPUNGE) {
@@ -894,7 +843,8 @@ bool f_imap_close(const Resource& imap_stream, int64_t flag /* = 0 */) {
   return true;
 }
 
-bool f_imap_createmailbox(const Resource& imap_stream, const String& mailbox) {
+static bool HHVM_FUNCTION(imap_createmailbox, const Resource& imap_stream,
+                          const String& mailbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_create(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
@@ -903,8 +853,8 @@ bool f_imap_createmailbox(const Resource& imap_stream, const String& mailbox) {
   }
 }
 
-bool f_imap_delete(const Resource& imap_stream, const String& msg_number,
-                   int64_t options /* = 0 */) {
+static bool HHVM_FUNCTION(imap_delete, const Resource& imap_stream,
+                          const String& msg_number, int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_setflag_full(obj->m_stream, (char *)msg_number.data(),
                     "\\DELETED",
@@ -912,7 +862,8 @@ bool f_imap_delete(const Resource& imap_stream, const String& msg_number,
   return true;
 }
 
-bool f_imap_deletemailbox(const Resource& imap_stream, const String& mailbox) {
+static bool HHVM_FUNCTION(imap_deletemailbox, const Resource& imap_stream,
+                          const String& mailbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_delete(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
@@ -921,7 +872,7 @@ bool f_imap_deletemailbox(const Resource& imap_stream, const String& mailbox) {
   }
 }
 
-Variant f_imap_errors() {
+static Variant HHVM_FUNCTION(imap_errors, ) {
   if (IMAPG(errorstack) == NIL) {
     return false;
   }
@@ -936,14 +887,15 @@ Variant f_imap_errors() {
   return ret;
 }
 
-bool f_imap_expunge(const Resource& imap_stream) {
+static bool HHVM_FUNCTION(imap_expunge, const Resource& imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_expunge(obj->m_stream);
   return true;
 }
 
-Variant f_imap_fetch_overview(const Resource& imap_stream, const String& sequence,
-                              int64_t options /* = 0 */) {
+static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
+                             const String& sequence,
+                             int64_t options /* = 0 */) {
   if (options && options != FT_UID) {
     Logger::Warning("invalid value for the options parameter");
     return false;
@@ -1005,8 +957,9 @@ Variant f_imap_fetch_overview(const Resource& imap_stream, const String& sequenc
   return ret;
 }
 
-Variant f_imap_fetchbody(const Resource& imap_stream, int64_t msg_number,
-                         const String& section, int64_t options /* = 0 */) {
+static Variant HHVM_FUNCTION(imap_fetchbody, const Resource& imap_stream,
+                             int64_t msg_number, const String& section,
+                             int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
     raise_warning("invalid value for the options parameter");
     return false;
@@ -1033,8 +986,8 @@ Variant f_imap_fetchbody(const Resource& imap_stream, int64_t msg_number,
   return String(body, len, CopyString);
 }
 
-Variant f_imap_fetchheader(const Resource& imap_stream, int64_t msg_number,
-                           int64_t options /* = 0 */) {
+static Variant HHVM_FUNCTION(imap_fetchheader, const Resource& imap_stream,
+                             int64_t msg_number, int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
     Logger::Warning("invalid value for the options parameter");
     return false;
@@ -1059,8 +1012,8 @@ Variant f_imap_fetchheader(const Resource& imap_stream, int64_t msg_number,
                                       (options ? options : NIL)), CopyString);
 }
 
-Variant f_imap_fetchstructure(const Resource& imap_stream, int64_t msg_number,
-                              int64_t options /* = 0 */) {
+static Variant HHVM_FUNCTION(imap_fetchstructure, const Resource& imap_stream,
+                             int64_t msg_number, int64_t options /* = 0 */) {
   if (options && ((options & ~FT_UID) != 0)) {
     raise_warning("invalid value for the options parameter");
     return false;
@@ -1101,7 +1054,8 @@ Variant f_imap_fetchstructure(const Resource& imap_stream, int64_t msg_number,
   return ret;
 }
 
-bool f_imap_gc(const Resource& imap_stream, int64_t caches) {
+static bool HHVM_FUNCTION(imap_gc, const Resource& imap_stream,
+                          int64_t caches) {
   if (caches && ((caches & ~(GC_TEXTS | GC_ELT | GC_ENV)) != 0)) {
     raise_warning("invalid value for the caches parameter");
     return false;
@@ -1112,18 +1066,10 @@ bool f_imap_gc(const Resource& imap_stream, int64_t caches) {
   return true;
 }
 
-Variant f_imap_header(const Resource& imap_stream, int64_t msg_number,
-                      int64_t fromlength /* = 0 */,
-                      int64_t subjectlength /* = 0 */,
-                      const String& defaulthost /* = "" */) {
-  return f_imap_headerinfo(imap_stream, msg_number,
-                           fromlength, subjectlength, defaulthost);
-}
-
-Variant f_imap_headerinfo(const Resource& imap_stream, int64_t msg_number,
-                          int64_t fromlength /* = 0 */,
-                          int64_t subjectlength /* = 0 */,
-                          const String& defaulthost /* = "" */) {
+static Variant HHVM_FUNCTION(imap_headerinfo, const Resource& imap_stream,
+                             int64_t msg_number, int64_t fromlength /* = 0 */,
+                             int64_t subjectlength /* = 0 */,
+                             const String& defaulthost /* = "" */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (fromlength < 0 || fromlength > MAILTMPLEN) {
     Logger::Warning("From length has to be between 0 and %d", MAILTMPLEN);
@@ -1182,7 +1128,15 @@ Variant f_imap_headerinfo(const Resource& imap_stream, int64_t msg_number,
   return ret;
 }
 
-Variant f_imap_last_error() {
+static Variant HHVM_FUNCTION(imap_header, const Resource& imap_stream,
+                             int64_t msg_number, int64_t fromlength /* = 0 */,
+                             int64_t subjectlength /* = 0 */,
+                             const String& defaulthost /* = "" */) {
+  return HHVM_FN(imap_headerinfo)(imap_stream, msg_number,
+                           fromlength, subjectlength, defaulthost);
+}
+
+static Variant HHVM_FUNCTION(imap_last_error, ) {
   if (IMAPG(errorstack) == NIL) {
     return false;
   }
@@ -1195,8 +1149,8 @@ Variant f_imap_last_error() {
   return uninit_null();
 }
 
-Variant f_imap_list(const Resource& imap_stream, const String& ref,
-                    const String& pattern) {
+static Variant HHVM_FUNCTION(imap_list, const Resource& imap_stream,
+                             const String& ref, const String& pattern) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
 
   /* set flag for normal, old mailbox list */
@@ -1217,14 +1171,14 @@ Variant f_imap_list(const Resource& imap_stream, const String& ref,
   return ret;
 }
 
-Variant f_imap_listmailbox(const Resource& imap_stream, const String& ref,
-                           const String& pattern) {
-  return f_imap_list(imap_stream, ref, pattern);
+static Variant HHVM_FUNCTION(imap_listmailbox, const Resource& imap_stream,
+                             const String& ref, const String& pattern) {
+  return HHVM_FN(imap_list)(imap_stream, ref, pattern);
 }
 
-bool f_imap_mail_copy(const Resource& imap_stream, const String& msglist,
-                      const String& mailbox,
-                      int64_t options /* = 0 */) {
+static bool HHVM_FUNCTION(imap_mail_copy, const Resource& imap_stream,
+                          const String& msglist, const String& mailbox,
+                          int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_copy_full(obj->m_stream, (char *)msglist.data(),
                     (char *)mailbox.data(), (options ? options : NIL)) == T) {
@@ -1234,8 +1188,9 @@ bool f_imap_mail_copy(const Resource& imap_stream, const String& msglist,
   }
 }
 
-bool f_imap_mail_move(const Resource& imap_stream, const String& msglist,
-                      const String& mailbox, int64_t options /* = 0 */) {
+static bool HHVM_FUNCTION(imap_mail_move, const Resource& imap_stream,
+                          const String& msglist, const String& mailbox,
+                          int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_copy_full(obj->m_stream, (char *)msglist.data(),
                      (char *)mailbox.data(),
@@ -1246,10 +1201,12 @@ bool f_imap_mail_move(const Resource& imap_stream, const String& msglist,
   }
 }
 
-bool f_imap_mail(const String& to, const String& subject, const String& message,
-                 const String& additional_headers /* = "" */,
-                 const String& cc /* = "" */, const String& bcc /* = "" */,
-                 const String& rpath /* = "" */) {
+static bool HHVM_FUNCTION(imap_mail, const String& to, const String& subject,
+                          const String& message,
+                          const String& additional_headers /* = "" */,
+                          const String& cc /* = "" */,
+                          const String& bcc /* = "" */,
+                          const String& rpath /* = "" */) {
   if (to.empty()) {
     raise_warning("No to field in mail command");
   }
@@ -1296,7 +1253,7 @@ bool f_imap_mail(const String& to, const String& subject, const String& message,
   }
 }
 
-Variant f_imap_mailboxmsginfo(const Resource& imap_stream) {
+static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   Object ret(SystemLib::AllocStdClassObject());
 
@@ -1331,23 +1288,25 @@ Variant f_imap_mailboxmsginfo(const Resource& imap_stream) {
   return ret;
 }
 
-Variant f_imap_msgno(const Resource& imap_stream, int64_t uid) {
+static Variant HHVM_FUNCTION(imap_msgno, const Resource& imap_stream,
+                             int64_t uid) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   return (int64_t)mail_msgno(obj->m_stream, uid);
 }
 
-Variant f_imap_num_msg(const Resource& imap_stream) {
+static Variant HHVM_FUNCTION(imap_num_msg, const Resource& imap_stream) {
   return (int64_t)imap_stream.getTyped<ImapStream>()->m_stream->nmsgs;
 }
 
-Variant f_imap_num_recent(const Resource& imap_stream) {
+static Variant HHVM_FUNCTION(imap_num_recent, const Resource& imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   return (int64_t)obj->m_stream->recent;
 }
 
-Variant f_imap_open(const String& mailbox, const String& username,
-                    const String& password,
-                    int64_t options /* = 0 */, int64_t retries /* = 0 */) {
+static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
+                             const String& username, const String& password,
+                             int64_t options /* = 0 */,
+                             int64_t retries /* = 0 */) {
   String filename = mailbox;
   if (filename[0] != '{') {
     filename = File::TranslatePath(filename);
@@ -1376,12 +1335,12 @@ Variant f_imap_open(const String& mailbox, const String& username,
   return NEWOBJ(ImapStream)(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
 }
 
-bool f_imap_ping(const Resource& imap_stream) {
+static bool HHVM_FUNCTION(imap_ping, const Resource& imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   return mail_ping(obj->m_stream);
 }
 
-Variant f_imap_qprint(const String& str) {
+static Variant HHVM_FUNCTION(imap_qprint, const String& str) {
   unsigned long newlength;
 
   char *decode = (char *)rfc822_qprint((unsigned char *) str.data(),
@@ -1395,8 +1354,8 @@ Variant f_imap_qprint(const String& str) {
   return ret;
 }
 
-bool f_imap_renamemailbox(const Resource& imap_stream, const String& old_mbox,
-                          const String& new_mbox) {
+static bool HHVM_FUNCTION(imap_renamemailbox, const Resource& imap_stream,
+                          const String& old_mbox, const String& new_mbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_rename(obj->m_stream, (char *)old_mbox.data(),
                   (char *)new_mbox.data()) == T) {
@@ -1406,8 +1365,9 @@ bool f_imap_renamemailbox(const Resource& imap_stream, const String& old_mbox,
   }
 }
 
-bool f_imap_reopen(const Resource& imap_stream, const String& mailbox,
-                   int64_t options /* = 0 */, int64_t retries /* = 0 */) {
+static bool HHVM_FUNCTION(imap_reopen, const Resource& imap_stream,
+                          const String& mailbox, int64_t options /* = 0 */,
+                          int64_t retries /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   long flags = NIL;
   long cl_flags = NIL;
@@ -1433,9 +1393,9 @@ bool f_imap_reopen(const Resource& imap_stream, const String& mailbox,
   return true;
 }
 
-Variant f_imap_search(const Resource& imap_stream, const String& criteria,
-                      int64_t options /* = 0 */,
-                      const String& charset /* = "" */) {
+static Variant HHVM_FUNCTION(imap_search, const Resource& imap_stream,
+                             const String& criteria, int64_t options /* = 0 */,
+                             const String& charset /* = "" */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
 
   char *search_criteria = (char*)criteria.data();
@@ -1467,8 +1427,8 @@ Variant f_imap_search(const Resource& imap_stream, const String& criteria,
   return ret;
 }
 
-bool f_imap_setflag_full(const Resource& imap_stream, const String& sequence,
-                         const String& flag,
+static bool HHVM_FUNCTION(imap_setflag_full, const Resource& imap_stream,
+                          const String& sequence, const String& flag,
                          int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_setflag_full(obj->m_stream, (char*)sequence.data(), (char*)flag.data(),
@@ -1476,8 +1436,8 @@ bool f_imap_setflag_full(const Resource& imap_stream, const String& sequence,
   return true;
 }
 
-Variant f_imap_status(const Resource& imap_stream, const String& mailbox,
-                      int64_t options /* = 0 */) {
+static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
+                             const String& mailbox, int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   Object ret(SystemLib::AllocStdClassObject());
 
@@ -1505,7 +1465,8 @@ Variant f_imap_status(const Resource& imap_stream, const String& mailbox,
   return ret;
 }
 
-bool f_imap_subscribe(const Resource& imap_stream, const String& mailbox) {
+static bool HHVM_FUNCTION(imap_subscribe, const Resource& imap_stream,
+                          const String& mailbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_subscribe(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
@@ -1514,7 +1475,8 @@ bool f_imap_subscribe(const Resource& imap_stream, const String& mailbox) {
   }
 }
 
-Variant f_imap_timeout(int64_t timeout_type, int64_t timeout /* = -1 */) {
+static Variant HHVM_FUNCTION(imap_timeout, int64_t timeout_type,
+                             int64_t timeout /* = -1 */) {
   int actual_type;
   if (timeout == -1) {
     switch (timeout_type) {
@@ -1559,7 +1521,8 @@ Variant f_imap_timeout(int64_t timeout_type, int64_t timeout /* = -1 */) {
   return false;
 }
 
-Variant f_imap_uid(const Resource& imap_stream, int64_t msg_number) {
+static Variant HHVM_FUNCTION(imap_uid, const Resource& imap_stream,
+                             int64_t msg_number) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (!obj->checkMsgNumber(msg_number)) {
     return false;
@@ -1567,15 +1530,16 @@ Variant f_imap_uid(const Resource& imap_stream, int64_t msg_number) {
   return (int64_t)mail_uid(obj->m_stream, msg_number);
 }
 
-bool f_imap_undelete(const Resource& imap_stream, const String& msg_number,
-                     int64_t flags /* = 0 */) {
+static bool HHVM_FUNCTION(imap_undelete, const Resource& imap_stream,
+                          const String& msg_number, int64_t flags /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_clearflag_full(obj->m_stream, (char *)msg_number.data(),
                       "\\DELETED", (flags ? flags : NIL));
   return true;
 }
 
-bool f_imap_unsubscribe(const Resource& imap_stream, const String& mailbox) {
+static bool HHVM_FUNCTION(imap_unsubscribe, const Resource& imap_stream,
+                          const String& mailbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_unsubscribe(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
@@ -1584,7 +1548,7 @@ bool f_imap_unsubscribe(const Resource& imap_stream, const String& mailbox) {
   }
 }
 
-Variant f_imap_utf8(const String& mime_encoded_text) {
+static Variant HHVM_FUNCTION(imap_utf8, const String& mime_encoded_text) {
   SIZEDTEXT src, dest;
   src.data  = NULL;
   src.size  = 0;
@@ -1601,4 +1565,122 @@ Variant f_imap_utf8(const String& mime_encoded_text) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_IMAP_CLOSETIMEOUT("IMAP_CLOSETIMEOUT");
+const StaticString s_IMAP_OPENTIMEOUT("IMAP_OPENTIMEOUT");
+const StaticString s_IMAP_READTIMEOUT("IMAP_READTIMEOUT");
+const StaticString s_IMAP_WRITETIMEOUT("IMAP_WRITETIMEOUT");
+
+static class imapExtension : public Extension {
+public:
+  imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
+
+  virtual void moduleInit() {
+    mail_link(&unixdriver);   /* link in the unix driver */
+    mail_link(&mhdriver);     /* link in the mh driver */
+    /* According to c-client docs (internal.txt) this shouldn't be used. */
+    /* mail_link(&mxdriver); */
+    mail_link(&mmdfdriver);   /* link in the mmdf driver */
+    mail_link(&newsdriver);   /* link in the news driver */
+    mail_link(&philedriver);  /* link in the phile driver */
+
+    mail_link(&imapdriver);   /* link in the imap driver */
+    mail_link(&nntpdriver);   /* link in the nntp driver */
+    mail_link(&pop3driver);   /* link in the pop3 driver */
+    mail_link(&mbxdriver);    /* link in the mbx driver */
+    mail_link(&tenexdriver);  /* link in the tenex driver */
+    mail_link(&mtxdriver);    /* link in the mtx driver */
+    mail_link(&dummydriver);  /* link in the dummy driver */
+
+    auth_link(&auth_log);     /* link in the log authenticator */
+    auth_link(&auth_md5);     /* link in the cram-md5 authenticator */
+
+#ifndef SKIP_IMAP_GSS
+    auth_link(&auth_gss);     /* link in the gss authenticator */
+#endif
+
+    auth_link(&auth_pla);     /* link in the plain authenticator */
+
+#ifndef SKIP_IMAP_SSL
+    ssl_onceonlyinit();
+#endif
+
+    /* plug in our gets */
+    mail_parameters(NIL, SET_GETS, (void *) NIL);
+
+    /* set default timeout values */
+    void *timeout = reinterpret_cast<void *>(
+      ThreadInfo::s_threadInfo.getNoCheck()->
+        m_reqInjectionData.getSocketDefaultTimeout());
+
+    mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);
+    mail_parameters(NIL, SET_READTIMEOUT,  timeout);
+    mail_parameters(NIL, SET_WRITETIMEOUT, timeout);
+    mail_parameters(NIL, SET_CLOSETIMEOUT, timeout);
+
+    Native::registerConstant<KindOfInt64>(
+      s_IMAP_CLOSETIMEOUT.get(), 4
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_IMAP_OPENTIMEOUT.get(), 1
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_IMAP_READTIMEOUT.get(), 2
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_IMAP_WRITETIMEOUT.get(), 3
+    );
+
+
+    HHVM_FE(imap_8bit);
+    HHVM_FE(imap_alerts);
+    HHVM_FE(imap_base64);
+    HHVM_FE(imap_binary);
+    HHVM_FE(imap_body);
+    HHVM_FE(imap_bodystruct);
+    HHVM_FE(imap_check);
+    HHVM_FE(imap_clearflag_full);
+    HHVM_FE(imap_close);
+    HHVM_FE(imap_createmailbox);
+    HHVM_FE(imap_delete);
+    HHVM_FE(imap_deletemailbox);
+    HHVM_FE(imap_errors);
+    HHVM_FE(imap_expunge);
+    HHVM_FE(imap_fetch_overview);
+    HHVM_FE(imap_fetchbody);
+    HHVM_FE(imap_fetchheader);
+    HHVM_FE(imap_fetchstructure);
+    HHVM_FE(imap_gc);
+    HHVM_FE(imap_header);
+    HHVM_FE(imap_headerinfo);
+    HHVM_FE(imap_last_error);
+    HHVM_FE(imap_list);
+    HHVM_FE(imap_listmailbox);
+    HHVM_FE(imap_mail_copy);
+    HHVM_FE(imap_mail_move);
+    HHVM_FE(imap_mail);
+    HHVM_FE(imap_mailboxmsginfo);
+    HHVM_FE(imap_msgno);
+    HHVM_FE(imap_num_msg);
+    HHVM_FE(imap_num_recent);
+    HHVM_FE(imap_open);
+    HHVM_FE(imap_ping);
+    HHVM_FE(imap_qprint);
+    HHVM_FE(imap_renamemailbox);
+    HHVM_FE(imap_reopen);
+    HHVM_FE(imap_search);
+    HHVM_FE(imap_setflag_full);
+    HHVM_FE(imap_status);
+    HHVM_FE(imap_subscribe);
+    HHVM_FE(imap_timeout);
+    HHVM_FE(imap_uid);
+    HHVM_FE(imap_undelete);
+    HHVM_FE(imap_unsubscribe);
+    HHVM_FE(imap_utf8);
+
+    loadSystemlib();
+  }
+
+} s_imap_extension;
+
 }

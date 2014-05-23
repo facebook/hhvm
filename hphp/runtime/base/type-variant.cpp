@@ -558,15 +558,9 @@ VarNR Variant::toKey() const {
   case KindOfBoolean:
   case KindOfInt64:
     return VarNR(m_data.num);
-  case KindOfDouble:
-    {
-      auto val = m_data.dbl > std::numeric_limits<uint64_t>::max()
-        ? 0u
-        : uint64_t(m_data.dbl);
-      return VarNR(val);
-    }
   case KindOfObject:
     break;
+  case KindOfDouble:
   case KindOfResource:
     return VarNR(toInt64());
   case KindOfRef:

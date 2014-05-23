@@ -6,6 +6,6 @@ if (OCAMLC_FOUND)
     ALL
     COMMAND CMAKE=1 make depend &&
             env OPTBIN="${OCAMLC_OPT_SUFFIX}" CMAKE=1 make
-    WORKING_DIRECTORY src
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
 endif()

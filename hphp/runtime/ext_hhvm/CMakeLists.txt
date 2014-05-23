@@ -17,14 +17,15 @@ endif()
 macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH SOURCE_REL
       BUILD_TARGET)
   set(SOURCE_ABS "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_REL}")
+  set(TARGET_ABS "${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_REL}")
   set(f_SRC "${SOURCE_ABS}/${REL}")
-  set(f_OBJ "${SOURCE_ABS}/CMakeFiles/${BUILD_TARGET}.dir/${REL}.o")
+  set(f_OBJ "${TARGET_ABS}/CMakeFiles/${BUILD_TARGET}.dir/${REL}.o")
   list(APPEND ${SOURCES} "${f_OBJ}.ext_hhvm.cpp")
   list(APPEND ${HEADERS} "${f_OBJ}.ext_hhvm.h")
   add_custom_command(
     OUTPUT "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
     DEPENDS ${f_SRC} gen-ext-hhvm
-    COMMAND "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "GEN_EXT_HHVM=${CMAKE_CURRENT_BINARY_DIR}/../../tools/bootstrap/gen-ext-hhvm"
             "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/bootstrap/gen-ext-hhvm.sh"
     ARGS ${EHHVM_OS} ${EHHVM_ARCH} ${f_OBJ}
          "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
@@ -60,8 +61,8 @@ EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "../ext" "hphp_runtime_ext")
 ## ext_hhvm_infotabs
 #
 
-set(INFOTABS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/ext_hhvm_infotabs.h")
-set(INFOTABS_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/ext_hhvm_infotabs.cpp")
+set(INFOTABS_HEADER "${CMAKE_CURRENT_BINARY_DIR}/ext_hhvm_infotabs.h")
+set(INFOTABS_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/ext_hhvm_infotabs.cpp")
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE"
              "${CMAKE_CURRENT_SOURCE_DIR}/../../system/idl")
@@ -76,7 +77,7 @@ endforeach()
 add_custom_command(
   OUTPUT ${INFOTABS_SOURCE}
   DEPENDS ${CXX_HEADERS} gen-infotabs
-  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/bootstrap/gen-infotabs"
+  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/../../tools/bootstrap/gen-infotabs"
   ARGS ${INFOTABS_SOURCE} ${HPHP_IDLS})
 list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})
 

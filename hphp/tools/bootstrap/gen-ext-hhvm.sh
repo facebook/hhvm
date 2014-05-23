@@ -10,11 +10,11 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 if [ "$1" = "darwin" ]; then
   gobjdump --section=".text" --section="LC_SEGMENT..text.hot.built." -t $3 | \
       awk '{ if ($2=="g") print $8 }' | \
-      $DIR/gen-ext-hhvm \
+      $GEN_EXT_HHVM \
       $2 $5 $4 $DIR/../../system/idl/*.idl.json
 else
   readelf -s -W $3 | grep 'FUNC.*GLOBAL' | \
       sed -e 's/^.*DEFAULT[0-9 ]*//' | \
-      $DIR/gen-ext-hhvm \
+      $GEN_EXT_HHVM \
       $2 $5 $4 $DIR/../../system/idl/*.idl.json
 fi

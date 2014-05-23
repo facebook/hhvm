@@ -32,14 +32,10 @@ ZEND_END_MODULE_GLOBALS(ezc_test)
 #define EZC_TEST_G(v) (ezc_test_globals.v)
 #endif
 
+struct _php_ezctest_obj {
+  zend_object std;
+  int clone_count;
+};
+typedef struct _php_ezctest_obj php_ezctest_obj;
+
 #endif  /* PHP_EZC_TEST_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

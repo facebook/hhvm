@@ -14,52 +14,53 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_EXECUTION_STACK
-#define incl_HPHP_ZEND_EXECUTION_STACK
+#ifndef incl_HPHP_ZEND_EXCEPTION_STORE
+#define incl_HPHP_ZEND_EXCEPTION_STORE
 
-#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
-#include <vector>
-#include "hphp/runtime/base/request-local.h"
+#include <exception>
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 
-enum class ZendStackMode {
-  HHVM_STACK,
-  SIDE_STACK
-};
+namespace HPHP {
 
-struct ZendStackEntry {
-  ZendStackMode mode;
-  void* value;
-};
-
-struct ZendExecutionStack final : HPHP::RequestEventHandler {
-  static zval* getArg(int i);
-  static int numArgs();
-
-  static void push(void* z);
-  static void* pop();
-  static void pushHHVMStack(void* ar);
-  static void popHHVMStack();
-
-  // Instance methods
-  void requestInit() override {
-    clear();
-  }
-  void requestShutdown() override {
-    clear();
-  }
-
-private:
-  static ZendExecutionStack & getStack();
-  void clear() {
-    m_stack.clear();
-    if (m_nullArg) {
-      m_nullArg->release();
-      m_nullArg = nullptr;
+class ZendExceptionStore final : public RequestEventHandler {
+  public:
+    static ZendExceptionStore& getInstance() {
+      return *tl_instance;
     }
-  }
-  std::vector<ZendStackEntry> m_stack;
-  HPHP::RefData * m_nullArg;
+
+    template <class E> void set(E e) {
+      m_ptr = std::make_exception_ptr(e);
+    }
+    void setPointer(std::exception_ptr ptr) {
+      m_ptr = ptr;
+    }
+    void clear() {
+      m_ptr = nullptr;
+    }
+    virtual void requestInit() {
+    }
+    virtual void requestShutdown() {
+      clear();
+    }
+    std::exception_ptr get() {
+      return m_ptr;
+    }
+    bool empty() {
+      return !m_ptr;
+    }
+    void rethrow() {
+      if (m_ptr) {
+        std::exception_ptr p = get();
+        clear();
+        std::rethrow_exception(p);
+      }
+    }
+
+  private:
+    std::exception_ptr m_ptr;
+    static __thread RequestLocal<ZendExceptionStore> tl_instance;
 };
 
-#endif // incl_HPHP_ZEND_EXECUTION_STACK
+}
+#endif

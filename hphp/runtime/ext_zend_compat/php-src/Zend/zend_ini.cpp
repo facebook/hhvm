@@ -35,7 +35,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
 {
   const zend_ini_entry *p = ini_entry;
 
-  auto extension = ZendExtension::GetByModuleNumber(module_number);
+  auto extension = HPHP::ZendExtension::GetByModuleNumber(module_number);
   assert(extension);
 
   while (p->name) {

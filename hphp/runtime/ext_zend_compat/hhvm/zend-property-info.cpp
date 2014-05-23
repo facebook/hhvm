@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-property-info.h"
 
+namespace HPHP {
 
 template <class T>
 void prop_to_zpi(zend_class_entry* ce,
@@ -45,4 +46,6 @@ void prop_to_zpi(zend_class_entry* ce,
   info->doc_comment = prop->m_docComment->data();
   info->doc_comment_len = prop->m_docComment->size();
   info->ce = ce;
+}
+
 }

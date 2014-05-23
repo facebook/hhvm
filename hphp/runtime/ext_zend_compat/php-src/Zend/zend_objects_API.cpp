@@ -23,10 +23,11 @@
 #include "zend_globals.h"
 #include "zend_variables.h"
 // has to be before zend_API since that defines getThis()
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendRequestLocal.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-request-local.h"
 #include "zend_API.h"
 #include "zend_objects_API.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-object.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-object-store.h"
 #include "hphp/runtime/vm/native-data.h"
 
 #define ZEND_DEBUG_OBJECTS 0
@@ -44,18 +45,27 @@ ZEND_API void *zend_object_store_get_object(const zval *zobject TSRMLS_DC) {
   return zend_object_store_get_object_by_handle(zod->getHandle() TSRMLS_CC);
 }
 
-ZEND_REQUEST_LOCAL_LIST(void*, s_object_store);
 ZEND_API void *zend_object_store_get_object_by_handle(zend_object_handle handle TSRMLS_DC) {
-  auto& store = s_object_store.get()->get();
-  return store[handle];
+  return HPHP::ZendObjectStore::getInstance().getObject(handle);
 }
 
-// TODO(#2898342) free the objects
 ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_store_dtor_t dtor, zend_objects_free_object_storage_t free_storage, zend_objects_store_clone_t clone TSRMLS_DC) {
-  auto& store = s_object_store.get()->get();
-  zend_object_handle index = store.size();
-  store.push_back(object);
-  return index;
+  return HPHP::ZendObjectStore::getInstance().insertObject(
+      object, dtor, free_storage, clone);
+}
+
+ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
+{
+  const HPHP::ZendObject * zod =
+    HPHP::Native::data<HPHP::ZendObject>(Z_OBJVAL_P(zobject));
+  zend_object_value retval;
+  retval.handle = HPHP::ZendObjectStore::getInstance().cloneObject(zod->getHandle());
+  if (retval.handle == 0) {
+    HPHP::raise_error("Trying to clone uncloneable object of class %s",
+        Z_OBJVAL_P(zobject)->getVMClass()->name()->data());
+  }
+  retval.handlers = zod->getHandlers();
+  return retval;
 }
 
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void) {

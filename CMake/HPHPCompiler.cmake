@@ -10,9 +10,7 @@ endif()
 # using Clang
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	# TODO: Fix Folly ad change to -std=c++11 (ISO C++11), GNU_GCC version enable flags: -ffast-math
-	set(CMAKE_CXX_FLAGS " -Wall -std=gnu++11 -stdlib=libc++ -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments")
-	set(CMAKE_C_FLAGS_RELEASE "-fast")
-	set(CMAKE_CXX_FLAGS_RELEASE "-fast")
+	set(CMAKE_CXX_FLAGS " -Wall -std=gnu++11 -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments")
 # using GCC
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)

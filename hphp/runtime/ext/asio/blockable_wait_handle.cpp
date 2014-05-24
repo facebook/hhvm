@@ -29,6 +29,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+void c_BlockableWaitHandle::UnblockChain(c_BlockableWaitHandle* parentChain) {
+  while (parentChain) {
+    parentChain = parentChain->unblock();
+  }
+}
+
 c_BlockableWaitHandle* c_BlockableWaitHandle::unblock() {
   c_BlockableWaitHandle* next = m_nextParent;
 

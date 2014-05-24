@@ -63,9 +63,10 @@ void c_SleepWaitHandle::process() {
     unregisterFromContext();
   }
 
+  auto const parentChain = getFirstParent();
   setState(STATE_SUCCEEDED);
   tvWriteNull(&m_resultOrException);
-  done();
+  c_BlockableWaitHandle::UnblockChain(parentChain);
 }
 
 String c_SleepWaitHandle::getName() {

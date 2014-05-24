@@ -76,16 +76,6 @@ Array c_WaitableWaitHandle::t_getparents() {
   return result;
 }
 
-void c_WaitableWaitHandle::done() {
-  assert(isFinished());
-  assert(cellIsPlausible(m_resultOrException));
-
-  // unblock parents
-  while (m_firstParent) {
-    m_firstParent = m_firstParent->unblock();
-  }
-}
-
 // throws on context depth level overflows and cross-context cycles
 void c_WaitableWaitHandle::join() {
   JIT::EagerVMRegAnchor _;

@@ -166,7 +166,7 @@ void c_AsyncFunctionWaitHandle::resume() {
 
     // async function reached RetC, which already set m_resultOrException
     if (isSucceeded()) {
-      done();
+      UnblockChain(getFirstParent());
       return;
     }
 
@@ -229,9 +229,10 @@ void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
     session->onAsyncFunctionFail(this, exception);
   }
 
+  auto const parentChain = getFirstParent();
   setState(STATE_FAILED);
   tvWriteObject(exception.get(), &m_resultOrException);
-  done();
+  UnblockChain(parentChain);
 }
 
 String c_AsyncFunctionWaitHandle::getName() {

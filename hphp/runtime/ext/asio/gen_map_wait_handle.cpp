@@ -166,6 +166,7 @@ void c_GenMapWaitHandle::onUnblocked() {
     }
   }
 
+  auto const parentChain = getFirstParent();
   if (m_exception.isNull()) {
     setState(STATE_SUCCEEDED);
     tvWriteObject(m_deps.get(), &m_resultOrException);
@@ -176,7 +177,7 @@ void c_GenMapWaitHandle::onUnblocked() {
   }
 
   m_deps = nullptr;
-  done();
+  UnblockChain(parentChain);
 }
 
 String c_GenMapWaitHandle::getName() {

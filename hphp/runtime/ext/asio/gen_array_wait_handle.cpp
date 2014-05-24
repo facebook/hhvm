@@ -198,6 +198,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
 
   m_iterPos = arrIter.currentPos();
 
+  auto const parentChain = getFirstParent();
   if (m_exception.isNull()) {
     setState(STATE_SUCCEEDED);
     cellDup(make_tv<KindOfArray>(m_deps.get()), m_resultOrException);
@@ -208,7 +209,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
   }
 
   m_deps = nullptr;
-  done();
+  UnblockChain(parentChain);
 }
 
 String c_GenArrayWaitHandle::getName() {

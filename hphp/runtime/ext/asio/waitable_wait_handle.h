@@ -60,8 +60,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   String getName();
 
  protected:
-  void done();
-
   void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
 
   bool isInContext() { return getContextIdx(); }

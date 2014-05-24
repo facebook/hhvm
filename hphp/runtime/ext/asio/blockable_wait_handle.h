@@ -43,8 +43,9 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   ~c_BlockableWaitHandle() {}
 
  public:
-  c_BlockableWaitHandle* getNextParent() { return m_nextParent; }
+  static void UnblockChain(c_BlockableWaitHandle* parentChain);
   c_BlockableWaitHandle* unblock();
+  c_BlockableWaitHandle* getNextParent() { return m_nextParent; }
 
   void exitContextBlocked(context_idx_t ctx_idx);
 

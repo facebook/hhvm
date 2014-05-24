@@ -70,9 +70,10 @@ void c_RescheduleWaitHandle::run() {
     return;
   }
 
+  auto const parentChain = getFirstParent();
   setState(STATE_SUCCEEDED);
   tvWriteNull(&m_resultOrException);
-  done();
+  c_BlockableWaitHandle::UnblockChain(parentChain);
 }
 
 String c_RescheduleWaitHandle::getName() {

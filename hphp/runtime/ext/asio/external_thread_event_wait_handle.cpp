@@ -114,22 +114,25 @@ void c_ExternalThreadEventWaitHandle::process() {
     m_event->unserialize(result);
   } catch (const Object& exception) {
     assert(exception->instanceof(SystemLib::s_ExceptionClass));
+    auto const parentChain = getFirstParent();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);
-    done();
+    c_BlockableWaitHandle::UnblockChain(parentChain);
     return;
   } catch (...) {
+    auto const parentChain = getFirstParent();
     setState(STATE_FAILED);
     tvWriteObject(AsioSession::Get()->getAbruptInterruptException().get(),
                   &m_resultOrException);
-    done();
+    c_BlockableWaitHandle::UnblockChain(parentChain);
     throw;
   }
 
   assert(cellIsPlausible(result));
+  auto const parentChain = getFirstParent();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
-  done();
+  c_BlockableWaitHandle::UnblockChain(parentChain);
 }
 
 String c_ExternalThreadEventWaitHandle::getName() {

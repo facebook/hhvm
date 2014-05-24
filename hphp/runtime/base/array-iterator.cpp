@@ -1680,6 +1680,7 @@ int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
 namespace {
 
+NEVER_INLINE
 int64_t iter_next_cold_inc_val(Iter* it,
                                TypedValue* valOut,
                                TypedValue* keyOut) {
@@ -1753,17 +1754,21 @@ int64_t iter_next_packed_impl(Iter* it,
 
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
-    if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
-      return iter_next_cold<false>(it, valOut, keyOut);
+    if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+      if (UNLIKELY(!valOut->m_data.pstr->hasMultipleRefs())) {
+        return iter_next_cold<false>(it, valOut, keyOut);
+      }
+      valOut->m_data.pstr->decRefCount();
     }
-    if (HasKey && UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
-      return iter_next_cold<false>(it, valOut, keyOut);
+    if (HasKey && UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
+      if (UNLIKELY(!keyOut->m_data.pstr->hasMultipleRefs())) {
+        return iter_next_cold_inc_val(it, valOut, keyOut);
+      }
+      keyOut->m_data.pstr->decRefCount();
     }
-    tvDecRefOnly(valOut);
     iter.setPos(pos);
     cellDup(*tvToCell(packedData(ad) + pos), *valOut);
     if (HasKey) {
-      tvDecRefOnly(keyOut);
       keyOut->m_data.num = pos;
       keyOut->m_type = KindOfInt64;
     }

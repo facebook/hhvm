@@ -137,12 +137,6 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   m_child = child;
 
   blockOn(child);
-
-  // needs to be called with non-zero refcnt
-  auto session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnAsyncFunctionCreateCallback())) {
-    session->onAsyncFunctionCreate(this, child);
-  }
 }
 
 void c_AsyncFunctionWaitHandle::resume() {
@@ -170,7 +164,7 @@ void c_AsyncFunctionWaitHandle::resume() {
   retry:
     // async function reached RetC, which already set m_resultOrException
     if (isSucceeded()) {
-      markAsSucceeded();
+      done();
       return;
     }
 
@@ -191,12 +185,6 @@ void c_AsyncFunctionWaitHandle::resume() {
       Object e(createCycleException(child()));
       g_context->resumeAsyncFuncThrow(resumable(), m_child, e.get());
       goto retry;
-    }
-
-    // on await callback
-    AsioSession* session = AsioSession::Get();
-    if (UNLIKELY(session->hasOnAsyncFunctionAwaitCallback())) {
-      session->onAsyncFunctionAwait(this, m_child);
     }
 
     // set up dependency
@@ -222,15 +210,6 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
-}
-
-void c_AsyncFunctionWaitHandle::markAsSucceeded() {
-  AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnAsyncFunctionSuccessCallback())) {
-    session->onAsyncFunctionSuccess(this, cellAsCVarRef(m_resultOrException));
-  }
-
-  done();
 }
 
 void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {

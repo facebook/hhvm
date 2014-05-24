@@ -3679,7 +3679,7 @@ void HhbcTranslator::emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal,
                        catchBlock, fp, retVal);
                  } else {
                    gen(FunctionSuspendHook, RetCtrlData(suspendingResumed),
-                       catchBlock, fp);
+                       catchBlock, fp, cns(suspendingResumed));
                  }
                });
 }

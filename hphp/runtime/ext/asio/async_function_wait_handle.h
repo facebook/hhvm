@@ -93,7 +93,6 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncFunction, state); }
   void initialize(c_WaitableWaitHandle* child);
-  void markAsSucceeded();
   void markAsFailed(const Object& exception);
   c_WaitableWaitHandle* child() { return m_child; }
 

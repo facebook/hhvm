@@ -52,6 +52,8 @@ class EventHook {
 
   static void Enable();
   static void Disable();
+  static void EnableAsync();
+  static void DisableAsync();
   static void EnableIntercept();
   static void DisableIntercept();
   static ssize_t CheckSurprise();
@@ -69,9 +71,11 @@ class EventHook {
     ringbufferEnter(ar);
     if (UNLIKELY(checkConditionFlags())) { onFunctionResume(ar); }
   }
-  static inline void FunctionSuspend(const ActRec* ar) {
+  static inline void FunctionSuspend(const ActRec* ar, bool suspendingResumed) {
     ringbufferExit(ar);
-    if (UNLIKELY(checkConditionFlags())) { onFunctionSuspend(ar); }
+    if (UNLIKELY(checkConditionFlags())) {
+      onFunctionSuspend(ar, suspendingResumed);
+    }
   }
   static inline void FunctionReturn(ActRec* ar, const TypedValue& retval) {
     ringbufferExit(ar);
@@ -86,7 +90,7 @@ class EventHook {
    * Event hooks -- JIT entry points.
    */
   static bool onFunctionCall(const ActRec* ar, int funcType);
-  static void onFunctionSuspend(const ActRec* ar);
+  static void onFunctionSuspend(const ActRec* ar, bool suspendingResumed);
   static void onFunctionReturnJit(ActRec* ar, const TypedValue retval) {
     onFunctionReturn(ar, retval);
   }

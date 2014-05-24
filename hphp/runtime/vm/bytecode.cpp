@@ -6989,7 +6989,7 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   // Call the FunctionSuspend hook. Keep the generator on the stack so that
   // the unwinder could free it if the hook fails.
   m_stack.pushObjectNoRc(cont);
-  EventHook::FunctionSuspend(cont->actRec());
+  EventHook::FunctionSuspend(cont->actRec(), false);
   m_stack.discard();
 
   // Grab caller info from ActRec.
@@ -7052,7 +7052,7 @@ OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
   cont->suspend(nullptr, resumeOffset, *m_stack.topC());
   m_stack.popTV();
 
-  EventHook::FunctionSuspend(m_fp);
+  EventHook::FunctionSuspend(m_fp, true);
 
   // Return control to the next()/send()/raise() caller.
   Offset soff = m_fp->m_soff;
@@ -7070,7 +7070,7 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   m_stack.popTV();
   m_stack.popTV();
 
-  EventHook::FunctionSuspend(m_fp);
+  EventHook::FunctionSuspend(m_fp, true);
 
   // Return control to the next()/send()/raise() caller.
   Offset soff = m_fp->m_soff;
@@ -7137,7 +7137,7 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   // Call the FunctionSuspend hook. Keep the AsyncFunctionWaitHandle
   // on the stack so that the unwinder could free it if the hook fails.
   m_stack.pushObjectNoRc(waitHandle);
-  EventHook::FunctionSuspend(waitHandle->actRec());
+  EventHook::FunctionSuspend(waitHandle->actRec(), false);
   m_stack.discard();
 
   // Grab caller info from ActRec.
@@ -7170,7 +7170,7 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   m_stack.discard();
 
   // Call the FunctionSuspend hook.
-  EventHook::FunctionSuspend(m_fp);
+  EventHook::FunctionSuspend(m_fp, true);
 
   // Transfer control back to the scheduler.
   m_fp = nullptr;

@@ -361,6 +361,14 @@ void RequestInjectionData::setSignaledFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::SignaledFlag);
 }
 
+void RequestInjectionData::setAsyncEventHookFlag() {
+  getConditionFlags()->fetch_or(RequestInjectionData::AsyncEventHookFlag);
+}
+
+void RequestInjectionData::clearAsyncEventHookFlag() {
+  getConditionFlags()->fetch_and(~RequestInjectionData::AsyncEventHookFlag);
+}
+
 void RequestInjectionData::setEventHookFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::EventHookFlag);
 }

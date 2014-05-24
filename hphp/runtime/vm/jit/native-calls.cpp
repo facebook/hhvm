@@ -357,7 +357,7 @@ static CallMap s_callMap {
     /* surprise flag support */
     {SurpriseHook,        &EventHook::CheckSurprise, DNone, SSync, {}},
     {FunctionSuspendHook, &EventHook::onFunctionSuspend, DNone, SSync,
-                            {{SSA, 0}}},
+                            {{SSA, 0}, {SSA, 1}}},
     {FunctionReturnHook,  &EventHook::onFunctionReturnJit, DNone, SSync,
                             {{SSA, 0}, {TV, 1}}},
 

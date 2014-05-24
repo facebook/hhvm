@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_xenon.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
 
@@ -45,6 +46,14 @@ void EventHook::Enable() {
 
 void EventHook::Disable() {
   ThreadInfo::s_threadInfo->m_reqInjectionData.clearEventHookFlag();
+}
+
+void EventHook::EnableAsync() {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.setAsyncEventHookFlag();
+}
+
+void EventHook::DisableAsync() {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.clearAsyncEventHookFlag();
 }
 
 void EventHook::EnableIntercept() {
@@ -323,9 +332,25 @@ void EventHook::onFunctionResume(const ActRec* ar) {
   onFunctionEnter(ar, EventHook::NormalFunc, flags);
 }
 
-void EventHook::onFunctionSuspend(const ActRec* ar) {
+void EventHook::onFunctionSuspend(const ActRec* ar, bool suspendingResumed) {
   ssize_t flags = CheckSurprise();
   onFunctionExit(ar, nullptr, nullptr, flags);
+
+  // Async profiler
+  if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+      ar->func()->isAsyncFunction()) {
+    assert(ar->resumed());
+    auto afwh = frame_afwh(ar);
+    auto session = AsioSession::Get();
+    // Blocking await @ eager execution => AsyncFunctionWaitHandle created.
+    if (!suspendingResumed && session->hasOnAsyncFunctionCreateCallback()) {
+      session->onAsyncFunctionCreate(afwh, afwh->getChild());
+    }
+    // Blocking await @ resumed execution => AsyncFunctionWaitHandle awaiting.
+    if (suspendingResumed && session->hasOnAsyncFunctionAwaitCallback()) {
+      session->onAsyncFunctionAwait(afwh, afwh->getChild());
+    }
+  }
 }
 
 void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
@@ -339,6 +364,17 @@ void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
 
   ssize_t flags = CheckSurprise();
   onFunctionExit(ar, &retval, nullptr, flags);
+
+  // Async profiler
+  if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+      ar->func()->isAsyncFunction() && ar->resumed()) {
+    auto session = AsioSession::Get();
+    // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.
+    if (session->hasOnAsyncFunctionSuccessCallback()) {
+      auto afwh = frame_afwh(ar);
+      session->onAsyncFunctionSuccess(afwh, cellAsCVarRef(retval));
+    }
+  }
 }
 
 void EventHook::onFunctionUnwind(const ActRec* ar, const Fault& fault) {

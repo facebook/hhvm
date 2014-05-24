@@ -1,0 +1,4 @@
+
+Deprecated: E_USER_DEPRECATED in %s/slow/error_handler/error_messages.php on line 3
+
+Fatal error: E_USER_ERROR in %s/slow/error_handler/error_messages.php on line 4

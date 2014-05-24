@@ -80,11 +80,11 @@ void StoreImmPatcher::patch(uint64_t actual) {
   }
 }
 
-void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
+void emitBindJ(CodeBlock& cb, CodeBlock& unused,
                ConditionCode cc, SrcKey dest, ServiceRequest req) {
   mcg->backEnd().prepareForSmash(cb, cc == JIT::CC_None ? kJmpLen : kJmpccLen);
   TCA toSmash = cb.frontier();
-  if (cb.base() == stubs.base()) {
+  if (cb.base() == unused.base()) {
     Asm a { cb };
     emitJmpOrJcc(a, cc, toSmash);
   }
@@ -92,13 +92,13 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
   mcg->setJmpTransID(toSmash);
 
   TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(stubs, mcg->getFreeStub(stubs),
+            ? emitEphemeralServiceReq(unused, mcg->getFreeStub(unused),
                                       req, toSmash, dest.toAtomicInt())
-            : emitServiceReq(stubs, req, toSmash,
+            : emitServiceReq(unused, req, toSmash,
                              dest.toAtomicInt()));
 
   Asm a { cb };
-  if (cb.base() == stubs.base()) {
+  if (cb.base() == unused.base()) {
     CodeCursor cursor(cb, toSmash);
     emitJmpOrJcc(a, cc, sr);
   } else {
@@ -167,7 +167,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   return sizeof(ActRec) + cellsToBytes(nLocalCells-1);
 }
 
-void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
+void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& unusedCode,
                         SrcKey srcKey,
                         const Func* funcd,
                         int numArgs) {
@@ -180,15 +180,15 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
   Asm a { mainCode };
   mcg->backEnd().prepareForSmash(mainCode, kCallLen);
   TCA toSmash = mainCode.frontier();
-  a.    call(stubsCode.frontier());
+  a.    call(unusedCode.frontier());
 
-  Asm astubs { stubsCode };
-  astubs.    movq   (rStashedAR, serviceReqArgRegs[1]);
-  emitPopRetIntoActRec(astubs);
-  emitServiceReq(stubsCode, JIT::REQ_BIND_CALL, req);
+  Asm aunused { unusedCode };
+  aunused.    movq   (rStashedAR, serviceReqArgRegs[1]);
+  emitPopRetIntoActRec(aunused);
+  emitServiceReq(unusedCode, JIT::REQ_BIND_CALL, req);
 
   TRACE(1, "will bind static call: tca %p, funcd %p, astubs %p\n",
-        toSmash, funcd, stubsCode.frontier());
+        toSmash, funcd, unusedCode.frontier());
   req->m_toSmash = toSmash;
   req->m_nArgs = numArgs;
   req->m_sourceInstr = srcKey;
@@ -290,22 +290,23 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   return retval;
 }
 
-void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
+void emitBindSideExit(CodeBlock& cb, CodeBlock& unused, JIT::ConditionCode cc,
                       SrcKey dest) {
-  emitBindJ(cb, stubs, cc, dest, REQ_BIND_SIDE_EXIT);
+  emitBindJ(cb, unused, cc, dest, REQ_BIND_SIDE_EXIT);
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& unused, JIT::ConditionCode cc,
                  SrcKey dest) {
-  emitBindJ(cb, stubs, cc, dest, REQ_BIND_JCC);
+  emitBindJ(cb, unused, cc, dest, REQ_BIND_JCC);
 }
 
-void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest) {
-  emitBindJ(cb, stubs, JIT::CC_None, dest, REQ_BIND_JMP);
+void emitBindJmp(CodeBlock& cb, CodeBlock& unused, SrcKey dest) {
+  emitBindJ(cb, unused, JIT::CC_None, dest, REQ_BIND_JMP);
 }
 
 int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
-                     SrcKey srcKey, const Func* funcd, int numArgs) {
+                     CodeBlock& unusedCode, SrcKey srcKey,
+                     const Func* funcd, int numArgs) {
   // If this is a call to a builtin and we don't need any argument
   // munging, we can skip the prologue system and do it inline.
   if (isNativeImplCall(funcd, numArgs)) {
@@ -331,7 +332,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
   }
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
   emitLea(a, rVmSp[cellsToBytes(numArgs)], rStashedAR);
-  emitBindCallHelper(mainCode, stubsCode, srcKey, funcd, numArgs);
+  emitBindCallHelper(mainCode, unusedCode, srcKey, funcd, numArgs);
   return 0;
 }
 

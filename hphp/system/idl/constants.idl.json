@@ -14,11 +14,6 @@
             "value": null
         },
         {
-            "name": "SID",
-            "type": "String",
-            "desc": "Dynamic constant: session_id()"
-        },
-        {
             "name": "PHP_SAPI",
             "type": "String",
             "desc": "Dynamic constant: php_sapi_name()"
@@ -733,11 +728,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "3.1.0-dev"
+            "value": "3.2.0-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "3.1.0-dev"
+            "value": "3.2.0-dev"
         },
         {
             "name": "HTML_ENTITIES",
@@ -958,22 +953,6 @@
         {
             "name": "IMAGETYPE_ICO",
             "value": 17
-        },
-        {
-            "name": "IMAP_CLOSETIMEOUT",
-            "value": 4
-        },
-        {
-            "name": "IMAP_OPENTIMEOUT",
-            "value": 1
-        },
-        {
-            "name": "IMAP_READTIMEOUT",
-            "value": 2
-        },
-        {
-            "name": "IMAP_WRITETIMEOUT",
-            "value": 3
         },
         {
             "name": "IMG_ARC_CHORD",
@@ -3199,15 +3178,31 @@
         },
         {
             "name": "PHP_OUTPUT_HANDLER_CONT",
-            "value": 2
+            "value": 0
         },
         {
-            "name": "PHP_OUTPUT_HANDLER_END",
-            "value": 4
+            "name": "PHP_OUTPUT_HANDLER_WRITE",
+            "value": 0
         },
         {
             "name": "PHP_OUTPUT_HANDLER_START",
             "value": 1
+        },
+        {
+            "name": "PHP_OUTPUT_HANDLER_CLEAN",
+            "value": 2
+        },
+        {
+            "name": "PHP_OUTPUT_HANDLER_FLUSH",
+            "value": 4
+        },
+        {
+            "name": "PHP_OUTPUT_HANDLER_END",
+            "value": 8
+        },
+        {
+            "name": "PHP_OUTPUT_HANDLER_FINAL",
+            "value": 8
         },
         {
             "name": "PHP_PREFIX",

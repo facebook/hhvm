@@ -621,7 +621,7 @@ struct Class : AtomicCountable {
     return false;
   }
   bool ifaceofDirect(const StringData* name) const {
-    return m_interfaces.lookupDefault(name, nullptr) != nullptr;
+    return m_interfaces.contains(name);
   }
 
   /*
@@ -1081,7 +1081,14 @@ inline bool isNormalClass(const Class* cls ) {
   return !(cls->attrs() & (AttrTrait | AttrInterface));
 }
 
-enum class ClassKind { Class, Interface, Trait };
+enum class ClassKind {
+  Class = AttrNone,
+  Interface = AttrInterface,
+  Trait = AttrTrait
+};
+inline Attr classKindAsAttr(ClassKind kind) {
+  return static_cast<Attr>(kind);
+}
 
 /*
  * Returns whether a class is persistent *and* has a persistent RDS

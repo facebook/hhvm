@@ -41,12 +41,6 @@ namespace {
   }
 }
 
-void c_GenArrayWaitHandle::t___construct() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Use GenArrayWaitHandle::create() instead of constructor"));
-  throw e;
-}
-
 void c_GenArrayWaitHandle::ti_setoncreatecallback(const Variant& callback) {
   if (!callback.isNull() &&
       (!callback.isObject() ||

@@ -23,14 +23,17 @@
 typedef struct _zend_class_entry zend_class_entry;
 struct _zend_class_entry;
 
-zend_class_entry* zend_hphp_class_to_class_entry(HPHP::Class* cls);
-HPHP::Class * zend_hphp_class_entry_to_class(const zend_class_entry * ce);
-zend_class_entry* zend_hphp_get_internal_class_entry(const HPHP::StringData* name);
-zend_class_entry* zend_hphp_register_internal_class_entry(HPHP::StringData* name);
+namespace HPHP {
 
-const HPHP::Class::SProp* zce_find_static_prop(const zend_class_entry* ce,
+zend_class_entry* zend_hphp_class_to_class_entry(Class* cls);
+Class * zend_hphp_class_entry_to_class(const zend_class_entry * ce);
+zend_class_entry* zend_hphp_get_internal_class_entry(const StringData* name);
+zend_class_entry* zend_hphp_register_internal_class_entry(StringData* name);
+
+const Class::SProp* zce_find_static_prop(const zend_class_entry* ce,
                                                const char* name,
                                                size_t len);
 
+}
 
 #endif

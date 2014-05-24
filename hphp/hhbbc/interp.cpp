@@ -105,7 +105,7 @@ template<class T, class... Ts>
 void impl(ISS& env, const T& t, Ts&&... ts) {
   impl(env, t);
 
-  assert(!env.flags.tookBranch &&
+  assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
          "you can't use impl with branching opcodes before last position");
   assert(!env.flags.strengthReduced);
 
@@ -539,6 +539,8 @@ void jmpImpl(ISS& env, const Op& op) {
     if (taken) {
       nofallthrough(env);
       env.propagate(*op.target, env.state);
+    } else {
+      never_taken(env);
     }
     return;
   }
@@ -1778,22 +1780,18 @@ void in(ISS& env, const bc::StaticLocInit& op) {
 }
 
 /*
- * This can't trivially check that the class exists (e.g. via
- * resolve_class) without knowing either:
+ * This can't trivially check that the class/trait/interface exists
+ * (e.g. via resolve_class) without knowing either:
  *
- *    a) autoload is guaranteed to load it and t1 == true, or
- *    b) it's already defined in this unit.
+ *  a) autoload is guaranteed to load it and t1 == true, or
+ *  b) it's already defined in this unit.
+ *
+ * op.subop (OODeclExistsOp) would be useful with resolution of the class
  */
-void clsExistsImpl(ISS& env, Attr testAttr) {
+void in(ISS& env, const bc::OODeclExists& op) {
   popC(env);
   popC(env);
   push(env, TBool);
-}
-
-void in(ISS& env, const bc::ClassExists&) { clsExistsImpl(env, AttrNone); }
-void in(ISS& env, const bc::TraitExists&) { clsExistsImpl(env, AttrTrait); }
-void in(ISS& env, const bc::InterfaceExists&) {
-  clsExistsImpl(env, AttrInterface);
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {
@@ -2112,9 +2110,13 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
       FTRACE(2, "  <called function that never returns>\n");
       continue;
     }
-    if (flags.tookBranch) {
+    switch (flags.jmpFlag) {
+    case StepFlags::JmpFlags::Taken:
       FTRACE(2, "  <took branch; no fallthrough>\n");
       return RunFlags {};
+    case StepFlags::JmpFlags::Fallthrough:
+    case StepFlags::JmpFlags::Either:
+      break;
     }
     if (flags.returned) {
       FTRACE(2, "  returned {}\n", show(*flags.returned));

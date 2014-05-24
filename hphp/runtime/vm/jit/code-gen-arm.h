@@ -31,10 +31,12 @@ namespace HPHP { namespace JIT { namespace ARM {
 struct CodeGenerator : public JIT::CodeGenerator {
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                JIT::MCGenerator* mcg, CodegenState& state)
+                CodeBlock& unusedCode, JIT::MCGenerator* mcg,
+                CodegenState& state)
       : m_unit(unit)
       , m_mainCode(mainCode)
       , m_stubsCode(stubsCode)
+      , m_unusedCode(unusedCode)
       , m_as(mainCode)
       , m_astubs(stubsCode)
       , m_mcg(mcg)
@@ -139,6 +141,7 @@ struct CodeGenerator : public JIT::CodeGenerator {
   const IRUnit&               m_unit;
   CodeBlock&                  m_mainCode;
   CodeBlock&                  m_stubsCode;
+  CodeBlock&                  m_unusedCode;
   vixl::MacroAssembler        m_as;
   vixl::MacroAssembler        m_astubs;
   MCGenerator*                m_mcg;

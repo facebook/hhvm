@@ -687,7 +687,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   recordGdbTranslation(skFuncBody, func,
                        code.main(), aStart,
                        false, true);
-  recordBCInstr(OpFuncPrologue, code.main(), start);
+  recordBCInstr(OpFuncPrologue, code.main(), start, false);
 
   return start;
 }
@@ -916,7 +916,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
     return tDest;
   }
 
-  TCA stub = emitEphemeralServiceReq(code.stubs(), getFreeStub(code.stubs()),
+  TCA stub = emitEphemeralServiceReq(code.unused(), getFreeStub(code.unused()),
                                      REQ_BIND_JMPCC_SECOND, toSmash,
                                      offWillDefer, cc);
 
@@ -1386,20 +1386,20 @@ MCGenerator::freeRequestStub(TCA stub) {
    * (FreeRequestStubTrigger) retries
    */
   if (!writer) return false;
-  assert(code.stubs().contains(stub));
+  assert(code.unused().contains(stub));
   m_freeStubs.push(stub);
   return true;
 }
 
-TCA MCGenerator::getFreeStub(CodeBlock& stubs) {
+TCA MCGenerator::getFreeStub(CodeBlock& unused) {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
     Stats::inc(Stats::Astubs_Reused);
     always_assert(m_freeStubs.m_list == nullptr ||
-                  code.isValidCodeAddress(TCA(m_freeStubs.m_list)));
+                  code.unused().contains(TCA(m_freeStubs.m_list)));
     TRACE(1, "recycle stub %p\n", ret);
   } else {
-    ret = stubs.frontier();
+    ret = unused.frontier();
     Stats::inc(Stats::Astubs_New);
     TRACE(1, "alloc new stub %p\n", ret);
   }
@@ -1506,7 +1506,7 @@ MCGenerator::emitNativeTrampoline(TCA helperAddr) {
   a.    ud2(); // hint that the jump doesn't go here.
 
   m_trampolineMap[helperAddr] = trampAddr;
-  recordBCInstr(OpNativeTrampoline, trampolines, trampAddr);
+  recordBCInstr(OpNativeTrampoline, trampolines, trampAddr, false);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
   }
@@ -2091,8 +2091,8 @@ void MCGenerator::traceCodeGen() {
   auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
-  recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier());
-  genCode(code.main(), code.stubs(), unit, &m_bcMap, this, regs);
+  recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier(), false);
+  genCode(unit, &m_bcMap, this, regs);
 
   m_numHHIRTrans++;
 }
@@ -2226,10 +2226,11 @@ static Debug::TCRange rangeFrom(const CodeBlock& cb, const TCA addr,
 
 void MCGenerator::recordBCInstr(uint32_t op,
                                 const CodeBlock& cb,
-                                const TCA addr) {
+                                const TCA addr,
+                                bool stubs) {
   if (addr != cb.frontier()) {
     m_debugInfo.recordBCInstr(Debug::TCRange(addr, cb.frontier(),
-                                             &cb == &code.stubs()), op);
+                                             stubs), op);
   }
 }
 
@@ -2439,7 +2440,7 @@ bool MCGenerator::dumpTCData() {
                 kRepoSchemaId,
                 code.trampolines().base(), code.main().frontier(),
                 code.prof().base(), code.prof().frontier(),
-                code.stubs().base(), code.stubs().frontier())) {
+                code.stubs().base(), code.unused().frontier())) {
     return false;
   }
 

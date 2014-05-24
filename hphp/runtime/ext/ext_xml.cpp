@@ -241,7 +241,9 @@ String xml_utf8_decode(const XML_Char *s, int len,
     newbuf[newlen] = decoder ? decoder(c) : c;
     ++newlen;
   }
-  str.setSize(newlen);
+
+  assert(newlen <= len);
+  str.shrink(newlen);
   return str;
 }
 
@@ -915,11 +917,15 @@ String f_utf8_decode(const String& data) {
     newbuf[newlen] = (char)(c > 0xff ? '?' : c);
     ++newlen;
   }
-  return str.setSize(newlen);
+
+  assert(newlen <= data.size());
+  str.shrink(newlen);
+  return str;
 }
 
 String f_utf8_encode(const String& data) {
-  String str = String(data.size() * 4, ReserveString);
+  const auto maxSize = data.size() * 4;
+  String str = String(maxSize, ReserveString);
   char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;
   const char *s = data.data();
@@ -941,7 +947,10 @@ String f_utf8_encode(const String& data) {
       newbuf[newlen++] = (0x80 | (c & 0x3f));
     }
   }
-  return str.setSize(newlen);
+
+  assert(newlen <= maxSize);
+  str.shrink(newlen);
+  return str;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

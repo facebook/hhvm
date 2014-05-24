@@ -986,10 +986,11 @@ class CompactReader {
         char* buf = s.bufferSlice().ptr;
 
         transport.readBytes(buf, size);
-        return s.setSize(size);
+        s.setSize(size);
+        return s;
       } else {
         transport.skip(size);
-        return "";
+        return empty_string;
       }
     }
 

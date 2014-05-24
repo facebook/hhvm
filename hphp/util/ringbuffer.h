@@ -75,7 +75,7 @@ static_assert(sizeof(RingBufferEntry) == 32,
 
 constexpr unsigned kMaxRBEntries = (1 << 20); // Must exceed number of threads
 
-extern RingBufferEntry g_ring[];
+extern RingBufferEntry* g_ring_ptr;
 extern std::atomic<int> g_ringIdx;
 
 const char* ringbufferName(RingBufferType t);

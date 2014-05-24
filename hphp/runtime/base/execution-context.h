@@ -36,10 +36,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
 
-#define PHP_OUTPUT_HANDLER_START  (1<<0)
-#define PHP_OUTPUT_HANDLER_CONT   (1<<1)
-#define PHP_OUTPUT_HANDLER_END    (1<<2)
-
 namespace vixl { class Simulator; }
 
 namespace HPHP {
@@ -228,7 +224,7 @@ public:
   String obCopyContents();
   String obDetachContents();
   int obGetContentLength();
-  void obClean();
+  void obClean(int handler_flag);
   bool obFlush();
   void obFlushAll();
   bool obEnd();
@@ -460,7 +456,6 @@ OPCODES
   void asyncSuspendE(IOP_ARGS, int32_t iters);
   void asyncSuspendR(IOP_ARGS);
   void ret(IOP_ARGS);
-  void classExistsImpl(IOP_ARGS, Attr typeAttr);
   void fPushObjMethodImpl(
       Class* cls, StringData* name, ObjectData* obj, int numArgs);
   ActRec* fPushFuncImpl(const Func* func, int numArgs);

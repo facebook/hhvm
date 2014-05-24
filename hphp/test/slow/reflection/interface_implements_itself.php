@@ -1,27 +1,30 @@
 <?php
 
 namespace {
-  interface I {}
+  interface Iface {}
 }
 
 namespace N {
-  interface I {}
+  interface Iface {}
 }
 
 namespace T {
-  interface I {}
+  interface Iface {}
 }
 
 namespace {
-  $i = new ReflectionClass('I');
-  $ni = new ReflectionClass('N\I');
-  $ti = new ReflectionClass('T\I');
+function main() {
+  $i  = new ReflectionClass('IFace');
+  $ni = new ReflectionClass('N\IFace');
+  $ti = new ReflectionClass('\T\IFace');
 
-  var_dump($i->implementsInterface('I'));
-  var_dump($ni->implementsInterface('N\I'));
-  var_dump($ti->implementsInterface('T\I'));
+  var_dump($i->implementsInterface('IfAcE'));
+  var_dump($ni->implementsInterface('\N\IfAcE'));
+  var_dump($ti->implementsInterface('T\IfAcE'));
 
-  var_dump($i->implementsInterface('N\I'));
-  var_dump($ti->implementsInterface('N\I'));
-  var_dump($ni->implementsInterface('I'));
+  var_dump($i->implementsInterface('N\Iface'));
+  var_dump($ti->implementsInterface('N\Iface'));
+  var_dump($ni->implementsInterface('Iface'));
+}
+main();
 }

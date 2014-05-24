@@ -1,0 +1,15 @@
+<?php
+
+$memc = new Memcached();
+$memc->addServer('localhost', '11211');
+$version = $memc->getVersion();
+if (!$version) {
+  echo "SKIP No Memcached running";
+} else {
+  foreach($version as $v) {
+    if (!version_compare($v, '1.3.0', '>=')) {
+      echo "SKIP Need memcached 1.3.0 for CAS";
+    }
+  }
+}
+

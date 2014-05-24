@@ -623,6 +623,15 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
         exp = NEW_EXP(ScalarExpression, type, scalar->text());
       }
       break;
+    case T_CLASS_C:
+      if (m_inTrait) {
+        // Inside traits we already did the magic for static::class so lets
+        // reuse that
+        out->exp = NEW_EXP(SimpleFunctionCall, "get_class", true,
+                           ExpressionListPtr(), ExpressionPtr());
+        return;
+      }
+      // fallthrough
     case T_STRING:
     case T_LNUMBER:
     case T_DNUMBER:
@@ -630,7 +639,6 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     case T_LINE:
     case T_COMPILER_HALT_OFFSET:
     case T_FUNC_C:
-    case T_CLASS_C:
       exp = NEW_EXP(ScalarExpression, type, scalar->text());
       break;
     case T_TRAIT_C:
@@ -2184,6 +2192,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"KeyedTraversable", "HH\\KeyedTraversable"},
     (AliasEntry){"KeyedContainer", "HH\\KeyedContainer"},
     (AliasEntry){"Iterator", "HH\\Iterator"},
+    (AliasEntry){"AsyncIterator", "HH\\AsyncIterator"},
     (AliasEntry){"KeyedIterator", "HH\\KeyedIterator"},
     (AliasEntry){"Iterable", "HH\\Iterable"},
     (AliasEntry){"KeyedIterable", "HH\\KeyedIterable"},

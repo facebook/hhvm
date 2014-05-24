@@ -1273,7 +1273,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
     fp = getPrevVMState(fp);
   }
   if (!fp) {
-    return Array::Create();
+    return empty_array;
   }
   assert(!fp->hasInvName());
   if (fp->hasVarEnv()) {
@@ -2540,7 +2540,7 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
   efile = HPHP::Eval::FileRepository::checkoutFile(
     hasRealpath ? rpath.get() : spath.get(), s);
   if (efile && initial_opt) {
-    // if initial_opt is not set, this shouldnt be recorded as a
+    // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
     if (RDS::testAndSetBit(efile->getId())) {
       initial = false;
@@ -7307,8 +7307,10 @@ OPTBLD_INLINE void ExecutionContext::iopIncStat(IOP_ARGS) {
   Stats::inc(Stats::StatCounter(counter), value);
 }
 
-void ExecutionContext::classExistsImpl(IOP_ARGS, Attr typeAttr) {
+OPTBLD_INLINE void ExecutionContext::iopOODeclExists(IOP_ARGS) {
   NEXT();
+  DECODE_OA(OODeclExistsOp, subop);
+
   TypedValue* aloadTV = m_stack.topTV();
   tvCastToBooleanInPlace(aloadTV);
   assert(aloadTV->m_type == KindOfBoolean);
@@ -7319,19 +7321,13 @@ void ExecutionContext::classExistsImpl(IOP_ARGS, Attr typeAttr) {
   tvCastToStringInPlace(name);
   assert(IS_STRING_TYPE(name->m_type));
 
-  tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, typeAttr);
-}
-
-OPTBLD_INLINE void ExecutionContext::iopClassExists(IOP_ARGS) {
-  classExistsImpl(IOP_PASS_ARGS, AttrNone);
-}
-
-OPTBLD_INLINE void ExecutionContext::iopInterfaceExists(IOP_ARGS) {
-  classExistsImpl(IOP_PASS_ARGS, AttrInterface);
-}
-
-OPTBLD_INLINE void ExecutionContext::iopTraitExists(IOP_ARGS) {
-  classExistsImpl(IOP_PASS_ARGS, AttrTrait);
+  ClassKind kind;
+  switch (subop) {
+    case OODeclExistsOp::Class : kind = ClassKind::Class; break;
+    case OODeclExistsOp::Trait : kind = ClassKind::Trait; break;
+    case OODeclExistsOp::Interface : kind = ClassKind::Interface; break;
+  }
+  tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, kind);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopSilence(IOP_ARGS) {

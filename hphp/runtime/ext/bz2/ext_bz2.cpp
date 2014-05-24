@@ -192,7 +192,8 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
   if (error == BZ_STREAM_END || error == BZ_OK) {
     size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
     BZ2_bzDecompressEnd(&bzs);
-    return ret.shrink(size);
+    ret.shrink(size);
+    return ret;
   } else {
     BZ2_bzDecompressEnd(&bzs);
     return error;

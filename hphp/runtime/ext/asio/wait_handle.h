@@ -29,18 +29,18 @@ namespace HPHP {
  * asynchronous. A WaitHandle class is a base class of all such objects. There
  * are multiple types of wait handles, this is their hierarchy:
  *
- * WaitHandle                     - abstract wait handle
- *   StaticWaitHandle             - statically finished wait handle
- *   WaitableWaitHandle           - wait handle that can be waited for
- *     BlockableWaitHandle        - wait handle that can be blocked by other WH
- *       AsyncFunctionWaitHandle  - async function-based asynchronous execution
- *       GenArrayWaitHandle       - wait handle representing an array of WHs
- *       GenMapWaitHandle         - wait handle representing an Map of WHs
- *       GenVectorWaitHandle      - wait handle representing an Vector of WHs
- *       SetResultToRefWaitHandle - wait handle that sets result to reference
- *     RescheduleWaitHandle       - wait handle that reschedules execution
- *     SleepWaitHandle            - wait handle that finishes after a timeout
- *     ExternalThreadEventWaitHandle  - thread-powered asynchronous execution
+ * WaitHandle                      - abstract wait handle
+ *  StaticWaitHandle               - statically finished wait handle
+ *  WaitableWaitHandle             - wait handle that can be waited for
+ *   BlockableWaitHandle           - wait handle that can be blocked by other WH
+ *    ResumableWaitHandle          - wait handle that can resume PHP execution
+ *     AsyncFunctionWaitHandle     - async function-based asynchronous execution
+ *    GenArrayWaitHandle           - wait handle representing an array of WHs
+ *    GenMapWaitHandle             - wait handle representing an Map of WHs
+ *    GenVectorWaitHandle          - wait handle representing an Vector of WHs
+ *   RescheduleWaitHandle          - wait handle that reschedules execution
+ *   SleepWaitHandle               - wait handle that finishes after a timeout
+ *   ExternalThreadEventWaitHandle - thread-powered asynchronous execution
  *
  * A wait handle can be either synchronously joined (waited for the operation
  * to finish) or passed in various contexts as a dependency and waited for
@@ -53,15 +53,14 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
 
   enum class Kind : uint8_t {
-    Static              = 0,
-    AsyncFunction       = 1,
-    GenArray            = 2,
-    GenMap              = 3,
-    GenVector           = 4,
-    SetResultToRef      = 5,
-    Reschedule          = 6,
-    Sleep               = 7,
-    ExternalThreadEvent = 8,
+    Static,
+    AsyncFunction,
+    GenArray,
+    GenMap,
+    GenVector,
+    Reschedule,
+    Sleep,
+    ExternalThreadEvent,
   };
 
   explicit c_WaitHandle(Class* cls = c_WaitHandle::classof())

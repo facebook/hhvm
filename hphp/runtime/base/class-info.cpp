@@ -470,7 +470,7 @@ const {
 
 static String staticString(const char *s) {
   if (!s) {
-    return null_string;
+    return String();
   }
   return makeStaticString(s);
 }

@@ -123,7 +123,8 @@ Variant f_fb_serialize(const Variant& thing) {
     String s(len, ReserveString);
     HPHP::serialize::FBSerializer<VariantController>::serialize(
       thing, s.bufferSlice().ptr);
-    return s.setSize(len);
+    s.setSize(len);
+    return s;
   } catch (const HPHP::serialize::SerializeError&) {
     return null_variant;
   }
@@ -455,7 +456,8 @@ Variant f_fb_compact_serialize(const Variant& thing) {
     if (val >= 0 && (uint64_t)val <= kInt7Mask) {
       String s(2, ReserveString);
       *(uint16_t*)(s.bufferSlice().ptr) = (uint16_t)htons(kInt13Prefix | val);
-      return s.setSize(2);
+      s.setSize(2);
+      return s;
     }
   }
 
@@ -774,7 +776,8 @@ bool f_fb_utf8ize(VRefParam input) {
     // We know that resultBuffer > total possible length.
     U8_APPEND_UNSAFE(dstBuf, dstPosBytes, curCodePoint);
   }
-  input = dstStr.setSize(dstPosBytes);
+  assert(dstPosBytes <= dstMaxLenBytes);
+  input = dstStr.shrink(dstPosBytes);
   return true;
 }
 
@@ -874,8 +877,10 @@ static String fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
     }
   }
 
+  assert(dstPosBytes <= dstMaxLenBytes);
   if (dstPosBytes > 0) {
-    return dstStr.setSize(dstPosBytes);
+    dstStr.shrink(dstPosBytes);
+    return dstStr;
   }
   return empty_string;
 }

@@ -199,6 +199,29 @@ static std::array<TypedValue, 2> makeArgsFromVectorKeyAndValue(
   }};
 }
 
+template<class TVector>
+ALWAYS_INLINE
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_fromKeysOf(const Variant& container) {
+  if (container.isNull()) { return NEWOBJ(TVector)(); }
+
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a container (array or collection)"));
+    throw e;
+  }
+
+  ArrayIter iter(cellContainer);
+  auto* target = NEWOBJ(TVector)();
+  assert(!target->hasImmutableBuffer());
+  target->reserve(getContainerSize(cellContainer));
+  Object ret = target;
+  for (; iter; ++iter) { target->addRaw(iter.first()); }
+  return ret;
+}
+
 template<class TVector, class MakeArgs>
 ALWAYS_INLINE
 typename std::enable_if<
@@ -1175,6 +1198,14 @@ Object c_Vector::ti_fromitems(const Variant& iterable) {
   return ret;
 }
 
+Object c_Vector::ti_fromkeysof(const Variant& container) {
+  return BaseVector::php_fromKeysOf<c_Vector>(container);
+}
+
+Object c_ImmVector::ti_fromkeysof(const Variant& container) {
+  return BaseVector::php_fromKeysOf<c_ImmVector>(container);
+}
+
 Object c_Vector::ti_fromarray(const Variant& arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1647,11 +1678,27 @@ Object c_Map::t_addall(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  reserve(std::max(sz, size_t(m_size)));
+  reserve(m_size + sz); // presume minimum key collisions
   for (; iter; ++iter) {
     add(iter.second());
   }
+  compactIfNecessary(); // ... and compact back if that was incorrect
   return this;
+}
+
+void c_Map::t_reserve(const Variant& sz) {
+  if (UNLIKELY(!sz.isInteger())) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  int64_t intSz = sz.toInt64();
+  if (UNLIKELY(intSz < 0)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  reserve(intSz); // checks for intSz > MaxReserveSize
 }
 
 Object c_Map::t_clear() {
@@ -3638,6 +3685,21 @@ void BaseSet::cow() {
   m_immCopy.reset();
 }
 
+void BaseSet::addAllKeysOf(const Cell& container) {
+  assert(isContainer(container));
+
+  auto sz = getContainerSize(container);
+  ArrayIter iter(container);
+  if (!sz || !iter) { return; }
+
+  mutateAndBump();
+  // In theory we could be deferring the version bump above because all the
+  // elements of iter could already be present in the set.
+  reserve(m_size + sz);
+  for (; iter; ++iter) { addRaw(iter.first()); }
+  compactIfNecessary();
+}
+
 void BaseSet::addAll(const Variant& t) {
   if (t.isNull()) { return; } // nothing to do
 
@@ -4497,6 +4559,17 @@ BaseSet::php_fromItems(const Variant& iterable) {
   return ret;
 }
 
+static ALWAYS_INLINE
+const Cell container_as_cell(const Variant& container) {
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a container (array or collection)"));
+    throw e;
+  }
+  return cellContainer;
+}
+
 template<class TSet>
 ALWAYS_INLINE
 typename std::enable_if<
@@ -4504,19 +4577,11 @@ typename std::enable_if<
 BaseSet::php_fromKeysOf(const Variant& container) {
   if (container.isNull()) { return NEWOBJ(TSet)(); }
 
-  const auto& cellContainer = *container.asCell();
-  if (UNLIKELY(!isContainer(cellContainer))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a container (array or collection)"));
-    throw e;
-  }
+  const auto& cellContainer = container_as_cell(container);
 
-  ArrayIter iter(cellContainer);
   auto* target = NEWOBJ(TSet)();
-  assert(!target->hasImmutableBuffer());
-  target->reserve(getContainerSize(cellContainer));
   Object ret = target;
-  for (; iter; ++iter) { target->addRaw(iter.first()); }
+  target->addAllKeysOf(cellContainer);
   return ret;
 }
 
@@ -4869,6 +4934,29 @@ Object c_Set::t_add(const Variant& val) {
 Object c_Set::t_addall(const Variant& iterable) {
   addAll(iterable);
   return this;
+}
+
+Object c_Set::t_addallkeysof(const Variant& container) {
+  if (!container.isNull()) {
+    const auto& containerCell = container_as_cell(container);
+    addAllKeysOf(containerCell);
+  }
+  return this;
+}
+
+void c_Set::t_reserve(const Variant& sz) {
+  if (UNLIKELY(!sz.isInteger())) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  int64_t intSz = sz.toInt64();
+  if (UNLIKELY(intSz < 0)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  reserve(intSz); // checks for intSz > MaxReserveSize
 }
 
 Object c_Set::t_clear() {

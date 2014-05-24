@@ -30,12 +30,6 @@ namespace {
   StaticString s_sleep("<sleep>");
 }
 
-void c_SleepWaitHandle::t___construct() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Use SleepWaitHandle::create() instead of constructor"));
-  throw e;
-}
-
 Object c_SleepWaitHandle::ti_create(int64_t usecs) {
   if (UNLIKELY(usecs < 0)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(

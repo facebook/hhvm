@@ -760,18 +760,18 @@ struct ShuffleData : IRExtraData {
 };
 
 struct ClassKindData : IRExtraData {
-  explicit ClassKindData(ClassKind kind) : kind(kind) {}
+  explicit ClassKindData(ClassKind kind): kind(uint32_t(kind)) {}
 
   std::string show() const {
-    switch (kind) {
-    case ClassKind::Class:     return "cls";
-    case ClassKind::Interface: return "interface";
-    case ClassKind::Trait:     return "trait";
+    switch (static_cast<ClassKind>(kind)) {
+      case ClassKind::Class:     return "cls";
+      case ClassKind::Interface: return "interface";
+      case ClassKind::Trait:     return "trait";
     }
     not_reached();
   }
 
-  ClassKind kind;
+  uint32_t kind; // ... allows for direct usage in native_call
 };
 
 struct NewStructData : IRExtraData {
@@ -945,7 +945,7 @@ X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
 X(Shuffle,                      ShuffleData);
-X(ThingExists,                  ClassKindData);
+X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(LdRaw,                        RawMemData);
 X(StRaw,                        RawMemData);

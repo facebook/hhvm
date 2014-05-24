@@ -30,7 +30,7 @@ FORWARD_DECLARE_CLASS(WaitHandle);
 FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
-FORWARD_DECLARE_CLASS(SetResultToRefWaitHandle);
+FORWARD_DECLARE_CLASS(ResumableWaitHandle);
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 
 class AsioSession {
@@ -64,7 +64,7 @@ class AsioSession {
       return static_cast<context_idx_t>(m_contexts.size());
     }
 
-    c_AsyncFunctionWaitHandle* getCurrentWaitHandle() {
+    c_ResumableWaitHandle* getCurrentWaitHandle() {
       assert(!isInContext() || getCurrentContext()->isRunning());
       return isInContext() ? getCurrentContext()->getCurrent() : nullptr;
     }
@@ -163,14 +163,6 @@ class AsioSession {
     bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
     void onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, const Variant& dependencies);
 
-    // SetResultToRefWaitHandle callbacks:
-    void setOnSetResultToRefCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::classof()));
-      m_onSetResultToRefCreateCallback = on_create;
-    }
-    bool hasOnSetResultToRefCreateCallback() { return m_onSetResultToRefCreateCallback.get(); }
-    void onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, const Object& child);
-
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
 
@@ -190,7 +182,6 @@ class AsioSession {
     Object m_onGenArrayCreateCallback;
     Object m_onGenMapCreateCallback;
     Object m_onGenVectorCreateCallback;
-    Object m_onSetResultToRefCreateCallback;
     Object m_onJoinCallback;
 };
 

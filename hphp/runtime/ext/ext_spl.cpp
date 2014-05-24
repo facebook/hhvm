@@ -344,27 +344,6 @@ String f_spl_autoload_extensions(const String& file_extensions /* = null_string 
   return StringUtil::Implode(s_extension_list->extensions, ",");
 }
 
-void f_spl_autoload(const String& class_name,
-                    const String& file_extensions /* = null_string */) {
-  Array ext = file_extensions.isNull()
-              ? s_extension_list->extensions
-              : StringUtil::Explode(file_extensions, ",").toArray();
-  String lClass = f_strtolower(class_name);
-  bool found = false;
-  for (ArrayIter iter(ext); iter; ++iter) {
-    String fileName = lClass + iter.second().toString();
-    include(fileName, true, "", false);
-    if (HHVM_FN(class_exists)(class_name, false)) {
-      found = true;
-      break;
-    }
-  }
-
-  if (!found && !AutoloadHandler::s_instance->isRunning()) {
-    throw_spl_exception("Class %s could not be loaded", class_name.c_str());
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 template <class T>

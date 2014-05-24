@@ -353,7 +353,14 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    * @return     string   The name of the function.
    */
   public function getName(): string {
-    return ($this->closure) ? '{closure}' : parent::getName();
+    if ($this->closure) {
+      $clsname = $this->getClosureScopeClassname($this->closure);
+      $pos = $clsname ? strrpos($clsname, '\\') : false;
+      return ($pos === false)
+        ? '{closure}'
+        : substr($clsname, 0, $pos + 1).'{closure}';
+    }
+    return parent::getName();
   }
 
   // __get and __set are used to maintain read-only $this->name
@@ -1707,8 +1714,9 @@ class ReflectionClass implements Reflector {
     if (!interface_exists($normalized_cls)) {
       throw new ReflectionException("Interface $normalized_cls does not exist");
     }
-    return $cls == $this->getName() ||
-           $this->isSubclassOf($normalized_cls);
+    return $this->isInterface()
+      ? is_a($this->getName(), $normalized_cls, true)
+      : $this->isSubclassOf($normalized_cls);
   }
 
   /**

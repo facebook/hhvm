@@ -40,12 +40,6 @@ namespace {
   }
 }
 
-void c_GenVectorWaitHandle::t___construct() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Use GenVectorWaitHandle::create() instead of constructor"));
-  throw e;
-}
-
 void c_GenVectorWaitHandle::ti_setoncreatecallback(const Variant& callback) {
   if (!callback.isNull() &&
       (!callback.isObject() ||

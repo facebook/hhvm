@@ -81,7 +81,6 @@ struct EnvConstants {
   static void requestExit();
   Variant lvalProxy;
   Variant stgv_Variant[1];
-#define k_SID stgv_Variant[0]
 };
 extern EnvConstants* get_env_constants();
 extern String k_PHP_BINARY;

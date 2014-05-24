@@ -479,7 +479,7 @@ String Variant::toStringHelper() const {
 Array Variant::toArrayHelper() const {
   switch (m_type) {
   case KindOfUninit:
-  case KindOfNull:    return Array::Create();
+  case KindOfNull:    return empty_array;
   case KindOfInt64:   return Array::Create(m_data.num);
   case KindOfStaticString:
   case KindOfString:  return Array::Create(m_data.pstr);
@@ -558,15 +558,9 @@ VarNR Variant::toKey() const {
   case KindOfBoolean:
   case KindOfInt64:
     return VarNR(m_data.num);
-  case KindOfDouble:
-    {
-      auto val = m_data.dbl > std::numeric_limits<uint64_t>::max()
-        ? 0u
-        : uint64_t(m_data.dbl);
-      return VarNR(val);
-    }
   case KindOfObject:
     break;
+  case KindOfDouble:
   case KindOfResource:
     return VarNR(toInt64());
   case KindOfRef:

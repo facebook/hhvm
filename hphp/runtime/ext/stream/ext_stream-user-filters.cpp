@@ -274,7 +274,7 @@ bool HHVM_FUNCTION(stream_filter_register,
 Array HHVM_FUNCTION(stream_get_filters) {
   auto filters = s_stream_user_filters.get()->m_registeredFilters;
   if (UNLIKELY(filters.isNull())) {
-    return Array::Create();
+    return empty_array;
   }
   return f_array_keys(filters).toArray();
 }

@@ -26,7 +26,7 @@ endif()
 
 add_executable(test ${CXX_SOURCES})
 target_link_libraries(test ${HHVM_LINK_LIBRARIES})
-embed_all_systemlibs(test "${CMAKE_CURRENT_SOURCE_DIR}/test")
+embed_all_systemlibs(test "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/test")
 add_dependencies(test systemlib)
 if (ENABLE_COTIRE)
   cotire(test)

@@ -312,6 +312,8 @@ CALL_OPCODE(RestoreErrorLevel)
 CALL_OPCODE(SurpriseHook)
 CALL_OPCODE(FunctionExitSurpriseHook)
 
+CALL_OPCODE(OODeclExists)
+
 #undef NOOP_OPCODE
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
@@ -478,8 +480,8 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                                         TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
-    emitEphemeralServiceReq(m_stubsCode,
-                            mcg->getFreeStub(m_stubsCode),
+    emitEphemeralServiceReq(m_unusedCode,
+                            mcg->getFreeStub(m_unusedCode),
                             REQ_BIND_JMPCC_FIRST,
                             patchAddr,
                             extra->taken,
@@ -2045,7 +2047,7 @@ void CodeGenerator::cgSideExitJmpInstanceOfBitmask(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitInstanceBitmaskCheck(inst);
-  emitBindSideExit(m_mainCode, m_stubsCode,
+  emitBindSideExit(m_mainCode, m_unusedCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -2054,7 +2056,7 @@ void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitInstanceBitmaskCheck(inst);
-  emitBindSideExit(m_mainCode, m_stubsCode,
+  emitBindSideExit(m_mainCode, m_unusedCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -2585,7 +2587,7 @@ void CodeGenerator::emitReqBindAddr(TCA& dest,
                                     SrcKey sk) {
   mcg->setJmpTransID((TCA)&dest);
 
-  dest = emitServiceReq(m_stubsCode, REQ_BIND_ADDR,
+  dest = emitServiceReq(m_unusedCode, REQ_BIND_ADDR,
                         &dest, sk.toAtomicInt());
 }
 
@@ -2627,8 +2629,8 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    cmpq(data->cases - 2, indexReg);
       mcg->backEnd().prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
-        m_stubsCode,
-        mcg->getFreeStub(m_stubsCode),
+        m_unusedCode,
+        mcg->getFreeStub(m_unusedCode),
         REQ_BIND_JMPCC_SECOND,
         m_as.frontier(),
         data->defaultOff,
@@ -2652,12 +2654,12 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     if (data->bounded) {
       indexVal -= data->base;
       if (indexVal >= data->cases - 2 || indexVal < 0) {
-        emitBindJmp(m_mainCode, m_stubsCode,
+        emitBindJmp(m_mainCode, m_unusedCode,
                     SrcKey(curFunc(), data->defaultOff, resumed()));
         return;
       }
     }
-    emitBindJmp(m_mainCode, m_stubsCode,
+    emitBindJmp(m_mainCode, m_unusedCode,
                 SrcKey(curFunc(), data->targets[indexVal], resumed()));
   }
 }
@@ -2960,7 +2962,7 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   emitBindJmp(
     m_mainCode,
-    m_stubsCode,
+    m_unusedCode,
     SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed())
   );
 }
@@ -3709,6 +3711,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const srcKey = m_curInst->marker().sk();
   auto const adjust = emitBindCall(m_mainCode,
                                    m_stubsCode,
+                                   m_unusedCode,
                                    srcKey,
                                    extra->callee,
                                    extra->numParams);
@@ -4572,7 +4575,7 @@ void CodeGenerator::emitSideExitGuard(Type type,
     type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken, resumed());
-      emitBindSideExit(m_mainCode, m_stubsCode, ccNegate(cc), sk);
+      emitBindSideExit(m_mainCode, m_unusedCode, ccNegate(cc), sk);
     });
 }
 
@@ -4599,7 +4602,7 @@ void CodeGenerator::cgExitJcc(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitCompare(inst);
-  emitBindSideExit(m_mainCode, m_stubsCode,
+  emitBindSideExit(m_mainCode, m_unusedCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -4608,7 +4611,7 @@ void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitCompareInt(inst);
-  emitBindSideExit(m_mainCode, m_stubsCode,
+  emitBindSideExit(m_mainCode, m_unusedCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -5113,32 +5116,6 @@ void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgThingExists(IRInstruction* inst) {
-  auto& a = m_as;
-
-  auto const attrs = [&] {
-    switch (inst->extra<ThingExists>()->kind) {
-    case ClassKind::Class:      return AttrNone;
-    case ClassKind::Interface:  return AttrInterface;
-    case ClassKind::Trait:      return AttrTrait;
-    }
-    not_reached();
-  }();
-
-  using Fn = bool (*)(const StringData*, bool, Attr);
-  Fn f = Unit::classExists;
-  cgCallHelper(
-    a,
-    CppCall::direct(f),
-    callDest(inst),
-    SyncOptions::kSyncPoint,
-    argGroup()
-      .ssa(0)
-      .imm(true)
-      .imm(attrs)
-  );
-}
-
 void CodeGenerator::cgLdCls(IRInstruction* inst) {
   auto const ch = ClassCache::alloc();
   RDS::recordRds(ch, sizeof(ClassCache),
@@ -5325,7 +5302,7 @@ void CodeGenerator::cgSideExitJmpZero(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitTestZero(inst->src(0), srcLoc(0));
-  emitBindSideExit(m_mainCode, m_stubsCode,
+  emitBindSideExit(m_mainCode, m_unusedCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -5334,7 +5311,7 @@ void CodeGenerator::cgSideExitJmpNZero(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitTestZero(inst->src(0), srcLoc(0));
-  emitBindSideExit(m_mainCode, m_stubsCode,
+  emitBindSideExit(m_mainCode, m_unusedCode,
                    opToConditionCode(inst->op()),
                    sk);
 }

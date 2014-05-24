@@ -31,6 +31,11 @@ namespace {
   StaticString s_externalThreadEvent("<external-thread-event>");
 }
 
+void c_ExternalThreadEventWaitHandle::t___construct() {
+  // gen-ext-hhvm requires at least one declared method in the class to work
+  not_reached();
+}
+
 void c_ExternalThreadEventWaitHandle::sweep() {
   assert(getState() == STATE_WAITING);
 
@@ -46,12 +51,6 @@ void c_ExternalThreadEventWaitHandle::sweep() {
     queue->receiveSome();
     done = queue->abandonAllReceived(this);
   }
-}
-
-void c_ExternalThreadEventWaitHandle::t___construct() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "ExternalThreadEventWaitHandle can be constructed only from extension"));
-  throw e;
 }
 
 c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(AsioExternalThreadEvent* event, ObjectData* priv_data) {

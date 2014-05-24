@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_ASIO_ASYNC_FUNCTION_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+#include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -34,14 +34,13 @@ namespace HPHP {
  * wait handle, giving control of the execution back to the asio framework.
  */
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
-class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
+class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
 
   explicit c_AsyncFunctionWaitHandle(
     Class* cls = c_AsyncFunctionWaitHandle::classof());
   ~c_AsyncFunctionWaitHandle();
-  void t___construct();
   static void ti_setoncreatecallback(const Variant& callback);
   static void ti_setonawaitcallback(const Variant& callback);
   static void ti_setonsuccesscallback(const Variant& callback);
@@ -68,7 +67,7 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
                                            JIT::TCA resumeAddr,
                                            Offset resumeOffset,
                                            ObjectData* child);
-  void run();
+  void resume();
   void onUnblocked();
   void ret(Cell& result);
   String getName();
@@ -98,7 +97,9 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   void markAsFailed(const Object& exception);
   c_WaitableWaitHandle* child() { return m_child; }
 
+  // valid if STATE_SCHEDULED || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
+
   Object m_privData;
 
   static const int8_t STATE_SCHEDULED = 3;

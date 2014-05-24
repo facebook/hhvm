@@ -18,6 +18,7 @@ function main() {
 
   $test("add", function ($s) { $s->add(42); });
   $test("addAll", function ($s) { $s->addAll(Set {42}); });
+  $test("addAllKeysOf", function ($s) { $s->addAllKeysOf(Map {42 => 'a'}); });
   $test("clear", function ($s) { $s->clear(); });
   $test("remove", function ($s) { $s->remove(1); });
 }

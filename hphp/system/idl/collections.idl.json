@@ -296,6 +296,7 @@
                     "name": "reserve",
                     "flags": [
                     ],
+                    "desc": "Instructs this Vector to grow its capacity to accommodate the given number of elements. The caller is expected to make the appropriate add/addAll calls to fill that reserved capacity.",
                     "return": {
                         "type": null
                     },
@@ -789,6 +790,22 @@
                     ]
                 },
                 {
+                    "name": "fromKeysOf",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Vector built from the keys of the specified container.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "container",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "fromArray",
                     "flags": [
                         "IsStatic"
@@ -833,6 +850,22 @@
                         "name": "iterable",
                         "type": "Variant",
                         "value": "null"
+                    }
+                ]
+            },
+            {
+                "name": "fromKeysOf",
+                "flags": [
+                    "IsStatic"
+                ],
+                "desc": "Returns a ImmVector built from the keys of the specified container.",
+                "return": {
+                    "type": "Object"
+                },
+                "args": [
+                    {
+                        "name": "container",
+                        "type": "Variant"
                     }
                 ]
             },
@@ -1692,6 +1725,21 @@
                     "args": [
                         {
                             "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "reserve",
+                    "flags": [
+                    ],
+                    "desc": "Instructs this Map to grow its capacity to accommodate the given number of elements. The caller is expected to make the appropriate add/set/addAll/setAll calls to fill this reserved capacity.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "sz",
                             "type": "Variant"
                         }
                     ]
@@ -3013,6 +3061,36 @@
                     "args": [
                         {
                             "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "addAllKeysOf",
+                    "flags": [
+                    ],
+                    "desc": "Adds the keys of the specified KeyedContainer to this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "container",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "reserve",
+                    "flags": [
+                    ],
+                    "desc": "Instructs this Set to grow its capacity to accommodate the given number of elements. The caller is expected to make the appropriate add/addAll calls to fill that reserved capacity.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "sz",
                             "type": "Variant"
                         }
                     ]

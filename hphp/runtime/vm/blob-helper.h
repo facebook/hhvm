@@ -332,7 +332,8 @@ private:
     assert(m_last - m_p >= sz);
     std::copy(m_p, m_p + sz, pch);
     m_p += sz;
-    return s.setSize(sz);
+    s.setSize(sz);
+    return s;
   }
 
 private:

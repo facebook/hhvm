@@ -21,7 +21,7 @@ class Exception {
   /**
    * This cannot be implemented in __construct, because a derived class may
    * implement its own __construct, losing the stacktrace. The runtime has
-   * special logic to call the __init__ method on instances of Exception before
+   * special logic to call the __init__ method before
    * calling __construct just to make sure $this->trace is always populated.
    */
   final function __init__() {

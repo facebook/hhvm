@@ -41,7 +41,6 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   {}
   ~c_GenArrayWaitHandle() {}
 
-  void t___construct();
   static void ti_setoncreatecallback(const Variant& callback);
   static Object ti_create(const Array& dependencies);
 

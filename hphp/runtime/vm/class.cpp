@@ -1085,6 +1085,7 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
   }
 
   // Save info to support ReflectionClass::getTraitAliases
+  traitName = traitCls->name();
   addTraitAlias(traitName, origMethName, newMethName);
 
   Func* traitMeth = traitCls->lookupMethod(origMethName);
@@ -2011,12 +2012,10 @@ void Class::setInitializers() {
   m_needInitialization = (m_pinitVec.size() > 0 ||
     m_staticProperties.size() > 0);
 
-  // The __init__ method defined in the Exception class gets special treatment
-  static StringData* sd__init__ = makeStaticString("__init__");
-  static StringData* sd_exn = makeStaticString("Exception");
-  const Func* einit = lookupMethod(sd__init__);
-  m_callsCustomInstanceInit =
-    (einit && einit->preClass()->name()->isame(sd_exn));
+  // The __init__ method gets special treatment
+  static StringData* s_init__ = makeStaticString("__init__");
+  auto method = lookupMethod(s_init__);
+  m_callsCustomInstanceInit = method && method->isBuiltin();
 }
 
 // Checks if interface methods are OK:

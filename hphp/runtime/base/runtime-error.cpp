@@ -63,7 +63,7 @@ void raise_recoverable_error(const std::string &msg) {
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::ErrorThrowMode::IfUnhandled,
-                         "HipHop Recoverable Fatal error: ");
+                         "\nCatchable Fatal error: ");
 }
 
 void raise_typehint_error(const std::string& msg) {

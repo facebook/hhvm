@@ -94,6 +94,7 @@ struct RequestInjectionData {
   int64_t m_errorReportingLevel;
   bool m_logErrors;
   std::string m_errorLog;
+  bool m_trackErrors;
   int64_t m_socketDefaultTimeout;
   std::vector<std::string> m_allowedDirectories;
   bool m_safeFileAccess;
@@ -137,6 +138,7 @@ struct RequestInjectionData {
     return m_allowedDirectories;
   }
   bool hasSafeFileAccess() const { return m_safeFileAccess; }
+  bool hasTrackErrors() { return m_trackErrors; }
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
 

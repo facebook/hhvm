@@ -45,7 +45,6 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
   {}
   ~c_RescheduleWaitHandle() {}
 
-  void t___construct();
   static Object ti_create(int64_t queue, int priority);
 
  public:

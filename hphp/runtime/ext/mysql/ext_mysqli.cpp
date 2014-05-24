@@ -354,7 +354,8 @@ static DataType get_option_value_type(int64_t option) {
   not_reached();
 }
 
-static Variant HHVM_METHOD(mysqli, options, int64_t option, const Variant& value) {
+static Variant HHVM_METHOD(mysqli, options, int64_t option,
+                           const Variant& value) {
   auto conn = get_connection(this_);
   VALIDATE_CONN(conn, MySQLState::INITED)
 
@@ -389,7 +390,8 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option, const Variant& value
     }
   }
 
-  return !mysql_options(conn->get(), (mysql_option)option, (const char*)value_ptr);
+  return !mysql_options(conn->get(), (mysql_option)option,
+                        static_cast<const char*>(value_ptr));
 }
 
 //static int64_t HHVM_STATIC_METHOD(mysqli, poll, VRefParam read,
@@ -416,7 +418,8 @@ static Variant HHVM_METHOD(mysqli, refresh, int64_t options) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 //
-//static bool HHVM_METHOD(mysqli, set_local_infile_handler, const Object& read_func) {
+//static bool HHVM_METHOD(mysqli, set_local_infile_handler,
+//                        const Object& read_func) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 
@@ -622,7 +625,8 @@ void HHVM_FUNCTION(mysqli_free_result, const Variant& result) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 //
-//static void HHVM_FUNCTION(mysqli_set_local_infile_default, const Object& link) {
+//static void HHVM_FUNCTION(mysqli_set_local_infile_default,
+//                          const Object& link) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 

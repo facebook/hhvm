@@ -163,6 +163,10 @@ Class* NamedEntity::getCachedClass() const {
   return LIKELY(m_cachedClass.bound()) ? *m_cachedClass : nullptr;
 }
 
+bool NamedEntity::isPersistentTypeAlias() const {
+  return m_cachedTypeAlias.isPersistent();
+}
+
 void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
   *m_cachedTypeAlias = td;
 }
@@ -684,7 +688,7 @@ void Unit::defTypeAlias(Id id) {
         Unit::lookupClass(typeName) != current->klass) {
       raise_error("The type %s is already defined to an incompatible type",
                   thisType->name->data());
-    }
+     }
     return;
   }
 
@@ -697,7 +701,9 @@ void Unit::defTypeAlias(Id id) {
 
   // TODO(#2103214): persistent type alias support
   if (!nameList->m_cachedTypeAlias.bound()) {
-    nameList->m_cachedTypeAlias.bind();
+    auto rdsMode = (thisType->attrs & AttrPersistent)
+      ? RDS::Mode::Persistent : RDS::Mode::Normal;
+    nameList->m_cachedTypeAlias.bind(rdsMode);
     RDS::recordRds(nameList->m_cachedTypeAlias.handle(),
                    sizeof(TypeAliasReq),
                    "TypeAlias", typeName->data());
@@ -831,9 +837,10 @@ Class* Unit::getClass(const NamedEntity* ne,
   return cls;
 }
 
-bool Unit::classExists(const StringData* name, bool autoload, Attr typeAttrs) {
+bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
   Class* cls = Unit::getClass(name, autoload);
-  return cls && (cls->attrs() & (AttrInterface | AttrTrait)) == typeAttrs;
+  return cls &&
+    (cls->attrs() & (AttrInterface | AttrTrait)) == classKindAsAttr(kind);
 }
 
 void Unit::loadFunc(const Func *func) {

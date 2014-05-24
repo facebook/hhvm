@@ -30,6 +30,12 @@ namespace HPHP { namespace JIT {
 TRACE_SET_MOD(hhir);
 using Trace::Indent;
 
+bool shouldHHIRRelaxGuards() {
+  return RuntimeOption::EvalHHIRRelaxGuards &&
+    (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
+     tx->mode() == TransKind::Optimize);
+}
+
 /*
  * Trace back through the source of fp, looking for a guard with the
  * given locId. If one can't be found, return nullptr.

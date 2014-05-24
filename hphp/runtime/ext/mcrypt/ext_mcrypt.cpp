@@ -182,7 +182,8 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
   if (iv_s != nullptr) {
     free(iv_s);
   }
-  return s.setSize(data_size);
+  s.setSize(data_size);
+  return s;
 }
 
 static Variant mcrypt_generic(const Resource& td, const String& data,
@@ -221,7 +222,8 @@ static Variant mcrypt_generic(const Resource& td, const String& data,
   } else {
     mcrypt_generic(pm->m_td, data_s, data_size);
   }
-  return s.setSize(data_size);
+  s.setSize(data_size);
+  return s;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

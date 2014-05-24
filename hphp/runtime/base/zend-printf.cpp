@@ -814,7 +814,7 @@ String string_printf(const char *format, int len, const Array& args) {
   }
 
   if (len == 0) {
-    return String("", 0, CopyString);
+    return empty_string;
   }
 
   int size = 240;

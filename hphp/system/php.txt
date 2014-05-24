@@ -9,6 +9,7 @@ hphp/system/php/lang/resource.php
 hphp/system/php/lang/Traversable.ns.php
 hphp/system/php/lang/Iterator.ns.php
 hphp/system/php/lang/IteratorAggregate.ns.php
+hphp/system/php/lang/AsyncIterator.ns.php
 hphp/system/php/lang/KeyedIterator.ns.php
 hphp/system/php/lang/KeyedIterable.ns.php
 hphp/system/php/lang/Exception.php
@@ -57,7 +58,6 @@ hphp/system/php/filter/filter_var_array.php
 hphp/system/php/filter/filter_input_array.php
 
 hphp/system/php/sessions/SessionHandlerInterface.php
-hphp/system/php/sessions/session_set_save_handler.ns.php
 
 hphp/system/php/redis/RedisException.php
 
@@ -98,7 +98,6 @@ hphp/system/php/password/password.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php
-hphp/system/php/sessions/session_register_shutdown.php
 hphp/system/php/soap/SoapFault.php
 hphp/system/php/spl/datastructures/SplFixedArray.php
 hphp/system/php/spl/datastructures/SplObjectStorage.php
@@ -111,4 +110,5 @@ hphp/system/php/spl/iterators/LimitIterator.php
 hphp/system/php/spl/iterators/NoRewindIterator.php
 hphp/system/php/spl/iterators/RecursiveIteratorIterator.php
 hphp/system/php/spl/miscellaneous/ArrayObject.php
+hphp/system/php/spl/miscellaneous/autoload.php
 hphp/system/php/string/wordwrap.php

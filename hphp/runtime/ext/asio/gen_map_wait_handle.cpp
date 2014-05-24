@@ -40,12 +40,6 @@ namespace {
   }
 }
 
-void c_GenMapWaitHandle::t___construct() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Use GenMapWaitHandle::create() instead of constructor"));
-  throw e;
-}
-
 void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
   if (!callback.isNull() &&
       (!callback.isObject() ||

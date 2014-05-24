@@ -364,7 +364,7 @@ Variant c_SQLite3::t_querysingle(const String& sql, bool entire_row /* = false *
         return get_column_value(pstmt, 0);
       case SQLITE_DONE: /* Valid but no results */
         if (entire_row) {
-          return Array::Create();
+          return empty_array;
         } else {
           return uninit_null();
         }

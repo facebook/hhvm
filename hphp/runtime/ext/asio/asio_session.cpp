@@ -22,7 +22,6 @@
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
-#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
 #include "hphp/runtime/ext/asio/sleep_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/system/systemlib.h"
@@ -160,17 +159,6 @@ void AsioSession::onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, const Va
       make_packed_array(wait_handle, dependencies));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by GenVectorWaitHandle::onCreate callback");
-  }
-}
-
-void AsioSession::onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, const Object& child) {
-  assert(m_onSetResultToRefCreateCallback.get());
-  try {
-    vm_call_user_func(
-      m_onSetResultToRefCreateCallback,
-      make_packed_array(wait_handle, child));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by SetResultToRefWaitHandle::onCreate callback");
   }
 }
 

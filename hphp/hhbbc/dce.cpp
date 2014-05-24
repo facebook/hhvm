@@ -184,7 +184,20 @@ bool setCouldHaveSideEffects(const Type& t) {
 
 //////////////////////////////////////////////////////////////////////
 
-enum class Use { Not, Used };
+/*
+ * Uses for a stack cell.
+ *
+ * 'Not' indicates that the cell is (unconditionally) not used.
+ * 'Used' indicates that the cell is (possibly) used.
+ * 'UsedIfLastRef' incates that the cell is only used if it was the
+ * last reference alive. For instance, a PopC will call the destructor
+ * of the top-of-stack cell if it was the last reference alive, and
+ * this counts as an example of 'UsedIfLastRef'.
+ *
+ * If the producer of the cell knows that it is not the last reference,
+ * then it can treat Use::UsedIfLastRef as being equivalent to Use::Not.
+ */
+enum class Use { Not, Used, UsedIfLastRef };
 using InstrId    = size_t;
 using InstrIdSet = std::set<InstrId>;
 using UseInfo    = std::pair<Use,InstrIdSet>;
@@ -234,8 +247,9 @@ struct DceState {
 
 const char* show(Use u) {
   switch (u) {
-  case Use::Not:   return "0";
-  case Use::Used:  return "U";
+  case Use::Not:              return "0";
+  case Use::Used:             return "U";
+  case Use::UsedIfLastRef:    return "UL";
   }
   not_reached();
 }
@@ -309,7 +323,32 @@ struct DceVisitor : boost::static_visitor<void> {
   void operator()(const bc::Dup&) {
     auto const u1 = push();
     auto const u2 = push();
-    popCond(u1, u2);
+    // Dup pushes a cell that is guaranteed to be not the last reference.
+    // So, it can be eliminated if the cell it pushes is used as either
+    // Use::Not or Use::UsedIfLastRef.
+    // The cell it pops can be marked Use::Not only if Dup itself
+    // can be eliminated.
+    switch (u1.first) {
+    case Use::Not:
+    case Use::UsedIfLastRef:
+      //  It is ok to eliminate the Dup even if its second output u2
+      //  is used, because eliminating the Dup still leaves the second
+      //  output u2 on stack.
+      markSetDead(u1.second);
+      switch (u2.first) {
+      case Use::Not:
+        pop(Use::Not, u2.second);
+        break;
+      case Use::Used:
+      case Use::UsedIfLastRef:
+        pop(Use::Used, InstrIdSet{});
+        break;
+      }
+      break;
+    case Use::Used:
+      pop(Use::Used, InstrIdSet{});
+      break;
+    }
   }
 
   void operator()(const bc::CGetL& op) {
@@ -409,14 +448,17 @@ private: // eval stack
    * destructor runs).  We could also look at the object type and see
    * if it is known that it can't have a user-defined destructor.
    *
-   * For now we're not trying though, since at the time this was
-   * tested there were only two additional "dead" PopC's in all of www
-   * if you remove the couldBe checks below.
+   * For now, we mark the cell popped with a Use::UsedIfLastRef. This indicates
+   * to the producer of the cell that the it is considered used if
+   * it could be the last reference alive (in which case the destructor
+   * would be run on Pop). If the producer knows that the cell is
+   * not the last reference (e.g. if it is a Dup), then Use:UsedIfLastRef
+   * is equivalent to Use::Not.
    */
   void discardNonDtors() {
     auto const t = topC();
     if (couldRunDestructor(t)) {
-      return pop(Use::Used, InstrIdSet{});
+      return pop(Use::UsedIfLastRef, InstrIdSet{m_id});
     }
     discard();
   }
@@ -436,6 +478,7 @@ private: // eval stack
       markSetDead(ui.second);
       break;
     case Use::Used:
+    case Use::UsedIfLastRef:
       break;
     }
   }

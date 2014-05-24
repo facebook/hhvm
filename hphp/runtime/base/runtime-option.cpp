@@ -386,14 +386,6 @@ static inline bool pgoDefault() {
   return !RuntimeOption::EvalSimulateARM;
 }
 
-static inline bool hhirRelaxGuardsDefault() {
-  return RuntimeOption::EvalJitRegionSelector == "tracelet";
-}
-
-static inline bool hhbcRelaxGuardsDefault() {
-  return !RuntimeOption::EvalHHIRRelaxGuards;
-}
-
 static inline bool evalJitDefault() {
 #ifdef __APPLE__
   return false;

@@ -76,7 +76,7 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
   if (RuntimeOption::InjectedStackTrace) {
     return g_context->getCallerInfo();
   }
-  return Array::Create();
+  return empty_array;
 }
 
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
@@ -242,7 +242,7 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
   if (error_type == k_E_USER_ERROR) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::IfUnhandled,
-                       "HipHop Recoverable error: ");
+                       "\nFatal error: ");
   } else if (error_type == k_E_USER_WARNING) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::Never,
@@ -254,7 +254,7 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
   } else if (error_type == k_E_USER_DEPRECATED) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::Never,
-                       "HipHop Deprecated: ");
+                       "\nDeprecated: ");
   } else {
     raise_warning("Invalid error type specified");
     return false;

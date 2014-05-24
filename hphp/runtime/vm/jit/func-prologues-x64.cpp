@@ -340,7 +340,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                    rax);
     a.    jmp     (rax);
   } else {
-    emitBindJmp(mcg->code.main(), mcg->code.stubs(), funcBody);
+    emitBindJmp(mcg->code.main(), mcg->code.unused(), funcBody);
   }
   return funcBody;
 }
@@ -351,21 +351,22 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
 TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   auto& mainCode = mcg->code.main();
-  auto& stubsCode = mcg->code.stubs();
+  auto& unusedCode = mcg->code.unused();
   Asm a { mainCode };
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
     a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndFlags)]);
-    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second, false));
-    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base(), false));
+    emitBindJcc(mainCode, unusedCode, CC_LE,
+                SrcKey(func, dvs[0].second, false));
+    emitBindJmp(mainCode, unusedCode, SrcKey(func, func->base(), false));
   } else {
     a.    loadl  (rVmFp[AROFF(m_numArgsAndFlags)], reg::eax);
     for (unsigned i = 0; i < dvs.size(); i++) {
       a.  cmpl   (dvs[i].first, reg::eax);
-      emitBindJcc(mainCode, stubsCode, CC_LE,
+      emitBindJcc(mainCode, unusedCode, CC_LE,
                   SrcKey(func, dvs[i].second, false));
     }
-    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base(), false));
+    emitBindJmp(mainCode, unusedCode, SrcKey(func, func->base(), false));
   }
   return start;
 }

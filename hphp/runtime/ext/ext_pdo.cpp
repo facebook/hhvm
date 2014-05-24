@@ -2394,7 +2394,7 @@ int pdo_parse_params(PDOStatement *stmt, const String& in, String &out) {
         query_type |= PDO_PLACEHOLDER_POSITIONAL;
       }
 
-      plc = (placeholder*)malloc(sizeof(*plc));
+      plc = (placeholder*)smart_malloc(sizeof(*plc));
       memset(plc, 0, sizeof(*plc));
       plc->next = NULL;
       plc->pos = s.tok;
@@ -2547,7 +2547,6 @@ rewrite:
     /* allocate output buffer */
     out = String(newbuffer_len, ReserveString);
     newbuffer = out.bufferSlice().ptr;
-    out.setSize(newbuffer_len);
 
     /* and build the query */
     plc = placeholders;
@@ -2571,7 +2570,6 @@ rewrite:
       memcpy(newbuffer, ptr, t);
       newbuffer += t;
     }
-    *newbuffer = '\0';
     out.setSize(newbuffer - out.data());
 
     ret = 1;
@@ -2634,7 +2632,7 @@ clean_up:
     plc = placeholders;
     placeholders = plc->next;
     plc->quoted.reset();
-    free(plc);
+    smart_free(plc);
   }
 
   return ret;

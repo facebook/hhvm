@@ -41,7 +41,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof());
   ~c_WaitableWaitHandle();
 
-  void t___construct();
   int t_getcontextidx();
   Object t_getcreator();
   Array t_getparents();

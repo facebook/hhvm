@@ -1135,7 +1135,7 @@ IRTranslator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
   auto const jitType = Type(i.outStack->rtt);
 
   m_hhbcTrans.setBcOff(i.next->offset(), false);
-  if (RuntimeOption::EvalHHIRRelaxGuards) {
+  if (shouldHHIRRelaxGuards()) {
     if (i.outputPredicted) {
       if (i.outputPredictionStatic && jitType.notCounted()) {
         // If the prediction is from static analysis it really means jitType |

@@ -23,16 +23,11 @@
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
-#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-void c_BlockableWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
 
 c_BlockableWaitHandle* c_BlockableWaitHandle::unblock() {
   c_BlockableWaitHandle* next = m_nextParent;
@@ -47,8 +42,6 @@ c_BlockableWaitHandle* c_BlockableWaitHandle::unblock() {
       static_cast<c_GenMapWaitHandle*>(this)->onUnblocked(); break;
     case Kind::GenVector:
       static_cast<c_GenVectorWaitHandle*>(this)->onUnblocked(); break;
-    case Kind::SetResultToRef:
-      static_cast<c_SetResultToRefWaitHandle*>(this)->onUnblocked(); break;
     case Kind::Static:
     case Kind::Reschedule:
     case Kind::Sleep:

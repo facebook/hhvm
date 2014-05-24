@@ -93,6 +93,7 @@ struct NamedEntity {
 
   const TypeAliasReq* getCachedTypeAlias() const;
   void setCachedTypeAlias(const TypeAliasReq&);
+  bool isPersistentTypeAlias() const;
 
   Class* clsList() const {
     return m_clsList.load(std::memory_order_acquire);

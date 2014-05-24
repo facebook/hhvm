@@ -665,7 +665,7 @@ static String HHVM_METHOD(ReflectionFunctionAbstract, getReturnTypeHint) {
     auto ret = const_cast<StringData*>(retTypeSD);
     return String(ret);
   }
-  return null_string;
+  return String();
 }
 
 ALWAYS_INLINE
@@ -761,7 +761,7 @@ static String HHVM_METHOD(ReflectionMethod, getPrototypeClassname) {
     auto ret = const_cast<StringData*>(prototypeCls->name());
     return String(ret);
   }
-  return null_string;
+  return String();
 }
 
 // private helper for getDeclaringClass
@@ -810,7 +810,7 @@ static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
   } else if (auto const thiz = clos->getThis()) { // closure with $this
     return String(thiz->o_getClassName());
   } else {
-    return null_string;
+    return String();
   }
 }
 
@@ -1238,7 +1238,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
 static String HHVM_METHOD(ReflectionClass, getConstructorName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto ctor = cls->getDeclaredCtor();
-  if (!ctor) { return null_string; }
+  if (!ctor) { return String(); }
   auto ret = const_cast<StringData*>(ctor->name());
   return String(ret);
 }

@@ -28,7 +28,7 @@
 #include "zend_variables.h"
 
 #ifdef HHVM
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-execution-stack.h"
 #endif
 
 typedef union _temp_variable {
@@ -217,7 +217,7 @@ static zend_always_inline void **zend_vm_stack_top(TSRMLS_D)
 static zend_always_inline void zend_vm_stack_push(void *ptr TSRMLS_DC)
 {
 #ifdef HHVM
-  ZendExecutionStack::push(ptr);
+  HPHP::ZendExecutionStack::push(ptr);
 #else
   *(EG(argument_stack)->top++) = ptr;
 #endif
@@ -226,7 +226,7 @@ static zend_always_inline void zend_vm_stack_push(void *ptr TSRMLS_DC)
 static zend_always_inline void *zend_vm_stack_pop(TSRMLS_D)
 {
 #ifdef HHVM
-  return ZendExecutionStack::pop();
+  return HPHP::ZendExecutionStack::pop();
 #else
   void *el = *(--EG(argument_stack)->top);
   return el;

@@ -361,6 +361,11 @@ bool RegionFormer::tryInline() {
     return false;
   }
 
+  if (curFunc()->isPseudoMain()) {
+    // TODO(#4238160): Hack inlining into pseudomain callsites is still buggy
+    return false;
+  }
+
   auto refuse = [this](const std::string& str) {
     FTRACE(2, "selectTracelet not inlining {}: {}\n",
            m_inst.toString(), str);

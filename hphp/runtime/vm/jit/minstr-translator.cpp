@@ -1758,6 +1758,7 @@ void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
         },
         [&] (SSATmp* base) { // Next
           m_ht.emitIncStat(Stats::ArrayGet_Packed, 1, false);
+          m_irb.constrainValue(base, DataTypeSpecialized);
           return emitPackedArrayGet(base, key, true);
         },
         [&] { // Taken

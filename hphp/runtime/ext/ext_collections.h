@@ -137,6 +137,11 @@ class BaseVector : public ExtCollectionObjectData {
   Variant php_lastValue();
   Variant php_lastKey();
 
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  static php_fromKeysOf(const Variant& container);
+
   void zip(BaseVector* bvec, const Variant& iterable);
   void keys(BaseVector* bvec);
 
@@ -453,6 +458,7 @@ class c_Vector : public BaseVector {
   Variant t_lastkey();
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
+  static Object ti_fromkeysof(const Variant& container);
   static Object ti_fromarray(const Variant& arr); // deprecated
   Object t_immutable();
 
@@ -580,6 +586,7 @@ class c_ImmVector : public BaseVector {
   }
 
   DECLARE_COLLECTION_MAGIC_METHODS();
+  static Object ti_fromkeysof(const Variant& container);
 
   DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
 
@@ -1235,6 +1242,7 @@ class c_Map : public BaseMap {
   void t___construct(const Variant& iterable = null_variant);
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
+  void t_reserve(const Variant& sz);
   Object t_clear();
   bool t_isempty();
   int64_t t_count();
@@ -1700,6 +1708,7 @@ class BaseSet : public ExtCollectionObjectData {
     return pos;
   }
 
+  void addAllKeysOf(const Cell& container);
   void addAll(const Variant& t);
   void init(const Variant& t);
 
@@ -1935,6 +1944,8 @@ class c_Set : public BaseSet {
   void t___construct(const Variant& iterable = null_variant);
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
+  Object t_addallkeysof(const Variant& val);
+  void t_reserve(const Variant& sz);
   Object t_clear();
   bool t_isempty();
   int64_t t_count();

@@ -46,10 +46,18 @@ LayoutInfo layoutBlocks(const IRUnit& unit) {
                         [&](int i) { return gen() % i; });
   }
 
-  // Partition into a and astubs, without changing relative order.
+  // Partition into a, astubs and acold, without changing relative order.
   ret.astubsIt = std::stable_partition(
     ret.blocks.begin(), ret.blocks.end(),
-    [&] (Block* b) { return b->hint() != Block::Hint::Unlikely; }
+    [&] (Block* b) {
+      return b->hint() == Block::Hint::Neither ||
+             b->hint() == Block::Hint::Likely;
+    }
+  );
+
+  ret.aunusedIt = std::stable_partition(
+    ret.astubsIt, ret.blocks.end(),
+    [&] (Block* b) { return b->hint() == Block::Hint::Unlikely; }
   );
 
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, 5)) {

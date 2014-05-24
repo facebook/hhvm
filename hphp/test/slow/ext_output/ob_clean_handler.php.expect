@@ -1,0 +1,8 @@
+string(47) "array (
+  'output' => 'herp',
+  'flags' => 3,
+)"
+string(48) "array (
+  'output' => 'derp',
+  'flags' => 11,
+)"

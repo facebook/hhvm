@@ -110,10 +110,14 @@ struct BackEnd : public JIT::BackEnd {
     CALLEE_SAVED_BARRIER();
   }
 
-  JIT::CodeGenerator* newCodeGenerator(const IRUnit& unit, CodeBlock& mainCode,
-                                       CodeBlock& stubsCode, MCGenerator* mcg,
+  JIT::CodeGenerator* newCodeGenerator(const IRUnit& unit,
+                                       CodeBlock& mainCode,
+                                       CodeBlock& stubsCode,
+                                       CodeBlock& unusedCode,
+                                       MCGenerator* mcg,
                                        CodegenState& state) override {
-    return new X64::CodeGenerator(unit, mainCode, stubsCode, mcg, state);
+    return new X64::CodeGenerator(unit, mainCode, stubsCode,
+                                  unusedCode, mcg, state);
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -468,6 +472,7 @@ RegPair hintCallBuiltinSrc(const IRInstruction& inst, unsigned srcNum) {
 // return the return-register hint for a CallBuiltin instruction
 RegPair hintCallBuiltinDst(const IRInstruction& inst, unsigned i) {
   // the decision logic here is distilled from CodeGenerator::cgCallBuiltin()
+  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
   if (i != 0) return InvalidRegPair;
   auto returnType = inst.typeParam();
   if (returnType <= Type::Dbl) {

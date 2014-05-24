@@ -28,7 +28,8 @@ const StaticString s_result("<result>");
 const StaticString s_exception("<exception>");
 
 void c_WaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
+  throw NotSupportedException(
+      __func__, "WaitHandles cannot be constructed directly");
 }
 
 void c_WaitHandle::ti_setonjoincallback(const Variant& callback) {

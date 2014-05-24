@@ -394,7 +394,8 @@ static Variant HHVM_METHOD(UConverter, convert,
     data->failure(error, "ucnv_fromUChars");
     return uninit_null();
   }
-  return destStr.setSize(dest_len);
+  destStr.setSize(dest_len);
+  return destStr;
 }
 
 /* ext/intl error handling */

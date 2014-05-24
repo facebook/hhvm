@@ -120,14 +120,34 @@ and parse_get_name name =
 
 and add name ce acc =
   match SMap.get name acc with
-    (* Only add to the map if the element isn't there, or if its type is
-     * abstract. Normally we don't want to overwrite existing elements to allow
-     * having yieldFoo and getFoo both declared in a class with potentially
-     * incompatible types (yes this is very confusing but www does it to some
-     * extent). However, if the existing method is abstract, we do want abstract
-     * implementations from abstract classes or traits to be allowed to be
-     * overwritten (i.e., implemented) by subclasses or including classes. *)
+    (* In a perfect world, we could just always add to the map. This is not a
+     * perfect world. It is filled with sinners and people who talk in theaters
+     * and www engineers who override a synthesized gen/get/prepare method with
+     * their own, physically provided in the file. Which since DY is implemented
+     * with __call is the one that gets called at runtime. But you also need to
+     * be able to override one DY method with another. So we need to do the
+     * following:
+     *
+     * - If the method we're about to synthesize doesn't exist yet, just add it.
+     * - If it does, check:
+     * -- Is it abstract? If so, we are implementing that abstract method, we
+     *    should go ahead and overwrite it.
+     * -- Is its return type reason Rdynamic_yield? If so, assume that we were
+     *    the ones that synthesized it in the first place and go ahead and
+     *    overwrite, so you can write a more specific return type in a child
+     *    class, for example. Checking the return type reason isn't terribly
+     *    clean, but it's a nice convenient flag that we synthesized it. If you
+     *    are reading this because it's causing problems, I'm sorry, and feel
+     *    free to add something to the appropriate record type.
+     * -- Otherwise, assume the version that is there was physically provided by
+     *    the code author, and keep theirs instead of synthesizing our own.
+     *
+     * One day, there will be a Glorious Revolution and DY will be moved into
+     * HHVM, and there will be perf wins and dancing angels and anti-patterns
+     * like this will go away. But today is not that day. Today, there is only
+     * tears and a deep, yearning hole my heart. *)
     | None
+    | Some { ce_type = (_, Tfun { ft_ret = Reason.Rdynamic_yield _, _; _ }); _ }
     | Some { ce_type = (_, Tfun { ft_abstract = true; _ }); _ } ->
       SMap.add name ce acc
     | _ -> acc

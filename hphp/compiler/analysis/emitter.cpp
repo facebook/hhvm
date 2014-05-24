@@ -4155,11 +4155,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         } else if ((call->isCallToFunction("class_exists") ||
                     call->isCallToFunction("interface_exists") ||
-                    call->isCallToFunction("trait_exists")) && params &&
-                   (params->getCount() == 1 || params->getCount() == 2)) {
+                    call->isCallToFunction("trait_exists"))
+                   && params
+                   && (params->getCount() == 1 || params->getCount() == 2)) {
           // Push name
           emitNameString(e, (*params)[0]);
           emitConvertToCell(e);
+          e.CastString();
 
           // Push autoload, defaulting to true
           if (params->getCount() == 1) {
@@ -4167,15 +4169,24 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           } else {
             visit((*params)[1]);
             emitConvertToCell(e);
+            e.CastBool();
           }
           if (call->isCallToFunction("class_exists")) {
-            e.ClassExists();
+            e.OODeclExists(OODeclExistsOp::Class);
           } else if (call->isCallToFunction("interface_exists")) {
-            e.InterfaceExists();
+            e.OODeclExists(OODeclExistsOp::Interface);
           } else {
             assert(call->isCallToFunction("trait_exists"));
-            e.TraitExists();
+            e.OODeclExists(OODeclExistsOp::Trait);
           }
+          return true;
+        } else if (call->isCallToFunction("get_class") &&
+                   !params &&
+                   call->getClassScope() &&
+                   !call->getClassScope()->isTrait()) {
+          StringData* name =
+            makeStaticString(call->getClassScope()->getOriginalName());
+          e.String(name);
           return true;
         }
 #define TYPE_CONVERT_INSTR(what, What)                                 \
@@ -4513,26 +4524,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case KindOfString:
           case KindOfStaticString:
           {
-            ScalarExpressionPtr
-              scalarExp(static_pointer_cast<ScalarExpression>(node));
-            // Inside traits, __class__ cannot be resolved yet,
-            // so emit call to get_class.
-            if (scalarExp->getType() == T_CLASS_C &&
-                ex->getFunctionScope()->getContainingClass() &&
-                ex->getFunctionScope()->getContainingClass()->isTrait()) {
-              static const StringData* fname =
-                makeStaticString("get_class");
-              Offset fpiStart = m_ue.bcPos();
-              e.FPushFuncD(0, fname);
-              {
-                FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-              }
-              e.FCall(0);
-              e.UnboxR();
-            } else {
-              StringData* nValue = makeStaticString(v.getStringData());
-              e.String(nValue);
-            }
+            StringData* nValue = makeStaticString(v.getStringData());
+            e.String(nValue);
             break;
           }
           case KindOfInt64:
@@ -7287,6 +7280,7 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   record.value    = value;
   record.kind     = kind;
   record.nullable = nullable;
+  record.attrs    = AttrNone;
   Id id = m_ue.addTypeAlias(record);
   e.DefTypeAlias(id);
 }

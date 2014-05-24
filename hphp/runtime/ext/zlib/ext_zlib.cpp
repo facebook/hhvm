@@ -239,7 +239,7 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
   if (Z_OK == status) {
     status = Z_DATA_ERROR;
   }
-  return null_string;
+  return String();
 }
 
 static Variant hhvm_zlib_decode(const String& data,
@@ -432,7 +432,8 @@ Variant HHVM_FUNCTION(qlzcompress, const String& data, int level /* = 1 */) {
   }
 
   assert(size <= (size_t)data.size() + 400);
-  return str.shrink(size);
+  str.shrink(size);
+  return str;
 }
 
 Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level /* = 1 */) {
@@ -484,7 +485,8 @@ Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level /* = 1 */) {
   if (dsize != size) {
     return false;
   }
-  return s.setSize(dsize);
+  s.setSize(dsize);
+  return s;
 }
 #endif // HAVE_QUICKLZ
 
@@ -514,7 +516,8 @@ Variant HHVM_FUNCTION(snuncompress, const String& data) {
   if (!snappy::RawUncompress(data.data(), data.size(), uncompressed)) {
     return false;
   }
-  return s.setSize(dsize);
+  s.setSize(dsize);
+  return s;
 }
 #endif // HAVE_SNAPPY
 
@@ -543,7 +546,8 @@ Variant HHVM_FUNCTION(nzcompress, const String& uncompressed) {
   int rc = compress(format->buf, &len, (uint8_t*)uncompressed.data(),
                     uncompressed.size());
   if (rc == Z_OK) {
-    return str.shrink(len + sizeof(*format));
+    str.shrink(len + sizeof(*format));
+    return str;
   }
   return false;
 }
@@ -572,9 +576,11 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
   }
 
   if (format->uncompressed_sz == 0) {
-    return str.shrink(len);
+    str.shrink(len);
+    return str;
   }
-  return str.setSize(len);
+  str.setSize(len);
+  return str;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -634,7 +640,7 @@ Variant HHVM_FUNCTION(lz4compress, const String& uncompressed) {
   }
   bufsize = csize + headerSize;
   s.shrink(bufsize);
-  return s.setSize(bufsize);
+  return s;
 }
 
 Variant HHVM_FUNCTION(lz4hccompress, const String& uncompressed) {
@@ -655,7 +661,8 @@ Variant HHVM_FUNCTION(lz4hccompress, const String& uncompressed) {
     return false;
   }
   bufsize = csize + headerSize;
-  return s.shrink(bufsize);
+  s.shrink(bufsize);
+  return s;
 }
 
 Variant HHVM_FUNCTION(lz4uncompress, const String& compressed) {
@@ -672,7 +679,8 @@ Variant HHVM_FUNCTION(lz4uncompress, const String& compressed) {
   if (ret <= 0) {
     return false;
   }
-  return s.setSize(dsize);
+  s.setSize(dsize);
+  return s;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -724,7 +732,8 @@ class __SystemLib_ChunkedInflator {
         }
         int64_t produced = buffer_length - m_zstream.avail_out;
         if (produced) {
-          return buffer.shrink(produced);
+          buffer.shrink(produced);
+          return buffer;
         }
         return empty_string;
       }

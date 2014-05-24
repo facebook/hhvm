@@ -384,6 +384,8 @@ public:
   F(uint64_t, JitAMaxUsage,            maxUsageDef())                   \
   F(uint64_t, JitAProfSize,            64 << 20)                        \
   F(uint64_t, JitAStubsSize,           64 << 20)                        \
+  F(uint64_t, JitAColdSize,            24 << 20)                        \
+  F(uint64_t, JitAFrozenSize,          40 << 20)                       \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:
@@ -469,8 +471,8 @@ public:
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
   F(uint32_t, HotFuncThreshold,        40)                              \
   F(bool, HHIRValidateRefCount,        debug)                           \
-  F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
-  F(bool, HHBCRelaxGuards,             hhbcRelaxGuardsDefault())        \
+  F(bool, HHIRRelaxGuards,             true)                            \
+  F(bool, HHBCRelaxGuards,             true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \

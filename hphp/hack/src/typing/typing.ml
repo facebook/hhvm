@@ -1859,13 +1859,7 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
     | Tapply (x, paraml) ->
         let env, class_ = Env.get_class env (snd x) in
         (match class_ with
-          | None ->
-            (match env.Env.genv.Env.mode with
-              | Ast.Mstrict ->
-                error p ("class "^snd x^" is undefined")
-              | Ast.Mdecl | Ast.Mpartial ->
-                env, (Reason.Rnone, Tany), None
-            )
+          | None -> env, (Reason.Rnone, Tany), None
           | Some class_ ->
             let paraml =
               if List.length paraml = 0

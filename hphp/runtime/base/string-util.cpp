@@ -150,7 +150,8 @@ String StringUtil::Implode(const Variant& items, const String& delim) {
   }
   smart_free(sitems);
   assert(p - buffer == len);
-  return s.setSize(len);
+  s.setSize(len);
+  return s;
 }
 
 Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
@@ -348,7 +349,7 @@ String StringUtil::UUDecode(const String& input) {
   if (!input.empty()) {
     return string_uudecode(input.data(), input.size());
   }
-  return null_string;
+  return String();
 }
 
 String StringUtil::Base64Encode(const String& input) {
@@ -397,7 +398,8 @@ String StringUtil::Translate(const String& input, const String& from,
   memcpy(ret, input.data(), len);
   auto trlen = std::min(from.size(), to.size());
   string_translate(ret, len, from.data(), to.data(), trlen);
-  return retstr.setSize(len);
+  retstr.setSize(len);
+  return retstr;
 }
 
 String StringUtil::ROT13(const String& input) {
@@ -422,7 +424,8 @@ String StringUtil::MD5(const char *data, uint32_t size,
   auto const hexLen = rawLen * 2;
   String hex(hexLen, ReserveString);
   string_bin2hex((char*)md5.digest, rawLen, hex.bufferSlice().ptr);
-  return hex.setSize(hexLen);
+  hex.setSize(hexLen);
+  return hex;
 }
 
 String StringUtil::MD5(const String& input, bool raw /* = false */) {

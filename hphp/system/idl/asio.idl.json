@@ -232,17 +232,6 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "getContextIdx",
                     "desc": "Get index of the scheduler context this wait handle operates in",
                     "flags": [
@@ -304,24 +293,27 @@
                 "NoDefaultSweep"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "ResumableWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle that can resume execution of PHP code",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
             ],
             "consts": [
             ]
         },
         {
             "name": "AsyncFunctionWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "parent": "ResumableWaitHandle",
             "desc": "A wait handle representing asynchronous execution of async function",
             "flags": [
                 "IsFinal",
@@ -329,17 +321,6 @@
                 "CppCustomDelete"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
                 {
                     "name": "setOnCreateCallback",
                     "desc": "Set callback to be called when an AsyncFunctionWaitHandle is created",
@@ -454,17 +435,6 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "create",
                     "desc": "Create a wait handle that waits for a given array of dependencies",
                     "flags": [
@@ -513,17 +483,6 @@
                 "NoDefaultSweep"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
                 {
                     "name": "create",
                     "desc": "Create a wait handle that waits for a given map of dependencies",
@@ -574,17 +533,6 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "create",
                     "desc": "Create a wait handle that waits for a given vector of dependencies",
                     "flags": [
@@ -625,72 +573,6 @@
             ]
         },
         {
-            "name": "SetResultToRefWaitHandle",
-            "parent": "BlockableWaitHandle",
-            "desc": "A wait handle proxy that sets result to a given reference",
-            "flags": [
-                "IsFinal",
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "create",
-                    "desc": "Create a wait handle that stores result of a dependency to a given reference",
-                    "flags": [
-                        "IsStatic"
-                    ],
-                    "return": {
-                        "type": "Object",
-                        "desc": "A WaitHandle that will store the result of a dependency to a given reference"
-                    },
-                    "args": [
-                        {
-                            "name": "wait_handle",
-                            "type": "Object",
-                            "desc": "A wait handle to wait for"
-                        },
-                        {
-                            "name": "ref",
-                            "type": "Variant",
-                            "desc": "A reference to set the result to",
-                            "ref": true
-                        }
-                    ]
-                },
-                {
-                    "name": "setOnCreateCallback",
-                    "desc": "Set callback for when a SetResultToRefWaitHandle is created",
-                    "flags": [
-                        "IsStatic",
-                        "HipHopSpecific"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                        {
-                            "name": "on_create_cb",
-                            "type": "Variant",
-                            "desc": "A Closure to be called on creation"
-                        }
-                    ]
-                }
-            ],
-            "consts": [
-            ]
-        },
-        {
             "name": "RescheduleWaitHandle",
             "parent": "WaitableWaitHandle",
             "desc": "A wait handle that succeeds with null once desired scheduling priority is eligible for execution",
@@ -699,17 +581,6 @@
                 "NoDefaultSweep"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
                 {
                     "name": "create",
                     "desc": "Create a wait handle that succeeds once desired scheduling priority is eligible for execution",
@@ -756,17 +627,6 @@
                 "NoDefaultSweep"
             ],
             "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
                 {
                     "name": "create",
                     "desc": "Create a wait handle that succeeds after the desired timeout expires",

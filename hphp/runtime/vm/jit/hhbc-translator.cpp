@@ -1193,34 +1193,25 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   PUNT(SetOpL);
 }
 
-void HhbcTranslator::classExistsImpl(ClassKind kind) {
+void HhbcTranslator::emitOODeclExists(unsigned char ucsubop) {
+  auto const subop = static_cast<OODeclExistsOp>(ucsubop);
   auto const catchTrace = makeCatch();
-  auto const tAutoload  = topC(0);
-  auto const tCls       = topC(1);
 
-  if (!tCls->isA(Type::Str) ||
-      !tAutoload->isConst() ||
-      !tAutoload->isA(Type::Bool) ||
-      !tAutoload->boolVal()) {
-    return emitInterpOne(Type::Bool, 2);
+  auto const tAutoload = popC();
+  auto const tCls = popC();
+
+  assert(tCls->isA(Type::Str)); // result of CastString
+  assert(tAutoload->isA(Type::Bool)); // result of CastBool
+
+  ClassKind kind;
+  switch (subop) {
+    case OODeclExistsOp::Class : kind = ClassKind::Class; break;
+    case OODeclExistsOp::Trait : kind = ClassKind::Trait; break;
+    case OODeclExistsOp::Interface : kind = ClassKind::Interface; break;
   }
 
-  auto const exists =
-    gen(ThingExists, catchTrace, ClassKindData { kind }, tCls);
-  popC(); popC(); push(exists);
+  push(gen(OODeclExists, catchTrace, ClassKindData { kind }, tCls, tAutoload));
   gen(DecRef, tCls);
-}
-
-void HhbcTranslator::emitClassExists() {
-  classExistsImpl(ClassKind::Class);
-}
-
-void HhbcTranslator::emitInterfaceExists() {
-  classExistsImpl(ClassKind::Interface);
-}
-
-void HhbcTranslator::emitTraitExists() {
-  classExistsImpl(ClassKind::Trait);
 }
 
 void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
@@ -4115,6 +4106,20 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
     return;
   }
   if (!(valType <= Type::Obj)) {
+    if (tc.isObjectOrTypeAlias()
+        && RuntimeOption::RepoAuthoritative
+        && !tc.isCallable()
+        && tc.isPrecise()) {
+      auto const td = tc.namedEntity()->getCachedTypeAlias();
+      if (tc.namedEntity()->isPersistentTypeAlias() && td) {
+        if ((td->nullable && valType <= Type::Null)
+            || td->kind == KindOfAny
+            || equivDataTypes(td->kind, valType.toDataType())) {
+          m_irb->constrainValue(val, TypeConstraint(DataTypeSpecific));
+          return;
+        }
+      }
+    }
     emitInterpOne(0);
     return;
   }
@@ -5834,7 +5839,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
  */
 template<typename Body>
 Block* HhbcTranslator::makeCatchImpl(Body body) {
-  auto exit = m_irb->makeExit();
+  auto exit = m_irb->makeExit(Block::Hint::Unused);
 
   BlockPusher bp(*m_irb, makeMarker(bcOff()), exit);
   gen(BeginCatch);

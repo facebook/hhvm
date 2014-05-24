@@ -576,6 +576,13 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         error("invalid operation for Silence: %d\n", op);
         ok = false;
         break;
+      case OpOODeclExists:
+#define OO_DECL_EXISTS_OP(x) if (op == static_cast<uint8_t>(OODeclExistsOp::x)) break;
+        OO_DECL_EXISTS_OPS
+#undef OO_DECL_EXISTS_OP
+          error("invalid operation for OODeclExists: %d\n", op);
+        ok = false;
+        break;
       }
     }
     case RATA:

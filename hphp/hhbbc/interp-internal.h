@@ -39,6 +39,7 @@ const StaticString s_get_defined_vars("get_defined_vars");
 const StaticString s_get_defined_vars_sl("__SystemLib\\get_defined_vars");
 
 const StaticString s_http_response_header("http_response_header");
+const StaticString s_php_errormsg("php_errormsg");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -83,7 +84,12 @@ void nothrow(ISS& env) {
 
 void calledNoReturn(ISS& env)    { env.flags.calledNoReturn = true; }
 void constprop(ISS& env)         { env.flags.canConstProp = true; }
-void nofallthrough(ISS& env)     { env.flags.tookBranch = true; }
+void nofallthrough(ISS& env)     {
+  env.flags.jmpFlag = StepFlags::JmpFlags::Taken;
+}
+void never_taken(ISS& env)       {
+  env.flags.jmpFlag = StepFlags::JmpFlags::Fallthrough;
+}
 void readUnknownLocals(ISS& env) { env.flags.mayReadLocalSet.set(); }
 void readAllLocals(ISS& env)     { env.flags.mayReadLocalSet.set(); }
 
@@ -282,7 +288,8 @@ Type locRaw(ISS& env, borrowed_ptr<const php::Local> l) {
 
 void setLocRaw(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
   mayReadLocal(env, l->id);
-  if (l->name && l->name->same(s_http_response_header.get())) {
+  if (l->name && (l->name->same(s_http_response_header.get()) ||
+                  l->name->same(s_php_errormsg.get()))) {
     auto current = env.state.locals[l->id];
     assert(current == TGen || current == TCell);
     return;

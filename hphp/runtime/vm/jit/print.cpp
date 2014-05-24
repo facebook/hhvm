@@ -76,6 +76,7 @@ void printLabel(std::ostream& os, const Block* block) {
     os << "<Catch>";
   } else {
     switch (block->hint()) {
+      case Block::Hint::Unused:        os << "<Unused>"; break;
       case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
       case Block::Hint::Likely:      os << "<Likely>"; break;
       default:
@@ -428,7 +429,8 @@ void print(std::ostream& os, const IRUnit& unit,
   os << "digraph G {\n";
   for (Block* block : blocks) {
     if (block->empty()) continue;
-    if (dotBodies && block->hint() != Block::Hint::Unlikely) {
+    if (dotBodies && block->hint() != Block::Hint::Unlikely &&
+        block->hint() != Block::Hint::Unused) {
       // Include the IR in the body of the node
       std::ostringstream out;
       print(out, block, regs, asmInfo, guards, &curMarker);

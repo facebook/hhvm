@@ -23,7 +23,6 @@
 #ifdef HAVE_CUSTOM_LIBEVENT
 #include "hphp/test/ext/test_ext_curl.h"
 #endif
-#include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/test/ext/test_ext_mysql.h"
 #include "hphp/test/ext/test_ext_server.h"
 

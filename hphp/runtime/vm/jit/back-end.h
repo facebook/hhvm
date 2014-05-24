@@ -97,6 +97,7 @@ class BackEnd {
   virtual CodeGenerator* newCodeGenerator(const IRUnit& unit,
                                           CodeBlock& mainCode,
                                           CodeBlock& stubsCode,
+                                          CodeBlock& unusedCode,
                                           MCGenerator* mcg,
                                           CodegenState& state) = 0;
   virtual void moveToAlign(CodeBlock& cb,

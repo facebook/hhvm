@@ -232,7 +232,8 @@ static uint32_t read_post(multipart_buffer *self, char *buf,
   uint32_t bytes_read = bytes_remaining;
   memcpy(buf, self->cursor, bytes_remaining);
   bytes_to_read -= bytes_remaining;
-  always_assert(self->cursor = (char *)self->post_data +
+  self->cursor += bytes_remaining;
+  always_assert(self->cursor == (char *)self->post_data +
                         (self->post_size - self->throw_size));
   while (bytes_to_read > 0 && self->transport->hasMorePostData()) {
     int extra_byte_read = 0;
@@ -1053,7 +1054,7 @@ void rfc1867PostHandler(Transport* transport,
 
       Array globals = php_globals_as_array();
       if (!is_anonymous) {
-        if (s && s > filename) {
+        if (s) {
           String val(s+1, strlen(s+1), CopyString);
           safe_php_register_variable(lbuf, val, globals, 0);
         } else {
@@ -1069,7 +1070,7 @@ void rfc1867PostHandler(Transport* transport,
       } else {
         snprintf(lbuf, llen, "%s[name]", param);
       }
-      if (s && s > filename) {
+      if (s) {
         String val(s+1, strlen(s+1), CopyString);
         safe_php_register_variable(lbuf, val, files, 0);
       } else {

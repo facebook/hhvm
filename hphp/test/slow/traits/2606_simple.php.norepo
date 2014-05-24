@@ -1,0 +1,11 @@
+\\ Repo mode does not handle getTraitAliases correctly
+\\ instead of printing out Foo::Bar(), it prints (null)::Bar()
+\\ D1314228 fixed the problem for the non-repo case.
+\\ Look at emitter.cpp::emitClassTraitAliasRule()
+\\ for a possible starting point to fix
+\\
+\\ Doesn't work, but was thinking about something like:
+\\  if (traitName->empty()) {
+\\    ClassScopePtr traitCls = stmt->getClassScope();
+\\    traitName = makeStaticString(traitCls->getOriginalName());
+\\  }

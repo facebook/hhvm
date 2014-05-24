@@ -104,7 +104,7 @@ struct ArrayIter {
   ArrayIter(const ArrayIter& iter);
 
   // Move ctor
-  ArrayIter(ArrayIter&& iter) {
+  ArrayIter(ArrayIter&& iter) noexcept {
     m_data = iter.m_data;
     m_pos = iter.m_pos;
     m_version = iter.m_version;
@@ -191,12 +191,6 @@ struct ArrayIter {
     assert(ad && m_pos != ArrayData::invalid_index);
     return ad->getValueRef(m_pos).asTypedValue();
   }
-
-  /*
-   * Used by the ext_zend_compat layer.
-   * Identical to nvSecond but the output is boxed.
-   */
-  RefData* zSecond();
 
   bool hasArrayData() const {
     return !((intptr_t)m_data & 1);

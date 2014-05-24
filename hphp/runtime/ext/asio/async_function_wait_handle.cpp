@@ -40,25 +40,17 @@ void delete_AsyncFunctionWaitHandle(ObjectData* od, const Class*) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_AsyncFunctionWaitHandle::c_AsyncFunctionWaitHandle(Class* cb)
-    : c_BlockableWaitHandle(cb), m_child(nullptr), m_privData() {
+    : c_ResumableWaitHandle(cb), m_privData() {
 }
 
 c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   if (LIKELY(isFinished())) {
-    assert(!m_child);
     return;
   }
 
+  assert(!isRunning());
   frame_free_locals_inl_no_hook<false>(actRec(), actRec()->func()->numLocals());
-  if (m_child) {
-    decRefObj(m_child);
-  }
-}
-
-void c_AsyncFunctionWaitHandle::t___construct() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Define an async functions instead of using this constructor"));
-  throw e;
+  decRefObj(m_child);
 }
 
 void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(const Variant& callback) {
@@ -166,7 +158,7 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   }
 }
 
-void c_AsyncFunctionWaitHandle::run() {
+void c_AsyncFunctionWaitHandle::resume() {
   // may happen if scheduled in multiple contexts
   if (getState() != STATE_SCHEDULED) {
     return;
@@ -191,7 +183,6 @@ void c_AsyncFunctionWaitHandle::run() {
   retry:
     // async function reached RetC, which already set m_resultOrException
     if (isSucceeded()) {
-      m_child = nullptr;
       markAsSucceeded();
       return;
     }
@@ -226,11 +217,9 @@ void c_AsyncFunctionWaitHandle::run() {
     blockOn(child());
   } catch (const Object& exception) {
     // process exception thrown by the async function
-    m_child = nullptr;
     markAsFailed(exception);
   } catch (...) {
     // process C++ exception
-    m_child = nullptr;
     markAsFailed(AsioSession::Get()->getAbruptInterruptException());
     throw;
   }

@@ -1,8 +1,10 @@
 #ifndef incl_ZEND_EXTENSION_INLINE_H_
 #define incl_ZEND_EXTENSION_INLINE_H_
 
+namespace HPHP {
+
 inline void ZendExtension::moduleShutdown() {
-  if (!HPHP::RuntimeOption::EnableZendCompat) {
+  if (!RuntimeOption::EnableZendCompat) {
     return;
   }
   zend_module_entry* entry = getEntry();
@@ -12,7 +14,7 @@ inline void ZendExtension::moduleShutdown() {
   }
 }
 inline void ZendExtension::threadShutdown() {
-  if (!HPHP::RuntimeOption::EnableZendCompat) {
+  if (!RuntimeOption::EnableZendCompat) {
     return;
   }
   zend_module_entry* entry = getEntry();
@@ -21,7 +23,7 @@ inline void ZendExtension::threadShutdown() {
   }
 }
 inline void ZendExtension::requestInit() {
-  if (!HPHP::RuntimeOption::EnableZendCompat) {
+  if (!RuntimeOption::EnableZendCompat) {
     return;
   }
   zend_module_entry* entry = getEntry();
@@ -31,7 +33,7 @@ inline void ZendExtension::requestInit() {
   }
 }
 inline void ZendExtension::requestShutdown() {
-  if (!HPHP::RuntimeOption::EnableZendCompat) {
+  if (!RuntimeOption::EnableZendCompat) {
     return;
   }
   zend_module_entry* entry = getEntry();
@@ -47,5 +49,7 @@ inline void ZendExtension::requestShutdown() {
 inline zend_module_entry *ZendExtension::getEntry() {
   enum { offset = offsetof(struct _zend_module_entry, name) };
   return (zend_module_entry*)(((char*)this) - offset);
+}
+
 }
 #endif

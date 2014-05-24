@@ -24,8 +24,8 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendExceptionStore.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-exception-store.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-execution-stack.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
 // zend.h is way to big to include here
 

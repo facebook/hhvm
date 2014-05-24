@@ -115,7 +115,6 @@
   CASE(Ceil) \
   CASE(CheckProp) \
   CASE(CheckThis) \
-  CASE(ClassExists) \
   CASE(Clone) \
   CASE(Cns) \
   CASE(CnsE) \
@@ -152,7 +151,6 @@
   CASE(InstanceOf) \
   CASE(InstanceOfD) \
   CASE(Int) \
-  CASE(InterfaceExists) \
   CASE(IssetG) \
   CASE(IssetL) \
   CASE(IssetS) \
@@ -169,6 +167,7 @@
   CASE(Not) \
   CASE(Null) \
   CASE(NullUninit) \
+  CASE(OODeclExists) \
   CASE(Parent) \
   CASE(PopA) \
   CASE(PopC) \
@@ -188,7 +187,6 @@
   CASE(String) \
   CASE(Strlen) \
   CASE(This) \
-  CASE(TraitExists) \
   CASE(True) \
   CASE(UnsetL) \
   CASE(VGetG) \

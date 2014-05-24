@@ -224,9 +224,10 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
      */
     return (inst.is(ReDefSP) && src->isA(Type::StkPtr)) ||
            (inst.is(ReDefResumableSP) && src->isA(Type::StkPtr)) ||
+           inst.is(TakeStack) ||
            src->isA(Type::StkPtr) ||
-           src->inst()->is(DefConst) ||
-           src->isA(Type::FramePtr);
+           src->isA(Type::FramePtr) ||
+           src->inst()->is(DefConst);
   };
 
   StateVector<Block,IdSet<SSATmp>> livein(unit, IdSet<SSATmp>());

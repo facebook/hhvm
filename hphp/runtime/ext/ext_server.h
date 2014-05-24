@@ -53,6 +53,8 @@ int64_t f_xbox_get_thread_timeout();
 void f_xbox_set_thread_timeout(int timeout);
 void f_xbox_schedule_thread_reset();
 int64_t f_xbox_get_thread_time();
+bool f_server_get_custom_bool_setting(const String& settingName,
+                                      bool defaultValue);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

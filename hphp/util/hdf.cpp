@@ -248,9 +248,7 @@ std::string Hdf::configGetString(const std::string &defValue /* = "" */) const {
 bool Hdf::configGetBool(bool defValue /* = false */) const {
   const char *v = configGet();
   if (v == nullptr) return defValue;
-
-  return *v && strcmp(v, "0") &&
-    strcasecmp(v, "false") && strcasecmp(v, "no") && strcasecmp(v, "off");
+  return convertRawConfigToBool(v);
 }
 
 int64_t Hdf::getInt(int64_t defValue, const char *type, int64_t maxValue) const {
@@ -365,6 +363,11 @@ void Hdf::configGet(hphp_string_imap<std::string> &values) const {
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
     values[hdf.getName()] = hdf.configGetString("");
   }
+}
+
+bool Hdf::convertRawConfigToBool(const char *v) {
+  return *v && strcmp(v, "0") &&
+    strcasecmp(v, "false") && strcasecmp(v, "no") && strcasecmp(v, "off");
 }
 
 int Hdf::compare(const char *v2) const {

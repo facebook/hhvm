@@ -143,6 +143,13 @@ public:
   void configGet(hphp_string_imap<std::string> &values) const;
 
   /**
+   * Helper function to convert a config string value to bool.
+   */
+
+  static bool convertRawConfigToBool(const char *v);
+
+
+  /**
    * Set this node's value.
    */
   void set(const char *value);

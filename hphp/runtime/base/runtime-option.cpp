@@ -361,6 +361,18 @@ int RuntimeOption::GetScannerType() {
   return type;
 }
 
+bool RuntimeOption::GetServerCustomBoolSetting(const std::string &settingName,
+                                               bool &val) {
+  auto it = RuntimeOption::CustomSettings.find(settingName);
+  if (it == RuntimeOption::CustomSettings.end()) {
+    // The value isn't present in the CustomSettings section
+    return false;
+  }
+
+  val = Hdf::convertRawConfigToBool(it->second.data());
+  return true;
+}
+
 static inline std::string regionSelectorDefault() {
 #ifdef HHVM_REGION_SELECTOR_TRACELET
   return "tracelet";
@@ -505,6 +517,8 @@ int RuntimeOption::Fb303ServerPoolThreads = 1;
 
 double RuntimeOption::XenonPeriodSeconds = 0.0;
 bool RuntimeOption::XenonForceAlwaysOn = false;
+
+std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 int RuntimeOption::EnableAlternative = 0;
 
@@ -1421,6 +1435,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(XenonPeriodSeconds, ini, hhprofServer["Period"], 0.0);
     Config::Bind(XenonForceAlwaysOn, ini, hhprofServer["ForceAlwaysOn"], false);
   }
+
+  Config::Get(ini, config["CustomSettings"], CustomSettings);
 
   refineStaticStringTableSize();
 

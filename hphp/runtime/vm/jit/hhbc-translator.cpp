@@ -3193,7 +3193,9 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   }
 }
 
-const StaticString s_count("count");
+const StaticString
+  s_count("count"),
+  s_getCustomBoolSettingFuncName("server_get_custom_bool_setting");
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
@@ -3205,18 +3207,53 @@ SSATmp* HhbcTranslator::optimizedCallCount() {
   return gen(Count, makeCatch(), val);
 }
 
-bool HhbcTranslator::optimizedFCallBuiltin(const Func* func, uint32_t numArgs) {
+SSATmp* HhbcTranslator::optimizedServerGetCustomBoolSetting() {
+  Type settingNameTmpType = topType(1);
+  Type defaultValueTmpType = topType(0);
+
+  // Only generate the optimized version if the types match exactly
+  if (!(settingNameTmpType <= Type::StaticStr) ||
+      !(defaultValueTmpType <= Type::Bool)) return nullptr;
+
+  auto const settingNameTmp = top(Type::Str, 1);
+  const StringData *settingName = settingNameTmp->strVal();
+
+  bool settingValue = false;
+  if (!RuntimeOption::GetServerCustomBoolSetting(settingName->toCppString(),
+                                                 settingValue)) {
+    // The value isn't present in the CustomSettings section of config.hdf so
+    // we will simply push the default value argument.
+    return top(Type::Bool, 0);
+  } else {
+    // We found the setting so return the value from config.hdf
+    return cns(settingValue);
+  }
+}
+
+bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
+                                           uint32_t numArgs,
+                                           uint32_t numNonDefault) {
   SSATmp* res = nullptr;
   switch (numArgs) {
     case 2:
       if (func->name()->isame(s_count.get())) res = optimizedCallCount();
+      else if (func->name()->isame(s_getCustomBoolSettingFuncName.get())) {
+        res = optimizedServerGetCustomBoolSetting();
+      }
       break;
     default: break;
   }
 
   if (res == nullptr) return false;
 
-  for (int i = 0; i < numArgs; ++i) gen(DecRef, popC());
+  // Decref and free args
+  for (int i = 0; i < numArgs; i++) {
+    auto const arg = popR();
+    if (i >= numArgs - numNonDefault) {
+      gen(DecRef, arg);
+    }
+  }
+
   push(res);
   return true;
 }
@@ -3230,7 +3267,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
 
   callee->validate();
 
-  if (optimizedFCallBuiltin(callee, numArgs)) return;
+  if (optimizedFCallBuiltin(callee, numArgs, numNonDefault)) return;
 
   /*
    * Spill args to stack.  Some of the arguments may be passed by

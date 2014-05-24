@@ -359,6 +359,9 @@ public:
 
   static int GetScannerType();
 
+  static bool GetServerCustomBoolSetting(const std::string &settingName,
+                                         bool &val);
+
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;
@@ -497,6 +500,11 @@ public:
 
 private:
   using string = std::string;
+
+  // Custom settings. This should be accessed via the GetServerCustomSetting
+  // APIs.
+  static std::map<std::string, std::string> CustomSettings;
+
 public:
 #define F(type, name, unused) \
   static type Eval ## name;

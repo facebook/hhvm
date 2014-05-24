@@ -724,7 +724,9 @@ private:
   void emitProfiledGuard(Type t, const char* location, int32_t id, G doGuard,
                          L loadAddr);
 
-  bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs);
+  bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
+                             uint32_t numNonDefault);
+  SSATmp* optimizedServerGetCustomBoolSetting();
   SSATmp* optimizedCallCount();
 
 private: // Exit trace creation routines.

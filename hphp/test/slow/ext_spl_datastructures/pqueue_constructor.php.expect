@@ -1,0 +1,8 @@
+array(3) {
+  [0]=>
+  string(5) "test1"
+  [1]=>
+  string(5) "test2"
+  [2]=>
+  string(5) "test3"
+}

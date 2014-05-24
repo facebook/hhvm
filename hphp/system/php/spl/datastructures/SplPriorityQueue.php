@@ -52,7 +52,7 @@ class SplPriorityQueue implements \HH\Iterator, Countable {
    *
    * @return     mixed   No value is returned.
    */
-  public function __construct() {
+  final public function __init__() {
     $this->heap = new _SplPriorityQueueHeap($this);
   }
 

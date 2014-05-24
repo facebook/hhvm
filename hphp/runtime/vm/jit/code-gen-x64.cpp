@@ -2456,10 +2456,6 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
         curFunc()->fullName()->data()).str());
   }
 
-  auto const smashTarget = static_cast<SmashTarget*>(
-    std::malloc(sizeof(SmashTarget))
-  );
-
   auto const mcHandler = extra->fatal ? handlePrimeCacheInit<true>
                                       : handlePrimeCacheInit<false>;
 
@@ -2476,19 +2472,6 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   auto const movAddr = a.frontier();
   a.    movq   (0x8000000000000000u, rAsm);
   assert(a.frontier() - kMovLen == movAddr);
-
-  /*
-   * For the first time through, set the cache to hold the pointer to the
-   * SmashTarget, so handlePreCacheMiss can use that information to know how
-   * to smash things.
-   *
-   * We set the low bit for two reasons: the Class* will never be a valid
-   * Class*, so we'll always miss the inline check before it's smashed, and
-   * handlePreCacheMiss can tell it's not been smashed yet and is therefore a
-   * valid PrimeData*.
-   */
-  *reinterpret_cast<uintptr_t*>(movAddr + kMovImmOff) =
-    reinterpret_cast<uintptr_t>(smashTarget) | 1;
 
   a.    movq   (rAsm, m_rScratch);
   a.    andl   (r32(rAsm), r32(rAsm));  // zero the top 32 bits
@@ -2515,8 +2498,17 @@ asm_label(a, slow_path);
   );
 asm_label(a, done);
 
-  smashTarget->movAddr = movAddr;
-  smashTarget->retAddr = info.returnAddress;
+  /*
+   * For the first time through, set the cache to hold the offset from
+   * the return address of the call to the movq (*2 + 1), so we can find
+   * the movq from the handler.
+   *
+   * We set the low bit for two reasons: the Class* will never be a valid
+   * Class*, so we'll always miss the inline check before it's smashed, and
+   * handlePrimeCacheMiss can tell it's not been smashed yet
+   */
+  *reinterpret_cast<uintptr_t*>(movAddr + kMovImmOff) =
+    ((info.returnAddress - movAddr) << 1) | 1;
 }
 
 void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {

@@ -424,7 +424,20 @@ void handlePrimeCacheInit(Entry* mce,
   if (!(rawTarget & 0x1)) {
     return lookup<fatal>(mce, ar, name, cls, ctx);
   }
-  auto const smashTarget = reinterpret_cast<SmashTarget*>(rawTarget & ~0x1);
+
+  // We should be able to use DECLARE_FRAME_POINTER here,
+  // but that fails inside templates.
+  // Fortunately, this code is very x86 specific anyway...
+#if defined(__x86_64__)
+  ActRec* framePtr;
+  asm volatile("mov %%rbp, %0" : "=r" (framePtr) ::);
+#else
+  ActRec* framePtr = ar;
+  always_assert(false);
+#endif
+
+  TCA retAddr = (TCA)framePtr->m_savedRip;
+  TCA movAddr = retAddr - (rawTarget >> 1);
 
   // First fill the request local method cache for this call.
   lookup<fatal>(mce, ar, name, cls, ctx);
@@ -483,8 +496,8 @@ void handlePrimeCacheInit(Entry* mce,
     assert(!(mce->m_value->attrs() & AttrStatic));
     imm = fval << 32 | cval;
   }
-  if (!smashMov(smashTarget->movAddr, imm)) {
-    // Someone beat us to it.  Bail early so we don't double-free.
+  if (!smashMov(movAddr, imm)) {
+    // Someone beat us to it.  Bail early.
     return;
   }
 
@@ -492,12 +505,8 @@ void handlePrimeCacheInit(Entry* mce,
   // call to start doing real dispatch.
   //
   // XXX Use of kCallLen here is a layering violation.
-  mcg->backEnd().smashCall(smashTarget->retAddr - X64::kCallLen,
+  mcg->backEnd().smashCall(retAddr - X64::kCallLen,
                            reinterpret_cast<TCA>(handleSlowPath<fatal>));
-
-  // Wait to free this until no request threads could be picking up
-  // the immediate.
-  Treadmill::deferredFree(smashTarget);
 }
 
 template

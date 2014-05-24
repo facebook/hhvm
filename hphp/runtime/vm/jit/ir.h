@@ -654,6 +654,7 @@ O(StAsyncArRaw,                     ND, S(FramePtr)                           \
                                           S(Int,TCA,Nullptr),              E) \
 O(StAsyncArChild,                   ND, S(FramePtr) S(Obj),            E|CRc) \
 O(StAsyncArResult,                  ND, S(FramePtr) S(Cell),           E|CRc) \
+O(LdAsyncArFParent,     D(Obj|Nullptr), S(FramePtr),                      NF) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
@@ -665,6 +666,7 @@ O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           S(Obj),             E|Er|N|CRc|PRc) \
 O(CreateSSWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
 O(AFWHPrepareChild,                 ND, S(FramePtr) S(Obj),           E|Er|N) \
+O(BWHUnblockChain,                  ND, S(Obj,Nullptr),                  E|N) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr),            Er|E|N|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \

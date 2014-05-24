@@ -38,7 +38,6 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   explicit c_BlockableWaitHandle(Class* cls =
       c_BlockableWaitHandle::classof())
     : c_WaitableWaitHandle(cls)
-    , m_nextParent(nullptr)
   {}
   ~c_BlockableWaitHandle() {}
 
@@ -55,9 +54,6 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   ObjectData* createCycleException(c_WaitableWaitHandle* child) const;
 
   static const int8_t STATE_BLOCKED = 2;
-
- private:
-  c_BlockableWaitHandle* m_nextParent;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

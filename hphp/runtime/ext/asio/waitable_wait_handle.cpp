@@ -34,9 +34,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb)
-    : c_WaitHandle(cb)
-    , m_firstParent(nullptr) {
+    : c_WaitHandle(cb) {
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());
+  m_firstParent = nullptr;
 }
 
 c_WaitableWaitHandle::~c_WaitableWaitHandle() {

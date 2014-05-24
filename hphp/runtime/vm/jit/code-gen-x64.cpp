@@ -220,6 +220,7 @@ CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
 CALL_OPCODE(CreateSSWH)
 CALL_OPCODE(AFWHPrepareChild)
+CALL_OPCODE(BWHUnblockChain)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
@@ -5672,6 +5673,14 @@ void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
   const int64_t off = c_AsyncFunctionWaitHandle::resultOff()
                     - c_AsyncFunctionWaitHandle::arOff();
   cgStore(asyncArReg[off], value, valueLoc, Width::Full);
+}
+
+void CodeGenerator::cgLdAsyncArFParent(IRInstruction* inst) {
+  auto asyncArReg = srcLoc(0).reg();
+  auto dstReg = dstLoc(0).reg();
+  const int64_t off = c_AsyncFunctionWaitHandle::firstParentOff()
+                    - c_AsyncFunctionWaitHandle::arOff();
+  m_as.loadq(asyncArReg[off], dstReg);
 }
 
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {

@@ -164,9 +164,8 @@ void c_AsyncFunctionWaitHandle::resume() {
           "Invariant violation: child neither succeeded nor failed");
     }
 
-    // async function reached RetC, which already set m_resultOrException
+    // async function reached RetC, which already did everything
     if (isSucceeded()) {
-      UnblockChain(getFirstParent());
       return;
     }
 
@@ -219,8 +218,10 @@ c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
+  auto const parentChain = getFirstParent();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
+  UnblockChain(parentChain);
 }
 
 void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {

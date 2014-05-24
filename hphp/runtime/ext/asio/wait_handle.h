@@ -48,6 +48,7 @@ namespace HPHP {
  * passed as an array member of GenArrayWaitHandle).
  */
 FORWARD_DECLARE_CLASS(WaitHandle);
+FORWARD_DECLARE_CLASS(BlockableWaitHandle);
 class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
@@ -123,7 +124,19 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   static const int8_t STATE_FAILED    = 1;
 
  protected:
-  Cell m_resultOrException;
+  union {
+    // STATE_SUCCEEDED || STATE_FAILED
+    Cell m_resultOrException;
+
+    // !STATE_SUCCEEDED && !STATE_FAILED
+    struct {
+      // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
+      c_BlockableWaitHandle* m_firstParent;
+
+      // BlockableWaitHandle: STATE_BLOCKED
+      c_BlockableWaitHandle* m_nextParent;
+    };
+  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

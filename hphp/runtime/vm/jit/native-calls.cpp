@@ -262,6 +262,8 @@ static CallMap s_callMap {
                            {{TV, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},
+    {BWHUnblockChain,    &c_BlockableWaitHandle::UnblockChain, DSSA, SNone,
+                           {{SSA, 0}}},
 
     /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},

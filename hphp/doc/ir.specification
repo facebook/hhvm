@@ -1739,6 +1739,11 @@ AFWHPrepareChild S0:FramePtr S1:Obj
   cross-scheduler and intra-scheduler cycle detection. Throws if the
   dependency cannot be established.
 
+BWHUnblockChain S0:{Obj,Nullptr}
+
+  Unblock chain of BlockableWaitHandles provided by S0 pointing to the first
+  BlockableWaitHandle in a chain.
+
 ContEnter S0:StkPtr S1:FramePtr S2:FramePtr S3:TCA S4:ConstInt
 
   Enters a generator body. S0 is the current stack pointer pointing to fully
@@ -1822,6 +1827,11 @@ StAsyncArResult S0:FramePtr S1:Cell
 
   Stores result into the AsyncFunctionWaitHandle object ActRec of which is S0.
   S1 is the value.
+
+D:{Obj,Nullptr} = LdAsyncArFParent S0:FramePtr
+
+  Loads the first parent of the AsyncFunctionWaitHandle object ActRec of which
+  is S0.
 
 D:Int = LdWHState S0:Obj
 

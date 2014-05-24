@@ -816,7 +816,7 @@ RegPair XLS::firstHint(Interval* current, const RegPositions& free_until) {
   if (!RuntimeOption::EvalHHIREnablePreColoring &&
       !RuntimeOption::EvalHHIREnableCoalescing) return InvalidRegPair;
   // search the copy interval for a register hint at pos
-  auto search = [&](Interval* copy, unsigned pos) {
+  auto search = [&](Interval* copy, unsigned pos) -> RegPair {
     for (auto ivl = copy; ivl; ivl = ivl->next) {
       if (pos == ivl->end() && ivl->loc.hasReg(0)) {
         return ivl->loc.pair();

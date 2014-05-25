@@ -251,11 +251,12 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto  funcVecLen = (parent != nullptr ? parent->m_methods.size() : 0)
                       + preClass->numMethods();
 
-  // In non-RepoAuthoritative mode, trait methods are not included
-  // in the method count, and they need to be estimated separately.
   std::vector<ClassPtr> usedTraits;
+  auto numTraitMethodsEstimate = loadUsedTraits(preClass, usedTraits);
+  // In RepoAuthoritative mode, trait methods are already flattened
+  // into the preClass, so we don't need to add in the estimate here.
   if (!RuntimeOption::RepoAuthoritative) {
-    funcVecLen += loadUsedTraits(preClass, usedTraits);
+    funcVecLen += numTraitMethodsEstimate;
   }
 
   auto const size = offsetof(Class, m_classVec)

@@ -15,7 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/std/ext_std_output.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/hardware-counter.h"
@@ -26,9 +27,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const int64_t k_PHP_OUTPUT_HANDLER_CONT = 0;
+const int64_t k_PHP_OUTPUT_HANDLER_WRITE = 0;
+const int64_t k_PHP_OUTPUT_HANDLER_START = 1;
+const int64_t k_PHP_OUTPUT_HANDLER_CLEAN = 2;
+const int64_t k_PHP_OUTPUT_HANDLER_FLUSH = 4;
+const int64_t k_PHP_OUTPUT_HANDLER_END = 8;
+const int64_t k_PHP_OUTPUT_HANDLER_FINAL = 8;
 
-bool f_ob_start(const Variant& callback /* = uninit_null() */,
-                int chunk_size /* = 0 */, bool erase /* = true */) {
+bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
+                             int chunk_size /* = 0 */,
+                             bool erase /* = true */) {
   // ignoring chunk_size and erase
 
   if (!callback.isNull()) {
@@ -41,88 +50,89 @@ bool f_ob_start(const Variant& callback /* = uninit_null() */,
   g_context->obStart(callback);
   return true;
 }
-void f_ob_clean() {
+void HHVM_FUNCTION(ob_clean) {
   // PHP_OUTPUT_HANDLER_START is included by PHP5
   g_context->obClean(k_PHP_OUTPUT_HANDLER_START | k_PHP_OUTPUT_HANDLER_CLEAN);
 }
-void f_ob_flush() {
+void HHVM_FUNCTION(ob_flush) {
   g_context->obFlush();
 }
-bool f_ob_end_clean() {
+bool HHVM_FUNCTION(ob_end_clean) {
   g_context->obClean(k_PHP_OUTPUT_HANDLER_START |
                      k_PHP_OUTPUT_HANDLER_CLEAN |
                      k_PHP_OUTPUT_HANDLER_END);
   return g_context->obEnd();
 }
-bool f_ob_end_flush() {
+bool HHVM_FUNCTION(ob_end_flush) {
   bool ret = g_context->obFlush();
   g_context->obEnd();
   return ret;
 }
-void f_flush() {
+void HHVM_FUNCTION(flush) {
   g_context->flush();
 }
-Variant f_ob_get_contents() {
-  if (f_ob_get_level() == 0) {
+Variant HHVM_FUNCTION(ob_get_contents) {
+  if (HHVM_FN(ob_get_level)() == 0) {
     return false;
   }
   return g_context->obCopyContents();
 }
-Variant f_ob_get_clean() {
-  String output = f_ob_get_contents();
-  if (!f_ob_end_clean()) {
+Variant HHVM_FUNCTION(ob_get_clean) {
+  String output = HHVM_FN(ob_get_contents)();
+  if (!HHVM_FN(ob_end_clean)()) {
     return false;
   }
   return output;
 }
-Variant f_ob_get_flush() {
+Variant HHVM_FUNCTION(ob_get_flush) {
   String output = g_context->obCopyContents();
-  if (!f_ob_end_flush()) {
+  if (!HHVM_FN(ob_end_flush)()) {
     return false;
   }
   return output;
 }
-int64_t f_ob_get_length() {
+int64_t HHVM_FUNCTION(ob_get_length) {
   return g_context->obGetContentLength();
 }
-int64_t f_ob_get_level() {
+int64_t HHVM_FUNCTION(ob_get_level) {
   return g_context->obGetLevel();
 }
-Array f_ob_get_status(bool full_status /* = false */) {
+Array HHVM_FUNCTION(ob_get_status, bool full_status /* = false */) {
   return g_context->obGetStatus(full_status);
 }
-void f_ob_implicit_flush(bool flag /* = true */) {
+void HHVM_FUNCTION(ob_implicit_flush, bool flag /* = true */) {
   g_context->obSetImplicitFlush(flag);
 }
-Array f_ob_list_handlers() {
+Array HHVM_FUNCTION(ob_list_handlers) {
   return g_context->obGetHandlers();
 }
-bool f_output_add_rewrite_var(const String& name, const String& value) {
+bool HHVM_FUNCTION(output_add_rewrite_var, const String& name,
+                                           const String& value) {
   throw NotSupportedException(__func__, "bad coding style");
 }
-bool f_output_reset_rewrite_vars() {
+bool HHVM_FUNCTION(output_reset_rewrite_vars) {
   throw NotSupportedException(__func__, "bad coding style");
 }
 
-void f_hphp_crash_log(const String& name, const String& value) {
+void HHVM_FUNCTION(hphp_crash_log, const String& name, const String& value) {
   StackTraceNoHeap::AddExtraLogging(name.data(), value.data());
 }
 
-void f_hphp_stats(const String& name, int64_t value) {
+void HHVM_FUNCTION(hphp_stats, const String& name, int64_t value) {
   ServerStats::Log(name.data(), value);
 }
-int64_t f_hphp_get_stats(const String& name) {
+int64_t HHVM_FUNCTION(hphp_get_stats, const String& name) {
   return ServerStats::Get(name.data());
 }
-Array f_hphp_get_status() {
+Array HHVM_FUNCTION(hphp_get_status) {
   std::string out;
   ServerStats::ReportStatus(out, ServerStats::Format::JSON);
   return HHVM_FN(json_decode)(String(out)).toArray();
 }
-Array f_hphp_get_iostatus() {
+Array HHVM_FUNCTION(hphp_get_iostatus) {
   return ServerStats::GetThreadIOStatuses();
 }
-void f_hphp_set_iostatus_address(const String& name) {
+void HHVM_FUNCTION(hphp_set_iostatus_address, const String& name) {
   return ServerStats::SetThreadIOStatusAddress(name.c_str());
 }
 
@@ -150,7 +160,7 @@ const StaticString
   s_process_usleep_time("process-usleep-time"),
   s_process_nsleep_time("process-nanosleep-time");
 
-Variant f_hphp_get_timers(bool get_as_float /* = true */) {
+Variant HHVM_FUNCTION(hphp_get_timers, bool get_as_float /* = true */) {
   Transport *transport = g_context->getTransport();
   if (transport == NULL) {
     return false;
@@ -183,7 +193,7 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   return ret.create();
 }
 
-Variant f_hphp_output_global_state(bool serialize /* = true */) {
+Variant HHVM_FUNCTION(hphp_output_global_state, bool serialize /* = true */) {
   Array r = Array();
   if (serialize) {
     return f_serialize(r);
@@ -192,24 +202,70 @@ Variant f_hphp_output_global_state(bool serialize /* = true */) {
   }
 }
 
-int64_t f_hphp_instruction_counter(void) {
+int64_t HHVM_FUNCTION(hphp_instruction_counter) {
   return HardwareCounter::GetInstructionCount();
 }
 
-Variant f_hphp_get_hardware_counters(void) {
+Variant HHVM_FUNCTION(hphp_get_hardware_counters) {
   Array ret;
 
   HardwareCounter::GetPerfEvents(ret);
   return ret;
 }
 
-bool f_hphp_set_hardware_events(const String& events /* = null */) {
+bool HHVM_FUNCTION(hphp_set_hardware_events,
+                    const String& events /* = null */) {
   return HardwareCounter::SetPerfEvents(events);
 }
 
-void f_hphp_clear_hardware_events() {
+void HHVM_FUNCTION(hphp_clear_hardware_events) {
   HardwareCounter::ClearPerfEvents();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::initOutput() {
+  HHVM_FE(ob_start);
+  HHVM_FE(ob_clean);
+  HHVM_FE(ob_flush);
+  HHVM_FE(ob_end_clean);
+  HHVM_FE(ob_end_flush);
+  HHVM_FE(flush);
+  HHVM_FE(ob_get_contents);
+  HHVM_FE(ob_get_clean);
+  HHVM_FE(ob_get_flush);
+  HHVM_FE(ob_get_length);
+  HHVM_FE(ob_get_level);
+  HHVM_FE(ob_get_status);
+  HHVM_FE(ob_implicit_flush);
+  HHVM_FE(ob_list_handlers);
+  HHVM_FE(output_add_rewrite_var);
+  HHVM_FE(output_reset_rewrite_vars);
+  HHVM_FE(hphp_crash_log);
+  HHVM_FE(hphp_stats);
+  HHVM_FE(hphp_get_stats);
+  HHVM_FE(hphp_get_status);
+  HHVM_FE(hphp_get_iostatus);
+  HHVM_FE(hphp_set_iostatus_address);
+  HHVM_FE(hphp_get_timers);
+  HHVM_FE(hphp_output_global_state);
+  HHVM_FE(hphp_instruction_counter);
+  HHVM_FE(hphp_get_hardware_counters);
+  HHVM_FE(hphp_set_hardware_events);
+  HHVM_FE(hphp_clear_hardware_events);
+
+#define INTCONST(v) Native::registerConstant<KindOfInt64> \
+                  (makeStaticString(#v), k_##v);
+  INTCONST(PHP_OUTPUT_HANDLER_CONT);
+  INTCONST(PHP_OUTPUT_HANDLER_WRITE);
+  INTCONST(PHP_OUTPUT_HANDLER_START);
+  INTCONST(PHP_OUTPUT_HANDLER_CLEAN);
+  INTCONST(PHP_OUTPUT_HANDLER_FLUSH);
+  INTCONST(PHP_OUTPUT_HANDLER_END);
+  INTCONST(PHP_OUTPUT_HANDLER_FINAL);
+#undef INTCONST
+
+  loadSystemlib("std_output");
+}
+
 }

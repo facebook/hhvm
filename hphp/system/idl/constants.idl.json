@@ -3177,34 +3177,6 @@
             "desc": "Dynamic constant - php_uname()"
         },
         {
-            "name": "PHP_OUTPUT_HANDLER_CONT",
-            "value": 0
-        },
-        {
-            "name": "PHP_OUTPUT_HANDLER_WRITE",
-            "value": 0
-        },
-        {
-            "name": "PHP_OUTPUT_HANDLER_START",
-            "value": 1
-        },
-        {
-            "name": "PHP_OUTPUT_HANDLER_CLEAN",
-            "value": 2
-        },
-        {
-            "name": "PHP_OUTPUT_HANDLER_FLUSH",
-            "value": 4
-        },
-        {
-            "name": "PHP_OUTPUT_HANDLER_END",
-            "value": 8
-        },
-        {
-            "name": "PHP_OUTPUT_HANDLER_FINAL",
-            "value": 8
-        },
-        {
             "name": "PHP_PREFIX",
             "value": ""
         },

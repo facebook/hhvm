@@ -92,10 +92,6 @@ public:
     return m_regs[i];
   }
 
-  RegPair pair() const {
-    return {reg(0), reg(1)};
-  }
-
   void setReg(PhysReg reg, uint32_t i) {
     assert(m_kind != kSpill);
     m_regs[i] = reg;

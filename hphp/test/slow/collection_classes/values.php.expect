@@ -16,7 +16,7 @@ object(HH\Vector)#11 (1) {
 }
 string(18) "LazyValuesIterable"
 string(18) "LazyValuesIterable"
-object(HH\Vector)#12 (1) {
+object(HH\Vector)#15 (1) {
   [0]=>
   string(3) "abc"
 }

@@ -16,5 +16,5 @@ bool(false)
 string(4) ":bar"
 string(4) ":bar"
 string(6) "waaaaa"
-string(11) "r\x00waaaaa"
+string(10) "r<0>waaaaa"
 string(1) "z"

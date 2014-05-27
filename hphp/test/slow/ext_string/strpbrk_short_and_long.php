@@ -48,9 +48,18 @@ function multiple_matches() {
 }
 
 function restarting_things() {
-  var_dump(strpbrk('foo\x00bar\x00waaaaa', 'w'));
-  var_dump(strpbrk('foo\x00bar\x00waaaaa', 'r'));
-  var_dump(strpbrk('foo\x00bar\x00waaaaaz', 'z'));
+  var_dump(
+    strtr(
+      strpbrk("foo\x00bar\x00waaaaa", 'w'),
+      array("\x00" => '<0>')));
+  var_dump(
+    strtr(
+      strpbrk("foo\x00bar\x00waaaaa", 'r'),
+      array("\x00" => '<0>')));
+  var_dump(
+    strtr(
+      strpbrk("foo\x00bar\x00waaaaaz", 'z'),
+      array("\x00" => '<0>')));
 }
 
 function main() {

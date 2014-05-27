@@ -1,0 +1,1 @@
+Fatal error: Declaration of D::foo() must be compatible with that of C::foo() in %s/test/slow/types/abstract_function_typehints.php on line 17

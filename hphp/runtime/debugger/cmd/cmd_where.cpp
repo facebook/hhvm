@@ -44,7 +44,7 @@ void CmdWhere::recvImpl(DebuggerThriftBuffer &thrift) {
     thrift.read(sdata);
     if (DebuggerWireHelpers::WireUnserialize(sdata, m_stacktrace) !=
         DebuggerWireHelpers::NoError) {
-      m_stacktrace = null_array;
+      m_stacktrace.reset();
       m_wireError = sdata;
     }
   }

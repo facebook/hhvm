@@ -76,7 +76,7 @@ static int getGrandfatheredOffset(const String& locale) {
 
 static String getGrandfatheredPreferred(int ofs) {
   if ((ofs < 0) || (ofs >= g_grandfathered.size())) {
-    return null_string;
+    return String();
   }
   if (ofs < g_grandfathered_preferred.size()) {
     return g_grandfathered_preferred[ofs];
@@ -158,7 +158,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
       }
       int pos = singleton_pos(locale);
       if (pos == 0) {
-        return null_string;
+        return String();
       } else if (pos > 0) {
         locale_name = f_substr(locale, 0, pos - 1);
       }
@@ -417,7 +417,7 @@ static Array HHVM_STATIC_METHOD(Locale, getAllVariants, const String& locale) {
   Variant val = get_icu_value(localeOrDefault(locale), LOC_VARIANT);
   String strval = val.toString();
   if (strval.empty()) {
-    return null_array;
+    return Array();
   }
   Array ret = Array::Create();
   const char *s = strval.c_str(), *e = s + strval.size(), *p;
@@ -478,7 +478,7 @@ static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
   UErrorCode error = U_ZERO_ERROR;
   String locname = localeOrDefault(locale);
   UEnumeration *e = uloc_openKeywords(locname.c_str(), &error);
-  if (!e) return null_array;
+  if (!e) return Array();
 
   Array ret = Array::Create();
   const char *key;
@@ -500,7 +500,7 @@ tryagain:
       s_intl_error->setError(error, "locale_get_keywords: Error encountered "
                                     "while getting the keyword  value for the "
                                     " keyword");
-      return null_array;
+      return Array();
     }
     ret.set(String(key, key_len, CopyString), String(ptr, val_len, CopyString));
   }
@@ -530,7 +530,7 @@ static String locale_suffix_strip(const String& locale) {
       }
     }
   }
-  return null_string;
+  return String();
 }
 
 inline void normalize_for_match(String& v) {

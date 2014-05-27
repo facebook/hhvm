@@ -27,7 +27,7 @@ inline Object ibi_create(const char *funcname,
   auto bi = func(Locale::createFromName(locale.c_str()), error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "%s: error creating BreakIterator", funcname);
-    return null_object;
+    return Object();
   }
 
   return IntlBreakIterator::newInstance(bi);

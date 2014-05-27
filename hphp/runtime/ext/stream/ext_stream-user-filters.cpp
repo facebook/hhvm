@@ -157,7 +157,7 @@ private:
                           const Variant& params) {
     auto class_name = m_registeredFilters.rvalAt(filter).asCStrRef();
     Class* class_ = Unit::getClass(class_name.get(), true);
-    Object obj = null_object;
+    Object obj = Object();
 
     if (LIKELY(class_ != nullptr)) {
       PackedArrayInit ctor_args(3);
@@ -171,7 +171,7 @@ private:
        * - false: documented value for failure
        */
       if (!(created.isNull() || created.toBoolean())) {
-        obj = null_object;
+        obj.reset();
       }
     } else {
       raise_warning("%s: user-filter \"%s\" requires class \"%s\", but that "
@@ -186,7 +186,7 @@ private:
       raise_warning("%s: unable to create or locate filter \"%s\"",
                     php_func,
                     filter.data());
-      return null_resource;
+      return Resource();
     }
 
     return Resource(NEWOBJ(StreamFilter)(obj, stream));
@@ -223,7 +223,7 @@ bool StreamFilter::remove() {
   assert(file);
   Resource rthis(this);
   auto ret = file->removeFilter(rthis);
-  m_stream = null_resource;
+  m_stream.reset();
   return ret;
 }
 
@@ -248,7 +248,7 @@ void BucketBrigade::prependBucket(const Object& bucket) {
 
 Object BucketBrigade::popFront() {
   if (m_buckets.empty()) {
-    return null_object;
+    return Object();
   }
   auto bucket = m_buckets.front();
   m_buckets.pop_front();

@@ -165,7 +165,7 @@ static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
     IntlTimeZone::ParseArg(timeZone, "intlcal_create_instance",
                            s_intl_error.get());
   if (!tz) {
-    return null_object;
+    return Object();
   }
   String loc = localeOrDefault(locale);
   UErrorCode error = U_ZERO_ERROR;
@@ -175,7 +175,7 @@ static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
   if (!cal) {
     delete tz;
     s_intl_error->setError(error, "Error creating ICU Calendar object");
-    return null_object;
+    return Object();
   }
   return IntlCalendar::newInstance(cal);
 }
@@ -254,7 +254,7 @@ static int64_t HHVM_METHOD(IntlCalendar, getErrorCode) {
 }
 
 static String HHVM_METHOD(IntlCalendar, getErrorMessage) {
-  CAL_FETCH(data, this_, null_string);
+  CAL_FETCH(data, this_, String());
   return data->getErrorMessage();
 }
 
@@ -334,7 +334,7 @@ static Variant HHVM_METHOD(IntlCalendar, getTime) {
 }
 
 static Object HHVM_METHOD(IntlCalendar, getTimeZone) {
-  CAL_FETCH(data, this_, null_object);
+  CAL_FETCH(data, this_, Object());
   return IntlTimeZone::newInstance(
     data->calendar()->getTimeZone().clone());
 }

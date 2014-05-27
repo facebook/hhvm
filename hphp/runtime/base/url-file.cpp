@@ -105,7 +105,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
                         m_response, pHeaders, &responseHeaders);
   }
 
-  m_responseHeaders = Array();
+  m_responseHeaders.reset();
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     m_responseHeaders.append(responseHeaders[i]);
   }

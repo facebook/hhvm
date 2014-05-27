@@ -142,7 +142,7 @@ static Object HHVM_STATIC_METHOD(IntlTimeZone, createTimeZone,
   if (!ustring_from_char(id, zoneId, error)) {
     s_intl_error->setError(error, "intltz_count_equivalent_ids: could not "
                                   "convert time zone id to UTF-16");
-    return null_object;
+    return Object();
   }
   return IntlTimeZone::newInstance(icu::TimeZone::createTimeZone(id));
 }
@@ -233,7 +233,7 @@ static int64_t HHVM_METHOD(IntlTimeZone, getErrorCode) {
 }
 
 static String HHVM_METHOD(IntlTimeZone, getErrorMessage) {
-  TZ_GET(data, this_, null_string);
+  TZ_GET(data, this_, String());
   return data->getErrorMessage();
 }
 

@@ -188,11 +188,11 @@ ALWAYS_INLINE
 static String getImageMimeType(MagickWand* wand) {
   String format = convertMagickString(MagickGetImageFormat(wand));
   if (format.empty()) {
-    return null_string;
+    return String();
   }
   String mimetype = convertMagickString(MagickToMime(format.c_str()));
   if (mimetype.empty()) {
-    return null_string;
+    return String();
   }
   return mimetype;
 }
@@ -232,7 +232,7 @@ String magickResolveFont(const String& fontName) {
   }
   auto font = f_realpath(fontName);
   if (font.isBoolean() && !font.toBoolean()) {
-    return null_string;
+    return String();
   } else {
     return font.toString();
   }
@@ -608,7 +608,7 @@ static void HHVM_METHOD(Imagick, __construct, const Variant& files) {
   auto wand = getMagickWandResource(this_);
   Array array = files.isString() ? make_packed_array(files)
               : files.isArray() ? files.toArray()
-              : null_array;
+              : Array();
   for (ArrayIter it(array); it; ++it) {
     String file = it.secondRefPlus().toString();
     imagickReadOp(wand->getWand(), file, MagickReadImage);

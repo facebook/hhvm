@@ -212,7 +212,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
 void MimePart::MimeHeader::clear() {
   m_empty = true;
   m_value.clear();
-  m_attributes = null_array;
+  m_attributes.reset();
 }
 
 Variant MimePart::MimeHeader::get(const String& attrname) {

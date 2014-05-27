@@ -34,7 +34,7 @@ Object createImagickPixel(PixelWand* wand, bool owner) {
 
 Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner) {
   if (wands == nullptr) {
-    return null_array;
+    return Array();
   } else {
     PackedArrayInit ret(num);
     for (int i = 0; i < num; ++i) {

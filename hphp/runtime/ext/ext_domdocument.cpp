@@ -448,7 +448,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       if (ret > 0) {
         retval = String((char *)xmlOutputBufferGetContent(buf), ret, CopyString);
       } else {
-        retval = String();
+        retval.setNull();
       }
     }
   }
@@ -3938,7 +3938,7 @@ Object c_DOMElement::t_getattributenodens(const String& namespaceuri,
   attrp = xmlHasNsProp(elemp, (xmlChar*)localname.data(),
                        (xmlChar*)namespaceuri.data());
   if (attrp == NULL) {
-    return null_object;
+    return Object();
   }
   c_DOMNode *ret = NEWOBJ(c_DOMAttr)();
   ret->m_doc = doc();
@@ -4886,7 +4886,7 @@ Variant c_DOMNodeList::t_item(int64_t index) {
       return create_node_object(itemnode, m_doc, owner);
     }
   }
-  return null_object;
+  return Object();
 }
 
 Variant c_DOMNodeList::t_getiterator() {

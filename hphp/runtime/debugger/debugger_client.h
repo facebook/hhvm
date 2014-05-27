@@ -291,7 +291,7 @@ public:
 
   void init(const DebuggerClientOptions &options);
   void clearCachedLocal() {
-    m_stacktrace = null_array;
+    m_stacktrace.reset();
   }
 
   /**

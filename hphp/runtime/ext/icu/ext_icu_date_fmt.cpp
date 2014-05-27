@@ -191,16 +191,16 @@ static void HHVM_METHOD(IntlDateFormatter, __construct,
 }
 
 static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
-  DATFMT_GET(data, this_, null_string);
+  DATFMT_GET(data, this_, String());
   double ts = data->getTimestamp(value);
   if (ts == NAN) {
-    return null_string;
+    return String();
   }
   UErrorCode error = U_ZERO_ERROR;
   int32_t len = udat_format(data->datefmt(), ts, nullptr, 0, nullptr, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
     data->setError(error);
-    return null_string;
+    return String();
   }
   error = U_ZERO_ERROR;
   icu::UnicodeString ret;
@@ -208,13 +208,13 @@ static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
   udat_format(data->datefmt(), ts, buffer, len + 1, nullptr, &error);
   if (U_FAILURE(error)) {
     data->setError(error);
-    return null_string;
+    return String();
   }
   ret.releaseBuffer(len);
   String out(u8(ret, error));
   if (U_FAILURE(error)) {
     data->setError(error);
-    return null_string;
+    return String();
   }
   return out;
 }
@@ -242,7 +242,7 @@ static int64_t HHVM_METHOD(IntlDateFormatter, getErrorCode) {
 }
 
 static String HHVM_METHOD(IntlDateFormatter, getErrorMessage) {
-  DATFMT_GET(data, this_, null_string);
+  DATFMT_GET(data, this_, String());
   return data->getErrorMessage();
 }
 
@@ -250,18 +250,18 @@ static String HHVM_METHOD(IntlDateFormatter, getLocale, const Variant& which) {
   ULocDataLocaleType whichloc = ULOC_ACTUAL_LOCALE;
   if (!which.isNull()) whichloc = (ULocDataLocaleType)which.toInt64();
 
-  DATFMT_GET(data, this_, null_string);
+  DATFMT_GET(data, this_, String());
   UErrorCode error = U_ZERO_ERROR;
   const char *loc = udat_getLocaleByType(data->datefmt(), whichloc, &error);
   if (U_FAILURE(error)) {
     data->setError(error);
-    return null_string;
+    return String();
   }
   return String(loc, CopyString);
 }
 
 static String HHVM_METHOD(IntlDateFormatter, getPattern) {
-  DATFMT_GET(data, this_, null_string);
+  DATFMT_GET(data, this_, String());
   UErrorCode error = U_ZERO_ERROR;
   int32_t len = udat_toPattern(data->datefmt(), false, nullptr, 0, &error);
   icu::UnicodeString tmp;
@@ -270,13 +270,13 @@ static String HHVM_METHOD(IntlDateFormatter, getPattern) {
   udat_toPattern(data->datefmt(), false, buf, len + 1, &error);
   if (U_FAILURE(error)) {
     data->setError(error, "Error getting formatter pattern");
-    return null_string;
+    return String();
   }
   tmp.releaseBuffer(len);
   String ret(u8(tmp, error));
   if (U_FAILURE(error)) {
     data->setError(error);
-    return null_string;
+    return String();
   }
   return ret;
 }
@@ -294,7 +294,7 @@ static String HHVM_METHOD(IntlDateFormatter, getTimeZoneId) {
   String ret(u8(id, error));
   if (U_FAILURE(error)) {
     data->setError(error, "Could not convert time zone id to UTF-8");
-    return null_string;
+    return String();
   }
   return ret;
 }
@@ -305,14 +305,14 @@ static Object HHVM_METHOD(IntlDateFormatter, getCalendarObject) {
 }
 
 static Object HHVM_METHOD(IntlDateFormatter, getTimeZone) {
-  DATFMT_GET(data, this_, null_object);
+  DATFMT_GET(data, this_, Object());
   const icu::TimeZone& tz = data->datefmtObject()->getTimeZone();
   auto ntz = tz.clone();
   if (!ntz) {
     data->setError(U_MEMORY_ALLOCATION_ERROR,
                    "datefmt_get_timezone: Out of memory "
                    "when cloning time zone");
-    return null_object;
+    return Object();
   }
   return IntlTimeZone::newInstance(ntz, true);
 }

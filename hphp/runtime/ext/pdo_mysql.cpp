@@ -1054,7 +1054,7 @@ bool PDOMySqlStatement::getColumn(int colno, Variant &value) {
   char *ptr; int len;
   if (m_stmt) {
     if (m_out_null[colno]) {
-      value = String();
+      value.setNull();
       return true;
     }
     ptr = (char*)m_bound_result[colno].buffer;

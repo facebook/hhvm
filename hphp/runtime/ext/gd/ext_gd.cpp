@@ -1749,12 +1749,12 @@ static Resource php_open_plain_file(const String& filename, const char *mode,
   Resource resource = File::Open(filename, mode);
   PlainFile *plain_file = resource.getTyped<PlainFile>(true, true);
   if (!plain_file) {
-    return null_resource;
+    return Resource();
   }
   FILE *fp = NULL;
   if (!plain_file || !(fp = plain_file->getStream())) {
     f_fclose(resource);
-    return null_resource;
+    return Resource();
   }
   if (fpp) *fpp = fp;
   return resource;

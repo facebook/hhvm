@@ -802,6 +802,7 @@ public:
   void name##q(IndexedMemoryRef m, Reg64 r) { instrMR(instr, m, r); } \
   void name##l(IndexedMemoryRef m, Reg32 r) { instrMR(instr, m, r); } \
   void name##w(IndexedMemoryRef m, Reg16 r) { instrMR(instr, m, r); } \
+  void name##q(RIPRelativeRef m, Reg64 r) { instrMR(instr, m, r); } \
   BYTE_LOAD_OP(name, instr##b)
 
 #define BYTE_STORE_OP(name, instr)                                    \

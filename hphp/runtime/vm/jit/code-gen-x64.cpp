@@ -2591,13 +2591,11 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
 
   // Load the maybe bound address.
   auto addr = intptr_t(addrPtr);
-  if (int32_t(addr) == addr) {
-    m_as.loadq(baseless(int32_t(addr)), dstReg);
-  } else {
-    // x64 does not support mov addr64, reg
-    m_as.movq(int64_t(addr), dstReg);
-    m_as.loadq(*dstReg, dstReg);
-  }
+  // the tc/global data is intentionally layed out to guarantee
+  // rip-relative addressing will work.
+  // Also, a rip-relative load, is 1 byte smaller than the corresponding
+  // baseless load.
+  m_as.loadq(rip[addr], dstReg);
 }
 
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {

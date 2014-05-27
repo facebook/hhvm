@@ -64,6 +64,7 @@ install_manifest.txt
 /hphp/compiler/Makefile
 /hphp/Makefile
 /Makefile
+/bin
 
 # eclipse files
 .project

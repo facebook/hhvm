@@ -249,7 +249,7 @@ public:
   void registerRequestEventHandler(RequestEventHandler* handler);
   void registerShutdownFunction(const Variant& function, Array arguments,
                                 ShutdownType type);
-  Variant popShutdownFunction(ShutdownType type);
+  bool removeShutdownFunction(const Variant& function, ShutdownType type);
   void onRequestShutdown();
   void onShutdownPreSend();
   void onShutdownPostSend();

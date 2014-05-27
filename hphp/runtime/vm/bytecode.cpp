@@ -4538,6 +4538,16 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     retval.m_type = KindOfObject;
   }
 
+  if (shouldProfile()) {
+    auto f = const_cast<Func*>(m_fp->func());
+    f->incProfCounter();
+    if (!(f->isPseudoMain() || f->isClosureBody() || f->isMagic() ||
+          Func::isSpecial(f->name()))) {
+      recordType(TypeProfileKey(TypeProfileKey::MethodName, f->name()),
+                 retval.m_type);
+    }
+  }
+
   // Type profile return value.
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     profileOneArgument(retval, -1, m_fp->func());
@@ -7413,19 +7423,8 @@ OPCODES
 #undef DECODE_JMP
 #undef DECODE
 
-static inline void
-profileReturnValue(const DataType dt) {
-  const Func* f = liveFunc();
-  if (f->isPseudoMain() || f->isClosureBody() || f->isMagic() ||
-      Func::isSpecial(f->name()))
-    return;
-  recordType(TypeProfileKey(TypeProfileKey::MethodName, f->name()), dt);
-}
-
-template <int dispatchFlags>
+template <bool breakOnCtlFlow>
 inline void ExecutionContext::dispatchImpl() {
-  static const bool breakOnCtlFlow = dispatchFlags & BreakOnCtlFlow;
-  static const bool profile = dispatchFlags & Profile;
   static const void *optabDirect[] = {
 #define O(name, imm, push, pop, flags) \
     &&Label##name,
@@ -7478,10 +7477,6 @@ inline void ExecutionContext::dispatchImpl() {
     ONTRACE(1,                                                          \
             Trace::trace("dispatch: %d: %s\n", pcOff(this),             \
                          nametab[uint8_t(op)]));                        \
-    if (profile && (op == OpRetC || op == OpRetV)) {                    \
-      const_cast<Func*>(liveFunc())->incProfCounter();                  \
-      profileReturnValue(m_stack.top()->m_type);                        \
-    }                                                                   \
     goto *optab[uint8_t(op)];                                           \
 } while (0)
 
@@ -7521,11 +7516,7 @@ inline void ExecutionContext::dispatchImpl() {
 }
 
 void ExecutionContext::dispatch() {
-  if (shouldProfile()) {
-    dispatchImpl<Profile>();
-  } else {
-    dispatchImpl<0>();
-  }
+  dispatchImpl<false>();
 }
 
 // We are about to go back to translated code, check whether we should
@@ -7545,7 +7536,7 @@ void ExecutionContext::dispatchBB() {
     Stats::incStatGrouped(cat, name, 1);
   }
 
-  dispatchImpl<BreakOnCtlFlow>();
+  dispatchImpl<true>();
   switchModeForDebugger();
 }
 

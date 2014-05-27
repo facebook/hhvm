@@ -693,14 +693,10 @@ public:
   void op##name();
 OPCODES
 #undef O
-  enum DispatchFlags {
-    BreakOnCtlFlow = 1 << 0,
-    Profile        = 1 << 1
-  };
-  template <int dispatchFlags>
+  template <bool breakOnCtlFlow>
   void dispatchImpl();
   void dispatch();
-  // dispatchBB() tries to run until a control-flow instruction has been run.
+  // dispatchBB() exits if a control-flow instruction has been run.
   void dispatchBB();
 
 public:

@@ -243,7 +243,7 @@ static Variant fail(bool return_null, const Variant& options) {
     }
   }
   if (return_null) {
-    return uninit_null();
+    return init_null();
   }
   return false;
 }

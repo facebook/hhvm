@@ -126,7 +126,7 @@ Variant f_fb_serialize(const Variant& thing) {
     s.setSize(len);
     return s;
   } catch (const HPHP::serialize::SerializeError&) {
-    return null_variant;
+    return init_null();
   }
 }
 
@@ -463,7 +463,7 @@ Variant f_fb_compact_serialize(const Variant& thing) {
 
   StringBuffer sb;
   if (fb_compact_serialize_variant(sb, thing, 0)) {
-    return uninit_null();
+    return init_null();
   }
 
   return sb.detach();

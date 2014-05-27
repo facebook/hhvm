@@ -768,7 +768,7 @@ Variant f_sscanf(int _argc,
   Variant ret;
   int result;
   result = string_sscanf(str.c_str(), format.c_str(), _argv.size(), ret);
-  if (SCAN_ERROR_WRONG_PARAM_COUNT == result) return uninit_null();
+  if (SCAN_ERROR_WRONG_PARAM_COUNT == result) return init_null();
   if (_argv.empty()) return ret;
 
   if (ret.isArray()) {
@@ -1124,14 +1124,14 @@ Variant f_strlen(const Variant& vstr) {
     return Variant(cell->m_data.pstr->size());
   case KindOfArray:
     raise_warning("strlen() expects parameter 1 to be string, array given");
-    return uninit_null();
+    return init_null();
   case KindOfResource:
     raise_warning("strlen() expects parameter 1 to be string, resource given");
-    return uninit_null();
+    return init_null();
   case KindOfObject:
     if (!HHVM_FN(method_exists)(vstr, "__toString")) {
       raise_warning("strlen() expects parameter 1 to be string, object given");
-      return uninit_null();
+      return init_null();
     } //else fallback to default
   default:
     const String& str = vstr.toString();

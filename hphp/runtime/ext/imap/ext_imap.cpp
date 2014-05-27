@@ -1146,7 +1146,7 @@ static Variant HHVM_FUNCTION(imap_last_error, ) {
       return String((const char *)cur->text.data, CopyString);
     }
   }
-  return uninit_null();
+  return init_null();
 }
 
 static Variant HHVM_FUNCTION(imap_list, const Resource& imap_stream,

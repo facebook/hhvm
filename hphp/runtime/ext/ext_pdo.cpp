@@ -767,7 +767,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
   _argc = _argv.size() + 1;
 
   if (stmt->default_fetch_type == PDO_FETCH_INTO) {
-    stmt->fetch.into = Variant();
+    stmt->fetch.into.unset();
   }
   stmt->default_fetch_type = PDO_FETCH_BOTH;
 
@@ -838,7 +838,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
     }
 
     if (retval) {
-      stmt->fetch.ctor_args = Variant();
+      stmt->fetch.ctor_args.unset();
       if (_argc == 3) {
         if (!_argv[1].isNull() && !_argv[1].isArray()) {
           pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
@@ -1369,7 +1369,7 @@ Variant c_PDO::t_errorcode() {
   }
 
   if (m_dbh->error_code[0] == '\0') {
-    return uninit_null();
+    return init_null();
   }
 
   /**
@@ -1421,7 +1421,7 @@ Variant c_PDO::t_query(int _argc, const String& sql, const Array& _argv) {
     pdo_raise_impl_error
       (m_dbh, nullptr, "HY000",
        "failed to instantiate user supplied statement class");
-    return uninit_null();
+    return init_null();
   }
   c_PDOStatement *pdostmt = ret.getTyped<c_PDOStatement>();
 
@@ -1434,7 +1434,7 @@ Variant c_PDO::t_query(int _argc, const String& sql, const Array& _argv) {
     stmt->default_fetch_type = m_dbh->default_fetch_type;
     stmt->active_query_string = stmt->query_string;
     stmt->dbh = m_dbh;
-    stmt->lazy_object_ref = uninit_null();
+    stmt->lazy_object_ref.unset();
 
     strcpy(stmt->error_code, PDO_ERR_NONE);
 
@@ -1509,13 +1509,13 @@ bool c_PDO::t_sqlitecreateaggregate(const String& name,
 Variant c_PDO::t___wakeup() {
   throw_pdo_exception(uninit_null(), uninit_null(),
                       "You cannot serialize or unserialize PDO instances");
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_PDO::t___sleep() {
   throw_pdo_exception(uninit_null(), uninit_null(),
                       "You cannot serialize or unserialize PDO instances");
-  return uninit_null();
+  return init_null();
 }
 
 Array c_PDO::ti_getavailabledrivers() {
@@ -1678,7 +1678,7 @@ static bool really_register_bound_param(PDOBoundParam *param,
       } else {
         hash.remove(param->paramno);
       }
-      param->parameter = Variant();
+      param->parameter.unset();
       return false;
     }
   }
@@ -1698,7 +1698,7 @@ static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
     case PDO_PARAM_INT:  dest = dest.toInt64();   break;
     case PDO_PARAM_BOOL: dest = dest.toBoolean(); break;
     case PDO_PARAM_STR:  dest = dest.toString();  break;
-    case PDO_PARAM_NULL: dest = uninit_null();             break;
+    case PDO_PARAM_NULL: dest = init_null();      break;
     }
   }
   if (stmt->dbh->stringify && (dest.isInteger() || dest.isDouble())) {
@@ -1734,7 +1734,7 @@ static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
       PDOBoundParam *param =
         iter.second().toResource().getTyped<PDOBoundParam>();
       if (param->paramno >= 0) {
-        param->parameter = Variant();
+        param->parameter.unset();
         /* set new value */
         fetch_value(stmt, param->parameter, param->paramno,
                     (int *)&param->param_type);
@@ -2070,7 +2070,7 @@ static int register_bound_param(const Variant& paramno, VRefParam param, int64_t
   }
 
   if (!really_register_bound_param(p.get(), stmt, is_param)) {
-    p->parameter = Variant();
+    p->parameter.unset();
     return false;
   }
   return true;
@@ -2947,7 +2947,7 @@ int64_t c_PDOStatement::t_rowcount() {
 
 Variant c_PDOStatement::t_errorcode() {
   if (m_stmt->error_code[0] == '\0') {
-    return uninit_null();
+    return init_null();
   }
   return String(m_stmt->error_code, CopyString);
 }
@@ -3162,13 +3162,13 @@ Variant c_PDOStatement::t_next() {
   } else {
     ++m_rowIndex;
   }
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_PDOStatement::t_rewind() {
   m_rowIndex = -1;
   t_next();
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_PDOStatement::t_valid() {
@@ -3178,13 +3178,13 @@ Variant c_PDOStatement::t_valid() {
 Variant c_PDOStatement::t___wakeup() {
   throw_pdo_exception(uninit_null(), uninit_null(), "You cannot serialize or unserialize "
                       "PDOStatement instances");
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_PDOStatement::t___sleep() {
   throw_pdo_exception(uninit_null(), uninit_null(), "You cannot serialize or unserialize "
                       "PDOStatement instances");
-  return uninit_null();
+  return init_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

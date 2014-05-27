@@ -162,7 +162,7 @@ Variant static memcache_fetch_from_storage(const char *payload,
 
   if (flags & MMC_COMPRESSED) {
     raise_warning("Unable to handle compressed values yet");
-    return uninit_null();
+    return init_null();
   }
 
   if (flags & MMC_SERIALIZED) {
@@ -568,7 +568,7 @@ bool c_Memcache::t_addserver(const String& host, int port /* = 11211 */,
 
 Variant c_Memcache::t___destruct() {
   t_close();
-  return uninit_null();
+  return init_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

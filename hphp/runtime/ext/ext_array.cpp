@@ -204,7 +204,7 @@ Variant f_array_combine(const Variant& keys, const Variant& values) {
   if (UNLIKELY(!isContainer(cell_keys) || !isContainer(cell_values))) {
     raise_warning("Invalid operand type was used: array_combine expects "
                   "arrays or collections");
-    return uninit_null();
+    return init_null();
   }
   auto keys_size = getContainerSize(cell_keys);
   if (UNLIKELY(keys_size != getContainerSize(cell_values))) {
@@ -235,7 +235,7 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
   if (UNLIKELY(!isContainer(cell_keys))) {
     raise_warning("Invalid operand type was used: array_fill_keys expects "
                   "an array or collection");
-    return uninit_null();
+    return init_null();
   }
 
   auto size = getContainerSize(cell_keys);
@@ -288,7 +288,7 @@ Variant f_array_flip(const Variant& trans) {
   if (UNLIKELY(!isContainer(transCell))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection", __FUNCTION__+2);
-    return uninit_null();
+    return init_null();
   }
 
   ArrayInit ret(getContainerSize(transCell), ArrayInit::Mixed{});
@@ -354,7 +354,7 @@ Variant f_array_keys(const Variant& input, const Variant& search_value /* = null
   if (UNLIKELY(!isContainer(cell_input))) {
     raise_warning("array_keys() expects parameter 1 to be an array "
                   "or collection");
-    return uninit_null();
+    return init_null();
   }
 
   if (LIKELY(!search_value.isInitialized())) {
@@ -385,7 +385,7 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
   const auto& cell_arr1 = *arr1.asCell();
   if (UNLIKELY(!isContainer(cell_arr1))) {
     raise_warning("array_map(): Argument #2 should be an array or collection");
-    return uninit_null();
+    return init_null();
   }
   if (LIKELY(_argv.empty())) {
     // Handle the common case where the caller passed two
@@ -519,7 +519,7 @@ Variant f_array_merge(int _argc, const Variant& array1,
     Variant v = iter.second();
     if (!v.isArray()) {
       throw_expected_array_exception();
-      return uninit_null();
+      return init_null();
     }
     const Array& arr_v = v.asCArrRef();
     php_array_merge(ret, arr_v);
@@ -546,7 +546,7 @@ Variant f_array_merge_recursive(int _argc, const Variant& array1,
     Variant v = iter.second();
     if (!v.isArray()) {
       throw_expected_array_exception();
-      return uninit_null();
+      return init_null();
     }
     const Array& arr_v = v.asCArrRef();
     php_array_merge_recursive(seen, false, ret, arr_v);
@@ -655,10 +655,10 @@ Variant f_array_pop(VRefParam containerRef) {
     raise_warning(
       "%s() expects parameter 1 to be an array or mutable collection",
       __FUNCTION__+2 /* remove the "f_" prefix */);
-    return uninit_null();
+    return init_null();
   }
   if (!getContainerSize(containerRef)) {
-    return uninit_null();
+    return init_null();
   }
   if (container->m_type == KindOfArray) {
     return containerRef.wrapped().toArrRef().pop();
@@ -673,7 +673,7 @@ Variant f_array_pop(VRefParam containerRef) {
     default:                     break;
   }
   assert(false);
-  return uninit_null();
+  return init_null();
 }
 
 Variant f_array_product(const Variant& array) {
@@ -733,7 +733,7 @@ Variant f_array_push(int _argc, VRefParam container,
   }
 
   throw_expected_array_or_collection_exception();
-  return uninit_null();
+  return init_null();
 }
 
 Variant f_array_rand(const Variant& input, int num_req /* = 1 */) {
@@ -755,7 +755,7 @@ Variant f_array_reduce(const Variant& input, const Variant& callback,
   CallerFrame cf;
   vm_decode_function(callback, cf(), false, ctx);
   if (ctx.func == NULL) {
-    return uninit_null();
+    return init_null();
   }
   return ArrayUtil::Reduce(arr_input, reduce_func, &ctx, initial);
 }
@@ -767,7 +767,7 @@ Variant f_array_reverse(const Variant& input, bool preserve_keys /* = false */) 
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection as argument 1",
                   __FUNCTION__+2);
-    return uninit_null();
+    return init_null();
   }
 
   if (LIKELY(cell_input.m_type == KindOfArray)) {
@@ -790,7 +790,7 @@ Variant f_array_shift(VRefParam array) {
     raise_warning(
       "%s() expects parameter 1 to be an array or mutable collection",
       __FUNCTION__+2 /* remove the "f_" prefix */);
-    return uninit_null();
+    return init_null();
   }
   if (cell_array->m_type == KindOfArray) {
     return array.wrapped().toArrRef().dequeue();
@@ -801,24 +801,24 @@ Variant f_array_shift(VRefParam array) {
   switch (obj->getCollectionType()) {
     case Collection::VectorType: {
       auto* vec = static_cast<c_Vector*>(obj);
-      if (!vec->size()) return uninit_null();
+      if (!vec->size()) return init_null();
       return vec->popFront();
     }
     case Collection::MapType: {
       auto* mp = static_cast<BaseMap*>(obj);
-      if (!mp->size()) return uninit_null();
+      if (!mp->size()) return init_null();
       return mp->popFront();
     }
     case Collection::SetType: {
       auto* st = static_cast<c_Set*>(obj);
-      if (!st->size()) return uninit_null();
+      if (!st->size()) return init_null();
       return st->popFront();
     }
     default: {
       raise_warning(
         "%s() expects parameter 1 to be an array or mutable collection",
         __FUNCTION__+2 /* remove the "f_" prefix */);
-      return uninit_null();
+      return init_null();
     }
   }
 }
@@ -831,7 +831,7 @@ Variant f_array_slice(const Variant& input, int offset,
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection as argument 1",
                   __FUNCTION__+2);
-    return uninit_null();
+    return init_null();
   }
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
 
@@ -897,7 +897,7 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
   if (UNLIKELY(!isContainer(*cell_array))) {
     raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
                   __FUNCTION__+2 /* remove the "f_" prefix */);
-    return uninit_null();
+    return init_null();
   }
   if (cell_array->m_type == KindOfArray) {
     if (array.toArray()->isVectorData()) {
@@ -967,7 +967,7 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
     default: {
       raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
                     __FUNCTION__+2 /* remove the "f_" prefix */);
-      return uninit_null();
+      return init_null();
     }
   }
 }
@@ -977,7 +977,7 @@ Variant f_array_values(const Variant& input) {
   if (!isContainer(cell_input)) {
     raise_warning("array_values() expects parameter 1 to be an array "
                   "or collection");
-    return uninit_null();
+    return init_null();
   }
   PackedArrayInit ai(getContainerSize(cell_input));
   for (ArrayIter iter(cell_input); iter; ++iter) {
@@ -1235,7 +1235,7 @@ Variant f_array_search(const Variant& needle, const Variant& haystack,
   if (UNLIKELY(!isContainer(cell_haystack))) {
     raise_warning("array_search() expects parameter 2 to be an array "
                   "or collection");
-    return uninit_null();
+    return init_null();
   }
 
   ArrayIter iter(cell_haystack);
@@ -1405,7 +1405,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
     raise_warning("%s() expects parameter %d to be an array or collection", \
                   __FUNCTION__+2, /* remove the "f_" prefix */ \
                   isContainer(c1) ? 2 : 1); \
-    return uninit_null(); \
+    return init_null(); \
   } \
   bool moreThanTwo = (_argc > 2); \
   size_t largestSize = getContainerSize(c2); \
@@ -1417,7 +1417,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
         raise_warning("%s() expects parameter %d to be an array or collection",\
                       __FUNCTION__+2, /* remove the "f_" prefix */ \
                       pos); \
-        return uninit_null(); \
+        return init_null(); \
       } \
       size_t sz = getContainerSize(c); \
       if (sz > largestSize) { \
@@ -1773,7 +1773,7 @@ static void containerKeysIntersectHelper(c_Set* st,
     raise_warning("%s() expects parameter %d to be an array or collection", \
                   __FUNCTION__+2, /* remove the "f_" prefix */ \
                   isContainer(c1) ? 2 : 1); \
-    return uninit_null(); \
+    return init_null(); \
   } \
   bool moreThanTwo = (_argc > 2); \
   /* Keep track of which input container was the smallest (excluding \
@@ -1788,7 +1788,7 @@ static void containerKeysIntersectHelper(c_Set* st,
         raise_warning("%s() expects parameter %d to be an array or collection",\
                       __FUNCTION__+2, /* remove the "f_" prefix */ \
                       pos+2); \
-        return uninit_null(); \
+        return init_null(); \
       } \
       size_t sz = getContainerSize(c); \
       if (sz < smallestSize) { \

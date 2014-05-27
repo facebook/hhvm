@@ -565,7 +565,7 @@ Variant ScalarExpression::getVariant() const {
     default:
       not_reached();
   }
-  return uninit_null();
+  return init_null();
 }
 
 bool ScalarExpression::getString(const std::string *&s) const {

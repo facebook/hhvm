@@ -272,7 +272,7 @@ Variant CreateVarForUncountedArray(const Variant& source) {
       return source.getDouble();
     case KindOfUninit:
     case KindOfNull:
-      return null_variant;
+      return init_null();
     case KindOfStaticString:
       return source.getStringData();
 
@@ -292,7 +292,7 @@ Variant CreateVarForUncountedArray(const Variant& source) {
     default:
       assert(false); // type not allowed
   }
-  return null_variant;
+  return init_null();
 }
 
 }

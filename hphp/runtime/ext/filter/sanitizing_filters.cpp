@@ -182,7 +182,7 @@ Variant php_filter_string(PHP_INPUT_FILTER_PARAM_DECL) {
 
   if (len == 0) {
     if (flags & k_FILTER_FLAG_EMPTY_STRING_NULL) {
-      return uninit_null();
+      return init_null();
     }
     return empty_string;
   }
@@ -253,7 +253,7 @@ Variant php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL) {
 
     return php_filter_encode_html(stripped.toString(), enc);
   } else if (flags & k_FILTER_FLAG_EMPTY_STRING_NULL && value.length() == 0) {
-    return uninit_null();
+    return init_null();
   }
   return value;
 }

@@ -2503,10 +2503,8 @@ void EmitterVisitor::visit(FileScopePtr file) {
               v = String(makeStaticString(v.asCStrRef().get()));
             } else if (v.isArray()) {
               v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
-            } else if (v.isNull()) {
-              // getScalarValue() sets this to uninit_null, so lets set it back
-              v = init_null_variant;
             } else {
+              assert(v.isInitialized());
               assert(!IS_REFCOUNTED_TYPE(v.getType()));
             }
             mainReturn = *v.asCell();

@@ -90,7 +90,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 
   if (json.empty()) {
-    return uninit_null();
+    return init_null();
   }
 
   const int64_t supported_options =
@@ -107,7 +107,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
   if (json.size() == 4) {
     if (!strcasecmp(json.data(), "null")) {
       json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
-      return uninit_null();
+      return init_null();
     }
     if (!strcasecmp(json.data(), "true")) {
       json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
@@ -158,7 +158,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
   }
 
   assert(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);
-  return uninit_null();
+  return init_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

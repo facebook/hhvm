@@ -141,7 +141,7 @@ static Variant HHVM_METHOD(IntlBreakIterator, getText) {
   FETCH_BI(data, this_, false);
   auto text = data->text();
   if (text.empty()) {
-    return uninit_null();
+    return init_null();
   }
   return text;
 }

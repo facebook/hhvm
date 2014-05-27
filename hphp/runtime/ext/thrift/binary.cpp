@@ -96,20 +96,20 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
   switch (thrift_typeID) {
     case T_STOP:
     case T_VOID:
-      return uninit_null();
+      return init_null();
     case T_STRUCT: {
       Variant val;
       if ((val = fieldspec.rvalAt(PHPTransport::s_class)).isNull()) {
         throw_tprotocolexception("no class type in spec", INVALID_DATA);
         skip_element(T_STRUCT, transport);
-        return uninit_null();
+        return init_null();
       }
       String structType = val.toString();
       ret = createObject(structType);
       if (ret.isNull()) {
         // unable to create class entry
         skip_element(T_STRUCT, transport);
-        return uninit_null();
+        return init_null();
       }
       Variant spec = HHVM_FN(hphp_get_static_property)(structType, s_TSPEC,
                                                                    false);
@@ -118,7 +118,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         snprintf(errbuf, 128, "spec for %s is wrong type: %d\n",
                  structType.data(), ret.getType());
         throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
-        return uninit_null();
+        return init_null();
       }
       binary_deserialize_spec(ret.toObject(), transport, spec.toArray());
       return ret;
@@ -281,7 +281,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
   char errbuf[128];
   sprintf(errbuf, "Unknown thrift typeID %d", thrift_typeID);
   throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
-  return uninit_null();
+  return init_null();
 }
 
 void skip_element(long thrift_typeID, PHPInputTransport& transport) {

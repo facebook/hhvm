@@ -44,7 +44,7 @@ void php_global_set(const StaticString&, Variant);
  *
  * For example:
  *
- *     auto arr = php_global_exchange(s_MyKey, Variant());
+ *     auto arr = php_global_exchange(s_MyKey, uninit_null());
  *     arr.set(123, "foo");
  *     php_globals_set(s_MyKey, std::move(arr));
  */

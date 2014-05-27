@@ -584,7 +584,7 @@ void const_load_impl(struct cache_info *info,
         switch (*v++) {
         case 0: value = false; break;
         case 1: value = true; break;
-        case 2: value = uninit_null(); break;
+        case 2: value = init_null(); break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }

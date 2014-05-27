@@ -440,7 +440,7 @@ static Variant HHVM_METHOD(ZipArchive, getProperty, int64_t property) {
       case 4:
         return "";
       default:
-        return null_variant;
+        return init_null();
     }
   }
 
@@ -473,7 +473,7 @@ static Variant HHVM_METHOD(ZipArchive, getProperty, int64_t property) {
       return String(comment, len, CopyString);
     }
     default:
-      return null_variant;
+      return init_null();
   }
 }
 
@@ -1264,7 +1264,7 @@ static Variant HHVM_FUNCTION(zip_close, const Resource& zip) {
 
   zipDir->close();
 
-  return null_variant;
+  return init_null();
 }
 
 static bool HHVM_FUNCTION(zip_entry_close, const Resource& zip_entry) {

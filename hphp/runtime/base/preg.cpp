@@ -559,7 +559,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
                     subpats_order > PREG_SET_ORDER)) ||
         (!global && subpats_order != 0)) {
       raise_warning("Invalid flags specified");
-      return null_variant;
+      return init_null();
     }
   }
 
@@ -1118,7 +1118,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());
-      return null_variant;
+      return init_null();
     }
 
     return ret;
@@ -1132,7 +1132,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                      callable, limit, replace_count);
       if (ret.isBoolean()) {
         assert(!ret.toBoolean());
-        return null_variant;
+        return init_null();
       }
       if (!ret.isString()) {
         return ret;
@@ -1161,7 +1161,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());
-      return null_variant;
+      return init_null();
     }
     if (!ret.isString()) {
       return ret;
@@ -1194,7 +1194,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
     if (ret.isString()) {
       count = replace_count;
       if (is_filter && replace_count == 0) {
-        return null_variant;
+        return init_null();
       } else {
         return ret.asStrRef();
       }

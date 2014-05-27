@@ -317,7 +317,7 @@ Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_cha
     xmlFree(retchar);
     return ret;
   } else {
-    return uninit_null();
+    return init_null();
   }
 }
 
@@ -335,7 +335,7 @@ Variant c_XMLReader::t_getattributeno(int64_t index) {
     xmlFree(retchar);
     return ret;
   } else {
-    return uninit_null();
+    return init_null();
   }
 }
 
@@ -357,7 +357,7 @@ Variant c_XMLReader::t_getattributens(const String& name, const String& namespac
     xmlFree(retchar);
     return ret;
   } else {
-    return uninit_null();
+    return init_null();
   }
 }
 
@@ -561,7 +561,7 @@ Variant c_XMLReader::t___get(Variant name) {
   PropertyAccessor *propertyMap = xmlreader_properties_map.get(name);
   if (!propertyMap) {
     raiseUndefProp(name.getStringData());
-    return uninit_null();
+    return init_null();
   }
 
   if (m_ptr) {
@@ -586,9 +586,9 @@ Variant c_XMLReader::t___get(Variant name) {
       return retint;
 
     default:
-      return uninit_null();
+      return init_null();
   }
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_XMLReader::t_expand(const Object& basenode /* = null */) {
@@ -628,7 +628,7 @@ Variant c_XMLReader::t_expand(const Object& basenode /* = null */) {
 }
 
 Variant c_XMLReader::t___destruct() {
-  return uninit_null();
+  return init_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1643,7 +1643,7 @@ public:
 
       return ret;
     }
-    return uninit_null();
+    return init_null();
   }
 
   /**
@@ -1685,7 +1685,7 @@ Variant f_hotprofiler_disable() {
 #ifdef HOTPROFILER
   return s_factory->stop();
 #else
-  return uninit_null();
+  return init_null();
 #endif
 }
 
@@ -1699,7 +1699,7 @@ Variant f_phprof_disable() {
 #ifdef HOTPROFILER
   return s_factory->stop();
 #else
-  return uninit_null();
+  return init_null();
 #endif
 }
 
@@ -1764,7 +1764,7 @@ Variant f_xhprof_disable() {
 #ifdef HOTPROFILER
   return s_factory->stop();
 #else
-  return uninit_null();
+  return init_null();
 #endif
 }
 
@@ -1786,7 +1786,7 @@ Variant f_xhprof_sample_disable() {
 #ifdef HOTPROFILER
   return s_factory->stop();
 #else
-  return uninit_null();
+  return init_null();
 #endif
 }
 

@@ -19,7 +19,7 @@ static Variant extractValue(ResourceBundle* data,
 #define EXTRACT_ERR(type) \
   if (U_FAILURE(error)) { \
     data->setError(error, "Failed to retreive " #type " value"); \
-    return uninit_null(); \
+    return init_null(); \
   }
 
   UErrorCode error = U_ZERO_ERROR;
@@ -31,7 +31,7 @@ static Variant extractValue(ResourceBundle* data,
       String ret8(u8(ret, error));
       if (U_FAILURE(error)) {
         data->setError(error, "Failed converting value to utf-8");
-        return uninit_null();
+        return init_null();
       }
       return ret8;
     }
@@ -61,7 +61,7 @@ static Variant extractValue(ResourceBundle* data,
       return ResourceBundle::newInstance(new icu::ResourceBundle(bundle));
     default:
       data->setError(U_ILLEGAL_ARGUMENT_ERROR, "Unknown resource type");
-      return uninit_null();
+      return init_null();
   }
 #undef EXTRACT_ERR
 }
@@ -125,19 +125,19 @@ static Variant HHVM_METHOD(ResourceBundle, get,
     if (U_FAILURE(error)) {
       data->setError(error, "Cannot load resource element %d",
                             (int)index.toInt64());
-      return uninit_null();
+      return init_null();
     }
   } else if (index.isString()) {
     child = data->resource()->get(index.toString().c_str(), error);
     if (U_FAILURE(error)) {
       data->setError(error, "Cannot load resource element '%s'",
                             index.toString().c_str());
-      return uninit_null();
+      return init_null();
     }
   } else {
     data->setError(U_ILLEGAL_ARGUMENT_ERROR,
                    "resourcebundle_get: index should be integer or string");
-    return uninit_null();
+    return init_null();
   }
 
   if (!fallback &&
@@ -154,7 +154,7 @@ static Variant HHVM_METHOD(ResourceBundle, get,
                      "Cannot load element %s without fallback from to %s",
                      index.toString().c_str(), locale.getName());
     }
-    return uninit_null();
+    return init_null();
   }
 
   return extractValue(data, child);
@@ -188,7 +188,7 @@ static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
 static Variant HHVM_METHOD(ResourceBundle, current) {
   FETCH_RSRC(data, this_);
   if (!data->iterValid()) {
-    return uninit_null();
+    return init_null();
   }
   UErrorCode error = U_ZERO_ERROR;
   return extractValue(data, data->iterCurrent(error));
@@ -197,7 +197,7 @@ static Variant HHVM_METHOD(ResourceBundle, current) {
 static Variant HHVM_METHOD(ResourceBundle, key) {
   FETCH_RSRC(data, this_);
   if (!data->iterValid()) {
-    return uninit_null();
+    return init_null();
   }
   return data->iterKey();
 }
@@ -205,7 +205,7 @@ static Variant HHVM_METHOD(ResourceBundle, key) {
 static Variant HHVM_METHOD(ResourceBundle, next) {
   FETCH_RSRC(data, this_);
   if (!data->iterNext()) {
-    return uninit_null();
+    return init_null();
   }
   UErrorCode error = U_ZERO_ERROR;
   return extractValue(data, data->iterCurrent(error));
@@ -215,7 +215,7 @@ static Variant HHVM_METHOD(ResourceBundle, rewind) {
   FETCH_RSRC(data, this_);
   data->iterRewind();
   if (!data->iterValid()) {
-    return uninit_null();
+    return init_null();
   }
   UErrorCode error = U_ZERO_ERROR;
   return extractValue(data, data->iterCurrent(error));

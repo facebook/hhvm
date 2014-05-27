@@ -152,7 +152,7 @@ static void getMethodNamesImpl(const Class* cls,
 
 Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto const cls = get_cls(class_or_object);
-  if (!cls) return null_variant;
+  if (!cls) return init_null();
   VMRegAnchor _;
 
   auto retVal = Array::attach(MixedArray::MakeReserve(cls->numMethods()));

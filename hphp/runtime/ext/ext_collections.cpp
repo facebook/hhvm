@@ -1128,7 +1128,7 @@ Variant c_ImmVector::t_firstvalue() {
 }
 
 Variant BaseVector::php_firstValue() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   return tvAsCVarRef(&m_data[0]);
 }
 
@@ -1141,7 +1141,7 @@ Variant c_ImmVector::t_firstkey() {
 }
 
 Variant BaseVector::php_firstKey() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   return 0;
 }
 
@@ -1154,7 +1154,7 @@ Variant c_ImmVector::t_lastvalue() {
 }
 
 Variant BaseVector::php_lastValue() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   return tvAsCVarRef(&m_data[m_size - 1]);
 }
 
@@ -1167,7 +1167,7 @@ Variant c_ImmVector::t_lastkey() {
 }
 
 Variant BaseVector::php_lastKey() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   return (int64_t)m_size - 1;
 }
 
@@ -1770,7 +1770,7 @@ Variant BaseMap::php_at(const Variant& key) const {
     return tvAsCVarRef(at(key.getStringData()));
   }
   throwBadKeyType();
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_ImmMap::t_at(const Variant& key) { return php_at(key); }
@@ -1783,18 +1783,18 @@ Variant BaseMap::php_get(const Variant& key) const {
     if (tv) {
       return tvAsCVarRef(tv);
     } else {
-      return uninit_null();
+      return init_null();
     }
   } else if (key.isString()) {
     TypedValue* tv = get(key.getStringData());
     if (tv) {
       return tvAsCVarRef(tv);
     } else {
-      return uninit_null();
+      return init_null();
     }
   }
   throwBadKeyType();
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_ImmMap::t_get(const Variant& key) { return php_get(key); }
@@ -2474,7 +2474,7 @@ Variant c_ImmMap::t_firstvalue() {
 }
 
 Variant BaseMap::php_firstValue() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   auto* e = firstElm();
   assert(e != elmLimit());
   return tvAsCVarRef(&e->data);
@@ -2489,7 +2489,7 @@ Variant c_ImmMap::t_firstkey() {
 }
 
 Variant BaseMap::php_firstKey() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   auto* e = firstElm();
   assert(e != elmLimit());
   if (e->hasIntKey()) {
@@ -2508,7 +2508,7 @@ Variant c_ImmMap::t_lastvalue() {
 }
 
 Variant BaseMap::php_lastValue() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   // TODO Task# 4281431: If nthElmPos(n) is optimized to
   // walk backward from the end when n > m_size/2, then
   // we could use that here instead of having to use a
@@ -2530,7 +2530,7 @@ Variant c_ImmMap::t_lastkey() {
 }
 
 Variant BaseMap::php_lastKey() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   // TODO Task# 4281431: If nthElmPos(n) is optimized to
   // walk backward from the end when n > m_size/2, then
   // we could use that here instead of having to use a
@@ -5118,7 +5118,7 @@ Variant c_ImmSet::t_firstvalue() {
 }
 
 Variant BaseSet::php_firstValue() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   auto* e = firstElm();
   assert(e != elmLimit());
   return tvAsCVarRef(&e->data);
@@ -5133,7 +5133,7 @@ Variant c_ImmSet::t_lastvalue() {
 }
 
 Variant BaseSet::php_lastValue() {
-  if (!m_size) return uninit_null();
+  if (!m_size) return init_null();
   // TODO Task# 4281431: If nthElmPos(n) is optimized to
   // walk backward from the end when n > m_size/2, then
   // we could use that here instead of having to use a
@@ -5435,7 +5435,7 @@ Variant c_Pair::t_get(const Variant& key) {
     if (tv) {
       return Variant(tvAsCVarRef(tv), Variant::CellDup());
     } else {
-      return Variant();
+      return init_null();
     }
   }
   throwBadKeyType();

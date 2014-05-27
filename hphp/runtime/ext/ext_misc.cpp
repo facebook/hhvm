@@ -198,7 +198,7 @@ static Class* getClassByName(const char* name, int len) {
 }
 
 Variant f_constant(const String& name) {
-  if (!name.get()) return uninit_null();
+  if (!name.get()) return init_null();
   const char *data = name.data();
   int len = name.length();
 
@@ -221,7 +221,7 @@ Variant f_constant(const String& name) {
     if (cns) return tvAsCVarRef(cns);
   }
 
-  return uninit_null();
+  return init_null();
 }
 
 bool f_define(const String& name, const Variant& value,

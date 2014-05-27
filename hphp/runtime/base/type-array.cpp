@@ -414,7 +414,7 @@ void Array::escalate() {
 
 Variant Array::rvalAt(int key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get((int64_t)key, flags & AccessFlags::Error);
-  return null_variant;
+  return init_null();
 }
 
 const Variant& Array::rvalAtRef(int key, ACCESSPARAMS_IMPL) const {
@@ -424,7 +424,7 @@ const Variant& Array::rvalAtRef(int key, ACCESSPARAMS_IMPL) const {
 
 Variant Array::rvalAt(int64_t key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get(key, flags & AccessFlags::Error);
-  return null_variant;
+  return init_null();
 }
 
 const Variant& Array::rvalAtRef(int64_t key, ACCESSPARAMS_IMPL) const {
@@ -693,7 +693,7 @@ Variant Array::pop() {
     if (newarr != m_px) ArrayBase::operator=(newarr);
     return ret;
   }
-  return null_variant;
+  return init_null();
 }
 
 Variant Array::dequeue() {
@@ -703,7 +703,7 @@ Variant Array::dequeue() {
     if (newarr != m_px) ArrayBase::operator=(newarr);
     return ret;
   }
-  return null_variant;
+  return init_null();
 }
 
 void Array::prepend(const Variant& v) {

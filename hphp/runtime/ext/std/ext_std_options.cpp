@@ -197,7 +197,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
     throw Assertion();
   }
 
-  return uninit_null();
+  return init_null();
 }
 
 static int64_t HHVM_FUNCTION(dl, const String& library) {
@@ -865,7 +865,7 @@ const StaticString s_m("m");
 Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
   struct utsname buf;
   if (uname((struct utsname *)&buf) == -1) {
-    return uninit_null();
+    return init_null();
   }
 
   if (mode == s_s) {
@@ -1139,7 +1139,7 @@ Variant HHVM_FUNCTION(version_compare,
       !strncmp(op, "ne", op_len)) {
     return compare != 0;
   }
-  return uninit_null();
+  return init_null();
 }
 
 static bool HHVM_FUNCTION(gc_enabled) {

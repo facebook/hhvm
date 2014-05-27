@@ -92,7 +92,7 @@ bool register_intercept(const String& name, const Variant& callback, const Varia
   StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
   if (!callback.toBoolean()) {
     if (name.empty()) {
-      s_intercept_data->m_global_handler = Variant();
+      s_intercept_data->m_global_handler.unset();
       handlers.clear();
     } else {
       handlers.erase(name);

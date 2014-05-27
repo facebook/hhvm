@@ -1008,7 +1008,7 @@ public:
       if (has_value) {
         vu.set(p, endptr);
         try {
-          auto sess = php_global_exchange(s__SESSION, Variant());
+          auto sess = php_global_exchange(s__SESSION, init_null());
           forceToArray(sess).set(key, vu.unserialize());
           php_global_set(s__SESSION, std::move(sess));
           p = vu.head();
@@ -1072,7 +1072,7 @@ public:
       if (has_value) {
         vu.set(q, endptr);
         try {
-          auto sess = php_global_exchange(s__SESSION, Variant());
+          auto sess = php_global_exchange(s__SESSION, init_null());
           forceToArray(sess).set(key, vu.unserialize());
           php_global_set(s__SESSION, std::move(sess));
           q = vu.head();
@@ -1111,7 +1111,7 @@ public:
     Variant ret = vm_call_user_func("wddx_deserialize", params, true);
     if (ret.isArray()) {
       Array arr = ret.toArray();
-      auto session = php_global_exchange(s__SESSION, Variant());
+      auto session = php_global_exchange(s__SESSION, init_null());
       for (ArrayIter iter(arr); iter; ++iter) {
         auto const key = iter.first();
         auto const value = iter.second();
@@ -1784,7 +1784,7 @@ static void HHVM_FUNCTION(session_unset) {
   if (PS(session_status) == Session::None) {
     return;
   }
-  php_global_set(s__SESSION, Variant());
+  php_global_set(s__SESSION, init_null());
   return;
 }
 
@@ -1811,7 +1811,7 @@ static Variant HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
     php_session_decode(value);
     return value;
   }
-  return uninit_null();
+  return init_null();
 }
 
 static bool HHVM_METHOD(SessionHandler, hhwrite,

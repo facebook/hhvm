@@ -1592,7 +1592,7 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
             return (*call->getParams())[1];
           } else {
             Array ret(Array::Create(0, false));
-            ret.set(1, Variant());
+            ret.set(1, init_null());
             return call->makeScalarExpression(ar, ret);
           }
         }

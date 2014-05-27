@@ -946,7 +946,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
     }
     return true;
   }
-  return uninit_null();
+  return init_null();
 }
 
 int MimePart::extractImpl(int decode, File *src) {

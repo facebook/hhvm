@@ -593,23 +593,23 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
 }
 
 static Variant get_private_subtags(const String& locname) {
-  if (locname.empty()) return uninit_null();
+  if (locname.empty()) return init_null();
   String locale(locname);
   int pos;
   while ((pos = singleton_pos(locale)) >= 0) {
     if ((locale[pos] == 'x') || (locale[pos] == 'X')) {
       if ((pos + 2) == locale.size()) {
         /* loc_name ends with '-x-' */
-        return uninit_null();
+        return init_null();
       }
       return f_substr(locale, pos);
     }
     if ((pos + 1) >= locale.size()) {
-      return uninit_null();
+      return init_null();
     }
     locale = f_substr(locale, pos + 1);
   }
-  return uninit_null();
+  return init_null();
 }
 
 static void add_array_entry(Array& ret,

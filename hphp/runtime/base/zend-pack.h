@@ -26,7 +26,7 @@ namespace HPHP {
 
 /**
  * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d,
- * x, X, @.
+ * x, X, Z and @.
  */
 class ZendPack {
 public:

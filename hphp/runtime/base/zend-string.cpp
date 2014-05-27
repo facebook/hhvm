@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/zend-math.h"
 
 #include "hphp/util/lock.h"
+#include "hphp/util/overflow.h"
 #include <math.h>
 #include <monetary.h>
 
@@ -510,6 +511,9 @@ String string_replace(const char *input, int len,
                       int &count, bool case_sensitive) {
   assert(input);
   assert(search && len_search);
+  assert(len >= 0);
+  assert(len_search >= 0);
+  assert(len_replace >= 0);
 
   if (len == 0) {
     return String();
@@ -539,10 +543,24 @@ String string_replace(const char *input, int len,
     return String(); // not found
   }
 
-  int reserve = len + (len_replace - len_search) * count;
-  if ((reserve - len) / count != (len_replace - len_search)) {
-    raise_error("String too large");
+  int reserve;
+
+  // Make sure the new size of the string wouldn't overflow int32_t. Don't
+  // bother if the replacement wouldn't make the string longer.
+  if (len_replace > len_search) {
+    auto raise = [&] { raise_error("String too large"); };
+    if (mul_overflow(len_replace - len_search, count)) {
+      raise();
+    }
+    int diff = (len_replace - len_search) * count;
+    if (add_overflow(len, diff)) {
+      raise();
+    }
+    reserve = len + diff;
+  } else {
+    reserve = len + (len_replace - len_search) * count;
   }
+
   String retString(reserve, ReserveString);
   char *ret = retString.bufferSlice().ptr;
   char *p = ret;

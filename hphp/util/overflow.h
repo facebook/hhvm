@@ -19,22 +19,33 @@
 
 namespace HPHP {
 
-inline bool add_overflow(int64_t a, int64_t b) {
-  auto mask = int64_t(1) << 63;
-  // same sign, result different sign
-  return ((a & mask) == (b & mask)) && ((a & mask) != ((a + b) & mask));
+template<typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type
+add_overflow(T a, T b) {
+  // Cast to unsigned so that ua + ub isn't undefined.
+  auto const ua = static_cast<typename std::make_unsigned<T>::type>(a);
+  auto const ub = static_cast<typename std::make_unsigned<T>::type>(b);
+
+  // Overflow if the inputs have the same sign, and the result of addition has
+  // the opposite sign.
+  return (~(ua ^ ub) & (ua ^ (ua + ub))) >> std::numeric_limits<T>::digits;
 }
 
-inline bool sub_overflow(int64_t a, int64_t b) {
-  if (a == 0 && b == std::numeric_limits<int64_t>::min()) {
-    return true;
+template<typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type
+sub_overflow(T a, T b) {
+  if (b == std::numeric_limits<T>::min()) {
+    // a - (INT_MIN)  -->  a - (-huge)  -->  a + huge
+    return a >= 0;
   }
   return add_overflow(a, -b);
 }
 
-inline bool mul_overflow(int64_t a, int64_t b) {
-  auto max = std::numeric_limits<int64_t>::max();
-  auto min = std::numeric_limits<int64_t>::min();
+template<typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type
+mul_overflow(T a, T b) {
+  auto max = std::numeric_limits<T>::max();
+  auto min = std::numeric_limits<T>::min();
 
   // Handle bad div cases first.
   if (a == 0 || b == 0) {

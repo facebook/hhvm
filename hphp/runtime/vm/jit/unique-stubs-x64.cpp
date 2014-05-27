@@ -336,7 +336,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
 
   a.    loadq  (rEC[spOff], rVmSp);
 
-  a.    testq  (rax, rax);
+  a.    testb  (rbyte(rax), rbyte(rax));
   a.    jz8    (noCallee);
 
   a.    addq   (8, rsp);

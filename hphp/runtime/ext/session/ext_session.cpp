@@ -187,7 +187,6 @@ std::vector<SessionModule*> SessionModule::RegisteredModules;
 static char hexconvtab[] =
   "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
 
-/* returns a pointer to the byte after the last valid character in out */
 static void bin_to_readable(const String& in, StringBuffer &out, char nbits) {
   unsigned char *p = (unsigned char *)in.data();
   unsigned char *q = (unsigned char *)in.data() + in.size();
@@ -273,7 +272,7 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = HHVM_FN(hash_final)(context.toResource());
+  String hashed = HHVM_FN(hash_final)(context.toResource(), /* raw */ true);
 
   if (PS(hash_bits_per_character) < 4 || PS(hash_bits_per_character) > 6) {
     PS(hash_bits_per_character) = 4;

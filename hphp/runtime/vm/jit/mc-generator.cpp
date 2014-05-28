@@ -1407,62 +1407,6 @@ MCGenerator::syncWork() {
   Stats::inc(Stats::TC_Sync);
 }
 
-TCA
-MCGenerator::emitNativeTrampoline(TCA helperAddr) {
-  auto& trampolines = code.trampolines();
-  if (!trampolines.canEmit(kExpectedPerTrampolineSize)) {
-    // not enough space to emit a trampoline, so just return the
-    // helper address and emitCall will the emit the right sequence
-    // to call it indirectly
-    TRACE(1, "Ran out of space to emit a trampoline for %p\n", helperAddr);
-    return helperAddr;
-  }
-
-  uint32_t index = m_numNativeTrampolines++;
-  TCA trampAddr = trampolines.frontier();
-  if (Stats::enabled()) {
-    emitIncStat(trampolines, &Stats::tl_helper_counters[0], index);
-    auto name = getNativeFunctionName(helperAddr);
-    const size_t limit = 50;
-    if (name.size() > limit) {
-      name[limit] = '\0';
-    }
-
-    // The duped string lives until process death intentionally.
-    Stats::helperNames[index].store(strdup(name.c_str()),
-                                    std::memory_order_release);
-  }
-
-  Asm a { trampolines };
-  // Move the 64-bit immediate address to rax, then jmp. If clobbering
-  // rax is a problem, we could do an rip-relative call with the address
-  // stored in the data section with no extra registers; but it has
-  // worse memory locality.
-  a.    emitImmReg(helperAddr, rax);
-  a.    jmp    (rax);
-  a.    ud2(); // hint that the jump doesn't go here.
-
-  m_trampolineMap[helperAddr] = trampAddr;
-  recordBCInstr(OpNativeTrampoline, trampolines, trampAddr, false);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
-  }
-
-  return trampAddr;
-}
-
-TCA
-MCGenerator::getNativeTrampoline(TCA helperAddr) {
-  if (!RuntimeOption::EvalJitTrampolines && !Stats::enabled()) {
-    return helperAddr;
-  }
-  auto const trampAddr = (TCA)folly::get_default(m_trampolineMap, helperAddr);
-  if (trampAddr) {
-    return trampAddr;
-  }
-  return emitNativeTrampoline(helperAddr);
-}
-
 // Get the address of the literal val in the global data section.
 // If it's not there, add it to the map in m_fixups, which will
 // be committed to m_literals when m_fixups.process() is called.
@@ -1830,7 +1774,6 @@ void MCGenerator::traceCodeGen() {
 
 MCGenerator::MCGenerator()
   : m_backEnd(newBackEnd())
-  , m_numNativeTrampolines(0)
   , m_numHHIRTrans(0)
   , m_catchTraceMap(128)
 {
@@ -2136,16 +2079,6 @@ bool MCGenerator::dumpTCCode(const char* filename) {
   if (result) {
     count = code.frozen().used();
     result = (fwrite(code.frozen().base(), 1, count, afrozenFile) == count);
-  }
-  if (result) {
-    for (auto const& pair : m_trampolineMap) {
-      void* helperAddr = pair.first;
-      void* trampAddr = pair.second;
-      auto functionName = getNativeFunctionName(helperAddr);
-      fprintf(helperAddrFile,"%10p %10p %s\n",
-              trampAddr, helperAddr,
-              functionName.c_str());
-    }
   }
   return result;
 }

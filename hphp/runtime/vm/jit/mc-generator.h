@@ -196,11 +196,6 @@ public:
   TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 
-  /*
-   * Get trampoline for a call into native C++.
-   */
-  TCA getNativeTrampoline(TCA helperAddress);
-
   inline void sync() {
     if (tl_regState == VMRegState::CLEAN) return;
     syncWork();
@@ -309,12 +304,6 @@ private:
                       bool& smashed);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
-
-  /*
-   * Emit trampoline to native C++ code.
-   */
-  TCA emitNativeTrampoline(TCA helperAddress);
-
   bool shouldTranslate() const {
     return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage;
   }
@@ -357,8 +346,6 @@ private:
 private:
   std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
-  PointerMap         m_trampolineMap;
-  int                m_numNativeTrampolines;
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;
@@ -371,27 +358,9 @@ private:
   CodeGenFixups      m_fixups;
   LiteralMap         m_literals;
 
-  // asize + acoldsize + afrozensize + gdatasize + trampolinesblocksize
+  // asize + acoldsize + afrozensize + gdatasize
   size_t             m_totalSize;
 };
-
-/*
- * Roughly expected length in bytes of each trampoline code sequence.
- *
- * Note that if stats is on, then this size is ~24 bytes due to the
- * instrumentation code that counts the number of calls through each
- * trampoline.
- *
- * When a small jump fits, it is only 7 bytes.  When it's a large jump
- * (followed by ud2) we have 11 bytes.
- *
- * We assume 11 bytes is the good size to expect, since stats are only
- * used for debugging modes.
- */
-const size_t kExpectedPerTrampolineSize = 11;
-
-const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
-  kExpectedPerTrampolineSize;
 
 TCA fcallHelper(ActRec* ar, void* sp);
 TCA funcBodyHelper(ActRec* ar, void* sp);

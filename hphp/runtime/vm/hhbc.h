@@ -752,8 +752,7 @@ enum AcoldOp {
 
 #define HIGH_OPCODES \
   O(FuncPrologue) \
-  O(TraceletGuard) \
-  O(NativeTrampoline)
+  O(TraceletGuard)
 
 enum HighOp {
   OpHighStart = OpAcoldCount-1,

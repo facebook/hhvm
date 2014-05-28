@@ -240,22 +240,17 @@ void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {
 }
 
 void emitCall(Asm& a, TCA dest) {
-  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
+  if (a.jmpDeltaFits(dest)) {
     a.    call(dest);
   } else {
-    dest = mcg->getNativeTrampoline(dest);
-    if (a.jmpDeltaFits(dest)) {
-      a.call(dest);
-    } else {
-      // can't do a near call; store address in data section.
-      // call by loading the address using rip-relative addressing.  This
-      // assumes the data section is near the current code section.  Since
-      // this sequence is directly in-line, rip-relative like this is
-      // more compact than loading a 64-bit immediate.
-      auto addr = mcg->allocLiteral((uint64_t)dest);
-      a.call(rip[(intptr_t)addr]);
-      assert(((int32_t*)a.frontier())[-1] + a.frontier() == (TCA)addr);
-    }
+    // can't do a near call; store address in data section.
+    // call by loading the address using rip-relative addressing.  This
+    // assumes the data section is near the current code section.  Since
+    // this sequence is directly in-line, rip-relative like this is
+    // more compact than loading a 64-bit immediate.
+    auto addr = mcg->allocLiteral((uint64_t)dest);
+    a.call(rip[(intptr_t)addr]);
+    assert(((int32_t*)a.frontier())[-1] + a.frontier() == (TCA)addr);
   }
 }
 

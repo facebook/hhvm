@@ -38,12 +38,9 @@ const char* g_counterNames[] = {
 #undef O
 };
 __thread uint64_t tl_counters[kNumStatCounters];
-__thread uint64_t tl_helper_counters[kMaxNumTrampolines];
 
 typedef hphp_const_char_map<hphp_const_char_map<uint64_t>> StatGroupMap;
 __thread StatGroupMap* tl_stat_groups = nullptr;
-
-std::atomic<const char*> helperNames[kMaxNumTrampolines];
 
 void init() {
   if (!enabledAny()) return;
@@ -64,14 +61,6 @@ void dump() {
   STATS
 #undef STAT
 #undef O
-
-  for (int i = 0;; i++) {
-    auto const name = helperNames[i].load(std::memory_order_acquire);
-    if (!name) break;
-    if (tl_helper_counters[i]) {
-      TRACE(0, "STAT %-50s %15" PRIu64 "\n", name, tl_helper_counters[i]);
-    }
-  }
 
   typedef std::pair<const char*, uint64_t> StatPair;
   for (auto const& group : *tl_stat_groups) {
@@ -117,7 +106,6 @@ void clear() {
   if (!enabledAny()) return;
   ++epoch;
   memset(&tl_counters[0], 0, sizeof(tl_counters));
-  memset(&tl_helper_counters[0], 0, sizeof(tl_helper_counters));
 
   assert(tl_stat_groups);
   delete tl_stat_groups;

@@ -687,12 +687,7 @@ void in(ISS& env, const bc::NativeImpl&) {
   }
 
   if (env.ctx.func->nativeInfo) {
-    auto const dt = env.ctx.func->nativeInfo->returnType;
-    if (dt != KindOfInvalid) {
-      // TODO(#3568043): adding TInitNull, because HNI doesn't know
-      // about nullability.
-      return doRet(env, union_of(from_DataType(dt), TInitNull));
-    }
+    return doRet(env, native_function_return_type(env.ctx.func));
   }
   doRet(env, TInitGen);
 }

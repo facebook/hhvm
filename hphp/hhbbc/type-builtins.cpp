@@ -78,4 +78,19 @@ bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
   return false;
 }
 
+Type native_function_return_type(borrowed_ptr<const php::Func> f) {
+  assert(f->nativeInfo);
+  if (f->nativeInfo->returnType == KindOfInvalid) {
+    return TGen;
+  }
+  auto t = from_DataType(f->nativeInfo->returnType);
+  // Regardless of ParamCoerceMode, native functions can return null if
+  // too many arguments are passed.
+  t = union_of(t, TInitNull);
+  if (f->attrs & AttrParamCoerceModeFalse) {
+    t = union_of(t, TFalse);
+  }
+  return t;
+}
+
 }}

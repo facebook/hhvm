@@ -6264,12 +6264,10 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
     Native::callFunc(func, nullptr, args, numArgs, ret);
   } else {
-    bool zendParamModeNull = !func->methInfo() ||
-      (func->methInfo()->attribute & ClassInfo::ParamCoerceModeNull);
-    if (zendParamModeNull) {
+    if (func->attrs() & AttrParamCoerceModeNull) {
       ret.m_type = KindOfNull;
     } else {
-      assert(func->methInfo()->attribute & ClassInfo::ParamCoerceModeFalse);
+      assert(func->attrs() & AttrParamCoerceModeFalse);
       ret.m_type = KindOfBoolean;
       ret.m_data.num = 0;
     }

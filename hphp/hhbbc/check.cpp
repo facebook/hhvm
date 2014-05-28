@@ -203,6 +203,9 @@ bool check(const php::Func& f) {
            f.cls->parentName->isame(s_Closure.get()));
   }
 
+  DEBUG_ONLY Attr pcm = AttrParamCoerceModeNull | AttrParamCoerceModeFalse;
+  assert((f.attrs & pcm) != pcm); // not both
+
   boost::dynamic_bitset<> seenId(f.nextBlockId);
   for (auto& block : f.blocks) {
     assert(checkBlock(*block));

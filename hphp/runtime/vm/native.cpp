@@ -322,6 +322,9 @@ TypedValue* functionWrapper(ActRec* ar) {
       LIKELY(nativeWrapperCheckArgs(ar))) {
     if (coerceFCallArgs(args, numArgs, numNonDefault, func)) {
       callFunc(func, nullptr, args, numArgs, rv);
+    } else if (func->attrs() & AttrParamCoerceModeFalse) {
+      rv.m_type = KindOfBoolean;
+      rv.m_data.num = 0;
     }
   }
 
@@ -364,6 +367,9 @@ TypedValue* methodWrapper(ActRec* ar) {
       }
 
       callFunc(func, &ctx, args, numArgs, rv);
+    } else if (func->attrs() & AttrParamCoerceModeFalse) {
+      rv.m_type = KindOfBoolean;
+      rv.m_data.num = 0;
     }
   }
 

@@ -920,16 +920,7 @@ void Func::incProfCounter() {
 }
 
 bool Func::isParamCoerceMode() const {
-  if (!isBuiltin()) return false;
-
-  // No method info implies this is an HNI or a systemlib PHP function. HNI
-  // functions are all PCM, systemlib functions are not.
-  if (!methInfo()) return isNative();
-
-  auto const attr = methInfo()->attribute;
-  auto const pcm =
-    ClassInfo::ParamCoerceModeNull | ClassInfo::ParamCoerceModeFalse;
-  return attr & pcm;
+  return attrs() & (AttrParamCoerceModeFalse | AttrParamCoerceModeNull);
 }
 
 //=============================================================================
@@ -1377,6 +1368,11 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   }
   if (info->attribute & ClassInfo::NoFCallBuiltin) {
     attrs = attrs | AttrNoFCallBuiltin;
+  }
+  if (info->attribute & ClassInfo::ParamCoerceModeNull) {
+    attrs = attrs | AttrParamCoerceModeNull;
+  } else if (info->attribute & ClassInfo::ParamCoerceModeFalse) {
+    attrs = attrs | AttrParamCoerceModeFalse;
   }
   if (pce()) {
     if (info->attribute & ClassInfo::IsStatic) {

@@ -345,38 +345,48 @@ typedef hphp_hash_set<FuncId> FuncIdSet;
  * fb_intercept.  (Note: we could split this into two bits, since you
  * can technically pessimize less for fb_intercept than you need to
  * for fb_rename_function, but we haven't done so at this point.)
+ *
+ * AttrParamCoerceModeNull will attempt to coerce parameters to the
+ * correct type. This isn't the same as casting - for example, a string
+ * can be cast to an array, but can not be coerced to array. If it fails,
+ * the function returns null. This is behavior is common in PHP5 builtins.
+ *
+ * AttrParamCoerceModeFalse is the same as AttrParamCoerceModeNull, except that
+ * if it fails to coerce types, it will return false instead of null.
  */
 enum Attr {
-  AttrNone          = 0,         // class  property  method  //
-  AttrReference     = (1 <<  0), //                     X    //
-  AttrPublic        = (1 <<  1), //            X        X    //
-  AttrProtected     = (1 <<  2), //            X        X    //
-  AttrPrivate       = (1 <<  3), //            X        X    //
-  AttrStatic        = (1 <<  4), //            X        X    //
-  AttrAbstract      = (1 <<  5), //    X                X    //
-  AttrFinal         = (1 <<  6), //    X                X    //
-  AttrInterface     = (1 <<  7), //    X                     //
-  AttrPhpLeafFn     = (1 <<  7), //                     X    //
-  AttrTrait         = (1 <<  8), //    X                X    //
-  AttrNoInjection   = (1 <<  9), //                     X    //
-  AttrUnique        = (1 << 10), //    X                X    //
-  AttrInterceptable = (1 << 11), //                     X    //
-  AttrNoExpandTrait = (1 << 12), //    X                     //
-  AttrNoOverride    = (1 << 13), //    X                X    //
-  AttrClone         = (1 << 14), //                     X    //
-  AttrVariadicByRef = (1 << 15), //                     X    //
-  AttrMayUseVV      = (1 << 16), //                     X    //
-  AttrPersistent    = (1 << 17), //    X                X    //
-  AttrDeepInit      = (1 << 18), //            X             //
-  AttrHot           = (1 << 19), //                     X    //
-  AttrBuiltin       = (1 << 20), //    X                X    //
-  AttrAllowOverride = (1 << 21), //                     X    //
-  AttrSkipFrame     = (1 << 22), //                     X    //
-  AttrNative        = (1 << 23), //                     X    //
-  AttrHPHPSpecific  = (1 << 25), //                     X    //
-  AttrIsFoldable    = (1 << 26), //                     X    //
-  AttrNoFCallBuiltin= (1 << 27), //                     X    //
-  AttrVariadicParam = (1 << 28), //                     X    //
+  AttrNone                 = 0,         // class  property  method  //
+  AttrReference            = (1 <<  0), //                     X    //
+  AttrPublic               = (1 <<  1), //            X        X    //
+  AttrProtected            = (1 <<  2), //            X        X    //
+  AttrPrivate              = (1 <<  3), //            X        X    //
+  AttrStatic               = (1 <<  4), //            X        X    //
+  AttrAbstract             = (1 <<  5), //    X                X    //
+  AttrFinal                = (1 <<  6), //    X                X    //
+  AttrInterface            = (1 <<  7), //    X                     //
+  AttrPhpLeafFn            = (1 <<  7), //                     X    //
+  AttrTrait                = (1 <<  8), //    X                X    //
+  AttrNoInjection          = (1 <<  9), //                     X    //
+  AttrUnique               = (1 << 10), //    X                X    //
+  AttrInterceptable        = (1 << 11), //                     X    //
+  AttrNoExpandTrait        = (1 << 12), //    X                     //
+  AttrNoOverride           = (1 << 13), //    X                X    //
+  AttrClone                = (1 << 14), //                     X    //
+  AttrVariadicByRef        = (1 << 15), //                     X    //
+  AttrMayUseVV             = (1 << 16), //                     X    //
+  AttrPersistent           = (1 << 17), //    X                X    //
+  AttrDeepInit             = (1 << 18), //            X             //
+  AttrHot                  = (1 << 19), //                     X    //
+  AttrBuiltin              = (1 << 20), //    X                X    //
+  AttrAllowOverride        = (1 << 21), //                     X    //
+  AttrSkipFrame            = (1 << 22), //                     X    //
+  AttrNative               = (1 << 23), //                     X    //
+  AttrHPHPSpecific         = (1 << 25), //                     X    //
+  AttrIsFoldable           = (1 << 26), //                     X    //
+  AttrNoFCallBuiltin       = (1 << 27), //                     X    //
+  AttrVariadicParam        = (1 << 28), //                     X    //
+  AttrParamCoerceModeFalse = (1 << 29), //                     X    //
+  AttrParamCoerceModeNull  = (1 << 30), //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

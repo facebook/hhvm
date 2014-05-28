@@ -159,7 +159,7 @@ function(HHVM_PUBLIC_HEADERS TARGET)
   install(
     CODE "INCLUDE(\"${HPHP_HOME}/CMake/HPHPFunctions.cmake\")
       HHVM_INSTALL_HEADERS(${TARGET} ${HPHP_HOME}
-      \"${CMAKE_INSTALL_PREFIX}/include\" ${ARGN})"
+      \"\${CMAKE_INSTALL_PREFIX}/include\" ${ARGN})"
     COMPONENT dev)
 endfunction()
 
@@ -178,9 +178,7 @@ function(HHVM_INSTALL_HEADERS TARGET SRCROOT DEST)
       else()
         string(SUBSTRING ${dest_rel} 0 ${slash_pos} dest_rel)
       endif()
-      file(COPY ${src_rel}
-        DESTINATION "${DEST}/${dest_rel}"
-        NO_SOURCE_PERMISSIONS)
+      file(INSTALL ${src_rel} DESTINATION "${DEST}/${dest_rel}")
     endif()
   endforeach()
 endfunction()

@@ -913,6 +913,7 @@ Variant f_stristr(const String& haystack, const Variant& needle) {
   return haystack.substr(ret.toInt32());
 }
 
+template<bool existence_only>
 static NEVER_INLINE
 Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
                                          const String& char_list) {
@@ -943,12 +944,15 @@ Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
   if (idx < haySize) {
     // we know that char_list contains null bytes, being terminated because
     // haystack has null bytes is just dandy
+    if (existence_only) { return true; }
     return String(hayData + idx, haySize - idx, CopyString);
   }
   return false;
 }
 
-Variant f_strpbrk(const String& haystack, const String& char_list) {
+template<bool existence_only>
+static ALWAYS_INLINE
+Variant strpbrk_impl(const String& haystack, const String& char_list) {
   if (char_list.empty()) {
     throw_invalid_argument("char_list: (empty)");
     return false;
@@ -975,11 +979,13 @@ Variant f_strpbrk(const String& haystack, const String& char_list) {
       while (*secondNull != '\0') { ++secondNull; }
 
       if ((secondNull - charListData) != char_list.size()) {
-        return strpbrk_char_list_has_nulls_slow(haystack, char_list);
+        return
+          strpbrk_char_list_has_nulls_slow<existence_only>(haystack, char_list);
       }
       ++charListData; // we can remember the null byte
     } else {
-      return strpbrk_char_list_has_nulls_slow(haystack, char_list);
+      return
+        strpbrk_char_list_has_nulls_slow<existence_only>(haystack, char_list);
     }
   }
 
@@ -995,9 +1001,19 @@ retry:
       haySize -= idx + 1;
       goto retry;
     }
+    if (existence_only) { return true; }
+
     return String(hayData + idx, haySize - idx, CopyString);
   }
   return false;
+}
+
+bool str_contains_any_of(const String& haystack, const String& char_list) {
+  return strpbrk_impl<true>(haystack, char_list).toBooleanVal();
+}
+
+Variant f_strpbrk(const String& haystack, const String& char_list) {
+  return strpbrk_impl<false>(haystack, char_list);
 }
 
 Variant f_strchr(const String& haystack, const Variant& needle) {

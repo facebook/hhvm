@@ -55,6 +55,7 @@ class EventHook {
   static void EnableIntercept();
   static void DisableIntercept();
   static ssize_t CheckSurprise();
+  static ssize_t GetConditionFlags();
 
   /**
    * Event hooks -- interpreter entry points.
@@ -102,7 +103,7 @@ private:
 
   static void onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags);
   static void onFunctionExit(const ActRec* ar, const TypedValue* retval,
-                             const Fault* fault);
+                             const Fault* fault, ssize_t flags);
 
   static bool RunInterceptHandler(ActRec* ar);
   static const char* GetFunctionNameForProfiler(const Func* func,

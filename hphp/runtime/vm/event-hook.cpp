@@ -60,6 +60,10 @@ ssize_t EventHook::CheckSurprise() {
   return check_request_surprise(info);
 }
 
+ssize_t EventHook::GetConditionFlags() {
+  return RDS::header()->conditionFlags.load();
+}
+
 class ExecutingSetprofileCallbackGuard {
 public:
   ExecutingSetprofileCallbackGuard() {
@@ -105,7 +109,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
-                                   const Fault* fault) {
+                                   ObjectData* exception) {
   JIT::VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
@@ -116,8 +120,8 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   Array frameinfo;
   if (retval) {
     frameinfo.set(s_return, tvAsCVarRef(retval));
-  } else if (fault && fault->m_faultType == Fault::Type::UserException) {
-    frameinfo.set(s_exception, fault->m_userException);
+  } else if (exception) {
+    frameinfo.set(s_exception, exception);
   }
   params.append(frameinfo);
 
@@ -244,7 +248,12 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
 }
 
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
-  Xenon::getInstance().log(true);
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(true);
+  }
+
+  // User profiler
   if (flags & RequestInjectionData::EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar);
@@ -260,38 +269,42 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
-                               const Fault* fault) {
-  auto const inlinedRip = JIT::tx->uniqueStubs.retInlHelper;
-  if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
-    // Inlined calls normally skip the function enter and exit events. If we
-    // side exit in an inlined callee, we want to make sure to skip the exit
-    // event to avoid unbalancing the call stack.
-    return;
+                               const Fault* fault, ssize_t flags) {
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(false);
   }
 
-  Xenon::getInstance().log(false);
-
+  // User profiler
+  //
+  // Inlined calls normally skip the function enter and exit events. If we
+  // side exit in an inlined callee, we want to make sure to skip the exit
+  // event to avoid unbalancing the call stack.
+  if ((flags & RequestInjectionData::EventHookFlag) &&
+      (JIT::TCA)ar->m_savedRip != JIT::tx->uniqueStubs.retInlHelper) {
 #ifdef HOTPROFILER
-  Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
-  if (profiler != nullptr) {
-    // NB: we don't have a function type flag to match what we got in
-    // onFunctionEnter. That's okay, though... we tolerate this in
-    // TraceProfiler.
-    end_profiler_frame(profiler,
-                       GetFunctionNameForProfiler(ar->func(), NormalFunc));
-  }
+    Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
+    if (profiler != nullptr) {
+      // NB: we don't have a function type flag to match what we got in
+      // onFunctionEnter. That's okay, though... we tolerate this in
+      // TraceProfiler.
+      end_profiler_frame(profiler,
+                         GetFunctionNameForProfiler(ar->func(), NormalFunc));
+    }
 #endif
 
-  // If we have a pending exception, then we're in the process of unwinding
-  // for that exception. We avoid running more PHP code (the user profiler) and
-  // also avoid raising more exceptions for surprises (including the pending
-  // exception).
-  if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
     if (shouldRunUserProfiler(ar->func())) {
-      runUserProfilerOnFunctionExit(ar, retval, fault);
+      if (ThreadInfo::s_threadInfo->m_pendingException != nullptr) {
+        // Avoid running PHP code when exception from destructor is pending.
+        // TODO(#2329497) will not happen once CheckSurprise is used
+      } else if (!fault) {
+        runUserProfilerOnFunctionExit(ar, retval, nullptr);
+      } else if (fault->m_faultType == Fault::Type::UserException) {
+        runUserProfilerOnFunctionExit(ar, retval, fault->m_userException);
+      } else {
+        // Avoid running PHP code when unwinding C++ exception.
+      }
     }
-    // XXX Disabled until t2329497 is fixed:
-    // CheckSurprise();
   }
 }
 
@@ -311,7 +324,8 @@ void EventHook::onFunctionResume(const ActRec* ar) {
 }
 
 void EventHook::onFunctionSuspend(const ActRec* ar) {
-  onFunctionExit(ar, nullptr, nullptr);
+  ssize_t flags = CheckSurprise();
+  onFunctionExit(ar, nullptr, nullptr, flags);
 }
 
 void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
@@ -323,11 +337,14 @@ void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
   // fails and unwinder kicks in, it won't try to decref them again.
   ar->setLocalsDecRefd();
 
-  onFunctionExit(ar, &retval, nullptr);
+  ssize_t flags = CheckSurprise();
+  onFunctionExit(ar, &retval, nullptr, flags);
 }
 
 void EventHook::onFunctionUnwind(const ActRec* ar, const Fault& fault) {
-  onFunctionExit(ar, nullptr, &fault);
+  // TODO(#2329497) can't CheckSurprise() yet, unwinder unable to replace fault
+  ssize_t flags = GetConditionFlags();
+  onFunctionExit(ar, nullptr, &fault, flags);
 }
 
 } // namespace HPHP

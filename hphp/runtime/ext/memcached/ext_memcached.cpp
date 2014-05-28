@@ -472,7 +472,7 @@ void HHVM_METHOD(Memcached, __construct,
   }
 }
 
-Variant HHVM_METHOD(Memcached, getAllKeys) {
+Variant HHVM_METHOD(Memcached, getallkeys) {
   FETCH_MEMCACHED_DATA(data, this_);
   memcached_dump_fn callbacks[] = {
     &memcached_dump_callback,
@@ -1129,6 +1129,7 @@ class MemcachedExtension : public Extension {
 
   virtual void moduleInit() {
     HHVM_ME(Memcached, __construct);
+    HHVM_ME(Memcached, getallkeys);
     HHVM_ME(Memcached, getbykey);
     HHVM_ME(Memcached, getmultibykey);
     HHVM_ME(Memcached, getdelayedbykey);

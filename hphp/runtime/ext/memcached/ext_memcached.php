@@ -313,7 +313,7 @@ class Memcached {
    * FALSE on failure.
    */
   <<__Native>>
-  function getAllKeys(): mixed;
+  public function getAllKeys(): mixed;
 
   /**
    * Retrieve an item from a specific server

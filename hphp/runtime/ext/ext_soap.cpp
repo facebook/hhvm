@@ -34,7 +34,7 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
 
@@ -1810,7 +1810,7 @@ static void send_soap_server_fault(
   xmlDocPtr doc_return = serialize_response_call
     (function, NULL, NULL, fault, headers, SOAP_GLOBAL(soap_version));
 
-  f_ob_end_clean(); // dump all buffered output
+  HHVM_FN(ob_end_clean)(); // dump all buffered output
 
   xmlChar *buf; int size;
   xmlDocDumpMemory(doc_return, &buf, &size);
@@ -2123,7 +2123,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
     return;
   }
 
-  if (!f_ob_start()) {
+  if (!HHVM_FN(ob_start)()) {
     throw SoapException("ob_start failed");
   }
 
@@ -2292,7 +2292,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
 
   // 7. throw away all buffered output so far, so we can send back a clean
   //    soap resposne
-  f_ob_end_clean();
+  HHVM_FN(ob_end_clean)();
 
   // 8. special case
   if (doc_return == NULL) {

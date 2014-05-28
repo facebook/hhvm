@@ -44,6 +44,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/debugger-hook.h"

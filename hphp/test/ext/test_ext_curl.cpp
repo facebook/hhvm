@@ -16,7 +16,7 @@
 
 #include "hphp/test/ext/test_ext_curl.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
-#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
 #include "hphp/runtime/server/libevent-server.h"
 
@@ -179,11 +179,11 @@ bool TestExtCurl::test_curl_exec() {
     Variant c = HHVM_FN(curl_init)(String(get_request_uri()));
     HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_WRITEFUNCTION,
                          "curl_write_func");
-    f_ob_start();
+    HHVM_FN(ob_start)();
     HHVM_FN(curl_exec)(c.toResource());
-    String res = f_ob_get_contents();
+    String res = HHVM_FN(ob_get_contents)();
     VS(res, "curl_write_func called with OK");
-    f_ob_end_clean();
+    HHVM_FN(ob_end_clean)();
   }
   return Count(true);
 }

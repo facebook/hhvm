@@ -5,7 +5,7 @@ $data = array(
     'bar-bazbazbaz-', 
     'foo'
 );
-usort($data, 'magic_sort_cmp');
+uasort($data, 'magic_sort_cmp');
 print_r($data);
 
 function magic_sort_cmp($a, $b) {

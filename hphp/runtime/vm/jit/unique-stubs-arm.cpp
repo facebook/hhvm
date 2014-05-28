@@ -223,7 +223,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& us) {
 }
 
 void emitFunctionEnterHelper(UniqueStubs& us) {
-  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
+  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
   MacroAssembler a { mcg->code.main() };
 
   us.functionEnterHelper = a.frontier();

@@ -104,7 +104,8 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
   vm_call_user_func(g_context->m_setprofileCallback, params);
 }
 
-void runUserProfilerOnFunctionExit(const ActRec* ar, TypedValue* retval) {
+void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
+                                   const Fault* fault) {
   JIT::VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
@@ -113,13 +114,10 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, TypedValue* retval) {
   params.append(VarNR(ar->func()->fullName()));
 
   Array frameinfo;
-  if (!g_context->m_faults.empty()) {
-    Fault fault = g_context->m_faults.back();
-    if (fault.m_faultType == Fault::Type::UserException) {
-      frameinfo.set(s_exception, fault.m_userException);
-    }
-  } else if (retval) {
+  if (retval) {
     frameinfo.set(s_return, tvAsCVarRef(retval));
+  } else if (fault && fault->m_faultType == Fault::Type::UserException) {
+    frameinfo.set(s_exception, fault->m_userException);
   }
   params.append(frameinfo);
 
@@ -245,13 +243,8 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
   return name;
 }
 
-bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
-  ssize_t flags = CheckSurprise();
+void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
   Xenon::getInstance().log(true);
-  if (flags & RequestInjectionData::InterceptFlag &&
-      !RunInterceptHandler(const_cast<ActRec*>(ar))) {
-    return false;
-  }
   if (flags & RequestInjectionData::EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar);
@@ -264,23 +257,10 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
     }
 #endif
   }
-  return true;
 }
 
-void EventHook::onFunctionExit(ActRec* ar, TypedValue* retval) {
-  // Null out $this for the exiting function, it has been decref'd so it's
-  // garbage.
-  //
-  // NB: This function is also run on async functions that are suspending, so
-  // we need to check that the function is actually returning.
-  JIT::VMRegAnchor _;
-  switch (static_cast<Op>(*g_context->getPC())) {
-    case OpRetC:
-    case OpRetV:
-      ar->setThisOrClassAllowNull(nullptr);
-    default: break;
-  }
-
+void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
+                               const Fault* fault) {
   auto const inlinedRip = JIT::tx->uniqueStubs.retInlHelper;
   if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
     // Inlined calls normally skip the function enter and exit events. If we
@@ -308,11 +288,46 @@ void EventHook::onFunctionExit(ActRec* ar, TypedValue* retval) {
   // exception).
   if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
     if (shouldRunUserProfiler(ar->func())) {
-      runUserProfilerOnFunctionExit(ar, retval);
+      runUserProfilerOnFunctionExit(ar, retval, fault);
     }
     // XXX Disabled until t2329497 is fixed:
     // CheckSurprise();
   }
+}
+
+bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
+  ssize_t flags = CheckSurprise();
+  if (flags & RequestInjectionData::InterceptFlag &&
+      !RunInterceptHandler(const_cast<ActRec*>(ar))) {
+    return false;
+  }
+  onFunctionEnter(ar, funcType, flags);
+  return true;
+}
+
+void EventHook::onFunctionResume(const ActRec* ar) {
+  ssize_t flags = CheckSurprise();
+  onFunctionEnter(ar, EventHook::NormalFunc, flags);
+}
+
+void EventHook::onFunctionSuspend(const ActRec* ar) {
+  onFunctionExit(ar, nullptr, nullptr);
+}
+
+void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
+  // Null out $this for the exiting function, it has been decref'd so it's
+  // garbage.
+  ar->setThisOrClassAllowNull(nullptr);
+
+  // The locals are already gone. Mark them as decref'd so that if this hook
+  // fails and unwinder kicks in, it won't try to decref them again.
+  ar->setLocalsDecRefd();
+
+  onFunctionExit(ar, &retval, nullptr);
+}
+
+void EventHook::onFunctionUnwind(const ActRec* ar, const Fault& fault) {
+  onFunctionExit(ar, nullptr, &fault);
 }
 
 } // namespace HPHP

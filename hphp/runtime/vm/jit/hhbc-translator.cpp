@@ -1567,9 +1567,9 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
     gen(StMem, contAR, cns(-cellsToBytes(i + 1)), loc);
   }
 
-  // Call the FunctionExit hook and put the return value on the stack so that
+  // Call the FunctionSuspend hook and put the return value on the stack so that
   // the unwinder would decref it.
-  emitRetSurpriseCheck(cont, makeCatch({cont}), false);
+  emitRetSurpriseCheck(contAR, nullptr, makeCatch({cont}), false);
 
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.
@@ -1614,7 +1614,7 @@ void HhbcTranslator::emitContEnter(Offset returnOffset) {
 
 void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
   auto const sp = spillStack();
-  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock, true);
+  emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlock, true);
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
@@ -1746,10 +1746,10 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
     gen(CopyCells, LocalId(numCells), m_irb->fp(), asyncAR);
   }
 
-  // Call the FunctionExit hook and put the AsyncFunctionWaitHandle
+  // Call the FunctionSuspend hook and put the AsyncFunctionWaitHandle
   // on the stack so that the unwinder would decref it.
   push(waitHandle);
-  emitRetSurpriseCheck(waitHandle, makeCatch(), false);
+  emitRetSurpriseCheck(asyncAR, nullptr, makeCatch(), false);
   discard(1);
 
   // Grab caller info from ActRec, free ActRec, store the return value
@@ -1778,7 +1778,7 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
 
   // Transfer control back to the scheduler.
   auto const sp = spillStack();
-  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock, true);
+  emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlock, true);
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
@@ -3553,11 +3553,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(ReleaseVVOrExit, makeExitSlow(), m_irb->fp());
   }
 
-  // In async function, wrap the return value into succeeded StaticWaitHandle.
-  if (!resumed() && func->isAsyncFunction()) {
-    push(gen(CreateSSWH, pop(type, DataTypeGeneric)));
-  }
-
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
   auto catchBlock = makeCatch();
@@ -3574,15 +3569,19 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(GenericRetDecRefs, m_irb->fp());
   }
 
-  // Call the FunctionExit hook and put the return value on the stack so that
   // Free $this.
   if (func->mayHaveThis()) {
     gen(DecRefThis, m_irb->fp());
   }
 
+  // Call the FunctionReturn hook and put the return value on the stack so that
   // the unwinder would decref it.
-  emitRetSurpriseCheck(resumed() ? cns(Type::Uninit) : retVal,
-                       catchBlock, false);
+  emitRetSurpriseCheck(m_irb->fp(), retVal, catchBlock, false);
+
+  // In async function, wrap the return value into succeeded StaticWaitHandle.
+  if (!resumed() && func->isAsyncFunction()) {
+    retVal = gen(CreateSSWH, retVal);
+  }
 
   // Type profile return value.
   if (RuntimeOption::EvalRuntimeTypeProfile) {
@@ -3666,7 +3665,8 @@ void HhbcTranslator::emitJmpSurpriseCheck(Block* catchBlock) {
                });
 }
 
-void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
+void HhbcTranslator::emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal,
+                                          Block* catchBlock,
                                           bool suspendingResumed) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
   m_irb->ifThen([&](Block* taken) {
@@ -3674,8 +3674,13 @@ void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
                },
                [&] {
                  m_irb->hint(Block::Hint::Unlikely);
-                 gen(FunctionExitSurpriseHook, RetCtrlData(suspendingResumed),
-                     catchBlock, m_irb->fp(), retVal);
+                 if (retVal != nullptr) {
+                   gen(FunctionReturnHook, RetCtrlData(suspendingResumed),
+                       catchBlock, fp, retVal);
+                 } else {
+                   gen(FunctionSuspendHook, RetCtrlData(suspendingResumed),
+                       catchBlock, fp);
+                 }
                });
 }
 

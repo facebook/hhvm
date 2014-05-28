@@ -199,7 +199,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   case VerifyRetCls:
     if (i == 1) return isI32(cint); // constraint class ptr
     break;
-  case FunctionExitSurpriseHook:
+  case FunctionReturnHook:
     if (i == 1) return okStore(cint); // return value
     break;
   default:

@@ -1703,8 +1703,8 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr,
 
   m_fp = enterFnAr;
   m_pc = m_fp->func()->unit()->at(resumable->resumeOffset());
-  if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
   assert(m_fp->func()->contains(m_pc));
+  EventHook::FunctionResume(enterFnAr);
 
   if (UNLIKELY(exception != nullptr)) {
     assert(exception->instanceof(SystemLib::s_ExceptionClass));
@@ -1745,7 +1745,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   }
 
   prepareFuncEntry(enterFnAr, m_pc, stk);
-  if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
+  if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(m_stack, enterFnAr->m_func, 0);
   assert(m_fp->func()->contains(m_pc));
 
@@ -2644,7 +2644,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   m_fp = ar;
   pc = func->getEntry();
   SYNC();
-  bool ret = EventHook::FunctionEnter(m_fp, funcType);
+  bool ret = EventHook::FunctionCall(m_fp, funcType);
   pc = m_pc;
   checkStack(m_stack, func, 0);
   return ret;
@@ -4522,22 +4522,21 @@ OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
-  // If in an eagerly executed async function, wrap the return value
-  // into succeeded StaticWaitHandle.
-  if (UNLIKELY(!m_fp->resumed() && m_fp->func()->isAsyncFunction())) {
-    auto const top = m_stack.topC();
-    top->m_data.pobj = c_StaticWaitHandle::CreateSucceededVM(*top);
-    top->m_type = KindOfObject;
-  }
-
   // Get the return value.
   TypedValue retval = *m_stack.topTV();
 
-  // Free $this and local variables. Calls FunctionExit hook. The return value
+  // Free $this and local variables. Calls FunctionReturn hook. The return value
   // is kept on the stack so that the unwinder would free it if the hook fails.
-  frame_free_locals_inl(m_fp, m_fp->func()->numLocals(),
-                        m_fp->resumed() ? nullptr : &retval);
+  frame_free_locals_inl(m_fp, m_fp->func()->numLocals(), &retval);
   m_stack.discard();
+
+  // If in an eagerly executed async function, wrap the return value
+  // into succeeded StaticWaitHandle.
+  if (UNLIKELY(!m_fp->resumed() && m_fp->func()->isAsyncFunction())) {
+    auto const retvalCell = *tvAssertCell(&retval);
+    retval.m_data.pobj = c_StaticWaitHandle::CreateSucceededVM(retvalCell);
+    retval.m_type = KindOfObject;
+  }
 
   // Type profile return value.
   if (RuntimeOption::EvalRuntimeTypeProfile) {
@@ -6209,7 +6208,7 @@ bool ExecutionContext::doFCall(ActRec* ar, PC& pc) {
         int(m_fp->m_func->base()));
   prepareFuncEntry(ar, pc, StackArgsState::Untrimmed);
   SYNC();
-  if (EventHook::FunctionEnter(ar, EventHook::NormalFunc)) return true;
+  if (EventHook::FunctionCall(ar, EventHook::NormalFunc)) return true;
   pc = m_pc;
   return false;
 }
@@ -6321,7 +6320,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
 
   prepareFuncEntry(ar, pc, StackArgsState::Trimmed);
   SYNC();
-  if (UNLIKELY(!EventHook::FunctionEnter(ar, EventHook::NormalFunc))) {
+  if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
     pc = m_pc;
     return false;
   }
@@ -6977,10 +6976,10 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   // Teleport local variables into the generator.
   fillResumableVars(func, m_fp, cont->actRec());
 
-  // Call the FunctionExit hook. Keep the generator on the stack so that
+  // Call the FunctionSuspend hook. Keep the generator on the stack so that
   // the unwinder could free it if the hook fails.
   m_stack.pushObjectNoRc(cont);
-  EventHook::FunctionExit(m_fp, m_stack.top());
+  EventHook::FunctionSuspend(cont->actRec());
   m_stack.discard();
 
   // Grab caller info from ActRec.
@@ -7023,24 +7022,16 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   assert(contAR->func()->contains(cont->resumable()->resumeOffset()));
   pc = contAR->func()->unit()->at(cont->resumable()->resumeOffset());
   SYNC();
+  EventHook::FunctionResume(m_fp);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContEnter(IOP_ARGS) {
   contEnterImpl(IOP_PASS_ARGS);
-
-  if (UNLIKELY(!EventHook::FunctionEnter(m_fp, EventHook::NormalFunc))) {
-    pc = m_pc;
-  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
   contEnterImpl(IOP_PASS_ARGS);
-
-  if (UNLIKELY(!EventHook::FunctionEnter(m_fp, EventHook::NormalFunc))) {
-    pc = m_pc;
-  } else {
-    iopThrow(IOP_PASS_ARGS);
-  }
+  iopThrow(IOP_PASS_ARGS);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
@@ -7051,7 +7042,7 @@ OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
   cont->suspend(nullptr, resumeOffset, *m_stack.topC());
   m_stack.popTV();
 
-  EventHook::FunctionExit(m_fp, nullptr);
+  EventHook::FunctionSuspend(m_fp);
 
   // Return control to the next()/send()/raise() caller.
   Offset soff = m_fp->m_soff;
@@ -7069,7 +7060,7 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   m_stack.popTV();
   m_stack.popTV();
 
-  EventHook::FunctionExit(m_fp, nullptr);
+  EventHook::FunctionSuspend(m_fp);
 
   // Return control to the next()/send()/raise() caller.
   Offset soff = m_fp->m_soff;
@@ -7133,10 +7124,10 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
          frame_iter(m_fp, iters - 1),
          iters * sizeof(Iter));
 
-  // Call the FunctionExit hook. Keep the AsyncFunctionWaitHandle on the stack
-  // so that the unwinder could free it if the hook fails.
+  // Call the FunctionSuspend hook. Keep the AsyncFunctionWaitHandle
+  // on the stack so that the unwinder could free it if the hook fails.
   m_stack.pushObjectNoRc(waitHandle);
-  EventHook::FunctionExit(m_fp, m_stack.topTV());
+  EventHook::FunctionSuspend(waitHandle->actRec());
   m_stack.discard();
 
   // Grab caller info from ActRec.
@@ -7168,8 +7159,8 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   frame_afwh(m_fp)->suspend(nullptr, resumeOffset, child);
   m_stack.discard();
 
-  // Call the FunctionExit hook.
-  EventHook::FunctionExit(m_fp, nullptr);
+  // Call the FunctionSuspend hook.
+  EventHook::FunctionSuspend(m_fp);
 
   // Transfer control back to the scheduler.
   m_fp = nullptr;

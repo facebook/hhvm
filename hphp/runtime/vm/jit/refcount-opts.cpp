@@ -862,12 +862,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
                // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||
                 m_inst->extra<RetCtrlData>()->suspendingResumed) &&
-               // The EndCatch in FunctionExitSurpriseHook's catch block is
+               // The EndCatch in Function{Suspend,Return}Hook's catch block is
                // special: it happens after locals and $this have been
                // decreffed, so we don't want to do the normal cleanup
                !(m_inst->is(EndCatch) &&
                  m_block->preds().front().inst()
-                   ->is(FunctionExitSurpriseHook) &&
+                   ->is(FunctionSuspendHook, FunctionReturnHook) &&
                  !m_block->preds().front().inst()
                    ->extra<RetCtrlData>()->suspendingResumed)) {
       // When leaving a trace, we need to account for all live references in

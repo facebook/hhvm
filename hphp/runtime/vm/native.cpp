@@ -386,20 +386,20 @@ TypedValue* methodWrapper(ActRec* ar) {
 TypedValue* unimplementedWrapper(ActRec* ar) {
   auto func = ar->m_func;
   auto cls = func->cls();
+  ar->m_r.m_type = KindOfNull;
   if (cls) {
     raise_error("Call to unimplemented native method %s::%s()",
                 cls->name()->data(), func->name()->data());
     if (func->isStatic()) {
-      frame_free_locals_no_this_inl(ar, func->numParams(), nullptr);
+      frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
     } else {
-      frame_free_locals_inl(ar, func->numParams(), nullptr);
+      frame_free_locals_inl(ar, func->numParams(), &ar->m_r);
     }
   } else {
     raise_error("Call to unimplemented native function %s()",
                 func->name()->data());
-    frame_free_locals_no_this_inl(ar, func->numParams(), nullptr);
+    frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
   }
-  ar->m_r.m_type = KindOfNull;
   return &ar->m_r;
 }
 

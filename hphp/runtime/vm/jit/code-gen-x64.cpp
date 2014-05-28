@@ -314,7 +314,8 @@ CALL_OPCODE(RestoreErrorLevel)
 CALL_OPCODE(Count)
 
 CALL_OPCODE(SurpriseHook)
-CALL_OPCODE(FunctionExitSurpriseHook)
+CALL_OPCODE(FunctionSuspendHook)
+CALL_OPCODE(FunctionReturnHook)
 
 CALL_OPCODE(OODeclExists)
 

@@ -55,7 +55,7 @@ c_Generator::~c_Generator() {
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
 
-  // Free locals, but don't trigger the EventHook for FunctionExit
+  // Free locals, but don't trigger the EventHook for FunctionReturn
   // since the generator has already been exited. We
   // don't want redundant calls.
   ActRec* ar = actRec();

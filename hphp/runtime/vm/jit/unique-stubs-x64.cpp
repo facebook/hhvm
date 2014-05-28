@@ -432,7 +432,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
 }
 
 void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
-  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
+  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
   Asm a { mcg->code.main() };
 
   moveToAlign(mcg->code.main());

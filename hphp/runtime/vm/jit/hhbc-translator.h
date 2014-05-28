@@ -706,7 +706,7 @@ private:
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck(Block* catchBlock);
-  void emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
+  void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);
 

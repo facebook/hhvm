@@ -159,7 +159,7 @@ frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
 void ALWAYS_INLINE
 frame_free_locals_inl(ActRec* fp, int numLocals, TypedValue* rv) {
   frame_free_locals_inl_no_hook<false>(fp, numLocals);
-  EventHook::FunctionExit(fp, rv);
+  EventHook::FunctionReturn(fp, *rv);
 }
 
 void ALWAYS_INLINE
@@ -169,19 +169,19 @@ frame_free_inl(ActRec* fp, TypedValue* rv) { // For frames with no locals
   assert(fp->m_varEnv == nullptr);
   assert(fp->hasThis());
   decRefObj(fp->getThis());
-  EventHook::FunctionExit(fp, rv);
+  EventHook::FunctionReturn(fp, *rv);
 }
 
 void ALWAYS_INLINE
-frame_free_locals_unwind(ActRec* fp, int numLocals) {
+frame_free_locals_unwind(ActRec* fp, int numLocals, const Fault& fault) {
   frame_free_locals_inl_no_hook<true>(fp, numLocals);
-  EventHook::FunctionExit(fp, nullptr);
+  EventHook::FunctionUnwind(fp, fault);
 }
 
 void ALWAYS_INLINE
 frame_free_locals_no_this_inl(ActRec* fp, int numLocals, TypedValue* rv) {
   frame_free_locals_helper_inl<false>(fp, numLocals);
-  EventHook::FunctionExit(fp, rv);
+  EventHook::FunctionReturn(fp, *rv);
 }
 
 // Helper for iopFCallBuiltin.

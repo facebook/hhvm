@@ -144,7 +144,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
   return UnwindAction::Propagate;
 }
 
-void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
+void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, const Fault& fault) {
   auto const func = fp->func();
   auto const curOp = *reinterpret_cast<const Op*>(pc);
   auto const prevFp = fp->sfp();
@@ -195,7 +195,7 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
       // uninit/zero during unwind.  This is because a backtrace
       // from another destructing object during this unwind may try
       // to read them.
-      frame_free_locals_unwind(fp, func->numLocals());
+      frame_free_locals_unwind(fp, func->numLocals(), fault);
     } catch (...) {}
   }
 
@@ -228,10 +228,12 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   fp = prevFp;
 }
 
-void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
+void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc,
+                             const Fault& fault) {
   auto const func = fp->func();
   auto const prevFp = fp->sfp();
   auto const soff = fp->m_soff;
+  auto const e = fault.m_userException;
   assert(!fp->resumed());
   assert(func->isAsyncFunction());
   assert(*reinterpret_cast<const Op*>(pc) != OpRetC);
@@ -243,7 +245,7 @@ void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
          implicit_cast<void*>(prevFp));
 
   try {
-    frame_free_locals_unwind(fp, func->numLocals());
+    frame_free_locals_unwind(fp, func->numLocals(), fault);
   } catch (...) {}
 
   stack.ndiscard(func->numSlotsInFrame());
@@ -432,7 +434,7 @@ UnwindAction unwind(ActRec*& fp,
     // into a failed StaticWaitHandle and return it to the caller.
     if (!fp->resumed() && fp->m_func->isAsyncFunction() &&
         fault.m_faultType == Fault::Type::UserException) {
-      tearDownEagerAsyncFrame(fp, stack, pc, fault.m_userException);
+      tearDownEagerAsyncFrame(fp, stack, pc, fault);
       g_context->m_faults.pop_back();
       return pc ? UnwindAction::ResumeVM : UnwindAction::Return;
     }
@@ -440,7 +442,7 @@ UnwindAction unwind(ActRec*& fp,
     // We found no more handlers in this frame, so the nested fault
     // count starts over for the caller frame.
     auto const lastFrameForNesting = !fp->sfp();
-    tearDownFrame(fp, stack, pc);
+    tearDownFrame(fp, stack, pc, fault);
 
     // Once we are done with EHs for the current frame we restore
     // default values for the fields inside Fault. This makes sure
@@ -483,7 +485,8 @@ void unwindBuiltinFrame() {
   }
 
   // Free the locals and VarEnv if there is one
-  frame_free_locals_inl(fp, fp->m_func->numLocals(), nullptr);
+  auto rv = make_tv<KindOfNull>();
+  frame_free_locals_inl(fp, fp->m_func->numLocals(), &rv);
 
   // Tear down the frame
   Offset pc = -1;
@@ -492,6 +495,7 @@ void unwindBuiltinFrame() {
   fp = sfp;
   g_context->m_pc = fp->m_func->unit()->at(pc);
   stack.discardAR();
+  stack.pushNull(); // return value
 }
 
 void pushFault(Exception* e) {
@@ -561,7 +565,6 @@ UnwindAction exception_handler() noexcept {
 
   catch (VMSwitchModeBuiltin&) {
     unwindBuiltinFrame();
-    g_context->getStack().pushNull(); // return value
     return UnwindAction::ResumeVM;
   }
 

@@ -613,7 +613,7 @@ static bool HHVM_METHOD(ImagickDraw, setClipUnits,
 static bool HHVM_METHOD(ImagickDraw, setFillAlpha, double opacity) {
   auto wand = getDrawingWandResource(this_);
   DrawSetFillOpacity(wand->getWand(), opacity);
-  throw true;
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFillColor,

@@ -798,8 +798,8 @@ private: // Exit trace creation routines.
 
 public:
   /*
-   * Accessors for the current function being compiled and its
-   * class and unit.
+   * Accessors for the current function being compiled, its class and unit, the
+   * current SrcKey, and the current eval stack.
    */
   const Func* curFunc()     const { return m_bcStateStack.back().func; }
   Class*      curClass()    const { return curFunc()->cls(); }
@@ -810,6 +810,35 @@ public:
   bool        resumed()     const { return m_bcStateStack.back().resumed; }
   size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
+
+  /*
+   * Eval stack helpers.
+   */
+  SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
+    return pop(Type::Cell, tc);
+  }
+  SSATmp* push(SSATmp* tmp);
+  SSATmp* pushIncRef(SSATmp* tmp, TypeConstraint tc = DataTypeCountness);
+  SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
+  void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
+  void    discard(unsigned n);
+  SSATmp* popV() { return pop(Type::BoxedCell); }
+  SSATmp* popR() { return pop(Type::Gen);       }
+  SSATmp* popA() { return pop(Type::Cls);       }
+  SSATmp* popF(TypeConstraint tc = DataTypeSpecific) {
+    return pop(Type::Gen, tc);
+  }
+  SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const;
+  SSATmp* top(Type type, uint32_t index = 0,
+              TypeConstraint tc = DataTypeSpecific);
+  SSATmp* topC(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
+    return top(Type::Cell, i, tc);
+  }
+  SSATmp* topF(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
+    return top(Type::Gen, i, tc);
+  }
+  SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
+  SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
 
 private:
   /*
@@ -845,34 +874,6 @@ private:
   const NamedEntityPair& lookupNamedEntityPairId(int id);
   const NamedEntity* lookupNamedEntityId(int id);
 
-  /*
-   * Eval stack helpers.
-   */
-  SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp, TypeConstraint tc = DataTypeCountness);
-  SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
-  void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
-  void    discard(unsigned n);
-  SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
-    return pop(Type::Cell, tc);
-  }
-  SSATmp* popV() { return pop(Type::BoxedCell); }
-  SSATmp* popR() { return pop(Type::Gen);       }
-  SSATmp* popA() { return pop(Type::Cls);       }
-  SSATmp* popF(TypeConstraint tc = DataTypeSpecific) {
-    return pop(Type::Gen, tc);
-  }
-  SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const;
-  SSATmp* top(Type type, uint32_t index = 0,
-              TypeConstraint tc = DataTypeSpecific);
-  SSATmp* topC(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
-    return top(Type::Cell, i, tc);
-  }
-  SSATmp* topF(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
-    return top(Type::Gen, i, tc);
-  }
-  SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
-  SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals,

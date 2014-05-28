@@ -302,7 +302,8 @@ void HhbcTranslator::beginInlining(unsigned numParams,
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
-  m_bcStateStack.emplace_back(target->base(), false, target);
+  m_bcStateStack.emplace_back(target->getEntryForNumArgs(numParams),
+                              false, target);
   updateMarker();
 
   always_assert_log(
@@ -1978,7 +1979,7 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
 }
 
 void HhbcTranslator::emitIsTypeC(DataType t) {
-  SSATmp* src = popC(DataTypeGeneric);
+  SSATmp* src = popC(DataTypeSpecific);
   push(gen(IsType, Type(t), src));
   gen(DecRef, src);
 }
@@ -1987,7 +1988,7 @@ void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
   auto const ldrefExit = makeExit();
   auto const ldgblExit = makeExit();
   auto const val =
-    ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeGeneric);
+    ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeSpecific);
   push(gen(IsType, Type(t), val));
 }
 

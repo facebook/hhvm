@@ -716,7 +716,8 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     // If func has changed after an FCall, we've started an inlined call. This
     // will have to change when we support inlining recursive calls.
     if (func != iter.sk().func()) {
-      assert(isRet(op) || op == Op::FCall || op == Op::FCallD);
+      assert(isRet(op) || op == Op::NativeImpl ||
+             op == Op::FCall || op == Op::FCallD);
       if (op == Op::FCall || op == Op::FCallD) {
         funcs.push_back(iter.sk().func());
         int totalDepth = 0;
@@ -743,7 +744,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
 
     // If we hit a RetC/V while inlining, leave that level and
     // continue. Otherwise, accept the tracelet.
-    if (isRet(op)) {
+    if (isRet(op) || op == Op::NativeImpl) {
       if (inlineDepth > 0) {
         --inlineDepth;
         funcs.pop_back();

@@ -1342,7 +1342,11 @@ SSATmp* Simplifier::simplifyIsType(const IRInstruction* inst) {
   auto src       = inst->src(0);
   auto srcType   = src->type();
 
-  if (typeMightRelax(src)) return nullptr;
+  // If typeMightRelax(src) returns true, we can't generally depend on the
+  // src's type. However, we always constrain the input to this opcode with at
+  // least DataTypeSpecific, so we only have to skip the optimization if the
+  // typeParam is specialized.
+  if (typeMightRelax(src) && type.isSpecialized()) return nullptr;
 
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.

@@ -738,7 +738,7 @@ private:
   void emitEmptyMem(SSATmp* ptr);
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
   void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
-                            bool& checkForInt);
+                            bool& checkForInt, bool& converted);
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
   SSATmp* ldClsPropAddrKnown(Block* catchBlock,

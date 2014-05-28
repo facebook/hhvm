@@ -1223,29 +1223,38 @@ static inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {
   not_reached();
 }
 
-template<KeyType keyType, bool checkForInt, bool warn>
+template<KeyType keyType, bool checkForInt, bool converted, bool warn>
 static inline const TypedValue* elemArrayImpl(TypedValue* a,
                                               key_type<keyType> key) {
+  static_assert((checkForInt && !converted) || !checkForInt,
+                "Can't both check for integer string and have been converted");
   assert(a->m_type == KindOfArray);
   auto const ad = a->m_data.parr;
+  if (converted) {
+    if (UNLIKELY(ad->isIntMapArray())) {
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+    }
+  }
   auto const ret = checkForInt ? checkedGet(ad, key)
                                : ad->nvGet(key);
   return ret ? ret : elemArrayNotFound<warn>(key);
 }
 
 #define HELPER_TABLE(m)                                 \
-  /* name               keyType  checkForInt   warn */  \
-  m(elemArrayS,    KeyType::Str,       false, false)    \
-  m(elemArraySi,   KeyType::Str,        true, false)    \
-  m(elemArrayI,    KeyType::Int,       false, false)    \
-  m(elemArraySW,   KeyType::Str,       false,  true)    \
-  m(elemArraySiW,  KeyType::Str,        true,  true)    \
-  m(elemArrayIW,   KeyType::Int,       false,  true)
+  /* name               keyType  checkForInt   converted   warn */  \
+  m(elemArrayS,    KeyType::Str,       false,   false,    false)    \
+  m(elemArraySi,   KeyType::Str,        true,   false,    false)    \
+  m(elemArrayI,    KeyType::Int,       false,   false,    false)    \
+  m(elemArrayIc,   KeyType::Int,       false,    true,    false)    \
+  m(elemArraySW,   KeyType::Str,       false,   false,     true)    \
+  m(elemArraySiW,  KeyType::Str,        true,   false,     true)    \
+  m(elemArrayIW,   KeyType::Int,       false,   false,     true)    \
+  m(elemArrayIWc,  KeyType::Int,       false,    true,     true)
 
-#define ELEM(nm, keyType, checkForInt, warn)                    \
-  const TypedValue* nm(TypedValue* a, key_type<keyType> key) {  \
-    return elemArrayImpl<keyType, checkForInt, warn>(           \
-      a, key);                                                  \
+#define ELEM(nm, keyType, checkForInt, converted, warn)             \
+  const TypedValue* nm(TypedValue* a, key_type<keyType> key) {      \
+    return elemArrayImpl<keyType, checkForInt, converted, warn>(    \
+      a, key);                                                      \
   }
 namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
@@ -1255,10 +1264,11 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::MInstrTranslator::emitElemArray(SSATmp* key, bool warn) {
   KeyType keyType;
   bool checkForInt;
-  m_ht.checkStrictlyInteger(key, keyType, checkForInt);
+  bool converted;
+  m_ht.checkStrictlyInteger(key, keyType, checkForInt, converted);
 
   typedef TypedValue* (*OpFunc)(ArrayData*, TypedValue*);
-  BUILD_OPTAB(keyType, checkForInt, warn);
+  BUILD_OPTAB(keyType, checkForInt, converted, warn);
   m_base = gen(ElemArray, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
@@ -1725,8 +1735,13 @@ SSATmp* HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* base,
   );
 }
 
-template<KeyType keyType, bool checkForInt>
+template<KeyType keyType, bool checkForInt, bool converted>
 static inline TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
+  if (converted) {
+    if (UNLIKELY(a->isIntMapArray())) {
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+    }
+  }
   auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
   if (ret) {
     ret = tvToCell(ret);
@@ -1736,15 +1751,16 @@ static inline TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   return arrayGetNotFound(key);
 }
 
-#define HELPER_TABLE(m)                    \
-  /* name        keyType     checkForInt */\
-  m(arrayGetS,   KeyType::Str,   false)    \
-  m(arrayGetSi,  KeyType::Str,    true)    \
-  m(arrayGetI,   KeyType::Int,   false)
+#define HELPER_TABLE(m)                                 \
+  /* name        keyType     checkForInt   converted  */\
+  m(arrayGetS,   KeyType::Str,   false,    false)       \
+  m(arrayGetSi,  KeyType::Str,    true,    false)       \
+  m(arrayGetI,   KeyType::Int,   false,    false)       \
+  m(arrayGetIc,  KeyType::Int,   false,     true)
 
-#define ELEM(nm, keyType, checkForInt)                                  \
+#define ELEM(nm, keyType, checkForInt, converted)                       \
   TypedValue nm(ArrayData* a, key_type<keyType> key) {                  \
-    return arrayGetImpl<keyType, checkForInt>(a, key);                  \
+    return arrayGetImpl<keyType, checkForInt, converted>(a, key);       \
   }
 namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
@@ -1754,10 +1770,11 @@ HELPER_TABLE(ELEM)
 SSATmp* HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
   KeyType keyType;
   bool checkForInt;
-  m_ht.checkStrictlyInteger(key, keyType, checkForInt);
+  bool converted;
+  m_ht.checkStrictlyInteger(key, keyType, checkForInt, converted);
 
   typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
-  BUILD_OPTAB(keyType, checkForInt);
+  BUILD_OPTAB(keyType, checkForInt, converted);
   assert(m_base->isA(Type::Arr));
   return gen(ArrayGet, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
@@ -2045,22 +2062,30 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayIsset() {
     });
 }
 
-template<KeyType keyType, bool checkForInt>
+template<KeyType keyType, bool checkForInt, bool converted>
 static inline uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
+  static_assert(!converted || keyType == KeyType::Int,
+                "Should have only been converted if KeyType is now an int");
+  if (converted) {
+    if (UNLIKELY(a->isIntMapArray())) {
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+    }
+  }
   auto const value = checkForInt ? checkedGet(a, key) : a->nvGet(key);
   if (!value) return 0;
   return !tvAsCVarRef(value).isNull();
 }
 
-#define HELPER_TABLE(m)                         \
-  /* name           keyType       checkForInt */\
-  m(arrayIssetS,    KeyType::Str,   false)      \
-  m(arrayIssetSi,   KeyType::Str,    true)      \
-  m(arrayIssetI,    KeyType::Int,   false)
+#define HELPER_TABLE(m)                                         \
+  /* name           keyType       checkForInt  converted      */\
+  m(arrayIssetS,    KeyType::Str,   false,      false)          \
+  m(arrayIssetSi,   KeyType::Str,    true,      false)          \
+  m(arrayIssetI,    KeyType::Int,   false,      false)          \
+  m(arrayIssetIc,   KeyType::Int,   false,      true)
 
-#define ISSET(nm, keyType, checkForInt)                                 \
+#define ISSET(nm, keyType, checkForInt, converted)                      \
   uint64_t nm(ArrayData* a, key_type<keyType> key) {                    \
-    return arrayIssetImpl<keyType, checkForInt>(a, key);                \
+    return arrayIssetImpl<keyType, checkForInt, converted>(a, key);     \
   }
 namespace MInstrHelpers {
 HELPER_TABLE(ISSET)
@@ -2071,10 +2096,11 @@ void HhbcTranslator::MInstrTranslator::emitArrayIsset() {
   SSATmp* key = getKey();
   KeyType keyType;
   bool checkForInt;
-  m_ht.checkStrictlyInteger(key, keyType, checkForInt);
+  bool converted;
+  m_ht.checkStrictlyInteger(key, keyType, checkForInt, converted);
 
   typedef uint64_t (*OpFunc)(ArrayData*, TypedValue*);
-  BUILD_OPTAB(keyType, checkForInt);
+  BUILD_OPTAB(keyType, checkForInt, converted);
   assert(m_base->isA(Type::Arr));
   m_result = gen(ArrayIsset, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
@@ -2210,7 +2236,7 @@ static inline ArrayData* checkedSet(ArrayData* a,
   not_reached();
 }
 
-template<KeyType keyType, bool checkForInt, bool setRef>
+template<KeyType keyType, bool checkForInt, bool converted, bool setRef>
 static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
     ArrayData* a, key_type<keyType> key,
     Cell value, RefData* ref) {
@@ -2220,23 +2246,31 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
   const bool copy = a->hasMultipleRefs();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : uncheckedSet(a, key, value, copy);
+  if (converted) {
+    if (UNLIKELY(ret->isIntMapArray())) {
+      // warn after operation since there may have been a copy
+      MixedArray::downgradeAndWarn(ret, MixedArray::Reason::kNumericString);
+    }
+  }
 
   return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);
 }
 
 #define HELPER_TABLE(m)                                    \
-  /* name        keyType        checkForInt setRef */      \
-  m(arraySetS,   KeyType::Str,   false,     false)         \
-  m(arraySetSi,  KeyType::Str,    true,     false)         \
-  m(arraySetI,   KeyType::Int,   false,     false)         \
-  m(arraySetSR,  KeyType::Str,   false,      true)         \
-  m(arraySetSiR, KeyType::Str,    true,      true)         \
-  m(arraySetIR,  KeyType::Int,   false,      true)
+  /* name        keyType        checkForInt  converted  setRef */       \
+  m(arraySetS,   KeyType::Str,   false,      false,     false)          \
+  m(arraySetSi,  KeyType::Str,    true,      false,     false)          \
+  m(arraySetI,   KeyType::Int,   false,      false,     false)          \
+  m(arraySetIc,  KeyType::Int,   false,       true,     false)          \
+  m(arraySetSR,  KeyType::Str,   false,      false,     true)           \
+  m(arraySetSiR, KeyType::Str,    true,      false,     true)           \
+  m(arraySetIR,  KeyType::Int,   false,      false,     true)           \
+  m(arraySetIRc, KeyType::Int,   false,       true,     true)
 
-#define ELEM(nm, keyType, checkForInt, setRef)                        \
+#define ELEM(nm, keyType, checkForInt, converted, setRef)             \
   typename ShuffleReturn<setRef>::return_type                         \
   nm(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) { \
-    return arraySetImpl<keyType, checkForInt, setRef>(                \
+    return arraySetImpl<keyType, checkForInt, converted, setRef>(     \
       a, key, value, ref);                                            \
   }
 namespace MInstrHelpers {
@@ -2252,11 +2286,12 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
   assert(value->type().notBoxed());
   KeyType keyType;
   bool checkForInt;
-  m_ht.checkStrictlyInteger(key, keyType, checkForInt);
+  bool converted;
+  m_ht.checkStrictlyInteger(key, keyType, checkForInt, converted);
   const DynLocation& base = *m_ni.inputs[m_mii.valCount()];
   bool setRef = base.rtt.isBoxed();
   typedef ArrayData* (*OpFunc)(ArrayData*, TypedValue*, TypedValue, RefData*);
-  BUILD_OPTAB(keyType, checkForInt, setRef);
+  BUILD_OPTAB(keyType, checkForInt, converted, setRef);
 
   // No catch trace below because the helper can't throw. It may reenter to
   // call destructors so it has a sync point in nativecalls.cpp, but exceptions

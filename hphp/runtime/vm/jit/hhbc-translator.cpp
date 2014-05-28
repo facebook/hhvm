@@ -2035,13 +2035,18 @@ void HhbcTranslator::emitArrayIdx() {
 
   KeyType arrayKeyType;
   bool checkForInt;
-  checkStrictlyInteger(key, arrayKeyType, checkForInt);
+  bool converted;
+  checkStrictlyInteger(key, arrayKeyType, checkForInt, converted);
 
   TCA opFunc;
   if (checkForInt) {
     opFunc = (TCA)&arrayIdxSi;
   } else if (KeyType::Int == arrayKeyType) {
-    opFunc = (TCA)&arrayIdxI;
+    if (converted) {
+      opFunc = (TCA)&arrayIdxIc;
+    } else {
+      opFunc = (TCA)&arrayIdxI;
+    }
   } else {
     assert(KeyType::Str == arrayKeyType);
     opFunc = (TCA)&arrayIdxS;
@@ -6502,8 +6507,9 @@ void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
 }
 
 void HhbcTranslator::checkStrictlyInteger(
-    SSATmp*& key, KeyType& keyType, bool& checkForInt) {
+    SSATmp*& key, KeyType& keyType, bool& checkForInt, bool& converted) {
   checkForInt = false;
+  converted = false;
   if (key->isA(Type::Int)) {
     keyType = KeyType::Int;
   } else {
@@ -6512,6 +6518,7 @@ void HhbcTranslator::checkStrictlyInteger(
     if (key->isConst()) {
       int64_t i;
       if (key->strVal()->isStrictlyInteger(i)) {
+        converted = true;
         keyType = KeyType::Int;
         key = cns(i);
       }

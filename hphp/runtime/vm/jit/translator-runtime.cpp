@@ -449,6 +449,13 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
+TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
+  if (UNLIKELY(a->isIntMapArray())) {
+    MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+  }
+  return arrayIdxI(a, key, def);
+}
+
 const StaticString s_idx("idx");
 
 TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {

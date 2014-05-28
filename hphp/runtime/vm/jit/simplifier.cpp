@@ -487,6 +487,9 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
     case IsWaitHandle:           return simplifyIsWaitHandle(inst);
 
+    case Count:       return simplifyCount(inst);
+    case CountArray:  return simplifyCountArray(inst);
+
     case CallBuiltin: return simplifyCallBuiltin(inst);
 
     default:
@@ -2034,6 +2037,43 @@ SSATmp* Simplifier::simplifyLdPackedArrayElem(const IRInstruction* inst) {
 }
 
 const StaticString s_isEmpty("isEmpty");
+
+SSATmp* Simplifier::simplifyCount(const IRInstruction* inst) {
+  auto const val = inst->src(0);
+  auto const ty = val->type();
+
+  if (ty <= Type::Null) return cns(0);
+
+  auto const oneTy = Type::Bool | Type::Int | Type::Dbl | Type::Str | Type::Res;
+  if (ty <= oneTy) return cns(1);
+
+  if (ty <= Type::Arr) return gen(CountArray, val);
+
+  if (ty < Type::Obj) {
+    auto const cls = ty.getClass();
+    if (!typeMightRelax(val) && cls != nullptr && cls->isCollectionClass()) {
+      return gen(CountCollection, val);
+    }
+    return nullptr;
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyCountArray(const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  auto const ty = src->type();
+
+  if (src->isConst()) return cns(src->arrVal()->size());
+
+  auto const notNvtw =
+    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kNvtwKind;
+
+  if (!typeMightRelax(src) && notNvtw) {
+    return gen(CountArrayFast, src);
+  }
+
+  return nullptr;
+}
 
 SSATmp* Simplifier::simplifyCallBuiltin(const IRInstruction* inst) {
   auto const callee = inst->extra<CallBuiltin>()->callee;

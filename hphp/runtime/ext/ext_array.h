@@ -188,6 +188,8 @@ Variant f_i18n_loc_get_error_code();
 
 Variant f_hphp_array_idx(const Variant& search, const Variant& key, const Variant& def);
 
+inline int64_t countHelper(TypedValue tv) { return f_count(tvAsVariant(&tv)); }
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -19,7 +19,9 @@
 
 #include "folly/Optional.h"
 
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
+
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
@@ -203,6 +205,8 @@ CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ZeroErrorLevel)
 CALL_OPCODE(RestoreErrorLevel)
+CALL_OPCODE(Count)
+CALL_OPCODE(CountArray)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
@@ -1965,6 +1969,20 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
                                    Stack::topOfStackOffset()]);
 
   emitServiceReq(m_mainCode, REQ_RESUME);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgCountArrayFast(IRInstruction* inst) {
+  auto const baseReg = x2a(srcLoc(0).reg());
+  auto const dstReg = x2a(dstLoc(0).reg());
+  m_as.  Ldr  (dstReg.W(), baseReg[ArrayData::offsetofSize()]);
+}
+
+void CodeGenerator::cgCountCollection(IRInstruction* inst) {
+  auto const baseReg = x2a(srcLoc(0).reg());
+  auto const dstReg = x2a(dstLoc(0).reg());
+  m_as.  Ldr  (dstReg.W(), baseReg[FAST_COLLECTION_SIZE_OFFSET]);
 }
 
 //////////////////////////////////////////////////////////////////////

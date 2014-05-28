@@ -3136,6 +3136,34 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   }
 }
 
+const StaticString s_count("count");
+
+SSATmp* HhbcTranslator::optimizedCallCount() {
+  auto const mode = top(Type::Int, 0);
+  auto const val = top(Type::Gen, 1);
+
+  // Bail if we're trying to do a recursive count()
+  if (!mode->isConst(0)) return nullptr;
+
+  return gen(Count, makeCatch(), val);
+}
+
+bool HhbcTranslator::optimizedFCallBuiltin(const Func* func, uint32_t numArgs) {
+  SSATmp* res = nullptr;
+  switch (numArgs) {
+    case 2:
+      if (func->name()->isame(s_count.get())) res = optimizedCallCount();
+      break;
+    default: break;
+  }
+
+  if (res == nullptr) return false;
+
+  for (int i = 0; i < numArgs; ++i) gen(DecRef, popC());
+  push(res);
+  return true;
+}
+
 void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
                                       uint32_t numNonDefault,
                                       int32_t funcId,
@@ -3144,6 +3172,8 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   const Func* callee = Unit::lookupFunc(ne);
 
   callee->validate();
+
+  if (optimizedFCallBuiltin(callee, numArgs)) return;
 
   /*
    * Spill args to stack.  Some of the arguments may be passed by

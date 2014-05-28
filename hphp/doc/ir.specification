@@ -1549,6 +1549,25 @@ InlinedFPAnchor S0:FramePtr
   because it is required by a either the VM for its ActRec or the routine
   itself for local storage. Is semantically equivalent to a Nop.
 
+D:Int = Count S0:Cell
+
+  Computes the number of elements in S0. The count of an array is the number of
+  elements it contains, without recursing into containers in the array.
+  Subtypes of Bool|Int|Dbl|Str|Res have a count of 1, subtypes of Null have a
+  count of 0. The count of objects that implement the Countable interface is
+  computed by returning the value of their count method. Objects that do not
+  implement Countable have a count of 1.
+
+D:Int = CountArray S0:Arr
+D:Int = CountArrayFast S0:Arr
+D:Int = CountCollection S0:Obj
+
+  Computes the number of elements in S0 using the same definition as Count, but
+  with a restriction on the input type.
+
+  CountArray expects any array. CountArrayFast expects an array whose kind is not
+  kNvtwKind. CountCollection expects a collection object.
+
 Nop
 
   Does nothing. It's sometimes useful for the simplifier to insert one of these

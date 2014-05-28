@@ -856,6 +856,10 @@ O(IncStatGrouped,                   ND, CStr CStr C(Int),                E|N) \
 O(RBTrace,                          ND, NA,                              E|N) \
 O(IncTransCounter,                  ND, NA,                                E) \
 O(IncProfCounter,                   ND, NA,                                E) \
+O(Count,                        D(Int), S(Cell),                        N|Er) \
+O(CountArray,                   D(Int), S(Arr),                         NF|N) \
+O(CountArrayFast,               D(Int), S(Arr),                           NF) \
+O(CountCollection,              D(Int), S(Obj),                           NF) \
 O(ArrayIdx,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \

@@ -309,6 +309,8 @@ CALL_OPCODE(InterfaceSupportsDbl)
 CALL_OPCODE(ZeroErrorLevel)
 CALL_OPCODE(RestoreErrorLevel)
 
+CALL_OPCODE(Count)
+
 CALL_OPCODE(SurpriseHook)
 CALL_OPCODE(FunctionExitSurpriseHook)
 
@@ -6112,6 +6114,32 @@ void CodeGenerator::cgProfileStr(IRInstruction* inst) {
       );
     }
   );
+}
+
+void CodeGenerator::cgCountArray(IRInstruction* inst) {
+  auto const baseReg = srcLoc(0).reg();
+  auto const dstReg  = dstLoc(0).reg();
+
+  m_as. cmpb(ArrayData::kNvtwKind, baseReg[ArrayData::offsetofKind()]);
+
+  unlikelyIfThenElse(CC_Z,
+    [&](Asm& a) { cgCallNative(a, inst); },
+    [&](Asm& a) { a.  loadl(baseReg[ArrayData::offsetofSize()], r32(dstReg)); }
+  );
+}
+
+void CodeGenerator::cgCountArrayFast(IRInstruction* inst) {
+  auto const baseReg = srcLoc(0).reg();
+  auto const dstReg  = dstLoc(0).reg();
+
+  m_as. loadl(baseReg[ArrayData::offsetofSize()], r32(dstReg));
+}
+
+void CodeGenerator::cgCountCollection(IRInstruction* inst) {
+  auto const baseReg = srcLoc(0).reg();
+  auto const dstReg  = dstLoc(0).reg();
+
+  m_as. loadl(baseReg[FAST_COLLECTION_SIZE_OFFSET], r32(dstReg));
 }
 
 void CodeGenerator::print() const {

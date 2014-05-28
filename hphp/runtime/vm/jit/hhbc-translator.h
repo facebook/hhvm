@@ -718,6 +718,9 @@ private:
   void emitProfiledGuard(Type t, const char* location, int32_t id, G doGuard,
                          L loadAddr);
 
+  bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs);
+  SSATmp* optimizedCallCount();
+
 private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff = -1);
   Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);

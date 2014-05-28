@@ -1334,6 +1334,8 @@ String string_uudecode(const char *src, int src_len) {
     }
 
     while (s < ee) {
+      if (s + 4 > e) goto err;
+
       *p++ = PHP_UU_DEC(*s) << 2 | PHP_UU_DEC(*(s + 1)) >> 4;
       *p++ = PHP_UU_DEC(*(s + 1)) << 4 | PHP_UU_DEC(*(s + 2)) >> 2;
       *p++ = PHP_UU_DEC(*(s + 2)) << 6 | PHP_UU_DEC(*(s + 3));

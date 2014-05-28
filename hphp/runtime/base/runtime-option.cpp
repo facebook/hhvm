@@ -345,6 +345,7 @@ bool RuntimeOption::CheckSymLink = true;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
+bool RuntimeOption::EnableZendSorting = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
@@ -1170,6 +1171,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.eval.enable_xhp", &EnableXHP);
     EnableZendCompat = Config::GetBool(ini, eval["EnableZendCompat"], false);
+    EnableZendSorting = Config::GetBool(ini, eval["EnableZendSorting"], false);
     TimeoutsUseWallTime = Config::GetBool(ini, eval["TimeoutsUseWallTime"], true);
     CheckFlushOnUserClose = Config::GetBool(ini, eval["CheckFlushOnUserClose"], true);
 

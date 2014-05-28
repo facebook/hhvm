@@ -528,7 +528,7 @@ O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),               E|CRc) \
 O(StProp,                           ND, S(Obj) C(Int) S(Gen),          E|CRc) \
-O(StCell,                           ND, S(PtrToGen) S(Gen),            E|CRc) \
+O(StCell,                           ND, S(PtrToGen) S(Gen),                E) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StGbl,                            ND, S(FramePtr) S(Gen),            E|CRc) \

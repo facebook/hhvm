@@ -240,7 +240,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   abstract public function getAttributesRecursive(): array;
 
-  abstract public function getAttributeRecursive(string $name);
+  abstract public function getAttributeRecursive($name);
 
   <<__Native>>
   public function getNumberOfParameters(): int;
@@ -517,7 +517,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     return $this->getAttributes();
   }
 
-  public function getAttributeRecursive(string $name) {
+  public function getAttributeRecursive($name) {
     return $this->getAttribute($name);
   }
 }
@@ -913,7 +913,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   <<__Native>>
   private function getPrototypeClassname(): string; // ?string
 
-  public function getAttributeRecursive(string $name) {
+  public function getAttributeRecursive($name) {
     $attrs = $this->getAttributes();
     if (isset($attrs[$name])) {
       return $attrs[$name];

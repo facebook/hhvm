@@ -70,7 +70,6 @@ const StaticString
   s_offsetUnset("offsetUnset"),
   s_s("s"),
   s_scalar("scalar"),
-  s_array("Array"),
   s_1("1"),
   s_unserialize("unserialize"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
@@ -462,7 +461,7 @@ String Variant::toStringHelper() const {
     assert(false); // Should be done in caller
     return m_data.pstr;
   case KindOfArray:   raise_notice("Array to string conversion");
-                      return s_array;
+                      return array_string;
   case KindOfObject:  return m_data.pobj->invokeToString();
   case KindOfResource: return m_data.pres->o_toString();
   case KindOfRef: return m_data.pref->var()->toString();

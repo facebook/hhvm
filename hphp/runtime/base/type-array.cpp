@@ -36,6 +36,7 @@ namespace HPHP {
 
 const Array null_array{};
 const Array empty_array{staticEmptyArray()};
+const StaticString array_string("Array");
 
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
@@ -277,7 +278,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
 String Array::toString() const {
   if (m_px == nullptr) return "";
   raise_notice("Array to string conversion");
-  return "Array";
+  return array_string;
 }
 
 Array &Array::merge(const Array& arr) {

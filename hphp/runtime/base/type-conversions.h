@@ -116,7 +116,7 @@ inline String toString(const ArrayData *v) {
   if (v) {
     raise_notice("Array to string conversion");
   }
-  return v ? "Array" : "";
+  return v ? static_cast<String>(array_string) : "";
 }
 inline String toString(const Array& v) { return toString(v.get());}
 inline String toString(ObjectData *v) {

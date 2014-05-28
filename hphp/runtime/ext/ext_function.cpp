@@ -92,7 +92,7 @@ bool f_is_callable(const Variant& v, bool syntax /* = false */,
     if (arr.size() != 2 ||
         &clsname == &null_variant ||
         &mthname == &null_variant) {
-      name = String("Array");
+      name = array_string;
       return false;
     }
 

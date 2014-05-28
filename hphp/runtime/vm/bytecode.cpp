@@ -5222,7 +5222,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetWithRefLM(IOP_ARGS) {
   DECODE_LA(local);
   if (!skip) {
     TypedValue* from = frame_local(m_fp, local);
-    tvAsVariant(base) = withRefBind(tvAsVariant(from));
+    tvAsVariant(base).setWithRef(tvAsVariant(from));
   }
   setHelperPost<0>(SETHELPERPOST_ARGS);
 }
@@ -5234,7 +5234,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetWithRefRM(IOP_ARGS) {
                            VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS);
   if (!skip) {
     TypedValue* from = m_stack.top();
-    tvAsVariant(base) = withRefBind(tvAsVariant(from));
+    tvAsVariant(base).setWithRef(tvAsVariant(from));
   }
   setHelperPost<0>(SETHELPERPOST_ARGS);
   m_stack.popTV();
@@ -6414,7 +6414,7 @@ OPTBLD_INLINE void ExecutionContext::iopWIterInit(IOP_ARGS) {
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   if (initIterator(pc, origPc, it, offset, c1)) {
-    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
   }
 }
 
@@ -6430,7 +6430,7 @@ OPTBLD_INLINE void ExecutionContext::iopWIterInitK(IOP_ARGS) {
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
   if (initIterator(pc, origPc, it, offset, c1)) {
-    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
     tvAsVariant(tv2) = it->arr().first();
   }
 }
@@ -6528,7 +6528,7 @@ OPTBLD_INLINE void ExecutionContext::iopWIterNext(IOP_ARGS) {
   TypedValue* tv1 = frame_local(m_fp, val);
   if (it->next()) {
     ITER_SKIP(offset);
-    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
   }
 }
 
@@ -6544,7 +6544,7 @@ OPTBLD_INLINE void ExecutionContext::iopWIterNextK(IOP_ARGS) {
   TypedValue* tv2 = frame_local(m_fp, key);
   if (it->next()) {
     ITER_SKIP(offset);
-    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
     tvAsVariant(tv2) = it->arr().first();
   }
 }

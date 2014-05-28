@@ -105,7 +105,6 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(RefData *r);
 
   /* implicit */ Variant(CVarStrongBind v);
-  /* implicit */ Variant(CVarWithRefBind v);
 
   /*
    * Creation constructor from ArrayInit that avoids a null check.
@@ -527,8 +526,6 @@ struct Variant : private TypedValue {
    */
   Variant &assign(const Variant& v);
   Variant &assignRef(Variant& v);
-
-  Variant &operator=(CVarWithRefBind v) { return setWithRef(variant(v)); }
 
   Variant &operator=(const StaticString &v) {
     set(v);
@@ -1021,11 +1018,9 @@ inline VRefParam directRef(const Variant& v) {
 }
 
 /*
-  these two classes are just to help choose the correct
-  overload.
+  this class is just to help choose the correct overload.
 */
 class VariantStrongBind { private: Variant m_var; };
-class VariantWithRefBind { private: Variant m_var; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR

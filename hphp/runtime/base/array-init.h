@@ -77,8 +77,6 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& set(CVarWithRefBind v) = delete;
-
   ArrayInit& setRef(Variant& v) = delete;
   ArrayInit& appendRef(Variant& v) {
     performOp([&]{ return MixedArray::AppendRef(m_data, v, false); });

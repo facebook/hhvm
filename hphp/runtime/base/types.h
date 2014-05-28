@@ -189,19 +189,14 @@ typedef const char * litstr; /* literal string */
 typedef const class VRefParamValue    &VRefParam;
 typedef const class RefResultValue    &RefResult;
 typedef const class VariantStrongBind &CVarStrongBind;
-typedef const class VariantWithRefBind&CVarWithRefBind;
 
 inline CVarStrongBind
 strongBind(const Variant& v)     { return *(VariantStrongBind*)&v; }
 inline CVarStrongBind
 strongBind(RefResult v)   { return *(VariantStrongBind*)&v; }
-inline CVarWithRefBind
-withRefBind(const Variant& v)    { return *(VariantWithRefBind*)&v; }
 
 inline const Variant&
 variant(CVarStrongBind v) { return *(Variant*)&v; }
-inline const Variant&
-variant(CVarWithRefBind v){ return *(Variant*)&v; }
 inline const Variant&
 variant(RefResult v)      { return *(Variant*)&v; }
 inline const Variant&

@@ -312,6 +312,21 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    * @return     mixed   The serialized representation of the ArrayObject.
    */
   public function serialize() {
+    /**
+     * This implementation is not compatible with PHP's. We cannot implement it
+     * because we lack a way to unserialize inline.
+
+      Correct implementation:
+
+      $props =
+        array_diff_key(get_object_vars($this), get_class_vars('ArrayObject'));
+
+      return
+        'x:' . serialize($this->flags) .
+        serialize($this->storage) . ';' .
+        'm:' . serialize($props);
+     */
+
     return serialize(array(
       'storage' => $this->storage,
       'flags' => $this->flags,
@@ -431,7 +446,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
     $this->iteratorClass = $data['iteratorClass'];
   }
 
-  public function __set (string $name, $value) {
+  public function __set ($name, $value) {
     if (!$this->hasProps()) {
       $this->$name = $value;
     } else {
@@ -469,5 +484,14 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
 
   private function hasProps() {
     return $this->flags & self::ARRAY_AS_PROPS;
+  }
+
+  public function __debugInfo() {
+    return array_merge(
+      array_diff_key(get_object_vars($this), get_class_vars('ArrayObject')),
+      array(
+        "\0ArrayObject\0storage" => $this->storage,
+      ),
+    );
   }
 }

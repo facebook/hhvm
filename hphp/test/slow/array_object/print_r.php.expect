@@ -1,0 +1,27 @@
+ArrayObject Object
+(
+    [bar] => baz
+    [storage:ArrayObject:private] => Array
+        (
+            [foo] => bar
+        )
+
+)
+ArrayObject Object
+(
+    [bar] => baz
+    [storage:ArrayObject:private] => Array
+        (
+            [foo] => bar
+        )
+
+)
+ArrayObject Object
+(
+    [storage:ArrayObject:private] => Array
+        (
+            [foo] => bar
+            [bar] => baz
+        )
+
+)

@@ -180,9 +180,9 @@ public:
   String readLine(int64_t maxlen = 0);
 
   /**
-   * Read one record a time. Returns a null string on failure or eof.
+   * Read one record a time. Returns a false on failure or eof.
    */
-  String readRecord(const String& delimiter, int64_t maxlen = 0);
+  Variant readRecord(const String& delimiter, int64_t maxlen = 0);
 
   /**
    * Read entire file and print it out.

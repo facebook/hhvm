@@ -627,9 +627,9 @@ String File::readLine(int64_t maxlen /* = 0 */) {
   return String(ret, total_copied, AttachString);
 }
 
-String File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
+Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
   if (eof() && m_writepos == m_readpos) {
-    return empty_string;
+    return false;
   }
 
   if (maxlen <= 0 || maxlen > CHUNK_SIZE) {

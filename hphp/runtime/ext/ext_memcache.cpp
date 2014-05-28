@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/zend-string.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -155,6 +156,17 @@ String static memcache_prepare_for_storage(const Variant& var, int &flag) {
   }
 }
 
+String static memcache_prepare_key(const String& var) {
+  auto data = var.get()->mutableData();
+  for (int i = 0; i < var.length(); i++) {
+    // This is a stupid encoding since it causes collisions but it matches php5
+    if (data[i] <= ' ') {
+      data[i] = '_';
+    }
+  }
+  return data;
+}
+
 Variant static memcache_fetch_from_storage(const char *payload,
                                            size_t payload_len,
                                            uint32_t flags) {
@@ -183,8 +195,10 @@ bool c_Memcache::t_add(const String& key, const Variant& var, int flag /*= 0*/,
 
   String serialized = memcache_prepare_for_storage(var, flag);
 
+  String serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_add(&m_memcache,
-                                        key.c_str(), key.length(),
+                                        serializedKey.c_str(),
+                                        serializedKey.length(),
                                         serialized.c_str(),
                                         serialized.length(),
                                         expire, flag);
@@ -199,13 +213,14 @@ bool c_Memcache::t_set(const String& key, const Variant& var, int flag /*= 0*/,
     return false;
   }
 
-  String serialized = memcache_prepare_for_storage(var, flag);
+  String serializedKey = memcache_prepare_key(key);
+  String serializedVar = memcache_prepare_for_storage(var, flag);
 
   memcached_return_t ret = memcached_set(&m_memcache,
-                                        key.c_str(), key.length(),
-                                        serialized.c_str(),
-                                        serialized.length(),
-                                        expire, flag);
+                                         serializedKey.c_str(),
+                                         serializedKey.length(),
+                                         serializedVar.c_str(),
+                                         serializedVar.length(), expire, flag);
 
   if (ret == MEMCACHED_SUCCESS) {
     return true;
@@ -214,17 +229,19 @@ bool c_Memcache::t_set(const String& key, const Variant& var, int flag /*= 0*/,
   return false;
 }
 
-bool c_Memcache::t_replace(const String& key, const Variant& var, int flag /*= 0*/,
-                           int expire /*= 0*/) {
+bool c_Memcache::t_replace(const String& key, const Variant& var,
+                           int flag /*= 0*/, int expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
   }
 
+  String serializedKey = memcache_prepare_key(key);
   String serialized = memcache_prepare_for_storage(var, flag);
 
   memcached_return_t ret = memcached_replace(&m_memcache,
-                                             key.c_str(), key.length(),
+                                             serializedKey.c_str(),
+                                             serializedKey.length(),
                                              serialized.c_str(),
                                              serialized.length(),
                                              expire, flag);
@@ -241,7 +258,9 @@ Variant c_Memcache::t_get(const Variant& key, VRefParam flags /*= null*/) {
     key_len.reserve(keyArr.size());
 
     for (ArrayIter iter(keyArr); iter; ++iter) {
-      real_keys.push_back(const_cast<char *>(iter.second().toString().c_str()));
+      auto key = iter.second().toString();
+      String serializedKey = memcache_prepare_key(key);
+      real_keys.push_back(const_cast<char *>(serializedKey.c_str()));
       key_len.push_back(iter.second().toString().length());
     }
 
@@ -285,14 +304,14 @@ Variant c_Memcache::t_get(const Variant& key, VRefParam flags /*= null*/) {
     uint32_t flags = 0;
 
     memcached_return_t ret;
-    String skey = key.toString();
+    String serializedKey = memcache_prepare_key(key.toString());
 
-    if (skey.length() == 0) {
+    if (serializedKey.length() == 0) {
       return false;
     }
 
-    payload = memcached_get(&m_memcache, skey.c_str(), skey.length(),
-                            &payload_len, &flags, &ret);
+    payload = memcached_get(&m_memcache, serializedKey.c_str(),
+                            serializedKey.length(), &payload_len, &flags, &ret);
 
     /* This is for historical reasons from libmemcached*/
     if (ret == MEMCACHED_END) {
@@ -317,8 +336,10 @@ bool c_Memcache::t_delete(const String& key, int expire /*= 0*/) {
     return false;
   }
 
+  String serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_delete(&m_memcache,
-                                            key.c_str(), key.length(),
+                                            serializedKey.c_str(),
+                                            serializedKey.length(),
                                             expire);
   return (ret == MEMCACHED_SUCCESS);
 }
@@ -330,8 +351,11 @@ int64_t c_Memcache::t_increment(const String& key, int offset /*= 1*/) {
   }
 
   uint64_t value;
-  memcached_return_t ret = memcached_increment(&m_memcache, key.c_str(),
-                                              key.length(), offset, &value);
+  String serializedKey = memcache_prepare_key(key);
+  memcached_return_t ret = memcached_increment(&m_memcache,
+                                               serializedKey.c_str(),
+                                               serializedKey.length(), offset,
+                                               &value);
 
   if (ret == MEMCACHED_SUCCESS) {
     return (int64_t)value;
@@ -347,8 +371,11 @@ int64_t c_Memcache::t_decrement(const String& key, int offset /*= 1*/) {
   }
 
   uint64_t value;
-  memcached_return_t ret = memcached_decrement(&m_memcache, key.c_str(),
-                                              key.length(), offset, &value);
+  String serializedKey = memcache_prepare_key(key);
+  memcached_return_t ret = memcached_decrement(&m_memcache,
+                                               serializedKey.c_str(),
+                                               serializedKey.length(), offset,
+                                               &value);
 
   if (ret == MEMCACHED_SUCCESS) {
     return (int64_t)value;
@@ -587,20 +614,23 @@ Object f_memcache_pconnect(const String& host, int port /* = 0 */,
   return f_memcache_connect(host, port, timeout, timeoutms);
 }
 
-bool f_memcache_add(const Object& memcache, const String& key, const Variant& var,
-                    int flag /* = 0 */, int expire /* = 0 */) {
+bool f_memcache_add(const Object& memcache, const String& key,
+                    const Variant& var, int flag /* = 0 */,
+                    int expire /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_add(key, var, flag, expire);
 }
 
-bool f_memcache_set(const Object& memcache, const String& key, const Variant& var,
-                    int flag /* = 0 */, int expire /* = 0 */) {
+bool f_memcache_set(const Object& memcache, const String& key,
+                    const Variant& var, int flag /* = 0 */,
+                    int expire /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_set(key, var, flag, expire);
 }
 
-bool f_memcache_replace(const Object& memcache, const String& key, const Variant& var,
-                        int flag /* = 0 */, int expire /* = 0 */) {
+bool f_memcache_replace(const Object& memcache, const String& key,
+                        const Variant& var, int flag /* = 0 */,
+                        int expire /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_replace(key, var, flag, expire);
 }
@@ -611,7 +641,8 @@ Variant f_memcache_get(const Object& memcache, const Variant& key,
   return memcache_obj->t_get(key, flags);
 }
 
-bool f_memcache_delete(const Object& memcache, const String& key, int expire /* = 0 */) {
+bool f_memcache_delete(const Object& memcache, const String& key,
+                       int expire /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_delete(key, expire);
 }
@@ -660,7 +691,8 @@ bool f_memcache_set_compress_threshold(const Object& memcache, int threshold,
   return memcache_obj->t_setcompressthreshold(threshold, min_savings);
 }
 
-Array f_memcache_get_stats(const Object& memcache, const String& type /* = null_string */,
+Array f_memcache_get_stats(const Object& memcache,
+                           const String& type /* = null_string */,
                            int slabid /* = 0 */, int limit /* = 100 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_getstats(type, slabid, limit);

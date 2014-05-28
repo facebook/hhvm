@@ -1737,11 +1737,13 @@ MCGenerator::translateWork(const TranslArgs& args) {
   TransKind  transKindToRecord = TransKind::Interp;
   UndoMarker undoA(code.main());
   UndoMarker undoAstubs(code.stubs());
+  UndoMarker undoAunused(code.unused());
   UndoMarker undoGlobalData(code.data());
 
   auto resetState = [&] {
     undoA.undo();
     undoAstubs.undo();
+    undoAunused.undo();
     undoGlobalData.undo();
     m_fixups.clear();
     m_bcMap.clear();

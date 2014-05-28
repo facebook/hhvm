@@ -148,6 +148,7 @@ int RuntimeOption::ResponseQueueCount = 0;
 int RuntimeOption::ServerGracefulShutdownWait = 0;
 bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
+bool RuntimeOption::ServerKillOnSIGTERM = false;
 int RuntimeOption::ServerDanglingWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
@@ -985,6 +986,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     ServerGracefulShutdownWait = Config::GetInt16(ini, server["GracefulShutdownWait"], 0);
     ServerHarshShutdown = Config::GetBool(ini, server["HarshShutdown"], true);
     ServerEvilShutdown = Config::GetBool(ini, server["EvilShutdown"], true);
+    ServerKillOnSIGTERM = Config::GetBool(ini, server["KillOnSIGTERM"], false);
     ServerDanglingWait = Config::GetInt16(ini, server["DanglingWait"], 0);
     ServerShutdownListenWait = Config::GetInt16(ini, server["ShutdownListenWait"], 0);
     ServerShutdownListenNoWork = Config::GetInt16(ini, server["ShutdownListenNoWork"], -1);

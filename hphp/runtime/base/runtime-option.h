@@ -150,6 +150,7 @@ public:
   static int ServerDanglingWait;
   static bool ServerHarshShutdown;
   static bool ServerEvilShutdown;
+  static bool ServerKillOnSIGTERM;
   static int ServerShutdownListenWait;
   static int ServerShutdownListenNoWork;
   static std::vector<std::string> ServerNextProtocols;

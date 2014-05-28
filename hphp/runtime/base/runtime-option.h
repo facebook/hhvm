@@ -441,7 +441,7 @@ public:
   F(uint32_t, HHIRAlwaysInlineMaxCost, 10)                              \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
-  F(bool, HHIRInlineFrameOpts,         true)                            \
+  F(bool, HHIRInlineFrameOpts,         false)                           \
   /* 1 (the default) gives most asserts. 2 adds less commonly           \
    * useful/more expensive asserts. */                                  \
   F(uint32_t, HHIRGenerateAsserts,     debug)                           \

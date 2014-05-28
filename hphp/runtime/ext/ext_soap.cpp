@@ -2793,7 +2793,7 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
     oneway = false;
   }
   if (oneway) {
-    return "";
+    return empty_string;
   }
   return response.detach();
 }

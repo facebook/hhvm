@@ -445,7 +445,7 @@ private:
 String f_shell_exec(const String& cmd) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(cmd.c_str());
-  if (!fp) return "";
+  if (!fp) return empty_string;
   StringBuffer sbuf;
   sbuf.read(fp);
   return sbuf.detach();
@@ -455,7 +455,7 @@ String f_exec(const String& command, VRefParam output /* = null */,
               VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command.c_str());
-  if (!fp) return "";
+  if (!fp) return empty_string;
   StringBuffer sbuf;
   sbuf.read(fp);
 
@@ -502,7 +502,7 @@ void f_passthru(const String& command, VRefParam return_var /* = null */) {
 String f_system(const String& command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command.c_str());
-  if (!fp) return "";
+  if (!fp) return empty_string;
   StringBuffer sbuf;
   if (fp) {
     sbuf.read(fp);

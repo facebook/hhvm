@@ -228,14 +228,14 @@ static Variant HHVM_FUNCTION(get_cfg_var, const String& option) {
 static String HHVM_FUNCTION(get_current_user) {
   int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
   if (pwbuflen < 1) {
-    return "";
+    return empty_string;
   }
   char *pwbuf = (char*)smart_malloc(pwbuflen);
   struct passwd pw;
   struct passwd *retpwptr = NULL;
   if (getpwuid_r(getuid(), &pw, pwbuf, pwbuflen, &retpwptr) != 0) {
     smart_free(pwbuf);
-    return "";
+    return empty_string;
   }
   String ret(pw.pw_name, CopyString);
   smart_free(pwbuf);

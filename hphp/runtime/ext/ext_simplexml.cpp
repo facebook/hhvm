@@ -1413,7 +1413,7 @@ String c_SimpleXMLElement::t_getname() {
   if (node) {
     return String((char*)node->name);
   }
-  return "";
+  return empty_string;
 }
 
 Object c_SimpleXMLElement::t_attributes(const String& ns /* = "" */,

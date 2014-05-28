@@ -315,7 +315,7 @@ String c_SQLite3::ti_escapestring(const String& sql) {
       return sret;
     }
   }
-  return "";
+  return empty_string;
 }
 
 Variant c_SQLite3::t_prepare(const String& sql) {

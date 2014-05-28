@@ -73,7 +73,7 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return "PGO profiling translations are still enabled.";
   }
 
-  return "";
+  return empty_string;
 }
 
 static class MiscExtension : public Extension {

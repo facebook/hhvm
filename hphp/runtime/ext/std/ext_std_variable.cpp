@@ -220,7 +220,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     assert(false);
     break;
   }
-  return "";
+  return empty_string;
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,

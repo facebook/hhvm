@@ -545,7 +545,7 @@ Variant f_idate(const String& format,
 
 Variant f_date(const String& format,
                int64_t timestamp /* = TimeStamp::Current() */) {
-  if (format.empty()) return "";
+  if (format.empty()) return empty_string;
   String ret = DateTime(timestamp, false).toString(format, false);
   if (ret.isNull()) return false;
   return ret;

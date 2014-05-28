@@ -209,7 +209,7 @@ String PageletTransport::getResults(
         long long nanosecs = (timeout_ms % 1000) * 1000000;
         if (!wait(seconds, nanosecs)) {
           code = -1;
-          return "";
+          return empty_string;
         }
       } else {
         wait();

@@ -1122,7 +1122,7 @@ Variant f_mb_list_mime_names(const String& name /* = null_string */) {
         }
         break;
       }
-      return "";
+      return empty_string;
     } else {
       return false;
     }

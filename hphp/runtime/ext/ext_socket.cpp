@@ -1207,7 +1207,7 @@ String ipaddr_convert(struct sockaddr *addr, int addrlen) {
 
   if (error) {
     raise_warning("%s", gai_strerror(error));
-    return "";
+    return empty_string;
   }
   return String(buffer, CopyString);
 }

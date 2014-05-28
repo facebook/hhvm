@@ -2765,24 +2765,6 @@ void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   emitLea(m_as, fp[off], dst);
 }
 
-void CodeGenerator::cgStashResumableSP(IRInstruction* inst) {
-  auto fpReg = srcLoc(0).reg();
-  auto spReg = srcLoc(1).reg();
-
-  ssize_t stashLoc = Resumable::stashedSpOff() - Resumable::arOff();
-
-  m_as.    storeq(spReg, fpReg[stashLoc]);
-}
-
-void CodeGenerator::cgReDefResumableSP(IRInstruction* inst) {
-  auto fpReg = srcLoc(1).reg();
-  auto dstReg = dstLoc(0).reg();
-
-  ssize_t stashLoc = Resumable::stashedSpOff() - Resumable::arOff();
-
-  m_as.    loadq (fpReg[stashLoc], dstReg);
-}
-
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
   auto ptr = srcLoc(0).reg();
   auto off = AROFF(m_sfp);

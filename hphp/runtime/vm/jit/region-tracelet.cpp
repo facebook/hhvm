@@ -361,6 +361,11 @@ bool RegionFormer::tryInline() {
     return false;
   }
 
+  if (resumed()) {
+    // Do not inline from a resumed function
+    return false;
+  }
+
   if (curFunc()->isPseudoMain()) {
     // TODO(#4238160): Hack inlining into pseudomain callsites is still buggy
     return false;

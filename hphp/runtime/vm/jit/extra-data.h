@@ -656,20 +656,6 @@ struct InterpOneData : IRExtraData {
 };
 
 /*
- * Important during offset to determine if crossing inline function will also
- * cross function call boundary.
- */
-struct ReDefResumableSPData : IRExtraData {
-  explicit ReDefResumableSPData(bool spans) : spansCall(spans) {}
-
-  std::string show() const {
-    return folly::to<std::string>(spansCall);
-  }
-
-  bool spansCall;
-};
-
-/*
  * StackOffset to adjust stack pointer by and boolean indicating whether or not
  * the stack pointer in src1 used for analysis spans a function call.
  *
@@ -872,7 +858,6 @@ X(CastStk,                      StackOffset);
 X(CoerceStk,                    StackOffset);
 X(AssertStk,                    StackOffset);
 X(ReDefSP,                      ReDefSPData);
-X(ReDefResumableSP,             ReDefResumableSPData);
 X(DefSP,                        StackOffset);
 X(DefInlineSP,                  StackOffset);
 X(LdStack,                      StackOffset);

@@ -3158,6 +3158,11 @@ bool shouldAnalyzeCallee(const Tracelet& tlet,
 
   if (!RuntimeOption::RepoAuthoritative) return false;
 
+  if (liveFrame()->resumed()) {
+    // Do not inline from a resumed function
+    return false;
+  }
+
   if (pushOp != OpFPushFuncD &&
       pushOp != OpFPushObjMethodD &&
       pushOp != OpFPushCtorD &&

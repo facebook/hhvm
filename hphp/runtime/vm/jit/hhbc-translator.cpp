@@ -244,7 +244,6 @@ size_t HhbcTranslator::spOffset() const {
  *   // sp_pre = some SpillStack, or maybe the DefSP
  *
  *   // FPI region:
- *           [ StashResumableSP fp0 sp0 ]
  *     sp1   = SpillStack sp_pre, ...
  *     sp2   = SpillFrame sp1, ...
  *     // ... possibly more spillstacks due to argument expressions
@@ -256,7 +255,6 @@ size_t HhbcTranslator::spOffset() const {
  *
  *           = InlineReturn fp2
  *
- * [ sp5  = ReDefResumableSP<spansCall> sp1 fp0     ]
  * [ sp5  = ReDefSP<frameOffset,spOffset,spansCall> sp1 fp0 ]
  *
  * The rest of the code then depends on sp5, and not any of the StkPtr
@@ -270,13 +268,8 @@ size_t HhbcTranslator::spOffset() const {
  * become PassSP and PassFP respectively to avoid the need to relabel inlined
  * IR instructions that refer to them.
  *
- * In the case of generators StashResumableSP and ReDefResumableSP are used to
- * store/extract the value of the StkPtr from a field in the continuation class.
- * This behavior is important because the StkPtr cannot be computed from the
- * FramePtr and if a call occurs it cannot live across the FCall in a register.
- *
- * ReDefSP and ReDefResumableSP both take sp1, the stack pointer from before the
- * inlined frame.  While this SSATmp may be dead if an FCall occurs in the
+ * ReDefSP takes sp1, the stack pointer from before the inlined frame.
+ * While this SSATmp may be dead if an FCall occurs in the
  * inlined frame it is still useful for determining stack types in the
  * simplifier.  Additionally these instructions both take an extradata
  * `spansCall' which is true iff an FCall occurs anywhere between the start and
@@ -2484,10 +2477,6 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
   auto actualStack = spillStack();
   auto returnSp = actualStack;
 
-  if (resumed()) {
-    gen(StashResumableSP, m_irb->fp(), m_irb->sp());
-  }
-
   m_fpiStack.emplace(returnSp, m_irb->spOffset());
 
   ActRecInfo info;
@@ -3299,6 +3288,8 @@ void HhbcTranslator::emitEndInlinedCommon() {
   assert(!m_fpiActiveStack.empty());
   assert(!curFunc()->isPseudoMain());
 
+  assert(!resumed());
+
   emitDecRefLocalsInline();
 
   if (curFunc()->mayHaveThis()) {
@@ -3318,21 +3309,14 @@ void HhbcTranslator::emitEndInlinedCommon() {
   m_fpiActiveStack.pop();
 
   updateMarker();
-  // See the comment in beginInlining about generator frames.
-  if (resumed()) {
-    gen(ReDefResumableSP,
-        ReDefResumableSPData(m_irb->inlinedFrameSpansCall()),
-        m_irb->sp(), m_irb->fp());
-  } else {
-    smart::vector<ReDefSPData::Frame> frames;
-    m_irb->state().forEachFrame([&frames](SSATmp* fp, int32_t off) {
-      frames.emplace_back(frameRoot(fp->inst())->dst(), off);
-    });
-    gen(ReDefSP, ReDefSPData(frames.size(), frames.data(),
-                             m_irb->spOffset(),
-                             m_irb->inlinedFrameSpansCall()),
-        m_irb->sp(), m_irb->fp());
-  }
+  smart::vector<ReDefSPData::Frame> frames;
+  m_irb->state().forEachFrame([&frames](SSATmp* fp, int32_t off) {
+    frames.emplace_back(frameRoot(fp->inst())->dst(), off);
+  });
+  gen(ReDefSP, ReDefSPData(frames.size(), frames.data(),
+                           m_irb->spOffset(),
+                           m_irb->inlinedFrameSpansCall()),
+      m_irb->sp(), m_irb->fp());
 
   /*
    * After the end of inlining, we are restoring to a previously

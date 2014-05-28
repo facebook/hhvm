@@ -48,16 +48,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case DefSP:
     return StackValueInfo { inst, Type::StackElem };
 
-  case ReDefResumableSP: {
-    auto const extra = inst->extra<ReDefResumableSP>();
-    auto info = getStackValue(inst->src(0), index);
-    if (extra->spansCall) info.spansCall = true;
-    return info;
-  }
-
-  case StashResumableSP:
-    return getStackValue(inst->src(1), index);
-
   case ReDefSP: {
     auto const extra = inst->extra<ReDefSP>();
     auto info = getStackValue(inst->src(0), index);

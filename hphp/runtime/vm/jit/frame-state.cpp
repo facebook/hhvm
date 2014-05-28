@@ -100,10 +100,6 @@ void FrameState::update(const IRInstruction* inst) {
     m_fpValue = inst->dst();
     break;
 
-  case ReDefResumableSP:
-    m_spValue = inst->dst();
-    break;
-
   case ReDefSP:
     m_spValue = inst->dst();
     m_spOffset = inst->extra<ReDefSP>()->spOffset;

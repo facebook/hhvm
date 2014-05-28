@@ -39,7 +39,6 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
   for (; first != last; ++first) {
     switch (first->op()) {
     case ReDefSP:
-    case ReDefResumableSP:
     case DecRef:
     case DecRefNZ:
     case IncRef:

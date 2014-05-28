@@ -2262,7 +2262,7 @@ static gdImagePtr _php_image_create_from(const String& filename,
                                          gdImagePtr(*func_p)(),
                                          gdImagePtr(*ioctx_func_p)()) {
   JIT::VMRegAnchor _;
-    gdImagePtr im = nullptr;
+  gdImagePtr im = nullptr;
 #ifdef HAVE_GD_JPG
   // long ignore_warning;
 #endif
@@ -2456,7 +2456,7 @@ static int _php_image_type (char data[8]) {
 #ifdef HAVE_LIBGD15
 gdImagePtr _php_image_create_from_string(const String& image, char *tn,
                                          gdImagePtr (*ioctx_func_p)()) {
-  gdImagePtr im;
+  JIT::VMRegAnchor _;
   gdIOCtx *io_ctx;
 
   io_ctx = gdNewDynamicCtxEx(image.length(), (char *)image.c_str(), 0);
@@ -2465,7 +2465,7 @@ gdImagePtr _php_image_create_from_string(const String& image, char *tn,
     return NULL;
   }
 
-  im = (*(gdImagePtr (*)(gdIOCtx *))ioctx_func_p)(io_ctx);
+  gdImagePtr im = (*(gdImagePtr (*)(gdIOCtx *))ioctx_func_p)(io_ctx);
   if (!im) {
     raise_warning("Passed data is not in '%s' format", tn);
 #if HAVE_LIBGD204

@@ -543,25 +543,42 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * Constructs a new ReflectionMethod.
    *
+   * Format 1:
+   *
    * @cls        mixed   Classname or object (instance of the class) that
    *                     contains the method.
-   * @name       mixed   Name of the method.
+   * @name       string  Name of the method.
+   *
+   * Format 2:
+   *
+   * @class_and_method string  Class name and method, separated by ::
    */
-  public function __construct(mixed $cls, string $name = '') {
-    if (!$name && is_string($cls)) {
-      $arr = explode('::', $cls, 3);
+  public function __construct(...) {
+    $args = func_get_args();
+    if (count($args) == 0 || count($args) > 2) {
+      throw new Exception(
+        'ReflectionMethod::__construct() takes either 1 or 2 arguments');
+    }
+
+    if (count($args) == 1) {
+      $arr = explode('::', $args[0], 3);
       if (count($arr) !== 2) {
         throw new ReflectionException("$cls is not a valid method name");
       }
       list($cls, $name) = $arr;
       $classname = $cls;
     } else {
+      $cls = $args[0];
+      $name = (string) $args[1];
+
       $classname = is_object($cls) ? get_class($cls) : $cls;
+      $method = $args[1];
     }
 
     $this->originalClass = $classname;
-    if (!$this->__init($cls, $name)) {
-      throw new ReflectionException("Method $classname::$name does not exist");
+    if (!$this->__init($cls, (string) $name)) {
+      throw new ReflectionException(
+        "Method $classname::$name() does not exist");
     }
   }
 

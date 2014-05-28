@@ -1550,8 +1550,6 @@ struct PropertyAccessor {
   bool test_isset;
 };
 
-const StaticString s_object_value_omitted("(object value omitted)");
-
 class PropertyAccessorMap : private hphp_const_char_imap<PropertyAccessor*> {
 public:
   explicit PropertyAccessorMap(PropertyAccessor* props,
@@ -1589,18 +1587,6 @@ public:
     if (iter == end()) return false;
     return !iter->second->test_isset &&
       !iter->second->getter(obj).isNull();
-  }
-
-  Array debugInfo(ObjectData* obj) {
-    Array ret;
-    for (auto it : *this) {
-      auto value = it.second->getter(obj);
-      if (value.isObject()) {
-        value = s_object_value_omitted;
-      }
-      ret.set(String(it.first, CopyString), value);
-    }
-    return ret;
   }
 };
 
@@ -1992,10 +1978,6 @@ Variant c_DOMNode::t___set(Variant name, Variant value) {
 
 bool c_DOMNode::t___isset(Variant name) {
   return domnode_properties_map.isset(this, name.toString());
-}
-
-Array c_DOMNode::t___debuginfo() {
-  return domnode_properties_map.debugInfo(this);
 }
 
 Variant c_DOMNode::t_appendchild(const Object& newnode) {
@@ -2490,7 +2472,7 @@ static Variant domattr_name_read(const Object& obj) {
 }
 
 static Variant domattr_specified_read(const Object& obj) {
-  /* T O D O */
+  /* TODO */
   return true;
 }
 
@@ -2565,10 +2547,6 @@ bool c_DOMAttr::t___isset(Variant name) {
   return domattr_properties_map.isset(this, name.toString());
 }
 
-Array c_DOMAttr::t___debuginfo() {
-  return domattr_properties_map.debugInfo(this);
-}
-
 bool c_DOMAttr::t_isid() {
   xmlAttrPtr attrp = (xmlAttrPtr)m_node;
   return attrp->atype == XML_ATTRIBUTE_ID;
@@ -2628,10 +2606,6 @@ Variant c_DOMCharacterData::t___set(Variant name, Variant value) {
 
 bool c_DOMCharacterData::t___isset(Variant name) {
   return domcharacterdata_properties_map.isset(this, name.toString());
-}
-
-Array c_DOMCharacterData::t___debuginfo() {
-  return domcharacterdata_properties_map.debugInfo(this);
 }
 
 bool c_DOMCharacterData::t_appenddata(const String& arg) {
@@ -2830,10 +2804,6 @@ Variant c_DOMText::t___set(Variant name, Variant value) {
 
 bool c_DOMText::t___isset(Variant name) {
   return domtext_properties_map.isset(this, name.toString());
-}
-
-Array c_DOMText::t___debuginfo() {
-  return domtext_properties_map.debugInfo(this);
 }
 
 bool c_DOMText::t_iswhitespaceinelementcontent() {
@@ -3134,10 +3104,6 @@ Variant c_DOMDocument::t___set(Variant name, Variant value) {
 
 bool c_DOMDocument::t___isset(Variant name) {
   return domdocument_properties_map.isset(this, name.toString());
-}
-
-Array c_DOMDocument::t___debuginfo() {
-  return domdocument_properties_map.debugInfo(this);
 }
 
 Variant c_DOMDocument::t_createattribute(const String& name) {
@@ -3799,10 +3765,6 @@ bool c_DOMDocumentType::t___isset(Variant name) {
   return domdocumenttype_properties_map.isset(this, name.toString());
 }
 
-Array c_DOMDocumentType::t___debuginfo() {
-  return domdocumenttype_properties_map.debugInfo(this);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static Variant dom_element_tag_name_read(const Object& obj) {
@@ -3906,10 +3868,6 @@ Variant c_DOMElement::t___set(Variant name, Variant value) {
 
 bool c_DOMElement::t___isset(Variant name) {
   return domelement_properties_map.isset(this, name.toString());
-}
-
-Array c_DOMElement::t___debuginfo() {
-  return domelement_properties_map.debugInfo(this);
 }
 
 String c_DOMElement::t_getattribute(const String& name) {
@@ -4503,10 +4461,6 @@ bool c_DOMEntity::t___isset(Variant name) {
   return domentity_properties_map.isset(this, name.toString());
 }
 
-Array c_DOMEntity::t___debuginfo() {
-  return domentity_properties_map.debugInfo(this);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void c_DOMEntityReference::t___construct(const String& name) {
@@ -4575,10 +4529,6 @@ Variant c_DOMNotation::t___set(Variant name, Variant value) {
 
 bool c_DOMNotation::t___isset(Variant name) {
   return domnotation_properties_map.isset(this, name.toString());
-}
-
-Array c_DOMNotation::t___debuginfo() {
-  return domnotation_properties_map.debugInfo(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4650,10 +4600,6 @@ Variant c_DOMProcessingInstruction::t___set(Variant name, Variant value) {
 
 bool c_DOMProcessingInstruction::t___isset(Variant name) {
   return domprocessinginstruction_properties_map.isset(this, name.toString());
-}
-
-Array c_DOMProcessingInstruction::t___debuginfo() {
-  return domprocessinginstruction_properties_map.debugInfo(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4821,10 +4767,6 @@ bool c_DOMNamedNodeMap::t___isset(Variant name) {
   return domnamednodemap_properties_map.isset(this, name.toString());
 }
 
-Array c_DOMNamedNodeMap::t___debuginfo() {
-  return domnamednodemap_properties_map.debugInfo(this);
-}
-
 Variant c_DOMNamedNodeMap::t_getiterator() {
   c_DOMNodeIterator *iter = NEWOBJ(c_DOMNodeIterator)();
   iter->set_iterator(this, this);
@@ -4898,12 +4840,8 @@ bool c_DOMNodeList::t___isset(Variant name) {
   return domnodelist_properties_map.isset(this, name.toString());
 }
 
-Array c_DOMNodeList::t___debuginfo() {
-  return domnodelist_properties_map.debugInfo(this);
-}
-
 Variant c_DOMNodeList::t_item(int64_t index) {
-  xmlNodePtr itemnode = nullptr;
+  xmlNodePtr itemnode = NULL;
   xmlNodePtr nodep, curnode;
   int count = 0;
   bool owner = false;
@@ -5284,10 +5222,6 @@ Variant c_DOMXPath::t___set(Variant name, Variant value) {
 
 bool c_DOMXPath::t___isset(Variant name) {
   return domxpath_properties_map.isset(this, name.toString());
-}
-
-Array c_DOMXPath::t___debuginfo() {
-  return domxpath_properties_map.debugInfo(this);
 }
 
 Variant c_DOMXPath::t_evaluate(const String& expr,

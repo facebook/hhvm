@@ -1834,15 +1834,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -1932,15 +1923,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -2119,15 +2101,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -2257,15 +2230,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -2940,15 +2904,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -3056,15 +3011,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -3514,15 +3460,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -3591,15 +3528,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -3694,15 +3622,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -3780,15 +3699,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -4128,15 +4038,6 @@
                     },
                     "args": [
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [
@@ -4401,15 +4302,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "__debuginfo",
-                    "flags": [],
-                    "return": {
-                        "type": "StringMap",
-                        "desc": "var_dump() compat output helper."
-                    },
-                    "args": []
                 }
             ],
             "consts": [

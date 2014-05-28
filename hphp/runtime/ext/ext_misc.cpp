@@ -638,10 +638,19 @@ Array f_token_get_all(const String& source) {
     if (tokid < 256) {
       res.append(String::FromChar((char)tokid));
     } else {
+      String value;
+      const int tokVal = get_user_token_id(tokid);
+      if (tokVal == UserTokenId_T_XHP_LABEL) {
+        value = String(":" + tok.text());
+      } else if (tokVal == UserTokenId_T_XHP_CATEGORY_LABEL) {
+        value = String("%" + tok.text());
+      } else {
+        value = String(tok.text());
+      }
       Array p = make_packed_array(
         // Convert the internal token ID to a user token ID
-        get_user_token_id(tokid),
-        String(tok.text()),
+        tokVal,
+        value,
         loc.line0
       );
       res.append(p);

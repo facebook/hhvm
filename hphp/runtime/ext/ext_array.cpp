@@ -2235,8 +2235,13 @@ Variant f_natcasesort(VRefParam array) {
 bool f_usort(VRefParam container, const Variant& cmp_function) {
   if (container.isArray()) {
     Array& arr_array = container.wrapped().toArrRef();
-    ArraySortTmp ast(arr_array);
-    return ast->usort(cmp_function);
+    if (RuntimeOption::EnableZendSorting) {
+      arr_array.sort(cmp_func, false, true, &cmp_function);
+      return true;
+    } else {
+      ArraySortTmp ast(arr_array);
+      return ast->usort(cmp_function);
+    }
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
@@ -2256,8 +2261,13 @@ bool f_usort(VRefParam container, const Variant& cmp_function) {
 bool f_uasort(VRefParam container, const Variant& cmp_function) {
   if (container.isArray()) {
     Array& arr_array = container.wrapped().toArrRef();
-    ArraySortTmp ast(arr_array);
-    return ast->uasort(cmp_function);
+    if (RuntimeOption::EnableZendSorting) {
+      arr_array.sort(cmp_func, false, false, &cmp_function);
+      return true;
+    } else {
+      ArraySortTmp ast(arr_array);
+      return ast->uasort(cmp_function);
+    }
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();

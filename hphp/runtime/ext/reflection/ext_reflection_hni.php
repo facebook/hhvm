@@ -931,7 +931,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
  * The ReflectionClass class reports information about a class.
  */
 <<__NativeData('ReflectionClassHandle')>>
-class ReflectionClass implements Reflector {
+class ReflectionClass implements Reflector, Serializable {
   const int IS_IMPLICIT_ABSTRACT = 16;
   const int IS_EXPLICIT_ABSTRACT = 32;
   const int IS_FINAL = 64;
@@ -958,6 +958,14 @@ class ReflectionClass implements Reflector {
     if (!$this->__init($classname)) {
       throw new ReflectionException("Class $classname does not exist");
     }
+  }
+
+  public function serialize() {
+    return serialize(['name' => $this->getName()]);
+  }
+
+  public function unserialize($string) {
+    $this->__init(unserialize($string)['name']);
   }
 
   <<__Native>>

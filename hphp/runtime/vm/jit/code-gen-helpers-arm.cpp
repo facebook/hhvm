@@ -112,10 +112,10 @@ void emitRegRegMove(vixl::MacroAssembler& a, const vixl::CPURegister& dst,
 //////////////////////////////////////////////////////////////////////
 
 void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
-  static_assert(RequestInjectionData::LastFlag < (1 << 8),
-                "Translator assumes RequestInjectionFlags fit in one byte");
-  a.  Ldrb  (rAsm, rVmTl[RDS::kConditionFlagsOff]);
-  a.  Tst   (rAsm, 0xff);
+  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
+                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  a.  Ldrh  (rAsm, rVmTl[RDS::kConditionFlagsOff]);
+  a.  Tst   (rAsm, 0xffffffff);
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,

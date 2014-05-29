@@ -29,15 +29,20 @@ constexpr uint32_t kPackedCapCodeThreshold = 0x10000ul;
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
 /*
  * Return the payload from a ArrayData* that is kPackedKind.
  */
-TypedValue* packedData(const ArrayData*) UNUSED;
+ALWAYS_INLINE
 TypedValue* packedData(const ArrayData* arr) {
   return const_cast<TypedValue*>(
     reinterpret_cast<const TypedValue*>(arr + 1)
+  );
+}
+
+ALWAYS_INLINE
+ArrayData* getArrayFromPackedData(const TypedValue* tv) {
+  return const_cast<ArrayData*>(
+    reinterpret_cast<const ArrayData*>(tv) - 1
   );
 }
 
@@ -55,7 +60,7 @@ TypedValue* packedData(const ArrayData* arr) {
  *   - No multiplication or division needed.
  */
 
-uint32_t packedCapToCode(uint32_t) UNUSED;
+ALWAYS_INLINE
 uint32_t packedCapToCode(uint32_t cap) {
   assert(cap <= kMaxPackedCap);
   if (UNLIKELY(cap > kPackedCapCodeThreshold)) {
@@ -66,7 +71,7 @@ uint32_t packedCapToCode(uint32_t cap) {
   return cap;
 }
 
-uint32_t packedCodeToCap(uint32_t) UNUSED;
+ALWAYS_INLINE
 uint32_t packedCodeToCap(uint32_t capCode) {
   assert(capCode <= 0xFFFFFFul);
   if (UNLIKELY(capCode > kPackedCapCodeThreshold)) {
@@ -77,7 +82,7 @@ uint32_t packedCodeToCap(uint32_t capCode) {
   return capCode;
 }
 
-uint32_t roundUpPackedCap(uint32_t) UNUSED;
+ALWAYS_INLINE
 uint32_t roundUpPackedCap(uint32_t cap) {
   assert(cap <= kMaxPackedCap);
   if (UNLIKELY(cap > kPackedCapCodeThreshold)) {
@@ -89,7 +94,7 @@ uint32_t roundUpPackedCap(uint32_t cap) {
   return cap;
 }
 
-bool sizeLessThanPackedCapCode(uint32_t, uint32_t) UNUSED;
+ALWAYS_INLINE
 bool sizeLessThanPackedCapCode(uint32_t size, uint32_t packedCapCode) {
   assert(packedCapCode <= 0xFFFFFFul);
   // Try comparing against m_packedCapCode first so that we can
@@ -106,8 +111,6 @@ bool sizeLessThanPackedCapCode(uint32_t size, uint32_t packedCapCode) {
   assert(cap <= kMaxPackedCap && packedCapCode <= cap);
   assert((size < packedCodeToCap(packedCapCode)) == (size < cap));
   return size < cap;
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////

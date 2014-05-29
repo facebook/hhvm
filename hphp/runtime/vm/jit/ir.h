@@ -403,7 +403,7 @@ O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
 O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
-O(VectorHasFrozenCopy,              ND, S(Obj),                            B) \
+O(VectorHasImmCopy,                 ND, S(Obj),                            B) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
 O(Box,                         DBox(0), S(Gen),                  E|N|CRc|PRc) \

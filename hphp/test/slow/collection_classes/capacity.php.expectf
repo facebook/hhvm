@@ -1,2 +1,2 @@
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Parameter sz must be at most 4294967295; 281474976710608 passed' in %a
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Parameter sz must be at most 3221225472; 281474976710608 passed' in %a

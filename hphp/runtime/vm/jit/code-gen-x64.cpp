@@ -4390,20 +4390,24 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
  * Given a vector, check if it has a immutable copy and jump to the taken
  * branch if so.
  */
-void CodeGenerator::cgVectorHasFrozenCopy(IRInstruction* inst) {
+void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(0).reg();
 
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
          vec->type().getClass() == c_Vector::classof());
 
-  // Vector keeps a smart pointer to the immutable copy, so we need
-  // some advanced arithmetic to get the offset of the raw pointer.
-  uint rawPtrOffset = c_Vector::immCopyOffset() + kExpectedMPxOffset;
+  // Vector::m_data field holds an address of an ArrayData plus
+  // sizeof(ArrayData) bytes. We need to check this ArrayData's
+  // m_count field to see if we need to call Vector::triggerCow().
+  uint rawPtrOffset = c_Vector::dataOffset() + kExpectedMPxOffset;
 
   m_as.loadq(vecReg[rawPtrOffset], m_rScratch);
-  m_as.testq(m_rScratch, m_rScratch);
-  emitFwdJcc(CC_NZ, inst->taken());
+  m_as.cmpl(
+    1,
+    m_rScratch[(int64_t)FAST_REFCOUNT_OFFSET - (int64_t)sizeof(ArrayData)]
+  );
+  emitFwdJcc(CC_NE, inst->taken());
 }
 
 /**

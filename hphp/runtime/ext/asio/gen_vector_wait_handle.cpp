@@ -80,7 +80,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      cellSet(child->getResult(), *current);
+      deps->set(iter_pos, &child->getResult());
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
@@ -138,7 +138,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      cellSet(child->getResult(), *current);
+      m_deps->set(m_iterPos, &child->getResult());
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {

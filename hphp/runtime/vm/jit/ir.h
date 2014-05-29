@@ -495,7 +495,9 @@ O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
 O(AllocObj,                  DAllocObj, S(Cls),                         Er|N) \
                                                                               \
 O(ConstructInstance,         DAllocObj, NA,                             Er|N) \
+O(CheckInitProps,                   ND, NA,                              B|E) \
 O(InitProps,                        ND, NA,                           E|Er|N) \
+O(CheckInitSProps,                  ND, NA,                              B|E) \
 O(InitSProps,                       ND, NA,                           E|Er|N) \
 O(NewInstanceRaw,            DAllocObj, NA,                                N) \
 O(InitObjProps,                     ND, S(Obj),                          E|N) \

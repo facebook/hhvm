@@ -225,6 +225,8 @@ CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(CustomInstanceInit)
+CALL_OPCODE(InitProps)
+CALL_OPCODE(InitSProps)
 CALL_OPCODE(LdClsCtor)
 CALL_OPCODE(LookupClsMethod)
 CALL_OPCODE(LookupClsRDSHandle)
@@ -3582,30 +3584,18 @@ void CodeGenerator::cgConstructInstance(IRInstruction* inst) {
                argGroup().immPtr(cls));
 }
 
-void CodeGenerator::cgInitProps(IRInstruction* inst) {
-  auto const cls    = inst->extra<InitProps>()->cls;
+void CodeGenerator::cgCheckInitProps(IRInstruction* inst) {
+  auto const cls = inst->extra<CheckInitProps>()->cls;
+  auto const branch = inst->taken();
   m_as.cmpq(0, rVmTl[cls->propHandle()]);
-  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-      cgCallHelper(a,
-                   CppCall::method(&Class::initProps),
-                   kVoidDest,
-                   SyncOptions::kSyncPoint,
-                   argGroup().imm((uint64_t)cls));
-    });
+  emitFwdJcc(m_as, CC_Z, branch);
 }
 
-void CodeGenerator::cgInitSProps(IRInstruction* inst) {
-  auto const cls    = inst->extra<InitSProps>()->cls;
-  cls->initSPropHandles();
-
+void CodeGenerator::cgCheckInitSProps(IRInstruction* inst) {
+  auto const cls = inst->extra<CheckInitSProps>()->cls;
+  auto const branch = inst->taken();
   m_as.cmpb(0, rVmTl[cls->sPropInitHandle()]);
-  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-      cgCallHelper(a,
-                   CppCall::method(&Class::initSProps),
-                   kVoidDest,
-                   SyncOptions::kSyncPoint,
-                   argGroup().imm((uint64_t)cls));
-    });
+  emitFwdJcc(m_as, CC_Z, branch);
 }
 
 void CodeGenerator::cgNewInstanceRaw(IRInstruction* inst) {

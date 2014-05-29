@@ -1080,9 +1080,17 @@ D:Obj = AllocObj S1:Cls
 
   Allocates a new object of class S1.
 
+CheckInitProps<class> -> B
+
+  Check if the properties for class are initialized and branches if not.
+
 InitProps<class> -> B
 
   Calls the property initializer function (86pinit) for class.  May throw.
+
+CheckInitSProps<class> -> B
+
+  Check if static properties for class are initialized and branches if not.
 
 InitSProps<class> -> B
 

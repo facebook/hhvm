@@ -2533,6 +2533,32 @@ static bool canInstantiateClass(const Class* cls) {
     !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait));
 }
 
+void HhbcTranslator::emitInitProps(const Class* cls, Block* catchBlock) {
+  cls->initPropHandle();
+  m_irb->ifThen(
+    [&](Block* taken) {
+      gen(CheckInitProps, taken, ClassData(cls));
+    },
+    [&] {
+      m_irb->hint(Block::Hint::Unlikely);
+      gen(InitProps, catchBlock, ClassData(cls));
+    }
+  );
+}
+
+void HhbcTranslator::emitInitSProps(const Class* cls, Block* catchBlock) {
+  cls->initSPropHandles();
+  m_irb->ifThen(
+    [&](Block* taken) {
+      gen(CheckInitSProps, taken, ClassData(cls));
+    },
+    [&] {
+      m_irb->hint(Block::Hint::Unlikely);
+      gen(InitSProps, catchBlock, ClassData(cls));
+    }
+  );
+}
+
 SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
   // If it's an extension class with a custom instance initializer,
   // that init function does all the work.
@@ -2545,13 +2571,8 @@ SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
   bool sprops = cls->numStaticProperties() > 0;
   assert((props || sprops) == cls->needInitialization());
   if (cls->needInitialization()) {
-    if (props) {
-      cls->initPropHandle();
-      gen(InitProps, makeCatch(), ClassData(cls));
-    }
-    if (sprops) {
-      gen(InitSProps, makeCatch(), ClassData(cls));
-    }
+    if (props) emitInitProps(cls, makeCatch());
+    if (sprops) emitInitSProps(cls, makeCatch());
   }
 
   // Next, allocate the object
@@ -4515,7 +4536,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
 
     auto const ptrTy = convertToType(repoTy).ptr();
 
-    gen(InitSProps, catchBlock, ClassData(cls));
+    emitInitSProps(cls, catchBlock);
     return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
   }
 

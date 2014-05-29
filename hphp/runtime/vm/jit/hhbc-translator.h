@@ -269,6 +269,8 @@ struct HhbcTranslator {
                              bool shouldFatal,
                              SSATmp* extraSpill);
   void emitFPushClsMethodF(int32_t numParams);
+  void emitInitProps(const Class* cls, Block* catchBlock);
+  void emitInitSProps(const Class* cls, Block* catchBlock);
   SSATmp* emitAllocObjFast(const Class* cls);
   void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
   void emitFPushCtor(int32_t numParams);

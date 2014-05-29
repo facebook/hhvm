@@ -1,10 +1,10 @@
 set(FREEBSD FALSE)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
-	set(FREEBSD TRUE)
+  set(FREEBSD TRUE)
 endif()
 set(LINUX FALSE)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-	set(LINUX TRUE)
+  set(LINUX TRUE)
 endif()
 
 # using Clang
@@ -12,8 +12,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # TODO: Fix Folly ad change to -std=c++11 (ISO C++11), GNU_GCC version enable flags: -ffast-math
   set(CMAKE_CXX_FLAGS " -Wall -std=gnu++11 -stdlib=libc++ -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments")
   # http://stackoverflow.com/a/19689089/2126990
-  set(CMAKE_C_FLAGS_RELEASE "-Os")
-  set(CMAKE_CXX_FLAGS_RELEASE "-Os")
+  set(CMAKE_C_FLAGS_RELEASE "-Ofast")
+  set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 # using GCC
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
@@ -38,6 +38,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   endif()
 
   # Generic GCC flags and Optional flags
+  # GCC 4.8+ Debug more faster
+  if (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
+    set(CMAKE_C_FLAGS_DEBUG "-Og")
+    set(CMAKE_CXX_FLAGS_DEBUG "-Og")
+  endif()
   set(CMAKE_C_FLAGS_RELEASE "-O3")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
   set(CMAKE_C_FLAGS "-w")

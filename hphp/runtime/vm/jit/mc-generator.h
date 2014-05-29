@@ -137,7 +137,8 @@ public:
   /*
    * Handlers for function prologues.
    */
-  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr);
+  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
+                      bool ignoreTCLimit = false);
   TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 

@@ -211,7 +211,7 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
 
 TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate()) return nullptr;
+  if (!writer) return nullptr;
   if (isDebuggerAttachedProcess()) return nullptr;
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
@@ -592,7 +592,8 @@ static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
 }
 
 TCA
-MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
+MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
+                             bool ignoreTCLimit) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
   int const numParams = func->numNonVariadicParams();
@@ -620,7 +621,8 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   }
 
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate()) return nullptr;
+  if (!writer) return nullptr;
+  if (!ignoreTCLimit && !shouldTranslate()) return nullptr;
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
@@ -707,7 +709,8 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
   func->resetPrologue(nArgs);
   m_tx.setMode(TransKind::Prologue);
   SCOPE_EXIT { m_tx.setMode(TransKind::Invalid); };
-  TCA start = getFuncPrologue(func, nArgs);
+  TCA start = getFuncPrologue(func, nArgs, nullptr /* ActRec */,
+                              true /* ignoreTCLimit */);
   func->setPrologue(nArgs, start);
 
   // Smash callers of the old prologue with the address of the new one.

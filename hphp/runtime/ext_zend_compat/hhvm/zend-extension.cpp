@@ -69,11 +69,13 @@ void ZendExtension::moduleInit() {
   }
   // Register global functions
   const zend_function_entry * fe = module->functions;
-  while (fe->fname) {
-    assert(fe->handler);
-    Native::registerBuiltinFunction(makeStaticString(fe->fname),
-                                          fe->handler);
-    fe++;
+  if (fe) {
+    while (fe->fname) {
+      assert(fe->handler);
+      Native::registerBuiltinFunction(makeStaticString(fe->fname),
+                                            fe->handler);
+      fe++;
+    }
   }
   // Call MINIT
   if (module->module_startup_func) {

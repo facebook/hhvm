@@ -39,7 +39,10 @@ public:
 
 private:
   int getNext();
-  json_utf8_decode m_decode;
+  unsigned int getNextChar();
+  const char *m_str;
+  int m_strlen;
+  int m_cursor;
   int m_loose; // Faceook: json_utf8_loose
   union {
     int m_low_surrogate; // used for decode

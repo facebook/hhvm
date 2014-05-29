@@ -221,7 +221,6 @@ class RecursiveIteratorIterator implements OuterIterator {
   public function rewind() {
     while ($this->iterators) {
       array_pop($this->iterators);
-      $this->endChildren();
     }
 
     $it = $this->originalIterator;

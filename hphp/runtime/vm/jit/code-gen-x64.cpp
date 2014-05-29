@@ -309,6 +309,8 @@ CALL_OPCODE(InterfaceSupportsDbl)
 CALL_OPCODE(ZeroErrorLevel)
 CALL_OPCODE(RestoreErrorLevel)
 
+CALL_OPCODE(Count)
+
 CALL_OPCODE(SurpriseHook)
 CALL_OPCODE(FunctionExitSurpriseHook)
 
@@ -1873,8 +1875,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
   if (src->isA(Type::PtrToGen)) {
     PhysReg base = loc.reg();
     emitTypeTest(inst->typeParam(), base[TVOFF(m_type)],
-                 base[TVOFF(m_data)],
-      [&](ConditionCode cc) { doJcc(cc); });
+                 base[TVOFF(m_data)], doJcc);
     return;
   }
   assert(src->isA(Type::Gen));
@@ -1886,8 +1887,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
     CG_PUNT(IsType-KnownType);
   }
   PhysReg dataSrcReg = loc.reg(0); // data register
-  emitTypeTest(inst->typeParam(), typeSrcReg, dataSrcReg,
-    [&](ConditionCode cc) { doJcc(cc); });
+  emitTypeTest(inst->typeParam(), typeSrcReg, dataSrcReg, doJcc);
 }
 
 template<class Loc>
@@ -2456,10 +2456,6 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
         curFunc()->fullName()->data()).str());
   }
 
-  auto const smashTarget = static_cast<SmashTarget*>(
-    std::malloc(sizeof(SmashTarget))
-  );
-
   auto const mcHandler = extra->fatal ? handlePrimeCacheInit<true>
                                       : handlePrimeCacheInit<false>;
 
@@ -2476,19 +2472,6 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   auto const movAddr = a.frontier();
   a.    movq   (0x8000000000000000u, rAsm);
   assert(a.frontier() - kMovLen == movAddr);
-
-  /*
-   * For the first time through, set the cache to hold the pointer to the
-   * SmashTarget, so handlePreCacheMiss can use that information to know how
-   * to smash things.
-   *
-   * We set the low bit for two reasons: the Class* will never be a valid
-   * Class*, so we'll always miss the inline check before it's smashed, and
-   * handlePreCacheMiss can tell it's not been smashed yet and is therefore a
-   * valid PrimeData*.
-   */
-  *reinterpret_cast<uintptr_t*>(movAddr + kMovImmOff) =
-    reinterpret_cast<uintptr_t>(smashTarget) | 1;
 
   a.    movq   (rAsm, m_rScratch);
   a.    andl   (r32(rAsm), r32(rAsm));  // zero the top 32 bits
@@ -2515,8 +2498,17 @@ asm_label(a, slow_path);
   );
 asm_label(a, done);
 
-  smashTarget->movAddr = movAddr;
-  smashTarget->retAddr = info.returnAddress;
+  /*
+   * For the first time through, set the cache to hold the offset from
+   * the return address of the call to the movq (*2 + 1), so we can find
+   * the movq from the handler.
+   *
+   * We set the low bit for two reasons: the Class* will never be a valid
+   * Class*, so we'll always miss the inline check before it's smashed, and
+   * handlePrimeCacheMiss can tell it's not been smashed yet
+   */
+  *reinterpret_cast<uintptr_t*>(movAddr + kMovImmOff) =
+    ((info.returnAddress - movAddr) << 1) | 1;
 }
 
 void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
@@ -2601,13 +2593,11 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
 
   // Load the maybe bound address.
   auto addr = intptr_t(addrPtr);
-  if (int32_t(addr) == addr) {
-    m_as.loadq(baseless(int32_t(addr)), dstReg);
-  } else {
-    // x64 does not support mov addr64, reg
-    m_as.movq(int64_t(addr), dstReg);
-    m_as.loadq(*dstReg, dstReg);
-  }
+  // the tc/global data is intentionally layed out to guarantee
+  // rip-relative addressing will work.
+  // Also, a rip-relative load, is 1 byte smaller than the corresponding
+  // baseless load.
+  m_as.loadq(rip[addr], dstReg);
 }
 
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
@@ -6124,6 +6114,32 @@ void CodeGenerator::cgProfileStr(IRInstruction* inst) {
       );
     }
   );
+}
+
+void CodeGenerator::cgCountArray(IRInstruction* inst) {
+  auto const baseReg = srcLoc(0).reg();
+  auto const dstReg  = dstLoc(0).reg();
+
+  m_as. cmpb(ArrayData::kNvtwKind, baseReg[ArrayData::offsetofKind()]);
+
+  unlikelyIfThenElse(CC_Z,
+    [&](Asm& a) { cgCallNative(a, inst); },
+    [&](Asm& a) { a.  loadl(baseReg[ArrayData::offsetofSize()], r32(dstReg)); }
+  );
+}
+
+void CodeGenerator::cgCountArrayFast(IRInstruction* inst) {
+  auto const baseReg = srcLoc(0).reg();
+  auto const dstReg  = dstLoc(0).reg();
+
+  m_as. loadl(baseReg[ArrayData::offsetofSize()], r32(dstReg));
+}
+
+void CodeGenerator::cgCountCollection(IRInstruction* inst) {
+  auto const baseReg = srcLoc(0).reg();
+  auto const dstReg  = dstLoc(0).reg();
+
+  m_as. loadl(baseReg[FAST_COLLECTION_SIZE_OFFSET], r32(dstReg));
 }
 
 void CodeGenerator::print() const {

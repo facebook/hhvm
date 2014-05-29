@@ -635,7 +635,7 @@ class CompactReader {
       switch (type) {
         case T_STOP:
         case T_VOID:
-          return uninit_null();
+          return init_null();
 
         case T_STRUCT: {
             Variant className = spec.rvalAt(PHPTransport::s_class);

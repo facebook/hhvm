@@ -35,8 +35,6 @@
 #include <tbb/concurrent_hash_map.h>
 #include <utility>
 
-#define PCRE_CACHE_SIZE 4096
-
 /* Only defined in pcre >= 8.32 */
 #ifndef PCRE_STUDY_JIT_COMPILE
 # define PCRE_STUDY_JIT_COMPILE 0
@@ -48,22 +46,24 @@ namespace HPHP {
 
 IMPLEMENT_THREAD_LOCAL(PCREglobals, s_pcre_globals);
 
-class pcre_cache_entry {
-  pcre_cache_entry(const pcre_cache_entry&);
-  pcre_cache_entry& operator=(const pcre_cache_entry&);
-
-public:
-  pcre_cache_entry() {}
-  ~pcre_cache_entry() {
-    if (extra) free(extra); // we don't have pcre_free_study yet
-    pcre_free(re);
+pcre_cache_entry::~pcre_cache_entry() {
+  if (extra) {
+#if PCRE_MAJOR < 8 || (PCRE_MAJOR == 8 && PCRE_MINOR < 20)
+    free(extra);
+#else
+    pcre_free_study(extra);
+#endif
   }
+  pcre_free(re);
+}
 
-  pcre *re;
-  pcre_extra *extra; // Holds results of studying
-  int preg_options;
-  int compile_options;
-};
+PCREglobals::~PCREglobals() {
+  m_overflow.clear();
+}
+
+void PCREglobals::cleanupOnRequestEnd(const pcre_cache_entry* ent) {
+  m_overflow.push_back(ent);
+}
 
 struct ahm_string_data_same {
   bool operator()(const StringData* s1, const StringData* s2) {
@@ -118,11 +118,14 @@ insert_cached_pcre(const String& regex, const pcre_cache_entry* ent) {
   auto pair = s_pcreCacheMap->insert(
     PCREEntry(makeStaticString(regex.get()), ent));
   if (!pair.second) {
-    delete ent;
     if (pair.first == s_pcreCacheMap->end()) {
-      raise_notice("PCRE cache full");
-      return nullptr;
+      // Global Cache is full
+      // still return the entry and free it at the end of the request
+      s_pcre_globals->cleanupOnRequestEnd(ent);
+      return ent;
     }
+    // collision, delete the new one
+    delete ent;
     return pair.first->second;
   }
   return ent;
@@ -556,7 +559,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
                     subpats_order > PREG_SET_ORDER)) ||
         (!global && subpats_order != 0)) {
       raise_warning("Invalid flags specified");
-      return null_variant;
+      return init_null();
     }
   }
 
@@ -1115,7 +1118,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());
-      return null_variant;
+      return init_null();
     }
 
     return ret;
@@ -1129,7 +1132,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                      callable, limit, replace_count);
       if (ret.isBoolean()) {
         assert(!ret.toBoolean());
-        return null_variant;
+        return init_null();
       }
       if (!ret.isString()) {
         return ret;
@@ -1158,7 +1161,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());
-      return null_variant;
+      return init_null();
     }
     if (!ret.isString()) {
       return ret;
@@ -1191,7 +1194,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
     if (ret.isString()) {
       count = replace_count;
       if (is_filter && replace_count == 0) {
-        return null_variant;
+        return init_null();
       } else {
         return ret.asStrRef();
       }

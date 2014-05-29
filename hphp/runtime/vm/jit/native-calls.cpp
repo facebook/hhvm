@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
+#include "hphp/runtime/ext/ext_array.h"
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 
@@ -357,6 +358,12 @@ static CallMap s_callMap {
     /* silence operator support */
     {ZeroErrorLevel, &zero_error_level, DSSA, SNone, {}},
     {RestoreErrorLevel, &restore_error_level, DNone, SNone, {{SSA, 0}}},
+
+    // count($mixed)
+    {Count, &countHelper, DSSA, SSync, {{TV, 0}}},
+
+    // count($array)
+    {CountArray, &ArrayData::size, DSSA, SNone, {{SSA, 0}}},
 };
 
 ArgGroup CallInfo::toArgGroup(const RegAllocInfo& regs,

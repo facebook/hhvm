@@ -1,0 +1,35 @@
+<pre>0: string(3) "one"
+1: string(0) ""
+2: string(5) "three"
+3 (eof): string(4) "four"
+4 (eof): bool(false)
+5 (eof): bool(false)
+
+0: string(3) "one"
+1: string(0) ""
+2: string(5) "three"
+3 (eof): string(4) "four"
+4 (eof): bool(false)
+5 (eof): bool(false)
+
+0: string(0) ""
+1: string(3) "two"
+2: string(5) "three"
+3 (eof): string(4) "four"
+4 (eof): bool(false)
+5 (eof): bool(false)
+
+0: string(0) ""
+1: string(3) "two"
+2: string(5) "three"
+3 (eof): string(4) "four"
+4 (eof): bool(false)
+5 (eof): bool(false)
+
+0: string(3) "one"
+1: string(3) "two"
+2: string(0) ""
+3 (eof): string(0) ""
+4 (eof): bool(false)
+5 (eof): bool(false)
+

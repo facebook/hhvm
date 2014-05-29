@@ -101,7 +101,7 @@ function test_stream_get_line() {
   fseek($f, 0);
   VS(stream_get_line($f, 300, "@"), "stream_get_line");
   VS(stream_get_line($f, 300, "@"), "test");
-  VS(stream_get_line($f, 300, "@"), "");
+  VS(stream_get_line($f, 300, "@"), false);
   fclose($f);
 }
 

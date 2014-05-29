@@ -249,7 +249,7 @@ public:
   void registerRequestEventHandler(RequestEventHandler* handler);
   void registerShutdownFunction(const Variant& function, Array arguments,
                                 ShutdownType type);
-  Variant popShutdownFunction(ShutdownType type);
+  bool removeShutdownFunction(const Variant& function, ShutdownType type);
   void onRequestShutdown();
   void onShutdownPreSend();
   void onShutdownPostSend();
@@ -579,7 +579,6 @@ public:
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
                          bool* fromVMEntry = nullptr);
-  void nullOutReturningActRecs();
   Array debugBacktrace(bool skip = false,
                        bool withSelf = false,
                        bool withThis = false,

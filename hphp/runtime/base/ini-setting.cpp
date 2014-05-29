@@ -84,7 +84,7 @@ static std::string dynamic_to_std_string(const folly::dynamic& v) {
 static Variant dynamic_to_variant(const folly::dynamic& v) {
   switch (v.type()) {
     case folly::dynamic::Type::NULLT:
-      return init_null_variant;
+      return init_null();
     case folly::dynamic::Type::BOOL:
       return v.asBool();
     case folly::dynamic::Type::DOUBLE:

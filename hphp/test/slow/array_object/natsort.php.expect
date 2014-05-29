@@ -1,17 +1,25 @@
 Standard sorting
 ArrayObject Object
 (
-    [3] => img1.png
-    [1] => img10.png
-    [0] => img12.png
-    [2] => img2.png
+    [storage:ArrayObject:private] => Array
+        (
+            [3] => img1.png
+            [1] => img10.png
+            [0] => img12.png
+            [2] => img2.png
+        )
+
 )
 
 Natural order sorting
 ArrayObject Object
 (
-    [3] => img1.png
-    [2] => img2.png
-    [1] => img10.png
-    [0] => img12.png
+    [storage:ArrayObject:private] => Array
+        (
+            [3] => img1.png
+            [2] => img2.png
+            [1] => img10.png
+            [0] => img12.png
+        )
+
 )

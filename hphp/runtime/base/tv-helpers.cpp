@@ -245,7 +245,6 @@ double tvCastToDouble(TypedValue* tv) {
 
 const StaticString
   s_1("1"),
-  s_Array("Array"),
   s_scalar("scalar");
 
 void tvCastToStringInPlace(TypedValue* tv) {
@@ -264,7 +263,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
   case KindOfString:  return;
   case KindOfArray:
     raise_notice("Array to string conversion");
-    s = s_Array.get();
+    s = array_string.get();
     tvDecRefArr(tv);
     goto static_string;
   case KindOfObject:
@@ -304,7 +303,7 @@ StringData* tvCastToString(const TypedValue* tv) {
   case KindOfStaticString: return tv->m_data.pstr;
   case KindOfString:  s = tv->m_data.pstr; break;
   case KindOfArray:   raise_notice("Array to string conversion");
-                      return s_Array.get();
+                      return array_string.get();
   case KindOfObject:  return tv->m_data.pobj->invokeToString().detach();
   case KindOfResource: return tv->m_data.pres->o_toString().detach();
   default:            not_reached();

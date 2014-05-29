@@ -162,14 +162,14 @@ static Variant php_finfo_get_type(
     {
       if (buffer.empty()) {
         raise_warning("Empty filename or path");
-        ret_val = null_string;
+        ret_val.reset();
         goto clean;
       }
 
       auto resource = File::Open(buffer, "rb");
       auto stream = resource.getTyped<File>(true);
       if (!stream) {
-        ret_val = null_string;
+        ret_val.reset();
         goto clean;
       }
 

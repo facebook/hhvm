@@ -81,6 +81,15 @@ struct PendingFixup {
     m_tca(tca), m_fixup(fixup) { }
 };
 
+struct CodeGenFixups {
+  std::vector<PendingFixup> m_pendingFixups;
+  std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
+  std::vector<std::pair<TCA,TransID>> m_pendingJmpTransIDs;
+  void process();
+  bool empty() const;
+  void clear();
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -111,14 +120,13 @@ public:
    */
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
-  void processPendingFixups();
   void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
 
   DataBlock& globalData() { return code.data(); }
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
   BackEnd& backEnd() { return *m_backEnd; }
 
-  const TcaTransIDMap& getJmpToTransIDMap() const {
+  TcaTransIDMap& getJmpToTransIDMap() {
     return m_jmpToTransID;
   }
 
@@ -174,7 +182,6 @@ public:
     assert(start);
     enterTC(start, nullptr);
   }
-
   /*
    * Called before entering a new PHP "world."
    */
@@ -193,6 +200,7 @@ public:
   TCA getFreeStub(CodeBlock& unused);
   void registerCatchBlock(CTCA ip, TCA block);
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
+  CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   TCA getTranslatedCaller() const;
   void setJmpTransID(TCA jmp);
   bool profileSrcKey(const SrcKey& sk) const;
@@ -276,7 +284,6 @@ private:
   TCA retranslateOpt(TransID transId, bool align);
   TCA regeneratePrologues(Func* func, SrcKey triggerSk);
   TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
-  void processPendingCatchTraces();
 
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);
@@ -307,12 +314,11 @@ private:
   uint64_t           m_numHHIRTrans;
   FixupMap           m_fixupMap;
   UnwindInfoHandle   m_unwindRegistrar;
-  std::vector<PendingFixup> m_pendingFixups;
-  std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
   CatchTraceMap      m_catchTraceMap;
   std::vector<TransBCMapping> m_bcMap;
   Debug::DebugInfo   m_debugInfo;
   FreeStubList       m_freeStubs;
+  CodeGenFixups      m_fixups;
 
   // asize + astubssize + gdatasize + trampolinesblocksize
   size_t             m_totalSize;

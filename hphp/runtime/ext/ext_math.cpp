@@ -42,7 +42,7 @@ Variant f_min(int _argc, const Variant& value,
 
     ArrayIter iter(cell_value);
     if (!iter) {
-      return uninit_null();
+      return init_null();
     }
     Variant ret = iter.secondRefPlus();
     ++iter;
@@ -78,7 +78,7 @@ Variant f_max(int _argc, const Variant& value,
 
     ArrayIter iter(cell_value);
     if (!iter) {
-      return uninit_null();
+      return init_null();
     }
     Variant ret = iter.secondRefPlus();
     ++iter;

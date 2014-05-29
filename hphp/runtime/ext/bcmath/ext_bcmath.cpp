@@ -138,7 +138,7 @@ static Variant HHVM_FUNCTION(bcdiv, const String& left, const String& right,
   php_str2num(&second, (char*)right.data());
   if (bc_divide(first, second, &result, scale) == -1) {
     raise_warning("Division by zero");
-    return Variant();
+    return init_null();
   }
   String ret(bc_num2str(result), AttachString);
   bc_free_num(&first);
@@ -156,7 +156,7 @@ static Variant HHVM_FUNCTION(bcmod, const String& left, const String& right) {
   php_str2num(&second, (char*)right.data());
   if (bc_modulo(first, second, &result, 0) == -1) {
     raise_warning("Division by zero");
-    return Variant();
+    return init_null();
   }
   String ret(bc_num2str(result), AttachString);
   bc_free_num(&first);

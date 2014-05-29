@@ -44,6 +44,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -427,12 +428,21 @@ void ExecutionContext::registerShutdownFunction(const Variant& function,
   forceToArray(funcs).append(callback);
 }
 
-Variant ExecutionContext::popShutdownFunction(ShutdownType type) {
-  Variant& funcs = m_shutdowns.lvalAt(type);
-  if (!funcs.isArray()) {
-    return uninit_null();
+bool ExecutionContext::removeShutdownFunction(const Variant& function,
+                                              ShutdownType type) {
+  bool ret = false;
+  auto& funcs = forceToArray(m_shutdowns.lvalAt(type));
+  PackedArrayInit newFuncs(funcs.size());
+
+  for (ArrayIter iter(funcs); iter; ++iter) {
+    if (!same(iter.second().toArray()[s_name], function)) {
+      newFuncs.appendWithRef(iter.secondRef());
+    } else {
+      ret = true;
+    }
   }
-  return funcs.toArrRef().pop();
+  funcs = newFuncs.toArray();
+  return ret;
 }
 
 Variant ExecutionContext::pushUserErrorHandler(const Variant& function,

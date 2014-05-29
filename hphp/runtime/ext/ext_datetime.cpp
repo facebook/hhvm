@@ -437,35 +437,35 @@ Variant c_DateInterval::t___set(Variant member, Variant value) {
   if (member.isString()) {
     if (same(member, s_y)) {
       m_di->setYears(value.toInt64());
-      return uninit_null();
+      return init_null();
     }
     if (same(member, s_m)) {
       m_di->setMonths(value.toInt64());
-      return uninit_null();
+      return init_null();
     }
     if (same(member, s_d)) {
       m_di->setDays(value.toInt64());
-      return uninit_null();
+      return init_null();
     }
     if (same(member, s_h)) {
       m_di->setHours(value.toInt64());
-      return uninit_null();
+      return init_null();
     }
     if (same(member, s_i)) {
       m_di->setMinutes(value.toInt64());
-      return uninit_null();
+      return init_null();
     }
     if (same(member, s_s)) {
       m_di->setSeconds(value.toInt64());
-      return uninit_null();
+      return init_null();
     }
     if (same(member, s_invert)) {
       m_di->setInverted(value.toBoolean());
-      return uninit_null();
+      return init_null();
     }
     if (same(member, s_days)) {
       m_di->setTotalDays(value.toInt64());
-      return uninit_null();
+      return init_null();
     }
   }
 
@@ -545,7 +545,7 @@ Variant f_idate(const String& format,
 
 Variant f_date(const String& format,
                int64_t timestamp /* = TimeStamp::Current() */) {
-  if (format.empty()) return "";
+  if (format.empty()) return empty_string;
   String ret = DateTime(timestamp, false).toString(format, false);
   if (ret.isNull()) return false;
   return ret;

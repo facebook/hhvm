@@ -66,7 +66,7 @@ bool ZipFile::open(const String& filename, const String& mode) {
   }
   if (m_innerFile.is<File>()) {
     auto file = m_innerFile.getTyped<File>();
-    m_tempFile = null_resource;
+    m_tempFile.reset();
     return (m_gzFile = gzdopen(dup(file->fd()), mode.data()));
   }
   return false;
@@ -92,7 +92,7 @@ bool ZipFile::closeImpl() {
     }
     if (m_tempFile.is<File>()) {
       m_tempFile.getTyped<File>()->close();
-      m_tempFile = null_resource;
+      m_tempFile.reset();
     }
   }
   File::closeImpl();

@@ -128,16 +128,6 @@ struct Entry {
   const Func* m_value;
 };
 
-/*
- * When we first create method cache entries, we need some information to set
- * up an immediate for the first dispatched function.  A pointer to one of
- * these is passed in rawTarget to handlePrimeCacheInit.
- */
-struct SmashTarget {
-  JIT::TCA movAddr;
-  JIT::TCA retAddr;
-};
-
 template<bool fatal>
 void handlePrimeCacheInit(Entry* mce,
                           ActRec* ar,

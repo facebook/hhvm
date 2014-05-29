@@ -152,7 +152,7 @@ class PhpConst {
     auto it = m_constant.find("value");
     assert(it != m_constant.items().end());
     auto v = it->second;
-    return v.isNull() ? "uninit_null()" : v.asString();
+    return v.isNull() ? "init_null()" : v.asString();
   }
 
   fbstring serialize() const { return phpSerialize(m_constant["value"]); }

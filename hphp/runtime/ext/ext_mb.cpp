@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/unicode_data.h"
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -1121,7 +1122,7 @@ Variant f_mb_list_mime_names(const String& name /* = null_string */) {
         }
         break;
       }
-      return "";
+      return empty_string;
     } else {
       return false;
     }

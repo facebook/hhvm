@@ -244,8 +244,7 @@ StringData* convResToStrHelper(ResourceData* o) {
 
 const StaticString
   s_empty(""),
-  s_1("1"),
-  s_Array("Array");
+  s_1("1");
 
 StringData* convCellToStrHelper(TypedValue tv) {
   switch (tv.m_type) {
@@ -259,7 +258,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
   case KindOfStaticString:
                        return tv.m_data.pstr;
   case KindOfArray:    raise_notice("Array to string conversion");
-                       return s_Array.get();
+                       return array_string.get();
   case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
   case KindOfResource: return convResToStrHelper(tv.m_data.pres);
   default:             not_reached();

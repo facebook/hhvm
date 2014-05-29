@@ -743,7 +743,7 @@ public:
                           bool top);
   void fillFuncEmitterParams(FuncEmitter* fe,
                              ExpressionListPtr params,
-                             bool builtin = false);
+                             bool coerce_params = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
   void emitConstMethodCallNoParams(Emitter& e, string name);

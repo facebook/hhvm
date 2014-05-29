@@ -1,0 +1,17 @@
+Warning: bcscale() expects parameter 1 to be integer, array given in %s/test/slow/types/builtin_coerce_param_mode.php on line 4
+NULL
+
+Warning: bcscale() expects parameter 1 to be integer, array given in %s/test/slow/types/builtin_coerce_param_mode.php on line 6
+NULL
+
+Warning: sqrt() expects parameter 1 to be double, array given in %s/test/slow/types/builtin_coerce_param_mode.php on line 9
+NULL
+
+Warning: sqrt() expects parameter 1 to be double, array given in %s/test/slow/types/builtin_coerce_param_mode.php on line 11
+NULL
+
+Warning: grapheme_extract() expects parameter 1 to be string, array given in %s/test/slow/types/builtin_coerce_param_mode.php on line 14
+bool(false)
+
+Warning: grapheme_extract() expects parameter 1 to be string, array given in %s/test/slow/types/builtin_coerce_param_mode.php on line 16
+bool(false)

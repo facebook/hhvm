@@ -342,9 +342,9 @@ void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
 }
 
 void emitTestSurpriseFlags(Asm& a) {
-  static_assert(RequestInjectionData::LastFlag < (1 << 8),
-                "Translator assumes RequestInjectionFlags fit in one byte");
-  a.    testb((int8_t)0xff, rVmTl[RDS::kConditionFlagsOff]);
+  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
+                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  a.    testl((int32_t)0xffffffff, rVmTl[RDS::kConditionFlagsOff]);
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,

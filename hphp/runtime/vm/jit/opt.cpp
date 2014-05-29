@@ -128,6 +128,9 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
+  auto const doReoptimize = RuntimeOption::EvalHHIRExtraOptPass &&
+    (RuntimeOption::EvalHHIRCse || RuntimeOption::EvalHHIRSimplification);
+
   if (shouldHHIRRelaxGuards()) {
     /*
      * In TransProfile mode, we can only relax the guards in tracelet
@@ -148,6 +151,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
                           RuntimeOption::EvalJitRegionSelector == "tracelet";
       auto changed = relaxGuards(unit, *irBuilder.guards(), simple);
       if (changed) finishPass("guard relaxation");
+
+      if (doReoptimize) {
+        irBuilder.reoptimize();
+        finishPass("guard relaxation reoptimize");
+      }
     }
   }
 
@@ -162,9 +170,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     doPass(optimizePredictions, "prediction opts");
   }
 
-  if (RuntimeOption::EvalHHIRExtraOptPass
-      && (RuntimeOption::EvalHHIRCse
-          || RuntimeOption::EvalHHIRSimplification)) {
+  if (doReoptimize) {
     irBuilder.reoptimize();
     finishPass("reoptimize");
     // Cleanup any dead code left around by CSE/Simplification

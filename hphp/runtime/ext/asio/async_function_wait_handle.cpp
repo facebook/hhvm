@@ -39,10 +39,6 @@ void delete_AsyncFunctionWaitHandle(ObjectData* od, const Class*) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_AsyncFunctionWaitHandle::c_AsyncFunctionWaitHandle(Class* cb)
-    : c_ResumableWaitHandle(cb), m_privData() {
-}
-
 c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   if (LIKELY(isFinished())) {
     return;
@@ -97,14 +93,6 @@ void c_AsyncFunctionWaitHandle::ti_setonfailcallback(const Variant& callback) {
   AsioSession::Get()->setOnAsyncFunctionFailCallback(callback.getObjectDataOrNull());
 }
 
-Object c_AsyncFunctionWaitHandle::t_getprivdata() {
-  return m_privData;
-}
-
-void c_AsyncFunctionWaitHandle::t_setprivdata(const Object& data) {
-  m_privData = data;
-}
-
 namespace {
 
 const StaticString s__closure_("{closure}");
@@ -147,7 +135,6 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   setState(STATE_BLOCKED);
   m_child = child;
-  m_privData = nullptr;
 
   blockOn(child);
 

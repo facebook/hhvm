@@ -713,7 +713,7 @@ public:
       m_exception = e.clone();
       m_phpException = false;
     }
-    return uninit_null();
+    return init_null();
   }
 
   static int curl_progress(void* p,
@@ -1081,7 +1081,7 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
       if (s_code != nullptr) {
         ret.set(s_content_type, String(s_code, CopyString));
       } else {
-        ret.set(s_content_type, uninit_null());
+        ret.set(s_content_type, init_null());
       }
     }
     if (curl_easy_getinfo(cp, CURLINFO_HTTP_CODE, &l_code) == CURLE_OK) {
@@ -1209,7 +1209,7 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
     }
   }
 
-  return uninit_null();
+  return init_null();
 }
 
 Variant HHVM_FUNCTION(curl_errno, const Resource& ch) {
@@ -1225,7 +1225,7 @@ Variant HHVM_FUNCTION(curl_error, const Resource& ch) {
 Variant HHVM_FUNCTION(curl_close, const Resource& ch) {
   CHECK_RESOURCE(curl);
   curl->close();
-  return uninit_null();
+  return init_null();
 }
 
 void HHVM_FUNCTION(curl_reset, const Resource& ch) {
@@ -1338,7 +1338,7 @@ void CurlMultiResource::sweep() {
   CurlMultiResource *curlm = mh.getTyped<CurlMultiResource>(true, true); \
   if (curlm == nullptr) {                                                \
     raise_warning("expects parameter 1 to be cURL multi resource");      \
-    return uninit_null();                                                \
+    return init_null();                                                  \
   }                                                                      \
 
 Resource HHVM_FUNCTION(curl_multi_init) {
@@ -1497,7 +1497,7 @@ Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
 Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh) {
   CHECK_MULTI_RESOURCE(curlm);
   curlm->close();
-  return uninit_null();
+  return init_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

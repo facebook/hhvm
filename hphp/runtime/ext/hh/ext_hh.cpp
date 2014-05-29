@@ -24,7 +24,23 @@ namespace HPHP {
 bool HHVM_FUNCTION(autoload_set_paths,
                    const Variant& map,
                    const String& root) {
-  return AutoloadHandler::s_instance->setMap(map.toArray(), root);
+  if (map.isArray()) {
+    return AutoloadHandler::s_instance->setMap(map.toCArrRef(), root);
+  }
+  if (!(map.isObject() && map.toObject()->isCollection())) {
+    return false;
+  }
+  // Assume we have Map<string, Map<string, string>> - convert to
+  // array<string, array<string, string>>
+  //
+  // Exception for 'failure' which should be a callable.
+  auto as_array = map.toArray();
+  for (auto it = as_array.begin(); !it.end(); it.next()) {
+    if (it.second().isObject() && it.second().toObject()->isCollection()) {
+      as_array.set(it.first(), it.second().toArray());
+    }
+  }
+  return AutoloadHandler::s_instance->setMap(as_array, root);
 }
 
 bool HHVM_FUNCTION(could_include, const String& file) {

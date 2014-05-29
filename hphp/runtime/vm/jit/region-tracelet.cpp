@@ -493,7 +493,7 @@ void RegionFormer::truncateLiterals() {
   auto unit = lastBlock.unit();
   for (int i = 0, len = lastBlock.length(); i < len; ++i, sk.advance(unit)) {
     auto const op = sk.op();
-    if (!isLiteral(op) && !isThisSelfOrParent(op)) {
+    if (!isLiteral(op) && !isThisSelfOrParent(op) && !isTypeAssert(op)) {
       if (i == len - 1) return;
       endSk = sk;
     }

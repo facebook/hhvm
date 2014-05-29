@@ -421,7 +421,7 @@ struct Inc : IncBase {
 
 struct IncO : IncBase {
   void intCase(Cell& cell) const {
-    if (add_overflow(cell.m_data.num, 1)) {
+    if (add_overflow(cell.m_data.num, int64_t{1})) {
       cellCopy(cellAddO(cell, make_int(1)), cell);
     } else {
       Inc().intCase(cell);
@@ -442,7 +442,7 @@ struct Dec : DecBase {
 
 struct DecO : DecBase {
   void intCase(Cell& cell) {
-    if (sub_overflow(cell.m_data.num, 1)) {
+    if (sub_overflow(cell.m_data.num, int64_t{1})) {
       cellCopy(cellSubO(cell, make_int(1)), cell);
     } else {
       Dec().intCase(cell);
@@ -470,21 +470,21 @@ Cell cellAddO(Cell c1, Cell c2) {
   auto over = [](int64_t a, int64_t b) {
     return make_dbl(double(a) + double(b));
   };
-  return cellArithO(Add(), add_overflow, over, c1, c2);
+  return cellArithO(Add(), add_overflow<int64_t>, over, c1, c2);
 }
 
 TypedNum cellSubO(Cell c1, Cell c2) {
   auto over = [](int64_t a, int64_t b) {
     return make_dbl(double(a) - double(b));
   };
-  return cellArithO(Sub(), sub_overflow, over, c1, c2);
+  return cellArithO(Sub(), sub_overflow<int64_t>, over, c1, c2);
 }
 
 TypedNum cellMulO(Cell c1, Cell c2) {
   auto over = [](int64_t a, int64_t b) {
     return make_dbl(double(a) * double(b));
   };
-  return cellArithO(Mul(), mul_overflow, over, c1, c2);
+  return cellArithO(Mul(), mul_overflow<int64_t>, over, c1, c2);
 }
 
 Cell cellDiv(Cell c1, Cell c2) {

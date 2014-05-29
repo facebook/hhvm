@@ -51,7 +51,7 @@ void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
     thrift.read(sdata);
     auto error = DebuggerWireHelpers::WireUnserialize(sdata, m_variables);
     if (error != DebuggerWireHelpers::NoError) {
-      m_variables = null_array;
+      m_variables.reset();
       if (error != DebuggerWireHelpers::HitLimit || m_version == 0) {
         // Unexpected error. Log it.
         m_wireError = sdata;
@@ -151,7 +151,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
       CmdVariable cmd(client.isStackTraceAsync()
         ? KindOfVariableAsync : KindOfVariable);
       cmd.m_frame = frame;
-      cmd.m_variables = null_array;
+      cmd.m_variables.reset();
       cmd.m_varName = name;
       cmd.m_filter = text;
       cmd.m_version = 2;

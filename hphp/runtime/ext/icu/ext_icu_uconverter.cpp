@@ -234,14 +234,14 @@ static bool HHVM_METHOD(UConverter, setDestinationEncoding,
 
 static Variant doGetEncoding(IntlUConverter *data, UConverter *cnv) {
   if (!cnv) {
-    return uninit_null();
+    return init_null();
   }
 
   UErrorCode error = U_ZERO_ERROR;
   const char *name = ucnv_getName(cnv, &error);
   if (U_FAILURE(error)) {
     data->failure(error, "ucnv_getName");
-    return uninit_null();
+    return init_null();
   }
 
   return String(name);
@@ -329,7 +329,7 @@ static Variant doGetSubstChars(IntlUConverter *data, UConverter *cnv) {
   ucnv_getSubstChars(cnv, chars, &chars_len, &error);
   if (U_FAILURE(error)) {
     data->failure(error, "ucnv_getSubstChars");
-    return uninit_null();
+    return init_null();
   }
 
   return String(chars, chars_len, CopyString);
@@ -362,7 +362,7 @@ static Variant HHVM_METHOD(UConverter, convert,
                                    str.c_str(), str.size(), &error);
   if (U_FAILURE(error) && error != U_BUFFER_OVERFLOW_ERROR) {
     data->failure(error, "ucnv_toUChars");
-    return uninit_null();
+    return init_null();
   }
 
   icu::UnicodeString tmp;
@@ -373,7 +373,7 @@ static Variant HHVM_METHOD(UConverter, convert,
   tmp.releaseBuffer(temp_len);
   if (U_FAILURE(error)) {
     data->failure(error, "ucnv_toUChars");
-    return uninit_null();
+    return init_null();
   }
 
   /* Convert to final encoding */
@@ -382,7 +382,7 @@ static Variant HHVM_METHOD(UConverter, convert,
                                      tmp.getBuffer(), tmp.length(), &error);
   if (U_FAILURE(error) && error != U_BUFFER_OVERFLOW_ERROR) {
     data->failure(error, "ucnv_fromUChars");
-    return uninit_null();
+    return init_null();
   }
 
   String destStr(dest_len, ReserveString);
@@ -392,7 +392,7 @@ static Variant HHVM_METHOD(UConverter, convert,
                              tmp.getBuffer(), tmp.length(), &error);
   if (U_FAILURE(error)) {
     data->failure(error, "ucnv_fromUChars");
-    return uninit_null();
+    return init_null();
   }
   destStr.setSize(dest_len);
   return destStr;
@@ -423,7 +423,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, reasonText, int64_t reason) {
     UCNV_REASON_CASE(CLONE)
     default:
       raise_warning("Unknown UConverterCallbackReason: %ld", (long)reason);
-      return uninit_null();
+      return init_null();
   }
 }
 #undef UCNV_REASON_CASE
@@ -446,7 +446,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getAliases,
 
   if (U_FAILURE(error)) {
     IntlUConverter::Failure(error, "ucnv_getAliases");
-    return uninit_null();
+    return init_null();
   }
 
   Array ret = Array::Create();
@@ -455,7 +455,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getAliases,
     const char *alias = ucnv_getAlias(encoding.c_str(), i, &error);
     if (U_FAILURE(error)) {
       IntlUConverter::Failure(error, "ucnv_getAliases");
-      return uninit_null();
+      return init_null();
     }
     ret.append(alias);
   }
@@ -471,7 +471,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandards) {
     const char *name = ucnv_getStandard(i, &error);
     if (U_FAILURE(error)) {
       IntlUConverter::Failure(error, "ucnv_getStandard");
-      return uninit_null();
+      return init_null();
     }
     ret.append(name);
   }
@@ -488,7 +488,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandardName,
 
   if (U_FAILURE(error)) {
     IntlUConverter::Failure(error, "ucnv_getStandardName");
-    return uninit_null();
+    return init_null();
   }
 
   return String(standard_name, CopyString);

@@ -65,7 +65,7 @@ public:
     return m_rsrc->get(m_iterIndex, error);
   }
   Variant iterKey() {
-    if (!iterValid()) return uninit_null();
+    if (!iterValid()) return init_null();
     if (m_isTable) {
       UErrorCode error = U_ZERO_ERROR;
       auto key = m_rsrc->get(m_iterIndex, error).getKey();

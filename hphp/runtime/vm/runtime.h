@@ -146,6 +146,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
 template<bool unwinding>
 void ALWAYS_INLINE
 frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
+  frame_free_locals_helper_inl<unwinding>(fp, numLocals);
   if (fp->hasThis()) {
     ObjectData* this_ = fp->getThis();
     if (unwinding) {
@@ -153,7 +154,6 @@ frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
     }
     decRefObj(this_);
   }
-  frame_free_locals_helper_inl<unwinding>(fp, numLocals);
 }
 
 void ALWAYS_INLINE

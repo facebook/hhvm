@@ -109,7 +109,7 @@ Variant APCHandle::toLocal() {
       return APCTypedValue::fromHandle(this)->getDouble();
     case KindOfUninit:
     case KindOfNull:
-      return null_variant; // shortcut.. no point to forward
+      return init_null(); // shortcut.. no point to forward
     case KindOfStaticString:
       return APCTypedValue::fromHandle(this)->getStringData();
 
@@ -124,7 +124,7 @@ Variant APCHandle::toLocal() {
 
     default:
       assert(false);
-      return null_variant;
+      return init_null();
   }
 }
 

@@ -2503,10 +2503,8 @@ void EmitterVisitor::visit(FileScopePtr file) {
               v = String(makeStaticString(v.asCStrRef().get()));
             } else if (v.isArray()) {
               v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
-            } else if (v.isNull()) {
-              // getScalarValue() sets this to uninit_null, so lets set it back
-              v = init_null_variant;
             } else {
+              assert(v.isInitialized());
               assert(!IS_REFCOUNTED_TYPE(v.getType()));
             }
             mainReturn = *v.asCell();
@@ -6171,7 +6169,9 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
  */
 const StaticString
   s_HipHopSpecific("__HipHopSpecific"),
-  s_IsFoldable("__IsFoldable");
+  s_IsFoldable("__IsFoldable"),
+  s_ParamCoerceModeNull("__ParamCoerceModeNull"),
+  s_ParamCoerceModeFalse("__ParamCoerceModeFalse");
 
 static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
   if (fe->hasUserAttribute(s_HipHopSpecific.get())) {
@@ -6179,6 +6179,11 @@ static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
   }
   if (fe->hasUserAttribute(s_IsFoldable.get())) {
     attrs = attrs | AttrIsFoldable;
+  }
+  if (fe->hasUserAttribute(s_ParamCoerceModeNull.get())) {
+    attrs = attrs | AttrParamCoerceModeNull;
+  } else if (fe->hasUserAttribute(s_ParamCoerceModeFalse.get())) {
+    attrs = attrs | AttrParamCoerceModeFalse;
   }
 }
 
@@ -6234,6 +6239,10 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
   }
 
   parseUserAttributes(fe, attrs);
+  // Not supported except in __Native functions
+  attrs = static_cast<Attr>(
+    attrs & ~(AttrParamCoerceModeNull | AttrParamCoerceModeFalse));
+
   return attrs;
 }
 
@@ -6429,6 +6438,9 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     }
   }
   parseUserAttributes(fe, attributes);
+  if (!(attributes & (AttrParamCoerceModeFalse | AttrParamCoerceModeNull))) {
+    attributes = attributes | AttrParamCoerceModeNull;
+  }
 
   const Location* sLoc = meth->getLocation().get();
   fe->setLocation(sLoc->line0, sLoc->line1);
@@ -6499,7 +6511,8 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   assignLocalVariableIds(meth->getFunctionScope());
 
   // add parameter info
-  fillFuncEmitterParams(fe, meth->getParams());
+  fillFuncEmitterParams(fe, meth->getParams(),
+                        meth->getFunctionScope()->isParamCoerceMode());
 
   // copy declared return type (hack)
   fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
@@ -6537,7 +6550,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
 
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
                                            ExpressionListPtr params,
-                                           bool builtin /*= false */) {
+                                           bool coerce_params /*= false */) {
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
     ParameterExpressionPtr par(
@@ -6549,7 +6562,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
     if (typeConstraint.hasConstraint()) {
       pi.setTypeConstraint(typeConstraint);
     }
-    if (builtin) {
+    if (coerce_params) {
       if (auto const typeAnnotation = par->annotation()) {
         pi.setBuiltinType(typeAnnotation->dataType());
       }

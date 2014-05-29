@@ -27,7 +27,7 @@
  *   default grapheme cluster boundary that conforms to the $size and
  *   $extract_type specified.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function grapheme_extract(string $haystack,
                           int $size,
                           int $extract_type = GRAPHEME_EXTR_COUNT,

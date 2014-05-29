@@ -675,7 +675,7 @@ MySQLFieldInfo *MySQLResult::getFieldInfo(int64_t field) {
 
 Variant MySQLResult::getField(int64_t field) const {
   if (!m_localized || field < 0 || field >= (int64_t)m_current_row->size()) {
-    return uninit_null();
+    return init_null();
   }
   return (*m_current_row)[field];
 }
@@ -1187,7 +1187,7 @@ Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field) {
 
 Variant mysql_makevalue(const String& data, enum_field_types field_type) {
   if (field_type == MYSQL_TYPE_NULL) {
-    return uninit_null();
+    return init_null();
   } else if (mysqlExtension::TypedResults) {
     switch (field_type) {
     case MYSQL_TYPE_DECIMAL:

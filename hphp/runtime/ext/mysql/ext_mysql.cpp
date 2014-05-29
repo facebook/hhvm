@@ -132,12 +132,12 @@ String f_mysql_get_client_info() {
 Variant f_mysql_set_charset(const String& charset,
                                    const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
-  if (!conn) return uninit_null();
+  if (!conn) return init_null();
   return !mysql_set_character_set(conn, charset.data());
 }
 Variant f_mysql_ping(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
-  if (!conn) return uninit_null();
+  if (!conn) return init_null();
   return !mysql_ping(conn);
 }
 Variant f_mysql_client_encoding(const Variant& link_identifier /* = uninit_null() */) {
@@ -830,7 +830,7 @@ Variant f_mysql_result(const Variant& result, int row,
                     CopyString);
     }
   }
-  return uninit_null();
+  return init_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

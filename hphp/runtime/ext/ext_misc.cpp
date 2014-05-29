@@ -73,7 +73,7 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return "PGO profiling translations are still enabled.";
   }
 
-  return "";
+  return empty_string;
 }
 
 static class MiscExtension : public Extension {
@@ -198,7 +198,7 @@ static Class* getClassByName(const char* name, int len) {
 }
 
 Variant f_constant(const String& name) {
-  if (!name.get()) return uninit_null();
+  if (!name.get()) return init_null();
   const char *data = name.data();
   int len = name.length();
 
@@ -221,7 +221,7 @@ Variant f_constant(const String& name) {
     if (cns) return tvAsCVarRef(cns);
   }
 
-  return uninit_null();
+  return init_null();
 }
 
 bool f_define(const String& name, const Variant& value,
@@ -638,10 +638,19 @@ Array f_token_get_all(const String& source) {
     if (tokid < 256) {
       res.append(String::FromChar((char)tokid));
     } else {
+      String value;
+      const int tokVal = get_user_token_id(tokid);
+      if (tokVal == UserTokenId_T_XHP_LABEL) {
+        value = String(":" + tok.text());
+      } else if (tokVal == UserTokenId_T_XHP_CATEGORY_LABEL) {
+        value = String("%" + tok.text());
+      } else {
+        value = String(tok.text());
+      }
       Array p = make_packed_array(
         // Convert the internal token ID to a user token ID
-        get_user_token_id(tokid),
-        String(tok.text()),
+        tokVal,
+        value,
         loc.line0
       );
       res.append(p);

@@ -21,6 +21,8 @@
 namespace HPHP { namespace HHBBC {
 namespace php { struct Func; struct Class; }
 
+struct Type;
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -29,6 +31,13 @@ namespace php { struct Func; struct Class; }
  */
 bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
                                          borrowed_ptr<php::Func> func);
+
+/*
+ * Given an HNI or IDL function, figure out the real return type. Thanks to
+ * ParamCoerceMode, this will either be a nullable or falsable version
+ * of the declared return type.
+ */
+Type native_function_return_type(borrowed_ptr<const php::Func> func);
 
 //////////////////////////////////////////////////////////////////////
 

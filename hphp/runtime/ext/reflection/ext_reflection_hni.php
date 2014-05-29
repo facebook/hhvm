@@ -240,7 +240,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   abstract public function getAttributesRecursive(): array;
 
-  abstract public function getAttributeRecursive(string $name);
+  abstract public function getAttributeRecursive($name);
 
   <<__Native>>
   public function getNumberOfParameters(): int;
@@ -517,7 +517,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     return $this->getAttributes();
   }
 
-  public function getAttributeRecursive(string $name) {
+  public function getAttributeRecursive($name) {
     return $this->getAttribute($name);
   }
 }
@@ -543,25 +543,42 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * Constructs a new ReflectionMethod.
    *
+   * Format 1:
+   *
    * @cls        mixed   Classname or object (instance of the class) that
    *                     contains the method.
-   * @name       mixed   Name of the method.
+   * @name       string  Name of the method.
+   *
+   * Format 2:
+   *
+   * @class_and_method string  Class name and method, separated by ::
    */
-  public function __construct(mixed $cls, string $name = '') {
-    if (!$name && is_string($cls)) {
-      $arr = explode('::', $cls, 3);
+  public function __construct(...) {
+    $args = func_get_args();
+    if (count($args) == 0 || count($args) > 2) {
+      throw new Exception(
+        'ReflectionMethod::__construct() takes either 1 or 2 arguments');
+    }
+
+    if (count($args) == 1) {
+      $arr = explode('::', $args[0], 3);
       if (count($arr) !== 2) {
         throw new ReflectionException("$cls is not a valid method name");
       }
       list($cls, $name) = $arr;
       $classname = $cls;
     } else {
+      $cls = $args[0];
+      $name = (string) $args[1];
+
       $classname = is_object($cls) ? get_class($cls) : $cls;
+      $method = $args[1];
     }
 
     $this->originalClass = $classname;
-    if (!$this->__init($cls, $name)) {
-      throw new ReflectionException("Method $classname::$name does not exist");
+    if (!$this->__init($cls, (string) $name)) {
+      throw new ReflectionException(
+        "Method $classname::$name() does not exist");
     }
   }
 
@@ -896,7 +913,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   <<__Native>>
   private function getPrototypeClassname(): string; // ?string
 
-  public function getAttributeRecursive(string $name) {
+  public function getAttributeRecursive($name) {
     $attrs = $this->getAttributes();
     if (isset($attrs[$name])) {
       return $attrs[$name];
@@ -931,7 +948,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
  * The ReflectionClass class reports information about a class.
  */
 <<__NativeData('ReflectionClassHandle')>>
-class ReflectionClass implements Reflector {
+class ReflectionClass implements Reflector, Serializable {
   const int IS_IMPLICIT_ABSTRACT = 16;
   const int IS_EXPLICIT_ABSTRACT = 32;
   const int IS_FINAL = 64;
@@ -958,6 +975,14 @@ class ReflectionClass implements Reflector {
     if (!$this->__init($classname)) {
       throw new ReflectionException("Class $classname does not exist");
     }
+  }
+
+  public function serialize() {
+    return serialize(['name' => $this->getName()]);
+  }
+
+  public function unserialize($string) {
+    $this->__init(unserialize($string)['name']);
   }
 
   <<__Native>>

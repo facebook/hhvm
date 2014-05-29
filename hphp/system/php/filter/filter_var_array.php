@@ -3,15 +3,20 @@
 function _filter_var_array_single($value, $filter, $options = array()) {
   $ret = filter_var($value, (int) $filter, $options);
 
+  // Retry with default filter if failed.
+  if ($ret === false) {
+    $ret = filter_var($value, FILTER_DEFAULT, $options);
+  }
+
   $flags = isset($options['flags']) ? $options['flags'] : 0;
   if ($flags & FILTER_FORCE_ARRAY && !is_array($ret)) {
-    $ret = array($ret);
+    return array($ret);
   }
   if ($flags & FILTER_REQUIRE_SCALAR && is_array($ret)) {
-    $ret = false;
+    return false;
   }
   if ($flags & FILTER_REQUIRE_ARRAY && is_null($ret)) {
-    $ret = array();
+    return array();
   }
 
   return $ret;
@@ -47,7 +52,6 @@ function _filter_var_array_single($value, $filter, $options = array()) {
    *                     the variable is not set.
    */
 function filter_var_array($data, $definition = null, $add_empty = true) {
-
   if (!is_array($data)) {
     trigger_error('filter_var_array() expects parameter 1 to be array, '.
       gettype($data).' given', E_USER_WARNING);

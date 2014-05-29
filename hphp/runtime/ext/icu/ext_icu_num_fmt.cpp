@@ -197,10 +197,10 @@ static void HHVM_METHOD(NumberFormatter, __construct,
 static String HHVM_METHOD(NumberFormatter, formatCurrency,
                           double value,
                           const String& currency) {
-  NUMFMT_GET(obj, this_, null_string);
+  NUMFMT_GET(obj, this_, String());
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString uCurrency(u16(currency, error));
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
 
   // By default UnicodeString isn't NULL terminated
   int32_t currencyBuffer_len = uCurrency.length();
@@ -216,7 +216,7 @@ static String HHVM_METHOD(NumberFormatter, formatCurrency,
                               nullptr, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
     obj->setError(error);
-    return null_string;
+    return String();
   }
   icu::UnicodeString out;
   error = U_ZERO_ERROR;
@@ -224,10 +224,10 @@ static String HHVM_METHOD(NumberFormatter, formatCurrency,
                                   currencyBuffer,
                                   out.getBuffer(len + 1), len + 1,
                                   nullptr, &error);
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   out.releaseBuffer(len);
   String ret(u8(out, error));
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   return ret;
 }
 
@@ -356,78 +356,78 @@ static int64_t HHVM_METHOD(NumberFormatter, getErrorCode) {
 }
 
 static String HHVM_METHOD(NumberFormatter, getErrorMessage) {
-  NUMFMT_GET(obj, this_, null_string);
+  NUMFMT_GET(obj, this_, String());
   return obj->getErrorMessage();
 }
 
 static String HHVM_METHOD(NumberFormatter, getLocale, int64_t type) {
-  NUMFMT_GET(obj, this_, null_string);
+  NUMFMT_GET(obj, this_, String());
   UErrorCode error = U_ZERO_ERROR;
   const char *loc = unum_getLocaleByType(obj->formatter(),
                                          (ULocDataLocaleType)type, &error);
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   return String(loc, CopyString);
 }
 
 static String HHVM_METHOD(NumberFormatter, getPattern) {
-  NUMFMT_GET(obj, this_, null_string);
+  NUMFMT_GET(obj, this_, String());
   UErrorCode error = U_ZERO_ERROR;
   int32_t len = unum_toPattern(obj->formatter(), 0, nullptr, 0, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
     obj->setError(error);
-    return null_string;
+    return String();
   }
   icu::UnicodeString out;
   error = U_ZERO_ERROR;
   len = unum_toPattern(obj->formatter(), 0,
                        out.getBuffer(len + 1), len + 1, &error);
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   out.releaseBuffer(len);
   String ret(u8(out, error));
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   return ret;
 }
 
 static String HHVM_METHOD(NumberFormatter, getSymbol, int64_t attr) {
-  NUMFMT_GET(obj, this_, null_string);
+  NUMFMT_GET(obj, this_, String());
   UErrorCode error = U_ZERO_ERROR;
   int32_t len = unum_getSymbol(obj->formatter(),
                                (UNumberFormatSymbol)attr,
                                nullptr, 0, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
     obj->setError(error);
-    return null_string;
+    return String();
   }
   icu::UnicodeString out;
   error = U_ZERO_ERROR;
   len = unum_getSymbol(obj->formatter(), (UNumberFormatSymbol)attr,
                        out.getBuffer(len + 1), len + 1, &error);
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   out.releaseBuffer(len);
   String ret(u8(out, error));
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   return ret;
 }
 
 static String HHVM_METHOD(NumberFormatter, getTextAttribute, int64_t attr) {
-  NUMFMT_GET(obj, this_, null_string);
+  NUMFMT_GET(obj, this_, String());
   UErrorCode error = U_ZERO_ERROR;
   int32_t len = unum_getTextAttribute(obj->formatter(),
                                       (UNumberFormatTextAttribute)attr,
                                       nullptr, 0, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
     obj->setError(error);
-    return null_string;
+    return String();
   }
   icu::UnicodeString out;
   error = U_ZERO_ERROR;
   len = unum_getTextAttribute(obj->formatter(),
                               (UNumberFormatTextAttribute)attr,
                               out.getBuffer(len + 1), len + 1, &error);
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   out.releaseBuffer(len);
   String ret(u8(out, error));
-  NUMFMT_CHECK(obj, error, null_string);
+  NUMFMT_CHECK(obj, error, String());
   return ret;
 }
 

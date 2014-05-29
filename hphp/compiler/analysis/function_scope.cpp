@@ -73,6 +73,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0) {
   init(ar);
+
   for (unsigned i = 0; i < attrs.size(); ++i) {
     if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
       attrs[i]->parseTimeFatal(Compiler::DeclaredAttributeTwice,
@@ -94,6 +95,16 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
     if (param.compare("VariadicByRef") == 0) {
       setVariableArgument(1);
       break;
+    }
+  }
+
+  if (isNative()) {
+    // Support ParamCoerceMode in HNI
+    if (hasUserAttr("__ParamCoerceModeFalse")) {
+      setClassInfoAttribute(ClassInfo::ParamCoerceModeFalse);
+    } else {
+      // Default for HNI is __ParamCoerceModeNull
+      setClassInfoAttribute(ClassInfo::ParamCoerceModeNull);
     }
   }
 }

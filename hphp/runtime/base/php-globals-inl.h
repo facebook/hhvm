@@ -46,7 +46,7 @@ inline Variant php_global_exchange(const StaticString& name, Variant newV) {
 inline Variant php_global(const StaticString& name) {
   auto const tv = g_context->m_globalVarEnv->lookup(name.get());
   // Note: Variant is making unnecessary KindOfUninit checks here.
-  return tv ? tvAsCVarRef(tv) : Variant();
+  return tv ? tvAsCVarRef(tv) : uninit_null();
 }
 
 //////////////////////////////////////////////////////////////////////

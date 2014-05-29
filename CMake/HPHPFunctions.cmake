@@ -179,7 +179,7 @@ function(HHVM_INSTALL_HEADERS TARGET SRCROOT DEST)
         string(SUBSTRING ${dest_rel} 0 ${slash_pos} dest_rel)
       endif()
       file(COPY ${src_rel}
-        DESTINATION "${DEST}/${dest_rel}"
+        DESTINATION "$ENV{DESTDIR}${DEST}/${dest_rel}"
         NO_SOURCE_PERMISSIONS)
     endif()
   endforeach()

@@ -688,7 +688,7 @@ static Variant _get_base_node_value(c_SimpleXMLElement* sxe_ref,
     subnode->node = node;
     return obj;
   }
-  return uninit_null();
+  return init_null();
 }
 
 static void sxe_properties_add(Array& rv, char* name, const Variant& value) {
@@ -1091,7 +1091,7 @@ Variant f_simplexml_import_dom(
   if (nodep) {
     if (nodep->doc == nullptr) {
       raise_warning("Imported Node must have associated Document");
-      return uninit_null();
+      return init_null();
     }
     if (nodep->type == XML_DOCUMENT_NODE ||
         nodep->type == XML_HTML_DOCUMENT_NODE) {
@@ -1102,7 +1102,7 @@ Variant f_simplexml_import_dom(
   if (nodep && nodep->type == XML_ELEMENT_NODE) {
     Class* cls = class_from_name(class_name, "simplexml_import_dom");
     if (!cls) {
-      return uninit_null();
+      return init_null();
     }
     Object obj = create_object(cls->nameStr(), Array(), false);
     c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
@@ -1111,7 +1111,7 @@ Variant f_simplexml_import_dom(
     return obj;
   } else {
     raise_warning("Invalid Nodetype to import");
-    return uninit_null();
+    return init_null();
   }
   return false;
 }
@@ -1124,7 +1124,7 @@ Variant f_simplexml_load_string(
   bool is_prefix /* = false */) {
   Class* cls = class_from_name(class_name, "simplexml_load_string");
   if (!cls) {
-    return uninit_null();
+    return init_null();
   }
 
   xmlDocPtr doc = xmlReadMemory(data.data(), data.size(), nullptr,
@@ -1208,7 +1208,7 @@ void c_SimpleXMLElement::t___construct(const String& data,
 
 Variant c_SimpleXMLElement::t_xpath(const String& path) {
   if (iter.type == SXE_ITER_ATTRLIST) {
-    return uninit_null(); // attributes don't have attributes
+    return init_null(); // attributes don't have attributes
   }
 
   if (!xpath) {
@@ -1413,7 +1413,7 @@ String c_SimpleXMLElement::t_getname() {
   if (node) {
     return String((char*)node->name);
   }
-  return "";
+  return empty_string;
 }
 
 Object c_SimpleXMLElement::t_attributes(const String& ns /* = "" */,
@@ -1433,14 +1433,14 @@ Variant c_SimpleXMLElement::t_addchild(const String& qname,
                                        const String& ns /* = null_string */) {
   if (qname.empty()) {
     raise_warning("Element name is required");
-    return uninit_null();
+    return init_null();
   }
 
   xmlNodePtr node = this->node;
 
   if (iter.type == SXE_ITER_ATTRLIST) {
     raise_warning("Cannot add element to attributes");
-    return uninit_null();
+    return init_null();
   }
 
   node = php_sxe_get_first_node(this, node);
@@ -1448,7 +1448,7 @@ Variant c_SimpleXMLElement::t_addchild(const String& qname,
   if (node == nullptr) {
     raise_warning("Cannot add child. "
                   "Parent is not a permanent member of the XML tree");
-    return uninit_null();
+    return init_null();
   }
 
   xmlChar* prefix = nullptr;
@@ -1553,7 +1553,7 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
 
 Variant c_SimpleXMLElement::t___unset(Variant name) {
   sxe_prop_dim_delete(this, name, true, false);
-  return uninit_null();
+  return init_null();
 }
 
 bool c_SimpleXMLElement::t___isset(Variant name) {
@@ -1673,18 +1673,18 @@ Variant c_SimpleXMLElementIterator::t_key() {
   if (curnode) {
     return String((char*)curnode->name);
   } else {
-    return uninit_null();
+    return init_null();
   }
 }
 
 Variant c_SimpleXMLElementIterator::t_next() {
   php_sxe_move_forward_iterator(sxe);
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_SimpleXMLElementIterator::t_rewind() {
   php_sxe_reset_iterator(sxe, true);
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_SimpleXMLElementIterator::t_valid() {

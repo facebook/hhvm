@@ -1,21 +1,30 @@
 object(ArrayObject)#2 (1) {
-  ["foo"]=>
+  ["storage":"ArrayObject":private]=>
   array(1) {
-    ["bar"]=>
-    string(7) "hello!!"
+    ["foo"]=>
+    array(1) {
+      ["bar"]=>
+      string(7) "hello!!"
+    }
   }
 }
 object(ArrayObject)#1 (1) {
-  ["foo"]=>
+  ["storage":"ArrayObject":private]=>
   array(1) {
-    ["bar"]=>
-    string(7) "hello!!"
+    ["foo"]=>
+    array(1) {
+      ["bar"]=>
+      string(7) "hello!!"
+    }
   }
 }
 object(ArrayObject)#1 (1) {
-  ["foo"]=>
+  ["storage":"ArrayObject":private]=>
   array(1) {
-    ["bar"]=>
-    string(7) "hello!!"
+    ["foo"]=>
+    array(1) {
+      ["bar"]=>
+      string(7) "hello!!"
+    }
   }
 }

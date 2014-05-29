@@ -787,7 +787,7 @@ Variant c_XMLWriter::t_flush(bool empty /* = true */) {
     }
     return ret;
   }
-  return "";
+  return empty_string;
 }
 
 String c_XMLWriter::t_outputmemory(bool flush /* = true */) {

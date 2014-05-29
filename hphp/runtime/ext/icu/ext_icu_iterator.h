@@ -100,7 +100,7 @@ public:
 private:
   icu::StringEnumeration *m_enum = nullptr;
   int64_t m_key = -1;
-  Variant m_current = null_string;
+  Variant m_current{Variant::NullInit()};
 
   static Class* c_IntlIterator;
 };

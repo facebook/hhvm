@@ -43,6 +43,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
+#include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
@@ -631,12 +632,7 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
     // We'd infer this anyway when we look at the bytecode body
     // (NativeImpl) for the HNI function, but just initializing it
     // here saves on whole-program iterations.
-    if (f->nativeInfo->returnType != KindOfInvalid) {
-      // TODO(#3568043): always add TInitNull, because HNI doesn't
-      // know about nullability.
-      auto const t = from_DataType(f->nativeInfo->returnType);
-      ret.returnTy = union_of(t, TInitNull);
-    }
+    ret.returnTy = native_function_return_type(f);
   }
   ret.thisAvailable = false;
   return &ret;

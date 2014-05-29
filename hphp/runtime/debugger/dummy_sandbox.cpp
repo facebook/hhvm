@@ -94,10 +94,10 @@ void DummySandbox::run() {
           msg = "Invalid sandbox was specified. "
             "PHP files may not be loaded properly.\n";
         } else {
-          auto server = php_global_exchange(s__SERVER, Variant());
+          auto server = php_global_exchange(s__SERVER, init_null());
           forceToArray(server);
           Array arr = server.toArrRef();
-          server = Variant();
+          server.unset();
           php_global_set(s__SERVER, sri.setServerVariables(std::move(arr)));
         }
         Debugger::RegisterSandbox(sandbox);

@@ -856,7 +856,7 @@ Variant HHVM_FUNCTION(odbc_prepare, const Resource& link, const String& query)
 {
   ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
   if (odbc_link == nullptr)
-    return Variant();
+    return init_null();
   return odbc_link->prepare(query);
 }
 

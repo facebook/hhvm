@@ -15,6 +15,8 @@
 */
 #include <gtest/gtest.h>
 
+#include "hphp/runtime/base/array-init.h"
+
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
@@ -162,5 +164,65 @@ TEST(Simplifier, JumpFuse) {
   }
 }
 
+TEST(Simplifier, Count) {
+  IRUnit unit{test_context};
+  Simplifier sim{unit};
+  BCMarker dummy = BCMarker::Dummy();
+
+  // Count($null) --> 0
+  {
+    auto null = unit.gen(Conjure, dummy, Type::Null);
+    auto count = unit.gen(Count, dummy, null->dst());
+    auto result = sim.simplify(count, false);
+
+    EXPECT_NE(nullptr, result.dst);
+    EXPECT_EQ(0, result.instrs.size());
+    EXPECT_EQ(0, result.dst->intVal());
+  }
+
+  // Count($bool_int_dbl_str) --> 1
+  {
+    auto ty = Type::Bool | Type::Int | Type::Dbl | Type::Str | Type::Res;
+    auto val = unit.gen(Conjure, dummy, ty);
+    auto count = unit.gen(Count, dummy, val->dst());
+    auto result = sim.simplify(count, false);
+
+    EXPECT_NE(nullptr, result.dst);
+    EXPECT_EQ(0, result.instrs.size());
+    EXPECT_EQ(1, result.dst->intVal());
+  }
+
+  // Count($array_no_kind) --> CountArray($array_no_kind)
+  {
+    auto arr = unit.gen(Conjure, dummy, Type::Arr);
+    auto count = unit.gen(Count, dummy, arr->dst());
+    auto result = sim.simplify(count, false);
+
+    EXPECT_NE(nullptr, result.dst);
+    EXPECT_EQ(1, result.instrs.size());
+    EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
+  }
+
+  // Count($array_not_nvtw) --> CountArrayFast($array_not_nvtw)
+  {
+    auto ty = Type::Arr.specialize(ArrayData::kPackedKind);
+    auto arr = unit.gen(Conjure, dummy, ty);
+    auto count = unit.gen(Count, dummy, arr->dst());
+    auto result = sim.simplify(count, false);
+
+    EXPECT_NE(nullptr, result.dst);
+    EXPECT_EQ(1, result.instrs.size());
+    EXPECT_MATCH(result.instrs[0], CountArrayFast, arr->dst());
+  }
+
+  // Count($some_obj) --> Count($some_obj)
+  {
+    auto obj = unit.gen(Conjure, dummy, Type::Obj);
+    auto count = unit.gen(Count, dummy, obj->dst());
+    auto result = sim.simplify(count, false);
+    EXPECT_NO_CHANGE(result);
+  }
+
+}
 
 }}

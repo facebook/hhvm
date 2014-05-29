@@ -655,11 +655,11 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   TCA stubStart = code.stubs().frontier();
 
   auto const skFuncBody = [&] {
-    assert(m_pendingFixups.empty());
+    assert(m_fixups.empty());
     auto ret = backEnd().emitFuncPrologue(code.main(), code.stubs(), func,
                                           funcIsMagic, nPassed,
                                           start, aStart);
-    processPendingFixups();
+    m_fixups.process();
     return ret;
   }();
 
@@ -891,8 +891,8 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
 
   auto& cb = code.blockFor(toSmash);
   Asm as { cb };
-  // Its not clear where chainFrom should go to if as is astubs
-  assert(&cb != &code.stubs());
+  // Its not clear where the IncomingBranch should go to if cb is code.unused()
+  assert(&cb != &code.unused());
 
   // XXX Use of kJmp*Len here is a layering violation.
   using namespace X64;
@@ -1656,19 +1656,42 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 
 void
 MCGenerator::recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff) {
-  m_pendingFixups.push_back(PendingFixup(frontier, Fixup(pcOff, spOff)));
+  m_fixups.m_pendingFixups.push_back(
+    PendingFixup(frontier, Fixup(pcOff, spOff)));
 }
 
 void
-MCGenerator::processPendingFixups() {
+CodeGenFixups::process() {
   for (uint i = 0; i < m_pendingFixups.size(); i++) {
     TCA tca = m_pendingFixups[i].m_tca;
-    assert(isValidCodeAddress(tca));
-    m_fixupMap.recordFixup(tca, m_pendingFixups[i].m_fixup);
+    assert(mcg->isValidCodeAddress(tca));
+    mcg->fixupMap().recordFixup(tca, m_pendingFixups[i].m_fixup);
   }
   m_pendingFixups.clear();
+
+  for (auto const& pair : m_pendingCatchTraces) {
+    mcg->catchTraceMap().insert(pair.first, pair.second);
+  }
+  m_pendingCatchTraces.clear();
+
+  for (auto const& elm : m_pendingJmpTransIDs) {
+    mcg->getJmpToTransIDMap().insert(elm);
+  }
+  m_pendingJmpTransIDs.clear();
 }
 
+void CodeGenFixups::clear() {
+  m_pendingFixups.clear();
+  m_pendingCatchTraces.clear();
+  m_pendingJmpTransIDs.clear();
+}
+
+bool CodeGenFixups::empty() const {
+  return
+    m_pendingFixups.empty() &&
+    m_pendingCatchTraces.empty() &&
+    m_pendingJmpTransIDs.empty();
+}
 
 void
 MCGenerator::translateWork(const TranslArgs& args) {
@@ -1691,8 +1714,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     undoA.undo();
     undoAstubs.undo();
     undoGlobalData.undo();
-    m_pendingFixups.clear();
-    m_pendingCatchTraces.clear();
+    m_fixups.clear();
     m_bcMap.clear();
     srcRec.clearInProgressTailJumps();
   };
@@ -1700,8 +1722,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
   auto assertCleanState = [&] {
     assert(code.main().frontier() == start);
     assert(code.stubs().frontier() == stubStart);
-    assert(m_pendingFixups.empty());
-    assert(m_pendingCatchTraces.empty());
+    assert(m_fixups.empty());
     assert(m_bcMap.empty());
     assert(srcRec.inProgressTailJumps().empty());
   };
@@ -1861,8 +1882,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     // Fall through.
   }
 
-  processPendingFixups();
-  processPendingCatchTraces();
+  m_fixups.process();
 
   TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),
               transKindToRecord, tp.get(), start,
@@ -2130,14 +2150,7 @@ void MCGenerator::initUniqueStubs() {
 
 void MCGenerator::registerCatchBlock(CTCA ip, TCA block) {
   FTRACE(1, "registerCatchBlock: afterCall: {} block: {}\n", ip, block);
-  m_pendingCatchTraces.emplace_back(ip, block);
-}
-
-void MCGenerator::processPendingCatchTraces() {
-  for (auto const& pair : m_pendingCatchTraces) {
-    m_catchTraceMap.insert(pair.first, pair.second);
-  }
-  m_pendingCatchTraces.clear();
+  m_fixups.m_pendingCatchTraces.emplace_back(ip, block);
 }
 
 folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
@@ -2483,7 +2496,7 @@ void MCGenerator::setJmpTransID(TCA jmp) {
 
   TransID transId = m_tx.profData()->curTransID();
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
-  m_jmpToTransID[jmp] = transId;
+  m_fixups.m_pendingJmpTransIDs.emplace_back(jmp, transId);
 }
 
 void

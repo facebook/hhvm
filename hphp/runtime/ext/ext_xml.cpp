@@ -339,7 +339,7 @@ static Variant xml_call_handler(XmlParser *parser, const Variant& handler,
     }
     return retval;
   }
-  return uninit_null();
+  return init_null();
 }
 
 static void _xml_add_to_info(XmlParser *parser, const String& nameStr) {

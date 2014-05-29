@@ -56,7 +56,7 @@ static Resource get_connection_resource(Object obj) {
   auto res = obj->o_realProp(s_connection, ObjectData::RealPropUnchecked,
                              s_mysqli.get());
   if (!res || !res->isResource()) {
-    return null_resource;
+    return Resource();
   }
 
   return res->toResource();

@@ -98,11 +98,11 @@ void imagickReadOp(MagickWand* wand,
     realpath = path;
   } else {
     auto var = f_realpath(path);
-    realpath = var.isString() ? var.toString() : null_string;
+    realpath = var.isString() ? var.toString() : String();
     if (realpath.empty() ||
         !f_is_file(realpath) ||
         !f_is_readable(realpath)) {
-      realpath = null_string;
+      realpath.reset();
     }
   }
   if (realpath.empty()) {
@@ -135,15 +135,15 @@ void imagickWriteOp(MagickWand* wand,
     static const int PHP_PATHINFO_DIRNAME = 1;
     String dirname = f_pathinfo(path, PHP_PATHINFO_DIRNAME).toString();
     if (!f_is_dir(dirname)) {
-      realpath = null_string;
+      // nothing to do here
     } else if (!f_is_file(path)) {
-      realpath = f_is_writable(dirname)
-               ? path
-               : null_string;
+      if (f_is_writable(dirname)) {
+        realpath = path;
+      }
     } else {
-      realpath = f_is_writable(path)
-               ? f_realpath(path).toString()
-               : null_string;
+      if (f_is_writable(path)) {
+        realpath = f_realpath(path).toString();
+      }
     }
   }
   if (realpath.empty()) {
@@ -237,7 +237,7 @@ void raiseDeprecated(const char* className,
 
 String convertMagickString(char* &&str) {
   if (str == nullptr) {
-    return null_string;
+    return String();
   } else {
     String ret(str);
     freeMagickMemory(str);
@@ -247,7 +247,7 @@ String convertMagickString(char* &&str) {
 
 String convertMagickData(size_t size, unsigned char* &data) {
   if (data == nullptr) {
-    return null_string;
+    return String();
   } else {
     String ret((char*)data, size, CopyString);
     freeMagickMemory(data);

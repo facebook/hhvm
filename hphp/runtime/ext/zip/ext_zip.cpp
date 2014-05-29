@@ -150,7 +150,7 @@ class ZipEntry : public SweepableResourceData {
       sb->resize(n);
       return sb->detach();
     }
-    return "";
+    return empty_string;
   }
 
   uint64_t getCompressedSize() {
@@ -438,9 +438,9 @@ static Variant HHVM_METHOD(ZipArchive, getProperty, int64_t property) {
         return 0;
       case 3:
       case 4:
-        return "";
+        return empty_string;
       default:
-        return null_variant;
+        return init_null();
     }
   }
 
@@ -468,12 +468,12 @@ static Variant HHVM_METHOD(ZipArchive, getProperty, int64_t property) {
       int len;
       auto comment = zip_get_archive_comment(zipDir->getZip(), &len, 0);
       if (comment == nullptr) {
-        return "";
+        return empty_string;
       }
       return String(comment, len, CopyString);
     }
     default:
-      return null_variant;
+      return init_null();
   }
 }
 
@@ -911,7 +911,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
   FAIL_IF_INVALID_INDEX(index);
 
   if (length < 0) {
-    return "";
+    return empty_string;
   }
 
   struct zip_stat zipStat;
@@ -920,7 +920,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
   }
 
   if (zipStat.size < 1) {
-    return "";
+    return empty_string;
   }
 
   auto zipFile = zip_fopen_index(zipDir->getZip(), index, flags);
@@ -937,7 +937,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
     sb->resize(n);
     return sb->detach();
   }
-  return "";
+  return empty_string;
 }
 
 static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
@@ -948,7 +948,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
   FAIL_IF_EMPTY_STRING_ZIPARCHIVE(getFromName, name);
 
   if (length < 0) {
-    return "";
+    return empty_string;
   }
 
   struct zip_stat zipStat;
@@ -957,7 +957,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
   }
 
   if (zipStat.size < 1) {
-    return "";
+    return empty_string;
   }
 
   auto zipFile = zip_fopen(zipDir->getZip(), name.c_str(), flags);
@@ -974,7 +974,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
     sb->resize(n);
     return sb->detach();
   }
-  return "";
+  return empty_string;
 }
 
 static Variant HHVM_METHOD(ZipArchive, getNameIndex, int64_t index,
@@ -1264,7 +1264,7 @@ static Variant HHVM_FUNCTION(zip_close, const Resource& zip) {
 
   zipDir->close();
 
-  return null_variant;
+  return init_null();
 }
 
 static bool HHVM_FUNCTION(zip_entry_close, const Resource& zip_entry) {

@@ -364,7 +364,7 @@ class MemcachedData {
       if (key->empty()) continue;
       keysCopy.push_back(key->data());
       keysLengthCopy.push_back(key->size());
-      if (returnValue) returnValue->set(String(key), null_variant, true);
+      if (returnValue) returnValue->set(String(key), init_null(), true);
     }
     if (keysCopy.size() == 0) {
       m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
@@ -472,7 +472,7 @@ void HHVM_METHOD(Memcached, __construct,
   }
 }
 
-Variant HHVM_METHOD(Memcached, getAllKeys) {
+Variant HHVM_METHOD(Memcached, getallkeys) {
   FETCH_MEMCACHED_DATA(data, this_);
   memcached_dump_fn callbacks[] = {
     &memcached_dump_callback,
@@ -954,7 +954,7 @@ Variant HHVM_METHOD(Memcached, getoption, int option) {
   case MEMCACHED_BEHAVIOR_SOCKET_RECV_SIZE:
     if (memcached_server_count(&data->m_impl->memcached) == 0) {
       raise_warning("no servers defined");
-      return null_variant;
+      return init_null();
     }
     // fall through
 
@@ -1129,6 +1129,7 @@ class MemcachedExtension : public Extension {
 
   virtual void moduleInit() {
     HHVM_ME(Memcached, __construct);
+    HHVM_ME(Memcached, getallkeys);
     HHVM_ME(Memcached, getbykey);
     HHVM_ME(Memcached, getmultibykey);
     HHVM_ME(Memcached, getdelayedbykey);

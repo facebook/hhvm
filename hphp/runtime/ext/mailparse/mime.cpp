@@ -212,7 +212,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
 void MimePart::MimeHeader::clear() {
   m_empty = true;
   m_value.clear();
-  m_attributes = null_array;
+  m_attributes.reset();
 }
 
 Variant MimePart::MimeHeader::get(const String& attrname) {
@@ -946,7 +946,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
     }
     return true;
   }
-  return uninit_null();
+  return init_null();
 }
 
 int MimePart::extractImpl(int decode, File *src) {

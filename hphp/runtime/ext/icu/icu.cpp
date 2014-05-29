@@ -153,14 +153,14 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   int32_t outlen;
   u_strToUTF8(nullptr, 0, &outlen, u16, u16_len, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
-    return null_string;
+    return String();
   }
   String ret(outlen + 1, ReserveString);
   char *out = ret.get()->mutableData();
   error = U_ZERO_ERROR;
   u_strToUTF8(out, outlen + 1, &outlen, u16, u16_len, &error);
   if (U_FAILURE(error)) {
-    return null_string;
+    return String();
   }
   ret.setSize(outlen);
   return ret;

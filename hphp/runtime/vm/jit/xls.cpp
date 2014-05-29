@@ -152,6 +152,7 @@ public:
 // data structures we use during the algorithm so we don't have
 // to pass them around everywhere.
 struct XLS {
+  typedef smart::vector<Interval*> IntervalList;
   XLS(IRUnit& unit, RegAllocInfo& regs, const Abi&);
   ~XLS();
   void allocate();
@@ -181,6 +182,7 @@ struct XLS {
   Use coalesceSrc(unsigned pos, const IRInstruction&, unsigned i);
   Use coalesceDst(unsigned pos, const IRInstruction&, unsigned i);
   RegPair firstHint(Interval*, const RegPositions&);
+  static void erase(IntervalList& list, IntervalList::iterator it);
   // debugging
   void print(const char* caption);
   void dumpIntervals();
@@ -199,8 +201,8 @@ private:
   PhysReg::Map<Interval> m_blocked;
   StateVector<Block,LiveSet> m_liveIn;
   smart::priority_queue<Interval*,Compare> m_pending;
-  smart::vector<Interval*> m_active;
-  smart::vector<Interval*> m_inactive;
+  IntervalList m_active;
+  IntervalList m_inactive;
   StateVector<Block,std::pair<IRInstruction*,IRInstruction*>> m_edgeCopies;
   unsigned m_frontier { 0 }; // debug_only to detect backtracking
   unsigned m_orig { 0 };
@@ -816,7 +818,7 @@ RegPair XLS::firstHint(Interval* current, const RegPositions& free_until) {
   if (!RuntimeOption::EvalHHIREnablePreColoring &&
       !RuntimeOption::EvalHHIREnableCoalescing) return InvalidRegPair;
   // search the copy interval for a register hint at pos
-  auto search = [&](Interval* copy, unsigned pos) {
+  auto search = [&](Interval* copy, unsigned pos) -> RegPair {
     for (auto ivl = copy; ivl; ivl = ivl->next) {
       if (pos == ivl->end() && ivl->loc.hasReg(0)) {
         return ivl->loc.pair();
@@ -1028,6 +1030,12 @@ void XLS::spill(Interval* ivl) {
   if (!isDefConst(ivl)) assignSpill(ivl);
 }
 
+// remove the element at list[i] by moving the last element down.
+void XLS::erase(IntervalList& list, IntervalList::iterator i) {
+  *i = list.back();
+  list.pop_back();
+}
+
 // Split and spill other intervals that conflict with current for
 // register r, at current->start().  If necessary, split the victims
 // again before their first use position that requires a register.
@@ -1038,7 +1046,7 @@ void XLS::spillOthers(Interval* current, RegPair r) {
     if (other->scratch || !conflict(r, other->regs())) {
       i++; continue;
     }
-    i = m_active.erase(i);
+    erase(m_active, i);
     spillAfter(other, cur_start);
   }
   for (auto i = m_inactive.begin(); i != m_inactive.end();) {
@@ -1050,7 +1058,7 @@ void XLS::spillOthers(Interval* current, RegPair r) {
     if (intersect >= current->end()) {
       i++; continue;
     }
-    i = m_inactive.erase(i);
+    erase(m_inactive, i);
     spillAfter(other, cur_start);
   }
 }
@@ -1063,12 +1071,10 @@ void XLS::update(unsigned pos) {
     auto ivl = *i;
     if (ivl->end() <= pos) {
       // done with ivl; remove interval from active list
-      *i = m_active.back();
-      m_active.pop_back();
+      erase(m_active, i);
     } else if (!ivl->covers(pos)) {
       // move ivl from active to inactive
-      *i = m_active.back();
-      m_active.pop_back();
+      erase(m_active, i);
       m_inactive.push_back(ivl);
     } else {
       i++;
@@ -1079,12 +1085,10 @@ void XLS::update(unsigned pos) {
     auto ivl = *i;
     if (ivl->end() <= pos) {
       // done with ivl; remove interval from inactive list
-      *i = m_inactive.back();
-      m_inactive.pop_back();
+      erase(m_inactive, i);
     } else if (ivl->covers(pos)) {
       // move ivl from inactive to active
-      *i = m_inactive.back();
-      m_inactive.pop_back();
+      erase(m_inactive, i);
       m_active.push_back(ivl);
     } else {
       i++;

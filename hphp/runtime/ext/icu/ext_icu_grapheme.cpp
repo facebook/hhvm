@@ -428,7 +428,7 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
 
   int64_t length = len.toInt64();
   if (!length) {
-    // we've validated start, we can return "" now
+    // we've validated start, we can return empty_string now
     return empty_string;
   }
   int32_t end_pos = start_pos;

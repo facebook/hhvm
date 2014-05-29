@@ -2160,25 +2160,6 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   return prevFp;
 }
 
-void ExecutionContext::nullOutReturningActRecs() {
-  VMRegAnchor _;
-  ActRec* fp = getFP();
-  if (!fp) return;
-  Offset pc = 0;
-  auto const curOp = *reinterpret_cast<const Op*>(getPC());
-  if (curOp == Op::RetC || curOp == Op::RetV) {
-    fp->setThisOrClassAllowNull(nullptr);
-  }
-  while (ActRec* prevFp = getPrevVMState(fp, &pc)) {
-    auto const curOp =
-      *reinterpret_cast<const Op*>(prevFp->m_func->unit()->at(pc));
-    if (curOp == Op::RetC || curOp == Op::RetV) {
-      prevFp->setThisOrClassAllowNull(nullptr);
-    }
-    fp = prevFp;
-  }
-}
-
 Array ExecutionContext::debugBacktrace(bool skip /* = false */,
                                        bool withSelf /* = false */,
                                        bool withThis /* = false */,
@@ -5241,7 +5222,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetWithRefLM(IOP_ARGS) {
   DECODE_LA(local);
   if (!skip) {
     TypedValue* from = frame_local(m_fp, local);
-    tvAsVariant(base) = withRefBind(tvAsVariant(from));
+    tvAsVariant(base).setWithRef(tvAsVariant(from));
   }
   setHelperPost<0>(SETHELPERPOST_ARGS);
 }
@@ -5253,7 +5234,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetWithRefRM(IOP_ARGS) {
                            VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS);
   if (!skip) {
     TypedValue* from = m_stack.top();
-    tvAsVariant(base) = withRefBind(tvAsVariant(from));
+    tvAsVariant(base).setWithRef(tvAsVariant(from));
   }
   setHelperPost<0>(SETHELPERPOST_ARGS);
   m_stack.popTV();
@@ -6283,12 +6264,10 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
     Native::callFunc(func, nullptr, args, numArgs, ret);
   } else {
-    bool zendParamModeNull = !func->methInfo() ||
-      (func->methInfo()->attribute & ClassInfo::ParamCoerceModeNull);
-    if (zendParamModeNull) {
+    if (func->attrs() & AttrParamCoerceModeNull) {
       ret.m_type = KindOfNull;
     } else {
-      assert(func->methInfo()->attribute & ClassInfo::ParamCoerceModeFalse);
+      assert(func->attrs() & AttrParamCoerceModeFalse);
       ret.m_type = KindOfBoolean;
       ret.m_data.num = 0;
     }
@@ -6433,7 +6412,7 @@ OPTBLD_INLINE void ExecutionContext::iopWIterInit(IOP_ARGS) {
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   if (initIterator(pc, origPc, it, offset, c1)) {
-    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
   }
 }
 
@@ -6449,7 +6428,7 @@ OPTBLD_INLINE void ExecutionContext::iopWIterInitK(IOP_ARGS) {
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
   if (initIterator(pc, origPc, it, offset, c1)) {
-    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
     tvAsVariant(tv2) = it->arr().first();
   }
 }
@@ -6547,7 +6526,7 @@ OPTBLD_INLINE void ExecutionContext::iopWIterNext(IOP_ARGS) {
   TypedValue* tv1 = frame_local(m_fp, val);
   if (it->next()) {
     ITER_SKIP(offset);
-    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
   }
 }
 
@@ -6563,7 +6542,7 @@ OPTBLD_INLINE void ExecutionContext::iopWIterNextK(IOP_ARGS) {
   TypedValue* tv2 = frame_local(m_fp, key);
   if (it->next()) {
     ITER_SKIP(offset);
-    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
     tvAsVariant(tv2) = it->arr().first();
   }
 }

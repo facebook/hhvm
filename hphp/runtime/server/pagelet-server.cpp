@@ -209,7 +209,7 @@ String PageletTransport::getResults(
         long long nanosecs = (timeout_ms % 1000) * 1000000;
         if (!wait(seconds, nanosecs)) {
           code = -1;
-          return "";
+          return empty_string;
         }
       } else {
         wait();
@@ -379,13 +379,13 @@ Resource PageletServer::TaskStart(
   {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
-      return null_resource;
+      return Resource();
     }
     if (RuntimeOption::PageletServerQueueLimit > 0 &&
         s_dispatcher->getQueuedJobs() >
         RuntimeOption::PageletServerQueueLimit) {
       pageletOverflowCounter->addValue(1);
-      return null_resource;
+      return Resource();
     }
   }
   PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data,
@@ -405,7 +405,7 @@ Resource PageletServer::TaskStart(
     s_dispatcher->enqueue(job);
     return ret;
   }
-  return null_resource;
+  return Resource();
 }
 
 int64_t PageletServer::TaskStatus(const Resource& task) {

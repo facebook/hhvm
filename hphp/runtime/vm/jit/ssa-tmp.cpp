@@ -68,8 +68,8 @@ int SSATmp::numWords() const {
 Variant SSATmp::variantVal() const {
   switch (type().toDataType()) {
   case KindOfUninit:
-    return uninit_null();
   case KindOfNull:
+    // Upon return both will converted to KindOfNull anyway.
     return init_null();
   case KindOfBoolean:
     return boolVal();

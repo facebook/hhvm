@@ -1,8 +1,7 @@
 wat
 ~something
-
-Notice: Undefined index: object in %s on line 10
-NULL
+object(Bar)#1 (0) {
+}
 
 Fatal error: Uncaught exception 'Exception' with message 'asd' in %s/hphp/test/quick/unwind_backtrace.php:4
 Stack trace:

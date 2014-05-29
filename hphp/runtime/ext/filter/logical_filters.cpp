@@ -773,7 +773,7 @@ Variant php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) {
 Variant php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL) {
   if (!f_is_callable(option_array)) {
     raise_warning("First argument is expected to be a valid callback");
-    return uninit_null();
+    return init_null();
   }
   Variant reffable = value;
   return vm_call_user_func(

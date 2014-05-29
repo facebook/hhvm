@@ -307,7 +307,7 @@ template<typename T>
 ALWAYS_INLINE
 Array convertMagickArray(size_t num, T* &arr) {
   if (arr == nullptr) {
-    return null_array;
+    return Array();
   } else {
     Array ret = convertArray(num, arr);
     freeMagickMemory(arr);

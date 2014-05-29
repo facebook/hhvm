@@ -34,7 +34,7 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
 
@@ -1810,7 +1810,7 @@ static void send_soap_server_fault(
   xmlDocPtr doc_return = serialize_response_call
     (function, NULL, NULL, fault, headers, SOAP_GLOBAL(soap_version));
 
-  f_ob_end_clean(); // dump all buffered output
+  HHVM_FN(ob_end_clean)(); // dump all buffered output
 
   xmlChar *buf; int size;
   xmlDocDumpMemory(doc_return, &buf, &size);
@@ -2123,7 +2123,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
     return;
   }
 
-  if (!f_ob_start()) {
+  if (!HHVM_FN(ob_start)()) {
     throw SoapException("ob_start failed");
   }
 
@@ -2292,7 +2292,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
 
   // 7. throw away all buffered output so far, so we can send back a clean
   //    soap resposne
-  f_ob_end_clean();
+  HHVM_FN(ob_end_clean)();
 
   // 8. special case
   if (doc_return == NULL) {
@@ -2532,7 +2532,7 @@ Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
     soap_headers = make_packed_array(input_headers);
   } else{
     raise_warning("Invalid SOAP header");
-    return uninit_null();
+    return init_null();
   }
   if (!m_default_headers.isNull()) {
     soap_headers.merge(m_default_headers.toArray());
@@ -2544,15 +2544,15 @@ Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
   };
 
   if (m_trace) {
-    m_last_request = Variant();
-    m_last_response = Variant();
+    m_last_request.unset();
+    m_last_response.unset();
   }
 
   if (location.empty()) {
     location = m_location;
   }
 
-  m_soap_fault = Variant();
+  m_soap_fault.unset();
 
   SoapServiceScope sss(this);
   Variant return_value;
@@ -2685,7 +2685,7 @@ Variant c_SoapClient::t___getfunctions() {
     }
     return ret;
   }
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_SoapClient::t___gettypes() {
@@ -2700,7 +2700,7 @@ Variant c_SoapClient::t___gettypes() {
     }
     return ret;
   }
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_SoapClient::t___dorequest(const String& buf, const String& location, const String& action,
@@ -2708,7 +2708,7 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
   if (location.empty()) {
     m_soap_fault =
       Object(SystemLib::AllocSoapFaultObject("HTTP", "Unable to parse URL"));
-    return uninit_null();
+    return init_null();
   }
 
   USE_SOAP_GLOBAL;
@@ -2734,7 +2734,7 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
         ret = HHVM_FN(gzencode)(buffer, level);
         headers["Content-Encoding"].push_back("gzip");
       }
-      if (!ret.isString()) return uninit_null();
+      if (!ret.isString()) return init_null();
       buffer = ret.toString();
     }
   }
@@ -2776,7 +2776,7 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
     }
     m_soap_fault = Object(SystemLib::AllocSoapFaultObject(
       "HTTP", msg));
-    return uninit_null();
+    return init_null();
   }
   if ((code >= 400) &&
       (m_exceptions || response.empty())) {
@@ -2785,7 +2785,7 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
       msg = HttpProtocol::GetReasonString(code);
     }
     m_soap_fault = Object(SystemLib::AllocSoapFaultObject("HTTP", msg));
-    return uninit_null();
+    return init_null();
   }
 
   // return response
@@ -2793,7 +2793,7 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
     oneway = false;
   }
   if (oneway) {
-    return "";
+    return empty_string;
   }
   return response.detach();
 }
@@ -2808,7 +2808,7 @@ Variant c_SoapClient::t___setcookie(const String& name,
       m_cookies.remove(name);
     }
   }
-  return uninit_null();
+  return init_null();
 }
 
 Variant c_SoapClient::t___setlocation(const String& new_location /* = null_string */) {
@@ -2819,7 +2819,7 @@ Variant c_SoapClient::t___setlocation(const String& new_location /* = null_strin
 
 bool c_SoapClient::t___setsoapheaders(const Variant& headers /* = null_variant */) {
   if (headers.isNull()) {
-    m_default_headers = uninit_null();
+    m_default_headers.unset();
   } else if (headers.isArray()) {
     Array arr = headers.toArray();
     verify_soap_headers_array(arr);

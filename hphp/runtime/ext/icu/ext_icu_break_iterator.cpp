@@ -27,7 +27,7 @@ inline Object ibi_create(const char *funcname,
   auto bi = func(Locale::createFromName(locale.c_str()), error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "%s: error creating BreakIterator", funcname);
-    return null_object;
+    return Object();
   }
 
   return IntlBreakIterator::newInstance(bi);
@@ -141,7 +141,7 @@ static Variant HHVM_METHOD(IntlBreakIterator, getText) {
   FETCH_BI(data, this_, false);
   auto text = data->text();
   if (text.empty()) {
-    return uninit_null();
+    return init_null();
   }
   return text;
 }

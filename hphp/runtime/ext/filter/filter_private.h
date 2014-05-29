@@ -24,7 +24,7 @@
 
 #define RETURN_VALIDATION_FAILED    \
   if (flags & k_FILTER_NULL_ON_FAILURE) {   \
-    return uninit_null();   \
+    return init_null();   \
   } else {    \
     return false;  \
   }

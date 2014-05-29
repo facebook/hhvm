@@ -195,13 +195,13 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 #define FIND_XML_NULL(xml, v)                                   \
   {                                                             \
     if (!xml) {                                                 \
-      v = Variant();                                            \
+      v = init_null();                                          \
       return v;                                                 \
     }                                                           \
     if (xml->properties) {                                      \
       xmlAttrPtr n = get_attribute(xml->properties, "nil");     \
       if (n) {                                                  \
-        v = Variant();                                          \
+        v = init_null();                                        \
         return v;                                               \
       }                                                         \
     }                                                           \
@@ -1139,7 +1139,7 @@ static xmlNodePtr to_xml_bool(encodeTypePtr type, const Variant& data, int style
 
 /* Null encode/decode */
 static Variant to_zval_null(encodeTypePtr type, xmlNodePtr data) {
-  return uninit_null();
+  return init_null();
 }
 
 static xmlNodePtr to_xml_null(encodeTypePtr type, const Variant& data, int style,

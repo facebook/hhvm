@@ -153,6 +153,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'A':
     case 'h':
     case 'H':
+    case 'Z':
       if (currentarg >= argc) {
         throw_invalid_argument("Type %c: not enough arguments", code);
         return false;
@@ -160,6 +161,10 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
 
       if (arg < 0) {
         arg = argv[currentarg].toString().size();
+        //add one, because Z is always NUL-terminated
+        if (code == 'Z') {
+          arg++;
+        }
       }
 
       currentarg++;
@@ -222,6 +227,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'c':
     case 'C':
     case 'x':
+    case 'Z':
       INC_OUTPUTPOS(arg,1);    /* 8 bit per arg */
       break;
 
@@ -287,13 +293,16 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     switch ((int) code) {
     case 'a':
     case 'A':
-      memset(&output[outputpos], (code == 'a') ? '\0' : ' ', arg);
+    case 'Z': {
+      int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
+      memset(&output[outputpos], (code != 'A') ? '\0' : ' ', arg);
       val = argv[currentarg++].toString();
       s = val.c_str();
       slen = val.size();
-      memcpy(&output[outputpos], s, (slen < arg) ? slen : arg);
+      memcpy(&output[outputpos], s, (slen < arg_cp) ? slen : arg_cp);
       outputpos += arg;
-      break;
+    }
+    break;
 
     case 'h':
     case 'H': {
@@ -515,6 +524,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
 
     case 'a':
     case 'A':
+    case 'Z':
       size = arg;
       arg = 1;
       break;
@@ -590,8 +600,8 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
       if ((inputpos + size) <= inputlen) {
         switch ((int) type) {
         case 'a':
-        case 'A': {
-          char pad = (type == 'a') ? '\0' : ' ';
+        case 'A':
+        case 'Z': {
           int len = inputlen - inputpos; /* Remaining string */
 
           /* If size was given take minimum of len and size */
@@ -601,14 +611,37 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
 
           size = len;
 
-          /* Remove padding chars from unpacked data */
-          while (--len >= 0) {
-            if (input[inputpos + len] != pad)
-              break;
+          /* A will strip any trailing whitespace */
+          if (type == 'A')
+          {
+            char padn = '\0'; char pads = ' '; char padt = '\t';
+            char padc = '\r'; char padl = '\n';
+            while (--len >= 0) {
+               if (input[inputpos + len] != padn
+                   && input[inputpos + len] != pads
+                   && input[inputpos + len] != padt
+                   && input[inputpos + len] != padc
+                   && input[inputpos + len] != padl
+               )
+                       break;
+            }
+          }
+          /* Remove everything after the first null */
+          if (type=='Z') {
+            int s;
+            for (s=0 ; s < len ; s++) {
+                     if (input[inputpos + s] == '\0')
+                             break;
+            }
+            len = s;
           }
 
+          /*only A is \0 terminated*/
+          if (type=='A')
+            len++;
+
           ret.set(String(n, CopyString),
-                  String(input + inputpos, len + 1, CopyString));
+                  String(input + inputpos, len, CopyString));
           break;
         }
 

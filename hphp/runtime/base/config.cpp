@@ -118,19 +118,12 @@ HackStrictOption Config::GetHackStrictOption(const IniSettingMap& ini,
     }
     return HackStrictOption::OFF;
   }
-  if (val == "off") {
-    return HackStrictOption::OFF;
-  }
   if (val == "warn") {
     return HackStrictOption::WARN;
   }
-  if (val == "error") {
-    return HackStrictOption::ERROR;
-  }
-  throw Exception("%s must be 'off', 'warn', 'error', or the empty "
-                  "string - got '%s'",
-                  config.getFullPath().c_str(),
-                  val.c_str());
+  bool ret;
+  ini_on_update(val, ret);
+  return ret ? HackStrictOption::ERROR : HackStrictOption::OFF;
 }
 
 }

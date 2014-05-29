@@ -25,6 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+enum class HackStrictOption;
+
 class ErrorConstants {
 public:
   enum class ErrorModes {
@@ -87,6 +89,10 @@ void raise_param_type_warning(
     int param_num,
     DataType expected_type,
     DataType actual_type);
+void raise_hack_strict(HackStrictOption option, const char *ini_setting,
+                       const std::string& msg);
+void raise_hack_strict(HackStrictOption option, const char *ini_setting,
+                       const char *fmt, ...);
 
 /*
  * Raise typehint error is the same as raise_recoverable_error, except

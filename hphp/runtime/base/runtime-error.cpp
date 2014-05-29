@@ -74,14 +74,13 @@ void raise_typehint_error(const std::string& msg) {
 }
 
 void raise_disallowed_dynamic_call(const std::string& msg) {
-  if ((RuntimeOption::RepoAuthoritative &&
-       Repo::global().DisallowDynamicVarEnvFuncs) ||
-      (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ERROR)) {
+  if (RuntimeOption::RepoAuthoritative &&
+      Repo::global().DisallowDynamicVarEnvFuncs) {
     raise_error(msg);
-  } else if (
-    RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::WARN) {
-    raise_warning(msg);
   }
+  raise_hack_strict(RuntimeOption::DisallowDynamicVarEnvFuncs,
+                    "disallow_dynamic_var_env_funcs",
+                    msg);
 }
 
 void raise_recoverable_error(const char *fmt, ...) {
@@ -165,6 +164,30 @@ void raise_warning(const char *fmt, ...) {
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::ErrorThrowMode::Never,
                          "\nWarning: ");
+}
+
+/**
+ * For use with the HackStrictOption settings. This will warn, error, or do
+ * nothing depending on what the user chose for the option. The second param
+ * should be the ini setting name after "hhvm.hack."
+ */
+void raise_hack_strict(HackStrictOption option, const char *ini_setting,
+                       const std::string& msg) {
+  if (option == HackStrictOption::WARN) {
+    raise_warning(std::string("(hhvm.hack.") + ini_setting + "=warn) " + msg);
+  } else if (option == HackStrictOption::ERROR) {
+    raise_error(std::string("(hhvm.hack.") + ini_setting + "=error) " + msg);
+  }
+}
+
+void raise_hack_strict(HackStrictOption option, const char *ini_setting,
+                       const char *fmt, ...) {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+  raise_hack_strict(option, ini_setting, msg);
 }
 
 /**

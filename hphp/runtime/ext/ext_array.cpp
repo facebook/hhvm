@@ -249,12 +249,9 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
     if (LIKELY(key.isInteger() || key.isString())) {
       ai.setKeyUnconverted(key, value);
     } else {
-      if (RuntimeOption::StrictArrayFillKeys == HackStrictOption::WARN) {
-        raise_warning("array_fill_keys: keys must be ints or strings");
-      } else if (RuntimeOption::StrictArrayFillKeys ==
-                 HackStrictOption::ERROR) {
-        raise_error("array_fill_keys: keys must be ints or strings");
-      }
+      raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
+                        "strict_array_fill_keys",
+                        "keys must be ints or strings");
       ai.setKeyUnconverted(key.toString(), value);
     }
   }

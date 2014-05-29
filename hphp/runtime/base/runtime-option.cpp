@@ -350,7 +350,8 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
-HackStrictOption RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
+HackStrictOption
+  RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
   RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF;
 
 int RuntimeOption::GetScannerType() {

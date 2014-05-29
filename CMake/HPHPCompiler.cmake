@@ -38,10 +38,10 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   endif()
 
   # Generic GCC flags and Optional flags
-  # GCC 4.8+ Debug more faster
   if (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
-    set(CMAKE_C_FLAGS_DEBUG "-Og")
-    set(CMAKE_CXX_FLAGS_DEBUG "-Og")
+    # Use -Og with Debug builds in gcc >= 4.8
+    set(CMAKE_C_FLAGS_DEBUG "-Og -g")
+    set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
   endif()
   set(CMAKE_C_FLAGS_RELEASE "-O3")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")

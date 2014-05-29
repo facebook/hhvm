@@ -414,10 +414,11 @@ protected:
           UNUSED uint8_t m_unused0;
           ArrayKind m_kind;
         };
-        // Packed arrays overlay their capacity with the kind field.
-        // kPackedKind is zero, and aliases the top byte of
-        // m_packedCap, so it won't influence the capacity.
-        uint32_t m_packedCap;
+        // Packed arrays overlay their encoded capacity with the kind field.
+        // kPackedKind is zero, and aliases the top byte of m_packedCapCode,
+        // so it won't influence the encoded capacity. For details on the
+        // encoding see the definition of packedCapToCode().
+        uint32_t m_packedCapCode;
       };
       uint32_t m_size;
     };

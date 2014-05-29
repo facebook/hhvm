@@ -7405,7 +7405,7 @@ condStackTraceSep(const char* pfx) {
           string stack = prettyStack(pfx);                                    \
           Trace::trace("%s\n", stack.c_str());)
 
-#define O(name, imm, pusph, pop, flags)                     \
+#define O(name, imm, push, pop, flags)                      \
 void ExecutionContext::op##name() {                         \
   condStackTraceSep("op"#name" ");                          \
   COND_STACKTRACE("op"#name" pre:  ");                      \
@@ -7489,7 +7489,7 @@ inline void ExecutionContext::dispatchImpl() {
   PC pc = vmpc();
   DISPATCH();
 
-#define O(name, imm, pusph, pop, flags)                       \
+#define O(name, imm, push, pop, flags)                        \
   LabelDbg##name:                                             \
     phpDebuggerOpcodeHook(pc);                                \
   LabelCover##name:                                           \

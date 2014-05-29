@@ -87,6 +87,7 @@ struct PackedArray {
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* NonSmartCopy(const ArrayData*);
+  static ArrayData* NonSmartCopyHelper(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*);
   static void Ksort(ArrayData*, int, bool);
   static void Sort(ArrayData*, int, bool);
@@ -120,9 +121,11 @@ struct PackedArray {
    * non-smart packed copy, like NonSmartCopy().
    */
   static ArrayData* NonSmartConvert(const ArrayData*);
+  static ArrayData* NonSmartConvertHelper(const ArrayData*);
 
 private:
   static ArrayData* Grow(ArrayData*);
+  static ArrayData* GrowHelper(ArrayData*);
   static MixedArray* ToMixedHeader(const ArrayData*, size_t);
   static MixedArray* ToMixed(ArrayData*);
   static MixedArray* ToMixedCopy(const ArrayData*);

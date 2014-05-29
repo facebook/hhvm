@@ -111,6 +111,7 @@ public:
    * The returned array is already incref'd.
    */
   static ArrayData* MakeReserve(uint32_t capacity);
+  static ArrayData* MakeReserveSlow(uint32_t capacity);
 
   /*
    * Allocate a new, empty, request-local array in mixed mode, with
@@ -132,6 +133,7 @@ public:
    * Pre: size > 0
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
+  static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -150,6 +152,7 @@ public:
    */
   static ArrayData* MakeUncounted(ArrayData* array);
   static ArrayData* MakeUncountedPacked(ArrayData* array);
+  static ArrayData* MakeUncountedPackedHelper(ArrayData* array);
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
@@ -288,6 +291,9 @@ public:
   static const uint32_t SmallHashSize = 1 << MinLgTableSize;
   static const uint32_t SmallMask = SmallHashSize - 1;
   static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+  static const uint64_t MaxHashSize = uint64_t(1) << 32;
+  static const uint32_t MaxMask = MaxHashSize - 1;
+  static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
   static const uint32_t MaxMakeSize = 4 * SmallSize;
 
   uint32_t iterLimit() const { return m_used; }

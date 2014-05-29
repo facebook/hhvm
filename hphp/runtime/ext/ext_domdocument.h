@@ -179,7 +179,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 public:
@@ -208,7 +208,7 @@ class c_DOMAttr : public c_DOMNode {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 };
@@ -236,7 +236,7 @@ class c_DOMCharacterData : public c_DOMNode {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 };
@@ -245,13 +245,13 @@ class c_DOMCharacterData : public c_DOMNode {
 // class DOMComment
 
 FORWARD_DECLARE_CLASS(DOMComment);
-class c_DOMComment : public c_DOMNode {
+class c_DOMComment : public c_DOMCharacterData {
  public:
   DECLARE_CLASS_NO_SWEEP(DOMComment)
 
   // need to implement
   c_DOMComment(Class* cls = c_DOMComment::classof())
-    : c_DOMNode(cls)
+    : c_DOMCharacterData(cls)
   {}
   ~c_DOMComment() {}
   public: void t___construct(const String& value = null_string);
@@ -280,7 +280,7 @@ class c_DOMText : public c_DOMCharacterData {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 };
@@ -357,7 +357,7 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 public:
@@ -415,7 +415,7 @@ class c_DOMDocumentType : public c_DOMNode {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 };
@@ -463,8 +463,7 @@ class c_DOMElement : public c_DOMNode {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
-
+  public: Array t___debuginfo();
 
 };
 
@@ -484,7 +483,7 @@ class c_DOMEntity : public c_DOMNode {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 };
@@ -525,7 +524,7 @@ class c_DOMNotation : public c_DOMNode {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 };
@@ -546,7 +545,7 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
 };
@@ -627,6 +626,7 @@ class c_DOMNamedNodeMap
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
+  public: Array t___debuginfo();
   public: Variant t_getiterator();
 
 
@@ -654,6 +654,7 @@ class c_DOMNodeList
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
+  public: Array t___debuginfo();
   public: Variant t_getiterator();
 
 
@@ -710,7 +711,7 @@ class c_DOMXPath
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
-
+  public: Array t___debuginfo();
 
 
  public:

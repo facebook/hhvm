@@ -1817,12 +1817,6 @@ StAsyncArRaw<OffsetData> S0:FramePtr S1:{Int,TCA,Nullptr}
   describes the offset from the AsyncFunctionWaitHandle base, and the size.
   S1 is the value.
 
-StAsyncArChild S0:FramePtr S1:Obj
-
-  Stores a WaitHandle object S1 into the AsyncFunctionWaitHandle object, whose
-  ActRec is given by S0. The offset into AsyncFunctionWaitHandle at which the
-  WaitHandle object is stored is known statically.
-
 StAsyncArResult S0:FramePtr S1:Cell
 
   Stores result into the AsyncFunctionWaitHandle object ActRec of which is S0.
@@ -1832,6 +1826,11 @@ D:{Obj,Nullptr} = LdAsyncArFParent S0:FramePtr
 
   Loads the first parent of the AsyncFunctionWaitHandle object ActRec of which
   is S0.
+
+AFWHBlockOn S0:FramePtr S1:Obj
+
+  Establish dependency between parent AsyncFunctionWaitHandle object, whose
+  ActRec is given by S0, and child WaitableWaitHandle object referenced by S1.
 
 D:Int = LdWHState S0:Obj
 

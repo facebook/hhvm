@@ -652,9 +652,9 @@ O(LdContArKey,                  DParam, S(FramePtr),                     PRc) \
 O(StContArKey,                      ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StAsyncArRaw,                     ND, S(FramePtr)                           \
                                           S(Int,TCA,Nullptr),              E) \
-O(StAsyncArChild,                   ND, S(FramePtr) S(Obj),            E|CRc) \
 O(StAsyncArResult,                  ND, S(FramePtr) S(Cell),           E|CRc) \
 O(LdAsyncArFParent,     D(Obj|Nullptr), S(FramePtr),                      NF) \
+O(AFWHBlockOn,                      ND, S(FramePtr) S(Obj),            E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \

@@ -204,8 +204,8 @@ void emitAssertFlagsNonNegative(Asm& as) {
 void emitAssertRefCount(Asm& as, PhysReg base) {
   as.cmpl(HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]);
   ifThen(as, CC_NLE, [&] {
-      as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
-      ifThen(as, CC_NBE, [&] { as.ud2(); });
+    as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
+    ifThen(as, CC_NBE, [&] { as.ud2(); });
   });
 }
 

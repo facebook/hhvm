@@ -1770,14 +1770,16 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
   // Prepare child for establishing dependency.
   gen(AFWHPrepareChild, catchBlock, m_irb->fp(), child);
 
-  // Store child and offset.
+  // Suspend the async function.
   auto const resumeSk = SrcKey(curFunc(), resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
   gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeAddr}, m_irb->fp(),
       resumeAddr);
   gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeOffset}, m_irb->fp(),
       cns(resumeOffset));
-  gen(StAsyncArChild, m_irb->fp(), child);
+
+  // Set up the dependency.
+  gen(AFWHBlockOn, m_irb->fp(), child);
 
   // Transfer control back to the scheduler.
   auto const sp = spillStack();

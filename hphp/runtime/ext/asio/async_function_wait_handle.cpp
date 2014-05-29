@@ -163,19 +163,6 @@ void c_AsyncFunctionWaitHandle::resume() {
       throw FatalErrorException(
           "Invariant violation: child neither succeeded nor failed");
     }
-
-    // async function reached RetC, which already did everything
-    if (isSucceeded()) {
-      return;
-    }
-
-    // async function reached AsyncSuspend, which already set m_child
-    assert(!m_child->isFinished());
-    assert(m_child->instanceof(c_WaitableWaitHandle::classof()));
-
-    // set up dependency
-    setState(STATE_BLOCKED);
-    blockOn(m_child);
   } catch (const Object& exception) {
     // process exception thrown by the async function
     markAsFailed(exception);
@@ -206,15 +193,18 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
   }
 }
 
-void
-c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
-                                 c_WaitableWaitHandle* child) {
+void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
+                                      c_WaitableWaitHandle* child) {
   // Prepare child for establishing dependency. May throw.
   prepareChild(child);
 
   // Suspend the async function.
   resumable()->setResumeAddr(nullptr, resumeOffset);
+
+  // Set up the dependency.
   m_child = child;
+  setState(STATE_BLOCKED);
+  blockOn(m_child);
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {

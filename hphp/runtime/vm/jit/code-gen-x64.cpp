@@ -5661,11 +5661,6 @@ void CodeGenerator::cgStAsyncArRaw(IRInstruction* inst) {
             info.size);
 }
 
-void CodeGenerator::cgStAsyncArChild(IRInstruction* inst) {
-  emitStRaw(inst, -c_AsyncFunctionWaitHandle::arOff() +
-            c_AsyncFunctionWaitHandle::childOff(), sz::qword);
-}
-
 void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
   auto asyncArReg = srcLoc(0).reg();
   auto value = inst->src(1);
@@ -5681,6 +5676,38 @@ void CodeGenerator::cgLdAsyncArFParent(IRInstruction* inst) {
   const int64_t off = c_AsyncFunctionWaitHandle::firstParentOff()
                     - c_AsyncFunctionWaitHandle::arOff();
   m_as.loadq(asyncArReg[off], dstReg);
+}
+
+void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
+  auto parentArReg = srcLoc(0).reg();
+  auto childReg = srcLoc(1).reg();
+  const int8_t blocked = c_WaitHandle::toKindState(
+      c_WaitHandle::Kind::AsyncFunction, c_BlockableWaitHandle::STATE_BLOCKED);
+  const int64_t firstParentOff = c_WaitableWaitHandle::firstParentOff();
+  const int64_t stateToArOff = c_AsyncFunctionWaitHandle::stateOff()
+                             - c_AsyncFunctionWaitHandle::arOff();
+  const int64_t nextParentToArOff = c_AsyncFunctionWaitHandle::nextParentOff()
+                                  - c_AsyncFunctionWaitHandle::arOff();
+  const int64_t childToArOff = c_AsyncFunctionWaitHandle::childOff()
+                             - c_AsyncFunctionWaitHandle::arOff();
+  const int64_t objToArOff = -c_AsyncFunctionWaitHandle::arOff();
+
+  // parent->setState(STATE_BLOCKED);
+  m_as.storeb(blocked, parentArReg[stateToArOff]);
+
+  // parent->m_nextParent = child->m_firstParent;
+  m_as.loadq (childReg[firstParentOff], m_rScratch);
+  m_as.storeq(m_rScratch, parentArReg[nextParentToArOff]);
+
+  // child->m_firstParent = parent;
+  m_as.lea   (parentArReg[objToArOff], m_rScratch);
+  m_as.storeq(m_rScratch, childReg[firstParentOff]);
+
+  // parent->m_child = child;
+  m_as.storeq(childReg, parentArReg[childToArOff]);
+
+  // parent->incRefCount();
+  emitIncRef(m_as, m_rScratch);
 }
 
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {

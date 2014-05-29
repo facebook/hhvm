@@ -139,7 +139,8 @@ static void hhvm_zlib_free(voidpf opaque, voidpf address) {
 static Variant hhvm_zlib_encode(const String& data,
                                 int64_t level, int64_t enc) {
   if ((level < -1) || (level > 9)) {
-    raise_warning("compression level (%ld) must be within -1..9", level);
+    raise_warning("compression level (%" PRId64 ") must be within -1..9",
+                  level);
     return false;
   }
   switch (enc) {
@@ -250,7 +251,7 @@ static Variant hhvm_zlib_decode(const String& data,
   }
 
   if (maxlen < 0) {
-    raise_warning("length (%ld) must be greater or equal zero", maxlen);
+    raise_warning("length (%" PRId64 ") must be greater or equal zero", maxlen);
     return false;
   }
 

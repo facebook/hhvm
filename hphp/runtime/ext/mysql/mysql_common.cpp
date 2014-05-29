@@ -1425,7 +1425,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
   return MySQLQueryReturn::OK_FETCH_RESULT;
 }
 
-Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
+Variant php_mysql_get_result(const Variant& link_id, bool use_store, bool from_store_result) {
   MySQL *rconn = NULL;
   MYSQL *conn = MySQL::GetConn(link_id, &rconn);
   if (!conn || !rconn) return false;
@@ -1451,6 +1451,13 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
     if (mysql_field_count(conn) > 0) {
       raise_warning("Unable to save result set");
       return false;
+
+	// If this was a store result request, and we had no columns
+	// it would have been for a query that doesn't return a result
+	// such as an INSERT/UPDATE statement, to match PHP's result
+	// we return false
+	} else if (from_store_result) {
+		return false;
     }
     return true;
   }
@@ -1477,7 +1484,7 @@ Variant php_mysql_do_query_and_get_result(const String& query, const Variant& li
 
   switch (result) {
     case MySQLQueryReturn::OK_FETCH_RESULT:
-      return php_mysql_get_result(link_id, use_store);
+      return php_mysql_get_result(link_id, use_store, false);
     case MySQLQueryReturn::OK:
       return true;
     case MySQLQueryReturn::FAIL:

@@ -360,7 +360,7 @@ Variant php_mysql_do_connect(const String& server, const String& username,
 enum MySQLQueryReturn { FAIL = 0, OK = 1, OK_FETCH_RESULT = 2 };
 MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
                                     bool async_mode);
-Variant php_mysql_get_result(const Variant& link_id, bool use_store);
+Variant php_mysql_get_result(const Variant& link_id, bool use_store, bool from_store_result);
 Variant php_mysql_do_query_and_get_result(const String& query, const Variant& link_id,
                                           bool use_store, bool async_mode);
 

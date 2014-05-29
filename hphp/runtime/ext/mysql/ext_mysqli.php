@@ -838,7 +838,7 @@ class mysqli {
   }
 
   <<__Native>>
-  private function hh_get_result(bool $use_store): ?mixed;
+  private function hh_get_result(bool $use_store, bool $from_store_result): ?mixed;
 
   /**
    * Transfers a result set from the last query
@@ -857,7 +857,7 @@ class mysqli {
    *   statement should have produced a non-empty result set.
    */
   public function store_result(): ?mixed {
-    $result = $this->hh_get_result(true);
+    $result = $this->hh_get_result(true, true);
     if ($result === null) {
       return null;
     }
@@ -875,7 +875,7 @@ class mysqli {
    *   if an error occurred.
    */
   public function use_result(): ?mixed {
-    $result = $this->hh_get_result(false);
+    $result = $this->hh_get_result(false, false);
     if ($result === null) {
       return null;
     }

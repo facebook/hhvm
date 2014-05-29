@@ -5,6 +5,15 @@ NEXT
 
 "Kanye West"
   - Interfaces {Keyed}Container match arrays *and* collections, not iterables
+  - Added ** and **= operators to HHVM and more compatibility fixes with PHP5.6
+  - Fixes and improvements to collections
+  - Replace json decoder with json-c library
+  - Document VMRegAnchor and isVMFrame()
+  - Improvements to array iterator code
+  - Improvements to the type checker
+  - Allow parser to be generated with bison 3
+  - Improvements and speed up to reflection code
+
 
 "Jay-Z" 9-May-2014
   - Make handling of code.hot overflows more robust

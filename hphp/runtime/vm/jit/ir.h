@@ -657,7 +657,7 @@ O(StAsyncArResult,                  ND, S(FramePtr) S(Cell),           E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
-O(CopyCells,                       ND, S(FramePtr) S(PtrToGen),            E) \
+O(CopyAsyncCells,                   ND, S(FramePtr) S(PtrToGen),        CRc|E) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           C(Int)                              \
                                           S(TCA,Nullptr)                      \

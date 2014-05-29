@@ -881,11 +881,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeInputs();
       defineOutputs();
     } else if (m_inst->is(CreateAFWH)) {
-      consumeAllLocals();
       consumeInputs();
       auto frame = frameRoot(m_inst->src(0)->inst());
       consumeFrame(m_state.frames.live.at(frame));
       defineOutputs();
+    } else if (m_inst->is(CopyAsyncCells)) {
+      consumeAllLocals();
     } else if (m_inst->is(DecRefLoc)) {
       consumeLocal(m_inst->extra<DecRefLoc>()->locId);
     } else if (m_inst->is(DecRefThis)) {

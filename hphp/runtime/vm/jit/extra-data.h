@@ -839,7 +839,7 @@ X(StLoc,                        LocalId);
 X(StCell,                       LocalOffset);
 X(StGbl,                        LocalId);
 X(StLocNT,                      LocalId);
-X(CopyCells,                    LocalId);
+X(CopyAsyncCells,               LocalId);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);

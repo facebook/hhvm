@@ -1824,9 +1824,11 @@ D:Cell = LdWHResult S0:Obj
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
 
-CopyCells<numCells> S0:FramePtr S1:PtrToGen
+CopyAsyncCells<numCells> S0:FramePtr S1:PtrToGen
 
-  Copy numCells cells from frame S0 to the same slot offsets in S1.
+  Copy numCells cells from frame S0 to the same slot offsets in S1. This
+  instruction may be used only to copy cells when suspending the frame of
+  an async function.
 
 
 17. Debugging, instrumentation, and profiling

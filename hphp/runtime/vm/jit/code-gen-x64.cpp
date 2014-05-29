@@ -5706,9 +5706,9 @@ void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
   m_as.lea (base[asyncArOffset], dest);
 }
 
-void CodeGenerator::cgCopyCells(IRInstruction* inst) {
+void CodeGenerator::cgCopyAsyncCells(IRInstruction* inst) {
   auto const fpReg    = srcLoc(0).reg();
-  auto const numCells = inst->extra<CopyCells>()->locId;
+  auto const numCells = inst->extra<CopyAsyncCells>()->locId;
   auto const asyncAR  = srcLoc(1).reg();
   auto const cellSize = sizeof(Cell);
 

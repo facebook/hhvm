@@ -1743,7 +1743,7 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
       gen(StCell, LocalOffset(localOffset(i)), asyncAR, loc);
     }
   } else {
-    gen(CopyCells, LocalId(numCells), m_irb->fp(), asyncAR);
+    gen(CopyAsyncCells, LocalId(numCells), m_irb->fp(), asyncAR);
   }
 
   // Call the FunctionSuspend hook and put the AsyncFunctionWaitHandle

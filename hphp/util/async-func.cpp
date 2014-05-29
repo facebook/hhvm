@@ -19,6 +19,7 @@
 #include <sys/resource.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <signal.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,8 +78,24 @@ void AsyncFuncImpl::start() {
     pthread_attr_setstack(&m_attr, m_threadStack, rlim.rlim_cur);
   }
 
+  // set the signal mask on created threads to _not_ include SIGTERM,
+  // SIGUSR1, and SIGHUP, which should be handled by the main thread
+  // and the main thread only
+  sigset_t newmask;
+  sigset_t oldmask;
+  sigemptyset(&newmask);
+  sigaddset(&newmask, SIGHUP);
+  sigaddset(&newmask, SIGUSR1);
+  sigaddset(&newmask, SIGTERM);
+  int s = pthread_sigmask(SIG_BLOCK, &newmask, &oldmask);
+  assert(s == 0);
+
   pthread_create(&m_threadId, &m_attr, ThreadFunc, (void*)this);
   assert(m_threadId);
+
+  // reset the signal mask to be the old mask
+  s = pthread_sigmask(SIG_SETMASK, &oldmask, nullptr);
+  assert(s == 0);
 }
 
 void AsyncFuncImpl::cancel() {

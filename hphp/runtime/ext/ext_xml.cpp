@@ -390,7 +390,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
         tag.set(s_tag, tag_name.substr(parser->toffset));
         tag.set(s_type, s_close);
         tag.set(s_level, parser->level);
-        parser->data.toArrRef().append(tag.create());
+        parser->data.toArrRef().append(tag.toArray());
       }
       parser->lastwasopen = 0;
     }

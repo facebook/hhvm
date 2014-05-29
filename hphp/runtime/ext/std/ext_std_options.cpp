@@ -737,7 +737,7 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
                set(s_ru_utime_tv_sec,  (int64_t)usg.ru_utime.tv_sec).
                set(s_ru_stime_tv_usec, (int64_t)usg.ru_stime.tv_usec).
                set(s_ru_stime_tv_sec,  (int64_t)usg.ru_stime.tv_sec).
-               create());
+               toArray());
 }
 
 static bool HHVM_FUNCTION(clock_getres,

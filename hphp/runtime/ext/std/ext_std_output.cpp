@@ -190,7 +190,7 @@ Variant HHVM_FUNCTION(hphp_get_timers, bool get_as_float /* = true */) {
   ret.set(s_process_usleep_time, (double)usleep_time/1000000);
   ret.set(s_process_nsleep_time, nsleep_time_s +
           (double)nsleep_time_n / 1000000000);
-  return ret.create();
+  return ret.toVariant();
 }
 
 Variant HHVM_FUNCTION(hphp_output_global_state, bool serialize /* = true */) {

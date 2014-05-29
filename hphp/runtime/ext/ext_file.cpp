@@ -1011,7 +1011,7 @@ Variant f_pathinfo(const String& path, int opt /* = 15 */) {
     ret.set(s_filename, filename);
   }
 
-  return ret.create();
+  return ret.toVariant();
 }
 
 Variant f_disk_free_space(const String& directory) {

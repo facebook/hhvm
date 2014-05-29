@@ -341,7 +341,7 @@ class MemcachedData {
                                    Variant& value) {
     Array params(PackedArrayInit(3).append(Variant(this))
                                    .append(key)
-                                   .appendRef(value).create());
+                                   .appendRef(value).toArray());
     if (!vm_call_user_func(callback, params).toBoolean()) {
       return MEMCACHED_NOTFOUND;
     }

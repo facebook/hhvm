@@ -138,7 +138,7 @@ Variant f_array_chunk(const Variant& input, int chunkSize,
     ret.append(chunk);
   }
 
-  return ret.toArray();
+  return ret.toVariant();
 }
 
 static inline bool array_column_coerce_key(Variant &key, const char *name) {
@@ -195,7 +195,7 @@ Variant f_array_column(const Variant& input, const Variant& val_key,
       ret.setKeyUnconverted(sub[idx], elem);
     }
   }
-  return ret.toArray();
+  return ret.toVariant();
 }
 
 Variant f_array_combine(const Variant& keys, const Variant& values) {
@@ -255,7 +255,7 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
       ai.setKeyUnconverted(key.toString(), value);
     }
   }
-  return ai.create();
+  return ai.toVariant();
 }
 
 Variant f_array_fill(int start_index, int num, const Variant& value) {
@@ -359,7 +359,7 @@ Variant f_array_keys(const Variant& input, const Variant& search_value /* = null
     for (ArrayIter iter(cell_input); iter; ++iter) {
       ai.append(iter.first());
     }
-    return ai.toArray();
+    return ai.toVariant();
   } else {
     Array ai = Array::attach(MixedArray::MakeReserve(0));
     for (ArrayIter iter(cell_input); iter; ++iter) {
@@ -410,7 +410,7 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
       // present
       ret.add(iter.first(), result, keyConverted);
     }
-    return ret.toArray();
+    return ret.toVariant();
   }
 
   // Handle the uncommon case where the caller passed a callback
@@ -459,7 +459,7 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
       ret_ai.append(params);
     }
   }
-  return ret_ai.toArray();
+  return ret_ai.toVariant();
 }
 
 static void php_array_merge(Array &arr1, const Array& arr2) {
@@ -980,7 +980,7 @@ Variant f_array_values(const Variant& input) {
   for (ArrayIter iter(cell_input); iter; ++iter) {
     ai.appendWithRef(iter.secondRefPlus());
   }
-  return ai.toArray();
+  return ai.toVariant();
 }
 
 static void walk_func(VRefParam value, const Variant& key, const Variant& userdata,

@@ -563,7 +563,7 @@ public:
       arr.set(s_alloc, counts.memory);
       arr.set(s_free, counts.peak_memory);
     }
-    ret.set(String(name), arr.create());
+    ret.set(String(name), arr.toArray());
   }
 
   template<class phpret, class StatsMap>

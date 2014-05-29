@@ -1012,7 +1012,7 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = k_CURLVERSION_NOW */) {
     protocol_list.append(String(*p++, CopyString));
   }
   ret.set(s_protocols, protocol_list);
-  return ret.create();
+  return ret.toVariant();
 }
 
 bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value) {

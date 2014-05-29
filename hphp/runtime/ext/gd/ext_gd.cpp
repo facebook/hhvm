@@ -1692,7 +1692,7 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
     }
     ret.set(s_mime, (char*)php_image_type_to_mime_type(itype));
     IM_FREE(result);
-    return ret.create();
+    return ret.toVariant();
   } else {
     return false;
   }
@@ -3681,7 +3681,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
     ret.set(s_red, im->red[col]);
     ret.set(s_green, im->green[col]);
     ret.set(s_blue, im->blue[col]);
-    return ret.create();
+    return ret.toVariant();
   }
 #endif
   raise_warning("Color index %" PRId64 " out of range", index);

@@ -274,7 +274,7 @@ Variant HHVM_FUNCTION(parse_url, const String& url,
     return init_null();
   }
 
-  ArrayInit ret(8, ArrayInit::Map{});
+  ArrayInit ret(resource.port ? 8 : 7, ArrayInit::Map{});
   SET_COMPONENT(scheme);
   SET_COMPONENT(host);
   if (resource.port) {
@@ -285,7 +285,7 @@ Variant HHVM_FUNCTION(parse_url, const String& url,
   SET_COMPONENT(path);
   SET_COMPONENT(query);
   SET_COMPONENT(fragment);
-  return ret.create();
+  return ret.toVariant();
 }
 
 String HHVM_FUNCTION(rawurldecode, const String& str) {

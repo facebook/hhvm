@@ -2477,7 +2477,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   a.    storeq (m_rScratch, actRecReg[AROFF(m_func)]);
   a.    jmp8   (done);
 asm_label(a, slow_path);
-  auto const info = cgCallHelper(
+  cgCallHelper(
     a,
     CppCall::direct(mcHandler),
     kVoidDest,
@@ -2503,8 +2503,11 @@ asm_label(a, done);
    * Class*, so we'll always miss the inline check before it's smashed, and
    * handlePrimeCacheMiss can tell it's not been smashed yet
    */
-  *reinterpret_cast<uintptr_t*>(movAddr + kMovImmOff) =
-    ((info.returnAddress - movAddr) << 1) | 1;
+  auto movAddrUInt = reinterpret_cast<uintptr_t>(movAddr);
+  *reinterpret_cast<uint64_t*>(movAddr + kMovImmOff) =
+    (movAddrUInt << 1) | 1;
+  mcg->cgFixups().m_addressImmediates.insert(
+    reinterpret_cast<TCA>(~movAddrUInt));
 }
 
 void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {

@@ -2309,6 +2309,7 @@ struct DecodedInstruction {
   bool hasImmediate() const { return m_immSz; }
   int64_t immediate() const;
   bool setImmediate(int64_t value);
+  bool isNop() const;
 private:
   void decode(uint8_t* ip);
   bool decodePrefix(uint8_t* ip);

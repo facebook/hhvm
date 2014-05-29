@@ -90,6 +90,7 @@ struct CodeGenFixups {
   std::set<TCA> m_addressImmediates;
   std::set<TCA*> m_codePointers;
   std::vector<TransBCMapping> m_bcMap;
+  std::multimap<TCA,std::pair<int,int>> m_alignFixups;
 
   CodeBlock* m_tletMain{nullptr};
   CodeBlock* m_tletCold{nullptr};
@@ -115,16 +116,28 @@ struct RelocationInfo {
   TCA dest() const { return m_dest; }
   bool relocated() { return m_destSize != size_t(-1); }
   size_t destSize() const { return m_destSize; }
-  void setDestEnd(TCA destEnd) { m_destSize = destEnd - m_dest; }
-  TCA adjustedAddress(TCA addr) const;
-  CTCA adjustedAddress(CTCA addr) const {
-    return adjustedAddress(const_cast<TCA>(addr));
+  void recordAddress(TCA src, TCA dest, int range);
+  TCA adjustedAddressAfter(TCA addr) const;
+  TCA adjustedAddressBefore(TCA addr) const;
+  CTCA adjustedAddressAfter(CTCA addr) const {
+    return adjustedAddressAfter(const_cast<TCA>(addr));
+  }
+  CTCA adjustedAddressBefore(CTCA addr) const {
+    return adjustedAddressBefore(const_cast<TCA>(addr));
   }
  private:
   TCA m_start;
   TCA m_end;
   TCA m_dest;
   size_t m_destSize{size_t(-1)};
+  /*
+   * maps from src address, to range of destination addresse
+   * This is because we could insert nops before the instruction
+   * corresponding to src. Most things want the address of the
+   * instruction corresponding to the src instruction; but eg
+   * the fixup map would want the address of the nop.
+   */
+  std::map<TCA,std::pair<TCA,int>> m_adjustedAddresses;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -265,8 +278,6 @@ public:
    * in bytes. Note that the code may have been emitted by other threads.
    */
   void codeEmittedThisRequest(size_t& requestEntry, size_t& now) const;
-  void fixupRange(TCA start, TCA end, RelocationInfo& rel);
-  void fixupMeta(SrcRec* sr, AsmInfo* asmInfo, RelocationInfo& rel);
 public:
   CodeCache code;
 

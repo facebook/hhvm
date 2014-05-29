@@ -282,7 +282,9 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
      * maximal possible service requests.
      */
     assert(as.frontier() - start <= maxStubSpace);
-    as.emitNop(start + maxStubSpace - as.frontier());
+    // do not use nops, or the relocator will strip them out
+    while (as.frontier() - start <= maxStubSpace - 2) as.ud2();
+    if (as.frontier() - start < maxStubSpace) as.int3();
     assert(as.frontier() - start == maxStubSpace);
   }
 

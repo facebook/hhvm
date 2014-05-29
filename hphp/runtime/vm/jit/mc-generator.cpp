@@ -1689,9 +1689,8 @@ CodeGenFixups::process() {
   }
   m_pendingJmpTransIDs.clear();
   /*
-   * Currently reusedStubs, addressImmediates, and
-   * codePointers are only used for relocation at the
-   * end of code gen.
+   * Currently these are only used by the relocator,
+   * so there's nothing left to do here.
    *
    * Once we try to relocate live code, we'll need to
    * store compact forms of these for later.
@@ -1700,6 +1699,7 @@ CodeGenFixups::process() {
   m_addressImmediates.clear();
   m_codePointers.clear();
   m_bcMap.clear();
+  m_alignFixups.clear();
 }
 
 void CodeGenFixups::clear() {
@@ -1710,6 +1710,7 @@ void CodeGenFixups::clear() {
   m_addressImmediates.clear();
   m_codePointers.clear();
   m_bcMap.clear();
+  m_alignFixups.clear();
 }
 
 bool CodeGenFixups::empty() const {
@@ -1720,7 +1721,8 @@ bool CodeGenFixups::empty() const {
     m_reusedStubs.empty() &&
     m_addressImmediates.empty() &&
     m_codePointers.empty() &&
-    m_bcMap.empty();
+    m_bcMap.empty() &&
+    m_alignFixups.empty();
 }
 
 void
@@ -2367,6 +2369,7 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
   if (!locked) {
     return false;
   }
+  assert(mcg->cgFixups().empty());
   struct timespec tsBegin, tsEnd;
   HPHP::Timer::GetMonotonicTime(tsBegin);
   // Doc says even find _could_ invalidate iterator, in pactice it should
@@ -2384,6 +2387,7 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
       addDbgGuardImpl(sk, sr);
     }
   }
+  mcg->cgFixups().process();
   Translator::WriteLease().drop();
   HPHP::Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
@@ -2415,11 +2419,13 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
   if (!locked) {
     return false;
   }
+  assert(mcg->cgFixups().empty());
   {
     if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
       addDbgGuardImpl(sk, sr);
     }
   }
+  mcg->cgFixups().process();
   Translator::WriteLease().drop();
   return true;
 }
@@ -2549,12 +2555,32 @@ void MCGenerator::setJmpTransID(TCA jmp) {
   m_fixups.m_pendingJmpTransIDs.emplace_back(jmp, transId);
 }
 
-TCA RelocationInfo::adjustedAddress(TCA addr) const {
+void RelocationInfo::recordAddress(TCA src, TCA dest, int range) {
+  assert(m_destSize == size_t(-1) || dest - m_dest >= m_destSize);
+  m_destSize = dest - m_dest;
+  m_adjustedAddresses.emplace(src, std::make_pair(dest, range));
+}
+
+TCA RelocationInfo::adjustedAddressAfter(TCA addr) const {
   if (size_t(addr - m_start) > size_t(m_end - m_start)) {
     return nullptr;
   }
 
-  return addr + (m_dest - m_start);
+  auto it = m_adjustedAddresses.find(addr);
+  if (it == m_adjustedAddresses.end()) return nullptr;
+
+  return it->second.first + it->second.second;
+}
+
+TCA RelocationInfo::adjustedAddressBefore(TCA addr) const {
+  if (size_t(addr - m_start) > size_t(m_end - m_start)) {
+    return nullptr;
+  }
+
+  auto it = m_adjustedAddresses.find(addr);
+  if (it == m_adjustedAddresses.end()) return nullptr;
+
+  return it->second.first;
 }
 
 void

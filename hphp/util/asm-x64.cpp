@@ -399,4 +399,11 @@ bool DecodedInstruction::setImmediate(int64_t value) {
   return writeValue(m_ip + m_size - m_immSz, m_immSz, value);
 }
 
+bool DecodedInstruction::isNop() const {
+  if (m_opcode == 0x90) {
+    return m_size == 1 || (m_size == 2 && m_flags.opndSzOvr);
+  }
+  return m_opcode == 0x1f && m_map_select == 1;
+}
+
 } }

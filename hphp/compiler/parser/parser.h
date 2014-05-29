@@ -151,7 +151,8 @@ public:
   void onIndirectRef(Token &out, Token &refCount, Token &var);
   void onStaticMember(Token &out, Token &cls, Token &name);
   void onRefDim(Token &out, Token &var, Token &offset);
-  void onCallParam(Token &out, Token *params, Token &expr, bool ref);
+  void onCallParam(Token &out, Token *params, Token &expr,
+                   bool ref, bool unpack);
   void onCall(Token &out, bool dynamic, Token &name, Token &params, Token *cls);
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);

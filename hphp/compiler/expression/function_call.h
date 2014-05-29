@@ -64,6 +64,7 @@ public:
   void setArrayParams() { m_arrayParams = true; }
   bool isValid() const { return m_valid; }
   bool hadBackslash() const { return m_hadBackslash; }
+  bool hasUnpack() const;
 
 private:
   void checkParamTypeCodeErrors(AnalysisResultPtr);
@@ -101,6 +102,7 @@ protected:
   int m_argArrayIndex;
   void optimizeArgArray(AnalysisResultPtr ar);
 
+  void checkUnpackParams();
   void markRefParams(FunctionScopePtr func, const std::string &name,
                      bool canInvokeFewArgs);
 

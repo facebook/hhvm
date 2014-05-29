@@ -61,7 +61,8 @@ struct OnDynamicVariableEI : ExtraInfo {
 
 struct OnCallParamEI : ExtraInfo {
   bool ref;
-  explicit OnCallParamEI(bool r) : ref(r) {}
+  bool unpack;
+  explicit OnCallParamEI(bool r, bool u) : ref(r), unpack(u) {}
 };
 
 struct OnCallEI : ExtraInfo {
@@ -511,9 +512,10 @@ struct Parser : ParserBase {
     out.setNodeType(ONREFDIM).appendChild(&var).appendChild(&offset);
   }
 
-  void onCallParam(Token &out, Token *params, Token &expr, bool ref) {
+  void onCallParam(Token &out, Token *params, Token &expr,
+                   bool ref, bool unpack) {
     out.setNodeType(ONCALLPARAM).appendChild(params).appendChild(&expr)
-      .setExtra(new OnCallParamEI(ref));
+      .setExtra(new OnCallParamEI(ref, unpack));
   }
 
   void onCall(Token &out, bool dynamic, Token &name, Token &params,

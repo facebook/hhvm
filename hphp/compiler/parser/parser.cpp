@@ -428,7 +428,8 @@ ExpressionPtr Parser::createDynamicVariable(ExpressionPtr exp) {
   return NEW_EXP(DynamicVariable, exp);
 }
 
-void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
+void Parser::onCallParam(Token &out, Token *params, Token &expr,
+                         bool ref, bool unpack) {
   if (!params) {
     out->exp = NEW_EXP0(ExpressionList);
   } else {
@@ -437,6 +438,9 @@ void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
   if (ref) {
     expr->exp->setContext(Expression::RefParameter);
     expr->exp->setContext(Expression::RefValue);
+  }
+  if (unpack) {
+    expr->exp->setContext(Expression::UnpackParameter);
   }
   out->exp->addElement(expr->exp);
 }
@@ -850,9 +854,9 @@ void Parser::onConst(Token &out, Token &name, Token &value) {
   Token sname;   onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
 
   Token fname;   fname.setText("define");
-  Token params1; onCallParam(params1, nullptr, sname, 0);
-  Token params2; onCallParam(params2, &params1, value, 0);
-  Token call;    onCall(call, 0, fname, params2, 0);
+  Token params1; onCallParam(params1, nullptr, sname, false, false);
+  Token params2; onCallParam(params2, &params1, value, false, false);
+  Token call;    onCall(call, false, fname, params2, nullptr);
   Token expr;    onExpStatement(expr, call);
 
   addTopStatement(expr);

@@ -339,7 +339,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     Token cls;     _p->onName(cls, parent, Parser::StringName);
     Token fname;   fname.setText("__xhpAttributeDeclaration");
     Token param1;  _p->onCall(param1, 0, fname, dummy, &cls);
-    Token params1; _p->onCallParam(params1, NULL, param1, 0);
+    Token params1; _p->onCallParam(params1, NULL, param1, false, false);
 
     for (unsigned int i = 0; i < classes.size(); i++) {
       Token parent;  parent.set(T_STRING, classes[i]);
@@ -347,11 +347,12 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
       Token fname;   fname.setText("__xhpAttributeDeclaration");
       Token param;   _p->onCall(param, 0, fname, dummy, &cls);
 
-      Token params; _p->onCallParam(params, &params1, param, 0);
+      Token params; _p->onCallParam(params, &params1, param, false, false);
       params1 = params;
     }
 
-    Token params2; _p->onCallParam(params2, &params1, arrAttributes, 0);
+    Token params2; _p->onCallParam(params2, &params1, arrAttributes,
+                                   false, false);
 
     Token name;    name.set(T_STRING, "array_merge");
     Token call;    _p->onCall(call, 0, name, params2, NULL);
@@ -1382,12 +1383,15 @@ function_call_parameter_list:
   |                                    { $$.reset();}
 ;
 non_empty_fcall_parameter_list:
-    expr                               { _p->onCallParam($$,NULL,$1,0);}
-  | '&' variable                       { _p->onCallParam($$,NULL,$2,1);}
-  | non_empty_fcall_parameter_list ','
-    expr                               { _p->onCallParam($$,&$1,$3,0);}
-  | non_empty_fcall_parameter_list ','
-    '&' variable                       { _p->onCallParam($$,&$1,$4,1);}
+  expr                               { _p->onCallParam($$,NULL,$1,false,false);}
+| '&' variable                       { _p->onCallParam($$,NULL,$2,true,false);}
+| "..." expr                         { _p->onCallParam($$,NULL,$2,false,true);}
+| non_empty_fcall_parameter_list
+',' expr                           { _p->onCallParam($$,&$1,$3,false, false);}
+| non_empty_fcall_parameter_list
+',' "..." expr                     { _p->onCallParam($$,&$1,$4,false,true);}
+| non_empty_fcall_parameter_list
+',' '&' variable                   { _p->onCallParam($$,&$1,$4,true, false);}
 ;
 
 global_var_list:
@@ -2040,10 +2044,10 @@ xhp_tag_body:
                                          Token t2; _p->onArray(t2,$2);
                                          Token file; scalar_file(_p, file);
                                          Token line; scalar_line(_p, line);
-                                         _p->onCallParam($1,NULL,t1,0);
-                                         _p->onCallParam($$, &$1,t2,0);
-                                         _p->onCallParam($1, &$1,file,0);
-                                         _p->onCallParam($1, &$1,line,0);
+                                         _p->onCallParam($1,NULL,t1,0,0);
+                                         _p->onCallParam($$, &$1,t2,0,0);
+                                         _p->onCallParam($1, &$1,file,0,0);
+                                         _p->onCallParam($1, &$1,line,0,0);
                                          $$.setText("");}
   | xhp_attributes T_XHP_TAG_GT
     xhp_children T_XHP_TAG_LT '/'
@@ -2051,10 +2055,10 @@ xhp_tag_body:
                                          Token line; scalar_line(_p, line);
                                          _p->onArray($4,$1);
                                          _p->onArray($5,$3);
-                                         _p->onCallParam($2,NULL,$4,0);
-                                         _p->onCallParam($$, &$2,$5,0);
-                                         _p->onCallParam($2, &$2,file,0);
-                                         _p->onCallParam($2, &$2,line,0);
+                                         _p->onCallParam($2,NULL,$4,0,0);
+                                         _p->onCallParam($$, &$2,$5,0,0);
+                                         _p->onCallParam($2, &$2,file,0,0);
+                                         _p->onCallParam($2, &$2,line,0,0);
                                          $$.setText($6.text());}
 ;
 xhp_opt_end_label:

@@ -1,9 +1,30 @@
 NEXT
+ -
+
+"LL Cool J"
+ - Over 200 other bug fixes (go lockdown!)
+ - Every HDF setting is now available as INI
+ - Cut session_id() size by 1/2
+ - Added 'Z' format string for pack/unpack
+ - We now build on clang
+ - Fix pcre cache to not fatal when full 
+ - Implement $php_errormsg
+ - Adding -n CLI option to hhvm php mode 
+ - Fix substitution of invalid UTF8 sequences in htmlspecialchars
+ - FastCGI: Use SCRIPT_FILENAME as the PHP script to run
+ - Can create DateTimeZone's from abbreviations
+ - Put all fastcgi params into $_SERVER
+ - Many DOM classes are now serializable
+ - Define the xhp tokens
+ - Many reflection changes for perf and compatibility
+ - Default fastcgi to listen on 127.0.0.1
+ - remove register_cleanup_function
  - Map: reserve()
  - Set: retain(), reserve(), addAllKeysOf()
  - {Set|ImmSet|Vector|ImmVector}::fromKeysOf()
 
 "Kanye West"
+  - Backport fix for CVE-2011-2202
   - Interfaces {Keyed}Container match arrays *and* collections, not iterables
   - Added ** and **= operators to HHVM and more compatibility fixes with PHP5.6
   - Fixes and improvements to collections

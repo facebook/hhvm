@@ -358,6 +358,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
   case KindOfInt64:
   case KindOfDouble:
   case KindOfStaticString:
+  case KindOfResource:
     o = SystemLib::AllocStdClassObject();
     o->o_set(s_scalar, tvAsVariant(tv));
     break;
@@ -371,7 +372,6 @@ void tvCastToObjectInPlace(TypedValue* tv) {
     tvAsVariant(tv) = ObjectData::FromArray(tv->m_data.parr);
     return;
   case KindOfObject: return;
-  case KindOfResource: return;
   default: assert(false); o = SystemLib::AllocStdClassObject(); break;
   }
   tv->m_data.pobj = o;

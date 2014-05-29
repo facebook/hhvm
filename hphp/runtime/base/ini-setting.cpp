@@ -276,6 +276,10 @@ folly::dynamic ini_get(double& p) {
   return p;
 }
 
+folly::dynamic ini_get(char& p) {
+  return p;
+}
+
 folly::dynamic ini_get(int16_t& p) {
   return p;
 }
@@ -285,6 +289,10 @@ folly::dynamic ini_get(int32_t& p) {
 }
 
 folly::dynamic ini_get(int64_t& p) {
+  return p;
+}
+
+folly::dynamic ini_get(unsigned char& p) {
   return p;
 }
 

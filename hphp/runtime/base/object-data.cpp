@@ -601,7 +601,7 @@ const StaticString
 inline Array getSerializeProps(const ObjectData* obj,
                                VariableSerializer* serializer) {
   if (serializer->getType() == VariableSerializer::Type::VarExport) {
-    Array props;
+    Array props = Array::Create();
     for (ArrayIter iter(obj->o_toArray()); iter; ++iter) {
       auto key = iter.first().toString();
       // Jump over any class attribute mangling

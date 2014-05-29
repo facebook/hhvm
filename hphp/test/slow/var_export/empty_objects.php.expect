@@ -1,0 +1,7 @@
+string(31) "stdClass::__set_state(array(
+))"
+string(51) "stdClass::__set_state(array(
+  'herp' => 'derp',
+))"
+string(26) "Foo::__set_state(array(
+))"

@@ -932,7 +932,10 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     EnableArgsInBacktraces =
       Config::GetBool(ini, eval["EnableArgsInBacktraces"], !RepoAuthoritative);
     EvalAuthoritativeMode =
-      Config::GetBool(ini, eval["AuthoritativeMode"], false) || RepoAuthoritative;
+      Config::GetBool(ini, eval["AuthoritativeMode"], false);
+    if (RepoAuthoritative) {
+      EvalAuthoritativeMode = true;
+    }
   }
   {
     Hdf server = config["Server"];
@@ -1013,7 +1016,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     ImplicitFlush = Config::GetBool(ini, server["ImplicitFlush"]);
     EnableEarlyFlush = Config::GetBool(ini, server["EnableEarlyFlush"], true);
     ForceChunkedEncoding = Config::GetBool(ini, server["ForceChunkedEncoding"]);
-    MaxPostSize = Config::GetInt32(ini, server["MaxPostSize"], 100) * (1LL << 20);
+    MaxPostSize = Config::GetInt32(ini, server["MaxPostSize"], 100);
+    MaxPostSize <<= 20;
     AlwaysPopulateRawPostData =
       Config::GetBool(ini, server["AlwaysPopulateRawPostData"], true);
     LibEventSyncSend = Config::GetBool(ini, server["LibEventSyncSend"], true);
@@ -1115,8 +1119,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     DnsCacheKeyFrequencyUpdatePeriod = Config::GetInt32(ini, dns["KeyFrequencyUpdatePeriod"], 1000);
 
     Hdf upload = server["Upload"];
-    UploadMaxFileSize = Config::GetInt32(ini, upload["UploadMaxFileSize"], 100)
-      * (1LL << 20);
+    UploadMaxFileSize = Config::GetInt32(ini, upload["UploadMaxFileSize"], 100);
+    UploadMaxFileSize <<= 20;
 
     UploadTmpDir = Config::GetString(ini, upload["UploadTmpDir"], "/tmp");
     EnableFileUploads = Config::GetBool(ini, upload["EnableFileUploads"], true);

@@ -20,7 +20,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/type_traits/is_convertible.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <utility>
 #include "folly/Bits.h"
 #include "hphp/util/atomic.h"
@@ -84,8 +83,8 @@ public:
     // to iterator direction.
     template<class OtherVal>
     thm_iterator(const thm_iterator<OtherVal>& o,
-                 typename boost::enable_if<
-                   boost::is_convertible<OtherVal*,IterVal*>
+                 typename std::enable_if<
+                   std::is_convertible<OtherVal*,IterVal*>::value
                  >::type* = 0)
       : m_table(o.m_table)
       , m_offset(o.m_offset)

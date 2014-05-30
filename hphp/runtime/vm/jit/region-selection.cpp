@@ -16,7 +16,6 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 #include <algorithm>
-#include <boost/range/adaptors.hpp>
 #include <functional>
 #include <exception>
 #include <utility>

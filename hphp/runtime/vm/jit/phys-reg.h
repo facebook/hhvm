@@ -360,7 +360,7 @@ struct RegPair {
 };
 const RegPair InvalidRegPair; // {InvalidReg,InvalidReg}
 
-static_assert(boost::has_trivial_destructor<RegSet>::value,
+static_assert(std::is_trivially_destructible<RegSet>::value,
               "RegSet must have a trivial destructor");
 
 //////////////////////////////////////////////////////////////////////

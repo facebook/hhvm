@@ -18,10 +18,7 @@
 #define incl_HPHP_VM_VERIFIER_UTIL_H_
 
 #include <cstddef> // for size_t
-#include <vector>
 #include <stdint.h>
-#include <boost/iterator/iterator_traits.hpp>
-#include "hphp/util/assertions.h"
 #include "hphp/util/arena.h"
 
 namespace HPHP {

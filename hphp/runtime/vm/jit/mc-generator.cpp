@@ -31,10 +31,6 @@
 #include <unwind.h>
 #include <unordered_set>
 
-#include <boost/bind.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
-#include <boost/range/adaptors.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <algorithm>
 #include <exception>
 #include <memory>

@@ -25,8 +25,6 @@
 #include <vector>
 #include <set>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "hphp/util/md5.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"

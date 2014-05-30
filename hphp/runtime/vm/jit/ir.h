@@ -27,12 +27,6 @@
 #include <cassert>
 #include <type_traits>
 
-#include <boost/noncopyable.hpp>
-#include <boost/checked_delete.hpp>
-#include <boost/type_traits/has_trivial_destructor.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/intrusive/list.hpp>
-
 #include "folly/Conv.h"
 #include "folly/Format.h"
 #include "folly/Range.h"

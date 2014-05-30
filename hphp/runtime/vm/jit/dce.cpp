@@ -16,8 +16,6 @@
 
 #include <array>
 
-#include <boost/range/adaptors.hpp>
-
 #include "folly/MapUtil.h"
 
 #include "hphp/util/trace.h"

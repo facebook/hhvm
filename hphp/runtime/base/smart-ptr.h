@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_SMART_PTR_H_
 #define incl_HPHP_SMART_PTR_H_
 
-#include <boost/static_assert.hpp>
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/countable.h"
 #include <utility>

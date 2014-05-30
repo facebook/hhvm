@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/type.h"
 
+#include <boost/algorithm/string/trim.hpp>
+
 #include "folly/Conv.h"
 #include "folly/Format.h"
 #include "folly/MapUtil.h"

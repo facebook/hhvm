@@ -835,6 +835,14 @@ void HhbcTranslator::emitFalse() {
   push(cns(false));
 }
 
+void HhbcTranslator::emitDir() {
+  push(cns(curUnit()->dirpath()));
+}
+
+void HhbcTranslator::emitFile() {
+  push(cns(curUnit()->filepath()));
+}
+
 void HhbcTranslator::emitInitThisLoc(int32_t id) {
   if (!curClass()) {
     // Do nothing if this is null

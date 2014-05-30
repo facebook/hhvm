@@ -267,6 +267,12 @@ String &String::operator=(const String& str) {
   return *this;
 }
 
+String &String::operator=(const StaticString& str) {
+  if (m_px) decRefStr(m_px);
+  m_px = str.m_px;
+  return *this;
+}
+
 String &String::operator=(const Variant& var) {
   return operator=(var.toString());
 }
@@ -565,11 +571,6 @@ StaticString::StaticString(litstr s, int length) {
 
 StaticString::StaticString(std::string s) {
   m_px = makeStaticString(s.c_str(), s.size());
-}
-
-StaticString::StaticString(const StaticString &str) {
-  assert(str.m_px->isStatic());
-  m_px = str.m_px;
 }
 
 StaticString& StaticString::operator=(const StaticString &str) {

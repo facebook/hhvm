@@ -132,6 +132,7 @@ public:
     }
   }
   String(const String& str) : StringBase(str.m_px) { }
+  /* implicit */ String(const StaticString& str);
   /* implicit */ String(char) = delete; // prevent unintentional promotion
 
   // Disable this---otherwise this would generally implicitly create a
@@ -291,6 +292,7 @@ public:
   String &operator =  (StringData *data);
   String &operator =  (litstr  v);
   String &operator =  (const String& v);
+  String &operator =  (const StaticString& v);
   String &operator =  (const Variant& v);
   String &operator =  (const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
@@ -556,7 +558,6 @@ public:
   explicit StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
   explicit StaticString(std::string s);
-  StaticString(const StaticString &str);
   ~StaticString() {
     // prevent ~SmartPtr from calling decRefCount after data is released
     m_px = nullptr;
@@ -572,6 +573,12 @@ String getDataTypeString(DataType t);
 
 //////////////////////////////////////////////////////////////////////
 
+inline String::String(const StaticString& str) :
+  StringBase(str.m_px, StringBase::NoIncRef{}) {
+  assert(str.m_px->isStatic());
+}
+
+//////////////////////////////////////////////////////////////////////
 }
 
 #endif

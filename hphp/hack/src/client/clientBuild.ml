@@ -14,7 +14,9 @@ type env = ServerMsg.build_opts
 
 let rec connect env retries =
   try
-    ClientUtils.connect env.ServerMsg.root
+    let result = ClientUtils.connect env.ServerMsg.root in
+    Printf.printf "\n%!";
+    result
   with
   | ClientExceptions.Server_cant_connect ->
     Printf.printf "Can't connect to server, retrying.\n%!";
@@ -25,7 +27,7 @@ let rec connect env retries =
     end
     else exit 2
   | ClientExceptions.Server_initializing ->
-    Printf.printf "Server still initializing.\n%!";
+    Printf.printf "Server still initializing. %s\r%!" (Utils.spinner());
     if retries > 0
     then begin
       Unix.sleep 1;

@@ -389,3 +389,11 @@ let str_starts_with long short =
   with Invalid_argument _ ->
     false
 
+let spinner =
+  let state = ref 0 in
+  fun () ->
+    begin
+      let str = List.nth ["-"; "\\"; "|"; "/"] (!state) in
+      state := (!state + 1) mod 4;
+      str
+    end

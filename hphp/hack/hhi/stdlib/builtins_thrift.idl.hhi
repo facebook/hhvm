@@ -8,8 +8,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function thrift_protocol_write_binary($transportobj, $method_name, $msgtype, $request_struct, $seqid, $strict_write, $oneway) { }
+function thrift_protocol_write_binary($transportobj, $method_name, $msgtype, $request_struct, $seqid, $strict_write, $oneway = false) { }
 function thrift_protocol_read_binary($transportobj, $obj_typename, $strict_read) { }
 function thrift_protocol_set_compact_version($version) { }
-function thrift_protocol_write_compact($transportobj, $method_name, $msgtype, $request_struct, $seqid, $oneway) { }
+function thrift_protocol_write_compact($transportobj, $method_name, $msgtype, $request_struct, $seqid, $oneway = false) { }
 function thrift_protocol_read_compact($transportobj, $obj_typename) { }

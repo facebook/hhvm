@@ -111,16 +111,6 @@ interface Awaitable<T> {
   public function getWaitHandle(): WaitHandle<T>;
 }
 
-interface Continuation<Tv> extends KeyedIterator<int, Tv> {
-  public function getOrigFuncName(): string;
-  public function send($v): void;
-  public function raise(Exception $e): void;
-  public function getLabel(): int;
-  public function update(int $label, Tv $value): void;
-  public function num_args(): int;
-  public function get_arg(int $index): mixed;
-}
-
 interface ConstCollection<Te> extends Countable {
   public function isEmpty(): bool;
   public function count(): int;

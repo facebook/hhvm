@@ -99,11 +99,6 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
    */
   public function linearSearch(Tv $search_value): int;
 
-  /**
-   * Returns an ImmVector containing the values from the specified array.
-   */
-  public static function fromArray(array $arr): ImmVector<Tv>;
-
   public static function fromItems(?Traversable<Tv> $items): ImmVector<Tv>;
 
   /**

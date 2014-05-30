@@ -452,8 +452,18 @@ struct string_data_lt {
   }
 };
 
-typedef hphp_hash_set<const StringData*, string_data_hash, string_data_same>
-  ConstStringDataSet;
+template <class T> using ConstStringDataMap = hphp_hash_map<
+  const StringData*,
+  T,
+  string_data_hash,
+  string_data_same
+>;
+
+using ConstStringDataSet = hphp_hash_set<
+  const StringData*,
+  string_data_hash,
+  string_data_same
+>;
 
 struct hphp_string_hash {
   size_t operator()(const String& s) const {

@@ -1,0 +1,7 @@
+Rewind: 
+RecursiveArrayIteratorIterator::rewind called 
+
+Next:
+RecursiveArrayIteratorIterator::beginChildren called 
+RecursiveArrayIteratorIterator::endChildren called 
+===DONE===

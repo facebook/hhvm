@@ -1273,7 +1273,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
     fp = getPrevVMState(fp);
   }
   if (!fp) {
-    return empty_array;
+    return empty_array();
   }
   assert(!fp->hasInvName());
   if (fp->hasVarEnv()) {
@@ -1638,7 +1638,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
         }
       }
       if (UNLIKELY(func->hasVariadicCaptureParam())) {
-        m_stack.pushArrayNoRc(empty_array.get());
+        m_stack.pushArrayNoRc(staticEmptyArray());
       }
     }
   }

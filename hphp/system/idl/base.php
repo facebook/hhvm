@@ -488,7 +488,7 @@ function get_serialized_default($s) {
       preg_match('/^(true|false|null)$/', $s)) {
     return serialize(eval("return $s;"));
   }
-  if ($s == "empty_array") return serialize(array());
+  if ($s == "empty_array_ref") return serialize(array());
   if (preg_match('/^null_(string|array|object|resource|variant)$/', $s)) {
     return serialize(null);
   }

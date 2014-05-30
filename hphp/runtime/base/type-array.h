@@ -66,8 +66,8 @@ public:
   ~Array();
 
   // Take ownership of this ArrayData.
-  static Array attach(ArrayData* ad) {
-    return Array(ad, SmartPtr::NoIncRef{});
+  static ALWAYS_INLINE Array attach(ArrayData* ad) {
+    return Array(ad, ArrayBase::NoIncRef{});
   }
 
   // Transfer ownership of our reference to this ArrayData.
@@ -106,7 +106,7 @@ public:
   {}
 
   // Move ctor
-  Array(Array&& src) : ArrayBase(std::move(src)) { }
+  Array(Array&& src) noexcept : ArrayBase(std::move(src)) { }
 
   // Move assign
   Array& operator=(Array&& src) {
@@ -423,7 +423,7 @@ public:
 // ArrNR
 
 struct ArrNR {
-  explicit ArrNR(ArrayData* data = 0) {
+  explicit ArrNR(ArrayData* data = nullptr) {
     m_px = data;
   }
 
@@ -461,13 +461,21 @@ private:
  */
 struct ArrayNoDtor {
   ArrayNoDtor() { new (&m_arr) Array(); }
-  ArrayNoDtor(ArrayNoDtor&& o) { new (&m_arr) Array(std::move(o.m_arr)); }
+  ArrayNoDtor(ArrayNoDtor&& o) noexcept {
+    new (&m_arr) Array(std::move(o.m_arr));
+  }
   ~ArrayNoDtor() {}
   Array& arr() { return m_arr; }
   void destroy() { m_arr.~Array(); }
 private:
   union { Array m_arr; };
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE Array empty_array() {
+  return Array::attach(staticEmptyArray());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -644,7 +644,7 @@ inline Array getSerializeProps(const ObjectData* obj,
     return ret.toArray();
   }
   if (ret.isNull()) {
-    return empty_array;
+    return empty_array();
   }
   raise_error("__debugInfo() must return an array");
   not_reached();

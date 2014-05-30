@@ -239,7 +239,7 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
   }
 
   auto size = getContainerSize(cell_keys);
-  if (!size) return empty_array;
+  if (!size) return empty_array();
 
   ArrayInit ai(size, ArrayInit::Mixed{});
   for (ArrayIter iter(cell_keys); iter; ++iter) {
@@ -846,7 +846,7 @@ Variant f_array_slice(const Variant& input, int offset,
   }
 
   if (len <= 0) {
-    return empty_array;
+    return empty_array();
   }
 
   // PackedArrayInit can't be used because non-numeric keys are preserved
@@ -1423,7 +1423,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
     } \
   } \
   /* If container1 is empty, we can stop here and return the empty array */ \
-  if (!getContainerSize(c1)) return empty_array; \
+  if (!getContainerSize(c1)) return empty_array(); \
   /* If all of the containers (except container1) are empty, we can just \
      return container1 (converting it to an array if needed) */ \
   if (!largestSize) { \
@@ -1796,7 +1796,7 @@ static void containerKeysIntersectHelper(c_Set* st,
   } \
   /* If any of the containers were empty, we can stop here and return the \
      empty array */ \
-  if (!getContainerSize(c1) || !smallestSize) return empty_array; \
+  if (!getContainerSize(c1) || !smallestSize) return empty_array(); \
   Array ret = Array::Create();
 
 Variant f_array_intersect(int _argc, const Variant& container1, const Variant& container2,

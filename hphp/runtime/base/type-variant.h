@@ -167,7 +167,7 @@ struct Variant : private TypedValue {
    * unbox refs and turn uninits to null.
    */
 
-  Variant(Variant&& v) {
+  Variant(Variant&& v) noexcept {
     if (UNLIKELY(v.m_type == KindOfRef)) {
       // We can't avoid the refcounting when it's a ref.  Do basically
       // what a copy would have done.
@@ -1138,11 +1138,11 @@ inline void Array::setWithRef(const Variant& k, const Variant& v,
   lvalAt(k, isKey ? AccessFlags::Key : AccessFlags::None).setWithRef(v);
 }
 
-inline Variant uninit_null() {
+ALWAYS_INLINE Variant uninit_null() {
   return Variant();
 }
 
-inline Variant init_null() {
+ALWAYS_INLINE Variant init_null() {
   return Variant(Variant::NullInit());
 }
 

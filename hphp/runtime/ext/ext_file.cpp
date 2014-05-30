@@ -1276,7 +1276,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
   }
   int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
   if (nret == GLOB_NOMATCH) {
-    return empty_array;
+    return empty_array();
   }
 
   if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
@@ -1285,7 +1285,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
         return false;
       }
     }
-    return empty_array;
+    return empty_array();
   }
 
   if (nret) {
@@ -1322,7 +1322,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
   // php's glob always produces an array, but Variant::Variant(CArrRef)
   // will produce KindOfNull if given a SmartPtr wrapped around null.
   if (ret.isNull()) {
-    return empty_array;
+    return empty_array();
   }
   return ret;
 }

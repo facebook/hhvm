@@ -1222,7 +1222,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
   auto obj_data = obj.get();
   assert(obj_data->getVMClass() == cls);
   if (!obj_data->hasDynProps()) {
-    return empty_array;
+    return empty_array();
   }
 
   auto const dynPropArray = obj_data->dynPropArray().get();

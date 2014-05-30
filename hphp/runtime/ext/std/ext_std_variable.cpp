@@ -234,7 +234,7 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
 ALWAYS_INLINE
 static Array get_defined_vars() {
   VarEnv* v = g_context->getVarEnv();
-  return v ? v->getDefinedVariables() : empty_array;
+  return v ? v->getDefinedVariables() : empty_array();
 }
 
 Array HHVM_FUNCTION(get_defined_vars) {

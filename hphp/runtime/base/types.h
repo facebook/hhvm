@@ -59,7 +59,7 @@ extern const VarNR NEGINF_varNR;
 extern const VarNR NAN_varNR;
 extern const String null_string;
 extern const Array null_array;
-extern const Array empty_array;
+extern const Array empty_array_ref;
 extern const StaticString array_string; // String("Array")
 
 class StringData;

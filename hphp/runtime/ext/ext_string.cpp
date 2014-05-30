@@ -1272,7 +1272,7 @@ Variant f_str_word_count(const String& str, int64_t format /* = 0 */,
   case 1:
   case 2:
     if (!str_len) {
-      return empty_array;
+      return empty_array();
     }
     break;
   case 0:

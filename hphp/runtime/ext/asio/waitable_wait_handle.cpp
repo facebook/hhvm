@@ -62,7 +62,7 @@ Object c_WaitableWaitHandle::t_getcreator() {
 Array c_WaitableWaitHandle::t_getparents() {
   // no parent data available if finished
   if (isFinished()) {
-    return empty_array;
+    return empty_array();
   }
 
   Array result = Array::Create();

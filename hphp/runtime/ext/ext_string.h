@@ -91,7 +91,7 @@ String f_htmlspecialchars(const String& str, int quote_style = k_ENT_COMPAT,
                           bool double_encode = true);
 String f_fb_htmlspecialchars(const String& str, int quote_style = k_ENT_COMPAT,
                              const String& charset = "ISO-8859-1",
-                             const Array& extra = empty_array);
+                             const Array& extra = empty_array_ref);
 String f_quoted_printable_encode(const String& str);
 String f_quoted_printable_decode(const String& str);
 Variant f_convert_uudecode(const String& data);

@@ -56,7 +56,7 @@ String ResourceData::o_toString() const {
 }
 
 Array ResourceData::o_toArray() const {
-  return empty_array;
+  return empty_array();
 }
 
 const StaticString s_Unknown("Unknown");

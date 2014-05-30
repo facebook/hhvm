@@ -35,7 +35,7 @@
 namespace HPHP {
 
 const Array null_array{};
-const Array empty_array{staticEmptyArray()};
+const Array empty_array_ref{staticEmptyArray()};
 const StaticString array_string("Array");
 
 void Array::setEvalScalar() const {

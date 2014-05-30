@@ -865,7 +865,7 @@
                 {
                     "name": "extra",
                     "type": "StringVec",
-                    "value": "empty_array",
+                    "value": "empty_array_ref",
                     "desc": "An array of extra ascii chars to be encoded."
                 }
             ]

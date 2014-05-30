@@ -53,7 +53,7 @@ void f_var_dump(int _argc, const Variant& expression,
 void HHVM_FUNCTION(debug_zval_dump, const Variant& variable);
 String HHVM_FUNCTION(serialize, const Variant& value);
 Variant HHVM_FUNCTION(unserialize, const String& str,
-                      const Array& class_whitelist = empty_array);
+                      const Array& class_whitelist = empty_array_ref);
 
 ///////////////////////////////////////////////////////////////////////////////
 // variable table

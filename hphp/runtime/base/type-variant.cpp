@@ -474,7 +474,7 @@ String Variant::toStringHelper() const {
 Array Variant::toArrayHelper() const {
   switch (m_type) {
   case KindOfUninit:
-  case KindOfNull:    return empty_array;
+  case KindOfNull:    return empty_array();
   case KindOfInt64:   return Array::Create(m_data.num);
   case KindOfStaticString:
   case KindOfString:  return Array::Create(m_data.pstr);

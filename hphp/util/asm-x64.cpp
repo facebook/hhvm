@@ -203,7 +203,7 @@ void DecodedInstruction::determineOperandsMap0(uint8_t* ip) {
         siz = sz::dword;
       }
       if (siz != sz::nosize) {
-        if (m_opcode & 0x08) {
+        if (!(m_opcode & 0x04)) {
           m_offSz = siz;
           m_flags.picOff = true;
         } else {
@@ -404,6 +404,57 @@ bool DecodedInstruction::isNop() const {
     return m_size == 1 || (m_size == 2 && m_flags.opndSzOvr);
   }
   return m_opcode == 0x1f && m_map_select == 1;
+}
+
+bool DecodedInstruction::isBranch() const {
+  if (!m_flags.picOff) return false;
+  if (m_map_select == 0) {
+    // The one-byte opcode map
+    return
+      (m_opcode & 0xf0) == 0x70 /* 8-bit conditional branch */ ||
+      m_opcode == 0xe9 /* 32-bit unconditional branch */ ||
+      m_opcode == 0xeb /* 8-bit unconditional branch */;
+  }
+  if (m_map_select == 1) {
+    // The two-byte opcode map (first byte is 0x0f)
+    return (m_opcode & 0xf0) == 0x80 /* 32-bit conditional branch */;
+  }
+  return false;
+}
+
+bool DecodedInstruction::shrinkBranch() {
+  assert(isBranch());
+  if (m_offSz != sz::dword) return false;
+  auto addr = m_ip + m_size - m_offSz;
+  auto delta = readValue(addr, m_offSz);
+  if (m_map_select == 1) {
+    if (m_flags.vex) return false;
+    assert((m_opcode & 0xf0) == 0x80); // must be a 32-bit conditional branch
+    /*
+      The pc-relative offset is from the end of the instruction, and the
+      instruction is shrinking by 4 bytes (opcode goes from 2 bytes to 1,
+      and offset goes from 4 to 1), so we need to adjust delta by 4.
+    */
+    delta += 4;
+    if (-128 > delta || delta > 127) return false;
+    addr[-2] = 0x70 | (m_opcode & 0x0f); // make it an 8 bit conditional branch
+    addr[-1] = delta;
+    m_size -= 4;
+  } else {
+    assert(m_opcode == 0xe9); // must be a 32-bit unconditional branch
+    /*
+      As above, but opcode was already 1 byte, so the reduction is only 3
+      bytes this time.
+    */
+    delta += 3;
+    if (-128 > delta || delta > 127) return false;
+    addr[-1] = 0xeb;
+    addr[0] = delta;
+    m_size -= 3;
+  }
+  m_offSz = sz::byte;
+  m_opcode = m_ip[m_size - 2];
+  return true;
 }
 
 } }

@@ -299,6 +299,7 @@ struct BackEnd : public JIT::BackEnd {
       }
 
       memcpy(dest, src, di.size());
+      DecodedInstruction d2(dest);
       if (di.hasPicOffset()) {
         /*
          * Rip-relative offsets that point outside the range
@@ -306,10 +307,12 @@ struct BackEnd : public JIT::BackEnd {
          * to point at the right thing
          */
         if (size_t(di.picAddress() - rel.start()) > range) {
-          DecodedInstruction d2(dest);
           bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
           assert(success);
         } else {
+          if (d2.isBranch() && d2.shrinkBranch()) {
+            internalRefsNeedUpdating = true;
+          }
           hasInternalRefs = true;
         }
       }
@@ -322,7 +325,6 @@ struct BackEnd : public JIT::BackEnd {
           if (fixups.m_addressImmediates.count((TCA)~uintptr_t(src))) {
             // Handle weird, encoded offset, used by cgLdObjMethod
             always_assert(di.immediate() == ((uintptr_t(src) << 1) | 1));
-            DecodedInstruction d2(dest);
             bool DEBUG_ONLY success =
               d2.setImmediate(((uintptr_t)dest << 1) | 1);
             assert(success);
@@ -347,7 +349,7 @@ struct BackEnd : public JIT::BackEnd {
       if (di.isNop()) {
         internalRefsNeedUpdating = true;
       } else {
-        dest += di.size();
+        dest += d2.size();
       }
       src += di.size();
     }

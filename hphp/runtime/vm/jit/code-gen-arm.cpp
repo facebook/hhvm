@@ -1988,9 +1988,8 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-Address CodeGenerator::cgInst(IRInstruction* inst) {
+void CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->op();
-  auto const start = m_as.frontier();
   m_curInst = inst;
   SCOPE_EXIT { m_curInst = nullptr; };
 
@@ -1998,12 +1997,11 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #define O(name, dsts, srcs, flags)                                \
   case name: FTRACE(7, "cg" #name "\n");                          \
              cg ## name (inst);                                   \
-             return m_as.frontier() == start ? nullptr : start;
+             return;
     IR_OPCODES
 #undef O
   default:
-    assert(0);
-    return nullptr;
+    always_assert(false);
   }
 }
 

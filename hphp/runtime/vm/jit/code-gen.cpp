@@ -100,9 +100,10 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
                                       coldCode.frontier()});
       prevMarker = inst->marker();
     }
-    auto* addr = cg->cgInst(inst);
-    if (state.asmInfo && addr) {
-      state.asmInfo->updateForInstruction(inst, addr, cb.frontier());
+    auto* start = cb.frontier();
+    cg->cgInst(inst);
+    if (state.asmInfo && start < cb.frontier()) {
+      state.asmInfo->updateForInstruction(inst, start, cb.frontier());
     }
   }
 }

@@ -48,7 +48,7 @@ struct CodeGenerator : public JIT::CodeGenerator {
   virtual ~CodeGenerator() {
   }
 
-  Address cgInst(IRInstruction* inst) override;
+  void cgInst(IRInstruction* inst) override;
 
  private:
   template<class Then>

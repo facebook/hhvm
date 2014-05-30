@@ -105,7 +105,7 @@ void genCode(IRUnit&                 unit,
 
 struct CodeGenerator {
   virtual ~CodeGenerator() {}
-  virtual Address cgInst(IRInstruction* inst) = 0;
+  virtual void cgInst(IRInstruction* inst) = 0;
 };
 
 }}

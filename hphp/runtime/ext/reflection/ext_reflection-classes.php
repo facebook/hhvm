@@ -260,18 +260,14 @@ class ReflectionParameter implements Reflector {
       return null;
     }
     $ltype = strtolower($this->info['type']);
-    if (hphp_scalar_typehints_enabled()) {
-      $nonClassTypehints = array(
-        'HH\bool' => 1,
-        'HH\int' => 1,
-        'HH\float' => 1,
-        'HH\string' => 1,
-        'array' => 1
-      );
-      if (isset($nonClassTypehints[$ltype])) {
-        return null;
-      }
-    } else if ($ltype === 'array') {
+    $nonClassTypehints = array(
+      'hh\bool' => 1,
+      'hh\int' => 1,
+      'hh\float' => 1,
+      'hh\string' => 1,
+      'array' => 1
+    );
+    if (isset($nonClassTypehints[$ltype])) {
       return null;
     }
     return new ReflectionClass($this->info['type']);

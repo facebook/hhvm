@@ -250,7 +250,7 @@ void genCodeImpl(IRUnit& unit,
 
   if (relocate) {
     if (asmInfo) {
-      printUnit(kCodeGenLevel, unit, " before relocation ", &regs, asmInfo);
+      printUnit(kRelocationLevel, unit, " before relocation ", &regs, asmInfo);
     }
 
     SrcKey sk(unit.context().func, unit.bcOff(), unit.context().resumed);

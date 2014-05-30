@@ -3659,6 +3659,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
 
   SSATmp* sp;
+  SSATmp* resumableObj = nullptr;
   if (!resumed()) {
     // Store the return value.
     gen(StRetVal, m_irb->fp(), retVal);
@@ -3683,6 +3684,9 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
     // Sync SP.
     sp = spillStack();
+
+    // Get the AsyncFunctionWaitHandle.
+    resumableObj = gen(LdResumableArObj, m_irb->fp());
   } else if (func->isNonAsyncGenerator()) {
     // Clear generator's key and value.
     auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
@@ -3703,9 +3707,16 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     not_reached();
   }
 
-  // Grab caller info from ActRec and return control to the caller.
+  // Grab caller info from ActRec.
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
+
+  // Drop reference to this resumable.
+  if (resumableObj != nullptr) {
+    gen(DecRef, resumableObj);
+  }
+
+  // Return control to the caller.
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed

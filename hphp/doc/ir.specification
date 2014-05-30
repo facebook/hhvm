@@ -1737,7 +1737,7 @@ ContArUpdateIdx S0:FramePtr S1:Int
   Updates the internal index of generator with S1 if necessary, i.e. if S1
   is larger than the index. S0 is the pointer to the embedded ActRec.
 
-D:FramePtr LdContActRec S0:PtrToGen
+D:FramePtr LdContActRec S0:Obj
 
   Loads the Generator object's ActRec, given a pointer to the generator
   object in S0.
@@ -1804,6 +1804,15 @@ D:Cell = LdWHResult S0:Obj
 
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
+
+D:FramePtr = LdAFWHActRec S0:Obj
+
+  Loads the AsyncFunctionWaitHandle object's ActRec, given a pointer to the
+  AsyncFunctionWaitHandle object in S0.
+
+D:Obj = LdResumableArObj S0:FramePtr
+
+  Loads the Resumable object, given a Resumable's frame pointer in S0.
 
 CopyAsyncCells<numCells> S0:FramePtr S1:PtrToGen
 

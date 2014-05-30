@@ -144,10 +144,9 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncFunctionWaitHandle::resume() {
-  auto exit_guard = folly::makeGuard([&] { decRefObj(this); });
-
   // may happen if scheduled in multiple contexts
   if (getState() != STATE_SCHEDULED) {
+    decRefObj(this);
     return;
   }
 
@@ -199,7 +198,6 @@ void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
   m_child = child;
   setState(STATE_BLOCKED);
   blockOn(m_child);
-  incRefCount();
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
@@ -207,6 +205,7 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
   UnblockChain(parentChain);
+  decRefObj(this);
 }
 
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
@@ -219,6 +218,7 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);
   UnblockChain(parentChain);
+  decRefObj(this);
 }
 
 String c_AsyncFunctionWaitHandle::getName() {

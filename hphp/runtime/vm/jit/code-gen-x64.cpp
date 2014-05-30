@@ -5706,9 +5706,6 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
 
   // parent->m_child = child;
   m_as.storeq(childReg, parentArReg[childToArOff]);
-
-  // parent->incRefCount();
-  emitIncRef(m_as, m_rScratch);
 }
 
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
@@ -5742,6 +5739,13 @@ void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
   auto const base = srcLoc(0).reg();
   auto asyncArOffset = c_AsyncFunctionWaitHandle::arOff();
   m_as.lea (base[asyncArOffset], dest);
+}
+
+void CodeGenerator::cgLdResumableArObj(IRInstruction* inst) {
+  auto const dstReg = dstLoc(0).reg();
+  auto const resumableArReg = srcLoc(0).reg();
+  auto const objectOff = Resumable::objectOff() - Resumable::arOff();
+  m_as.lea (resumableArReg[objectOff], dstReg);
 }
 
 void CodeGenerator::cgCopyAsyncCells(IRInstruction* inst) {

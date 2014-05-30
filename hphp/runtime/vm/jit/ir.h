@@ -648,7 +648,8 @@ O(AFWHBlockOn,                      ND, S(FramePtr) S(Obj),            E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
-O(CopyAsyncCells,                   ND, S(FramePtr) S(PtrToGen),        CRc|E) \
+O(LdResumableArObj,             D(Obj), S(FramePtr),                   C|PRc) \
+O(CopyAsyncCells,                   ND, S(FramePtr) S(PtrToGen),       CRc|E) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           C(Int)                              \
                                           S(TCA,Nullptr)                      \

@@ -132,8 +132,6 @@ public:
   }
 } s_misc_extension;
 
-using JIT::CallerFrame;
-
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(tokenizer, 0.1);
 

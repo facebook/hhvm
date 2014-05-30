@@ -158,7 +158,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
 static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
   if (!s_option_data->assertActive) return true;
 
-  JIT::CallerFrame cf;
+  CallerFrame cf;
   Offset callerOffset;
   auto const fp = cf(&callerOffset);
 

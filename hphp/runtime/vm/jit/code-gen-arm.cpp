@@ -1613,11 +1613,10 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
     auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff();
-    m_as.Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
-    m_as.Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
-                                   Stack::topOfStackOffset()]);
+    m_as.Str  (rVmFp, rVmTl[RDS::kVmfpOff]);
+    m_as.Str  (rVmSp, rVmTl[RDS::kVmspOff]);
     m_as.Mov  (rAsm, pc);
-    m_as.Str  (rAsm, rGContextReg[offsetof(ExecutionContext, m_pc)]);
+    m_as.Str  (rAsm, rVmTl[RDS::kVmpcOff]);
   }
 
   // The stack pointer currently points to the MInstrState we need to use.
@@ -1966,9 +1965,8 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
 
-  m_as.   Ldr   (rVmFp, rReturnReg[offsetof(ExecutionContext, m_fp)]);
-  m_as.   Ldr   (rVmSp, rReturnReg[offsetof(ExecutionContext, m_stack) +
-                                   Stack::topOfStackOffset()]);
+  m_as.   Ldr   (rVmFp, rVmTl[RDS::kVmfpOff]);
+  m_as.   Ldr   (rVmSp, rVmTl[RDS::kVmspOff]);
 
   emitServiceReq(m_mainCode, REQ_RESUME);
 }

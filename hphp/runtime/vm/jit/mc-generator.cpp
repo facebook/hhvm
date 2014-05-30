@@ -134,9 +134,6 @@ static __thread size_t s_initialTCSize;
 // The global MCGenerator object.
 MCGenerator* mcg;
 
-// Register dirtiness: thread-private.
-__thread VMRegState tl_regState = VMRegState::CLEAN;
-
 CppCall MCGenerator::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
@@ -306,8 +303,8 @@ MCGenerator::numTranslations(SrcKey sk) const {
 static void populateLiveContext(RegionContext& ctx) {
   typedef RegionDesc::Location L;
 
-  const ActRec*     const fp {g_context->getFP()};
-  const TypedValue* const sp {g_context->getStack().top()};
+  const ActRec*     const fp {vmfp()};
+  const TypedValue* const sp {vmsp()};
 
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
@@ -587,7 +584,7 @@ MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
 static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  vmfp() = (Cell*)ar;
+  vmfp() = ar;
   vmsp() = sp;
   vmpc() = ar->unit()->at(pcOff);
 }
@@ -1069,11 +1066,11 @@ MCGenerator::enterTC(TCA start, void* data) {
     // recognizes, or we luck out and the leaseholder exits.
     while (!start) {
       TRACE(2, "enterTC forwarding BB to interpreter\n");
-      g_context->m_pc = sk.unit()->at(sk.offset());
+      vmpc() = sk.unit()->at(sk.offset());
       INC_TPC(interp_bb);
       g_context->dispatchBB();
-      PC newPc = g_context->getPC();
-      if (!newPc) { g_context->m_fp = 0; return; }
+      PC newPc = vmpc();
+      if (!newPc) { vmfp() = 0; return; }
       sk = SrcKey(liveFunc(), newPc, liveResumed());
       start = getTranslation(TranslArgs(sk, true));
     }
@@ -1096,7 +1093,7 @@ MCGenerator::enterTC(TCA start, void* data) {
     }
 
     mcg->backEnd().enterTCHelper(start, info);
-    assert(g_context->m_stack.isValidAddress((uintptr_t)vmsp()));
+    assert(isValidVMStackAddress(vmRegsUnsafe().stack.top()));
 
     tl_regState = VMRegState::CLEAN; // Careful: pc isn't sync'ed yet.
     TRACE(1, "enterTC: %p fp%p sp%p } return\n", start,
@@ -1276,7 +1273,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
 
   case REQ_INTERPRET: {
     Offset off = args[0];
-    g_context->m_pc = liveUnit()->at(off);
+    vmpc() = liveUnit()->at(off);
     /*
      * We know the compilation unit has not changed; basic blocks do
      * not span files. I claim even exceptions do not violate this
@@ -1286,8 +1283,8 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     // dispatch until BB ends
     INC_TPC(interp_bb);
     g_context->dispatchBB();
-    PC newPc = g_context->getPC();
-    if (!newPc) { g_context->m_fp = 0; return false; }
+    PC newPc = vmpc();
+    if (!newPc) { vmfp() = 0; return false; }
     SrcKey newSk(liveFunc(), newPc, liveResumed());
     SKTRACE(5, newSk, "interp: exit\n");
     sk = newSk;
@@ -1299,7 +1296,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     // getting to the destination's translation, if any.
     ActRec* ar = (ActRec*)args[0];
     ActRec* caller = (ActRec*)args[1];
-    assert((Cell*) caller == vmfp());
+    assert(caller == vmfp());
     Unit* destUnit = caller->m_func->unit();
     // Set PC so logging code in getTranslation doesn't get confused.
     vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
@@ -1313,7 +1310,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
 
   case REQ_RESUME: {
     if (UNLIKELY(vmpc() == 0)) {
-      g_context->m_fp = 0;
+      vmfp() = 0;
       return false;
     }
     SrcKey dest(liveFunc(), vmpc(), liveResumed());

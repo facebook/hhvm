@@ -14,15 +14,39 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/translator-helpers.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {
-namespace JIT {
 
-void translatorTraceCodeGen() {
-  mcg->traceCodeGen();
+// Register dirtiness: thread-private.
+__thread VMRegState tl_regState = VMRegState::CLEAN;
+
+VMRegAnchor::VMRegAnchor()
+  : m_old(tl_regState)
+{
+  assert_native_stack_aligned();
+  JIT::mcg->sync();
 }
 
-} // HPHP::JIT
-} // HPHP
+VMRegAnchor::VMRegAnchor(ActRec* ar)
+  : m_old(tl_regState)
+{
+  // Some C++ entry points have an ActRec prepared from after a call
+  // instruction. This syncs us to right after the call instruction.
+  assert(tl_regState == VMRegState::DIRTY);
+  m_old = VMRegState::DIRTY;
+  tl_regState = VMRegState::CLEAN;
+
+  auto prevAr = g_context->getOuterVMFrame(ar);
+  const Func* prevF = prevAr->m_func;
+  assert(!ar->resumed());
+  auto& regs = vmRegs();
+  regs.stack.top() = (TypedValue*)ar - ar->numArgs();
+  assert(vmStack().isValidAddress((uintptr_t)vmsp()));
+  regs.pc = prevF->unit()->at(prevF->base() + ar->m_soff);
+  regs.fp = prevAr;
+}
+
+}

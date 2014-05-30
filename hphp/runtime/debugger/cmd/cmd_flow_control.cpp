@@ -15,8 +15,11 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
+
 #include <algorithm>
+
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -146,7 +149,7 @@ bool CmdFlowControl::atStepOutOffset(Unit* unit, Offset o) {
 void CmdFlowControl::setupStepOuts() {
   // Existing step outs should be cleaned up before making new ones.
   assert(!hasStepOuts());
-  auto fp = g_context->getFP();
+  auto fp = vmfp();
   if (!fp) return; // No place to step out to!
   Offset returnOffset;
   bool fromVMEntry;

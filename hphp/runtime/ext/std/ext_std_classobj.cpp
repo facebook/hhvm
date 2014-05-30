@@ -25,10 +25,6 @@
 
 namespace HPHP {
 
-using JIT::CallerFrame;
-using JIT::EagerCallerFrame;
-using JIT::VMRegAnchor;
-
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -158,7 +154,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto retVal = Array::attach(MixedArray::MakeReserve(cls->numMethods()));
   getMethodNamesImpl(
     cls,
-    arGetContextClassFromBuiltin(g_context->getFP()),
+    arGetContextClassFromBuiltin(vmfp()),
     retVal
   );
   return f_array_values(retVal).toArray();

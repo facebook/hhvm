@@ -49,7 +49,7 @@ namespace HPHP {
     auto& dtor = s_resource_dtors.at(type);
     if (dtor.list_dtor_ex) {
       TSRMLS_FETCH();
-      JIT::VMRegAnchor _;
+      VMRegAnchor _;
       dtor.list_dtor_ex(this TSRMLS_CC);
     }
   }

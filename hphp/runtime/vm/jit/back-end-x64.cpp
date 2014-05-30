@@ -37,7 +37,7 @@ namespace HPHP { namespace JIT {
 using namespace reg;
 
 extern "C" void enterTCHelper(Cell* vm_sp,
-                              Cell* vm_fp,
+                              ActRec* vm_fp,
                               TCA start,
                               TReqInfo* infoPtr,
                               ActRec* firstAR,
@@ -106,7 +106,9 @@ struct BackEnd : public JIT::BackEnd {
     // We have to force C++ to spill anything that might be in a callee-saved
     // register (aside from rbp). enterTCHelper does not save them.
     CALLEE_SAVED_BARRIER();
-    JIT::enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(), RDS::tl_base);
+    auto& regs = vmRegsUnsafe();
+    JIT::enterTCHelper(regs.stack.top(), regs.fp, start,
+                       &info, vmFirstAR(), RDS::tl_base);
     CALLEE_SAVED_BARRIER();
   }
 

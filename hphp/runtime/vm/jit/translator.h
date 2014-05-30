@@ -57,16 +57,6 @@ namespace JIT {
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
-/*
- * DIRTY when the live register state is spread across the stack and m_fixup,
- * CLEAN when it has been sync'ed into g_context.
- */
-enum class VMRegState {
-  CLEAN,
-  DIRTY
-};
-extern __thread VMRegState tl_regState;
-
 struct NormalizedInstruction;
 
 // A DynLocation is a Location-in-execution: a location, along with
@@ -552,10 +542,6 @@ public:
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);
   static bool liveFrameIsPseudoMain();
-
-  inline bool stateIsDirty() {
-    return tl_regState == VMRegState::DIRTY;
-  }
 
   inline bool isTransDBEnabled() const {
     return debug || RuntimeOption::EvalDumpTC;

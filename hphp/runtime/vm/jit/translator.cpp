@@ -174,7 +174,8 @@ RuntimeType Translator::liveType(Location l,
     case Location::Local: {
       Cell *base;
       int offset = locPhysicalOffset(l);
-      base    = l.space == Location::Stack ? vmsp() : vmfp();
+      base = l.space == Location::Stack ? vmsp()
+                                        : reinterpret_cast<Cell*>(vmfp());
       outer = &base[offset];
     } break;
     case Location::Iter: {
@@ -3352,7 +3353,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   auto const oldAnalyzeCalleeDepth = m_analysisDepth++;
   vmpc() = nullptr; // should never be used
   vmsp() = nullptr; // should never be used
-  vmfp() = reinterpret_cast<Cell*>(&fakeAR);
+  vmfp() = &fakeAR;
   auto restoreFrame = [&]{
     vmfp() = oldFP;
     vmsp() = oldSP;

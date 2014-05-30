@@ -20,12 +20,13 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 
@@ -297,7 +298,7 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
 
 void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
                                 int id) const {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   std::string name = displayName(func);
   auto const givenType = describe_actual_type(tv, isHHType());
   // Handle return type constraint failures

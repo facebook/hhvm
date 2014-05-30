@@ -5459,12 +5459,8 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
 
-  // The interpOne method returns a pointer to the current ExecutionContext
-  // in rax.  Use it read the 'm_fp' and 'm_stack.m_top' fields into the
-  // rVmFp and rVmSp registers.
-  m_as.loadq(rax[offsetof(ExecutionContext, m_fp)], rVmFp);
-  m_as.loadq(rax[offsetof(ExecutionContext, m_stack) +
-                 Stack::topOfStackOffset()], rVmSp);
+  m_as.loadq(rVmTl[RDS::kVmfpOff], rVmFp);
+  m_as.loadq(rVmTl[RDS::kVmspOff], rVmSp);
 
   emitServiceReq(m_mainCode, REQ_RESUME);
 }

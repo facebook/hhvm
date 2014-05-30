@@ -353,11 +353,11 @@ vm_decode_function(const Variant& function,
 Variant vm_call_user_func(const Variant& function, const Variant& params,
                           bool forwarding /* = false */) {
   ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  HPHP::JIT::CallerFrame cf;
+  Class* cls = nullptr;
+  CallerFrame cf;
   StringData* invName = nullptr;
-  const HPHP::Func* f = vm_decode_function(function, cf(), forwarding,
-                                           obj, cls, invName);
+  const Func* f = vm_decode_function(function, cf(), forwarding,
+                                     obj, cls, invName);
   if (f == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
@@ -373,8 +373,8 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
 static bool vm_decode_function_cufiter(const Variant& function,
                                        SmartCufIterPtr& cufIter) {
   ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  HPHP::JIT::CallerFrame cf;
+  Class* cls = nullptr;
+  CallerFrame cf;
   StringData* invName = nullptr;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
   const HPHP::Func* func = vm_decode_function(function, cf(), false,
@@ -1065,7 +1065,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
         }
       }
       try {
-        JIT::VMRegAnchor _;
+        VMRegAnchor _;
         bool initial;
         auto const ec = g_context.getNoCheck();
         Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);

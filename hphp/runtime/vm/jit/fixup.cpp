@@ -17,6 +17,7 @@
 
 #include "hphp/vixl/a64/simulator-a64.h"
 
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -63,9 +64,7 @@ bool isVMFrame(const ExecutionContext* ec, const ActRec* ar) {
   // Determine whether the frame pointer is outside the native stack, cleverly
   // using a single unsigned comparison to do both halves of the bounds check.
   bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
-  assert(!ret ||
-         (ar >= ec->m_stack.getStackLowAddress() &&
-          ar < ec->m_stack.getStackHighAddress()) ||
+  assert(!ret || isValidVMStackAddress(ar) ||
          (ar->m_func->validate(), ar->resumed()));
   return ret;
 }
@@ -94,9 +93,10 @@ FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
         TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
               regs.m_fp->m_func->name()->data(),
               regs.m_fp, regs.m_sp, regs.m_pc);
-        ec->m_fp = const_cast<ActRec*>(regs.m_fp);
-        ec->m_pc = reinterpret_cast<PC>(regs.m_pc);
-        vmsp() = regs.m_sp;
+        auto& vmRegs = vmRegsUnsafe();
+        vmRegs.fp = const_cast<ActRec*>(regs.m_fp);
+        vmRegs.pc = reinterpret_cast<PC>(regs.m_pc);
+        vmRegs.stack.top() = regs.m_sp;
         return;
       }
     }
@@ -119,8 +119,8 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
       uintptr_t(ar) - s_stackLimit >= s_stackSize &&
       !sim->is_on_stack(ar);
     assert(!ret ||
-           (ar >= g_context->m_stack.getStackLowAddress() &&
-            ar < g_context->m_stack.getStackHighAddress()) ||
+           (ar >= vmStack().getStackLowAddress() &&
+            ar < vmStack().getStackHighAddress()) ||
            ar->resumed());
     return ret;
   };
@@ -157,8 +157,8 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
     TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\b",
           regs.m_fp->m_func->name()->data(),
           regs.m_fp, regs.m_sp, regs.m_pc);
-    ec->m_fp = const_cast<ActRec*>(regs.m_fp);
-    ec->m_pc = reinterpret_cast<PC>(regs.m_pc);
+    vmfp() = const_cast<ActRec*>(regs.m_fp);
+    vmpc() = reinterpret_cast<PC>(regs.m_pc);
     vmsp() = regs.m_sp;
     return;
   }

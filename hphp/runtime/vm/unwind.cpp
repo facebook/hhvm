@@ -24,10 +24,11 @@
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
@@ -469,8 +470,8 @@ const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
 // Unwind the frame for a builtin.  Currently only used when switching
 // modes for hphpd_break and fb_enable_code_coverage.
 void unwindBuiltinFrame() {
-  auto& stack = g_context->getStack();
-  auto& fp = g_context->m_fp;
+  auto& stack = vmStack();
+  auto& fp = vmfp();
 
   assert(fp->m_func->methInfo());
   assert(fp->m_func->name()->isame(s_hphpd_break.get()) ||
@@ -479,7 +480,7 @@ void unwindBuiltinFrame() {
   // Free any values that may be on the eval stack.  We know there
   // can't be FPI regions and it can't be a generator body because
   // it's a builtin frame.
-  auto const evalTop = reinterpret_cast<TypedValue*>(g_context->getFP());
+  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp());
   while (stack.topTV() < evalTop) {
     stack.popTV();
   }
@@ -493,7 +494,7 @@ void unwindBuiltinFrame() {
   ActRec* sfp = g_context->getPrevVMState(fp, &pc);
   assert(pc != -1);
   fp = sfp;
-  g_context->m_pc = fp->m_func->unit()->at(pc);
+  vmpc() = fp->m_func->unit()->at(pc);
   stack.discardAR();
   stack.pushNull(); // return value
 }
@@ -518,9 +519,9 @@ void pushFault(const Object& o) {
 UnwindAction enterUnwinder() {
   auto fault = g_context->m_faults.back();
   return unwind(
-    g_context->m_fp,      // by ref
-    g_context->getStack(),// by ref
-    g_context->m_pc,      // by ref
+    vmfp(),    // by ref
+    vmStack(), // by ref
+    vmpc(),    // by ref
     fault
   );
 }
@@ -532,7 +533,7 @@ UnwindAction enterUnwinder() {
 UnwindAction exception_handler() noexcept {
   FTRACE(1, "unwind exception_handler\n");
 
-  g_context->checkRegState();
+  checkVMRegState();
 
   try { throw; }
 
@@ -545,11 +546,11 @@ UnwindAction exception_handler() noexcept {
    */
   catch (const VMPrepareUnwind&) {
     Fault fault = g_context->m_faults.back();
-    FTRACE(1, "unwind: restoring offset {}\n", g_context->m_pc);
+    FTRACE(1, "unwind: restoring offset {}\n", vmpc());
     return unwind(
-      g_context->m_fp,
-      g_context->getStack(),
-      g_context->m_pc,
+      vmfp(),
+      vmStack(),
+      vmpc(),
       fault
     );
   }

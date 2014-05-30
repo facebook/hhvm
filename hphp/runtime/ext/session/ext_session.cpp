@@ -373,7 +373,7 @@ ObjectData* SystemlibSessionModule::getObject() {
     return o;
   }
 
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   Variant ret;
 
   if (!m_cls) {

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_xenon.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
@@ -103,7 +104,7 @@ bool shouldRunUserProfiler(const Func* func) {
 }
 
 void runUserProfilerOnFunctionEnter(const ActRec* ar) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
@@ -119,7 +120,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
                                    ObjectData* exception) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
@@ -187,9 +188,9 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     }
   }
 
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
 
-  PC savePc = g_context->m_pc;
+  PC savePc = vmpc();
 
   Variant doneFlag = true;
   Variant called_on;
@@ -215,17 +216,17 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
 
     frame_free_locals_inl_no_hook<true>(ar, ar->func()->numLocals());
-    Stack& stack = g_context->getStack();
+    Stack& stack = vmStack();
     stack.top() = (Cell*)(ar + 1);
     cellDup(*ret.asCell(), *stack.allocTV());
 
-    g_context->m_fp = outer;
-    g_context->m_pc = outer ? outer->func()->unit()->at(pcOff) : nullptr;
+    vmfp() = outer;
+    vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;
 
     return false;
   }
-  g_context->m_fp = ar;
-  g_context->m_pc = savePc;
+  vmfp() = ar;
+  vmpc() = savePc;
 
   return true;
 }

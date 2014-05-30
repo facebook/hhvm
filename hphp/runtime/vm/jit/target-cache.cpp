@@ -90,7 +90,7 @@ const Func* FuncCache::lookup(RDS::Handle handle, StringData* sd) {
     // Miss. Does it actually exist?
     func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
-      JIT::VMRegAnchor _;
+      VMRegAnchor _;
       func = Unit::loadFunc(sd);
       if (!func) {
         raise_error("Call to undefined function %s()", sd->data());

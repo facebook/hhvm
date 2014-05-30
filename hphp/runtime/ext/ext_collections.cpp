@@ -1313,7 +1313,7 @@ bool c_Vector::usort(const Variant& cmp_function) {
   mutateAndBump();
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
-  JIT::CallerFrame cf;
+  CallerFrame cf;
   vm_decode_function(cmp_function, cf(), false, ctx);
   if (!ctx.func) {
     return false;
@@ -3323,7 +3323,7 @@ void BaseMap::ksort(int sort_flags, bool ascending) {
 #define USER_SORT_BODY(acc_type)                                \
   do {                                                          \
     CallCtx ctx;                                                \
-    JIT::CallerFrame cf;                                        \
+    CallerFrame cf;                                             \
     vm_decode_function(cmp_function, cf(), false, ctx);         \
     if (!ctx.func) {                                            \
       return false;                                             \

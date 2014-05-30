@@ -41,7 +41,7 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   // compiled with -fomit-frame-pointer with the intention of having it call
   // back. Normal HHVM extensions have the luxury of only when such a thing
   // will be attempted, but we have no way to know in advance.
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
 
   TSRMLS_FETCH();
   zend_ext_func native_func = reinterpret_cast<zend_ext_func>(ar->func()->nativeFuncPtr());

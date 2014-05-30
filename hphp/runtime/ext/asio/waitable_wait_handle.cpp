@@ -78,7 +78,7 @@ Array c_WaitableWaitHandle::t_getparents() {
 
 // throws on context depth level overflows and cross-context cycles
 void c_WaitableWaitHandle::join() {
-  JIT::EagerVMRegAnchor _;
+  EagerVMRegAnchor _;
 
   AsioSession* session = AsioSession::Get();
 

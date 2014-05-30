@@ -35,8 +35,6 @@
 
 namespace HPHP {
 
-using JIT::VMRegAnchor;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -389,7 +387,7 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
   VMRegAnchor _;
   bool visible, accessible;
   TypedValue* tv = class_->getSProp(
-    force ? class_ : arGetContextClass(g_context->getFP()),
+    force ? class_ : arGetContextClass(vmfp()),
     prop.get(), visible, accessible
   );
   if (tv == nullptr) {
@@ -414,7 +412,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   VMRegAnchor _;
   bool visible, accessible;
   TypedValue* tv = class_->getSProp(
-    force ? class_ : arGetContextClass(g_context->getFP()),
+    force ? class_ : arGetContextClass(vmfp()),
     prop.get(), visible, accessible
   );
   if (tv == nullptr) {

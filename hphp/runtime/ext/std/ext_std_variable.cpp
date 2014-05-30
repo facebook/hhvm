@@ -301,7 +301,7 @@ int64_t extract_impl(VRefParam vref_array,
     return 0;
   }
 
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   auto const varEnv = g_context->getVarEnv();
   if (!varEnv) return 0;
 

@@ -131,33 +131,6 @@ extern __thread void* tl_base;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Statically layed-out header that goes at the front of RDS.
- */
-struct Header {
-  /*
-   * Surprise flags.  May be written by other threads.  At various
-   * points, the runtime will check whether this word is non-zero, and
-   * if so go to a slow path to handle unusual conditions (e.g. OOM).
-   */
-  std::atomic<ssize_t> conditionFlags;
-};
-
-/*
- * Access to the statically layed out header.
- */
-Header* header();
-
-/*
- * Values for dynamically defined constants are stored as key value
- * pairs in an array, accessible here.
- */
-Array& s_constants();
-
-constexpr ptrdiff_t kConditionFlagsOff   = offsetof(Header, conditionFlags);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * RDS symbols are centrally registered here.
  *
  * All StringData*'s below must be static strings.
@@ -350,6 +323,12 @@ void recordRds(Handle h, size_t size, const Symbol& sym);
  * RDS.
  */
 std::vector<void*> allTLBases();
+
+/*
+ * Values for dynamically defined constants are stored as key value
+ * pairs in an array, accessible here.
+ */
+Array& s_constants();
 
 //////////////////////////////////////////////////////////////////////
 

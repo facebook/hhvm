@@ -480,12 +480,11 @@ class FrameRestore {
  public:
   explicit FrameRestore(const PreClass* preClass) {
     auto const ec = g_context.getNoCheck();
-    ActRec* fp = ec->getFP();
-    PC pc = ec->getPC();
+    ActRec* fp = vmfp();
+    PC pc = vmpc();
 
-    if (ec->m_stack.top() &&
-        (!fp || fp->m_func->unit() != preClass->unit())) {
-      m_top = ec->m_stack.top();
+    if (vmsp() && (!fp || fp->m_func->unit() != preClass->unit())) {
+      m_top = vmsp();
       m_fp = fp;
       m_pc = pc;
 
@@ -497,7 +496,7 @@ class FrameRestore {
         stack has been setup. So dont do anything if m_stack.top()
         is NULL
       */
-      ActRec &tmp = *ec->m_stack.allocA();
+      ActRec &tmp = *vmStack().allocA();
       tmp.m_sfp = fp;
       tmp.m_savedRip = 0;
       tmp.m_func = preClass->unit()->getMain();
@@ -507,8 +506,8 @@ class FrameRestore {
       tmp.setThis(nullptr);
       tmp.m_varEnv = 0;
       tmp.initNumArgs(0);
-      ec->m_fp = &tmp;
-      ec->m_pc = preClass->unit()->at(preClass->getOffset());
+      vmfp() = &tmp;
+      vmpc() = preClass->unit()->at(preClass->getOffset());
       ec->pushLocalsAndIterators(tmp.m_func);
     } else {
       m_top = nullptr;
@@ -517,11 +516,10 @@ class FrameRestore {
     }
   }
   ~FrameRestore() {
-    auto const ec = g_context.getNoCheck();
     if (m_top) {
-      ec->m_stack.top() = m_top;
-      ec->m_fp = m_fp;
-      ec->m_pc = m_pc;
+      vmsp() = m_top;
+      vmfp() = m_fp;
+      vmpc() = m_pc;
     }
   }
  private:
@@ -820,7 +818,7 @@ Class* Unit::loadClass(const NamedEntity* ne,
 
 Class* Unit::loadMissingClass(const NamedEntity* ne,
                               const StringData* name) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
@@ -1434,7 +1432,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
               Stats::inc(Stats::PseudoMain_Reentered);
               TypedValue ret;
               VarEnv* ve = nullptr;
-              ActRec* fp = g_context->m_fp;
+              ActRec* fp = vmfp();
               if (!fp) {
                 ve = g_context->m_globalVarEnv;
               } else {

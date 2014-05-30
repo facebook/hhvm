@@ -66,9 +66,6 @@ const int64_t k_UCOL_STRENGTH = UCOL_STRENGTH;
 const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64_t k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
-using HPHP::JIT::CallerFrame;
-using HPHP::JIT::EagerCallerFrame;
-
 #define getCheckedArrayRet(input, fail)                           \
   auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
   if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \

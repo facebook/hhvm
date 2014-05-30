@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-header.h"
 
 #include <atomic>
 

@@ -69,17 +69,10 @@ void moveToAlign(CodeBlock& cb,
 }
 
 void emitEagerSyncPoint(Asm& as, const Op* pc) {
-  static COff spOff = offsetof(ExecutionContext, m_stack) +
-    Stack::topOfStackOffset();
-  static COff fpOff = offsetof(ExecutionContext, m_fp);
-  static COff pcOff = offsetof(ExecutionContext, m_pc);
-
   // we can use rAsm because we don't clobber it in X64Assembler
-  Reg64 rEC = rAsm;
-  emitGetGContext(as, rEC);
-  as.  storeq(rVmFp, rEC[fpOff]);
-  as.  storeq(rVmSp, rEC[spOff]);
-  emitImmStoreq(as, intptr_t(pc), rEC[pcOff]);
+  as.  storeq(rVmFp, rVmTl[RDS::kVmfpOff]);
+  as.  storeq(rVmSp, rVmTl[RDS::kVmspOff]);
+  emitImmStoreq(as, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
 }
 
 // emitEagerVMRegSave --
@@ -93,19 +86,9 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
          RegSaveFlags::None);
 
   Reg64 pcReg = rdi;
-  PhysReg rEC = rAsm;
   assert(!kSpecialCrossTraceRegs.contains(rdi));
 
-  emitGetGContext(as, rEC);
-
-  static COff spOff = offsetof(ExecutionContext, m_stack) +
-    Stack::topOfStackOffset();
-  static COff fpOff = offsetof(ExecutionContext, m_fp) - spOff;
-  static COff pcOff = offsetof(ExecutionContext, m_pc) - spOff;
-
-  assert(spOff != 0);
-  as.   addq   (spOff, r64(rEC));
-  as.   storeq (rVmSp, *rEC);
+  as.   storeq (rVmSp, rVmTl[RDS::kVmspOff]);
   if (savePC) {
     // We're going to temporarily abuse rVmSp to hold the current unit.
     Reg64 rBC = rVmSp;
@@ -115,11 +98,11 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
     as. loadq  (rBC[Func::unitOff()], rBC);
     as. loadq  (rBC[Unit::bcOff()], rBC);
     as. addq   (rBC, pcReg);
-    as. storeq (pcReg, rEC[pcOff]);
+    as. storeq (pcReg, rVmTl[RDS::kVmpcOff]);
     as. pop    (rBC);
   }
   if (saveFP) {
-    as. storeq (rVmFp, rEC[fpOff]);
+    as. storeq (rVmFp, rVmTl[RDS::kVmfpOff]);
   }
 }
 

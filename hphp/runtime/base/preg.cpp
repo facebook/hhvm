@@ -1026,7 +1026,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
           int full_len = result.size();
           const char* data = result.data() + result_len;
           if (eval) {
-            JIT::VMRegAnchor _;
+            VMRegAnchor _;
             // reserve space for "<?php return " + code + ";"
             String prefixedCode(full_len - result_len + 14, ReserveString);
             prefixedCode += "<?php return ";

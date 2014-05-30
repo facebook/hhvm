@@ -733,6 +733,7 @@ static const struct {
    */
   { OpFCall,       {FStack,           Stack1,       OutPred,           0 }},
   { OpFCallD,      {FStack,           Stack1,       OutPred,           0 }},
+  { OpFCallUnpack, {FStack,           Stack1,       OutPred,           0 }},
   { OpFCallArray,  {FStack,           Stack1,       OutPred,
                                                    -(int)kNumActRecCells }},
   // TODO: output type is known

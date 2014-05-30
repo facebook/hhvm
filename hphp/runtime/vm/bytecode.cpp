@@ -1425,6 +1425,7 @@ static inline void checkNativeStack() {
  */
 ALWAYS_INLINE
 static void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
+  assert(f);
   auto const info = ThreadInfo::s_threadInfo.getNoCheck();
   /*
    * Check whether func's maximum stack usage would overflow the stack.
@@ -1464,89 +1465,160 @@ static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
   stack.popAR();
 }
 
-static bool prepareArrayArgs(ActRec* ar, const Cell& args,
-                             Stack& stack,
-                             bool doCufRefParamChecks,
-                             TypedValue* retval) {
-  assert(ar != nullptr);
+static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell&args,
+                                               Stack& stack, int nregular) {
+  assert(ar != nullptr && ar->hasInvName());
   assert(!cellIsNull(&args));
-  assert(stack.top() == (void*) ar);
-  const Func* f = ar->m_func;
-  assert(f);
-
-  assert(!ar->hasExtraArgs());
-  // invName should be non-NULL only if calling __call or __callStatic
-  assert(!(ar->hasInvName())
-         || f->name()->isame(s___call.get())
-         || f->name()->isame(s___callStatic.get()));
-
+  assert(nregular >= 0);
+  assert((stack.top() + nregular) == (void*) ar);
   assert(isContainer(args));
-  int nargs = getContainerSize(args);
-  assert(!ar->hasVarEnv() || (nargs == 0));
-  if (UNLIKELY(ar->hasInvName())) {
-    stack.pushStringNoRc(ar->getInvName());
-    if (args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
+  DEBUG_ONLY const Func* f = ar->m_func;
+  assert(f &&
+         (f->name()->isame(s___call.get()) ||
+          f->name()->isame(s___callStatic.get())));
+
+  // We'll need to make this the first argument
+  StringData* invName = ar->getInvName();
+  ar->setVarEnv(nullptr);
+  assert(!ar->hasVarEnv() && !ar->hasInvName());
+
+  auto nargs = getContainerSize(args);
+
+  if (UNLIKELY(0 == nargs)) {
+    // We need to make an array containing all the arguments passed by
+    // the caller and put it where the second argument is.
+    auto argArray = Array::attach(
+      nregular
+      ? MixedArray::MakePacked(
+        nregular, reinterpret_cast<TypedValue*>(ar) - nregular)
+      : staticEmptyArray()
+    );
+
+    // Remove the arguments from the stack; they were moved into the
+    // array so we don't need to decref.
+    stack.ndiscard(nregular);
+
+    // Move invName to where the first argument belongs, no need
+    // to incRef/decRef since we are transferring ownership
+    assert(stack.top() == (void*) ar);
+    stack.pushStringNoRc(invName);
+
+    // Move argArray to where the second argument belongs. We've already
+    // incReffed the array above so we don't need to do it here.
+    stack.pushArrayNoRc(argArray.detach());
+  } else {
+    if (nregular == 0
+        && args.m_type == KindOfArray
+        && args.m_data.parr->isVectorData()) {
+      assert(stack.top() == (void*) ar);
+      stack.pushStringNoRc(invName);
       stack.pushArray(args.m_data.parr);
     } else {
-      PackedArrayInit ai(getContainerSize(args));
+      PackedArrayInit ai(nargs + nregular);
+      for (int i = 0; i < nregular; ++i) {
+        // appendWithRef bumps the refcount and splits if necessary, to
+        // compensate for the upcoming pop from the stack
+        ai.appendWithRef(tvAsVariant(stack.top()));
+        stack.popTV();
+      }
+      assert(stack.top() == (void*) ar);
+      stack.pushStringNoRc(invName);
       for (ArrayIter iter(args); iter; ++iter) {
         ai.appendWithRef(iter.secondRefPlus());
       }
       stack.pushArray(ai.create());
     }
-    ar->setVarEnv(0);
-    ar->initNumArgs(2);
+  }
+
+  ar->setNumArgs(2);
+}
+
+// offset is the number of params already on the stack to which the
+// contents of args are to be added; for call_user_func_array, this is
+// always 0; for unpacked arguments, it may be greater if normally passed
+// params precede the unpack.
+static bool prepareArrayArgs(ActRec* ar, const Cell& args,
+                             Stack& stack,
+                             int nregular,
+                             bool doCufRefParamChecks,
+                             TypedValue* retval) {
+  assert(ar != nullptr);
+  assert(!cellIsNull(&args));
+  assert(nregular >= 0);
+  assert((stack.top() + nregular) == (void*) ar);
+  const Func* f = ar->m_func;
+  assert(f);
+
+  assert(!ar->hasExtraArgs());
+
+  assert(isContainer(args));
+  int nargs = nregular + getContainerSize(args);
+  assert(!ar->hasVarEnv() || (0 == nargs));
+  if (UNLIKELY(ar->hasInvName())) {
+    shuffleMagicArrayArgs(ar, args, stack, nregular);
     return true;
   }
 
   int nparams = f->numNonVariadicParams();
-
+  int nextra_regular = std::max(nregular - nparams, 0);
   ArrayIter iter(args);
-  for (int i = 0; iter && i < nparams; ++i, ++iter) {
-    TypedValue* from = const_cast<TypedValue*>(
-      iter.secondRefPlus().asTypedValue());
-    TypedValue* to = stack.allocTV();
-    if (LIKELY(!f->byRef(i))) {
-      cellDup(*tvToCell(from), *to);
-    } else if (LIKELY(from->m_type == KindOfRef &&
-                      from->m_data.pref->m_count >= 2)) {
-      refDup(*from, *to);
-    } else {
-      if (doCufRefParamChecks) {
-        try {
-          raise_warning("Parameter %d to %s() expected to be a reference, "
-                        "value given", i + 1, f->fullName()->data());
-        } catch (...) {
-          // If the user error handler throws an exception, discard the
-          // uninitialized value(s) at the top of the eval stack so that the
-          // unwinder doesn't choke
-          stack.discard();
-          cleanupParamsAndActRec(stack, ar, nullptr, &i);
-          if (retval) { tvWriteNull(retval); }
-          throw;
+  if (LIKELY(nextra_regular == 0)) {
+    for (int i = nregular; iter && (i < nparams); ++i, ++iter) {
+      TypedValue* from = const_cast<TypedValue*>(
+        iter.secondRefPlus().asTypedValue());
+      TypedValue* to = stack.allocTV();
+      if (LIKELY(!f->byRef(i))) {
+        cellDup(*tvToCell(from), *to);
+      } else if (LIKELY(from->m_type == KindOfRef &&
+                        from->m_data.pref->m_count >= 2)) {
+        refDup(*from, *to);
+      } else {
+        if (doCufRefParamChecks) {
+          try {
+            raise_warning("Parameter %d to %s() expected to be a reference, "
+                          "value given", i + 1, f->fullName()->data());
+          } catch (...) {
+            // If the user error handler throws an exception, discard the
+            // uninitialized value(s) at the top of the eval stack so that the
+            // unwinder doesn't choke
+            stack.discard();
+            cleanupParamsAndActRec(stack, ar, nullptr, &i);
+            if (retval) { tvWriteNull(retval); }
+            throw;
+          }
+          if (skipCufOnInvalidParams) {
+            stack.discard();
+            cleanupParamsAndActRec(stack, ar, nullptr, &i);
+            if (retval) { tvWriteNull(retval); }
+            return false;
+          }
         }
-        if (skipCufOnInvalidParams) {
-          stack.discard();
-          cleanupParamsAndActRec(stack, ar, nullptr, &i);
-          if (retval) { tvWriteNull(retval); }
-          return false;
-        }
+        cellDup(*tvToCell(from), *to);
       }
-      cellDup(*tvToCell(from), *to);
+    }
+
+    if (LIKELY(!iter)) {
+      // argArray was exhausted, so there are no "extra" arguments but there
+      // may be a deficit of non-variadic arguments, and the need to push an
+      // empty array for the variadic argument ... that work is left to
+      // prepareFuncEntry
+      ar->initNumArgs(nargs);
+      return true;
     }
   }
-  if (LIKELY(!iter)) {
-    // argArray was exhausted, so there are no "extra" arguments but there
-    // may be a deficit of non-variadic arguments, and the need to push an
-    // empty array for the variadic argument ... that work is left to
-    // prepareFuncEntry
-    ar->initNumArgs(nargs);
-    return true;
-  }
 
-  // argArray was not exhausted, and there are "extra" arguments
+  // there are "extra" arguments; passed as standard arguments prior to the
+  // ... unpack operator and/or still remaining in argArray
   assert(nargs > nparams);
+  assert(nextra_regular > 0 || !!iter);
   if (LIKELY(f->discardExtraArgs())) {
+    if (UNLIKELY(nextra_regular > 0)) {
+      // if unpacking, any regularly passed arguments on the stack
+      // in excess of those expected by the function need to be discarded
+      // in addition to the ones held in the arry
+      do { stack.popTV(); } while (--nextra_regular);
+    }
+
     // the extra args are not used in the function; no reason to add them
     // to the stack
     ar->initNumArgs(f->numParams());
@@ -1558,7 +1630,25 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
   if (f->attrs() & AttrMayUseVV) {
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
     PackedArrayInit ai(extra);
-    for (int i = 0; i < extra; ++i, ++iter) {
+    if (UNLIKELY(nextra_regular > 0)) {
+      for (int i = 0; i < nextra_regular; ++i) {
+        TypedValue* to = extraArgs->getExtraArg(i);
+        const TypedValue* from = stack.top();
+        if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
+          refDup(*from, *to);
+        } else {
+          cellDup(*tvToCell(from), *to);
+        }
+        if (hasVarParam) {
+          // appendWithRef bumps the refcount: this accounts for the fact
+          // that the extra args values went from being present on the stack
+          // to being in (both) ExtraArgs and the variadic args
+          ai.appendWithRef(tvAsCVarRef(from));
+        }
+        stack.discard();
+      }
+    }
+    for (int i = nextra_regular; i < extra; ++i, ++iter) {
       TypedValue* to = extraArgs->getExtraArg(i);
       const TypedValue* from = iter.secondRefPlus().asTypedValue();
       if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
@@ -1584,11 +1674,21 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
   } else {
     assert(hasVarParam);
     if (nparams == 0
-        && args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
+        && nextra_regular == 0
+        && args.m_type == KindOfArray
+        && args.m_data.parr->isVectorData()) {
       stack.pushArray(args.m_data.parr);
     } else {
       PackedArrayInit ai(extra);
-      for (int i = 0; i < extra; ++i, ++iter) {
+      if (UNLIKELY(nextra_regular > 0)) {
+        for (int i = 0; i < nextra_regular; ++i) {
+          // appendWithRef bumps the refcount and splits if necessary,
+          // to compensate for the upcoming pop from the stack
+          ai.appendWithRef(tvAsVariant(stack.top()));
+          stack.popTV();
+        }
+      }
+      for (int i = nextra_regular; i < extra; ++i, ++iter) {
         // appendWithRef bumps the refcount to compensate for the
         // eventual decref of arrayArgs.
         ai.appendWithRef(iter.secondRefPlus());
@@ -1986,7 +2086,8 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
       : args;
     auto prepResult = prepareArrayArgs(
       ar, prepArgs,
-      vmStack(), (bool) (flags & InvokeCuf), retval);
+      vmStack(), 0,
+      (bool) (flags & InvokeCuf), retval);
     if (UNLIKELY(!prepResult)) {
       assert(KindOfNull == retval->m_type);
       return;
@@ -6242,23 +6343,30 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   tvCopy(ret, *vmStack().allocTV());
 }
 
-bool ExecutionContext::doFCallArray(PC& pc) {
-  ActRec* ar = (ActRec*)(vmStack().top() + 1);
-  assert(ar->numArgs() == 1);
+bool ExecutionContext::doFCallArray(PC& pc, int numStackValues,
+                                    CallArrOnInvalidContainer onInvalid) {
+  assert(numStackValues >= 1);
+  ActRec* ar = (ActRec*)(vmStack().top() + numStackValues);
+  assert(ar->numArgs() == numStackValues);
 
   Cell* c1 = vmStack().topC();
   if (UNLIKELY(!isContainer(*c1))) {
-    if (skipCufOnInvalidParams) {
-      // task #1756122
-      // this is what we /should/ do, but our code base depends
-      // on the broken behavior of casting the second arg to an
-      // array.
-      cleanupParamsAndActRec(vmStack(), ar, nullptr, nullptr);
-      vmStack().pushNull();
-      raise_warning("call_user_func_array() expects parameter 2 to be array");
-      return false;
-    } else {
-      tvCastToArrayInPlace(c1);
+    switch (onInvalid) {
+      case CallArrOnInvalidContainer::CastToArray:
+        tvCastToArrayInPlace(c1);
+        break;
+      case CallArrOnInvalidContainer::WarnAndReturnNull:
+        vmStack().pushNull();
+        cleanupParamsAndActRec(vmStack(), ar, nullptr, nullptr);
+        raise_warning("call_user_func_array() expects parameter 2 to be array");
+        return false;
+      case CallArrOnInvalidContainer::WarnAndContinue:
+        tvRefcountedDecRef(c1);
+        // argument_unpacking RFC dictates "containers and Traversables"
+        raise_debugging("Only containers may be unpacked");
+        c1->m_type = KindOfArray;
+        c1->m_data.parr = staticEmptyArray();
+        break;
     }
   }
 
@@ -6266,6 +6374,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
   {
     Cell args = *c1;
     vmStack().discard(); // prepareArrayArgs will push arguments onto the stack
+    numStackValues--;
     SCOPE_EXIT { tvRefcountedDecRef(&args); };
     checkStack(vmStack(), func, 0);
 
@@ -6275,7 +6384,15 @@ bool ExecutionContext::doFCallArray(PC& pc) {
           int(vmfp()->m_func->base()));
     ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
 
-    auto prepResult = prepareArrayArgs(ar, args, vmStack(),
+    if (UNLIKELY((CallArrOnInvalidContainer::WarnAndContinue == onInvalid)
+                 && func->anyByRef())) {
+      raise_error("Unpacking unsupported for calls to functions that"
+                  " take any arguments by reference");
+      vmStack().pushNull();
+      return false;
+    }
+
+    auto prepResult = prepareArrayArgs(ar, args, vmStack(), numStackValues,
                                        /* ref param checks */ true, nullptr);
     if (UNLIKELY(!prepResult)) {
       vmStack().pushNull(); // return value is null if args are invalid
@@ -6296,14 +6413,24 @@ bool ExecutionContext::doFCallArrayTC(PC pc) {
   assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  auto const ret = doFCallArray(pc);
+  auto const ret = doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopFCallArray(IOP_ARGS) {
   NEXT();
-  (void)doFCallArray(pc);
+  (void)doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
+}
+
+OPTBLD_INLINE void ExecutionContext::iopFCallUnpack(IOP_ARGS) {
+  ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
+  NEXT();
+  DECODE_IVA(numArgs);
+  assert(numArgs == ar->numArgs());
+  checkStack(vmStack(), ar->m_func, 0);
+  (void) doFCallArray(pc, numArgs,
+                      CallArrOnInvalidContainer::WarnAndContinue);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopCufSafeArray(IOP_ARGS) {

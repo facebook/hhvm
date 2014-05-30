@@ -440,6 +440,7 @@ void Parser::onCallParam(Token &out, Token *params, Token &expr,
     expr->exp->setContext(Expression::RefValue);
   }
   if (unpack) {
+    (dynamic_pointer_cast<ExpressionList>(out->exp))->setContainsUnpack();
     expr->exp->setContext(Expression::UnpackParameter);
   }
   out->exp->addElement(expr->exp);

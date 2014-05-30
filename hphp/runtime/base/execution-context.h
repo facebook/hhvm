@@ -561,13 +561,21 @@ public:
   PCFilter* m_lastLocFilter;
   bool m_dbgNoBreak;
   bool doFCall(ActRec* ar, PC& pc);
-  bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
   const Variant& getEvaledArg(const StringData* val, const String& namespacedName);
   String getLastErrorPath() const { return m_lastErrorPath; }
   int getLastErrorLine() const { return m_lastErrorLine; }
 
 private:
+  enum class CallArrOnInvalidContainer {
+    // task #1756122: warning and returning null is what we /should/ always
+    // do in call_user_func_array, but some code depends on the broken
+    // behavior of casting the list of args to FCallArray to an array.
+    CastToArray,
+    WarnAndReturnNull,
+    WarnAndContinue
+  };
+  bool doFCallArray(PC& pc, int stkSize, CallArrOnInvalidContainer);
   enum class StackArgsState { // tells prepareFuncEntry how much work to do
     // the stack may contain more arguments than the function expects
     Untrimmed,

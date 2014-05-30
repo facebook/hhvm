@@ -446,6 +446,22 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Parameters.
 
+bool Func::anyByRef() const {
+  if (m_refBitVal || (m_attrs & AttrVariadicByRef)) {
+    return true;
+  }
+
+  if (UNLIKELY(numParams() >= kBitsPerQword)) {
+    auto limit = ((uint32_t) numParams() / kBitsPerQword);
+    for (int i = 0; i < limit; ++i) {
+      if (shared()->m_refBitPtr[i]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool Func::byRef(int32_t arg) const {
   const uint64_t* ref = &m_refBitVal;
   assert(arg >= 0);

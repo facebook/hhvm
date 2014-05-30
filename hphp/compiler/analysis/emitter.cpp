@@ -4440,7 +4440,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
-        e.FCall(numParams);
+        if (ne->hasUnpack()) {
+          e.FCallUnpack(numParams);
+        } else {
+          e.FCall(numParams);
+        }
+
         bool inferred = false;
         if (Option::WholeProgram && Option::GenerateInferredTypes) {
           FunctionScopePtr fs = ne->getFuncScope();
@@ -4504,7 +4509,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             emitFuncCallArg(e, (*params)[i], i);
           }
         }
-        e.FCall(numParams);
+        if (om->hasUnpack()) {
+          e.FCallUnpack(numParams);
+        } else {
+          e.FCall(numParams);
+        }
         if (Option::WholeProgram) {
           fixReturnType(e, om);
         }
@@ -5422,6 +5431,12 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                      int paramId) {
   visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
+
+  // TODO(4599379): if dealing with an unpack, here is where we'd want to
+  // emit a bytecode to traverse any containers;
+  // TODO(4599368): if dealing with an unpack, would need to kick out of
+  // the pass-by-ref behavior and defer that to FCallUnpack
+
   PassByRefKind passByRefKind = getPassByRefKind(exp);
   if (Option::WholeProgram && !exp->hasAnyContext(Expression::InvokeArgument |
                                                   Expression::RefParameter)) {
@@ -5438,7 +5453,7 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
       return;
     }
   }
-  emitFPass(e, paramId, getPassByRefKind(exp));
+  emitFPass(e, paramId, passByRefKind);
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,
@@ -7024,7 +7039,12 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     }
   }
   if (flags == CallUserFuncNone) return false;
-
+  if (func->hasUnpack()) {
+    throw EmitterVisitor::IncludeTimeFatalException(
+      func,
+      "Using argument unpacking for a call_user_func is not supported"
+    );
+  }
   int param = 1;
   ExpressionPtr callable = (*params)[0];
   visit(callable);
@@ -7151,6 +7171,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   ExpressionListPtr params(paramsOverride ? paramsOverride :
                                             node->getParams());
   int numParams = params ? params->getCount() : 0;
+  auto const unpack = node->hasUnpack();
+  assert(!paramsOverride || !unpack);
+
   Func* fcallBuiltin = nullptr;
   StringData* nLiteral = nullptr;
   Offset fpiStart = 0;
@@ -7188,7 +7211,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   } else if (!nameStr.empty()) {
     // foo()
     nLiteral = makeStaticString(nameStr);
-    fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
+    if (!unpack) {
+      fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
+    }
     if (fcallBuiltin && (fcallBuiltin->attrs() & AttrAllowOverride)) {
       if (!Option::WholeProgram ||
           (node->getFuncScope() && node->getFuncScope()->isUserFunction())) {
@@ -7264,7 +7289,11 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
         emitFuncCallArg(e, (*params)[i], i);
       }
     }
-    e.FCall(numParams);
+    if (unpack) {
+      e.FCallUnpack(numParams);
+    } else {
+      e.FCall(numParams);
+    }
   }
   if (Option::WholeProgram || fcallBuiltin) {
     fixReturnType(e, node, fcallBuiltin);

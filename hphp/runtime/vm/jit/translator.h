@@ -473,6 +473,7 @@ opcodeControlFlowInfo(const Op instr) {
     case Op::FCall:
     case Op::FCallD:
     case Op::FCallArray:
+    case Op::FCallUnpack:
     case Op::ContEnter:
     case Op::ContRaise:
     case Op::Incl:

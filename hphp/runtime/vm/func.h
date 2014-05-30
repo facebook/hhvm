@@ -423,6 +423,11 @@ struct Func {
   bool byRef(int32_t arg) const;
 
   /*
+   * Whether any parameters /may/ be taken by reference.
+   */
+  bool anyByRef() const;
+
+  /*
    * Whether the arg-th parameter /must/ be taken by reference.
    *
    * Some builtins take positional or variadic arguments only optionally by

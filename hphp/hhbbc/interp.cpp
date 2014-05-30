@@ -1512,6 +1512,19 @@ void in(ISS& env, const bc::FCallArray& op) {
   push(env, TInitGen);
 }
 
+void in(ISS& env, const bc::FCallUnpack& op) {
+  // FCallUnpack has pretty much the same effects as FCallArray, just with
+  // potentially more than one argument. It's possible that we can share
+  // more code with FCall and FCallArray here.
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) { popF(env); }
+  auto const ar = fpiPop(env);
+  specialFunctionEffects(env, ar);
+  if (ar.func) {
+    return push(env, env.index.lookup_return_type(env.ctx, *ar.func));
+  }
+  push(env, TInitGen);
+}
+
 void in(ISS& env, const bc::FCallBuiltin& op) {
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
   specialFunctionEffects(env, op.str3);

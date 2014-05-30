@@ -1,5 +1,7 @@
 NEXT
  - All numeric comparisons involving NAN, except != and !==, are now false.
+ - Interface requirements (similar to trait requirements) enforced
+ - Initial support for PHP5.6 argument unpacking: f($x, $y, ...$args)
 
 "Mos Def" 11-Jun-2014
  - Turn on new tracelet region selector by default; analyze() is deprecated

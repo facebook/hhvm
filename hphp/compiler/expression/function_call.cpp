@@ -119,14 +119,10 @@ int FunctionCall::getKidCount() const {
 }
 
 bool FunctionCall::hasUnpack() const {
-  auto const numParams = m_params ? m_params->getCount() : 0;
-  if (numParams > 0) {
-    auto const lastParam = (*m_params)[numParams - 1];
-    // if there are multiple unpacks, they still need to be at the end
-    // of the list.
-    return lastParam->hasContext(Expression::UnpackParameter);
-  }
-  return false;
+  // NOTE: hasContext(Expression::UnpackParameter) on the last parameter
+  // does not work in RepoAuthoritative mode due to contexts being cleared
+  // and copied as part of whole program optimizations
+  return m_params && m_params->containsUnpack();
 }
 
 void FunctionCall::setNthKid(int n, ConstructPtr cp) {

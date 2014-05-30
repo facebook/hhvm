@@ -1,0 +1,21 @@
+
+Warning: Only containers may be unpacked in %s/unpack_call_invalid_arg.php on line 10
+f
+string(1) "a"
+string(1) "b"
+array(0) {
+}
+
+Warning: Only containers may be unpacked in %s/unpack_call_invalid_arg.php on line 12
+f
+string(1) "a"
+string(1) "b"
+array(0) {
+}
+
+Warning: Only containers may be unpacked in %s/unpack_call_invalid_arg.php on line 15
+f
+string(1) "a"
+string(1) "b"
+array(0) {
+}

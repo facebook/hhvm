@@ -276,7 +276,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
 // manipulations
 
 String Array::toString() const {
-  if (m_px == nullptr) return "";
+  if (m_px == nullptr) return empty_string;
   raise_notice("Array to string conversion");
   return array_string;
 }

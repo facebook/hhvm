@@ -370,7 +370,7 @@ void hh_shared_clear() {
  */
 /*****************************************************************************/
 
-static int htable_add(int64_t* table, unsigned long hash, int64_t value) {
+static int htable_add(uint64_t* table, unsigned long hash, int64_t value) {
   unsigned long slot = hash & (DEP_SIZE - 1);
 
   while(1) {

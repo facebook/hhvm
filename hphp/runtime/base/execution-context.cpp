@@ -245,7 +245,7 @@ String ExecutionContext::obCopyContents() {
       return oss.copy();
     }
   }
-  return "";
+  return empty_string;
 }
 
 String ExecutionContext::obDetachContents() {
@@ -255,7 +255,7 @@ String ExecutionContext::obDetachContents() {
       return oss.detach();
     }
   }
-  return "";
+  return empty_string;
 }
 
 int ExecutionContext::obGetContentLength() {

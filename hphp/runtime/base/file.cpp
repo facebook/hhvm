@@ -77,13 +77,13 @@ String File::TranslatePathKeepRelative(const String& filename) {
 
     // disallow access with an absolute path
     if (canonicalized.charAt(0) == '/') {
-      return "";
+      return empty_string;
     }
 
     // unresolvable paths are all considered as unsafe
     if (canonicalized.find("..") >= 0) {
       assert(canonicalized.find("..") == 0);
-      return "";
+      return empty_string;
     }
   }
 

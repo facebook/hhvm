@@ -70,6 +70,7 @@ ELSE (WIN32)
   # NO_CMAKE_SYSTEM_PATH prevents CMake from finding 32-bit library on 64-bit arch (issue #1531)
   FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r
     PATHS
+    $ENV{MYSQL_DIR}/libmysql_r/.libs
     $ENV{MYSQL_DIR}/${LIB_DIR}
     $ENV{MYSQL_DIR}/${LIB_DIR}/mysql
     /usr/${LIB_DIR}/mysql

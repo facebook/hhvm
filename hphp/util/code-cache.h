@@ -77,6 +77,9 @@ struct CodeCache {
     return const_cast<CodeCache&>(*this).frozen();
   }
 
+  const CodeBlock& realCold()   const { return m_cold;   }
+  const CodeBlock& realFrozen() const { return m_frozen; }
+
   DataBlock& data() { return m_data; }
 
   // Read-only access for MCGenerator::dumpTCCode()

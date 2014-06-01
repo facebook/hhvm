@@ -85,20 +85,23 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
                                                                     frozenCode,
                                                                     mcg,
                                                                     state));
-
-  BCMarker prevMarker;
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
-    // If we're on the first instruction of the block or we have a new
-    // marker since the last instruction, update the bc mapping.
-    if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        (mcg->tx().isTransDBEnabled() ||
-        RuntimeOption::EvalJitUseVtuneAPI) && bcMap) {
-      bcMap->push_back(TransBCMapping{inst->marker().func()->unit()->md5(),
-                                      inst->marker().bcOff(),
-                                      cb.frontier(),
-                                      coldCode.frontier()});
-      prevMarker = inst->marker();
+    if (bcMap &&
+        (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI)) {
+      // Don't insert an entry in bcMap if the marker corresponds to
+      // last entry in there.
+      if (bcMap->empty() ||
+          bcMap->back().md5 != inst->marker().func()->unit()->md5() ||
+          bcMap->back().bcStart != inst->marker().bcOff()) {
+        mcg->code.unlock(); // to access code.main() below. relocked below
+        bcMap->push_back(TransBCMapping{inst->marker().func()->unit()->md5(),
+                                        inst->marker().bcOff(),
+                                        mcg->code.main().frontier(),
+                                        mcg->code.realCold().frontier(),
+                                        mcg->code.realFrozen().frontier()});
+        mcg->code.lock();
+      }
     }
     auto* start = cb.frontier();
     cg->cgInst(inst);

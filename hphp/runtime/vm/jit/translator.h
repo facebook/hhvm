@@ -243,6 +243,7 @@ struct TransBCMapping {
   Offset bcStart;
   TCA    aStart;
   TCA    acoldStart;
+  TCA    afrozenStart;
 };
 
 /*
@@ -261,6 +262,8 @@ struct TransRec {
   uint32_t               aLen;
   TCA                    acoldStart;
   uint32_t               acoldLen;
+  TCA                    afrozenStart;
+  uint32_t               afrozenLen;
   std::vector<TransBCMapping>
                          bcMapping;
 
@@ -273,7 +276,9 @@ struct TransRec {
            TCA         _aStart = 0,
            uint32_t    _aLen = 0,
            TCA         _acoldStart = 0,
-           uint32_t    _acoldLen = 0)
+           uint32_t    _acoldLen = 0,
+           TCA         _afrozenStart = 0,
+           uint32_t    _afrozenLen = 0)
       : id(0)
       , kind(_kind)
       , src(s)
@@ -284,19 +289,23 @@ struct TransRec {
       , aLen(_aLen)
       , acoldStart(_acoldStart)
       , acoldLen(_acoldLen)
+      , afrozenStart(_afrozenStart)
+      , afrozenLen(_afrozenLen)
     { }
 
-  TransRec(SrcKey                   s,
-           MD5                      _md5,
-           std::string              _funcName,
-           TransKind                _kind,
-           const Tracelet*          t,
-           TCA                      _aStart = 0,
-           uint32_t                 _aLen = 0,
-           TCA                      _acoldStart = 0,
-           uint32_t                 _acoldLen = 0,
-           std::vector<TransBCMapping>  _bcMapping =
-             std::vector<TransBCMapping>());
+  TransRec(SrcKey                      s,
+           MD5                         _md5,
+           std::string                 _funcName,
+           TransKind                   _kind,
+           const Tracelet*             t,
+           TCA                         _aStart = 0,
+           uint32_t                    _aLen = 0,
+           TCA                         _acoldStart = 0,
+           uint32_t                    _acoldLen = 0,
+           TCA                         _afrozenStart = 0,
+           uint32_t                    _afrozenLen = 0,
+           std::vector<TransBCMapping> _bcMapping =
+                                                 std::vector<TransBCMapping>());
 
   void setID(TransID newID) { id = newID; }
   std::string print(uint64_t profCount) const;

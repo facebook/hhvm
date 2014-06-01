@@ -377,8 +377,9 @@ MCGenerator::createTranslation(const TranslArgs& args) {
 
   // We put retranslate requests at the end of our slab to more frequently
   //   allow conditional jump fall-throughs
-  TCA astart = code.main().frontier();
-  TCA coldstart = code.cold().frontier();
+  TCA astart          = code.main().frontier();
+  TCA realColdStart   = code.realCold().frontier();
+  TCA realFrozenStart = code.realFrozen().frontier();
   TCA req = emitServiceReq(code.cold(), REQ_RETRANSLATE, sk.offset());
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
@@ -387,12 +388,14 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   sr->setAnchorTranslation(req);
 
   size_t asize = code.main().frontier() - astart;
-  size_t coldsize = code.cold().frontier() - coldstart;
+  size_t realColdSize   = code.realCold().frontier()   - realColdStart;
+  size_t realFrozenSize = code.realFrozen().frontier() - realFrozenStart;
   assert(asize == 0);
-  if (coldsize && RuntimeOption::EvalDumpTCAnchors) {
+  if (realColdSize && RuntimeOption::EvalDumpTCAnchors) {
     TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),
                 TransKind::Anchor,
-                astart, asize, coldstart, coldsize);
+                astart, asize, realColdStart, realColdSize,
+                realFrozenStart, realFrozenSize);
     m_tx.addTranslation(tr);
     if (RuntimeOption::EvalJitUseVtuneAPI) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
@@ -402,7 +405,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
       m_tx.profData()->addTransNonProf(TransKind::Anchor, sk);
     }
     assert(!m_tx.isTransDBEnabled() ||
-           m_tx.getTransRec(coldstart)->kind == TransKind::Anchor);
+           m_tx.getTransRec(realColdStart)->kind == TransKind::Anchor);
   }
 
   return retranslate(args);
@@ -652,7 +655,8 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   // prologues, this is just a possible prologue.
   TCA aStart    = code.main().frontier();
   TCA start     = aStart;
-  TCA coldStart = code.cold().frontier();
+  TCA realColdStart   = mcg->code.realCold().frontier();
+  TCA realFrozenStart = mcg->code.realFrozen().frontier();
 
   auto const skFuncBody = [&] {
     assert(m_fixups.empty());
@@ -673,8 +677,10 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
          m_tx.mode() == TransKind::Proflogue);
   TransRec tr(skFuncBody, func->unit()->md5(),
               skFuncBody.func()->fullName()->data(),
-              m_tx.mode(), aStart, code.main().frontier() - aStart,
-              coldStart, code.cold().frontier() - coldStart);
+              m_tx.mode(),
+              aStart,          code.main().frontier()       - aStart,
+              realColdStart,   code.realCold().frontier()   - realColdStart,
+              realFrozenStart, code.realFrozen().frontier() - realFrozenStart);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
@@ -1729,6 +1735,9 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   TCA        start             = code.main().frontier();
   TCA        coldStart         = code.cold().frontier();
+  TCA        realColdStart     = code.realCold().frontier();
+  TCA DEBUG_ONLY frozenStart   = code.frozen().frontier();
+  TCA        realFrozenStart   = code.realFrozen().frontier();
   SrcRec&    srcRec            = *m_tx.getSrcRec(sk);
   TransKind  transKindToRecord = TransKind::Interp;
   UndoMarker undoA(code.main());
@@ -1748,7 +1757,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   auto assertCleanState = [&] {
     assert(code.main().frontier() == start);
-    assert(code.cold().frontier() == coldStart);
+    assert(code.frozen().frontier() == frozenStart);
     assert(m_fixups.empty());
     assert(m_bcMap.empty());
     assert(srcRec.inProgressTailJumps().empty());
@@ -1912,9 +1921,10 @@ MCGenerator::translateWork(const TranslArgs& args) {
   m_fixups.process();
 
   TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),
-              transKindToRecord, tp.get(), start,
-              code.main().frontier() - start, coldStart,
-              code.cold().frontier() - coldStart,
+              transKindToRecord, tp.get(),
+              start,           code.main().frontier()       - start,
+              realColdStart,   code.realCold().frontier()   - realColdStart,
+              realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
               m_bcMap);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
@@ -2425,6 +2435,7 @@ bool MCGenerator::dumpTCCode(const char* filename) {
   OPEN_FILE(aFile,          "_a");
   OPEN_FILE(aprofFile,      "_aprof");
   OPEN_FILE(acoldFile,      "_acold");
+  OPEN_FILE(afrozenFile,    "_afrozen");
   OPEN_FILE(helperAddrFile, "_helpers_addrs.txt");
 
 #undef OPEN_FILE
@@ -2440,6 +2451,10 @@ bool MCGenerator::dumpTCCode(const char* filename) {
   if (result) {
     count = code.cold().used();
     result = (fwrite(code.cold().base(), 1, count, acoldFile) == count);
+  }
+  if (result) {
+    count = code.frozen().used();
+    result = (fwrite(code.frozen().base(), 1, count, afrozenFile) == count);
   }
   if (result) {
     for (auto const& pair : m_trampolineMap) {
@@ -2476,17 +2491,20 @@ bool MCGenerator::dumpTCData() {
   if (!tcDataFile) return false;
 
   if (!gzprintf(tcDataFile,
-                "repo_schema     = %s\n"
-                "a.base          = %p\n"
-                "a.frontier      = %p\n"
-                "aprof.base      = %p\n"
-                "aprof.frontier  = %p\n"
-                "acold.base      = %p\n"
-                "acold.frontier  = %p\n\n",
+                "repo_schema      = %s\n"
+                "a.base           = %p\n"
+                "a.frontier       = %p\n"
+                "aprof.base       = %p\n"
+                "aprof.frontier   = %p\n"
+                "acold.base       = %p\n"
+                "acold.frontier   = %p\n"
+                "afrozen.base     = %p\n"
+                "afrozen.frontier = %p\n\n",
                 kRepoSchemaId,
                 code.trampolines().base(), code.main().frontier(),
                 code.prof().base(), code.prof().frontier(),
-                code.cold().base(), code.frozen().frontier())) {
+                code.cold().base(), code.cold().frontier(),
+                code.frozen().base(), code.frozen().frontier())) {
     return false;
   }
 
@@ -2498,7 +2516,7 @@ bool MCGenerator::dumpTCData() {
   for (TransID t = 0; t < m_tx.getCurrentTransID(); t++) {
     if (gzputs(tcDataFile,
                m_tx.getTransRec(t)->print(m_tx.getTransCounter(t)).c_str()) ==
-         -1) {
+        -1) {
       return false;
     }
   }

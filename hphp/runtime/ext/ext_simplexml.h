@@ -79,7 +79,7 @@ class c_SimpleXMLElement :
   public: Object t_children(const String& ns = "", bool is_prefix = false);
   public: String t_getname();
   public: Object t_attributes(const String& ns = "", bool is_prefix = false);
-  public: Variant t_addchild(const String& qname, const String& value = null_string, const String& ns = null_string);
+  public: Variant t_addchild(const String& qname, const String& value = null_string, const Variant& ns = null_string);
   public: void t_addattribute(const String& qname, const String& value = null_string, const String& ns = null_string);
   public: String t___tostring();
   public: Variant t___get(Variant name);

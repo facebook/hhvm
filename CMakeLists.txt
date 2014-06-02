@@ -8,7 +8,7 @@ ENDIF()
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")
-  message(FATAL_ERROR "third-party/CMakeLists.txt missing."
+  message(FATAL_ERROR "third-party/CMakeLists.txt missing. "
                       "Try updating your submodule with:
 rm -r third-party
 git submodule update --init --recursive

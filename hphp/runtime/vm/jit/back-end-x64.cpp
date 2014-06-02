@@ -414,6 +414,18 @@ struct BackEnd : public JIT::BackEnd {
       }
     }
 
+    for (auto& tbc : fixups.m_bcMap) {
+      if (TCA adjusted = rel.adjustedAddress(tbc.aStart)) {
+        tbc.aStart = adjusted;
+      }
+      if (TCA adjusted = rel.adjustedAddress(tbc.acoldStart)) {
+        tbc.acoldStart = adjusted;
+      }
+      if (TCA adjusted = rel.adjustedAddress(tbc.afrozenStart)) {
+        tbc.afrozenStart = adjusted;
+      }
+    }
+
     std::set<TCA> updated;
     for (auto addrImm : fixups.m_addressImmediates) {
       if (TCA adjusted = rel.adjustedAddress(addrImm)) {

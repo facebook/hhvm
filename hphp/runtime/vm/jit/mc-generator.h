@@ -89,6 +89,17 @@ struct CodeGenFixups {
   std::vector<TCA> m_reusedStubs;
   std::set<TCA> m_addressImmediates;
   std::set<TCA*> m_codePointers;
+  std::vector<TransBCMapping> m_bcMap;
+
+  CodeBlock* m_tletMain{nullptr};
+  CodeBlock* m_tletCold{nullptr};
+  CodeBlock* m_tletFrozen{nullptr};
+
+  void setBlocks(CodeBlock* main, CodeBlock* cold, CodeBlock* frozen) {
+    m_tletMain = main;
+    m_tletCold = cold;
+    m_tletFrozen = frozen;
+  }
 
   void process();
   bool empty() const;
@@ -344,7 +355,6 @@ private:
   FixupMap           m_fixupMap;
   UnwindInfoHandle   m_unwindRegistrar;
   CatchTraceMap      m_catchTraceMap;
-  std::vector<TransBCMapping> m_bcMap;
   Debug::DebugInfo   m_debugInfo;
   FreeStubList       m_freeStubs;
   CodeGenFixups      m_fixups;

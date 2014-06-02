@@ -83,13 +83,12 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
       if (bcMap->empty() ||
           bcMap->back().md5 != inst->marker().func()->unit()->md5() ||
           bcMap->back().bcStart != inst->marker().bcOff()) {
-        mcg->code.unlock(); // to access code.main() below. relocked below
-        bcMap->push_back(TransBCMapping{inst->marker().func()->unit()->md5(),
-                                        inst->marker().bcOff(),
-                                        mcg->code.main().frontier(),
-                                        mcg->code.realCold().frontier(),
-                                        mcg->code.realFrozen().frontier()});
-        mcg->code.lock();
+        bcMap->push_back(TransBCMapping{
+            inst->marker().func()->unit()->md5(),
+            inst->marker().bcOff(),
+            mcg->cgFixups().m_tletMain->frontier(),
+            mcg->cgFixups().m_tletCold->frontier(),
+            mcg->cgFixups().m_tletFrozen->frontier()});
       }
     }
     auto* start = cb.frontier();
@@ -100,11 +99,10 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
   }
 }
 
-void genCodeImpl(IRUnit& unit,
-                 std::vector<TransBCMapping>* bcMap,
-                 JIT::MCGenerator* mcg,
-                 const RegAllocInfo& regs,
-                 AsmInfo* asmInfo) {
+static void genCodeImpl(IRUnit& unit,
+                        JIT::MCGenerator* mcg,
+                        const RegAllocInfo& regs,
+                        AsmInfo* asmInfo) {
   LiveRegs live_regs = computeLiveRegs(unit, regs);
   CodegenState state(unit, regs, live_regs, asmInfo);
 
@@ -163,10 +161,16 @@ void genCodeImpl(IRUnit& unit,
   auto frozenStart = frozenCode->frontier();
   auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
   auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
+  auto bcMap = &mcg->cgFixups().m_bcMap;
 
   {
     mcg->code.lock();
-    SCOPE_EXIT { mcg->code.unlock(); };
+    mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
+
+    SCOPE_EXIT {
+      mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
+      mcg->code.unlock();
+    };
 
     /*
      * Emit the given block on the supplied assembler.  The `nextLinear'
@@ -290,17 +294,17 @@ void genCodeImpl(IRUnit& unit,
   }
 }
 
-void genCode(IRUnit& unit, std::vector<TransBCMapping>* bcMap,
+void genCode(IRUnit& unit,
              JIT::MCGenerator* mcg,
              const RegAllocInfo& regs) {
   Timer _t(Timer::codeGen);
 
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    genCodeImpl(unit, bcMap, mcg, regs, &ai);
+    genCodeImpl(unit, mcg, regs, &ai);
     printUnit(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
   } else {
-    genCodeImpl(unit, bcMap, mcg, regs, nullptr);
+    genCodeImpl(unit, mcg, regs, nullptr);
   }
 }
 

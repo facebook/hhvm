@@ -97,7 +97,6 @@ struct CodegenState {
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);
 
 void genCode(IRUnit&                 unit,
-             std::vector<TransBCMapping>* bcMap,
              MCGenerator*            mcg,
              const RegAllocInfo&     regs);
 

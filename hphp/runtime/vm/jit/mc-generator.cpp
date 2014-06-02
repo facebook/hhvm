@@ -1700,6 +1700,7 @@ CodeGenFixups::process() {
   m_reusedStubs.clear();
   m_addressImmediates.clear();
   m_codePointers.clear();
+  m_bcMap.clear();
 }
 
 void CodeGenFixups::clear() {
@@ -1709,6 +1710,7 @@ void CodeGenFixups::clear() {
   m_reusedStubs.clear();
   m_addressImmediates.clear();
   m_codePointers.clear();
+  m_bcMap.clear();
 }
 
 bool CodeGenFixups::empty() const {
@@ -1718,7 +1720,8 @@ bool CodeGenFixups::empty() const {
     m_pendingJmpTransIDs.empty() &&
     m_reusedStubs.empty() &&
     m_addressImmediates.empty() &&
-    m_codePointers.empty();
+    m_codePointers.empty() &&
+    m_bcMap.empty();
 }
 
 void
@@ -1748,7 +1751,6 @@ MCGenerator::translateWork(const TranslArgs& args) {
     undoAfrozen.undo();
     undoGlobalData.undo();
     m_fixups.clear();
-    m_bcMap.clear();
     srcRec.clearInProgressTailJumps();
   };
 
@@ -1756,7 +1758,6 @@ MCGenerator::translateWork(const TranslArgs& args) {
     assert(code.main().frontier() == start);
     assert(code.frozen().frontier() == frozenStart);
     assert(m_fixups.empty());
-    assert(m_bcMap.empty());
     assert(srcRec.inProgressTailJumps().empty());
   };
 
@@ -1915,19 +1916,17 @@ MCGenerator::translateWork(const TranslArgs& args) {
     // Fall through.
   }
 
-  m_fixups.process();
-
   TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),
               transKindToRecord, tp.get(),
               start,           code.main().frontier()       - start,
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
-              m_bcMap);
+              m_fixups.m_bcMap);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
-  m_bcMap.clear();
+  m_fixups.process();
 
   recordGdbTranslation(sk, sk.func(), code.main(), start,
                        false, false);
@@ -2146,7 +2145,7 @@ void MCGenerator::traceCodeGen() {
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier(), false);
-  genCode(unit, &m_bcMap, this, regs);
+  genCode(unit, this, regs);
 
   m_numHHIRTrans++;
 }

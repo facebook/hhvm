@@ -1191,7 +1191,7 @@ and assign p env e1 ty2 =
       let env, folded_ety2 = Env.expand_type env folded_ty2 in
       (match folded_ety2 with
       | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
-          let env, ty2 = Typing_tdef.expand_typedef SSet.empty env r x argl in
+          let env, ty2 = Typing_tdef.expand_typedef env r x argl in
           assign p env e1 ty2
       | r, Tapply ((_, ("\\Vector" | "\\ImmVector")), [elt_type])
       | r, Tarray (_, Some elt_type, None) ->
@@ -1615,7 +1615,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       then error_array p ety1
       else env, (Reason.Rnone, Tany)
   | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
-      let env, ty1 = Typing_tdef.expand_typedef SSet.empty env (fst ety1) x argl in
+      let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       let env, ety1 = Env.expand_type env ty1 in
       array_get is_lvalue p env ty1 ety1 e2 ty2
   | _ -> error_array p ety1
@@ -1642,7 +1642,7 @@ and array_append is_lvalue p env ty1 =
       then error_array_append p ety1
       else env, (Reason.Rnone, Tany)
   | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
-      let env, ty1 = Typing_tdef.expand_typedef SSet.empty env (fst ety1) x argl in
+      let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       array_append is_lvalue p env ty1
   | _ when !is_silent_mode ->
       env, (Reason.Rnone, Tany)
@@ -1707,7 +1707,7 @@ and class_get ~is_method ~is_const env cty (p, mid) cid =
 and class_get_ ~is_method ~is_const env cty (p, mid) cid =
   match cty with
   | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
-      let env, cty = Typing_tdef.expand_typedef SSet.empty env r x argl in
+      let env, cty = Typing_tdef.expand_typedef env r x argl in
       class_get_ ~is_method ~is_const env cty (p, mid) cid
   | _, Tgeneric (_, Some (_, Tapply ((_, c), paraml)))
   | _, Tapply ((_, c), paraml) ->
@@ -1851,7 +1851,7 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
       let k_lhs' ty = k_lhs (p, Tgeneric (x, Some ty)) in
       obj_get_ is_method env ty id k k_lhs'
   | p, Tapply ((_, x) as c, argl) when Typing_env.is_typedef env x ->
-      let env, ty1 = Typing_tdef.expand_typedef SSet.empty env (fst ety1) x argl in
+      let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       let k_lhs' ty = k_lhs (p, Tapply (c, argl)) in
       obj_get_ is_method env ty1 id k k_lhs'
   | _ -> k begin match snd ety1 with
@@ -2172,7 +2172,7 @@ and call_ pos env fty el =
   let env, efty = Env.expand_type env fty in
   (match efty with
   | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
-      let env, fty = Typing_tdef.expand_typedef SSet.empty env r x argl in
+      let env, fty = Typing_tdef.expand_typedef env r x argl in
       call_ pos env fty el
   | _, (Tany | Tunresolved []) ->
       let env, _ = lmap expr env el in
@@ -2374,7 +2374,7 @@ and non_null env ty =
       end tyl [] in
       env, (r, Tunresolved tyl)
   | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
-      let env, ty = Typing_tdef.expand_typedef SSet.empty env r x argl in
+      let env, ty = Typing_tdef.expand_typedef env r x argl in
       non_null env ty
   | r, Tgeneric (x, Some ty) ->
       let env, ty = non_null env ty in

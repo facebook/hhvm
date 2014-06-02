@@ -62,10 +62,10 @@ and sub_type env ty1 ty2 =
   let env, ety2 = Env.expand_type env ty2 in
   match ety1, ety2 with
   | (r, Tapply ((_, x), argl)), _ when Typing_env.is_typedef env x ->
-      let env, ty1 = TDef.expand_typedef SSet.empty env r x argl in
+      let env, ty1 = TDef.expand_typedef env r x argl in
       sub_type env ty1 ty2
   | _, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
-      let env, ty2 = TDef.expand_typedef SSet.empty env r x argl in
+      let env, ty2 = TDef.expand_typedef env r x argl in
       sub_type env ty1 ty2
   | (_, Tunresolved _), (_, Tunresolved _) ->
       let env, _ = Unify.unify env ty1 ty2 in
@@ -278,7 +278,7 @@ and sub_string p env ty2 =
   | (_, Tgeneric (_, Some ty)) ->
       sub_string p env ty
   | (r2, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
-      let env, ty2 = Typing_tdef.expand_typedef SSet.empty env r2 x argl in
+      let env, ty2 = Typing_tdef.expand_typedef env r2 x argl in
       sub_string p env ty2
   | (r2, Tapply (x, _)) ->
       let env, class_ = Env.get_class env (snd x) in

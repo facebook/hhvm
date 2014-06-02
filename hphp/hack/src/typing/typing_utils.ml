@@ -22,7 +22,7 @@ module Env = Typing_env
 let not_implemented _ = failwith "Function not implemented"
 
 type expand_typedef = 
-    SSet.t -> Env.env -> Reason.t -> string -> ty list -> Env.env * ty
+    Env.env -> Reason.t -> string -> ty list -> Env.env * ty
 
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
 let expand_typedef x = !expand_typedef_ref x

@@ -19,7 +19,7 @@ module TUtils = Typing_utils
 (* Expanding type definition *)
 (*****************************************************************************)
 
-let rec expand_typedef seen env r x argl =
+let rec expand_typedef_ seen env r x argl =
   let pos = Reason.to_pos r in
   let env, tdef = Typing_env.get_typedef env x in
   let tdef = match tdef with None -> assert false | Some x -> x in
@@ -88,11 +88,10 @@ and check_typedef seen env (r, t) =
   | Tfun fty ->
       check_fun_typedef seen env fty
   | Tapply ((p, x), argl) when Typing_env.is_typedef env x ->
-      if SSet.mem x seen
+      if seen = x
       then error p "Cyclic typedef"
       else
-        let seen = SSet.add x seen in
-        let env, ty = expand_typedef seen env r x argl in
+        let env, ty = expand_typedef_ seen env r x argl in
         check_typedef seen env ty
   | Tabstract (_, tyl, cstr) ->
       check_typedef_list seen env tyl;
@@ -130,6 +129,8 @@ and check_typedef_tparam seen env (_, x) =
 and check_typedef_opt seen env = function
   | None -> ()
   | Some x -> check_typedef seen env x
+
+let expand_typedef env r x argl = expand_typedef_ x env r x argl
 
 (*****************************************************************************)
 (*****************************************************************************)

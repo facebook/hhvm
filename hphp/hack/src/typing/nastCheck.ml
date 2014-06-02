@@ -756,15 +756,11 @@ and attribute env (_, e) =
   expr env e;
   ()
 
-let typedef tenv (_, params, h) =
+let typedef tenv name (_, params, h) =
   let env = { t_is_gen = ref false;
               t_is_finally = ref false;
               class_name = None; class_kind = None;
               tenv = tenv } in
   hint env h;
-  (match h with
-  | p, Happly ((_, x), _) when Typing_env.is_typedef tenv x ->
-      let tenv, ty = Typing_hint.hint tenv h in
-      Typing_tdef.check_typedef SSet.empty tenv ty;
-      ()
-  | _ -> ())
+  let tenv, ty = Typing_hint.hint tenv h in
+  Typing_tdef.check_typedef name tenv ty

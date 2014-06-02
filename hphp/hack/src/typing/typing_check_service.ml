@@ -54,10 +54,16 @@ let check_typedef x =
         let _, args, hint as typedef = Naming_heap.TypedefHeap.find_unsafe x in
         let filename = Pos.filename (fst hint) in
         let tenv = Typing_env.empty filename in
+        (* Mode for typedefs themselves doesn't really matter right now, but
+         * they can expand hints, so make it loose so that the typedef doesn't
+         * fail. (The hint will get re-checked with the proper mode anyways.)
+         * Ideally the typedef would carry the right mode with it, but it's a
+         * slightly larger change than I want to deal with right now. *)
+        let tenv = Typing_env.set_mode tenv Ast.Mdecl in
         let tenv = Typing_env.set_root tenv (Typing_deps.Dep.Class x) in
         (* TODO It's pretty ugly that this try/catch is here whereas the others
          * are in Typing.fun_def and friends. *)
-        try NastCheck.typedef tenv typedef with Typing_defs.Ignore -> ()
+        try NastCheck.typedef tenv x typedef with Typing_defs.Ignore -> ()
     )
   with Not_found ->
     ()

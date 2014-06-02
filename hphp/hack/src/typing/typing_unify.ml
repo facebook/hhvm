@@ -63,10 +63,10 @@ let rec unify env ty1 ty2 =
    * is a typedef it won't get expanded. So we need an explicit check for both.
    *)
   | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef env x ->
-      let env, ty1 = TDef.expand_typedef SSet.empty env r x argl in
+      let env, ty1 = TDef.expand_typedef env r x argl in
       unify env ty1 ty2
   | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
-      let env, ty1 = TDef.expand_typedef SSet.empty env r x argl in
+      let env, ty1 = TDef.expand_typedef env r x argl in
       unify env ty1 ty2
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in

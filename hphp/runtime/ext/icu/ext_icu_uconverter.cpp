@@ -104,10 +104,10 @@ static void ucnvToUCallback(ObjectData *objval,
   if (MemoryManager::sweeping()) return;
   auto data = Native::data<IntlUConverter>(objval);
   String source(args->source, args->sourceLimit - args->source, CopyString);
-  Variant errRef((int64_t)*pErrorCode);
+  Variant errRef(RefData::Make(make_tv<KindOfInt64>(*pErrorCode)));
   Variant ret = objval->o_invoke_few_args(
     s_toUCallback, 4,
-    reason, source, String(codeUnits, length, CopyString), strongBind(errRef));
+    reason, source, String(codeUnits, length, CopyString), errRef);
   if (errRef.is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)errRef.toInt64();
   } else {
@@ -165,11 +165,11 @@ static void ucnvFromUCallback(ObjectData *objval,
     U16_NEXT(codeUnits, i, length, c);
     source.append((int64_t)c);
   }
-  Variant errRef((int64_t)*pErrorCode);
+  Variant errRef(RefData::Make(make_tv<KindOfInt64>(*pErrorCode)));
   Variant ret =
     objval->o_invoke_few_args(
       s_fromUCallback, 4,
-      reason, source, (int64_t)codePoint, strongBind(errRef));
+      reason, source, (int64_t)codePoint, errRef);
   if (errRef.is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)errRef.toInt64();
   } else {

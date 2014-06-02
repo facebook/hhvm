@@ -70,6 +70,7 @@ struct Variant : private TypedValue {
   enum class CellCopy {};
   enum class CellDup {};
   enum class ArrayInitCtor {};
+  enum class StrongBind {};
 
   Variant() { m_type = KindOfUninit; }
   explicit Variant(NullInit) { m_type = KindOfNull; }
@@ -103,8 +104,6 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(ObjectData *v);
   /* implicit */ Variant(ResourceData *v);
   /* implicit */ Variant(RefData *r);
-
-  /* implicit */ Variant(CVarStrongBind v);
 
   /*
    * Creation constructor from ArrayInit that avoids a null check.
@@ -155,6 +154,8 @@ struct Variant : private TypedValue {
       m_data.pstr->incRefCount();
     }
   }
+
+  Variant(Variant& v, StrongBind) { constructRefHelper(v); }
 
   Variant& operator=(const Variant& v) {
     return assign(v);
@@ -965,7 +966,8 @@ public:
   template <class T> /* implicit */ VRefParamValue(const T &v) : m_var(v) {}
 
   /* implicit */ VRefParamValue() : m_var(Variant::NullInit()) {}
-  /* implicit */ VRefParamValue(RefResult v) : m_var(strongBind(v)) {}
+  /* implicit */ VRefParamValue(RefResult v)
+    : m_var(const_cast<Variant&>(variant(v)), Variant::StrongBind{}) {} // XXX
   template <typename T>
   Variant &operator=(const T &v) const {
     m_var = v;
@@ -983,7 +985,7 @@ public:
 
   explicit operator bool   () const { return m_var.toBoolean();}
   operator int    () const { return m_var.toInt32();}
-  operator int64_t  () const { return m_var.toInt64();}
+  operator int64_t() const { return m_var.toInt64();}
   operator double () const { return m_var.toDouble();}
   operator String () const { return m_var.toString();}
   operator Array  () const { return m_var.toArray();}
@@ -1016,11 +1018,6 @@ private:
 inline VRefParam directRef(const Variant& v) {
   return *(VRefParamValue*)&v;
 }
-
-/*
-  this class is just to help choose the correct overload.
-*/
-class VariantStrongBind { private: Variant m_var; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR

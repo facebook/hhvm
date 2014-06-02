@@ -208,10 +208,6 @@ Variant::Variant(const Variant& v) {
   constructValHelper(v);
 }
 
-Variant::Variant(CVarStrongBind v) {
-  constructRefHelper(const_cast<Variant&>(variant(v))); // XXX
-}
-
 /*
  * The destruct functions below all arbitrarily take RefData* as an
  * example of a refcounted object, then just cast to the proper type.

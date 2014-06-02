@@ -485,7 +485,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v1("original");
-    Variant v2 = strongBind(v1);
+    Variant v2(v1, Variant::StrongBind{});
     v2 = String("changed");
     VERIFY(equal(v1, String("changed")));
   }

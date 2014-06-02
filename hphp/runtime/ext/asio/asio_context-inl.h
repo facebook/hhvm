@@ -31,11 +31,11 @@ uint32_t AsioContext::registerTo(smart::vector<TWaitHandle*>& vec,
 
 template <class TWaitHandle>
 void AsioContext::unregisterFrom(smart::vector<TWaitHandle*>& vec,
-                                 uint32_t ev_idx) {
-  assert(ev_idx < vec.size());
-  if (ev_idx != vec.size() - 1) {
-    vec[ev_idx] = vec.back();
-    vec[ev_idx]->setIndex(ev_idx);
+                                 uint32_t idx) {
+  assert(idx < vec.size());
+  if (idx != vec.size() - 1) {
+    vec[idx] = vec.back();
+    vec[idx]->setContextVectorIndex(idx);
   }
   vec.pop_back();
 }

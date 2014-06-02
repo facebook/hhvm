@@ -171,12 +171,12 @@ void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
 
 void c_ExternalThreadEventWaitHandle::registerToContext() {
   AsioContext *ctx = getContext();
-  m_index = ctx->registerTo(ctx->getExternalThreadEvents(), this);
+  m_ctxVecIndex = ctx->registerTo(ctx->getExternalThreadEvents(), this);
 }
 
 void c_ExternalThreadEventWaitHandle::unregisterFromContext() {
   AsioContext *ctx = getContext();
-  ctx->unregisterFrom(ctx->getExternalThreadEvents(), m_index);
+  ctx->unregisterFrom(ctx->getExternalThreadEvents(), m_ctxVecIndex);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -117,6 +117,9 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   void setKindState(Kind kind, uint8_t state) {
     o_subclassData.u8[0] = toKindState(kind, state);
   }
+  void setContextVectorIndex(uint32_t idx) {
+    m_ctxVecIndex = idx;
+  }
 
   // The code in the TC will depend on the values of these constants.
   // See emitAwait().
@@ -133,8 +136,14 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
       // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
       c_BlockableWaitHandle* m_firstParent;
 
-      // BlockableWaitHandle: STATE_BLOCKED
-      c_BlockableWaitHandle* m_nextParent;
+      union {
+        // BlockableWaitHandle: STATE_BLOCKED
+        c_BlockableWaitHandle* m_nextParent;
+
+        // ExternalThreadEventWaitHandle: STATE_WAITING
+        // SleepWaitHandle: STATE_WAITING
+        uint32_t m_ctxVecIndex;
+      };
     };
   };
 };

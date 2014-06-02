@@ -47,11 +47,6 @@ class c_SleepWaitHandle : public c_WaitableWaitHandle {
   void exitContext(context_idx_t ctx_idx);
   AsioSession::TimePoint getWakeTime() const { return m_waketime; };
 
-  void setIndex(uint32_t ev_idx) {
-    assert(getState() == STATE_WAITING);
-    m_index = ev_idx;
-  }
-
  private:
   void setState(uint8_t state) { setKindState(Kind::Sleep, state); }
   void initialize(int64_t usecs);
@@ -59,7 +54,6 @@ class c_SleepWaitHandle : public c_WaitableWaitHandle {
   void unregisterFromContext();
 
   AsioSession::TimePoint m_waketime;
-  uint32_t m_index;
 
   static const int8_t STATE_WAITING = 2;
 };

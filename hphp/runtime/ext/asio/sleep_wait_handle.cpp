@@ -105,12 +105,12 @@ void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
 
 void c_SleepWaitHandle::registerToContext() {
   AsioContext *ctx = getContext();
-  m_index = ctx->registerTo<c_SleepWaitHandle>(ctx->getSleepEvents(), this);
+  m_ctxVecIndex = ctx->registerTo(ctx->getSleepEvents(), this);
 }
 
 void c_SleepWaitHandle::unregisterFromContext() {
   AsioContext *ctx = getContext();
-  ctx->unregisterFrom<c_SleepWaitHandle>(ctx->getSleepEvents(), m_index);
+  ctx->unregisterFrom(ctx->getSleepEvents(), m_ctxVecIndex);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

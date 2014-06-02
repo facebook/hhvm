@@ -52,7 +52,7 @@ class AsioContext {
     uint32_t registerTo(smart::vector<TWaitHandle*>& vec, TWaitHandle* wh);
 
     template <class TWaitHandle>
-    void unregisterFrom(smart::vector<TWaitHandle*>& vec, uint32_t ev_idx);
+    void unregisterFrom(smart::vector<TWaitHandle*>& vec, uint32_t idx);
 
     smart::vector<c_SleepWaitHandle*>& getSleepEvents() {
       return m_sleepEvents;

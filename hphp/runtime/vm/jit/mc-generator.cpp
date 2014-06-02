@@ -2206,7 +2206,6 @@ void MCGenerator::requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
   PendQ::drain();
-  m_tx.requestResetHighLevelTranslator();
   Treadmill::startRequest();
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
   Stats::init();

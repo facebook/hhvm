@@ -34,7 +34,6 @@
 #include "folly/MapUtil.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/util/biased-coin.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
@@ -74,7 +73,6 @@ TRACE_SET_MOD(trans);
 namespace HPHP {
 namespace JIT {
 
-static __thread BiasedCoin *dbgTranslateCoin;
 Lease Translator::s_writeLease;
 
 struct TraceletContext {
@@ -2507,13 +2505,6 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
             dl->location.spaceName(), dl->location.offset);
     assert(dl->location.isStack());
     ni->outStack = dl;
-  }
-}
-
-void
-Translator::requestResetHighLevelTranslator() {
-  if (dbgTranslateCoin) {
-    dbgTranslateCoin->reset();
   }
 }
 

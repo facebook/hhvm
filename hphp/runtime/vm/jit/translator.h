@@ -455,8 +455,6 @@ public:
   void traceEnd();
   void traceFree();
 
-  void requestResetHighLevelTranslator();
-
 public:
   /* translateRegion reads from the RegionBlacklist to determine when
    * to interpret an instruction, and adds failed instructions to the

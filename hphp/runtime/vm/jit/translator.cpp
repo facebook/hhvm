@@ -4124,6 +4124,7 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       if (isFirstRegionInstr) {
+        ht.endGuards();
         if (RuntimeOption::EvalJitTransCounters) {
           ht.emitIncTransCounter();
         }
@@ -4343,8 +4344,8 @@ void Translator::addTranslation(const TransRec& transRec) {
 
   if (!isTransDBEnabled()) return;
   uint32_t id = getCurrentTransID();
-  m_translations.push_back(transRec);
-  m_translations[id].setID(id);
+  m_translations.emplace_back(transRec);
+  m_translations[id].id = id;
 
   if (transRec.aLen > 0) {
     m_transDB[transRec.aStart] = id;
@@ -4390,86 +4391,6 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
   }
 };
 
-}
-
-TransRec::TransRec(SrcKey                      s,
-                   MD5                         _md5,
-                   std::string                 _funcName,
-                   TransKind                   _kind,
-                   const Tracelet*             t,
-                   TCA                         _aStart,
-                   uint32_t                    _aLen,
-                   TCA                         _acoldStart,
-                   uint32_t                    _acoldLen,
-                   TCA                         _afrozenStart,
-                   uint32_t                    _afrozenLen,
-                   std::vector<TransBCMapping> _bcMapping)
-    : id(0)
-    , kind(_kind)
-    , src(s)
-    , md5(_md5)
-    , funcName(_funcName)
-    , bcStopOffset(t ? t->nextSk().offset() : 0)
-    , aStart(_aStart)
-    , aLen(_aLen)
-    , acoldStart(_acoldStart)
-    , acoldLen(_acoldLen)
-    , afrozenStart(_afrozenStart)
-    , afrozenLen(_afrozenLen)
-    , bcMapping(_bcMapping) {
-  if (t != nullptr) {
-    for (auto dep : t->m_dependencies) {
-      dependencies.push_back(*dep.second);
-    }
-  }
-}
-
-
-std::string
-TransRec::print(uint64_t profCount) const {
-  std::string ret;
-
-  // Split up the call to prevent template explosion
-  ret += folly::format(
-           "Translation {} {{\n"
-           "  src.md5 = {}\n"
-           "  src.funcId = {}\n"
-           "  src.funcName = {}\n"
-           "  src.startOffset = {}\n"
-           "  src.stopOffset = {}\n"
-           "  src.resumed = {}\n",
-           id, md5, src.getFuncId(),
-           funcName.empty() ? "Pseudo-main" : funcName,
-           src.offset(), bcStopOffset,
-           (int32_t)src.resumed()).str();
-
-  ret += folly::format(
-           "  kind = {} ({})\n"
-           "  aStart = {}\n"
-           "  aLen = {:#x}\n"
-           "  coldStart = {}\n"
-           "  coldLen = {:#x}\n"
-           "  frozenStart = {}\n"
-           "  frozenLen = {:#x}\n",
-           static_cast<uint32_t>(kind), show(kind),
-           aStart, aLen,
-           acoldStart, acoldLen,
-           afrozenStart, afrozenLen).str();
-
-  ret += folly::format(
-           "  profCount = {}\n"
-           "  bcMapping = {}\n",
-           profCount, bcMapping.size()).str();
-
-  for (auto const& info : bcMapping) {
-    ret += folly::format(
-      "    {} {} {} {} {}\n",
-      info.md5, info.bcStart,
-      info.aStart, info.acoldStart, info.afrozenStart).str();
-  }
-
-  ret += "}\n\n";
-  return ret;
 }
 
 void

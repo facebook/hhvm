@@ -104,6 +104,7 @@ struct HhbcTranslator {
   void guardRefs(int64_t entryArDelta,
                  const std::vector<bool>& mask,
                  const std::vector<bool>& vals);
+  void endGuards();
 
   // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32_t localIndex, Type type);

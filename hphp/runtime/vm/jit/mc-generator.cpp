@@ -389,7 +389,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   size_t realFrozenSize = code.realFrozen().frontier() - realFrozenStart;
   assert(asize == 0);
   if (realColdSize && RuntimeOption::EvalDumpTCAnchors) {
-    TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),
+    TransRec tr(sk,
                 TransKind::Anchor,
                 astart, asize, realColdStart, realColdSize,
                 realFrozenStart, realFrozenSize);
@@ -672,8 +672,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
 
   assert(m_tx.mode() == TransKind::Prologue ||
          m_tx.mode() == TransKind::Proflogue);
-  TransRec tr(skFuncBody, func->unit()->md5(),
-              skFuncBody.func()->fullName()->data(),
+  TransRec tr(skFuncBody,
               m_tx.mode(),
               aStart,          code.main().frontier()       - aStart,
               realColdStart,   code.realCold().frontier()   - realColdStart,
@@ -1560,8 +1559,8 @@ MCGenerator::reachedTranslationLimit(SrcKey sk,
           SKTRACE(2, sk, "%zd: Anchor\n", i);
         } else {
           SKTRACE(2, sk, "%zd: guards {\n", i);
-          for (unsigned j = 0; j < rec->dependencies.size(); ++j) {
-            TRACE(2, rec->dependencies[j]);
+          for (unsigned j = 0; j < rec->guards.size(); ++j) {
+            FTRACE(2, "{}\n", rec->guards[j]);
           }
           SKTRACE(2, sk, "%zd } guards\n", i);
         }
@@ -1916,18 +1915,6 @@ MCGenerator::translateWork(const TranslArgs& args) {
     // Fall through.
   }
 
-  TransRec tr(sk, sk.unit()->md5(), sk.func()->fullName()->data(),
-              transKindToRecord, tp.get(),
-              start,           code.main().frontier()       - start,
-              realColdStart,   code.realCold().frontier()   - realColdStart,
-              realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
-              m_fixups.m_bcMap);
-  m_tx.addTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportTraceletToVtune(sk.unit(), sk.func(), tr);
-  }
-  m_fixups.process();
-
   recordGdbTranslation(sk, sk.func(), code.main(), start,
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), coldStart,
@@ -1935,7 +1922,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
   if (RuntimeOption::EvalJitPGO) {
     if (transKindToRecord == TransKind::Profile) {
       if (!region) {
-        assert(tp);
+        always_assert(tp);
         region = selectTraceletLegacy(liveSpOff(), *tp);
       }
       m_tx.profData()->addTransProfile(region, pconds);
@@ -1943,6 +1930,19 @@ MCGenerator::translateWork(const TranslArgs& args) {
       m_tx.profData()->addTransNonProf(transKindToRecord, sk);
     }
   }
+
+  TransRec tr(sk, transKindToRecord,
+              start,           code.main().frontier()       - start,
+              realColdStart,   code.realCold().frontier()   - realColdStart,
+              realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
+              region, tp.get(), m_fixups.m_bcMap);
+  m_tx.addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(sk.unit(), sk.func(), tr);
+  }
+
+  m_fixups.process();
+
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
@@ -1977,6 +1977,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
     {
       emitGuardChecks(sk, t.m_resolvedDeps,
         t.m_dependencies, t.m_refDeps, srcRec);
+      ht.endGuards();
 
       dumpTranslationInfo(t, code.main().frontier());
 

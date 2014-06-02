@@ -69,6 +69,7 @@ struct CodegenState {
     , liveRegs(liveRegs)
     , asmInfo(asmInfo)
     , catches(unit, CatchInfo())
+    , pastGuards(false)
   {}
 
   // Each block has a list of addresses to patch, and an address if
@@ -94,6 +95,11 @@ struct CodegenState {
   // Used to pass information about the state of the world at native
   // calls between cgCallHelper and cgBeginCatch.
   StateVector<Block, CatchInfo> catches;
+
+  // Have we progressed past the guards? Used to suppress TransBCMappings until
+  // we're translating code that can properly be attributed to specific
+  // bytecode.
+  bool pastGuards;
 };
 
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);

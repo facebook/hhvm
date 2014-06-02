@@ -1655,9 +1655,8 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
   const auto* it = &m_bc[startOffset];
   int prevLineNum = -1;
   while (it < &m_bc[stopOffset]) {
-    assert(funcIt == funcMap.end() ||
-      funcIt->first >= offsetOf(it));
     if (opts.showFuncs) {
+      assert(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
       if (funcIt != funcMap.end() &&
           funcIt->first == offsetOf(it)) {
         out.put('\n');

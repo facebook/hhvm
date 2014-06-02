@@ -4167,6 +4167,10 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
   }
 }
 
+void HhbcTranslator::endGuards() {
+  gen(EndGuards);
+}
+
 void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
   bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;

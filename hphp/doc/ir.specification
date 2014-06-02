@@ -345,6 +345,11 @@ GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
   If any of the checks fail, make a fallback jump. (Jump to a service request
   that will chain to a retranslation of this tracelet.)
 
+EndGuards
+
+  A no-op at runtime, this instruction serves to mark the end of the initial
+  sequence of guards in a trace.
+
 D:{Func} = CheckNonNull S0:{Nullptr|Func|PtrToGen|TCA} -> B
 
   If the value in S0 is Nullptr, branch to block B.

@@ -665,6 +665,9 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     out << " (ID " << shared()->m_id << ")";
   }
   out << std::endl;
+
+  if (!opts.metadata) return;
+
   const ParamInfoVec& params = shared()->m_params;
   for (uint i = 0; i < params.size(); ++i) {
     if (params[i].funcletOff() != InvalidAbsoluteOffset) {

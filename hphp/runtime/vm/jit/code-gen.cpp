@@ -76,10 +76,12 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
                                                                     state));
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
-    if (bcMap &&
+
+    if (instr.is(EndGuards)) state.pastGuards = true;
+    if (bcMap && state.pastGuards &&
         (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI)) {
-      // Don't insert an entry in bcMap if the marker corresponds to
-      // last entry in there.
+      // Don't insert an entry in bcMap if the marker corresponds to last entry
+      // in there.
       if (bcMap->empty() ||
           bcMap->back().md5 != inst->marker().func()->unit()->md5() ||
           bcMap->back().bcStart != inst->marker().bcOff()) {

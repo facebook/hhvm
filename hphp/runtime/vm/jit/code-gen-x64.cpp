@@ -170,6 +170,7 @@ NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
+NOOP_OPCODE(EndGuards)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)

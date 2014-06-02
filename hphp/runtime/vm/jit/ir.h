@@ -206,6 +206,7 @@ O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CheckLoc,                D(FramePtr), S(FramePtr),                     B|E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                       B|E) \
+O(EndGuards,                        ND, NA,                                E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                      N|Er) \
 O(CastStkIntToDbl,           D(StkPtr), S(StkPtr),                         E) \
 O(CoerceStk,                 D(StkPtr), S(StkPtr),                    B|N|Er) \

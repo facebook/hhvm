@@ -221,7 +221,15 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       stack.discardAR();
     }
   } else if (func->isAsyncFunction()) {
-    // Do nothing. AsyncFunctionWaitHandle will handle the exception.
+    auto const waitHandle = frame_afwh(fp);
+    if (fault.m_faultType == Fault::Type::UserException) {
+      // Handle exception thrown by async function.
+      waitHandle->fail(fault.m_userException);
+      action = UnwindAction::ResumeVM;
+    } else {
+      // Fail the async function and let the C++ exception propagate.
+      waitHandle->fail(AsioSession::Get()->getAbruptInterruptException());
+    }
   } else if (func->isAsyncGenerator()) {
     // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
   } else if (func->isNonAsyncGenerator()) {

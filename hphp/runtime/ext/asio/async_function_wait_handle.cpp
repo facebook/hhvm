@@ -148,28 +148,17 @@ void c_AsyncFunctionWaitHandle::resume() {
     return;
   }
 
-  try {
-    setState(STATE_RUNNING);
+  assert(getState() == STATE_SCHEDULED);
+  assert(m_child->isFinished());
+  setState(STATE_RUNNING);
 
-    // resume async function
-    if (LIKELY(m_child->isSucceeded())) {
-      // child succeeded, pass the result to the async function
-      g_context->resumeAsyncFunc(resumable(), m_child, m_child->getResult());
-    } else if (m_child->isFailed()) {
-      // child failed, raise the exception inside the async function
-      g_context->resumeAsyncFuncThrow(resumable(), m_child,
-                                      m_child->getException());
-    } else {
-      throw FatalErrorException(
-          "Invariant violation: child neither succeeded nor failed");
-    }
-  } catch (const Object& exception) {
-    // process exception thrown by the async function
-    markAsFailed(exception);
-  } catch (...) {
-    // process C++ exception
-    markAsFailed(AsioSession::Get()->getAbruptInterruptException());
-    throw;
+  if (LIKELY(m_child->isSucceeded())) {
+    // child succeeded, pass the result to the async function
+    g_context->resumeAsyncFunc(resumable(), m_child, m_child->getResult());
+  } else {
+    // child failed, raise the exception inside the async function
+    g_context->resumeAsyncFuncThrow(resumable(), m_child,
+                                    m_child->getException());
   }
 }
 
@@ -214,7 +203,7 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
   UnblockChain(parentChain);
 }
 
-void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
+void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnAsyncFunctionFailCallback())) {
     session->onAsyncFunctionFail(this, exception);
@@ -222,7 +211,7 @@ void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
 
   auto const parentChain = getFirstParent();
   setState(STATE_FAILED);
-  tvWriteObject(exception.get(), &m_resultOrException);
+  tvWriteObject(exception, &m_resultOrException);
   UnblockChain(parentChain);
 }
 

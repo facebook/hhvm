@@ -95,8 +95,8 @@ class AsioSession {
     bool processSleepEvents();
 
     // Abrupt interrupt exception.
-    const Object& getAbruptInterruptException() {
-      return m_abruptInterruptException;
+    ObjectData* getAbruptInterruptException() {
+      return m_abruptInterruptException.get();
     }
 
     bool hasAbruptInterruptException() {

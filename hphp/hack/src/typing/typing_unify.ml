@@ -44,6 +44,12 @@ let rec unify env ty1 ty2 =
       let r = unify_reason r1 r2 in
       let env, ty = unify env ty1 ty2 in
       env, (r, Toption ty)
+  (* Mixed is nullable and we want it to unify with both ?T and T at
+   * the same time. If we try to unify mixed with an option,
+   * we peel of the ? and unify mixed with the underlying type. *)
+  | (r2, Tmixed), (_, Toption ty1)
+  | (_, Toption ty1), (r2, Tmixed) ->
+    unify env ty1 (r2, Tmixed)
   | (r1, (Tprim Nast.Tvoid as ty1')), (r2, (Toption ty as ty2')) ->
      (* When we are in async functions, we allow people to write Awaitable<void>
       * and then do yield result(null) *)

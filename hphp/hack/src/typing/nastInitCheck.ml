@@ -140,7 +140,7 @@ module Env = struct
   and cvar acc cv =
     let cname = snd cv.cv_id in
     match cv.cv_type with
-    | Some (_, Hoption _) | None -> acc
+    | Some (_, Hoption _) | Some (_, Hmixed) | None -> acc
     | _ ->
         match cv.cv_expr with
         | Some _ -> acc

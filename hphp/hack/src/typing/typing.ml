@@ -2351,12 +2351,6 @@ and binop p env bop p1 ty1 p2 ty2 =
   | Ast.Eq _ ->
       assert false
 
-
-and dyn_option p x_ty =
-  match x_ty with
-  | _, Tmixed -> Reason.Rwitness p, Toption (Reason.Rwitness p, Tmixed)
-  | _ -> x_ty
-
 and non_null env ty =
   let env, ty = Env.expand_type env ty in
   match ty with
@@ -2392,7 +2386,6 @@ and condition_var_non_null env = function
   | _, Lvar (p, x) ->
       let env, x_ty = Env.get_local env x in
       let env, x_ty = Env.expand_type env x_ty in
-      let x_ty = dyn_option p x_ty in
       let env, x_ty = non_null env x_ty in
       Env.set_local env x x_ty
   | p, Class_get (cname, (_, member_name)) as e ->

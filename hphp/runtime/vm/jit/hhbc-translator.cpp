@@ -3269,11 +3269,15 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
                      callee->methInfo()->parameters[i]->valueLen > 0)) {
           t = Type::NullableObj;
         }
-        gen(CastStk,
-            makeCatch(),
-            t,
-            StackOffset(numArgs - i - 1),
-            m_irb->sp());
+        auto const sp = m_irb->sp();
+        auto const offset = numArgs - i - 1;
+        auto const stkVal = getStackValue(sp, offset);
+        if (stkVal.knownType <= Type::Int && t <= Type::Dbl) {
+          m_irb->constrainStack(offset, DataTypeSpecific);
+          gen(CastStkIntToDbl, t, StackOffset(offset), sp);
+        } else {
+          gen(CastStk, makeCatch(), t, StackOffset(offset), sp);
+        }
       }
       break;
     case KindOfUnknown:

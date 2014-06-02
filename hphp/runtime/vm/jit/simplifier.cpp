@@ -70,6 +70,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return getStackValue(inst->src(0), index);
 
   case CastStk:
+  case CastStkIntToDbl:
     // fallthrough
   case CoerceStk:
     // fallthrough

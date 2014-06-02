@@ -3736,6 +3736,14 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
                args);
 }
 
+void CodeGenerator::cgCastStkIntToDbl(IRInstruction* inst) {
+  auto spReg = srcLoc(0).reg();
+  auto offset = cellsToBytes(inst->extra<CastStkIntToDbl>()->offset);
+  m_as.cvtsi2sd(refTVData(spReg[offset]), rCgXMM0);
+  emitStoreReg(m_as, rCgXMM0, refTVData(spReg[offset]));
+  emitStoreTVType(m_as, KindOfDouble, refTVType(spReg[offset]));
+}
+
 void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   Type type       = inst->typeParam();
   uint32_t offset = inst->extra<CoerceStk>()->offset;

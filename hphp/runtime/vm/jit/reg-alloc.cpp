@@ -45,6 +45,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
            opc == GuardStk ||
            opc == AssertStk ||
            opc == CastStk ||
+           opc == CastStkIntToDbl ||
            opc == CoerceStk ||
            opc == SideExitGuardStk  ||
            MInstrEffects::supported(opc));

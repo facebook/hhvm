@@ -112,6 +112,7 @@ void FrameState::update(const IRInstruction* inst) {
 
   case AssertStk:
   case CastStk:
+  case CastStkIntToDbl:
   case CoerceStk:
   case CheckStk:
   case GuardStk:

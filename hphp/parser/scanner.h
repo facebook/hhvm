@@ -28,6 +28,11 @@
 #include "hphp/parser/location.h"
 #include "hphp/parser/hphp.tab.hpp"
 
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -238,7 +243,7 @@ public:
   /**
    * Called by lex.yy.cpp for YY_INPUT (see hphp.x)
    */
-  int read(char *text, int &result, int max);
+  int read(char *text, yy_size_t &result, yy_size_t max);
 
   /**
    * Called by scanner rules.

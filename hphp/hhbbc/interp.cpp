@@ -285,7 +285,7 @@ void in(ISS& env, const bc::ClsCns& op) {
   auto const t1 = topA(env);
   if (t1.strictSubtypeOf(TCls)) {
     auto const dcls = dcls_of(t1);
-    if (dcls.type == ClsTag::Exact) {
+    if (dcls.type == DCls::Exact) {
       return reduce(env, bc::PopA {},
                          bc::ClsCnsD { op.str1, dcls.cls.name() });
     }
@@ -1236,16 +1236,12 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   folly::Optional<res::Class> rcls;
   if (is_opt(obj)) obj = unopt(obj);
   if (obj.strictSubtypeOf(TObj)) rcls = dcls_of(objcls(obj)).cls;
-
-  folly::Optional<res::Func> func = folly::none;
-  if (obj.subtypeOf(TObj)) {
-    func = env.index.resolve_method(env.ctx, objcls(obj), op.str2);
-    if (func && !rcls) rcls = func->interfaceCls();
-  }
   fpiPush(env, ActRec {
     FPIKind::ObjMeth,
     rcls,
-    func
+    obj.subtypeOf(TObj)
+      ? env.index.resolve_method(env.ctx, objcls(obj), op.str2)
+      : folly::none
   });
 }
 
@@ -1273,13 +1269,12 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
   auto const t1 = popA(env);
   auto const t2 = popC(env);
   auto const v2 = tv(t2);
+  auto const rfunc =
+    v2 && v2->m_type == KindOfStaticString
+      ? env.index.resolve_method(env.ctx, t1, v2->m_data.pstr)
+      : folly::none;
   folly::Optional<res::Class> rcls;
   if (t1.strictSubtypeOf(TCls)) rcls = dcls_of(t1).cls;
-  folly::Optional<res::Func> rfunc = folly::none;
-  if (v2 && v2->m_type == KindOfStaticString) {
-    rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
-    if (rfunc && !rcls) rcls = rfunc->interfaceCls();
-  }
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc });
 }
 
@@ -1301,7 +1296,7 @@ void in(ISS& env, const bc::FPushCtor& op) {
   auto const t1 = topA(env);
   if (t1.strictSubtypeOf(TCls)) {
     auto const dcls = dcls_of(t1);
-    if (dcls.type == ClsTag::Exact) {
+    if (dcls.type == DCls::Exact) {
       return reduce(env, bc::PopA {},
                          bc::FPushCtorD { op.arg1, dcls.cls.name() });
     }

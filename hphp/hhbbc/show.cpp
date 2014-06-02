@@ -510,20 +510,20 @@ std::string show(Type t) {
     break;
   case DataTag::Obj:
     switch (t.m_data.dobj.type) {
-    case ClsTag::Exact:
+    case DObj::Exact:
       folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
       break;
-    case ClsTag::Sub:
+    case DObj::Sub:
       folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
       break;
     }
     break;
   case DataTag::Cls:
     switch (t.m_data.dcls.type) {
-    case ClsTag::Exact:
+    case DCls::Exact:
       folly::toAppend("=", show(t.m_data.dcls.cls), &ret);
       break;
-    case ClsTag::Sub:
+    case DCls::Sub:
       folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
       break;
     }

@@ -34,17 +34,10 @@ enum class UnwindAction {
   Propagate,
 
   /*
-   * A catch or fault handler was identified and the VM state has been
-   * prepared for entry to it.
+   * The exception was either handled, or a catch or fault handler was
+   * identified and the VM state has been prepared for entry to it.
    */
   ResumeVM,
-
-  /**
-   * An exception thrown from an eagerly executed async function was
-   * wrapped into a failed StaticWaitHandle. The async function was
-   * running in the top frame, so we need to return from the VM instance.
-   */
-  Return,
 };
 
 /*

@@ -145,7 +145,8 @@ UnwindAction checkHandlers(const EHEnt* eh,
   return UnwindAction::Propagate;
 }
 
-void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, const Fault& fault) {
+UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
+                           const Fault& fault) {
   auto const func = fp->func();
   auto const curOp = *reinterpret_cast<const Op*>(pc);
   auto const prevFp = fp->sfp();
@@ -200,15 +201,30 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, const Fault& fault) {
     } catch (...) {}
   }
 
+  auto action = UnwindAction::Propagate;
+
   if (LIKELY(!fp->resumed())) {
-    // Free ActRec.
-    stack.ndiscard(func->numSlotsInFrame());
-    stack.discardAR();
-  } else if (fp->func()->isAsyncFunction()) {
+    if (UNLIKELY(func->isAsyncFunction()) &&
+        fault.m_faultType == Fault::Type::UserException) {
+      // If in an eagerly executed async function, wrap the user exception
+      // into a failed StaticWaitHandle and return it to the caller.
+      auto const e = fault.m_userException;
+      stack.ndiscard(func->numSlotsInFrame());
+      stack.ret();
+      assert(stack.topTV() == &fp->m_r);
+      tvWriteObject(c_StaticWaitHandle::CreateFailed(e), &fp->m_r);
+      e->decRefCount();
+      action = UnwindAction::ResumeVM;
+    } else {
+      // Free ActRec.
+      stack.ndiscard(func->numSlotsInFrame());
+      stack.discardAR();
+    }
+  } else if (func->isAsyncFunction()) {
     // Do nothing. AsyncFunctionWaitHandle will handle the exception.
-  } else if (fp->func()->isAsyncGenerator()) {
+  } else if (func->isAsyncGenerator()) {
     // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
-  } else if (fp->func()->isNonAsyncGenerator()) {
+  } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished.
     frame_generator(fp)->finish();
   } else {
@@ -216,48 +232,12 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, const Fault& fault) {
   }
 
   /*
-   * At the final ActRec in this nesting level.  We don't need to set
-   * pc and fp since we're about to re-throw the exception.  And we
-   * don't want to dereference prefFp since we just popped it.
+   * At the final ActRec in this nesting level.
    */
-  if (!prevFp) return;
-
-  assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
-         prevFp->resumed());
-  auto const prevOff = soff + prevFp->func()->base();
-  pc = prevFp->func()->unit()->at(prevOff);
-  fp = prevFp;
-}
-
-void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc,
-                             const Fault& fault) {
-  auto const func = fp->func();
-  auto const prevFp = fp->sfp();
-  auto const soff = fp->m_soff;
-  auto const e = fault.m_userException;
-  assert(!fp->resumed());
-  assert(func->isAsyncFunction());
-  assert(*reinterpret_cast<const Op*>(pc) != OpRetC);
-
-  FTRACE(1, "tearDownAsyncFrame: {} ({})\n  fp {} prevFp {}\n",
-         func->fullName()->data(),
-         func->unit()->filepath()->data(),
-         implicit_cast<void*>(fp),
-         implicit_cast<void*>(prevFp));
-
-  try {
-    frame_free_locals_unwind(fp, func->numLocals(), fault);
-  } catch (...) {}
-
-  stack.ndiscard(func->numSlotsInFrame());
-  stack.ret();
-  assert(stack.topTV() == &fp->m_r);
-  tvWriteObject(c_StaticWaitHandle::CreateFailed(e), &fp->m_r);
-  e->decRefCount();
-
   if (UNLIKELY(!prevFp)) {
-    pc = 0;
-    return;
+    pc = nullptr;
+    fp = nullptr;
+    return action;
   }
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
@@ -265,6 +245,7 @@ void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc,
   auto const prevOff = soff + prevFp->func()->base();
   pc = prevFp->func()->unit()->at(prevOff);
   fp = prevFp;
+  return action;
 }
 
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
@@ -420,8 +401,6 @@ UnwindAction unwind(ActRec*& fp,
           return UnwindAction::ResumeVM;
         case UnwindAction::Propagate:
           break;
-        case UnwindAction::Return:
-          not_reached();
         }
       }
       // If we came here, it means that no further EHs were found for
@@ -431,19 +410,17 @@ UnwindAction unwind(ActRec*& fp,
       // escapes the exception handler where it was thrown.
     } while (chainFaults(fault));
 
-    // If in an eagerly executed async function, wrap the user exception
-    // into a failed StaticWaitHandle and return it to the caller.
-    if (!fp->resumed() && fp->m_func->isAsyncFunction() &&
-        fault.m_faultType == Fault::Type::UserException) {
-      tearDownEagerAsyncFrame(fp, stack, pc, fault);
-      g_context->m_faults.pop_back();
-      return pc ? UnwindAction::ResumeVM : UnwindAction::Return;
-    }
-
     // We found no more handlers in this frame, so the nested fault
     // count starts over for the caller frame.
     auto const lastFrameForNesting = !fp->sfp();
-    tearDownFrame(fp, stack, pc, fault);
+    auto const action = tearDownFrame(fp, stack, pc, fault);
+    switch (action) {
+      case UnwindAction::ResumeVM:
+        g_context->m_faults.pop_back();
+        return action;
+      case UnwindAction::Propagate:
+        break;
+    }
 
     // Once we are done with EHs for the current frame we restore
     // default values for the fields inside Fault. This makes sure

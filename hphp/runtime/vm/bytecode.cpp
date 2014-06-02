@@ -1830,8 +1830,7 @@ resume:
       case UnwindAction::Propagate:
         break;
       case UnwindAction::ResumeVM:
-        goto resume;
-      case UnwindAction::Return:
+        if (vmpc()) { goto resume; }
         return;
     }
   }

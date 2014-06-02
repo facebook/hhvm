@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/min-max-macros.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -4095,9 +4094,9 @@ static int hphp_gdImageConvolution(gdImagePtr src, float filter[3][3],
       new_a = gdImageAlpha(srcback, pxl);
 
       for (j=0; j<3; j++) {
-        int yv = MIN(MAX(y - 1 + j, 0), src->sy - 1);
+        int yv = std::min(std::max(y - 1 + j, 0), src->sy - 1);
         for (i=0; i<3; i++) {
-                pxl = f(srcback, MIN(MAX(x - 1 + i, 0), src->sx - 1), yv);
+          pxl = f(srcback, std::min(std::max(x - 1 + i, 0), src->sx - 1), yv);
           new_r += (float)gdImageRed(srcback, pxl) * filter[j][i];
           new_g += (float)gdImageGreen(srcback, pxl) * filter[j][i];
           new_b += (float)gdImageBlue(srcback, pxl) * filter[j][i];

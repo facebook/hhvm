@@ -21,7 +21,6 @@
 #include <cstdint>
 
 #include "hphp/util/tls-pod-bag.h"
-#include "hphp/util/min-max-macros.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/complex-types.h"

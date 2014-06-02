@@ -117,12 +117,14 @@ void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, 
     } catch (const Object& cycle_exception) {
       putException(m_exception, cycle_exception.get());
       ++m_iterPos;
+      incRefCount();
       onUnblocked();
       return;
     }
   }
 
   blockOn(child);
+  incRefCount();
 }
 
 void c_GenVectorWaitHandle::onUnblocked() {
@@ -168,6 +170,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
 
   m_deps = nullptr;
   UnblockChain(parentChain);
+  decRefObj(this);
 }
 
 String c_GenVectorWaitHandle::getName() {

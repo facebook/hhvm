@@ -140,6 +140,7 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   m_child = child;
 
   blockOn(child);
+  incRefCount();
 }
 
 void c_AsyncFunctionWaitHandle::resume() {
@@ -181,7 +182,8 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
   if (isInContext()) {
     getContext()->schedule(this);
-    incRefCount();
+  } else {
+    decRefObj(this);
   }
 }
 
@@ -197,6 +199,7 @@ void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
   m_child = child;
   setState(STATE_BLOCKED);
   blockOn(m_child);
+  incRefCount();
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {

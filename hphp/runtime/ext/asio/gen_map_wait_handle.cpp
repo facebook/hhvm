@@ -124,12 +124,14 @@ void c_GenMapWaitHandle::initialize(const Object& exception, c_Map* deps, ssize_
     } catch (const Object& cycle_exception) {
       putException(m_exception, cycle_exception.get());
       m_iterPos = m_deps->iter_next(m_iterPos);
+      incRefCount();
       onUnblocked();
       return;
     }
   }
 
   blockOn(child);
+  incRefCount();
 }
 
 void c_GenMapWaitHandle::onUnblocked() {
@@ -178,6 +180,7 @@ void c_GenMapWaitHandle::onUnblocked() {
 
   m_deps = nullptr;
   UnblockChain(parentChain);
+  decRefObj(this);
 }
 
 String c_GenMapWaitHandle::getName() {

@@ -31,9 +31,6 @@ c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
 
   // Extend the linked list of parents.
   m_nextParent = child->addParent(this);
-
-  // Increment ref count so that we won't disappear before child calls back.
-  incRefCount();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

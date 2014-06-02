@@ -55,9 +55,6 @@ c_BlockableWaitHandle* c_BlockableWaitHandle::unblock() {
       not_reached();
   }
 
-  // decrement ref count, we can't be called by child anymore
-  decRefObj(this);
-
   return next;
 }
 

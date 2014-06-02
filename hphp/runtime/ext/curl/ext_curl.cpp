@@ -283,7 +283,7 @@ public:
       }
     }
     if (m_write.method == PHP_CURL_RETURN) {
-      return empty_string;
+      return empty_string_variant();
     }
     return true;
   }

@@ -180,7 +180,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         s.setSize(size);
         return s;
       } else {
-        return empty_string;
+        return empty_string_variant();
       }
     }
     case T_MAP: { // array of key -> value

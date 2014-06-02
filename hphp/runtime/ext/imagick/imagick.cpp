@@ -2392,7 +2392,7 @@ static Array HHVM_METHOD(Imagick, queryFontMetrics,
       s_characterWidth, s_characterHeight, s_ascender, s_descender,
       s_textWidth, s_textHeight, s_maxHorizontalAdvance,
       // s_x1, s_y1, s_x2, s_y2,
-      s_boundingBox, empty_string, empty_string, empty_string,
+      s_boundingBox, empty_string_ref, empty_string_ref, empty_string_ref,
       s_originX, s_originY
     };
     static const size_t boundingBoxOffset = 7;

@@ -621,7 +621,7 @@ bool PhpParam::defValueNeedsVariable() const {
   fbstring defVal = getDefault();
 
   if (cppKindOf == KindOfString &&
-      ((defVal == "empty_string") ||
+      ((defVal == "empty_string_ref") ||
        (defVal == "null_string") ||
        (g_knownStringConstants.count(defVal) > 0))) {
     return false;

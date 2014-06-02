@@ -234,7 +234,7 @@ String ExecutionContext::obCopyContents() {
       return oss.copy();
     }
   }
-  return empty_string;
+  return empty_string();
 }
 
 String ExecutionContext::obDetachContents() {
@@ -244,7 +244,7 @@ String ExecutionContext::obDetachContents() {
       return oss.detach();
     }
   }
-  return empty_string;
+  return empty_string();
 }
 
 int ExecutionContext::obGetContentLength() {
@@ -667,7 +667,7 @@ void ExecutionContext::handleError(const std::string& msg,
 
     if (errorNeedsLogging(errnum)) {
       DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee.getMessage()));
-      String file = empty_string;
+      String file = empty_string();
       int line = 0;
       if (RuntimeOption::InjectedStackTrace) {
         Array bt = ee.getBackTrace();
@@ -727,7 +727,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 bool ExecutionContext::onFatalError(const Exception &e) {
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
   recordLastError(e, errnum);
-  String file = empty_string;
+  String file = empty_string();
   int line = 0;
   bool silenced = false;
   if (RuntimeOption::InjectedStackTrace) {

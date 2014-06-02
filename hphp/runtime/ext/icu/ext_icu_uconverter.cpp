@@ -406,7 +406,7 @@ static int64_t HHVM_METHOD(UConverter, getErrorCode) {
 }
 
 static String HHVM_METHOD(UConverter, getErrorMessage) {
-  FETCH_CNV(data, this_, empty_string);
+  FETCH_CNV(data, this_, empty_string());
   return data->getErrorMessage();
 }
 

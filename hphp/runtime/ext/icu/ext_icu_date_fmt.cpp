@@ -184,7 +184,7 @@ static void HHVM_METHOD(IntlDateFormatter, __construct,
                         int64_t datetype, int64_t timetype,
                         const Variant& timezone /*= null */,
                         const Variant& calendar /*= null */,
-                        const String& pattern /*= empty_string */) {
+                        const String& pattern /*= empty_string_ref */) {
   auto data = Native::data<IntlDateFormatter>(this_);
   data->setDateFormatter(locale, datetype, timetype,
                          timezone, calendar, pattern);

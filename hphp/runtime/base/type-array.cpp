@@ -276,7 +276,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
 // manipulations
 
 String Array::toString() const {
-  if (m_px == nullptr) return empty_string;
+  if (m_px == nullptr) return empty_string();
   raise_notice("Array to string conversion");
   return array_string;
 }
@@ -437,7 +437,7 @@ const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_px->get(key, error);
-    if (key.isNull()) return m_px->get(empty_string, error);
+    if (key.isNull()) return m_px->get(staticEmptyString(), error);
     int64_t n;
     if (!key.get()->isStrictlyInteger(n)) {
       return m_px->get(key, error);
@@ -457,7 +457,7 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
   switch (key.getRawType()) {
   case KindOfUninit:
   case KindOfNull:
-    return m_px->get(empty_string, flags & AccessFlags::Error);
+    return m_px->get(staticEmptyString(), flags & AccessFlags::Error);
   case KindOfBoolean:
   case KindOfInt64:
     return m_px->get(key.asTypedValue()->m_data.num,

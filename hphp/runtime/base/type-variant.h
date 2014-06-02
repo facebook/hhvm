@@ -1178,6 +1178,12 @@ inline Array& forceToArray(Variant& var) {
 
 //////////////////////////////////////////////////////////////////////
 
+ALWAYS_INLINE Variant empty_string_variant() {
+  return Variant(staticEmptyString(), Variant::StaticStrInit{});
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_VARIANT_H_

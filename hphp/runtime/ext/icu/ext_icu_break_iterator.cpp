@@ -109,7 +109,7 @@ static int64_t HHVM_METHOD(IntlBreakIterator, getErrorCode) {
 }
 
 static String HHVM_METHOD(IntlBreakIterator, getErrorMessage) {
-  FETCH_BI(data, this_, empty_string);
+  FETCH_BI(data, this_, empty_string());
   return data->getErrorMessage();
 }
 

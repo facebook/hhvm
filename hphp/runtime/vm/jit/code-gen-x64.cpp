@@ -5210,7 +5210,7 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
                    CppCall::direct(arr_str_helper),
                    callDest(inst),
                    SyncOptions::kNoSyncPoint,
-                   argGroup().ssa(0/*arr*/).immPtr(empty_string.get()));
+                   argGroup().ssa(0/*arr*/).immPtr(staticEmptyString()));
     } else {
       m_as.movq(0, dstLoc(0).reg());
     }

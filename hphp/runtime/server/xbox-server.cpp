@@ -81,7 +81,7 @@ String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
         long long nanosecs = (timeout_ms - seconds * 1000) * 1000;
         if (!wait(seconds, nanosecs)) {
           code = -1;
-          return empty_string;
+          return empty_string();
         }
       } else {
         wait();

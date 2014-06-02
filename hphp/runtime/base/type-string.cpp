@@ -29,7 +29,7 @@
 namespace HPHP {
 
 const String null_string = String();
-const StaticString empty_string("");
+const StaticString empty_string_ref("");
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -374,7 +374,7 @@ String operator+(const String & lhs, const String & rhs) {
 // conversions
 
 VarNR String::toKey() const {
-  if (!m_px) return VarNR(empty_string);
+  if (!m_px) return VarNR(staticEmptyString());
   int64_t n = 0;
   if (m_px->isStrictlyInteger(n)) {
     return VarNR(n);
@@ -620,7 +620,7 @@ String getDataTypeString(DataType t) {
       assert(false);
       break;
   }
-  return empty_string;
+  return empty_string();
 }
 
 //////////////////////////////////////////////////////////////////////////////

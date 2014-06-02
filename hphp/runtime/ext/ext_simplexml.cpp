@@ -661,7 +661,7 @@ static inline String sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list,
     xmlFree(tmp);
     return ret;
   } else {
-    return empty_string;
+    return empty_string();
   }
 }
 
@@ -1413,7 +1413,7 @@ String c_SimpleXMLElement::t_getname() {
   if (node) {
     return String((char*)node->name);
   }
-  return empty_string;
+  return empty_string();
 }
 
 Object c_SimpleXMLElement::t_attributes(const String& ns /* = "" */,

@@ -391,7 +391,7 @@ String FileUtil::relativePath(const std::string& fromDir,
   // Sanity checks
   if (fromDir[0] != '/' || toFile[0] != '/' ||
       fromDir[fromDir.size() - 1] != '/') {
-    return empty_string;
+    return empty_string();
   }
 
   // Maybe we're lucky and this is an easy case

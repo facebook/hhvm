@@ -131,7 +131,7 @@ struct VariantController {
     return ret;
   }
   static StringType getStaticEmptyString() {
-    return empty_string;
+    return empty_string();
   }
   static char* getMutablePtr(StringType& s) {
     return s.bufferSlice().ptr;

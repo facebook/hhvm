@@ -669,10 +669,12 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
          ++iter, ++startIter, ++lengthIter) {
       int nStart = startIter.second().toInt32();
       int nLength = lengthIter.second().toInt32();
-      String repl = empty_string;
+      String repl;
       if (replIter) {
         repl = replIter.second().toString();
         ++replIter;
+      } else {
+        repl = empty_string();
       }
       auto s2 = string_replace(iter.second().toString(), nStart, nLength, repl);
       ret.append(s2);
@@ -713,7 +715,7 @@ String f_str_repeat(const String& input, int multiplier) {
   }
 
   if (multiplier == 0) {
-    return empty_string;
+    return empty_string();
   }
 
   if (input.size() == 1) {

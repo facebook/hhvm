@@ -167,6 +167,12 @@ struct StringData {
   static StringData* MakeUncounted(StringSlice);
 
   /*
+   * Same as MakeStatic but initializes the empty string in aligned storage.
+   * This should be called by the static string table initialization code.
+   */
+  static StringData* MakeEmpty();
+
+  /*
    * Offset accessor for the JIT compiler.
    */
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
@@ -520,6 +526,23 @@ void decRefStr(StringData* s);
 struct string_data_hash;
 struct string_data_same;
 struct string_data_isame;
+
+//////////////////////////////////////////////////////////////////////
+
+extern std::aligned_storage<
+  sizeof(StringData) + 1,
+  alignof(StringData)
+>::type s_theEmptyString;
+
+/*
+ * Return the "static empty string". This is a singleton StaticString
+ * that can be used to return a StaticString for the empty string in
+ * as lightweight a manner as possible.
+ */
+ALWAYS_INLINE StringData* staticEmptyString() {
+  void* vp = &s_theEmptyString;
+  return static_cast<StringData*>(vp);
+}
 
 //////////////////////////////////////////////////////////////////////
 

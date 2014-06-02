@@ -445,7 +445,7 @@ extern std::aligned_storage<
  * that can be used whenever an empty array is needed.  It has
  * kEmptyKind and uses the functions in empty-array.cpp.
  */
-inline ArrayData* staticEmptyArray() {
+ALWAYS_INLINE ArrayData* staticEmptyArray() {
   void* vp = &s_theEmptyArray;
   return static_cast<ArrayData*>(vp);
 }

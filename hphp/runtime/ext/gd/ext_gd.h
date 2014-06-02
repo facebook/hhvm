@@ -245,7 +245,7 @@ bool HHVM_FUNCTION(png2wbmp,
   int64_t dest_width, int64_t threshold);
 Variant HHVM_FUNCTION(exif_imagetype, const String& filename);
 Variant HHVM_FUNCTION(exif_read_data,
-  const String& filename, const String& sections = empty_string,
+  const String& filename, const String& sections = empty_string_ref,
   bool arrays = false, bool thumbnail = false);
 Variant HHVM_FUNCTION(read_exif_data,
   const String& filename, const String& sections = null_string,

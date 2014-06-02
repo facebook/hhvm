@@ -70,7 +70,7 @@ public:
 
   explicit File(bool nonblocking = true,
                 const String& wrapper_type = null_string,
-                const String& stream_type = empty_string);
+                const String& stream_type = empty_string_ref);
   virtual ~File();
 
   static StaticString& classnameof() {

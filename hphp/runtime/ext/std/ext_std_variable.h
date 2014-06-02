@@ -73,12 +73,12 @@ int64_t constexpr EXTR_REFS             = 0x100;
 
 int64_t HHVM_FUNCTION(extract, VRefParam vref_array,
                       int64_t extract_type = EXTR_OVERWRITE,
-                      const String& prefix = empty_string);
+                      const String& prefix = empty_string_ref);
 
 // accessible as __SystemLib\\extract
 int64_t HHVM_FUNCTION(__SystemLib_extract, VRefParam vref_array,
                       int64_t extract_type = EXTR_OVERWRITE,
-                      const String& prefix = empty_string);
+                      const String& prefix = empty_string_ref);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

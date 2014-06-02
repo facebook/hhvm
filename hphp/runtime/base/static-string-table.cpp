@@ -110,14 +110,6 @@ DEBUG_ONLY bool checkStaticStr(const StringData* s) {
   return true;
 }
 
-void create_string_data_map() {
-  StringDataMap::Config config;
-  config.growthFactor = 1;
-  s_stringDataMap =
-    new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
-                      config);
-}
-
 StringData** precompute_chars();
 StringData** precompute_chars() {
   StringData** raw = new StringData*[256];
@@ -130,8 +122,7 @@ StringData** precompute_chars() {
 
 StringData** precomputed_chars = precompute_chars();
 
-StringData* insertStaticString(StringSlice slice) {
-  auto const sd = StringData::MakeStatic(slice);
+StringData* insertStaticString(StringData* sd) {
   auto pair = s_stringDataMap->insert(
     make_intern_key(sd),
     RDS::Link<TypedValue>(RDS::kInvalidHandle)
@@ -141,6 +132,19 @@ StringData* insertStaticString(StringSlice slice) {
   }
   assert(to_sdata(pair.first->first) != nullptr);
   return const_cast<StringData*>(to_sdata(pair.first->first));
+}
+
+inline StringData* insertStaticStringSlice(StringSlice slice) {
+  return insertStaticString(StringData::MakeStatic(slice));
+}
+
+void create_string_data_map() {
+  StringDataMap::Config config;
+  config.growthFactor = 1;
+  s_stringDataMap =
+    new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
+                      config);
+  insertStaticString(StringData::MakeEmpty());
 }
 
 }
@@ -164,7 +168,7 @@ StringData* makeStaticString(const StringData* str) {
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
-  return insertStaticString(str->slice());
+  return insertStaticStringSlice(str->slice());
 }
 
 StringData* makeStaticString(StringSlice slice) {
@@ -175,7 +179,7 @@ StringData* makeStaticString(StringSlice slice) {
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
-  return insertStaticString(slice);
+  return insertStaticStringSlice(slice);
 }
 
 StringData* lookupStaticString(const StringData *str) {

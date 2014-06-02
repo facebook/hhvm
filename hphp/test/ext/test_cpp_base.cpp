@@ -346,9 +346,9 @@ bool TestCppBase::TestArray() {
   {
     Array arr;
     arr.lvalAt(Variant()) = 123;
-    VERIFY(arr.exists(empty_string));
+    VERIFY(arr.exists(empty_string_ref));
     arr.remove(Variant());
-    VERIFY(!arr.exists(empty_string));
+    VERIFY(!arr.exists(empty_string_ref));
   }
   {
     Array arr;

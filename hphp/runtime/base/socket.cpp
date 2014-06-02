@@ -50,7 +50,7 @@ Socket::Socket()
 
 Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
                int port /* = 0 */, double timeout /* = 0 */,
-               const StaticString& streamType /* = empty_string */)
+               const StaticString& streamType /* = empty_string_ref */)
   : File(true, null_string, streamType.get()), m_port(port), m_type(type),
     m_error(0), m_timeout(0), m_timedOut(false), m_bytesSent(0) {
   if (address) m_address = address;
@@ -73,7 +73,7 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
   m_isLocal = (type == AF_UNIX);
 
   // Attempt to infer stream type only if it was not explicitly specified.
-  if (empty_string == streamType) {
+  if (staticEmptyString() == streamType.get()) {
     inferStreamType();
   }
 }
@@ -247,14 +247,14 @@ int64_t Socket::tell() {
 
 // Tries to infer stream type based on getsockopt() values.
 // If no conclusive match can be found, leaves m_streamType
-// as its default value of empty_string.
+// as its default value of empty_string_ref.
 void Socket::inferStreamType() {
   int result, type;
   socklen_t len = sizeof(type);
   result = getsockopt(m_fd, SOL_SOCKET, SO_TYPE, &type, &len);
   if (result != 0) {
     // getsockopt error.
-    // Nothing to do here because the default stream type is empty_string.
+    // Nothing to do here because the default stream type is empty_string_ref.
     return;
   }
 
@@ -279,7 +279,7 @@ void Socket::inferStreamType() {
   }
 
   // Nothing to do in default case because the default stream type is
-  // empty_string.
+  // empty_string_ref.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

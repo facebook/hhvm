@@ -344,10 +344,6 @@ struct Unit {
     assert(m_filepath);
     return m_filepath;
   }
-  const String& filepathRef() const {
-    assert(m_filepath);
-    return *(String*)(&m_filepath);
-  }
   const StringData* dirpath() const {
     assert(m_dirpath);
     return m_dirpath;

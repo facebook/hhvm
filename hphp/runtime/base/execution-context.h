@@ -520,7 +520,7 @@ public:
   ObjectData* getThis();
   Class* getContextClass();
   Class* getParentContextClass();
-  const String& getContainingFileName();
+  StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
   Eval::PhpFile* lookupPhpFile(

@@ -1856,7 +1856,7 @@ static Variant domnode_prefix_read(const Object& obj) {
   if (str) {
     return String(str, CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void domnode_prefix_write(const Object& obj, const Variant& value) {
@@ -1948,7 +1948,7 @@ static Variant domnode_textcontent_read(const Object& obj) {
     xmlFree(str);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void domnode_textcontent_write(const Object& obj, const Variant& value) {
@@ -2506,7 +2506,7 @@ static Variant domattr_value_read(const Object& obj) {
     xmlFree(content);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void domattr_value_write(const Object& obj, const Variant& value) {
@@ -2591,7 +2591,7 @@ static Variant dom_characterdata_data_read(const Object& obj) {
     xmlFree(content);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void dom_characterdata_data_write(const Object& obj, const Variant& value) {
@@ -2774,7 +2774,7 @@ String c_DOMCharacterData::t_substringdata(int64_t offset, int64_t count) {
     xmlFree(substring);
     return ret;
   }
-  return empty_string;
+  return empty_string();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2810,7 +2810,7 @@ static Variant dom_text_whole_text_read(const Object& obj) {
     xmlFree(wholetext);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static PropertyAccessor domtext_properties[] = {
@@ -3754,7 +3754,7 @@ static Variant dom_documenttype_public_id_read(const Object& obj) {
   if (dtdptr->ExternalID) {
     return String((char *)(dtdptr->ExternalID), CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static Variant dom_documenttype_system_id_read(const Object& obj) {
@@ -3762,7 +3762,7 @@ static Variant dom_documenttype_system_id_read(const Object& obj) {
   if (dtdptr->SystemID) {
     return String((char *)(dtdptr->SystemID), CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static Variant dom_documenttype_internal_subset_read(const Object& obj) {
@@ -3782,7 +3782,7 @@ static Variant dom_documenttype_internal_subset_read(const Object& obj) {
       return String((char *)strintsubset, CopyString);
     }
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static PropertyAccessor domdocumenttype_properties[] = {
@@ -3956,7 +3956,7 @@ String c_DOMElement::t_getattribute(const String& name) {
     xmlFree(value);
     return ret;
   }
-  return empty_string;
+  return empty_string();
 }
 
 Variant c_DOMElement::t_getattributenode(const String& name) {
@@ -4030,7 +4030,7 @@ String c_DOMElement::t_getattributens(const String& namespaceuri,
       }
     }
   }
-  return empty_string;
+  return empty_string();
 }
 
 Object c_DOMElement::t_getelementsbytagname(const String& name) {
@@ -4562,7 +4562,7 @@ static Variant dom_notation_public_id_read(const Object& obj) {
   if (nodep->ExternalID) {
     return String((char *)(nodep->ExternalID), CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static Variant dom_notation_system_id_read(const Object& obj) {
@@ -4570,7 +4570,7 @@ static Variant dom_notation_system_id_read(const Object& obj) {
   if (nodep->SystemID) {
     return String((char *)(nodep->SystemID), CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static PropertyAccessor domnotation_properties[] = {
@@ -4624,7 +4624,7 @@ static Variant dom_processinginstruction_data_read(const Object& obj) {
     xmlFree(content);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void dom_processinginstruction_data_write(const Object& obj, const Variant& value) {

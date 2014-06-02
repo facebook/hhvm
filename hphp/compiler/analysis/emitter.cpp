@@ -3964,7 +3964,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             }
           }
         } else {
-          e.String(empty_string.get());
+          e.String(staticEmptyString());
         }
 
         if (el->getType() == '`') {
@@ -6534,7 +6534,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
 
   const Location* sLoc = meth->getLocation().get();
   StringData* methDoc = Option::GenerateDocComments ?
-    makeStaticString(meth->getDocComment()) : empty_string.get();
+    makeStaticString(meth->getDocComment()) : staticEmptyString();
 
   fe->init(sLoc->line0,
            sLoc->line1,
@@ -6712,7 +6712,7 @@ void EmitterVisitor::emitPostponedCtors() {
     if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
       attrs = attrs | AttrBuiltin;
     }
-    StringData* methDoc = empty_string.get();
+    StringData* methDoc = staticEmptyString();
     const Location* sLoc = p.m_is->getLocation().get();
     p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
     Emitter e(p.m_is, m_ue, *this);
@@ -6729,7 +6729,7 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
   if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
     attrs = attrs | AttrBuiltin;
   }
-  StringData* methDoc = empty_string.get();
+  StringData* methDoc = staticEmptyString();
   const Location* sLoc = p.m_is->getLocation().get();
   p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
 
@@ -6788,7 +6788,7 @@ void EmitterVisitor::emitPostponedCinits() {
     if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
       attrs = attrs | AttrBuiltin;
     }
-    StringData* methDoc = empty_string.get();
+    StringData* methDoc = staticEmptyString();
     const Location* sLoc = p.m_is->getLocation().get();
     p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
     static const StringData* s_constName = makeStaticString("constName");
@@ -7337,7 +7337,7 @@ void EmitterVisitor::emitClass(Emitter& e,
   StringData* className = makeStaticString(cNode->getOriginalName());
   StringData* parentName = makeStaticString(cNode->getOriginalParent());
   StringData* classDoc = Option::GenerateDocComments ?
-    makeStaticString(cNode->getDocComment()) : empty_string.get();
+    makeStaticString(cNode->getDocComment()) : staticEmptyString();
   Attr attr = cNode->isInterface() ? AttrInterface :
               cNode->isTrait()     ? AttrTrait     :
               cNode->isAbstract()  ? AttrAbstract  :
@@ -7481,7 +7481,7 @@ void EmitterVisitor::emitClass(Emitter& e,
 
           auto const propName = makeStaticString(var->getName());
           auto const propDoc = Option::GenerateDocComments ?
-            makeStaticString(var->getDocComment()) : empty_string.get();
+            makeStaticString(var->getDocComment()) : staticEmptyString();
           TypedValue tvVal;
           // Some properties may need to be marked with the AttrDeepInit
           // attribute, while other properties should not be marked with
@@ -8204,7 +8204,7 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   */
   StringData* name = makeStaticString("86null");
   FuncEmitter* fe = ue->newFuncEmitter(name);
-  fe->init(0, 0, ue->bcPos(), attrs, true, empty_string.get());
+  fe->init(0, 0, ue->bcPos(), attrs, true, staticEmptyString());
   ue->emitOp(OpNull);
   ue->emitOp(OpRetC);
   fe->setMaxStackCells(1);
@@ -8262,7 +8262,7 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
   static const StringData* valStr = makeStaticString("value");
 
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
-  fe->init(0, 0, ue.bcPos(), attrs, false, empty_string.get());
+  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
   switch (m) {
     case METH_SEND:
     case METH_RAISE:
@@ -8323,7 +8323,7 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
 
 static int32_t emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
-  fe->init(0, 0, ue.bcPos(), attrs, false, empty_string.get());
+  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
   ue.emitOp(OpThis);
   ue.emitOp(OpRetC);
   return 1;  // we use one stack slot
@@ -8468,7 +8468,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       bool added UNUSED = pce->addMethod(fe);
       assert(added);
       fe->init(0, 0, ue->bcPos(), AttrBuiltin|AttrPublic,
-               false, empty_string.get());
+               false, staticEmptyString());
       ue->emitOp(OpNull);
       ue->emitOp(OpRetC);
       fe->setMaxStackCells(1);
@@ -8491,7 +8491,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           cnsInfo->name.get(),
           nullptr,
           (TypedValue*)(&val),
-          empty_string.get());
+          staticEmptyString());
       }
     }
     {

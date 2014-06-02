@@ -1,9 +1,5 @@
 %{
-#ifdef XHPAST2_PARSER
-#include "hphp/parser/xhpast2/parser.h"
-#else
 #include "hphp/compiler/parser/parser.h"
-#endif
 #include <boost/lexical_cast.hpp>
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"

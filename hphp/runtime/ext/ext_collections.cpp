@@ -5422,7 +5422,7 @@ Variant c_Pair::t_at(const Variant& key) {
   assert(isFullyConstructed());
   auto* k = key.asCell();
   if (k->m_type == KindOfInt64) {
-    return Variant(tvAsCVarRef(at(k->m_data.num)), Variant::CellCopy());
+    return Variant(tvAsCVarRef(at(k->m_data.num)), Variant::CellDup());
   }
   throwBadKeyType();
 }

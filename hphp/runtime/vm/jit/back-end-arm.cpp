@@ -178,10 +178,10 @@ struct BackEnd : public JIT::BackEnd {
     return ARM::emitUniqueStubs();
   }
 
-  TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+  TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
-    return ARM::emitServiceReqWork(cb, start, persist, flags, req, argv);
+    return ARM::emitServiceReqWork(cb, start, flags, req, argv);
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,

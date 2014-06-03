@@ -22,7 +22,7 @@ namespace HPHP { namespace JIT { namespace ARM {
  * See service-requests-x64.h for interface documentation.
  */
 
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
 void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest);
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,

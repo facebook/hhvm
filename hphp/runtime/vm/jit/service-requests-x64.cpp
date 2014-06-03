@@ -40,6 +40,11 @@ TRACE_SET_MOD(servicereq);
 // instruction pointers.
 constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
 
+TCA
+emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
+                   SRFlags flags, ServiceRequest req,
+                   const ServiceReqArgVec& argv);
+
 namespace {
 
 class StoreImmPatcher {
@@ -169,6 +174,17 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   return sizeof(ActRec) + cellsToBytes(nLocalCells-1);
 }
 
+static int maxStubSpace() {
+  /* max space for moving to align, saving VM regs plus emitting args */
+  static constexpr int
+    kVMRegSpace = 0x14,
+    kMovSize = 0xa,
+    kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
+    kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
+      kNumServiceRegs * kMovSize;
+  return kMaxStubSpace;
+}
+
 void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& frozenCode,
                         SrcKey srcKey,
                         const Func* funcd,
@@ -179,15 +195,34 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& frozenCode,
   // TCA.
   ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
 
+  // Use some space from the beginning of the service
+  // request stub to emit BIND_CALL specific code.
+  TCA start = mcg->getFreeStub(frozenCode, &mcg->cgFixups());
+
   Asm a { mainCode };
   mcg->backEnd().prepareForSmash(mainCode, kCallLen);
   TCA toSmash = mainCode.frontier();
-  a.    call(frozenCode.frontier());
+  a.    call(start);
 
-  Asm afrozen { frozenCode };
-  afrozen.    movq   (rStashedAR, serviceReqArgRegs[1]);
-  emitPopRetIntoActRec(afrozen);
-  emitServiceReq(frozenCode, JIT::REQ_BIND_CALL, req);
+  TCA end;
+  CodeBlock cb;
+  auto stubSpace = maxStubSpace();
+  cb.init(start, stubSpace, "stubTemp");
+  Asm as { cb };
+
+  as.    movq   (rStashedAR, serviceReqArgRegs[1]);
+  emitPopRetIntoActRec(as);
+
+  auto spaceLeft = stubSpace - (cb.frontier() - start);
+  ServiceReqArgVec argv;
+  packServiceReqArgs(argv, req);
+
+  emitServiceReqImpl(start, cb.frontier(), end, spaceLeft,
+                     SRFlags::None, JIT::REQ_BIND_CALL, argv);
+
+  if (start == frozenCode.frontier()) {
+    frozenCode.skip(end - start);
+  }
 
   TRACE(1, "will bind static call: tca %p, funcd %p, acold %p\n",
         toSmash, funcd, frozenCode.frontier());
@@ -203,21 +238,17 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& frozenCode,
 //////////////////////////////////////////////////////////////////////
 
 TCA
-emitServiceReqWork(CodeBlock& cbIn, TCA start, bool persist, SRFlags flags,
-                   ServiceRequest req, const ServiceReqArgVec& argv) {
+emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
+                   SRFlags flags, ServiceRequest req,
+                   const ServiceReqArgVec& argv) {
   assert(start);
-  const bool align = flags & SRFlags::Align;
+  const bool align   = flags & SRFlags::Align;
+  const bool persist = flags & SRFlags::Persist;
 
-  /* max space for moving to align, saving VM regs plus emitting args */
-  static const int
-    kVMRegSpace = 0x14,
-    kMovSize = 0xa,
-    kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
-    kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
-      kNumServiceRegs * kMovSize;
+  DEBUG_ONLY static constexpr int kMovSize = 0xa;
 
   CodeBlock cb;
-  cb.init(start, kMaxStubSpace, "stubTemp");
+  cb.init(start, maxStubSpace, "stubTemp");
   Asm as { cb };
 
   if (align) {
@@ -256,7 +287,7 @@ emitServiceReqWork(CodeBlock& cbIn, TCA start, bool persist, SRFlags flags,
   if (persist) {
     as.  emitImmReg(0, JIT::X64::rAsm);
   } else {
-    as.  lea(rip[(int64_t)start], JIT::X64::rAsm);
+    as.  lea(rip[(int64_t)stubStart], JIT::X64::rAsm);
   }
   TRACE(3, ")\n");
   as.    emitImmReg(req, JIT::reg::rdi);
@@ -290,15 +321,26 @@ emitServiceReqWork(CodeBlock& cbIn, TCA start, bool persist, SRFlags flags,
      * Recycled stubs need to be uniformly sized. Make space for the
      * maximal possible service requests.
      */
-    assert(as.frontier() - start <= kMaxStubSpace);
-    as.emitNop(start + kMaxStubSpace - as.frontier());
-    assert(as.frontier() - start == kMaxStubSpace);
+    assert(as.frontier() - start <= maxStubSpace);
+    as.emitNop(start + maxStubSpace - as.frontier());
+    assert(as.frontier() - start == maxStubSpace);
   }
 
-  if (start == cbIn.frontier()) {
-    cbIn.skip(cb.frontier() - start);
-  }
+  end = cb.frontier();
   return retval;
+}
+
+TCA
+emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
+                   ServiceRequest req, const ServiceReqArgVec& argv) {
+  TCA end;
+  auto ret = emitServiceReqImpl(start, start, end, maxStubSpace(), flags,
+                                req, argv);
+
+  if (start == cb.frontier()) {
+    cb.skip(end - start);
+  }
+  return ret;
 }
 
 void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,

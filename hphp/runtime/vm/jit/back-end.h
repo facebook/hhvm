@@ -107,7 +107,7 @@ class BackEnd {
                            MoveToAlignFlags alignment
                            = MoveToAlignFlags::kJmpTargetAlign) = 0;
   virtual UniqueStubs emitUniqueStubs() = 0;
-  virtual TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist,
+  virtual TCA emitServiceReqWork(CodeBlock& cb, TCA start,
                                  SRFlags flags, ServiceRequest req,
                                  const ServiceReqArgVec& argv) = 0;
   virtual void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,

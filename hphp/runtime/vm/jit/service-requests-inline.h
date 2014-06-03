@@ -68,8 +68,9 @@ TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  return mcg->backEnd().emitServiceReqWork(cb, cb.frontier(), true, flags, sr,
-                                           argv);
+  return mcg->backEnd().emitServiceReqWork(cb, cb.frontier(),
+                                           flags | SRFlags::Persist,
+                                           sr, argv);
 }
 
 template<typename... Arg>
@@ -84,7 +85,7 @@ TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  return mcg->backEnd().emitServiceReqWork(cb, start, false, SRFlags::None, sr,
+  return mcg->backEnd().emitServiceReqWork(cb, start, SRFlags::None, sr,
                                            argv);
 }
 

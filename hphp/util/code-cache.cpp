@@ -231,7 +231,7 @@ CodeBlock& CodeCache::cold() {
 
 CodeBlock& CodeCache::frozen() {
   always_assert(!m_lock);
-  return m_frozen.capacity() != 0 ? m_frozen : m_cold;
+  return m_frozen;
 }
 
 }

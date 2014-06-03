@@ -446,6 +446,7 @@ struct BackEnd : public JIT::BackEnd {
       fixupStateVector(asmInfo->instRanges, rel);
       fixupStateVector(asmInfo->asmRanges, rel);
       fixupStateVector(asmInfo->acoldRanges, rel);
+      fixupStateVector(asmInfo->afrozenRanges, rel);
     }
   }
 

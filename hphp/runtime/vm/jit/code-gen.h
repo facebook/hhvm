@@ -44,12 +44,14 @@ struct AsmInfo {
     : instRanges(unit, TcaRange(nullptr, nullptr))
     , asmRanges(unit, TcaRange(nullptr, nullptr))
     , acoldRanges(unit, TcaRange(nullptr, nullptr))
+    , afrozenRanges(unit, TcaRange(nullptr, nullptr))
   {}
 
   // Asm address info for each instruction and block
   StateVector<IRInstruction,TcaRange> instRanges;
   StateVector<Block,TcaRange> asmRanges;
   StateVector<Block,TcaRange> acoldRanges;
+  StateVector<Block,TcaRange> afrozenRanges;
 
   void updateForInstruction(IRInstruction* inst, TCA start, TCA end);
 };

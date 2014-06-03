@@ -184,8 +184,9 @@ static void genCodeImpl(IRUnit& unit,
       FTRACE(6, "genBlock {} on {}\n", block->id(),
              cb.base() == coldCode.base() ? "acold" : "a");
 
-      auto const aStart      = cb.frontier();
-      auto const acoldStart  = coldCode.frontier();
+      auto const aStart       = cb.frontier();
+      auto const acoldStart   = coldCode.frontier();
+      auto const afrozenStart = frozenCode->frontier();
       mcg->backEnd().patchJumps(cb, state, block);
       state.addresses[block] = aStart;
 
@@ -206,9 +207,13 @@ static void genCodeImpl(IRUnit& unit,
 
       if (state.asmInfo) {
         state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
-        if (cb.base() != coldCode.base()) {
+        if (cb.base() != coldCode.base() && frozenCode != &coldCode) {
           state.asmInfo->acoldRanges[block] = TcaRange(acoldStart,
                                                        coldCode.frontier());
+        }
+        if (cb.base() != frozenCode->base()) {
+          state.asmInfo->afrozenRanges[block] = TcaRange(afrozenStart,
+                                                        frozenCode->frontier());
         }
       }
     };

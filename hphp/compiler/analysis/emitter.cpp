@@ -15,6 +15,7 @@
 */
 #include "hphp/compiler/analysis/emitter.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <memory>
 #include <iostream>
 #include <iomanip>
@@ -2591,7 +2592,11 @@ void EmitterVisitor::visit(FileScopePtr file) {
     if (currentPositionIsReachable()) {
       LocationPtr loc(new Location());
       e.setTempLocation(loc);
-      e.Int(1);
+      if (boost::algorithm::ends_with(filename, ") : eval()'d code")) {
+        e.Null();
+      } else {
+        e.Int(1);
+      }
       e.RetC();
       e.setTempLocation(LocationPtr());
     }

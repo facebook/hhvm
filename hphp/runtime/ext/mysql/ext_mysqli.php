@@ -166,12 +166,12 @@ class mysqli {
   /**
    * Starts a transaction
    *
-   * @param int $flags -
-   * @param string $name -
+   * @param ?int $flags -
+   * @param ?string $name -
    *
    * @return bool -
    */
-  public function begin_transaction(int $flags, string $name): bool {
+  public function begin_transaction(?int $flags = null, ?string $name = null): bool {
     $query = 'START TRANSACTION';
     if ($name) {
       $query .= '/*'. $name .'*/';

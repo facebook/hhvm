@@ -294,6 +294,10 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    * @return     mixed   No value is returned.
    */
   public function offsetUnset($index) {
+    if(!$this->offsetExists($index)) {
+      [][$index]; // Try to access wrong key so a Notice is raised
+      return;
+    }
     if ($this->isArray()) {
       unset($this->storage[$index]);
     } else {

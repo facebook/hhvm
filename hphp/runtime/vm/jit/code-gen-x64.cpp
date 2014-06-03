@@ -2574,8 +2574,11 @@ void CodeGenerator::emitReqBindAddr(TCA& dest,
                                     SrcKey sk) {
   mcg->setJmpTransID((TCA)&dest);
 
-  dest = emitServiceReq(m_frozenCode, REQ_BIND_ADDR,
-                        &dest, sk.toAtomicInt());
+  dest = emitEphemeralServiceReq(m_frozenCode,
+                               mcg->getFreeStub(m_frozenCode, &mcg->cgFixups()),
+                               REQ_BIND_ADDR,
+                               &dest,
+                               sk.toAtomicInt());
   mcg->cgFixups().m_codePointers.insert(&dest);
 }
 

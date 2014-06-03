@@ -31,6 +31,21 @@ else()
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 endif()
 
+if (LIB64)
+  set(LIB_SUFFIX 64)
+else (LIB64)
+  get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+  if (${LIB64} STREQUAL "TRUE")
+    set(LIB_SUFFIX 64)
+  else ()
+    set(LIB_SUFFIX "")
+  endif ()
+endif (LIB64)
+
+if (NOT LIB_DIR)
+  set(LIB_DIR "lib${LIB_SUFFIX}")
+endif (NOT LIB_DIR)
+
 set(HHVM_LINK_LIBRARIES
   ${HHVM_ANCHOR_SYMS}
   hphp_analysis

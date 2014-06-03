@@ -1430,7 +1430,7 @@ Object c_SimpleXMLElement::t_attributes(const String& ns /* = "" */,
 
 Variant c_SimpleXMLElement::t_addchild(const String& qname,
                                        const String& value /* = null_string */,
-                                       const String& ns /* = null_string */) {
+                                       const Variant& ns /* = null */) {
   if (qname.empty()) {
     raise_warning("Element name is required");
     return init_null();
@@ -1462,13 +1462,14 @@ Variant c_SimpleXMLElement::t_addchild(const String& qname,
 
   xmlNsPtr nsptr = nullptr;
   if (!ns.isNull()) {
-    if (ns.empty()) {
+    const String& ns_ = ns.toString();
+    if (ns_.empty()) {
       newnode->ns = nullptr;
-      nsptr = xmlNewNs(newnode, (xmlChar*)ns.data(), prefix);
+      nsptr = xmlNewNs(newnode, (xmlChar*)ns_.data(), prefix);
     } else {
-      nsptr = xmlSearchNsByHref(node->doc, node, (xmlChar*)ns.data());
+      nsptr = xmlSearchNsByHref(node->doc, node, (xmlChar*)ns_.data());
       if (nsptr == nullptr) {
-        nsptr = xmlNewNs(newnode, (xmlChar*)ns.data(), prefix);
+        nsptr = xmlNewNs(newnode, (xmlChar*)ns_.data(), prefix);
       }
       newnode->ns = nsptr;
     }

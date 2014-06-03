@@ -164,7 +164,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|
   public: bool t_isdefaultnamespace(const String& namespaceuri);
   public: bool t_issamenode(const Object& node);
   public: bool t_issupported(const String& feature, const String& version);
-  public: Variant t_lookupnamespaceuri(const String& namespaceuri);
+  public: Variant t_lookupnamespaceuri(const Variant& namespaceuri);
   public: Variant t_lookupprefix(const String& prefix);
   public: void t_normalize();
   public: Variant t_removechild(const Object& node);

@@ -2296,18 +2296,32 @@ bool c_DOMNode::t_issupported(const String& feature, const String& version) {
   return dom_has_feature(feature.data(), version.data());
 }
 
-Variant c_DOMNode::t_lookupnamespaceuri(const String& namespaceuri) {
+Variant c_DOMNode::t_lookupnamespaceuri(const Variant& namespaceuri) {
+  // Because IDL does not support '?string' we have to do it ourselves.
+  if (!namespaceuri.isString() && !namespaceuri.isNull()) {
+    raise_param_type_warning("DOMNode::lookupNamespaceUri", 1,
+                             DataType::KindOfString, namespaceuri.getType());
+    return init_null();
+  }
+
   xmlNodePtr nodep = m_node;
   xmlNsPtr nsptr;
   if (nodep->type == XML_DOCUMENT_NODE ||
       nodep->type == XML_HTML_DOCUMENT_NODE) {
     nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
-    if (nodep == NULL) {
+    if (nodep == nullptr) {
       return init_null();
     }
   }
-  nsptr = xmlSearchNs(nodep->doc, nodep, (xmlChar*)namespaceuri.data());
-  if (nsptr && nsptr->href != NULL) {
+
+  String nsuri = namespaceuri.toString();
+  const char* ns = nsuri.data();
+  if (namespaceuri.isNull()) {
+    ns = nullptr;
+  }
+
+  nsptr = xmlSearchNs(nodep->doc, nodep, (xmlChar*)ns);
+  if (nsptr && nsptr->href != nullptr) {
     return String((char *)nsptr->href, CopyString);
   }
   return init_null();

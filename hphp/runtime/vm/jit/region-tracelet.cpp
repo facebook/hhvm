@@ -350,31 +350,31 @@ void RegionFormer::addInstruction() {
 }
 
 bool RegionFormer::traceThroughJmp() {
+  bool inlining = inliningDepth();
+
   // We only trace through unconditional jumps and conditional jumps with const
-  // inputs.
+  // inputs while inlining.
   if (!isUnconditionalJmp(m_inst.op()) &&
-      !(isConditionalJmp(m_inst.op()) &&
+      !(inlining && isConditionalJmp(m_inst.op()) &&
         m_ht.topType(0, DataTypeGeneric).isConst())) {
     return false;
   }
 
-  auto inlineDepth = inliningDepth();
-
   // Normally we want to keep profiling translations to basic blocks, but if
   // we're inlining we want to analyze as much of the callee as possible.
-  if (m_profiling && inlineDepth == 0) return false;
+  if (m_profiling && !inlining) return false;
 
   // Don't trace through too many jumps, unless we're inlining. We want to make
   // sure we don't break a tracelet in the middle of an inlined call; if the
   // inlined callee becomes too big that's caught in shouldIRInline.
-  if (m_numJmps == Translator::MaxJmpsTracedThrough && inlineDepth == 0) {
+  if (m_numJmps == Translator::MaxJmpsTracedThrough && !inlining) {
     return false;
   }
 
   auto offset = m_inst.imm[0].u_BA;
   // Only trace through backwards jumps if it's a JmpNS and we're
   // inlining. This is to get DV funclets.
-  if (offset < 0 && m_inst.op() != OpJmpNS && inlineDepth == 0) {
+  if (offset < 0 && (m_inst.op() != OpJmpNS || !inlining)) {
     return false;
   }
 

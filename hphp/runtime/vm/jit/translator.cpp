@@ -3371,7 +3371,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   auto subTrace = analyze(
     SrcKey(target, entryOffset, false),
     initialMap,
-    target->maxStackCells()
+    parent.m_stackSlackUsedForInlining + target->maxStackCells()
   );
 
   /*

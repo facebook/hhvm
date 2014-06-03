@@ -33,25 +33,24 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  template<class TWaitHandle>
+  template<bool decRef, class TWaitHandle>
   void exitContextQueue(context_idx_t ctx_idx,
                         smart::queue<TWaitHandle*> &queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop();
       wait_handle->exitContext(ctx_idx);
-      decRefObj(wait_handle);
+      if (decRef) decRefObj(wait_handle);
     }
   }
 
-  template<bool decRef, class TWaitHandle>
+  template<class TWaitHandle>
   void exitContextVector(context_idx_t ctx_idx,
                          smart::vector<TWaitHandle*> &vector) {
     while (!vector.empty()) {
       auto wait_handle = vector.back();
       vector.pop_back();
       wait_handle->exitContext(ctx_idx);
-      if (decRef) decRefObj(wait_handle);
     }
   }
 }
@@ -60,22 +59,17 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
   assert(!m_current);
 
-  exitContextQueue(ctx_idx, m_runnableQueue);
+  exitContextQueue<false>(ctx_idx, m_runnableQueue);
 
   for (auto it : m_priorityQueueDefault) {
-    exitContextQueue(ctx_idx, it.second);
+    exitContextQueue<true>(ctx_idx, it.second);
   }
   for (auto it : m_priorityQueueNoPendingIO) {
-    exitContextQueue(ctx_idx, it.second);
+    exitContextQueue<true>(ctx_idx, it.second);
   }
 
-  exitContextVector<false>(ctx_idx, m_sleepEvents);
-  exitContextVector<false>(ctx_idx, m_externalThreadEvents);
-}
-
-void AsioContext::schedule(c_ResumableWaitHandle* wait_handle) {
-  m_runnableQueue.push(wait_handle);
-  wait_handle->incRefCount();
+  exitContextVector(ctx_idx, m_sleepEvents);
+  exitContextVector(ctx_idx, m_externalThreadEvents);
 }
 
 void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority) {
@@ -125,7 +119,6 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       m_current = current;
       auto exit_guard = folly::makeGuard([&] {
         m_current = nullptr;
-        decRefObj(current);
       });
 
       m_current->resume();

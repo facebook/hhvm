@@ -143,6 +143,8 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncFunctionWaitHandle::resume() {
+  auto exit_guard = folly::makeGuard([&] { decRefObj(this); });
+
   // may happen if scheduled in multiple contexts
   if (getState() != STATE_SCHEDULED) {
     return;
@@ -179,6 +181,7 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
   if (isInContext()) {
     getContext()->schedule(this);
+    incRefCount();
   }
 }
 
@@ -286,6 +289,7 @@ void c_AsyncFunctionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
       // reschedule so that we get run
       setContextIdx(ctx_idx);
       getContext()->schedule(this);
+      incRefCount();
       break;
 
     case STATE_RUNNING: {
@@ -305,12 +309,14 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
 
   // stop before corrupting unioned data
   if (isFinished()) {
+    decRefObj(this);
     return;
   }
 
   // not in a context being exited
   assert(getContextIdx() <= ctx_idx);
   if (getContextIdx() != ctx_idx) {
+    decRefObj(this);
     return;
   }
 
@@ -319,20 +325,23 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
       // we were already ran due to duplicit scheduling; the context will be
       // updated thru exitContext() call on the non-blocked wait handle we
       // recursively depend on
+      decRefObj(this);
       break;
 
     case STATE_SCHEDULED:
-      // move us to the parent context
-      setContextIdx(getContextIdx() - 1);
-
-      // reschedule if still in a context
-      if (isInContext()) {
-        getContext()->schedule(this);
-      }
-
-      // recursively move all wait handles blocked by us
+      // Recursively move all wait handles blocked by us.
       for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
         pwh->exitContextBlocked(ctx_idx);
+      }
+
+      // Move us to the parent context.
+      setContextIdx(getContextIdx() - 1);
+
+      // Reschedule if still in a context.
+      if (isInContext()) {
+        getContext()->schedule(this);
+      } else {
+        decRefObj(this);
       }
 
       break;

@@ -27,6 +27,7 @@ type program_ret =
 module type SERVER_PROGRAM = sig
   val init : genv -> env -> Path.path -> program_ret
   val recheck: genv -> env -> (SSet.t * SSet.t) -> string list ref -> program_ret
+  val infer: (string * int * int) -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
   val name: string
   val get_errors: ServerEnv.env -> error list
@@ -67,6 +68,8 @@ module HackProgram : SERVER_PROGRAM = struct
           Printf.printf "*************************************************\n";
           Die
         end else Continue env
+
+  let infer = ServerInferType.go 
 
   let parse_options = ServerArgs.parse_options
 
@@ -187,7 +190,7 @@ end = struct
     | ServerMsg.ERROR_OUT_OF_DATE -> incorrect_hash oc
     | ServerMsg.PRINT_TYPES fn -> ServerPrintTypes.go fn genv env ic oc
     | ServerMsg.INFER_TYPE (fn, line, char) ->
-        ServerInferType.go (fn, line, char) oc
+        Program.infer (fn, line, char) oc
     | ServerMsg.STATUS client_root -> print_status genv env client_root oc
     | ServerMsg.SKIP          -> assert false
     | ServerMsg.LIST_FILES    -> ServerEnv.list_files env oc

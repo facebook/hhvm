@@ -4732,14 +4732,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
-        ce->setClosureClassName(makeStaticString(clsName));
-        e.CreateCl(useCount, ce->getClosureClassName());
+        auto ssClsName = makeStaticString(clsName);
+        e.CreateCl(useCount, ssClsName);
 
         // From here on out, we're creating a new class to hold the closure.
         const static StringData* parentName = makeStaticString("Closure");
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
-          ce->getClosureClassName(), PreClass::ClosureHoistable);
+          ssClsName, PreClass::ClosureHoistable);
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
                   AttrUnique | AttrPersistent, parentName, nullptr);
 

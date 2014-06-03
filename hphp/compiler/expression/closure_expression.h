@@ -52,8 +52,6 @@ public:
   FunctionStatementPtr getClosureFunction() { return m_func; }
   ExpressionListPtr getClosureVariables() { return m_vars; }
   ExpressionListPtr getClosureValues() { return m_values; }
-  StringData* getClosureClassName() { return m_closureClassName; }
-  void setClosureClassName(StringData* value) { m_closureClassName = value; }
   bool hasStaticLocals();
   ClosureType type() const { return m_type; }
   std::set<std::string> collectParamNames() const;
@@ -81,7 +79,6 @@ private:
   FunctionStatementPtr m_func;
   ExpressionListPtr m_vars;
   ExpressionListPtr m_values;
-  StringData* m_closureClassName;
   std::set<std::string> m_unboundNames;
   CaptureState m_captureState;
 };

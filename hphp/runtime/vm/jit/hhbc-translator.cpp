@@ -3603,12 +3603,6 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 }
 
 void HhbcTranslator::emitDecRefLocalsInline() {
-  /*
-   * Note: this is currently off for isInlining() because the shuffle
-   * was preventing a decref elimination due to ordering.  Currently
-   * we don't inline anything with parameters, though, so it doesn't
-   * matter.  This will need to be revisted then.
-   */
   for (int id = curFunc()->numLocals() - 1; id >= 0; --id) {
     gen(DecRefLoc, Type::Gen, LocalId(id), m_irb->fp());
   }

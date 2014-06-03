@@ -67,21 +67,19 @@ IF (WIN32)
     $ENV{ProgramFiles}/MySQL/*/lib/${libsuffixDist}
     $ENV{SystemDrive}/MySQL/*/lib/${libsuffixDist})
 ELSE (WIN32)
-  # NO_CMAKE_SYSTEM_PATH prevents CMake from finding 32-bit library on 64-bit arch (issue #1531)
   FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r
     PATHS
     $ENV{MYSQL_DIR}/libmysql_r/.libs
-    $ENV{MYSQL_DIR}/${LIB_DIR}
-    $ENV{MYSQL_DIR}/${LIB_DIR}/mysql
-    /usr/${LIB_DIR}/mysql
-    /usr/local/${LIB_DIR}/mysql
-    /usr/local/mysql/${LIB_DIR}
-    /usr/local/mysql/${LIB_DIR}/mysql
-    /opt/local/mysql5/${LIB_DIR}
-    /opt/local/${LIB_DIR}/mysql5/mysql
-    /opt/mysql/mysql/${LIB_DIR}/mysql
-    /opt/mysql/${LIB_DIR}/mysql
-    NO_CMAKE_SYSTEM_PATH)
+    $ENV{MYSQL_DIR}/lib
+    $ENV{MYSQL_DIR}/lib/mysql
+    /usr/lib/mysql
+    /usr/local/lib/mysql
+    /usr/local/mysql/lib
+    /usr/local/mysql/lib/mysql
+    /opt/local/mysql5/lib
+    /opt/local/lib/mysql5/mysql
+    /opt/mysql/mysql/lib/mysql
+    /opt/mysql/lib/mysql)
 ENDIF (WIN32)
 
 IF(MYSQL_LIB)

@@ -23,8 +23,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 # using GCC
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-  if (NOT (GCC_VERSION VERSION_GREATER 4.7 OR GCC_VERSION VERSION_EQUAL 4.7))
-    message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.7 or greater.")
+  if (NOT (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8))
+    message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.8 or greater.")
   endif()
 
   # ARM64
@@ -34,23 +34,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set (GNUCC_PLAT_OPT "-mcrc32")
   endif()
 
-  # GCC 4.8+
-  set (GNUCC_48_OPT "")
-  if (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
-    set (GNUCC_48_OPT "-Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations")
-  else()
-    # Workaround for GCC bug
-    add_definitions(-D_GLIBCXX_USE_NANOSLEEP)
-  endif()
-
   # Use -Og with Debug builds in gcc >= 4.8
-  if (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
-    set (CMAKE_C_FLAGS_DEBUG    "-Og -g")
-    set (CMAKE_CXX_FLAGS_DEBUG  "-Og -g")
-  else()
-    set (CMAKE_C_FLAGS_DEBUG    "-g")
-    set (CMAKE_CXX_FLAGS_DEBUG  "-g")
-  endif()
+  set (CMAKE_C_FLAGS_DEBUG    "-Og -g")
+  set (CMAKE_CXX_FLAGS_DEBUG  "-Og -g")
 
   # Generic GCC flags and Optional flags
   set (CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
@@ -60,7 +46,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set (CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g")
   set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
   set (CMAKE_C_FLAGS                  "-w")
-  set (CMAKE_CXX_FLAGS "-Wall -std=gnu++11 -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized ${GNUCC_PLAT_OPT} ${GNUCC_48_OPT}")
+  set (CMAKE_CXX_FLAGS "-Wall -std=gnu++11 -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations ${GNUCC_PLAT_OPT}")
 # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   set (CMAKE_C_FLAGS   "-no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -w")

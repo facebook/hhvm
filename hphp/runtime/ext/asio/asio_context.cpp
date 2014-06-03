@@ -90,7 +90,6 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assert(wait_handle);
   assert(wait_handle->getContext() == this);
 
-  uint8_t check_ete_counter = 0;
   auto session = AsioSession::Get();
   auto ete_queue = session->getExternalThreadEventQueue();
   auto& sleep_queue = session->getSleepEventQueue();
@@ -99,39 +98,32 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     session->initAbruptInterruptException();
   }
 
+  auto exit_guard = folly::makeGuard([&] { m_current = nullptr; });
+
   while (!wait_handle->isFinished()) {
-    // Process ready external thread and sleep events once per 256 other events
-    // (when 8-bit check_ete_counter overflows).
-    if (!++check_ete_counter) {
-      // Process any sleep handles that have completed their sleep.
-      session->processSleepEvents();
-
-      // Queue may contain received unprocessed events from failed runUntil().
-      if (UNLIKELY(ete_queue->hasReceived()) || ete_queue->tryReceiveSome()) {
-        ete_queue->processAllReceived();
-      }
-    }
-
     // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.front();
+      m_current = m_runnableQueue.front();
       m_runnableQueue.pop();
-      m_current = current;
-      auto exit_guard = folly::makeGuard([&] {
-        m_current = nullptr;
-      });
-
       m_current->resume();
+      continue;
+    }
+    m_current = nullptr;
+
+    // Process all sleep handles that have completed their sleep.
+    if (session->processSleepEvents()) {
+      continue;
+    }
+
+    // Process all external thread events that have completed their operation.
+    // Queue may contain received unprocessed events from failed runUntil().
+    if (UNLIKELY(ete_queue->hasReceived()) || ete_queue->tryReceiveSome()) {
+      ete_queue->processAllReceived();
       continue;
     }
 
     // Run default priority queue once.
     if (runSingle(m_priorityQueueDefault)) {
-      continue;
-    }
-
-    // Continue if any sleep handles can be processed now.
-    if (session->processSleepEvents()) {
       continue;
     }
 

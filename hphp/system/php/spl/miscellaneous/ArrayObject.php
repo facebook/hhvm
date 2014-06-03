@@ -45,11 +45,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
     if (!$input) {
       $input = array();
     }
-    if (($input instanceof ArrayObject) || ($input instanceof ArrayIterator)) {
-      $this->storage = $input->getArrayCopy();
-    } else {
-      $this->storage = $input;
-    }
+    $this->check_array_object_or_iterator($input);
     $this->flags = $flags;
     $this->iteratorClass = $iterator_class;
   }
@@ -119,7 +115,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    */
   public function exchangeArray($input) {
     $old = $this->storage;
-    $this->storage = $input;
+    $this->check_array_object_or_iterator($input);
     return $old;
   }
 
@@ -488,6 +484,14 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
 
   private function hasProps() {
     return $this->flags & self::ARRAY_AS_PROPS;
+  }
+
+  private function check_array_object_or_iterator($input) {
+    if (($input instanceof ArrayObject) || ($input instanceof ArrayIterator)) {
+      $this->storage = $input->getArrayCopy();
+    } else {
+      $this->storage = $input;
+    }
   }
 
   public function __debugInfo() {

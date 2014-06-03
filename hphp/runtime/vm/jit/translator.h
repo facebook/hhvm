@@ -376,10 +376,6 @@ extern Translator* tx;
  * Translator annotates a tracelet with input/output locations/types.
  */
 struct Translator {
-  // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
-  // generate an inline return for.
-  static const int kMaxInlineReturnDecRefs = 1;
-
   static const int MaxJmpsTracedThrough = 5;
 
   JIT::UniqueStubs uniqueStubs;

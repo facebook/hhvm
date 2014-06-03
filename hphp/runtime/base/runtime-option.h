@@ -142,7 +142,7 @@ public:
   static int FiberCount;
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
-  static size_t ServerMemoryHeadRoom;
+  static int64_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
   static int64_t ImageMemoryMaxBytes;
   static int ResponseQueueCount;
@@ -326,9 +326,6 @@ public:
 
   static bool EnableDnsCache;
   static int DnsCacheTTL;
-  static time_t DnsCacheKeyMaturityThreshold;
-  static size_t DnsCacheMaximumCapacity;
-  static int DnsCacheKeyFrequencyUpdatePeriod;
 
   static std::map<std::string, std::string> ServerVariables;
 
@@ -552,8 +549,8 @@ public:
   static std::string MailForceExtraParameters;
 
   // preg stack depth and debug support options
-  static long PregBacktraceLimit;
-  static long PregRecursionLimit;
+  static int64_t PregBacktraceLimit;
+  static int64_t PregRecursionLimit;
   static bool EnablePregErrorLog;
 
   // pprof/hhprof server options

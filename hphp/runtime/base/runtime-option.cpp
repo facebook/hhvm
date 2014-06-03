@@ -140,7 +140,7 @@ bool RuntimeOption::PageletServerThreadDropStack = false;
 int RuntimeOption::FiberCount = Process::GetCPUCount();
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
-size_t RuntimeOption::ServerMemoryHeadRoom = 0;
+int64_t RuntimeOption::ServerMemoryHeadRoom = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
@@ -324,9 +324,6 @@ bool RuntimeOption::UseDirectCopy = false;
 
 bool RuntimeOption::EnableDnsCache = false;
 int RuntimeOption::DnsCacheTTL = 10 * 60; // 10 minutes
-time_t RuntimeOption::DnsCacheKeyMaturityThreshold = 20;
-size_t RuntimeOption::DnsCacheMaximumCapacity = 0;
-int RuntimeOption::DnsCacheKeyFrequencyUpdatePeriod = 1000;
 
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
@@ -476,8 +473,8 @@ int RuntimeOption::DebuggerSignalTimeout = 1;
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
 
-long RuntimeOption::PregBacktraceLimit = 1000000;
-long RuntimeOption::PregRecursionLimit = 100000;
+int64_t RuntimeOption::PregBacktraceLimit = 1000000;
+int64_t RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
 
 bool RuntimeOption::HHProfServerEnabled = false;
@@ -1138,11 +1135,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Hdf dns = server["DnsCache"];
     Config::Bind(EnableDnsCache, ini, dns["Enable"]);
     Config::Bind(DnsCacheTTL, ini, dns["TTL"], 600); // 10 minutes
-    Config::Bind(DnsCacheKeyMaturityThreshold, ini,
-                 dns["KeyMaturityThreshold"], 20);
-    Config::Bind(DnsCacheMaximumCapacity, ini, dns["MaximumCapacity"], 0);
-    Config::Bind(DnsCacheKeyFrequencyUpdatePeriod, ini,
-                 dns["KeyFrequencyUpdatePeriod"], 1000);
 
     Hdf upload = server["Upload"];
     Config::Bind(UploadMaxFileSize, ini, upload["UploadMaxFileSize"], 100);

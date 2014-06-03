@@ -119,7 +119,11 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    */
   public function exchangeArray($input) {
     $old = $this->storage;
-    $this->storage = $input;
+    if(($input instanceof ArrayObject) || ($input instanceof ArrayIterator)) {
+      $this->storage = $input->getArrayCopy();
+    } else {
+      $this->storage = $input;
+    }
     return $old;
   }
 

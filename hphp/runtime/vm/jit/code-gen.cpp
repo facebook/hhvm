@@ -37,17 +37,6 @@ void AsmInfo::updateForInstruction(IRInstruction* inst, TCA start, TCA end) {
   asmRanges[block] = TcaRange(asmRanges[block].start(), end);
 }
 
-const Func* loadClassCtor(Class* cls) {
-  const Func* f = cls->getCtor();
-  if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    VMRegAnchor _;
-    UNUSED LookupResult res =
-      g_context->lookupCtorMethod(f, cls, true /*raise*/);
-    assert(res == LookupResult::MethodFoundWithThis);
-  }
-  return f;
-}
-
 /*
  * Compute and save registers that are live *across* each inst, not including
  * registers whose lifetimes end at inst, nor registers defined by inst.

@@ -847,6 +847,17 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
   }
 }
 
+const Func* loadClassCtor(Class* cls) {
+  const Func* f = cls->getCtor();
+  if (UNLIKELY(!(f->attrs() & AttrPublic))) {
+    VMRegAnchor _;
+    UNUSED LookupResult res =
+      g_context->lookupCtorMethod(f, cls, true /*raise*/);
+    assert(res == LookupResult::MethodFoundWithThis);
+  }
+  return f;
+}
+
 const Func* lookupUnknownFunc(const StringData* name) {
   VMRegAnchor _;
   auto const func = Unit::loadFunc(name);

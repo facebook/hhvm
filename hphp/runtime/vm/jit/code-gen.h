@@ -94,8 +94,6 @@ struct CodegenState {
   StateVector<Block, CatchInfo> catches;
 };
 
-const Func* loadClassCtor(Class* cls);
-
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);
 
 void genCode(IRUnit&                 unit,

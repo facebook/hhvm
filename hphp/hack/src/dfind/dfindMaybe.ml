@@ -33,9 +33,9 @@ let (>>=) x f =
 let return x = Some x
 
 let handle_file_exn path = function
-  | Inotify.Error (reason, 2) -> ()
+  | Fsnotify.Error (reason, 2) -> ()
       (* The file got deleted in the mean time ... we don't care *)
-  | Inotify.Error (reason, errno) -> 
+  | Fsnotify.Error (reason, errno) -> 
       (* This is bad ... *)
       Printf.fprintf !log 
         "Error: could not add watch to %s [%s, %d]\n" path reason errno

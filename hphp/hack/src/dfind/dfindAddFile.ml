@@ -102,21 +102,12 @@ let rec add_file links env path =
 and ignore_add_watch links env path = ignore (add_watch links env path)
 
 and add_watch links env path =
-  call (add_inotify_watch env) path >>= fun watch ->
-  if WMap.mem watch env.wnames
-  then
-    if WMap.find watch env.wnames = path
-    then return ()
-    else add_new_watch links env path watch
-  else add_new_watch links env path watch
+  call (add_fsnotify_watch env) path >>= function
+  | None -> return ()
+  | Some watch -> add_file links env path
 
-and add_inotify_watch env path =
-  return (Inotify.add_watch env.inotify path DfindEnv.events)
-
-
-and add_new_watch links env path watch =
-  env.wnames <- WMap.add watch path env.wnames;
-  add_file links env path
+and add_fsnotify_watch env path = 
+  return (Fsnotify.add_watch env.fsnotify path)
 
 and add_new_file links env path =
   let time = Time.get() in

@@ -46,9 +46,18 @@ SYSLIBS=nums.cma bigarray.cma str.cma unix.cma $(EXTLIBS)
 ifeq ($(OS), Linux)
   INOTIFY=inotify
   INOTIFYLIB=inotify/inotify.cma
+  FSNOTIFY=fsnotify_linux
+  FSNOTIFYLIB=fsnotify_linux/lib.cma
+endif
+ifeq ($(OS), Darwin)
+  FSEVENTS=fsevents
+  FSEVENTSLIB=fsevents/fsevents.cma
+  FSNOTIFY=fsnotify_darwin
+  FSNOTIFYLIB=fsnotify_darwin/lib.cma
 endif
 
-LIBS=$(INOTIFYLIB) \
+LIBS=$(INOTIFYLIB) $(FSEVENTSLIB)\
+ $(FSNOTIFYLIB) \
  utils/utils.cma \
  hhi/hhi.cma \
  avl/lib.cma \
@@ -61,7 +70,9 @@ LIBS=$(INOTIFYLIB) \
  server/lib.cma \
  client/lib.cma
 
-MAKESUBDIRS=$(INOTIFY) avl dfind \
+MAKESUBDIRS=$(INOTIFY) $(FSEVENTS) \
+ $(FSNOTIFY) \
+ avl dfind \
  utils globals \
  hhi \
  heap procs \

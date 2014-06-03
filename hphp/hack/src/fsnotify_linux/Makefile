@@ -1,26 +1,19 @@
+# Copyright (c) 2014, Facebook, Inc.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the "hack" directory of this source tree. An additional grant
+# of patent rights can be found in the PATENTS file in the same directory.
+
 TOP=..
 ##############################################################################
 # Variables
 ##############################################################################
 TARGET=lib
 
-SRC= dfindEnv.ml \
-   dfindMaybe.ml dfindAddFile.ml \
-   dfindServer.ml dfindLib.ml
+SRC= fsnotify.ml
 
-OS=$(shell uname -s)
-ifeq ($(OS), Linux)
-  FSEVENTS=$(TOP)/fsnotify_linux
-endif
-ifeq ($(OS), Darwin)
-  FSEVENTS=$(TOP)/fsnotify_darwin
-endif
-
-ifndef FSEVENTS
-  $(error Unsupported os: OS)
-endif
-
-INCLUDEDIRS=$(FSEVENTS) $(TOP)/avl
+INCLUDEDIRS=$(TOP)/inotify
 
 ##############################################################################
 # Generic variables

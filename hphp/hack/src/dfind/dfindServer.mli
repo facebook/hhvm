@@ -37,7 +37,7 @@ val is_running: unit -> bool
 (* Wait for the server to be ready (when we just forked it) *)
 val wait_for_server: Unix.file_descr -> unit
 
-(* fork the server, the first function is used to process inotify_events
+(* fork the server, the first function is used to process fsnotify_events
  * the second one to handle incomping messages.
 *)
 val fork: unit -> Unix.file_descr

@@ -56,7 +56,7 @@ type insert_patch = {
 type patch =
 | Insert of insert_patch
 | Remove of Pos.t
-| Replace of insert_patch 
+| Replace of insert_patch
 
 type command =
 | ERROR_OUT_OF_DATE
@@ -74,6 +74,7 @@ type command =
 | FIND_REFS of find_refs_action
 | IDENTIFY_FUNCTION of string * int * int
 | OUTLINE of string
+| METHOD_JUMP of (string * bool)
 | INFER_TYPE of string * int * int (* filename, line, char *)
 | REFACTOR of refactor_action
 | SEARCH of string

@@ -317,6 +317,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_members_fully_known   = tc.tc_members_fully_known            ;
       tc_kind                  = tc.tc_kind                           ;
       tc_name                  = tc.tc_name                           ;
+      tc_pos                   = tc.tc_pos                            ;
       tc_extends               = tc.tc_extends                        ;
       tc_req_ancestors         = tc.tc_req_ancestors                  ;
       tc_req_ancestors_extends = tc.tc_req_ancestors_extends          ;

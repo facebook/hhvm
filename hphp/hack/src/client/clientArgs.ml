@@ -131,6 +131,10 @@ let parse_check_args cmd =
       "";
     "--outline", Arg.Unit (set_mode MODE_OUTLINE),
       " (mode) prints an outline of the text on stdin";
+    "--inheritance-children", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_CHILDREN x) ()),
+      " (mode) prints a list of all related classes or methods to the given class";
+    "--inheritance-ancestors", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
+      " (mode) prints a list of all related classes or methods to the given class";
     "--version", Arg.Unit (set_mode MODE_VERSION),
       " (mode) show version and exit\n";
 

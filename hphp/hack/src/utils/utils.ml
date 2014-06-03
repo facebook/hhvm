@@ -326,15 +326,16 @@ let set_of_list list =
   List.fold_right SSet.add list SSet.empty
 
 let strip_ns s =
-  if s.[0] = '\\' then String.sub s 1 ((String.length s) - 1) else s
+  if String.length s == 0 || s.[0] <> '\\' then s
+  else String.sub s 1 ((String.length s) - 1)
 
 (*****************************************************************************)
 (* Primitives *)
 (*****************************************************************************)
 
-let open_in_no_fail fn = 
+let open_in_no_fail fn =
   try open_in fn
-  with e -> 
+  with e ->
     let e = Printexc.to_string e in
     Printf.fprintf stderr "Could not open_in: '%s' (%s)\n" fn e;
     exit 3
@@ -347,7 +348,7 @@ let close_in_no_fail fn ic =
 
 let open_out_no_fail fn =
   try open_out fn
-  with e -> 
+  with e ->
     let e = Printexc.to_string e in
     Printf.fprintf stderr "Could not open_out: '%s' (%s)\n" fn e;
     exit 3

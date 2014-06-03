@@ -76,7 +76,7 @@ let rec main args retries =
         ServerMsg.cmd_to_channel oc command;
         let results = Marshal.from_channel ic in
         ClientFindRefs.go results args.output_json;
-        exit 0     
+        exit 0
     | MODE_FIND_REFS name ->
         let ic, oc = connect args.root in
         let pieces = Str.split (Str.regexp "::") name in
@@ -144,6 +144,20 @@ let rec main args retries =
       ServerMsg.cmd_to_channel oc command;
       let results = Marshal.from_channel ic in
       ClientOutline.go results args.output_json;
+      exit 0
+    | MODE_METHOD_JUMP_CHILDREN class_ ->
+      let ic, oc = connect args.root in
+      let command = ServerMsg.METHOD_JUMP (class_, true) in
+      ServerMsg.cmd_to_channel oc command;
+      let results = Marshal.from_channel ic in
+      ClientMethodJumps.go results true args.output_json;
+      exit 0
+    | MODE_METHOD_JUMP_ANCESTORS class_ ->
+      let ic, oc = connect args.root in
+      let command = ServerMsg.METHOD_JUMP (class_, false) in
+      ServerMsg.cmd_to_channel oc command;
+      let results = Marshal.from_channel ic in
+      ClientMethodJumps.go results false args.output_json;
       exit 0
     | MODE_STATUS -> ClientCheckStatus.check_status args
     | MODE_VERSION ->

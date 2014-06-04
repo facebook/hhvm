@@ -74,7 +74,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
       return (TCA)-ar->m_savedRip;
     }
     setupAfterPrologue(ar, sp);
-    assert(ar == vmfp());
+    assert(ar == vmRegsUnsafe().fp);
     return tx->uniqueStubs.resumeHelper;
   } catch (...) {
     /*

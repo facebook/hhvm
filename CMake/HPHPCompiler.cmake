@@ -34,7 +34,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set (GNUCC_PLAT_OPT "-mcrc32")
   endif()
 
-  # Use -Og with Debug builds in gcc >= 4.8
+  # Use -Og with Debug builds
   set (CMAKE_C_FLAGS_DEBUG    "-Og -g")
   set (CMAKE_CXX_FLAGS_DEBUG  "-Og -g")
 

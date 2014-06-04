@@ -156,12 +156,13 @@ class mysqli {
   /**
    * Starts a transaction
    *
-   * @param int $flags -
-   * @param string $name -
+   * @param ?int $flags -
+   * @param ?string $name -
    *
    * @return bool -
    */
-  public function begin_transaction(int $flags, string $name): bool {
+  public function begin_transaction(?int $flags = null,
+                                    ?string $name = null): bool {
     $query = 'START TRANSACTION';
     if ($name) {
       $query .= '/*'. $name .'*/';
@@ -169,7 +170,8 @@ class mysqli {
 
     if ($flags) {
       $option_strings = Map {
-        MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT => 'WITH CONSISTENT SNAPSHOT',
+        MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT =>
+          'WITH CONSISTENT SNAPSHOT',
         MYSQLI_TRANS_START_READ_WRITE => 'READ WRITE',
         MYSQLI_TRANS_START_READ_ONLY => 'READ ONLY',
       };
@@ -236,7 +238,8 @@ class mysqli {
     }
 
     if ($flags) {
-      switch ($flags & (MYSQLI_TRANS_COR_AND_CHAIN | MYSQLI_TRANS_COR_AND_NO_CHAIN)) {
+      switch ($flags & (MYSQLI_TRANS_COR_AND_CHAIN |
+                        MYSQLI_TRANS_COR_AND_NO_CHAIN)) {
         case MYSQLI_TRANS_COR_AND_CHAIN:
           $query .= ' AND CHAIN';
         case MYSQLI_TRANS_COR_AND_NO_CHAIN:
@@ -245,7 +248,8 @@ class mysqli {
           // Do nothing to mimic Zend
           break;
       }
-      switch ($flags & (MYSQLI_TRANS_COR_RELEASE | MYSQLI_TRANS_COR_NO_RELEASE)) {
+      switch ($flags & (MYSQLI_TRANS_COR_RELEASE |
+                        MYSQLI_TRANS_COR_NO_RELEASE)) {
         case MYSQLI_TRANS_COR_RELEASE:
           $query .= ' RELEASE';
         case MYSQLI_TRANS_COR_NO_RELEASE:

@@ -403,6 +403,9 @@ protected:
   friend struct PackedArray;
   friend struct EmptyArray;
   friend struct MixedArray;
+  friend class BaseVector;
+  friend class c_Vector;
+  friend class c_ImmVector;
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)
@@ -414,10 +417,11 @@ protected:
           UNUSED uint8_t m_unused0;
           ArrayKind m_kind;
         };
-        // Packed arrays overlay their capacity with the kind field.
-        // kPackedKind is zero, and aliases the top byte of
-        // m_packedCap, so it won't influence the capacity.
-        uint32_t m_packedCap;
+        // Packed arrays overlay their encoded capacity with the kind field.
+        // kPackedKind is zero, and aliases the top byte of m_packedCapCode,
+        // so it won't influence the encoded capacity. For details on the
+        // encoding see the definition of packedCapToCode().
+        uint32_t m_packedCapCode;
       };
       uint32_t m_size;
     };
@@ -444,7 +448,7 @@ extern std::aligned_storage<
  * that can be used whenever an empty array is needed.  It has
  * kEmptyKind and uses the functions in empty-array.cpp.
  */
-inline ArrayData* staticEmptyArray() {
+ALWAYS_INLINE ArrayData* staticEmptyArray() {
   void* vp = &s_theEmptyArray;
   return static_cast<ArrayData*>(vp);
 }

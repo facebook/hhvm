@@ -58,10 +58,6 @@ class c_ExternalThreadEventWaitHandle
     m_nextToProcess = next;
   }
   ObjectData* getPrivData() { return m_privData.get(); }
-  void setIndex(uint32_t ete_idx) {
-    assert(getState() == STATE_WAITING);
-    m_index = ete_idx;
-  }
 
   void abandon(bool sweeping);
   void process();
@@ -79,7 +75,6 @@ class c_ExternalThreadEventWaitHandle
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
   AsioExternalThreadEvent* m_event;
   Object m_privData;
-  uint32_t m_index;
 
   static const uint8_t STATE_WAITING = 2;
 };

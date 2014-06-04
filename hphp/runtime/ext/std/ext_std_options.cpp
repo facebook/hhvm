@@ -158,7 +158,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
 static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
   if (!s_option_data->assertActive) return true;
 
-  JIT::CallerFrame cf;
+  CallerFrame cf;
   Offset callerOffset;
   auto const fp = cf(&callerOffset);
 
@@ -182,8 +182,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
     PackedArrayInit ai(3);
     ai.append(String(const_cast<StringData*>(unit->filepath())));
     ai.append(Variant(unit->getLineNumber(callerOffset)));
-    ai.append(assertion.isString() ? assertion.toString()
-                                   : static_cast<String>(empty_string));
+    ai.append(assertion.isString() ? assertion : empty_string_variant_ref);
     f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
   }
 
@@ -228,14 +227,14 @@ static Variant HHVM_FUNCTION(get_cfg_var, const String& option) {
 static String HHVM_FUNCTION(get_current_user) {
   int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
   if (pwbuflen < 1) {
-    return empty_string;
+    return empty_string();
   }
   char *pwbuf = (char*)smart_malloc(pwbuflen);
   struct passwd pw;
   struct passwd *retpwptr = NULL;
   if (getpwuid_r(getuid(), &pw, pwbuf, pwbuflen, &retpwptr) != 0) {
     smart_free(pwbuf);
-    return empty_string;
+    return empty_string();
   }
   String ret(pw.pw_name, CopyString);
   smart_free(pwbuf);
@@ -274,7 +273,7 @@ static Array HHVM_FUNCTION(get_included_files) {
 
 static Array HHVM_FUNCTION(inclued_get_data) {
   // TODO: Clearly this is not implemented...
-  return empty_array;
+  return empty_array();
 }
 
 static int64_t HHVM_FUNCTION(get_magic_quotes_gpc) {
@@ -295,7 +294,7 @@ static Variant HHVM_FUNCTION(getenv, const String& varname) {
 
 static Variant HHVM_FUNCTION(getlastmod) {
   struct stat s;
-  int ret = ::stat(g_context->getContainingFileName().c_str(), &s);
+  int ret = ::stat(g_context->getContainingFileName()->data(), &s);
   return ret == 0 ? s.st_mtime : false;
 }
 
@@ -309,7 +308,7 @@ static Variant HHVM_FUNCTION(getmygid) {
 
 static Variant HHVM_FUNCTION(getmyinode) {
   struct stat s;
-  int ret = ::stat(g_context->getContainingFileName().c_str(), &s);
+  int ret = ::stat(g_context->getContainingFileName()->data(), &s);
   return ret == 0 ? s.st_ino : false;
 }
 
@@ -737,7 +736,7 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
                set(s_ru_utime_tv_sec,  (int64_t)usg.ru_utime.tv_sec).
                set(s_ru_stime_tv_usec, (int64_t)usg.ru_stime.tv_usec).
                set(s_ru_stime_tv_sec,  (int64_t)usg.ru_stime.tv_sec).
-               create());
+               toArray());
 }
 
 static bool HHVM_FUNCTION(clock_getres,
@@ -784,7 +783,7 @@ static String HHVM_FUNCTION(cpu_get_model) {
 }
 
 Variant HHVM_FUNCTION(ini_get, const String& varname) {
-  String value = empty_string;
+  String value = empty_string();
   IniSetting::Get(varname, value);
   return value;
 }

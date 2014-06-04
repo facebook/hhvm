@@ -2,10 +2,10 @@ DOMCharacterData
 object(DOMCharacterData)#1 (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class DOMCharacterData in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class DOMCharacterData in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(26) {
+array(27) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -15,48 +15,50 @@ array(26) {
   [3]=>
   string(7) "__isset"
   [4]=>
-  string(10) "appendData"
+  string(11) "__debuginfo"
   [5]=>
-  string(10) "deleteData"
+  string(10) "appendData"
   [6]=>
-  string(10) "insertData"
+  string(10) "deleteData"
   [7]=>
-  string(11) "replaceData"
+  string(10) "insertData"
   [8]=>
-  string(13) "substringData"
+  string(11) "replaceData"
   [9]=>
-  string(11) "appendChild"
+  string(13) "substringData"
   [10]=>
-  string(9) "cloneNode"
+  string(11) "appendChild"
   [11]=>
-  string(9) "getLineNo"
+  string(9) "cloneNode"
   [12]=>
-  string(13) "hasAttributes"
+  string(9) "getLineNo"
   [13]=>
-  string(13) "hasChildNodes"
+  string(13) "hasAttributes"
   [14]=>
-  string(12) "insertBefore"
+  string(13) "hasChildNodes"
   [15]=>
-  string(18) "isDefaultNamespace"
+  string(12) "insertBefore"
   [16]=>
-  string(10) "isSameNode"
+  string(18) "isDefaultNamespace"
   [17]=>
-  string(11) "isSupported"
+  string(10) "isSameNode"
   [18]=>
-  string(18) "lookupNamespaceUri"
+  string(11) "isSupported"
   [19]=>
-  string(12) "lookupPrefix"
+  string(18) "lookupNamespaceUri"
   [20]=>
-  string(9) "normalize"
+  string(12) "lookupPrefix"
   [21]=>
-  string(11) "removeChild"
+  string(9) "normalize"
   [22]=>
-  string(12) "replaceChild"
+  string(11) "removeChild"
   [23]=>
-  string(4) "c14n"
+  string(12) "replaceChild"
   [24]=>
-  string(8) "c14nfile"
+  string(4) "c14n"
   [25]=>
+  string(8) "c14nfile"
+  [26]=>
   string(11) "getNodePath"
 }
 ================
@@ -66,10 +68,10 @@ object(A_DOMCharacterData)#2 (1) {
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_DOMCharacterData in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_DOMCharacterData in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(26) {
+array(27) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -79,47 +81,49 @@ array(26) {
   [3]=>
   string(7) "__isset"
   [4]=>
-  string(10) "appendData"
+  string(11) "__debuginfo"
   [5]=>
-  string(10) "deleteData"
+  string(10) "appendData"
   [6]=>
-  string(10) "insertData"
+  string(10) "deleteData"
   [7]=>
-  string(11) "replaceData"
+  string(10) "insertData"
   [8]=>
-  string(13) "substringData"
+  string(11) "replaceData"
   [9]=>
-  string(11) "appendChild"
+  string(13) "substringData"
   [10]=>
-  string(9) "cloneNode"
+  string(11) "appendChild"
   [11]=>
-  string(9) "getLineNo"
+  string(9) "cloneNode"
   [12]=>
-  string(13) "hasAttributes"
+  string(9) "getLineNo"
   [13]=>
-  string(13) "hasChildNodes"
+  string(13) "hasAttributes"
   [14]=>
-  string(12) "insertBefore"
+  string(13) "hasChildNodes"
   [15]=>
-  string(18) "isDefaultNamespace"
+  string(12) "insertBefore"
   [16]=>
-  string(10) "isSameNode"
+  string(18) "isDefaultNamespace"
   [17]=>
-  string(11) "isSupported"
+  string(10) "isSameNode"
   [18]=>
-  string(18) "lookupNamespaceUri"
+  string(11) "isSupported"
   [19]=>
-  string(12) "lookupPrefix"
+  string(18) "lookupNamespaceUri"
   [20]=>
-  string(9) "normalize"
+  string(12) "lookupPrefix"
   [21]=>
-  string(11) "removeChild"
+  string(9) "normalize"
   [22]=>
-  string(12) "replaceChild"
+  string(11) "removeChild"
   [23]=>
-  string(4) "c14n"
+  string(12) "replaceChild"
   [24]=>
-  string(8) "c14nfile"
+  string(4) "c14n"
   [25]=>
+  string(8) "c14nfile"
+  [26]=>
   string(11) "getNodePath"
 }

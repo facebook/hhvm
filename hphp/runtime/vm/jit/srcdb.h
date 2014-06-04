@@ -68,7 +68,7 @@ private:
     T m_data[1]; // Actually variable length
     Impl() : m_size(0) { }
     static Impl* make() {
-      static_assert(boost::has_trivial_destructor<T>::value,
+      static_assert(std::is_trivially_destructible<T>::value,
                     "GrowableVector can only hold trivially "
                     "destructible types");
       auto mem = malloc(sizeof(Impl));
@@ -124,7 +124,9 @@ struct IncomingBranch {
 
   Tag type()        const { return static_cast<Tag>(m_ptr.size()); }
   TCA toSmash()     const { return TCA(m_ptr.ptr()); }
-
+  void adjust(TCA addr) {
+    m_ptr.set(m_ptr.size(), addr);
+  }
 private:
   explicit IncomingBranch(Tag type, TCA toSmash) {
     m_ptr.set((uint32_t)type, toSmash);

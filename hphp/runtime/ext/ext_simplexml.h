@@ -30,7 +30,10 @@ Variant f_simplexml_load_string(const String& data,
                                 int64_t options = 0,
                                 const String& ns = "",
                                 bool is_prefix = false);
-Variant f_simplexml_load_file(const String& filename, const String& class_name = "SimpleXMLElement", int64_t options = 0, const String& ns = "", bool is_prefix = false);
+Variant f_simplexml_load_file(const String& filename,
+                              const String& class_name = "SimpleXMLElement",
+                              int64_t options = 0, const String& ns = "",
+                              bool is_prefix = false);
 Variant f_libxml_get_errors();
 Variant f_libxml_get_last_error();
 void f_libxml_clear_errors();
@@ -62,7 +65,9 @@ class c_SimpleXMLElement :
 
   public: c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
   public: ~c_SimpleXMLElement();
-  public: void t___construct(const String& data, int64_t options = 0, bool data_is_url = false, const String& ns = "", bool is_prefix = false);
+  public: void t___construct(const String& data, int64_t options = 0,
+                             bool data_is_url = false, const String& ns = "",
+                             bool is_prefix = false);
   public: bool t_offsetexists(const Variant& index);
   public: Variant t_offsetget(const Variant& index);
   public: void t_offsetset(const Variant& index, const Variant& newvalue);
@@ -79,8 +84,12 @@ class c_SimpleXMLElement :
   public: Object t_children(const String& ns = "", bool is_prefix = false);
   public: String t_getname();
   public: Object t_attributes(const String& ns = "", bool is_prefix = false);
-  public: Variant t_addchild(const String& qname, const String& value = null_string, const String& ns = null_string);
-  public: void t_addattribute(const String& qname, const String& value = null_string, const String& ns = null_string);
+  public: Variant t_addchild(const String& qname,
+                             const String& value = null_string,
+                             const Variant& ns = null_string);
+  public: void t_addattribute(const String& qname,
+                              const String& value = null_string,
+                              const String& ns = null_string);
   public: String t___tostring();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -115,7 +124,8 @@ class c_SimpleXMLElementIterator : public ExtObjectData {
  public:
   DECLARE_CLASS_NO_SWEEP(SimpleXMLElementIterator)
 
-  public: c_SimpleXMLElementIterator(Class* cls = c_SimpleXMLElementIterator::classof());
+  public: c_SimpleXMLElementIterator(Class* cls =
+                                     c_SimpleXMLElementIterator::classof());
   public: ~c_SimpleXMLElementIterator();
   public: void t___construct();
   public: Variant t_current();

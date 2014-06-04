@@ -20,10 +20,6 @@
 namespace HPHP {
 namespace JIT {
 
-void translatorSync() {
-  mcg->sync();
-}
-
 void translatorTraceCodeGen() {
   mcg->traceCodeGen();
 }

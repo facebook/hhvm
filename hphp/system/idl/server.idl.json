@@ -340,6 +340,29 @@
             },
             "args": [
             ]
+        },
+        {
+            "name": "server_get_custom_bool_setting",
+            "desc": "Returns the value of a custom boolean server setting from config.hdf",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "The value of the setting or the default value passed in if the setting isn't present in the config.hdf."
+            },
+            "args": [
+                {
+                    "name": "settingName",
+                    "type": "String",
+                    "desc": "The name of the setting to fetch."
+                },
+                {
+                    "name": "defaultValue",
+                    "type": "Boolean",
+                    "desc": "The value to return if the setting isn't present in the config.hdf."
+                }
+            ]
         }
     ],
     "classes": [

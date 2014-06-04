@@ -346,9 +346,9 @@ bool TestCppBase::TestArray() {
   {
     Array arr;
     arr.lvalAt(Variant()) = 123;
-    VERIFY(arr.exists(empty_string));
+    VERIFY(arr.exists(empty_string_ref));
     arr.remove(Variant());
-    VERIFY(!arr.exists(empty_string));
+    VERIFY(!arr.exists(empty_string_ref));
   }
   {
     Array arr;
@@ -485,7 +485,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v1("original");
-    Variant v2 = strongBind(v1);
+    Variant v2(v1, Variant::StrongBind{});
     v2 = String("changed");
     VERIFY(equal(v1, String("changed")));
   }

@@ -38,7 +38,7 @@
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal
 #else
-#include "memcache/ch/hash.h" // @nolint
+#include "mcrouter/lib/fbi/hash.h" // @nolint
 #endif
 
 namespace HPHP {

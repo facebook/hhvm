@@ -640,11 +640,7 @@ array(3) {
   [1]=>
   string(3) "gen"
   [2]=>
-  array(1) {
-    ["return"]=>
-    object(Generator)#2 (0) {
-    }
-  }
+  NULL
 }
 array(3) {
   [0]=>
@@ -877,7 +873,10 @@ array(3) {
   [1]=>
   string(3) "gen"
   [2]=>
-  NULL
+  array(1) {
+    ["return"]=>
+    NULL
+  }
 }
 array(3) {
   [0]=>

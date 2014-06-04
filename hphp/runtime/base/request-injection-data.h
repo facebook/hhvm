@@ -37,13 +37,15 @@ struct RequestInjectionData {
   static const ssize_t PendingExceptionFlag = 1 << 4;
   static const ssize_t InterceptFlag        = 1 << 5;
   static const ssize_t XenonSignalFlag      = 1 << 6;
+  static const ssize_t AsyncEventHookFlag   = 1 << 7;
   // Set by the debugger to break out of loops in translated code.
-  static const ssize_t DebuggerSignalFlag   = 1 << 7;
+  static const ssize_t DebuggerSignalFlag   = 1 << 8;
   static const ssize_t LastFlag             = DebuggerSignalFlag;
   // flags that shouldn't be cleared by fetchAndClearFlags, because:
   // fetchAndClearFlags is only supposed to touch flags related to PHP-visible
   // signals/exceptions and resource limits
-  static const ssize_t StickyFlags = RequestInjectionData::EventHookFlag |
+  static const ssize_t StickyFlags = RequestInjectionData::AsyncEventHookFlag |
+                                     RequestInjectionData::EventHookFlag |
                                      RequestInjectionData::InterceptFlag |
                                      RequestInjectionData::XenonSignalFlag;
 
@@ -148,6 +150,8 @@ struct RequestInjectionData {
   void setTimedOutFlag();
   void clearTimedOutFlag();
   void setSignaledFlag();
+  void setAsyncEventHookFlag();
+  void clearAsyncEventHookFlag();
   void setEventHookFlag();
   void clearEventHookFlag();
   void setPendingExceptionFlag();

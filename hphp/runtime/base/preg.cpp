@@ -850,7 +850,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
       raise_warning(
         "Modifier /e cannot be used with replacement callback."
       );
-      return String();
+      return init_null();
     }
     raise_deprecated(
       "preg_replace(): The /e modifier is deprecated, use "
@@ -1026,7 +1026,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
           int full_len = result.size();
           const char* data = result.data() + result_len;
           if (eval) {
-            JIT::VMRegAnchor _;
+            VMRegAnchor _;
             // reserve space for "<?php return " + code + ";"
             String prefixedCode(full_len - result_len + 14, ReserveString);
             prefixedCode += "<?php return ";
@@ -1090,7 +1090,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                          callable, limit, start_offset, g_notempty);
         }
         pcre_handle_exec_error(count);
-        return String();
+        return init_null();
       }
 
       /* If we have matched an empty string, mimic what Perl's /g options does.

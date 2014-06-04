@@ -33,8 +33,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using HPHP::JIT::CallerFrame;
-using HPHP::JIT::EagerCallerFrame;
 using std::string;
 
 const StaticString

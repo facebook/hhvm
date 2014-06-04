@@ -148,7 +148,7 @@ icu::UnicodeString u16(const char *u8, int32_t u8_len, UErrorCode &error,
 String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   error = U_ZERO_ERROR;
   if (u16_len == 0) {
-    return empty_string;
+    return empty_string();
   }
   int32_t outlen;
   u_strToUTF8(nullptr, 0, &outlen, u16, u16_len, &error);

@@ -29,7 +29,7 @@
 namespace HPHP {
 
 const String null_string = String();
-const StaticString empty_string("");
+const StaticString empty_string_ref("");
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -267,6 +267,12 @@ String &String::operator=(const String& str) {
   return *this;
 }
 
+String &String::operator=(const StaticString& str) {
+  if (m_px) decRefStr(m_px);
+  m_px = str.m_px;
+  return *this;
+}
+
 String &String::operator=(const Variant& var) {
   return operator=(var.toString());
 }
@@ -368,7 +374,7 @@ String operator+(const String & lhs, const String & rhs) {
 // conversions
 
 VarNR String::toKey() const {
-  if (!m_px) return VarNR(empty_string);
+  if (!m_px) return VarNR(staticEmptyString());
   int64_t n = 0;
   if (m_px->isStrictlyInteger(n)) {
     return VarNR(n);
@@ -567,11 +573,6 @@ StaticString::StaticString(std::string s) {
   m_px = makeStaticString(s.c_str(), s.size());
 }
 
-StaticString::StaticString(const StaticString &str) {
-  assert(str.m_px->isStatic());
-  m_px = str.m_px;
-}
-
 StaticString& StaticString::operator=(const StaticString &str) {
   // Assignment to a StaticString is ignored. Generated code
   // should never use a StaticString on the left-hand side of
@@ -619,7 +620,7 @@ String getDataTypeString(DataType t) {
       assert(false);
       break;
   }
-  return empty_string;
+  return empty_string();
 }
 
 //////////////////////////////////////////////////////////////////////////////

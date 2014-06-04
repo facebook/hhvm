@@ -25,8 +25,9 @@ namespace HPHP {
 namespace JIT {
 
 static void setupAfterPrologue(ActRec* fp, void* sp) {
-  g_context->m_fp = fp;
-  g_context->m_stack.top() = (Cell*)sp;
+  auto& regs = vmRegsUnsafe();
+  regs.fp = fp;
+  regs.stack.top() = (Cell*)sp;
   int nargs = fp->numArgs();
   int nparams = fp->m_func->numNonVariadicParams();
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -41,9 +42,9 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
     }
   }
   if (firstDVInitializer != InvalidAbsoluteOffset) {
-    g_context->m_pc = fp->m_func->unit()->entry() + firstDVInitializer;
+    regs.pc = fp->m_func->unit()->entry() + firstDVInitializer;
   } else {
-    g_context->m_pc = fp->m_func->getEntry();
+    regs.pc = fp->m_func->getEntry();
   }
 }
 
@@ -63,7 +64,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
        * dv funclets. Dont run the prologue again.
        */
       VMRegAnchor _(ar);
-      if (g_context->doFCall(ar, g_context->m_pc)) {
+      if (g_context->doFCall(ar, vmpc())) {
         return tx->uniqueStubs.resumeHelperRet;
       }
       // We've been asked to skip the function body
@@ -73,7 +74,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
       return (TCA)-ar->m_savedRip;
     }
     setupAfterPrologue(ar, sp);
-    assert(ar == g_context->m_fp);
+    assert(ar == vmfp());
     return tx->uniqueStubs.resumeHelper;
   } catch (...) {
     /*

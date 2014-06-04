@@ -40,6 +40,33 @@ struct Config {
 
   static void Parse(const std::string &config, IniSettingMap &ini, Hdf &hdf);
 
+  /** Prefer the Bind() over the GetFoo() as it makes ini_get() work too */
+  static void Bind(bool& loc, const IniSettingMap &ini,
+                   const Hdf& config, const bool defValue = false);
+  static void Bind(const char*& loc, const IniSettingMap &ini,
+                   const Hdf& config, const char *defValue = nullptr);
+  static void Bind(std::string& loc, const IniSettingMap &ini,
+                   const Hdf& config, const std::string defValue = "");
+  static void Bind(char& loc, const IniSettingMap &ini,
+                   const Hdf& config, const char defValue = 0);
+  static void Bind(unsigned char& loc,const IniSettingMap &ini,
+                   const Hdf& config, const unsigned char defValue = 0);
+  static void Bind(int16_t& loc, const IniSettingMap &ini,
+                   const Hdf& config, const int16_t defValue = 0);
+  static void Bind(uint16_t& loc, const IniSettingMap &ini,
+                   const Hdf& config, const uint16_t defValue = 0);
+  static void Bind(int32_t& loc, const IniSettingMap &ini,
+                   const Hdf& config, const int32_t defValue = 0);
+  static void Bind(uint32_t& loc, const IniSettingMap &ini,
+                   const Hdf& config, const uint32_t defValue = 0);
+  static void Bind(int64_t& loc, const IniSettingMap &ini,
+                   const Hdf& config, const int64_t defValue = 0);
+  static void Bind(uint64_t& loc, const IniSettingMap &ini,
+                   const Hdf& config, const uint64_t defValue = 0);
+  static void Bind(double& loc, const IniSettingMap &ini,
+                   const Hdf& config, const double defValue = 0);
+  static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
+                   const Hdf& config);
   static bool GetBool(const IniSettingMap &ini, const Hdf& config,
                       const bool defValue = false);
   static const char *Get(const IniSettingMap &ini, const Hdf& config,
@@ -64,9 +91,6 @@ struct Config {
                             const uint64_t defValue = 0);
   static double GetDouble(const IniSettingMap &ini, const Hdf& config,
                           const double defValue = 0);
-  static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
-                                              const Hdf& config,
-                                              const bool EnableHipHopSyntax);
 
   template<class T>
   static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {

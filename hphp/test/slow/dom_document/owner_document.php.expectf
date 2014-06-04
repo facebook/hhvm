@@ -1,0 +1,145 @@
+object(DOMDocument)#1 (35) {
+  ["substituteEntities"]=>
+  bool(false)
+  ["recover"]=>
+  bool(false)
+  ["validateOnParse"]=>
+  bool(false)
+  ["formatOutput"]=>
+  bool(false)
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["xmlStandalone"]=>
+  bool(true)
+  ["standalone"]=>
+  bool(true)
+  ["attributes"]=>
+  NULL
+  ["version"]=>
+  string(3) "1.0"
+  ["nextSibling"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["config"]=>
+  NULL
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentURI"]=>
+  NULL
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["lastChild"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["previousSibling"]=>
+  NULL
+  ["encoding"]=>
+  NULL
+  ["nodeValue"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["nodeName"]=>
+  string(9) "#document"
+  ["parentNode"]=>
+  NULL
+  ["firstChild"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["nodeType"]=>
+  int(9)
+  ["prefix"]=>
+  string(0) ""
+  ["resolveExternals"]=>
+  bool(false)
+  ["localName"]=>
+  NULL
+  ["doctype"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["documentElement"]=>
+  NULL
+  ["actualEncoding"]=>
+  NULL
+  ["xmlEncoding"]=>
+  NULL
+}
+object(DOMDocument)#1 (35) {
+  ["substituteEntities"]=>
+  bool(false)
+  ["recover"]=>
+  bool(false)
+  ["validateOnParse"]=>
+  bool(false)
+  ["formatOutput"]=>
+  bool(false)
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["xmlStandalone"]=>
+  bool(true)
+  ["standalone"]=>
+  bool(true)
+  ["attributes"]=>
+  NULL
+  ["version"]=>
+  string(3) "1.0"
+  ["nextSibling"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["config"]=>
+  NULL
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentURI"]=>
+  NULL
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["lastChild"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["previousSibling"]=>
+  NULL
+  ["encoding"]=>
+  NULL
+  ["nodeValue"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["nodeName"]=>
+  string(9) "#document"
+  ["parentNode"]=>
+  NULL
+  ["firstChild"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["nodeType"]=>
+  int(9)
+  ["prefix"]=>
+  string(0) ""
+  ["resolveExternals"]=>
+  bool(false)
+  ["localName"]=>
+  NULL
+  ["doctype"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["documentElement"]=>
+  NULL
+  ["actualEncoding"]=>
+  NULL
+  ["xmlEncoding"]=>
+  NULL
+}
+bool(true)

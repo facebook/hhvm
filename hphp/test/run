@@ -157,6 +157,7 @@ function get_options($argv) {
     'hhas-round-trip' => '',
     'color' => 'c',
     'no-fun' => '',
+    'cores' => '',
   );
   $options = array();
   $files = array();
@@ -344,6 +345,9 @@ function hhvm_cmd_impl($options, $config /*, $extra_args... */) {
     isset($options['bccf']) ? '-vEval.HHIRBytecodeControlFlow=1' : '',
     extra_args($options),
   );
+  if (!isset($options['cores'])) {
+    $args[] = '-vResourceLimit.CoreFileSize=0';
+  }
 
   $extra_args = array_slice(func_get_args(), 2);
   return implode(' ', array_merge($args, $extra_args));
@@ -364,7 +368,6 @@ function hhvm_cmd($options, $test, $test_run = null) {
     find_test_ext($test, 'ini'),
     find_debug_config($test, 'hphpd.ini'),
     read_file(find_test_ext($test, 'opts')),
-    '-vResourceLimit.CoreFileSize=0',
     '--file',
     escapeshellarg($test_run),
     $use_automain ? escapeshellarg($test) : ''
@@ -443,6 +446,10 @@ class Status {
   const GREEN = 32;
   const YELLOW = 33;
 
+  const PASS_SERVER = 0;
+  const SKIP_SERVER = 1;
+  const PASS_CLI = 2;
+
   public static function setMode($mode) {
     self::$mode = $mode;
   }
@@ -461,7 +468,9 @@ class Status {
 
   public static function pass($test, $detail) {
     array_push(self::$results, array('name' => $test, 'status' => 'passed'));
-    self::send(self::MSG_TEST_PASS, [$test, $detail === 'pass-server']);
+    $how = $detail === 'pass-server' ? self::PASS_SERVER :
+      ($detail === 'skip-server' ? self::SKIP_SERVER : self::PASS_CLI);
+    self::send(self::MSG_TEST_PASS, [$test, $how]);
   }
 
   public static function skip($test, $reason = null) {
@@ -601,9 +610,10 @@ function dump_hhas_to_temp($hhvm_cmd, $test) {
 const HHAS_EXT = '.hhas';
 function can_run_server_test($test) {
   return
-    !find_test_ext($test, 'noserver') &&
+    !is_file("$test.noserver") &&
     !find_test_ext($test, 'opts') &&
-    !find_test_ext($test, 'ini') &&
+    !is_file("$test.ini") &&
+    !is_file("$test.onlyrepo") &&
     strpos($test, 'quick/debugger') === false &&
     strpos($test, 'quick/xenon') === false &&
     strpos($test, 'slow/streams/') === false &&
@@ -840,7 +850,9 @@ function run_test($options, $test) {
   }
 
   if ($outputs = run_config_server($options, $test)) {
-    return run_config_post($outputs, $test, $options) ? 'pass-server' : false;
+    return run_config_post($outputs, $test, $options) ? 'pass-server'
+      : (run_one_config($options, $test, $hhvm, $hhvm_env) ? 'skip-server'
+         : false);
   }
   return run_one_config($options, $test, $hhvm, $hhvm_env);
 }
@@ -912,7 +924,7 @@ function msg_loop($num_tests, $queue) {
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
-              Status::sayColor(Status::YELLOW, 'x');
+              Status::sayColor(Status::RED, 'x');
             }
             break;
 
@@ -927,11 +939,16 @@ function msg_loop($num_tests, $queue) {
 
       case Status::MSG_TEST_PASS:
         $passed++;
-        list($test, $server) = $message;
+        list($test, $how) = $message;
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
-              Status::sayColor(Status::GREEN, $server ? ',' : '.');
+              if ($how == Status::SKIP_SERVER) {
+                Status::sayColor(Status::RED, '.');
+              } else {
+                Status::sayColor(Status::GREEN,
+                                 $how == Status::PASS_SERVER ? ',' : '.');
+              }
             }
             break;
 
@@ -1143,7 +1160,16 @@ function start_server_impl($options, $config, $port) {
     '-vServer.RequestTimeoutSeconds='.SERVER_TIMEOUT,
     '-vPageletServer.ThreadCount=0',
     '-vLog.UseRequestLog=1',
-    '-vLog.File=/dev/null'
+    '-vLog.File=/dev/null',
+
+    // This ensures we actually jit everything:
+    '-vEval.JitRequireWriteLease=1',
+
+    // The default test config uses a small TC but we'll be running thousands
+    // of tests against the same process:
+    '-vEval.JitASize=100000000',
+    '-vEval.JitAStubsSize=100000000',
+    '-vEval.JitGlobalDataSize=32000000'
   );
   if (getenv('HHVM_TEST_SERVER_LOG')) {
     echo "Starting server '$command'\n";

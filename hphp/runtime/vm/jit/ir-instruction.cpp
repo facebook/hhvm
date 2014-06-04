@@ -107,7 +107,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case StRetVal:
     case StLoc:
     case StLocNT:
-    case StAsyncArChild:
+    case AFWHBlockOn:
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
 
@@ -189,7 +189,7 @@ bool IRInstruction::isRawLoad() const {
 
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
-  assert(is(IncRef, PassFP, PassSP,
+  assert(is(IncRef,
             CheckType, AssertType, AssertNonNull,
             StRef,
             ColAddElemC, ColAddNewElemC,

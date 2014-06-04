@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include <limits>
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 
 #define DECLARE_COLLECTION_MAGIC_METHODS()           \
   String t___tostring();                             \
@@ -152,23 +153,53 @@ class BaseVector : public ExtCollectionObjectData {
   Array tovaluesarray();
   int64_t linearsearch(const Variant& search_value);
 
+ public:
+  ArrayData* arrayData() {
+    auto* ret = getArrayFromPackedData(m_data);
+    assert(ret == staticEmptyArray() || ret->isPacked());
+    return ret;
+  }
+  const ArrayData* arrayData() const {
+    auto* ret = getArrayFromPackedData(m_data);
+    assert(ret == staticEmptyArray() || ret->isPacked());
+    return ret;
+  }
+  void setSize(uint32_t sz) {
+    assert(sz <= m_capacity);
+    // This check is important because it ensures that we avoiding
+    // writing a size of 0 to the static empty array
+    if (sz == m_size) return;
+    assert(!arrayData()->hasMultipleRefs());
+    m_size = sz;
+    arrayData()->m_size = sz;
+  }
+  void incSize() {
+    assert(m_size + 1 <= m_capacity);
+    assert(!arrayData()->hasMultipleRefs());
+    ++m_size;
+    arrayData()->m_size = m_size;
+  }
+  void decSize() {
+    assert(m_size > 0);
+    assert(!arrayData()->hasMultipleRefs());
+    --m_size;
+    arrayData()->m_size = m_size;
+  }
+
+ protected:
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, TVector*>::type
   static Clone(ObjectData* obj) {
     auto thiz = static_cast<TVector*>(obj);
     auto target = static_cast<TVector*>(obj->cloneImpl());
-    uint sz = thiz->m_size;
-    if (!sz) {
+    if (!thiz->m_size) {
       return target;
     }
-    TypedValue* data;
-    target->m_capacity = target->m_size = sz;
-    target->m_data = data =
-      (TypedValue*)MM().objMallocLogged(sz * sizeof(TypedValue));
-    for (int i = 0; i < sz; ++i) {
-      cellDup(thiz->m_data[i], data[i]);
-    }
+    thiz->arrayData()->incRefCount();
+    target->m_data = thiz->m_data;
+    target->m_size = thiz->m_size;
+    target->m_capacity = thiz->m_capacity;
     return target;
   }
 
@@ -267,9 +298,11 @@ class BaseVector : public ExtCollectionObjectData {
   /*virtual*/ ~BaseVector();
 
   void grow();
+  void reserveImpl(uint32_t newCap);
 
   static constexpr uint64_t MaxCapacity() {
-    return std::numeric_limits<decltype(m_capacity)>::max();
+    // same as mixed-array for now
+    return MixedArray::MaxSize;
   }
 
   template <bool raw>
@@ -282,9 +315,9 @@ class BaseVector : public ExtCollectionObjectData {
     if (!raw) {
       mutateAndBump();
     }
-    assert(!hasImmutableBuffer());
+    assert(canMutateBuffer());
     cellDup(*val, m_data[m_size]);
-    ++m_size;
+    incSize();
   }
 
   // addRaw() adds a new element to this Vector but doesn't check for an
@@ -293,15 +326,17 @@ class BaseVector : public ExtCollectionObjectData {
   void addRaw(const TypedValue* val) { addImpl<true>(val); }
   void addRaw(const Variant& val) { addRaw(val.asCell()); }
 
+ public:
   void add(const TypedValue* val) { addImpl<false>(val); }
   void add(const Variant& val) { add(val.asCell()); }
 
+ protected:
   // setRaw() assigns a value to the specified key in this Vector but
   // doesn't increment m_version, so it's only safe to use in some cases.
   // If you're not sure, use set() instead.
   void setRaw(int64_t key, const TypedValue* val) {
     assert(val->m_type != KindOfRef);
-    assert(!hasImmutableBuffer());
+    assert(canMutateBuffer());
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       throwOOB(key);
       return;
@@ -328,6 +363,7 @@ class BaseVector : public ExtCollectionObjectData {
     setRaw(key.asCell(), val.asCell());
   }
 
+ public:
   void set(int64_t key, const TypedValue* val) {
     mutate();
     setRaw(key, val);
@@ -346,35 +382,74 @@ class BaseVector : public ExtCollectionObjectData {
     set(key.asCell(), val.asCell());
   }
 
- public:
-  bool hasImmutableBuffer() const { return !m_immCopy.isNull(); }
+  /**
+   * canMutateBuffer() indicates whether it is currently safe to directly
+   * modify this Vector's buffer. canMutateBuffer() is vacuously true for
+   * buffers with zero capacity (i.e. the staticEmptyArray() case) because
+   * you can't meaningfully mutate zero-capacity buffer without first doing
+   * a grow. This may seem weird, but its actually much smoother in practice
+   * than the alternative of returning false for such cases.
+   */
+  bool canMutateBuffer() const {
+    return m_capacity == 0 || !arrayData()->hasMultipleRefs();
+  }
 
   /**
-   * Should be called by any operation that mutates the vector, since
-   * we might need to to trigger COW.
+   * mutate() must be called before any doing anything that mutates this
+   * Vector's buffer, unless it can be proven that canMutateBuffer() is
+   * true. mutate() takes care of updating m_immCopy and making a copy
+   * this Vector's buffer if needed.
    */
-  void mutate() { if (hasImmutableBuffer()) cow(); }
+  void mutate() {
+    if (arrayData()->hasMultipleRefs()) {
+      // mutateImpl() does two things for us. First it drops the the
+      // immutable collection held by m_immCopy (if m_immCopy is not
+      // null). Second, it takes care of copying the buffer if needed.
+      mutateImpl();
+    }
+  }
 
   void mutateAndBump() { mutate(); ++m_version; }
 
+  void dropImmCopy() {
+    assert(m_immCopy.isNull() ||
+           (m_data == ((BaseVector*)m_immCopy.get())->m_data &&
+            arrayData()->hasMultipleRefs()));
+    m_immCopy.reset();
+  }
+
  protected:
   /**
-   * Copy-On-Write the buffer and reset the immutable copy.
+   * Copy the buffer and reset the immutable copy.
    */
-  void cow();
+  void mutateImpl();
 
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
   static void Unserialize(const char* vectorType, ObjectData* obj,
                           VariableUnserializer* uns, int64_t sz, char type);
 
-  // Properties
-  uint m_size;
+  // Fields
+
+  uint32_t m_size;
+  uint32_t m_capacity;
+
+  // m_data is an interior pointer into an ArrayData as computed by the
+  // packedData() helper function. The ArrayData's address can be computed
+  // from m_data via the getArrayFromPackedData() helper function. When
+  // capacity is non-zero, m_data points to the beginning of the element
+  // store within a packed array.
   TypedValue* m_data;
-  uint m_capacity;
-  int32_t m_version;
-  // A pointer to a ImmVector which with it shares the buffer.
+
+  // m_immCopy is a smart pointer to an ImmVector that is an up-to-date
+  // shallow copy of this Vector (or m_immCopy is null). We maintain the
+  // invariant that a Vector and its m_immCopy share the same ArrayData
+  // buffer. Neither the Vector or the ImmVector "owns" the ArrayData
+  // buffer; instead we rely on the ArrayData's ref counting to deal
+  // with freeing the buffer at the right time.
   Object m_immCopy;
+
+  int32_t m_version;
 
  private:
 
@@ -1106,17 +1181,17 @@ class BaseMap : public ExtCollectionObjectData {
 
   /**
    * Should be called by any operation that mutates the map, since
-   * we might need to to trigger COW.
+   * we might need to make a copy of the buffer before mutating it.
    */
-  void mutate() { if (hasImmutableBuffer()) cow(); }
+  void mutate() { if (hasImmutableBuffer()) copyBuffer(); }
 
   void mutateAndBump() { mutate(); ++m_version; }
 
  protected:
   /**
-   * Copy-On-Write the buffer and reset the immutable copy.
+   * Copy the buffer and reset the immutable copy.
    */
-  void cow();
+  void copyBuffer();
 
  private:
   template<class TMap>
@@ -1791,18 +1866,18 @@ class BaseSet : public ExtCollectionObjectData {
   bool hasImmutableBuffer() const { return !m_immCopy.isNull(); }
 
   /**
-   * Should be called by any operation that mutates the vector, since
-   * we might need to to trigger COW.
+   * Should be called by any operation that mutates the set, since
+   * we might need to make a copy of the buffer before mutating it.
    */
-  void mutate() { if (hasImmutableBuffer()) cow(); }
+  void mutate() { if (hasImmutableBuffer()) copyBuffer(); }
 
   void mutateAndBump() { mutate(); ++m_version; }
 
  protected:
   /**
-   * Copy-On-Write the buffer and reset the immutable copy.
+   * Copy the buffer and reset the immutable copy.
    */
-  void cow();
+  void copyBuffer();
 
   // PHP-land methods exported by child classes.
 

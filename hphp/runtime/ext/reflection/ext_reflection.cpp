@@ -35,8 +35,6 @@
 
 namespace HPHP {
 
-using JIT::VMRegAnchor;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -152,7 +150,7 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
 
   ret.set(s_name,      name);
   ret.set(s_version,   ext ? ext->getVersion() : "");
-  ret.set(s_info,      empty_string);
+  ret.set(s_info,      empty_string_variant_ref);
   ret.set(s_ini,       Array::Create());
   ret.set(s_constants, Array::Create());
   ret.set(s_functions, Array::Create());
@@ -389,7 +387,7 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
   VMRegAnchor _;
   bool visible, accessible;
   TypedValue* tv = class_->getSProp(
-    force ? class_ : arGetContextClass(g_context->getFP()),
+    force ? class_ : arGetContextClass(vmfp()),
     prop.get(), visible, accessible
   );
   if (tv == nullptr) {
@@ -414,7 +412,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   VMRegAnchor _;
   bool visible, accessible;
   TypedValue* tv = class_->getSProp(
-    force ? class_ : arGetContextClass(g_context->getFP()),
+    force ? class_ : arGetContextClass(vmfp()),
     prop.get(), visible, accessible
   );
   if (tv == nullptr) {
@@ -430,7 +428,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 
 String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   Class* cls = Unit::loadClass(name.get());
-  if (!cls) return empty_string;
+  if (!cls) return empty_string();
   return cls->nameStr();
 }
 
@@ -575,11 +573,11 @@ static Array get_function_param_info(const Func* func) {
       fpi.typeConstraint().hasConstraint() &&
       !fpi.typeConstraint().isExtended();
     auto const type = nonExtendedConstraint ? fpi.typeConstraint().typeName()
-      : empty_string.get();
+      : staticEmptyString();
 
     param.set(s_type, VarNR(type));
     const StringData* typeHint = fpi.userType() ?
-      fpi.userType() : empty_string.get();
+      fpi.userType() : staticEmptyString();
     param.set(s_type_hint, VarNR(typeHint));
     param.set(s_function, VarNR(func->name()));
     if (func->preClass()) {
@@ -853,7 +851,7 @@ const StaticString s_ReflectionClassHandle("ReflectionClassHandle");
 // helper for __construct
 static String HHVM_METHOD(ReflectionClass, __init, const String& name) {
   auto const cls = Unit::loadClass(name.get());
-  if (!cls) return empty_string;
+  if (!cls) return empty_string();
   ReflectionClassHandle::Get(this_)->setClass(cls);
   return cls->nameStr();
 }
@@ -1222,7 +1220,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
   auto obj_data = obj.get();
   assert(obj_data->getVMClass() == cls);
   if (!obj_data->hasDynProps()) {
-    return empty_array;
+    return empty_array();
   }
 
   auto const dynPropArray = obj_data->dynPropArray().get();
@@ -1476,7 +1474,7 @@ Array get_class_info(const String& name) {
 
   Array ret;
   ret.set(s_name,      VarNR(cls->name()));
-  ret.set(s_extension, empty_string);
+  ret.set(s_extension, empty_string_variant_ref);
   ret.set(s_parent,    VarNR(cls->parentStr()));
 
   // interfaces

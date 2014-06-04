@@ -80,7 +80,7 @@ void ArrayDirectory::rewind() {
 
 String ArrayDirectory::path() {
   if (!m_it) {
-    return empty_string;
+    return empty_string();
   }
 
   auto entry = m_it.second();

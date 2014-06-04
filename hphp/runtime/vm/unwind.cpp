@@ -24,10 +24,11 @@
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
@@ -144,7 +145,8 @@ UnwindAction checkHandlers(const EHEnt* eh,
   return UnwindAction::Propagate;
 }
 
-void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
+UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
+                           const Fault& fault) {
   auto const func = fp->func();
   auto const curOp = *reinterpret_cast<const Op*>(pc);
   auto const prevFp = fp->sfp();
@@ -195,19 +197,42 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
       // uninit/zero during unwind.  This is because a backtrace
       // from another destructing object during this unwind may try
       // to read them.
-      frame_free_locals_unwind(fp, func->numLocals());
+      frame_free_locals_unwind(fp, func->numLocals(), fault);
     } catch (...) {}
   }
 
+  auto action = UnwindAction::Propagate;
+
   if (LIKELY(!fp->resumed())) {
-    // Free ActRec.
-    stack.ndiscard(func->numSlotsInFrame());
-    stack.discardAR();
-  } else if (fp->func()->isAsyncFunction()) {
-    // Do nothing. AsyncFunctionWaitHandle will handle the exception.
-  } else if (fp->func()->isAsyncGenerator()) {
+    if (UNLIKELY(func->isAsyncFunction()) &&
+        fault.m_faultType == Fault::Type::UserException) {
+      // If in an eagerly executed async function, wrap the user exception
+      // into a failed StaticWaitHandle and return it to the caller.
+      auto const e = fault.m_userException;
+      stack.ndiscard(func->numSlotsInFrame());
+      stack.ret();
+      assert(stack.topTV() == &fp->m_r);
+      tvWriteObject(c_StaticWaitHandle::CreateFailed(e), &fp->m_r);
+      e->decRefCount();
+      action = UnwindAction::ResumeVM;
+    } else {
+      // Free ActRec.
+      stack.ndiscard(func->numSlotsInFrame());
+      stack.discardAR();
+    }
+  } else if (func->isAsyncFunction()) {
+    auto const waitHandle = frame_afwh(fp);
+    if (fault.m_faultType == Fault::Type::UserException) {
+      // Handle exception thrown by async function.
+      waitHandle->fail(fault.m_userException);
+      action = UnwindAction::ResumeVM;
+    } else {
+      // Fail the async function and let the C++ exception propagate.
+      waitHandle->fail(AsioSession::Get()->getAbruptInterruptException());
+    }
+  } else if (func->isAsyncGenerator()) {
     // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
-  } else if (fp->func()->isNonAsyncGenerator()) {
+  } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished.
     frame_generator(fp)->finish();
   } else {
@@ -215,46 +240,12 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   }
 
   /*
-   * At the final ActRec in this nesting level.  We don't need to set
-   * pc and fp since we're about to re-throw the exception.  And we
-   * don't want to dereference prefFp since we just popped it.
+   * At the final ActRec in this nesting level.
    */
-  if (!prevFp) return;
-
-  assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
-         prevFp->resumed());
-  auto const prevOff = soff + prevFp->func()->base();
-  pc = prevFp->func()->unit()->at(prevOff);
-  fp = prevFp;
-}
-
-void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
-  auto const func = fp->func();
-  auto const prevFp = fp->sfp();
-  auto const soff = fp->m_soff;
-  assert(!fp->resumed());
-  assert(func->isAsyncFunction());
-  assert(*reinterpret_cast<const Op*>(pc) != OpRetC);
-
-  FTRACE(1, "tearDownAsyncFrame: {} ({})\n  fp {} prevFp {}\n",
-         func->fullName()->data(),
-         func->unit()->filepath()->data(),
-         implicit_cast<void*>(fp),
-         implicit_cast<void*>(prevFp));
-
-  try {
-    frame_free_locals_unwind(fp, func->numLocals());
-  } catch (...) {}
-
-  stack.ndiscard(func->numSlotsInFrame());
-  stack.ret();
-  assert(stack.topTV() == &fp->m_r);
-  tvWriteObject(c_StaticWaitHandle::CreateFailed(e), &fp->m_r);
-  e->decRefCount();
-
   if (UNLIKELY(!prevFp)) {
-    pc = 0;
-    return;
+    pc = nullptr;
+    fp = nullptr;
+    return action;
   }
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
@@ -262,6 +253,7 @@ void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
   auto const prevOff = soff + prevFp->func()->base();
   pc = prevFp->func()->unit()->at(prevOff);
   fp = prevFp;
+  return action;
 }
 
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
@@ -417,8 +409,6 @@ UnwindAction unwind(ActRec*& fp,
           return UnwindAction::ResumeVM;
         case UnwindAction::Propagate:
           break;
-        case UnwindAction::Return:
-          not_reached();
         }
       }
       // If we came here, it means that no further EHs were found for
@@ -428,19 +418,17 @@ UnwindAction unwind(ActRec*& fp,
       // escapes the exception handler where it was thrown.
     } while (chainFaults(fault));
 
-    // If in an eagerly executed async function, wrap the user exception
-    // into a failed StaticWaitHandle and return it to the caller.
-    if (!fp->resumed() && fp->m_func->isAsyncFunction() &&
-        fault.m_faultType == Fault::Type::UserException) {
-      tearDownEagerAsyncFrame(fp, stack, pc, fault.m_userException);
-      g_context->m_faults.pop_back();
-      return pc ? UnwindAction::ResumeVM : UnwindAction::Return;
-    }
-
     // We found no more handlers in this frame, so the nested fault
     // count starts over for the caller frame.
     auto const lastFrameForNesting = !fp->sfp();
-    tearDownFrame(fp, stack, pc);
+    auto const action = tearDownFrame(fp, stack, pc, fault);
+    switch (action) {
+      case UnwindAction::ResumeVM:
+        g_context->m_faults.pop_back();
+        return action;
+      case UnwindAction::Propagate:
+        break;
+    }
 
     // Once we are done with EHs for the current frame we restore
     // default values for the fields inside Fault. This makes sure
@@ -467,8 +455,8 @@ const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
 // Unwind the frame for a builtin.  Currently only used when switching
 // modes for hphpd_break and fb_enable_code_coverage.
 void unwindBuiltinFrame() {
-  auto& stack = g_context->getStack();
-  auto& fp = g_context->m_fp;
+  auto& stack = vmStack();
+  auto& fp = vmfp();
 
   assert(fp->m_func->methInfo());
   assert(fp->m_func->name()->isame(s_hphpd_break.get()) ||
@@ -477,21 +465,23 @@ void unwindBuiltinFrame() {
   // Free any values that may be on the eval stack.  We know there
   // can't be FPI regions and it can't be a generator body because
   // it's a builtin frame.
-  auto const evalTop = reinterpret_cast<TypedValue*>(g_context->getFP());
+  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp());
   while (stack.topTV() < evalTop) {
     stack.popTV();
   }
 
   // Free the locals and VarEnv if there is one
-  frame_free_locals_inl(fp, fp->m_func->numLocals(), nullptr);
+  auto rv = make_tv<KindOfNull>();
+  frame_free_locals_inl(fp, fp->m_func->numLocals(), &rv);
 
   // Tear down the frame
   Offset pc = -1;
   ActRec* sfp = g_context->getPrevVMState(fp, &pc);
   assert(pc != -1);
   fp = sfp;
-  g_context->m_pc = fp->m_func->unit()->at(pc);
+  vmpc() = fp->m_func->unit()->at(pc);
   stack.discardAR();
+  stack.pushNull(); // return value
 }
 
 void pushFault(Exception* e) {
@@ -514,9 +504,9 @@ void pushFault(const Object& o) {
 UnwindAction enterUnwinder() {
   auto fault = g_context->m_faults.back();
   return unwind(
-    g_context->m_fp,      // by ref
-    g_context->getStack(),// by ref
-    g_context->m_pc,      // by ref
+    vmfp(),    // by ref
+    vmStack(), // by ref
+    vmpc(),    // by ref
     fault
   );
 }
@@ -528,7 +518,7 @@ UnwindAction enterUnwinder() {
 UnwindAction exception_handler() noexcept {
   FTRACE(1, "unwind exception_handler\n");
 
-  g_context->checkRegState();
+  checkVMRegState();
 
   try { throw; }
 
@@ -541,11 +531,11 @@ UnwindAction exception_handler() noexcept {
    */
   catch (const VMPrepareUnwind&) {
     Fault fault = g_context->m_faults.back();
-    FTRACE(1, "unwind: restoring offset {}\n", g_context->m_pc);
+    FTRACE(1, "unwind: restoring offset {}\n", vmpc());
     return unwind(
-      g_context->m_fp,
-      g_context->getStack(),
-      g_context->m_pc,
+      vmfp(),
+      vmStack(),
+      vmpc(),
       fault
     );
   }
@@ -561,7 +551,6 @@ UnwindAction exception_handler() noexcept {
 
   catch (VMSwitchModeBuiltin&) {
     unwindBuiltinFrame();
-    g_context->getStack().pushNull(); // return value
     return UnwindAction::ResumeVM;
   }
 

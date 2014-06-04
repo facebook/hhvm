@@ -236,7 +236,7 @@ static const std::unordered_map<fbstring,fbstring> g_serializedDefaults = {
   {"true",              "b:1;"},
   {"false",             "b:0;"},
   {"null",              "N;"},
-  {"empty_array",       "a:0:{}"},
+  {"empty_array_ref",   "a:0:{}"},
   {"null_string",       "N;"},
   {"null_array",        "N;"},
   {"null_object",       "N;"},
@@ -249,7 +249,7 @@ static const std::unordered_map<fbstring,fbstring> g_phpDefaults = {
   {"true",              "true"},
   {"false",             "false"},
   {"null",              "null"},
-  {"empty_array",       "array()"},
+  {"empty_array_ref",   "array()"},
   {"null_string",       "null"},
   {"null_array",        "null"},
   {"null_object",       "null"},
@@ -621,7 +621,7 @@ bool PhpParam::defValueNeedsVariable() const {
   fbstring defVal = getDefault();
 
   if (cppKindOf == KindOfString &&
-      ((defVal == "empty_string") ||
+      ((defVal == "empty_string_ref") ||
        (defVal == "null_string") ||
        (g_knownStringConstants.count(defVal) > 0))) {
     return false;

@@ -50,7 +50,7 @@ class IntlTimeZone : public IntlError {
     return obj;
   }
 
-  static IntlTimeZone* Get(Object obj) {
+  static IntlTimeZone* Get(ObjectData* obj) {
     return GetData<IntlTimeZone>(obj, s_IntlTimeZone);
   }
 

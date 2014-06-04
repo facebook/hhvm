@@ -212,18 +212,18 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
 
   auto ignoreSrc = [&](IRInstruction& inst, SSATmp* src) {
     /*
-     * ReDefSP, ReDefResumableSP, and TakeStack, and FramePtr/StKptr-typed
-     * tmps are used only for stack analysis in the simplifier and therefore
-     * may live across calls.  In particular, ReDef[Generator]SP are used to
-     * bridge the logical stack of the caller when a callee is inlined so that
-     * analysis does not scan into the callee stack when searching for a type
-     * of value in the caller.
+     * ReDefSP, TakeStack, and FramePtr/StkPtr-typed tmps are used
+     * only for stack analysis in the simplifier and therefore may
+     * live across calls. In particular, ReDefSP are used to bridge
+     * the logical stack of the caller when a callee is inlined so
+     * that analysis does not scan into the callee stack when
+     * searching for a type of value in the caller.
      *
-     * Tmps defined by DefConst are always available and may be assigned to
-     * registers if needed by the instructions using the const.
+     * Tmps defined by DefConst are always available and may be
+     * assigned to registers if needed by the instructions using the
+     * const.
      */
     return (inst.is(ReDefSP) && src->isA(Type::StkPtr)) ||
-           (inst.is(ReDefResumableSP) && src->isA(Type::StkPtr)) ||
            inst.is(TakeStack) ||
            src->isA(Type::StkPtr) ||
            src->isA(Type::FramePtr) ||

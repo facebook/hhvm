@@ -65,7 +65,7 @@ static void on_kill(int sig) {
   // shutting down.  The fix is to add a lock to HttpServer::Server but it seems
   // like overkill.
   if (HttpServer::Server) {
-    HttpServer::Server->stopOnSignal();
+    HttpServer::Server->stopOnSignal(sig);
   }
   signal(sig, SIG_DFL);
   raise(sig);
@@ -74,7 +74,7 @@ static void on_kill(int sig) {
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer()
-  : m_stopped(false), m_stopReason(nullptr),
+  : m_stopped(false), m_killed(false), m_stopReason(nullptr),
     m_watchDog(this, &HttpServer::watchDog) {
 
   // enabling mutex profiling, but it's not turned on
@@ -324,6 +324,11 @@ void HttpServer::runOrExitProcess() {
       Logger::Warning("Server stopping with reason: %s\n", m_stopReason);
     }
     removePid();
+    // if we were killed, bail out immediately
+    if (m_killed) {
+      Logger::Info("page server killed");
+      return;
+    }
     Logger::Info("page server stopped");
   }
 
@@ -402,7 +407,18 @@ void HttpServer::abortServers() {
   }
 }
 
-void HttpServer::stopOnSignal() {
+void HttpServer::stopOnSignal(int sig) {
+  // Signal to the main server thread to exit immediately if
+  // we want to die on SIGTERM
+  if (RuntimeOption::ServerKillOnSIGTERM && sig == SIGTERM) {
+    Lock lock(this);
+    m_stopped = true;
+    m_killed = true;
+    m_stopReason = "SIGTERM received";
+    notify();
+    return;
+  }
+
   if (RuntimeOption::ServerGracefulShutdownWait) {
     signal(SIGALRM, exit_on_timeout);
     alarm(RuntimeOption::ServerGracefulShutdownWait);

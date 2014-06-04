@@ -87,7 +87,7 @@ function class_meth(string $class, string $method)
  */
 function inst_meth($instance, string $method)
   /* : (function(<hack figures this>): <and this>) */ {
-  invariant(is_object($instance), 'expecting an object');
+  invariant(\is_object($instance), 'expecting an object');
   return array($instance, $method);
 }
 

@@ -191,7 +191,7 @@ Variant f_stream_get_contents(const Resource& handle, int maxlen /* = -1 */,
   }
 
   if (maxlen == 0) {
-    return String();
+    return init_null();
   }
 
   File *file = handle.getTyped<File>(false /* nullOkay */,
@@ -613,7 +613,7 @@ void StreamContext::setOption(const String& wrapper,
 
 Array StreamContext::getOptions() const {
   if (m_options.isNull()) {
-    return empty_array;
+    return empty_array();
   }
   return m_options;
 }

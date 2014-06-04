@@ -485,8 +485,8 @@
                         },
                         {
                             "name": "ns",
-                            "type": "String",
-                            "value": "null_string"
+                            "type": "Variant",
+                            "value": "null"
                         }
                     ]
                 },

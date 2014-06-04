@@ -58,7 +58,7 @@ class IntlCalendar : public IntlError {
     return ret;
   }
 
-  static IntlCalendar* Get(Object obj) {
+  static IntlCalendar* Get(ObjectData* obj) {
     return GetData<IntlCalendar>(obj, s_IntlCalendar);
   }
 

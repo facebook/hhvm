@@ -547,15 +547,22 @@ bool Func::byRef(int32_t arg) const {
 
 const StaticString s_extract("extract");
 const StaticString s_extractNative("__SystemLib\\extract");
+const StaticString s_current("current");
+const StaticString s_key("key");
 
 bool Func::mustBeRef(int32_t arg) const {
   if (!byRef(arg)) return false;
   if (arg == 0) {
-    if (UNLIKELY(m_attrs & AttrNative)) {
-      // Extract is special (in more ways than one)---here it needs
-      // to be able to take its first argument by ref or not by ref.
+    if (UNLIKELY(m_attrs & AttrBuiltin)) {
+      // This hacks mustBeRef() to return false for the first parameter of
+      // extract(), current(), and key(). These functions try to take their
+      // first parameter by reference but they also allow expressions that
+      // cannot be taken by reference (ex. an array literal).
+      // TODO Task #4442937: Come up with a cleaner way to do this.
       if (name() == s_extract.get() && !cls()) return false;
       if (name() == s_extractNative.get() && !cls()) return false;
+      if (name() == s_current.get() && !cls()) return false;
+      if (name() == s_key.get() && !cls()) return false;
     }
   }
   return
@@ -658,6 +665,9 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     out << " (ID " << shared()->m_id << ")";
   }
   out << std::endl;
+
+  if (!opts.metadata) return;
+
   const ParamInfoVec& params = shared()->m_params;
   for (uint i = 0; i < params.size(); ++i) {
     if (params[i].funcletOff() != InvalidAbsoluteOffset) {

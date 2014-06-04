@@ -44,6 +44,12 @@ let rec unify env ty1 ty2 =
       let r = unify_reason r1 r2 in
       let env, ty = unify env ty1 ty2 in
       env, (r, Toption ty)
+  (* Mixed is nullable and we want it to unify with both ?T and T at
+   * the same time. If we try to unify mixed with an option,
+   * we peel of the ? and unify mixed with the underlying type. *)
+  | (r2, Tmixed), (_, Toption ty1)
+  | (_, Toption ty1), (r2, Tmixed) ->
+    unify env ty1 (r2, Tmixed)
   | (r1, (Tprim Nast.Tvoid as ty1')), (r2, (Toption ty as ty2')) ->
      (* When we are in async functions, we allow people to write Awaitable<void>
       * and then do yield result(null) *)
@@ -57,10 +63,10 @@ let rec unify env ty1 ty2 =
    * is a typedef it won't get expanded. So we need an explicit check for both.
    *)
   | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef env x ->
-      let env, ty1 = TDef.expand_typedef SSet.empty env r x argl in
+      let env, ty1 = TDef.expand_typedef env r x argl in
       unify env ty1 ty2
   | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
-      let env, ty1 = TDef.expand_typedef SSet.empty env r x argl in
+      let env, ty1 = TDef.expand_typedef env r x argl in
       unify env ty1 ty2
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in

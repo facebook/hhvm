@@ -51,7 +51,7 @@ icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
     auto IntlTimeZone_Class = Unit::lookupClass(s_IntlTimeZone.get());
     if (IntlTimeZone_Class &&
         ((cls == IntlTimeZone_Class) || cls->classof(IntlTimeZone_Class))) {
-      return IntlTimeZone::Get(objarg)->timezone()->clone();
+      return IntlTimeZone::Get(objarg.get())->timezone()->clone();
     }
     if (auto dtz = objarg.getTyped<c_DateTimeZone>(true, true)) {
       tzstr = dtz->t_getname();
@@ -290,7 +290,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getTZDataVersion) {
 
 static bool HHVM_METHOD(IntlTimeZone, hasSameRules, const Object& otherTimeZone) {
   TZ_GET(obj1, this_, false);
-  TZ_GET(obj2, otherTimeZone, false);
+  TZ_GET(obj2, otherTimeZone.get(), false);
   return obj1->timezone()->hasSameRules(*obj2->timezone());
 }
 

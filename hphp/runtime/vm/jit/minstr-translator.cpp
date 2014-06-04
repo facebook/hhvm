@@ -2335,7 +2335,7 @@ void HhbcTranslator::MInstrTranslator::emitVectorSet(
   gen(CheckBounds, makeCatch(), key, size);
 
   m_irb.ifThen([&](Block* taken) {
-          gen(VectorHasFrozenCopy, taken, m_base);
+          gen(VectorHasImmCopy, taken, m_base);
         },
         [&] {
           m_irb.hint(Block::Hint::Unlikely);

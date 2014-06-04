@@ -76,7 +76,7 @@ Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern, const Varia
   if (!f_is_callable(callback)) {
     raise_warning("Not a valid callback function %s",
         callback.toString().data());
-    return empty_string;
+    return empty_string_variant();
   }
   return preg_replace_impl(pattern, callback, subject,
                            limit, count, true, false);

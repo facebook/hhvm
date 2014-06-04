@@ -45,14 +45,14 @@ struct Resumable {
   static constexpr ptrdiff_t arOff() {
     return offsetof(Resumable, m_actRec);
   }
-  static constexpr ptrdiff_t stashedSpOff() {
-    return offsetof(Resumable, m_stashedSp);
-  }
   static constexpr ptrdiff_t resumeAddrOff() {
     return offsetof(Resumable, m_resumeAddr);
   }
   static constexpr ptrdiff_t resumeOffsetOff() {
     return offsetof(Resumable, m_resumeOffset);
+  }
+  static constexpr ptrdiff_t objectOff() {
+    return sizeof(Resumable);
   }
 
   static void* Create(const ActRec* fp, size_t numSlots, JIT::TCA resumeAddr,
@@ -109,11 +109,6 @@ private:
 
   // ActRec of the resumed frame.
   ActRec m_actRec;
-
-  // Temporary storage used to save the SP when inlining into a resumable. This
-  // is used in an offsetof expression above, but clang doesn't recognize that
-  // as a "use", hence the UNUSED.
-  UNUSED void* m_stashedSp;
 
   // Resume address.
   JIT::TCA m_resumeAddr;

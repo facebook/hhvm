@@ -182,7 +182,7 @@ void WandResource<PixelIterator>::destoryWand() {
 template<typename Wand>
 ALWAYS_INLINE
 void setWandResource(const StaticString& className,
-                     const Object& obj,
+                     ObjectData* obj,
                      Wand* wand,
                      bool destroy = true) {
   auto res = Resource(NEWOBJ(WandResource<Wand>(wand, destroy)));
@@ -192,8 +192,8 @@ void setWandResource(const StaticString& className,
 template<typename Wand>
 ALWAYS_INLINE
 WandResource<Wand>* getWandResource(const StaticString& className,
-                                    const Object& obj) {
-  if (!obj.instanceof(className)) {
+                                    ObjectData* obj) {
+  if (!ObjNR(obj).asObject().instanceof(className)) {
     return nullptr;
   }
   auto var = obj->o_get("wand", true, className.get());
@@ -207,7 +207,7 @@ WandResource<Wand>* getWandResource(const StaticString& className,
 template<typename Wand, typename T>
 ALWAYS_INLINE
 WandResource<Wand>* getWandResource(const StaticString& className,
-                                    const Object& obj,
+                                    ObjectData* obj,
                                     const std::string& msg) {
   auto ret = getWandResource<Wand>(className, obj);
   if (ret == nullptr || ret->getWand() == nullptr) {
@@ -218,28 +218,28 @@ WandResource<Wand>* getWandResource(const StaticString& className,
 }
 
 ALWAYS_INLINE
-WandResource<MagickWand>* getMagickWandResource(const Object& obj) {
+WandResource<MagickWand>* getMagickWandResource(ObjectData* obj) {
   return getWandResource<MagickWand, ImagickException>(
     s_Imagick, obj,
     "Can not process invalid Imagick object");
 }
 
 ALWAYS_INLINE
-WandResource<DrawingWand>* getDrawingWandResource(const Object& obj) {
+WandResource<DrawingWand>* getDrawingWandResource(ObjectData* obj) {
   return getWandResource<DrawingWand, ImagickDrawException>(
     s_ImagickDraw, obj,
     "Can not process invalid ImagickDraw object");
 }
 
 ALWAYS_INLINE
-WandResource<PixelWand>* getPixelWandResource(const Object& obj) {
+WandResource<PixelWand>* getPixelWandResource(ObjectData* obj) {
   auto ret = getWandResource<PixelWand>(s_ImagickPixel, obj);
   assert(ret != nullptr && ret->getWand() != nullptr);
   return ret;
 }
 
 ALWAYS_INLINE
-WandResource<PixelIterator>* getPixelIteratorResource(const Object& obj) {
+WandResource<PixelIterator>* getPixelIteratorResource(ObjectData* obj) {
   return getWandResource<PixelIterator, ImagickPixelIteratorException>(
     s_ImagickPixelIterator, obj,
     "ImagickPixelIterator is not initialized correctly");

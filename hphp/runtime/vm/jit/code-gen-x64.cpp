@@ -130,9 +130,8 @@ PhysReg CodeGenerator::selectScratchReg(IRInstruction* inst) {
   return rCgGP;
 }
 
-Address CodeGenerator::cgInst(IRInstruction* inst) {
+void CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->op();
-  auto const start = m_as.frontier();
   m_curInst = inst;
   m_instRegs = &m_state.regs[inst];
   m_rScratch = selectScratchReg(inst);
@@ -142,13 +141,12 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #define O(name, dsts, srcs, flags)                                \
   case name: FTRACE(7, "cg" #name "\n");                          \
              cg ## name (inst);                                   \
-             return m_as.frontier() == start ? nullptr : start;
+             return;
   IR_OPCODES
 #undef O
 
   default:
-    assert(0);
-    return nullptr;
+    always_assert(false);
   }
 }
 
@@ -172,6 +170,7 @@ NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
+NOOP_OPCODE(EndGuards)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -219,12 +218,16 @@ CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
 CALL_OPCODE(CreateSSWH)
+CALL_OPCODE(AFWHPrepareChild)
+CALL_OPCODE(BWHUnblockChain)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(CustomInstanceInit)
+CALL_OPCODE(InitProps)
+CALL_OPCODE(InitSProps)
 CALL_OPCODE(LdClsCtor)
 CALL_OPCODE(LookupClsMethod)
 CALL_OPCODE(LookupClsRDSHandle)
@@ -312,7 +315,8 @@ CALL_OPCODE(RestoreErrorLevel)
 CALL_OPCODE(Count)
 
 CALL_OPCODE(SurpriseHook)
-CALL_OPCODE(FunctionExitSurpriseHook)
+CALL_OPCODE(FunctionSuspendHook)
+CALL_OPCODE(FunctionReturnHook)
 
 CALL_OPCODE(OODeclExists)
 
@@ -482,10 +486,10 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                                         TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
-    emitEphemeralServiceReq(m_unusedCode,
-                            mcg->getFreeStub(m_unusedCode),
+    emitEphemeralServiceReq(m_frozenCode,
+                            mcg->getFreeStub(m_frozenCode, &mcg->cgFixups()),
                             REQ_BIND_JMPCC_FIRST,
-                            patchAddr,
+                            RipRelative(patchAddr),
                             extra->taken,
                             extra->notTaken,
                             cc,
@@ -503,14 +507,6 @@ void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
   auto reg = srcLoc(0).reg(0);
   m_as.testq (reg, reg);
   emitFwdJcc(CC_NZ, inst->taken());
-}
-
-void CodeGenerator::cgPassFP(IRInstruction* inst) {
-  cgMov(inst);
-}
-
-void CodeGenerator::cgPassSP(IRInstruction* inst) {
-  cgMov(inst);
 }
 
 void CodeGenerator::cgCheckNonNull(IRInstruction* inst) {
@@ -2047,7 +2043,7 @@ void CodeGenerator::cgSideExitJmpInstanceOfBitmask(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitInstanceBitmaskCheck(inst);
-  emitBindSideExit(m_mainCode, m_unusedCode,
+  emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -2056,7 +2052,7 @@ void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitInstanceBitmaskCheck(inst);
-  emitBindSideExit(m_mainCode, m_unusedCode,
+  emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -2579,8 +2575,12 @@ void CodeGenerator::emitReqBindAddr(TCA& dest,
                                     SrcKey sk) {
   mcg->setJmpTransID((TCA)&dest);
 
-  dest = emitServiceReq(m_unusedCode, REQ_BIND_ADDR,
-                        &dest, sk.toAtomicInt());
+  dest = emitEphemeralServiceReq(m_frozenCode,
+                               mcg->getFreeStub(m_frozenCode, &mcg->cgFixups()),
+                               REQ_BIND_ADDR,
+                               &dest,
+                               sk.toAtomicInt());
+  mcg->cgFixups().m_codePointers.insert(&dest);
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
@@ -2619,10 +2619,10 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    cmpq(data->cases - 2, indexReg);
       mcg->backEnd().prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
-        m_unusedCode,
-        mcg->getFreeStub(m_unusedCode),
+        m_frozenCode,
+        mcg->getFreeStub(m_frozenCode, &mcg->cgFixups()),
         REQ_BIND_JMPCC_SECOND,
-        m_as.frontier(),
+        RipRelative(m_as.frontier()),
         data->defaultOff,
         CC_AE);
       mcg->setJmpTransID(m_as.frontier());
@@ -2644,12 +2644,12 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     if (data->bounded) {
       indexVal -= data->base;
       if (indexVal >= data->cases - 2 || indexVal < 0) {
-        emitBindJmp(m_mainCode, m_unusedCode,
+        emitBindJmp(m_mainCode, m_frozenCode,
                     SrcKey(curFunc(), data->defaultOff, resumed()));
         return;
       }
     }
-    emitBindJmp(m_mainCode, m_unusedCode,
+    emitBindJmp(m_mainCode, m_frozenCode,
                 SrcKey(curFunc(), data->targets[indexVal], resumed()));
   }
 }
@@ -2741,13 +2741,6 @@ void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
   m_as.    loadq  (fpReg[AROFF(m_sfp)], rVmFp);
 }
 
-void CodeGenerator::cgDefInlineSP(IRInstruction* inst) {
-  auto fp  = srcLoc(1).reg();
-  auto dst = dstLoc(0).reg();
-  auto off = -inst->extra<StackOffset>()->offset * sizeof(Cell);
-  emitLea(m_as, fp[off], dst);
-}
-
 void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   // TODO(#2288359): this instruction won't be necessary (for
   // non-generator frames) when we don't track rVmSp independently
@@ -2757,24 +2750,6 @@ void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   auto dst = dstLoc(0).reg();
   auto off = -inst->extra<ReDefSP>()->spOffset * sizeof(Cell);
   emitLea(m_as, fp[off], dst);
-}
-
-void CodeGenerator::cgStashResumableSP(IRInstruction* inst) {
-  auto fpReg = srcLoc(0).reg();
-  auto spReg = srcLoc(1).reg();
-
-  ssize_t stashLoc = Resumable::stashedSpOff() - Resumable::arOff();
-
-  m_as.    storeq(spReg, fpReg[stashLoc]);
-}
-
-void CodeGenerator::cgReDefResumableSP(IRInstruction* inst) {
-  auto fpReg = srcLoc(1).reg();
-  auto dstReg = dstLoc(0).reg();
-
-  ssize_t stashLoc = Resumable::stashedSpOff() - Resumable::arOff();
-
-  m_as.    loadq (fpReg[stashLoc], dstReg);
 }
 
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
@@ -2952,7 +2927,7 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   emitBindJmp(
     m_mainCode,
-    m_unusedCode,
+    m_frozenCode,
     SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed())
   );
 }
@@ -2961,10 +2936,10 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
 
   TCA sr = emitServiceReq(
-    m_stubsCode, REQ_RETRANSLATE_OPT,
+    m_coldCode, REQ_RETRANSLATE_OPT,
     SrcKey(curFunc(), extra->offset, resumed()).toAtomicInt(),
     extra->transId);
-  if (m_mainCode.frontier() != m_stubsCode.frontier()) {
+  if (m_mainCode.frontier() != m_coldCode.frontier()) {
     m_as.jmp(sr);
   }
 }
@@ -3090,7 +3065,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
  * Depending on the current translation kind, do nothing, profile, or collect
  * profiling data for the current DecRef* instruction
  *
- * Returns true iff the release path for this DecRef should be put in stubs
+ * Returns true iff the release path for this DecRef should be put in cold
  * code.
  */
 bool CodeGenerator::decRefDestroyIsUnlikely(OptDecRefProfile& profile,
@@ -3276,7 +3251,7 @@ void CodeGenerator::cgDecRefStaticType(Type type,
   if (genZeroCheck) {
     patchStaticCheck = cgCheckStaticBitAndDecRef(
       type, dataReg, [&] (Asm& a) {
-        // Emit the call to release in m_astubs
+        // Emit the call to release in m_acold
         cgCallHelper(a,
                      m_mcg->getDtorCall(type.toDataType()),
                      kVoidDest,
@@ -3312,7 +3287,7 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
         [&] (Asm& a) {
           // load destructor fptr
           loadDestructorFunc(a, typeReg, m_rScratch);
-          // Emit call to release in m_astubs
+          // Emit call to release in m_acold
           cgCallHelper(a,
                        CppCall::indirect(m_rScratch),
                        kVoidDest,
@@ -3350,7 +3325,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
   // Emit check for UncountedValue or StaticValue and the actual DecRef
   Address patchStaticCheck =
       cgCheckStaticBitAndDecRef(Type::Cell, scratchReg, [&](Asm& a) {
-        // Emit call to release in m_astubs
+        // Emit call to release in m_acold
         a.lea(baseReg[offset], scratchReg);
         cgCallHelper(a,
                      CppCall::direct(tv_release_generic),
@@ -3582,30 +3557,18 @@ void CodeGenerator::cgConstructInstance(IRInstruction* inst) {
                argGroup().immPtr(cls));
 }
 
-void CodeGenerator::cgInitProps(IRInstruction* inst) {
-  auto const cls    = inst->extra<InitProps>()->cls;
+void CodeGenerator::cgCheckInitProps(IRInstruction* inst) {
+  auto const cls = inst->extra<CheckInitProps>()->cls;
+  auto const branch = inst->taken();
   m_as.cmpq(0, rVmTl[cls->propHandle()]);
-  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-      cgCallHelper(a,
-                   CppCall::method(&Class::initProps),
-                   kVoidDest,
-                   SyncOptions::kSyncPoint,
-                   argGroup().imm((uint64_t)cls));
-    });
+  emitFwdJcc(m_as, CC_Z, branch);
 }
 
-void CodeGenerator::cgInitSProps(IRInstruction* inst) {
-  auto const cls    = inst->extra<InitSProps>()->cls;
-  cls->initSPropHandles();
-
+void CodeGenerator::cgCheckInitSProps(IRInstruction* inst) {
+  auto const cls = inst->extra<CheckInitSProps>()->cls;
+  auto const branch = inst->taken();
   m_as.cmpb(0, rVmTl[cls->sPropInitHandle()]);
-  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-      cgCallHelper(a,
-                   CppCall::method(&Class::initSProps),
-                   kVoidDest,
-                   SyncOptions::kSyncPoint,
-                   argGroup().imm((uint64_t)cls));
-    });
+  emitFwdJcc(m_as, CC_Z, branch);
 }
 
 void CodeGenerator::cgNewInstanceRaw(IRInstruction* inst) {
@@ -3698,10 +3661,42 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   a.    storeq (rFP,                              rSP[ar + AROFF(m_sfp)]);
   a.    storel (safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]);
 
+  if (extra->knownPrologue) {
+    assert(extra->callee);
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      auto const off = cellsToBytes(extra->numParams) + AROFF(m_savedRip);
+      emitImmStoreq(a, 0xff00ff00b00b00d0, rSP[off]);
+    }
+    emitLea(a, rSP[cellsToBytes(extra->numParams)], rStashedAR);
+    /*
+     * Normally there's no need to prepare for smash if this is a live
+     * or optimized translation, since we know where we are going.
+     *
+     * However, if we're going to a profiling prologue, we want it to
+     * be smashable later, so we need to tell the profiling module
+     * about this and prepare for smashing the call.
+     */
+    if (mcg->code.prof().contains(extra->knownPrologue)) {
+      auto const calleeNumParams = extra->callee->numNonVariadicParams();
+      auto const prologIndex =
+        extra->numParams <= calleeNumParams ? extra->numParams
+                                            : calleeNumParams + 1;
+      mcg->backEnd().prepareForSmash(a.code(), kCallLen);
+      mcg->tx().profData()->addPrologueMainCaller(
+        extra->callee,
+        prologIndex,
+        a.code().frontier()
+      );
+      always_assert(mcg->backEnd().isSmashable(a.code().frontier(), kCallLen));
+    }
+    a.  call   (extra->knownPrologue);
+    return;
+  }
+
   auto const srcKey = m_curInst->marker().sk();
   auto const adjust = emitBindCall(m_mainCode,
-                                   m_stubsCode,
-                                   m_unusedCode,
+                                   m_coldCode,
+                                   m_frozenCode,
                                    srcKey,
                                    extra->callee,
                                    extra->numParams);
@@ -3743,6 +3738,14 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
                kVoidDest,
                SyncOptions::kSyncPoint,
                args);
+}
+
+void CodeGenerator::cgCastStkIntToDbl(IRInstruction* inst) {
+  auto spReg = srcLoc(0).reg();
+  auto offset = cellsToBytes(inst->extra<CastStkIntToDbl>()->offset);
+  m_as.cvtsi2sd(refTVData(spReg[offset]), rCgXMM0);
+  emitStoreReg(m_as, rCgXMM0, refTVData(spReg[offset]));
+  emitStoreTVType(m_as, KindOfDouble, refTVType(spReg[offset]));
 }
 
 void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
@@ -3825,7 +3828,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // Pointers to smartptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
   auto srcNum = uint32_t{0};
-  if (callee->isMethod()) {
+  if (callee->isMethod() && !(callee->attrs() & AttrStatic)) {
     // Note, we don't support objects with vtables here (if they may
     // need a this pointer adjustment).  This should be filtered out
     // earlier right now.
@@ -4391,20 +4394,24 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
  * Given a vector, check if it has a immutable copy and jump to the taken
  * branch if so.
  */
-void CodeGenerator::cgVectorHasFrozenCopy(IRInstruction* inst) {
+void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(0).reg();
 
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
          vec->type().getClass() == c_Vector::classof());
 
-  // Vector keeps a smart pointer to the immutable copy, so we need
-  // some advanced arithmetic to get the offset of the raw pointer.
-  uint rawPtrOffset = c_Vector::immCopyOffset() + kExpectedMPxOffset;
+  // Vector::m_data field holds an address of an ArrayData plus
+  // sizeof(ArrayData) bytes. We need to check this ArrayData's
+  // m_count field to see if we need to call Vector::triggerCow().
+  uint rawPtrOffset = c_Vector::dataOffset() + kExpectedMPxOffset;
 
   m_as.loadq(vecReg[rawPtrOffset], m_rScratch);
-  m_as.testq(m_rScratch, m_rScratch);
-  emitFwdJcc(CC_NZ, inst->taken());
+  m_as.cmpl(
+    1,
+    m_rScratch[(int64_t)FAST_REFCOUNT_OFFSET - (int64_t)sizeof(ArrayData)]
+  );
+  emitFwdJcc(CC_NE, inst->taken());
 }
 
 /**
@@ -4565,7 +4572,7 @@ void CodeGenerator::emitSideExitGuard(Type type,
     type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken, resumed());
-      emitBindSideExit(m_mainCode, m_unusedCode, ccNegate(cc), sk);
+      emitBindSideExit(m_mainCode, m_frozenCode, ccNegate(cc), sk);
     });
 }
 
@@ -4592,7 +4599,7 @@ void CodeGenerator::cgExitJcc(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitCompare(inst);
-  emitBindSideExit(m_mainCode, m_unusedCode,
+  emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -4601,7 +4608,7 @@ void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitCompareInt(inst);
-  emitBindSideExit(m_mainCode, m_unusedCode,
+  emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -5211,7 +5218,7 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
                    CppCall::direct(arr_str_helper),
                    callDest(inst),
                    SyncOptions::kNoSyncPoint,
-                   argGroup().ssa(0/*arr*/).immPtr(empty_string.get()));
+                   argGroup().ssa(0/*arr*/).immPtr(staticEmptyString()));
     } else {
       m_as.movq(0, dstLoc(0).reg());
     }
@@ -5292,7 +5299,7 @@ void CodeGenerator::cgSideExitJmpZero(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitTestZero(inst->src(0), srcLoc(0));
-  emitBindSideExit(m_mainCode, m_unusedCode,
+  emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -5301,7 +5308,7 @@ void CodeGenerator::cgSideExitJmpNZero(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
                          resumed());
   emitTestZero(inst->src(0), srcLoc(0));
-  emitBindSideExit(m_mainCode, m_unusedCode,
+  emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
                    sk);
 }
@@ -5460,12 +5467,8 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
 
-  // The interpOne method returns a pointer to the current ExecutionContext
-  // in rax.  Use it read the 'm_fp' and 'm_stack.m_top' fields into the
-  // rVmFp and rVmSp registers.
-  m_as.loadq(rax[offsetof(ExecutionContext, m_fp)], rVmFp);
-  m_as.loadq(rax[offsetof(ExecutionContext, m_stack) +
-                 Stack::topOfStackOffset()], rVmSp);
+  m_as.loadq(rVmTl[RDS::kVmfpOff], rVmFp);
+  m_as.loadq(rVmTl[RDS::kVmspOff], rVmSp);
 
   emitServiceReq(m_mainCode, REQ_RESUME);
 }
@@ -5667,11 +5670,6 @@ void CodeGenerator::cgStAsyncArRaw(IRInstruction* inst) {
             info.size);
 }
 
-void CodeGenerator::cgStAsyncArChild(IRInstruction* inst) {
-  emitStRaw(inst, -c_AsyncFunctionWaitHandle::arOff() +
-            c_AsyncFunctionWaitHandle::childOff(), sz::qword);
-}
-
 void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
   auto asyncArReg = srcLoc(0).reg();
   auto value = inst->src(1);
@@ -5679,6 +5677,43 @@ void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
   const int64_t off = c_AsyncFunctionWaitHandle::resultOff()
                     - c_AsyncFunctionWaitHandle::arOff();
   cgStore(asyncArReg[off], value, valueLoc, Width::Full);
+}
+
+void CodeGenerator::cgLdAsyncArFParent(IRInstruction* inst) {
+  auto asyncArReg = srcLoc(0).reg();
+  auto dstReg = dstLoc(0).reg();
+  const int64_t off = c_AsyncFunctionWaitHandle::firstParentOff()
+                    - c_AsyncFunctionWaitHandle::arOff();
+  m_as.loadq(asyncArReg[off], dstReg);
+}
+
+void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
+  auto parentArReg = srcLoc(0).reg();
+  auto childReg = srcLoc(1).reg();
+  const int8_t blocked = c_WaitHandle::toKindState(
+      c_WaitHandle::Kind::AsyncFunction, c_BlockableWaitHandle::STATE_BLOCKED);
+  const int64_t firstParentOff = c_WaitableWaitHandle::firstParentOff();
+  const int64_t stateToArOff = c_AsyncFunctionWaitHandle::stateOff()
+                             - c_AsyncFunctionWaitHandle::arOff();
+  const int64_t nextParentToArOff = c_AsyncFunctionWaitHandle::nextParentOff()
+                                  - c_AsyncFunctionWaitHandle::arOff();
+  const int64_t childToArOff = c_AsyncFunctionWaitHandle::childOff()
+                             - c_AsyncFunctionWaitHandle::arOff();
+  const int64_t objToArOff = -c_AsyncFunctionWaitHandle::arOff();
+
+  // parent->setState(STATE_BLOCKED);
+  m_as.storeb(blocked, parentArReg[stateToArOff]);
+
+  // parent->m_nextParent = child->m_firstParent;
+  m_as.loadq (childReg[firstParentOff], m_rScratch);
+  m_as.storeq(m_rScratch, parentArReg[nextParentToArOff]);
+
+  // child->m_firstParent = parent;
+  m_as.lea   (parentArReg[objToArOff], m_rScratch);
+  m_as.storeq(m_rScratch, childReg[firstParentOff]);
+
+  // parent->m_child = child;
+  m_as.storeq(childReg, parentArReg[childToArOff]);
 }
 
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
@@ -5714,9 +5749,16 @@ void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
   m_as.lea (base[asyncArOffset], dest);
 }
 
-void CodeGenerator::cgCopyCells(IRInstruction* inst) {
+void CodeGenerator::cgLdResumableArObj(IRInstruction* inst) {
+  auto const dstReg = dstLoc(0).reg();
+  auto const resumableArReg = srcLoc(0).reg();
+  auto const objectOff = Resumable::objectOff() - Resumable::arOff();
+  m_as.lea (resumableArReg[objectOff], dstReg);
+}
+
+void CodeGenerator::cgCopyAsyncCells(IRInstruction* inst) {
   auto const fpReg    = srcLoc(0).reg();
-  auto const numCells = inst->extra<CopyCells>()->locId;
+  auto const numCells = inst->extra<CopyAsyncCells>()->locId;
   auto const asyncAR  = srcLoc(1).reg();
   auto const cellSize = sizeof(Cell);
 

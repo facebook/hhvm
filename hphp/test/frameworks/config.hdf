@@ -1,6 +1,7 @@
 Eval {
   JitASize = 10485760 # 10 MB
-  JitAStubsSize = 10485760 # 10 MB
+  JitAColdSize = 4194304 # 4 MB
+  JitAFrozenSize = 6291456 # 6 MB
   JitGlobalDataSize = 2097152 # 2 MB
   EnableZendCompat = true
 }

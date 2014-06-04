@@ -66,9 +66,6 @@ const int64_t k_UCOL_STRENGTH = UCOL_STRENGTH;
 const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64_t k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
-using HPHP::JIT::CallerFrame;
-using HPHP::JIT::EagerCallerFrame;
-
 #define getCheckedArrayRet(input, fail)                           \
   auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
   if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
@@ -138,7 +135,7 @@ Variant f_array_chunk(const Variant& input, int chunkSize,
     ret.append(chunk);
   }
 
-  return ret.toArray();
+  return ret.toVariant();
 }
 
 static inline bool array_column_coerce_key(Variant &key, const char *name) {
@@ -195,7 +192,7 @@ Variant f_array_column(const Variant& input, const Variant& val_key,
       ret.setKeyUnconverted(sub[idx], elem);
     }
   }
-  return ret.toArray();
+  return ret.toVariant();
 }
 
 Variant f_array_combine(const Variant& keys, const Variant& values) {
@@ -239,7 +236,7 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
   }
 
   auto size = getContainerSize(cell_keys);
-  if (!size) return empty_array;
+  if (!size) return empty_array();
 
   ArrayInit ai(size, ArrayInit::Mixed{});
   for (ArrayIter iter(cell_keys); iter; ++iter) {
@@ -249,16 +246,13 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
     if (LIKELY(key.isInteger() || key.isString())) {
       ai.setKeyUnconverted(key, value);
     } else {
-      if (RuntimeOption::StrictArrayFillKeys == HackStrictOption::WARN) {
-        raise_warning("array_fill_keys: keys must be ints or strings");
-      } else if (RuntimeOption::StrictArrayFillKeys ==
-                 HackStrictOption::ERROR) {
-        raise_error("array_fill_keys: keys must be ints or strings");
-      }
+      raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
+                        "strict_array_fill_keys",
+                        "keys must be ints or strings");
       ai.setKeyUnconverted(key.toString(), value);
     }
   }
-  return ai.create();
+  return ai.toVariant();
 }
 
 Variant f_array_fill(int start_index, int num, const Variant& value) {
@@ -336,7 +330,7 @@ bool f_array_key_exists(const Variant& key, const Variant& search) {
     return ad->exists(cell->m_data.num);
   case KindOfUninit:
   case KindOfNull:
-    return ad->exists(empty_string);
+    return ad->exists(staticEmptyString());
   default:
     break;
   }
@@ -362,7 +356,7 @@ Variant f_array_keys(const Variant& input, const Variant& search_value /* = null
     for (ArrayIter iter(cell_input); iter; ++iter) {
       ai.append(iter.first());
     }
-    return ai.toArray();
+    return ai.toVariant();
   } else {
     Array ai = Array::attach(MixedArray::MakeReserve(0));
     for (ArrayIter iter(cell_input); iter; ++iter) {
@@ -413,7 +407,7 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
       // present
       ret.add(iter.first(), result, keyConverted);
     }
-    return ret.toArray();
+    return ret.toVariant();
   }
 
   // Handle the uncommon case where the caller passed a callback
@@ -462,7 +456,7 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
       ret_ai.append(params);
     }
   }
-  return ret_ai.toArray();
+  return ret_ai.toVariant();
 }
 
 static void php_array_merge(Array &arr1, const Array& arr2) {
@@ -849,7 +843,7 @@ Variant f_array_slice(const Variant& input, int offset,
   }
 
   if (len <= 0) {
-    return empty_array;
+    return empty_array();
   }
 
   // PackedArrayInit can't be used because non-numeric keys are preserved
@@ -983,7 +977,7 @@ Variant f_array_values(const Variant& input) {
   for (ArrayIter iter(cell_input); iter; ++iter) {
     ai.appendWithRef(iter.secondRefPlus());
   }
-  return ai.toArray();
+  return ai.toVariant();
 }
 
 static void walk_func(VRefParam value, const Variant& key, const Variant& userdata,
@@ -1379,7 +1373,7 @@ static inline bool checkSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
 }
 
 static void containerValuesToSetHelper(c_Set* st, const Variant& container) {
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   for (ArrayIter iter(container); iter; ++iter) {
     auto const& c = *iter.secondRefPlus().asCell();
@@ -1388,7 +1382,7 @@ static void containerValuesToSetHelper(c_Set* st, const Variant& container) {
 }
 
 static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
   for (ArrayIter iter(container); iter; ++iter) {
@@ -1426,7 +1420,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
     } \
   } \
   /* If container1 is empty, we can stop here and return the empty array */ \
-  if (!getContainerSize(c1)) return empty_array; \
+  if (!getContainerSize(c1)) return empty_array(); \
   /* If all of the containers (except container1) are empty, we can just \
      return container1 (converting it to an array if needed) */ \
   if (!largestSize) { \
@@ -1458,7 +1452,7 @@ Variant f_array_diff(int _argc, const Variant& container1, const Variant& contai
   // is not present in the Set. When checking if a value is present in the
   // Set, any value that is not an integer or string is cast to a string, and
   // we convert int-like strings to integers.
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {
@@ -1507,7 +1501,7 @@ Variant f_array_diff_key(int _argc, const Variant& container1, const Variant& co
   // not present in the Set. When checking if a key is present in the Set, any
   // key that is not an integer or string is cast to a string, and we convert
   // int-like strings to integers.
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {
@@ -1692,7 +1686,7 @@ static void containerValuesIntersectHelper(c_Set* st,
   assert(count >= 2);
   c_Map* mp;
   Object mapObj = mp = NEWOBJ(c_Map)();
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
   for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
@@ -1732,7 +1726,7 @@ static void containerKeysIntersectHelper(c_Set* st,
   assert(count >= 2);
   c_Map* mp;
   Object mapObj = mp = NEWOBJ(c_Map)();
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
   bool isKey = containers[0].m_type == KindOfArray;
@@ -1799,7 +1793,7 @@ static void containerKeysIntersectHelper(c_Set* st,
   } \
   /* If any of the containers were empty, we can stop here and return the \
      empty array */ \
-  if (!getContainerSize(c1) || !smallestSize) return empty_array; \
+  if (!getContainerSize(c1) || !smallestSize) return empty_array(); \
   Array ret = Array::Create();
 
 Variant f_array_intersect(int _argc, const Variant& container1, const Variant& container2,
@@ -1827,7 +1821,7 @@ Variant f_array_intersect(int _argc, const Variant& container1, const Variant& c
   // is present in the Set. When checking if a value is present in the Set,
   // any value that is not an integer or string is cast to a string, and we
   // convert int-like strings to integers.
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {
@@ -1881,7 +1875,7 @@ Variant f_array_intersect_key(int _argc, const Variant& container1, const Varian
   // is present in the Set. When checking if a key is present in the Set,
   // any value that is not an integer or string is cast to a string, and we
   // convert int-like strings to integers.
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {

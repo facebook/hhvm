@@ -142,10 +142,7 @@ if [[ "x$DISTRO" == "xubuntu" ]];then
     # Leave this install till after the main parallel package install above
     # since it adds a non-12.04 package repo and we don't want to
     # pull EVERYTHING in, just the newer gcc compiler (and toolchain)
-    GCC_VER=4.7
-    if [ "x${TRAVIS}" != "x" ]; then
-      GCC_VER=4.8
-    fi
+    GCC_VER=4.8
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo apt-get -y update
     sudo apt-get -y install gcc-${GCC_VER} g++-${GCC_VER}

@@ -34,7 +34,6 @@
 #include "folly/MapUtil.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/util/biased-coin.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
@@ -74,7 +73,6 @@ TRACE_SET_MOD(trans);
 namespace HPHP {
 namespace JIT {
 
-static __thread BiasedCoin *dbgTranslateCoin;
 Lease Translator::s_writeLease;
 
 struct TraceletContext {
@@ -176,7 +174,8 @@ RuntimeType Translator::liveType(Location l,
     case Location::Local: {
       Cell *base;
       int offset = locPhysicalOffset(l);
-      base    = l.space == Location::Stack ? vmsp() : vmfp();
+      base = l.space == Location::Stack ? vmsp()
+                                        : reinterpret_cast<Cell*>(vmfp());
       outer = &base[offset];
     } break;
     case Location::Iter: {
@@ -2510,13 +2509,6 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
   }
 }
 
-void
-Translator::requestResetHighLevelTranslator() {
-  if (dbgTranslateCoin) {
-    dbgTranslateCoin->reset();
-  }
-}
-
 bool DynLocation::canBeAliased() const {
   return isValue() &&
     ((Translator::liveFrameIsPseudoMain() && isLocal()) || isRef());
@@ -3158,6 +3150,11 @@ bool shouldAnalyzeCallee(const Tracelet& tlet,
 
   if (!RuntimeOption::RepoAuthoritative) return false;
 
+  if (liveFrame()->resumed()) {
+    // Do not inline from a resumed function
+    return false;
+  }
+
   if (pushOp != OpFPushFuncD &&
       pushOp != OpFPushObjMethodD &&
       pushOp != OpFPushCtorD &&
@@ -3356,7 +3353,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   auto const oldAnalyzeCalleeDepth = m_analysisDepth++;
   vmpc() = nullptr; // should never be used
   vmsp() = nullptr; // should never be used
-  vmfp() = reinterpret_cast<Cell*>(&fakeAR);
+  vmfp() = &fakeAR;
   auto restoreFrame = [&]{
     vmfp() = oldFP;
     vmsp() = oldSP;
@@ -3374,7 +3371,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   auto subTrace = analyze(
     SrcKey(target, entryOffset, false),
     initialMap,
-    target->maxStackCells()
+    parent.m_stackSlackUsedForInlining + target->maxStackCells()
   );
 
   /*
@@ -4127,6 +4124,7 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       if (isFirstRegionInstr) {
+        ht.endGuards();
         if (RuntimeOption::EvalJitTransCounters) {
           ht.emitIncTransCounter();
         }
@@ -4340,20 +4338,20 @@ void Translator::addTranslation(const TransRec& transRec) {
                           transRec.src.getFuncId(),
                           transRec.src.offset()).str().c_str(),
                         transRec.aLen,
-                        transRec.astubsLen,
+                        transRec.acoldLen,
                         transRec.kind);
   }
 
   if (!isTransDBEnabled()) return;
   uint32_t id = getCurrentTransID();
-  m_translations.push_back(transRec);
-  m_translations[id].setID(id);
+  m_translations.emplace_back(transRec);
+  m_translations[id].id = id;
 
   if (transRec.aLen > 0) {
     m_transDB[transRec.aStart] = id;
   }
-  if (transRec.astubsLen > 0) {
-    m_transDB[transRec.astubsStart] = id;
+  if (transRec.acoldLen > 0) {
+    m_transDB[transRec.acoldStart] = id;
   }
 }
 
@@ -4393,78 +4391,6 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
   }
 };
 
-}
-
-TransRec::TransRec(SrcKey                   s,
-                   MD5                      _md5,
-                   std::string              _funcName,
-                   TransKind                _kind,
-                   const Tracelet*          t,
-                   TCA                      _aStart,
-                   uint32_t                 _aLen,
-                   TCA                      _astubsStart,
-                   uint32_t                 _astubsLen,
-                   std::vector<TransBCMapping>   _bcMapping)
-    : id(0)
-    , kind(_kind)
-    , src(s)
-    , md5(_md5)
-    , funcName(_funcName)
-    , bcStopOffset(t ? t->nextSk().offset() : 0)
-    , aStart(_aStart)
-    , aLen(_aLen)
-    , astubsStart(_astubsStart)
-    , astubsLen(_astubsLen)
-    , bcMapping(_bcMapping) {
-  if (t != nullptr) {
-    for (auto dep : t->m_dependencies) {
-      dependencies.push_back(*dep.second);
-    }
-  }
-}
-
-
-std::string
-TransRec::print(uint64_t profCount) const {
-  std::string ret;
-
-  // Split up the call to prevent template explosion
-  ret += folly::format(
-           "Translation {} {{\n"
-           "  src.md5 = {}\n"
-           "  src.funcId = {}\n"
-           "  src.funcName = {}\n"
-           "  src.startOffset = {}\n"
-           "  src.stopOffset = {}\n"
-           "  src.resumed = {}\n",
-           id, md5, src.getFuncId(),
-           funcName.empty() ? "Pseudo-main" : funcName,
-           src.offset(), bcStopOffset,
-           (int32_t)src.resumed()).str();
-
-  ret += folly::format(
-           "  kind = {} ({})\n"
-           "  aStart = {}\n"
-           "  aLen = {:#x}\n"
-           "  stubStart = {}\n"
-           "  stubLen = {:#x}\n",
-           static_cast<uint32_t>(kind), show(kind),
-           aStart, aLen, astubsStart, astubsLen).str();
-
-  ret += folly::format(
-           "  profCount = {}\n"
-           "  bcMapping = {}\n",
-           profCount, bcMapping.size()).str();
-
-  for (auto const& info : bcMapping) {
-    ret += folly::format(
-      "    {} {} {} {}\n",
-      info.md5, info.bcStart,
-      info.aStart, info.astubsStart).str();
-  }
-
-  ret += "}\n\n";
-  return ret;
 }
 
 void

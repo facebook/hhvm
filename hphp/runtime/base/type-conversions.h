@@ -109,18 +109,17 @@ inline String toString(int64_t   v) { return v;}
 inline String toString(double  v) { return v;}
 inline String toString(litstr  v) = delete;
 inline String toString(StringData *v) {
-  return v ? String(v) : static_cast<String>(empty_string);
+  return v ? String(v) : empty_string();
 }
 inline String toString(const String& v) { return toString(v.get());}
 inline String toString(const ArrayData *v) {
-  if (v) {
-    raise_notice("Array to string conversion");
-  }
-  return v ? static_cast<String>(array_string) : "";
+  if (v == nullptr) return empty_string();
+  raise_notice("Array to string conversion");
+  return array_string;
 }
 inline String toString(const Array& v) { return toString(v.get());}
 inline String toString(ObjectData *v) {
-  return v ? v->invokeToString() : static_cast<String>(empty_string);
+  return v ? v->invokeToString() : empty_string();
 }
 inline String toString(const Object& v) { return toString(v.get());}
 inline String toString(const Variant& v) { return v.toString();}

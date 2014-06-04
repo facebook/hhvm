@@ -76,7 +76,7 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
   if (RuntimeOption::InjectedStackTrace) {
     return g_context->getCallerInfo();
   }
-  return empty_array;
+  return empty_array();
 }
 
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,

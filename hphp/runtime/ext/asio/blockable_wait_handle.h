@@ -38,25 +38,26 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   explicit c_BlockableWaitHandle(Class* cls =
       c_BlockableWaitHandle::classof())
     : c_WaitableWaitHandle(cls)
-    , m_nextParent(nullptr)
   {}
   ~c_BlockableWaitHandle() {}
 
  public:
-  c_BlockableWaitHandle* getNextParent() { return m_nextParent; }
+  static constexpr ptrdiff_t nextParentOff() {
+    return offsetof(c_BlockableWaitHandle, m_nextParent);
+  }
+
+  static void UnblockChain(c_BlockableWaitHandle* parentChain);
   c_BlockableWaitHandle* unblock();
+  c_BlockableWaitHandle* getNextParent() { return m_nextParent; }
 
   void exitContextBlocked(context_idx_t ctx_idx);
+
+  static const int8_t STATE_BLOCKED = 2;
 
  protected:
   void blockOn(c_WaitableWaitHandle* child);
   void detectCycle(c_WaitableWaitHandle* child) const;
   ObjectData* createCycleException(c_WaitableWaitHandle* child) const;
-
-  static const int8_t STATE_BLOCKED = 2;
-
- private:
-  c_BlockableWaitHandle* m_nextParent;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

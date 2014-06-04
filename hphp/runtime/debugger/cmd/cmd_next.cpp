@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_next.h"
+
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext/ext_generator.h"
@@ -43,13 +45,13 @@ void CmdNext::onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   m_stackDepth = proxy.getStackDepth();
   m_vmDepth = g_context->m_nesting;
   m_loc = interrupt.getFileLine();
-  ActRec *fp = g_context->getFP();
+  ActRec *fp = vmfp();
   if (!fp) {
     // If we have no frame just wait for the next instruction to be interpreted.
     m_needsVMInterrupt = true;
     return;
   }
-  PC pc = g_context->getPC();
+  PC pc = vmpc();
   stepCurrentLine(interrupt, fp, pc);
 }
 
@@ -57,13 +59,13 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   TRACE(2, "CmdNext::onBeginInterrupt\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
 
-  ActRec *fp = g_context->getFP();
+  ActRec *fp = vmfp();
   if (!fp) {
     // If we have no frame just wait for the next instruction to be interpreted.
     m_needsVMInterrupt = true;
     return;
   }
-  PC pc = g_context->getPC();
+  PC pc = vmpc();
   Unit* unit = fp->m_func->unit();
   Offset offset = unit->offsetOf(pc);
   TRACE(2, "CmdNext: pc %p, opcode %s at '%s' offset %d\n",
@@ -204,7 +206,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   auto op = *reinterpret_cast<const Op*>(pc);
   if (op == OpAwait) {
     assert(fp->func()->isAsync());
-    auto wh = c_WaitHandle::fromCell(g_context->getStack().topC());
+    auto wh = c_WaitHandle::fromCell(vmsp());
     if (wh && !wh->isFinished()) {
       TRACE(2, "CmdNext: encountered blocking await\n");
       if (fp->resumed()) {
@@ -276,7 +278,7 @@ void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
 // the new AsyncFunctionWaitHandle is now available, and it can predict
 // where execution will resume.
 void CmdNext::stepAfterAwait() {
-  auto topObj = g_context->getStack().topTV()->m_data.pobj;
+  auto topObj = vmsp()->m_data.pobj;
   assert(topObj->instanceof(c_AsyncFunctionWaitHandle::classof()));
   auto wh = static_cast<c_AsyncFunctionWaitHandle*>(topObj);
   auto func = wh->actRec()->func();

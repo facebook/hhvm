@@ -1122,7 +1122,7 @@ Variant f_mb_list_mime_names(const String& name /* = null_string */) {
         }
         break;
       }
-      return empty_string;
+      return empty_string_variant();
     } else {
       return false;
     }
@@ -1311,7 +1311,7 @@ static Variant php_mbfl_convert(const Variant& var,
                                 mbfl_string *string,
                                 mbfl_string *result) {
   if (var.is(KindOfArray)) {
-    Array ret = empty_array;
+    Array ret = empty_array();
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
       ret.set(iter.first(),

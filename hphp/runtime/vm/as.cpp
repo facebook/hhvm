@@ -1827,8 +1827,8 @@ void parse_property(AsmState& as) {
 
   TypedValue tvInit = parse_member_tv_initializer(as);
   as.pce->addProperty(makeStaticString(name),
-                      attrs, empty_string.get(),
-                      empty_string.get(),
+                      attrs, staticEmptyString(),
+                      staticEmptyString(),
                       &tvInit,
                       RepoAuthType{});
 }
@@ -1847,8 +1847,8 @@ void parse_constant(AsmState& as) {
 
   TypedValue tvInit = parse_member_tv_initializer(as);
   as.pce->addConstant(makeStaticString(name),
-                      empty_string.get(), &tvInit,
-                      empty_string.get());
+                      staticEmptyString(), &tvInit,
+                      staticEmptyString());
 }
 
 /*
@@ -2049,7 +2049,7 @@ void parse_class(AsmState& as) {
                as.ue->bcPos(),
                attrs,
                makeStaticString(parentName),
-               empty_string.get());
+               staticEmptyString());
   for (size_t i = 0; i < ifaces.size(); ++i) {
     as.pce->addInterface(makeStaticString(ifaces[i]));
   }

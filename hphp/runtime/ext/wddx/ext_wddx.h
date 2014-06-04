@@ -39,15 +39,16 @@ class WddxPacket: public ResourceData {
   bool add_var(const String& varName, bool hasVarTag);
   string packet_end();
   bool serialize_value(const Variant& varVariant);
-  bool recursiveAddVar(String varName, const Variant& varVariant,
+  bool recursiveAddVar(const String& varName, const Variant& varVariant,
                        bool hasVarTag );
 
  private:
-  string getWddxEncoded(string varType, string varValue, String varName,
-                        bool hasVarTag);
+  string getWddxEncoded(const string& varType, const string& varValue,
+                        const String& varName, bool hasVarTag);
 
-  string wrapValue(string start, string end, string varValue,
-                   String varName, bool hasVarTag);
+  string wrapValue(const string& start, const string& end,
+                   const string& varValue, const String& varName,
+                   bool hasVarTag);
 
   string m_packetString;
   bool m_packetClosed;

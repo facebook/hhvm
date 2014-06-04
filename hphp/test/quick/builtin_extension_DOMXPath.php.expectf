@@ -1,13 +1,13 @@
 DOMXPath
 
-Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DOMXPath)#1 (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class DOMXPath in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class DOMXPath in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(8) {
+array(9) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -24,20 +24,22 @@ array(8) {
   string(5) "__set"
   [7]=>
   string(7) "__isset"
+  [8]=>
+  string(11) "__debuginfo"
 }
 ================
 A_DOMXPath
 
-Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DOMXPath)#2 (1) {
   ["___x"]=>
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_DOMXPath in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_DOMXPath in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(8) {
+array(9) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -54,4 +56,6 @@ array(8) {
   string(5) "__set"
   [7]=>
   string(7) "__isset"
+  [8]=>
+  string(11) "__debuginfo"
 }

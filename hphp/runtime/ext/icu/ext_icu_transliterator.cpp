@@ -19,7 +19,7 @@ const icu::UnicodeString s_RulesTransPHP("RulesTransPHP",
 static bool HHVM_METHOD(Transliterator, __init,
                         const String&  idOrRules,
                         int64_t direction, bool rules) {
-  auto data = Native::data<Transliterator>(this_.get());
+  auto data = Native::data<Transliterator>(this_);
   if ((direction != UTRANS_FORWARD) && (direction != UTRANS_REVERSE)) {
     data->setError(U_ILLEGAL_ARGUMENT_ERROR,
                    "transliterator_create: invalid direction");

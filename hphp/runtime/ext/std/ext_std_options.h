@@ -27,12 +27,12 @@ Variant HHVM_FUNCTION(ini_get, const String& varname);
 Variant HHVM_FUNCTION(ini_set,
                       const String& varname, const Variant& newvalue);
 String HHVM_FUNCTION(php_sapi_name);
-Variant HHVM_FUNCTION(php_uname, const String& mode = empty_string);
+Variant HHVM_FUNCTION(php_uname, const String& mode = empty_string_ref);
 String HHVM_FUNCTION(sys_get_temp_dir);
 Variant HHVM_FUNCTION(version_compare,
                       const String& version1,
                       const String& version2,
-                      const String& sop = empty_string);
+                      const String& sop = empty_string_ref);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

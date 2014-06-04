@@ -481,7 +481,7 @@ String string_replace(const char *s, int len, int start, int length,
   assert(s);
   assert(replacement);
   if (!string_substr_check(len, start, length, false)) {
-    return empty_string;
+    return empty_string();
   }
 
   String retString(len + len_repl - length, ReserveString);
@@ -1202,7 +1202,7 @@ String string_numeric_to_base(const Variant& value, int base) {
 
   assert(string_validate_base(base));
   if ((!value.isInteger() && !value.isDouble())) {
-    return empty_string;
+    return empty_string();
   }
 
   if (value.isDouble()) {
@@ -1213,7 +1213,7 @@ String string_numeric_to_base(const Variant& value, int base) {
     /* Don't try to convert +/- infinity */
     if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
       raise_warning("Number too large");
-      return empty_string;
+      return empty_string();
     }
 
     end = ptr = buf + sizeof(buf) - 1;

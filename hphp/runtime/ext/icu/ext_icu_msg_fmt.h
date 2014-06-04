@@ -44,7 +44,7 @@ public:
     return !m_namedParts.empty() || !m_numericParts.empty();
   }
 
-  static MessageFormatter* Get(Object obj) {
+  static MessageFormatter* Get(ObjectData* obj) {
     return GetData<MessageFormatter>(obj, s_MessageFormatter);
   }
 

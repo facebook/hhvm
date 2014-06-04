@@ -44,19 +44,13 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   IRInstruction* inst = sp->inst();
 
   switch (inst->op()) {
-  case DefInlineSP:
   case DefSP:
+    // You aren't really allowed to look above your current stack.  We
+    // can't assert fail here if the index is too high right now
+    // though, because it's currently legal to call getStackValue with
+    // invalid stack offsets.  (And this is done in ir-builder; see
+    // TODO(#4355796)).
     return StackValueInfo { inst, Type::StackElem };
-
-  case ReDefResumableSP: {
-    auto const extra = inst->extra<ReDefResumableSP>();
-    auto info = getStackValue(inst->src(0), index);
-    if (extra->spansCall) info.spansCall = true;
-    return info;
-  }
-
-  case StashResumableSP:
-    return getStackValue(inst->src(1), index);
 
   case ReDefSP: {
     auto const extra = inst->extra<ReDefSP>();
@@ -65,7 +59,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return info;
   }
 
-  case PassSP:
   case ExceptionBarrier:
   case Mov:
     return getStackValue(inst->src(0), index);
@@ -77,6 +70,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return getStackValue(inst->src(0), index);
 
   case CastStk:
+  case CastStkIntToDbl:
     // fallthrough
   case CoerceStk:
     // fallthrough
@@ -236,13 +230,13 @@ void copyProp(IRInstruction* inst) {
     auto tmp     = inst->src(i);
     auto srcInst = tmp->inst();
 
-    if (srcInst->is(Mov, PassSP, PassFP)) {
+    if (srcInst->is(Mov)) {
       inst->setSrc(i, srcInst->src(0));
     }
 
     // We're assuming that all of our src instructions have already been
     // copyPropped.
-    assert(!inst->src(i)->inst()->is(Mov, PassSP, PassFP));
+    assert(!inst->src(i)->inst()->is(Mov));
   }
 }
 
@@ -285,14 +279,6 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
   }
 
   return inst;
-}
-
-IRInstruction* findPassFP(IRInstruction* fpInst) {
-  while (!fpInst->is(DefFP, DefInlineFP, PassFP)) {
-    assert(fpInst->dst()->isA(Type::FramePtr));
-    fpInst = fpInst->src(0)->inst();
-  }
-  return fpInst->is(PassFP) ? fpInst : nullptr;
 }
 
 const IRInstruction* frameRoot(const IRInstruction* fpInst) {
@@ -1357,7 +1343,11 @@ SSATmp* Simplifier::simplifyIsType(const IRInstruction* inst) {
   auto src       = inst->src(0);
   auto srcType   = src->type();
 
-  if (typeMightRelax(src)) return nullptr;
+  // If typeMightRelax(src) returns true, we can't generally depend on the
+  // src's type. However, we always constrain the input to this opcode with at
+  // least DataTypeSpecific, so we only have to skip the optimization if the
+  // typeParam is specialized.
+  if (typeMightRelax(src) && type.isSpecialized()) return nullptr;
 
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.

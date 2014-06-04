@@ -87,6 +87,8 @@ private:
   HhbcTranslator& m_ht;
   smart::vector<ActRecState> m_arStates;
   RefDeps m_refDeps;
+  uint32_t m_numJmps;
+
   const int m_inlineDepth;
   const bool m_profiling;
 
@@ -99,6 +101,7 @@ private:
   bool prepareInstruction();
   void addInstruction();
   bool consumeInput(int i, const InputInfo& ii);
+  bool traceThroughJmp();
   bool tryInline();
   void recordDependencies();
   void truncateLiterals();
@@ -121,6 +124,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
                              ctx.func })
   , m_ht(m_irTrans.hhbcTrans())
   , m_arStates(1)
+  , m_numJmps(0)
   , m_inlineDepth(inlineDepth)
   , m_profiling(profiling)
 {}
@@ -146,8 +150,6 @@ int RegionFormer::inliningDepth() const {
 }
 
 RegionDescPtr RegionFormer::go() {
-  uint32_t numJmps = 0;
-
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
     if (t <= Type::Cls) {
@@ -161,16 +163,7 @@ RegionDescPtr RegionFormer::go() {
   while (true) {
     if (!prepareInstruction()) break;
 
-    // Instead of translating a Jmp, go to its destination.
-    if (!m_profiling && isUnconditionalJmp(m_inst.op()) &&
-        m_inst.imm[0].u_BA > 0 && numJmps < Translator::MaxJmpsTracedThrough) {
-      // Include the Jmp in the region and continue to its destination.
-      ++numJmps;
-      m_sk.setOffset(m_sk.offset() + m_inst.imm[0].u_BA);
-      m_blockFinished = true;
-
-      continue;
-    }
+    if (traceThroughJmp()) continue;
 
     m_curBlock->setKnownFunc(m_sk, m_inst.funcd);
 
@@ -201,7 +194,8 @@ RegionDescPtr RegionFormer::go() {
       continue;
     }
 
-    auto const inlineReturn = m_ht.isInlining() && isRet(m_inst.op());
+    auto const inlineReturn = m_ht.isInlining() &&
+      (isRet(m_inst.op()) || m_inst.op() == OpNativeImpl);
     try {
       m_irTrans.translateInstr(m_inst);
     } catch (const FailedIRGen& exn) {
@@ -217,8 +211,8 @@ RegionDescPtr RegionFormer::go() {
     m_sk.advance(m_curBlock->unit());
 
     if (inlineReturn) {
-      // If we just translated an inlined RetC, grab the updated SrcKey from
-      // m_ht and clean up.
+      // If we just translated a return from an inlined call, grab the updated
+      // SrcKey from m_ht and clean up.
       m_sk = m_ht.curSrcKey().advanced(curUnit());
       m_arStates.pop_back();
       m_blockFinished = true;
@@ -248,8 +242,8 @@ RegionDescPtr RegionFormer::go() {
     always_assert_log(
       !m_ht.isInlining(),
       [&] {
-        return folly::format("Tried to end region while inlining:\n{}",
-                             m_ht.unit()).str();
+        return folly::format("Tried to end region while inlining:\n{}\n{}",
+                             show(*m_region), m_ht.unit()).str();
       });
 
     m_ht.end(m_sk.offset());
@@ -355,9 +349,64 @@ void RegionFormer::addInstruction() {
   m_curBlock->addInstruction();
 }
 
+bool RegionFormer::traceThroughJmp() {
+  bool inlining = inliningDepth();
+
+  // We only trace through unconditional jumps and conditional jumps with const
+  // inputs while inlining.
+  if (!isUnconditionalJmp(m_inst.op()) &&
+      !(inlining && isConditionalJmp(m_inst.op()) &&
+        m_ht.topType(0, DataTypeGeneric).isConst())) {
+    return false;
+  }
+
+  // Normally we want to keep profiling translations to basic blocks, but if
+  // we're inlining we want to analyze as much of the callee as possible.
+  if (m_profiling && !inlining) return false;
+
+  // Don't trace through too many jumps, unless we're inlining. We want to make
+  // sure we don't break a tracelet in the middle of an inlined call; if the
+  // inlined callee becomes too big that's caught in shouldIRInline.
+  if (m_numJmps == Translator::MaxJmpsTracedThrough && !inlining) {
+    return false;
+  }
+
+  auto offset = m_inst.imm[0].u_BA;
+  // Only trace through backwards jumps if it's a JmpNS and we're
+  // inlining. This is to get DV funclets.
+  if (offset < 0 && (m_inst.op() != OpJmpNS || !inlining)) {
+    return false;
+  }
+
+  // Ok we're good. For unconditional jumps, just set m_sk to the dest. For
+  // known conditional jumps we have to consume the const value on the top of
+  // the stack and figure out which branch to go to.
+  if (isUnconditionalJmp(m_inst.op())) {
+    m_sk.setOffset(m_sk.offset() + offset);
+  } else {
+    auto value = m_ht.popC();
+    auto taken =
+      value->variantVal().toBoolean() == (m_inst.op() == OpJmpNZ);
+    FTRACE(2, "Tracing through {}taken Jmp(N)Z on constant {}\n",
+           taken ? "" : "not ", *value->inst());
+
+    m_sk.setOffset(taken ? m_sk.offset() + offset
+                         : m_sk.advanced().offset());
+  }
+
+  ++m_numJmps;
+  m_blockFinished = true;
+  return true;
+}
+
 bool RegionFormer::tryInline() {
   if (!RuntimeOption::RepoAuthoritative ||
       (m_inst.op() != Op::FCall && m_inst.op() != Op::FCallD)) {
+    return false;
+  }
+
+  if (resumed()) {
+    // Do not inline from a resumed function
     return false;
   }
 
@@ -377,8 +426,8 @@ bool RegionFormer::tryInline() {
   }
 
   auto callee = m_inst.funcd;
-  if (!callee || callee->isCPPBuiltin()) {
-    return refuse("don't know callee or callee is builtin");
+  if (!callee) {
+    return refuse("don't know callee");
   }
 
   if (callee == curFunc()) {
@@ -390,8 +439,26 @@ bool RegionFormer::tryInline() {
     return refuse("callee has a variadic capture");
   }
 
-  if (m_inst.imm[0].u_IVA != callee->numParams()) {
-    return refuse("numArgs doesn't match numParams of callee");
+  auto startOffset = callee->base();
+  auto const numArgs = m_inst.imm[0].u_IVA;
+  auto const numParams = callee->numParams();
+
+  // It's ok if numArgs doesn't match numParams as long as the gap can be
+  // filled in by dv funclets.
+  if (numArgs != numParams) {
+    if (numArgs > numParams) {
+      return refuse("numArgs greater than numParams of callee");
+    }
+
+    for (auto i = numArgs; i < numParams; ++i) {
+      auto const& param = callee->params()[i];
+      if (param.hasDefaultValue()) {
+        if (startOffset == callee->base()) startOffset = param.funcletOff();
+      } else {
+        return refuse("numArgs less than numParams of callee so we'd need to "
+                      "emit mising argument warnings");
+      }
+    }
   }
 
   // For analysis purposes, we require that the FPush* instruction is in the
@@ -454,16 +521,21 @@ bool RegionFormer::tryInline() {
   // the callee.
   RegionContext ctx;
   ctx.func = callee;
-  ctx.bcOffset = callee->base();
+  ctx.bcOffset = startOffset;
   ctx.spOffset = callee->numSlotsInFrame();
   ctx.resumed = false;
-  for (int i = 0; i < callee->numParams(); ++i) {
+  for (int i = 0; i < numArgs; ++i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee. It's up to the callee to constraint further if needed.
     auto type = m_ht.topType(i, DataTypeGeneric);
-    uint32_t paramIdx = callee->numParams() - 1 - i;
-    typedef RegionDesc::Location Location;
-    ctx.liveTypes.push_back({Location::Local{paramIdx}, type});
+    uint32_t paramIdx = numArgs - 1 - i;
+    ctx.liveTypes.push_back({RegionDesc::Location::Local{paramIdx}, type});
+  }
+
+  for (unsigned i = numArgs; i < numParams; ++i) {
+    // These locals will be populated by DV init funclets but they'll start
+    // out as Uninit.
+    ctx.liveTypes.push_back({RegionDesc::Location::Local{i}, Type::Uninit});
   }
 
   FTRACE(1, "selectTracelet analyzing callee {} with context:\n{}",

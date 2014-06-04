@@ -199,7 +199,7 @@ Array TimeZone::GetAbbreviations() {
       element.set(s_timezone_id, uninit_null());
     }
     auto& val = ret.lvalAt(String(entry->name));
-    forceToArray(val).append(element.create());
+    forceToArray(val).append(element.toArray());
   }
   return ret;
 }

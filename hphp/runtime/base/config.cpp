@@ -20,6 +20,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <fstream>
 
+#include "hphp/compiler/option.h"
 #include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
@@ -83,54 +84,60 @@ const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
   return config.configGet(defValue);
 }
 
-// The HDF wins because the -v options are still done via HDF
-#define GET_BODY(T, METHOD) \
+#define CONFIG_BODY(T, METHOD) \
 T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
-                      const T defValue) { \
+                      const T defValue /* = 0ish */) { \
   auto* value = ini.get_ptr(IniName(config)); \
   if (value && value->isString()) { \
     T ret; \
     ini_on_update(value->data(), ret); \
+    /* The HDF still wins because the -v options
+     * are still done via HDF, for now */ \
     return config.configGet##METHOD(ret); \
   } \
   return config.configGet##METHOD(defValue); \
+} \
+void Config::Bind(T& loc, const IniSetting::Map &ini, const Hdf& config, \
+                  const T defValue /* = 0ish */) { \
+  loc = Get##METHOD(ini, config, defValue); \
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
+                   IniName(config), &loc); \
 }
 
-GET_BODY(bool, Bool)
-GET_BODY(std::string, String)
-GET_BODY(char, Byte)
-GET_BODY(unsigned char, UByte)
-GET_BODY(int16_t, Int16)
-GET_BODY(uint16_t, UInt16)
-GET_BODY(int32_t, Int32)
-GET_BODY(uint32_t, UInt32)
-GET_BODY(int64_t, Int64)
-GET_BODY(uint64_t, UInt64)
-GET_BODY(double, Double)
+CONFIG_BODY(bool, Bool)
+CONFIG_BODY(char, Byte)
+CONFIG_BODY(unsigned char, UByte)
+CONFIG_BODY(int16_t, Int16)
+CONFIG_BODY(uint16_t, UInt16)
+CONFIG_BODY(int32_t, Int32)
+CONFIG_BODY(uint32_t, UInt32)
+CONFIG_BODY(int64_t, Int64)
+CONFIG_BODY(uint64_t, UInt64)
+CONFIG_BODY(double, Double)
+CONFIG_BODY(std::string, String)
 
-HackStrictOption Config::GetHackStrictOption(const IniSettingMap& ini,
-                                             const Hdf& config,
-                                             const bool EnableHipHopSyntax) {
+static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
+                                            const Hdf& config) {
   auto val = Config::GetString(ini, config);
   if (val.empty()) {
-    if (EnableHipHopSyntax) {
+    if (Option::EnableHipHopSyntax || RuntimeOption::EnableHipHopSyntax) {
       return HackStrictOption::ERROR;
     }
-    return HackStrictOption::OFF;
-  }
-  if (val == "off") {
     return HackStrictOption::OFF;
   }
   if (val == "warn") {
     return HackStrictOption::WARN;
   }
-  if (val == "error") {
-    return HackStrictOption::ERROR;
-  }
-  throw Exception("%s must be 'off', 'warn', 'error', or the empty "
-                  "string - got '%s'",
-                  config.getFullPath().c_str(),
-                  val.c_str());
+  bool ret;
+  ini_on_update(val, ret);
+  return ret ? HackStrictOption::ERROR : HackStrictOption::OFF;
+}
+
+void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
+                  const Hdf& config) {
+  // Currently this doens't bind to ini_get since it is hard to thread through
+  // an enum
+  loc = GetHackStrictOption(ini, config);
 }
 
 }

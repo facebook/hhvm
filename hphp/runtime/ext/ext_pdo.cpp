@@ -743,7 +743,7 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
   if (clsname.empty()) {
     stmt->fetch.clsname = "stdclass";
   }
-  stmt->fetch.constructor = empty_string; //NULL;
+  stmt->fetch.constructor = empty_string(); //NULL;
   HPHP::Class* cls = HPHP::Unit::loadClass(clsname.get());
   if (cls) {
     const HPHP::Func* method = cls->getDeclaredCtor();
@@ -1705,7 +1705,7 @@ static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
     dest = dest.toString();
   }
   if (dest.isNull() && stmt->dbh->oracle_nulls == PDO_NULL_TO_STRING) {
-    dest = empty_string;
+    dest = empty_string_variant();
   }
 }
 

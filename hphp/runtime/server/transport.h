@@ -17,8 +17,10 @@
 #ifndef incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 #define incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 
+#include <list>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 #include "hphp/util/compression.h"
 #include "hphp/util/functional.h"
@@ -39,7 +41,7 @@ using CaseInsenMap =
   std::unordered_map<std::string, V, string_hashi, string_eqstri>;
 
 using HeaderMap = CaseInsenMap<std::vector<std::string>>;
-using CookieMap = CaseInsenMap<std::string>;
+using CookieList = std::vector<std::pair<std::string, std::string>>;
 
 /**
  * A class defining an interface that request handler can use to query
@@ -243,6 +245,41 @@ public:
   virtual void onSendEndImpl() {}
 
   /**
+   * Returns true if this transport supports server pushed resources
+   */
+  virtual bool supportsServerPush() { return false; }
+
+  /**
+   * Attempt to push the resource identified by host/path on this transport
+   *
+   * @param priority (3 bit priority, 0 = highest, 7 = lowest),
+   * @param headers HTTP headers for this resource
+   * @param body body bytes (optional)
+   * @param size length of @p body or 0
+   * @param eom true if no more body bytes are expected
+   *
+   * @return an ID that can be passed to pushResourceBody if more body
+   *         is being streamed later.  0 indicates that the push failed
+   *         immediately.
+   */
+  virtual int64_t pushResource(const char *host, const char *path,
+                               uint8_t priority, const Array& headers,
+                                const void *data, int size, bool eom) {
+    return 0;
+  };
+
+  /**
+   * Stream body and/or EOM marker for a pushed resource
+   *
+   * @param id ID returned by pushResource
+   * @param data body bytes (optional if eom is true)
+   * @param size length of @p body
+   * @param eom true if no more body bytes are expected
+   */
+  virtual void pushResourceBody(int64_t id, const void *data, int size,
+                                bool eom) {}
+
+  /**
    * Need this implementation to break keep-alive connections.
    */
   virtual bool isServerStopping() { return false;}
@@ -431,7 +468,7 @@ protected:
   bool m_firstHeaderSet;
   std::string m_firstHeaderFile;
   int m_firstHeaderLine;
-  CookieMap m_responseCookies;
+  CookieList m_responseCookiesList;
   int m_responseSize;
   int m_responseTotalSize; // including added headers
   int m_responseSentSize;
@@ -462,6 +499,7 @@ protected:
   static void parseQuery(char *query, ParamMap &params);
   static void urlUnescape(char *value);
   bool splitHeader(const String& header, String &name, const char *&value);
+  std::list<std::string> getCookieLines();
 
   StringHolder prepareResponse(const void *data, int size, bool &compressed,
                                bool last);

@@ -35,7 +35,7 @@
 namespace HPHP {
 
 const Array null_array{};
-const Array empty_array{staticEmptyArray()};
+const Array empty_array_ref{staticEmptyArray()};
 const StaticString array_string("Array");
 
 void Array::setEvalScalar() const {
@@ -276,7 +276,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
 // manipulations
 
 String Array::toString() const {
-  if (m_px == nullptr) return "";
+  if (m_px == nullptr) return empty_string();
   raise_notice("Array to string conversion");
   return array_string;
 }
@@ -437,7 +437,7 @@ const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_px->get(key, error);
-    if (key.isNull()) return m_px->get(empty_string, error);
+    if (key.isNull()) return m_px->get(staticEmptyString(), error);
     int64_t n;
     if (!key.get()->isStrictlyInteger(n)) {
       return m_px->get(key, error);
@@ -457,7 +457,7 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
   switch (key.getRawType()) {
   case KindOfUninit:
   case KindOfNull:
-    return m_px->get(empty_string, flags & AccessFlags::Error);
+    return m_px->get(staticEmptyString(), flags & AccessFlags::Error);
   case KindOfBoolean:
   case KindOfInt64:
     return m_px->get(key.asTypedValue()->m_data.num,
@@ -742,7 +742,7 @@ void Array::unserialize(VariableUnserializer *uns) {
   } else {
     // Pre-allocate an ArrayData of the given size, to avoid escalation in
     // the middle, which breaks references.
-    operator=(ArrayInit(size, ArrayInit::Mixed{}).create());
+    operator=(ArrayInit(size, ArrayInit::Mixed{}).toArray());
     for (int64_t i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
       if (!key.isString() && !key.isInteger()) {

@@ -563,7 +563,7 @@ public:
       arr.set(s_alloc, counts.memory);
       arr.set(s_free, counts.peak_memory);
     }
-    ret.set(String(name), arr.create());
+    ret.set(String(name), arr.toArray());
   }
 
   template<class phpret, class StatsMap>
@@ -1376,8 +1376,8 @@ class MemoProfiler : public Profiler {
 
  private:
   virtual void beginFrame(const char *symbol) {
-    JIT::VMRegAnchor _;
-    ActRec *ar = g_context->getFP();
+    VMRegAnchor _;
+    ActRec *ar = vmfp();
     Frame f(symbol);
     if (ar->hasThis()) {
       auto& memo = m_memos[symbol];
@@ -1412,13 +1412,13 @@ class MemoProfiler : public Profiler {
     if (memo.m_ignore) return;
     ++memo.m_count;
     memo.m_ignore = true;
-    JIT::VMRegAnchor _;
-    ActRec *ar = g_context->getFP();
+    VMRegAnchor _;
+    ActRec *ar = vmfp();
     // Lots of random cases to skip just to keep this simple for
     // now. There's no reason not to do more later.
     if (!g_context->m_faults.empty()) return;
     if (ar->m_func->isCPPBuiltin() || ar->resumed()) return;
-    auto ret_tv = g_context->m_stack.topTV();
+    auto ret_tv = vmStack().topTV();
     auto ret = tvAsCVarRef(ret_tv);
     if (ret.isNull()) return;
     if (!(ret.isString() || ret.isObject() || ret.isArray())) return;

@@ -261,18 +261,12 @@ enum class DataTag : uint8_t {
 
 //////////////////////////////////////////////////////////////////////
 
-// Tag for precision of the type a class/object.
-enum class ClsTag : uint8_t {
-  Exact,
-  Sub
-};
-
 /*
  * Information about a class type.  The class is either exact or a
  * subtype of the supplied class.
  */
 struct DCls {
-  ClsTag type;
+  enum { Exact, Sub } type;
   res::Class cls;
 };
 
@@ -284,12 +278,14 @@ struct DCls {
  * the wait handle will produce.
  */
 struct DObj {
-  explicit DObj(ClsTag type, res::Class cls)
+  enum Tag { Exact, Sub };
+
+  explicit DObj(Tag type, res::Class cls)
     : type(type)
     , cls(cls)
   {}
 
-  ClsTag type;
+  Tag type;
   res::Class cls;
   copy_ptr<Type> whType;
 };

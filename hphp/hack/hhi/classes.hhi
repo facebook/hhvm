@@ -49,6 +49,24 @@ class RuntimeException extends Exception {
 class OutOfBoundsException extends RuntimeException {
 }
 
+class Continuation<Tv> implements KeyedIterator<int, Tv> {
+  public function getOrigFuncName(): string {}
+  public function current(): Tv {}
+  public function key(): int {}
+  public function valid(): bool {}
+  public function next(): void {}
+  public function send($v): void {}
+  public function raise(Exception $e): void {}
+  public function rewind(): void {}
+  public function getLabel(): int {}
+  public function update(int $label, Tv $value): void {}
+  public function num_args(): int {}
+  public function get_arg(int $index): mixed {}
+}
+
+class Generator<Tv> extends Continuation<Tv> {
+}
+
 abstract class WaitHandle<T> implements Awaitable<T> {
   public function getWaitHandle(): this {}
   public function import(): void {}
@@ -62,15 +80,7 @@ abstract class WaitHandle<T> implements Awaitable<T> {
   public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
 }
 
-abstract class StaticWaitHandle<T> extends WaitHandle<T> {
-}
-
-class StaticResultWaitHandle<T> extends StaticWaitHandle<T> {
-  public static function create(T $result): StaticResultWaitHandle<T> {}
-}
-
-class StaticExceptionWaitHandle extends StaticWaitHandle<void> {
-  public static function create(Exception $exception): StaticExceptionWaitHandle {}
+class StaticWaitHandle<T> extends WaitHandle<T> {
 }
 
 abstract class WaitableWaitHandle<T> extends WaitHandle<T> {
@@ -84,8 +94,6 @@ abstract class BlockableWaitHandle<T> extends WaitableWaitHandle<T> {
 }
 
 class AsyncFunctionWaitHandle<T> extends BlockableWaitHandle<T> {
-  public function getPrivData() {}
-  public function setPrivData($data) {}
   public static function setOnCreateCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnAwaitCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnSuccessCallback(?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback) {}
@@ -106,10 +114,6 @@ class GenMapWaitHandle<Tk, Tv> extends BlockableWaitHandle<Map<Tk, Tv>> {
 class GenVectorWaitHandle<T> extends BlockableWaitHandle<Vector<T>> {
   public static function create(Vector<WaitHandle<T>> $dependencies): WaitHandle<Vector<T>> {}
   public static function setOnCreateCallback(?(function(GenVectorWaitHandle<T>, Vector<mixed>): void) $callback) {}
-}
-
-class SetResultToRefWaitHandle<T> extends BlockableWaitHandle<T> {
-  public static function create(WaitHandle<T> $wait_handle, ?T &$ref): SetResultToRefWaitHandle<T> {}
 }
 
 class RescheduleWaitHandle extends WaitableWaitHandle<void> {

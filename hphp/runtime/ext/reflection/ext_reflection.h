@@ -63,19 +63,12 @@ class ReflectionFuncHandle {
   }
   ~ReflectionFuncHandle() {}
 
-  static ReflectionFuncHandle* Get(Object obj) {
-    if (obj.isNull()) {
-      raise_error("NULL object passed");
-      return nullptr;
-    }
-    auto ret = Native::data<ReflectionFuncHandle>(obj.get());
-    return ret;
+  static ReflectionFuncHandle* Get(ObjectData* obj) {
+    return Native::data<ReflectionFuncHandle>(obj);
   }
 
-  static const Func* GetFuncFor(Object obj) {
-    auto handle = ReflectionFuncHandle::Get(obj);
-    assert(handle);
-    return handle->getFunc();
+  static const Func* GetFuncFor(ObjectData* obj) {
+    return Native::data<ReflectionFuncHandle>(obj)->getFunc();
   }
 
   const Func* getFunc() { return m_func; }
@@ -103,19 +96,12 @@ class ReflectionClassHandle {
   }
   ~ReflectionClassHandle() {}
 
-  static ReflectionClassHandle* Get(Object obj) {
-    if (obj.isNull()) {
-      raise_error("NULL object passed");
-      return nullptr;
-    }
-    auto ret = Native::data<ReflectionClassHandle>(obj.get());
-    return ret;
+  static ReflectionClassHandle* Get(ObjectData* obj) {
+    return Native::data<ReflectionClassHandle>(obj);
   }
 
-  static const Class* GetClassFor(Object obj) {
-    auto handle = ReflectionClassHandle::Get(obj);
-    assert(handle);
-    return handle->getClass();
+  static const Class* GetClassFor(ObjectData* obj) {
+    return Native::data<ReflectionClassHandle>(obj)->getClass();
   }
 
   const Class* getClass() { return m_cls; }

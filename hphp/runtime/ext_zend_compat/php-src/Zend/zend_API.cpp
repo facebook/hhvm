@@ -474,7 +474,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
   zval ****varargs = NULL;
   int *n_varargs = NULL;
 
-  HPHP::JIT::VMRegAnchor _;
+  HPHP::VMRegAnchor _;
 
   for (spec_walk = type_spec; *spec_walk; spec_walk++) {
     c = *spec_walk;

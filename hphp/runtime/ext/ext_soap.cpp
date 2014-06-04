@@ -2092,7 +2092,7 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
     return server->m_soap_functions.ft.exists(f_strtolower(fn_name));
   }
   HPHP::Func* f = cls ? cls->lookupMethod(fn_name.get()) : nullptr;
-  return (f && f->isPublic());
+  return (f && f->isPublic()) || soap_obj->getAttribute(ObjectData::HasCall);
 }
 
 const StaticString
@@ -2793,7 +2793,7 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
     oneway = false;
   }
   if (oneway) {
-    return empty_string;
+    return empty_string_variant();
   }
   return response.detach();
 }

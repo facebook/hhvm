@@ -234,7 +234,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   for (auto& key : s_arraysToUnset) {
     g->remove(key.get(), false);
   }
-  g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
+  g->set(s_HTTP_RAW_POST_DATA, empty_string_variant_ref, false);
 
 #define X(name)                                       \
   Array name##arr(Array::Create());                   \
@@ -518,8 +518,8 @@ static void CopyServerInfo(Array& server,
   server.set(s_SERVER_PORT, transport->getServerPort());
   server.set(s_SERVER_SOFTWARE, transport->getServerSoftware());
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
-  server.set(s_SERVER_ADMIN, empty_string);
-  server.set(s_SERVER_SIGNATURE, empty_string);
+  server.set(s_SERVER_ADMIN, empty_string_variant_ref);
+  server.set(s_SERVER_SIGNATURE, empty_string_variant_ref);
 }
 
 static void CopyRemoteInfo(Array& server, Transport *transport) {
@@ -668,9 +668,10 @@ static void CopyPathInfo(Array& server,
     }
     break;
   default:
-    server.set(s_REQUEST_METHOD, empty_string); break;
+    server.set(s_REQUEST_METHOD, empty_string_variant_ref); break;
   }
-  server.set(s_HTTPS, transport->isSSL() ? s_on : empty_string);
+  server.set(s_HTTPS, transport->isSSL() ? Variant(s_on) :
+                                           empty_string_variant_ref);
   server.set(s_QUERY_STRING, r.queryString());
 
   server.set(s_argv, make_packed_array(r.queryString()));
@@ -772,7 +773,8 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
     } else if (!post) {
       int len = p - s;
       String sname = url_decode(s, len);
-      register_variable(variables, (char*)sname.data(), empty_string);
+      register_variable(variables, (char*)sname.data(),
+                        empty_string_variant_ref);
     }
     s = p + 1;
   }
@@ -813,7 +815,8 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
         int len = strlen(var);
         String sname = url_decode(var, len);
 
-        register_variable(variables, (char*)sname.data(), empty_string, false);
+        register_variable(variables, (char*)sname.data(),
+                          empty_string_variant_ref, false);
       }
     }
 

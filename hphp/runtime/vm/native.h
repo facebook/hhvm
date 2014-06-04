@@ -100,7 +100,7 @@ class Object;
  */
 #define HHVM_MN(cn,fn) c_ ## cn ## _ni_ ## fn
 #define HHVM_METHOD(cn, fn, ...) \
-        HHVM_MN(cn,fn)(const Object& this_, ##__VA_ARGS__)
+        HHVM_MN(cn,fn)(ObjectData* const this_, ##__VA_ARGS__)
 #define HHVM_NAMED_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
                           makeStaticString(#cn "->" #fn), \
                           mimpl)
@@ -186,9 +186,9 @@ bool coerceFCallArgs(TypedValue* args,
  * If <ctx> is not nullptr, it is prepended to <args> when
  * calling.
  */
-void callFunc(const Func* func, TypedValue *ctx,
+void callFunc(const Func* func, void* ctx,
               TypedValue* args, int32_t numArgs,
-              TypedValue &ret);
+              TypedValue& ret);
 /**
  * ActRec to native function call wrapper
  *

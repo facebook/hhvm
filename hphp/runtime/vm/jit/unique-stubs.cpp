@@ -27,12 +27,12 @@ TRACE_SET_MOD(ustubs);
 //////////////////////////////////////////////////////////////////////
 
 TCA UniqueStubs::add(const char* name, TCA start) {
-  auto const inAStubs = start > mcg->code.stubs().base();
-  UNUSED auto const stop = inAStubs ? mcg->code.stubs().frontier()
+  auto const inACold = start > mcg->code.cold().base();
+  UNUSED auto const stop = inACold ? mcg->code.cold().frontier()
     : mcg->code.main().frontier();
 
   FTRACE(1, "unique stub: {} {} -- {:4} bytes: {}\n",
-         inAStubs ? "astubs @ "
+         inACold ? "acold @ "
          : "  ahot @  ",
          static_cast<void*>(start),
          static_cast<size_t>(stop - start),

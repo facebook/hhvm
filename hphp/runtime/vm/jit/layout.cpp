@@ -32,7 +32,7 @@ TRACE_SET_MOD(hhir);
 /*
  * Currently we have very limited control flow in any given tracelet,
  * so this just selects an appropriate reverse post order on the
- * blocks, and partitions the unlikely ones to astubs.
+ * blocks, and partitions the unlikely ones to acold.
  */
 LayoutInfo layoutBlocks(const IRUnit& unit) {
   LayoutInfo ret;
@@ -46,8 +46,8 @@ LayoutInfo layoutBlocks(const IRUnit& unit) {
                         [&](int i) { return gen() % i; });
   }
 
-  // Partition into a, astubs and acold, without changing relative order.
-  ret.astubsIt = std::stable_partition(
+  // Partition into a, acold and afrozen, without changing relative order.
+  ret.acoldIt = std::stable_partition(
     ret.blocks.begin(), ret.blocks.end(),
     [&] (Block* b) {
       return b->hint() == Block::Hint::Neither ||
@@ -55,8 +55,8 @@ LayoutInfo layoutBlocks(const IRUnit& unit) {
     }
   );
 
-  ret.aunusedIt = std::stable_partition(
-    ret.astubsIt, ret.blocks.end(),
+  ret.afrozenIt = std::stable_partition(
+    ret.acoldIt, ret.blocks.end(),
     [&] (Block* b) { return b->hint() == Block::Hint::Unlikely; }
   );
 
@@ -74,8 +74,9 @@ LayoutInfo layoutBlocks(const IRUnit& unit) {
     };
 
     auto it = ret.blocks.begin();
-    printRegion("\n       a: ", it, ret.astubsIt);
-    printRegion("\n  astubs: ", it, ret.blocks.end());
+    printRegion("\n        a: ", it, ret.acoldIt);
+    printRegion("\n    acold: ", it, ret.afrozenIt);
+    printRegion("\n  afrozen: ", it, ret.blocks.end());
 
     HPHP::Trace::traceRelease("%s\n", str.c_str());
   }

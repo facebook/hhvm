@@ -184,6 +184,10 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {CustomInstanceInit, &ObjectData::callCustomInstanceInit,
                            DSSA, SSync, {{SSA, 0}}},
+    {InitProps,          &Class::initProps, DNone, SSync,
+                           {{extra(&ClassData::cls)}}},
+    {InitSProps,         &Class::initSProps, DNone, SSync,
+                           {{extra(&ClassData::cls)}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
     {LookupClsRDSHandle, lookupClsRDSHandle, DSSA, SNone, {{SSA, 0}}},
@@ -256,6 +260,10 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
     {CreateSSWH,         &c_StaticWaitHandle::CreateSucceededVM, DSSA, SNone,
                            {{TV, 0}}},
+    {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}}},
+    {BWHUnblockChain,    &c_BlockableWaitHandle::UnblockChain, DSSA, SNone,
+                           {{SSA, 0}}},
 
     /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},
@@ -351,9 +359,11 @@ static CallMap s_callMap {
     {DbgAssertPtr, assertTv, DNone, SNone, {{SSA, 0}}},
 
     /* surprise flag support */
-    {SurpriseHook, &EventHook::CheckSurprise, DNone, SSync, {}},
-    {FunctionExitSurpriseHook, &EventHook::onFunctionExitJit, DNone, SSync,
-                               {{SSA, 0}, {TV, 1}}},
+    {SurpriseHook,        &EventHook::CheckSurprise, DNone, SSync, {}},
+    {FunctionSuspendHook, &EventHook::onFunctionSuspend, DNone, SSync,
+                            {{SSA, 0}, {SSA, 1}}},
+    {FunctionReturnHook,  &EventHook::onFunctionReturnJit, DNone, SSync,
+                            {{SSA, 0}, {TV, 1}}},
 
     /* silence operator support */
     {ZeroErrorLevel, &zero_error_level, DSSA, SNone, {}},

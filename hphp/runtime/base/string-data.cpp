@@ -80,6 +80,13 @@ void freeForSize(void* vp, uint32_t size) {
 
 //////////////////////////////////////////////////////////////////////
 
+std::aligned_storage<
+  sizeof(StringData) + 1,
+  alignof(StringData)
+>::type s_theEmptyString;
+
+//////////////////////////////////////////////////////////////////////
+
 // create either a static or an uncounted string.
 // Diffrence between static and uncounted is in the lifetime
 // of the string. Static are alive for the lifetime of the process.
@@ -124,6 +131,26 @@ StringData* StringData::MakeStatic(StringSlice sl) {
 
 StringData* StringData::MakeUncounted(StringSlice sl) {
   return MakeShared(sl, false);
+}
+
+StringData* StringData::MakeEmpty() {
+  void* vpEmpty = &s_theEmptyString;
+
+  auto const sd = static_cast<StringData*>(vpEmpty);
+  auto const data = reinterpret_cast<char*>(sd + 1);
+
+  sd->m_data        = data;
+  sd->m_lenAndCount = 0;
+  sd->m_capAndHash  = 1;
+  data[0] = 0;
+
+  assert(sd->m_hash == 0);
+  assert(sd->m_count == 0);
+  sd->setStatic();
+  assert(sd->isFlat());
+  assert(sd->isStatic());
+  assert(sd->checkSane());
+  return sd;
 }
 
 void StringData::destructStatic() {

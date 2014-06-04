@@ -69,7 +69,7 @@ int ssystem(const char *command);
 /**
  * Find the relative path from a directory with trailing slash to the file
  */
-std::string relativePath(const std::string& fromDir, const std::string& toFile);
+String relativePath(const std::string& fromDir, const String& toFile);
 
 /**
  * Canonicalize path to remove "..", "." and "\/", etc..

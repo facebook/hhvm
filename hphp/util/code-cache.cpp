@@ -63,25 +63,27 @@ CodeCache::CodeCache()
   const size_t kASize       = ru(RuntimeOption::EvalJitASize);
   const size_t kAProfSize   = ru(RuntimeOption::EvalJitPGO ?
                                  RuntimeOption::EvalJitAProfSize : 0);
-  const size_t kAStubsSize  = ru(RuntimeOption::EvalJitAColdSize);
-  const size_t kAUnusedSize = ru(RuntimeOption::EvalJitAFrozenSize);
+  const size_t kAColdSize  = ru(RuntimeOption::EvalJitAColdSize);
+  const size_t kAFrozenSize = ru(RuntimeOption::EvalJitAFrozenSize);
 
   const size_t kGDataSize  = ru(RuntimeOption::EvalJitGlobalDataSize);
-  m_totalSize = kAHotSize + kASize + kAStubsSize + kAProfSize +
-                kAUnusedSize + kGDataSize;
+  m_totalSize = kAHotSize + kASize + kAColdSize + kAProfSize +
+                kAFrozenSize + kGDataSize;
   m_codeSize = m_totalSize - kGDataSize;
 
   if ((kASize < (10 << 20)) ||
-      (kAStubsSize < (10 << 20)) ||
+      (kAColdSize < (4 << 20)) ||
+      (kAFrozenSize < (6 << 20)) ||
       (kGDataSize < (2 << 20))) {
-    fprintf(stderr, "Allocation sizes ASize, AStubsSize, and GlobalDataSize "
-                    "are too small.\n");
+    fprintf(stderr, "Allocation sizes ASize, AColdSize, AFrozenSize and "
+                    "GlobalDataSize are too small.\n");
     exit(1);
   }
 
   if (m_totalSize > (2ul << 30)) {
-    fprintf(stderr,"Combined size of ASize, AStubSize, and GlobalDataSize "
-                   "must be < 2GiB to support 32-bit relative addresses\n");
+    fprintf(stderr,"Combined size of ASize, AColdSize, AFrozenSize and "
+                    "GlobalDataSize must be < 2GiB to support 32-bit relative "
+                    "addresses\n");
     exit(1);
   }
 
@@ -154,14 +156,14 @@ CodeCache::CodeCache()
   m_prof.init(base, kAProfSize, "prof");
   base += kAProfSize;
 
-  TRACE(1, "init astubs @%p\n", base);
-  m_stubs.init(base, kAStubsSize, "stubs");
+  TRACE(1, "init acold @%p\n", base);
+  m_cold.init(base, kAColdSize, "cold");
   enhugen(base, RuntimeOption::EvalTCNumHugeColdMB);
-  base += kAStubsSize;
+  base += kAColdSize;
 
-  TRACE(1, "init aunused @%p\n", base);
-  m_unused.init(base, kAUnusedSize, "aunused");
-  base += kAUnusedSize;
+  TRACE(1, "init afrozen @%p\n", base);
+  m_frozen.init(base, kAFrozenSize, "afrozen");
+  base += kAFrozenSize;
 
   TRACE(1, "init gdata @%p\n", base);
   m_data.init(base, kGDataSize, "gdata");
@@ -181,7 +183,7 @@ CodeCache::~CodeCache() {
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
   always_assert(!m_lock);
   return JIT::codeBlockChoose(addr, m_main, m_hot, m_prof,
-                              m_stubs, m_trampolines, m_unused);
+                              m_cold, m_trampolines, m_frozen);
 }
 
 size_t CodeCache::totalUsed() const {
@@ -217,18 +219,19 @@ CodeBlock& CodeCache::main() {
     always_assert(false && "Invalid Selection");
 }
 
-CodeBlock& CodeCache::stubs() {
+CodeBlock& CodeCache::cold() {
   always_assert(!m_lock);
   switch (m_selection) {
     case Selection::Default:
-    case Selection::Hot:     return m_stubs;
-    case Selection::Profile: return unused();
+    case Selection::Hot:     return m_cold;
+    case Selection::Profile: return frozen();
   }
   always_assert(false && "Invalid Selection");
 }
 
-CodeBlock& CodeCache::unused() {
-  return m_unused.capacity() != 0 ? m_unused : m_stubs;
+CodeBlock& CodeCache::frozen() {
+  always_assert(!m_lock);
+  return m_frozen;
 }
 
 }

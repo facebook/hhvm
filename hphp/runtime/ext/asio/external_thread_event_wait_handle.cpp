@@ -114,22 +114,25 @@ void c_ExternalThreadEventWaitHandle::process() {
     m_event->unserialize(result);
   } catch (const Object& exception) {
     assert(exception->instanceof(SystemLib::s_ExceptionClass));
+    auto const parentChain = getFirstParent();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);
-    done();
+    c_BlockableWaitHandle::UnblockChain(parentChain);
     return;
   } catch (...) {
+    auto const parentChain = getFirstParent();
     setState(STATE_FAILED);
-    tvWriteObject(AsioSession::Get()->getAbruptInterruptException().get(),
+    tvWriteObject(AsioSession::Get()->getAbruptInterruptException(),
                   &m_resultOrException);
-    done();
+    c_BlockableWaitHandle::UnblockChain(parentChain);
     throw;
   }
 
   assert(cellIsPlausible(result));
+  auto const parentChain = getFirstParent();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
-  done();
+  c_BlockableWaitHandle::UnblockChain(parentChain);
 }
 
 String c_ExternalThreadEventWaitHandle::getName() {
@@ -168,12 +171,12 @@ void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
 
 void c_ExternalThreadEventWaitHandle::registerToContext() {
   AsioContext *ctx = getContext();
-  m_index = ctx->registerTo(ctx->getExternalThreadEvents(), this);
+  m_ctxVecIndex = ctx->registerTo(ctx->getExternalThreadEvents(), this);
 }
 
 void c_ExternalThreadEventWaitHandle::unregisterFromContext() {
   AsioContext *ctx = getContext();
-  ctx->unregisterFrom(ctx->getExternalThreadEvents(), m_index);
+  ctx->unregisterFrom(ctx->getExternalThreadEvents(), m_ctxVecIndex);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

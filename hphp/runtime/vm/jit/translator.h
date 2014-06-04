@@ -25,8 +25,6 @@
 #include <vector>
 #include <set>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "hphp/util/md5.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"
@@ -36,12 +34,13 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
-#include "hphp/runtime/vm/jit/write-lease.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -58,16 +57,6 @@ namespace JIT {
 
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
-
-/*
- * DIRTY when the live register state is spread across the stack and m_fixup,
- * CLEAN when it has been sync'ed into g_context.
- */
-enum class VMRegState {
-  CLEAN,
-  DIRTY
-};
-extern __thread VMRegState tl_regState;
 
 struct NormalizedInstruction;
 
@@ -238,73 +227,6 @@ typedef hphp_hash_map<RegionDesc::BlockId,
                       RegionDesc::Block*> BlockIdToRegionBlockMap;
 
 /*
- * Used to maintain a mapping from the bytecode to its corresponding x86.
- */
-struct TransBCMapping {
-  MD5    md5;
-  Offset bcStart;
-  TCA    aStart;
-  TCA    astubsStart;
-};
-
-/*
- * A record with various information about a translation.
- */
-struct TransRec {
-  TransID                id;
-  TransKind              kind;
-  SrcKey                 src;
-  MD5                    md5;
-  std::string            funcName;
-  Offset                 bcStopOffset;
-  std::vector<DynLocation>
-                         dependencies;
-  TCA                    aStart;
-  uint32_t               aLen;
-  TCA                    astubsStart;
-  uint32_t               astubsLen;
-  std::vector<TransBCMapping>
-                         bcMapping;
-
-  TransRec() {}
-
-  TransRec(SrcKey      s,
-           MD5         _md5,
-           std::string _funcName,
-           TransKind   _kind,
-           TCA         _aStart = 0,
-           uint32_t    _aLen = 0,
-           TCA         _astubsStart = 0,
-           uint32_t    _astubsLen = 0)
-      : id(0)
-      , kind(_kind)
-      , src(s)
-      , md5(_md5)
-      , funcName(_funcName)
-      , bcStopOffset(0)
-      , aStart(_aStart)
-      , aLen(_aLen)
-      , astubsStart(_astubsStart)
-      , astubsLen(_astubsLen)
-    { }
-
-  TransRec(SrcKey                   s,
-           MD5                      _md5,
-           std::string              _funcName,
-           TransKind                _kind,
-           const Tracelet*          t,
-           TCA                      _aStart = 0,
-           uint32_t                 _aLen = 0,
-           TCA                      _astubsStart = 0,
-           uint32_t                 _astubsLen = 0,
-           std::vector<TransBCMapping>  _bcMapping =
-             std::vector<TransBCMapping>());
-
-  void setID(TransID newID) { id = newID; }
-  std::string print(uint64_t profCount) const;
-};
-
-/*
  * The information about the context a translation is ocurring
  * in---these fields are fixed for the whole translation.  Many
  * objects in the JIT need access to this.
@@ -379,10 +301,6 @@ extern Translator* tx;
  * Translator annotates a tracelet with input/output locations/types.
  */
 struct Translator {
-  // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
-  // generate an inline return for.
-  static const int kMaxInlineReturnDecRefs = 1;
-
   static const int MaxJmpsTracedThrough = 5;
 
   JIT::UniqueStubs uniqueStubs;
@@ -447,8 +365,6 @@ public:
   void traceStart(TransContext);
   void traceEnd();
   void traceFree();
-
-  void requestResetHighLevelTranslator();
 
 public:
   /* translateRegion reads from the RegionBlacklist to determine when
@@ -547,10 +463,6 @@ public:
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);
   static bool liveFrameIsPseudoMain();
-
-  inline bool stateIsDirty() {
-    return tl_regState == VMRegState::DIRTY;
-  }
 
   inline bool isTransDBEnabled() const {
     return debug || RuntimeOption::EvalDumpTC;
@@ -855,6 +767,10 @@ struct InstrInfo {
 const InstrInfo& getInstrInfo(Op op);
 
 typedef const int COff; // Const offsets
+
+inline bool isNativeImplCall(const Func* funcd, int numArgs) {
+  return funcd && funcd->methInfo() && numArgs == funcd->numParams();
+}
 
 } } // HPHP::JIT
 

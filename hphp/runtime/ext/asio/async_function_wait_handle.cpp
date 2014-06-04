@@ -111,25 +111,28 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
                                   JIT::TCA resumeAddr,
                                   Offset resumeOffset,
-                                  ObjectData* child) {
+                                  c_WaitableWaitHandle* child) {
   assert(fp);
   assert(!fp->resumed());
   assert(fp->func()->isAsyncFunction());
   assert(child);
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
+  assert(!child->isFinished());
 
-  auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
-  assert(!child_wh->isFinished());
-
-  checkCreateErrors(child_wh);
+  checkCreateErrors(child);
 
   void* obj = Resumable::Create(fp, numSlots, resumeAddr, resumeOffset,
                                 sizeof(c_AsyncFunctionWaitHandle));
   auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
   waitHandle->incRefCount();
   waitHandle->setNoDestruct();
-  waitHandle->initialize(child_wh);
+  waitHandle->initialize(child);
   return waitHandle;
+}
+
+void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
+                                             c_WaitableWaitHandle* child) {
+  frame_afwh(fp)->prepareChild(child);
 }
 
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
@@ -137,78 +140,40 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   m_child = child;
 
   blockOn(child);
-
-  // needs to be called with non-zero refcnt
-  auto session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnAsyncFunctionCreateCallback())) {
-    session->onAsyncFunctionCreate(this, child);
-  }
+  incRefCount();
 }
 
 void c_AsyncFunctionWaitHandle::resume() {
   // may happen if scheduled in multiple contexts
   if (getState() != STATE_SCHEDULED) {
+    decRefObj(this);
     return;
   }
 
-  try {
-    setState(STATE_RUNNING);
+  assert(getState() == STATE_SCHEDULED);
+  assert(m_child->isFinished());
+  setState(STATE_RUNNING);
 
-    // resume async function
-    if (LIKELY(m_child->isSucceeded())) {
-      // child succeeded, pass the result to the async function
-      g_context->resumeAsyncFunc(resumable(), m_child, m_child->getResult());
-    } else if (m_child->isFailed()) {
-      // child failed, raise the exception inside the async function
-      g_context->resumeAsyncFuncThrow(resumable(), m_child,
-                                      m_child->getException());
-    } else {
-      throw FatalErrorException(
-          "Invariant violation: child neither succeeded nor failed");
-    }
+  if (LIKELY(m_child->isSucceeded())) {
+    // child succeeded, pass the result to the async function
+    g_context->resumeAsyncFunc(resumable(), m_child, m_child->getResult());
+  } else {
+    // child failed, raise the exception inside the async function
+    g_context->resumeAsyncFuncThrow(resumable(), m_child,
+                                    m_child->getException());
+  }
+}
 
-  retry:
-    // async function reached RetC, which already set m_resultOrException
-    if (isSucceeded()) {
-      markAsSucceeded();
-      return;
-    }
+void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
+  assert(!child->isFinished());
 
-    // async function reached AsyncSuspend, which already set m_child
-    assert(!m_child->isFinished());
-    assert(m_child->instanceof(c_WaitableWaitHandle::classof()));
+  // import child into the current context, throw on cross-context cycles
+  child->enterContext(getContextIdx());
 
-    // import child into the current context, detect cross-context cycles
-    try {
-      child()->enterContext(getContextIdx());
-    } catch (Object& e) {
-      g_context->resumeAsyncFuncThrow(resumable(), m_child, e.get());
-      goto retry;
-    }
-
-    // detect cycles
-    if (UNLIKELY(isDescendantOf(child()))) {
-      Object e(createCycleException(child()));
-      g_context->resumeAsyncFuncThrow(resumable(), m_child, e.get());
-      goto retry;
-    }
-
-    // on await callback
-    AsioSession* session = AsioSession::Get();
-    if (UNLIKELY(session->hasOnAsyncFunctionAwaitCallback())) {
-      session->onAsyncFunctionAwait(this, m_child);
-    }
-
-    // set up dependency
-    setState(STATE_BLOCKED);
-    blockOn(child());
-  } catch (const Object& exception) {
-    // process exception thrown by the async function
-    markAsFailed(exception);
-  } catch (...) {
-    // process C++ exception
-    markAsFailed(AsioSession::Get()->getAbruptInterruptException());
-    throw;
+  // detect cycles
+  if (UNLIKELY(isDescendantOf(child))) {
+    Object e(createCycleException(child));
+    throw e;
   }
 }
 
@@ -216,39 +181,44 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
   if (isInContext()) {
     getContext()->schedule(this);
+  } else {
+    decRefObj(this);
   }
+}
+
+void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
+                                      c_WaitableWaitHandle* child) {
+  // Prepare child for establishing dependency. May throw.
+  prepareChild(child);
+
+  // Suspend the async function.
+  resumable()->setResumeAddr(nullptr, resumeOffset);
+
+  // Set up the dependency.
+  m_child = child;
+  setState(STATE_BLOCKED);
+  blockOn(m_child);
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
+  auto const parentChain = getFirstParent();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
+  UnblockChain(parentChain);
+  decRefObj(this);
 }
 
-void c_AsyncFunctionWaitHandle::markAsSucceeded() {
-  AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnAsyncFunctionSuccessCallback())) {
-    session->onAsyncFunctionSuccess(this, cellAsCVarRef(m_resultOrException));
-  }
-
-  done();
-}
-
-void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
+void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnAsyncFunctionFailCallback())) {
     session->onAsyncFunctionFail(this, exception);
   }
 
+  auto const parentChain = getFirstParent();
   setState(STATE_FAILED);
-  tvWriteObject(exception.get(), &m_resultOrException);
-  done();
-}
-
-void
-c_AsyncFunctionWaitHandle::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
-                                   c_WaitableWaitHandle* child) {
-  resumable()->setResumeAddr(resumeAddr, resumeOffset);
-  m_child = child;
+  tvWriteObject(exception, &m_resultOrException);
+  UnblockChain(parentChain);
+  decRefObj(this);
 }
 
 String c_AsyncFunctionWaitHandle::getName() {
@@ -302,7 +272,7 @@ String c_AsyncFunctionWaitHandle::getName() {
 c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
     assert(m_child);
-    return child();
+    return m_child;
   } else {
     assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
     return nullptr;
@@ -314,7 +284,7 @@ void c_AsyncFunctionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
     case STATE_BLOCKED:
       // enter child into new context recursively
       assert(m_child);
-      child()->enterContext(ctx_idx);
+      m_child->enterContext(ctx_idx);
       setContextIdx(ctx_idx);
       break;
 
@@ -322,6 +292,7 @@ void c_AsyncFunctionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
       // reschedule so that we get run
       setContextIdx(ctx_idx);
       getContext()->schedule(this);
+      incRefCount();
       break;
 
     case STATE_RUNNING: {
@@ -341,12 +312,14 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
 
   // stop before corrupting unioned data
   if (isFinished()) {
+    decRefObj(this);
     return;
   }
 
   // not in a context being exited
   assert(getContextIdx() <= ctx_idx);
   if (getContextIdx() != ctx_idx) {
+    decRefObj(this);
     return;
   }
 
@@ -355,20 +328,23 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
       // we were already ran due to duplicit scheduling; the context will be
       // updated thru exitContext() call on the non-blocked wait handle we
       // recursively depend on
+      decRefObj(this);
       break;
 
     case STATE_SCHEDULED:
-      // move us to the parent context
-      setContextIdx(getContextIdx() - 1);
-
-      // reschedule if still in a context
-      if (isInContext()) {
-        getContext()->schedule(this);
-      }
-
-      // recursively move all wait handles blocked by us
+      // Recursively move all wait handles blocked by us.
       for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
         pwh->exitContextBlocked(ctx_idx);
+      }
+
+      // Move us to the parent context.
+      setContextIdx(getContextIdx() - 1);
+
+      // Reschedule if still in a context.
+      if (isInContext()) {
+        getContext()->schedule(this);
+      } else {
+        decRefObj(this);
       }
 
       break;

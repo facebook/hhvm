@@ -669,10 +669,12 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
          ++iter, ++startIter, ++lengthIter) {
       int nStart = startIter.second().toInt32();
       int nLength = lengthIter.second().toInt32();
-      String repl = empty_string;
+      String repl;
       if (replIter) {
         repl = replIter.second().toString();
         ++replIter;
+      } else {
+        repl = empty_string();
       }
       auto s2 = string_replace(iter.second().toString(), nStart, nLength, repl);
       ret.append(s2);
@@ -713,7 +715,7 @@ String f_str_repeat(const String& input, int multiplier) {
   }
 
   if (multiplier == 0) {
-    return empty_string;
+    return empty_string();
   }
 
   if (input.size() == 1) {
@@ -907,15 +909,36 @@ Variant f_stristr(const String& haystack, const Variant& needle) {
 }
 
 static NEVER_INLINE
-Variant strpbrk_slow(const String& haystack, const String& char_list) {
-  auto const hd = haystack.get()->data();
-  auto const cd = char_list.get()->data();
-  for (size_t i = 0; i < haystack.length(); ++i) {
-    for (size_t j = 0; j < char_list.length(); ++j) {
-      if (hd[i] == cd[j]) {
-        return String(hd + i, haystack.length() - i, CopyString);
-      }
-    }
+Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
+                                         const String& char_list) {
+
+  auto const charListSz = char_list.size();
+  auto const charListData = char_list.c_str();
+  assert(memchr(charListData, '\0', charListSz) != nullptr);
+
+  // in order to use strcspn, remove all null byte(s) from char_list
+  auto charListWithoutNull = (char*) smart_malloc(charListSz);
+  SCOPE_EXIT { smart_free(charListWithoutNull); };
+
+  auto copy_ptr = charListWithoutNull;
+  auto const charListStop = charListData + char_list.size();
+  for (auto ptr = charListData; ptr != charListStop; ++ptr) {
+    if (*ptr != '\0') { *copy_ptr++ = *ptr; }
+  }
+  assert((copy_ptr - charListWithoutNull) < charListSz);
+  // at least one of charListData chars was null, so there must be room:
+  *copy_ptr = '\0';
+
+  // Use strcspn instead of strpbrk because the latter doesn't report when
+  // its terminated due to a null byte in haystack in any manageable way.
+  auto haySize = haystack.size();
+  auto hayData = haystack.c_str();
+
+  size_t idx = strcspn(hayData, charListWithoutNull);
+  if (idx < haySize) {
+    // we know that char_list contains null bytes, being terminated because
+    // haystack has null bytes is just dandy
+    return String(hayData + idx, haySize - idx, CopyString);
   }
   return false;
 }
@@ -925,22 +948,44 @@ Variant f_strpbrk(const String& haystack, const String& char_list) {
     throw_invalid_argument("char_list: (empty)");
     return false;
   }
-
-  auto const charListData = char_list.c_str();
-  auto const charListStop = charListData + char_list.size();
-  for (auto ptr = charListData; ptr != charListStop;) {
-    if (UNLIKELY(*ptr++ == '\0')) return strpbrk_slow(haystack, char_list);
+  if (haystack.empty()) {
+    return false;
   }
 
-  // Use strcspn instead of strpbrk because the latter doesn't report
-  // when its terminated due to a null byte in haystack in any
-  // manageable way.
+  auto charListData = char_list.c_str();
+
+  // equivalent to rawmemchr(charListData, '\0') ... charListData must be
+  // null-terminated
+  auto firstNull = charListData;
+  while (*firstNull != '\0') { ++firstNull; }
+
+  auto const hasNullByte = (firstNull - charListData) < char_list.size();
+
+  if (UNLIKELY(hasNullByte)) {
+    if ((firstNull - charListData) == (char_list.size() - 1)) {
+      // the first null is the last character in char_list
+    } else if (firstNull == charListData) {
+      // the first null is the first character in char_list
+      auto secondNull = firstNull + 1;
+      while (*secondNull != '\0') { ++secondNull; }
+
+      if ((secondNull - charListData) != char_list.size()) {
+        return strpbrk_char_list_has_nulls_slow(haystack, char_list);
+      }
+      ++charListData; // we can remember the null byte
+    } else {
+      return strpbrk_char_list_has_nulls_slow(haystack, char_list);
+    }
+  }
+
+  // Use strcspn instead of strpbrk because the latter doesn't report when
+  // it's terminated due to a null byte in haystack in any manageable way.
   auto haySize = haystack.size();
   auto hayData = haystack.c_str();
 retry:
   size_t idx = strcspn(hayData, charListData);
   if (idx < haySize) {
-    if (UNLIKELY(hayData[idx] == '\0')) {
+    if (UNLIKELY(hayData[idx] == '\0' && !hasNullByte)) {
       hayData += idx + 1;
       haySize -= idx + 1;
       goto retry;
@@ -1229,7 +1274,7 @@ Variant f_str_word_count(const String& str, int64_t format /* = 0 */,
   case 1:
   case 2:
     if (!str_len) {
-      return empty_array;
+      return empty_array();
     }
     break;
   case 0:

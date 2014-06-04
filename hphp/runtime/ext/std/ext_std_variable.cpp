@@ -220,7 +220,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     assert(false);
     break;
   }
-  return empty_string;
+  return empty_string();
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
@@ -234,7 +234,7 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
 ALWAYS_INLINE
 static Array get_defined_vars() {
   VarEnv* v = g_context->getVarEnv();
-  return v ? v->getDefinedVariables() : empty_array;
+  return v ? v->getDefinedVariables() : empty_array();
 }
 
 Array HHVM_FUNCTION(get_defined_vars) {
@@ -301,7 +301,7 @@ int64_t extract_impl(VRefParam vref_array,
     return 0;
   }
 
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   auto const varEnv = g_context->getVarEnv();
   if (!varEnv) return 0;
 

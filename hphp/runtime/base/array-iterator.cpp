@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/apc-local-array-defs.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
@@ -913,7 +914,7 @@ bool Iter::init(TypedValue* c1) {
       if (isIterator) {
         (void) new (&arr()) ArrayIter(obj.detach(), ArrayIter::noInc);
       } else {
-        Class* ctx = arGetContextClass(g_context->getFP());
+        Class* ctx = arGetContextClass(vmfp());
         auto ctxStr = ctx ? ctx->nameStr() : StrNR();
         Array iterArray(obj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();

@@ -84,7 +84,7 @@ Variant f_ldap_get_values_len
 Variant f_ldap_get_values(
   const Resource& link, const Resource& result_entry, const String& attribute);
 bool f_ldap_control_paged_result(const Resource& link, int pagesize,
-  bool iscritical = false, const String& cookie = empty_string);
+  bool iscritical = false, const String& cookie = empty_string_ref);
 bool f_ldap_control_paged_result_response(const Resource& link, const Resource& result,
   VRefParam cookie = uninit_null(), VRefParam estimated = uninit_null());
 

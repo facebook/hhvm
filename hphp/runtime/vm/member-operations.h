@@ -870,7 +870,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   Cell* value,
                                   bool copy) {
   if (IS_NULL_TYPE(key.m_type)) {
-    return a->set(empty_string, cellAsCVarRef(*value), copy);
+    return a->set(staticEmptyString(), cellAsCVarRef(*value), copy);
   }
   if (IS_STRING_TYPE(key.m_type)) {
     return SetElemArrayPre<setResult>(a, key.m_data.pstr, value, copy);

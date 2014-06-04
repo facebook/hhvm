@@ -31,7 +31,7 @@ namespace HPHP { namespace JIT { namespace X64 {
  *   the TC.
  *
  *   Return value is a destination; we emit the bulky service
- *   request code into astubs.
+ *   request code into acold.
  *
  *   Returns a continuation that will run after the arguments have been
  *   emitted. This is gross, but is a partial workaround for the inability
@@ -41,19 +41,19 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
 
 /*
- * "cb" may be either the main section or unused section.
+ * "cb" may be either the main section or frozen section.
  */
-void emitBindSideExit(CodeBlock& cb, CodeBlock& unused, JIT::ConditionCode cc,
+void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
                       SrcKey dest);
-void emitBindJcc(CodeBlock& cb, CodeBlock& unused, JIT::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
                  SrcKey dest);
-void emitBindJmp(CodeBlock& cb, CodeBlock& unused, SrcKey dest);
+void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest);
 
 /*
  * Returns the amount by which rVmSp should be adjusted.
  */
-int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
-                     CodeBlock& unusedCode, SrcKey srcKey,
+int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
+                     CodeBlock& frozenCode, SrcKey srcKey,
                      const Func* funcd, int numArgs);
 
 }}}

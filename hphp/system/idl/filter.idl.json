@@ -270,7 +270,7 @@
                 {
                     "name": "options",
                     "type": "Variant",
-                    "value": "empty_array"
+                    "value": "empty_array_ref"
                 }
             ]
         }

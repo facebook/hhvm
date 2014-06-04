@@ -261,7 +261,7 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
     return false;
   }
   if (size == 0) {
-    return empty_string;
+    return empty_string_variant();
   }
 
   const char *p = haystack.c_str() + start;
@@ -428,8 +428,8 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
 
   int64_t length = len.toInt64();
   if (!length) {
-    // we've validated start, we can return empty_string now
-    return empty_string;
+    // we've validated start, we can return empty_string_variant now
+    return empty_string_variant();
   }
   int32_t end_pos = start_pos;
   int32_t (*iter_func)(UBreakIterator *);

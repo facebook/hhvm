@@ -390,7 +390,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
         tag.set(s_tag, tag_name.substr(parser->toffset));
         tag.set(s_type, s_close);
         tag.set(s_level, parser->level);
-        parser->data.toArrRef().append(tag.create());
+        parser->data.toArrRef().append(tag.toArray());
       }
       parser->lastwasopen = 0;
     }
@@ -714,7 +714,7 @@ int64_t f_xml_parse(const Resource& parser, const String& data, bool is_final /*
 int64_t f_xml_parse_into_struct(const Resource& parser, const String& data, VRefParam values,
                             VRefParam index /* = null */) {
   int ret;
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   XmlParser * p = parser.getTyped<XmlParser>();
   values = Array::Create();
   p->data.assignRef(values);

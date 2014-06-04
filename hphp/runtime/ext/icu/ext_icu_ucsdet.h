@@ -30,7 +30,7 @@ class EncodingDetector : public IntlError {
     ucsdet_close(m_encodingDetector);
   }
 
-  static EncodingDetector* Get(Object obj) {
+  static EncodingDetector* Get(ObjectData* obj) {
     return GetData<EncodingDetector>(obj, s_EncodingDetector);
   }
 
@@ -96,7 +96,7 @@ class EncodingMatch : public IntlError {
     return ret;
   }
 
-  static EncodingMatch* Get(Object obj) {
+  static EncodingMatch* Get(ObjectData* obj) {
     return GetData<EncodingMatch>(obj, s_EncodingMatch);
   }
 

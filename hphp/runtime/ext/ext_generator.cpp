@@ -55,7 +55,7 @@ c_Generator::~c_Generator() {
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
 
-  // Free locals, but don't trigger the EventHook for FunctionExit
+  // Free locals, but don't trigger the EventHook for FunctionReturn
   // since the generator has already been exited. We
   // don't want redundant calls.
   ActRec* ar = actRec();
@@ -118,7 +118,7 @@ String c_Generator::t_getcalledclass() {
   } else if (actRec()->hasClass()) {
     called_class = actRec()->getClass()->name()->data();
   } else {
-    called_class = empty_string;
+    called_class = empty_string();
   }
 
   return called_class;

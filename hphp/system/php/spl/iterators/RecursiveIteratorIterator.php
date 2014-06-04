@@ -192,7 +192,7 @@ class RecursiveIteratorIterator implements OuterIterator {
       case self::STATE_CHILD:
         $children = $this->callGetChildren();
         if (!$children instanceof RecursiveIterator) {
-          throw new Exception(
+          throw new UnexpectedValueException(
             'Objects returned by RecursiveIterator::getChildren() must '.
             'implement RecursiveIterator'
           );
@@ -221,7 +221,6 @@ class RecursiveIteratorIterator implements OuterIterator {
   public function rewind() {
     while ($this->iterators) {
       array_pop($this->iterators);
-      $this->endChildren();
     }
 
     $it = $this->originalIterator;

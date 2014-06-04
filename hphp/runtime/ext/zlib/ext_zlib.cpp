@@ -139,7 +139,8 @@ static void hhvm_zlib_free(voidpf opaque, voidpf address) {
 static Variant hhvm_zlib_encode(const String& data,
                                 int64_t level, int64_t enc) {
   if ((level < -1) || (level > 9)) {
-    raise_warning("compression level (%ld) must be within -1..9", level);
+    raise_warning("compression level (%" PRId64 ") must be within -1..9",
+                  level);
     return false;
   }
   switch (enc) {
@@ -250,7 +251,7 @@ static Variant hhvm_zlib_decode(const String& data,
   }
 
   if (maxlen < 0) {
-    raise_warning("length (%ld) must be greater or equal zero", maxlen);
+    raise_warning("length (%" PRId64 ") must be greater or equal zero", maxlen);
     return false;
   }
 
@@ -564,7 +565,7 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
 
   size_t len = ntohl(format->uncompressed_sz);
   if (len == 0) {
-    return empty_string;
+    return empty_string_variant();
   }
 
   String str(len, ReserveString);
@@ -712,7 +713,7 @@ class __SystemLib_ChunkedInflator {
   String inflateChunk(const String& chunk) {
     if (m_eof) {
       raise_warning("Tried to inflate after final chunk");
-      return empty_string;
+      return empty_string();
     }
     m_zstream.next_in = (Bytef*) chunk.data();
     m_zstream.avail_in = chunk.length();
@@ -735,11 +736,11 @@ class __SystemLib_ChunkedInflator {
           buffer.shrink(produced);
           return buffer;
         }
-        return empty_string;
+        return empty_string();
       }
     } while (++factor < maxfactor);
     raise_warning("Failed to extract chunk");
-    return empty_string;
+    return empty_string();
   }
 
  private:
@@ -748,8 +749,7 @@ class __SystemLib_ChunkedInflator {
 };
 
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
-  assert(!src.isNull()); \
-  auto dest = Native::data<__SystemLib_ChunkedInflator>(src.get());
+  auto dest = Native::data<__SystemLib_ChunkedInflator>(src);
 
 bool HHVM_METHOD(__SystemLib_ChunkedInflator, eof) {
   FETCH_CHUNKED_INFLATOR(data, this_);

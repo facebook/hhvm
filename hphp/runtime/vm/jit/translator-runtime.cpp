@@ -548,7 +548,7 @@ TCA sswitchHelperFast(const StringData* val,
 
 // TODO(#2031980): clear these out
 void tv_release_generic(TypedValue* tv) {
-  assert(JIT::tx->stateIsDirty());
+  assert(vmRegStateIsDirty());
   assert(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
          tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
          tv->m_type == KindOfRef);
@@ -847,8 +847,19 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
   }
 }
 
+const Func* loadClassCtor(Class* cls) {
+  const Func* f = cls->getCtor();
+  if (UNLIKELY(!(f->attrs() & AttrPublic))) {
+    VMRegAnchor _;
+    UNUSED LookupResult res =
+      g_context->lookupCtorMethod(f, cls, true /*raise*/);
+    assert(res == LookupResult::MethodFoundWithThis);
+  }
+  return f;
+}
+
 const Func* lookupUnknownFunc(const StringData* name) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   auto const func = Unit::loadFunc(name);
   if (UNLIKELY(!func)) {
     raise_error("Call to undefined function %s()", name->data());
@@ -858,7 +869,7 @@ const Func* lookupUnknownFunc(const StringData* name) {
 
 const Func* lookupFallbackFunc(const StringData* name,
                                const StringData* fallback) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   // Try to load the first function
   auto func = Unit::loadFunc(name);
   if (LIKELY(!func)) {
@@ -949,11 +960,12 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
 static void sync_regstate_to_caller(ActRec* preLive) {
   assert(tl_regState == VMRegState::DIRTY);
   auto const ec = g_context.getNoCheck();
-  ec->m_stack.top() = (TypedValue*)preLive - preLive->numArgs();
+  auto& regs = vmRegsUnsafe();
+  regs.stack.top() = (TypedValue*)preLive - preLive->numArgs();
   ActRec* fp = preLive == ec->m_firstAR ?
     ec->m_nestedVMs.back().fp : preLive->m_sfp;
-  ec->m_fp = fp;
-  ec->m_pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
+  regs.fp = fp;
+  regs.pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
   tl_regState = VMRegState::CLEAN;
 }
 

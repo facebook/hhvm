@@ -238,7 +238,7 @@ void MixedArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
       return true;                                              \
     }                                                           \
     CallCtx ctx;                                                \
-    JIT::CallerFrame cf;                                        \
+    CallerFrame cf;                                             \
     vm_decode_function(cmp_function, cf(), false, ctx);         \
     if (!ctx.func) {                                            \
       return false;                                             \

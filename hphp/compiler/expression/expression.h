@@ -138,6 +138,7 @@ public:
                                  // ObjectPropertyExpression::m_object
     RefAssignmentLHS = 0x100000, // LHS of a reference assignment
     ReturnContext = 0x200000,    // Return expression
+    UnpackParameter = 0x400000,  // e.g. f(...$x)
   };
 
   enum Order {

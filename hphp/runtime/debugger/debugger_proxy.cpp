@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"
 
@@ -798,7 +799,7 @@ int DebuggerProxy::getRealStackDepth() {
   TRACE(2, "DebuggerProxy::getRealStackDepth\n");
   int depth = 0;
   auto const context = g_context.getNoCheck();
-  auto fp = context->getFP();
+  auto fp = vmfp();
   if (!fp) return 0;
 
   while (fp != nullptr) {
@@ -811,8 +812,7 @@ int DebuggerProxy::getRealStackDepth() {
 int DebuggerProxy::getStackDepth() {
   TRACE(2, "DebuggerProxy::getStackDepth\n");
   int depth = 0;
-  auto const context = g_context.getNoCheck();
-  auto fp = context->getFP();
+  auto fp = vmfp();
   if (!fp) return 0;
   fp = fp->sfp();
   while (fp) {

@@ -32,7 +32,7 @@ public:
 
   bool isValid() const { return true; }
 
-  static IntlUConverter* Get(Object obj) {
+  static IntlUConverter* Get(ObjectData* obj) {
     return GetData<IntlUConverter>(obj, s_UConverter);
   }
 

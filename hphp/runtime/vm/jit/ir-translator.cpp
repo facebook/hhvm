@@ -568,7 +568,7 @@ IRTranslator::translateFCallBuiltin(const NormalizedInstruction& i) {
 }
 
 static bool isInlinableCPPBuiltin(const Func* f) {
-  if (f->attrs() & (AttrNoFCallBuiltin|AttrStatic) ||
+  if (f->attrs() & AttrNoFCallBuiltin ||
       f->numParams() > Native::maxFCallBuiltinArgs() ||
       !f->nativeFuncPtr()) {
     return false;
@@ -576,16 +576,16 @@ static bool isInlinableCPPBuiltin(const Func* f) {
   if (f->returnType() == KindOfDouble && !Native::allowFCallBuiltinDoubles()) {
     return false;
   }
-  if (!f->methInfo()) {
-    // TODO(#4313939): hni builtins
-    return false;
-  }
-  auto const info = f->methInfo();
-  if (info->attribute & (ClassInfo::NoFCallBuiltin |
-                         ClassInfo::VariableArguments |
-                         ClassInfo::RefVariableArguments |
-                         ClassInfo::MixedVariableArguments)) {
-    return false;
+  if (auto const info = f->methInfo()) {
+    if (info->attribute & (ClassInfo::NoFCallBuiltin |
+                           ClassInfo::VariableArguments |
+                           ClassInfo::RefVariableArguments |
+                           ClassInfo::MixedVariableArguments)) {
+      return false;
+    }
+    // Note: there is no need for a similar-to-the-above check for HNI
+    // builtins---they'll just have a nullptr nativeFuncPtr (if they
+    // were declared as needing an ActRec).
   }
 
   // Don't do this for things which require this pointer adjustments
@@ -605,7 +605,7 @@ static bool isInlinableCPPBuiltin(const Func* f) {
    */
   for (auto i = uint32_t{0}; i < f->numParams(); ++i) {
     if (f->params()[i].builtinType() != KindOfUnknown) {
-      return false;
+      if (f->isParamCoerceMode()) return false;
     }
   }
 
@@ -716,7 +716,8 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     // If func has changed after an FCall, we've started an inlined call. This
     // will have to change when we support inlining recursive calls.
     if (func != iter.sk().func()) {
-      assert(isRet(op) || op == Op::FCall || op == Op::FCallD);
+      assert(isRet(op) || op == Op::NativeImpl ||
+             op == Op::FCall || op == Op::FCallD);
       if (op == Op::FCall || op == Op::FCallD) {
         funcs.push_back(iter.sk().func());
         int totalDepth = 0;
@@ -743,7 +744,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
 
     // If we hit a RetC/V while inlining, leave that level and
     // continue. Otherwise, accept the tracelet.
-    if (isRet(op)) {
+    if (isRet(op) || op == Op::NativeImpl) {
       if (inlineDepth > 0) {
         --inlineDepth;
         funcs.pop_back();

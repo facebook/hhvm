@@ -171,18 +171,19 @@ let rec main args retries =
                      "just started this can take some time." in
       if args.retry_if_init
       then begin
-        Printf.fprintf stderr "%s Retrying...\n" init_msg;
+        Printf.fprintf stderr "%s Retrying... %s\r" init_msg (Utils.spinner());
         flush stderr;
         Unix.sleep(1);
         main args retries
       end else begin
-        Printf.fprintf stderr "%s Try again...\n" init_msg;
+        Printf.fprintf stderr "%s Try again... %s\r" init_msg (Utils.spinner());
         flush stderr;
       end
   | Server_cant_connect ->
       if retries > 1
       then begin
-        Printf.fprintf stderr "Error: could not connect to hh_server, retrying...\n";
+        Printf.fprintf stderr "Error: could not connect to hh_server, retrying... %s\r"
+          (Utils.spinner());
         flush stderr;
         Unix.sleep(1);
         main args (retries-1)
@@ -194,7 +195,8 @@ let rec main args retries =
   | Server_busy ->
       if retries > 1
       then begin
-        Printf.fprintf stderr "Error: hh_server is busy, retrying...\n";
+        Printf.fprintf stderr "Error: hh_server is busy, retrying... %s\r"
+          (Utils.spinner());
         flush stderr;
         Unix.sleep(1);
         main args (retries-1)
@@ -232,7 +234,8 @@ let rec main args retries =
   | _ ->
       if retries > 1
       then begin
-        Printf.fprintf stderr "Error: hh_server disconnected or crashed, retrying...\n";
+        Printf.fprintf stderr "Error: hh_server disconnected or crashed, retrying... %s\r"
+          (Utils.spinner());
         flush stderr;
         Unix.sleep(1);
         main args (retries-1)

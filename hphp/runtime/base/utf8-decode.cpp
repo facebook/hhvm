@@ -1,164 +1,132 @@
-/* utf8_decode.c */
-
-/* 2005-12-25 */
-
 /*
-Copyright (c) 2005 JSON.org
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-The Software shall be used for Good, not Evil.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  +----------------------------------------------------------------------+
+  | HipHop for PHP                                                       |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+  | Copyright (c) 1997-2014 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.01 of the PHP license,      |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_01.txt                                  |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Author: Omar Kilani <omar@php.net>                                   |
+  +----------------------------------------------------------------------+
 */
 
 #include "hphp/runtime/base/utf8-decode.h"
-
-/*
-    Very Strict UTF-8 Decoder
-
-    UTF-8 is a multibyte character encoding of Unicode. A character can be
-    represented by 1-4 bytes. The bit pattern of the first byte indicates the
-    number of continuation bytes.
-
-    Most UTF-8 decoders tend to be lenient, attempting to recover as much
-    information as possible, even from badly encoded input. This UTF-8
-    decoder is not lenient. It will reject input which does not include
-    proper continuation bytes. It will reject aliases (or suboptimal
-    codings). It will reject surrogates. (Surrogate encoding should only be
-    used with UTF-16.)
-
-    Code     Contination Minimum Maximum
-    0xxxxxxx           0       0     127
-    10xxxxxx       error
-    110xxxxx           1     128    2047
-    1110xxxx           2    2048   65535 excluding 55296 - 57343
-    11110xxx           3   65536 1114111
-    11111xxx       error
-*/
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-/*
-    Get the next byte. It returns UTF8_END if there are no more bytes.
-*/
-static int
-get(json_utf8_decode *utf8)
-{
-    int c;
-    if (utf8->the_index >= utf8->the_length) {
-        return utf8->the_index == utf8->the_length ? UTF8_END : UTF8_ERROR;
-    }
-    c = utf8->the_input[utf8->the_index] & 0xFF;
-    utf8->the_index += 1;
-    return c;
+#define CHECK_LEN(pos, chars_need) ((m_strlen - (pos)) >= (chars_need))
+
+/* valid as single byte character or leading byte */
+static bool utf8_lead(unsigned char c) {
+  return c < 0x80 || (c >= 0xC2 && c <= 0xF4);
 }
 
-
-/*
-    Get the 6-bit payload of the next continuation byte.
-    Return UTF8_ERROR if it is not a contination byte.
-*/
-static int
-cont(json_utf8_decode *utf8)
-{
-    int c = get(utf8);
-    return ((c & 0xC0) == 0x80) ? (c & 0x3F) : UTF8_ERROR;
+/* whether it's actually valid depends on other stuff;
+ * this macro cannot check for non-shortest forms, surrogates or
+ * code points above 0x10FFFF */
+static bool utf8_trail(unsigned char c) {
+  return c >= 0x80 && c <= 0xBF;
 }
 
-
-/*
-    Initialize the UTF-8 decoder. The decoder is not reentrant,
-*/
-static void
-utf8_decode_init(json_utf8_decode *utf8, const char *p, int length)
-{
-    utf8->the_index = 0;
-    utf8->the_input = p;
-    utf8->the_length = length;
-}
-
-/*
-    Extract the next character.
-    Returns: the character (between 0 and 1114111)
-         or  UTF8_END   (the end)
-         or  UTF8_ERROR (error)
-*/
-static int
-utf8_decode_next(json_utf8_decode *utf8)
-{
-    int c;  /* the first byte of the character */
-    int r;  /* the result */
-
-    c = get(utf8);
-    if (c < 0) {
-      return c;
-    }
-/*
-    Zero continuation (0 to 127)
-*/
-    if ((c & 0x80) == 0) {
-        return c;
-    }
-/*
-    One contination (128 to 2047)
-*/
-    if ((c & 0xE0) == 0xC0) {
-        int c1 = cont(utf8);
-        if (c1 < 0) {
-            return UTF8_ERROR;
-        }
-        r = ((c & 0x1F) << 6) | c1;
-        return r >= 128 ? r : UTF8_ERROR;
-    }
-/*
-    Two continuation (2048 to 55295 and 57344 to 65535)
-*/
-    if ((c & 0xF0) == 0xE0) {
-        int c1 = cont(utf8);
-        int c2 = cont(utf8);
-        if (c1 < 0 || c2 < 0) {
-            return UTF8_ERROR;
-        }
-        r = ((c & 0x0F) << 12) | (c1 << 6) | c2;
-        return r >= 2048 && (r < 55296 || r > 57343) ? r : UTF8_ERROR;
-    }
-/*
-    Three continuation (65536 to 1114111)
-*/
-    if ((c & 0xF8) == 0xF0) {
-        int c1 = cont(utf8);
-        int c2 = cont(utf8);
-        int c3 = cont(utf8);
-        if (c1 < 0 || c2 < 0 || c3 < 0) {
-            return UTF8_ERROR;
-        }
-        r = ((c & 0x0F) << 18) | (c1 << 12) | (c2 << 6) | c3;
-        return r >= 65536 && r <= 1114111 ? r : UTF8_ERROR;
-    }
-    return UTF8_ERROR;
-}
-
-///////////////////////////////////////////////////////////////////////////////
+#define MB_FAILURE(pos, advance) do { \
+  m_cursor = pos + (advance); \
+  return -1; \
+} while (0)
 
 UTF8To16Decoder::UTF8To16Decoder(const char *utf8, int length, bool loose)
-    : m_loose(loose), m_low_surrogate(0) {
-  utf8_decode_init(&m_decode, utf8, length);
+    : m_str(utf8), m_strlen(length), m_cursor(0), m_loose(loose),
+      m_low_surrogate(0) {}
+
+// Inspired by ext/standard/html.c:get_next_char()
+unsigned int UTF8To16Decoder::getNextChar() {
+  int pos = m_cursor;
+  unsigned int this_char = 0;
+
+  assert(pos <= m_strlen);
+
+  if (!CHECK_LEN(pos, 1))
+    MB_FAILURE(pos, 1);
+
+  /* We'll follow strategy 2. from section 3.6.1 of UTR #36:
+   * "In a reported illegal byte sequence, do not include any
+   *  non-initial byte that encodes a valid character or is a leading
+   *  byte for a valid sequence." */
+  unsigned char c = m_str[pos];
+  if (c < 0x80) {
+    this_char = c;
+    pos++;
+  } else if (c < 0xc2) {
+    MB_FAILURE(pos, 1);
+  } else if (c < 0xe0) {
+    if (!CHECK_LEN(pos, 2))
+      MB_FAILURE(pos, 1);
+
+    if (!utf8_trail(m_str[pos + 1])) {
+      MB_FAILURE(pos, utf8_lead(m_str[pos + 1]) ? 1 : 2);
+    }
+    this_char = ((c & 0x1f) << 6) | (m_str[pos + 1] & 0x3f);
+    if (this_char < 0x80) { /* non-shortest form */
+      MB_FAILURE(pos, 2);
+    }
+    pos += 2;
+  } else if (c < 0xf0) {
+    int avail = m_strlen - pos;
+
+    if (avail < 3 ||
+        !utf8_trail(m_str[pos + 1]) || !utf8_trail(m_str[pos + 2])) {
+      if (avail < 2 || utf8_lead(m_str[pos + 1]))
+        MB_FAILURE(pos, 1);
+      else if (avail < 3 || utf8_lead(m_str[pos + 2]))
+        MB_FAILURE(pos, 2);
+      else
+        MB_FAILURE(pos, 3);
+    }
+
+    this_char = ((c & 0x0f) << 12) | ((m_str[pos + 1] & 0x3f) << 6) |
+                (m_str[pos + 2] & 0x3f);
+    if (this_char < 0x800) { /* non-shortest form */
+      MB_FAILURE(pos, 3);
+    } else if (this_char >= 0xd800 && this_char <= 0xdfff) { /* surrogate */
+      MB_FAILURE(pos, 3);
+    }
+    pos += 3;
+  } else if (c < 0xf5) {
+    int avail = m_strlen - pos;
+
+    if (avail < 4 ||
+        !utf8_trail(m_str[pos + 1]) || !utf8_trail(m_str[pos + 2]) ||
+        !utf8_trail(m_str[pos + 3])) {
+      if (avail < 2 || utf8_lead(m_str[pos + 1]))
+        MB_FAILURE(pos, 1);
+      else if (avail < 3 || utf8_lead(m_str[pos + 2]))
+        MB_FAILURE(pos, 2);
+      else if (avail < 4 || utf8_lead(m_str[pos + 3]))
+        MB_FAILURE(pos, 3);
+      else
+        MB_FAILURE(pos, 4);
+    }
+
+    this_char = ((c & 0x07) << 18) | ((m_str[pos + 1] & 0x3f) << 12) |
+                ((m_str[pos + 2] & 0x3f) << 6) | (m_str[pos + 3] & 0x3f);
+    if (this_char < 0x10000 || this_char > 0x10FFFF) {
+      /* non-shortest form or outside range */
+      MB_FAILURE(pos, 4);
+    }
+    pos += 4;
+  } else {
+    MB_FAILURE(pos, 1);
+  }
+
+  m_cursor = pos;
+  return this_char;
 }
 
 int UTF8To16Decoder::decode() {
@@ -179,21 +147,21 @@ int UTF8To16Decoder::decode() {
 }
 
 int UTF8To16Decoder::decodeAsUTF8() {
-  if (m_index == m_decode.the_index) {
+  if (m_index == m_cursor) {
     // validate the next char
     int c = getNext();
     if (c < 0) {
       return c;
     }
   }
-  return m_decode.the_input[m_index++] & 0xFF;
+  return m_str[m_index++] & 0xFF;
 }
 
 int UTF8To16Decoder::getNext() {
-  int c = utf8_decode_next(&m_decode);
+  int c = getNextChar();
   if (c < 0) {
   /*** BEGIN Facebook: json_utf8_loose ***/
-    if (c == UTF8_END) {
+    if (m_cursor > m_strlen) {
       return UTF8_END;
     }
     if (m_loose) {

@@ -142,7 +142,7 @@ public:
   static int FiberCount;
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
-  static size_t ServerMemoryHeadRoom;
+  static int64_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
   static int64_t ImageMemoryMaxBytes;
   static int ResponseQueueCount;
@@ -150,6 +150,7 @@ public:
   static int ServerDanglingWait;
   static bool ServerHarshShutdown;
   static bool ServerEvilShutdown;
+  static bool ServerKillOnSIGTERM;
   static int ServerShutdownListenWait;
   static int ServerShutdownListenNoWork;
   static std::vector<std::string> ServerNextProtocols;
@@ -325,9 +326,6 @@ public:
 
   static bool EnableDnsCache;
   static int DnsCacheTTL;
-  static time_t DnsCacheKeyMaturityThreshold;
-  static size_t DnsCacheMaximumCapacity;
-  static int DnsCacheKeyFrequencyUpdatePeriod;
 
   static std::map<std::string, std::string> ServerVariables;
 
@@ -361,6 +359,9 @@ public:
 
   static int GetScannerType();
 
+  static bool GetServerCustomBoolSetting(const std::string &settingName,
+                                         bool &val);
+
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;
@@ -384,10 +385,10 @@ public:
   F(uint64_t, JitASize,                60 << 20)                        \
   F(uint64_t, JitAMaxUsage,            maxUsageDef())                   \
   F(uint64_t, JitAProfSize,            64 << 20)                        \
-  F(uint64_t, JitAStubsSize,           64 << 20)                        \
   F(uint64_t, JitAColdSize,            24 << 20)                        \
-  F(uint64_t, JitAFrozenSize,          40 << 20)                       \
+  F(uint64_t, JitAFrozenSize,          40 << 20)                        \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
+  F(uint64_t, JitRelocationSize,       1 << 20)                         \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:
      0 - no checks or enforcement
@@ -470,7 +471,7 @@ public:
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
-  F(uint32_t, HotFuncThreshold,        40)                              \
+  F(uint32_t, HotFuncThreshold,        80)                              \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \
   F(bool, HHBCRelaxGuards,             true)                            \
@@ -499,6 +500,11 @@ public:
 
 private:
   using string = std::string;
+
+  // Custom settings. This should be accessed via the GetServerCustomSetting
+  // APIs.
+  static std::map<std::string, std::string> CustomSettings;
+
 public:
 #define F(type, name, unused) \
   static type Eval ## name;
@@ -551,8 +557,8 @@ public:
   static std::string MailForceExtraParameters;
 
   // preg stack depth and debug support options
-  static long PregBacktraceLimit;
-  static long PregRecursionLimit;
+  static int64_t PregBacktraceLimit;
+  static int64_t PregRecursionLimit;
   static bool EnablePregErrorLog;
 
   // pprof/hhprof server options

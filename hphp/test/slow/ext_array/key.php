@@ -20,3 +20,4 @@ while (true) {
   next($array);
 }
 var_dump($output);
+var_dump(key(array()));

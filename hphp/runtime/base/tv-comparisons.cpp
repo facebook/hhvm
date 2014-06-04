@@ -122,7 +122,7 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
 
   switch (cell.m_type) {
   case KindOfUninit:
-  case KindOfNull:         return op(empty_string.get(), val);
+  case KindOfNull:         return op(staticEmptyString(), val);
   case KindOfBoolean:      return op(!!cell.m_data.num, toBoolean(val));
   case KindOfDouble:       return op(cell.m_data.dbl, val->toDouble());
   case KindOfArray:        return op(true, false);
@@ -264,7 +264,7 @@ bool cellRelOp(Op op, Cell c1, Cell c2) {
   switch (c2.m_type) {
   case KindOfUninit:
   case KindOfNull:
-    return IS_STRING_TYPE(c1.m_type) ? op(c1.m_data.pstr, empty_string.get()) :
+    return IS_STRING_TYPE(c1.m_type) ? op(c1.m_data.pstr, staticEmptyString()) :
            c1.m_type == KindOfObject ? op(true, false) :
            cellRelOp(op, c1, false);
   case KindOfInt64:        return cellRelOp(op, c1, c2.m_data.num);

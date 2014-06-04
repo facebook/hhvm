@@ -591,9 +591,8 @@ public:
     return m_top;
   }
 
-  static inline size_t topOfStackOffset() {
-    Stack *that = 0;
-    return (size_t)&that->m_top;
+  static constexpr size_t topOfStackOffset() {
+    return offsetof(Stack, m_top);
   }
 
   static TypedValue* frameStackBase(const ActRec* fp);

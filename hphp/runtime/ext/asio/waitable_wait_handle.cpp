@@ -34,9 +34,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb)
-    : c_WaitHandle(cb)
-    , m_firstParent(nullptr) {
+    : c_WaitHandle(cb) {
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());
+  m_firstParent = nullptr;
 }
 
 c_WaitableWaitHandle::~c_WaitableWaitHandle() {
@@ -62,7 +62,7 @@ Object c_WaitableWaitHandle::t_getcreator() {
 Array c_WaitableWaitHandle::t_getparents() {
   // no parent data available if finished
   if (isFinished()) {
-    return empty_array;
+    return empty_array();
   }
 
   Array result = Array::Create();
@@ -76,19 +76,9 @@ Array c_WaitableWaitHandle::t_getparents() {
   return result;
 }
 
-void c_WaitableWaitHandle::done() {
-  assert(isFinished());
-  assert(cellIsPlausible(m_resultOrException));
-
-  // unblock parents
-  while (m_firstParent) {
-    m_firstParent = m_firstParent->unblock();
-  }
-}
-
 // throws on context depth level overflows and cross-context cycles
 void c_WaitableWaitHandle::join() {
-  JIT::EagerVMRegAnchor _;
+  EagerVMRegAnchor _;
 
   AsioSession* session = AsioSession::Get();
 

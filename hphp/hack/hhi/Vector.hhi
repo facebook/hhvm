@@ -209,11 +209,6 @@ final class Vector<Tv> implements MutableVector<Tv> {
    */
   public function shuffle(): void;
 
-  /**
-   * Returns a Vector containing the values from the specified array.
-   */
-  public static function fromArray<T>(array<T, Tv> $arr): Vector<Tv>;
-
   public static function fromItems(?Traversable<Tv> $items): Vector<Tv>;
 
   /**

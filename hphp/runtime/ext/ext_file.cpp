@@ -636,7 +636,7 @@ Variant f_parse_ini_file(const String& filename,
   String translated = File::TranslatePath(filename);
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
-      String cfd = g_context->getContainingFileName();
+      auto const cfd = String::attach(g_context->getContainingFileName());
       if (!cfd.empty()) {
         int npos = cfd.rfind('/');
         if (npos >= 0) {
@@ -964,7 +964,7 @@ Variant f_pathinfo(const String& path, int opt /* = 15 */) {
   ArrayInit ret(4, ArrayInit::Map{});
 
   if (opt == 0) {
-    return empty_string;
+    return empty_string_variant();
   }
 
   if ((opt & PHP_PATHINFO_DIRNAME) == PHP_PATHINFO_DIRNAME) {
@@ -972,7 +972,7 @@ Variant f_pathinfo(const String& path, int opt /* = 15 */) {
     if (opt == PHP_PATHINFO_DIRNAME) {
       return dirname;
     }
-    if (!dirname.equal(empty_string)) {
+    if (!dirname.equal(staticEmptyString())) {
       ret.set(s_dirname, dirname);
     }
   }
@@ -987,7 +987,7 @@ Variant f_pathinfo(const String& path, int opt /* = 15 */) {
 
   if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
     int pos = basename.rfind('.');
-    String extension(empty_string);
+    String extension(empty_string());
     if (pos >= 0) {
       extension = basename.substr(pos + 1);
       ret.set(s_extension, extension);
@@ -999,7 +999,7 @@ Variant f_pathinfo(const String& path, int opt /* = 15 */) {
 
   if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
     int pos = basename.rfind('.');
-    String filename(empty_string);
+    String filename(empty_string());
     if (pos >= 0) {
       filename = basename.substr(0, pos);
     } else {
@@ -1011,7 +1011,7 @@ Variant f_pathinfo(const String& path, int opt /* = 15 */) {
     ret.set(s_filename, filename);
   }
 
-  return ret.create();
+  return ret.toVariant();
 }
 
 Variant f_disk_free_space(const String& directory) {
@@ -1276,7 +1276,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
   }
   int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
   if (nret == GLOB_NOMATCH) {
-    return empty_array;
+    return empty_array();
   }
 
   if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
@@ -1285,7 +1285,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
         return false;
       }
     }
-    return empty_array;
+    return empty_array();
   }
 
   if (nret) {
@@ -1322,7 +1322,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
   // php's glob always produces an array, but Variant::Variant(CArrRef)
   // will produce KindOfNull if given a SmartPtr wrapped around null.
   if (ret.isNull()) {
-    return empty_array;
+    return empty_array();
   }
   return ret;
 }

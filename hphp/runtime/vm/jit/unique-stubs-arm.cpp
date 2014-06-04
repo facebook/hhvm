@@ -63,15 +63,11 @@ void emitReturnHelpers(UniqueStubs& us) {
 void emitResumeHelpers(UniqueStubs& us) {
   MacroAssembler a { mcg->code.main() };
 
-  auto const fpOff = offsetof(ExecutionContext, m_fp);
-  auto const spOff = offsetof(ExecutionContext, m_stack) +
-                       Stack::topOfStackOffset();
-
   us.resumeHelperRet = a.frontier();
   a.   Str   (vixl::x30, rStashedAR[AROFF(m_savedRip)]);
   us.resumeHelper = a.frontier();
-  a.   Ldr   (rVmFp, rGContextReg[fpOff]);
-  a.   Ldr   (rVmSp, rGContextReg[spOff]);
+  a.   Ldr   (rVmFp, rVmTl[RDS::kVmfpOff]);
+  a.   Ldr   (rVmSp, rVmTl[RDS::kVmspOff]);
 
   emitServiceReq(mcg->code.main(), REQ_RESUME);
 
@@ -80,7 +76,7 @@ void emitResumeHelpers(UniqueStubs& us) {
 }
 
 void emitStackOverflowHelper(UniqueStubs& us) {
-  MacroAssembler a { mcg->code.stubs() };
+  MacroAssembler a { mcg->code.cold() };
 
   us.stackOverflowHelper = a.frontier();
   a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
@@ -91,7 +87,7 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
 
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(mcg->code.stubs(), REQ_STACK_OVERFLOW);
+  emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);
 }
@@ -195,9 +191,8 @@ void emitFCallHelperThunk(UniqueStubs& us) {
   a.   Cmp   (rReturnReg, 0);
   a.   B     (&jmpRet, vixl::gt);
   a.   Neg   (rReturnReg, rReturnReg);
-  a.   Ldr   (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
-  a.   Ldr   (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
-                                  Stack::topOfStackOffset()]);
+  a.   Ldr   (rVmFp, rVmTl[RDS::kVmfpOff]);
+  a.   Ldr   (rVmSp, rVmTl[RDS::kVmspOff]);
 
   a.   bind  (&jmpRet);
 
@@ -223,7 +218,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& us) {
 }
 
 void emitFunctionEnterHelper(UniqueStubs& us) {
-  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
+  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
   MacroAssembler a { mcg->code.main() };
 
   us.functionEnterHelper = a.frontier();
@@ -257,8 +252,7 @@ void emitFunctionEnterHelper(UniqueStubs& us) {
   auto rIgnored = rAsm2;
   a.   Pop     (rVmFp, rAsm);
   a.   Pop     (rIgnored, rLinkReg);
-  a.   Ldr     (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
-                                    Stack::topOfStackOffset()]);
+  a.   Ldr     (rVmSp, rVmTl[RDS::kVmspOff]);
   a.   Br      (rAsm);
 
   us.add("functionEnterHelper", us.functionEnterHelper);

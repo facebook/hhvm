@@ -27,12 +27,6 @@
 #include <cassert>
 #include <type_traits>
 
-#include <boost/noncopyable.hpp>
-#include <boost/checked_delete.hpp>
-#include <boost/type_traits/has_trivial_destructor.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/intrusive/list.hpp>
-
 #include "folly/Conv.h"
 #include "folly/Format.h"
 #include "folly/Range.h"
@@ -212,7 +206,9 @@ O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CheckLoc,                D(FramePtr), S(FramePtr),                     B|E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                       B|E) \
+O(EndGuards,                        ND, NA,                                E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                      N|Er) \
+O(CastStkIntToDbl,           D(StkPtr), S(StkPtr),                         E) \
 O(CoerceStk,                 D(StkPtr), S(StkPtr),                    B|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(ProfileStr,                       ND, S(PtrToStr),                       E) \
@@ -391,7 +387,8 @@ O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(CheckSurpriseFlags,               ND, NA,                              B|E) \
 O(SurpriseHook,                     ND, NA,                           Er|N|E) \
-O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(Gen),           Er|N|E) \
+O(FunctionSuspendHook,              ND, S(FramePtr,PtrToGen) C(Bool), Er|N|E) \
+O(FunctionReturnHook,               ND, S(FramePtr) S(Gen),           Er|N|E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
@@ -407,7 +404,7 @@ O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
 O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
-O(VectorHasFrozenCopy,              ND, S(Obj),                            B) \
+O(VectorHasImmCopy,                 ND, S(Obj),                            B) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
 O(Box,                         DBox(0), S(Gen),                  E|N|CRc|PRc) \
@@ -495,7 +492,9 @@ O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
 O(AllocObj,                  DAllocObj, S(Cls),                         Er|N) \
                                                                               \
 O(ConstructInstance,         DAllocObj, NA,                             Er|N) \
+O(CheckInitProps,                   ND, NA,                              B|E) \
 O(InitProps,                        ND, NA,                           E|Er|N) \
+O(CheckInitSProps,                  ND, NA,                              B|E) \
 O(InitSProps,                       ND, NA,                           E|Er|N) \
 O(NewInstanceRaw,            DAllocObj, NA,                                N) \
 O(InitObjProps,                     ND, S(Obj),                          E|N) \
@@ -573,12 +572,7 @@ O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr) S(FramePtr),  NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
 O(DefFP,                   D(FramePtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
-O(DefInlineSP,               D(StkPtr), S(StkPtr) S(FramePtr),            NF) \
 O(ReDefSP,                   D(StkPtr), S(StkPtr) S(FramePtr),            NF) \
-O(PassSP,                    D(StkPtr), S(StkPtr),                         P) \
-O(PassFP,                  D(FramePtr), S(FramePtr),                       P) \
-O(StashResumableSP,                 ND, S(FramePtr) S(StkPtr),             E) \
-O(ReDefResumableSP,          D(StkPtr), S(StkPtr) S(FramePtr),             E) \
 O(VerifyParamCls,                   ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \
@@ -649,18 +643,22 @@ O(LdContArKey,                  DParam, S(FramePtr),                     PRc) \
 O(StContArKey,                      ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StAsyncArRaw,                     ND, S(FramePtr)                           \
                                           S(Int,TCA,Nullptr),              E) \
-O(StAsyncArChild,                   ND, S(FramePtr) S(Obj),            E|CRc) \
 O(StAsyncArResult,                  ND, S(FramePtr) S(Cell),           E|CRc) \
+O(LdAsyncArFParent,     D(Obj|Nullptr), S(FramePtr),                      NF) \
+O(AFWHBlockOn,                      ND, S(FramePtr) S(Obj),            E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
-O(CopyCells,                       ND, S(FramePtr) S(PtrToGen),            E) \
+O(LdResumableArObj,             D(Obj), S(FramePtr),                   C|PRc) \
+O(CopyAsyncCells,                   ND, S(FramePtr) S(PtrToGen),       CRc|E) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           C(Int)                              \
                                           S(TCA,Nullptr)                      \
                                           C(Int)                              \
                                           S(Obj),             E|Er|N|CRc|PRc) \
 O(CreateSSWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
+O(AFWHPrepareChild,                 ND, S(FramePtr) S(Obj),           E|Er|N) \
+O(BWHUnblockChain,                  ND, S(Obj,Nullptr),                  E|N) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr),            Er|E|N|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \

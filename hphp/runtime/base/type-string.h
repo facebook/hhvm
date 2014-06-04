@@ -64,6 +64,9 @@ StringData* buildStringData(double  n);
 class String : protected SmartPtr<StringData> {
   typedef SmartPtr<StringData> StringBase;
 
+  explicit String(StringData* sd, StringBase::NoIncRef) :
+    StringBase(sd, StringBase::NoIncRef{}) { }
+
 public:
   typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
     IntegerStringDataMap;
@@ -132,6 +135,7 @@ public:
     }
   }
   String(const String& str) : StringBase(str.m_px) { }
+  /* implicit */ String(const StaticString& str);
   /* implicit */ String(char) = delete; // prevent unintentional promotion
 
   // Disable this---otherwise this would generally implicitly create a
@@ -200,6 +204,11 @@ public:
     String result;
     result.m_px = s.m_px;
     return result;
+  }
+
+  static ALWAYS_INLINE String attach(StringData* sd) {
+    assert(sd->isStatic());
+    return String(sd, StringBase::NoIncRef{});
   }
 
   void clear() { reset();}
@@ -291,6 +300,7 @@ public:
   String &operator =  (StringData *data);
   String &operator =  (litstr  v);
   String &operator =  (const String& v);
+  String &operator =  (const StaticString& v);
   String &operator =  (const Variant& v);
   String &operator =  (const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
@@ -450,8 +460,18 @@ struct string_data_lt {
   }
 };
 
-typedef hphp_hash_set<const StringData*, string_data_hash, string_data_same>
-  ConstStringDataSet;
+template <class T> using ConstStringDataMap = hphp_hash_map<
+  const StringData*,
+  T,
+  string_data_hash,
+  string_data_same
+>;
+
+using ConstStringDataSet = hphp_hash_set<
+  const StringData*,
+  string_data_hash,
+  string_data_same
+>;
 
 struct hphp_string_hash {
   size_t operator()(const String& s) const {
@@ -556,7 +576,6 @@ public:
   explicit StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
   explicit StaticString(std::string s);
-  StaticString(const StaticString &str);
   ~StaticString() {
     // prevent ~SmartPtr from calling decRefCount after data is released
     m_px = nullptr;
@@ -567,8 +586,20 @@ private:
   void insert();
 };
 
-extern const StaticString empty_string;
 String getDataTypeString(DataType t);
+
+//////////////////////////////////////////////////////////////////////
+
+inline String::String(const StaticString& str) :
+  StringBase(str.m_px, StringBase::NoIncRef{}) {
+  assert(str.m_px->isStatic());
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE String empty_string() {
+  return String::attach(staticEmptyString());
+}
 
 //////////////////////////////////////////////////////////////////////
 

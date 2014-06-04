@@ -33,12 +33,6 @@ void bindOnLinkImpl(std::atomic<Handle>& handle, Mode mode,
 
 //////////////////////////////////////////////////////////////////////
 
-inline Header* header() {
-  return static_cast<Header*>(tl_base);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 template<class T> Link<T>::Link(Handle handle) : m_handle(handle) {}
 template<class T> Link<T>::Link(const Link& l) : m_handle{l.handle()} {}
 

@@ -244,20 +244,18 @@ size_t HhbcTranslator::spOffset() const {
  *   // sp_pre = some SpillStack, or maybe the DefSP
  *
  *   // FPI region:
- *           [ StashResumableSP fp0 sp0 ]
  *     sp1   = SpillStack sp_pre, ...
  *     sp2   = SpillFrame sp1, ...
  *     // ... possibly more spillstacks due to argument expressions
  *     sp3   = SpillStack sp2, -argCount
  *     fp2   = DefInlineFP<func,retBC,retSP> sp2 sp1
- *     sp4   = DefInlineSP<numLocals> sp1 fp2
+ *     sp4   = ReDefSP<spOffset,spansCall> sp1 fp2
  *
  *         // ... callee body ...
  *
  *           = InlineReturn fp2
  *
- * [ sp5  = ReDefResumableSP<spansCall> sp1 fp0     ]
- * [ sp5  = ReDefSP<frameOffset,spOffset,spansCall> sp1 fp0 ]
+ * [ sp5  = ReDefSP<spOffset,spansCall> sp1 fp0 ]
  *
  * The rest of the code then depends on sp5, and not any of the StkPtr
  * tree going through the callee body.  The sp5 tmp has the same view
@@ -265,34 +263,15 @@ size_t HhbcTranslator::spOffset() const {
  * before the return address is pushed but after the activation record
  * is popped.
  *
- * In DCE we attempt to remove the SpillFrame/InlineReturn/DefInlineFP/
- * DefInlineSP instructions if they aren't needed.  DefInlineSP and DefInlineFP
- * become PassSP and PassFP respectively to avoid the need to relabel inlined
- * IR instructions that refer to them.
+ * In DCE we attempt to remove the SpillFrame, InlineReturn, and
+ * DefInlineFP instructions if they aren't needed.
  *
- * In the case of generators StashResumableSP and ReDefResumableSP are used to
- * store/extract the value of the StkPtr from a field in the continuation class.
- * This behavior is important because the StkPtr cannot be computed from the
- * FramePtr and if a call occurs it cannot live across the FCall in a register.
- *
- * ReDefSP and ReDefResumableSP both take sp1, the stack pointer from before the
- * inlined frame.  While this SSATmp may be dead if an FCall occurs in the
- * inlined frame it is still useful for determining stack types in the
- * simplifier.  Additionally these instructions both take an extradata
- * `spansCall' which is true iff an FCall occurs anywhere between the start and
- * end of the inlined function.  This is information is also used in the
- * simplifier to determine when an SSATmp may be used in lieu of a load from
- * the stack.
- *
- * At this time StLoc, ReDefSP, DefInlineSP, PassSP, SpillFrame, and DefInlineFP
- * are all considered weak references to a frame pointer.  Additionally any
- * instruction which calls native or may raise an error is considered a
- * reference to the FP and prevent it from being elided.  This is done by
- * inserting an InlineFPAnchor instruction when they are encountered.  These
- * instructions are inserted initially by IRBuilder and later removed and
- * re-inserted during the reoptimize pass to ensure that they are not associated
- * with instructions that have been removed in DCE or modified in the
- * simplifier.
+ * ReDefSP takes sp1, the stack pointer from before the inlined frame.
+ * This SSATmp may be used for determining stack types in the
+ * simplifier, or stack values if the inlined body doesn't contain a
+ * call---these instructions both take an extradata `spansCall' which
+ * is true iff a Call occured anywhere between the the definition of
+ * its first argument and itself.
  */
 void HhbcTranslator::beginInlining(unsigned numParams,
                                    const Func* target,
@@ -323,7 +302,8 @@ void HhbcTranslator::beginInlining(unsigned numParams,
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
-  m_bcStateStack.emplace_back(target->base(), false, target);
+  m_bcStateStack.emplace_back(target->getEntryForNumArgs(numParams),
+                              false, target);
   updateMarker();
 
   always_assert_log(
@@ -335,7 +315,16 @@ void HhbcTranslator::beginInlining(unsigned numParams,
     });
 
   auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP, m_irb->fp());
-  gen(DefInlineSP, StackOffset(target->numLocals()), m_irb->sp(), m_irb->fp());
+  gen(
+    ReDefSP,
+    ReDefSPData {
+      target->numLocals(),
+      false /* spansCall; calls in FPI regions are not inline
+             * candidates currently */
+    },
+    m_irb->sp(),
+    m_irb->fp()
+  );
 
   profileFunctionEntry("Inline");
 
@@ -842,6 +831,14 @@ void HhbcTranslator::emitFalse() {
   push(cns(false));
 }
 
+void HhbcTranslator::emitDir() {
+  push(cns(curUnit()->dirpath()));
+}
+
+void HhbcTranslator::emitFile() {
+  push(cns(curUnit()->filepath()));
+}
+
 void HhbcTranslator::emitInitThisLoc(int32_t id) {
   if (!curClass()) {
     // Do nothing if this is null
@@ -1272,7 +1269,7 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
        * Even though this path is "cold", we're not marking it
        * unlikely because the size of the instructions this will
        * generate is about 10 bytes, which is not much larger than the
-       * 5 byte jump to astubs would be.
+       * 5 byte jump to acold would be.
        *
        * One note about StaticLoc: we're literally always going to
        * generate a fallthrough trace here that is cold (the code that
@@ -1567,9 +1564,9 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
     gen(StMem, contAR, cns(-cellsToBytes(i + 1)), loc);
   }
 
-  // Call the FunctionExit hook and put the return value on the stack so that
+  // Call the FunctionSuspend hook and put the return value on the stack so that
   // the unwinder would decref it.
-  emitRetSurpriseCheck(cont, makeCatch({cont}), false);
+  emitRetSurpriseCheck(contAR, nullptr, makeCatch({cont}), false);
 
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.
@@ -1614,7 +1611,7 @@ void HhbcTranslator::emitContEnter(Offset returnOffset) {
 
 void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
   auto const sp = spillStack();
-  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock, true);
+  emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlock, true);
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
@@ -1743,13 +1740,13 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
       gen(StCell, LocalOffset(localOffset(i)), asyncAR, loc);
     }
   } else {
-    gen(CopyCells, LocalId(numCells), m_irb->fp(), asyncAR);
+    gen(CopyAsyncCells, LocalId(numCells), m_irb->fp(), asyncAR);
   }
 
-  // Call the FunctionExit hook and put the AsyncFunctionWaitHandle
+  // Call the FunctionSuspend hook and put the AsyncFunctionWaitHandle
   // on the stack so that the unwinder would decref it.
   push(waitHandle);
-  emitRetSurpriseCheck(waitHandle, makeCatch(), false);
+  emitRetSurpriseCheck(asyncAR, nullptr, makeCatch(), false);
   discard(1);
 
   // Grab caller info from ActRec, free ActRec, store the return value
@@ -1762,23 +1759,28 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
 }
 
 void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
-                                Offset resumeOffset) {
+                                Block* catchBlockNoSpill, Offset resumeOffset) {
   assert(curFunc()->isAsync());
   assert(resumed());
   assert(child->isA(Type::Obj));
 
-  // Store child and offset.
+  // Prepare child for establishing dependency.
+  gen(AFWHPrepareChild, catchBlock, m_irb->fp(), child);
+
+  // Suspend the async function.
   auto const resumeSk = SrcKey(curFunc(), resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
   gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeAddr}, m_irb->fp(),
       resumeAddr);
   gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeOffset}, m_irb->fp(),
       cns(resumeOffset));
-  gen(StAsyncArChild, m_irb->fp(), child);
+
+  // Set up the dependency.
+  gen(AFWHBlockOn, m_irb->fp(), child);
 
   // Transfer control back to the scheduler.
   auto const sp = spillStack();
-  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock, true);
+  emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlockNoSpill, true);
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
@@ -1789,7 +1791,8 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
 void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
   assert(curFunc()->isAsync());
 
-  auto const catchBlock = resumed() ? makeCatchNoSpill() : makeCatch();
+  auto const catchBlock = makeCatch();
+  auto const catchBlockNoSpill = resumed() ? makeCatchNoSpill() : nullptr;
   auto const exitSlow   = makeExitSlow();
 
   if (!topC()->isA(Type::Obj)) PUNT(Await-NonObject);
@@ -1813,7 +1816,7 @@ void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
     },
     [&] { // Next: the wait handle is not finished, we need to suspend
       if (resumed()) {
-        emitAwaitR(child, catchBlock, resumeOffset);
+        emitAwaitR(child, catchBlock, catchBlockNoSpill, resumeOffset);
       } else {
         emitAwaitE(child, catchBlock, resumeOffset, numIters);
       }
@@ -1976,7 +1979,7 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
 }
 
 void HhbcTranslator::emitIsTypeC(DataType t) {
-  SSATmp* src = popC(DataTypeGeneric);
+  SSATmp* src = popC(DataTypeSpecific);
   push(gen(IsType, Type(t), src));
   gen(DecRef, src);
 }
@@ -1985,7 +1988,7 @@ void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
   auto const ldrefExit = makeExit();
   auto const ldgblExit = makeExit();
   auto const val =
-    ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeGeneric);
+    ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeSpecific);
   push(gen(IsType, Type(t), val));
 }
 
@@ -2478,10 +2481,6 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
   auto actualStack = spillStack();
   auto returnSp = actualStack;
 
-  if (resumed()) {
-    gen(StashResumableSP, m_irb->fp(), m_irb->sp());
-  }
-
   m_fpiStack.emplace(returnSp, m_irb->spOffset());
 
   ActRecInfo info;
@@ -2533,6 +2532,32 @@ static bool canInstantiateClass(const Class* cls) {
     !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait));
 }
 
+void HhbcTranslator::emitInitProps(const Class* cls, Block* catchBlock) {
+  cls->initPropHandle();
+  m_irb->ifThen(
+    [&](Block* taken) {
+      gen(CheckInitProps, taken, ClassData(cls));
+    },
+    [&] {
+      m_irb->hint(Block::Hint::Unlikely);
+      gen(InitProps, catchBlock, ClassData(cls));
+    }
+  );
+}
+
+void HhbcTranslator::emitInitSProps(const Class* cls, Block* catchBlock) {
+  cls->initSPropHandles();
+  m_irb->ifThen(
+    [&](Block* taken) {
+      gen(CheckInitSProps, taken, ClassData(cls));
+    },
+    [&] {
+      m_irb->hint(Block::Hint::Unlikely);
+      gen(InitSProps, catchBlock, ClassData(cls));
+    }
+  );
+}
+
 SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
   // If it's an extension class with a custom instance initializer,
   // that init function does all the work.
@@ -2545,13 +2570,8 @@ SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
   bool sprops = cls->numStaticProperties() > 0;
   assert((props || sprops) == cls->needInitialization());
   if (cls->needInitialization()) {
-    if (props) {
-      cls->initPropHandle();
-      gen(InitProps, makeCatch(), ClassData(cls));
-    }
-    if (sprops) {
-      gen(InitSProps, makeCatch(), ClassData(cls));
-    }
+    if (props) emitInitProps(cls, makeCatch());
+    if (sprops) emitInitSProps(cls, makeCatch());
   }
 
   // Next, allocate the object
@@ -3125,18 +3145,57 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
     }
   }
 
+  /*
+   * Figure out if we know where we're going already (if a prologue
+   * was already generated, we don't need to do a whole bind call
+   * thing again).
+   *
+   * We're skipping magic calls right now because 'callee' will be set
+   * to __call in some cases (with 86ctor) where we shouldn't really
+   * call that function (arguable bug in annotation).
+   *
+   * TODO(#4357498): This is currently disabled, because we haven't
+   * set things up properly to be able to eagerly bind.  Because
+   * code-gen can punt, the code there needs to delay adding these
+   * smash locations until after we know the translation isn't punted.
+   */
+  auto const knownPrologue = [&]() -> TCA {
+    if (false) {
+      if (!callee || callee->isMagic()) return nullptr;
+      auto const prologueIndex =
+        numParams <= callee->numNonVariadicParams()
+          ? numParams
+          : callee->numNonVariadicParams() + 1;
+      TCA ret;
+      if (!mcg->checkCachedPrologue(callee, prologueIndex, ret)) {
+        return nullptr;
+      }
+      return ret;
+    }
+    return nullptr;
+  }();
+
   auto const sp = spillStack();
   gen(
     Call,
-    CallData { numParams, returnBcOffset, callee, destroyLocals },
-    sp, m_irb->fp()
+    CallData {
+      numParams,
+      returnBcOffset,
+      callee,
+      destroyLocals,
+      knownPrologue
+    },
+    sp,
+    m_irb->fp()
   );
   if (!m_fpiStack.empty()) {
     m_fpiStack.pop();
   }
 }
 
-const StaticString s_count("count");
+const StaticString
+  s_count("count"),
+  s_getCustomBoolSettingFuncName("server_get_custom_bool_setting");
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
@@ -3148,18 +3207,53 @@ SSATmp* HhbcTranslator::optimizedCallCount() {
   return gen(Count, makeCatch(), val);
 }
 
-bool HhbcTranslator::optimizedFCallBuiltin(const Func* func, uint32_t numArgs) {
+SSATmp* HhbcTranslator::optimizedServerGetCustomBoolSetting() {
+  Type settingNameTmpType = topType(1);
+  Type defaultValueTmpType = topType(0);
+
+  // Only generate the optimized version if the types match exactly
+  if (!(settingNameTmpType <= Type::StaticStr) ||
+      !(defaultValueTmpType <= Type::Bool)) return nullptr;
+
+  auto const settingNameTmp = top(Type::Str, 1);
+  const StringData *settingName = settingNameTmp->strVal();
+
+  bool settingValue = false;
+  if (!RuntimeOption::GetServerCustomBoolSetting(settingName->toCppString(),
+                                                 settingValue)) {
+    // The value isn't present in the CustomSettings section of config.hdf so
+    // we will simply push the default value argument.
+    return top(Type::Bool, 0);
+  } else {
+    // We found the setting so return the value from config.hdf
+    return cns(settingValue);
+  }
+}
+
+bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
+                                           uint32_t numArgs,
+                                           uint32_t numNonDefault) {
   SSATmp* res = nullptr;
   switch (numArgs) {
     case 2:
       if (func->name()->isame(s_count.get())) res = optimizedCallCount();
+      else if (func->name()->isame(s_getCustomBoolSettingFuncName.get())) {
+        res = optimizedServerGetCustomBoolSetting();
+      }
       break;
     default: break;
   }
 
   if (res == nullptr) return false;
 
-  for (int i = 0; i < numArgs; ++i) gen(DecRef, popC());
+  // Decref and free args
+  for (int i = 0; i < numArgs; i++) {
+    auto const arg = popR();
+    if (i >= numArgs - numNonDefault) {
+      gen(DecRef, arg);
+    }
+  }
+
   push(res);
   return true;
 }
@@ -3173,7 +3267,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
 
   callee->validate();
 
-  if (optimizedFCallBuiltin(callee, numArgs)) return;
+  if (optimizedFCallBuiltin(callee, numArgs, numNonDefault)) return;
 
   /*
    * Spill args to stack.  Some of the arguments may be passed by
@@ -3212,11 +3306,15 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
                      callee->methInfo()->parameters[i]->valueLen > 0)) {
           t = Type::NullableObj;
         }
-        gen(CastStk,
-            makeCatch(),
-            t,
-            StackOffset(numArgs - i - 1),
-            m_irb->sp());
+        auto const sp = m_irb->sp();
+        auto const offset = numArgs - i - 1;
+        auto const stkVal = getStackValue(sp, offset);
+        if (stkVal.knownType <= Type::Int && t <= Type::Dbl) {
+          m_irb->constrainStack(offset, DataTypeSpecific);
+          gen(CastStkIntToDbl, t, StackOffset(offset), sp);
+        } else {
+          gen(CastStk, makeCatch(), t, StackOffset(offset), sp);
+        }
       }
       break;
     case KindOfUnknown:
@@ -3272,6 +3370,8 @@ void HhbcTranslator::emitEndInlinedCommon() {
   assert(!m_fpiActiveStack.empty());
   assert(!curFunc()->isPseudoMain());
 
+  assert(!resumed());
+
   emitDecRefLocalsInline();
 
   if (curFunc()->mayHaveThis()) {
@@ -3291,21 +3391,15 @@ void HhbcTranslator::emitEndInlinedCommon() {
   m_fpiActiveStack.pop();
 
   updateMarker();
-  // See the comment in beginInlining about generator frames.
-  if (resumed()) {
-    gen(ReDefResumableSP,
-        ReDefResumableSPData(m_irb->inlinedFrameSpansCall()),
-        m_irb->sp(), m_irb->fp());
-  } else {
-    smart::vector<ReDefSPData::Frame> frames;
-    m_irb->state().forEachFrame([&frames](SSATmp* fp, int32_t off) {
-      frames.emplace_back(frameRoot(fp->inst())->dst(), off);
-    });
-    gen(ReDefSP, ReDefSPData(frames.size(), frames.data(),
-                             m_irb->spOffset(),
-                             m_irb->inlinedFrameSpansCall()),
-        m_irb->sp(), m_irb->fp());
-  }
+  gen(
+    ReDefSP,
+    ReDefSPData {
+      m_irb->spOffset(),
+      m_irb->inlinedFrameSpansCall()
+    },
+    m_irb->sp(),
+    m_irb->fp()
+  );
 
   /*
    * After the end of inlining, we are restoring to a previously
@@ -3346,14 +3440,18 @@ void HhbcTranslator::emitNativeImplInlined() {
     return sframe->extra<ActRecInfo>()->isFromFPushCtor();
   }();
 
+  bool const instanceMethod = callee->isMethod() &&
+                                !(callee->attrs() & AttrStatic);
+
   // Collect the parameter locals---we'll need them later.  Also
   // determine which ones will need to be passed through the eval
   // stack.
   auto const numArgs = callee->numParams();
-  auto const paramThis = callee->isMethod() ? gen(LdThis, m_irb->fp())
-                                            : nullptr;
+  auto const paramThis = instanceMethod ? gen(LdThis, m_irb->fp())
+                                        : nullptr;
   SSATmp* paramSSAs[numArgs];
   bool paramThroughStack[numArgs];
+  bool paramNeedsConversion[numArgs];
   auto numParamsThroughStack = uint32_t{0};
   for (auto i = uint32_t{0}; i < numArgs; ++i) {
     paramSSAs[i] = ldLoc(i, nullptr, DataTypeSpecific);
@@ -3375,6 +3473,10 @@ void HhbcTranslator::emitNativeImplInlined() {
       paramThroughStack[i] = true;
       break;
     }
+
+    paramNeedsConversion[i] =
+      pi.builtinType() != KindOfUnknown &&
+        !(paramSSAs[i]->type() <= Type(pi.builtinType()));
   }
 
   // For the same reason that we have to IncRef the locals above, we
@@ -3407,38 +3509,6 @@ void HhbcTranslator::emitNativeImplInlined() {
   }
 
   /*
-   * Prepare the actual arguments to the CallBuiltin instruction.
-   */
-  auto const cbNumArgs = numArgs + (callee->isMethod() ? 1 : 0);
-  SSATmp* args[cbNumArgs];
-
-  auto argIdx   = uint32_t{0};
-  auto stackIdx = uint32_t{0};
-
-  if (paramThis) args[argIdx++] = paramThis;
-  for (auto i = uint32_t{0}; i < numArgs; ++i) {
-    if (!paramThroughStack[i]) {
-      args[argIdx++] = paramSSAs[i];
-      continue;
-    }
-
-    args[argIdx++] = ldStackAddr(
-      numParamsThroughStack - stackIdx - 1,
-      DataTypeSpecific
-    );
-    ++stackIdx;
-  }
-
-  assert(stackIdx == numParamsThroughStack);
-  assert(argIdx == cbNumArgs);
-
-  auto const retType = [&] {
-    auto const retDt = callee->returnType();
-    auto const ret = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
-    return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
-  }();
-
-  /*
    * We have an unusual situation if we raise an exception:
    *
    * The unwinder is going to see our PC as equal to the FCallD for
@@ -3452,7 +3522,7 @@ void HhbcTranslator::emitNativeImplInlined() {
    * need to pop anything we pushed, put down a fake ActRec, and then
    * eagerly sync VM regs to represent that stack depth.
    */
-  auto const unusualCatch = makeCatchImpl([&] {
+  auto const makeUnusualCatch = [&] { return makeCatchImpl([&] {
     // TODO(#4323657): this is generating generic DecRefs at the time
     // of this writing---probably we're not handling the stack chain
     // correctly in a catch block.
@@ -3475,14 +3545,72 @@ void HhbcTranslator::emitNativeImplInlined() {
     gen(SyncABIRegs, m_irb->fp(), stack);
     gen(EagerSyncVMRegs, m_irb->fp(), stack);
     return stack;
-  });
+  }); };
 
+  /*
+   * Prepare the actual arguments to the CallBuiltin instruction.  If
+   * any of the parameters need type conversions, we need to handle
+   * that too.
+   */
+  auto const cbNumArgs = numArgs + (instanceMethod ? 1 : 0);
+  SSATmp* args[cbNumArgs];
+  {
+    auto argIdx   = uint32_t{0};
+    auto stackIdx = uint32_t{0};
+
+    if (paramThis) args[argIdx++] = paramThis;
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      if (!paramThroughStack[i]) {
+        if (paramNeedsConversion[i]) {
+          auto const ty = Type(callee->params()[i].builtinType());
+          auto const oldVal = paramSSAs[i];
+          paramSSAs[i] = [&] {
+            if (ty <= Type::Int) {
+              return gen(ConvCellToInt, makeUnusualCatch(), oldVal);
+            }
+            if (ty <= Type::Dbl) {
+              return gen(ConvCellToDbl, makeUnusualCatch(), oldVal);
+            }
+            always_assert(ty <= Type::Bool);  // or will be passed by stack
+            return gen(ConvCellToBool, oldVal);
+          }();
+          gen(DecRef, oldVal);
+        }
+        args[argIdx++] = paramSSAs[i];
+        continue;
+      }
+
+      auto const offset = numParamsThroughStack - stackIdx - 1;
+      if (paramNeedsConversion[i]) {
+        gen(CastStk,
+            makeUnusualCatch(),
+            Type(callee->params()[i].builtinType()),
+            StackOffset { static_cast<int32_t>(offset) },
+            m_irb->sp());
+      }
+
+      args[argIdx++] = ldStackAddr(offset, DataTypeSpecific);
+      ++stackIdx;
+    }
+
+    assert(stackIdx == numParamsThroughStack);
+    assert(argIdx == cbNumArgs);
+  }
+
+  /*
+   * Make the actual call.
+   */
+  auto const retType = [&] {
+    auto const retDt = callee->returnType();
+    auto const ret = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
+    return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
+  }();
   SSATmp** decayedPtr = &args[0];
   auto const ret = gen(
     CallBuiltin,
     retType,
     CallBuiltinData { callee, false /* destroyLocals */ },
-    unusualCatch,
+    makeUnusualCatch(),
     std::make_pair(cbNumArgs, decayedPtr)
   );
 
@@ -3512,12 +3640,6 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 }
 
 void HhbcTranslator::emitDecRefLocalsInline() {
-  /*
-   * Note: this is currently off for isInlining() because the shuffle
-   * was preventing a decref elimination due to ordering.  Currently
-   * we don't inline anything with parameters, though, so it doesn't
-   * matter.  This will need to be revisted then.
-   */
   for (int id = curFunc()->numLocals() - 1; id >= 0; --id) {
     gen(DecRefLoc, Type::Gen, LocalId(id), m_irb->fp());
   }
@@ -3530,11 +3652,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     //       we start decRefing locs because then there'll be no corresponding
     //       bytecode boundaries until the end of RetC
     gen(ReleaseVVOrExit, makeExitSlow(), m_irb->fp());
-  }
-
-  // In async function, wrap the return value into succeeded StaticWaitHandle.
-  if (!resumed() && func->isAsyncFunction()) {
-    push(gen(CreateSSWH, pop(type, DataTypeGeneric)));
   }
 
   // Pop the return value. Since it will be teleported to its place in memory,
@@ -3553,15 +3670,19 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(GenericRetDecRefs, m_irb->fp());
   }
 
-  // Call the FunctionExit hook and put the return value on the stack so that
   // Free $this.
   if (func->mayHaveThis()) {
     gen(DecRefThis, m_irb->fp());
   }
 
+  // Call the FunctionReturn hook and put the return value on the stack so that
   // the unwinder would decref it.
-  emitRetSurpriseCheck(resumed() ? cns(Type::Uninit) : retVal,
-                       catchBlock, false);
+  emitRetSurpriseCheck(m_irb->fp(), retVal, catchBlock, false);
+
+  // In async function, wrap the return value into succeeded StaticWaitHandle.
+  if (!resumed() && func->isAsyncFunction()) {
+    retVal = gen(CreateSSWH, retVal);
+  }
 
   // Type profile return value.
   if (RuntimeOption::EvalRuntimeTypeProfile) {
@@ -3569,6 +3690,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
 
   SSATmp* sp;
+  SSATmp* resumableObj = nullptr;
   if (!resumed()) {
     // Store the return value.
     gen(StRetVal, m_irb->fp(), retVal);
@@ -3576,6 +3698,9 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     // Free ActRec.
     sp = gen(RetAdjustStack, m_irb->fp());
   } else if (func->isAsyncFunction()) {
+    // Load the parent chain.
+    auto parentChain = gen(LdAsyncArFParent, m_irb->fp());
+
     // Mark the async function as succeeded.
     auto succeeded = c_WaitHandle::toKindState(
         c_WaitHandle::Kind::AsyncFunction, c_WaitHandle::STATE_SUCCEEDED);
@@ -3585,8 +3710,14 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     // Store the return value.
     gen(StAsyncArResult, m_irb->fp(), retVal);
 
+    // Unblock parents.
+    gen(BWHUnblockChain, parentChain);
+
     // Sync SP.
     sp = spillStack();
+
+    // Get the AsyncFunctionWaitHandle.
+    resumableObj = gen(LdResumableArObj, m_irb->fp());
   } else if (func->isNonAsyncGenerator()) {
     // Clear generator's key and value.
     auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
@@ -3607,9 +3738,16 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     not_reached();
   }
 
-  // Grab caller info from ActRec and return control to the caller.
+  // Grab caller info from ActRec.
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
+
+  // Drop reference to this resumable.
+  if (resumableObj != nullptr) {
+    gen(DecRef, resumableObj);
+  }
+
+  // Return control to the caller.
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
@@ -3645,7 +3783,8 @@ void HhbcTranslator::emitJmpSurpriseCheck(Block* catchBlock) {
                });
 }
 
-void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
+void HhbcTranslator::emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal,
+                                          Block* catchBlock,
                                           bool suspendingResumed) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
   m_irb->ifThen([&](Block* taken) {
@@ -3653,8 +3792,13 @@ void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
                },
                [&] {
                  m_irb->hint(Block::Hint::Unlikely);
-                 gen(FunctionExitSurpriseHook, RetCtrlData(suspendingResumed),
-                     catchBlock, m_irb->fp(), retVal);
+                 if (retVal != nullptr) {
+                   gen(FunctionReturnHook, RetCtrlData(suspendingResumed),
+                       catchBlock, fp, retVal);
+                 } else {
+                   gen(FunctionSuspendHook, RetCtrlData(suspendingResumed),
+                       catchBlock, fp, cns(suspendingResumed));
+                 }
                });
 }
 
@@ -4058,6 +4202,10 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
       cns(vals64)
     );
   }
+}
+
+void HhbcTranslator::endGuards() {
+  gen(EndGuards);
 }
 
 void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
@@ -4515,7 +4663,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
 
     auto const ptrTy = convertToType(repoTy).ptr();
 
-    gen(InitSProps, catchBlock, ClassData(cls));
+    emitInitSProps(cls, catchBlock);
     return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
   }
 

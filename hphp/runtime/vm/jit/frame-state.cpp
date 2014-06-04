@@ -100,16 +100,11 @@ void FrameState::update(const IRInstruction* inst) {
     m_fpValue = inst->dst();
     break;
 
-  case ReDefResumableSP:
-    m_spValue = inst->dst();
-    break;
-
   case ReDefSP:
     m_spValue = inst->dst();
     m_spOffset = inst->extra<ReDefSP>()->spOffset;
     break;
 
-  case DefInlineSP:
   case DefSP:
     m_spValue = inst->dst();
     m_spOffset = inst->extra<StackOffset>()->offset;
@@ -117,6 +112,7 @@ void FrameState::update(const IRInstruction* inst) {
 
   case AssertStk:
   case CastStk:
+  case CastStkIntToDbl:
   case CoerceStk:
   case CheckStk:
   case GuardStk:

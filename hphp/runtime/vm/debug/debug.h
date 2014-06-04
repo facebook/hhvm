@@ -51,13 +51,13 @@ class DebugInfo {
   void generatePidMapOverlay();
   void recordDataMapImpl(void* from, void* to, const std::string& desc);
 
-  /* maintain separate dwarf info for a and astubs, so that we
+  /* maintain separate dwarf info for a and acold, so that we
    * don't emit dwarf info for the two in the same ELF file.
    * gdb tends to get confused when it sees dwarf info for
    * widely separated addresses ranges in the same ELF file.
    */
   DwarfInfo m_aDwarfInfo;
-  DwarfInfo m_astubsDwarfInfo;
+  DwarfInfo m_acoldDwarfInfo;
   /*
    * Stuff to output symbol names to /tmp/perf-%d.map files.  This stuff
    * can be read by perf top/record, etc.

@@ -79,15 +79,22 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
 
 ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
+  ArrayData* ad;
+  if (LIKELY(size <= kPackedCapCodeThreshold)) {
+    auto const cap = size;
+    ad = static_cast<ArrayData*>(
+      MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+    );
+    assert(cap == packedCodeToCap(cap));
+    ad->m_kindAndSize = uint64_t{size} << 32 | cap;  // sets kPackedKind
+    assert(ad->m_kind == kPackedKind);
+    assert(ad->m_size == size);
+    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  } else {
+    ad = MakePackedHelper(size, values);
+  }
 
-  auto const cap = size;
-  auto const ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-  );
-
-  ad->m_kindAndSize = uint64_t{size} << 32 | cap;  // sets kPackedKind
   ad->m_posAndCount = uint64_t{1} << 32;
-
   // Append values by moving -- Caller assumes we update refcount.
   // Values are in reverse order since they come from the stack, which
   // grows down.
@@ -99,14 +106,27 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
     ++ptr;
   }
 
-  assert(ad->m_kind == kPackedKind);
-  assert(ad->m_size == size);
-  assert(ad->m_packedCap == cap);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 1);
   assert(PackedArray::checkInvariants(ad));
   return ad;
 }
+
+NEVER_INLINE
+ArrayData*
+MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
+  auto const cap = roundUpPackedCap(size);
+  auto const ad = static_cast<ArrayData*>(
+    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+  );
+  auto const capCode = packedCapToCode(cap);
+  ad->m_kindAndSize = uint64_t{size} << 32 | capCode;  // sets kPackedKind
+  assert(ad->m_kind == kPackedKind);
+  assert(ad->m_size == size);
+  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  return ad;
+}
+
 
 MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
                                  const TypedValue* values) {
@@ -324,15 +344,24 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
 ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
   assert(PackedArray::checkInvariants(array));
 
-  // We don't need to copy the full capacity, since the array won't
-  // change once it's uncounted.
-  auto const cap  = array->m_size;
+  ArrayData* ad;
   auto const size = array->m_size;
+  if (LIKELY(size <= kPackedCapCodeThreshold)) {
+    // We don't need to copy the full capacity, since the array won't
+    // change once it's uncounted.
+    auto const cap = size;
+    ad = static_cast<ArrayData*>(
+      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    );
+    assert(cap == packedCodeToCap(cap));
+    ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
+    assert(ad->m_kind == ArrayData::kPackedKind);
+    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+    assert(ad->m_size == size);
+  } else {
+    ad = MakeUncountedPackedHelper(array);
+  }
 
-  auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
-  );
-  ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
   ad->m_posAndCount = static_cast<uint64_t>(UncountedValue) << 32 |
                         static_cast<uint32_t>(array->m_pos);
   auto const srcData = packedData(array);
@@ -342,14 +371,25 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
     tvCopy(*CreateVarForUncountedArray(tvAsCVarRef(ptr)).asTypedValue(),
            *targetData);
   }
-
-  assert(ad->m_kind == ArrayData::kPackedKind);
-  assert(ad->m_packedCap == cap);
-  assert(ad->m_size == size);
   assert(ad->m_pos == array->m_pos);
   assert(ad->m_count == UncountedValue);
   assert(ad->isUncounted());
   assert(PackedArray::checkInvariants(ad));
+  return ad;
+}
+
+NEVER_INLINE
+ArrayData* MixedArray::MakeUncountedPackedHelper(ArrayData* array) {
+  auto const cap = roundUpPackedCap(array->m_size);
+  auto const ad = static_cast<ArrayData*>(
+    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+  );
+  auto const capCode = packedCapToCode(cap);
+  auto const size = array->m_size;
+  ad->m_kindAndSize = uint64_t{size} << 32 | capCode; // zero kind
+  assert(ad->m_kind == ArrayData::kPackedKind);
+  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  assert(ad->m_size == size);
   return ad;
 }
 
@@ -511,7 +551,7 @@ bool MixedArray::checkInvariants() const {
 
   // All arrays:
   assert(m_tableMask > 0 && ((m_tableMask+1) & m_tableMask) == 0);
-  assert(m_tableMask == folly::nextPowTwo(m_cap) - 1);
+  assert(m_tableMask == folly::nextPowTwo<uint64_t>(m_cap) - 1);
   assert(m_cap == computeMaxElms(m_tableMask));
 
   if (isZombie()) return true;

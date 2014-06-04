@@ -158,7 +158,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
       }
       int pos = singleton_pos(locale);
       if (pos == 0) {
-        return String();
+        return init_null();
       } else if (pos > 0) {
         locale_name = f_substr(locale, 0, pos - 1);
       }

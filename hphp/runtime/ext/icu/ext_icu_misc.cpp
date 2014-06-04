@@ -125,7 +125,7 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
   arr.set(s_result, result);
   arr.set(s_isTransitionalDifferent, info.isTransitionalDifferent);
   arr.set(s_errors, (long)info.errors);
-  retInfo = arr.create();
+  retInfo = arr.toVariant();
   return result;
 
 #else

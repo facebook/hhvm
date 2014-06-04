@@ -31,8 +31,6 @@ $excluded = array(
   'submodules',
 
   // non-PHP licenses
-  'runtime/base/utf8-decode.c',
-  'runtime/base/utf8-to-utf16.c',
   'runtime/base/zend-strtod.cpp',
   'runtime/ext/json/JSON_parser.cpp',
   'runtime/ext/php_unicode.h',
@@ -50,7 +48,6 @@ $files_zend = array(
   'zend/',
   'runtime/base/intl-convert.cpp',
   'runtime/base/intl-convert.h',
-  'runtime/base/utf8-decode.h',
   'runtime/base/zend-collator.h',
   'runtime/base/zend-collator.cpp',
   'runtime/base/zend-functions.h',

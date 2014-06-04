@@ -27,7 +27,6 @@
 #include <libgen.h>
 
 #include "folly/String.h"
-#include "folly/ScopeGuard.h"
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -384,15 +383,15 @@ std::string FileUtil::safe_dirname(const std::string& path) {
   return safe_dirname(path.c_str(), path.size());
 }
 
-std::string FileUtil::relativePath(const std::string& fromDir,
-                                   const std::string& toFile) {
+String FileUtil::relativePath(const std::string& fromDir,
+                              const String& toFile) {
 
   size_t maxlen = (fromDir.size() + toFile.size()) * 3;
 
   // Sanity checks
   if (fromDir[0] != '/' || toFile[0] != '/' ||
       fromDir[fromDir.size() - 1] != '/') {
-    return "";
+    return empty_string();
   }
 
   // Maybe we're lucky and this is an easy case
@@ -401,9 +400,8 @@ std::string FileUtil::relativePath(const std::string& fromDir,
     return toFile.substr(from_len);
   }
 
-  char* path = (char*) malloc(maxlen);
-  SCOPE_EXIT { free(path); };
-  int path_len = 0;
+  String ret(maxlen, ReserveString);
+  char* path = ret.bufferSlice().ptr;
 
   const char* from_dir = fromDir.c_str();
   const char* to_file = toFile.c_str();
@@ -432,7 +430,6 @@ std::string FileUtil::relativePath(const std::string& fromDir,
   while (cur) {
     if (cur == '/') {
       strcpy(path_end, "../");
-      path_len += 3;
       maxlen -= 3;
       path_end += 3;
     }
@@ -442,13 +439,16 @@ std::string FileUtil::relativePath(const std::string& fromDir,
 
   if (from_start[-1] != '/') {
     strcpy(path_end, "../");
-    path_len += 3;
     maxlen -= 3;
     path_end += 3;
   }
 
-  strncpy(path_end, to_start, maxlen - 1);
-  return std::string(path);
+  // Ensure the result is null-terminated after the strcpy
+  assert(to_start - to_file <= toFile.size());
+  assert(path_end - path + strlen(to_start) < ret.get()->capacity());
+
+  strcpy(path_end, to_start);
+  return ret.setSize(strlen(path));
 }
 
 String FileUtil::canonicalize(const String &path) {

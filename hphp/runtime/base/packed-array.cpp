@@ -35,8 +35,7 @@ namespace HPHP {
 
 bool PackedArray::checkInvariants(const ArrayData* arr) {
   assert(arr->isPacked());
-  assert(arr->m_packedCap < kMaxPackedCap);
-  assert(arr->m_size <= arr->m_packedCap);
+  assert(arr->m_size <= packedCodeToCap(arr->m_packedCapCode));
   static_assert(ArrayData::kPackedKind == 0, "");
   // Note that m_pos < m_size is not an invariant, because an array
   // that grows will only adjust m_size to zero on the old array.
@@ -193,23 +192,29 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
 NEVER_INLINE
 ArrayData* PackedArray::Grow(ArrayData* old) {
   assert(checkInvariants(old));
-  assert(old->m_size == old->m_packedCap);
+  assert(old->m_size == packedCodeToCap(old->m_packedCapCode));
+  DEBUG_ONLY auto const oldPos = old->m_pos;
 
-  DEBUG_ONLY auto const oldPos  = old->m_pos;
+  ArrayData* ad;
+  if (LIKELY(old->m_packedCapCode <= kPackedCapCodeThreshold / 2)) {
+    assert(old->m_packedCapCode == packedCodeToCap(old->m_packedCapCode));
+    auto const cap = old->m_packedCapCode * 2;
+    ad = static_cast<ArrayData*>(
+      MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    );
+    auto const oldSize = old->m_size;
+    assert(cap == packedCodeToCap(cap));
+    ad->m_kindAndSize = uint64_t{oldSize} << 32 | cap;
+    assert(ad->m_kind == ArrayData::kPackedKind);
+    assert(ad->m_size == oldSize);
+    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  } else {
+    ad = GrowHelper(old);
+  }
 
-  auto const oldCap  = old->m_packedCap;
-  auto const cap     = oldCap * 2;
-  if (UNLIKELY(cap >= kMaxPackedCap)) return nullptr;
-
-  auto const ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
-  );
-
-  auto const oldSize        = old->m_size;
   auto const oldPosUnsigned = uint64_t{static_cast<uint32_t>(old->m_pos)};
-
-  ad->m_kindAndSize = uint64_t{oldSize} << 32 | cap;
   ad->m_posAndCount = oldPosUnsigned;
+
   if (UNLIKELY(strong_iterators_exist())) {
     move_strong_iterators(ad, old);
   }
@@ -218,24 +223,42 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
   // better not to reuse the memcpy return value here because gcc had
   // `ad' in a callee saved register anyway.  The reg-to-reg move was
   // smaller than subtracting sizeof(ArrayData) from rax to return.
+  auto const oldSize = old->m_size;
   old->m_size = 0;
   std::memcpy(packedData(ad), packedData(old), oldSize * sizeof(TypedValue));
 
   // TODO(#2926276): it would be good to refactor callers to expect
   // our refcount to start at 1.
 
-  assert(ad->m_kind == ArrayData::kPackedKind);
   assert(ad->m_pos == oldPos);
   assert(ad->m_count == 0);
-  assert(ad->m_packedCap == cap);
-  assert(ad->m_size == oldSize);
   assert(checkInvariants(ad));
   return ad;
 }
 
 NEVER_INLINE
+ArrayData* PackedArray::GrowHelper(ArrayData* old) {
+  auto const oldCap = packedCodeToCap(old->m_packedCapCode);
+  static_assert(kMaxPackedCap >= MixedArray::MaxSize, "");
+  if (UNLIKELY(oldCap > MixedArray::MaxSize / 2)) return nullptr;
+  auto const cap = roundUpPackedCap(oldCap * 2);
+  // The capacity should not change if it round trips into
+  // encoded form and back
+  ArrayData* ad = static_cast<ArrayData*>(
+    MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
+  );
+  auto const capCode = packedCapToCode(cap);
+  auto const oldSize = old->m_size;
+  ad->m_kindAndSize = uint64_t{oldSize} << 32 | capCode;
+  assert(ad->m_kind == ArrayData::kPackedKind);
+  assert(ad->m_size == oldSize);
+  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  return ad;
+}
+
+NEVER_INLINE
 ArrayData* PackedArray::CopyAndResizeIfNeededSlow(const ArrayData* adIn) {
-  assert(adIn->m_size == adIn->m_packedCap);
+  assert(adIn->m_size == packedCodeToCap(adIn->m_packedCapCode));
   // Note: this path will have to handle splitting strong iterators
   // later when we combine copy & grow into one operation.
   // For now I'm just making use of copyPacked to do it for me before
@@ -250,14 +273,18 @@ ArrayData* PackedArray::CopyAndResizeIfNeededSlow(const ArrayData* adIn) {
 
 ALWAYS_INLINE
 ArrayData* PackedArray::CopyAndResizeIfNeeded(const ArrayData* adIn) {
-  if (LIKELY(adIn->m_size != adIn->m_packedCap)) return Copy(adIn);
+  if (LIKELY(sizeLessThanPackedCapCode(adIn->m_size, adIn->m_packedCapCode))) {
+    return Copy(adIn);
+  }
   return CopyAndResizeIfNeededSlow(adIn);
 }
 
 ALWAYS_INLINE
 ArrayData* PackedArray::ResizeIfNeeded(ArrayData* adIn) {
-  if (UNLIKELY(adIn->m_size == adIn->m_packedCap)) return Grow(adIn);
-  return adIn;
+  if (LIKELY(sizeLessThanPackedCapCode(adIn->m_size, adIn->m_packedCapCode))) {
+    return adIn;
+  }
+  return Grow(adIn);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -266,13 +293,14 @@ NEVER_INLINE
 ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   assert(checkInvariants(adIn));
 
-  auto const cap  = adIn->m_packedCap;
-  auto const size = adIn->m_size;
+  auto const cap = packedCodeToCap(adIn->m_packedCapCode);
 
   auto const ad = static_cast<ArrayData*>(
     MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
-  ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
+  auto const size = adIn->m_size;
+  auto const capCode = adIn->m_packedCapCode;
+  ad->m_kindAndSize = uint64_t{size} << 32 | capCode; // zero kind
   ad->m_posAndCount = static_cast<uint32_t>(adIn->m_pos);
 
   auto const srcData = packedData(adIn);
@@ -283,7 +311,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   }
 
   assert(ad->m_kind == ArrayData::kPackedKind);
-  assert(ad->m_packedCap == cap);
+  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
   assert(ad->m_size == size);
   assert(ad->m_pos == adIn->m_pos);
   assert(ad->m_count == 0);
@@ -303,81 +331,141 @@ ArrayData* PackedArray::CopyWithStrongIterators(const ArrayData* ad) {
 ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
   assert(checkInvariants(adIn));
 
-  // There's no reason to use the full capacity, since non-smart
-  // arrays are not mutable.
-  auto const cap  = adIn->m_size;
-  auto const size = adIn->m_size;
+  ArrayData* ad;
+  if (LIKELY(adIn->m_size <= kPackedCapCodeThreshold)) {
+    // There's no reason to use the full capacity, since non-smart
+    // arrays are not mutable.
+    auto const cap = adIn->m_size;
+    ad = static_cast<ArrayData*>(
+      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    );
+    auto const size = adIn->m_size;
+    assert(cap == packedCodeToCap(cap));
+    ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
+    assert(ad->m_kind == ArrayData::kPackedKind);
+    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+    assert(ad->m_size == size);
+  } else {
+    ad = NonSmartCopyHelper(adIn);
+  }
 
-  auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
-  );
-  ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
-  ad->m_posAndCount = static_cast<uint32_t>(adIn->m_pos);
-
+  ad->m_posAndCount  = static_cast<uint32_t>(adIn->m_pos);
   auto const srcData = packedData(adIn);
+  auto const size    = adIn->m_size;
   auto const stop    = srcData + size;
   auto targetData    = reinterpret_cast<TypedValue*>(ad + 1);
   for (auto ptr = srcData; ptr != stop; ++ptr, ++targetData) {
     tvDupFlattenVars(ptr, targetData, adIn);
   }
 
-  assert(ad->m_kind == ArrayData::kPackedKind);
-  assert(ad->m_packedCap == cap);
-  assert(ad->m_size == size);
   assert(ad->m_pos == adIn->m_pos);
   assert(ad->m_count == 0);
   assert(checkInvariants(ad));
   return ad;
 }
 
-ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
-  assert(arr->isVectorData());
-
-  auto const cap  = arr->m_size;
-  auto const size = arr->m_size;
-
+NEVER_INLINE
+ArrayData* PackedArray::NonSmartCopyHelper(const ArrayData* adIn) {
+  auto const cap = roundUpPackedCap(adIn->m_size);
   auto const ad = static_cast<ArrayData*>(
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
-  ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
+  auto const capCode = packedCapToCode(cap);
+  auto const size = adIn->m_size;
+  ad->m_kindAndSize = uint64_t{size} << 32 | capCode; // zero kind
+  assert(ad->m_kind == ArrayData::kPackedKind);
+  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  assert(ad->m_size == size);
+  return ad;
+}
+
+ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
+  assert(arr->isVectorData());
+
+  ArrayData* ad;
+  if (LIKELY(arr->m_size <= kPackedCapCodeThreshold)) {
+    auto const cap = arr->m_size;
+    ad = static_cast<ArrayData*>(
+      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    );
+    auto const size = arr->m_size;
+    assert(cap == packedCodeToCap(cap));
+    ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
+    assert(ad->m_kind == ArrayData::kPackedKind);
+    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+    assert(ad->m_size == size);
+  } else {
+    ad = NonSmartConvertHelper(arr);
+  }
+
   ad->m_posAndCount = static_cast<uint32_t>(arr->m_pos);
-
   auto data = reinterpret_cast<TypedValue*>(ad + 1);
-
   for (auto pos = arr->iter_begin();
       pos != ArrayData::invalid_index;
       pos = arr->iter_advance(pos), ++data) {
     tvDupFlattenVars(arr->getValueRef(pos).asTypedValue(), data, arr);
   }
 
-  assert(ad->m_kind == ArrayData::kPackedKind);
-  assert(ad->m_packedCap == cap);
-  assert(ad->m_size == size);
   assert(ad->m_pos == arr->m_pos);
   assert(ad->m_count == 0);
   assert(checkInvariants(ad));
   return ad;
 }
 
+NEVER_INLINE
+ArrayData* PackedArray::NonSmartConvertHelper(const ArrayData* arr) {
+  auto const cap = roundUpPackedCap(arr->m_size);
+  auto const ad = static_cast<ArrayData*>(
+    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+  );
+  auto const capCode = packedCapToCode(cap);
+  auto const size = arr->m_size;
+  ad->m_kindAndSize = uint64_t{size} << 32 | capCode; // zero kind
+  assert(ad->m_kind == ArrayData::kPackedKind);
+  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  assert(ad->m_size == size);
+  return ad;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* MixedArray::MakeReserve(uint32_t capacity) {
-  auto const kSmallSize = MixedArray::SmallSize;
-  auto const cap = std::max(capacity, kSmallSize);
-  auto const ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-  );
+  ArrayData* ad;
+  if (LIKELY(capacity <= kPackedCapCodeThreshold)) {
+    auto const kSmallSize = MixedArray::SmallSize;
+    auto const cap = std::max(capacity, kSmallSize);
+    ad = static_cast<ArrayData*>(
+      MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+    );
+    assert(cap == packedCodeToCap(cap));
+    ad->m_kindAndSize = cap;    // zeros m_size and m_kind
+    assert(ad->m_kind == kPackedKind);
+    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+    assert(ad->m_size == 0);
+  } else {
+    ad = MakeReserveSlow(capacity);
+  }
 
-  ad->m_kindAndSize = cap;    // zeros m_size and m_kind
   ad->m_posAndCount = uint64_t{1} << 32 |
                         static_cast<uint32_t>(ArrayData::invalid_index);
 
-  assert(ad->m_kind == kPackedKind);
-  assert(ad->m_packedCap == cap);
-  assert(ad->m_size == 0);
   assert(ad->m_count == 1);
   assert(ad->m_pos == ArrayData::invalid_index);
   assert(PackedArray::checkInvariants(ad));
+  return ad;
+}
+
+NEVER_INLINE
+ArrayData* MixedArray::MakeReserveSlow(uint32_t capacity) {
+  auto const cap = roundUpPackedCap(capacity);
+  auto const ad = static_cast<ArrayData*>(
+    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+  );
+  auto const capCode = packedCapToCode(cap);
+  ad->m_kindAndSize = capCode;    // zeros m_size and m_kind
+  assert(ad->m_kind == kPackedKind);
+  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  assert(ad->m_size == 0);
   return ad;
 }
 
@@ -396,7 +484,7 @@ void PackedArray::Release(ArrayData* ad) {
     free_strong_iterators(ad);
   }
 
-  auto const cap = ad->m_packedCap;
+  auto const cap = packedCodeToCap(ad->m_packedCapCode);
   MM().objFreeLogged(ad, sizeof(ArrayData) + sizeof(TypedValue) * cap);
 }
 
@@ -783,7 +871,7 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn,
 void PackedArray::OnSetEvalScalar(ArrayData* ad) {
   assert(checkInvariants(ad));
   auto ptr = packedData(ad);
-  auto const stop = ptr + ad->m_packedCap;
+  auto const stop = ptr + ad->m_size;
   for (; ptr != stop; ++ptr) {
     tvAsVariant(ptr).setEvalScalar();
   }
@@ -865,7 +953,7 @@ ArrayData* MixedArray::AddNewElemC(ArrayData* ad, TypedValue value) {
     if (LIKELY(ad->m_pos >= 0) &&
         LIKELY(!ad->hasMultipleRefs())) {
       int64_t const k = ad->m_size;
-      if (LIKELY(k < ad->m_packedCap)) {
+      if (LIKELY(sizeLessThanPackedCapCode(k, ad->m_packedCapCode))) {
         auto& tv = packedData(ad)[k];
         // TODO(#3888164): this KindOfUninit check is almost certainly
         // unnecessary, but it was here so it hasn't been removed yet.

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-array.h"
@@ -114,7 +115,8 @@ size_t getMemSize(const ArrayData* arr) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kPackedKind: {
     auto size = sizeof(ArrayData) +
-                (arr->m_packedCap - arr->m_size) * sizeof(TypedValue);
+      (packedCodeToCap(arr->m_packedCapCode) - arr->m_size) *
+      sizeof(TypedValue);
     auto const values = reinterpret_cast<const TypedValue*>(arr + 1);
     auto const last = values + arr->m_size;
     for (auto ptr = values; ptr != last; ++ptr) {

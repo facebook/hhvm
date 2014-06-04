@@ -95,8 +95,8 @@ class AsioSession {
     bool processSleepEvents();
 
     // Abrupt interrupt exception.
-    const Object& getAbruptInterruptException() {
-      return m_abruptInterruptException;
+    ObjectData* getAbruptInterruptException() {
+      return m_abruptInterruptException.get();
     }
 
     bool hasAbruptInterruptException() {
@@ -109,14 +109,17 @@ class AsioSession {
     void setOnAsyncFunctionCreateCallback(ObjectData* on_start) {
       assert(!on_start || on_start->instanceof(c_Closure::classof()));
       m_onAsyncFunctionCreateCallback = on_start;
+      updateEventHookState();
     }
     void setOnAsyncFunctionAwaitCallback(ObjectData* on_await) {
       assert(!on_await || on_await->instanceof(c_Closure::classof()));
       m_onAsyncFunctionAwaitCallback = on_await;
+      updateEventHookState();
     }
     void setOnAsyncFunctionSuccessCallback(ObjectData* on_success) {
       assert(!on_success || on_success->instanceof(c_Closure::classof()));
       m_onAsyncFunctionSuccessCallback = on_success;
+      updateEventHookState();
     }
     void setOnAsyncFunctionFailCallback(ObjectData* on_fail) {
       assert(!on_fail || on_fail->instanceof(c_Closure::classof()));
@@ -127,9 +130,10 @@ class AsioSession {
     bool hasOnAsyncFunctionSuccessCallback() { return m_onAsyncFunctionSuccessCallback.get(); }
     bool hasOnAsyncFunctionFailCallback() { return m_onAsyncFunctionFailCallback.get(); }
     void onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child);
-    void onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitHandle* child);
+    void onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child);
     void onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, const Variant& result);
     void onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, const Object& exception);
+    void updateEventHookState();
 
     // WaitHandle callbacks:
     void setOnJoinCallback(ObjectData* on_join) {

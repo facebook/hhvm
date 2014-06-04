@@ -1,12 +1,12 @@
 DOMElement
 
-Warning: DOMElement::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: DOMElement::__construct() expects at least 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DOMElement)#1 (0) {
 }
 string(22) "O:10:"DOMElement":0:{}"
 object(DOMElement)#2 (0) {
 }
-array(39) {
+array(40) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -16,80 +16,82 @@ array(39) {
   [3]=>
   string(7) "__isset"
   [4]=>
-  string(12) "getAttribute"
+  string(11) "__debuginfo"
   [5]=>
-  string(16) "getAttributeNode"
+  string(12) "getAttribute"
   [6]=>
-  string(18) "getAttributeNodeNS"
+  string(16) "getAttributeNode"
   [7]=>
-  string(14) "getAttributeNS"
+  string(18) "getAttributeNodeNS"
   [8]=>
-  string(20) "getElementsByTagName"
+  string(14) "getAttributeNS"
   [9]=>
-  string(22) "getElementsByTagNameNS"
+  string(20) "getElementsByTagName"
   [10]=>
-  string(12) "hasAttribute"
+  string(22) "getElementsByTagNameNS"
   [11]=>
-  string(14) "hasAttributeNS"
+  string(12) "hasAttribute"
   [12]=>
-  string(15) "removeAttribute"
+  string(14) "hasAttributeNS"
   [13]=>
-  string(19) "removeAttributeNode"
+  string(15) "removeAttribute"
   [14]=>
-  string(17) "removeAttributeNS"
+  string(19) "removeAttributeNode"
   [15]=>
-  string(12) "setAttribute"
+  string(17) "removeAttributeNS"
   [16]=>
-  string(16) "setAttributeNode"
+  string(12) "setAttribute"
   [17]=>
-  string(18) "setAttributeNodeNS"
+  string(16) "setAttributeNode"
   [18]=>
-  string(14) "setAttributeNS"
+  string(18) "setAttributeNodeNS"
   [19]=>
-  string(14) "setIDAttribute"
+  string(14) "setAttributeNS"
   [20]=>
-  string(18) "setIDAttributeNode"
+  string(14) "setIDAttribute"
   [21]=>
-  string(16) "setIDAttributeNS"
+  string(18) "setIDAttributeNode"
   [22]=>
-  string(11) "appendChild"
+  string(16) "setIDAttributeNS"
   [23]=>
-  string(9) "cloneNode"
+  string(11) "appendChild"
   [24]=>
-  string(9) "getLineNo"
+  string(9) "cloneNode"
   [25]=>
-  string(13) "hasAttributes"
+  string(9) "getLineNo"
   [26]=>
-  string(13) "hasChildNodes"
+  string(13) "hasAttributes"
   [27]=>
-  string(12) "insertBefore"
+  string(13) "hasChildNodes"
   [28]=>
-  string(18) "isDefaultNamespace"
+  string(12) "insertBefore"
   [29]=>
-  string(10) "isSameNode"
+  string(18) "isDefaultNamespace"
   [30]=>
-  string(11) "isSupported"
+  string(10) "isSameNode"
   [31]=>
-  string(18) "lookupNamespaceUri"
+  string(11) "isSupported"
   [32]=>
-  string(12) "lookupPrefix"
+  string(18) "lookupNamespaceUri"
   [33]=>
-  string(9) "normalize"
+  string(12) "lookupPrefix"
   [34]=>
-  string(11) "removeChild"
+  string(9) "normalize"
   [35]=>
-  string(12) "replaceChild"
+  string(11) "removeChild"
   [36]=>
-  string(4) "c14n"
+  string(12) "replaceChild"
   [37]=>
-  string(8) "c14nfile"
+  string(4) "c14n"
   [38]=>
+  string(8) "c14nfile"
+  [39]=>
   string(11) "getNodePath"
 }
 ================
 A_DOMElement
 
-Warning: DOMElement::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: DOMElement::__construct() expects at least 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DOMElement)#3 (1) {
   ["___x"]=>
   NULL
@@ -99,7 +101,7 @@ object(A_DOMElement)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(39) {
+array(40) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -109,73 +111,75 @@ array(39) {
   [3]=>
   string(7) "__isset"
   [4]=>
-  string(12) "getAttribute"
+  string(11) "__debuginfo"
   [5]=>
-  string(16) "getAttributeNode"
+  string(12) "getAttribute"
   [6]=>
-  string(18) "getAttributeNodeNS"
+  string(16) "getAttributeNode"
   [7]=>
-  string(14) "getAttributeNS"
+  string(18) "getAttributeNodeNS"
   [8]=>
-  string(20) "getElementsByTagName"
+  string(14) "getAttributeNS"
   [9]=>
-  string(22) "getElementsByTagNameNS"
+  string(20) "getElementsByTagName"
   [10]=>
-  string(12) "hasAttribute"
+  string(22) "getElementsByTagNameNS"
   [11]=>
-  string(14) "hasAttributeNS"
+  string(12) "hasAttribute"
   [12]=>
-  string(15) "removeAttribute"
+  string(14) "hasAttributeNS"
   [13]=>
-  string(19) "removeAttributeNode"
+  string(15) "removeAttribute"
   [14]=>
-  string(17) "removeAttributeNS"
+  string(19) "removeAttributeNode"
   [15]=>
-  string(12) "setAttribute"
+  string(17) "removeAttributeNS"
   [16]=>
-  string(16) "setAttributeNode"
+  string(12) "setAttribute"
   [17]=>
-  string(18) "setAttributeNodeNS"
+  string(16) "setAttributeNode"
   [18]=>
-  string(14) "setAttributeNS"
+  string(18) "setAttributeNodeNS"
   [19]=>
-  string(14) "setIDAttribute"
+  string(14) "setAttributeNS"
   [20]=>
-  string(18) "setIDAttributeNode"
+  string(14) "setIDAttribute"
   [21]=>
-  string(16) "setIDAttributeNS"
+  string(18) "setIDAttributeNode"
   [22]=>
-  string(11) "appendChild"
+  string(16) "setIDAttributeNS"
   [23]=>
-  string(9) "cloneNode"
+  string(11) "appendChild"
   [24]=>
-  string(9) "getLineNo"
+  string(9) "cloneNode"
   [25]=>
-  string(13) "hasAttributes"
+  string(9) "getLineNo"
   [26]=>
-  string(13) "hasChildNodes"
+  string(13) "hasAttributes"
   [27]=>
-  string(12) "insertBefore"
+  string(13) "hasChildNodes"
   [28]=>
-  string(18) "isDefaultNamespace"
+  string(12) "insertBefore"
   [29]=>
-  string(10) "isSameNode"
+  string(18) "isDefaultNamespace"
   [30]=>
-  string(11) "isSupported"
+  string(10) "isSameNode"
   [31]=>
-  string(18) "lookupNamespaceUri"
+  string(11) "isSupported"
   [32]=>
-  string(12) "lookupPrefix"
+  string(18) "lookupNamespaceUri"
   [33]=>
-  string(9) "normalize"
+  string(12) "lookupPrefix"
   [34]=>
-  string(11) "removeChild"
+  string(9) "normalize"
   [35]=>
-  string(12) "replaceChild"
+  string(11) "removeChild"
   [36]=>
-  string(4) "c14n"
+  string(12) "replaceChild"
   [37]=>
-  string(8) "c14nfile"
+  string(4) "c14n"
   [38]=>
+  string(8) "c14nfile"
+  [39]=>
   string(11) "getNodePath"
 }

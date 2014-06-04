@@ -1,12 +1,58 @@
 NEXT
+ -
+
+"LL Cool J"
+ - Over 200 other bug fixes (go lockdown!)
+ - Every HDF setting is now available as INI
+ - Cut session_id() size by 1/2
+ - Added 'Z' format string for pack/unpack
+ - We now build on clang
+ - Fix pcre cache to not fatal when full 
+ - Implement $php_errormsg
+ - Adding -n CLI option to hhvm php mode 
+ - Fix substitution of invalid UTF8 sequences in htmlspecialchars
+ - FastCGI: Use SCRIPT_FILENAME as the PHP script to run
+ - Can create DateTimeZone's from abbreviations
+ - Put all fastcgi params into $_SERVER
+ - Many DOM classes are now serializable
+ - Define the xhp tokens
+ - Many reflection changes for perf and compatibility
+ - Default fastcgi to listen on 127.0.0.1
+ - remove register_cleanup_function
  - Map: reserve()
  - Set: retain(), reserve(), addAllKeysOf()
  - {Set|ImmSet|Vector|ImmVector}::fromKeysOf()
 
 "Kanye West"
+  - Backport fix for CVE-2011-2202
   - Interfaces {Keyed}Container match arrays *and* collections, not iterables
+  - Added ** and **= operators to HHVM and more compatibility fixes with PHP5.6
+  - Fixes and improvements to collections
+  - Replace json decoder with json-c library
+  - Document VMRegAnchor and isVMFrame()
+  - Improvements to array iterator code
+  - Improvements to the type checker
+  - Allow parser to be generated with bison 3
+  - Improvements and speed up to reflection code
 
-"Jay-Z"
+
+"Jay-Z" 9-May-2014
+  - Make handling of code.hot overflows more robust
+  - Catch server errors sooner
+  - Fix segfault and infinite recursion in fileinfo extension
+  - Resolve systemlib constants at compile time
+  - Resume resumables natively
+  - Import round() table optimizations from php-src
+  - Delete bytecode Peephole optimizer
+  - Remove most of annotation.cpp, and some other code gated on !UsedHHBBC
+  - Create phis for locals
+  - Fix free of "" in rfc1867PostHandler
+  - Add firstValue(), firstKey(), lastValue(), lastKey() to collections
+  - Add concat() to collections
+  - Clarify Hack license
+  - Add CakePHP3 to test runner
+  - Better error when TC is full
+  - Add hash_equals() from PHP 5.6
 
 "Insane Poetry" 24-Apr-2014
   - Support for PHP 5.6 variadic ...$args syntax for func declarations

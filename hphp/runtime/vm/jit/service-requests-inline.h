@@ -52,12 +52,19 @@ inline void packServiceReqArgs(ServiceReqArgVec& argv) {
 
 //////////////////////////////////////////////////////////////////////
 
+inline bool isEphemeralServiceReq(ServiceRequest sr) {
+  return sr == REQ_BIND_JMPCC_FIRST ||
+         sr == REQ_BIND_JMPCC_SECOND ||
+         sr == REQ_BIND_JMP ||
+         sr == REQ_BIND_JCC ||
+         sr == REQ_BIND_SIDE_EXIT ||
+         sr == REQ_BIND_ADDR;
+}
+
 template<typename... Arg>
 TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
   // These should reuse stubs. Use emitEphemeralServiceReq.
-  assert(sr != REQ_BIND_JMPCC_FIRST &&
-         sr != REQ_BIND_JMPCC_SECOND &&
-         sr != REQ_BIND_JMP);
+  assert(!isEphemeralServiceReq(sr));
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
@@ -73,10 +80,7 @@ TCA emitServiceReq(CodeBlock& cb, ServiceRequest sr, Arg... a) {
 template<typename... Arg>
 TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
                             Arg... a) {
-  assert(sr == REQ_BIND_JMPCC_FIRST ||
-         sr == REQ_BIND_JMPCC_SECOND ||
-         sr == REQ_BIND_JMP);
-  assert(cb.contains(start));
+  assert(isEphemeralServiceReq(sr));
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);

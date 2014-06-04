@@ -1,5 +1,49 @@
 bool(false)
 NULL
 bool(true)
-object(DOMDocumentType)#%d (0) {
+object(DOMDocumentType)#3 (22) {
+  ["internalSubset"]=>
+  string(35) "<!DOCTYPE graph SYSTEM "graph.dtd">"
+  ["systemId"]=>
+  string(9) "graph.dtd"
+  ["publicId"]=>
+  string(0) ""
+  ["baseURI"]=>
+  NULL
+  ["localName"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
+  ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["entities"]=>
+  string(22) "(object value omitted)"
+  ["namespaceURI"]=>
+  NULL
+  ["nodeValue"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["notations"]=>
+  string(22) "(object value omitted)"
+  ["nodeType"]=>
+  int(10)
+  ["nodeName"]=>
+  string(5) "graph"
+  ["textContent"]=>
+  string(0) ""
+  ["lastChild"]=>
+  NULL
+  ["name"]=>
+  string(5) "graph"
+  ["firstChild"]=>
+  NULL
+  ["childNodes"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
 }

@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
 #include "hphp/runtime/ext/asio/sleep_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -87,7 +88,7 @@ void AsioSession::onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_Waita
   }
 }
 
-void AsioSession::onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitHandle* child) {
+void AsioSession::onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child) {
   assert(m_onAsyncFunctionAwaitCallback.get());
   try {
     vm_call_user_func(
@@ -117,6 +118,16 @@ void AsioSession::onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, const Obj
       make_packed_array(cont, exception));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onFail callback");
+  }
+}
+
+void AsioSession::updateEventHookState() {
+  if (hasOnAsyncFunctionCreateCallback() ||
+      hasOnAsyncFunctionAwaitCallback() ||
+      hasOnAsyncFunctionSuccessCallback()) {
+    EventHook::EnableAsync();
+  } else {
+    EventHook::DisableAsync();
   }
 }
 

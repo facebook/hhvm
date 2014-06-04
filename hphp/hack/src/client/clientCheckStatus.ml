@@ -44,50 +44,71 @@ let print_error_color (e:Utils.error) =
   print_reason_color ~first:true (List.hd e);
   List.iter (print_reason_color ~first:false) (List.tl e)
 
-let check_status (args:client_check_env) =
-  Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ -> raise Server_busy));
-  ignore(Unix.alarm 6);
+module type CHECKER_UTILS = sig
+  val start_server : client_check_env -> unit
+  val server_name : string
+end
 
-  (* Check if a server is up *)
-  if not (ClientUtils.server_exists args.root)
-  then begin
+module HackCheckerUtils : CHECKER_UTILS = struct
+  let start_server args = ClientStart.start_server args.root
+  let server_name = "hh_server"
+end
+
+module type STATUS_CHECKER = sig
+  val check_status : client_check_env -> unit
+end
+
+module StatusChecker (CheckerUtils : CHECKER_UTILS) : STATUS_CHECKER = struct
+  let check_status (args:client_check_env) =
+    Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ -> raise Server_busy));
+    ignore(Unix.alarm 6);
+
+    let name = CheckerUtils.server_name in
+
+    (* Check if a server is up *)
+    if not (ClientUtils.server_exists args.root)
+    then begin
+      ignore (Unix.alarm 0);
+      if args.autostart
+      then
+        (* fork the server and raise an exception *)
+        CheckerUtils.start_server args;
+      raise Server_missing
+    end;
+    let ic, oc = ClientUtils.connect args.root in
+    ServerMsg.cmd_to_channel oc (ServerMsg.STATUS args.root);
+    let response = ServerMsg.response_from_channel ic in
     ignore (Unix.alarm 0);
-    if args.autostart
-    then
-      (* fork the server and raise an exception *)
-      ClientStart.start_server args.root;
-    raise Server_missing
-  end;
-  let ic, oc = ClientUtils.connect args.root in
-  ServerMsg.cmd_to_channel oc (ServerMsg.STATUS args.root);
-  let response = ServerMsg.response_from_channel ic in
-  ignore (Unix.alarm 0);
-  match response with
-  | ServerMsg.SERVER_OUT_OF_DATE ->
-    if args.autostart
-    then Printf.printf "hh_server is outdated, going to launch a new one.\n"
-    else Printf.printf "hh_server is outdated, killing it.\n";
-    flush stdout;
-    raise Server_missing
-  | ServerMsg.NO_ERRORS ->
-    ServerError.print_errorl args.output_json [] stdout;
-    exit 0
-  | ServerMsg.ERRORS e ->
-    if args.output_json || args.from <> ""
-    then ServerError.print_errorl args.output_json e stdout
-    else List.iter print_error_color e;
-    exit 2
-  | ServerMsg.DIRECTORY_MISMATCH d ->
-    Printf.printf "hh_server is running on a different directory.\n";
-    Printf.printf "server_root: %s, client_root: %s\n"
-      (Path.string_of_path d.ServerMsg.server)
-      (Path.string_of_path d.ServerMsg.client);
-    flush stdout;
-    raise Server_directory_mismatch
-  | ServerMsg.SERVER_DYING ->
-    Printf.printf "Server has been killed for %s\n" 
-      (Path.string_of_path args.root);
-    exit 2
-  | ServerMsg.PONG -> 
-      Printf.printf "Why on earth did the server respond with a pong?\n%!";
+    match response with
+    | ServerMsg.SERVER_OUT_OF_DATE ->
+      if args.autostart
+      then Printf.printf "%s is outdated, going to launch a new one.\n" name
+      else Printf.printf "%s is outdated, killing it.\n" name;
+      flush stdout;
+      raise Server_missing
+    | ServerMsg.NO_ERRORS ->
+      ServerError.print_errorl args.output_json [] stdout;
+      exit 0
+    | ServerMsg.ERRORS e ->
+      if args.output_json || args.from <> ""
+      then ServerError.print_errorl args.output_json e stdout
+      else List.iter print_error_color e;
       exit 2
+    | ServerMsg.DIRECTORY_MISMATCH d ->
+      Printf.printf "%s is running on a different directory.\n" name;
+      Printf.printf "server_root: %s, client_root: %s\n"
+        (Path.string_of_path d.ServerMsg.server)
+        (Path.string_of_path d.ServerMsg.client);
+      flush stdout;
+      raise Server_directory_mismatch
+    | ServerMsg.SERVER_DYING ->
+      Printf.printf "Server has been killed for %s\n" 
+        (Path.string_of_path args.root);
+      exit 2
+    | ServerMsg.PONG -> 
+        Printf.printf "Why on earth did the server respond with a pong?\n%!";
+        exit 2
+end
+
+module HackStatusChecker = StatusChecker (HackCheckerUtils)
+let check_status = HackStatusChecker.check_status

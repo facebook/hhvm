@@ -129,6 +129,7 @@
   CASE(CreateCl) \
   CASE(DefCns) \
   CASE(DefFunc) \
+  CASE(Dir) \
   CASE(Div) \
   CASE(Double) \
   CASE(Dup) \
@@ -145,6 +146,7 @@
   CASE(FPushFuncU) \
   CASE(FPushObjMethodD) \
   CASE(False) \
+  CASE(File) \
   CASE(Floor) \
   CASE(Idx) \
   CASE(InitThisLoc) \

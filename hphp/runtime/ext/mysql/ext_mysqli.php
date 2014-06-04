@@ -91,7 +91,7 @@ class mysqli {
    *   permissions (depending on if a password as provided or not).
    * @param string $dbname - If provided will specify the default database
    *   to be used when performing queries.
-   * @param int $port - Specifies the port number to attempt to connect to
+   * @param mixed $port - Specifies the port number to attempt to connect to
    *   the MySQL server.
    * @param string $socket - Specifies the socket or named pipe that should
    *   be used.    Specifying the socket parameter will not explicitly
@@ -111,16 +111,6 @@ class mysqli {
       return;
     }
 
-    if (is_string($port)) {
-      if (!ctype_digit($port)) {
-        throw new Exception('Port is not numeric');
-      };
-      $port = (int) $port;
-    }
-    if ($port !== null && !is_int($port)) {
-      throw new Exception('Port is not numeric');
-    }
-
     // Connect
     $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
   }
@@ -138,7 +128,7 @@ class mysqli {
                           ?string $username = null,
                           ?string $passwd = null,
                           ?string $dbname = null,
-                          ?int $port = null,
+                          mixed $port = null,
                           ?string $socket = null): void {
     $this->hh_init();
 
@@ -166,12 +156,13 @@ class mysqli {
   /**
    * Starts a transaction
    *
-   * @param int $flags -
-   * @param string $name -
+   * @param ?int $flags -
+   * @param ?string $name -
    *
    * @return bool -
    */
-  public function begin_transaction(int $flags, string $name): bool {
+  public function begin_transaction(?int $flags = null,
+                                    ?string $name = null): bool {
     $query = 'START TRANSACTION';
     if ($name) {
       $query .= '/*'. $name .'*/';
@@ -179,7 +170,8 @@ class mysqli {
 
     if ($flags) {
       $option_strings = Map {
-        MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT => 'WITH CONSISTENT SNAPSHOT',
+        MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT =>
+          'WITH CONSISTENT SNAPSHOT',
         MYSQLI_TRANS_START_READ_WRITE => 'READ WRITE',
         MYSQLI_TRANS_START_READ_ONLY => 'READ ONLY',
       };
@@ -246,7 +238,8 @@ class mysqli {
     }
 
     if ($flags) {
-      switch ($flags & (MYSQLI_TRANS_COR_AND_CHAIN | MYSQLI_TRANS_COR_AND_NO_CHAIN)) {
+      switch ($flags & (MYSQLI_TRANS_COR_AND_CHAIN |
+                        MYSQLI_TRANS_COR_AND_NO_CHAIN)) {
         case MYSQLI_TRANS_COR_AND_CHAIN:
           $query .= ' AND CHAIN';
         case MYSQLI_TRANS_COR_AND_NO_CHAIN:
@@ -255,7 +248,8 @@ class mysqli {
           // Do nothing to mimic Zend
           break;
       }
-      switch ($flags & (MYSQLI_TRANS_COR_RELEASE | MYSQLI_TRANS_COR_NO_RELEASE)) {
+      switch ($flags & (MYSQLI_TRANS_COR_RELEASE |
+                        MYSQLI_TRANS_COR_NO_RELEASE)) {
         case MYSQLI_TRANS_COR_RELEASE:
           $query .= ' RELEASE';
         case MYSQLI_TRANS_COR_NO_RELEASE:
@@ -588,7 +582,7 @@ class mysqli {
    *   not).
    * @param string $dbname - If provided will specify the default
    *   database to be used when performing queries.
-   * @param int $port - Specifies the port number to attempt to connect
+   * @param mixed $port - Specifies the port number to attempt to connect
    *   to the MySQL server.
    * @param string $socket - Specifies the socket or named pipe that
    *   should be used.    Specifying the socket parameter will not
@@ -614,9 +608,22 @@ class mysqli {
                                ?string $username = null,
                                ?string $passwd = null,
                                ?string $dbname = null,
-                               ?int $port = null,
+                               mixed $port = null,
                                ?string $socket = null,
                                ?int $flags = 0): bool {
+
+    // TODO: Fix this to use ZendParamMode when it is available
+    // See D1359972 for context
+    if (is_string($port)) {
+      if (!ctype_digit($port)) {
+        throw new Exception('Port is not numeric');
+      };
+      $port = (int) $port;
+    }
+    if ($port !== null && !is_int($port)) {
+      throw new Exception('Port is not numeric');
+    }
+
     $server = null;
     if ($host) {
       $server = $host;
@@ -1637,7 +1644,7 @@ function mysqli_connect(?string $host = null,
                         ?string $username = null,
                         ?string $passwd = null,
                         ?string $dbname = null,
-                        ?int $port = null,
+                        mixed $port = null,
                         ?string $socket = null): mixed {
   $link = new mysqli($host, $username, $passwd, $dbname, $port, $socket);
   if ($link->connect_errno > 0) {
@@ -2130,7 +2137,7 @@ function mysqli_query(mysqli $link,
  *   permissions (depending on if a password as provided or not).
  * @param string $dbname - If provided will specify the default database
  *   to be used when performing queries.
- * @param int $port - Specifies the port number to attempt to connect to
+ * @param mixed $port - Specifies the port number to attempt to connect to
  *   the MySQL server.
  * @param string $socket - Specifies the socket or named pipe that should
  *   be used.    Specifying the socket parameter will not explicitly
@@ -2156,7 +2163,7 @@ function mysqli_real_connect(mysqli $link,
                              ?string $username = null,
                              ?string $passwd = null,
                              ?string $dbname = null,
-                             ?int $port = null,
+                             mixed $port = null,
                              ?string $socket = null,
                              ?int $flags = 0): bool {
   return $link->real_connect($host, $username, $passwd, $dbname, $port, $socket,

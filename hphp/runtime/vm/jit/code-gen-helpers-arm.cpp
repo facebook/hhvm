@@ -118,29 +118,28 @@ void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
   a.  Tst   (rAsm, 0xffffffff);
 }
 
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  JIT::Fixup fixup) {
   vixl::MacroAssembler a { mainCode };
-  vixl::MacroAssembler astubs { stubsCode };
+  vixl::MacroAssembler acold { coldCode };
 
   emitTestSurpriseFlags(a);
-  mcg->backEnd().emitSmashableJump(mainCode, stubsCode.frontier(), CC_NZ);
+  mcg->backEnd().emitSmashableJump(mainCode, coldCode.frontier(), CC_NZ);
 
-  astubs.  Mov  (argReg(0), rVmFp);
+  acold.  Mov  (argReg(0), rVmFp);
 
   auto fixupAddr =
-    emitCallWithinTC(astubs, tx->uniqueStubs.functionEnterHelper);
+    emitCallWithinTC(acold, tx->uniqueStubs.functionEnterHelper);
   mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
-  mcg->backEnd().emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
+  mcg->backEnd().emitSmashableJump(coldCode, mainCode.frontier(), CC_None);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
-  a.    Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
-                                  Stack::topOfStackOffset()]);
+  a.    Str  (rVmSp, rVmTl[RDS::kVmspOff]);
   if ((bool)(flags & RegSaveFlags::SaveFP)) {
-    a.  Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
+    a.  Str  (rVmFp, rVmTl[RDS::kVmfpOff]);
   }
 
   if ((bool)(flags & RegSaveFlags::SavePC)) {
@@ -149,7 +148,7 @@ void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
     a.  Ldr  (rAsm, rAsm[Func::unitOff()]);
     a.  Ldr  (rAsm, rAsm[Unit::bcOff()]);
     a.  Add  (rAsm, rAsm, vixl::Operand(argReg(0), vixl::UXTW));
-    a.  Str  (rAsm, rGContextReg[offsetof(ExecutionContext, m_pc)]);
+    a.  Str  (rAsm, rVmTl[RDS::kVmpcOff]);
   }
 }
 

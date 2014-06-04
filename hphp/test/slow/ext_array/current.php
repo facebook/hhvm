@@ -13,6 +13,7 @@ function a() {
 function b() {
   $arr = array();
   var_dump(current($arr));
+  var_dump(current(array()));
 }
 
 function c() {

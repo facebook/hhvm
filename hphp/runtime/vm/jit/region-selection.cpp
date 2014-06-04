@@ -16,7 +16,6 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 #include <algorithm>
-#include <boost/range/adaptors.hpp>
 #include <functional>
 #include <exception>
 #include <utility>
@@ -694,7 +693,7 @@ std::string show(RegionDesc::Location l) {
   case RegionDesc::Location::Tag::Local:
     return folly::format("Local{{{}}}", l.localId()).str();
   case RegionDesc::Location::Tag::Stack:
-    return folly::format("Stack{{{}, {}}}",
+    return folly::format("Stack{{{},{}}}",
                          l.stackOffset(), l.stackOffsetFromFp()).str();
   }
   not_reached();

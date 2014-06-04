@@ -117,7 +117,7 @@ String StringUtil::Implode(const Variant& items, const String& delim) {
     throw_param_is_not_container();
   }
   int size = getContainerSize(items);
-  if (size == 0) return "";
+  if (size == 0) return empty_string();
 
   String* sitems = (String*)smart_malloc(size * sizeof(String));
   int len = 0;
@@ -218,7 +218,7 @@ String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
   char *ret = string_html_encode(input.data(), len,
                                  qsBitmask, utf8, dEncode, htmlEnt);
   if (!ret) {
-    return empty_string;
+    return empty_string();
   }
   return String(ret, len, AttachString);
 }

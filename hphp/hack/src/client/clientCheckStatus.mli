@@ -8,4 +8,15 @@
  *
  *)
 
+module type CHECKER_UTILS = sig
+  val start_server : ClientEnv.client_check_env -> unit
+  val server_name : string
+end
+
+module type STATUS_CHECKER = sig
+  val check_status : ClientEnv.client_check_env -> unit
+end
+
+module StatusChecker (CheckerUtils : CHECKER_UTILS) : STATUS_CHECKER
+
 val check_status : ClientEnv.client_check_env -> unit

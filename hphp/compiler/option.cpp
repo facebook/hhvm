@@ -259,14 +259,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     const Hdf& lang = config["Hack"]["Lang"];
     IntsOverflowToInts =
       Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
-    StrictArrayFillKeys =
-      Config::GetHackStrictOption(ini,
-                                  lang["StrictArrayFillKeys"],
-                                  EnableHipHopSyntax);
-    DisallowDynamicVarEnvFuncs =
-      Config::GetHackStrictOption(ini,
-                                  lang["DisallowDynamicVarEnvFuncs"],
-                                  EnableHipHopSyntax);
+    Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
+    Config::Bind(DisallowDynamicVarEnvFuncs, ini,
+                 lang["DisallowDynamicVarEnvFuncs"]);
   }
 
   EnableAspTags = Config::GetBool(ini, config["EnableAspTags"]);

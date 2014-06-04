@@ -79,98 +79,11 @@ trace, and zero or more exit traces which handle side exits. Instructions in
 exit traces may use Variables defined on the main trace, so these exits are not
 separate compilation units.
 
-
 Types
 -----
 
-Types in the IR are used in several contexts. In all cases, a Type represents a
-set of runtime values, however, a Type's meaning depends on the context in
-which it appears. A type which annotates an instruction (like IsType) modifies
-its behavior, extending its opcode. The type of each source parameter restricts
-the type of any variable used by that parameter. A variable's type describes
-the set of values it may hold at the point it is defined.
-
-Since types represent sets of values, we define relations on types in terms of
-the sets of values they represent. Two types S and T are equal (S == T) if they
-represent equal sets of values. S is more refined than T (S <: T), or a subtype
-of T, if the set of values represented by S is a subset of the set of values
-represented by T. S and T are not related if neither value set is a subtype of
-the other: (S <: T) and (T <: S) are both false. A type U is a union of S and T
-(U = {S|T}) if it represents the union of S and T's value sets. In that case, S
-and T are both subtypes of U (S <: U, T <: U), even if S and T are not related.
-
-Variables in the IR contain a mix of PHP-visible types and internal types. The
-following table describes types representing PHP values. Note that the types
-used here are more specific than what can be discriminated by user code (e.g.,
-StaticStr and CountedStr both appear as type String at the PHP level).
-
-  Type            HHVM representation
-  ----            -------------------
-  Uninit          KindOfUninit
-  InitNull        KindOfNull
-  Null            {Uninit|InitNull}
-  Bool            false=0,true=1 (actual bit width varies)
-  Int             int64_t (64-bit twos compliment binary integer)
-  Dbl             double (IEEE 754 64-bit binary floating point)
-  StaticStr       StringData* where isStatic() == true
-  CountedStr      StringData* where isStatic() == false
-  UncountedInit   TypedValue {Null|Bool|Int|Dbl|StaticStr}
-  Uncounted       TypedValue {Unin|Null|Bool|Int|Dbl|StaticStr}
-  Str             StringData* {CountedStr|StaticStr}
-  StaticArr       ArrayData* where isStatic() == true
-  CountedArr      ArrayData* where isStatic() == false
-  Arr             ArrayData* {CountedArr|StaticArr}
-  Obj             ObjectData*
-  Obj<Class>      ObjectData* of the specific type Class
-  Counted         {CountedStr|CountedArr|Obj|BoxedCell}
-  Cell            {Null|Bool|Int|Dbl|Str|Arr|Obj}
-
-A PHP reference is implemented as a container object (RefData) which contains
-one value. The contained value cannot be another PHP reference. For every type
-T in the table above, there is a corresponding type BoxedT, which is a pointer
-to a RefData struct containing a value of type T.
-
-  Type            HHVM representation
-  ----            -------------------
-  BoxedInitNull   RefData* containing InitNull
-  ...             Everything from the first table above can be boxed
-  BoxedCell       RefData* containing Cell (topmost boxed type).
-
-Finally, there is one top-level type representing all possible PHP values:
-
-  Gen             {Cell|BoxedCell}
-
-The VM also manipulates values of various internal types, which are never
-visible at the PHP semantic level, and do not have any type relation with the
-above PHP-facing types.
-
-  Type            HHVM representation
-  ----            -------------------
-  PtrToT          Exists for all T in Gen. Represents a TypedValue*
-  Bottom          No value, {}. Subtype of every other type
-  Top             Supertype of every other type
-  Cls             Class*
-  Func            Func*
-  VarEnv          VarEnv*
-  NamedEntity     NamedEntity*
-  Cctx            A Class* with the lowest bit set (as stored in ActRec.m_cls)
-  Ctx             {Obj|Cctx}
-  RetAddr         Return address
-  StkPtr          Pointer into VM execution stack
-  FramePtr        Pointer to a frame on the VM execution stack
-  TCA             Machine code address
-  Nullptr         Represents a null pointer
-
-There is also one special type which represents all the possible types that can
-be on the stack.
-
-  StackElem       {Gen|Cls}
-
-In the instruction descriptions below, we also use a "Const" prefix on several
-types loosely, which means the operand must be the requested type and must be a
-compile-time constant. The optimizer relies on accessing the value of those
-operands.
-
+For an overview of the HHIR type system, see the "Type System" section in
+hackers-guide/jit-core.md.
 
 Variables
 ---------
@@ -389,6 +302,11 @@ D:StkPtr = CastStk<T,offset> S0:StkPtr
   Returns a new StkPtr that represents the same stack as S0, but with the slot
   at offset (in cells) converted to type T.
 
+D:StkPtr = CastStkIntToDbl<offset> S0:StkPtr
+
+  Returns a new StkPtr where the slot at offset has been converted from an
+  integer to double.
+
 D:StkPtr = CoerceStk<T,offset> S0:StkPtr -> B
 
   Returns a new StkPtr that represents the same stack as S0, but with the slot
@@ -426,6 +344,11 @@ GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
 
   If any of the checks fail, make a fallback jump. (Jump to a service request
   that will chain to a retranslation of this tracelet.)
+
+EndGuards
+
+  A no-op at runtime, this instruction serves to mark the end of the initial
+  sequence of guards in a trace.
 
 D:{Func} = CheckNonNull S0:{Nullptr|Func|PtrToGen|TCA} -> B
 
@@ -1080,9 +1003,17 @@ D:Obj = AllocObj S1:Cls
 
   Allocates a new object of class S1.
 
+CheckInitProps<class> -> B
+
+  Check if the properties for class are initialized and branches if not.
+
 InitProps<class> -> B
 
   Calls the property initializer function (86pinit) for class.  May throw.
+
+CheckInitSProps<class> -> B
+
+  Check if static properties for class are initialized and branches if not.
 
 InitSProps<class> -> B
 
@@ -1496,58 +1427,15 @@ D:StkPtr = ReDefSP<offset,spansCall> S0:StkPtr S1:FramePtr
 
   Re-define a stack in terms of a frame pointer S1 and an offset, putting the
   resulting pointer in D. The resulting stack is assumed to give the same view
-  as S1, which is a previous stack pointer. (I.e. for getStackValue we just
-  chain to S1.)  The S0 stack pointer is only used for analysis.
+  as S0, which is a previous stack pointer. (I.e. for getStackValue we just
+  chain to S0.)
 
   This instruction is used when entering or "returning" from an inlined call.
-  The one used on entry will be DCE'd when the actrec can be eliminated. The
-  one on exit is only needed until TODO(#2288359).
+  The one used on entry will generally be DCE'd when the actrec can be
+  eliminated. The one on exit is only needed until TODO(#2288359).
 
-  The spansCall boolean indicates that the inlined frame spanned a procedure
-  call and that any SSATmps created before inlining are now invalid. This is
-  required for several analysis steps including the simplifier.
-
-D:StkPtr = StashResumableSP<offset> S0:FramePtr S1:StkPtr
-
-  Store a resumable's stack pointer, for later use.
-
-  The point of this is a bit of a hack to handle the fact that we currently
-  assign the same registers to frame (rVmFp) and stack pointers (rVmSp) through
-  the IR. During an inline call, we want to be able to have uses of the stack
-  after the call, but we can't restore it using a frame pointer like with
-  ReDefSP, because the values of rVmSp and rVmFp are not related like that in a
-  resumable.
-
-  This instruction moves the value of rVmSp into a Resumable. It can be
-  retrieved using ReDefResumableSP.
-
-  TODO(#2288359): this shouldn't be needed.
-
-D:StkPtr = ReDefResumableSP<offset,spansCall> S0:StkPtr S1:FramePtr
-
-  Restore a resumable's stack pointer. See StashResumableSP. The S0 stack
-  pointer refers to the stack pointer before inlining, it is used for stack
-  value analysis but never used outside of analysis (see ReDefSP). The spansCall
-  boolean value indicates that the inlined frame spanned a function call, this
-  is important as it indicates to later analysis steps that SSATmps created
-  before the inlined frame have been invalidated.
-
-D:StkPtr PassSP S0:StkPtr
-
-  Indicates that every use of StkPtr D is actually an alias to S0. This is a
-  hack to make dead code elimination easier when removing callee frames from
-  inlined functions. It is effectively the same as a nop as we currently use a
-  specialized register for every stack pointer (#2288359).
-
-D:FramePtr PassFP S0:FramePtr
-
-  Alias a frame pointer to a different SSATmp (see PassSP).
-
-InlinedFPAnchor S0:FramePtr
-
-  Indicates that an inlined frame cannot be elided during dead code elimination
-  because it is required by a either the VM for its ActRec or the routine
-  itself for local storage. Is semantically equivalent to a Nop.
+  The spansCall boolean is true if there is possibly a Call instructions
+  between the definition of S0 and this instruction.
 
 D:Int = Count S0:Cell
 
@@ -1808,6 +1696,21 @@ D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:Int S2:{TCA,Nullptr}
   the native resume address to S2, resume offset to S3, and mark it blocked on
   non-finished child S4.
 
+AFWHPrepareChild S0:FramePtr S1:Obj
+
+  Prepare unfinished WaitableWaitHandle object specified by S1 for getting
+  awaited by an AsyncFunctionWaitHandle object specified by its ActRec
+  provided by S0.
+
+  Injects S1 into the currently running scheduler instance and performs
+  cross-scheduler and intra-scheduler cycle detection. Throws if the
+  dependency cannot be established.
+
+BWHUnblockChain S0:{Obj,Nullptr}
+
+  Unblock chain of BlockableWaitHandles provided by S0 pointing to the first
+  BlockableWaitHandle in a chain.
+
 ContEnter S0:StkPtr S1:FramePtr S2:FramePtr S3:TCA S4:ConstInt
 
   Enters a generator body. S0 is the current stack pointer pointing to fully
@@ -1839,7 +1742,7 @@ ContArUpdateIdx S0:FramePtr S1:Int
   Updates the internal index of generator with S1 if necessary, i.e. if S1
   is larger than the index. S0 is the pointer to the embedded ActRec.
 
-D:FramePtr LdContActRec S0:PtrToGen
+D:FramePtr LdContActRec S0:Obj
 
   Loads the Generator object's ActRec, given a pointer to the generator
   object in S0.
@@ -1881,16 +1784,20 @@ StAsyncArRaw<OffsetData> S0:FramePtr S1:{Int,TCA,Nullptr}
   describes the offset from the AsyncFunctionWaitHandle base, and the size.
   S1 is the value.
 
-StAsyncArChild S0:FramePtr S1:Obj
-
-  Stores a WaitHandle object S1 into the AsyncFunctionWaitHandle object, whose
-  ActRec is given by S0. The offset into AsyncFunctionWaitHandle at which the
-  WaitHandle object is stored is known statically.
-
 StAsyncArResult S0:FramePtr S1:Cell
 
   Stores result into the AsyncFunctionWaitHandle object ActRec of which is S0.
   S1 is the value.
+
+D:{Obj,Nullptr} = LdAsyncArFParent S0:FramePtr
+
+  Loads the first parent of the AsyncFunctionWaitHandle object ActRec of which
+  is S0.
+
+AFWHBlockOn S0:FramePtr S1:Obj
+
+  Establish dependency between parent AsyncFunctionWaitHandle object, whose
+  ActRec is given by S0, and child WaitableWaitHandle object referenced by S1.
 
 D:Int = LdWHState S0:Obj
 
@@ -1903,9 +1810,20 @@ D:Cell = LdWHResult S0:Obj
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
 
-CopyCells<numCells> S0:FramePtr S1:PtrToGen
+D:FramePtr = LdAFWHActRec S0:Obj
 
-  Copy numCells cells from frame S0 to the same slot offsets in S1.
+  Loads the AsyncFunctionWaitHandle object's ActRec, given a pointer to the
+  AsyncFunctionWaitHandle object in S0.
+
+D:Obj = LdResumableArObj S0:FramePtr
+
+  Loads the Resumable object, given a Resumable's frame pointer in S0.
+
+CopyAsyncCells<numCells> S0:FramePtr S1:PtrToGen
+
+  Copy numCells cells from frame S0 to the same slot offsets in S1. This
+  instruction may be used only to copy cells when suspending the frame of
+  an async function.
 
 
 17. Debugging, instrumentation, and profiling

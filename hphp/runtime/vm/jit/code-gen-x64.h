@@ -32,15 +32,15 @@ constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 struct CodeGenerator : public JIT::CodeGenerator {
   typedef JIT::X64Assembler Asm;
 
-  CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                CodeBlock& unusedCode, JIT::MCGenerator* mcg,
+  CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& coldCode,
+                CodeBlock& frozenCode, JIT::MCGenerator* mcg,
                 CodegenState& state)
     : m_unit(unit)
     , m_mainCode(mainCode)
-    , m_stubsCode(stubsCode)
-    , m_unusedCode(unusedCode)
+    , m_coldCode(coldCode)
+    , m_frozenCode(frozenCode)
     , m_as(mainCode)
-    , m_astubs(stubsCode)
+    , m_acold(coldCode)
     , m_mcg(mcg)
     , m_state(state)
     , m_rScratch(InvalidReg)
@@ -51,7 +51,7 @@ struct CodeGenerator : public JIT::CodeGenerator {
   virtual ~CodeGenerator() {
   }
 
-  Address cgInst(IRInstruction* inst) override;
+  void cgInst(IRInstruction* inst) override;
 
 private:
   const PhysLoc srcLoc(unsigned i) const {
@@ -267,14 +267,14 @@ private:
 
   /*
    * Generate an if-block that branches around some unlikely code, handling
-   * the cases when a == astubs and a != astubs.  cc is the branch condition
+   * the cases when a == acold and a != acold.  cc is the branch condition
    * to run the unlikely block.
    *
    * Passes the proper assembler to use to the unlikely function.
    */
   template <class Block>
   void unlikelyIfBlock(ConditionCode cc, Block unlikely) {
-    if (m_as.base() == m_astubs.base()) {
+    if (m_as.base() == m_acold.base()) {
       Label done;
       m_as.jcc(ccNegate(cc), done);
       unlikely(m_as);
@@ -282,9 +282,9 @@ private:
     } else {
       Label unlikelyLabel, done;
       m_as.jcc(cc, unlikelyLabel);
-      asm_label(m_astubs, unlikelyLabel);
-      unlikely(m_astubs);
-      m_astubs.jmp(done);
+      asm_label(m_acold, unlikelyLabel);
+      unlikely(m_acold);
+      m_acold.jmp(done);
       asm_label(m_as, done);
     }
   }
@@ -311,11 +311,11 @@ private:
   }
 
   /*
-   * Same as ifThenElse except the first block is off in astubs
+   * Same as ifThenElse except the first block is off in acold
    */
   template <class Then, class Else>
   void unlikelyIfThenElse(ConditionCode cc, Then unlikely, Else elseBlock) {
-    if (m_as.base() == m_astubs.base()) {
+    if (m_as.base() == m_acold.base()) {
       Label elseLabel, done;
       m_as.jcc8(ccNegate(cc), elseLabel);
       unlikely(m_as);
@@ -327,9 +327,9 @@ private:
       Label unlikelyLabel, done;
       m_as.jcc(cc, unlikelyLabel);
       elseBlock(m_as);
-      asm_label(m_astubs, unlikelyLabel);
-      unlikely(m_astubs);
-      m_astubs.jmp(done);
+      asm_label(m_acold, unlikelyLabel);
+      unlikely(m_acold);
+      m_acold.jmp(done);
       asm_label(m_as, done);
     }
   }
@@ -340,10 +340,10 @@ private:
 private:
   const IRUnit&       m_unit;
   CodeBlock&          m_mainCode;
-  CodeBlock&          m_stubsCode;
-  CodeBlock&          m_unusedCode;
+  CodeBlock&          m_coldCode;
+  CodeBlock&          m_frozenCode;
   Asm                 m_as;  // current "main" assembler
-  Asm                 m_astubs; // for stubs and other cold code
+  Asm                 m_acold; // for cold code
   MCGenerator*        m_mcg;
   CodegenState&       m_state;
   Reg64               m_rScratch; // currently selected GP scratch reg

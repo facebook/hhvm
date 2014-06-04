@@ -862,12 +862,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
                // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||
                 m_inst->extra<RetCtrlData>()->suspendingResumed) &&
-               // The EndCatch in FunctionExitSurpriseHook's catch block is
+               // The EndCatch in Function{Suspend,Return}Hook's catch block is
                // special: it happens after locals and $this have been
                // decreffed, so we don't want to do the normal cleanup
                !(m_inst->is(EndCatch) &&
                  m_block->preds().front().inst()
-                   ->is(FunctionExitSurpriseHook) &&
+                   ->is(FunctionSuspendHook, FunctionReturnHook) &&
                  !m_block->preds().front().inst()
                    ->extra<RetCtrlData>()->suspendingResumed)) {
       // When leaving a trace, we need to account for all live references in
@@ -881,11 +881,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeInputs();
       defineOutputs();
     } else if (m_inst->is(CreateAFWH)) {
-      consumeAllLocals();
       consumeInputs();
       auto frame = frameRoot(m_inst->src(0)->inst());
       consumeFrame(m_state.frames.live.at(frame));
       defineOutputs();
+    } else if (m_inst->is(CopyAsyncCells)) {
+      consumeAllLocals();
     } else if (m_inst->is(DecRefLoc)) {
       consumeLocal(m_inst->extra<DecRefLoc>()->locId);
     } else if (m_inst->is(DecRefThis)) {
@@ -1019,18 +1020,25 @@ struct SinkPointAnalyzer : private LocalStateHook {
     ITRACE(3, "consuming normal inputs\n");
     for (uint32_t i = 0; i < m_inst->numSrcs(); ++i) {
       Indent _i;
-      auto* src = m_inst->src(i);
+      auto src = m_inst->src(i);
 
       if (src->isA(Type::StkPtr) && src->inst()->is(SpillFrame) &&
-                 !m_inst->is(DefInlineFP, DefInlineSP,
-                             Call, CallArray, ContEnter)) {
-        // If the StkPtr being consumed points to a pre-live ActRec, observe
-        // its $this pointer since many of our helper functions decref it.
-        auto* this_ = src->inst()->src(2);
-        if (this_->isA(Type::Obj)) {
-          auto const sinkPoint = SinkPoint(m_ids.before(m_inst), this_, false);
-          this_ = canonical(this_);
-          observeValue(this_, m_state.values[this_], sinkPoint);
+          !m_inst->is(DefInlineFP,
+                      Call,
+                      CallArray,
+                      ContEnter)) {
+        bool const beginInlDefSP = m_inst->is(ReDefSP) &&
+                                     m_inst->src(1)->inst()->is(DefInlineFP);
+        if (!beginInlDefSP) {
+          // If the StkPtr being consumed points to a pre-live ActRec, observe
+          // its $this pointer since many of our helper functions decref it.
+          auto this_ = src->inst()->src(2);
+          if (this_->isA(Type::Obj)) {
+            auto const sinkPoint = SinkPoint(m_ids.before(m_inst), this_,
+              false);
+            this_ = canonical(this_);
+            observeValue(this_, m_state.values[this_], sinkPoint);
+          }
         }
       }
 

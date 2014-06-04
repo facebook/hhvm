@@ -67,6 +67,7 @@ FunctionCall::FunctionCall
     m_name = toLower(name);
   }
   m_clsNameTemp = -1;
+  this->checkUnpackParams();
 }
 
 void FunctionCall::reset() {
@@ -117,6 +118,17 @@ int FunctionCall::getKidCount() const {
   return 3;
 }
 
+bool FunctionCall::hasUnpack() const {
+  auto const numParams = m_params ? m_params->getCount() : 0;
+  if (numParams > 0) {
+    auto const lastParam = (*m_params)[numParams - 1];
+    // if there are multiple unpacks, they still need to be at the end
+    // of the list.
+    return lastParam->hasContext(Expression::UnpackParameter);
+  }
+  return false;
+}
+
 void FunctionCall::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
@@ -127,10 +139,28 @@ void FunctionCall::setNthKid(int n, ConstructPtr cp) {
       break;
     case 2:
       m_params = dynamic_pointer_cast<ExpressionList>(cp);
+      this->checkUnpackParams();
       break;
     default:
       assert(false);
       break;
+  }
+}
+
+void FunctionCall::checkUnpackParams() {
+  if (!m_params) { return; }
+  ExpressionList &params = *m_params;
+  const auto numParams = params.getCount();
+
+  // when supporting multiple unpacks at the end of the param list, this
+  // will need to disallow transitions from unpack to non-unpack.
+  for (int i = 0; i < (numParams - 1); ++i) {
+    ExpressionPtr p = params[i];
+    if (p->hasContext(Expression::UnpackParameter)) {
+      parseTimeFatal(
+        Compiler::NoError,
+        "Only the last parameter in a function call is allowed to use ...");
+    }
   }
 }
 

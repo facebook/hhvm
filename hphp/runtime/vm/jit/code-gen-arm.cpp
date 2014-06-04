@@ -119,6 +119,7 @@ NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
+NOOP_OPCODE(EndGuards)
 
 // XXX
 NOOP_OPCODE(DbgAssertPtr);
@@ -201,6 +202,8 @@ CALL_OPCODE(ArrayAdd)
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
 CALL_OPCODE(CreateSSWH)
+CALL_OPCODE(AFWHPrepareChild)
+CALL_OPCODE(BWHUnblockChain)
 CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ZeroErrorLevel)
@@ -260,6 +263,7 @@ PUNT_OPCODE(ProfileArray)
 PUNT_OPCODE(CheckTypeMem)
 PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)
+PUNT_OPCODE(CastStkIntToDbl)
 PUNT_OPCODE(CoerceStk)
 PUNT_OPCODE(CheckDefinedClsEq)
 PUNT_OPCODE(TryEndCatch)
@@ -362,7 +366,8 @@ PUNT_OPCODE(SideExitGuardLoc)
 PUNT_OPCODE(JmpIndirect)
 PUNT_OPCODE(CheckSurpriseFlags)
 PUNT_OPCODE(SurpriseHook)
-PUNT_OPCODE(FunctionExitSurpriseHook)
+PUNT_OPCODE(FunctionSuspendHook)
+PUNT_OPCODE(FunctionReturnHook)
 PUNT_OPCODE(ExitOnVarEnv)
 PUNT_OPCODE(ReleaseVVOrExit)
 PUNT_OPCODE(CheckInit)
@@ -373,7 +378,7 @@ PUNT_OPCODE(CheckBounds)
 PUNT_OPCODE(LdVectorSize)
 PUNT_OPCODE(CheckPackedArrayBounds)
 PUNT_OPCODE(CheckPackedArrayElemNull)
-PUNT_OPCODE(VectorHasFrozenCopy)
+PUNT_OPCODE(VectorHasImmCopy)
 PUNT_OPCODE(VectorDoCow)
 PUNT_OPCODE(CheckNonNull)
 PUNT_OPCODE(AssertNonNull)
@@ -431,7 +436,9 @@ PUNT_OPCODE(LdSSwitchDestFast)
 PUNT_OPCODE(LdSSwitchDestSlow)
 PUNT_OPCODE(JmpSwitchDest)
 PUNT_OPCODE(ConstructInstance)
+PUNT_OPCODE(CheckInitProps)
 PUNT_OPCODE(InitProps)
+PUNT_OPCODE(CheckInitSProps)
 PUNT_OPCODE(InitSProps)
 PUNT_OPCODE(NewInstanceRaw)
 PUNT_OPCODE(InitObjProps)
@@ -466,13 +473,8 @@ PUNT_OPCODE(DecRef)
 PUNT_OPCODE(DecRefNZ)
 PUNT_OPCODE(DefInlineFP)
 PUNT_OPCODE(InlineReturn)
-PUNT_OPCODE(DefInlineSP)
 PUNT_OPCODE(ReDefSP)
 PUNT_OPCODE(OODeclExists);
-PUNT_OPCODE(PassSP)
-PUNT_OPCODE(PassFP)
-PUNT_OPCODE(StashResumableSP)
-PUNT_OPCODE(ReDefResumableSP)
 PUNT_OPCODE(VerifyParamCls)
 PUNT_OPCODE(VerifyRetCls)
 PUNT_OPCODE(ConcatCellCell)
@@ -490,12 +492,14 @@ PUNT_OPCODE(StContArValue)
 PUNT_OPCODE(LdContArKey)
 PUNT_OPCODE(StContArKey)
 PUNT_OPCODE(StAsyncArRaw)
-PUNT_OPCODE(StAsyncArChild)
 PUNT_OPCODE(StAsyncArResult)
+PUNT_OPCODE(LdAsyncArFParent)
+PUNT_OPCODE(AFWHBlockOn)
 PUNT_OPCODE(LdWHState)
 PUNT_OPCODE(LdWHResult)
 PUNT_OPCODE(LdAFWHActRec)
-PUNT_OPCODE(CopyCells)
+PUNT_OPCODE(LdResumableArObj)
+PUNT_OPCODE(CopyAsyncCells)
 PUNT_OPCODE(IterInit)
 PUNT_OPCODE(IterInitK)
 PUNT_OPCODE(IterNext)
@@ -1419,7 +1423,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), extra->taken, resumed());
-      emitBindSideExit(this->m_mainCode, this->m_unusedCode, sk, ccNegate(cc));
+      emitBindSideExit(this->m_mainCode, this->m_frozenCode, sk, ccNegate(cc));
     }
   );
 }
@@ -1534,7 +1538,7 @@ void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   emitBindJmp(
     m_mainCode,
-    m_unusedCode,
+    m_frozenCode,
     SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed())
   );
 }
@@ -1611,11 +1615,10 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
     auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff();
-    m_as.Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
-    m_as.Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
-                                   Stack::topOfStackOffset()]);
+    m_as.Str  (rVmFp, rVmTl[RDS::kVmfpOff]);
+    m_as.Str  (rVmSp, rVmTl[RDS::kVmspOff]);
     m_as.Mov  (rAsm, pc);
-    m_as.Str  (rAsm, rGContextReg[offsetof(ExecutionContext, m_pc)]);
+    m_as.Str  (rAsm, rVmTl[RDS::kVmpcOff]);
   }
 
   // The stack pointer currently points to the MInstrState we need to use.
@@ -1706,8 +1709,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   auto const srcKey = m_curInst->marker().sk();
   auto const adjust = emitBindCall(m_mainCode,
-                                   m_stubsCode,
-                                   m_unusedCode,
+                                   m_coldCode,
+                                   m_frozenCode,
                                    srcKey,
                                    extra->callee,
                                    extra->numParams);
@@ -1964,9 +1967,8 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
 
-  m_as.   Ldr   (rVmFp, rReturnReg[offsetof(ExecutionContext, m_fp)]);
-  m_as.   Ldr   (rVmSp, rReturnReg[offsetof(ExecutionContext, m_stack) +
-                                   Stack::topOfStackOffset()]);
+  m_as.   Ldr   (rVmFp, rVmTl[RDS::kVmfpOff]);
+  m_as.   Ldr   (rVmSp, rVmTl[RDS::kVmspOff]);
 
   emitServiceReq(m_mainCode, REQ_RESUME);
 }
@@ -1987,9 +1989,8 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-Address CodeGenerator::cgInst(IRInstruction* inst) {
+void CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->op();
-  auto const start = m_as.frontier();
   m_curInst = inst;
   SCOPE_EXIT { m_curInst = nullptr; };
 
@@ -1997,12 +1998,11 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #define O(name, dsts, srcs, flags)                                \
   case name: FTRACE(7, "cg" #name "\n");                          \
              cg ## name (inst);                                   \
-             return m_as.frontier() == start ? nullptr : start;
+             return;
     IR_OPCODES
 #undef O
   default:
-    assert(0);
-    return nullptr;
+    always_assert(false);
   }
 }
 

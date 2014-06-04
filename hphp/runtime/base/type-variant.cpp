@@ -55,6 +55,8 @@ const VarNR false_varNR(false);
 const VarNR INF_varNR(std::numeric_limits<double>::infinity());
 const VarNR NEGINF_varNR(std::numeric_limits<double>::infinity());
 const VarNR NAN_varNR(std::numeric_limits<double>::quiet_NaN());
+const Variant empty_string_variant_ref(staticEmptyString(),
+                                       Variant::StaticStrInit{});
 
 static void unserializeProp(VariableUnserializer *uns,
                             ObjectData *obj, const String& key,
@@ -206,10 +208,6 @@ Variant::Variant(RefData *r) {
 // the version of the high frequency function that is not inlined
 Variant::Variant(const Variant& v) {
   constructValHelper(v);
-}
-
-Variant::Variant(CVarStrongBind v) {
-  constructRefHelper(const_cast<Variant&>(variant(v))); // XXX
 }
 
 /*
@@ -453,8 +451,9 @@ double Variant::toDoubleHelper() const {
 String Variant::toStringHelper() const {
   switch (m_type) {
   case KindOfUninit:
-  case KindOfNull:    return empty_string;
-  case KindOfBoolean: return m_data.num ? s_1 : empty_string;
+  case KindOfNull:    return empty_string();
+  case KindOfBoolean: return m_data.num ? static_cast<String>(s_1)
+                                        : empty_string();
   case KindOfDouble:  return m_data.dbl;
   case KindOfStaticString:
   case KindOfString:
@@ -474,7 +473,7 @@ String Variant::toStringHelper() const {
 Array Variant::toArrayHelper() const {
   switch (m_type) {
   case KindOfUninit:
-  case KindOfNull:    return empty_array;
+  case KindOfNull:    return empty_array();
   case KindOfInt64:   return Array::Create(m_data.num);
   case KindOfStaticString:
   case KindOfString:  return Array::Create(m_data.pstr);
@@ -549,7 +548,7 @@ VarNR Variant::toKey() const {
   switch (m_type) {
   case KindOfUninit:
   case KindOfNull:
-    return VarNR(empty_string);
+    return VarNR(staticEmptyString());
   case KindOfBoolean:
   case KindOfInt64:
     return VarNR(m_data.num);

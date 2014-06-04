@@ -581,14 +581,14 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
       now = time(nullptr);
       now_double = (double)now;
     }
-    String file = empty_string;
+    String file = empty_string();
     if (argc > 0) {
       file = StringData::Make(argv[0], CopyString);
     }
     serverArr.set(s_REQUEST_START_TIME, now);
     serverArr.set(s_REQUEST_TIME, now);
     serverArr.set(s_REQUEST_TIME_FLOAT, now_double);
-    serverArr.set(s_DOCUMENT_ROOT, empty_string);
+    serverArr.set(s_DOCUMENT_ROOT, empty_string_variant_ref);
     serverArr.set(s_SCRIPT_FILENAME, file);
     serverArr.set(s_SCRIPT_NAME, file);
     serverArr.set(s_PHP_SELF, file);

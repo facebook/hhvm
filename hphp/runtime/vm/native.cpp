@@ -48,7 +48,7 @@ class NativeFuncCaller {
  public:
   NativeFuncCaller(const Func* f,
                    TypedValue* args, size_t numArgs,
-                   TypedValue* ctx = nullptr,
+                   void* ctx = nullptr,
                    void *retArg = nullptr) : m_func(f) {
     auto numGP = numGPRegArgs();
     int64_t tmp[kMaxBuiltinArgs];
@@ -56,15 +56,10 @@ class NativeFuncCaller {
 
     // Prepend by-ref arg and/or context as needed
     if (retArg) {
-      m_GP[m_GPcount++] = (int64_t)retArg;
+      m_GP[m_GPcount++] = reinterpret_cast<int64_t>(retArg);
     }
     if (ctx) {
-      if (ctx->m_type == KindOfClass) {
-        m_GP[m_GPcount++] = (int64_t)ctx->m_data.pcls;
-      } else {
-        assert(ctx->m_type == KindOfObject);
-        m_GP[m_GPcount++] = (int64_t)&ctx->m_data;
-      }
+      m_GP[m_GPcount++] = reinterpret_cast<int64_t>(ctx);
     }
 
     // Shuffle args into two vectors.
@@ -215,9 +210,9 @@ bool coerceFCallArgs(TypedValue* args,
   return true;
 }
 
-void callFunc(const Func* func, TypedValue *ctx,
+void callFunc(const Func* func, void* ctx,
               TypedValue* args, int32_t numArgs,
-              TypedValue &ret) {
+              TypedValue& ret) {
   ret.m_type = func->returnType();
   void *retArg = nullptr;
   if (ret.m_type == KindOfUnknown) {
@@ -351,22 +346,20 @@ TypedValue* methodWrapper(ActRec* ar) {
       // Prepend a context arg for methods
       // KindOfClass when it's being called statically Foo::bar()
       // KindOfObject when it's being called on an instance $foo->bar()
-      TypedValue ctx;
+      void* ctx;  // ObjectData* or Class*
       if (ar->hasThis()) {
         if (isStatic) {
           throw_instance_method_fatal(getInvokeName(ar)->data());
         }
-        ctx.m_type = KindOfObject;
-        ctx.m_data.pobj = ar->getThis();
+        ctx = ar->getThis();
       } else {
         if (!isStatic) {
           throw_instance_method_fatal(getInvokeName(ar)->data());
         }
-        ctx.m_type = KindOfClass;
-        ctx.m_data.pcls = const_cast<Class*>(ar->getClass());
+        ctx = ar->getClass();
       }
 
-      callFunc(func, &ctx, args, numArgs, rv);
+      callFunc(func, ctx, args, numArgs, rv);
     } else if (func->attrs() & AttrParamCoerceModeFalse) {
       rv.m_type = KindOfBoolean;
       rv.m_data.num = 0;
@@ -386,20 +379,20 @@ TypedValue* methodWrapper(ActRec* ar) {
 TypedValue* unimplementedWrapper(ActRec* ar) {
   auto func = ar->m_func;
   auto cls = func->cls();
+  ar->m_r.m_type = KindOfNull;
   if (cls) {
     raise_error("Call to unimplemented native method %s::%s()",
                 cls->name()->data(), func->name()->data());
     if (func->isStatic()) {
-      frame_free_locals_no_this_inl(ar, func->numParams(), nullptr);
+      frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
     } else {
-      frame_free_locals_inl(ar, func->numParams(), nullptr);
+      frame_free_locals_inl(ar, func->numParams(), &ar->m_r);
     }
   } else {
     raise_error("Call to unimplemented native function %s()",
                 func->name()->data());
-    frame_free_locals_no_this_inl(ar, func->numParams(), nullptr);
+    frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
   }
-  ar->m_r.m_type = KindOfNull;
   return &ar->m_r;
 }
 

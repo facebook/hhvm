@@ -23,8 +23,10 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_xenon.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
 
@@ -47,6 +49,14 @@ void EventHook::Disable() {
   ThreadInfo::s_threadInfo->m_reqInjectionData.clearEventHookFlag();
 }
 
+void EventHook::EnableAsync() {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.setAsyncEventHookFlag();
+}
+
+void EventHook::DisableAsync() {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.clearAsyncEventHookFlag();
+}
+
 void EventHook::EnableIntercept() {
   ThreadInfo::s_threadInfo->m_reqInjectionData.setInterceptFlag();
 }
@@ -58,6 +68,10 @@ void EventHook::DisableIntercept() {
 ssize_t EventHook::CheckSurprise() {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   return check_request_surprise(info);
+}
+
+ssize_t EventHook::GetConditionFlags() {
+  return RDS::header()->conditionFlags.load();
 }
 
 class ExecutingSetprofileCallbackGuard {
@@ -90,7 +104,7 @@ bool shouldRunUserProfiler(const Func* func) {
 }
 
 void runUserProfilerOnFunctionEnter(const ActRec* ar) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
@@ -104,8 +118,9 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
   vm_call_user_func(g_context->m_setprofileCallback, params);
 }
 
-void runUserProfilerOnFunctionExit(const ActRec* ar, TypedValue* retval) {
-  JIT::VMRegAnchor _;
+void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
+                                   ObjectData* exception) {
+  VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
@@ -113,13 +128,10 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, TypedValue* retval) {
   params.append(VarNR(ar->func()->fullName()));
 
   Array frameinfo;
-  if (!g_context->m_faults.empty()) {
-    Fault fault = g_context->m_faults.back();
-    if (fault.m_faultType == Fault::Type::UserException) {
-      frameinfo.set(s_exception, fault.m_userException);
-    }
-  } else if (retval) {
+  if (retval) {
     frameinfo.set(s_return, tvAsCVarRef(retval));
+  } else if (exception) {
+    frameinfo.set(s_exception, exception);
   }
   params.append(frameinfo);
 
@@ -176,9 +188,9 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     }
   }
 
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
 
-  PC savePc = g_context->m_pc;
+  PC savePc = vmpc();
 
   Variant doneFlag = true;
   Variant called_on;
@@ -204,17 +216,17 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
 
     frame_free_locals_inl_no_hook<true>(ar, ar->func()->numLocals());
-    Stack& stack = g_context->getStack();
+    Stack& stack = vmStack();
     stack.top() = (Cell*)(ar + 1);
     cellDup(*ret.asCell(), *stack.allocTV());
 
-    g_context->m_fp = outer;
-    g_context->m_pc = outer ? outer->func()->unit()->at(pcOff) : nullptr;
+    vmfp() = outer;
+    vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;
 
     return false;
   }
-  g_context->m_fp = ar;
-  g_context->m_pc = savePc;
+  vmfp() = ar;
+  vmpc() = savePc;
 
   return true;
 }
@@ -245,13 +257,13 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
   return name;
 }
 
-bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
-  ssize_t flags = CheckSurprise();
-  Xenon::getInstance().log(true);
-  if (flags & RequestInjectionData::InterceptFlag &&
-      !RunInterceptHandler(const_cast<ActRec*>(ar))) {
-    return false;
+void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(true);
   }
+
+  // User profiler
   if (flags & RequestInjectionData::EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar);
@@ -264,55 +276,112 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
     }
 #endif
   }
+}
+
+void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
+                               const Fault* fault, ssize_t flags) {
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(false);
+  }
+
+  // User profiler
+  //
+  // Inlined calls normally skip the function enter and exit events. If we
+  // side exit in an inlined callee, we want to make sure to skip the exit
+  // event to avoid unbalancing the call stack.
+  if ((flags & RequestInjectionData::EventHookFlag) &&
+      (JIT::TCA)ar->m_savedRip != JIT::tx->uniqueStubs.retInlHelper) {
+#ifdef HOTPROFILER
+    Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
+    if (profiler != nullptr) {
+      // NB: we don't have a function type flag to match what we got in
+      // onFunctionEnter. That's okay, though... we tolerate this in
+      // TraceProfiler.
+      end_profiler_frame(profiler,
+                         GetFunctionNameForProfiler(ar->func(), NormalFunc));
+    }
+#endif
+
+    if (shouldRunUserProfiler(ar->func())) {
+      if (ThreadInfo::s_threadInfo->m_pendingException != nullptr) {
+        // Avoid running PHP code when exception from destructor is pending.
+        // TODO(#2329497) will not happen once CheckSurprise is used
+      } else if (!fault) {
+        runUserProfilerOnFunctionExit(ar, retval, nullptr);
+      } else if (fault->m_faultType == Fault::Type::UserException) {
+        runUserProfilerOnFunctionExit(ar, retval, fault->m_userException);
+      } else {
+        // Avoid running PHP code when unwinding C++ exception.
+      }
+    }
+  }
+}
+
+bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
+  ssize_t flags = CheckSurprise();
+  if (flags & RequestInjectionData::InterceptFlag &&
+      !RunInterceptHandler(const_cast<ActRec*>(ar))) {
+    return false;
+  }
+  onFunctionEnter(ar, funcType, flags);
   return true;
 }
 
-void EventHook::onFunctionExit(ActRec* ar, TypedValue* retval) {
+void EventHook::onFunctionResume(const ActRec* ar) {
+  ssize_t flags = CheckSurprise();
+  onFunctionEnter(ar, EventHook::NormalFunc, flags);
+}
+
+void EventHook::onFunctionSuspend(const ActRec* ar, bool suspendingResumed) {
+  ssize_t flags = CheckSurprise();
+  onFunctionExit(ar, nullptr, nullptr, flags);
+
+  // Async profiler
+  if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+      ar->func()->isAsyncFunction()) {
+    assert(ar->resumed());
+    auto afwh = frame_afwh(ar);
+    auto session = AsioSession::Get();
+    // Blocking await @ eager execution => AsyncFunctionWaitHandle created.
+    if (!suspendingResumed && session->hasOnAsyncFunctionCreateCallback()) {
+      session->onAsyncFunctionCreate(afwh, afwh->getChild());
+    }
+    // Blocking await @ resumed execution => AsyncFunctionWaitHandle awaiting.
+    if (suspendingResumed && session->hasOnAsyncFunctionAwaitCallback()) {
+      session->onAsyncFunctionAwait(afwh, afwh->getChild());
+    }
+  }
+}
+
+void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
   // Null out $this for the exiting function, it has been decref'd so it's
   // garbage.
-  //
-  // NB: This function is also run on async functions that are suspending, so
-  // we need to check that the function is actually returning.
-  JIT::VMRegAnchor _;
-  switch (static_cast<Op>(*g_context->getPC())) {
-    case OpRetC:
-    case OpRetV:
-      ar->setThisOrClassAllowNull(nullptr);
-    default: break;
-  }
+  ar->setThisOrClassAllowNull(nullptr);
 
-  auto const inlinedRip = JIT::tx->uniqueStubs.retInlHelper;
-  if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
-    // Inlined calls normally skip the function enter and exit events. If we
-    // side exit in an inlined callee, we want to make sure to skip the exit
-    // event to avoid unbalancing the call stack.
-    return;
-  }
+  // The locals are already gone. Mark them as decref'd so that if this hook
+  // fails and unwinder kicks in, it won't try to decref them again.
+  ar->setLocalsDecRefd();
 
-  Xenon::getInstance().log(false);
+  ssize_t flags = CheckSurprise();
+  onFunctionExit(ar, &retval, nullptr, flags);
 
-#ifdef HOTPROFILER
-  Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
-  if (profiler != nullptr) {
-    // NB: we don't have a function type flag to match what we got in
-    // onFunctionEnter. That's okay, though... we tolerate this in
-    // TraceProfiler.
-    end_profiler_frame(profiler,
-                       GetFunctionNameForProfiler(ar->func(), NormalFunc));
-  }
-#endif
-
-  // If we have a pending exception, then we're in the process of unwinding
-  // for that exception. We avoid running more PHP code (the user profiler) and
-  // also avoid raising more exceptions for surprises (including the pending
-  // exception).
-  if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
-    if (shouldRunUserProfiler(ar->func())) {
-      runUserProfilerOnFunctionExit(ar, retval);
+  // Async profiler
+  if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+      ar->func()->isAsyncFunction() && ar->resumed()) {
+    auto session = AsioSession::Get();
+    // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.
+    if (session->hasOnAsyncFunctionSuccessCallback()) {
+      auto afwh = frame_afwh(ar);
+      session->onAsyncFunctionSuccess(afwh, cellAsCVarRef(retval));
     }
-    // XXX Disabled until t2329497 is fixed:
-    // CheckSurprise();
   }
+}
+
+void EventHook::onFunctionUnwind(const ActRec* ar, const Fault& fault) {
+  // TODO(#2329497) can't CheckSurprise() yet, unwinder unable to replace fault
+  ssize_t flags = GetConditionFlags();
+  onFunctionExit(ar, nullptr, &fault, flags);
 }
 
 } // namespace HPHP

@@ -28,7 +28,7 @@ using PixelSetFunction = void (*)(PixelWand*, const double);
 
 Object createImagickPixel(PixelWand* wand, bool owner) {
   Object ret = ImagickPixel::allocObject();
-  setWandResource(s_ImagickPixel, ret, wand, owner);
+  setWandResource(s_ImagickPixel, ret.get(), wand, owner);
   return ret;
 }
 
@@ -52,7 +52,7 @@ WandResource<PixelWand> getPixelWand(const Variant& obj) {
     IMAGICKPIXEL_THROW(
       "The parameter must be an instance of ImagickPixel or a string");
   } else {
-    auto wand = getPixelWandResource(obj.toCObjRef());
+    auto wand = getPixelWandResource(obj.toCObjRef().get());
     return WandResource<PixelWand>(wand->getWand(), false);
   }
 }
@@ -176,7 +176,7 @@ static Array HHVM_METHOD(ImagickPixel, getHSL) {
     s_luminosity, luminosity);
 }
 
-static bool isSimilar(const Object& this_, const Variant& color,
+static bool isSimilar(ObjectData* this_, const Variant& color,
                       double fuzz, bool useQuantum) {
   auto wand = getPixelWandResource(this_);
   WandResource<PixelWand> pixel(buildColorWand(color));

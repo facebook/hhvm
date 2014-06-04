@@ -147,14 +147,6 @@ struct DebuggerSettings {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ExecutionContext {
-  // These members are declared first for performance reasons: they
-  // are accessed from within the TC and having their offset fit
-  // within a single byte makes the generated code slightly smaller
-  // and faster.
-  Stack m_stack;
-  ActRec* m_fp;
-  PC m_pc;
-
   enum ShutdownType {
     ShutDown,
     PostSend,
@@ -521,22 +513,6 @@ public:
   std::vector<Eval::PhpFile*> m_evaledFilesOrder;
   std::vector<Unit*> m_createdFuncs;
 
-  /*
-   * Accessors for ExecutionContext state that check safety wrt
-   * whether these values may be stale due to TC.  Asserts in these
-   * usually mean the need for a VMRegAnchor somewhere in the call
-   * chain.
-   */
-
-  void checkRegStateWork() const;
-  void checkRegState() const { if (debug) checkRegStateWork(); }
-
-  const ActRec* getFP()    const { checkRegState(); return m_fp; }
-        ActRec* getFP()          { checkRegState(); return m_fp; }
-        PC      getPC()    const { checkRegState(); return m_pc; }
-  const Stack&  getStack() const { checkRegState(); return m_stack; }
-        Stack&  getStack()       { checkRegState(); return m_stack; }
-
   ActRec* m_firstAR;
   std::vector<Fault> m_faults;
 
@@ -544,7 +520,7 @@ public:
   ObjectData* getThis();
   Class* getContextClass();
   Class* getParentContextClass();
-  const String& getContainingFileName();
+  StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
   Eval::PhpFile* lookupPhpFile(
@@ -693,14 +669,10 @@ public:
   void op##name();
 OPCODES
 #undef O
-  enum DispatchFlags {
-    BreakOnCtlFlow = 1 << 0,
-    Profile        = 1 << 1
-  };
-  template <int dispatchFlags>
+  template <bool breakOnCtlFlow>
   void dispatchImpl();
   void dispatch();
-  // dispatchBB() tries to run until a control-flow instruction has been run.
+  // dispatchBB() exits if a control-flow instruction has been run.
   void dispatchBB();
 
 public:

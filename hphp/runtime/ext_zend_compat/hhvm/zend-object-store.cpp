@@ -72,7 +72,7 @@ void ZendObjectStore::freeObject(zend_object_handle handle) {
 
   if (obj.free_storage) {
     TSRMLS_FETCH();
-    HPHP::JIT::VMRegAnchor _;
+    HPHP::VMRegAnchor _;
     obj.free_storage(obj.object TSRMLS_CC);
   }
 

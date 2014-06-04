@@ -55,9 +55,9 @@ LIBS=$(INOTIFYLIB) \
  globals/lib.cma \
  heap/heap.cma procs/lib.cma \
  deps/lib.cma parsing/lib.cma naming/lib.cma typing/lib.cma \
- server/lib.cma \
  socket/lib.cma \
  $(BUILD_CMAS) \
+ server/lib.cma \
  client/lib.cma
 
 MAKESUBDIRS=$(INOTIFY) avl dfind \

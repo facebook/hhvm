@@ -124,12 +124,14 @@ void c_GenMapWaitHandle::initialize(const Object& exception, c_Map* deps, ssize_
     } catch (const Object& cycle_exception) {
       putException(m_exception, cycle_exception.get());
       m_iterPos = m_deps->iter_next(m_iterPos);
+      incRefCount();
       onUnblocked();
       return;
     }
   }
 
   blockOn(child);
+  incRefCount();
 }
 
 void c_GenMapWaitHandle::onUnblocked() {
@@ -166,6 +168,7 @@ void c_GenMapWaitHandle::onUnblocked() {
     }
   }
 
+  auto const parentChain = getFirstParent();
   if (m_exception.isNull()) {
     setState(STATE_SUCCEEDED);
     tvWriteObject(m_deps.get(), &m_resultOrException);
@@ -176,7 +179,8 @@ void c_GenMapWaitHandle::onUnblocked() {
   }
 
   m_deps = nullptr;
-  done();
+  UnblockChain(parentChain);
+  decRefObj(this);
 }
 
 String c_GenMapWaitHandle::getName() {

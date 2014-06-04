@@ -158,12 +158,12 @@ struct BackEnd : public JIT::BackEnd {
 
   JIT::CodeGenerator* newCodeGenerator(const IRUnit& unit,
                                        CodeBlock& mainCode,
-                                       CodeBlock& stubsCode,
-                                       CodeBlock& unusedCode,
+                                       CodeBlock& coldCode,
+                                       CodeBlock& frozenCode,
                                        MCGenerator* mcg,
                                        CodegenState& state) override {
-    return new ARM::CodeGenerator(unit, mainCode, stubsCode,
-                                  unusedCode, mcg, state);
+    return new ARM::CodeGenerator(unit, mainCode, coldCode,
+                                  frozenCode, mcg, state);
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -182,7 +182,7 @@ struct BackEnd : public JIT::BackEnd {
     return ARM::emitServiceReqWork(cb, start, persist, flags, req, argv);
   }
 
-  void emitInterpReq(CodeBlock& mainCode, CodeBlock& stubsCode,
+  void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
                      const SrcKey& sk) override {
     if (RuntimeOption::EvalJitTransCounters) {
       vixl::MacroAssembler a { mainCode };
@@ -192,7 +192,7 @@ struct BackEnd : public JIT::BackEnd {
     // sequence.
     mcg->backEnd().emitSmashableJump(
       mainCode,
-      emitServiceReq(stubsCode, REQ_INTERPRET, sk.offset()),
+      emitServiceReq(coldCode, REQ_INTERPRET, sk.offset()),
       CC_None
     );
   }
@@ -205,10 +205,10 @@ struct BackEnd : public JIT::BackEnd {
     return ARM::funcPrologueToGuard(prologue, func);
   }
 
-  SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode, Func* func,
+  SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode, Func* func,
                           bool funcIsMagic, int nPassed, TCA& start,
                           TCA& aStart) override {
-    return ARM::emitFuncPrologue(mainCode, stubsCode, func, funcIsMagic,
+    return ARM::emitFuncPrologue(mainCode, coldCode, func, funcIsMagic,
                                  nPassed, start, aStart);
   }
 
@@ -441,7 +441,7 @@ struct BackEnd : public JIT::BackEnd {
     return *reinterpret_cast<TCA*>(dest);
   }
 
-  void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeStubs,
+  void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
                    SrcKey sk, size_t dbgOff) override {
     vixl::MacroAssembler a { codeMain };
 
@@ -455,7 +455,7 @@ struct BackEnd : public JIT::BackEnd {
     // Is the debugger attached?
     a.   Ldr  (rAsm.W(), rAsm[dbgOff]);
     a.   Tst  (rAsm, 0xff);
-    // skip jump to stubs if no debugger attached
+    // skip jump to cold if no debugger attached
     a.   B    (&after, vixl::eq);
     a.   Ldr  (rAsm, &interpReqAddr);
     a.   Br   (rAsm);
@@ -465,7 +465,7 @@ struct BackEnd : public JIT::BackEnd {
     }
     a.   bind (&interpReqAddr);
     TCA interpReq =
-      emitServiceReq(codeStubs, REQ_INTERPRET, sk.offset());
+      emitServiceReq(codeCold, REQ_INTERPRET, sk.offset());
     a.   dc64 (interpReq);
     a.   bind (&after);
   }

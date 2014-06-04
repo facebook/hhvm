@@ -113,7 +113,7 @@ struct FilterRequestData final : RequestEventHandler {
       case k_INPUT_SERVER: return m_SERVER;
       case k_INPUT_ENV: return m_ENV;
     }
-    return empty_array;
+    return empty_array();
   }
 
 private:
@@ -336,7 +336,7 @@ Variant f_filter_id(const String& filtername) {
   } while(0)
 
 Variant f_filter_var(const Variant& variable, int64_t filter /* = 516 */,
-                     const Variant& options /* = empty_array */) {
+                     const Variant& options /* = empty_array_ref */) {
   int64_t filter_flags;
   if (options.isArray()) {
     filter_flags = options.toCArrRef()[s_flags].toInt64();

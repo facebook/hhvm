@@ -1,13 +1,13 @@
 DOMEntityReference
 
-Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DOMEntityReference)#1 (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class DOMEntityReference in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class DOMEntityReference in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(21) {
+array(22) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -50,20 +50,22 @@ array(21) {
   string(5) "__set"
   [20]=>
   string(7) "__isset"
+  [21]=>
+  string(11) "__debuginfo"
 }
 ================
 A_DOMEntityReference
 
-Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DOMEntityReference)#2 (1) {
   ["___x"]=>
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_DOMEntityReference in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_DOMEntityReference in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(21) {
+array(22) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -106,4 +108,6 @@ array(21) {
   string(5) "__set"
   [20]=>
   string(7) "__isset"
+  [21]=>
+  string(11) "__debuginfo"
 }

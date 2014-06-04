@@ -59,8 +59,14 @@ extern const VarNR NEGINF_varNR;
 extern const VarNR NAN_varNR;
 extern const String null_string;
 extern const Array null_array;
-extern const Array empty_array;
+extern const Array empty_array_ref;
 extern const StaticString array_string; // String("Array")
+
+// Use empty_string() if you're returning String
+// Use empty_string_variant() if you're returning Variant
+// Or use these if you need to pass by const reference:
+extern const StaticString empty_string_ref; // const StaticString&
+extern const Variant empty_string_variant_ref; // const Variant&
 
 class StringData;
 class ArrayData;
@@ -189,15 +195,7 @@ typedef const char * litstr; /* literal string */
 
 typedef const class VRefParamValue    &VRefParam;
 typedef const class RefResultValue    &RefResult;
-typedef const class VariantStrongBind &CVarStrongBind;
 
-inline CVarStrongBind
-strongBind(const Variant& v)     { return *(VariantStrongBind*)&v; }
-inline CVarStrongBind
-strongBind(RefResult v)   { return *(VariantStrongBind*)&v; }
-
-inline const Variant&
-variant(CVarStrongBind v) { return *(Variant*)&v; }
 inline const Variant&
 variant(RefResult v)      { return *(Variant*)&v; }
 inline const Variant&

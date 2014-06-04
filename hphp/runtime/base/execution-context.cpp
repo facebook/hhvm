@@ -58,9 +58,7 @@ namespace HPHP {
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 ExecutionContext::ExecutionContext()
-  : m_fp(nullptr)
-  , m_pc(nullptr)
-  , m_transport(nullptr)
+  : m_transport(nullptr)
   , m_cwd(Process::CurrentWorkingDirectory)
   , m_out(nullptr)
   , m_implicitFlush(false)
@@ -99,15 +97,6 @@ ExecutionContext::ExecutionContext()
     ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.
       setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
   }
-
-  // Make sure any fields accessed from the TC are within a byte of
-  // ExecutionContext's beginning.
-  static_assert(offsetof(ExecutionContext, m_stack) <= 0xff,
-                "m_stack offset too large");
-  static_assert(offsetof(ExecutionContext, m_fp) <= 0xff,
-                "m_fp offset too large");
-  static_assert(offsetof(ExecutionContext, m_pc) <= 0xff,
-                "m_pc offset too large");
 }
 
 ExecutionContext::~ExecutionContext() {
@@ -245,7 +234,7 @@ String ExecutionContext::obCopyContents() {
       return oss.copy();
     }
   }
-  return "";
+  return empty_string();
 }
 
 String ExecutionContext::obDetachContents() {
@@ -255,7 +244,7 @@ String ExecutionContext::obDetachContents() {
       return oss.detach();
     }
   }
-  return "";
+  return empty_string();
 }
 
 int ExecutionContext::obGetContentLength() {
@@ -658,8 +647,8 @@ void ExecutionContext::handleError(const std::string& msg,
       // Set $php_errormsg in the parent scope
       Variant varFrom(ee.getMessage());
       const auto tvFrom(varFrom.asTypedValue());
-      JIT::VMRegAnchor _;
-      auto fp = getFP();
+      VMRegAnchor _;
+      auto fp = vmfp();
       if (fp->func()->isBuiltin()) {
         fp = getPrevVMState(fp);
       }
@@ -678,7 +667,7 @@ void ExecutionContext::handleError(const std::string& msg,
 
     if (errorNeedsLogging(errnum)) {
       DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee.getMessage()));
-      String file = empty_string;
+      String file = empty_string();
       int line = 0;
       if (RuntimeOption::InjectedStackTrace) {
         Array bt = ee.getBackTrace();
@@ -738,7 +727,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 bool ExecutionContext::onFatalError(const Exception &e) {
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
   recordLastError(e, errnum);
-  String file = empty_string;
+  String file = empty_string();
   int line = 0;
   bool silenced = false;
   if (RuntimeOption::InjectedStackTrace) {

@@ -247,10 +247,11 @@ struct ClassInfo {
   borrowed_ptr<ClassInfo> parent = nullptr;
 
   /*
-   * A set of the interface class info structures.  This
-   * includes both declared and inherited interfaces.
+   * A vector of the declared interfaces class info structures.  This
+   * is in declaration order mirroring the php::Class interfaceNames
+   * vector, and do not include inherited interfaces.
    */
-  std::set<borrowed_ptr<ClassInfo>> allInterfaces;
+  std::vector<borrowed_ptr<const ClassInfo>> declInterfaces;
 
   /*
    * A (case-sensitive) map from class constant name to the php::Const
@@ -271,9 +272,8 @@ struct ClassInfo {
    * FuncFamily objects that group the set of possibly-overriding
    * methods.
    *
-   * If this class is an interface, it maps from interface method
-   * names to associated FuncFamily objects that group the set of
-   * methods implemented.
+   * Note that this does not currently encode anything for interface
+   * methods.
    *
    * Invariant: methods on this class with AttrNoOverride or
    * AttrPrivate will not have an entry in this map.
@@ -319,20 +319,16 @@ struct ClassInfo {
 
 namespace res {
 
-Class::Class(Either<SString,borrowed_ptr<ClassInfo>> val)
-  : val(val)
+Class::Class(borrowed_ptr<const Index> idx,
+             Either<SString,borrowed_ptr<ClassInfo>> val)
+  : index(idx)
+  , val(val)
 {}
 
-Class::Class(Either<SString,borrowed_ptr<ClassInfo>> val,
-             std::set<borrowed_ptr<ClassInfo>>&& ifc)
-  : val(val)
-  , ifaces(std::make_shared<std::set<borrowed_ptr<ClassInfo>>>(std::move(ifc)))
-{}
+// Class type operations here are very conservative for now.
 
 bool Class::same(const Class& o) const {
-  return val == o.val && ((ifaces && o.ifaces)
-                           ? *ifaces == *o.ifaces
-                           : ifaces == o.ifaces);
+  return val == o.val;
 }
 
 bool Class::subtypeOf(const Class& o) const {
@@ -341,48 +337,31 @@ bool Class::subtypeOf(const Class& o) const {
   if (s1 || s2) return s1 == s2;
   auto c1 = val.right();
   auto c2 = o.val.right();
-
-  auto hasInterface = [&](borrowed_ptr<ClassInfo> iface) {
-    if (c1->allInterfaces.count(iface) != 0) {
-      return true;
-    }
-    return ifaces ? ifaces->count(iface) != 0 : false;
-  };
-
-  if (c2->cls->attrs & AttrInterface && !hasInterface(c2)) {
-    return false;
+  if (c1->baseList.size() >= c2->baseList.size()) {
+    return c1->baseList[c2->baseList.size() - 1] == c2;
   }
-  if (!(c2->cls->attrs & AttrInterface)) {
-    if (c1->baseList.size() < c2->baseList.size()
-        || c1->baseList[c2->baseList.size() - 1] != c2) {
-      return false;
-    }
-  }
-  if (o.ifaces) {
-    for (auto iface : *o.ifaces) {
-      if (!hasInterface(iface)) return false;
-    }
-  }
-  return true;
+  return false;
 }
 
-bool Class::couldBe(const Class& o, ClsTag tag, ClsTag otherTag) const {
+bool Class::couldBe(const Class& o) const {
   // If either types are not unique return true
   if (val.left() || o.val.left()) return true;
 
   auto c1 = val.right();
   auto c2 = o.val.right();
-
-  if (subtypeOf(o) || o.subtypeOf(*this)) {
+  // if one or the other is an interface return true for now.
+  // TODO(#3621433): better interface stuff
+  if (c1->cls->attrs & AttrInterface || c2->cls->attrs & AttrInterface) {
     return true;
   }
-  if (c1->cls->attrs & AttrInterface) {
-    return (otherTag == ClsTag::Sub) && !(c2->cls->attrs & AttrNoOverride);
+
+  // Both types are unique classes so they "could be" if they are in an
+  // inheritance relationship
+  if (c1->baseList.size() >= c2->baseList.size()) {
+    return c1->baseList[c2->baseList.size() - 1] == c2;
+  } else {
+    return c2->baseList[c1->baseList.size() - 1] == c1;
   }
-  if (c2->cls->attrs & AttrInterface) {
-    return (tag == ClsTag::Sub) && !(c1->cls->attrs & AttrNoOverride);
-  }
-  return false;
 }
 
 SString Class::name() const {
@@ -401,28 +380,6 @@ bool Class::couldBeOverriden() const {
   );
 }
 
-bool Class::couldBeInterface() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (borrowed_ptr<ClassInfo> cinfo) {
-      return (cinfo->cls->attrs & AttrInterface);
-    }
-  );
-}
-
-static void intersect(std::set<borrowed_ptr<ClassInfo>>& res,
-                      const std::set<borrowed_ptr<ClassInfo>>& a,
-                      const std::set<borrowed_ptr<ClassInfo>>& b,
-                      std::set<borrowed_ptr<ClassInfo>>& skip) {
-  std::set<borrowed_ptr<ClassInfo>> common;
-  std::set<borrowed_ptr<ClassInfo>> filtered;
-
-  std::set_intersection(a.begin(), a.end(), b.begin(), b.end(),
-                        std::inserter(common, common.begin()));
-  std::set_difference(common.begin(), common.end(), skip.begin(), skip.end(),
-                      std::inserter(res, res.begin()));
-}
-
 folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (val.left() || o.val.left()) return folly::none;
   auto const c1 = val.right();
@@ -437,42 +394,10 @@ folly::Optional<Class> Class::commonAncestor(const Class& o) const {
     ancestor = *it1;
     ++it1; ++it2;
   }
-  std::set<borrowed_ptr<ClassInfo>> ifc;
-
-  /*
-   * Find the intersection between the interfaces of this class and 'o'.
-   * Since interfaces in the Class are spread over cinfo->allInterfaces
-   * and the extra interfaces 'ifaces', we need to intersect over all
-   * 4 pairs: (allInterfaces, allInterfaces), (allInterfaces, ifaces),
-   * (ifaces, allInterfaces) and (ifaces, ifaces).
-   *
-   * Also, if ancestor is not nullptr, we need to skip the interfaces
-   * of ancestor.
-   */
-  if (ancestor) {
-    intersect(ifc, c1->allInterfaces, c2->allInterfaces,
-              ancestor->allInterfaces);
-  } else {
-    std::set<borrowed_ptr<ClassInfo>> empty;
-    intersect(ifc, c1->allInterfaces, c2->allInterfaces, empty);
-  }
-  if (ifaces) {
-    intersect(ifc, *ifaces, c2->allInterfaces, ifc);
-    if (o.ifaces) intersect(ifc, *ifaces, *o.ifaces, ifc);
-  }
-  if (o.ifaces) intersect(ifc, c1->allInterfaces, *o.ifaces, ifc);
-
   if (ancestor == nullptr) {
-    if (ifc.size() != 0) {
-      auto it = ifc.begin();
-      ancestor = *it;
-      ifc.erase(it);
-    }
-    if (!ancestor) return folly::none;
+    return folly::none;
   }
-
-  if (ifc.size() != 0) return res::Class { ancestor, std::move(ifc) };
-  return res::Class { ancestor };
+  return res::Class { index, ancestor };
 }
 
 std::string show(const Class& c) {
@@ -480,16 +405,8 @@ std::string show(const Class& c) {
     [] (SString s) -> std::string {
       return s->data();
     },
-    [&] (borrowed_ptr<ClassInfo> cinfo) {
-      std::string ret;
-      ret = cinfo->cls->name->data();
-      if (c.ifaces) {
-        for (auto i : *c.ifaces) {
-          ret += "i<'";
-          ret += i->cls->name->data();
-        }
-      }
-      return ret;
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return folly::format("{}*", cinfo->cls->name->data()).str();
     }
   );
 }
@@ -497,14 +414,6 @@ std::string show(const Class& c) {
 Func::Func(borrowed_ptr<const Index> idx, Rep val)
   : index(idx)
   , val(val)
-  , rcls(folly::none)
-{}
-
-Func::Func(borrowed_ptr<const Index> idx, Rep val,
-           res::Class rcls)
-  : index(idx)
-  , val(val)
-  , rcls(rcls)
 {}
 
 bool Func::same(const Func& o) const {
@@ -656,12 +565,11 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   if (!rparent) return true;
 
   if (!build_cls_info_rec(rleaf, rparent->parent)) return false;
-  for (auto& iface : rparent->allInterfaces) {
+  for (auto& iface : rparent->declInterfaces) {
     if (!build_cls_info_rec(rleaf, iface)) return false;
   }
 
-  auto const parentIface = rparent->cls->attrs & AttrInterface;
-  auto const leafIface   = rleaf->cls->attrs & AttrInterface;
+  auto const isIface = rparent->cls->attrs & AttrInterface;
 
   /*
    * Make a table of all the constants on this class.
@@ -679,7 +587,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    */
   for (auto& c : rparent->cls->constants) {
     auto& cptr = rleaf->clsConstants[c.name];
-    if (parentIface && cptr) {
+    if (isIface && cptr) {
       if (cptr->cls != rparent->cls) return false;
     }
     cptr = &c;
@@ -687,8 +595,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
 
   /*
    * Make a table of the methods on this class, excluding interface
-   * methods. For interfaces, add the method only to the interface or
-   * extending interfaces.
+   * methods.
    *
    * Duplicate method names override parent methods, unless the parent
    * method is final and the class is not a __MockClass, in which case
@@ -698,7 +605,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    * method table, here.  This isn't currently "wrong", because
    * calling it would be a fatal.  TODO: re-evaluate this idea.
    */
-  if (!parentIface || leafIface) {
+  if (!isIface) {
     for (auto& m : rparent->cls->methods) {
       auto& ent = rleaf->methods[m->name];
       if (ent.func) {
@@ -709,7 +616,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
           ent.hasPrivateAncestor =
             ent.hasPrivateAncestor || ent.func->cls != rleaf->cls;
         } else {
-          assert(!(ent.func->attrs & AttrNoOverride) || parentIface);
+          assert(!(ent.func->attrs & AttrNoOverride));
         }
       }
       ent.func = borrow(m);
@@ -894,36 +801,16 @@ void resolve_combinations(IndexData& index,
   auto cinfo = folly::make_unique<ClassInfo>();
   cinfo->cls = cls;
   if (cls->parentName) {
-    cinfo->parent        = env.lookup(cls->parentName);
-    /*
-     * Interfaces don't store a baseList, because that implies
-     * a single inheritance chain, whereas interfaces can extent multiple
-     * interfaces. Instead, all of an interface's parents (recursively)
-     * are stored in its allInterfaces list.
-     */
-    if (cinfo->cls->attrs & AttrInterface) {
-      cinfo->allInterfaces.insert(cinfo->parent);
-    } else {
-      cinfo->baseList      = cinfo->parent->baseList;
-    }
-    for (auto& i : cinfo->parent->allInterfaces) {
-      if (cinfo->allInterfaces.count(i) == 0) {
-        cinfo->allInterfaces.insert(i);
-      }
-    }
+    cinfo->parent   = env.lookup(cls->parentName);
+    cinfo->baseList = cinfo->parent->baseList;
+    if (cinfo->parent->cls->attrs & AttrInterface) return;
   }
   cinfo->baseList.push_back(borrow(cinfo));
 
   for (auto& iname : cls->interfaceNames) {
     auto const iface = env.lookup(iname);
-    if (cinfo->allInterfaces.count(iface) == 0) {
-      cinfo->allInterfaces.insert(iface);
-    }
-    for (auto& i : iface->allInterfaces) {
-      if (cinfo->allInterfaces.count(i) == 0) {
-        cinfo->allInterfaces.insert(i);
-      }
-    }
+    if (!(iface->cls->attrs & AttrInterface)) return;
+    cinfo->declInterfaces.push_back(iface);
   }
 
   if (!build_cls_info(borrow(cinfo))) return;
@@ -956,9 +843,6 @@ void compute_subclass_list(IndexData& index) {
     for (auto& cparent : cinfo->baseList) {
       cparent->subclassList.push_back(borrow(cinfo));
     }
-    for (auto& iface : cinfo->allInterfaces) {
-      iface->subclassList.push_back(borrow(cinfo));
-    }
   }
 }
 
@@ -970,12 +854,6 @@ void define_func_family(IndexData& index,
   auto const family = borrow(index.funcFamilies.back());
 
   for (auto& cleaf : cinfo->subclassList) {
-    // For interfaces, skip the method defined in the interface itself
-    // or any of its extending interfaces. These apparently have an InitNull
-    // return type
-    if (cleaf->cls->attrs & AttrInterface) {
-      continue;
-    }
     auto const leafFnIt = cleaf->methods.find(name);
     if (leafFnIt == end(cleaf->methods)) continue;
     if (leafFnIt->second.func->attrs & AttrInterceptable) {
@@ -1004,16 +882,12 @@ void define_func_family(IndexData& index,
    * actually matters.  It could be avoided on an instance---but we're
    * not trying to notice those cases right now.
    *
-   * Interface functions are not part of the family. So, for interfaces
-   * that have no implementing classes, the FuncFamily might be empty.
+   * For now we're leaving that alone, which gives the invariant that
+   * every FuncFamily we create here is non-empty.
    */
+  always_assert(!family->possibleFuncs.empty());
 
-  if (!family->possibleFuncs.empty()) {
-    cinfo->methodFamilies.emplace(name, family);
-  } else {
-    // discard the empty funcFamily
-    index.funcFamilies.pop_back();
-  }
+  cinfo->methodFamilies.emplace(name, family);
 }
 
 void define_func_families(IndexData& index) {
@@ -1229,7 +1103,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     // aliases aren't allowed everywhere we're doing resolve_class
     // calls.)
     if (!m_data->typeAliases.count(clsName)) {
-      return res::Class { clsName };
+      return res::Class { this, clsName };
     }
     return folly::none;
   };
@@ -1253,7 +1127,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
         }
         assert(0);
       }
-      return res::Class { cinfo };
+      return res::Class { this, cinfo };
     }
     break;
   }
@@ -1314,36 +1188,6 @@ res::Class Index::builtin_class(SString name) const {
   return *rcls;
 }
 
-folly::Optional<res::Func> Index::resolve_iface_method(Context ctx,
-                                                       res::Class cls,
-                                                       SString name) const {
-  if (!options.FuncFamilies) return folly::none;
-
-  auto cinfo = cls.val.right();
-
-  if (cinfo->cls->attrs & AttrInterface) {
-    auto const famIt = cinfo->methodFamilies.find(name);
-    if (famIt != end(cinfo->methodFamilies)) {
-      if (famIt->second->containsInterceptables) {
-        return folly::none;
-      }
-      return res::Func { this, famIt->second, res::Class(cinfo) };
-    }
-  }
-
-  if (cls.ifaces) {
-    for (auto iface : *cls.ifaces) {
-      auto const famIt = cinfo->methodFamilies.find(name);
-      if (famIt == end(iface->methodFamilies)) continue;
-      if (famIt->second->containsInterceptables) {
-        return folly::none;
-      }
-      return res::Func { this, famIt->second, res::Class(iface) };
-    }
-  }
-  return folly::none;
-}
-
 folly::Optional<res::Func> Index::resolve_method(Context ctx,
                                                  Type clsType,
                                                  SString name) const {
@@ -1351,13 +1195,8 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
     return folly::none;
   }
   auto const dcls  = dcls_of(clsType);
-
   auto const cinfo = dcls.cls.val.right();
   if (!cinfo) return folly::none;
-
-  if (cinfo->cls->attrs & AttrInterface) {
-    return resolve_iface_method(ctx, dcls.cls, name);
-  }
 
   /*
    * Whether or not the context class has a private method with the
@@ -1388,9 +1227,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
    * Look up the method in the target class.
    */
   auto const methIt = cinfo->methods.find(name);
-  if (methIt == end(cinfo->methods)) {
-    return resolve_iface_method(ctx, dcls.cls, name);
-  }
+  if (methIt == end(cinfo->methods)) return folly::none;
   if (methIt->second.func->attrs & AttrInterceptable) return folly::none;
   auto const ftarget = methIt->second.func;
 
@@ -1478,12 +1315,12 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
   };
 
   switch (dcls.type) {
-  case ClsTag::Exact:
+  case DCls::Exact:
     if (cinfo->hasMagicCall || cinfo->hasMagicCallStatic) {
       if (couldBeInaccessible()) return folly::none;
     }
     return do_resolve(ftarget);
-  case ClsTag::Sub:
+  case DCls::Sub:
     if (cinfo->derivedHasMagicCall || cinfo->derivedHasMagicCallStatic) {
       if (couldBeInaccessible()) return folly::none;
     }
@@ -1494,9 +1331,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
 
     {
       auto const famIt = cinfo->methodFamilies.find(name);
-      if (famIt == end(cinfo->methodFamilies)) {
-        return resolve_iface_method(ctx, dcls.cls, name);
-      }
+      if (famIt == end(cinfo->methodFamilies)) return folly::none;
       if (famIt->second->containsInterceptables) {
         return folly::none;
       }
@@ -1842,9 +1677,9 @@ bool Index::must_be_derived_from(borrowed_ptr<const php::Class> cls,
   auto const clsClasses    = find_range(m_data->classInfo, cls->name);
   auto const parentClasses = find_range(m_data->classInfo, parent->name);
   for (auto& kvCls : clsClasses) {
-    auto const rCls = res::Class { kvCls.second };
+    auto const rCls = res::Class { this, kvCls.second };
     for (auto& kvPar : parentClasses) {
-      auto const rPar = res::Class { kvPar.second };
+      auto const rPar = res::Class { this, kvPar.second };
       if (!rCls.subtypeOf(rPar)) return false;
     }
   }
@@ -1860,10 +1695,10 @@ Index::could_be_related(borrowed_ptr<const php::Class> cls,
   auto const clsClasses    = find_range(m_data->classInfo, cls->name);
   auto const parentClasses = find_range(m_data->classInfo, parent->name);
   for (auto& kvCls : clsClasses) {
-    auto const rCls = res::Class { kvCls.second };
+    auto const rCls = res::Class { this, kvCls.second };
     for (auto& kvPar : parentClasses) {
-      auto const rPar = res::Class { kvPar.second };
-      if (rCls.couldBe(rPar, ClsTag::Sub, ClsTag::Sub)) return true;
+      auto const rPar = res::Class { this, kvPar.second };
+      if (rCls.couldBe(rPar)) return true;
     }
   }
   return false;

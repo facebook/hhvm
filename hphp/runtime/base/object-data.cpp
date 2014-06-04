@@ -601,7 +601,7 @@ const StaticString
 inline Array getSerializeProps(const ObjectData* obj,
                                VariableSerializer* serializer) {
   if (serializer->getType() == VariableSerializer::Type::VarExport) {
-    Array props;
+    Array props = Array::Create();
     for (ArrayIter iter(obj->o_toArray()); iter; ++iter) {
       auto key = iter.first().toString();
       // Jump over any class attribute mangling
@@ -644,7 +644,7 @@ inline Array getSerializeProps(const ObjectData* obj,
     return ret.toArray();
   }
   if (ret.isNull()) {
-    return empty_array;
+    return empty_array();
   }
   raise_error("__debugInfo() must return an array");
   not_reached();
@@ -1756,7 +1756,7 @@ String ObjectData::invokeToString() {
     );
     // If the user error handler decides to allow execution to continue,
     // we return the empty string.
-    return empty_string;
+    return empty_string();
   }
   TypedValue tv;
   g_context->invokeFuncFew(&tv, method, this);
@@ -1769,7 +1769,7 @@ String ObjectData::invokeToString() {
       m_cls->preClass()->name()->data());
     // If the user error handler decides to allow execution to continue,
     // we return the empty string.
-    return empty_string;
+    return empty_string();
   }
   String ret = tv.m_data.pstr;
   decRefStr(tv.m_data.pstr);

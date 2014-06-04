@@ -72,7 +72,7 @@ static void HHVM_METHOD(ResourceBundle, __construct, const Variant& locale,
   const char *bundle = bundleName.isNull() ? nullptr :
                        bundleName.toString().c_str();
   auto loc = Locale::createFromName(localeOrDefault(locale.toString()).c_str());
-  auto data = Native::data<ResourceBundle>(this_.get());
+  auto data = Native::data<ResourceBundle>(this_);
   UErrorCode error = U_ZERO_ERROR;
   auto rsrc = new icu::ResourceBundle(bundle, loc, error);
   if (U_FAILURE(error)) {

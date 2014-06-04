@@ -1550,6 +1550,8 @@ struct PropertyAccessor {
   bool test_isset;
 };
 
+const StaticString s_object_value_omitted("(object value omitted)");
+
 class PropertyAccessorMap : private hphp_const_char_imap<PropertyAccessor*> {
 public:
   explicit PropertyAccessorMap(PropertyAccessor* props,
@@ -1587,6 +1589,18 @@ public:
     if (iter == end()) return false;
     return !iter->second->test_isset &&
       !iter->second->getter(obj).isNull();
+  }
+
+  Array debugInfo(ObjectData* obj) {
+    Array ret = obj->o_toArray();
+    for (auto it : *this) {
+      auto value = it.second->getter(obj);
+      if (value.isObject()) {
+        value = s_object_value_omitted;
+      }
+      ret.set(String(it.first, CopyString), value);
+    }
+    return ret;
   }
 };
 
@@ -1791,13 +1805,14 @@ static Variant domnode_ownerdocument_read(const Object& obj) {
       nodep->type == XML_HTML_DOCUMENT_NODE) {
     return init_null();
   }
-  if ((xmlNodePtr) nodep->doc == domnode->doc()->m_node) {
-    return domnode->doc();
+  auto doc = domnode->doc();
+  if (!doc.isNull() && ((xmlNodePtr) nodep->doc == doc->m_node)) {
+    return doc;
   } else {
     // The node wasn't created by this extension, so doesn't already have
     // a DOMDocument - make one. dom_import_xml() is one way for this to
     // happen.
-    return create_node_object((xmlNodePtr) nodep->doc, domnode->doc());
+    return create_node_object((xmlNodePtr) nodep->doc, doc);
   }
 }
 
@@ -1841,7 +1856,7 @@ static Variant domnode_prefix_read(const Object& obj) {
   if (str) {
     return String(str, CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void domnode_prefix_write(const Object& obj, const Variant& value) {
@@ -1933,7 +1948,7 @@ static Variant domnode_textcontent_read(const Object& obj) {
     xmlFree(str);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void domnode_textcontent_write(const Object& obj, const Variant& value) {
@@ -1978,6 +1993,13 @@ Variant c_DOMNode::t___set(Variant name, Variant value) {
 
 bool c_DOMNode::t___isset(Variant name) {
   return domnode_properties_map.isset(this, name.toString());
+}
+
+Array c_DOMNode::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domnode_properties_map.debugInfo(this);
 }
 
 Variant c_DOMNode::t_appendchild(const Object& newnode) {
@@ -2274,18 +2296,32 @@ bool c_DOMNode::t_issupported(const String& feature, const String& version) {
   return dom_has_feature(feature.data(), version.data());
 }
 
-Variant c_DOMNode::t_lookupnamespaceuri(const String& namespaceuri) {
+Variant c_DOMNode::t_lookupnamespaceuri(const Variant& namespaceuri) {
+  // Because IDL does not support '?string' we have to do it ourselves.
+  if (!namespaceuri.isString() && !namespaceuri.isNull()) {
+    raise_param_type_warning("DOMNode::lookupNamespaceUri", 1,
+                             DataType::KindOfString, namespaceuri.getType());
+    return init_null();
+  }
+
   xmlNodePtr nodep = m_node;
   xmlNsPtr nsptr;
   if (nodep->type == XML_DOCUMENT_NODE ||
       nodep->type == XML_HTML_DOCUMENT_NODE) {
     nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
-    if (nodep == NULL) {
+    if (nodep == nullptr) {
       return init_null();
     }
   }
-  nsptr = xmlSearchNs(nodep->doc, nodep, (xmlChar*)namespaceuri.data());
-  if (nsptr && nsptr->href != NULL) {
+
+  String nsuri = namespaceuri.toString();
+  const char* ns = nsuri.data();
+  if (namespaceuri.isNull()) {
+    ns = nullptr;
+  }
+
+  nsptr = xmlSearchNs(nodep->doc, nodep, (xmlChar*)ns);
+  if (nsptr && nsptr->href != nullptr) {
     return String((char *)nsptr->href, CopyString);
   }
   return init_null();
@@ -2472,7 +2508,7 @@ static Variant domattr_name_read(const Object& obj) {
 }
 
 static Variant domattr_specified_read(const Object& obj) {
-  /* TODO */
+  /* T O D O */
   return true;
 }
 
@@ -2484,7 +2520,7 @@ static Variant domattr_value_read(const Object& obj) {
     xmlFree(content);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void domattr_value_write(const Object& obj, const Variant& value) {
@@ -2547,6 +2583,13 @@ bool c_DOMAttr::t___isset(Variant name) {
   return domattr_properties_map.isset(this, name.toString());
 }
 
+Array c_DOMAttr::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domattr_properties_map.debugInfo(this);
+}
+
 bool c_DOMAttr::t_isid() {
   xmlAttrPtr attrp = (xmlAttrPtr)m_node;
   return attrp->atype == XML_ATTRIBUTE_ID;
@@ -2562,7 +2605,7 @@ static Variant dom_characterdata_data_read(const Object& obj) {
     xmlFree(content);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void dom_characterdata_data_write(const Object& obj, const Variant& value) {
@@ -2606,6 +2649,13 @@ Variant c_DOMCharacterData::t___set(Variant name, Variant value) {
 
 bool c_DOMCharacterData::t___isset(Variant name) {
   return domcharacterdata_properties_map.isset(this, name.toString());
+}
+
+Array c_DOMCharacterData::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domcharacterdata_properties_map.debugInfo(this);
 }
 
 bool c_DOMCharacterData::t_appenddata(const String& arg) {
@@ -2738,7 +2788,7 @@ String c_DOMCharacterData::t_substringdata(int64_t offset, int64_t count) {
     xmlFree(substring);
     return ret;
   }
-  return empty_string;
+  return empty_string();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2774,7 +2824,7 @@ static Variant dom_text_whole_text_read(const Object& obj) {
     xmlFree(wholetext);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static PropertyAccessor domtext_properties[] = {
@@ -2804,6 +2854,13 @@ Variant c_DOMText::t___set(Variant name, Variant value) {
 
 bool c_DOMText::t___isset(Variant name) {
   return domtext_properties_map.isset(this, name.toString());
+}
+
+Array c_DOMText::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domtext_properties_map.debugInfo(this);
 }
 
 bool c_DOMText::t_iswhitespaceinelementcontent() {
@@ -3104,6 +3161,13 @@ Variant c_DOMDocument::t___set(Variant name, Variant value) {
 
 bool c_DOMDocument::t___isset(Variant name) {
   return domdocument_properties_map.isset(this, name.toString());
+}
+
+Array c_DOMDocument::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domdocument_properties_map.debugInfo(this);
 }
 
 Variant c_DOMDocument::t_createattribute(const String& name) {
@@ -3704,7 +3768,7 @@ static Variant dom_documenttype_public_id_read(const Object& obj) {
   if (dtdptr->ExternalID) {
     return String((char *)(dtdptr->ExternalID), CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static Variant dom_documenttype_system_id_read(const Object& obj) {
@@ -3712,7 +3776,7 @@ static Variant dom_documenttype_system_id_read(const Object& obj) {
   if (dtdptr->SystemID) {
     return String((char *)(dtdptr->SystemID), CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static Variant dom_documenttype_internal_subset_read(const Object& obj) {
@@ -3732,7 +3796,7 @@ static Variant dom_documenttype_internal_subset_read(const Object& obj) {
       return String((char *)strintsubset, CopyString);
     }
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static PropertyAccessor domdocumenttype_properties[] = {
@@ -3763,6 +3827,13 @@ Variant c_DOMDocumentType::t___set(Variant name, Variant value) {
 
 bool c_DOMDocumentType::t___isset(Variant name) {
   return domdocumenttype_properties_map.isset(this, name.toString());
+}
+
+Array c_DOMDocumentType::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domdocumenttype_properties_map.debugInfo(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3870,6 +3941,13 @@ bool c_DOMElement::t___isset(Variant name) {
   return domelement_properties_map.isset(this, name.toString());
 }
 
+Array c_DOMElement::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domelement_properties_map.debugInfo(this);
+}
+
 String c_DOMElement::t_getattribute(const String& name) {
   xmlNodePtr nodep = m_node;
   xmlChar *value = NULL;
@@ -3892,7 +3970,7 @@ String c_DOMElement::t_getattribute(const String& name) {
     xmlFree(value);
     return ret;
   }
-  return empty_string;
+  return empty_string();
 }
 
 Variant c_DOMElement::t_getattributenode(const String& name) {
@@ -3966,7 +4044,7 @@ String c_DOMElement::t_getattributens(const String& namespaceuri,
       }
     }
   }
-  return empty_string;
+  return empty_string();
 }
 
 Object c_DOMElement::t_getelementsbytagname(const String& name) {
@@ -4461,6 +4539,13 @@ bool c_DOMEntity::t___isset(Variant name) {
   return domentity_properties_map.isset(this, name.toString());
 }
 
+Array c_DOMEntity::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domentity_properties_map.debugInfo(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void c_DOMEntityReference::t___construct(const String& name) {
@@ -4491,7 +4576,7 @@ static Variant dom_notation_public_id_read(const Object& obj) {
   if (nodep->ExternalID) {
     return String((char *)(nodep->ExternalID), CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static Variant dom_notation_system_id_read(const Object& obj) {
@@ -4499,7 +4584,7 @@ static Variant dom_notation_system_id_read(const Object& obj) {
   if (nodep->SystemID) {
     return String((char *)(nodep->SystemID), CopyString);
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static PropertyAccessor domnotation_properties[] = {
@@ -4531,6 +4616,13 @@ bool c_DOMNotation::t___isset(Variant name) {
   return domnotation_properties_map.isset(this, name.toString());
 }
 
+Array c_DOMNotation::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domnotation_properties_map.debugInfo(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static Variant dom_processinginstruction_target_read(const Object& obj) {
@@ -4546,7 +4638,7 @@ static Variant dom_processinginstruction_data_read(const Object& obj) {
     xmlFree(content);
     return ret;
   }
-  return empty_string;
+  return empty_string_variant();
 }
 
 static void dom_processinginstruction_data_write(const Object& obj, const Variant& value) {
@@ -4600,6 +4692,13 @@ Variant c_DOMProcessingInstruction::t___set(Variant name, Variant value) {
 
 bool c_DOMProcessingInstruction::t___isset(Variant name) {
   return domprocessinginstruction_properties_map.isset(this, name.toString());
+}
+
+Array c_DOMProcessingInstruction::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domprocessinginstruction_properties_map.debugInfo(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4767,6 +4866,10 @@ bool c_DOMNamedNodeMap::t___isset(Variant name) {
   return domnamednodemap_properties_map.isset(this, name.toString());
 }
 
+Array c_DOMNamedNodeMap::t___debuginfo() {
+  return domnamednodemap_properties_map.debugInfo(this);
+}
+
 Variant c_DOMNamedNodeMap::t_getiterator() {
   c_DOMNodeIterator *iter = NEWOBJ(c_DOMNodeIterator)();
   iter->set_iterator(this, this);
@@ -4840,8 +4943,12 @@ bool c_DOMNodeList::t___isset(Variant name) {
   return domnodelist_properties_map.isset(this, name.toString());
 }
 
+Array c_DOMNodeList::t___debuginfo() {
+  return domnodelist_properties_map.debugInfo(this);
+}
+
 Variant c_DOMNodeList::t_item(int64_t index) {
-  xmlNodePtr itemnode = NULL;
+  xmlNodePtr itemnode = nullptr;
   xmlNodePtr nodep, curnode;
   int count = 0;
   bool owner = false;
@@ -5222,6 +5329,13 @@ Variant c_DOMXPath::t___set(Variant name, Variant value) {
 
 bool c_DOMXPath::t___isset(Variant name) {
   return domxpath_properties_map.isset(this, name.toString());
+}
+
+Array c_DOMXPath::t___debuginfo() {
+  if (!m_node) {
+    return o_toArray();
+  }
+  return domxpath_properties_map.debugInfo(this);
 }
 
 Variant c_DOMXPath::t_evaluate(const String& expr,

@@ -380,7 +380,7 @@ String CmdInfo::GetModifier(const Array& info, const String& name) {
   if (info[name].toBoolean()) {
     return name + " ";
   }
-  return empty_string;
+  return empty_string();
 }
 
 String CmdInfo::FindSubSymbol(const Array& symbols, const std::string &symbol) {

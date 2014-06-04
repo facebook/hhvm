@@ -26,7 +26,7 @@ namespace HPHP {
 StaticString s_call("__call");
 
 UserFSNode::UserFSNode(Class* cls, const Variant& context /*= null */) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   const Func* ctor;
   m_cls = cls;
   if (LookupResult::MethodFoundWithThis !=
@@ -45,7 +45,7 @@ UserFSNode::UserFSNode(Class* cls, const Variant& context /*= null */) {
 
 Variant UserFSNode::invoke(const Func* func, const String& name,
                            const Array& args, bool& invoked) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
 
   // Assume failure
   invoked = false;
@@ -66,7 +66,7 @@ Variant UserFSNode::invoke(const Func* func, const String& name,
     return uninit_null();
   }
 
-  HPHP::JIT::CallerFrame cf;
+  CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
   switch(g_context->lookupObjMethod(func, m_cls, name.get(), ctx)) {
     case LookupResult::MethodFoundWithThis:

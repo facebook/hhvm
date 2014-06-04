@@ -43,21 +43,21 @@ TRACE_SET_MOD(ustubs);
 namespace {
 
 TCA emitRetFromInterpretedFrame() {
-  Asm a { mcg->code.stubs() };
-  moveToAlign(mcg->code.stubs());
+  Asm a { mcg->code.cold() };
+  moveToAlign(mcg->code.cold());
   auto const ret = a.frontier();
 
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
   a.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   a.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.stubs(), SRFlags::JmpInsteadOfRet,
+  emitServiceReq(mcg->code.cold(), SRFlags::JmpInsteadOfRet,
                  REQ_POST_INTERP_RET);
   return ret;
 }
 
 TCA emitRetFromInterpretedGeneratorFrame() {
-  Asm a { mcg->code.stubs() };
-  moveToAlign(mcg->code.stubs());
+  Asm a { mcg->code.cold() };
+  moveToAlign(mcg->code.cold());
   auto const ret = a.frontier();
 
   // We have to get the Generator object from the current AR's $this, then
@@ -66,7 +66,7 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
   a.    lea  (rContAR[c_Generator::arOff()], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.stubs(), SRFlags::JmpInsteadOfRet,
+  emitServiceReq(mcg->code.cold(), SRFlags::JmpInsteadOfRet,
                  REQ_POST_INTERP_RET);
   return ret;
 }
@@ -105,16 +105,11 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.main() };
   moveToAlign(mcg->code.main());
 
-  auto const fpOff = offsetof(ExecutionContext, m_fp);
-  auto const spOff = offsetof(ExecutionContext, m_stack) +
-                       Stack::topOfStackOffset();
-
   uniqueStubs.resumeHelperRet = a.frontier();
   a.    pop   (rStashedAR[AROFF(m_savedRip)]);
   uniqueStubs.resumeHelper = a.frontier();
-  emitGetGContext(a, rax);
-  a.   loadq  (rax[fpOff], rVmFp);
-  a.   loadq  (rax[spOff], rVmSp);
+  a.   loadq  (rVmTl[RDS::kVmfpOff], rVmFp);
+  a.   loadq  (rVmTl[RDS::kVmspOff], rVmSp);
   emitServiceReq(mcg->code.main(), REQ_RESUME);
 
   uniqueStubs.add("resumeHelpers", uniqueStubs.resumeHelper);
@@ -125,22 +120,18 @@ void emitDefClsHelper(UniqueStubs& uniqueStubs) {
   uniqueStubs.defClsHelper = a.frontier();
 
   void (*helper)(PreClass*) = defClsHelper;
-  PhysReg rEC = argNumToRegName[2];
-  emitGetGContext(a, rEC);
-  a.   storeq (rVmFp, rEC[offsetof(ExecutionContext, m_fp)]);
-  a.   storeq (argNumToRegName[1],
-                  rEC[offsetof(ExecutionContext, m_pc)]);
-  a.   storeq (rax, rEC[offsetof(ExecutionContext, m_stack) +
-                    Stack::topOfStackOffset()]);
+  a.   storeq (rVmFp, rVmTl[RDS::kVmfpOff]);
+  a.   storeq (argNumToRegName[1], rVmTl[RDS::kVmpcOff]);
+  a.   storeq (rax, rVmTl[RDS::kVmspOff]);
   a.   jmp    (TCA(helper));
 
   uniqueStubs.add("defClsHelper", uniqueStubs.defClsHelper);
 }
 
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.stubs() };
+  Asm a { mcg->code.cold() };
 
-  moveToAlign(mcg->code.stubs());
+  moveToAlign(mcg->code.cold());
   uniqueStubs.stackOverflowHelper = a.frontier();
 
   // We are called from emitStackCheck, with the new stack frame in
@@ -151,7 +142,7 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   a.    loadl  (rax[Func::sharedBaseOffset()], eax);
   a.    addl   (eax, edi);
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(mcg->code.stubs(), REQ_STACK_OVERFLOW);
+  emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
 
   uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
 }
@@ -310,14 +301,9 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   auto const rBC     = r13;
   auto const rEC     = r15;
 
-  auto const spOff = offsetof(ExecutionContext, m_stack) +
-                       Stack::topOfStackOffset();
-  auto const fpOff = offsetof(ExecutionContext, m_fp);
-  auto const pcOff = offsetof(ExecutionContext, m_pc);
-
   emitGetGContext(a, rEC);
-  a.    storeq (rVmFp, rEC[fpOff]);
-  a.    storeq (rVmSp, rEC[spOff]);
+  a.    storeq (rVmFp, rVmTl[RDS::kVmfpOff]);
+  a.    storeq (rVmSp, rVmTl[RDS::kVmspOff]);
 
   // rBC := fp -> m_func -> m_unit -> m_bc
   a.    loadq  (rVmFp[AROFF(m_func)], rBC);
@@ -325,7 +311,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    loadq  (rBC[Unit::bcOff()],   rBC);
   // Convert offsets into PC's and sync the PC
   a.    addq   (rBC,    rPCOff);
-  a.    storeq (rPCOff, rEC[pcOff]);
+  a.    storeq (rPCOff, rVmTl[RDS::kVmpcOff]);
   a.    addq   (rBC,    rPCNext);
 
   a.    subq   (8, rsp);  // stack parity
@@ -334,13 +320,13 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   assert(rPCNext == argNumToRegName[1]);
   a.    call   (TCA(getMethodPtr(&ExecutionContext::doFCallArrayTC)));
 
-  a.    loadq  (rEC[spOff], rVmSp);
+  a.    loadq  (rVmTl[RDS::kVmspOff], rVmSp);
 
   a.    testb  (rbyte(rax), rbyte(rax));
   a.    jz8    (noCallee);
 
   a.    addq   (8, rsp);
-  a.    loadq  (rEC[fpOff], rVmFp);
+  a.    loadq  (rVmTl[RDS::kVmfpOff], rVmFp);
   a.    pop    (rVmFp[AROFF(m_savedRip)]);
   a.    loadq  (rVmFp[AROFF(m_func)], rax);
   a.    loadq  (rax[Func::funcBodyOff()], rax);
@@ -402,11 +388,9 @@ asm_label(a, popAndXchg);
   a.    ud2    ();
 
 asm_label(a, skip);
-  emitGetGContext(a, rdi);
   a.    neg    (rax);
-  a.    loadq  (rdi[offsetof(ExecutionContext, m_fp)], rVmFp);
-  a.    loadq  (rdi[offsetof(ExecutionContext, m_stack) +
-                    Stack::topOfStackOffset()], rVmSp);
+  a.    loadq  (rVmTl[RDS::kVmfpOff], rVmFp);
+  a.    loadq  (rVmTl[RDS::kVmspOff], rVmSp);
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -432,7 +416,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
 }
 
 void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
-  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
+  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
   Asm a { mcg->code.main() };
 
   moveToAlign(mcg->code.main());
@@ -463,8 +447,7 @@ asm_label(a, skip);
   a.   pop     (rsi);
   a.   addq    (16, rsp); // drop our call frame
   emitGetGContext(a, rax);
-  a.   loadq   (rax[offsetof(ExecutionContext, m_stack) +
-                    Stack::topOfStackOffset()], rVmSp);
+  a.   loadq   (rVmTl[RDS::kVmspOff], rVmSp);
   a.   jmp     (rsi);
   a.   ud2     ();
 

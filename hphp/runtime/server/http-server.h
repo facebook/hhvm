@@ -56,13 +56,14 @@ public:
   HPHP::Server *getPageServer() { return m_pageServer.get(); }
   void getSatelliteStats(std::vector<std::pair<std::string, int>> *stats);
 
-  void stopOnSignal();
+  void stopOnSignal(int sig);
 
 private:
   static void startupFailure();
 
 private:
   bool m_stopped;
+  bool m_killed;
   const char* m_stopReason;
 
   ServerPtr m_pageServer;

@@ -56,10 +56,11 @@ std::string WddxPacket::packet_end() {
 }
 
 bool WddxPacket::serialize_value(const Variant& varVariant) {
-  return recursiveAddVar(empty_string, varVariant, false);
+  return recursiveAddVar(empty_string_ref, varVariant, false);
 }
 
-bool WddxPacket::recursiveAddVar(String varName, const Variant& varVariant,
+bool WddxPacket::recursiveAddVar(const String& varName,
+                                 const Variant& varVariant,
                                  bool hasVarTag) {
 
   bool isArray = varVariant.isArray();
@@ -136,9 +137,9 @@ bool WddxPacket::recursiveAddVar(String varName, const Variant& varVariant,
   return false;
 }
 
-std::string WddxPacket::getWddxEncoded(std::string varType,
-                                       std::string varValue,
-                                       String varName,
+std::string WddxPacket::getWddxEncoded(const std::string& varType,
+                                       const std::string& varValue,
+                                       const String& varName,
                                        bool hasVarTag) {
   if (varType.compare("NULL") == 0) {
     return wrapValue("<null/>", "", "", varName, hasVarTag);
@@ -155,10 +156,10 @@ std::string WddxPacket::getWddxEncoded(std::string varType,
   return "";
 }
 
-std::string WddxPacket::wrapValue(std::string start,
-                                  std::string end,
-                                  std::string varValue,
-                                  String varName,
+std::string WddxPacket::wrapValue(const std::string& start,
+                                  const std::string& end,
+                                  const std::string& varValue,
+                                  const String& varName,
                                   bool hasVarTag) {
   std::string startVar = "";
   std::string endVar = "";
@@ -199,7 +200,8 @@ static TypedValue* add_vars_helper(ActRec* ar) {
 }
 
 static TypedValue* serialize_vars_helper(ActRec* ar) {
-  WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string, true, true);
+  WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string_variant_ref,
+                                              true, true);
   int start_index = 0;
   for (int i = start_index; i < ar->numArgs(); i++) {
     auto const tv = getArg(ar, i);

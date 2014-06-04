@@ -73,7 +73,7 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return "PGO profiling translations are still enabled.";
   }
 
-  return empty_string;
+  return empty_string();
 }
 
 static class MiscExtension : public Extension {
@@ -131,8 +131,6 @@ public:
     loadSystemlib();
   }
 } s_misc_extension;
-
-using JIT::CallerFrame;
 
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(tokenizer, 0.1);

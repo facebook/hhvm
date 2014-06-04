@@ -47,6 +47,10 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   Array t_getdependencystack();
 
  public:
+  static constexpr ptrdiff_t firstParentOff() {
+    return offsetof(c_WaitableWaitHandle, m_firstParent);
+  }
+
   context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
   AsioContext* getContext() {
     assert(isInContext());
@@ -60,8 +64,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   String getName();
 
  protected:
-  void done();
-
   void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
 
   bool isInContext() { return getContextIdx(); }
@@ -71,9 +73,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   c_WaitableWaitHandle* getChild();
   bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;
   void enterContextImpl(context_idx_t ctx_idx);
-
- private:
-  c_BlockableWaitHandle* m_firstParent;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

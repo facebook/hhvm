@@ -52,9 +52,12 @@ const StaticString
 
 //////////////////////////////////////////////////////////////////////////////
 // helper
-static Resource get_connection_resource(Object obj) {
-  auto res = obj->o_realProp(s_connection, ObjectData::RealPropUnchecked,
-                             s_mysqli.get());
+static Resource get_connection_resource(ObjectData* obj) {
+  auto res = obj->o_realProp(
+    s_connection,
+    ObjectData::RealPropUnchecked,
+    s_mysqli.get()
+  );
   if (!res || !res->isResource()) {
     return Resource();
   }
@@ -62,14 +65,17 @@ static Resource get_connection_resource(Object obj) {
   return res->toResource();
 }
 
-static MySQL *get_connection(Object obj) {
+static MySQL *get_connection(ObjectData* obj) {
   auto res = get_connection_resource(obj);
   return res.getTyped<MySQL>(true, false);
 }
 
-static MySQLStmt *getStmt(Object obj) {
-  auto res = obj->o_realProp(s_stmt, ObjectData::RealPropUnchecked,
-                             s_mysqli_stmt.get());
+static MySQLStmt *getStmt(ObjectData* obj) {
+  auto res = obj->o_realProp(
+    s_stmt,
+    ObjectData::RealPropUnchecked,
+    s_mysqli_stmt.get()
+  );
   assert(res->isResource());
 
   auto stmt = res->asResRef().getTyped<MySQLStmt>(false, false);
@@ -78,9 +84,12 @@ static MySQLStmt *getStmt(Object obj) {
   return stmt;
 }
 
-static MySQLResult *getResult(Object obj) {
-  auto res = obj->o_realProp(s_result, ObjectData::RealPropUnchecked,
-                             s_mysqli_result.get());
+static MySQLResult *getResult(ObjectData* obj) {
+  auto res = obj->o_realProp(
+    s_result,
+    ObjectData::RealPropUnchecked,
+    s_mysqli_result.get()
+  );
   if (!res || !res->isResource()) {
     return nullptr;
   }
@@ -266,7 +275,7 @@ static void HHVM_METHOD(mysqli, hh_update_last_error, Object stmt_obj) {
   auto conn = get_connection(this_);
   assert(conn);
 
-  auto stmt = getStmt(stmt_obj);
+  auto stmt = getStmt(stmt_obj.get());
   assert(stmt);
 
   auto s = stmt->get();
@@ -556,7 +565,7 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_field_count) {
 
 static void HHVM_METHOD(mysqli_stmt, hh_init, Variant connection) {
   Object obj = connection.toObject();
-  auto data = NEWOBJ(MySQLStmt)(get_connection(obj)->get());
+  auto data = NEWOBJ(MySQLStmt)(get_connection(obj.get())->get());
   this_->o_set(s_stmt, Resource(data), s_mysqli_stmt.get());
 }
 

@@ -109,7 +109,7 @@ static int64_t HHVM_METHOD(IntlBreakIterator, getErrorCode) {
 }
 
 static String HHVM_METHOD(IntlBreakIterator, getErrorMessage) {
-  FETCH_BI(data, this_, empty_string);
+  FETCH_BI(data, this_, empty_string());
   return data->getErrorMessage();
 }
 
@@ -252,7 +252,7 @@ static int64_t HHVM_METHOD(IntlCodePointBreakIterator, getLastCodePoint) {
 static void HHVM_METHOD(IntlRuleBasedBreakIterator, __construct,
                         const String& rules, bool compiled /*=false*/) {
   s_intl_error->clearError();
-  auto data = Native::data<IntlBreakIterator>(this_.get());
+  auto data = Native::data<IntlBreakIterator>(this_);
   if (compiled) {
 #if U_ICU_VERSION_MAJOR_NUM * 100 + U_ICU_VERSION_MINOR_NUM >= 408
     UErrorCode error = U_ZERO_ERROR;

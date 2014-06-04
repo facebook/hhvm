@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/min-max-macros.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -1692,7 +1691,7 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
     }
     ret.set(s_mime, (char*)php_image_type_to_mime_type(itype));
     IM_FREE(result);
-    return ret.create();
+    return ret.toVariant();
   } else {
     return false;
   }
@@ -2261,7 +2260,7 @@ static gdImagePtr _php_image_create_from(const String& filename,
                                          int image_type, char *tn,
                                          gdImagePtr(*func_p)(),
                                          gdImagePtr(*ioctx_func_p)()) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   gdImagePtr im = nullptr;
 #ifdef HAVE_GD_JPG
   // long ignore_warning;
@@ -2456,7 +2455,7 @@ static int _php_image_type (char data[8]) {
 #ifdef HAVE_LIBGD15
 gdImagePtr _php_image_create_from_string(const String& image, char *tn,
                                          gdImagePtr (*ioctx_func_p)()) {
-  JIT::VMRegAnchor _;
+  VMRegAnchor _;
   gdIOCtx *io_ctx;
 
   io_ctx = gdNewDynamicCtxEx(image.length(), (char *)image.c_str(), 0);
@@ -3681,7 +3680,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
     ret.set(s_red, im->red[col]);
     ret.set(s_green, im->green[col]);
     ret.set(s_blue, im->blue[col]);
-    return ret.create();
+    return ret.toVariant();
   }
 #endif
   raise_warning("Color index %" PRId64 " out of range", index);
@@ -4095,9 +4094,9 @@ static int hphp_gdImageConvolution(gdImagePtr src, float filter[3][3],
       new_a = gdImageAlpha(srcback, pxl);
 
       for (j=0; j<3; j++) {
-        int yv = MIN(MAX(y - 1 + j, 0), src->sy - 1);
+        int yv = std::min(std::max(y - 1 + j, 0), src->sy - 1);
         for (i=0; i<3; i++) {
-                pxl = f(srcback, MIN(MAX(x - 1 + i, 0), src->sx - 1), yv);
+          pxl = f(srcback, std::min(std::max(x - 1 + i, 0), src->sx - 1), yv);
           new_r += (float)gdImageRed(srcback, pxl) * filter[j][i];
           new_g += (float)gdImageGreen(srcback, pxl) * filter[j][i];
           new_b += (float)gdImageBlue(srcback, pxl) * filter[j][i];
@@ -5241,7 +5240,7 @@ static String exif_get_sectionname(int section) {
   case SECTION_WINXP:     return s_WINXP;
   case SECTION_MAKERNOTE: return s_MAKERNOTE;
   }
-  return empty_string;
+  return empty_string();
 }
 
 static tag_table_type exif_get_tag_table(int section) {

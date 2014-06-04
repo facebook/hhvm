@@ -25,6 +25,7 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_string.h"
 
@@ -359,6 +360,14 @@ void RequestInjectionData::clearTimedOutFlag() {
 
 void RequestInjectionData::setSignaledFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::SignaledFlag);
+}
+
+void RequestInjectionData::setAsyncEventHookFlag() {
+  getConditionFlags()->fetch_or(RequestInjectionData::AsyncEventHookFlag);
+}
+
+void RequestInjectionData::clearAsyncEventHookFlag() {
+  getConditionFlags()->fetch_and(~RequestInjectionData::AsyncEventHookFlag);
 }
 
 void RequestInjectionData::setEventHookFlag() {

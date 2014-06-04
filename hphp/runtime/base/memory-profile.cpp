@@ -31,10 +31,10 @@ static ProfileStackTrace getStackTrace() {
   ProfileStackTrace trace;
 
   if (g_context.isNull()) return trace;
-  JIT::VMRegAnchor _;
-  ActRec *fp = g_context->getFP();
+  VMRegAnchor _;
+  ActRec *fp = vmfp();
   if (!fp) return trace;
-  PC pc = g_context->getPC();
+  PC pc = vmpc();
 
   const Func *f = fp->m_func;
   Unit *u = f->unit();

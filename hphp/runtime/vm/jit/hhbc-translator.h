@@ -104,6 +104,7 @@ struct HhbcTranslator {
   void guardRefs(int64_t entryArDelta,
                  const std::vector<bool>& mask,
                  const std::vector<bool>& vals);
+  void endGuards();
 
   // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32_t localIndex, Type type);
@@ -182,6 +183,8 @@ struct HhbcTranslator {
   void emitNull();
   void emitTrue();
   void emitFalse();
+  void emitDir();
+  void emitFile();
   void emitCGetL(int32_t id);
   void emitFPassL(int32_t id);
   void emitPushL(uint32_t id);
@@ -269,6 +272,8 @@ struct HhbcTranslator {
                              bool shouldFatal,
                              SSATmp* extraSpill);
   void emitFPushClsMethodF(int32_t numParams);
+  void emitInitProps(const Class* cls, Block* catchBlock);
+  void emitInitSProps(const Class* cls, Block* catchBlock);
   SSATmp* emitAllocObjFast(const Class* cls);
   void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
   void emitFPushCtor(int32_t numParams);
@@ -422,7 +427,8 @@ struct HhbcTranslator {
   // async functions
   void emitAwaitE(SSATmp* child, Block* catchBlock, Offset resumeOffset,
                   int iters);
-  void emitAwaitR(SSATmp* child, Block* catchBlock, Offset resumeOffset);
+  void emitAwaitR(SSATmp* child, Block* catchBlock, Block* catchBlockNoSpill,
+                  Offset resumeOffset);
   void emitAwait(Offset resumeOffset, int iters);
 
   void emitStrlen();
@@ -704,7 +710,7 @@ private:
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck(Block* catchBlock);
-  void emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
+  void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);
 
@@ -718,7 +724,9 @@ private:
   void emitProfiledGuard(Type t, const char* location, int32_t id, G doGuard,
                          L loadAddr);
 
-  bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs);
+  bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
+                             uint32_t numNonDefault);
+  SSATmp* optimizedServerGetCustomBoolSetting();
   SSATmp* optimizedCallCount();
 
 private: // Exit trace creation routines.
@@ -793,8 +801,8 @@ private: // Exit trace creation routines.
 
 public:
   /*
-   * Accessors for the current function being compiled and its
-   * class and unit.
+   * Accessors for the current function being compiled, its class and unit, the
+   * current SrcKey, and the current eval stack.
    */
   const Func* curFunc()     const { return m_bcStateStack.back().func; }
   Class*      curClass()    const { return curFunc()->cls(); }
@@ -805,6 +813,35 @@ public:
   bool        resumed()     const { return m_bcStateStack.back().resumed; }
   size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
+
+  /*
+   * Eval stack helpers.
+   */
+  SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
+    return pop(Type::Cell, tc);
+  }
+  SSATmp* push(SSATmp* tmp);
+  SSATmp* pushIncRef(SSATmp* tmp, TypeConstraint tc = DataTypeCountness);
+  SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
+  void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
+  void    discard(unsigned n);
+  SSATmp* popV() { return pop(Type::BoxedCell); }
+  SSATmp* popR() { return pop(Type::Gen);       }
+  SSATmp* popA() { return pop(Type::Cls);       }
+  SSATmp* popF(TypeConstraint tc = DataTypeSpecific) {
+    return pop(Type::Gen, tc);
+  }
+  SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const;
+  SSATmp* top(Type type, uint32_t index = 0,
+              TypeConstraint tc = DataTypeSpecific);
+  SSATmp* topC(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
+    return top(Type::Cell, i, tc);
+  }
+  SSATmp* topF(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
+    return top(Type::Gen, i, tc);
+  }
+  SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
+  SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
 
 private:
   /*
@@ -840,34 +877,6 @@ private:
   const NamedEntityPair& lookupNamedEntityPairId(int id);
   const NamedEntity* lookupNamedEntityId(int id);
 
-  /*
-   * Eval stack helpers.
-   */
-  SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp, TypeConstraint tc = DataTypeCountness);
-  SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
-  void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
-  void    discard(unsigned n);
-  SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
-    return pop(Type::Cell, tc);
-  }
-  SSATmp* popV() { return pop(Type::BoxedCell); }
-  SSATmp* popR() { return pop(Type::Gen);       }
-  SSATmp* popA() { return pop(Type::Cls);       }
-  SSATmp* popF(TypeConstraint tc = DataTypeSpecific) {
-    return pop(Type::Gen, tc);
-  }
-  SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const;
-  SSATmp* top(Type type, uint32_t index = 0,
-              TypeConstraint tc = DataTypeSpecific);
-  SSATmp* topC(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
-    return top(Type::Cell, i, tc);
-  }
-  SSATmp* topF(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
-    return top(Type::Gen, i, tc);
-  }
-  SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
-  SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals,

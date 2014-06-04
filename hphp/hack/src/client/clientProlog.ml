@@ -16,7 +16,9 @@ type env = {
 
 let rec connect env retries =
   try
-    ClientUtils.connect env.root
+    let result = ClientUtils.connect env.root in
+    Printf.printf "\n%!";
+    result
   with
   | ClientExceptions.Server_cant_connect ->
     Printf.printf
@@ -24,7 +26,7 @@ let rec connect env retries =
       Try 'hh start your_directory'\n";
     exit 2
   | ClientExceptions.Server_initializing ->
-    Printf.printf "Server still initializing.\n%!";
+    Printf.printf "Server still initializing. %s\r%!" (Utils.spinner());
     if retries > 0
     then (
       Unix.sleep(1);

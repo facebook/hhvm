@@ -152,12 +152,20 @@ struct ServiceReqArgInfo {
   enum {
     Immediate,
     CondCode,
+    RipRelative,
   } m_kind;
   union {
     uint64_t m_imm;
     JIT::ConditionCode m_cc;
   };
 };
+
+inline ServiceReqArgInfo RipRelative(TCA addr) {
+  return ServiceReqArgInfo {
+    ServiceReqArgInfo::RipRelative,
+    { (uint64_t)addr }
+  };
+}
 
 typedef smart::vector<ServiceReqArgInfo> ServiceReqArgVec;
 

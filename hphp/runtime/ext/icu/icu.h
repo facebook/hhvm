@@ -64,15 +64,8 @@ class IntlError {
 };
 
 template<class T>
-T* GetData(Object obj, const String& ctx) {
-  if (obj.isNull()) {
-    raise_error("NULL object passed");
-    return nullptr;
-  }
-  auto ret = Native::data<T>(obj.get());
-  if (!ret) {
-    return nullptr;
-  }
+T* GetData(ObjectData* obj, const String& ctx) {
+  auto const ret = Native::data<T>(obj);
   if (!ret->isValid()) {
     ret->setError(U_ILLEGAL_ARGUMENT_ERROR,
                   "Found unconstructed %s", ctx.c_str());
@@ -80,6 +73,9 @@ T* GetData(Object obj, const String& ctx) {
   }
   return ret;
 }
+
+template<class T>
+T* GetData(Object, const String&);  // get a link error.
 
 /////////////////////////////////////////////////////////////////////////////
 

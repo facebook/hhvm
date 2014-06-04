@@ -34,7 +34,6 @@
 #include "hphp/util/process.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/config.h"
-#include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #define USE_VARARGS

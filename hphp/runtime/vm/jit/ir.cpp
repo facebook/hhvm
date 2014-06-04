@@ -21,7 +21,6 @@
 #include <forward_list>
 #include <sstream>
 #include <type_traits>
-#include <boost/algorithm/string.hpp>
 
 #include "folly/Format.h"
 #include "folly/Traits.h"

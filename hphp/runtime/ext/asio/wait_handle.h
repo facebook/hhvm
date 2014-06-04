@@ -48,6 +48,7 @@ namespace HPHP {
  * passed as an array member of GenArrayWaitHandle).
  */
 FORWARD_DECLARE_CLASS(WaitHandle);
+FORWARD_DECLARE_CLASS(BlockableWaitHandle);
 class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
@@ -116,6 +117,9 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   void setKindState(Kind kind, uint8_t state) {
     o_subclassData.u8[0] = toKindState(kind, state);
   }
+  void setContextVectorIndex(uint32_t idx) {
+    m_ctxVecIndex = idx;
+  }
 
   // The code in the TC will depend on the values of these constants.
   // See emitAwait().
@@ -123,7 +127,25 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   static const int8_t STATE_FAILED    = 1;
 
  protected:
-  Cell m_resultOrException;
+  union {
+    // STATE_SUCCEEDED || STATE_FAILED
+    Cell m_resultOrException;
+
+    // !STATE_SUCCEEDED && !STATE_FAILED
+    struct {
+      // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
+      c_BlockableWaitHandle* m_firstParent;
+
+      union {
+        // BlockableWaitHandle: STATE_BLOCKED
+        c_BlockableWaitHandle* m_nextParent;
+
+        // ExternalThreadEventWaitHandle: STATE_WAITING
+        // SleepWaitHandle: STATE_WAITING
+        uint32_t m_ctxVecIndex;
+      };
+    };
+  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

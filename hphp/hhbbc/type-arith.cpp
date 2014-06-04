@@ -63,6 +63,12 @@ folly::Optional<Type> eval_const_divmod(Type t1, Type t2, Fun fun) {
   return folly::none;
 }
 
+Type bitwise_arith(Type t1, Type t2) {
+  if (t1.subtypeOf(TStr) && t2.subtypeOf(TStr)) return TStr;
+  if (!t1.couldBe(TStr) || !t2.couldBe(TStr)) return TInt;
+  return TInitCell;
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -130,20 +136,19 @@ Type typePow(Type t1, Type t2) {
 
 Type typeBitAnd(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellBitAnd)) return *t;
-  return TInitCell;
+  return bitwise_arith(t1, t2);
 }
 
 Type typeBitOr(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellBitOr)) return *t;
-  return TInitCell;
+  return bitwise_arith(t1, t2);
 }
 
 Type typeBitXor(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellBitXor)) return *t;
-  return TInitCell;
+  return bitwise_arith(t1, t2);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }}
-

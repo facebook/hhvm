@@ -440,11 +440,13 @@ struct CallData : IRExtraData {
   explicit CallData(uint32_t numParams,
                     Offset after,
                     const Func* callee,
-                    bool destroy)
+                    bool destroy,
+                    TCA knownPrologue)
     : numParams(numParams)
     , after(after)
     , callee(callee)
     , destroyLocals(destroy)
+    , knownPrologue(knownPrologue)
   {}
 
   std::string show() const {
@@ -455,7 +457,8 @@ struct CallData : IRExtraData {
       callee
         ? folly::format(",{}", callee->fullName()->data()).str()
         : std::string{},
-      destroyLocals ? ",destroyLocals" : ""
+      destroyLocals ? ",destroyLocals" : "",
+      !!knownPrologue ? ",knownPrologue" : ""
     );
   }
 
@@ -463,6 +466,7 @@ struct CallData : IRExtraData {
   Offset after;
   const Func* callee;  // nullptr if not statically known
   bool destroyLocals;
+  TCA knownPrologue;   // nullptr if not statically known
 };
 
 struct RetCtrlData : IRExtraData {
@@ -656,20 +660,6 @@ struct InterpOneData : IRExtraData {
 };
 
 /*
- * Important during offset to determine if crossing inline function will also
- * cross function call boundary.
- */
-struct ReDefResumableSPData : IRExtraData {
-  explicit ReDefResumableSPData(bool spans) : spansCall(spans) {}
-
-  std::string show() const {
-    return folly::to<std::string>(spansCall);
-  }
-
-  bool spansCall;
-};
-
-/*
  * StackOffset to adjust stack pointer by and boolean indicating whether or not
  * the stack pointer in src1 used for analysis spans a function call.
  *
@@ -678,37 +668,18 @@ struct ReDefResumableSPData : IRExtraData {
  * frame pointer when one or more enclosing frames have been elided.
  */
 struct ReDefSPData : IRExtraData {
-  struct Frame {
-    explicit Frame(const SSATmp* fp = nullptr, int32_t spOff = 0)
-      : fp(fp)
-      , spOff(spOff)
-    {}
-
-    const SSATmp* fp;
-    int32_t spOff;
-  };
-
-  explicit ReDefSPData(uint32_t nFrames, Frame* frames, int32_t off, bool spans)
-    : frames(frames)
-    , nFrames(nFrames)
-    , spOffset(off)
+  explicit ReDefSPData(int32_t off, bool spans)
+    : spOffset(off)
     , spansCall(spans)
   {}
 
-  ReDefSPData* clone(Arena& arena) const {
-    auto* r = new (arena) ReDefSPData(nFrames, frames, spOffset, spansCall);
-    r->frames = new (arena) Frame[nFrames];
-    std::copy(frames, frames + nFrames, r->frames);
-    return r;
-  }
-
   std::string show() const {
-    return folly::format("spOff:{}{}", spOffset,
-                         spansCall ? ", spans call" : "").str();
+    return folly::format(
+      "{}{}",
+      spOffset,
+      spansCall ? ",spansCall" : ""
+    ).str();
   }
-
-  Frame* frames;
-  uint32_t nFrames;
 
   int32_t spOffset;
   bool spansCall;
@@ -839,7 +810,7 @@ X(StLoc,                        LocalId);
 X(StCell,                       LocalOffset);
 X(StGbl,                        LocalId);
 X(StLocNT,                      LocalId);
-X(CopyCells,                    LocalId);
+X(CopyAsyncCells,               LocalId);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);
@@ -857,7 +828,9 @@ X(MIterInitK,                   IterData);
 X(MIterNext,                    IterData);
 X(MIterNextK,                   IterData);
 X(ConstructInstance,            ClassData);
+X(CheckInitProps,               ClassData);
 X(InitProps,                    ClassData);
+X(CheckInitSProps,              ClassData);
 X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
@@ -867,12 +840,11 @@ X(SpillFrame,                   ActRecInfo);
 X(GuardStk,                     StackOffset);
 X(CheckStk,                     StackOffset);
 X(CastStk,                      StackOffset);
+X(CastStkIntToDbl,              StackOffset);
 X(CoerceStk,                    StackOffset);
 X(AssertStk,                    StackOffset);
 X(ReDefSP,                      ReDefSPData);
-X(ReDefResumableSP,             ReDefResumableSPData);
 X(DefSP,                        StackOffset);
-X(DefInlineSP,                  StackOffset);
 X(LdStack,                      StackOffset);
 X(LdStackAddr,                  StackOffset);
 X(DecRefStack,                  StackOffset);
@@ -885,7 +857,8 @@ X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
-X(FunctionExitSurpriseHook,     RetCtrlData);
+X(FunctionSuspendHook,          RetCtrlData);
+X(FunctionReturnHook,           RetCtrlData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
 X(LookupClsMethodCache,         ClsMethodData);

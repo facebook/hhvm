@@ -80,7 +80,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      cellSet(child->getResult(), *current);
+      deps->set(iter_pos, &child->getResult());
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
@@ -117,12 +117,14 @@ void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, 
     } catch (const Object& cycle_exception) {
       putException(m_exception, cycle_exception.get());
       ++m_iterPos;
+      incRefCount();
       onUnblocked();
       return;
     }
   }
 
   blockOn(child);
+  incRefCount();
 }
 
 void c_GenVectorWaitHandle::onUnblocked() {
@@ -136,7 +138,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      cellSet(child->getResult(), *current);
+      m_deps->set(m_iterPos, &child->getResult());
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {
@@ -156,6 +158,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
     }
   }
 
+  auto const parentChain = getFirstParent();
   if (m_exception.isNull()) {
     setState(STATE_SUCCEEDED);
     tvWriteObject(m_deps.get(), &m_resultOrException);
@@ -166,7 +169,8 @@ void c_GenVectorWaitHandle::onUnblocked() {
   }
 
   m_deps = nullptr;
-  done();
+  UnblockChain(parentChain);
+  decRefObj(this);
 }
 
 String c_GenVectorWaitHandle::getName() {

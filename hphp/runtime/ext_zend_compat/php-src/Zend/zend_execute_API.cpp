@@ -57,7 +57,7 @@ ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_ent
 }
 
 ZEND_API const char *get_active_function_name(TSRMLS_D) {
-  HPHP::JIT::VMRegAnchor _;
+  HPHP::VMRegAnchor _;
   return HPHP::liveFunc()->name()->data();
 }
 
@@ -76,7 +76,7 @@ ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC) {
 }
 
 ZEND_API const char *zend_get_executed_filename(TSRMLS_D) {
-  return HPHP::g_context->getContainingFileName().data();
+  return HPHP::g_context->getContainingFileName()->data();
 }
 
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D) {
@@ -163,7 +163,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
   // mostly from vm_call_user_func
   HPHP::ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
-  HPHP::JIT::CallerFrame cf;
+  HPHP::CallerFrame cf;
   HPHP::StringData* invName = nullptr;
   const HPHP::Func* f = HPHP::vm_decode_function(
     HPHP::tvAsCVarRef(fci->function_name->tv()), cf(), false, obj, cls, invName

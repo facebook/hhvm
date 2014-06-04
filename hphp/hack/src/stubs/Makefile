@@ -4,7 +4,7 @@ TOP=..
 ##############################################################################
 TARGET=lib
 
-SRC= eventLogger.ml buildMain.ml prologMain.ml flow.ml
+SRC= eventLogger.ml buildMain.ml prologMain.ml 
 
 ##############################################################################
 # Generic variables

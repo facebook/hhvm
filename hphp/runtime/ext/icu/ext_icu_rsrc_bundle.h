@@ -27,9 +27,10 @@ public:
     return m_rsrc;
   }
 
-  static ResourceBundle* Get(Object obj) {
+  static ResourceBundle* Get(ObjectData* obj) {
     return GetData<ResourceBundle>(obj, s_ResourceBundle);
   }
+
   static Object newInstance(icu::ResourceBundle* bundle) {
     if (!c_ResourceBundle) {
       c_ResourceBundle = Unit::lookupClass(s_ResourceBundle.get());

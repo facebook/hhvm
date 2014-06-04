@@ -69,17 +69,10 @@ void moveToAlign(CodeBlock& cb,
 }
 
 void emitEagerSyncPoint(Asm& as, const Op* pc) {
-  static COff spOff = offsetof(ExecutionContext, m_stack) +
-    Stack::topOfStackOffset();
-  static COff fpOff = offsetof(ExecutionContext, m_fp);
-  static COff pcOff = offsetof(ExecutionContext, m_pc);
-
   // we can use rAsm because we don't clobber it in X64Assembler
-  Reg64 rEC = rAsm;
-  emitGetGContext(as, rEC);
-  as.  storeq(rVmFp, rEC[fpOff]);
-  as.  storeq(rVmSp, rEC[spOff]);
-  emitImmStoreq(as, intptr_t(pc), rEC[pcOff]);
+  as.  storeq(rVmFp, rVmTl[RDS::kVmfpOff]);
+  as.  storeq(rVmSp, rVmTl[RDS::kVmspOff]);
+  emitImmStoreq(as, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
 }
 
 // emitEagerVMRegSave --
@@ -93,19 +86,9 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
          RegSaveFlags::None);
 
   Reg64 pcReg = rdi;
-  PhysReg rEC = rAsm;
   assert(!kSpecialCrossTraceRegs.contains(rdi));
 
-  emitGetGContext(as, rEC);
-
-  static COff spOff = offsetof(ExecutionContext, m_stack) +
-    Stack::topOfStackOffset();
-  static COff fpOff = offsetof(ExecutionContext, m_fp) - spOff;
-  static COff pcOff = offsetof(ExecutionContext, m_pc) - spOff;
-
-  assert(spOff != 0);
-  as.   addq   (spOff, r64(rEC));
-  as.   storeq (rVmSp, *rEC);
+  as.   storeq (rVmSp, rVmTl[RDS::kVmspOff]);
   if (savePC) {
     // We're going to temporarily abuse rVmSp to hold the current unit.
     Reg64 rBC = rVmSp;
@@ -115,11 +98,11 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
     as. loadq  (rBC[Func::unitOff()], rBC);
     as. loadq  (rBC[Unit::bcOff()], rBC);
     as. addq   (rBC, pcReg);
-    as. storeq (pcReg, rEC[pcOff]);
+    as. storeq (pcReg, rVmTl[RDS::kVmpcOff]);
     as. pop    (rBC);
   }
   if (saveFP) {
-    as. storeq (rVmFp, rEC[fpOff]);
+    as. storeq (rVmFp, rVmTl[RDS::kVmfpOff]);
   }
 }
 
@@ -204,8 +187,8 @@ void emitAssertFlagsNonNegative(Asm& as) {
 void emitAssertRefCount(Asm& as, PhysReg base) {
   as.cmpl(HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]);
   ifThen(as, CC_NLE, [&] {
-      as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
-      ifThen(as, CC_NBE, [&] { as.ud2(); });
+    as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
+    ifThen(as, CC_NBE, [&] { as.ud2(); });
   });
 }
 
@@ -333,7 +316,7 @@ void emitRB(X64Assembler& a,
 void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
   Asm a { cb };
   // call to a trace function
-  a.    movq   (a.frontier(), rcx);
+  a.    lea    (rip[(int64_t)a.frontier()], rcx);
   a.    movq   (rVmFp, rdi);
   a.    movq   (rVmSp, rsi);
   a.    movq   (pcOff, rdx);
@@ -347,19 +330,19 @@ void emitTestSurpriseFlags(Asm& a) {
   a.    testl((int32_t)0xffffffff, rVmTl[RDS::kConditionFlagsOff]);
 }
 
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  Fixup fixup) {
   Asm a { mainCode };
-  Asm astubs { stubsCode };
+  Asm acold { coldCode };
 
   emitTestSurpriseFlags(a);
-  a.  jnz  (stubsCode.frontier());
+  a.  jnz  (coldCode.frontier());
 
-  astubs.  movq  (rVmFp, argNumToRegName[0]);
-  emitCall(astubs, tx->uniqueStubs.functionEnterHelper);
-  mcg->recordSyncPoint(stubsCode.frontier(),
+  acold.  movq  (rVmFp, argNumToRegName[0]);
+  emitCall(acold, tx->uniqueStubs.functionEnterHelper);
+  mcg->recordSyncPoint(coldCode.frontier(),
                        fixup.m_pcOffset, fixup.m_spOffset);
-  astubs.  jmp   (mainCode.frontier());
+  acold.  jmp   (mainCode.frontier());
 }
 
 template<class Mem>

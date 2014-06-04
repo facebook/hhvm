@@ -315,7 +315,7 @@ String c_SQLite3::ti_escapestring(const String& sql) {
       return sret;
     }
   }
-  return empty_string;
+  return empty_string();
 }
 
 Variant c_SQLite3::t_prepare(const String& sql) {
@@ -364,7 +364,7 @@ Variant c_SQLite3::t_querysingle(const String& sql, bool entire_row /* = false *
         return get_column_value(pstmt, 0);
       case SQLITE_DONE: /* Valid but no results */
         if (entire_row) {
-          return empty_array;
+          return empty_array();
         } else {
           return init_null();
         }

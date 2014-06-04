@@ -125,13 +125,28 @@ namespace detail {
       // printing debug information, so we want to handle invalid Blocks
       // gracefully.
       if (!block->empty()) {
-        Block* taken = block->taken();
-        if (taken && !cold(block) && cold(taken)) {
-          walk(taken);
-          taken = nullptr;
+        // If we're not cold but exactly one our successors is, we visit that
+        // one first so it appears as late as possible in an RPO
+        // sort. Otherwise we visit taken first so next appears before it when
+        // RPO sorted. Note that these are just heuristics; all possible
+        // outcomes are valid post-order traversals and should not affect
+        // correctness.
+
+        auto next = block->next();
+        auto taken = block->taken();
+        auto coldSuccs = (next && cold(next)) + (taken && cold(taken));
+        if (!cold(block) && coldSuccs == 1) {
+          if (next && cold(next)) {
+            walk(next);
+            next = nullptr;
+          } else if (taken && cold(taken)) {
+            walk(taken);
+            taken = nullptr;
+          }
         }
-        if (Block* next = block->next()) walk(next);
+
         if (taken) walk(taken);
+        if (next) walk(next);
       }
       m_visitor(block);
     }

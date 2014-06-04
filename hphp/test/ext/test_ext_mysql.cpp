@@ -458,7 +458,9 @@ bool TestExtMysql::test_mysql_free_result() {
   VS(f_mysql_query("insert into test (name) values ('test'),('test2')"), true);
 
   Variant res = f_mysql_query("select * from test");
+  VS(f_is_resource("result is a resource"), true);
   f_mysql_free_result(res);
+  VS(f_is_resource("result is not a resource after being freed"), false);
   return Count(true);
 }
 

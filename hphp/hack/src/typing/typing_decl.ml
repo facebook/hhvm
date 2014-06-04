@@ -25,7 +25,6 @@ exception Propagate_parent_error
 (*****************************************************************************)
 open Utils
 open Typing_defs
-open Silent
 open Nast
 open Typing_deps
 
@@ -179,13 +178,11 @@ let get_trait_requirements env class_nast impls =
 (*****************************************************************************)
 
 let ifun_decl nenv (f: Ast.fun_) =
-  try
-    let f = Naming.fun_ nenv f in
-    let cid = snd f.f_name in
-    Naming_heap.FunHeap.add cid f;
-    Typing.fun_decl f;
-    ()
-  with Ignore -> ()
+  let f = Naming.fun_ nenv f in
+  let cid = snd f.f_name in
+  Naming_heap.FunHeap.add cid f;
+  Typing.fun_decl f;
+  ()
 
 (*****************************************************************************)
 (* Section declaring the type of a class *)
@@ -294,9 +291,6 @@ and class_is_abstract c =
     | _ -> false
 
 and class_decl c =
-  try class_decl_ c with Ignore -> ()
-
-and class_decl_ c =
   let is_abstract = class_is_abstract c in
   let cls_pos, cls_name = c.c_name in
   let env = Typing_env.empty (Pos.filename cls_pos) in
@@ -420,7 +414,7 @@ and trait_exists env acc trait =
     | _ -> false
 
 and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
-  if SMap.mem method_name obj && not !is_silent_mode
+  if SMap.mem method_name obj
   then begin
     let static_position = Reason.to_pos reason_for_type in
     let dyn_method = SMap.find_unsafe method_name obj in
@@ -519,7 +513,7 @@ and static_class_var_decl c (env, acc) cv =
            }
   in
   let acc = SMap.add ("$"^id) ce acc in
-  if cv.cv_expr = None && not !is_silent_mode && (c.c_mode = Ast.Mstrict ||
+  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict ||
       c.c_mode = Ast.Mpartial)
   then begin match cv.cv_type with
     | None
@@ -566,7 +560,7 @@ and method_check_override c m acc =
     error pos ((Utils.strip_ns class_id)^"::"^id
                ^": combining private and override is nonsensical");
   match SMap.get id acc with
-    | Some { ce_final = true; ce_type = (r, _); _ } when not !is_silent_mode ->
+    | Some { ce_final = true; ce_type = (r, _); _ } ->
       error_final ~parent:(Reason.to_pos r) ~child:pos
     | Some _ -> false
     | None when override && c.c_kind = Ast.Ctrait -> true

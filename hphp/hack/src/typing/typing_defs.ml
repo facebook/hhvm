@@ -11,16 +11,6 @@
 
 open Utils
 
-(* This exception will be raised when we want to ignore an error.
- * It is useful in the following case:
- * Somebody has code in strict mode, and is using a class A.
- * A has a naming error, and because of that, the type of A cannot
- * be found. When that happens, we want to stop trying to type-check
- * the class. Because all the errors that are going to be thrown
- * are just the result of the missing type definition A.
- *)
-exception Ignore
-
 module Reason = Typing_reason
 
 type visibility =

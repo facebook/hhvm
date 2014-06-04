@@ -241,7 +241,6 @@ let autocomplete_result_to_json res =
 
 let hh_auto_complete fn =
   Autocomplete.auto_complete := true;
-  Silent.is_silent_mode := true;
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.argument_global_type := None;
@@ -280,20 +279,17 @@ let hh_auto_complete fn =
         (fun _ res acc -> (autocomplete_result_to_json res) :: acc)
         result
         [] in
-    Silent.is_silent_mode := false;
     output_json (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;
                           "internal_error",  JBool false;
                         ])
   with _ ->
-    Silent.is_silent_mode := false;
     output_json (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_get_method_at_position fn line char =
   Find_refs.find_method_at_cursor_result := None;
   Autocomplete.auto_complete := false;
-  Silent.is_silent_mode := true;
   Find_refs.find_method_at_cursor_target := Some (line, char);
   let content = Hashtbl.find files fn in
   try
@@ -346,11 +342,9 @@ let hh_get_method_at_position fn line char =
                  ]
       | _ -> JAssoc [ "internal_error", JBool false;
                     ] in
-    Silent.is_silent_mode := false;
     Find_refs.find_method_at_cursor_target := None;
     output_json result
   with _ ->
-    Silent.is_silent_mode := false;
     Find_refs.find_method_at_cursor_target := None;
     output_json (JAssoc [ "internal_error", JBool true;
                         ])
@@ -466,7 +460,6 @@ let hh_hack_coloring fn =
   Typing_defs.accumulate_types := true;
   ignore (hh_check ~check_mode:false fn);
   let result = !(Typing_defs.type_acc) in
-  Silent.is_silent_mode := false;
   Typing_defs.accumulate_types := false;
   Typing_defs.type_acc := [];
   let result = ColorFile.go (Hashtbl.find files fn) result in
@@ -503,7 +496,6 @@ let hh_get_method_calls fn =
                       ])
 
 let hh_arg_info fn line char =
-  Silent.is_silent_mode := true;
   Autocomplete.argument_info_target :=  Some (line, char);
   Autocomplete.argument_info_expected := None;
   Autocomplete.argument_info_position := None;
@@ -523,7 +515,6 @@ let hh_arg_info fn line char =
              "type",  JString str2;
            ]
     end expected in
-  Silent.is_silent_mode := false;
   Autocomplete.argument_info_target := None;
   Autocomplete.argument_info_expected := None;
   Autocomplete.argument_info_position := None;

@@ -357,22 +357,15 @@ and hint_ env p = function
       ()
   | Happly ((_, x), hl) when Typing_env.is_typedef env.tenv x ->
       let tdef = Typing_env.Typedefs.find_unsafe x in
-      let params =
-        match tdef with
-        | Typing_env.Typedef.Error -> raise Ignore
-        | Typing_env.Typedef.Ok (_, x, _, _) -> x
-      in
-      check_params env p x params hl
+      (match tdef with
+      | Typing_env.Typedef.Error -> ()
+      | Typing_env.Typedef.Ok (_, params, _, _) ->
+          check_params env p x params hl
+      )
   | Happly ((_, x), hl) ->
       let _, class_ = Env.get_class env.tenv x in
       (match class_ with
-      | None ->
-          (match env.tenv.Typing_env.genv.Typing_env.mode with
-          | Ast.Mstrict ->
-              raise Ignore
-          | Ast.Mpartial | Ast.Mdecl ->
-              ()
-          )
+      | None -> ()
       | Some class_ ->
           check_params env p x class_.tc_tparams hl
       );

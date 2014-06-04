@@ -16,7 +16,6 @@
 open Utils
 open Typing_defs
 open Typing_ops
-open Silent
 
 module Env = Typing_env
 module TUtils = Typing_utils
@@ -199,7 +198,6 @@ let open_class_hint = function
   | _ -> assert false
 
 let check_implements env parent_type type_ =
-  if !is_silent_mode then () else
   let parent_pos, parent_name, parent_tparaml = open_class_hint parent_type in
   let pos, name, tparaml = open_class_hint type_ in
   let env, parent_class = Env.get_class env (snd parent_name) in

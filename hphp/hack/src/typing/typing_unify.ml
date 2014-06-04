@@ -9,7 +9,6 @@
  *)
 open Utils
 open Typing_defs
-open Silent
 
 module Env = Typing_env
 module TUtils = Typing_utils
@@ -55,8 +54,6 @@ let rec unify env ty1 ty2 =
       * and then do yield result(null) *)
       if Env.allow_null_as_void env
       then unify env ty1 ty
-      else if !is_silent_mode
-      then env, (r1, ty1')
       else TUtils.uerror r1 ty1' r2 ty2'
   (* It might look like you can combine the next two cases, but you can't --
    * if both sides are a Tapply the "when" guard will only check ty1, so if ty2
@@ -98,8 +95,6 @@ and unify_ env r1 ty1 r2 ty2 =
       (match x, y with
       | x, y when x = y ->
 	  env, Tprim x
-      | _ when !is_silent_mode ->
-          env, Tany
       | _ ->
           TUtils.uerror r1 ty1 r2 ty2
       )
@@ -135,12 +130,9 @@ and unify_ env r1 ty1 r2 ty2 =
         in
         if List.length argl1 <> List.length argl2
         then
-          if !is_silent_mode
-          then env, Tany
-          else
-            error_l [p1, "This type has "^soi (List.length argl1)^
-                     " arguments";
-                     p2, "This one has "^soi (List.length argl2)]
+          error_l [p1, "This type has "^soi (List.length argl1)^
+                   " arguments";
+                   p2, "This one has "^soi (List.length argl2)]
         else
           let env, argl = lfold2 unify env argl1 argl2 in
           env, Tapply (id, argl)
@@ -224,7 +216,6 @@ and unify_ env r1 ty1 r2 ty2 =
       let env = TUtils.apply_shape ~f env (r1, fdm1) (r2, fdm2) in
       let env = TUtils.apply_shape ~f env (r2, fdm2) (r1, fdm1) in
       env, Tshape fdm1
-  | _ when !is_silent_mode -> env, Tany
   | _ ->
       TUtils.uerror r1 ty1 r2 ty2
 

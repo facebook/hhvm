@@ -63,7 +63,7 @@ let check_typedef x =
         let tenv = Typing_env.set_root tenv (Typing_deps.Dep.Class x) in
         (* TODO It's pretty ugly that this try/catch is here whereas the others
          * are in Typing.fun_def and friends. *)
-        try NastCheck.typedef tenv x typedef with Typing_defs.Ignore -> ()
+        NastCheck.typedef tenv x typedef
     )
   with Not_found ->
     ()

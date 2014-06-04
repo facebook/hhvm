@@ -9,7 +9,6 @@
  *)
 
 open Utils
-open Silent
 open Typing_defs
 
 module Env = Typing_env
@@ -129,6 +128,5 @@ let no_generic p local_var_id env =
   let ty = Typing_expand.fully_expand env ty in
   match IsGeneric.ty ty with
   | None -> env
-  | Some _ when !is_silent_mode -> env
   | Some x -> error p ("This static variable cannot use the parameter "^
                        x^".")

@@ -4,7 +4,7 @@ TOP=..
 ##############################################################################
 TARGET=lib
 
-SRC= serverConfig.ml autocomplete.ml silent.ml find_refs.ml ide.ml
+SRC= serverConfig.ml autocomplete.ml find_refs.ml ide.ml
 
 INCLUDEDIRS=$(TOP)/utils
 

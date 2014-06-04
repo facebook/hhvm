@@ -330,7 +330,7 @@ module Env = struct
  * consts, fun_names, class_names
  *)
   let new_var env (p, x) =
-    if SMap.mem x !env && not !Silent.is_silent_mode
+    if SMap.mem x !env
     then
       let p', y = SMap.find_unsafe x !env in
       error_name_already_bound x p p'
@@ -442,7 +442,7 @@ module Env = struct
       let lcl = SMap.get x !(env.locals) in
       match lcl with
       | Some lcl -> (if fst lcl != p then save_ref x p env); p, snd lcl
-      | None when not !Autocomplete.auto_complete && not !Silent.is_silent_mode ->
+      | None when not !Autocomplete.auto_complete ->
           if SMap.mem x !(env.all_locals)
           then bad_style env (p, x)
           else begin
@@ -522,13 +522,7 @@ module Env = struct
     then
       let p', y = SMap.find_unsafe x !env in
       if Pos.compare p p' = 0 then (p, y)
-      else if not !Silent.is_silent_mode
-      then
-        error_name_already_bound x p p'
-      else
-        let y = p, Ident.make x in
-        env := SMap.add x y !env;
-        y
+      else error_name_already_bound x p p'
     else
       let y = p, Ident.make x in
       env := SMap.add x y !env;
@@ -617,7 +611,7 @@ let opt f x = match x with None -> None | Some x -> Some (f x)
 
 let check_repetition s param =
   let x = snd param.param_id in
-  if SSet.mem x s && not !Silent.is_silent_mode
+  if SSet.mem x s
   then error (fst param.param_id) ("Argument already bound: "^x)
   else SSet.add x s
 
@@ -710,11 +704,8 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   | "\\boolean"
   | "\\double"
   | "\\real" ->
-      if !Silent.is_silent_mode
-      then N.Hany
-      else
-        error p ("Primitive type annotations are always available and may no \
-                  longer be referred to in the toplevel namespace.")
+      error p ("Primitive type annotations are always available and may no \
+                longer be referred to in the toplevel namespace.")
   | "void"             -> N.Hprim N.Tvoid
   | "int"              -> N.Hprim N.Tint
   | "bool"             -> N.Hprim N.Tbool
@@ -731,30 +722,19 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       | _ -> Error.too_many_args p
       )
   | "integer" ->
-      if !Silent.is_silent_mode
-      then N.Hprim N.Tint
-      else
-        error p "Invalid Hack type. Using \"integer\" in Hack is considered \
-                 an error. Use \"int\" instead, to keep the codebase \
-                 consistent."
+      error p "Invalid Hack type. Using \"integer\" in Hack is considered \
+               an error. Use \"int\" instead, to keep the codebase \
+               consistent."
   | "boolean" ->
-      if !Silent.is_silent_mode
-      then N.Hprim N.Tbool
-      else
-        error p "Invalid Hack type. Using \"boolean\" in Hack is considered \
-                 an error. Use \"bool\" instead, to keep the codebase \
-                 consistent."
+      error p "Invalid Hack type. Using \"boolean\" in Hack is considered \
+               an error. Use \"bool\" instead, to keep the codebase \
+               consistent."
   | "double" ->
-      if !Silent.is_silent_mode
-      then N.Hprim N.Tfloat
-      else
-        error p "Invalid Hack type. Using \"double\" in Hack is considered \
-         an error. Use \"float\" instead. They are equivalent data types \
-         and the codebase remains consistent."
+      error p "Invalid Hack type. Using \"double\" in Hack is considered \
+       an error. Use \"float\" instead. They are equivalent data types \
+       and the codebase remains consistent."
   | "real" ->
-      if !Silent.is_silent_mode
-      then N.Hprim N.Tfloat
-      else error p "Invalid Hack type. Using \"real\" in Hack is considered \
+      error p "Invalid Hack type. Using \"real\" in Hack is considered \
         an error. Use \"float\" instead. They are equivalent data types and \
         the codebase remains consistent."
   | "this" when allow_this ->
@@ -854,7 +834,7 @@ let interface c constructor methods smethods =
 (*****************************************************************************)
 
 let check_method acc { N.m_name = (p, x); _ } =
-  if SSet.mem x acc && not !Silent.is_silent_mode
+  if SSet.mem x acc
   then error p "Name already bound"
   else SSet.add x acc
 
@@ -1011,7 +991,6 @@ and constructor env acc = function
       let env = ({ genv with in_member_fun = true}, lenv) in
       (match acc with
       | None -> Some (method_ env m)
-      | Some _ when !Silent.is_silent_mode -> acc
       | Some _ -> error p ("Name already bound: "^name))
   | Method _ -> acc
 
@@ -1359,16 +1338,11 @@ and foreach_stmt env e ae b =
 and as_expr env = function
   | As_id (p, Lvar x) ->
       N.As_id (p, N.Lvar (Env.new_lvar env x))
-  | As_id (p, _) when !Silent.is_silent_mode ->
-      N.As_id (p, N.Lvar (Env.new_lvar env (p, "__dumb")))
   | As_id (p, _) -> error p "Was expecting a variable name"
   | As_kv ((p1, Lvar x1), (p2, Lvar x2)) ->
       let x1 = p1, N.Lvar (Env.new_lvar env x1) in
       let x2 = p2, N.Lvar (Env.new_lvar env x2) in
       N.As_kv (x1, x2)
-  | As_kv ((p, _), _) when !Silent.is_silent_mode ->
-      N.As_kv ((p, N.Lvar (Env.new_lvar env (p, "__dumb"))),
-               (p, N.Lvar (Env.new_lvar env (p, "__dumb"))))
   | As_kv ((p, _), _) -> error p "Was expecting variable names"
 
 and try_stmt env st b cl fb =

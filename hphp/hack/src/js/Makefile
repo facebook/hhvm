@@ -17,7 +17,6 @@ SRC = \
   sharedMem.ml\
   autocomplete.ml\
   find_refs.ml\
-  silent.ml\
   typing_deps.ml\
   namespace_env.ml\
   ast.ml\
@@ -201,9 +200,6 @@ autocomplete.ml: $(TOP)/globals/autocomplete.ml
 find_refs.ml: $(TOP)/globals/find_refs.ml
 	cp $(TOP)/globals/find_refs.ml .
 
-silent.ml: $(TOP)/globals/silent.ml
-	cp $(TOP)/globals/silent.ml .
-
 naming_error.ml: $(TOP)/naming/naming_error.ml
 	cp $(TOP)/naming/naming_error.ml .
 
@@ -309,7 +305,6 @@ clean::
 	rm -f typing_print.ml
 	rm -f typing_dynamic_yield.ml
 	rm -f find_refs.ml
-	rm -f silent.ml
 	rm -f autocomplete.ml
 	rm -f nast_terminality.ml
 	rm -f colorFile.ml

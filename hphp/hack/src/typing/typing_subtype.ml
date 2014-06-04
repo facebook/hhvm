@@ -10,7 +10,6 @@
 
 open Utils
 open Typing_defs
-open Silent
 
 module Reason = Typing_reason
 module Inst = Typing_instantiate
@@ -125,10 +124,7 @@ and sub_type env ty1 ty2 =
       let env, class_ = Env.get_class env cid2 in
       (match class_ with
         | None ->
-          (match env.Env.genv.Env.mode with
-            | Ast.Mstrict -> raise Ignore
-            | Ast.Mpartial | Ast.Mdecl -> env
-          )
+            env
         | Some class_ ->
           let subtype_req_ancestor =
             if class_.tc_kind = Ast.Ctrait then
@@ -171,7 +167,6 @@ and sub_type env ty1 ty2 =
                   let subst = Inst.make_subst class_.tc_tparams tyl2 in
                   let env, up_obj = Inst.instantiate subst env up_obj in
                   sub_type env ty1 up_obj
-                | None when !is_silent_mode -> env
                 | None when class_.tc_members_fully_known ->
                   TUtils.uerror p1 ty1_ p2 ty2_
                 | _ -> env
@@ -283,12 +278,9 @@ and sub_string p env ty2 =
   | (r2, Tapply (x, _)) ->
       let env, class_ = Env.get_class env (snd x) in
       (match class_ with
-      | None when Env.is_strict env ->
-          raise Ignore
       | None -> env
       | Some {tc_name = "\\Stringish"; _} -> env
       | Some tc when SMap.mem "\\Stringish" tc.tc_ancestors -> env
-      | _ when !is_silent_mode -> env
       | Some _ -> error_l [
           p, "You cannot use this object as a string";
           Reason.to_pos r2, "This object doesn't implement __toString"]

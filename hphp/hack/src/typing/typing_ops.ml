@@ -9,7 +9,6 @@
  *)
 
 open Utils
-open Silent
 
 module Reason  = Typing_reason
 module TUtils  = Typing_utils
@@ -27,7 +26,6 @@ let sub_type p ur env ty1 ty2 =
   let env = { env with Env.pos = p } in
   try SubType.sub_type env ty1 ty2
   with
-  | Error _ when !is_silent_mode -> env
   | Error l ->
     raise (Error ((p, Reason.string_of_ureason ur) :: l))
 

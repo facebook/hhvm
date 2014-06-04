@@ -13,7 +13,6 @@
 open Utils
 open Nast
 open Typing_defs
-open Silent
 
 (* Exception raised when we hit a return statement and the initialization
  * is not over.
@@ -62,7 +61,6 @@ module Error = struct
     ])
 
   let call_before_init p cv =
-    if !is_silent_mode then () else
     error p (
     sl([
        "Until the initialization of $this is over,";

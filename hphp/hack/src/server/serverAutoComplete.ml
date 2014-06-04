@@ -47,7 +47,6 @@ let complete_global nenv oc =
 
 let restore() =
   Autocomplete.auto_complete := false;
-  Silent.is_silent_mode := false;
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.argument_global_type := None;
@@ -55,7 +54,6 @@ let restore() =
       
 let setup() =
   Autocomplete.auto_complete := true;
-  Silent.is_silent_mode := true;
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.argument_global_type := None;

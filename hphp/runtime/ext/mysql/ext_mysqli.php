@@ -91,7 +91,7 @@ class mysqli {
    *   permissions (depending on if a password as provided or not).
    * @param string $dbname - If provided will specify the default database
    *   to be used when performing queries.
-   * @param int $port - Specifies the port number to attempt to connect to
+   * @param mixed $port - Specifies the port number to attempt to connect to
    *   the MySQL server.
    * @param string $socket - Specifies the socket or named pipe that should
    *   be used.    Specifying the socket parameter will not explicitly
@@ -111,16 +111,6 @@ class mysqli {
       return;
     }
 
-    if (is_string($port)) {
-      if (!ctype_digit($port)) {
-        throw new Exception('Port is not numeric');
-      };
-      $port = (int) $port;
-    }
-    if ($port !== null && !is_int($port)) {
-      throw new Exception('Port is not numeric');
-    }
-
     // Connect
     $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
   }
@@ -138,7 +128,7 @@ class mysqli {
                           ?string $username = null,
                           ?string $passwd = null,
                           ?string $dbname = null,
-                          ?int $port = null,
+                          mixed $port = null,
                           ?string $socket = null): void {
     $this->hh_init();
 
@@ -588,7 +578,7 @@ class mysqli {
    *   not).
    * @param string $dbname - If provided will specify the default
    *   database to be used when performing queries.
-   * @param int $port - Specifies the port number to attempt to connect
+   * @param mixed $port - Specifies the port number to attempt to connect
    *   to the MySQL server.
    * @param string $socket - Specifies the socket or named pipe that
    *   should be used.    Specifying the socket parameter will not
@@ -614,9 +604,20 @@ class mysqli {
                                ?string $username = null,
                                ?string $passwd = null,
                                ?string $dbname = null,
-                               ?int $port = null,
+                               mixed $port = null,
                                ?string $socket = null,
                                ?int $flags = 0): bool {
+
+    if (is_string($port)) {
+      if (!ctype_digit($port)) {
+        throw new Exception('Port is not numeric');
+      };
+      $port = (int) $port;
+    }
+    if ($port !== null && !is_int($port)) {
+      throw new Exception('Port is not numeric');
+    }
+
     $server = null;
     if ($host) {
       $server = $host;
@@ -1637,7 +1638,7 @@ function mysqli_connect(?string $host = null,
                         ?string $username = null,
                         ?string $passwd = null,
                         ?string $dbname = null,
-                        ?int $port = null,
+                        mixed $port = null,
                         ?string $socket = null): mixed {
   $link = new mysqli($host, $username, $passwd, $dbname, $port, $socket);
   if ($link->connect_errno > 0) {
@@ -2130,7 +2131,7 @@ function mysqli_query(mysqli $link,
  *   permissions (depending on if a password as provided or not).
  * @param string $dbname - If provided will specify the default database
  *   to be used when performing queries.
- * @param int $port - Specifies the port number to attempt to connect to
+ * @param mixed $port - Specifies the port number to attempt to connect to
  *   the MySQL server.
  * @param string $socket - Specifies the socket or named pipe that should
  *   be used.    Specifying the socket parameter will not explicitly
@@ -2156,7 +2157,7 @@ function mysqli_real_connect(mysqli $link,
                              ?string $username = null,
                              ?string $passwd = null,
                              ?string $dbname = null,
-                             ?int $port = null,
+                             mixed $port = null,
                              ?string $socket = null,
                              ?int $flags = 0): bool {
   return $link->real_connect($host, $username, $passwd, $dbname, $port, $socket,

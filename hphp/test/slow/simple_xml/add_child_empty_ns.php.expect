@@ -1,0 +1,4 @@
+string(8) "<a>b</a>"
+string(17) "<a xmlns="">b</a>"
+string(17) "<a xmlns="">b</a>"
+string(18) "<a xmlns="0">b</a>"

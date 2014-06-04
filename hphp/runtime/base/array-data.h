@@ -403,6 +403,9 @@ protected:
   friend struct PackedArray;
   friend struct EmptyArray;
   friend struct MixedArray;
+  friend class BaseVector;
+  friend class c_Vector;
+  friend class c_ImmVector;
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)
@@ -445,7 +448,7 @@ extern std::aligned_storage<
  * that can be used whenever an empty array is needed.  It has
  * kEmptyKind and uses the functions in empty-array.cpp.
  */
-inline ArrayData* staticEmptyArray() {
+ALWAYS_INLINE ArrayData* staticEmptyArray() {
   void* vp = &s_theEmptyArray;
   return static_cast<ArrayData*>(vp);
 }

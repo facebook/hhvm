@@ -16,6 +16,8 @@ option(USE_GOOGLE_CPU_PROFILER "Use Google cpu profiler" OFF)
 
 option(DISABLE_HARDWARE_COUNTERS "Disable hardware counters (for XenU systems)" OFF)
 
+option(ENABLE_TRACE "Enable tracing in release build" OFF)
+
 IF (NOT APPLE)
   option(ENABLE_ZEND_COMPAT "Enable Zend source compatibility" ON)
 ENDIF (NOT APPLE)

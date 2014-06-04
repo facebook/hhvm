@@ -76,7 +76,7 @@ ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC) {
 }
 
 ZEND_API const char *zend_get_executed_filename(TSRMLS_D) {
-  return HPHP::g_context->getContainingFileName().data();
+  return HPHP::g_context->getContainingFileName()->data();
 }
 
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D) {

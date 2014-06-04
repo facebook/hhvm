@@ -70,7 +70,7 @@ String StringBuffer::detach() {
     m_cap = 0;
     return String(str); // causes incref
   }
-  return empty_string;
+  return empty_string();
 }
 
 String StringBuffer::copy() const {

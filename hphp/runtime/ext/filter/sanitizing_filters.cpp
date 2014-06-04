@@ -33,7 +33,7 @@ static String php_filter_encode_html(const String& value,
   unsigned char *e = s + len;
 
   if (len == 0) {
-    return empty_string;
+    return empty_string();
   }
   StringBuffer str(len);
 
@@ -68,7 +68,7 @@ static Variant php_filter_encode_url(const String& value, const unsigned char* c
   unsigned char *e = s + char_len;
   int len = value.length();
   if (len == 0) {
-    return empty_string;
+    return empty_string_variant();
   }
 
   memset(tmp, 1, sizeof(tmp)-1);
@@ -98,7 +98,7 @@ static Variant php_filter_strip(const String& value, long flags) {
   int i;
   int len = value.length();
   if (len == 0) {
-    return empty_string;
+    return empty_string_variant();
   }
 
   /* Optimization for if no strip flags are set */
@@ -139,7 +139,7 @@ static Variant filter_map_apply(const String& value, filter_map *map) {
   int i;
   int len = value.length();
   if (len == 0) {
-    return empty_string;
+    return empty_string_variant();
   }
 
   str = (unsigned char *)value.data();
@@ -176,15 +176,16 @@ Variant php_filter_string(PHP_INPUT_FILTER_PARAM_DECL) {
 
   String encoded(php_filter_encode_html(stripped, enc));
   int len = encoded.length();
+  auto const empty = staticEmptyString();
   String ret = string_strip_tags(
-    encoded.data(), len, empty_string.data(), empty_string.length(), true
+    encoded.data(), len, empty->data(), empty->size(), true
   );
 
   if (len == 0) {
     if (flags & k_FILTER_FLAG_EMPTY_STRING_NULL) {
       return init_null();
     }
-    return empty_string;
+    return empty_string_variant();
   }
   return ret;
 }

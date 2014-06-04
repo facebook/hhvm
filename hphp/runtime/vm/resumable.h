@@ -51,6 +51,9 @@ struct Resumable {
   static constexpr ptrdiff_t resumeOffsetOff() {
     return offsetof(Resumable, m_resumeOffset);
   }
+  static constexpr ptrdiff_t objectOff() {
+    return sizeof(Resumable);
+  }
 
   static void* Create(const ActRec* fp, size_t numSlots, JIT::TCA resumeAddr,
                       Offset resumeOffset, size_t objSize) {

@@ -253,9 +253,9 @@ void tvCastToStringInPlace(TypedValue* tv) {
   StringData * s;
   switch (tv->m_type) {
   case KindOfUninit:
-  case KindOfNull:    s = empty_string.get(); goto static_string;
+  case KindOfNull:    s = staticEmptyString(); goto static_string;
   case KindOfBoolean:
-    s = tv->m_data.num ? s_1.get() : empty_string.get();
+    s = tv->m_data.num ? s_1.get() : staticEmptyString();
     goto static_string;
   case KindOfInt64:   s = buildStringData(tv->m_data.num); break;
   case KindOfDouble:  s = buildStringData(tv->m_data.dbl); break;
@@ -296,8 +296,8 @@ StringData* tvCastToString(const TypedValue* tv) {
   StringData* s;
   switch (tv->m_type) {
   case KindOfUninit:
-  case KindOfNull:    return empty_string.get();
-  case KindOfBoolean: return tv->m_data.num ? s_1.get() : empty_string.get();
+  case KindOfNull:    return staticEmptyString();
+  case KindOfBoolean: return tv->m_data.num ? s_1.get() : staticEmptyString();
   case KindOfInt64:   s = buildStringData(tv->m_data.num); break;
   case KindOfDouble:  s = buildStringData(tv->m_data.dbl); break;
   case KindOfStaticString: return tv->m_data.pstr;

@@ -244,9 +244,9 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       auto tv = cnsMap.second;
       constBuild.add(cnsMap.first, PreClass::Const(pc.get(),
                                                    cnsMap.first,
-                                                   empty_string.get(),
+                                                   staticEmptyString(),
                                                    tv,
-                                                   empty_string.get()));
+                                                   staticEmptyString()));
     }
   }
 

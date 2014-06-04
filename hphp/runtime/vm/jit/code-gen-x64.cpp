@@ -170,6 +170,7 @@ NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
+NOOP_OPCODE(EndGuards)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -2574,8 +2575,11 @@ void CodeGenerator::emitReqBindAddr(TCA& dest,
                                     SrcKey sk) {
   mcg->setJmpTransID((TCA)&dest);
 
-  dest = emitServiceReq(m_frozenCode, REQ_BIND_ADDR,
-                        &dest, sk.toAtomicInt());
+  dest = emitEphemeralServiceReq(m_frozenCode,
+                               mcg->getFreeStub(m_frozenCode, &mcg->cgFixups()),
+                               REQ_BIND_ADDR,
+                               &dest,
+                               sk.toAtomicInt());
   mcg->cgFixups().m_codePointers.insert(&dest);
 }
 
@@ -4390,20 +4394,24 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
  * Given a vector, check if it has a immutable copy and jump to the taken
  * branch if so.
  */
-void CodeGenerator::cgVectorHasFrozenCopy(IRInstruction* inst) {
+void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(0).reg();
 
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
          vec->type().getClass() == c_Vector::classof());
 
-  // Vector keeps a smart pointer to the immutable copy, so we need
-  // some advanced arithmetic to get the offset of the raw pointer.
-  uint rawPtrOffset = c_Vector::immCopyOffset() + kExpectedMPxOffset;
+  // Vector::m_data field holds an address of an ArrayData plus
+  // sizeof(ArrayData) bytes. We need to check this ArrayData's
+  // m_count field to see if we need to call Vector::triggerCow().
+  uint rawPtrOffset = c_Vector::dataOffset() + kExpectedMPxOffset;
 
   m_as.loadq(vecReg[rawPtrOffset], m_rScratch);
-  m_as.testq(m_rScratch, m_rScratch);
-  emitFwdJcc(CC_NZ, inst->taken());
+  m_as.cmpl(
+    1,
+    m_rScratch[(int64_t)FAST_REFCOUNT_OFFSET - (int64_t)sizeof(ArrayData)]
+  );
+  emitFwdJcc(CC_NE, inst->taken());
 }
 
 /**
@@ -4861,6 +4869,8 @@ void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch, ne, cls, method, fake_fp);
   }
+  always_assert(srcLoc(0).reg() == rbp);
+  always_assert(!inst->src(0)->isConst());
 
   // can raise an error if class is undefined
   cgCallHelper(m_as,
@@ -5210,7 +5220,7 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
                    CppCall::direct(arr_str_helper),
                    callDest(inst),
                    SyncOptions::kNoSyncPoint,
-                   argGroup().ssa(0/*arr*/).immPtr(empty_string.get()));
+                   argGroup().ssa(0/*arr*/).immPtr(staticEmptyString()));
     } else {
       m_as.movq(0, dstLoc(0).reg());
     }
@@ -5436,6 +5446,7 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   void* interpOneHelper = interpOneEntryPoints[opc];
 
   auto dstReg = InvalidReg;
+  always_assert(!inst->src(1)->isConst());
   cgCallHelper(m_as,
                CppCall::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
                callDest(dstReg),
@@ -5706,9 +5717,6 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
 
   // parent->m_child = child;
   m_as.storeq(childReg, parentArReg[childToArOff]);
-
-  // parent->incRefCount();
-  emitIncRef(m_as, m_rScratch);
 }
 
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
@@ -5742,6 +5750,13 @@ void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
   auto const base = srcLoc(0).reg();
   auto asyncArOffset = c_AsyncFunctionWaitHandle::arOff();
   m_as.lea (base[asyncArOffset], dest);
+}
+
+void CodeGenerator::cgLdResumableArObj(IRInstruction* inst) {
+  auto const dstReg = dstLoc(0).reg();
+  auto const resumableArReg = srcLoc(0).reg();
+  auto const objectOff = Resumable::objectOff() - Resumable::arOff();
+  m_as.lea (resumableArReg[objectOff], dstReg);
 }
 
 void CodeGenerator::cgCopyAsyncCells(IRInstruction* inst) {

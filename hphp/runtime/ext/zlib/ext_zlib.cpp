@@ -565,7 +565,7 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
 
   size_t len = ntohl(format->uncompressed_sz);
   if (len == 0) {
-    return empty_string;
+    return empty_string_variant();
   }
 
   String str(len, ReserveString);
@@ -713,7 +713,7 @@ class __SystemLib_ChunkedInflator {
   String inflateChunk(const String& chunk) {
     if (m_eof) {
       raise_warning("Tried to inflate after final chunk");
-      return empty_string;
+      return empty_string();
     }
     m_zstream.next_in = (Bytef*) chunk.data();
     m_zstream.avail_in = chunk.length();
@@ -736,11 +736,11 @@ class __SystemLib_ChunkedInflator {
           buffer.shrink(produced);
           return buffer;
         }
-        return empty_string;
+        return empty_string();
       }
     } while (++factor < maxfactor);
     raise_warning("Failed to extract chunk");
-    return empty_string;
+    return empty_string();
   }
 
  private:

@@ -45,7 +45,9 @@ class AsioContext {
     bool isRunning() { return m_current; }
     c_ResumableWaitHandle* getCurrent() { return m_current; }
 
-    void schedule(c_ResumableWaitHandle* wait_handle);
+    void schedule(c_ResumableWaitHandle* wait_handle) {
+      m_runnableQueue.push(wait_handle);
+    }
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
 
     template <class TWaitHandle>

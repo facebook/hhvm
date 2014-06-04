@@ -5240,7 +5240,7 @@ static String exif_get_sectionname(int section) {
   case SECTION_WINXP:     return s_WINXP;
   case SECTION_MAKERNOTE: return s_MAKERNOTE;
   }
-  return empty_string;
+  return empty_string();
 }
 
 static tag_table_type exif_get_tag_table(int section) {

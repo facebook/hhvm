@@ -344,7 +344,7 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
 
   if (!m_firstHeaderSet) {
     m_firstHeaderSet = true;
-    m_firstHeaderFile = g_context->getContainingFileName().data();
+    m_firstHeaderFile = g_context->getContainingFileName()->data();
     m_firstHeaderLine = g_context->getLine();
   }
 
@@ -400,25 +400,23 @@ void Transport::removeHeader(const char *name) {
   if (name && *name) {
     m_responseHeaders.erase(name);
     if (strcasecmp(name, "Set-Cookie") == 0) {
-      m_responseCookies.clear();
+      m_responseCookiesList.clear();
     }
   }
 }
 
 void Transport::removeAllHeaders() {
   m_responseHeaders.clear();
-  m_responseCookies.clear();
+  m_responseCookiesList.clear();
 }
 
 void Transport::getResponseHeaders(HeaderMap &headers) {
   headers = m_responseHeaders;
 
   std::vector<std::string> &cookies = headers["Set-Cookie"];
-  for (auto iter = m_responseCookies.begin();
-       iter != m_responseCookies.end();
-       ++iter) {
-    cookies.push_back(iter->second);
-  }
+  std::list<std::string> cookies_existing = getCookieLines();
+  cookies.insert(cookies.end(), cookies_existing.begin(),
+     cookies_existing.end());
 }
 
 bool Transport::acceptEncoding(const char *encoding) {
@@ -612,13 +610,37 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
   // PHP5 does not deduplicate cookies. That behavior is preserved when
   // CookieDeduplicate is not enabled. Otherwise, we will only keep the
   // last cookie for a given name-domain-path triplet.
-  String dedup_key = RuntimeOption::AllowDuplicateCookies ?
-    cookie :
-    name + "\n" + domain + "\n" + path;
+  String dedup_key = name + "\n" + domain + "\n" + path;
 
-  m_responseCookies[dedup_key.data()] = cookie;
+  m_responseCookiesList.emplace(m_responseCookiesList.end(),
+    dedup_key.data(), cookie);
+
   return true;
 }
+
+std::list<std::string> Transport::getCookieLines() {
+  std::list<std::string> ret;
+  if (RuntimeOption::AllowDuplicateCookies) {
+    for(CookieList::const_iterator iter = m_responseCookiesList.begin();
+        iter != m_responseCookiesList.end(); ++iter) {
+      ret.push_back(iter->second);
+    }
+  } else {
+    // We will dedupe with last-one-wins semantics by walking backwards and
+    // including only those whose dedupe key we have not seen yet, then
+    // reversing the list
+    std::unordered_set<std::string> already_seen;
+    for(auto iter = m_responseCookiesList.crbegin();
+        iter != m_responseCookiesList.crend(); ++iter) {
+      if (already_seen.find(iter->first) == already_seen.end()) {
+        ret.push_front(iter->second);
+        already_seen.insert(iter->first);
+      }
+    }
+  }
+  return ret;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -632,9 +654,10 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     }
   }
 
-  for (CookieMap::const_iterator iter = m_responseCookies.begin();
-       iter != m_responseCookies.end(); ++iter) {
-    addHeaderImpl("Set-Cookie", iter->second.c_str());
+  const std::list<std::string> cookies = getCookieLines();
+  for (std::list<std::string>::const_iterator iter = cookies.begin();
+       iter != cookies.end(); ++iter) {
+    addHeaderImpl("Set-Cookie", iter->c_str());
   }
 
   if (compressed) {

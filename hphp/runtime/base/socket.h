@@ -47,7 +47,7 @@ public:
 
   Socket();
   Socket(int sockfd, int type, const char *address = nullptr, int port = 0,
-         double timeout = 0, const StaticString& streamType = empty_string);
+         double timeout = 0, const StaticString& streamType = empty_string_ref);
   virtual ~Socket();
 
   // overriding ResourceData

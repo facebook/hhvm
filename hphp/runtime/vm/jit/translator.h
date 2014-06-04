@@ -34,12 +34,13 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
-#include "hphp/runtime/vm/jit/write-lease.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -226,82 +227,6 @@ typedef hphp_hash_map<RegionDesc::BlockId,
                       RegionDesc::Block*> BlockIdToRegionBlockMap;
 
 /*
- * Used to maintain a mapping from the bytecode to its corresponding x86.
- */
-struct TransBCMapping {
-  MD5    md5;
-  Offset bcStart;
-  TCA    aStart;
-  TCA    acoldStart;
-  TCA    afrozenStart;
-};
-
-/*
- * A record with various information about a translation.
- */
-struct TransRec {
-  TransID                id;
-  TransKind              kind;
-  SrcKey                 src;
-  MD5                    md5;
-  std::string            funcName;
-  Offset                 bcStopOffset;
-  std::vector<DynLocation>
-                         dependencies;
-  TCA                    aStart;
-  uint32_t               aLen;
-  TCA                    acoldStart;
-  uint32_t               acoldLen;
-  TCA                    afrozenStart;
-  uint32_t               afrozenLen;
-  std::vector<TransBCMapping>
-                         bcMapping;
-
-  TransRec() {}
-
-  TransRec(SrcKey      s,
-           MD5         _md5,
-           std::string _funcName,
-           TransKind   _kind,
-           TCA         _aStart = 0,
-           uint32_t    _aLen = 0,
-           TCA         _acoldStart = 0,
-           uint32_t    _acoldLen = 0,
-           TCA         _afrozenStart = 0,
-           uint32_t    _afrozenLen = 0)
-      : id(0)
-      , kind(_kind)
-      , src(s)
-      , md5(_md5)
-      , funcName(_funcName)
-      , bcStopOffset(0)
-      , aStart(_aStart)
-      , aLen(_aLen)
-      , acoldStart(_acoldStart)
-      , acoldLen(_acoldLen)
-      , afrozenStart(_afrozenStart)
-      , afrozenLen(_afrozenLen)
-    { }
-
-  TransRec(SrcKey                      s,
-           MD5                         _md5,
-           std::string                 _funcName,
-           TransKind                   _kind,
-           const Tracelet*             t,
-           TCA                         _aStart = 0,
-           uint32_t                    _aLen = 0,
-           TCA                         _acoldStart = 0,
-           uint32_t                    _acoldLen = 0,
-           TCA                         _afrozenStart = 0,
-           uint32_t                    _afrozenLen = 0,
-           std::vector<TransBCMapping> _bcMapping =
-                                                 std::vector<TransBCMapping>());
-
-  void setID(TransID newID) { id = newID; }
-  std::string print(uint64_t profCount) const;
-};
-
-/*
  * The information about the context a translation is ocurring
  * in---these fields are fixed for the whole translation.  Many
  * objects in the JIT need access to this.
@@ -376,10 +301,6 @@ extern Translator* tx;
  * Translator annotates a tracelet with input/output locations/types.
  */
 struct Translator {
-  // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
-  // generate an inline return for.
-  static const int kMaxInlineReturnDecRefs = 1;
-
   static const int MaxJmpsTracedThrough = 5;
 
   JIT::UniqueStubs uniqueStubs;

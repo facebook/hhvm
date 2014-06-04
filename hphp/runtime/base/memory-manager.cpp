@@ -123,7 +123,7 @@ void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated,
     not_reached();
   }
 
-  size_t headRoom = RuntimeOption::ServerMemoryHeadRoom;
+  int64_t headRoom = RuntimeOption::ServerMemoryHeadRoom;
   // Compute cactiveLimit based on s_cactiveLimitCeiling, as computed in
   // threadStatsInit().
   if (headRoom != 0 && headRoom < MemoryManager::s_cactiveLimitCeiling) {

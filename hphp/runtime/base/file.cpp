@@ -77,13 +77,13 @@ String File::TranslatePathKeepRelative(const String& filename) {
 
     // disallow access with an absolute path
     if (canonicalized.charAt(0) == '/') {
-      return empty_string;
+      return empty_string();
     }
 
     // unresolvable paths are all considered as unsafe
     if (canonicalized.find("..") >= 0) {
       assert(canonicalized.find("..") == 0);
-      return empty_string;
+      return empty_string();
     }
   }
 
@@ -155,7 +155,7 @@ Resource File::Open(const String& filename, const String& mode,
 
 File::File(bool nonblocking /* = true */,
            const String& wrapper /* = null_string */,
-           const String& stream_type /* = empty_string */)
+           const String& stream_type /* = empty_string_ref */)
   : m_isLocal(false), m_fd(-1), m_closed(false), m_nonblocking(nonblocking),
     m_writepos(0), m_readpos(0), m_position(0), m_eof(false),
     m_wrapperType(wrapper.get()), m_streamType(stream_type.get()),
@@ -191,13 +191,13 @@ void File::invokeFiltersOnClose() {
   }
   // As it's being closed, we can't actually do anything with filter output
   applyFilters(
-    empty_string,
+    empty_string_ref,
     m_readFilters,
     /* closing = */ true
   );
   if (!m_writeFilters.empty()) {
     auto buf = applyFilters(
-      empty_string,
+      empty_string_ref,
       m_writeFilters,
       /* closing = */ true
     );
@@ -263,6 +263,9 @@ String File::read() {
 String File::read(int64_t length) {
   if (length <= 0) {
     raise_notice("Invalid length %" PRId64, length);
+    // XXX: Changing this to empty_string causes problems, something is
+    // writing to this upstream but I'm not sure what and since it's
+    // unlikely to provide significant gain alone I'm leaving it for now.
     return "";
   }
 
@@ -493,7 +496,7 @@ bool File::removeFilter(Resource& resource) {
     if (it->get() == rd) {
       std::list<Resource> closing_filters;
       closing_filters.push_back(rd);
-      String result(applyFilters(empty_string,
+      String result(applyFilters(empty_string_ref,
                                  closing_filters,
                                  /* closing = */ true));
       std::list<Resource> later_filters;
@@ -698,7 +701,7 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
     return s;
   }
 
-  return empty_string;
+  return empty_string();
 }
 
 int64_t File::print() {
@@ -1042,7 +1045,7 @@ String File::applyFilters(const String& buffer,
     // PSFS_ERR_FATAL doesn't raise a fatal in Zend - appears to be
     // treated the same as PSFS_FEED_ME
     if (UNLIKELY(result != k_PSFS_PASS_ON)) {
-      return empty_string;
+      return empty_string();
     }
   }
 

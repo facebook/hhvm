@@ -221,6 +221,7 @@ struct Func {
   struct PrintOpts {
     PrintOpts()
       : fpi(true)
+      , metadata(true)
     {}
 
     PrintOpts& noFpi() {
@@ -228,7 +229,13 @@ struct Func {
       return *this;
     }
 
+    PrintOpts& noMetadata() {
+      metadata = false;
+      return *this;
+    }
+
     bool fpi;
+    bool metadata;
   };
   void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
 

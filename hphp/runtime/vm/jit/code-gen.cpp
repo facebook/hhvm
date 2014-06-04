@@ -37,17 +37,6 @@ void AsmInfo::updateForInstruction(IRInstruction* inst, TCA start, TCA end) {
   asmRanges[block] = TcaRange(asmRanges[block].start(), end);
 }
 
-const Func* loadClassCtor(Class* cls) {
-  const Func* f = cls->getCtor();
-  if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    VMRegAnchor _;
-    UNUSED LookupResult res =
-      g_context->lookupCtorMethod(f, cls, true /*raise*/);
-    assert(res == LookupResult::MethodFoundWithThis);
-  }
-  return f;
-}
-
 /*
  * Compute and save registers that are live *across* each inst, not including
  * registers whose lifetimes end at inst, nor registers defined by inst.
@@ -87,20 +76,21 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
                                                                     state));
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
-    if (bcMap &&
+
+    if (instr.is(EndGuards)) state.pastGuards = true;
+    if (bcMap && state.pastGuards &&
         (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI)) {
-      // Don't insert an entry in bcMap if the marker corresponds to
-      // last entry in there.
+      // Don't insert an entry in bcMap if the marker corresponds to last entry
+      // in there.
       if (bcMap->empty() ||
           bcMap->back().md5 != inst->marker().func()->unit()->md5() ||
           bcMap->back().bcStart != inst->marker().bcOff()) {
-        mcg->code.unlock(); // to access code.main() below. relocked below
-        bcMap->push_back(TransBCMapping{inst->marker().func()->unit()->md5(),
-                                        inst->marker().bcOff(),
-                                        mcg->code.main().frontier(),
-                                        mcg->code.realCold().frontier(),
-                                        mcg->code.realFrozen().frontier()});
-        mcg->code.lock();
+        bcMap->push_back(TransBCMapping{
+            inst->marker().func()->unit()->md5(),
+            inst->marker().bcOff(),
+            mcg->cgFixups().m_tletMain->frontier(),
+            mcg->cgFixups().m_tletCold->frontier(),
+            mcg->cgFixups().m_tletFrozen->frontier()});
       }
     }
     auto* start = cb.frontier();
@@ -111,11 +101,10 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
   }
 }
 
-void genCodeImpl(IRUnit& unit,
-                 std::vector<TransBCMapping>* bcMap,
-                 JIT::MCGenerator* mcg,
-                 const RegAllocInfo& regs,
-                 AsmInfo* asmInfo) {
+static void genCodeImpl(IRUnit& unit,
+                        JIT::MCGenerator* mcg,
+                        const RegAllocInfo& regs,
+                        AsmInfo* asmInfo) {
   LiveRegs live_regs = computeLiveRegs(unit, regs);
   CodegenState state(unit, regs, live_regs, asmInfo);
 
@@ -174,10 +163,16 @@ void genCodeImpl(IRUnit& unit,
   auto frozenStart = frozenCode->frontier();
   auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
   auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
+  auto bcMap = &mcg->cgFixups().m_bcMap;
 
   {
     mcg->code.lock();
-    SCOPE_EXIT { mcg->code.unlock(); };
+    mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
+
+    SCOPE_EXIT {
+      mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
+      mcg->code.unlock();
+    };
 
     /*
      * Emit the given block on the supplied assembler.  The `nextLinear'
@@ -191,8 +186,9 @@ void genCodeImpl(IRUnit& unit,
       FTRACE(6, "genBlock {} on {}\n", block->id(),
              cb.base() == coldCode.base() ? "acold" : "a");
 
-      auto const aStart      = cb.frontier();
-      auto const acoldStart  = coldCode.frontier();
+      auto const aStart       = cb.frontier();
+      auto const acoldStart   = coldCode.frontier();
+      auto const afrozenStart = frozenCode->frontier();
       mcg->backEnd().patchJumps(cb, state, block);
       state.addresses[block] = aStart;
 
@@ -213,9 +209,13 @@ void genCodeImpl(IRUnit& unit,
 
       if (state.asmInfo) {
         state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
-        if (cb.base() != coldCode.base()) {
+        if (cb.base() != coldCode.base() && frozenCode != &coldCode) {
           state.asmInfo->acoldRanges[block] = TcaRange(acoldStart,
                                                        coldCode.frontier());
+        }
+        if (cb.base() != frozenCode->base()) {
+          state.asmInfo->afrozenRanges[block] = TcaRange(afrozenStart,
+                                                        frozenCode->frontier());
         }
       }
     };
@@ -301,17 +301,17 @@ void genCodeImpl(IRUnit& unit,
   }
 }
 
-void genCode(IRUnit& unit, std::vector<TransBCMapping>* bcMap,
+void genCode(IRUnit& unit,
              JIT::MCGenerator* mcg,
              const RegAllocInfo& regs) {
   Timer _t(Timer::codeGen);
 
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    genCodeImpl(unit, bcMap, mcg, regs, &ai);
+    genCodeImpl(unit, mcg, regs, &ai);
     printUnit(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
   } else {
-    genCodeImpl(unit, bcMap, mcg, regs, nullptr);
+    genCodeImpl(unit, mcg, regs, nullptr);
   }
 }
 

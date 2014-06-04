@@ -330,7 +330,7 @@ bool f_array_key_exists(const Variant& key, const Variant& search) {
     return ad->exists(cell->m_data.num);
   case KindOfUninit:
   case KindOfNull:
-    return ad->exists(empty_string);
+    return ad->exists(staticEmptyString());
   default:
     break;
   }
@@ -1373,7 +1373,7 @@ static inline bool checkSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
 }
 
 static void containerValuesToSetHelper(c_Set* st, const Variant& container) {
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   for (ArrayIter iter(container); iter; ++iter) {
     auto const& c = *iter.secondRefPlus().asCell();
@@ -1382,7 +1382,7 @@ static void containerValuesToSetHelper(c_Set* st, const Variant& container) {
 }
 
 static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
   for (ArrayIter iter(container); iter; ++iter) {
@@ -1452,7 +1452,7 @@ Variant f_array_diff(int _argc, const Variant& container1, const Variant& contai
   // is not present in the Set. When checking if a value is present in the
   // Set, any value that is not an integer or string is cast to a string, and
   // we convert int-like strings to integers.
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {
@@ -1501,7 +1501,7 @@ Variant f_array_diff_key(int _argc, const Variant& container1, const Variant& co
   // not present in the Set. When checking if a key is present in the Set, any
   // key that is not an integer or string is cast to a string, and we convert
   // int-like strings to integers.
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {
@@ -1686,7 +1686,7 @@ static void containerValuesIntersectHelper(c_Set* st,
   assert(count >= 2);
   c_Map* mp;
   Object mapObj = mp = NEWOBJ(c_Map)();
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
   for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
@@ -1726,7 +1726,7 @@ static void containerKeysIntersectHelper(c_Set* st,
   assert(count >= 2);
   c_Map* mp;
   Object mapObj = mp = NEWOBJ(c_Map)();
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
   bool isKey = containers[0].m_type == KindOfArray;
@@ -1821,7 +1821,7 @@ Variant f_array_intersect(int _argc, const Variant& container1, const Variant& c
   // is present in the Set. When checking if a value is present in the Set,
   // any value that is not an integer or string is cast to a string, and we
   // convert int-like strings to integers.
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {
@@ -1875,7 +1875,7 @@ Variant f_array_intersect_key(int _argc, const Variant& container1, const Varian
   // is present in the Set. When checking if a key is present in the Set,
   // any value that is not an integer or string is cast to a string, and we
   // convert int-like strings to integers.
-  Variant strHolder(empty_string.get());
+  Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {

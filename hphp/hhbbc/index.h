@@ -40,14 +40,12 @@ namespace HPHP { namespace HHBBC {
 
 struct Type;
 struct Index;
-enum class ClsTag : uint8_t;
 
 namespace php {
 struct Class;
 struct Func;
 struct Unit;
 struct Program;
-struct Const;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -140,9 +138,8 @@ struct Class {
    * Returns true if this class could be a subtype of `o' at runtime.
    * When true is returned the two classes may still be unrelated but it is
    * not possible to tell. A typical example is with "non unique" classes.
-   * 'tag' and 'otherTag' specify the precision of type of the class.
    */
-  bool couldBe(const Class& o, ClsTag tag, ClsTag otherTag) const;
+  bool couldBe(const Class& o) const;
 
   /*
    * Returns the name of this class.  Non-null guarantee.
@@ -159,26 +156,19 @@ struct Class {
   bool couldBeOverriden() const;
 
   /*
-   * Returns true if this class could be an interface.
-   */
-  bool couldBeInterface() const;
-
-  /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
    * If there is no common ancestor folly::none is returned
    */
   folly::Optional<Class> commonAncestor(const Class& o) const;
 
 private:
-  Class(Either<SString, borrowed_ptr<ClassInfo>>);
-  Class(Either<SString, borrowed_ptr<ClassInfo>>,
-        std::set<borrowed_ptr<ClassInfo>>&& ifaces);
+  Class(borrowed_ptr<const Index>, Either<SString,borrowed_ptr<ClassInfo>>);
 
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
+  borrowed_ptr<const Index> index;
   Either<SString,borrowed_ptr<ClassInfo>> val;
-  std::shared_ptr<std::set<borrowed_ptr<ClassInfo>>> ifaces;
 };
 
 /*
@@ -206,13 +196,6 @@ struct Func {
    */
   SString name() const;
 
-  /*
-   * Returns interface class associated with this function, if any.
-   * This field is present only when the function is resolved through
-   * an interface.
-   */
-  folly::Optional<res::Class> interfaceCls() const { return rcls; }
-
 private:
   friend struct ::HPHP::HHBBC::Index;
   using Rep = boost::variant< SString
@@ -222,13 +205,11 @@ private:
 
 private:
   Func(borrowed_ptr<const Index>, Rep);
-  Func(borrowed_ptr<const Index>, Rep, res::Class);
   friend std::string show(const Func&);
 
 private:
   borrowed_ptr<const Index> index;
   Rep val;
-  folly::Optional<res::Class> rcls;
 };
 
 /*
@@ -490,10 +471,6 @@ private:
 private:
   template<class FuncRange>
   res::Func resolve_func_helper(const FuncRange&, SString) const;
-
-  folly::Optional<res::Func> resolve_iface_method(Context,
-                                                  res::Class cls,
-                                                  SString name) const;
   res::Func do_resolve(borrowed_ptr<const php::Func>) const;
   bool must_be_derived_from(borrowed_ptr<const php::Class>,
                             borrowed_ptr<const php::Class>) const;

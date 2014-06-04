@@ -122,6 +122,10 @@ if(APPLE OR FREEBSD)
   add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 
+if(ENABLE_TRACE)
+    add_definitions(-DUSE_TRACE=1)
+endif()
+
 if(APPLE)
   # We have to be a little more permissive in some cases.
   add_definitions(-fpermissive)

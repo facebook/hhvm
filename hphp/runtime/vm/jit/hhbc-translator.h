@@ -104,6 +104,7 @@ struct HhbcTranslator {
   void guardRefs(int64_t entryArDelta,
                  const std::vector<bool>& mask,
                  const std::vector<bool>& vals);
+  void endGuards();
 
   // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32_t localIndex, Type type);
@@ -723,7 +724,9 @@ private:
   void emitProfiledGuard(Type t, const char* location, int32_t id, G doGuard,
                          L loadAddr);
 
-  bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs);
+  bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
+                             uint32_t numNonDefault);
+  SSATmp* optimizedServerGetCustomBoolSetting();
   SSATmp* optimizedCallCount();
 
 private: // Exit trace creation routines.

@@ -206,6 +206,7 @@ O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CheckLoc,                D(FramePtr), S(FramePtr),                     B|E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                       B|E) \
+O(EndGuards,                        ND, NA,                                E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                      N|Er) \
 O(CastStkIntToDbl,           D(StkPtr), S(StkPtr),                         E) \
 O(CoerceStk,                 D(StkPtr), S(StkPtr),                    B|N|Er) \
@@ -403,7 +404,7 @@ O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
 O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
-O(VectorHasFrozenCopy,              ND, S(Obj),                            B) \
+O(VectorHasImmCopy,                 ND, S(Obj),                            B) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
 O(Box,                         DBox(0), S(Gen),                  E|N|CRc|PRc) \
@@ -648,7 +649,8 @@ O(AFWHBlockOn,                      ND, S(FramePtr) S(Obj),            E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
-O(CopyAsyncCells,                   ND, S(FramePtr) S(PtrToGen),        CRc|E) \
+O(LdResumableArObj,             D(Obj), S(FramePtr),                   C|PRc) \
+O(CopyAsyncCells,                   ND, S(FramePtr) S(PtrToGen),       CRc|E) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           C(Int)                              \
                                           S(TCA,Nullptr)                      \

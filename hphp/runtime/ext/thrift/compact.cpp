@@ -990,7 +990,7 @@ class CompactReader {
         return s;
       } else {
         transport.skip(size);
-        return empty_string;
+        return empty_string_variant();
       }
     }
 

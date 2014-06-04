@@ -62,6 +62,12 @@ extern const Array null_array;
 extern const Array empty_array_ref;
 extern const StaticString array_string; // String("Array")
 
+// Use empty_string() if you're returning String
+// Use empty_string_variant() if you're returning Variant
+// Or use these if you need to pass by const reference:
+extern const StaticString empty_string_ref; // const StaticString&
+extern const Variant empty_string_variant_ref; // const Variant&
+
 class StringData;
 class ArrayData;
 class ObjectData;

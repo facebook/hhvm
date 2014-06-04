@@ -122,7 +122,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   } catch (...) {
     auto const parentChain = getFirstParent();
     setState(STATE_FAILED);
-    tvWriteObject(AsioSession::Get()->getAbruptInterruptException().get(),
+    tvWriteObject(AsioSession::Get()->getAbruptInterruptException(),
                   &m_resultOrException);
     c_BlockableWaitHandle::UnblockChain(parentChain);
     throw;

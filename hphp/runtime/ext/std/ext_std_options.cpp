@@ -182,8 +182,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
     PackedArrayInit ai(3);
     ai.append(String(const_cast<StringData*>(unit->filepath())));
     ai.append(Variant(unit->getLineNumber(callerOffset)));
-    ai.append(assertion.isString() ? assertion.toString()
-                                   : static_cast<String>(empty_string));
+    ai.append(assertion.isString() ? assertion : empty_string_variant_ref);
     f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
   }
 
@@ -228,14 +227,14 @@ static Variant HHVM_FUNCTION(get_cfg_var, const String& option) {
 static String HHVM_FUNCTION(get_current_user) {
   int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
   if (pwbuflen < 1) {
-    return empty_string;
+    return empty_string();
   }
   char *pwbuf = (char*)smart_malloc(pwbuflen);
   struct passwd pw;
   struct passwd *retpwptr = NULL;
   if (getpwuid_r(getuid(), &pw, pwbuf, pwbuflen, &retpwptr) != 0) {
     smart_free(pwbuf);
-    return empty_string;
+    return empty_string();
   }
   String ret(pw.pw_name, CopyString);
   smart_free(pwbuf);
@@ -295,7 +294,7 @@ static Variant HHVM_FUNCTION(getenv, const String& varname) {
 
 static Variant HHVM_FUNCTION(getlastmod) {
   struct stat s;
-  int ret = ::stat(g_context->getContainingFileName().c_str(), &s);
+  int ret = ::stat(g_context->getContainingFileName()->data(), &s);
   return ret == 0 ? s.st_mtime : false;
 }
 
@@ -309,7 +308,7 @@ static Variant HHVM_FUNCTION(getmygid) {
 
 static Variant HHVM_FUNCTION(getmyinode) {
   struct stat s;
-  int ret = ::stat(g_context->getContainingFileName().c_str(), &s);
+  int ret = ::stat(g_context->getContainingFileName()->data(), &s);
   return ret == 0 ? s.st_ino : false;
 }
 
@@ -784,7 +783,7 @@ static String HHVM_FUNCTION(cpu_get_model) {
 }
 
 Variant HHVM_FUNCTION(ini_get, const String& varname) {
-  String value = empty_string;
+  String value = empty_string();
   IniSetting::Get(varname, value);
   return value;
 }

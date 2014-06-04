@@ -142,7 +142,7 @@ public:
   static int FiberCount;
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
-  static size_t ServerMemoryHeadRoom;
+  static int64_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
   static int64_t ImageMemoryMaxBytes;
   static int ResponseQueueCount;
@@ -326,9 +326,6 @@ public:
 
   static bool EnableDnsCache;
   static int DnsCacheTTL;
-  static time_t DnsCacheKeyMaturityThreshold;
-  static size_t DnsCacheMaximumCapacity;
-  static int DnsCacheKeyFrequencyUpdatePeriod;
 
   static std::map<std::string, std::string> ServerVariables;
 
@@ -361,6 +358,9 @@ public:
   static HackStrictOption DisallowDynamicVarEnvFuncs;
 
   static int GetScannerType();
+
+  static bool GetServerCustomBoolSetting(const std::string &settingName,
+                                         bool &val);
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
@@ -500,6 +500,11 @@ public:
 
 private:
   using string = std::string;
+
+  // Custom settings. This should be accessed via the GetServerCustomSetting
+  // APIs.
+  static std::map<std::string, std::string> CustomSettings;
+
 public:
 #define F(type, name, unused) \
   static type Eval ## name;
@@ -552,8 +557,8 @@ public:
   static std::string MailForceExtraParameters;
 
   // preg stack depth and debug support options
-  static long PregBacktraceLimit;
-  static long PregRecursionLimit;
+  static int64_t PregBacktraceLimit;
+  static int64_t PregRecursionLimit;
   static bool EnablePregErrorLog;
 
   // pprof/hhprof server options

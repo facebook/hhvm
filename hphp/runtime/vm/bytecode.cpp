@@ -1168,16 +1168,18 @@ Class* ExecutionContext::getParentContextClass() {
   return nullptr;
 }
 
-const String& ExecutionContext::getContainingFileName() {
+StringData* ExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = vmfp();
-  if (ar == nullptr) return empty_string;
+  if (ar == nullptr) return staticEmptyString();
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
-    if (ar == nullptr) return empty_string;
+    if (ar == nullptr) return staticEmptyString();
   }
   Unit* unit = ar->m_func->unit();
-  return unit->filepathRef();
+  assert(unit->filepath()->isStatic());
+  // XXX: const StringData* -> Variant(bool) conversion problem makes this ugly
+  return const_cast<StringData*>(unit->filepath());
 }
 
 int ExecutionContext::getLine() {
@@ -1828,8 +1830,7 @@ resume:
       case UnwindAction::Propagate:
         break;
       case UnwindAction::ResumeVM:
-        goto resume;
-      case UnwindAction::Return:
+        if (vmpc()) { goto resume; }
         return;
     }
   }
@@ -2693,7 +2694,7 @@ const Variant& ExecutionContext::getEvaledArg(const StringData* val,
 void ExecutionContext::recordLastError(const Exception &e, int errnum) {
   m_lastError = String(e.getMessage());
   m_lastErrorNum = errnum;
-  m_lastErrorPath = getContainingFileName();
+  m_lastErrorPath = String::attach(getContainingFileName());
   m_lastErrorLine = getLine();
 }
 
@@ -5004,7 +5005,7 @@ OPTBLD_INLINE void ExecutionContext::iopAssertRATL(IOP_ARGS) {
       localId,
       localId < func->numNamedLocals() ? func->localNames()[localId]->data()
                                        : "<unnamed>",
-      getContainingFileName().data(),
+      getContainingFileName()->data(),
       getLine(),
       show(rat),
       tv.pretty()
@@ -5024,7 +5025,7 @@ OPTBLD_INLINE void ExecutionContext::iopAssertRATStk(IOP_ARGS) {
       tvMatchesRepoAuthType(tv, rat),
       "failed assert RATStk {} in {}:{}, expected {}, got {}",
       stkSlot,
-      getContainingFileName().data(),
+      getContainingFileName()->data(),
       getLine(),
       show(rat),
       tv.pretty()
@@ -6682,7 +6683,7 @@ OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {
   string_printf(
     evalFilename,
     "%s(%d) : eval()'d code",
-    getContainingFileName().data(),
+    getContainingFileName()->data(),
     getLine()
   );
   Unit* unit = compileEvalString(prefixedCode.get(), evalFilename.c_str());

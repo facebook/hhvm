@@ -44,12 +44,14 @@ struct AsmInfo {
     : instRanges(unit, TcaRange(nullptr, nullptr))
     , asmRanges(unit, TcaRange(nullptr, nullptr))
     , acoldRanges(unit, TcaRange(nullptr, nullptr))
+    , afrozenRanges(unit, TcaRange(nullptr, nullptr))
   {}
 
   // Asm address info for each instruction and block
   StateVector<IRInstruction,TcaRange> instRanges;
   StateVector<Block,TcaRange> asmRanges;
   StateVector<Block,TcaRange> acoldRanges;
+  StateVector<Block,TcaRange> afrozenRanges;
 
   void updateForInstruction(IRInstruction* inst, TCA start, TCA end);
 };
@@ -67,6 +69,7 @@ struct CodegenState {
     , liveRegs(liveRegs)
     , asmInfo(asmInfo)
     , catches(unit, CatchInfo())
+    , pastGuards(false)
   {}
 
   // Each block has a list of addresses to patch, and an address if
@@ -92,14 +95,16 @@ struct CodegenState {
   // Used to pass information about the state of the world at native
   // calls between cgCallHelper and cgBeginCatch.
   StateVector<Block, CatchInfo> catches;
-};
 
-const Func* loadClassCtor(Class* cls);
+  // Have we progressed past the guards? Used to suppress TransBCMappings until
+  // we're translating code that can properly be attributed to specific
+  // bytecode.
+  bool pastGuards;
+};
 
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);
 
 void genCode(IRUnit&                 unit,
-             std::vector<TransBCMapping>* bcMap,
              MCGenerator*            mcg,
              const RegAllocInfo&     regs);
 

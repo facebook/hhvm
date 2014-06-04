@@ -72,6 +72,7 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
   void onUnblocked();
   void await(Offset resumeOffset, c_WaitableWaitHandle* child);
   void ret(Cell& result);
+  void fail(ObjectData* exception);
   String getName();
   c_WaitableWaitHandle* getChild();
   void enterContextImpl(context_idx_t ctx_idx);
@@ -94,7 +95,6 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
   void setState(uint8_t state) { setKindState(Kind::AsyncFunction, state); }
   void initialize(c_WaitableWaitHandle* child);
   void prepareChild(c_WaitableWaitHandle* child);
-  void markAsFailed(const Object& exception);
 
   // valid if STATE_SCHEDULED || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;

@@ -118,7 +118,7 @@ String c_Generator::t_getcalledclass() {
   } else if (actRec()->hasClass()) {
     called_class = actRec()->getClass()->name()->data();
   } else {
-    called_class = empty_string;
+    called_class = empty_string();
   }
 
   return called_class;

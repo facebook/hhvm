@@ -32,7 +32,7 @@ public:
 
   explicit TempFile(bool autoDelete = true,
                     const String& wrapper_type = null_string,
-                    const String& stream_type = empty_string);
+                    const String& stream_type = empty_string_ref);
   virtual ~TempFile();
 
   // overriding ResourceData

@@ -1642,7 +1642,7 @@
                     "args": [
                         {
                             "name": "namespaceuri",
-                            "type": "String",
+                            "type": "Variant",
                             "desc": "The prefix of the namespace."
                         }
                     ]

@@ -1090,7 +1090,8 @@ public:
   WddxSessionSerializer() : SessionSerializer("wddx") {}
 
   virtual String encode() {
-    WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string, true, true);
+    WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string_variant_ref,
+                                                true, true);
     for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
@@ -1578,7 +1579,7 @@ static String HHVM_FUNCTION(session_id,
                             const Variant& newid /* = null_string */) {
   String ret = PS(id);
   if (ret.isNull()) {
-    ret = empty_string;
+    ret = empty_string();
   }
 
   if (!newid.isNull()) {

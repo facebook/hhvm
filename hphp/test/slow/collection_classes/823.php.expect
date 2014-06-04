@@ -1,20 +1,39 @@
 int(2)
 int(2)
+int(2)
+int(2)
 bool(false)
+int(2)
 ------------------------
 int(0)
 string(3) "foo"
 int(1)
 int(42)
 ------------------------
-string(3) "foo"
-int(42)
+int(0)
+object(stdClass)#5 (0) {
+}
+int(1)
+int(73)
 ------------------------
 string(3) "foo"
 int(42)
+object(stdClass)#5 (0) {
+}
+int(73)
 ------------------------
 string(3) "foo"
 int(42)
+object(stdClass)#5 (0) {
+}
+int(73)
+------------------------
+string(3) "foo"
+int(42)
+NULL
+object(stdClass)#5 (0) {
+}
+int(73)
 NULL
 ------------------------
 array(2) {
@@ -23,24 +42,49 @@ array(2) {
   [1]=>
   int(42)
 }
+array(2) {
+  [0]=>
+  object(stdClass)#5 (0) {
+  }
+  [1]=>
+  int(73)
+}
 ------------------------
 string(33) "V:7:"HH\Pair":2:{s:3:"foo";i:42;}"
-object(HH\Pair)#4 (2) {
+string(42) "V:7:"HH\Pair":2:{O:8:"stdClass":0:{}i:73;}"
+object(HH\Pair)#6 (2) {
   [0]=>
   string(3) "foo"
   [1]=>
   int(42)
 }
+object(HH\Pair)#6 (2) {
+  [0]=>
+  object(stdClass)#7 (0) {
+  }
+  [1]=>
+  int(73)
+}
 ------------------------
+int(2)
 int(2)
 ------------------------
 bool(true)
 bool(true)
+bool(true)
+bool(true)
+------------------------
 int(0)
 string(3) "foo"
 int(1)
 int(42)
 ------------------------
+int(0)
+object(stdClass)#5 (0) {
+}
+int(1)
+int(73)
+------------------------
 array(2) {
   [0]=>
   string(3) "foo"
@@ -49,14 +93,35 @@ array(2) {
 }
 array(2) {
   [0]=>
+  object(stdClass)#5 (0) {
+  }
+  [1]=>
+  int(73)
+}
+array(2) {
+  [0]=>
   string(3) "foo"
   [1]=>
   int(42)
+}
+array(2) {
+  [0]=>
+  object(stdClass)#5 (0) {
+  }
+  [1]=>
+  int(73)
 }
 ------------------------
-object(HH\Pair)#4 (2) {
+object(HH\Pair)#6 (2) {
   [0]=>
   string(3) "foo"
   [1]=>
   int(42)
+}
+object(HH\Pair)#7 (2) {
+  [0]=>
+  object(stdClass)#5 (0) {
+  }
+  [1]=>
+  int(73)
 }

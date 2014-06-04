@@ -64,6 +64,9 @@ StringData* buildStringData(double  n);
 class String : protected SmartPtr<StringData> {
   typedef SmartPtr<StringData> StringBase;
 
+  explicit String(StringData* sd, StringBase::NoIncRef) :
+    StringBase(sd, StringBase::NoIncRef{}) { }
+
 public:
   typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
     IntegerStringDataMap;
@@ -201,6 +204,11 @@ public:
     String result;
     result.m_px = s.m_px;
     return result;
+  }
+
+  static ALWAYS_INLINE String attach(StringData* sd) {
+    assert(sd->isStatic());
+    return String(sd, StringBase::NoIncRef{});
   }
 
   void clear() { reset();}
@@ -578,7 +586,6 @@ private:
   void insert();
 };
 
-extern const StaticString empty_string;
 String getDataTypeString(DataType t);
 
 //////////////////////////////////////////////////////////////////////
@@ -589,6 +596,13 @@ inline String::String(const StaticString& str) :
 }
 
 //////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE String empty_string() {
+  return String::attach(staticEmptyString());
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif

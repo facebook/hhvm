@@ -30,7 +30,7 @@ namespace HPHP {
 
 static inline StrNR ctxClassName() {
   Class* ctx = g_context->getContextClass();
-  return ctx ? ctx->nameStr() : StrNR(empty_string);
+  return ctx ? ctx->nameStr() : StrNR(staticEmptyString());
 }
 
 static const Class* get_cls(const Variant& class_or_object) {

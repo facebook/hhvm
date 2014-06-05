@@ -149,7 +149,9 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
       Timer _t(Timer::optimize_relaxGuards);
       const bool simple = kind == TransKind::Profile &&
                           RuntimeOption::EvalJitRegionSelector == "tracelet";
-      auto changed = relaxGuards(unit, *irBuilder.guards(), simple);
+      RelaxGuardsFlags flags = (RelaxGuardsFlags)
+        (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
+      auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
       if (changed) finishPass("guard relaxation");
 
       if (doReoptimize) {

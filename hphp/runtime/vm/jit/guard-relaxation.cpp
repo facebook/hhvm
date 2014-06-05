@@ -203,11 +203,12 @@ Type relaxInner(Type t, TypeConstraint tc) {
  * DataTypeGeneric. Returns true iff any changes were made to the trace.
  */
 bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
-                 bool simple) {
+                 RelaxGuardsFlags flags) {
   Timer _t(Timer::optimize_relaxGuards);
   ITRACE(2, "entering relaxGuards\n");
   Indent _i;
-
+  bool simple = flags & RelaxSimple;
+  bool reflow = flags & RelaxReflow;
   splitCriticalEdges(unit);
   auto& guards = constraints.guards;
   auto blocks = rpoSortCfg(unit);
@@ -242,6 +243,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   }
 
   if (!changed) return false;
+  if (!reflow) return true;
 
   // Make a second pass to reflow types, with some special logic for loads.
   FrameState state{unit, unit.entry()->front().marker()};

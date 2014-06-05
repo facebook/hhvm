@@ -3973,9 +3973,6 @@ void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
 }
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
-  auto const ldrefExit = makeExit();
-  auto const ldgblExit = makeExit();
-
   emitProfiledGuard(
     type, "Loc", locId,
     [&](Type type) { gen(GuardLoc, type, LocalId(locId), m_irb->fp()); },
@@ -3984,6 +3981,8 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
   );
 
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
+    auto const ldrefExit = makeExit();
+    auto const ldgblExit = makePseudoMainExit();
     auto const val = ldLoc(locId, ldgblExit, DataTypeSpecific);
     gen(LdRef, type.unbox(), ldrefExit, val);
   }
@@ -5864,6 +5863,10 @@ Block* HhbcTranslator::makeExit(Offset targetBcOff,
                                 std::vector<SSATmp*>& spillValues) {
   if (targetBcOff == -1) targetBcOff = bcOff();
   return makeExitImpl(targetBcOff, ExitFlag::JIT, spillValues, CustomExit{});
+}
+
+Block* HhbcTranslator::makePseudoMainExit(Offset targetBcOff /* = -1 */) {
+  return inPseudoMain() ? makeExit(targetBcOff) : nullptr;
 }
 
 Block* HhbcTranslator::makeExitWarn(Offset targetBcOff,

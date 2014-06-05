@@ -1424,7 +1424,6 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
           return ret;
         }
         redo_any = get_zval_property(ret, "any");
-        ret.toObject()->o_set("any", uninit_null());
       } else {
         if (soap_check_xml_ref(ret, data)) {
           return ret;

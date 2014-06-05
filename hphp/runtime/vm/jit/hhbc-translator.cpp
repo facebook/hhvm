@@ -3302,8 +3302,8 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
         // Func::ParamInfo default values, as the C++ code sets them up,
         // but here we need to check if there /is/ a default.
         Type t(pi.builtinType());
-        if (UNLIKELY(pi.builtinType() == KindOfObject &&
-                     callee->methInfo()->parameters[i]->valueLen > 0)) {
+        if (pi.builtinType() == KindOfObject &&
+            callee->methInfo()->parameters[i]->valueLen > 0) {
           t = Type::NullableObj;
         }
         auto const sp = m_irb->sp();

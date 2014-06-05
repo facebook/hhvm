@@ -15,47 +15,30 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/asio/asio_context.h"
-#include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
-#include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/system/systemlib.h"
+
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-int f_asio_get_current_context_idx() {
-  return AsioSession::Get()->getCurrentContextIdx();
-}
-
-Object f_asio_get_running_in_context(int ctx_idx) {
-  auto session = AsioSession::Get();
-
-  if (ctx_idx <= 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected ctx_idx to be a positive integer"));
-    throw e;
-  }
-  if (ctx_idx > session->getCurrentContextIdx()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected ctx_idx to be less than or equal to the current context index"));
-    throw e;
+c_ResumableWaitHandle* c_ResumableWaitHandle::getRunning(ActRec* fp) {
+  while (fp && !(fp->resumed() && fp->func()->isAsync())) {
+    fp = g_context->getPrevVMState(fp);
   }
 
-  if (ctx_idx < session->getCurrentContextIdx()) {
-    auto fp = session->getContext(ctx_idx + 1)->getSavedFP();
-    return c_ResumableWaitHandle::getRunning(fp);
+  if (!fp) {
+    return nullptr;
+  } else if (fp->func()->isAsyncFunction()) {
+    return frame_afwh(fp);
+  } else if (fp->func()->isAsyncGenerator()) {
+    // not implemented yet
+    not_reached();
   } else {
-    VMRegAnchor _;
-    return c_ResumableWaitHandle::getRunning(vmfp());
+    not_reached();
   }
-}
-
-Object f_asio_get_running() {
-  VMRegAnchor _;
-  return c_ResumableWaitHandle::getRunning(vmfp());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

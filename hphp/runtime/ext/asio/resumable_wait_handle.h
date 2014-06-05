@@ -22,6 +22,9 @@
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 
 namespace HPHP {
+
+struct ActRec;
+
 ///////////////////////////////////////////////////////////////////////////////
 // class ResumableWaitHandle
 
@@ -42,6 +45,7 @@ class c_ResumableWaitHandle : public c_BlockableWaitHandle {
   ~c_ResumableWaitHandle() {}
 
  public:
+  static c_ResumableWaitHandle* getRunning(ActRec* fp);
   void resume();
   void exitContext(context_idx_t ctx_idx);
 };

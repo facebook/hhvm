@@ -57,7 +57,6 @@ namespace {
 
 void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
-  assert(!m_current);
 
   exitContextQueue<false>(ctx_idx, m_runnableQueue);
 
@@ -86,7 +85,6 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, 
 }
 
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
-  assert(!m_current);
   assert(wait_handle);
   assert(wait_handle->getContext() == this);
 
@@ -98,17 +96,14 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     session->initAbruptInterruptException();
   }
 
-  auto exit_guard = folly::makeGuard([&] { m_current = nullptr; });
-
   while (!wait_handle->isFinished()) {
     // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
-      m_current = m_runnableQueue.front();
+      auto current = m_runnableQueue.front();
       m_runnableQueue.pop();
-      m_current->resume();
+      current->resume();
       continue;
     }
-    m_current = nullptr;
 
     // Process all sleep handles that have completed their sleep.
     if (session->processSleepEvents()) {

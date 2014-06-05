@@ -2895,6 +2895,12 @@ c_SoapHeader::c_SoapHeader(Class* cb) :
 c_SoapHeader::~c_SoapHeader() {
 }
 
+static const StaticString
+  s_namespace("namespace"),
+  s_name("name"),
+  s_data("data"),
+  s_mustUnderstand("mustUnderstand");
+
 void c_SoapHeader::t___construct(const String& ns, const String& name,
                                  const Variant& data /* = null */,
                                  bool mustunderstand /* = false */,
@@ -2912,6 +2918,11 @@ void c_SoapHeader::t___construct(const String& ns, const String& name,
   m_name = name;
   m_data = data;
   m_mustUnderstand = mustunderstand;
+
+  o_set(s_namespace, ns);
+  o_set(s_name, name);
+  o_set(s_data, data);
+  o_set(s_mustUnderstand, mustunderstand);
 
   if (actor.isInteger() &&
       (actor.toInt64() == SOAP_ACTOR_NEXT ||

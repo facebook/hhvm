@@ -1053,38 +1053,12 @@ void in(ISS& env, const bc::SetOpS&) {
 
 void in(ISS& env, const bc::IncDecL& op) {
   auto const loc = locAsCell(env, op.loc1);
-  auto const val = tv(loc);
-  if (!val) {
-    // Only tracking IncDecL for constants for now.
-    setLoc(env, op.loc1, TInitCell);
-    return push(env, TInitCell);
-  }
-
+  auto const newT = typeIncDec(op.subop, loc);
   auto const pre = isPre(op.subop);
-  auto const inc = isInc(op.subop);
-  auto const over = isIncDecO(op.subop);
 
   if (!pre) push(env, loc);
-
-  // We can't constprop with this eval_cell, because of the effects
-  // on locals.
-  auto resultTy = eval_cell([inc,over,val] {
-    auto c = *val;
-    if (inc) {
-      (over ? cellIncO : cellInc)(c);
-    } else {
-      (over ? cellDecO : cellDec)(c);
-    }
-    return c;
-  });
-
-  // We may have inferred a TSStr or TSArr with a value here, but at
-  // runtime it will not be static.
-  resultTy = loosen_statics(resultTy);
-
-  if (pre) push(env, resultTy);
-
-  setLoc(env, op.loc1, resultTy);
+  setLoc(env, op.loc1, newT);
+  if (pre)  push(env, newT);
 }
 
 void in(ISS& env, const bc::IncDecN& op) {

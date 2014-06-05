@@ -151,4 +151,40 @@ Type typeBitXor(Type t1, Type t2) {
 
 //////////////////////////////////////////////////////////////////////
 
+Type typeIncDec(IncDecOp op, Type t) {
+  auto const overflowToDbl = isIncDecO(op);
+  auto const val = tv(t);
+
+  if (!val) {
+    // Doubles always stay doubles
+    if (t.subtypeOf(TDbl)) return TDbl;
+
+    // Ints stay ints unless they can overflow to doubles
+    if (t.subtypeOf(TInt) && !overflowToDbl) return TInt;
+
+    return TInitCell;
+  }
+
+  auto const inc = isInc(op);
+
+  // We can't constprop with this eval_cell, because of the effects
+  // on locals.
+  auto resultTy = eval_cell([inc,overflowToDbl,val] {
+    auto c = *val;
+    if (inc) {
+      (overflowToDbl ? cellIncO : cellInc)(c);
+    } else {
+      (overflowToDbl ? cellDecO : cellDec)(c);
+    }
+    return c;
+  });
+
+  // We may have inferred a TSStr or TSArr with a value here, but at
+  // runtime it will not be static.
+  resultTy = loosen_statics(resultTy);
+  return resultTy;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

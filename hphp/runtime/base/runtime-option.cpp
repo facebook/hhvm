@@ -60,8 +60,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool RuntimeOption::Loaded = false;
-
 const char *RuntimeOption::ExecutionMode = "";
 std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
@@ -569,8 +567,7 @@ static bool matchHdfPattern(const std::string &value, const IniSetting::Map& ini
 
 void RuntimeOption::Load(const IniSetting::Map& ini,
                          Hdf& config,
-                         std::vector<std::string> *overwrites /* = nullptr */,
-                         bool empty /* = false */) {
+                         std::vector<std::string> *overwrites /* = nullptr */) {
   if (overwrites) {
     // Do these first, mainly so we can override Tier.*.machine,
     // Tier.*.tier and Tier.*.cpu on the command line. But it can
@@ -896,13 +893,11 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
         Hdf repoLocal = repo["Local"];
         // Repo.Local.Mode.
         Config::Bind(RepoLocalMode, ini, repoLocal["Mode"]);
-        if (!empty && RepoLocalMode.empty()) {
+        if (RepoLocalMode.empty()) {
           const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
           if (HHVM_REPO_LOCAL_MODE != nullptr) {
             RepoLocalMode = HHVM_REPO_LOCAL_MODE;
           }
-        }
-        if (RepoLocalMode.empty()) {
           RepoLocalMode = "r-";
         }
         if (RepoLocalMode.compare("rw")
@@ -914,7 +909,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
         }
         // Repo.Local.Path.
         Config::Bind(RepoLocalPath, ini, repoLocal["Path"]);
-        if (!empty && RepoLocalPath.empty()) {
+        if (RepoLocalPath.empty()) {
           const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
           if (HHVM_REPO_LOCAL_PATH != nullptr) {
             RepoLocalPath = HHVM_REPO_LOCAL_PATH;
@@ -1536,7 +1531,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
   Extension::LoadModules(ini, config);
   SharedStores::Create();
-  if (overwrites) Loaded = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -804,6 +804,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                      "hhvm.eval.enable_xhp", &EnableXHP);
     Config::Bind(EnableZendCompat, ini, eval["EnableZendCompat"], false);
     Config::Bind(EnableZendSorting, ini, eval["EnableZendSorting"], false);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.eval.enable_zend_sorting", &EnableZendSorting);
     Config::Bind(TimeoutsUseWallTime, ini, eval["TimeoutsUseWallTime"], true);
     Config::Bind(CheckFlushOnUserClose, ini, eval["CheckFlushOnUserClose"],
                  true);
@@ -1501,6 +1503,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                    "hhvm.eval.jit", &EvalJit);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
                    "hhvm.eval.jit_pseudomain", &EvalJitPseudomain);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "hhvm.eval.perf_pid_map", &EvalPerfPidMap);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_id",
                    IniSetting::SetAndGet<std::string>(

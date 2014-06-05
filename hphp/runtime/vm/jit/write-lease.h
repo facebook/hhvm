@@ -34,7 +34,7 @@ namespace HPHP { namespace JIT {
  */
 
 struct Lease {
-  static const int64_t kStandardHintExpireInterval = 750;
+  static const int64_t kStandardHintExpireInterval = 1500; // in microseconds
   pthread_t       m_owner;
   pthread_mutex_t m_lock;
   // m_held: since there's no portable, universally invalid pthread_t,

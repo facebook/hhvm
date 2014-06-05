@@ -1,0 +1,8 @@
+Function [ <user> function foo ] {
+  @@ %s/ReflectionFunction_toString_001.php 3 - 3
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $bar ]
+    Parameter #1 [ <optional> $baz = 123 ]
+  }
+}

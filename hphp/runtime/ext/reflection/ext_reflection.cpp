@@ -1099,6 +1099,10 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
   size_t numConsts = cls->numConstants();
+  if (!numConsts) {
+    return Array::Create();
+  }
+
   c_Set* st;
   Object o = st = NEWOBJ(c_Set)();
   st->reserve(numConsts);

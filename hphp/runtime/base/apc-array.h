@@ -38,7 +38,7 @@ struct APCArray {
   // Entry point to create an APCArray of any kind
   static APCHandle* MakeShared(ArrayData* data,
                                bool inner,
-                               bool forceAPCObj);
+                               bool unserializeObj);
   static APCHandle* MakeShared();
 
   static Variant MakeArray(APCHandle* handle);
@@ -133,9 +133,9 @@ private:
   // Create API
   //
   static APCHandle* MakeShared(ArrayData* data,
-                               bool forceAPCObj);
+                               bool unserializeObj);
   static APCHandle* MakePackedShared(ArrayData* data,
-                                     bool forceAPCObj);
+                                     bool unserializeObj);
 
   void mustCache() { m_handle.m_shouldCache = true; }
   void setPacked() { m_handle.setPacked(); }

@@ -107,7 +107,7 @@ struct ConcurrentTableSharedStore {
   bool clear();
 
   void prime(const std::vector<KeyValuePair> &vars);
-  bool constructPrime(const String& v, KeyValuePair& item, bool serObj);
+  bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
   bool constructPrime(const Variant& v, KeyValuePair& item);
   void primeDone();
 
@@ -171,7 +171,7 @@ private:
 
 private:
   APCHandle* construct(const Variant& v) {
-    return APCHandle::Create(v);
+    return APCHandle::Create(v, false);
   }
 
   bool eraseImpl(const String& key, bool expired, int64_t oldestTime = 0);
@@ -190,9 +190,7 @@ private:
   void addToExpirationQueue(const char* key, int64_t etime);
 
   bool handleUpdate(const String& key, APCHandle* svar);
-  bool handlePromoteObj(const String& key,
-                        APCHandle* svar,
-                        const Variant& val);
+  bool handlePromoteObj(const String& key, APCHandle* svar, const Variant& valye);
   APCHandle* unserialize(const String& key, const StoreValue* sval);
 
   // helpers for dumping APC

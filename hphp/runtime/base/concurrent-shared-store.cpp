@@ -224,12 +224,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     VariableUnserializer vu(sval->sAddr, sval->getSerializedSize(), sType);
     Variant v;
     v.unserialize(&vu);
-    if (sval->isSerializedObj()) {
-      assert(v.isString());
-      sval->var = APCHandle::CreateObjectFromSerializedString(v.asCStrRef());
-    } else {
-      sval->var = APCHandle::Create(v);
-    }
+    sval->var = APCHandle::Create(v, sval->isSerializedObj());
     sval->size = m_apcStats.addAPCValue(sval->var, true);
     return sval->var;
   } catch (Exception &e) {
@@ -479,10 +474,10 @@ void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
 
 bool ConcurrentTableSharedStore::constructPrime(const String& v,
                                                 KeyValuePair& item,
-                                                bool serObj) {
+                                                bool serialized) {
   if (s_apc_file_storage.getState() !=
-        SharedStoreFileStorage::StorageState::Invalid &&
-      (!v.get()->isStatic() || serObj)) {
+      SharedStoreFileStorage::StorageState::Invalid &&
+      (!v.get()->isStatic() || serialized)) {
     // StaticString for non-object should consume limited amount of space,
     // not worth going through the file storage
 
@@ -493,22 +488,18 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
     char *sAddr = s_apc_file_storage.put(s.data(), s.size());
     if (sAddr) {
       item.sAddr = sAddr;
-      item.sSize = serObj ? 0 - s.size() : s.size();
+      item.sSize = serialized ? 0 - s.size() : s.size();
       return false;
     }
   }
-  if (serObj) {
-    item.value = APCHandle::CreateObjectFromSerializedString(v);
-  } else {
-    item.value = APCHandle::Create(v);
-  }
+  item.value = APCHandle::Create(v, serialized);
   return true;
 }
 
 bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
                                                 KeyValuePair& item) {
   if (s_apc_file_storage.getState() !=
-        SharedStoreFileStorage::StorageState::Invalid &&
+      SharedStoreFileStorage::StorageState::Invalid &&
       (IS_REFCOUNTED_TYPE(v.getType()))) {
     // Only do the storage for ref-counted type
     String s = apc_serialize(v);
@@ -519,7 +510,7 @@ bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
       return false;
     }
   }
-  item.value = APCHandle::Create(v);
+  item.value = APCHandle::Create(v, false);
   return true;
 }
 

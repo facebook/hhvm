@@ -33,10 +33,9 @@ namespace HPHP {
 
 APCHandle* APCArray::MakeShared(ArrayData* arr,
                                 bool inner,
-                                bool forceAPCObj) {
-  if (!inner || (apcExtension::UseUncounted && apcExtension::InnerUncounted)) {
-    // only need to call traverseData() on the top level array
-    // or if we are trying to optimize inner arrays too
+                                bool unserializeObj) {
+  if (!inner) {
+    // only need to call traverseData() on the toplevel array
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     DataWalker::DataFeature features = walker.traverseData(arr);
     if (features.isCircular() || features.hasCollection()) {
@@ -55,10 +54,10 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
   }
 
   if (arr->isVectorData()) {
-    return APCArray::MakePackedShared(arr, forceAPCObj);
+    return APCArray::MakePackedShared(arr, unserializeObj);
   }
 
-  return APCArray::MakeShared(arr, forceAPCObj);
+  return APCArray::MakeShared(arr, unserializeObj);
 }
 
 APCHandle* APCArray::MakeShared() {
@@ -68,7 +67,7 @@ APCHandle* APCArray::MakeShared() {
 }
 
 APCHandle* APCArray::MakeShared(ArrayData* arr,
-                                bool forceAPCObj) {
+                                bool unserializeObj) {
   auto num = arr->size();
   auto cap = num > 2 ? folly::nextPowTwo(num) : 2;
 
@@ -81,8 +80,10 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
 
   try {
     for (ArrayIter it(arr); !it.end(); it.next()) {
-      auto key = APCHandle::Create(it.first(), true, forceAPCObj);
-      auto val = APCHandle::Create(it.secondRef(), true, forceAPCObj);
+      auto key = APCHandle::Create(it.first(), false, true,
+                                   unserializeObj);
+      auto val = APCHandle::Create(it.secondRef(), false, true,
+                                   unserializeObj);
       if (val->shouldCache()) {
         ret->mustCache();
       }
@@ -97,7 +98,7 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
 }
 
 APCHandle* APCArray::MakePackedShared(ArrayData* arr,
-                                      bool forceAPCObj) {
+                                      bool unserializeObj) {
   size_t num_elems = arr->size();
   void* p = malloc(sizeof(APCArray) + sizeof(APCHandle*) * num_elems);
   auto ret = new (p) APCArray(static_cast<size_t>(num_elems));
@@ -105,7 +106,9 @@ APCHandle* APCArray::MakePackedShared(ArrayData* arr,
   try {
     size_t i = 0;
     for (ArrayIter it(arr); !it.end(); it.next()) {
-      APCHandle* val = APCHandle::Create(it.secondRef(), true, forceAPCObj);
+      APCHandle* val = APCHandle::Create(it.secondRef(),
+                                         false, true,
+                                         unserializeObj);
       if (val->shouldCache()) {
         ret->mustCache();
       }
@@ -139,13 +142,13 @@ APCArray::~APCArray() {
   if (isPacked()) {
     APCHandle** v = vals();
     for (size_t i = 0, n = m_size; i < n; i++) {
-      v[i]->unreferenceRoot();
+      v[i]->unreference();
     }
   } else {
     Bucket* bks = buckets();
     for (int i = 0; i < m.m_num; i++) {
-      bks[i].key->unreferenceRoot();
-      bks[i].val->unreferenceRoot();
+      bks[i].key->unreference();
+      bks[i].val->unreference();
     }
   }
 }
@@ -159,7 +162,7 @@ void APCArray::add(APCHandle *key, APCHandle *val) {
   bucket->val = val;
   m.m_num++;
   int hash_pos;
-  if (!key->isRefCountedHandle()) {
+  if (!IS_REFCOUNTED_TYPE(key->getType())) {
     APCTypedValue *k = APCTypedValue::fromHandle(key);
     hash_pos = (key->is(KindOfInt64) ?
         k->getInt64() : k->getStringData()->hash()) & m.m_capacity_mask;
@@ -179,7 +182,7 @@ ssize_t APCArray::indexOf(const StringData* key) const {
   ssize_t bucket = hash()[h & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {
-    if (!b[bucket].key->isRefCountedHandle()) {
+    if (!IS_REFCOUNTED_TYPE(b[bucket].key->getType())) {
       APCTypedValue *k = APCTypedValue::fromHandle(b[bucket].key);
       if (!b[bucket].key->is(KindOfInt64) &&
           key->same(k->getStringData())) {

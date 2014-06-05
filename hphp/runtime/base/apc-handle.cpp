@@ -28,8 +28,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 APCHandle* APCHandle::Create(const Variant& source,
-                             bool inner,
-                             bool forceAPCObj) {
+                             bool serialized,
+                             bool inner /* = false */,
+                             bool unserializeObj /* = false*/) {
+  return CreateSharedType(source, serialized, inner, unserializeObj);
+}
+
+APCHandle* APCHandle::CreateSharedType(const Variant& source,
+                                       bool serialized,
+                                       bool inner,
+                                       bool unserializeObj) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
     case KindOfBoolean: {
@@ -52,12 +60,20 @@ APCHandle* APCHandle::Create(const Variant& source,
     }
 
     case KindOfStaticString: {
+      if (serialized) goto StringCase;
+
       auto value = new APCTypedValue(type, source.getStringData());
       return value->getHandle();
     }
-
+StringCase:
     case KindOfString: {
       StringData* s = source.getStringData();
+      if (serialized) {
+        // It is priming, and there might not be the right class definitions
+        // for unserialization.
+        return APCObject::MakeShared(apc_reserialize(s));
+      }
+
       auto const st = lookupStaticString(s);
       if (st) {
         APCTypedValue* value = new APCTypedValue(KindOfStaticString, st);
@@ -65,7 +81,7 @@ APCHandle* APCHandle::Create(const Variant& source,
       }
 
       assert(!s->isStatic()); // would've been handled above
-      if (apcExtension::UseUncounted) {
+      if (!inner && apcExtension::UseUncounted) {
         StringData* st = StringData::MakeUncounted(s->slice());
         APCTypedValue* value = new APCTypedValue(st);
         return value->getHandle();
@@ -76,7 +92,7 @@ APCHandle* APCHandle::Create(const Variant& source,
     case KindOfArray:
       return APCArray::MakeShared(source.getArrayData(),
                                   inner,
-                                  forceAPCObj);
+                                  unserializeObj);
 
     case KindOfResource:
       // TODO Task #2661075: Here and elsewhere in the runtime, we convert
@@ -85,18 +101,12 @@ APCHandle* APCHandle::Create(const Variant& source,
       return APCArray::MakeShared();
 
     case KindOfObject:
-      return forceAPCObj ? APCObject::Construct(source.getObjectData())
-                         : APCObject::MakeShared(apc_serialize(source));
+      return unserializeObj ? APCObject::Construct(source.getObjectData())
+                            : APCObject::MakeShared(apc_serialize(source));
 
     default:
       return nullptr;
   }
-}
-
-APCHandle* APCHandle::CreateObjectFromSerializedString(const String& source) {
-  // It is priming, and there might not be the right class definitions
-  // for unserialization.
-  return APCObject::MakeShared(apc_reserialize(source.get()));
 }
 
 Variant APCHandle::toLocal() {

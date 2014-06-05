@@ -1656,7 +1656,7 @@ c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(Class* cb) :
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
   if (sxe) {
-    sxe->decRefCount();
+    decRefObj(sxe);
     sxe = nullptr;
   }
 }

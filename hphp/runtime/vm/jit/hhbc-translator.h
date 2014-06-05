@@ -219,6 +219,7 @@ struct HhbcTranslator {
   void emitPopR();
   void emitDup();
   void emitUnboxR();
+  void emitUnbox();
   void emitJmpZ(Offset taken, Offset next, bool bothPaths, bool breaksTracelet);
   void emitJmpNZ(Offset taken, Offset next, bool bothPaths,
                  bool breaksTracelet);

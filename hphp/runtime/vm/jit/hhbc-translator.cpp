@@ -471,6 +471,14 @@ void HhbcTranslator::emitUnboxR() {
   emitUnboxRAux();
 }
 
+void HhbcTranslator::emitUnbox() {
+  Block* exit = makeExit();
+  SSATmp* srcBox = popV();
+  SSATmp* unboxed = unbox(srcBox, exit);
+  pushIncRef(unboxed);
+  gen(DecRef, srcBox);
+}
+
 void HhbcTranslator::emitThis() {
   pushIncRef(gen(LdThis, makeExitNullThis(), m_irb->fp()));
 }

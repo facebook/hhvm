@@ -1450,7 +1450,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
 Type Index::lookup_class_constant(Context ctx,
                                   res::Class rcls,
                                   SString cnsName) const {
-  if (rcls.val.left()) return TInitUnc;
+  if (rcls.val.left()) return TInitCell;
   auto const cinfo = rcls.val.right();
 
   auto const it = cinfo->clsConstants.find(cnsName);
@@ -1458,11 +1458,11 @@ Type Index::lookup_class_constant(Context ctx,
     if (it->second->val.m_type == KindOfUninit) {
       // This is a class constant that needs an 86cinit to run.  It
       // would be good to eventually be able to analyze these.
-      return TInitUnc;
+      return TInitCell;
     }
     return from_cell(it->second->val);
   }
-  return TInitUnc;
+  return TInitCell;
 }
 
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {

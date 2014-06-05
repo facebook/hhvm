@@ -634,7 +634,10 @@ void RegionFormer::recordDependencies() {
   bool changed = false;
   if (doRelax) {
     Timer _t(Timer::selectTracelet_relaxGuards);
-    changed = relaxGuards(unit, *m_ht.irBuilder().guards(), m_profiling);
+    // The IR is going to be discarded immediately, so skip reflowing
+    // the types in relaxGuards to save JIT time.
+    RelaxGuardsFlags flags = m_profiling ? RelaxSimple : RelaxNormal;
+    changed = relaxGuards(unit, *m_ht.irBuilder().guards(), flags);
   }
 
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {

@@ -2072,7 +2072,6 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
-  fp->setReturnVMExit();
   // We don't need to check for space for the ActRec (unlike generally
   // in normal re-entry), because the ActRec isn't on the stack.
   checkStack(vmStack(), fp->func(), 0);
@@ -2098,7 +2097,6 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
-  fp->setReturnVMExit();
   checkStack(vmStack(), fp->func(), 0);
 
   // decref after we hold reference to the exception

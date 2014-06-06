@@ -46,6 +46,13 @@ a();
 // still 42
 var_dump($php_errormsg);
 
+function nosilence() {
+  $a = array();
+  $a->b;
+  var_dump(isset($php_errormsg));
+}
+nosilence();
+
 // we can turn it off
 ini_set('track_errors', false);
 @strtr();

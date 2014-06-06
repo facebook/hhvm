@@ -1166,18 +1166,17 @@ and new_object ~check_not_abstract p env c el =
  * as tuples. Example: array('', 0). Since the elements have
  * incompatible types, it should be a tuple. However, while migrating
  * code, it is more flexible to allow it in partial.
+ *
+ * This probably isn't a good idea and should just use ty2 in all cases, but
+ * FB www has about 50 errors if you just use ty2 -- not impossible to clean
+ * up but more work right now than I want to do. Also it probably affects open
+ * source code too, so this may be a nice small test case for our upcoming
+ * migration/upgrade strategy.
  *)
 and convert_array_as_tuple p env ty2 =
   let r2 = fst ty2 in
-  let p2 = Reason.to_pos r2 in
-  if TUtils.is_array_as_tuple env ty2
-  then
-    if Env.is_strict env
-    then
-      let msg_tuple =
-        "This array has heterogeneous elements, you should use a tuple instead" in
-      error_l [p, "Invalid assignment"; p2, msg_tuple]
-    else env, (r2, Tany)
+  if not (Env.is_strict env) && TUtils.is_array_as_tuple env ty2
+  then env, (r2, Tany)
   else env, ty2
 
 and assign p env e1 ty2 =

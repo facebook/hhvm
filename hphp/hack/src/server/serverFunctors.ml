@@ -45,7 +45,7 @@ module HackProgram : SERVER_PROGRAM = struct
       try
         let regex = Str.regexp_string "enable_hhi_embedding" in
         (* This is such a stupid interface. *)
-        ignore (Str.string_match regex hhconfig 0);
+        ignore (Str.search_forward regex hhconfig 0);
         true
       with Not_found -> false in
     let next_files =

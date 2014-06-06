@@ -471,6 +471,14 @@ void HhbcTranslator::emitUnboxR() {
   emitUnboxRAux();
 }
 
+void HhbcTranslator::emitUnbox() {
+  Block* exit = makeExit();
+  SSATmp* srcBox = popV();
+  SSATmp* unboxed = unbox(srcBox, exit);
+  pushIncRef(unboxed);
+  gen(DecRef, srcBox);
+}
+
 void HhbcTranslator::emitThis() {
   pushIncRef(gen(LdThis, makeExitNullThis(), m_irb->fp()));
 }
@@ -3302,8 +3310,8 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
         // Func::ParamInfo default values, as the C++ code sets them up,
         // but here we need to check if there /is/ a default.
         Type t(pi.builtinType());
-        if (UNLIKELY(pi.builtinType() == KindOfObject &&
-                     callee->methInfo()->parameters[i]->valueLen > 0)) {
+        if (pi.builtinType() == KindOfObject &&
+            callee->methInfo()->parameters[i]->valueLen > 0) {
           t = Type::NullableObj;
         }
         auto const sp = m_irb->sp();
@@ -3973,9 +3981,6 @@ void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
 }
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
-  auto const ldrefExit = makeExit();
-  auto const ldgblExit = makeExit();
-
   emitProfiledGuard(
     type, "Loc", locId,
     [&](Type type) { gen(GuardLoc, type, LocalId(locId), m_irb->fp()); },
@@ -3984,6 +3989,8 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
   );
 
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
+    auto const ldrefExit = makeExit();
+    auto const ldgblExit = makePseudoMainExit();
     auto const val = ldLoc(locId, ldgblExit, DataTypeSpecific);
     gen(LdRef, type.unbox(), ldrefExit, val);
   }
@@ -5864,6 +5871,10 @@ Block* HhbcTranslator::makeExit(Offset targetBcOff,
                                 std::vector<SSATmp*>& spillValues) {
   if (targetBcOff == -1) targetBcOff = bcOff();
   return makeExitImpl(targetBcOff, ExitFlag::JIT, spillValues, CustomExit{});
+}
+
+Block* HhbcTranslator::makePseudoMainExit(Offset targetBcOff /* = -1 */) {
+  return inPseudoMain() ? makeExit(targetBcOff) : nullptr;
 }
 
 Block* HhbcTranslator::makeExitWarn(Offset targetBcOff,

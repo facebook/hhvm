@@ -17,11 +17,13 @@
 
 #include "hphp/runtime/ext/ext_xenon.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
-#include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include <signal.h>
 #include <vector>
 #include <time.h>
@@ -241,18 +243,10 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 }
 
 Array XenonRequestLocalData::logAsyncStack() {
+  VMRegAnchor _;
   Array bt;
-  auto session = AsioSession::Get();
-  // we need this check here to see if the asio is in a valid state for queries
-  // if it is not, then return
-  // calling getCurrentWaitHandle directly while asio is not in a valid state
-  // will assert, so we need to check this ourselves before invoking it
-  if (session->isInContext() && !session->getCurrentContext()->isRunning()) {
-    ++m_asyncInvalidCount;
-    return bt;
-  }
 
-  auto currentWaitHandle = session->getCurrentWaitHandle();
+  auto currentWaitHandle = c_ResumableWaitHandle::getRunning(vmfp());
   if (currentWaitHandle == nullptr) {
     // if we have a nullptr, then we have no async stack to store for this log
     return bt;

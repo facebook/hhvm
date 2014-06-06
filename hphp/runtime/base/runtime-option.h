@@ -53,10 +53,7 @@ class RuntimeOption {
 public:
   static void Load(const IniSettingMap &ini,
                    Hdf& config,
-                   std::vector<std::string>* overwrites = nullptr,
-                   bool empty = false);
-
-  static bool Loaded;
+                   std::vector<std::string>* overwrites = nullptr);
 
   static bool ServerExecutionMode() {
     return strcmp(ExecutionMode, "srv") == 0;

@@ -219,6 +219,7 @@ struct HhbcTranslator {
   void emitPopR();
   void emitDup();
   void emitUnboxR();
+  void emitUnbox();
   void emitJmpZ(Offset taken, Offset next, bool bothPaths, bool breaksTracelet);
   void emitJmpNZ(Offset taken, Offset next, bool bothPaths,
                  bool breaksTracelet);
@@ -736,6 +737,7 @@ private: // Exit trace creation routines.
                       const StringData* warning);
   Block* makeExitError(SSATmp* msg, Block* catchBlock);
   Block* makeExitNullThis();
+  Block* makePseudoMainExit(Offset targetBcOff = -1);
 
   SSATmp* promoteBool(SSATmp* src);
   Opcode promoteBinaryDoubles(Op op, SSATmp*& src1, SSATmp*& src2);

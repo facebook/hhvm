@@ -91,20 +91,19 @@ case $DISTRO in
 
         # install apt-fast to speed up later dependency installation
         sudo add-apt-repository -y ppa:apt-fast/stable
-        sudo add-apt-repository -y ppa:mapnik/boost
+        sudo add-apt-repository -y ppa:boost-latest/ppa
         sudo apt-get -y update
         sudo apt-get -y install apt-fast
 
         # install the actual dependencies
         sudo apt-fast -y update
-        sudo apt-fast -y install git-core cmake g++ libboost1.49-dev libmysqlclient-dev \
+        sudo apt-fast -y install git-core cmake g++ boost1.55 libmysqlclient-dev \
             libxml2-dev libmcrypt-dev libicu-dev openssl build-essential binutils-dev \
             libcap-dev libgd2-xpm-dev zlib1g-dev libtbb-dev libonig-dev libpcre3-dev \
-            autoconf libtool libcurl4-openssl-dev libboost-regex1.49-dev libboost-system1.49-dev \
-            libboost-program-options1.49-dev libboost-filesystem1.49-dev libboost-thread1.49-dev \
             wget memcached libreadline-dev libncurses-dev libmemcached-dev libbz2-dev \
             libc-client2007e-dev php5-mcrypt php5-imagick libgoogle-perftools-dev \
             libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion \
+            autoconf libtool libcurl4-openssl-dev \
             libmagickwand-dev libxslt1-dev &
 
         git clone git://github.com/libevent/libevent.git --quiet &

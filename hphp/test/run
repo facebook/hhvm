@@ -593,11 +593,31 @@ function skip_test($options, $test) {
   if (!$skipif_test) {
     return false;
   }
+ 
+  // For now, run the .skipif in non-repo since building a repo for it is hard
+  $options_without_repo = $options;
+  unset($options_without_repo['repo']);
 
-  list($hhvm, $_) = hhvm_cmd($options, $test, $skipif_test);
-  $out = shell_exec($hhvm . ' 2> /dev/null');
-  $out = trim($out);
-  return (bool)strlen($out);
+  list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $skipif_test);
+  $descriptorspec = array(
+    0 => array("pipe", "r"),
+    1 => array("pipe", "w"),
+    2 => array("pipe", "w"),
+  );
+  $pipes = null;
+  $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes);
+  if (!is_resource($process)) {
+    // This is weird. We can't run HHVM but we probably shouldn't skip the test
+    // since on a broken build everything will show up as skipped and give you a
+    // SHIPIT
+    return false;
+  }
+
+  fclose($pipes[0]);
+  $output = stream_get_contents($pipes[1]);
+  fclose($pipes[1]);
+  proc_close($process);
+  return strlen($output) != 0;
 }
 
 function dump_hhas_to_temp($hhvm_cmd, $test) {

@@ -74,8 +74,6 @@ struct CodeGenerator : public JIT::CodeGenerator {
   const Func* curFunc() const { return m_curInst->marker().func(); }
   bool resumed() const { return m_curInst->marker().resumed(); }
 
-  void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc);
-
   void emitCompareInt(IRInstruction* inst);
   void emitCompareIntAndSet(IRInstruction* inst,
                             vixl::Condition cond);
@@ -148,6 +146,9 @@ struct CodeGenerator : public JIT::CodeGenerator {
   CodegenState&               m_state;
   IRInstruction*              m_curInst;
 };
+
+void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc,
+                     CodegenState& state);
 
 }}}
 

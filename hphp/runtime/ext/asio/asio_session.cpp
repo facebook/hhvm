@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
 #include "hphp/runtime/ext/asio/sleep_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 
@@ -44,31 +45,25 @@ AsioSession::AsioSession()
     : m_contexts(), m_externalThreadEventQueue() {
 }
 
-void AsioSession::enterContext() {
-  assert(!isInContext() || getCurrentContext()->isRunning());
-
+void AsioSession::enterContext(ActRec* savedFP) {
   if (UNLIKELY(getCurrentContextIdx() >= MAX_CONTEXT_DEPTH)) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Unable to enter asio context: too many contexts open"));
     throw e;
   }
 
-  m_contexts.push_back(new AsioContext());
+  m_contexts.push_back(new AsioContext(savedFP));
 
   assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
   assert(isInContext());
-  assert(!getCurrentContext()->isRunning());
 }
 
 void AsioSession::exitContext() {
   assert(isInContext());
-  assert(!getCurrentContext()->isRunning());
 
   m_contexts.back()->exit(m_contexts.size());
   delete m_contexts.back();
   m_contexts.pop_back();
-
-  assert(!isInContext() || getCurrentContext()->isRunning());
 }
 
 void AsioSession::initAbruptInterruptException() {

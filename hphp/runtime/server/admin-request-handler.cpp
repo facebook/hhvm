@@ -23,6 +23,7 @@
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
+#include "hphp/runtime/base/file-util.h"
 #endif
 
 #include "hphp/runtime/base/file-repository.h"

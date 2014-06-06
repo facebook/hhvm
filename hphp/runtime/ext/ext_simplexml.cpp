@@ -819,9 +819,10 @@ next_iter:
 static Variant sxe_object_cast(c_SimpleXMLElement* sxe, int8_t type) {
   if (type == HPHP::KindOfBoolean) {
     xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
+    if (node) return true;
     Array properties = Array::Create();
     sxe_get_prop_hash(sxe, true, properties);
-    return node != nullptr || properties.size();
+    return properties.size() != 0;
   }
 
   xmlChar* contents = nullptr;
@@ -1655,7 +1656,7 @@ c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(Class* cb) :
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
   if (sxe) {
-    sxe->decRefCount();
+    decRefObj(sxe);
     sxe = nullptr;
   }
 }

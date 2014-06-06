@@ -4869,8 +4869,9 @@ void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch, ne, cls, method, fake_fp);
   }
-  always_assert(srcLoc(0).reg() == rbp);
-  always_assert(!inst->src(0)->isConst());
+  if (inst->src(0)->isConst()) {
+    PUNT(LookupClsMethodCache_const_fp);
+  }
 
   // can raise an error if class is undefined
   cgCallHelper(m_as,
@@ -5446,7 +5447,9 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   void* interpOneHelper = interpOneEntryPoints[opc];
 
   auto dstReg = InvalidReg;
-  always_assert(!inst->src(1)->isConst());
+  if (inst->src(1)->isConst()) {
+    PUNT(InterpOneCommon_const_fp);
+  }
   cgCallHelper(m_as,
                CppCall::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
                callDest(dstReg),

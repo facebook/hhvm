@@ -190,6 +190,7 @@
   CASE(Strlen) \
   CASE(This) \
   CASE(True) \
+  CASE(Unbox) \
   CASE(UnsetL) \
   CASE(VGetG) \
   CASE(VGetL) \

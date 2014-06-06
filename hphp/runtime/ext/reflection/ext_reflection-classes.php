@@ -131,7 +131,7 @@ class ReflectionParameter implements Reflector {
     } else {
       $out .= '<required> '.$type.'$'.$this->getName();
     }
-    $out .= ' ]';
+    $out .= " ]\n";
     return $out;
   }
 
@@ -551,7 +551,25 @@ class ReflectionProperty implements Reflector {
    *
    */
   public function __toString() {
-    return "";
+    if ($this->isStatic()) {
+      $def = '';
+    } elseif ($this->isDefault()) {
+      $def = '<default> ';
+    } else {
+      $def = '<dynamic> ';
+    }
+    // FIXME: Implicit public
+    if ($this->isPrivate()) {
+      $modifiers = 'private';
+    } elseif ($this->isProtected()) {
+      $modifiers = 'protected';
+    } else {
+      $modifiers = 'public';
+    }
+    if ($this->isStatic()) {
+      $modifiers .= ' static';
+    }
+    return "Property [ {$def}{$modifiers} \${$this->getName()} ]\n";
   }
 
   // Prevent cloning
@@ -879,7 +897,13 @@ class ReflectionExtension implements Reflector {
    *                     same way as the ReflectionExtension::export().
    */
   public function __toString() {
-    return "";
+    /* HHVM extensions don't (currently) track what consts/ini/funcs/classes
+     * are associated with them (nor do they track a unique number).
+     * Provide a placeholder string with the data we do have pending
+     * changes to the Extension registry.
+     */
+    return "Extension [ <persistent> extension #0 {$this->getName()} " .
+           "version {$this->getVersion()} \{\}\n";
   }
 
   // Prevent cloning

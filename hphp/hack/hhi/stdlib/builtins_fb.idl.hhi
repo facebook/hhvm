@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -63,6 +63,7 @@ function fb_lazy_realpath($filename) { }
 function fb_setprofile($callback) { }
 function fb_gc_collect_cycles() { }
 function fb_gc_detect_cycles($filename) { }
+function fb_get_method_param_default_info(mixed $cls, string $name, bool $prohibitStatic = false): array<int,mixed> { }
 
 namespace HH {
 

@@ -41,7 +41,7 @@ endif
 #------------------------------------------------------------------------------
 # Main variables
 #------------------------------------------------------------------------------
-SYSLIBS=nums.cma bigarray.cma str.cma unix.cma
+SYSLIBS=nums.cma bigarray.cma str.cma unix.cma $(EXTLIBS)
 
 ifeq ($(OS), Linux)
   INOTIFY=inotify
@@ -50,6 +50,7 @@ endif
 
 LIBS=$(INOTIFYLIB) \
  utils/utils.cma \
+ hhi/hhi.cma \
  avl/lib.cma \
  dfind/lib.cma \
  globals/lib.cma \
@@ -62,6 +63,7 @@ LIBS=$(INOTIFYLIB) \
 
 MAKESUBDIRS=$(INOTIFY) avl dfind \
  utils globals \
+ hhi \
  heap procs \
  deps parsing naming typing \
  server \
@@ -86,13 +88,18 @@ INCLUDEDIRS=$(filter-out $(FILTER_FROM_INCLUDE),$(MAKESUBDIRS)) \
 all:: opt
 opt:
 	$(MAKE) rec.opt
+	$(MAKE) hhi_archive
 	$(MAKE) $(PROGS:=.opt)
 	$(MAKE) bin
 bc:
 	$(MAKE) rec
+	$(MAKE) hhi_archive
 	$(MAKE) $(PROGS:=.bc)
 top: $(TARGET).top
 
+
+hhi_archive:
+	$(MAKE) -C ../hhi
 
 rec:
 	set -e; for i in $(MAKESUBDIRS); do $(MAKE) -C $$i all || exit 1; done
@@ -150,7 +157,7 @@ distclean:: clean
 ##############################################################################
 ifeq ($(OS), Linux)
 bin:
-	cp -f hh_server.opt ../bin/hh_server
+	objcopy --add-section hhi=../bin/hhi.tar.gz hh_server.opt ../bin/hh_server
 	cp hh_client.opt ../bin/hh_client
 	cp hh_single.opt ../bin/hh_single_type_check
 else

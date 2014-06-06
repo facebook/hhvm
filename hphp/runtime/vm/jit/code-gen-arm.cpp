@@ -593,19 +593,18 @@ PUNT_OPCODE(ColIsNEmpty)
 
 //////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
-                                    Block* target,
-                                    ConditionCode cc) {
+void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc,
+                     CodegenState& state) {
   vixl::MacroAssembler as { cb };
 
-  if (m_state.addresses[target]) {
+  if (state.addresses[target]) {
     not_implemented();
   }
 
   // The block hasn't been emitted yet. Record the location in CodegenState.
   // CodegenState holds a map from Block* to the head of a linked list, where
   // the jump instructions themselves are the list nodes.
-  auto next = reinterpret_cast<TCA>(m_state.patches[target]);
+  auto next = reinterpret_cast<TCA>(state.patches[target]);
   auto here = cb.frontier();
 
   // To avoid encoding 0x0 as the jump target. That would conflict with the use
@@ -616,7 +615,7 @@ void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
   // This will never actually be executed as a jump to "next". It's just a
   // pointer to the next jump instruction to retarget.
   mcg->backEnd().emitSmashableJump(cb, next, cc);
-  m_state.patches[target] = here;
+  state.patches[target] = here;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -641,7 +640,7 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {
-  emitJumpToBlock(m_mainCode, inst->taken(), CC_None);
+  emitJumpToBlock(m_mainCode, inst->taken(), CC_None, m_state);
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
@@ -1341,7 +1340,7 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
     rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc));
+      emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc), m_state);
     }
   );
 }
@@ -1374,7 +1373,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   };
 
   auto doJcc = [&] (ConditionCode cc) {
-    emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc));
+    emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc), m_state);
   };
 
   Type typeParam = inst->typeParam();
@@ -1385,7 +1384,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     return;
   }
   if (srcType.not(typeParam)) {
-    emitJumpToBlock(m_mainCode, inst->taken(), CC_None);
+    emitJumpToBlock(m_mainCode, inst->taken(), CC_None, m_state);
     return;
   }
 

@@ -29,9 +29,16 @@ namespace HPHP { namespace JIT {
 struct SSATmp;
 struct IRUnit;
 
+enum RelaxGuardsFlags {
+  RelaxNormal =      0,
+  RelaxSimple = 1 << 0,
+  RelaxReflow = 1 << 1,
+};
+
 IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
 bool shouldHHIRRelaxGuards();
-bool relaxGuards(IRUnit&, const GuardConstraints& guards, bool simple = false);
+bool relaxGuards(IRUnit&, const GuardConstraints& guards,
+                 RelaxGuardsFlags flags);
 
 typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
 void visitGuards(IRUnit&, const VisitGuardFn& func);

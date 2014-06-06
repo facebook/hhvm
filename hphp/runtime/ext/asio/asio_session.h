@@ -26,6 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ActRec;
 FORWARD_DECLARE_CLASS(WaitHandle);
 FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
@@ -42,7 +43,7 @@ class AsioSession {
     void operator delete(void* ptr) { smart_free(ptr); }
 
     // context
-    void enterContext();
+    void enterContext(ActRec* savedFP);
     void exitContext();
 
     bool isInContext() {
@@ -62,11 +63,6 @@ class AsioSession {
     context_idx_t getCurrentContextIdx() {
       assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
       return static_cast<context_idx_t>(m_contexts.size());
-    }
-
-    c_ResumableWaitHandle* getCurrentWaitHandle() {
-      assert(!isInContext() || getCurrentContext()->isRunning());
-      return isInContext() ? getCurrentContext()->getCurrent() : nullptr;
     }
 
     // External thread events.

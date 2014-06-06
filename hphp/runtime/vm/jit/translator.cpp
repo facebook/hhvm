@@ -3396,7 +3396,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * want to do that unnecessarily.
    */
   if (!shouldIRInline(callerFunc, target, *subTrace)) {
-    if (UNLIKELY(Stats::enabledAny() && getenv("HHVM_STATS_FAILEDINL"))) {
+    if (Stats::enabledAny() && getenv("HHVM_STATS_FAILEDINL")) {
       subTrace->m_inliningFailed = true;
       // Save the trace for stats purposes but don't waste time doing any
       // further processing since we know we won't inline it.

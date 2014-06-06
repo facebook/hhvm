@@ -118,10 +118,7 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
     bool ret =
       uintptr_t(ar) - s_stackLimit >= s_stackSize &&
       !sim->is_on_stack(ar);
-    assert(!ret ||
-           (ar >= vmStack().getStackLowAddress() &&
-            ar < vmStack().getStackHighAddress()) ||
-           ar->resumed());
+    assert(!ret || isValidVMStackAddress(ar) || ar->resumed());
     return ret;
   };
 
@@ -157,9 +154,10 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
     TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\b",
           regs.m_fp->m_func->name()->data(),
           regs.m_fp, regs.m_sp, regs.m_pc);
-    vmfp() = const_cast<ActRec*>(regs.m_fp);
-    vmpc() = reinterpret_cast<PC>(regs.m_pc);
-    vmsp() = regs.m_sp;
+    auto& vmRegs = vmRegsUnsafe();
+    vmRegs.fp = const_cast<ActRec*>(regs.m_fp);
+    vmRegs.pc = reinterpret_cast<PC>(regs.m_pc);
+    vmRegs.stack.top() = regs.m_sp;
     return;
   }
 

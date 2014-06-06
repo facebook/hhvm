@@ -83,8 +83,10 @@ struct BackEnd : public JIT::BackEnd {
   uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
                                  uintptr_t saved_rStashedAr) {
     sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
-    sim.   set_xreg(ARM::rVmFp.code(), vmfp());
-    sim.   set_xreg(ARM::rVmSp.code(), vmsp());
+
+    auto& vmRegs = vmRegsUnsafe();
+    sim.   set_xreg(ARM::rVmFp.code(), vmRegs.fp);
+    sim.   set_xreg(ARM::rVmSp.code(), vmRegs.stack.top());
     sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
     sim.   set_xreg(ARM::rStashedAR.code(), saved_rStashedAr);
 
@@ -236,7 +238,9 @@ struct BackEnd : public JIT::BackEnd {
   }
 
   void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) override {
-    not_reached();
+    // This function always emits a smashable jump but every jump on ARM is
+    // smashable so it's free.
+    emitJumpToBlock(cb, target, CC_None, state);
   }
 
   void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) override {

@@ -36,7 +36,30 @@ end
 
 module HackProgram : SERVER_PROGRAM = struct
   let init genv env root =
-    let next_files = Find.make_next_files_php root in
+    (* Completely the wrong way to read hhconfig, but this will be reverted
+     * shortly. Ultimately we should build a different options record for Hack
+     * and really parse the hhconfig into that, but this functorization should
+     * be straightened up a bit first. *)
+    let hhconfig = cat_no_fail ((Path.string_of_path root) ^ "/.hhconfig") in
+    let enable_hhi_embedding =
+      try
+        let regex = Str.regexp_string "enable_hhi_embedding" in
+        (* This is such a stupid interface. *)
+        ignore (Str.search_forward regex hhconfig 0);
+        true
+      with Not_found -> false in
+    let next_files =
+      if enable_hhi_embedding then begin
+        let next_files_hhi =
+          match Hhi.get_hhi_root () with
+          | Some hhi_root -> Find.make_next_files_php hhi_root
+          | None -> print_endline "Could not locate hhi files"; exit 1 in
+        let next_files_root = Find.make_next_files_php root in
+        fun () ->
+          match next_files_hhi () with
+          | [] -> next_files_root ()
+          | x -> x
+      end else Find.make_next_files_php root in
     match ServerArgs.convert genv.options with
     | None ->
         let env = ServerInit.init genv env next_files in

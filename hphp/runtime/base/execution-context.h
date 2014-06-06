@@ -513,7 +513,6 @@ public:
   std::vector<Eval::PhpFile*> m_evaledFilesOrder;
   std::vector<Unit*> m_createdFuncs;
 
-  ActRec* m_firstAR;
   std::vector<Fault> m_faults;
 
   ActRec* getStackFrame();

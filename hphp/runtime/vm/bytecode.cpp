@@ -1792,7 +1792,7 @@ void ExecutionContext::enterVM(ActRec* ar, StackArgsState stk,
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
-  m_firstAR = ar;
+  vmFirstAR() = ar;
 
   /*
    * When an exception is propagating, each nesting of the VM is
@@ -2147,7 +2147,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   // Linear search from end of m_nestedVMs. In practice, we're probably
   // looking for something recently pushed.
   int i = m_nestedVMs.size() - 1;
-  ActRec* firstAR = m_firstAR;
+  ActRec* firstAR = vmFirstAR();
   while (i >= 0 && firstAR != fp) {
     firstAR = m_nestedVMs[i--].firstAR;
   }
@@ -2945,7 +2945,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   ar->setReturnVMExit();
   vmfp() = ar;
   vmpc() = s_debuggerDummy->entry();
-  m_firstAR = ar;
+  vmFirstAR() = ar;
   vmfp()->setVarEnv(m_globalVarEnv);
   m_globalVarEnv->enterFP(nullptr, vmfp());
 }
@@ -7576,8 +7576,8 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
     return;
   }
 
-  VMState savedVM = { vmpc(), vmfp(), m_firstAR, savedSP };
-  TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), m_firstAR, savedSP);
+  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP };
+  TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
 
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
@@ -7601,7 +7601,7 @@ void ExecutionContext::popVMState() {
     // last exit
     vmfp() = nullptr;
     vmpc() = nullptr;
-    m_firstAR = nullptr;
+    vmFirstAR() = nullptr;
     return;
   }
 
@@ -7610,7 +7610,7 @@ void ExecutionContext::popVMState() {
   VMState &savedVM = m_nestedVMs.back();
   vmpc() = savedVM.pc;
   vmfp() = savedVM.fp;
-  m_firstAR = savedVM.firstAR;
+  vmFirstAR() = savedVM.firstAR;
   vmStack().top() = savedVM.sp;
 
   if (debug) {

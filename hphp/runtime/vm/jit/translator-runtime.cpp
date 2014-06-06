@@ -962,7 +962,7 @@ static void sync_regstate_to_caller(ActRec* preLive) {
   auto const ec = g_context.getNoCheck();
   auto& regs = vmRegsUnsafe();
   regs.stack.top() = (TypedValue*)preLive - preLive->numArgs();
-  ActRec* fp = preLive == ec->m_firstAR ?
+  ActRec* fp = preLive == vmFirstAR() ?
     ec->m_nestedVMs.back().fp : preLive->m_sfp;
   regs.fp = fp;
   regs.pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);

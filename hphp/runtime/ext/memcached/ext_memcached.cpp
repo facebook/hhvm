@@ -24,6 +24,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <fastlz.h>
 #include <zlib.h>
 
 #include "hphp/system/systemlib.h"
@@ -42,7 +43,9 @@ namespace HPHP {
 #define MEMC_VAL_IS_IGBINARY   5
 #define MEMC_VAL_IS_JSON       6
 
-#define MEMC_VAL_COMPRESSED    (1<<4)
+#define MEMC_VAL_COMPRESSED         (1<<4)
+#define MEMC_VAL_COMPRESSION_ZLIB   (1<<5)
+#define MEMC_VAL_COMPRESSION_FASTLZ (1<<6)
 
 #define MEMC_COMPRESS_THRESHOLD 100
 
@@ -285,19 +288,54 @@ class MemcachedData {
   bool toObject(Variant& value, const memcached_result_st &result) {
     const char *payload  = memcached_result_value(&result);
     size_t payloadLength = memcached_result_length(&result);
-    uint32_t flags         = memcached_result_flags(&result);
+    uint32_t flags       = memcached_result_flags(&result);
 
     String decompPayload;
     if (flags & MEMC_VAL_COMPRESSED) {
       bool done = false;
       std::vector<char> buffer;
       unsigned long bufferSize;
-      for (int factor = 1; !done && factor <= 16; ++factor) {
-        bufferSize = payloadLength * (1 << factor) + 1;
-        buffer.resize(bufferSize);
-        if (uncompress((Bytef*)buffer.data(), &bufferSize,
-                       (const Bytef*)payload, (uLong)payloadLength) == Z_OK) {
-          done = true;
+      uint32_t maxLength;
+      int status;
+
+      /* new-style */
+      if ((flags & MEMC_VAL_COMPRESSION_FASTLZ || flags & MEMC_VAL_COMPRESSION_ZLIB)
+          && payloadLength > sizeof(uint32_t)) {
+        memcpy(&maxLength, payload, sizeof(uint32_t));
+        if (maxLength < std::numeric_limits<uint32_t>::max()) {
+          buffer.resize(maxLength + 1);
+          payloadLength -= sizeof(uint32_t);
+          payload += sizeof(uint32_t);
+          bufferSize = maxLength;
+
+          if (flags & MEMC_VAL_COMPRESSION_FASTLZ) {
+            bufferSize = fastlz_decompress(payload, payloadLength,
+                                           buffer.data(), maxLength);
+            done = (bufferSize > 0);
+          } else if (flags & MEMC_VAL_COMPRESSION_ZLIB) {
+            status = uncompress((Bytef *)buffer.data(), &bufferSize,
+                                (const Bytef *)payload, (uLong)payloadLength);
+            done = (status == Z_OK);
+          }
+        }
+      }
+
+      /* old-style */
+      if (!done) {
+        for (int factor = 1; factor <= 16; ++factor) {
+          if (payloadLength >= std::numeric_limits<unsigned long>::max() / (1 << factor)) {
+            break;
+          }
+          bufferSize = payloadLength * (1 << factor) + 1;
+          buffer.resize(bufferSize);
+          status = uncompress((Bytef*)buffer.data(), &bufferSize,
+                              (const Bytef*)payload, (uLong)payloadLength);
+          if (status == Z_OK) {
+            done = true;
+            break;
+          } else if (status != Z_BUF_ERROR) {
+            break;
+          }
         }
       }
       if (!done) {

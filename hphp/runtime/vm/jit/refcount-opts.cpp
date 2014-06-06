@@ -121,13 +121,45 @@ struct Value {
     return pendingIncs.empty() && realCount == 0 && !fromLoad;
   }
 
-  /* Merge other's state with this state. fromLoad and realCount must match
-   * between the two. pendingIncs is truncated to the size of the smaller of
-   * the two, then the sets at each index are merged. */
+  /*
+   * Merge other's state with this state, with the following
+   * conditions:
+   * 1. fromLoad must match between the two;
+   * 2. if realCounts do not match, the smaller must be fromLoad, and
+   *    the result count is the max of the incoming counts;
+   * 3. pendingIncs is truncated to the size of the smaller of the
+   *    two, then the sets at each index are merged.
+   *
+   * Condition 2 handles cases where the refcount can't be proven to
+   * match, but can be conservatively assumed to be OK.  Consider:
+   *
+   * B0:
+   *  t1 = LdLoc<0>
+   *       IncRef t1
+   *       DecRef t2
+   *       JmpNZ B2
+   * B1:
+   *       IncRef t1
+   *       SpillStack t1
+   *       TakeStack t1
+   *       DecRef t1
+   * B2:
+   *       ...
+   *
+   * The count of t1 at B2 will be 1 if coming from B0, and 0 if
+   * coming from B1, due to the SpillStack.  However, the TakeStack
+   * marks t1 as fromLoad, which lets us know that there's at least
+   * one surviving reference, so we can move forward assuming the max
+   * of the two.
+   */
   void merge(const Value& other) {
     always_assert(fromLoad == other.fromLoad);
-    always_assert(realCount == other.realCount);
-
+    if (realCount > other.realCount) {
+      always_assert(other.fromLoad);
+    } else if (realCount < other.realCount) {
+      always_assert(fromLoad);
+      realCount = other.realCount;
+    }
     auto minSize = std::min(pendingIncs.size(), other.pendingIncs.size());
     pendingIncs.resize(minSize);
     for (unsigned i = 0; i < minSize; ++i) {

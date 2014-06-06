@@ -15,6 +15,7 @@
 */
 #include "hphp/compiler/analysis/emitter.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <memory>
 #include <iostream>
 #include <iomanip>
@@ -2580,7 +2581,11 @@ void EmitterVisitor::visit(FileScopePtr file) {
       m_ue.setMergeOnly(true);
       if (mainReturn.m_type == KindOfInvalid) {
         tvWriteUninit(&mainReturn);
-        tvAsVariant(&mainReturn) = 1;
+        if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
+          tvAsVariant(&mainReturn) = init_null();
+        } else {
+          tvAsVariant(&mainReturn) = 1;
+        }
       }
       m_ue.setMainReturn(&mainReturn);
     }
@@ -2591,7 +2596,11 @@ void EmitterVisitor::visit(FileScopePtr file) {
     if (currentPositionIsReachable()) {
       LocationPtr loc(new Location());
       e.setTempLocation(loc);
-      e.Int(1);
+      if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
+        e.Null();
+      } else {
+        e.Int(1);
+      }
       e.RetC();
       e.setTempLocation(LocationPtr());
     }

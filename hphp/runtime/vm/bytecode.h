@@ -44,6 +44,8 @@ namespace HPHP {
 #define IOP_PASS_ARGS   pc
 #define IOP_PASS(pc)    pc
 
+#define EVAL_FILENAME_SUFFIX ") : eval()'d code"
+
 ALWAYS_INLINE
 void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
   assert(cellIsPlausible(*lhs));

@@ -6682,7 +6682,7 @@ OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {
   auto evalFilename = std::string();
   string_printf(
     evalFilename,
-    "%s(%d) : eval()'d code",
+    "%s(%d" EVAL_FILENAME_SUFFIX,
     getContainingFileName()->data(),
     getLine()
   );

@@ -83,11 +83,6 @@ class MemcacheData {
   };
 };
 
-#define FETCH_MEMCACHE_DATA(dest, src) \
-  assert(!src.isNull()); \
-  auto dest = Native::data<MemcacheData>(src.get()); \
-  assert(dest);
-
 static bool ini_on_update_hash_strategy(const std::string& value) {
   if (!strncasecmp(value.data(), "standard", sizeof("standard"))) {
     MEMCACHEG(hash_strategy) = "standard";
@@ -112,7 +107,7 @@ static bool ini_on_update_hash_function(const std::string& value) {
 static bool HHVM_METHOD(Memcache, connect, const String& host, int port /*= 0*/,
                                            int timeout /*= 0*/,
                                            int timeoutms /*= 0*/) {
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
 
   if (!host.empty() &&
@@ -174,7 +169,7 @@ static bool HHVM_METHOD(Memcache, add, const String& key, const Variant& var,
     return false;
   }
 
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   String serialized = memcache_prepare_for_storage(var, flag);
 
   String serializedKey = memcache_prepare_key(key);
@@ -195,7 +190,7 @@ static bool HHVM_METHOD(Memcache, set, const String& key, const Variant& var,
     return false;
   }
 
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   String serializedKey = memcache_prepare_key(key);
   String serializedVar = memcache_prepare_for_storage(var, flag);
 
@@ -220,7 +215,7 @@ static bool HHVM_METHOD(Memcache, replace, const String& key,
     return false;
   }
 
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   String serializedKey = memcache_prepare_key(key);
   String serialized = memcache_prepare_for_storage(var, flag);
 
@@ -235,7 +230,7 @@ static bool HHVM_METHOD(Memcache, replace, const String& key,
 
 static Variant HHVM_METHOD(Memcache, get, const Variant& key,
                                           VRefParam flags /*= null*/) {
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   if (key.is(KindOfArray)) {
     std::vector<const char *> real_keys;
     std::vector<size_t> key_len;
@@ -324,7 +319,7 @@ static bool HHVM_METHOD(Memcache, delete, const String& key,
     return false;
   }
 
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   String serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_delete(&data->m_memcache,
                                             serializedKey.c_str(),
@@ -340,7 +335,7 @@ static int64_t HHVM_METHOD(Memcache, increment, const String& key,
     return false;
   }
 
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   uint64_t value;
   String serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_increment(&data->m_memcache,
@@ -362,7 +357,7 @@ static int64_t HHVM_METHOD(Memcache, decrement, const String& key,
     return false;
   }
 
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   uint64_t value;
   String serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_decrement(&data->m_memcache,
@@ -378,13 +373,13 @@ static int64_t HHVM_METHOD(Memcache, decrement, const String& key,
 }
 
 static bool HHVM_METHOD(Memcache, close) {
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   memcached_quit(&data->m_memcache);
   return true;
 }
 
 static Variant HHVM_METHOD(Memcache, getversion) {
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   int server_count = memcached_server_count(&data->m_memcache);
   char version[16];
   int version_len = 0;
@@ -414,7 +409,7 @@ static Variant HHVM_METHOD(Memcache, getversion) {
 }
 
 static bool HHVM_METHOD(Memcache, flush, int expire /*= 0*/) {
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   return memcached_flush(&data->m_memcache, expire) == MEMCACHED_SUCCESS;
 }
 
@@ -430,7 +425,7 @@ static bool HHVM_METHOD(Memcache, setcompressthreshold, int threshold,
     return false;
   }
 
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
 
   data->m_compress_threshold = threshold;
   data->m_min_compress_savings = min_savings;
@@ -472,7 +467,7 @@ static Array memcache_build_stats(const memcached_st *ptr,
 
 static Array HHVM_METHOD(Memcache, getstats, const String& type /* = null_string */,
                              int slabid /* = 0 */, int limit /* = 100 */) {
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   if (!memcached_server_count(&data->m_memcache)) {
     return Array();
   }
@@ -504,7 +499,7 @@ static Array HHVM_METHOD(Memcache, getstats, const String& type /* = null_string
 static Array HHVM_METHOD(Memcache, getextendedstats, const String& type /* = null_string */,
                                      int slabid /* = 0 */,
                                      int limit /* = 100 */) {
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
   memcached_stat_st *stats;
 
@@ -550,7 +545,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host, int port /* = 1
                              bool status /* = true */,
                              const Variant& failure_callback /* = null_variant */,
                              int timeoutms /* = 0 */) {
-  FETCH_MEMCACHE_DATA(data, this_);
+  auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
 
   if (!host.empty() &&

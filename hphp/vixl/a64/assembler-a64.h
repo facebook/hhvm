@@ -1725,18 +1725,19 @@ class Assembler {
   void Emit(Instr instruction) {
     assert(cb_.canEmit(sizeof(instruction)));
     assert(sizeof(instruction) == sizeof(uint32_t));
+    CheckBufferSpace();
 
 #ifdef DEBUG
     finalized_ = false;
 #endif
 
     cb_.dword(instruction);
-    CheckBufferSpace();
   }
 
   // Emit data inline in the instruction stream.
   void EmitData(void const * data, unsigned size) {
     assert(cb_.canEmit(size));
+    CheckBufferSpace();
 
 #ifdef DEBUG
     finalized_ = false;
@@ -1745,7 +1746,6 @@ class Assembler {
     // TODO: Record this 'instruction' as data, so that it can be disassembled
     // correctly.
     cb_.bytes(size, reinterpret_cast<const uint8_t*>(data));
-    CheckBufferSpace();
   }
 
   inline void CheckBufferSpace() {

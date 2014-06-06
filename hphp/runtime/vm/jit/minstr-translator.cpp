@@ -365,7 +365,7 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
       simpleArrayIsset || simpleStringOp) {
     setNoMIState();
     if (simpleCollectionGet || simpleCollectionIsset) {
-      constrainBase(DataTypeSpecialized, baseVal);
+      constrainBase(TypeConstraint(baseType.getClass()), baseVal);
     } else {
       constrainBase(DataTypeSpecific, baseVal);
     }
@@ -724,12 +724,20 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
       return;
 
     case SimpleOp::PackedArray:
+      constrainBase(TypeConstraint(DataTypeSpecialized).setWantArrayKind());
+      return;
+
     case SimpleOp::Vector:
     case SimpleOp::Map:
-    case SimpleOp::Pair:
-      constrainBase(DataTypeSpecialized);
+    case SimpleOp::Pair: {
+      SSATmp* base = getInput(m_mii.valCount(), DataTypeGeneric);
+      auto baseType = base->type().unbox();
+      constrainBase(TypeConstraint(baseType.getClass()));
       return;
+    }
   }
+
+  not_reached();
 }
 
 // "Simple" bases are stack cells and locals.
@@ -1758,7 +1766,8 @@ void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
         },
         [&] (SSATmp* base) { // Next
           m_ht.emitIncStat(Stats::ArrayGet_Packed, 1, false);
-          m_irb.constrainValue(base, DataTypeSpecialized);
+          m_irb.constrainValue(
+            base, TypeConstraint(DataTypeSpecialized).setWantArrayKind());
           return emitPackedArrayGet(base, key, true);
         },
         [&] { // Taken

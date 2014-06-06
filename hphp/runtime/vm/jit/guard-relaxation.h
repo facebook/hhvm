@@ -48,6 +48,7 @@ Type relaxType(Type t, TypeConstraint cat);
 void incCategory(DataTypeCategory& c);
 TypeConstraint relaxConstraint(const TypeConstraint origTc,
                                const Type knownType, const Type toRelax);
+TypeConstraint applyConstraint(TypeConstraint origTc, TypeConstraint newTc);
 
 } }
 

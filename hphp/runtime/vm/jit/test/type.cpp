@@ -245,12 +245,18 @@ TEST(Type, TypeConstraints) {
   EXPECT_FALSE(fits(Type::Gen, DataTypeCountness));
   EXPECT_FALSE(fits(Type::Gen, DataTypeCountnessInit));
   EXPECT_FALSE(fits(Type::Gen, DataTypeSpecific));
-  EXPECT_FALSE(fits(Type::Gen, DataTypeSpecialized));
+  EXPECT_FALSE(fits(Type::Gen,
+                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
 
   EXPECT_TRUE(fits(Type::Cell,
                    {DataTypeGeneric, DataTypeSpecific}));
   EXPECT_FALSE(fits(Type::Gen,
                     {DataTypeGeneric, DataTypeSpecific}));
+
+  EXPECT_FALSE(fits(Type::Arr,
+                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
+  EXPECT_TRUE(fits(Type::Arr.specialize(ArrayData::kPackedKind),
+                   TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
 }
 
 TEST(Type, Relax) {

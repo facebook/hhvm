@@ -2807,12 +2807,13 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
                                               SSATmp* extraSpill) {
   SSATmp* objOrCls = obj;
   const Class* baseClass = nullptr;
-  if (obj->type().isSpecialized() &&
-      !m_irb->constrainValue(obj,
-                             TypeConstraint(DataTypeSpecialized).setWeak())) {
-    // If we know the class without having to specialize a guard any
-    // further, use it.
-    baseClass = obj->type().getClass();
+  if (obj->type().isSpecialized()) {
+    auto cls = obj->type().getClass();
+    if (!m_irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
+      // If we know the class without having to specialize a guard any further,
+      // use it.
+      baseClass = cls;
+    }
   }
 
   bool magicCall = false;
@@ -4380,12 +4381,11 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
    * would pass. If we don't know, we still have to emit them because valType
    * might be a subtype of its specialized object type.
    */
-  if (valType < Type::Obj &&
-      !m_irb->constrainValue(val,
-                             TypeConstraint(DataTypeSpecialized).setWeak())) {
+  if (valType < Type::Obj) {
     auto const cls = valType.getClass();
-    if ((knownConstraint && cls->classof(knownConstraint)) ||
-        cls->name()->isame(clsName)) {
+    if (!m_irb->constrainValue(val, TypeConstraint(cls).setWeak()) &&
+        ((knownConstraint && cls->classof(knownConstraint)) ||
+         cls->name()->isame(clsName))) {
       return;
     }
   }

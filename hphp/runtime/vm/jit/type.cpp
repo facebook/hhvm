@@ -1102,6 +1102,12 @@ void assertOperandTypes(const IRInstruction* inst) {
                         check(src()->isA(t), t, nullptr); \
                         ++curSrc;                         \
                       }
+#define AK(kind)      {                                                 \
+                        Type t = Type::Arr.specialize(                  \
+                          ArrayData::k##kind##Kind);                    \
+                        check(src()->isA(t), t, nullptr);               \
+                        ++curSrc;                                       \
+                      }
 #define C(type)       check(src()->isConst() && \
                             src()->isA(type),   \
                             Type(),             \
@@ -1147,6 +1153,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 
 #undef NA
 #undef S
+#undef AK
 #undef C
 #undef CStr
 #undef SVar
@@ -1174,13 +1181,22 @@ void assertOperandTypes(const IRInstruction* inst) {
 }
 
 std::string TypeConstraint::toString() const {
-  std::string catStr = typeCategoryName(category);
+  std::string ret = "<" + typeCategoryName(category);
 
   if (innerCat > DataTypeGeneric) {
-    folly::toAppend(",inner:", typeCategoryName(innerCat), &catStr);
+    folly::toAppend(",inner:", typeCategoryName(innerCat), &ret);
   }
 
-  return folly::format("<{}>", catStr).str();
+  if (category == DataTypeSpecialized) {
+    if (wantArrayKind()) ret += ",ArrayKind";
+    if (wantClass()) {
+      folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
+    }
+  }
+
+  if (weak) ret += ",weak";
+
+  return ret + '>';
 }
 
 //////////////////////////////////////////////////////////////////////

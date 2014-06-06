@@ -258,14 +258,38 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
 
   auto const newType = refineType(oldType, typeParam);
 
-  // oldType is at least as good as the new type. Eliminate this AssertTypeOp,
-  // but only if the type won't relax, or the source value is another assert
-  // that's good enough.
-  if (oldType <= newType &&
-      (!typeMightRelax(oldVal) ||
-       (typeSrc && typeSrc->is(AssertType, AssertLoc, AssertStk) &&
-        typeSrc->typeParam() <= newType))) {
-    return inst->src(0);
+  if (oldType <= newType) {
+    // oldType is at least as good as the new type. Eliminate this
+    // AssertTypeOp, but only if the src type won't relax, or the source value
+    // is another assert that's good enough. We do this to avoid eliminating
+    // apparently redundant assert opcodes that may become useful after prior
+    // guards are relaxed.
+    if (!typeMightRelax(oldVal) ||
+        (typeSrc && typeSrc->is(AssertType, AssertLoc, AssertStk) &&
+         typeSrc->typeParam() <= newType)) {
+      return inst->src(0);
+    }
+
+    if (oldType < newType) {
+      // This can happen because of limitations in how Type::operator& (used in
+      // refinedType()) handles specialized types: sometimes it returns a Type
+      // that's wider than it could be. It shouldn't affect correctness but it
+      // can cause us to miss out on some perf.
+      ITRACE(1, "Suboptimal AssertTypeOp: refineType({}, {}) -> {} in {}\n",
+             oldType, typeParam, newType, *inst);
+
+      // We don't currently support intersecting RepoAuthType::Arrays
+      // (t4473238), so we might be here because oldType and typeParam have
+      // different RATArrays. If that's the case and typeParam provides no
+      // other useful information we can unconditionally eliminate this
+      // instruction: RATArrays never come from guards so we can't miss out on
+      // anything by doing so.
+      if (oldType < Type::Arr && oldType.getArrayType() &&
+          typeParam < Type::Arr && typeParam.getArrayType() &&
+          !typeParam.hasArrayKind()) {
+        return inst->src(0);
+      }
+    }
   }
 
   return nullptr;
@@ -706,36 +730,12 @@ bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
   auto& guard = m_constraints.guards[inst];
-  auto changed = false;
-  ITRACE(2, "constrainGuard({}, {}): existing constraint {}\n",
-         *inst, tc, guard);
+  auto newTc = applyConstraint(guard, tc);
+  ITRACE(2, "constrainGuard({}, {}): {} -> {}\n", *inst, tc, guard, newTc);
   Indent _i;
 
-  // For category and innerCat, constrain the guard if the assertedType isn't
-  // strong enough to fit what we want and tc is more specific than the
-  // existing category.
-
-  if (tc.innerCat > guard.innerCat) {
-    if (!tc.weak) {
-      ITRACE(1, "constraining inner type of {}: {} -> {}\n",
-             *inst, guard.innerCat, tc.innerCat);
-      guard.innerCat = tc.innerCat;
-    }
-    changed = true;
-  } else {
-    ITRACE(2, "not constraining innerCat\n");
-  }
-
-  if (tc.category > guard.category) {
-    if (!tc.weak) {
-      ITRACE(1, "constraining {}: {} -> {}\n",
-             *inst, guard.category, tc.category);
-      guard.category = tc.category;
-    }
-    changed = true;
-  } else {
-    ITRACE(2, "not constraining category\n");
-  }
+  auto const changed = guard != newTc;
+  if (!tc.weak) guard = newTc;
 
   return changed;
 }
@@ -815,9 +815,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
 
     // Relax typeParam with its current constraint. This is used below to
     // recursively relax the constraint on the source, if needed.
-    auto constraint = m_constraints.guards[inst];
-    constraint.category = std::max(constraint.category, guardTc.category);
-    constraint.innerCat = std::max(constraint.innerCat, guardTc.innerCat);
+    auto constraint = applyConstraint(m_constraints.guards[inst], guardTc);
     auto const knownType = relaxType(typeParam, constraint);
 
     if (!typeFitsConstraint(knownType, tc)) {
@@ -927,9 +925,7 @@ bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* typeSrc,
 
   // Relax typeParam with its current constraint.  This is used below to
   // recursively relax the constraint on the source, if needed.
-  auto constraint = m_constraints.guards[guard];
-  constraint.category = std::max(constraint.category, guardTc.category);
-  constraint.innerCat = std::max(constraint.innerCat, guardTc.innerCat);
+  auto constraint = applyConstraint(m_constraints.guards[guard], guardTc);
   auto const knownType = relaxType(typeParam, constraint);
 
   if (!typeFitsConstraint(knownType, tc)) {
@@ -994,11 +990,9 @@ bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
     auto const guardTc = relaxConstraint(tc, srcType, typeParam);
     changed = constrainGuard(typeSrc, guardTc) || changed;
 
-    // Relax typeParam with its current constraint.  This is used below to
+    // Relax typeParam with its current constraint. This is used below to
     // recursively relax the constraint on the source, if needed.
-    auto constraint = m_constraints.guards[typeSrc];
-    constraint.category = std::max(constraint.category, guardTc.category);
-    constraint.innerCat = std::max(constraint.innerCat, guardTc.innerCat);
+    auto constraint = applyConstraint(m_constraints.guards[typeSrc], guardTc);
     auto const knownType = relaxType(typeParam, constraint);
 
     if (!typeFitsConstraint(knownType, tc)) {

@@ -258,9 +258,19 @@ static bool typeFitsOuterConstraint(Type t, TypeConstraint tc) {
 
     case DataTypeSpecialized:
       // Type::isSpecialized() returns true for types like {Arr<Packed>|Int}
-      // and Arr has non-specialized subtypes, so we check that t is both
-      // specialized and a strict subtype of Obj or Arr.
-      return t.isSpecialized() && (t < Type::Obj || t < Type::Arr);
+      // and Arr has non-specialized subtypes, so we require that t is
+      // specialized, a strict subtype of Obj or Arr, and that it fits the
+      // specific requirements of tc.
+
+      assert(tc.wantClass() ^ tc.wantArrayKind());
+      if (!t.isSpecialized()) return false;
+      if (t < Type::Obj) {
+        return tc.wantClass() && t.getClass()->classof(tc.desiredClass());
+      }
+      if (t < Type::Arr) {
+        return tc.wantArrayKind() && t.hasArrayKind();
+      }
+      return false;
   }
 
   not_reached();
@@ -310,6 +320,20 @@ Type relaxType(Type t, TypeConstraint tc) {
       return relaxInner(t.unspecialize(), tc);
 
     case DataTypeSpecialized:
+      assert(tc.wantClass() ^ tc.wantArrayKind());
+
+      if (tc.wantClass()) {
+        // We could try to relax t's specialized class to tc.desiredClass() if
+        // they're related but not the same, but we only support guarding on
+        // final classes so the resulting guard would be bogus.
+      } else {
+        // t might have a RepoAuthType::Array that wasn't asked for in tc, but
+        // RATArrays always come from static analysis and never guards, so we
+        // don't need to eliminate it here. Just make sure t actually fits the
+        // constraint.
+        assert(t < Type::Arr && t.hasArrayKind());
+      }
+
       return relaxInner(t, tc);
   }
 
@@ -354,6 +378,13 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
   newTc.weak = origTc.weak;
 
   while (true) {
+    if (newTc.category == DataTypeSpecialized) {
+      // We need to ask for the right kind of specialization, so grab it from
+      // origTc.
+      if (origTc.wantArrayKind()) newTc.setWantArrayKind();
+      if (origTc.wantClass()) newTc.setDesiredClass(origTc.desiredClass());
+    }
+
     auto const relaxed = relaxType(toRelax, newTc);
     auto const newDstType = refineType(relaxed, knownType);
     if (typeFitsConstraint(newDstType, origTc)) break;
@@ -376,6 +407,30 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
   always_assert(newTc.category <= origTc.category &&
                 newTc.innerCat <= origTc.innerCat);
   return newTc;
+}
+
+/*
+ * Return a copy of tc refined with any new information in newTc.
+ */
+TypeConstraint applyConstraint(TypeConstraint tc, const TypeConstraint newTc) {
+  tc.category = std::max(newTc.category, tc.category);
+  tc.innerCat = std::max(newTc.innerCat, tc.innerCat);
+
+  if (newTc.wantArrayKind()) tc.setWantArrayKind();
+
+  if (newTc.wantClass()) {
+    if (tc.wantClass()) {
+      // It only makes sense to constrain tc with a class that's related to its
+      // existing class, and we want to preserve the more derived of the two.
+      auto cls1 = tc.desiredClass();
+      auto cls2 = newTc.desiredClass();
+      tc.setDesiredClass(cls1->classof(cls2) ? cls1 : cls2);
+    } else {
+      tc.setDesiredClass(newTc.desiredClass());
+    }
+  }
+
+  return tc;
 }
 
 } }

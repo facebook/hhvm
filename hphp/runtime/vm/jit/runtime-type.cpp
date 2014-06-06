@@ -395,7 +395,7 @@ string RuntimeType::pretty() const {
                   "(Kind {})",
                   ArrayData::kindToString(arrayKind()));
   }
-  if (valueType() == KindOfBoolean && valueBoolean() != -1) {
+  if (outerType() == KindOfBoolean && valueBoolean() != -1) {
     folly::format(&retval, "(Val {})", valueBoolean());
   }
   return retval;

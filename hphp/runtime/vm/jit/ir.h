@@ -163,6 +163,7 @@ class FailedCodeGen : public std::runtime_error {
  *
  *     NA               instruction takes no sources
  *     S(t1,...,tn)     source must be a subtype of {t1|..|tn}
+ *     AK(<kind>)       source must be an array with specified kind
  *     C(type)          source must be a constant, and subtype of type
  *     CStr             same as C(StaticStr)
  *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
@@ -402,8 +403,8 @@ O(CheckNullptr,                     ND, S(CountedStr,Nullptr),       B|E|CRc) \
 O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA),      B) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
-O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
-O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
+O(CheckPackedArrayBounds,           ND, AK(Packed) S(Int),               B|E) \
+O(CheckPackedArrayElemNull,    D(Bool), AK(Packed) S(Int),                 E) \
 O(VectorHasImmCopy,                 ND, S(Obj),                            B) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
@@ -419,7 +420,7 @@ O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),                B) \
 O(LdProp,                       DParam, S(Obj) C(Int),                     B) \
 O(LdElem,                      D(Cell), S(PtrToCell) S(Int),               E) \
-O(LdPackedArrayElem,          DArrElem, S(Arr) S(Int),                     E) \
+O(LdPackedArrayElem,          DArrElem, AK(Packed) S(Int),                 E) \
 O(LdRef,                        DLdRef, S(BoxedCell),                      B) \
 O(LdThis,                        DThis, S(FramePtr),                     B|C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \

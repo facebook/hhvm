@@ -554,6 +554,7 @@ static unsigned long get_hash(value key) {
  */
 /*****************************************************************************/
 static void write_at(unsigned int slot, value data) {
+  // Try to write in a value to indicate that the data is being written.
   if(hashtbl[slot].addr == NULL &&
      __sync_bool_compare_and_swap(&(hashtbl[slot].addr), NULL, 1)) {
     hashtbl[slot].addr = hh_store_ocaml(data);
@@ -586,22 +587,21 @@ void hh_add(value key, value data) {
         return;
       }
 
-      // Grabbing it failed -- why? If someone else inserted the data we were
-      // about to, we are done (don't double-insert). Otherwise, keep going.
+      // Grabbing it failed -- why? If someone else is trying to insert
+      // the data we were about to, try to insert it ourselves too.
+      // Otherwise, keep going.
       // Note that this read relies on the __sync call above preventing the
       // compiler from caching the value read out of memory. (And of course
       // isn't safe on any arch that requires memory barriers.)
       if(hashtbl[slot].hash == hash) {
-        // FIXME: there is a race here. The data may not actually be written by
-        // the time we return here, and even the sigil value "1" may not be
-        // written into the address by the winning thread. If this thread
-        // manages to call hh_mem on this key before the winning thread can
-        // write the sigil "1", things will be broken since the data we just
-        // wrote will be missing. Want to more carefully think out the right
-        // fix and need to commit a fix for a much worse race, so leaving this
-        // here for now -- this thread has to get all the way back into hh_mem
-        // before the other thread executes the 37 instructions it takes to
-        // write the sigil, so I'm not super worried.
+        // Some other thread already grabbed this slot to write this
+        // key, but they might not have written the address (or even
+        // the sigil value) yet. We can't return from hh_add until we
+        // know that hh_mem would succeed, which is to say that addr is
+        // no longer null. To make sure hh_mem will work, we try
+        // writing the value ourselves; either we insert it ourselves or
+        // we know the address is now non-NULL.
+        write_at(slot, data);
         return;
       }
     }

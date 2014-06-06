@@ -83,8 +83,8 @@ protected:
 
 class FileOpenException : public Exception {
 public:
-  explicit FileOpenException(const char *filename)
-      : Exception("Unable to open file %s", filename) {
+  explicit FileOpenException(const std::string& filename)
+      : Exception("Unable to open file %s", filename.c_str()) {
   }
 
   EXCEPTION_COMMON_IMPL(FileOpenException);

@@ -1312,7 +1312,7 @@ static int execute_program_impl(int argc, char** argv) {
       HPHP::Eval::PhpFile* phpFile = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
       if (phpFile == nullptr) {
-        throw FileOpenException(po.lint.c_str());
+        throw FileOpenException(po.lint);
       }
       Unit* unit = phpFile->unit();
       const StringData* msg;

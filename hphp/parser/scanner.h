@@ -200,7 +200,7 @@ public:
   };
 
 public:
-  Scanner(const char *filename, int type, bool md5 = false);
+  Scanner(const std::string& filename, int type, bool md5 = false);
   Scanner(std::istream &stream, int type, const char *fileName = "",
           bool md5 = false);
   Scanner(const char *source, int len, int type, const char *fileName = "",

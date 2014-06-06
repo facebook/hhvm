@@ -2592,7 +2592,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     if (currentPositionIsReachable()) {
       LocationPtr loc(new Location());
       e.setTempLocation(loc);
-      if (boost::algorithm::ends_with(filename, ") : eval()'d code")) {
+      if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
         e.Null();
       } else {
         e.Int(1);

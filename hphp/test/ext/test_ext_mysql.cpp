@@ -70,6 +70,7 @@ bool TestExtMysql::RunTests(const std::string &which) {
   RUN_TEST(test_mysql_num_fields);
   RUN_TEST(test_mysql_num_rows);
   RUN_TEST(test_mysql_free_result);
+  RUN_TEST(test_mysql_free_localized_result);
   RUN_TEST(test_mysql_data_seek);
   RUN_TEST(test_mysql_fetch_row);
   RUN_TEST(test_mysql_fetch_assoc);
@@ -453,7 +454,6 @@ bool TestExtMysql::test_mysql_num_rows() {
 }
 
 bool TestExtMysql::test_mysql_free_result() {
-  Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   VERIFY(CreateTestTable());
   VS(f_mysql_query("insert into test (name) values ('test'),('test2')"), true);
 
@@ -461,6 +461,23 @@ bool TestExtMysql::test_mysql_free_result() {
   VS(f_is_resource("result is a resource"), true);
   f_mysql_free_result(res);
   VS(f_is_resource("result is not a resource after being freed"), false);
+  VS(f_mysql_num_rows(res), false);
+
+  return Count(true);
+}
+
+bool TestExtMysql::test_mysql_free_localized_result() {
+  VERIFY(CreateTestTable());
+  VS(f_mysql_query("insert into test (name) values ('test'),('test2')"), true);
+
+  mysqlExtension::Localize = true;
+  Variant res = f_mysql_query("select * from test");
+  VS(f_is_resource("result is a resource"), true);
+  f_mysql_free_result(res);
+  VS(f_is_resource("result is not a resource after being freed"), false);
+  VS(f_mysql_num_rows(res), false);
+
+  mysqlExtension::Localize = false;
   return Count(true);
 }
 

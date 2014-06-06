@@ -337,7 +337,7 @@ MySQLResult *php_mysql_extract_result(const Variant& result) {
   MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
-  if (res == nullptr || (res->get() == nullptr && !res->isLocalized())) {
+  if (res == nullptr || res->isInvalid()) {
     raise_warning("supplied argument is not a valid MySQL result resource");
     return nullptr;
   }
@@ -712,6 +712,8 @@ bool MySQLResult::seekRow(int64_t row) {
 }
 
 bool MySQLResult::fetchRow() {
+  // If not localized, use standard mysql functions on m_res
+  assert(isLocalized());
   if (m_current_row != m_rows->end()) m_current_row++;
   if (m_current_row != m_rows->end()) {
     m_row_ready = true;

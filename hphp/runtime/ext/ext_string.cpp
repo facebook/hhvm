@@ -534,13 +534,18 @@ Variant f_strtok(const String& str, const Variant& token /* = null_variant */) {
     }
   }
 
-  String ret(s0 + pos0, i - pos0, CopyString);
-  s_tokenizer_data->pos = i + 1;
-
   // reset mask
   for (int i = 0; i < stoken.size(); i++) {
     mask[(unsigned char)stoken.data()[i]] = 0;
   }
+
+  if (pos0 == sstr.size()) {
+    return false;
+  }
+
+  String ret(s0 + pos0, i - pos0, CopyString);
+  s_tokenizer_data->pos = i + 1;
+
   return ret;
 }
 

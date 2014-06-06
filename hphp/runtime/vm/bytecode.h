@@ -275,30 +275,45 @@ struct ActRec {
    * constructors exit via an exception.
    */
 
+  static constexpr int kNumArgsBits = 29;
+  static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
+  static constexpr int kFlagsMask   = ~kNumArgsMask;
+
+  static constexpr int kLocalsDecRefdShift = kNumArgsBits;
+  static constexpr int kResumedShift       = kNumArgsBits + 1;
+  static constexpr int kFPushCtorShift     = kNumArgsBits + 2;
+
+  static_assert(kFPushCtorShift <= 8 * sizeof(int32_t) - 1,
+                "Out of bits in ActRec");
+
+  static constexpr int kLocalsDecRefdMask = 1 << kLocalsDecRefdShift;
+  static constexpr int kResumedMask       = 1 << kResumedShift;
+  static constexpr int kFPushCtorMask     = 1 << kFPushCtorShift;
+
   int32_t numArgs() const {
-    return m_numArgsAndFlags & ~(7u << 29);
+    return m_numArgsAndFlags & kNumArgsMask;
   }
 
   bool localsDecRefd() const {
-    return m_numArgsAndFlags & (1u << 29);
+    return m_numArgsAndFlags & kLocalsDecRefdMask;
   }
 
   bool resumed() const {
-    return m_numArgsAndFlags & (1u << 30);
+    return m_numArgsAndFlags & kResumedMask;
   }
 
   bool isFromFPushCtor() const {
-    return m_numArgsAndFlags & (1u << 31);
+    return m_numArgsAndFlags & kFPushCtorMask;
   }
 
   static inline uint32_t
   encodeNumArgs(uint32_t numArgs, bool localsDecRefd, bool resumed,
                 bool isFPushCtor) {
-    assert((numArgs & (1u << 29)) == 0);
+    assert((numArgs & kFlagsMask) == 0);
     return numArgs |
-      (localsDecRefd << 29) |
-      (resumed << 30) |
-      (isFPushCtor << 31);
+      (localsDecRefd << kLocalsDecRefdShift) |
+      (resumed       << kResumedShift) |
+      (isFPushCtor   << kFPushCtorShift);
   }
 
   void initNumArgs(uint32_t numArgs) {

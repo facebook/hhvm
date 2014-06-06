@@ -126,61 +126,6 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
   }
 }
 
-/*
- * If inst is a guard/assert instruction that can be removed with its newly
- * relaxed typeParam, do so and return true. Otherwise, return false.
- */
-bool removeGuard(IRUnit& unit, IRInstruction* inst, const FrameState& state) {
-  Type prevType;
-  switch (inst->op()) {
-    case GuardLoc:
-    case CheckLoc:
-    case AssertLoc:
-      prevType = state.localType(inst->extra<LocalId>()->locId);
-      break;
-
-    case GuardStk:
-    case CheckStk:
-    case AssertStk:
-      prevType = getStackValue(inst->src(0),
-                               inst->extra<StackOffset>()->offset).knownType;
-      break;
-
-    case CheckType:
-    case AssertType:
-      prevType = inst->src(0)->type();
-      break;
-
-    default:
-      return false;
-  }
-
-  ITRACE(2, "removeGuard inspecting {}\n", *inst);
-  auto type = inst->typeParam();
-  if (type < prevType) return false;
-
-  if (!(type >= prevType)) {
-    // Neither is a subtype of the other. If they have no intersection the
-    // guard will always fail but we can let the simplifier take care of
-    // that.
-    return false;
-  }
-
-  ITRACE(2, "replacing {} with Mov due to prevType {}\n", *inst, prevType);
-  if (inst->isControlFlow()) {
-    // We can't replace CF instructions with a Mov, so stick a Mov in front of
-    // it and convert it to a Jmp to the next block.
-    auto* block = inst->block();
-    block->insert(block->iteratorTo(inst),
-                  unit.mov(inst->dst(), inst->src(0), inst->marker()));
-    inst->setTaken(inst->next());
-    inst->convertToJmp();
-  } else {
-    inst->convertToMov();
-  }
-  return true;
-}
-
 Type relaxInner(Type t, TypeConstraint tc) {
   if (t.notBoxed()) return t;
 
@@ -248,16 +193,16 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   // Make a second pass to reflow types, with some special logic for loads.
   FrameState state{unit, unit.entry()->front().marker()};
   for (auto* block : blocks) {
+    ITRACE(2, "relaxGuards reflow entering B{}\n", block->id());
+    Indent _i;
     state.startBlock(block);
 
     for (auto& inst : *block) {
       state.setMarker(inst.marker());
       copyProp(&inst);
       visitLoad(&inst, state);
-      if (!removeGuard(unit, &inst, state)) {
-        retypeDests(&inst);
-        state.update(&inst);
-      }
+      retypeDests(&inst);
+      state.update(&inst);
     }
 
     state.finishBlock(block);

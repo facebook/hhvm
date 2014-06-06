@@ -17,6 +17,9 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/frame-state.h"
+#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -64,6 +67,87 @@ SSATmp* IRUnit::findConst(Type type) {
     return tmp;
   }
   return m_constTable.insert(cloneInstruction(&inst)->dst());
+}
+
+static bool isMainExit(const Block* b) {
+  if (b->hint() == Block::Hint::Unlikely) return false;
+  if (b->hint() == Block::Hint::Unused) return false;
+  if (b->next()) return false;
+  // The Await bytecode instruction does a RetCtrl to the scheduler,
+  // which is in a likely block.  We don't want to consider this as
+  // the main exit.
+  if (b->back().op() == RetCtrl && b->back().marker().sk().op() == OpAwait) {
+    return false;
+  }
+  auto taken = b->taken();
+  if (!taken) return true;
+  if (taken->isCatch()) return true;
+  return false;
+}
+
+/*
+ * Intended to be called after all optimizations are finished on a
+ * single-entry, single-exit tracelet, this collects the types of all stack
+ * slots and locals at the end of the main exit.
+ */
+void IRUnit::collectPostConditions() {
+  // This function is only correct when given a single-exit region, as in
+  // TransKind::Profile.  Furthermore, its output is only used to guide
+  // formation of profile-driven regions.
+  assert(tx->mode() == TransKind::Profile);
+  assert(m_postConds.empty());
+  Timer _t(Timer::collectPostConditions);
+
+  // We want the state for the last block on the "main trace".  Figure
+  // out which that is.
+  Block* mainExit = nullptr;
+  FrameState state{*this, entry()->front().marker()};
+  ITRACE(2, "collectPostConditions starting\n");
+  Trace::Indent _i;
+
+  for (auto* block : rpoSortCfg(*this)) {
+    state.startBlock(block);
+
+    for (auto& inst : *block) {
+      state.setMarker(inst.marker());
+      state.update(&inst);
+    }
+
+    if (isMainExit(block)) {
+      mainExit = block;
+      break;
+    }
+
+    state.finishBlock(block);
+  }
+  always_assert(mainExit != nullptr);
+
+  FTRACE(1, "mainExit: B{}\n", mainExit->id());
+
+  // state currently holds the state at the end of mainExit
+  auto const curFunc  = state.func();
+  auto const sp       = state.sp();
+  auto const spOffset = state.spOffset();
+
+  for (unsigned i = 0; i < spOffset; ++i) {
+    auto t = getStackValue(sp, i).knownType;
+    if (!t.equals(Type::StackElem)) {
+      m_postConds.push_back({ RegionDesc::Location::Stack{i, spOffset - i},
+                              t });
+    }
+  }
+
+  for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
+    auto t = state.localType(i);
+    if (!t.equals(Type::Gen)) {
+      FTRACE(1, "Local {}: {}\n", i, t.toString());
+      m_postConds.push_back({ RegionDesc::Location::Local{i}, t });
+    }
+  }
+}
+
+const PostConditions& IRUnit::postConditions() const {
+  return m_postConds;
 }
 
 }}

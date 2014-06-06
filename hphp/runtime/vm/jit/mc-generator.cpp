@@ -1833,7 +1833,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
           if (m_tx.mode() == TransKind::Profile &&
               result == Translator::Success &&
               RuntimeOption::EvalJitPGOUsePostConditions) {
-            pconds = m_tx.irTrans()->hhbcTrans().irBuilder().getKnownTypes();
+            pconds = m_tx.irTrans()->hhbcTrans().unit().postConditions();
           }
 
           FTRACE(2, "translateRegion finished with result {}\n",
@@ -1883,7 +1883,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         if (m_tx.mode() == TransKind::Profile &&
             result == Translator::Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = m_tx.irTrans()->hhbcTrans().irBuilder().getKnownTypes();
+          pconds = m_tx.irTrans()->hhbcTrans().unit().postConditions();
         }
       }
 
@@ -2141,6 +2141,10 @@ void MCGenerator::traceCodeGen() {
 
   optimize(unit, ht.irBuilder(), m_tx.mode());
   finishPass(" after optimizing ", kOptLevel);
+  if (m_tx.mode() == TransKind::Profile &&
+      RuntimeOption::EvalJitPGOUsePostConditions) {
+    unit.collectPostConditions();
+  }
 
   auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.

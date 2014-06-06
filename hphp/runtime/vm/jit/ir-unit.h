@@ -312,6 +312,9 @@ public:
 
   const LabelRefs& labelRefs() const { return m_labelRefs; }
 
+  void collectPostConditions();
+  const PostConditions& postConditions() const;
+
   std::string toString() const;
 
 private:
@@ -328,6 +331,7 @@ private:
 
   // Information collected for optimization passes
   LabelRefs m_labelRefs;
+  PostConditions m_postConds;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -156,70 +156,6 @@ void IRBuilder::appendBlock(Block* block) {
   m_curBlock = block;
 }
 
-static bool isMainExit(const Block* b) {
-  if (b->hint() == Block::Hint::Unlikely) return false;
-  if (b->hint() == Block::Hint::Unused) return false;
-  if (b->next()) return false;
-  // The Await bytecode instruction does a RetCtrl to the scheduler,
-  // which is in a likely block.  We don't want to consider this as
-  // the main exit.
-  if (b->back().op() == RetCtrl && b->back().marker().sk().op() == OpAwait) {
-    return false;
-  }
-  auto taken = b->taken();
-  if (!taken) return true;
-  if (taken->isCatch()) return true;
-  return false;
-}
-
-/*
- * Compute the stack and local type postconditions for a
- * single-entry/single-exit tracelet.
- */
-std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() {
-  // This function is only correct when given a single-exit region, as
-  // in TransKind::Profile.  Furthermore, its output is only used to
-  // guide formation of profile-driven regions.
-  assert(tx->mode() == TransKind::Profile);
-
-  // We want the state for the last block on the "main trace".  Figure
-  // out which that is.
-  Block* mainExit = nullptr;
-  for (auto* b : rpoSortCfg(m_unit)) {
-    if (isMainExit(b)) {
-      assert(mainExit == nullptr);
-      mainExit = b;
-    }
-  }
-  assert(mainExit != nullptr);
-
-  // Load state for mainExit.  This feels hacky.
-  FTRACE(1, "mainExit: B{}\n", mainExit->id());
-  m_state.startBlock(mainExit);
-
-  // Now use the current state to get all the types.
-  std::vector<RegionDesc::TypePred> result;
-  auto const curFunc  = m_state.func();
-  auto const sp       = m_state.sp();
-  auto const spOffset = m_state.spOffset();
-
-  for (unsigned i = 0; i < curFunc->maxStackCells(); ++i) {
-    auto t = getStackValue(sp, i).knownType;
-    if (!t.equals(Type::StackElem)) {
-      result.push_back({ RegionDesc::Location::Stack{i, spOffset - i}, t });
-    }
-  }
-
-  for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
-    auto t = m_state.localType(i);
-    if (!t.equals(Type::Gen)) {
-      FTRACE(1, "Local {}: {}\n", i, t.toString());
-      result.push_back({ RegionDesc::Location::Local{i}, t });
-    }
-  }
-  return result;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
@@ -705,7 +641,8 @@ void IRBuilder::reoptimize() {
   auto const idoms = findDominators(m_unit, blocksIds);
 
   for (auto* block : blocksIds.blocks) {
-    FTRACE(5, "Block: {}\n", block->id());
+    ITRACE(5, "reoptimize entering block: {}\n", block->id());
+    Indent _i;
 
     m_state.startBlock(block);
     m_curBlock = block;

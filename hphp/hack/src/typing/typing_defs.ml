@@ -141,12 +141,6 @@ and class_type = {
   tc_req_ancestors_extends         : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
   tc_user_attributes     : Ast.user_attribute SMap.t;
-  (* These are approximations of what the class depends on,
-   * So that we can prefetch these classes to heat-up the caches *)
-  tc_prefetch_classes    : SSet.t;
-  tc_prefetch_funs       : SSet.t;
-
-  tc_mtime               : float;
 }
 
 and tparam = Ast.id * ty option

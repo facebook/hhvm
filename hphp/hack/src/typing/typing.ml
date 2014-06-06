@@ -2675,7 +2675,6 @@ and class_def env_up _ c =
     else begin
       if not !auto_complete && not !is_silent_mode
       then begin
-        Env.prefetch (snd c.c_name);
         NastCheck.class_ env_up c;
         NastInitCheck.class_ env_up c;
       end;

@@ -330,9 +330,6 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_ancestors             = SMap.map ty tc.tc_ancestors          ;
       tc_ancestors_checked_when_concrete    = SMap.map ty tc.tc_ancestors_checked_when_concrete ;
       tc_user_attributes       = tc.tc_user_attributes                ;
-      tc_prefetch_classes      = tc.tc_prefetch_classes               ;
-      tc_prefetch_funs         = tc.tc_prefetch_funs                  ;
-      tc_mtime                 = 0.0                                  ;
     }
 
   and constructor = function

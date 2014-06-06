@@ -393,9 +393,6 @@ and class_decl_ c =
     tc_req_ancestors = req_ancestors;
     tc_req_ancestors_extends = req_ancestors_extends;
     tc_user_attributes = c.c_user_attributes;
-    tc_prefetch_classes = Env.get_prefetch_classes env;
-    tc_prefetch_funs = Env.get_prefetch_funs env;
-    tc_mtime = c.Nast.c_mtime;
   } in
   if Ast.Cnormal = c.c_kind then
     SMap.iter (method_check_trait_overrides c) m

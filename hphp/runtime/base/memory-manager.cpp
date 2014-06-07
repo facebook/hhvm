@@ -37,10 +37,6 @@ TRACE_SET_MOD(smartalloc);
 
 //////////////////////////////////////////////////////////////////////
 
-const uint32_t SLAB_SIZE = 2 << 20;
-
-//////////////////////////////////////////////////////////////////////
-
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
 size_t MemoryManager::s_cactiveLimitCeiling = 0;
@@ -377,13 +373,14 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   FTRACE(3, "smartRealloc: {} to {}\n", inputPtr, nbytes);
   assert(nbytes > 0);
 
-  void* ptr = debug ? static_cast<DebugHeader*>(inputPtr) - 1 : inputPtr;
+  void* ptr = debug ? static_cast<DebugHeader*>((void*)(uintptr_t(inputPtr) -
+                                                kDebugExtraSize)) : inputPtr;
 
   auto const n = static_cast<SweepNode*>(ptr) - 1;
   if (LIKELY(n->padbytes <= kMaxSmartSize)) {
     void* newmem = smart_malloc(nbytes);
     auto const copySize = std::min(
-      n->padbytes - sizeof(SmallNode) - (debug ? sizeof(DebugHeader) : 0),
+      n->padbytes - sizeof(SmallNode) - kDebugExtraSize,
       nbytes
     );
     newmem = memcpy(newmem, inputPtr, copySize);
@@ -412,36 +409,62 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
  * Get a new slab, then allocate nbytes from it and install it in our
  * slab list.  Return the newly allocated nbytes-sized block.
  */
-NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
+NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
-  char* slab = (char*) safe_malloc(SLAB_SIZE);
-  assert(uintptr_t(slab) % 16 == 0);
-  JEMALLOC_STATS_ADJUST(&m_stats, SLAB_SIZE);
-  m_stats.alloc += SLAB_SIZE;
+  void* slab = safe_malloc(kSlabSize);
+  assert((uintptr_t(slab) & kSmartSizeAlignMask) == 0);
+  JEMALLOC_STATS_ADJUST(&m_stats, kSlabSize);
+  m_stats.alloc += kSlabSize;
   if (m_stats.alloc > m_stats.peakAlloc) {
     m_stats.peakAlloc = m_stats.alloc;
   }
   m_slabs.push_back(slab);
-  m_front = slab + nbytes;
-  m_limit = slab + SLAB_SIZE;
-  FTRACE(3, "newSlab: adding slab at {} to limit {}\n",
-         static_cast<void*>(slab),
-         static_cast<void*>(m_limit));
+  m_front = (void*)(uintptr_t(slab) + nbytes);
+  m_limit = (void*)(uintptr_t(slab) + kSlabSize);
+  FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab, m_limit);
   return slab;
 }
 
-// allocate nbytes from the current slab, aligned to 16-bytes
-void* MemoryManager::slabAlloc(size_t nbytes) {
-  const size_t kAlignMask = 15;
-  assert((nbytes & 7) == 0);
-  char* ptr = (char*)(uintptr_t(m_front + kAlignMask) & ~kAlignMask);
-  if (ptr + nbytes <= m_limit) {
-    m_front = ptr + nbytes;
-    return ptr;
+// allocate nbytes from the current slab, aligned to kSmartSizeAlign
+void* MemoryManager::slabAlloc(size_t nbytes, unsigned index) {
+  assert(nbytes <= kSlabSize);
+  assert((nbytes & kSmartSizeAlignMask) == 0);
+  assert((uintptr_t(m_front) & kSmartSizeAlignMask) == 0);
+  void* ptr = m_front;
+  {
+    void* next = (void*)(uintptr_t(ptr) + nbytes);
+    if (uintptr_t(next) <= uintptr_t(m_limit)) {
+      m_front = next;
+    } else {
+      ptr = newSlab(nbytes);
+    }
   }
-  return newSlab(nbytes);
+
+  // Preallocate more of the same in order to amortize entry into this method.
+  unsigned nPrealloc;
+  if (nbytes * kSmartPreallocCountLimit <= kSmartPreallocBytesLimit) {
+    nPrealloc = kSmartPreallocCountLimit;
+  } else {
+    nPrealloc = kSmartPreallocBytesLimit / nbytes;
+  }
+  {
+    void* front = (void*)(uintptr_t(m_front) + nPrealloc*nbytes);
+    if (uintptr_t(front) > uintptr_t(m_limit)) {
+      nPrealloc = ((uintptr_t)m_limit - uintptr_t(m_front)) / nbytes;
+      front = (void*)(uintptr_t(m_front) + nPrealloc*nbytes);
+    }
+    m_front = front;
+  }
+  for (void* p = (void*)(uintptr_t(m_front) - nbytes); p != ptr;
+       p = (void*)(uintptr_t(p) - nbytes)) {
+    m_freelists[index].push(
+        debugPreFree(debugPostAllocate(p, debugRemoveExtra(nbytes),
+                                       debugRemoveExtra(nbytes)),
+                     debugRemoveExtra(nbytes), debugRemoveExtra(nbytes)));
+  }
+  return ptr;
 }
 
 inline void* MemoryManager::smartEnlist(SweepNode* n) {
@@ -569,17 +592,18 @@ void* MemoryManager::debugPostAllocate(void* p,
   header->requestedSize = bytes;
   header->returnedCap = returnedCap;
   header->padding = 0;
-  return header + 1;
+  return (void*)(uintptr_t(header) + kDebugExtraSize);
 }
 
 void* MemoryManager::debugPreFree(void* p,
                                   size_t bytes,
                                   size_t userSpecifiedBytes) {
-  auto const header = reinterpret_cast<DebugHeader*>(p) - 1;
+  auto const header = reinterpret_cast<DebugHeader*>(uintptr_t(p) -
+                                                     kDebugExtraSize);
   assert(checkPreFree(header, bytes, userSpecifiedBytes));
   header->allocatedMagic = 0; // will get a freelist pointer shortly
   header->requestedSize = DebugHeader::kFreedMagic;
-  memset(header + 1, kSmartFreeFill, bytes);
+  memset(p, kSmartFreeFill, bytes);
   return header;
 }
 
@@ -603,9 +627,9 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);
     DEBUG_ONLY auto it = std::find_if(
       begin(m_slabs), end(m_slabs),
-      [&] (char* base) {
+      [&] (void* base) {
         auto const baseInt = reinterpret_cast<uintptr_t>(base);
-        return ptrInt >= baseInt && ptrInt < baseInt + SLAB_SIZE;
+        return ptrInt >= baseInt && ptrInt < baseInt + kSlabSize;
       }
     );
     assert(it != end(m_slabs));

@@ -1738,17 +1738,17 @@ void in(ISS& env, const bc::BareThis& op) {
 }
 
 void in(ISS& env, const bc::InitThisLoc& op) {
-  setLocRaw(env, findLocalById(env, op.arg1), TCell);
+  setLocRaw(env, op.loc1, TCell);
 }
 
 void in(ISS& env, const bc::StaticLoc& op) {
-  setLocRaw(env, findLocalById(env, op.arg1), TRef);
+  setLocRaw(env, op.loc1, TRef);
   push(env, TBool);
 }
 
 void in(ISS& env, const bc::StaticLocInit& op) {
   popC(env);
-  setLocRaw(env, findLocalById(env, op.arg1), TRef);
+  setLocRaw(env, op.loc1, TRef);
 }
 
 /*
@@ -1767,8 +1767,7 @@ void in(ISS& env, const bc::OODeclExists& op) {
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {
-  auto loc = findLocalById(env, op.arg1);
-  locAsCell(env, loc);
+  locAsCell(env, op.loc1);
   if (!options.HardTypeHints) return;
 
   /*
@@ -1783,10 +1782,10 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * references if it re-enters, even if Option::HardTypeHints is
    * on.
    */
-  auto const constraint = env.ctx.func->params[op.arg1].typeConstraint;
+  auto const constraint = env.ctx.func->params[op.loc1->id].typeConstraint;
   if (constraint.hasConstraint() && !constraint.isTypeVar()) {
     FTRACE(2, "     {}\n", constraint.fullName());
-    setLoc(env, loc, env.index.lookup_constraint(env.ctx, constraint));
+    setLoc(env, op.loc1, env.index.lookup_constraint(env.ctx, constraint));
   }
 }
 void in(ISS& env, const bc::VerifyRetTypeV& op) {}

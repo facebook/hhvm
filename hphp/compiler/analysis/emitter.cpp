@@ -2444,6 +2444,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     if (fsp->needsLocalThis()) {
       static const StringData* thisStr = makeStaticString("this");
       Id thisId = m_curFunc->lookupVarId(thisStr);
+      emitVirtualLocal(thisId);
       e.InitThisLoc(thisId);
     }
     if (fsp->needsFinallyLocals()) {
@@ -3092,11 +3093,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
 
           if (value->isScalar()) {
+            emitVirtualLocal(local);
             visit(value);
             emitConvertToCell(e);
             e.StaticLocInit(local, name);
           } else {
             Label done;
+            emitVirtualLocal(local);
             e.StaticLoc(local, name);
             e.JmpNZ(done);
 
@@ -6641,11 +6644,13 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
     assert(!m_curFunc->top());
     static const StringData* thisStr = makeStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
+    emitVirtualLocal(thisId);
     e.InitThisLoc(thisId);
   }
   for (uint i = 0; i < m_curFunc->params().size(); i++) {
     const TypeConstraint& tc = m_curFunc->params()[i].typeConstraint;
     if (!tc.hasConstraint()) continue;
+    emitVirtualLocal(i);
     e.VerifyParamType(i);
   }
 

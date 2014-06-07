@@ -673,13 +673,13 @@ constexpr int32_t kMaxConcatN = 4;
   O(BareThis,        ONE(OA(BareThisOp)),                               \
                                        NOV,             ONE(CV),    NF) \
   O(CheckThis,       NA,               NOV,             NOV,        NF) \
-  O(InitThisLoc,     ONE(IVA),         NOV,             NOV,        NF) \
-  O(StaticLoc,       TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
-  O(StaticLocInit,   TWO(IVA,SA),      ONE(CV),         NOV,        NF) \
+  O(InitThisLoc,     ONE(LA),          NOV,             NOV,        NF) \
+  O(StaticLoc,       TWO(LA,SA),       NOV,             ONE(CV),    NF) \
+  O(StaticLocInit,   TWO(LA,SA),       ONE(CV),         NOV,        NF) \
   O(Catch,           NA,               NOV,             ONE(CV),    NF) \
   O(OODeclExists,    ONE(OA(OODeclExistsOp)),                           \
                                        TWO(CV,CV),      ONE(CV),    NF) \
-  O(VerifyParamType, ONE(IVA),         NOV,             NOV,        NF) \
+  O(VerifyParamType, ONE(LA),          NOV,             NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeV,  NA,               ONE(VV),         ONE(VV),    NF) \
   O(Self,            NA,               NOV,             ONE(AV),    NF) \

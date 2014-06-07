@@ -6792,7 +6792,7 @@ OPTBLD_INLINE void ExecutionContext::iopCheckThis(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopInitThisLoc(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(id);
+  DECODE_LA(id);
   TypedValue* thisLoc = frame_local(vmfp(), id);
   tvRefcountedDecRef(thisLoc);
   if (vmfp()->hasThis()) {
@@ -6823,7 +6823,7 @@ static inline RefData* lookupStatic(StringData* name,
 
 OPTBLD_INLINE void ExecutionContext::iopStaticLoc(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(localId);
+  DECODE_LA(localId);
   DECODE_LITSTR(var);
 
   bool inited;
@@ -6844,7 +6844,7 @@ OPTBLD_INLINE void ExecutionContext::iopStaticLoc(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopStaticLocInit(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(localId);
+  DECODE_LA(localId);
   DECODE_LITSTR(var);
 
   bool inited;
@@ -6884,7 +6884,7 @@ OPTBLD_INLINE void ExecutionContext::iopVerifyParamType(IOP_ARGS) {
   SYNC(); // We might need vmpc() to be updated to throw.
   NEXT();
 
-  DECODE_IVA(paramId);
+  DECODE_LA(paramId);
   const Func *func = vmfp()->m_func;
   assert(paramId < func->numParams());
   assert(func->numParams() == int(func->params().size()));

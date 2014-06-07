@@ -128,6 +128,12 @@ struct Options {
   bool GlobalDCE = false;
 
   /*
+   * Whether to remove completely unused local variables.  This
+   * requires GlobalDCE.
+   */
+  bool RemoveUnusedLocals = false;
+
+  /*
    * If true, insert opcodes that assert inferred types, so we can
    * assume them at runtime.
    */

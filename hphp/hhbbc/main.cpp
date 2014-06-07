@@ -110,6 +110,7 @@ void parse_options(int argc, char** argv) {
     ("constant-prop",           po::value(&options.ConstantProp))
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
+    ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))

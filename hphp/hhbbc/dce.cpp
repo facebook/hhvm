@@ -243,6 +243,14 @@ struct DceState {
    * to keep eval stack consumers and producers balanced.
    */
   boost::dynamic_bitset<> markedDead;
+
+  /*
+   * The set of locals that were ever live in this block.  (This
+   * includes locals that were live going out of this block.)  This
+   * set is used by global DCE to remove locals that are completely
+   * unused in the entire function.
+   */
+  std::bitset<kMaxTrackedLocals> usedLocals;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -598,6 +606,7 @@ dce_visit(const Index& index,
   dceState.markedDead.resize(blk->hhbcs.size());
   dceState.liveLocals = liveOut;
   dceState.stack.resize(states.back().first.stack.size());
+  dceState.usedLocals = liveOut;
   for (auto& s : dceState.stack) {
     s = UseInfo { Use::Used, InstrIdSet{} };
   }
@@ -626,6 +635,8 @@ dce_visit(const Index& index,
       dceState.liveLocals |= liveOutExn;
       dceState.killBeforePEI.reset();
     }
+
+    dceState.usedLocals |= dceState.liveLocals;
 
     FTRACE(4, "    dce stack: {}\n",
       [&] {
@@ -677,15 +688,16 @@ DceAnalysis analyze_dce(const Index& index,
   return DceAnalysis {};
 }
 
-void optimize_dce(const Index& index,
-                  Context const ctx,
-                  borrowed_ptr<php::Block> const blk,
-                  const State& stateIn,
-                  std::bitset<kMaxTrackedLocals> liveOut,
-                  std::bitset<kMaxTrackedLocals> liveOutExn) {
+std::bitset<kMaxTrackedLocals>
+optimize_dce(const Index& index,
+             Context const ctx,
+             borrowed_ptr<php::Block> const blk,
+             const State& stateIn,
+             std::bitset<kMaxTrackedLocals> liveOut,
+             std::bitset<kMaxTrackedLocals> liveOutExn) {
   auto const dceState = dce_visit(index, ctx, blk,
     stateIn, liveOut, liveOutExn);
-  if (!dceState) return;
+  if (!dceState) return std::bitset<kMaxTrackedLocals>{};
 
   // Remove all instructions that were marked dead, and replace
   // instructions that can be replaced with pops but aren't dead.
@@ -697,6 +709,45 @@ void optimize_dce(const Index& index,
   // Blocks must be non-empty.  Make sure we don't change that.
   if (blk->hhbcs.empty()) {
     blk->hhbcs.push_back(bc::Nop {});
+  }
+
+  return dceState->usedLocals;
+}
+
+void remove_unused_locals(Context const ctx,
+                          std::bitset<kMaxTrackedLocals> usedLocals) {
+  if (!options.RemoveUnusedLocals) return;
+  auto const func = ctx.func;
+
+  /*
+   * Removing unused locals in closures requires checking which ones
+   * are captured variables so we can remove the relevant properties,
+   * and then we'd have to mutate the CreateCl callsite, so we don't
+   * bother for now.
+   *
+   * Note: many closure bodies have unused $this local, because of
+   * some emitter quirk, so this might be worthwhile.
+   */
+  if (func->isClosureBody) return;
+
+  func->locals.erase(
+    std::remove_if(
+      begin(func->locals),
+      end(func->locals),
+      [&] (const std::unique_ptr<php::Local>& l) {
+        if (!usedLocals.test(l->id)) {
+          FTRACE(2, "  removing: {}\n", local_string(borrow(l)));
+          return true;
+        }
+        return false;
+      }
+    ),
+    end(func->locals)
+  );
+
+  // Fixup local ids, in case we removed any.
+  for (auto i = uint32_t{0}; i < func->locals.size(); ++i) {
+    func->locals[i]->id = i;
   }
 }
 
@@ -855,9 +906,10 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * remove instructions that don't need to be there.
    */
   FTRACE(1, "|---- global DCE optimize ({})\n", show(ai.ctx));
+  std::bitset<kMaxTrackedLocals> usedLocals;
   for (auto& b : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", b->id);
-    optimize_dce(
+    usedLocals |= optimize_dce(
       index,
       ai.ctx,
       b,
@@ -866,6 +918,9 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       blockStates[rpoId(b)].liveOutExn
     );
   }
+
+  FTRACE(1, "  used locals: {}\n", bits_string(ai.ctx.func, usedLocals));
+  remove_unused_locals(ai.ctx, usedLocals);
 }
 
 //////////////////////////////////////////////////////////////////////

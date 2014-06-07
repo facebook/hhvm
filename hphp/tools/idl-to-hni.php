@@ -125,6 +125,7 @@ function output_function($fp, $func, $indent = '') {
         case 'isfoldable':     $ua[] = '__IsFoldable'; break;
         case 'hiphopspecific': $ua[] = '__HipHopSpecific'; break;
         case 'noinjection':    $nativea[] = '"NoInjection"'; break;
+        case 'paramcoercemodefalse': $ua[] = '__ParamCoerceModeFalse'; break;
         default: fwrite(STDERR, "Unknown Flag: $flag\n");
       }
     }

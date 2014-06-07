@@ -287,6 +287,19 @@ struct HhbcTranslator {
                       bool destroyLocals);
   void emitFCall(uint32_t numParams, Offset returnBcOffset,
                  const Func* callee, bool destroyLocals);
+  template<class GetArg>
+  void emitBuiltinCall(const Func* callee,
+                       uint32_t numArgs,
+                       uint32_t numNonDefault,
+                       SSATmp* paramThis,
+                       bool inlining,
+                       bool wasInliningConstructor,
+                       bool destroyLocals,
+                       GetArg getArg);
+  void emitFCallBuiltinCoerce(const Func* callee,
+                              uint32_t numArgs,
+                              uint32_t numNonDefault,
+                              bool destroyLocals);
   void emitFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault,
                         int32_t funcId, bool destroyLocals);
   void emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId, Type outPred);

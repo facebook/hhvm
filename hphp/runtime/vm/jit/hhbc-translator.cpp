@@ -3271,17 +3271,10 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
   return true;
 }
 
-void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
-                                      uint32_t numNonDefault,
-                                      int32_t funcId,
-                                      bool destroyLocals) {
-  const NamedEntity* ne = lookupNamedEntityId(funcId);
-  const Func* callee = Unit::lookupFunc(ne);
-
-  callee->validate();
-
-  if (optimizedFCallBuiltin(callee, numArgs, numNonDefault)) return;
-
+void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
+                                            uint32_t numArgs,
+                                            uint32_t numNonDefault,
+                                            bool destroyLocals) {
   /*
    * Spill args to stack.  Some of the arguments may be passed by
    * reference, for which case we will pass a stack address.
@@ -3303,32 +3296,11 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     case KindOfObject:
     case KindOfResource:
     case KindOfString:
-      if (callee->isParamCoerceMode()) {
-        gen(CoerceStk,
-            Type(pi.builtinType()),
-            StackOffset(numArgs - i - 1),
-            makeExitSlow(),
-            m_irb->sp());
-      } else {
-        // cpi.value/valueLen contain the default values for C++ built-ins,
-        // as serialize()'d data. It's generally unneccessary to populate
-        // Func::ParamInfo default values, as the C++ code sets them up,
-        // but here we need to check if there /is/ a default.
-        Type t(pi.builtinType());
-        if (pi.builtinType() == KindOfObject &&
-            callee->methInfo()->parameters[i]->valueLen > 0) {
-          t = Type::NullableObj;
-        }
-        auto const sp = m_irb->sp();
-        auto const offset = numArgs - i - 1;
-        auto const stkVal = getStackValue(sp, offset);
-        if (stkVal.knownType <= Type::Int && t <= Type::Dbl) {
-          m_irb->constrainStack(offset, DataTypeSpecific);
-          gen(CastStkIntToDbl, t, StackOffset(offset), sp);
-        } else {
-          gen(CastStk, makeCatch(), t, StackOffset(offset), sp);
-        }
-      }
+      gen(CoerceStk,
+          Type(pi.builtinType()),
+          StackOffset(numArgs - i - 1),
+          makeExitSlow(),
+          m_irb->sp());
       break;
     case KindOfUnknown:
       break;
@@ -3376,6 +3348,222 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     }
   }
 
+  push(ret);
+}
+
+void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
+                                      uint32_t numNonDefault,
+                                      int32_t funcId,
+                                      bool destroyLocals) {
+  const NamedEntity* ne = lookupNamedEntityId(funcId);
+  const Func* callee = Unit::lookupFunc(ne);
+
+  callee->validate();
+
+  if (optimizedFCallBuiltin(callee, numArgs, numNonDefault)) return;
+
+  if (callee->isParamCoerceMode()) {
+    return emitFCallBuiltinCoerce(callee, numArgs, numNonDefault,
+                                  destroyLocals);
+  }
+
+  emitBuiltinCall(callee,
+                  numArgs,
+                  numNonDefault,
+                  nullptr,  /* no this */
+                  false,    /* not inlining */
+                  false,    /* not inlining constructor */
+                  destroyLocals,
+                  [&](uint32_t) { return popC(); });
+}
+
+template<class GetArg>
+void HhbcTranslator::emitBuiltinCall(const Func* callee,
+                                     uint32_t numArgs,
+                                     uint32_t numNonDefault,
+                                     SSATmp* paramThis,
+                                     bool inlining,
+                                     bool wasInliningConstructor,
+                                     bool destroyLocals,
+                                     GetArg getArg) {
+  // Collect the parameter locals---we'll need them later.  Also
+  // determine which ones will need to be passed through the eval
+  // stack.
+  smart::vector<SSATmp*> paramSSAs(numArgs);
+  smart::vector<bool> paramThroughStack(numArgs);
+  smart::vector<bool> paramNeedsConversion(numArgs);
+  auto numParamsThroughStack = uint32_t{0};
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    // Fill in paramSSAs in reverse, since they may come from popC's.
+    auto const offset = numArgs - i - 1;
+    paramSSAs[offset] = getArg(offset);
+
+    auto const& pi = callee->params()[offset];
+    switch (pi.builtinType()) {
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfDouble:
+        paramThroughStack[offset] = false;
+        break;
+      default:
+        ++numParamsThroughStack;
+        paramThroughStack[offset] = true;
+        break;
+    }
+
+    paramNeedsConversion[offset] = offset < numNonDefault
+                                   && pi.builtinType() != KindOfUnknown;
+  }
+
+  // For the same reason that we have to IncRef the locals above, we
+  // need to grab one on the $this.
+  if (paramThis) gen(IncRef, paramThis);
+
+  if (inlining) emitEndInlinedCommon();   /////// leaving inlined function
+
+  /*
+   * Everything that needs to be on the stack gets spilled now.
+   *
+   * Note: right here we should eventually be handling the possibility
+   * that we need to coerce parameters.  But right now any situation
+   * requiring that is disabled in shouldIRInline.
+   */
+  if (numParamsThroughStack != 0 || !inlining) {
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      if (paramThroughStack[i]) {
+        push(paramSSAs[i]);
+      }
+    }
+    // We're going to do ldStackAddrs on these, so the stack must be
+    // materialized:
+    spillStack();
+    // This marker update is to make sure rbx points to the bottom of
+    // our stack when we enter our catch trace.  The catch trace
+    // twiddles the VM registers directly on the execution context to
+    // make the unwinder understand the situation, however.
+    updateMarker();
+  }
+
+  /*
+   * We have an unusual situation if we raise an exception:
+   *
+   * The unwinder is going to see our PC as equal to the FCallD for
+   * the call to this NativeImpl instruction.  This means the PC will
+   * be inside the FPI region for the call, so it'll try to pop an
+   * ActRec.
+   *
+   * Meanwhile, we've just exited the inlined callee (and its frame
+   * was hopefully removed by dce), and then pushed any of our
+   * by-reference arguments on the eval stack.  So, if we throw, we
+   * need to pop anything we pushed, put down a fake ActRec, and then
+   * eagerly sync VM regs to represent that stack depth.
+   */
+  auto const makeUnusualCatch = [&] { return makeCatchImpl([&] {
+        // TODO(#4323657): this is generating generic DecRefs at the time
+        // of this writing---probably we're not handling the stack chain
+        // correctly in a catch block.
+        for (auto i = uint32_t{0}; i < numArgs; ++i) {
+          if (paramThroughStack[i]) {
+            popDecRef(Type::Gen);
+          } else {
+            gen(DecRef, paramSSAs[i]);
+          }
+        }
+        if (inlining) {
+          emitFPushActRec(cns(callee),
+                          paramThis ? paramThis : cns(Type::Nullptr),
+                          ActRec::encodeNumArgs(numArgs,
+                                                false /* localsDecRefd */,
+                                                false /* resumed */,
+                                                wasInliningConstructor),
+                          nullptr);
+        }
+        for (auto i = uint32_t{0}; i < numArgs; ++i) {
+          // TODO(#4313939): it's not actually necessary to push these
+          // nulls.
+          push(cns(Type::InitNull));
+        }
+        auto const stack = spillStack();
+        gen(SyncABIRegs, m_irb->fp(), stack);
+        gen(EagerSyncVMRegs, m_irb->fp(), stack);
+        return stack;
+      }); };
+
+  /*
+   * Prepare the actual arguments to the CallBuiltin instruction.  If
+   * any of the parameters need type conversions, we need to handle
+   * that too.
+   */
+  auto const cbNumArgs = numArgs + (paramThis ? 1 : 0);
+  SSATmp* args[cbNumArgs];
+  {
+    auto argIdx   = uint32_t{0};
+    auto stackIdx = uint32_t{0};
+
+    if (paramThis) args[argIdx++] = paramThis;
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      if (!paramThroughStack[i]) {
+        if (paramNeedsConversion[i]) {
+          auto const ty = Type(callee->params()[i].builtinType());
+          auto const oldVal = paramSSAs[i];
+          paramSSAs[i] = [&] {
+            if (ty <= Type::Int) {
+              return gen(ConvCellToInt, makeUnusualCatch(), oldVal);
+            }
+            if (ty <= Type::Dbl) {
+              return gen(ConvCellToDbl, makeUnusualCatch(), oldVal);
+            }
+            always_assert(ty <= Type::Bool);  // or will be passed by stack
+            return gen(ConvCellToBool, oldVal);
+          }();
+          gen(DecRef, oldVal);
+        }
+        args[argIdx++] = paramSSAs[i];
+        continue;
+      }
+
+      auto const offset = numParamsThroughStack - stackIdx - 1;
+      if (paramNeedsConversion[i]) {
+        Type t(callee->params()[i].builtinType());
+        if (callee->params()[i].builtinType() == KindOfObject &&
+            callee->methInfo()->parameters[i]->valueLen > 0) {
+          t = Type::NullableObj;
+        }
+        gen(CastStk,
+            makeUnusualCatch(),
+            t,
+            StackOffset { static_cast<int32_t>(offset) },
+            m_irb->sp());
+      }
+
+      args[argIdx++] = ldStackAddr(offset, DataTypeSpecific);
+      ++stackIdx;
+    }
+
+    assert(stackIdx == numParamsThroughStack);
+    assert(argIdx == cbNumArgs);
+  }
+
+  // Make the actual call.
+  auto const retType = [&] {
+    auto const retDt = callee->returnType();
+    auto const ret = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
+    return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
+  }();
+  SSATmp** decayedPtr = &args[0];
+  auto const ret = gen(
+    CallBuiltin,
+    retType,
+    CallBuiltinData { callee, destroyLocals },
+    makeUnusualCatch(),
+    std::make_pair(cbNumArgs, decayedPtr)
+  );
+
+  // Pop the stack params and push the return value.
+  if (paramThis) gen(DecRef, paramThis);
+  for (auto i = uint32_t{0}; i < numParamsThroughStack; ++i) {
+    popDecRef(Type::Gen);
+  }
   push(ret);
 }
 
@@ -3455,184 +3643,25 @@ void HhbcTranslator::emitNativeImplInlined() {
 
   bool const instanceMethod = callee->isMethod() &&
                                 !(callee->attrs() & AttrStatic);
-
   // Collect the parameter locals---we'll need them later.  Also
   // determine which ones will need to be passed through the eval
   // stack.
   auto const numArgs = callee->numParams();
   auto const paramThis = instanceMethod ? gen(LdThis, m_irb->fp())
                                         : nullptr;
-  SSATmp* paramSSAs[numArgs];
-  bool paramThroughStack[numArgs];
-  bool paramNeedsConversion[numArgs];
-  auto numParamsThroughStack = uint32_t{0};
-  for (auto i = uint32_t{0}; i < numArgs; ++i) {
-    paramSSAs[i] = ldLoc(i, nullptr, DataTypeSpecific);
-    // These increfs must be "inside" the callee: the inline return is
-    // going to decref them, and the callee may own the only reference
-    // to these tmps.  In the normal situation these increfs should
-    // cancel with the DecRefs.
-    gen(IncRef, paramSSAs[i]);
 
-    auto const& pi = callee->params()[i];
-    switch (pi.builtinType()) {
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-      paramThroughStack[i] = false;
-      break;
-    default:
-      ++numParamsThroughStack;
-      paramThroughStack[i] = true;
-      break;
-    }
-
-    paramNeedsConversion[i] =
-      pi.builtinType() != KindOfUnknown &&
-        !(paramSSAs[i]->type() <= Type(pi.builtinType()));
-  }
-
-  // For the same reason that we have to IncRef the locals above, we
-  // need to grab one on the $this.
-  if (paramThis) gen(IncRef, paramThis);
-
-  emitEndInlinedCommon();  /////// leaving inlined function
-
-  /*
-   * Everything that needs to be on the stack gets spilled now.
-   *
-   * Note: right here we should eventually be handling the possibility
-   * that we need to coerce parameters.  But right now any situation
-   * requiring that is disabled in shouldIRInline.
-   */
-  if (numParamsThroughStack != 0) {
-    for (auto i = uint32_t{0}; i < numArgs; ++i) {
-      if (paramThroughStack[i]) {
-        push(paramSSAs[i]);
-      }
-    }
-    // We're going to do ldStackAddrs on these, so the stack must be
-    // materialized:
-    spillStack();
-    // This marker update is to make sure rbx points to the bottom of
-    // our stack when we enter our catch trace.  The catch trace
-    // twiddles the VM registers directly on the execution context to
-    // make the unwinder understand the situation, however.
-    updateMarker();
-  }
-
-  /*
-   * We have an unusual situation if we raise an exception:
-   *
-   * The unwinder is going to see our PC as equal to the FCallD for
-   * the call to this NativeImpl instruction.  This means the PC will
-   * be inside the FPI region for the call, so it'll try to pop an
-   * ActRec.
-   *
-   * Meanwhile, we've just exited the inlined callee (and its frame
-   * was hopefully removed by dce), and then pushed any of our
-   * by-reference arguments on the eval stack.  So, if we throw, we
-   * need to pop anything we pushed, put down a fake ActRec, and then
-   * eagerly sync VM regs to represent that stack depth.
-   */
-  auto const makeUnusualCatch = [&] { return makeCatchImpl([&] {
-    // TODO(#4323657): this is generating generic DecRefs at the time
-    // of this writing---probably we're not handling the stack chain
-    // correctly in a catch block.
-    for (auto i = uint32_t{0}; i < numParamsThroughStack; ++i) {
-      popDecRef(Type::Gen);
-    }
-    emitFPushActRec(cns(callee),
-                    paramThis ? paramThis : cns(Type::Nullptr),
-                    ActRec::encodeNumArgs(numArgs,
-                                          false /* localsDecRefd */,
-                                          false /* resumed */,
-                                          wasInliningConstructor),
-                    nullptr);
-    for (auto i = uint32_t{0}; i < numArgs; ++i) {
-      // TODO(#4313939): it's not actually necessary to push these
-      // nulls.
-      push(cns(Type::InitNull));
-    }
-    auto const stack = spillStack();
-    gen(SyncABIRegs, m_irb->fp(), stack);
-    gen(EagerSyncVMRegs, m_irb->fp(), stack);
-    return stack;
-  }); };
-
-  /*
-   * Prepare the actual arguments to the CallBuiltin instruction.  If
-   * any of the parameters need type conversions, we need to handle
-   * that too.
-   */
-  auto const cbNumArgs = numArgs + (instanceMethod ? 1 : 0);
-  SSATmp* args[cbNumArgs];
-  {
-    auto argIdx   = uint32_t{0};
-    auto stackIdx = uint32_t{0};
-
-    if (paramThis) args[argIdx++] = paramThis;
-    for (auto i = uint32_t{0}; i < numArgs; ++i) {
-      if (!paramThroughStack[i]) {
-        if (paramNeedsConversion[i]) {
-          auto const ty = Type(callee->params()[i].builtinType());
-          auto const oldVal = paramSSAs[i];
-          paramSSAs[i] = [&] {
-            if (ty <= Type::Int) {
-              return gen(ConvCellToInt, makeUnusualCatch(), oldVal);
-            }
-            if (ty <= Type::Dbl) {
-              return gen(ConvCellToDbl, makeUnusualCatch(), oldVal);
-            }
-            always_assert(ty <= Type::Bool);  // or will be passed by stack
-            return gen(ConvCellToBool, oldVal);
-          }();
-          gen(DecRef, oldVal);
-        }
-        args[argIdx++] = paramSSAs[i];
-        continue;
-      }
-
-      auto const offset = numParamsThroughStack - stackIdx - 1;
-      if (paramNeedsConversion[i]) {
-        gen(CastStk,
-            makeUnusualCatch(),
-            Type(callee->params()[i].builtinType()),
-            StackOffset { static_cast<int32_t>(offset) },
-            m_irb->sp());
-      }
-
-      args[argIdx++] = ldStackAddr(offset, DataTypeSpecific);
-      ++stackIdx;
-    }
-
-    assert(stackIdx == numParamsThroughStack);
-    assert(argIdx == cbNumArgs);
-  }
-
-  /*
-   * Make the actual call.
-   */
-  auto const retType = [&] {
-    auto const retDt = callee->returnType();
-    auto const ret = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
-    return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
-  }();
-  SSATmp** decayedPtr = &args[0];
-  auto const ret = gen(
-    CallBuiltin,
-    retType,
-    CallBuiltinData { callee, false /* destroyLocals */ },
-    makeUnusualCatch(),
-    std::make_pair(cbNumArgs, decayedPtr)
-  );
-
-  // Pop the stack params, decref this, and push the return value.
-  if (paramThis) gen(DecRef, paramThis);
-  for (auto i = uint32_t{0}; i < numParamsThroughStack; ++i) {
-    popDecRef(Type::Gen);
-  }
-  push(ret);
+  emitBuiltinCall(callee,
+                  numArgs,
+                  numArgs,  /* numNonDefault */
+                  paramThis,
+                  true,     /* inlining */
+                  wasInliningConstructor,
+                  false,    /* destroyLocals */
+                  [&](uint32_t i) {
+                    auto ret = ldLoc(i, nullptr, DataTypeSpecific);
+                    gen(IncRef, ret);
+                    return ret;
+                  });
 }
 
 void HhbcTranslator::emitRetFromInlined(Type type) {

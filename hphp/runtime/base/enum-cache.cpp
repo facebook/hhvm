@@ -26,11 +26,10 @@ static EnumCache cache;
 
 const StaticString enumName("Enum");
 
-const EnumCache::EnumValues* EnumCache::getValues(
-    const Class* klass,
-    bool recurse) {
-  if (klass->classVecLen() == 1 ||
-      !enumName.get()->same(klass->classVec()[0]->name())) {
+const EnumCache::EnumValues* EnumCache::getValues(const Class* klass,
+                                                  bool recurse) {
+  if (UNLIKELY(klass->classVecLen() == 1 ||
+               !enumName.get()->same(klass->classVec()[0]->name()))) {
     std::string msg;
     msg += klass->name()->data();
     msg += " must derive from Enum";
@@ -59,9 +58,8 @@ EnumCache::~EnumCache() {
   m_enumValuesMap.clear();
 }
 
-const EnumCache::EnumValues* EnumCache::loadEnumValues(
-    const Class* klass,
-    bool recurse) {
+const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
+                                                       bool recurse) {
   auto const numConstants = klass->numConstants();
   size_t foundOnClass = 0;
   Array values;
@@ -112,7 +110,7 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(
 }
 
 const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
-    intptr_t key) const {
+  intptr_t key) const {
   EnumValuesMap::const_accessor acc;
   if (m_enumValuesMap.find(acc, key)) {
     return acc->second;
@@ -120,9 +118,8 @@ const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
   return nullptr;
 }
 
-const EnumCache::EnumValues* EnumCache::getEnumValues(
-    const Class* klass,
-    bool recurse) {
+const EnumCache::EnumValues* EnumCache::getEnumValues(const Class* klass,
+                                                      bool recurse) {
   const EnumCache::EnumValues* values =
       getEnumValuesIfDefined(getKey(klass, recurse));
   if (values == nullptr) {

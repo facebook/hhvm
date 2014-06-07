@@ -567,6 +567,11 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     return hphp_invoke($this->getName(), array_values($args));
   }
 
+  /* No support for disabling currently */
+  public function isDisabled() {
+    return false;
+  }
+
   <<__Native>>
   private function getClosureScopeClassname(object $closure): string;
 

@@ -14,24 +14,24 @@ NULL
 
 Notice: Undefined property: A::$x in %s on line 14
 
-Warning: Cannot access property on non-object in %s on line 14
+Notice: Cannot access property on non-object in %s on line 14
 
-Warning: Cannot access property on non-object in %s on line 14
+Notice: Cannot access property on non-object in %s on line 14
 
-Warning: Cannot access property on non-object in %s on line 14
+Notice: Cannot access property on non-object in %s on line 14
 
-Warning: Cannot access property on non-object in %s on line 14
+Notice: Cannot access property on non-object in %s on line 14
 NULL
 
 Notice: Undefined property: A::$x in %s on line 16
 
-Warning: Cannot access property on non-object in %s on line 16
+Notice: Cannot access property on non-object in %s on line 16
 
-Warning: Cannot access property on non-object in %s on line 16
+Notice: Cannot access property on non-object in %s on line 16
 
-Warning: Cannot access property on non-object in %s on line 16
+Notice: Cannot access property on non-object in %s on line 16
 
-Warning: Cannot access property on non-object in %s on line 16
+Notice: Cannot access property on non-object in %s on line 16
 NULL
 NULL
 object(A)#1 (2) {
@@ -50,23 +50,23 @@ NULL
 
 Notice: Undefined property: A::$x in %s on line 14
 
-Warning: Cannot access property on non-object in %s on line 14
+Notice: Cannot access property on non-object in %s on line 14
 
-Warning: Cannot access property on non-object in %s on line 14
+Notice: Cannot access property on non-object in %s on line 14
 
-Warning: Cannot access property on non-object in %s on line 14
+Notice: Cannot access property on non-object in %s on line 14
 
-Warning: Cannot access property on non-object in %s on line 14
+Notice: Cannot access property on non-object in %s on line 14
 NULL
 
 Notice: Undefined property: A::$x in %s on line 16
 
-Warning: Cannot access property on non-object in %s on line 16
+Notice: Cannot access property on non-object in %s on line 16
 
-Warning: Cannot access property on non-object in %s on line 16
+Notice: Cannot access property on non-object in %s on line 16
 
-Warning: Cannot access property on non-object in %s on line 16
+Notice: Cannot access property on non-object in %s on line 16
 
-Warning: Cannot access property on non-object in %s on line 16
+Notice: Cannot access property on non-object in %s on line 16
 NULL
 NULL

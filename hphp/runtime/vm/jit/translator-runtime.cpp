@@ -266,7 +266,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
 }
 
 void raisePropertyOnNonObject() {
-  raise_warning("Cannot access property on non-object");
+  raise_notice("Cannot access property on non-object");
 }
 
 void raiseUndefProp(ObjectData* base, const StringData* name) {

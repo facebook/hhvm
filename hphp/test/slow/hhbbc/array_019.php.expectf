@@ -1,7 +1,7 @@
 
 Warning: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 8
 
-Warning: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 9
+Notice: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 9
 NULL
 array(1) {
   ["x"]=>

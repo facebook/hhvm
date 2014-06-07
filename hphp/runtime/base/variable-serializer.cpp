@@ -645,6 +645,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
   ArrayInfo &info = m_arrayInfos.back();
   info.first_element = true;
   info.indent_delta = 0;
+  info.size = size;
 
   switch (m_type) {
   case Type::DebuggerDump:
@@ -763,7 +764,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
       m_buf->append('{');
     }
 
-    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
+    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT && 
+	info.size > 0) {
       m_buf->append("\n");
       m_indent += (info.indent_delta = 4);
     }
@@ -1016,7 +1018,8 @@ void VariableSerializer::writeArrayFooter() {
     m_buf->append('}');
     break;
   case Type::JSON:
-    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
+    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT && 
+	info.size > 0) {
       m_buf->append("\n");
       indent();
     }

@@ -456,7 +456,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
 }
 
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const Tracelet* t,
+                           TraceletFn tletFn,
                            TransKind kind) {
   auto const mode = regionMode();
 
@@ -474,9 +474,10 @@ RegionDescPtr selectRegion(const RegionContext& context,
           return selectMethod(context);
         case RegionMode::Tracelet:
           return selectTracelet(context, 0, kind == TransKind::Profile);
-        case RegionMode::Legacy:
-          always_assert(t);
-          return selectTraceletLegacy(context.spOffset, *t);
+        case RegionMode::Legacy: {
+          auto tlet = tletFn();
+          return selectTraceletLegacy(context.spOffset, *tlet);
+        }
       }
       not_reached();
     } catch (const std::exception& e) {

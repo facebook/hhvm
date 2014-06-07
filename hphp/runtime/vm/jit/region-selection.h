@@ -382,8 +382,9 @@ struct RegionContext::PreLiveAR {
  * returning nullptr causes it to use the current level 0 tracelet
  * analyzer.  Eventually we'd like this to completely replace analyze.
  */
+using TraceletFn = std::function<std::unique_ptr<Tracelet>()>;
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const Tracelet* t,
+                           TraceletFn tlet,
                            TransKind kind);
 
 /*

@@ -1727,7 +1727,7 @@ void
 MCGenerator::translateWork(const TranslArgs& args) {
   Timer _t(Timer::translate);
   auto sk = args.m_sk;
-  std::unique_ptr<Tracelet> tp;
+  std::unique_ptr<Tracelet> tlet;
 
   SKTRACE(1, sk, "translateWork\n");
   assert(m_tx.getSrcDB().find(sk));
@@ -1779,12 +1779,12 @@ MCGenerator::translateWork(const TranslArgs& args) {
     } else {
       assert(m_tx.mode() == TransKind::Profile ||
              m_tx.mode() == TransKind::Live);
-      tp = m_tx.analyze(sk);
       RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
                                sk.resumed() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
-      region = selectRegion(rContext, tp.get(), m_tx.mode());
+      region = selectRegion(rContext, [&]{ return m_tx.analyze(sk); },
+                            m_tx.mode());
 
       if (RuntimeOption::EvalJitCompareRegions &&
           RuntimeOption::EvalJitRegionSelector == "tracelet") {
@@ -1856,17 +1856,14 @@ MCGenerator::translateWork(const TranslArgs& args) {
         }
       }
       if (!region || result == Translator::Failure) {
-        // If the region translator failed for an Optimize
-        // translation, it's OK to do a Live translation for the
-        // function entry.  We lazily create the tracelet here in this
-        // case.
+        // If the region translator failed for an Optimize translation, it's OK
+        // to do a Live translation for the function entry.
         if (m_tx.mode() == TransKind::Optimize) {
           if (sk.getFuncId() == liveFunc()->getFuncId() &&
               liveUnit()->contains(vmpc()) &&
               sk.offset() == liveUnit()->offsetOf(vmpc()) &&
               sk.resumed() == liveResumed()) {
             m_tx.setMode(TransKind::Live);
-            tp = m_tx.analyze(sk);
           } else {
             m_tx.setMode(TransKind::Interp);
             m_tx.traceFree();
@@ -1875,7 +1872,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
         }
         FTRACE(1, "trying translateTracelet\n");
         assertCleanState();
-        result = translateTracelet(*tp);
+        if (!tlet) tlet = m_tx.analyze(sk);
+        result = translateTracelet(*tlet);
 
         // If we're profiling, grab the postconditions so we can
         // use them in region selection whenever we decide to
@@ -1922,8 +1920,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
   if (RuntimeOption::EvalJitPGO) {
     if (transKindToRecord == TransKind::Profile) {
       if (!region) {
-        always_assert(tp);
-        region = selectTraceletLegacy(liveSpOff(), *tp);
+        always_assert(tlet);
+        region = selectTraceletLegacy(liveSpOff(), *tlet);
       }
       m_tx.profData()->addTransProfile(region, pconds);
     } else {
@@ -1935,7 +1933,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
               start,           code.main().frontier()       - start,
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
-              region, tp.get(), m_fixups.m_bcMap);
+              region, tlet.get(), m_fixups.m_bcMap);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);

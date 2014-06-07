@@ -281,10 +281,8 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
-    folly::format(&ret, "${: <8} :: {}\n",
-      f.locals[i]->name
-        ? std::string(f.locals[i]->name->data())
-        : folly::format("<unnamed{}>", i).str(),
+    folly::format(&ret, "{: <8} :: {}\n",
+      local_string(borrow(f.locals[i])),
       show(st.locals[i])
     );
   }

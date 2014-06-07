@@ -203,6 +203,8 @@ using InstrIdSet = std::set<InstrId>;
 using UseInfo    = std::pair<Use,InstrIdSet>;
 
 struct DceState {
+  borrowed_ptr<const php::Func> func;
+
   /*
    * Eval stack use information.  Stacks slots are marked as being
    * needed or not needed.  If they aren't needed, they carry a set of
@@ -266,9 +268,16 @@ std::string show(const UseInfo& ui) {
   return folly::format("{}@{}", show(ui.first), show(ui.second)).str();
 }
 
-std::string show(std::bitset<kMaxTrackedLocals> locs) {
+std::string bits_string(borrowed_ptr<const php::Func> func,
+                        std::bitset<kMaxTrackedLocals> locs) {
   std::ostringstream out;
-  out << locs;
+  if (func->locals.size() < kMaxTrackedLocals) {
+    for (auto i = func->locals.size(); i-- > 0;) {
+      out << (locs.test(i) ? '1' : '0');
+    }
+  } else {
+    out << locs;
+  }
   return out.str();
 }
 
@@ -496,7 +505,7 @@ private: // eval stack
 
 private: // locals
   void addGenSet(std::bitset<kMaxTrackedLocals> locs) {
-    FTRACE(4, "      conservative: {}\n", show(locs));
+    FTRACE(4, "      conservative: {}\n", bits_string(m_dceState.func, locs));
     m_dceState.liveLocals |= locs;
     m_dceState.gen |= locs;
     m_dceState.kill &= ~locs;
@@ -585,6 +594,7 @@ dce_visit(const Index& index,
   auto const states = locally_propagated_states(index, ctx, blk, stateIn);
 
   auto dceState = DceState{};
+  dceState.func = ctx.func;
   dceState.markedDead.resize(blk->hhbcs.size());
   dceState.liveLocals = liveOut;
   dceState.stack.resize(states.back().first.stack.size());
@@ -652,6 +662,9 @@ DceAnalysis analyze_dce(const Index& index,
                         Context const ctx,
                         borrowed_ptr<php::Block> const blk,
                         const State& stateIn) {
+  // During this analysis pass, we have to assume everything could be
+  // live out, so we set allLive here.  (Later we'll determine the
+  // real liveOut sets.)
   auto allLive = std::bitset<kMaxTrackedLocals>{};
   allLive.set();
   if (auto dceState = dce_visit(index, ctx, blk, stateIn, allLive, allLive)) {
@@ -716,6 +729,16 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   };
 
   FTRACE(1, "|---- global DCE analyze ({})\n", show(ai.ctx));
+  FTRACE(2, "{}", [&] {
+    using namespace folly::gen;
+    auto i = uint32_t{0};
+    return from(ai.ctx.func->locals)
+      | mapped(
+        [&] (const std::unique_ptr<php::Local>& l) {
+          return folly::sformat("  {} {}\n", i++, local_string(borrow(l)));
+        })
+      | unsplit<std::string>("");
+  }());
 
   /*
    * Create a DceAnalysis for each block, indexed by rpo id.
@@ -794,12 +817,12 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
               "kill     : {}\n"
               "kill exn : {}\n"
               "live in  : {}\n",
-              show(liveOut),
-              show(liveOutExn),
-              show(transfer.gen),
-              show(transfer.kill),
-              show(transfer.killExn),
-              show(liveIn));
+              bits_string(ai.ctx.func, liveOut),
+              bits_string(ai.ctx.func, liveOutExn),
+              bits_string(ai.ctx.func, transfer.gen),
+              bits_string(ai.ctx.func, transfer.kill),
+              bits_string(ai.ctx.func, transfer.killExn),
+              bits_string(ai.ctx.func, liveIn));
 
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.

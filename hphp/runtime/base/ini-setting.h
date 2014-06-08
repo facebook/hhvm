@@ -161,6 +161,11 @@ public:
                       FollyDynamic);
   static bool SetUser(const String& name, const Variant& value);
 
+  /**
+   * Get the mode for a setting
+   */
+  static bool GetMode(const std::string& name, Mode& mode);
+
   template<class T>
   struct SetAndGet {
     explicit SetAndGet(std::function<bool (const T&)> a, std::function<T ()> b)

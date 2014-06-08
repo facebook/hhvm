@@ -125,12 +125,23 @@ String::String(int64_t n) {
   m_px->setRefCount(1);
 }
 
-StringData* buildStringData(double n) {
-  char *buf;
-
+void formatPhpDblStr(char **pbuf, double n) {
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
-  vspprintf(&buf, 0, "%.*G", 14, n);
+  vspprintf(pbuf, 0, "%.*G", 14, n);
+}
+
+StringData* buildStringData(double n) {
+  char *buf = nullptr;
+  formatPhpDblStr(&buf, n);
   return StringData::Make(buf, AttachString);
+}
+
+std::string convDblToStrWithPhpFormat(double n) {
+  char *buf = nullptr;
+  formatPhpDblStr(&buf, n);
+  std::string retVal(buf);
+  free(buf);
+  return retVal;
 }
 
 String::String(double n) {

@@ -777,7 +777,7 @@ private:
 
   bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
                              uint32_t numNonDefault);
-  SSATmp* optimizedServerGetCustomBoolSetting();
+  SSATmp* optimizedCallIniGet();
   SSATmp* optimizedCallCount();
 
 private: // Exit trace creation routines.

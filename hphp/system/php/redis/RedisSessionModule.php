@@ -152,7 +152,12 @@ class RedisSessionModule implements SessionHandlerInterface {
 
   public function destroy($key) {
     $redis = $this->connect($key);
-    return $redis->del($key);
+    if ($redis === false) {
+        return false;
+    } else {
+        $redis->del($key);
+        return true;
+    }
   }
 
   public function gc($maxlifetime) {

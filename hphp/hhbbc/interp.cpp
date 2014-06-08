@@ -164,6 +164,9 @@ void in(ISS& env, const bc::Box&) {
 
 void in(ISS& env, const bc::BoxR&) {
   nothrow(env);
+  if (topR(env).subtypeOf(TRef)) {
+    return reduce(env, bc::BoxRNop {});
+  }
   popR(env);
   push(env, TRef);
 }
@@ -733,15 +736,28 @@ void in(ISS& env, const bc::CGetS&) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
   if (vname && vname->m_type == KindOfStaticString &&
       self && tcls.subtypeOf(*self)) {
     if (auto const ty = selfPropAsCell(env, vname->m_data.pstr)) {
       // Only nothrow when we know it's a private declared property
       // (and thus accessible here).
       nothrow(env);
+
+      // We can only constprop here if we know for sure this is exactly the
+      // correct class.  The reason for this is that you could have a LSB class
+      // attempting to access a private static in a derived class with the same
+      // name as a private static in this class, which is supposed to fatal at
+      // runtime (for an example see test/quick/static_sprop2.php).
+      auto const selfExact = selfClsExact(env);
+      if (selfExact && tcls.subtypeOf(*selfExact)) {
+        constprop(env);
+      }
+
       return push(env, *ty);
     }
   }
+
   push(env, TInitCell);
 }
 
@@ -925,7 +941,18 @@ void in(ISS& env, const bc::InstanceOf& op) {
     return reduce(env, bc::PopC {},
                        bc::InstanceOfD { v1->m_data.pstr });
   }
-  // Ignoring t1-is-an-object case.
+
+  if (t1.strictSubtypeOf(TObj)) {
+    auto const dobj = dobj_of(t1);
+    switch (dobj.type) {
+    case DObj::Sub:
+      break;
+    case DObj::Exact:
+      return reduce(env, bc::PopC {},
+                         bc::InstanceOfD { dobj.cls.name() });
+    }
+  }
+
   popC(env);
   popC(env);
   push(env, TBool);

@@ -225,11 +225,34 @@ void unlikelyIfThenElse(Vout& vmain, Vout& vstub, ConditionCode cc,
   vmain = done;
 }
 
+PhysLoc CodeGenerator::srcLoc(unsigned i) const {
+  return m_slocs[i];
+}
+
+PhysLoc CodeGenerator::dstLoc(unsigned i) const {
+  return m_dlocs[i];
+}
+
+ArgGroup CodeGenerator::argGroup() const {
+  return ArgGroup(m_curInst, m_state.regs[m_curInst]);
+}
+
 void CodeGenerator::cgInst(IRInstruction* inst) {
+  assert(!m_curInst && m_slocs.empty() && m_dlocs.empty());
   Opcode opc = inst->op();
   m_curInst = inst;
-  m_instRegs = &m_state.regs[inst];
-  SCOPE_EXIT { m_curInst = nullptr; };
+  SCOPE_EXIT {
+    m_curInst = nullptr;
+    m_slocs.clear();
+    m_dlocs.clear();
+  };
+  auto& locs = m_state.regs[inst];
+  for (unsigned i = 0, n = inst->numSrcs(); i < n; i++) {
+    m_slocs.push_back(locs.src(i));
+  }
+  for (unsigned i = 0, n = inst->numDsts(); i < n; i++) {
+    m_dlocs.push_back(locs.dst(i));
+  }
   switch (opc) {
 #define O(name, dsts, srcs, flags)                                \
     case name: FTRACE(7, "cg" #name "\n");                          \
@@ -443,8 +466,14 @@ VregXMM CodeGenerator::prepXMM(Vout& v, const SSATmp* src,
   always_assert(srcLoc.reg() != InvalidReg);
   auto rsrc = srcLoc.reg();
 
-  // Case 1: src is already in a XMM register
-  if (rsrc.isSIMD()) {
+  if (src->isA(Type::Dbl)) {
+    if (rsrc.isGP()) {
+      // double val in gpr
+      auto tmp = v.makeReg();
+      v << copy{rsrc, tmp};
+      return tmp;
+    }
+    // src already in simd or vreg
     return rsrc;
   }
 
@@ -456,9 +485,9 @@ VregXMM CodeGenerator::prepXMM(Vout& v, const SSATmp* src,
   }
 
   // Case 2.b: Bool or Int stored in GP reg
-  zeroExtendIfBool(v, src, rsrc);
+  auto s2 = zeroExtendIfBool(v, src, rsrc);
   auto rtmp = v.makeReg();
-  v << cvtsi2sd{rsrc, rtmp};
+  v << cvtsi2sd{s2, rtmp};
   return rtmp;
 }
 
@@ -1168,9 +1197,8 @@ void CodeGenerator::cgUnaryIntOp(PhysLoc dst_loc,
   auto& v = vmain();
 
   // Integer operations require 64-bit representations
-  zeroExtendIfBool(v, src, srcReg);
-  v << copy{srcReg, dstReg};
-  v << OpInstr{dstReg, dstReg};
+  auto s2 = zeroExtendIfBool(v, src, srcReg);
+  v << OpInstr{s2, dstReg};
 }
 
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
@@ -1404,8 +1432,7 @@ void CodeGenerator::cgDivDbl(IRInstruction* inst) {
   // now load dividend
   auto srcReg0 = prepXMM(v, src0, loc0);
 
-  v << copy{srcReg0, resReg};
-  v << divsd{srcReg1, resReg, resReg};
+  v << divsd{srcReg1, srcReg0, resReg};
   v << copy{resReg, dstReg};
 }
 
@@ -2367,9 +2394,9 @@ void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
   // cause false dependencies to prevent register renaming from kicking
   // in. Break the dependency chain by zeroing out the XMM reg.
   auto& v = vmain();
-  zeroExtendIfBool(v, src, srcReg);
+  auto s2 = zeroExtendIfBool(v, src, srcReg);
   auto tmp_dbl = v.makeReg();
-  v << cvtsi2sd{srcReg, tmp_dbl};
+  v << cvtsi2sd{s2, tmp_dbl};
   v << copy{tmp_dbl, dstReg};
 }
 
@@ -3868,7 +3895,6 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   // For primitive return types (int, bool, double), the return value
   // is already in dstReg (the builtin call returns in rax or xmm0).
-  // For void return types, there is no return value, so just exit.
   if (dstReg == InvalidReg || returnType.isSimpleType()) {
     return;
   }
@@ -4096,8 +4122,8 @@ void CodeGenerator::cgStore(MemoryRef dst, SSATmp* src, PhysLoc srcLoc,
                   Type::Arr | Type::StaticStr | Type::Cls));
     emitImmStoreq(v, src->rawVal(), memRef);
   } else {
-    zeroExtendIfBool(v, src, srcReg);
-    v << store{srcReg, memRef};
+    auto s2 = zeroExtendIfBool(v, src, srcReg);
+    v << store{s2, memRef};
   }
 }
 
@@ -4114,7 +4140,7 @@ void CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, Vptr base,
   // if dstReg == InvalidReg then there's nothing to load.
   if (dstReg == InvalidReg) return;
   if (type <= Type::Bool) {
-    vmain() << loadl{refTVData(base), toReg32(dstReg)};
+    vmain() << loadl{refTVData(base), dstReg};
   } else {
     vmain() << load{refTVData(base), dstReg};
   }

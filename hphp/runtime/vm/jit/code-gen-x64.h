@@ -50,15 +50,9 @@ struct CodeGenerator : public JIT::CodeGenerator {
   void cgInst(IRInstruction* inst) override;
 
 private:
-  const PhysLoc srcLoc(unsigned i) const {
-    return (*m_instRegs).src(i);
-  }
-  const PhysLoc dstLoc(unsigned i) const {
-    return (*m_instRegs).dst(i);
-  }
-  ArgGroup argGroup() const {
-    return ArgGroup(m_curInst, *m_instRegs);
-  }
+  PhysLoc srcLoc(unsigned i) const;
+  PhysLoc dstLoc(unsigned i) const;
+  ArgGroup argGroup() const;
 
   // Autogenerate function declarations for each IR instruction in ir.h
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);
@@ -253,7 +247,7 @@ private:
   Vout&               m_vfrozen;
   CodegenState&       m_state;
   IRInstruction*      m_curInst;  // current instruction being generated
-  const RegAllocInfo::RegMap* m_instRegs; // registers for current m_curInst.
+  smart::vector<PhysLoc> m_slocs, m_dlocs;
 };
 
 // Helpers to compute a reference to a TypedValue type and data

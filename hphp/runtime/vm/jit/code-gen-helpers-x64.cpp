@@ -261,8 +261,9 @@ void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg) {
 }
 
 void emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
-  v << copy{srcReg, dstReg};
-  v << decq{dstReg, dstReg};
+  auto t = v.makeReg();
+  v << copy{srcReg, t};
+  v << decq{t, dstReg};
 }
 
 void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {
@@ -400,9 +401,8 @@ void emitLdLowPtr(Asm& as, MemoryRef mem, PhysReg reg, size_t size) {
 }
 
 void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
-  assert(reg.isValid() && reg.isGP());
   if (size == 8) {
-    v << loadq{mem, reg};
+    v << load{mem, reg};
   } else if (size == 4) {
     v << loadl{mem, reg};
   } else {
@@ -492,20 +492,13 @@ void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
   v << unpcklpd{t1, t0, d0}; // s0,s1 -> d0[0],d0[1]
 }
 
-void zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
-  if (src->isA(Type::Bool) && reg.isValid()) {
-    // zero-extend the bool from a byte to a quad
-    // note: movzbl actually extends the value to 64 bits.
-    v << movzbl{reg, reg};
-  }
-}
-
-void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg) {
-  if (src->isA(Type::Bool) && reg != InvalidReg) {
-    // zero-extend the bool from a byte to a quad
-    // note: movzbl actually extends the value to 64 bits.
-    as.movzbl(rbyte(reg), r32(reg));
-  }
+Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
+  if (!src->isA(Type::Bool)) return reg;
+  // zero-extend the bool from a byte to a quad
+  // note: movzbl actually extends the value to 64 bits.
+  auto extended = v.makeReg();
+  v << movzbl{reg, extended};
+  return extended;
 }
 
 ConditionCode opToConditionCode(Opcode opc) {

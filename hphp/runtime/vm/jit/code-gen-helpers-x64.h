@@ -187,8 +187,7 @@ void emitCmpClass(Vout&, Vreg reg1, Vreg reg2);
 void copyTV(Vout&, const PhysLoc& src, const PhysLoc& dst);
 void pack2(Vout&, Vreg s0, Vreg s1, Vreg d0);
 
-void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);
-void zeroExtendIfBool(Vout& as, const SSATmp* src, Vreg reg);
+Vreg zeroExtendIfBool(Vout&, const SSATmp* src, Vreg reg);
 
 ConditionCode opToConditionCode(Opcode opc);
 

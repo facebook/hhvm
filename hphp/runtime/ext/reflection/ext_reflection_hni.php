@@ -567,8 +567,16 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     return hphp_invoke($this->getName(), array_values($args));
   }
 
-  /* No support for disabling currently */
-  public function isDisabled() {
+  /**
+   * ( excerpt from
+   * http://php.net/manual/en/reflectionfunction.isdisabled.php )
+   *
+   * Checks if the function is disabled, via the disable_functions directive.
+   *
+   * @return     bool   TRUE if it's disable, otherwise FALSE
+   */
+  public function isDisabled(): bool {
+    // FIXME: HHVM doesn't support the disable_functions directive.
     return false;
   }
 

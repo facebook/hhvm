@@ -2251,7 +2251,8 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
     auto const isReturning =
       curOp == Op::RetC || curOp == Op::RetV ||
-      curOp == Op::CreateCont || curOp == Op::Await;
+      curOp == Op::CreateCont || curOp == Op::Await ||
+      fp->localsDecRefd();
 
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin() && !fp->resumed()) {

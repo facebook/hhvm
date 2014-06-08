@@ -334,8 +334,8 @@ struct ActRec {
   }
 
   void setLocalsDecRefd() {
-    assert(!(m_numArgsAndFlags & (1 << 29)));
-    m_numArgsAndFlags |= 1 << 29;
+    assert(!localsDecRefd());
+    m_numArgsAndFlags |= kLocalsDecRefdMask;
   }
 
   static void* encodeThis(ObjectData* obj, Class* cls) {

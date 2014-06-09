@@ -670,42 +670,7 @@ bool Unit::aliasClass(Class* original, const StringData* alias) {
   return true;
 }
 
-void Unit::defTypeAlias(Id id) {
-  assert(id < m_typeAliases.size());
-  auto thisType = &m_typeAliases[id];
-  auto nameList = GetNamedEntity(thisType->name);
-  const StringData* typeName = thisType->value;
-
-  /*
-   * Check if this name already was defined as a type alias, and if so
-   * make sure it is compatible.
-   */
-  if (auto current = nameList->getCachedTypeAlias()) {
-    if (thisType->kind != current->kind ||
-        thisType->nullable != current->nullable ||
-        Unit::lookupClass(typeName) != current->klass) {
-      raise_error("The type %s is already defined to an incompatible type",
-                  thisType->name->data());
-     }
-    return;
-  }
-
-  // There might also be a class with this name already.
-  if (nameList->getCachedClass()) {
-    raise_error("The name %s is already defined as a class",
-                thisType->name->data());
-    return;
-  }
-
-  // TODO(#2103214): persistent type alias support
-  if (!nameList->m_cachedTypeAlias.bound()) {
-    auto rdsMode = (thisType->attrs & AttrPersistent)
-      ? RDS::Mode::Persistent : RDS::Mode::Normal;
-    nameList->m_cachedTypeAlias.bind(rdsMode);
-    RDS::recordRds(nameList->m_cachedTypeAlias.handle(),
-                   sizeof(TypeAliasReq),
-                   "TypeAlias", typeName->data());
-  }
+static TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
   /*
    * If this type alias is a KindOfObject and the name on the right
    * hand side was another type alias, we will bind the name to the
@@ -719,13 +684,10 @@ void Unit::defTypeAlias(Id id) {
    */
 
   if (thisType->kind != KindOfObject) {
-    nameList->setCachedTypeAlias(
-      TypeAliasReq { thisType->kind,
-                     thisType->nullable,
-                     nullptr,
-                     thisType->name }
-    );
-    return;
+    return TypeAliasReq { thisType->kind,
+                          thisType->nullable,
+                          nullptr,
+                          thisType->name };
   }
 
   /*
@@ -742,49 +704,98 @@ void Unit::defTypeAlias(Id id) {
    * do our due diligence here.
    */
 
-  auto targetNE = GetNamedEntity(typeName);
+  const StringData* typeName = thisType->value;
+  auto targetNE = Unit::GetNamedEntity(typeName);
 
   if (auto klass = Unit::lookupClass(targetNE)) {
-    nameList->setCachedTypeAlias(
-      TypeAliasReq { KindOfObject,
-                     thisType->nullable,
-                     klass,
-                     thisType->name }
-    );
-    return;
+    return TypeAliasReq { KindOfObject,
+                          thisType->nullable,
+                          klass,
+                          thisType->name };
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    nameList->setCachedTypeAlias(
-      TypeAliasReq { targetTd->kind,
-                     thisType->nullable || targetTd->nullable,
-                     targetTd->klass,
-                     thisType->name }
-    );
-    return;
+    return TypeAliasReq { targetTd->kind,
+                          thisType->nullable || targetTd->nullable,
+                          targetTd->klass,
+                          thisType->name };
   }
 
   if (auto klass = Unit::loadClass(typeName)) {
-    nameList->setCachedTypeAlias(
-      TypeAliasReq { KindOfObject,
-                     thisType->nullable,
-                     klass,
-                     thisType->name }
-    );
-    return;
+    return TypeAliasReq { KindOfObject,
+                          thisType->nullable,
+                          klass,
+                          thisType->name };
   }
 
   if (auto targetTd = getTypeAliasWithAutoload(targetNE, typeName)) {
-    nameList->setCachedTypeAlias(
-      TypeAliasReq { targetTd->kind,
-                     thisType->nullable || targetTd->nullable,
-                     targetTd->klass,
-                     thisType->name }
-    );
+    return TypeAliasReq { targetTd->kind,
+                          thisType->nullable || targetTd->nullable,
+                          targetTd->klass,
+                          thisType->name };
+  }
+
+  return TypeAliasReq { KindOfInvalid,
+                        false,
+                        nullptr,
+                        nullptr };
+}
+
+void Unit::defTypeAlias(Id id) {
+  assert(id < m_typeAliases.size());
+  auto thisType = &m_typeAliases[id];
+  auto nameList = GetNamedEntity(thisType->name);
+  const StringData* typeName = thisType->value;
+
+  /*
+   * Check if this name already was defined as a type alias, and if so
+   * make sure it is compatible.
+   */
+  if (auto current = nameList->getCachedTypeAlias()) {
+    auto raiseIncompatible = [&] {
+      raise_error("The type %s is already defined to an incompatible type",
+                  thisType->name->data());
+    };
+    if (thisType->attrs & AttrPersistent) {
+      // We may have cached the fully resolved type in a previous request.
+      auto resolved = resolveTypeAlias(thisType);
+      if (resolved.kind != current->kind ||
+          resolved.nullable != current->nullable ||
+          resolved.klass != current->klass) {
+        raiseIncompatible();
+      }
+      return;
+    }
+    if (thisType->kind != current->kind ||
+        thisType->nullable != current->nullable ||
+        Unit::lookupClass(typeName) != current->klass) {
+      raiseIncompatible();
+    }
     return;
   }
 
-  raise_error("Unknown type or class %s", typeName->data());
+  // There might also be a class with this name already.
+  if (nameList->getCachedClass()) {
+    raise_error("The name %s is already defined as a class",
+                thisType->name->data());
+    return;
+  }
+
+  if (!nameList->m_cachedTypeAlias.bound()) {
+    auto rdsMode = (thisType->attrs & AttrPersistent)
+      ? RDS::Mode::Persistent : RDS::Mode::Normal;
+    nameList->m_cachedTypeAlias.bind(rdsMode);
+    RDS::recordRds(nameList->m_cachedTypeAlias.handle(),
+                   sizeof(TypeAliasReq),
+                   "TypeAlias", typeName->data());
+  }
+
+  auto resolved = resolveTypeAlias(thisType);
+  if (resolved.kind == KindOfInvalid) {
+    raise_error("Unknown type or class %s", typeName->data());
+    return;
+  }
+  nameList->setCachedTypeAlias(resolved);
 }
 
 void Unit::renameFunc(const StringData* oldName, const StringData* newName) {

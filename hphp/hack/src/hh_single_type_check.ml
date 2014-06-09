@@ -74,7 +74,7 @@ let die str =
   close_out oc;
   exit 2
 
-let error l = die (Utils.pmsg_l l)
+let error l = die (Errors.pmsg_l l)
 
 let parse_options () =
   let fn_ref = ref None in
@@ -139,11 +139,13 @@ let parse_file fn =
     let files = make_files contentl in
     List.fold_right begin fun (sub_fn, content) ast ->
       Pos.file := fn^"--"^sub_fn ;
-      Parser_hack.program content @ ast
+      let _, _, ast' = Parser_hack.program content in
+      ast' @ ast
     end files []
   else begin
     Pos.file := fn ;
-    Parser_hack.program content
+    let _, _, ast = Parser_hack.program content in
+    ast
   end
 
 (* collect definition names from parsed ast *)
@@ -170,27 +172,30 @@ let collect_defs ast =
 let main_hack { filename; suggest; _ } =
   SharedMem.init();
   Typing.debug := true;
-  try
-    Pos.file := builtins_filename;
-    let ast_builtins = Parser_hack.program builtins in
-    Pos.file := filename;
-    let ast_file = parse_file filename in
-    let ast = ast_builtins @ ast_file in
-    Parser_heap.ParserHeap.add filename ast;
-    let funs, classes, typedefs, consts = collect_defs ast in
-    let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
-    let all_classes = List.fold_right begin fun (_, cname) acc ->
-      SMap.add cname (SSet.singleton filename) acc
-    end classes SMap.empty in
-    Typing_decl.make_env nenv all_classes filename;
-    List.iter (fun (_, fname) -> Typing_check_service.type_fun fname) funs;
-    List.iter (fun (_, cname) -> Typing_check_service.type_class cname) classes;
-    List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
-    Printf.printf "No errors\n";
-    if suggest
-    then suggest_and_print filename funs classes typedefs consts
-  with
-  | Utils.Error l -> error l
+  let errors, () =
+    Errors.do_ begin fun () ->
+      Pos.file := builtins_filename;
+      let _, _, ast_builtins = Parser_hack.program builtins in
+      Pos.file := filename;
+      let ast_file = parse_file filename in
+      let ast = ast_builtins @ ast_file in
+      Parser_heap.ParserHeap.add filename ast;
+      let funs, classes, typedefs, consts = collect_defs ast in
+      let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
+      let all_classes = List.fold_right begin fun (_, cname) acc ->
+        SMap.add cname (SSet.singleton filename) acc
+      end classes SMap.empty in
+      Typing_decl.make_env nenv all_classes filename;
+      List.iter (fun (_, fname) -> Typing_check_service.type_fun fname) funs;
+      List.iter (fun (_, cname) -> Typing_check_service.type_class cname) classes;
+      List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
+      if suggest
+      then suggest_and_print filename funs classes typedefs consts
+    end
+  in
+  if errors <> []
+  then error (List.hd errors)
+  else Printf.printf "No errors\n"
 
 (* command line driver *)
 let _ =
@@ -199,3 +204,4 @@ let _ =
   else
     let options = parse_options () in
     main_hack options
+

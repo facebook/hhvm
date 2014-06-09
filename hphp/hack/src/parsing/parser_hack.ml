@@ -725,7 +725,6 @@ and class_ ~attr ~final ~kind env =
       c_name            = cname;
       c_extends         = cextends;
       c_body            = cbody;
-      c_mtime           = 0.0;
       c_namespace       = Namespace_env.empty;
     }
   in

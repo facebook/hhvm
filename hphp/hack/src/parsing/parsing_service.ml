@@ -105,7 +105,6 @@ let parse_file check_mode fn =
   else begin
     Pos.file := fn;
     try
-      Ast.mtime := (Unix.stat fn).Unix.st_mtime;
       Ast.mode := Ast.Mstrict;
       Parser_hack.is_hh_file := false;
       let comments, ast, errors = Parser_hack.from_file_with_errors fn in

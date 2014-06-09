@@ -621,12 +621,6 @@ let check_repetition s param =
   then error (fst param.param_id) ("Argument already bound: "^x)
   else SSet.add x s
 
-(* All classes extend Object (for JS generation) *)
-let get_class_parent pos parent_type c =
-  if !Ast.is_js && parent_type = [] && c.c_kind = Ast.Cnormal
-  then [pos, N.Happly ((pos, "Object"), [])]
-  else parent_type
-
 (* Check that the implemented interface exists *)
 let implement env x =
   match snd x with
@@ -922,7 +916,6 @@ and class_ genv c =
   let sm_names = List.fold_right SSet.add sm_names SSet.empty in
   List.iter (hint_no_typedef env) c.c_extends;
   let parent   = List.map (hint ~allow_this:true env) c.c_extends in
-  let parent   = get_class_parent (fst name) parent c in
   let fmethod  = class_method env sm_names v_names in
   let methods  = List.fold_right fmethod c.c_body [] in
   let uses     = List.fold_right (class_use env) c.c_body [] in
@@ -958,7 +951,6 @@ and class_ genv c =
     N.c_static_methods = smethods;
     N.c_methods        = methods;
     N.c_user_attributes = c.c_user_attributes;
-    N.c_mtime          = c.c_mtime;
   }
 
 and class_check env c =

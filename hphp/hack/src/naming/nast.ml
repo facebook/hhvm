@@ -63,8 +63,6 @@ and class_ = {
     c_static_methods : method_ list     ;
     c_methods        : method_ list     ;
     c_user_attributes : Ast.user_attribute SMap.t;
-    (* The last time the file was modified *)
-    c_mtime          : float            ;
   }
 
 and tparam = sid * hint option

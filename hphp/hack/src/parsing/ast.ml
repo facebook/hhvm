@@ -11,16 +11,6 @@
 open Utils
 
 (*****************************************************************************)
-(* Globals *)
-(*****************************************************************************)
-
-(* True when we are in the IDE (the JS version of Hack) *)
-let is_js = ref false
-
-(* The file modification time, useful to check the consistency of our data. *)
-let mtime = ref 0.0
-
-(*****************************************************************************)
 (* Parsing modes *)
 (*****************************************************************************)
 
@@ -101,7 +91,6 @@ and class_ = {
     c_extends: hint list;
     c_implements: hint list;
     c_body: class_elt list;
-    c_mtime: float;
     c_namespace: Namespace_env.env;
   }
 

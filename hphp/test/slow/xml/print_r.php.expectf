@@ -1,70 +1,70 @@
 --Document--
 DOMDocument Object
 (
-    [substituteEntities] => 
     [recover] => 
-    [validateOnParse] => 
-    [formatOutput] => 
-    [xmlVersion] => 1.0
+    [documentURI] => %s
+    [strictErrorChecking] => 1
     [xmlStandalone] => 1
     [standalone] => 1
     [attributes] => 
-    [version] => 1.0
-    [nextSibling] => 
+    [nodeValue] => 
+    [resolveExternals] => 
     [childNodes] => (object value omitted)
-    [config] => 
-    [implementation] => (object value omitted)
-    [documentURI] => %s
-    [strictErrorChecking] => 1
+    [previousSibling] => 
+    [nodeName] => #document
+    [xmlVersion] => 1.0
     [lastChild] => (object value omitted)
+    [nodeType] => 9
+    [formatOutput] => 
+    [firstChild] => (object value omitted)
+    [parentNode] => 
+    [ownerDocument] => 
+    [config] => 
+    [prefix] => 
+    [implementation] => (object value omitted)
+    [preserveWhiteSpace] => 1
+    [documentElement] => (object value omitted)
+    [namespaceURI] => 
+    [baseURI] => %s
+    [substituteEntities] => 
     [textContent] => 
   Hello
   World
 
-    [previousSibling] => 
-    [encoding] => 
-    [nodeValue] => 
-    [namespaceURI] => 
-    [preserveWhiteSpace] => 1
-    [nodeName] => #document
-    [parentNode] => 
-    [firstChild] => (object value omitted)
-    [ownerDocument] => 
-    [nodeType] => 9
-    [prefix] => 
-    [resolveExternals] => 
-    [localName] => 
+    [nextSibling] => 
     [doctype] => 
-    [baseURI] => %s
-    [documentElement] => (object value omitted)
+    [validateOnParse] => 
+    [version] => 1.0
     [actualEncoding] => 
+    [encoding] => 
+    [localName] => 
     [xmlEncoding] => 
 )
 --Element--
 DOMElement Object
 (
-    [baseURI] => %s
     [schemaTypeInfo] => 
+    [tagName] => root
+    [textContent] => 
+  Hello
+  World
+
+    [baseURI] => %s
     [localName] => root
     [prefix] => 
     [ownerDocument] => (object value omitted)
     [parentNode] => (object value omitted)
     [namespaceURI] => 
+    [nodeType] => 1
+    [lastChild] => (object value omitted)
+    [nodeName] => root
+    [previousSibling] => 
+    [firstChild] => (object value omitted)
+    [childNodes] => (object value omitted)
     [nodeValue] => 
   Hello
   World
 
-    [previousSibling] => 
-    [nodeType] => 1
-    [nodeName] => root
-    [textContent] => 
-  Hello
-  World
-
-    [lastChild] => (object value omitted)
-    [firstChild] => (object value omitted)
-    [childNodes] => (object value omitted)
     [nextSibling] => 
-    [tagName] => root
     [attributes] => (object value omitted)
 )

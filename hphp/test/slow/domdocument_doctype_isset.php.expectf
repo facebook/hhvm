@@ -6,7 +6,9 @@ object(DOMDocumentType)#3 (22) {
   string(35) "<!DOCTYPE graph SYSTEM "graph.dtd">"
   ["systemId"]=>
   string(9) "graph.dtd"
-  ["publicId"]=>
+  ["notations"]=>
+  string(22) "(object value omitted)"
+  ["textContent"]=>
   string(0) ""
   ["baseURI"]=>
   NULL
@@ -18,32 +20,30 @@ object(DOMDocumentType)#3 (22) {
   string(22) "(object value omitted)"
   ["parentNode"]=>
   string(22) "(object value omitted)"
-  ["entities"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
-  NULL
-  ["nodeValue"]=>
-  NULL
-  ["previousSibling"]=>
-  NULL
-  ["notations"]=>
-  string(22) "(object value omitted)"
-  ["nodeType"]=>
-  int(10)
-  ["nodeName"]=>
-  string(5) "graph"
-  ["textContent"]=>
-  string(0) ""
-  ["lastChild"]=>
-  NULL
   ["name"]=>
   string(5) "graph"
+  ["namespaceURI"]=>
+  NULL
+  ["nodeType"]=>
+  int(10)
+  ["lastChild"]=>
+  NULL
+  ["entities"]=>
+  string(22) "(object value omitted)"
+  ["nodeName"]=>
+  string(5) "graph"
+  ["previousSibling"]=>
+  NULL
   ["firstChild"]=>
   NULL
   ["childNodes"]=>
   NULL
+  ["nodeValue"]=>
+  NULL
   ["nextSibling"]=>
   NULL
+  ["publicId"]=>
+  string(0) ""
   ["attributes"]=>
   NULL
 }

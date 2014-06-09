@@ -1,5 +1,7 @@
 DOMDocumentFragment
 object(DOMDocumentFragment)#1 (16) {
+  ["textContent"]=>
+  string(0) ""
   ["baseURI"]=>
   NULL
   ["localName"]=>
@@ -12,22 +14,20 @@ object(DOMDocumentFragment)#1 (16) {
   NULL
   ["namespaceURI"]=>
   NULL
-  ["nodeValue"]=>
-  NULL
-  ["previousSibling"]=>
-  NULL
   ["nodeType"]=>
   int(11)
+  ["lastChild"]=>
+  NULL
   ["nodeName"]=>
   string(18) "#document-fragment"
-  ["textContent"]=>
-  string(0) ""
-  ["lastChild"]=>
+  ["previousSibling"]=>
   NULL
   ["firstChild"]=>
   NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
+  ["nodeValue"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
@@ -90,6 +90,8 @@ A_DOMDocumentFragment
 object(A_DOMDocumentFragment)#2 (17) {
   ["___x"]=>
   NULL
+  ["textContent"]=>
+  string(0) ""
   ["baseURI"]=>
   NULL
   ["localName"]=>
@@ -102,22 +104,20 @@ object(A_DOMDocumentFragment)#2 (17) {
   NULL
   ["namespaceURI"]=>
   NULL
-  ["nodeValue"]=>
-  NULL
-  ["previousSibling"]=>
-  NULL
   ["nodeType"]=>
   int(11)
+  ["lastChild"]=>
+  NULL
   ["nodeName"]=>
   string(18) "#document-fragment"
-  ["textContent"]=>
-  string(0) ""
-  ["lastChild"]=>
+  ["previousSibling"]=>
   NULL
   ["firstChild"]=>
   NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
+  ["nodeValue"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>

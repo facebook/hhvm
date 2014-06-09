@@ -2,7 +2,9 @@ DOMText
 object(DOMText)#1 (19) {
   ["length"]=>
   int(0)
-  ["data"]=>
+  ["wholeText"]=>
+  string(0) ""
+  ["textContent"]=>
   string(0) ""
   ["baseURI"]=>
   NULL
@@ -14,26 +16,24 @@ object(DOMText)#1 (19) {
   NULL
   ["parentNode"]=>
   NULL
-  ["wholeText"]=>
-  string(0) ""
   ["namespaceURI"]=>
-  NULL
-  ["nodeValue"]=>
-  string(0) ""
-  ["previousSibling"]=>
   NULL
   ["nodeType"]=>
   int(3)
+  ["lastChild"]=>
+  NULL
   ["nodeName"]=>
   string(5) "#text"
-  ["textContent"]=>
-  string(0) ""
-  ["lastChild"]=>
+  ["previousSibling"]=>
   NULL
   ["firstChild"]=>
   NULL
+  ["data"]=>
+  string(0) ""
   ["childNodes"]=>
   NULL
+  ["nodeValue"]=>
+  string(0) ""
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
@@ -110,7 +110,9 @@ object(A_DOMText)#2 (20) {
   NULL
   ["length"]=>
   int(0)
-  ["data"]=>
+  ["wholeText"]=>
+  string(0) ""
+  ["textContent"]=>
   string(0) ""
   ["baseURI"]=>
   NULL
@@ -122,26 +124,24 @@ object(A_DOMText)#2 (20) {
   NULL
   ["parentNode"]=>
   NULL
-  ["wholeText"]=>
-  string(0) ""
   ["namespaceURI"]=>
-  NULL
-  ["nodeValue"]=>
-  string(0) ""
-  ["previousSibling"]=>
   NULL
   ["nodeType"]=>
   int(3)
+  ["lastChild"]=>
+  NULL
   ["nodeName"]=>
   string(5) "#text"
-  ["textContent"]=>
-  string(0) ""
-  ["lastChild"]=>
+  ["previousSibling"]=>
   NULL
   ["firstChild"]=>
   NULL
+  ["data"]=>
+  string(0) ""
   ["childNodes"]=>
   NULL
+  ["nodeValue"]=>
+  string(0) ""
   ["nextSibling"]=>
   NULL
   ["attributes"]=>

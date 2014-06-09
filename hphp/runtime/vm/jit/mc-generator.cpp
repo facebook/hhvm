@@ -2331,8 +2331,9 @@ std::string MCGenerator::getUsage() {
   });
   // Report code.stubs usage = code.cold + code.frozen usage, so
   // ODS doesn't break.
-  auto const stubsUsed = code.cold().used() + code.frozen().used();
-  auto const stubsCapacity = code.cold().capacity() + code.frozen().capacity();
+  auto const stubsUsed = code.realCold().used() + code.realFrozen().used();
+  auto const stubsCapacity = code.realCold().capacity() +
+    code.realFrozen().capacity();
   addRow(std::string("code.stubs"), stubsUsed, stubsCapacity);
 
   addRow("data", code.data().used(), code.data().capacity());

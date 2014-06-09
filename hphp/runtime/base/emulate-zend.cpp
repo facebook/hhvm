@@ -223,15 +223,6 @@ int emulate_zend(int argc, char** argv) {
     newargv.push_back(ini_path);
   }
 
-  if (cnt < argc && strcmp(argv[cnt], "--") == 0) cnt++;
-  if (cnt < argc) {
-    // There are arguments following the filename, so copy them.
-    newargv.push_back("--");
-    for (int i = cnt; i < argc; i++) {
-      newargv.push_back(argv[i]);
-    }
-  }
-
   if (ignore_default_configs) {
     // Appending empty file to -c options to avoid loading defaults
     ini_fd = get_tempfile_if_not_exists(ini_fd, ini_path);
@@ -253,6 +244,15 @@ int emulate_zend(int argc, char** argv) {
     if (access(default_config_file, R_OK) != -1) {
       newargv.push_back("-c");
       newargv.push_back(default_config_file);
+    }
+  }
+
+  if (cnt < argc && strcmp(argv[cnt], "--") == 0) cnt++;
+  if (cnt < argc) {
+    // There are arguments following the filename, so copy them.
+    newargv.push_back("--");
+    for (int i = cnt; i < argc; i++) {
+      newargv.push_back(argv[i]);
     }
   }
 

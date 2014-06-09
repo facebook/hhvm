@@ -1,0 +1,9 @@
+string(%d) "%s/hhvm/hhvm --php -n %S/test/slow/emulate_zend/argv.inc foo bar"
+array(3) {
+  [0]=>
+  string(%d) "%s/test/slow/emulate_zend/argv.inc"
+  [1]=>
+  string(3) "foo"
+  [2]=>
+  string(3) "bar"
+}

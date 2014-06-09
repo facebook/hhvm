@@ -8,12 +8,6 @@
  *
  *)
 
-type error = (Pos.t * string) list
-
-exception Error of error
-
-open Hh_json
-
 (* Silly stubs. *)
 module Hhi = struct
   let get_hhi_root () = Some "hhi-root"
@@ -21,28 +15,6 @@ end
 module Path = struct
   let string_of_path x = x
 end
-
-let to_json (e : error) : json =
-  let elts = List.map (fun (p, w) ->
-                        let line, scol, ecol = Pos.info_pos p in
-                        JAssoc [ "descr", JString w;
-                                 "path",  JString p.Pos.pos_file;
-                                 "line",  JInt line;
-                                 "start", JInt scol;
-                                 "end",   JInt ecol
-                               ]
-                      ) e
-  in
-  JAssoc [ "message", JList elts ]
-
-
-
-let error_l message =
-  raise (Error message)
-
-let error p w =
-  raise (Error [p, w])
-
 
 let debug = ref false
 let d s =
@@ -147,16 +119,6 @@ let pmsg p s =
 let pmsg_l l =
   let l = List.map (fun (p, e) -> pmsg p e) l in
   List.fold_right (^) l ""
-
-let to_string (e : error) : string =
-  let buf = Buffer.create 50 in
-  List.iter (fun (p, w) -> Buffer.add_string buf (pmsg p w)) e;
-  Buffer.contents buf
-
-let internal_error s =
-  Printf.fprintf stderr
-    "You just found a bug!\nShoot me an email: julien.verlaguet@fb.com";
-  exit 2
 
 let opt f env = function
   | None -> env, None
@@ -268,7 +230,7 @@ let rec make_list f n =
 
 let safe_ios p s =
   try int_of_string s
-  with _ -> error p "Value is too large"
+  with _ -> Errors.add p "Value is too large"; -1
 
 let sl l =
   List.fold_right (^) l ""
@@ -358,3 +320,15 @@ let str_starts_with long short =
     long = short
   with Invalid_argument _ ->
     false
+
+(*****************************************************************************)
+(* Same as List.iter2, except that we only iterate as far as the shortest
+ * of both lists.
+ *)
+(*****************************************************************************)
+
+let rec iter2_shortest f l1 l2 =
+  match l1, l2 with
+  | [], _ | _, [] -> ()
+  | x1 :: rl1, x2 :: rl2 -> f x1 x2; iter2_shortest f rl1 rl2
+

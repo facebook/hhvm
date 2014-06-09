@@ -9,6 +9,7 @@ SRC= json.ml \
      tmp.ml build_id.ml \
      ident.ml \
      printSignal.ml ttyColor.ml \
+     errors.ml \
      utils.ml \
      lock.ml wwwroot.ml \
      pidLog.ml fork.ml trie.ml \

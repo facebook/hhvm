@@ -11,6 +11,7 @@ SRC = \
   str.ml\
   pos.ml\
   ident.ml\
+  errors.ml\
   utils.ml\
   prefix.ml\
   value.ml\

@@ -1342,8 +1342,6 @@ HELPER_TABLE(PROP)
 #undef PROP
 
 void HhbcTranslator::MInstrTranslator::emitCGetProp() {
-  assert(!m_ni.outLocal);
-
   const Class* knownCls = nullptr;
   const auto propInfo   = getPropertyOffset(m_ni, contextClass(), knownCls,
                                             m_mii, m_mInd, m_iInd);

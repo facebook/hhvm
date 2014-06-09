@@ -26,25 +26,6 @@ namespace JIT {
 
 struct NormalizedInstruction;
 
-/*
- * A tracelet is a unit of input to the back-end. It is a partially typed,
- * non-maximal basic block, representing the next slice of the program to
- * be executed.
- * It is a consecutive set of instructions, only the last of which may be a
- * transfer of control, annotated types and locations for each opcode's input
- * and output.
- */
-typedef hphp_hash_map<Location, DynLocation*, Location> ChangeMap;
-typedef ChangeMap DepMap;
-
-struct InstrStream {
-  InstrStream() : first(nullptr), last(nullptr) {}
-  void append(NormalizedInstruction* ni);
-  void remove(NormalizedInstruction* ni);
-  NormalizedInstruction* first;
-  NormalizedInstruction* last;
-};
-
 struct RefDeps {
   struct Record {
     std::vector<bool> m_mask;
@@ -129,78 +110,6 @@ struct ActRecState {
   bool checkByRef(int argNum, int stackOffset, RefDeps* outRefDeps);
   const Func* knownFunc();
   State currentState();
-};
-
-struct Tracelet : private boost::noncopyable {
-  ChangeMap      m_changes;
-  DepMap         m_dependencies;
-  DepMap         m_resolvedDeps; // dependencies resolved by static analysis
-  InstrStream    m_instrStream;
-  int            m_stackChange;
-
-  // SrcKey for the start of the Tracelet. This will be the same as
-  // m_instrStream.first->source.
-  SrcKey         m_sk;
-
-  // numOpcodes is the number of raw opcode instructions, before optimization.
-  // The immediates optimization may both:
-  //
-  // 1. remove the first opcode, thus making
-  //        sk.instr != instrs.first->source.instr
-  // 2. remove no longer needed instructions
-  int            m_numOpcodes;
-
-  // Assumptions about entering actRec's reffiness.
-  ActRecState    m_arState;
-  RefDeps        m_refDeps;
-
-  /*
-   * If we were unable to make sense of the instruction stream (e.g., it
-   * used instructions that the translator does not understand), then this
-   * tracelet is useful only for defining the boundaries of a basic block.
-   * The low-level translator can handle this by backing off to the
-   * bytecode interpreter.
-   */
-  bool           m_analysisFailed;
-
-  /*
-   * If IR inlining failed we may still need access to the trace for profiling
-   * purposes if stats are enabled so maintain this to verify that we should use
-   * this Tracelet for inlining purposes.
-   */
-  bool           m_inliningFailed;
-
-  /*
-   * A counter that accumulates the worst-possible stack depth we're
-   * causing via nested inlining.  This is used to make sure
-   * multi-level inlining doesn't cause the stack to go deeper than
-   * the kStackCheckLeafPadding threshold, which is necessary for
-   * correctness because we omit stack overflow checks for the inlined
-   * code.
-   */
-  uint32_t       m_stackSlackUsedForInlining{0};
-
-  // Track which NormalizedInstructions and DynLocations are owned by this
-  // Tracelet; used for cleanup purposes
-  boost::ptr_vector<NormalizedInstruction> m_instrs;
-  boost::ptr_vector<DynLocation> m_dynlocs;
-
-  Tracelet();
-  ~Tracelet();
-
-  NormalizedInstruction* newNormalizedInstruction();
-  DynLocation* newDynLocation(Location l, DataType t);
-  DynLocation* newDynLocation(Location l, RuntimeType t);
-  DynLocation* newDynLocation();
-
-  /* These aren't merged into a single method with a default argument
-   * to make gdb happy. */
-  void print() const;
-  void print(std::ostream& out) const;
-  std::string toString() const;
-
-  SrcKey nextSk() const;
-  const Func* func() const;
 };
 
 } } // HPHP::JIT

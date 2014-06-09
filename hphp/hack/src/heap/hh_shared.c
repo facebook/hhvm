@@ -240,7 +240,7 @@ static void set_priorities() {
 
   // Don't slam the CPU either, though this has much less tendency to make the
   // system totally unresponsive so we don't need to lower all the way.
-  nice(10);
+  (void)nice(10);
 }
 
 /*****************************************************************************/

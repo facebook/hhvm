@@ -48,7 +48,7 @@ let error el =
                "internal_error", JBool false;
              ]
     else
-      let errors_json = List.map Utils.to_json el in
+      let errors_json = List.map Errors.to_json el in
       JAssoc [ "passed",         JBool false;
                "errors",         JList errors_json;
                "internal_error", JBool false;
@@ -68,13 +68,9 @@ let type_fun x fn =
 
 let type_class x fn =
   try
-    (match Naming_heap.ClassStatus.find_unsafe x with
-    | Naming_heap.Error -> ()
-    | Naming_heap.Ok ->
-        let class_ = Naming_heap.ClassHeap.find_unsafe x in
-        let tenv = Typing_env.empty fn in
-        Typing.class_def tenv x class_
-    )
+    let class_ = Naming_heap.ClassHeap.find_unsafe x in
+    let tenv = Typing_env.empty fn in
+    Typing.class_def tenv x class_
   with Not_found ->
     ()
 
@@ -104,7 +100,7 @@ and get_sub_class cname acc =
       get_sub_class sub_cname acc
   end sub_classes acc
 
-let declare_file ~fix_file fn content =
+let declare_file fn content =
   let _, old_funs, old_classes =
     try Hashtbl.find globals fn
     with Not_found -> true, [], []
@@ -120,9 +116,9 @@ let declare_file ~fix_file fn content =
   try
     Pos.file := fn ;
     Autocomplete.auto_complete := false;
-    let ast = Parser_hack.program ~fail:(not fix_file) content in
-    let is_php = not !(Parser_hack.is_hh_file) in
-    if !(Parser_hack.is_hh_file)
+    let is_hh_file, _, ast = Parser_hack.program content in
+    let is_php = not is_hh_file in
+    if is_hh_file
     then begin
       Parser_heap.ParserHeap.add fn ast;
       let funs, classes, typedefs, consts = make_funs_classes ast in
@@ -147,18 +143,19 @@ let declare_file ~fix_file fn content =
 let hh_add_file fn content =
   Hashtbl.replace files fn content;
   try
-    declare_file ~fix_file:true fn content;
+    declare_file fn content
   with e ->
     ()
 
 let hh_check ?(check_mode=true) fn =
-  declare_file ~fix_file:(not check_mode) fn (Hashtbl.find files fn);
+  declare_file fn (Hashtbl.find files fn);
   Pos.file := fn;
   Autocomplete.auto_complete := false;
   let content = Hashtbl.find files fn in
-  try
+  Errors.try_
+    begin fun () ->
 (*    let builtins = Parser.program lexer (Lexing.from_string Ast.builtins) in *)
-    let ast = Parser_hack.program ~fail:check_mode content in
+    let _, _, ast = Parser_hack.program content in
     let ast = (*builtins @ *) ast in
     Parser_heap.ParserHeap.add fn ast;
     let funs, classes, typedefs, consts = make_funs_classes ast in
@@ -170,11 +167,10 @@ let hh_check ?(check_mode=true) fn =
     List.iter (fun (_, fname) -> type_fun fname fn) funs;
     List.iter (fun (_, cname) -> type_class cname fn) classes;
     error []
-  with
-  | Error l ->
+    end
+    begin fun l ->
       error [l]
-  | e ->
-      raise e
+    end
 
 let complete_global completion_type fn =
   let result = ref SMap.empty in
@@ -246,7 +242,7 @@ let hh_auto_complete fn =
   Autocomplete.argument_global_type := None;
   let content = Hashtbl.find files fn in
   try
-    let ast = Parser_hack.program ~fail:false content in
+    let _, _, ast = Parser_hack.program content in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -293,7 +289,7 @@ let hh_get_method_at_position fn line char =
   Find_refs.find_method_at_cursor_target := Some (line, char);
   let content = Hashtbl.find files fn in
   try
-    let ast = Parser_hack.program ~fail:false content in
+    let _, _, ast = Parser_hack.program content in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->

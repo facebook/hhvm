@@ -175,7 +175,7 @@ let main_hack { filename; suggest; _ } =
     let ast_builtins = Parser_hack.program builtins in
     Pos.file := filename;
     let ast_file = parse_file filename in
-    let ast = Namespaces.elaborate_defs (ast_builtins @ ast_file) in
+    let ast = ast_builtins @ ast_file in
     Parser_heap.ParserHeap.add filename ast;
     let funs, classes, typedefs, consts = collect_defs ast in
     let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in

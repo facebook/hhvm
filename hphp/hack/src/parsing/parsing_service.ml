@@ -109,7 +109,6 @@ let parse_file check_mode fn =
       Ast.mode := Ast.Mstrict;
       Parser_hack.is_hh_file := false;
       let comments, ast, errors = Parser_hack.from_file_with_errors fn in
-      let ast = Namespaces.elaborate_defs ast in
       if not check_mode then SearchService.WorkerApi.update fn ast;
       if errors <> []
       then raise (Utils.Error errors);

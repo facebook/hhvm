@@ -396,7 +396,7 @@ let rec entry ~fail content =
     env.errors := [];
   let comments = !L.comment_list in
   L.comment_list := [];
-  comments, ast, !(env.errors)
+  comments, Namespaces.elaborate_defs ast, !(env.errors)
 
 (*****************************************************************************)
 (* Hack headers (strict, decl, partial) *)

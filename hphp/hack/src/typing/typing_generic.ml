@@ -128,5 +128,8 @@ let no_generic p local_var_id env =
   let ty = Typing_expand.fully_expand env ty in
   match IsGeneric.ty ty with
   | None -> env
-  | Some x -> error p ("This static variable cannot use the parameter "^
-                       x^".")
+  | Some x -> 
+      Errors.add p ("This static variable cannot use the parameter "^
+                    x^".");
+      env
+

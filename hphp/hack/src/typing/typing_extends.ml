@@ -43,14 +43,14 @@ module Error = struct
     let vis = TUtils.string_of_visibility class_elt.ce_visibility in
     let msg1 = pos, "This member visibility is: " ^ vis in
     let msg2 = parent_pos, parent_vis ^ " was expected" in
-    error_l [msg1; msg2]
+    Errors.add_list [msg1; msg2]
 
   (* Method missing *)
   let member_not_implemented member_name parent_pos pos defn_pos =
     let msg1 = pos, "This object doesn't implement the method "^member_name in
     let msg2 = parent_pos, "Which is required by this interface" in
     let msg3 = defn_pos, "As defined here" in
-    error_l [msg1; msg2; msg3]
+    Errors.add_list [msg1; msg2; msg3]
 
   (* Incompatible override *)
   let override (parent_pos, parent_name) (pos, name) error_message_l =
@@ -61,10 +61,10 @@ module Error = struct
        "\nRead the following to see why:"
       ) in
     (* This is a cascading error message *)
-    raise (Error (msg1 :: msg2 :: error_message_l))
+    Errors.add_list (msg1 :: msg2 :: error_message_l)
 
   let missing_constructor pos =
-    error pos "The constructor is not implemented"
+    Errors.add pos "The constructor is not implemented"
 
 end
 
@@ -207,7 +207,6 @@ let check_implements env parent_type type_ =
   | Some parent_class, Some class_ ->
       let parent_class = parent_pos, parent_class, parent_tparaml in
       let class_ = pos, class_, tparaml in
-      try
-        check_class_implements env parent_class class_
-      with Error errorl ->
-        Error.override parent_name name errorl
+      Errors.try_
+        (fun () -> check_class_implements env parent_class class_)
+        (fun errorl -> Error.override parent_name name errorl)

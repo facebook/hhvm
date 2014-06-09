@@ -112,10 +112,12 @@ and instantiate subst env (r, ty) =
                  * the constraints on generics
                  *)
                 Env.add_todo env begin fun env ->
-                  try
-                    check_constraint env ty x_ty
-                  with Error l ->
-                    Reason.explain_generic_constraint r x l
+                  Errors.try_
+                    (fun () -> check_constraint env ty x_ty)
+                    (fun l ->
+                      Reason.explain_generic_constraint r x l;
+                      env
+                    )
                 end
           in
           env, (r, snd x_ty)

@@ -188,6 +188,7 @@ module CompareTypes = struct
 
   and class_ (subst, same) c1 c2 =
     let same =
+      same &&
       c1.tc_final = c2.tc_final &&
       c1.tc_need_init = c2.tc_need_init &&
       c1.tc_members_fully_known = c2.tc_members_fully_known &&
@@ -268,7 +269,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
 
   and ty_ = function
     | Tanon _
-    | Tvar _               -> raise (Error [Pos.none, "internal error"])
+    | Tvar _               -> failwith "Internal error"
     | Tany
     | Tmixed as x          -> x
     | Tarray (b, ty1, ty2) -> Tarray (b, ty_opt ty1, ty_opt ty2)

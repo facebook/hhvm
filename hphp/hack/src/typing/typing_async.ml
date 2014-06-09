@@ -25,7 +25,7 @@ let enforce_not_awaitable env e ty =
       match snd e with
       | Nast.Binop (Ast.Eq _, _, _) -> ()
       | _ ->
-          Utils.error_l [
+          Errors.add_list [
           fst e, "This expression is of type Awaitable, but it's "^
           "either being discarded or used in a dangerous way before "^
           "being awaited";
@@ -33,7 +33,6 @@ let enforce_not_awaitable env e ty =
         ]
   end
   | _ -> ()
-
 
 (* We would like to pretend that the wait_for*() functions are overloaded like
  * function wait_for<T>(Awaitable<T> $a): _AsyncWaitHandle<T>
@@ -100,14 +99,18 @@ let gena env p ty =
   | r, ty ->
     (* Oh well...let's at least make sure it is array-ish *)
     let expected_ty = r, Tarray (true, None, None) in
-    let env = try
-      Type.sub_type p Reason.URawait env expected_ty (r, ty)
-    with _ ->
-      let ty_str = Typing_print.error ty in
-      Utils.error_l [
-        p, "gena expects an array";
-        Reason.to_pos r, "It is incompatible with " ^ ty_str;
-      ] in
+    let env =
+      Errors.try_
+        (fun () -> Type.sub_type p Reason.URawait env expected_ty (r, ty))
+        (fun _ ->
+          let ty_str = Typing_print.error ty in
+          Errors.add_list [
+          p, "gena expects an array";
+          Reason.to_pos r, "It is incompatible with " ^ ty_str;
+        ];
+          env
+        )
+    in
     env, expected_ty
 
 let genva env p tyl =

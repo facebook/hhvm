@@ -8,7 +8,7 @@
  *
  *)
 
-open Utils
+open Typing_defs
 
 module Reason  = Typing_reason
 module TUtils  = Typing_utils
@@ -24,13 +24,19 @@ module SubType = Typing_subtype
 
 let sub_type p ur env ty1 ty2 =
   let env = { env with Env.pos = p } in
-  try SubType.sub_type env ty1 ty2
-  with
-  | Error l ->
-    raise (Error ((p, Reason.string_of_ureason ur) :: l))
+  Errors.try_
+    (fun () -> SubType.sub_type env ty1 ty2)
+    (fun l ->
+      Errors.add_list ((p, Reason.string_of_ureason ur) :: l);
+      env
+    )
 
 let unify p ur env ty1 ty2 =
   let env = { env with Env.pos = p } in
-  try Unify.unify env ty1 ty2
-  with Error l -> raise (Error ((p, Reason.string_of_ureason ur) :: l))
+  Errors.try_ 
+    (fun () -> Unify.unify env ty1 ty2)
+    (fun l ->
+      Errors.add_list ((p, Reason.string_of_ureason ur) :: l);
+      env, (Reason.Rwitness p, Tany)
+    )
 

@@ -24,8 +24,6 @@ type mode =
   | Mpartial (* Don't fail if you see a function/class you don't know *)
  (* with tarzan *)
 
-let mode = ref Mstrict
-
 (*****************************************************************************)
 (* Constants *)
 (*****************************************************************************)

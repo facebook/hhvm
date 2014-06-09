@@ -40,20 +40,20 @@ type cvar_status =
 module Error = struct
 
   let read_before_write (p, v) =
-    error p (
+    Errors.add p (
     sl[
     "Read access to $this->"; v; " before initialization"
   ])
 
   let no_construct_parent p =
-    error p (sl[
+    Errors.add p (sl[
     "You are extending a class that needs to be initialized\n";
     "Make sure you call parent::__construct.\n"
     ])
 
   let not_initialized (p, c) =
     if c = "parent::__construct" then no_construct_parent p else
-    error p (sl[
+    Errors.add p (sl[
     "The class member "; c;" is not always properly initialized\n";
     "Make sure you systematically set $this->"; c;
     " when the method __construct is called\n";
@@ -61,7 +61,7 @@ module Error = struct
     ])
 
   let call_before_init p cv =
-    error p (
+    Errors.add p (
     sl([
        "Until the initialization of $this is over,";
        " you can only call private methods\n";
@@ -336,6 +336,7 @@ and expr_ env acc p e =
   let afield = afield env in
   let fun_paraml = fun_paraml env in
   match e with
+  | Any -> acc
   | Array fdl -> List.fold_left afield acc fdl
   | ValCollection (_, el) -> exprl acc el
   | KeyValCollection (_, fdl) -> List.fold_left field acc fdl
@@ -348,7 +349,7 @@ and expr_ env acc p e =
   | Lvar _ -> acc
   | Obj_get ((_, This), (_, Id (_, vx as v))) ->
       if SSet.mem vx env.cvars && not (SSet.mem vx acc)
-      then Error.read_before_write v
+      then (Error.read_before_write v; acc)
       else acc
   | Clone e -> expr acc e
   | Obj_get (e1, e2) ->

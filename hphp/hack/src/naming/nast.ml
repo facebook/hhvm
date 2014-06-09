@@ -157,6 +157,7 @@ and class_id =
 
 and expr = Pos.t * expr_
 and expr_ =
+  | Any
   | Array of afield list
   | Shape of expr SMap.t
   | ValCollection of string * expr list

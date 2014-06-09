@@ -35,57 +35,57 @@ module Error = struct
     sl ["The type ";(Utils.strip_ns name);" expects ";nargs;" type parameter(s)"]
 
   let abstract_outside (p, _) =
-    error p
+    Errors.add p
     "This method is declared as abstract, in a class that isn't"
 
   let interface_with_body (p, _) =
-    error p
+    Errors.add p
     "A method cannot have a body in an interface"
 
   let abstract_with_body (p, _) =
-    error p
+    Errors.add p
     "This method is declared as abstract, but has a body"
 
   let not_abstract_without_body (p, _) =
-    error p
+    Errors.add p
     "This method is not declared as abstract, it must have a body"
 
   let return_in_gen p =
-    error p
+    Errors.add p
       ("Don't use return in a generator (a generator"^
        " is a function that uses yield)")
 
   let return_in_finally p =
-    error p
+    Errors.add p
       ("Don't use return in a finally block;"^
           " there's nothing to receive the return value")
 
   let yield_in_async_function p =
-    error p
+    Errors.add p
     "Don't use yield in an async function"
 
   let await_in_sync_function p =
-    error p
+    Errors.add p
     "await can only be used inside async functions"
 
   let magic (p, s) =
-    error p
+    Errors.add p
       ("Don't call "^s^" it's one of these magic things we want to avoid")
 
   let non_interface (p : Pos.t) (c2: string) (verb: string): 'a =
-    error p ("Cannot " ^ verb ^ " " ^ (strip_ns c2) ^ " - it is not an interface")
+    Errors.add p ("Cannot " ^ verb ^ " " ^ (strip_ns c2) ^ " - it is not an interface")
 
   let toString_returns_string pos =
-    error pos "__toString should return a string"
+    Errors.add pos "__toString should return a string"
 
   let toString_visibility pos =
-    error pos "__toString must have public visibility and cannot be static"
+    Errors.add pos "__toString must have public visibility and cannot be static"
 
   let uses_non_trait (p: Pos.t) (n: string) (t: string) =
-    error p ((Utils.strip_ns n) ^ " is not a trait. It is " ^ t ^ ".")
+    Errors.add p ((Utils.strip_ns n) ^ " is not a trait. It is " ^ t ^ ".")
 
   let requires_non_class (p: Pos.t) (n: string) (t: string) =
-    error p ((Utils.strip_ns n) ^ " is not a class. It is " ^ t ^ ".")
+    Errors.add p ((Utils.strip_ns n) ^ " is not a class. It is " ^ t ^ ".")
 
 end
 
@@ -196,6 +196,7 @@ module CheckFunctionType = struct
   ()
 
   and expr_ p f_type exp = match f_type, exp with
+    | _, Any -> ()
     | _, Array _
     | _, Fun_id _
     | _, Method_id _
@@ -357,11 +358,12 @@ and hint_ env p = function
       ()
   | Happly ((_, x), hl) when Typing_env.is_typedef env.tenv x ->
       let tdef = Typing_env.Typedefs.find_unsafe x in
-      (match tdef with
-      | Typing_env.Typedef.Error -> ()
-      | Typing_env.Typedef.Ok (_, params, _, _) ->
-          check_params env p x params hl
-      )
+      let params =
+        match tdef with
+        | Typing_env.Typedef.Error -> []
+        | Typing_env.Typedef.Ok (_, x, _, _) -> x
+      in
+      check_params env p x params hl
   | Happly ((_, x), hl) ->
       let _, class_ = Env.get_class env.tenv x in
       (match class_ with
@@ -383,7 +385,7 @@ and check_arity env p tname arity size =
   if size = 0 && not (Typing_env.is_strict env.tenv) then () else
   let nargs = soi arity in
   let msg   = Error.type_arity tname nargs in
-  error p msg
+  Errors.add p msg
 
 and class_ tenv c =
   if c.c_mode = Ast.Mdecl || !auto_complete then () else begin
@@ -483,23 +485,25 @@ and interface env c =
   (* make sure that interfaces only have empty public methods *)
   liter begin fun env m ->
     if m.m_body <> []
-    then error (fst m.m_name) "This method shouldn't have a body"
+    then Errors.add (fst m.m_name) "This method shouldn't have a body"
     else ();
     if m.m_visibility <> Public
-    then error (fst m.m_name) "Access type for interface method must be public"
+    then
+      Errors.add (fst m.m_name)
+        "Access type for interface method must be public"
     else ()
   end env (c.c_static_methods @ c.c_methods);
   (* make sure that interfaces don't have any member variables *)
   match c.c_vars with
   | hd::_ ->
     let pos = fst (hd.cv_id) in
-    error pos "Interfaces cannot have member variables";
+    Errors.add pos "Interfaces cannot have member variables";
   | _ -> ();
   (* make sure that interfaces don't have static variables *)
   match c.c_static_vars with
   | hd::_ ->
     let pos = fst (hd.cv_id) in
-    error pos "Interfaces cannot have static variables";
+    Errors.add pos "Interfaces cannot have static variables";
   | _ -> ()
 
 and class_const env (h, _, e) =
@@ -541,7 +545,7 @@ and method_ (env, is_static) m =
       if String.lowercase (strip_ns cname) = String.lowercase mname
           && env.class_kind <> Some Ast.Ctrait
       then
-        error p ("This is a dangerous method name, "^
+        Errors.add p ("This is a dangerous method name, "^
                  "if you want to define a constructor, use "^
                  "__construct")
       else ()
@@ -622,6 +626,7 @@ and expr env (_, e) =
   expr_ env e
 
 and expr_ env = function
+  | Any
   | Array _
   | Fun_id _
   | Method_id _

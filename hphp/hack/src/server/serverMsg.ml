@@ -100,7 +100,7 @@ type response =
 | SERVER_OUT_OF_DATE
 | DIRECTORY_MISMATCH of directory_mismatch
 | NO_ERRORS
-| ERRORS of Utils.error list
+| ERRORS of Errors.error list
 | SERVER_DYING
 | PONG
 

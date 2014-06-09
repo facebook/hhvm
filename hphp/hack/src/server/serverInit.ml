@@ -34,8 +34,6 @@ let init_hack genv env get_next =
   let fast = FileInfo.simplify_fast files_info in
   let fast = SSet.fold SMap.remove failed2 fast in
   let errorl3, failed3 = Typing_decl_service.go genv.workers nenv fast in
-
-  let fast = SSet.fold SMap.remove failed3 fast in
   let errorl4, failed4 = Typing_check_service.go genv.workers fast in
 
   let failed =

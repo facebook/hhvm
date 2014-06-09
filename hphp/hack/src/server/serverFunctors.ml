@@ -31,7 +31,7 @@ module type SERVER_PROGRAM = sig
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
   val name: string
-  val get_errors: ServerEnv.env -> error list
+  val get_errors: ServerEnv.env -> Errors.t
 end
 
 module HackProgram : SERVER_PROGRAM = struct

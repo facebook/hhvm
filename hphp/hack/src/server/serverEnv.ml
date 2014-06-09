@@ -31,7 +31,7 @@ type genv = {
 type env = {
     files_info     : FileInfo.t SMap.t;
     nenv           : Naming.env;
-    errorl         : error list;
+    errorl         : Errors.t;
     (* skip errors at initialization *)
     skip           : bool ref;
     (* the strings in those sets represent filenames *)

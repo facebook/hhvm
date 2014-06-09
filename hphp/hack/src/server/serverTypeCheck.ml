@@ -272,11 +272,7 @@ let type_check genv env =
   let fast = reparse fast files_info to_recheck in
   let errorl', failed_check = Typing_check_service.go genv.workers fast in
 
-  (* If we found errors during the declaration phase,
-   * it's best to only show those errors, because all the others are
-   * probably a consequence of the original mistake.
-   *)
-  let errorl = if errorl <> [] then errorl else errorl' in
+  let errorl = List.rev (List.rev_append errorl' errorl) in
 
   let t2 = Unix.gettimeofday() in
   Printf.printf "Type-check: %f\n" (t2 -. t); flush stdout;

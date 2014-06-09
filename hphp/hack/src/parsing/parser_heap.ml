@@ -14,9 +14,12 @@ module ParserHeap = SharedMem.NoCache(struct
 end)
 
 let find_class_in_file file_name class_name =
-  List.fold_left begin fun acc def ->
-    match def with
-    | Ast.Class c when snd c.Ast.c_name = class_name -> Some c
-    | _ -> acc
-  end None (ParserHeap.find_unsafe file_name)
+  match ParserHeap.get file_name with
+  | None -> None
+  | Some defs ->
+      List.fold_left begin fun acc def ->
+        match def with
+        | Ast.Class c when snd c.Ast.c_name = class_name -> Some c
+        | _ -> acc
+      end None defs
 

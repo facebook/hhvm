@@ -16,7 +16,7 @@ val go:
   bool ->
   FileInfo.t SMap.t ->
   get_next:(unit -> string list) ->
-  FileInfo.t SMap.t * Utils.error list * SSet.t
+  FileInfo.t SMap.t * Errors.t * SSet.t
 
 (* used by hack build *)
 val legacy_php_file_info: (string -> FileInfo.t) ref

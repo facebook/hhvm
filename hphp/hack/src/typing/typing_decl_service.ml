@@ -22,7 +22,7 @@ type fast = (SSet.t * SSet.t * SSet.t * SSet.t) SMap.t
 type failed = SSet.t
 
 (* The result excepted from the service *)
-type result = Utils.error list * failed
+type result = Errors.t * failed
 
 (*****************************************************************************)
 (* The place where we store the shared data in cache *)
@@ -41,14 +41,16 @@ end)
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
-let decl_file all_classes nenv (errors, failed) fn = try
-  d ("Typing decl: "^fn);
-  Typing_decl.make_env nenv all_classes fn;
-  dn "OK";
-  errors, failed
-with Utils.Error l ->
-  dn "FAILED";
-   l :: errors, SSet.add fn failed
+let decl_file all_classes nenv (errorl, failed) fn =
+  let errorl', () = Errors.do_ begin fun () ->
+    d ("Typing decl: "^fn);
+    Typing_decl.make_env nenv all_classes fn;
+    dn "OK";
+  end
+  in
+  let failed = if errorl' = [] then failed else SSet.add fn failed in
+  let errorl = List.rev_append (List.rev errorl') errorl in
+  errorl, failed
 
 let decl_files (errors, failed) fnl =
   let all_classes, nenv = TypeDeclarationStore.load() in

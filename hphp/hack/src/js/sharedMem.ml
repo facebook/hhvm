@@ -24,18 +24,10 @@ type t = string list
 *)
 (*****************************************************************************)
 let is_local = ref true
-let (local_autocomplete: (string, string) Hashtbl.t) = Hashtbl.create 7
-let (local_check: (string, string) Hashtbl.t) = Hashtbl.create 7
-let (local_h: (string, string) Hashtbl.t ref) = ref local_autocomplete
-
-let autocomplete_mode () =
-  local_h := local_autocomplete
-
-let check_mode () =
-  local_h := local_check
+let (local_h: (string, string) Hashtbl.t) = Hashtbl.create 7
 
 let find_unsafe x =
-  Hashtbl.find !local_h x
+  Hashtbl.find local_h x
 
 let get x = 
   try Some (find_unsafe x) with Not_found -> None
@@ -43,7 +35,7 @@ let get x =
 let get_batch ks =
   let acc = ref SMap.empty in
   SSet.iter begin fun x ->
-    try acc := SMap.add x (Obj.magic (Hashtbl.find !local_h x)) !acc
+    try acc := SMap.add x (Obj.magic (Hashtbl.find local_h x)) !acc
     with Not_found -> ()
   end ks;
   !acc
@@ -51,14 +43,14 @@ let get_batch ks =
 let mem x = get x <> None
 
 let add x data = 
-  Hashtbl.replace !local_h x data
+  Hashtbl.replace local_h x data
 
 let remove x = 
-  Hashtbl.remove !local_h x
+  Hashtbl.remove local_h x
 
 let remove_batch x =
   SSet.iter begin fun x ->
-    Hashtbl.remove !local_h x
+    Hashtbl.remove local_h x
   end x
 
 (*****************************************************************************)

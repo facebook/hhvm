@@ -143,20 +143,12 @@ let declare_file ~fix_file fn content =
 
 let hh_add_file fn content =
   Hashtbl.replace files fn content;
-  let context = !SharedMem.local_h in
   try
-    SharedMem.autocomplete_mode();
     declare_file ~fix_file:true fn content;
-    SharedMem.check_mode();
-    declare_file ~fix_file:false fn content;
-    SharedMem.local_h := context
   with e ->
-    SharedMem.local_h := context;
     ()
 
 let hh_check ?(check_mode=true) fn =
-  let context = !SharedMem.local_h in
-  if check_mode then SharedMem.check_mode();
   declare_file ~fix_file:(not check_mode) fn (Hashtbl.find files fn);
   Pos.file := fn;
   Autocomplete.auto_complete := false;
@@ -174,14 +166,11 @@ let hh_check ?(check_mode=true) fn =
     Typing_decl.make_env nenv all_classes fn;
     List.iter (fun (_, fname) -> type_fun fname fn) funs;
     List.iter (fun (_, cname) -> type_class cname fn) classes;
-    SharedMem.local_h := context;
     error []
   with
   | Error l ->
-      SharedMem.local_h := context;
       error [l]
   | e ->
-      SharedMem.local_h := context;
       raise e
 
 let complete_global completion_type fn =

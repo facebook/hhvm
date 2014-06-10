@@ -110,9 +110,11 @@
     install_root: guzzle
     test_root: guzzle
   guzzle4:
-    url: https://github.com/guzzle/guzzle.git
-    branch: 4.0.1
-    commit: c1cf6c8630b71fa7c9b8f7e769758bb1d9147dae
+    # Slightly after 4.1.1, to include
+    # https://github.com/guzzle/guzzle/pull/701
+    url: https://github.com/fredemmott/guzzle.git
+    branch: change-port
+    commit: 4db19b75d9211e729ff277c238ef5de4bf658597
     install_root: guzzle4
     test_root: guzzle4
   hhvmquickinterp:

@@ -402,7 +402,15 @@ public:
   public:
     explicit FunctionInfo(int rva = -1)
       : m_maybeStatic(false)
-      , m_maybeRefReturn(false)
+      /*
+       * Note: m_maybeRefReturn used to implement an optimization to
+       * avoid unbox checks when we call functions where we know no
+       * function with that name returns by reference.  This isn't
+       * correct, however, because __call can return by reference, so
+       * it's disabled here.  (The default to enable it should be
+       * 'false'.)
+       */
+      , m_maybeRefReturn(true)
       , m_refVarArg(rva)
     {}
 

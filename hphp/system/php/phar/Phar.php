@@ -71,7 +71,7 @@ class Phar extends RecursiveDirectoryIterator
     }
     $data = file_get_contents($filename);
 
-    $halt_token = "\n__HALT_COMPILER();";
+    $halt_token = "__HALT_COMPILER();";
     $pos = strpos($data, $halt_token);
     if ($pos === false) {
       throw new PharException("__HALT_COMPILER(); must be declared in a phar");

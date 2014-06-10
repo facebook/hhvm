@@ -135,23 +135,36 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
    * tests with the compiled repo as the Central repo.
    */
   for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+    if (repoName(repoId).empty()) {
+      // The repo wasn't loadable
+      continue;
+    }
     try {
       RepoStmt stmt(*this);
+      const auto& tbl = table(repoId, "GlobalData");
       stmt.prepare(
         folly::format(
-          "SELECT data from {};", table(repoId, "GlobalData")
+          "SELECT count(*), data from {};", tbl
         ).str()
       );
       RepoTxn txn(*this);
       RepoTxnQuery query(txn, stmt);
       query.step();
-      if (!query.row()) continue;
-      BlobDecoder decoder = query.getBlob(0);
+      if (!query.row()) {
+        throw RepoExc("Can't find table %s", tbl.c_str());
+      };
+      int val;
+      query.getInt(0, val);
+      if (val == 0) {
+        throw RepoExc("No rows in %s. Did you forget to compile that file with "
+                      "this HHVM version?", tbl.c_str());
+      };
+      BlobDecoder decoder = query.getBlob(1);
       decoder(s_globalData);
 
       txn.commit();
     } catch (RepoExc& e) {
-      failures.push_back(e.msg());
+      failures.push_back(repoName(repoId) + ": "  + e.msg());
       continue;
     }
 
@@ -160,11 +173,18 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
 
   if (allowFailure) return;
 
-  // We should always have a global data section in RepoAuthoritative
-  // mode, or the repo is messed up.
-  std::fprintf(stderr, "failed to load Repo::GlobalData:\n");
-  for (auto& f : failures) {
-    std::fprintf(stderr, "  %s\n", f.c_str());
+  if (failures.empty()) {
+    std::fprintf(stderr, "No repo was loadable. Check all the possible repo "
+                 "locations (Repo.Central.Path, HHVM_REPO_CENTRAL_PATH, and "
+                 "$HOME/.hhvm.hhbc) to make sure one of them is a valid "
+                 "sqlite3 HHVM repo built with this exact HHVM version.\n");
+  } else {
+    // We should always have a global data section in RepoAuthoritative
+    // mode, or the repo is messed up.
+    std::fprintf(stderr, "Failed to load Repo::GlobalData:\n");
+    for (auto& f : failures) {
+      std::fprintf(stderr, "  %s\n", f.c_str());
+    }
   }
   std::abort();
 }

@@ -153,9 +153,9 @@ c_Generator *c_Generator::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Generator*>(obj);
   auto fp = thiz->actRec();
 
-  c_Generator* cont = Create(fp, fp->func()->numSlotsInFrame(),
-                             thiz->resumable()->resumeAddr(),
-                             thiz->resumable()->resumeOffset());
+  c_Generator* cont = Create<true>(fp, fp->func()->numSlotsInFrame(),
+                                   thiz->resumable()->resumeAddr(),
+                                   thiz->resumable()->resumeOffset());
   cont->copyVars(fp);
   cont->setState(thiz->getState());
   cont->m_index  = thiz->m_index;

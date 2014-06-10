@@ -265,7 +265,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
     case StRetVal:
     case StLoc:
     case StLocNT:
-    case StCell:
       return srcIdx == 1;
 
     case StProp:

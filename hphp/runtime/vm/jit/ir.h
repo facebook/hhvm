@@ -390,7 +390,6 @@ O(CheckSurpriseFlags,               ND, NA,                              B|E) \
 O(SurpriseHook,                     ND, NA,                           Er|N|E) \
 O(FunctionSuspendHook,              ND, S(FramePtr,PtrToGen) C(Bool), Er|N|E) \
 O(FunctionReturnHook,               ND, S(FramePtr) S(Gen),           Er|N|E) \
-O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
 O(RaiseWarning,                     ND, S(Str),                       E|N|Er) \
@@ -526,7 +525,6 @@ O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),               E|CRc) \
 O(StProp,                           ND, S(Obj) C(Int) S(Gen),          E|CRc) \
-O(StCell,                           ND, S(PtrToGen) S(Gen),            E|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StGbl,                            ND, S(FramePtr) S(Gen),            E|CRc) \
@@ -651,7 +649,6 @@ O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
 O(LdResumableArObj,             D(Obj), S(FramePtr),                   C|PRc) \
-O(CopyAsyncCells,                   ND, S(FramePtr) S(PtrToGen),       CRc|E) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           C(Int)                              \
                                           S(TCA,Nullptr)                      \

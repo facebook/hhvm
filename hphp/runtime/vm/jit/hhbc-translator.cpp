@@ -1552,13 +1552,8 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   assert(!resumed());
   assert(curFunc()->isNonAsyncGenerator());
 
-  auto const ldgblExit = makePseudoMainExit();
-
-  if (curFunc()->attrs() & AttrMayUseVV) {
-    gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
-  }
-
-  // Create the Generator object.
+  // Create the Generator object. CreateCont takes care of copying local
+  // variables and iterators.
   auto const func = curFunc();
   auto const resumeSk = SrcKey(func, resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
@@ -1567,10 +1562,6 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
   // Teleport local variables into the generator.
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
-  for (int i = 0; i < func->numLocals(); ++i) {
-    auto const loc = ldLoc(i, ldgblExit, DataTypeGeneric);
-    gen(StMem, contAR, cns(-cellsToBytes(i + 1)), loc);
-  }
 
   // Call the FunctionSuspend hook and put the return value on the stack so that
   // the unwinder would decref it.
@@ -1725,9 +1716,9 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
   assert(curFunc()->isAsync());
   assert(!resumed());
   assert(child->isA(Type::Obj));
-  auto const kMaxCellStores = 3;
 
-  // Create the AsyncFunctionWaitHandle object.
+  // Create the AsyncFunctionWaitHandle object. CreateAFWH takes care of
+  // copying local variables and iterators.
   auto const func = curFunc();
   auto const resumeSk = SrcKey(func, resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
@@ -1736,20 +1727,7 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
         resumeAddr, cns(resumeOffset),
         child);
 
-  // Teleport local variables into the AsyncFunctionWaitHandle.
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
-
-  static_assert(sizeof(Iter) % sizeof(TypedValue) == 0, "Iter size changed");
-  auto const numCells = func->numLocals() +
-                        numIters * sizeof(Iter) / sizeof(TypedValue);
-  if (numIters == 0 && func->numLocals() <= kMaxCellStores) {
-    for (int i = 0; i < func->numLocals(); ++i) {
-      auto const loc = ldLoc(i, nullptr, DataTypeGeneric);
-      gen(StCell, LocalOffset(localOffset(i)), asyncAR, loc);
-    }
-  } else {
-    gen(CopyAsyncCells, LocalId(numCells), m_irb->fp(), asyncAR);
-  }
 
   // Call the FunctionSuspend hook and put the AsyncFunctionWaitHandle
   // on the stack so that the unwinder would decref it.
@@ -1807,9 +1785,6 @@ void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
 
   auto const child = popC();
   gen(JmpZero, exitSlow, gen(IsWaitHandle, child));
-  if ((curFunc()->attrs() & AttrMayUseVV) && !resumed()) {
-    gen(ExitOnVarEnv, exitSlow, m_irb->fp());
-  }
 
   // cns() would ODR-use these
   auto const kSucceeded = c_WaitHandle::STATE_SUCCEEDED;

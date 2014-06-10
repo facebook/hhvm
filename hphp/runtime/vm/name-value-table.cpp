@@ -102,7 +102,7 @@ NameValueTable::~NameValueTable() {
   free(m_table);
 }
 
-void NameValueTable::suspend(ActRec* oldFP, ActRec* newFP) {
+void NameValueTable::suspend(const ActRec* oldFP, ActRec* newFP) {
   assert(m_fp == oldFP);
   assert(oldFP->func() == newFP->func());
   assert(!oldFP->resumed());

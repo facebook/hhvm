@@ -170,7 +170,7 @@ class VarEnv {
 
   VarEnv* clone(ActRec* fp) const;
 
-  void suspend(ActRec* oldFP, ActRec* newFP);
+  void suspend(const ActRec* oldFP, ActRec* newFP);
   void enterFP(ActRec* oldFP, ActRec* newFP);
   void exitFP(ActRec* fp);
 
@@ -300,6 +300,10 @@ struct ActRec {
 
   bool resumed() const {
     return m_numArgsAndFlags & kResumedMask;
+  }
+
+  void setResumed() {
+    m_numArgsAndFlags |= kResumedMask;
   }
 
   bool isFromFPushCtor() const {

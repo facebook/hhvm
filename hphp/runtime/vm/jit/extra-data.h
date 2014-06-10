@@ -318,20 +318,6 @@ struct StackOffset : IRExtraData {
 };
 
 /*
- * Local offsets.
- */
-struct LocalOffset : IRExtraData {
-  explicit LocalOffset(int32_t offset) : offset(offset) {}
-
-  std::string show() const { return folly::to<std::string>(offset); }
-
-  bool cseEquals(LocalOffset o) const { return offset == o.offset; }
-  size_t cseHash() const { return std::hash<int32_t>()(offset); }
-
-  int32_t offset;
-};
-
-/*
  * Bytecode offsets.
  */
 struct BCOffset : IRExtraData {
@@ -807,10 +793,8 @@ X(TrackLoc,                     LocalId);
 X(LdGbl,                        LocalId);
 X(DecRefLoc,                    LocalId);
 X(StLoc,                        LocalId);
-X(StCell,                       LocalOffset);
 X(StGbl,                        LocalId);
 X(StLocNT,                      LocalId);
-X(CopyAsyncCells,               LocalId);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);

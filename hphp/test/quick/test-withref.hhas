@@ -1,0 +1,115 @@
+# WIterInit/WIterNext (which perform iteration with-ref) can only be
+# tested using hhas.  This file was created by compiling the following
+# snippet of PHP and changing IterInit/IterNext to their W-flavor
+# cousins.
+
+# $ar = array(5, 6);
+# var_dump($ar);
+#
+# $x =& $ar[0];
+# $x = 7;
+# var_dump($x);
+# var_dump($ar);
+#
+# $ar2 = array();
+# $k = sprintf("%d", 11);
+# $v = sprintf("%d", 22);
+# foreach ($ar as $k => $v) {
+#   $v = $v * 2;
+#   $ar2[$k] = $v;
+# }
+# var_dump($ar2);
+# var_dump($ar);
+# var_dump($x);
+
+.adata my_array = """a:2:{i:0;i:5;i:1;i:6;}""";
+.adata empty = """a:0:{}""";
+
+.main {
+      .numiters 1;
+  # line 4
+     Array @my_array
+     SetL $ar
+     PopC
+  # line 5
+    FPushFuncD 1 "var_dump"
+    FPassL 0 $ar
+    FCall 1
+    PopR
+  # line 7
+    VGetM <L:$ar EI:0>
+    BindL $x
+    PopV
+  # line 8
+    Int 7
+    SetL $x
+    PopC
+  # line 9
+    FPushFuncD 1 "var_dump"
+    FPassL 0 $x
+    FCall 1
+    PopR
+  # line 10
+    FPushFuncD 1 "var_dump"
+    FPassL 0 $ar
+    FCall 1
+    PopR
+  # line 12
+    Array @empty
+    SetL $ar2
+    PopC
+  # line 13
+    FPushFuncD 2 "sprintf"
+    String "%d"
+    FPassCE 0
+    Int 11
+    FPassCE 1
+    FCall 2
+    UnboxR
+    SetL $k
+    PopC
+  # line 14
+    FPushFuncD 2 "sprintf"
+    String "%d"
+    FPassCE 0
+    Int 22
+    FPassCE 1
+    FCall 2
+    UnboxR
+    SetL $v
+    PopC
+  # line 18
+    CGetL $ar
+    WIterInitK 0 end_loop $v $k
+  # line 16
+loop:
+    Int 2
+    CGetL2 $v
+    MulO
+    SetL $v
+    PopC
+  # line 17
+    CGetL $v
+    SetM <L:$ar2 EL:$k>
+    PopC
+  # line 18
+    WIterNextK 0 loop $v $k
+  # line 19
+end_loop:
+    FPushFuncD 1 "var_dump"
+    FPassL 0 $ar2
+    FCall 1
+    PopR
+  # line 20
+    FPushFuncD 1 "var_dump"
+    FPassL 0 $ar
+    FCall 1
+    PopR
+  # line 21
+    FPushFuncD 1 "var_dump"
+    FPassL 0 $x
+    FCall 1
+    PopR
+    Int 1
+    RetC
+}

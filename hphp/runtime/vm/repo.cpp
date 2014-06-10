@@ -122,7 +122,7 @@ void Repo::setCliFile(const std::string& cliFile) {
   s_cliFile = cliFile;
 }
 
-void Repo::loadGlobalData() {
+void Repo::loadGlobalData(bool allowFailure /* = false */) {
   m_lsrp.load();
 
   if (!RuntimeOption::RepoAuthoritative) return;
@@ -157,6 +157,8 @@ void Repo::loadGlobalData() {
 
     return;
   }
+
+  if (allowFailure) return;
 
   // We should always have a global data section in RepoAuthoritative
   // mode, or the repo is messed up.

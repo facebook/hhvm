@@ -478,22 +478,24 @@ void Repo::initCentral() {
   assert(m_dbc == nullptr);
   auto tryPath = [this, &error](const char* path) {
     std::string subErr;
-    if (!openCentral(path, subErr)) return false;
-
-    folly::format(&error, "  {}\n", subErr.empty() ? path : subErr);
+    if (!openCentral(path, subErr)) {
+      folly::format(&error, "  {}\n", subErr.empty() ? path : subErr);
+      return false;
+    }
     return true;
   };
 
-  // Try Repo.Central.Path (or HHVM_REPO_CENTRAL_PATH).
+  // Try Repo.Central.Path
   if (!RuntimeOption::RepoCentralPath.empty()) {
-    if (!tryPath(RuntimeOption::RepoCentralPath.c_str())) {
+    if (tryPath(RuntimeOption::RepoCentralPath.c_str())) {
       return;
     }
   }
 
+  // Try HHVM_REPO_CENTRAL_PATH
   const char* HHVM_REPO_CENTRAL_PATH = getenv("HHVM_REPO_CENTRAL_PATH");
   if (HHVM_REPO_CENTRAL_PATH != nullptr) {
-    if (!tryPath(HHVM_REPO_CENTRAL_PATH)) {
+    if (tryPath(HHVM_REPO_CENTRAL_PATH)) {
       return;
     }
   }
@@ -503,7 +505,7 @@ void Repo::initCentral() {
   if (HOME != nullptr) {
     std::string centralPath = HOME;
     centralPath += "/.hhvm.hhbc";
-    if (!tryPath(centralPath.c_str())) {
+    if (tryPath(centralPath.c_str())) {
       return;
     }
   }
@@ -520,7 +522,7 @@ void Repo::initCentral() {
           && (HOME == nullptr || strcmp(HOME, pwbufp->pw_dir))) {
         std::string centralPath = pwbufp->pw_dir;
         centralPath += "/.hhvm.hhbc";
-        if (!tryPath(centralPath.c_str())) {
+        if (tryPath(centralPath.c_str())) {
           return;
         }
       }
@@ -568,7 +570,7 @@ bool Repo::openCentral(const char* rawPath, std::string& errorMsg) {
              __func__, repoPath.c_str());
     errorMsg = folly::format("Failed to open {}: {} - {}",
                              repoPath, err, sqlite3_errmsg(m_dbc)).str();
-    return true;
+    return false;
   }
   // Register a busy handler to avoid spurious SQLITE_BUSY errors.
   sqlite3_busy_handler(m_dbc, busyHandler, (void*)this);
@@ -582,7 +584,7 @@ bool Repo::openCentral(const char* rawPath, std::string& errorMsg) {
              " '%s': %s\n", __func__, repoPath.c_str(), re.what());
     errorMsg = folly::format("Failed to initialize connection to {}: {}",
                              repoPath, re.what()).str();
-    return true;
+    return false;
   }
   // sqlite3_open_v2() will silently open in read-only mode if file permissions
   // prevent writing, and there is no apparent way to detect this other than to
@@ -595,11 +597,11 @@ bool Repo::openCentral(const char* rawPath, std::string& errorMsg) {
              repoPath.c_str());
     errorMsg = folly::format("Failed to initialize schema in {}: {}",
                              repoPath, errorMsg).str();
-    return true;
+    return false;
   }
   m_centralRepo = repoPath;
   TRACE(1, "Central repo: '%s'\n", m_centralRepo.c_str());
-  return false;
+  return true;
 }
 
 void Repo::initLocal() {

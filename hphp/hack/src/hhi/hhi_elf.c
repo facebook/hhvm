@@ -52,13 +52,13 @@ value get_embedded_hhi_data(value filename) {
     goto fail_after_open;
   }
 
-  size_t shstrndx = -1;
+  size_t shstrndx = 0;
 #ifdef HAVE_ELF_GETSHDRSTRNDX
   int stat = elf_getshdrstrndx(e, &shstrndx);
 #else
   int stat = elf_getshstrndx(e, &shstrndx);
 #endif
-  if (stat < 0 || shstrndx == -1) {
+  if (stat < 0 || shstrndx == 0) {
     goto fail_after_elf_begin;
   }
 
@@ -87,7 +87,10 @@ value get_embedded_hhi_data(value filename) {
 
       lseek(fd, offset, SEEK_SET);
       result = caml_alloc_string(size);
-      read(fd, String_val(result), size);
+      ssize_t ret = read(fd, String_val(result), size);
+      if (ret != (ssize_t)size) {
+        goto fail_after_elf_begin;
+      }
 
       close(fd);
       CAMLreturn(SOME(result));

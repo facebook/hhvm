@@ -240,7 +240,8 @@ static void set_priorities() {
 
   // Don't slam the CPU either, though this has much less tendency to make the
   // system totally unresponsive so we don't need to lower all the way.
-  (void)nice(10);
+  int dummy = nice(10);
+  (void)dummy; // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509
 }
 
 /*****************************************************************************/
@@ -273,7 +274,7 @@ void hh_shared_init() {
   // stack overflow, but we don't actually handle that exception, so what
   // happens in practice is we terminate at toplevel with an unhandled exception
   // and a useless ocaml backtrace. A core dump is actually more useful. Sigh.
-  struct sigaction sigact = {};
+  struct sigaction sigact;
   sigact.sa_handler = SIG_DFL;
   sigemptyset(&sigact.sa_mask);
   sigact.sa_flags = 0;

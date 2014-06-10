@@ -224,10 +224,10 @@ static Variant HHVM_METHOD(mysqli, hh_get_connection, int64_t state) {
   return res;
 }
 
-static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
+static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store, bool from_store_result) {
   auto res = get_connection_resource(this_);
   VALIDATE_RESOURCE(res, MySQLState::CONNECTED)
-  return php_mysql_get_result(res, use_store);
+  return php_mysql_get_result(res, use_store, from_store_result);
 }
 
 static void HHVM_METHOD(mysqli, hh_init) {

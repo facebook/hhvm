@@ -18,11 +18,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-APCHandle* APCString::MakeShared(DataType type, StringData* data) {
+APCHandle* APCString::MakeShared(
+    DataType type, StringData* data, size_t& size) {
   auto len = data->size();
 
   auto const cap = static_cast<uint32_t>(len) + 1;
   auto const apcStr = new (cap) APCString(type);
+  size = cap + sizeof(APCString);
 
   apcStr->m_data.m_lenAndCount = len;
   apcStr->m_data.m_cap         = cap;

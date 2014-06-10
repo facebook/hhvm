@@ -55,7 +55,7 @@ APCObject::APCObject(ObjectData* obj, uint32_t propCount)
   m_handle.mustCache();
 }
 
-APCHandle* APCObject::Construct(ObjectData* objectData) {
+APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
   // This function assumes the object and object/array down the tree
   // have no internal references and do not implement the serializable
   // interface.
@@ -65,9 +65,8 @@ APCHandle* APCObject::Construct(ObjectData* objectData) {
   objectData->o_getArray(odProps, false);
   auto const propCount = odProps.size();
 
-  auto const apcObj = new (
-    std::malloc(sizeof(APCObject) + sizeof(Prop) * propCount)
-  ) APCObject(objectData, propCount);
+  size = sizeof(APCObject) + sizeof(Prop) * propCount;
+  auto const apcObj = new (std::malloc(size)) APCObject(objectData, propCount);
   if (!propCount) return apcObj->getHandle();
 
   auto prop = apcObj->props();
@@ -77,7 +76,9 @@ APCHandle* APCObject::Construct(ObjectData* objectData) {
     const Variant& value = it.secondRef();
     APCHandle *val = nullptr;
     if (!value.isNull()) {
-      val = APCHandle::Create(value, false, true, true);
+      size_t s = 0;
+      val = APCHandle::Create(value, s, false, true, true);
+      size += s;
     }
 
     const String& keySD = key.asCStrRef();
@@ -130,7 +131,8 @@ void APCObject::Delete(APCHandle* handle) {
 
 //////////////////////////////////////////////////////////////////////
 
-APCHandle* APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
+APCHandle* APCObject::MakeAPCObject(
+    APCHandle* obj, size_t& size, const Variant& value) {
   if (!value.is(KindOfObject) || obj->getObjAttempted()) {
     return nullptr;
   }
@@ -143,7 +145,7 @@ APCHandle* APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
       features.hasSerializableReference()) {
     return nullptr;
   }
-  APCHandle* tmp = APCHandle::Create(value, false, true, true);
+  APCHandle* tmp = APCHandle::Create(value, size, false, true, true);
   tmp->setObjAttempted();
   return tmp;
 }

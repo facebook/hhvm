@@ -31,7 +31,7 @@ namespace HPHP {
  */
 struct APCString {
   // Entry point to create an APCString
-  static APCHandle* MakeShared(DataType type, StringData* s);
+  static APCHandle* MakeShared(DataType type, StringData* s, size_t& size);
 
   // Return the PHP string from the APC one
   static Variant MakeString(APCHandle* handle) {

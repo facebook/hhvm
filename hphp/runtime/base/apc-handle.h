@@ -105,6 +105,7 @@ struct APCHandle {
    * the various flags. This is the only entry point to create APC entities.
    */
   static APCHandle* Create(const Variant& source,
+                           size_t& size,
                            bool serialized,
                            bool inner = false,
                            bool unserializeObj = false);
@@ -188,6 +189,7 @@ private:
   void deleteShared();
 
   static APCHandle* CreateSharedType(const Variant& source,
+                                     size_t& size,
                                      bool serialized,
                                      bool inner,
                                      bool unserializeObj);

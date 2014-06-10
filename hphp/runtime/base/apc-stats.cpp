@@ -30,14 +30,16 @@ namespace HPHP {
 namespace {
 
 size_t getMemSize(const TypedValue* tv) {
-  if (!IS_REFCOUNTED_TYPE(tv->m_type)) {
+  const auto& v = tvAsCVarRef(tv);
+  auto type = v.getType();
+  if (!IS_REFCOUNTED_TYPE(type)) {
     return sizeof(Variant);
   }
-  if (tv->m_type == KindOfString) {
-    return getMemSize(tv->m_data.pstr);
+  if (type == KindOfString) {
+    return getMemSize(v.getStringData());
   }
-  if (tv->m_type == KindOfArray) {
-    return getMemSize(tv->m_data.parr);
+  if (type == KindOfArray) {
+    return getMemSize(v.getArrayData());
   }
   assert(!"Unsupported Variant type for getMemSize()");
   return 0;
@@ -149,4 +151,168 @@ size_t getMemSize(const ArrayData* arr) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+APCStats::APCStats() : m_valueSize(nullptr)
+                     , m_keySize(nullptr)
+                     , m_inFileSize(nullptr)
+                     , m_livePrimedSize(nullptr)
+                     , m_entries(nullptr)
+                     , m_primedEntries(nullptr)
+                     , m_livePrimedEntries(nullptr)
+                     , m_detailedStats(nullptr) {
+  m_valueSize = ServiceData::createTimeseries(
+      "apc.value_size", {ServiceData::StatsType::SUM});
+  m_keySize = ServiceData::createTimeseries(
+      "apc.key_size", {ServiceData::StatsType::SUM});
+  m_inFileSize = ServiceData::createTimeseries(
+      "apc.in_file_size", {ServiceData::StatsType::SUM});
+  m_livePrimedSize = ServiceData::createTimeseries(
+      "apc.primed_live_size", {ServiceData::StatsType::SUM});
+
+  m_entries = ServiceData::createCounter("apc.entries");
+  m_primedEntries = ServiceData::createCounter("apc.primed_entries");
+  m_livePrimedEntries =
+      ServiceData::createCounter("apc.primed_live_entries");
+  if (RuntimeOption::EnableAPCStats) {
+    m_detailedStats = new APCDetailedStats();
+  }
+}
+
+APCStats::~APCStats() {
+  if (m_detailedStats) delete m_detailedStats;
+}
+
+APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
+                                     , m_apcString(nullptr)
+                                     , m_uncString(nullptr)
+                                     , m_serArray(nullptr)
+                                     , m_apcArray(nullptr)
+                                     , m_uncArray(nullptr)
+                                     , m_serObject(nullptr)
+                                     , m_apcObject(nullptr)
+                                     , m_setValues(nullptr)
+                                     , m_delValues(nullptr)
+                                     , m_replValues(nullptr)
+                                     , m_expValues(nullptr) {
+  m_uncounted = ServiceData::createCounter("apc.type_uncounted");
+  m_apcString = ServiceData::createCounter("apc.type_apc_string");
+  m_uncString = ServiceData::createCounter("apc.type_unc_string");
+  m_serArray = ServiceData::createCounter("apc.type_ser_array");
+  m_apcArray = ServiceData::createCounter("apc.type_apc_array");
+  m_uncArray = ServiceData::createCounter("apc.type_unc_array");
+  m_serObject = ServiceData::createCounter("apc.type_ser_object");
+  m_apcObject = ServiceData::createCounter("apc.type_apc_object");
+
+  m_setValues = ServiceData::createCounter("apc.set_values");
+  m_delValues = ServiceData::createCounter("apc.deleted_values");
+  m_replValues = ServiceData::createCounter("apc.replaced_values");
+  m_expValues = ServiceData::createCounter("apc.expired_values");
+}
+
+void APCDetailedStats::addAPCValue(APCHandle* handle) {
+  m_setValues->increment();
+  addType(handle);
+}
+
+void APCDetailedStats::updateAPCValue(APCHandle* handle,
+                                      APCHandle* oldHandle,
+                                      bool expired) {
+  removeType(oldHandle);
+  addType(handle);
+  if (expired) {
+    m_expValues->increment();
+  } else {
+    m_replValues->increment();
+  }
+}
+
+void APCDetailedStats::removeAPCValue(APCHandle* handle, bool expired) {
+  removeType(handle);
+  if (expired) {
+    m_expValues->increment();
+  } else {
+    m_delValues->increment();
+  }
+}
+
+void APCDetailedStats::addType(APCHandle* handle) {
+  DataType type = handle->getType();
+  assert(!IS_REFCOUNTED_TYPE(type) ||
+         type == KindOfString ||
+         type == KindOfArray ||
+         type == KindOfObject);
+  if (!IS_REFCOUNTED_TYPE(type)) {
+    m_uncounted->increment();
+    return;
+  }
+  switch (type) {
+  case KindOfString:
+    if (handle->getUncounted()) {
+      m_uncString->increment();
+    } else {
+      m_apcString->increment();
+    }
+    return;
+  case KindOfArray:
+    if (handle->getUncounted()) {
+      m_uncArray->increment();
+    } else if (handle->getSerializedArray()) {
+      m_serArray->increment();
+    } else {
+      m_apcArray->increment();
+    }
+    return;
+  case KindOfObject:
+    if (handle->getIsObj()) {
+      m_apcObject->increment();
+    } else {
+      m_serObject->increment();
+    }
+    return;
+  default:
+    return;
+  }
+}
+
+void APCDetailedStats::removeType(APCHandle* handle) {
+  DataType type = handle->getType();
+  assert(!IS_REFCOUNTED_TYPE(type) ||
+         type == KindOfString ||
+         type == KindOfArray ||
+         type == KindOfObject);
+  if (!IS_REFCOUNTED_TYPE(type)) {
+    m_uncounted->decrement();
+    return;
+  }
+  switch (type) {
+  case KindOfString:
+    if (handle->getUncounted()) {
+      m_uncString->decrement();
+    } else {
+      m_apcString->decrement();
+    }
+    return;
+  case KindOfArray:
+    if (handle->getUncounted()) {
+      m_uncArray->decrement();
+    } else if (handle->getSerializedArray()) {
+      m_serArray->decrement();
+    } else {
+      m_apcArray->decrement();
+    }
+    return;
+  case KindOfObject:
+    if (handle->getIsObj()) {
+      m_apcObject->decrement();
+    } else {
+      m_serObject->decrement();
+    }
+    return;
+  default:
+    return;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

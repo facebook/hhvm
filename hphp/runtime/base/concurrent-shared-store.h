@@ -170,17 +170,15 @@ private:
   };
 
 private:
-  APCHandle* construct(const Variant& v) {
-    return APCHandle::Create(v, false);
+  APCHandle* construct(const Variant& v, size_t& size) {
+    return APCHandle::Create(v, size, false);
   }
 
   bool eraseImpl(const String& key, bool expired, int64_t oldestTime = 0);
 
   void eraseAcc(Map::accessor &acc) {
     const char *pkey = acc->first;
-    if (RuntimeOption::EnableAPCStats) {
-      m_apcStats.removeKey(pkey);
-    }
+    m_apcStats.removeKey(strlen(pkey));
     m_vars.erase(acc);
     free((void *)pkey);
   }

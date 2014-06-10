@@ -28,6 +28,6 @@ function test($connect_timeout, $send_timeout) {
   return strlen(stream_get_contents($fd)) == $data_size;
 }
 
-var_dump(test(0.001, 0.5));
+var_dump(test(0.1, 0.5));
 var_dump(test(0.5, 0.001));
-var_dump(test(0.001, 0));
+var_dump(test(0.1, 0));

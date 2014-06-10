@@ -20,10 +20,8 @@ type options = {
     root             : Path.path;
     should_detach    : bool;
     convert          : Path.path option;
-    lang             : lang;
     rest             : string list;
   }
-  and lang = Hack | Flow
 
 val parse_options: unit -> options
 val default_options: root:string -> options
@@ -39,4 +37,3 @@ val skip_init     : options -> bool
 val root          : options -> Path.path
 val should_detach : options -> bool
 val convert       : options -> Path.path option
-val is_flow	  : options -> bool

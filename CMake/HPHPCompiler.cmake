@@ -20,7 +20,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   else()
     message(FATAL_ERROR "${PROJECT_NAME} requires clang 3.3 or later")
   endif()
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -lc++ -pedantic -Wall -Wextra -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments")
+  # libstdc++ deprecated
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -stdlib=libc++ -lc++ -pedantic -Wall -Wextra -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments")
   # CMAKE_BUILD_TYPE: http://www.cmake.org/Wiki/CMake_Useful_Variables#Compilers_and_Tools
   set (CMAKE_C_FLAGS_DEBUG            "-g")
   set (CMAKE_CXX_FLAGS_DEBUG          "-g")
@@ -62,7 +63,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set (CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g")
   set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
   set (CMAKE_C_FLAGS                  "-w")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations ${GNUCC_PLAT_OPT}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -pedantic -Wall -Wextra -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations ${GNUCC_PLAT_OPT}")
 # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   set (CMAKE_C_FLAGS   "-no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -w")

@@ -179,7 +179,7 @@ static void init_shared_globals(char* mem) {
 
   mem += page_size;
   // Just checking that the page is large enough.
-  assert(page_size > CACHE_LINE_SIZE + sizeof(int));
+  assert(page_size > CACHE_LINE_SIZE + (int)sizeof(int));
   /* END OF THE FIRST PAGE */
 
   /* Global storage initialization */
@@ -371,7 +371,7 @@ void hh_shared_clear() {
  */
 /*****************************************************************************/
 
-static int htable_add(uint64_t* table, unsigned long hash, int64_t value) {
+static int htable_add(uint64_t* table, unsigned long hash, uint64_t value) {
   unsigned long slot = hash & (DEP_SIZE - 1);
 
   while(1) {
@@ -466,8 +466,6 @@ void hh_collect() {
   char* dest;
   size_t mem_size = 0;
   char* tmp_heap;
-
-  assert(heap_init_size >= 0);
 
   if(*heap < heap_init + 2 * heap_init_size) {
     // We have not grown passed twice the size of the initial size

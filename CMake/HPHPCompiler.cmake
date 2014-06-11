@@ -10,8 +10,7 @@ endif()
 # using Clang
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   exec_program(${CMAKE_C_COMPILER} ARGS "--version 2>&1 | grep version" OUTPUT_VARIABLE _clang_version_info)
-  string(REGEX REPLACE "^.*([ ]version|based[ ]on[ ]LLVM)[ ]([0-9]+\\.[0-9]+).*"
-      "\\2" CLANG_VERSION "${_clang_version_info}")
+  string(REGEX REPLACE "^.*([ ]version|based[ ]on[ ]LLVM)[ ]([0-9]+\\.[0-9]+).*" "\\2" CLANG_VERSION "${_clang_version_info}")
   if(CLANG_VERSION VERSION_EQUAL 3.3)
     message("-- Clang 3.3 detected, using strict C++11 features")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")

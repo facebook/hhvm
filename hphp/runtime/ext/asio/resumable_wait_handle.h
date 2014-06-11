@@ -43,6 +43,10 @@ class c_ResumableWaitHandle : public c_BlockableWaitHandle {
     : c_BlockableWaitHandle(cls)
   {}
   ~c_ResumableWaitHandle() {}
+  static void ti_setoncreatecallback(const Variant& callback);
+  static void ti_setonawaitcallback(const Variant& callback);
+  static void ti_setonsuccesscallback(const Variant& callback);
+  static void ti_setonfailcallback(const Variant& callback);
 
  public:
   static c_ResumableWaitHandle* getRunning(ActRec* fp);

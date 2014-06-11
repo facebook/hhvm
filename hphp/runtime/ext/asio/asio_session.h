@@ -101,36 +101,6 @@ class AsioSession {
 
     void initAbruptInterruptException();
 
-    // AsyncFunctionWaitHandle callbacks:
-    void setOnAsyncFunctionCreateCallback(ObjectData* on_start) {
-      assert(!on_start || on_start->instanceof(c_Closure::classof()));
-      m_onAsyncFunctionCreateCallback = on_start;
-      updateEventHookState();
-    }
-    void setOnAsyncFunctionAwaitCallback(ObjectData* on_await) {
-      assert(!on_await || on_await->instanceof(c_Closure::classof()));
-      m_onAsyncFunctionAwaitCallback = on_await;
-      updateEventHookState();
-    }
-    void setOnAsyncFunctionSuccessCallback(ObjectData* on_success) {
-      assert(!on_success || on_success->instanceof(c_Closure::classof()));
-      m_onAsyncFunctionSuccessCallback = on_success;
-      updateEventHookState();
-    }
-    void setOnAsyncFunctionFailCallback(ObjectData* on_fail) {
-      assert(!on_fail || on_fail->instanceof(c_Closure::classof()));
-      m_onAsyncFunctionFailCallback = on_fail;
-    }
-    bool hasOnAsyncFunctionCreateCallback() { return m_onAsyncFunctionCreateCallback.get(); }
-    bool hasOnAsyncFunctionAwaitCallback() { return m_onAsyncFunctionAwaitCallback.get(); }
-    bool hasOnAsyncFunctionSuccessCallback() { return m_onAsyncFunctionSuccessCallback.get(); }
-    bool hasOnAsyncFunctionFailCallback() { return m_onAsyncFunctionFailCallback.get(); }
-    void onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child);
-    void onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child);
-    void onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, const Variant& result);
-    void onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, const Object& exception);
-    void updateEventHookState();
-
     // WaitHandle callbacks:
     void setOnJoinCallback(ObjectData* on_join) {
       assert(!on_join || on_join->instanceof(c_Closure::classof()));
@@ -138,6 +108,36 @@ class AsioSession {
     }
     bool hasOnJoinCallback() { return m_onJoinCallback.get(); }
     void onJoin(c_WaitHandle* wait_handle);
+
+    // ResumableWaitHandle callbacks:
+    void setOnResumableCreateCallback(ObjectData* on_start) {
+      assert(!on_start || on_start->instanceof(c_Closure::classof()));
+      m_onResumableCreateCallback = on_start;
+      updateEventHookState();
+    }
+    void setOnResumableAwaitCallback(ObjectData* on_await) {
+      assert(!on_await || on_await->instanceof(c_Closure::classof()));
+      m_onResumableAwaitCallback = on_await;
+      updateEventHookState();
+    }
+    void setOnResumableSuccessCallback(ObjectData* on_success) {
+      assert(!on_success || on_success->instanceof(c_Closure::classof()));
+      m_onResumableSuccessCallback = on_success;
+      updateEventHookState();
+    }
+    void setOnResumableFailCallback(ObjectData* on_fail) {
+      assert(!on_fail || on_fail->instanceof(c_Closure::classof()));
+      m_onResumableFailCallback = on_fail;
+    }
+    bool hasOnResumableCreateCallback() { return m_onResumableCreateCallback.get(); }
+    bool hasOnResumableAwaitCallback() { return m_onResumableAwaitCallback.get(); }
+    bool hasOnResumableSuccessCallback() { return m_onResumableSuccessCallback.get(); }
+    bool hasOnResumableFailCallback() { return m_onResumableFailCallback.get(); }
+    void onResumableCreate(c_ResumableWaitHandle* cont, c_WaitableWaitHandle* child);
+    void onResumableAwait(c_ResumableWaitHandle* cont, c_WaitableWaitHandle* child);
+    void onResumableSuccess(c_ResumableWaitHandle* cont, const Variant& result);
+    void onResumableFail(c_ResumableWaitHandle* cont, const Object& exception);
+    void updateEventHookState();
 
     // GenArrayWaitHandle callbacks:
     void setOnGenArrayCreateCallback(ObjectData* on_create) {
@@ -175,14 +175,14 @@ class AsioSession {
 
     Object m_abruptInterruptException;
 
-    Object m_onAsyncFunctionCreateCallback;
-    Object m_onAsyncFunctionAwaitCallback;
-    Object m_onAsyncFunctionSuccessCallback;
-    Object m_onAsyncFunctionFailCallback;
+    Object m_onJoinCallback;
+    Object m_onResumableCreateCallback;
+    Object m_onResumableAwaitCallback;
+    Object m_onResumableSuccessCallback;
+    Object m_onResumableFailCallback;
     Object m_onGenArrayCreateCallback;
     Object m_onGenMapCreateCallback;
     Object m_onGenVectorCreateCallback;
-    Object m_onJoinCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -344,12 +344,12 @@ void EventHook::onFunctionSuspend(const ActRec* ar, bool suspendingResumed) {
     auto afwh = frame_afwh(ar);
     auto session = AsioSession::Get();
     // Blocking await @ eager execution => AsyncFunctionWaitHandle created.
-    if (!suspendingResumed && session->hasOnAsyncFunctionCreateCallback()) {
-      session->onAsyncFunctionCreate(afwh, afwh->getChild());
+    if (!suspendingResumed && session->hasOnResumableCreateCallback()) {
+      session->onResumableCreate(afwh, afwh->getChild());
     }
     // Blocking await @ resumed execution => AsyncFunctionWaitHandle awaiting.
-    if (suspendingResumed && session->hasOnAsyncFunctionAwaitCallback()) {
-      session->onAsyncFunctionAwait(afwh, afwh->getChild());
+    if (suspendingResumed && session->hasOnResumableAwaitCallback()) {
+      session->onResumableAwait(afwh, afwh->getChild());
     }
   }
 }
@@ -371,9 +371,9 @@ void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
       ar->func()->isAsyncFunction() && ar->resumed()) {
     auto session = AsioSession::Get();
     // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.
-    if (session->hasOnAsyncFunctionSuccessCallback()) {
+    if (session->hasOnResumableSuccessCallback()) {
       auto afwh = frame_afwh(ar);
-      session->onAsyncFunctionSuccess(afwh, cellAsCVarRef(retval));
+      session->onResumableSuccess(afwh, cellAsCVarRef(retval));
     }
   }
 }

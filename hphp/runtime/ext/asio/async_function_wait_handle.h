@@ -43,10 +43,7 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
     : c_ResumableWaitHandle(cls)
   {}
   ~c_AsyncFunctionWaitHandle();
-  static void ti_setoncreatecallback(const Variant& callback);
-  static void ti_setonawaitcallback(const Variant& callback);
-  static void ti_setonsuccesscallback(const Variant& callback);
-  static void ti_setonfailcallback(const Variant& callback);
+  void t___construct();
 
  public:
   static constexpr ptrdiff_t resumableOff() { return -sizeof(Resumable); }

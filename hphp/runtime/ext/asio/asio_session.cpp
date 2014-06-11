@@ -72,66 +72,66 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
-void AsioSession::onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child) {
-  assert(m_onAsyncFunctionCreateCallback.get());
-  try {
-    vm_call_user_func(
-      m_onAsyncFunctionCreateCallback,
-     make_packed_array(cont, child));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onCreate callback");
-  }
-}
-
-void AsioSession::onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child) {
-  assert(m_onAsyncFunctionAwaitCallback.get());
-  try {
-    vm_call_user_func(
-      m_onAsyncFunctionAwaitCallback,
-      make_packed_array(cont, child));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onAwait callback");
-  }
-}
-
-void AsioSession::onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, const Variant& result) {
-  assert(m_onAsyncFunctionSuccessCallback.get());
-  try {
-    vm_call_user_func(
-      m_onAsyncFunctionSuccessCallback,
-      make_packed_array(cont, result));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onSuccess callback");
-  }
-}
-
-void AsioSession::onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, const Object& exception) {
-  assert(m_onAsyncFunctionFailCallback.get());
-  try {
-    vm_call_user_func(
-      m_onAsyncFunctionFailCallback,
-      make_packed_array(cont, exception));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onFail callback");
-  }
-}
-
-void AsioSession::updateEventHookState() {
-  if (hasOnAsyncFunctionCreateCallback() ||
-      hasOnAsyncFunctionAwaitCallback() ||
-      hasOnAsyncFunctionSuccessCallback()) {
-    EventHook::EnableAsync();
-  } else {
-    EventHook::DisableAsync();
-  }
-}
-
 void AsioSession::onJoin(c_WaitHandle* wait_handle) {
   assert(m_onJoinCallback.get());
   try {
     vm_call_user_func(m_onJoinCallback, Array::Create(wait_handle));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by WaitHandle::onJoin callback");
+  }
+}
+
+void AsioSession::onResumableCreate(c_ResumableWaitHandle* resumable, c_WaitableWaitHandle* child) {
+  assert(m_onResumableCreateCallback.get());
+  try {
+    vm_call_user_func(
+      m_onResumableCreateCallback,
+     make_packed_array(resumable, child));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by ResumableWaitHandle::onCreate callback");
+  }
+}
+
+void AsioSession::onResumableAwait(c_ResumableWaitHandle* resumable, c_WaitableWaitHandle* child) {
+  assert(m_onResumableAwaitCallback.get());
+  try {
+    vm_call_user_func(
+      m_onResumableAwaitCallback,
+      make_packed_array(resumable, child));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by ResumableWaitHandle::onAwait callback");
+  }
+}
+
+void AsioSession::onResumableSuccess(c_ResumableWaitHandle* resumable, const Variant& result) {
+  assert(m_onResumableSuccessCallback.get());
+  try {
+    vm_call_user_func(
+      m_onResumableSuccessCallback,
+      make_packed_array(resumable, result));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by ResumableWaitHandle::onSuccess callback");
+  }
+}
+
+void AsioSession::onResumableFail(c_ResumableWaitHandle* resumable, const Object& exception) {
+  assert(m_onResumableFailCallback.get());
+  try {
+    vm_call_user_func(
+      m_onResumableFailCallback,
+      make_packed_array(resumable, exception));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by ResumableWaitHandle::onFail callback");
+  }
+}
+
+void AsioSession::updateEventHookState() {
+  if (hasOnResumableCreateCallback() ||
+      hasOnResumableAwaitCallback() ||
+      hasOnResumableSuccessCallback()) {
+    EventHook::EnableAsync();
+  } else {
+    EventHook::DisableAsync();
   }
 }
 

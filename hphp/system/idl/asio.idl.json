@@ -307,20 +307,6 @@
                 "NoDefaultSweep"
             ],
             "funcs": [
-            ],
-            "consts": [
-            ]
-        },
-        {
-            "name": "AsyncFunctionWaitHandle",
-            "parent": "ResumableWaitHandle",
-            "desc": "A wait handle representing asynchronous execution of async function",
-            "flags": [
-                "IsFinal",
-                "NoDefaultSweep",
-                "CppCustomDelete"
-            ],
-            "funcs": [
                 {
                     "name": "setOnCreateCallback",
                     "desc": "Set callback to be called when an AsyncFunctionWaitHandle is created",
@@ -391,6 +377,31 @@
                             "type": "Variant",
                             "desc": "A Closure to be called when an async function fails"
                         }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "AsyncFunctionWaitHandle",
+            "parent": "ResumableWaitHandle",
+            "desc": "A wait handle representing asynchronous execution of async function",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep",
+                "CppCustomDelete"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
                     ]
                 }
             ],

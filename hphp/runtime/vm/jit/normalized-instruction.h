@@ -34,8 +34,7 @@ struct Tracelet;
 
 // A NormalizedInstruction has been decorated with its typed inputs and
 // outputs.
-class NormalizedInstruction {
- public:
+struct NormalizedInstruction {
   NormalizedInstruction* next;
   NormalizedInstruction* prev;
 
@@ -82,7 +81,6 @@ class NormalizedInstruction {
   bool breaksTracelet:1;
   bool includeBothPaths:1;
   bool changesPC:1;
-  bool fuseBranch:1;
   bool preppedByRef:1;
   bool outputPredicted:1;
   bool outputPredictionStatic:1;
@@ -97,11 +95,6 @@ class NormalizedInstruction {
    *   return 5;       # can decRef ar->m_this unconditionally
    */
   bool guardedThis:1;
-
-  /*
-   * guardedCls indicates that we know the class exists
-   */
-  bool guardedCls:1;
 
   /*
    * instruction is statically known to have no effect, e.g. unboxing a Cell
@@ -129,6 +122,7 @@ class NormalizedInstruction {
   SrcKey nextSk() const;
 
   NormalizedInstruction();
+  NormalizedInstruction(SrcKey, const Unit*);
   ~NormalizedInstruction();
 
   void markInputInferred(int i) {

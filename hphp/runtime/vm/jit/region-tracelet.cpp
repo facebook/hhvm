@@ -261,9 +261,7 @@ RegionDescPtr RegionFormer::go() {
  */
 bool RegionFormer::prepareInstruction() {
   m_inst.~NormalizedInstruction();
-  new (&m_inst) NormalizedInstruction();
-  m_inst.source = m_sk;
-  m_inst.m_unit = curUnit();
+  new (&m_inst) NormalizedInstruction(m_sk, curUnit());
   m_inst.breaksTracelet = opcodeBreaksBB(m_inst.op()) ||
                             (dontGuardAnyInputs(m_inst.op()) &&
                              opcodeChangesPC(m_inst.op()));

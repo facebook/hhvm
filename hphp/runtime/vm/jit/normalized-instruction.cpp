@@ -21,12 +21,12 @@
 namespace HPHP {
 namespace JIT {
 
-NormalizedInstruction::NormalizedInstruction()
+NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
     : next(nullptr)
     , prev(nullptr)
-    , source()
+    , source(sk)
     , funcd(nullptr)
-    , m_unit(nullptr)
+    , m_unit(u)
     , outStack(nullptr)
     , outLocal(nullptr)
     , outLocal2(nullptr)
@@ -42,18 +42,20 @@ NormalizedInstruction::NormalizedInstruction()
     , breaksTracelet(false)
     , includeBothPaths(false)
     , changesPC(false)
-    , fuseBranch(false)
     , preppedByRef(false)
     , outputPredicted(false)
     , outputPredictionStatic(false)
     , ignoreInnerType(false)
     , guardedThis(false)
-    , guardedCls(false)
     , noOp(false)
     , interp(false)
     , inlineReturn(false) {
   memset(imm, 0, sizeof(imm));
 }
+
+NormalizedInstruction::NormalizedInstruction()
+    : NormalizedInstruction(SrcKey{}, nullptr)
+  {}
 
 NormalizedInstruction::~NormalizedInstruction() { }
 

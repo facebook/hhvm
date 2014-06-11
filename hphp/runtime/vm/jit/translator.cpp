@@ -3544,7 +3544,6 @@ Translator::analyze(SrcKey sk,
     ni->m_unit = unit;
     ni->breaksTracelet = false;
     ni->changesPC = opcodeChangesPC(ni->op());
-    ni->fuseBranch = false;
 
     assert(!t.m_analysisFailed);
     oldStackFrameOffset = stackFrameOffset;
@@ -4147,19 +4146,15 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       // Create and initialize the instruction.
-      NormalizedInstruction inst;
-      inst.source = sk;
-      inst.m_unit = block->unit();
+      NormalizedInstruction inst(sk, block->unit());
       inst.breaksTracelet =
         i == block->length() - 1 && block == region.blocks.back();
       inst.changesPC = opcodeChangesPC(inst.op());
       inst.funcd = topFunc;
-      inst.nextOffset = kInvalidOffset;
       if (instrIsNonCallControlFlow(inst.op()) && !inst.breaksTracelet) {
         assert(b < region.blocks.size());
         inst.nextOffset = region.blocks[b+1]->start().offset();
       }
-      inst.outputPredicted = false;
       populateImmediates(inst);
       if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
         // TODO(t3730617): Could extend this logic to other

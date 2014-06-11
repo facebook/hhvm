@@ -8,14 +8,4 @@
  *
  *)
 
-type error = (Pos.t * string) list
-type t = error list
-
-val add: Pos.t -> string -> unit
-val add_list: error -> unit
-
-val do_: (unit -> 'a) -> t * 'a
-val try_: (unit -> 'a) -> (error -> 'a) -> 'a
-val to_json: error -> Hh_json.json
-val pmsg_l: error -> string
-val to_string: error -> string
+let get_hhi_root () = Some "hhi-root"

@@ -13,6 +13,7 @@
 (* Error module                                                              *)
 (*****************************************************************************)
 open Utils
+module Json = Hh_json
 
 let print_errorl_json oc el =
   let res =

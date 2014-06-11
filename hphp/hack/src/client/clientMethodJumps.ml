@@ -8,6 +8,8 @@
  *
  *)
 
+module Json = Hh_json
+
 let pos_to_json pos =
   let line, start, end_ = Pos.info_pos pos in
   Json.JAssoc [

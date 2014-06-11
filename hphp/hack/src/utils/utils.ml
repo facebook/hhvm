@@ -8,6 +8,8 @@
  *
  *)
 
+include Sys_utils
+
 let () = Random.self_init ()
 let debug = ref false
 
@@ -270,13 +272,6 @@ let rec cut_after n = function
   | l when n <= 0 -> []
   | x :: rl -> x :: cut_after (n-1) rl
 
-let exec_read cmd =
-  let ic = Unix.open_process_in cmd in
-  let result = input_line ic in
-  assert (result <> "");
-  assert (Unix.close_process_in ic = Unix.WEXITED 0);
-  result
-
 let iter_n_acc n f acc =
   let acc = ref acc in
   for i = 1 to n do
@@ -290,61 +285,6 @@ let set_of_list list =
 let strip_ns s =
   if String.length s == 0 || s.[0] <> '\\' then s
   else String.sub s 1 ((String.length s) - 1)
-
-(*****************************************************************************)
-(* Primitives *)
-(*****************************************************************************)
-
-let open_in_no_fail fn =
-  try open_in fn
-  with e ->
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_in: '%s' (%s)\n" fn e;
-    exit 3
-
-let close_in_no_fail fn ic =
-  try close_in ic with e ->
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
-    exit 3
-
-let open_out_no_fail fn =
-  try open_out fn
-  with e ->
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_out: '%s' (%s)\n" fn e;
-    exit 3
-
-let close_out_no_fail fn oc =
-  try close_out oc with e ->
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
-    exit 3
-
-(*****************************************************************************)
-(* Dumps the content of a file. *)
-(*****************************************************************************)
-
-let cat filename =
-  let ic = open_in filename in
-  let len = in_channel_length ic in
-  let buf = Buffer.create len in
-  Buffer.add_channel buf ic len;
-  let content = Buffer.contents buf in
-  close_in ic;
-  content
-
-let cat_no_fail filename =
-  let ic = open_in_no_fail filename in
-  let len = in_channel_length ic in
-  let buf = Buffer.create len in
-  Buffer.add_channel buf ic len;
-  let content = Buffer.contents buf in
-  close_in_no_fail filename ic;
-  content
-
-let nl_regexp = Str.regexp "[\r\n]"
-let split_lines = Str.split nl_regexp
 
 let str_starts_with long short =
   try

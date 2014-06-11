@@ -8,6 +8,7 @@
  *
  *)
 open Format
+module Json = Hh_json
 
 type env = {
   root: Path.path option;

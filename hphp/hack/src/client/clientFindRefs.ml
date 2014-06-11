@@ -8,6 +8,8 @@
  *
  *)
 
+module Json = Hh_json
+
 let print_result (name, pos) =
   let pos_str = Pos.string pos in
   print_endline (pos_str ^ " " ^ name);

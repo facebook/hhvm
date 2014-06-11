@@ -938,7 +938,9 @@ Variant HHVM_METHOD(Memcached, getoption, int option) {
       memcached_return retval;
       char *result = (char*) memcached_callback_get(&data->m_impl->memcached,
           MEMCACHED_CALLBACK_PREFIX_KEY, &retval);
-      if (retval == MEMCACHED_SUCCESS) return String(result, CopyString);
+      if (retval == MEMCACHED_SUCCESS && result) {
+        return String(result, CopyString);
+      }
       else return empty_string_variant();
     }
 

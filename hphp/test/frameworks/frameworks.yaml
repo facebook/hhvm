@@ -452,9 +452,10 @@
     # Larger timeout, no code coverage, no selenium testing
     config_file: phpmyadmin/phpunit.xml.hhvm
   phpunit:
-    url: https://github.com/sebastianbergmann/phpunit.git
-    branch: 4.0.14
-    commit: a80b77d92a6c7723d77c6728b4ae37e92a65ac1d
+    url: https://github.com/fredemmott/phpunit.git
+    # 4.2.x branch + https://github.com/sebastianbergmann/phpunit/pull/1288
+    branch: json-test-on-latest-hhvm
+    commit: 8fdf5ff0df202957eca6c1d875138c6e48108c17
     install_root: phpunit
     test_root: phpunit
   proxymanager:

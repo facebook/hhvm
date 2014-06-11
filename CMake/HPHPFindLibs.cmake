@@ -279,9 +279,6 @@ endif()
 
 find_package(LibDwarf REQUIRED)
 include_directories(${LIBDWARF_INCLUDE_DIRS})
-if (LIBDWARF_HAVE_ENCODE_LEB128)
-  add_definitions("-DHAVE_LIBDWARF_20130729")
-endif()
 
 find_package(LibElf REQUIRED)
 include_directories(${LIBELF_INCLUDE_DIRS})

@@ -21,7 +21,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   else()
     message(FATAL_ERROR "${PROJECT_NAME} requires clang 3.3 or later")
   endif()
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -lc++ -pedantic -Wall -Wextra -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments")
   # CMAKE_BUILD_TYPE: http://www.cmake.org/Wiki/CMake_Useful_Variables#Compilers_and_Tools
   set (CMAKE_C_FLAGS_DEBUG            "-g")
   set (CMAKE_CXX_FLAGS_DEBUG          "-g")

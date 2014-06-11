@@ -47,6 +47,74 @@
     ],
     "classes": [
         {
+            "name": "AsyncGenerator",
+            "desc": "A generator that can be iterated asynchronously",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep",
+                "CppCustomDelete"
+            ],
+            "ifaces": [
+                "HH\\AsyncIterator"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "desc": "Continue asynchronous iteration",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "send",
+                    "desc": "Continue asynchronous iteration with value",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "A value to be received by yield expression"
+                        }
+                    ]
+                },
+                {
+                    "name": "raise",
+                    "desc": "Continue asynchronous iteration with raised exception",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "exception",
+                            "type": "Object",
+                            "desc": "An exception to be thrown by yield expression"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "name": "WaitHandle",
             "desc": "A wait handle representing asynchronous operation",
             "flags": [
@@ -391,6 +459,30 @@
                 "IsFinal",
                 "NoDefaultSweep",
                 "CppCustomDelete"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "AsyncGeneratorWaitHandle",
+            "parent": "ResumableWaitHandle",
+            "desc": "A wait handle representing asynchronous execution of async generator",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {

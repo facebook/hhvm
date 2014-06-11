@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
@@ -92,7 +93,7 @@ frame_base_generator(const ActRec* fp) {
   assert(fp->func()->isGenerator());
   auto resumable = frame_resumable(fp);
   auto obj = (ObjectData*)((char*)resumable - BaseGenerator::resumableOff());
-  assert(/* obj->getVMClass() == c_AsyncGenerator::classof() || */
+  assert(obj->getVMClass() == c_AsyncGenerator::classof() ||
          obj->getVMClass() == c_Generator::classof());
   return static_cast<BaseGenerator*>(obj);
 }
@@ -103,6 +104,14 @@ frame_generator(const ActRec* fp) {
   auto obj = frame_base_generator(fp);
   assert(obj->getVMClass() == c_Generator::classof());
   return static_cast<c_Generator*>(obj);
+}
+
+inline c_AsyncGenerator*
+frame_async_generator(const ActRec* fp) {
+  assert(fp->func()->isAsyncGenerator());
+  auto obj = frame_base_generator(fp);
+  assert(obj->getVMClass() == c_AsyncGenerator::classof());
+  return static_cast<c_AsyncGenerator*>(obj);
 }
 
 /*

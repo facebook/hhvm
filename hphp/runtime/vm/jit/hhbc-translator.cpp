@@ -1656,7 +1656,9 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
 
 void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   assert(!resumed());
-  assert(curFunc()->isNonAsyncGenerator());
+  assert(curFunc()->isGenerator());
+
+  if (curFunc()->isAsyncGenerator()) PUNT(CreateCont-AsyncGenerator);
 
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
@@ -1687,7 +1689,8 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
 void HhbcTranslator::emitContEnter(Offset returnOffset) {
   assert(curClass());
-  assert(curClass()->classof(c_Generator::classof()));
+  assert(curClass()->classof(c_AsyncGenerator::classof()) ||
+         curClass()->classof(c_Generator::classof()));
   assert(curFunc()->contains(returnOffset));
 
   // Load generator's FP and resume address.
@@ -1745,8 +1748,12 @@ void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
 }
 
 void HhbcTranslator::emitYield(Offset resumeOffset) {
-  auto catchBlock = makeCatchNoSpill();
+  assert(resumed());
+  assert(curFunc()->isGenerator());
 
+  if (curFunc()->isAsyncGenerator()) PUNT(Yield-AsyncGenerator);
+
+  auto catchBlock = makeCatchNoSpill();
   emitYieldImpl(resumeOffset);
 
   // take a fast path if this generator has no yield k => v;
@@ -1770,6 +1777,11 @@ void HhbcTranslator::emitYield(Offset resumeOffset) {
 }
 
 void HhbcTranslator::emitYieldK(Offset resumeOffset) {
+  assert(resumed());
+  assert(curFunc()->isGenerator());
+
+  if (curFunc()->isAsyncGenerator()) PUNT(YieldK-AsyncGenerator);
+
   auto catchBlock = makeCatchNoSpill();
   emitYieldImpl(resumeOffset);
 
@@ -1789,6 +1801,8 @@ void HhbcTranslator::emitYieldK(Offset resumeOffset) {
 
 void HhbcTranslator::emitContCheck(bool checkStarted) {
   assert(curClass());
+  assert(curClass()->classof(c_AsyncGenerator::classof()) ||
+         curClass()->classof(c_Generator::classof()));
   SSATmp* cont = gen(LdThis, m_irb->fp());
   gen(ContPreNext, makeExitSlow(), cont, cns(checkStarted));
 }
@@ -1884,6 +1898,8 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
 
 void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
   assert(curFunc()->isAsync());
+
+  if (curFunc()->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
 
   auto const catchBlock = makeCatch();
   auto const exitSlow   = makeExitSlow();
@@ -3884,6 +3900,8 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 }
 
 void HhbcTranslator::emitRetC(bool freeInline) {
+  if (curFunc()->isAsyncGenerator()) PUNT(RetC-AsyncGenerator);
+
   if (isInlining()) {
     assert(!resumed());
     emitRetFromInlined(Type::Cell);

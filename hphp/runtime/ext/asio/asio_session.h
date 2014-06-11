@@ -32,7 +32,6 @@ FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
 FORWARD_DECLARE_CLASS(ResumableWaitHandle);
-FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 
 class AsioSession {
   public:

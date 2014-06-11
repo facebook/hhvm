@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
@@ -107,6 +108,8 @@ String c_WaitableWaitHandle::getName() {
       not_reached();
     case Kind::AsyncFunction:
       return static_cast<c_AsyncFunctionWaitHandle*>(this)->getName();
+    case Kind::AsyncGenerator:
+      return static_cast<c_AsyncGeneratorWaitHandle*>(this)->getName();
     case Kind::GenArray:
       return static_cast<c_GenArrayWaitHandle*>(this)->getName();
     case Kind::GenMap:
@@ -131,6 +134,8 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
       not_reached();
     case Kind::AsyncFunction:
       return static_cast<c_AsyncFunctionWaitHandle*>(this)->getChild();
+    case Kind::AsyncGenerator:
+      return static_cast<c_AsyncGeneratorWaitHandle*>(this)->getChild();
     case Kind::GenArray:
       return static_cast<c_GenArrayWaitHandle*>(this)->getChild();
     case Kind::GenMap:
@@ -151,6 +156,9 @@ void c_WaitableWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
       not_reached();
     case Kind::AsyncFunction:
       static_cast<c_AsyncFunctionWaitHandle*>(this)->enterContextImpl(ctx_idx);
+      return;
+    case Kind::AsyncGenerator:
+      static_cast<c_AsyncGeneratorWaitHandle*>(this)->enterContextImpl(ctx_idx);
       return;
     case Kind::GenArray:
       static_cast<c_GenArrayWaitHandle*>(this)->enterContextImpl(ctx_idx);

@@ -348,7 +348,7 @@ private:
     {}
 
     void checkFinalAssertions() {
-      assert(!isGenerator || (!isAsync && !hasNonEmptyReturn));
+      assert(!isGenerator || !hasNonEmptyReturn);
     }
 
     bool hasNonEmptyReturn; // function contains a non-empty return statement

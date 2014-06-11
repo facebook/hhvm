@@ -958,6 +958,7 @@ void Parser::checkFunctionContext(string funcName,
 
   // let async modifier be mandatory
   if (funcContext.isAsync && !modifiers->isAsync()) {
+    invalidAwait();
     PARSE_ERROR("Function '%s' contains 'await' but is not declared as async.",
                 funcName.c_str());
   }
@@ -965,10 +966,6 @@ void Parser::checkFunctionContext(string funcName,
   if (modifiers->isAsync() && returnsRef) {
     PARSE_ERROR("Asynchronous function '%s' cannot return reference.",
                 funcName.c_str());
-  }
-
-  if (modifiers->isAsync() && funcContext.isGenerator) {
-    PARSE_ERROR("'yield' is not allowed in async functions.");
   }
 
   if (modifiers->isAsync() && !canBeAsyncOrGenerator(funcName, m_clsName)) {
@@ -1662,11 +1659,6 @@ bool Parser::setIsGenerator() {
     PARSE_ERROR("Generators cannot return values using \"return\"");
     return false;
   }
-  if (fc.isAsync) {
-    invalidYield();
-    PARSE_ERROR("'yield' is not allowed in async functions.");
-    return false;
-  }
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
     invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
@@ -1713,18 +1705,13 @@ bool Parser::setIsAsync() {
     return false;
   }
 
-  FunctionContext& fc = m_funcContexts.back();
-  if (fc.isGenerator) {
-    invalidAwait();
-    PARSE_ERROR("'await' is not allowed in generators.");
-    return false;
-  }
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
     invalidAwait();
     PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
                     "magic methods.");
   }
 
+  FunctionContext& fc = m_funcContexts.back();
   fc.isAsync = true;
   return true;
 }

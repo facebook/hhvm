@@ -3087,7 +3087,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         assert(m_evalStack.size() == 1);
         bool hasConstraint = m_curFunc->retTypeConstraint.hasConstraint();
 
-        // async functions and generators
+        // resumables
         if (m_curFunc->isAsync || m_curFunc->isGenerator) {
           assert(retSym == StackSym::C);
           hasConstraint = false;
@@ -6384,26 +6384,15 @@ void EmitterVisitor::emitPostponedMeths() {
     }
 
     auto funcScope = meth->getFunctionScope();
-    if (funcScope->isGenerator()) {
-      // emit the generator
-      m_curFunc = fe;
-      fe->isGenerator = true;
-      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitMethod(meth);
-    } else if (funcScope->isAsync()) {
-      // emit the outer function (which creates wait handle if blocked)
-      m_curFunc = fe;
-      fe->isAsync = true;
-      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitMethod(meth);
+    m_curFunc = fe;
+    fe->isAsync = funcScope->isAsync();
+    fe->isGenerator = funcScope->isGenerator();
+
+    if (funcScope->isNative()) {
+      bindNativeFunc(meth, fe);
     } else {
-      m_curFunc = fe;
-      if (funcScope->isNative()) {
-        bindNativeFunc(meth, fe);
-      } else {
-        emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-        emitMethod(meth);
-      }
+      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+      emitMethod(meth);
     }
 
     if (fe->isClosureBody) {
@@ -8389,13 +8378,18 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   ue->setFilepath(s_systemlibNativeCls.get());
   ue->addTrivialPseudoMain();
 
-  ContMethMap contMethods;
-  contMethods[makeStaticString("next")] = METH_NEXT;
-  contMethods[makeStaticString("send")] = METH_SEND;
-  contMethods[makeStaticString("raise")] = METH_RAISE;
-  contMethods[makeStaticString("valid")] = METH_VALID;
-  contMethods[makeStaticString("current")] = METH_CURRENT;
-  contMethods[makeStaticString("key")] = METH_KEY;
+  ContMethMap asyncGenMethods;
+  asyncGenMethods[makeStaticString("next")] = METH_NEXT;
+  asyncGenMethods[makeStaticString("send")] = METH_SEND;
+  asyncGenMethods[makeStaticString("raise")] = METH_RAISE;
+
+  ContMethMap genMethods;
+  genMethods[makeStaticString("next")] = METH_NEXT;
+  genMethods[makeStaticString("send")] = METH_SEND;
+  genMethods[makeStaticString("raise")] = METH_RAISE;
+  genMethods[makeStaticString("valid")] = METH_VALID;
+  genMethods[makeStaticString("current")] = METH_CURRENT;
+  genMethods[makeStaticString("key")] = METH_KEY;
 
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
@@ -8475,6 +8469,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
+      static const StringData* asyncGenCls = makeStaticString("asyncgenerator");
       static const StringData* generatorCls = makeStaticString("generator");
       static const StringData* waitHandleCls = makeStaticString("waithandle");
       static const StringData* gwhMeth = makeStaticString("getwaithandle");
@@ -8484,8 +8479,12 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
       auto stackPad = int32_t{0};
-      if (e.name->isame(generatorCls) &&
-          (cmeth = folly::get_ptr(contMethods, methName))) {
+      if (e.name->isame(asyncGenCls) &&
+          (cmeth = folly::get_ptr(asyncGenMethods, methName))) {
+        auto methCpy = *cmeth;
+        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
+      } else if (e.name->isame(generatorCls) &&
+          (cmeth = folly::get_ptr(genMethods, methName))) {
         auto methCpy = *cmeth;
         stackPad = emitGeneratorMethod(*ue, fe, methCpy);
       } else if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {

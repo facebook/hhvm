@@ -17,6 +17,9 @@
 
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator.h"
+#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -41,20 +44,22 @@ void c_ResumableWaitHandle::ti_setonfailcallback(const Variant& callback) {
 }
 
 c_ResumableWaitHandle* c_ResumableWaitHandle::getRunning(ActRec* fp) {
-  while (fp && !(fp->resumed() && fp->func()->isAsync())) {
-    fp = g_context->getPrevVMState(fp);
+  for (; fp; fp = g_context->getPrevVMState(fp)) {
+    if (fp->resumed() && fp->func()->isAsync()) {
+      if (fp->func()->isGenerator()) {
+        // async generator
+        auto generator = frame_async_generator(fp);
+        if (!generator->isEagerlyExecuted()) {
+          return generator->getWaitHandle();
+        }
+      } else {
+        // async function
+        return frame_afwh(fp);
+      }
+    }
   }
 
-  if (!fp) {
-    return nullptr;
-  } else if (fp->func()->isAsyncFunction()) {
-    return frame_afwh(fp);
-  } else if (fp->func()->isAsyncGenerator()) {
-    // not implemented yet
-    not_reached();
-  } else {
-    not_reached();
-  }
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

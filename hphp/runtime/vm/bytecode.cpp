@@ -79,6 +79,8 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator.h"
+#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
@@ -846,18 +848,19 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
   assert(fp->resumed());
   auto const sfp = fp->sfp();
   if (sfp) {
-    // The non-reentrant case occurs when a generator is resumed via ContEnter
-    // or ContRaise opcode. These opcodes leave a single value on the stack
-    // that becomes part of the generator's stack. So we find the caller's FP,
-    // compensate for its locals and iterators, and then we've found the base
-    // of the generator's stack.
-    assert(fp->func()->isNonAsyncGenerator());
+    // The non-reentrant case occurs when a non-async or async generator is
+    // resumed via ContEnter or ContRaise opcode. These opcodes leave a single
+    // value on the stack that becomes part of the generator's stack. So we
+    // find the caller's FP, compensate for its locals and iterators, and then
+    // we've found the base of the generator's stack.
+    assert(fp->func()->isGenerator());
     return (TypedValue*)sfp - sfp->func()->numSlotsInFrame();
   } else {
-    // The reentrant case occurs when asio scheduler resumes an async function.
-    // We simply use the top of stack of the previous VM frame (since the
-    // ActRec, locals, and iters for this frame do not reside on the VM stack).
-    assert(fp->func()->isAsyncFunction());
+    // The reentrant case occurs when asio scheduler resumes an async function
+    // or async generator. We simply use the top of stack of the previous VM
+    // frame (since the ActRec, locals, and iters for this frame do not reside
+    // on the VM stack).
+    assert(fp->func()->isAsync());
     return g_context.getNoCheck()->m_nestedVMs.back().sp;
   }
 }
@@ -1720,7 +1723,7 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr,
                                           Resumable* resumable,
                                           ObjectData* exception) {
   assert(enterFnAr);
-  assert(enterFnAr->func()->isAsyncFunction());
+  assert(enterFnAr->func()->isAsync());
   assert(enterFnAr->resumed());
   assert(resumable);
 
@@ -2154,7 +2157,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   if (LIKELY(prevFp != nullptr)) {
     if (prevSp) {
       if (UNLIKELY(fp->resumed())) {
-        assert(fp->func()->isNonAsyncGenerator());
+        assert(fp->func()->isGenerator());
         *prevSp = (TypedValue*)prevFp - prevFp->func()->numSlotsInFrame();
       } else {
         *prevSp = (TypedValue*)(fp + 1);
@@ -4622,6 +4625,19 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     // Mark the async function as succeeded and store the return value.
     assert(!sfp);
     frame_afwh(vmfp())->ret(retval);
+  } else if (vmfp()->func()->isAsyncGenerator()) {
+    // Mark the async generator as finished.
+    assert(IS_NULL_TYPE(retval.m_type));
+    auto const gen = frame_async_generator(vmfp());
+    auto const eagerResult = gen->ret();
+    if (eagerResult) {
+      // Eager execution => return StaticWaitHandle.
+      assert(sfp);
+      vmStack().pushObjectNoRc(eagerResult);
+    } else {
+      // Resumed execution => return control to the scheduler.
+      assert(!sfp);
+    }
   } else if (vmfp()->func()->isNonAsyncGenerator()) {
     // Mark the generator as finished and store the return value.
     assert(IS_NULL_TYPE(retval.m_type));
@@ -7016,41 +7032,45 @@ const StaticString s_this("this");
 
 OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   NEXT();
-  assert(!vmfp()->resumed());
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  auto const numSlots = func->numSlotsInFrame();
+  auto const resumeOffset = func->unit()->offsetOf(pc);
+  assert(!fp->resumed());
+  assert(func->isGenerator());
 
-  const auto resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
-
-  // Create the Generator object. Create takes care of copying local
+  // Create the {Async,}Generator object. Create takes care of copying local
   // variables and iterators.
-  auto cont = c_Generator::Create<false>(vmfp(),
-                                         vmfp()->func()->numSlotsInFrame(),
-                                         nullptr,
-                                         resumeOffset);
+  auto const gen = func->isAsync()
+    ? static_cast<BaseGenerator*>(
+        c_AsyncGenerator::Create(fp, numSlots, nullptr, resumeOffset))
+    : static_cast<BaseGenerator*>(
+        c_Generator::Create<false>(fp, numSlots, nullptr, resumeOffset));
 
   // Call the FunctionSuspend hook. Keep the generator on the stack so that
   // the unwinder could free it if the hook fails.
-  vmStack().pushObjectNoRc(cont);
-  EventHook::FunctionSuspend(cont->actRec(), false);
+  vmStack().pushObjectNoRc(gen);
+  EventHook::FunctionSuspend(gen->actRec(), false);
   vmStack().discard();
 
   // Grab caller info from ActRec.
-  ActRec* sfp = vmfp()->sfp();
-  Offset soff = vmfp()->m_soff;
+  ActRec* sfp = fp->sfp();
+  Offset soff = fp->m_soff;
 
   // Free ActRec and store the return value.
-  vmStack().ndiscard(vmfp()->m_func->numSlotsInFrame());
+  vmStack().ndiscard(numSlots);
   vmStack().ret();
-  tvCopy(make_tv<KindOfObject>(cont), *vmStack().topTV());
-  assert(vmStack().topTV() == &vmfp()->m_r);
+  tvCopy(make_tv<KindOfObject>(gen), *vmStack().topTV());
+  assert(vmStack().topTV() == &fp->m_r);
 
   // Return control to the caller.
   vmfp() = sfp;
-  pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+  pc = LIKELY(sfp != nullptr) ? sfp->func()->getEntry() + soff : nullptr;
 }
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {
   auto const obj = fp->getThis();
-  assert(/*obj->instanceof(c_AsyncGenerator::classof()) ||*/
+  assert(obj->instanceof(c_AsyncGenerator::classof()) ||
          obj->instanceof(c_Generator::classof()));
   return static_cast<BaseGenerator*>(obj);
 }
@@ -7070,15 +7090,15 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
 
   // Do linkage of the generator's AR.
   assert(vmfp()->hasThis());
-  c_Generator* cont = this_generator(vmfp());
-  assert(cont->getState() == BaseGenerator::State::Running);
-  ActRec* contAR = cont->actRec();
-  contAR->setReturn(vmfp(), pc, tx->uniqueStubs.genRetHelper);
+  BaseGenerator* gen = this_base_generator(vmfp());
+  assert(gen->getState() == BaseGenerator::State::Running);
+  ActRec* genAR = gen->actRec();
+  genAR->setReturn(vmfp(), pc, tx->uniqueStubs.genRetHelper);
 
-  vmfp() = contAR;
+  vmfp() = genAR;
 
-  assert(contAR->func()->contains(cont->resumable()->resumeOffset()));
-  pc = contAR->func()->unit()->at(cont->resumable()->resumeOffset());
+  assert(genAR->func()->contains(gen->resumable()->resumeOffset()));
+  pc = genAR->func()->unit()->at(gen->resumable()->resumeOffset());
   SYNC();
   EventHook::FunctionResume(vmfp());
 }
@@ -7102,22 +7122,33 @@ OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
   assert(func->isGenerator());
 
   if (!func->isAsync()) {
+    // Non-async generator.
     assert(fp->sfp());
     frame_generator(fp)->yield(resumeOffset, key, value);
 
     // Push return value of next()/send()/raise().
     vmStack().pushNull();
   } else {
-    not_reached();
+    // Async generator.
+    auto const gen = frame_async_generator(fp);
+    auto const eagerResult = gen->yield(resumeOffset, key, value);
+    if (eagerResult) {
+      // Eager execution => return StaticWaitHandle.
+      assert(fp->sfp());
+      vmStack().pushObjectNoRc(eagerResult);
+    } else {
+      // Resumed execution => return control to the scheduler.
+      assert(!fp->sfp());
+    }
   }
 
-  EventHook::FunctionSuspend(vmfp(), true);
+  EventHook::FunctionSuspend(fp, true);
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();
   Offset soff = fp->m_soff;
 
-  // Return control to the next()/send()/raise() caller.$a
+  // Return control to the next()/send()/raise() caller.
   vmfp() = sfp;
   pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
@@ -7142,7 +7173,7 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
   NEXT();
   DECODE_IVA(checkStarted);
-  this_generator(vmfp())->preNext(checkStarted);
+  this_base_generator(vmfp())->preNext(checkStarted);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContValid(IOP_ARGS) {
@@ -7167,7 +7198,7 @@ OPTBLD_INLINE void ExecutionContext::iopContCurrent(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   assert(!vmfp()->resumed());
-  assert(vmfp()->func()->isAsync());
+  assert(vmfp()->func()->isAsyncFunction());
   const auto func = vmfp()->m_func;
   const auto resumeOffset = func->unit()->offsetOf(pc);
 
@@ -7208,9 +7239,11 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
 }
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
-  assert(vmfp()->resumed());
-  assert(vmfp()->func()->isAsync());
-  assert(!vmfp()->sfp());
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  auto const resumeOffset = func->unit()->offsetOf(pc);
+  assert(fp->resumed());
+  assert(func->isAsync());
 
   // Obtain child
   Cell& value = *vmStack().topC();
@@ -7218,17 +7251,37 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   assert(value.m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
   auto const child = static_cast<c_WaitableWaitHandle*>(value.m_data.pobj);
 
-  // Await child and suspend the async function. May throw.
-  auto const resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
-  frame_afwh(vmfp())->await(resumeOffset, child);
-  vmStack().discard();
+  // Await child and suspend the async function/generator. May throw.
+  if (!func->isGenerator()) {
+    // Async function.
+    assert(!fp->sfp());
+    frame_afwh(fp)->await(resumeOffset, child);
+    vmStack().discard();
+  } else {
+    // Async generator.
+    auto const gen = frame_async_generator(fp);
+    auto const eagerResult = gen->await(resumeOffset, child);
+    vmStack().discard();
+    if (eagerResult) {
+      // Eager execution => return AsyncGeneratorWaitHandle.
+      assert(fp->sfp());
+      vmStack().pushObjectNoRc(eagerResult);
+    } else {
+      // Resumed execution => return control to the scheduler.
+      assert(!fp->sfp());
+    }
+  }
 
   // Call the FunctionSuspend hook.
-  EventHook::FunctionSuspend(vmfp(), true);
+  EventHook::FunctionSuspend(fp, true);
 
-  // Transfer control back to the scheduler.
-  vmfp() = nullptr;
-  pc = nullptr;
+  // Grab caller info from ActRec.
+  ActRec* sfp = fp->sfp();
+  Offset soff = fp->m_soff;
+
+  // Return control to the caller or scheduler.
+  vmfp() = sfp;
+  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopAwait(IOP_ARGS) {

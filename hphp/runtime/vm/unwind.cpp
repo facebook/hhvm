@@ -22,6 +22,9 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator.h"
+#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -239,7 +242,20 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       waitHandle->failCpp();
     }
   } else if (func->isAsyncGenerator()) {
-    // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
+    auto const gen = frame_async_generator(fp);
+    if (fault.m_faultType == Fault::Type::UserException) {
+      // Handle exception thrown by async generator.
+      decRefLocals();
+      auto eagerResult = gen->fail(fault.m_userException);
+      if (eagerResult) {
+        stack.pushObjectNoRc(eagerResult);
+      }
+      action = UnwindAction::ResumeVM;
+    } else if (gen->isEagerlyExecuted() || gen->getWaitHandle()->isRunning()) {
+      // Fail the async generator and let the C++ exception propagate.
+      decRefLocals();
+      gen->failCpp();
+    }
   } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished.
     decRefLocals();

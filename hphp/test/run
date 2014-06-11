@@ -360,7 +360,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     $use_automain = 'automain' === idx($options, 'mode')
       && 'php' === pathinfo($test, PATHINFO_EXTENSION);
     $test_run = $use_automain
-      ? __DIR__.'/pseudomain_wrapper.php'
+      ? __DIR__.'/tools/pseudomain_wrapper.php'
       : $test;
   }
   $cmd = hhvm_cmd_impl(
@@ -1141,7 +1141,8 @@ function print_failure($argv, $results, $options) {
   if (idx($options, 'mode') == 'automain') {
     print make_header(
       'Automain caveat: wrapper script may change semantics');
-    print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
+    print 'The automain wrapper script '
+      .__DIR__.'/tools/pseudomain_wrapper.php'
       .' may have changed behavior'."\n"
       .'(e.g. extra frames in backtraces) by moving code from '
       .'pseudo-main to file top-level and adding a wrapper function.'

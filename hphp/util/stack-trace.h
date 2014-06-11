@@ -46,6 +46,8 @@ public:
 
 public:
   static bool Enabled;
+  static const char** FunctionBlacklist;
+  static unsigned int FunctionBlacklistCount;
 
 protected:
   StackTraceBase();

@@ -1,0 +1,5 @@
+<?php
+$MySQLi = new mysqli('localhost', 'my_user', 'my_password', 'my_db');
+if ($MySQLi->connect_error) {
+  echo "SKIP MySQL isn't running";
+}

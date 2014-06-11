@@ -417,7 +417,7 @@ function memcache_connect(mixed $host,
                           mixed $timeout = 0,
                           mixed $timeoutms = 0): Memcache {
   $ret = new Memcache();
-  $ret->connect($host, $port, $timeout, $timestamp);
+  $ret->connect($host, $port, $timeout, $timeoutms);
   return $ret;
 }
 

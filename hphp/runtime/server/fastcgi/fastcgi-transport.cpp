@@ -385,7 +385,11 @@ static const std::string
   s_scriptName("SCRIPT_NAME"),
   s_scriptFilename("SCRIPT_FILENAME"),
   s_queryString("QUERY_STRING"),
-  s_https("HTTPS");
+  s_https("HTTPS"),
+  s_slash("/"),
+  s_modProxy("proxy:"),
+  s_modProxySearch("://"),
+  s_questionMark("?");
 
 void FastCGITransport::onHeadersComplete() {
   m_requestURI = getRawHeader(s_requestURI);
@@ -450,16 +454,19 @@ void FastCGITransport::onHeadersComplete() {
   }
 
   // do a check for mod_proxy_fcgi and remove the extra portions of the string
-  const std::string modProxy = "proxy:fcgi://";
-  if (m_scriptFilename.find(modProxy) == 0) {
-    m_scriptFilename = m_scriptFilename.substr(modProxy.length());
+  if (m_scriptFilename.find(s_modProxy) == 0) {
+    // remove the proxy:type + :// from the start.
+    int proxyPos = m_scriptFilename.find(s_modProxySearch);
+    if (proxyPos != String::npos) {
+      m_scriptFilename = m_scriptFilename.substr(proxyPos + s_modProxySearch.size());
+    }
     // remove everything before the first / which is host:port
-    int slashPos = m_scriptFilename.find('/');
+    int slashPos = m_scriptFilename.find(s_slash);
     if (slashPos != String::npos) {
       m_scriptFilename = m_scriptFilename.substr(slashPos);
     }
     // remove everything after the first ?
-    int questionPos = m_scriptFilename.find('?');
+    int questionPos = m_scriptFilename.find(s_questionMark);
     if (questionPos != String::npos) {
       m_scriptFilename = m_scriptFilename.substr(0, questionPos);
     }

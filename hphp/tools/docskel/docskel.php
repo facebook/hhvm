@@ -4,8 +4,11 @@ include(__DIR__ . '/base.php');
 // see hphp/runtime/vm/bytecode.h:kMaxBuiltinArgs
 const MAX_BUILTIN_ARGS = 5;
 
-function generateDocComment(string $doccomment, array $func = null,
+function generateDocComment(string $doccomment, ?array $func = null,
                             string $indent = ''): string {
+  if ($func === null) {
+    $func = [];
+  }
   $str = $doccomment . "\n";
   if (!empty($func['args'])) {
     $str .= "\n";
@@ -175,7 +178,7 @@ function generateCPPStub(array $func, array $classes): string {
   if (!$actrec) {
     $ret .= "$args) {\n";
   } else if (!$alias) {
-    $ret .= ")(ActRec* ar_) {\n$args\n";
+    $ret .= ')(ActRec* ar_) {'."\n$args\n";
   } else {
     $type = in_array('static', $alias['modifiers'])
           ? 'HHVM_STATIC_MN' : 'HHVM_MN';

@@ -2,7 +2,7 @@
 <?hh
 // Run with --help for help.
 $FBCODE_ROOT = __DIR__.'/../..';
-include_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
+require_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
 
 //////////////////////////////////////////////////////////////////////
 
@@ -68,7 +68,7 @@ function determine_flags(OptionMap $opts): string {
 
   if ($opts->containsKey('region-mode')) {
     $flags .=
-      '-v Eval.JitRegionSelector='.$opts['region-mode'].' '.
+      '-v Eval.JitRegionSelector='.((string)$opts['region-mode']).' '.
       '';
   }
 
@@ -88,7 +88,7 @@ function determine_flags(OptionMap $opts): string {
 
   if ($opts->containsKey('pgo-threshold')) {
     $flags .=
-      '-v Eval.JitPGOThreshold='.$opts['pgo-threshold'].' '.
+      '-v Eval.JitPGOThreshold='.((string)$opts['pgo-threshold']).' '.
       '';
   }
 
@@ -111,7 +111,7 @@ function determine_env(OptionMap $opts): string {
   $traces = Vector {};
   foreach ($trace_opts as $k => $v) {
     if ($opts->containsKey($k)) {
-      $traces->add("$v:".$opts[$k]);
+      $traces->add("$v:".((string)$opts[$k]));
     }
   }
   if ($traces->isEmpty()) return $fixed_env;
@@ -188,7 +188,7 @@ function run_hhvm(OptionMap $opts): void {
     exit(0);
   }
   if ($opts->containsKey('repo')) {
-    $flags = repo_auth_flags($flags, $opts['repo']);
+    $flags = repo_auth_flags($flags, (string) $opts['repo']);
   } else if ($opts->containsKey('compile')) {
     $flags = compile_with_hphp($flags, $opts->containsKey('print-command'));
   }
@@ -201,6 +201,7 @@ function run_hhvm(OptionMap $opts): void {
     echo "\n$cmd\n\n";
   } else {
     // Give the return value of the command back to the caller.
+    $retval = null;
     passthru($cmd, $retval);
     exit($retval);
   }
@@ -208,7 +209,10 @@ function run_hhvm(OptionMap $opts): void {
 
 function main(): void {
   $opts = parse_options(my_option_map());
-  if ($opts->containsKey('help')) return help();
+  if ($opts->containsKey('help')) {
+    help();
+    return;
+  }
   run_hhvm($opts);
 }
 

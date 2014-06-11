@@ -17,5 +17,5 @@ val dfind_init:
 
 (* new set of php and js files *)  
 val get_updates:
-  ServerEnv.genv -> Path.path -> SSet.t * SSet.t
+  ServerEnv.genv -> Path.path -> SSet.t * SSet.t * bool
 

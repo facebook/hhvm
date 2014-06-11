@@ -941,6 +941,9 @@ def walk(filename, dest_subdir):
             exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
         if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
             exp = exp.replace('to be long', 'to be integer')
+        if '/ext/curl/tests/curl_basic_008.php' in full_dest_filename or \
+           '/ext/curl/tests/curl_basic_010.php' in full_dest_filename:
+            exp = exp.replace('host:)', 'host:|Could not resolve:)')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:

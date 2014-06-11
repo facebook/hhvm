@@ -100,6 +100,7 @@ HttpServer::HttpServer()
   options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
   m_pageServer = std::move(serverFactory->createServer(options));
   m_pageServer->addTakeoverListener(this);
+  m_pageServer->addServerEventListener(this);
 
   if (additionalThreads) {
     auto handlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
@@ -236,6 +237,12 @@ void HttpServer::takeoverShutdown() {
   stop();
 }
 
+void HttpServer::serverStopped(HPHP::Server* server) {
+  Logger::Info("Page server stopped");
+  assert(server == m_pageServer.get());
+  removePid();
+}
+
 HttpServer::~HttpServer() {
   // XXX: why should we have to call stop here?  If we haven't already
   // stopped (and joined all the threads), watchDog could still be
@@ -323,7 +330,6 @@ void HttpServer::runOrExitProcess() {
     if (m_stopReason) {
       Logger::Warning("Server stopping with reason: %s\n", m_stopReason);
     }
-    removePid();
     // if we were killed, bail out immediately
     if (m_killed) {
       Logger::Info("page server killed");
@@ -561,15 +567,34 @@ bool HttpServer::startServer(bool pageServer) {
         return false;
       }
 
-      // TODO: fix /stop (t3725397)
       HttpClient http;
       std::string url = "http://";
-      url += RuntimeOption::ServerIP;
+      std::string serverIp = (RuntimeOption::ServerIP.empty()) ? "localhost" :
+        RuntimeOption::ServerIP;
+      url += serverIp;
       url += ":";
       url += boost::lexical_cast<std::string>(RuntimeOption::AdminServerPort);
       url += "/stop";
-      StringBuffer response;
-      http.get(url.c_str(), response);
+      std::string auth;
+
+      auto passwords = RuntimeOption::AdminPasswords;
+      if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {
+        passwords.insert(RuntimeOption::AdminPassword);
+      }
+      auto passwordIter = passwords.begin();
+      int statusCode = 401;
+      do {
+        std::string auth_url;
+        if (passwordIter != passwords.end()) {
+          auth_url = url + "?auth=";
+          auth_url += *passwordIter;
+          passwordIter++;
+        } else {
+          auth_url = url;
+        }
+        StringBuffer response;
+        statusCode = http.get(auth_url.c_str(), response);
+      } while (statusCode == 401 && passwordIter != passwords.end());
 
       if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
         if (i == 0) {

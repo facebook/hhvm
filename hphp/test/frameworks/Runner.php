@@ -18,8 +18,8 @@ class Runner {
   private string $diff_information = "";
   private string $stat_information = "";
 
-  private array<resource> $pipes = null;
-  private resource $process = null;
+  private array<resource> $pipes = [];
+  private ?resource $process = null;
   private string $actual_test_command = "";
 
   public function __construct(public Framework $framework, string $p = "") {
@@ -164,7 +164,7 @@ class Runner {
     $test = rtrim($test, PHP_EOL);
     $test = remove_string_from_text($test, __DIR__, null);
     $this->test_information .= $test.PHP_EOL;
-    $this->processStatus($status, $test);
+    $this->processStatus(nullthrows($status), $test);
 
     return $continue_testing;
   }
@@ -184,15 +184,17 @@ class Runner {
 
     $this->test_information .= $status.PHP_EOL;
 
-    if ($this->framework->getCurrentTestStatuses() !== null &&
-        $this->framework->getCurrentTestStatuses()->containsKey($test)) {
-      if ($status === $this->framework->getCurrentTestStatuses()[$test]) {
+    $statuses = $this->framework->getCurrentTestStatuses();
+
+    if ($statuses !== null &&
+        $statuses->containsKey($test)) {
+      if ($status === $statuses[$test]) {
         // FIX: posix_isatty(STDOUT) was always returning false, even
         // though can print in color. Check this out later.
         verbose(Colors::GREEN.Statuses::PASS.Colors::NONE, !Options::$csv_only);
       } else {
         // Red if we go from pass to something else
-        if ($this->framework->getCurrentTestStatuses()[$test] === '.') {
+        if ($statuses[$test] === '.') {
           verbose(Colors::RED.Statuses::FAIL.Colors::NONE, !Options::$csv_only);
         // Green if we go from something else to pass
         } else if ($status === '.') {
@@ -206,12 +208,12 @@ class Runner {
         }
         verbose(PHP_EOL."Different status in ".$this->framework->getName().
                 " for test ".$test." was ".
-                $this->framework->getCurrentTestStatuses()[$test].
+                $statuses[$test].
                 " and now is ".$status.PHP_EOL, !Options::$csv_only);
         $this->diff_information .= "----------------------".PHP_EOL.
           $test.PHP_EOL.PHP_EOL.
           $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL.
-          "EXPECTED: ".$this->framework->getCurrentTestStatuses()[$test].
+          "EXPECTED: ".$statuses[$test].
           PHP_EOL.">>>>>>>".PHP_EOL.
           "ACTUAL: ".$status.PHP_EOL.PHP_EOL;
       }
@@ -220,7 +222,7 @@ class Runner {
       // because we are establishing a baseline. OR we have run the tests
       // before, but we are having an issue getting to the actual tests
       // (e.g., yii is one test suite that has behaved this way).
-      if ($this->framework->getCurrentTestStatuses() !== null) {
+      if ($statuses !== null) {
         verbose(Colors::LIGHTBLUE.Statuses::FAIL.Colors::NONE,
                 !Options::$csv_only);
         verbose(PHP_EOL."Different status in ".$this->framework->getName().
@@ -405,9 +407,10 @@ class Runner {
 
     $env = $_ENV;
     // Use the proxies in case the test needs access to the outside world
-    $env = array_merge($env, ProxyInformation::$proxies->toArray());
+    $env = array_merge($env, nullthrows(ProxyInformation::$proxies)->toArray());
     if ($this->framework->getEnvVars() !== null) {
-      $env = array_merge($env, $this->framework->getEnvVars()->toArray());
+      $env = array_merge($env,
+                         nullthrows($this->framework->getEnvVars())->toArray());
     }
     $this->process = proc_open($this->actual_test_command, $descriptorspec,
                                $this->pipes, $this->framework->getTestPath(),

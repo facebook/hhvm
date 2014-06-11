@@ -1,6 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
-include_once __DIR__.'/../../../hphp/tools/command_line_lib.php';
+require_once __DIR__.'/../../../hphp/tools/command_line_lib.php';
 require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
@@ -34,17 +34,19 @@ class TestFinder {
     // So check for both and do the right thing
     if (file_exists(__DIR__."/vendor/phpunit/phpunit/src/")) {
       // For 3.8+
-      include_once __DIR__."/vendor/autoload.php";
+      require_once __DIR__."/vendor/autoload.php";
     } else if (file_exists(__DIR__."/vendor/phpunit/phpunit/PHPUnit/")) {
       // For 3.7 and below
-      include_once __DIR__."/vendor/phpunit/phpunit/PHPUnit/Autoload.php";
+      require_once __DIR__."/vendor/phpunit/phpunit/PHPUnit/Autoload.php";
     } else {
       // Fallback to token based test finding
       findTestMethodsViaToken();
       return;
     }
 
-    include_once $this->bootstrap_file;
+    if ($this->bootstrap_file !== null) {
+      require_once $this->bootstrap_file;
+    }
 
     $current_classes = get_declared_classes();
     $tests = "";
@@ -53,7 +55,7 @@ class TestFinder {
         $tests .= $tf.PHP_EOL;
         continue;
       }
-      include_once $tf;
+      require_once $tf;
       // New classes will be brought in by the include; get the difference
       // between what was currently loaded.
       $file_classes = array_diff(get_declared_classes(), $current_classes);
@@ -77,7 +79,10 @@ class TestFinder {
   }
 
   public function findTestsPHPT(): void {
-    file_put_contents($this->tests_file, implode(PHP_EOL, $this->test_files));
+    file_put_contents(
+      $this->tests_file,
+      implode(PHP_EOL, $this->test_files->toArray())
+    );
   }
 
   public function findTestMethodsViaTokens(): void {
@@ -138,7 +143,7 @@ class TestFinder {
     file_put_contents($this->tests_file, $tests);
   }
 
-  public function findTestFiles(): void {
+  private function findTestFiles(): void {
     $this->test_files = Set {};
     $exclude_pattern = "/\.disabled\.hhvm/";
     $exclude_dirs = Set {};
@@ -200,12 +205,12 @@ class TestFinder {
   }
 }
 
-function help(): void {
+function tf_help(): void {
   display_help("Finds the tests for the given framework",
-               oss_test_option_map());
+               test_finder_option_map());
 }
 
-function oss_test_option_map(): OptionInfoMap {
+function test_finder_option_map(): OptionInfoMap {
   return Map {
     'help'                => Pair {'h', "Print help message."},
     'framework-name:'     => Pair {'',  "The framework name."},
@@ -229,28 +234,29 @@ function oss_test_option_map(): OptionInfoMap {
   };
 }
 
-function main(array $argv): void {
-  $options = parse_options(oss_test_option_map());
+function tf_main(array $argv): void {
+  $options = parse_options(test_finder_option_map());
   if ($options->containsKey('help')) {
-    help();
+    tf_help();
     exit(0);
   }
   try {
-    $fn = $options['framework-name'];
-    $tf = $options['tests-file'];
-    $tff = $options['test-files-file'];
-    $tp = $options['test-path'];
-    $tfp = $options['test-file-pattern'];
-    $cf = $options['config-file'];
+    $fn = (string) $options['framework-name'];
+    $tf = (string) $options['tests-file'];
+    $tff = (string) $options['test-files-file'];
+    $tp = (string) $options['test-path'];
+    $tfp = (string) $options['test-file-pattern'];
+    $cf = (string) $options['config-file'];
     $bf = $options->containsKey('bootstrap-file')
-          ? $options['bootstrap-file']
+          ? (string) $options['bootstrap-file']
           : null;
-    $mode = $options['test-find-mode'];
+    $mode = (string) $options['test-find-mode'];
   } catch (Exception $e) {
-    help();
+    tf_help();
     echo "Provide required command line arguments!\n";
     exit(-1);
-   }
+    throw $e; // unreachable, but makes typechecker happy - #2916
+  }
   $tf = new TestFinder($fn, $tf, $tff, $tp, $tfp, $cf, $bf);
   // Mediawiki and others are clowntown when it comes to autoloading stuff
   // for reflection. Or I am a clown. Either way, workaround it.
@@ -259,7 +265,7 @@ function main(array $argv): void {
     case TestFindModes::TOKEN:
       $tf->findTestMethodsViaTokens();
       break;
-    case $mode === TestFindModes::PHPT:
+    case TestFindModes::PHPT:
       $tf->findTestsPHPT();
       break;
     default:
@@ -269,4 +275,4 @@ function main(array $argv): void {
 }
 
 
-main($argv);
+tf_main($argv);

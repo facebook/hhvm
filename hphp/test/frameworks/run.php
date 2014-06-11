@@ -139,7 +139,7 @@ function prepare(Set $available_frameworks, Set $framework_class_overrides,
   return $frameworks;
 }
 
-function fork_buckets(Traversable $data, callable $callback): int {
+function fork_buckets(Traversable $data, (function(array):int) $callback): int {
   $num_threads = min(count($data), num_cpus() + 1);
   if (Options::$num_threads !== -1) {
     $num_threads = min(count($data), Options::$num_threads);
@@ -238,7 +238,7 @@ function run_tests(Vector $frameworks): void {
     error_and_exit("No tests found to run");
   }
 
-  fork_buckets($all_tests, ($bucket) ==> run_test_bucket($bucket));
+  fork_buckets($all_tests, fun('run_test_bucket'));
 
   /****************************************
   * All tests complete. Create results for
@@ -604,7 +604,8 @@ function oss_test_option_map(): OptionInfoMap {
 function main(array $argv): void {
   $options = parse_options(oss_test_option_map());
   if ($options->containsKey('help')) {
-    return help();
+    help();
+    return;
   }
   // Parse all the options passed to run.php and come out with a list of
   // frameworks passed into test (or --all or --allexcept)

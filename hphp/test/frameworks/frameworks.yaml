@@ -193,7 +193,7 @@
       - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleUrlTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
-    branch: "3.3-dev"
+    branch: "3.4-dev"
     commit: 11b927eb40b6646733ead7a9e3cd5f2e68a289b8
     install_root: joomla-cms
     test_root: joomla-cms

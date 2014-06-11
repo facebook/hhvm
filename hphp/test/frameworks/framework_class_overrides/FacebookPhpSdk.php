@@ -26,7 +26,7 @@ XML;
     if (file_exists($this->getInstallRoot())) {
       foreach ($extra_files as $file) {
         if (!file_exists($file)) {
-          remove_dir_recursive($this->getInstallRoot());
+          remove_dir_recursive(nullthrows($this->getInstallRoot()));
           return false;
         }
       }

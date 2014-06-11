@@ -12,7 +12,7 @@ class Pear extends Framework {
     verbose("Creating a bootstrap.php for running the pear tests.\n",
             Options::$verbose);
     $bootstrap_php = <<<BOOTSTRAP
-<?php
+<?hh
 putenv('PHP_PEAR_RUNTESTS=1');
 BOOTSTRAP;
     file_put_contents($this->getTestPath()."/bootstrap.php", $bootstrap_php);
@@ -44,7 +44,7 @@ XML;
       // are there; otherwise we need a redownload.
       foreach ($extra_files as $file) {
         if (!file_exists($file)) {
-          remove_dir_recursive($this->getInstallRoot());
+          remove_dir_recursive(nullthrows($this->getInstallRoot()));
           return false;
         }
       }

@@ -98,7 +98,7 @@ function find_first_file_recursive(Set $filenames, string $root_dir,
 
 function find_all_files(string $pattern, string $root_dir,
                         string $exclude_file_pattern,
-                        Set $exclude_dirs = null): ?Set {
+                        ?Set<string> $exclude_dirs = null): ?Set<string> {
   if (!file_exists($root_dir)) {
     return null;
   }
@@ -111,7 +111,7 @@ function find_all_files(string $pattern, string $root_dir,
     if (preg_match($pattern, $fileinfo->getFileName()) === 1 &&
         preg_match($exclude_file_pattern, $fileinfo->getFileName()) === 0 &&
         strstr($fileinfo->getPath(), '/vendor/') === false &&
-        !$exclude_dirs->contains(dirname($fileinfo->getPath()))) {
+        !nullthrows($exclude_dirs)->contains(dirname($fileinfo->getPath()))) {
       $files[] = $fileinfo->getPathName();
     }
   }
@@ -119,10 +119,12 @@ function find_all_files(string $pattern, string $root_dir,
   return $files;
 }
 
-function find_all_files_containing_text(string $text,
-                                        string $root_dir,
-                                        string $exclude_file_pattern,
-                                        Set $exclude_dirs = null): ?Set {
+function find_all_files_containing_text(
+  string $text,
+  string $root_dir,
+  string $exclude_file_pattern,
+  ?Set<string> $exclude_dirs = null,
+): ?Set<string> {
   if (!file_exists($root_dir)) {
     return null;
   }
@@ -134,8 +136,8 @@ function find_all_files_containing_text(string $text,
   foreach ($sit as $fileinfo) {
     if (strpos(file_get_contents($fileinfo->getPathName()), $text) !== false &&
         preg_match($exclude_file_pattern, $fileinfo->getFileName()) === 0 &&
-        strstr($file_info->getPath(), '/vendor/') === false &&
-        !$exclude_dirs->contains(dirname($fileinfo->getPath()))) {
+        strstr($fileinfo->getPath(), '/vendor/') === false &&
+        !nullthrows($exclude_dirs)->contains(dirname($fileinfo->getPath()))) {
       $files[] = $fileinfo->getPathName();
     }
   }
@@ -237,7 +239,7 @@ function get_runtime_build(bool $use_php = false): string {
         " --config ".__DIR__."/php.ini";
     }
   }
-  return $build;
+  return nullthrows($build);
 }
 
 function error_and_exit(string $message, bool $to_file = false): void {
@@ -254,7 +256,7 @@ function error_and_exit(string $message, bool $to_file = false): void {
 // Include all PHP files in a directory
 function include_all_php($folder){
   foreach (glob("{$folder}/*.php") as $filename) {
-    include_once $filename;
+    require_once $filename;
   }
 }
 
@@ -275,6 +277,7 @@ function run_install(string $proc, string $path, ?Map $env): ?int
   }
   $pipes = null;
   $process = proc_open($proc, $descriptorspec, $pipes, $path, $env_arr);
+  assert($pipes !== null);
   if (is_resource($process)) {
     fclose($pipes[0]);
     $start_time = microtime(true);
@@ -293,4 +296,14 @@ function run_install(string $proc, string $path, ?Map $env): ?int
   }
   verbose("Couldn't proc_open: $proc\n", Options::$verbose);
   return null;
+}
+
+function nullthrows<T>(?T $x, ?string $message = null): T {
+  if ($x !== null) {
+    return $x;
+  }
+  if ($message === null) {
+    $message = 'Unexpected null';
+  }
+  throw new Exception($message);
 }

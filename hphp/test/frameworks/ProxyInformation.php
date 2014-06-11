@@ -3,7 +3,7 @@
 // in case folks outside this proxy wall need to change them.
 class ProxyInformation {
 
-  public static Map $proxies = null;
+  public static ?Map<string, string> $proxies = null;
 
   // Determine through a poor man's method whether a proxy will be required to
   // get out to the internet. If we get headers back, then a proxy is not

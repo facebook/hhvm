@@ -171,8 +171,8 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
       if (!m_sym->isSystem() &&
           !(getContext() &
             (LValue|RefValue|RefParameter|UnsetContext|ExistContext)) &&
-          m_sym->getDeclaration().get() == this) {
-        assert(!m_sym->isParameter());
+          m_sym->getDeclaration().get() == this &&
+          !m_sym->isParameter()) {
 
         if (!variables->getAttribute(VariableTable::ContainsLDynamicVariable) &&
             !getScope()->is(BlockScope::ClassScope)) {

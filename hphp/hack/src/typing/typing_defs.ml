@@ -124,6 +124,7 @@ and class_type = {
   tc_members_init        : SSet.t;
   tc_kind                : Ast.class_kind;
   tc_name                : string    ;
+  tc_pos                 : Pos.t ;
   tc_tparams             : tparam list   ;
   tc_consts              : class_elt SMap.t;
   tc_cvars               : class_elt SMap.t;

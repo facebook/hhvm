@@ -229,6 +229,8 @@ end = struct
         ServerIdentifyFunction.go content line char oc
     | ServerMsg.OUTLINE content ->
         ServerFileOutline.go content oc
+    | ServerMsg.METHOD_JUMP (class_, find_children) ->
+        ServerMethodJumps.go class_ find_children env genv oc
     | ServerMsg.SAVE_STATE filename ->
         let dump = ServerSign.dump_state env genv in
         let status = ServerSign.save dump filename in

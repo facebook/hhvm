@@ -107,7 +107,7 @@ public:
    * Load the repo-global metadata table, including the global litstr
    * table.  Normally called during process initialization.
    */
-  void loadGlobalData();
+  void loadGlobalData(bool allowFailure = false);
 
   /*
    * Access to global data.

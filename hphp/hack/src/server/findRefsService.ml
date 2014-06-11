@@ -30,7 +30,7 @@ let find_child_classes target_class_name files_info files =
       acc)
   end files SSet.empty
 
-let get_child_classes workers files_info class_name =
+let get_child_classes_files workers files_info class_name =
   match Naming_heap.ClassHeap.get class_name with
   | Some class_ ->
     (* Find the files that contain classes that extend class_ *)
@@ -40,10 +40,7 @@ let get_child_classes workers files_info class_name =
     let extend_deps =
         Typing_compare.get_extend_deps trace cid_hash (ISet.singleton cid_hash)
     in
-    let files = Typing_deps.get_files extend_deps in
-    (* Iterate over classes defined in those files to build a set of all
-       child classes *)
-    find_child_classes class_name files_info files
+    Typing_deps.get_files extend_deps
   | _ ->
     SSet.empty
 

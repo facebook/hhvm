@@ -18,7 +18,7 @@ for word in $words; do
     # we'll end up with some garbled text inside a .noserver file.
     (
         echo "Looking for $word"
-        for file in $(find quick slow zend/good -name '*.php' -exec grep -rl -F $word {} +); do
+        for file in $(find ../quick ../slow ../zend/good -name '*.php' -exec grep -rl -F $word {} +); do
             if [[ ! -s $file.noserver ]]; then
                 echo $file.noserver
                 echo "Used banned symbol $word" > $file.noserver

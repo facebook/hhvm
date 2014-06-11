@@ -77,7 +77,7 @@ class StreamUserFilters : public RequestEventHandler {
   }
 
   virtual void requestShutdown() {
-    m_registeredFilters = empty_array();
+    m_registeredFilters.detach();
   }
 private:
   Variant appendOrPrependFilter(const Resource& stream,

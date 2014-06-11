@@ -12,12 +12,12 @@
 #
 #   Checkout and build your new hhvm, then:
 #   ./test/run -l -m jit ./test/quick
-#   ./test/compare-ir.sh
+#   ./test/tools/compare-ir.sh
 #
 # Produces an ir-diffs.diff file that you can inspect for meaningful
 # differences in JIT output.
 
-TEST_DIRS=$(dirname $0)
+TEST_DIRS=$(dirname $0)/..
 
 #
 # Strip out hex symbols and other extraneous differences

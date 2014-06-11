@@ -869,7 +869,7 @@ class mysqli {
       return null;
     }
     if (is_bool($result)) {
-      return $result;
+      return false;
     }
 
     return new mysqli_result($result, MYSQLI_STORE_RESULT);

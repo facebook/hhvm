@@ -1,0 +1,10 @@
+bool(false)
+object(mysqli_result)#%i (%i) {
+  ["__result":"mysqli_result":private]=>
+  resource(%i) of type (mysql result)
+  ["__resulttype":"mysqli_result":private]=>
+  int(0)
+  ["__done":"mysqli_result":private]=>
+  bool(false)
+}
+bool(false)

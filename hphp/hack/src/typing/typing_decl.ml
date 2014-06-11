@@ -380,6 +380,7 @@ and class_decl_ c =
     tc_members_fully_known = ext_strict;
     tc_kind = c.c_kind;
     tc_name = snd c.c_name;
+    tc_pos = fst c.c_name;
     tc_tparams = tparams;
     tc_consts = consts;
     tc_cvars = cvars;

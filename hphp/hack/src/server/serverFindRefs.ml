@@ -32,8 +32,10 @@ let search_function function_name include_defs genv env =
 let search_method class_name method_name include_defs genv env =
   let class_name = add_ns class_name in
   (* Find all the classes that extend this one *)
-  let all_classes = FindRefsService.get_child_classes
+  let files = FindRefsService.get_child_classes_files
       genv.ServerEnv.workers env.ServerEnv.files_info class_name in
+  let all_classes = FindRefsService.find_child_classes
+      class_name env.ServerEnv.files_info files in
   let all_classes = SSet.add class_name all_classes in
   (* Get all the files that reference those classes *)
   let files = FindRefsService.get_dependent_files

@@ -76,6 +76,9 @@ struct NamedBfd {
 // statics
 
 bool StackTraceBase::Enabled = true;
+static const char* s_defaultBlacklist[] = {"_ZN4HPHP16StackTraceNoHeap"};
+const char** StackTraceBase::FunctionBlacklist = s_defaultBlacklist;
+unsigned int StackTraceBase::FunctionBlacklistCount = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
@@ -378,8 +381,13 @@ bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num,
                                             : dlInfo.dli_sname;
   if (!funcname) funcname = "??";
 
-  // ignore frames in the StackTrace class
-  if (strstr(funcname, "StackTraceNoHeap")) return false ;
+  // ignore some frames that are always present
+  for (int i = 0; i < FunctionBlacklistCount; i++) {
+    auto ignoreFunc = FunctionBlacklist[i];
+    if (strncmp(funcname, ignoreFunc, strlen(ignoreFunc)) == 0) {
+      return false;
+    }
+  }
 
   dprintf(fd, "# %d%s ", frame_num, frame_num < 10 ? " " : "");
   Demangle(fd, funcname);

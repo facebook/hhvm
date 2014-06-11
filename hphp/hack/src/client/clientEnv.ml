@@ -24,6 +24,8 @@ type client_mode =
 | MODE_FIND_REFS of string
 | MODE_IDENTIFY_FUNCTION of string
 | MODE_OUTLINE
+| MODE_METHOD_JUMP_CHILDREN of string
+| MODE_METHOD_JUMP_ANCESTORS of string
 | MODE_REFACTOR
 | MODE_FIND_CLASS_REFS of string
 | MODE_SEARCH of string

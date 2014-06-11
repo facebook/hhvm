@@ -73,11 +73,13 @@ let resolve_types acc collated_values =
     let ureason = Typing_reason.URnone in
     let any = reason, Typing_defs.Tany in
     let env, type_ =
-      try 
-        let unify (env, ty1) ty2 =
-          Typing_ops.unify Pos.none ureason env ty1 ty2 in
-        List.fold_left unify (env, any) tyl
-      with Timeout -> raise Timeout | _ -> try
+      try
+        Errors.try_ begin fun () ->
+          let unify (env, ty1) ty2 =
+            Typing_ops.unify Pos.none ureason env ty1 ty2 in
+          List.fold_left unify (env, any) tyl
+        end (fun _ -> raise Exit)
+      with Timeout -> raise Timeout | _ -> try Errors.try_ begin fun () ->
         let sub ty1 env ty2 =
           Typing_ops.sub_type Pos.none ureason env ty1 ty2 in
 
@@ -87,7 +89,10 @@ let resolve_types acc collated_values =
         let rec guess_super env tyl = function
           | [] -> raise Not_found
           | guess :: guesses ->
-            try List.fold_left (sub guess) env tyl, guess
+            try
+              Errors.try_ begin fun () ->
+                List.fold_left (sub guess) env tyl, guess
+              end (fun _ -> raise Exit)
             with Timeout -> raise Timeout | _ -> guess_super env tyl guesses in
 
         let xhp = reason, Typing_defs.Tapply ((Pos.none, "\\:xhp"), []) in
@@ -118,6 +123,7 @@ let resolve_types acc collated_values =
           tyl
         in
         guess_super env tyl guesses
+        end (fun _ -> raise Exit)
       with Timeout -> raise Timeout | _ ->
         env, any
     in

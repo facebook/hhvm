@@ -1,4 +1,3 @@
-No errors
 File: void.php, line: 12, kind: Kreturn, type: void
 File: void.php, line: 16, kind: Kreturn, type: void
 File: void.php, line: 25, kind: Kreturn, type: Awaitable<void>
@@ -6,3 +5,4 @@ File: void.php, line: 29, kind: Kreturn, type: Awaitable<int>
 File: void.php, line: 34, kind: Kreturn, type: Awaitable<?int>
 File: void.php, line: 43, kind: Kreturn, type: Awaitable<?int>
 File: void.php, line: 57, kind: Kreturn, type: void
+No errors

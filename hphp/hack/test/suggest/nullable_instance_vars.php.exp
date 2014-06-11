@@ -1,4 +1,3 @@
-No errors
 File: nullable_instance_vars.php, line: 13, kind: Kmember:a, type: int
 File: nullable_instance_vars.php, line: 14, kind: Kmember:b, type: ?int
 File: nullable_instance_vars.php, line: 15, kind: Kmember:c, type: ?int
@@ -8,3 +7,4 @@ File: nullable_instance_vars.php, line: 18, kind: Kmember:f, type: int
 File: nullable_instance_vars.php, line: 20, kind: Kmember:$s, type: ?int
 File: nullable_instance_vars.php, line: 21, kind: Kmember:$t, type: ?int
 File: nullable_instance_vars.php, line: 22, kind: Kmember:$u, type: int
+No errors

@@ -151,6 +151,7 @@ struct Func {
 #ifdef DEBUG
     assert(this && m_magic == kMagic);
 #endif
+    assert(m_name != nullptr);
   }
 
   FuncId getFuncId() const {

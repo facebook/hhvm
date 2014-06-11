@@ -189,6 +189,9 @@ Variant static memcache_fetch_from_storage(const char *payload,
     std::vector<char> buffer;
     size_t buffer_len;
     for (int factor = 1; !done && factor <= 16; ++factor) {
+      if (payload_len >= std::numeric_limits<unsigned long>::max() / (1 << factor)) {
+        break;
+      }
       buffer_len = payload_len * (1 << factor) + 1;
       buffer.resize(buffer_len);
       if (uncompress((Bytef*)buffer.data(), &buffer_len,

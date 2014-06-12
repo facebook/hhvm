@@ -55,7 +55,7 @@ function parse_options(OptionInfoMap $optmap): OptionMap {
   return parse_options_UNSAFE($optmap);
 }
 
-function parse_options_impl(OptionInfoMap $optmap, array<string> $argv): OptionMap {
+function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): OptionMap {
   $short_to_long     = Map {};
   $long_to_default   = Map {};
   $long_supports_arg = Map {};

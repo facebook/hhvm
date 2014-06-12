@@ -66,7 +66,6 @@ private:
   const char *m_extended_method;
   HeaderMap m_requestHeaders;
   bool m_sendStarted;
-  bool m_sendEnded;
   int m_requestSize;
 };
 

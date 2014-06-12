@@ -312,18 +312,18 @@ struct FrameStack {
   }
 
   /* Map from the instruction defining the frame to a Frame object. */
-  smart::hash_map<const IRInstruction*, Frame> live;
+  smart::flat_map<const IRInstruction*, Frame> live;
 
   /* Similar to live, but for frames that have been popped. We keep track of
    * these because we often refer to a LdThis from an inlined function after
    * it's returned. */
-  smart::hash_map<const IRInstruction*, Frame> dead;
+  smart::flat_map<const IRInstruction*, Frame> dead;
 
   /* Frames that have been pushed but not activated. */
   smart::vector<Frame> preLive;
 };
 
-typedef smart::hash_map<SSATmp*, SSATmp*> CanonMap;
+typedef smart::flat_map<SSATmp*, SSATmp*> CanonMap;
 
 /*
  * State holds all the information we care about during the analysis pass, and
@@ -332,7 +332,7 @@ typedef smart::hash_map<SSATmp*, SSATmp*> CanonMap;
 struct State {
   /* values maps from live SSATmps to the currently known state about the
    * value. */
-  smart::hash_map<SSATmp*, Value> values;
+  smart::flat_map<SSATmp*, Value> values;
 
   /* canon keeps track of values that have been through passthrough
    * instructions, like CheckType and AssertType. */
@@ -385,6 +385,11 @@ struct IncomingState {
   IncomingState(const Block* f, const State& s)
     : from(f)
     , state(s)
+  {}
+
+  IncomingState(const Block* f, State&& s)
+    : from(f)
+    , state(std::move(s))
   {}
 
   const Block* from;
@@ -516,18 +521,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
       }
       m_inst = nullptr;
 
-      // Propagate current state to the next block, if one exists. If we have a
-      // taken branch, that information will be propagated in processInst().
       auto* next = block->next();
       auto* taken = block->taken();
-      if (next) {
-        ITRACE(3, "propagating B{}'s state to next - B{}\n",
-               m_block->id(), next->id());
-        Indent _i;
-        FTRACE(3, "{}", show(m_state));
-        m_savedStates[next].emplace_back(block, m_state);
-      }
-
       if (!next && !taken) {
         // This block is terminal. Ensure that all live references have been
         // accounted for.
@@ -551,6 +546,16 @@ struct SinkPointAnalyzer : private LocalStateHook {
                             valState.second.optDelta() == 0,
                             showFailure);
         }
+      }
+
+      // Propagate current state to the next block, if one exists. If we have a
+      // taken branch, that information will be propagated in processInst().
+      if (next) {
+        ITRACE(3, "propagating B{}'s state to next - B{}\n",
+               m_block->id(), next->id());
+        Indent _i;
+        FTRACE(3, "{}", show(m_state));
+        m_savedStates[next].emplace_back(block, std::move(m_state));
       }
       FTRACE(3, "\n");
 
@@ -598,7 +603,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
      * was optimized away because the branch turned into a Nop).
      */
     if (states.size() == 1 && !m_block->front().is(DefLabel)) {
-      return states.front().state;
+      return std::move(states.front().state);
     }
 
     auto const& firstFrames = states.front().state.frames;
@@ -653,7 +658,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     // Now, we build a map from values to their merged incoming state and which
     // blocks provide information about the value.
     smart::hash_map<SSATmp*, IncomingValue> mergedValues;
-    for (auto& inState : states) {
+    for (auto const& inState : states) {
       if (inState.state.frames != firstFrames) {
         if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
           throw ControlFlowFailedExc(__FILE__, __LINE__);
@@ -1034,16 +1039,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
       }
     }
 
-    // SpillStack and Call may have some of their sources replaced with None,
-    // to indicate that the value doesn't need to be stored again. We still
-    // want to trace down the original source to track its refcount state, and
-    // we do so by scanning all currently tracked values from LdStacks.
-    auto ldStacksLazy = folly::lazy([&]{
-      auto* spill = m_inst->is(SpillStack) ? m_inst : m_inst->src(0)->inst();
-      assert(spill->is(SpillStack));
-      return collectLdStacks(spill->src(0));
-    });
-
     ITRACE(3, "consuming normal inputs\n");
     for (uint32_t i = 0; i < m_inst->numSrcs(); ++i) {
       Indent _i;
@@ -1084,22 +1079,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
     ITRACE(3, "getting local effects from FrameState\n");
     Indent _i;
     m_frameState.getLocalEffects(m_inst, *this);
-  }
-
-  /* For all LdStack instructions from the given sp, build a map from stack
-   * offset to value. Used above in consumeInputs. */
-  smart::hash_map<int32_t, SSATmp*> collectLdStacks(SSATmp* sp) {
-    smart::hash_map<int32_t, SSATmp*> ret;
-
-    for (auto const& pair : m_state.values) {
-      auto* inst = pair.first->inst();
-      if (inst->is(LdStack) && inst->src(0) == sp) {
-        auto const offset = inst->extra<LdStack>()->offset;
-        ret[offset] = inst->dst();
-      }
-    }
-
-    return ret;
   }
 
   /*

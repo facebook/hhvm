@@ -1538,7 +1538,7 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
     emitJmpCondHelper(offset, true, res);
   } else {
     gen(DecRef, src);
-    emitJmp(offset, true, nullptr);
+    emitJmpImpl(offset, JmpFlagBreakTracelet, nullptr);
   }
 }
 
@@ -2022,20 +2022,19 @@ void HhbcTranslator::emitDup() {
   pushIncRef(topC());
 }
 
-void HhbcTranslator::emitJmp(int32_t offset,
-                             bool breakTracelet,
-                             Block* catchBlock) {
+void HhbcTranslator::emitJmpImpl(int32_t offset,
+                                 JmpFlags flags,
+                                 Block* catchBlock) {
   // If surprise flags are set, exit trace and handle surprise
   bool backward = static_cast<uint32_t>(offset) <= bcOff();
   if (backward && catchBlock) {
     emitJmpSurpriseCheck(catchBlock);
   }
   if (genMode() == IRGenMode::CFG) {
-    // TODO(t3730057): Optimize away spillstacks and fallthrough
-    // jumps, either by doing something clever here or adding to
-    // jumpopts.
-    exceptionBarrier();
-    auto target = (breakTracelet
+    if (flags & JmpFlagNextIsMerge) {
+      exceptionBarrier();
+    }
+    auto target = (flags & JmpFlagBreakTracelet
                    || m_irb->blockIsIncompatible(offset))
       ? makeExit(offset)
       : makeBlock(offset);
@@ -2043,16 +2042,14 @@ void HhbcTranslator::emitJmp(int32_t offset,
     gen(Jmp, target);
     return;
   }
-  if (!breakTracelet) return;
+  if (!(flags & JmpFlagBreakTracelet)) return;
   gen(Jmp, makeExit(offset));
 }
 
-void HhbcTranslator::emitJmp(int32_t offset,
-                             bool breakTracelet,
-                             bool noSurprise) {
-  emitJmp(offset, breakTracelet, noSurprise ? nullptr : makeCatch());
+void HhbcTranslator::emitJmp(int32_t offset, JmpFlags flags) {
+  emitJmpImpl(offset, flags,
+              flags & JmpFlagSurprise ? makeCatch() : nullptr);
 }
-
 
 SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
                                           bool negate,
@@ -2068,20 +2065,19 @@ SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
 void HhbcTranslator::emitJmpHelper(int32_t taken,
                                    int32_t next,
                                    bool negate,
-                                   bool bothPaths,
-                                   bool breaksTracelet,
+                                   JmpFlags flags,
                                    SSATmp* src) {
-  if (breaksTracelet) {
+  if (flags & JmpFlagBreakTracelet) {
     spillStack();
   }
-  if (genMode() == IRGenMode::CFG) {
+  if (genMode() == IRGenMode::CFG && (flags & JmpFlagNextIsMerge)) {
     // Before jumping to a merge point we have to ensure that the
     // stack pointer is sync'ed.  Without an ExceptionBarrier the
     // SpillStack can be removed by DCE (especially since merge points
     // start with a DefSP to block SP-chain walking).
     exceptionBarrier();
   }
-  auto const target  = (!bothPaths
+  auto const target  = (!(flags & JmpFlagBothPaths)
                         || m_irb->blockIsIncompatible(taken))
     ? makeExit(taken)
     : makeBlock(taken);
@@ -2098,16 +2094,14 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
   }
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken, Offset next, bool bothPaths,
-                              bool breaksTracelet) {
+void HhbcTranslator::emitJmpZ(Offset taken, Offset next, JmpFlags flags) {
   auto const src = popC();
-  emitJmpHelper(taken, next, true, bothPaths, breaksTracelet, src);
+  emitJmpHelper(taken, next, true, flags, src);
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, bool bothPaths,
-                               bool breaksTracelet) {
+void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, JmpFlags flags) {
   auto const src = popC();
-  emitJmpHelper(taken, next, false, bothPaths, breaksTracelet, src);
+  emitJmpHelper(taken, next, false, flags, src);
 }
 
 /*
@@ -6382,11 +6376,11 @@ void HhbcTranslator::end(Offset nextPc) {
   gen(ReqBindJmp, BCOffset(nextPc));
 }
 
-void HhbcTranslator::endBlock(Offset next) {
+void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
   if (m_irb->blockExists(next)) {
-    emitJmp(next,
-            false /* breakTracelet */,
-            nullptr);
+    emitJmpImpl(next,
+                nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
+                nullptr);
   }
 }
 

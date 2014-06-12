@@ -44,6 +44,24 @@ enum class IRGenMode {
   CFG,
 };
 
+enum JmpFlags {
+  JmpFlagNone          = 0,
+  JmpFlagBreakTracelet = 1,
+  JmpFlagNextIsMerge   = 2,
+  JmpFlagBothPaths     = 4,
+  JmpFlagSurprise      = 8
+};
+
+inline JmpFlags operator|(JmpFlags f1, JmpFlags f2) {
+  return static_cast<JmpFlags>(
+    static_cast<unsigned>(f1) | static_cast<unsigned>(f2));
+}
+
+inline JmpFlags operator&(JmpFlags f1, JmpFlags f2) {
+  return static_cast<JmpFlags>(
+    static_cast<unsigned>(f1) & static_cast<unsigned>(f2));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -86,7 +104,7 @@ struct HhbcTranslator {
   IRGenMode genMode() const { return m_mode; }
 
   // End a bytecode block and do the right thing with fallthrough.
-  void endBlock(Offset next);
+  void endBlock(Offset next, bool nextIsMerge);
 
   void end();
   void end(Offset nextPc);
@@ -262,11 +280,10 @@ public:
   void emitDup();
   void emitUnboxR();
   void emitUnbox();
-  void emitJmpZ(Offset taken, Offset next, bool bothPaths, bool breaksTracelet);
-  void emitJmpNZ(Offset taken, Offset next, bool bothPaths,
-                 bool breaksTracelet);
-  void emitJmp(int32_t offset, bool breakTracelet, Block* catchBlock);
-  void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
+  void emitJmpZ(Offset taken, Offset next, JmpFlags);
+  void emitJmpNZ(Offset taken, Offset next, JmpFlags);
+  void emitJmpImpl(int32_t offset, JmpFlags, Block* catchBlock);
+  void emitJmp(int32_t offset, JmpFlags);
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
   void emitLt()    { emitCmp(Lt);    }
@@ -731,8 +748,8 @@ private:
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
-  void emitJmpHelper(int32_t taken, int32_t next, bool negate,
-                     bool bothPaths, bool breaksTracelet, SSATmp* src);
+  void emitJmpHelper(int32_t taken, int32_t next, bool negate, JmpFlags,
+                     SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);

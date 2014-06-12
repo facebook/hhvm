@@ -80,6 +80,7 @@ struct NormalizedInstruction {
                      // this is the offset of the next instruction in the trace*
   bool breaksTracelet:1;
   bool includeBothPaths:1;
+  bool nextIsMerge:1;
   bool changesPC:1;
   bool preppedByRef:1;
   bool outputPredicted:1;

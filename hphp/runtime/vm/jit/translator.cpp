@@ -4046,6 +4046,38 @@ static bool containsBothSuccs(const OffsetSet&             succOffsets,
   return takenIncluded && fallthruIncluded;
 }
 
+/*
+ * Returns whether offset is a control-flow merge within region.
+ */
+static bool isMergePoint(Offset offset, const RegionDesc& region) {
+  for (auto block : region.blocks) {
+    auto const bid = block->id();
+    if (block->start().offset() == offset) {
+      auto inCount = int{0};
+      for (auto arc : region.arcs) {
+        if (arc.dst == bid) inCount++;
+      }
+      if (inCount >= 2) return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Returns whether the next instruction following inst (whether by
+ * fallthrough or branch target) is a merge in region.
+ */
+static bool nextIsMerge(const NormalizedInstruction& inst,
+                        const RegionDesc& region) {
+  Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
+  if (instrIsNonCallControlFlow(inst.op())) {
+    Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
+    return isMergePoint(takenOffset, region)
+        || isMergePoint(fallthruOffset, region);
+  }
+  return isMergePoint(fallthruOffset, region);
+}
+
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
@@ -4157,6 +4189,7 @@ Translator::translateRegion(const RegionDesc& region,
         inst.nextOffset = region.blocks[b+1]->start().offset();
       }
       populateImmediates(inst);
+      inst.nextIsMerge = nextIsMerge(inst, region);
       if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
         // TODO(t3730617): Could extend this logic to other
         // conditional control flow ops, e.g., IterNext, etc.
@@ -4253,7 +4286,14 @@ Translator::translateRegion(const RegionDesc& region,
           auto nextOffset = inst.nextOffset != kInvalidOffset
             ? inst.nextOffset
             : inst.offset() + instrLen((Op*)(inst.pc()));
-          ht.endBlock(nextOffset);
+          // prepareForSideExit is done later in Trace mode, but it
+          // needs to happen here or else we generate the SpillStack
+          // after the fallthrough jump, which is just weird.
+          if (b < region.blocks.size() - 1
+              && region.isSideExitingBlock(blockId)) {
+            ht.prepareForSideExit();
+          }
+          ht.endBlock(nextOffset, inst.nextIsMerge);
         }
       }
 
@@ -4265,8 +4305,10 @@ Translator::translateRegion(const RegionDesc& region,
       }
     }
 
-    if (b < region.blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
-      ht.prepareForSideExit();
+    if (ht.genMode() == IRGenMode::Trace) {
+      if (b < region.blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
+        ht.prepareForSideExit();
+      }
     }
 
     assert(!typePreds.hasNext());

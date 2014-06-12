@@ -6569,16 +6569,16 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
     FuncEmitter::ParamInfo pi;
     auto const typeConstraint = determine_type_constraint(par);
     if (typeConstraint.hasConstraint()) {
-      pi.setTypeConstraint(typeConstraint);
+      pi.typeConstraint = typeConstraint;
     }
     if (coerce_params) {
       if (auto const typeAnnotation = par->annotation()) {
-        pi.setBuiltinType(typeAnnotation->dataType());
+        pi.builtinType = typeAnnotation->dataType();
       }
     }
 
     if (par->hasUserType()) {
-      pi.setUserType(makeStaticString(par->getUserTypeHint()));
+      pi.userType = makeStaticString(par->getUserTypeHint());
     }
 
     // Store info about the default value if there is one.
@@ -6588,7 +6588,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
       if (vNode->isScalar()) {
         TypedValue dv;
         initScalar(dv, vNode);
-        pi.setDefaultValue(dv);
+        pi.defaultValue = dv;
 
         std::string orig = vNode->getComment();
         if (orig.empty()) {
@@ -6609,7 +6609,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
         vNode->outputPHP(cg, ar);
         phpCode = makeStaticString(os.str());
       }
-      pi.setPhpCode(phpCode);
+      pi.phpCode = phpCode;
     }
 
     ExpressionListPtr paramUserAttrs =
@@ -6624,12 +6624,12 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
         assert(uaValue->isScalar());
         TypedValue tv;
         initScalar(tv, uaValue);
-        pi.addUserAttribute(uaName, tv);
+        pi.userAttributes[uaName] = tv;
       }
     }
 
     pi.setRef(par->isRef());
-    pi.setVariadic(par->isVariadic());
+    pi.variadic = par->isVariadic();
     fe->appendParam(parName, pi);
   }
 }
@@ -6644,7 +6644,7 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
     e.InitThisLoc(thisId);
   }
   for (uint i = 0; i < m_curFunc->params().size(); i++) {
-    const TypeConstraint& tc = m_curFunc->params()[i].typeConstraint();
+    const TypeConstraint& tc = m_curFunc->params()[i].typeConstraint;
     if (!tc.hasConstraint()) continue;
     e.VerifyParamType(i);
   }
@@ -7066,7 +7066,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();
   for (int i = 0; i < f->numParams(); i++) {
     if ((!allowDoubleArgs) &&
-        (f->params()[i].builtinType() == KindOfDouble)) {
+        (f->params()[i].builtinType == KindOfDouble)) {
       return nullptr;
     }
     if (i >= numParams) {
@@ -7086,7 +7086,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
         if (!pi.hasDefaultValue()) {
           return nullptr;
         }
-        if (pi.defaultValue().m_type == KindOfUninit) {
+        if (pi.defaultValue.m_type == KindOfUninit) {
           // TODO: Resolve persistent constants
           return nullptr;
         }
@@ -7206,9 +7206,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       for (; i < fcallBuiltin->numParams(); i++) {
         auto &pi = fcallBuiltin->params()[i];
         assert(pi.hasDefaultValue());
-        auto &def = pi.defaultValue();
+        auto &def = pi.defaultValue;
         emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
-                              pi.builtinType(), i);
+                              pi.builtinType, i);
       }
     }
     e.FCallBuiltin(fcallBuiltin->numParams(), numParams, nLiteral);

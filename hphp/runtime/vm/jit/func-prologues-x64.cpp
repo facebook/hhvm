@@ -313,7 +313,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Emit warnings for any missing arguments
   if (!func->isCPPBuiltin()) {
     for (int i = nPassed; i < numNonVariadicParams; ++i) {
-      if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
+      if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
         if (false) { // typecheck
           JIT::raiseMissingArgument((const Func*) nullptr, 0);
         }

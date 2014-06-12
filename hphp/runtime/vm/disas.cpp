@@ -207,7 +207,7 @@ FuncInfo find_func_info(const Func* func) {
     for (auto i = uint32_t{0}; i < func->numParams(); ++i) {
       auto& param = func->params()[i];
       if (param.hasDefaultValue()) {
-        add_target("DV", func->params()[i].funcletOff());
+        add_target("DV", func->params()[i].funcletOff);
       }
     }
   };
@@ -477,9 +477,9 @@ std::string func_param_list(const FuncInfo& finfo) {
     if (func->byRef(i)) ret += "&";
     ret += folly::format("${}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
-      auto const off = func->params()[i].funcletOff();
+      auto const off = func->params()[i].funcletOff;
       ret += folly::format(" = {}", jmp_label(finfo, off)).str();
-      if (auto const code = func->params()[i].phpCode()) {
+      if (auto const code = func->params()[i].phpCode) {
         ret += folly::format("({})", escaped_long(code)).str();
       }
     }

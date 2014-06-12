@@ -34,7 +34,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
   if (nargs < nparams) {
     const Func::ParamInfoVec& paramInfo = fp->m_func->params();
     for (int i = nargs; i < nparams; ++i) {
-      Offset dvInitializer = paramInfo[i].funcletOff();
+      Offset dvInitializer = paramInfo[i].funcletOff;
       if (dvInitializer != InvalidAbsoluteOffset) {
         firstDVInitializer = dvInitializer;
         break;

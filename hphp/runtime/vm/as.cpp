@@ -1655,7 +1655,7 @@ void parse_parameter_list(AsmState& as) {
       ch = as.in.getc();
       if (ch == '(') {
         String str = parse_long_string(as);
-        param.setPhpCode(makeStaticString(str));
+        param.phpCode = makeStaticString(str);
         TypedValue tv;
         tvWriteUninit(&tv);
         if (str.size() == 4) {
@@ -1668,7 +1668,7 @@ void parse_parameter_list(AsmState& as) {
           tv = make_tv<KindOfBoolean>(false);
         }
         if (tv.m_type != KindOfUninit) {
-          param.setDefaultValue(tv);
+          param.defaultValue = tv;
         }
         as.in.expectWs(')');
         as.in.skipWhitespace();

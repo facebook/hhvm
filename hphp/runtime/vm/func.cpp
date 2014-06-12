@@ -88,8 +88,8 @@ void Func::checkDeclarationCompat(const PreClass* preClass,
       auto const& p = params[i];
       if (p.isVariadic()) { decl_incompat(preClass, imeth); }
       auto const& ip = iparams[i];
-      if (!p.typeConstraint().compat(ip.typeConstraint())
-          && !ip.typeConstraint().isTypeVar()) {
+      if (!p.typeConstraint.compat(ip.typeConstraint)
+          && !ip.typeConstraint.isTypeVar()) {
         decl_incompat(preClass, imeth);
       }
       if (!iparams[i].hasDefaultValue()) {
@@ -109,11 +109,11 @@ void Func::checkDeclarationCompat(const PreClass* preClass,
 
       // To be compatible with a variadic interface, params from the
       // variadic onwards must have a compatible typehint
-      auto const& ivarConstraint = iparams[iparams.size() - 1].typeConstraint();
+      auto const& ivarConstraint = iparams[iparams.size() - 1].typeConstraint;
       if (!ivarConstraint.isTypeVar()) {
         for (; i < this->numParams(); ++i) {
           auto const& p = params[i];
-          if (!p.typeConstraint().compat(ivarConstraint)) {
+          if (!p.typeConstraint.compat(ivarConstraint)) {
             decl_incompat(preClass, imeth);
           }
         }
@@ -670,10 +670,10 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 
   const ParamInfoVec& params = shared()->m_params;
   for (uint i = 0; i < params.size(); ++i) {
-    if (params[i].funcletOff() != InvalidAbsoluteOffset) {
-      out << " DV for parameter " << i << " at " << params[i].funcletOff();
-      if (params[i].phpCode()) {
-        out << " = " << params[i].phpCode()->data();
+    if (params[i].funcletOff != InvalidAbsoluteOffset) {
+      out << " DV for parameter " << i << " at " << params[i].funcletOff;
+      if (params[i].phpCode) {
+        out << " = " << params[i].phpCode->data();
       }
       out << std::endl;
     }
@@ -780,14 +780,14 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
           // Most of the time the default value is scalar, so we can
           // avoid evaling in the common case
           pi->value = strdup(f_serialize(
-            tvAsVariant((TypedValue*)&fpi.defaultValue())).get()->data());
+            tvAsVariant((TypedValue*)&fpi.defaultValue)).get()->data());
         } else {
           // Eval PHP code to get default value, and serialize the result. Note
           // that access of undefined class constants can cause the eval() to
           // fatal. Zend lets such fatals propagate, so don't bother catching
           // exceptions here.
           const Variant& v = g_context->getEvaledArg(
-            fpi.phpCode(),
+            fpi.phpCode,
             cls() ? cls()->nameStr() : nameStr()
           );
           pi->value = strdup(f_serialize(v).get()->data());
@@ -795,12 +795,12 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
         // This is a raw char*, but its lifetime should be at least as long
         // as the the Func*. At this writing, it's a merged anon string
         // owned by ParamInfo.
-        pi->valueText = fpi.phpCode()->data();
+        pi->valueText = fpi.phpCode->data();
       }
-      pi->type = fpi.typeConstraint().hasConstraint() ?
-        fpi.typeConstraint().typeName()->data() : "";
-      for (auto it = fpi.userAttributes().begin();
-          it != fpi.userAttributes().end(); ++it) {
+      pi->type = fpi.typeConstraint.hasConstraint() ?
+        fpi.typeConstraint.typeName()->data() : "";
+      for (auto it = fpi.userAttributes.begin();
+          it != fpi.userAttributes.end(); ++it) {
         // convert the typedvalue to a cvarref and push into pi.
         auto userAttr = new ClassInfo::UserAttributeInfo;
         assert(it->first->isStatic());
@@ -842,7 +842,7 @@ DVFuncletsVec Func::getDVFunclets() const {
   for (int i = 0; i < nParams; ++i) {
     const ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue()) {
-      dvs.push_back(std::make_pair(i, pi.funcletOff()));
+      dvs.push_back(std::make_pair(i, pi.funcletOff));
     }
   }
   return dvs;
@@ -876,7 +876,7 @@ bool Func::isDVEntry(Offset offset) const {
   auto const nparams = numNonVariadicParams();
   for (int i = 0; i < nparams; i++) {
     const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue() && pi.funcletOff() == offset) return true;
+    if (pi.hasDefaultValue() && pi.funcletOff == offset) return true;
   }
   return false;
 }
@@ -890,7 +890,7 @@ int Func::getDVEntryNumParams(Offset offset) const {
   auto const nparams = numNonVariadicParams();
   for (int i = 0; i < nparams; i++) {
     const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue() && pi.funcletOff() == offset) return i;
+    if (pi.hasDefaultValue() && pi.funcletOff == offset) return i;
   }
   return -1;
 }
@@ -901,7 +901,7 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
   for (unsigned i = numArgsPassed; i < nparams; i++) {
     const Func::ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue()) {
-      return pi.funcletOff();
+      return pi.funcletOff;
     }
   }
   return base();
@@ -927,10 +927,6 @@ void Func::incProfCounter() {
   if (m_profCounter >= RuntimeOption::EvalHotFuncThreshold) {
     m_attrs = (Attr)(m_attrs | AttrHot);
   }
-}
-
-bool Func::isParamCoerceMode() const {
-  return attrs() & (AttrParamCoerceModeFalse | AttrParamCoerceModeNull);
 }
 
 //=============================================================================
@@ -1300,15 +1296,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_returnType = m_returnType;
   std::vector<Func::ParamInfo> fParams;
   for (unsigned i = 0; i < m_params.size(); ++i) {
-    Func::ParamInfo pi;
-    pi.setFuncletOff(m_params[i].funcletOff());
-    pi.setDefaultValue(m_params[i].defaultValue());
-    pi.setPhpCode(m_params[i].phpCode());
-    pi.setTypeConstraint(m_params[i].typeConstraint());
-    pi.setUserAttributes(m_params[i].userAttributes());
-    pi.setBuiltinType(m_params[i].builtinType());
-    pi.setUserType(m_params[i].userType());
-    pi.setVariadic(m_params[i].isVariadic());
+    Func::ParamInfo pi = m_params[i];
     f->appendParam(m_params[i].ref(), pi, fParams);
   }
 
@@ -1415,7 +1403,7 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
     FuncEmitter::ParamInfo pi;
     const auto& parameter = info->parameters[i];
     pi.setRef((bool)(parameter->attribute & ClassInfo::IsReference));
-    pi.setBuiltinType(parameter->argType);
+    pi.builtinType = parameter->argType;
     appendParam(makeStaticString(parameter->name), pi);
   }
 }

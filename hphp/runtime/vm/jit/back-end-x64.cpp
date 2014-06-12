@@ -643,14 +643,14 @@ RegPair hintCallBuiltinSrc(const IRInstruction& inst, unsigned srcNum) {
   auto& params = callee->params();
   int i = 0, n = callee->numParams();
   for (; i < n && spos < srcNum; ++i, ++spos) {
-    if (params[i].builtinType() == KindOfDouble) {
+    if (params[i].builtinType == KindOfDouble) {
       dpos++;
     } else {
       ipos++;
     }
   }
   if (i < n && spos == srcNum) {
-    if (params[i].builtinType() == KindOfDouble) {
+    if (params[i].builtinType == KindOfDouble) {
       if (dpos < kNumSIMDRegisterArgs) {
         return {argNumToSIMDRegName[dpos], InvalidReg};
       }

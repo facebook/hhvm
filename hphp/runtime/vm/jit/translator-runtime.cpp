@@ -336,7 +336,7 @@ void VerifyParamTypeFail(int paramNum) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
-  auto const& tc = func->params()[paramNum].typeConstraint();
+  auto const& tc = func->params()[paramNum].typeConstraint;
   TypedValue* tv = frame_local(ar, paramNum);
   assert(!tc.check(tv, func));
   tc.verifyParamFail(func, tv, paramNum);

@@ -2228,7 +2228,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           auto func = ni->func();
           const auto& inRtt = ni->inputs[0]->rtt;
           auto paramId = ni->imm[0].u_IVA;
-          const auto& tc = func->params()[paramId].typeConstraint();
+          const auto& tc = func->params()[paramId].typeConstraint;
           if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
               (inRtt.isVagueValue() || inRtt.isObject() || inRtt.isRef())) {
             auto* loc = t.newDynLocation(
@@ -3265,7 +3265,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
       auto const& param = target->params()[i];
       if (param.hasDefaultValue()) {
         if (ret == kInvalidOffset) {
-          ret = param.funcletOff();
+          ret = param.funcletOff;
         }
       } else {
         FTRACE(1, "analyzeCallee: refusing because we would "

@@ -158,7 +158,7 @@ void ActRec::setReturnVMExit() {
 
 bool
 ActRec::skipFrame() const {
-  return m_func && m_func->skipFrame();
+  return m_func && m_func->isSkipFrame();
 }
 
 template <>
@@ -1627,7 +1627,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
         const Func::ParamInfoVec& paramInfo = func->params();
         for (int i = nargs; i < nparams; ++i) {
           stack.pushUninit();
-          Offset dvInitializer = paramInfo[i].funcletOff();
+          Offset dvInitializer = paramInfo[i].funcletOff;
           if (dvInitializer == InvalidAbsoluteOffset) {
             // We wait to raise warnings until after all the locals have been
             // initialized. This is important because things need to be in a
@@ -1671,7 +1671,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
     SYNC();
     const Func::ParamInfoVec& paramInfo = func->params();
     for (int i = ar->numArgs(); i < nparams; ++i) {
-      Offset dvInitializer = paramInfo[i].funcletOff();
+      Offset dvInitializer = paramInfo[i].funcletOff;
       if (dvInitializer == InvalidAbsoluteOffset) {
         const char* name = func->name()->data();
         if (nparams == 1) {
@@ -6869,7 +6869,7 @@ OPTBLD_INLINE void ExecutionContext::iopVerifyParamType(IOP_ARGS) {
   const Func *func = vmfp()->m_func;
   assert(paramId < func->numParams());
   assert(func->numParams() == int(func->params().size()));
-  const TypeConstraint& tc = func->params()[paramId].typeConstraint();
+  const TypeConstraint& tc = func->params()[paramId].typeConstraint;
   assert(tc.hasConstraint());
   if (!tc.isTypeVar()) {
     tc.verifyParam(frame_local(vmfp(), paramId), func, paramId);

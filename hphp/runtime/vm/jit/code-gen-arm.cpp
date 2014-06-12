@@ -1637,7 +1637,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   for (auto i = uint32_t{0}; i < numArgs; ++i, ++srcNum) {
     auto const& pi = func->params()[i];
-    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
+    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
       callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
       callArgs.ssa(srcNum);

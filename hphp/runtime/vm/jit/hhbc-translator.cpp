@@ -3287,7 +3287,7 @@ void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {
     auto const& pi = callee->params()[i];
-    switch (pi.builtinType()) {
+    switch (pi.builtinType) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
@@ -3296,7 +3296,7 @@ void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
     case KindOfResource:
     case KindOfString:
       gen(CoerceStk,
-          Type(pi.builtinType()),
+          Type(pi.builtinType),
           StackOffset(numArgs - i - 1),
           makeExitSlow(),
           m_irb->sp());
@@ -3312,11 +3312,11 @@ void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
   SSATmp* args[numArgs];
   for (int i = numArgs - 1; i >= 0; i--) {
     auto const& pi = callee->params()[i];
-    switch (pi.builtinType()) {
+    switch (pi.builtinType) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-      args[i] = top(Type(pi.builtinType()),
+      args[i] = top(Type(pi.builtinType),
                         numArgs - i - 1);
       break;
     default:
@@ -3398,7 +3398,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
     paramSSAs[offset] = getArg(offset);
 
     auto const& pi = callee->params()[offset];
-    switch (pi.builtinType()) {
+    switch (pi.builtinType) {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
@@ -3411,7 +3411,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
     }
 
     paramNeedsConversion[offset] = offset < numNonDefault
-                                   && pi.builtinType() != KindOfUnknown;
+                                   && pi.builtinType != KindOfUnknown;
   }
 
   // For the same reason that we have to IncRef the locals above, we
@@ -3503,7 +3503,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
     for (auto i = uint32_t{0}; i < numArgs; ++i) {
       if (!paramThroughStack[i]) {
         if (paramNeedsConversion[i]) {
-          auto const ty = Type(callee->params()[i].builtinType());
+          auto const ty = Type(callee->params()[i].builtinType);
           auto const oldVal = paramSSAs[i];
           paramSSAs[i] = [&] {
             if (ty <= Type::Int) {
@@ -3523,8 +3523,8 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
 
       auto const offset = numParamsThroughStack - stackIdx - 1;
       if (paramNeedsConversion[i]) {
-        Type t(callee->params()[i].builtinType());
-        if (callee->params()[i].builtinType() == KindOfObject &&
+        Type t(callee->params()[i].builtinType);
+        if (callee->params()[i].builtinType == KindOfObject &&
             callee->methInfo()->parameters[i]->valueLen > 0) {
           t = Type::NullableObj;
         }
@@ -4255,7 +4255,7 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
   auto const ldgblExit = makePseudoMainExit();
   auto func = curFunc();
   auto const& tc = isReturnType ? func->returnTypeConstraint()
-                                : func->params()[id].typeConstraint();
+                                : func->params()[id].typeConstraint;
   auto* val = isReturnType ? topR() : ldLoc(id, ldgblExit, DataTypeSpecific);
   assert(val->type().isBoxed() || val->type().notBoxed());
   if (val->type().isBoxed()) {
@@ -5709,7 +5709,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
 
     case OpVerifyParamType: {
       auto paramId = inst.imm[0].u_LA;
-      auto const& tc = func->params()[paramId].typeConstraint();
+      auto const& tc = func->params()[paramId].typeConstraint;
       auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
       if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
           (locType <= Type::Obj || locType.maybeBoxed())) {

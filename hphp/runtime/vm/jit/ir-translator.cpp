@@ -604,7 +604,7 @@ static bool isInlinableCPPBuiltin(const Func* f) {
    * So for now, we only inline cases where the params are Variants.
    */
   for (auto i = uint32_t{0}; i < f->numParams(); ++i) {
-    if (f->params()[i].builtinType() != KindOfUnknown) {
+    if (f->params()[i].builtinType != KindOfUnknown) {
       if (f->isParamCoerceMode()) return false;
     }
   }

@@ -451,7 +451,7 @@ bool RegionFormer::tryInline() {
     for (auto i = numArgs; i < numParams; ++i) {
       auto const& param = callee->params()[i];
       if (param.hasDefaultValue()) {
-        if (startOffset == callee->base()) startOffset = param.funcletOff();
+        if (startOffset == callee->base()) startOffset = param.funcletOff;
       } else {
         return refuse("numArgs less than numParams of callee so we'd need to "
                       "emit mising argument warnings");

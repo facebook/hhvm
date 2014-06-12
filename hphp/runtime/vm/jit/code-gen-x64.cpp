@@ -3830,12 +3830,12 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
-    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
+    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
       assert(inst->src(srcNum)->type().isPtr() &&
              srcLoc(srcNum).reg() != InvalidReg);
       callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
-      callArgs.ssa(srcNum, pi.builtinType() == KindOfDouble);
+      callArgs.ssa(srcNum, pi.builtinType == KindOfDouble);
     }
   }
 

@@ -200,7 +200,7 @@ bool FuncChecker::checkOffsets() {
   for (Range<FixedVector<Func::ParamInfo> > p(m_func->params()); !p.empty(); ) {
     const Func::ParamInfo& param = p.popFront();
     if (param.hasDefaultValue()) {
-      ok &= checkOffset("dv-entry", param.funcletOff(), "func body", base,
+      ok &= checkOffset("dv-entry", param.funcletOff, "func body", base,
                         funclets);
     }
   }

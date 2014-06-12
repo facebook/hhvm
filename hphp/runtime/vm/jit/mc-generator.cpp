@@ -737,7 +737,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       m_tx.setMode(TransKind::Optimize);
-      SrcKey  funcletSK(func, paramInfo.funcletOff(), false);
+      SrcKey  funcletSK(func, paramInfo.funcletOff, false);
       TransID funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
       if (funcletTransId != kInvalidTransID) {
         invalidateSrcKey(funcletSK);

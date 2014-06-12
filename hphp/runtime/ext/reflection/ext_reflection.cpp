@@ -125,19 +125,19 @@ const Func* get_method_func(const Class* cls, const String& meth_name) {
 }
 
 Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
-                                         const Func* func) {
+                                  const Func* func) {
   assert(fpi.hasDefaultValue());
   if (fpi.hasScalarDefaultValue()) {
     // Most of the time the default value is scalar, so we can
     // avoid evaling in the common case
-    return tvAsVariant((TypedValue*)&fpi.defaultValue());
+    return tvAsVariant((TypedValue*)&fpi.defaultValue);
   } else {
     // Eval PHP code to get default value. Note that access of
     // undefined class constants can cause the eval() to
     // fatal. Zend lets such fatals propagate, so don't bother catching
     // exceptions here.
     return g_context->getEvaledArg(
-      fpi.phpCode(),
+      fpi.phpCode,
       func->cls() ? func->cls()->nameStr() : func->nameStr()
     );
   }
@@ -573,28 +573,28 @@ static Array get_function_param_info(const Func* func) {
     param.set(s_name, name);
 
     auto const nonExtendedConstraint =
-      fpi.typeConstraint().hasConstraint() &&
-      !fpi.typeConstraint().isExtended();
-    auto const type = nonExtendedConstraint ? fpi.typeConstraint().typeName()
+      fpi.typeConstraint.hasConstraint() &&
+      !fpi.typeConstraint.isExtended();
+    auto const type = nonExtendedConstraint ? fpi.typeConstraint.typeName()
       : staticEmptyString();
 
     param.set(s_type, VarNR(type));
-    const StringData* typeHint = fpi.userType() ?
-      fpi.userType() : staticEmptyString();
+    const StringData* typeHint = fpi.userType ?
+      fpi.userType : staticEmptyString();
     param.set(s_type_hint, VarNR(typeHint));
     param.set(s_function, VarNR(func->name()));
     if (func->preClass()) {
       param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
                                func->preClass()->name()));
     }
-    if (!nonExtendedConstraint || fpi.typeConstraint().isNullable()) {
+    if (!nonExtendedConstraint || fpi.typeConstraint.isNullable()) {
       param.set(s_nullable, true_varNR);
     }
 
-    if (fpi.phpCode()) {
+    if (fpi.phpCode) {
       Variant v = default_arg_from_php_code(fpi, func);
       param.set(s_default, v);
-      param.set(s_defaultText, VarNR(fpi.phpCode()));
+      param.set(s_defaultText, VarNR(fpi.phpCode));
     } else if (auto mi = func->methInfo()) {
       auto p = mi->parameters[i];
       auto defText = p->valueText;
@@ -629,8 +629,8 @@ static Array get_function_param_info(const Func* func) {
     }
     {
       Array userAttrs = Array::Create();
-      for (auto it = fpi.userAttributes().begin();
-           it != fpi.userAttributes().end(); ++it) {
+      for (auto it = fpi.userAttributes.begin();
+           it != fpi.userAttributes.end(); ++it) {
         userAttrs.set(StrNR(it->first), tvAsCVarRef(&it->second));
       }
       param.set(s_attributes, VarNR(userAttrs));

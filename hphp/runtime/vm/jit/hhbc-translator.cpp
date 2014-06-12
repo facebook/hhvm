@@ -73,9 +73,9 @@ HhbcTranslator::HhbcTranslator(TransContext context)
   : m_context(context)
   , m_unit(context)
   , m_irb(new IRBuilder(context.initSpOffset, m_unit, context.func))
-  , m_bcStateStack { BcState(context.initBcOffset,
-                             context.resumed,
-                             context.func) }
+  , m_bcStateStack { BcState { context.initBcOffset,
+                               context.resumed,
+                               context.func } }
   , m_lastBcOff{false}
   , m_hasExit{false}
   , m_mode{IRGenMode::Trace}
@@ -101,6 +101,16 @@ bool HhbcTranslator::classIsPersistentOrCtxParent(const Class* cls) const {
   if (classHasPersistentRDS(cls)) return true;
   if (!curClass()) return false;
   return curClass()->classof(cls);
+}
+
+SrcKey HhbcTranslator::nextSrcKey() const {
+  SrcKey srcKey = curSrcKey();
+  srcKey.advance(curFunc()->unit());
+  return srcKey;
+}
+
+Offset HhbcTranslator::nextBcOff() const {
+  return nextSrcKey().offset();
 }
 
 ArrayData* HhbcTranslator::lookupArrayId(int arrId) {
@@ -302,8 +312,9 @@ void HhbcTranslator::beginInlining(unsigned numParams,
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
-  m_bcStateStack.emplace_back(target->getEntryForNumArgs(numParams),
-                              false, target);
+  m_bcStateStack.emplace_back(BcState { target->getEntryForNumArgs(numParams),
+                                        false,
+                                        target});
   updateMarker();
 
   always_assert_log(
@@ -498,6 +509,11 @@ void HhbcTranslator::emitRB(Trace::RingBufferType t, const StringData* msg,
   if (!Trace::moduleEnabledRelease(Trace::ringbuffer, level)) return;
 
   gen(RBTrace, RBTraceData(t, msg));
+}
+
+void HhbcTranslator::emitRB(Trace::RingBufferType t, std::string msg,
+                            int level) {
+  emitRB(t, makeStaticString(msg), level);
 }
 
 void HhbcTranslator::emitDbgAssertRetAddr() {
@@ -2030,6 +2046,13 @@ void HhbcTranslator::emitJmp(int32_t offset,
   if (!breakTracelet) return;
   gen(Jmp, makeExit(offset));
 }
+
+void HhbcTranslator::emitJmp(int32_t offset,
+                             bool breakTracelet,
+                             bool noSurprise) {
+  emitJmp(offset, breakTracelet, noSurprise ? nullptr : makeCatch());
+}
+
 
 SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
                                           bool negate,

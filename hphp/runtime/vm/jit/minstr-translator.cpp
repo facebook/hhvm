@@ -2702,6 +2702,33 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
   }
 }
 
+Block* HhbcTranslator::MInstrTranslator::makeEmptyCatch() {
+  return m_ht.makeCatch();
+}
+
+Block* HhbcTranslator::MInstrTranslator::makeCatch() {
+  auto b = makeEmptyCatch();
+  m_failedVec.push_back(b);
+  return b;
+}
+
+Block* HhbcTranslator::MInstrTranslator::makeCatchSet() {
+  assert(!m_failedSetBlock);
+  m_failedSetBlock = makeCatch();
+
+  // This catch trace will be modified in emitMPost to end with a side
+  // exit, and TryEndCatch will fall through to that side exit if an
+  // InvalidSetMException is thrown.
+  m_failedSetBlock->back().setOpcode(TryEndCatch);
+  return m_failedSetBlock;
+}
+
+void HhbcTranslator::MInstrTranslator::prependToTraces(IRInstruction* inst) {
+  for (auto b : m_failedVec) {
+    b->prepend(m_unit.cloneInstruction(inst));
+  }
+}
+
 bool HhbcTranslator::MInstrTranslator::needFirstRatchet() const {
   if (m_ni.inputs[m_mii.valCount()]->valueType() == KindOfArray) {
     switch (m_ni.immVecM[0]) {

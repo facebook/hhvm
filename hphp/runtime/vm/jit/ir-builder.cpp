@@ -696,7 +696,8 @@ void IRBuilder::reoptimize() {
         // we would have to insert the mov on the fall-through edge.
         assert(inst->op() != DefLabel);
         assert(block->empty() || !block->back().isBlockEnd());
-        appendInstruction(m_unit.mov(dst, tmp, inst->marker()));
+        auto src = tmp->inst()->is(Mov) ? tmp->inst()->src(0) : tmp;
+        appendInstruction(m_unit.mov(dst, src, inst->marker()));
       }
 
       if (inst->block() == nullptr && inst->isBlockEnd()) {

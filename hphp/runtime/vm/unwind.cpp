@@ -243,7 +243,7 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished.
     decRefLocals();
-    frame_generator(fp)->finish();
+    frame_generator(fp)->fail();
   } else {
     not_reached();
   }

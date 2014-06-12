@@ -443,6 +443,7 @@ OPCODES
 #undef O
 
   void contEnterImpl(IOP_ARGS);
+  void yield(IOP_ARGS, const Cell* key, const Cell& value);
   void asyncSuspendE(IOP_ARGS, int32_t iters);
   void asyncSuspendR(IOP_ARGS);
   void ret(IOP_ARGS);

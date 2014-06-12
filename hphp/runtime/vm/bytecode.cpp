@@ -4626,7 +4626,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   } else if (vmfp()->func()->isNonAsyncGenerator()) {
     // Mark the generator as finished and store the return value.
     assert(IS_NULL_TYPE(retval.m_type));
-    frame_generator(vmfp())->finish();
+    frame_generator(vmfp())->ret();
 
     // Push return value of next()/send()/raise().
     vmStack().pushNull();
@@ -7092,45 +7092,51 @@ OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
   iopThrow(IOP_PASS_ARGS);
 }
 
-OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
-  NEXT();
+OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
+                                           const Cell* key,
+                                           const Cell& value) {
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  auto const resumeOffset = func->unit()->offsetOf(pc);
+  assert(fp->resumed());
+  assert(func->isGenerator());
 
-  auto cont = frame_generator(vmfp());
-  auto resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
-  cont->suspend(nullptr, resumeOffset, *vmStack().topC());
-  vmStack().popTV();
+  if (!func->isAsync()) {
+    assert(fp->sfp());
+    frame_generator(fp)->yield(resumeOffset, key, value);
 
-  // Push return value of next()/send()/raise().
-  vmStack().pushNull();
+    // Push return value of next()/send()/raise().
+    vmStack().pushNull();
+  } else {
+    not_reached();
+  }
 
   EventHook::FunctionSuspend(vmfp(), true);
 
-  // Return control to the next()/send()/raise() caller.
-  Offset soff = vmfp()->m_soff;
-  vmfp() = vmfp()->sfp();
-  pc = vmfp()->func()->getEntry() + soff;
-  assert(vmfp());
+  // Grab caller info from ActRec.
+  ActRec* sfp = fp->sfp();
+  Offset soff = fp->m_soff;
+
+  // Return control to the next()/send()/raise() caller.$a
+  vmfp() = sfp;
+  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
+}
+
+OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
+  NEXT();
+  auto const value = *vmStack().topC();
+  vmStack().discard();
+
+  yield(IOP_PASS_ARGS, nullptr, value);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   NEXT();
+  auto const key = *vmStack().indC(1);
+  auto const value = *vmStack().topC();
+  vmStack().ndiscard(2);
 
-  auto cont = frame_generator(vmfp());
-  auto resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
-  cont->suspend(nullptr, resumeOffset, *vmStack().indC(1), *vmStack().topC());
-  vmStack().popTV();
-  vmStack().popTV();
-
-  // Push return value of next()/send()/raise().
-  vmStack().pushNull();
-
-  EventHook::FunctionSuspend(vmfp(), true);
-
-  // Return control to the next()/send()/raise() caller.
-  Offset soff = vmfp()->m_soff;
-  vmfp() = vmfp()->sfp();
-  pc = vmfp()->func()->getEntry() + soff;
-  assert(vmfp());
+  yield(IOP_PASS_ARGS, &key, value);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {

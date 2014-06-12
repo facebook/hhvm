@@ -2075,7 +2075,7 @@ and call_construct p env class_ params el =
         class_.tc_members_fully_known &&
         not !is_silent_mode
       then error p "This constructor expects no argument";
-      env
+      fst (lfold expr env el)
   | Some { ce_visibility = vis; ce_type = m; _ } ->
       check_visibility p env (Reason.to_pos (fst m), vis) None;
       let subst = Inst.make_subst class_.tc_tparams params in

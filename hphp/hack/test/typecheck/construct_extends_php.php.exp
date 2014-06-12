@@ -1,0 +1,4 @@
+File "construct_extends_php.php", line 16, characters 19-22:
+You are trying to access the member test but this is not an object, it is an int
+File "construct_extends_php.php", line 15, characters 14-16:
+Check this out

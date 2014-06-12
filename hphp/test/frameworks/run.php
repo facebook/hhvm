@@ -192,9 +192,9 @@ function run_tests(Vector $frameworks): void {
       $framework->prepareCurrentTestStatuses(
                                         PHPUnitPatterns::$status_code_pattern,
                                         PHPUnitPatterns::$stop_parsing_pattern);
-      verbose(Colors::YELLOW.$framework->getName().Colors::NONE.": running. ".
-              "Comparing against ".count($framework->getCurrentTestStatuses()).
-              " tests\n", !Options::$csv_only);
+      human(Colors::YELLOW.$framework->getName().Colors::NONE.": running. ".
+            "Comparing against ".count($framework->getCurrentTestStatuses()).
+            " tests\n");
       $run_msg = "Comparing test suite with previous run. ".
         Colors::GREEN."Green . (dot) ".Colors::NONE.
         "means test result same as previous. ".
@@ -208,10 +208,10 @@ function run_tests(Vector $frameworks): void {
         "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE.
         "means we are having trouble accessing the tests from the ".
         "expected run and can't get a proper status".PHP_EOL;
-      verbose($run_msg, Options::$verbose);
+      verbose($run_msg);
     } else {
-      verbose("Establishing baseline statuses for ".$framework->getName().
-              " with gray dots...\n", !Options::$csv_only);
+      human("Establishing baseline statuses for ".$framework->getName().
+            " with gray dots...\n");
     }
 
     // If we are running the tests for the framework in parallel, then let's
@@ -233,7 +233,7 @@ function run_tests(Vector $frameworks): void {
   /*************************************
    * Run the test suite
    ************************************/
-  verbose("Beginning the unit tests.....\n", !Options::$csv_only);
+  human("Beginning the unit tests.....\n");
   if ($all_tests->isEmpty()) {
     error_and_exit("No tests found to run");
   }
@@ -289,7 +289,7 @@ All tests ran as expected.
       (___)__.|_____
 
 THUMBSUP;
-   verbose($msg, !Options::$csv_only);
+   human($msg);
   } else {
     $msg = <<<THUMBSDOWN
 All tests did not run as expected. Either some statuses were
@@ -306,7 +306,7 @@ tests expected to run
          (_((
 
 THUMBSDOWN;
-    verbose($msg, !Options::$csv_only);
+    human($msg);
   }
 
   // Print the diffs
@@ -324,8 +324,7 @@ THUMBSDOWN;
   // and current maps to see if we are different
   if (md5(serialize(Options::$original_framework_info)) !==
       md5(serialize(Options::$framework_info))) {
-    verbose("Updating frameworks.json because some hashes have been updated",
-            !Options::$csv_only);
+    human("Updating frameworks.json because some hashes have been updated");
     file_put_contents(__DIR__."/frameworks.yaml",
                       Spyc::YAMLDump(Options::$framework_info));
   }
@@ -344,7 +343,7 @@ function get_unit_testing_infra_dependencies(): void {
   // 30 day old mark, resintall it anyway.
   if (!(file_exists(__DIR__."/composer.phar")) ||
       (time() - filectime(__DIR__."/composer.phar")) >= 29*24*60*60) {
-    verbose("Getting composer.phar....\n", !Options::$csv_only);
+    human("Getting composer.phar....\n");
     unlink(__DIR__."/composer.phar");
     $comp_url = "http://getcomposer.org/composer.phar";
     $get_composer_command = "wget ".$comp_url." -P ".__DIR__." 2>&1";
@@ -362,8 +361,7 @@ function get_unit_testing_infra_dependencies(): void {
   $lock_file = __DIR__."/composer.lock";
   if (!file_exists($md5_file) ||
       file_get_contents($md5_file) !== md5($json_file_contents)) {
-    verbose("\nUpdated composer.json found. Updating phpunit binary.\n",
-            !Options::$csv_only);
+    human("\nUpdated composer.json found. Updating phpunit binary.\n");
     if (file_exists($vendor_dir)) {
       remove_dir_recursive($vendor_dir);
     }
@@ -374,8 +372,8 @@ function get_unit_testing_infra_dependencies(): void {
   // Install phpunit from composer.json located in __DIR__
   $phpunit_binary = __DIR__."/vendor/bin/phpunit";
   if (!(file_exists($phpunit_binary))) {
-    verbose("\nDownloading PHPUnit in order to run tests. There may be an ".
-            "output delay while the download begins.\n", !Options::$csv_only);
+    human("\nDownloading PHPUnit in order to run tests. There may be an ".
+          "output delay while the download begins.\n");
     // Use the timeout to avoid curl SlowTimer timeouts and problems
     $phpunit_install_command = get_runtime_build()." ".
                                "-v ResourceLimit.SocketDefaultTimeout=30 ".
@@ -436,7 +434,7 @@ function print_summary_information(string $summary_file): void {
       print "files, respectively".PHP_EOL;
     }
   } else {
-      verbose("\nNO SUMMARY INFO AVAILABLE!\n", !Options::$csv_only);
+      human("\nNO SUMMARY INFO AVAILABLE!\n");
   }
 }
 

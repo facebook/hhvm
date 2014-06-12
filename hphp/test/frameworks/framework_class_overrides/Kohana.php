@@ -10,7 +10,7 @@ class Kohana extends Framework {
     parent::install();
     $root = nullthrows($this->getInstallRoot());
 
-    verbose("Initialize submodules.\n", Options::$verbose);
+    verbose("Initialize submodules.\n");
     $git_command = "git submodule update --init";
     $git_ret = run_install($git_command, $root,
                            ProxyInformation::$proxies);
@@ -20,7 +20,7 @@ class Kohana extends Framework {
                      "! Removing framework!\n", Options::$csv_only);
     }
 
-    verbose("Updating submodule branches.\n", Options::$verbose);
+    verbose("Updating submodule branches.\n");
     // Manually checkout release appropriate system branch
     // See: https://github.com/kohana/kohana/wiki/developers
     $git_command = 'git submodule foreach "';
@@ -34,8 +34,7 @@ class Kohana extends Framework {
                      "! Removing framework!\n", Options::$csv_only);
     }
 
-    verbose("Creating a phpunit.xml for running the Kohana tests.\n",
-            Options::$verbose);
+    verbose("Creating a phpunit.xml for running the Kohana tests.\n");
     $phpunit_xml = <<<XML
 <phpunit bootstrap="./modules/unittest/bootstrap_all_modules.php">
 <testsuites>

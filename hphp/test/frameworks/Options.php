@@ -119,10 +119,10 @@ class Options {
     }
 
     if ($options->containsKey('zend')) {
-      verbose ("Will try Zend if necessary. If Zend doesn't work, the script ".
-           "will still continue; the particular framework on which Zend ".
-           "was attempted may not be available though.\n", self::$verbose);
-      self::$zend_path = (string) $options['zend'];
+      verbose("Will try Zend if necessary. If Zend doesn't work, the script ".
+              "will still continue; the particular framework on which Zend ".
+           "was attempted may not be available though.\n");
+       self::$zend_path = (string) $options['zend'];
       $framework_names->removeKey(0);
       $framework_names->removeKey(0);
     }
@@ -156,12 +156,12 @@ class Options {
     }
 
     verbose("Script running...Be patient as some frameworks take a while with ".
-            "a debug build of HHVM\n", self::$verbose);
+            "a debug build of HHVM\n");
 
     if (ProxyInformation::is_proxy_required()) {
       verbose("Looks like proxy may be required. Setting to default FB proxy ".
-           "values. Please change Map in ProxyInformation.php to correct ".
-           "values, if necessary.\n", self::$verbose);
+              "values. Please change Map in ProxyInformation.php to correct ".
+              "values, if necessary.\n");
     }
 
     // This will return just the name of the frameworks passed in, if any left

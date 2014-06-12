@@ -11,15 +11,14 @@ class Yii extends Framework {
     $files = glob($this->getInstallRoot().
                   "/tests/assets/*/CAssetManagerTest.php");
     foreach ($files as $file) {
-      verbose("Removing $file\n", Options::$verbose);
+      verbose("Removing $file\n");
       unlink($file);
     }
   }
 
   protected function install(): void {
     parent::install();
-    verbose("Creating a new phpunit.xml for running the yii tests.\n",
-            Options::$verbose);
+    verbose("Creating a new phpunit.xml for running the yii tests.\n");
     $phpunit_xml = <<<XML
 <phpunit bootstrap="bootstrap.php"
     colors="false"

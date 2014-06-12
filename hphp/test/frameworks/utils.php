@@ -1,5 +1,6 @@
 <?hh
 require_once __DIR__.'/SortedIterator.php';
+require_once __DIR__.'/Options.php';
 
 // For determining number of processes
 function num_cpus() {
@@ -154,8 +155,31 @@ function command_exists(string $cmd): bool {
     return !empty($ret);
 }
 
-function verbose(string $msg, bool $verbose): void {
-  if ($verbose) {
+/**
+ * Print if output format is for humans
+ */
+function human(string $msg): void {
+  if (!Options::$csv_only) {
+    print $msg;
+  }
+}
+
+/**
+ * Print output if verbose mode is on. This implies that the output format
+ * is human-readable.
+ */
+function verbose(string $msg): void {
+  if (Options::$verbose) {
+    assert(!Options::$csv_only);
+    print $msg;
+  }
+}
+
+/**
+ * Print output if format is human readable, but not not verbose.
+ */
+function not_verbose(string $msg): void {
+  if (!(Options::$csv_only || Options::$verbose)) {
     print $msg;
   }
 }
@@ -264,7 +288,7 @@ function include_all_php($folder){
 // (e.g. PHPUnit), frameworks and framework dependencies.
 function run_install(string $proc, string $path, ?Map $env): ?int
 {
-  verbose("Running: $proc\n", Options::$verbose);
+  verbose("Running: $proc\n");
   $descriptorspec = array(
     0 => array("pipe", "r"),
     1 => array("pipe", "w"),
@@ -282,19 +306,19 @@ function run_install(string $proc, string $path, ?Map $env): ?int
     fclose($pipes[0]);
     $start_time = microtime(true);
     while ($line = fgets($pipes[1])) {
-      verbose("$line", Options::$verbose);
+      verbose("$line");
       if ((microtime(true) - $start_time) > 1) {
-        verbose(".", !Options::$verbose && !Options::$csv_only);
+        not_verbose(".");
         $start_time = microtime(true);
       }
     }
-    verbose(stream_get_contents($pipes[2]), Options::$verbose);
+    verbose(stream_get_contents($pipes[2]));
     fclose($pipes[1]);
     $ret = proc_close($process);
-    verbose("Returned status $ret\n", Options::$verbose);
+    verbose("Returned status $ret\n");
     return $ret;
   }
-  verbose("Couldn't proc_open: $proc\n", Options::$verbose);
+  verbose("Couldn't proc_open: $proc\n");
   return null;
 }
 

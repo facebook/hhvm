@@ -117,7 +117,7 @@ class Runner {
   }
 
   private function analyzeTest(string $test): bool {
-    verbose("Analyzing test: ".$test.PHP_EOL, Options::$verbose);
+    verbose("Analyzing test: ".$test.PHP_EOL);
     // If we hit a fatal or something, we will stop the overall test running
     // for this particular test sequence
     $continue_testing = true;
@@ -191,25 +191,23 @@ class Runner {
       if ($status === $statuses[$test]) {
         // FIX: posix_isatty(STDOUT) was always returning false, even
         // though can print in color. Check this out later.
-        verbose(Colors::GREEN.Statuses::PASS.Colors::NONE, !Options::$csv_only);
+        human(Colors::GREEN.Statuses::PASS.Colors::NONE);
       } else {
         // Red if we go from pass to something else
         if ($statuses[$test] === '.') {
-          verbose(Colors::RED.Statuses::FAIL.Colors::NONE, !Options::$csv_only);
+          human(Colors::RED.Statuses::FAIL.Colors::NONE);
         // Green if we go from something else to pass
         } else if ($status === '.') {
-          verbose(Colors::GREEN.Statuses::FAIL.Colors::NONE,
-                  !Options::$csv_only);
+          human(Colors::GREEN.Statuses::FAIL.Colors::NONE);
         // Blue if we go from something "faily" to something "faily"
         // e.g., E to I or F
         } else {
-          verbose(Colors::BLUE.Statuses::FAIL.Colors::NONE,
-                  !Options::$csv_only);
+          human(Colors::BLUE.Statuses::FAIL.Colors::NONE);
         }
-        verbose(PHP_EOL."Different status in ".$this->framework->getName().
-                " for test ".$test." was ".
-                $statuses[$test].
-                " and now is ".$status.PHP_EOL, !Options::$csv_only);
+        human(PHP_EOL."Different status in ".$this->framework->getName().
+              " for test ".$test." was ".
+              $statuses[$test].
+              " and now is ".$status.PHP_EOL);
         $this->diff_information .= "----------------------".PHP_EOL.
           $test.PHP_EOL.PHP_EOL.
           $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL.
@@ -223,15 +221,14 @@ class Runner {
       // before, but we are having an issue getting to the actual tests
       // (e.g., yii is one test suite that has behaved this way).
       if ($statuses !== null) {
-        verbose(Colors::LIGHTBLUE.Statuses::FAIL.Colors::NONE,
-                !Options::$csv_only);
-        verbose(PHP_EOL."Different status in ".$this->framework->getName().
-                " for test ".$test.PHP_EOL,!Options::$csv_only);
+        human(Colors::LIGHTBLUE.Statuses::FAIL.Colors::NONE);
+        human(PHP_EOL."Different status in ".$this->framework->getName().
+              " for test ".$test.PHP_EOL);
         $this->diff_information .= "----------------------".PHP_EOL.
           "Maybe haven't see this test before: ".$test.PHP_EOL.PHP_EOL.
           $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL;
       } else {
-        verbose(Colors::GRAY.Statuses::PASS.Colors::NONE, !Options::$csv_only);
+        human(Colors::GRAY.Statuses::PASS.Colors::NONE);
       }
     }
   }
@@ -397,7 +394,7 @@ class Runner {
 
   private function initialize(): bool {
     $this->actual_test_command = $this->framework->getTestCommand($this->name);
-    verbose("Command: ".$this->actual_test_command."\n", Options::$verbose);
+    verbose("Command: ".$this->actual_test_command."\n");
 
     $descriptorspec = array(
       0 => array("pipe", "r"),

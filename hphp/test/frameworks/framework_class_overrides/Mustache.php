@@ -9,7 +9,7 @@ class Mustache extends Framework {
   protected function install(): void {
     parent::install();
 
-    verbose("Initialize submodules.\n", Options::$verbose);
+    verbose("Initialize submodules.\n");
     $git_command = "git submodule update --init";
     $git_ret = run_install($git_command, nullthrows($this->getInstallRoot()),
                            ProxyInformation::$proxies);

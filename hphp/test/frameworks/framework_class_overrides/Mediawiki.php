@@ -14,13 +14,12 @@ class Mediawiki extends Framework {
     $this->skipDatabaseTests();
     # Mediawiki has a custom test runner that pulls in parts of PHPUnit
     # from vendor/
-    verbose("Installing phpunit 3.7 for Mediawiki.\n", Options::$verbose);
+    verbose("Installing phpunit 3.7 for Mediawiki.\n");
     $phpunit = get_runtime_build().' '.__DIR__.
       '/../composer.phar --working-dir='.$this->getInstallRoot().' '.
       "require 'phpunit/phpunit=3.7.*'";
     exec($phpunit);
-    verbose("Adding LocalSettings.php file to Mediawiki test dir.\n",
-            Options::$verbose);
+    verbose("Adding LocalSettings.php file to Mediawiki test dir.\n");
     $touch_command = "touch ".$this->getInstallRoot()."/LocalSettings.php";
     exec($touch_command);
   }
@@ -28,7 +27,7 @@ class Mediawiki extends Framework {
   // We don't have a MySQL instance running for our test runs, so Database
   // tests won't work
   private function skipDatabaseTests() {
-    verbose("Modifying suite.xml to skip database tests\n", Options::$verbose);
+    verbose("Modifying suite.xml to skip database tests\n");
     $file = Options::$frameworks_root.'/mediawiki-core/tests/phpunit/suite.xml';
     $doc = new DOMDocument();
     $doc->load($file);

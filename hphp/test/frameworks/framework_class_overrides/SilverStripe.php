@@ -7,7 +7,7 @@ class SilverStripe extends Framework {
   }
   protected function install(): void {
     parent::install();
-    verbose("Installing dependencies.\n", Options::$verbose);
+    verbose("Installing dependencies.\n");
 
     $dependencies_install_cmd = get_runtime_build()." ".__DIR__.
       "/../composer.phar require silverstripe/sqlite3 dev-master";
@@ -21,10 +21,7 @@ class SilverStripe extends Framework {
                      ". Removing framework. \n", Options::$csv_only);
     }
 
-    verbose(
-      "Creating a _ss_environment file for setting SQLite adapter.\n",
-      Options::$verbose
-    );
+    verbose("Creating a _ss_environment file for setting SQLite adapter.\n");
 
     $contents = <<<'ENV_FILE'
 <?hh

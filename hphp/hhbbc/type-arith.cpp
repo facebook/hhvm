@@ -185,6 +185,31 @@ Type typeIncDec(IncDecOp op, Type t) {
   return resultTy;
 }
 
+Type typeArithSetOp(SetOpOp op, Type lhs, Type rhs) {
+  switch (op) {
+    case SetOpOp::PlusEqual:   return typeAdd(lhs, rhs);
+    case SetOpOp::MinusEqual:  return typeSub(lhs, rhs);
+    case SetOpOp::MulEqual:    return typeMul(lhs, rhs);
+
+    case SetOpOp::DivEqual:    return typeDiv(lhs, rhs);
+    case SetOpOp::ModEqual:    return typeMod(lhs, rhs);
+    case SetOpOp::PowEqual:    return typePow(lhs, rhs);
+
+    case SetOpOp::AndEqual:    return typeBitAnd(lhs, rhs);
+    case SetOpOp::OrEqual:     return typeBitOr(lhs, rhs);
+    case SetOpOp::XorEqual:    return typeBitXor(lhs, rhs);
+
+    case SetOpOp::PlusEqualO:  return typeAddO(lhs, rhs);
+    case SetOpOp::MinusEqualO: return typeSubO(lhs, rhs);
+    case SetOpOp::MulEqualO:   return typeMulO(lhs, rhs);
+
+    case SetOpOp::ConcatEqual: return TStr;
+    case SetOpOp::SlEqual:     return TInt;
+    case SetOpOp::SrEqual:     return TInt;
+  }
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

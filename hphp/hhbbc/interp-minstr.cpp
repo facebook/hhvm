@@ -26,6 +26,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-internal.h"
+#include "hphp/hhbbc/type-arith.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -910,21 +911,32 @@ void miFinalSetProp(MIS& env) {
   push(env, resultTy);
 }
 
-void miFinalSetOpProp(MIS& env) {
+void miFinalSetOpProp(MIS& env, SetOpOp subop) {
   auto const name = mcodeStringKey(env);
-  popC(env);
+  auto const rhsTy = popC(env);
+
   miPop(env);
   handleInThisPropD(env);
   handleInSelfPropD(env);
   handleBasePropD(env);
+
+  auto resultTy = TInitCell;
+
   if (couldBeThisObj(env, env.base)) {
+    if (name && mustBeThisObj(env, env.base)) {
+      if (auto const lhsTy = thisPropAsCell(env, name)) {
+        resultTy = typeArithSetOp(subop, *lhsTy, rhsTy);
+      }
+    }
+
     if (name) {
-      mergeThisProp(env, name, TInitCell);
+      mergeThisProp(env, name, resultTy);
     } else {
       loseNonRefThisPropTypes(env);
     }
   }
-  push(env, TInitCell);
+
+  push(env, resultTy);
 }
 
 void miFinalIncDecProp(MIS& env) {
@@ -1246,7 +1258,7 @@ void miFinal(MIS& env, const bc::SetM& op) {
 
 void miFinal(MIS& env, const bc::SetOpM& op) {
   if (mcodeIsElem(env.mcode())) return miFinalSetOpElem(env);
-  if (mcodeIsProp(env.mcode())) return miFinalSetOpProp(env);
+  if (mcodeIsProp(env.mcode())) return miFinalSetOpProp(env, op.subop);
   return miFinalSetOpNewElem(env);
 }
 

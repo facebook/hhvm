@@ -1017,8 +1017,9 @@ void in(ISS& env, const bc::SetOpL& op) {
     return;
   }
 
-  setLoc(env, op.loc1, TInitCell);
-  push(env, TInitCell);
+  auto const resultTy = typeArithSetOp(op.subop, loc, t1);
+  setLoc(env, op.loc1, resultTy);
+  push(env, resultTy);
 }
 
 void in(ISS& env, const bc::SetOpN&) {

@@ -122,21 +122,24 @@ let declare_file ~fix_file fn content =
     Autocomplete.auto_complete := false;
     let ast = Parser_hack.program ~fail:(not fix_file) content in
     let is_php = not !(Parser_hack.is_hh_file) in
-    Parser_heap.ParserHeap.add fn ast;
-    let funs, classes, typedefs, consts = make_funs_classes ast in
-    Hashtbl.replace globals fn (is_php, funs, classes);
-    let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
-    let all_classes = List.fold_right begin fun (_, cname) acc ->
-      SMap.add cname (SSet.singleton fn) acc
-    end classes SMap.empty in
-    Typing_decl.make_env nenv all_classes fn;
-    let sub_classes = get_sub_classes all_classes in
-    SSet.iter begin fun cname ->
-      match Naming_heap.ClassHeap.get cname with
-      | None -> ()
-      | Some c -> Typing_decl.class_decl c
-    end sub_classes;
-    ()
+    if !(Parser_hack.is_hh_file)
+    then begin
+      Parser_heap.ParserHeap.add fn ast;
+      let funs, classes, typedefs, consts = make_funs_classes ast in
+      Hashtbl.replace globals fn (is_php, funs, classes);
+      let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
+      let all_classes = List.fold_right begin fun (_, cname) acc ->
+        SMap.add cname (SSet.singleton fn) acc
+      end classes SMap.empty in
+      Typing_decl.make_env nenv all_classes fn;
+      let sub_classes = get_sub_classes all_classes in
+      SSet.iter begin fun cname ->
+        match Naming_heap.ClassHeap.get cname with
+        | None -> ()
+        | Some c -> Typing_decl.class_decl c
+      end sub_classes
+    end
+    else Hashtbl.replace globals fn (false, [], [])
   with _ ->
     Hashtbl.replace globals fn (true, [], []);
     ()

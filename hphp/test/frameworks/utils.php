@@ -266,12 +266,8 @@ function get_runtime_build(bool $use_php = false): string {
   return nullthrows($build);
 }
 
-function error_and_exit(string $message, bool $to_file = false): void {
-  if ($to_file) {
-    $target = Options::$script_errors_file;
-  } else {
-    $target = 'php://stderr';
-  }
+function error_and_exit(string $message): void {
+  $target = 'php://stderr';
   file_put_contents($target, basename(__FILE__).": ".
                     $message.PHP_EOL, FILE_APPEND);
   exit(1);

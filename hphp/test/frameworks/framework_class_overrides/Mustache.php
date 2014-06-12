@@ -16,7 +16,7 @@ class Mustache extends Framework {
     if ($git_ret !== 0) {
       remove_dir_recursive(nullthrows($this->getInstallRoot()));
       error_and_exit("Could not initialize submodules for ". $this->name.
-                     "! Removing framework!\n", Options::$csv_only);
+                     "! Removing framework!\n");
     }
   }
 }

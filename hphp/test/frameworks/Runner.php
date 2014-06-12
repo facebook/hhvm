@@ -109,8 +109,7 @@ class Runner {
       $this->outputData();
     } else {
       error_and_exit("Could not open process to run test ".$this->name.
-                     " for framework ".$this->framework->getName(),
-                     Options::$csv_only);
+                     " for framework ".$this->framework->getName());
     }
     chdir(__DIR__);
     return $ret_val;

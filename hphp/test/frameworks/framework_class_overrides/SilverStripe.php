@@ -18,7 +18,7 @@ class SilverStripe extends Framework {
     if ($install_ret !== 0) {
       remove_dir_recursive(nullthrows($this->getInstallRoot()));
       error_and_exit("Couldn't download dependencies for ".$this->getName().
-                     ". Removing framework. \n", Options::$csv_only);
+                     ". Removing framework. \n");
     }
 
     verbose("Creating a _ss_environment file for setting SQLite adapter.\n");

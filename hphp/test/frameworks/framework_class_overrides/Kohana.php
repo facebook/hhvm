@@ -17,7 +17,7 @@ class Kohana extends Framework {
     if ($git_ret !== 0) {
       remove_dir_recursive($root);
       error_and_exit("Could not initialize submodules for ". $this->name.
-                     "! Removing framework!\n", Options::$csv_only);
+                     "! Removing framework!\n");
     }
 
     verbose("Updating submodule branches.\n");
@@ -31,7 +31,7 @@ class Kohana extends Framework {
     if ($git_ret !== 0) {
       remove_dir_recursive($root);
       error_and_exit("Could not checkout submodule branch for ". $this->name.
-                     "! Removing framework!\n", Options::$csv_only);
+                     "! Removing framework!\n");
     }
 
     verbose("Creating a phpunit.xml for running the Kohana tests.\n");

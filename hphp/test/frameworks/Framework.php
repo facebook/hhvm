@@ -417,8 +417,7 @@ class Framework {
         }
         else {
           error_and_exit("The stats file for ".$this->name." is corrupt! It ".
-                         "should only have test names and statuses in it.\n",
-                         Options::$csv_only);
+                         "should only have test names and statuses in it.\n");
         }
       }
       // Count blacklisted tests as failures
@@ -592,8 +591,7 @@ class Framework {
 
     $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies);
     if ($git_ret !== 0) {
-      error_and_exit("Could not download framework ".$this->name."!\n",
-                     Options::$csv_only);
+      error_and_exit("Could not download framework ".$this->name."!\n");
     }
 
     // If we are using --latest or --latest-record, we checkout from a branch
@@ -613,7 +611,7 @@ class Framework {
     if ($git_ret !== 0) {
       remove_dir_recursive(nullthrows($this->install_root));
       error_and_exit("Could not checkout baseline code for ". $this->name.
-                     "! Removing framework!\n", Options::$csv_only);
+                     "! Removing framework!\n");
     }
   }
 
@@ -670,12 +668,10 @@ class Framework {
             pcntl_wexitstatus($child_status) !== 0) {
           unlink($this->tests_file);
           unlink($this->test_files_file);
-          error_and_exit("Could not get tests for ".$this->name,
-                         Options::$csv_only);
+          error_and_exit("Could not get tests for ".$this->name);
         }
       } else {
-        error_and_exit("Could not open process tp get tests for ".$this->name,
-                       Options::$csv_only);
+        error_and_exit("Could not open process tp get tests for ".$this->name);
       }
     }
 
@@ -754,13 +750,13 @@ class Framework {
             remove_dir_recursive(nullthrows($this->install_root));
             error_and_exit("Couldn't download dependencies for ".$this->name.
                            ". Removing framework. You can try the --zend ".
-                           "option.\n", Options::$csv_only);
+                           "option.\n");
           }
         } else { // No vendor directory. Dependencies could not have been gotten
           remove_dir_recursive(nullthrows($this->install_root));
           error_and_exit("Couldn't download dependencies for ".$this->name.
                          ". Removing framework. You can try the --zend ".
-                         "option.\n", Options::$csv_only);
+                         "option.\n");
         }
       }
     }
@@ -791,7 +787,7 @@ class Framework {
       if ($git_ret !== 0) {
         remove_dir_recursive(nullthrows($this->install_root));
         error_and_exit("Could not get pull request code for ".$this->name."!".
-                       " Removing framework!\n", Options::$csv_only);
+                       " Removing framework!\n");
       }
       if ($dir_to_move !== null) {
         $mv_command = "mv ".$dir_to_move." ".$dir;

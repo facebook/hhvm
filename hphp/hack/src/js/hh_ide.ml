@@ -188,6 +188,7 @@ let complete_global completion_type fn =
             | Ast.Cnormal -> "class"
             | Ast.Cinterface -> "interface"
             | Ast.Ctrait -> "trait") in
+            let s = Utils.strip_ns s in
             SMap.add s (Autocomplete.make_result s Pos.none type_)
                 !result
         | None -> !result)
@@ -195,6 +196,7 @@ let complete_global completion_type fn =
         Typing_utils.should_complete_fun completion_type s ->
         (match (Typing_env.Funs.get s) with
         | Some fun_ ->
+            let s = Utils.strip_ns s in
             let it = (Typing_reason.Rnone, Typing_defs.Tfun fun_) in
             let type_ = Typing_print.full_strip_ns (Typing_env.empty fn) it in
             let sig_ = s^" "^type_ in

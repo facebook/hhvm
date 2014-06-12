@@ -45,7 +45,7 @@ void* reader(void* that) {
   const StringData* sd = makeStaticString("test");
   // ar2: a mock actrec, requires a Func, which can't be builtin.
   Unit u;
-  Func f(u, 1, nullptr, 1, 1, 0, 0, sd, AttrNone, true, nullptr, 0);
+  Func f(u, nullptr, 1, 1, 0, 0, sd, AttrNone, true, nullptr, 0);
   { // Avoiding using FRIEND_TEST; instead, breaking encapsulation like the
     // JIT does in order to say: f.m_paramCounts |= 1 (non-variadic)
     auto paramCounts = reinterpret_cast<uint32_t*>(

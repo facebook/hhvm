@@ -81,8 +81,8 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   us.stackOverflowHelper = a.frontier();
   a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
   a.  Ldr  (rAsm2.W(), rStashedAR[AROFF(m_soff)]);
-  a.  Ldr  (rAsm, rAsm[Func::sharedOffset()]);
-  a.  Ldr  (rAsm.W(), rAsm[Func::sharedBaseOffset()]);
+  a.  Ldr  (rAsm, rAsm[Func::sharedOff()]);
+  a.  Ldr  (rAsm.W(), rAsm[Func::sharedBaseOff()]);
   // The VM-reg-save helper will read the current BC offset out of argReg(0).
   a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
 

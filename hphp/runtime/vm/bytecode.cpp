@@ -704,6 +704,25 @@ static std::string toStringIter(const Iter* it, bool itRef) {
   return "I:?";
 }
 
+/*
+ * Return true if Offset o is inside the protected region of a fault
+ * funclet for iterId, otherwise false. itRef will be set to true if
+ * the iterator was initialized with MIterInit*, false if the iterator
+ * was initialized with IterInit*.
+ */
+static bool checkIterScope(const Func* f, Offset o, Id iterId, bool& itRef) {
+  assert(o >= f->base() && o < f->past());
+  for (auto const& eh : f->ehtab()) {
+    if (eh.m_type == EHEnt::Type::Fault &&
+        eh.m_base <= o && o < eh.m_past &&
+        eh.m_iterId == iterId) {
+      itRef = eh.m_itRef;
+      return true;
+    }
+  }
+  return false;
+}
+
 void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
                           int offset, const TypedValue* ftop,
                           const string& prefix) const {
@@ -753,7 +772,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
         os << " ";
       }
       bool itRef;
-      if (func->checkIterScope(offset, i, itRef)) {
+      if (checkIterScope(func, offset, i, itRef)) {
         os << toStringIter(it, itRef);
       } else {
         os << "I:Undefined";

@@ -138,8 +138,8 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   // rStashedAR. Get the caller's PC into rdi and save it off.
   a.    loadq  (rVmFp[AROFF(m_func)], rax);
   a.    loadl  (rStashedAR[AROFF(m_soff)], edi);
-  a.    loadq  (rax[Func::sharedOffset()], rax);
-  a.    loadl  (rax[Func::sharedBaseOffset()], eax);
+  a.    loadq  (rax[Func::sharedOff()], rax);
+  a.    loadl  (rax[Func::sharedBaseOff()], eax);
   a.    addl   (eax, edi);
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
   emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);

@@ -80,6 +80,11 @@ inline StrNR Func::fullNameStr() const {
   return StrNR(m_fullName);
 }
 
+inline const NamedEntity* Func::getNamedEntity() const {
+  assert(!shared()->m_preClass);
+  return m_namedEntity;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // File info.
 
@@ -270,6 +275,10 @@ inline BuiltinFunction Func::nativeFuncPtr() const {
   return shared()->m_nativeFuncPtr;
 }
 
+inline const ClassInfo::MethodInfo* Func::methInfo() const {
+  return shared()->m_info;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Closures.
 
@@ -314,7 +323,23 @@ inline bool Func::isResumable() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Methods.
+
+inline Slot Func::methodSlot() const {
+  assert(m_cls);
+  return m_methodSlot;
+}
+
+inline bool Func::hasPrivateAncestor() const {
+  return m_hasPrivateAncestor;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Magic methods.
+
+inline bool Func::isGenerated() const {
+  return shared()->m_isGenerated;
+}
 
 inline bool Func::isDestructor() const {
   return !strcmp(m_name->data(), "__destruct");
@@ -389,6 +414,10 @@ inline const Func::FPIEntVec& Func::fpitab() const {
 ///////////////////////////////////////////////////////////////////////////////
 // JIT data.
 
+inline RDS::Handle Func::funcHandle() const {
+  return m_cachedFunc.handle();
+}
+
 inline unsigned char* Func::getFuncBody() const {
   return m_funcBody;
 }
@@ -416,6 +445,40 @@ inline void Func::resetPrologues() {
   // Useful when killing code; forget what we've learned about the contents
   // of the translation cache.
   initPrologues(numParams());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Other methods.
+
+inline char& Func::maybeIntercepted() const {
+  return m_maybeIntercepted;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Public setters.
+
+inline void Func::setAttrs(Attr attrs) {
+  m_attrs = attrs;
+}
+
+inline void Func::setBaseCls(Class* baseCls) {
+  m_baseCls = baseCls;
+}
+
+inline void Func::setFuncHandle(RDS::Link<Func*> l) {
+  // TODO(#2950356): This assertion fails for create_function with an existing
+  // declared function named __lambda_func.
+  //assert(!m_cachedFunc.valid());
+  m_cachedFunc = l;
+}
+
+inline void Func::setHasPrivateAncestor(bool b) {
+  m_hasPrivateAncestor = b;
+}
+
+inline void Func::setMethodSlot(Slot s) {
+  assert(m_cls);
+  m_methodSlot = s;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

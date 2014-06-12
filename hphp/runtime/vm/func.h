@@ -145,10 +145,17 @@ struct Func {
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
 
-  Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
+  Func(Unit& unit, PreClass* preClass, int line1, int line2,
        Offset base, Offset past, const StringData* name, Attr attrs,
        bool top, const StringData* docComment, int numParams);
   ~Func();
+
+  /*
+   * Allocate memory for a function, including the extra preceding and
+   * succeeding data.
+   */
+  static void* allocFuncMem(const StringData* name, int numParams,
+                            bool needsNextClonedClosure, bool lowMem);
 
   /*
    * Destruct and free a Func*.
@@ -166,9 +173,6 @@ struct Func {
    * Classes in repo mode.  Finally, we clone inherited methods that define
    * static locals in order to instantiate new static locals for the child
    * class's copy of the method.
-   *
-   * FIXME: Currently, we have a small handful of setters which set properties
-   * after clone occurs.  This is kind of gross and we should fix it somehow.
    */
   Func* clone(Class* cls, const StringData* name = nullptr) const;
   Func* cloneAndSetClass(Class* cls) const;
@@ -232,10 +236,10 @@ struct Func {
   bool top() const;
 
   /*
-   * The Unit, PreClass, and Classes of the function.
+   * The Unit, PreClass, Classes of the function.
    *
-   * The `baseCls' is the Class which first declares the method; the `cls' is
-   * the Class which implements it.
+   * The `baseCls' is the first Class in the inheritance hierarchy which
+   * declares the method; the `cls' is the Class which implements it.
    */
   Unit* unit() const;
   PreClass* preClass() const;
@@ -253,6 +257,13 @@ struct Func {
    */
   const StringData* fullName() const;
   StrNR fullNameStr() const;
+
+  /*
+   * The function's named entity.  Only valid for non-methods.
+   *
+   * @requires: shared()->m_preClass == nullptr
+   */
+  const NamedEntity* getNamedEntity() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -436,7 +447,7 @@ struct Func {
   const StringData* localVarName(Id id) const;
 
   /*
-   * Array of named locals.
+   * Array of named locals.  Includes parameter names.
    *
    * Should not be indexed past numNamedLocals() - 1.
    */
@@ -546,7 +557,7 @@ struct Func {
    * In fact, the only functions that may not have nativeFuncPtr's are Native
    * (i.e., HNI) functions declared with NeedsActRec.
    *
-   * FIXME(4497824): This naming is pretty bad.
+   * FIXME(#4497824): This naming is pretty bad.
    */
   bool isNative() const;
 
@@ -573,6 +584,13 @@ struct Func {
    * (i.e., "Native") functions declared with NeedsActRec.
    */
   BuiltinFunction nativeFuncPtr() const;
+
+  /*
+   * Get the MethodInfo object of a builtin.
+   *
+   * Return null if the function is not a builtin.
+   */
+  const ClassInfo::MethodInfo* methInfo() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -636,7 +654,29 @@ struct Func {
 
 
   /////////////////////////////////////////////////////////////////////////////
+  // Methods.                                                           [const]
+
+  /*
+   * Index of this function in the method table of its Class.
+   */
+  Slot methodSlot() const;
+
+  /*
+   * Whether this function has a private implementation on a parent class.
+   */
+  bool hasPrivateAncestor() const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
   // Magic methods.                                                     [const]
+
+  /*
+   * Is this a compiler-generated function?
+   *
+   * This includes special methods like 86pinit, 86sinit, and 86ctor, as well
+   * as all closures.
+   */
+  bool isGenerated() const;
 
   /*
    * Is this function __destruct()?
@@ -665,17 +705,7 @@ struct Func {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Other attributes.                                                  [const]
-
-  /*
-   * Get the system attributes of the function.
-   */
-  Attr attrs() const;
-
-  /*
-   * Get the user-declared attributes of the function.
-   */
-  const UserAttributeMap& userAttributes() const;
+  // Persistence.                                                       [const]
 
   /*
    * Whether this function is uniquely named across the codebase.
@@ -696,6 +726,31 @@ struct Func {
    * @implies: isUnique()
    */
   bool isPersistent() const;
+
+  /*
+   * Is this always the function that's returned when we look up its name from
+   * the context of `fromUnit'?
+   *
+   * A weaker condition than persistence, since a function is always name
+   * binding immutable from the context of the unit in which it is defined.
+   * Used to make some translation-time optimizations which make assumptions
+   * about where function calls will go.
+   */
+  bool isNameBindingImmutable(const Unit* fromUnit) const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Other attributes.                                                  [const]
+
+  /*
+   * Get the system attributes of the function.
+   */
+  Attr attrs() const;
+
+  /*
+   * Get the user-declared attributes of the function.
+   */
+  const UserAttributeMap& userAttributes() const;
 
   /*
    * Whether to ignore this function's frame in backtraces.
@@ -747,6 +802,14 @@ struct Func {
 
   /////////////////////////////////////////////////////////////////////////////
   // JIT data.
+
+  /*
+   * Get the RDS handle for the function with this function's name.
+   *
+   * We can burn these into the TC even when functions are not persistent,
+   * since only a single name-to-function mapping will exist per request.
+   */
+  RDS::Handle funcHandle() const;
 
   /*
    * Get and set the function body code pointer.
@@ -820,99 +883,67 @@ struct Func {
   //    (1) Don't add more methods to Func here.
 
   /*
-   * Return true if Offset o is inside the protected region of a fault
-   * funclet for iterId, otherwise false. itRef will be set to true if
-   * the iterator was initialized with MIterInit*, false if the iterator
-   * was initialized with IterInit*.
+   * Intercept hook flag.
    */
-  bool checkIterScope(Offset o, Id iterId, bool& itRef) const;
+  char& maybeIntercepted() const;
 
-  // imeth: an abstract / interface method
-  void checkDeclarationCompat(const PreClass* preClass,
-                              const Func* imeth) const;
-
-  // This can be thought of as "if I look up this Func's name while in fromUnit,
-  // will I always get this Func back?" This is important for the translator: if
-  // this condition holds, it allows for some translation-time optimizations by
-  // making assumptions about where function calls will go.
-  bool isNameBindingImmutable(const Unit* fromUnit) const;
-
+  /*
+   * Populate the MethodInfo for this function in `mi'.
+   *
+   * If methInfo() is non-null, this just performs a deep copy.
+   */
   void getFuncInfo(ClassInfo::MethodInfo* mi) const;
 
-  /**
-   * Was this generated specially by the compiler to aide the runtime?
+  /*
+   * Profile-guided optimization linkage.
    */
-  bool isGenerated() const { return shared()->m_isGenerated; }
-  const ClassInfo::MethodInfo* methInfo() const { return shared()->m_info; }
-
-  void setBaseCls(Class* baseCls) { m_baseCls = baseCls; }
-  void setAttrs(Attr attrs) { m_attrs = attrs; }
-
-  bool hasPrivateAncestor() const { return m_hasPrivateAncestor; }
-  void setHasPrivateAncestor(bool b) { m_hasPrivateAncestor = b; }
-  // Assembly linkage.
-  static size_t fullNameOffset() {
-    return offsetof(Func, m_fullName);
-  }
-  static size_t sharedOffset() {
-    return offsetof(Func, m_shared);
-  }
-  static size_t sharedBaseOffset() {
-    return offsetof(SharedData, m_base);
-  }
-  char &maybeIntercepted() const { return m_maybeIntercepted; }
-
   bool shouldPGO() const;
   void incProfCounter();
 
-  static void* allocFuncMem(
-    const StringData* name, int numParams,
-    bool needsNextClonedClosure,
-    bool lowMem);
-
-
-  const NamedEntity* getNamedEntity() const {
-    assert(!m_shared->m_preClass);
-    return m_namedEntity;
-  }
-  Slot methodSlot() const {
-    assert(m_cls);
-    return m_methodSlot;
-  }
-  void setMethodSlot(Slot s) {
-    assert(m_cls);
-    m_methodSlot = s;
-  }
-  RDS::Handle funcHandle() const { return m_cachedFunc.handle(); }
-  void setFuncHandle(RDS::Link<Func*> l) {
-    // TODO(#2950356): this assertion fails for create_function with
-    // an existing declared function named __lambda_func.
-    // assert(!m_cachedFunc.valid());
-    m_cachedFunc = l;
-  }
-
+  /*
+   * Does any HHBC block end at `off'?
+   */
   bool anyBlockEndsAt(Offset off) const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Public setters.
+  //
+  // TODO(#4504609): These setters are only used by Class at Class creation
+  // time.  We should refactor the creation path into a separate friend module
+  // to avoid this garbage.
+  //
+  // Having public setters here should be avoided, so try not to add any.
+
+  void setAttrs(Attr attrs);
+  void setBaseCls(Class* baseCls);
+  void setFuncHandle(RDS::Link<Func*> l);
+  void setHasPrivateAncestor(bool b);
+  void setMethodSlot(Slot s);
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
-public: // Offset accessors for the translator.
-#define X(f) static constexpr ptrdiff_t f##Off() {      \
-    return offsetof(Func, m_##f);                       \
+#define OFF(f) static constexpr ptrdiff_t f##Off() {  \
+    return offsetof(Func, m_##f);                     \
   }
-  X(attrs);
-  X(unit);
-  X(cls);
-  X(paramCounts);
-  X(refBitVal);
-  X(fullName);
-  X(prologueTable);
-  X(maybeIntercepted);
-  X(maxStackCells);
-  X(funcBody);
-  X(shared);
-#undef X
+  OFF(attrs)
+  OFF(cls)
+  OFF(fullName)
+  OFF(funcBody)
+  OFF(maxStackCells)
+  OFF(maybeIntercepted)
+  OFF(paramCounts)
+  OFF(prologueTable)
+  OFF(refBitVal)
+  OFF(shared)
+  OFF(unit)
+#undef OFF
+
+  static constexpr ptrdiff_t sharedBaseOff() {
+    return offsetof(SharedData, m_base);
+  }
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -922,29 +953,41 @@ private:
   typedef IndexedStringMap<LowStringPtr, true, Id> NamedLocalsMap;
 
   struct SharedData : public AtomicCountable {
+    SharedData(PreClass* preClass, Offset base, Offset past,
+               int line1, int line2, bool top, const StringData* docComment);
+    ~SharedData();
+
+    /*
+     * Interface for AtomicCountable.
+     */
+    void atomicRelease();
+
+    /*
+     * Properties shared by all clones of a Func.
+     */
     PreClass* m_preClass;
-    Id m_id;
     Offset m_base;
+    Offset m_past;
     Id m_numLocals;
     Id m_numIterators;
-    Offset m_past;
     int m_line1;
     int m_line2;
     DataType m_returnType;
-    const ClassInfo::MethodInfo* m_info; // For builtins.
-    // bits 64 and up of the reffiness guards (first 64 bits
-    // are in Func::m_refBitVal)
+    const ClassInfo::MethodInfo* m_info;
+    // Bits 64 and up of the reffiness guards (the first 64 bits are in
+    // Func::m_refBitVal for faster access).
     uint64_t* m_refBitPtr;
     BuiltinFunction m_builtinFuncPtr;
     BuiltinFunction m_nativeFuncPtr;
-    ParamInfoVec m_params; // m_params[i] corresponds to parameter i.
-    NamedLocalsMap m_localNames; // includes parameter names
+    ParamInfoVec m_params;
+    NamedLocalsMap m_localNames;
     SVInfoVec m_staticVars;
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
+    // Cache for the anyBlockEndsAt() method.
     hphp_hash_set<Offset> m_blockEnds;
     LowStringPtr m_docComment;
-    bool m_top : 1; // Defined at top level.
+    bool m_top : 1;
     bool m_isClosureBody : 1;
     bool m_isAsync : 1;
     bool m_isGenerator : 1;
@@ -953,57 +996,82 @@ private:
     UserAttributeMap m_userAttributes;
     TypeConstraint m_retTypeConstraint;
     LowStringPtr m_retUserType;
-    // per-func filepath for traits flattened during repo construction
     LowStringPtr m_originalFilename;
-    SharedData(PreClass* preClass, Id id, Offset base,
-        Offset past, int line1, int line2, bool top,
-        const StringData* docComment);
-    ~SharedData();
-    void atomicRelease();
   };
+
   typedef AtomicSmartPtr<SharedData> SharedDataPtr;
 
-  static const int kBitsPerQword = 64;
-  static const StringData* s___call;
-  static const StringData* s___callStatic;
-  static const int kMagic = 0xba5eba11;
+  /*
+   * SharedData accessors for internal use.
+   */
+  const SharedData* shared() const { return m_shared.get(); }
+        SharedData* shared()       { return m_shared.get(); }
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Internal methods.
 
 private:
-  void setFullName(int numParams);
+  /*
+   * Func initialization/creation helpers.
+   */
   void init(int numParams);
   void initPrologues(int numParams);
+  void setFullName(int numParams);
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
-  void allocVarId(const StringData* name);
-  const SharedData* shared() const { return m_shared.get(); }
-  SharedData* shared() { return m_shared.get(); }
-  Func* findCachedClone(Class* cls) const;
 
   /*
-   * Closures' __invoke() methods have an extra pointer used to keep cloned
-   * versions of themselves with different contexts.
+   * The __invoke() methods of Closure objects (colloquially just "closures")
+   * are allocated with an extra pointer before the Func object itself.  These
+   * are used to chain clones of these closures with different Class contexts.
    *
-   * const here is the equivalent of "mutable" since this is just a cache.
+   * The `const' specifier here is a bit of a lie since we return a non-const
+   * reference to the aforementioned pointer.
+   *
+   * @requires: isClosureBody()
    */
   Func*& nextClonedClosure() const;
 
-private:
   /*
-   * Fields are organized in reverse order of frequency of use
-   * Do not re-order without checking perf
+   * Find the clone of this closure with `cls' as its context.
+   *
+   * Return nullptr if this is not a closure or if no such clone exists.
    */
+  Func* findCachedClone(Class* cls) const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Constants.
+
+private:
+  static constexpr int kBitsPerQword = 64;
+  static const StringData* s___call;
+  static const StringData* s___callStatic;
+  static constexpr int kMagic = 0xba5eba11;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Properties.
+  //
+  // The fields of Fucn are organized in reverse order of frequency of use.
+  // Do not re-order with checking perf!
+
+private:
 #ifdef DEBUG
-  int m_magic; // For asserts only.
+  // For asserts only.
+  int m_magic;
 #endif
   LowStringPtr m_fullName;
-  uint32_t m_profCounter{0};     // profile counter used to detect hot functions
-  unsigned char* volatile m_funcBody;  // Accessed from assembly.
+  // Profile counter used to detect hot functions.
+  uint32_t m_profCounter{0};
+  unsigned char* volatile m_funcBody;
   mutable RDS::Link<Func*> m_cachedFunc{RDS::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
   LowStringPtr m_name;
-  // The first Class in the inheritance hierarchy that declared this method;
-  // note that this may be an abstract class that did not provide an
+  // The first Class in the inheritance hierarchy that declared this method.
+  // Note that this may be an abstract class that did not provide an
   // implementation.
   LowClassPtr m_baseCls{nullptr};
   // The Class that provided this method implementation.
@@ -1012,23 +1080,21 @@ private:
     const NamedEntity* m_namedEntity{nullptr};
     Slot m_methodSlot;
   };
+  // Atomically-accessed intercept flag.  -1, 0, or 1.
   // TODO(#1114385) intercept should work via invalidation.
-  mutable char m_maybeIntercepted; // -1, 0, or 1.  Accessed atomically.
-  bool m_hasPrivateAncestor : 1; // This flag indicates if any of this
-                                 // Class's ancestors provide a
-                                 // "private" implementation for this
-                                 // method
+  mutable char m_maybeIntercepted;
+  bool m_hasPrivateAncestor : 1;
   int m_maxStackCells{0};
   uint64_t m_refBitVal{0};
   Unit* m_unit;
   SharedDataPtr m_shared;
-  // Initialized by Func::finishedEmittingParams, the least significant bit
-  // is 1 if the last param is not variadic; the 31 most significant bits
-  // are the total number of params (including the variadic param)
+  // Initialized by Func::finishedEmittingParams.  The least significant bit is
+  // 1 if the last param is not variadic; the 31 most significant bits are the
+  // total number of params (including the variadic param).
   uint32_t m_paramCounts{0};
   Attr m_attrs;
-  // This must be the last field declared in this structure
-  // and the Func class should not be inherited from.
+  // This must be the last field declared in this structure, and the Func class
+  // should not be inherited from.
   unsigned char* volatile m_prologueTable[kNumFixedPrologues];
 };
 

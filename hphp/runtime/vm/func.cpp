@@ -54,84 +54,6 @@ const StringData* Func::s___callStatic = makeStaticString("__callStatic");
 //=============================================================================
 // Func.
 
-static inline void decl_incompat(const PreClass* implementor,
-                                 const Func* imeth) {
-  const char* name = imeth->name()->data();
-  raise_error("Declaration of %s::%s() must be compatible with "
-              "that of %s::%s()",
-              implementor->name()->data(), name,
-              imeth->cls()->preClass()->name()->data(), name);
-}
-
-// Check compatibility vs interface and abstract declarations
-void Func::checkDeclarationCompat(const PreClass* preClass,
-                                  const Func* imeth) const {
-  const Func::ParamInfoVec& params = this->params();
-  const Func::ParamInfoVec& iparams = imeth->params();
-  auto const ivariadic = imeth->hasVariadicCaptureParam();
-  if (ivariadic && !this->hasVariadicCaptureParam()) {
-    decl_incompat(preClass, imeth);
-  }
-
-  // Verify that meth has at least as many parameters as imeth.
-  if (this->numParams() < imeth->numParams()) {
-    // This check doesn't require special casing for variadics, because
-    // it's not ok to turn a variadic function into a non-variadic.
-    decl_incompat(preClass, imeth);
-  }
-  // Verify that the typehints for meth's parameters are compatible with
-  // imeth's corresponding parameter typehints.
-  size_t firstOptional = 0;
-  {
-    size_t i = 0;
-    for (; i < imeth->numNonVariadicParams(); ++i) {
-      auto const& p = params[i];
-      if (p.isVariadic()) { decl_incompat(preClass, imeth); }
-      auto const& ip = iparams[i];
-      if (!p.typeConstraint.compat(ip.typeConstraint)
-          && !ip.typeConstraint.isTypeVar()) {
-        decl_incompat(preClass, imeth);
-      }
-      if (!iparams[i].hasDefaultValue()) {
-        // The leftmost of imeth's contiguous trailing optional parameters
-        // must start somewhere to the right of this parameter (which may
-        // be the variadic param)
-        firstOptional = i + 1;
-      }
-    }
-    if (ivariadic) {
-      assert(iparams[iparams.size() - 1].isVariadic());
-      assert(params[params.size() - 1].isVariadic());
-      // reffiness of the variadics must match
-      if (imeth->byRef(iparams.size() - 1) != this->byRef(params.size() - 1)) {
-        decl_incompat(preClass, imeth);
-      }
-
-      // To be compatible with a variadic interface, params from the
-      // variadic onwards must have a compatible typehint
-      auto const& ivarConstraint = iparams[iparams.size() - 1].typeConstraint;
-      if (!ivarConstraint.isTypeVar()) {
-        for (; i < this->numParams(); ++i) {
-          auto const& p = params[i];
-          if (!p.typeConstraint.compat(ivarConstraint)) {
-            decl_incompat(preClass, imeth);
-          }
-        }
-      }
-    }
-  }
-
-  // Verify that meth provides defaults, starting with the parameter that
-  // corresponds to the leftmost of imeth's contiguous trailing optional
-  // parameters and *not* including any variadic last param (variadics
-  // don't have any default values).
-  for (unsigned i = firstOptional; i < this->numNonVariadicParams(); ++i) {
-    if (!params[i].hasDefaultValue()) {
-      decl_incompat(preClass, imeth);
-    }
-  }
-}
-
 static std::atomic<FuncId> s_nextFuncId(0);
 
 // This size hint will create a ~6MB vector and is rarely hit in
@@ -314,7 +236,7 @@ void* Func::allocFuncMem(
   return ((Func**) mem) + numExtraFuncPtrs;
 }
 
-Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
+Func::Func(Unit& unit, PreClass* preClass, int line1, int line2,
            Offset base, Offset past, const StringData* name, Attr attrs,
            bool top, const StringData* docComment, int numParams)
   : m_name(name)
@@ -322,9 +244,8 @@ Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
   , m_attrs(attrs)
 {
   m_hasPrivateAncestor = false;
-  m_shared = new SharedData(preClass, preClass ? -1 : id,
-                            base, past, line1, line2,
-                            top, docComment);
+  m_shared = new SharedData(preClass, base, past,
+                            line1, line2, top, docComment);
   init(numParams);
 }
 
@@ -445,21 +366,6 @@ void Func::rename(const StringData* name) {
 
 int Func::numSlotsInFrame() const {
   return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
-}
-
-bool Func::checkIterScope(Offset o, Id iterId, bool& itRef) const {
-  const EHEntVec& ehtab = shared()->m_ehtab;
-  assert(o >= base() && o < past());
-  for (unsigned i = 0, n = ehtab.size(); i < n; i++) {
-    const EHEnt* eh = &ehtab[i];
-    if (eh->m_type == EHEnt::Type::Fault &&
-        eh->m_base <= o && o < eh->m_past &&
-        eh->m_iterId == iterId) {
-      itRef = eh->m_itRef;
-      return true;
-    }
-  }
-  return false;
 }
 
 const EHEnt* Func::findEH(Offset o) const {
@@ -661,9 +567,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   }
 
   out << " at " << base();
-  if (shared()->m_id != -1) {
-    out << " (ID " << shared()->m_id << ")";
-  }
   out << std::endl;
 
   if (!opts.metadata) return;
@@ -848,17 +751,28 @@ DVFuncletsVec Func::getDVFunclets() const {
   return dvs;
 }
 
-Func::SharedData::SharedData(PreClass* preClass, Id id,
-                             Offset base, Offset past, int line1, int line2,
-                             bool top, const StringData* docComment)
-  : m_preClass(preClass), m_id(id), m_base(base),
-    m_numLocals(0), m_numIterators(0),
-    m_past(past), m_line1(line1), m_line2(line2),
-    m_info(nullptr), m_refBitPtr(0), m_builtinFuncPtr(nullptr),
-    m_docComment(docComment), m_top(top), m_isClosureBody(false),
-    m_isAsync(false), m_isGenerator(false), m_isPairGenerator(false),
-    m_isGenerated(false), m_originalFilename(nullptr) {
-}
+Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
+                             int line1, int line2, bool top,
+                             const StringData* docComment)
+  : m_preClass(preClass)
+  , m_base(base)
+  , m_past(past)
+  , m_numLocals(0)
+  , m_numIterators(0)
+  , m_line1(line1)
+  , m_line2(line2)
+  , m_info(nullptr)
+  , m_refBitPtr(0)
+  , m_builtinFuncPtr(nullptr)
+  , m_docComment(docComment)
+  , m_top(top)
+  , m_isClosureBody(false)
+  , m_isAsync(false)
+  , m_isGenerator(false)
+  , m_isPairGenerator(false)
+  , m_isGenerated(false)
+  , m_originalFilename(nullptr)
+{}
 
 Func::SharedData::~SharedData() {
   free(m_refBitPtr);
@@ -1288,7 +1202,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (!m_containsCalls) { attrs = Attr(attrs | AttrPhpLeafFn); }
 
   assert(!m_pce == !preClass);
-  Func* f = m_ue.newFunc(this, unit, m_id, preClass, m_line1, m_line2, m_base,
+  Func* f = m_ue.newFunc(this, unit, preClass, m_line1, m_line2, m_base,
                          m_past, m_name, attrs, m_top, m_docComment,
                          m_params.size(), m_isClosureBody);
 

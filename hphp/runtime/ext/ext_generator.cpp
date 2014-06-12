@@ -48,7 +48,7 @@ c_Generator::c_Generator(Class* cb)
 }
 
 c_Generator::~c_Generator() {
-  if (LIKELY(getState() == Done)) {
+  if (LIKELY(getState() == State::Done)) {
     return;
   }
 
@@ -59,7 +59,7 @@ c_Generator::~c_Generator() {
   // since the generator has already been exited. We
   // don't want redundant calls.
   ActRec* ar = actRec();
-  frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
+  frame_free_locals_inl_no_hook<false>(ar, ar->func()->numLocals());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -68,16 +68,16 @@ void c_Generator::t___construct() {}
 
 void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
                              const Cell& value) {
-  assert(getState() == Running);
+  assert(getState() == State::Running);
   resumable()->setResumeAddr(resumeAddr, resumeOffset);
   cellSet(make_tv<KindOfInt64>(++m_index), m_key);
   cellSet(value, m_value);
-  setState(Started);
+  setState(State::Started);
 }
 
 void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
                              const Cell& key, const Cell& value) {
-  assert(getState() == Running);
+  assert(getState() == State::Running);
   resumable()->setResumeAddr(resumeAddr, resumeOffset);
   cellSet(key, m_key);
   cellSet(value, m_value);
@@ -85,7 +85,7 @@ void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
     int64_t new_index = m_key.m_data.num;
     m_index = new_index > m_index ? new_index : m_index;
   }
-  setState(Started);
+  setState(State::Started);
 }
 
 // Functions with native implementation.

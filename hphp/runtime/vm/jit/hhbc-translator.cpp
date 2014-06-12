@@ -1651,7 +1651,7 @@ void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
 
   // Set state from Running to Started.
   gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-      cns(c_Generator::Started));
+      cns(BaseGenerator::State::Started));
 }
 
 void HhbcTranslator::emitYield(Offset resumeOffset) {
@@ -3771,7 +3771,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
     // Mark generator as finished.
     gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-        cns(c_Generator::Done));
+        cns(BaseGenerator::State::Done));
 
     // Sync SP.
     sp = spillStack();

@@ -7014,9 +7014,16 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
 }
 
+static inline BaseGenerator* this_base_generator(const ActRec* fp) {
+  auto const obj = fp->getThis();
+  assert(/*obj->instanceof(c_AsyncGenerator::classof()) ||*/
+         obj->instanceof(c_Generator::classof()));
+  return static_cast<BaseGenerator*>(obj);
+}
+
 static inline c_Generator* this_generator(const ActRec* fp) {
-  ObjectData* obj = fp->getThis();
-  assert(obj->instanceof(c_Generator::classof()));
+  auto const obj = this_base_generator(fp);
+  assert(obj->getVMClass() == c_Generator::classof());
   return static_cast<c_Generator*>(obj);
 }
 
@@ -7030,7 +7037,7 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   // Do linkage of the generator's AR.
   assert(vmfp()->hasThis());
   c_Generator* cont = this_generator(vmfp());
-  assert(cont->getState() == c_Generator::Running);
+  assert(cont->getState() == BaseGenerator::State::Running);
   ActRec* contAR = cont->actRec();
   contAR->setReturn(vmfp(), pc, tx->uniqueStubs.genRetHelper);
 
@@ -7094,9 +7101,8 @@ OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopContValid(IOP_ARGS) {
   NEXT();
-  TypedValue* tv = vmStack().allocTV();
-  tvWriteUninit(tv);
-  tvAsVariant(tv) = this_generator(vmfp())->getState() != c_Generator::Done;
+  vmStack().pushBool(
+    this_generator(vmfp())->getState() != BaseGenerator::State::Done);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContKey(IOP_ARGS) {

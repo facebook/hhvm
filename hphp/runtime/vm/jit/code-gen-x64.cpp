@@ -5495,24 +5495,24 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg      = srcLoc(0).reg();
   auto checkStarted = inst->src(1)->boolVal();
-  auto stateOff     = c_Generator::stateOff();
+  auto stateOff     = BaseGenerator::stateOff();
 
-  static_assert(c_Generator::Created == 0, "used below");
-  static_assert(c_Generator::Started == 1, "used below");
+  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
+  static_assert(uint8_t(BaseGenerator::State::Started) == 1, "used below");
 
   // Take exit if state != 1 (checkStarted) or state > 1 (!checkStarted).
   m_as.cmpb(1, contReg[stateOff]);
   emitFwdJcc(checkStarted ? CC_NE : CC_A, inst->taken());
 
   // Set generator state as Running.
-  m_as.storeb(c_Generator::Running, contReg[stateOff]);
+  m_as.storeb(int8_t(BaseGenerator::State::Running), contReg[stateOff]);
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   auto contReg  = srcLoc(0).reg();
-  auto stateOff = c_Generator::stateOff();
+  auto stateOff = BaseGenerator::stateOff();
 
-  static_assert(c_Generator::Created == 0, "used below");
+  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
 
   // Take exit if state == 0.
   m_as.testb(int8_t(0xff), contReg[stateOff]);
@@ -5522,10 +5522,10 @@ void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
 void CodeGenerator::cgContValid(IRInstruction* inst) {
   auto contReg  = srcLoc(0).reg();
   auto dstReg   = dstLoc(0).reg();
-  auto stateOff = c_Generator::stateOff();
+  auto stateOff = BaseGenerator::stateOff();
 
   // Return 1 if generator state is not Done.
-  m_as.cmpb(c_Generator::Done, contReg[stateOff]);
+  m_as.cmpb(int8_t(BaseGenerator::State::Done), contReg[stateOff]);
   m_as.setne(rbyte(dstReg));
   m_as.movzbl(rbyte(dstReg), r32(dstReg));
 }
@@ -5559,7 +5559,7 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
 void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
   auto dest = dstLoc(0).reg();
   auto base = srcLoc(0).reg();
-  ptrdiff_t offset = c_Generator::arOff();
+  ptrdiff_t offset = BaseGenerator::arOff();
 
   m_as.lea (base[offset], dest) ;
 }
@@ -5588,7 +5588,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  emitLdRaw(inst, -c_Generator::arOff());
+  emitLdRaw(inst, -BaseGenerator::arOff());
 }
 
 void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
@@ -5621,7 +5621,7 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 
 void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
   auto const info = inst->extra<RawMemData>()->info();
-  emitStRaw(inst, -c_Generator::arOff() + info.offset, info.size);
+  emitStRaw(inst, -BaseGenerator::arOff() + info.offset, info.size);
 }
 
 void CodeGenerator::cgLdContArValue(IRInstruction* inst) {

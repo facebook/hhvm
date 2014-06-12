@@ -79,6 +79,7 @@ frame_resumable(const ActRec* fp) {
 
 inline c_AsyncFunctionWaitHandle*
 frame_afwh(const ActRec* fp) {
+  assert(fp->func()->isAsyncFunction());
   auto resumable = frame_resumable(fp);
   auto arOffset = c_AsyncFunctionWaitHandle::arOff();
   auto waitHandle = (c_AsyncFunctionWaitHandle*)((char*)resumable - arOffset);
@@ -86,10 +87,20 @@ frame_afwh(const ActRec* fp) {
   return waitHandle;
 }
 
+inline BaseGenerator*
+frame_base_generator(const ActRec* fp) {
+  assert(fp->func()->isGenerator());
+  auto resumable = frame_resumable(fp);
+  auto obj = (ObjectData*)((char*)resumable - BaseGenerator::resumableOff());
+  assert(/* obj->getVMClass() == c_AsyncGenerator::classof() || */
+         obj->getVMClass() == c_Generator::classof());
+  return static_cast<BaseGenerator*>(obj);
+}
+
 inline c_Generator*
 frame_generator(const ActRec* fp) {
-  auto resumable = frame_resumable(fp);
-  auto obj = (ObjectData*)((char*)resumable - c_Generator::resumableOff());
+  assert(fp->func()->isNonAsyncGenerator());
+  auto obj = frame_base_generator(fp);
   assert(obj->getVMClass() == c_Generator::classof());
   return static_cast<c_Generator*>(obj);
 }

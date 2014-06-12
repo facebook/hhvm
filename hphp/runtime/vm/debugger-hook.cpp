@@ -171,7 +171,7 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
 static void addBreakPointFuncEntry(const Func* f) {
   // we are in a generator, skip CreateCont / RetC / PopC opcodes
   auto base = f->isGenerator()
-    ? (f->isAsync() ? bad_value<Offset>() : c_Generator::userBase(f))
+    ? BaseGenerator::userBase(f)
     : f->base();
   auto pc = f->unit()->at(base);
 

@@ -31,23 +31,16 @@ FORWARD_DECLARE_CLASS(Continuation);
 FORWARD_DECLARE_CLASS(Generator);
 
 ///////////////////////////////////////////////////////////////////////////////
-// class Continuation
+// class BaseGenerator
 
-class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(Continuation)
-
-  explicit c_Continuation(Class* cls = c_Continuation::classof())
-    : ExtObjectDataFlags(cls) {}
-  ~c_Continuation() {}
-  void t___construct() {}
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class Generator
-
-struct c_Generator : c_Continuation {
-  DECLARE_CLASS_NO_SWEEP(Generator)
+class BaseGenerator : public ExtObjectDataFlags<ObjectData::HasClone> {
+public:
+  enum class State : uint8_t {
+    Created = 0,  // generator was created but never iterated
+    Started = 1,  // generator was iterated but not currently running
+    Running = 2,  // generator is currently being iterated
+    Done    = 3   // generator has finished its execution
+  };
 
   static constexpr ptrdiff_t resumableOff() { return -sizeof(Resumable); }
   static constexpr ptrdiff_t arOff() {
@@ -60,20 +53,88 @@ struct c_Generator : c_Continuation {
     return resumableOff() + Resumable::resumeOffsetOff();
   }
   static constexpr ptrdiff_t stateOff() {
-    return offsetof(c_Generator, o_subclassData.u8[0]);
+    return offsetof(BaseGenerator, o_subclassData.u8[0]);
   }
 
-  enum GeneratorState : uint8_t {
-    Created = 0,  // generator was created but never iterated
-    Started = 1,  // generator was iterated but not currently running
-    Running = 2,  // generator is currently being iterated
-    Done    = 3   // generator has finished its execution
-  };
+  explicit BaseGenerator(Class* cls) : ExtObjectDataFlags(cls) {}
 
-  GeneratorState getState() const {
-    return static_cast<GeneratorState>(o_subclassData.u8[0]);
+  Resumable* resumable() const {
+    return reinterpret_cast<Resumable*>(
+      const_cast<char*>(reinterpret_cast<const char*>(this) + resumableOff()));
   }
-  void setState(GeneratorState state) { o_subclassData.u8[0] = state; }
+
+  ActRec* actRec() const {
+    return resumable()->actRec();
+  }
+
+  State getState() const {
+    return static_cast<State>(o_subclassData.u8[0]);
+  }
+
+  void setState(State state) {
+    o_subclassData.u8[0] = static_cast<uint8_t>(state);
+  }
+
+  void startedCheck() {
+    if (getState() == State::Created) {
+      throw_exception(Object(
+        SystemLib::AllocExceptionObject("Need to call next() first")));
+    }
+  }
+
+  void preNext(bool checkStarted) {
+    if (checkStarted) {
+      startedCheck();
+    }
+    if (getState() == State::Running) {
+      throw_exception(Object(
+        SystemLib::AllocExceptionObject("Generator is already running")));
+    }
+    if (getState() == State::Done) {
+      throw_exception(Object(
+        SystemLib::AllocExceptionObject("Generator is already finished")));
+    }
+    assert(getState() == State::Created || getState() == State::Started);
+    setState(State::Running);
+  }
+
+  /**
+   * Get adjusted generator function base() where the real user code starts.
+   *
+   * Skips CreateCont and PopC opcodes.
+   */
+  static Offset userBase(const Func* func) {
+    assert(func->isGenerator());
+    auto base = func->base();
+
+    DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));
+    assert(op[0] == OpCreateCont);
+    assert(op[1] == OpPopC);
+
+    return base + 2;
+  }
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// class Continuation
+
+class c_Continuation : public BaseGenerator {
+public:
+  DECLARE_CLASS_NO_SWEEP(Continuation)
+
+  explicit c_Continuation(Class* cls = c_Continuation::classof())
+    : BaseGenerator(cls) {}
+  ~c_Continuation() {}
+  void t___construct() {}
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class Generator
+
+class c_Generator : public c_Continuation {
+public:
+  DECLARE_CLASS_NO_SWEEP(Generator)
 
   void t___construct();
   void suspend(JIT::TCA resumeAddr, Offset resumeOffset, const Cell& value);
@@ -101,54 +162,15 @@ struct c_Generator : c_Continuation {
     auto const cont = new (obj) c_Generator();
     cont->incRefCount();
     cont->setNoDestruct();
-    cont->setState(Created);
+    cont->setState(State::Created);
     return cont;
   }
 
-  /**
-   * Get adjusted generator function base() where the real user code starts.
-   *
-   * Skips CreateCont and PopC opcodes.
-   */
-  static Offset userBase(const Func* func) {
-    assert(func->isNonAsyncGenerator());
-    auto base = func->base();
-
-    DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));
-    assert(op[0] == OpCreateCont);
-    assert(op[1] == OpPopC);
-
-    return base + 2;
-  }
-
-  inline void startedCheck() {
-    if (getState() == Created) {
-      throw_exception(Object(
-        SystemLib::AllocExceptionObject("Need to call next() first")));
-    }
-  }
-
-  inline void preNext(bool checkStarted) {
-    if (checkStarted) {
-      startedCheck();
-    }
-    if (getState() == Running) {
-      throw_exception(Object(
-        SystemLib::AllocExceptionObject("Generator is already running")));
-    }
-    if (getState() == Done) {
-      throw_exception(Object(
-        SystemLib::AllocExceptionObject("Generator is already finished")));
-    }
-    assert(getState() == Created || getState() == Started);
-    setState(Running);
-  }
-
   inline void finish() {
-    assert(getState() == Running);
+    assert(getState() == State::Running);
     cellSetNull(m_key);
     cellSetNull(m_value);
-    setState(Done);
+    setState(State::Done);
   }
 
 private:
@@ -161,15 +183,6 @@ public:
   int64_t m_index;
   Cell m_key;
   Cell m_value;
-
-  Resumable* resumable() const {
-    return reinterpret_cast<Resumable*>(
-      const_cast<char*>(reinterpret_cast<const char*>(this) + resumableOff()));
-  }
-
-  ActRec* actRec() const {
-    return resumable()->actRec();
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

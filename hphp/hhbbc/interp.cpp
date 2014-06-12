@@ -1842,8 +1842,8 @@ void in(ISS& env, const bc::CreateCont& op) {
   push(env, TInitNull);
 }
 
-void in(ISS& env, const bc::ContEnter&) { popC(env); }
-void in(ISS& env, const bc::ContRaise&) { popC(env); }
+void in(ISS& env, const bc::ContEnter&) { popC(env); push(env, TInitCell); }
+void in(ISS& env, const bc::ContRaise&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::Yield&) {
   popC(env);

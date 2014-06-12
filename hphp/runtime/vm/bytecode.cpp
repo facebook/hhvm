@@ -4627,6 +4627,9 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     // Mark the generator as finished and store the return value.
     assert(IS_NULL_TYPE(retval.m_type));
     frame_generator(vmfp())->finish();
+
+    // Push return value of next()/send()/raise().
+    vmStack().pushNull();
   } else {
     not_reached();
   }
@@ -7097,6 +7100,9 @@ OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
   cont->suspend(nullptr, resumeOffset, *vmStack().topC());
   vmStack().popTV();
 
+  // Push return value of next()/send()/raise().
+  vmStack().pushNull();
+
   EventHook::FunctionSuspend(vmfp(), true);
 
   // Return control to the next()/send()/raise() caller.
@@ -7114,6 +7120,9 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   cont->suspend(nullptr, resumeOffset, *vmStack().indC(1), *vmStack().topC());
   vmStack().popTV();
   vmStack().popTV();
+
+  // Push return value of next()/send()/raise().
+  vmStack().pushNull();
 
   EventHook::FunctionSuspend(vmfp(), true);
 

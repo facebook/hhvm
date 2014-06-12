@@ -629,7 +629,7 @@ O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(Shuffle,                          ND, SVar(Top),                        NF) \
 O(CreateCont,                   D(Obj), S(FramePtr) C(Int)                    \
                                           S(TCA,Nullptr) C(Int),     E|N|PRc) \
-O(ContEnter,                        ND, S(StkPtr)                             \
+O(ContEnter,                 D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(FramePtr)                         \
                                           S(TCA)                              \

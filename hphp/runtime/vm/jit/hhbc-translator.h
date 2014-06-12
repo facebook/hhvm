@@ -484,11 +484,10 @@ public:
   void emitIterBreak(const ImmVector& iv, uint32_t offset, bool breakTracelet);
   void emitVerifyParamType(uint32_t paramId);
 
-  void emitResumedReturnControl(Block* catchBlock);
-
-  // continuations
+  // generators
   void emitCreateCont(Offset resumeOffset);
   void emitContEnter(Offset returnOffset);
+  void emitYieldReturnControl(Block* catchBlock);
   void emitYieldImpl(Offset resumeOffset);
   void emitYield(Offset resumeOffset);
   void emitYieldK(Offset resumeOffset);

@@ -1643,12 +1643,12 @@ void HhbcTranslator::emitContEnter(Offset returnOffset) {
   // Enter generator.
   auto returnBcOffset = returnOffset - curFunc()->base();
   gen(ContEnter, sp, m_irb->fp(), genFp, resumeAddr, cns(returnBcOffset));
-
-  // The top of the stack was consumed by the generator.
-  popC(DataTypeGeneric);
 }
 
-void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
+void HhbcTranslator::emitYieldReturnControl(Block* catchBlock) {
+  // Push return value of next()/send()/raise().
+  push(cns(Type::InitNull));
+
   auto const sp = spillStack();
   emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlock, true);
 
@@ -1700,7 +1700,7 @@ void HhbcTranslator::emitYield(Offset resumeOffset) {
   }
 
   // transfer control
-  emitResumedReturnControl(catchBlock);
+  emitYieldReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitYieldK(Offset resumeOffset) {
@@ -1718,7 +1718,7 @@ void HhbcTranslator::emitYieldK(Offset resumeOffset) {
   }
 
   // transfer control
-  emitResumedReturnControl(catchBlock);
+  emitYieldReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitContCheck(bool checkStarted) {
@@ -3787,6 +3787,9 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     // Mark generator as finished.
     gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
         cns(BaseGenerator::State::Done));
+
+    // Push return value of next()/send()/raise().
+    push(cns(Type::InitNull));
 
     // Sync SP.
     sp = spillStack();

@@ -8340,7 +8340,9 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
           not_reached();
       }
 
-      ue.emitOp(OpNull);
+      // debugBacktrace has off-by-one bug when determining whether we are
+      // in returning opcode; add Nop to avoid it
+      ue.emitOp(OpNop);
       ue.emitOp(OpRetC);
       break;
     }

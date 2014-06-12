@@ -36,6 +36,65 @@ bool shouldHHIRRelaxGuards() {
      tx->mode() == TransKind::Optimize);
 }
 
+/* For each possible dest type, determine if its type might relax. */
+#define ND             always_assert(false);
+#define D(t)           return false; // fixed type
+#define DofS(n)        return typeMightRelax(inst->src(n));
+#define DUnbox(n)      DofS(n)
+#define DBox(n)        DofS(n)
+#define DRefineS(n)    return true;  // typeParam may relax
+#define DParam         return true;  // typeParam may relax
+#define DLdRef         return true;  // typeParam may relax
+#define DAllocObj      return false; // fixed type from ExtraData
+#define DArrPacked     return false; // fixed type
+#define DArrElem       assert(inst->is(LdPackedArrayElem));     \
+  return typeMightRelax(inst->src(0));
+#define DThis          return false; // fixed type from ctx class
+#define DMulti         return true;  // DefLabel; value could be anything
+#define DSetElem       return false; // fixed type
+#define DStk(x)        x;
+#define DBuiltin       return false; // from immutable typeParam
+#define DSubtract(n,t) DofS(n)
+#define DLdRaw         return false; // fixed type from ExtraData
+#define DCns           return false; // fixed type
+
+bool typeMightRelax(const SSATmp* tmp) {
+  if (tmp == nullptr) return true;
+
+  if (tmp->isA(Type::Cls) || tmp->type() == Type::Gen) return false;
+  if (canonical(tmp)->inst()->is(DefConst)) return false;
+
+  auto inst = tmp->inst();
+  // Do the rest based on the opcode's dest type
+  switch (inst->op()) {
+#   define O(name, dst, src, flags) case name: dst
+  IR_OPCODES
+#   undef O
+  }
+
+  return true;
+}
+
+#undef ND
+#undef D
+#undef DofS
+#undef DUnbox
+#undef DBox
+#undef DRefineS
+#undef DParam
+#undef DLdRef
+#undef DAllocObj
+#undef DArrPacked
+#undef DArrElem
+#undef DThis
+#undef DMulti
+#undef DSetElem
+#undef DStk
+#undef DBuiltin
+#undef DSubtract
+#undef DLdRaw
+#undef DCns
+
 /*
  * Trace back through the source of fp, looking for a guard with the
  * given locId. If one can't be found, return nullptr.

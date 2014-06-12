@@ -2089,9 +2089,7 @@ SSATmp* Simplifier::simplifyIsWaitHandle(const IRInstruction* inst) {
 
 bool Simplifier::typeMightRelax(SSATmp* tmp) const {
   if (!m_typesMightRelax) return false;
-  if (tmp && (canonical(tmp)->inst()->is(DefConst) ||
-              tmp->isA(Type::Cls))) return false;
-  return true;
+  return JIT::typeMightRelax(tmp);
 }
 
 //////////////////////////////////////////////////////////////////////

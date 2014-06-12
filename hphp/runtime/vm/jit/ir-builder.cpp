@@ -72,10 +72,7 @@ IRBuilder::~IRBuilder() {
  */
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   if (!shouldConstrainGuards()) return false;
-  if (tmp && (canonical(tmp)->inst()->is(DefConst) ||
-              tmp->isA(Type::Cls))) return false;
-
-  return true;
+  return JIT::typeMightRelax(tmp);
 }
 
 SSATmp* IRBuilder::genPtrToInitNull() {
@@ -235,6 +232,10 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
                                            const Type oldType,
                                            SSATmp* oldVal,
                                            IRInstruction* typeSrc) {
+  ITRACE(3, "preOptimizeAssertTypeOp({}, {}, {}, {})\n",
+         *inst, oldType,
+         oldVal ? oldVal->toString() : "nullptr",
+         typeSrc ? typeSrc->toString() : "nullptr");
   auto const typeParam = inst->typeParam();
 
   if (oldType.not(typeParam)) {
@@ -266,7 +267,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
     // guards are relaxed.
     if (!typeMightRelax(oldVal) ||
         (typeSrc && typeSrc->is(AssertType, AssertLoc, AssertStk) &&
-         typeSrc->typeParam() <= newType)) {
+         typeSrc->typeParam() <= inst->typeParam())) {
       return inst->src(0);
     }
 

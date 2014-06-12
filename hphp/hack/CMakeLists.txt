@@ -12,11 +12,11 @@ if (OCAMLC_FOUND)
     list(APPEND hackcflags -ccopt -DHAVE_ELF_GETSHDRSTRNDX)
   endif()
 
-  unset(hacklibs)
   foreach(lib ${LIBELF_LIBRARIES})
     get_filename_component(pth ${lib} PATH)
     get_filename_component(base ${lib} NAME_WE)
-    list(APPEND hacklibs ${pth}/${base}.a)
+    string(REGEX REPLACE "^lib" "" libname ${base})
+    list(APPEND hackcflags -ccopt -L${pth} -cclib -l${libname})
   endforeach()
 
   add_custom_target(
@@ -25,7 +25,6 @@ if (OCAMLC_FOUND)
     COMMAND make depend &&
       env OPTBIN="${OCAMLC_OPT_SUFFIX}"
           OCAMLCFLAGS_EXTRA="${hackcflags}"
-          EXTLIBS="${hacklibs}"
           make
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )

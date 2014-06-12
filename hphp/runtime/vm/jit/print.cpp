@@ -419,6 +419,23 @@ std::string Block::toString() const {
 
 //////////////////////////////////////////////////////////////////////
 
+void printOpcodeStats(std::ostream& os, const BlockList& blocks) {
+  uint32_t counts[kNumOpcodes];
+  memset(counts, 0, sizeof(counts));
+
+  for (auto block : blocks) {
+    for (auto& inst : *block) ++counts[static_cast<size_t>(inst.op())];
+  }
+
+  os << "\nopcode counts:\n";
+  for (unsigned i = 0; i < kNumOpcodes; ++i) {
+    if (counts[i] == 0) continue;
+    auto op = safe_cast<Opcode>(i);
+    os << folly::format("{:>5} {}\n", counts[i], opcodeName(op));
+  }
+  os << '\n';
+}
+
 /*
  * Unit
  */
@@ -430,6 +447,9 @@ void print(std::ostream& os, const IRUnit& unit,
 
   auto const layout = layoutBlocks(unit);
   auto const& blocks = layout.blocks;
+
+  if (dumpIREnabled(kExtraLevel)) printOpcodeStats(os, blocks);
+
   // Print the block CFG above the actual code.
   os << "digraph G {\n";
   for (Block* block : blocks) {

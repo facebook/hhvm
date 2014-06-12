@@ -625,6 +625,16 @@ bool f_ldap_modify(const Resource& link, const String& dn, const Array& entry) {
 
 bool f_ldap_bind(const Resource& link, const String& bind_rdn /* = null_string */,
                  const String& bind_password /* = null_string */) {
+
+  if (memchr(bind_rdn.data(), '\0', bind_rdn.size()) != nullptr) {
+    raise_warning("DN contains a null byte");
+    return false;
+  }
+  if (memchr(bind_password.data(), '\0', bind_password.size()) != nullptr) {
+    raise_warning("Password contains a null byte");
+    return false;
+  }
+
   int rc;
   LdapLink *ld = link.getTyped<LdapLink>();
   if ((rc = ldap_bind_s(ld->link, (char*)bind_rdn.data(),

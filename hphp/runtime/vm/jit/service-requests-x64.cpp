@@ -47,46 +47,6 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
 
 namespace {
 
-class StoreImmPatcher {
- public:
-  StoreImmPatcher(CodeBlock& cb, uint64_t initial, RegNumber reg,
-                  int32_t offset, RegNumber base);
-  void patch(uint64_t actual);
- private:
-  CodeAddress m_addr;
-  bool m_is32;
-};
-
-StoreImmPatcher::StoreImmPatcher(CodeBlock& cb, uint64_t initial,
-                                 RegNumber reg,
-                                 int32_t offset, RegNumber base) {
-  X64Assembler as { cb };
-  m_is32 = deltaFits(initial, sz::dword);
-  mcg->cgFixups().m_addressImmediates.insert(cb.frontier());
-  if (m_is32) {
-    as.storeq(int32_t(initial), r64(base)[offset]);
-    m_addr = cb.frontier() - 4;
-  } else {
-    as.movq(initial, r64(reg));
-    m_addr = cb.frontier() - 8;
-    as.storeq(r64(reg), r64(base)[offset]);
-  }
-  assert((m_is32 ? (uint64_t)*(int32_t*)m_addr : *(uint64_t*)m_addr)
-         == initial);
-}
-
-void StoreImmPatcher::patch(uint64_t actual) {
-  if (m_is32) {
-    if (deltaFits(actual, sz::dword)) {
-      *(uint32_t*)m_addr = actual;
-    } else {
-      not_reached();
-    }
-  } else {
-    *(uint64_t*)m_addr = actual;
-  }
-}
-
 void emitBindJ(CodeBlock& cb, CodeBlock& frozen,
                ConditionCode cc, SrcKey dest, ServiceRequest req) {
   mcg->backEnd().prepareForSmash(cb, cc == JIT::CC_None ? kJmpLen : kJmpccLen);
@@ -363,19 +323,22 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
   // If this is a call to a builtin and we don't need any argument
   // munging, we can skip the prologue system and do it inline.
   if (isNativeImplCall(funcd, numArgs)) {
-    StoreImmPatcher patchIP(mainCode, (uint64_t)mainCode.frontier(), reg::rax,
-                            cellsToBytes(numArgs) + AROFF(m_savedRip),
-                            rVmSp);
+    Asm a { mainCode };
+    auto retAddr = (int64_t)mcg->tx().uniqueStubs.retHelper;
+    if (deltaFits(retAddr, sz::dword)) {
+      a.storeq(int32_t(retAddr),
+               rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
+    } else {
+      a.lea(rip[retAddr], reg::rax);
+      a.storeq(reg::rax, rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
+    }
     assert(funcd->numLocals() == funcd->numParams());
     assert(funcd->numIterators() == 0);
-    Asm a { mainCode };
     emitLea(a, rVmSp[cellsToBytes(numArgs)], rVmFp);
     emitCheckSurpriseFlagsEnter(mainCode, coldCode, Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals
     // other than the arguments passed.
-    auto retval = emitNativeImpl(mainCode, funcd);
-    patchIP.patch(uint64_t(mainCode.frontier()));
-    return retval;
+    return emitNativeImpl(mainCode, funcd);
   }
 
   Asm a { mainCode };

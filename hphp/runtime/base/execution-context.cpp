@@ -536,12 +536,16 @@ void ExecutionContext::onShutdownPostSend() {
           executeFunctions(m_shutdowns[CleanUp].toArray());
         }
       }
-    } catch (const ExitException &e) {
-      // do nothing
-    } catch (const Exception &e) {
-      onFatalError(e);
-    } catch (const Object &e) {
-      onUnhandledException(e);
+    } catch (...) {
+      try {
+        bump_counter_and_rethrow();
+      } catch (const ExitException &e) {
+        // do nothing
+      } catch (const Exception &e) {
+        onFatalError(e);
+      } catch (const Object &e) {
+        onUnhandledException(e);
+      }
     }
   } catch (...) {
     Logger::Error("unknown exception was thrown from psp");

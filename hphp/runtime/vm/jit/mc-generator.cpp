@@ -1401,7 +1401,7 @@ MCGenerator::freeRequestStub(TCA stub) {
 TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
-    Stats::inc(Stats::Acold_Reused);
+    Stats::inc(Stats::Astub_Reused);
     always_assert(m_freeStubs.m_list == nullptr ||
                   code.isValidCodeAddress(TCA(m_freeStubs.m_list)));
     TRACE(1, "recycle stub %p\n", ret);
@@ -1410,7 +1410,7 @@ TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
     }
   } else {
     ret = frozen.frontier();
-    Stats::inc(Stats::Acold_New);
+    Stats::inc(Stats::Astub_New);
     TRACE(1, "alloc new stub %p\n", ret);
   }
   return ret;

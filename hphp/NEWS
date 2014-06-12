@@ -1,7 +1,39 @@
-NEXT
- -
+"Mos Def" 11-Jun-2014
+ - Turn on new tracelet region selector by default; analyze() is deprecated
+ - Fix a bug in debugBacktrace with NativeImpl methods
+ - Request local allocator now uses logarithmically spaced size classes
+ - Improvements to JIT'd FCallBuiltin to cause fewer spills
+ - Enable vtable-style dispatch on methods marked "abstract"
+ - JIT several instructions that were being punted:  Unbox, File, Dir
+ - Increase "hinted drop" time on write lease, improving JIT'd code layout
+ - Implemented __toString functions in reflection classes
+ - Several tc-print bug fixes
+ - Some improvements in hhbbc arithmetic type inference
+ - More service requests are "ephemeral", reducing wasted stubs space
+ - HH\Vector now has a packed array internally, for O(1) conversions to array
+ - current() and key() now support expressions that can't be taken by reference
+ - Fix a long-standing but very rare race condition with Closure class names
+ - gcc 4.8 is the new minimum to build
+ - Various bug/compat fixes in Soap, SimpleXML, ArrayObject, DOMNode, mysqli
+ - Add a scheme to extend support for efficient packed arrays w/ cap up to 2^32
+ - Move vmfp, vmsp, and vmpc into RDS
+ - Fix some hard-to-hit bugs in inlining relating to stack overflow checks
+ - Faster int to double conversion when calling builtins from the JIT
+ - Fix ReflectionParameter::getClass for scalar typehints
+ - better tuning of the PGO 'hot function' threshold
+ - performance improvements to calling native class methods
+ - improve performance of async functions that exit via exception
+ - several bug fixes in refcount optimization pass relating to async functions
+ - More hhir-related docs in the hackers-guide
+ - Initial support for relocating generated machine code
+ - JIT optimizations for count()
+ - Corrected the result of var_dump and print_r for ArrayObject
+ - fix HH\autoload_set_paths with nested maps
+ - make ReflectionClass serializable
+ - ext/standard/output HNI conversion
+ - allow usage of zend-qsort in user sorts with a runtime option
 
-"LL Cool J"
+"LL Cool J" 28-May-2014
  - Over 200 other bug fixes (go lockdown!)
  - Every HDF setting is now available as INI
  - Cut session_id() size by 1/2
@@ -34,7 +66,6 @@ NEXT
   - Improvements to the type checker
   - Allow parser to be generated with bison 3
   - Improvements and speed up to reflection code
-
 
 "Jay-Z" 9-May-2014
   - Make handling of code.hot overflows more robust

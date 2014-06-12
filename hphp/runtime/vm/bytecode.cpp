@@ -329,7 +329,7 @@ VarEnv* VarEnv::clone(ActRec* fp) const {
   return smart_new<VarEnv>(this, fp);
 }
 
-void VarEnv::suspend(ActRec* oldFP, ActRec* newFP) {
+void VarEnv::suspend(const ActRec* oldFP, ActRec* newFP) {
   m_nvTable.suspend(oldFP, newFP);
 }
 
@@ -6961,37 +6961,18 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCl(IOP_ARGS) {
 
 const StaticString s_this("this");
 
-// The variable environment, extra args and all locals are teleported
-// from the ActRec on the evaluation stack to the suspended ActRec
-// on the heap.
-void ExecutionContext::fillResumableVars(const Func* func,
-                                            ActRec* origFp,
-                                            ActRec* genFp) {
-  for (Id i = 0; i < func->numLocals(); ++i) {
-    tvCopy(*frame_local(origFp, i), *frame_local(genFp, i));
-  }
-
-  // m_varEnv and m_extraArgs are in the same union
-  assert((void*)&genFp->m_varEnv == (void*)&genFp->m_extraArgs);
-  genFp->m_varEnv = origFp->m_varEnv;
-  if (UNLIKELY(genFp->hasVarEnv())) {
-    genFp->getVarEnv()->suspend(origFp, genFp);
-  }
-}
-
 OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   NEXT();
   assert(!vmfp()->resumed());
 
-  const auto func = vmfp()->func();
   const auto resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
 
-  // Create the Generator object.
-  auto cont = c_Generator::Create(vmfp(), vmfp()->func()->numSlotsInFrame(),
-                                  nullptr, resumeOffset);
-
-  // Teleport local variables into the generator.
-  fillResumableVars(func, vmfp(), cont->actRec());
+  // Create the Generator object. Create takes care of copying local
+  // variables and iterators.
+  auto cont = c_Generator::Create<false>(vmfp(),
+                                         vmfp()->func()->numSlotsInFrame(),
+                                         nullptr,
+                                         resumeOffset);
 
   // Call the FunctionSuspend hook. Keep the generator on the stack so that
   // the unwinder could free it if the hook fails.
@@ -7128,18 +7109,11 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   assert(!child->isFinished());
   vmStack().discard();
 
-  // Create the AsyncFunctionWaitHandle object.
+  // Create the AsyncFunctionWaitHandle object. Create takes care of
+  // copying local variables and itertors.
   auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(
     c_AsyncFunctionWaitHandle::Create(vmfp(), vmfp()->func()->numSlotsInFrame(),
                                       nullptr, resumeOffset, child));
-
-  // Teleport local variables into the AsyncFunctionWaitHandle.
-  fillResumableVars(func, vmfp(), waitHandle->actRec());
-
-  // Teleport iterators into the AsyncFunctionWaitHandle.
-  memcpy(frame_iter(waitHandle->actRec(), iters - 1),
-         frame_iter(vmfp(), iters - 1),
-         iters * sizeof(Iter));
 
   // Call the FunctionSuspend hook. Keep the AsyncFunctionWaitHandle
   // on the stack so that the unwinder could free it if the hook fails.

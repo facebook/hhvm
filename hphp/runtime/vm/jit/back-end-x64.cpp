@@ -145,10 +145,10 @@ struct BackEnd : public JIT::BackEnd {
     return X64::emitUniqueStubs();
   }
 
-  TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+  TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
-    return X64::emitServiceReqWork(cb, start, persist, flags, req, argv);
+    return X64::emitServiceReqWork(cb, start, flags, req, argv);
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,

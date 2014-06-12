@@ -597,11 +597,6 @@ FunctionExitSurpriseHook S0:FramePtr S1:Gen
   should be the current frame pointer, and S1 should be the return value
   of the function.
 
-ExitOnVarEnv S0:FramePtr -> B
-
-  Loads the VarEnv slot off the ActRec pointed to by S0. If it is non-zero,
-  jumps to the exit-trace block B.
-
 Halt
 
   Halt execution. Used only in tests, as a terminal instruction that does not
@@ -1204,10 +1199,6 @@ StMem S0:PtrToGen S1:ConstInt S2:Gen
 StProp S0:Obj S1:Int S2:Gen
 
   Store S2 into the location S0 + S1 (in bytes).
-
-StCell<offset> S0:PtrToGen S1:Gen
-
-  Store S1 into the location S0 + offset (in bytes).
 
 StElem S0:PtrToCell S1:Int S2:Cell
 
@@ -1818,12 +1809,6 @@ D:FramePtr = LdAFWHActRec S0:Obj
 D:Obj = LdResumableArObj S0:FramePtr
 
   Loads the Resumable object, given a Resumable's frame pointer in S0.
-
-CopyAsyncCells<numCells> S0:FramePtr S1:PtrToGen
-
-  Copy numCells cells from frame S0 to the same slot offsets in S1. This
-  instruction may be used only to copy cells when suspending the frame of
-  an async function.
 
 
 17. Debugging, instrumentation, and profiling

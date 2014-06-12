@@ -80,12 +80,14 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
     if (!resolveURL(vhost, pathTranslation, sourceRoot)) {
       return false;
     }
-    // PATH_INFO wasn't filled by resolveURL() because m_originalURL
-    // didn't contain it. We set it now, based on PATH_TRANSLATED.
-    m_origPathInfo = transport->getPathTranslated();
-    if (!m_origPathInfo.empty() &&
-        m_origPathInfo.charAt(0) != '/') {
-      m_origPathInfo = "/" + m_origPathInfo;
+    if (m_origPathInfo.empty()) {
+      // PATH_INFO wasn't filled by resolveURL() because m_originalURL
+      // didn't contain it. We set it now, based on PATH_TRANSLATED.
+      m_origPathInfo = transport->getPathTranslated();
+      if (!m_origPathInfo.empty() &&
+          m_origPathInfo.charAt(0) != '/') {
+        m_origPathInfo = "/" + m_origPathInfo;
+      }
     }
     m_pathInfo = m_origPathInfo;
     return true;

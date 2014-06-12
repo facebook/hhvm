@@ -26,7 +26,7 @@ type program_ret =
 
 module type SERVER_PROGRAM = sig
   val init : genv -> env -> Path.path -> program_ret
-  val recheck: genv -> env -> (SSet.t * SSet.t) -> string list ref -> program_ret
+  val recheck: genv -> env -> (SSet.t * SSet.t * bool) -> string list ref -> program_ret
   val infer: (string * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
@@ -71,27 +71,27 @@ module HackProgram : SERVER_PROGRAM = struct
         Exit 0
 
   let recheck genv env updates report =
-    let diff_php, _ = updates in
-    if not (SSet.is_empty diff_php) 
-    then
+    let diff_php, _, hhconfig_changed = updates in
+    if hhconfig_changed then begin
+      Printf.printf "hhconfig changed, exiting server to pick up changes\n";
+      Die
+    end else if not (SSet.is_empty diff_php) then
       let failed_parsing = SSet.union diff_php env.failed_parsing in
       let check_env = { env with failed_parsing = failed_parsing } in
       Continue (ServerTypeCheck.check genv check_env);
-    else 
-      if !report <> []
-        then begin
-          (* We have a report that the state is inconsistent, at the same
-          * time, dfind is telling us that nothing changed between the moment
-          * where we produced the report and now. Basically: we have a bug!
-          *)
-          Printf.printf "SERVER PANIC!!!!!!!!!!!!!\n";
-          Printf.printf "*************************************************\n";
-          Printf.printf "CRASH REPORT:\n";
-          Printf.printf "*************************************************\n";
-          List.iter (Printf.printf "%s\n") !report;
-          Printf.printf "*************************************************\n";
-          Die
-        end else Continue env
+    else if !report <> [] then begin
+      (* We have a report that the state is inconsistent, at the same
+      * time, dfind is telling us that nothing changed between the moment
+      * where we produced the report and now. Basically: we have a bug!
+      *)
+      Printf.printf "SERVER PANIC!!!!!!!!!!!!!\n";
+      Printf.printf "*************************************************\n";
+      Printf.printf "CRASH REPORT:\n";
+      Printf.printf "*************************************************\n";
+      List.iter (Printf.printf "%s\n") !report;
+      Printf.printf "*************************************************\n";
+      Die
+    end else Continue env
 
   let infer = ServerInferType.go 
 

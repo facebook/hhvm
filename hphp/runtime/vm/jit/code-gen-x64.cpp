@@ -2863,13 +2863,6 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgStCell(IRInstruction* inst) {
-  auto const offset  = inst->extra<StCell>()->offset;
-  auto const asyncAR = srcLoc(0).reg();
-
-  cgStore(asyncAR[offset], inst->src(1), srcLoc(1), Width::Full);
-}
-
 void CodeGenerator::cgStProp(IRInstruction* inst) {
   auto objReg = srcLoc(0).reg();
   auto propOff  = inst->src(1)->intVal();
@@ -5358,15 +5351,6 @@ void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
   emitFwdJcc(CC_NZ, inst->taken());
 }
 
-void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
-  assert(!(inst->src(0)->isConst()));
-  auto fpReg = srcLoc(0).reg();
-  Block*  label = inst->taken();
-
-  m_as.    cmpq   (0, fpReg[AROFF(m_varEnv)]);
-  emitFwdJcc(CC_NE, label);
-}
-
 void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   Block*     label = inst->taken();
   TransID  transId = inst->extra<CheckCold>()->transId;
@@ -5760,23 +5744,6 @@ void CodeGenerator::cgLdResumableArObj(IRInstruction* inst) {
   auto const resumableArReg = srcLoc(0).reg();
   auto const objectOff = Resumable::objectOff() - Resumable::arOff();
   m_as.lea (resumableArReg[objectOff], dstReg);
-}
-
-void CodeGenerator::cgCopyAsyncCells(IRInstruction* inst) {
-  auto const fpReg    = srcLoc(0).reg();
-  auto const numCells = inst->extra<CopyAsyncCells>()->locId;
-  auto const asyncAR  = srcLoc(1).reg();
-  auto const cellSize = sizeof(Cell);
-
-  if (!numCells) return;
-  m_as.   movq(int32_t(-(numCells * cellSize)), rAsm);
-
-  Label loopHead;
-asm_label(m_as, loopHead);
-  m_as.   movdqu(fpReg[rAsm], rCgXMM0);
-  m_as.   movdqu(rCgXMM0, asyncAR[rAsm]);
-  m_as.   addq(int32_t(cellSize), rAsm);
-  m_as.   jnz8(loopHead);
 }
 
 void CodeGenerator::cgIterInit(IRInstruction* inst) {

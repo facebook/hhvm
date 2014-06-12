@@ -100,7 +100,7 @@ struct NameValueTable : private boost::noncopyable {
   /**
    * Suspend locals into an in-resumable ActRec.
    */
-  void suspend(ActRec* oldFP, ActRec* newFP);
+  void suspend(const ActRec* oldFP, ActRec* newFP);
 
   /**
    * Attach to a new ActRec and populate its locals with TypedValues stored

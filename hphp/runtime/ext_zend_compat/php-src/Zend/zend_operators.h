@@ -466,15 +466,22 @@ inline const TypedValue& zval_follow_ref(const zval &z) {
  */
 class ZArrVal {
 private:
-  HPHP::TypedValue* m_tv;
+  TypedValue* m_tv;
 public:
-  explicit ZArrVal(HPHP::TypedValue* tv) : m_tv(tv) {}
+  explicit ZArrVal(TypedValue* tv) : m_tv(tv) {}
   void cowCheck() {
-    if (m_tv->m_data.parr->hasMultipleRefs()) {
-      HPHP::ArrayData* a = m_tv->m_data.parr->copy();
-      a->incRefCount();
+    ArrayData * ad = m_tv->m_data.parr;
+    if (ad->isStatic() || ad->hasMultipleRefs()) {
+      ad = ad->copy();
+      ad->incRefCount();
+      // copy() causes an array to be unproxied, so we normally need
+      // to reproxy it
+      if (!ad->isProxyArray()) {
+        ad = ProxyArray::Make(ad);
+        ad->incRefCount();
+      }
       m_tv->m_data.parr->decRefCount();
-      m_tv->m_data.parr = a;
+      m_tv->m_data.parr = ad;
     }
   }
   /* implicit */ operator HashTable*() {
@@ -490,7 +497,7 @@ public:
     return getHashTable();
   }
   HashTable* operator&() {
-    throw HPHP::NotImplementedException(
+    throw NotImplementedException(
       "Taking the address of the result of Z_ARRVAL is not "
       "supported at present");
   }

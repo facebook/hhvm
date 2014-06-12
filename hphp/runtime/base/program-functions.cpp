@@ -341,7 +341,7 @@ static void handle_exception_append_bt(std::string& errorMsg,
   }
 }
 
-static void bump_counter_and_rethrow() {
+void bump_counter_and_rethrow() {
   try {
     throw;
   } catch (const RequestTimeoutException& e) {

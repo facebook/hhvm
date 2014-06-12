@@ -467,8 +467,6 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case DecRefStack:  return simplifyDecRefStack(inst);
     case LdLoc:        return simplifyLdLoc(inst);
 
-    case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
-
     case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
     case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
     case IsWaitHandle:           return simplifyIsWaitHandle(inst);
@@ -494,16 +492,6 @@ SSATmp* Simplifier::simplifySpillStack(const IRInstruction* inst) {
   // need the instruction; the old stack is still accurate.
   if (!numSpillSrcs && spDeficit == 0) return sp;
 
-  return nullptr;
-}
-
-// We never inline functions that could have a VarEnv, so an
-// ExitOnVarEnv that has a frame based on DefInlineFP can be removed.
-SSATmp* Simplifier::simplifyExitOnVarEnv(const IRInstruction* inst) {
-  auto const frameInst = inst->src(0)->inst();
-  if (frameInst->op() == DefInlineFP) {
-    return gen(Nop);
-  }
   return nullptr;
 }
 

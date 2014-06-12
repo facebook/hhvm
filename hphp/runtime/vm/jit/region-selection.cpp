@@ -23,6 +23,7 @@
 
 #include "folly/Memory.h"
 #include "folly/Conv.h"
+#include "folly/String.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"
@@ -836,10 +837,10 @@ std::string show(const RegionDesc& region) {
       for (auto& arc : region.arcs) {
         folly::toAppend(show(arc), &ret);
       }
-      folly::toAppend("Side-exiting Blocks: ", &ret);
-      for (auto b : region.sideExitingBlocks) {
-        folly::toAppend(b, &ret);
-      }
+      folly::toAppend("Side-exiting Blocks:\n",
+                      folly::join(", ", region.sideExitingBlocks),
+                      "\n",
+                      &ret);
       return ret;
     }()
   ).str();

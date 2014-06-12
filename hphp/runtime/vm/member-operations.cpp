@@ -29,6 +29,13 @@ StringData* prepareAnyKey(TypedValue* tv) {
   }
 }
 
+void unknownBaseType(const TypedValue* tv) {
+  always_assert_flog(
+    false,
+    "Unknown KindOf: {} in member operation base",
+    static_cast<uint8_t>(tv->m_type));
+}
+
 void objArrayAccess(ObjectData* base) {
   assert(!base->isCollection());
   if (!base->getVMClass()->classof(SystemLib::s_ArrayAccessClass)) {

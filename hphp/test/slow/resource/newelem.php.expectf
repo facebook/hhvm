@@ -1,0 +1,7 @@
+Warning: Cannot use a scalar value as an array in %s/test/slow/resource/newelem.php on line 8
+resource(1) of type (stream)
+NULL
+
+Warning: Cannot use a scalar value as an array in %s/test/slow/resource/newelem.php on line 11
+resource(1) of type (stream)
+int(2)

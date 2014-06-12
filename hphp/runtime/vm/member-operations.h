@@ -145,6 +145,8 @@ void objOffsetUnset(ObjectData* base, const Variant& offset);
 
 void throw_cannot_use_newelem_for_lval_read() ATTRIBUTE_NORETURN;
 
+void unknownBaseType(const TypedValue*) ATTRIBUTE_NORETURN;
+
 // Post: base is a Cell*
 ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
   // Get inner variant if necessary.
@@ -204,9 +206,9 @@ inline const TypedValue* ElemEmptyish() {
 }
 
 /**
- * Elem when base is an Int64 or Double
+ * Elem when base is an Int64, Double, or Resource.
  */
-inline const TypedValue* ElemNumberish() {
+inline const TypedValue* ElemScalar() {
   if (RuntimeOption::EnableHipHopSyntax) {
     raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   }
@@ -218,7 +220,7 @@ inline const TypedValue* ElemNumberish() {
  */
 inline const TypedValue* ElemBoolean(TypedValue* base) {
   if (base->m_data.num) {
-    return ElemNumberish();
+    return ElemScalar();
   }
   return ElemEmptyish();
 }
@@ -306,7 +308,8 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvScratch,
     return ElemEmptyish();
   case KindOfInt64:
   case KindOfDouble:
-    return ElemNumberish();
+  case KindOfResource:
+    return ElemScalar();
   case KindOfBoolean:
     return ElemBoolean(base);
   case KindOfStaticString:
@@ -317,8 +320,7 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvScratch,
   case KindOfObject:
     return ElemObject<warn, keyType>(tvRef, base, key);
   default:
-    assert(false);
-    return nullptr;
+    unknownBaseType(base);
   }
 }
 
@@ -389,9 +391,9 @@ inline TypedValue* ElemDEmptyish(TypedValue* base, key_type<keyType> key) {
 }
 
 /**
- * ElemD when base is an Int64 or Double
+ * ElemD when base is an Int64, Double, or Resource.
  */
-inline TypedValue* ElemDNumberish(TypedValue& tvScratch) {
+inline TypedValue* ElemDScalar(TypedValue& tvScratch) {
   // TODO Task #2757837: Get rid of tvScratch
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   tvWriteUninit(&tvScratch);
@@ -405,7 +407,7 @@ template <bool warn, KeyType keyType>
 inline TypedValue* ElemDBoolean(TypedValue& tvScratch, TypedValue* base,
                                 key_type<keyType> key) {
   if (base->m_data.num) {
-    return ElemDNumberish(tvScratch);
+    return ElemDScalar(tvScratch);
   }
   return ElemDEmptyish<warn, keyType>(base, key);
 }
@@ -466,7 +468,8 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
     return ElemDBoolean<warn, keyType>(tvScratch, base, key);
   case KindOfInt64:
   case KindOfDouble:
-    return ElemDNumberish(tvScratch);
+  case KindOfResource:
+    return ElemDScalar(tvScratch);
   case KindOfStaticString:
   case KindOfString:
     return ElemDString<warn, keyType>(base, key);
@@ -475,8 +478,7 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfObject:
     return ElemDObject<reffy, keyType>(tvRef, base, key);
   default:
-    assert(false);
-    return nullptr; // Silence compiler warning.
+    unknownBaseType(base);
   }
 }
 
@@ -539,8 +541,9 @@ inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfBoolean:
   case KindOfInt64:
   case KindOfDouble:
-    // Unset on a null base never modifies the base, but the
-    // const_cast is necessary to placate the type system.
+  case KindOfResource:
+    // Unset on scalar base never modifies the base, but the const_cast is
+    // necessary to placate the type system.
     return const_cast<TypedValue*>(null_variant.asTypedValue());
   case KindOfStaticString:
   case KindOfString:
@@ -551,8 +554,7 @@ inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfObject:
     return ElemUObject<keyType>(tvRef, base, key);
   default:
-    not_reached();
-    return nullptr;
+    unknownBaseType(base);
   }
 }
 
@@ -653,10 +655,10 @@ inline void SetElemEmptyish(TypedValue* base, key_type<keyType> key,
 }
 
 /**
- * SetElem when base is an Int64 or Double
+ * SetElem when base is an Int64, Double, or Resource.
  */
 template <bool setResult>
-inline void SetElemNumberish(Cell* value) {
+inline void SetElemScalar(Cell* value) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   if (!setResult) {
     throw InvalidSetMException(make_tv<KindOfNull>());
@@ -672,7 +674,7 @@ template <bool setResult, KeyType keyType>
 inline void SetElemBoolean(TypedValue* base, key_type<keyType> key,
                            Cell* value) {
   if (base->m_data.num) {
-    SetElemNumberish<setResult>(value);
+    SetElemScalar<setResult>(value);
   } else {
     SetElemEmptyish<keyType>(base, key, value);
   }
@@ -929,7 +931,8 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
     return nullptr;
   case KindOfInt64:
   case KindOfDouble:
-    SetElemNumberish<setResult>(value);
+  case KindOfResource:
+    SetElemScalar<setResult>(value);
     return nullptr;
   case KindOfStaticString:
   case KindOfString:
@@ -941,8 +944,7 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
     SetElemObject<keyType>(base, key, value);
     return nullptr;
   default:
-    not_reached();
-    return nullptr;
+    unknownBaseType(base);
   }
 }
 
@@ -972,7 +974,7 @@ inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
  * SetNewElem when base is Int64 or Double
  */
 template <bool setResult>
-inline void SetNewElemNumberish(Cell* value) {
+inline void SetNewElemScalar(Cell* value) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   if (!setResult) {
     throw InvalidSetMException(make_tv<KindOfNull>());
@@ -987,7 +989,7 @@ inline void SetNewElemNumberish(Cell* value) {
 template <bool setResult>
 inline void SetNewElemBoolean(TypedValue* base, Cell* value) {
   if (base->m_data.num) {
-    SetNewElemNumberish<setResult>(value);
+    SetNewElemScalar<setResult>(value);
   } else {
     SetNewElemEmptyish(base, value);
   }
@@ -1047,7 +1049,8 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
     return SetNewElemBoolean<setResult>(base,  value);
   case KindOfInt64:
   case KindOfDouble:
-    return SetNewElemNumberish<setResult>(value);
+  case KindOfResource:
+    return SetNewElemScalar<setResult>(value);
   case KindOfStaticString:
   case KindOfString:
     return SetNewElemString(base, value);
@@ -1055,7 +1058,8 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
     return SetNewElemArray(base, value);
   case KindOfObject:
     return SetNewElemObject(base, value);
-  default: assert(false);
+  default:
+    unknownBaseType(base);
   }
 }
 
@@ -1081,7 +1085,7 @@ inline TypedValue* SetOpElemEmptyish(SetOpOp op, Cell* base,
 /**
  * SetOpElem when base is Int64 or Double
  */
-inline TypedValue* SetOpElemNumberish(TypedValue& tvScratch) {
+inline TypedValue* SetOpElemScalar(TypedValue& tvScratch) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   tvWriteNull(&tvScratch);
   return &tvScratch;
@@ -1106,15 +1110,16 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      result = SetOpElemNumberish(tvScratch);
+      result = SetOpElemScalar(tvScratch);
     } else {
       result = SetOpElemEmptyish(op, base, key, rhs);
     }
     break;
   }
   case KindOfInt64:
-  case KindOfDouble: {
-    result = SetOpElemNumberish(tvScratch);
+  case KindOfDouble:
+  case KindOfResource: {
+    result = SetOpElemScalar(tvScratch);
     break;
   }
   case KindOfStaticString:
@@ -1145,7 +1150,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   default: {
-    always_assert(false && "Unexpected DataType");
+    unknownBaseType(base);
   }
   }
   return result;
@@ -1159,7 +1164,7 @@ inline TypedValue* SetOpNewElemEmptyish(SetOpOp op,
   SETOP_BODY(result, op, rhs);
   return result;
 }
-inline TypedValue* SetOpNewElemNumberish(TypedValue& tvScratch) {
+inline TypedValue* SetOpNewElemScalar(TypedValue& tvScratch) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   tvWriteNull(&tvScratch);
   return &tvScratch;
@@ -1178,15 +1183,16 @@ inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      result = SetOpNewElemNumberish(tvScratch);
+      result = SetOpNewElemScalar(tvScratch);
     } else {
       result = SetOpNewElemEmptyish(op, base, rhs);
     }
     break;
   }
   case KindOfInt64:
-  case KindOfDouble: {
-    result = SetOpNewElemNumberish(tvScratch);
+  case KindOfDouble:
+  case KindOfResource: {
+    result = SetOpNewElemScalar(tvScratch);
     break;
   }
   case KindOfStaticString:
@@ -1214,8 +1220,7 @@ inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   default: {
-    assert(false);
-    result = nullptr; // Silence compiler warning.
+    unknownBaseType(base);
   }
   }
   return result;
@@ -1339,7 +1344,7 @@ inline void IncDecElemEmptyish(IncDecOp op, TypedValue* base,
   IncDecBody<setResult>(op, result, &dest);
 }
 template <bool setResult>
-inline void IncDecElemNumberish(TypedValue& dest) {
+inline void IncDecElemScalar(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   if (setResult) {
     tvWriteNull(&dest);
@@ -1359,15 +1364,16 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      IncDecElemNumberish<setResult>(dest);
+      IncDecElemScalar<setResult>(dest);
     } else {
       IncDecElemEmptyish<setResult>(op, base, key, dest);
     }
     break;
   }
   case KindOfInt64:
-  case KindOfDouble: {
-    IncDecElemNumberish<setResult>(dest);
+  case KindOfDouble:
+  case KindOfResource: {
+    IncDecElemScalar<setResult>(dest);
     break;
   }
   case KindOfStaticString:
@@ -1396,7 +1402,9 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     IncDecBody<setResult>(op, result, &dest);
     break;
   }
-  default: assert(false);
+  default: {
+    unknownBaseType(base);
+  }
   }
 }
 
@@ -1411,7 +1419,7 @@ inline void IncDecNewElemEmptyish(IncDecOp op, TypedValue* base,
 }
 
 template <bool setResult>
-inline void IncDecNewElemNumberish(TypedValue& dest) {
+inline void IncDecNewElemScalar(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   if (setResult) {
     tvWriteNull(&dest);
@@ -1432,15 +1440,16 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      IncDecNewElemNumberish<setResult>(dest);
+      IncDecNewElemScalar<setResult>(dest);
     } else {
       IncDecNewElemEmptyish<setResult>(op, base, dest);
     }
     break;
   }
   case KindOfInt64:
-  case KindOfDouble: {
-    IncDecNewElemNumberish<setResult>(dest);
+  case KindOfDouble:
+  case KindOfResource: {
+    IncDecNewElemScalar<setResult>(dest);
     break;
   }
   case KindOfStaticString:
@@ -1468,7 +1477,9 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     }
     break;
   }
-  default: assert(false);
+  default: {
+    unknownBaseType(base);
+  }
   }
 }
 

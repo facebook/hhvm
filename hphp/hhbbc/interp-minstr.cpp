@@ -341,7 +341,7 @@ void handleInSelfPropD(MIS& env) {
   if (!couldBeInSelf(env, env.base)) return;
 
   if (auto const name = env.base.locName) {
-    auto const ty = thisPropAsCell(env, name);
+    auto const ty = selfPropAsCell(env, name);
     if (ty && propCouldPromoteToObj(*ty)) {
       mergeSelfProp(env, name,
         objExact(env.index.builtin_class(s_stdClass.get())));

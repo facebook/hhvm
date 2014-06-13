@@ -1309,7 +1309,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      HPHP::Eval::PhpFile* phpFile = g_context->lookupPhpFile(
+      auto const phpFile = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
       if (phpFile == nullptr) {
         throw FileOpenException(po.lint);

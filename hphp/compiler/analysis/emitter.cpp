@@ -8125,8 +8125,6 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
 
 Thunklet::~Thunklet() {}
 
-using HPHP::Eval::PhpFile;
-
 static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
   for (int i = 0, n = c->getKidCount(); i < n; i++) {
     if (ConstructPtr k = c->getNthKid(i)) {

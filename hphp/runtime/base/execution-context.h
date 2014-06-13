@@ -43,7 +43,7 @@ struct RequestEventHandler;
 struct EventHook;
 struct PCFilter;
 struct Resumable;
-namespace Eval { struct PhpFile; }
+struct PhpFile;
 namespace JIT { struct Translator; }
 }
 
@@ -504,11 +504,11 @@ public:
 
   hphp_hash_map<
     StringData*,
-    Eval::PhpFile*,
+    PhpFile*,
     string_data_hash,
     string_data_same
   > m_evaledFiles;
-  std::vector<Eval::PhpFile*> m_evaledFilesOrder;
+  std::vector<PhpFile*> m_evaledFilesOrder;
   std::vector<Unit*> m_createdFuncs;
 
   std::vector<Fault> m_faults;
@@ -520,15 +520,16 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  Eval::PhpFile* lookupPhpFile(
+  PhpFile* lookupPhpFile(
       StringData* path, const char* currentDir, bool* initial = nullptr);
   Unit* evalInclude(StringData* path,
                               const StringData* curUnitFilePath, bool* initial);
   Unit* evalIncludeRoot(StringData* path,
                                   InclOpFlags flags, bool* initial);
-  Eval::PhpFile* lookupIncludeRoot(StringData* path,
-                                         InclOpFlags flags, bool* initial,
-                                         Unit* unit = 0);
+  PhpFile* lookupIncludeRoot(StringData* path,
+                             InclOpFlags flags,
+                             bool* initial,
+                             Unit* unit = 0);
   bool evalUnit(Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, Unit* unit);
   Unit* compileEvalString(StringData* code,

@@ -2495,20 +2495,20 @@ const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
   return ci;
 }
 
-HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
-                                                     const char* currentDir,
-                                                     bool* initial_opt) {
+PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
+                                         const char* currentDir,
+                                         bool* initial_opt) {
   bool init;
   bool &initial = initial_opt ? *initial_opt : init;
   initial = true;
 
   struct stat s;
-  String spath = Eval::resolveVmInclude(path, currentDir, &s);
+  auto const spath = resolveVmInclude(path, currentDir, &s);
   if (spath.isNull()) return nullptr;
 
   // Check if this file has already been included.
   auto it = m_evaledFiles.find(spath.get());
-  HPHP::Eval::PhpFile* efile = nullptr;
+  PhpFile* efile = nullptr;
   if (it != end(m_evaledFiles)) {
     // We found it! Return the unit.
     efile = it->second;
@@ -2542,7 +2542,7 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
     }
   }
   // This file hasn't been included yet, so we need to parse the file
-  efile = HPHP::Eval::FileRepository::checkoutFile(
+  efile = FileRepository::checkoutFile(
     hasRealpath ? rpath.get() : spath.get(), s);
   if (efile && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
@@ -2569,7 +2569,7 @@ Unit* ExecutionContext::evalInclude(StringData* path,
                                       const StringData* curUnitFilePath,
                                       bool* initial) {
   namespace fs = boost::filesystem;
-  HPHP::Eval::PhpFile* efile = nullptr;
+  PhpFile* efile = nullptr;
   if (curUnitFilePath) {
     fs::path currentUnit(curUnitFilePath->data());
     fs::path currentDir(currentUnit.branch_path());
@@ -2583,16 +2583,16 @@ Unit* ExecutionContext::evalInclude(StringData* path,
   return nullptr;
 }
 
-HPHP::Unit* ExecutionContext::evalIncludeRoot(
+Unit* ExecutionContext::evalIncludeRoot(
   StringData* path, InclOpFlags flags, bool* initial) {
-  HPHP::Eval::PhpFile* efile = lookupIncludeRoot(path, flags, initial);
+  auto const efile = lookupIncludeRoot(path, flags, initial);
   return efile ? efile->unit() : 0;
 }
 
-HPHP::Eval::PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
-                                                           InclOpFlags flags,
-                                                           bool* initial,
-                                                           Unit* unit) {
+PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
+                                             InclOpFlags flags,
+                                             bool* initial,
+                                             Unit* unit) {
   String absPath;
   if (flags & InclOpFlags::Relative) {
     namespace fs = boost::filesystem;

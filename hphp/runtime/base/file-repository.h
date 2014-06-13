@@ -14,14 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_FILE_REPOSITORY_H_
-#define incl_HPHP_EVAL_FILE_REPOSITORY_H_
-
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/type-string.h"
-
-#include "hphp/util/lock.h"
-#include "hphp/util/md5.h"
+#ifndef incl_HPHP_FILE_REPOSITORY_H_
+#define incl_HPHP_FILE_REPOSITORY_H_
 
 #include <sys/stat.h>
 #include <atomic>
@@ -29,51 +23,45 @@
 #include <set>
 #include <vector>
 
+#include "hphp/util/lock.h"
+#include "hphp/util/md5.h"
+
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-string.h"
+
 #ifdef __APPLE__
 #define st_mtim st_mtimespec
 #endif
 
 namespace HPHP {
-class Unit;
 
-/* UnitVisitor: abstract interface for running code on each Unit. */
-class UnitVisitor {
-public:
-  virtual ~UnitVisitor() { }
-  virtual void operator()(Unit *u) = 0;
-};
-}
+struct Unit;
 
-namespace HPHP {
-namespace Eval {
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-static inline bool md5Enabled() {
-  return true;
-}
-
-static inline bool isAuthoritativeRepo() {
-  return RuntimeOption::RepoAuthoritative;
-}
-
-class PhpFile {
-public:
+struct PhpFile {
   PhpFile(const std::string &fileName, const std::string &srcRoot,
           const std::string &relPath, const std::string &md5,
-          HPHP::Unit* unit);
+          Unit* unit);
   ~PhpFile();
-  void incRef();
-  int decRef(int num = 1);
-  void decRefAndDelete();
-  int getRef() { return m_refCount.load(std::memory_order_acquire); }
-  // time_t readTime() const { return m_timestamp; }
+
+  PhpFile(const PhpFile&) = delete;
+  PhpFile& operator=(const PhpFile&) = delete;
+
   const std::string &getFileName() const { return m_fileName; }
   const std::string &getSrcRoot() const { return m_srcRoot; }
   const std::string &getRelPath() const { return m_relPath; }
   const std::string &getMd5() const { return m_md5; }
-  HPHP::Unit* unit() const { return m_unit; }
+  Unit* unit() const { return m_unit; }
   int getId() const { return m_id; }
   void setId(int id);
+
+private:
+  friend struct FileRepository;
+  int getRef() const { return m_refCount.load(std::memory_order_acquire); }
+  void incRef();
+  int decRef();
+  void decRefAndDelete();
 
 private:
   std::atomic<int> m_refCount;
@@ -83,37 +71,39 @@ private:
   std::string m_srcRoot;
   std::string m_relPath;
   std::string m_md5;
-  HPHP::Unit* m_unit;
+  Unit* m_unit;
 };
 
-class PhpFileWrapper {
-  static int64_t timespecCompare(const struct timespec& l,
-                               const struct timespec& r) {
-    if (l.tv_sec != r.tv_sec) return l.tv_sec - r.tv_sec;
-    int64_t ret = l.tv_nsec - r.tv_nsec;
-    return ret;
-  }
-public:
-  PhpFileWrapper(const struct stat &s, PhpFile *phpFile) :
+struct PhpFileWrapper {
+  PhpFileWrapper(const struct stat& s, PhpFile* phpFile) :
     m_mtime(s.st_mtim), m_ino(s.st_ino), m_devId(s.st_dev),
     m_phpFile(phpFile) {
   }
   ~PhpFileWrapper() {}
+
   bool isChanged(const struct stat &s) {
-    if (isAuthoritativeRepo()) {
+    if (RuntimeOption::RepoAuthoritative) {
       return false;
     }
     return timespecCompare(m_mtime, s.st_mtim) < 0 ||
            m_ino != s.st_ino ||
            m_devId != s.st_dev;
   }
-  PhpFile *getPhpFile() { return m_phpFile; }
+  PhpFile* getPhpFile() { return m_phpFile; }
+
+private:
+  static int64_t timespecCompare(const struct timespec& l,
+                               const struct timespec& r) {
+    if (l.tv_sec != r.tv_sec) return l.tv_sec - r.tv_sec;
+    int64_t ret = l.tv_nsec - r.tv_nsec;
+    return ret;
+  }
 
 private:
   struct timespec m_mtime;
   ino_t m_ino;
   dev_t m_devId;
-  PhpFile *m_phpFile;
+  PhpFile* m_phpFile;
 };
 
 struct UnitMd5Val {
@@ -121,14 +111,13 @@ struct UnitMd5Val {
   bool m_present;
 };
 
-typedef tbb::concurrent_hash_map<const StringData *, struct UnitMd5Val,
+typedef tbb::concurrent_hash_map<const StringData*, struct UnitMd5Val,
                                  StringDataHashCompare> UnitMd5Map;
-typedef RankedCHM<const StringData*, HPHP::Eval::PhpFileWrapper*,
+typedef RankedCHM<const StringData*, PhpFileWrapper*,
                   StringDataHashCompare, RankFileRepo> ParsedFilesMap;
 typedef hphp_hash_map<std::string, PhpFile*, string_hash> Md5FileMap;
-typedef std::vector<HPHP::Unit *> UnitVec;
 
-/**
+/*
  * FileRepository tracks all the Units that are currently live in this session.
  *
  * Currently live means that its been loaded at least once, and we haven't
@@ -144,12 +133,9 @@ typedef std::vector<HPHP::Unit *> UnitVec;
  * can no longer be reached by new requests, but existing requests could still
  * be referring to it, so the Unit is freed via TreadMill.
  */
-class FileRepository {
-public:
-  class FileInfo {
-  public:
-    FileInfo() : m_phpFile(nullptr) {}
-    PhpFile *m_phpFile;
+struct FileRepository {
+  struct FileInfo {
+    PhpFile* m_phpFile{nullptr};
     String m_inputString;
     std::string m_md5;
     std::string m_unitMd5;
@@ -157,36 +143,39 @@ public:
     std::string m_relPath;
   };
 
-  /**
-   * The first time you attempt to invoke a file in a request, this is called.
-   * From then on, invoke_file will store the PhpFile and use that.
-   */
-  static PhpFile *checkoutFile(StringData *rname, const struct stat &s);
-  static bool findFile(const StringData *path, struct stat *s);
-  static bool fileDump(const char *filename);
+  static PhpFile* checkoutFile(StringData* rname, const struct stat& s);
+  static void deleteOrphanedUnits();
+  static bool readRepoMd5(const StringData *path, FileInfo& fileInfo);
   static std::string unitMd5(const std::string& fileMd5);
+  static size_t getLoadedFiles();
+
+public: // XXX: logically private
+  static bool findFile(const StringData* path, struct stat* s);
+
+private:
+  friend struct PhpFile;
+  struct FileDumpInitializer;
+
+private:
+  static bool fileDump(const char *filename);
   static void setFileInfo(const StringData *name, const std::string& md5,
                           FileInfo &fileInfo, bool fromRepo = false);
   static bool readActualFile(const StringData *name, const struct stat &s,
                              FileInfo &fileInfo);
   static void computeMd5(const StringData *name, FileInfo& fileInfo);
-  static bool readRepoMd5(const StringData *path, FileInfo& fileInfo);
   static bool readFile(const StringData *name,
                        const struct stat &s, FileInfo &fileInfo);
-  static PhpFile *readHhbc(const std::string &name, const FileInfo &fileInfo);
-  static PhpFile *parseFile(const std::string &name, const FileInfo &fileInfo);
-  static String translateFileName(StringData *file);
+  static PhpFile* readHhbc(const std::string &name, const FileInfo &fileInfo);
+  static PhpFile* parseFile(const std::string &name, const FileInfo &fileInfo);
   static void onDelete(PhpFile *f);
-  static void forEachUnit(UnitVisitor& uit);
-  static size_t getLoadedFiles();
-  static void enqueueOrphanedUnitForDeletion(HPHP::Unit *u);
-  static void deleteOrphanedUnits();
+  static void enqueueOrphanedUnitForDeletion(Unit* u);
+
 private:
   static ParsedFilesMap s_files;
   static UnitMd5Map s_unitMd5Map;
   static ReadWriteMutex s_md5Lock;
   static Md5FileMap s_md5Files;
-  static UnitVec s_orphanedUnitsToDelete;
+  static std::vector<Unit*> s_orphanedUnitsToDelete;
 
   static bool fileStat(const std::string &name, struct stat *s);
   static std::set<std::string> s_names;
@@ -195,8 +184,8 @@ private:
 String resolveVmInclude(StringData* path, const char* currentDir,
                         struct stat *s, bool allow_dir = false);
 
-///////////////////////////////////////////////////////////////////////////////
-}
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif /* incl_HPHP_EVAL_FILE_REPOSITORY_H_ */
+#endif

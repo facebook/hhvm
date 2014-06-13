@@ -53,7 +53,6 @@ namespace HPHP {
 TRACE_SET_MOD(fr);
 extern bool (*file_dump)(const char *filename);
 
-namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::set<std::string> FileRepository::s_names;
@@ -62,7 +61,7 @@ PhpFile::PhpFile(const std::string &fileName,
                  const std::string &srcRoot,
                  const std::string &relPath,
                  const std::string &md5,
-                 HPHP::Unit* unit)
+                 Unit* unit)
     : m_refCount(0), m_id(0),
       m_profName(std::string("run_init::") + std::string(fileName)),
       m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5),
@@ -94,12 +93,12 @@ void PhpFile::incRef() {
         m_fileName.c_str(), ret - 1, ret, this, __builtin_return_address(0));
 }
 
-int PhpFile::decRef(int n) {
-  int ret = m_refCount.fetch_sub(n, std::memory_order_acq_rel);
+int PhpFile::decRef() {
+  int ret = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
   TRACE(4, "PhpFile: %s decRef() %d -> %d %p called by %p\n",
-        m_fileName.c_str(), ret, ret - n, this, __builtin_return_address(0));
-  assert(ret >= n); // fetch_sub returns the old value
-  return ret - n;
+        m_fileName.c_str(), ret, ret - 1, this, __builtin_return_address(0));
+  assert(ret >= 1); // fetch_sub returns the old value
+  return ret - 1;
 }
 
 void PhpFile::decRefAndDelete() {
@@ -117,10 +116,10 @@ ReadWriteMutex FileRepository::s_md5Lock(RankFileMd5);
 ParsedFilesMap FileRepository::s_files;
 Md5FileMap FileRepository::s_md5Files;
 UnitMd5Map FileRepository::s_unitMd5Map;
-UnitVec FileRepository::s_orphanedUnitsToDelete;
+std::vector<Unit*> FileRepository::s_orphanedUnitsToDelete;
 
-static class FileDumpInitializer {
-  public: FileDumpInitializer() {
+struct FileRepository::FileDumpInitializer {
+  FileDumpInitializer() {
     file_dump = FileRepository::fileDump;
   }
 } s_fileDumpInitializer;
@@ -148,19 +147,11 @@ bool FileRepository::fileDump(const char *filename) {
 
 void FileRepository::onDelete(PhpFile* f) {
   assert(f->getRef() == 0);
-  if (md5Enabled()) {
+  {
     WriteLock lock(s_md5Lock);
     s_md5Files.erase(f->getMd5());
   }
   delete f;
-}
-
-void FileRepository::forEachUnit(UnitVisitor& uit) {
-  ReadLock lock(s_md5Lock);
-  for (Md5FileMap::const_iterator it = s_md5Files.begin();
-       it != s_md5Files.end(); ++it) {
-    uit(it->second->unit());
-  }
 }
 
 size_t FileRepository::getLoadedFiles() {
@@ -168,10 +159,10 @@ size_t FileRepository::getLoadedFiles() {
   return s_md5Files.size();
 }
 
-PhpFile *FileRepository::checkoutFile(StringData *rname,
-                                      const struct stat &s) {
+PhpFile* FileRepository::checkoutFile(StringData* rname,
+                                      const struct stat& s) {
   FileInfo fileInfo;
-  PhpFile *ret = nullptr;
+  PhpFile* ret = nullptr;
   String name(rname);
   bool isPlainFile = File::IsPlainFilePath(name);
 
@@ -190,12 +181,12 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   } else {
     // Do the read before we get the repo lock, since it will call into the
     // stream library and will needs its own locks.
-    if (isAuthoritativeRepo()) {
+    if (RuntimeOption::RepoAuthoritative) {
       throw FatalErrorException(
         "including urls doesn't work in RepoAuthoritative mode"
       );
     }
-    Stream::Wrapper* w = Stream::getWrapperFromURI(name);
+    auto const w = Stream::getWrapperFromURI(name);
     if (!w) return nullptr;
     File* f = w->open(name, "r", 0, null_variant);
     if (!f) return nullptr;
@@ -206,7 +197,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   }
 
   TRACE(1, "FR fast path miss: %s\n", rname->data());
-  const StringData *n = makeStaticString(name.get());
+  auto const staticName = makeStaticString(name.get());
 
   PhpFile* toKill = nullptr;
   SCOPE_EXIT {
@@ -214,7 +205,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     if (toKill) toKill->decRefAndDelete();
   };
   ParsedFilesMap::accessor acc;
-  bool isNew = s_files.insert(acc, n);
+  bool isNew = s_files.insert(acc, staticName);
   PhpFileWrapper* old = acc->second;
   SCOPE_EXIT {
     // run this just before acc is released
@@ -231,7 +222,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   bool isChanged = !isNew && old->isChanged(s);
 
   if (isNew || isChanged) {
-    if (isPlainFile && !readFile(n, s, fileInfo)) {
+    if (isPlainFile && !readFile(staticName, s, fileInfo)) {
       TRACE(1, "File disappeared between stat and FR::readNewFile: %s\n",
             rname->data());
       return nullptr;
@@ -239,7 +230,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     ret = fileInfo.m_phpFile;
     if (isChanged && ret == old->getPhpFile()) {
       // The file changed but had the same contents.
-      if (debug && md5Enabled()) {
+      if (do_assert) {
         ReadLock lock(s_md5Lock);
         assert(s_md5Files.find(ret->getMd5())->second == ret);
       }
@@ -255,13 +246,14 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   // If we get here the file was not in s_files or has changed on disk
   if (!ret) {
     // Try to read Unit from .hhbc repo.
-    ret = readHhbc(n->data(), fileInfo);
+    ret = readHhbc(staticName->data(), fileInfo);
   }
   if (!ret) {
-    if (isAuthoritativeRepo()) {
-      raise_error("Tried to parse %s in repo authoritative mode", n->data());
+    if (RuntimeOption::RepoAuthoritative) {
+      raise_error("Tried to parse %s in repo authoritative mode",
+        staticName->data());
     }
-    ret = parseFile(n->data(), fileInfo);
+    ret = parseFile(staticName->data(), fileInfo);
     if (!ret) return nullptr;
   }
   assert(ret != nullptr);
@@ -279,7 +271,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     acc->second = new PhpFileWrapper(s, ret);
   }
 
-  if (md5Enabled()) {
+  {
     WriteLock lock(s_md5Lock);
     s_md5Files[ret->getMd5()] = ret;
   }
@@ -287,7 +279,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
 }
 
 bool FileRepository::findFile(const StringData *path, struct stat *s) {
-  if (isAuthoritativeRepo()) {
+  if (RuntimeOption::RepoAuthoritative) {
     {
       UnitMd5Map::const_accessor acc;
       if (s_unitMd5Map.find(acc, path)) {
@@ -306,22 +298,6 @@ bool FileRepository::findFile(const StringData *path, struct stat *s) {
     return acc->second.m_present;
   }
   return fileStat(path->data(), s) && !S_ISDIR(s->st_mode);
-}
-
-String FileRepository::translateFileName(StringData *file) {
-  ParsedFilesMap::const_accessor acc;
-  if (!s_files.find(acc, file)) return file;
-  std::string srcRoot(SourceRootInfo::GetCurrentSourceRoot());
-  if (srcRoot.empty()) return file;
-  PhpFile *f = acc->second->getPhpFile();
-  const std::string &parsedSrcRoot = f->getSrcRoot();
-  if (srcRoot == parsedSrcRoot) return file;
-  int len = parsedSrcRoot.size();
-  if (len > 0 && file->size() > len &&
-      strncmp(file->data(), parsedSrcRoot.c_str(), len) == 0) {
-    return srcRoot + (file->data() + len);
-  }
-  return file;
 }
 
 std::string FileRepository::unitMd5(const std::string& fileMd5) {
@@ -398,11 +374,9 @@ bool FileRepository::readActualFile(const StringData *name,
 }
 
 void FileRepository::computeMd5(const StringData *name, FileInfo& fileInfo) {
-  if (md5Enabled()) {
-    auto& input = fileInfo.m_inputString;
-    std::string md5 = string_md5(input.data(), input.size());
-    setFileInfo(name, md5, fileInfo, false);
-  }
+  auto& input = fileInfo.m_inputString;
+  std::string md5 = string_md5(input.data(), input.size());
+  setFileInfo(name, md5, fileInfo, false);
 }
 
 bool FileRepository::readRepoMd5(const StringData *path,
@@ -444,7 +418,7 @@ bool FileRepository::readRepoMd5(const StringData *path,
 bool FileRepository::readFile(const StringData *name,
                               const struct stat &s,
                               FileInfo &fileInfo) {
-  if (!isAuthoritativeRepo()) {
+  if (!RuntimeOption::RepoAuthoritative) {
     TRACE(1, "read initial \"%s\"\n", name->data());
     return readActualFile(name, s, fileInfo);
   }
@@ -485,7 +459,7 @@ bool FileRepository::fileStat(const std::string &name, struct stat *s) {
   return StatCache::stat(name, s) == 0;
 }
 
-void FileRepository::enqueueOrphanedUnitForDeletion(HPHP::Unit *u) {
+void FileRepository::enqueueOrphanedUnitForDeletion(Unit *u) {
   assert(RuntimeOption::HHProfServerEnabled);
   s_orphanedUnitsToDelete.push_back(u);
 }
@@ -510,7 +484,7 @@ const StaticString s_file_url("file://");
 
 static bool findFile(const StringData *path, struct stat *s, bool allow_dir) {
   s->st_mode = 0;
-  auto ret = HPHP::Eval::FileRepository::findFile(path, s);
+  auto ret = FileRepository::findFile(path, s);
   if (S_ISDIR(s->st_mode) && allow_dir) {
     // The call explicitly populates the struct for dirs, but returns false for
     // them because it is geared toward file includes.
@@ -580,5 +554,5 @@ String resolveVmInclude(StringData* path, const char* currentDir,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
+
 }

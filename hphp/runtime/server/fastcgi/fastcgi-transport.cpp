@@ -366,7 +366,10 @@ void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
   cursor = Cursor(value_chain.get());
   std::string value = cursor.readFixedString(
                                value_chain->computeChainDataLength());
-  m_requestHeaders.emplace(key, value);
+  auto it = m_requestHeaders.emplace(key, value);
+  if (!it.second) {
+    it.first->second = value;
+  }
 }
 
 static const std::string

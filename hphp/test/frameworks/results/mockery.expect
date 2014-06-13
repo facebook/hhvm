@@ -27,7 +27,7 @@ ContainerTest::testCanMockClassWithConstructorNeedingClassArgs
 ContainerTest::testCanMockClassWithOldStyleConstructorAndArguments
 .
 ContainerTest::testCanMockClassWithReservedWordMethod
-S
+.
 ContainerTest::testCanMockInterface
 .
 ContainerTest::testCanMockInterfaceWithAbstractMethod

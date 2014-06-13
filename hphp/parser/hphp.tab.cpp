@@ -79,19 +79,19 @@
 /* Line 189 of yacc.c  */
 #line 1 "hphp.y"
 
+// macros for bison
+#define YYSTYPE HPHP::HPHP_PARSER_NS::Token
+#define YYSTYPE_IS_TRIVIAL false
+#define YYLTYPE HPHP::Location
+#define YYLTYPE_IS_TRIVIAL true
+#define YYERROR_VERBOSE
+#define YYINITDEPTH 500
+#define YYLEX_PARAM _p
+
 #include "hphp/compiler/parser/parser.h"
 #include <boost/lexical_cast.hpp>
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
-
-// macros for bison
-#define YYSTYPE HPHP::HPHP_PARSER_NS::Token
-#define YYSTYPE_IS_TRIVIAL 1
-#define YYLTYPE HPHP::Location
-#define YYLTYPE_IS_TRIVIAL 1
-#define YYERROR_VERBOSE
-#define YYINITDEPTH 500
-#define YYLEX_PARAM _p
 
 #ifdef yyerror
 #undef yyerror

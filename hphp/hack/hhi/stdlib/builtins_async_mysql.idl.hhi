@@ -53,6 +53,7 @@ class AsyncMysqlClient {
 class AsyncMysqlConnection {
   public function __construct() { }
   public function query(string $query, int $timeout_micros = -1) { }
+  public function multiQuery(Vector<string> $query, int $timeout_micros = -1) { }
   public function close() { }
   public function releaseConnection() { }
   public function serverInfo() { }

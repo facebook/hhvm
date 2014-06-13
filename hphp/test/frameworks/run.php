@@ -349,7 +349,8 @@ function get_unit_testing_infra_dependencies(): void {
     human("Getting composer.phar....\n");
     unlink(__DIR__."/composer.phar");
     $comp_url = "http://getcomposer.org/composer.phar";
-    $get_composer_command = "wget ".$comp_url." -P ".__DIR__." 2>&1";
+    $get_composer_command = "curl ".$comp_url." -o ".
+      __DIR__."/composer.phar 2>&1";
     $ret = run_install($get_composer_command, __DIR__,
                        ProxyInformation::$proxies);
     if ($ret !== 0) {
@@ -411,30 +412,35 @@ function print_summary_information(string $summary_file): void {
     $decoded_results = json_decode($contents, true);
     ksort($decoded_results);
 
-    if (Options::$output_format === OutputFormat::CSV) {
-      if (Options::$csv_header) {
-        $print_str = str_pad("date,", 20);
+    switch (Options::$output_format) {
+      case OutputFormat::CSV:
+        if (Options::$csv_header) {
+          $print_str = str_pad("date,", 20);
+          foreach ($decoded_results as $key => $value) {
+            $print_str .= str_pad($key.",", 20);
+          }
+          print rtrim($print_str, " ,") . PHP_EOL;
+        }
+        $print_str = str_pad(date("Y/m/d-G:i:s").",", 20);
         foreach ($decoded_results as $key => $value) {
-          $print_str .= str_pad($key.",", 20);
+          $print_str .= str_pad($value.",", 20);
         }
         print rtrim($print_str, " ,") . PHP_EOL;
-      }
-      $print_str = str_pad(date("Y/m/d-G:i:s").",", 20);
-      foreach ($decoded_results as $key => $value) {
-        $print_str .= str_pad($value.",", 20);
-      }
-      print rtrim($print_str, " ,") . PHP_EOL;
-    } else {
-      print PHP_EOL."ALL TESTS COMPLETE!".PHP_EOL;
-      print "SUMMARY:".PHP_EOL;
-      foreach ($decoded_results as $key => $value) {
-        print $key."=".$value.PHP_EOL;
-      }
-      print PHP_EOL;
-      print "To run differing tests (if they exist), see above for the".PHP_EOL;
-      print "commands or the results/.diff file. To run erroring or".PHP_EOL;
-      print "fataling tests see results/.errors and results/.fatals".PHP_EOL;
-      print "files, respectively".PHP_EOL;
+        break;
+      case OutputFormat::FBMAKE:
+        break;
+      default:
+        print PHP_EOL."ALL TESTS COMPLETE!".PHP_EOL;
+        print "SUMMARY:".PHP_EOL;
+        foreach ($decoded_results as $key => $value) {
+          print $key."=".$value.PHP_EOL;
+        }
+        print PHP_EOL;
+        print "To run differing tests (if they exist), see above for the".PHP_EOL;
+        print "commands or the results/.diff file. To run erroring or".PHP_EOL;
+        print "fataling tests see results/.errors and results/.fatals".PHP_EOL;
+        print "files, respectively".PHP_EOL;
+        break;
     }
   } else {
       human("\nNO SUMMARY INFO AVAILABLE!\n");
@@ -584,6 +590,8 @@ function oss_test_option_map(): OptionInfoMap {
     'csvheader'           => Pair {'',  "Add a header line for the summary ".
                                         "CSV which includes the framework ".
                                         "names."},
+    'fbmake'              => Pair {'',  "Output a stream of JSON objects that ".
+                                        "Facebook's test systems understand"},
     'by-file'             => Pair {'f',  "DEFAULT: Run tests for a framework ".
                                          "on a per test file basis, as ".
                                          "opposed to a an individual test ".

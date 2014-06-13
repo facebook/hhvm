@@ -167,6 +167,47 @@ function human(string $msg): void {
   }
 }
 
+function fbmake_json(Map<string, mixed> $data) {
+  if (Options::$output_format === OutputFormat::FBMAKE) {
+    // Yep, really. STDERR. If you put it on STDOUT instead, 'All tests passed.'
+    fprintf(STDERR, "%s\n", json_encode($data));
+  }
+}
+
+function fbmake_test_name(Framework $framework, string $test) {
+  return $framework->getName().'/'.$test;
+}
+
+function fbmake_result_json(
+  Framework $framework,
+  string $test,
+  string $status
+): Map<string, mixed> {
+  if (Options::$output_format !== OutputFormat::FBMAKE) {
+    return Map { };
+  }
+
+  $expected = $framework->getCurrentTestStatuses();
+  if ($expected && $expected->containsKey($test)) {
+    $expected = $expected[$test];
+
+    if ($expected === $status) {
+      return Map {
+        'status' => 'passed',
+        'details' => 'Matched expected status: '.$status,
+      };
+    }
+    return Map {
+      'status' => 'failed',
+      'details' => 'Expected '.$expected.', got '.$status,
+    };
+  }
+  return Map {
+    'status' => 'failed',
+    'details' => 'Unknown test - updated expect file needed?',
+  };
+}
+
 /**
  * Print output if verbose mode is on. This implies that the output format
  * is human-readable.
@@ -297,6 +338,13 @@ function run_install(string $proc, string $path, ?Map $env): ?int
   if ($env !== null) {
     $env_arr = array_merge($_ENV, $env->toArray());
   }
+  // If you have this set, it probably points to hhvm objects, not OSS
+  // objects. Misses here seem to be a huge slowdown, causing problems with
+  // fbmake timeouts.
+  if (array_key_exists('GIT_ALTERNATE_OBJECT_DIRECTORIES', $env_arr)) {
+    unset($env_arr['GIT_ALTERNATE_OBJECT_DIRECTORIES']);
+  }
+
   $pipes = null;
   $process = proc_open($proc, $descriptorspec, $pipes, $path, $env_arr);
   assert($pipes !== null);

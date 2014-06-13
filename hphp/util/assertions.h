@@ -27,17 +27,6 @@
 
 #define IMPLIES(a, b) (!(a) || (b))
 
-#ifndef __GXX_EXPERIMENTAL_CXX0X__
-# define static_assert(what, why) CT_ASSERT((what))
-#endif
-
-// Usage example: const_assert(hhvm);
-#define const_assert(c) do {                                                  \
-  if (!(c)) {                                                                 \
-    always_assert(false);                                                     \
-  }                                                                           \
-} while (0)
-
 #ifdef __INTEL_COMPILER
 #define not_reached()                                                \
   do {                                                               \

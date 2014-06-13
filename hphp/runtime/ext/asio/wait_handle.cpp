@@ -44,7 +44,7 @@ void c_WaitHandle::ti_setonjoincallback(const Variant& callback) {
 }
 
 Object c_WaitHandle::t_getwaithandle() {
-  const_assert(false);
+  always_assert(false);
 }
 
 // throws if cross-context cycle found

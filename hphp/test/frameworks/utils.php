@@ -159,7 +159,10 @@ function command_exists(string $cmd): bool {
  * Print if output format is for humans
  */
 function human(string $msg): void {
-  if (!Options::$csv_only) {
+  if (
+    (Options::$output_format === OutputFormat::HUMAN) ||
+    (Options::$output_format === OutputFormat::HUMAN_VERBOSE)
+  ) {
     print $msg;
   }
 }
@@ -169,8 +172,7 @@ function human(string $msg): void {
  * is human-readable.
  */
 function verbose(string $msg): void {
-  if (Options::$verbose) {
-    assert(!Options::$csv_only);
+  if (Options::$output_format === OutputFormat::HUMAN_VERBOSE) {
     print $msg;
   }
 }
@@ -179,7 +181,7 @@ function verbose(string $msg): void {
  * Print output if format is human readable, but not not verbose.
  */
 function not_verbose(string $msg): void {
-  if (!(Options::$csv_only || Options::$verbose)) {
+  if (Options::$output_format === OutputFormat::HUMAN) {
     print $msg;
   }
 }

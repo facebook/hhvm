@@ -4,12 +4,17 @@ require_once __DIR__.'/utils.php';
 require_once __DIR__.'/ProxyInformation.php';
 require_once __DIR__.'/../../../hphp/tools/command_line_lib.php';
 
+class OutputFormat {
+  const int HUMAN = 1;
+  const int HUMAN_VERBOSE = 2;
+  const int CSV = 3;
+};
+
 class Options {
   public static string $frameworks_root = __DIR__.'/framework_downloads';
   // seconds to run any individual test for any framework
   public static int $timeout = 90;
-  public static bool $verbose = false;
-  public static bool $csv_only = false;
+  public static int $output_format = OutputFormat::HUMAN;
   public static bool $csv_header = false;
   public static bool $force_redownload = false;
   public static bool $get_latest_framework_code = false;
@@ -63,12 +68,12 @@ class Options {
         // Can't be both summary and verbose.
         error_and_exit("Cannot be --csv and --verbose together");
       }
-      self::$csv_only = true;
+      self::$output_format = OutputFormat::CSV;
       // $tests[0] may not even be "summary", but it doesn't matter, we are
       // just trying to make the count right for $frameworks
       $framework_names->removeKey(0);
     } else if ($options->containsKey('verbose')) {
-      self::$verbose = true;
+      self::$output_format = OutputFormat::HUMAN_VERBOSE;
       $framework_names->removeKey(0);
     }
 

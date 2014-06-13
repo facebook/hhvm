@@ -310,7 +310,10 @@ THUMBSDOWN;
   }
 
   // Print the diffs
-  if (!Options::$csv_only) {
+  if (
+    (Options::$output_format === OutputFormat::HUMAN) ||
+    (Options::$output_format === OutputFormat::HUMAN_VERBOSE)
+  ) {
     foreach($diff_frameworks as $framework) {
       print_diffs($framework);
     }
@@ -408,7 +411,7 @@ function print_summary_information(string $summary_file): void {
     $decoded_results = json_decode($contents, true);
     ksort($decoded_results);
 
-    if (Options::$csv_only) {
+    if (Options::$output_format === OutputFormat::CSV) {
       if (Options::$csv_header) {
         $print_str = str_pad("date,", 20);
         foreach ($decoded_results as $key => $value) {

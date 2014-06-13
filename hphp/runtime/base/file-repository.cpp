@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/base/file-repository.h"
 
-#include <fstream>
 #include <sstream>
 
 #include <sys/types.h>
@@ -46,12 +45,9 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-using std::endl;
-
 namespace HPHP {
 
 TRACE_SET_MOD(fr);
-extern bool (*file_dump)(const char *filename);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -117,33 +113,6 @@ ParsedFilesMap FileRepository::s_files;
 Md5FileMap FileRepository::s_md5Files;
 UnitMd5Map FileRepository::s_unitMd5Map;
 std::vector<Unit*> FileRepository::s_orphanedUnitsToDelete;
-
-struct FileRepository::FileDumpInitializer {
-  FileDumpInitializer() {
-    file_dump = FileRepository::fileDump;
-  }
-} s_fileDumpInitializer;
-
-bool FileRepository::fileDump(const char *filename) {
-  std::ofstream out(filename);
-  if (out.fail()) return false;
-  out << "s_files: " << s_files.size() << endl;
-  for (ParsedFilesMap::const_iterator it =
-       s_files.begin(); it != s_files.end(); it++) {
-    out << it->first->data() << endl;
-  }
-  {
-    ReadLock lock(s_md5Lock);
-    out << "s_md5Files: " << s_md5Files.size() << endl;
-    for (Md5FileMap::const_iterator it = s_md5Files.begin();
-         it != s_md5Files.end(); it++) {
-      out << it->second->getMd5().c_str() << " "
-          << it->second->getFileName().c_str() << endl;
-    }
-  }
-  out.close();
-  return true;
-}
 
 void FileRepository::onDelete(PhpFile* f) {
   assert(f->getRef() == 0);
@@ -302,7 +271,6 @@ bool FileRepository::findFile(const StringData *path, struct stat *s) {
 
 std::string FileRepository::unitMd5(const std::string& fileMd5) {
   // Incorporate relevant options into the unit md5 (there will be more)
-  std::ostringstream opts;
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::EnableEmitSwitch ? '1' : '0')
     + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')

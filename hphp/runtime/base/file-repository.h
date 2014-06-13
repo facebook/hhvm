@@ -154,10 +154,8 @@ public: // XXX: logically private
 
 private:
   friend struct PhpFile;
-  struct FileDumpInitializer;
 
 private:
-  static bool fileDump(const char *filename);
   static void setFileInfo(const StringData *name, const std::string& md5,
                           FileInfo &fileInfo, bool fromRepo = false);
   static bool readActualFile(const StringData *name, const struct stat &s,

@@ -186,7 +186,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  /tmp/apc_dump_meta\n"
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
-        "/dump-file-repo:  dump file repository to /tmp/file_repo_dump\n"
 
         "/pcre-cache-size: get pcre cache map size\n"
         "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
@@ -866,8 +865,6 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
 ///////////////////////////////////////////////////////////////////////////////
 // Dump cache content
 
-bool (*file_dump)(const char *filename) = nullptr;
-
 bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
                                                  Transport *transport) {
   if (cmd == "dump-apc") {
@@ -886,13 +883,6 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
                     RuntimeOption::RequestTimeoutSeconds : 10;
     }
     apc_dump("/tmp/apc_dump", keyOnly, false, waitSeconds);
-    transport->sendString("Done");
-    return true;
-  }
-  if (cmd == "dump-file-repo") {
-    if (file_dump) {
-      (*file_dump)("/tmp/file_repo_dump");
-    }
     transport->sendString("Done");
     return true;
   }

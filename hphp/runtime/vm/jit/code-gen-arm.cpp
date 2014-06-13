@@ -213,20 +213,20 @@ CALL_OPCODE(CountArray)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
-            const Func* vmFunc, bool resumed) {
+            const Func* vmFunc, bool resumed, TransID profTransId) {
   FTRACE(1, "punting: {}\n", func);
-  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed);
+  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed, profTransId);
 }
 
-#define PUNT_OPCODE(name)                                           \
-  void CodeGenerator::cg##name(IRInstruction* inst) {               \
-    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),  \
-           curFunc(), resumed());                                   \
+#define PUNT_OPCODE(name)                                               \
+  void CodeGenerator::cg##name(IRInstruction* inst) {                   \
+    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),      \
+           curFunc(), resumed(), m_curInst->marker().profTransId());    \
   }
 
 #define CG_PUNT(instr)                                              \
     cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
-           curFunc(), resumed())
+           curFunc(), resumed(), m_curInst->marker().profTransId())
 
 /////////////////////////////////////////////////////////////////////
 //TODO t3702757: Convert to CALL_OPCODE, the following set works on

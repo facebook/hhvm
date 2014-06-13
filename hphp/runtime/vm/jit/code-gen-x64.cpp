@@ -86,17 +86,17 @@ using namespace JIT::reg;
  */
 
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
-            const Func* vmFunc, bool resumed) {
+            const Func* vmFunc, bool resumed, TransID profTransId) {
   if (dumpIREnabled()) {
     HPHP::Trace::trace("--------- CG_PUNT %s %d %s  bcOff: %d \n",
                        file, line, func, bcOff);
   }
-  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed);
+  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed, profTransId);
 }
 
 #define CG_PUNT(instr)                                            \
   cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
-         curFunc(), resumed())
+         curFunc(), resumed(), m_curInst->marker().profTransId())
 
 const char* getContextName(const Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";

@@ -4077,7 +4077,8 @@ Translator::translateRegion(const RegionDesc& region,
     auto knownFuncs    = makeMapWalker(block->knownFuncs());
 
     const Func* topFunc = nullptr;
-    ht.setProfTransID(getTransId(blockId));
+    TransID profTransId = getTransId(blockId);
+    ht.setProfTransID(profTransId);
 
     OffsetSet succOffsets;
     if (ht.genMode() == IRGenMode::CFG) {
@@ -4165,7 +4166,7 @@ Translator::translateRegion(const RegionDesc& region,
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if
       // this is true.
-      inst.interp = toInterp.count(sk);
+      inst.interp = toInterp.count(ProfSrcKey{profTransId, sk});
 
       InputInfos inputInfos;
       getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
@@ -4232,15 +4233,16 @@ Translator::translateRegion(const RegionDesc& region,
       try {
         m_irTrans->translateInstr(inst);
       } catch (const FailedIRGen& exn) {
+        ProfSrcKey psk{profTransId, sk};
         always_assert_log(
-          !toInterp.count(sk),
+          !toInterp.count(psk),
           [&] {
             std::ostringstream oss;
             oss << folly::format("IR generation failed with {}\n", exn.what());
             print(oss, m_irTrans->hhbcTrans().unit());
             return oss.str();
           });
-        toInterp.insert(sk);
+        toInterp.insert(psk);
         return Retry;
       }
 
@@ -4281,15 +4283,16 @@ Translator::translateRegion(const RegionDesc& region,
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const FailedCodeGen& exn) {
     SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
+    ProfSrcKey psk{exn.profTransId, sk};
     always_assert_log(
-      !toInterp.count(sk),
+      !toInterp.count(psk),
       [&] {
         std::ostringstream oss;
         oss << folly::format("code generation failed with {}\n", exn.what());
         print(oss, m_irTrans->hhbcTrans().unit());
         return oss.str();
       });
-    toInterp.insert(sk);
+    toInterp.insert(psk);
     return Retry;
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {

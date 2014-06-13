@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-src-key.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
@@ -370,7 +371,7 @@ public:
   /* translateRegion reads from the RegionBlacklist to determine when
    * to interpret an instruction, and adds failed instructions to the
    * blacklist so they're interpreted on the next attempt. */
-  typedef hphp_hash_set<SrcKey, SrcKey::Hasher> RegionBlacklist;
+  typedef ProfSrcKeySet RegionBlacklist;
   TranslateResult translateRegion(const RegionDesc& region,
                                   bool bcControlFlow,
                                   RegionBlacklist& interp);

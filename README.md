@@ -23,7 +23,7 @@ You can run standalone programs just by passing them to hhvm: `hhvm my_script.ph
 
 If you want to host a website: 
 * Install your favorite webserver
-* Install our [package](https://github.com/facebook/hhvm/wiki#installing-pre-built-packages-for-hhvm)
+* Install our [package](https://github.com/facebook/hhvm/wiki/Prebuilt%20Packages%20for%20HHVM)
 * Start your webserver
 * Run `sudo /etc/init.d/hhvm start`
 * Visit your site at http://.../index.php

@@ -1353,7 +1353,9 @@ Variant preg_split(const String& pattern, const String& subject,
               return false;
             }
           }
-          count = pcre_exec(bump_pce->re, bump_pce->extra, subject.data(),
+          pcre_extra *extra = bump_pce->extra;
+          set_extra_limits(extra);
+          count = pcre_exec(bump_pce->re, extra, subject.data(),
                             subject.size(), start_offset,
                             0, offsets, size_offsets);
           if (count < 1) {

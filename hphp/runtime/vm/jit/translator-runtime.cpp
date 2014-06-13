@@ -555,51 +555,71 @@ void tv_release_generic(TypedValue* tv) {
   g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
 }
 
-static Cell lookupCnsCommonHelper(const TypedValue* tv,
-                            StringData* name,
-                            StringData* fallback,
-                            bool error) {
-  assert(tv->m_type == KindOfUninit);
+// Lookup the deferred constant that the passed TypedValue* references,
+// if it references one at all. Deferred constants are constants like
+// SID and STDOUT.
+// Returns null if it doesn't reference a deferred constant.
+static const Cell* lookupDeferredConstant(const TypedValue* tv) {
+  if (tv == nullptr) return nullptr;
 
-  // Deferred constants such as SID
-  if (UNLIKELY(tv->m_data.pref != nullptr)) {
-    ClassInfo::ConstantInfo* ci =
-      (ClassInfo::ConstantInfo*)(void*)tv->m_data.pref;
-    Cell *cns = const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
-    if (LIKELY(cns->m_type != KindOfUninit)) {
-      Cell c1;
-      cellDup(*cns, c1);
-      return c1;
+  if (tv->m_type == KindOfUninit && UNLIKELY(tv->m_data.pref != nullptr)) {
+    ClassInfo::ConstantInfo* ci = (ClassInfo::ConstantInfo*)(void*)tv->m_data.pref;
+
+    if (ci->isDeferred()) {
+      const Cell* cns = ci->getDeferredValue().asTypedValue();
+      if (LIKELY(cns->m_type != KindOfUninit)) {
+        return cns;
+      }
     }
   }
 
+  return nullptr;
+}
+
+/**
+ * Lookup the constant, if there is a fall back, try to load that
+ * if the first lookup fails.
+ */
+static Cell lookupCnsCommonHelper(const TypedValue* tv,
+                                  StringData* name,
+                                  StringData* fallback,
+                                  bool error) {
+  const Cell* cns = nullptr; // The value we're looking up
+  Cell c1; // The value we're going to return
   bool cacheConsts = RDS::s_constants().get() != nullptr;
 
-  // Check for qualified name
+  // If there's no fallback, see if it's a deferred constant first.
+  if (fallback == nullptr) {
+    cns = lookupDeferredConstant(tv);
+  }
 
-  const Cell* cns = nullptr;
-  if (UNLIKELY(cacheConsts)) {
+  // Check for the qualified name
+  if (!cns && UNLIKELY(cacheConsts)) {
     cns = RDS::s_constants()->nvGet(name);
   }
   if (!cns) {
-    cns = Unit::loadCns(const_cast<StringData*>(name));
+    cns = Unit::loadCns(name);
   }
 
-  // Check for unqualified name, if there is one
-
+  // Check for the unqualified name, if there is one
   if (!cns && fallback != nullptr) {
-    if (UNLIKELY(cacheConsts)) {
+    cns = lookupDeferredConstant(tv);
+
+    // If the cache handle is valid, use that
+    if (!cns && UNLIKELY(tv && tv->m_type != KindOfUninit)) {
+      cns = tv;
+    }
+    if (!cns && UNLIKELY(cacheConsts)) {
       cns = RDS::s_constants()->nvGet(fallback);
     }
     if (!cns) {
-      cns = Unit::loadCns(const_cast<StringData*>(fallback));
+      cns = Unit::loadCns(fallback);
     }
   }
 
   // Return the constant's value
 
   if (LIKELY(cns != nullptr)) {
-    Cell c1;
     cellDup(*cns, c1);
     return c1;
   }
@@ -612,8 +632,7 @@ static Cell lookupCnsCommonHelper(const TypedValue* tv,
     raise_error("Undefined constant '%s'", cnsName->data());
   } else {
     raise_notice(Strings::UNDEFINED_CONSTANT, cnsName->data(), cnsName->data());
-    Cell c1;
-    c1.m_data.pstr = const_cast<StringData*>(cnsName);
+    c1.m_data.pstr = cnsName;
     c1.m_type = KindOfStaticString;
     return c1;
   }
@@ -621,7 +640,8 @@ static Cell lookupCnsCommonHelper(const TypedValue* tv,
 }
 
 Cell lookupCnsHelper(const TypedValue* tv, StringData* nm, bool error) {
-    return lookupCnsCommonHelper(tv, nm, nullptr, error);
+  assert(tv->m_type == KindOfUninit);
+  return lookupCnsCommonHelper(tv, nm, nullptr, error);
 }
 
 Cell lookupCnsUHelper(const TypedValue* tv,

@@ -343,7 +343,7 @@ void FastCGITransport::onBody(std::unique_ptr<folly::IOBuf> chain) {
   size_t length = chain->computeChainDataLength();
   std::string s = cursor.readFixedString(length);
   m_monitor.lock();
-  m_bodyQueue.append(std::move(chain));
+  m_bodyQueue.append(s);
   if (m_waiting > 0) {
     m_monitor.notify();
   }

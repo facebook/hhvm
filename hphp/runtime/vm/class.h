@@ -572,14 +572,6 @@ struct Class : AtomicCountable {
   void atomicRelease();
 
   /*
-   * releaseRefs() is called when a Class is put into the zombie state,
-   * to free any references to child classes, interfaces and traits
-   * Its safe to call multiple times, so is also called from the destructor
-   * (in case we bypassed the zombie state).
-   */
-  void releaseRefs();
-
-  /*
    * isZombie() returns true if this class has been logically destroyed,
    * but needed to be preserved due to outstanding references.
    */
@@ -895,6 +887,7 @@ private:
   ~Class();
 
 private:
+  void releaseRefs();
   void initialize(TypedValue*& sPropData) const;
   PropInitVec* initPropsImpl() const;
   TypedValue* initSPropsImpl() const;

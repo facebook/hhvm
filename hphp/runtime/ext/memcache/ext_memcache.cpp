@@ -29,6 +29,8 @@
 
 namespace HPHP {
 
+const int64_t k_MEMCACHE_COMPRESSED = MMC_COMPRESSED;
+
 static bool ini_on_update_hash_strategy(const std::string& value);
 static bool ini_on_update_hash_function(const std::string& value);
 
@@ -121,15 +123,43 @@ static bool HHVM_METHOD(Memcache, connect, const String& host, int port /*= 0*/,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-static String memcache_prepare_for_storage(const Variant& var, int &flag) {
+static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
+                                                      const Variant& var,
+                                                      int &flag) {
+  String v;
   if (var.isString()) {
-    return var.toString();
+    v = var.toString();
   } else if (var.isNumeric() || var.isBoolean()) {
-    return var.toString();
+    v = var.toString();
   } else {
     flag |= MMC_SERIALIZED;
-    return f_serialize(var);
+    v = f_serialize(var);
   }
+  std::vector<char> payload;
+  size_t value_len = v.length();
+
+  if (data->m_compress_threshold && value_len >= data->m_compress_threshold) {
+    flag |= MMC_COMPRESSED;
+  }
+  if (flag & MMC_COMPRESSED) {
+    size_t payload_len = compressBound(value_len);
+    payload.resize(payload_len);
+    if (compress((Bytef*)payload.data(), &payload_len,
+                 (const Bytef*)v.data(), value_len) == Z_OK) {
+      payload.resize(payload_len);
+      if (payload_len >= value_len * (1 - data->m_min_compress_savings)) {
+        flag &= ~MMC_COMPRESSED;
+      }
+    } else {
+      flag &= ~MMC_COMPRESSED;
+      raise_warning("could not compress value");
+    }
+  }
+  if (!(flag & MMC_COMPRESSED)) {
+    payload.resize(0);
+    payload.insert(payload.end(), v.data(), v.data() + value_len);
+   }
+  return payload;
 }
 
 static String memcache_prepare_key(const String& var) {
@@ -196,14 +226,14 @@ static bool HHVM_METHOD(Memcache, add, const String& key, const Variant& var,
   }
 
   auto data = Native::data<MemcacheData>(this_);
-  String serialized = memcache_prepare_for_storage(var, flag);
+  std::vector<char> serialized = memcache_prepare_for_storage(data, var, flag);
 
   String serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_add(&data->m_memcache,
                                         serializedKey.c_str(),
                                         serializedKey.length(),
-                                        serialized.c_str(),
-                                        serialized.length(),
+                                        serialized.data(),
+                                        serialized.size(),
                                         expire, flag);
 
   return (ret == MEMCACHED_SUCCESS);
@@ -218,13 +248,14 @@ static bool HHVM_METHOD(Memcache, set, const String& key, const Variant& var,
 
   auto data = Native::data<MemcacheData>(this_);
   String serializedKey = memcache_prepare_key(key);
-  String serializedVar = memcache_prepare_for_storage(var, flag);
+  std::vector<char> serializedVar =
+    memcache_prepare_for_storage(data, var, flag);
 
   memcached_return_t ret = memcached_set(&data->m_memcache,
                                          serializedKey.c_str(),
                                          serializedKey.length(),
-                                         serializedVar.c_str(),
-                                         serializedVar.length(), expire, flag);
+                                         serializedVar.data(),
+                                         serializedVar.size(), expire, flag);
 
   if (ret == MEMCACHED_SUCCESS) {
     return true;
@@ -243,13 +274,13 @@ static bool HHVM_METHOD(Memcache, replace, const String& key,
 
   auto data = Native::data<MemcacheData>(this_);
   String serializedKey = memcache_prepare_key(key);
-  String serialized = memcache_prepare_for_storage(var, flag);
+  std::vector<char> serialized = memcache_prepare_for_storage(data, var, flag);
 
   memcached_return_t ret = memcached_replace(&data->m_memcache,
                                              serializedKey.c_str(),
                                              serializedKey.length(),
-                                             serialized.c_str(),
-                                             serialized.length(),
+                                             serialized.data(),
+                                             serialized.size(),
                                              expire, flag);
   return (ret == MEMCACHED_SUCCESS);
 }
@@ -594,6 +625,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+const StaticString s_MEMCACHE_COMPRESSED("MEMCACHE_COMPRESSED");
 
 class MemcacheExtension : public Extension {
   public:
@@ -616,6 +648,9 @@ class MemcacheExtension : public Extension {
     }
 
     virtual void moduleInit() {
+      Native::registerConstant<KindOfInt64>(
+        s_MEMCACHE_COMPRESSED.get(), k_MEMCACHE_COMPRESSED
+      );
       HHVM_ME(Memcache, connect);
       HHVM_ME(Memcache, add);
       HHVM_ME(Memcache, set);

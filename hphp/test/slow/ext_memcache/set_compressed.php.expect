@@ -1,0 +1,11 @@
+array(4) {
+  [0]=>
+  string(5) "VALUE"
+  [1]=>
+  string(24) "TEST_KEY_COMPRESSION_SET"
+  [2]=>
+  string(1) "3"
+  [3]=>
+  string(2) "91"
+}
+bool(true)

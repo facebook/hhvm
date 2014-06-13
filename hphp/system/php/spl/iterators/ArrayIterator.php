@@ -34,6 +34,8 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   public function __construct($array = array(), $flags = 0) {
     if (($array instanceof ArrayObject) || ($array instanceof ArrayIterator)) {
       $this->storage = $array->getArrayCopy();
+    } else if (is_object($array)) {
+      $this->storage = get_object_vars($array);
     } else {
       $this->storage = (array) $array;
     }

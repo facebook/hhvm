@@ -1,0 +1,10 @@
+object(ArrayObject)#1 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(0) {
+  }
+}
+array(1) {
+  ["var1"]=>
+  string(4) "var1"
+}
+{"var1":"var1"}

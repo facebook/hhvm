@@ -694,7 +694,7 @@ void HhbcTranslator::emitCnsCommon(uint32_t id,
       // lookup.
       assert(!fallbackNameTmp);
       if (error) {
-        result = gen(LookupCnsE, cnsNameTmp);
+        result = gen(LookupCnsE, makeCatch(), cnsNameTmp);
       } else {
         result = gen(LookupCns, makeCatch(), cnsNameTmp);
       }

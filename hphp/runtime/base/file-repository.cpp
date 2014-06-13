@@ -66,6 +66,11 @@ PhpFile::PhpFile(const std::string &fileName,
 
 PhpFile::~PhpFile() {
   always_assert(getRef() == 0);
+  if (do_assert) {
+    ReadLock lock(FileRepository::s_md5Lock);
+    UNUSED auto const it = FileRepository::s_md5Files.find(getMd5());
+    assert(it == end(FileRepository::s_md5Files) || it->second != this);
+  }
   if (m_unit != nullptr) {
     // If we have or in the process of a collecting an hhprof dump than we need
     // to keep these units around as they might be needed for symbol resolution
@@ -99,7 +104,14 @@ int PhpFile::decRef() {
 
 void PhpFile::decRefAndDelete() {
   if (decRef() == 0) {
-    Treadmill::enqueue([this] { FileRepository::onDelete(this); });
+    {
+      WriteLock lock(FileRepository::s_md5Lock);
+      auto const it = FileRepository::s_md5Files.find(getMd5());
+      if (it != end(FileRepository::s_md5Files) && it->second == this) {
+        FileRepository::s_md5Files.erase(it);
+      }
+    }
+    Treadmill::enqueue([this] { delete this; });
   }
 }
 
@@ -113,15 +125,6 @@ ParsedFilesMap FileRepository::s_files;
 Md5FileMap FileRepository::s_md5Files;
 UnitMd5Map FileRepository::s_unitMd5Map;
 std::vector<Unit*> FileRepository::s_orphanedUnitsToDelete;
-
-void FileRepository::onDelete(PhpFile* f) {
-  assert(f->getRef() == 0);
-  {
-    WriteLock lock(s_md5Lock);
-    s_md5Files.erase(f->getMd5());
-  }
-  delete f;
-}
 
 size_t FileRepository::getLoadedFiles() {
   ReadLock lock(s_md5Lock);
@@ -242,6 +245,7 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
 
   {
     WriteLock lock(s_md5Lock);
+    assert(ret->getRef() != 0);
     s_md5Files[ret->getMd5()] = ret;
   }
   return ret;
@@ -311,7 +315,8 @@ void FileRepository::setFileInfo(const StringData *name,
   auto it = s_md5Files.find(fileInfo.m_md5);
   if (it != s_md5Files.end()) {
     PhpFile *f = it->second;
-    if (!fileInfo.m_relPath.empty() &&
+    if (f->getRef() != 0 &&
+        !fileInfo.m_relPath.empty() &&
         fileInfo.m_relPath == f->getRelPath()) {
       assert(fileInfo.m_md5 == f->getMd5());
       fileInfo.m_phpFile = f;

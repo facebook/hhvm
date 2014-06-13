@@ -165,7 +165,6 @@ private:
                        const struct stat &s, FileInfo &fileInfo);
   static PhpFile* readHhbc(const std::string &name, const FileInfo &fileInfo);
   static PhpFile* parseFile(const std::string &name, const FileInfo &fileInfo);
-  static void onDelete(PhpFile *f);
   static void enqueueOrphanedUnitForDeletion(Unit* u);
 
 private:

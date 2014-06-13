@@ -26,6 +26,7 @@
 #include "hphp/compiler/statement/typedef_statement.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/hash.h"
 

@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/disas.h"
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"

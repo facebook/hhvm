@@ -16,225 +16,58 @@
 
 #include "hphp/runtime/vm/func.h"
 
-#include "hphp/parser/parser.h"
-
+#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-string.h"
 
-#include "hphp/runtime/vm/blob-helper.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/func-inline.h"
-#include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/runtime.h"
-
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/types.h"
-
+#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
-#include "hphp/system/systemlib.h"
-
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/fixed-vector.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
+
+#include <atomic>
+#include <ostream>
+#include <vector>
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhbc);
+
 using JIT::tx;
 using JIT::mcg;
 
 const StringData* Func::s___call       = makeStaticString("__call");
 const StringData* Func::s___callStatic = makeStaticString("__callStatic");
 
-//=============================================================================
-// Func.
-
-static std::atomic<FuncId> s_nextFuncId(0);
-
-// This size hint will create a ~6MB vector and is rarely hit in
-// practice. Note that this is just a hint and exceeding it won't
-// affect correctness.
+/*
+ * This size hint will create a ~6MB vector and is rarely hit in practice.
+ * Note that this is just a hint and exceeding it won't affect correctness.
+ */
 constexpr size_t kFuncVecSizeHint = 750000;
+
+/*
+ * FuncId high water mark and FuncId -> Func* table.
+ */
+static std::atomic<FuncId> s_nextFuncId(0);
 static AtomicVector<const Func*> s_funcVec(kFuncVecSizeHint, nullptr);
 
-void Func::setNewFuncId() {
-  assert(m_funcId == InvalidFuncId);
-  m_funcId = s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
 
-  s_funcVec.ensureSize(m_funcId + 1);
-  DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, this);
-  assert(oldVal == nullptr);
-}
-
-FuncId Func::nextFuncId() {
-  return s_nextFuncId.load(std::memory_order_relaxed);
-}
-
-const Func* Func::fromFuncId(FuncId id) {
-  assert(id < s_nextFuncId);
-  auto func = s_funcVec.get(id);
-  func->validate();
-  return func;
-}
-
-bool Func::isFuncIdValid(FuncId id) {
-  assert(id < s_nextFuncId);
-  return s_funcVec.get(id) != nullptr;
-}
-
-void Func::setFullName(int numParams) {
-  assert(m_name->isStatic());
-  if (m_cls) {
-    m_fullName = makeStaticString(
-      std::string(m_cls->name()->data()) + "::" + m_name->data());
-  } else {
-    m_fullName = m_name;
-    m_namedEntity = Unit::GetNamedEntity(m_name);
-  }
-  if (RuntimeOption::EvalPerfDataMap) {
-    int numPre = isClosureBody() ? 1 : 0;
-    char* from = (char*)this - numPre * sizeof(Func);
-
-    int maxNumPrologues = Func::getMaxNumPrologues(numParams);
-    int numPrologues = maxNumPrologues > kNumFixedPrologues ?
-      maxNumPrologues : kNumFixedPrologues;
-    char* to = (char*)(m_prologueTable + numPrologues);
-    Debug::DebugInfo::recordDataMap(
-      from, to, folly::format("Func-{}-{}", numPre,
-                              (isPseudoMain() ?
-                               m_unit->filepath()->data() :
-                               m_fullName->data())).str());
-  }
-  if (RuntimeOption::DynamicInvokeFunctions.size()) {
-    if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
-        RuntimeOption::DynamicInvokeFunctions.end()) {
-      m_attrs = Attr(m_attrs | AttrInterceptable);
-    }
-  }
-}
-
-bool Func::anyBlockEndsAt(Offset off) const {
-  assert(JIT::Translator::WriteLease().amOwner());
-  // The empty() check relies on a Func's bytecode always being nonempty
-  assert(base() != past());
-  if (m_shared->m_blockEnds.empty()) {
-    using namespace Verifier;
-
-    Arena arena;
-    GraphBuilder builder{arena, this};
-    Graph* cfg = builder.build();
-
-    for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
-      auto last = blocks.popFront()->last - m_unit->entry();
-      m_shared->m_blockEnds.insert(last);
-    }
-
-    assert(!m_shared->m_blockEnds.empty());
-  }
-
-  return m_shared->m_blockEnds.count(off) != 0;
-}
-
-int Func::numPrologues() const {
-  int maxNumPrologues = Func::getMaxNumPrologues(numParams());
-  int nPrologues = maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
-                                                        : kNumFixedPrologues;
-  return nPrologues;
-}
-
-void Func::resetPrologue(int numParams) {
-  auto const& stubs = tx->uniqueStubs;
-  m_prologueTable[numParams] = stubs.fcallHelperThunk;
-}
-
-void Func::initPrologues(int numParams) {
-  int maxNumPrologues = Func::getMaxNumPrologues(numParams);
-  int numPrologues =
-    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
-                                         : kNumFixedPrologues;
-
-  if (tx == nullptr) {
-    m_funcBody = nullptr;
-    for (int i = 0; i < numPrologues; i++) {
-      m_prologueTable[i] = nullptr;
-    }
-    return;
-  }
-
-  auto const& stubs = tx->uniqueStubs;
-
-  m_funcBody = stubs.funcBodyHelperThunk;
-
-  TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
-  for (int i = 0; i < numPrologues; i++) {
-    m_prologueTable[i] = stubs.fcallHelperThunk;
-  }
-}
-
-void Func::init(int numParams) {
-  // For methods, we defer setting the full name until m_cls is initialized
-  m_maybeIntercepted = -1;
-  if (!preClass()) {
-    setNewFuncId();
-    setFullName(numParams);
-  } else {
-    m_fullName = nullptr;
-  }
-  if (isSpecial(m_name)) {
-    /*
-     * i)  We dont want these compiler generated functions to
-     *     appear in backtraces.
-     *
-     * ii) 86sinit and 86pinit construct NameValueTableWrappers
-     *     on the stack. So we MUST NOT allow those to leak into
-     *     the backtrace (since the backtrace will outlive the
-     *     variables).
-     */
-    m_attrs = m_attrs | AttrNoInjection;
-  }
-#ifdef DEBUG
-  m_magic = kMagic;
-#endif
-  assert(m_name);
-  initPrologues(numParams);
-}
-
-void* Func::allocFuncMem(
-  const StringData* name, int numParams,
-  bool needsNextClonedClosure,
-  bool lowMem) {
-  int maxNumPrologues = Func::getMaxNumPrologues(numParams);
-  int numExtraPrologues =
-    maxNumPrologues > kNumFixedPrologues ?
-    maxNumPrologues - kNumFixedPrologues :
-    0;
-  int numExtraFuncPtrs = (int) needsNextClonedClosure;
-  size_t funcSize =
-    sizeof(Func) +
-    numExtraPrologues * sizeof(unsigned char*) +
-    numExtraFuncPtrs * sizeof(Func*);
-
-  void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
-
-  /**
-   * The Func object can have optional nextClonedClosure pointer to Func
-   * in front of the actual object. The layout is as follows:
-   *
-   *               +--------------------------------+ low address
-   *               |  nextClonedClosure (optional)  |
-   *               |  in closures                   |
-   *               +--------------------------------+ Func* address
-   *               |  Func object                   |
-   *               +--------------------------------+ high address
-   */
-  memset(mem, 0, numExtraFuncPtrs * sizeof(Func*));
-  return ((Func**) mem) + numExtraFuncPtrs;
-}
+///////////////////////////////////////////////////////////////////////////////
+// Creation and destruction.
 
 Func::Func(Unit& unit, PreClass* preClass, int line1, int line2,
            Offset base, Offset past, const StringData* name, Attr attrs,
@@ -269,6 +102,38 @@ Func::~Func() {
   validate();
   m_magic = ~m_magic;
 #endif
+}
+
+void* Func::allocFuncMem(
+  const StringData* name, int numParams,
+  bool needsNextClonedClosure,
+  bool lowMem) {
+  int maxNumPrologues = Func::getMaxNumPrologues(numParams);
+  int numExtraPrologues =
+    maxNumPrologues > kNumFixedPrologues ?
+    maxNumPrologues - kNumFixedPrologues :
+    0;
+  int numExtraFuncPtrs = (int) needsNextClonedClosure;
+  size_t funcSize =
+    sizeof(Func) +
+    numExtraPrologues * sizeof(unsigned char*) +
+    numExtraFuncPtrs * sizeof(Func*);
+
+  void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
+
+  /**
+   * The Func object can have optional nextClonedClosure pointer to Func
+   * in front of the actual object. The layout is as follows:
+   *
+   *               +--------------------------------+ low address
+   *               |  nextClonedClosure (optional)  |
+   *               |  in closures                   |
+   *               +--------------------------------+ Func* address
+   *               |  Func object                   |
+   *               +--------------------------------+ high address
+   */
+  memset(mem, 0, numExtraFuncPtrs * sizeof(Func*));
+  return ((Func**) mem) + numExtraFuncPtrs;
 }
 
 void Func::destroy(Func* func) {
@@ -346,17 +211,6 @@ Func* Func::cloneAndSetClass(Class* cls) const {
   return clonedFunc;
 }
 
-Func* Func::findCachedClone(Class* cls) const {
-  Func* nextFunc = const_cast<Func*>(this);
-  while (nextFunc) {
-    if (nextFunc->cls() == cls) {
-      return nextFunc;
-    }
-    nextFunc = nextFunc->nextClonedClosure();
-  }
-  return nullptr;
-}
-
 void Func::rename(const StringData* name) {
   m_name = name;
   setFullName(numParams());
@@ -364,118 +218,91 @@ void Func::rename(const StringData* name) {
   Unit::loadFunc(this);
 }
 
-int Func::numSlotsInFrame() const {
-  return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
-}
 
-const EHEnt* Func::findEH(Offset o) const {
-  assert(o >= base() && o < past());
-  return HPHP::findEH(shared()->m_ehtab, o);
-}
+///////////////////////////////////////////////////////////////////////////////
+// Initialization.
 
-const FPIEnt* Func::findFPI(Offset o) const {
-  assert(o >= base() && o < past());
-  const FPIEnt* fe = nullptr;
-  unsigned int i;
-
-  const FPIEntVec& fpitab = shared()->m_fpitab;
-  for (i = 0; i < fpitab.size(); i++) {
+void Func::init(int numParams) {
+  // For methods, we defer setting the full name until m_cls is initialized
+  m_maybeIntercepted = -1;
+  if (!preClass()) {
+    setNewFuncId();
+    setFullName(numParams);
+  } else {
+    m_fullName = nullptr;
+  }
+  if (isSpecial(m_name)) {
     /*
-     * We consider the "FCall" instruction part of the FPI region, but
-     * the corresponding push is not considered part of it.  (This
-     * means all offsets in the FPI region will have the partial
-     * ActRec on the stack.)
+     * i)  We dont want these compiler generated functions to
+     *     appear in backtraces.
+     *
+     * ii) 86sinit and 86pinit construct NameValueTableWrappers
+     *     on the stack. So we MUST NOT allow those to leak into
+     *     the backtrace (since the backtrace will outlive the
+     *     variables).
      */
-    if (fpitab[i].m_fpushOff < o && o <= fpitab[i].m_fcallOff) {
-      fe = &fpitab[i];
+    m_attrs = m_attrs | AttrNoInjection;
+  }
+#ifdef DEBUG
+  m_magic = kMagic;
+#endif
+  assert(m_name);
+  initPrologues(numParams);
+}
+
+void Func::initPrologues(int numParams) {
+  int maxNumPrologues = Func::getMaxNumPrologues(numParams);
+  int numPrologues =
+    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
+                                         : kNumFixedPrologues;
+
+  if (tx == nullptr) {
+    m_funcBody = nullptr;
+    for (int i = 0; i < numPrologues; i++) {
+      m_prologueTable[i] = nullptr;
+    }
+    return;
+  }
+
+  auto const& stubs = tx->uniqueStubs;
+
+  m_funcBody = stubs.funcBodyHelperThunk;
+
+  TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
+  for (int i = 0; i < numPrologues; i++) {
+    m_prologueTable[i] = stubs.fcallHelperThunk;
+  }
+}
+
+void Func::setFullName(int numParams) {
+  assert(m_name->isStatic());
+  if (m_cls) {
+    m_fullName = makeStaticString(
+      std::string(m_cls->name()->data()) + "::" + m_name->data());
+  } else {
+    m_fullName = m_name;
+    m_namedEntity = Unit::GetNamedEntity(m_name);
+  }
+  if (RuntimeOption::EvalPerfDataMap) {
+    int numPre = isClosureBody() ? 1 : 0;
+    char* from = (char*)this - numPre * sizeof(Func);
+
+    int maxNumPrologues = Func::getMaxNumPrologues(numParams);
+    int numPrologues = maxNumPrologues > kNumFixedPrologues ?
+      maxNumPrologues : kNumFixedPrologues;
+    char* to = (char*)(m_prologueTable + numPrologues);
+    Debug::DebugInfo::recordDataMap(
+      from, to, folly::format("Func-{}-{}", numPre,
+                              (isPseudoMain() ?
+                               m_unit->filepath()->data() :
+                               m_fullName->data())).str());
+  }
+  if (RuntimeOption::DynamicInvokeFunctions.size()) {
+    if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
+        RuntimeOption::DynamicInvokeFunctions.end()) {
+      m_attrs = Attr(m_attrs | AttrInterceptable);
     }
   }
-  return fe;
-}
-
-const FPIEnt* Func::findPrecedingFPI(Offset o) const {
-  assert(o >= base() && o < past());
-  const FPIEntVec& fpitab = shared()->m_fpitab;
-  assert(fpitab.size());
-  const FPIEnt* fe = &fpitab[0];
-  unsigned int i;
-  for (i = 1; i < fpitab.size(); i++) {
-    const FPIEnt* cur = &fpitab[i];
-    if (o > cur->m_fcallOff &&
-        fe->m_fcallOff < cur->m_fcallOff) {
-      fe = cur;
-    }
-  }
-  assert(fe);
-  return fe;
-}
-
-bool Func::isClonedClosure() const {
-  if (!isClosureBody()) return false;
-  if (!cls()) return true;
-  return cls()->lookupMethod(name()) != this;
-}
-
-bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
-  if (RuntimeOption::EvalJitEnableRenameFunction ||
-      m_attrs & AttrInterceptable) {
-    return false;
-  }
-
-  if (isBuiltin()) {
-    return true;
-  }
-
-  if (isUnique() && RuntimeOption::RepoAuthoritative) {
-    return true;
-  }
-
-  // Defined at top level, in the same unit as the caller. This precludes
-  // conditionally defined functions and cross-module calls -- both phenomena
-  // can change name->Func mappings during the lifetime of a TC.
-  return top() && (fromUnit == m_unit);
-}
-
-bool Func::byRef(int32_t arg) const {
-  const uint64_t* ref = &m_refBitVal;
-  assert(arg >= 0);
-  if (UNLIKELY(arg >= kBitsPerQword)) {
-    // Super special case. A handful of builtins are varargs functions where the
-    // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
-    if (arg >= numParams()) {
-      return m_attrs & AttrVariadicByRef;
-    }
-    ref = &shared()->m_refBitPtr[(uint32_t)arg / kBitsPerQword - 1];
-  }
-  int bit = (uint32_t)arg % kBitsPerQword;
-  return *ref & (1ull << bit);
-}
-
-const StaticString s_extract("extract");
-const StaticString s_extractNative("__SystemLib\\extract");
-const StaticString s_current("current");
-const StaticString s_key("key");
-
-bool Func::mustBeRef(int32_t arg) const {
-  if (!byRef(arg)) return false;
-  if (arg == 0) {
-    if (UNLIKELY(m_attrs & AttrBuiltin)) {
-      // This hacks mustBeRef() to return false for the first parameter of
-      // extract(), current(), and key(). These functions try to take their
-      // first parameter by reference but they also allow expressions that
-      // cannot be taken by reference (ex. an array literal).
-      // TODO Task #4442937: Come up with a cleaner way to do this.
-      if (name() == s_extract.get() && !cls()) return false;
-      if (name() == s_extractNative.get() && !cls()) return false;
-      if (name() == s_current.get() && !cls()) return false;
-      if (name() == s_key.get() && !cls()) return false;
-    }
-  }
-  return
-    arg < numParams() ||
-    !(m_attrs & AttrVariadicByRef) ||
-    !methInfo() ||
-    !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
 }
 
 void Func::appendParam(bool ref, const Func::ParamInfo& info,
@@ -531,10 +358,259 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   assert(numParams() == fParams.size());
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+// FuncId manipulation.
+
+void Func::setNewFuncId() {
+  assert(m_funcId == InvalidFuncId);
+  m_funcId = s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
+
+  s_funcVec.ensureSize(m_funcId + 1);
+  DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, this);
+  assert(oldVal == nullptr);
+}
+
+FuncId Func::nextFuncId() {
+  return s_nextFuncId.load(std::memory_order_relaxed);
+}
+
+const Func* Func::fromFuncId(FuncId id) {
+  assert(id < s_nextFuncId);
+  auto func = s_funcVec.get(id);
+  func->validate();
+  return func;
+}
+
+bool Func::isFuncIdValid(FuncId id) {
+  assert(id < s_nextFuncId);
+  return s_funcVec.get(id) != nullptr;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Bytecode.
+
+DVFuncletsVec Func::getDVFunclets() const {
+ DVFuncletsVec dvs;
+  int nParams = numParams();
+  for (int i = 0; i < nParams; ++i) {
+    const ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue()) {
+      dvs.push_back(std::make_pair(i, pi.funcletOff));
+    }
+  }
+  return dvs;
+}
+
+bool Func::isEntry(Offset offset) const {
+  return offset == base() || isDVEntry(offset);
+}
+
+bool Func::isDVEntry(Offset offset) const {
+  auto const nparams = numNonVariadicParams();
+  for (int i = 0; i < nparams; i++) {
+    const ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue() && pi.funcletOff == offset) return true;
+  }
+  return false;
+}
+
+int Func::getEntryNumParams(Offset offset) const {
+  if (offset == base()) return numNonVariadicParams();
+  return getDVEntryNumParams(offset);
+}
+
+int Func::getDVEntryNumParams(Offset offset) const {
+  auto const nparams = numNonVariadicParams();
+  for (int i = 0; i < nparams; i++) {
+    const ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue() && pi.funcletOff == offset) return i;
+  }
+  return -1;
+}
+
+Offset Func::getEntryForNumArgs(int numArgsPassed) const {
+  assert(numArgsPassed >= 0);
+  auto const nparams = numNonVariadicParams();
+  for (unsigned i = numArgsPassed; i < nparams; i++) {
+    const Func::ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue()) {
+      return pi.funcletOff;
+    }
+  }
+  return base();
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Parameters.
+
+bool Func::byRef(int32_t arg) const {
+  const uint64_t* ref = &m_refBitVal;
+  assert(arg >= 0);
+  if (UNLIKELY(arg >= kBitsPerQword)) {
+    // Super special case. A handful of builtins are varargs functions where the
+    // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
+    if (arg >= numParams()) {
+      return m_attrs & AttrVariadicByRef;
+    }
+    ref = &shared()->m_refBitPtr[(uint32_t)arg / kBitsPerQword - 1];
+  }
+  int bit = (uint32_t)arg % kBitsPerQword;
+  return *ref & (1ull << bit);
+}
+
+const StaticString s_extract("extract");
+const StaticString s_extractNative("__SystemLib\\extract");
+const StaticString s_current("current");
+const StaticString s_key("key");
+
+bool Func::mustBeRef(int32_t arg) const {
+  if (!byRef(arg)) return false;
+  if (arg == 0) {
+    if (UNLIKELY(m_attrs & AttrBuiltin)) {
+      // This hacks mustBeRef() to return false for the first parameter of
+      // extract(), current(), and key(). These functions try to take their
+      // first parameter by reference but they also allow expressions that
+      // cannot be taken by reference (ex. an array literal).
+      // TODO Task #4442937: Come up with a cleaner way to do this.
+      if (name() == s_extract.get() && !cls()) return false;
+      if (name() == s_extractNative.get() && !cls()) return false;
+      if (name() == s_current.get() && !cls()) return false;
+      if (name() == s_key.get() && !cls()) return false;
+    }
+  }
+  return
+    arg < numParams() ||
+    !(m_attrs & AttrVariadicByRef) ||
+    !methInfo() ||
+    !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Locals, iterators, and stack.
+
 Id Func::lookupVarId(const StringData* name) const {
   assert(name != nullptr);
   return shared()->m_localNames.findIndex(name);
 }
+
+int Func::numSlotsInFrame() const {
+  return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Closures.
+
+bool Func::isClonedClosure() const {
+  if (!isClosureBody()) return false;
+  if (!cls()) return true;
+  return cls()->lookupMethod(name()) != this;
+}
+
+Func* Func::findCachedClone(Class* cls) const {
+  Func* nextFunc = const_cast<Func*>(this);
+  while (nextFunc) {
+    if (nextFunc->cls() == cls) {
+      return nextFunc;
+    }
+    nextFunc = nextFunc->nextClonedClosure();
+  }
+  return nullptr;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Persistence.
+
+bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
+      m_attrs & AttrInterceptable) {
+    return false;
+  }
+
+  if (isBuiltin()) {
+    return true;
+  }
+
+  if (isUnique() && RuntimeOption::RepoAuthoritative) {
+    return true;
+  }
+
+  // Defined at top level, in the same unit as the caller. This precludes
+  // conditionally defined functions and cross-module calls -- both phenomena
+  // can change name->Func mappings during the lifetime of a TC.
+  return top() && (fromUnit == m_unit);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Unit table entries.
+
+const EHEnt* Func::findEH(Offset o) const {
+  assert(o >= base() && o < past());
+  return HPHP::findEH(shared()->m_ehtab, o);
+}
+
+const FPIEnt* Func::findFPI(Offset o) const {
+  assert(o >= base() && o < past());
+  const FPIEnt* fe = nullptr;
+  unsigned int i;
+
+  const FPIEntVec& fpitab = shared()->m_fpitab;
+  for (i = 0; i < fpitab.size(); i++) {
+    /*
+     * We consider the "FCall" instruction part of the FPI region, but
+     * the corresponding push is not considered part of it.  (This
+     * means all offsets in the FPI region will have the partial
+     * ActRec on the stack.)
+     */
+    if (fpitab[i].m_fpushOff < o && o <= fpitab[i].m_fcallOff) {
+      fe = &fpitab[i];
+    }
+  }
+  return fe;
+}
+
+const FPIEnt* Func::findPrecedingFPI(Offset o) const {
+  assert(o >= base() && o < past());
+  const FPIEntVec& fpitab = shared()->m_fpitab;
+  assert(fpitab.size());
+  const FPIEnt* fe = &fpitab[0];
+  unsigned int i;
+  for (i = 1; i < fpitab.size(); i++) {
+    const FPIEnt* cur = &fpitab[i];
+    if (o > cur->m_fcallOff &&
+        fe->m_fcallOff < cur->m_fcallOff) {
+      fe = cur;
+    }
+  }
+  assert(fe);
+  return fe;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// JIT data.
+
+int Func::numPrologues() const {
+  int maxNumPrologues = Func::getMaxNumPrologues(numParams());
+  int nPrologues = maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
+                                                        : kNumFixedPrologues;
+  return nPrologues;
+}
+
+void Func::resetPrologue(int numParams) {
+  auto const& stubs = tx->uniqueStubs;
+  m_prologueTable[numParams] = stubs.fcallHelperThunk;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Pretty printer.
 
 static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrStatic)    { out << " static"; }
@@ -627,6 +703,10 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     }
   }
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Other methods.
 
 void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
   assert(mi);
@@ -739,17 +819,53 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
   }
 }
 
-DVFuncletsVec Func::getDVFunclets() const {
- DVFuncletsVec dvs;
-  int nParams = numParams();
-  for (int i = 0; i < nParams; ++i) {
-    const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue()) {
-      dvs.push_back(std::make_pair(i, pi.funcletOff));
-    }
-  }
-  return dvs;
+bool Func::shouldPGO() const {
+  if (!RuntimeOption::EvalJitPGO) return false;
+
+  // Non-cloned closures simply contain prologues that redispacth to
+  // cloned closures.  They don't contain a translation for the
+  // function entry, which is what triggers an Optimize retranslation.
+  // So don't generate profiling translations for them -- there's not
+  // much to do with PGO anyway here, since they just have prologues.
+  if (isClosureBody() && !isClonedClosure()) return false;
+
+  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
+  return attrs() & AttrHot;
 }
+
+void Func::incProfCounter() {
+  if (m_attrs & AttrHot) return;
+  __sync_fetch_and_add(&m_profCounter, 1);
+  if (m_profCounter >= RuntimeOption::EvalHotFuncThreshold) {
+    m_attrs = (Attr)(m_attrs | AttrHot);
+  }
+}
+
+bool Func::anyBlockEndsAt(Offset off) const {
+  assert(JIT::Translator::WriteLease().amOwner());
+  // The empty() check relies on a Func's bytecode always being nonempty
+  assert(base() != past());
+  if (m_shared->m_blockEnds.empty()) {
+    using namespace Verifier;
+
+    Arena arena;
+    GraphBuilder builder{arena, this};
+    Graph* cfg = builder.build();
+
+    for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
+      auto last = blocks.popFront()->last - m_unit->entry();
+      m_shared->m_blockEnds.insert(last);
+    }
+
+    assert(!m_shared->m_blockEnds.empty());
+  }
+
+  return m_shared->m_blockEnds.count(off) != 0;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// SharedData.
 
 Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
                              int line1, int line2, bool top,
@@ -782,693 +898,5 @@ void Func::SharedData::atomicRelease() {
   delete this;
 }
 
-bool Func::isEntry(Offset offset) const {
-  return offset == base() || isDVEntry(offset);
+///////////////////////////////////////////////////////////////////////////////
 }
-
-bool Func::isDVEntry(Offset offset) const {
-  auto const nparams = numNonVariadicParams();
-  for (int i = 0; i < nparams; i++) {
-    const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue() && pi.funcletOff == offset) return true;
-  }
-  return false;
-}
-
-int Func::getEntryNumParams(Offset offset) const {
-  if (offset == base()) return numNonVariadicParams();
-  return getDVEntryNumParams(offset);
-}
-
-int Func::getDVEntryNumParams(Offset offset) const {
-  auto const nparams = numNonVariadicParams();
-  for (int i = 0; i < nparams; i++) {
-    const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue() && pi.funcletOff == offset) return i;
-  }
-  return -1;
-}
-
-Offset Func::getEntryForNumArgs(int numArgsPassed) const {
-  assert(numArgsPassed >= 0);
-  auto const nparams = numNonVariadicParams();
-  for (unsigned i = numArgsPassed; i < nparams; i++) {
-    const Func::ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue()) {
-      return pi.funcletOff;
-    }
-  }
-  return base();
-}
-
-bool Func::shouldPGO() const {
-  if (!RuntimeOption::EvalJitPGO) return false;
-
-  // Non-cloned closures simply contain prologues that redispacth to
-  // cloned closures.  They don't contain a translation for the
-  // function entry, which is what triggers an Optimize retranslation.
-  // So don't generate profiling translations for them -- there's not
-  // much to do with PGO anyway here, since they just have prologues.
-  if (isClosureBody() && !isClonedClosure()) return false;
-
-  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return attrs() & AttrHot;
-}
-
-void Func::incProfCounter() {
-  if (m_attrs & AttrHot) return;
-  __sync_fetch_and_add(&m_profCounter, 1);
-  if (m_profCounter >= RuntimeOption::EvalHotFuncThreshold) {
-    m_attrs = (Attr)(m_attrs | AttrHot);
-  }
-}
-
-//=============================================================================
-// FuncEmitter.
-
-FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
-  : m_ue(ue)
-  , m_pce(nullptr)
-  , m_sn(sn)
-  , m_id(id)
-  , m_name(n)
-  , m_numLocals(0)
-  , m_numUnnamedLocals(0)
-  , m_activeUnnamedLocals(0)
-  , m_numIterators(0)
-  , m_nextFreeIterator(0)
-  , m_retTypeConstraint(TypeConstraint())
-  , m_retUserType(nullptr)
-  , m_ehTabSorted(false)
-  , m_returnType(KindOfInvalid)
-  , m_top(false)
-  , m_isClosureBody(false)
-  , m_isAsync(false)
-  , m_isGenerator(false)
-  , m_isPairGenerator(false)
-  , m_containsCalls(false)
-  , m_info(nullptr)
-  , m_builtinFuncPtr(nullptr)
-  , m_originalFilename(nullptr)
-{}
-
-FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
-                         PreClassEmitter* pce)
-  : m_ue(ue)
-  , m_pce(pce)
-  , m_sn(sn)
-  , m_name(n)
-  , m_numLocals(0)
-  , m_numUnnamedLocals(0)
-  , m_activeUnnamedLocals(0)
-  , m_numIterators(0)
-  , m_nextFreeIterator(0)
-  , m_retTypeConstraint(TypeConstraint())
-  , m_retUserType(nullptr)
-  , m_ehTabSorted(false)
-  , m_returnType(KindOfInvalid)
-  , m_top(false)
-  , m_isClosureBody(false)
-  , m_isAsync(false)
-  , m_isGenerator(false)
-  , m_isPairGenerator(false)
-  , m_containsCalls(false)
-  , m_info(nullptr)
-  , m_builtinFuncPtr(nullptr)
-  , m_originalFilename(nullptr)
-{}
-
-FuncEmitter::~FuncEmitter() {
-}
-
-void FuncEmitter::init(int line1, int line2, Offset base, Attr attrs, bool top,
-                       const StringData* docComment) {
-  m_line1 = line1;
-  m_line2 = line2;
-  m_base = base;
-  m_attrs = attrs;
-  m_top = top;
-  m_docComment = docComment;
-  if (!isPseudoMain()) {
-    if (!SystemLib::s_inited) {
-      assert(m_attrs & AttrBuiltin);
-    }
-    if ((m_attrs & AttrBuiltin) && !pce()) {
-      m_attrs = m_attrs | AttrSkipFrame;
-    }
-  }
-}
-
-void FuncEmitter::finish(Offset past, bool load) {
-  m_past = past;
-  sortEHTab();
-  sortFPITab(load);
-}
-
-EHEnt& FuncEmitter::addEHEnt() {
-  assert(!m_ehTabSorted
-    || "should only mark the ehtab as sorted after adding all of them");
-  m_ehtab.push_back(EHEnt());
-  m_ehtab.back().m_parentIndex = 7777;
-  return m_ehtab.back();
-}
-
-void FuncEmitter::setEhTabIsSorted() {
-  m_ehTabSorted = true;
-  if (!debug) return;
-
-  Offset curBase = 0;
-  for (size_t i = 0; i < m_ehtab.size(); ++i) {
-    auto& eh = m_ehtab[i];
-
-    // Base offsets must be monotonically increasing.
-    always_assert(curBase <= eh.m_base);
-    curBase = eh.m_base;
-
-    // Parent should come before, and must enclose this guy.
-    always_assert(eh.m_parentIndex == -1 || eh.m_parentIndex < i);
-    if (eh.m_parentIndex != -1) {
-      auto& parent = m_ehtab[eh.m_parentIndex];
-      always_assert(parent.m_base <= eh.m_base &&
-                    parent.m_past >= eh.m_past);
-    }
-  }
-}
-
-FPIEnt& FuncEmitter::addFPIEnt() {
-  m_fpitab.push_back(FPIEnt());
-  return m_fpitab.back();
-}
-
-Id FuncEmitter::newLocal() {
-  return m_numLocals++;
-}
-
-void FuncEmitter::appendParam(const StringData* name, const ParamInfo& info) {
-  allocVarId(name);
-  m_params.push_back(info);
-}
-
-void FuncEmitter::allocVarId(const StringData* name) {
-  assert(name != nullptr);
-  // Unnamed locals are segregated (they all come after the named locals).
-  assert(m_numUnnamedLocals == 0);
-  UNUSED Id id;
-  if (m_localNames.find(name) == m_localNames.end()) {
-    id = newLocal();
-    assert(id == (int)m_localNames.size());
-    m_localNames.add(name, name);
-  }
-}
-
-Id FuncEmitter::lookupVarId(const StringData* name) const {
-  assert(this->hasVar(name));
-  return m_localNames.find(name)->second;
-}
-
-bool FuncEmitter::hasVar(const StringData* name) const {
-  assert(name != nullptr);
-  return m_localNames.find(name) != m_localNames.end();
-}
-
-Id FuncEmitter::allocIterator() {
-  assert(m_numIterators >= m_nextFreeIterator);
-  Id id = m_nextFreeIterator++;
-  if (m_numIterators < m_nextFreeIterator) {
-    m_numIterators = m_nextFreeIterator;
-  }
-  return id;
-}
-
-void FuncEmitter::freeIterator(Id id) {
-  --m_nextFreeIterator;
-  assert(id == m_nextFreeIterator);
-}
-
-void FuncEmitter::setNumIterators(Id numIterators) {
-  assert(m_numIterators == 0);
-  m_numIterators = numIterators;
-}
-
-Id FuncEmitter::allocUnnamedLocal() {
-  ++m_activeUnnamedLocals;
-  if (m_activeUnnamedLocals > m_numUnnamedLocals) {
-    newLocal();
-    ++m_numUnnamedLocals;
-  }
-  return m_numLocals - m_numUnnamedLocals + (m_activeUnnamedLocals - 1);
-}
-
-void FuncEmitter::freeUnnamedLocal(Id id) {
-  assert(m_activeUnnamedLocals > 0);
-  --m_activeUnnamedLocals;
-}
-
-void FuncEmitter::setNumLocals(Id numLocals) {
-  assert(numLocals >= m_numLocals);
-  m_numLocals = numLocals;
-}
-
-void FuncEmitter::addStaticVar(Func::SVInfo svInfo) {
-  m_staticVars.push_back(svInfo);
-}
-
-namespace {
-
-/*
- * Ordering on EHEnts where e1 < e2 iff
- *
- *    a) e1 and e2 do not overlap, and e1 comes first
- *    b) e1 encloses e2
- *    c) e1 and e2 have the same region, but e1 is a Catch funclet and
- *       e2 is a Fault funclet.
- */
-struct EHEntComp {
-  bool operator()(const EHEnt& e1, const EHEnt& e2) const {
-    if (e1.m_base == e2.m_base) {
-      if (e1.m_past == e2.m_past) {
-        return e1.m_type == EHEnt::Type::Catch;
-      }
-      return e1.m_past > e2.m_past;
-    }
-    return e1.m_base < e2.m_base;
-  }
-};
-
-}
-
-void FuncEmitter::sortEHTab() {
-  if (m_ehTabSorted) return;
-
-  std::sort(m_ehtab.begin(), m_ehtab.end(), EHEntComp());
-
-  for (unsigned int i = 0; i < m_ehtab.size(); i++) {
-    m_ehtab[i].m_parentIndex = -1;
-    for (int j = i - 1; j >= 0; j--) {
-      if (m_ehtab[j].m_past >= m_ehtab[i].m_past) {
-        // parent EHEnt better enclose this one.
-        assert(m_ehtab[j].m_base <= m_ehtab[i].m_base);
-        m_ehtab[i].m_parentIndex = j;
-        break;
-      }
-    }
-  }
-
-  setEhTabIsSorted();
-}
-
-void FuncEmitter::sortFPITab(bool load) {
-  // Sort it and fill in parent info
-  std::sort(
-    begin(m_fpitab), end(m_fpitab),
-    [&] (const FPIEnt& a, const FPIEnt& b) {
-      return a.m_fpushOff < b.m_fpushOff;
-    }
-  );
-  for (unsigned int i = 0; i < m_fpitab.size(); i++) {
-    m_fpitab[i].m_parentIndex = -1;
-    m_fpitab[i].m_fpiDepth = 1;
-    for (int j = i - 1; j >= 0; j--) {
-      if (m_fpitab[j].m_fcallOff > m_fpitab[i].m_fcallOff) {
-        m_fpitab[i].m_parentIndex = j;
-        m_fpitab[i].m_fpiDepth = m_fpitab[j].m_fpiDepth + 1;
-        break;
-      }
-    }
-    if (!load) {
-      // m_fpOff does not include the space taken up by locals, iterators and
-      // the AR itself. Fix it here.
-      m_fpitab[i].m_fpOff += m_numLocals
-        + m_numIterators * kNumIterCells
-        + (m_fpitab[i].m_fpiDepth) * kNumActRecCells;
-    }
-  }
-}
-
-void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
-  m_userAttributes[name] = tv;
-}
-
-/* <<__Native>> user attribute causes systemlib declarations
- * to hook internal (C++) implementation of funcs/methods
- *
- * The Native attribute may have the following sub-options
- *  "ActRec": The internal function takes a fixed prototype
- *      TypedValue* funcname(ActRec *ar);
- *      Note that systemlib declaration must still be hack annotated
- *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
- *      Effectively forces functions to generate an ActRec
- *  "NoInjection": Do not include this frame in backtraces
- *  "ZendCompat": Use zend compat wrapper
- *
- *  e.g.   <<__Native("ActRec")>> function foo():mixed;
- */
-static const StaticString
-  s_native("__Native"),
-  s_actrec("ActRec"),
-  s_nofcallbuiltin("NoFCallBuiltin"),
-  s_variadicbyref("VariadicByRef"),
-  s_noinjection("NoInjection"),
-  s_zendcompat("ZendCompat");
-
-int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
-  int ret = Native::AttrNone;
-
-  auto it = m_userAttributes.find(s_native.get());
-  assert(it != m_userAttributes.end());
-  const TypedValue userAttr = it->second;
-  assert(userAttr.m_type == KindOfArray);
-  for (ArrayIter it(userAttr.m_data.parr); it; ++it) {
-    Variant userAttrVal = it.second();
-    if (userAttrVal.isString()) {
-      String userAttrStrVal = userAttrVal.toString();
-      if (userAttrStrVal.get()->isame(s_actrec.get())) {
-        ret = ret | Native::AttrActRec;
-        attrs = attrs | AttrMayUseVV;
-      } else if (userAttrStrVal.get()->isame(s_nofcallbuiltin.get())) {
-        attrs = attrs | AttrNoFCallBuiltin;
-      } else if (userAttrStrVal.get()->isame(s_variadicbyref.get())) {
-        attrs = attrs | AttrVariadicByRef;
-      } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
-        attrs = attrs | AttrNoInjection;
-      } else if (userAttrStrVal.get()->isame(s_zendcompat.get())) {
-        ret = ret | Native::AttrZendCompat;
-        // ZendCompat implies ActRec, no FCallBuiltin
-        attrs = attrs | AttrMayUseVV | AttrNoFCallBuiltin;
-        ret = ret | Native::AttrActRec;
-      }
-    }
-  }
-  return ret;
-}
-
-void FuncEmitter::commit(RepoTxn& txn) const {
-  Repo& repo = Repo::get();
-  FuncRepoProxy& frp = repo.frp();
-  int repoId = m_ue.repoId();
-  int64_t usn = m_ue.sn();
-
-  frp.insertFunc(repoId)
-     .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, m_name, m_top);
-}
-
-Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
-  bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureName(m_name->toCppString());
-
-  Attr attrs = m_attrs;
-  if (preClass && preClass->attrs() & AttrInterface) {
-    attrs = Attr(attrs | AttrAbstract);
-  }
-  if (attrs & AttrPersistent &&
-      ((RuntimeOption::EvalJitEnableRenameFunction && !isGenerated) ||
-       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) ||
-       attrs & AttrInterceptable)) {
-    if (attrs & AttrBuiltin) {
-      SystemLib::s_anyNonPersistentBuiltins = true;
-    }
-    attrs = Attr(attrs & ~AttrPersistent);
-  }
-  if (RuntimeOption::EvalJitEnableRenameFunction &&
-      !m_name->empty() &&
-      !Func::isSpecial(m_name) &&
-      !m_isClosureBody) {
-    // intercepted functions need to pass all args through
-    // to the interceptee
-    attrs = Attr(attrs | AttrMayUseVV);
-  }
-  if (isVariadic()) { attrs = Attr(attrs | AttrVariadicParam); }
-
-  if (!m_containsCalls) { attrs = Attr(attrs | AttrPhpLeafFn); }
-
-  assert(!m_pce == !preClass);
-  Func* f = m_ue.newFunc(this, unit, preClass, m_line1, m_line2, m_base,
-                         m_past, m_name, attrs, m_top, m_docComment,
-                         m_params.size(), m_isClosureBody);
-
-  f->shared()->m_info = m_info;
-  f->shared()->m_returnType = m_returnType;
-  std::vector<Func::ParamInfo> fParams;
-  for (unsigned i = 0; i < m_params.size(); ++i) {
-    Func::ParamInfo pi = m_params[i];
-    f->appendParam(m_params[i].ref(), pi, fParams);
-  }
-
-  f->shared()->m_localNames.create(m_localNames);
-  f->shared()->m_numLocals = m_numLocals;
-  f->shared()->m_numIterators = m_numIterators;
-  f->m_maxStackCells = m_maxStackCells;
-  f->shared()->m_staticVars = m_staticVars;
-  f->shared()->m_ehtab = m_ehtab;
-  f->shared()->m_fpitab = m_fpitab;
-  f->shared()->m_isClosureBody = m_isClosureBody;
-  f->shared()->m_isAsync = m_isAsync;
-  f->shared()->m_isGenerator = m_isGenerator;
-  f->shared()->m_isPairGenerator = m_isPairGenerator;
-  f->shared()->m_userAttributes = m_userAttributes;
-  f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
-  f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
-  f->shared()->m_retTypeConstraint = m_retTypeConstraint;
-  f->shared()->m_retUserType = m_retUserType;
-  f->shared()->m_originalFilename = m_originalFilename;
-  f->shared()->m_isGenerated = isGenerated;
-
-  f->finishedEmittingParams(fParams);
-
-  if (attrs & AttrNative) {
-    auto nif = Native::GetBuiltinFunction(m_name,
-                                          m_pce ? m_pce->name() : nullptr,
-                                          f->isStatic());
-    if (nif) {
-      Attr dummy = AttrNone;
-      int nativeAttrs = parseNativeAttributes(dummy);
-      if (nativeAttrs & Native::AttrZendCompat) {
-        f->shared()->m_nativeFuncPtr = nif;
-        f->shared()->m_builtinFuncPtr = zend_wrap_func;
-      } else {
-        if (parseNativeAttributes(dummy) & Native::AttrActRec) {
-          f->shared()->m_builtinFuncPtr = nif;
-          f->shared()->m_nativeFuncPtr = nullptr;
-        } else {
-          f->shared()->m_nativeFuncPtr = nif;
-          f->shared()->m_builtinFuncPtr = m_pce ? Native::methodWrapper
-                                                : Native::functionWrapper;
-        }
-      }
-    } else {
-      f->shared()->m_builtinFuncPtr = Native::unimplementedWrapper;
-    }
-  }
-  return f;
-}
-
-void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
-                                 BuiltinFunction bif, BuiltinFunction nif,
-                                 Offset base) {
-  assert(info);
-  m_info = info;
-  Attr attrs = AttrBuiltin;
-  if (info->attribute & (ClassInfo::RefVariableArguments |
-                         ClassInfo::MixedVariableArguments)) {
-    attrs = attrs | AttrVariadicByRef;
-  }
-  if (info->attribute & ClassInfo::IsReference) {
-    attrs = attrs | AttrReference;
-  }
-  if (info->attribute & ClassInfo::NoInjection) {
-    attrs = attrs | AttrNoInjection;
-  }
-  if (info->attribute & ClassInfo::NoFCallBuiltin) {
-    attrs = attrs | AttrNoFCallBuiltin;
-  }
-  if (info->attribute & ClassInfo::ParamCoerceModeNull) {
-    attrs = attrs | AttrParamCoerceModeNull;
-  } else if (info->attribute & ClassInfo::ParamCoerceModeFalse) {
-    attrs = attrs | AttrParamCoerceModeFalse;
-  }
-  if (pce()) {
-    if (info->attribute & ClassInfo::IsStatic) {
-      attrs = attrs | AttrStatic;
-    }
-    if (info->attribute & ClassInfo::IsFinal) {
-      attrs = attrs | AttrFinal;
-    }
-    if (info->attribute & ClassInfo::IsAbstract) {
-      attrs = attrs | AttrAbstract;
-    }
-    if (info->attribute & ClassInfo::IsPrivate) {
-      attrs = attrs | AttrPrivate;
-    } else if (info->attribute & ClassInfo::IsProtected) {
-      attrs = attrs | AttrProtected;
-    } else {
-      attrs = attrs | AttrPublic;
-    }
-  } else if (info->attribute & ClassInfo::AllowOverride) {
-    attrs = attrs | AttrAllowOverride;
-  }
-
-  setReturnType(info->returnType);
-  setDocComment(info->docComment);
-  setLocation(0, 0);
-  setBuiltinFunc(bif, nif, attrs, base);
-
-  for (unsigned i = 0; i < info->parameters.size(); ++i) {
-    // For builtin only, we use a dummy ParamInfo
-    FuncEmitter::ParamInfo pi;
-    const auto& parameter = info->parameters[i];
-    pi.setRef((bool)(parameter->attribute & ClassInfo::IsReference));
-    pi.builtinType = parameter->argType;
-    appendParam(makeStaticString(parameter->name), pi);
-  }
-}
-
-void FuncEmitter::setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
-                                 Attr attrs, Offset base) {
-  assert(bif);
-  m_builtinFuncPtr = bif;
-  m_nativeFuncPtr = nif;
-  m_base = base;
-  m_top = true;
-  // TODO: Task #1137917: See if we can avoid marking most builtins with
-  // "MayUseVV" and still make things work
-  m_attrs = attrs | AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
-}
-
-template<class SerDe>
-void FuncEmitter::serdeMetaData(SerDe& sd) {
-  // NOTE: name, top, and a few other fields currently serialized
-  // outside of this.
-  sd(m_line1)
-    (m_line2)
-    (m_base)
-    (m_past)
-    (m_attrs)
-    (m_returnType)
-    (m_docComment)
-    (m_numLocals)
-    (m_numIterators)
-    (m_maxStackCells)
-    (m_isClosureBody)
-    (m_isAsync)
-    (m_isGenerator)
-    (m_isPairGenerator)
-    (m_containsCalls)
-
-    (m_params)
-    (m_localNames)
-    (m_staticVars)
-    (m_ehtab)
-    (m_fpitab)
-    (m_userAttributes)
-    (m_retTypeConstraint)
-    (m_retUserType)
-    (m_originalFilename)
-    ;
-}
-
-//=============================================================================
-// FuncRepoProxy.
-
-FuncRepoProxy::FuncRepoProxy(Repo& repo)
-  : RepoProxy(repo)
-#define FRP_OP(c, o) \
-  , m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral)
-    FRP_OPS
-#undef FRP_OP
-{
-#define FRP_OP(c, o) \
-  m_##o[RepoIdLocal] = &m_##o##Local; \
-  m_##o[RepoIdCentral] = &m_##o##Central;
-  FRP_OPS
-#undef FRP_OP
-}
-
-FuncRepoProxy::~FuncRepoProxy() {
-}
-
-void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
-  std::stringstream ssCreate;
-  ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Func")
-           << "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER,"
-              " name TEXT, top INTEGER,"
-              " extraData BLOB,"
-              " PRIMARY KEY (unitSn, funcSn));";
-  txn.exec(ssCreate.str());
-}
-
-void FuncRepoProxy::InsertFuncStmt
-                  ::insert(const FuncEmitter& fe,
-                           RepoTxn& txn, int64_t unitSn, int funcSn,
-                           Id preClassId, const StringData* name,
-                           bool top) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Func")
-             << " VALUES(@unitSn, @funcSn, @preClassId, @name, "
-                "        @top, @extraData);";
-    txn.prepare(*this, ssInsert.str());
-  }
-
-  BlobEncoder extraBlob;
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindStaticString("@name", name);
-  query.bindBool("@top", top);
-  const_cast<FuncEmitter&>(fe).serdeMetaData(extraBlob);
-  query.bindBlob("@extraData", extraBlob, /* static */ true);
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncsStmt
-                  ::get(UnitEmitter& ue) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT funcSn,preClassId,name,top,extraData "
-                "FROM "
-             << m_repo.table(m_repoId, "Func")
-             << " WHERE unitSn == @unitSn ORDER BY funcSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", ue.sn());
-  do {
-    query.step();
-    if (query.row()) {
-      int funcSn;               /**/ query.getInt(0, funcSn);
-      Id preClassId;            /**/ query.getId(1, preClassId);
-      StringData* name;         /**/ query.getStaticString(2, name);
-      bool top;                 /**/ query.getBool(3, top);
-      BlobDecoder extraBlob =   /**/ query.getBlob(4);
-
-      FuncEmitter* fe;
-      if (preClassId < 0) {
-        fe = ue.newFuncEmitter(name);
-      } else {
-        PreClassEmitter* pce = ue.pce(preClassId);
-        fe = ue.newMethodEmitter(name, pce);
-        bool added UNUSED = pce->addMethod(fe);
-        assert(added);
-      }
-      assert(fe->sn() == funcSn);
-      fe->setTop(top);
-      fe->serdeMetaData(extraBlob);
-      if (!SystemLib::s_inited && !fe->isPseudoMain()) {
-        assert(fe->attrs() & AttrBuiltin);
-        if (preClassId < 0) {
-          assert(fe->attrs() & AttrPersistent);
-          assert(fe->attrs() & AttrUnique);
-          assert(fe->attrs() & AttrSkipFrame);
-        }
-      }
-      fe->setEhTabIsSorted();
-      fe->finish(fe->past(), true);
-      ue.recordFunction(fe);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-} // HPHP::VM

@@ -93,7 +93,8 @@
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/preclass-emit.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/system/systemlib.h"
 

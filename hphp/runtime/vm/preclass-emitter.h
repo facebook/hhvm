@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 
 #include <vector>

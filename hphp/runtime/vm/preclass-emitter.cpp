@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/preclass-emit.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 
 #include <limits>
 

@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
@@ -53,15 +54,6 @@ namespace Native { struct NativeDataInfo; }
 typedef hphp_hash_set<LowStringPtr,
                       string_data_hash,
                       string_data_isame> TraitNameSet;
-
-/*
- * User attributes on various runtime structures are stored in this
- * map, currently.
- */
-typedef hphp_hash_map<LowStringPtr,
-                      TypedValue,
-                      string_data_hash,
-                      string_data_isame> UserAttributeMap;
 
 using BuiltinCtorFunction = ObjectData* (*)(Class*);
 using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);

@@ -343,11 +343,13 @@ and stmt env = function
        * statements that are expressions, e.g., "foo();" we want to check, but
        * "return foo();" we do not even though the expression "foo()" is a
        * subexpression of the statement "return foo();". *)
-       Typing_async.enforce_not_awaitable env e ty;
+       (match snd e with
+         | Nast.Binop (Ast.Eq _, _, _) -> ()
+         | _ -> Typing_async.enforce_not_awaitable env (fst e) ty);
       env
   | If (e, b1, b2)  ->
       let env, ty = expr env e in
-      Typing_async.enforce_not_awaitable env e ty;
+      Typing_async.enforce_not_awaitable env (fst e) ty;
       let parent_lenv = env.Env.lenv in
       let env  = condition env true e in
       let env  = block env b1 in
@@ -910,7 +912,7 @@ and expr_ is_lvalue env (p, e) =
       unop p env uop ty
   | Eif (c, e1, e2) ->
       let env, tyc = expr env c in
-      Typing_async.enforce_not_awaitable env c tyc;
+      Typing_async.enforce_not_awaitable env (fst c) tyc;
       let lenv = env.Env.lenv in
       let env  = condition env true c in
       let env, ty1 = match e1 with
@@ -2263,6 +2265,7 @@ and unop p env uop ty =
   match uop with
   | Ast.Unot ->
       (* !$x (logical not) works with any type, so we just return Tbool *)
+      Typing_async.enforce_not_awaitable env p ty;
       env, (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Utild ->
       (* ~$x (bitwise not) only works with int *)

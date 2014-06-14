@@ -697,11 +697,11 @@ private:
 
 public:
   SimpleProfiler() {
-    echo("<div style='display:none'>");
+    g_context->write("<div style='display:none'>");
   }
 
   ~SimpleProfiler() {
-    echo("</div>");
+    g_context->write("</div>");
     print_output();
   }
 
@@ -719,16 +719,17 @@ public:
 
 private:
   void print_output() {
-    echo("<link rel='stylesheet' href='/css/hotprofiler.css' type='text/css'>"
+    g_context->write(
+          "<link rel='stylesheet' href='/css/hotprofiler.css' type='text/css'>"
           "<script language='javascript' src='/js/hotprofiler.js'></script>"
           "<p><center><h2>Hotprofiler Data</h2></center><br>"
           "<div id='hotprofiler_stats'></div>"
           "<script language='javascript'>hotprofiler_data = [");
     for (StatsMap::const_iterator iter = m_stats.begin();
          iter != m_stats.end(); ++iter) {
-      echo("{\"fn\": \"");
-      echo(iter->first.c_str());
-      echo("\"");
+      g_context->write("{\"fn\": \"");
+      g_context->write(iter->first.c_str());
+      g_context->write("\"");
 
       const CountMap &counts = iter->second;
 
@@ -738,11 +739,11 @@ private:
         ",\"ct\": %" PRId64 ",\"wt\": %" PRId64 ",\"ut\": %" PRId64 ",\"st\": 0",
         counts.count, (int64_t)to_usec(counts.tsc, m_MHz),
         (int64_t)to_usec(counts.vtsc, m_MHz, true));
-      echo(buf);
+      g_context->write(buf);
 
-      echo("},\n");
+      g_context->write("},\n");
     }
-    echo("]; write_data('ut', false);</script><br><br>&nbsp;<br>");
+    g_context->write("]; write_data('ut', false);</script><br><br>&nbsp;<br>");
   }
 };
 

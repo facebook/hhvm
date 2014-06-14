@@ -492,7 +492,7 @@ void f_passthru(const String& command, VRefParam return_var /* = null */) {
     if (len == -1 && errno == EINTR) continue;
     if (len <= 0) break; // break on error or EOF
     buffer[len] = '\0';
-    echo(String(buffer, len, CopyString));
+    g_context->write(String(buffer, len, CopyString));
   }
   int ret = ctx.exit();
   if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
@@ -517,9 +517,10 @@ String f_system(const String& command, VRefParam return_var /* = null */) {
     count--; // remove explode()'s last empty line
   }
 
+  auto& ectx = *g_context;
   for (int i = 0; i < count; i++) {
-    echo(lines[i].toString());
-    echo("\n");
+    ectx.write(lines[i].toString());
+    ectx.write("\n");
   }
   if (!count || lines.empty()) {
     return String();

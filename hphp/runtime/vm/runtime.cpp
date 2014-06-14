@@ -54,13 +54,13 @@ void print_string(StringData* s) {
 void print_int(int64_t i) {
   char buf[256];
   snprintf(buf, 256, "%" PRId64, i);
-  echo(buf);
+  g_context->write(buf);
   TRACE(1, "t-x64 output(int): %" PRId64 "\n", i);
 }
 
 void print_boolean(bool val) {
   if (val) {
-    echo("1");
+    g_context->write("1");
   }
 }
 

@@ -258,7 +258,7 @@ Variant f_die(const Variant& status /* = null_variant */) {
 
 Variant f_exit(const Variant& status /* = null_variant */) {
   if (status.isString()) {
-    echo(status.toString());
+    g_context->write(status.toString());
     throw ExitException(0);
   }
   throw ExitException(status.toInt32());

@@ -1121,7 +1121,8 @@ ObjectData* ExecutionContext::createObject(StringData* clsName,
                                              bool init /* = true */) {
   Class* class_ = Unit::loadClass(clsName);
   if (class_ == nullptr) {
-    throw_missing_class(clsName->data());
+    throw ClassNotFoundException(
+      (std::string("unknown class ") + clsName->data()).c_str());
   }
 
   Object o;
@@ -4275,7 +4276,7 @@ OPTBLD_INLINE void ExecutionContext::iopInstanceOfD(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopPrint(IOP_ARGS) {
   NEXT();
   Cell* c1 = vmStack().topC();
-  echo(cellAsVariant(*c1).toString());
+  write(cellAsVariant(*c1).toString());
   vmStack().replaceC<KindOfInt64>(1);
 }
 
@@ -4301,7 +4302,7 @@ OPTBLD_INLINE void ExecutionContext::iopExit(IOP_ARGS) {
   if (c1->m_type == KindOfInt64) {
     exitCode = c1->m_data.num;
   } else {
-    echo(cellAsVariant(*c1).toString());
+    write(cellAsVariant(*c1).toString());
   }
   vmStack().popC();
   vmStack().pushNull();

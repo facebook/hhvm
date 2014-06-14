@@ -984,7 +984,7 @@ void MimePart::callUserFunc(const String& s) {
 }
 
 void MimePart::outputToStdout(const String& s) {
-  echo(s);
+  g_context->write(s);
 }
 
 void MimePart::outputToFile(const String& s) {

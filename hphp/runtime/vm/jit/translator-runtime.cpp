@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/autoload-handler.h"
 
 namespace HPHP {
 

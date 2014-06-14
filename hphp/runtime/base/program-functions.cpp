@@ -1516,10 +1516,6 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
 ///////////////////////////////////////////////////////////////////////////////
 // C++ ffi
 
-extern "C" void hphp_fatal_error(const char *s) {
-  throw_fatal(s);
-}
-
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
     auto data = (RequestInjectionData*)info->si_value.sival_ptr;

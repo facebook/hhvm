@@ -883,7 +883,7 @@ Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
 }
 
 static bool HHVM_FUNCTION(phpinfo, int64_t what /*=0 */) {
-  echo("HipHop\n");
+  g_context->write("HipHop\n");
   return false;
 }
 

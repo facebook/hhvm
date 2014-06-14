@@ -45,21 +45,6 @@
 # endif
 #endif
 
-/**
- * This file contains a list of functions that HPHP generates to wrap
- * around different expressions to maintain semantics. If we read
- * through all types of expressions in
- * compiler/expression/expression.h, we can find most of them can be
- * directly transformed into C/C++ counterpart without too much
- * syntactical changes. The functions in this file happen to be the
- * ones that are somewhat special.
- *
- * Another way to think about this file is that this file has a list of C-style
- * functions, and the rest of run-time has object/classes for other tasks,
- * although we do have some global functions defined in other files as well,
- * when they are closer to the classes/objects in the same files.
- */
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_self;
@@ -78,17 +63,6 @@ String concat4(const String& s1, const String& s2, const String& s3,
                const String& s4);
 
 ///////////////////////////////////////////////////////////////////////////////
-// output functions
-
-inline void echo(const char *s) {
-  g_context->write(s);
-}
-inline void echo(const char *s, int len) {
-  g_context->write(s, len);
-}
-inline void echo(const String& s) {
-  g_context->write(s);
-}
 
 void NEVER_INLINE throw_invalid_property_name(const String& name)
   ATTRIBUTE_NORETURN;
@@ -139,45 +113,15 @@ vm_decode_function(const Variant& function,
                                 ctx.invName, warn);
 }
 
-ActRec* vm_get_previous_frame();
 Variant vm_call_user_func(const Variant& function, const Variant& params,
                           bool forwarding = false);
 
-/**
- * Invoking an arbitrary static method.
- */
 Variant invoke_static_method(const String& s, const String& method,
                              const Variant& params, bool fatal = true);
-
-/**
- * Fallback when a dynamic function call fails to find a user function
- * matching the name.  If no handlers are able to
- * invoke the function, throw an InvalidFunctionCallException.
- */
-Variant invoke_failed(const char *func,
-                      bool fatal = true);
-Variant invoke_failed(const Variant& func,
-                      bool fatal = true);
 
 Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
-/**
- * When fatal coding errors are transformed to this function call.
- */
-inline Variant throw_fatal(const char *msg, void *dummy = nullptr) {
-  throw FatalErrorException(msg);
-}
-inline Variant throw_missing_class(const char *cls) {
-  throw ClassNotFoundException((std::string("unknown class ") + cls).c_str());
-}
-
-inline Variant throw_missing_file(const char *file) {
-  if (file[0] == '\0') {
-    throw NoFileSpecifiedException();
-  }
-  throw PhpFileDoesNotExistException(file);
-}
 void throw_instance_method_fatal(const char *name);
 
 void throw_iterator_not_valid() ATTRIBUTE_NORETURN;
@@ -283,97 +227,14 @@ inline Variant unserialize_from_string(const String& str,
 String resolve_include(const String& file, const char* currentDir,
                        bool (*tryFile)(const String& file, void* ctx),
                        void* ctx);
-Variant include(const String& file, bool once = false,
-                const char *currentDir = "",
-                bool raiseNotice = true);
-Variant require(const String& file, bool once = false,
-                const char *currentDir = "",
-                bool raiseNotice = true);
 Variant include_impl_invoke(const String& file, bool once = false,
                             const char *currentDir = "");
-Variant invoke_file(const String& file, bool once = false,
-                    const char *currentDir = nullptr);
-bool invoke_file_impl(Variant &res, const String& path, bool once,
-                      const char *currentDir);
+Variant require(const String& file, bool once, const char* currentDir,
+                bool raiseNotice);
 
 bool function_exists(const String& function_name);
-
-/**
- * For autoload support
- */
-
-class AutoloadHandler final : public RequestEventHandler {
-  enum Result {
-    Failure,
-    Success,
-    StopAutoloading,
-    ContinueAutoloading
-  };
-
-  struct HandlerBundle {
-    HandlerBundle() = delete;
-    HandlerBundle(const Variant& handler,
-                  smart::unique_ptr<CufIter>& cufIter) :
-      m_handler(handler) {
-      m_cufIter = std::move(cufIter);
-    }
-
-    Variant m_handler; // used to respond to f_spl_autoload_functions
-    smart::unique_ptr<CufIter> m_cufIter; // used to invoke handlers
-  };
-
-  class CompareBundles {
-public:
-    explicit CompareBundles(CufIter* cufIter) : m_cufIter(cufIter) { }
-    bool operator()(const HandlerBundle& hb);
-private:
-    CufIter* m_cufIter;
-  };
-
-public:
-  AutoloadHandler() { }
-
-  ~AutoloadHandler() {
-    m_map.detach();
-    m_map_root.detach();
-    // m_handlers won't run a destructor so nothing to do here
-    m_loading.detach();
-  }
-
-  virtual void requestInit();
-  virtual void requestShutdown();
-
-  Array getHandlers();
-  bool addHandler(const Variant& handler, bool prepend);
-  void removeHandler(const Variant& handler);
-  void removeAllHandlers();
-  bool isRunning();
-
-  bool invokeHandler(const String& className, bool forceSplStack = false);
-  bool autoloadFunc(StringData* name);
-  bool autoloadConstant(StringData* name);
-  bool autoloadType(const String& name);
-  bool setMap(const Array& map, const String& root);
-  DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
-
-private:
-  template <class T>
-  Result loadFromMap(const String& name, const String& kind, bool toLower,
-                     const T &checkExists);
-  static String getSignature(const Variant& handler);
-
-  Array m_map;
-  String m_map_root;
-  bool m_spl_stack_inited;
-  union {
-    smart::deque<HandlerBundle> m_handlers;
-  };
-  Array m_loading;
-};
-
-#define CALL_USER_FUNC_FEW_ARGS_COUNT 6
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_BUILTIN_FUNCTIONS_H_
+#endif

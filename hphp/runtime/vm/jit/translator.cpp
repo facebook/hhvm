@@ -4611,7 +4611,7 @@ void invalidatePath(const std::string& path) {
      * inotify saw this path change. Now poke the file repository;
      * it will notice the underlying PhpFile* has changed.
      *
-     * We don't actually need to *do* anything with the PhpFile* from
+     * We don't actually need to *do* anything with the Unit* from
      * this lookup; since the path has changed, the file we'll get out is
      * going to be some new file, not the old file that needs invalidation.
      */

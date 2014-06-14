@@ -169,7 +169,7 @@ void setFileInfo(const StringData* name,
   ReadLock lock(s_md5Lock);
   auto it = s_md5Files.find(fileInfo.m_md5);
   if (it != s_md5Files.end()) {
-    PhpFile *f = it->second;
+    PhpFile* f = it->second;
     if (f->getRef() != 0 &&
         !fileInfo.m_relPath.empty() &&
         fileInfo.m_relPath == f->getRelPath()) {
@@ -542,7 +542,7 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
     ret->incRef();
     ret->setId(RDS::allocBit());
   } else {
-    PhpFile *f = old->getPhpFile();
+    PhpFile* f = old->getPhpFile();
     if (f != ret) {
       ret->setId(f->getId());
       ret->incRef();

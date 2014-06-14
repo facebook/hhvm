@@ -521,16 +521,16 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  PhpFile* lookupPhpFile(
+  Unit* lookupPhpFile(
       StringData* path, const char* currentDir, bool* initial = nullptr);
   Unit* evalInclude(StringData* path,
                               const StringData* curUnitFilePath, bool* initial);
   Unit* evalIncludeRoot(StringData* path,
                                   InclOpFlags flags, bool* initial);
-  PhpFile* lookupIncludeRoot(StringData* path,
-                             InclOpFlags flags,
-                             bool* initial,
-                             Unit* unit = 0);
+  Unit* lookupIncludeRoot(StringData* path,
+                          InclOpFlags flags,
+                          bool* initial,
+                          Unit* unit);
   bool evalUnit(Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, Unit* unit);
   Unit* compileEvalString(StringData* code,

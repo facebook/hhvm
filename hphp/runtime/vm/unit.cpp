@@ -951,10 +951,8 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              auto const efile = g_context->lookupIncludeRoot(s,
+              auto const unit = g_context->lookupIncludeRoot(s,
                 InclOpFlags::DocRoot, nullptr, this);
-              assert(efile);
-              Unit* unit = efile->unit();
               unit->initialMerge();
               m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
               break;

@@ -262,14 +262,12 @@ static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
 }
 
 static Array HHVM_FUNCTION(get_included_files) {
-  Array included_files = Array::Create();
-  int idx = 0;
-  for (auto& file: g_context->m_evaledFilesOrder) {
-    included_files.set(idx++, file->getFileName());
+  PackedArrayInit pai(g_context->m_evaledFilesOrder.size());
+  for (auto& file : g_context->m_evaledFilesOrder) {
+    pai.append(file->getFileName());
   }
-  return included_files;
+  return pai.toArray();
 }
-
 
 static Array HHVM_FUNCTION(inclued_get_data) {
   // TODO: Clearly this is not implemented...

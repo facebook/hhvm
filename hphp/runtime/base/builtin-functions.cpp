@@ -842,13 +842,9 @@ Variant invoke_file(const String& s, bool once, const char *currentDir) {
 bool invoke_file_impl(Variant &res, const String& path, bool once,
                       const char *currentDir) {
   bool initial;
-  auto const efile = g_context->lookupPhpFile(path.get(),
+  auto const u = g_context->lookupPhpFile(path.get(),
     currentDir, &initial);
-  Unit* u = nullptr;
-  if (efile) u = efile->unit();
-  if (u == nullptr) {
-    return false;
-  }
+  if (u == nullptr) return false;
   if (!once || initial) {
     g_context->invokeUnit((TypedValue*)(&res), u);
   }

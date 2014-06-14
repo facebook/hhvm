@@ -2491,9 +2491,9 @@ const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
   return ci;
 }
 
-PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
-                                         const char* currentDir,
-                                         bool* initial_opt) {
+Unit* ExecutionContext::lookupPhpFile(StringData* path,
+                                      const char* currentDir,
+                                      bool* initial_opt) {
   bool init;
   bool &initial = initial_opt ? *initial_opt : init;
   initial = true;
@@ -2509,7 +2509,7 @@ PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
     // We found it! Return the unit.
     efile = it->second;
     initial = false;
-    return efile;
+    return efile->unit();
   }
   // We didn't find it, so try the realpath.
   bool alreadyResolved =
@@ -2532,7 +2532,7 @@ PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
           m_evaledFilesOrder.push_back(efile);
           spath.get()->incRefCount();
           initial = false;
-          return efile;
+          return efile->unit();
         }
       }
     }
@@ -2558,37 +2558,30 @@ PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
     }
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
   }
-  return efile;
+  return efile ? efile->unit() : nullptr;
 }
 
 Unit* ExecutionContext::evalInclude(StringData* path,
                                       const StringData* curUnitFilePath,
                                       bool* initial) {
   namespace fs = boost::filesystem;
-  PhpFile* efile = nullptr;
   if (curUnitFilePath) {
     fs::path currentUnit(curUnitFilePath->data());
     fs::path currentDir(currentUnit.branch_path());
-    efile = lookupPhpFile(path, currentDir.string().c_str(), initial);
-  } else {
-    efile = lookupPhpFile(path, "", initial);
+    return lookupPhpFile(path, currentDir.string().c_str(), initial);
   }
-  if (efile) {
-    return efile->unit();
-  }
-  return nullptr;
+  return lookupPhpFile(path, "", initial);
 }
 
 Unit* ExecutionContext::evalIncludeRoot(
-  StringData* path, InclOpFlags flags, bool* initial) {
-  auto const efile = lookupIncludeRoot(path, flags, initial);
-  return efile ? efile->unit() : 0;
+    StringData* path, InclOpFlags flags, bool* initial) {
+  return lookupIncludeRoot(path, flags, initial, nullptr);
 }
 
-PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
-                                             InclOpFlags flags,
-                                             bool* initial,
-                                             Unit* unit) {
+Unit* ExecutionContext::lookupIncludeRoot(StringData* path,
+                                          InclOpFlags flags,
+                                          bool* initial,
+                                          Unit* unit) {
   String absPath;
   if (flags & InclOpFlags::Relative) {
     namespace fs = boost::filesystem;
@@ -2612,7 +2605,7 @@ PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
   auto const it = m_evaledFiles.find(absPath.get());
   if (it != end(m_evaledFiles)) {
     if (initial) *initial = false;
-    return it->second;
+    return it->second->unit();
   }
 
   return lookupPhpFile(absPath.get(), "", initial);
@@ -6678,10 +6671,11 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
     ec->evalInclude(path.get(), vmfp()->m_func->unit()->filepath(), &initial);
   vmStack().popC();
   if (u == nullptr) {
-    ((flags & InclOpFlags::Fatal) ?
-     (void (*)(const char *, ...))raise_error :
-     (void (*)(const char *, ...))raise_warning)("File not found: %s",
-                                                 path.data());
+    if (flags & InclOpFlags::Fatal) {
+      raise_error("File not found: %s", path.data());
+    } else {
+      raise_warning("File not found: %s", path.data());
+    }
     vmStack().pushFalse();
   } else {
     if (!(flags & InclOpFlags::Once) || initial) {

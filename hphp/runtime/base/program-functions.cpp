@@ -1309,12 +1309,11 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      auto const phpFile = g_context->lookupPhpFile(
+      auto const unit = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
-      if (phpFile == nullptr) {
+      if (unit == nullptr) {
         throw FileOpenException(po.lint);
       }
-      Unit* unit = phpFile->unit();
       const StringData* msg;
       int line;
       if (unit->compileTimeFatal(msg, line)) {

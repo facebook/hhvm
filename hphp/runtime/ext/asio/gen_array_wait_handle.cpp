@@ -137,7 +137,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
     return c_StaticWaitHandle::CreateSucceeded(
       make_tv<KindOfArray>(depCopy.get()));
   } else {
-    return c_StaticWaitHandle::CreateFailed(exception.get());
+    return Object::attach(c_StaticWaitHandle::CreateFailed(exception.detach()));
   }
 }
 

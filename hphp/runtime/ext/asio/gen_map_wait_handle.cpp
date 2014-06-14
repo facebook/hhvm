@@ -108,7 +108,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
     return c_StaticWaitHandle::CreateSucceeded(
       make_tv<KindOfObject>(deps.get()));
   } else {
-    return c_StaticWaitHandle::CreateFailed(exception.get());
+    return Object::attach(c_StaticWaitHandle::CreateFailed(exception.detach()));
   }
 }
 

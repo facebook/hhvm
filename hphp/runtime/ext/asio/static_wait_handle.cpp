@@ -42,12 +42,20 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededVM(const Cell result) {
   return waitHandle;
 }
 
+/**
+ * Create failed StaticWaitHandle object.
+ *
+ * - consumes reference of the given Exception object
+ * - produces reference for the returned StaticWaitHandle object
+ */
 c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
+  assert(exception);
   assert(exception->instanceof(SystemLib::s_ExceptionClass));
 
   auto waitHandle = NEWOBJ(c_StaticWaitHandle)();
   waitHandle->setState(STATE_FAILED);
-  tvWriteObject(exception, &waitHandle->m_resultOrException);
+  waitHandle->incRefCount();
+  cellCopy(make_tv<KindOfObject>(exception), waitHandle->m_resultOrException);
   return waitHandle;
 }
 

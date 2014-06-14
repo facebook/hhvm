@@ -208,12 +208,12 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
         fault.m_faultType == Fault::Type::UserException) {
       // If in an eagerly executed async function, wrap the user exception
       // into a failed StaticWaitHandle and return it to the caller.
-      auto const e = fault.m_userException;
+      auto const exception = fault.m_userException;
+      auto const waitHandle = c_StaticWaitHandle::CreateFailed(exception);
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
       assert(stack.topTV() == &fp->m_r);
-      tvWriteObject(c_StaticWaitHandle::CreateFailed(e), &fp->m_r);
-      e->decRefCount();
+      cellCopy(make_tv<KindOfObject>(waitHandle), fp->m_r);
       action = UnwindAction::ResumeVM;
     } else {
       // Free ActRec.

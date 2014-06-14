@@ -15,16 +15,17 @@
 */
 #include "hphp/runtime/base/file-repository.h"
 
-#include <sstream>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 
+#include "hphp/util/lock.h"
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -49,9 +50,328 @@ namespace HPHP {
 
 TRACE_SET_MOD(fr);
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-std::set<std::string> FileRepository::s_names;
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+int64_t timespecCompare(const struct timespec& l,
+                        const struct timespec& r) {
+  if (l.tv_sec != r.tv_sec) return l.tv_sec - r.tv_sec;
+  return l.tv_nsec - r.tv_nsec;
+}
+
+struct PhpFileWrapper {
+  PhpFileWrapper(const struct stat& s, PhpFile* phpFile)
+    : m_mtime(s.st_mtim)
+    , m_ino(s.st_ino)
+    , m_devId(s.st_dev)
+    , m_phpFile(phpFile)
+  {}
+
+  bool isChanged(const struct stat &s) const {
+    if (RuntimeOption::RepoAuthoritative) {
+      return false;
+    }
+    return timespecCompare(m_mtime, s.st_mtim) < 0 ||
+           m_ino != s.st_ino ||
+           m_devId != s.st_dev;
+  }
+
+  PhpFile* getPhpFile() const { return m_phpFile; }
+
+private:
+  struct timespec m_mtime;
+  ino_t m_ino;
+  dev_t m_devId;
+  PhpFile* m_phpFile;
+};
+
+struct UnitMd5Val {
+  MD5 m_unitMd5;
+  bool m_present;
+};
+
+struct FileInfo {
+  PhpFile* m_phpFile{nullptr};
+  String m_inputString;
+  std::string m_md5;
+  std::string m_unitMd5;
+  std::string m_srcRoot;
+  std::string m_relPath;
+};
+
+struct ResolveIncludeContext {
+  String path;    // translated path of the file
+  struct stat* s; // stat for the file
+  bool allow_dir; // return true for dirs?
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * The FileRepository maintains a chm from file-paths to
+ * PhpFileWrappers.  The PhpFileWrapper is owned by the chm entry, and
+ * refers to a refCounted PhpFile (the refCount is the number of times
+ * it appears in the FileRepository in total - symlinks can cause a
+ * PhpFile to appear more than once). The PhpFile refers to, and owns
+ * a Unit.
+ *
+ * When the last reference to a PhpFile goes away, the Unit and its contents
+ * can no longer be reached by new requests, but existing requests could still
+ * be referring to it, so the Unit is freed via TreadMill.
+ */
+
+using UnitMd5Map = tbb::concurrent_hash_map<
+  const StringData*,
+  UnitMd5Val,
+  StringDataHashCompare
+>;
+UnitMd5Map s_unitMd5Map;
+
+using ParsedFilesMap = RankedCHM<
+  const StringData*,
+  PhpFileWrapper*,
+  StringDataHashCompare,
+  RankFileRepo
+>;
+ParsedFilesMap s_files;
+
+ReadWriteMutex s_md5Lock;
+hphp_hash_map<std::string,PhpFile*,string_hash> s_md5Files;
+
+std::vector<Unit*> s_orphanedUnitsToDelete; // FIXME(#4512485)
+
+//////////////////////////////////////////////////////////////////////
+
+void setFileInfo(const StringData* name,
+                 const std::string& md5,
+                 FileInfo& fileInfo,
+                 bool fromRepo) {
+  // Incorporate the path into the md5 that is used as the key for file
+  // repository lookups.  This assures that even if two PHP files have
+  // identical content, separate units exist for them (so that
+  // Unit::filepath() and Unit::dirpath() work correctly).
+  std::string s = md5 + '\0' + name->data();
+  fileInfo.m_md5 = string_md5(s.c_str(), s.size());
+
+  if (fromRepo) {
+    fileInfo.m_unitMd5 = md5;
+  } else {
+    fileInfo.m_unitMd5 = FileRepository::unitMd5(md5);
+  }
+
+  fileInfo.m_srcRoot = SourceRootInfo::GetCurrentSourceRoot();
+  int srcRootLen = fileInfo.m_srcRoot.size();
+  if (srcRootLen) {
+    if (!strncmp(name->data(), fileInfo.m_srcRoot.c_str(), srcRootLen)) {
+      fileInfo.m_relPath = std::string(name->data() + srcRootLen);
+    }
+  }
+
+  ReadLock lock(s_md5Lock);
+  auto it = s_md5Files.find(fileInfo.m_md5);
+  if (it != s_md5Files.end()) {
+    PhpFile *f = it->second;
+    if (f->getRef() != 0 &&
+        !fileInfo.m_relPath.empty() &&
+        fileInfo.m_relPath == f->getRelPath()) {
+      assert(fileInfo.m_md5 == f->getMd5());
+      fileInfo.m_phpFile = f;
+    }
+  }
+}
+
+bool readRepoMd5Impl(const StringData *path, FileInfo& fileInfo) {
+  MD5 md5;
+  bool found;
+  {
+    UnitMd5Map::const_accessor acc;
+    found = s_unitMd5Map.find(acc, path);
+    if (found) {
+      if (!acc->second.m_present) {
+        return false;
+      }
+      md5 = acc->second.m_unitMd5;
+      path = acc->first;
+    }
+  }
+  if (!found) {
+    UnitMd5Map::accessor acc;
+    path = makeStaticString(path);
+    if (s_unitMd5Map.insert(acc, path)) {
+      if (!Repo::get().findFile(path->data(),
+                                    SourceRootInfo::GetCurrentSourceRoot(),
+                                    md5)) {
+        acc->second.m_present = false;
+        return false;
+      }
+      acc->second.m_present = true;
+      acc->second.m_unitMd5 = md5;
+    } else {
+      md5 = acc->second.m_unitMd5;
+      path = acc->first;
+    }
+  }
+  setFileInfo(path, md5.toString(), fileInfo, true);
+  return true;
+}
+
+PhpFile* parseFile(const std::string& name,
+                   const FileInfo& fileInfo) {
+  MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
+  Unit* unit = compile_file(fileInfo.m_inputString.data(),
+                            fileInfo.m_inputString.size(),
+                            md5, name.c_str());
+  always_assert(unit != nullptr &&
+                "failed to produce a unit; possibly due to corrupt hhbc repo");
+
+  return new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
+                     fileInfo.m_md5, unit);
+}
+
+PhpFile* readHhbc(const std::string& name, const FileInfo& fileInfo) {
+  auto const md5 = MD5(fileInfo.m_unitMd5.c_str());
+  auto const u = Repo::get().loadUnit(name, md5);
+  if (u != nullptr) {
+    return new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
+                       fileInfo.m_md5, u);
+  }
+
+  return nullptr;
+}
+
+void computeMd5(const StringData *name, FileInfo& fileInfo) {
+  auto& input = fileInfo.m_inputString;
+  std::string md5 = string_md5(input.data(), input.size());
+  setFileInfo(name, md5, fileInfo, false);
+}
+
+bool readActualFile(const StringData* name,
+                    const struct stat& s,
+                    FileInfo& fileInfo) {
+  if (s.st_size > StringData::MaxSize) {
+    throw FatalErrorException(0, "file %s is too big", name->data());
+  }
+  int fileSize = s.st_size;
+  int fd = open(name->data(), O_RDONLY);
+  if (!fd) return false; // ignore file open exception
+  String str = String(fileSize, ReserveString);
+  char *input = str.bufferSlice().ptr;
+  if (!input) return false;
+  int nbytes = read(fd, input, fileSize);
+  close(fd);
+  str.setSize(fileSize);
+  fileInfo.m_inputString = str;
+  if (nbytes != fileSize) return false;
+
+  computeMd5(name, fileInfo);
+  return true;
+}
+
+bool readFile(const StringData* name,
+              const struct stat& s,
+              FileInfo& fileInfo) {
+  if (!RuntimeOption::RepoAuthoritative) {
+    TRACE(1, "read initial \"%s\"\n", name->data());
+    return readActualFile(name, s, fileInfo);
+  }
+
+  if (!readRepoMd5Impl(name, fileInfo)) {
+    return false;
+  }
+  return true;
+}
+
+const StaticString s_file_url("file://");
+
+bool findFile(const StringData* path, struct stat* s) {
+  if (RuntimeOption::RepoAuthoritative) {
+    {
+      UnitMd5Map::const_accessor acc;
+      if (s_unitMd5Map.find(acc, path)) {
+        return acc->second.m_present;
+      }
+    }
+    MD5 md5;
+    const StringData* spath = makeStaticString(path);
+    UnitMd5Map::accessor acc;
+    if (s_unitMd5Map.insert(acc, spath)) {
+      bool present = Repo::get().findFile(
+        path->data(), SourceRootInfo::GetCurrentSourceRoot(), md5);
+      acc->second.m_present = present;
+      acc->second.m_unitMd5 = md5;
+    }
+    return acc->second.m_present;
+  }
+  return StatCache::stat(path->data(), s) == 0 && !S_ISDIR(s->st_mode);
+}
+
+bool findFile(const StringData* path, struct stat* s, bool allow_dir) {
+  s->st_mode = 0;
+  auto ret = findFile(path, s);
+  if (S_ISDIR(s->st_mode) && allow_dir) {
+    // The call explicitly populates the struct for dirs, but returns false for
+    // them because it is geared toward file includes.
+    return true;
+  }
+  return ret;
+}
+
+bool findFileWrapper(const String& file, void* ctx) {
+  auto const context = static_cast<ResolveIncludeContext*>(ctx);
+  assert(context->path.isNull());
+
+  Stream::Wrapper* w = Stream::getWrapperFromURI(file);
+  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
+    if (w->stat(file, context->s) == 0) {
+      context->path = file;
+      return true;
+    }
+  }
+
+  // handle file://
+  if (file.substr(0, 7) == s_file_url) {
+    return findFileWrapper(file.substr(7), ctx);
+  }
+
+  if (!w) return false;
+
+  // TranslatePath() will canonicalize the path and also check
+  // whether the file is in an allowed directory.
+  String translatedPath = File::TranslatePathKeepRelative(file);
+  if (file[0] != '/') {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
+      context->path = translatedPath;
+      return true;
+    }
+    return false;
+  }
+  if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
+      context->path = translatedPath;
+      return true;
+    }
+  }
+  std::string server_root(SourceRootInfo::GetCurrentSourceRoot());
+  if (server_root.empty()) {
+    server_root = std::string(g_context->getCwd().data());
+    if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
+      server_root += "/";
+    }
+  }
+  String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
+  if (findFile(rel_path.get(), context->s, context->allow_dir)) {
+    context->path = rel_path;
+    return true;
+  }
+  return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
 
 PhpFile::PhpFile(const std::string &fileName,
                  const std::string &srcRoot,
@@ -67,9 +387,9 @@ PhpFile::PhpFile(const std::string &fileName,
 PhpFile::~PhpFile() {
   always_assert(getRef() == 0);
   if (do_assert) {
-    ReadLock lock(FileRepository::s_md5Lock);
-    UNUSED auto const it = FileRepository::s_md5Files.find(getMd5());
-    assert(it == end(FileRepository::s_md5Files) || it->second != this);
+    ReadLock lock(s_md5Lock);
+    UNUSED auto const it = s_md5Files.find(getMd5());
+    assert(it == end(s_md5Files) || it->second != this);
   }
   if (m_unit != nullptr) {
     // If we have or in the process of a collecting an hhprof dump than we need
@@ -78,7 +398,7 @@ PhpFile::~PhpFile() {
     // part of post-collection cleanup.
     if (memory_profiling && RuntimeOption::HHProfServerEnabled &&
         ProfileController::isTracking()) {
-      FileRepository::enqueueOrphanedUnitForDeletion(m_unit);
+      s_orphanedUnitsToDelete.push_back(m_unit);
     } else {
       // Deleting a Unit can grab a low-ranked lock and we're probably
       // at a high rank right now
@@ -105,10 +425,10 @@ int PhpFile::decRef() {
 void PhpFile::decRefAndDelete() {
   if (decRef() == 0) {
     {
-      WriteLock lock(FileRepository::s_md5Lock);
-      auto const it = FileRepository::s_md5Files.find(getMd5());
-      if (it != end(FileRepository::s_md5Files) && it->second == this) {
-        FileRepository::s_md5Files.erase(it);
+      WriteLock lock(s_md5Lock);
+      auto const it = s_md5Files.find(getMd5());
+      if (it != end(s_md5Files) && it->second == this) {
+        s_md5Files.erase(it);
       }
     }
     Treadmill::enqueue([this] { delete this; });
@@ -119,12 +439,6 @@ void PhpFile::setId(int id) {
   m_id = id;
   m_unit->setCacheId(id);
 }
-
-ReadWriteMutex FileRepository::s_md5Lock(RankFileMd5);
-ParsedFilesMap FileRepository::s_files;
-Md5FileMap FileRepository::s_md5Files;
-UnitMd5Map FileRepository::s_unitMd5Map;
-std::vector<Unit*> FileRepository::s_orphanedUnitsToDelete;
 
 size_t FileRepository::getLoadedFiles() {
   ReadLock lock(s_md5Lock);
@@ -251,28 +565,6 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
   return ret;
 }
 
-bool FileRepository::findFile(const StringData *path, struct stat *s) {
-  if (RuntimeOption::RepoAuthoritative) {
-    {
-      UnitMd5Map::const_accessor acc;
-      if (s_unitMd5Map.find(acc, path)) {
-        return acc->second.m_present;
-      }
-    }
-    MD5 md5;
-    const StringData* spath = makeStaticString(path);
-    UnitMd5Map::accessor acc;
-    if (s_unitMd5Map.insert(acc, spath)) {
-      bool present = Repo::get().findFile(
-        path->data(), SourceRootInfo::GetCurrentSourceRoot(), md5);
-      acc->second.m_present = present;
-      acc->second.m_unitMd5 = md5;
-    }
-    return acc->second.m_present;
-  }
-  return fileStat(path->data(), s) && !S_ISDIR(s->st_mode);
-}
-
 std::string FileRepository::unitMd5(const std::string& fileMd5) {
   // Incorporate relevant options into the unit md5 (there will be more)
   std::string t = fileMd5 + '\0'
@@ -286,155 +578,10 @@ std::string FileRepository::unitMd5(const std::string& fileMd5) {
   return string_md5(t.c_str(), t.size());
 }
 
-void FileRepository::setFileInfo(const StringData *name,
-                                 const std::string& md5,
-                                 FileInfo &fileInfo,
-                                 bool fromRepo) {
-  // Incorporate the path into the md5 that is used as the key for file
-  // repository lookups.  This assures that even if two PHP files have
-  // identical content, separate units exist for them (so that
-  // Unit::filepath() and Unit::dirpath() work correctly).
-  std::string s = md5 + '\0' + name->data();
-  fileInfo.m_md5 = string_md5(s.c_str(), s.size());
-
-  if (fromRepo) {
-    fileInfo.m_unitMd5 = md5;
-  } else {
-    fileInfo.m_unitMd5 = unitMd5(md5);
-  }
-
-  fileInfo.m_srcRoot = SourceRootInfo::GetCurrentSourceRoot();
-  int srcRootLen = fileInfo.m_srcRoot.size();
-  if (srcRootLen) {
-    if (!strncmp(name->data(), fileInfo.m_srcRoot.c_str(), srcRootLen)) {
-      fileInfo.m_relPath = std::string(name->data() + srcRootLen);
-    }
-  }
-
-  ReadLock lock(s_md5Lock);
-  auto it = s_md5Files.find(fileInfo.m_md5);
-  if (it != s_md5Files.end()) {
-    PhpFile *f = it->second;
-    if (f->getRef() != 0 &&
-        !fileInfo.m_relPath.empty() &&
-        fileInfo.m_relPath == f->getRelPath()) {
-      assert(fileInfo.m_md5 == f->getMd5());
-      fileInfo.m_phpFile = f;
-    }
-  }
-}
-
-bool FileRepository::readActualFile(const StringData *name,
-                                    const struct stat &s,
-                                    FileInfo &fileInfo) {
-  if (s.st_size > StringData::MaxSize) {
-    throw FatalErrorException(0, "file %s is too big", name->data());
-  }
-  int fileSize = s.st_size;
-  int fd = open(name->data(), O_RDONLY);
-  if (!fd) return false; // ignore file open exception
-  String str = String(fileSize, ReserveString);
-  char *input = str.bufferSlice().ptr;
-  if (!input) return false;
-  int nbytes = read(fd, input, fileSize);
-  close(fd);
-  str.setSize(fileSize);
-  fileInfo.m_inputString = str;
-  if (nbytes != fileSize) return false;
-
-  computeMd5(name, fileInfo);
-  return true;
-}
-
-void FileRepository::computeMd5(const StringData *name, FileInfo& fileInfo) {
-  auto& input = fileInfo.m_inputString;
-  std::string md5 = string_md5(input.data(), input.size());
-  setFileInfo(name, md5, fileInfo, false);
-}
-
-bool FileRepository::readRepoMd5(const StringData *path,
-                                 FileInfo& fileInfo) {
-  MD5 md5;
-  bool found;
-  {
-    UnitMd5Map::const_accessor acc;
-    found = s_unitMd5Map.find(acc, path);
-    if (found) {
-      if (!acc->second.m_present) {
-        return false;
-      }
-      md5 = acc->second.m_unitMd5;
-      path = acc->first;
-    }
-  }
-  if (!found) {
-    UnitMd5Map::accessor acc;
-    path = makeStaticString(path);
-    if (s_unitMd5Map.insert(acc, path)) {
-      if (!Repo::get().findFile(path->data(),
-                                    SourceRootInfo::GetCurrentSourceRoot(),
-                                    md5)) {
-        acc->second.m_present = false;
-        return false;
-      }
-      acc->second.m_present = true;
-      acc->second.m_unitMd5 = md5;
-    } else {
-      md5 = acc->second.m_unitMd5;
-      path = acc->first;
-    }
-  }
-  setFileInfo(path, md5.toString(), fileInfo, true);
-  return true;
-}
-
-bool FileRepository::readFile(const StringData *name,
-                              const struct stat &s,
-                              FileInfo &fileInfo) {
-  if (!RuntimeOption::RepoAuthoritative) {
-    TRACE(1, "read initial \"%s\"\n", name->data());
-    return readActualFile(name, s, fileInfo);
-  }
-
-  if (!readRepoMd5(name, fileInfo)) {
-    return false;
-  }
-  return true;
-}
-
-PhpFile *FileRepository::readHhbc(const std::string &name,
-                                  const FileInfo &fileInfo) {
-  MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
-  Unit* u = Repo::get().loadUnit(name, md5);
-  if (u != nullptr) {
-    PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
-                             fileInfo.m_md5, u);
-    return p;
-  }
-
-  return nullptr;
-}
-
-PhpFile* FileRepository::parseFile(const std::string& name,
-                                   const FileInfo& fileInfo) {
-  MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
-  Unit* unit = compile_file(fileInfo.m_inputString.data(),
-                            fileInfo.m_inputString.size(),
-                            md5, name.c_str());
-  always_assert(unit != nullptr &&
-                "failed to produce a unit; possibly due to corrupt hhbc repo");
-
-  return new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
-                     fileInfo.m_md5, unit);
-}
-
-bool FileRepository::fileStat(const std::string &name, struct stat *s) {
-  return StatCache::stat(name, s) == 0;
-}
-
-void FileRepository::enqueueOrphanedUnitForDeletion(Unit *u) {
-  assert(RuntimeOption::HHProfServerEnabled);
-  s_orphanedUnitsToDelete.push_back(u);
+folly::Optional<MD5> FileRepository::readRepoMd5(const StringData* path) {
+  FileInfo fi;
+  if (!readRepoMd5Impl(path, fi)) return folly::none;
+  return MD5{fi.m_md5.c_str()};
 }
 
 void FileRepository::deleteOrphanedUnits() {
@@ -447,81 +594,15 @@ void FileRepository::deleteOrphanedUnits() {
   s_orphanedUnitsToDelete.clear();
 }
 
-struct ResolveIncludeContext {
-  String path; // translated path of the file
-  struct stat* s; // stat for the file
-  bool allow_dir; // return true for dirs?
-};
-
-const StaticString s_file_url("file://");
-
-static bool findFile(const StringData *path, struct stat *s, bool allow_dir) {
-  s->st_mode = 0;
-  auto ret = FileRepository::findFile(path, s);
-  if (S_ISDIR(s->st_mode) && allow_dir) {
-    // The call explicitly populates the struct for dirs, but returns false for
-    // them because it is geared toward file includes.
-    return true;
-  }
-  return ret;
-}
-
-static bool findFileWrapper(const String& file, void* ctx) {
-  ResolveIncludeContext* context = (ResolveIncludeContext*)ctx;
-  assert(context->path.isNull());
-
-  Stream::Wrapper* w = Stream::getWrapperFromURI(file);
-  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
-    if (w->stat(file, context->s) == 0) {
-      context->path = file;
-      return true;
-    }
-  }
-
-  // handle file://
-  if (file.substr(0, 7) == s_file_url) {
-    return findFileWrapper(file.substr(7), ctx);
-  }
-
-  if (!w) return false;
-
-  // TranslatePath() will canonicalize the path and also check
-  // whether the file is in an allowed directory.
-  String translatedPath = File::TranslatePathKeepRelative(file);
-  if (file[0] != '/') {
-    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
-      context->path = translatedPath;
-      return true;
-    }
-    return false;
-  }
-  if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
-    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
-      context->path = translatedPath;
-      return true;
-    }
-  }
-  std::string server_root(SourceRootInfo::GetCurrentSourceRoot());
-  if (server_root.empty()) {
-    server_root = std::string(g_context->getCwd().data());
-    if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
-      server_root += "/";
-    }
-  }
-  String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
-  if (findFile(rel_path.get(), context->s, context->allow_dir)) {
-    context->path = rel_path;
-    return true;
-  }
-  return false;
-}
-
-String resolveVmInclude(StringData* path, const char* currentDir,
-                        struct stat *s, bool allow_dir /* = false */) {
+String resolveVmInclude(StringData* path,
+                        const char* currentDir,
+                        struct stat* s,
+                        bool allow_dir /* = false */) {
   ResolveIncludeContext ctx;
   ctx.s = s;
   ctx.allow_dir = allow_dir;
-  resolve_include(path, currentDir, findFileWrapper, (void*)&ctx);
+  void* vpCtx = &ctx;
+  resolve_include(path, currentDir, findFileWrapper, vpCtx);
   // If resolve_include() could not find the file, return NULL
   return ctx.path;
 }

@@ -27,19 +27,22 @@ void c_StaticWaitHandle::t___construct() {
   not_reached();
 }
 
+/**
+ * Create succeeded StaticWaitHandle object.
+ *
+ * - consumes reference of the given cell
+ * - produces reference for the returned StaticWaitHandle object
+ */
 c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell& result) {
-  auto waitHandle = NEWOBJ(c_StaticWaitHandle)();
-  waitHandle->setState(STATE_SUCCEEDED);
-  cellDup(result, waitHandle->m_resultOrException);
-  return waitHandle;
-}
-
-c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededVM(const Cell result) {
   auto waitHandle = NEWOBJ(c_StaticWaitHandle)();
   waitHandle->setState(STATE_SUCCEEDED);
   waitHandle->incRefCount();
   cellCopy(result, waitHandle->m_resultOrException);
   return waitHandle;
+}
+
+c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededVM(const Cell result) {
+  return CreateSucceeded(result);
 }
 
 /**

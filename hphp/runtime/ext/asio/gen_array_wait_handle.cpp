@@ -74,8 +74,8 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
          depCopy->kind() == ArrayData::kEmptyKind);
 
   if (depCopy->kind() == ArrayData::kEmptyKind) {
-    auto const empty = make_tv<KindOfArray>(depCopy.get());
-    return c_StaticWaitHandle::CreateSucceeded(empty);
+    auto const empty = make_tv<KindOfArray>(depCopy.detach());
+    return Object::attach(c_StaticWaitHandle::CreateSucceeded(empty));
   }
 
   Object exception;
@@ -134,8 +134,8 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
   // that's all we give back.  Otherwise give back the array of
   // results.
   if (exception.isNull()) {
-    return c_StaticWaitHandle::CreateSucceeded(
-      make_tv<KindOfArray>(depCopy.get()));
+    return Object::attach(c_StaticWaitHandle::CreateSucceeded(
+      make_tv<KindOfArray>(depCopy.detach())));
   } else {
     return Object::attach(c_StaticWaitHandle::CreateFailed(exception.detach()));
   }

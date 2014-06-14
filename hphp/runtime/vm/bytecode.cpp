@@ -4589,9 +4589,9 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   // If in an eagerly executed async function, wrap the return value
   // into succeeded StaticWaitHandle.
   if (UNLIKELY(!vmfp()->resumed() && vmfp()->func()->isAsyncFunction())) {
-    auto const retvalCell = *tvAssertCell(&retval);
-    retval.m_data.pobj = c_StaticWaitHandle::CreateSucceededVM(retvalCell);
-    retval.m_type = KindOfObject;
+    auto const& retvalCell = *tvAssertCell(&retval);
+    auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retvalCell);
+    cellCopy(make_tv<KindOfObject>(waitHandle), retval);
   }
 
   if (shouldProfile()) {

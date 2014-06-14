@@ -382,6 +382,8 @@ public:
   void emitCastArray();
   void emitCastObject();
 
+  void emitNameA();
+
   void emitSwitch(const ImmVector&, int64_t base, bool bounded);
   void emitSSwitch(const ImmVector&);
 

@@ -1971,6 +1971,14 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   emitServiceReq(m_mainCode, REQ_RESUME);
 }
 
+void CodeGenerator::cgLdClsName(IRInstruction* inst) {
+  auto const dstReg = x2a(dstLoc(0).reg());
+  auto const srcReg = x2a(srcLoc(0).reg());
+
+  m_as.   Ldr   (dstReg, srcReg[Class::preClassOff()]);
+  m_as.   Ldr   (dstReg, dstReg[PreClass::nameOffset()]);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgCountArrayFast(IRInstruction* inst) {

@@ -48,7 +48,8 @@ class Unit;
 class UnitEmitter;
 class Class;
 class NamedEntity;
-class PreClass;
+struct PreClass;
+struct Class;
 namespace Native { struct NativeDataInfo; }
 
 typedef hphp_hash_set<LowStringPtr,
@@ -299,9 +300,10 @@ struct PreClass : AtomicCountable {
   int line2() const { return m_line2; }
   Offset getOffset() const { return m_offset; }
   const StringData* name() const { return m_name; }
+  static constexpr Offset nameOffset() { return offsetof(PreClass, m_name); }
   StrNR nameStr() const { return StrNR(m_name); }
   Attr attrs() const { return m_attrs; }
-  static Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
+  static constexpr Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
   const StringData* parent() const { return m_parent; }
   StrNR parentStr() const { return StrNR(m_parent); }
   const StringData* docComment() const { return m_docComment; }
@@ -839,12 +841,24 @@ struct Class : AtomicCountable {
   }
   LowClassPtr const* classVec() const { return m_classVec; }
 
-  static size_t preClassOff() { return offsetof(Class, m_preClass); }
-  static size_t classVecOff() { return offsetof(Class, m_classVec); }
-  static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
-  static Offset getMethodsOffset() { return offsetof(Class, m_methods); }
-  static ptrdiff_t invokeFuncOff() { return offsetof(Class, m_invoke); }
-  static size_t instanceBitsOff() { return offsetof(Class, m_instanceBits); }
+  static constexpr size_t preClassOff() {
+    return offsetof(Class, m_preClass);
+  }
+  static constexpr size_t classVecOff() {
+    return offsetof(Class, m_classVec);
+  }
+  static constexpr size_t classVecLenOff() {
+    return offsetof(Class, m_classVecLen);
+  }
+  static constexpr Offset getMethodsOffset() {
+    return offsetof(Class, m_methods);
+  }
+  static constexpr ptrdiff_t invokeFuncOff() {
+    return offsetof(Class, m_invoke);
+  }
+  static constexpr size_t instanceBitsOff() {
+    return offsetof(Class, m_instanceBits);
+  }
 
   /* Return pointer to start of malloced memory for 'this' */
   Func** mallocPtrFromThis() const;

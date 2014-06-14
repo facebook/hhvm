@@ -3224,6 +3224,10 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   }
 }
 
+void HhbcTranslator::emitNameA() {
+  push(gen(LdClsName, popA()));
+}
+
 const StaticString
   s_count("count"),
   s_ini_get("ini_get");

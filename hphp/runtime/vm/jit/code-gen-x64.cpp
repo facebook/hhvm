@@ -3979,6 +3979,14 @@ void CodeGenerator::cgLdCctx(IRInstruction* inst) {
   return cgLdCtx(inst);
 }
 
+void CodeGenerator::cgLdClsName(IRInstruction* inst) {
+  auto const dstReg = dstLoc(0).reg();
+  auto const srcReg = srcLoc(0).reg();
+
+  m_as.loadq(srcReg[Class::preClassOff()], dstReg);
+  m_as.loadq(dstReg[PreClass::nameOffset()], dstReg);
+}
+
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   assert(inst->src(1)->isConst());
   auto const offset = inst->src(1);

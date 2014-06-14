@@ -125,8 +125,7 @@ let save_infer env pos ty =
   match !infer_target with
   | None -> ()
   | Some (line, char_pos) ->
-      let l, start, end_ = Pos.info_pos pos in
-      if l = line && start <= char_pos && char_pos <= end_ && !infer_type = None
+      if Pos.inside pos line char_pos && !infer_type = None
       then begin
         infer_type := Some (Typing_print.full_strip_ns env ty);
         infer_pos := Some (Reason.to_pos (fst ty));

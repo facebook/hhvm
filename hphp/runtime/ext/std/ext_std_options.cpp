@@ -269,11 +269,6 @@ static Array HHVM_FUNCTION(get_included_files) {
   return pai.toArray();
 }
 
-static Array HHVM_FUNCTION(inclued_get_data) {
-  // TODO: Clearly this is not implemented...
-  return empty_array();
-}
-
 static int64_t HHVM_FUNCTION(get_magic_quotes_gpc) {
   return RuntimeOption::EnableMagicQuotesGpc ? 1 : 0;
 }
@@ -1182,7 +1177,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(restore_include_path);
   HHVM_FE(set_include_path);
   HHVM_FE(get_included_files);
-  HHVM_FE(inclued_get_data);
   HHVM_FE(get_magic_quotes_gpc);
   HHVM_FE(get_magic_quotes_runtime);
   HHVM_FE(getenv);

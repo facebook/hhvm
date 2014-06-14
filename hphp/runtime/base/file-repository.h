@@ -40,7 +40,6 @@ struct StringData;
 
 struct PhpFile {
   PhpFile(const std::string& fileName,
-          const std::string& srcRoot,
           const std::string& relPath,
           const std::string& md5,
           Unit* unit);
@@ -50,7 +49,6 @@ struct PhpFile {
   PhpFile& operator=(const PhpFile&) = delete;
 
   const std::string& getFileName() const { return m_fileName; }
-  const std::string& getSrcRoot() const { return m_srcRoot; }
   const std::string& getRelPath() const { return m_relPath; }
   const std::string& getMd5() const { return m_md5; }
   int getRef() const { return m_refCount.load(std::memory_order_acquire); }
@@ -67,9 +65,7 @@ private:
 private:
   std::atomic<int> m_refCount;
   unsigned m_id;
-  std::string m_profName;
   std::string m_fileName;
-  std::string m_srcRoot;
   std::string m_relPath;
   std::string m_md5;
   Unit* m_unit;

@@ -97,7 +97,6 @@ struct FileInfo {
   String m_inputString;
   std::string m_md5;
   std::string m_unitMd5;
-  std::string m_srcRoot;
   std::string m_relPath;
 };
 
@@ -159,10 +158,10 @@ void setFileInfo(const StringData* name,
     fileInfo.m_unitMd5 = FileRepository::unitMd5(md5);
   }
 
-  fileInfo.m_srcRoot = SourceRootInfo::GetCurrentSourceRoot();
-  int srcRootLen = fileInfo.m_srcRoot.size();
+  auto const srcRoot = SourceRootInfo::GetCurrentSourceRoot();
+  int srcRootLen = srcRoot.size();
   if (srcRootLen) {
-    if (!strncmp(name->data(), fileInfo.m_srcRoot.c_str(), srcRootLen)) {
+    if (!strncmp(name->data(), srcRoot.c_str(), srcRootLen)) {
       fileInfo.m_relPath = std::string(name->data() + srcRootLen);
     }
   }
@@ -224,16 +223,14 @@ PhpFile* parseFile(const std::string& name,
   always_assert(unit != nullptr &&
                 "failed to produce a unit; possibly due to corrupt hhbc repo");
 
-  return new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
-                     fileInfo.m_md5, unit);
+  return new PhpFile(name, fileInfo.m_relPath, fileInfo.m_md5, unit);
 }
 
 PhpFile* readHhbc(const std::string& name, const FileInfo& fileInfo) {
   auto const md5 = MD5(fileInfo.m_unitMd5.c_str());
   auto const u = Repo::get().loadUnit(name, md5);
   if (u != nullptr) {
-    return new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
-                       fileInfo.m_md5, u);
+    return new PhpFile(name, fileInfo.m_relPath, fileInfo.m_md5, u);
   }
 
   return nullptr;
@@ -370,16 +367,17 @@ bool findFileWrapper(const String& file, void* ctx) {
 
 }
 
-PhpFile::PhpFile(const std::string &fileName,
-                 const std::string &srcRoot,
-                 const std::string &relPath,
-                 const std::string &md5,
+PhpFile::PhpFile(const std::string& fileName,
+                 const std::string& relPath,
+                 const std::string& md5,
                  Unit* unit)
-    : m_refCount(0), m_id(0),
-      m_profName(std::string("run_init::") + std::string(fileName)),
-      m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5),
-      m_unit(unit) {
-}
+  : m_refCount(0)
+  , m_id(0)
+  , m_fileName(fileName)
+  , m_relPath(relPath)
+  , m_md5(md5)
+  , m_unit(unit)
+{}
 
 PhpFile::~PhpFile() {
   always_assert(getRef() == 0);

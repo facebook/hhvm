@@ -3300,5 +3300,5 @@ and namespace_use_list env acc =
 
 let from_file filename =
   Pos.file := filename;
-  let content = Utils.cat filename in
+  let content = Utils.cat_no_fail filename in
   program content

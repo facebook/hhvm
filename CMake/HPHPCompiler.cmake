@@ -7,6 +7,16 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
 	set (LINUX TRUE)
 endif()
 
+# ccache
+FIND_PACKAGE(CCache)
+if(CCACHE_FOUND AND ENABLE_CCACHE)
+  SET(CCACHE "ccache" CACHE STRING "ccache")
+  SET(CMAKE_C_COMPILER_ARG1 ${CMAKE_C_COMPILER})
+  SET(CMAKE_C_COMPILER ${CCACHE})
+  SET(CMAKE_CXX_COMPILER_ARG1 ${CMAKE_CXX_COMPILER})
+  SET(CMAKE_CXX_COMPILER ${CCACHE})
+endif()
+
 # using Clang
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # TODO: Fix Folly ad change to -std=c++11 (ISO C++11), GNU_GCC version enable flags: -ffast-math
@@ -22,7 +32,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 # using GCC
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+  # Detect version GCC
+  if (CCACHE_FOUND AND ENABLE_CCACHE)
+    string(STRIP ${CMAKE_CXX_COMPILER_ARG1} CMAKE_CXX_COMPILER_ARG1_stripped)
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER_ARG1_stripped} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+  else()
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+  endif()
   if (NOT (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8))
     message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.8 or greater.")
   endif()

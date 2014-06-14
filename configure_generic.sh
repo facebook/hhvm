@@ -61,13 +61,14 @@ else
 fi
 
 # Place to save all the binaries/libraries/headers from the ext packages
-export CMAKE_PREFIX_PATH=`/bin/pwd`/..
+export CMAKE_PREFIX_PATH="`/bin/pwd`/.."
 
+# Speeding up build times: http://trac.webkit.org/wiki/WebKitGTK/SpeedUpBuild
 case $DISTRO in
     fedora)
         # install the actual dependencies
         sudo yum groupinstall "Fedora Packager" -y
-        sudo yum install -y git wget make autoconf binutils-devel \
+        sudo yum install -y git ccache wget make autoconf binutils-devel \
             boost-devel bzip2-devel chrpath cmake cyrus-sasl elfutils-libelf-devel  \
             expat-devel fontconfig-devel freetype-devel gcc-c++ gd-devel glibc-devel  \
             glog-devel jemalloc-devel keyutils-libs krb5-devel libaio-devel libcap-devel  \
@@ -97,7 +98,7 @@ case $DISTRO in
 
         # install the actual dependencies
         sudo apt-fast -y update
-        sudo apt-fast -y install git-core cmake g++ boost1.55 libmysqlclient-dev \
+        sudo apt-fast -y install git-core ccache cmake g++ boost1.55 libmysqlclient-dev \
             libxml2-dev libmcrypt-dev libicu-dev openssl build-essential binutils-dev \
             libcap-dev libgd2-xpm-dev zlib1g-dev libtbb-dev libonig-dev libpcre3-dev \
             wget memcached libreadline-dev libncurses-dev libmemcached-dev libbz2-dev \
@@ -109,7 +110,7 @@ case $DISTRO in
         git clone git://github.com/libevent/libevent.git --quiet &
         git clone git://github.com/bagder/curl.git --quiet &
         svn checkout http://google-glog.googlecode.com/svn/trunk/ google-glog --quiet &
-        wget http://www.canonware.com/download/jemalloc/jemalloc-3.5.1.tar.bz2 --quiet &
+        wget -nc http://www.canonware.com/download/jemalloc/jemalloc-3.5.1.tar.bz2 --quiet &
         ;;
     *)
         echo "Unknown distribution. Please update packages in this section."
@@ -157,7 +158,7 @@ cd libevent
 git checkout release-1.4.14b-stable
 cat ../third-party/libevent-1.4.14.fb-changes.diff | patch -p1
 ./autogen.sh
-./configure --prefix=$CMAKE_PREFIX_PATH
+./configure --prefix=$CMAKE_PREFIX_PATH CC="ccache gcc" CXX="ccache g++"
 make -j $CPUS
 make install
 cd ..
@@ -165,7 +166,7 @@ cd ..
 # curl
 cd curl
 ./buildconf
-./configure --prefix=$CMAKE_PREFIX_PATH
+./configure --prefix=$CMAKE_PREFIX_PATH CC="ccache gcc" CXX="ccache g++"
 make -j $CPUS
 make install
 cd ..
@@ -173,7 +174,7 @@ cd ..
 if [[ "x$DISTRO" == "xubuntu" ]];then
     # glog
     cd google-glog
-    ./configure --prefix=$CMAKE_PREFIX_PATH
+    ./configure --prefix=$CMAKE_PREFIX_PATH CC="ccache gcc" CXX="ccache g++"
     make -j $CPUS
     make install
     cd ..
@@ -181,7 +182,7 @@ if [[ "x$DISTRO" == "xubuntu" ]];then
     # jemaloc
     tar xjvf jemalloc-3.5.1.tar.bz2
     cd jemalloc-3.5.1
-    ./configure --prefix=$CMAKE_PREFIX_PATH
+    ./configure --prefix=$CMAKE_PREFIX_PATH CC="ccache gcc" CXX="ccache g++"
     make -j $CPUS
     make install
     cd ..
@@ -194,7 +195,12 @@ fi
 rm -rf libevent curl
 
 # hphp
-cmake .
+if [ "x${TRAVIS}" != "x" ]; then
+  # travis reduce time build
+  cmake -DENABLE_CCACHE=ON -DENABLE_COTIRE=ON .
+else
+  cmake .
+fi
 
 # all set
 echo "-------------------------------------------------------------------------"

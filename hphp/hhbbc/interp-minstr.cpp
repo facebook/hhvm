@@ -1059,14 +1059,25 @@ void miFinalSetElem(MIS& env) {
 
   /*
    * In some unusual cases with illegal keys, SetM pushes null
-   * instead of the right hand side.  If the base is a string, it
-   * pushes a new string with the value of the first character of
-   * the right hand side converted to a string (or something like
-   * that), so for now we're leaving out string bases too.
+   * instead of the right hand side.
+   *
+   * There are also some special cases for SetM for different base types:
+   * 1. If the base is a string, SetM pushes a new string with the
+   * value of the first character of the right hand side converted
+   * to a string (or something like that).
+   * 2. If the base is a primitive type, SetM pushes null.
+   * 3. If the base is an object, and it does not implement ArrayAccess,
+   * it is still ok to push the right hand side, because it is a
+   * fatal.
+   *
+   * We push the right hand side on the stack only if the base is an
+   * array, object or emptyish.
    */
-  auto const isWeird = env.base.type.couldBe(TStr) ||
-                       key.couldBe(TObj) ||
-                       key.couldBe(TArr);
+  auto const isWeird = key.couldBe(TObj) ||
+                       key.couldBe(TArr) ||
+                       (!env.base.type.subtypeOf(TArr) &&
+                        !env.base.type.subtypeOf(TObj) &&
+                        !mustBeEmptyish(env.base.type));
 
   if (mustBeInFrame(env.base) && env.base.type.subtypeOf(TArr)) {
     env.base.type = array_set(env.base.type, key, t1);

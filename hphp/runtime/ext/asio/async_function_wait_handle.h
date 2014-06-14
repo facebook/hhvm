@@ -70,6 +70,7 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
   void await(Offset resumeOffset, c_WaitableWaitHandle* child);
   void ret(Cell& result);
   void fail(ObjectData* exception);
+  void failCpp();
   String getName();
   c_WaitableWaitHandle* getChild();
   void enterContextImpl(context_idx_t ctx_idx);

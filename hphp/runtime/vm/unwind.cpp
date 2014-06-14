@@ -228,7 +228,7 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       action = UnwindAction::ResumeVM;
     } else {
       // Fail the async function and let the C++ exception propagate.
-      waitHandle->fail(AsioSession::Get()->getAbruptInterruptException());
+      waitHandle->failCpp();
     }
   } else if (func->isAsyncGenerator()) {
     // Do nothing. AsyncGeneratorWaitHandle will handle the exception.

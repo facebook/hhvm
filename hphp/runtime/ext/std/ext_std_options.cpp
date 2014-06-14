@@ -784,7 +784,10 @@ static String HHVM_FUNCTION(cpu_get_model) {
 
 Variant HHVM_FUNCTION(ini_get, const String& varname) {
   String value = empty_string();
-  IniSetting::Get(varname, value);
+  bool ret = IniSetting::Get(varname, value);
+  if (!ret) {
+    return false;
+  }
   return value;
 }
 

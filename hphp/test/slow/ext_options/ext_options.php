@@ -23,6 +23,7 @@ var_dump($sec);
 var_dump($nsec);
 
 var_dump(ini_get(""));
+var_dump(ini_get("setting_that_does_not_exist"));
 ini_set("memory_limit", 50000000);
 var_dump(ini_get("memory_limit"));
 set_time_limit(30);

@@ -191,11 +191,11 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
         VMRegAnchor _;
         bool initial;
         auto const ec = g_context.getNoCheck();
-        Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
-        if (u) {
+        auto const unit = ec->lookupUnit(fName.get(), "", &initial);
+        if (unit) {
           if (initial) {
             TypedValue retval;
-            ec->invokeFunc(&retval, u->getMain(), init_null_variant,
+            ec->invokeFunc(&retval, unit->getMain(), init_null_variant,
                            nullptr, nullptr, nullptr, nullptr,
                            ExecutionContext::InvokePseudoMain);
             tvRefcountedDecRef(&retval);

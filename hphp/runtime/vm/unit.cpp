@@ -16,15 +16,25 @@
 
 #include "hphp/runtime/vm/unit.h"
 
-#include "hphp/compiler/option.h"
+#include <boost/algorithm/string.hpp>
+#include <sys/mman.h>
+#include <tbb/concurrent_unordered_map.h>
+#include <iostream>
+#include <iomanip>
 
+#include "hphp/util/atomic.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/read-only-arena.h"
 #include "hphp/parser/parser.h"
+
+#include "hphp/runtime/server/source-root-info.h"
 
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/file-util.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/blob-helper.h"
@@ -35,25 +45,14 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-util.h"
-
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-
 #include "hphp/runtime/vm/verifier/check.h"
 
-#include "hphp/util/atomic.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/read-only-arena.h"
+#include "hphp/compiler/option.h"
 
 #include "folly/Memory.h"
 #include "folly/ScopeGuard.h"
-
-#include <boost/algorithm/string.hpp>
-#include <sys/mman.h>
-#include <tbb/concurrent_unordered_map.h>
-#include <iostream>
-#include <iomanip>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -952,8 +951,11 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              auto const unit = g_context->lookupIncludeRoot(s,
-                InclOpFlags::DocRoot, nullptr, this);
+              auto const unit = g_context->lookupUnit(
+                SourceRootInfo::RelativeToPhpRoot(StrNR(s)).get(),
+                "",
+                nullptr /* initial_opt */
+              );
               unit->initialMerge();
               m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
               break;

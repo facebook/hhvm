@@ -2129,7 +2129,7 @@ void invalidatePath(const std::string& path) {
      * going to be some new file, not the old file that needs invalidation.
      */
     String spath(path);
-    g_context->lookupPhpFile(spath.get(), "");
+    g_context->lookupUnit(spath.get(), "", nullptr /* initial_opt */);
   });
 }
 

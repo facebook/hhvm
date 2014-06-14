@@ -740,7 +740,7 @@ String concat4(const String& s1, const String& s2, const String& s3,
 static bool invoke_file_impl(Variant& res, const String& path, bool once,
                              const char *currentDir) {
   bool initial;
-  auto const u = g_context->lookupPhpFile(path.get(),
+  auto const u = g_context->lookupUnit(path.get(),
     currentDir, &initial);
   if (u == nullptr) return false;
   if (!once || initial) {

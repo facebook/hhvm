@@ -524,18 +524,9 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  Unit* lookupPhpFile(
-      StringData* path, const char* currentDir, bool* initial = nullptr);
-  Unit* evalInclude(StringData* path,
-                              const StringData* curUnitFilePath, bool* initial);
-  Unit* evalIncludeRoot(StringData* path,
-                                  InclOpFlags flags, bool* initial);
-  Unit* lookupIncludeRoot(StringData* path,
-                          InclOpFlags flags,
-                          bool* initial,
-                          Unit* unit);
+  Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial);
   bool evalUnit(Unit* unit, PC& pc, int funcType);
-  void invokeUnit(TypedValue* retval, Unit* unit);
+  void invokeUnit(TypedValue* retval, const Unit* unit);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
   StrNR createFunction(const String& args, const String& code);

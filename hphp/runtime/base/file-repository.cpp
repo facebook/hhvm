@@ -69,7 +69,7 @@ struct PhpFileWrapper {
     , m_phpFile(phpFile)
   {}
 
-  bool isChanged(const struct stat &s) const {
+  bool isChanged(const struct stat& s) const {
     if (RuntimeOption::RepoAuthoritative) {
       return false;
     }
@@ -439,7 +439,7 @@ size_t FileRepository::getLoadedFiles() {
 }
 
 PhpFile* FileRepository::checkoutFile(StringData* rname,
-                                      const struct stat& s) {
+                                      const struct stat& statInfo) {
   FileInfo fileInfo;
   PhpFile* ret = nullptr;
   String name(rname);
@@ -452,7 +452,7 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
     // Get the common fast path out of the way with as little locking
     // as possible: it's in the map and has not changed on disk
     ParsedFilesMap::const_accessor acc;
-    if (s_files.find(acc, name.get()) && !acc->second->isChanged(s)) {
+    if (s_files.find(acc, name.get()) && !acc->second->isChanged(statInfo)) {
       TRACE(1, "FR fast path hit %s\n", rname->data());
       ret = acc->second->getPhpFile();
       return ret;
@@ -485,7 +485,7 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
   };
   ParsedFilesMap::accessor acc;
   bool isNew = s_files.insert(acc, staticName);
-  PhpFileWrapper* old = acc->second;
+  auto const old = acc->second;
   SCOPE_EXIT {
     // run this just before acc is released
     if (old && old != acc->second) {
@@ -498,10 +498,10 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
   };
 
   assert(isNew || old); // We don't leave null entries around.
-  bool isChanged = !isNew && old->isChanged(s);
+  bool isChanged = !isNew && old->isChanged(statInfo);
 
   if (isNew || isChanged) {
-    if (isPlainFile && !readFile(staticName, s, fileInfo)) {
+    if (isPlainFile && !readFile(staticName, statInfo, fileInfo)) {
       TRACE(1, "File disappeared between stat and FR::readNewFile: %s\n",
             rname->data());
       return nullptr;
@@ -538,7 +538,7 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
   assert(ret != nullptr);
 
   if (isNew) {
-    acc->second = new PhpFileWrapper(s, ret);
+    acc->second = new PhpFileWrapper(statInfo, ret);
     ret->incRef();
     ret->setId(RDS::allocBit());
   } else {
@@ -547,7 +547,7 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
       ret->setId(f->getId());
       ret->incRef();
     }
-    acc->second = new PhpFileWrapper(s, ret);
+    acc->second = new PhpFileWrapper(statInfo, ret);
   }
 
   {

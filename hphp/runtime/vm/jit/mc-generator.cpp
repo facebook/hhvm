@@ -69,7 +69,6 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/repo.h"
@@ -2206,7 +2205,6 @@ void MCGenerator::codeEmittedThisRequest(size_t& requestEntry,
 void MCGenerator::requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
-  PendQ::drain();
   Treadmill::startRequest();
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
   Stats::init();
@@ -2221,7 +2219,6 @@ void MCGenerator::requestExit() {
             " kept, %15" PRId64 " grabbed\n",
             Process::GetThreadIdForTrace(), Translator::WriteLease().m_hintKept,
             Translator::WriteLease().m_hintGrabbed);
-  PendQ::drain();
   Treadmill::finishRequest();
   Stats::dump();
   Stats::clear();

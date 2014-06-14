@@ -58,7 +58,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -4412,29 +4411,6 @@ uint64_t Translator::getTransCounter(TransID transId) const {
   return counter;
 }
 
-namespace {
-
-struct DeferredPathInvalidate : public DeferredWorkItem {
-  const std::string m_path;
-  explicit DeferredPathInvalidate(const std::string& path) : m_path(path) {
-    assert(m_path.size() >= 1 && m_path[0] == '/');
-  }
-  void operator()() {
-    String spath(m_path);
-    /*
-     * inotify saw this path change. Now poke the file repository;
-     * it will notice the underlying PhpFile* has changed.
-     *
-     * We don't actually need to *do* anything with the PhpFile* from
-     * this lookup; since the path has changed, the file we'll get out is
-     * going to be some new file, not the old file that needs invalidation.
-     */
-    (void)g_context->lookupPhpFile(spath.get(), "");
-  }
-};
-
-}
-
 void
 ActRecState::pushFunc(const NormalizedInstruction& inst) {
   assert(isFPush(inst.op()));
@@ -4629,7 +4605,19 @@ std::string traceletShape(const Tracelet& trace) {
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
-  PendQ::defer(new JIT::DeferredPathInvalidate(path));
+  assert(path.size() >= 1 && path[0] == '/');
+  Treadmill::enqueue([path] {
+    /*
+     * inotify saw this path change. Now poke the file repository;
+     * it will notice the underlying PhpFile* has changed.
+     *
+     * We don't actually need to *do* anything with the PhpFile* from
+     * this lookup; since the path has changed, the file we'll get out is
+     * going to be some new file, not the old file that needs invalidation.
+     */
+    String spath(path);
+    g_context->lookupPhpFile(spath.get(), "");
+  });
 }
 
-} // HPHP
+}

@@ -41,7 +41,6 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -140,8 +139,6 @@ ParsedFilesMap s_files;
 
 ReadWriteMutex s_md5Lock;
 hphp_hash_map<std::string,PhpFile*,string_hash> s_md5Files;
-
-std::vector<Unit*> s_orphanedUnitsToDelete; // FIXME(#4512485)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -398,11 +395,9 @@ PhpFile::~PhpFile() {
     // part of post-collection cleanup.
     if (memory_profiling && RuntimeOption::HHProfServerEnabled &&
         ProfileController::isTracking()) {
-      s_orphanedUnitsToDelete.push_back(m_unit);
+      ProfileController::enqueueOrphanedUnit(m_unit);
     } else {
-      // Deleting a Unit can grab a low-ranked lock and we're probably
-      // at a high rank right now
-      PendQ::defer(new DeferredDeleter<Unit>(m_unit));
+      delete m_unit;
     }
     m_unit = nullptr;
   }
@@ -582,16 +577,6 @@ folly::Optional<MD5> FileRepository::readRepoMd5(const StringData* path) {
   FileInfo fi;
   if (!readRepoMd5Impl(path, fi)) return folly::none;
   return MD5{fi.m_md5.c_str()};
-}
-
-void FileRepository::deleteOrphanedUnits() {
-  assert(RuntimeOption::HHProfServerEnabled);
-  for (auto const& u : s_orphanedUnitsToDelete) {
-    // Deleting a Unit can grab a low-ranked lock and we're probably
-    // at a high rank right now
-    PendQ::defer(new DeferredDeleter<Unit>(u));
-  }
-  s_orphanedUnitsToDelete.clear();
 }
 
 String resolveVmInclude(StringData* path,

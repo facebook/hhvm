@@ -86,7 +86,6 @@ private:
  */
 struct FileRepository {
   static PhpFile* checkoutFile(StringData* rname, const struct stat& s);
-  static void deleteOrphanedUnits();
   static folly::Optional<MD5> readRepoMd5(const StringData* path);
   static std::string unitMd5(const std::string& fileMd5);
   static size_t getLoadedFiles();

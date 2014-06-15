@@ -16,6 +16,8 @@
 */
 #include "hphp/runtime/ext/std/ext_std_options.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/utsname.h>

@@ -17,6 +17,9 @@
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/autoload-handler.h"
 

@@ -22,6 +22,9 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <atomic>
+#include <ctime>
+#include <cstdlib>
 
 #include "folly/ScopeGuard.h"
 
@@ -45,6 +48,10 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#ifdef __APPLE__
+#define st_mtim st_mtimespec
+#endif
+
 namespace HPHP {
 
 TRACE_SET_MOD(fr);
@@ -52,6 +59,38 @@ TRACE_SET_MOD(fr);
 //////////////////////////////////////////////////////////////////////
 
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+struct PhpFile {
+  PhpFile(const std::string& fileName,
+          const std::string& relPath,
+          const std::string& md5,
+          Unit* unit);
+  ~PhpFile();
+
+  PhpFile(const PhpFile&) = delete;
+  PhpFile& operator=(const PhpFile&) = delete;
+
+  const std::string& getFileName() const { return m_fileName; }
+  const std::string& getRelPath() const { return m_relPath; }
+  const std::string& getMd5() const { return m_md5; }
+  int getRef() const { return m_refCount.load(std::memory_order_acquire); }
+  Unit* unit() const { return m_unit; }
+  int getId() const { return m_id; }
+  void incRef();
+  int decRef();
+  void decRefAndDelete();
+  void setId(int id);
+
+private:
+  std::atomic<int> m_refCount;
+  unsigned m_id;
+  std::string m_fileName;
+  std::string m_relPath;
+  std::string m_md5;
+  Unit* m_unit;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -109,7 +148,7 @@ struct ResolveIncludeContext {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * The FileRepository maintains a chm from file-paths to
+ * This module maintains a concurrent hash map from file-paths to
  * PhpFileWrappers.  The PhpFileWrapper is owned by the chm entry, and
  * refers to a refCounted PhpFile (the refCount is the number of times
  * it appears in the FileRepository in total - symlinks can cause a
@@ -141,6 +180,74 @@ hphp_hash_map<std::string,PhpFile*,string_hash> s_md5Files;
 
 //////////////////////////////////////////////////////////////////////
 
+PhpFile::PhpFile(const std::string& fileName,
+                 const std::string& relPath,
+                 const std::string& md5,
+                 Unit* unit)
+  : m_refCount(0)
+  , m_id(0)
+  , m_fileName(fileName)
+  , m_relPath(relPath)
+  , m_md5(md5)
+  , m_unit(unit)
+{}
+
+PhpFile::~PhpFile() {
+  always_assert(getRef() == 0);
+  if (do_assert) {
+    ReadLock lock(s_md5Lock);
+    UNUSED auto const it = s_md5Files.find(getMd5());
+    assert(it == end(s_md5Files) || it->second != this);
+  }
+  if (m_unit != nullptr) {
+    // If we have or in the process of a collecting an hhprof dump than we need
+    // to keep these units around as they might be needed for symbol resolution
+    // when that dump is collected by pprof. We will treadmill these later as
+    // part of post-collection cleanup.
+    if (memory_profiling && RuntimeOption::HHProfServerEnabled &&
+        ProfileController::isTracking()) {
+      ProfileController::enqueueOrphanedUnit(m_unit);
+    } else {
+      delete m_unit;
+    }
+    m_unit = nullptr;
+  }
+}
+
+void PhpFile::incRef() {
+  UNUSED int ret = m_refCount.fetch_add(1, std::memory_order_acq_rel);
+  TRACE(4, "PhpFile: %s incRef() %d -> %d %p called by %p\n",
+        m_fileName.c_str(), ret - 1, ret, this, __builtin_return_address(0));
+}
+
+int PhpFile::decRef() {
+  int ret = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
+  TRACE(4, "PhpFile: %s decRef() %d -> %d %p called by %p\n",
+        m_fileName.c_str(), ret, ret - 1, this, __builtin_return_address(0));
+  assert(ret >= 1); // fetch_sub returns the old value
+  return ret - 1;
+}
+
+void PhpFile::decRefAndDelete() {
+  if (decRef() == 0) {
+    {
+      WriteLock lock(s_md5Lock);
+      auto const it = s_md5Files.find(getMd5());
+      if (it != end(s_md5Files) && it->second == this) {
+        s_md5Files.erase(it);
+      }
+    }
+    Treadmill::enqueue([this] { delete this; });
+  }
+}
+
+void PhpFile::setId(int id) {
+  m_id = id;
+  m_unit->setCacheId(id);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void setFileInfo(const StringData* name,
                  const std::string& md5,
                  FileInfo& fileInfo,
@@ -155,7 +262,7 @@ void setFileInfo(const StringData* name,
   if (fromRepo) {
     fileInfo.m_unitMd5 = md5;
   } else {
-    fileInfo.m_unitMd5 = FileRepository::unitMd5(md5);
+    fileInfo.m_unitMd5 = mangleUnitMd5(md5);
   }
 
   auto const srcRoot = SourceRootInfo::GetCurrentSourceRoot();
@@ -363,83 +470,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   return false;
 }
 
-//////////////////////////////////////////////////////////////////////
-
-}
-
-PhpFile::PhpFile(const std::string& fileName,
-                 const std::string& relPath,
-                 const std::string& md5,
-                 Unit* unit)
-  : m_refCount(0)
-  , m_id(0)
-  , m_fileName(fileName)
-  , m_relPath(relPath)
-  , m_md5(md5)
-  , m_unit(unit)
-{}
-
-PhpFile::~PhpFile() {
-  always_assert(getRef() == 0);
-  if (do_assert) {
-    ReadLock lock(s_md5Lock);
-    UNUSED auto const it = s_md5Files.find(getMd5());
-    assert(it == end(s_md5Files) || it->second != this);
-  }
-  if (m_unit != nullptr) {
-    // If we have or in the process of a collecting an hhprof dump than we need
-    // to keep these units around as they might be needed for symbol resolution
-    // when that dump is collected by pprof. We will treadmill these later as
-    // part of post-collection cleanup.
-    if (memory_profiling && RuntimeOption::HHProfServerEnabled &&
-        ProfileController::isTracking()) {
-      ProfileController::enqueueOrphanedUnit(m_unit);
-    } else {
-      delete m_unit;
-    }
-    m_unit = nullptr;
-  }
-}
-
-void PhpFile::incRef() {
-  UNUSED int ret = m_refCount.fetch_add(1, std::memory_order_acq_rel);
-  TRACE(4, "PhpFile: %s incRef() %d -> %d %p called by %p\n",
-        m_fileName.c_str(), ret - 1, ret, this, __builtin_return_address(0));
-}
-
-int PhpFile::decRef() {
-  int ret = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-  TRACE(4, "PhpFile: %s decRef() %d -> %d %p called by %p\n",
-        m_fileName.c_str(), ret, ret - 1, this, __builtin_return_address(0));
-  assert(ret >= 1); // fetch_sub returns the old value
-  return ret - 1;
-}
-
-void PhpFile::decRefAndDelete() {
-  if (decRef() == 0) {
-    {
-      WriteLock lock(s_md5Lock);
-      auto const it = s_md5Files.find(getMd5());
-      if (it != end(s_md5Files) && it->second == this) {
-        s_md5Files.erase(it);
-      }
-    }
-    Treadmill::enqueue([this] { delete this; });
-  }
-}
-
-void PhpFile::setId(int id) {
-  m_id = id;
-  m_unit->setCacheId(id);
-}
-
-size_t FileRepository::getLoadedFiles() {
-  ReadLock lock(s_md5Lock);
-  return s_md5Files.size();
-}
-
-PhpFile* FileRepository::checkoutFile(StringData* rname,
-                                      const struct stat& statInfo) {
+PhpFile* checkoutFile(StringData* rname, const struct stat& statInfo) {
   FileInfo fileInfo;
   PhpFile* ret = nullptr;
   String name(rname);
@@ -558,8 +589,13 @@ PhpFile* FileRepository::checkoutFile(StringData* rname,
   return ret;
 }
 
-std::string FileRepository::unitMd5(const std::string& fileMd5) {
-  // Incorporate relevant options into the unit md5 (there will be more)
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::EnableEmitSwitch ? '1' : '0')
     + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')
@@ -571,7 +607,10 @@ std::string FileRepository::unitMd5(const std::string& fileMd5) {
   return string_md5(t.c_str(), t.size());
 }
 
-//////////////////////////////////////////////////////////////////////
+size_t numLoadedUnits() {
+  ReadLock lock(s_md5Lock);
+  return s_md5Files.size();
+}
 
 String resolveVmInclude(StringData* path,
                         const char* currentDir,
@@ -631,8 +670,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   }
 
   // This file hasn't been included yet, so we need to parse the file
-  auto const efile = FileRepository::checkoutFile(
-    hasRealpath ? rpath.get() : spath.get(), s);
+  auto const efile = checkoutFile(hasRealpath ? rpath.get() : spath.get(), s);
   if (efile && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.

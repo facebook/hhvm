@@ -181,7 +181,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
       m_closureGenerator(false), m_nsState(SeenNothing),
       m_nsAliasTable(getAutoAliasedClasses(), [&] { return isAutoAliasOn(); }) {
-  string md5str = FileRepository::unitMd5(scanner.getMd5());
+  auto const md5str = mangleUnitMd5(scanner.getMd5());
   MD5 md5 = MD5(md5str.c_str());
 
   m_file = FileScopePtr(new FileScope(m_fileName, fileSize, md5));

@@ -608,7 +608,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     });
     appendStat("targetcache", RDS::usedBytes());
     appendStat("rds", RDS::usedBytes()); // TODO(#2966387): temp double logging
-    appendStat("units", FileRepository::getLoadedFiles());
+    appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
     out << "}" << endl;
     transport->sendString(out.str());

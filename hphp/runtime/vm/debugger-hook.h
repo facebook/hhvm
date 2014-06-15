@@ -19,7 +19,9 @@
 
 #include <functional>
 
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
 #include "hphp/runtime/base/thread-info.h"
 
 namespace HPHP { namespace Eval { struct DebuggerProxy; } }
@@ -32,9 +34,10 @@ namespace HPHP { namespace Eval { struct DebuggerProxy; } }
 
 namespace HPHP {
 
-struct PhpFile;
 struct Class;
 struct Func;
+struct Unit;
+struct ObjectData;
 
 // "Hooks" called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
@@ -44,7 +47,7 @@ void phpDebuggerExceptionThrownHook(ObjectData* exception);
 void phpDebuggerExceptionHandlerHook();
 void phpDebuggerErrorHook(const std::string& message);
 void phpDebuggerEvalHook(const Func* f);
-void phpDebuggerFileLoadHook(PhpFile* efile);
+void phpDebuggerFileLoadHook(Unit* efile);
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
 
@@ -135,6 +138,6 @@ public:
   }
 };
 
-}      // namespace HPHP::VM
+}
 
-#endif /* incl_HPHP_DEBUGGER_HOOK_H_ */
+#endif

@@ -2121,8 +2121,8 @@ void invalidatePath(const std::string& path) {
   assert(path.size() >= 1 && path[0] == '/');
   Treadmill::enqueue([path] {
     /*
-     * inotify saw this path change. Now poke the file repository;
-     * it will notice the underlying PhpFile* has changed.
+     * inotify saw this path change. Now poke the unit loader; it will
+     * notice the underlying php file has changed.
      *
      * We don't actually need to *do* anything with the Unit* from
      * this lookup; since the path has changed, the file we'll get out is

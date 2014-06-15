@@ -599,12 +599,9 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
 
   // Check if this file has already been included.
   auto it = eContext->m_evaledFiles.find(spath.get());
-  PhpFile* efile = nullptr;
   if (it != end(eContext->m_evaledFiles)) {
-    // We found it! Return the unit.
-    efile = it->second;
     initial = false;
-    return efile->unit();
+    return it->second;
   }
 
   // We didn't find it, so try the realpath.
@@ -621,21 +618,20 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
         hasRealpath = true;
         it = eContext->m_evaledFiles.find(rpath.get());
         if (it != eContext->m_evaledFiles.end()) {
-          // We found it! Update the mapping for spath and
-          // return the unit.
-          efile = it->second;
-          eContext->m_evaledFiles[spath.get()] = efile;
-          eContext->m_evaledFilesOrder.push_back(efile);
+          // We found it! Update the mapping for spath and return the
+          // unit.
+          auto const unit = it->second;
           spath.get()->incRefCount();
+          eContext->m_evaledFiles[spath.get()] = unit;
           initial = false;
-          return efile->unit();
+          return unit;
         }
       }
     }
   }
 
   // This file hasn't been included yet, so we need to parse the file
-  efile = FileRepository::checkoutFile(
+  auto const efile = FileRepository::checkoutFile(
     hasRealpath ? rpath.get() : spath.get(), s);
   if (efile && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
@@ -645,15 +641,15 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     }
     // if parsing was successful, update the mappings for spath and
     // rpath (if it exists).
-    eContext->m_evaledFilesOrder.push_back(efile);
-    eContext->m_evaledFiles[spath.get()] = efile;
+    eContext->m_evaledFilesOrder.push_back(efile->unit()->filepath());
+    eContext->m_evaledFiles[spath.get()] = efile->unit();
     spath.get()->incRefCount();
     // Don't incRef efile; checkoutFile() already counted it.
     if (hasRealpath) {
-      eContext->m_evaledFiles[rpath.get()] = efile;
+      eContext->m_evaledFiles[rpath.get()] = efile->unit();
       rpath.get()->incRefCount();
     }
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile->unit()));
   }
 
   return efile ? efile->unit() : nullptr;

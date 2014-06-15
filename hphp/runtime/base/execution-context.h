@@ -508,11 +508,11 @@ public:
 
   hphp_hash_map<
     StringData*,
-    PhpFile*,
+    Unit*,
     string_data_hash,
     string_data_same
   > m_evaledFiles;
-  std::vector<PhpFile*> m_evaledFilesOrder;
+  std::vector<const StringData*> m_evaledFilesOrder;
   std::vector<Unit*> m_createdFuncs;
 
   std::vector<Fault> m_faults;

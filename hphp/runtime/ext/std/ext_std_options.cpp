@@ -264,7 +264,7 @@ static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
 static Array HHVM_FUNCTION(get_included_files) {
   PackedArrayInit pai(g_context->m_evaledFilesOrder.size());
   for (auto& file : g_context->m_evaledFilesOrder) {
-    pai.append(file->getFileName());
+    pai.append(const_cast<StringData*>(file));
   }
   return pai.toArray();
 }

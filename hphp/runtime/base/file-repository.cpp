@@ -179,7 +179,7 @@ void setFileInfo(const StringData* name,
   }
 }
 
-bool readRepoMd5Impl(const StringData *path, FileInfo& fileInfo) {
+bool readRepoMd5(const StringData *path, FileInfo& fileInfo) {
   MD5 md5;
   bool found;
   {
@@ -272,7 +272,7 @@ bool readFile(const StringData* name,
     return readActualFile(name, s, fileInfo);
   }
 
-  if (!readRepoMd5Impl(name, fileInfo)) {
+  if (!readRepoMd5(name, fileInfo)) {
     return false;
   }
   return true;
@@ -569,12 +569,6 @@ std::string FileRepository::unitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::IntsOverflowToInts ? '1' : '0');
   return string_md5(t.c_str(), t.size());
-}
-
-folly::Optional<MD5> FileRepository::readRepoMd5(const StringData* path) {
-  FileInfo fi;
-  if (!readRepoMd5Impl(path, fi)) return folly::none;
-  return MD5{fi.m_md5.c_str()};
 }
 
 String resolveVmInclude(StringData* path,

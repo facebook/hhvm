@@ -85,13 +85,6 @@ struct FileRepository {
   static PhpFile* checkoutFile(StringData* rname, const struct stat& s);
 
   /*
-   * Return the MD5 for a path.  This is only used by emitter.cpp to
-   * try to find the systemlib repo---please don't call it anywhere
-   * else.
-   */
-  static folly::Optional<MD5> readRepoMd5(const StringData* path);
-
-  /*
    * Mangle a file's md5sum with runtime options.  This doesn't belong
    * here.
    */

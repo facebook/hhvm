@@ -16,7 +16,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -231,8 +231,11 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
                                const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
     String systemName = String("/:") + String(fname);
-    if (auto const md5 = FileRepository::readRepoMd5(systemName.get())) {
-      if (auto const u = Repo::get().loadUnit(fname, *md5)) {
+    MD5 md5;
+    if (Repo::get().findFile(systemName.data(),
+                             SourceRootInfo::GetCurrentSourceRoot(),
+                             md5)) {
+      if (auto const u = Repo::get().loadUnit(fname, md5)) {
         return u;
       }
     }

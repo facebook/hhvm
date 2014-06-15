@@ -163,6 +163,7 @@ void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
+  assert(isRunning());
   auto const parentChain = getFirstParent();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
@@ -176,6 +177,7 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
  * - consumes reference of the given Exception object
  */
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
+  assert(isRunning());
   assert(exception);
   assert(exception->instanceof(SystemLib::s_ExceptionClass));
 
@@ -195,6 +197,7 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
  * Mark the wait handle as failed due to unexpected abrupt interrupt.
  */
 void c_AsyncFunctionWaitHandle::failCpp() {
+  assert(isRunning());
   auto const exception = AsioSession::Get()->getAbruptInterruptException();
   auto const parentChain = getFirstParent();
   setState(STATE_FAILED);

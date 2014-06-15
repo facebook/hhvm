@@ -169,41 +169,44 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     fp->getThis()->setNoDestruct();
   }
 
-  /*
-   * It is possible that locals have already been decref'd.
-   *
-   * Here's why:
-   *
-   *   - If a destructor for any of these things throws a php
-   *     exception, it's swallowed at the dtor boundary and we keep
-   *     running php.
-   *
-   *   - If the destructor for any of these things throws a fatal,
-   *     it's swallowed, and we set surprise flags to throw a fatal
-   *     from now on.
-   *
-   *   - If the second case happened and we have to run another
-   *     destructor, its enter hook will throw, but it will be
-   *     swallowed again.
-   *
-   *   - Finally, the exit hook for the returning function can
-   *     throw, but this happens last so everything is destructed.
-   *
-   *   - When that happens, exit hook sets localsDecRefd flag.
-   */
-  if (!fp->localsDecRefd()) {
-    try {
-      // Note that we must convert locals and the $this to
-      // uninit/zero during unwind.  This is because a backtrace
-      // from another destructing object during this unwind may try
-      // to read them.
-      frame_free_locals_unwind(fp, func->numLocals(), fault);
-    } catch (...) {}
-  }
+  auto const decRefLocals = [&] {
+    /*
+     * It is possible that locals have already been decref'd.
+     *
+     * Here's why:
+     *
+     *   - If a destructor for any of these things throws a php
+     *     exception, it's swallowed at the dtor boundary and we keep
+     *     running php.
+     *
+     *   - If the destructor for any of these things throws a fatal,
+     *     it's swallowed, and we set surprise flags to throw a fatal
+     *     from now on.
+     *
+     *   - If the second case happened and we have to run another
+     *     destructor, its enter hook will throw, but it will be
+     *     swallowed again.
+     *
+     *   - Finally, the exit hook for the returning function can
+     *     throw, but this happens last so everything is destructed.
+     *
+     *   - When that happens, exit hook sets localsDecRefd flag.
+     */
+    if (!fp->localsDecRefd()) {
+      try {
+        // Note that we must convert locals and the $this to
+        // uninit/zero during unwind.  This is because a backtrace
+        // from another destructing object during this unwind may try
+        // to read them.
+        frame_free_locals_unwind(fp, func->numLocals(), fault);
+      } catch (...) {}
+    }
+  };
 
   auto action = UnwindAction::Propagate;
 
   if (LIKELY(!fp->resumed())) {
+    decRefLocals();
     if (UNLIKELY(func->isAsyncFunction()) &&
         fault.m_faultType == Fault::Type::UserException) {
       // If in an eagerly executed async function, wrap the user exception
@@ -224,16 +227,22 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     auto const waitHandle = frame_afwh(fp);
     if (fault.m_faultType == Fault::Type::UserException) {
       // Handle exception thrown by async function.
+      decRefLocals();
       waitHandle->fail(fault.m_userException);
       action = UnwindAction::ResumeVM;
-    } else {
-      // Fail the async function and let the C++ exception propagate.
+    } else if (waitHandle->isRunning()) {
+      // Let the C++ exception propagate. If the current frame represents async
+      // function that is running, mark it as abruptly interrupted. Some opcodes
+      // like Await may change state of the async function just before exit hook
+      // decides to throw C++ exception.
+      decRefLocals();
       waitHandle->failCpp();
     }
   } else if (func->isAsyncGenerator()) {
     // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
   } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished.
+    decRefLocals();
     frame_generator(fp)->finish();
   } else {
     not_reached();

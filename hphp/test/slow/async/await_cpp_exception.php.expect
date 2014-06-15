@@ -1,0 +1,3 @@
+triggering destructor
+exiting
+will exit once suspend hook is called

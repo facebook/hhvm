@@ -500,8 +500,7 @@ public:
   // async functions
   void emitAwaitE(SSATmp* child, Block* catchBlock, Offset resumeOffset,
                   int iters);
-  void emitAwaitR(SSATmp* child, Block* catchBlock, Block* catchBlockNoSpill,
-                  Offset resumeOffset);
+  void emitAwaitR(SSATmp* child, Block* catchBlock, Offset resumeOffset);
   void emitAwait(Offset resumeOffset, int iters);
 
   void emitStrlen();

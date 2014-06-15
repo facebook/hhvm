@@ -524,7 +524,6 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial);
   bool evalUnit(Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, const Unit* unit);
   Unit* compileEvalString(StringData* code,

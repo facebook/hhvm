@@ -571,6 +571,8 @@ std::string FileRepository::unitMd5(const std::string& fileMd5) {
   return string_md5(t.c_str(), t.size());
 }
 
+//////////////////////////////////////////////////////////////////////
+
 String resolveVmInclude(StringData* path,
                         const char* currentDir,
                         struct stat* s,
@@ -584,6 +586,79 @@ String resolveVmInclude(StringData* path,
   return ctx.path;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
+  bool init;
+  bool& initial = initial_opt ? *initial_opt : init;
+  initial = true;
+
+  struct stat s;
+  auto const spath = resolveVmInclude(path, currentDir, &s);
+  if (spath.isNull()) return nullptr;
+
+  auto const eContext = g_context.getNoCheck();
+
+  // Check if this file has already been included.
+  auto it = eContext->m_evaledFiles.find(spath.get());
+  PhpFile* efile = nullptr;
+  if (it != end(eContext->m_evaledFiles)) {
+    // We found it! Return the unit.
+    efile = it->second;
+    initial = false;
+    return efile->unit();
+  }
+
+  // We didn't find it, so try the realpath.
+  bool alreadyResolved =
+    RuntimeOption::RepoAuthoritative ||
+    (!RuntimeOption::CheckSymLink && (spath[0] == '/'));
+  bool hasRealpath = false;
+  String rpath;
+  if (!alreadyResolved) {
+    std::string rp = StatCache::realpath(spath.data());
+    if (rp.size() != 0) {
+      rpath = StringData::Make(rp.data(), rp.size(), CopyString);
+      if (!rpath.same(spath)) {
+        hasRealpath = true;
+        it = eContext->m_evaledFiles.find(rpath.get());
+        if (it != eContext->m_evaledFiles.end()) {
+          // We found it! Update the mapping for spath and
+          // return the unit.
+          efile = it->second;
+          eContext->m_evaledFiles[spath.get()] = efile;
+          eContext->m_evaledFilesOrder.push_back(efile);
+          spath.get()->incRefCount();
+          initial = false;
+          return efile->unit();
+        }
+      }
+    }
+  }
+
+  // This file hasn't been included yet, so we need to parse the file
+  efile = FileRepository::checkoutFile(
+    hasRealpath ? rpath.get() : spath.get(), s);
+  if (efile && initial_opt) {
+    // if initial_opt is not set, this shouldn't be recorded as a
+    // per request fetch of the file.
+    if (RDS::testAndSetBit(efile->getId())) {
+      initial = false;
+    }
+    // if parsing was successful, update the mappings for spath and
+    // rpath (if it exists).
+    eContext->m_evaledFilesOrder.push_back(efile);
+    eContext->m_evaledFiles[spath.get()] = efile;
+    spath.get()->incRefCount();
+    // Don't incRef efile; checkoutFile() already counted it.
+    if (hasRealpath) {
+      eContext->m_evaledFiles[rpath.get()] = efile;
+      rpath.get()->incRefCount();
+    }
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
+  }
+
+  return efile ? efile->unit() : nullptr;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }

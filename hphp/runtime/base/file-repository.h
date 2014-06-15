@@ -114,6 +114,35 @@ String resolveVmInclude(StringData* path,
                         struct stat* s,  // out
                         bool allow_dir = false);
 
+/*
+ * Try to get a Unit* for a php file, given a path and directory.  The
+ * actual path to try to find the file at is located using these
+ * arguments, resolveVmInclude, and possibly StatCache::realpath
+ * calls.
+ *
+ * In RepoAuthoritative mode, this will only find Units that were
+ * compiled into the repo ahead of time.  Otherwise, this function may
+ * invoke the compiler to create a new Unit for a file.  Units are
+ * cached across requests in either case, so even in
+ * non-RepoAuthoritative mode this function won't need to compile it
+ * over and over, but it does need to check whether the file has
+ * changed.
+ *
+ * The `initial_opt' argument performs two functions:
+ *
+ *    o If non-null, it is an output param indicating whether whether
+ *      this was the first time this unit was found in this request.
+ *      (For example, if you are doing an include_once you need to
+ *      know whether it was already included.)
+ *
+ *    o If it's non-null, it means we should count this lookup as a
+ *      request-local lookup for the current request.
+ *
+ * May return nullptr if the Unit can't be loaded, and may throw
+ * exceptions or fatal errors.
+ */
+Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt);
+
 //////////////////////////////////////////////////////////////////////
 
 }

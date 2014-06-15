@@ -1319,7 +1319,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      auto const unit = g_context->lookupUnit(
+      auto const unit = lookupUnit(
         makeStaticString(po.lint.c_str()), "", nullptr);
       if (unit == nullptr) {
         throw FileOpenException(po.lint);

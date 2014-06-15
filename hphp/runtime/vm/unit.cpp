@@ -951,7 +951,7 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              auto const unit = g_context->lookupUnit(
+              auto const unit = lookupUnit(
                 SourceRootInfo::RelativeToPhpRoot(StrNR(s)).get(),
                 "",
                 nullptr /* initial_opt */

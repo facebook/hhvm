@@ -2495,76 +2495,6 @@ const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
   return ci;
 }
 
-Unit* ExecutionContext::lookupUnit(StringData* path,
-                                   const char* currentDir,
-                                   bool* initial_opt) {
-  bool init;
-  bool &initial = initial_opt ? *initial_opt : init;
-  initial = true;
-
-  struct stat s;
-  auto const spath = resolveVmInclude(path, currentDir, &s);
-  if (spath.isNull()) return nullptr;
-
-  // Check if this file has already been included.
-  auto it = m_evaledFiles.find(spath.get());
-  PhpFile* efile = nullptr;
-  if (it != end(m_evaledFiles)) {
-    // We found it! Return the unit.
-    efile = it->second;
-    initial = false;
-    return efile->unit();
-  }
-  // We didn't find it, so try the realpath.
-  bool alreadyResolved =
-    RuntimeOption::RepoAuthoritative ||
-    (!RuntimeOption::CheckSymLink && (spath[0] == '/'));
-  bool hasRealpath = false;
-  String rpath;
-  if (!alreadyResolved) {
-    std::string rp = StatCache::realpath(spath.data());
-    if (rp.size() != 0) {
-      rpath = StringData::Make(rp.data(), rp.size(), CopyString);
-      if (!rpath.same(spath)) {
-        hasRealpath = true;
-        it = m_evaledFiles.find(rpath.get());
-        if (it != m_evaledFiles.end()) {
-          // We found it! Update the mapping for spath and
-          // return the unit.
-          efile = it->second;
-          m_evaledFiles[spath.get()] = efile;
-          m_evaledFilesOrder.push_back(efile);
-          spath.get()->incRefCount();
-          initial = false;
-          return efile->unit();
-        }
-      }
-    }
-  }
-  // This file hasn't been included yet, so we need to parse the file
-  efile = FileRepository::checkoutFile(
-    hasRealpath ? rpath.get() : spath.get(), s);
-  if (efile && initial_opt) {
-    // if initial_opt is not set, this shouldn't be recorded as a
-    // per request fetch of the file.
-    if (RDS::testAndSetBit(efile->getId())) {
-      initial = false;
-    }
-    // if parsing was successful, update the mappings for spath and
-    // rpath (if it exists).
-    m_evaledFilesOrder.push_back(efile);
-    m_evaledFiles[spath.get()] = efile;
-    spath.get()->incRefCount();
-    // Don't incRef efile; checkoutFile() already counted it.
-    if (hasRealpath) {
-      m_evaledFiles[rpath.get()] = efile;
-      rpath.get()->incRefCount();
-    }
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
-  }
-  return efile ? efile->unit() : nullptr;
-}
-
 /*
   Instantiate hoistable classes and functions.
   If there is any more work left to do, setup a
@@ -6649,13 +6579,13 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
     if (flags & InclOpFlags::Relative) {
       String absPath = curUnitFilePath() + '/';
       absPath += path;
-      return ec->lookupUnit(absPath.get(), "", &initial);
+      return lookupUnit(absPath.get(), "", &initial);
     }
     if (flags & InclOpFlags::DocRoot) {
-      return ec->lookupUnit(
+      return lookupUnit(
         SourceRootInfo::RelativeToPhpRoot(path).get(), "", &initial);
     }
-    return ec->lookupUnit(path.get(), curUnitFilePath().c_str(), &initial);
+    return lookupUnit(path.get(), curUnitFilePath().c_str(), &initial);
   }();
 
   vmStack().popC();

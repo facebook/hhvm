@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -191,7 +192,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
         VMRegAnchor _;
         bool initial;
         auto const ec = g_context.getNoCheck();
-        auto const unit = ec->lookupUnit(fName.get(), "", &initial);
+        auto const unit = lookupUnit(fName.get(), "", &initial);
         if (unit) {
           if (initial) {
             TypedValue retval;

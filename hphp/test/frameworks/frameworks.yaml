@@ -500,7 +500,7 @@
     commit: b86f11706b80972e3239c8ab0f24382b3b8dcf52
     install_root: slim
     test_root: slim
-  symfony:
+  symfony2:
     url: https://github.com/symfony/symfony.git
     branch: v2.4.3
     commit: 3199b2e0d194f71fe2e13c95768b2ef22206682b

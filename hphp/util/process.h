@@ -148,6 +148,13 @@ public:
   }
 
   /**
+   * Are we in the main thread still?
+   */
+  static bool IsInMainThread() {
+    return Process::GetThreadPid() == Process::GetProcessId();
+  }
+
+  /**
    * Get CPU information.
    */
   static int GetCPUCount();

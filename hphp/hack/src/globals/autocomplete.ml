@@ -21,6 +21,13 @@ type autocomplete_result = {
 
 let auto_complete = ref false
 let auto_complete_result = ref (SMap.empty: autocomplete_result SMap.t)
+(* The position we're autocompleting at. This is used so when we reach this
+ * position in typing, we can recognize it and store types. Set in naming. *)
+let (auto_complete_pos: Pos.t option ref) = ref None
+(* A map of variable names to ident at the autocomplete point. This is
+ * set in naming. When we reach this point in typing, variable names are
+ * not available, but we can use this map to relate names to types *)
+let auto_complete_vars = ref (SMap.empty: Ident.t SMap.t)
 
 (*****************************************************************************)
 (* Argument info mode *)

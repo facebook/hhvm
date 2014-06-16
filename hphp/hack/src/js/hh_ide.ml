@@ -245,6 +245,8 @@ let hh_auto_complete fn =
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.argument_global_type := None;
+  Autocomplete.auto_complete_pos := None;
+  Autocomplete.auto_complete_vars := SMap.empty;
   let content = Hashtbl.find files fn in
   try
     let {Parser_hack.is_hh_file; comments; ast} =
@@ -261,6 +263,7 @@ let hh_auto_complete fn =
           let nenv = Naming.empty in
           let tenv = Typing_env.empty fn in
           let c = Naming.class_ nenv c in
+          Typing_decl.class_decl c;
           let res = Typing.class_def tenv (snd c.Nast.c_name) c in
           res
       | _ -> ()
@@ -283,12 +286,14 @@ let hh_auto_complete fn =
         result
         [] in
     AutocompleteService.detach_hooks();
+    Autocomplete.auto_complete := false;
     output_json (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;
                           "internal_error",  JBool false;
                         ])
   with _ ->
     AutocompleteService.detach_hooks();
+    Autocomplete.auto_complete := false;
     output_json (JAssoc [ "internal_error", JBool true;
                         ])
 

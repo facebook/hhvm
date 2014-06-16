@@ -50,6 +50,8 @@ let restore() =
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.argument_global_type := None;
+  Autocomplete.auto_complete_pos := None;
+  Autocomplete.auto_complete_vars := SMap.empty;
   ()
       
 let setup() =
@@ -57,6 +59,8 @@ let setup() =
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.argument_global_type := None;
+  Autocomplete.auto_complete_pos := None;
+  Autocomplete.auto_complete_vars := SMap.empty;
   ()
 
 let auto_complete env content oc =

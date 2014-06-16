@@ -845,7 +845,8 @@ and expr_ is_lvalue env (p, e) =
         )
       )
     )
-  | Lvar (_, x) ->
+  | Lvar ((_, x) as id) ->
+      Typing_hooks.dispatch_lvar_hook id env;
       let env, x = Env.get_local env x in
       env, x
   | List el ->

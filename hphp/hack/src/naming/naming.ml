@@ -1477,20 +1477,9 @@ and expr_ env = function
       | _ -> N.Id (Env.global_const env x)
       )
   | Lvar (_, "$this") -> N.This
-  | Lvar (_, x as var) when Autocomplete.is_auto_complete x ->
-      Autocomplete.argument_global_type := Some Autocomplete.Acvar;
-      Autocomplete.auto_complete_result :=
-        SMap.fold begin fun x pos acc ->
-          SMap.add x (Autocomplete.make_result_without_type x (fst pos)) acc
-        end !((snd env).locals) SMap.empty;
-      if (fst env).in_member_fun then begin
-        let this_result = (match (fst env).cclass with
-        | None -> Autocomplete.make_result_without_pos_or_type "$this"
-        | Some cid -> Autocomplete.make_result_without_type "$this" (fst cid)) in
-        Autocomplete.auto_complete_result :=
-          SMap.add "$this" this_result !Autocomplete.auto_complete_result end;
-      N.Lvar (Env.lvar env var)
-  | Lvar x -> N.Lvar (Env.lvar env x)
+  | Lvar x ->
+      Naming_hooks.dispatch_lvar_hook x !((snd env).locals);
+      N.Lvar (Env.lvar env x)
   | Obj_get (e1, (p, Id x)) ->
       N.Obj_get (expr env e1, (p, N.Id x))
   | Obj_get (e1, (p, _ as e2)) ->

@@ -8,10 +8,12 @@
  *
  *)
 
-type parser_return =
-  bool *                       (* True if we are dealing with a hack file *)
-  (Pos.t * string) list *      (* Comments *)
-  Ast.program
+type parser_return = {
+    (* True if we are dealing with a hack file *)
+    is_hh_file : bool;
+    comments   : (Pos.t * string) list;
+    ast        : Ast.program;
+  }
 
 val program : string -> parser_return
 

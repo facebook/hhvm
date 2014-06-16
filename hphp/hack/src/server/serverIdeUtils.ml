@@ -45,7 +45,9 @@ let declare content =
   let declared_funs = ref SSet.empty in
   let declared_classes = ref SSet.empty in
   try 
-    let _, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -88,7 +90,7 @@ let declare content =
     SSet.empty, SSet.empty
 
 let fix_file_and_def content = try
-  let _, errors, ast = Parser_hack.program content in
+  let {Parser_hack.is_hh_file; comments; ast} = Parser_hack.program content in
   List.iter begin fun def ->
     match def with
     | Ast.Fun f ->

@@ -116,7 +116,9 @@ let declare_file fn content =
   try
     Pos.file := fn ;
     Autocomplete.auto_complete := false;
-    let is_hh_file, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     let is_php = not is_hh_file in
     if is_hh_file
     then begin
@@ -155,7 +157,9 @@ let hh_check ?(check_mode=true) fn =
   Errors.try_
     begin fun () ->
 (*    let builtins = Parser.program lexer (Lexing.from_string Ast.builtins) in *)
-    let _, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     let ast = (*builtins @ *) ast in
     Parser_heap.ParserHeap.add fn ast;
     let funs, classes, typedefs, consts = make_funs_classes ast in
@@ -242,7 +246,9 @@ let hh_auto_complete fn =
   Autocomplete.argument_global_type := None;
   let content = Hashtbl.find files fn in
   try
-    let _, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -289,7 +295,9 @@ let hh_get_method_at_position fn line char =
   Find_refs.find_method_at_cursor_target := Some (line, char);
   let content = Hashtbl.find files fn in
   try
-    let _, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->

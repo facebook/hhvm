@@ -8758,9 +8758,12 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   // We need to put the native func units in the repo so hhbbc can
   // find them.
   auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
+  auto nbasecls  = emitHHBCNativeClassUnit(hhbc_ext_base_classes,
+                                           hhbc_ext_base_classes_count);
   auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
-                                       hhbc_ext_class_count);
+                                       hhbc_ext_classes_count);
   ues.push_back(std::move(nfunc));
+  ues.push_back(std::move(nbasecls));
   ues.push_back(std::move(ncls));
 
   if (!Option::UseHHBBC) {

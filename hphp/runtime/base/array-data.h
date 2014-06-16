@@ -47,6 +47,7 @@ struct ArrayData {
     kEmptyKind,   // The singleton static empty array
     kNvtwKind,    // NameValueTableWrapper
     kProxyKind,   // ProxyArray
+    kIntMapKind,  // IntMapArray, int keys, maybe holes, similar to MixedArray
     kNumKinds     // insert new values before kNumKinds.
   };
 
@@ -142,10 +143,13 @@ public:
    * Specific kind querying operators.
    */
   bool isPacked() const { return m_kind == kPackedKind; }
-  bool isMixed() const { return m_kind == kMixedKind; }
+  // All logic should treat kMixedKind the same as kIntMapKind except
+  // for logic specific to kIntMapKind in which case use isIntMapArray()
+  bool isMixed() const { return m_kind == kMixedKind || m_kind == kIntMapKind; }
   bool isSharedArray() const { return m_kind == kSharedKind; }
   bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
+  bool isIntMapArray() const { return m_kind == kIntMapKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.

@@ -358,6 +358,7 @@ static int *create_offset_array(const pcre_cache_entry *pce,
  */
 static char** make_subpats_table(int num_subpats, const pcre_cache_entry* pce) {
   pcre_extra* extra = pce->extra;
+  set_extra_limits(extra);
   char **subpat_names = (char **)smart_calloc(num_subpats, sizeof(char *));
   int name_cnt = 0, name_size, ni = 0;
   char *name_table;
@@ -1274,6 +1275,7 @@ Variant preg_split(const String& pattern, const String& subject,
   const char *last_match = subject.data();
   t_last_error_code = PHP_PCRE_NO_ERROR;
   pcre_extra *extra = pce->extra;
+  set_extra_limits(extra);
 
   // Get next piece if no limit or limit not yet reached and something matched
   Array return_value = Array::Create();

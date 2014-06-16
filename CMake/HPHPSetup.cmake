@@ -51,18 +51,12 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-IF(NOT DEFINED CMAKE_PREFIX_PATH)
-  message(STATUS "CMAKE_PREFIX_PATH was missing, proceeding anyway")
-endif()
-
 # Look for the chrpath tool so we can warn if it's not there
 SET(FOUND_CHRPATH OFF)
 IF(UNIX AND NOT APPLE)
     find_program(CHRPATH chrpath)
     IF (NOT CHRPATH STREQUAL "CHRPATH-NOTFOUND")
         SET(FOUND_CHRPATH ON)
-    else()
-        message(WARNING "chrpath not found, rpath will not be stripped from installed binaries")
     endif()
 ENDIF(UNIX AND NOT APPLE)
 

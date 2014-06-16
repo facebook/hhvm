@@ -1,23 +1,20 @@
+cache: apt
+
 language: cpp
 
-# This doesn't work - travis defaults to plain gcc if unknown
-# http://github.com/travis-ci/travis-ci/issues/979
-# http://llvm.org/apt/
 compiler:
   - gcc
-#  - gcc-4.8
-#  - clang-3.4
-#  - clang-3.5
 
 services:
   - memcached
 
 # Commands before installing prerequisites
 before_script:
-  - time TRAVIS=1 ./configure_generic.sh
+  - time -p TRAVIS=1 ./configure_generic.sh
+  - ccache --max-size 8G
 # for some tests
-  - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
-  - time make -j 6
+  - time -p sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
+  - time -p make -j 6
   - cd hphp/test/zend/good/ext/curl/tests/responder && ../../../../../../../hhvm/hhvm -m server -p 8444 &
 # mysql configuration for unit-tests
   - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
@@ -81,7 +78,11 @@ env:
   - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/Z.*#'"
 
 # Main test script
-script: time PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8444" hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
+script:
+  - time -p PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8444" hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
+
+after_script:
+  - ccache -s
 
 # Notifications
 # The default is to send email on all failures and changed success
@@ -96,20 +97,3 @@ notifications:
 
 matrix:
   fast_finish: true
-#  include:
-#    - compiler: clang
-#      env: CC=clang-3.4 CXX=clang++-3.4  PACKAGE=clang-3.4
-#    - compiler: clang
-#      env: CC=clang-3.5 CXX=clang++-3.5  PACKAGE=clang-3.5
-#    - compiler: gcc
-#      env: CC=gcc-4.8   CXX=g++-4.8  PACKAGE=g++-4.8
-# http://www.ubuntuupdates.org/package/core/trusty/main/base/gcc-4.9-base
-#    - compiler: gcc
-#      env: CC=gcc-4.9   CXX=g++-4.9  PACKAGE=g++-4.9
-
-# everything that was pushed was already on 'master', except
-# http://docs.travis-ci.com/user/build-configuration/#Using-regular-expressions
-#branches:
-#  only:
-#    - master
-#    - /^HHVM-.*$/

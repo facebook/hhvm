@@ -500,6 +500,12 @@
     commit: b86f11706b80972e3239c8ab0f24382b3b8dcf52
     install_root: slim
     test_root: slim
+  stash:
+    url: https://github.com/tedious/Stash.git
+    branch: master
+    commit: 4d76935edae27bd9ed9e87f839efd5af4a8015d1
+    install_root: stash
+    test_root: stash
   symfony:
     url: https://github.com/symfony/symfony.git
     branch: v2.4.3

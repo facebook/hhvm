@@ -547,7 +547,7 @@
     # Test against a commit that allows best HHVM compatibility right now. update this to RC when RC is released.
     commit: 639e52c1994ac816ded6919ebe97a7f8532a5aef
     install_root: yii2
-    test_root: yii2/tests
+    test_root: yii2
     config_file: yii2/phpunit.xml.dist
     clowns:
       # needs sphinx installed

@@ -48,8 +48,7 @@ bool HHVM_FUNCTION(autoload_set_paths,
 }
 
 bool HHVM_FUNCTION(could_include, const String& file) {
-  struct stat s;
-  return !resolveVmInclude(file.get(), "", &s).isNull();
+  return lookupUnit(file.get(), "", nullptr /* initial_opt */) != nullptr;
 }
 
 static class HHExtension : public Extension {

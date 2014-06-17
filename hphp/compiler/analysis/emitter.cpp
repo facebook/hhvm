@@ -7421,7 +7421,11 @@ void EmitterVisitor::emitClass(Emitter& e,
   PreClass::Hoistable hoistable = PreClass::NotHoistable;
   if (toplevel) {
     if (SystemLib::s_inited && !cNode->isSystem()) {
-      if (nInterfaces > firstInterface || cNode->getUsedTraitNames().size()) {
+      if (nInterfaces > firstInterface
+          || cNode->getUsedTraitNames().size()
+          || cNode->getTraitRequiredExtends().size()
+          || cNode->getTraitRequiredImplements().size()
+         ) {
         hoistable = PreClass::Mergeable;
       } else if (firstInterface &&
                  !m_hoistables.count(cNode->getOriginalParent())) {

@@ -158,7 +158,7 @@ cd libevent
 git checkout release-1.4.14b-stable
 cat ../third-party/libevent-1.4.14.fb-changes.diff | patch -p1
 ./autogen.sh
-./configure --prefix=$CMAKE_PREFIX_PATH CC="ccache gcc" CXX="ccache g++"
+./configure --prefix=$CMAKE_PREFIX_PATH
 make -j $CPUS
 make install
 cd ..
@@ -166,7 +166,7 @@ cd ..
 # curl
 cd curl
 ./buildconf
-./configure --prefix=$CMAKE_PREFIX_PATH CC="ccache gcc" CXX="ccache g++"
+./configure --prefix=$CMAKE_PREFIX_PATH
 make -j $CPUS
 make install
 cd ..
@@ -174,7 +174,7 @@ cd ..
 if [[ "x$DISTRO" == "xubuntu" ]];then
     # glog
     cd google-glog
-    ./configure --prefix=$CMAKE_PREFIX_PATH CC="ccache gcc" CXX="ccache g++"
+    ./configure --prefix=$CMAKE_PREFIX_PATH
     make -j $CPUS
     make install
     cd ..
@@ -182,7 +182,7 @@ if [[ "x$DISTRO" == "xubuntu" ]];then
     # jemaloc
     tar xjvf jemalloc-3.5.1.tar.bz2
     cd jemalloc-3.5.1
-    ./configure --prefix=$CMAKE_PREFIX_PATH CC="ccache gcc" CXX="ccache g++"
+    ./configure --prefix=$CMAKE_PREFIX_PATH
     make -j $CPUS
     make install
     cd ..

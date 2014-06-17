@@ -298,7 +298,7 @@
     # commit: 51f3f06f0fe78a722dabfd14578444bdd078d9de
     install_root: lessphp
     test_root: lessphp
-  magento2:
+  mpagento2:
     url: https://github.com/magento/magento2.git
     # Master is the only branch
     branch: master
@@ -340,6 +340,10 @@
     commit: 996c944fa2ddedddfaf0d276b913809d6a32fd85
     install_root: mustache
     test_root: mustache
+    clowns:
+      # This test fails if /tmp/mustache-test/foo exists. Given we run in
+      # parallel, this is a bad test.
+      - mustache/test/Mustache/Test/Cache/FilesystemCacheTest.php
   paris:
     url: https://github.com/j4mie/paris.git
     branch: v1.4.2

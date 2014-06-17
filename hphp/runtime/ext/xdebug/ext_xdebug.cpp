@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
@@ -27,8 +29,22 @@ static bool HHVM_FUNCTION(xdebug_break)
 static String HHVM_FUNCTION(xdebug_call_class)
   XDEBUG_NOTIMPLEMENTED
 
-static String HHVM_FUNCTION(xdebug_call_file)
-  XDEBUG_NOTIMPLEMENTED
+static String HHVM_FUNCTION(xdebug_call_file) {
+  // We want the frame of our callee's callee
+  VMRegAnchor _; // Ensure consistent state for vmfp
+  ActRec* fp0 = g_context->getPrevVMState(vmfp());
+  assert(fp0);
+  ActRec* fp1 = g_context->getPrevVMState(fp0);
+
+  //  In PHP5 xdebug, a top level call returns the top level file
+  if (!fp1 && fp0->m_func->isPseudoMain()) {
+    fp1 = fp0;
+  }
+  assert(fp1);
+
+  const char* filename = fp1->m_func->filename()->data();
+  return String(filename, CopyString);
+}
 
 static int64_t HHVM_FUNCTION(xdebug_call_line)
   XDEBUG_NOTIMPLEMENTED

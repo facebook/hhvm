@@ -7,7 +7,13 @@ function xdebug_break(): bool;
 <<__Native>>
 function xdebug_call_class(): string;
 
-<<__Native>>
+/**
+ * This function returns the filename that contains the function/method that
+ * called the current function/method.
+ *
+ * @return string - Returns the calling file.
+ */
+<<__Native("NoFCallBuiltin")>>
 function xdebug_call_file(): string;
 
 <<__Native>>

@@ -2232,13 +2232,9 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     if (withSelf) {
       // Builtins don't have a file and line number
       if (!fp->m_func->isBuiltin()) {
-        Unit *unit = fp->m_func->unit();
+        Unit* unit = fp->m_func->unit();
         assert(unit);
-        const char* filename = unit->filepath()->data();
-        if (fp->m_func->originalFilename()) {
-          filename = fp->m_func->originalFilename()->data();
-        }
-        assert(filename);
+        const char* filename = fp->m_func->filename()->data();
         Offset off = pc;
 
         ArrayInit frame(parserFrame ? 4 : 2, ArrayInit::Map{});

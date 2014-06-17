@@ -288,6 +288,11 @@ struct Func {
   const StringData* originalFilename() const;
 
   /*
+   * The original filename if it is defined, the unit's filename otherwise.
+   */
+  const StringData* filename() const;
+
+  /*
    * Start and end line of the function.
    *
    * It'd be nice if these were called lineStart and lineEnd or something, but

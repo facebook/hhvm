@@ -393,7 +393,7 @@ PHP_FUNCTION(ezc_hash_set)
   ZEND_FETCH_RESOURCE(hash, HashTable*, &zht, -1, le_ezc_test_hash_name, le_ezc_test_hash);
 
   initial_value = (char*)ecalloc(1, value_len + 1);
-  zend_symtable_update(hash, key, key_len + 1, initial_value, value_len, (void**)&dest);
+  zend_symtable_update(hash, key, key_len + 1, initial_value, value_len + 1, (void**)&dest);
   memcpy(dest, value, value_len);
   dest[value_len] = '\0';
   efree(initial_value);

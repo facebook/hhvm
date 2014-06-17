@@ -532,6 +532,7 @@ struct Class : AtomicCountable {
   typedef IndexedStringMap<LowClassPtr, true, int> InterfaceMap;
   typedef FixedStringMap<Slot, false, Slot> MethodMap;
   typedef FixedStringMapBuilder<Func*, Slot, false, Slot> MethodMapBuilder;
+  typedef IndexedStringMap<const PreClass::ClassRequirement*, true, int> RequirementMap;
 
   /* If set, runs during setMethods() */
   static void (*MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
@@ -663,6 +664,7 @@ struct Class : AtomicCountable {
   bool needInitialization() const { return m_needInitialization; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
+  const RequirementMap& allRequirements() const { return m_requirements; }
   // See comment for m_usedTraits
   const std::vector<ClassPtr>& usedTraitClasses() const {
     return m_usedTraits;
@@ -956,9 +958,9 @@ private:
   void setInterfaces();
   void setClassVec();
   void setFuncVec(MethodMapBuilder& builder);
-  void checkTraitConstraints() const;
-  void checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
-                                const StringData* recName) const;
+  void setRequirements();
+  void checkRequirementConstraints() const;
+  void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();
 
   template<bool setParents> void setInstanceBitsImpl();
@@ -1022,6 +1024,7 @@ private:
   uint32_t m_builtinODTailSize{0};
   PreClassPtr m_preClass;
   InterfaceMap m_interfaces;
+  RequirementMap m_requirements;
   // Bitmap of parent classes and implemented interfaces. Each bit
   // corresponds to a commonly used class name, determined during the
   // profiling warmup requests.

@@ -16,8 +16,7 @@
 */
 
 #include "hphp/runtime/ext/imagick/constants.h"
-
-#include <wand/MagickWand.h>
+#include "hphp/runtime/ext/imagick/ext_imagick.h"
 
 namespace HPHP {
 

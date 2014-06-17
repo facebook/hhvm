@@ -137,9 +137,6 @@ public:
   DECLARE_CLASS_NO_SWEEP(Generator)
 
   void t___construct();
-  void suspend(JIT::TCA resumeAddr, Offset resumeOffset, const Cell& value);
-  void suspend(JIT::TCA resumeAddr, Offset resumeOffset, const Cell& value,
-               const Cell& key);
   Variant t_current();
   Variant t_key();
   void t_next();
@@ -156,28 +153,27 @@ public:
   static c_Generator* Create(const ActRec* fp, size_t numSlots,
                              JIT::TCA resumeAddr, Offset resumeOffset) {
     assert(fp);
+    assert(fp->resumed() == clone);
     assert(fp->func()->isNonAsyncGenerator());
     void* obj = Resumable::Create<clone>(fp, numSlots, resumeAddr, resumeOffset,
                                          sizeof(c_Generator));
-    auto const cont = new (obj) c_Generator();
-    cont->incRefCount();
-    cont->setNoDestruct();
-    cont->setState(State::Created);
-    return cont;
+    auto const gen = new (obj) c_Generator();
+    gen->incRefCount();
+    gen->setNoDestruct();
+    gen->setState(State::Created);
+    return gen;
   }
 
-  inline void finish() {
-    assert(getState() == State::Running);
-    cellSetNull(m_key);
-    cellSetNull(m_value);
-    setState(State::Done);
-  }
+  void yield(Offset resumeOffset, const Cell* key, const Cell& value);
+  void ret() { done(); }
+  void fail() { done(); }
 
 private:
   explicit c_Generator(Class* cls = c_Generator::classof());
   ~c_Generator();
 
   void copyVars(ActRec *fp);
+  void done();
 
 public:
   int64_t m_index;

@@ -970,6 +970,12 @@ void Parser::checkFunctionContext(string funcName,
   if (modifiers->isAsync() && funcContext.isGenerator) {
     PARSE_ERROR("'yield' is not allowed in async functions.");
   }
+
+  if (modifiers->isAsync() && !canBeAsyncOrGenerator(funcName, m_clsName)) {
+    PARSE_ERROR("cannot declare constructors, destructors, and "
+                    "magic methods such as '%s' as async",
+                funcName.c_str());
+  }
 }
 
 void Parser::prepareConstructorParameters(StatementListPtr stmts,

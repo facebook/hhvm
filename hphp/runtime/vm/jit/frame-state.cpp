@@ -95,6 +95,8 @@ void FrameState::update(const IRInstruction* inst) {
     break;
 
   case ContEnter:
+    m_spValue = inst->dst();
+    m_frameSpansCall = true;
     clearCse();
     break;
 

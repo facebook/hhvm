@@ -690,8 +690,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
-  O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
-  O(ContRaise,       NA,               ONE(CV),         NOV,        CF) \
+  O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
+  O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(Yield,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \

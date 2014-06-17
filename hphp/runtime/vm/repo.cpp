@@ -21,6 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/process.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
@@ -186,7 +187,9 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
       std::fprintf(stderr, "  %s\n", f.c_str());
     }
   }
-  std::abort();
+
+  assert(Process::IsInMainThread());
+  exit(1);
 }
 
 void Repo::saveGlobalData(GlobalData newData) {
@@ -555,6 +558,9 @@ void Repo::initCentral() {
   // Database initialization failed; this is an unrecoverable state.
   Logger::Error("%s", error.c_str());
 
+  if (Process::IsInMainThread()) {
+    exit(1);
+  }
   always_assert_log(false, [&error] { return error; });
 }
 

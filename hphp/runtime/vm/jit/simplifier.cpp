@@ -123,6 +123,16 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return info;
   }
 
+  case ContEnter: {
+    if (index == 0) {
+      // return value from call
+      return StackValueInfo { inst, Type::Gen };
+    }
+    auto info = getStackValue(inst->src(0), index);
+    info.spansCall = true;
+    return info;
+  }
+
   case SpillStack: {
     int64_t numPushed    = 0;
     int32_t numSpillSrcs = inst->numSrcs() - 2;

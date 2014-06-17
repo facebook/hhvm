@@ -53,8 +53,4 @@ let init genv env next_files =
   let env = { env with errorl = errorl;
               failed_parsing = failed } in
   ServerError.print_errorl (ServerArgs.json_mode genv.options) env.errorl stdout;
-  if !(env.skip)
-  then { env with errorl = [];
-        failed_parsing = SSet.empty;
-        failed_check = SSet.empty }
-  else env
+  env

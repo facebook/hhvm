@@ -111,8 +111,6 @@ let parse_check_args cmd =
       " (mode) show the types for file specified";
     "--type-at-pos", Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
       " (mode) show type at a given position in file [filename:line:character]";
-    "--skip", Arg.Unit (set_mode MODE_SKIP),
-      " (mode) unsafe! ignore any existing errors";
     "--list-files", Arg.Unit (set_mode MODE_LIST_FILES),
       " (mode) list files with errors";
     "--auto-complete", Arg.Unit (set_mode MODE_AUTO_COMPLETE),

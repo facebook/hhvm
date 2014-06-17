@@ -298,7 +298,7 @@ Class::Class(PreClass* preClass, Class* parent,
 }
 
 Class::~Class() {
-  releaseRefs();
+  releaseRefs(); // must be called for Func-nulling side effects
 
   if (m_sPropCache) {
     for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
@@ -316,6 +316,12 @@ Class::~Class() {
   EnumCache::deleteValues(this);
 }
 
+/*
+ * releaseRefs() is called when a Class is put into the zombie state,
+ * to free any references to child classes, interfaces and traits Its
+ * safe to call multiple times, so is also called from the destructor
+ * (in case we bypassed the zombie state).
+ */
 void Class::releaseRefs() {
   /*
    * We have to be careful here.
@@ -365,18 +371,22 @@ void Class::destroy() {
   // Only do this once.
   m_cachedClass = RDS::Link<Class*>(RDS::kInvalidHandle);
 
-  PreClass* pcls = m_preClass.get();
-  pcls->namedEntity()->removeClass(this);
   /*
-   * Regardless of refCount, this Class is now unusable.
-   * Release what we can immediately, to allow dependent
-   * classes to be freed.
-   * Needs to be under the lock, because multiple threads
-   * could call destroy
+   * Regardless of refCount, this Class is now unusable.  Remove it
+   * from the class list.
+   *
+   * Needs to be under the lock, because multiple threads could call
+   * destroy, or want to manipulate the class list.  (It's safe for
+   * other threads to concurrently read the class list without the
+   * lock.)
    */
-  releaseRefs();
+  auto const pcls = m_preClass.get();
+  pcls->namedEntity()->removeClass(this);
   Treadmill::enqueue(
-    [this] { if (!this->decAtomicCount()) this->atomicRelease(); }
+    [this] {
+      releaseRefs();
+      if (!this->decAtomicCount()) this->atomicRelease();
+    }
   );
 }
 

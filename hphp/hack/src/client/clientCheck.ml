@@ -57,11 +57,6 @@ let rec main args retries =
     | MODE_LIST_FILES ->
       let infol = get_list_files args in
       List.iter (Printf.printf "%s\n") infol
-    | MODE_SKIP ->
-      let ic, oc = connect args.root in
-      let command = ServerMsg.SKIP in
-      ServerMsg.cmd_to_channel oc command;
-      Printf.printf "No errors!\n"; flush stdout;
     | MODE_COLORING file ->
         let file = expand_path file in
         let ic, oc = connect args.root in

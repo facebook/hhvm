@@ -221,7 +221,6 @@ end = struct
         Program.infer (fn, line, char) oc
     | ServerMsg.SUGGEST (files) -> Program.suggest files oc
     | ServerMsg.STATUS client_root -> print_status genv env client_root oc
-    | ServerMsg.SKIP          -> assert false
     | ServerMsg.LIST_FILES    -> ServerEnv.list_files env oc
     | ServerMsg.AUTOCOMPLETE content ->
         ServerAutoComplete.auto_complete env content oc
@@ -325,11 +324,6 @@ end = struct
     if finished <> [] then () else begin
       ServerPeriodical.stamp_connection();
       match msg with
-      | ServerMsg.SKIP ->
-        Printf.printf "THIS IS BAD: Skipping errors!\n"; flush stdout;
-        env := { !env with errorl = [];
-                failed_parsing = SSet.empty;
-                failed_check = SSet.empty};
       | ServerMsg.BUILD _ ->
         (* The build step is special. It closes the socket itself. *)
         HandleMessage.respond genv !env ~client ~msg
@@ -371,7 +365,6 @@ end = struct
     let env = MainInit.go genv env root in
     let socket = Socket.init_unix_socket root in
     EventLogger.init_done ();
-    env.skip := false;
     let env = ref env in
     let report = ref [] in
     while true do

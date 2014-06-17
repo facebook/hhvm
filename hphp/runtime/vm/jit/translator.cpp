@@ -1368,8 +1368,8 @@ static const struct {
   /*** 14. Generator instructions ***/
 
   { OpCreateCont,  {None,             Stack1,       OutNull,           1 }},
-  { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
-  { OpContRaise,   {Stack1,           None,         OutNone,          -1 }},
+  { OpContEnter,   {Stack1,           Stack1,       OutUnknown,        0 }},
+  { OpContRaise,   {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpYield,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpYieldK,      {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},

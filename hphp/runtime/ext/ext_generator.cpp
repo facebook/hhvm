@@ -52,41 +52,17 @@ c_Generator::~c_Generator() {
     return;
   }
 
+  assert(getState() != State::Running);
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
 
-  // Free locals, but don't trigger the EventHook for FunctionReturn
-  // since the generator has already been exited. We
-  // don't want redundant calls.
+  // Free locals, but don't trigger the EventHook for FunctionReturn since
+  // the generator has already been exited. We don't want redundant calls.
   ActRec* ar = actRec();
   frame_free_locals_inl_no_hook<false>(ar, ar->func()->numLocals());
 }
 
-//////////////////////////////////////////////////////////////////////
-
 void c_Generator::t___construct() {}
-
-void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
-                             const Cell& value) {
-  assert(getState() == State::Running);
-  resumable()->setResumeAddr(resumeAddr, resumeOffset);
-  cellSet(make_tv<KindOfInt64>(++m_index), m_key);
-  cellSet(value, m_value);
-  setState(State::Started);
-}
-
-void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
-                             const Cell& key, const Cell& value) {
-  assert(getState() == State::Running);
-  resumable()->setResumeAddr(resumeAddr, resumeOffset);
-  cellSet(key, m_key);
-  cellSet(value, m_value);
-  if (m_key.m_type == KindOfInt64) {
-    int64_t new_index = m_key.m_data.num;
-    m_index = new_index > m_index ? new_index : m_index;
-  }
-  setState(State::Started);
-}
 
 // Functions with native implementation.
 void c_Generator::t_next() { const_assert(false); }
@@ -163,6 +139,34 @@ c_Generator *c_Generator::Clone(ObjectData* obj) {
   cellSet(thiz->m_value, cont->m_value);
 
   return cont;
+}
+
+void c_Generator::yield(Offset resumeOffset,
+                        const Cell* key, const Cell& value) {
+  assert(getState() == State::Running);
+  resumable()->setResumeAddr(nullptr, resumeOffset);
+
+  if (key) {
+    cellSet(*key, m_key);
+    tvRefcountedDecRefNZ(*key);
+    if (m_key.m_type == KindOfInt64) {
+      int64_t new_index = m_key.m_data.num;
+      m_index = new_index > m_index ? new_index : m_index;
+    }
+  } else {
+    cellSet(make_tv<KindOfInt64>(++m_index), m_key);
+  }
+  cellSet(value, m_value);
+  tvRefcountedDecRefNZ(value);
+
+  setState(State::Started);
+}
+
+void c_Generator::done() {
+  assert(getState() == State::Running);
+  cellSetNull(m_key);
+  cellSetNull(m_value);
+  setState(State::Done);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -210,6 +210,11 @@ bad_tests = (
     '/ext/standard/tests/file/copy_variation8.php',
 
     # flaky: t3851970
+    '/ext/standard/tests/file/fopen_variation12.php',
+    '/ext/standard/tests/file/mkdir-002.php',
+    '/ext/standard/tests/file/readlink_realpath_variation1.php',
+    '/ext/session/tests/027.php',
+    '/ext/standard/tests/file/lchgrp_basic.php',
     '/ext/standard/tests/file/mkdir-001.php',
     '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation4.php',
     '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation3.php',

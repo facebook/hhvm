@@ -1,0 +1,7 @@
+array(1) refcount(2){
+  [0]=>
+  object(EzcTestCloneable)#1 (%d) refcount(1){
+  }
+}
+EzcTestCloneable free_storage (clone 0)
+End

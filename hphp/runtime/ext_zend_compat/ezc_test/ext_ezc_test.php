@@ -79,3 +79,8 @@ function ezc_array_val_set(array $a, mixed $key, mixed $value): mixed;
 <<__NativeData("ZendCompat")>> class EzcTestCloneable {}
 <<__NativeData("ZendCompat")>> class EzcTestUncloneable1 {}
 <<__NativeData("ZendCompat")>> class EzcTestUncloneable2 {}
+
+/** Create an array with a TestCloneable object in it. Test of
+ * object_init_ex(). */
+<<__Native("ZendCompat")>>
+function ezc_create_cloneable_in_array(): mixed;

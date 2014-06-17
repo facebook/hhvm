@@ -2437,6 +2437,7 @@ bool MCGenerator::dumpTCCode(const char* filename) {
   if (F == nullptr) return false;                               \
   SCOPE_EXIT{ fclose(F); };
 
+  OPEN_FILE(ahotFile,       "_ahot");
   OPEN_FILE(aFile,          "_a");
   OPEN_FILE(aprofFile,      "_aprof");
   OPEN_FILE(acoldFile,      "_acold");
@@ -2445,10 +2446,13 @@ bool MCGenerator::dumpTCCode(const char* filename) {
 
 #undef OPEN_FILE
 
-  // dump starting from the trampolines; this assumes CodeCache places
-  // trampolines before the translation cache
-  size_t count = code.main().frontier() - code.trampolines().base();
-  bool result = (fwrite(code.trampolines().base(), 1, count, aFile) == count);
+  // dump starting from the hot region
+  size_t count = code.hot().used();
+  bool result = (fwrite(code.hot().base(), 1, count, ahotFile) == count);
+  if (result) {
+    count = code.main().used();
+    result = (fwrite(code.main().base(), 1, count, aFile) == count);
+  }
   if (result) {
     count = code.prof().used();
     result = (fwrite(code.prof().base(), 1, count, aprofFile) == count);
@@ -2497,6 +2501,8 @@ bool MCGenerator::dumpTCData() {
 
   if (!gzprintf(tcDataFile,
                 "repo_schema      = %s\n"
+                "ahot.base        = %p\n"
+                "ahot.frontier    = %p\n"
                 "a.base           = %p\n"
                 "a.frontier       = %p\n"
                 "aprof.base       = %p\n"
@@ -2506,7 +2512,8 @@ bool MCGenerator::dumpTCData() {
                 "afrozen.base     = %p\n"
                 "afrozen.frontier = %p\n\n",
                 kRepoSchemaId,
-                code.trampolines().base(), code.main().frontier(),
+                code.hot().base(), code.hot().frontier(),
+                code.main().base(), code.main().frontier(),
                 code.prof().base(), code.prof().frontier(),
                 code.cold().base(), code.cold().frontier(),
                 code.frozen().base(), code.frozen().frontier())) {

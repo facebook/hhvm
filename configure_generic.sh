@@ -109,7 +109,7 @@ case $DISTRO in
         git clone git://github.com/libevent/libevent.git --quiet &
         git clone git://github.com/bagder/curl.git --quiet &
         svn checkout http://google-glog.googlecode.com/svn/trunk/ google-glog --quiet &
-        wget http://www.canonware.com/download/jemalloc/jemalloc-3.5.1.tar.bz2 --quiet &
+        wget -nc http://www.canonware.com/download/jemalloc/jemalloc-3.5.1.tar.bz2 --quiet &
         ;;
     *)
         echo "Unknown distribution. Please update packages in this section."

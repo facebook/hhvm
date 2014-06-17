@@ -19,7 +19,7 @@
 #include "hphp/parser/parser.h"
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
 

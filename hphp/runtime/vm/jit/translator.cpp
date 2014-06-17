@@ -33,10 +33,12 @@
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
 
-#include "hphp/runtime/base/arch.h"
-#include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/base/rds.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/map-walker.h"
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
@@ -58,9 +60,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/util/map-walker.h"
-#include "hphp/util/ringbuffer.h"
-#include "hphp/util/trace.h"
 
 #define KindOfUnknown DontUseKindOfUnknownInThisFile
 #define KindOfInvalid DontUseKindOfInvalidInThisFile

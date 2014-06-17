@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FILE_REPOSITORY_H_
-#define incl_HPHP_FILE_REPOSITORY_H_
+#ifndef incl_HPHP_UNIT_CACHE_H_
+#define incl_HPHP_UNIT_CACHE_H_
 
 #include <string>
 

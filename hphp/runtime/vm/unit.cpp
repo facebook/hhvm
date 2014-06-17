@@ -29,7 +29,7 @@
 
 #include "hphp/runtime/server/source-root-info.h"
 
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"

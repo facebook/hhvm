@@ -99,7 +99,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/string-vsnprintf.h"
 
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 
 #ifdef FACEBOOK
 #include "hphp/facebook/src/compiler/fb_compiler_hooks.h"

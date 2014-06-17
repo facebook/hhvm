@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/file-util.h"
 #endif
 
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/base/http-client.h"

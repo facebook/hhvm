@@ -62,7 +62,6 @@ type command =
 | ERROR_OUT_OF_DATE
 | PRINT_TYPES of string
 | STATUS of Path.path
-| SKIP
 | LIST_FILES
 | AUTOCOMPLETE of string
 | SAVE_STATE of string

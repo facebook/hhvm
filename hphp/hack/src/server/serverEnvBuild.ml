@@ -41,7 +41,6 @@ let make_env options =
   { nenv           = Naming.empty;
     files_info     = SMap.empty;
     errorl         = [];
-    skip           = ref (ServerArgs.skip_init options);
     failed_parsing = SSet.empty;
     failed_decl    = SSet.empty;
     failed_check   = SSet.empty;

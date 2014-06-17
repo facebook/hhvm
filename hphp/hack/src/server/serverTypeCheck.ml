@@ -278,8 +278,7 @@ let type_check genv env =
   Printf.printf "Type-check: %f\n" (t2 -. t); flush stdout;
 
   (* Done, that's the new environment *)
-  { skip = ref false;
-    files_info = files_info;
+  { files_info = files_info;
     nenv = nenv;
     errorl = errorl;
     failed_parsing = SSet.union failed_naming failed_parsing;

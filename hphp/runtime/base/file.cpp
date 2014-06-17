@@ -130,10 +130,6 @@ bool File::IsVirtualDirectory(const String& filename) {
     StaticContentCache::TheFileCache->dirExists(filename.data(), false);
 }
 
-bool File::IsPlainFilePath(const String& filename) {
-  return filename.find("://") == String::npos;
-}
-
 Resource File::Open(const String& filename, const String& mode,
                     int options /* = 0 */,
                     const Variant& context /* = null */) {

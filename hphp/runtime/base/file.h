@@ -63,7 +63,9 @@ public:
                        int options = 0, const Variant& context = uninit_null());
 
   static bool IsVirtualDirectory(const String& filename);
-  static bool IsPlainFilePath(const String& filename);
+  static bool IsPlainFilePath(const String& filename) {
+    return filename.find("://") == String::npos;
+  }
 
 public:
   static const int USE_INCLUDE_PATH;

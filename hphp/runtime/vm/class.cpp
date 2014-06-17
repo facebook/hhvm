@@ -2285,14 +2285,18 @@ unsigned Class::loadUsedTraits(PreClass* preClass,
     methodCount += classPtr->m_methods.size();
 
   }
-  // Trait aliases can increase method count. Get an estimate of
-  // the number of aliased functions.
-  for (auto const& rule : preClass->traitAliasRules()) {
-    auto origName = rule.getOrigMethodName();
-    auto newName = rule.getNewMethodName();
-    if (origName != newName) methodCount++;
-  }
 
+  if (!RuntimeOption::RepoAuthoritative) {
+    // Trait aliases can increase method count. Get an estimate of the
+    // number of aliased functions. This doesn't need to be done in
+    // RepoAuthoritative mode due to trait flattening ensuring that added
+    // methods are already present in the preclass.
+    for (auto const& rule : preClass->traitAliasRules()) {
+      auto origName = rule.getOrigMethodName();
+      auto newName = rule.getNewMethodName();
+      if (origName != newName) methodCount++;
+    }
+  }
   return methodCount;
 }
 

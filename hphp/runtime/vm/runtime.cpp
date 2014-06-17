@@ -230,9 +230,9 @@ Unit* compile_string(const char* s,
 Unit* compile_systemlib_string(const char* s, size_t sz,
                                const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
-    Eval::FileRepository::FileInfo fi;
+    FileRepository::FileInfo fi;
     String systemName = String("/:") + String(fname);
-    if (Eval::FileRepository::readRepoMd5(systemName.get(), fi)) {
+    if (FileRepository::readRepoMd5(systemName.get(), fi)) {
       MD5 md5(fi.m_unitMd5.c_str());
       if (Unit* u = Repo::get().loadUnit(fname, md5)) {
         return u;

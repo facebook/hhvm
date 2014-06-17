@@ -15,6 +15,7 @@
 */
 #include "hphp/compiler/analysis/emitter.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <memory>
 #include <iostream>
 #include <iomanip>
@@ -116,7 +117,7 @@
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
-#include "hphp/runtime/vm/preclass-emit.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -2443,6 +2444,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     if (fsp->needsLocalThis()) {
       static const StringData* thisStr = makeStaticString("this");
       Id thisId = m_curFunc->lookupVarId(thisStr);
+      emitVirtualLocal(thisId);
       e.InitThisLoc(thisId);
     }
     if (fsp->needsFinallyLocals()) {
@@ -2580,7 +2582,11 @@ void EmitterVisitor::visit(FileScopePtr file) {
       m_ue.setMergeOnly(true);
       if (mainReturn.m_type == KindOfInvalid) {
         tvWriteUninit(&mainReturn);
-        tvAsVariant(&mainReturn) = 1;
+        if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
+          tvAsVariant(&mainReturn) = init_null();
+        } else {
+          tvAsVariant(&mainReturn) = 1;
+        }
       }
       m_ue.setMainReturn(&mainReturn);
     }
@@ -2591,7 +2597,11 @@ void EmitterVisitor::visit(FileScopePtr file) {
     if (currentPositionIsReachable()) {
       LocationPtr loc(new Location());
       e.setTempLocation(loc);
-      e.Int(1);
+      if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
+        e.Null();
+      } else {
+        e.Int(1);
+      }
       e.RetC();
       e.setTempLocation(LocationPtr());
     }
@@ -2726,15 +2736,23 @@ void EmitterVisitor::visitKids(ConstructPtr c) {
 }
 
 template<class Fun>
-bool checkKeys(ExpressionPtr init_expr, Fun fun) {
-  if (init_expr->getKindOf() != Expression::KindOfExpressionList) return false;
-  ExpressionListPtr el = static_pointer_cast<ExpressionList>(init_expr);
+bool checkKeys(ExpressionPtr init_expr, bool check_size, Fun fun) {
+  if (init_expr->getKindOf() != Expression::KindOfExpressionList) {
+    return false;
+  }
+
+  auto el = static_pointer_cast<ExpressionList>(init_expr);
   int n = el->getCount();
-  if (n < 1 || n > MixedArray::MaxMakeSize) return false;
+  if (n < 1 || (check_size && n > MixedArray::MaxMakeSize)) {
+    return false;
+  }
+
   for (int i = 0, n = el->getCount(); i < n; ++i) {
     ExpressionPtr ex = (*el)[i];
-    if (ex->getKindOf() != Expression::KindOfArrayPairExpression) return false;
-    ArrayPairExpressionPtr ap = static_pointer_cast<ArrayPairExpression>(ex);
+    if (ex->getKindOf() != Expression::KindOfArrayPairExpression) {
+      return false;
+    }
+    auto ap = static_pointer_cast<ArrayPairExpression>(ex);
     if (ap->isRef()) return false;
     if (!fun(ap)) return false;
   }
@@ -2744,14 +2762,37 @@ bool checkKeys(ExpressionPtr init_expr, Fun fun) {
 /*
  * isPackedInit() returns true if this expression list looks like an
  * array with no keys and no ref values; e.g. array(x,y,z).
+ *
  * In this case we can NewPackedArray to create the array. The elements are
  * pushed on the stack, so we arbitrarily limit this to a small multiple of
  * MixedArray::SmallSize (12).
  */
-bool isPackedInit(ExpressionPtr init_expr, int* size) {
+bool isPackedInit(ExpressionPtr init_expr, int* size,
+                  bool check_size = true) {
   *size = 0;
-  return checkKeys(init_expr, [&](ArrayPairExpressionPtr ap) {
-    if (ap->getName() != nullptr) return false;
+  return checkKeys(init_expr, check_size, [&](ArrayPairExpressionPtr ap) {
+    Variant key;
+
+    // If we have a key...
+    if (ap->getName() != nullptr) {
+      // ...and it has no scalar value, bail.
+      if (!ap->getScalarValue(key)) return false;
+
+      if (key.isInteger()) {
+        // If it's an integer key, check if it's the next packed index.
+        if (key.asInt64Val() != *size) return false;
+      } else {
+        // Give up if it's not a string.
+        if (!key.isString()) return false;
+
+        int64_t i; double d;
+        auto numtype = key.getStringData()->isNumericWithVal(i, d, false);
+
+        // If it's a string of the next packed index,
+        if (numtype != KindOfInt64 || i != *size) return false;
+      }
+    }
+
     (*size)++;
     return true;
   });
@@ -2762,7 +2803,7 @@ bool isPackedInit(ExpressionPtr init_expr, int* size) {
  * all static strings with no duplicates.
  */
 bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
-  return checkKeys(init_expr, [&](ArrayPairExpressionPtr ap) {
+  return checkKeys(init_expr, true, [&](ArrayPairExpressionPtr ap) {
     auto key = ap->getName();
     if (key == nullptr || !key->isLiteralString()) return false;
     auto name = key->getLiteralString();
@@ -3083,11 +3124,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
 
           if (value->isScalar()) {
+            emitVirtualLocal(local);
             visit(value);
             emitConvertToCell(e);
             e.StaticLocInit(local, name);
           } else {
             Label done;
+            emitVirtualLocal(local);
             e.StaticLoc(local, name);
             e.JmpNZ(done);
 
@@ -3442,6 +3485,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (op == T_ARRAY) {
           int num_elems;
           std::vector<std::string> keys;
+
           if (u->isScalar()) {
             TypedValue tv;
             tvWriteUninit(&tv);
@@ -3449,42 +3493,44 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (m_staticArrays.empty()) {
               e.Array(tv.m_data.parr);
             }
+
           } else if (isPackedInit(u->getExpression(), &num_elems)) {
             // evaluate array values onto stack
-            ExpressionListPtr el =
-              static_pointer_cast<ExpressionList>(u->getExpression());
+            auto el = static_pointer_cast<ExpressionList>(u->getExpression());
             for (int i = 0; i < num_elems; i++) {
-              ArrayPairExpressionPtr ap =
-                static_pointer_cast<ArrayPairExpression>((*el)[i]);
+              auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
               visit(ap->getValue());
               emitConvertToCell(e);
             }
             e.NewPackedArray(num_elems);
+
           } else if (isStructInit(u->getExpression(), keys)) {
-            ExpressionListPtr el =
-              static_pointer_cast<ExpressionList>(u->getExpression());
+            auto el = static_pointer_cast<ExpressionList>(u->getExpression());
             for (int i = 0, n = keys.size(); i < n; i++) {
-              ArrayPairExpressionPtr ap =
-                static_pointer_cast<ArrayPairExpression>((*el)[i]);
+              auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
               visit(ap->getValue());
               emitConvertToCell(e);
             }
             e.NewStructArray(keys);
+
           } else {
             assert(m_staticArrays.empty());
+            auto capacityHint = MixedArray::SmallSize;
+
             ExpressionPtr ex = u->getExpression();
-            int capacityHint = -1;
             if (ex->getKindOf() == Expression::KindOfExpressionList) {
-              ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
+              auto el = static_pointer_cast<ExpressionList>(ex);
+
               int capacity = el->getCount();
               if (capacity > 0) {
                 capacityHint = capacity;
               }
             }
-            if (capacityHint != -1) {
+
+            if (isPackedInit(ex, &num_elems, false /* ignore size */)) {
               e.NewArray(capacityHint);
             } else {
-              e.NewArray(MixedArray::SmallSize);
+              e.NewMixedArray(capacityHint);
             }
             visit(ex);
           }
@@ -6560,16 +6606,16 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
     FuncEmitter::ParamInfo pi;
     auto const typeConstraint = determine_type_constraint(par);
     if (typeConstraint.hasConstraint()) {
-      pi.setTypeConstraint(typeConstraint);
+      pi.typeConstraint = typeConstraint;
     }
     if (coerce_params) {
       if (auto const typeAnnotation = par->annotation()) {
-        pi.setBuiltinType(typeAnnotation->dataType());
+        pi.builtinType = typeAnnotation->dataType();
       }
     }
 
     if (par->hasUserType()) {
-      pi.setUserType(makeStaticString(par->getUserTypeHint()));
+      pi.userType = makeStaticString(par->getUserTypeHint());
     }
 
     // Store info about the default value if there is one.
@@ -6579,7 +6625,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
       if (vNode->isScalar()) {
         TypedValue dv;
         initScalar(dv, vNode);
-        pi.setDefaultValue(dv);
+        pi.defaultValue = dv;
 
         std::string orig = vNode->getComment();
         if (orig.empty()) {
@@ -6600,7 +6646,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
         vNode->outputPHP(cg, ar);
         phpCode = makeStaticString(os.str());
       }
-      pi.setPhpCode(phpCode);
+      pi.phpCode = phpCode;
     }
 
     ExpressionListPtr paramUserAttrs =
@@ -6615,12 +6661,12 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
         assert(uaValue->isScalar());
         TypedValue tv;
         initScalar(tv, uaValue);
-        pi.addUserAttribute(uaName, tv);
+        pi.userAttributes[uaName] = tv;
       }
     }
 
     pi.setRef(par->isRef());
-    pi.setVariadic(par->isVariadic());
+    pi.variadic = par->isVariadic();
     fe->appendParam(parName, pi);
   }
 }
@@ -6632,11 +6678,13 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
     assert(!m_curFunc->top());
     static const StringData* thisStr = makeStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
+    emitVirtualLocal(thisId);
     e.InitThisLoc(thisId);
   }
   for (uint i = 0; i < m_curFunc->params().size(); i++) {
-    const TypeConstraint& tc = m_curFunc->params()[i].typeConstraint();
+    const TypeConstraint& tc = m_curFunc->params()[i].typeConstraint;
     if (!tc.hasConstraint()) continue;
+    emitVirtualLocal(i);
     e.VerifyParamType(i);
   }
 
@@ -7057,7 +7105,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();
   for (int i = 0; i < f->numParams(); i++) {
     if ((!allowDoubleArgs) &&
-        (f->params()[i].builtinType() == KindOfDouble)) {
+        (f->params()[i].builtinType == KindOfDouble)) {
       return nullptr;
     }
     if (i >= numParams) {
@@ -7077,7 +7125,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
         if (!pi.hasDefaultValue()) {
           return nullptr;
         }
-        if (pi.defaultValue().m_type == KindOfUninit) {
+        if (pi.defaultValue.m_type == KindOfUninit) {
           // TODO: Resolve persistent constants
           return nullptr;
         }
@@ -7197,9 +7245,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       for (; i < fcallBuiltin->numParams(); i++) {
         auto &pi = fcallBuiltin->params()[i];
         assert(pi.hasDefaultValue());
-        auto &def = pi.defaultValue();
+        auto &def = pi.defaultValue;
         emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
-                              pi.builtinType(), i);
+                              pi.builtinType, i);
       }
     }
     e.FCallBuiltin(fcallBuiltin->numParams(), numParams, nLiteral);
@@ -8111,8 +8159,6 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
 
 Thunklet::~Thunklet() {}
 
-using HPHP::Eval::PhpFile;
-
 static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
   for (int i = 0, n = c->getKidCount(); i < n; i++) {
     if (ConstructPtr k = c->getNthKid(i)) {
@@ -8294,7 +8340,9 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
           not_reached();
       }
 
-      ue.emitOp(OpNull);
+      // debugBacktrace has off-by-one bug when determining whether we are
+      // in returning opcode; add Nop to avoid it
+      ue.emitOp(OpNop);
       ue.emitOp(OpRetC);
       break;
     }

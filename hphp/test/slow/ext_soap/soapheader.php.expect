@@ -1,0 +1,42 @@
+object(SoapHeader)#1 (4) {
+  ["namespace"]=>
+  string(3) "env"
+  ["name"]=>
+  string(7) "header1"
+  ["data"]=>
+  array(1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+  ["mustUnderstand"]=>
+  bool(false)
+}
+string(3) "env"
+string(7) "header1"
+array(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
+bool(false)
+object(SoapHeader)#1 (4) {
+  ["namespace"]=>
+  string(9) "namespace"
+  ["name"]=>
+  string(4) "name"
+  ["data"]=>
+  array(1) {
+    ["hello"]=>
+    string(5) "world"
+  }
+  ["mustUnderstand"]=>
+  bool(true)
+}
+object(SoapHeader)#1 (3) {
+  ["namespace"]=>
+  string(9) "namespace"
+  ["name"]=>
+  string(4) "name"
+  ["mustUnderstand"]=>
+  bool(true)
+}
+

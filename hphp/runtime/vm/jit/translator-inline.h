@@ -30,8 +30,6 @@
  */
 namespace HPHP   {
 
-inline ActRec*& vmFirstAR() { return g_context->m_firstAR; }
-
 inline ActRec* liveFrame()    { return vmfp(); }
 inline const Func* liveFunc() { return liveFrame()->m_func; }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }

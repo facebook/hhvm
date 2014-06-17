@@ -157,7 +157,7 @@ static void addBreakPointInUnit(Eval::BreakPointInfoPtr bp, Unit* unit) {
 }
 
 static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
-                                 Eval::PhpFile* efile) {
+                                 PhpFile* efile) {
   std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
@@ -171,7 +171,7 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
 static void addBreakPointFuncEntry(const Func* f) {
   // we are in a generator, skip CreateCont / RetC / PopC opcodes
   auto base = f->isGenerator()
-    ? (f->isAsync() ? bad_value<Offset>() : c_Generator::userBase(f))
+    ? BaseGenerator::userBase(f)
     : f->base();
   auto pc = f->unit()->at(base);
 
@@ -274,7 +274,7 @@ void phpDebuggerEvalHook(const Func* f) {
 }
 
 // Called by the VM when a file is loaded.
-void phpDebuggerFileLoadHook(Eval::PhpFile* efile) {
+void phpDebuggerFileLoadHook(PhpFile* efile) {
   Eval::DebuggerProxyPtr proxy = Eval::Debugger::GetProxy();
   if (proxy == nullptr) return;
   addBreakPointsInFile(proxy.get(), efile);

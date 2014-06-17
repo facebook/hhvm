@@ -13,10 +13,8 @@
 (* The environment shared by everyone *)
 (*****************************************************************************)
 
-module Watch = struct type t = Inotify.wd let compare = compare end
 module SSet = Set.Make(String)
 module SMap = Map.Make(String)
-module WMap = Map.Make(Watch)
 
 module Time = struct
   type t = int
@@ -62,11 +60,8 @@ type t = {
     (* Work left to output *)
     mutable to_output : output list                           ;
 
-    (* Map            : watch => filename *)
-    mutable wnames    : string WMap.t                         ;
-
-    (* The inotify file descriptor, we read this for new events *)
-            inotify   : Unix.file_descr                       ;
+    (* The fsnotify environment, we use this for interacting with fsnotify  *)
+            fsnotify  : Fsnotify.env                          ;
 
     (* The set of files with their timestamp *)
     mutable files     : TimeFiles.t                           ;
@@ -93,18 +88,6 @@ type t = {
     (* Time since the process started *)
             start_time : float                                ;
   }
-
-(*****************************************************************************)
-(* The events from Inotify we want to watch
- * We care about all the different forms of "writes".
- *)
-(*****************************************************************************)
-
-let events = Inotify.(
-  [ S_Create; S_Delete; S_Delete_self;
-    S_Modify; S_Move_self; S_Moved_from;
-    S_Moved_to; S_Attrib;
-  ])
 
 (*****************************************************************************)
 (* The environment variable containing what we want to skip *)
@@ -163,14 +146,13 @@ let get_clients env = env.clientl
  *)
 (*****************************************************************************)
 
-let make() =
-  let inotify = Inotify.init() in
+let make root =
   let user = Sys.getenv "USER" in
   let log = open_out ("/tmp/dfind_"^user^".log") in
+  let fsnotify = Fsnotify.init root log in
   {
     to_output = []                ;
-    wnames    = WMap.empty        ;
-    inotify   = inotify           ;
+    fsnotify  = fsnotify          ;
     files     = TimeFiles.empty   ;
     new_files = SSet.empty        ;
     dirs      = SMap.empty        ;

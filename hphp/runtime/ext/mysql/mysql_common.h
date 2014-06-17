@@ -205,12 +205,16 @@ public:
       mysql_free_result(m_res);
       m_res = NULL;
     }
+    if (isLocalized()) {
+      m_rows.clear();
+    }
   }
 
   virtual bool isInvalid() const {
-    // TODO: figure out correct behavior for localized results, and fix Facebook
-    // Localized results *never* have an m_res.
-    return isLocalized() ? false : m_res == nullptr;
+    if (isLocalized()) {
+      return !m_rows.hasValue();
+    }
+    return m_res == nullptr;
   }
 
   MYSQL_RES *get() {

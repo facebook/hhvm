@@ -67,11 +67,13 @@ struct BCMarker {
                                 m_sk.getFuncId() == DummyFuncId; }
   bool hasFunc() const { return valid() && !isDummy(); }
 
-  SrcKey sk() const { assert(valid()); return m_sk; }
-  const Func* func() const { assert(hasFunc()); return m_sk.func(); }
-  Offset bcOff() const { assert(valid()); return m_sk.offset(); }
-  bool resumed() const { assert(valid()); return m_sk.resumed(); }
-  int32_t spOff() const { assert(valid()); return m_spOff; }
+  SrcKey      sk()          const { assert(valid());   return m_sk;           }
+  const Func* func()        const { assert(hasFunc()); return m_sk.func();    }
+  Offset      bcOff()       const { assert(valid());   return m_sk.offset();  }
+  bool        resumed()     const { assert(valid());   return m_sk.resumed(); }
+  int32_t     spOff()       const { assert(valid());   return m_spOff;        }
+  TransID     profTransId() const { assert(valid());   return m_profTransID;  }
+
   void setSpOff(int32_t sp) { assert(valid()); m_spOff = sp; }
 };
 

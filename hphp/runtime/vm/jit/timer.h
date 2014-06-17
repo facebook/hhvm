@@ -24,6 +24,7 @@
 #define JIT_TIMERS                              \
   TIMER_NAME(analyze)                           \
   TIMER_NAME(codeGen)                           \
+  TIMER_NAME(collectPostConditions)             \
   TIMER_NAME(optimize)                          \
   TIMER_NAME(optimize_dce)                      \
   TIMER_NAME(optimize_jumpOpts)                 \

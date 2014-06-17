@@ -203,6 +203,8 @@ using InstrIdSet = std::set<InstrId>;
 using UseInfo    = std::pair<Use,InstrIdSet>;
 
 struct DceState {
+  borrowed_ptr<const php::Func> func;
+
   /*
    * Eval stack use information.  Stacks slots are marked as being
    * needed or not needed.  If they aren't needed, they carry a set of
@@ -241,6 +243,14 @@ struct DceState {
    * to keep eval stack consumers and producers balanced.
    */
   boost::dynamic_bitset<> markedDead;
+
+  /*
+   * The set of locals that were ever live in this block.  (This
+   * includes locals that were live going out of this block.)  This
+   * set is used by global DCE to remove locals that are completely
+   * unused in the entire function.
+   */
+  std::bitset<kMaxTrackedLocals> usedLocals;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -266,9 +276,16 @@ std::string show(const UseInfo& ui) {
   return folly::format("{}@{}", show(ui.first), show(ui.second)).str();
 }
 
-std::string show(std::bitset<kMaxTrackedLocals> locs) {
+std::string bits_string(borrowed_ptr<const php::Func> func,
+                        std::bitset<kMaxTrackedLocals> locs) {
   std::ostringstream out;
-  out << locs;
+  if (func->locals.size() < kMaxTrackedLocals) {
+    for (auto i = func->locals.size(); i-- > 0;) {
+      out << (locs.test(i) ? '1' : '0');
+    }
+  } else {
+    out << locs;
+  }
   return out.str();
 }
 
@@ -496,7 +513,7 @@ private: // eval stack
 
 private: // locals
   void addGenSet(std::bitset<kMaxTrackedLocals> locs) {
-    FTRACE(4, "      conservative: {}\n", show(locs));
+    FTRACE(4, "      conservative: {}\n", bits_string(m_dceState.func, locs));
     m_dceState.liveLocals |= locs;
     m_dceState.gen |= locs;
     m_dceState.kill &= ~locs;
@@ -585,9 +602,11 @@ dce_visit(const Index& index,
   auto const states = locally_propagated_states(index, ctx, blk, stateIn);
 
   auto dceState = DceState{};
+  dceState.func = ctx.func;
   dceState.markedDead.resize(blk->hhbcs.size());
   dceState.liveLocals = liveOut;
   dceState.stack.resize(states.back().first.stack.size());
+  dceState.usedLocals = liveOut;
   for (auto& s : dceState.stack) {
     s = UseInfo { Use::Used, InstrIdSet{} };
   }
@@ -616,6 +635,8 @@ dce_visit(const Index& index,
       dceState.liveLocals |= liveOutExn;
       dceState.killBeforePEI.reset();
     }
+
+    dceState.usedLocals |= dceState.liveLocals;
 
     FTRACE(4, "    dce stack: {}\n",
       [&] {
@@ -652,6 +673,9 @@ DceAnalysis analyze_dce(const Index& index,
                         Context const ctx,
                         borrowed_ptr<php::Block> const blk,
                         const State& stateIn) {
+  // During this analysis pass, we have to assume everything could be
+  // live out, so we set allLive here.  (Later we'll determine the
+  // real liveOut sets.)
   auto allLive = std::bitset<kMaxTrackedLocals>{};
   allLive.set();
   if (auto dceState = dce_visit(index, ctx, blk, stateIn, allLive, allLive)) {
@@ -664,15 +688,16 @@ DceAnalysis analyze_dce(const Index& index,
   return DceAnalysis {};
 }
 
-void optimize_dce(const Index& index,
-                  Context const ctx,
-                  borrowed_ptr<php::Block> const blk,
-                  const State& stateIn,
-                  std::bitset<kMaxTrackedLocals> liveOut,
-                  std::bitset<kMaxTrackedLocals> liveOutExn) {
+std::bitset<kMaxTrackedLocals>
+optimize_dce(const Index& index,
+             Context const ctx,
+             borrowed_ptr<php::Block> const blk,
+             const State& stateIn,
+             std::bitset<kMaxTrackedLocals> liveOut,
+             std::bitset<kMaxTrackedLocals> liveOutExn) {
   auto const dceState = dce_visit(index, ctx, blk,
     stateIn, liveOut, liveOutExn);
-  if (!dceState) return;
+  if (!dceState) return std::bitset<kMaxTrackedLocals>{};
 
   // Remove all instructions that were marked dead, and replace
   // instructions that can be replaced with pops but aren't dead.
@@ -684,6 +709,45 @@ void optimize_dce(const Index& index,
   // Blocks must be non-empty.  Make sure we don't change that.
   if (blk->hhbcs.empty()) {
     blk->hhbcs.push_back(bc::Nop {});
+  }
+
+  return dceState->usedLocals;
+}
+
+void remove_unused_locals(Context const ctx,
+                          std::bitset<kMaxTrackedLocals> usedLocals) {
+  if (!options.RemoveUnusedLocals) return;
+  auto const func = ctx.func;
+
+  /*
+   * Removing unused locals in closures requires checking which ones
+   * are captured variables so we can remove the relevant properties,
+   * and then we'd have to mutate the CreateCl callsite, so we don't
+   * bother for now.
+   *
+   * Note: many closure bodies have unused $this local, because of
+   * some emitter quirk, so this might be worthwhile.
+   */
+  if (func->isClosureBody) return;
+
+  func->locals.erase(
+    std::remove_if(
+      begin(func->locals),
+      end(func->locals),
+      [&] (const std::unique_ptr<php::Local>& l) {
+        if (!usedLocals.test(l->id)) {
+          FTRACE(2, "  removing: {}\n", local_string(borrow(l)));
+          return true;
+        }
+        return false;
+      }
+    ),
+    end(func->locals)
+  );
+
+  // Fixup local ids, in case we removed any.
+  for (auto i = uint32_t{0}; i < func->locals.size(); ++i) {
+    func->locals[i]->id = i;
   }
 }
 
@@ -716,6 +780,16 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   };
 
   FTRACE(1, "|---- global DCE analyze ({})\n", show(ai.ctx));
+  FTRACE(2, "{}", [&] {
+    using namespace folly::gen;
+    auto i = uint32_t{0};
+    return from(ai.ctx.func->locals)
+      | mapped(
+        [&] (const std::unique_ptr<php::Local>& l) {
+          return folly::sformat("  {} {}\n", i++, local_string(borrow(l)));
+        })
+      | unsplit<std::string>("");
+  }());
 
   /*
    * Create a DceAnalysis for each block, indexed by rpo id.
@@ -794,12 +868,12 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
               "kill     : {}\n"
               "kill exn : {}\n"
               "live in  : {}\n",
-              show(liveOut),
-              show(liveOutExn),
-              show(transfer.gen),
-              show(transfer.kill),
-              show(transfer.killExn),
-              show(liveIn));
+              bits_string(ai.ctx.func, liveOut),
+              bits_string(ai.ctx.func, liveOutExn),
+              bits_string(ai.ctx.func, transfer.gen),
+              bits_string(ai.ctx.func, transfer.kill),
+              bits_string(ai.ctx.func, transfer.killExn),
+              bits_string(ai.ctx.func, liveIn));
 
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.
@@ -832,9 +906,10 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * remove instructions that don't need to be there.
    */
   FTRACE(1, "|---- global DCE optimize ({})\n", show(ai.ctx));
+  std::bitset<kMaxTrackedLocals> usedLocals;
   for (auto& b : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", b->id);
-    optimize_dce(
+    usedLocals |= optimize_dce(
       index,
       ai.ctx,
       b,
@@ -843,6 +918,9 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       blockStates[rpoId(b)].liveOutExn
     );
   }
+
+  FTRACE(1, "  used locals: {}\n", bits_string(ai.ctx.func, usedLocals));
+  remove_unused_locals(ai.ctx, usedLocals);
 }
 
 //////////////////////////////////////////////////////////////////////

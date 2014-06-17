@@ -309,6 +309,7 @@ void optimize(Index& index, php::Program& program) {
    * queries to php::Func and php::Class structures.
    */
   trace_time final_pass("final pass");
+  index.freeze();
   parallel::for_each(
     all_function_contexts(program),
     [&] (Context ctx) { optimize_func(index, analyze_func(index, ctx)); }

@@ -9,11 +9,6 @@
  *)
 
 
-
-type status =
-  | Error
-  | Ok
-
 (* ClassStatus is something that we want to be able to access very quickly.
  * Workers in the "declaration" phase need to be able to know if their parent
  * class has already been declared or not.
@@ -26,10 +21,6 @@ type status =
  * Using a cache is not an option since the class status are updated
  * concurrently.
  *)
-module ClassStatus = SharedMem.NoCache(struct
-  type t = status
-  let prefix = Prefix.make()
-end)
 
 module ClassHeap = SharedMem.NoCache(struct
   type t = Nast.class_
@@ -38,11 +29,6 @@ end)
 
 module FunHeap = SharedMem.NoCache(struct
   type t = Nast.fun_
-  let prefix = Prefix.make()
-end)
-
-module TypedefStatus = SharedMem.NoCache(struct
-  type t = status
   let prefix = Prefix.make()
 end)
 

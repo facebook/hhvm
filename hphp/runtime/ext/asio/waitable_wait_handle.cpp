@@ -79,22 +79,18 @@ Array c_WaitableWaitHandle::t_getparents() {
 // throws on context depth level overflows and cross-context cycles
 void c_WaitableWaitHandle::join() {
   EagerVMRegAnchor _;
-
-  AsioSession* session = AsioSession::Get();
+  auto const savedFP = vmfp();
 
   assert(!isFinished());
-  assert(!session->isInContext() || session->getCurrentContext()->isRunning());
 
+  AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoinCallback())) {
     session->onJoin(this);
   }
 
   // enter new asio context and set up guard that will exit once we are done
-  session->enterContext();
+  session->enterContext(savedFP);
   auto exit_guard = folly::makeGuard([&] { session->exitContext(); });
-
-  assert(session->isInContext());
-  assert(!session->getCurrentContext()->isRunning());
 
   // import this wait handle to the newly created context
   // throws if cross-context cycle found
@@ -195,6 +191,7 @@ Array c_WaitableWaitHandle::t_getdependencystack() {
   if (isFinished()) return result;
   hphp_hash_set<int64_t> visited;
   auto wait_handle = this;
+  auto session = AsioSession::Get();
   while (wait_handle != nullptr) {
     result.append(wait_handle);
     visited.insert(wait_handle->t_getid());
@@ -213,10 +210,16 @@ Array c_WaitableWaitHandle::t_getdependencystack() {
     if (p) continue;
 
     // 2. cross the context boundary
-    result.append(null_object);
-    wait_handle = (context_idx > 1)
-      ? AsioSession::Get()->getContext(context_idx - 1)->getCurrent()
-      : nullptr;
+    auto context = session->getContext(context_idx);
+    if (!context) {
+      break;
+    }
+    wait_handle = c_ResumableWaitHandle::getRunning(context->getSavedFP());
+    auto target_context_idx = wait_handle ? wait_handle->getContextIdx() : 0;
+    while (context_idx > target_context_idx) {
+      --context_idx;
+      result.append(null_object);
+    }
   }
   return result;
 }

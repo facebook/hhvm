@@ -328,7 +328,7 @@ class SplFileObject extends SplFileInfo
    *                     Note that seeking past EOF is not considered an
    *                     error.
    */
-  public function fseek($offset, $whence) {
+  public function fseek($offset, $whence = SEEK_SET) {
     return fseek($this->rsrc, $offset, $whence);
   }
 

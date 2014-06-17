@@ -32,79 +32,41 @@ let is_prefix dir file =
   file.[String.length dir] = '/'
 
 (*****************************************************************************)
-(* Processing an inotify event *)
+(* Processing an fsnotify event *)
 (*****************************************************************************)
 
-(* Can be useful to see what the event actually is, for debugging *)
-let string_of ev =
-  let wd,mask,cookie,s = ev in
-  let mask = String.concat ":" (List.map Inotify.string_of_event mask) in
-  let s = match s with Some s -> s | None -> "\"\"" in
-  Printf.sprintf "wd [%u] mask[%s] cookie[%ld] %s" (Inotify.int_of_wd wd)
-    mask cookie s
-
 (* Die if something unexpected happened *)
-let check_event env fname = function
-  | Inotify.Access
-  | Inotify.Attrib
-  | Inotify.Close_write
-  | Inotify.Close_nowrite
-  | Inotify.Create
-  | Inotify.Delete
-  | Inotify.Delete_self
-  | Inotify.Move_self
-  | Inotify.Moved_from
-  | Inotify.Moved_to
-  | Inotify.Open
-  | Inotify.Ignored
-  | Inotify.Modify
-  | Inotify.Isdir -> ()
-  | Inotify.Q_overflow ->
-      Printf.fprintf env.log "INOTIFY OVERFLOW!!!\n";
-      flush env.log;
-      exit 5
-  | Inotify.Unmount ->
-      Printf.fprintf env.log "UNMOUNT EVENT!!!\n";
-      flush env.log;
-      exit 5
 
-let (process_inotify_event:
-       DfindEnv.t -> SSet.t -> Inotify.event
+let (process_fsnotify_event:
+       DfindEnv.t -> SSet.t -> Fsnotify.event
          -> SSet.t) = fun env dirty event ->
-  let wd, mask, _cookie, fname = event in
-  List.iter (check_event env fname) mask;
-  match fname
-  with None -> dirty
-  | Some fname ->
-      let wname = try WMap.find wd env.DfindEnv.wnames with _ -> assert false in
-      (* Let's rebuild the full name of the file *)
-      let path  = wname ^ "/" ^ fname in
-      (* Tell everybody that this file has changed *)
-      let dirty = SSet.add path dirty in
-      (* Is it a directory? Be conservative, everything we know about this
-       * directory is now "dirty"
-       *)
-      let dirty =
-        if SMap.mem path env.dirs
-        then SSet.union dirty (SMap.find path env.dirs)
-        else begin
-          let dir_content =
-            try SMap.find wname env.dirs
-            with Not_found -> SSet.empty
-          in
-          env.dirs <- SMap.add wname (SSet.add path dir_content) env.dirs;
-          dirty
-        end
+  let { Fsnotify.path; wpath; } = event in
+
+  (* Tell everybody that this file has changed *)
+  let dirty = SSet.add path dirty in
+  (* Is it a directory? Be conservative, everything we know about this
+    * directory is now "dirty"
+    *)
+  let dirty =
+    if SMap.mem path env.dirs
+    then SSet.union dirty (SMap.find path env.dirs)
+    else begin
+      let dir_content =
+        try SMap.find wpath env.dirs
+        with Not_found -> SSet.empty
       in
-      env.new_files <- SSet.empty;
-      (* Add the file, plus all of the sub elements if it is a directory *)
-      DfindAddFile.path env path;
-      (* Add everything new we found in this directory
-       * (empty when it's a regular file)
-       *)
-      let dirty = SSet.union env.new_files dirty in
-(*      Printf.fprintf env.log "Event: %s\n" (string_of event); flush env.log; *)
+      env.dirs <- SMap.add wpath (SSet.add path dir_content) env.dirs;
       dirty
+    end
+  in
+  env.new_files <- SSet.empty;
+  (* Add the file, plus all of the sub elements if it is a directory *)
+  DfindAddFile.path env path;
+  (* Add everything new we found in this directory
+    * (empty when it's a regular file)
+    *)
+  let dirty = SSet.union env.new_files dirty in
+  dirty
 
 (*****************************************************************************)
 (* Processing a user handle
@@ -118,7 +80,6 @@ let set_handle_time env handle =
   set_handle env handle new_time
 
 let get_all_files env (dir, h as handle) =
-  Printf.fprintf env.log "Dumping handle: %s[%s]\n" dir h; flush env.log;
   (* Find the time when the handle was created *)
   let time =
     match get_handle env handle with
@@ -146,7 +107,7 @@ let print_handle ~close env handle oc =
 
 (*****************************************************************************)
 (* Section defining the functions called by the server
- * Whenever an inotify event is received, process_event is called
+ * Whenever an fsnotify event is received, process_event is called
  * Whenever a new message is received, process_message is called
  *)
 (*****************************************************************************)
@@ -158,10 +119,10 @@ let (send_to_client: DfindEnv.t -> SSet.t -> DfindEnv.client -> unit) =
   fun env dirty (dir, handle, oc) ->
     add_output env ~close:false oc dirty
 
-let (process_inotify_events: DfindEnv.t -> Inotify.event list -> unit) =
+let (process_fsnotify_events: DfindEnv.t -> Fsnotify.event list -> unit) =
   fun env evs ->
   (* What's new? *)
-  let dirty = List.fold_left (process_inotify_event env) SSet.empty evs in
+  let dirty = List.fold_left (process_fsnotify_event env) SSet.empty evs in
   let time = Time.get() in
   (* Insert the files with the current timestamp *)
   SSet.iter begin fun file ->
@@ -201,7 +162,7 @@ let process_client_msg env oc = function
 (*****************************************************************************)
 
 let server_socket, client_socket =
-  let tmp = Filename.temp_dir_name in
+  let tmp = Tmp.temp_dir_name in
   let user = Sys.getenv "USER" in
   let sock_name = tmp ^ "/dfind_"^user^".sock" in
   begin fun () -> (* Server side *)
@@ -243,7 +204,7 @@ let server_socket, client_socket =
 (*****************************************************************************)
 
 let get_pid_file () =
-  let tmp = Filename.temp_dir_name in
+  let tmp = Tmp.temp_dir_name in
   let user = Sys.getenv "USER" in
   let fn = tmp ^ "/dfind_"^user^".pid" in
   fn
@@ -304,17 +265,12 @@ let daemon env socket =
   Printf.fprintf env.log "Status: Starting daemon\n"; flush env.log;
 
   while true do
-    let fdl = [ env.inotify; socket ] in
     let output_descrl = DfindEnv.get_output_descrl env in
     exit_if_unused env;
-    let readyl, out_readyl, _ = Unix.select fdl output_descrl [] half_hour in
-    if out_readyl <> []
-    then output env;
-    if List.exists (fun x -> x = env.inotify) readyl then begin
-      let evs = Unix.handle_unix_error Inotify.read env.inotify in
-      process_inotify_events env evs
-    end;
-    if List.exists (fun x -> x = socket) readyl then begin
+    let write_callback = fun () -> output env in
+    let write_fdl = List.map (fun fd -> (fd, write_callback)) output_descrl in
+
+    let socket_callback () = 
       try
         Printf.fprintf env.log "STATUS: message received\n"; flush env.log;
         env.last_query <- Unix.time();
@@ -327,20 +283,22 @@ let daemon env socket =
         Printf.fprintf env.log "Exception: %s\n" (Printexc.to_string e);
         flush env.log;
         ()
-    end;
+    in let read_fdl = [
+      socket, socket_callback
+    ] in
+
+    let fsnotify_callback = process_fsnotify_events env in
+    let timeout = half_hour in
+    Fsnotify.select env.fsnotify ~read_fdl ~write_fdl ~timeout fsnotify_callback
   done
 
 let daemon_from_pipe env message_in result_out =
   let env = { env with log = stdout; } in
   let acc = ref SSet.empty in
   while true do
-    let fdl = [ message_in; env.inotify ] in
-    let readyl, _, _ = Unix.select fdl [] [] (-1.0) in
-    if List.exists (fun x -> x = env.inotify) readyl then begin
-      let evs = Unix.handle_unix_error Inotify.read env.inotify in
-      acc := List.fold_left (process_inotify_event env) !acc evs;
-    end;
-    if List.exists (fun x -> x = message_in) readyl then begin
+    let fsnotify_callback events = 
+      acc := List.fold_left (process_fsnotify_event env) !acc events
+    in let message_in_callback () = 
       let ic = Unix.in_channel_of_descr message_in in
       flush env.log;
       let msg = Marshal.from_channel ic in
@@ -348,8 +306,10 @@ let daemon_from_pipe env message_in result_out =
       let result_out = Unix.out_channel_of_descr result_out in
       Marshal.to_channel result_out !acc [];
       flush result_out;
-      acc := SSet.empty;
-    end;
+      acc := SSet.empty
+    in let read_fdl = [(message_in, message_in_callback)] in
+    let timeout = -1.0 in
+    Fsnotify.select env.fsnotify ~read_fdl ~timeout fsnotify_callback
   done
 
 let fork_in_pipe root =
@@ -360,48 +320,11 @@ let fork_in_pipe root =
   | 0 ->
       Unix.close msg_out;
       Unix.close result_in;
-      let env = DfindEnv.make() in
+      let env = DfindEnv.make root in
       DfindAddFile.path env root;
-      Printf.printf "Added %s\n" root; flush stdout;
       daemon_from_pipe env msg_in result_out;
       assert false
   | pid ->
       Unix.close msg_in;
       Unix.close result_out;
       msg_out, result_in, pid
-
-
-let fork () =
-  let ready_in, ready_out = Unix.pipe() in
-  match Unix.fork() with
-  | -1 -> failwith "Go get yourself a real computer"
-  | 0 ->
-      (* The server must not die when a client dies,
-       * if a client is killed via sig interrupt,
-       * we will get the SIGPIPE signal server-side,
-       * OCaml doesn't catch this signal (one of the very few).
-       * All the other signals that we care about are turned
-       * into exceptions ... So we are good.
-       *)
-      close_in  stdin;
-      close_out stdout;
-      close_out stderr;
-      Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
-      Sys.set_signal Sys.sigint Sys.Signal_ignore;
-      Unix.close ready_in;
-      let env = DfindEnv.make() in
-      DfindMaybe.set_log env.log;
-      let socket = server_socket () in
-      lock_pid_file();
-      (* This tells the client that originated the fork that
-       * the server is ready.
-       *)
-      notify_client ready_out;
-      (try
-        daemon env socket;
-      with e ->
-        Printf.fprintf env.log "Daemon died: %s\n" (Printexc.to_string e));
-      assert false (* daemon doesn't finish *)
-  | pid ->
-      Unix.close ready_out;
-      ready_in

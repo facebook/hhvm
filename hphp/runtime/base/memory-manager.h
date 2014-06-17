@@ -24,6 +24,7 @@
 #include "folly/Memory.h"
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
+#include "hphp/util/compilation-flags.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/memory-usage-stats.h"
@@ -104,15 +105,152 @@ template<class T> void smart_delete_array(T* t, size_t count);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * The maximum size where we use our custom allocator for
- * request-local memory.
+ * Debug mode header.
  *
- * Allocations larger than this size go to the underlying malloc
- * implementation, and certain specialized allocator functions have
- * preconditions about the requested size being above or below this
- * number to avoid checking at runtime.
+ * For size-untracked allocations, this sits in front of the user
+ * payload for small allocations, and in front of the SweepNode in
+ * big allocations.  The allocatedMagic aliases the space for the
+ * FreeList::Node pointers, but should catch double frees due to
+ * kAllocatedMagic.
+ *
+ * For size-tracked allocations, this always sits in front of
+ * whatever header we're using (SmallNode or SweepNode).
+ *
+ * We set requestedSize to kFreedMagic when a block is not
+ * allocated.
  */
-constexpr size_t kMaxSmartSize = 2048;
+struct DebugHeader {
+  static constexpr uintptr_t kAllocatedMagic = 0xDB6000A110C0A7EDull;
+  static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
+
+  uintptr_t allocatedMagic;
+  size_t requestedSize;     // zero for size-untracked allocator
+  size_t returnedCap;
+  size_t padding;
+};
+
+/*
+ * Slabs are consumed via bump allocation.  The individual allocations are
+ * quantized into a fixed set of size classes, the sizes of which are an
+ * implementation detail documented here to shed light on the algorthms that
+ * compute size classes.  Request sizes are rounded up to the nearest size in
+ * the relevant SMART_SIZES table; e.g. 17 is rounded up to 32.  There are
+ * 2^LG_SMART_SIZES_PER_DOUBLING size classes for each doubling of size
+ * (ignoring the alignment-constrained smallest size classes), which limits
+ * internal fragmentation to 33% or 20%, for LG_SMART_SIZES_PER_DOUBLING
+ * set to 1 or 2, respectively.
+ */
+
+#define LG_SMART_SIZES_PER_DOUBLING 2
+
+#if (LG_SMART_SIZES_PER_DOUBLING == 1)
+#define SMART_SIZES \
+/*        index, delta, size */ \
+  SMART_SIZE( 0,    16,   16) \
+  SMART_SIZE( 1,    16,   32) \
+  SMART_SIZE( 2,    16,   48) \
+  SMART_SIZE( 3,    16,   64) \
+  SMART_SIZE( 4,    32,   96) \
+  SMART_SIZE( 5,    32,  128) \
+  SMART_SIZE( 6,    64,  192) \
+  SMART_SIZE( 7,    64,  256) \
+  SMART_SIZE( 8,   128,  384) \
+  SMART_SIZE( 9,   128,  512) \
+  SMART_SIZE(10,   256,  768) \
+  SMART_SIZE(11,   256, 1024) \
+  SMART_SIZE(12,   512, 1536) \
+  SMART_SIZE(13,   512, 2048) \
+  SMART_SIZE(14,  1024, 3072) \
+  SMART_SIZE(15,  1024, 4096) \
+
+#elif (LG_SMART_SIZES_PER_DOUBLING == 2)
+#define SMART_SIZES \
+/*        index, delta, size */ \
+  SMART_SIZE( 0,    16,   16) \
+  SMART_SIZE( 1,    16,   32) \
+  SMART_SIZE( 2,    16,   48) \
+  SMART_SIZE( 3,    16,   64) \
+  SMART_SIZE( 4,    16,   80) \
+  SMART_SIZE( 5,    16,   96) \
+  SMART_SIZE( 6,    16,  112) \
+  SMART_SIZE( 7,    16,  128) \
+  SMART_SIZE( 8,    32,  160) \
+  SMART_SIZE( 9,    32,  192) \
+  SMART_SIZE(10,    32,  224) \
+  SMART_SIZE(11,    32,  256) \
+  SMART_SIZE(12,    64,  320) \
+  SMART_SIZE(13,    64,  384) \
+  SMART_SIZE(14,    64,  448) \
+  SMART_SIZE(15,    64,  512) \
+  SMART_SIZE(16,   128,  640) \
+  SMART_SIZE(17,   128,  768) \
+  SMART_SIZE(18,   128,  896) \
+  SMART_SIZE(19,   128, 1024) \
+  SMART_SIZE(20,   256, 1280) \
+  SMART_SIZE(21,   256, 1536) \
+  SMART_SIZE(22,   256, 1792) \
+  SMART_SIZE(23,   256, 2048) \
+  SMART_SIZE(24,   512, 2560) \
+  SMART_SIZE(25,   512, 3072) \
+  SMART_SIZE(26,   512, 3584) \
+  SMART_SIZE(27,   512, 4096) \
+
+#else
+#  error Need SMART_SIZES definition for specified LG_SMART_SIZES_PER_DOUBLING
+#endif
+
+__attribute__((aligned(64)))
+constexpr uint8_t kSmartSize2Index[] = {
+#define S2I_16(i)  i,
+#define S2I_32(i)  S2I_16(i) S2I_16(i)
+#define S2I_64(i)  S2I_32(i) S2I_32(i)
+#define S2I_128(i) S2I_64(i) S2I_64(i)
+#define S2I_256(i) S2I_128(i) S2I_128(i)
+#define S2I_512(i) S2I_256(i) S2I_256(i)
+#define S2I_1024(i) S2I_512(i) S2I_512(i)
+#define SMART_SIZE(index, delta, size) S2I_##delta(index)
+  SMART_SIZES
+#undef S2I_16
+#undef S2I_32
+#undef S2I_64
+#undef S2I_128
+#undef S2I_256
+#undef S2I_512
+#undef S2I_1024
+#undef SMART_SIZE
+};
+
+constexpr uint32_t kMaxSmartSizeLookup = 4096;
+
+constexpr unsigned kLgSlabSize = 21;
+constexpr size_t kSlabSize = size_t{1} << kLgSlabSize;
+constexpr unsigned kLgSmartSizeQuantum = 4;
+constexpr size_t kSmartSizeAlign = 1u << kLgSmartSizeQuantum;
+constexpr size_t kSmartSizeAlignMask = kSmartSizeAlign - 1;
+
+constexpr size_t kDebugExtraSize = debug ?
+                                   ((sizeof(DebugHeader) + kSmartSizeAlignMask)
+                                    & ~kSmartSizeAlignMask) : 0;
+
+constexpr unsigned kLgSizeClassesPerDoubling = LG_SMART_SIZES_PER_DOUBLING;
+constexpr unsigned kLgMaxSmartSize = kLgSlabSize;
+static_assert(kLgMaxSmartSize > kLgSmartSizeQuantum + 1,
+              "Too few size classes");
+constexpr size_t kNumSmartSizes = (kLgMaxSmartSize - kLgSmartSizeQuantum
+                                  - (kLgSizeClassesPerDoubling - 1))
+                                  << kLgSizeClassesPerDoubling;
+/*
+ * The maximum size where we use our custom allocator for request-local memory.
+ *
+ * Allocations larger than this size go to the underlying malloc implementation,
+ * and certain specialized allocator functions have preconditions about the
+ * requested size being above or below this number to avoid checking at runtime.
+ */
+constexpr size_t kMaxSmartSize = (size_t{1} << kLgMaxSmartSize)
+                                 - kDebugExtraSize;
+
+constexpr unsigned kSmartPreallocCountLimit = 8;
+constexpr size_t kSmartPreallocBytesLimit = size_t{1} << 9;
 
 /*
  * Constants for the various debug junk-filling of different types of
@@ -174,6 +312,16 @@ struct MemoryManager {
    * MemoryManager may not be set up (i.e. between requests).
    */
   static bool sweeping();
+
+  /*
+   * Size class helpers.
+   */
+private:
+  static uint32_t bsr(uint32_t x);
+  static uint8_t smartSize2IndexCompute(uint32_t size);
+  static uint8_t smartSize2IndexLookup(uint32_t size);
+  static uint8_t smartSize2Index(uint32_t size);
+public:
 
   /*
    * Return the smart size class for a given requested allocation
@@ -319,7 +467,6 @@ private:
   friend void  smart_free(void* ptr);
 
   struct SmallNode;
-  struct DebugHeader;
 
   struct FreeList {
     struct Node;
@@ -330,9 +477,6 @@ private:
     Node* head = nullptr;
   };
 
-  static constexpr unsigned kLgSizeQuantum = 4; // 16 bytes
-  static constexpr unsigned kNumSizes = kMaxSmartSize >> kLgSizeQuantum;
-  static constexpr size_t kSmartSizeMask = (1 << kLgSizeQuantum) - 1;
   static void* TlsInitSetup;
 
 private:
@@ -341,8 +485,8 @@ private:
   MemoryManager& operator=(const MemoryManager&) = delete;
 
 private:
-  void* slabAlloc(size_t nbytes);
-  char* newSlab(size_t nbytes);
+  void* slabAlloc(size_t nbytes, unsigned index);
+  void* newSlab(size_t nbytes);
   void* smartEnlist(SweepNode*);
   void* smartMallocBig(size_t nbytes);
   void* smartCallocBig(size_t nbytes);
@@ -374,14 +518,14 @@ private:
 private:
   TRACE_SET_MOD(smartalloc);
 
-  char* m_front;
-  char* m_limit;
-  std::array<FreeList,kNumSizes> m_freelists;
+  void* m_front;
+  void* m_limit;
+  std::array<FreeList,kNumSmartSizes> m_freelists;
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
   SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
   bool m_statsIntervalActive;
-  std::vector<char*> m_slabs;
+  std::vector<void*> m_slabs;
 
 #ifdef USE_JEMALLOC
   uint64_t* m_allocated;

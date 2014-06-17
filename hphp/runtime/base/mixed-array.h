@@ -122,6 +122,15 @@ public:
   static ArrayData* MakeReserveMixed(uint32_t capacity);
 
   /*
+   * Allocate a new, empty, request-local array with the same mode as
+   * `other' and with enough space reserved for `capacity' members, or
+   * if `capacity' is zero, with the same capacity as `other'.
+   *
+   * The returned array is already incref'd.
+   */
+  static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
+
+  /*
    * Allocate a packed MixedArray.  This is an array in packed
    * mode, containing `size' values, in the reverse order of the
    * `values' array.
@@ -260,17 +269,8 @@ private:
   MixedArray* copyMixed() const;
   MixedArray* copyMixedAndResizeIfNeeded() const;
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
+
 public:
-
-  /**
-   * Main helper for AddNewElemC.  The semantics are slightly different from
-   * other helpers, but tuned for the opcode.  The value to set is passed by
-   * value; the caller has incref'd it if necessary, and this call *moves* it
-   * to its location in the array (caller must not decref).  If the value cannot
-   * be stored in the array, this helper decref's it.
-   */
-  static ArrayData* AddNewElemC(ArrayData* a, TypedValue value);
-
   // Elm's data.m_type == KindOfInvalid for deleted slots.
   static bool isTombstone(DataType t) {
     assert(IS_REAL_TYPE(t) || t == KindOfInvalid);

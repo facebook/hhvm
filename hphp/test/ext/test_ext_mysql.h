@@ -66,6 +66,7 @@ class TestExtMysql : public TestCppExt {
   bool test_mysql_num_fields();
   bool test_mysql_num_rows();
   bool test_mysql_free_result();
+  bool test_mysql_free_localized_result();
   bool test_mysql_data_seek();
   bool test_mysql_fetch_row();
   bool test_mysql_fetch_assoc();

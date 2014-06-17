@@ -166,13 +166,15 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddElemIntKey,      addElemIntKeyHelper, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {AddNewElem,         &MixedArray::AddNewElemC, DSSA, SNone,
+    {AddNewElem,         addNewElemHelper, DSSA, SNone,
                            {{SSA, 0}, {TV, 1}}},
     {ArrayAdd,           arrayAdd, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {Box,                boxValue, DSSA, SNone, {{TV, 0}}},
+    {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewArray,           MixedArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
-    {Clone,              &ObjectData::clone, DSSA, SSync,
-                           {{SSA, 0}}},
+    {NewMixedArray,      MixedArray::MakeReserveMixed, DSSA, SNone, {{SSA, 0}}},
+    {NewLikeArray,       MixedArray::MakeReserveLike, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}}},
     {NewPackedArray,     MixedArray::MakePacked, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
     {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
@@ -252,7 +254,7 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Generator support helpers */
-    {CreateCont,         &c_Generator::Create, DSSA, SNone,
+    {CreateCont,         &c_Generator::Create<false>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     /* Async function support helpers */

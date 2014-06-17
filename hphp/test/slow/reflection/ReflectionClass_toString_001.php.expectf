@@ -1,0 +1,37 @@
+Class [ <user> abstract class Foo ] {
+  @@ %s/test/slow/reflection/ReflectionClass_toString_001.php 3-11
+
+  - Constants [0] {
+  }
+
+  - Static properties [1] {
+    Property [ protected static $d ]
+  }
+
+  - Static methods [1] {
+    Method [ <user> final static protected method baz ] {
+      @@ %s/test/slow/reflection/ReflectionClass_toString_001.php 10 - 10
+
+      - Parameters [1] {
+        Parameter #0 [ <optional> stdClass or NULL $a = NULL ]
+      }
+    }
+  }
+
+  - Properties [3] {
+    Property [ <default> public $a ]
+    Property [ <default> protected $b ]
+    Property [ <default> private $c ]
+  }
+
+  - Methods [1] {
+    Method [ <user> abstract public method bar ] {
+      @@ %s/test/slow/reflection/ReflectionClass_toString_001.php 9 - 9
+
+      - Parameters [2] {
+        Parameter #0 [ <required> $bar ]
+        Parameter #1 [ <optional> $baz = 123 ]
+      }
+    }
+  }
+}

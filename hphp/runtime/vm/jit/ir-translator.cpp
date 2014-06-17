@@ -79,6 +79,20 @@ TRACE_SET_MOD(hhir);
     }                                                   \
   } while (0)
 
+static JmpFlags instrJmpFlags(const NormalizedInstruction& ni) {
+  JmpFlags flags = JmpFlagNone;
+  if (ni.breaksTracelet) {
+    flags = flags | JmpFlagBreakTracelet;
+  }
+  if (ni.nextIsMerge) {
+    flags = flags | JmpFlagNextIsMerge;
+  }
+  if (ni.includeBothPaths) {
+    flags = flags | JmpFlagBothPaths;
+  }
+  return flags;
+}
+
 IRTranslator::IRTranslator(TransContext context)
   : m_hhbcTrans{context}
 {}
@@ -236,22 +250,18 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
 
   if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
     if (op == OpJmpZ) {
-      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, i.includeBothPaths,
-                i.breaksTracelet);
+      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, instrJmpFlags(i));
     } else {
-      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, i.includeBothPaths,
-                i.breaksTracelet);
+      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, instrJmpFlags(i));
     }
     return;
   }
   assert(i.nextOffset == takenOffset);
   // invert the branch
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, i.includeBothPaths,
-              i.breaksTracelet);
+    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, instrJmpFlags(i));
   } else {
-    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, i.includeBothPaths,
-              i.breaksTracelet);
+    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, instrJmpFlags(i));
   }
 }
 
@@ -348,11 +358,12 @@ void IRTranslator::translateConcatN(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateJmp(const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, false);
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA,
+            instrJmpFlags(i) | JmpFlagSurprise);
 }
 
 void IRTranslator::translateJmpNS(const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, true);
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, instrJmpFlags(i));
 }
 
 void
@@ -604,7 +615,7 @@ static bool isInlinableCPPBuiltin(const Func* f) {
    * So for now, we only inline cases where the params are Variants.
    */
   for (auto i = uint32_t{0}; i < f->numParams(); ++i) {
-    if (f->params()[i].builtinType() != KindOfUnknown) {
+    if (f->params()[i].builtinType != KindOfUnknown) {
       if (f->isParamCoerceMode()) return false;
     }
   }

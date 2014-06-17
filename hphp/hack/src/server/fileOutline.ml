@@ -28,7 +28,7 @@ let get_class_summary class_ =
   res_list
 
 let outline content =
-  let ast = Parser_hack.program ~fail:false content in
+  let {Parser_hack.ast; _} = Parser_hack.program content in
   let funs, classes = List.fold_left begin fun (funs, classes) def ->
     match def with
     | Ast.Fun f ->

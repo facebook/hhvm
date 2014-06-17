@@ -11,15 +11,14 @@ class Yii extends Framework {
     $files = glob($this->getInstallRoot().
                   "/tests/assets/*/CAssetManagerTest.php");
     foreach ($files as $file) {
-      verbose("Removing $file\n", Options::$verbose);
+      verbose("Removing $file\n");
       unlink($file);
     }
   }
 
   protected function install(): void {
     parent::install();
-    verbose("Creating a new phpunit.xml for running the yii tests.\n",
-            Options::$verbose);
+    verbose("Creating a new phpunit.xml for running the yii tests.\n");
     $phpunit_xml = <<<XML
 <phpunit bootstrap="bootstrap.php"
     colors="false"
@@ -48,7 +47,7 @@ XML;
       // are there; otherwise we need a redownload.
       foreach ($extra_files as $file) {
         if (!file_exists($file)) {
-          remove_dir_recursive($this->getInstallRoot());
+          remove_dir_recursive(nullthrows($this->getInstallRoot()));
           return false;
         }
       }

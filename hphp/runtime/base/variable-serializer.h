@@ -136,6 +136,7 @@ private:
     bool is_vector;     // whether current array is a vector
     bool first_element; // whether this is first array element
     int  indent_delta;  // the extra indent to serialize this object
+    int  size;          // the number of elements in the array
   };
   smart::vector<ArrayInfo> m_arrayInfos;
 

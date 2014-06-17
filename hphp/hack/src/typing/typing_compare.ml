@@ -188,6 +188,7 @@ module CompareTypes = struct
 
   and class_ (subst, same) c1 c2 =
     let same =
+      same &&
       c1.tc_final = c2.tc_final &&
       c1.tc_need_init = c2.tc_need_init &&
       c1.tc_members_fully_known = c2.tc_members_fully_known &&
@@ -268,7 +269,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
 
   and ty_ = function
     | Tanon _
-    | Tvar _               -> raise (Error [Pos.none, "internal error"])
+    | Tvar _               -> failwith "Internal error"
     | Tany
     | Tmixed as x          -> x
     | Tarray (b, ty1, ty2) -> Tarray (b, ty_opt ty1, ty_opt ty2)
@@ -317,6 +318,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_members_fully_known   = tc.tc_members_fully_known            ;
       tc_kind                  = tc.tc_kind                           ;
       tc_name                  = tc.tc_name                           ;
+      tc_pos                   = tc.tc_pos                            ;
       tc_extends               = tc.tc_extends                        ;
       tc_req_ancestors         = tc.tc_req_ancestors                  ;
       tc_req_ancestors_extends = tc.tc_req_ancestors_extends          ;
@@ -330,9 +332,6 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_ancestors             = SMap.map ty tc.tc_ancestors          ;
       tc_ancestors_checked_when_concrete    = SMap.map ty tc.tc_ancestors_checked_when_concrete ;
       tc_user_attributes       = tc.tc_user_attributes                ;
-      tc_prefetch_classes      = tc.tc_prefetch_classes               ;
-      tc_prefetch_funs         = tc.tc_prefetch_funs                  ;
-      tc_mtime                 = 0.0                                  ;
     }
 
   and constructor = function

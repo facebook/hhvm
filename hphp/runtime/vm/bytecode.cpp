@@ -158,7 +158,7 @@ void ActRec::setReturnVMExit() {
 
 bool
 ActRec::skipFrame() const {
-  return m_func && m_func->skipFrame();
+  return m_func && m_func->isSkipFrame();
 }
 
 template <>
@@ -329,7 +329,7 @@ VarEnv* VarEnv::clone(ActRec* fp) const {
   return smart_new<VarEnv>(this, fp);
 }
 
-void VarEnv::suspend(ActRec* oldFP, ActRec* newFP) {
+void VarEnv::suspend(const ActRec* oldFP, ActRec* newFP) {
   m_nvTable.suspend(oldFP, newFP);
 }
 
@@ -704,6 +704,25 @@ static std::string toStringIter(const Iter* it, bool itRef) {
   return "I:?";
 }
 
+/*
+ * Return true if Offset o is inside the protected region of a fault
+ * funclet for iterId, otherwise false. itRef will be set to true if
+ * the iterator was initialized with MIterInit*, false if the iterator
+ * was initialized with IterInit*.
+ */
+static bool checkIterScope(const Func* f, Offset o, Id iterId, bool& itRef) {
+  assert(o >= f->base() && o < f->past());
+  for (auto const& eh : f->ehtab()) {
+    if (eh.m_type == EHEnt::Type::Fault &&
+        eh.m_base <= o && o < eh.m_past &&
+        eh.m_iterId == iterId) {
+      itRef = eh.m_itRef;
+      return true;
+    }
+  }
+  return false;
+}
+
 void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
                           int offset, const TypedValue* ftop,
                           const string& prefix) const {
@@ -753,7 +772,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
         os << " ";
       }
       bool itRef;
-      if (func->checkIterScope(offset, i, itRef)) {
+      if (checkIterScope(func, offset, i, itRef)) {
         os << toStringIter(it, itRef);
       } else {
         os << "I:Undefined";
@@ -1627,7 +1646,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
         const Func::ParamInfoVec& paramInfo = func->params();
         for (int i = nargs; i < nparams; ++i) {
           stack.pushUninit();
-          Offset dvInitializer = paramInfo[i].funcletOff();
+          Offset dvInitializer = paramInfo[i].funcletOff;
           if (dvInitializer == InvalidAbsoluteOffset) {
             // We wait to raise warnings until after all the locals have been
             // initialized. This is important because things need to be in a
@@ -1671,7 +1690,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
     SYNC();
     const Func::ParamInfoVec& paramInfo = func->params();
     for (int i = ar->numArgs(); i < nparams; ++i) {
-      Offset dvInitializer = paramInfo[i].funcletOff();
+      Offset dvInitializer = paramInfo[i].funcletOff;
       if (dvInitializer == InvalidAbsoluteOffset) {
         const char* name = func->name()->data();
         if (nparams == 1) {
@@ -1792,7 +1811,7 @@ void ExecutionContext::enterVM(ActRec* ar, StackArgsState stk,
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
-  m_firstAR = ar;
+  vmFirstAR() = ar;
 
   /*
    * When an exception is propagating, each nesting of the VM is
@@ -2072,7 +2091,6 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
-  fp->setReturnVMExit();
   // We don't need to check for space for the ActRec (unlike generally
   // in normal re-entry), because the ActRec isn't on the stack.
   checkStack(vmStack(), fp->func(), 0);
@@ -2098,7 +2116,6 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
-  fp->setReturnVMExit();
   checkStack(vmStack(), fp->func(), 0);
 
   // decref after we hold reference to the exception
@@ -2149,7 +2166,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   // Linear search from end of m_nestedVMs. In practice, we're probably
   // looking for something recently pushed.
   int i = m_nestedVMs.size() - 1;
-  ActRec* firstAR = m_firstAR;
+  ActRec* firstAR = vmFirstAR();
   while (i >= 0 && firstAR != fp) {
     firstAR = m_nestedVMs[i--].firstAR;
   }
@@ -2253,7 +2270,8 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
     auto const isReturning =
       curOp == Op::RetC || curOp == Op::RetV ||
-      curOp == Op::CreateCont || curOp == Op::Await;
+      curOp == Op::CreateCont || curOp == Op::Await ||
+      fp->localsDecRefd();
 
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin() && !fp->resumed()) {
@@ -2477,20 +2495,20 @@ const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
   return ci;
 }
 
-HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
-                                                     const char* currentDir,
-                                                     bool* initial_opt) {
+PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
+                                         const char* currentDir,
+                                         bool* initial_opt) {
   bool init;
   bool &initial = initial_opt ? *initial_opt : init;
   initial = true;
 
   struct stat s;
-  String spath = Eval::resolveVmInclude(path, currentDir, &s);
+  auto const spath = resolveVmInclude(path, currentDir, &s);
   if (spath.isNull()) return nullptr;
 
   // Check if this file has already been included.
   auto it = m_evaledFiles.find(spath.get());
-  HPHP::Eval::PhpFile* efile = nullptr;
+  PhpFile* efile = nullptr;
   if (it != end(m_evaledFiles)) {
     // We found it! Return the unit.
     efile = it->second;
@@ -2524,7 +2542,7 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
     }
   }
   // This file hasn't been included yet, so we need to parse the file
-  efile = HPHP::Eval::FileRepository::checkoutFile(
+  efile = FileRepository::checkoutFile(
     hasRealpath ? rpath.get() : spath.get(), s);
   if (efile && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
@@ -2551,7 +2569,7 @@ Unit* ExecutionContext::evalInclude(StringData* path,
                                       const StringData* curUnitFilePath,
                                       bool* initial) {
   namespace fs = boost::filesystem;
-  HPHP::Eval::PhpFile* efile = nullptr;
+  PhpFile* efile = nullptr;
   if (curUnitFilePath) {
     fs::path currentUnit(curUnitFilePath->data());
     fs::path currentDir(currentUnit.branch_path());
@@ -2565,16 +2583,16 @@ Unit* ExecutionContext::evalInclude(StringData* path,
   return nullptr;
 }
 
-HPHP::Unit* ExecutionContext::evalIncludeRoot(
+Unit* ExecutionContext::evalIncludeRoot(
   StringData* path, InclOpFlags flags, bool* initial) {
-  HPHP::Eval::PhpFile* efile = lookupIncludeRoot(path, flags, initial);
+  auto const efile = lookupIncludeRoot(path, flags, initial);
   return efile ? efile->unit() : 0;
 }
 
-HPHP::Eval::PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
-                                                           InclOpFlags flags,
-                                                           bool* initial,
-                                                           Unit* unit) {
+PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
+                                             InclOpFlags flags,
+                                             bool* initial,
+                                             Unit* unit) {
   String absPath;
   if (flags & InclOpFlags::Relative) {
     namespace fs = boost::filesystem;
@@ -2947,7 +2965,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   ar->setReturnVMExit();
   vmfp() = ar;
   vmpc() = s_debuggerDummy->entry();
-  m_firstAR = ar;
+  vmFirstAR() = ar;
   vmfp()->setVarEnv(m_globalVarEnv);
   m_globalVarEnv->enterFP(nullptr, vmfp());
 }
@@ -3699,7 +3717,38 @@ OPTBLD_INLINE void ExecutionContext::iopArray(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopNewArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(capacity);
-  vmStack().pushArrayNoRc(MixedArray::MakeReserve(capacity));
+  if (capacity == 0) {
+    vmStack().pushArrayNoRc(staticEmptyArray());
+  } else {
+    vmStack().pushArrayNoRc(MixedArray::MakeReserve(capacity));
+  }
+}
+
+OPTBLD_INLINE void ExecutionContext::iopNewMixedArray(IOP_ARGS) {
+  NEXT();
+  DECODE_IVA(capacity);
+  if (capacity == 0) {
+    vmStack().pushArrayNoRc(staticEmptyArray());
+  } else {
+    vmStack().pushArrayNoRc(MixedArray::MakeReserveMixed(capacity));
+  }
+}
+
+OPTBLD_INLINE void ExecutionContext::iopNewLikeArrayL(IOP_ARGS) {
+  NEXT();
+  DECODE_LA(local);
+  DECODE_IVA(capacity);
+
+  ArrayData* arr;
+  TypedValue* fr = frame_local(vmfp(), local);
+
+  if (LIKELY(fr->m_type == KindOfArray)) {
+    arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
+  } else {
+    capacity = (capacity ? capacity : MixedArray::SmallSize);
+    arr = MixedArray::MakeReserve(capacity);
+  }
+  vmStack().pushArrayNoRc(arr);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {
@@ -4540,9 +4589,9 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   // If in an eagerly executed async function, wrap the return value
   // into succeeded StaticWaitHandle.
   if (UNLIKELY(!vmfp()->resumed() && vmfp()->func()->isAsyncFunction())) {
-    auto const retvalCell = *tvAssertCell(&retval);
-    retval.m_data.pobj = c_StaticWaitHandle::CreateSucceededVM(retvalCell);
-    retval.m_type = KindOfObject;
+    auto const& retvalCell = *tvAssertCell(&retval);
+    auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retvalCell);
+    cellCopy(make_tv<KindOfObject>(waitHandle), retval);
   }
 
   if (shouldProfile()) {
@@ -4577,7 +4626,10 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   } else if (vmfp()->func()->isNonAsyncGenerator()) {
     // Mark the generator as finished and store the return value.
     assert(IS_NULL_TYPE(retval.m_type));
-    frame_generator(vmfp())->finish();
+    frame_generator(vmfp())->ret();
+
+    // Push return value of next()/send()/raise().
+    vmStack().pushNull();
   } else {
     not_reached();
   }
@@ -6682,7 +6734,7 @@ OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {
   auto evalFilename = std::string();
   string_printf(
     evalFilename,
-    "%s(%d) : eval()'d code",
+    "%s(%d" EVAL_FILENAME_SUFFIX,
     getContainingFileName()->data(),
     getLine()
   );
@@ -6774,7 +6826,7 @@ OPTBLD_INLINE void ExecutionContext::iopCheckThis(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopInitThisLoc(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(id);
+  DECODE_LA(id);
   TypedValue* thisLoc = frame_local(vmfp(), id);
   tvRefcountedDecRef(thisLoc);
   if (vmfp()->hasThis()) {
@@ -6805,7 +6857,7 @@ static inline RefData* lookupStatic(StringData* name,
 
 OPTBLD_INLINE void ExecutionContext::iopStaticLoc(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(localId);
+  DECODE_LA(localId);
   DECODE_LITSTR(var);
 
   bool inited;
@@ -6826,7 +6878,7 @@ OPTBLD_INLINE void ExecutionContext::iopStaticLoc(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopStaticLocInit(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(localId);
+  DECODE_LA(localId);
   DECODE_LITSTR(var);
 
   bool inited;
@@ -6866,11 +6918,11 @@ OPTBLD_INLINE void ExecutionContext::iopVerifyParamType(IOP_ARGS) {
   SYNC(); // We might need vmpc() to be updated to throw.
   NEXT();
 
-  DECODE_IVA(paramId);
+  DECODE_LA(paramId);
   const Func *func = vmfp()->m_func;
   assert(paramId < func->numParams());
   assert(func->numParams() == int(func->params().size()));
-  const TypeConstraint& tc = func->params()[paramId].typeConstraint();
+  const TypeConstraint& tc = func->params()[paramId].typeConstraint;
   assert(tc.hasConstraint());
   if (!tc.isTypeVar()) {
     tc.verifyParam(frame_local(vmfp(), paramId), func, paramId);
@@ -6962,37 +7014,18 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCl(IOP_ARGS) {
 
 const StaticString s_this("this");
 
-// The variable environment, extra args and all locals are teleported
-// from the ActRec on the evaluation stack to the suspended ActRec
-// on the heap.
-void ExecutionContext::fillResumableVars(const Func* func,
-                                            ActRec* origFp,
-                                            ActRec* genFp) {
-  for (Id i = 0; i < func->numLocals(); ++i) {
-    tvCopy(*frame_local(origFp, i), *frame_local(genFp, i));
-  }
-
-  // m_varEnv and m_extraArgs are in the same union
-  assert((void*)&genFp->m_varEnv == (void*)&genFp->m_extraArgs);
-  genFp->m_varEnv = origFp->m_varEnv;
-  if (UNLIKELY(genFp->hasVarEnv())) {
-    genFp->getVarEnv()->suspend(origFp, genFp);
-  }
-}
-
 OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   NEXT();
   assert(!vmfp()->resumed());
 
-  const auto func = vmfp()->func();
   const auto resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
 
-  // Create the Generator object.
-  auto cont = c_Generator::Create(vmfp(), vmfp()->func()->numSlotsInFrame(),
-                                  nullptr, resumeOffset);
-
-  // Teleport local variables into the generator.
-  fillResumableVars(func, vmfp(), cont->actRec());
+  // Create the Generator object. Create takes care of copying local
+  // variables and iterators.
+  auto cont = c_Generator::Create<false>(vmfp(),
+                                         vmfp()->func()->numSlotsInFrame(),
+                                         nullptr,
+                                         resumeOffset);
 
   // Call the FunctionSuspend hook. Keep the generator on the stack so that
   // the unwinder could free it if the hook fails.
@@ -7015,9 +7048,16 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
 }
 
+static inline BaseGenerator* this_base_generator(const ActRec* fp) {
+  auto const obj = fp->getThis();
+  assert(/*obj->instanceof(c_AsyncGenerator::classof()) ||*/
+         obj->instanceof(c_Generator::classof()));
+  return static_cast<BaseGenerator*>(obj);
+}
+
 static inline c_Generator* this_generator(const ActRec* fp) {
-  ObjectData* obj = fp->getThis();
-  assert(obj->instanceof(c_Generator::classof()));
+  auto const obj = this_base_generator(fp);
+  assert(obj->getVMClass() == c_Generator::classof());
   return static_cast<c_Generator*>(obj);
 }
 
@@ -7031,7 +7071,7 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   // Do linkage of the generator's AR.
   assert(vmfp()->hasThis());
   c_Generator* cont = this_generator(vmfp());
-  assert(cont->getState() == c_Generator::Running);
+  assert(cont->getState() == BaseGenerator::State::Running);
   ActRec* contAR = cont->actRec();
   contAR->setReturn(vmfp(), pc, tx->uniqueStubs.genRetHelper);
 
@@ -7052,39 +7092,51 @@ OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
   iopThrow(IOP_PASS_ARGS);
 }
 
-OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
-  NEXT();
+OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
+                                           const Cell* key,
+                                           const Cell& value) {
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  auto const resumeOffset = func->unit()->offsetOf(pc);
+  assert(fp->resumed());
+  assert(func->isGenerator());
 
-  auto cont = frame_generator(vmfp());
-  auto resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
-  cont->suspend(nullptr, resumeOffset, *vmStack().topC());
-  vmStack().popTV();
+  if (!func->isAsync()) {
+    assert(fp->sfp());
+    frame_generator(fp)->yield(resumeOffset, key, value);
+
+    // Push return value of next()/send()/raise().
+    vmStack().pushNull();
+  } else {
+    not_reached();
+  }
 
   EventHook::FunctionSuspend(vmfp(), true);
 
-  // Return control to the next()/send()/raise() caller.
-  Offset soff = vmfp()->m_soff;
-  vmfp() = vmfp()->sfp();
-  pc = vmfp()->func()->getEntry() + soff;
-  assert(vmfp());
+  // Grab caller info from ActRec.
+  ActRec* sfp = fp->sfp();
+  Offset soff = fp->m_soff;
+
+  // Return control to the next()/send()/raise() caller.$a
+  vmfp() = sfp;
+  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
+}
+
+OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
+  NEXT();
+  auto const value = *vmStack().topC();
+  vmStack().discard();
+
+  yield(IOP_PASS_ARGS, nullptr, value);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   NEXT();
+  auto const key = *vmStack().indC(1);
+  auto const value = *vmStack().topC();
+  vmStack().ndiscard(2);
 
-  auto cont = frame_generator(vmfp());
-  auto resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
-  cont->suspend(nullptr, resumeOffset, *vmStack().indC(1), *vmStack().topC());
-  vmStack().popTV();
-  vmStack().popTV();
-
-  EventHook::FunctionSuspend(vmfp(), true);
-
-  // Return control to the next()/send()/raise() caller.
-  Offset soff = vmfp()->m_soff;
-  vmfp() = vmfp()->sfp();
-  pc = vmfp()->func()->getEntry() + soff;
-  assert(vmfp());
+  yield(IOP_PASS_ARGS, &key, value);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
@@ -7095,9 +7147,8 @@ OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopContValid(IOP_ARGS) {
   NEXT();
-  TypedValue* tv = vmStack().allocTV();
-  tvWriteUninit(tv);
-  tvAsVariant(tv) = this_generator(vmfp())->getState() != c_Generator::Done;
+  vmStack().pushBool(
+    this_generator(vmfp())->getState() != BaseGenerator::State::Done);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContKey(IOP_ARGS) {
@@ -7129,18 +7180,11 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   assert(!child->isFinished());
   vmStack().discard();
 
-  // Create the AsyncFunctionWaitHandle object.
+  // Create the AsyncFunctionWaitHandle object. Create takes care of
+  // copying local variables and itertors.
   auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(
     c_AsyncFunctionWaitHandle::Create(vmfp(), vmfp()->func()->numSlotsInFrame(),
                                       nullptr, resumeOffset, child));
-
-  // Teleport local variables into the AsyncFunctionWaitHandle.
-  fillResumableVars(func, vmfp(), waitHandle->actRec());
-
-  // Teleport iterators into the AsyncFunctionWaitHandle.
-  memcpy(frame_iter(waitHandle->actRec(), iters - 1),
-         frame_iter(vmfp(), iters - 1),
-         iters * sizeof(Iter));
 
   // Call the FunctionSuspend hook. Keep the AsyncFunctionWaitHandle
   // on the stack so that the unwinder could free it if the hook fails.
@@ -7578,8 +7622,8 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
     return;
   }
 
-  VMState savedVM = { vmpc(), vmfp(), m_firstAR, savedSP };
-  TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), m_firstAR, savedSP);
+  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP };
+  TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
 
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
@@ -7603,7 +7647,7 @@ void ExecutionContext::popVMState() {
     // last exit
     vmfp() = nullptr;
     vmpc() = nullptr;
-    m_firstAR = nullptr;
+    vmFirstAR() = nullptr;
     return;
   }
 
@@ -7612,7 +7656,7 @@ void ExecutionContext::popVMState() {
   VMState &savedVM = m_nestedVMs.back();
   vmpc() = savedVM.pc;
   vmfp() = savedVM.fp;
-  m_firstAR = savedVM.firstAR;
+  vmFirstAR() = savedVM.firstAR;
   vmStack().top() = savedVM.sp;
 
   if (debug) {

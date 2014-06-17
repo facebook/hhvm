@@ -1,0 +1,8 @@
+Function [ <internal> function trim ] {
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $str ]
+    Parameter #1 [ <optional> $charlist = '
+  	' . "\0" . ' ' ]
+  }
+}

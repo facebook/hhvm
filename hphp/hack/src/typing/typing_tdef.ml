@@ -23,11 +23,7 @@ let rec expand_typedef_ seen env r x argl =
   let pos = Reason.to_pos r in
   let env, tdef = Typing_env.get_typedef env x in
   let tdef = match tdef with None -> assert false | Some x -> x in
-  let tdef =
-    match tdef with
-    | Env.Typedef.Error -> raise Ignore
-    | Env.Typedef.Ok x -> x
-  in
+  match tdef with Env.Typedef.Error -> env, (r, Tany) | Env.Typedef.Ok tdef ->
   let visibility, tparaml, tcstr, expanded_ty = tdef in
   let should_expand =
     match visibility with
@@ -39,10 +35,10 @@ let rec expand_typedef_ seen env r x argl =
   then begin
     let n = List.length tparaml in
     let n = string_of_int n in
-    error pos ("The type "^x^" expects "^n^" parameters");
+    Errors.add pos ("The type "^x^" expects "^n^" parameters");
   end;
   let subst = ref SMap.empty in
-  List.iter2 begin fun ((_, param), _) ty ->
+  Utils.iter2_shortest begin fun ((_, param), _) ty ->
     subst := SMap.add param ty !subst
   end tparaml argl;
   let env, expanded_ty =
@@ -61,8 +57,12 @@ let rec expand_typedef_ seen env r x argl =
       env, (r, Tabstract ((pos, x), argl, tcstr))
     end
   in
-  check_typedef seen env expanded_ty;
-  env, (r, snd expanded_ty)
+  Errors.try_
+    (fun () ->
+      check_typedef seen env expanded_ty;
+      env, (r, snd expanded_ty)
+    )
+    (fun l -> Errors.add_list l; env, (r, Tany))
 
 and check_typedef seen env (r, t) =
   match t with
@@ -89,7 +89,7 @@ and check_typedef seen env (r, t) =
       check_fun_typedef seen env fty
   | Tapply ((p, x), argl) when Typing_env.is_typedef env x ->
       if seen = x
-      then error p "Cyclic typedef"
+      then Errors.add p "Cyclic typedef"
       else
         let env, ty = expand_typedef_ seen env r x argl in
         check_typedef seen env ty

@@ -145,7 +145,7 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...) /* {{{ */
 
     f = open(translated.c_str(), flags, mode);
   } else {
-    f = open(translated.c_str(), flags);
+    f = open(translated.c_str(), flags & ~O_CREAT);
   }
   return f;
 }

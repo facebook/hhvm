@@ -93,6 +93,16 @@ struct Options {
   bool NoOptimizations = false;
 
   /*
+   * If true, analyze calls to functions in a context-sensitive way.
+   *
+   * Note, this is disabled by default because of the need to have an
+   * intersection operation in the type system to maintain index
+   * invariants---it doesn't quite work yet.  See comments in
+   * index.cpp.
+   */
+  bool ContextSensitiveInterp = false;
+
+  /*
    * If true, completely remove jumps to blocks that are inferred to
    * be dead.  When false, dead blocks are replaced with Fatal
    * bytecodes.
@@ -116,6 +126,12 @@ struct Options {
    */
   bool LocalDCE = true;
   bool GlobalDCE = false;
+
+  /*
+   * Whether to remove completely unused local variables.  This
+   * requires GlobalDCE.
+   */
+  bool RemoveUnusedLocals = false;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can

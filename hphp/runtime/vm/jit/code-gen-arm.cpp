@@ -139,7 +139,6 @@ CALL_OPCODE(Box)
 CALL_OPCODE(ConvIntToStr)
 
 CALL_OPCODE(AllocObj)
-CALL_OPCODE(NewPackedArray)
 
 CALL_OPCODE(ConcatStrStr)
 CALL_OPCODE(ConcatIntStr)
@@ -187,6 +186,9 @@ CALL_OPCODE(LdArrFuncCtx)
 CALL_OPCODE(LdArrFPushCuf)
 CALL_OPCODE(LdStrFPushCuf)
 CALL_OPCODE(NewArray)
+CALL_OPCODE(NewMixedArray)
+CALL_OPCODE(NewLikeArray)
+CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(ClosureStaticLocInit)
@@ -213,20 +215,20 @@ CALL_OPCODE(CountArray)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
-            const Func* vmFunc, bool resumed) {
+            const Func* vmFunc, bool resumed, TransID profTransId) {
   FTRACE(1, "punting: {}\n", func);
-  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed);
+  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed, profTransId);
 }
 
-#define PUNT_OPCODE(name)                                           \
-  void CodeGenerator::cg##name(IRInstruction* inst) {               \
-    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),  \
-           curFunc(), resumed());                                   \
+#define PUNT_OPCODE(name)                                               \
+  void CodeGenerator::cg##name(IRInstruction* inst) {                   \
+    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),      \
+           curFunc(), resumed(), m_curInst->marker().profTransId());    \
   }
 
 #define CG_PUNT(instr)                                              \
     cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
-           curFunc(), resumed())
+           curFunc(), resumed(), m_curInst->marker().profTransId())
 
 /////////////////////////////////////////////////////////////////////
 //TODO t3702757: Convert to CALL_OPCODE, the following set works on
@@ -368,7 +370,6 @@ PUNT_OPCODE(CheckSurpriseFlags)
 PUNT_OPCODE(SurpriseHook)
 PUNT_OPCODE(FunctionSuspendHook)
 PUNT_OPCODE(FunctionReturnHook)
-PUNT_OPCODE(ExitOnVarEnv)
 PUNT_OPCODE(ReleaseVVOrExit)
 PUNT_OPCODE(CheckInit)
 PUNT_OPCODE(CheckInitMem)
@@ -454,7 +455,6 @@ PUNT_OPCODE(StRetVal)
 PUNT_OPCODE(RetAdjustStack)
 PUNT_OPCODE(StMem)
 PUNT_OPCODE(StProp)
-PUNT_OPCODE(StCell)
 PUNT_OPCODE(StLocNT)
 PUNT_OPCODE(StRef)
 PUNT_OPCODE(StRaw)
@@ -499,7 +499,6 @@ PUNT_OPCODE(LdWHState)
 PUNT_OPCODE(LdWHResult)
 PUNT_OPCODE(LdAFWHActRec)
 PUNT_OPCODE(LdResumableArObj)
-PUNT_OPCODE(CopyAsyncCells)
 PUNT_OPCODE(IterInit)
 PUNT_OPCODE(IterInitK)
 PUNT_OPCODE(IterNext)
@@ -593,19 +592,18 @@ PUNT_OPCODE(ColIsNEmpty)
 
 //////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
-                                    Block* target,
-                                    ConditionCode cc) {
+void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc,
+                     CodegenState& state) {
   vixl::MacroAssembler as { cb };
 
-  if (m_state.addresses[target]) {
+  if (state.addresses[target]) {
     not_implemented();
   }
 
   // The block hasn't been emitted yet. Record the location in CodegenState.
   // CodegenState holds a map from Block* to the head of a linked list, where
   // the jump instructions themselves are the list nodes.
-  auto next = reinterpret_cast<TCA>(m_state.patches[target]);
+  auto next = reinterpret_cast<TCA>(state.patches[target]);
   auto here = cb.frontier();
 
   // To avoid encoding 0x0 as the jump target. That would conflict with the use
@@ -616,7 +614,7 @@ void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
   // This will never actually be executed as a jump to "next". It's just a
   // pointer to the next jump instruction to retarget.
   mcg->backEnd().emitSmashableJump(cb, next, cc);
-  m_state.patches[target] = here;
+  state.patches[target] = here;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -641,7 +639,7 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {
-  emitJumpToBlock(m_mainCode, inst->taken(), CC_None);
+  emitJumpToBlock(m_mainCode, inst->taken(), CC_None, m_state);
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
@@ -1341,7 +1339,7 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
     rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc));
+      emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc), m_state);
     }
   );
 }
@@ -1374,7 +1372,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   };
 
   auto doJcc = [&] (ConditionCode cc) {
-    emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc));
+    emitJumpToBlock(m_mainCode, inst->taken(), ccNegate(cc), m_state);
   };
 
   Type typeParam = inst->typeParam();
@@ -1385,7 +1383,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     return;
   }
   if (srcType.not(typeParam)) {
-    emitJumpToBlock(m_mainCode, inst->taken(), CC_None);
+    emitJumpToBlock(m_mainCode, inst->taken(), CC_None, m_state);
     return;
   }
 
@@ -1641,7 +1639,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   for (auto i = uint32_t{0}; i < numArgs; ++i, ++srcNum) {
     auto const& pi = func->params()[i];
-    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
+    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
       callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
       callArgs.ssa(srcNum);

@@ -65,6 +65,9 @@
     commit: 5d4900e79d5ea08118782345fb97e23e6ab1e4f0
     install_root: composer
     test_root: composer
+    clowns:
+     # https://github.com/composer/composer/issues/3049 - fails on PHP5 too
+     - composer/tests/Composer/Test/Json/JsonFileTest.php
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
     # Stable is 2.4.2, but need master since we have pull requests.
@@ -110,9 +113,11 @@
     install_root: guzzle
     test_root: guzzle
   guzzle4:
-    url: https://github.com/guzzle/guzzle.git
-    branch: 4.0.1
-    commit: c1cf6c8630b71fa7c9b8f7e769758bb1d9147dae
+    # Slightly after 4.1.1, to include
+    # https://github.com/guzzle/guzzle/pull/701
+    url: https://github.com/fredemmott/guzzle.git
+    branch: change-port
+    commit: 4db19b75d9211e729ff277c238ef5de4bf658597
     install_root: guzzle4
     test_root: guzzle4
   hhvmquickinterp:
@@ -188,7 +193,7 @@
       - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleUrlTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
-    branch: "3.3-dev"
+    branch: "3.4-dev"
     commit: 11b927eb40b6646733ead7a9e3cd5f2e68a289b8
     install_root: joomla-cms
     test_root: joomla-cms
@@ -450,9 +455,10 @@
     # Larger timeout, no code coverage, no selenium testing
     config_file: phpmyadmin/phpunit.xml.hhvm
   phpunit:
-    url: https://github.com/sebastianbergmann/phpunit.git
-    branch: 4.0.14
-    commit: a80b77d92a6c7723d77c6728b4ae37e92a65ac1d
+    url: https://github.com/fredemmott/phpunit.git
+    # 4.2.x branch + https://github.com/sebastianbergmann/phpunit/pull/1288
+    branch: json-test-on-latest-hhvm
+    commit: 8fdf5ff0df202957eca6c1d875138c6e48108c17
     install_root: phpunit
     test_root: phpunit
   proxymanager:

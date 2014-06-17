@@ -51,18 +51,12 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-IF(NOT DEFINED CMAKE_PREFIX_PATH)
-  message(STATUS "CMAKE_PREFIX_PATH was missing, proceeding anyway")
-endif()
-
 # Look for the chrpath tool so we can warn if it's not there
 SET(FOUND_CHRPATH OFF)
 IF(UNIX AND NOT APPLE)
     find_program(CHRPATH chrpath)
     IF (NOT CHRPATH STREQUAL "CHRPATH-NOTFOUND")
         SET(FOUND_CHRPATH ON)
-    else()
-        message(WARNING "chrpath not found, rpath will not be stripped from installed binaries")
     endif()
 ENDIF(UNIX AND NOT APPLE)
 
@@ -159,6 +153,7 @@ add_definitions(-DHPHP_OSS=1)
 # later versions of binutils don't play well without automake
 add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
 
+include_directories("${TP_DIR}/fastlz")
 include_directories("${TP_DIR}/libsqlite3")
 include_directories("${TP_DIR}/timelib")
 include_directories("${TP_DIR}/libafdt/src")

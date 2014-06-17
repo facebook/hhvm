@@ -62,9 +62,11 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
 
 //////////////////////////////////////////////////////////////////////
 
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argv) {
   MacroAssembler a { cb };
+
+  const bool persist = flags & SRFlags::Persist;
 
   folly::Optional<CodeCursor> maybeCc = folly::none;
   if (start != cb.frontier()) {

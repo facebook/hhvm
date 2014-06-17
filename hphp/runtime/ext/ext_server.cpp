@@ -228,18 +228,5 @@ int64_t f_xbox_get_thread_time() {
   throw Exception("Not an xbox worker!");
 }
 
-bool f_server_get_custom_bool_setting(const String& settingName,
-                                      bool defaultValue) {
-  bool retVal = false;
-  if (!RuntimeOption::GetServerCustomBoolSetting(settingName.toCppString(),
-                                                 retVal)) {
-    // The value isn't present in the CustomSettings section of config.hdf,
-    // so return the default value instead.
-    retVal = defaultValue;
-  }
-
-  return retVal;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

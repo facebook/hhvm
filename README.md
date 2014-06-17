@@ -1,4 +1,4 @@
-# HHVM [![Build Status](https://travis-ci.org/facebook/hhvm.svg)](https://travis-ci.org/facebook/hhvm)
+# HHVM [![Build Status](https://travis-ci.org/facebook/hhvm.svg?branch=master)](https://travis-ci.org/facebook/hhvm)
 
 HHVM (aka the HipHop Virtual Machine) is an open-source virtual machine designed for executing programs written in [Hack](http://hacklang.org) and PHP. HHVM uses a just-in-time compilation approach to achieve superior performance while maintaining the flexibility that PHP developers are accustomed to. To date, HHVM (and its predecessor HPHPc before it) has realized over a 9x increase in web request throughput and over a 5x reduction in memory consumption for Facebook compared with the PHP 5.2 engine + APC.
 
@@ -23,7 +23,7 @@ You can run standalone programs just by passing them to hhvm: `hhvm my_script.ph
 
 If you want to host a website: 
 * Install your favorite webserver
-* Install our [package](https://github.com/facebook/hhvm/wiki#installing-pre-built-packages-for-hhvm)
+* Install our [package](https://github.com/facebook/hhvm/wiki/Prebuilt%20Packages%20for%20HHVM)
 * Start your webserver
 * Run `sudo /etc/init.d/hhvm start`
 * Visit your site at http://.../index.php

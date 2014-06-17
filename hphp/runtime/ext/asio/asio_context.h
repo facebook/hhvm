@@ -26,6 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ActRec;
 FORWARD_DECLARE_CLASS(WaitableWaitHandle);
 FORWARD_DECLARE_CLASS(ResumableWaitHandle);
 FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
@@ -39,11 +40,10 @@ class AsioContext {
     void* operator new(size_t size) { return smart_malloc(size); }
     void operator delete(void* ptr) { smart_free(ptr); }
 
-    AsioContext() : m_current(nullptr) {}
+    explicit AsioContext(ActRec* savedFP) : m_savedFP(savedFP) {}
     void exit(context_idx_t ctx_idx);
 
-    bool isRunning() { return m_current; }
-    c_ResumableWaitHandle* getCurrent() { return m_current; }
+    ActRec* getSavedFP() const { return m_savedFP; }
 
     void schedule(c_ResumableWaitHandle* wait_handle) {
       m_runnableQueue.push(wait_handle);
@@ -74,7 +74,8 @@ class AsioContext {
 
     bool runSingle(reschedule_priority_queue_t& queue);
 
-    c_ResumableWaitHandle* m_current;
+    // Frame pointer to the ActRec of the WaitHandle::join() call.
+    ActRec* m_savedFP;
 
     // queue of ResumableWaitHandles ready for immediate execution
     smart::queue<c_ResumableWaitHandle*> m_runnableQueue;

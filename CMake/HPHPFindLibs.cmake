@@ -439,6 +439,7 @@ macro(hphp_link target)
     target_link_libraries(${target} ${RT_LIB})
   endif()
 
+  target_link_libraries(${target} fastlz)
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} sqlite3)
   target_link_libraries(${target} lz4)

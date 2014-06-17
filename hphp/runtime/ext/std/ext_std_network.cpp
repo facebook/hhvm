@@ -489,18 +489,22 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   case DNS_T_TXT: {
     int ll = 0;
 
-    subarray.set(s_type, s_TXT);
     String s = String(dlen, ReserveString);
     tp = (unsigned char *)s.bufferSlice().ptr;
 
     while (ll < dlen) {
       n = cp[ll];
+      if ((n + ll) > dlen) {
+        // bad record, don't set anything
+        break;
+      }
       memcpy(tp + ll , cp + ll + 1, n);
       ll = ll + n + 1;
     }
     s.setSize(dlen > 0 ? dlen - 1 : 0);
     cp += dlen;
 
+    subarray.set(s_type, s_TXT);
     subarray.set(s_txt, s);
     break;
   }

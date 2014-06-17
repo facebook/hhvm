@@ -40,7 +40,7 @@ let print_reason_color ~(first:bool) ((p, s): Pos.t * string) =
     let strings = List.map (fun (_,x) -> x) to_print in
     List.iter (Printf.printf "%s") strings
 
-let print_error_color (e:Utils.error) =
+let print_error_color (e:Errors.error) =
   print_reason_color ~first:true (List.hd e);
   List.iter (print_reason_color ~first:false) (List.tl e)
 

@@ -365,7 +365,7 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
       simpleArrayIsset || simpleStringOp) {
     setNoMIState();
     if (simpleCollectionGet || simpleCollectionIsset) {
-      constrainBase(DataTypeSpecialized, baseVal);
+      constrainBase(TypeConstraint(baseType.getClass()), baseVal);
     } else {
       constrainBase(DataTypeSpecific, baseVal);
     }
@@ -724,12 +724,20 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
       return;
 
     case SimpleOp::PackedArray:
+      constrainBase(TypeConstraint(DataTypeSpecialized).setWantArrayKind());
+      return;
+
     case SimpleOp::Vector:
     case SimpleOp::Map:
-    case SimpleOp::Pair:
-      constrainBase(DataTypeSpecialized);
+    case SimpleOp::Pair: {
+      SSATmp* base = getInput(m_mii.valCount(), DataTypeGeneric);
+      auto baseType = base->type().unbox();
+      constrainBase(TypeConstraint(baseType.getClass()));
       return;
+    }
   }
+
+  not_reached();
 }
 
 // "Simple" bases are stack cells and locals.
@@ -1758,7 +1766,8 @@ void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
         },
         [&] (SSATmp* base) { // Next
           m_ht.emitIncStat(Stats::ArrayGet_Packed, 1, false);
-          m_irb.constrainValue(base, DataTypeSpecialized);
+          m_irb.constrainValue(
+            base, TypeConstraint(DataTypeSpecialized).setWantArrayKind());
           return emitPackedArrayGet(base, key, true);
         },
         [&] { // Taken
@@ -2690,6 +2699,33 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
     }
     gen(CheckNullptr, exit, m_strTestResult);
     gen(IncStat, cns(Stats::TC_SetMStrGuess_Hit), cns(1), cns(false));
+  }
+}
+
+Block* HhbcTranslator::MInstrTranslator::makeEmptyCatch() {
+  return m_ht.makeCatch();
+}
+
+Block* HhbcTranslator::MInstrTranslator::makeCatch() {
+  auto b = makeEmptyCatch();
+  m_failedVec.push_back(b);
+  return b;
+}
+
+Block* HhbcTranslator::MInstrTranslator::makeCatchSet() {
+  assert(!m_failedSetBlock);
+  m_failedSetBlock = makeCatch();
+
+  // This catch trace will be modified in emitMPost to end with a side
+  // exit, and TryEndCatch will fall through to that side exit if an
+  // InvalidSetMException is thrown.
+  m_failedSetBlock->back().setOpcode(TryEndCatch);
+  return m_failedSetBlock;
+}
+
+void HhbcTranslator::MInstrTranslator::prependToTraces(IRInstruction* inst) {
+  for (auto b : m_failedVec) {
+    b->prepend(m_unit.cloneInstruction(inst));
   }
 }
 

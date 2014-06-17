@@ -134,9 +134,13 @@ module WorkerApi = struct
 
   let uppercase_filter str =
     let result = ref [] in
+    (* let the first character through every time so camelcase names
+     * that begin with lower case don't miss the first word. *)
+    let first_char = ref true in
     String.iter begin fun c ->
-      if Char.lowercase c <> c
-      then result := c :: !result
+      if !first_char || Char.lowercase c <> c
+      then result := c :: !result;
+      first_char := false
     end str;
     let i = ref (List.length !result) in
     let filtered_str = String.create !i in
@@ -150,7 +154,7 @@ module WorkerApi = struct
     let name = (snd c.Ast.c_name) in
     (* camel name is the name filtered for the starting letters of camelcase
      * For example, FooBarClass's camel name is FBC *)
-    let camel_name = clean_key (uppercase_filter name) in
+    let camel_name = clean_key (uppercase_filter (Utils.strip_ns name)) in
     let name = clean_key name in
     let c_result = result_from_id c.Ast.c_name (Class c.Ast.c_kind) in
     let acc =

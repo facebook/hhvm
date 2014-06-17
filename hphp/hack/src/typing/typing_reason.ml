@@ -244,5 +244,6 @@ let none = Rnone
 
 let explain_generic_constraint reason name messagel =
   let pos = to_pos reason in
-  Utils.error_l
+  Errors.add_list
     (messagel @ [pos, "Considering the constraint on the type '"^name^"'"])
+

@@ -16,8 +16,6 @@
 (* The options from the command line *)
 (*****************************************************************************)
 
-type lang = Hack | Flow
-
 type options = {
     check_mode       : bool;
     json_mode        : bool;
@@ -26,7 +24,6 @@ type options = {
     root             : Path.path;
     should_detach    : bool;
     convert          : Path.path option;
-    lang             : lang;
     rest             : string list;
   }
 
@@ -127,7 +124,6 @@ let populate_options () =
     root          = Path.mk_path !root;
     should_detach = !should_detach;
     convert       = convert;
-    lang          = Hack;
     rest          = !rest_options;
   }
 
@@ -141,7 +137,6 @@ let default_options ~root =
   root = Path.mk_path root;
   should_detach = false;
   convert = None;
-  lang = Hack;
   rest = [];
 }
 
@@ -153,9 +148,7 @@ let default_options ~root =
 
 let check_options options =
   let root = options.root in
-  (* for now, we don't care if flow is run on the root *)
-  if options.lang = Hack
-  then Wwwroot.assert_www_directory root;
+  Wwwroot.assert_www_directory root;
   ()
 
 (*****************************************************************************)
@@ -178,4 +171,3 @@ let skip_init options = options.skip_init
 let root options = options.root
 let should_detach options = options.should_detach
 let convert options = options.convert
-let is_flow options = options.lang = Flow

@@ -9,14 +9,14 @@ class Mustache extends Framework {
   protected function install(): void {
     parent::install();
 
-    verbose("Initialize submodules.\n", Options::$verbose);
+    verbose("Initialize submodules.\n");
     $git_command = "git submodule update --init";
-    $git_ret = run_install($git_command, $this->getInstallRoot(),
+    $git_ret = run_install($git_command, nullthrows($this->getInstallRoot()),
                            ProxyInformation::$proxies);
     if ($git_ret !== 0) {
-      remove_dir_recursive($this->getInstallRoot());
+      remove_dir_recursive(nullthrows($this->getInstallRoot()));
       error_and_exit("Could not initialize submodules for ". $this->name.
-                     "! Removing framework!\n", Options::$csv_only);
+                     "! Removing framework!\n");
     }
   }
 }

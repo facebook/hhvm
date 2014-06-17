@@ -966,6 +966,15 @@ class Redis {
     $line = fgets($this->connection);
     if (substr($line, -2) == "\r\n") {
       $line = substr($line, 0, -2);
+    } else if (substr($line, -1) == "\r") {
+      $line = substr($line, 0, -1);
+      $lf = fgetc($this->connection);
+      if ($lf === false) {
+        // A response must terminate with both CR and LF. Refuse to guess.
+        return false;
+      } else if ($lf !== "\n") {
+        throw new RedisException("Protocol error: CR not followed by LF");
+      }
     }
 
     return $line;

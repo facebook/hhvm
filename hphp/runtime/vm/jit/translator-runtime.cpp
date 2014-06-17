@@ -62,6 +62,16 @@ namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
+ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
+  ArrayData* r = a->append(tvAsCVarRef(&value), a->getCount() != 1);
+  if (UNLIKELY(r != a)) {
+    r->incRefCount();
+    decRefArr(a);
+  }
+  tvRefcountedDecRef(value);
+  return r;
+}
+
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,
                                TypedValue value) {
@@ -266,7 +276,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
 }
 
 void raisePropertyOnNonObject() {
-  raise_warning("Cannot access property on non-object");
+  raise_notice("Cannot access property on non-object");
 }
 
 void raiseUndefProp(ObjectData* base, const StringData* name) {
@@ -336,7 +346,7 @@ void VerifyParamTypeFail(int paramNum) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
-  auto const& tc = func->params()[paramNum].typeConstraint();
+  auto const& tc = func->params()[paramNum].typeConstraint;
   TypedValue* tv = frame_local(ar, paramNum);
   assert(!tc.check(tv, func));
   tc.verifyParamFail(func, tv, paramNum);
@@ -962,7 +972,7 @@ static void sync_regstate_to_caller(ActRec* preLive) {
   auto const ec = g_context.getNoCheck();
   auto& regs = vmRegsUnsafe();
   regs.stack.top() = (TypedValue*)preLive - preLive->numArgs();
-  ActRec* fp = preLive == ec->m_firstAR ?
+  ActRec* fp = preLive == vmFirstAR() ?
     ec->m_nestedVMs.back().fp : preLive->m_sfp;
   regs.fp = fp;
   regs.pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);

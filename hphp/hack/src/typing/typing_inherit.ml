@@ -19,7 +19,6 @@
 open Utils
 open Nast
 open Typing_defs
-open Silent
 
 module Env = Typing_env
 module Inst = Typing_instantiate
@@ -113,8 +112,8 @@ let desugar_class_hint = function
 
 let check_arity pos class_name class_type class_parameters =
   let arity = List.length class_type.tc_tparams in
-  if List.length class_parameters <> arity && not !is_silent_mode
-  then error pos ("The class "^(Utils.strip_ns class_name)^" expects "^
+  if List.length class_parameters <> arity
+  then Errors.add pos ("The class "^(Utils.strip_ns class_name)^" expects "^
     soi arity^" arguments");
   ()
 

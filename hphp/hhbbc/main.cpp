@@ -45,6 +45,8 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
+namespace fs = boost::filesystem;
+
 //////////////////////////////////////////////////////////////////////
 
 std::string output_repo;
@@ -102,10 +104,13 @@ void parse_options(int argc, char** argv) {
 
   po::options_description oflags("Optimization Flags");
   oflags.add_options()
+    ("context-sensitive-interp",
+                                po::value(&options.ContextSensitiveInterp))
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
     ("constant-prop",           po::value(&options.ConstantProp))
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
+    ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))
@@ -229,13 +234,17 @@ void compile_repo() {
 int main(int argc, char** argv) try {
   parse_options(argc, argv);
 
-  if (boost::filesystem::exists(output_repo)) {
+  if (fs::exists(output_repo)) {
     std::cout << "output repo already exists; removing it\n";
     if (unlink(output_repo.c_str())) {
       std::cerr << "failed to unlink output repo: "
                 << strerror(errno) << '\n';
       return 1;
     }
+  }
+  if (!fs::exists(input_repo)) {
+    std::cerr << "input repo `" << input_repo << "' not found\n";
+    return 1;
   }
 
   Hdf config;

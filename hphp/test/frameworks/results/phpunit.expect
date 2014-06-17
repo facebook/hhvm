@@ -2,6 +2,20 @@ CountTest::testCount
 .
 CountTest::testCountDoesNotChangeIteratorKey
 .
+ExceptionMessageTest::testLiteralMessage
+.
+ExceptionMessageTest::testMessageWithXdebugScreamOn
+S
+ExceptionMessageTest::testPatialMessageBegin
+.
+ExceptionMessageTest::testPatialMessageEnd
+.
+ExceptionMessageTest::testPatialMessageMiddle
+.
+ExceptionMessageTest::testRegexMessage
+.
+ExceptionMessageTest::testRegexMessageExtreme
+.
 Extensions_RepeatedTestTest::testRepeatedMoreThanOnce
 .
 Extensions_RepeatedTestTest::testRepeatedNegative
@@ -1268,95 +1282,7 @@ Framework_AssertTest::testXMLStructureWrongNumberOfNodes
 .
 Framework_AssertTest::testXmlStringNotEqualsXmlFile
 .
-Framework_Assert_FunctionsTest::testLogicalAnd
-.
-Framework_Assert_FunctionsTest::testLogicalOr
-.
-Framework_Assert_FunctionsTest::testLogicalXor
-.
 Framework_BaseTestListenerTest::testEndEventsAreCounted
-.
-Framework_ComparatorTest::testGetInstance with data set #0
-.
-Framework_ComparatorTest::testGetInstance with data set #1
-.
-Framework_ComparatorTest::testGetInstance with data set #10
-.
-Framework_ComparatorTest::testGetInstance with data set #11
-.
-Framework_ComparatorTest::testGetInstance with data set #12
-.
-Framework_ComparatorTest::testGetInstance with data set #13
-.
-Framework_ComparatorTest::testGetInstance with data set #14
-.
-Framework_ComparatorTest::testGetInstance with data set #15
-.
-Framework_ComparatorTest::testGetInstance with data set #16
-.
-Framework_ComparatorTest::testGetInstance with data set #17
-.
-Framework_ComparatorTest::testGetInstance with data set #18
-.
-Framework_ComparatorTest::testGetInstance with data set #19
-.
-Framework_ComparatorTest::testGetInstance with data set #2
-.
-Framework_ComparatorTest::testGetInstance with data set #20
-.
-Framework_ComparatorTest::testGetInstance with data set #21
-.
-Framework_ComparatorTest::testGetInstance with data set #22
-.
-Framework_ComparatorTest::testGetInstance with data set #23
-.
-Framework_ComparatorTest::testGetInstance with data set #24
-.
-Framework_ComparatorTest::testGetInstance with data set #25
-.
-Framework_ComparatorTest::testGetInstance with data set #26
-.
-Framework_ComparatorTest::testGetInstance with data set #27
-.
-Framework_ComparatorTest::testGetInstance with data set #28
-.
-Framework_ComparatorTest::testGetInstance with data set #29
-.
-Framework_ComparatorTest::testGetInstance with data set #3
-.
-Framework_ComparatorTest::testGetInstance with data set #30
-.
-Framework_ComparatorTest::testGetInstance with data set #31
-.
-Framework_ComparatorTest::testGetInstance with data set #32
-.
-Framework_ComparatorTest::testGetInstance with data set #33
-.
-Framework_ComparatorTest::testGetInstance with data set #34
-.
-Framework_ComparatorTest::testGetInstance with data set #35
-.
-Framework_ComparatorTest::testGetInstance with data set #36
-.
-Framework_ComparatorTest::testGetInstance with data set #37
-.
-Framework_ComparatorTest::testGetInstance with data set #38
-.
-Framework_ComparatorTest::testGetInstance with data set #4
-.
-Framework_ComparatorTest::testGetInstance with data set #5
-.
-Framework_ComparatorTest::testGetInstance with data set #6
-.
-Framework_ComparatorTest::testGetInstance with data set #7
-.
-Framework_ComparatorTest::testGetInstance with data set #8
-.
-Framework_ComparatorTest::testGetInstance with data set #9
-.
-Framework_ComparatorTest::testRegister
-.
-Framework_ComparatorTest::testUnregister
 .
 Framework_ConstraintTest::testAttributeEqualTo
 .
@@ -1840,6 +1766,14 @@ Framework_TestCaseTest::testExceptionInTearDown
 .
 Framework_TestCaseTest::testExceptionInTest
 .
+Framework_TestCaseTest::testExceptionWithMessage
+.
+Framework_TestCaseTest::testExceptionWithRegexpMessage
+.
+Framework_TestCaseTest::testExceptionWithWrongMessage
+.
+Framework_TestCaseTest::testExceptionWithWrongRegexpMessage
+.
 Framework_TestCaseTest::testExpectOutputRegexFooActualBar
 .
 Framework_TestCaseTest::testExpectOutputRegexFooActualFoo
@@ -1904,6 +1838,10 @@ Util_ConfigurationTest::testFilterConfigurationIsReadCorrectly
 .
 Util_ConfigurationTest::testGroupConfigurationIsReadCorrectly
 .
+Util_ConfigurationTest::testHandlePHPConfigurationDoesNotOverriteVariablesFromPutEnv
+.
+Util_ConfigurationTest::testHandlePHPConfigurationDoesNotOverwrittenExistingEnvArrayVariables
+.
 Util_ConfigurationTest::testListenerConfigurationIsReadCorrectly
 .
 Util_ConfigurationTest::testLoggingConfigurationIsReadCorrectly
@@ -1917,6 +1855,20 @@ Util_ConfigurationTest::testPHPUnitConfigurationIsReadCorrectly
 Util_ConfigurationTest::testSeleniumBrowserConfigurationIsReadCorrectly
 .
 Util_ConfigurationTest::testXincludeInConfiguration
+.
+Util_RegexTest::testInvalidRegex with data set #0
+.
+Util_RegexTest::testInvalidRegex with data set #1
+.
+Util_RegexTest::testInvalidRegex with data set #2
+.
+Util_RegexTest::testValidRegex with data set #0
+.
+Util_RegexTest::testValidRegex with data set #1
+.
+Util_RegexTest::testValidRegex with data set #2
+.
+Util_RegexTest::testValidRegex with data set #3
 .
 Util_TestDox_NamePrettifierTest::testCaterForUserDefinedPrefix
 .

@@ -8,11 +8,8 @@
  *
  *)
 
-
-open Utils
-
 let alok (pos, x) =
-  error pos ("You probably forgot to bind this type parameter right?\nAdd <"^
+  Errors.add pos ("You probably forgot to bind this type parameter right?\nAdd <"^
                x^"> somewhere (after the function name definition, or after the class name)\nExamples: "^
               "function foo<T> or class A<T>")
 
@@ -21,16 +18,16 @@ let alok (pos, x) =
    it is not allowed for now, because of type erasure
 *)
 let generic_class_var (pos, _) =
-  error pos "A class variable cannot be generic"
+  Errors.add pos "A class variable cannot be generic"
 
 let too_many_args pos =
-  error pos "Too many arguments"
+  Errors.add pos "Too many arguments"
 
 let unexpected_arrow (pos, cname) =
-  error pos ("Keys may not be specified for " ^ cname ^ " initialization")
+  Errors.add pos ("Keys may not be specified for " ^ cname ^ " initialization")
 
 let missing_arrow (pos, cname) =
-  error pos ("Keys must be specified for " ^ cname ^ " initialization")
+  Errors.add pos ("Keys must be specified for " ^ cname ^ " initialization")
 
 let disallowed_xhp_type (pos, name) =
-  error pos (name ^ " is not a valid type. Use :xhp or XHPChild.")
+  Errors.add pos (name ^ " is not a valid type. Use :xhp or XHPChild.")

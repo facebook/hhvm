@@ -9,15 +9,13 @@ class Pear extends Framework {
 
   protected function install(): void {
     parent::install();
-    verbose("Creating a bootstrap.php for running the pear tests.\n",
-            Options::$verbose);
+    verbose("Creating a bootstrap.php for running the pear tests.\n");
     $bootstrap_php = <<<BOOTSTRAP
-<?php
+<?hh
 putenv('PHP_PEAR_RUNTESTS=1');
 BOOTSTRAP;
     file_put_contents($this->getTestPath()."/bootstrap.php", $bootstrap_php);
-    verbose("Creating a phpunit.xml for running the pear tests.\n",
-            Options::$verbose);
+    verbose("Creating a phpunit.xml for running the pear tests.\n");
     $phpunit_xml = <<<XML
 <phpunit bootstrap="bootstrap.php">
 <testsuites>
@@ -44,7 +42,7 @@ XML;
       // are there; otherwise we need a redownload.
       foreach ($extra_files as $file) {
         if (!file_exists($file)) {
-          remove_dir_recursive($this->getInstallRoot());
+          remove_dir_recursive(nullthrows($this->getInstallRoot()));
           return false;
         }
       }

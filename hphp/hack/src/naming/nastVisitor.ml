@@ -198,6 +198,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
 
   method on_expr_ acc e =
     match e with
+   | Any         -> acc
    | Array afl   -> this#on_array acc afl
    | Shape sh    -> this#on_shape acc sh
    | True        -> this#on_true acc

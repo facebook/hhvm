@@ -88,7 +88,7 @@ let find_all_locks file : (string * Path.path) list =
   let results = !results in
   let parse_result acc result =
     let regexp_str = Printf.sprintf "^%s/hh_server_\\([^/]*\\)/.*"
-      Filename.temp_dir_name in
+      Tmp.temp_dir_name in
     if Str.string_match (Str.regexp regexp_str) result 0
     then
       let user = Str.matched_group 1 result in

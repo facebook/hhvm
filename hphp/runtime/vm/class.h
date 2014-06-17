@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
@@ -53,15 +54,6 @@ namespace Native { struct NativeDataInfo; }
 typedef hphp_hash_set<LowStringPtr,
                       string_data_hash,
                       string_data_isame> TraitNameSet;
-
-/*
- * User attributes on various runtime structures are stored in this
- * map, currently.
- */
-typedef hphp_hash_map<LowStringPtr,
-                      TypedValue,
-                      string_data_hash,
-                      string_data_isame> UserAttributeMap;
 
 using BuiltinCtorFunction = ObjectData* (*)(Class*);
 using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
@@ -580,14 +572,6 @@ struct Class : AtomicCountable {
   void atomicRelease();
 
   /*
-   * releaseRefs() is called when a Class is put into the zombie state,
-   * to free any references to child classes, interfaces and traits
-   * Its safe to call multiple times, so is also called from the destructor
-   * (in case we bypassed the zombie state).
-   */
-  void releaseRefs();
-
-  /*
    * isZombie() returns true if this class has been logically destroyed,
    * but needed to be preserved due to outstanding references.
    */
@@ -903,6 +887,7 @@ private:
   ~Class();
 
 private:
+  void releaseRefs();
   void initialize(TypedValue*& sPropData) const;
   PropInitVec* initPropsImpl() const;
   TypedValue* initSPropsImpl() const;

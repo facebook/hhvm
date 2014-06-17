@@ -37,6 +37,13 @@ enum RelaxGuardsFlags {
 
 IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
 bool shouldHHIRRelaxGuards();
+
+/*
+ * Given a possibly null SSATmp*, determine if the type of that tmp may be
+ * loosened by guard relaxation.
+ */
+bool typeMightRelax(const SSATmp* tmp);
+
 bool relaxGuards(IRUnit&, const GuardConstraints& guards,
                  RelaxGuardsFlags flags);
 
@@ -48,6 +55,7 @@ Type relaxType(Type t, TypeConstraint cat);
 void incCategory(DataTypeCategory& c);
 TypeConstraint relaxConstraint(const TypeConstraint origTc,
                                const Type knownType, const Type toRelax);
+TypeConstraint applyConstraint(TypeConstraint origTc, TypeConstraint newTc);
 
 } }
 

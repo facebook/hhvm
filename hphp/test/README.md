@@ -26,7 +26,7 @@ all sub-suites.
 `test/run test/slow -m automain`
 
 * Run everything that is supposed to pass -
-`fbmake runtests`
+`test/run all`
 
 # File Layout
 

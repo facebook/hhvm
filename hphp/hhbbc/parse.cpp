@@ -36,9 +36,9 @@
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/vm/preclass-emit.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
@@ -98,7 +98,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
   // Each entry point for a DV funclet is the start of a basic
   // block.
   for (auto& param : fe.params()) {
-    if (param.hasDefaultValue()) markBlock(param.funcletOff());
+    if (param.hasDefaultValue()) markBlock(param.funcletOff);
   }
 
   // The main entry point is also a basic block start.
@@ -625,7 +625,7 @@ void link_entry_points(php::Func& func,
   func.dvEntries.resize(fe.params().size());
   for (size_t i = 0, sz = fe.params().size(); i < sz; ++i) {
     if (fe.params()[i].hasDefaultValue()) {
-      auto const dv = findBlock(fe.params()[i].funcletOff());
+      auto const dv = findBlock(fe.params()[i].funcletOff);
       func.params[i].dvEntryPoint = dv;
       func.dvEntries[i] = dv;
     }
@@ -692,15 +692,15 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
   for (auto& param : fe.params()) {
     func.params.push_back(
       php::Param {
-        param.defaultValue(),
+        param.defaultValue,
         nullptr,
-        param.typeConstraint(),
-        param.userType(),
-        param.phpCode(),
-        param.userAttributes(),
-        param.builtinType(),
+        param.typeConstraint,
+        param.userType,
+        param.phpCode,
+        param.userAttributes,
+        param.builtinType,
         param.ref(),
-        param.isVariadic()
+        param.variadic
       }
     );
   }

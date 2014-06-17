@@ -1222,10 +1222,10 @@ int64_t new_iter_array_key(Iter*       dest,
     return 0;
   }
   if (UNLIKELY(IS_REFCOUNTED_TYPE(valOut->m_type))) {
-    return new_iter_array_cold<false>(dest, ad, valOut, keyOut);
+    return new_iter_array_cold<WithRef>(dest, ad, valOut, keyOut);
   }
   if (UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
-    return new_iter_array_cold<false>(dest, ad, valOut, keyOut);
+    return new_iter_array_cold<WithRef>(dest, ad, valOut, keyOut);
   }
 
   // We are transferring ownership of the array to the iterator, therefore
@@ -1265,7 +1265,7 @@ int64_t new_iter_array_key(Iter*       dest,
     return 1;
   }
 
-  return new_iter_array_cold<false>(dest, ad, valOut, keyOut);
+  return new_iter_array_cold<WithRef>(dest, ad, valOut, keyOut);
 }
 
 template int64_t new_iter_array_key<false>(Iter* dest, ArrayData* ad,

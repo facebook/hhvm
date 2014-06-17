@@ -313,10 +313,11 @@ struct Type {
   ~Type() noexcept;
 
   /*
-   * Exact equality or inequality of types.
+   * Exact equality or inequality of types, and hashing.
    */
   bool operator==(const Type& o) const;
   bool operator!=(const Type& o) const { return !(*this == o); }
+  size_t hash() const;
 
   /*
    * Returns true if this type is definitely going to be a subtype or a strict
@@ -566,6 +567,11 @@ Type aempty();
  * Create a reference counted empty array.
  */
 Type counted_aempty();
+
+/*
+ * Create an any-countedness empty array type.
+ */
+Type some_aempty();
 
 /*
  * Create types for objects or classes with some known constraint on

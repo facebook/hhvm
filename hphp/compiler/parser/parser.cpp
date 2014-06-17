@@ -181,7 +181,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
       m_closureGenerator(false), m_nsState(SeenNothing),
       m_nsAliasTable(getAutoAliasedClasses(), [&] { return isAutoAliasOn(); }) {
-  string md5str = Eval::FileRepository::unitMd5(scanner.getMd5());
+  string md5str = FileRepository::unitMd5(scanner.getMd5());
   MD5 md5 = MD5(md5str.c_str());
 
   m_file = FileScopePtr(new FileScope(m_fileName, fileSize, md5));
@@ -969,6 +969,12 @@ void Parser::checkFunctionContext(string funcName,
 
   if (modifiers->isAsync() && funcContext.isGenerator) {
     PARSE_ERROR("'yield' is not allowed in async functions.");
+  }
+
+  if (modifiers->isAsync() && !canBeAsyncOrGenerator(funcName, m_clsName)) {
+    PARSE_ERROR("cannot declare constructors, destructors, and "
+                    "magic methods such as '%s' as async",
+                funcName.c_str());
   }
 }
 

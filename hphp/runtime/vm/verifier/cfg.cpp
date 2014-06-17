@@ -48,7 +48,7 @@ void GraphBuilder::createBlocks() {
   for (Range<Func::ParamInfoVec> p(m_func->params()); !p.empty(); ) {
     const Func::ParamInfo& param = p.popFront();
     m_graph->entries[dv_index++] = !param.hasDefaultValue() ? 0 :
-                                   createBlock(param.funcletOff());
+                                   createBlock(param.funcletOff);
   }
   // main entry point
   assert(dv_index == m_graph->param_count);

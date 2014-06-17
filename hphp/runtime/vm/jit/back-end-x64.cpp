@@ -145,10 +145,10 @@ struct BackEnd : public JIT::BackEnd {
     return X64::emitUniqueStubs();
   }
 
-  TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+  TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
-    return X64::emitServiceReqWork(cb, start, persist, flags, req, argv);
+    return X64::emitServiceReqWork(cb, start, flags, req, argv);
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
@@ -223,13 +223,21 @@ struct BackEnd : public JIT::BackEnd {
     return (iFrontier & ~kCacheLineMask) == (lastByte & ~kCacheLineMask);
   }
 
-  void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) override {
+ private:
+  void prepareForSmashImpl(CodeBlock& cb, int nBytes, int offset) {
     if (!isSmashable(cb.frontier(), nBytes, offset)) {
       X64Assembler a { cb };
       int gapSize = (~(uintptr_t(a.frontier()) + offset) & kCacheLineMask) + 1;
       a.emitNop(gapSize);
       assert(isSmashable(a.frontier(), nBytes, offset));
     }
+  }
+
+ public:
+  void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) override {
+    prepareForSmashImpl(cb, nBytes, offset);
+    mcg->cgFixups().m_alignFixups.emplace(cb.frontier(),
+                                          std::make_pair(nBytes, offset));
   }
 
   void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
@@ -267,13 +275,31 @@ struct BackEnd : public JIT::BackEnd {
     TCA src = rel.start();
     TCA dest = rel.dest();
     size_t range = rel.end() - src;
+    bool hasInternalRefs = false;
+    bool internalRefsNeedUpdating = false;
 
     while (src != rel.end()) {
       assert(src < rel.end());
       DecodedInstruction di(src);
 
-      memcpy(dest, src, di.size());
+      int destRange = 0;
+      auto af = fixups.m_alignFixups.equal_range(src);
+      while (af.first != af.second) {
+        if (!isSmashable(dest,
+                         af.first->second.first, af.first->second.second)) {
+          DataBlock tmp;
+          tmp.init(dest, kCacheLineSize, "");
+          prepareForSmashImpl(tmp,
+                              af.first->second.first, af.first->second.second);
+          destRange += tmp.frontier() - dest;
+          dest = tmp.frontier();
+          internalRefsNeedUpdating = true;
+        }
+        ++af.first;
+      }
 
+      memcpy(dest, src, di.size());
+      DecodedInstruction d2(dest);
       if (di.hasPicOffset()) {
         /*
          * Rip-relative offsets that point outside the range
@@ -281,32 +307,85 @@ struct BackEnd : public JIT::BackEnd {
          * to point at the right thing
          */
         if (size_t(di.picAddress() - rel.start()) > range) {
-          DecodedInstruction d2(dest);
           bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
           assert(success);
+        } else {
+          if (d2.isBranch() && d2.shrinkBranch()) {
+            internalRefsNeedUpdating = true;
+          }
+          hasInternalRefs = true;
         }
       }
-      if (di.hasImmediate() && !fixups.m_addressImmediates.count(src)) {
-        /*
-         * An immediate that points into the range being moved, but which
-         * isn't tagged as an addressImmediate, is most likely a bug
-         * and its instruction's address needs to be put into
-         * fixups.m_addressImmediates. But it could just happen by bad
-         * luck, so just log it.
-         */
-        if (size_t(di.immediate() - (uint64_t)rel.start()) <= range) {
-          FTRACE(3,
-                 "relocate: instruction at {} has immediate 0x{:x}"
-                 "which looks like an address that needs relocating\n",
-                 src, di.immediate());
+      if (di.hasImmediate()) {
+        if (fixups.m_addressImmediates.count(src)) {
+          if (size_t(di.immediate() - (uint64_t)rel.start()) <= range) {
+            hasInternalRefs = internalRefsNeedUpdating = true;
+          }
+        } else {
+          if (fixups.m_addressImmediates.count((TCA)~uintptr_t(src))) {
+            // Handle weird, encoded offset, used by cgLdObjMethod
+            always_assert(di.immediate() == ((uintptr_t(src) << 1) | 1));
+            bool DEBUG_ONLY success =
+              d2.setImmediate(((uintptr_t)dest << 1) | 1);
+            assert(success);
+          }
+          /*
+           * An immediate that points into the range being moved, but which
+           * isn't tagged as an addressImmediate, is most likely a bug
+           * and its instruction's address needs to be put into
+           * fixups.m_addressImmediates. But it could just happen by bad
+           * luck, so just log it.
+           */
+          if (size_t(di.immediate() - (uint64_t)rel.start()) <= range) {
+            FTRACE(3,
+                   "relocate: instruction at {} has immediate 0x{:x}"
+                   "which looks like an address that needs relocating\n",
+                   src, di.immediate());
+          }
         }
       }
 
+      rel.recordAddress(src, dest - destRange, destRange);
+      if (di.isNop()) {
+        internalRefsNeedUpdating = true;
+      } else {
+        dest += d2.size();
+      }
       src += di.size();
-      dest += di.size();
     }
 
-    rel.setDestEnd(dest);
+    rel.recordAddress(src, dest, 0);
+
+    if (hasInternalRefs && internalRefsNeedUpdating) {
+      src = rel.start();
+      while (src != rel.end()) {
+        DecodedInstruction di(src);
+        TCA newPicAddress = nullptr;
+        int64_t newImmediate = 0;
+        if (di.hasPicOffset() &&
+            size_t(di.picAddress() - rel.start()) <= range) {
+          newPicAddress = rel.adjustedAddressAfter(di.picAddress());
+          always_assert(newPicAddress);
+        }
+        if (di.hasImmediate() &&
+            size_t((TCA)di.immediate() - rel.start()) <= range &&
+            fixups.m_addressImmediates.count(src)) {
+          newImmediate = (int64_t)rel.adjustedAddressAfter((TCA)di.immediate());
+          always_assert(newImmediate);
+        }
+        if (newImmediate || newPicAddress) {
+          dest = rel.adjustedAddressAfter(src);
+          DecodedInstruction d2(dest);
+          if (newPicAddress) {
+            d2.setPicAddress(newPicAddress);
+          }
+          if (newImmediate) {
+            d2.setImmediate(newImmediate);
+          }
+        }
+        src += di.size();
+      }
+    }
 
     return rel.destSize();
   }
@@ -324,7 +403,7 @@ struct BackEnd : public JIT::BackEnd {
          * A pointer into something that has been relocated needs to be
          * updated.
          */
-        if (TCA adjusted = rel.adjustedAddress(di.picAddress())) {
+        if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
           di.setPicAddress(adjusted);
         }
       }
@@ -334,7 +413,7 @@ struct BackEnd : public JIT::BackEnd {
          * Similarly for addressImmediates - and see comment above
          * for non-address immediates.
          */
-        if (TCA adjusted = rel.adjustedAddress((TCA)di.immediate())) {
+        if (TCA adjusted = rel.adjustedAddressAfter((TCA)di.immediate())) {
           if (fixups.m_addressImmediates.count(start)) {
             di.setImmediate((int64_t)adjusted);
           } else {
@@ -354,8 +433,8 @@ struct BackEnd : public JIT::BackEnd {
   void fixupStateVector(StateVector<T, TcaRange>& sv, RelocationInfo& rel) {
     for (auto& ii : sv) {
       if (!ii.empty()) {
-        auto s = rel.adjustedAddress(ii.begin());
-        auto e = rel.adjustedAddress(ii.end());
+        auto s = rel.adjustedAddressBefore(ii.begin());
+        auto e = rel.adjustedAddressAfter(ii.end());
         if (e || s) {
           if (!s) s = ii.begin();
           if (!e) e = ii.end();
@@ -373,28 +452,36 @@ struct BackEnd : public JIT::BackEnd {
     auto& ip = sr->inProgressTailJumps();
     for (size_t i = 0; i < ip.size(); ++i) {
       IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
-      if (TCA adjusted = rel.adjustedAddress(ib.toSmash())) {
+      if (TCA adjusted = rel.adjustedAddressAfter(ib.toSmash())) {
         ib.adjust(adjusted);
       }
     }
 
     for (auto& fixup : fixups.m_pendingFixups) {
-      if (TCA adjusted = rel.adjustedAddress(fixup.m_tca)) {
+      /*
+       * Pending fixups always point after the call instruction,
+       * so use the "before" address, since there may be nops
+       * before the next actual instruction.
+       */
+      if (TCA adjusted = rel.adjustedAddressBefore(fixup.m_tca)) {
         fixup.m_tca = adjusted;
       }
     }
 
     for (auto& ct : fixups.m_pendingCatchTraces) {
-      if (CTCA adjusted = rel.adjustedAddress(ct.first)) {
+      /*
+       * Similar to fixups - this is a return address
+       */
+      if (CTCA adjusted = rel.adjustedAddressBefore(ct.first)) {
         ct.first = adjusted;
       }
-      if (TCA adjusted = rel.adjustedAddress(ct.second)) {
+      if (TCA adjusted = rel.adjustedAddressAfter(ct.second)) {
         ct.second = adjusted;
       }
     }
 
     for (auto& jt : fixups.m_pendingJmpTransIDs) {
-      if (TCA adjusted = rel.adjustedAddress(jt.first)) {
+      if (TCA adjusted = rel.adjustedAddressAfter(jt.first)) {
         jt.first = adjusted;
       }
     }
@@ -406,7 +493,7 @@ struct BackEnd : public JIT::BackEnd {
       while (addr[0] != 0x0f || addr[1] != 0x0b) {
         DecodedInstruction di(addr);
         if (di.hasPicOffset()) {
-          if (TCA adjusted = rel.adjustedAddress(di.picAddress())) {
+          if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
             di.setPicAddress(adjusted);
           }
         }
@@ -415,21 +502,24 @@ struct BackEnd : public JIT::BackEnd {
     }
 
     for (auto& tbc : fixups.m_bcMap) {
-      if (TCA adjusted = rel.adjustedAddress(tbc.aStart)) {
+      if (TCA adjusted = rel.adjustedAddressBefore(tbc.aStart)) {
         tbc.aStart = adjusted;
       }
-      if (TCA adjusted = rel.adjustedAddress(tbc.acoldStart)) {
+      if (TCA adjusted = rel.adjustedAddressBefore(tbc.acoldStart)) {
         tbc.acoldStart = adjusted;
       }
-      if (TCA adjusted = rel.adjustedAddress(tbc.afrozenStart)) {
+      if (TCA adjusted = rel.adjustedAddressBefore(tbc.afrozenStart)) {
         tbc.afrozenStart = adjusted;
       }
     }
 
     std::set<TCA> updated;
     for (auto addrImm : fixups.m_addressImmediates) {
-      if (TCA adjusted = rel.adjustedAddress(addrImm)) {
+      if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
         updated.insert(adjusted);
+      } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
+        // just for cgLdObjMethod
+        updated.insert((TCA)~uintptr_t(odd));
       } else {
         updated.insert(addrImm);
       }
@@ -437,7 +527,7 @@ struct BackEnd : public JIT::BackEnd {
     updated.swap(fixups.m_addressImmediates);
 
     for (auto codePtr : fixups.m_codePointers) {
-      if (TCA adjusted = rel.adjustedAddress(*codePtr)) {
+      if (TCA adjusted = rel.adjustedAddressAfter(*codePtr)) {
         *codePtr = adjusted;
       }
     }
@@ -643,14 +733,14 @@ RegPair hintCallBuiltinSrc(const IRInstruction& inst, unsigned srcNum) {
   auto& params = callee->params();
   int i = 0, n = callee->numParams();
   for (; i < n && spos < srcNum; ++i, ++spos) {
-    if (params[i].builtinType() == KindOfDouble) {
+    if (params[i].builtinType == KindOfDouble) {
       dpos++;
     } else {
       ipos++;
     }
   }
   if (i < n && spos == srcNum) {
-    if (params[i].builtinType() == KindOfDouble) {
+    if (params[i].builtinType == KindOfDouble) {
       if (dpos < kNumSIMDRegisterArgs) {
         return {argNumToSIMDRegName[dpos], InvalidReg};
       }

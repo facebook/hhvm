@@ -1,0 +1,16 @@
+bool(false)
+string(0) ""
+int(0)
+int(0)
+
+Warning: Accessing XMLReader::$hasvalue with the incorrect casing in %s on line 10
+bool(false)
+
+Warning: Accessing XMLReader::$baseuri with the incorrect casing in %s on line 11
+string(0) ""
+
+Warning: Accessing XMLReader::$attributecount with the incorrect casing in %s on line 12
+int(0)
+
+Warning: Accessing XMLReader::$nodetype with the incorrect casing in %s on line 13
+int(0)

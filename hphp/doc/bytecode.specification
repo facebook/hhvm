@@ -1031,6 +1031,19 @@ NewArray <capacity hint>    []  ->  [C:Arr]
   stack. The implementation may make use of the hint in %1 to pre-size the
   array. The hint %1 must be greater than or equal to 0.
 
+NewMixedArray <capacity hint>    []  ->  [C:Arr]
+
+  New array in mixed mode, with a capacity hint. Creates a new array and pushes
+  it onto the stack. The implementation may make use of the hint in %1 to
+  pre-size the array. The hint %1 must be greater than or equal to 0.
+
+NewLikeArrayL <local variable id> <capacity hint>   []  ->  [C:Arr]
+
+  New array with the same kind as the array stored in the local variable %1.
+  If %1 is not an array, returns an array in mixed mode.  The implementation
+  may make use of the hint in %2 to pre-size the array.  If %2 == 0, the
+  implementation may instead use the size of %1 as the hint.
+
 NewPackedArray <num elems>    [C..C]  ->  [C]
 
   New array. Creates a new array from the top %1 cells on the stack, pops those
@@ -4088,19 +4101,27 @@ CreateCont   []  ->  [C:Null]
   becomes available on the stack. It is illegal to resume newly constructed
   Generator using ContEnter with a non-null value or ContRaise opcodes.
 
-ContEnter   [C]  ->  []
+ContEnter   [C]  ->  [C]
 
   This instruction may only appear in non-static methods of the Generator
   class. It transfers control flow to the saved resume offset of a function
   associated with $this Generator object. The $1 will remain available
-  on the stack after the control is transferred.
+  on the stack after the control is transferred. Once the control is
+  transferred back, a value determined by suspending opcode (Await, Yield,
+  YieldK or RetC) will be pushed on the stack. This value corresponds to
+  the next()/send() return value -- null for non-async generators, and
+  WaitHandle or null for async generators.
 
-ContRaise   [C:Obj]  ->  []
+ContRaise   [C:Obj]  ->  [C]
 
   This instruction may only appear in non-static methods of the Generator
   class. It transfers control flow to the saved resume offset of a function
   associated with $this Generator object. The Exception stored at $1 is
-  raised instead of invoking code at the resume offset.
+  raised instead of invoking code at the resume offset. Once the control is
+  transferred back, a value determined by suspending opcode (Await, Yield,
+  YieldK or RetC) will be pushed on the stack. This value corresponds to
+  the raise() return value -- null for non-async generators, and WaitHandle
+  or null for async generators.
 
 Yield   [C]  ->  [C]
 

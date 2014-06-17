@@ -241,44 +241,6 @@ and debugl stack env x =
 
 let debug env ty = debug ISet.empty env ty; print_newline()
 
-let make_class mtime x = {
-  tc_final = false;
-  tc_abstract = false;
-  tc_need_init  = false;
-  tc_members_init = SSet.empty;
-  tc_members_fully_known     = true;
-  tc_kind       = Ast.Cnormal;
-  tc_name       = x;
-  tc_tparams    = [];
-  tc_consts     = SMap.empty;
-  tc_cvars      = SMap.empty;
-  tc_scvars     = SMap.empty;
-  tc_methods    = SMap.empty;
-  tc_smethods   = SMap.empty;
-  tc_construct  = None;
-  tc_ancestors = SMap.empty;
-  tc_ancestors_checked_when_concrete = SMap.empty;
-  tc_req_ancestors = SSet.empty;
-  tc_req_ancestors_extends = SSet.empty;
-  tc_extends    = SSet.empty;
-  tc_user_attributes = SMap.empty;
-
-  tc_prefetch_classes = SSet.empty;
-  tc_prefetch_funs = SSet.empty;
-
-  tc_mtime = mtime;
-}
-
-(*
-(* Fucks up the connection *)
-let predef_class x =
-  Classes.add x (make_class x)
-
-let () =
-  let p = predef_class in
-  p "Exception"
-*)
-
 let empty_fake_members = {
     last_call = None;
     invalid   = SSet.empty;
@@ -310,21 +272,6 @@ let empty file = {
     file    = file;
   }
 }
-
-let get_prefetch_classes env = env.pclasses
-let get_prefetch_funs env = env.pfuns
-
-let prefetch cid =
-  match Classes.get cid with
-  | None -> ()
-  | Some tc ->
-      let _ = Classes.get_batch tc.tc_prefetch_classes in
-      let _ = Funs.get_batch tc.tc_prefetch_funs in
-      ()
-
-let prefetch_funs funs =
-  let _ = Funs.get_batch funs in
-  ()
 
 let add_class x y =
   Classes.add x y

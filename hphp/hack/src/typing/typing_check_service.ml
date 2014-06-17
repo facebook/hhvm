@@ -35,36 +35,28 @@ let type_fun x =
 
 let type_class x =
   try
-    (match Naming_heap.ClassStatus.find_unsafe x with
-    | Naming_heap.Error -> ()
-    | Naming_heap.Ok ->
-        let class_ = Naming_heap.ClassHeap.find_unsafe x in
-        let filename = Pos.filename (fst class_.Nast.c_name) in
-        let tenv = Typing_env.empty filename in
-        Typing.class_def tenv x class_
-    )
+    let class_ = Naming_heap.ClassHeap.find_unsafe x in
+    let filename = Pos.filename (fst class_.Nast.c_name) in
+    let tenv = Typing_env.empty filename in
+    Typing.class_def tenv x class_
   with Not_found ->
     ()
 
 let check_typedef x =
   try
-    (match Naming_heap.TypedefStatus.find_unsafe x with
-    | Naming_heap.Error -> ()
-    | Naming_heap.Ok ->
-        let _, args, hint as typedef = Naming_heap.TypedefHeap.find_unsafe x in
-        let filename = Pos.filename (fst hint) in
-        let tenv = Typing_env.empty filename in
-        (* Mode for typedefs themselves doesn't really matter right now, but
-         * they can expand hints, so make it loose so that the typedef doesn't
-         * fail. (The hint will get re-checked with the proper mode anyways.)
-         * Ideally the typedef would carry the right mode with it, but it's a
-         * slightly larger change than I want to deal with right now. *)
-        let tenv = Typing_env.set_mode tenv Ast.Mdecl in
-        let tenv = Typing_env.set_root tenv (Typing_deps.Dep.Class x) in
-        (* TODO It's pretty ugly that this try/catch is here whereas the others
-         * are in Typing.fun_def and friends. *)
-        try NastCheck.typedef tenv x typedef with Typing_defs.Ignore -> ()
-    )
+    let _, args, hint as typedef = Naming_heap.TypedefHeap.find_unsafe x in
+    let filename = Pos.filename (fst hint) in
+    let tenv = Typing_env.empty filename in
+    (* Mode for typedefs themselves doesn't really matter right now, but
+     * they can expand hints, so make it loose so that the typedef doesn't
+     * fail. (The hint will get re-checked with the proper mode anyways.)
+     * Ideally the typedef would carry the right mode with it, but it's a
+     * slightly larger change than I want to deal with right now. *)
+    let tenv = Typing_env.set_mode tenv Ast.Mdecl in
+    let tenv = Typing_env.set_root tenv (Typing_deps.Dep.Class x) in
+    (* TODO It's pretty ugly that this try/catch is here whereas the others
+     * are in Typing.fun_def and friends. *)
+    NastCheck.typedef tenv x typedef
   with Not_found ->
     ()
 
@@ -89,18 +81,20 @@ let check_const x =
   with Not_found ->
     ()
 
-let check_file fast (errors, failed) fn = try
-  match SMap.get fn fast with
-  | None ->
-      errors, failed
-  | Some { FileInfo.n_funs; n_classes; n_types; n_consts } ->
-      SSet.iter type_fun n_funs;
-      SSet.iter type_class n_classes;
-      SSet.iter check_typedef n_types;
-      SSet.iter check_const n_consts;
-      errors, failed
-with Utils.Error l ->
-  l :: errors, SSet.add fn failed
+let check_file fast (errors, failed) fn =
+  let errors', () = Errors.do_
+    begin fun () ->
+      match SMap.get fn fast with
+      | None -> ()
+      | Some { FileInfo.n_funs; n_classes; n_types; n_consts } ->
+          SSet.iter type_fun n_funs;
+          SSet.iter type_class n_classes;
+          SSet.iter check_typedef n_types;
+          SSet.iter check_const n_consts;
+    end
+  in
+  let failed = if errors' <> [] then SSet.add fn failed else failed in
+  List.rev_append errors' errors, failed
 
 let check_files fast (errors, failed) fnl =
   SharedMem.invalidate_caches();

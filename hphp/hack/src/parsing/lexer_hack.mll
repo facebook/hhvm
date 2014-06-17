@@ -390,7 +390,10 @@ and heredoc_token = parse
   | _                  { Tany        }
 
 and comment buf = parse
-  | eof                { Utils.error (Pos.make lexbuf) "unterminated comment" }
+  | eof                { let pos = Pos.make lexbuf in
+                         Errors.add pos "unterminated comment";
+                         pos, Buffer.contents buf
+                       }
   | '\n'               { Lexing.new_line lexbuf;
                          Buffer.add_char buf '\n';
                          comment buf lexbuf
@@ -406,7 +409,10 @@ and line_comment = parse
   | _                  { line_comment lexbuf }
 
 and xhp_comment = parse
-  | eof                { Utils.error (Pos.make lexbuf) "unterminated xhp comment" }
+  | eof                { let pos = Pos.make lexbuf in
+                         Errors.add pos "unterminated xhp comment";
+                         ()
+                       }
   | '\n'               { Lexing.new_line lexbuf; xhp_comment lexbuf }
   | "-->"              { () }
   | _                  { xhp_comment lexbuf }
@@ -437,7 +443,10 @@ and string = parse
   | _                  { string lexbuf }
 
 and string_backslash = parse
-  | eof                { Utils.error (Pos.make lexbuf) "Unexpected end of file" }
+  | eof                { let pos = Pos.make lexbuf in
+                         Errors.add pos "Unexpected end of file";
+                         ()
+                       }
   | '\n'               { Lexing.new_line lexbuf }
   | _                  { () }
 

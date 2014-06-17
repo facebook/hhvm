@@ -1,8 +1,12 @@
 object(DOMElement)#3 (18) {
-  ["baseURI"]=>
-  string(%d) "%s/"
   ["schemaTypeInfo"]=>
   NULL
+  ["tagName"]=>
+  string(4) "root"
+  ["textContent"]=>
+  string(13) "$1 - SITENAME"
+  ["baseURI"]=>
+  string(%d) "%s"
   ["localName"]=>
   string(4) "root"
   ["prefix"]=>
@@ -13,26 +17,22 @@ object(DOMElement)#3 (18) {
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
   NULL
-  ["nodeValue"]=>
-  string(13) "$1 - SITENAME"
-  ["previousSibling"]=>
-  NULL
   ["nodeType"]=>
   int(1)
-  ["nodeName"]=>
-  string(4) "root"
-  ["textContent"]=>
-  string(13) "$1 - SITENAME"
   ["lastChild"]=>
   string(22) "(object value omitted)"
+  ["nodeName"]=>
+  string(4) "root"
+  ["previousSibling"]=>
+  NULL
   ["firstChild"]=>
   string(22) "(object value omitted)"
   ["childNodes"]=>
   string(22) "(object value omitted)"
+  ["nodeValue"]=>
+  string(13) "$1 - SITENAME"
   ["nextSibling"]=>
   NULL
-  ["tagName"]=>
-  string(4) "root"
   ["attributes"]=>
   string(22) "(object value omitted)"
 }

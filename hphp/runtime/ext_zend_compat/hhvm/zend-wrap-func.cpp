@@ -30,8 +30,15 @@ void zBoxAndProxy(TypedValue* arg) {
     tvBox(arg);
   }
   auto inner = arg->m_data.pref->tv();
-  if (inner->m_type == KindOfArray) {
-    inner->m_data.parr = ProxyArray::Make(inner->m_data.parr);
+  if (inner->m_type == KindOfArray && !inner->m_data.parr->isProxyArray()) {
+    ArrayData * inner_arr = inner->m_data.parr;
+    if (inner_arr->isStatic() || inner_arr->hasMultipleRefs()) {
+      ArrayData * tmp = inner_arr->copy();
+      inner_arr->decRefAndRelease();
+      inner_arr = tmp;
+      inner_arr->incRefCount();
+    }
+    inner->m_data.parr = ProxyArray::Make(inner_arr);
   }
 }
 

@@ -28,7 +28,6 @@ Ad-hoc rules for typing some common idioms
 
 *)
 
-open Utils
 open Typing_defs
 
 module Env = Typing_env
@@ -128,11 +127,13 @@ let parse_printf_string (env:Env.env) (s:string) (pos:Pos.t) (class_:ty) : Env.e
           (match read_modifier env (i+1) next i0 with
              | env, xs, ys -> env, add_reason good_args @ xs, targs @ ys)
       | env, None ->
-          error_l [
+          Errors.add_list [
             (pos, "I don't understand the format string " ^ snippet ^ " in " ^ s);
             (Reason.to_pos (fst class_),
              "You can add a new format specifier by adding "
-             ^fname^"() to "^Print.suggest class_)]
+             ^fname^"() to "^Print.suggest class_)];
+            (match read_text env (i+1) with
+             | env, xs, ys -> env, add_reason xs, ys)
   in
     read_text env 0
 
@@ -180,8 +181,8 @@ let retype_magic_func (env:Env.env) (ft:fun_type) (el:Nast.expr list) : Env.env 
                   env, Some ((name, (why, Tprim Nast.Tstring)) :: argl, targl)
              |  env, Left pos ->
                   if Env.is_strict env
-                  then error pos "This argument must be a literal string"
-                  else env, None)
+                  then Errors.add pos "This argument must be a literal string";
+                  env, None)
       | (param::params), (_::args) ->
           (match f env params args with
              | env, None -> env, None

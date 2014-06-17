@@ -13,6 +13,7 @@
 (*****************************************************************************)
 
 module C = TtyColor
+module Json = Hh_json
 let err_clr       = C.Bold C.Red       (* Unchecked code *)
 let checked_clr   = C.Normal C.Green   (* Checked code *)
 let kwd_clr       = C.Normal C.Magenta (* Keyword *)

@@ -18,7 +18,7 @@ open Utils
 type failed = SSet.t
 
 (* The result excepted from the service *)
-type result = Utils.error list * failed
+type result = Errors.t * failed
 
 (*****************************************************************************)
 (* We need to know all the classes defined, because we want to declare

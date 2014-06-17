@@ -31,8 +31,8 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/preclass-emit.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
@@ -491,14 +491,14 @@ void emit_locals_and_params(FuncEmitter& fe,
     if (id < func.params.size()) {
       auto& param = func.params[id];
       FuncEmitter::ParamInfo pinfo;
-      pinfo.setDefaultValue(param.defaultValue);
-      pinfo.setTypeConstraint(param.typeConstraint);
-      pinfo.setUserType(param.userTypeConstraint);
-      pinfo.setPhpCode(param.phpCode);
-      pinfo.setUserAttributes(param.userAttributes);
-      pinfo.setBuiltinType(param.builtinType);
+      pinfo.defaultValue = param.defaultValue;
+      pinfo.typeConstraint = param.typeConstraint;
+      pinfo.userType = param.userTypeConstraint;
+      pinfo.phpCode = param.phpCode;
+      pinfo.userAttributes = param.userAttributes;
+      pinfo.builtinType = param.builtinType;
       pinfo.setRef(param.byRef);
-      pinfo.setVariadic(param.isVariadic);
+      pinfo.variadic = param.isVariadic;
       fe.appendParam(func.locals[id]->name, pinfo);
       if (auto const dv = param.dvEntryPoint) {
         fe.setParamFuncletOff(id, info.blockInfo[dv->id].offset);

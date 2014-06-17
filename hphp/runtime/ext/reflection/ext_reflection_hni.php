@@ -298,6 +298,72 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     }
     return $count;
   }
+
+  /* No support for deprecation currently */
+  public function isDeprecated() {
+    return false;
+  }
+
+  public function getExtension() {
+    // FIXME: HHVM doesn't support this
+    return null;
+  }
+
+  public function getExtensionName() {
+    return null;
+  }
+
+  protected function _toStringHelper($type,
+                                     array $preAttrs = [],
+                                     array $funcAttrs = []) {
+    $ret = '';
+    if ($doc = $this->getDocComment()) {
+      $ret .= $doc . "\n";
+    }
+    $ret .= "$type [ <";
+    if ($this->isInternal()) {
+      $ret .= 'internal';
+      if ($this->isDeprecated()) {
+        $ret .= ', deprecated';
+      }
+      if ($extensionName = $this->getExtensionName()) {
+        $ret .= ':' . $extensionName;
+      }
+    } else {
+      $ret .= 'user';
+    }
+    if ($preAttrs) {
+      $ret .= ' , ' . implode(', ', $preAttrs);
+    }
+    $ret .= '> ';
+    if ($funcAttrs) {
+      $ret .= implode(' ', $funcAttrs) . ' ';
+    }
+    $ret .= ($type == 'Method') ? 'method ' : 'function ';
+    if ($this->returnsReference()) {
+      $ret .= '&';
+    }
+    $ret .= $this->getName() . " ] {\n";
+
+    if ($this->getStartLine() > 0) {
+      $ret .= "  @@ {$this->getFilename()} " .
+              "{$this->getStartLine()} - {$this->getEndLine()}\n";
+    }
+
+    if ($this->isClosure()) {
+      // TODO: Not enough info
+    }
+
+    $params = $this->getParameters();
+    $ret .= "\n  - Parameters [" . count($params) . "] {\n  ";
+    foreach($params as $param) {
+      $ret .= '  ' . str_replace("\n", "\n  ", (string)$param);
+    }
+    $ret .= "}\n";
+
+    $ret .= "}\n";
+    return $ret;
+  }
 }
 
 /**
@@ -411,8 +477,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    *                     instance.
    */
   public function __toString(): string {
-    // TODO
-    return '';
+    return $this->_toStringHelper($this->isClosure() ? 'Closure' : 'Function');
   }
 
   // Prevent cloning
@@ -500,6 +565,19 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
                                 '__invoke', array_values($args));
     }
     return hphp_invoke($this->getName(), array_values($args));
+  }
+
+  /**
+   * ( excerpt from
+   * http://docs.hhvm.com/manual/en/reflectionfunction.isdisabled.php )
+   *
+   * Checks if the function is disabled, via the disable_functions directive.
+   *
+   * @return     bool   TRUE if it's disable, otherwise FALSE
+   */
+  public function isDisabled(): bool {
+    // FIXME: HHVM doesn't support the disable_functions directive.
+    return false;
   }
 
   <<__Native>>
@@ -622,8 +700,43 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *                     instance.
    */
   public function __toString(): string {
-    // TODO
-    return '';
+    $preAttrs = [];
+    if ($this->getPrototypeClassname()) {
+      $protoname = $this->getPrototype()->getName();
+      if ($protoname != $this->getName()) {
+        $preAttrs[] = "prototype $protoname";
+      }
+    }
+    // TODO: "inherits $class"
+    // TODO: "overwrites $class"
+    // Need this info surfaced
+    if ($this->isConstructor()) {
+      $preAttrs[] = 'ctor';
+    }
+    if ($this->isDestructor()) {
+      $preAttrs[] = 'dtor';
+    }
+
+    $funcAttrs = [];
+    if ($this->isAbstract()) {
+      $funcAttrs[] = 'abstract';
+    }
+    if ($this->isFinal()) {
+      $funcAttrs[] = 'final';
+    }
+    if ($this->isStatic()) {
+      $funcAttrs[] = 'static';
+    }
+
+    if ($this->isPrivate()) {
+      $funcAttrs[] = 'private';
+    } elseif ($this->isProtected()) {
+      $funcAttrs[] = 'protected';
+    } else {
+      $funcAttrs[] = 'public';
+    }
+
+    return $this->_toStringHelper('Method', $preAttrs, $funcAttrs);
   }
 
   // Prevent cloning
@@ -988,6 +1101,10 @@ class ReflectionClass implements Reflector, Serializable {
   <<__Native>>
   private function __init(string $name): string;
 
+  public function isIterable(): bool {
+    return $this->isSubclassOf(Traversable::class);
+  }
+
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.tostring.php )
    *
@@ -997,8 +1114,134 @@ class ReflectionClass implements Reflector, Serializable {
    *                     instance.
    */
   public function __toString(): string {
-    // TODO
-    return '';
+    $ret = '';
+    if ($docComment = $this->getDocComment()) {
+      $ret .= $docComment . "\n";
+    }
+    if ($this instanceof ReflectionObject) {
+      $ret .= 'Object of class [ ';
+    } elseif ($this->isInterface()) {
+      $ret .= 'Interface [ ';
+    } elseif ($this->isTrait()) {
+      $ret .= 'Trait [ ';
+    } else {
+      $ret .= 'Class [ ';
+    }
+    if ($this->isInternal()) {
+      $ret .= '<internal:';
+      if ($extensionName = $this->getExtensionName()) {
+        $ret .= ':' . $extensionName;
+      }
+      $ret .= '> ';
+    } else {
+      $ret .= '<user> ';
+    }
+    if ($this->isIterable()) {
+      $ret .= '<iterable> ';
+    }
+    if ($this->isInterface()) {
+      $ret .= 'interface ';
+    } elseif ($this->isTrait()) {
+      $ret .= 'trait ';
+    } else {
+      if ($this->isAbstract()) {
+        $ret .= 'abstract ';
+      }
+      if ($this->isFinal()) {
+        $ret .= 'final ';
+      }
+      $ret .= 'class ';
+    }
+    $ret .= $this->getName();
+    if ($parent = $this->getParentClass()) {
+      $ret .= " extends {$parent->getName()}";
+    }
+    if ($ifaces = $this->getInterfaceNames()) {
+      if ($this->isInterface()) {
+        $ret .= ' extends ';
+      } else {
+        $ret .= ' implements ';
+      }
+      $ret .= implode(', ', $ifaces);
+    }
+    $ret .= " ] {\n";
+    if ($this->getStartLine() > 0) {
+      $ret .= "  @@ {$this->getFilename()} " .
+              "{$this->getStartLine()}-{$this->getEndLine()}\n";
+    }
+
+    $consts = $this->getConstants();
+    $ret .= "\n  - Constants [" . count($consts) . "] {\n";
+    foreach($consts as $k => $v) {
+      $ret .= '    Constant [ ' . gettype($v) . " $k {" . (string)$v . "}\n";
+    }
+    $ret .= "  }\n";
+
+    /* Static Properties */
+    $props = $this->getProperties();
+    $numStaticProps = 0;
+    $numDynamicProps = 0;
+    foreach($props as $prop) {
+      if ($prop->isStatic()) {
+        ++$numStaticProps;
+      } elseif (!$prop->isDefault()) {
+        ++$numDynamicProps;
+      }
+    }
+    $ret .= "\n  - Static properties [{$numStaticProps}] {\n  ";
+    foreach($props as $prop) {
+      if (!$prop->isStatic()) continue;
+      $ret .= '  ' . str_replace("\n", "\n  ", (string)$prop);
+    }
+    $ret .= "}\n";
+
+    /* Static Methods  */
+    $funcs = $this->getMethods();
+    $numStaticFuncs = 0;
+    foreach($funcs as $func) {
+      if ($func->isStatic()) ++$numStaticFuncs;
+    }
+    $ret .= "\n  - Static methods [{$numStaticFuncs}] {\n";
+    foreach($funcs as $func) {
+      if (!$func->isStatic()) continue;
+      $ret .= '    ' . str_replace("\n", "\n    ",
+                                   rtrim((string)$func, "\n")) . "\n";
+    }
+    $ret .= "  }\n";
+
+    /* Declared Instance Properties */
+    $numMemberProps = count($props) - ($numStaticProps + $numDynamicProps);
+    $ret .= "\n  - Properties [{$numMemberProps}] {\n  ";
+    foreach($props as $prop) {
+      if ($prop->isStatic()) continue;
+      if (!$prop->isDefault()) continue;
+      $ret .= '  ' . str_replace("\n", "\n  ", (string)$prop);
+    }
+    $ret .= "}\n";
+
+    /* Dynamic Instance Properties */
+    if ($numDynamicProps) {
+      $ret .= "\n  - Dynamic Properties [{$numDynamicProps}] {\n  ";
+      foreach($props as $prop) {
+        if ($prop->isStatic()) continue;
+        if ($prop->isDefault()) continue;
+        $ret .= '  ' . str_replace("\n", "\n  ", (string)$prop);
+      }
+      $ret .= "}\n";
+    }
+
+    /* Instance Methods */
+    $numMemberFuncs = count($funcs) - $numStaticFuncs;
+    $ret .= "\n  - Methods [{$numMemberFuncs}] {\n";
+    foreach($funcs as $func) {
+      if ($func->isStatic()) continue;
+      $ret .= '    ' . str_replace("\n", "\n    ",
+                                   rtrim((string)$func, "\n")) . "\n";
+    }
+    $ret .= "  }\n";
+
+    $ret .= "}\n";
+    return preg_replace("/(^|\n)\s+(\n|$)/", "\n\n", $ret);
   }
 
   // Prevent cloning

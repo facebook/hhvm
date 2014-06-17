@@ -48,7 +48,8 @@ end)
 (*****************************************************************************)
 
 let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
-  try
+  let decl_errors, () = Errors.do_
+    begin fun () ->
     (* We start "recording" dependencies. 
      * Whenever we are type-checking or declaring types, the checker
      * records all the dependencies in a global (cf Typing_deps).
@@ -59,9 +60,11 @@ let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
      * If a new dependency shows up, it will end-up in Typing_deps.record_acc.
      * Sending only the difference is a drastic improvement in perf.
      *)
-    Typing_decl.make_env nenv all_classes fn;
-    errors, failed
-  with Utils.Error l ->
+      Typing_decl.make_env nenv all_classes fn
+    end
+  in
+  List.fold_left
+    begin fun (errors, failed) l ->
     (* It is important to add the file that is the cause of the failure.
      * What can happen is that during a declaration phase, we realize
      * that a parent class is outdated. When this happens, we redeclare
@@ -69,12 +72,12 @@ let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
      * where the error occurs might be different from the file we
      * are declaring right now.
      *)
-    let file_with_error = Pos.filename (fst (List.hd l)) in
-    assert (file_with_error <> "");
-    let failed = SSet.add file_with_error failed in
-    let failed = SSet.add fn failed in
-    l :: errors, failed
-  | e -> failwith ("Things went horribly wrong: "^Printexc.to_string e)
+      let file_with_error = Pos.filename (fst (List.hd l)) in
+      assert (file_with_error <> "");
+      let failed = SSet.add file_with_error failed in
+      let failed = SSet.add fn failed in
+      l :: errors, failed
+    end (errors, failed) decl_errors
 
 (*****************************************************************************)
 (* Given a set of classes, compare the old and the new type and deduce
@@ -274,9 +277,8 @@ let invalidate_heap { FileInfo.n_funs; n_classes; n_types; n_consts } =
   Typing_env.Typedefs.oldify_batch n_types;
   Typing_env.GConsts.oldify_batch n_consts;
   Naming_heap.FunHeap.remove_batch n_funs;
-  Naming_heap.ClassStatus.remove_batch n_classes;
+  Typing_decl.remove_classes n_classes;
   Naming_heap.ClassHeap.remove_batch n_classes;
-  Naming_heap.TypedefStatus.remove_batch n_types;
   Naming_heap.TypedefHeap.remove_batch n_types;
   Naming_heap.ConstHeap.remove_batch n_consts;
   SharedMem.collect();

@@ -35,7 +35,7 @@ namespace HPHP {
  *     virtual void requestInit() {...}
  *     virtual void requestShutdown() {...}
  *   };
- *   IMPLEMENT_STATIC_REQUEST_LOCAL(IMPLEMENT_STATIC_REQUEST_LOCAL, s_data);
+ *   IMPLEMENT_STATIC_REQUEST_LOCAL(MyRequestLocalClass, s_data);
  *
  * How to use the request-local macros:
  *

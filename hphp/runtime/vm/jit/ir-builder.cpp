@@ -72,10 +72,7 @@ IRBuilder::~IRBuilder() {
  */
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   if (!shouldConstrainGuards()) return false;
-  if (tmp && (canonical(tmp)->inst()->is(DefConst) ||
-              tmp->isA(Type::Cls))) return false;
-
-  return true;
+  return JIT::typeMightRelax(tmp);
 }
 
 SSATmp* IRBuilder::genPtrToInitNull() {
@@ -154,70 +151,6 @@ void IRBuilder::appendBlock(Block* block) {
   // Load up the state for the new block.
   m_state.startBlock(block);
   m_curBlock = block;
-}
-
-static bool isMainExit(const Block* b) {
-  if (b->hint() == Block::Hint::Unlikely) return false;
-  if (b->hint() == Block::Hint::Unused) return false;
-  if (b->next()) return false;
-  // The Await bytecode instruction does a RetCtrl to the scheduler,
-  // which is in a likely block.  We don't want to consider this as
-  // the main exit.
-  if (b->back().op() == RetCtrl && b->back().marker().sk().op() == OpAwait) {
-    return false;
-  }
-  auto taken = b->taken();
-  if (!taken) return true;
-  if (taken->isCatch()) return true;
-  return false;
-}
-
-/*
- * Compute the stack and local type postconditions for a
- * single-entry/single-exit tracelet.
- */
-std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() {
-  // This function is only correct when given a single-exit region, as
-  // in TransKind::Profile.  Furthermore, its output is only used to
-  // guide formation of profile-driven regions.
-  assert(tx->mode() == TransKind::Profile);
-
-  // We want the state for the last block on the "main trace".  Figure
-  // out which that is.
-  Block* mainExit = nullptr;
-  for (auto* b : rpoSortCfg(m_unit)) {
-    if (isMainExit(b)) {
-      assert(mainExit == nullptr);
-      mainExit = b;
-    }
-  }
-  assert(mainExit != nullptr);
-
-  // Load state for mainExit.  This feels hacky.
-  FTRACE(1, "mainExit: B{}\n", mainExit->id());
-  m_state.startBlock(mainExit);
-
-  // Now use the current state to get all the types.
-  std::vector<RegionDesc::TypePred> result;
-  auto const curFunc  = m_state.func();
-  auto const sp       = m_state.sp();
-  auto const spOffset = m_state.spOffset();
-
-  for (unsigned i = 0; i < curFunc->maxStackCells(); ++i) {
-    auto t = getStackValue(sp, i).knownType;
-    if (!t.equals(Type::StackElem)) {
-      result.push_back({ RegionDesc::Location::Stack{i, spOffset - i}, t });
-    }
-  }
-
-  for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
-    auto t = m_state.localType(i);
-    if (!t.equals(Type::Gen)) {
-      FTRACE(1, "Local {}: {}\n", i, t.toString());
-      result.push_back({ RegionDesc::Location::Local{i}, t });
-    }
-  }
-  return result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -299,6 +232,10 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
                                            const Type oldType,
                                            SSATmp* oldVal,
                                            IRInstruction* typeSrc) {
+  ITRACE(3, "preOptimizeAssertTypeOp({}, {}, {}, {})\n",
+         *inst, oldType,
+         oldVal ? oldVal->toString() : "nullptr",
+         typeSrc ? typeSrc->toString() : "nullptr");
   auto const typeParam = inst->typeParam();
 
   if (oldType.not(typeParam)) {
@@ -322,14 +259,38 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
 
   auto const newType = refineType(oldType, typeParam);
 
-  // oldType is at least as good as the new type. Eliminate this AssertTypeOp,
-  // but only if the type won't relax, or the source value is another assert
-  // that's good enough.
-  if (oldType <= newType &&
-      (!typeMightRelax(oldVal) ||
-       (typeSrc && typeSrc->is(AssertType, AssertLoc, AssertStk) &&
-        typeSrc->typeParam() <= newType))) {
-    return inst->src(0);
+  if (oldType <= newType) {
+    // oldType is at least as good as the new type. Eliminate this
+    // AssertTypeOp, but only if the src type won't relax, or the source value
+    // is another assert that's good enough. We do this to avoid eliminating
+    // apparently redundant assert opcodes that may become useful after prior
+    // guards are relaxed.
+    if (!typeMightRelax(oldVal) ||
+        (typeSrc && typeSrc->is(AssertType, AssertLoc, AssertStk) &&
+         typeSrc->typeParam() <= inst->typeParam())) {
+      return inst->src(0);
+    }
+
+    if (oldType < newType) {
+      // This can happen because of limitations in how Type::operator& (used in
+      // refinedType()) handles specialized types: sometimes it returns a Type
+      // that's wider than it could be. It shouldn't affect correctness but it
+      // can cause us to miss out on some perf.
+      ITRACE(1, "Suboptimal AssertTypeOp: refineType({}, {}) -> {} in {}\n",
+             oldType, typeParam, newType, *inst);
+
+      // We don't currently support intersecting RepoAuthType::Arrays
+      // (t4473238), so we might be here because oldType and typeParam have
+      // different RATArrays. If that's the case and typeParam provides no
+      // other useful information we can unconditionally eliminate this
+      // instruction: RATArrays never come from guards so we can't miss out on
+      // anything by doing so.
+      if (oldType < Type::Arr && oldType.getArrayType() &&
+          typeParam < Type::Arr && typeParam.getArrayType() &&
+          !typeParam.hasArrayKind()) {
+        return inst->src(0);
+      }
+    }
   }
 
   return nullptr;
@@ -705,7 +666,8 @@ void IRBuilder::reoptimize() {
   auto const idoms = findDominators(m_unit, blocksIds);
 
   for (auto* block : blocksIds.blocks) {
-    FTRACE(5, "Block: {}\n", block->id());
+    ITRACE(5, "reoptimize entering block: {}\n", block->id());
+    Indent _i;
 
     m_state.startBlock(block);
     m_curBlock = block;
@@ -734,7 +696,8 @@ void IRBuilder::reoptimize() {
         // we would have to insert the mov on the fall-through edge.
         assert(inst->op() != DefLabel);
         assert(block->empty() || !block->back().isBlockEnd());
-        appendInstruction(m_unit.mov(dst, tmp, inst->marker()));
+        auto src = tmp->inst()->is(Mov) ? tmp->inst()->src(0) : tmp;
+        appendInstruction(m_unit.mov(dst, src, inst->marker()));
       }
 
       if (inst->block() == nullptr && inst->isBlockEnd()) {
@@ -769,36 +732,12 @@ bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
   auto& guard = m_constraints.guards[inst];
-  auto changed = false;
-  ITRACE(2, "constrainGuard({}, {}): existing constraint {}\n",
-         *inst, tc, guard);
+  auto newTc = applyConstraint(guard, tc);
+  ITRACE(2, "constrainGuard({}, {}): {} -> {}\n", *inst, tc, guard, newTc);
   Indent _i;
 
-  // For category and innerCat, constrain the guard if the assertedType isn't
-  // strong enough to fit what we want and tc is more specific than the
-  // existing category.
-
-  if (tc.innerCat > guard.innerCat) {
-    if (!tc.weak) {
-      ITRACE(1, "constraining inner type of {}: {} -> {}\n",
-             *inst, guard.innerCat, tc.innerCat);
-      guard.innerCat = tc.innerCat;
-    }
-    changed = true;
-  } else {
-    ITRACE(2, "not constraining innerCat\n");
-  }
-
-  if (tc.category > guard.category) {
-    if (!tc.weak) {
-      ITRACE(1, "constraining {}: {} -> {}\n",
-             *inst, guard.category, tc.category);
-      guard.category = tc.category;
-    }
-    changed = true;
-  } else {
-    ITRACE(2, "not constraining category\n");
-  }
+  auto const changed = guard != newTc;
+  if (!tc.weak) guard = newTc;
 
   return changed;
 }
@@ -878,9 +817,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
 
     // Relax typeParam with its current constraint. This is used below to
     // recursively relax the constraint on the source, if needed.
-    auto constraint = m_constraints.guards[inst];
-    constraint.category = std::max(constraint.category, guardTc.category);
-    constraint.innerCat = std::max(constraint.innerCat, guardTc.innerCat);
+    auto constraint = applyConstraint(m_constraints.guards[inst], guardTc);
     auto const knownType = relaxType(typeParam, constraint);
 
     if (!typeFitsConstraint(knownType, tc)) {
@@ -990,9 +927,7 @@ bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* typeSrc,
 
   // Relax typeParam with its current constraint.  This is used below to
   // recursively relax the constraint on the source, if needed.
-  auto constraint = m_constraints.guards[guard];
-  constraint.category = std::max(constraint.category, guardTc.category);
-  constraint.innerCat = std::max(constraint.innerCat, guardTc.innerCat);
+  auto constraint = applyConstraint(m_constraints.guards[guard], guardTc);
   auto const knownType = relaxType(typeParam, constraint);
 
   if (!typeFitsConstraint(knownType, tc)) {
@@ -1057,11 +992,9 @@ bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
     auto const guardTc = relaxConstraint(tc, srcType, typeParam);
     changed = constrainGuard(typeSrc, guardTc) || changed;
 
-    // Relax typeParam with its current constraint.  This is used below to
+    // Relax typeParam with its current constraint. This is used below to
     // recursively relax the constraint on the source, if needed.
-    auto constraint = m_constraints.guards[typeSrc];
-    constraint.category = std::max(constraint.category, guardTc.category);
-    constraint.innerCat = std::max(constraint.innerCat, guardTc.innerCat);
+    auto constraint = applyConstraint(m_constraints.guards[typeSrc], guardTc);
     auto const knownType = relaxType(typeParam, constraint);
 
     if (!typeFitsConstraint(knownType, tc)) {

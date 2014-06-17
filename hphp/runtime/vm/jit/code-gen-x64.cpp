@@ -86,17 +86,17 @@ using namespace JIT::reg;
  */
 
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
-            const Func* vmFunc, bool resumed) {
+            const Func* vmFunc, bool resumed, TransID profTransId) {
   if (dumpIREnabled()) {
     HPHP::Trace::trace("--------- CG_PUNT %s %d %s  bcOff: %d \n",
                        file, line, func, bcOff);
   }
-  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed);
+  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed, profTransId);
 }
 
 #define CG_PUNT(instr)                                            \
   cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
-         curFunc(), resumed())
+         curFunc(), resumed(), m_curInst->marker().profTransId())
 
 const char* getContextName(const Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";
@@ -221,6 +221,8 @@ CALL_OPCODE(CreateSSWH)
 CALL_OPCODE(AFWHPrepareChild)
 CALL_OPCODE(BWHUnblockChain)
 CALL_OPCODE(NewArray)
+CALL_OPCODE(NewMixedArray)
+CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
@@ -2477,7 +2479,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   a.    storeq (m_rScratch, actRecReg[AROFF(m_func)]);
   a.    jmp8   (done);
 asm_label(a, slow_path);
-  auto const info = cgCallHelper(
+  cgCallHelper(
     a,
     CppCall::direct(mcHandler),
     kVoidDest,
@@ -2503,8 +2505,11 @@ asm_label(a, done);
    * Class*, so we'll always miss the inline check before it's smashed, and
    * handlePrimeCacheMiss can tell it's not been smashed yet
    */
-  *reinterpret_cast<uintptr_t*>(movAddr + kMovImmOff) =
-    ((info.returnAddress - movAddr) << 1) | 1;
+  auto movAddrUInt = reinterpret_cast<uintptr_t>(movAddr);
+  *reinterpret_cast<uint64_t*>(movAddr + kMovImmOff) =
+    (movAddrUInt << 1) | 1;
+  mcg->cgFixups().m_addressImmediates.insert(
+    reinterpret_cast<TCA>(~movAddrUInt));
 }
 
 void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
@@ -2861,13 +2866,6 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
       m_as.emitImmReg(src->type().toDataType(), rd.reg(1));
     }
   }
-}
-
-void CodeGenerator::cgStCell(IRInstruction* inst) {
-  auto const offset  = inst->extra<StCell>()->offset;
-  auto const asyncAR = srcLoc(0).reg();
-
-  cgStore(asyncAR[offset], inst->src(1), srcLoc(1), Width::Full);
 }
 
 void CodeGenerator::cgStProp(IRInstruction* inst) {
@@ -3837,12 +3835,12 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
-    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
+    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
       assert(inst->src(srcNum)->type().isPtr() &&
              srcLoc(srcNum).reg() != InvalidReg);
       callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
-      callArgs.ssa(srcNum, pi.builtinType() == KindOfDouble);
+      callArgs.ssa(srcNum, pi.builtinType == KindOfDouble);
     }
   }
 
@@ -4869,8 +4867,9 @@ void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch, ne, cls, method, fake_fp);
   }
-  always_assert(srcLoc(0).reg() == rbp);
-  always_assert(!inst->src(0)->isConst());
+  if (inst->src(0)->isConst()) {
+    PUNT(LookupClsMethodCache_const_fp);
+  }
 
   // can raise an error if class is undefined
   cgCallHelper(m_as,
@@ -5357,15 +5356,6 @@ void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
   emitFwdJcc(CC_NZ, inst->taken());
 }
 
-void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
-  assert(!(inst->src(0)->isConst()));
-  auto fpReg = srcLoc(0).reg();
-  Block*  label = inst->taken();
-
-  m_as.    cmpq   (0, fpReg[AROFF(m_varEnv)]);
-  emitFwdJcc(CC_NE, label);
-}
-
 void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   Block*     label = inst->taken();
   TransID  transId = inst->extra<CheckCold>()->transId;
@@ -5446,7 +5436,9 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   void* interpOneHelper = interpOneEntryPoints[opc];
 
   auto dstReg = InvalidReg;
-  always_assert(!inst->src(1)->isConst());
+  if (inst->src(1)->isConst()) {
+    PUNT(InterpOneCommon_const_fp);
+  }
   cgCallHelper(m_as,
                CppCall::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
                callDest(dstReg),
@@ -5505,24 +5497,24 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg      = srcLoc(0).reg();
   auto checkStarted = inst->src(1)->boolVal();
-  auto stateOff     = c_Generator::stateOff();
+  auto stateOff     = BaseGenerator::stateOff();
 
-  static_assert(c_Generator::Created == 0, "used below");
-  static_assert(c_Generator::Started == 1, "used below");
+  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
+  static_assert(uint8_t(BaseGenerator::State::Started) == 1, "used below");
 
   // Take exit if state != 1 (checkStarted) or state > 1 (!checkStarted).
   m_as.cmpb(1, contReg[stateOff]);
   emitFwdJcc(checkStarted ? CC_NE : CC_A, inst->taken());
 
   // Set generator state as Running.
-  m_as.storeb(c_Generator::Running, contReg[stateOff]);
+  m_as.storeb(int8_t(BaseGenerator::State::Running), contReg[stateOff]);
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   auto contReg  = srcLoc(0).reg();
-  auto stateOff = c_Generator::stateOff();
+  auto stateOff = BaseGenerator::stateOff();
 
-  static_assert(c_Generator::Created == 0, "used below");
+  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
 
   // Take exit if state == 0.
   m_as.testb(int8_t(0xff), contReg[stateOff]);
@@ -5532,10 +5524,10 @@ void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
 void CodeGenerator::cgContValid(IRInstruction* inst) {
   auto contReg  = srcLoc(0).reg();
   auto dstReg   = dstLoc(0).reg();
-  auto stateOff = c_Generator::stateOff();
+  auto stateOff = BaseGenerator::stateOff();
 
   // Return 1 if generator state is not Done.
-  m_as.cmpb(c_Generator::Done, contReg[stateOff]);
+  m_as.cmpb(int8_t(BaseGenerator::State::Done), contReg[stateOff]);
   m_as.setne(rbyte(dstReg));
   m_as.movzbl(rbyte(dstReg), r32(dstReg));
 }
@@ -5569,7 +5561,7 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
 void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
   auto dest = dstLoc(0).reg();
   auto base = srcLoc(0).reg();
-  ptrdiff_t offset = c_Generator::arOff();
+  ptrdiff_t offset = BaseGenerator::arOff();
 
   m_as.lea (base[offset], dest) ;
 }
@@ -5598,7 +5590,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  emitLdRaw(inst, -c_Generator::arOff());
+  emitLdRaw(inst, -BaseGenerator::arOff());
 }
 
 void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
@@ -5631,7 +5623,7 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 
 void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
   auto const info = inst->extra<RawMemData>()->info();
-  emitStRaw(inst, -c_Generator::arOff() + info.offset, info.size);
+  emitStRaw(inst, -BaseGenerator::arOff() + info.offset, info.size);
 }
 
 void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
@@ -5757,23 +5749,6 @@ void CodeGenerator::cgLdResumableArObj(IRInstruction* inst) {
   auto const resumableArReg = srcLoc(0).reg();
   auto const objectOff = Resumable::objectOff() - Resumable::arOff();
   m_as.lea (resumableArReg[objectOff], dstReg);
-}
-
-void CodeGenerator::cgCopyAsyncCells(IRInstruction* inst) {
-  auto const fpReg    = srcLoc(0).reg();
-  auto const numCells = inst->extra<CopyAsyncCells>()->locId;
-  auto const asyncAR  = srcLoc(1).reg();
-  auto const cellSize = sizeof(Cell);
-
-  if (!numCells) return;
-  m_as.   movq(int32_t(-(numCells * cellSize)), rAsm);
-
-  Label loopHead;
-asm_label(m_as, loopHead);
-  m_as.   movdqu(fpReg[rAsm], rCgXMM0);
-  m_as.   movdqu(rCgXMM0, asyncAR[rAsm]);
-  m_as.   addq(int32_t(cellSize), rAsm);
-  m_as.   jnz8(loopHead);
 }
 
 void CodeGenerator::cgIterInit(IRInstruction* inst) {

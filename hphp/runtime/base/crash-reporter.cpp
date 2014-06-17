@@ -57,6 +57,10 @@ static void bt_handler(int sig) {
 
   // Turn on stack traces for coredumps
   StackTrace::Enabled = true;
+  static const char* s_newBlacklist[] =
+    {"_ZN4HPHP16StackTraceNoHeap", "_ZN4HPHPL10bt_handlerEi", "killpg"};
+  StackTrace::FunctionBlacklist = s_newBlacklist;
+  StackTrace::FunctionBlacklistCount = 3;
   StackTraceNoHeap st;
 
   char pid[sizeof(Process::GetProcessId())*3+2]; // '-' and \0

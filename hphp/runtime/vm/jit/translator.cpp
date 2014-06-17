@@ -1067,6 +1067,8 @@ static const struct {
   { OpString,      {None,             Stack1,       OutStringImm,      1 }},
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
+  { OpNewMixedArray,  {None,          Stack1,       OutArray,          1 }},
+  { OpNewLikeArrayL,  {None,          Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
@@ -1366,8 +1368,8 @@ static const struct {
   /*** 14. Generator instructions ***/
 
   { OpCreateCont,  {None,             Stack1,       OutNull,           1 }},
-  { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
-  { OpContRaise,   {Stack1,           None,         OutNone,          -1 }},
+  { OpContEnter,   {Stack1,           Stack1,       OutUnknown,        0 }},
+  { OpContRaise,   {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpYield,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpYieldK,      {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
@@ -2228,7 +2230,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           auto func = ni->func();
           const auto& inRtt = ni->inputs[0]->rtt;
           auto paramId = ni->imm[0].u_IVA;
-          const auto& tc = func->params()[paramId].typeConstraint();
+          const auto& tc = func->params()[paramId].typeConstraint;
           if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
               (inRtt.isVagueValue() || inRtt.isObject() || inRtt.isRef())) {
             auto* loc = t.newDynLocation(
@@ -3265,7 +3267,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
       auto const& param = target->params()[i];
       if (param.hasDefaultValue()) {
         if (ret == kInvalidOffset) {
-          ret = param.funcletOff();
+          ret = param.funcletOff;
         }
       } else {
         FTRACE(1, "analyzeCallee: refusing because we would "
@@ -3544,7 +3546,6 @@ Translator::analyze(SrcKey sk,
     ni->m_unit = unit;
     ni->breaksTracelet = false;
     ni->changesPC = opcodeChangesPC(ni->op());
-    ni->fuseBranch = false;
 
     assert(!t.m_analysisFailed);
     oldStackFrameOffset = stackFrameOffset;
@@ -4047,6 +4048,38 @@ static bool containsBothSuccs(const OffsetSet&             succOffsets,
   return takenIncluded && fallthruIncluded;
 }
 
+/*
+ * Returns whether offset is a control-flow merge within region.
+ */
+static bool isMergePoint(Offset offset, const RegionDesc& region) {
+  for (auto block : region.blocks) {
+    auto const bid = block->id();
+    if (block->start().offset() == offset) {
+      auto inCount = int{0};
+      for (auto arc : region.arcs) {
+        if (arc.dst == bid) inCount++;
+      }
+      if (inCount >= 2) return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Returns whether the next instruction following inst (whether by
+ * fallthrough or branch target) is a merge in region.
+ */
+static bool nextIsMerge(const NormalizedInstruction& inst,
+                        const RegionDesc& region) {
+  Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
+  if (instrIsNonCallControlFlow(inst.op())) {
+    Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
+    return isMergePoint(takenOffset, region)
+        || isMergePoint(fallthruOffset, region);
+  }
+  return isMergePoint(fallthruOffset, region);
+}
+
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
@@ -4078,7 +4111,8 @@ Translator::translateRegion(const RegionDesc& region,
     auto knownFuncs    = makeMapWalker(block->knownFuncs());
 
     const Func* topFunc = nullptr;
-    ht.setProfTransID(getTransId(blockId));
+    TransID profTransId = getTransId(blockId);
+    ht.setProfTransID(profTransId);
 
     OffsetSet succOffsets;
     if (ht.genMode() == IRGenMode::CFG) {
@@ -4147,20 +4181,17 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       // Create and initialize the instruction.
-      NormalizedInstruction inst;
-      inst.source = sk;
-      inst.m_unit = block->unit();
+      NormalizedInstruction inst(sk, block->unit());
       inst.breaksTracelet =
         i == block->length() - 1 && block == region.blocks.back();
       inst.changesPC = opcodeChangesPC(inst.op());
       inst.funcd = topFunc;
-      inst.nextOffset = kInvalidOffset;
       if (instrIsNonCallControlFlow(inst.op()) && !inst.breaksTracelet) {
         assert(b < region.blocks.size());
         inst.nextOffset = region.blocks[b+1]->start().offset();
       }
-      inst.outputPredicted = false;
       populateImmediates(inst);
+      inst.nextIsMerge = nextIsMerge(inst, region);
       if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
         // TODO(t3730617): Could extend this logic to other
         // conditional control flow ops, e.g., IterNext, etc.
@@ -4170,7 +4201,7 @@ Translator::translateRegion(const RegionDesc& region,
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if
       // this is true.
-      inst.interp = toInterp.count(sk);
+      inst.interp = toInterp.count(ProfSrcKey{profTransId, sk});
 
       InputInfos inputInfos;
       getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
@@ -4237,15 +4268,16 @@ Translator::translateRegion(const RegionDesc& region,
       try {
         m_irTrans->translateInstr(inst);
       } catch (const FailedIRGen& exn) {
+        ProfSrcKey psk{profTransId, sk};
         always_assert_log(
-          !toInterp.count(sk),
+          !toInterp.count(psk),
           [&] {
             std::ostringstream oss;
             oss << folly::format("IR generation failed with {}\n", exn.what());
             print(oss, m_irTrans->hhbcTrans().unit());
             return oss.str();
           });
-        toInterp.insert(sk);
+        toInterp.insert(psk);
         return Retry;
       }
 
@@ -4256,7 +4288,14 @@ Translator::translateRegion(const RegionDesc& region,
           auto nextOffset = inst.nextOffset != kInvalidOffset
             ? inst.nextOffset
             : inst.offset() + instrLen((Op*)(inst.pc()));
-          ht.endBlock(nextOffset);
+          // prepareForSideExit is done later in Trace mode, but it
+          // needs to happen here or else we generate the SpillStack
+          // after the fallthrough jump, which is just weird.
+          if (b < region.blocks.size() - 1
+              && region.isSideExitingBlock(blockId)) {
+            ht.prepareForSideExit();
+          }
+          ht.endBlock(nextOffset, inst.nextIsMerge);
         }
       }
 
@@ -4268,8 +4307,10 @@ Translator::translateRegion(const RegionDesc& region,
       }
     }
 
-    if (b < region.blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
-      ht.prepareForSideExit();
+    if (ht.genMode() == IRGenMode::Trace) {
+      if (b < region.blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
+        ht.prepareForSideExit();
+      }
     }
 
     assert(!typePreds.hasNext());
@@ -4286,15 +4327,16 @@ Translator::translateRegion(const RegionDesc& region,
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const FailedCodeGen& exn) {
     SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
+    ProfSrcKey psk{exn.profTransId, sk};
     always_assert_log(
-      !toInterp.count(sk),
+      !toInterp.count(psk),
       [&] {
         std::ostringstream oss;
         oss << folly::format("code generation failed with {}\n", exn.what());
         print(oss, m_irTrans->hhbcTrans().unit());
         return oss.str();
       });
-    toInterp.insert(sk);
+    toInterp.insert(psk);
     return Retry;
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {

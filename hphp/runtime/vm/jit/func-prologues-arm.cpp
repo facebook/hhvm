@@ -109,7 +109,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       for (auto i = nPassed; i < numNonVariadicParams; ++i) {
         auto const& pi = paramInfo[i];
         if (pi.hasDefaultValue()) {
-          dvInitializer = pi.funcletOff();
+          dvInitializer = pi.funcletOff;
           break;
         }
       }
@@ -248,7 +248,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Emit warnings for missing arguments
   if (!func->isCPPBuiltin()) {
     for (auto i = nPassed; i < numNonVariadicParams; ++i) {
-      if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
+      if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
         a.  Mov  (argReg(0), func);
         a.  Mov  (argReg(1), i);
         auto fixupAddr = emitCall(a,

@@ -341,7 +341,7 @@ static void handle_exception_append_bt(std::string& errorMsg,
   }
 }
 
-static void bump_counter_and_rethrow() {
+void bump_counter_and_rethrow() {
   try {
     throw;
   } catch (const RequestTimeoutException& e) {
@@ -1309,10 +1309,10 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      HPHP::Eval::PhpFile* phpFile = g_context->lookupPhpFile(
+      auto const phpFile = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
       if (phpFile == nullptr) {
-        throw FileOpenException(po.lint.c_str());
+        throw FileOpenException(po.lint);
       }
       Unit* unit = phpFile->unit();
       const StringData* msg;

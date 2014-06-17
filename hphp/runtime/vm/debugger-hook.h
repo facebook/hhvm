@@ -22,11 +22,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/thread-info.h"
 
-namespace HPHP {
-namespace Eval{
-class DebuggerProxy;
-class PhpFile;
-}}
+namespace HPHP { namespace Eval { struct DebuggerProxy; } }
 
 ///////////////////////////////////////////////////////////////////////////////
 // This is a set of functions which are primarily called from the VM to notify
@@ -36,6 +32,10 @@ class PhpFile;
 
 namespace HPHP {
 
+struct PhpFile;
+struct Class;
+struct Func;
+
 // "Hooks" called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
 // execution indefinitely within one of these hooks.
@@ -44,9 +44,7 @@ void phpDebuggerExceptionThrownHook(ObjectData* exception);
 void phpDebuggerExceptionHandlerHook();
 void phpDebuggerErrorHook(const std::string& message);
 void phpDebuggerEvalHook(const Func* f);
-void phpDebuggerFileLoadHook(Eval::PhpFile* efile);
-class Class;
-class Func;
+void phpDebuggerFileLoadHook(PhpFile* efile);
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
 

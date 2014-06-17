@@ -29,7 +29,8 @@ and hint_ p env = function
       env, Tmixed
   | Harray (h1, h2) ->
       if Env.is_strict env && h1 = None
-      then error p "You cannot have an array without generics in strict mode";
+      then Errors.add p
+          "You cannot have an array without generics in strict mode";
       let env, h1 = opt hint env h1 in
       let env, h2 = opt hint env h2 in
       env, Tarray (true, h1, h2)
@@ -38,7 +39,8 @@ and hint_ p env = function
       let env, ty_opt = opt hint env hopt in
       env, Tgeneric (x, ty_opt)
   | Hoption (_, Hprim Tvoid) ->
-      error p "?void is a nonsensical typehint"
+      Errors.add p "?void is a nonsensical typehint";
+      env, Tany
   | Hoption h ->
       let env, h = hint env h in
       env, Toption h
@@ -60,7 +62,8 @@ and hint_ p env = function
     }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
-      error p ("Did you want a tuple? Try (X,Y), not tuple<X,Y>")
+      Errors.add p ("Did you want a tuple? Try (X,Y), not tuple<X,Y>");
+      env, Tany
   | Happly (((p, c) as id), argl) ->
       Find_refs.process_class_ref p c None;
       let env = Env.add_wclass env c in

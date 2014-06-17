@@ -2,7 +2,7 @@ DOMComment
 object(DOMComment)#1 (18) {
   ["length"]=>
   int(0)
-  ["data"]=>
+  ["textContent"]=>
   string(0) ""
   ["baseURI"]=>
   NULL
@@ -16,22 +16,22 @@ object(DOMComment)#1 (18) {
   NULL
   ["namespaceURI"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
-  ["previousSibling"]=>
-  NULL
   ["nodeType"]=>
   int(8)
+  ["lastChild"]=>
+  NULL
   ["nodeName"]=>
   string(8) "#comment"
-  ["textContent"]=>
-  string(0) ""
-  ["lastChild"]=>
+  ["previousSibling"]=>
   NULL
   ["firstChild"]=>
   NULL
+  ["data"]=>
+  string(0) ""
   ["childNodes"]=>
   NULL
+  ["nodeValue"]=>
+  string(0) ""
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
@@ -104,7 +104,7 @@ object(A_DOMComment)#2 (19) {
   NULL
   ["length"]=>
   int(0)
-  ["data"]=>
+  ["textContent"]=>
   string(0) ""
   ["baseURI"]=>
   NULL
@@ -118,22 +118,22 @@ object(A_DOMComment)#2 (19) {
   NULL
   ["namespaceURI"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
-  ["previousSibling"]=>
-  NULL
   ["nodeType"]=>
   int(8)
+  ["lastChild"]=>
+  NULL
   ["nodeName"]=>
   string(8) "#comment"
-  ["textContent"]=>
-  string(0) ""
-  ["lastChild"]=>
+  ["previousSibling"]=>
   NULL
   ["firstChild"]=>
   NULL
+  ["data"]=>
+  string(0) ""
   ["childNodes"]=>
   NULL
+  ["nodeValue"]=>
+  string(0) ""
   ["nextSibling"]=>
   NULL
   ["attributes"]=>

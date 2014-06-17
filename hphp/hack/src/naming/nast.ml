@@ -63,8 +63,6 @@ and class_ = {
     c_static_methods : method_ list     ;
     c_methods        : method_ list     ;
     c_user_attributes : Ast.user_attribute SMap.t;
-    (* The last time the file was modified *)
-    c_mtime          : float            ;
   }
 
 and tparam = sid * hint option
@@ -159,6 +157,7 @@ and class_id =
 
 and expr = Pos.t * expr_
 and expr_ =
+  | Any
   | Array of afield list
   | Shape of expr SMap.t
   | ValCollection of string * expr list

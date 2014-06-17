@@ -122,6 +122,12 @@ enum class SRFlags {
    * unbalance the return stack buffer---in these cases use a jmp.
    */
   JmpInsteadOfRet = 1 << 1,
+
+  /*
+   * Indicates if the service request is persistent. For non-persistent
+   * requests, the service request stub may be reused.
+   */
+  Persist = 1 << 2,
 };
 
 inline bool operator&(SRFlags a, SRFlags b) {

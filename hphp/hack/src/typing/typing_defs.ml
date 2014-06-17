@@ -11,16 +11,6 @@
 
 open Utils
 
-(* This exception will be raised when we want to ignore an error.
- * It is useful in the following case:
- * Somebody has code in strict mode, and is using a class A.
- * A has a naming error, and because of that, the type of A cannot
- * be found. When that happens, we want to stop trying to type-check
- * the class. Because all the errors that are going to be thrown
- * are just the result of the missing type definition A.
- *)
-exception Ignore
-
 module Reason = Typing_reason
 
 type visibility =
@@ -124,6 +114,7 @@ and class_type = {
   tc_members_init        : SSet.t;
   tc_kind                : Ast.class_kind;
   tc_name                : string    ;
+  tc_pos                 : Pos.t ;
   tc_tparams             : tparam list   ;
   tc_consts              : class_elt SMap.t;
   tc_cvars               : class_elt SMap.t;
@@ -141,12 +132,6 @@ and class_type = {
   tc_req_ancestors_extends         : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
   tc_user_attributes     : Ast.user_attribute SMap.t;
-  (* These are approximations of what the class depends on,
-   * So that we can prefetch these classes to heat-up the caches *)
-  tc_prefetch_classes    : SSet.t;
-  tc_prefetch_funs       : SSet.t;
-
-  tc_mtime               : float;
 }
 
 and tparam = Ast.id * ty option

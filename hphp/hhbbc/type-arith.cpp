@@ -151,4 +151,65 @@ Type typeBitXor(Type t1, Type t2) {
 
 //////////////////////////////////////////////////////////////////////
 
+Type typeIncDec(IncDecOp op, Type t) {
+  auto const overflowToDbl = isIncDecO(op);
+  auto const val = tv(t);
+
+  if (!val) {
+    // Doubles always stay doubles
+    if (t.subtypeOf(TDbl)) return TDbl;
+
+    // Ints stay ints unless they can overflow to doubles
+    if (t.subtypeOf(TInt) && !overflowToDbl) return TInt;
+
+    return TInitCell;
+  }
+
+  auto const inc = isInc(op);
+
+  // We can't constprop with this eval_cell, because of the effects
+  // on locals.
+  auto resultTy = eval_cell([inc,overflowToDbl,val] {
+    auto c = *val;
+    if (inc) {
+      (overflowToDbl ? cellIncO : cellInc)(c);
+    } else {
+      (overflowToDbl ? cellDecO : cellDec)(c);
+    }
+    return c;
+  });
+
+  // We may have inferred a TSStr or TSArr with a value here, but at
+  // runtime it will not be static.
+  resultTy = loosen_statics(resultTy);
+  return resultTy;
+}
+
+Type typeArithSetOp(SetOpOp op, Type lhs, Type rhs) {
+  switch (op) {
+    case SetOpOp::PlusEqual:   return typeAdd(lhs, rhs);
+    case SetOpOp::MinusEqual:  return typeSub(lhs, rhs);
+    case SetOpOp::MulEqual:    return typeMul(lhs, rhs);
+
+    case SetOpOp::DivEqual:    return typeDiv(lhs, rhs);
+    case SetOpOp::ModEqual:    return typeMod(lhs, rhs);
+    case SetOpOp::PowEqual:    return typePow(lhs, rhs);
+
+    case SetOpOp::AndEqual:    return typeBitAnd(lhs, rhs);
+    case SetOpOp::OrEqual:     return typeBitOr(lhs, rhs);
+    case SetOpOp::XorEqual:    return typeBitXor(lhs, rhs);
+
+    case SetOpOp::PlusEqualO:  return typeAddO(lhs, rhs);
+    case SetOpOp::MinusEqualO: return typeSubO(lhs, rhs);
+    case SetOpOp::MulEqualO:   return typeMulO(lhs, rhs);
+
+    case SetOpOp::ConcatEqual: return TStr;
+    case SetOpOp::SlEqual:     return TInt;
+    case SetOpOp::SrEqual:     return TInt;
+  }
+  not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

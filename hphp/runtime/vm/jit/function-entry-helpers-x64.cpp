@@ -34,7 +34,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
   if (nargs < nparams) {
     const Func::ParamInfoVec& paramInfo = fp->m_func->params();
     for (int i = nargs; i < nparams; ++i) {
-      Offset dvInitializer = paramInfo[i].funcletOff();
+      Offset dvInitializer = paramInfo[i].funcletOff;
       if (dvInitializer != InvalidAbsoluteOffset) {
         firstDVInitializer = dvInitializer;
         break;
@@ -74,7 +74,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
       return (TCA)-ar->m_savedRip;
     }
     setupAfterPrologue(ar, sp);
-    assert(ar == vmfp());
+    assert(ar == vmRegsUnsafe().fp);
     return tx->uniqueStubs.resumeHelper;
   } catch (...) {
     /*

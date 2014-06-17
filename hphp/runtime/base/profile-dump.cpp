@@ -296,7 +296,7 @@ void ProfileController::cleanup(const std::unique_lock<std::mutex>& lock) {
   m_reqType = RequestType::None;
   m_profileType = ProfileType::Default;
   m_dump.clear();
-  HPHP::Eval::FileRepository::deleteOrphanedUnits();
+  FileRepository::deleteOrphanedUnits();
 }
 
 }

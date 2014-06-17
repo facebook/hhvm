@@ -96,6 +96,11 @@ inline const unsigned char*& vmpc() {
   return vmRegs().pc;
 }
 
+inline ActRec*& vmFirstAR() {
+  // This is safe because firstAR is always updated directly.
+  return vmRegsUnsafe().firstAR;
+}
+
 inline void assert_native_stack_aligned() {
   assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 }

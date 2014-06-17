@@ -126,7 +126,7 @@ void retypeDests(IRInstruction* inst) {
     auto const oldType = ssa->type();
     retypeDst(inst, i);
     if (!ssa->type().equals(oldType)) {
-      FTRACE(5, "reflowTypes: retyped {} in {}\n", oldType.toString(),
+      ITRACE(5, "reflowTypes: retyped {} in {}\n", oldType.toString(),
              inst->toString());
     }
   }

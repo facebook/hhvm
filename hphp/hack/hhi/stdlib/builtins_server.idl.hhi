@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -27,4 +27,3 @@ function xbox_get_thread_timeout() { }
 function xbox_set_thread_timeout($timeout) { }
 function xbox_schedule_thread_reset() { }
 function xbox_get_thread_time() { }
-function server_get_custom_bool_setting(string $settingName, bool $defaultValue) : bool {}

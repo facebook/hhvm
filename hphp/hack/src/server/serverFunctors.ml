@@ -26,17 +26,40 @@ type program_ret =
 
 module type SERVER_PROGRAM = sig
   val init : genv -> env -> Path.path -> program_ret
-  val recheck: genv -> env -> (SSet.t * SSet.t) -> string list ref -> program_ret
+  val recheck: genv -> env -> (SSet.t * SSet.t * bool) -> string list ref -> program_ret
   val infer: (string * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
   val name: string
-  val get_errors: ServerEnv.env -> error list
+  val get_errors: ServerEnv.env -> Errors.t
 end
 
 module HackProgram : SERVER_PROGRAM = struct
   let init genv env root =
-    let next_files = Find.make_next_files_php root in
+    (* Completely the wrong way to read hhconfig, but this will be reverted
+     * shortly. Ultimately we should build a different options record for Hack
+     * and really parse the hhconfig into that, but this functorization should
+     * be straightened up a bit first. *)
+    let hhconfig = cat_no_fail ((Path.string_of_path root) ^ "/.hhconfig") in
+    let enable_hhi_embedding =
+      try
+        let regex = Str.regexp_string "enable_hhi_embedding" in
+        (* This is such a stupid interface. *)
+        ignore (Str.search_forward regex hhconfig 0);
+        true
+      with Not_found -> false in
+    let next_files =
+      if enable_hhi_embedding then begin
+        let next_files_hhi =
+          match Hhi.get_hhi_root () with
+          | Some hhi_root -> Find.make_next_files_php hhi_root
+          | None -> print_endline "Could not locate hhi files"; exit 1 in
+        let next_files_root = Find.make_next_files_php root in
+        fun () ->
+          match next_files_hhi () with
+          | [] -> next_files_root ()
+          | x -> x
+      end else Find.make_next_files_php root in
     match ServerArgs.convert genv.options with
     | None ->
         let env = ServerInit.init genv env next_files in
@@ -48,27 +71,27 @@ module HackProgram : SERVER_PROGRAM = struct
         Exit 0
 
   let recheck genv env updates report =
-    let diff_php, _ = updates in
-    if not (SSet.is_empty diff_php) 
-    then
+    let diff_php, _, hhconfig_changed = updates in
+    if hhconfig_changed then begin
+      Printf.printf "hhconfig changed, exiting server to pick up changes\n";
+      Die
+    end else if not (SSet.is_empty diff_php) then
       let failed_parsing = SSet.union diff_php env.failed_parsing in
       let check_env = { env with failed_parsing = failed_parsing } in
       Continue (ServerTypeCheck.check genv check_env);
-    else 
-      if !report <> []
-        then begin
-          (* We have a report that the state is inconsistent, at the same
-          * time, dfind is telling us that nothing changed between the moment
-          * where we produced the report and now. Basically: we have a bug!
-          *)
-          Printf.printf "SERVER PANIC!!!!!!!!!!!!!\n";
-          Printf.printf "*************************************************\n";
-          Printf.printf "CRASH REPORT:\n";
-          Printf.printf "*************************************************\n";
-          List.iter (Printf.printf "%s\n") !report;
-          Printf.printf "*************************************************\n";
-          Die
-        end else Continue env
+    else if !report <> [] then begin
+      (* We have a report that the state is inconsistent, at the same
+      * time, dfind is telling us that nothing changed between the moment
+      * where we produced the report and now. Basically: we have a bug!
+      *)
+      Printf.printf "SERVER PANIC!!!!!!!!!!!!!\n";
+      Printf.printf "*************************************************\n";
+      Printf.printf "CRASH REPORT:\n";
+      Printf.printf "*************************************************\n";
+      List.iter (Printf.printf "%s\n") !report;
+      Printf.printf "*************************************************\n";
+      Die
+    end else Continue env
 
   let infer = ServerInferType.go 
 
@@ -198,7 +221,6 @@ end = struct
         Program.infer (fn, line, char) oc
     | ServerMsg.SUGGEST (files) -> Program.suggest files oc
     | ServerMsg.STATUS client_root -> print_status genv env client_root oc
-    | ServerMsg.SKIP          -> assert false
     | ServerMsg.LIST_FILES    -> ServerEnv.list_files env oc
     | ServerMsg.AUTOCOMPLETE content ->
         ServerAutoComplete.auto_complete env content oc
@@ -206,6 +228,8 @@ end = struct
         ServerIdentifyFunction.go content line char oc
     | ServerMsg.OUTLINE content ->
         ServerFileOutline.go content oc
+    | ServerMsg.METHOD_JUMP (class_, find_children) ->
+        ServerMethodJumps.go class_ find_children env genv oc
     | ServerMsg.SAVE_STATE filename ->
         let dump = ServerSign.dump_state env genv in
         let status = ServerSign.save dump filename in
@@ -300,11 +324,6 @@ end = struct
     if finished <> [] then () else begin
       ServerPeriodical.stamp_connection();
       match msg with
-      | ServerMsg.SKIP ->
-        Printf.printf "THIS IS BAD: Skipping errors!\n"; flush stdout;
-        env := { !env with errorl = [];
-                failed_parsing = SSet.empty;
-                failed_check = SSet.empty};
       | ServerMsg.BUILD _ ->
         (* The build step is special. It closes the socket itself. *)
         HandleMessage.respond genv !env ~client ~msg
@@ -346,7 +365,6 @@ end = struct
     let env = MainInit.go genv env root in
     let socket = Socket.init_unix_socket root in
     EventLogger.init_done ();
-    env.skip := false;
     let env = ref env in
     let report = ref [] in
     while true do

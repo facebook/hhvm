@@ -49,48 +49,9 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   decRefObj(m_child);
 }
 
-void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set AsyncFunctionWaitHandle::onStart: on_start_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnAsyncFunctionCreateCallback(callback.getObjectDataOrNull());
-}
-
-void c_AsyncFunctionWaitHandle::ti_setonawaitcallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set AsyncFunctionWaitHandle::onAwait: on_await_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnAsyncFunctionAwaitCallback(callback.getObjectDataOrNull());
-}
-
-void c_AsyncFunctionWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set AsyncFunctionWaitHandle::onSuccess: on_success_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnAsyncFunctionSuccessCallback(callback.getObjectDataOrNull());
-}
-
-void c_AsyncFunctionWaitHandle::ti_setonfailcallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set AsyncFunctionWaitHandle::onFail: on_fail_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnAsyncFunctionFailCallback(callback.getObjectDataOrNull());
+void c_AsyncFunctionWaitHandle::t___construct() {
+  // gen-ext-hhvm requires at least one declared method in the class to work
+  not_reached();
 }
 
 namespace {
@@ -121,9 +82,10 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
 
   checkCreateErrors(child);
 
-  void* obj = Resumable::Create(fp, numSlots, resumeAddr, resumeOffset,
-                                sizeof(c_AsyncFunctionWaitHandle));
+  void* obj = Resumable::Create<false>(fp, numSlots, resumeAddr, resumeOffset,
+                                       sizeof(c_AsyncFunctionWaitHandle));
   auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
+  waitHandle->actRec()->setReturnVMExit();
   waitHandle->incRefCount();
   waitHandle->setNoDestruct();
   waitHandle->initialize(child);
@@ -201,6 +163,7 @@ void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
+  assert(isRunning());
   auto const parentChain = getFirstParent();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
@@ -208,12 +171,34 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
   decRefObj(this);
 }
 
+/**
+ * Mark the wait handle as failed due to PHP exception.
+ *
+ * - consumes reference of the given Exception object
+ */
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
+  assert(isRunning());
+  assert(exception);
+  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+
   AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnAsyncFunctionFailCallback())) {
-    session->onAsyncFunctionFail(this, exception);
+  if (UNLIKELY(session->hasOnResumableFailCallback())) {
+    session->onResumableFail(this, exception);
   }
 
+  auto const parentChain = getFirstParent();
+  setState(STATE_FAILED);
+  cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
+  UnblockChain(parentChain);
+  decRefObj(this);
+}
+
+/**
+ * Mark the wait handle as failed due to unexpected abrupt interrupt.
+ */
+void c_AsyncFunctionWaitHandle::failCpp() {
+  assert(isRunning());
+  auto const exception = AsioSession::Get()->getAbruptInterruptException();
   auto const parentChain = getFirstParent();
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);

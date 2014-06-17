@@ -62,14 +62,6 @@ end
 (* Helpers *)
 (*****************************************************************************)
 
-(* Using a C primitive that systematically reads from mmap makes things
- * much faster in incremental mode. I don't exatly know why ...
- * My guess is that when the filesystem is busy each system call costs
- * us more, mapping everything in a file is only one system call, so
- * that could explain it. But really, I don't know.
- *)
-external hh_read_file: string -> string = "hh_read_file"
-
 let neutral = (SMap.empty, [], SSet.empty, SSet.empty)
 
 let empty_file_info : FileInfo.t = {
@@ -95,35 +87,6 @@ let get_defs ast =
     | Ast.Stmt _ -> acc1, acc2, acc3, acc4
   end ([], [], [], []) ast
 
-let parse_file check_mode fn =
-  let content = hh_read_file fn in
-  if String.length content = 0
-  then begin
-    Parser_heap.ParserHeap.add fn [];
-    empty_file_info
-  end
-  else begin
-    Pos.file := fn;
-    try
-      Ast.mtime := (Unix.stat fn).Unix.st_mtime;
-      Ast.mode := Ast.Mstrict;
-      Parser_hack.is_hh_file := false;
-      let comments, ast, errors = Parser_hack.from_file_with_errors fn in
-      let ast = Namespaces.elaborate_defs ast in
-      if not check_mode then SearchService.WorkerApi.update fn ast;
-      if errors <> []
-      then raise (Utils.Error errors);
-      AddDeps.program ast;
-      let funs, classes, types, consts = get_defs ast in
-      Parser_heap.ParserHeap.add fn ast;
-      {FileInfo.funs; classes; types; consts; comments; 
-      consider_names_just_for_autoload = false}
-    with
-    | e ->
-        Parser_heap.ParserHeap.add fn [];
-        raise e
-  end
-
 let legacy_php_file_info = ref (fun fn ->
   empty_file_info
 )
@@ -134,31 +97,38 @@ let legacy_php_file_info = ref (fun fn ->
  * error_files is SSet.t of files that we failed to parse
  *)
 let parse check_mode (acc, errorl, error_files, php_files) fn =
-  try
-    let defs = parse_file check_mode fn in
+  let errorl', {Parser_hack.is_hh_file; comments; ast} =
+    Errors.do_ begin fun () -> 
+      Parser_hack.from_file fn
+    end
+  in
+  if not check_mode then SearchService.WorkerApi.update fn ast;
+  if is_hh_file then begin
+    AddDeps.program ast;
+    let funs, classes, types, consts = get_defs ast in
+    Parser_heap.ParserHeap.add fn ast;
+    let defs = 
+      {FileInfo.funs; classes; types; consts; comments; 
+       consider_names_just_for_autoload = false}
+    in
     let acc = SMap.add fn defs acc in
+    let errorl = List.rev_append errorl' errorl in
+    let error_files =
+      if errorl' = []
+      then error_files 
+      else SSet.add fn error_files
+    in
     acc, errorl, error_files, php_files
-  with
-  | Utils.Error l ->
-      let acc, php_files =
-        if !(Parser_hack.is_hh_file)
-        then SMap.add fn empty_file_info acc, php_files
-        (* we also now keep in the file_info regular php files
-         * as we need at least their names in hack build
-         *)
-        else 
-          let info = !legacy_php_file_info fn in
-          SMap.add fn info acc, SSet.add fn php_files 
-      in
-      if !(Parser_hack.is_hh_file)
-      then acc, l :: errorl, SSet.add fn error_files, php_files
-      else acc, errorl, error_files, php_files
-  | exn ->
-      if !(Parser_hack.is_hh_file)
-      then
-        let l = [Pos.make_from_file(), Printexc.to_string exn] in
-        acc, l :: errorl, SSet.add fn error_files, php_files
-      else acc, errorl, error_files, php_files
+  end
+  else begin
+    let info = try !legacy_php_file_info fn with _ -> empty_file_info in
+    let acc = SMap.add fn info acc in
+    let php_files = SSet.add fn php_files in
+    (* we also now keep in the file_info regular php files
+     * as we need at least their names in hack build
+     *)
+    acc, errorl, error_files, php_files
+  end
 
 (* Merging the results when the operation is done in parallel *)
 let merge_parse

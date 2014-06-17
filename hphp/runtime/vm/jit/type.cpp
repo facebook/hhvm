@@ -746,6 +746,16 @@ Type ldRefReturn(const IRInstruction* inst) {
   // Guarding on specialized types and uncommon unions like {Int|Bool} is
   // expensive enough that we only want to do it in situations where we've
   // manually confirmed the benefit.
+
+  if (inst->typeParam().strictSubtypeOf(Type::Obj) &&
+      inst->typeParam().getClass()->attrs() & AttrFinal &&
+      inst->typeParam().getClass()->isCollectionClass()) {
+    /*
+     * This case is needed for the minstr-translator.
+     * see MInstrTranslator::checkMIState().
+     */
+    return inst->typeParam();
+  }
   auto type = inst->typeParam().unspecialize();
 
   if (type.isKnownDataType())      return type;
@@ -1102,6 +1112,12 @@ void assertOperandTypes(const IRInstruction* inst) {
                         check(src()->isA(t), t, nullptr); \
                         ++curSrc;                         \
                       }
+#define AK(kind)      {                                                 \
+                        Type t = Type::Arr.specialize(                  \
+                          ArrayData::k##kind##Kind);                    \
+                        check(src()->isA(t), t, nullptr);               \
+                        ++curSrc;                                       \
+                      }
 #define C(type)       check(src()->isConst() && \
                             src()->isA(type),   \
                             Type(),             \
@@ -1147,6 +1163,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 
 #undef NA
 #undef S
+#undef AK
 #undef C
 #undef CStr
 #undef SVar
@@ -1174,13 +1191,22 @@ void assertOperandTypes(const IRInstruction* inst) {
 }
 
 std::string TypeConstraint::toString() const {
-  std::string catStr = typeCategoryName(category);
+  std::string ret = "<" + typeCategoryName(category);
 
   if (innerCat > DataTypeGeneric) {
-    folly::toAppend(",inner:", typeCategoryName(innerCat), &catStr);
+    folly::toAppend(",inner:", typeCategoryName(innerCat), &ret);
   }
 
-  return folly::format("<{}>", catStr).str();
+  if (category == DataTypeSpecialized) {
+    if (wantArrayKind()) ret += ",ArrayKind";
+    if (wantClass()) {
+      folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
+    }
+  }
+
+  if (weak) ret += ",weak";
+
+  return ret + '>';
 }
 
 //////////////////////////////////////////////////////////////////////

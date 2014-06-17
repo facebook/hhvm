@@ -210,6 +210,14 @@ bad_tests = (
     '/ext/standard/tests/file/copy_variation8.php',
 
     # flaky: t3851970
+    '/ext/standard/tests/file/fopen_variation12.php',
+    '/ext/standard/tests/file/mkdir-002.php',
+    '/ext/standard/tests/file/readlink_realpath_variation1.php',
+    '/ext/session/tests/027.php',
+    '/ext/standard/tests/file/lchgrp_basic.php',
+    '/ext/standard/tests/file/mkdir-001.php',
+    '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation4.php',
+    '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation3.php',
     '/ext/sockets/tests/ipv4loop.php',
     '/ext/ftp/tests/ftp_alloc_basic2.php',
     '/ext/sockets/tests/socket_write_params.php',
@@ -939,6 +947,9 @@ def walk(filename, dest_subdir):
             exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
         if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
             exp = exp.replace('to be long', 'to be integer')
+        if '/ext/curl/tests/curl_basic_008.php' in full_dest_filename or \
+           '/ext/curl/tests/curl_basic_010.php' in full_dest_filename:
+            exp = exp.replace('host:)', 'host:|Could not resolve:)')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:

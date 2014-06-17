@@ -71,7 +71,7 @@ class NativeFuncCaller {
     // GP regs only contain integer arguments (when there are less than
     // numGPRegArgs INT args)
     for (size_t i = 0; i < numArgs; ++i) {
-      auto type = m_func->params()[i].builtinType();
+      auto type = m_func->params()[i].builtinType;
       if (type == KindOfDouble) {
         if (m_SIMDcount < kNumSIMDRegs) {
           m_SIMD[m_SIMDcount++] = args[-i].m_data.dbl;
@@ -181,7 +181,7 @@ bool coerceFCallArgs(TypedValue* args,
     COERCE_OR_CAST(kind, kind)                          \
     break; /* end of case */
 
-    switch (pi.builtinType()) {
+    switch (pi.builtinType) {
       CASE(Boolean)
       CASE(Int64)
       CASE(Double)
@@ -259,7 +259,7 @@ static inline int32_t minNumArgs(ActRec *ar) {
   int32_t num = numArgs;
   const Func::ParamInfoVec& paramInfo = func->params();
   while (num &&
-         (paramInfo[num-1].funcletOff() != InvalidAbsoluteOffset)) {
+         (paramInfo[num-1].funcletOff != InvalidAbsoluteOffset)) {
     --num;
   }
   return num;
@@ -287,7 +287,7 @@ static inline bool nativeWrapperCheckArgs(ActRec* ar) {
   if (numNonDefault < numArgs) {
     const Func::ParamInfoVec& paramInfo = func->params();
     for (auto i = numNonDefault; i < numArgs; ++i) {
-      if (InvalidAbsoluteOffset == paramInfo[i].funcletOff()) {
+      if (InvalidAbsoluteOffset == paramInfo[i].funcletOff) {
         // There's at least one non-default param which wasn't passed
         throw_wrong_arguments_nr(getInvokeName(ar)->data(),
               numNonDefault, minNumArgs(ar), numArgs, 1);

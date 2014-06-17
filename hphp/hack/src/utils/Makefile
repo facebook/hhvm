@@ -4,11 +4,13 @@ TOP=..
 ##############################################################################
 TARGET=utils
 
-SRC= json.ml \
+SRC= hh_json.ml \
      path.ml pos.ml \
      tmp.ml build_id.ml \
      ident.ml \
      printSignal.ml ttyColor.ml \
+     errors.ml \
+     sys_utils.ml \
      utils.ml \
      lock.ml wwwroot.ml \
      pidLog.ml fork.ml trie.ml \

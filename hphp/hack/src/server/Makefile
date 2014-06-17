@@ -9,16 +9,18 @@ TARGET=lib
 SRC= serverArgs.ml serverEnv.ml \
  serverMsg.ml find.ml serverDfind.ml \
  serverIdeUtils.ml \
+ findRefsService.ml methodJumps.ml serverMethodJumps.ml \
  serverPeriodical.ml serverPrintTypes.ml \
  serverError.ml serverTypeCheck.ml serverIdentifyFunction.ml \
  serverAutoComplete.ml serverEnvBuild.ml serverHealth.ml serverSign.ml \
  serverInit.ml serverConvert.ml findRefsService.ml serverFindRefs.ml \
  serverRefactor.ml serverInferType.ml \
- fileOutline.ml serverFileOutline.ml serverSearch.ml \
- serverFunctors.ml
+ fileOutline.ml serverFileOutline.ml methodJumps.ml serverMethodJumps.ml \
+ serverSearch.ml serverFunctors.ml
 
 
 INCLUDEDIRS=$(TOP)/utils \
+ $(TOP)/hhi \
  $(TOP)/deps $(TOP)/globals \
  $(TOP)/parsing $(TOP)/naming $(TOP)/typing \
  $(TOP)/procs $(TOP)/heap \

@@ -76,7 +76,9 @@ class StreamUserFilters : public RequestEventHandler {
     vm_call_user_func(s_default_filters_register_func, empty_array_ref);
   }
 
-  virtual void requestShutdown() {}
+  virtual void requestShutdown() {
+    m_registeredFilters.detach();
+  }
 private:
   Variant appendOrPrependFilter(const Resource& stream,
                  const String& filtername,

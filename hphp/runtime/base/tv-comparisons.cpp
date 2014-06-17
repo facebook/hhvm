@@ -600,6 +600,13 @@ bool cellLessOrEqual(Cell c1, Cell c2) {
       (c1.m_type == KindOfResource && c2.m_type == KindOfResource)) {
     return cellLess(c1, c2) || cellEqual(c1, c2);
   }
+
+  // We have to treat NaN specially: NAN <= NAN is false, for example, so we
+  // can't just say !(NAN > NAN).
+  if ((c1.m_type == KindOfDouble && std::isnan(c1.m_data.dbl)) ||
+      (c2.m_type == KindOfDouble && std::isnan(c2.m_data.dbl))) {
+    return cellLess(c1, c2) || cellEqual(c1, c2);
+  }
   return !cellGreater(c1, c2);
 }
 
@@ -610,6 +617,10 @@ bool cellGreaterOrEqual(Cell c1, Cell c2) {
   if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
       (c1.m_type == KindOfResource && c2.m_type == KindOfResource)) {
+    return cellGreater(c1, c2) || cellEqual(c1, c2);
+  }
+  if ((c1.m_type == KindOfDouble && std::isnan(c1.m_data.dbl)) ||
+      (c2.m_type == KindOfDouble && std::isnan(c2.m_data.dbl))) {
     return cellGreater(c1, c2) || cellEqual(c1, c2);
   }
   return !cellLess(c1, c2);

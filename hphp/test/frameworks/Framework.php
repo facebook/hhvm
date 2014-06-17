@@ -16,19 +16,19 @@ class Framework {
   private string $test_path;
   private string $test_name_pattern;
   private string $test_file_pattern;
-  private ?Map $current_test_statuses = null;
-  private Set $test_files = null;
+  private ?Map<string, string> $current_test_statuses = null;
+  private ?Set $test_files = null;
 
-  private string $install_root;
-  private string $git_path;
-  private string $git_commit;
-  private string $git_branch;
+  private ?string $install_root;
+  private ?string $git_path;
+  private ?string $git_commit;
+  private ?string $git_branch;
   private Set $blacklist;
   private Set $clownylist;
-  private array<int, array<string, string>> $pull_requests;
-  private Set $individual_tests = null;
-  private string $bootstrap_file = null;
-  private string $config_file = null;
+  private array<array<string, string>> $pull_requests;
+  private ?Set $individual_tests = null;
+  private ?string $bootstrap_file = null;
+  private ?string $config_file = null;
 
   // $name, $parallel, $test_fine_mode, etc. are constructor promoted
   // Assume the framework unit tests will be run in parallel until otherwise
@@ -37,10 +37,10 @@ class Framework {
   // in the same PHPUnit process. Also assume that tests will be found by
   // reflecting over the framework. However, some require that we use php
   // tokens or are found via phpt files.
-  public function __construct(private string $name,
-                              private string $test_command = null,
-                              private Map $env_vars = null,
-                              private Map $args_for_tests = null,
+  public function __construct(protected string $name,
+                              private ?string $test_command = null,
+                              private ?Map $env_vars = null,
+                              private ?Map $args_for_tests = null,
                               private bool $parallel = true,
                               private string $test_find_mode =
                                 TestFindModes::REFLECTION) {
@@ -156,7 +156,7 @@ class Framework {
     return $this->env_vars;
   }
 
-  public function getCurrentTestStatuses(): ?Map {
+  public function getCurrentTestStatuses(): ?Map<string, string> {
     return $this->current_test_statuses;
   }
 
@@ -185,11 +185,11 @@ class Framework {
   //********************
   // Protected getters
   //********************
-  protected function getInstallRoot(): string {
+  protected function getInstallRoot(): ?string {
     return $this->install_root;
   }
 
-  protected function getGitBranch(): string {
+  protected function getGitBranch(): ?string {
     return $this->git_branch;
   }
 
@@ -209,9 +209,8 @@ class Framework {
   }
 
   private function setBlacklist(?array<int, string> $blacklist): void {
-    $this->blacklist = null;
+    $this->blacklist = Set {};
     if ($blacklist !== null) {
-      $this->blacklist = Set {};
       foreach ($blacklist as $test) {
         $this->blacklist[] = Options::$frameworks_root."/".$test;
       }
@@ -219,9 +218,8 @@ class Framework {
   }
 
   private function setClownylist(?array<int, string> $clownylist): void {
-    $this->clownylist = null;
+    $this->clownylist = Set {};
     if ($clownylist !== null) {
-      $this->clownylist = Set {};
       foreach ($clownylist as $test) {
         $this->clownylist[] = Options::$frameworks_root."/".$test;
       }
@@ -230,10 +228,9 @@ class Framework {
 
   private function setPullRequests(
     ?array<int, array<string, string>> $pull_requests
-    ): void {
-    $this->pull_requests = null;
+  ): void {
+    $this->pull_requests = array();
     if ($pull_requests !== null) {
-      $this->pull_requests = array();
       foreach($pull_requests as $pr) {
         if (array_key_exists("pull_dir", $pr)) {
           $pr['pull_dir'] = Options::$frameworks_root."/".$pr['pull_dir'];
@@ -291,7 +288,7 @@ class Framework {
     }
 
     verbose("General test command for: ".$this->name." is: ".
-            $this->test_command . "\n", Options::$verbose);
+            $this->test_command . "\n");
   }
 
   private function setTestFilePattern(?string $test_file_pattern = null):
@@ -313,8 +310,7 @@ class Framework {
     }
 
     if ($this->config_file !== null) {
-      verbose("Using phpunit xml file in: ".$this->config_file."\n",
-              Options::$verbose);
+      verbose("Using phpunit xml file in: ".$this->config_file."\n");
       // For now, remove any logging and code coverage settings from
       // the configuration file.
       $config_data = simplexml_load_file($this->config_file);
@@ -323,8 +319,7 @@ class Framework {
       }
       file_put_contents($this->config_file, $config_data->saveXML());
     } else {
-      verbose("No phpunit xml file found for: ".$this->name.".\n",
-              Options::$verbose);
+      verbose("No phpunit xml file found for: ".$this->name.".\n");
     }
   }
 
@@ -360,7 +355,7 @@ class Framework {
   public function getPassPercentage(): mixed {
     if (filesize($this->stats_file) === 0) {
       verbose("Stats File: ".$this->stats_file." has no content. Returning ".
-              "fatal\n", Options::$verbose);
+              "fatal\n");
       return Statuses::FATAL;
     }
 
@@ -408,8 +403,8 @@ class Framework {
           $num_errors_failures += 1;
         } else if ($line === Statuses::SKIP) {
           // If status is SKIP, then we just move on and don't count either way.
-        } else if ($this->individual_tests->contains($line) ||
-                   $this->test_files->contains($line)) {
+        } else if (nullthrows($this->individual_tests)->contains($line) ||
+                   nullthrows($this->test_files)->contains($line)) {
           // Just skip over the test names or test file. They are in the stats
           // file as context for the numbers
         } else if ($line === $this->name) {
@@ -422,8 +417,7 @@ class Framework {
         }
         else {
           error_and_exit("The stats file for ".$this->name." is corrupt! It ".
-                         "should only have test names and statuses in it.\n",
-                         Options::$csv_only);
+                         "should only have test names and statuses in it.\n");
         }
       }
       // Count blacklisted tests as failures
@@ -447,15 +441,16 @@ class Framework {
     }
 
     verbose(strtoupper($this->name).
-            " TEST COMPLETE with pass percentage of: ".$pct."\n",
-            Options::$verbose);
-    verbose("Stats File: ".$this->stats_file."\n", Options::$verbose);
+            " TEST COMPLETE with pass percentage of: ".$pct."\n");
+    verbose("Stats File: ".$this->stats_file."\n");
 
     return $pct;
   }
 
-  public function prepareCurrentTestStatuses(string $status_code_pattern,
-                                           string $stop_parsing_pattern): void {
+  public function prepareCurrentTestStatuses(
+    string $status_code_pattern,
+    string $stop_parsing_pattern
+  ): void {
     $file = fopen($this->expect_file, "r");
 
     $matches = array();
@@ -491,9 +486,8 @@ class Framework {
 
     if (Options::$generate_new_expect_file) {
       unlink($this->expect_file);
-      verbose("Resetting the expect file for ".$this->name.". ".
-              "Establishing new baseline with gray dots...\n",
-              !Options::$csv_only);
+      human("Resetting the expect file for ".$this->name.". ".
+            "Establishing new baseline with gray dots...\n");
     }
   }
 
@@ -531,9 +525,8 @@ class Framework {
   // adventurous, so we will see how this works out after some time to test it
   // out
   protected function install(): void {
-    verbose("Installing ".$this->name.
-            ". You will see white dots during install.....\n",
-            !Options::$csv_only);
+    human("Installing ".$this->name.
+          ". You will see white dots during install.....\n");
     // Get rid of any test file and test information. Why? Well, for example,
     // just in case the frameworks are being installed in a different directory
     // path. The tests files file would have the wrong path information then.
@@ -561,27 +554,24 @@ class Framework {
 
     // The commit hash has changed and we need to download new code
     if ($git_head_info !== $this->git_commit) {
-      verbose("Redownloading ".$this->name." because git commit changed...\n",
-              !Options::$csv_only);
-      remove_dir_recursive($this->install_root);
+      human("Redownloading ".$this->name." because git commit changed...\n");
+      remove_dir_recursive(nullthrows($this->install_root));
       return false;
     }
 
     if (Options::$force_redownload) {
-      verbose("Forced redownloading of ".$this->name."...\n",
-              !Options::$csv_only);
-      remove_dir_recursive($this->install_root);
+      human("Forced redownloading of ".$this->name."...\n");
+      remove_dir_recursive(nullthrows($this->install_root));
       return false;
     }
 
     if (Options::$get_latest_framework_code) {
-      verbose("Get latest code for ".$this->name."...\n",
-              !Options::$csv_only);
-      remove_dir_recursive($this->install_root);
+      human("Get latest code for ".$this->name."...\n");
+      remove_dir_recursive(nullthrows($this->install_root));
       return false;
     }
 
-    verbose($this->name." already installed.\n", Options::$verbose);
+    verbose($this->name." already installed.\n");
     return true;
   }
 
@@ -590,7 +580,7 @@ class Framework {
   //********************
   private function installCode(): void {
      // Get the source from GitHub
-    verbose("Retrieving framework ".$this->name."....\n", Options::$verbose);
+    verbose("Retrieving framework ".$this->name."....\n");
     $git_command = "git clone";
     $git_command .= " ".$this->git_path;
     $git_command .= " -b ".$this->git_branch;
@@ -601,8 +591,7 @@ class Framework {
 
     $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies);
     if ($git_ret !== 0) {
-      error_and_exit("Could not download framework ".$this->name."!\n",
-                     Options::$csv_only);
+      error_and_exit("Could not download framework ".$this->name."!\n");
     }
 
     // If we are using --latest or --latest-record, we checkout from a branch
@@ -617,18 +606,18 @@ class Framework {
     // Checkout out our baseline test code via SHA or branch
     $git_command = "git checkout";
     $git_command .= " ".$this->git_commit;
-    $git_ret = run_install($git_command, $this->install_root,
+    $git_ret = run_install($git_command, nullthrows($this->install_root),
                            ProxyInformation::$proxies);
     if ($git_ret !== 0) {
-      remove_dir_recursive($this->install_root);
+      remove_dir_recursive(nullthrows($this->install_root));
       error_and_exit("Could not checkout baseline code for ". $this->name.
-                     "! Removing framework!\n", Options::$csv_only);
+                     "! Removing framework!\n");
     }
   }
 
   private function prepareOutputFiles(): void {
     if (!(file_exists(Options::$results_root))) {
-      mkdir($path, 0755, true);
+      mkdir(dirname(Options::$results_root), 0755, true);
     }
     $this->out_file = Options::$results_root."/".$this->name.".out";
     $this->expect_file = Options::$results_root."/".$this->name.".expect";
@@ -663,12 +652,13 @@ class Framework {
         1 => array("pipe", "w"),
         2 => array("pipe", "w"),
       );
-      $pipes = null;
+      $pipes = array();
       verbose("Command used to find the test files and tests for ".$this->name.
-              ": ".$find_tests_command."\n", Options::$verbose);
+              ": ".$find_tests_command."\n");
       $proc = proc_open($find_tests_command, $descriptorspec, $pipes, __DIR__);
       if (is_resource($proc)) {
         $pid = proc_get_status($proc)["pid"];
+        $child_status = null;
         pcntl_waitpid($pid, $child_status);
         fclose($pipes[0]);
         fclose($pipes[1]);
@@ -678,12 +668,10 @@ class Framework {
             pcntl_wexitstatus($child_status) !== 0) {
           unlink($this->tests_file);
           unlink($this->test_files_file);
-          error_and_exit("Could not get tests for ".$this->name,
-                         Options::$csv_only);
+          error_and_exit("Could not get tests for ".$this->name);
         }
       } else {
-        error_and_exit("Could not open process tp get tests for ".$this->name,
-                       Options::$csv_only);
+        error_and_exit("Could not open process tp get tests for ".$this->name);
       }
     }
 
@@ -694,9 +682,9 @@ class Framework {
     $this->test_files->addAll(file($this->test_files_file,
                                    FILE_IGNORE_NEW_LINES));
     if ($first_time) {
-      verbose("Found ".count($this->individual_tests)." tests for ".$this->name.
-              ". Each test could have more than one data set, making the ".
-              "total number be actually higher.\n", !Options::$csv_only);
+      human("Found ".count($this->individual_tests)." tests for ".$this->name.
+            ". Each test could have more than one data set, making the ".
+            "total number be actually higher.\n");
     }
   }
 
@@ -706,13 +694,13 @@ class Framework {
     $this->clownylist = $this->disable($this->clownylist,
                                      ".disabled.hhvm.clownylist");
     verbose(count($this->blacklist)." files were blacklisted (auto fail) ".
-            $this->name."...\n", Options::$verbose);
+            $this->name."...\n");
     verbose(count($this->clownylist)." files were clownylisted (no-op/no run) ".
-            $this->name."...\n", Options::$verbose);
+            $this->name."...\n");
   }
 
-  private function disable(?Set $tests, string $suffix): ?Set {
-    if ($tests === null) { return null; }
+  private function disable(?Set $tests, string $suffix): Set {
+    if ($tests === null) { return Set { }; }
     $updated_tests = Set {};
     foreach ($tests as $t) {
       // Check if we are already disabled first
@@ -727,13 +715,15 @@ class Framework {
   }
 
   private function installDependencies(): void {
-    $composer_json_path = find_first_file_recursive(Set {"composer.json"},
-                                                  $this->install_root, true);
-    verbose("composer.json found in: $composer_json_path\n", Options::$verbose);
+    $composer_json_path = find_first_file_recursive(
+      Set {"composer.json"},
+      nullthrows($this->install_root),
+      true
+    );
+    verbose("composer.json found in: $composer_json_path\n");
     // Check to see if composer dependencies are necessary to run the test
     if ($composer_json_path !== null) {
-      verbose("Retrieving dependencies for framework ".$this->name.".....\n",
-              Options::$verbose);
+      verbose("Retrieving dependencies for framework ".$this->name.".....\n");
       // Use the timeout to avoid curl SlowTimer timeouts and problems
       $dependencies_install_cmd = get_runtime_build();
       // Only put this timeout if we are using hhvm
@@ -748,31 +738,32 @@ class Framework {
       if ($install_ret !== 0) {
         // Let's just really make sure the dependencies didn't get installed
         // by checking the vendor directories to see if they are empty.
-        $fw_vendor_dir = find_first_file_recursive(Set {"vendor"},
-                                                 $this->install_root,
-                                                 false);
+        $fw_vendor_dir = find_first_file_recursive(
+          Set {"vendor"},
+          nullthrows($this->install_root),
+          false
+        );
         if ($fw_vendor_dir !== null) {
           // If there is no content in the directories under vendor, then we
           // did not get the dependencies.
           if (any_dir_empty_one_level($fw_vendor_dir)) {
-            remove_dir_recursive($this->install_root);
+            remove_dir_recursive(nullthrows($this->install_root));
             error_and_exit("Couldn't download dependencies for ".$this->name.
                            ". Removing framework. You can try the --zend ".
-                           "option.\n", Options::$csv_only);
+                           "option.\n");
           }
         } else { // No vendor directory. Dependencies could not have been gotten
-          remove_dir_recursive($this->install_root);
+          remove_dir_recursive(nullthrows($this->install_root));
           error_and_exit("Couldn't download dependencies for ".$this->name.
                          ". Removing framework. You can try the --zend ".
-                         "option.\n", Options::$csv_only);
+                         "option.\n");
         }
       }
     }
   }
 
   private function installPullRequests(): void {
-    verbose("Merging some upstream pull requests for ".$this->name."\n",
-            Options::$verbose);
+    verbose("Merging some upstream pull requests for ".$this->name."\n");
     foreach ($this->pull_requests as $pr) {
       $dir = $pr["pull_dir"];
       $rep = $pr["pull_repo"];
@@ -782,8 +773,7 @@ class Framework {
       $dir_to_move = null;
       chdir($dir);
       $git_command = "";
-      verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
-              Options::$verbose);
+      verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n");
       if ($type === "pull") {
         $git_command = "git pull --no-rebase ".$rep." ".$gc;
       } else if ($type === "submodulemove") {
@@ -791,21 +781,20 @@ class Framework {
         $move_from_dir = $pr["move_from_dir"];
         $dir_to_move = $pr["dir_to_move"];
       }
-      verbose("Pull request command: ".$git_command."\n", Options::$verbose);
+      verbose("Pull request command: ".$git_command."\n");
       $git_ret = run_install($git_command, $dir,
                              ProxyInformation::$proxies);
       if ($git_ret !== 0) {
-        remove_dir_recursive($this->install_root);
+        remove_dir_recursive(nullthrows($this->install_root));
         error_and_exit("Could not get pull request code for ".$this->name."!".
-                       " Removing framework!\n", Options::$csv_only);
+                       " Removing framework!\n");
       }
       if ($dir_to_move !== null) {
         $mv_command = "mv ".$dir_to_move." ".$dir;
-        verbose("Move command: ".$mv_command."\n", Options::$verbose);
+        verbose("Move command: ".$mv_command."\n");
         exec($mv_command);
-        verbose("After move, removing: ".$move_from_dir."\n",
-                Options::$verbose);
-        remove_dir_recursive($move_from_dir);
+        verbose("After move, removing: ".$move_from_dir."\n");
+        remove_dir_recursive(nullthrows($move_from_dir));
       }
       chdir(__DIR__);
     }

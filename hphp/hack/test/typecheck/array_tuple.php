@@ -9,12 +9,12 @@
  *
  */
 
-function show(mixed $x): void {}
-
 function test(): void {
   $array = array(array('', 0), array('', 0));
 
   foreach ($array as $update) {
     list($name, $value) = $update;
+    hh_show($name);
+    hh_show($value);
   }
 }

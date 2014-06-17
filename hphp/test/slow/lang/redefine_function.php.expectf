@@ -1,1 +1,1 @@
-Fatal error: Cannot redeclare foo() (previously declared in %s/test/slow/lang/redefine_function.php:8) in %s/test/slow/lang/redefine_function.php on line 10
+Fatal error: Cannot redeclare foo() (previously declared in %Stest/slow/lang/redefine_function.php:8) in %s/test/slow/lang/redefine_function.php on line 10

@@ -26,6 +26,7 @@
 
 #include "hphp/vixl/a64/simulator-a64.h"
 #include "hphp/util/thread-local.h"
+#include "hphp/util/compilation-flags.h"
 #include "folly/Format.h"
 #include <math.h>
 
@@ -74,7 +75,9 @@ Simulator::Simulator(Decoder* decoder, std::ostream& stream)
   // Allocate and setup the simulator stack.
   stack_ = reinterpret_cast<byte*>(malloc(stack_size_));
   // Fill it with junk bytes
-  memset(stack_, kSimulatorStackJunk, stack_size_);
+  if (HPHP::debug) {
+    memset(stack_, kSimulatorStackJunk, stack_size_);
+  }
   stack_limit_ = stack_ + stack_protection_size_;
   byte* tos = stack_ + stack_size_ - stack_protection_size_;
   // The stack pointer must be 16 bytes aligned.

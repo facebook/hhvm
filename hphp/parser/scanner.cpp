@@ -85,16 +85,16 @@ void ScannerToken::xhpDecode() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Scanner::Scanner(const char *filename, int type, bool md5 /* = false */)
+Scanner::Scanner(const std::string& filename, int type, bool md5 /* = false */)
     : m_filename(filename), m_stream(nullptr), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
       m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0),
       m_listener(nullptr) {
-  m_stream = new std::ifstream(filename);
+  m_stream = new std::ifstream(m_filename);
   m_streamOwner = true;
   if (m_stream->fail()) {
     delete m_stream; m_stream = nullptr;
-    throw FileOpenException(filename);
+    throw FileOpenException(m_filename);
   }
   if (md5) computeMd5();
   init();
@@ -594,7 +594,7 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
   return tokid;
 }
 
-int Scanner::read(char *text, int &result, int max) {
+int Scanner::read(char *text, yy_size_t &result, yy_size_t max) {
   if (m_stream) {
     if (!m_stream->eof()) {
       m_stream->read(text, max);
@@ -615,6 +615,14 @@ int Scanner::read(char *text, int &result, int max) {
   }
   return (result = 0);
 }
+
+int Scanner::read(char *text, int &result, yy_size_t max) {
+  yy_size_t tmp;
+  auto const ret = read(text, tmp, max);
+  result = tmp;
+  return ret;
+}
+
 
 void Scanner::error(const char* fmt, ...) {
   va_list ap;

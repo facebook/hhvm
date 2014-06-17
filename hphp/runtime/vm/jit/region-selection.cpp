@@ -23,6 +23,7 @@
 
 #include "folly/Memory.h"
 #include "folly/Conv.h"
+#include "folly/String.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"
@@ -456,7 +457,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
 }
 
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const Tracelet* t,
+                           TraceletFn tletFn,
                            TransKind kind) {
   auto const mode = regionMode();
 
@@ -474,9 +475,10 @@ RegionDescPtr selectRegion(const RegionContext& context,
           return selectMethod(context);
         case RegionMode::Tracelet:
           return selectTracelet(context, 0, kind == TransKind::Profile);
-        case RegionMode::Legacy:
-          always_assert(t);
-          return selectTraceletLegacy(context.spOffset, *t);
+        case RegionMode::Legacy: {
+          auto tlet = tletFn();
+          return selectTraceletLegacy(context.spOffset, *tlet);
+        }
       }
       not_reached();
     } catch (const std::exception& e) {
@@ -835,10 +837,10 @@ std::string show(const RegionDesc& region) {
       for (auto& arc : region.arcs) {
         folly::toAppend(show(arc), &ret);
       }
-      folly::toAppend("Side-exiting Blocks: ", &ret);
-      for (auto b : region.sideExitingBlocks) {
-        folly::toAppend(b, &ret);
-      }
+      folly::toAppend("Side-exiting Blocks:\n",
+                      folly::join(", ", region.sideExitingBlocks),
+                      "\n",
+                      &ret);
       return ret;
     }()
   ).str();

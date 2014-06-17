@@ -1,4 +1,7 @@
 string(4) ":bar"
+string(7) "<0>hurr"
+string(9) "zz<0>hurr"
+string(15) "foo:bazz<0>hurr"
 string(15) "<0>bar<0>waaaaa"
 string(15) "<0>bar<0>waaaaa"
 string(15) "<0>bar<0>waaaaa"

@@ -23,6 +23,8 @@ class SortedIterator extends SplHeap {
     }
   }
   public function compare(mixed $b, mixed $a): int {
+    assert($a instanceof SplFileInfo);
+    assert($b instanceof SplFileInfo);
     return strcmp($a->getPath(), $b->getPath());
   }
 }

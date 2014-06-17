@@ -13,9 +13,9 @@ open Utils
 (* Error. *)
 (*****************************************************************************)
 
-let report_error errl =
-  let err_str = Utils.pmsg_l errl in
-  Printf.printf "Could not auto-complete because of errors: %s\n" err_str;
+let report_error exn =
+  let exn_str = Printexc.to_string exn in
+  Printf.printf "Could not auto-complete because of errors: %s\n" exn_str;
   flush stdout;
   ()
 
@@ -40,13 +40,14 @@ let revive funs classes =
 
 let declare content =
   Autocomplete.auto_complete := false;
-  Silent.is_silent_mode := true;
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.auto_complete_result := SMap.empty;
   let declared_funs = ref SSet.empty in
   let declared_classes = ref SSet.empty in
-  try
-    let ast = Parser_hack.program ~fail:false content in
+  try 
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -84,40 +85,33 @@ let declare content =
       | _ -> ()
     end ast;
     !declared_funs, !declared_classes
-  with
-  | Error l ->
-      report_error l;
-      SSet.empty, SSet.empty
-  | _ ->
-      SSet.empty, SSet.empty
+  with e ->
+    report_error e;
+    SSet.empty, SSet.empty
 
-let fix_file_and_def content =
-  try
-    let ast = Parser_hack.program ~fail:false content in
-    List.iter begin fun def ->
-      match def with
-      | Ast.Fun f ->
-          let nenv = Naming.empty in
-          let f = Naming.fun_ nenv f in
-          let filename = Pos.filename (fst f.Nast.f_name) in
-          let tenv = Typing_env.empty filename in
-          Typing.fun_def tenv (snd f.Nast.f_name) f
-      | Ast.Class c ->
-          let nenv = Naming.empty in
-          let c = Naming.class_ nenv c in
-          let filename = Pos.filename (fst c.Nast.c_name) in
-          let tenv = Typing_env.empty filename in
-          let res = Typing.class_def tenv (snd c.Nast.c_name) c in
-          res
-      | _ -> ()
-    end ast;
-    ()
-  with
-  | Error l ->
-      report_error l;
-      ()
-  | _ -> ()
-
+let fix_file_and_def content = try
+  let {Parser_hack.is_hh_file; comments; ast} = Parser_hack.program content in
+  List.iter begin fun def ->
+    match def with
+    | Ast.Fun f ->
+        let nenv = Naming.empty in
+        let f = Naming.fun_ nenv f in
+        let filename = Pos.filename (fst f.Nast.f_name) in
+        let tenv = Typing_env.empty filename in
+        Typing.fun_def tenv (snd f.Nast.f_name) f
+    | Ast.Class c ->
+        let nenv = Naming.empty in
+        let c = Naming.class_ nenv c in
+        let filename = Pos.filename (fst c.Nast.c_name) in
+        let tenv = Typing_env.empty filename in
+        let res = Typing.class_def tenv (snd c.Nast.c_name) c in
+        res
+    | _ -> ()
+  end ast;
+with e ->
+  report_error e;
+  ()
+    
 let recheck file_names =
   SharedMem.invalidate_caches();
   List.iter begin fun fn ->

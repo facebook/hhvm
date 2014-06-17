@@ -10,12 +10,10 @@
 
 let setup line char =
   Find_refs.find_method_at_cursor_result := None;
-  Silent.is_silent_mode := true;
   Find_refs.find_method_at_cursor_target := Some (line, char)
   
 let restore() =
   Find_refs.find_method_at_cursor_result := None;
-  Silent.is_silent_mode := false;
   Find_refs.find_method_at_cursor_target := None
 
 let identify content line char =

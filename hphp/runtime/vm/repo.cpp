@@ -21,6 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/process.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
@@ -122,7 +123,7 @@ void Repo::setCliFile(const std::string& cliFile) {
   s_cliFile = cliFile;
 }
 
-void Repo::loadGlobalData() {
+void Repo::loadGlobalData(bool allowFailure /* = false */) {
   m_lsrp.load();
 
   if (!RuntimeOption::RepoAuthoritative) return;
@@ -135,36 +136,60 @@ void Repo::loadGlobalData() {
    * tests with the compiled repo as the Central repo.
    */
   for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+    if (repoName(repoId).empty()) {
+      // The repo wasn't loadable
+      continue;
+    }
     try {
       RepoStmt stmt(*this);
+      const auto& tbl = table(repoId, "GlobalData");
       stmt.prepare(
         folly::format(
-          "SELECT data from {};", table(repoId, "GlobalData")
+          "SELECT count(*), data from {};", tbl
         ).str()
       );
       RepoTxn txn(*this);
       RepoTxnQuery query(txn, stmt);
       query.step();
-      if (!query.row()) continue;
-      BlobDecoder decoder = query.getBlob(0);
+      if (!query.row()) {
+        throw RepoExc("Can't find table %s", tbl.c_str());
+      };
+      int val;
+      query.getInt(0, val);
+      if (val == 0) {
+        throw RepoExc("No rows in %s. Did you forget to compile that file with "
+                      "this HHVM version?", tbl.c_str());
+      };
+      BlobDecoder decoder = query.getBlob(1);
       decoder(s_globalData);
 
       txn.commit();
     } catch (RepoExc& e) {
-      failures.push_back(e.msg());
+      failures.push_back(repoName(repoId) + ": "  + e.msg());
       continue;
     }
 
     return;
   }
 
-  // We should always have a global data section in RepoAuthoritative
-  // mode, or the repo is messed up.
-  std::fprintf(stderr, "failed to load Repo::GlobalData:\n");
-  for (auto& f : failures) {
-    std::fprintf(stderr, "  %s\n", f.c_str());
+  if (allowFailure) return;
+
+  if (failures.empty()) {
+    std::fprintf(stderr, "No repo was loadable. Check all the possible repo "
+                 "locations (Repo.Central.Path, HHVM_REPO_CENTRAL_PATH, and "
+                 "$HOME/.hhvm.hhbc) to make sure one of them is a valid "
+                 "sqlite3 HHVM repo built with this exact HHVM version.\n");
+  } else {
+    // We should always have a global data section in RepoAuthoritative
+    // mode, or the repo is messed up.
+    std::fprintf(stderr, "Failed to load Repo::GlobalData:\n");
+    for (auto& f : failures) {
+      std::fprintf(stderr, "  %s\n", f.c_str());
+    }
   }
-  std::abort();
+
+  assert(Process::IsInMainThread());
+  exit(1);
 }
 
 void Repo::saveGlobalData(GlobalData newData) {
@@ -478,22 +503,24 @@ void Repo::initCentral() {
   assert(m_dbc == nullptr);
   auto tryPath = [this, &error](const char* path) {
     std::string subErr;
-    if (!openCentral(path, subErr)) return false;
-
-    folly::format(&error, "  {}\n", subErr.empty() ? path : subErr);
+    if (!openCentral(path, subErr)) {
+      folly::format(&error, "  {}\n", subErr.empty() ? path : subErr);
+      return false;
+    }
     return true;
   };
 
-  // Try Repo.Central.Path (or HHVM_REPO_CENTRAL_PATH).
+  // Try Repo.Central.Path
   if (!RuntimeOption::RepoCentralPath.empty()) {
-    if (!tryPath(RuntimeOption::RepoCentralPath.c_str())) {
+    if (tryPath(RuntimeOption::RepoCentralPath.c_str())) {
       return;
     }
   }
 
+  // Try HHVM_REPO_CENTRAL_PATH
   const char* HHVM_REPO_CENTRAL_PATH = getenv("HHVM_REPO_CENTRAL_PATH");
   if (HHVM_REPO_CENTRAL_PATH != nullptr) {
-    if (!tryPath(HHVM_REPO_CENTRAL_PATH)) {
+    if (tryPath(HHVM_REPO_CENTRAL_PATH)) {
       return;
     }
   }
@@ -503,7 +530,7 @@ void Repo::initCentral() {
   if (HOME != nullptr) {
     std::string centralPath = HOME;
     centralPath += "/.hhvm.hhbc";
-    if (!tryPath(centralPath.c_str())) {
+    if (tryPath(centralPath.c_str())) {
       return;
     }
   }
@@ -520,7 +547,7 @@ void Repo::initCentral() {
           && (HOME == nullptr || strcmp(HOME, pwbufp->pw_dir))) {
         std::string centralPath = pwbufp->pw_dir;
         centralPath += "/.hhvm.hhbc";
-        if (!tryPath(centralPath.c_str())) {
+        if (tryPath(centralPath.c_str())) {
           return;
         }
       }
@@ -531,6 +558,9 @@ void Repo::initCentral() {
   // Database initialization failed; this is an unrecoverable state.
   Logger::Error("%s", error.c_str());
 
+  if (Process::IsInMainThread()) {
+    exit(1);
+  }
   always_assert_log(false, [&error] { return error; });
 }
 
@@ -568,7 +598,7 @@ bool Repo::openCentral(const char* rawPath, std::string& errorMsg) {
              __func__, repoPath.c_str());
     errorMsg = folly::format("Failed to open {}: {} - {}",
                              repoPath, err, sqlite3_errmsg(m_dbc)).str();
-    return true;
+    return false;
   }
   // Register a busy handler to avoid spurious SQLITE_BUSY errors.
   sqlite3_busy_handler(m_dbc, busyHandler, (void*)this);
@@ -582,7 +612,7 @@ bool Repo::openCentral(const char* rawPath, std::string& errorMsg) {
              " '%s': %s\n", __func__, repoPath.c_str(), re.what());
     errorMsg = folly::format("Failed to initialize connection to {}: {}",
                              repoPath, re.what()).str();
-    return true;
+    return false;
   }
   // sqlite3_open_v2() will silently open in read-only mode if file permissions
   // prevent writing, and there is no apparent way to detect this other than to
@@ -595,11 +625,11 @@ bool Repo::openCentral(const char* rawPath, std::string& errorMsg) {
              repoPath.c_str());
     errorMsg = folly::format("Failed to initialize schema in {}: {}",
                              repoPath, errorMsg).str();
-    return true;
+    return false;
   }
   m_centralRepo = repoPath;
   TRACE(1, "Central repo: '%s'\n", m_centralRepo.c_str());
-  return false;
+  return true;
 }
 
 void Repo::initLocal() {

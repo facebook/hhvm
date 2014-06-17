@@ -436,8 +436,8 @@ void handlePrimeCacheInit(Entry* mce,
   always_assert(false);
 #endif
 
-  TCA retAddr = (TCA)framePtr->m_savedRip;
-  TCA movAddr = retAddr - (rawTarget >> 1);
+  TCA retAddr = TCA(framePtr->m_savedRip);
+  TCA movAddr = TCA(rawTarget >> 1);
 
   // First fill the request local method cache for this call.
   lookup<fatal>(mce, ar, name, cls, ctx);

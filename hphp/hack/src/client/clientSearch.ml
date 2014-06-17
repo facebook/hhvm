@@ -9,6 +9,7 @@
  *)
 
 module SS = SearchService
+module Json = Hh_json
 
 let desc_string_from_type result_type =
   match result_type with

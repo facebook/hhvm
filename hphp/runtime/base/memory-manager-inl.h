@@ -115,31 +115,6 @@ struct MemoryManager::SmallNode {
   size_t padbytes;  // <= kMaxSmartSize means small block
 };
 
-/*
- * Debug mode header.
- *
- * For size-untracked allocations, this sits in front of the user
- * payload for small allocations, and in front of the SweepNode in
- * big allocations.  The allocatedMagic aliases the space for the
- * FreeList::Node pointers, but should catch double frees due to
- * kAllocatedMagic.
- *
- * For size-tracked allocations, this always sits in front of
- * whatever header we're using (SmallNode or SweepNode).
- *
- * We set requestedSize to kFreedMagic when a block is not
- * allocated.
- */
-struct MemoryManager::DebugHeader {
-  static constexpr uintptr_t kAllocatedMagic = 0xDB6000A110C0A7EDull;
-  static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
-
-  uintptr_t allocatedMagic;
-  size_t requestedSize;     // zero for size-untracked allocator
-  size_t returnedCap;
-  size_t padding;
-};
-
 struct MemoryManager::FreeList::Node {
   Node* next;
 };
@@ -161,13 +136,13 @@ inline void MemoryManager::FreeList::push(void* val) {
 template<class SizeT> ALWAYS_INLINE
 SizeT MemoryManager::debugAddExtra(SizeT sz) {
   if (!debug) return sz;
-  return sz + sizeof(DebugHeader);
+  return sz + kDebugExtraSize;
 }
 
 template<class SizeT> ALWAYS_INLINE
 SizeT MemoryManager::debugRemoveExtra(SizeT sz) {
   if (!debug) return sz;
-  return sz - sizeof(DebugHeader);
+  return sz - kDebugExtraSize;
 }
 
 #ifndef DEBUG
@@ -184,10 +159,67 @@ ALWAYS_INLINE void* MemoryManager::debugPreFree(void* p, size_t, size_t) {
 
 //////////////////////////////////////////////////////////////////////
 
+inline uint32_t MemoryManager::bsr(uint32_t x) {
+#if defined(__i386__) || defined(__x86_64__)
+  uint32_t ret;
+  __asm__ ("bsr %1, %0"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return ret;
+#else
+  // Equivalent (but incompletely strength-reduced by gcc):
+  return 31 - __builtin_clz(x);
+#endif
+}
+
+inline uint8_t MemoryManager::smartSize2IndexCompute(uint32_t size) {
+  uint32_t x = bsr((size<<1)-1);
+  uint32_t shift = (x < kLgSizeClassesPerDoubling + kLgSmartSizeQuantum)
+                   ? 0 : x - (kLgSizeClassesPerDoubling + kLgSmartSizeQuantum);
+  uint32_t grp = shift << kLgSizeClassesPerDoubling;
+
+  int32_t lgReduced = x - kLgSizeClassesPerDoubling
+                      - 1; // Counteract left shift of bsr() argument.
+  uint32_t lgDelta = (lgReduced < int32_t(kLgSmartSizeQuantum))
+                     ? kLgSmartSizeQuantum : lgReduced;
+  uint32_t deltaInverseMask = -1 << lgDelta;
+  constexpr uint32_t kModMask = (1u << kLgSizeClassesPerDoubling) - 1;
+  uint32_t mod = ((((size-1) & deltaInverseMask) >> lgDelta)) & kModMask;
+
+  auto const index = grp + mod;
+  assert(index < kNumSmartSizes);
+  return index;
+}
+
+inline uint8_t MemoryManager::smartSize2IndexLookup(uint32_t size) {
+  uint8_t index = kSmartSize2Index[(size-1) >> kLgSmartSizeQuantum];
+  assert(index == smartSize2IndexCompute(size));
+  return index;
+}
+
+inline uint8_t MemoryManager::smartSize2Index(uint32_t size) {
+  assert(size > 0);
+  assert(size <= kMaxSmartSize + kDebugExtraSize);
+  if (LIKELY(size <= kMaxSmartSizeLookup)) {
+    return smartSize2IndexLookup(size);
+  }
+  return smartSize2IndexCompute(size);
+}
+
 inline uint32_t MemoryManager::smartSizeClass(uint32_t reqBytes) {
-  assert(reqBytes <= kMaxSmartSize);
-  auto const ret = (reqBytes + kSmartSizeMask) & ~kSmartSizeMask;
-  assert(ret <= kMaxSmartSize);
+  uint32_t x = bsr((reqBytes<<1)-1);
+  int32_t lgReduced = x - kLgSizeClassesPerDoubling
+                      - 1; // Counteract left shift of bsr() argument.
+  uint32_t lgDelta = (lgReduced < int32_t(kLgSmartSizeQuantum))
+                      ? kLgSmartSizeQuantum : lgReduced;
+  uint32_t delta = 1u << lgDelta;
+  uint32_t deltaMask = delta - 1;
+  auto const ret = (reqBytes + deltaMask) & ~deltaMask;
+  assert(ret <= kMaxSmartSize + kDebugExtraSize);
+  if (kDebugExtraSize != 0) {
+    return std::min(ret, uint32_t(kMaxSmartSize));
+  }
   return ret;
 }
 
@@ -197,19 +229,18 @@ inline bool MemoryManager::sweeping() {
 
 inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   assert(bytes > 0);
-  assert(bytes <= kMaxSmartSize);
+  assert(bytes <= kMaxSmartSize + kDebugExtraSize);
 
   // Note: unlike smart_malloc, we don't track internal fragmentation
   // in the usage stats when we're going through smartMallocSize.
   m_stats.usage += bytes;
 
-  unsigned i = (bytes - 1) >> kLgSizeQuantum;
-  assert(i < kNumSizes);
+  unsigned i = smartSize2Index(bytes);
   void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
-    p = slabAlloc(debugAddExtra(MemoryManager::smartSizeClass(bytes)));
+    p = slabAlloc(debugAddExtra(MemoryManager::smartSizeClass(bytes)), i);
   }
-  assert(reinterpret_cast<uintptr_t>(p) % 16 == 0);
+  assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
 
   FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);
   return debugPostAllocate(p, bytes, bytes);
@@ -217,11 +248,10 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
 
 inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   assert(bytes > 0);
-  assert(bytes <= kMaxSmartSize);
-  assert(reinterpret_cast<uintptr_t>(ptr) % 16 == 0);
+  assert(bytes <= kMaxSmartSize + kDebugExtraSize);
+  assert((reinterpret_cast<uintptr_t>(ptr) & kSmartSizeAlignMask) == 0);
 
-  unsigned i = (bytes - 1) >> kLgSizeQuantum;
-  assert(i < kNumSizes);
+  unsigned i = smartSize2Index(bytes);
   m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
   m_stats.usage -= bytes;
 

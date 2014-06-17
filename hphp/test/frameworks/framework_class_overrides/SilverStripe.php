@@ -7,27 +7,24 @@ class SilverStripe extends Framework {
   }
   protected function install(): void {
     parent::install();
-    verbose("Installing dependencies.\n", Options::$verbose);
+    verbose("Installing dependencies.\n");
 
     $dependencies_install_cmd = get_runtime_build()." ".__DIR__.
       "/../composer.phar require silverstripe/sqlite3 dev-master";
     $install_ret = run_install($dependencies_install_cmd,
-                               $this->getInstallRoot(),
+                               nullthrows($this->getInstallRoot()),
                                ProxyInformation::$proxies);
 
     if ($install_ret !== 0) {
-      remove_dir_recursive($this->getInstallRoot());
+      remove_dir_recursive(nullthrows($this->getInstallRoot()));
       error_and_exit("Couldn't download dependencies for ".$this->getName().
-                     ". Removing framework. \n", Options::$csv_only);
+                     ". Removing framework. \n");
     }
 
-    verbose(
-      "Creating a _ss_environment file for setting SQLite adapter.\n",
-      Options::$verbose
-    );
+    verbose("Creating a _ss_environment file for setting SQLite adapter.\n");
 
     $contents = <<<'ENV_FILE'
-<?php
+<?hh
 define('SS_DATABASE_SERVER', 'localhost');
 define('SS_DATABASE_USERNAME', 'root');
 define('SS_DATABASE_PASSWORD', '');
@@ -55,7 +52,7 @@ ENV_FILE;
     if (file_exists($this->getInstallRoot())) {
       foreach ($extra_files as $file) {
         if (!file_exists($file)) {
-          remove_dir_recursive($this->getInstallRoot());
+          remove_dir_recursive(nullthrows($this->getInstallRoot()));
           return false;
         }
       }

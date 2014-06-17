@@ -36,7 +36,7 @@ start:    IsTypeL $arr Arr
           CGetL $func
           DecodeCufIter 0 bad_param2
 .try_fault kill_iter_0 {
-            NewArray 3  # MixedArray::SmallSize
+            NewLikeArrayL $arr 0
             SetL $res
             PopC
 
@@ -56,7 +56,7 @@ endloop_a:CIterFree 0
 endloop_n:CGetL $res
           RetC
 
-no_func:  NewArray 3
+no_func:  NewLikeArrayL $arr 0
           SetL $res
           PopC
           CGetL $arr
@@ -75,7 +75,7 @@ start_kt: IssetL $func
           CGetL $func
           DecodeCufIter 0 bad_param2
 .try_fault kill_iter_0_kt {
-            NewArray 3
+            NewLikeArrayL $arr 0
             SetL $res
             PopC
 
@@ -97,7 +97,7 @@ endloop_a_kt:CIterFree 0
 endloop_n_kt:CGetL $res
              RetC
 
-no_func_kt:  NewArray 3
+no_func_kt:  NewLikeArrayL $arr 0
              SetL $res
              PopC
              CGetL $arr

@@ -186,7 +186,7 @@ Array getPercentParamInfoArray(const Func* func) {
 void writeProfileInformationToDisk() {
   assert(allProfileInfo != nullptr);
   folly::dynamic all_info = folly::dynamic::object;
-  for (auto i = 0; i  <= Func::nextFuncId(); i++) {
+  for (auto i = 0; i <= Func::nextFuncId(); i++) {
     folly::dynamic info = {};
     auto funcParamMap = allProfileInfo->get(i);
     if (funcParamMap == &emptyFuncCounter) {

@@ -34,8 +34,6 @@ let init_hack genv env get_next =
   let fast = FileInfo.simplify_fast files_info in
   let fast = SSet.fold SMap.remove failed2 fast in
   let errorl3, failed3 = Typing_decl_service.go genv.workers nenv fast in
-
-  let fast = SSet.fold SMap.remove failed3 fast in
   let errorl4, failed4 = Typing_check_service.go genv.workers fast in
 
   let failed =
@@ -55,8 +53,4 @@ let init genv env next_files =
   let env = { env with errorl = errorl;
               failed_parsing = failed } in
   ServerError.print_errorl (ServerArgs.json_mode genv.options) env.errorl stdout;
-  if !(env.skip)
-  then { env with errorl = [];
-        failed_parsing = SSet.empty;
-        failed_check = SSet.empty }
-  else env
+  env

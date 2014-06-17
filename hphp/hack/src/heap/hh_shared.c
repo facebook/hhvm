@@ -179,7 +179,7 @@ static void init_shared_globals(char* mem) {
 
   mem += page_size;
   // Just checking that the page is large enough.
-  assert(page_size > CACHE_LINE_SIZE + sizeof(int));
+  assert(page_size > CACHE_LINE_SIZE + (int)sizeof(int));
   /* END OF THE FIRST PAGE */
 
   /* Global storage initialization */
@@ -240,7 +240,8 @@ static void set_priorities() {
 
   // Don't slam the CPU either, though this has much less tendency to make the
   // system totally unresponsive so we don't need to lower all the way.
-  nice(10);
+  int dummy = nice(10);
+  (void)dummy; // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509
 }
 
 /*****************************************************************************/
@@ -273,7 +274,7 @@ void hh_shared_init() {
   // stack overflow, but we don't actually handle that exception, so what
   // happens in practice is we terminate at toplevel with an unhandled exception
   // and a useless ocaml backtrace. A core dump is actually more useful. Sigh.
-  struct sigaction sigact = {};
+  struct sigaction sigact;
   sigact.sa_handler = SIG_DFL;
   sigemptyset(&sigact.sa_mask);
   sigact.sa_flags = 0;
@@ -370,7 +371,7 @@ void hh_shared_clear() {
  */
 /*****************************************************************************/
 
-static int htable_add(uint64_t* table, unsigned long hash, int64_t value) {
+static int htable_add(uint64_t* table, unsigned long hash, uint64_t value) {
   unsigned long slot = hash & (DEP_SIZE - 1);
 
   while(1) {
@@ -466,8 +467,6 @@ void hh_collect() {
   size_t mem_size = 0;
   char* tmp_heap;
 
-  assert(heap_init_size >= 0);
-
   if(*heap < heap_init + 2 * heap_init_size) {
     // We have not grown passed twice the size of the initial size
     return;
@@ -554,6 +553,7 @@ static unsigned long get_hash(value key) {
  */
 /*****************************************************************************/
 static void write_at(unsigned int slot, value data) {
+  // Try to write in a value to indicate that the data is being written.
   if(hashtbl[slot].addr == NULL &&
      __sync_bool_compare_and_swap(&(hashtbl[slot].addr), NULL, 1)) {
     hashtbl[slot].addr = hh_store_ocaml(data);
@@ -586,22 +586,21 @@ void hh_add(value key, value data) {
         return;
       }
 
-      // Grabbing it failed -- why? If someone else inserted the data we were
-      // about to, we are done (don't double-insert). Otherwise, keep going.
+      // Grabbing it failed -- why? If someone else is trying to insert
+      // the data we were about to, try to insert it ourselves too.
+      // Otherwise, keep going.
       // Note that this read relies on the __sync call above preventing the
       // compiler from caching the value read out of memory. (And of course
       // isn't safe on any arch that requires memory barriers.)
       if(hashtbl[slot].hash == hash) {
-        // FIXME: there is a race here. The data may not actually be written by
-        // the time we return here, and even the sigil value "1" may not be
-        // written into the address by the winning thread. If this thread
-        // manages to call hh_mem on this key before the winning thread can
-        // write the sigil "1", things will be broken since the data we just
-        // wrote will be missing. Want to more carefully think out the right
-        // fix and need to commit a fix for a much worse race, so leaving this
-        // here for now -- this thread has to get all the way back into hh_mem
-        // before the other thread executes the 37 instructions it takes to
-        // write the sigil, so I'm not super worried.
+        // Some other thread already grabbed this slot to write this
+        // key, but they might not have written the address (or even
+        // the sigil value) yet. We can't return from hh_add until we
+        // know that hh_mem would succeed, which is to say that addr is
+        // no longer null. To make sure hh_mem will work, we try
+        // writing the value ourselves; either we insert it ourselves or
+        // we know the address is now non-NULL.
+        write_at(slot, data);
         return;
       }
     }
@@ -697,44 +696,4 @@ void hh_remove(value key) {
   assert(my_pid == master_pid);
   assert(hashtbl[slot].hash == get_hash(key));
   hashtbl[slot].addr = NULL;
-}
-
-/*****************************************************************************/
-/* Returns a copy of the content of a file in an ocaml string.
- * This code should be very tolerant to failure. At any given time, the
- * file could be modified, when that happens, we don't want to fail, we
- * return the empty string instead.
- */
-/*****************************************************************************/
-
-value hh_read_file(value filename) {
-  CAMLparam1(filename);
-  CAMLlocal1(result);
-
-  int fd;
-  struct stat sb;
-  char* memblock;
-
-  fd = open(String_val(filename), O_RDONLY);
-  if(fd == -1) {
-    result = caml_alloc_string(0);
-  }
-  else if(fstat(fd, &sb) == -1) {
-    result = caml_alloc_string(0);
-    close(fd);
-  }
-  else if((memblock =
-           (char*)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0))
-          == MAP_FAILED) {
-    result = caml_alloc_string(0);
-    close(fd);
-  }
-  else {
-    result = caml_alloc_string(sb.st_size);
-    memcpy(String_val(result), memblock, sb.st_size);
-    munmap(memblock, sb.st_size);
-    close(fd);
-  }
-
-  CAMLreturn(result);
 }

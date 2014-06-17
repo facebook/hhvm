@@ -48,7 +48,7 @@ let error el =
                "internal_error", JBool false;
              ]
     else
-      let errors_json = List.map Utils.to_json el in
+      let errors_json = List.map Errors.to_json el in
       JAssoc [ "passed",         JBool false;
                "errors",         JList errors_json;
                "internal_error", JBool false;
@@ -68,13 +68,9 @@ let type_fun x fn =
 
 let type_class x fn =
   try
-    (match Naming_heap.ClassStatus.find_unsafe x with
-    | Naming_heap.Error -> ()
-    | Naming_heap.Ok ->
-        let class_ = Naming_heap.ClassHeap.find_unsafe x in
-        let tenv = Typing_env.empty fn in
-        Typing.class_def tenv x class_
-    )
+    let class_ = Naming_heap.ClassHeap.find_unsafe x in
+    let tenv = Typing_env.empty fn in
+    Typing.class_def tenv x class_
   with Not_found ->
     ()
 
@@ -104,7 +100,7 @@ and get_sub_class cname acc =
       get_sub_class sub_cname acc
   end sub_classes acc
 
-let declare_file ~fix_file fn content =
+let declare_file fn content =
   let _, old_funs, old_classes =
     try Hashtbl.find globals fn
     with Not_found -> true, [], []
@@ -120,50 +116,50 @@ let declare_file ~fix_file fn content =
   try
     Pos.file := fn ;
     Autocomplete.auto_complete := false;
-    let ast = Parser_hack.program ~fail:(not fix_file) content in
-    let is_php = not !(Parser_hack.is_hh_file) in
-    Parser_heap.ParserHeap.add fn ast;
-    let funs, classes, typedefs, consts = make_funs_classes ast in
-    Hashtbl.replace globals fn (is_php, funs, classes);
-    let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
-    let all_classes = List.fold_right begin fun (_, cname) acc ->
-      SMap.add cname (SSet.singleton fn) acc
-    end classes SMap.empty in
-    Typing_decl.make_env nenv all_classes fn;
-    let sub_classes = get_sub_classes all_classes in
-    SSet.iter begin fun cname ->
-      match Naming_heap.ClassHeap.get cname with
-      | None -> ()
-      | Some c -> Typing_decl.class_decl c
-    end sub_classes;
-    ()
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
+    let is_php = not is_hh_file in
+    if is_hh_file
+    then begin
+      Parser_heap.ParserHeap.add fn ast;
+      let funs, classes, typedefs, consts = make_funs_classes ast in
+      Hashtbl.replace globals fn (is_php, funs, classes);
+      let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
+      let all_classes = List.fold_right begin fun (_, cname) acc ->
+        SMap.add cname (SSet.singleton fn) acc
+      end classes SMap.empty in
+      Typing_decl.make_env nenv all_classes fn;
+      let sub_classes = get_sub_classes all_classes in
+      SSet.iter begin fun cname ->
+        match Naming_heap.ClassHeap.get cname with
+        | None -> ()
+        | Some c -> Typing_decl.class_decl c
+      end sub_classes
+    end
+    else Hashtbl.replace globals fn (false, [], [])
   with _ ->
     Hashtbl.replace globals fn (true, [], []);
     ()
 
 let hh_add_file fn content =
   Hashtbl.replace files fn content;
-  let context = !SharedMem.local_h in
   try
-    SharedMem.autocomplete_mode();
-    declare_file ~fix_file:true fn content;
-    SharedMem.check_mode();
-    declare_file ~fix_file:false fn content;
-    SharedMem.local_h := context
+    declare_file fn content
   with e ->
-    SharedMem.local_h := context;
     ()
 
 let hh_check ?(check_mode=true) fn =
-  let context = !SharedMem.local_h in
-  if check_mode then SharedMem.check_mode();
-  declare_file ~fix_file:(not check_mode) fn (Hashtbl.find files fn);
+  declare_file fn (Hashtbl.find files fn);
   Pos.file := fn;
   Autocomplete.auto_complete := false;
   let content = Hashtbl.find files fn in
-  try
+  Errors.try_
+    begin fun () ->
 (*    let builtins = Parser.program lexer (Lexing.from_string Ast.builtins) in *)
-    let ast = Parser_hack.program ~fail:check_mode content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     let ast = (*builtins @ *) ast in
     Parser_heap.ParserHeap.add fn ast;
     let funs, classes, typedefs, consts = make_funs_classes ast in
@@ -174,15 +170,11 @@ let hh_check ?(check_mode=true) fn =
     Typing_decl.make_env nenv all_classes fn;
     List.iter (fun (_, fname) -> type_fun fname fn) funs;
     List.iter (fun (_, cname) -> type_class cname fn) classes;
-    SharedMem.local_h := context;
     error []
-  with
-  | Error l ->
-      SharedMem.local_h := context;
+    end
+    begin fun l ->
       error [l]
-  | e ->
-      SharedMem.local_h := context;
-      raise e
+    end
 
 let complete_global completion_type fn =
   let result = ref SMap.empty in
@@ -199,6 +191,7 @@ let complete_global completion_type fn =
             | Ast.Cnormal -> "class"
             | Ast.Cinterface -> "interface"
             | Ast.Ctrait -> "trait") in
+            let s = Utils.strip_ns s in
             SMap.add s (Autocomplete.make_result s Pos.none type_)
                 !result
         | None -> !result)
@@ -206,6 +199,7 @@ let complete_global completion_type fn =
         Typing_utils.should_complete_fun completion_type s ->
         (match (Typing_env.Funs.get s) with
         | Some fun_ ->
+            let s = Utils.strip_ns s in
             let it = (Typing_reason.Rnone, Typing_defs.Tfun fun_) in
             let type_ = Typing_print.full_strip_ns (Typing_env.empty fn) it in
             let sig_ = s^" "^type_ in
@@ -247,13 +241,14 @@ let autocomplete_result_to_json res =
 
 let hh_auto_complete fn =
   Autocomplete.auto_complete := true;
-  Silent.is_silent_mode := true;
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.argument_global_type := None;
   let content = Hashtbl.find files fn in
   try
-    let ast = Parser_hack.program ~fail:false content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -286,24 +281,23 @@ let hh_auto_complete fn =
         (fun _ res acc -> (autocomplete_result_to_json res) :: acc)
         result
         [] in
-    Silent.is_silent_mode := false;
     output_json (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;
                           "internal_error",  JBool false;
                         ])
   with _ ->
-    Silent.is_silent_mode := false;
     output_json (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_get_method_at_position fn line char =
   Find_refs.find_method_at_cursor_result := None;
   Autocomplete.auto_complete := false;
-  Silent.is_silent_mode := true;
   Find_refs.find_method_at_cursor_target := Some (line, char);
   let content = Hashtbl.find files fn in
   try
-    let ast = Parser_hack.program ~fail:false content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -352,11 +346,9 @@ let hh_get_method_at_position fn line char =
                  ]
       | _ -> JAssoc [ "internal_error", JBool false;
                     ] in
-    Silent.is_silent_mode := false;
     Find_refs.find_method_at_cursor_target := None;
     output_json result
   with _ ->
-    Silent.is_silent_mode := false;
     Find_refs.find_method_at_cursor_target := None;
     output_json (JAssoc [ "internal_error", JBool true;
                         ])
@@ -472,7 +464,6 @@ let hh_hack_coloring fn =
   Typing_defs.accumulate_types := true;
   ignore (hh_check ~check_mode:false fn);
   let result = !(Typing_defs.type_acc) in
-  Silent.is_silent_mode := false;
   Typing_defs.accumulate_types := false;
   Typing_defs.type_acc := [];
   let result = ColorFile.go (Hashtbl.find files fn) result in
@@ -509,7 +500,6 @@ let hh_get_method_calls fn =
                       ])
 
 let hh_arg_info fn line char =
-  Silent.is_silent_mode := true;
   Autocomplete.argument_info_target :=  Some (line, char);
   Autocomplete.argument_info_expected := None;
   Autocomplete.argument_info_position := None;
@@ -529,7 +519,6 @@ let hh_arg_info fn line char =
              "type",  JString str2;
            ]
     end expected in
-  Silent.is_silent_mode := false;
   Autocomplete.argument_info_target := None;
   Autocomplete.argument_info_expected := None;
   Autocomplete.argument_info_position := None;

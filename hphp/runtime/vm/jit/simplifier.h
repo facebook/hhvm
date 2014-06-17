@@ -146,7 +146,6 @@ private:
                       SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(const IRInstruction*);
   SSATmp* simplifyQueryJmp(const IRInstruction*);
-  SSATmp* simplifyExitOnVarEnv(const IRInstruction*);
   SSATmp* simplifyCastStk(const IRInstruction*);
   SSATmp* simplifyCoerceStk(const IRInstruction*);
   SSATmp* simplifyLdStack(const IRInstruction*);

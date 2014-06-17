@@ -31,11 +31,16 @@ let init_env lb = {
   errors   = ref [];
 }
 
+type parser_return = {
+    (* True if we are dealing with a hack file *)
+    is_hh_file : bool;
+    comments   : (Pos.t * string) list;
+    ast        : Ast.program;
+  }
+
 (*****************************************************************************)
 (* Lexer (with backtracking) *)
 (*****************************************************************************)
-
-type comments = (Pos.t * string) list
 
 type saved_lb = {
   (* no need to save refill_buff because it's constant *)
@@ -146,12 +151,6 @@ let expect_word env name =
   if tok <> Tword || value <> name
   then error_expect env ("Was expecting: '"^name^ "' (not '"^value^"')");
   ()
-
-let rec filter_duplicate_errors acc = function
-  | [_] | [] as l -> l
-  | (pos1, _) :: ((pos2, _) :: _ as rl) when Pos.compare pos1 pos2 = 0 ->
-      filter_duplicate_errors acc rl
-  | x :: rl -> filter_duplicate_errors (x :: acc) rl
 
 (*****************************************************************************)
 (* Modifiers checks (public private, final abstract etc ...)  *)
@@ -381,22 +380,19 @@ let ref_variable env =
 (* Entry point *)
 (*****************************************************************************)
 
-let rec entry ~fail content =
+let rec program content =
   is_hh_file := false;
   L.comment_list := [];
   let lb = Lexing.from_string content in
   let env = init_env lb in
   let ast = header env in
-  if fail then begin
-    if !(env.errors) <> [] then
-      (env.errors := (filter_duplicate_errors [] !(env.errors)))
-    else if not !is_hh_file then
-      env.errors := [Pos.none, "PHP FILE"];
-  end else
-    env.errors := [];
   let comments = !L.comment_list in
   L.comment_list := [];
-  comments, ast, !(env.errors)
+  if !(env.errors) <> []
+  then Errors.add_list [List.hd (List.rev !(env.errors))];
+  let is_hh_file = !is_hh_file in
+  let ast = Namespaces.elaborate_defs ast in
+  {is_hh_file; comments; ast}
 
 (*****************************************************************************)
 (* Hack headers (strict, decl, partial) *)
@@ -430,7 +426,7 @@ and get_header env =
   | `explicit_mode ->
       let _token = L.token env.lb in
       (match Lexing.lexeme env.lb with
-      | "strict" when !(Silent.is_silent_mode) || !(Ide.is_ide_mode) -> Ast.HhFile, Some Ast.Mpartial
+      | "strict" when !(Ide.is_ide_mode) -> Ast.HhFile, Some Ast.Mpartial
       | "strict" -> Ast.HhFile, Some Ast.Mstrict
       | ("decl"|"only-headers") -> Ast.HhFile, Some Ast.Mdecl
       | "partial" -> Ast.HhFile, Some Ast.Mpartial
@@ -725,7 +721,6 @@ and class_ ~attr ~final ~kind env =
       c_name            = cname;
       c_extends         = cextends;
       c_body            = cbody;
-      c_mtime           = 0.0;
       c_namespace       = Namespace_env.empty;
     }
   in
@@ -3307,24 +3302,7 @@ and namespace_use_list env acc =
 (* Helper *)
 (*****************************************************************************)
 
-let ensure_no_errors errors =
-  if errors <> []
-  then raise (Utils.Error errors)
-  else ()
-
-let program ?(fail=true) content =
-  let _, ast, errors = (entry ~fail content) in
-  ensure_no_errors errors;
-  ast 
-
-let from_file_with_errors filename =
-  let content = Utils.cat filename in
-  entry ~fail:true content
-
-let from_file_with_comments filename =
-  let comments, ast, errors = from_file_with_errors filename in
-  ensure_no_errors errors;
-  comments, ast
-
 let from_file filename =
-  snd (from_file_with_comments filename)
+  Pos.file := filename;
+  let content = try Utils.cat filename with _ -> "" in
+  program content

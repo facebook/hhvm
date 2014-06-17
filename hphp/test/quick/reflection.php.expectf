@@ -161,7 +161,24 @@ bool(true)
 bool(true)
 
 --- export("f") ---
-string(0) ""
+string(%d) "/**
+ * This is f's doc comment.
+ */
+Function [ <user> function &f ] {
+  @@ %s/test/quick/reflection.php 13 - 20
+
+  - Parameters [4] {
+    Parameter #0 [ <required> $a ]
+    Parameter #1 [ <required> $b ]
+    Parameter #2 [ <optional> $c = NULL ]
+    Parameter #3 [ <optional> $d = array (
+    0 => 1,
+    1 => 2,
+    2 => 'some string',
+  ) ]
+  }
+}
+"
 
 --- invokeArgs("f") ---
 In f()
@@ -184,10 +201,104 @@ In g(a, b, some string)
 NULL
 
 --- export("g") ---
-string(0) ""
+string(%d) "/**
+ * This is g's doc comment.
+ */
+Function [ <user> function g ] {
+  @@ %s/test/quick/reflection.php 92 - 94
+
+  - Parameters [3] {
+    Parameter #0 [ <optional> $a = NULL ]
+    Parameter #1 [ <optional> $b = array (
+    0 => 1,
+    1 => 2,
+    2 => 3,
+  ) ]
+    Parameter #2 [ <optional> $c = 'some string' ]
+  }
+}
+"
 
 --- export() ---
-string(0) ""
+string(%d) "/**
+ * This is B's doc comment.
+ */
+Class [ <user> class B extends A implements I, K, H, J ] {
+  @@ %s/test/quick/reflection.php 131-147
+
+  - Constants [2] {
+    Constant [ string C0 {B::C0}
+    Constant [ string C1 {B::C1}
+  }
+
+  - Static properties [3] {
+    Property [ public static $s0 ]
+    Property [ public static $s1 ]
+    Property [ public static $s2 ]
+  }
+
+  - Static methods [2] {
+    Method [ <user> static public method smethB0 ] {
+      @@ %s/test/quick/reflection.php 141 - 141
+
+      - Parameters [0] {
+      }
+    }
+    Method [ <user> static private method smethB1 ] {
+      @@ %s/test/quick/reflection.php 142 - 142
+
+      - Parameters [0] {
+      }
+    }
+  }
+
+  - Properties [4] {
+    Property [ <default> private $p0 ]
+    Property [ <default> protected $p1 ]
+    Property [ <default> public $p2 ]
+    Property [ <default> public $p3 ]
+  }
+
+  - Methods [6] {
+    Method [ <user> public method methI ] {
+      @@ %s/test/quick/reflection.php 143 - 143
+
+      - Parameters [0] {
+      }
+    }
+    Method [ <user> public method methJ ] {
+      @@ %s/test/quick/reflection.php 144 - 144
+
+      - Parameters [0] {
+      }
+    }
+    Method [ <user> public method methK ] {
+      @@ %s/test/quick/reflection.php 145 - 145
+
+      - Parameters [0] {
+      }
+    }
+    Method [ <user> private method methB ] {
+      @@ %s/test/quick/reflection.php 146 - 146
+
+      - Parameters [0] {
+      }
+    }
+    Method [ <user> public method methH ] {
+      @@ %s/test/quick/reflection.php 125 - 125
+
+      - Parameters [0] {
+      }
+    }
+    Method [ <user> protected method methA ] {
+      @@ %s/test/quick/reflection.php 126 - 126
+
+      - Parameters [0] {
+      }
+    }
+  }
+}
+"
 
 --- getConstant() ---
 string(5) "B::C0"
@@ -243,7 +354,7 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#20 (1) {
+object(ReflectionClass)#44 (1) {
   ["obj":"ReflectionClass":private]=>
   NULL
 }
@@ -308,7 +419,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#33 (4) {
+object(B)#56 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -320,7 +431,7 @@ object(B)#33 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#33 (4) {
+object(B)#56 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

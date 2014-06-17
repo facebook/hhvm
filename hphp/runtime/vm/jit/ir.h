@@ -84,26 +84,30 @@ class FailedTraceGen : public std::runtime_error {
 
 class FailedCodeGen : public std::runtime_error {
  public:
-  const char*    file;
-  const int      line;
-  const char*    func;
-  const Offset   bcOff;
-  const Func*    vmFunc;
-  const bool     resumed;
+  const char*   file;
+  const int     line;
+  const char*   func;
+  const Offset  bcOff;
+  const Func*   vmFunc;
+  const bool    resumed;
+  const TransID profTransId;
 
   FailedCodeGen(const char* _file, int _line, const char* _func,
-                uint32_t _bcOff, const Func* _vmFunc, bool _resumed)
-    : std::runtime_error(folly::format("FailedCodeGen @ {}:{} in {}. {}@{}{}",
-                                       _file, _line, _func,
-                                       _vmFunc->fullName()->data(), _bcOff,
-                                       _resumed ? "r" : "")
-                         .str())
+                uint32_t _bcOff, const Func* _vmFunc, bool _resumed,
+                TransID _profTransId)
+    : std::runtime_error(
+      folly::format("FailedCodeGen @ {}:{} in {}. {}@{}{}. tid = {}",
+                    _file, _line, _func,
+                    _vmFunc->fullName()->data(), _bcOff,
+                    _resumed ? "r" : "", _profTransId)
+      .str())
     , file(_file)
     , line(_line)
     , func(_func)
     , bcOff(_bcOff)
     , vmFunc(_vmFunc)
     , resumed(_resumed)
+    , profTransId(_profTransId)
   {}
 };
 
@@ -163,6 +167,7 @@ class FailedCodeGen : public std::runtime_error {
  *
  *     NA               instruction takes no sources
  *     S(t1,...,tn)     source must be a subtype of {t1|..|tn}
+ *     AK(<kind>)       source must be an array with specified kind
  *     C(type)          source must be a constant, and subtype of type
  *     CStr             same as C(StaticStr)
  *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
@@ -389,7 +394,6 @@ O(CheckSurpriseFlags,               ND, NA,                              B|E) \
 O(SurpriseHook,                     ND, NA,                           Er|N|E) \
 O(FunctionSuspendHook,              ND, S(FramePtr,PtrToGen) C(Bool), Er|N|E) \
 O(FunctionReturnHook,               ND, S(FramePtr) S(Gen),           Er|N|E) \
-O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
 O(RaiseWarning,                     ND, S(Str),                       E|N|Er) \
@@ -402,8 +406,8 @@ O(CheckNullptr,                     ND, S(CountedStr,Nullptr),       B|E|CRc) \
 O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA),      B) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
-O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
-O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
+O(CheckPackedArrayBounds,           ND, AK(Packed) S(Int),               B|E) \
+O(CheckPackedArrayElemNull,    D(Bool), AK(Packed) S(Int),                 E) \
 O(VectorHasImmCopy,                 ND, S(Obj),                            B) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
@@ -419,7 +423,7 @@ O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),                B) \
 O(LdProp,                       DParam, S(Obj) C(Int),                     B) \
 O(LdElem,                      D(Cell), S(PtrToCell) S(Int),               E) \
-O(LdPackedArrayElem,          DArrElem, S(Arr) S(Int),                     E) \
+O(LdPackedArrayElem,          DArrElem, AK(Packed) S(Int),                 E) \
 O(LdRef,                        DLdRef, S(BoxedCell),                      B) \
 O(LdThis,                        DThis, S(FramePtr),                     B|C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
@@ -505,6 +509,8 @@ O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
+O(NewLikeArray,                 D(Arr), S(Arr) C(Int),                 N|PRc) \
+O(NewMixedArray,                D(Arr), C(Int),                        N|PRc) \
 O(NewPackedArray,           DArrPacked, C(Int) S(StkPtr),        E|N|PRc|CRc) \
 O(NewStructArray,               D(Arr), S(StkPtr),               E|N|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \
@@ -525,7 +531,6 @@ O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),               E|CRc) \
 O(StProp,                           ND, S(Obj) C(Int) S(Gen),          E|CRc) \
-O(StCell,                           ND, S(PtrToGen) S(Gen),            E|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StGbl,                            ND, S(FramePtr) S(Gen),            E|CRc) \
@@ -624,7 +629,7 @@ O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(Shuffle,                          ND, SVar(Top),                        NF) \
 O(CreateCont,                   D(Obj), S(FramePtr) C(Int)                    \
                                           S(TCA,Nullptr) C(Int),     E|N|PRc) \
-O(ContEnter,                        ND, S(StkPtr)                             \
+O(ContEnter,                 D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(FramePtr)                         \
                                           S(TCA)                              \
@@ -650,7 +655,6 @@ O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
 O(LdResumableArObj,             D(Obj), S(FramePtr),                   C|PRc) \
-O(CopyAsyncCells,                   ND, S(FramePtr) S(PtrToGen),       CRc|E) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           C(Int)                              \
                                           S(TCA,Nullptr)                      \

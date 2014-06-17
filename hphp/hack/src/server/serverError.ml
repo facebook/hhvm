@@ -13,6 +13,7 @@
 (* Error module                                                              *)
 (*****************************************************************************)
 open Utils
+module Json = Hh_json
 
 let print_errorl_json oc el =
   let res =
@@ -22,7 +23,7 @@ let print_errorl_json oc el =
                     "version", Json.JString Build_id.build_id_ohai;
                   ]
     else
-      let errors_json = List.map Utils.to_json el in
+      let errors_json = List.map Errors.to_json el in
       Json.JAssoc [ "passed", Json.JBool false;
                     "errors", Json.JList errors_json;
                     "version", Json.JString Build_id.build_id_ohai;
@@ -39,7 +40,7 @@ let print_errorl use_json el oc =
     if el = []
     then output_string oc "No errors!\n"
     else
-      let sl = List.map Utils.pmsg_l el in
+      let sl = List.map Errors.pmsg_l el in
       let sl = uniq (List.sort String.compare sl) in
       List.iter begin fun s ->
         if !debug then begin

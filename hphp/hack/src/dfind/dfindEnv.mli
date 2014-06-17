@@ -13,20 +13,8 @@
 (* The environment shared by everyone *)
 (*****************************************************************************)
 
-(* A watch in this case refers to an inotify watch. Inotify watches are used
- * to subscribe to events on files in linux kernel.
- * Once a watch has been added to a file, the kernel notifies us every time
- * the file changes (by sending an event to a pipe, cf env.inotify).
- * We need to be able to compare watches because there could be multiple
- * paths that lead to the same watch (because of symlinks).
-*)
-module Watch: sig
-  type t = Inotify.wd
-  val compare: t -> t -> int
-end
 module SSet: Set.S with type elt = String.t
 module SMap: Map.S with type key = String.t
-module WMap: Map.S with type key = Watch.t
 
 (* This is in fact a fake time module, we don't want to use the "real"
  * unix timestamps, because we would run into atomicity problems.
@@ -80,13 +68,8 @@ type t = {
     (* The list of things left to output *)
     mutable to_output : output list                           ;
 
-    (* Map            : watch => filename *)
-    mutable wnames    : string WMap.t                         ;
-
-    (* The inotify file descriptor, we read this for new events
-     * on directories.
-     *)
-            inotify   : Unix.file_descr                       ;
+    (* The fsnotify environment, we use this for interacting with fsnotify  *)
+            fsnotify  : Fsnotify.env                          ;
 
     (* The set of files with their timestamp *)
     mutable files     : TimeFiles.t                           ;
@@ -115,14 +98,6 @@ type t = {
   }
 
 (*****************************************************************************)
-(* The events from Inotify we want to watch
- * We care about all the different forms of "writes".
- *)
-(*****************************************************************************)
-
-val events: Inotify.select_event list
-
-(*****************************************************************************)
 (* Functions used to update handles *)
 (*****************************************************************************)
 
@@ -142,7 +117,7 @@ val get_clients: t -> client list
  *)
 (*****************************************************************************)
 
-val make: unit -> t
+val make: string -> t
 
 (*****************************************************************************)
 (* The environment variable containing the pattern we want to skip *)

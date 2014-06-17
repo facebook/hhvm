@@ -84,6 +84,23 @@ inline bool operator<(Context a, Context b) {
 std::string show(Context);
 
 /*
+ * Context for a call to a function.  This means the types and number
+ * of arguments, and where it is being called from.
+ *
+ * TODO(#3788877): add type of $this if it is going to be an object
+ * method, and the LSB class type if static.
+ */
+struct CallContext {
+  Context caller;
+  std::vector<Type> args;
+};
+
+inline bool operator==(const CallContext& a, const CallContext& b) {
+  return a.caller == b.caller &&
+         a.args == b.args;
+}
+
+/*
  * State of properties on a class.  Map from property name to its
  * Type.
  */
@@ -248,6 +265,33 @@ struct Index {
   ~Index();
 
   /*
+   * The index operates in two modes: frozen, and unfrozen.
+   *
+   * Conceptually, the index is mutable and may acquire new
+   * information until it has been frozen, and once frozen, it retains
+   * the information it had at the point it was frozen.
+   *
+   * The reason this exists is because certain functions on the index
+   * may cause it to need to consult information in the bodies of
+   * functions other than the Context passed in.  Specifically, if the
+   * interpreter tries to look up the return type for a callee in a
+   * given CallContext, the index may choose to recursively invoke
+   * type inference on that callee's function body to see if more
+   * precise information can be determined, unless it is frozen.
+   *
+   * This is fine until the final pass, because all bytecode is
+   * read-only at that stage.  However, in the final pass, other
+   * threads might be optimizing a callee's bytecode and changing it,
+   * so we should not be reading from it to perform type inference
+   * concurrently.  Freezing the index tells it it can't do that
+   * anymore.
+   *
+   * These are the functions to query and transition to frozen state.
+   */
+  bool frozen() const;
+  void freeze();
+
+  /*
    * The Index contains a Builder for an ArrayTypeTable.
    *
    * If we're creating assert types with options.InsertAssertions, we
@@ -364,10 +408,19 @@ struct Index {
   Type lookup_class_constant(Context, res::Class, SString cns) const;
 
   /*
-   * Return the best known return type for a resolved function.
-   * Returns TInitGen at worst.
+   * Return the best known return type for a resolved function, in a
+   * context insensitive way.  Returns TInitGen at worst.
    */
   Type lookup_return_type(Context, res::Func) const;
+
+  /*
+   * Return the best known return type for a resolved function, given
+   * the supplied calling context.  Returns TInitGen at worst.
+   *
+   * During analyze phases, this function may re-enter analyze in
+   * order to interpret the callee with these argument types.
+   */
+  Type lookup_return_type(CallContext, res::Func) const;
 
   /*
    * Look up the return type for an unresolved function.  The

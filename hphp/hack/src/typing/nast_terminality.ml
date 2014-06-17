@@ -8,7 +8,6 @@
  *
  *)
 
-open Utils
 open Nast
 
 (* Module coded with an exception, if we find a terminal statement we
@@ -178,7 +177,7 @@ end = struct
         | Default [] -> ()
         | Case (e, b) -> begin
           terminal b;
-          error_l [
+          Errors.add_list [
             p, ("This switch has a case that implicitly falls through and is "^
                 "not annotated with // FALLTHROUGH");
             fst e, "This case implicitly falls through"
@@ -186,8 +185,9 @@ end = struct
         end
         | Default b -> begin
           terminal b;
-          error p ("This switch has a default case that implicitly falls "^
-                   "through and is not annotated with // FALLTHROUGH")
+          Errors.add p
+              ("This switch has a default case that implicitly falls "^
+               "through and is not annotated with // FALLTHROUGH")
         end
       with Exit -> ()
     end (List.tl (List.rev cl)) (* Skip the last case *)

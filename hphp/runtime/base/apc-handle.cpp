@@ -28,75 +28,97 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 APCHandle* APCHandle::Create(const Variant& source,
-                             bool inner,
-                             bool forceAPCObj) {
+                             size_t& size,
+                             bool serialized,
+                             bool inner /* = false */,
+                             bool unserializeObj /* = false*/) {
+  return CreateSharedType(source, size, serialized, inner, unserializeObj);
+}
+
+APCHandle* APCHandle::CreateSharedType(const Variant& source,
+                                       size_t& size,
+                                       bool serialized,
+                                       bool inner,
+                                       bool unserializeObj) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
     case KindOfBoolean: {
       auto value = new APCTypedValue(type,
           static_cast<int64_t>(source.getBoolean()));
+      size = sizeof(APCTypedValue);
       return value->getHandle();
     }
     case KindOfInt64: {
       auto value = new APCTypedValue(type, source.getInt64());
+      size = sizeof(APCTypedValue);
       return value->getHandle();
     }
     case KindOfDouble: {
       auto value = new APCTypedValue(type, source.getDouble());
+      size = sizeof(APCTypedValue);
       return value->getHandle();
     }
     case KindOfUninit:
     case KindOfNull: {
       auto value = new APCTypedValue(type);
+      size = sizeof(APCTypedValue);
       return value->getHandle();
     }
 
     case KindOfStaticString: {
+      if (serialized) goto StringCase;
+
       auto value = new APCTypedValue(type, source.getStringData());
+      size = sizeof(APCTypedValue);
       return value->getHandle();
     }
-
+StringCase:
     case KindOfString: {
       StringData* s = source.getStringData();
+      if (serialized) {
+        // It is priming, and there might not be the right class definitions
+        // for unserialization.
+        return APCObject::MakeShared(apc_reserialize(s), size);
+      }
+
       auto const st = lookupStaticString(s);
       if (st) {
         APCTypedValue* value = new APCTypedValue(KindOfStaticString, st);
+        size = sizeof(APCTypedValue);
         return value->getHandle();
       }
 
       assert(!s->isStatic()); // would've been handled above
-      if (apcExtension::UseUncounted) {
+      if (!inner && apcExtension::UseUncounted) {
         StringData* st = StringData::MakeUncounted(s->slice());
         APCTypedValue* value = new APCTypedValue(st);
+        size = sizeof(APCTypedValue) + st->size();
         return value->getHandle();
       }
-      return APCString::MakeShared(type, s);
+      return APCString::MakeShared(type, s, size);
     }
 
     case KindOfArray:
       return APCArray::MakeShared(source.getArrayData(),
+                                  size,
                                   inner,
-                                  forceAPCObj);
+                                  unserializeObj);
 
     case KindOfResource:
       // TODO Task #2661075: Here and elsewhere in the runtime, we convert
       // Resources to the empty array during various serialization operations,
       // which does not match Zend behavior. We should fix this.
+      size = sizeof(APCArray);
       return APCArray::MakeShared();
 
     case KindOfObject:
-      return forceAPCObj ? APCObject::Construct(source.getObjectData())
-                         : APCObject::MakeShared(apc_serialize(source));
+      return unserializeObj ?
+          APCObject::Construct(source.getObjectData(), size) :
+          APCObject::MakeShared(apc_serialize(source), size);
 
     default:
       return nullptr;
   }
-}
-
-APCHandle* APCHandle::CreateObjectFromSerializedString(const String& source) {
-  // It is priming, and there might not be the right class definitions
-  // for unserialization.
-  return APCObject::MakeShared(apc_reserialize(source.get()));
 }
 
 Variant APCHandle::toLocal() {

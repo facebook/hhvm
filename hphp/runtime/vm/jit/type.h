@@ -843,7 +843,16 @@ struct TypeConstraint {
     : category(cat)
     , innerCat(inner)
     , weak(false)
+    , m_specialized(0)
   {}
+
+  explicit TypeConstraint(const Class* cls)
+    : TypeConstraint(DataTypeSpecialized)
+  {
+    setDesiredClass(cls);
+  }
+
+  void applyConstraint(TypeConstraint newTc);
 
   std::string toString() const;
 
@@ -854,11 +863,41 @@ struct TypeConstraint {
 
   bool operator==(TypeConstraint tc2) const {
     return category == tc2.category && innerCat == tc2.innerCat &&
-      weak == tc2.weak;
+      weak == tc2.weak && m_specialized == tc2.m_specialized;
   }
+  bool operator!=(TypeConstraint tc2) const { return !(*this == tc2); }
 
   bool empty() const {
     return category == DataTypeGeneric && innerCat == DataTypeGeneric && !weak;
+  }
+
+  static constexpr uint8_t kWantArrayKind = 0x1;
+
+  TypeConstraint& setWantArrayKind() {
+    assert(!wantClass());
+    assert(category == DataTypeSpecialized);
+    m_specialized |= kWantArrayKind;
+    return *this;
+  }
+
+  bool wantArrayKind() const { return m_specialized & kWantArrayKind; }
+
+  TypeConstraint& setDesiredClass(const Class* cls) {
+    assert(m_specialized == 0 ||
+           desiredClass()->classof(cls) || cls->classof(desiredClass()));
+    assert(category == DataTypeSpecialized);
+    m_specialized = reinterpret_cast<uintptr_t>(cls);
+    assert(wantClass());
+    return *this;
+  }
+
+  bool wantClass() const {
+    return m_specialized != 0 && !wantArrayKind();
+  }
+
+  const Class* desiredClass() const {
+    assert(wantClass());
+    return reinterpret_cast<const Class*>(m_specialized);
   }
 
   // category starts as DataTypeGeneric and is refined to more specific values
@@ -875,6 +914,12 @@ struct TypeConstraint {
   // actually want to constrain the guard (if found). Most often used to figure
   // out if a type can be used without further constraining guards.
   bool weak;
+
+ private:
+  // m_specialized either holds a Class* or a 1 in its low bit, indicating that
+  // for a DataTypeSpecialized constraint, we require the specified class or an
+  // array kind, respectively.
+  uintptr_t m_specialized;
 };
 
 const int kTypeWordOffset = offsetof(TypedValue, m_type) % 8;

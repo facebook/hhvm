@@ -131,19 +131,17 @@ static void genCodeImpl(IRUnit& unit,
      * Allocate enough space that the relocated cold code doesn't
      * overlap the emitted cold code.
      */
-    coldCode.init(coldCodeIn.frontier() +
-                  RuntimeOption::EvalJitRelocationSize,
-                  RuntimeOption::EvalJitRelocationSize, "cgRelocStub");
-    size_t align = mcg->backEnd().cacheLineSize();
-    assert(!(align & (align - 1)));
-    size_t delta =
-      (mainCodeIn.frontier() - coldCode.frontier()) & (align - 1);
-    mainCode.init(coldCode.frontier() +
-                  RuntimeOption::EvalJitRelocationSize + delta,
-                  RuntimeOption::EvalJitRelocationSize - delta, "cgRelocMain");
 
-    assert(!((mainCode.frontier() - mainCodeIn.frontier()) & (align - 1)));
-    assert(!((coldCode.frontier() - coldCodeIn.frontier()) & (align - 1)));
+    static unsigned seed = 42;
+    auto off = rand_r(&seed) & (mcg->backEnd().cacheLineSize() - 1);
+    coldCode.init(coldCodeIn.frontier() +
+                   RuntimeOption::EvalJitRelocationSize + off,
+                   RuntimeOption::EvalJitRelocationSize - off, "cgRelocCold");
+
+    mainCode.init(coldCode.frontier() +
+                  RuntimeOption::EvalJitRelocationSize + off,
+                  RuntimeOption::EvalJitRelocationSize - off, "cgRelocMain");
+
     relocate = true;
   } else {
     /*
@@ -285,6 +283,24 @@ static void genCodeImpl(IRUnit& unit,
     be.adjustForRelocation(sr, asmInfo, coldRel, mcg->cgFixups());
     be.adjustForRelocation(sr, asmInfo, mainRel, mcg->cgFixups());
 
+    if (asmInfo) {
+      static int64_t mainDeltaTot = 0, coldDeltaTot = 0;
+      int64_t mainDelta =
+        mainRel.destSize() -
+        (mainCode.frontier() - mainCode.base());
+      int64_t coldDelta =
+        coldRel.destSize() -
+        (coldCode.frontier() - coldCode.base());
+
+      mainDeltaTot += mainDelta;
+      HPHP::Trace::traceRelease("main delta after relocation: %" PRId64
+                                " (%" PRId64 ")\n",
+                                mainDelta, mainDeltaTot);
+      coldDeltaTot += coldDelta;
+      HPHP::Trace::traceRelease("cold delta after relocation: %" PRId64
+                                " (%" PRId64 ")\n",
+                                coldDelta, coldDeltaTot);
+    }
 #ifndef NDEBUG
     auto& ip = sr->inProgressTailJumps();
     for (size_t i = 0; i < ip.size(); ++i) {

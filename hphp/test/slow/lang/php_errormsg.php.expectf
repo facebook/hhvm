@@ -13,4 +13,7 @@ string(45) "strlen() expects exactly 1 parameter, 0 given"
 string(5) "Array"
 string(26) "Array to string conversion"
 int(42)
+
+Notice: Cannot access property on non-object in %s/test/slow/lang/php_errormsg.php on line 51
+bool(true)
 int(42)

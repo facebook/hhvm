@@ -11,6 +11,7 @@ SRC= nast.ml nastVisitor.ml \
 
 INCLUDEDIRS=$(TOP)/utils \
   $(TOP)/globals \
+  $(TOP)/hhi \
   $(TOP)/deps $(TOP)/parsing \
   $(TOP)/heap
 

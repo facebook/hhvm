@@ -538,6 +538,7 @@ std::string show(const Func&);
 std::string show(const Class&);
 std::string show(const Unit&);
 std::string show(const Program&);
+std::string local_string(borrowed_ptr<const php::Local>);
 
 //////////////////////////////////////////////////////////////////////
 

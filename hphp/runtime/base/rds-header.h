@@ -43,6 +43,9 @@ struct VMRegs {
   /* VM program counter. Points to the beginning of the currently executing
    * bytecode instruction. */
   PC pc;
+
+  /* First ActRec of this VM instance. */
+  ActRec* firstAR;
 };
 
 namespace RDS {
@@ -61,6 +64,8 @@ struct Header {
   VMRegs vmRegs;
 };
 
+static_assert(sizeof(Header) <= 64, "RDS::Header should fit in one cache line");
+
 /*
  * Access to the statically layed out header.
  */
@@ -74,6 +79,7 @@ constexpr ptrdiff_t kVmspOff           = kVmRegsOff + offsetof(VMRegs, stack) +
                                            Stack::topOfStackOffset();
 constexpr ptrdiff_t kVmfpOff           = kVmRegsOff + offsetof(VMRegs, fp);
 constexpr ptrdiff_t kVmpcOff           = kVmRegsOff + offsetof(VMRegs, pc);
+constexpr ptrdiff_t kVmFirstAROff      = kVmRegsOff + offsetof(VMRegs, firstAR);
 
 } }
 

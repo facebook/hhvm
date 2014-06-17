@@ -8,33 +8,9 @@
  *
  *)
 
+include Sys_utils
 
-open Json
-
-type error = (Pos.t * string) list
-
-exception Error of error
-
-
-let to_json (e : error) : json =
-  let elts = List.map (fun (p, w) ->
-                        let line, scol, ecol = Pos.info_pos p in
-                        JAssoc [ "descr", JString w;
-                                 "path",  JString p.Pos.pos_file;
-                                 "line",  JInt line;
-                                 "start", JInt scol;
-                                 "end",   JInt ecol
-                               ]
-                      ) e
-  in
-  JAssoc [ "message", JList elts ]
-
-let error_l message =
-  raise (Error message)
-
-let error p w =
-  raise (Error [p, w])
-
+let () = Random.self_init ()
 let debug = ref false
 
 let d s =
@@ -116,17 +92,6 @@ module Map = struct end
 
 let spf = Printf.sprintf
 
-let pmsg p s =
-  Printf.sprintf "%s\n%s\n" (Pos.string p) s
-
-let pmsg_l l =
-  let l = List.map (fun (p, e) -> pmsg p e) l in
-  List.fold_right (^) l ""
-
-let to_string (e : error) : string =
-  let buf = Buffer.create 50 in
-  List.iter (fun (p, w) -> Buffer.add_string buf (pmsg p w)) e;
-  Buffer.contents buf
 
 let internal_error s =
   Printf.fprintf stderr
@@ -243,7 +208,7 @@ let rec make_list f n =
 
 let safe_ios p s =
   try int_of_string s
-  with _ -> error p "Value is too large"
+  with _ -> Errors.add p "Value is too large"; -1
 
 let sl l =
   List.fold_right (^) l ""
@@ -307,13 +272,6 @@ let rec cut_after n = function
   | l when n <= 0 -> []
   | x :: rl -> x :: cut_after (n-1) rl
 
-let exec_read cmd =
-  let ic = Unix.open_process_in cmd in
-  let result = input_line ic in
-  assert (result <> "");
-  assert (Unix.close_process_in ic = Unix.WEXITED 0);
-  result
-
 let iter_n_acc n f acc =
   let acc = ref acc in
   for i = 1 to n do
@@ -325,62 +283,8 @@ let set_of_list list =
   List.fold_right SSet.add list SSet.empty
 
 let strip_ns s =
-  if s.[0] = '\\' then String.sub s 1 ((String.length s) - 1) else s
-
-(*****************************************************************************)
-(* Primitives *)
-(*****************************************************************************)
-
-let open_in_no_fail fn = 
-  try open_in fn
-  with e -> 
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_in: '%s' (%s)\n" fn e;
-    exit 3
-
-let close_in_no_fail fn ic =
-  try close_in ic with e ->
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
-    exit 3
-
-let open_out_no_fail fn =
-  try open_out fn
-  with e -> 
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_out: '%s' (%s)\n" fn e;
-    exit 3
-
-let close_out_no_fail fn oc =
-  try close_out oc with e ->
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
-    exit 3
-
-(*****************************************************************************)
-(* Dumps the content of a file. *)
-(*****************************************************************************)
-
-let cat filename =
-  let ic = open_in filename in
-  let len = in_channel_length ic in
-  let buf = Buffer.create len in
-  Buffer.add_channel buf ic len;
-  let content = Buffer.contents buf in
-  close_in ic;
-  content
-
-let cat_no_fail filename =
-  let ic = open_in_no_fail filename in
-  let len = in_channel_length ic in
-  let buf = Buffer.create len in
-  Buffer.add_channel buf ic len;
-  let content = Buffer.contents buf in
-  close_in_no_fail filename ic;
-  content
-
-let nl_regexp = Str.regexp "[\r\n]"
-let split_lines = Str.split nl_regexp
+  if String.length s == 0 || s.[0] <> '\\' then s
+  else String.sub s 1 ((String.length s) - 1)
 
 let str_starts_with long short =
   try
@@ -397,3 +301,15 @@ let spinner =
       state := (!state + 1) mod 4;
       str
     end
+
+(*****************************************************************************)
+(* Same as List.iter2, except that we only iterate as far as the shortest
+ * of both lists.
+ *)
+(*****************************************************************************)
+
+let rec iter2_shortest f l1 l2 =
+  match l1, l2 with
+  | [], _ | _, [] -> ()
+  | x1 :: rl1, x2 :: rl2 -> f x1 x2; iter2_shortest f rl1 rl2
+

@@ -48,7 +48,7 @@ let is_js_path path =
 (*****************************************************************************)
 
 let make_next_files_with_find filter root =
-  let ic = Unix.open_process_in ("find "^Path.string_of_path root^"/ ") in
+  let ic = Unix.open_process_in ("find "^Path.string_of_path root) in
   let done_ = ref false in
   (* This is subtle, but to optimize latency, we open the process and
    * then return a closure immediately. That way 'find' gets started

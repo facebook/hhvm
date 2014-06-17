@@ -20,6 +20,7 @@ BUILD_DIRS=stubs
 BUILD_CMAS=stubs/lib.cma
 EXTRA_INCLUDEDIRS=
 FILTER_FROM_INCLUDE=
+PROGS=hh_single hh_server hh_client
 
 # If you want to build the JS typechecker, uncomment these lines. Requires
 # js_of_ocaml, and is kind of slow to build, which is why it's off by default.
@@ -30,26 +31,28 @@ FILTER_FROM_INCLUDE=
 #FILTER_FROM_INCLUDE=js
 
 #------------------------------------------------------------------------------
-# Program related variables
-#------------------------------------------------------------------------------
-ifeq ($(OS), Linux)
-  PROGS=hh_single hh_server hh_client
-else
-  PROGS=hh_single
-endif
-
-#------------------------------------------------------------------------------
 # Main variables
 #------------------------------------------------------------------------------
-SYSLIBS=nums.cma bigarray.cma str.cma unix.cma
+SYSLIBS=nums.cma bigarray.cma str.cma unix.cma $(EXTLIBS)
 
 ifeq ($(OS), Linux)
   INOTIFY=inotify
   INOTIFYLIB=inotify/inotify.cma
+  FSNOTIFY=fsnotify_linux
+  FSNOTIFYLIB=fsnotify_linux/lib.cma
+endif
+ifeq ($(OS), Darwin)
+  FSEVENTS=fsevents
+  FSEVENTSLIB=fsevents/fsevents.cma 
+  FSNOTIFY=fsnotify_darwin
+  FSNOTIFYLIB=fsnotify_darwin/lib.cma
+  SECTCREATE=-cclib "-sectcreate __text hhi ../bin/hhi.tar.gz"
 endif
 
-LIBS=$(INOTIFYLIB) \
+LIBS=$(INOTIFYLIB) $(FSEVENTSLIB)\
+ $(FSNOTIFYLIB) \
  utils/utils.cma \
+ hhi/hhi.cma \
  avl/lib.cma \
  dfind/lib.cma \
  globals/lib.cma \
@@ -60,8 +63,12 @@ LIBS=$(INOTIFYLIB) \
  server/lib.cma \
  client/lib.cma
 
-MAKESUBDIRS=$(INOTIFY) avl dfind \
- utils globals \
+MAKESUBDIRS=$(INOTIFY) $(FSEVENTS) \
+ utils \
+ $(FSNOTIFY) \
+ avl dfind \
+ globals \
+ hhi \
  heap procs \
  deps parsing naming typing \
  server \
@@ -86,13 +93,18 @@ INCLUDEDIRS=$(filter-out $(FILTER_FROM_INCLUDE),$(MAKESUBDIRS)) \
 all:: opt
 opt:
 	$(MAKE) rec.opt
+	$(MAKE) hhi_archive
 	$(MAKE) $(PROGS:=.opt)
 	$(MAKE) bin
 bc:
 	$(MAKE) rec
+	$(MAKE) hhi_archive
 	$(MAKE) $(PROGS:=.bc)
 top: $(TARGET).top
 
+
+hhi_archive:
+	$(MAKE) -C ../hhi
 
 rec:
 	set -e; for i in $(MAKESUBDIRS); do $(MAKE) -C $$i all || exit 1; done
@@ -114,9 +126,9 @@ hh_single.opt: $(LIBS:.cma=.cmxa) $(OBJS:.cmo=.cmx) hh_single_type_check.cmx
 
 
 hh_server.bc: $(LIBS) $(OBJS) hh_server.cmo
-	$(OCAMLC) -custom -o $@ $(SYSLIBS) $^
+	$(OCAMLC) $(SECTCREATE) -custom -o $@ $(SYSLIBS) $^
 hh_server.opt: $(LIBS:.cma=.cmxa) $(OBJS:.cmo=.cmx) hh_server.cmx
-	$(OCAMLOPT) -o $@ $(SYSLIBS:.cma=.cmxa)  $^
+	$(OCAMLOPT) $(SECTCREATE) -o $@ $(SYSLIBS:.cma=.cmxa)  $^
 
 hh_client.bc: $(LIBS) $(OBJS) hh_client.cmo
 	$(OCAMLC) -custom -o $@ $(SYSLIBS) $^
@@ -148,15 +160,13 @@ distclean:: clean
 ##############################################################################
 # Install
 ##############################################################################
-ifeq ($(OS), Linux)
+
 bin:
-	cp -f hh_server.opt ../bin/hh_server
+ifeq ($(OS), Linux)
+	objcopy --add-section hhi=../bin/hhi.tar.gz hh_server.opt ../bin/hh_server
+endif
 	cp hh_client.opt ../bin/hh_client
 	cp hh_single.opt ../bin/hh_single_type_check
-else
-bin:
-	cp hh_single.opt ../bin/hh_single_type_check
-endif
 
 stamp:
 	rm -f utils/get_build_id.gen.c

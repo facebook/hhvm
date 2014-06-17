@@ -711,7 +711,7 @@ static void sxe_properties_add(Array& rv, char* name, const Variant& value) {
 }
 
 static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
-                              Array& rv) {
+                              Array& rv, bool isBoolCast = false) {
   rv.clear();
 
   Object iter_data = nullptr;
@@ -802,6 +802,7 @@ static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
       } else {
         sxe_properties_add(rv, name, value);
       }
+      if (isBoolCast) break;
 next_iter:
       if (use_iter) {
         node = php_sxe_iterator_fetch(sxe, node->next, 0);
@@ -821,7 +822,7 @@ static Variant sxe_object_cast(c_SimpleXMLElement* sxe, int8_t type) {
     xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
     if (node) return true;
     Array properties = Array::Create();
-    sxe_get_prop_hash(sxe, true, properties);
+    sxe_get_prop_hash(sxe, true, properties, true);
     return properties.size() != 0;
   }
 
@@ -1656,7 +1657,7 @@ c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(Class* cb) :
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
   if (sxe) {
-    sxe->decRefCount();
+    decRefObj(sxe);
     sxe = nullptr;
   }
 }

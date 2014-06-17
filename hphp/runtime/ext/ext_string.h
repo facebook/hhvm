@@ -152,6 +152,7 @@ Variant f_strrchr(const String& haystack, const Variant& needle);
 Variant f_strstr(const String& haystack, const Variant& needle, bool before_needle = false);
 Variant f_stristr(const String& haystack, const Variant& needle);
 Variant f_strpbrk(const String& haystack, const String& char_list);
+bool str_contains_any_of(const String& haystack, const String& char_list);
 
 Variant f_strchr(const String& haystack, const Variant& needle);
 

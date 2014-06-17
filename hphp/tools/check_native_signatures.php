@@ -38,7 +38,7 @@ function parse_php_functions(string $file):
     "#<<[^>]*__Native([^>]*)>>\nfunction +([^(]*)\(([^)]*)\) *: *(.+?);#m";
 
   $functions = Map {};
-
+  $matches = [];
   if (preg_match_all($function_regex, $source, $matches, PREG_SET_ORDER)) {
     foreach($matches as $match) {
       $nativeArgs = $match[1];
@@ -95,6 +95,7 @@ function parse_cpp_functions(string $file):
             "#^(?:static )?(\S+) +HHVM_FUNCTION\(([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $functions = Map {};
+  $matches = [];
 
   if (preg_match_all($function_regex, $source, $matches, PREG_SET_ORDER)) {
     foreach($matches as $match) {
@@ -128,11 +129,13 @@ function parse_php_methods(string $file):
     "#<<[^>]*__Native([^>]*)>>\n\\s*.*?function +([^(]*)\(([^)]*)\) *: *(.+?);#m";
 
   $methods = Map {};
+  $classes = [];
 
   if (preg_match_all($class_regex, $source, $classes, PREG_SET_ORDER)) {
     foreach ($classes as $class) {
       $cname = $class[1];
       $source = $class[2];
+      $matches = [];
       if (preg_match_all($method_regex, $source, $matches, PREG_SET_ORDER)) {
         foreach($matches as $match) {
           $nativeArgs = $match[1];
@@ -192,6 +195,7 @@ function parse_cpp_methods(string $file):
     "#^(?:static )?(\S+) +HHVM_(?:STATIC_)?METHOD\(([^,)]+),\s+([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $methods = Map {};
+  $matches = [];
 
   if (preg_match_all($method_regex, $source, $matches, PREG_SET_ORDER)) {
     foreach($matches as $match) {

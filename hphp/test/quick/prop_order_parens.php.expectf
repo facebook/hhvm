@@ -17,6 +17,6 @@ Notice: Array to string conversion in %s on line 50
 
 Notice: Undefined property: C::$Array in %s on line 50
 
-Warning: Cannot access property on non-object in %s on line 50
+Notice: Cannot access property on non-object in %s on line 50
 NULL
 int(650)

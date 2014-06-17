@@ -1,143 +1,143 @@
 object(DOMDocument)#1 (35) {
-  ["substituteEntities"]=>
-  bool(false)
   ["recover"]=>
   bool(false)
-  ["validateOnParse"]=>
-  bool(false)
-  ["formatOutput"]=>
-  bool(false)
-  ["xmlVersion"]=>
-  string(3) "1.0"
+  ["documentURI"]=>
+  NULL
+  ["strictErrorChecking"]=>
+  bool(true)
   ["xmlStandalone"]=>
   bool(true)
   ["standalone"]=>
   bool(true)
   ["attributes"]=>
   NULL
-  ["version"]=>
-  string(3) "1.0"
-  ["nextSibling"]=>
-  NULL
-  ["childNodes"]=>
-  string(22) "(object value omitted)"
-  ["config"]=>
-  NULL
-  ["implementation"]=>
-  string(22) "(object value omitted)"
-  ["documentURI"]=>
-  NULL
-  ["strictErrorChecking"]=>
-  bool(true)
-  ["lastChild"]=>
-  NULL
-  ["textContent"]=>
-  string(0) ""
-  ["previousSibling"]=>
-  NULL
-  ["encoding"]=>
-  NULL
   ["nodeValue"]=>
   NULL
-  ["namespaceURI"]=>
+  ["resolveExternals"]=>
+  bool(false)
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["previousSibling"]=>
   NULL
-  ["preserveWhiteSpace"]=>
-  bool(true)
   ["nodeName"]=>
   string(9) "#document"
-  ["parentNode"]=>
-  NULL
-  ["firstChild"]=>
-  NULL
-  ["ownerDocument"]=>
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["lastChild"]=>
   NULL
   ["nodeType"]=>
   int(9)
+  ["formatOutput"]=>
+  bool(false)
+  ["firstChild"]=>
+  NULL
+  ["parentNode"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["config"]=>
+  NULL
   ["prefix"]=>
   string(0) ""
-  ["resolveExternals"]=>
-  bool(false)
-  ["localName"]=>
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["documentElement"]=>
   NULL
-  ["doctype"]=>
+  ["namespaceURI"]=>
   NULL
   ["baseURI"]=>
   NULL
-  ["documentElement"]=>
+  ["substituteEntities"]=>
+  bool(false)
+  ["textContent"]=>
+  string(0) ""
+  ["nextSibling"]=>
   NULL
+  ["doctype"]=>
+  NULL
+  ["validateOnParse"]=>
+  bool(false)
+  ["version"]=>
+  string(3) "1.0"
   ["actualEncoding"]=>
+  NULL
+  ["encoding"]=>
+  NULL
+  ["localName"]=>
   NULL
   ["xmlEncoding"]=>
   NULL
 }
 object(DOMDocument)#1 (35) {
-  ["substituteEntities"]=>
-  bool(false)
   ["recover"]=>
   bool(false)
-  ["validateOnParse"]=>
-  bool(false)
-  ["formatOutput"]=>
-  bool(false)
-  ["xmlVersion"]=>
-  string(3) "1.0"
+  ["documentURI"]=>
+  NULL
+  ["strictErrorChecking"]=>
+  bool(true)
   ["xmlStandalone"]=>
   bool(true)
   ["standalone"]=>
   bool(true)
   ["attributes"]=>
   NULL
-  ["version"]=>
-  string(3) "1.0"
-  ["nextSibling"]=>
-  NULL
-  ["childNodes"]=>
-  string(22) "(object value omitted)"
-  ["config"]=>
-  NULL
-  ["implementation"]=>
-  string(22) "(object value omitted)"
-  ["documentURI"]=>
-  NULL
-  ["strictErrorChecking"]=>
-  bool(true)
-  ["lastChild"]=>
-  NULL
-  ["textContent"]=>
-  string(0) ""
-  ["previousSibling"]=>
-  NULL
-  ["encoding"]=>
-  NULL
   ["nodeValue"]=>
   NULL
-  ["namespaceURI"]=>
+  ["resolveExternals"]=>
+  bool(false)
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["previousSibling"]=>
   NULL
-  ["preserveWhiteSpace"]=>
-  bool(true)
   ["nodeName"]=>
   string(9) "#document"
-  ["parentNode"]=>
-  NULL
-  ["firstChild"]=>
-  NULL
-  ["ownerDocument"]=>
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["lastChild"]=>
   NULL
   ["nodeType"]=>
   int(9)
+  ["formatOutput"]=>
+  bool(false)
+  ["firstChild"]=>
+  NULL
+  ["parentNode"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["config"]=>
+  NULL
   ["prefix"]=>
   string(0) ""
-  ["resolveExternals"]=>
-  bool(false)
-  ["localName"]=>
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["documentElement"]=>
   NULL
-  ["doctype"]=>
+  ["namespaceURI"]=>
   NULL
   ["baseURI"]=>
   NULL
-  ["documentElement"]=>
+  ["substituteEntities"]=>
+  bool(false)
+  ["textContent"]=>
+  string(0) ""
+  ["nextSibling"]=>
   NULL
+  ["doctype"]=>
+  NULL
+  ["validateOnParse"]=>
+  bool(false)
+  ["version"]=>
+  string(3) "1.0"
   ["actualEncoding"]=>
+  NULL
+  ["encoding"]=>
+  NULL
+  ["localName"]=>
   NULL
   ["xmlEncoding"]=>
   NULL

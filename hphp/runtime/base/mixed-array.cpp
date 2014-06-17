@@ -77,6 +77,17 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
   return ad;
 }
 
+ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
+                                       uint32_t capacity) {
+  capacity = (capacity ? capacity : other->m_size);
+
+  if (other->m_kind == kPackedKind) {
+    return MixedArray::MakeReserve(capacity);
+  } else {
+    return MixedArray::MakeReserveMixed(capacity);
+  }
+}
+
 ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
   ArrayData* ad;
@@ -179,8 +190,8 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
 template<class CopyKeyValue>
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
-                                AllocMode mode,
-                                CopyKeyValue copyKeyValue) {
+                                  AllocMode mode,
+                                  CopyKeyValue copyKeyValue) {
   assert(other.m_kind == kMixedKind);
 
   auto const cap  = other.m_cap;

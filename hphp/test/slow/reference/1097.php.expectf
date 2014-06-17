@@ -1,4 +1,4 @@
-Warning: Cannot access property on non-object in %s/test/slow/reference/1097.php on line 4
+Notice: Cannot access property on non-object in %s/test/slow/reference/1097.php on line 4
 NULL
 array(1) {
   [0]=>

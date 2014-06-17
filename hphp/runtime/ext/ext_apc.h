@@ -60,7 +60,6 @@ class apcExtension : public Extension {
   static bool FileStorageKeepFileLinked;
   static std::vector<std::string> NoTTLPrefix;
   static bool UseUncounted;
-  static bool InnerUncounted;
   static bool Stat;
   static bool EnableCLI;
 

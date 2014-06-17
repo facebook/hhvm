@@ -93,7 +93,8 @@
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/preclass-emit.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/system/systemlib.h"
 
@@ -1655,7 +1656,7 @@ void parse_parameter_list(AsmState& as) {
       ch = as.in.getc();
       if (ch == '(') {
         String str = parse_long_string(as);
-        param.setPhpCode(makeStaticString(str));
+        param.phpCode = makeStaticString(str);
         TypedValue tv;
         tvWriteUninit(&tv);
         if (str.size() == 4) {
@@ -1668,7 +1669,7 @@ void parse_parameter_list(AsmState& as) {
           tv = make_tv<KindOfBoolean>(false);
         }
         if (tv.m_type != KindOfUninit) {
-          param.setDefaultValue(tv);
+          param.defaultValue = tv;
         }
         as.in.expectWs(')');
         as.in.skipWhitespace();

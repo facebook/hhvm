@@ -737,7 +737,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       m_tx.setMode(TransKind::Optimize);
-      SrcKey  funcletSK(func, paramInfo.funcletOff(), false);
+      SrcKey  funcletSK(func, paramInfo.funcletOff, false);
       TransID funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
       if (funcletTransId != kInvalidTransID) {
         invalidateSrcKey(funcletSK);
@@ -1401,7 +1401,7 @@ MCGenerator::freeRequestStub(TCA stub) {
 TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
-    Stats::inc(Stats::Acold_Reused);
+    Stats::inc(Stats::Astub_Reused);
     always_assert(m_freeStubs.m_list == nullptr ||
                   code.isValidCodeAddress(TCA(m_freeStubs.m_list)));
     TRACE(1, "recycle stub %p\n", ret);
@@ -1410,7 +1410,7 @@ TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
     }
   } else {
     ret = frozen.frontier();
-    Stats::inc(Stats::Acold_New);
+    Stats::inc(Stats::Astub_New);
     TRACE(1, "alloc new stub %p\n", ret);
   }
   return ret;
@@ -1689,9 +1689,8 @@ CodeGenFixups::process() {
   }
   m_pendingJmpTransIDs.clear();
   /*
-   * Currently reusedStubs, addressImmediates, and
-   * codePointers are only used for relocation at the
-   * end of code gen.
+   * Currently these are only used by the relocator,
+   * so there's nothing left to do here.
    *
    * Once we try to relocate live code, we'll need to
    * store compact forms of these for later.
@@ -1700,6 +1699,7 @@ CodeGenFixups::process() {
   m_addressImmediates.clear();
   m_codePointers.clear();
   m_bcMap.clear();
+  m_alignFixups.clear();
 }
 
 void CodeGenFixups::clear() {
@@ -1710,6 +1710,7 @@ void CodeGenFixups::clear() {
   m_addressImmediates.clear();
   m_codePointers.clear();
   m_bcMap.clear();
+  m_alignFixups.clear();
 }
 
 bool CodeGenFixups::empty() const {
@@ -1720,14 +1721,15 @@ bool CodeGenFixups::empty() const {
     m_reusedStubs.empty() &&
     m_addressImmediates.empty() &&
     m_codePointers.empty() &&
-    m_bcMap.empty();
+    m_bcMap.empty() &&
+    m_alignFixups.empty();
 }
 
 void
 MCGenerator::translateWork(const TranslArgs& args) {
   Timer _t(Timer::translate);
   auto sk = args.m_sk;
-  std::unique_ptr<Tracelet> tp;
+  std::unique_ptr<Tracelet> tlet;
 
   SKTRACE(1, sk, "translateWork\n");
   assert(m_tx.getSrcDB().find(sk));
@@ -1779,12 +1781,12 @@ MCGenerator::translateWork(const TranslArgs& args) {
     } else {
       assert(m_tx.mode() == TransKind::Profile ||
              m_tx.mode() == TransKind::Live);
-      tp = m_tx.analyze(sk);
       RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
                                sk.resumed() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
-      region = selectRegion(rContext, tp.get(), m_tx.mode());
+      region = selectRegion(rContext, [&]{ return m_tx.analyze(sk); },
+                            m_tx.mode());
 
       if (RuntimeOption::EvalJitCompareRegions &&
           RuntimeOption::EvalJitRegionSelector == "tracelet") {
@@ -1833,7 +1835,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
           if (m_tx.mode() == TransKind::Profile &&
               result == Translator::Success &&
               RuntimeOption::EvalJitPGOUsePostConditions) {
-            pconds = m_tx.irTrans()->hhbcTrans().irBuilder().getKnownTypes();
+            pconds = m_tx.irTrans()->hhbcTrans().unit().postConditions();
           }
 
           FTRACE(2, "translateRegion finished with result {}\n",
@@ -1856,17 +1858,14 @@ MCGenerator::translateWork(const TranslArgs& args) {
         }
       }
       if (!region || result == Translator::Failure) {
-        // If the region translator failed for an Optimize
-        // translation, it's OK to do a Live translation for the
-        // function entry.  We lazily create the tracelet here in this
-        // case.
+        // If the region translator failed for an Optimize translation, it's OK
+        // to do a Live translation for the function entry.
         if (m_tx.mode() == TransKind::Optimize) {
           if (sk.getFuncId() == liveFunc()->getFuncId() &&
               liveUnit()->contains(vmpc()) &&
               sk.offset() == liveUnit()->offsetOf(vmpc()) &&
               sk.resumed() == liveResumed()) {
             m_tx.setMode(TransKind::Live);
-            tp = m_tx.analyze(sk);
           } else {
             m_tx.setMode(TransKind::Interp);
             m_tx.traceFree();
@@ -1875,7 +1874,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
         }
         FTRACE(1, "trying translateTracelet\n");
         assertCleanState();
-        result = translateTracelet(*tp);
+        if (!tlet) tlet = m_tx.analyze(sk);
+        result = translateTracelet(*tlet);
 
         // If we're profiling, grab the postconditions so we can
         // use them in region selection whenever we decide to
@@ -1883,7 +1883,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         if (m_tx.mode() == TransKind::Profile &&
             result == Translator::Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = m_tx.irTrans()->hhbcTrans().irBuilder().getKnownTypes();
+          pconds = m_tx.irTrans()->hhbcTrans().unit().postConditions();
         }
       }
 
@@ -1922,8 +1922,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
   if (RuntimeOption::EvalJitPGO) {
     if (transKindToRecord == TransKind::Profile) {
       if (!region) {
-        always_assert(tp);
-        region = selectTraceletLegacy(liveSpOff(), *tp);
+        always_assert(tlet);
+        region = selectTraceletLegacy(liveSpOff(), *tlet);
       }
       m_tx.profData()->addTransProfile(region, pconds);
     } else {
@@ -1935,7 +1935,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
               start,           code.main().frontier()       - start,
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
-              region, tp.get(), m_fixups.m_bcMap);
+              region, tlet.get(), m_fixups.m_bcMap);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
@@ -2141,6 +2141,10 @@ void MCGenerator::traceCodeGen() {
 
   optimize(unit, ht.irBuilder(), m_tx.mode());
   finishPass(" after optimizing ", kOptLevel);
+  if (m_tx.mode() == TransKind::Profile &&
+      RuntimeOption::EvalJitPGOUsePostConditions) {
+    unit.collectPostConditions();
+  }
 
   auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
@@ -2329,8 +2333,9 @@ std::string MCGenerator::getUsage() {
   });
   // Report code.stubs usage = code.cold + code.frozen usage, so
   // ODS doesn't break.
-  auto const stubsUsed = code.cold().used() + code.frozen().used();
-  auto const stubsCapacity = code.cold().capacity() + code.frozen().capacity();
+  auto const stubsUsed = code.realCold().used() + code.realFrozen().used();
+  auto const stubsCapacity = code.realCold().capacity() +
+    code.realFrozen().capacity();
   addRow(std::string("code.stubs"), stubsUsed, stubsCapacity);
 
   addRow("data", code.data().used(), code.data().capacity());
@@ -2364,6 +2369,7 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
   if (!locked) {
     return false;
   }
+  assert(mcg->cgFixups().empty());
   struct timespec tsBegin, tsEnd;
   HPHP::Timer::GetMonotonicTime(tsBegin);
   // Doc says even find _could_ invalidate iterator, in pactice it should
@@ -2381,6 +2387,7 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
       addDbgGuardImpl(sk, sr);
     }
   }
+  mcg->cgFixups().process();
   Translator::WriteLease().drop();
   HPHP::Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
@@ -2412,11 +2419,13 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
   if (!locked) {
     return false;
   }
+  assert(mcg->cgFixups().empty());
   {
     if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
       addDbgGuardImpl(sk, sr);
     }
   }
+  mcg->cgFixups().process();
   Translator::WriteLease().drop();
   return true;
 }
@@ -2546,12 +2555,32 @@ void MCGenerator::setJmpTransID(TCA jmp) {
   m_fixups.m_pendingJmpTransIDs.emplace_back(jmp, transId);
 }
 
-TCA RelocationInfo::adjustedAddress(TCA addr) const {
+void RelocationInfo::recordAddress(TCA src, TCA dest, int range) {
+  assert(m_destSize == size_t(-1) || dest - m_dest >= m_destSize);
+  m_destSize = dest - m_dest;
+  m_adjustedAddresses.emplace(src, std::make_pair(dest, range));
+}
+
+TCA RelocationInfo::adjustedAddressAfter(TCA addr) const {
   if (size_t(addr - m_start) > size_t(m_end - m_start)) {
     return nullptr;
   }
 
-  return addr + (m_dest - m_start);
+  auto it = m_adjustedAddresses.find(addr);
+  if (it == m_adjustedAddresses.end()) return nullptr;
+
+  return it->second.first + it->second.second;
+}
+
+TCA RelocationInfo::adjustedAddressBefore(TCA addr) const {
+  if (size_t(addr - m_start) > size_t(m_end - m_start)) {
+    return nullptr;
+  }
+
+  auto it = m_adjustedAddresses.find(addr);
+  if (it == m_adjustedAddresses.end()) return nullptr;
+
+  return it->second.first;
 }
 
 void

@@ -4,8 +4,7 @@ require_once __DIR__.'/../Framework.php';
 class FacebookPhpSdk extends Framework {
   protected function install(): void {
     parent::install();
-    verbose("Creating a phpunit.xml for running the Facebook PHP SDK tests.\n",
-            Options::$verbose);
+    verbose("Creating a phpunit.xml for running the Facebook PHP SDK tests.\n");
     $phpunit_xml = <<<XML
 <phpunit bootstrap="./tests/bootstrap.php">
 <testsuites>
@@ -26,7 +25,7 @@ XML;
     if (file_exists($this->getInstallRoot())) {
       foreach ($extra_files as $file) {
         if (!file_exists($file)) {
-          remove_dir_recursive($this->getInstallRoot());
+          remove_dir_recursive(nullthrows($this->getInstallRoot()));
           return false;
         }
       }

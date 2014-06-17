@@ -84,5 +84,5 @@ val is_resource:  string
 
 val ndecl_file:
   string -> FileInfo.t ->
-  Utils.error list * SSet.t * env ->
-  Utils.error list * SSet.t * env
+  Errors.t * SSet.t * env ->
+  Errors.t * SSet.t * env

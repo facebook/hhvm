@@ -37,7 +37,7 @@ namespace HPHP { namespace JIT { namespace X64 {
  *   emitted. This is gross, but is a partial workaround for the inability
  *   to capture argument packs in the version of gcc we're using.
  */
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
 
 /*

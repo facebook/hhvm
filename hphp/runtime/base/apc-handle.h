@@ -105,13 +105,10 @@ struct APCHandle {
    * the various flags. This is the only entry point to create APC entities.
    */
   static APCHandle* Create(const Variant& source,
+                           size_t& size,
+                           bool serialized,
                            bool inner = false,
-                           bool forceAPCObj = false);
-
-  /*
-   * Create an APCHandle for a serialized object.
-   */
-  static APCHandle* CreateObjectFromSerializedString(const String& source);
+                           bool unserializeObj = false);
 
   /*
    * Get an instance of the PHP object represented by this APCHandle. The
@@ -147,9 +144,6 @@ struct APCHandle {
 
   void unreferenceRoot();
 
-  bool isRefCountedHandle() const {
-    return !getUncounted() && IS_REFCOUNTED_TYPE(m_type);
-  }
 
   //
   // Type info API
@@ -193,6 +187,13 @@ private:
   APCHandle& operator=(APCHandle const&) = delete;
 
   void deleteShared();
+
+  static APCHandle* CreateSharedType(const Variant& source,
+                                     size_t& size,
+                                     bool serialized,
+                                     bool inner,
+                                     bool unserializeObj);
+  static APCHandle* CreateUncounted(const Variant& source);
 
   bool shouldCache() const { return m_shouldCache; }
   void mustCache() { m_shouldCache = true; }

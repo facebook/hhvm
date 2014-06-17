@@ -11,7 +11,6 @@
 
 type client_mode =
 | MODE_LIST_FILES
-| MODE_SKIP
 | MODE_SHOW_TYPES of string
 | MODE_TYPE_AT_POS of string
 | MODE_AUTO_COMPLETE
@@ -24,6 +23,8 @@ type client_mode =
 | MODE_FIND_REFS of string
 | MODE_IDENTIFY_FUNCTION of string
 | MODE_OUTLINE
+| MODE_METHOD_JUMP_CHILDREN of string
+| MODE_METHOD_JUMP_ANCESTORS of string
 | MODE_REFACTOR
 | MODE_FIND_CLASS_REFS of string
 | MODE_SEARCH of string

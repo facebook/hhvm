@@ -1,0 +1,20 @@
+string(3) "x:x"
+string(5) "urn:x"
+string(1) "x"
+string(1) "x"
+string(0) ""
+
+Warning: Accessing DOMNode derived property 'nodename' with the incorrect casing in %s on line 13
+string(3) "x:x"
+
+Warning: Accessing DOMNode derived property 'namespaceuri' with the incorrect casing in %s on line 14
+string(5) "urn:x"
+
+Warning: Accessing DOMNode derived property 'PREFIX' with the incorrect casing in %s on line 15
+string(1) "x"
+
+Warning: Accessing DOMNode derived property 'localname' with the incorrect casing in %s on line 16
+string(1) "x"
+
+Warning: Accessing DOMNode derived property 'textcontent' with the incorrect casing in %s on line 17
+string(0) ""

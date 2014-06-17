@@ -18,7 +18,6 @@ let go fn genv env ic oc =
   Typing_defs.accumulate_types := true;
   ServerIdeUtils.recheck [fn];
   let result = !(Typing_defs.type_acc) in
-  Silent.is_silent_mode := false;
   Typing_defs.accumulate_types := false;
   Typing_defs.type_acc := [];
   Marshal.to_channel oc result [];

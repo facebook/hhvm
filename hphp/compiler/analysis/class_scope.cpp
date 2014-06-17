@@ -38,8 +38,8 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/statement/class_constant.h"
+#include "hphp/compiler/statement/class_require_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
-#include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -462,14 +462,13 @@ void ClassScope::addImportTraitMethod(const TraitMethod &traitMethod,
   m_importMethToTraitMap[methName].push_back(traitMethod);
 }
 
-void ClassScope::addTraitRequirement(const string &requiredName,
+void ClassScope::addClassRequirement(const string &requiredName,
                                      bool isExtends) {
-  assert(isTrait());
-
+  assert(isTrait() || (isInterface() && isExtends));
   if (isExtends) {
-    m_traitRequiredExtends.insert(requiredName);
+    m_requiredExtends.insert(requiredName);
   } else {
-    m_traitRequiredImplements.insert(requiredName);
+    m_requiredImplements.insert(requiredName);
   }
 }
 
@@ -550,17 +549,17 @@ void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
   }
 }
 
-void ClassScope::importTraitRequirements(AnalysisResultPtr ar,
+void ClassScope::importClassRequirements(AnalysisResultPtr ar,
                                          ClassScopePtr trait) {
   if (isTrait()) {
-    for (auto const& req : trait->getTraitRequiredExtends()) {
-      addTraitRequirement(req, true);
+    for (auto const& req : trait->getClassRequiredExtends()) {
+      addClassRequirement(req, true);
     }
-    for (auto const& req : trait->getTraitRequiredImplements()) {
-      addTraitRequirement(req, false);
+    for (auto const& req : trait->getClassRequiredImplements()) {
+      addClassRequirement(req, false);
     }
   } else {
-    for (auto const& req : trait->getTraitRequiredExtends()) {
+    for (auto const& req : trait->getClassRequiredExtends()) {
       if (!derivesFrom(ar, req, true, false)) {
         getStmt()->analysisTimeFatal(
           Compiler::InvalidDerivation,
@@ -572,7 +571,7 @@ void ClassScope::importTraitRequirements(AnalysisResultPtr ar,
         );
       }
     }
-    for (auto const& req : trait->getTraitRequiredImplements()) {
+    for (auto const& req : trait->getClassRequiredImplements()) {
       if (!derivesFrom(ar, req, true, false)) {
         getStmt()->analysisTimeFatal(
           Compiler::InvalidDerivation,
@@ -817,7 +816,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   }
 
   if (isTrait()) {
-    for (auto const& req : getTraitRequiredExtends()) {
+    for (auto const& req : getClassRequiredExtends()) {
       ClassScopePtr rCls = ar->findClass(req);
       if (!rCls || rCls->isFinal() || rCls->isInterface()) {
         getStmt()->analysisTimeFatal(
@@ -829,7 +828,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
         );
       }
     }
-    for (auto const& req : getTraitRequiredImplements()) {
+    for (auto const& req : getClassRequiredImplements()) {
       ClassScopePtr rCls = ar->findClass(req);
       if (!rCls || !(rCls->isInterface())) {
         getStmt()->analysisTimeFatal(
@@ -867,7 +866,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     // interfaces required by one trait may be implemented by another trait
     // whose "use" appears later in the class' scope
     ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
-    importTraitRequirements(ar, tCls);
+    importClassRequirements(ar, tCls);
   }
 
   // Apply rules

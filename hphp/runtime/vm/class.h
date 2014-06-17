@@ -242,12 +242,12 @@ struct PreClass : AtomicCountable {
     Attr         m_modifiers;
   };
 
-  struct TraitRequirement {
+  struct ClassRequirement {
    public:
     // Solely for SerDe
-    TraitRequirement(): m_word(0) {}
+    ClassRequirement(): m_word(0) {}
 
-    explicit TraitRequirement(const StringData* req, bool isExtends) {
+    explicit ClassRequirement(const StringData* req, bool isExtends) {
       m_word = pack(req, isExtends);
     }
 
@@ -285,7 +285,7 @@ struct PreClass : AtomicCountable {
 
   typedef FixedVector<LowStringPtr> InterfaceVec;
   typedef FixedVector<LowStringPtr> UsedTraitVec;
-  typedef FixedVector<TraitRequirement> TraitRequirementsVec;
+  typedef FixedVector<ClassRequirement> ClassRequirementsVec;
   typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
   typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
 
@@ -310,8 +310,8 @@ struct PreClass : AtomicCountable {
   Id id() const { return m_id; }
   const InterfaceVec& interfaces() const { return m_interfaces; }
   const UsedTraitVec& usedTraits() const { return m_usedTraits; }
-  const TraitRequirementsVec& traitRequirements() const {
-    return m_traitRequirements;
+  const ClassRequirementsVec& requirements() const {
+    return m_requirements;
   }
   const TraitPrecRuleVec& traitPrecRules() const { return m_traitPrecRules; }
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
@@ -413,7 +413,7 @@ private:
   BuiltinCtorFunction m_instanceCtor = nullptr;
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
-  TraitRequirementsVec m_traitRequirements;
+  ClassRequirementsVec m_requirements;
   TraitPrecRuleVec m_traitPrecRules;
   TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;

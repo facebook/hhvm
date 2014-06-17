@@ -306,14 +306,14 @@ public:
     }
   }
 
-  const boost::container::flat_set<std::string>& getTraitRequiredExtends()
+  const boost::container::flat_set<std::string>& getClassRequiredExtends()
     const {
-    return m_traitRequiredExtends;
+    return m_requiredExtends;
   }
 
-  const boost::container::flat_set<std::string>& getTraitRequiredImplements()
+  const boost::container::flat_set<std::string>& getClassRequiredImplements()
     const {
-    return m_traitRequiredImplements;
+    return m_requiredImplements;
   }
 
   const std::vector<std::string> &getUsedTraitNames() const {
@@ -327,7 +327,7 @@ public:
 
   void addTraitAlias(TraitAliasStatementPtr aliasStmt);
 
-  void addTraitRequirement(const std::string &requiredName, bool isExtends);
+  void addClassRequirement(const std::string &requiredName, bool isExtends);
 
   void importUsedTraits(AnalysisResultPtr ar);
 
@@ -405,8 +405,8 @@ private:
   UserAttributeMap m_userAttributes;
 
   std::vector<std::string> m_usedTraitNames;
-  boost::container::flat_set<std::string> m_traitRequiredExtends;
-  boost::container::flat_set<std::string> m_traitRequiredImplements;
+  boost::container::flat_set<std::string> m_requiredExtends;
+  boost::container::flat_set<std::string> m_requiredImplements;
   // m_traitAliases is used to support ReflectionClass::getTraitAliases
   std::vector<std::pair<std::string, std::string> > m_traitAliases;
 
@@ -479,7 +479,7 @@ private:
 
   void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
 
-  void importTraitRequirements(AnalysisResultPtr ar, ClassScopePtr trait);
+  void importClassRequirements(AnalysisResultPtr ar, ClassScopePtr trait);
 
   MethodStatementPtr findTraitMethod(AnalysisResultPtr ar,
                                      ClassScopePtr trait,

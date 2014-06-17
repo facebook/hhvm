@@ -1455,9 +1455,9 @@ class_statement:
   | T_XHP_CHILDREN
     xhp_children_stmt ';'              { xhp_children_stmt(_p,$$,$2);}
   | T_REQUIRE T_EXTENDS fully_qualified_class_name  ';'
-                                       { _p->onTraitRequire($$, $3, true); }
+                                       { _p->onClassRequire($$, $3, true); }
   | T_REQUIRE T_IMPLEMENTS fully_qualified_class_name ';'
-                                       { _p->onTraitRequire($$, $3, false); }
+                                       { _p->onClassRequire($$, $3, false); }
   | T_USE trait_list ';'               { Token t; t.reset();
                                          _p->onTraitUse($$,$2,t); }
   | T_USE trait_list '{'

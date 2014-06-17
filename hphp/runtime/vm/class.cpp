@@ -2270,7 +2270,6 @@ unsigned Class::loadUsedTraits(PreClass* preClass,
                   classPtr->name()->data());
     }
 
-
     if (RuntimeOption::RepoAuthoritative) {
       // In RepoAuthoritative mode (with the WholeProgram compiler
       // optimizations), the contents of traits are flattened away into the
@@ -2307,7 +2306,7 @@ void Class::checkTraitConstraints() const {
   }
 
   if (attrs() & AttrTrait) {
-    for (auto const& req : m_preClass->traitRequirements()) {
+    for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
       auto const reqCls = Unit::loadClass(reqName);
       if (!reqCls) {
@@ -2349,7 +2348,7 @@ void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
     auto const usedTrait = ut.get();
     auto const ptrait = usedTrait->preClass();
 
-    for (auto const& req : ptrait->traitRequirements()) {
+    for (auto const& req : ptrait->requirements()) {
       auto const reqName = req.name();
       if (req.is_extends()) {
         auto reqExtCls = Unit::lookupClass(reqName);

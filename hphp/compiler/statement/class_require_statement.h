@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRAIT_REQUIRE_STATEMENT_H_
-#define incl_HPHP_TRAIT_REQUIRE_STATEMENT_H_
+#ifndef incl_HPHP_CLASS_REQUIRE_STATEMENT_H_
+#define incl_HPHP_CLASS_REQUIRE_STATEMENT_H_
 
 #include "hphp/compiler/statement/statement.h"
 
@@ -24,11 +24,11 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(StatementList);
-DECLARE_BOOST_TYPES(TraitRequireStatement);
+DECLARE_BOOST_TYPES(ClassRequireStatement);
 
-class TraitRequireStatement : public Statement, public IParseHandler {
+class ClassRequireStatement : public Statement, public IParseHandler {
 public:
-  TraitRequireStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
+  ClassRequireStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                         const std::string &required,
                         bool isExtends);
 
@@ -46,4 +46,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_TRAIT_REQUIRE_STATEMENT_H_
+#endif // incl_HPHP_CLASS_REQUIRE_STATEMENT_H_

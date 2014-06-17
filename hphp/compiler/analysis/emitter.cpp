@@ -88,7 +88,7 @@
 #include "hphp/compiler/statement/unset_statement.h"
 #include "hphp/compiler/statement/while_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
-#include "hphp/compiler/statement/trait_require_statement.h"
+#include "hphp/compiler/statement/class_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
@@ -3450,7 +3450,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         return false;
       }
       case Statement::KindOfUseTraitStatement:
-      case Statement::KindOfTraitRequireStatement:
+      case Statement::KindOfClassRequireStatement:
       case Statement::KindOfTraitPrecStatement:
       case Statement::KindOfTraitAliasStatement: {
         not_implemented();
@@ -7423,8 +7423,8 @@ void EmitterVisitor::emitClass(Emitter& e,
     if (SystemLib::s_inited && !cNode->isSystem()) {
       if (nInterfaces > firstInterface
           || cNode->getUsedTraitNames().size()
-          || cNode->getTraitRequiredExtends().size()
-          || cNode->getTraitRequiredImplements().size()
+          || cNode->getClassRequiredExtends().size()
+          || cNode->getClassRequiredImplements().size()
          ) {
         hoistable = PreClass::Mergeable;
       } else if (firstInterface &&
@@ -7460,14 +7460,14 @@ void EmitterVisitor::emitClass(Emitter& e,
   for (size_t i = 0; i < usedTraits.size(); i++) {
     pce->addUsedTrait(makeStaticString(usedTraits[i]));
   }
-  if (cNode->isTrait()) {
-    for (auto& reqExtends : cNode->getTraitRequiredExtends()) {
-      pce->addTraitRequirement(
-        PreClass::TraitRequirement(makeStaticString(reqExtends), true));
+  if (cNode->isTrait() || cNode->isInterface()) {
+    for (auto& reqExtends : cNode->getClassRequiredExtends()) {
+      pce->addClassRequirement(
+        PreClass::ClassRequirement(makeStaticString(reqExtends), true));
     }
-    for (auto& reqImplements : cNode->getTraitRequiredImplements()) {
-      pce->addTraitRequirement(
-        PreClass::TraitRequirement(makeStaticString(reqImplements), false));
+    for (auto& reqImplements : cNode->getClassRequiredImplements()) {
+      pce->addClassRequirement(
+        PreClass::ClassRequirement(makeStaticString(reqImplements), false));
     }
   }
   auto const& userAttrs = cNode->userAttributes();

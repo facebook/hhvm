@@ -31,7 +31,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
-#include "hphp/compiler/statement/trait_require_statement.h"
+#include "hphp/compiler/statement/class_require_statement.h"
 #include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/option.h"
 #include <sstream>

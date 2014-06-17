@@ -8417,14 +8417,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1458 "hphp.y"
-    { _p->onTraitRequire((yyval), (yyvsp[(3) - (4)]), true); ;}
+    { _p->onClassRequire((yyval), (yyvsp[(3) - (4)]), true); ;}
     break;
 
   case 256:
 
 /* Line 1455 of yacc.c  */
 #line 1460 "hphp.y"
-    { _p->onTraitRequire((yyval), (yyvsp[(3) - (4)]), false); ;}
+    { _p->onClassRequire((yyval), (yyvsp[(3) - (4)]), false); ;}
     break;
 
   case 257:

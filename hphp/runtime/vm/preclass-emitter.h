@@ -162,16 +162,16 @@ class PreClassEmitter {
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode);
   void addUsedTrait(const StringData* traitName);
-  void addTraitRequirement(const PreClass::TraitRequirement req) {
-    m_traitRequirements.push_back(req);
+  void addClassRequirement(const PreClass::ClassRequirement req) {
+    m_requirements.push_back(req);
   }
   void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
   void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
   const std::vector<LowStringPtr>& usedTraits() const {
     return m_usedTraits;
   }
-  const std::vector<PreClass::TraitRequirement>& traitRequirements() const {
-    return m_traitRequirements;
+  const std::vector<PreClass::ClassRequirement>& requirements() const {
+    return m_requirements;
   }
   const std::vector<PreClass::TraitAliasRule>& traitAliasRules() const {
     return m_traitAliasRules;
@@ -224,7 +224,7 @@ class PreClassEmitter {
 
   std::vector<LowStringPtr> m_interfaces;
   std::vector<LowStringPtr> m_usedTraits;
-  std::vector<PreClass::TraitRequirement> m_traitRequirements;
+  std::vector<PreClass::ClassRequirement> m_requirements;
   std::vector<PreClass::TraitPrecRule> m_traitPrecRules;
   std::vector<PreClass::TraitAliasRule> m_traitAliasRules;
   UserAttributeMap m_userAttributes;

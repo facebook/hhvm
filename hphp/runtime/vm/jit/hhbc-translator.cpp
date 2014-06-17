@@ -3314,7 +3314,9 @@ void HhbcTranslator::emitNameA() {
 
 const StaticString
   s_count("count"),
-  s_ini_get("ini_get");
+  s_ini_get("ini_get"),
+  s_get_class("get_class"),
+  s_get_called_class("get_called_class");
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
@@ -3349,13 +3351,52 @@ SSATmp* HhbcTranslator::optimizedCallIniGet() {
   return cns(makeStaticString(value));
 }
 
+SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {
+  auto const curCls = curClass();
+  auto const curName = [&] {
+    return curCls != nullptr ? cns(curCls->name()) : nullptr;
+  };
+
+  if (numNonDefault == 0) return curName();
+
+  assert(numNonDefault == 1);
+
+  auto const val = topC(0);
+
+  if (val->isA(Type::Null)) return curName();
+
+  // get_class($this) is just get_called_class().
+  if (val->inst()->is(LdThis)) return optimizedCallGetCalledClass();
+
+  auto const ty = val->type();
+  if (!(ty < Type::Obj)) return nullptr;
+  if (auto const exact = ty.getExactClass()) return cns(exact->name());
+  return nullptr;
+}
+
+SSATmp* HhbcTranslator::optimizedCallGetCalledClass() {
+  if (!curClass()) return nullptr;
+
+  auto const ctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+  auto const cls = gen(LdClsCtx, ctx);
+  return gen(LdClsName, cls);
+}
+
 bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
                                            uint32_t numArgs,
                                            uint32_t numNonDefault) {
   SSATmp* res = nullptr;
   switch (numArgs) {
+    case 0:
+      if (func->name()->isame(s_get_called_class.get())) {
+        res = optimizedCallGetCalledClass();
+      }
+      break;
     case 1:
       if (func->name()->isame(s_ini_get.get())) res = optimizedCallIniGet();
+      else if (func->name()->isame(s_get_class.get())) {
+        res = optimizedCallGetClass(numNonDefault);
+      }
       break;
     case 2:
       if (func->name()->isame(s_count.get())) res = optimizedCallCount();

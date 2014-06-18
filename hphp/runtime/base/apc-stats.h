@@ -126,6 +126,13 @@ private:
  * to get basic info about APC.
  */
 struct APCStats {
+
+  static APCStats& getAPCStats() {
+    return *s_apcStats.get();
+  }
+
+  static void Create();
+
   APCStats();
   ~APCStats();
 
@@ -208,6 +215,19 @@ struct APCStats {
     }
   }
 
+  void addPendingDelete(size_t size) {
+    assert(size > 0);
+    m_pendingDeleteSize->addValue(size);
+  }
+
+  void removePendingDelete(size_t size) {
+    assert(size > 0);
+    m_pendingDeleteSize->addValue(-size);
+  }
+
+private:
+  static std::unique_ptr<APCStats> s_apcStats;
+
 private:
   /*
    * Memory size counters
@@ -223,6 +243,8 @@ private:
   // Size of primed data that is brought to life, that is, that goes
   // into memory
   ServiceData::ExportedTimeSeries* m_livePrimedSize;
+  // Size of the APC data pending deletes in the treadmill
+  ServiceData::ExportedTimeSeries* m_pendingDeleteSize;
 
   /*
    * Number of entry counters

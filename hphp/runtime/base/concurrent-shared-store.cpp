@@ -75,7 +75,7 @@ bool ConcurrentTableSharedStore::clear() {
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
     if (iter->second.inMem()) {
-      iter->second.var->unreferenceRoot();
+      iter->second.var->unreferenceRoot(iter->second.size);
     }
     free((void *)iter->first);
   }
@@ -107,13 +107,14 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key,
       return false;
     }
     if (acc->second.inMem()) {
-      m_apcStats.removeAPCValue(acc->second.size, acc->second.var,
-                                acc->second.expiry == 0, expired);
+      APCStats::getAPCStats().removeAPCValue(
+          acc->second.size, acc->second.var,
+          acc->second.expiry == 0, expired);
       if (expired && acc->second.expiry < oldestLive &&
           acc->second.var->getUncounted()) {
         APCTypedValue::fromHandle(acc->second.var)->deleteUncounted();
       } else {
-        acc->second.var->unreferenceRoot();
+        acc->second.var->unreferenceRoot(acc->second.size);
       }
     } else {
       assert(acc->second.inFile());
@@ -194,7 +195,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
     if (!m_vars.find(acc, tagStringData(key.get()))) {
       // There is a chance another thread deletes the key when this thread is
       // converting the object. In that case, we just bail
-      converted->unreferenceRoot();
+      converted->unreferenceRoot(size);
       return false;
     }
     // A write lock was acquired during find
@@ -204,13 +205,13 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
     // updated it already, check before updating
     if (sv == svar && !sv->getIsObj()) {
       sval->var = converted;
-      m_apcStats.updateAPCValue(converted, size, sv, sval->size,
-                                sval->expiry == 0, false);
+      APCStats::getAPCStats().updateAPCValue(
+          converted, size, sv, sval->size, sval->expiry == 0, false);
+      sv->unreferenceRoot(sval->size);
       sval->size = size;
-      sv->unreferenceRoot();
       return true;
     }
-    converted->unreferenceRoot();
+    converted->unreferenceRoot(size);
   }
   return false;
 }
@@ -229,7 +230,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     size_t size = 0;
     sval->var = APCHandle::Create(v, size, sval->isSerializedObj());
     sval->size = size;
-    m_apcStats.addAPCValue(sval->var, size, true);
+    APCStats::getAPCStats().addAPCValue(sval->var, size, true);
     return sval->var;
   } catch (Exception &e) {
     raise_notice("APC Primed fetch failed: key %s (%s).",
@@ -319,9 +320,9 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
         ret = get_int64_value(sval) + step;
         size_t size = 0;
         APCHandle *svar = construct(Variant(ret), size);
-        m_apcStats.updateAPCValue(svar, size, sval->var, sval->size,
-                                  sval->expiry == 0, false);
-        sval->var->unreferenceRoot();
+        APCStats::getAPCStats().updateAPCValue(
+            svar, size, sval->var, sval->size, sval->expiry == 0, false);
+        sval->var->unreferenceRoot(sval->size);
         sval->var = svar;
         sval->size = size;
         found = true;
@@ -344,9 +345,9 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
       if (!sval->expired() && get_int64_value(sval) == old) {
         size_t size = 0;
         APCHandle *var = construct(Variant(val), size);
-        m_apcStats.updateAPCValue(var, size, sval->var, sval->size,
-                                  sval->expiry == 0, false);
-        sval->var->unreferenceRoot();
+        APCStats::getAPCStats().updateAPCValue(
+            var, size, sval->var, sval->size, sval->expiry == 0, false);
+        sval->var->unreferenceRoot(sval->size);
         sval->var = var;
         sval->size = size;
         success = true;
@@ -422,11 +423,11 @@ bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
           sval->sSize = 0;
         }
       } else {
-        svar->unreferenceRoot();
+        svar->unreferenceRoot(size);
         return false;
       }
     } else {
-      m_apcStats.addKey(keyLen);
+      APCStats::getAPCStats().addKey(keyLen);
     }
     int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime || !limit_ttl);
     if (check_noTTL(key.data(), key.size())) {
@@ -434,15 +435,17 @@ bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
     }
     if (current) {
       if (sval->expiry == 0 && adjustedTtl != 0) {
-        m_apcStats.removeAPCValue(sval->size, current, true, sval->expired());
-        m_apcStats.addAPCValue(svar, size, false);
+        APCStats::getAPCStats().removeAPCValue(
+            sval->size, current, true, sval->expired());
+        APCStats::getAPCStats().addAPCValue(svar, size, false);
       } else {
-        m_apcStats.updateAPCValue(svar, size, current, sval->size,
-                                  sval->expiry == 0, sval->expired());
+        APCStats::getAPCStats().updateAPCValue(
+            svar, size, current, sval->size,
+            sval->expiry == 0, sval->expired());
       }
-      current->unreferenceRoot();
+      current->unreferenceRoot(sval->size);
     } else {
-      m_apcStats.addAPCValue(svar, size, present);
+      APCStats::getAPCStats().addAPCValue(svar, size, present);
     }
     sval->set(svar, adjustedTtl);
     sval->size = size;
@@ -467,16 +470,16 @@ void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
     auto keyLen = strlen(item.key);
     const char *copy = strdup(item.key);
     if (m_vars.insert(acc, copy)) {
-      m_apcStats.addPrimedKey(keyLen);
+      APCStats::getAPCStats().addPrimedKey(keyLen);
     }
     if (item.inMem()) {
-      m_apcStats.addAPCValue(item.value, item.sSize, true);
+      APCStats::getAPCStats().addAPCValue(item.value, item.sSize, true);
       acc->second.set(item.value, 0);
       acc->second.size = item.sSize;
     } else {
       acc->second.sAddr = item.sAddr;
       acc->second.sSize = item.sSize;
-      m_apcStats.addInFileValue(std::abs(acc->second.sSize));
+      APCStats::getAPCStats().addInFileValue(std::abs(acc->second.sSize));
     }
   }
 }
@@ -550,7 +553,7 @@ void ConcurrentTableSharedStore::primeDone() {
       auto handle = this->construct(1, size);
       acc->second.set(handle, 0);
       acc->second.size = size;
-      m_apcStats.addAPCValue(handle, size, true);
+      APCStats::getAPCStats().addAPCValue(handle, size, true);
     }
   }
 }

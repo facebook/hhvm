@@ -2722,34 +2722,40 @@ ExecutionContext::pushLocalsAndIterators(const Func* func,
   }
 }
 
-void ExecutionContext::enqueueAPCHandle(APCHandle* handle) {
-  assert(handle->getUncounted());
+void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
+  assert(handle->getUncounted() && size > 0);
   assert(handle->getType() == KindOfString ||
          handle->getType() == KindOfArray);
-  m_apcHandles.push_back(handle);
+  m_apcHandles.m_handles.push_back(handle);
+  m_apcHandles.m_memSize += size;
 }
 
 // Treadmill solution for the SharedVariant memory management
 namespace {
 class FreedAPCHandle {
+  size_t m_memSize;
   std::vector<APCHandle*> m_apcHandles;
 public:
-  explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles)
-    : m_apcHandles(std::move(shandles))
+  explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles, size_t size)
+    : m_memSize(size), m_apcHandles(std::move(shandles))
   {}
   void operator()() {
     for (auto handle : m_apcHandles) {
       APCTypedValue::fromHandle(handle)->deleteUncounted();
     }
+    APCStats::getAPCStats().removePendingDelete(m_memSize);
   }
 };
 }
 
 void ExecutionContext::manageAPCHandle() {
-  assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
-  if (m_apcHandles.size() > 0) {
-    Treadmill::enqueue(FreedAPCHandle(std::move(m_apcHandles)));
-    m_apcHandles.clear();
+  assert(apcExtension::UseUncounted || m_apcHandles.m_handles.size() == 0);
+  if (m_apcHandles.m_handles.size() > 0) {
+    Treadmill::enqueue(
+        FreedAPCHandle(std::move(m_apcHandles.m_handles),
+                       m_apcHandles.m_memSize));
+    APCStats::getAPCStats().addPendingDelete(m_apcHandles.m_memSize);
+    m_apcHandles.m_handles.clear();
   }
 }
 

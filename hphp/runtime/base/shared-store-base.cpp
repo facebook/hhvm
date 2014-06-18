@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/concurrent-shared-store.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/alloc.h"
@@ -52,6 +53,7 @@ SharedStores::SharedStores() {
 }
 
 void SharedStores::create() {
+  APCStats::Create();
   for (int i = 0; i < MAX_SHARED_STORE; i++) {
     switch (apcExtension::TableType) {
       case apcExtension::TableTypes::ConcurrentTable:

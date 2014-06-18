@@ -153,10 +153,17 @@ size_t getMemSize(const ArrayData* arr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::unique_ptr<APCStats> APCStats::s_apcStats = nullptr;
+
+void APCStats::Create() {
+  s_apcStats = folly::make_unique<APCStats>();
+}
+
 APCStats::APCStats() : m_valueSize(nullptr)
                      , m_keySize(nullptr)
                      , m_inFileSize(nullptr)
                      , m_livePrimedSize(nullptr)
+                     , m_pendingDeleteSize(nullptr)
                      , m_entries(nullptr)
                      , m_primedEntries(nullptr)
                      , m_livePrimedEntries(nullptr)
@@ -169,6 +176,8 @@ APCStats::APCStats() : m_valueSize(nullptr)
       "apc.in_file_size", {ServiceData::StatsType::SUM});
   m_livePrimedSize = ServiceData::createTimeseries(
       "apc.primed_live_size", {ServiceData::StatsType::SUM});
+  m_pendingDeleteSize = ServiceData::createTimeseries(
+      "apc.pending_delete_size", {ServiceData::StatsType::SUM});
 
   m_entries = ServiceData::createCounter("apc.entries");
   m_primedEntries = ServiceData::createCounter("apc.primed_entries");

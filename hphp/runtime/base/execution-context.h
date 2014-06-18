@@ -379,10 +379,13 @@ public:
   void requestExit();
 
   void pushLocalsAndIterators(const Func* f, int nparams = 0);
-  void enqueueAPCHandle(APCHandle* handle);
+  void enqueueAPCHandle(APCHandle* handle, size_t size);
 
 private:
-  std::vector<APCHandle*> m_apcHandles;
+  struct APCHandles {
+    size_t m_memSize = 0;
+    std::vector<APCHandle*> m_handles;
+  } m_apcHandles;
   void manageAPCHandle();
 
   enum class VectorLeaveCode {

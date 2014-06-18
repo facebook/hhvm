@@ -142,7 +142,14 @@ struct APCHandle {
     }
   }
 
-  void unreferenceRoot();
+  /*
+   * Remove the root reference that holds that handle alive.
+   * The handle may or may not be deleted immediately and it may be
+   * queued with the treadmill to wait for all live requests to be done.
+   * The argument 'size' is a hint and used for reporting purposes.
+   * It can be 0 though one should try hard to pass the correct info.
+   */
+  void unreferenceRoot(size_t size);
 
 
   //

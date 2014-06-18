@@ -1,0 +1,149 @@
+Warning: fopen() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: popen() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: file_put_contents() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: file() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: readfile() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: parse_ini_file() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: md5_file() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: sha1_file() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: fileperms() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: fileinode() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: filesize() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: fileowner() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: filegroup() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: fileatime() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: filemtime() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: filectime() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: filetype() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: linkinfo() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: is_writable() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: is_writeable() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: is_readable() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: is_executable() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: is_file() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: is_dir() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: is_link() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: file_exists() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: stat() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: lstat() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: realpath() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: disk_total_space() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: chmod() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: chown() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: lchown() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: chgrp() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: lchgrp() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: touch() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: copy() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: rename() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: unlink() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: link() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: symlink() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: tempnam() expects parameter 1 to be a valid path, string given in %s
+NULL
+
+Warning: mkdir() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: chdir() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: chroot() expects parameter 1 to be a valid path, string given in %s
+bool(false)
+
+Warning: scandir() expects parameter 1 to be a valid path, string given in %s
+NULL

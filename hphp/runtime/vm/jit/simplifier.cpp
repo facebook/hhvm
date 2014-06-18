@@ -427,6 +427,7 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case ConvCellToInt: return simplifyConvCellToInt(inst);
     case ConvCellToDbl: return simplifyConvCellToDbl(inst);
     case ConvObjToBool: return simplifyConvObjToBool(inst);
+    case ConvCellToObj: return simplifyConvCellToObj(inst);
     case Floor:         return simplifyFloor(inst);
     case Ceil:          return simplifyCeil(inst);
     case UnboxPtr:      return simplifyUnboxPtr(inst);
@@ -1685,6 +1686,12 @@ SSATmp* Simplifier::simplifyConvObjToBool(const IRInstruction* inst) {
   if (ty < Type::Obj && ty.getClass() && ty.getClass()->isCollectionClass()) {
     return gen(ColIsNEmpty, inst->src(0));
   }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvCellToObj(const IRInstruction* inst) {
+  if (inst->src(0)->isA(Type::Obj)) return inst->src(0);
+
   return nullptr;
 }
 

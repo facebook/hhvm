@@ -704,12 +704,13 @@ void HhbcTranslator::emitAddElemC() {
 
   // val is teleported from the stack to the array, so we don't have to do any
   // refcounting.
+  auto const catchBlock = makeCatch();
   auto const val = popC(DataTypeGeneric);
   auto const key = popC();
   auto const arr = popC();
   // The AddElem* instructions decref their args, so don't decref pop'ed
   // values.
-  push(gen(op, arr, key, val));
+  push(gen(op, catchBlock, arr, key, val));
 }
 
 void HhbcTranslator::emitAddNewElemC() {
@@ -717,10 +718,11 @@ void HhbcTranslator::emitAddNewElemC() {
     return emitInterpOne(Type::Arr, 2);
   }
 
+  auto const catchBlock = makeCatch();
   auto const val = popC();
   auto const arr = popC();
   // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
-  push(gen(AddNewElem, arr, val));
+  push(gen(AddNewElem, catchBlock, arr, val));
 }
 
 void HhbcTranslator::emitNewCol(int type, int size) {
@@ -4704,12 +4706,9 @@ void HhbcTranslator::emitCastInt() {
 }
 
 void HhbcTranslator::emitCastObject() {
+  auto catchBlock = makeCatch();
   SSATmp* src = popC();
-  if (src->isA(Type::Obj)) {
-    push(src);
-  } else {
-    push(gen(ConvCellToObj, src));
-  }
+  push(gen(ConvCellToObj, catchBlock, src));
 }
 
 void HhbcTranslator::emitCastString() {

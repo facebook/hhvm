@@ -997,18 +997,21 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 
   auto* taken = m_curInst->taken();
   if (taken && taken->isCatch()) {
-    always_assert(sync != SyncOptions::kNoSyncPoint);
-    always_assert_log(
+    always_assert_flog(
+      sync != SyncOptions::kNoSyncPoint,
+      "cgCallHelper called with kNoSyncPoint but inst has a catch block: {}\n",
+      *m_curInst
+    );
+    always_assert_flog(
       taken->catchMarker() == m_curInst->marker(),
-      [&] {
-        return folly::format("Catch trace doesn't match fixup:\n"
-                             "Instruction: {}\n"
-                             "Catch trace: {}\n"
-                             "Fixup      : {}\n",
-                             m_curInst->toString(),
-                             taken->catchMarker().show(),
-                             m_curInst->marker().show()).str();
-      });
+      "Catch trace doesn't match fixup:\n"
+      "Instruction: {}\n"
+      "Catch trace: {}\n"
+      "Fixup      : {}\n",
+      m_curInst->toString(),
+      taken->catchMarker().show(),
+      m_curInst->marker().show()
+    );
 
     auto& info = m_state.catches[taken];
     assert(!info.afterCall);

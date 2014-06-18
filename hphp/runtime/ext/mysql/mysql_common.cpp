@@ -1423,8 +1423,11 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
   }
   Logger::Verbose("runtime/ext_mysql: successfully executed [%dms] [%s]",
                   (int)timer.getTime(), query.data());
-
-  return MySQLQueryReturn::OK_FETCH_RESULT;
+  if (mysql_field_count(conn) == 0) {
+    return MySQLQueryReturn::OK;
+  } else {
+    return MySQLQueryReturn::OK_FETCH_RESULT;
+  }
 }
 
 Variant php_mysql_get_result(const Variant& link_id, bool use_store) {

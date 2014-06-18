@@ -6225,9 +6225,10 @@ SSATmp* HhbcTranslator::ldLocInner(uint32_t locId,
                                    Block* ldrefExit,
                                    Block* ldgblExit,
                                    TypeConstraint constraint) {
-  // We only care if the local is KindOfRef or not. DataTypeCountness
-  // gets us that.
-  auto loc = ldLoc(locId, ldgblExit, DataTypeCountness);
+  // We only care if the local is KindOfRef or not.
+  // We also care about "init"ness (for Isset), so we need to use
+  // DataTypeCountnessInit
+  auto loc = ldLoc(locId, ldgblExit, DataTypeCountnessInit);
   assert((loc->type().isBoxed() || loc->type().notBoxed()) &&
          "Currently we don't handle traces where locals are maybeBoxed");
 

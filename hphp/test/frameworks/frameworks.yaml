@@ -298,7 +298,7 @@
     # commit: 51f3f06f0fe78a722dabfd14578444bdd078d9de
     install_root: lessphp
     test_root: lessphp
-  mpagento2:
+  magento2:
     url: https://github.com/magento/magento2.git
     # Master is the only branch
     branch: master

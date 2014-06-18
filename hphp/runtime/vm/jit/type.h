@@ -885,7 +885,7 @@ struct TypeConstraint {
   TypeConstraint& setDesiredClass(const Class* cls) {
     assert(m_specialized == 0 ||
            desiredClass()->classof(cls) || cls->classof(desiredClass()));
-    assert(category == DataTypeSpecialized);
+    assert(category == DataTypeSpecialized || innerCat == DataTypeSpecialized);
     m_specialized = reinterpret_cast<uintptr_t>(cls);
     assert(wantClass());
     return *this;
@@ -898,6 +898,13 @@ struct TypeConstraint {
   const Class* desiredClass() const {
     assert(wantClass());
     return reinterpret_cast<const Class*>(m_specialized);
+  }
+
+  // Get the inner constraint, preserving m_specialized if appropriate.
+  TypeConstraint inner() const {
+    auto tc = TypeConstraint{innerCat}.setWeak(weak);
+    if (tc.category == DataTypeSpecialized) tc.m_specialized = m_specialized;
+    return tc;
   }
 
   // category starts as DataTypeGeneric and is refined to more specific values

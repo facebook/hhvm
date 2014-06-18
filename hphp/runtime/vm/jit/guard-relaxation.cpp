@@ -185,16 +185,43 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
   }
 }
 
-Type relaxInner(Type t, TypeConstraint tc) {
-  if (t.notBoxed()) return t;
+Type relaxOuter(Type t, TypeConstraint tc) {
+  assert(t.notBoxed());
 
-  auto cell = t & Type::Cell;
-  auto inner = (t & Type::BoxedCell).innerType();
-  auto innerCat = tc.innerCat;
+  switch (tc.category) {
+    case DataTypeGeneric:
+      return Type::Gen;
 
-  auto innerRelaxed = innerCat == DataTypeGeneric ? Type::Cell
-                                                  : relaxType(inner, innerCat);
-  return cell | (innerRelaxed - Type::Uninit).box();
+    case DataTypeCountness:
+      return t.notCounted() ? Type::Uncounted : t.unspecialize();
+
+    case DataTypeCountnessInit:
+      if (t <= Type::Uninit) return Type::Uninit;
+      return (t.notCounted() && t.not(Type::Uninit))
+        ? Type::UncountedInit : t.unspecialize();
+
+    case DataTypeSpecific:
+      return t.unspecialize();
+
+    case DataTypeSpecialized:
+      assert(tc.wantClass() ^ tc.wantArrayKind());
+
+      if (tc.wantClass()) {
+        // We could try to relax t's specialized class to tc.desiredClass() if
+        // they're related but not the same, but we only support guarding on
+        // final classes so the resulting guard would be bogus.
+      } else {
+        // t might have a RepoAuthType::Array that wasn't asked for in tc, but
+        // RATArrays always come from static analysis and never guards, so we
+        // don't need to eliminate it here. Just make sure t actually fits the
+        // constraint.
+        assert(t < Type::Arr && t.hasArrayKind());
+      }
+
+      return t;
+  }
+
+  not_reached();
 }
 }
 
@@ -341,7 +368,7 @@ static bool typeFitsOuterConstraint(Type t, TypeConstraint tc) {
  */
 static bool typeFitsInnerConstraint(Type t, TypeConstraint tc) {
   return tc.innerCat == DataTypeGeneric || t.notBoxed() ||
-    typeFitsOuterConstraint((t & Type::BoxedCell).innerType(), tc.innerCat);
+    typeFitsOuterConstraint((t & Type::BoxedCell).innerType(), tc.inner());
 }
 
 /*
@@ -360,43 +387,21 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
  * required by tc.
  */
 Type relaxType(Type t, TypeConstraint tc) {
-  always_assert(t <= Type::Gen);
+  always_assert(t <= Type::Gen && t != Type::Bottom);
+  if (tc.category == DataTypeGeneric) return Type::Gen;
 
-  switch (tc.category) {
-    case DataTypeGeneric:
-      return Type::Gen;
+  auto outerRelaxed = relaxOuter(t & Type::Cell, tc);
+  if (t.notBoxed()) return outerRelaxed;
 
-    case DataTypeCountness:
-      return t.notCounted() ? Type::Uncounted
-                            : relaxInner(t.unspecialize(), tc);
+  auto innerType = (t & Type::BoxedCell).innerType();
+  auto innerRelaxed = tc.innerCat == DataTypeGeneric ? Type::Cell
+                                                     : relaxOuter(innerType,
+                                                                  tc.inner());
 
-    case DataTypeCountnessInit:
-      if (t <= Type::Uninit) return Type::Uninit;
-      return (t.notCounted() && t.not(Type::Uninit))
-        ? Type::UncountedInit : relaxInner(t.unspecialize(), tc);
-
-    case DataTypeSpecific:
-      return relaxInner(t.unspecialize(), tc);
-
-    case DataTypeSpecialized:
-      assert(tc.wantClass() ^ tc.wantArrayKind());
-
-      if (tc.wantClass()) {
-        // We could try to relax t's specialized class to tc.desiredClass() if
-        // they're related but not the same, but we only support guarding on
-        // final classes so the resulting guard would be bogus.
-      } else {
-        // t might have a RepoAuthType::Array that wasn't asked for in tc, but
-        // RATArrays always come from static analysis and never guards, so we
-        // don't need to eliminate it here. Just make sure t actually fits the
-        // constraint.
-        assert(t < Type::Arr && t.hasArrayKind());
-      }
-
-      return relaxInner(t, tc);
-  }
-
-  not_reached();
+  // Only add outerRelax into the result type if t had a meaningful outer type
+  // coming in.
+  return (t.isBoxed() ? Type::Bottom : outerRelaxed) |
+    (innerRelaxed - Type::Uninit).box();
 }
 
 void incCategory(DataTypeCategory& c) {

@@ -1201,14 +1201,6 @@ bool IRBuilder::blockIsIncompatible(Offset offset) {
   auto it = m_offsetToBlockMap.find(offset);
   if (it == m_offsetToBlockMap.end()) return false;
   auto* block = it->second;
-  if (!block->empty() && block->back().isBlockEnd()) {
-    // If a block is generated before one of its predecessors, then
-    // we were conservative and cleared it's FrameState in the beginning.
-    // So it should be compatible with everything.
-    assert(RuntimeOption::EvalJitLoops);
-    return false;
-  }
-  if (!block->empty()) return true;
   return !m_state.compatible(block);
 }
 

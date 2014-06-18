@@ -462,7 +462,7 @@ String f_implode(const Variant& arg1, const Variant& arg2 /* = null_variant */) 
     items = arg2;
     delim = arg1.toString();
   } else {
-    throw_bad_type_exception("expected a container as one of the arguments");
+    throw_bad_type_exception("implode() expected a container as one of the arguments");
     return String();
   }
   return StringUtil::Implode(items, delim);

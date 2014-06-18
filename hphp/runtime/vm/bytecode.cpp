@@ -2898,14 +2898,17 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     // recent FP must be used. This can happen if we are trying to debug
     // an eval() call or a call issued by debugger itself.
     auto savedFP = vmfp();
-    vmfp() = fp->m_varEnv->getFP();
+    if (fp) {
+      vmfp() = fp->m_varEnv->getFP();
+    }
     SCOPE_EXIT { vmfp() = savedFP; };
 
     // Invoke the given PHP, possibly specialized to match the type of the
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
     invokeFunc(retval, unit->getMain(functionClass), init_null_variant,
-               this_, frameClass, fp->m_varEnv, nullptr, InvokePseudoMain);
+               this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
+               InvokePseudoMain);
     failed = false;
   } catch (FatalErrorException &e) {
     g_context->write(s_fatal);

@@ -696,8 +696,6 @@ int64_t MySQLResult::getRowCount() const {
 
 bool MySQLResult::seekRow(int64_t row) {
   if (row < 0 || row >= getRowCount()) {
-    raise_warning("Unable to jump to row %" PRId64 " on MySQL result index %d",
-                    row, o_getId());
     return false;
   }
 

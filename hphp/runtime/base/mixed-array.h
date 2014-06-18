@@ -518,13 +518,8 @@ private:
     };
     uint64_t m_capAndUsed;
   };
-  union {
-    struct {
-      uint32_t m_tableMask; // Bitmask used when indexing into the hash table.
-      uint32_t m_hLoad;     // Hash table load (# of non-empty slots).
-    };
-    uint64_t m_maskAndLoad;
-  };
+  uint32_t m_tableMask;     // Bitmask used when indexing into the hash table.
+  UNUSED uint32_t m_unused2;
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 

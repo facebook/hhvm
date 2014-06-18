@@ -57,7 +57,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
   ad->m_posAndCount = uint64_t{1} << 32 |
                         static_cast<uint32_t>(ArrayData::invalid_index);
   ad->m_capAndUsed  = cap;
-  ad->m_maskAndLoad = mask;
+  ad->m_tableMask   = mask;
   ad->m_nextKI      = 0;
 
   auto const data = reinterpret_cast<Elm*>(ad + 1);
@@ -71,7 +71,6 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
   assert(ad->m_cap == cap);
   assert(ad->m_used == 0);
   assert(ad->m_nextKI == 0);
-  assert(ad->m_hLoad == 0);
   assert(ad->m_tableMask == mask);
   assert(ad->checkInvariants());
   return ad;
@@ -173,7 +172,6 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
     auto ei = ad->findForNewInsert(h);
     *ei = i;
   }
-  ad->m_hLoad = size;
 
   assert(ad->m_kind == kMixedKind);
   assert(ad->m_size == size);
@@ -203,7 +201,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kMixedKind << 24;
   ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
-  ad->m_maskAndLoad     = uint64_t{other.m_hLoad} << 32 | mask;
+  ad->m_tableMask       = mask;
   ad->m_nextKI          = other.m_nextKI;
 
   auto const data      = reinterpret_cast<Elm*>(ad + 1);
@@ -224,6 +222,10 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     }
   }
 
+  // We need to assert this up here before we possibly call compact (which
+  // will cause m_used to change)
+  assert(ad->m_used == other.m_used);
+
   // If the element density dropped below 50% due to indirect elements
   // being converted into tombstones, we should do a compaction
   if (ad->m_size < ad->m_used / 2) {
@@ -234,10 +236,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(ad->m_count == 0);
-  assert(ad->m_used == other.m_used);
   assert(ad->m_cap == cap);
   assert(ad->m_tableMask == mask);
-  assert(ad->m_hLoad == other.m_hLoad);
   assert(ad->checkInvariants());
   return ad;
 }
@@ -540,12 +540,10 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  *   m_nextKI >= highest actual int key
  *   Elm.data.m_type maybe KindOfInvalid (tombstone)
  *   hash[] maybe Tombstone
- *   m_hLoad >= m_size, == number of non-Empty hash entries
  *
  * kPackedKind:
  *   m_size == m_used
  *   m_nextKI = uninitialized
- *   m_hLoad = uninitialized
  *   Elm.key uninitialized
  *   Elm.hash uninitialized
  *   no KindOfInvalid tombstones
@@ -573,41 +571,6 @@ bool MixedArray::checkInvariants() const {
   if (m_pos != invalid_index) {
     assert(size_t(m_pos) < m_used);
     assert(!isTombstone(data()[m_pos].data.m_type));
-  }
-  if (m_used > 0) {
-    // can't have a tombstone at the end; m_used should have been trimmed.
-    assert(!isTombstone(data()[m_used - 1].data.m_type));
-  }
-
-  // Type specific:
-  switch (m_kind) {
-  case kPackedKind:
-    assert(m_size == m_used);
-    // The following loop is for debugging arrays only; it slows
-    // things down too much for general use
-    if (false) {
-      for (auto i = size_t{0}; i < m_size; ++i) {
-        assert(data()[i].data.m_type != KindOfUninit);
-        assert(tvIsPlausible(data()[i].data));
-      }
-    }
-    break;
-  case kMixedKind: {
-    assert(m_hLoad >= m_size);
-    size_t load = 0;
-    // The following loop is for debugging arrays only; it slows
-    // things down too much for general use
-    if (false) {
-      for (size_t i = 0; i <= m_tableMask; i++) {
-        load += hashTab()[i] != Empty;
-      }
-      assert(m_hLoad == load);
-    }
-    break;
-  }
-  default:
-    assert(false);
-    break;
   }
 
   return true;
@@ -776,7 +739,6 @@ template <class Hit> ALWAYS_INLINE
 int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
-  assert(m_hLoad <= computeMaxElms(m_tableMask));
   size_t tableMask = m_tableMask;
   auto* elms = data();
   auto* hashtable = hashTab();
@@ -839,7 +801,6 @@ MixedArray::InsertPos MixedArray::insert(StringData* k) {
 
 template <class Hit, class Remove> ALWAYS_INLINE
 ssize_t MixedArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
-  assert(m_hLoad <= computeMaxElms(m_tableMask));
   size_t mask = m_tableMask;
   auto* elms = data();
   auto* hashtable = hashTab();
@@ -1000,7 +961,6 @@ ALWAYS_INLINE MixedArray* MixedArray::resizeIfNeeded() {
 NEVER_INLINE MixedArray* MixedArray::resize() {
   uint32_t maxElms = computeMaxElms(m_tableMask);
   assert(m_used <= maxElms);
-  assert(m_hLoad <= maxElms);
   // At a minimum, compaction is required.  If the load factor would be >0.5
   // even after compaction, grow instead, in order to avoid the possibility
   // of repeated compaction if the load factor were to hover at nearly 0.75.
@@ -1044,7 +1004,7 @@ MixedArray* MixedArray::Grow(MixedArray* old) {
   ad->m_kindAndSize     = uint64_t{oldSize} << 32 | kMixedKind << 24;
   ad->m_posAndCount     = oldPosUnsigned;
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
-  ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
+  ad->m_tableMask       = mask;
   ad->m_nextKI          = old->m_nextKI;
   auto table            = reinterpret_cast<int32_t*>(ad->data() + cap);
 
@@ -1078,7 +1038,6 @@ MixedArray* MixedArray::Grow(MixedArray* old) {
   assert(ad->m_pos == oldPos);
   assert(ad->m_used == oldUsed);
   assert(ad->m_tableMask == mask);
-  assert(ad->m_hLoad == oldSize);
   assert(ad->checkInvariants());
   return ad;
 }
@@ -1135,7 +1094,6 @@ void MixedArray::compact(bool renumber /* = false */) {
   size_t tableSize = mask + 1;
   auto table = hashTab();
   initHash(table, tableSize);
-  m_hLoad = 0;
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
     while (isTombstone(elms[frPos].data.m_type)) {
       assert(frPos + 1 < m_used);
@@ -1153,7 +1111,6 @@ void MixedArray::compact(bool renumber /* = false */) {
     *ie = toPos;
   }
   m_used = m_size;
-  m_hLoad = m_size;
   if (m_pos != invalid_index) {
     // Update m_pos, now that compaction is complete.
     if (mPos.hash) {
@@ -1423,15 +1380,8 @@ void MixedArray::erase(ssize_t pos) {
   uint64_t oldDatum = tv->m_data.num;
   tv->m_type = KindOfInvalid;
   --m_size;
-  // If this element was last, adjust m_used.
-  if (size_t(pos + 1) == m_used) {
-    do {
-      --m_used;
-    } while (m_used > 0 && isTombstone(elms[m_used - 1].data.m_type));
-  }
   // Mark the hash entry as "deleted".
   assert(m_used <= m_cap);
-  assert(m_hLoad <= m_cap);
 
   // Finally, decref the old value
   tvRefcountedDecRefHelper(oldType, oldDatum);
@@ -1557,7 +1507,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   ad->m_kindAndSize     = uint64_t{oldSize} << 32 | kMixedKind << 24;
   ad->m_posAndCount     = uint64_t{1} << 32 | oldPosUnsigned;
   ad->m_cap             = cap;
-  ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
+  ad->m_tableMask       = mask;
   ad->m_nextKI          = oldNextKI;
 
   auto const data  = ad->data();
@@ -1619,7 +1569,6 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   assert(ad->m_cap == cap);
   assert(ad->m_used <= oldUsed);
   assert(ad->m_used == dstElm - data);
-  assert(ad->m_hLoad == oldSize);
   assert(ad->m_tableMask == mask);
   assert(ad->m_nextKI == oldNextKI);
   assert(ad->checkInvariants());

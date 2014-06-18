@@ -45,8 +45,7 @@ ALWAYS_INLINE
 bool MixedArray::isFull() const {
   assert(!isPacked());
   assert(m_used <= m_cap);
-  assert(m_hLoad <= m_cap);
-  return m_used == m_cap || m_hLoad == m_cap;
+  return m_used == m_cap;
 }
 
 inline void MixedArray::initHash(int32_t* hash, size_t tableSize) {
@@ -146,9 +145,8 @@ void MixedArray::dupArrayElmWithRef(ssize_t pos,
 ALWAYS_INLINE
 MixedArray::Elm& MixedArray::allocElm(int32_t* ei) {
   assert(!validPos(*ei) && !isFull());
-  assert(m_size != 0 || m_used == 0);
+  assert(m_size == 0 || m_used != 0);
   ++m_size;
-  m_hLoad += (*ei == Empty);
   size_t i = m_used;
   (*ei) = i;
   m_used = i + 1;

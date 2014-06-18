@@ -486,7 +486,7 @@ public:
   void setPrevOpcode(Op op) { m_prevOpcode = op; }
   Op getPrevOpcode() const { return m_prevOpcode; }
   bool currentPositionIsReachable() {
-    return (m_ue.bcPos() == m_curFunc->base()
+    return (m_ue.bcPos() == m_curFunc->base
             || isJumpTarget(m_ue.bcPos())
             || (instrFlags(getPrevOpcode()) & TF) == 0);
   }

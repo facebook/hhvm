@@ -87,12 +87,12 @@ void PreClassEmitter::addInterface(const StringData* n) {
 }
 
 bool PreClassEmitter::addMethod(FuncEmitter* method) {
-  MethodMap::const_iterator it = m_methodMap.find(method->name());
+  MethodMap::const_iterator it = m_methodMap.find(method->name);
   if (it != m_methodMap.end()) {
     return false;
   }
   m_methods.push_back(method);
-  m_methodMap[method->name()] = method;
+  m_methodMap[method->name] = method;
   return true;
 }
 

@@ -223,11 +223,11 @@ class FuncFinisher {
  public:
   FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe)
     : m_ev(ev), m_e(e), m_fe(fe) {
-      TRACE(2, "FuncFinisher constructed: %s\n", m_fe->name()->data());
+      TRACE(2, "FuncFinisher constructed: %s\n", m_fe->name->data());
     }
 
   ~FuncFinisher() {
-    TRACE(2, "Finishing func: %s\n", m_fe->name()->data());
+    TRACE(2, "Finishing func: %s\n", m_fe->name->data());
     m_ev->finishFunc(m_e, m_fe);
   }
 };
@@ -2196,7 +2196,7 @@ void EmitterVisitor::restoreJumpTargetEvalStack() {
 }
 
 void EmitterVisitor::recordCall() {
-  m_curFunc->setContainsCalls();
+  m_curFunc->containsCalls = true;
 }
 
 bool EmitterVisitor::isJumpTarget(Offset target) {
@@ -3085,10 +3085,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         assert(m_evalStack.size() == 1);
-        bool hasConstraint = m_curFunc->returnTypeConstraint().hasConstraint();
+        bool hasConstraint = m_curFunc->retTypeConstraint.hasConstraint();
 
         // async functions and generators
-        if (m_curFunc->isAsync() || m_curFunc->isGenerator()) {
+        if (m_curFunc->isAsync || m_curFunc->isGenerator) {
           assert(retSym == StackSym::C);
           hasConstraint = false;
         }
@@ -3120,7 +3120,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             AnalysisResultPtr ar(new AnalysisResult());
             value->outputPHP(cg, ar);
             svInfo.phpCode = makeStaticString(os.str());
-            m_curFunc->addStaticVar(svInfo);
+            m_curFunc->staticVars.push_back(svInfo);
           }
 
           if (value->isScalar()) {
@@ -4802,7 +4802,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // code that pulls the object's instance variables into locals.
         static const StringData* invokeName = makeStaticString("__invoke");
         FuncEmitter* invoke = m_ue.newMethodEmitter(invokeName, pce);
-        invoke->setIsClosureBody(true);
+        invoke->isClosureBody = true;
         pce->addMethod(invoke);
         MethodStatementPtr body(
           static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
@@ -4819,7 +4819,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // evaluate key passed to yield, if applicable
         ExpressionPtr keyExp = y->getKeyExpression();
         if (keyExp) {
-          m_curFunc->setIsPairGenerator(true);
+          m_curFunc->isPairGenerator = true;
           visit(keyExp);
           emitConvertToCell(e);
         }
@@ -6220,15 +6220,15 @@ const StaticString
   s_ParamCoerceModeFalse("__ParamCoerceModeFalse");
 
 static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
-  if (fe->hasUserAttribute(s_HipHopSpecific.get())) {
+  if (fe->userAttributes.count(s_HipHopSpecific.get())) {
     attrs = attrs | AttrHPHPSpecific;
   }
-  if (fe->hasUserAttribute(s_IsFoldable.get())) {
+  if (fe->userAttributes.count(s_IsFoldable.get())) {
     attrs = attrs | AttrIsFoldable;
   }
-  if (fe->hasUserAttribute(s_ParamCoerceModeNull.get())) {
+  if (fe->userAttributes.count(s_ParamCoerceModeNull.get())) {
     attrs = attrs | AttrParamCoerceModeNull;
-  } else if (fe->hasUserAttribute(s_ParamCoerceModeFalse.get())) {
+  } else if (fe->userAttributes.count(s_ParamCoerceModeFalse.get())) {
     attrs = attrs | AttrParamCoerceModeFalse;
   }
 }
@@ -6279,7 +6279,7 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
 
   // For closures, the MethodStatement didn't have real attributes; enforce
   // that the __invoke method is public here
-  if (fe->isClosureBody()) {
+  if (fe->isClosureBody) {
     assert(!(attrs & (AttrProtected | AttrPrivate)));
     attrs = attrs | AttrPublic;
   }
@@ -6387,13 +6387,13 @@ void EmitterVisitor::emitPostponedMeths() {
     if (funcScope->isGenerator()) {
       // emit the generator
       m_curFunc = fe;
-      fe->setIsGenerator(true);
+      fe->isGenerator = true;
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitMethod(meth);
     } else if (funcScope->isAsync()) {
       // emit the outer function (which creates wait handle if blocked)
       m_curFunc = fe;
-      fe->setIsAsync(true);
+      fe->isAsync = true;
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitMethod(meth);
     } else {
@@ -6406,10 +6406,10 @@ void EmitterVisitor::emitPostponedMeths() {
       }
     }
 
-    if (fe->isClosureBody()) {
+    if (fe->isClosureBody) {
       TypedValue uninit;
       tvWriteUninit(&uninit);
-      for (auto& sv : m_curFunc->svInfo()) {
+      for (auto& sv : m_curFunc->staticVars) {
         auto const str = makeStaticString(
           folly::format("86static_{}", sv.name->data()).str());
         fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
@@ -6441,7 +6441,7 @@ void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
     assert(uaValue->isScalar());
     TypedValue tv;
     initScalar(tv, uaValue);
-    fe->addUserAttribute(uaName, tv);
+    fe->userAttributes[uaName] = tv;
   }
 }
 
@@ -6490,10 +6490,11 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   const Location* sLoc = meth->getLocation().get();
   fe->setLocation(sLoc->line0, sLoc->line1);
-  fe->setDocComment(
-    Option::GenerateDocComments ? meth->getDocComment().c_str() : "");
-  fe->setReturnType(meth->retTypeAnnotation()->dataType());
-  fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
+  fe->docComment = makeStaticString(
+    Option::GenerateDocComments ? meth->getDocComment().c_str() : ""
+  );
+  fe->returnType = meth->retTypeAnnotation()->dataType();
+  fe->retUserType = makeStaticString(meth->getReturnTypeConstraint());
 
   FunctionScopePtr funcScope = meth->getFunctionScope();
   const char *funcname  = funcScope->getName().c_str();
@@ -6545,7 +6546,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   }
 
   // assign ids to 0Closure and use parameters (closures)
-  if (fe->isClosureBody()) {
+  if (fe->isClosureBody) {
     fe->allocVarId(makeStaticString("0Closure"));
 
     for (auto& useVar : *useVars) {
@@ -6561,21 +6562,20 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
                         meth->getFunctionScope()->isParamCoerceMode());
 
   // copy declared return type (hack)
-  fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
+  fe->retUserType = makeStaticString(meth->getReturnTypeConstraint());
 
   auto annot = meth->retTypeAnnotation();
   // Ideally we should handle the void case in TypeConstraint::check. This
   // should however get done in a different diff, since it could impact
   // perf in a negative way (#3145038)
   if (annot && !annot->isVoid() && !annot->isThis()) {
-    fe->setReturnTypeConstraint(
-      determine_type_constraint_from_annot(annot, true));
+    fe->retTypeConstraint = determine_type_constraint_from_annot(annot, true);
   }
 
   // add the original filename for flattened traits
   auto const originalFilename = meth->getOriginalFilename();
   if (!originalFilename.empty()) {
-    fe->setOriginalFilename(makeStaticString(originalFilename));
+    fe->originalFilename = makeStaticString(originalFilename);
   }
 
   const Location* sLoc = meth->getLocation().get();
@@ -6665,7 +6665,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
       }
     }
 
-    pi.setRef(par->isRef());
+    pi.byRef = par->isRef();
     pi.variadic = par->isVariadic();
     fe->appendParam(parName, pi);
   }
@@ -6675,14 +6675,14 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   FunctionScopePtr funcScope = meth->getFunctionScope();
 
   if (funcScope->needsLocalThis() && !funcScope->isStatic()) {
-    assert(!m_curFunc->top());
+    assert(!m_curFunc->top);
     static const StringData* thisStr = makeStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
     emitVirtualLocal(thisId);
     e.InitThisLoc(thisId);
   }
-  for (uint i = 0; i < m_curFunc->params().size(); i++) {
-    const TypeConstraint& tc = m_curFunc->params()[i].typeConstraint;
+  for (uint i = 0; i < m_curFunc->params.size(); i++) {
+    const TypeConstraint& tc = m_curFunc->params[i].typeConstraint;
     if (!tc.hasConstraint()) continue;
     emitVirtualLocal(i);
     e.VerifyParamType(i);
@@ -6705,7 +6705,7 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   emitMethodPrologue(e, meth);
 
   // emit code to create generator object
-  if (m_curFunc->isGenerator()) {
+  if (m_curFunc->isGenerator) {
     e.CreateCont();
     e.PopC();
   }
@@ -6746,7 +6746,7 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
       emitCGet(e);
       emitSet(e);
       e.PopC();
-      m_curFunc->setParamFuncletOff(i, entryPoint.getAbsoluteOffset());
+      m_curFunc->params[i].funcletOff = entryPoint.getAbsoluteOffset();
     }
   }
   if (hasOptional) e.JmpNS(topOfBody);
@@ -8033,10 +8033,10 @@ void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {
 }
 
 void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe) {
-  fe->setMaxStackCells(m_actualStackHighWater +
-                       fe->numIterators() * kNumIterCells +
-                       fe->numLocals() +
-                       m_fdescHighWater);
+  fe->maxStackCells = m_actualStackHighWater +
+                      fe->numIterators() * kNumIterCells +
+                      fe->numLocals() +
+                      m_fdescHighWater;
   m_actualStackHighWater = 0;
   m_fdescHighWater = 0;
 }
@@ -8257,7 +8257,7 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   fe->init(0, 0, ue->bcPos(), attrs, true, staticEmptyString());
   ue->emitOp(OpNull);
   ue->emitOp(OpRetC);
-  fe->setMaxStackCells(1);
+  fe->maxStackCells = 1;
   fe->finish(ue->bcPos(), false);
   ue->recordFunction(fe);
 
@@ -8286,8 +8286,8 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     fe->setBuiltinFunc(mi, bif, nif, base);
     ue->emitOp(OpNativeImpl);
     assert(!fe->numIterators());
-    fe->setMaxStackCells(fe->numLocals());
-    fe->setAttrs(fe->attrs() | attrs);
+    fe->maxStackCells = fe->numLocals();
+    fe->attrs |= attrs;
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);
   }
@@ -8321,7 +8321,7 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
       // We always want these methods to be cloned with new funcids in
       // subclasses so we can burn Class*s and Func*s into the
       // translations
-      fe->setAttrs(Attr(fe->attrs() | AttrClone));
+      fe->attrs |= AttrClone;
 
       // check generator status; send()/raise() also checks started
       ue.emitOp(OpContCheck);
@@ -8510,7 +8510,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       }
       Offset past = ue->bcPos();
       assert(!fe->numIterators());
-      fe->setMaxStackCells(fe->numLocals() + stackPad);
+      fe->maxStackCells = fe->numLocals() + stackPad;
       fe->finish(past, false);
       ue->recordFunction(fe);
     }
@@ -8523,7 +8523,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                false, staticEmptyString());
       ue->emitOp(OpNull);
       ue->emitOp(OpRetC);
-      fe->setMaxStackCells(1);
+      fe->maxStackCells = 1;
       fe->finish(ue->bcPos(), false);
       ue->recordFunction(fe);
     }

@@ -36,21 +36,17 @@ let init_hack genv env get_next =
   let errorl3, failed3 = Typing_decl_service.go genv.workers nenv fast in
   let errorl4, failed4 = Typing_check_service.go genv.workers fast in
 
-  let failed =
-    List.fold_right
-      SSet.union [failed1; failed2; failed3; failed4] SSet.empty in
   let env = { env with files_info = files_info; nenv = nenv } in
 
   SharedMem.init_done();
 
   let errorl = List.fold_right List.rev_append
       [errorl1; errorl2; errorl3; errorl4] [] in
-  env, errorl, failed
+  env, errorl
 
 (* entry point *)
 let init genv env next_files =
-  let env, errorl, failed = init_hack genv env next_files in
-  let env = { env with errorl = errorl;
-              failed_parsing = failed } in
+  let env, errorl = init_hack genv env next_files in
+  let env = { env with errorl = errorl } in
   ServerError.print_errorl (ServerArgs.json_mode genv.options) env.errorl stdout;
   env

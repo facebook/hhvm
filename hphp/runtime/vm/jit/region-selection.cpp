@@ -709,6 +709,14 @@ std::string show(RegionDesc::TypePred ta) {
   ).str();
 }
 
+std::string show(const PostConditions& pconds) {
+  std::string ret;
+  for (const auto& postCond : pconds) {
+    folly::toAppend("  postcondition: ", show(postCond), "\n", &ret);
+  }
+  return ret;
+}
+
 std::string show(const RegionDesc::ReffinessPred& pred) {
   std::ostringstream out;
   out << "offset: " << pred.arSpOffset << " mask: ";
@@ -813,9 +821,7 @@ std::string show(const RegionDesc::Block& b) {
     skIter.advance(b.unit());
   }
 
-  for (const auto& postCond : b.postConds()) {
-    folly::toAppend("  postcondition: ", show(postCond), "\n", &ret);
-  }
+  folly::toAppend(show(b.postConds()), &ret);
 
   return ret;
 }

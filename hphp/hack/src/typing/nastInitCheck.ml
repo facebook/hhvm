@@ -38,43 +38,6 @@ type cvar_status =
 
 let parent_init_cvar = "parent::__construct"
 
-module Error = struct
-
-  let read_before_write (p, v) =
-    Errors.add p (
-    sl[
-    "Read access to $this->"; v; " before initialization"
-  ])
-
-  let no_construct_parent p =
-    Errors.add p (sl[
-    "You are extending a class that needs to be initialized\n";
-    "Make sure you call parent::__construct.\n"
-    ])
-
-  let not_initialized (p, c) =
-    if c = parent_init_cvar then no_construct_parent p else
-    Errors.add p (sl[
-    "The class member "; c;" is not always properly initialized\n";
-    "Make sure you systematically set $this->"; c;
-    " when the method __construct is called\n";
-    "Alternatively, you can define the type as optional (?...)\n"
-    ])
-
-  let call_before_init p cv =
-    Errors.add p (
-    sl([
-       "Until the initialization of $this is over,";
-       " you can only call private methods\n";
-        "The initialization is not over because ";
-     ] @
-       if cv = parent_init_cvar
-       then ["you forgot to call parent::__construct"]
-       else ["$this->"; cv; " can still potentially be null"])
-   )
-
-end
-
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
    Vok  ==> when it is declared as optional, it is the job of the
@@ -216,12 +179,12 @@ and class_ tenv c =
         let needs_parent_call = SSet.mem parent_init_cvar env.cvars in
         let is_calling_parent = SSet.mem parent_init_cvar inits in
         if has_constructor && needs_parent_call && not is_calling_parent
-        then Error.not_initialized (p, parent_init_cvar);
+        then Errors.not_initialized (p, parent_init_cvar);
       end
       else begin
         SSet.iter begin fun x ->
           if not (SSet.mem x inits)
-          then Error.not_initialized (p, x);
+          then Errors.not_initialized (p, x);
         end env.cvars
       end
   end
@@ -325,7 +288,7 @@ and are_all_init env set =
 and check_all_init p env acc =
   SSet.iter begin fun cv ->
     if not (SSet.mem cv acc)
-    then Error.call_before_init p cv
+    then Errors.call_before_init p cv
   end env.cvars
 
 and exprl env acc l = List.fold_left (expr env) acc l
@@ -350,7 +313,7 @@ and expr_ env acc p e =
   | Lvar _ -> acc
   | Obj_get ((_, This), (_, Id (_, vx as v))) ->
       if SSet.mem vx env.cvars && not (SSet.mem vx acc)
-      then (Error.read_before_write v; acc)
+      then (Errors.read_before_write v; acc)
       else acc
   | Clone e -> expr acc e
   | Obj_get (e1, e2) ->

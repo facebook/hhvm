@@ -49,8 +49,8 @@ let die() =
 
 let list_files env oc =
   let acc = List.fold_right begin
-    fun p acc ->
-      let pos, _ = List.hd p in
+    fun error acc ->
+      let pos = Errors.get_pos error in
       SSet.add pos.Pos.pos_file acc
   end env.errorl SSet.empty in
   SSet.iter (fun (s) -> Printf.fprintf oc "%s\n" s) acc;

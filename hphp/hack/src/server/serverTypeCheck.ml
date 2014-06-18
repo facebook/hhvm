@@ -276,9 +276,7 @@ let type_check genv env =
   let failed = SSet.union failed_check failed in
 
   let old_errors = List.filter begin fun err ->
-    match err with
-    | [] -> assert false
-    | (pos, _) :: _ ->
+      let pos = Errors.get_pos err in
       let filename = Pos.filename pos in
       not (SSet.mem filename failed) && not (SMap.mem filename fast)
   end env.errorl in

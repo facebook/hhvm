@@ -35,7 +35,7 @@ let rec expand_typedef_ seen env r x argl =
   then begin
     let n = List.length tparaml in
     let n = string_of_int n in
-    Errors.add pos ("The type "^x^" expects "^n^" parameters");
+    Errors.type_param_arity pos x n
   end;
   let subst = ref SMap.empty in
   Utils.iter2_shortest begin fun ((_, param), _) ty ->
@@ -57,12 +57,12 @@ let rec expand_typedef_ seen env r x argl =
       env, (r, Tabstract ((pos, x), argl, tcstr))
     end
   in
-  Errors.try_
+  Errors.try_with_error
     (fun () ->
       check_typedef seen env expanded_ty;
       env, (r, snd expanded_ty)
     )
-    (fun l -> Errors.add_list l; env, (r, Tany))
+    (fun () -> env, (r, Tany))
 
 and check_typedef seen env (r, t) =
   match t with
@@ -89,7 +89,7 @@ and check_typedef seen env (r, t) =
       check_fun_typedef seen env fty
   | Tapply ((p, x), argl) when Typing_env.is_typedef env x ->
       if seen = x
-      then Errors.add p "Cyclic typedef"
+      then Errors.cyclic_typedef p
       else
         let env, ty = expand_typedef_ seen env r x argl in
         check_typedef seen env ty

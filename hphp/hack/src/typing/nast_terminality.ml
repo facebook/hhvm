@@ -179,17 +179,11 @@ end = struct
         | Default [] -> ()
         | Case (e, b) -> begin
           terminal b;
-          Errors.add_list [
-            p, ("This switch has a case that implicitly falls through and is "^
-                "not annotated with // FALLTHROUGH");
-            fst e, "This case implicitly falls through"
-          ]
+          Errors.case_fallthrough p (fst e)
         end
         | Default b -> begin
           terminal b;
-          Errors.add p
-              ("This switch has a default case that implicitly falls "^
-               "through and is not annotated with // FALLTHROUGH")
+          Errors.default_fallthrough p
         end
       with Exit -> ()
     end (List.tl (List.rev cl)) (* Skip the last case *)

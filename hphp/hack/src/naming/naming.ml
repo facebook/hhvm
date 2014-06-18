@@ -19,7 +19,6 @@ open Utils
 open Ast
 
 module N = Nast
-module Error = Naming_error
 
 (*****************************************************************************)
 (* The types *)
@@ -303,29 +302,6 @@ module Env = struct
     let env  = genv, lenv in
     env
 
-  let error_name_already_bound x p1 p2 =
-    let x = Utils.strip_ns x in
-    let errs = [
-      p1, "Name already bound: "^x;
-      p2, "Previous definition is here"
-    ] in
-    let hhi_msg =
-      "This appears to be defined in an hhi file included in your project "^
-      "root. The hhi files for the standard library are now a part of the "^
-      "typechecker and must be removed from your project. Typically, you can "^
-      "do this by deleting the \"hhi\" directory you copied into your "^
-      "project when first starting with Hack." in
-    (* unsafe_opt since init stack will refuse to continue if we don't have an
-     * hhi root. *)
-    let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-    let errs =
-      if str_starts_with p1.Pos.pos_file hhi_root
-        then errs @ [p2, hhi_msg]
-      else if str_starts_with p2.Pos.pos_file hhi_root
-        then errs @ [p1, hhi_msg]
-      else errs in
-    Errors.add_list errs
-
 (* Helper used to write in different environments
  * consts, fun_names, class_names
  *)
@@ -333,7 +309,8 @@ module Env = struct
     if SMap.mem x !env
     then begin
       let p', _ = SMap.find_unsafe x !env in
-      error_name_already_bound x p p'
+      let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
+      Errors.error_name_already_bound hhi_root x p p'
     end;
     let y = p, Ident.make x in
     env := SMap.add x y !env;
@@ -345,7 +322,7 @@ module Env = struct
     | None ->
         (match genv.in_mode with
         | Ast.Mstrict ->
-            Errors.add p ("Unbound name: "^(strip_ns x)); 
+            Errors.unbound_name p x
         | Ast.Mdecl | Ast.Mpartial -> ()
         );
         p, Ident.make x
@@ -355,8 +332,7 @@ module Env = struct
   let bad_style env (p, x) =
     let p' = SMap.get x !(env.all_locals) in
     match p' with None -> assert false | Some p' ->
-      Errors.add_list [p, ("The variable "^ x ^" is defined");
-               p', ("But in a different scope")]
+      Errors.different_scope p x p'
 
   let is_superglobal =
     let l = [
@@ -437,7 +413,7 @@ module Env = struct
 
   let handle_undefined_variable (genv, env) (p, x) =
     match env.unbound_mode with
-    | UBMErr -> Errors.add p ("Undefined variable: "^x); p, Ident.make x
+    | UBMErr -> Errors.undefined p x; p, Ident.make x
     | UBMFunc f -> f (p, x)
 
 (* Function used to name a local variable *)
@@ -524,7 +500,8 @@ module Env = struct
       let p', y = SMap.find_unsafe x !env in
       if Pos.compare p p' = 0 then (p, y)
       else begin
-        error_name_already_bound x p p';
+        let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
+        Errors.error_name_already_bound hhi_root x p p';
         let y = p, Ident.make x in
         env := SMap.add x y !env;
         y
@@ -603,11 +580,8 @@ let is_alok_type_name (_, x) = String.length x <= 2 && x.[0] = 'T'
 let check_constraint ((pos, name), _) =
   (* TODO refactor this in a seperate module for errors *)
   if String.lowercase name = "this"
-  then Errors.add pos "The type parameter \"this\" is reserved"
-  else if name.[0] <> 'T' then
-    Errors.add pos
-      "Please make your type parameter start with the letter T (capital)"
-
+  then Errors.this_reserved pos
+  else if name.[0] <> 'T' then Errors.start_with_T pos
 
 (* One of the rare cases where I don't work with a functional
  * environment ...
@@ -619,7 +593,7 @@ let opt f x = match x with None -> None | Some x -> Some (f x)
 let check_repetition s param =
   let x = snd param.param_id in
   if SSet.mem x s
-  then Errors.add (fst param.param_id) ("Argument already bound: "^x);
+  then Errors.already_bound (fst param.param_id) x;
   SSet.add x s
 
 (* Check that the implemented interface exists *)
@@ -634,10 +608,7 @@ let no_typedef (genv, _) cid =
   if SMap.mem name !(genv.typedefs)
   then
     let def_pos, _ = SMap.find_unsafe name !(genv.typedefs) in
-    Errors.add_list [
-    pos, "Unexpected typedef";
-    def_pos, "Definition is here";
-  ]
+    Errors.unexpected_typedef pos def_pos
 
 let hint_no_typedef env = function
   | _, Happly (x, _) -> no_typedef env x
@@ -679,7 +650,7 @@ and hint_ ~allow_this is_static_var p env x =
       List.fold_left begin fun fdm (pname, h) ->
         let pos, name = pname in
         if SMap.mem name fdm
-        then Errors.add pos "Field name already bound";
+        then Errors.fd_name_already_bound pos;
         SMap.add name (hint env h) fdm
       end SMap.empty fdl
   end
@@ -689,12 +660,12 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   let hint = hint ~allow_this in
   let params = (fst env).type_params in
   if   is_alok_type_name id && not (SMap.mem x params)
-  then Error.alok id;
+  then Errors.alok id;
   if   is_static_var && SMap.mem x params
-  then Error.generic_class_var id;
+  then Errors.generic_class_var (fst id);
   (* some common Xhp screw ups *)
   if   (x = "Xhp") || (x = ":Xhp") || (x = "XHP")
-  then Error.disallowed_xhp_type (p, x);
+  then Errors.disallowed_xhp_type p x;
   match x with
   | "\\void"
   | "\\int"
@@ -709,8 +680,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   | "\\boolean"
   | "\\double"
   | "\\real" ->
-      Errors.add p ("Primitive type annotations are always available and may no \
-                      longer be referred to in the toplevel namespace.");
+      Errors.primitive_toplevel p;
       N.Hany
   | "void"             -> N.Hprim N.Tvoid
   | "int"              -> N.Hprim N.Tint
@@ -725,34 +695,26 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       | [] -> N.Harray (None, None)
       | [x] -> N.Harray (Some (hint env x), None)
       | [x; y] -> N.Harray (Some (hint env x), Some (hint env y))
-      | _ -> Error.too_many_args p; N.Hany
+      | _ -> Errors.too_many_args p; N.Hany
       )
   | "integer" ->
-      Errors.add p "Invalid Hack type. Using \"integer\" in Hack is considered \
-        an error. Use \"int\" instead, to keep the codebase \
-        consistent.";
+      Errors.integer_instead_of_int p;
       N.Hprim N.Tint
   | "boolean" ->
-      Errors.add p "Invalid Hack type. Using \"boolean\" in Hack is considered \
-                 an error. Use \"bool\" instead, to keep the codebase \
-                 consistent.";
+      Errors.boolean_instead_of_bool p;
       N.Hprim N.Tbool
   | "double" ->
-      Errors.add p "Invalid Hack type. Using \"double\" in Hack is considered \
-         an error. Use \"float\" instead. They are equivalent data types \
-         and the codebase remains consistent.";
+      Errors.double_instead_of_float p;
       N.Hprim N.Tfloat
   | "real" ->
-      Errors.add p "Invalid Hack type. Using \"real\" in Hack is considered \
-        an error. Use \"float\" instead. They are equivalent data types and \
-        the codebase remains consistent.";
+      Errors.real_instead_of_float p;
        N.Hprim N.Tfloat
   | "this" when allow_this ->
       if hl != []
-      then Errors.add p "\"this\" expects no arguments";
+      then Errors.this_no_argument p;
       (match (fst env).cclass with
       | None ->
-        Errors.add p "Cannot use \"this\" outside of a class";
+        Errors.this_outside_of_class p;
         N.Hany
       | Some cid ->
         let tparaml = (fst env).type_paraml in
@@ -769,20 +731,17 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   | "this" ->
       (match (fst env).cclass with
       | None ->
-          Errors.add p "Cannot use \"this\" outside of a class";
+          Errors.this_outside_of_class p
       | Some _ ->
-          Errors.add p "The type \"this\" can only be used as a return type, \
-            to instantiate a covariant type variable, \
-            or as a private non-static member variable"
+          Errors.this_must_be_return p
       );
       N.Hany
   | _ when String.lowercase x = "this" ->
-      Errors.add p ("Invalid Hack type \""^x^"\". Use \"this\" instead");
+      Errors.lowercase_this p x;
       N.Hany
   | _ when SMap.mem x params ->
       if hl <> [] then
-      Errors.add p (Printf.sprintf "%s is a type parameter. Type parameters cannot \
-        themselves take type parameters (e.g. %s<int> doesn't make sense)" x x);
+      Errors.tparam_with_tparam p x;
       let env, gen_constraint = get_constraint env x in
       N.Habstr (x, opt (hint env) gen_constraint)
   | _ ->
@@ -851,7 +810,7 @@ let interface c constructor methods smethods =
 
 let check_method acc { N.m_name = (p, x); _ } =
   if SSet.mem x acc
-  then Errors.add p "Name already bound";
+  then Errors.method_name_already_bound p x;
   SSet.add x acc
 
 let check_name_collision methods =
@@ -861,16 +820,10 @@ let check_name_collision methods =
 (* Checking for shadowing of method type parameters *)
 (*****************************************************************************)
 
-let shadowed_type_param p (pos, name) =
-  Errors.add_list [
-    p, Printf.sprintf "You cannot re-bind the type parameter %s" name;
-    pos, Printf.sprintf "%s is already bound here" name
-  ]
-
 let check_method_tparams class_tparam_names { N.m_tparams = tparams; _ } =
   List.iter
     (fun ((p,x),_) -> List.iter
-       (fun (pc,xc) -> if (x = xc) then shadowed_type_param p (pc, x))
+       (fun (pc,xc) -> if (x = xc) then Errors.shadowed_type_param p pc x)
        class_tparam_names)
     tparams
 
@@ -963,7 +916,7 @@ and type_paraml env tparams =
       match SMap.get name seen with
       | None -> (SMap.add name p seen, (type_param env tparam)::tparaml)
       | Some pos -> 
-          shadowed_type_param p (pos, name);
+          Errors.shadowed_type_param p pos name;
           seen, tparaml
     )
     (SMap.empty, [])
@@ -1010,7 +963,7 @@ and constructor env acc = function
       let env = ({ genv with in_member_fun = true}, lenv) in
       (match acc with
       | None -> Some (method_ env m)
-      | Some _ -> Errors.add p ("Name already bound: "^name); acc)
+      | Some _ -> Errors.method_name_already_bound p name; acc)
   | Method _ -> acc
 
 and class_const env x acc =
@@ -1100,7 +1053,7 @@ and const_def h env (x, e) =
           | Array _ ->
               None, Env.new_const env x, expr env e
           | _ ->
-            Errors.add (fst x) "Please add a type hint";
+            Errors.missing_typehint (fst x); 
               None, Env.new_const env x, (fst e, N.Any)
           )
       | Some h ->
@@ -1359,14 +1312,14 @@ and as_expr env = function
   | As_id (p, Lvar x) ->
       N.As_id (p, N.Lvar (Env.new_lvar env x))
   | As_id (p, _) ->
-      Errors.add p "Was expecting a variable name";
+      Errors.expected_variable p;
       N.As_id (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
   | As_kv ((p1, Lvar x1), (p2, Lvar x2)) ->
       let x1 = p1, N.Lvar (Env.new_lvar env x1) in
       let x2 = p2, N.Lvar (Env.new_lvar env x2) in
       N.As_kv (x1, x2)
   | As_kv ((p, _), _) ->
-      Errors.add p "Was expecting variable names";
+      Errors.expected_variable p;
       N.As_kv ((p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder"))),
                (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder"))))
 
@@ -1439,17 +1392,17 @@ and expr_ env = function
       | "\\Pair" ->
         (match l with
           | [] ->
-              Errors.add p "Too few arguments";
+              Errors.too_few_arguments p;
               N.Any
           | e1::e2::[] ->
             let pn = "Pair" in
             N.Pair (afield_value env pn e1, afield_value env pn e2)
           | _ ->
-              Errors.add p "Too many arguments";
+              Errors.too_many_arguments p;
               N.Any
         )
       | _ -> 
-          Errors.add p ("Unexpected collection type " ^ (Utils.strip_ns cn));
+          Errors.expected_collection p cn;
           N.Any
   end
   | Clone e -> N.Clone (expr env e)
@@ -1466,7 +1419,7 @@ and expr_ env = function
       | "__CLASS__" ->
         (match (fst env).cclass with
           | None -> 
-              Errors.add (fst x) "Using __CLASS__ outside a class";
+              Errors.illegal_CLASS (fst x);
               N.Any
           | Some c -> N.String c)
       | "__FILE__" | "__DIR__"
@@ -1485,7 +1438,7 @@ and expr_ env = function
   | Obj_get (e1, (p, _ as e2)) ->
       (match (fst env).in_mode with
       | Ast.Mstrict ->
-          Errors.add p "Dynamic method call"
+          Errors.dynamic_method_call p
       | Ast.Mpartial | Ast.Mdecl ->
           ()
       );
@@ -1502,75 +1455,63 @@ and expr_ env = function
       N.Call (N.Cnormal, (p, N.Id (p, "echo")), List.map (expr env) el)
   | Call ((p, Id (_, "call_user_func")), el) ->
       (match el with
-      | [] -> Errors.add p "Too few arguments"; N.Any
+      | [] -> Errors.too_few_arguments p; N.Any
       | f :: el ->
           N.Call (N.Cuser_func, expr env f, List.map (expr env) el)
       )
   | Call ((p, Id (_, "fun")), el) ->
       (match el with
-      | [] -> Errors.add p "Too few arguments"; N.Any
+      | [] -> Errors.too_few_arguments p; N.Any
       | [_, String x] -> N.Fun_id (Env.fun_id env x)
       | [p, _] ->
-          let msg = "The argument to fun() must be a single-quoted, constant "^
-                    "literal string representing a valid function name." in
-          Errors.add p msg; N.Any
-      | _ -> Errors.add p "Too many arguments"; N.Any
+          Errors.illegal_fun p;
+          N.Any
+      | _ -> Errors.too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "inst_meth")), el) ->
       (match el with
-      | [] -> Errors.add p "Too few arguments"; N.Any
-      | [_] -> Errors.add p "Too few arguments"; N.Any
+      | [] -> Errors.too_few_arguments p; N.Any
+      | [_] -> Errors.too_few_arguments p; N.Any
       | instance::(_, String meth)::[] ->
         N.Method_id (expr env instance, meth)
       | (p, _)::(_)::[] ->
-        let msg = "The argument to inst_meth() must be an expression and a "^
-          "constant literal string representing a valid method name." in
-        Errors.add p msg; N.Any
-      | _ -> Errors.add p "Too many arguments"; N.Any
+        Errors.illegal_inst_meth p;
+        N.Any
+      | _ -> Errors.too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "meth_caller")), el) ->
       (match el with
-      | [] -> Errors.add p "Too few arguments"; N.Any
-      | [_] -> Errors.add p "Too few arguments"; N.Any
+      | [] -> Errors.too_few_arguments p; N.Any
+      | [_] -> Errors.too_few_arguments p; N.Any
       | e1::e2::[] ->
           (match (expr env e1), (expr env e2) with
           | (_, N.String cl), (_, N.String meth)
           | (_, N.Class_const (N.CI cl, (_, "class"))), (_, N.String meth) ->
             N.Method_caller (Env.class_name env cl, meth)
           | (p, _), (_) ->
-            let msg =
-              "The two arguments to meth_caller() must be:"
-              ^"\n - first: ClassOrInterface::class"
-              ^"\n - second: a single-quoted string literal containing the name"
-              ^" of a non-static method of that class" in
-            Errors.add p msg;
+            Errors.illegal_meth_caller p;
             N.Any
           )
-      | _ -> Errors.add p "Too many arguments"; N.Any
+      | _ -> Errors.too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "class_meth")), el) ->
       (match el with
-      | [] -> Errors.add p "Too few arguments"; N.Any
-      | [_] -> Errors.add p "Too few arguments"; N.Any
+      | [] -> Errors.too_few_arguments p; N.Any
+      | [_] -> Errors.too_few_arguments p; N.Any
       | e1::e2::[] ->
           (match (expr env e1), (expr env e2) with
           | (_, N.String cl), (_, N.String meth)
           | (_, N.Class_const (N.CI cl, (_, "class"))), (_, N.String meth) ->
             N.Smethod_id (Env.class_name env cl, meth)
           | (p, _), (_) ->
-            let msg =
-              "The two arguments to class_meth() must be:"
-              ^"\n - first: ValidClassname::class"
-              ^"\n - second: a single-quoted string literal containing the name"
-              ^" of a static method of that class" in
-            Errors.add p msg;
+            Errors.illegal_class_meth p;
             N.Any
           )
-      | _ -> Errors.add p "Too many arguments"; N.Any
+      | _ -> Errors.too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "assert")), el) ->
       if List.length el <> 1
-      then Errors.add p "assert expects exactly one argument";
+      then Errors.assert_arity p;
       N.Assert (N.AE_assert (expr env (List.hd el)))
   | Call ((p, Id (_, "invariant")), el) ->
       (match el with
@@ -1578,7 +1519,7 @@ and expr_ env = function
           let el = List.map (expr env) el in
           N.Assert (N.AE_invariant (expr env st, expr env format, el))
         | _ ->
-          Errors.add p "Too few arguments";
+          Errors.too_few_arguments p;
           N.Any
       )
   | Call ((p, Id (_, "invariant_violation")), el) ->
@@ -1587,33 +1528,32 @@ and expr_ env = function
         let el = List.map (expr env) el in
         N.Assert (N.AE_invariant_violation (expr env format, el))
       | _ ->
-        Errors.add p "Too few arguments";
+        Errors.too_few_arguments p;
         N.Any  
       )
   | Call ((p, Id (_, "tuple")), el) ->
       (match el with
-      | [] -> Errors.add p "Too few arguments"; N.Any
+      | [] -> Errors.too_few_arguments p; N.Any
       | el -> N.List (List.map (expr env) el)
       )
   | Call ((p, Id (_, "gena")), el) ->
       (match el with
       | [e] -> N.Special_func (N.Gena (expr env e))
-      | _ -> Errors.add p "gena() expects exactly 1 argument"; N.Any
+      | _ -> Errors.gena_arity p; N.Any
       )
   | Call ((p, Id (_, "genva")), el) ->
       if List.length el < 1
-      then (Errors.add p "genva() expects at least 1 argument"; N.Any)
+      then (Errors.genva_arity p; N.Any)
       else N.Special_func (N.Genva (List.map (expr env) el))
   | Call ((p, Id (_, "gen_array_rec")), el) ->
       (match el with
       | [e] -> N.Special_func (N.Gen_array_rec (expr env e))
-      | _ -> Errors.add p "gen_array_rec() expects exactly 1 argument"; N.Any
+      | _ -> Errors.gen_array_rec_arity p; N.Any
       )
   | Call ((p, Id (_, "gen_array_va_rec_DEPRECATED")), el) ->
       if List.length el < 1
       then begin
-        Errors.add p
-          "gen_array_va_rec_DEPRECATED() expects at least 1 argument";
+        Errors.gen_array_va_rec_arity p;
         N.Any
       end
       else N.Special_func (N.Gen_array_va_rec (List.map (expr env) el))
@@ -1680,7 +1620,7 @@ and expr_ env = function
       N.Shape begin List.fold_left begin fun fdm (pname, value) ->
         let pos, name = pname in
         if SMap.mem name fdm
-        then Errors.add pos "Field already defined";
+        then Errors.fd_name_already_bound pos;
         SMap.add name (expr env value) fdm
       end SMap.empty fdl
       end
@@ -1706,7 +1646,7 @@ and make_class_id env cid =
   no_typedef env cid;
   match snd cid with
   | x when x.[0] = '$' && (fst env).in_mode = Ast.Mstrict ->
-      Errors.add (fst cid) "Don't use dynamic classes";
+      Errors.dynamic_class (fst cid);
       N.CI cid
   | "parent" -> N.CIparent
   | "self" ->  N.CIself
@@ -1746,12 +1686,12 @@ and afield env = function
 and afield_value env cname = function
   | AFvalue e -> expr env e
   | AFkvalue (e1, e2) ->
-      Error.unexpected_arrow ((fst e1), cname);
+      Errors.unexpected_arrow (fst e1) cname;
       expr env e1
 
 and afield_kvalue env cname = function
   | AFvalue e ->
-      Error.missing_arrow ((fst e), cname);
+      Errors.missing_arrow (fst e) cname;
       expr env e, expr env (fst e, Lvar (fst e, "__internal_placeholder"))
   | AFkvalue (e1, e2) -> expr env e1, expr env e2
 
@@ -1778,7 +1718,7 @@ let typedef genv tdef =
   let tparaml = type_paraml env tdef.t_tparams in
   List.iter begin function
     | (_, Some (pos, _)) ->
-        Errors.add pos "Constraints on typedefs are not supported"
+        Errors.typedef_constraint pos;
     | _ -> ()
   end tparaml;
   let ty = hint env ty in
@@ -1791,7 +1731,7 @@ let typedef genv tdef =
 let check_constant cst =
   (match cst.cst_type with
   | None when cst.cst_mode = Ast.Mstrict ->
-      Errors.add (fst cst.cst_name) "Please add a type hint"
+      Errors.add_a_typehint (fst cst.cst_name)
   | None
   | Some _ -> ());
   match snd cst.cst_value with
@@ -1801,8 +1741,8 @@ let check_constant cst =
   | Unop ((Uplus | Uminus), _)
   | String2 ([], _) -> ()
   | String2 ((var_pos, _) :: _, _) ->
-      Errors.add var_pos "You cannot use a local variable in a constant definition"
-  | _ -> Errors.add (fst cst.cst_value) "Illegal constant value"
+      Errors.local_const var_pos
+  | _ -> Errors.illegal_constant (fst cst.cst_value)
 
 let global_const genv cst =
   let env = Env.make_const_env genv cst in

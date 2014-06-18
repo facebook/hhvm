@@ -41,6 +41,7 @@ let print_reason_color ~(first:bool) ((p, s): Pos.t * string) =
     List.iter (Printf.printf "%s") strings
 
 let print_error_color (e:Errors.error) =
+  let e = Errors.to_list e in
   print_reason_color ~first:true (List.hd e);
   List.iter (print_reason_color ~first:false) (List.tl e)
 

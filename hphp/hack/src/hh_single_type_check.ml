@@ -74,7 +74,7 @@ let die str =
   close_out oc;
   exit 2
 
-let error l = die (Errors.pmsg_l l)
+let error l = die (Errors.to_string l)
 
 let parse_options () =
   let fn_ref = ref None in

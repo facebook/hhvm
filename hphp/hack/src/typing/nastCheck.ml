@@ -29,72 +29,11 @@ open Autocomplete
 
 module Env = Typing_env
 
-module Error = struct
-
-  let type_arity name nargs =
-    sl ["The type ";(Utils.strip_ns name);" expects ";nargs;" type parameter(s)"]
-
-  let abstract_outside (p, _) =
-    Errors.add p
-    "This method is declared as abstract, in a class that isn't"
-
-  let interface_with_body (p, _) =
-    Errors.add p
-    "A method cannot have a body in an interface"
-
-  let abstract_with_body (p, _) =
-    Errors.add p
-    "This method is declared as abstract, but has a body"
-
-  let not_abstract_without_body (p, _) =
-    Errors.add p
-    "This method is not declared as abstract, it must have a body"
-
-  let return_in_gen p =
-    Errors.add p
-      ("Don't use return in a generator (a generator"^
-       " is a function that uses yield)")
-
-  let return_in_finally p =
-    Errors.add p
-      ("Don't use return in a finally block;"^
-          " there's nothing to receive the return value")
-
-  let yield_in_async_function p =
-    Errors.add p
-    "Don't use yield in an async function"
-
-  let await_in_sync_function p =
-    Errors.add p
-    "await can only be used inside async functions"
-
-  let magic (p, s) =
-    Errors.add p
-      ("Don't call "^s^" it's one of these magic things we want to avoid")
-
-  let non_interface (p : Pos.t) (c2: string) (verb: string): 'a =
-    Errors.add p ("Cannot " ^ verb ^ " " ^ (strip_ns c2) ^ " - it is not an interface")
-
-  let toString_returns_string pos =
-    Errors.add pos "__toString should return a string"
-
-  let toString_visibility pos =
-    Errors.add pos "__toString must have public visibility and cannot be static"
-
-  let uses_non_trait (p: Pos.t) (n: string) (t: string) =
-    Errors.add p ((Utils.strip_ns n) ^ " is not a trait. It is " ^ t ^ ".")
-
-  let requires_non_class (p: Pos.t) (n: string) (t: string) =
-    Errors.add p ((Utils.strip_ns n) ^ " is not a class. It is " ^ t ^ ".")
-
-end
-
-
 module CheckGenerator = struct
 
   let rec stmt = function
     | Return (p, _) ->
-        Error.return_in_gen p
+        Errors.return_in_gen p
     | Throw (p, _) -> ()
     | Noop
     | Fallthrough
@@ -263,7 +202,7 @@ module CheckFunctionType = struct
         ()
     | _, Efun (f, _) -> ()
     | Ast.FAsync, Yield_break
-    | Ast.FAsync, Yield _ -> Error.yield_in_async_function p
+    | Ast.FAsync, Yield _ -> Errors.yield_in_async_function p
     | Ast.FAsync, Special_func func ->
       (match func with
         | Gena e
@@ -280,7 +219,7 @@ module CheckFunctionType = struct
         | Genva el
         | Gen_array_va_rec el -> liter expr f_type el);
       ()
-    | Ast.FSync, Await _ -> Error.await_in_sync_function p
+    | Ast.FSync, Await _ -> Errors.await_in_sync_function p
     | Ast.FAsync, Await e -> expr f_type e; ()
     | _, Xml (_, attrl, el) ->
         List.iter (fun (_, e) -> expr f_type e) attrl;
@@ -384,8 +323,7 @@ and check_arity env p tname arity size =
   if size = arity then () else
   if size = 0 && not (Typing_env.is_strict env.tenv) then () else
   let nargs = soi arity in
-  let msg   = Error.type_arity tname nargs in
-  Errors.add p msg
+  Errors.type_arity p tname nargs
 
 and class_ tenv c =
   if c.c_mode = Ast.Mdecl || !auto_complete then () else begin
@@ -430,7 +368,7 @@ and check_is_interface (env, error_verb) (x : hint) =
           ()
         | Some { tc_kind = Ast.Cinterface; _ } -> ()
         | Some { tc_name; _ } ->
-          Error.non_interface (fst x) tc_name error_verb
+          Errors.non_interface (fst x) tc_name error_verb
       )
     | _ -> failwith "assertion failure: interface isn't a Happly"
 
@@ -449,7 +387,7 @@ and check_is_class env (x : hint) =
         | Some { tc_kind = Ast.Cabstract; _ } -> ()
         | Some { tc_kind = Ast.Cnormal; _ } -> ()
         | Some { tc_kind; tc_name; _ } ->
-          Error.requires_non_class (fst x) tc_name (Ast.string_of_class_kind tc_kind)
+          Errors.requires_non_class (fst x) tc_name (Ast.string_of_class_kind tc_kind)
       )
     | _ -> failwith "assertion failure: interface isn't a Happly"
 
@@ -476,7 +414,7 @@ and check_is_trait env (h : hint) =
       (* Anything other than a trait we are going to throw an error *)
       (* using the tc_kind and tc_name fields of our type_info *)
       | Some { tc_kind; tc_name; _ } ->
-        Error.uses_non_trait (fst h) tc_name (Ast.string_of_class_kind tc_kind)
+        Errors.uses_non_trait (fst h) tc_name (Ast.string_of_class_kind tc_kind)
     )
   | _ -> failwith "assertion failure: trait isn't an Happly"
   )
@@ -485,25 +423,23 @@ and interface env c =
   (* make sure that interfaces only have empty public methods *)
   liter begin fun env m ->
     if m.m_body <> []
-    then Errors.add (fst m.m_name) "This method shouldn't have a body"
+    then Errors.abstract_body (fst m.m_name)
     else ();
     if m.m_visibility <> Public
-    then
-      Errors.add (fst m.m_name)
-        "Access type for interface method must be public"
+    then Errors.not_public_interface (fst m.m_name)
     else ()
   end env (c.c_static_methods @ c.c_methods);
   (* make sure that interfaces don't have any member variables *)
   match c.c_vars with
   | hd::_ ->
     let pos = fst (hd.cv_id) in
-    Errors.add pos "Interfaces cannot have member variables";
+    Errors.interface_with_member_variable pos
   | _ -> ();
   (* make sure that interfaces don't have static variables *)
   match c.c_static_vars with
   | hd::_ ->
     let pos = fst (hd.cv_id) in
-    Errors.add pos "Interfaces cannot have static variables";
+    Errors.interface_with_static_member_variable pos
   | _ -> ()
 
 and class_const env (h, _, e) =
@@ -519,10 +455,10 @@ and check__toString m is_static =
   if snd m.m_name = "__toString"
   then begin
     if m.m_visibility <> Public || is_static
-    then Error.toString_visibility (fst m.m_name);
+    then Errors.toString_visibility (fst m.m_name);
     match m.m_ret with
       | Some (_, Hprim Tstring) -> ()
-      | Some (p, _) -> Error.toString_returns_string p
+      | Some (p, _) -> Errors.toString_returns_string p
       | None -> ()
   end
 
@@ -536,18 +472,15 @@ and method_ (env, is_static) m =
   if !(env.t_is_gen)
   then CheckGenerator.block m.m_body;
   if m.m_body <> [] && m.m_abstract
-  then Error.abstract_with_body m.m_name;
+  then Errors.abstract_with_body m.m_name;
   if m.m_body = [] && not m.m_abstract
-  then Error.not_abstract_without_body m.m_name;
+  then Errors.not_abstract_without_body m.m_name;
   (match env.class_name with
   | Some cname ->
       let p, mname = m.m_name in
       if String.lowercase (strip_ns cname) = String.lowercase mname
           && env.class_kind <> Some Ast.Ctrait
-      then
-        Errors.add p ("This is a dangerous method name, "^
-                 "if you want to define a constructor, use "^
-                 "__construct")
+      then Errors.dangerous_method_name p
       else ()
   | None -> assert false);
   env.t_is_gen := old_gen;
@@ -565,7 +498,7 @@ and fun_param_opt env (h, _, e) =
 
 and stmt env = function
   | Return (p, _) when !(env.t_is_finally) ->
-    Error.return_in_finally p; ()
+    Errors.return_in_finally p; ()
   | Return (_, None)
   | Noop
   | Fallthrough
@@ -646,7 +579,7 @@ and expr_ env = function
   | Clone e -> expr env e; ()
   | Obj_get (e, (_, Id s)) ->
       if is_magic s && Env.is_strict env.tenv
-      then Error.magic s;
+      then Errors.magic s;
       expr env e;
       ()
   | Obj_get (e1, e2) ->

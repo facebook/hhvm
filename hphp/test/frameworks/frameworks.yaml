@@ -447,6 +447,18 @@
       #   find . -name '*.php' | grep -v vendor/ | xargs -n 1 -P 32 hhvm -l
       # We pass it, but it's slow, and not a unit test, so skip it
       - phpbb3/tests/lint_test.php
+      # These store state on the local file system. Flakey if multiple copies
+      # running simultaneously
+      - phpbb3/tests/template/subdir/includephp_from_subdir_test.php
+      - phpbb3/tests/template/includephp_test.php
+      - phpbb3/tests/template/template_events_test.php
+      - phpbb3/tests/template/template_includecss_test.php
+      - phpbb3/tests/template/template_includejs_test.php
+      - phpbb3/tests/template/template_inheritance_test.php
+      - phpbb3/tests/template/template_parser_test.php
+      - phpbb3/tests/template/template_test.php
+      - phpbb3/tests/template/template_test_case.php
+      - phpbb3/tests/template/template_test_case_with_tree.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git
     # Stable is RELEASE_4_1_9 but we have many pull requests in master

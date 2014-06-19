@@ -567,6 +567,28 @@
     clowns:
       # Needs a local memcache server
       - yii/tests/framework/caching/CMemCacheTest.php
+  yii2:
+    url: https://github.com/yiisoft/yii2.git
+    branch: master
+    # Test against a commit that allows best HHVM compatibility right now. update this to RC when RC is released.
+    commit: 639e52c1994ac816ded6919ebe97a7f8532a5aef
+    install_root: yii2
+    test_root: yii2
+    config_file: yii2/phpunit.xml.dist
+    clowns:
+      # needs sphinx installed
+      - yii2/tests/unit/extensions/sphinx/ActiveDataProviderTest.php
+      - yii2/tests/unit/extensions/sphinx/ActiveRecordTest.php
+      - yii2/tests/unit/extensions/sphinx/ActiveRelationTest.php
+      - yii2/tests/unit/extensions/sphinx/ColumnSchemaTest.php
+      - yii2/tests/unit/extensions/sphinx/CommandTest.php
+      - yii2/tests/unit/extensions/sphinx/ConnectionTest.php
+      - yii2/tests/unit/extensions/sphinx/ExternalActiveRelationTest.php
+      - yii2/tests/unit/extensions/sphinx/QueryTest.php
+      - yii2/tests/unit/extensions/sphinx/SchemaTest.php
+      # needs a local memcache server
+      - yii2/tests/unit/framework/caching/MemCacheTest.php
+      - yii2/tests/unit/framework/caching/MemCachedTest.php
   zf2:
     url: https://github.com/zendframework/zf2.git
     # Stable is release-2.2.5, but pull requests require master

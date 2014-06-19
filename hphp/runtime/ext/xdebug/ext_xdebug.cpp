@@ -95,11 +95,13 @@ static String HHVM_FUNCTION(xdebug_get_tracefile_name)
 static bool HHVM_FUNCTION(xdebug_is_enabled)
   XDEBUG_NOTIMPLEMENTED
 
-static int64_t HHVM_FUNCTION(xdebug_memory_usage)
-  XDEBUG_NOTIMPLEMENTED
+static int64_t HHVM_FUNCTION(xdebug_memory_usage) {
+  return MM().getStats().usage;
+}
 
-static int64_t HHVM_FUNCTION(xdebug_peak_memory_usage)
-  XDEBUG_NOTIMPLEMENTED
+static int64_t HHVM_FUNCTION(xdebug_peak_memory_usage) {
+  return MM().getStats().peakUsage;
+}
 
 static void HHVM_FUNCTION(xdebug_print_function_stack,
                           const String& message /* = "user triggered" */,

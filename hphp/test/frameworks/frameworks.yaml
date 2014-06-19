@@ -567,6 +567,12 @@
     clowns:
       # Needs a local memcache server
       - yii/tests/framework/caching/CMemCacheTest.php
+      # These mutate fixed locations on the local file system - can't run
+      # multiple instance at the same time reliably.
+      - yii/tests/framework/caching/CFileCacheDependencyTest.php
+      - yii/tests/framework/caching/CFileCacheTest.php
+      - yii/tests/framework/caching/CDbCacheTest.php
+      - yii/tests/framework/caching/CDirectoryCacheDependencyTest.php
   zf2:
     url: https://github.com/zendframework/zf2.git
     # Stable is release-2.2.5, but pull requests require master

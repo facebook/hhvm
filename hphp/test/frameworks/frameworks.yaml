@@ -144,9 +144,12 @@
     commit: f8a2343d3147f595d43e735b89b11c277520f141
     install_root: joomla-framework
     test_root: joomla-framework
-    # These are subtests which need their own composer set and aren't run
-    # by their travis setup
     clowns:
+      # Uses fixed location on filesystem - can't be run in parallel
+      - joomla-framework/src/Joomla/Archive/Tests/Bzip2Test.php
+      - joomla-framework/src/Joomla/Archive/Tests/GzipTest.php
+      # These are subtests which need their own composer set and aren't run
+      # by their travis setup
       - joomla-framework/src/Joomla/Google/Tests/JGoogleAuthOauth2Test.php
       - joomla-framework/src/Joomla/Google/Tests/JGoogleDataAdsenseTest.php
       - joomla-framework/src/Joomla/Google/Tests/JGoogleDataCalendarTest.php

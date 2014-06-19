@@ -1,35 +1,5 @@
 get_schema_steps_test::test_get_schema_steps with data set #0
 .
-phpbb\mimetype\guesser_test::test_content_guesser with data set #0
-.
-phpbb\mimetype\guesser_test::test_content_guesser with data set #1
-.
-phpbb\mimetype\guesser_test::test_content_guesser with data set #2
-.
-phpbb\mimetype\guesser_test::test_file_not_readable
-.
-phpbb\mimetype\guesser_test::test_guess_files with data set #0
-.
-phpbb\mimetype\guesser_test::test_guess_files with data set #1
-.
-phpbb\mimetype\guesser_test::test_guess_files with data set #2
-.
-phpbb\mimetype\guesser_test::test_guess_files with data set #3
-.
-phpbb\mimetype\guesser_test::test_guess_files with data set #4
-.
-phpbb\mimetype\guesser_test::test_guess_files with data set #5
-.
-phpbb\mimetype\guesser_test::test_incorrect_guesser with data set #0
-.
-phpbb\mimetype\guesser_test::test_incorrect_guesser with data set #1
-.
-phpbb\mimetype\guesser_test::test_incorrect_guesser with data set #2
-.
-phpbb\mimetype\guesser_test::test_null_guess
-.
-phpbb\mimetype\guesser_test::test_sort_priority
-.
 phpbb_acp_board_select_auth_method_test::test_select_auth_method with data set #0
 .
 phpbb_acp_board_select_auth_method_test::test_select_auth_method with data set #1

@@ -512,6 +512,10 @@
     commit: 3b3cda59d2d8a1618ed66c5d9fd1d76395040ddd
     install_root: silverstripe
     test_root: silverstripe
+    clowns:
+      # Mutates local filesystem, doesn't support multiple concurrent runs
+      - silverstripe/framework/tests/view/SSViewerCacheBlockTest.php
+      - silverstripe/framework/tests/cache/CacheTest.php
   slim:
     url: https://github.com/fredemmott/Slim
     # This branch makes a test less flakey

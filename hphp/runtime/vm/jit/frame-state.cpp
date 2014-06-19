@@ -508,17 +508,6 @@ bool FrameState::compatible(Block* block) {
   }
 
   assert(m_locals.size() == snapshot.locals.size());
-  for (int i = 0; i < m_locals.size(); ++i) {
-    // Enforce strict equality of types for now.  Eventually we could
-    // relax this depending on downstream operations.
-    //
-    // TODO(t3729135): We don't bother to check values here because we
-    // clear the CSE table at any merge.  Eventually we will support
-    // phis instead.
-    if (m_locals[i].type != snapshot.locals[i].type) {
-      return false;
-    }
-  }
 
   // TODO(t3730468): We don't check the stack here, because we always
   // spill the stack on all paths leading up to a merge, and insert a

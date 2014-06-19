@@ -58,20 +58,6 @@ let uerror r1 ty1 r2 ty2 =
     (Reason.to_string ("It is incompatible with " ^ ty2) r2)
   )
 
-(*****************************************************************************)
-(* Adding results to auto-completion  *)
-(*****************************************************************************)
-
-let add_auto_result env class_members =
-  Autocomplete.auto_complete_result :=
-    SMap.fold begin fun x class_elt acc ->
-      let ty = class_elt.ce_type in
-      let type_ = Typing_print.full_strip_ns env ty in
-      let pos = Reason.to_pos (fst ty) in
-      let sig_ = x^" "^type_ in
-      SMap.add sig_ (Autocomplete.make_result x pos type_) acc
-    end class_members SMap.empty
-
 let handle_class_type completion_type c =
   match completion_type, c.Typing_defs.tc_kind with
   | Some Autocomplete.Acid, Ast.Cnormal

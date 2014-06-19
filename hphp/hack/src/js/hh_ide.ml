@@ -240,6 +240,7 @@ let autocomplete_result_to_json res =
            ]
 
 let hh_auto_complete fn =
+  AutocompleteService.attach_hooks();
   Autocomplete.auto_complete := true;
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.auto_complete_for_global := "";
@@ -281,11 +282,13 @@ let hh_auto_complete fn =
         (fun _ res acc -> (autocomplete_result_to_json res) :: acc)
         result
         [] in
+    AutocompleteService.detach_hooks();
     output_json (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;
                           "internal_error",  JBool false;
                         ])
   with _ ->
+    AutocompleteService.detach_hooks();
     output_json (JAssoc [ "internal_error", JBool true;
                         ])
 

@@ -720,10 +720,10 @@ and expr_ is_lvalue env (p, e) =
       let env = string2 env idl in
       env, (Reason.Rwitness p, Tprim Tstring)
   | Fun_id x ->
-      auto_complete_id x;
+      Typing_hooks.dispatch_id_hook x;
       fun_type_of_id env x
-  | Id (cst_pos, cst_name) ->
-      auto_complete_id (cst_pos, cst_name);
+  | Id ((cst_pos, cst_name) as id) ->
+      Typing_hooks.dispatch_id_hook id;
       (match Env.get_gconst env cst_name with
       | None when Env.is_strict env ->
           Errors.add cst_pos "Unbound global constant (Typing)";
@@ -1428,7 +1428,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       end
   | Fun_id x
   | Id x ->
-      auto_complete_id x;
+      Typing_hooks.dispatch_id_hook x;
       let env, fty = fun_type_of_id env x in
       let env, fty = Env.expand_type env fty in
       let env, fty = Inst.instantiate_fun env fty el in
@@ -1450,13 +1450,6 @@ and fun_type_of_id env x =
         env, (Reason.Rwitness fty.ft_pos, Tfun fty)
   in
   env, fty
-
-and auto_complete_id x =
-  if is_auto_complete (snd x)
-  then begin
-      argument_global_type := Some Acid;
-      auto_complete_for_global := snd x
-  end
 
 (* Checking that the user explicitely made a copy *)
 and array_cow p =
@@ -1769,23 +1762,8 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
                   (p, (class_.tc_name^"::"^mid)) ::
                       !Typing_defs.accumulate_method_calls_result;
           Find_refs.process_find_refs (Some class_.tc_name) mid p;
+          Typing_hooks.dispatch_smethod_hook class_ (p, mid) env (Some cid);
           (match smethod with
-          | None when !auto_complete ->
-              if is_auto_complete mid
-              then begin
-                argument_global_type := Some Acclass_get;
-                let filter = begin fun key x map ->
-                  if class_.tc_members_fully_known then
-                    match is_visible env x.ce_visibility (Some cid) with
-                    | None -> SMap.add key x map
-                    | _ -> map
-                  else SMap.add key x map end in
-                let results = SMap.fold SMap.add class_.tc_smethods
-                    (SMap.fold SMap.add class_.tc_consts class_.tc_scvars) in
-                TUtils.add_auto_result env
-                  (SMap.fold filter results SMap.empty);
-              end;
-              env, (Reason.Rnone, Tany)
           | None ->
             (match Env.get_static_member is_method env class_ "__callStatic" with
               | env, None ->
@@ -1918,23 +1896,8 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                 (p, (class_.tc_name^"::"^s)) ::
                 !Typing_defs.accumulate_method_calls_result;
             Find_refs.process_find_refs (Some class_.tc_name) s p;
+            Typing_hooks.dispatch_cmethod_hook class_ (p, s) env None;
             (match method_ with
-              | None when !auto_complete ->
-                if is_auto_complete s
-                then begin
-                  argument_global_type := Some Acclass_get;
-                  let filter = begin fun key x map ->
-                    if class_.tc_members_fully_known then
-                      match is_visible env x.ce_visibility None with
-                        | None -> SMap.add key x map
-                        | _ -> map
-                    else SMap.add key x map end in
-                  let results =
-                    SMap.fold SMap.add class_.tc_methods class_.tc_cvars in
-                  TUtils.add_auto_result env
-                    (SMap.fold filter results SMap.empty);
-                end;
-                env, (Reason.Rnone, Tany), None
               | None ->
                 (match Env.get_member is_method env class_ "__call" with
                   | env, None ->

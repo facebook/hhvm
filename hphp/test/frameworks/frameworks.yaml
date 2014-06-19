@@ -289,6 +289,11 @@
     commit: 1faf4c8508378b0b102d148c53c322a8048b16dd
     install_root: laravel
     test_root: laravel
+    clowns:
+      # If the system clock crosses a whole-second boundary
+      # (eg :00.999 => :01.000), these tests fail.
+      - laravel/tests/Database/DatabaseEloquentRelationTest.php
+      - laravel/tests/Database/DatabaseEloquentModelTest.php
   lessphp:
     # Until pull request for phpunit.xml is accepted. The original repository
     # is commented out below.

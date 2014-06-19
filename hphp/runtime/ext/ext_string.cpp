@@ -1144,6 +1144,30 @@ Variant f_substr_count(const String& haystack, const String& needle, int offset 
   return count;
 }
 
+namespace {
+  bool string_strspn_check(int inputLength, int &start, int &scanLength) {
+    if (start < 0) {
+      start += inputLength;
+      if (start < 0) {
+        start = 0;
+      }
+    } else if (start > inputLength) {
+      return false;
+    }
+
+    if (scanLength < 0) {
+      scanLength += (inputLength - start);
+      if (scanLength < 0) {
+        scanLength = 0;
+      }
+    }
+    if (scanLength > inputLength - start) {
+      scanLength = inputLength - start;
+    }
+    return true;
+  }
+}
+
 Variant f_strspn(const String& str1, const String& str2, int start /* = 0 */,
                  int length /* = 0x7FFFFFFF */) {
   const char *s1 = str1.data();
@@ -1151,7 +1175,7 @@ Variant f_strspn(const String& str1, const String& str2, int start /* = 0 */,
   int s1_len = str1.size();
   int s2_len = str2.size();
 
-  if (!string_substr_check(s1_len, start, length)) {
+  if (!string_strspn_check(s1_len, start, length)) {
     return false;
   }
 
@@ -1170,7 +1194,7 @@ Variant f_strcspn(const String& str1, const String& str2, int start /* = 0 */,
   int s1_len = str1.size();
   int s2_len = str2.size();
 
-  if (!string_substr_check(s1_len, start, length)) {
+  if (!string_strspn_check(s1_len, start, length)) {
     return false;
   }
 

@@ -94,12 +94,18 @@ and fun_type = {
 and fun_params = (string option * ty) list
 
 and class_elt = {
-  ce_final      : bool;
-  ce_override   : bool;
-  ce_visibility : visibility;
-  ce_type       : ty;
+  ce_final       : bool;
+  ce_override    : bool;
+  (* true if this elt arose from require-extends or other mechnaisms
+     of hack "synthesizing" methods that were not written by the
+     programmer. The eventual purpose of this is to make sure that
+     elts that *are* written by the programmer take precedence over
+     synthesized elts. *)
+  ce_synthesized : bool;
+  ce_visibility  : visibility;
+  ce_type        : ty;
   (* classname where this elt originates from *)
-  ce_origin     : string;
+  ce_origin      : string;
 }
 
 and class_type = {

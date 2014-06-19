@@ -1,0 +1,4 @@
+File "trait_require_extends2.php", line 21, characters 22-24:
+You cannot override this method
+File "trait_require_extends2.php", line 7, characters 28-30:
+It was declared as final

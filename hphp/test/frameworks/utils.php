@@ -5,7 +5,7 @@ require_once __DIR__.'/Options.php';
 class TimeoutException extends Exception {
 }
 
-const INSTALL_TIMEOUT_SECS = 2 * 60; // 2 minutes
+const INSTALL_TIMEOUT_SECS = 10 * 60; // 10 minutes
 const NETWORK_RETRIES = 3;
 
 // For determining number of processes

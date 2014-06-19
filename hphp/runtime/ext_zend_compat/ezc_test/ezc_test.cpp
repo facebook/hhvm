@@ -570,6 +570,23 @@ static zend_object_value EzcTestUncloneable2_create_object(zend_class_entry *ce 
 }
 /* }}} */
 
+/* {{{ proto object ezc_create_cloneable_in_array()
+ * Create an array with a TestCloneable object in it. Test of
+ * object_init_ex(). */
+PHP_FUNCTION(ezc_create_cloneable_in_array)
+{
+  zval * element;
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+    return;
+  }
+  array_init_size(return_value, 1);
+  ALLOC_INIT_ZVAL(element);
+  object_init_ex(element, EzcTestCloneable_ce);
+  zend_hash_next_index_insert(Z_ARRVAL_P(return_value),
+      (void*)&element, sizeof(zval*), NULL);
+}
+/* }}} */
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_fetch_global, 0)
 ZEND_END_ARG_INFO()
@@ -634,6 +651,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_ezc_array_val_set, 0)
   ZEND_ARG_INFO(0, key)
   ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_create_cloneable_in_array, 0)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ ezc_test_functions[]
@@ -653,6 +674,7 @@ const zend_function_entry ezc_test_functions[] = {
   PHP_FE(ezc_hash_get, arginfo_ezc_hash_get)
   PHP_FE(ezc_hash_append, arginfo_ezc_hash_append)
   PHP_FE(ezc_array_val_set, arginfo_ezc_array_val_set)
+  PHP_FE(ezc_create_cloneable_in_array, arginfo_ezc_create_cloneable_in_array)
   PHP_FE_END
 };
 /* }}} */

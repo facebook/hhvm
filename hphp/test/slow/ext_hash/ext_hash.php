@@ -71,6 +71,12 @@ function test_hash_file() {
   var_dump(hash_hmac_file("md5", __DIR__.'/test_file.txt', "secret"));
 }
 
+function test_hash_hmac() {
+  $data = "the quick brown fox jumped over the lazy dog.";
+  var_dump(hash_hmac("md5", $data, "secret"));
+  var_dump(hash_hmac("md5", $data, ""));
+}
+
 function test_furchash() {
   if (is_facebook()) {
     var_dump(furchash_hphp_ext("15minutesoffame", 15, 86) == '25');
@@ -83,3 +89,4 @@ brown_fox();
 test_hash_init();
 test_hash_file();
 test_furchash();
+test_hash_hmac();

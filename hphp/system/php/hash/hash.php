@@ -96,7 +96,11 @@ function hash_hmac(?string $algo = null,
     return null;
   }
 
-  $ctx = hash_init($algo, HASH_HMAC, $key);
+  // hash_init() doesn't allow empty keys (for good reason)
+  // but hash_hmac() needs to support them.
+  // Rely on the fact that HMAC keys are null padded
+  // making a key of "\0" equivalent to ""
+  $ctx = hash_init($algo, HASH_HMAC, ($key !== '') ? $key : "\0");
   if (!$ctx) {
     return false;
   }
@@ -132,7 +136,11 @@ function hash_hmac_file(?string $algo = null,
     return null;
   }
 
-  $ctx = hash_init($algo, HASH_HMAC, $key);
+  // hash_init() doesn't allow empty keys (for good reason)
+  // but hash_hmac_file() needs to support them.
+  // Rely on the fact that HMAC keys are null padded
+  // making a key of "\0" equivalent to ""
+  $ctx = hash_init($algo, HASH_HMAC, ($key !== '') ? $key : "\0");
   if (!$ctx) {
     return false;
   }

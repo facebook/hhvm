@@ -685,9 +685,7 @@ and hint_ ~allow_this is_static_var p env x =
   end
 
 and hint_id ~allow_this env is_static_var (p, x as id) hl =
-  if Autocomplete.is_auto_complete x then (
-    Autocomplete.auto_complete_for_global := x;
-    Autocomplete.argument_global_type := Some Autocomplete.Actype);
+  Naming_hooks.dispatch_hint_hook id;
   let hint = hint ~allow_this in
   let params = (fst env).type_params in
   if   is_alok_type_name id && not (SMap.mem x params)
@@ -1665,9 +1663,7 @@ and expr_ env = function
   | InstanceOf (e1, e2) ->
       N.InstanceOf (expr env e1, expr env e2)
   | New (x, el) ->
-      if Autocomplete.is_auto_complete (snd x) then (
-        Autocomplete.auto_complete_for_global := (snd x);
-        Autocomplete.argument_global_type := Some Autocomplete.Acnew);
+      Naming_hooks.dispatch_new_id_hook x;
       N.New (make_class_id env x, exprl env el)
   | Efun (f, idl) ->
       let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in

@@ -18,14 +18,20 @@ let is_auto_complete x =
   let suffix = String.sub x (String.length x - suffix_len) suffix_len in
   suffix = auto_complete_suffix
 
-let auto_complete_id x =
+let autocomplete_token ac_type x =
   if Autocomplete.is_auto_complete (snd x)
   then begin
-    Autocomplete.argument_global_type := Some Autocomplete.Acid;
+    Autocomplete.argument_global_type := Some ac_type;
     Autocomplete.auto_complete_for_global := snd x
   end
+  
+let autocomplete_id = autocomplete_token Autocomplete.Acid
 
-let auto_complete_method is_static class_ id env cid =
+let autocomplete_hint = autocomplete_token Autocomplete.Actype
+
+let autocomplete_new = autocomplete_token Autocomplete.Acnew
+
+let autocomplete_method is_static class_ id env cid =
   if is_auto_complete (snd id)
   then begin
     Autocomplete.argument_global_type := Some Autocomplete.Acclass_get;
@@ -52,14 +58,17 @@ let auto_complete_method is_static class_ id env cid =
       end results SMap.empty
   end
 
-let auto_complete_smethod = auto_complete_method true
+let autocomplete_smethod = autocomplete_method true
 
-let auto_complete_cmethod = auto_complete_method false
+let autocomplete_cmethod = autocomplete_method false
 
 let attach_hooks () =
-  Typing_hooks.attach_id_hook auto_complete_id;
-  Typing_hooks.attach_smethod_hook auto_complete_smethod;
-  Typing_hooks.attach_cmethod_hook auto_complete_cmethod
+  Typing_hooks.attach_id_hook autocomplete_id;
+  Typing_hooks.attach_smethod_hook autocomplete_smethod;
+  Typing_hooks.attach_cmethod_hook autocomplete_cmethod;
+  Naming_hooks.attach_hint_hook autocomplete_hint;
+  Naming_hooks.attach_new_id_hook autocomplete_new
 
 let detach_hooks () =
-  Typing_hooks.remove_all_hooks()
+  Typing_hooks.remove_all_hooks();
+  Naming_hooks.remove_all_hooks()

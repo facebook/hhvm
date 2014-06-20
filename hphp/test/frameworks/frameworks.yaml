@@ -508,6 +508,9 @@
     commit: 3a5d12166b38d059a96c232d809332e7f3e60d9d
     install_root: reactphp
     test_root: reactphp
+    clowns:
+      # Intentionally racy and flakey: $this->assertRunFasterThan(0.005)
+      - reactphp/tests/EventLoop/StreamSelectLoopTest.php
   silverstripe:
     url: https://github.com/silverstripe/silverstripe-installer.git
     # Needed to go beyond the most likely stable 3.1.2 in order

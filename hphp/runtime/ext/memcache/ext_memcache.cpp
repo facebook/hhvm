@@ -299,8 +299,10 @@ static Variant HHVM_METHOD(Memcache, get, const Variant& key,
     for (ArrayIter iter(keyArr); iter; ++iter) {
       auto key = iter.second().toString();
       String serializedKey = memcache_prepare_key(key);
-      real_keys.push_back(const_cast<char *>(serializedKey.c_str()));
-      key_len.push_back(iter.second().toString().length());
+      char *k = new char[serializedKey.length()+1];
+      std::strcpy(k, serializedKey.c_str());
+      real_keys.push_back(k);
+      key_len.push_back(serializedKey.length());
     }
 
     if (!real_keys.empty()) {
@@ -335,6 +337,8 @@ static Variant HHVM_METHOD(Memcache, get, const Variant& key,
                                                    payload_len, flags));
       }
       memcached_result_free(&result);
+      for ( size_t i = 0 ; i < real_keys.size() ; i++ )
+            delete [] real_keys[i];
 
       return return_val;
     }

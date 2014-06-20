@@ -808,10 +808,12 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
     let cname = snd (Env.class_name env id) in
     let gen_read_api_covariance =
       (cname = "\\GenReadApi" || cname = "\\GenReadIdxApi") in
+    let privacy_policy_base_covariance =
+      (cname = "\\PrivacyPolicyBase") in
     let awaitable_covariance =
       (cname = "\\Awaitable" || cname = "\\WaitHandle") in
     let allow_this = allow_this &&
-      (awaitable_covariance || gen_read_api_covariance) in
+      (awaitable_covariance || gen_read_api_covariance || privacy_policy_base_covariance) in
     N.Happly (Env.class_name env id, hintl ~allow_this env hl)
 
 and get_constraint env tparam =

@@ -498,6 +498,43 @@ PHP_FUNCTION(ezc_array_val_set)
 }
 /* }}} */
 
+/* {{{ proto void ezc_array_set(array a, mixed key, mixed value)
+ * Set an element of an array passed by reference, by modifying the data
+ * pointer returned by zend_hash_find().
+ */
+PHP_FUNCTION(ezc_array_set)
+{
+  zval *array, *key, *value;
+  zval **data;
+  int found;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "azz", &array, &key, &value) == FAILURE)
+  {
+    return;
+  }
+
+  if (Z_TYPE_P(key) == IS_LONG) {
+    found = zend_hash_index_find(
+        Z_ARRVAL_P(array), Z_LVAL_P(key), (void**)&data);
+  } else if (Z_TYPE_P(key) == IS_STRING) {
+    found = zend_hash_find(
+        Z_ARRVAL_P(array), Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, (void**)&data);
+  } else {
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, "array key must be either integer or string");
+    return;
+  }
+  if (found == FAILURE) {
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, "array key must exist");
+    return;
+  }
+  zval_ptr_dtor(data);
+  Z_ADDREF_P(value);
+  *data = value;
+}
+
+/* }}} */
+
 /* {{{ EzcTestCloneable_create_object */
 static zend_object_value EzcTestCloneable_create_object(zend_class_entry *ce TSRMLS_DC)
 {
@@ -655,6 +692,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_create_cloneable_in_array, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_array_set, 0)
+  ZEND_ARG_INFO(1, a)
+  ZEND_ARG_INFO(0, key)
+  ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ ezc_test_functions[]
@@ -675,6 +717,7 @@ const zend_function_entry ezc_test_functions[] = {
   PHP_FE(ezc_hash_append, arginfo_ezc_hash_append)
   PHP_FE(ezc_array_val_set, arginfo_ezc_array_val_set)
   PHP_FE(ezc_create_cloneable_in_array, arginfo_ezc_create_cloneable_in_array)
+  PHP_FE(ezc_array_set, arginfo_ezc_array_set)
   PHP_FE_END
 };
 /* }}} */

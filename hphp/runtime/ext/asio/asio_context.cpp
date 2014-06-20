@@ -70,7 +70,7 @@ namespace {
 void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
 
-  exitContextQueue<false>(ctx_idx, m_runnableQueue);
+  exitContextVector(ctx_idx, m_runnableQueue);
 
   for (auto it : m_priorityQueueDefault) {
     exitContextQueue<true>(ctx_idx, it.second);
@@ -111,8 +111,8 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   while (!wait_handle->isFinished()) {
     // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.front();
-      m_runnableQueue.pop();
+      auto current = m_runnableQueue.back();
+      m_runnableQueue.pop_back();
       current->resume();
       continue;
     }

@@ -4065,6 +4065,19 @@ static bool isMergePoint(Offset offset, const RegionDesc& region) {
   return false;
 }
 
+static bool blockHasUnprocessedPred(
+  const RegionDesc&             region,
+  RegionDesc::BlockId           blockId,
+  const RegionDesc::BlockIdSet& processedBlocks)
+{
+  for (auto& arc : region.arcs) {
+    if (arc.dst == blockId && processedBlocks.count(arc.src) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /*
  * Returns whether the next instruction following inst (whether by
  * fallthrough or branch target) is a merge in region.
@@ -4089,6 +4102,7 @@ Translator::translateRegion(const RegionDesc& region,
 
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
+  IRBuilder& irb = ht.irBuilder();
   assert(!region.blocks.empty());
   const SrcKey startSk = region.blocks.front()->start();
   auto profilingFunc = false;
@@ -4100,6 +4114,8 @@ Translator::translateRegion(const RegionDesc& region,
     ht.setGenMode(IRGenMode::CFG);
     createBlockMaps(region, blockIdToIRBlock, blockIdToRegionBlock);
   }
+
+  RegionDesc::BlockIdSet processedBlocks;
 
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   for (auto b = 0; b < region.blocks.size(); b++) {
@@ -4118,7 +4134,11 @@ Translator::translateRegion(const RegionDesc& region,
 
     OffsetSet succOffsets;
     if (ht.genMode() == IRGenMode::CFG) {
-      ht.irBuilder().startBlock(blockIdToIRBlock[blockId]);
+      Block* irBlock = blockIdToIRBlock[blockId];
+      if (blockHasUnprocessedPred(region, blockId, processedBlocks)) {
+        irb.clearBlockState(irBlock);
+      }
+      ht.irBuilder().startBlock(irBlock);
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
     }
@@ -4358,6 +4378,8 @@ Translator::translateRegion(const RegionDesc& region,
         ht.prepareForSideExit();
       }
     }
+
+    processedBlocks.insert(blockId);
 
     assert(!typePreds.hasNext());
     assert(!byRefs.hasNext());

@@ -459,6 +459,7 @@ public:
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
+  F(bool,     JitLoops,                false)                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitDryRuns,              false)                           \
   F(bool,     JitCompareRegions,       false)                           \

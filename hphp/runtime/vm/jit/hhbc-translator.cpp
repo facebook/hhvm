@@ -2125,8 +2125,8 @@ void HhbcTranslator::emitJmpImpl(int32_t offset,
     if (flags & JmpFlagNextIsMerge) {
       exceptionBarrier();
     }
-    auto target = (flags & JmpFlagBreakTracelet
-                   || m_irb->blockIsIncompatible(offset))
+    auto target =
+      (!m_irb->blockExists(offset) || m_irb->blockIsIncompatible(offset))
       ? makeExit(offset)
       : makeBlock(offset);
     assert(target != nullptr);

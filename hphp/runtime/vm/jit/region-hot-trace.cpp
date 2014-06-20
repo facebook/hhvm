@@ -130,6 +130,10 @@ RegionDescPtr selectHotTrace(TransID triggerId,
   if (selectedVec) selectedVec->clear();
 
   PostConditions accumPostConds;
+  // Maps BlockIds to the set of BC offsets for its successor blocks.
+  // Used to prevent multiple successors with the same SrcKey for now.
+  // This can go away once task #4157613 is done.
+  hphp_hash_map<RegionDesc::BlockId, SrcKeySet> succSKSet;
 
   while (!selectedSet.count(tid)) {
 
@@ -200,13 +204,17 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     if (region->blocks.size() > 0) {
       auto newBlockId  = blockRegion->blocks.front().get()->id();
       auto predBlockId = region->blocks.back().get()->id();
-      region->addArc(predBlockId, newBlockId);
-
+      if (!RuntimeOption::EvalHHIRBytecodeControlFlow) {
+        region->addArc(predBlockId, newBlockId);
+      } else {
       // With bytecode control-flow, we add all forward arcs in the TransCFG
       // that are induced by the blocks in the region, as a simple way
       // to expose control-flow for now.
       // This can go away once Task #4075822 is done.
-      if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+        auto newBlockSrcKey = blockRegion->blocks.front().get()->start();
+        if (succSKSet[predBlockId].count(newBlockSrcKey)) break;
+        region->addArc(predBlockId, newBlockId);
+        succSKSet[predBlockId].insert(newBlockSrcKey);
         assert(hasTransId(newBlockId));
         auto newTransId = getTransId(newBlockId);
         for (auto iOther = 0; iOther < region->blocks.size(); iOther++) {
@@ -214,10 +222,22 @@ RegionDescPtr selectHotTrace(TransID triggerId,
           auto otherBlockId = other.get()->id();
           if (!hasTransId(otherBlockId)) continue;
           auto otherTransId = getTransId(otherBlockId);
+          auto otherBlockSrcKey = other.get()->start();
           if (cfg.hasArc(otherTransId, newTransId) &&
-              otherTransId != predBlockId &&  // avoid duplicate arc
-              !other.get()->inlinedCallee()) {
+              !other.get()->inlinedCallee() &&
+              // Task #4157613 will allow the following check to go away
+              !succSKSet[otherBlockId].count(newBlockSrcKey)) {
             region->addArc(otherBlockId, newBlockId);
+            succSKSet[otherBlockId].insert(newBlockSrcKey);
+          }
+          // When Eval.JitLoops is set, insert back-edges in the
+          // region if they exist in the TransCFG.
+          if (RuntimeOption::EvalJitLoops &&
+              cfg.hasArc(newTransId, otherTransId) &&
+              // Task #4157613 will allow the following check to go away
+              !succSKSet[newBlockId].count(otherBlockSrcKey)) {
+            region->addArc(newTransId, otherTransId);
+            succSKSet[newBlockId].insert(otherBlockSrcKey);
           }
         }
       }

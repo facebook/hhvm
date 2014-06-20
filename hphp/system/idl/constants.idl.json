@@ -3210,7 +3210,7 @@
         },
         {
             "name": "PHP_EXTRA_VERSION",
-            "value": ""
+            "value": "hiphop"
         },
         {
             "name": "PM_STR",

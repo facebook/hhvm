@@ -140,8 +140,11 @@ class IteratorIterator implements OuterIterator {
       $key = $this->iterator->key();
       $this->key = is_null($key) ? $this->position : $key;
       return true;
+    } else {
+      $this->current = null;
+      $this->key = null;
+      return false;
     }
-    return false;
   }
 
   protected function _getPosition() {

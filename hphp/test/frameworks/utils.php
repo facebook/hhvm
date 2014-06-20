@@ -34,24 +34,6 @@ function remove_dir_recursive(string $root_dir) {
                RecursiveDirectoryIterator::SKIP_DOTS),
              RecursiveIteratorIterator::CHILD_FIRST);
 
-  // This can be better, but good enough for now.
-  // Maybe just use rm -rf, but that always seems
-  // a bit dangerous. The below is probably only
-  // O(2n) or so. No order depth order guaranteed
-  // with the iterator, so actual files can be
-  // deleted before symlinks
-
-  // Get rid of the symlinks first to avoid orphan
-  // symlinks that cannot be deleted.
-  foreach ($files as $fileinfo) {
-    if (is_link($fileinfo)) {
-      $target = readlink($fileinfo);
-      unlink($fileinfo);
-      unlink($target);
-    }
-  }
-
-  // Get rid of the rest
   foreach ($files as $fileinfo) {
     if ($fileinfo->isDir()) {
       rmdir($fileinfo->getRealPath());

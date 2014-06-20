@@ -114,6 +114,9 @@
     commit: fa0046309160ea52aeed51b5608adfd263dfa0a2
     install_root: guzzle
     test_root: guzzle
+    clowns:
+      # Depends on external resource (example.com), unreliable
+      - guzzle/tests/Guzzle/Tests/Plugin/Async/AsyncPluginTest.php
   guzzle4:
     # Slightly after 4.1.1, to include
     # https://github.com/guzzle/guzzle/pull/701

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/thread-init-fini.h"
@@ -37,8 +38,6 @@
 
 #define DOM_LOAD_STRING 0
 #define DOM_LOAD_FILE 1
-
-#define LIBXML_SAVE_NOEMPTYTAG 1<<2
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -60,8 +59,6 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(dom, 20031129);
 #endif
 
 // defined in ext_simplexml.cpp
-extern bool libxml_use_internal_error();
-extern void libxml_add_error(const std::string &msg);
 extern xmlNodePtr simplexml_export_node(c_SimpleXMLElement* sxe);
 
 static void php_libxml_internal_error_handler(int error_type, void *ctx,

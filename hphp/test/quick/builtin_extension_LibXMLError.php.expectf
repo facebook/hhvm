@@ -1,25 +1,21 @@
 LibXMLError
-object(LibXMLError)#1 (0) {
+object(LibXMLError)#%d (0) {
 }
-
-Warning: Attempted to serialize unserializable builtin class LibXMLError in %s/builtin_extensions.inc on line 8
-string(2) "N;"
-NULL
-array(1) {
-  [0]=>
-  string(11) "__construct"
+string(23) "O:11:"LibXMLError":0:{}"
+object(LibXMLError)#%d (0) {
+}
+array(0) {
 }
 ================
 A_LibXMLError
-object(A_LibXMLError)#2 (1) {
+object(A_LibXMLError)#%d (1) {
   ["___x"]=>
   NULL
 }
-
-Warning: Attempted to serialize unserializable builtin class A_LibXMLError in %s/builtin_extensions.inc on line 26
-string(2) "N;"
-NULL
-array(1) {
-  [0]=>
-  string(11) "__construct"
+string(38) "O:13:"A_LibXMLError":1:{s:4:"___x";N;}"
+object(A_LibXMLError)#%d (1) {
+  ["___x"]=>
+  NULL
+}
+array(0) {
 }

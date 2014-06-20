@@ -3210,7 +3210,7 @@
         },
         {
             "name": "PHP_EXTRA_VERSION",
-            "value": ""
+            "value": "hhvm"
         },
         {
             "name": "PM_STR",

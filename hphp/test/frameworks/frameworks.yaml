@@ -153,6 +153,7 @@
       # Uses fixed location on filesystem (__DIR__) - can't be run in parallel
       - joomla-framework/src/Joomla/Archive/Tests/Bzip2Test.php
       - joomla-framework/src/Joomla/Archive/Tests/GzipTest.php
+      - joomla-framework/src/Joomla/Archive/Tests/ArchiveTest.php
       # These are subtests which need their own composer set and aren't run
       # by their travis setup
       - joomla-framework/src/Joomla/Google/Tests/JGoogleAuthOauth2Test.php

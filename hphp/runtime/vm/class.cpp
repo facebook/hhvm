@@ -1592,16 +1592,23 @@ void Class::setConstants() {
     const PreClass::Const* preConst = &m_preClass->constants()[i];
     ConstMap::Builder::iterator it2 = builder.find(preConst->name());
     if (it2 != builder.end()) {
-      if (!(builder[it2->second].m_class->attrs() & AttrInterface)) {
-        // Overlay ancestor's constant, only if it was not an interface const.
-        builder[it2->second].m_class = this;
-        builder[it2->second].m_val = preConst->val();
-      } else {
-        raise_error("Cannot override previously defined constant %s::%s in %s",
-                  builder[it2->second].m_class->name()->data(),
-                  preConst->name()->data(),
-                  m_preClass->name()->data());
+      auto definingClass = builder[it2->second].m_class;
+      // Forbid redefining constants from interfaces, but not superclasses.
+      // Constants from interfaces implemented by superclasses can be
+      // overridden.
+      if (definingClass->attrs() & AttrInterface) {
+        for (auto interface: declInterfaces()) {
+          if (interface->hasConstant(preConst->name())) {
+            raise_error("Cannot override previously defined constant "
+                        "%s::%s in %s",
+                        builder[it2->second].m_class->name()->data(),
+                        preConst->name()->data(),
+                        m_preClass->name()->data());
+          }
+        }
       }
+      builder[it2->second].m_class = this;
+      builder[it2->second].m_val = preConst->val();
     } else {
       // Append constant.
       Const constant;

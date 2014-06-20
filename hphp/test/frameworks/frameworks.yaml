@@ -145,7 +145,7 @@
     install_root: joomla-framework
     test_root: joomla-framework
     clowns:
-      # Uses fixed location on filesystem - can't be run in parallel
+      # Uses fixed location on filesystem (__DIR__) - can't be run in parallel
       - joomla-framework/src/Joomla/Archive/Tests/Bzip2Test.php
       - joomla-framework/src/Joomla/Archive/Tests/GzipTest.php
       # These are subtests which need their own composer set and aren't run
@@ -349,8 +349,7 @@
     install_root: mustache
     test_root: mustache
     clowns:
-      # This test fails if /tmp/mustache-test/foo exists. Given we run in
-      # parallel, this is a bad test.
+      # This test fails if sys_get_temp_dir().'/mustache-test/foo' exists.
       - mustache/test/Mustache/Test/Cache/FilesystemCacheTest.php
   paris:
     url: https://github.com/j4mie/paris.git
@@ -455,8 +454,8 @@
       #   find . -name '*.php' | grep -v vendor/ | xargs -n 1 -P 32 hhvm -l
       # We pass it, but it's slow, and not a unit test, so skip it
       - phpbb3/tests/lint_test.php
-      # These mutate the local file system. Flakey if multiple copies running
-      # simultaneously
+      # These mutate a fixed location on the local filesystem (__DIR__). This
+      # makes the tests unreliable.
       - phpbb3/tests/mimetype/guesser_test.php
       - phpbb3/tests/template/subdir/includephp_from_subdir_test.php
       - phpbb3/tests/template/includephp_test.php
@@ -521,7 +520,8 @@
     install_root: silverstripe
     test_root: silverstripe
     clowns:
-      # Mutates local filesystem, doesn't support multiple concurrent runs
+      # Mutates fixed location on local filesystem (within checkout directory),
+      # doesn't support multiple concurrent runs.
       - silverstripe/framework/tests/view/SSViewerCacheBlockTest.php
       - silverstripe/framework/tests/cache/CacheTest.php
   slim:
@@ -579,8 +579,9 @@
     clowns:
       # Needs a local memcache server
       - yii/tests/framework/caching/CMemCacheTest.php
-      # These mutate fixed locations on the local file system - can't run
-      # multiple instance at the same time reliably.
+      # These mutate fixed locations (relative to the checkout directory) on the
+      # local file system - can't run multiple instance at the same time
+      # reliably.
       - yii/tests/framework/caching/CFileCacheDependencyTest.php
       - yii/tests/framework/caching/CFileCacheTest.php
       - yii/tests/framework/caching/CDbCacheTest.php

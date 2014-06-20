@@ -240,44 +240,6 @@ Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameGetContent
 .
 Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameIsFresh
 .
-Assetic\Test\Factory\AssetFactoryTest::testCreateAssetCollection
-.
-Assetic\Test\Factory\AssetFactoryTest::testCreateAssetReference
-.
-Assetic\Test\Factory\AssetFactoryTest::testCreateFileAsset
-.
-Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAsset
-.
-Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAssetAndExcludeDirectories
-.
-Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAssetAndLoadFiles
-.
-Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #0
-.
-Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #1
-.
-Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #2
-.
-Assetic\Test\Factory\AssetFactoryTest::testFilter
-.
-Assetic\Test\Factory\AssetFactoryTest::testIncludingOptionalFilter
-.
-Assetic\Test\Factory\AssetFactoryTest::testInvalidFilter
-.
-Assetic\Test\Factory\AssetFactoryTest::testNestedFormula
-.
-Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerNotReference
-.
-Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerReference
-.
-Assetic\Test\Factory\AssetFactoryTest::testNoFilterManager
-.
-Assetic\Test\Factory\AssetFactoryTest::testOptionalInvalidFilter
-.
-Assetic\Test\Factory\AssetFactoryTest::testWorkerReturn
-.
-Assetic\Test\Factory\AssetFactoryTest::testWorkers
-.
 Assetic\Test\Factory\LazyAssetManagerTest::testGetFromLoader
 .
 Assetic\Test\Factory\LazyAssetManagerTest::testGetLastModified
@@ -487,7 +449,7 @@ Assetic\Test\Filter\JSMinPlusFilterTest::testRelativeSourceUrlImportImports
 Assetic\Test\Filter\JpegoptimFilterTest::testFilter
 S
 Assetic\Test\Filter\JpegtranFilterTest::testFilter
-.
+S
 Assetic\Test\Filter\LessFilterTest::testCompressImport
 S
 Assetic\Test\Filter\LessFilterTest::testFilterLoad

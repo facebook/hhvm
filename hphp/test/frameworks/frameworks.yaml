@@ -40,6 +40,8 @@
       # release of 1.1.2; test is fixed in master, but we want to test
       # latest stable
       - assetic/tests/Assetic/Test/Filter/GoogleClosure/CompilerApiFilterTest.php
+      # Flakey - mutates fixed location (__DIR__)
+      - assetic/tests/Assetic/Test/Factory/AssetFactoryTest.php
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
     url: https://github.com/cakephp/cakephp

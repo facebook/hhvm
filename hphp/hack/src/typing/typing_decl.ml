@@ -580,7 +580,7 @@ and method_check_override c m acc =
     | None when override && c.c_kind = Ast.Ctrait -> true
     | None when override ->
       Errors.add pos
-        ((Utils.strip_ns class_id)^"::"^id^"() should be an override; \
+        ((Utils.strip_ns class_id)^"::"^id^"() is marked as override; \
            no non-private parent definition found \
            or overridden parent is defined in non-<?hh code");
       false

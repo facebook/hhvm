@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle-defs.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
 
@@ -51,6 +52,17 @@ namespace {
       auto wait_handle = vector.back();
       vector.pop_back();
       wait_handle->exitContext(ctx_idx);
+    }
+  }
+
+  void onIOWaitEnter() {
+  }
+
+  void onIOWaitExit() {
+    // The web request may have timed out while we were waiting for I/O.
+    // Fail early to avoid further execution of PHP code.
+    if (UNLIKELY(checkConditionFlags())) {
+      EventHook::CheckSurprise();
     }
   }
 }
@@ -124,6 +136,8 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
     // Wait for pending external thread events...
     if (!m_externalThreadEvents.empty()) {
+      onIOWaitEnter();
+
       // ...but only until the next sleeper (from any context) finishes.
       AsioSession::TimePoint waketime;
       if (sleep_queue.empty()) {
@@ -145,14 +159,20 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
         // No received events means the next-to-wake sleeper timed us out.
         session->processSleepEvents();
       }
+
+      onIOWaitExit();
       continue;
     }
 
     // If we're here, then the only things left are sleepers.  Wait for one to
     // be ready (in any context).
     if (!m_sleepEvents.empty()) {
+      onIOWaitEnter();
+
       std::this_thread::sleep_until(sleep_queue.top()->getWakeTime());
       session->processSleepEvents();
+
+      onIOWaitExit();
       continue;
     }
 

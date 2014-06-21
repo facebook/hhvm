@@ -19,30 +19,25 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <memory>
-#include <set>
 #include <string>
-#include <vector>
-#include <atomic>
 #include <ctime>
 #include <cstdlib>
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/util/lock.h"
+#include "hphp/util/rank.h"
+#include "hphp/util/mutex.h"
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/util/process.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/profile-dump.h"
-#include "hphp/runtime/server/source-root-info.h"
-
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -81,10 +76,11 @@ struct CachedUnit {
  * they don't need to be littered with RepoAuthoritative checks.
  */
 
-using RepoUnitCache = tbb::concurrent_hash_map<
+using RepoUnitCache = RankedCHM<
   const StringData*,     // must be static
   CachedUnit,
-  StringDataHashCompare
+  StringDataHashCompare,
+  RankUnitCache
 >;
 RepoUnitCache s_repoUnitCache;
 
@@ -128,10 +124,11 @@ struct CachedUnitNonRepo {
   dev_t devId;
 };
 
-using NonRepoUnitCache = tbb::concurrent_hash_map<
+using NonRepoUnitCache = RankedCHM<
   const StringData*,     // must be static
   CachedUnitNonRepo,
-  StringDataHashCompare
+  StringDataHashCompare,
+  RankUnitCache
 >;
 NonRepoUnitCache s_nonRepoUnitCache;
 

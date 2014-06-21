@@ -48,9 +48,8 @@ enum Rank {
 
   RankStatCache,
 
-  RankFileRepo,
-  RankStatCacheNode = RankFileRepo,
-  RankFileMd5,
+  RankUnitCache,
+  RankStatCacheNode = RankUnitCache,
 
   RankInstanceCounts,
   RankInstanceBits = RankInstanceCounts,

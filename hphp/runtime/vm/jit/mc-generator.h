@@ -290,7 +290,8 @@ private:
   /*
    * Service request handlers.
    */
-  TCA bindJmp(TCA toSmash, SrcKey dest, JIT::ServiceRequest req, bool& smashed);
+  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req,
+              TransFlags trflags, bool& smashed);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
                      bool toTake,

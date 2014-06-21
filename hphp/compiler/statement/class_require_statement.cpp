@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/statement/trait_require_statement.h"
+#include "hphp/compiler/statement/class_require_statement.h"
 #include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/code_model_enums.h"
@@ -25,16 +25,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 
-TraitRequireStatement::TraitRequireStatement
+ClassRequireStatement::ClassRequireStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  const std::string &required,
  bool isExtends)
-    : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(TraitRequireStatement)),
+    : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassRequireStatement)),
       m_extends(isExtends), m_required(required) {
 }
 
-StatementPtr TraitRequireStatement::clone() {
-  TraitRequireStatementPtr new_stmt(new TraitRequireStatement(*this));
+StatementPtr ClassRequireStatement::clone() {
+  ClassRequireStatementPtr new_stmt(new ClassRequireStatement(*this));
   return new_stmt;
 }
 
@@ -42,43 +42,49 @@ StatementPtr TraitRequireStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void TraitRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
+void ClassRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
                                          ClassScopePtr scope) {
-  if (!scope->isTrait()) {
-    parseTimeFatal(Compiler::InvalidTraitStatement,
-                   "Only traits can require in class scope");
+  if (!scope->isTrait() && !scope->isInterface()) {
+     parseTimeFatal(Compiler::InvalidTraitStatement,
+                   "Only traits and interfaces may use 'require' in class scope");
+  }
+  if (scope->isInterface() && !m_extends) {
+    parseTimeFatal(
+      Compiler::InvalidTraitStatement,
+      "'require implements' may not be used in interface scope"
+      "; instead, use interface inheritance");
   }
 
   ar->parseOnDemandByClass(toLower(m_required));
-  scope->addTraitRequirement(m_required, m_extends);
+  scope->addClassRequirement(m_required, m_extends);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void TraitRequireStatement::analyzeProgram(AnalysisResultPtr ar) {}
+void ClassRequireStatement::analyzeProgram(AnalysisResultPtr ar) {}
 
-ConstructPtr TraitRequireStatement::getNthKid(int n) const {
+ConstructPtr ClassRequireStatement::getNthKid(int n) const {
   always_assert(false);
   return ConstructPtr();
 }
 
-int TraitRequireStatement::getKidCount() const {
+int ClassRequireStatement::getKidCount() const {
   return 0;
 }
 
-void TraitRequireStatement::setNthKid(int n, ConstructPtr cp) {
+void ClassRequireStatement::setNthKid(int n, ConstructPtr cp) {
   always_assert(false);
 }
 
-void TraitRequireStatement::inferTypes(AnalysisResultPtr ar) {
+void ClassRequireStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void TraitRequireStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("TraitRequiresStatement", 3);
+void ClassRequireStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ClassRequiresStatement", 3);
   cg.printPropertyHeader("name");
   cg.printValue(m_required);
   cg.printPropertyHeader("kind");
@@ -95,7 +101,7 @@ void TraitRequireStatement::outputCodeModel(CodeGenerator &cg) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void TraitRequireStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ClassRequireStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("require %s %s;\n",
             m_extends ? "extends " : "implements ",
             m_required.c_str());

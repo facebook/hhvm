@@ -70,7 +70,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   ad->m_kindAndSize      = shiftedSize | MixedArray::kMixedKind << 24;
   ad->m_posAndCount      = static_cast<uint32_t>(old->m_pos);  // zero count
   ad->m_capAndUsed       = shiftedSize | cap;
-  ad->m_maskAndLoad      = shiftedSize | mask;
+  ad->m_tableMask        = mask;
   ad->m_nextKI           = oldSize;
 
   assert(ad->m_kind == ArrayData::kMixedKind);
@@ -80,7 +80,6 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   assert(ad->m_used == oldSize);
   assert(ad->m_cap == cap);
   assert(ad->m_tableMask == mask);
-  assert(ad->m_hLoad == oldSize);
   assert(ad->m_nextKI == oldSize);
   // Can't checkInvariants yet, since we haven't populated the payload.
   return ad;

@@ -439,6 +439,72 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
   m_lastBcOff = lastBcOff;
 }
 
+void HhbcTranslator::emitSingletonSProp(const Func* func,
+                                        const Op* clsOp,
+                                        const Op* propOp) {
+  assert(*clsOp == Op::String);
+  assert(*propOp == Op::String);
+
+  TransFlags trflags;
+  trflags.noinlineSingleton = true;
+
+  auto exitBlock = makeExit(trflags);
+  auto catchBlock = makeCatch();
+
+  // Pull the class and property names.
+  auto const unit = func->unit();
+  auto const clsName  = unit->lookupLitstrId(getImmPtr(clsOp,  0)->u_SA);
+  auto const propName = unit->lookupLitstrId(getImmPtr(propOp, 0)->u_SA);
+
+  // Make sure we have a valid class.
+  auto const cls = Unit::lookupClass(clsName);
+  if (UNLIKELY(!classHasPersistentRDS(cls))) {
+    PUNT(SingletonSProp-Persistent);
+  }
+
+  // Make sure the sprop is accessible from the singleton method's context.
+  bool visible, accessible;
+  cls->findSProp(func->cls(), propName, visible, accessible);
+
+  if (UNLIKELY(!visible || !accessible)) {
+    PUNT(SingletonSProp-Accessibility);
+  }
+
+  // Look up the static property.
+  auto const sprop   = ldClsPropAddrKnown(catchBlock, cns(cls), cns(propName));
+  auto const unboxed = gen(UnboxPtr, sprop);
+  auto const value   = gen(LdMem, unboxed->type().deref(), unboxed, cns(0));
+
+  // Side exit if the static property is null.
+  auto isnull = gen(IsType, Type::Null, value);
+  gen(JmpNZero, exitBlock, isnull);
+
+  // Return the singleton.
+  pushIncRef(value);
+}
+
+void HhbcTranslator::emitSingletonSLoc(const Func* func, const Op* op) {
+  assert(*op == Op::StaticLocInit);
+
+  TransFlags trflags;
+  trflags.noinlineSingleton = true;
+
+  auto exit = makeExit(trflags);
+  auto const name = func->unit()->lookupLitstrId(getImmPtr(op, 1)->u_SA);
+
+  // Side exit if the static local is uninitialized.
+  auto const box = gen(LdStaticLocCached, StaticLocName { func, name });
+  gen(CheckStaticLocInit, exit, box);
+
+  // Side exit if the static local is null.
+  auto value = gen(LdRef, Type::Cell, exit, box);
+  auto isnull = gen(IsType, Type::Null, value);
+  gen(JmpNZero, exit, isnull);
+
+  // Return the singleton.
+  pushIncRef(value);
+}
+
 void HhbcTranslator::emitPrint() {
   Type type = topC()->type();
   if (type.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Str)) {
@@ -2059,8 +2125,8 @@ void HhbcTranslator::emitJmpImpl(int32_t offset,
     if (flags & JmpFlagNextIsMerge) {
       exceptionBarrier();
     }
-    auto target = (flags & JmpFlagBreakTracelet
-                   || m_irb->blockIsIncompatible(offset))
+    auto target =
+      (!m_irb->blockExists(offset) || m_irb->blockIsIncompatible(offset))
       ? makeExit(offset)
       : makeBlock(offset);
     assert(target != nullptr);
@@ -3222,6 +3288,10 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   if (!m_fpiStack.empty()) {
     m_fpiStack.pop();
   }
+}
+
+void HhbcTranslator::emitNameA() {
+  push(gen(LdClsName, popA()));
 }
 
 const StaticString
@@ -4687,6 +4757,23 @@ void HhbcTranslator::destroyName(SSATmp* name) {
   popDecRef(name->type());
 }
 
+SSATmp* HhbcTranslator::ldClsPropAddrKnown(Block* catchBlock,
+                                           SSATmp* ssaCls,
+                                           SSATmp* ssaName) {
+  auto const cls = ssaCls->clsVal();
+
+  auto const repoTy = [&] {
+    if (!RuntimeOption::RepoAuthoritative) return RepoAuthType{};
+    auto const slot = cls->lookupSProp(ssaName->strVal());
+    return cls->staticPropRepoAuthType(slot);
+  }();
+
+  auto const ptrTy = convertToType(repoTy).ptr();
+
+  emitInitSProps(cls, catchBlock);
+  return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
+}
+
 SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
                                       SSATmp* ssaCls,
                                       SSATmp* ssaName,
@@ -4710,18 +4797,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
   }();
 
   if (sPropKnown) {
-    auto const cls = ssaCls->clsVal();
-
-    auto const repoTy = [&] {
-      if (!RuntimeOption::RepoAuthoritative) return RepoAuthType{};
-      auto const slot = cls->lookupSProp(ssaName->strVal());
-      return cls->staticPropRepoAuthType(slot);
-    }();
-
-    auto const ptrTy = convertToType(repoTy).ptr();
-
-    emitInitSProps(cls, catchBlock);
-    return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
+    return ldClsPropAddrKnown(catchBlock, ssaCls, ssaName);
   }
 
   if (raise) {
@@ -5917,10 +5993,17 @@ Block* HhbcTranslator::makeExit(Offset targetBcOff /* = -1 */) {
   return makeExit(targetBcOff, spillValues);
 }
 
+Block* HhbcTranslator::makeExit(TransFlags trflags) {
+  auto spillValues = peekSpillValues();
+  return makeExit(-1, spillValues, trflags);
+}
+
 Block* HhbcTranslator::makeExit(Offset targetBcOff,
-                                std::vector<SSATmp*>& spillValues) {
+                                std::vector<SSATmp*>& spillValues,
+                                TransFlags trflags) {
   if (targetBcOff == -1) targetBcOff = bcOff();
-  return makeExitImpl(targetBcOff, ExitFlag::JIT, spillValues, CustomExit{});
+  return makeExitImpl(targetBcOff, ExitFlag::JIT, spillValues,
+                      CustomExit{}, trflags);
 }
 
 Block* HhbcTranslator::makePseudoMainExit(Offset targetBcOff /* = -1 */) {
@@ -5990,7 +6073,8 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
 
 Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
                                     std::vector<SSATmp*>& stackValues,
-                                    const CustomExit& customFn) {
+                                    const CustomExit& customFn,
+                                    TransFlags trflags) {
   Offset curBcOff = bcOff();
   BCMarker currentMarker = makeMarker(curBcOff);
   m_irb->evalStack().swap(stackValues);
@@ -6049,7 +6133,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 
     if (!changesPC) {
       // If the op changes PC, InterpOneCF handles getting to the right place
-      gen(ReqBindJmp, BCOffset(interpSk.advanced().offset()));
+      gen(ReqBindJmp, ReqBindJmpData(interpSk.advanced().offset()));
     }
     return exit;
   }
@@ -6061,9 +6145,9 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
     // func, while context.initBcOffset is in the outer func, so
     // bindJmp will always work (and there's no guarantee that there
     // is an anchor translation, so we must not use ReqRetranslate).
-    gen(ReqRetranslate);
+    gen(ReqRetranslate, ReqRetranslateData(trflags));
   } else {
-    gen(ReqBindJmp, BCOffset(targetBcOff));
+    gen(ReqBindJmp, ReqBindJmpData(targetBcOff, trflags));
   }
   return exit;
 }
@@ -6397,7 +6481,7 @@ void HhbcTranslator::end(Offset nextPc) {
   setBcOff(nextPc, true);
   auto const sp = spillStack();
   gen(SyncABIRegs, m_irb->fp(), sp);
-  gen(ReqBindJmp, BCOffset(nextPc));
+  gen(ReqBindJmp, ReqBindJmpData(nextPc));
 }
 
 void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {

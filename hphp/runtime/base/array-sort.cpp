@@ -125,7 +125,6 @@ void MixedArray::postSort(bool resetKeys) {
   assert(m_size > 0);
   auto const ht = hashTab();
   initHash(ht, hashSize());
-  m_hLoad = 0;
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
@@ -144,7 +143,6 @@ void MixedArray::postSort(bool resetKeys) {
       *ei = pos;
     }
   }
-  m_hLoad = m_size;
 }
 
 ArrayData* MixedArray::EscalateForSort(ArrayData* ad) {

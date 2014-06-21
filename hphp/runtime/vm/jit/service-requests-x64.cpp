@@ -47,30 +47,54 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
 
 namespace {
 
-void emitBindJ(CodeBlock& cb, CodeBlock& frozen,
-               ConditionCode cc, SrcKey dest, ServiceRequest req) {
+/*
+ * Work to be done for jmp-smashing service requests before the service request
+ * is emitted.
+ *
+ * Most notably, we must check if the CodeBlock for the jmp and for the stub
+ * are aliased.  If so, we reserve space for the jmp which we'll emit properly
+ * after the service request stub is emitted.
+ */
+ALWAYS_INLINE
+TCA emitBindJPre(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc) {
   mcg->backEnd().prepareForSmash(cb, cc == JIT::CC_None ? kJmpLen : kJmpccLen);
+
   TCA toSmash = cb.frontier();
   if (cb.base() == frozen.base()) {
-    Asm a { cb };
-    emitJmpOrJcc(a, cc, toSmash);
+    mcg->backEnd().emitSmashableJump(cb, toSmash, cc);
   }
 
   mcg->setJmpTransID(toSmash);
 
+  return toSmash;
+}
+
+/*
+ * Work to be done for jmp-smashing service requests after the service request
+ * stub is emitted.
+ */
+ALWAYS_INLINE
+void emitBindJPost(CodeBlock& cb, CodeBlock& frozen,
+                   ConditionCode cc, TCA toSmash, TCA sr) {
+  Asm a { cb };
+  if (cb.base() == frozen.base()) {
+    CodeCursor cursor(cb, toSmash);
+    mcg->backEnd().emitSmashableJump(cb, sr, cc);
+  } else {
+    mcg->backEnd().emitSmashableJump(cb, sr, cc);
+  }
+}
+
+void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
+               SrcKey dest, ServiceRequest req, TransFlags trflags) {
+  auto toSmash = emitBindJPre(cb, frozen, cc);
   TCA sr = emitEphemeralServiceReq(frozen,
                                    mcg->getFreeStub(frozen,
                                                     &mcg->cgFixups()),
                                    req, RipRelative(toSmash),
-                                   dest.toAtomicInt());
-
-  Asm a { cb };
-  if (cb.base() == frozen.base()) {
-    CodeCursor cursor(cb, toSmash);
-    emitJmpOrJcc(a, cc, sr);
-  } else {
-    emitJmpOrJcc(a, cc, sr);
-  }
+                                   dest.toAtomicInt(),
+                                   trflags.packed);
+  emitBindJPost(cb, frozen, cc, toSmash, sr);
 }
 
 /*
@@ -306,17 +330,28 @@ emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
 }
 
 void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
-                      SrcKey dest) {
-  emitBindJ(cb, frozen, cc, dest, REQ_BIND_SIDE_EXIT);
+                      SrcKey dest, TransFlags trflags) {
+  emitBindJ(cb, frozen, cc, dest, REQ_BIND_SIDE_EXIT, trflags);
 }
 
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
                  SrcKey dest) {
-  emitBindJ(cb, frozen, cc, dest, REQ_BIND_JCC);
+  emitBindJ(cb, frozen, cc, dest, REQ_BIND_JCC, TransFlags{});
 }
 
-void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest) {
-  emitBindJ(cb, frozen, JIT::CC_None, dest, REQ_BIND_JMP);
+void emitBindJmp(CodeBlock& cb, CodeBlock& frozen,
+                 SrcKey dest, TransFlags trflags) {
+  emitBindJ(cb, frozen, CC_None, dest, REQ_BIND_JMP, trflags);
+}
+
+TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
+                    SrcKey dest, TransFlags trflags) {
+  auto toSmash = emitBindJPre(cb, frozen, cc);
+  TCA sr = emitServiceReq(frozen, REQ_RETRANSLATE,
+                          dest.offset(), trflags.packed);
+  emitBindJPost(cb, frozen, cc, toSmash, sr);
+
+  return toSmash;
 }
 
 int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,

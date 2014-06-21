@@ -6,10 +6,6 @@ Mustache_Test_Cache_AbstractCacheTest::testGetSetLogger
 .
 Mustache_Test_Cache_AbstractCacheTest::testSetLoggerThrowsExceptions
 .
-Mustache_Test_Cache_FilesystemCacheTest::testCacheGetNone
-.
-Mustache_Test_Cache_FilesystemCacheTest::testCachePut
-.
 Mustache_Test_CompilerTest::testCompile with data set #0
 .
 Mustache_Test_CompilerTest::testCompile with data set #1

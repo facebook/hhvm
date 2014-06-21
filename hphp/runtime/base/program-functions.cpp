@@ -1309,12 +1309,11 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      auto const phpFile = g_context->lookupPhpFile(
+      auto const unit = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
-      if (phpFile == nullptr) {
+      if (unit == nullptr) {
         throw FileOpenException(po.lint);
       }
-      Unit* unit = phpFile->unit();
       const StringData* msg;
       int line;
       if (unit->compileTimeFatal(msg, line)) {
@@ -1516,10 +1515,6 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
 
 ///////////////////////////////////////////////////////////////////////////////
 // C++ ffi
-
-extern "C" void hphp_fatal_error(const char *s) {
-  throw_fatal(s);
-}
 
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {

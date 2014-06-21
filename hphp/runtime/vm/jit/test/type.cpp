@@ -259,11 +259,23 @@ TEST(Type, TypeConstraints) {
                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
 }
 
-TEST(Type, Relax) {
-  EXPECT_EQ(Type::BoxedInitCell | Type::InitNull,
-            relaxType(Type::BoxedObj |Type::InitNull,
+TEST(Type, RelaxType) {
+  EXPECT_EQ(Type::Gen, relaxType(Type::BoxedStr, {DataTypeGeneric}));
+  EXPECT_EQ(Type::BoxedInitCell | Type::Uncounted,
+            relaxType(Type::BoxedObj | Type::InitNull,
                       {DataTypeCountness, DataTypeGeneric}));
 
+
+  auto inner = TypeConstraint{DataTypeSpecialized};
+  inner.setDesiredClass(SystemLib::s_IteratorClass);
+  inner.innerCat = DataTypeSpecialized;
+  inner.category = DataTypeSpecific;
+  auto type = Type::Obj.specialize(SystemLib::s_IteratorClass).box();
+  EXPECT_EQ("BoxedObj<Iterator>", type.toString());
+  EXPECT_EQ(type, relaxType(type, inner));
+}
+
+TEST(Type, RelaxConstraint) {
   EXPECT_EQ(TypeConstraint(DataTypeCountness, DataTypeCountness),
             relaxConstraint(TypeConstraint{DataTypeSpecific, DataTypeSpecific},
                             Type::BoxedCell,

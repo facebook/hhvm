@@ -42,6 +42,4 @@ let make_env options =
     files_info     = SMap.empty;
     errorl         = [];
     failed_parsing = SSet.empty;
-    failed_decl    = SSet.empty;
-    failed_check   = SSet.empty;
   }

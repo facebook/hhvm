@@ -59,24 +59,14 @@ using std::string;
 
 const StaticString
   s_offsetExists("offsetExists"),
-  s___autoload("__autoload"),
   s___call("__call"),
   s___callStatic("__callStatic"),
   s___invoke("__invoke"),
-  s_exception("exception"),
-  s_previous("previous"),
   s_self("self"),
   s_parent("parent"),
-  s_static("static"),
-  s_class("class"),
-  s_function("function"),
-  s_constant("constant"),
-  s_type("type"),
-  s_failure("failure");
+  s_static("static");
 
 ///////////////////////////////////////////////////////////////////////////////
-
-typedef smart::unique_ptr<CufIter> SmartCufIterPtr;
 
 bool array_is_valid_callback(const Array& arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
@@ -367,64 +357,18 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   return ret;
 }
 
-/*
- * Helper method from converting between a PHP function and a CufIter.
- */
-static bool vm_decode_function_cufiter(const Variant& function,
-                                       SmartCufIterPtr& cufIter) {
-  ObjectData* obj = nullptr;
-  Class* cls = nullptr;
-  CallerFrame cf;
-  StringData* invName = nullptr;
-  // Don't warn here, let the caller decide what to do if the func is nullptr.
-  const HPHP::Func* func = vm_decode_function(function, cf(), false,
-                                              obj, cls, invName, false);
-  if (func == nullptr) {
-    return false;
+static Variant invoke_failed(const char *func,
+                             bool fatal /* = true */) {
+  if (fatal) {
+    throw InvalidFunctionCallException(func);
   }
-
-  cufIter = smart::make_unique<CufIter>();
-  cufIter->setFunc(func);
-  cufIter->setName(invName);
-  if (obj) {
-    cufIter->setCtx(obj);
-    obj->incRefCount();
-  } else {
-    cufIter->setCtx(cls);
-  }
-
-  return true;
+  raise_warning("call_user_func to non-existent function %s", func);
+  return false;
 }
 
-/*
- * Wraps calling an (autoload) PHP function from a CufIter.
- */
-static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
-                                         const Array& params) {
-  ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  StringData* invName = cufIter.name();
-  const HPHP::Func* f = cufIter.func();
-  if (cufIter.ctx()) {
-    if (uintptr_t(cufIter.ctx()) & 1) {
-      cls = (Class*)(uintptr_t(cufIter.ctx()) & ~1);
-    } else {
-      obj = (ObjectData*)cufIter.ctx();
-    }
-  }
-  assert(!obj || !cls);
-  if (invName) {
-    invName->incRefCount();
-  }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf);
-  return ret;
-}
-
-Variant invoke(const String& function, const Variant& params,
-               strhash_t hash /* = -1 */, bool tryInterp /* = true */,
-               bool fatal /* = true */) {
+static Variant invoke(const String& function, const Variant& params,
+                      strhash_t hash, bool tryInterp,
+                      bool fatal) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     Variant ret;
@@ -434,6 +378,8 @@ Variant invoke(const String& function, const Variant& params,
   return invoke_failed(function.c_str(), fatal);
 }
 
+// Declared in externals.h.  If you're considering calling this
+// function for some new code, please reconsider.
 Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   String funcName(function, CopyString);
@@ -456,26 +402,6 @@ Variant invoke_static_method(const String& s, const String& method,
   Variant ret;
   g_context->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
   return ret;
-}
-
-Variant invoke_failed(const Variant& func,
-                      bool fatal /* = true */) {
-  if (func.isObject()) {
-    return o_invoke_failed(func.toCObjRef()->o_getClassName().c_str(),
-        "__invoke", fatal);
-  } else {
-    return invoke_failed(func.toString().c_str(), fatal);
-  }
-}
-
-Variant invoke_failed(const char *func,
-                      bool fatal /* = true */) {
-  if (fatal) {
-    throw InvalidFunctionCallException(func);
-  } else {
-    raise_warning("call_user_func to non-existent function %s", func);
-    return false;
-  }
 }
 
 Variant o_invoke_failed(const char *cls, const char *meth,
@@ -811,6 +737,33 @@ String concat4(const String& s1, const String& s2, const String& s3,
   return str;
 }
 
+static bool invoke_file_impl(Variant& res, const String& path, bool once,
+                             const char *currentDir) {
+  bool initial;
+  auto const u = g_context->lookupPhpFile(path.get(),
+    currentDir, &initial);
+  if (u == nullptr) return false;
+  if (!once || initial) {
+    g_context->invokeUnit(res.asTypedValue(), u);
+  }
+  return true;
+}
+
+static NEVER_INLINE Variant throw_missing_file(const char* file) {
+  if (file[0] == '\0') throw NoFileSpecifiedException();
+  throw PhpFileDoesNotExistException(file);
+}
+
+static Variant invoke_file(const String& s,
+                           bool once,
+                           const char *currentDir) {
+  Variant r;
+  if (invoke_file_impl(r, s, once, currentDir)) {
+    return r;
+  }
+  return throw_missing_file(s.c_str());
+}
+
 Variant include_impl_invoke(const String& file, bool once,
                             const char *currentDir) {
   if (file[0] == '/') {
@@ -829,30 +782,6 @@ Variant include_impl_invoke(const String& file, bool once,
     // Don't try/catch - We want the exception to be passed along
     return invoke_file(file, once, currentDir);
   }
-}
-
-Variant invoke_file(const String& s, bool once, const char *currentDir) {
-  Variant r;
-  if (invoke_file_impl(r, s, once, currentDir)) {
-    return r;
-  }
-  return throw_missing_file(s.c_str());
-}
-
-bool invoke_file_impl(Variant &res, const String& path, bool once,
-                      const char *currentDir) {
-  bool initial;
-  auto const efile = g_context->lookupPhpFile(path.get(),
-    currentDir, &initial);
-  Unit* u = nullptr;
-  if (efile) u = efile->unit();
-  if (u == nullptr) {
-    return false;
-  }
-  if (!once || initial) {
-    g_context->invokeUnit((TypedValue*)(&res), u);
-  }
-  return true;
 }
 
 /**
@@ -985,311 +914,15 @@ static Variant include_impl(const String& file, bool once,
   return ctx.returnValue;
 }
 
-Variant include(const String& file, bool once /* = false */,
-                const char *currentDir /* = NULL */,
-                bool raiseNotice /*= true*/) {
-  return include_impl(file, once, currentDir, false, raiseNotice);
-}
-
-Variant require(const String& file, bool once /* = false */,
-                const char *currentDir /* = NULL */,
-                bool raiseNotice /*= true*/) {
+Variant require(const String& file,
+                bool once,
+                const char* currentDir,
+                bool raiseNotice) {
   return include_impl(file, once, currentDir, true, raiseNotice);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// class AutoloadHandler
-
-IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
-
-void AutoloadHandler::requestInit() {
-  assert(m_map.get() == nullptr);
-  assert(m_map_root.get() == nullptr);
-  assert(m_loading.get() == nullptr);
-  m_spl_stack_inited = false;
-  new (&m_handlers) smart::deque<HandlerBundle>();
-}
-
-void AutoloadHandler::requestShutdown() {
-  m_map.reset();
-  m_map_root.reset();
-  m_loading.reset();
-  // m_spl_stack_inited will be re-initialized by the next requestInit
-  // m_handlers will be re-initialized by the next requestInit
-}
-
-bool AutoloadHandler::setMap(const Array& map, const String& root) {
-  this->m_map = map;
-  this->m_map_root = root;
-  return true;
-}
-
-class ClassExistsChecker {
- public:
-  ClassExistsChecker() {}
-  bool operator()(const String& name) const {
-    return Unit::lookupClass(name.get()) != nullptr;
-  }
-};
-
-class ConstantExistsChecker {
- public:
-  bool operator()(const String& name) const {
-    return Unit::lookupCns(name.get()) != nullptr;
-  }
-};
-
-template <class T>
-AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
-                                                     const String& kind,
-                                                     bool toLower,
-                                                     const T &checkExists) {
-  assert(!m_map.isNull());
-
-  // always normalize name before autoloading
-  const String& name = normalizeNS(clsName);
-
-  while (true) {
-    const Variant& type_map = m_map.get()->get(kind);
-    auto const typeMapCell = type_map.asCell();
-    if (typeMapCell->m_type != KindOfArray) return Failure;
-    String canonicalName = toLower ? f_strtolower(name) : name;
-    const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
-    bool ok = false;
-    Variant err{Variant::NullInit()};
-    if (file.isString()) {
-      String fName = file.toCStrRef().get();
-      if (fName.get()->data()[0] != '/') {
-        if (!m_map_root.empty()) {
-          fName = m_map_root + fName;
-        }
-      }
-      try {
-        VMRegAnchor _;
-        bool initial;
-        auto const ec = g_context.getNoCheck();
-        Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
-        if (u) {
-          if (initial) {
-            TypedValue retval;
-            ec->invokeFunc(&retval, u->getMain(), init_null_variant,
-                           nullptr, nullptr, nullptr, nullptr,
-                           ExecutionContext::InvokePseudoMain);
-            tvRefcountedDecRef(&retval);
-          }
-          ok = true;
-        }
-      } catch (Exception& e) {
-        err = e.getMessage();
-      } catch (Object& e) {
-        err = e;
-      } catch (...) {
-        err = String("Unknown Exception");
-      }
-    }
-    if (ok && checkExists(name)) {
-      return Success;
-    }
-    const Variant& func = m_map.get()->get(s_failure);
-    if (func.isNull()) return Failure;
-    // can throw, otherwise
-    //  - true means the map was updated. try again
-    //  - false means we should stop applying autoloaders (only affects classes)
-    //  - anything else means keep going
-    Variant action = vm_call_user_func(func,
-                                       make_packed_array(kind, name, err));
-    auto const actionCell = action.asCell();
-    if (actionCell->m_type == KindOfBoolean) {
-      if (actionCell->m_data.num) continue;
-      return StopAutoloading;
-    }
-    return ContinueAutoloading;
-  }
-}
-
-bool AutoloadHandler::autoloadFunc(StringData* name) {
-  return !m_map.isNull() &&
-    loadFromMap(name, s_function, true, function_exists) != Failure;
-}
-
-bool AutoloadHandler::autoloadConstant(StringData* name) {
-  return !m_map.isNull() &&
-    loadFromMap(name, s_constant, false, ConstantExistsChecker()) != Failure;
-}
-
-bool AutoloadHandler::autoloadType(const String& name) {
-  return !m_map.isNull() &&
-    loadFromMap(name, s_type, true,
-      [] (const String& name) {
-        return Unit::GetNamedEntity(name.get())->
-          getCachedTypeAlias() != nullptr;
-      }
-    ) != Failure;
-}
-
-/**
- * invokeHandler returns true if any autoload handlers were executed,
- * false otherwise. When this function returns true, it is the caller's
- * responsibility to check if the given class or interface exists.
- */
-bool AutoloadHandler::invokeHandler(const String& clsName,
-                                    bool forceSplStack /* = false */) {
-
-  if (clsName.empty()) return false;
-
-  const String& className = normalizeNS(clsName);
-
-  if (!m_map.isNull()) {
-    ClassExistsChecker ce;
-    Result res = loadFromMap(className, s_class, true, ce);
-    if (res == ContinueAutoloading) {
-      if (ce(className)) return true;
-    } else {
-      if (res != Failure) return res == Success;
-    }
-  }
-  // If we end up in a recursive autoload loop where we try to load the
-  // same class twice, just fail the load to mimic PHP as many frameworks
-  // rely on it unless we are forcing a restart (due to spl_autoload_call)
-  // in which case autoload is allowed to be reentrant.
-  if (!forceSplStack) {
-    if (m_loading.exists(className)) { return false; }
-    m_loading.add(className, className);
-  } else {
-    // We can still overflow the stack if there is a loop when using
-    // spl_autoload_call directly, but this behavior matches the reference
-    // implementation.
-    m_loading.append(className);
-  }
-
-  // Make sure state is cleaned up from this load; autoloading of arbitrary
-  // code below can throw
-  SCOPE_EXIT {
-    String l_className = m_loading.pop();
-    assert(l_className == className);
-  };
-
-  Array params = PackedArrayInit(1).append(className).toArray();
-  if (!m_spl_stack_inited && !forceSplStack) {
-    if (function_exists(s___autoload)) {
-      invoke(s___autoload, params, -1, true, false);
-      return true;
-    }
-    return false;
-  }
-  if (!m_spl_stack_inited || m_handlers.empty()) {
-    return false;
-  }
-  Object autoloadException;
-  for (const HandlerBundle& hb : m_handlers) {
-    try {
-      vm_call_user_func_cufiter(*hb.m_cufIter, params);
-    } catch (Object& ex) {
-      assert(ex.instanceof(SystemLib::s_ExceptionClass));
-      if (autoloadException.isNull()) {
-        autoloadException = ex;
-      } else {
-        Object cur = ex;
-        Variant next = cur->o_get(s_previous, false, s_exception);
-        while (next.isObject()) {
-          cur = next.toObject();
-          next = cur->o_get(s_previous, false, s_exception);
-        }
-        cur->o_set(s_previous, autoloadException, s_exception);
-        autoloadException = ex;
-      }
-    }
-    if (Unit::lookupClass(className.get()) != nullptr) {
-      break;
-    }
-  }
-  if (!autoloadException.isNull()) {
-    throw autoloadException;
-  }
-  return true;
-}
-
-Array AutoloadHandler::getHandlers() {
-  if (!m_spl_stack_inited) {
-    return Array();
-  }
-
-  PackedArrayInit handlers(m_handlers.size());
-
-  for (const HandlerBundle& hb : m_handlers) {
-    handlers.append(hb.m_handler);
-  }
-
-  return handlers.toArray();
-}
-
-bool AutoloadHandler::CompareBundles::operator()(
-  const HandlerBundle& hb) {
-  auto const& lhs = *m_cufIter;
-  auto const& rhs = *hb.m_cufIter;
-
-  if (lhs.ctx() != rhs.ctx()) {
-    // We only consider ObjectData* for equality (not a Class*) so if either is
-    // an object these are not considered equal.
-    if (!(uintptr_t(lhs.ctx()) & 1) || !(uintptr_t(rhs.ctx()) & 1)) {
-      return false;
-    }
-  }
-
-  return lhs.func() == rhs.func();
-}
-
-bool AutoloadHandler::addHandler(const Variant& handler, bool prepend) {
-  SmartCufIterPtr cufIter = nullptr;
-  if (!vm_decode_function_cufiter(handler, cufIter)) {
-    return false;
-  }
-
-  m_spl_stack_inited = true;
-
-  // Zend doesn't modify the order of the list if the handler is already
-  // registered.
-  auto const& compareBundles = CompareBundles(cufIter.get());
-  if (std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles) !=
-      m_handlers.end()) {
-    return true;
-  }
-
-  if (!prepend) {
-    m_handlers.emplace_back(handler, cufIter);
-  } else {
-    m_handlers.emplace_front(handler, cufIter);
-  }
-
-  return true;
-}
-
-bool AutoloadHandler::isRunning() {
-  return !m_loading.empty();
-}
-
-void AutoloadHandler::removeHandler(const Variant& handler) {
-  SmartCufIterPtr cufIter = nullptr;
-  if (!vm_decode_function_cufiter(handler, cufIter)) {
-    return;
-  }
-
-  // Use find_if instead of remove_if since we know there can only be one match
-  // in the vector.
-  auto const& compareBundles = CompareBundles(cufIter.get());
-  auto it = std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles);
-  if (it != m_handlers.end()) {
-    m_handlers.erase(it);
-  }
-}
-
-void AutoloadHandler::removeAllHandlers() {
-  m_spl_stack_inited = false;
-  m_handlers.clear();
-}
-
 bool function_exists(const String& function_name) {
-  auto f = HPHP::Unit::lookupFunc(function_name.get());
+  auto f = Unit::lookupFunc(function_name.get());
   return (f != nullptr) &&
          (f->builtinFuncPtr() != Native::unimplementedWrapper);
 }

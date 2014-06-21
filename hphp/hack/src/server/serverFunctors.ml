@@ -19,7 +19,7 @@ type failed_parsing = SSet.t
 type files = SSet.t
 type client = in_channel * out_channel
 
-type program_ret = 
+type program_ret =
   | Die
   | Continue of env
   | Exit of int
@@ -93,7 +93,7 @@ module HackProgram : SERVER_PROGRAM = struct
       Die
     end else Continue env
 
-  let infer = ServerInferType.go 
+  let infer = ServerInferType.go
 
   let suggest _files oc =
     output_string oc "Unimplemented\n";
@@ -235,15 +235,17 @@ end = struct
         let status = ServerSign.save dump filename in
         output_string oc (status^"\n");
         flush oc
-    | ServerMsg.SHOW classname ->
+    | ServerMsg.SHOW name ->
         output_string oc "starting\n";
         output_string oc "class:\n";
         SharedMem.invalidate_caches();
+        let qual_name = if name.[0] = '\\' then name
+          else ("\\"^name) in
         let nenv = env.nenv in
-        (match SMap.get classname nenv.Naming.iclasses with
+        (match SMap.get qual_name nenv.Naming.iclasses with
         | Some (p, _) -> output_string oc ((Pos.string p)^"\n")
         | None -> output_string oc "Missing from nenv\n");
-        let class_ = Typing_env.Classes.get classname in
+        let class_ = Typing_env.Classes.get qual_name in
         (match class_ with
         | None ->
             output_string oc "Missing from Typing_env\n"
@@ -252,10 +254,10 @@ end = struct
             output_string oc (class_str^"\n")
         );
         output_string oc "function:\n";
-        (match SMap.get classname nenv.Naming.ifuns with
+        (match SMap.get qual_name nenv.Naming.ifuns with
         | Some (p, _) -> output_string oc ((Pos.string p)^"\n")
         | None -> output_string oc "Missing from nenv\n");
-        let fun_ = Typing_env.Funs.get classname in
+        let fun_ = Typing_env.Funs.get qual_name in
         (match fun_ with
         | None ->
             output_string oc "Missing from Typing_env\n"
@@ -274,10 +276,10 @@ end = struct
          * we have already returned from handle_connection(), hence
          * this additional try.
          *)
-        (try 
+        (try
            build_hook genv env;
            close_out oc;
-        with exn -> 
+        with exn ->
           Printf.printf "Exn in build_hook: %s" (Printexc.to_string exn);
         );
         ServerTypeCheck.hook_after_parsing := (fun _ _ -> ())

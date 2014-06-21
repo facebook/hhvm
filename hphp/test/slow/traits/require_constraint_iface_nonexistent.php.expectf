@@ -1,0 +1,1 @@
+Fatal error: 'NonExistent' required by interface 'I1' cannot be loaded in %s/slow/traits/require_constraint_iface_nonexistent.php on line 3

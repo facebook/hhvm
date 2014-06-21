@@ -207,7 +207,7 @@ module Full = struct
     let buf = Buffer.create 50 in
     ty ISet.empty env (Buffer.add_string buf) x;
     Buffer.contents buf
-  
+
   let to_string_strip_ns env x =
     let buf = Buffer.create 50 in
     let add_string str =
@@ -237,7 +237,7 @@ module PrintClass = struct
 
   let pos p =
     let line, start, end_ = Pos.info_pos p in
-    Printf.sprintf "(%d, %d, %d)" line start end_
+    Printf.sprintf "(line %d: chars %d-%d)" line start end_
 
   let class_kind = function
     | Ast.Cabstract -> "Cabstract"

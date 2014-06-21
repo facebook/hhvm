@@ -505,6 +505,7 @@ O(InitObjProps,                     ND, S(Obj),                          E|N) \
 O(CustomInstanceInit,        DAllocObj, S(Obj),                         Er|N) \
                                                                               \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
+O(LdClsName,              D(StaticStr), S(Cls),                            C) \
 O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \

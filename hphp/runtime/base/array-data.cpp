@@ -94,11 +94,12 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 
 #define DISPATCH(entry)                         \
   { PackedArray::entry,                         \
-    MixedArray::entry,                           \
+    MixedArray::entry,                          \
     APCLocalArray::entry,                       \
     EmptyArray::entry,                          \
     NameValueTableWrapper::entry,               \
-    ProxyArray::entry                           \
+    ProxyArray::entry,                          \
+    MixedArray::entry                           \
   },
 
 /*
@@ -581,19 +582,22 @@ extern const ArrayFunctions g_array_funcs = {
     &ZSetIntThrow,
     &ZSetIntThrow,
     &ZSetIntThrow,
-    &ProxyArray::ZSetInt },
+    &ProxyArray::ZSetInt,
+    &MixedArray::ZSetInt },
   { &PackedArray::ZSetStr,
     &MixedArray::ZSetStr,
     &ZSetStrThrow,
     &ZSetStrThrow,
     &ZSetStrThrow,
-    &ProxyArray::ZSetStr },
+    &ProxyArray::ZSetStr,
+    &MixedArray::ZSetStr },
   { &PackedArray::ZAppend,
     &MixedArray::ZAppend,
     &ZAppendThrow,
     &ZAppendThrow,
     &ZAppendThrow,
-    &ProxyArray::ZAppend },
+    &ProxyArray::ZAppend,
+    &MixedArray::ZAppend },
 };
 
 #undef DISPATCH
@@ -834,13 +838,14 @@ const Variant& ArrayData::getNotFound(const Variant& k) {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,6> names = {{
+  std::array<const char*,7> names = {{
     "PackedKind",
     "MixedKind",
     "SharedKind",
     "EmptyKind",
     "NvtwKind",
     "ProxyKind",
+    "IntMapKind",
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

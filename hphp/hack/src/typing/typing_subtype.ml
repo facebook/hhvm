@@ -109,8 +109,8 @@ and sub_type env ty1 ty2 =
       let env = Env.set_allow_null_as_void env in
       let env = sub_type env ty1 ty2 in
       Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
-  | (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet")), [ty1]))),
-    (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet")), [ty2]))) ->
+  | (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty1]))),
+    (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty2]))) ->
       sub_type env ty1 ty2
   | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty1; vty1]))),
     (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty2; vty2]))) ->

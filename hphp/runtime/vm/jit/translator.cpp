@@ -33,35 +33,35 @@
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
 
-#include "hphp/util/trace.h"
-#include "hphp/util/map-walker.h"
-#include "hphp/util/ringbuffer.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/pendq.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/util/map-walker.h"
+#include "hphp/util/ringbuffer.h"
+#include "hphp/util/trace.h"
 
 #define KindOfUnknown DontUseKindOfUnknownInThisFile
 #define KindOfInvalid DontUseKindOfInvalidInThisFile
@@ -4065,6 +4065,19 @@ static bool isMergePoint(Offset offset, const RegionDesc& region) {
   return false;
 }
 
+static bool blockHasUnprocessedPred(
+  const RegionDesc&             region,
+  RegionDesc::BlockId           blockId,
+  const RegionDesc::BlockIdSet& processedBlocks)
+{
+  for (auto& arc : region.arcs) {
+    if (arc.dst == blockId && processedBlocks.count(arc.src) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /*
  * Returns whether the next instruction following inst (whether by
  * fallthrough or branch target) is a merge in region.
@@ -4083,11 +4096,13 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
-                            RegionBlacklist& toInterp) {
+                            RegionBlacklist& toInterp,
+                            TransFlags trflags) {
   const Timer translateRegionTimer(Timer::translateRegion);
 
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
+  IRBuilder& irb = ht.irBuilder();
   assert(!region.blocks.empty());
   const SrcKey startSk = region.blocks.front()->start();
   auto profilingFunc = false;
@@ -4100,6 +4115,8 @@ Translator::translateRegion(const RegionDesc& region,
     createBlockMaps(region, blockIdToIRBlock, blockIdToRegionBlock);
   }
 
+  RegionDesc::BlockIdSet processedBlocks;
+
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block  = region.blocks[b];
@@ -4109,6 +4126,7 @@ Translator::translateRegion(const RegionDesc& region,
     auto byRefs        = makeMapWalker(block->paramByRefs());
     auto refPreds      = makeMapWalker(block->reffinessPreds());
     auto knownFuncs    = makeMapWalker(block->knownFuncs());
+    auto skipTrans     = false;
 
     const Func* topFunc = nullptr;
     TransID profTransId = getTransId(blockId);
@@ -4116,7 +4134,11 @@ Translator::translateRegion(const RegionDesc& region,
 
     OffsetSet succOffsets;
     if (ht.genMode() == IRGenMode::CFG) {
-      ht.irBuilder().startBlock(blockIdToIRBlock[blockId]);
+      Block* irBlock = blockIdToIRBlock[blockId];
+      if (blockHasUnprocessedPred(region, blockId, processedBlocks)) {
+        irb.clearBlockState(irBlock);
+      }
+      ht.irBuilder().startBlock(irBlock);
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
     }
@@ -4264,9 +4286,51 @@ Translator::translateRegion(const RegionDesc& region,
         continue;
       }
 
+      // Singleton inlining optimization.
+      if (RuntimeOption::EvalHHIRInlineSingletons) {
+        bool didInlineSingleton = [&] {
+          if (!RuntimeOption::RepoAuthoritative) return false;
+
+          // I don't really want to inline my arm, thanks.
+          if (arch() != Arch::X64) return false;
+
+          // Don't inline if we're retranslating due to a side-exit from an
+          // inlined call.
+          if (trflags.noinlineSingleton && startSk == inst.source) return false;
+
+          // Bail early if this isn't a push.
+          if (inst.op() != Op::FPushFuncD &&
+              inst.op() != Op::FPushClsMethodD) {
+            return false;
+          }
+
+          // ...and also if this is the end of the block.
+          if (i == block->length() - 1) return false;
+
+          // This is safe to do even if singleton inlining fails; we just won't
+          // change topFunc in the next pass since hasNext() will return false.
+          if (knownFuncs.hasNext(inst.nextSk())) {
+            topFunc = knownFuncs.next();
+
+            // Detect a singleton pattern and inline it if found.
+            return m_irTrans->tryTranslateSingletonInline(inst, topFunc);
+          }
+
+          return false;
+        }();
+
+        // Skip the translation of this instruction (the FPush) -and- the next
+        // instruction (the FCall) if we succeeded at singleton inlining.  We
+        // still want the fallthrough and prediction logic, though.
+        if (didInlineSingleton) {
+          skipTrans = true;
+          continue;
+        }
+      }
+
       // Emit IR for the body of the instruction.
       try {
-        m_irTrans->translateInstr(inst);
+        if (!skipTrans) m_irTrans->translateInstr(inst);
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk{profTransId, sk};
         always_assert_log(
@@ -4280,6 +4344,8 @@ Translator::translateRegion(const RegionDesc& region,
         toInterp.insert(psk);
         return Retry;
       }
+
+      skipTrans = false;
 
       // Insert a fallthrough jump
       if (ht.genMode() == IRGenMode::CFG &&
@@ -4312,6 +4378,8 @@ Translator::translateRegion(const RegionDesc& region,
         ht.prepareForSideExit();
       }
     }
+
+    processedBlocks.insert(blockId);
 
     assert(!typePreds.hasNext());
     assert(!byRefs.hasNext());
@@ -4410,29 +4478,6 @@ uint64_t Translator::getTransCounter(TransID transId) const {
                               [transId % transCountersPerChunk];
   }
   return counter;
-}
-
-namespace {
-
-struct DeferredPathInvalidate : public DeferredWorkItem {
-  const std::string m_path;
-  explicit DeferredPathInvalidate(const std::string& path) : m_path(path) {
-    assert(m_path.size() >= 1 && m_path[0] == '/');
-  }
-  void operator()() {
-    String spath(m_path);
-    /*
-     * inotify saw this path change. Now poke the file repository;
-     * it will notice the underlying PhpFile* has changed.
-     *
-     * We don't actually need to *do* anything with the PhpFile* from
-     * this lookup; since the path has changed, the file we'll get out is
-     * going to be some new file, not the old file that needs invalidation.
-     */
-    (void)g_context->lookupPhpFile(spath.get(), "");
-  }
-};
-
 }
 
 void
@@ -4629,7 +4674,19 @@ std::string traceletShape(const Tracelet& trace) {
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
-  PendQ::defer(new JIT::DeferredPathInvalidate(path));
+  assert(path.size() >= 1 && path[0] == '/');
+  Treadmill::enqueue([path] {
+    /*
+     * inotify saw this path change. Now poke the file repository;
+     * it will notice the underlying PhpFile* has changed.
+     *
+     * We don't actually need to *do* anything with the Unit* from
+     * this lookup; since the path has changed, the file we'll get out is
+     * going to be some new file, not the old file that needs invalidation.
+     */
+    String spath(path);
+    g_context->lookupPhpFile(spath.get(), "");
+  });
 }
 
-} // HPHP
+}

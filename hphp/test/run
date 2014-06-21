@@ -1110,9 +1110,13 @@ SHIP
 
 function print_failure($argv, $results, $options) {
   $failed = array();
+  $passed = array();
   foreach ($results as $result) {
-    if ($result['status'] == 'failed') {
+    if ($result['status'] === 'failed') {
       $failed[] = $result['name'];
+    }
+    if ($result['status'] === 'passed') {
+      $passed[] = $result['name'];
     }
   }
   asort($failed);
@@ -1132,6 +1136,15 @@ function print_failure($argv, $results, $options) {
   file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
   print make_header('For xargs, list of failures is available using:').
     'cat '.$failing_tests_file."\n";
+
+  if (!empty($passed)) {
+    $passing_tests_file = !empty($options['success-file'])
+      ? $options['success-file']
+      : tempnam('/tmp', 'tests-passed');
+    file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
+    print make_header('For xargs, list of passed tests is available using:').
+      'cat '.$passing_tests_file."\n";
+  }
 
   print_commands($failed, $options);
 

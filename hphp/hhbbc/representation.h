@@ -482,7 +482,7 @@ struct Class {
    * be flattened.
    */
   std::vector<LowStringPtr> usedTraitNames;
-  std::vector<PreClass::TraitRequirement> traitRequirements;
+  std::vector<PreClass::ClassRequirement> requirements;
   std::vector<PreClass::TraitPrecRule> traitPrecRules;
   std::vector<PreClass::TraitAliasRule> traitAliasRules;
 

@@ -462,7 +462,8 @@ String f_implode(const Variant& arg1, const Variant& arg2 /* = null_variant */) 
     items = arg2;
     delim = arg1.toString();
   } else {
-    throw_bad_type_exception("expected a container as one of the arguments");
+    throw_bad_type_exception("implode() expects a container as "
+                             "one of the arguments");
     return String();
   }
   return StringUtil::Implode(items, delim);
@@ -745,14 +746,14 @@ String f_str_repeat(const String& input, int multiplier) {
 Variant f_printf(int _argc, const String& format, const Array& _argv /* = null_array */) {
   String output = string_printf(format.data(), format.size(), _argv);
   if (output.isNull()) return false;
-  echo(output.data(), output.size());
+  g_context->write(output.data(), output.size());
   return output.size();
 }
 
 Variant f_vprintf(const String& format, const Array& args) {
   String output = string_printf(format.data(), format.size(), args);
   if (output.isNull()) return false;
-  echo(output.data(), output.size());
+  g_context->write(output.data(), output.size());
   return output.size();
 }
 

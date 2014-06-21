@@ -484,6 +484,8 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case Count:       return simplifyCount(inst);
     case CountArray:  return simplifyCountArray(inst);
 
+    case LdClsName:   return simplifyLdClsName(inst);
+
     case CallBuiltin: return simplifyCallBuiltin(inst);
 
     default:
@@ -2061,6 +2063,11 @@ SSATmp* Simplifier::simplifyCountArray(const IRInstruction* inst) {
   }
 
   return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLdClsName(const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  return src->isConst(Type::Cls) ? cns(src->clsVal()->name()) : nullptr;
 }
 
 SSATmp* Simplifier::simplifyCallBuiltin(const IRInstruction* inst) {

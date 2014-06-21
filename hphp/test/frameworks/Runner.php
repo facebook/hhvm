@@ -17,6 +17,9 @@ class Runner {
   private string $fatal_information = "";
   private string $diff_information = "";
   private string $stat_information = "";
+  // Each PHPUnit process gets its' own tempdir to avoid race conditions
+  // between multiple runs
+  private ?string $temp_dir;
 
   private array<resource> $pipes = [];
   private ?resource $process = null;
@@ -416,6 +419,11 @@ class Runner {
       $env = array_merge($env,
                          nullthrows($this->framework->getEnvVars())->toArray());
     }
+    $temp_dir = sys_get_temp_dir().'/hhvm_oss_'.uniqid('', true);
+    mkdir($temp_dir);
+    $this->temp_dir = $temp_dir;
+    $env['TMPDIR'] = $temp_dir;
+
     $this->process = proc_open($this->actual_test_command, $descriptorspec,
                                $this->pipes, $this->framework->getTestPath(),
                                $env);
@@ -426,6 +434,8 @@ class Runner {
     fclose($this->pipes[0]);
     fclose($this->pipes[1]);
     fclose($this->pipes[2]);
+
+    remove_dir_recursive(nullthrows($this->temp_dir));
 
     return proc_close($this->process) === -1 ? -1 : 0;
   }

@@ -65,12 +65,12 @@ c_Generator::~c_Generator() {
 void c_Generator::t___construct() {}
 
 // Functions with native implementation.
-void c_Generator::t_next() { const_assert(false); }
-void c_Generator::t_send(const Variant& v) { const_assert(false); }
-void c_Generator::t_raise(const Variant& v) { const_assert(false); }
-bool c_Generator::t_valid() { const_assert(false); }
-Variant c_Generator::t_current() { const_assert(false); }
-Variant c_Generator::t_key() { const_assert(false); }
+void c_Generator::t_next() { always_assert(false); }
+void c_Generator::t_send(const Variant& v) { always_assert(false); }
+void c_Generator::t_raise(const Variant& v) { always_assert(false); }
+bool c_Generator::t_valid() { always_assert(false); }
+Variant c_Generator::t_current() { always_assert(false); }
+Variant c_Generator::t_key() { always_assert(false); }
 
 const StaticString s_next("next");
 void c_Generator::t_rewind() {

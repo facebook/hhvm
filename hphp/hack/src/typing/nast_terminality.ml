@@ -31,7 +31,8 @@ end = struct
     | Expr (_, Assert (
             AE_assert (_, False) |
             AE_invariant ((_, False), _, _) |
-            AE_invariant_violation _)) -> raise Exit
+            AE_invariant_violation _))
+    | Expr (_, Call (Cnormal, (_, Id (_, "exit")), _)) -> raise Exit
     | Expr (_, Yield (_, Special_func sf)) -> special_func sf
     | If (_, b1, b2) ->
       (try terminal inside_case b1; () with Exit ->
@@ -118,7 +119,8 @@ end = struct
     | Expr (_, Assert (
             AE_assert (_, False) |
             AE_invariant ((_, False), _, _) |
-            AE_invariant_violation _)) -> raise Exit
+            AE_invariant_violation _))
+    | Expr (_, Call (Cnormal, (_, Id (_, "exit")), _)) -> raise Exit
     | Expr (_, Yield (_, Special_func sf)) -> special_func sf
     | If (_, b1, b2) ->
       (try terminal b1; () with Exit ->

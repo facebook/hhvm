@@ -867,7 +867,7 @@ void emit_class(EmitUnitState& state,
 
   for (auto& x : cls.interfaceNames)     pce->addInterface(x);
   for (auto& x : cls.usedTraitNames)     pce->addUsedTrait(x);
-  for (auto& x : cls.traitRequirements)  pce->addTraitRequirement(x);
+  for (auto& x : cls.requirements)       pce->addClassRequirement(x);
   for (auto& x : cls.traitPrecRules)     pce->addTraitPrecRule(x);
   for (auto& x : cls.traitAliasRules)    pce->addTraitAliasRule(x);
 

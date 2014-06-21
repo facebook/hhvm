@@ -320,13 +320,19 @@ Variant f_filter_list() {
   return ret;
 }
 
-Variant f_filter_id(const String& filtername) {
+Variant f_filter_id(const Variant& filtername) {
+  if (filtername.isArray()) {
+    raise_warning("Array to string conversion");
+    return init_null();
+  }
+
   size_t size = sizeof(filter_list) / sizeof(filter_list_entry);
   for (size_t i = 0; i < size; ++i) {
     if (filter_list[i].name == filtername) {
       return filter_list[i].id;
     }
   }
+
   return false;
 }
 

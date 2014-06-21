@@ -48,7 +48,8 @@ class Unit;
 class UnitEmitter;
 class Class;
 class NamedEntity;
-class PreClass;
+struct PreClass;
+struct Class;
 namespace Native { struct NativeDataInfo; }
 
 typedef hphp_hash_set<LowStringPtr,
@@ -241,12 +242,12 @@ struct PreClass : AtomicCountable {
     Attr         m_modifiers;
   };
 
-  struct TraitRequirement {
+  struct ClassRequirement {
    public:
     // Solely for SerDe
-    TraitRequirement(): m_word(0) {}
+    ClassRequirement(): m_word(0) {}
 
-    explicit TraitRequirement(const StringData* req, bool isExtends) {
+    explicit ClassRequirement(const StringData* req, bool isExtends) {
       m_word = pack(req, isExtends);
     }
 
@@ -284,7 +285,7 @@ struct PreClass : AtomicCountable {
 
   typedef FixedVector<LowStringPtr> InterfaceVec;
   typedef FixedVector<LowStringPtr> UsedTraitVec;
-  typedef FixedVector<TraitRequirement> TraitRequirementsVec;
+  typedef FixedVector<ClassRequirement> ClassRequirementsVec;
   typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
   typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
 
@@ -299,17 +300,18 @@ struct PreClass : AtomicCountable {
   int line2() const { return m_line2; }
   Offset getOffset() const { return m_offset; }
   const StringData* name() const { return m_name; }
+  static constexpr Offset nameOffset() { return offsetof(PreClass, m_name); }
   StrNR nameStr() const { return StrNR(m_name); }
   Attr attrs() const { return m_attrs; }
-  static Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
+  static constexpr Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
   const StringData* parent() const { return m_parent; }
   StrNR parentStr() const { return StrNR(m_parent); }
   const StringData* docComment() const { return m_docComment; }
   Id id() const { return m_id; }
   const InterfaceVec& interfaces() const { return m_interfaces; }
   const UsedTraitVec& usedTraits() const { return m_usedTraits; }
-  const TraitRequirementsVec& traitRequirements() const {
-    return m_traitRequirements;
+  const ClassRequirementsVec& requirements() const {
+    return m_requirements;
   }
   const TraitPrecRuleVec& traitPrecRules() const { return m_traitPrecRules; }
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
@@ -411,7 +413,7 @@ private:
   BuiltinCtorFunction m_instanceCtor = nullptr;
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
-  TraitRequirementsVec m_traitRequirements;
+  ClassRequirementsVec m_requirements;
   TraitPrecRuleVec m_traitPrecRules;
   TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;
@@ -530,6 +532,7 @@ struct Class : AtomicCountable {
   typedef IndexedStringMap<LowClassPtr, true, int> InterfaceMap;
   typedef FixedStringMap<Slot, false, Slot> MethodMap;
   typedef FixedStringMapBuilder<Func*, Slot, false, Slot> MethodMapBuilder;
+  typedef IndexedStringMap<const PreClass::ClassRequirement*, true, int> RequirementMap;
 
   /* If set, runs during setMethods() */
   static void (*MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
@@ -661,6 +664,7 @@ struct Class : AtomicCountable {
   bool needInitialization() const { return m_needInitialization; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
+  const RequirementMap& allRequirements() const { return m_requirements; }
   // See comment for m_usedTraits
   const std::vector<ClassPtr>& usedTraitClasses() const {
     return m_usedTraits;
@@ -839,12 +843,24 @@ struct Class : AtomicCountable {
   }
   LowClassPtr const* classVec() const { return m_classVec; }
 
-  static size_t preClassOff() { return offsetof(Class, m_preClass); }
-  static size_t classVecOff() { return offsetof(Class, m_classVec); }
-  static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
-  static Offset getMethodsOffset() { return offsetof(Class, m_methods); }
-  static ptrdiff_t invokeFuncOff() { return offsetof(Class, m_invoke); }
-  static size_t instanceBitsOff() { return offsetof(Class, m_instanceBits); }
+  static constexpr size_t preClassOff() {
+    return offsetof(Class, m_preClass);
+  }
+  static constexpr size_t classVecOff() {
+    return offsetof(Class, m_classVec);
+  }
+  static constexpr size_t classVecLenOff() {
+    return offsetof(Class, m_classVecLen);
+  }
+  static constexpr Offset getMethodsOffset() {
+    return offsetof(Class, m_methods);
+  }
+  static constexpr ptrdiff_t invokeFuncOff() {
+    return offsetof(Class, m_invoke);
+  }
+  static constexpr size_t instanceBitsOff() {
+    return offsetof(Class, m_instanceBits);
+  }
 
   /* Return pointer to start of malloced memory for 'this' */
   Func** mallocPtrFromThis() const;
@@ -942,9 +958,9 @@ private:
   void setInterfaces();
   void setClassVec();
   void setFuncVec(MethodMapBuilder& builder);
-  void checkTraitConstraints() const;
-  void checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
-                                const StringData* recName) const;
+  void setRequirements();
+  void checkRequirementConstraints() const;
+  void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();
 
   template<bool setParents> void setInstanceBitsImpl();
@@ -1008,6 +1024,7 @@ private:
   uint32_t m_builtinODTailSize{0};
   PreClassPtr m_preClass;
   InterfaceMap m_interfaces;
+  RequirementMap m_requirements;
   // Bitmap of parent classes and implemented interfaces. Each bit
   // corresponds to a commonly used class name, determined during the
   // profiling warmup requests.

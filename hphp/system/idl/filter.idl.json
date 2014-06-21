@@ -243,7 +243,7 @@
             "args": [
                 {
                     "name": "filtername",
-                    "type": "String",
+                    "type": "Variant",
                     "desc": "Name of a filter to get."
                 }
             ]

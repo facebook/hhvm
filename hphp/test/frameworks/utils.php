@@ -2,6 +2,12 @@
 require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/Options.php';
 
+class TimeoutException extends Exception {
+}
+
+const INSTALL_TIMEOUT_SECS = 10 * 60; // 10 minutes
+const NETWORK_RETRIES = 3;
+
 // For determining number of processes
 function num_cpus() {
   switch(PHP_OS) {
@@ -28,24 +34,6 @@ function remove_dir_recursive(string $root_dir) {
                RecursiveDirectoryIterator::SKIP_DOTS),
              RecursiveIteratorIterator::CHILD_FIRST);
 
-  // This can be better, but good enough for now.
-  // Maybe just use rm -rf, but that always seems
-  // a bit dangerous. The below is probably only
-  // O(2n) or so. No order depth order guaranteed
-  // with the iterator, so actual files can be
-  // deleted before symlinks
-
-  // Get rid of the symlinks first to avoid orphan
-  // symlinks that cannot be deleted.
-  foreach ($files as $fileinfo) {
-    if (is_link($fileinfo)) {
-      $target = readlink($fileinfo);
-      unlink($fileinfo);
-      unlink($target);
-    }
-  }
-
-  // Get rid of the rest
   foreach ($files as $fileinfo) {
     if ($fileinfo->isDir()) {
       rmdir($fileinfo->getRealPath());
@@ -325,7 +313,24 @@ function include_all_php($folder){
 
 // This will run processes that will get the test infra dependencies
 // (e.g. PHPUnit), frameworks and framework dependencies.
-function run_install(string $proc, string $path, ?Map $env): ?int
+function run_install(
+  string $proc,
+  string $path,
+  ?Map $env,
+  int $retries = NETWORK_RETRIES
+): ?int {
+  while ($retries > 0) {
+    try {
+      return run_install_impl($proc, $path, $env);
+    } catch (TimeoutException $e) {
+      verbose((string) $e);
+      $retries--;
+    }
+  }
+  return run_install_impl($proc, $path, $env);
+}
+
+function run_install_impl(string $proc, string $path, ?Map $env): ?int
 {
   verbose("Running: $proc\n");
   $descriptorspec = array(
@@ -351,10 +356,24 @@ function run_install(string $proc, string $path, ?Map $env): ?int
   if (is_resource($process)) {
     fclose($pipes[0]);
     $start_time = microtime(true);
-    while ($line = fgets($pipes[1])) {
-      verbose("$line");
+
+    $read = [$pipes[1]];
+    $write = [];
+    $except = $read;
+    $ready = null;
+    while (true) {
+      $ready = stream_select($read, $write, $except, INSTALL_TIMEOUT_SECS);
+      if ($ready === 0) {
+        proc_terminate($process);
+        throw new TimeoutException("Hit timeout reading from proc: ".$proc);
+      }
+      if (feof($pipes[1])) {
+        break;
+      }
+      $block = fread($pipes[1], 8096);
+      verbose($block);
       if ((microtime(true) - $start_time) > 1) {
-        not_verbose(".");
+        not_verbose('.');
         $start_time = microtime(true);
       }
     }

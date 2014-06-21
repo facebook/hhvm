@@ -251,10 +251,10 @@ struct TranslArgs {
     : m_sk(sk)
     , m_align(align)
     , m_interp(false)
+    , m_dryRun(false)
     , m_setFuncBody(false)
     , m_transId(kInvalidTransID)
     , m_region(nullptr)
-    , m_dryRun(false)
   {}
 
   TranslArgs& sk(const SrcKey& sk) {
@@ -269,8 +269,16 @@ struct TranslArgs {
     m_interp = interp;
     return *this;
   }
+  TranslArgs& dryRun(bool dry) {
+    m_dryRun = dry;
+    return *this;
+  }
   TranslArgs& setFuncBody() {
     m_setFuncBody = true;
+    return *this;
+  }
+  TranslArgs& flags(TransFlags flags) {
+    m_flags = flags;
     return *this;
   }
   TranslArgs& transId(TransID transId) {
@@ -281,18 +289,15 @@ struct TranslArgs {
     m_region = region;
     return *this;
   }
-  TranslArgs& dryRun(bool dry) {
-    m_dryRun = dry;
-    return *this;
-  }
 
   SrcKey m_sk;
   bool m_align;
   bool m_interp;
+  bool m_dryRun;
   bool m_setFuncBody;
+  TransFlags m_flags;
   TransID m_transId;
   JIT::RegionDescPtr m_region;
-  bool m_dryRun;
 };
 
 class Translator;
@@ -374,7 +379,8 @@ public:
   typedef ProfSrcKeySet RegionBlacklist;
   TranslateResult translateRegion(const RegionDesc& region,
                                   bool bcControlFlow,
-                                  RegionBlacklist& interp);
+                                  RegionBlacklist& interp,
+                                  TransFlags trflags = TransFlags{});
 
 private:
   typedef std::map<TCA, TransID> TransDB;

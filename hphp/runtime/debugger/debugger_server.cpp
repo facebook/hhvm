@@ -80,7 +80,7 @@ bool DebuggerServer::start() {
   memset(&hint, 0, sizeof(hint));
   hint.ai_family = AF_UNSPEC;
   hint.ai_socktype = SOCK_STREAM;
-  hint.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
+  hint.ai_flags = AI_PASSIVE;
   if (RuntimeOption::DebuggerDisableIPv6) {
     hint.ai_family = AF_INET;
   }
@@ -98,8 +98,11 @@ bool DebuggerServer::start() {
   struct addrinfo *cur;
   for (cur = ai; cur; cur = cur->ai_next) {
     SmartPtr<Socket> m_sock;
-    m_sock = new Socket(socket(cur->ai_family, cur->ai_socktype, 0),
-                        cur->ai_family, cur->ai_addr->sa_data, port);
+    int s_fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
+    if (s_fd < 0 && errno == EAFNOSUPPORT) {
+      continue;
+    }
+    m_sock = new Socket(s_fd, cur->ai_family, cur->ai_addr->sa_data, port);
 
     int yes = 1;
     setsockopt(m_sock->fd(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
@@ -124,6 +127,11 @@ bool DebuggerServer::start() {
     }
 
     m_socks.push_back(m_sock);
+  }
+
+  if (m_socks.size() == 0) {
+    Logger::Error("Did not bind to any sockets on port %d", port);
+    return false;
   }
 
   m_serverThread.start();

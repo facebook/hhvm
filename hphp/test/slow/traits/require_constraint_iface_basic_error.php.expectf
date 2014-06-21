@@ -1,0 +1,1 @@
+Fatal error: Class 'C' required to extend class 'Super' by interface 'I2' in %s/slow/traits/require_constraint_iface_basic_error.php on line 17

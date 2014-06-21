@@ -133,7 +133,9 @@ let parse_check_args cmd =
       " (mode) prints a list of all related classes or methods to the given class";
     "--inheritance-ancestors", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
       " (mode) prints a list of all related classes or methods to the given class";
-    "--version", Arg.Unit (set_mode MODE_VERSION),
+    "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
+      " (mode) show human-readable type info for the given name; output is not meant for machine parsing";
+     "--version", Arg.Unit (set_mode MODE_VERSION),
       " (mode) show version and exit\n";
 
     (* flags *)
@@ -163,8 +165,6 @@ let parse_check_args cmd =
       " (deprecated) equivalent to --from check_trunk";
     "--save-state", Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       " <file> debug mode (do not use)";
-    "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
-      " debug mode (do not use)";
   ] in
   let args = parse_without_command options usage "check" in
 

@@ -68,7 +68,7 @@ bool f_dangling_server_proxy_old_request() {
     return false;
   }
   transport->setResponse(code, "dangling_server_proxy_old_request");
-  echo(response.detach());
+  g_context->write(response.detach());
   return true;
 }
 

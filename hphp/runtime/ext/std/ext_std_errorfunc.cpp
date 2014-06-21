@@ -82,7 +82,7 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
                                           int64_t limit /* = 0 */) {
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
-  echo(debug_string_backtrace(false, ignore_args, limit));
+  g_context->write(debug_string_backtrace(false, ignore_args, limit));
 }
 
 const StaticString

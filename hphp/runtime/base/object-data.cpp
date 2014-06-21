@@ -421,10 +421,37 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
   }
 }
 
+namespace {
+
+size_t getPropertyIfAccessible(ObjectData* obj,
+                               Class* ctx,
+                               const StringData* key,
+                               bool getRef,
+                               Array& properties,
+                               size_t propLeft) {
+  bool visible, accessible, unset;
+  auto val = obj->getProp(ctx, key, visible, accessible, unset);
+  if (accessible && val->m_type != KindOfUninit && !unset) {
+    --propLeft;
+    if (getRef) {
+      if (val->m_type != KindOfRef) {
+        tvBox(val);
+      }
+      properties.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
+    } else {
+      properties.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
+    }
+  }
+  return propLeft;
+}
+
+}
+
 Array ObjectData::o_toIterArray(const String& context,
                                 bool getRef /* = false */) {
   Array* dynProps = nullptr;
-  size_t size = m_cls->declPropNumAccessible();
+  size_t accessibleProps = m_cls->declPropNumAccessible();
+  size_t size = accessibleProps;
   if (getAttribute(HasDynPropArr)) {
     dynProps = &dynPropArray();
     size += dynProps->size();
@@ -445,20 +472,23 @@ Array ObjectData::o_toIterArray(const String& context,
 
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
-      bool visible, accessible, unset;
-      auto val = getProp(ctx, key, visible, accessible, unset);
-      if (accessible && val->m_type != KindOfUninit && !unset) {
-        if (getRef) {
-          if (val->m_type != KindOfRef) {
-            tvBox(val);
-          }
-          retArray.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
-        } else {
-          retArray.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
-        }
-      }
+      accessibleProps = getPropertyIfAccessible(
+          this, ctx, key, getRef, retArray, accessibleProps);
     }
     klass = klass->parent();
+  }
+  if (!RuntimeOption::RepoAuthoritative && accessibleProps > 0) {
+    // we may have properties from traits
+    const auto* props = m_cls->declProperties();
+    auto numDeclProp = m_cls-> numDeclProperties();
+    for (size_t i = 0; i < numDeclProp; i++) {
+      const auto* key = props[i].m_name.get();
+      if (!retArray.get()->exists(key)) {
+        accessibleProps = getPropertyIfAccessible(
+            this, ctx, key, getRef, retArray, accessibleProps);
+        if (accessibleProps == 0) break;
+      }
+    }
   }
 
   // Now get dynamic properties.

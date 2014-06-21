@@ -444,6 +444,7 @@ and build_constructor env class_ method_ =
   let cstr = {
     ce_final = method_.m_final;
     ce_override = false ;
+    ce_synthesized = false;
     ce_visibility = vis;
     ce_type = ty;
     ce_origin = class_name;
@@ -479,7 +480,7 @@ and class_const_decl c (env, acc) (h, id, e) =
         )
       | Some h -> Typing_hint.hint env h
   in
-  let ce = { ce_final = true; ce_override = false;
+  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
              ce_visibility = Vpublic; ce_type = ty; ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add (snd id) ce acc in
@@ -493,6 +494,7 @@ and class_class_decl class_id =
   {
     ce_final      = false;
     ce_override   = false;
+    ce_synthesized   = false;
     ce_visibility = Vpublic;
     ce_type       = (reason, Tprim Tstring);
     ce_origin     = name;
@@ -506,7 +508,7 @@ and class_var_decl c (env, acc) cv =
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_override = false;
+  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
              ce_visibility = vis; ce_type = ty; ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add id ce acc in
@@ -519,7 +521,7 @@ and static_class_var_decl c (env, acc) cv =
       | Some ty -> Typing_hint.hint env ty in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_override = false;
+  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
              ce_visibility = vis; ce_type = ty; ce_origin = (snd c.c_name);
            }
   in
@@ -595,7 +597,7 @@ and method_decl_acc c (env, acc) m =
     | _ -> visibility (snd c.c_name) m.m_visibility
   in
   let ce = {
-    ce_final = m.m_final; ce_override = check_override;
+    ce_final = m.m_final; ce_override = check_override; ce_synthesized = false;
     ce_visibility = vis; ce_type = ty; ce_origin = snd (c.c_name);
   } in
   let acc = SMap.add id ce acc in

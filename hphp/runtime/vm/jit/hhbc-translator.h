@@ -145,6 +145,9 @@ struct HhbcTranslator {
   void profileInlineFunctionShape(const std::string& str);
   void profileSmallFunctionShape(const std::string& str);
   void profileFailedInlShape(const std::string& str);
+  void emitSingletonSProp(const Func* func,
+                          const Op* clsOp, const Op* propOp);
+  void emitSingletonSLoc(const Func* func, const Op* op);
 
   // Other public functions for irtranslator.
   void setThisAvailable();
@@ -381,6 +384,8 @@ public:
   void emitCastString();
   void emitCastArray();
   void emitCastObject();
+
+  void emitNameA();
 
   void emitSwitch(const ImmVector&, int64_t base, bool bounded);
   void emitSSwitch(const ImmVector&);
@@ -737,6 +742,8 @@ private:
                             bool& checkForInt);
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
+  SSATmp* ldClsPropAddrKnown(Block* catchBlock,
+                             SSATmp* cls, SSATmp* name);
   SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls,
                         SSATmp* name, bool raise);
   void emitUnboxRAux();
@@ -780,7 +787,10 @@ private:
 
 private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff = -1);
-  Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);
+  Block* makeExit(TransFlags trflags);
+  Block* makeExit(Offset targetBcOff,
+                  std::vector<SSATmp*>& spillValues,
+                  TransFlags trflags = TransFlags{});
   Block* makeExitWarn(Offset targetBcOff, std::vector<SSATmp*>& spillValues,
                       const StringData* warning);
   Block* makeExitError(SSATmp* msg, Block* catchBlock);
@@ -847,7 +857,9 @@ private: // Exit trace creation routines.
   };
   typedef std::function<SSATmp* ()> CustomExit;
   Block* makeExitImpl(Offset targetBcOff, ExitFlag flag,
-                      std::vector<SSATmp*>& spillValues, const CustomExit&);
+                      std::vector<SSATmp*>& spillValues,
+                      const CustomExit& customFn,
+                      TransFlags trflags = TransFlags{});
 
 private:
   /*

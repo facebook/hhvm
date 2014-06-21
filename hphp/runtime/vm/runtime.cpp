@@ -54,13 +54,13 @@ void print_string(StringData* s) {
 void print_int(int64_t i) {
   char buf[256];
   snprintf(buf, 256, "%" PRId64, i);
-  echo(buf);
+  g_context->write(buf);
   TRACE(1, "t-x64 output(int): %" PRId64 "\n", i);
 }
 
 void print_boolean(bool val) {
   if (val) {
-    echo("1");
+    g_context->write("1");
   }
 }
 
@@ -230,11 +230,9 @@ Unit* compile_string(const char* s,
 Unit* compile_systemlib_string(const char* s, size_t sz,
                                const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
-    FileRepository::FileInfo fi;
     String systemName = String("/:") + String(fname);
-    if (FileRepository::readRepoMd5(systemName.get(), fi)) {
-      MD5 md5(fi.m_unitMd5.c_str());
-      if (Unit* u = Repo::get().loadUnit(fname, md5)) {
+    if (auto const md5 = FileRepository::readRepoMd5(systemName.get())) {
+      if (auto const u = Repo::get().loadUnit(fname, *md5)) {
         return u;
       }
     }

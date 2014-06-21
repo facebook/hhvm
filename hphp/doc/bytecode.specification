@@ -230,9 +230,9 @@ Async functions
 ---------------
 
 Async functions are special type of functions representing asynchronous
-execution. They can suspend while waiting for other asynchronous operation to
-finish. This is achieved using AsyncSuspend opcode, which suspends execution
-into an AsyncFunctionWaitHandle object. Once the given dependency is finished,
+execution. They can suspend while waiting for other asynchronous operations to
+finish. This is achieved using Await opcode, which suspends execution into
+an AsyncFunctionWaitHandle object. Once the given dependency is finished,
 the scheduler resumes async function at the next opcode.
 
 The async function body can be executed in 2 different modes. If the execution
@@ -240,17 +240,18 @@ was never suspended, we are in "eager execution" mode. The code executed after
 the resume is executed in "resumed execution" mode.
 
 The "eager execution" can end in 3 different ways. If a RetC opcode is reached,
-the result is wrapped into StaticResultWaitHandle and returned to the caller.
-If an exception is thrown, it is wrapped into StaticExceptionWaitHandle and
-returned to the caller. Otherwise, an AsyncSuspend opcode is reached, which
-suspends the current execution state into an AsyncFunctionWaitHandle object
-and returns it to the caller. This mechanism allows fast execution if no
-blocking asynchronous operation was reached.
+the result is wrapped into a succeeded StaticWaitHandle and returned to the
+caller. If an exception is thrown, it is wrapped into a failed StaticWaitHandle
+and returned to the caller. Otherwise, if an Await opcode was reached and the
+provided child WaitHandle has not finished, the current execution state is
+suspended into an AsyncFunctionWaitHandle object and retured to the caller.
+This mechanism allows fast execution if no blocking asynchronous operation was
+reached.
 
 The "resumed execution" mode is always entered from the scheduler. In this mode,
 the async function either gets blocked on another dependency, or gets finished.
-The scheduler is notified of these events using AsyncSuspend and RetC opcodes
-(or via unwinder if an exception was thrown) and the control is given back.
+The scheduler is notified of these events using Await and RetC opcodes (or via
+the unwinder if an exception was thrown) and the control is given back.
 
 The async function implementation is still changing and the implementation may
 change significantly, so this spec is staying light on details for now.
@@ -871,8 +872,7 @@ to the first immediate argument, and %2 is used to refer to the second
 immediate argument.
 
 Note that the relative offset immediate used by a Jmp*, Iter*, MIter*, Switch,
-SSwitch or AsyncSuspend instruction is relative the beginning
-of the instruction.
+or SSwitch instruction is relative to the beginning of the instruction.
 
 There are numerous instructions that operate on different kinds of locations.
 Locations are specified using "location descriptors". The complete list of

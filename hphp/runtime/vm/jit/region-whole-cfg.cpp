@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/region-whole-cfg.h"
-
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 
 namespace HPHP {

@@ -71,16 +71,28 @@ let add_method name sig_ methods =
       (* The method didn't exist so far, let's add it *)
       SMap.add name sig_ methods
   | Some old_sig ->
-      if not (is_abstract_method old_sig) && is_abstract_method sig_
-      (* The method was defined was not abstract, and this one is
-       * abstract. We don't want to override a concrete method with
-       * an abstract one.
+      if ((not (is_abstract_method old_sig) && is_abstract_method sig_)
+          || (is_abstract_method old_sig = is_abstract_method sig_
+          && not (old_sig.ce_synthesized) && sig_.ce_synthesized))
+
+      (* The then-branch of this if is encountered when the method being
+       * added shouldn't *actually* be added. When's that?
+       * In isolation, we can say that
+       *   - We don't want to override a concrete method with
+       *     an abstract one.
+       *   - We don't want to override a method that's actually
+       *     implemented by the programmer with one that's "synthetic",
+       *     e.g. arising merely from a require-extends declaration in
+       *     a trait.
+       * When these two considerations conflict, we give precedence to
+       * abstractness for determining priority of the method.
        *)
       then methods
-      (* We're overwriting a method definition. This is OK when a
-       * naming conflict is parent class vs trait (trait wins!), but
-       * not really OK when the naming conflict is trait vs trait
-       * (we rely on HHVM to catch the error at runtime) *)
+
+      (* Otherwise, we *are* overwriting a method definition. This is
+       * OK when a naming conflict is parent class vs trait (trait
+       * wins!), but not really OK when the naming conflict is trait vs
+       * trait (we rely on HHVM to catch the error at runtime) *)
       else SMap.add name {sig_ with ce_override = false} methods
 
 let add_methods methods' acc =
@@ -90,7 +102,11 @@ let add_members members acc =
   SMap.fold SMap.add members acc
 
 let add_constructor cstr acc =
-  match cstr with None -> acc | _ -> cstr
+  match (cstr, acc) with
+  | None, _ -> acc
+  | Some ce, Some acce when ce.ce_synthesized && not acce.ce_synthesized
+      -> acc
+  | _ -> cstr
 
 let add_inherited inherited acc = {
   ih_cstr     = add_constructor inherited.ih_cstr acc.ih_cstr;
@@ -131,6 +147,18 @@ let constructor env subst = function
     let env, ty = Inst.instantiate subst env ce.ce_type in
     env, Some {ce with ce_type = ty}
 
+let map_inherited f inh =
+  {
+    ih_cstr = (match inh.ih_cstr with
+    | None -> None
+    | Some x -> Some (f x));
+    ih_consts   = SMap.map f inh.ih_consts;
+    ih_cvars    = SMap.map f inh.ih_cvars;
+    ih_scvars   = SMap.map f inh.ih_scvars;
+    ih_methods  = SMap.map f inh.ih_methods;
+    ih_smethods = SMap.map f inh.ih_smethods;
+  }
+
 (*****************************************************************************)
 (* Code filtering the private members (useful for inheritance) *)
 (*****************************************************************************)
@@ -144,7 +172,7 @@ let filter_private x =
 
 let chown_private owner =
   SMap.map begin fun class_elt ->
-    match class_elt.ce_visibility with 
+    match class_elt.ce_visibility with
       | Vprivate _ -> {class_elt with ce_visibility = Vprivate owner}
       | _ -> class_elt end
 
@@ -246,6 +274,9 @@ let from_parent env c =
 
 let from_requirements c (env, acc) reqs =
   let env, inherited = from_class c env reqs in
+  let inherited = map_inherited
+    (fun ce -> { ce with ce_synthesized = true })
+    inherited in
   env, add_inherited inherited acc
 
 let from_trait c (env, acc) uses =

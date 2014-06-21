@@ -21,7 +21,6 @@ function get_include_path() { }
 function restore_include_path() { }
 function set_include_path($new_include_path) { }
 function get_included_files() { }
-function inclued_get_data() { }
 function get_magic_quotes_gpc() { }
 function get_magic_quotes_runtime() { }
 function get_required_files() { }

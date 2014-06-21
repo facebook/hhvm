@@ -12,7 +12,7 @@ $x = get_loaded_extensions();
 var_dump(empty($x));
 
 var_dump(get_included_files()[0] === __FILE__);
-var_dump(inclued_get_data());
+var_dump(array());
 
 var_dump(get_magic_quotes_gpc());
 var_dump(get_magic_quotes_runtime());

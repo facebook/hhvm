@@ -477,6 +477,14 @@ inline static bool decode_entity(char *entity, int *len,
       return true;
     }
 
+    if (!all          && (code != '&') &&
+        (code != '<') && (code != '>') &&
+        (code != '"') && (code != '\'')) {
+      // htmlspecialchars_decode() does not parse numeric
+      // entities other than & < > " '
+      return false;
+    }
+
     switch (charset) {
       case cs_utf_8:
       {

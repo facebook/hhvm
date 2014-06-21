@@ -244,7 +244,7 @@ void PreClass::setUserAttributes(const UserAttributeMap &ua) {
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 392, "Change this only on purpose");
+static_assert(sizeof(Class) == 408, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
@@ -293,7 +293,7 @@ Class::Class(PreClass* preClass, Class* parent,
   setProperties();
   setInitializers();
   setClassVec();
-  checkTraitConstraints();
+  setRequirements();
   setNativeDataInfo();
 }
 
@@ -356,6 +356,7 @@ void Class::releaseRefs() {
   m_numDeclInterfaces = 0;
   m_declInterfaces.reset();
   m_usedTraits.clear();
+  m_requirements.clear();
 }
 
 void Class::destroy() {
@@ -2246,64 +2247,38 @@ void Class::setInterfaces() {
   checkInterfaceMethods();
 }
 
-void Class::setNativeDataInfo() {
-  for (auto cls = this; cls; cls = cls->parent()) {
-    if ((m_nativeDataInfo = cls->preClass()->nativeDataInfo())) {
-      m_instanceCtor = Native::nativeDataInstanceCtor;
-      m_instanceDtor = Native::nativeDataInstanceDtor;
-      break;
+void Class::setRequirements() {
+  RequirementMap::Builder reqBuilder;
+
+  if (m_parent.get() != nullptr) {
+    auto const& parentReqs = m_parent->allRequirements();
+    for (int i = 0, req_size = parentReqs.size(); i < req_size ; ++i) {
+      auto const& req = parentReqs[i];
+      reqBuilder.add(req->name(), req);
     }
   }
-}
 
-unsigned Class::loadUsedTraits(PreClass* preClass,
-                               std::vector<ClassPtr>& usedTraits) {
-  unsigned methodCount = 0;
-  for (auto const& traitName : preClass->usedTraits()) {
-    Class* classPtr = Unit::loadClass(traitName);
-    if (classPtr == nullptr) {
-      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
+    const Class* iface = m_interfaces[i];
+    auto const& ifaceReqs = iface->allRequirements();
+    for (int r = 0, req_size = ifaceReqs.size(); r < req_size ; ++r) {
+      auto const& req = ifaceReqs[r];
+      reqBuilder.add(req->name(), req);
     }
-    if (!(classPtr->attrs() & AttrTrait)) {
-      raise_error("%s cannot use %s - it is not a trait",
-                  preClass->name()->data(),
-                  classPtr->name()->data());
-    }
-
-
-    if (RuntimeOption::RepoAuthoritative) {
-      // In RepoAuthoritative mode (with the WholeProgram compiler
-      // optimizations), the contents of traits are flattened away into the
-      // preClasses of "use"r classes. Continuing here allows us to avoid
-      // unnecessarily attempting to re-import trait methods and
-      // properties, only to fail due to (surprise surprise!) the same
-      // method/property existing on m_preClass.
-      continue;
-    }
-
-    usedTraits.push_back(ClassPtr(classPtr));
-    methodCount += classPtr->m_methods.size();
-
-  }
-  // Trait aliases can increase method count. Get an estimate of
-  // the number of aliased functions.
-  for (auto const& rule : preClass->traitAliasRules()) {
-    auto origName = rule.getOrigMethodName();
-    auto newName = rule.getNewMethodName();
-    if (origName != newName) methodCount++;
   }
 
-  return methodCount;
-}
-
-void Class::checkTraitConstraints() const {
-
-  if (attrs() & AttrInterface) {
-    return; // nothing to do
+  for (auto const& ut : m_usedTraits) {
+    auto const usedTrait = ut.get();
+    auto const& traitReqs = usedTrait->allRequirements();
+    for (int i = 0, req_size = traitReqs.size(); i < req_size ; ++i) {
+      auto const& req = traitReqs[i];
+      reqBuilder.add(req->name(), req);
+    }
   }
 
   if (attrs() & AttrTrait) {
-    for (auto const& req : m_preClass->traitRequirements()) {
+    // Check that requirements are semantically valid
+    for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
       auto const reqCls = Unit::loadClass(reqName);
       if (!reqCls) {
@@ -2329,60 +2304,170 @@ void Class::checkTraitConstraints() const {
                       reqName->data());
         }
       }
+
+      reqBuilder.add(reqName, &req);
     }
-    return;
-  }
-
-  checkTraitConstraintsRec(usedTraitClasses(), nullptr);
-}
-
-void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
-                                     const StringData* recName) const {
-
-  if (!usedTraits.size()) { return; }
-
-  for (auto const& ut : usedTraits) {
-    auto const usedTrait = ut.get();
-    auto const ptrait = usedTrait->preClass();
-
-    for (auto const& req : ptrait->traitRequirements()) {
+  } else if (attrs() & AttrInterface) {
+    // Check that requirements are semantically valid
+    for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
-      if (req.is_extends()) {
-        auto reqExtCls = Unit::lookupClass(reqName);
-        // errors should've been raised for the following when the
-        // usedTrait was first loaded
-        assert(reqExtCls != nullptr);
-        assert(!(reqExtCls->attrs() & (AttrTrait | AttrInterface)));
-
-        if ((m_classVecLen < reqExtCls->m_classVecLen) ||
-            (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls)) {
-          raise_error(Strings::TRAIT_REQ_EXTENDS,
-                      m_preClass->name()->data(),
-                      reqName->data(),
-                      ptrait->name()->data(),
-                      ((recName == nullptr) ? "use" : recName->data()));
-        }
-        continue;
+      auto const reqCls = Unit::loadClass(reqName);
+      if (!reqCls) {
+        raise_error("'%s' required by interface '%s' cannot be loaded",
+                    reqName->data(),
+                    m_preClass->name()->data());
       }
 
-      assert(req.is_implements());
-      if (!ifaceofDirect(reqName)) {
+      assert(req.is_extends());
+      if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
+        raise_error("Interface '%s' requires extension of '%s', but %s "
+                    "is not an extendable class",
+                    m_preClass->name()->data(),
+                    reqName->data(),
+                    reqName->data());
+      }
+      reqBuilder.add(reqName, &req);
+    }
+  }
+
+  m_requirements.create(reqBuilder);
+  checkRequirementConstraints();
+}
+
+void Class::setNativeDataInfo() {
+  for (auto cls = this; cls; cls = cls->parent()) {
+    if ((m_nativeDataInfo = cls->preClass()->nativeDataInfo())) {
+      m_instanceCtor = Native::nativeDataInstanceCtor;
+      m_instanceDtor = Native::nativeDataInstanceDtor;
+      break;
+    }
+  }
+}
+
+unsigned Class::loadUsedTraits(PreClass* preClass,
+                               std::vector<ClassPtr>& usedTraits) {
+  unsigned methodCount = 0;
+  for (auto const& traitName : preClass->usedTraits()) {
+    Class* classPtr = Unit::loadClass(traitName);
+    if (classPtr == nullptr) {
+      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+    }
+    if (!(classPtr->attrs() & AttrTrait)) {
+      raise_error("%s cannot use %s - it is not a trait",
+                  preClass->name()->data(),
+                  classPtr->name()->data());
+    }
+
+    if (RuntimeOption::RepoAuthoritative) {
+      // In RepoAuthoritative mode (with the WholeProgram compiler
+      // optimizations), the contents of traits are flattened away into the
+      // preClasses of "use"r classes. Continuing here allows us to avoid
+      // unnecessarily attempting to re-import trait methods and
+      // properties, only to fail due to (surprise surprise!) the same
+      // method/property existing on m_preClass.
+      continue;
+    }
+
+    usedTraits.push_back(ClassPtr(classPtr));
+    methodCount += classPtr->m_methods.size();
+
+  }
+
+  if (!RuntimeOption::RepoAuthoritative) {
+    // Trait aliases can increase method count. Get an estimate of the
+    // number of aliased functions. This doesn't need to be done in
+    // RepoAuthoritative mode due to trait flattening ensuring that added
+    // methods are already present in the preclass.
+    for (auto const& rule : preClass->traitAliasRules()) {
+      auto origName = rule.getOrigMethodName();
+      auto newName = rule.getNewMethodName();
+      if (origName != newName) methodCount++;
+    }
+  }
+  return methodCount;
+}
+
+void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  const {
+  assert(!(attrs() & (AttrInterface | AttrTrait)));
+
+  auto const reqName = req->name();
+  if (req->is_implements()) {
+    // "require implements" is only allowed on traits; in repo mode,
+    // m_usedTraits is expected to be empty, but errors due to unsatisfied
+    // "require implements" requirements are expected to be taken care of
+    // as part of RepoAuthoritative mode trait flattening.
+    assert(!RuntimeOption::RepoAuthoritative);
+    assert(m_usedTraits.size() > 0);
+
+    for (auto const& traitCls : m_usedTraits) {
+      if (traitCls->allRequirements().contains(reqName)) {
         raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
                     m_preClass->name()->data(),
                     reqName->data(),
-                    ptrait->name()->data(),
-                    ((recName == nullptr) ? "use" : recName->data()));
+                    traitCls->preClass()->name()->data(),
+                    "use");
+        return;
       }
+    }
+
+    always_assert(false); // requirements cannot spontaneously generate
+    return;
+  }
+
+  assert(req->is_extends());
+  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
+    const Class* iface = m_interfaces[i];
+    if (iface->allRequirements().contains(reqName)) {
+      raise_error("Class '%s' required to extend class '%s'"
+                  " by interface '%s'",
+                  m_preClass->name()->data(),
+                  reqName->data(),
+                  iface->preClass()->name()->data());
+      return;
     }
   }
 
-  // separate loop for recursive checks
-  for (auto const& ut : usedTraits) {
-    Class* usedTrait = ut.get();
-    checkTraitConstraintsRec(
-      usedTrait->usedTraitClasses(),
-      recName == nullptr ? usedTrait->preClass()->name() : recName
-    );
+  for (auto const& traitCls : m_usedTraits) {
+    if (traitCls->allRequirements().contains(reqName)) {
+      raise_error(Strings::TRAIT_REQ_EXTENDS,
+                  m_preClass->name()->data(),
+                  reqName->data(),
+                  traitCls->preClass()->name()->data(),
+                  "use");
+      return;
+    }
+  }
+
+  // calls to this method are expected to come as a result of an error due
+  // to a requirement coming from traits or interfaces
+  always_assert(false);
+}
+
+void Class::checkRequirementConstraints() const {
+
+  if (attrs() & (AttrInterface | AttrTrait)) {
+    return; // nothing to do
+  }
+
+  for (int i = 0, req_size = m_requirements.size(); i < req_size ; ++i) {
+    auto const& req = m_requirements[i];
+    auto const reqName = req->name();
+    if (req->is_implements()) {
+      if (UNLIKELY(!ifaceofDirect(reqName))) {
+        raiseUnsatisfiedRequirement(req);
+      }
+    } else {
+      auto reqExtCls = Unit::lookupClass(reqName);
+      // errors should've been raised for the following when the
+      // usedTrait was first loaded
+      assert(reqExtCls != nullptr);
+      assert(!(reqExtCls->attrs() & (AttrTrait | AttrInterface)));
+
+      if (UNLIKELY((m_classVecLen < reqExtCls->m_classVecLen) ||
+                   (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls))) {
+        raiseUnsatisfiedRequirement(req);
+      }
+    }
   }
 }
 

@@ -104,11 +104,6 @@ function set_include_path(mixed $new_include_path): string;
 <<__Native>>
 function get_included_files(): array;
 
-/* Get the inclued data.
- */
-<<__Native>>
-function inclued_get_data(): array;
-
 /* Returns the current configuration setting of magic_quotes_gpc  Keep in mind
  * that attempting to set magic_quotes_gpc at runtime will not work.  For more
  * information about magic_quotes, see this security section.

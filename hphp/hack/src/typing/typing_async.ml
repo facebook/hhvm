@@ -14,24 +14,20 @@ module Type   = Typing_ops
 module Env    = Typing_env
 module TUtils = Typing_utils
 
-let enforce_not_awaitable env e ty =
+let enforce_not_awaitable env p ty =
   let _, ety = Env.expand_type env ty in
   match ety with
   (* Match only a single unresolved -- this isn't typically how you
    * look into an unresolved, but the single list case is all we care
    * about since that's all you can get in this case (I think). *)
   | _, Tunresolved [r, Tapply ((_, "\\Awaitable"), _)]
-  | r, Tapply ((_, "\\Awaitable"), _) -> begin
-      match snd e with
-      | Nast.Binop (Ast.Eq _, _, _) -> ()
-      | _ ->
-          Errors.add_list [
-          fst e, "This expression is of type Awaitable, but it's "^
-          "either being discarded or used in a dangerous way before "^
-          "being awaited";
-          Reason.to_pos r, "This is why I think it is Awaitable"
-        ]
-  end
+  | r, Tapply ((_, "\\Awaitable"), _) ->
+      Errors.add_list [
+        p, "This expression is of type Awaitable, but it's "^
+        "either being discarded or used in a dangerous way before "^
+        "being awaited";
+        Reason.to_pos r, "This is why I think it is Awaitable"
+      ]
   | _ -> ()
 
 (* We would like to pretend that the wait_for*() functions are overloaded like

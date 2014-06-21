@@ -161,6 +161,7 @@
   CASE(MIterFree) \
   CASE(Mod) \
   CASE(Pow) \
+  CASE(NameA) \
   CASE(NativeImpl) \
   CASE(NewArray) \
   CASE(NewCol) \

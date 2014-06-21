@@ -160,6 +160,11 @@ struct FrameState final : private LocalStateHook {
   void pauseBlock(Block*);
 
   /*
+   * Clear state associate with the given block.
+   */
+  void clearBlock(Block*);
+
+  /*
    * Clear all tracked state.
    */
   void clear();

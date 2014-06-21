@@ -2042,21 +2042,21 @@ void CodeGenerator::cgReqBindJmpNInstanceOfBitmask(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSideExitJmpInstanceOfBitmask(IRInstruction* inst) {
-  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
-                         resumed());
+  auto const extra = inst->extra<SideExitJccData>();
+  auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   emitInstanceBitmaskCheck(inst);
   emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
-                   sk);
+                   sk, extra->trflags);
 }
 
 void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
-  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
-                         resumed());
+  auto const extra = inst->extra<SideExitJccData>();
+  auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   emitInstanceBitmaskCheck(inst);
   emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
-                   sk);
+                   sk, extra->trflags);
 }
 
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
@@ -2581,10 +2581,12 @@ void CodeGenerator::emitReqBindAddr(TCA& dest,
   mcg->setJmpTransID((TCA)&dest);
 
   dest = emitEphemeralServiceReq(m_frozenCode,
-                               mcg->getFreeStub(m_frozenCode, &mcg->cgFixups()),
-                               REQ_BIND_ADDR,
-                               &dest,
-                               sk.toAtomicInt());
+                                 mcg->getFreeStub(m_frozenCode,
+                                                  &mcg->cgFixups()),
+                                 REQ_BIND_ADDR,
+                                 &dest,
+                                 sk.toAtomicInt(),
+                                 TransFlags{}.packed);
   mcg->cgFixups().m_codePointers.insert(&dest);
 }
 
@@ -2923,10 +2925,14 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
+  auto offset  = inst->extra<ReqBindJmp>()->offset;
+  auto trflags = inst->extra<ReqBindJmp>()->trflags;
+
   emitBindJmp(
     m_mainCode,
     m_frozenCode,
-    SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed())
+    SrcKey(curFunc(), offset, resumed()),
+    trflags
   );
 }
 
@@ -2946,7 +2952,14 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assert(m_unit.bcOff() == inst->marker().bcOff());
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
   auto const destSR = m_mcg->tx().getSrcRec(destSK);
-  destSR->emitFallbackJump(m_mainCode);
+
+  auto trflags = inst->extra<ReqRetranslate>()->trflags;
+
+  if (trflags.packed == 0) {
+    destSR->emitFallbackJump(m_mainCode);
+  } else {
+    destSR->emitFallbackJumpCustom(m_mainCode, m_frozenCode, destSK, trflags);
+  }
 }
 
 void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc) {
@@ -3979,6 +3992,14 @@ void CodeGenerator::cgLdCctx(IRInstruction* inst) {
   return cgLdCtx(inst);
 }
 
+void CodeGenerator::cgLdClsName(IRInstruction* inst) {
+  auto const dstReg = dstLoc(0).reg();
+  auto const srcReg = srcLoc(0).reg();
+
+  m_as.loadq(srcReg[Class::preClassOff()], dstReg);
+  m_as.loadq(dstReg[PreClass::nameOffset()], dstReg);
+}
+
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   assert(inst->src(1)->isConst());
   auto const offset = inst->src(1);
@@ -4594,21 +4615,21 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgExitJcc(IRInstruction* inst) {
-  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
-                         resumed());
+  auto const extra = inst->extra<SideExitJccData>();
+  auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   emitCompare(inst);
   emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
-                   sk);
+                   sk, extra->trflags);
 }
 
 void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
-  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
-                         resumed());
+  auto const extra = inst->extra<SideExitJccData>();
+  auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   emitCompareInt(inst);
   emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
-                   sk);
+                   sk, extra->trflags);
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
@@ -5297,21 +5318,21 @@ void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSideExitJmpZero(IRInstruction* inst) {
-  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
-                         resumed());
+  auto const extra = inst->extra<SideExitJccData>();
+  auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   emitTestZero(inst->src(0), srcLoc(0));
   emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
-                   sk);
+                   sk, extra->trflags);
 }
 
 void CodeGenerator::cgSideExitJmpNZero(IRInstruction* inst) {
-  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken,
-                         resumed());
+  auto const extra = inst->extra<SideExitJccData>();
+  auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   emitTestZero(inst->src(0), srcLoc(0));
   emitBindSideExit(m_mainCode, m_frozenCode,
                    opToConditionCode(inst->op()),
-                   sk);
+                   sk, extra->trflags);
 }
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {

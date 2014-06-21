@@ -168,7 +168,6 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   ad->m_capAndUsed  = uint64_t{1} << 32 | cap;
   ad->m_tableMask   = mask;
   ad->m_nextKI      = 0;
-  ad->m_hLoad       = 1;
 
   auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);
@@ -211,7 +210,6 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   ad->m_capAndUsed  = uint64_t{1} << 32 | cap;
   ad->m_tableMask   = mask;
   ad->m_nextKI      = key + 1;
-  ad->m_hLoad       = 1;
 
   auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);

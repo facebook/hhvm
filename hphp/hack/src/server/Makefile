@@ -12,7 +12,8 @@ SRC= serverArgs.ml serverEnv.ml \
  findRefsService.ml methodJumps.ml serverMethodJumps.ml \
  serverPeriodical.ml serverPrintTypes.ml \
  serverError.ml serverTypeCheck.ml serverIdentifyFunction.ml \
- serverAutoComplete.ml serverEnvBuild.ml serverHealth.ml serverSign.ml \
+ autocompleteService.ml serverAutoComplete.ml serverEnvBuild.ml \
+ serverHealth.ml serverSign.ml \
  serverInit.ml serverConvert.ml findRefsService.ml serverFindRefs.ml \
  serverRefactor.ml serverInferType.ml \
  fileOutline.ml serverFileOutline.ml methodJumps.ml serverMethodJumps.ml \

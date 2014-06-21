@@ -24,11 +24,11 @@ and terminal_ in_try = function
   | Continue
   | Expr (_, (Call ((_, Id (_, "assert")), [_, False])
   | Call ((_, Id (_, "invariant")), (_, False) :: _ :: _)
-  | Call ((_, Id (_, "invariant_violation")), _ :: _))) ->
-      raise Exit
+  | Call ((_, Id (_, "invariant_violation")), _ :: _)))
   | Expr (_, Yield (_, Call ((_, Id (_, "result")), _)))
-  | Return _ -> raise Exit
-  | Expr (_, Call ((_, Id (_, "result")), [(_, False)])) -> raise Exit
+  | Return _
+  | Expr (_, Call ((_, Id (_, "result")), [(_, False)]))
+  | Expr (_, Call ((_, Id (_, "exit")), _)) -> raise Exit
   | If (_, b1, b2) ->
       (try terminal in_try b1; () with Exit ->
         terminal in_try b2)

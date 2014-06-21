@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/autoload-handler.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/blob-helper.h"
@@ -951,10 +952,8 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              auto const efile = g_context->lookupIncludeRoot(s,
+              auto const unit = g_context->lookupIncludeRoot(s,
                 InclOpFlags::DocRoot, nullptr, this);
-              assert(efile);
-              Unit* unit = efile->unit();
               unit->initialMerge();
               m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
               break;

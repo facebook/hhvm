@@ -1067,6 +1067,12 @@ void in(ISS& env, const bc::IncDecL& op) {
   auto const newT = typeIncDec(op.subop, loc);
   auto const pre = isPre(op.subop);
 
+  // If it's a non-numeric string, this may cause it to exceed the max length.
+  if (!locCouldBeUninit(env, op.loc1) &&
+      !loc.couldBe(TStr)) {
+    nothrow(env);
+  }
+
   if (!pre) push(env, loc);
   setLoc(env, op.loc1, newT);
   if (pre)  push(env, newT);

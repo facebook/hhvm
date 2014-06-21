@@ -7,7 +7,13 @@ function xdebug_break(): bool;
 <<__Native>>
 function xdebug_call_class(): string;
 
-<<__Native>>
+/**
+ * This function returns the filename that contains the function/method that
+ * called the current function/method.
+ *
+ * @return string - Returns the calling file.
+ */
+<<__Native("NoFCallBuiltin")>>
 function xdebug_call_file(): string;
 
 <<__Native>>
@@ -58,9 +64,19 @@ function xdebug_get_tracefile_name(): string;
 <<__Native>>
 function xdebug_is_enabled(): bool;
 
+/**
+ * Returns the current amount of memory the script uses.
+ *
+ * @return int - Returns the current memory usage
+ */
 <<__Native>>
 function xdebug_memory_usage(): int;
 
+/**
+ * Returns the maximum amount of memory the script used until now.
+ *
+ * @return int - Returns the peak memory usage
+ */
 <<__Native>>
 function xdebug_peak_memory_usage(): int;
 

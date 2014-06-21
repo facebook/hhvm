@@ -13,17 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/region-selection.h"
+
 #include <algorithm>
 #include <vector>
 
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/region-hot-trace.h"
-#include "hphp/runtime/vm/jit/region-whole-cfg.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace JIT {

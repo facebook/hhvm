@@ -70,15 +70,14 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * arg TSRMLS_DC) {
   always_assert(ht->isProxyArray());
   HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
-  for (auto pos = ht->iter_begin();
-      pos != HPHP::ArrayData::invalid_index;
-      pos = ht->iter_advance(pos))
-  {
-    void * data = proxy->proxyGetValueRef(pos);
+  proxy->escalate();
+  for (HPHP::MArrayIter pos(proxy->innerRef());pos.advance();) {
+    void * data = proxy->proxyGet(pos);
     int result = apply_func(data, arg TSRMLS_CC);
 
     if (result & ZEND_HASH_APPLY_REMOVE) {
-      not_implemented();
+      HPHP::Variant key = pos.key();
+      proxy->remove(key, false);
     }
     if (result & ZEND_HASH_APPLY_STOP) {
       break;
@@ -92,11 +91,9 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
   always_assert(ht->isProxyArray());
   HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
 
-  for (auto pos = ht->iter_begin();
-      pos != HPHP::ArrayData::invalid_index;
-      pos = ht->iter_advance(pos))
-  {
-    HPHP::Variant key = ht->getKey(pos);
+  proxy->escalate();
+  for (HPHP::MArrayIter pos(proxy->innerRef());pos.advance();) {
+    HPHP::Variant key = pos.key();
     int result;
     va_start(args, num_args);
     if (key.isInteger()) {
@@ -109,11 +106,11 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
       hash_key.nKeyLength = key.asCStrRef().size() + 1;
       hash_key.h = 0;
     }
-    void * data = proxy->proxyGetValueRef(pos);
+    void *data = proxy->proxyGet(pos);
     result = apply_func(data TSRMLS_CC, num_args, args, &hash_key);
 
     if (result & ZEND_HASH_APPLY_REMOVE) {
-      not_implemented();
+      proxy->remove(key, false);
     }
     if (result & ZEND_HASH_APPLY_STOP) {
       va_end(args);
@@ -179,32 +176,48 @@ ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyL
 }
 
 ZEND_API ulong zend_hash_next_free_element(const HashTable *ht) {
-  return ht->iter_end() + 1;
+  // TODO: What the caller really wants here is MixedArray::m_nextKI
+  // Previously ht->iter_end() + 1 was returned, but that will give some
+  // vaguely related number like MixedArray::m_used or APCLocalArray::m_size,
+  // certainly not the key of the next append operation.
+  not_implemented();
 }
 
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos) {
   if (pos) {
-    *pos = ht->iter_advance(*pos);
-    return *pos != ht->invalid_index;
+    return pos->advance() ? SUCCESS : FAILURE;
+  } else {
+    (void) ht->next();
+    return ht->isInvalid() ? FAILURE : SUCCESS;
   }
-  ht->next();
-  return ht->isInvalid() ? FAILURE : SUCCESS;
 }
+
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos) {
   if (pos) {
-    *pos = ht->iter_rewind(*pos);
-    return *pos != ht->invalid_index;
+    // Sorry, MArrayIter only goes forwards
+    HPHP::raise_warning("zend_hash_move_backwards_ex(): "
+                        "not implemented for non-null pos");
+    return FAILURE;
+  } else {
+    (void) ht->prev();
+    return ht->isInvalid() ? FAILURE : SUCCESS;
   }
-  ht->prev();
-  return ht->isInvalid() ? FAILURE : SUCCESS;
 }
+
 ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos) {
-  HashPosition hp = pos ? *pos : ht->getPosition();
-  if (hp == ht->invalid_index) {
-    return HASH_KEY_NON_EXISTENT;
+  HPHP::Variant key;
+  if (pos) {
+    if (!pos->prepare()) {
+      return HASH_KEY_NON_EXISTENT;
+    }
+    key = pos->key();
+  } else {
+    if (ht->isInvalid()) {
+      return HASH_KEY_NON_EXISTENT;
+    }
+    key = ht->key();
   }
 
-  HPHP::Variant key = ht->getKey(hp);
   if (key.isString()) {
     HPHP::String keyStr = key.toString();
     if (duplicate) {
@@ -223,14 +236,22 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index,
   *num_index = key.toInt64();
   return HASH_KEY_IS_LONG;
 }
-ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos) {
-  HashPosition hp = pos ? *pos : ht->getPosition();
-  if (hp == ht->invalid_index) {
-    return HASH_KEY_NON_EXISTENT;
-  }
 
-  HPHP::Variant key = ht->getKey(hp);
-  HPHP::DataType type = key.getType();
+ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos) {
+  HPHP::DataType type;
+  if (pos) {
+    if (!pos->prepare()) {
+      return HASH_KEY_NON_EXISTENT;
+    }
+    HPHP::Variant key = pos->key();
+    type = key.getType();
+  } else {
+    if (ht->isInvalid()) {
+      return HASH_KEY_NON_EXISTENT;
+    }
+    HPHP::Variant key = ht->key();
+    type = key.getType();
+  }
   switch (type) {
     case HPHP::KindOfInt64:
       return HASH_KEY_IS_LONG;
@@ -243,13 +264,17 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 }
 
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos) {
-  HashPosition hp = pos ? *pos : ht->getPosition();
-  if (hp == ht->invalid_index) {
-    return FAILURE;
-  }
   always_assert(ht->isProxyArray());
   HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
-  void * val = proxy->proxyGetValueRef(hp);
+  void *val;
+  if (pos) {
+    val = proxy->proxyGet(*pos); // may return nullptr
+  } else if (proxy->isInvalid()) {
+    val = nullptr;
+  } else {
+    HPHP::Variant key = proxy->key();
+    val = proxy->proxyGet(key);
+  }
   if (!val) {
     return FAILURE;
   }
@@ -259,7 +284,11 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos) {
   if (pos) {
-    *pos = ht->iter_begin();
+    always_assert(ht->isProxyArray());
+    HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
+    ht->escalate();
+    (void) new (pos) HPHP::MArrayIter(proxy->innerRef());
+    pos->advance();
   } else {
     ht->reset();
   }
@@ -267,14 +296,12 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
   always_assert(source->isProxyArray());
-  HPHP::ProxyArray * proxy_source = static_cast<HPHP::ProxyArray*>(source);
+  HPHP::ProxyArray * source_proxy = static_cast<HPHP::ProxyArray*>(source);
   target->plusEq(source);
   if (pCopyConstructor) {
-    for (auto pos = source->iter_begin();
-        pos != HPHP::ArrayData::invalid_index;
-        pos = source->iter_advance(pos))
-    {
-      pCopyConstructor(proxy_source->proxyGetValueRef(pos));
+    source->escalate();
+    for (HPHP::MArrayIter pos(source_proxy->innerRef());pos.advance();) {
+      pCopyConstructor(source_proxy->proxyGet(pos));
     }
   }
 }
@@ -298,11 +325,9 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
   HPHP::ProxyArray * source_proxy = static_cast<HPHP::ProxyArray*>(source);
   target->merge(source);
   if (pCopyConstructor) {
-    for (auto pos = source->iter_begin();
-        pos != HPHP::ArrayData::invalid_index;
-        pos = source->iter_advance(pos))
-    {
-      pCopyConstructor(source_proxy->proxyGetValueRef(pos));
+    source->escalate();
+    for (HPHP::MArrayIter pos(source_proxy->innerRef()); pos.advance();) {
+      pCopyConstructor(source_proxy->proxyGet(pos));
     }
   }
 }

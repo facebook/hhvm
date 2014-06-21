@@ -366,6 +366,10 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   }
 }
 
+<<__Native>>
+function hphp_miarray(): array;
+
+
 /**
  * ( excerpt from http://php.net/manual/en/class.reflectionfunction.php )
  *

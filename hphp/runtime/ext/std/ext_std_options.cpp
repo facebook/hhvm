@@ -262,18 +262,11 @@ static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
 }
 
 static Array HHVM_FUNCTION(get_included_files) {
-  Array included_files = Array::Create();
-  int idx = 0;
-  for (auto& file: g_context->m_evaledFilesOrder) {
-    included_files.set(idx++, file->getFileName());
+  PackedArrayInit pai(g_context->m_evaledFilesOrder.size());
+  for (auto& file : g_context->m_evaledFilesOrder) {
+    pai.append(file->getFileName());
   }
-  return included_files;
-}
-
-
-static Array HHVM_FUNCTION(inclued_get_data) {
-  // TODO: Clearly this is not implemented...
-  return empty_array();
+  return pai.toArray();
 }
 
 static int64_t HHVM_FUNCTION(get_magic_quotes_gpc) {
@@ -890,7 +883,7 @@ Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
 }
 
 static bool HHVM_FUNCTION(phpinfo, int64_t what /*=0 */) {
-  echo("HipHop\n");
+  g_context->write("HipHop\n");
   return false;
 }
 
@@ -1184,7 +1177,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(restore_include_path);
   HHVM_FE(set_include_path);
   HHVM_FE(get_included_files);
-  HHVM_FE(inclued_get_data);
   HHVM_FE(get_magic_quotes_gpc);
   HHVM_FE(get_magic_quotes_runtime);
   HHVM_FE(getenv);

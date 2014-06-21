@@ -1121,7 +1121,8 @@ ObjectData* ExecutionContext::createObject(StringData* clsName,
                                              bool init /* = true */) {
   Class* class_ = Unit::loadClass(clsName);
   if (class_ == nullptr) {
-    throw_missing_class(clsName->data());
+    throw ClassNotFoundException(
+      (std::string("unknown class ") + clsName->data()).c_str());
   }
 
   Object o;
@@ -2232,13 +2233,9 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     if (withSelf) {
       // Builtins don't have a file and line number
       if (!fp->m_func->isBuiltin()) {
-        Unit *unit = fp->m_func->unit();
+        Unit* unit = fp->m_func->unit();
         assert(unit);
-        const char* filename = unit->filepath()->data();
-        if (fp->m_func->originalFilename()) {
-          filename = fp->m_func->originalFilename()->data();
-        }
-        assert(filename);
+        const char* filename = fp->m_func->filename()->data();
         Offset off = pc;
 
         ArrayInit frame(parserFrame ? 4 : 2, ArrayInit::Map{});
@@ -2495,9 +2492,9 @@ const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
   return ci;
 }
 
-PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
-                                         const char* currentDir,
-                                         bool* initial_opt) {
+Unit* ExecutionContext::lookupPhpFile(StringData* path,
+                                      const char* currentDir,
+                                      bool* initial_opt) {
   bool init;
   bool &initial = initial_opt ? *initial_opt : init;
   initial = true;
@@ -2513,7 +2510,7 @@ PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
     // We found it! Return the unit.
     efile = it->second;
     initial = false;
-    return efile;
+    return efile->unit();
   }
   // We didn't find it, so try the realpath.
   bool alreadyResolved =
@@ -2536,7 +2533,7 @@ PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
           m_evaledFilesOrder.push_back(efile);
           spath.get()->incRefCount();
           initial = false;
-          return efile;
+          return efile->unit();
         }
       }
     }
@@ -2562,37 +2559,30 @@ PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
     }
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
   }
-  return efile;
+  return efile ? efile->unit() : nullptr;
 }
 
 Unit* ExecutionContext::evalInclude(StringData* path,
                                       const StringData* curUnitFilePath,
                                       bool* initial) {
   namespace fs = boost::filesystem;
-  PhpFile* efile = nullptr;
   if (curUnitFilePath) {
     fs::path currentUnit(curUnitFilePath->data());
     fs::path currentDir(currentUnit.branch_path());
-    efile = lookupPhpFile(path, currentDir.string().c_str(), initial);
-  } else {
-    efile = lookupPhpFile(path, "", initial);
+    return lookupPhpFile(path, currentDir.string().c_str(), initial);
   }
-  if (efile) {
-    return efile->unit();
-  }
-  return nullptr;
+  return lookupPhpFile(path, "", initial);
 }
 
 Unit* ExecutionContext::evalIncludeRoot(
-  StringData* path, InclOpFlags flags, bool* initial) {
-  auto const efile = lookupIncludeRoot(path, flags, initial);
-  return efile ? efile->unit() : 0;
+    StringData* path, InclOpFlags flags, bool* initial) {
+  return lookupIncludeRoot(path, flags, initial, nullptr);
 }
 
-PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
-                                             InclOpFlags flags,
-                                             bool* initial,
-                                             Unit* unit) {
+Unit* ExecutionContext::lookupIncludeRoot(StringData* path,
+                                          InclOpFlags flags,
+                                          bool* initial,
+                                          Unit* unit) {
   String absPath;
   if (flags & InclOpFlags::Relative) {
     namespace fs = boost::filesystem;
@@ -2616,7 +2606,7 @@ PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
   auto const it = m_evaledFiles.find(absPath.get());
   if (it != end(m_evaledFiles)) {
     if (initial) *initial = false;
-    return it->second;
+    return it->second->unit();
   }
 
   return lookupPhpFile(absPath.get(), "", initial);
@@ -2732,34 +2722,40 @@ ExecutionContext::pushLocalsAndIterators(const Func* func,
   }
 }
 
-void ExecutionContext::enqueueAPCHandle(APCHandle* handle) {
-  assert(handle->getUncounted());
+void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
+  assert(handle->getUncounted() && size > 0);
   assert(handle->getType() == KindOfString ||
          handle->getType() == KindOfArray);
-  m_apcHandles.push_back(handle);
+  m_apcHandles.m_handles.push_back(handle);
+  m_apcHandles.m_memSize += size;
 }
 
 // Treadmill solution for the SharedVariant memory management
 namespace {
 class FreedAPCHandle {
+  size_t m_memSize;
   std::vector<APCHandle*> m_apcHandles;
 public:
-  explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles)
-    : m_apcHandles(std::move(shandles))
+  explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles, size_t size)
+    : m_memSize(size), m_apcHandles(std::move(shandles))
   {}
   void operator()() {
     for (auto handle : m_apcHandles) {
       APCTypedValue::fromHandle(handle)->deleteUncounted();
     }
+    APCStats::getAPCStats().removePendingDelete(m_memSize);
   }
 };
 }
 
 void ExecutionContext::manageAPCHandle() {
-  assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
-  if (m_apcHandles.size() > 0) {
-    Treadmill::enqueue(FreedAPCHandle(std::move(m_apcHandles)));
-    m_apcHandles.clear();
+  assert(apcExtension::UseUncounted || m_apcHandles.m_handles.size() == 0);
+  if (m_apcHandles.m_handles.size() > 0) {
+    Treadmill::enqueue(
+        FreedAPCHandle(std::move(m_apcHandles.m_handles),
+                       m_apcHandles.m_memSize));
+    APCStats::getAPCStats().addPendingDelete(m_apcHandles.m_memSize);
+    m_apcHandles.m_handles.clear();
   }
 }
 
@@ -2908,14 +2904,17 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     // recent FP must be used. This can happen if we are trying to debug
     // an eval() call or a call issued by debugger itself.
     auto savedFP = vmfp();
-    vmfp() = fp->m_varEnv->getFP();
+    if (fp) {
+      vmfp() = fp->m_varEnv->getFP();
+    }
     SCOPE_EXIT { vmfp() = savedFP; };
 
     // Invoke the given PHP, possibly specialized to match the type of the
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
     invokeFunc(retval, unit->getMain(functionClass), init_null_variant,
-               this_, frameClass, fp->m_varEnv, nullptr, InvokePseudoMain);
+               this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
+               InvokePseudoMain);
     failed = false;
   } catch (FatalErrorException &e) {
     g_context->write(s_fatal);
@@ -4286,7 +4285,7 @@ OPTBLD_INLINE void ExecutionContext::iopInstanceOfD(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopPrint(IOP_ARGS) {
   NEXT();
   Cell* c1 = vmStack().topC();
-  echo(cellAsVariant(*c1).toString());
+  write(cellAsVariant(*c1).toString());
   vmStack().replaceC<KindOfInt64>(1);
 }
 
@@ -4312,7 +4311,7 @@ OPTBLD_INLINE void ExecutionContext::iopExit(IOP_ARGS) {
   if (c1->m_type == KindOfInt64) {
     exitCode = c1->m_data.num;
   } else {
-    echo(cellAsVariant(*c1).toString());
+    write(cellAsVariant(*c1).toString());
   }
   vmStack().popC();
   vmStack().pushNull();
@@ -6682,10 +6681,11 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
     ec->evalInclude(path.get(), vmfp()->m_func->unit()->filepath(), &initial);
   vmStack().popC();
   if (u == nullptr) {
-    ((flags & InclOpFlags::Fatal) ?
-     (void (*)(const char *, ...))raise_error :
-     (void (*)(const char *, ...))raise_warning)("File not found: %s",
-                                                 path.data());
+    if (flags & InclOpFlags::Fatal) {
+      raise_error("File not found: %s", path.data());
+    } else {
+      raise_warning("File not found: %s", path.data());
+    }
     vmStack().pushFalse();
   } else {
     if (!(flags & InclOpFlags::Once) || initial) {

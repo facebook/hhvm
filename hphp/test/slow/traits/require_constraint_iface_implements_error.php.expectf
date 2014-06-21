@@ -1,0 +1,1 @@
+Fatal error: 'require implements' may not be used in interface scope; instead, use interface inheritance in %s/test/slow/traits/require_constraint_iface_implements_error.php on line 7

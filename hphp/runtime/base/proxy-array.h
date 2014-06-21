@@ -36,11 +36,6 @@ namespace HPHP {
  * TODO: rename to ZendArray
  */
 struct ProxyArray : public ArrayData {
-  explicit ProxyArray(ArrayData* ad)
-    : ArrayData(kProxyKind)
-    , m_ad(ad)
-  {}
-
   static ProxyArray* Make(ArrayData*);
 
 public:
@@ -72,11 +67,18 @@ public:
   void * proxyGet(int64_t k) const;
 
   /**
-   * Get a pointer to the data for an array element identified by its position,
-   * as returned by iter_begin() etc. This is used to implement the
-   * HashPosition interface.
+   * Get a pointer to the data for an array element identified by a given
+   * variant key as a void*. If the array holds zvals, this will be a zval**,
+   * i.e. RefData**. If it holds arbitrary data, a pointer to that data will
+   * be returned.
    */
-  void * proxyGetValueRef(ssize_t pos) const;
+  void * proxyGet(const Variant& k) const;
+
+  /**
+   * Get a pointer to the data for an array element identified by an MArrayIter
+   * position. This is used to implement the HashPosition interface.
+   */
+  void * proxyGet(MArrayIter & pos) const;
 
   /**
    * Set an element by StringData* or integer key, and return the new data
@@ -90,6 +92,11 @@ public:
    */
   void proxyAppend(void* data, uint32_t data_size, void** dest);
 
+  /**
+   * Get a RefData which always points to the inner ArrayData
+   */
+  RefData * innerRef() const;
+
 private:
   /**
    * Returns true if the array contains zvals. The caller conventionally
@@ -101,11 +108,11 @@ private:
   }
 
   /**
-   * Convert a TypedValue retrieved from the array to the void* expected by the
+   * Convert a Variant retrieved from the array to the void* expected by the
    * Zend compat caller. This will retrieve the underlying data pointer from
    * the ZendCustomElement resource, if applicable.
    */
-  void * elementToData(TypedValue * tv) const;
+  void * elementToData(Variant* v) const;
 
   /**
    * Make a ZendCustomElement resource wrapping the given data block. If pDest
@@ -189,12 +196,16 @@ public:
 private:
   static ProxyArray* asProxyArray(ArrayData* ad);
   static const ProxyArray* asProxyArray(const ArrayData* ad);
-  static ProxyArray* reseatable(ArrayData* oldArr, ArrayData* newArr);
-  static ArrayData* innerArr(ArrayData* ad);
+  static void reseatable(const ArrayData* oldArr, ArrayData* newArr);
+
   static ArrayData* innerArr(const ArrayData* ad);
 
 private:
-  ArrayData* m_ad;
+  // The inner array. This is mutable since zend_hash_find() etc. has a
+  // const ProxyArray* as a parameter, but we need to modify the inner array
+  // to box and proxy the return values, so making this mutable avoids a
+  // const_cast.
+  mutable RefData *m_ref;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -205,13 +216,13 @@ void ProxyArray::proxySet(K k,
   ArrayData * r;
   if (hasZvalValues()) {
     assert(data_size == sizeof(void*));
-    r = m_ad->zSet(k, *(RefData**)data);
+    r = innerArr(this)->zSet(k, *(RefData**)data);
     if (dest) {
-      *dest = (void*)(&m_ad->nvGet(k)->m_data.pref);
+      *dest = (void*)(&r->nvGet(k)->m_data.pref);
     }
   } else {
     ResourceData * elt = makeElementResource(data, data_size, dest);
-    r = m_ad->set(k, elt, false);
+    r = innerArr(this)->set(k, elt, false);
   }
   reseatable(this, r);
 }

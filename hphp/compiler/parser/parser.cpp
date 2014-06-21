@@ -84,7 +84,7 @@
 #include "hphp/compiler/statement/goto_statement.h"
 #include "hphp/compiler/statement/label_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
-#include "hphp/compiler/statement/trait_require_statement.h"
+#include "hphp/compiler/statement/class_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
@@ -1303,8 +1303,8 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
   out->exp = expList;
 }
 
-void Parser::onTraitRequire(Token &out, Token &name, bool isExtends) {
-  out->stmt = NEW_STMT(TraitRequireStatement, name->text(), isExtends);
+void Parser::onClassRequire(Token &out, Token &name, bool isExtends) {
+  out->stmt = NEW_STMT(ClassRequireStatement, name->text(), isExtends);
 }
 
 void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {

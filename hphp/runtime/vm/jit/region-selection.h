@@ -28,14 +28,12 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP {
+namespace HPHP { namespace JIT {
 
-namespace JIT {
-struct Tracelet;
 struct MCGenerator;
-}
-
-namespace JIT {
+struct ProfData;
+struct Tracelet;
+struct TransCFG;
 
 using boost::container::flat_map;
 using boost::container::flat_multimap;
@@ -410,6 +408,26 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
                                    const Tracelet& tlet);
 
 /*
+ * Select the hottest trace beginning with triggerId.
+ */
+RegionDescPtr selectHotTrace(TransID triggerId,
+                             const ProfData* profData,
+                             TransCFG& cfg,
+                             TransIDSet& selectedSet,
+                             TransIDVec* selectedVec = nullptr);
+
+/*
+ * Create a region, beginning with triggerId, that includes as much of
+ * the TransCFG as possible.  Excludes multiple translations of the
+ * same SrcKey.
+ */
+RegionDescPtr selectWholeCFG(TransID triggerId,
+                             const ProfData* profData,
+                             TransCFG& cfg,
+                             TransIDSet& selectedSet,
+                             TransIDVec* selectedVec = nullptr);
+
+/*
  * Checks whether the type predictions at the beginning of block
  * satisfy the post-conditions in prevPostConds.
  */
@@ -442,6 +460,7 @@ TransID getTransId(RegionDesc::BlockId blockId);
  */
 std::string show(RegionDesc::Location);
 std::string show(RegionDesc::TypePred);
+std::string show(const PostConditions&);
 std::string show(const RegionDesc::ReffinessPred&);
 std::string show(RegionContext::LiveType);
 std::string show(RegionContext::PreLiveAR);

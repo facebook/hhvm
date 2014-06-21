@@ -57,24 +57,6 @@ let uerror r1 ty1 r2 ty2 =
     (Reason.to_string ("This is " ^ ty1) r1)
     (Reason.to_string ("It is incompatible with " ^ ty2) r2)
 
-let handle_class_type completion_type c =
-  match completion_type, c.Typing_defs.tc_kind with
-  | Some Autocomplete.Acid, Ast.Cnormal
-  | Some Autocomplete.Acid, Ast.Cabstract
-  | Some Autocomplete.Acnew, Ast.Cnormal
-  | Some Autocomplete.Actype, _ -> true
-  | _ -> false
-
-let should_complete_fun completion_type name =
-  match (Typing_env.Funs.get name) with
-  | Some _ when completion_type = (Some Autocomplete.Acid) -> true
-  | _ -> false
-
-let should_complete_class completion_type name =
-  match (Typing_env.Classes.get name) with
-  | Some c when handle_class_type completion_type c -> true
-  | _ -> false
-
 let is_argument_info_target p =
   match !argument_info_target with
   | None -> false

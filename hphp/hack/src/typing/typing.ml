@@ -1099,7 +1099,7 @@ and anon_make anon_lenv p f =
   let is_typing_self = ref false in
   fun env tyl ->
     if !is_typing_self
-    then begin 
+    then begin
       Errors.add p "Anonymous functions cannot be recursive";
       env, (Reason.Rwitness p, Tany)
     end
@@ -1326,37 +1326,42 @@ and field_key env = function
   | Nast.AFvalue (p, _) -> env, (Reason.Rwitness p, Tprim Tint)
   | Nast.AFkvalue (x, _) -> expr env x
 
-and call_parent_construct p env el =
-  match Env.get_parent env with
-  | _, Tapply (cid, params) ->
-      let check_not_abstract = false in
-      let env, parent = new_object ~check_not_abstract p env CIparent el in
-      let env, _ = Type.unify p (Reason.URnone) env (Env.get_parent env) parent in
-      env, (Reason.Rwitness p, Tprim Tvoid)
-  | _ -> missing_parent p env
+and check_parent_construct pos env el env_parent =
+  let check_not_abstract = false in
+  let env, parent = new_object ~check_not_abstract pos env CIparent el in
+  let env, _ = Type.unify pos (Reason.URnone) env env_parent parent in
+  env, (Reason.Rwitness pos, Tprim Tvoid)
 
-and missing_parent pos env =
-  let default = env, (Reason.Rnone, Tany) in
-  match Env.get_self env with
-  | _, Tapply ((_, self), _) ->
-      let self_class =
-        match snd (Env.get_class env self) with
-        | None -> assert false
-        | Some tc -> tc
-      in
-      (* We don't know the entire hierarchy, assume it's correct *)
-      if not self_class.tc_members_fully_known then () else
-      (* We do know all the hierarchy, and we are dealing with a "normal" class
-       * (not a trait) *)
-      if self_class.tc_kind = Ast.Cnormal
-      then Errors.add pos "The parent class is undefined"
-          (* We are dealing with a trait, it only fails in strict. *)
-      else if Env.is_strict env
-      then Errors.add pos "Don't call parent::__construct from a trait";
-      default
-  | _ ->
-      Errors.add pos "parent is undefined outside of a class";
-      default
+and call_parent_construct pos env el =
+  let parent = Env.get_parent env in
+  match parent with
+    | _, Tapply (_, params) -> check_parent_construct pos env el parent
+    | _ ->
+      let default = env, (Reason.Rnone, Tany) in
+      match Env.get_self env with
+        | _, Tapply ((_, self), _) ->
+          (match snd (Env.get_class env self) with
+            | Some ({tc_kind = Ast.Ctrait; tc_req_ancestors ; tc_name; _}
+                       as trait) ->
+              (match trait_most_concrete_req_class trait env with
+                | None -> Errors.add pos
+                  ("parent:: inside a trait is undefined"
+                   ^" without 'require extends' of a class defined in <?hh");
+                  default
+                | Some tc_parent ->
+                  (* FIXME: should bind in correct params *)
+                  let r = Reason.Rwitness pos in
+                  let fake_parent_ty = trait_fake_parent_ty pos tc_parent env in
+                  check_parent_construct pos env el (r, fake_parent_ty)
+              )
+            | Some self_tc ->
+              if not self_tc.tc_members_fully_known
+              then () (* Don't know the hierarchy, assume it's correct *)
+              else Errors.add pos "The parent class is undefined";
+              default
+            | None -> assert false)
+        | _ ->
+          Errors.add pos "parent is undefined outside of a class"; default
 
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
@@ -2028,45 +2033,45 @@ and trait_most_concrete_req_class trait env =
       )
   ) trait.tc_req_ancestors None
 
+and trait_fake_parent_ty pos parent_tc env =
+  let self_ty = Env.get_self env in
+  match self_ty with
+    | (_, Tapply (_, tyl)) ->
+        (* FIXME: fake parent type copies the typelist *)
+      Tapply ((pos, parent_tc.tc_name), tyl)
+    | _ -> failwith ("Internal error; expected to find self as "
+                     ^parent_tc.tc_name)
+
 and static_class_id p env = function
   | CIparent ->
-      (match Env.get_self env with
+    (match Env.get_self env with
       | _, Tapply ((self_pos, self), _) ->
-          (match snd (Env.get_class env self) with
+        (match snd (Env.get_class env self) with
           | Some (
             {tc_kind = Ast.Ctrait; tc_req_ancestors ; tc_name; _}
               as trait) ->
-              (match trait_most_concrete_req_class trait env with
+            (match trait_most_concrete_req_class trait env with
               | None ->
                 Errors.add p
-                    ("parent:: inside a trait is undefined"
-                     ^" without 'require extends' of a class defined in <?hh");
+                  ("parent:: inside a trait is undefined"
+                   ^" without 'require extends' of a class defined in <?hh");
                 env, (Reason.Rwitness p, Tany)
               | Some parent ->
-                  let r = Reason.Rwitness p in
-                  let self_ty = Env.get_self env in
-                  let ty = 
-                    match self_ty with
-                    | (_, Tapply (_, tyl)) ->
-                        Tapply ((p, parent.tc_name), tyl)
-                    | _ ->
-                        failwith
-                          ("Internal error; expected to find self as "^
-                           parent.tc_name)
-                  in
-                  (* in a trait, parent is "this", but with the type of the most
-                   * concrete class the trait 'require extend's *)
-                  env, (r, Tgeneric ("this", Some (r, ty)))
-              )
+                let r = Reason.Rwitness p in
+                let fake_parent = trait_fake_parent_ty p parent env in
+                (* in a trait, parent is "this", but with the type of the most
+                 * concrete class the trait 'require extend's *)
+                env, (r, Tgeneric ("this", Some (r, fake_parent)))
+            )
           | _ ->
-              let parent = Env.get_parent env in
-              let parent_defined = snd parent <> Tany in
-              if not parent_defined
-              then Errors.add p "parent is undefined";
-              let r = Reason.Rwitness p in
-              (* parent is still technically the same object. *)
-              env, (r, Tgeneric ("this", Some (r, snd parent)))
-          )
+            let parent = Env.get_parent env in
+            let parent_defined = snd parent <> Tany in
+            if not parent_defined
+            then Errors.add p "parent is undefined";
+            let r = Reason.Rwitness p in
+            (* parent is still technically the same object. *)
+            env, (r, Tgeneric ("this", Some (r, snd parent)))
+        )
       | _ ->
         let parent = Env.get_parent env in
         let parent_defined = snd parent <> Tany in
@@ -2215,7 +2220,7 @@ and call_ pos env fty el =
       let anon = Env.get_anonymous env id in
       let fpos = Reason.to_pos r2 in
       (match anon with
-      | None -> 
+      | None ->
           Errors.add pos "recursive call to anonymous function";
           env, (Reason.Rnone, Tany)
       | Some anon ->
@@ -2563,7 +2568,7 @@ and check_null_wtf env p ty =
             Errors.add p ("You are using a sketchy null check ...\n"^
                      "Use is_null, or $x === null instead")
         | _, Tprim _ ->
-            Errors.add p 
+            Errors.add p
               ("You are using a sketchy null check on a primitive type ...\n"^
                "Use is_null, or $x === null instead")
         | _ -> ())

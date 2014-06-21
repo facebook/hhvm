@@ -486,18 +486,18 @@ and class_const_decl c (env, acc) (h, id, e) =
   let acc = SMap.add (snd id) ce acc in
   env, acc
 
-(* Every class, interface, and trait implicitly defines ::class to
+(* Every class, interface, and trait implicitly defines a ::class to
  * allow accessing its fully qualified name as a string *)
 and class_class_decl class_id =
   let pos, name = class_id in
   let reason = Reason.Rclass_class (pos, name) in
   {
-    ce_final      = false;
-    ce_override   = false;
-    ce_synthesized   = false;
-    ce_visibility = Vpublic;
-    ce_type       = (reason, Tprim Tstring);
-    ce_origin     = name;
+    ce_final       = false;
+    ce_override    = false;
+    ce_synthesized = true;
+    ce_visibility  = Vpublic;
+    ce_type        = (reason, Tprim Tstring);
+    ce_origin      = name;
   }
 
 and class_var_decl c (env, acc) cv =
@@ -545,11 +545,11 @@ and method_decl c env m =
   let env, arity, params = Typing.make_params env true 0 m.m_params in
   let env, ret =
     match m.m_ret with
-    | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
-    | Some ret -> Typing_hint.hint env ret in
+      | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
+      | Some ret -> Typing_hint.hint env ret in
   let arity_max =
     if m.m_ddd then 1000 else
-    List.length m.m_params
+      List.length m.m_params
   in
   let env, tparams = lfold Typing.type_param env m.m_tparams in
   let ft = {
@@ -571,7 +571,7 @@ and method_check_override c m acc =
   let override = SMap.mem "Override" m.m_user_attributes in
   if m.m_visibility = Private && override then
     Errors.add pos ((Utils.strip_ns class_id)^"::"^id
-               ^": combining private and override is nonsensical");
+                    ^": combining private and override is nonsensical");
   match SMap.get id acc with
     | Some { ce_final = is_final; ce_type = (r, _); _ } ->
       if is_final then
@@ -580,7 +580,7 @@ and method_check_override c m acc =
     | None when override && c.c_kind = Ast.Ctrait -> true
     | None when override ->
       Errors.add pos
-          ((Utils.strip_ns class_id)^"::"^id^"() should be an override; \
+        ((Utils.strip_ns class_id)^"::"^id^"() should be an override; \
            no non-private parent definition found \
            or overridden parent is defined in non-<?hh code");
       false
@@ -594,7 +594,7 @@ and method_decl_acc c (env, acc) m =
     match SMap.get id acc, m.m_visibility with
       | Some { ce_visibility = Vprotected _ as parent_vis; _ }, Protected ->
         parent_vis
-    | _ -> visibility (snd c.c_name) m.m_visibility
+      | _ -> visibility (snd c.c_name) m.m_visibility
   in
   let ce = {
     ce_final = m.m_final; ce_override = check_override; ce_synthesized = false;

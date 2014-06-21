@@ -165,7 +165,10 @@ module Full = struct
         ty st env o ety
     | Tfun ft ->
       if ft.ft_abstract then o "abs " else ();
-      o "(function"; fun_type st env o ft; o ")"
+      o "(function"; fun_type st env o ft; o ")";
+      (match ft.ft_ret with
+        | (Reason.Rdynamic_yield _, _) -> o " [DynamicYield]"
+        | _ -> ())
     | Tabstract ((_, s), tyl, _) -> o s; o "<"; list k tyl; o ">"
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
     *)
@@ -262,8 +265,9 @@ module PrintClass = struct
       | Vprivate _ -> "private"
       | Vprotected _ -> "protected"
     in
+    let synth = (if ce.ce_synthesized then "synthetic " else "") in
     let type_ = Full.to_string tenv ce.ce_type in
-    vis^" "^type_
+    synth^vis^" "^type_
 
   let class_elt_smap m =
     SMap.fold begin fun field v acc ->

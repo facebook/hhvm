@@ -27,7 +27,6 @@
 
 #include <string>
 
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // all defined exceptions
@@ -44,6 +43,7 @@ public:
   ExtendedException(SkipFrame frame, const std::string &msg);
   ExtendedException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   Array getBackTrace() const;
+  std::pair<String, int> getFileAndLine() const;
   // a silent exception does not have its exception message logged
   bool isSilent() const { return m_silent; }
   void setSilent(bool s = true) { m_silent = s; }

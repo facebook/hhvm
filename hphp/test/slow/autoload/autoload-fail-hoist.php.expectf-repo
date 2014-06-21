@@ -1,0 +1,3 @@
+X::method
+NOTE: repo-mode doesn't invoke the autoloader at all (I1 is in repo)
+Done

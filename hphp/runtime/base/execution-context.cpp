@@ -671,17 +671,9 @@ void ExecutionContext::handleError(const std::string& msg,
 
     if (errorNeedsLogging(errnum)) {
       DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee.getMessage()));
-      String file = empty_string();
-      int line = 0;
-      if (RuntimeOption::InjectedStackTrace) {
-        Array bt = ee.getBackTrace();
-        if (!bt.empty()) {
-          Array top = bt.rvalAt(0).toArray();
-          if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-          if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
-        }
-      }
-      Logger::Log(Logger::LogError, prefix.c_str(), ee, file.c_str(), line);
+      auto fileAndLine = ee.getFileAndLine();
+      Logger::Log(Logger::LogError, prefix.c_str(), ee,
+                  fileAndLine.first.c_str(), fileAndLine.second);
     }
   }
 }
@@ -731,24 +723,17 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 bool ExecutionContext::onFatalError(const Exception &e) {
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
   recordLastError(e, errnum);
-  String file = empty_string();
-  int line = 0;
+
   bool silenced = false;
-  if (RuntimeOption::InjectedStackTrace) {
-    if (auto const ee = dynamic_cast<const ExtendedException *>(&e)) {
-      silenced = ee->isSilent();
-      Array bt = ee->getBackTrace();
-      if (!bt.empty()) {
-        Array top = bt.rvalAt(0).toArray();
-        if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-        if (top.exists(s_line)) line = top.rvalAt(s_line).toInt32();
-      }
-    }
+  auto fileAndLine = std::make_pair(empty_string(), 0);
+  if (auto const ee = dynamic_cast<const ExtendedException *>(&e)) {
+    silenced = ee->isSilent();
+    fileAndLine = ee->getFileAndLine();
   }
   // need to silence even with the AlwaysLogUnhandledExceptions flag set
   if (!silenced && RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, "\nFatal error: ", e,
-                file.c_str(), line);
+                fileAndLine.first.c_str(), fileAndLine.second);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
@@ -756,7 +741,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, "\nFatal error: ", e,
-                file.c_str(), line);
+                fileAndLine.first.c_str(), fileAndLine.second);
   }
   return handled;
 }

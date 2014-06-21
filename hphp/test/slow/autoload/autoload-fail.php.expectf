@@ -1,6 +1,6 @@
 string(5) "class"
 string(1) "C"
-string(28) "syntax error, unexpected '{'"
+string(%d) "syntax error, unexpected '{' in %s/test/slow/autoload/autoload-fail-c.inc on line %d"
 string(5) "class"
 string(1) "D"
 string(9) "Surprise!"
@@ -10,7 +10,7 @@ array(1) {
     ["file"]=>
     string(%d) "%s/test/slow/autoload/autoload-fail.php"
     ["line"]=>
-    int(24)
+    int(28)
     ["function"]=>
     string(7) "include"
     ["args"]=>

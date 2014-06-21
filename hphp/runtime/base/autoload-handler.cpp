@@ -158,6 +158,10 @@ struct ConstantExistsChecker {
 };
 }
 
+const StaticString
+  s_file("file"),
+  s_line("line");
+
 template <class T>
 AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
                                                      const String& kind,
@@ -198,6 +202,12 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
           }
           ok = true;
         }
+      } catch (ExtendedException& ee) {
+        auto fileAndLine = ee.getFileAndLine();
+        err = (fileAndLine.first.empty()) ? ee.getMessage()
+          : folly::format("{0} in {1} on line {2}",
+                          ee.getMessage(), fileAndLine.first.c_str(),
+                          fileAndLine.second).str();
       } catch (Exception& e) {
         err = e.getMessage();
       } catch (Object& e) {

@@ -35,6 +35,20 @@ IMPLEMENT_THREAD_LOCAL_PROXY(AsioSession, false, AsioSession::s_current);
 
 namespace {
   const context_idx_t MAX_CONTEXT_DEPTH = std::numeric_limits<context_idx_t>::max();
+
+  void runCallback(const Object& function, const Array& params, char* name) {
+    assert(function.get());
+    try {
+      vm_call_user_func(function, params);
+    } catch (const Object& exception) {
+      try {
+        raise_warning("[asio] Ignoring exception thrown by %s callback", name);
+      } catch (const Object& exception) {
+        // Swallow the exception. Callers are not designed to deal with
+        // PHP exceptions.
+      }
+    }
+  }
 }
 
 void AsioSession::Init() {
@@ -72,57 +86,44 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
-void AsioSession::onJoin(c_WaitHandle* wait_handle) {
-  assert(m_onJoinCallback.get());
-  try {
-    vm_call_user_func(m_onJoinCallback, Array::Create(wait_handle));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by WaitHandle::onJoin callback");
-  }
+void AsioSession::onJoin(c_WaitHandle* waitHandle) {
+  runCallback(
+    m_onJoinCallback,
+    Array::Create(waitHandle),
+    "WaitHandle::onJoin"
+  );
 }
 
 void AsioSession::onResumableCreate(c_ResumableWaitHandle* resumable, c_WaitableWaitHandle* child) {
-  assert(m_onResumableCreateCallback.get());
-  try {
-    vm_call_user_func(
-      m_onResumableCreateCallback,
-     make_packed_array(resumable, child));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by ResumableWaitHandle::onCreate callback");
-  }
+  runCallback(
+    m_onResumableCreateCallback,
+    make_packed_array(resumable, child),
+    "ResumableWaitHandle::onCreate"
+  );
 }
 
 void AsioSession::onResumableAwait(c_ResumableWaitHandle* resumable, c_WaitableWaitHandle* child) {
-  assert(m_onResumableAwaitCallback.get());
-  try {
-    vm_call_user_func(
-      m_onResumableAwaitCallback,
-      make_packed_array(resumable, child));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by ResumableWaitHandle::onAwait callback");
-  }
+  runCallback(
+    m_onResumableAwaitCallback,
+    make_packed_array(resumable, child),
+    "ResumableWaitHandle::onAwait"
+  );
 }
 
 void AsioSession::onResumableSuccess(c_ResumableWaitHandle* resumable, const Variant& result) {
-  assert(m_onResumableSuccessCallback.get());
-  try {
-    vm_call_user_func(
-      m_onResumableSuccessCallback,
-      make_packed_array(resumable, result));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by ResumableWaitHandle::onSuccess callback");
-  }
+  runCallback(
+    m_onResumableSuccessCallback,
+    make_packed_array(resumable, result),
+    "ResumableWaitHandle::onSuccess"
+  );
 }
 
 void AsioSession::onResumableFail(c_ResumableWaitHandle* resumable, const Object& exception) {
-  assert(m_onResumableFailCallback.get());
-  try {
-    vm_call_user_func(
-      m_onResumableFailCallback,
-      make_packed_array(resumable, exception));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by ResumableWaitHandle::onFail callback");
-  }
+  runCallback(
+    m_onResumableFailCallback,
+    make_packed_array(resumable, exception),
+    "ResumableWaitHandle::onFail"
+  );
 }
 
 void AsioSession::updateEventHookState() {
@@ -135,37 +136,28 @@ void AsioSession::updateEventHookState() {
   }
 }
 
-void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, const Variant& dependencies) {
-  assert(m_onGenArrayCreateCallback.get());
-  try {
-    vm_call_user_func(
-      m_onGenArrayCreateCallback,
-      make_packed_array(wait_handle, dependencies));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by GenArrayWaitHandle::onCreate callback");
-  }
+void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* waitHandle, const Variant& dependencies) {
+  runCallback(
+    m_onGenArrayCreateCallback,
+    make_packed_array(waitHandle, dependencies),
+    "GenArrayWaitHandle::onCreate"
+  );
 }
 
-void AsioSession::onGenMapCreate(c_GenMapWaitHandle* wait_handle, const Variant& dependencies) {
-  assert(m_onGenMapCreateCallback.get());
-  try {
-    vm_call_user_func(
-      m_onGenMapCreateCallback,
-      make_packed_array(wait_handle, dependencies));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by GenMapWaitHandle::onCreate callback");
-  }
+void AsioSession::onGenMapCreate(c_GenMapWaitHandle* waitHandle, const Variant& dependencies) {
+  runCallback(
+    m_onGenMapCreateCallback,
+    make_packed_array(waitHandle, dependencies),
+    "GenMapWaitHandle::onCreate"
+  );
 }
 
-void AsioSession::onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, const Variant& dependencies) {
-  assert(m_onGenVectorCreateCallback.get());
-  try {
-    vm_call_user_func(
-      m_onGenVectorCreateCallback,
-      make_packed_array(wait_handle, dependencies));
-  } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by GenVectorWaitHandle::onCreate callback");
-  }
+void AsioSession::onGenVectorCreate(c_GenVectorWaitHandle* waitHandle, const Variant& dependencies) {
+  runCallback(
+    m_onGenVectorCreateCallback,
+    make_packed_array(waitHandle, dependencies),
+    "GenVectorWaitHandle::onCreate"
+  );
 }
 
 bool AsioSession::sleep_wh_greater::operator() (const c_SleepWaitHandle* x,

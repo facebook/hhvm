@@ -107,7 +107,7 @@ class AsioSession {
       m_onJoinCallback = on_join;
     }
     bool hasOnJoinCallback() { return m_onJoinCallback.get(); }
-    void onJoin(c_WaitHandle* wait_handle);
+    void onJoin(c_WaitHandle* waitHandle);
 
     // ResumableWaitHandle callbacks:
     void setOnResumableCreateCallback(ObjectData* on_start) {
@@ -145,7 +145,7 @@ class AsioSession {
       m_onGenArrayCreateCallback = on_create;
     }
     bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
-    void onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, const Variant& dependencies);
+    void onGenArrayCreate(c_GenArrayWaitHandle* waitHandle, const Variant& dependencies);
 
     // GenMapWaitHandle callbacks:
     void setOnGenMapCreateCallback(ObjectData* on_create) {
@@ -153,7 +153,7 @@ class AsioSession {
       m_onGenMapCreateCallback = on_create;
     }
     bool hasOnGenMapCreateCallback() { return m_onGenMapCreateCallback.get(); }
-    void onGenMapCreate(c_GenMapWaitHandle* wait_handle, const Variant& dependencies);
+    void onGenMapCreate(c_GenMapWaitHandle* waitHandle, const Variant& dependencies);
 
     // GenVectorWaitHandle callbacks:
     void setOnGenVectorCreateCallback(ObjectData* on_create) {
@@ -161,7 +161,7 @@ class AsioSession {
       m_onGenVectorCreateCallback = on_create;
     }
     bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
-    void onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, const Variant& dependencies);
+    void onGenVectorCreate(c_GenVectorWaitHandle* waitHandle, const Variant& dependencies);
 
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);

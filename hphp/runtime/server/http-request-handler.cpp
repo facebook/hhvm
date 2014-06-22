@@ -371,7 +371,10 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   ret = hphp_invoke(context, file, false, Array(), uninit_null(),
                     RuntimeOption::RequestInitFunction,
                     RuntimeOption::RequestInitDocument,
-                    error, errorMsg);
+                    error, errorMsg,
+                    true /* once */,
+                    false /* warmupOnly */,
+                    false /* richErrorMessage */);
 
   if (ret) {
     String content = context->obDetachContents();
@@ -398,7 +401,10 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
       ret = hphp_invoke(context, errorPage, false, Array(), uninit_null(),
                         RuntimeOption::RequestInitFunction,
                         RuntimeOption::RequestInitDocument,
-                        error, errorMsg);
+                        error, errorMsg,
+                        true /* once */,
+                        false /* warmupOnly */,
+                        false /* richErrorMessage */);
       if (ret) {
         String content = context->obDetachContents();
         transport->sendRaw((void*)content.data(), content.size());

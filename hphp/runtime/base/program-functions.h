@@ -78,13 +78,19 @@ void hphp_process_init();
 void hphp_session_init();
 
 ExecutionContext* hphp_context_init();
-bool hphp_invoke_simple(const std::string &filename, bool warmupOnly = false);
-bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
-                 bool func, const Array& funcParams, VRefParam funcRet,
-                 const std::string &reqInitFunc, const std::string &reqInitDoc,
-                 bool &error, std::string &errorMsg,
-                 bool once = true, bool warmupOnly = false,
-                 bool richErrorMsg = false);
+bool hphp_invoke_simple(const std::string& filename, bool warmupOnly);
+bool hphp_invoke(ExecutionContext *context,
+                 const std::string &cmd,
+                 bool func,
+                 const Array& funcParams,
+                 VRefParam funcRet,
+                 const std::string &reqInitFunc,
+                 const std::string &reqInitDoc,
+                 bool &error,
+                 std::string &errorMsg,
+                 bool once,
+                 bool warmupOnly,
+                 bool richErrorMsg);
 void hphp_context_exit(ExecutionContext *context, bool psp,
                        bool shutdown = true, const char *program = nullptr);
 

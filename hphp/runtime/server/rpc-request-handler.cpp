@@ -297,7 +297,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         rpcFile = (std::string) canonicalize_path(rpcFile, "", 0);
         rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
         ret = hphp_invoke(m_context, rpcFile, false, Array(), uninit_null(),
-                          reqInitFunc, reqInitDoc, error, errorMsg, runOnce);
+                          reqInitFunc, reqInitDoc, error, errorMsg, runOnce,
+                          false /* warmupOnly */,
+                          false /* richErrorMessage */);
       }
       // no need to do the initialization for a second time
       reqInitFunc.clear();
@@ -305,7 +307,10 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     }
     if (ret && !rpcFunc.empty()) {
       ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
-                        reqInitFunc, reqInitDoc, error, errorMsg);
+                        reqInitFunc, reqInitDoc, error, errorMsg,
+                        true /* once */,
+                        false /* warmupOnly */,
+                        false /* richErrorMessage */);
     }
     if (ret) {
       bool serializeFailed = false;

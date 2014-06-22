@@ -132,7 +132,7 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
     // even if it's empty, still need to call for warmup
     hphp_invoke_simple("", true); // not to run the 1st file if compiled
   } else {
-    hphp_invoke_simple(options.extension);
+    hphp_invoke_simple(options.extension, false /* warmup only */);
   }
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_reqInjectionData.setDebugger(true);
@@ -141,7 +141,7 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
     Debugger::InterruptSessionStarted(options.fileName.c_str());
   }
   if (!options.fileName.empty()) {
-    hphp_invoke_simple(options.fileName);
+    hphp_invoke_simple(options.fileName, false /* warmup only */);
   }
   {
     DebuggerDummyEnv dde;

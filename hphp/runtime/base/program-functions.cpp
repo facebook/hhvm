@@ -1413,7 +1413,7 @@ static int execute_program_impl(int argc, char** argv) {
         execute_command_line_begin(new_argc, new_argv,
                                    po.xhprofFlags, po.config);
         ret = 255;
-        if (hphp_invoke_simple(file)) {
+        if (hphp_invoke_simple(file, false /* warmup only */)) {
           ret = ExitException::ExitCode;
         }
         execute_command_line_end(po.xhprofFlags, true, file.c_str());
@@ -1662,20 +1662,22 @@ ExecutionContext *hphp_context_init() {
   return context;
 }
 
-bool hphp_invoke_simple(const std::string &filename,
-                        bool warmupOnly /* = false */) {
+bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
   bool error;
   string errorMsg;
   return hphp_invoke(g_context.getNoCheck(), filename, false, null_array,
-                     uninit_null(), "", "", error, errorMsg, true, warmupOnly);
+                     uninit_null(), "", "", error, errorMsg,
+                     true /* once */,
+                     warmupOnly,
+                     false /* richErrorMsg */);
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, const Array& funcParams, VRefParam funcRet,
                  const string &reqInitFunc, const string &reqInitDoc,
                  bool &error, string &errorMsg,
-                 bool once /* = true */, bool warmupOnly /* = false */,
-                 bool richErrorMsg /* = false */) {
+                 bool once, bool warmupOnly,
+                 bool richErrorMsg) {
   bool isServer = RuntimeOption::ServerExecutionMode();
   error = false;
 

@@ -733,7 +733,7 @@ void DebuggerClient::run() {
   if (m_options.extension.empty()) {
     hphp_invoke_simple("", true); // warm-up only
   } else {
-    hphp_invoke_simple(m_options.extension);
+    hphp_invoke_simple(m_options.extension, false);
   }
   while (true) {
     bool reconnect = false;

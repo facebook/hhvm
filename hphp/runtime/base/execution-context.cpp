@@ -531,10 +531,6 @@ void ExecutionContext::onShutdownPostSend() {
           SCOPE_EXIT { m_shutdowns.remove(PostSend); };
           executeFunctions(m_shutdowns[PostSend].toArray());
         }
-        if (m_shutdowns.exists(CleanUp)) {
-          SCOPE_EXIT { m_shutdowns.remove(CleanUp); };
-          executeFunctions(m_shutdowns[CleanUp].toArray());
-        }
       }
     } catch (...) {
       try {

@@ -150,9 +150,6 @@ struct ExecutionContext {
   enum ShutdownType {
     ShutDown,
     PostSend,
-    CleanUp,
-
-    ShutdownTypeCount
   };
 
   enum class ErrorThrowMode {

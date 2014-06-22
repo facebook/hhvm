@@ -138,6 +138,42 @@
                     ]
                 },
                 {
+                    "name": "setOnIOWaitEnterCallback",
+                    "desc": "Set callback for when the scheduler enters I/O wait",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when I/O wait is entered"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnIOWaitExitCallback",
+                    "desc": "Set callback for when the scheduler exits I/O wait",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when I/O wait is exited"
+                        }
+                    ]
+                },
+                {
                     "name": "setOnJoinCallback",
                     "desc": "Set callback for when join() is called",
                     "flags": [

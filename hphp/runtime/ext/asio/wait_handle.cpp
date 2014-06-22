@@ -32,6 +32,14 @@ void c_WaitHandle::t___construct() {
       __func__, "WaitHandles cannot be constructed directly");
 }
 
+void c_WaitHandle::ti_setoniowaitentercallback(const Variant& callback) {
+  AsioSession::Get()->setOnIOWaitEnterCallback(callback);
+}
+
+void c_WaitHandle::ti_setoniowaitexitcallback(const Variant& callback) {
+  AsioSession::Get()->setOnIOWaitExitCallback(callback);
+}
+
 void c_WaitHandle::ti_setonjoincallback(const Variant& callback) {
   AsioSession::Get()->setOnJoinCallback(callback);
 }

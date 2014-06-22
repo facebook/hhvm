@@ -101,8 +101,14 @@ class AsioSession {
     void initAbruptInterruptException();
 
     // WaitHandle callbacks:
+    void setOnIOWaitEnterCallback(const Variant& callback);
+    void setOnIOWaitExitCallback(const Variant& callback);
     void setOnJoinCallback(const Variant& callback);
+    bool hasOnIOWaitEnterCallback() { return m_onIOWaitEnterCallback.get(); }
+    bool hasOnIOWaitExitCallback() { return m_onIOWaitExitCallback.get(); }
     bool hasOnJoinCallback() { return m_onJoinCallback.get(); }
+    void onIOWaitEnter();
+    void onIOWaitExit();
     void onJoin(c_WaitHandle* waitHandle);
 
     // ResumableWaitHandle callbacks:
@@ -166,6 +172,8 @@ class AsioSession {
 
     Object m_abruptInterruptException;
 
+    Object m_onIOWaitEnterCallback;
+    Object m_onIOWaitExitCallback;
     Object m_onJoinCallback;
     Object m_onResumableCreateCallback;
     Object m_onResumableAwaitCallback;

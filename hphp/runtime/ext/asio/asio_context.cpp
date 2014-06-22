@@ -55,14 +55,21 @@ namespace {
     }
   }
 
-  void onIOWaitEnter() {
+  inline void onIOWaitEnter(AsioSession* session) {
+    if (UNLIKELY(session->hasOnIOWaitEnterCallback())) {
+      session->onIOWaitEnter();
+    }
   }
 
-  void onIOWaitExit() {
+  inline void onIOWaitExit(AsioSession* session) {
     // The web request may have timed out while we were waiting for I/O.
     // Fail early to avoid further execution of PHP code.
     if (UNLIKELY(checkConditionFlags())) {
       EventHook::CheckSurprise();
+    }
+
+    if (UNLIKELY(session->hasOnIOWaitExitCallback())) {
+      session->onIOWaitExit();
     }
   }
 }
@@ -136,8 +143,6 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
     // Wait for pending external thread events...
     if (!m_externalThreadEvents.empty()) {
-      onIOWaitEnter();
-
       // ...but only until the next sleeper (from any context) finishes.
       AsioSession::TimePoint waketime;
       if (sleep_queue.empty()) {
@@ -148,7 +153,9 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
       // Wait if necessary.
       if (LIKELY(!ete_queue->hasReceived())) {
+        onIOWaitEnter(session);
         ete_queue->receiveSomeUntil(waketime);
+        onIOWaitExit(session);
       }
 
       if (ete_queue->hasReceived()) {
@@ -160,19 +167,17 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
         session->processSleepEvents();
       }
 
-      onIOWaitExit();
       continue;
     }
 
     // If we're here, then the only things left are sleepers.  Wait for one to
     // be ready (in any context).
     if (!m_sleepEvents.empty()) {
-      onIOWaitEnter();
-
+      onIOWaitEnter(session);
       std::this_thread::sleep_until(sleep_queue.top()->getWakeTime());
-      session->processSleepEvents();
+      onIOWaitExit(session);
 
-      onIOWaitExit();
+      session->processSleepEvents();
       continue;
     }
 

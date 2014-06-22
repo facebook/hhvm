@@ -104,8 +104,38 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
+void AsioSession::setOnIOWaitEnterCallback(const Variant& callback) {
+  m_onIOWaitEnterCallback = checkCallback(
+    callback,
+    "WaitHandle::onIOWaitEnter"
+  );
+}
+
+void AsioSession::setOnIOWaitExitCallback(const Variant& callback) {
+  m_onIOWaitExitCallback = checkCallback(
+    callback,
+    "WaitHandle::onIOWaitExit"
+  );
+}
+
 void AsioSession::setOnJoinCallback(const Variant& callback) {
   m_onJoinCallback = checkCallback(callback, "WaitHandle::onJoin");
+}
+
+void AsioSession::onIOWaitEnter() {
+  runCallback(
+    m_onIOWaitEnterCallback,
+    Array::Create(),
+    "WaitHandle::onIOWaitEnter"
+  );
+}
+
+void AsioSession::onIOWaitExit() {
+  runCallback(
+    m_onIOWaitExitCallback,
+    Array::Create(),
+    "WaitHandle::onIOWaitExit"
+  );
 }
 
 void AsioSession::onJoin(c_WaitHandle* waitHandle) {

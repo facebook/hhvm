@@ -511,10 +511,14 @@ void ExecutionContext::executeFunctions(const Array& funcs) {
 
 void ExecutionContext::onShutdownPreSend() {
   // in case obStart was called without obFlush
-  SCOPE_EXIT { obFlushAll(); };
+  SCOPE_EXIT {
+    try { obFlushAll(); } catch (...) {}
+  };
 
   if (!m_shutdowns.isNull() && m_shutdowns.exists(ShutDown)) {
-    SCOPE_EXIT { m_shutdowns.remove(ShutDown); };
+    SCOPE_EXIT {
+      try { m_shutdowns.remove(ShutDown); } catch (...) {}
+    };
     executeFunctions(m_shutdowns[ShutDown].toArray());
   }
 }
@@ -528,7 +532,9 @@ void ExecutionContext::onShutdownPostSend() {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
       if (!m_shutdowns.isNull()) {
         if (m_shutdowns.exists(PostSend)) {
-          SCOPE_EXIT { m_shutdowns.remove(PostSend); };
+          SCOPE_EXIT {
+            try { m_shutdowns.remove(PostSend); } catch (...) {}
+          };
           executeFunctions(m_shutdowns[PostSend].toArray());
         }
       }

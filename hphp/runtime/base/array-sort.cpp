@@ -121,7 +121,7 @@ done:
  * handles rebuilding the hash. Also, if resetKeys is true, postSort() will
  * renumber the keys 0 thru n-1.
  */
-void MixedArray::postSort(bool resetKeys) {
+void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
   assert(m_size > 0);
   auto const ht = hashTab();
   initHash(ht, hashSize());

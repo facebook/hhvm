@@ -3341,7 +3341,7 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
  * postSort() runs after the sort has been performed. For c_Map,
  * postSort() handles rebuilding the hash.
  */
-void BaseMap::postSort() {
+void BaseMap::postSort() {  // Must provide the nothrow guarantee
   assert(m_size > 0);
   auto const table = hashTab();
   initHash(table, hashSize());

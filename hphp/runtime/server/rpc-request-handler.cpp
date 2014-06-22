@@ -155,7 +155,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   auto& reqData = ThreadInfo::s_threadInfo->m_reqInjectionData;
   reqData.setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
   SCOPE_EXIT {
-    reqData.setTimeout(0);
+    reqData.setTimeout(0);  // can't throw when you pass zero
     reqData.reset();
   };
 

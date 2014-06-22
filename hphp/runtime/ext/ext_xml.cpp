@@ -460,7 +460,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           String mytype;
 
           auto curtag = parser->data.toArrRef().pop();
-          SCOPE_EXIT { parser->data.toArrRef().append(curtag); };
+          SCOPE_EXIT {
+            try {
+              parser->data.toArrRef().append(curtag);
+            } catch (...) {}
+          };
 
           if (curtag.toArrRef().exists(s_type)) {
             mytype = curtag.toArrRef().rvalAt(s_type).toString();

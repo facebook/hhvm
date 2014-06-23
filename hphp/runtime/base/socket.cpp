@@ -139,8 +139,8 @@ bool Socket::checkLiveness() {
   p.revents = 0;
   if (poll(&p, 1, 0) > 0 && p.revents > 0) {
     char buf;
-    if (0 >= recv(m_fd, &buf, sizeof(buf), MSG_PEEK) &&
-        errno != EAGAIN) {
+    int64_t ret = recv(m_fd, &buf, sizeof(buf), MSG_PEEK);
+    if (ret == 0 || (ret == -1 && errno != EAGAIN && errno != EWOULDBLOCK)) {
       return false;
     }
   }

@@ -414,6 +414,8 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
     return convert_to_array(this, SystemLib::s_ArrayObjectClass);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
     return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
+  } else if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+    return Array::Create(Object(const_cast<ObjectData*>(this)));
   } else {
     Array ret(ArrayData::Create());
     o_getArray(ret, pubOnly);
@@ -656,6 +658,14 @@ inline Array getSerializeProps(const ObjectData* obj,
     // When ArrayIterator is casted to an array, it return it's array object,
     // however when it's being var_dump'd or print_r'd, it shows it's properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
+      Array ret(ArrayData::Create());
+      obj->o_getArray(ret);
+      return ret;
+    }
+
+    // Same with Closure, since it's a dynamic object but still has it's own
+    // different behavior for var_dump and cast to array
+    if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
       Array ret(ArrayData::Create());
       obj->o_getArray(ret);
       return ret;

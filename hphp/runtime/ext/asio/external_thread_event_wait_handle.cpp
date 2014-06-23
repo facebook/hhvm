@@ -31,9 +31,16 @@ namespace {
   StaticString s_externalThreadEvent("<external-thread-event>");
 }
 
-void c_ExternalThreadEventWaitHandle::t___construct() {
-  // gen-ext-hhvm requires at least one declared method in the class to work
-  not_reached();
+void c_ExternalThreadEventWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+  AsioSession::Get()->setOnExternalThreadEventCreateCallback(callback);
+}
+
+void c_ExternalThreadEventWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
+  AsioSession::Get()->setOnExternalThreadEventSuccessCallback(callback);
+}
+
+void c_ExternalThreadEventWaitHandle::ti_setonfailcallback(const Variant& callback) {
+  AsioSession::Get()->setOnExternalThreadEventFailCallback(callback);
 }
 
 void c_ExternalThreadEventWaitHandle::sweep() {
@@ -69,6 +76,11 @@ void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event,
 
   if (isInContext()) {
     registerToContext();
+  }
+
+  auto session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnExternalThreadEventCreateCallback())) {
+    session->onExternalThreadEventCreate(this);
   }
 }
 
@@ -118,6 +130,11 @@ void c_ExternalThreadEventWaitHandle::process() {
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);
     c_BlockableWaitHandle::UnblockChain(parentChain);
+
+    auto session = AsioSession::Get();
+    if (UNLIKELY(session->hasOnExternalThreadEventFailCallback())) {
+      session->onExternalThreadEventFail(this, exception);
+    }
     return;
   } catch (...) {
     auto const parentChain = getFirstParent();
@@ -133,6 +150,11 @@ void c_ExternalThreadEventWaitHandle::process() {
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
   c_BlockableWaitHandle::UnblockChain(parentChain);
+
+  auto session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnExternalThreadEventSuccessCallback())) {
+    session->onExternalThreadEventSuccess(this, tvAsCVarRef(&result));
+  }
 }
 
 String c_ExternalThreadEventWaitHandle::getName() {

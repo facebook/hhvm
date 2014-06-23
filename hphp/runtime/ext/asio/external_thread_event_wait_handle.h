@@ -42,8 +42,9 @@ class c_ExternalThreadEventWaitHandle
     : c_WaitableWaitHandle(cls)
   {}
   ~c_ExternalThreadEventWaitHandle() {}
-
-  void t___construct();
+  static void ti_setoncreatecallback(const Variant& callback);
+  static void ti_setonsuccesscallback(const Variant& callback);
+  static void ti_setonfailcallback(const Variant& callback);
 
  public:
   static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event,

@@ -38,6 +38,8 @@ class c_SleepWaitHandle : public c_WaitableWaitHandle {
     : c_WaitableWaitHandle(cls)
   {}
   ~c_SleepWaitHandle() {}
+  static void ti_setoncreatecallback(const Variant& callback);
+  static void ti_setonsuccesscallback(const Variant& callback);
   static Object ti_create(int64_t usecs);
 
  public:

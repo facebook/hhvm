@@ -136,6 +136,25 @@ class AsioSession {
     bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
     void onGenVectorCreate(c_GenVectorWaitHandle* waitHandle, const Variant& dependencies);
 
+    // ExternalThreadEventWaitHandle callbacks:
+    void setOnExternalThreadEventCreateCallback(const Variant& callback);
+    void setOnExternalThreadEventSuccessCallback(const Variant& callback);
+    void setOnExternalThreadEventFailCallback(const Variant& callback);
+    bool hasOnExternalThreadEventCreateCallback() { return m_onExternalThreadEventCreateCallback.get(); }
+    bool hasOnExternalThreadEventSuccessCallback() { return m_onExternalThreadEventSuccessCallback.get(); }
+    bool hasOnExternalThreadEventFailCallback() { return m_onExternalThreadEventFailCallback.get(); }
+    void onExternalThreadEventCreate(c_ExternalThreadEventWaitHandle* waitHandle);
+    void onExternalThreadEventSuccess(c_ExternalThreadEventWaitHandle* waitHandle, const Variant& result);
+    void onExternalThreadEventFail(c_ExternalThreadEventWaitHandle* waitHandle, const Object& exception);
+
+    // SleepWaitHandle callbacks:
+    void setOnSleepCreateCallback(const Variant& callback);
+    void setOnSleepSuccessCallback(const Variant& callback);
+    bool hasOnSleepCreateCallback() { return m_onSleepCreateCallback.get(); }
+    bool hasOnSleepSuccessCallback() { return m_onSleepSuccessCallback.get(); }
+    void onSleepCreate(c_SleepWaitHandle* waitHandle);
+    void onSleepSuccess(c_SleepWaitHandle* waitHandle);
+
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
 
@@ -156,6 +175,11 @@ class AsioSession {
     Object m_onGenArrayCreateCallback;
     Object m_onGenMapCreateCallback;
     Object m_onGenVectorCreateCallback;
+    Object m_onExternalThreadEventCreateCallback;
+    Object m_onExternalThreadEventSuccessCallback;
+    Object m_onExternalThreadEventFailCallback;
+    Object m_onSleepCreateCallback;
+    Object m_onSleepSuccessCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -22,7 +22,7 @@
             ],
             "return": {
                 "type": "Object",
-                "desc": "An AsyncFunctionWaitHandle that is running in a specified context"
+                "desc": "A ResumableWaitHandle that is running in a specified context"
             },
             "args": [
                 {
@@ -39,7 +39,7 @@
             ],
             "return": {
                 "type": "Object",
-                "desc": "An AsyncFunctionWaitHandle that is running in the current context"
+                "desc": "A ResumableWaitHandle that is running in the current context"
             },
             "args": [
             ]
@@ -309,7 +309,7 @@
             "funcs": [
                 {
                     "name": "setOnCreateCallback",
-                    "desc": "Set callback to be called when an AsyncFunctionWaitHandle is created",
+                    "desc": "Set callback to be called when a ResumableWaitHandle is created",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -321,7 +321,7 @@
                         {
                             "name": "callback",
                             "type": "Variant",
-                            "desc": "A Closure to be called when an AsyncFunctionWaitHandle is created"
+                            "desc": "A Closure to be called when a ResumableWaitHandle is created"
                         }
                     ]
                 },
@@ -345,7 +345,7 @@
                 },
                 {
                     "name": "setOnSuccessCallback",
-                    "desc": "Set callback to be called when an async function finishes successfully",
+                    "desc": "Set callback to be called when a ResumableWaitHandle finishes successfully",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -357,13 +357,13 @@
                         {
                             "name": "callback",
                             "type": "Variant",
-                            "desc": "A Closure to be called when an async function finishes"
+                            "desc": "A Closure to be called when a ResumableWaitHandle finishes"
                         }
                     ]
                 },
                 {
                     "name": "setOnFailCallback",
-                    "desc": "Set callback to be called when an async function fails",
+                    "desc": "Set callback to be called when a ResumableWaitHandle fails",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -375,7 +375,7 @@
                         {
                             "name": "callback",
                             "type": "Variant",
-                            "desc": "A Closure to be called when an async function fails"
+                            "desc": "A Closure to be called when a ResumableWaitHandle fails"
                         }
                     ]
                 }
@@ -627,6 +627,42 @@
                             "desc": "Non-negative number of microseconds to sleep for"
                         }
                     ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback to be called when a SleepWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when a SleepWaitHandle is created"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnSuccessCallback",
+                    "desc": "Set callback to be called when a SleepWaitHandle finishes successfully",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when a SleepWaitHandle finishes"
+                        }
+                    ]
                 }
             ],
             "consts": [
@@ -645,14 +681,57 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback to be called when an ExternalThreadEventWaitHandle is created",
                     "flags": [
-                        "IsPrivate"
+                        "IsStatic",
+                        "HipHopSpecific"
                     ],
                     "return": {
                         "type": null
                     },
                     "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an ExternalThreadEventWaitHandle is created"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnSuccessCallback",
+                    "desc": "Set callback to be called when an ExternalThreadEventWaitHandle finishes successfully",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an ExternalThreadEventWaitHandle finishes"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnFailCallback",
+                    "desc": "Set callback to be called when an ExternalThreadEventWaitHandle fails",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an ExternalThreadEventWaitHandle fails"
+                        }
                     ]
                 }
             ]

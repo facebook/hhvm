@@ -255,6 +255,95 @@ void AsioSession::onGenVectorCreate(
   );
 }
 
+void AsioSession::setOnExternalThreadEventCreateCallback(
+  const Variant& callback
+) {
+  m_onExternalThreadEventCreateCallback = checkCallback(
+    callback,
+    "ExternalThreadEventWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::setOnExternalThreadEventSuccessCallback(
+  const Variant& callback
+) {
+  m_onExternalThreadEventSuccessCallback = checkCallback(
+    callback,
+    "ExternalThreadEventWaitHandle::onSuccess"
+  );
+}
+
+void AsioSession::setOnExternalThreadEventFailCallback(
+  const Variant& callback
+) {
+  m_onExternalThreadEventFailCallback = checkCallback(
+    callback,
+    "ExternalThreadEventWaitHandle::onFail"
+  );
+}
+
+void AsioSession::onExternalThreadEventCreate(
+  c_ExternalThreadEventWaitHandle* waitHandle
+) {
+  runCallback(
+    m_onExternalThreadEventCreateCallback,
+    make_packed_array(waitHandle),
+    "ExternalThreadEventWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onExternalThreadEventSuccess(
+  c_ExternalThreadEventWaitHandle* waitHandle,
+  const Variant& result
+) {
+  runCallback(
+    m_onExternalThreadEventSuccessCallback,
+    make_packed_array(waitHandle, result),
+    "ExternalThreadEventWaitHandle::onSuccess"
+  );
+}
+
+void AsioSession::onExternalThreadEventFail(
+  c_ExternalThreadEventWaitHandle* waitHandle,
+  const Object& exception
+) {
+  runCallback(
+    m_onExternalThreadEventFailCallback,
+    make_packed_array(waitHandle, exception),
+    "ExternalThreadEventWaitHandle::onFail"
+  );
+}
+
+void AsioSession::setOnSleepCreateCallback(const Variant& callback) {
+  m_onSleepCreateCallback = checkCallback(
+    callback,
+    "SleepWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::setOnSleepSuccessCallback(const Variant& callback) {
+  m_onSleepSuccessCallback = checkCallback(
+    callback,
+    "SleepWaitHandle::onSuccess"
+  );
+}
+
+void AsioSession::onSleepCreate(c_SleepWaitHandle* waitHandle) {
+  runCallback(
+    m_onSleepCreateCallback,
+    make_packed_array(waitHandle),
+    "SleepWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onSleepSuccess(c_SleepWaitHandle* waitHandle) {
+  runCallback(
+    m_onSleepSuccessCallback,
+    make_packed_array(waitHandle),
+    "SleepWaitHandle::onSuccess"
+  );
+}
+
 bool AsioSession::sleep_wh_greater::operator() (const c_SleepWaitHandle* x,
                                                 const c_SleepWaitHandle* y) {
   return x->getWakeTime() > y->getWakeTime();

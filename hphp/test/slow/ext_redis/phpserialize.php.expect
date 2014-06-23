@@ -1,9 +1,16 @@
+string(2) "N;"
 NULL
+string(4) "b:1;"
 bool(true)
+string(4) "b:0;"
 bool(false)
+string(6) "i:123;"
 int(123)
+string(6) "d:456;"
 float(456)
+string(25) "s:17:"A string of words";"
 string(17) "A string of words"
+string(30) "a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}"
 array(3) {
   [0]=>
   int(1)

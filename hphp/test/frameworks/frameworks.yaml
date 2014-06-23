@@ -367,7 +367,7 @@
     url: https://github.com/pear/pear-core.git
     # master is the best branch for pear
     branch: master
-    commit: 15dd8a6cceb520226a6546dd09b740cdc3ea4d4c
+    commit: def22219cfd80fab6f8f8c982fcabbbe9fb41917
     install_root: pear-core
     test_root: pear-core
     test_file_regex: /.*(\.phpt)$/

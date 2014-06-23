@@ -41,6 +41,9 @@ and hint_ p env = function
   | Hoption (_, Hprim Tvoid) ->
       Errors.add p "?void is a nonsensical typehint";
       env, Tany
+  | Hoption (_, Hmixed) ->
+      Errors.add p "?mixed is a redundant typehint - just use mixed";
+      env, Tany
   | Hoption h ->
       let env, h = hint env h in
       env, Toption h

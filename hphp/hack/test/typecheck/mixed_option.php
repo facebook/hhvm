@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,15 +9,6 @@
  *
  */
 
-interface PlainSprintf {
-  public function format_s(mixed $s): string;
-}
-
-function sprintf(FormatString<PlainSprintf> $f, ...): string {
-  return 'hi';
-}
-
-function f() {
-  sprintf('%s', 'hi');
-  sprintf("%s", 'hi');
+async function f(): Awaitable<?mixed> {
+  return null;
 }

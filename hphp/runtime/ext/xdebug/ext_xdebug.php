@@ -25,6 +25,16 @@ function xdebug_call_file(): string;
 <<__Native("NoFCallBuiltin")>>
 function xdebug_call_line(): int;
 
+/*
+ * This function returns the name of the function/method from which the current
+ * function/method was called from.
+ *
+ * @return mixed- Returns the calling function/method or false if called at the
+ *                top level
+ */
+<<__Native("NoFCallBuiltin")>>
+function xdebug_call_function(): mixed;
+
 <<__Native>>
 function xdebug_code_coverage_started(): bool;
 

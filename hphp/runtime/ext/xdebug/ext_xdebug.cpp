@@ -23,6 +23,8 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static const StaticString s_CALL_FN_MAIN("{main}");
+
 /*
  * Returns the frame of the callee's callee. Useful for the xdebug_call_*
  * functions. Only returns nullptr if the callee is the top level pseudo-main
@@ -75,6 +77,20 @@ static int64_t HHVM_FUNCTION(xdebug_call_line) {
   Unit *unit = fp->m_func->unit();
   assert(unit);
   return unit->getLineNumber(pc);
+}
+
+static Variant HHVM_FUNCTION(xdebug_call_function) {
+  // PHP5 xdebug returns false if the callee is top-level
+  ActRec *fp = get_call_fp();
+  if (fp == nullptr) {
+    return false;
+  }
+
+  // PHP5 xdebug returns "{main}" for pseudo-main
+  if (fp->m_func->isPseudoMain()) {
+    return s_CALL_FN_MAIN;
+  }
+  return String(fp->m_func->name()->data(), CopyString);
 }
 
 static bool HHVM_FUNCTION(xdebug_code_coverage_started)
@@ -195,6 +211,7 @@ void XDebugExtension::moduleInit() {
   HHVM_FE(xdebug_break);
   HHVM_FE(xdebug_call_class);
   HHVM_FE(xdebug_call_file);
+  HHVM_FE(xdebug_call_function);
   HHVM_FE(xdebug_call_line);
   HHVM_FE(xdebug_code_coverage_started);
   HHVM_FE(xdebug_debug_zval);

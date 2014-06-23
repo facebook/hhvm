@@ -23,6 +23,7 @@ class Options {
   public static bool $force_redownload = false;
   public static bool $get_latest_framework_code = false;
   public static bool $generate_new_expect_file = false;
+  public static bool $include_flakey = false;
   public static ?string $zend_path = null;
   public static bool $all = false;
   public static bool $allexcept = false;
@@ -64,6 +65,13 @@ class Options {
     } else if ($options->containsKey('allexcept')) {
       self::$allexcept = true;
       $framework_names->removeKey(0);
+    }
+
+    if ($options->containsKey('flakey')) {
+      if ($options->containsKey('record')) {
+        error_and_exit('Can not use --flakey and --record together');
+      }
+      self::$include_flakey = true;
     }
 
 

@@ -127,7 +127,7 @@ let get_class_parents_and_traits env class_nast =
 (* for non-traits, check that each used trait's requirements have been
  * satisfied; for traits, accumulate the requirements so that we can
  * successfully check the bodies of trait methods *)
-let merge_parent_trait_reqs class_nast impls
+let merge_parent_class_reqs class_nast impls
     (env, req_ancestors, req_ancestors_extends) trait_hint =
   let parent_pos, parent = unpack_hint trait_hint in
   let env, parent_type = Env.get_class_dep env parent in
@@ -138,7 +138,7 @@ let merge_parent_trait_reqs class_nast impls
     | Some parent_type when (class_nast.c_kind != Ast.Ctrait) ->
       SSet.iter begin fun req ->
         if SMap.mem req impls then () (* requirement satisfied *)
-        else Errors.trait_req parent_pos req
+        else Errors.unsatisfied_req parent_pos req
       end parent_type.tc_req_ancestors;
       env, req_ancestors, req_ancestors_extends
     | Some parent_type ->
@@ -147,10 +147,10 @@ let merge_parent_trait_reqs class_nast impls
         SSet.union parent_type.tc_req_ancestors_extends req_ancestors_extends in
       env, req_ancestors, req_ancestors_extends
 
-let get_trait_req class_nast impls (env, requirements, req_extends) hint =
+let get_class_req class_nast impls (env, requirements, req_extends) hint =
   let parent_pos, req = unpack_hint hint in
-  if class_nast.c_kind != Ast.Ctrait && not (SMap.mem req impls) then
-    Errors.trait_req parent_pos req;
+  if class_nast.c_kind != Ast.Ctrait && class_nast.c_kind != Ast.Cinterface &&
+    not (SMap.mem req impls) then Errors.unsatisfied_req parent_pos req;
   let requirements = SSet.add req requirements in
   let req_extends = SSet.add req req_extends in
   let env, req_type = Env.get_class_dep env req in
@@ -162,20 +162,20 @@ let get_trait_req class_nast impls (env, requirements, req_extends) hint =
       (* The parent class lives in Hack *)
       env, requirements, SSet.union req_extends parent_type.tc_extends
 
-let get_trait_requirements env class_nast impls =
+let get_class_requirements env class_nast impls =
   let req_ancestors = SSet.empty in
   let req_ancestors_extends = SSet.empty in
   let acc = (env, req_ancestors, req_ancestors_extends) in
   let acc =
-    List.fold_left (get_trait_req class_nast impls)
+    List.fold_left (get_class_req class_nast impls)
       acc class_nast.c_req_extends in
   let acc =
-    List.fold_left (get_trait_req class_nast impls)
+    List.fold_left (get_class_req class_nast impls)
       acc class_nast.c_req_implements in
   let acc =
-    List.fold_left (merge_parent_trait_reqs class_nast impls)
+    List.fold_left (merge_parent_class_reqs class_nast impls)
       acc class_nast.c_uses in
-  if class_nast.c_kind != Ast.Ctrait then
+  if class_nast.c_kind != Ast.Ctrait && class_nast.c_kind != Ast.Cinterface then
     (* for a non-trait, requirements have been checked ... nothing to save *)
     env, SSet.empty, SSet.empty
   else
@@ -327,7 +327,7 @@ and class_decl c =
     else extends
   in
   let env, req_ancestors, req_ancestors_extends =
-    get_trait_requirements env c impl in
+    get_class_requirements env c impl in
   let env, m = if DynamicYield.is_dynamic_yield (snd c.c_name)
     then DynamicYield.clean_dynamic_yield env m
     else env, m in

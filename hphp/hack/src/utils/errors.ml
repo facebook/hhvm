@@ -686,8 +686,8 @@ let wrong_extend_kind child_pos child parent_pos parent =
   let msg2 = parent_pos, "This is "^parent in
   add_list [msg1; msg2]
 
-let trait_req pos req =
-  add pos ("Failure to satisfy trait requirement: "^(Utils.strip_ns req))
+let unsatisfied_req pos req =
+  add pos ("Failure to satisfy requirement: "^(Utils.strip_ns req))
 
 let cyclic_class_def stack pos =
   let stack = SSet.fold (fun x y -> (Utils.strip_ns x)^" "^y) stack "" in
@@ -762,6 +762,12 @@ let type_arity pos name nargs =
 let abstract_outside (p, _) =
   add p
     "This method is declared as abstract, in a class that isn't"
+
+let invalid_req_implements p =
+  add p "Only traits may use 'require implements'"
+
+let invalid_req_extends p =
+  add p "Only traits and interfaces may use 'require extends'"
 
 let interface_with_body (p, _) =
   add p

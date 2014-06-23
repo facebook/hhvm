@@ -119,16 +119,17 @@ and sub_type env ty1 ty2 =
         | None -> env
         | Some class_ ->
           let subtype_req_ancestor =
-            if class_.tc_kind = Ast.Ctrait then
-            (* a trait is never the runtime type, but it can be used as
-             * a constraint if it has requirements for its using
-             * classes *)
+            if class_.tc_kind = Ast.Ctrait || class_.tc_kind = Ast.Cinterface then
+              (* a trait is never the runtime type, but it can be used as
+               * a constraint if it has requirements for its using
+               * classes *)
               let pos = (fst x2) in
               let env, ret = SSet.fold begin fun elt acc ->
                 match acc with
                   | _, Some _ -> acc
                   | env, None ->
-                    Errors.try_ begin fun () ->                        
+                    Errors.try_ begin fun () ->
+                      (* FIXME: need to actually use the type *)
                       let candidate_ty = (p2, Tapply ((pos, elt), tyl2)) in
                       env, Some (sub_type env ty1 candidate_ty)
                     end (fun _ -> acc)

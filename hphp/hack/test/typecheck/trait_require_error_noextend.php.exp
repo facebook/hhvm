@@ -1,2 +1,2 @@
 File "trait_require_error_noextend.php", line 23, characters 7-12:
-Failure to satisfy trait requirement: Super
+Failure to satisfy requirement: Super

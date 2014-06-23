@@ -869,7 +869,7 @@ and class_ genv c =
   let methods  = List.fold_right fmethod c.c_body [] in
   let uses     = List.fold_right (class_use env) c.c_body [] in
   let req_implements, req_extends = List.fold_right
-    (class_require env) c.c_body ([], []) in
+    (class_require env c.c_kind) c.c_body ([], []) in
   let tparam_l  = type_paraml env c.c_tparams in
   let consts   = List.fold_right (class_const env) c.c_body [] in
   List.iter (hint_no_typedef env) c.c_implements;
@@ -936,15 +936,22 @@ and class_use env x acc =
   | ClassVars _ -> acc
   | Method _ -> acc
 
-and class_require env x acc =
+and class_require env c_kind x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
   | ClassUse _ -> acc
+  | ClassTraitRequire (MustExtend, h)
+      when c_kind <> Ast.Ctrait && c_kind <> Ast.Cinterface ->
+    let () = Errors.invalid_req_extends (fst h) in
+    acc
   | ClassTraitRequire (MustExtend, h) ->
     hint_no_typedef env h;
     let acc_impls, acc_exts = acc in
     (acc_impls, hint ~allow_this:true env h :: acc_exts)
+  | ClassTraitRequire (MustImplement, h) when c_kind <> Ast.Ctrait ->
+    let () = Errors.invalid_req_implements (fst h) in
+    acc
   | ClassTraitRequire (MustImplement, h) ->
     hint_no_typedef env h;
     let acc_impls, acc_exts = acc in

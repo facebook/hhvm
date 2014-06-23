@@ -2755,16 +2755,22 @@ hh_typeargs_opt:
   |                                    { $$.reset(); }
 ;
 
-hh_type_list:
+hh_non_empty_type_list:
     hh_type                            { Token t; t.reset();
                                          _p->onTypeList($1, t);
                                          $$ = $1; }
-  | hh_type_list ',' hh_type           { _p->onTypeList($1, $3);
+  | hh_non_empty_type_list ',' hh_type { _p->onTypeList($1, $3);
                                          $$ = $1; }
 ;
 
+hh_type_list:
+    hh_non_empty_type_list
+    possible_comma                     { $$ = $1; }
+;
+
 hh_func_type_list:
-  hh_type_list ',' T_ELLIPSIS          { $$ = $1; }
+    hh_non_empty_type_list
+    ',' T_ELLIPSIS                     { $$ = $1; }
   | hh_type_list                       { $$ = $1; }
   | T_ELLIPSIS                         { $$.reset(); }
   |                                    { $$.reset(); }
@@ -2842,7 +2848,9 @@ hh_type:
                                         _p->onTypeList($7, $4);
                                         _p->onTypeAnnotation($$, $2, $7);
                                         _p->onTypeSpecialization($$, 'f'); }
-  | '(' hh_type_list ',' hh_type ')'  { only_in_hh_syntax(_p);
+  | '(' hh_type ','
+    hh_non_empty_type_list
+    possible_comma ')'                { only_in_hh_syntax(_p);
                                         _p->onTypeList($2, $4);
                                         Token t; t.reset(); t.setText("array");
                                         _p->onTypeAnnotation($$, t, $2);

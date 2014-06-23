@@ -81,7 +81,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_join_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on join()"
                         }
@@ -319,7 +319,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_create_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called when an AsyncFunctionWaitHandle is created"
                         }
@@ -337,7 +337,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_await_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called when an async function blockingly await"
                         }
@@ -355,7 +355,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_success_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called when an async function finishes"
                         }
@@ -373,7 +373,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_fail_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called when an async function fails"
                         }
@@ -447,7 +447,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_create_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on creation"
                         }
@@ -496,7 +496,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_create_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on creation"
                         }
@@ -545,7 +545,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_create_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on creation"
                         }

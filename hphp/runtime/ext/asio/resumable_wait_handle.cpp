@@ -25,47 +25,19 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void c_ResumableWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set ResumableWaitHandle::onStart: on_start_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnResumableCreateCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnResumableCreateCallback(callback);
 }
 
 void c_ResumableWaitHandle::ti_setonawaitcallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set ResumableWaitHandle::onAwait: on_await_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnResumableAwaitCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnResumableAwaitCallback(callback);
 }
 
 void c_ResumableWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set ResumableWaitHandle::onSuccess: on_success_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnResumableSuccessCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnResumableSuccessCallback(callback);
 }
 
 void c_ResumableWaitHandle::ti_setonfailcallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set ResumableWaitHandle::onFail: on_fail_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnResumableFailCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnResumableFailCallback(callback);
 }
 
 c_ResumableWaitHandle* c_ResumableWaitHandle::getRunning(ActRec* fp) {

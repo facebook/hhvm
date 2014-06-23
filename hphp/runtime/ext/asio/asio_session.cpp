@@ -16,7 +16,10 @@
 */
 
 #include "hphp/runtime/ext/asio/asio_session.h"
+
 #include <limits>
+
+#include <folly/String.h>
 
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
@@ -34,7 +37,22 @@ namespace HPHP {
 IMPLEMENT_THREAD_LOCAL_PROXY(AsioSession, false, AsioSession::s_current);
 
 namespace {
-  const context_idx_t MAX_CONTEXT_DEPTH = std::numeric_limits<context_idx_t>::max();
+  const context_idx_t MAX_CONTEXT_DEPTH =
+    std::numeric_limits<context_idx_t>::max();
+
+  ObjectData* checkCallback(const Variant& callback, char* name) {
+    if (!callback.isNull() &&
+        (!callback.isObject() ||
+         !callback.getObjectData()->instanceof(c_Closure::classof()))) {
+      auto msg = folly::format(
+        "Unable to set {}: callback not a closure",
+        name
+      ).str();
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
+      throw e;
+    }
+    return callback.getObjectDataOrNull();
+  }
 
   void runCallback(const Object& function, const Array& params, char* name) {
     assert(function.get());
@@ -86,6 +104,10 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
+void AsioSession::setOnJoinCallback(const Variant& callback) {
+  m_onJoinCallback = checkCallback(callback, "WaitHandle::onJoin");
+}
+
 void AsioSession::onJoin(c_WaitHandle* waitHandle) {
   runCallback(
     m_onJoinCallback,
@@ -94,7 +116,41 @@ void AsioSession::onJoin(c_WaitHandle* waitHandle) {
   );
 }
 
-void AsioSession::onResumableCreate(c_ResumableWaitHandle* resumable, c_WaitableWaitHandle* child) {
+void AsioSession::setOnResumableCreateCallback(const Variant& callback) {
+  m_onResumableCreateCallback = checkCallback(
+    callback,
+    "ResumableWaitHandle::onCreate"
+  );
+  updateEventHookState();
+}
+
+void AsioSession::setOnResumableAwaitCallback(const Variant& callback) {
+  m_onResumableAwaitCallback = checkCallback(
+    callback,
+    "ResumableWaitHandle::onAwait"
+  );
+  updateEventHookState();
+}
+
+void AsioSession::setOnResumableSuccessCallback(const Variant& callback) {
+  m_onResumableSuccessCallback = checkCallback(
+    callback,
+    "ResumableWaitHandle::onSuccess"
+  );
+  updateEventHookState();
+}
+
+void AsioSession::setOnResumableFailCallback(const Variant& callback) {
+  m_onResumableFailCallback = checkCallback(
+    callback,
+    "ResumableWaitHandle::onFail"
+  );
+}
+
+void AsioSession::onResumableCreate(
+  c_ResumableWaitHandle* resumable,
+  c_WaitableWaitHandle* child
+) {
   runCallback(
     m_onResumableCreateCallback,
     make_packed_array(resumable, child),
@@ -102,7 +158,10 @@ void AsioSession::onResumableCreate(c_ResumableWaitHandle* resumable, c_Waitable
   );
 }
 
-void AsioSession::onResumableAwait(c_ResumableWaitHandle* resumable, c_WaitableWaitHandle* child) {
+void AsioSession::onResumableAwait(
+  c_ResumableWaitHandle* resumable,
+  c_WaitableWaitHandle* child
+) {
   runCallback(
     m_onResumableAwaitCallback,
     make_packed_array(resumable, child),
@@ -110,7 +169,10 @@ void AsioSession::onResumableAwait(c_ResumableWaitHandle* resumable, c_WaitableW
   );
 }
 
-void AsioSession::onResumableSuccess(c_ResumableWaitHandle* resumable, const Variant& result) {
+void AsioSession::onResumableSuccess(
+  c_ResumableWaitHandle* resumable,
+  const Variant& result
+) {
   runCallback(
     m_onResumableSuccessCallback,
     make_packed_array(resumable, result),
@@ -118,7 +180,10 @@ void AsioSession::onResumableSuccess(c_ResumableWaitHandle* resumable, const Var
   );
 }
 
-void AsioSession::onResumableFail(c_ResumableWaitHandle* resumable, const Object& exception) {
+void AsioSession::onResumableFail(
+  c_ResumableWaitHandle* resumable,
+  const Object& exception
+) {
   runCallback(
     m_onResumableFailCallback,
     make_packed_array(resumable, exception),
@@ -136,7 +201,17 @@ void AsioSession::updateEventHookState() {
   }
 }
 
-void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* waitHandle, const Variant& dependencies) {
+void AsioSession::setOnGenArrayCreateCallback(const Variant& callback) {
+  m_onGenArrayCreateCallback = checkCallback(
+    callback,
+    "GenArrayWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onGenArrayCreate(
+  c_GenArrayWaitHandle* waitHandle,
+  const Variant& dependencies
+) {
   runCallback(
     m_onGenArrayCreateCallback,
     make_packed_array(waitHandle, dependencies),
@@ -144,7 +219,17 @@ void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* waitHandle, const Varia
   );
 }
 
-void AsioSession::onGenMapCreate(c_GenMapWaitHandle* waitHandle, const Variant& dependencies) {
+void AsioSession::setOnGenMapCreateCallback(const Variant& callback) {
+  m_onGenMapCreateCallback = checkCallback(
+    callback,
+    "GenMapWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onGenMapCreate(
+  c_GenMapWaitHandle* waitHandle,
+  const Variant& dependencies
+) {
   runCallback(
     m_onGenMapCreateCallback,
     make_packed_array(waitHandle, dependencies),
@@ -152,7 +237,17 @@ void AsioSession::onGenMapCreate(c_GenMapWaitHandle* waitHandle, const Variant& 
   );
 }
 
-void AsioSession::onGenVectorCreate(c_GenVectorWaitHandle* waitHandle, const Variant& dependencies) {
+void AsioSession::setOnGenVectorCreateCallback(const Variant& callback) {
+  m_onGenVectorCreateCallback = checkCallback(
+    callback,
+    "GenVectorWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onGenVectorCreate(
+  c_GenVectorWaitHandle* waitHandle,
+  const Variant& dependencies
+) {
   runCallback(
     m_onGenVectorCreateCallback,
     make_packed_array(waitHandle, dependencies),

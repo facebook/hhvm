@@ -102,33 +102,15 @@ class AsioSession {
     void initAbruptInterruptException();
 
     // WaitHandle callbacks:
-    void setOnJoinCallback(ObjectData* on_join) {
-      assert(!on_join || on_join->instanceof(c_Closure::classof()));
-      m_onJoinCallback = on_join;
-    }
+    void setOnJoinCallback(const Variant& callback);
     bool hasOnJoinCallback() { return m_onJoinCallback.get(); }
     void onJoin(c_WaitHandle* waitHandle);
 
     // ResumableWaitHandle callbacks:
-    void setOnResumableCreateCallback(ObjectData* on_start) {
-      assert(!on_start || on_start->instanceof(c_Closure::classof()));
-      m_onResumableCreateCallback = on_start;
-      updateEventHookState();
-    }
-    void setOnResumableAwaitCallback(ObjectData* on_await) {
-      assert(!on_await || on_await->instanceof(c_Closure::classof()));
-      m_onResumableAwaitCallback = on_await;
-      updateEventHookState();
-    }
-    void setOnResumableSuccessCallback(ObjectData* on_success) {
-      assert(!on_success || on_success->instanceof(c_Closure::classof()));
-      m_onResumableSuccessCallback = on_success;
-      updateEventHookState();
-    }
-    void setOnResumableFailCallback(ObjectData* on_fail) {
-      assert(!on_fail || on_fail->instanceof(c_Closure::classof()));
-      m_onResumableFailCallback = on_fail;
-    }
+    void setOnResumableCreateCallback(const Variant& callback);
+    void setOnResumableAwaitCallback(const Variant& callback);
+    void setOnResumableSuccessCallback(const Variant& callback);
+    void setOnResumableFailCallback(const Variant& callback);
     bool hasOnResumableCreateCallback() { return m_onResumableCreateCallback.get(); }
     bool hasOnResumableAwaitCallback() { return m_onResumableAwaitCallback.get(); }
     bool hasOnResumableSuccessCallback() { return m_onResumableSuccessCallback.get(); }
@@ -140,26 +122,17 @@ class AsioSession {
     void updateEventHookState();
 
     // GenArrayWaitHandle callbacks:
-    void setOnGenArrayCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::classof()));
-      m_onGenArrayCreateCallback = on_create;
-    }
+    void setOnGenArrayCreateCallback(const Variant& callback);
     bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
     void onGenArrayCreate(c_GenArrayWaitHandle* waitHandle, const Variant& dependencies);
 
     // GenMapWaitHandle callbacks:
-    void setOnGenMapCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::classof()));
-      m_onGenMapCreateCallback = on_create;
-    }
+    void setOnGenMapCreateCallback(const Variant& callback);
     bool hasOnGenMapCreateCallback() { return m_onGenMapCreateCallback.get(); }
     void onGenMapCreate(c_GenMapWaitHandle* waitHandle, const Variant& dependencies);
 
     // GenVectorWaitHandle callbacks:
-    void setOnGenVectorCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::classof()));
-      m_onGenVectorCreateCallback = on_create;
-    }
+    void setOnGenVectorCreateCallback(const Variant& callback);
     bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
     void onGenVectorCreate(c_GenVectorWaitHandle* waitHandle, const Variant& dependencies);
 

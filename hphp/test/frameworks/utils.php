@@ -36,9 +36,9 @@ function remove_dir_recursive(string $root_dir) {
 
   foreach ($files as $fileinfo) {
     if ($fileinfo->isDir()) {
-      rmdir($fileinfo->getRealPath());
+      rmdir($fileinfo->getPathname());
     } else {
-      unlink($fileinfo->getRealPath());
+      unlink($fileinfo->getPathname());
     }
   }
 

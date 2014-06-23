@@ -325,7 +325,7 @@
     url: https://github.com/fredemmott/mediawiki-core.git
     # When we move back to mediawiki-core, stable branch is wmf/1.22wmf22
     branch: hhvm-fix
-    commit: f5e7ff5
+    commit: f5e7ff5328e783b2b20a829f6506fc1f2f988f02
     install_root: mediawiki-core
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/

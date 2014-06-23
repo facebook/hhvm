@@ -138,7 +138,7 @@ size_t getMemSize(const ArrayData* arr) {
         size += sizeof(MixedArray::Elm);
         continue;
       }
-      size += ptr->hasStrKey() ? getMemSize(ptr->key) : sizeof(int64_t);
+      size += ptr->hasStrKey() ? getMemSize(ptr->skey) : sizeof(int64_t);
       size += getMemSize(&ptr->data);
     }
     return size;

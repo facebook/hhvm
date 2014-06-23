@@ -316,7 +316,7 @@ inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
     bool good = true;
     for (; i < nKeyLength; ++i) {
       if (arKey[i] >= '0' && arKey[i] <= '9') {
-        num = 10*num + arKey[i] - '0';
+        num = 10*num + (arKey[i] - '0');
       }
       else {
         good = false;

@@ -666,6 +666,13 @@ void __attribute__((weak)) __hot_end();
 static void NEVER_INLINE AT_END_OF_TEXT __attribute__((optimize("2")))
 hugifyText(char* from, char* to) {
 #if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
+  if (from > to || (to - from) < sizeof(uint64_t)) {
+    // This shouldn't happen if HHVM is behaving correctly (I think),
+    // but if it does then there is nothing to do and we should bail
+    // out early because the call to wordcpy() below can't handle
+    // zero size or negative sizes.
+    return;
+  }
   size_t sz = to - from;
   void* mem = malloc(sz);
   memcpy(mem, from, sz);

@@ -60,7 +60,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
   ad->m_tableMask   = mask;
   ad->m_nextKI      = 0;
 
-  auto const data = reinterpret_cast<Elm*>(ad + 1);
+  auto const data = mixedData(ad);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);
   wordfill(hash, Empty, mask + 1);
 
@@ -183,7 +183,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   ad->m_tableMask        = mask;
   ad->m_nextKI           = 0;
 
-  auto const data = reinterpret_cast<Elm*>(ad + 1);
+  auto const data = mixedData(ad);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);
   ad->initHash(hash, mask + 1);
 
@@ -234,7 +234,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   ad->m_tableMask       = mask;
   ad->m_nextKI          = other.m_nextKI;
 
-  auto const data      = reinterpret_cast<Elm*>(ad + 1);
+  auto const data      = mixedData(ad);
   auto const hash      = reinterpret_cast<int32_t*>(data + cap);
 
   copyHash(hash, other.hashTab(), mask + 1);
@@ -279,9 +279,9 @@ NEVER_INLINE ArrayData* MixedArray::NonSmartCopy(const ArrayData* in) {
     *a,
     AllocMode::NonSmart,
     [&] (const Elm& from, Elm& to, const ArrayData* container) {
-      to.key = from.key;
+      to.skey = from.skey;
       to.data.hash() = from.data.hash();
-      if (to.hasStrKey()) to.key->incRefCount();
+      if (to.hasStrKey()) to.skey->incRefCount();
       tvDupFlattenVars(&from.data, &to.data, container);
       assert(to.hash() == from.hash()); // ensure not clobbered.
     }
@@ -292,9 +292,9 @@ NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   assert(checkInvariants());
   return CopyMixed(*this, AllocMode::Smart,
       [&](const Elm& from, Elm& to, const ArrayData* container) {
-        to.key = from.key;
+        to.skey = from.skey;
         to.data.hash() = from.data.hash();
-        if (to.hasStrKey()) to.key->incRefCount();
+        if (to.hasStrKey()) to.skey->incRefCount();
         tvDupFlattenVars(&from.data, &to.data, container);
         assert(to.hash() == from.hash()); // ensure not clobbered.
       });
@@ -366,11 +366,11 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
     [&] (const Elm& fr, Elm& to, const ArrayData* container) {
       to.data.hash() = fr.data.hash();
       if (to.hasStrKey()) {
-        auto const st = lookupStaticString(fr.key);
-        to.key = (st != nullptr) ? st
-                                 : StringData::MakeUncounted(fr.key->slice());
+        auto const st = lookupStaticString(fr.skey);
+        to.skey = (st != nullptr) ? st
+                                  : StringData::MakeUncounted(fr.skey->slice());
       } else {
-        to.key = fr.key;
+        to.skey = fr.skey;
       }
       tvCopy(
         *CreateVarForUncountedArray(tvAsCVarRef(&fr.data)).asTypedValue(),
@@ -448,7 +448,7 @@ void MixedArray::Release(ArrayData* in) {
 
     for (auto ptr = data; ptr != stop; ++ptr) {
       if (isTombstone(ptr->data.m_type)) continue;
-      if (ptr->hasStrKey()) decRefStr(ptr->key);
+      if (ptr->hasStrKey()) decRefStr(ptr->skey);
       tvRefcountedDecRef(&ptr->data);
     }
 
@@ -498,9 +498,9 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
     for (auto ptr = data; ptr != stop; ++ptr) {
       if (isTombstone(ptr->data.m_type)) continue;
       if (ptr->hasStrKey()) {
-        assert(!ptr->key->isRefCounted());
-        if (!ptr->key->isStatic()) {
-          ptr->key->destructStatic();
+        assert(!ptr->skey->isRefCounted());
+        if (!ptr->skey->isStatic()) {
+          ptr->skey->destructStatic();
         }
       }
 
@@ -574,7 +574,7 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  * kPackedKind:
  *   m_size == m_used
  *   m_nextKI = uninitialized
- *   Elm.key uninitialized
+ *   Elm.skey uninitialized
  *   Elm.hash uninitialized
  *   no KindOfInvalid tombstones
  */
@@ -706,7 +706,7 @@ static bool hitStringKey(const MixedArray::Elm& e, const StringData* s,
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
   assert(!MixedArray::isTombstone(e.data.m_type));
-  return hash == e.hash() && (s == e.key || s->same(e.key));
+  return hash == e.hash() && (s == e.skey || s->same(e.skey));
 }
 
 static bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
@@ -887,7 +887,7 @@ MixedArray::findForRemove(const StringData* s, strhash_t prehash) {
         return hitStringKey(e, s, h);
       },
       [] (Elm& e) {
-        decRefStr(e.key);
+        decRefStr(e.skey);
         e.setIntKey(0);
       }
     );
@@ -1008,7 +1008,8 @@ NEVER_INLINE MixedArray* MixedArray::resize() {
   // even after compaction, grow instead, in order to avoid the possibility
   // of repeated compaction if the load factor were to hover at nearly 0.75.
   if (m_size > maxElms / 2) {
-    return Grow(this);
+    assert(m_tableMask <= 0x7fffffffU);
+    return Grow(this, maxElms * 2, m_tableMask * 2 + 1);
   }
   compact(false);
   return this;
@@ -1107,15 +1108,19 @@ MixedArray::InsertCheckUnbalanced(MixedArray* ad,
   }
 }
 
-MixedArray* MixedArray::Grow(MixedArray* old) {
+MixedArray*
+MixedArray::Grow(MixedArray* old, uint32_t newCap, uint32_t newMask) {
   assert(!old->isPacked());
-  assert(old->m_tableMask <= 0x7fffffffU);
+  assert(old->m_size > 0);
+  assert(newCap >= old->m_size);
+  assert(newMask > 0 && ((newMask+1) & newMask) == 0);
+  assert(newMask == folly::nextPowTwo<uint64_t>(newCap) - 1);
+  assert(newCap == computeMaxElms(newMask));
 
   DEBUG_ONLY auto oldPos = old->m_pos;
 
-  auto const oldMask    = old->m_tableMask;
-  auto const mask       = oldMask * 2 + 1;
-  auto const cap        = computeMaxElms(mask);
+  auto const mask       = newMask;
+  auto const cap        = newCap;
   auto const ad         = smartAllocArray(cap, mask);
   auto const oldKind    = old->m_kind;
 
@@ -1151,7 +1156,7 @@ MixedArray* MixedArray::Grow(MixedArray* old) {
     }
   }
 
-  old->m_used = -uint32_t{1};
+  old->setZombie();
 
   assert(old->isZombie());
   assert(ad->m_kind == oldKind);
@@ -1169,11 +1174,11 @@ struct ElmKey {
   ElmKey() {}
   ElmKey(int32_t hash, StringData* key)
     : hash(hash)
-    , key(key)
+    , skey(key)
   {}
   int32_t hash;
   union {
-    StringData* key;
+    StringData* skey;
     int64_t ikey;
   };
 };
@@ -1188,11 +1193,11 @@ void MixedArray::compact(bool renumber /* = false */) {
     assert(size_t(m_pos) < m_used);
     auto& e = data()[m_pos];
     mPos.hash = e.hasIntKey() ? 0 : e.hash();
-    mPos.key = e.key;
+    mPos.skey = e.skey;
   } else {
     // Silence compiler warnings.
     mPos.hash = 0;
-    mPos.key = nullptr;
+    mPos.skey = nullptr;
   }
 
   TinyVector<ElmKey,3> siKeys;
@@ -1203,7 +1208,7 @@ void MixedArray::compact(bool renumber /* = false */) {
       auto const ei = miEnt.iter->m_pos;
       if (ei != invalid_index) {
         auto& e = data()[ei];
-        siKeys.push_back(ElmKey(e.hash(), e.key));
+        siKeys.push_back(ElmKey(e.hash(), e.skey));
       }
     });
   }
@@ -1236,7 +1241,7 @@ void MixedArray::compact(bool renumber /* = false */) {
   if (m_pos != invalid_index) {
     // Update m_pos, now that compaction is complete.
     if (mPos.hash) {
-      m_pos = ssize_t(find(mPos.key, mPos.hash));
+      m_pos = ssize_t(find(mPos.skey, mPos.hash));
     } else {
       m_pos = ssize_t(find(mPos.ikey));
     }
@@ -1253,7 +1258,7 @@ void MixedArray::compact(bool renumber /* = false */) {
     auto& k = siKeys[key];
     key++;
     if (k.hash) { // string key
-      iter->m_pos = ssize_t(find(k.key, k.hash));
+      iter->m_pos = ssize_t(find(k.skey, k.hash));
     } else { // int key
       iter->m_pos = ssize_t(find(k.ikey));
     }
@@ -1562,7 +1567,7 @@ void MixedArray::adjustMArrayIter(ssize_t pos) {
   });
 }
 
-void MixedArray::erase(ssize_t pos) {
+void MixedArray::eraseNoCompact(ssize_t pos) {
   assert(validPos(pos));
 
   // move strong iterators to the previous element
@@ -1586,11 +1591,6 @@ void MixedArray::erase(ssize_t pos) {
 
   // Finally, decref the old value
   tvRefcountedDecRefHelper(oldType, oldDatum);
-
-  if (m_size < m_used / 2) {
-    // Compact in order to keep elms from being overly sparse.
-    compact(false);
-  }
 }
 
 ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
@@ -1799,11 +1799,11 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
     assert(size_t(src->m_pos) < src->m_used);
     auto& e = srcElm[src->m_pos];
     mPos.hash = e.hasIntKey() ? 0 : e.hash();
-    mPos.key = e.key;
+    mPos.skey = e.skey;
   } else {
     // Silence compiler warnings.
     mPos.hash = 0;
-    mPos.key = nullptr;
+    mPos.skey = nullptr;
   }
 
   // Copy the elements
@@ -1815,8 +1815,8 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
     if (hasIntKey) {
       dstElm->setIntKey(srcElm->ikey);
     } else {
-      srcElm->key->incRefCount();
-      dstElm->setStrKey(srcElm->key, hash);
+      srcElm->skey->incRefCount();
+      dstElm->setStrKey(srcElm->skey, hash);
     }
     *ad->findForNewInsert(table, mask, hash) = i;
     ++dstElm;
@@ -1826,7 +1826,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   // Now that we have finished copying the elements, update ad->m_pos
   if (src->m_pos != invalid_index) {
     ad->m_pos = mPos.hash
-      ? ssize_t(ad->find(mPos.key, mPos.hash))
+      ? ssize_t(ad->find(mPos.skey, mPos.hash))
       : ssize_t(ad->find(mPos.ikey));
   }
 
@@ -1899,10 +1899,10 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
 
     auto const hash = srcElem->hash();
     if (srcElem->hasStrKey()) {
-      auto const ei = ret->findForInsert(srcElem->key, hash);
+      auto const ei = ret->findForInsert(srcElem->skey, hash);
       if (validPos(*ei)) continue;
       auto& e = ret->allocElm(ei);
-      e.setStrKey(srcElem->key, hash);
+      e.setStrKey(srcElem->skey, hash);
       ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
       continue;
     }
@@ -1949,7 +1949,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
         ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
       } else {
         Variant* p;
-        ret->addLvalImpl(srcElem->key, p);
+        ret->addLvalImpl(srcElem->skey, p);
         p->setWithRef(tvAsCVarRef(&srcElem->data));
       }
     }
@@ -1991,7 +1991,7 @@ ArrayData* MixedArray::PopImpl(ArrayData* ad, Variant& value) {
     auto& e = elms[pos];
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
-    auto pos2 = e.hasStrKey() ? a->findForRemove(e.key, e.hash()) :
+    auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash()) :
                 a->findForRemove(e.ikey, true);
     assert(pos2 == pos);
     a->erase(pos2);
@@ -2029,7 +2029,7 @@ ArrayData* MixedArray::DequeueImpl(ArrayData* adInput, Variant& value) {
   if (validPos(pos)) {
     auto& e = elms[pos];
     value = tvAsCVarRef(&e.data);
-    auto pos2 = e.hasStrKey() ? a->findForRemove(e.key, e.hash()) :
+    auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash()) :
                 a->findForRemove(e.ikey, false);
     assert(pos2 == pos);
     a->erase(pos2);
@@ -2107,9 +2107,9 @@ void MixedArray::OnSetEvalScalar(ArrayData* ad) {
   for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
     auto& e = elms[i];
     if (!isTombstone(e.data.m_type)) {
-      auto key = e.key;
+      auto key = e.skey;
       if (e.hasStrKey() && !key->isStatic()) {
-        e.key = makeStaticString(key);
+        e.skey = makeStaticString(key);
         decRefStr(key);
       }
       tvAsVariant(&e.data).setEvalScalar();

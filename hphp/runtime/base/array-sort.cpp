@@ -37,7 +37,7 @@ struct KeyAccessor {
   bool isInt(ElmT elm) const { return elm.hasIntKey(); }
   bool isStr(ElmT elm) const { return elm.hasStrKey(); }
   int64_t getInt(ElmT elm) const { return elm.ikey; }
-  StringData* getStr(ElmT elm) const { return elm.key; }
+  StringData* getStr(ElmT elm) const { return elm.skey; }
   Variant getValue(ElmT elm) const {
     if (isInt(elm)) {
       return getInt(elm);
@@ -128,7 +128,7 @@ void MixedArray::postSort(bool resetKeys) {
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
-      if (e.hasStrKey()) decRefStr(e.key);
+      if (e.hasStrKey()) decRefStr(e.skey);
       e.setIntKey(pos);
       ht[pos] = pos;
     }

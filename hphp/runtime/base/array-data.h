@@ -410,6 +410,9 @@ protected:
   friend class BaseVector;
   friend class c_Vector;
   friend class c_ImmVector;
+  friend class BaseMap;
+  friend class c_Map;
+  friend class c_ImmMap;
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)

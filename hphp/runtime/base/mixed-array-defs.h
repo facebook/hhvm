@@ -27,6 +27,25 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Return the payload from a ArrayData* that is kMixedKind.
+ */
+ALWAYS_INLINE
+MixedArray::Elm* mixedData(const MixedArray* arr) {
+  return reinterpret_cast<MixedArray::Elm*>(
+    const_cast<MixedArray*>(arr) + 1
+  );
+}
+
+ALWAYS_INLINE
+MixedArray* getArrayFromMixedData(const MixedArray::Elm* elms) {
+  auto* a = const_cast<MixedArray*>(
+    reinterpret_cast<const MixedArray*>(elms) - 1
+  );
+  assert(mixedData(a) == elms);
+  return a;
+}
+
 inline ArrayData::~ArrayData() {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(this);
@@ -107,7 +126,7 @@ void MixedArray::getElmKey(const Elm& e, TypedValue* out) {
     out->m_type = KindOfInt64;
     return;
   }
-  auto str = e.key;
+  auto str = e.skey;
   out->m_data.pstr = str;
   out->m_type = KindOfString;
   str->incRefCount();

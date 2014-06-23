@@ -1,0 +1,3 @@
+<?php
+
+hphpd_break();

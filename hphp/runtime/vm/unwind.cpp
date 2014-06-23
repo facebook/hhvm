@@ -474,7 +474,8 @@ void unwindBuiltinFrame() {
   // Free any values that may be on the eval stack.  We know there
   // can't be FPI regions and it can't be a generator body because
   // it's a builtin frame.
-  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp());
+  const int numSlots = fp->m_func->numSlotsInFrame();
+  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp()) - numSlots;
   while (stack.topTV() < evalTop) {
     stack.popTV();
   }
@@ -489,6 +490,7 @@ void unwindBuiltinFrame() {
   assert(pc != -1);
   fp = sfp;
   vmpc() = fp->m_func->unit()->at(pc);
+  stack.ndiscard(numSlots);
   stack.discardAR();
   stack.pushNull(); // return value
 }

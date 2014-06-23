@@ -1,0 +1,10 @@
+Program %s/break.php loaded. Type '[r]un' or '[c]ontinue' to go.
+continue
+Break on line 3 of %s/break.php
+   2 
+   3*hphpd_break();
+   4 (END)
+
+n
+Program %s/break.php exited normally.
+quit

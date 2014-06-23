@@ -6,8 +6,4 @@ bool(true)
 string(6) "method"
 string(6) "method"
 string(6) "method"
-
-Fatal error: Uncaught exception 'ReflectionException' with message 'Method Foo::() does not exist' in :
-Stack trace:
-#0 %s/test/slow/reflection/ReflectionMethod__construct.php(39): ReflectionMethod->__construct()
-#1 {main}
+ReflectionException: Method Foo::() does not exist

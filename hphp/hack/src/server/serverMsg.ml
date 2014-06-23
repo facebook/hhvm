@@ -22,7 +22,8 @@
 type build_opts = {
   root: Path.path;
   steps: string list option; (* steps for hack build to run.
-                                 None means 'all' *)
+                         None means 'all' *)
+  no_steps: string list option; (* ...but don't run these steps *)
   run_scripts: bool; (* when true, run remaining arc build steps
                      that we haven't figured out how to port yet*)
   serial: bool; (* when true, don't use parallel workers *)

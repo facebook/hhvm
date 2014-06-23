@@ -385,17 +385,17 @@ string RuntimeType::pretty() const {
                     knownClass()->name()->data());
     }
   }
-  if (valueType() == KindOfClass && valueClass() != nullptr) {
+  if (isClass() && valueClass() != nullptr) {
     folly::format(&retval,
                   "(Class {})",
                   valueClass()->name()->data());
   }
-  if (valueType() == KindOfArray && hasArrayKind()) {
+  if (isArray() && hasArrayKind()) {
     folly::format(&retval,
                   "(Kind {})",
                   ArrayData::kindToString(arrayKind()));
   }
-  if (outerType() == KindOfBoolean && valueBoolean() != -1) {
+  if (isBoolean() && valueBoolean() != -1) {
     folly::format(&retval, "(Val {})", valueBoolean());
   }
   return retval;

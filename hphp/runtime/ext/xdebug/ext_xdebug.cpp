@@ -23,6 +23,30 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Returns the frame of the callee's callee. Useful for the xdebug_call_*
+ * functions. Only returns nullptr if the callee is the top level pseudo-main
+ *
+ * If an offset pointer is passed, we store in it it the pc offset of the
+ * call to the callee.
+ */
+static ActRec *get_call_fp(Offset *off = nullptr) {
+  // We want the frame of our callee's callee
+  VMRegAnchor _; // Ensure consistent state for vmfp
+  ActRec* fp0 = g_context->getPrevVMState(vmfp());
+  assert(fp0);
+  ActRec* fp1 = g_context->getPrevVMState(fp0, off);
+
+  // fp1 should only be NULL if fp0 is the top-level pseudo-main
+  if (!fp1) {
+    assert(fp0->m_func->isPseudoMain());
+    fp1 = nullptr;
+  }
+  return fp1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static bool HHVM_FUNCTION(xdebug_break)
   XDEBUG_NOTIMPLEMENTED
 
@@ -30,24 +54,28 @@ static String HHVM_FUNCTION(xdebug_call_class)
   XDEBUG_NOTIMPLEMENTED
 
 static String HHVM_FUNCTION(xdebug_call_file) {
-  // We want the frame of our callee's callee
-  VMRegAnchor _; // Ensure consistent state for vmfp
-  ActRec* fp0 = g_context->getPrevVMState(vmfp());
-  assert(fp0);
-  ActRec* fp1 = g_context->getPrevVMState(fp0);
-
-  //  In PHP5 xdebug, a top level call returns the top level file
-  if (!fp1 && fp0->m_func->isPseudoMain()) {
-    fp1 = fp0;
+  // PHP5 xdebug returns the top-level file if the callee is top-level
+  ActRec *fp = get_call_fp();
+  if (fp == nullptr) {
+    VMRegAnchor _; // Ensure consistent state for vmfp
+    fp = g_context->getPrevVMState(vmfp());
+    assert(fp);
   }
-  assert(fp1);
-
-  const char* filename = fp1->m_func->filename()->data();
-  return String(filename, CopyString);
+  return String(fp->m_func->filename()->data(), CopyString);
 }
 
-static int64_t HHVM_FUNCTION(xdebug_call_line)
-  XDEBUG_NOTIMPLEMENTED
+static int64_t HHVM_FUNCTION(xdebug_call_line) {
+  // PHP5 xdebug returns 0 when it can't determine the line number
+  Offset pc;
+  ActRec *fp = get_call_fp(&pc);
+  if (fp == nullptr) {
+    return 0;
+  }
+
+  Unit *unit = fp->m_func->unit();
+  assert(unit);
+  return unit->getLineNumber(pc);
+}
 
 static bool HHVM_FUNCTION(xdebug_code_coverage_started)
   XDEBUG_NOTIMPLEMENTED

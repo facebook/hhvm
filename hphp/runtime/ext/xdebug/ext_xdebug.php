@@ -16,7 +16,13 @@ function xdebug_call_class(): string;
 <<__Native("NoFCallBuiltin")>>
 function xdebug_call_file(): string;
 
-<<__Native>>
+/**
+ * This function returns the line number that contains the function/method that
+ * called the current function/method.
+ *
+ * @return int - Returns the calling line
+ */
+<<__Native("NoFCallBuiltin")>>
 function xdebug_call_line(): int;
 
 <<__Native>>

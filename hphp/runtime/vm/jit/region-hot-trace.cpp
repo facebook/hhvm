@@ -236,7 +236,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
               cfg.hasArc(newTransId, otherTransId) &&
               // Task #4157613 will allow the following check to go away
               !succSKSet[newBlockId].count(otherBlockSrcKey)) {
-            region->addArc(newTransId, otherTransId);
+            region->addArc(newBlockId, otherBlockId);
             succSKSet[newBlockId].insert(otherBlockSrcKey);
           }
         }

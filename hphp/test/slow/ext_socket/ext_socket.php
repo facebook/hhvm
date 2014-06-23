@@ -118,4 +118,4 @@ var_dump(fwrite($fsock, "foo") > 0);
 
 $fsock2 = pfsockopen("udp://[::1]", $port);
 var_dump($fsock !== false);
-var_dump(ftell($fsock) == ftell($fsock2));
+var_dump($fsock != $fsock2);

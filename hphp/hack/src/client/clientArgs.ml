@@ -127,7 +127,23 @@ let parse_check_args cmd =
       " (mode) print the full function name at the position [line:character] of the text on stdin";
     "--refactor", Arg.Unit (set_mode MODE_REFACTOR),
       "";
-    "--search", Arg.String (fun x -> set_mode (MODE_SEARCH x) ()),
+    "--search", Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
+      "";
+    "--search-class",
+      Arg.String (fun x -> set_mode
+          (MODE_SEARCH (x, "class")) ()),
+      "";
+    "--search-function",
+      Arg.String (fun x -> set_mode
+          (MODE_SEARCH (x, "function")) ()),
+      "";
+    "--search-typedef",
+      Arg.String (fun x -> set_mode
+          (MODE_SEARCH (x, "typedef")) ()),
+      "";
+    "--search-constant",
+      Arg.String (fun x -> set_mode
+          (MODE_SEARCH (x, "constant")) ()),
       "";
     "--outline", Arg.Unit (set_mode MODE_OUTLINE),
       " (mode) prints an outline of the text on stdin";

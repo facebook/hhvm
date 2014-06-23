@@ -158,8 +158,8 @@ module Program : Server.SERVER_PROGRAM = struct
        *)
       output_string oc ("PROLOG_READY:" ^path);
       flush oc
-    | ServerMsg.SEARCH query ->
-        ServerSearch.go query oc
+    | ServerMsg.SEARCH (query, type_) ->
+        ServerSearch.go query type_ oc
 
   let handle_connection_ genv env socket =
     let cli, _ = Unix.accept socket in

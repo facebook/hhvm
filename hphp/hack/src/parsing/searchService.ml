@@ -9,20 +9,9 @@
  *)
 
 open Utils
+open FuzzySearchService
 
-type search_result_type =
-  | Class of Ast.class_kind
-  | Method of bool * string
-  | ClassVar of bool * string
-  | Function
-  | Typedef
-  | Constant
-
-type search_result = {
-    pos        : Pos.t;
-    name       : string;
-    result_type: search_result_type;
-  }
+type search_result = FuzzySearchService.term
 
 (* Shared memory for workers to put lists of pairs of keys and results
   * of our index. Indexed on file name. Cached because we read from here
@@ -56,58 +45,6 @@ let simplify_key key =
   with Not_found ->
     key
 
-(* Module used to rank results. Provides a comparison function for sorting *)
-module Ranking = struct
-
-  (* Class and functions are the most interesting results, so move them
-   * to the top. Then, typedefs. Methods and constants are last *)
-  let search_result_type_compare a b =
-    let rank_search_result_type type_ = match type_ with
-      | Class _
-      | Function -> 4
-      | Typedef -> 3
-      | _ -> 2 in
-    (rank_search_result_type b) - (rank_search_result_type a)
-  
-  (* look for results that exactly match the query *)
-  let search_result_name_compare query a_name b_name =
-    let a_name = Utils.strip_ns a_name in
-    let b_name = Utils.strip_ns b_name in
-    if a_name <> b_name
-    then begin
-      if a_name = query then -1
-      else if b_name = query then 1
-      else 0
-    end else
-    0
-  
-  let result_compare query a b =
-    (* First compare the result to the query to move any exact match
-     * to the top *)
-    let name_compare =
-      search_result_name_compare query (snd a).name (snd b).name in
-    if name_compare <> 0
-    then name_compare
-    else
-      (* case insensitive comparison of result name to query *)
-      let lower_name_compare =
-        search_result_name_compare query
-          (String.lowercase (snd a).name)
-          (String.lowercase (snd b).name)
-      in
-      if lower_name_compare <> 0
-      then lower_name_compare
-      else
-        (* rank based on the result type *)
-        let type_compare =
-          search_result_type_compare (snd a).result_type (snd b).result_type in
-        if type_compare <> 0
-        then type_compare
-        else
-          (* finally, just string compare the keys *)
-          String.compare (fst a) (fst b)
-end
-
 module WorkerApi = struct
 
   (* cleans off namespace and colon at the start of xhp name because the
@@ -122,56 +59,11 @@ module WorkerApi = struct
       else key
     else key
 
-  let result_from_id id res_type =
-    {
-      pos         = fst id;
-      name        = snd id;
-      result_type = res_type;
-    }
-
-  let result_and_key_from_id id res_type =
-    clean_key (snd id), result_from_id id res_type
-
-  let uppercase_filter str =
-    let result = ref [] in
-    (* let the first character through every time so camelcase names
-     * that begin with lower case don't miss the first word. *)
-    let first_char = ref true in
-    String.iter begin fun c ->
-      if !first_char || Char.lowercase c <> c
-      then result := c :: !result;
-      first_char := false
-    end str;
-    let i = ref (List.length !result) in
-    let filtered_str = String.create !i in
-    List.iter begin fun c ->
-      String.set filtered_str (!i - 1) c;
-      decr i
-    end !result;
-    filtered_str
-
-  let add_cid_result c acc =
-    let name = (snd c.Ast.c_name) in
-    (* camel name is the name filtered for the starting letters of camelcase
-     * For example, FooBarClass's camel name is FBC *)
-    let camel_name = clean_key (uppercase_filter (Utils.strip_ns name)) in
-    let name = clean_key name in
-    let c_result = result_from_id c.Ast.c_name (Class c.Ast.c_kind) in
-    let acc =
-      (* only add the camel name if this result wouldn't have already
-       * been covered by the normal name *)
-      if camel_name <> "" && not (str_starts_with name camel_name)
-      then (camel_name, c_result) :: acc
-      else acc
-    in
-    (name, c_result) :: acc
-
 (* Unlike anything else, we need to look at the class body to extract it's
  * methods so that they can also be searched for *)
   let update_class c acc =
     let prefix = (snd c.Ast.c_name)^"::" in
-    let acc = add_cid_result c acc in
-    let acc = List.fold_left begin fun acc elt ->
+    List.fold_left begin fun acc elt ->
       match elt with
       | Ast.Method m -> let id = m.Ast.m_name in
           let name = prefix^(snd id) in
@@ -201,28 +93,53 @@ module WorkerApi = struct
             (clean_key (snd id), res) :: (clean_key name, res) :: acc        
           end acc vars*)
       | _ -> acc
-    end acc c.Ast.c_body in
-    acc
+    end acc c.Ast.c_body
   
   (* Called by a worker after the file is parsed *)
   let update fn ast =
-   let defs = List.fold_left begin fun acc def ->
+    let type_to_keylist, type_to_defmap, defs =
+        List.fold_left begin fun (type_to_keylist, type_to_defmap, defs) def ->
       match def with
-      | Ast.Fun f -> (result_and_key_from_id f.Ast.f_name Function) :: acc
-      | Ast.Class c -> update_class c acc
+      | Ast.Fun f ->
+          let type_to_keylist, type_to_defmap =
+            FuzzySearchService.process_term
+                f.Ast.f_name Function type_to_keylist type_to_defmap in
+          type_to_keylist, type_to_defmap, defs
+      | Ast.Class c ->
+          let type_to_keylist, type_to_defmap =
+            FuzzySearchService.process_term
+                c.Ast.c_name
+                (Class c.Ast.c_kind)
+                type_to_keylist
+                type_to_defmap
+          in
+          (* Still index methods for regular search *)
+          let defs = update_class c defs in
+          type_to_keylist, type_to_defmap, defs
       | Ast.Typedef td ->
-          (result_and_key_from_id td.Ast.t_id Typedef) ::acc
+          let type_to_keylist, type_to_defmap =
+            FuzzySearchService.process_term
+                td.Ast.t_id Typedef type_to_keylist type_to_defmap in
+          type_to_keylist, type_to_defmap, defs
       | Ast.Constant cst ->
-          (result_and_key_from_id cst.Ast.cst_name Constant) :: acc
-      | _ -> acc
-    end [] ast in
+          let type_to_keylist, type_to_defmap =
+            FuzzySearchService.process_term
+                cst.Ast.cst_name Constant type_to_keylist type_to_defmap in
+          type_to_keylist, type_to_defmap, defs
+      | _ -> type_to_keylist, type_to_defmap, defs
+    end (TMap.empty, TMap.empty, []) ast in
+
     SearchUpdates.add fn defs;
     let keys = List.fold_left begin fun acc def ->
       let key = simplify_key (fst def) in
       SSet.add key acc
     end SSet.empty defs in
     let keys = SSet.elements keys in
-    SearchKeys.add fn keys
+    SearchKeys.add fn keys;
+
+    FuzzySearchService.SearchKeyToTermMap.add fn type_to_defmap;
+    FuzzySearchService.SearchKeys.add fn type_to_keylist
+
 end
 
 module MasterApi = struct
@@ -311,12 +228,37 @@ module MasterApi = struct
       SSet.add file acc
     end php_files files in
     SSet.iter process_file files;
+
+    FuzzySearchService.index_files files;
     (* At this point, users can start searching agian so we should clear the
      * cache that contains the actual results. We don't have to worry
      * about the string->keys list shared memory because it's uncached *)
     SharedMem.invalidate_caches()
-  
-  let query input =
+
+  let clear_shared_memory failed_parsing =
+    SearchUpdates.remove_batch failed_parsing;
+    SearchKeys.remove_batch failed_parsing;
+    FuzzySearchService.SearchKeyToTermMap.remove_batch failed_parsing;
+    FuzzySearchService.SearchKeys.remove_batch failed_parsing
+
+  (* Note: the score should be able to compare to the scoring in
+   * FuzzySearchService so that the results can be merged and the ordering still
+   * makes sense. *)
+  let rec get_score ?qi:(qi=0) ?ti:(ti=0) ?score:(score=0) term query =
+    if (String.length query = String.length term.name) then
+      if String.compare query term.name = 0 then 0
+      else String.length term.name
+    else if (qi >= String.length query || ti >= String.length term.name) then
+      score + ti + String.length term.name
+    else
+      let qc = String.get query qi in
+      let tc = String.get term.name ti in
+      if Char.compare qc tc = 0 then
+        get_score ~qi:(qi+1) ~ti:(ti+1) ~score:(score) term query
+      else
+        get_score ~qi:(qi+1) ~ti:(ti+1) ~score:(score+1) term query
+
+  let search_query input =
     let str = String.lowercase (Utils.strip_ns input) in
     let short_key = simplify_key str in
     (* get all the keys beneath short_key in the trie *)
@@ -345,10 +287,37 @@ module MasterApi = struct
          * have not been simplified, so we check if they start with
          * the full search term *)
         if str_starts_with key str then
-        results := (key, res) :: !results
+          let score =
+            if str_starts_with (String.lowercase res.name) str
+            then get_score res str
+            else (String.length key) * 2
+          in
+          results := (res, score) :: !results
       end defs
     end files;
-    let res = List.sort (Ranking.result_compare input) !results in
+    let res = List.sort begin fun a b ->
+      (snd a) - (snd b)
+    end !results in
+    Utils.cut_after 50 res
+
+  let get_type = function
+    | "class" -> Some (Class Ast.Cnormal)
+    | "function" -> Some Function
+    | "constant" -> Some Constant
+    | "typedef" -> Some Typedef
+    | _ -> None
+
+  let query input type_ =
+    let type_ = get_type type_ in
+    let res = match type_ with
+    | Some _ -> []
+    | None -> search_query input in
+
+    let fuzzy_results = FuzzySearchService.query input type_ in
+    let res = List.merge begin fun a b ->
+      (snd a) - (snd b)
+    end fuzzy_results res in
     let res = Utils.cut_after 50 res in
-    List.map snd res
+    List.map fst res
+
 end

@@ -8,7 +8,7 @@
  *
  *)
 
-module SS = SearchService
+module SS = FuzzySearchService
 module Json = Hh_json
 
 let desc_string_from_type result_type =

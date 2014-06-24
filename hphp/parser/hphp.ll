@@ -119,6 +119,7 @@ static int getNextTokenType(int t) {
     case T_RETURN:
     case T_YIELD:
     case T_AWAIT:
+    case T_ASYNC:
     case T_NEW:
     case T_INSTANCEOF:
     case T_DOUBLE_ARROW:
@@ -466,7 +467,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"select"             { HH_ONLY_KEYWORD(T_SELECT); }
 <ST_IN_SCRIPTING>"group"              { HH_ONLY_KEYWORD(T_GROUP); }
 <ST_IN_SCRIPTING>"by"                 { HH_ONLY_KEYWORD(T_BY); }
-<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff] {
+<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff($] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }
 

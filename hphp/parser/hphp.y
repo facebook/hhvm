@@ -1870,6 +1870,24 @@ lambda_expression:
                                                             v,$1,w,$3);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
+  | T_ASYNC
+    T_VARIABLE                         { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();
+                                         Token u;
+                                         _p->onParam($2,NULL,u,$2,0,
+                                                     NULL,NULL,NULL);}
+    lambda_body                        { Token v; Token w;
+                                         $1 = T_ASYNC;
+                                         _p->onMemberModifier($1, nullptr, $1);
+                                         _p->finishStatement($4, $4); $4 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            &$1,
+                                                            v,$2,w,$4);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
   | T_LAMBDA_OP                        { _p->pushFuncLocation();
                                          Token t;
                                          _p->onNewLabelScope(true);
@@ -1885,10 +1903,29 @@ lambda_expression:
                                                             u,$3,v,$6);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
+  | T_ASYNC
+    T_LAMBDA_OP                        { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();}
+    parameter_list
+    T_LAMBDA_CP
+    hh_opt_return_type
+    lambda_body                        { Token u; Token v;
+                                         $1 = T_ASYNC;
+                                         _p->onMemberModifier($1, nullptr, $1);
+                                         _p->finishStatement($7, $7); $7 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            &$1,
+                                                            u,$4,v,$7);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
 ;
 
 lambda_body:
     T_LAMBDA_ARROW expr               { $$ = _p->onExprForLambda($2);}
+  | T_LAMBDA_ARROW await_expr         { $$ = _p->onExprForLambda($2);}
   | T_LAMBDA_ARROW
     '{' inner_statement_list '}'      { $$ = $3; }
 ;

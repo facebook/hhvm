@@ -1074,7 +1074,7 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
     : NEW_EXP0(ModifierExpression);
   modifiersExp->setHasPrivacy(type == FunctionType::Method);
   if (type == FunctionType::Closure && !modifiersExp->validForClosure()) {
-    PARSE_ERROR("Invalid modifier on closure funciton.");
+    PARSE_ERROR("Invalid modifier on closure function.");
   }
   if (type == FunctionType::Function) {
     if (!modifiersExp->validForFunction()) {

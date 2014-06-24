@@ -915,7 +915,7 @@ and type_paraml env tparams =
     (fun (seen, tparaml) (((p, name), _) as tparam) ->
       match SMap.get name seen with
       | None -> (SMap.add name p seen, (type_param env tparam)::tparaml)
-      | Some pos -> 
+      | Some pos ->
           Errors.shadowed_type_param p pos name;
           seen, tparaml
     )
@@ -1053,7 +1053,7 @@ and const_def h env (x, e) =
           | Array _ ->
               None, Env.new_const env x, expr env e
           | _ ->
-            Errors.missing_typehint (fst x); 
+            Errors.missing_typehint (fst x);
               None, Env.new_const env x, (fst e, N.Any)
           )
       | Some h ->
@@ -1401,7 +1401,7 @@ and expr_ env = function
               Errors.too_many_arguments p;
               N.Any
         )
-      | _ -> 
+      | _ ->
           Errors.expected_collection p cn;
           N.Any
   end
@@ -1418,7 +1418,7 @@ and expr_ env = function
       | "__LINE__" -> N.Int x
       | "__CLASS__" ->
         (match (fst env).cclass with
-          | None -> 
+          | None ->
               Errors.illegal_CLASS (fst x);
               N.Any
           | Some c -> N.String c)
@@ -1462,6 +1462,8 @@ and expr_ env = function
   | Call ((p, Id (_, "fun")), el) ->
       (match el with
       | [] -> Errors.too_few_arguments p; N.Any
+      | [_, String (p2, s)] when String.contains s ':' ->
+        Errors.illegal_meth_fun p; N.Any
       | [_, String x] -> N.Fun_id (Env.fun_id env x)
       | [p, _] ->
           Errors.illegal_fun p;
@@ -1529,7 +1531,7 @@ and expr_ env = function
         N.Assert (N.AE_invariant_violation (expr env format, el))
       | _ ->
         Errors.too_few_arguments p;
-        N.Any  
+        N.Any
       )
   | Call ((p, Id (_, "tuple")), el) ->
       (match el with

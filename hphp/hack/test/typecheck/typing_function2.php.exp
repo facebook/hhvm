@@ -1,0 +1,2 @@
+File "typing_function2.php", line 19, characters 23-25:
+String argument to fun() contains ':'; for static class methods, use class_meth(Cls::class, 'method_name'), not fun('Cls::method_name')

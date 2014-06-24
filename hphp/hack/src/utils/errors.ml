@@ -58,7 +58,7 @@ let generic_class_var pos =
 
 let explain_constraint pos name (error: error) =
   add_list (
-  error @ 
+  error @
   [pos, "Considering the constraint on the type '"^name^"'"]
 )
 
@@ -220,6 +220,12 @@ let illegal_fun p =
     "literal string representing a valid function name." in
   add p msg
 
+let illegal_meth_fun p =
+  let msg = "String argument to fun() contains ':';"^
+    " for static class methods, use"^
+    " class_meth(Cls::class, 'method_name'), not fun('Cls::method_name')" in
+  add p msg
+
 let illegal_inst_meth p =
   let msg = "The argument to inst_meth() must be an expression and a "^
     "constant literal string representing a valid method name." in
@@ -270,7 +276,7 @@ let local_const var_pos =
   add var_pos "You cannot use a local variable in a constant definition"
 
 let illegal_constant pos =
-  add pos "Illegal constant value" 
+  add pos "Illegal constant value"
 
 let cyclic_constraint p =
   add p "Cyclic constraint"
@@ -430,7 +436,7 @@ let typing_error_l err =
 
 let undefined_field p name =
   add p ("The field "^name^" is undefined")
-    
+
 let shape_access p =
   add p "Was expecting a constant string (for shape access)"
 
@@ -534,7 +540,7 @@ let sketchy_null_check p =
          "Use is_null, or $x === null instead")
 
 let sketchy_null_check_primitive p =
-  add p 
+  add p
     ("You are using a sketchy null check on a primitive type ...\n"^
      "Use is_null, or $x === null instead")
 
@@ -866,7 +872,7 @@ let override parent_pos parent_name pos name (error: error) =
 
 let missing_constructor pos =
   add pos "The constructor is not implemented"
-  
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

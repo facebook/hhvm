@@ -217,7 +217,8 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
 
   if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
-    return gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
+    gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
+    return inst->src(0);
   }
 
   return preOptimizeCheckTypeOp(
@@ -315,7 +316,8 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const locId = inst->extra<AssertLoc>()->locId;
 
   if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
-    return gen(AssertType, inst->typeParam(), prevValue);
+    gen(AssertType, inst->typeParam(), prevValue);
+    return inst->src(0);
   }
 
   auto* typeSrc = localTypeSource(locId);

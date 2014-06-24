@@ -234,7 +234,7 @@ function find_tests($files, array $options = null) {
   }
   $files = implode(' ', $files);
   $tests = explode("\n", shell_exec(
-      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
+      "find \"$files\" -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
   ));
   if (!$tests) {
     error(usage());
@@ -381,7 +381,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
   }
 
   if (isset($options['repo'])) {
-    $hhbbc_repo = "$test.repo/hhvm.hhbbc";
+    $hhbbc_repo = "\"$test.repo/hhvm.hhbbc\"";
     $cmd .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
     $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
   }
@@ -408,7 +408,7 @@ function hphp_cmd($options, $test) {
     '--config',
     find_file($test, 'hphp_config.ini'),
     read_file("$test.hphp_opts"),
-    "-thhbc -l0 -k1 -o $test.repo $test",
+    "-thhbc -l0 -k1 -o \"$test.repo\" \"$test\"",
   ));
 }
 
@@ -419,7 +419,7 @@ function hhbbc_cmd($options, $test) {
     '--no-logging',
     '--parallel-num-threads=1',
     read_file("$test.hhbbc_opts"),
-    "-o $test.repo/hhvm.hhbbc $test.repo/hhvm.hhbc",
+    "-o \"$test.repo/hhvm.hhbbc\" \"$test.repo/hhvm.hhbc\"",
   ));
 }
 
@@ -977,7 +977,8 @@ function run_test($options, $test) {
 
     $hphp_repo = "$test.repo/hhvm.hhbc";
     $hhbbc_repo = "$test.repo/hhvm.hhbbc";
-    shell_exec("rm -f $hphp_repo $hhbbc_repo $test.repo/CodeError.js");
+    shell_exec("rm -f \"$hphp_repo\" \"$hhbbc_repo\" ".
+               "\"$test.repo/CodeError.js\"");
     $hphp = hphp_cmd($options, $test);
     $hhbbc = hhbbc_cmd($options, $test);
     shell_exec("$hphp 2>&1");

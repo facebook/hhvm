@@ -375,14 +375,6 @@ static inline std::string regionSelectorDefault() {
   return "tracelet";
 }
 
-static inline bool hhirBytecodeControlFlowDefault() {
-#ifdef HHVM_BYTECODE_CONTROL_FLOW
-  return true;
-#else
-  return false;
-#endif
-}
-
 static inline bool pgoDefault() {
   // TODO(3496304)
   return !RuntimeOption::EvalSimulateARM;

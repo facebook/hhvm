@@ -273,7 +273,6 @@ public:
   static bool TranslateLeakStackTrace;
   static bool NativeStackTrace;
   static bool FullBacktrace;
-  static bool ServerStackTrace;
   static bool ServerErrorMessage;
   static bool TranslateSource;
   static bool RecordInput;

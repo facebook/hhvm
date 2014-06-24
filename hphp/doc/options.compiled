@@ -600,7 +600,6 @@ next requests.
 
   Debug {
     FullBacktrace = false
-    ServerStackTrace = false
     ServerErrorMessage = false
     TranslateSource = false
 
@@ -614,7 +613,7 @@ next requests.
     CoreDumpReportDirectory = /tmp
   }
 
-- FullBacktrace, ServerStackTrace, ServerErrorMessage, TranslateSource
+- FullBacktrace, ServerErrorMessage, TranslateSource
 
 These settings turn on error messages in HTTP responses with detailed
 stacktrace information. TranslateSource will translate C++ file and line

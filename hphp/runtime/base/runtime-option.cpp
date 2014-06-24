@@ -272,7 +272,6 @@ int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
 bool RuntimeOption::TranslateLeakStackTrace = false;
 bool RuntimeOption::NativeStackTrace = false;
 bool RuntimeOption::FullBacktrace = false;
-bool RuntimeOption::ServerStackTrace = false;
 bool RuntimeOption::ServerErrorMessage = false;
 bool RuntimeOption::TranslateSource = false;
 bool RuntimeOption::RecordInput = false;
@@ -1275,7 +1274,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(TranslateLeakStackTrace, ini,
                  debug["TranslateLeakStackTrace"]);
     Config::Bind(FullBacktrace, ini, debug["FullBacktrace"]);
-    Config::Bind(ServerStackTrace, ini, debug["ServerStackTrace"]);
     Config::Bind(ServerErrorMessage, ini, debug["ServerErrorMessage"]);
     Config::Bind(TranslateSource, ini, debug["TranslateSource"]);
     Config::Bind(RecordInput, ini, debug["RecordInput"]);

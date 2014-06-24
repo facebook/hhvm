@@ -397,14 +397,9 @@ static void handle_exception_helper(bool& ret,
   } catch (const UncatchableException &e) {
     ret = false;
     error = true;
-    errorMsg = "";
-    if (RuntimeOption::ServerStackTrace) {
-      errorMsg = e.what();
-    } else {
-      errorMsg = e.getMessage();
-      errorMsg += "\n";
-      errorMsg += ExtendedLogger::StringOfStackTrace(e.getBackTrace());
-    }
+    errorMsg = e.getMessage();
+    errorMsg += "\n";
+    errorMsg += ExtendedLogger::StringOfStackTrace(e.getBackTrace());
     Logger::Error("%s", errorMsg.c_str());
     if (richErrorMsg) {
       handle_exception_append_bt(errorMsg, e);

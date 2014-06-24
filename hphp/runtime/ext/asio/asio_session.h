@@ -28,6 +28,7 @@ namespace HPHP {
 
 struct ActRec;
 FORWARD_DECLARE_CLASS(WaitHandle);
+FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
 FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
@@ -126,6 +127,11 @@ class AsioSession {
     void onResumableFail(c_ResumableWaitHandle* cont, const Object& exception);
     void updateEventHookState();
 
+    // AwaitAllWaitHandle callbacks:
+    void setOnAwaitAllCreateCallback(const Variant& callback);
+    bool hasOnAwaitAllCreateCallback() { return m_onAwaitAllCreateCallback.get(); }
+    void onAwaitAllCreate(c_AwaitAllWaitHandle* wait_handle, const Variant& dependencies);
+
     // GenArrayWaitHandle callbacks:
     void setOnGenArrayCreateCallback(const Variant& callback);
     bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
@@ -179,6 +185,7 @@ class AsioSession {
     Object m_onResumableAwaitCallback;
     Object m_onResumableSuccessCallback;
     Object m_onResumableFailCallback;
+    Object m_onAwaitAllCreateCallback;
     Object m_onGenArrayCreateCallback;
     Object m_onGenMapCreateCallback;
     Object m_onGenVectorCreateCallback;

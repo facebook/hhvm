@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator.h"
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
+#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"

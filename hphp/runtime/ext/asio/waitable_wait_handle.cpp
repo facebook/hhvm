@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
+#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
@@ -99,6 +100,7 @@ String c_WaitableWaitHandle::getName() {
     case Kind::Static:              not_reached();
     case Kind::AsyncFunction:       return asAsyncFunction()->getName();
     case Kind::AsyncGenerator:      return asAsyncGenerator()->getName();
+    case Kind::AwaitAll:            return asAwaitAll()->getName();
     case Kind::GenArray:            return asGenArray()->getName();
     case Kind::GenMap:              return asGenMap()->getName();
     case Kind::GenVector:           return asGenVector()->getName();
@@ -116,13 +118,13 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
     case Kind::Static:              not_reached();
     case Kind::AsyncFunction:       return asAsyncFunction()->getChild();
     case Kind::AsyncGenerator:      return asAsyncGenerator()->getChild();
+    case Kind::AwaitAll:            return asAwaitAll()->getChild();
     case Kind::GenArray:            return asGenArray()->getChild();
     case Kind::GenMap:              return asGenMap()->getChild();
     case Kind::GenVector:           return asGenVector()->getChild();
     case Kind::Reschedule:          return nullptr;
     case Kind::Sleep:               return nullptr;
     case Kind::ExternalThreadEvent: return nullptr;
-      return nullptr;
   }
   not_reached();
 }
@@ -135,6 +137,8 @@ void c_WaitableWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
       return asAsyncFunction()->enterContextImpl(ctx_idx);
     case Kind::AsyncGenerator:
       return asAsyncGenerator()->enterContextImpl(ctx_idx);
+    case Kind::AwaitAll:
+      return asAwaitAll()->enterContextImpl(ctx_idx);
     case Kind::GenArray:
       return asGenArray()->enterContextImpl(ctx_idx);
     case Kind::GenMap:

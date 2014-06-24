@@ -297,6 +297,7 @@ class BaseVector : public ExtCollectionObjectData {
   explicit BaseVector(Class* cls);
   /*virtual*/ ~BaseVector();
 
+  Cell* data() const { return tvAssertCell(m_data); }
   void grow();
   void reserveImpl(uint32_t newCap);
 
@@ -467,6 +468,7 @@ class BaseVector : public ExtCollectionObjectData {
   friend class BaseMap;
   friend class BaseSet;
   friend class c_Pair;
+  friend class c_AwaitAllWaitHandle;
 
   template<class TVector>
   friend ObjectData* collectionDeepCopyBaseVector(TVector* vec);
@@ -1378,6 +1380,7 @@ class BaseMap : public HashCollection {
   friend class c_Map;
   friend class c_ImmMap;
   friend class ArrayIter;
+  friend class c_AwaitAllWaitHandle;
   friend class c_GenMapWaitHandle;
 
   static void compileTimeAssertions() {

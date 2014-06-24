@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
+#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
@@ -34,6 +35,7 @@ namespace {
     switch (wh->getKind()) {
       case Kind::AsyncFunction:  wh->asAsyncFunction()->onUnblocked(); break;
       case Kind::AsyncGenerator: wh->asAsyncGenerator()->onUnblocked(); break;
+      case Kind::AwaitAll:       wh->asAwaitAll()->onUnblocked(); break;
       case Kind::GenArray:       wh->asGenArray()->onUnblocked(); break;
       case Kind::GenMap:         wh->asGenMap()->onUnblocked(); break;
       case Kind::GenVector:      wh->asGenVector()->onUnblocked(); break;

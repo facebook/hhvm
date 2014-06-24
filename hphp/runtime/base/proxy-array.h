@@ -200,6 +200,7 @@ private:
   static void reseatable(const ArrayData* oldArr, ArrayData* newArr);
 
   static ArrayData* innerArr(const ArrayData* ad);
+  friend class c_AwaitAllWaitHandle;
 
 private:
   // The inner array. This is mutable since zend_hash_find() etc. has a

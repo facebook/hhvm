@@ -395,6 +395,7 @@ private:
   friend class BaseSet;
   friend class c_Set;
   friend class c_ImmSet;
+  friend class c_AwaitAllWaitHandle;
   enum class ClonePacked {};
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };

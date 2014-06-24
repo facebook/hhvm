@@ -537,6 +537,92 @@
             ]
         },
         {
+            "name": "AwaitAllWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle that waits for a list of other wait handles",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep",
+                "CppCustomDelete"
+            ],
+            "funcs": [
+                {
+                    "name": "fromArray",
+                    "desc": "Create a wait handle that waits for a given array of dependencies",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given array of dependencies"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "VariantMap",
+                            "desc": "An Array of dependencies to wait for"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromMap",
+                    "desc": "Create a wait handle that waits for a given Map of dependencies",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given Map of dependencies"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "Variant",
+                            "desc": "A Map of dependencies to wait for"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromVector",
+                    "desc": "Create a wait handle that waits for a given Vector of dependencies",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given Vector of dependencies"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "Variant",
+                            "desc": "A Vector of dependencies to wait for"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a AwaitAllWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
             "name": "GenArrayWaitHandle",
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing an array of asynchronous operations",

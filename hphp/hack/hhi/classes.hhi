@@ -106,6 +106,21 @@ class AsyncFunctionWaitHandle<T> extends BlockableWaitHandle<T> {
   public static function setOnFailCallback(?(function(AsyncFunctionWaitHandle<mixed>, Exception): void) $callback) {}
 }
 
+class AwaitAllWaitHandle extends BlockableWaitHandle<void> {
+  public static function fromVector<T>(
+    ConstVector<WaitHandle<T>> $deps
+  ): WaitHandle<void>;
+  public static function fromArray<T>(
+    array<WaitHandle<T>> $deps
+  ): WaitHandle<void>;
+  public static function fromMap<Tk, Tv>(
+    ConstMap<Tk, WaitHandle<Tv>> $deps
+  ): WaitHandle<void>;
+  public static function setOnCreateCallback(
+    ?(function(AwaitAllWaitHandle<void>, Vector<mixed>): void) $callback
+  ): void {}
+}
+
 class GenArrayWaitHandle extends BlockableWaitHandle<array> {
   // This is technically overloaded to allow an array of nullable
   public static function create(array $dependencies): WaitHandle<array> {}

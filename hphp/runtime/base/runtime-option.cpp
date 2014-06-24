@@ -70,8 +70,6 @@ std::string RuntimeOption::LogFileSymLink;
 int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
-bool RuntimeOption::InjectedStackTrace = true;
-int RuntimeOption::InjectedStackTraceLimit = -1;
 bool RuntimeOption::NoSilencer = false;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
@@ -653,11 +651,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     ));
 
     Config::Bind(Logger::LogHeader, ini, logger["Header"]);
-    bool logInjectedStackTrace = Config::GetBool(ini, logger["InjectedStackTrace"]);
-    if (logInjectedStackTrace) {
-      Logger::SetTheLogger(new ExtendedLogger());
-      ExtendedLogger::EnabledByDefault = true;
-    }
     Config::Bind(Logger::LogNativeStackTrace, ini, logger["NativeStackTrace"],
                  true);
     Config::Bind(Logger::MaxMessagesPerRequest, ini,
@@ -1142,10 +1135,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(LightProcessFilePrefix, ini, server["LightProcessFilePrefix"],
                  "./lightprocess");
     Config::Bind(LightProcessCount, ini, server["LightProcessCount"], 0);
-
-    Config::Bind(InjectedStackTrace, ini, server["InjectedStackTrace"], true);
-    Config::Bind(InjectedStackTraceLimit, ini,
-                 server["InjectedStackTraceLimit"], -1);
 
     Config::Bind(ForceServerNameToHeader, ini,
                  server["ForceServerNameToHeader"]);

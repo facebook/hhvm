@@ -81,13 +81,11 @@ const StaticString s_file("file"), s_line("line");
 std::pair<String, int> ExtendedException::getFileAndLine() const {
   String file = empty_string();
   int line = 0;
-  if (RuntimeOption::InjectedStackTrace) {
-    Array bt = getBackTrace();
-    if (!bt.empty()) {
-      Array top = bt.rvalAt(0).toArray();
-      if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-      if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
-    }
+  Array bt = getBackTrace();
+  if (!bt.empty()) {
+    Array top = bt.rvalAt(0).toArray();
+    if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
+    if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
   }
   return std::make_pair(file, line);
 }

@@ -13,7 +13,6 @@ node's purpose. Listed values are defaults, unless examples.
     RuntimeErrorReportingLevel = 8191
     Header = false
     HeaderMangle = 0
-    InjectedStackTrace = true
     NativeStackTrace = true
     MaxMessagesPerRequest = -1
 
@@ -25,7 +24,7 @@ PHP fatal errors, and AlwaysLogUnhandledExceptions will make sure they get
 logged even if a user's error handler is installed for them. We also provided
 RuntimeErrorReportingLevel for compatibility with PHP.
 
-- Header, InjectedStackTrace, NativeStackTrace
+- Header, NativeStackTrace
 
 These settings control log line formats. Header includes timestamp, process id,
 thread id, request id (counted from 1 since server starts), message id
@@ -37,8 +36,6 @@ and printed on every line of logging right after header. These stacktraces can
 be translated into human readable frames by running "-m translate" with the
 compiled program. (2) PHP stacktrace from code injection. Generated C++ code
 injects stacktrace preparation code into every frame of functions and methods.
-InjectedStackTrace can turn on this PHP stacktrace, which sometimes is cleaner
-than the C++ stacktrace, which can be turned on and off by NativeStackTrace.
 
 - HeaderMangle
 

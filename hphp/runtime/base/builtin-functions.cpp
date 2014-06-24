@@ -653,19 +653,13 @@ Exception* generate_request_timeout_exception() {
     "entire web request took longer than ";
   exceptionMsg += folly::to<std::string>(data.getTimeout());
   exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
-  Array exceptionStack;
-  if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_context->debugBacktrace(false, true, true);
-  }
+  Array exceptionStack = g_context->debugBacktrace(false, true, true);
   ret = new RequestTimeoutException(exceptionMsg, exceptionStack);
   return ret;
 }
 
 Exception* generate_memory_exceeded_exception() {
-  Array exceptionStack;
-  if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_context->debugBacktrace(false, true, true);
-  }
+  Array exceptionStack = g_context->debugBacktrace(false, true, true);
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack);
 }

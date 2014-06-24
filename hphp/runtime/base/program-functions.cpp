@@ -400,7 +400,7 @@ static void handle_exception_helper(bool& ret,
     errorMsg = "";
     if (RuntimeOption::ServerStackTrace) {
       errorMsg = e.what();
-    } else if (RuntimeOption::InjectedStackTrace) {
+    } else {
       errorMsg = e.getMessage();
       errorMsg += "\n";
       errorMsg += ExtendedLogger::StringOfStackTrace(e.getBackTrace());

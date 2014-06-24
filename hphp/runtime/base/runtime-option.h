@@ -73,8 +73,6 @@ public:
   static int LogHeaderMangle;
   static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;
-  static bool InjectedStackTrace;
-  static int InjectedStackTraceLimit; // limit the size of the backtrace
   static bool NoSilencer;
   static bool CallUserHandlerOnFatals;
   static bool ThrowExceptionOnBadMethodCall;

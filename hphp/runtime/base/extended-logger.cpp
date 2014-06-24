@@ -24,9 +24,8 @@
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                   \
   void ExtendedLogger::LOGLEVEL(const char *fmt, ...) {                \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    if (RuntimeOption::InjectedStackTrace &&                           \
-        !ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = g_context->debugBacktrace();                        \
+    if (!ExtendedLogger::EnabledByDefault) {                           \
+      Array bt = g_context->debugBacktrace();                          \
       if (!bt.empty()) {                                               \
         va_list ap; va_start(ap, fmt);                                 \
         Logger::LogEscapeMore(Log ## LOGLEVEL, fmt, ap);               \
@@ -41,9 +40,8 @@
   }                                                                    \
   void ExtendedLogger::LOGLEVEL(const std::string &msg) {              \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    if (RuntimeOption::InjectedStackTrace &&                           \
-        !ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = g_context->debugBacktrace();                        \
+    if (!ExtendedLogger::EnabledByDefault) {                           \
+      Array bt = g_context->debugBacktrace();                          \
       if (!bt.empty()) {                                               \
         Logger::Log(Log ## LOGLEVEL, msg, nullptr, true, true);        \
         Log(Log ## LOGLEVEL, bt);                                      \
@@ -74,11 +72,8 @@ void ExtendedLogger::log(LogLevelType level, const char *type,
   if (!IsEnabled()) return;
   Logger::log(level, type, e, file, line);
 
-  if (RuntimeOption::InjectedStackTrace) {
-    const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
-    if (ee) {
-      Log(level, ee->getBackTrace());
-    }
+  if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
+    Log(level, ee->getBackTrace());
   }
 }
 
@@ -86,13 +81,11 @@ void ExtendedLogger::log(LogLevelType level, const std::string &msg,
                          const StackTrace *stackTrace,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
-  if (RuntimeOption::InjectedStackTrace) {
-    Array bt = g_context->debugBacktrace();
-    if (!bt.empty()) {
-      Logger::log(level, msg, stackTrace, escape, escape);
-      Log(level, bt, escape, escapeMore);
-      return;
-    }
+  Array bt = g_context->debugBacktrace();
+  if (!bt.empty()) {
+    Logger::log(level, msg, stackTrace, escape, escape);
+    Log(level, bt, escape, escapeMore);
+    return;
   }
   Logger::log(level, msg, stackTrace, escape, escapeMore);
 }

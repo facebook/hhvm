@@ -476,16 +476,18 @@ UnwindAction unwind(ActRec*& fp,
 
 const StaticString s_hphpd_break("hphpd_break");
 const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
+const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
 
 // Unwind the frame for a builtin.  Currently only used when switching
-// modes for hphpd_break and fb_enable_code_coverage.
+// modes for hphpd_break, fb_enable_code_coverage, and
+// xdebug_start_code_coverage
 void unwindBuiltinFrame() {
   auto& stack = vmStack();
   auto& fp = vmfp();
 
-  assert(fp->m_func->methInfo());
   assert(fp->m_func->name()->isame(s_hphpd_break.get()) ||
-         fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
+         fp->m_func->name()->isame(s_fb_enable_code_coverage.get()) ||
+         fp->m_func->name()->isame(s_xdebug_start_code_coverage.get()));
 
   // Free any values that may be on the eval stack.  We know there
   // can't be FPI regions and it can't be a generator body because

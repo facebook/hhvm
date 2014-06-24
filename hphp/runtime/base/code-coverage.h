@@ -35,8 +35,10 @@ public:
    * Returns an array in this format,
    *
    *  array('filename' => array( line => count, ...))
+   *
+   * If sys is passed as false, systemlib files are not included.
    */
-  Array Report();
+  Array Report(bool sys = true);
 
   /**
    * Write JSON format into the file.

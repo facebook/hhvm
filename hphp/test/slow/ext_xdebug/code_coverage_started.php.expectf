@@ -1,0 +1,47 @@
+bool(false)
+bool(true)
+array(1) {
+  ["%s/test/slow/ext_xdebug/code_coverage_started.php"]=>
+  array(3) {
+    [5]=>
+    int(1)
+    [6]=>
+    int(1)
+    [8]=>
+    int(1)
+  }
+}
+bool(true)
+bool(false)
+array(1) {
+  ["%s/test/slow/ext_xdebug/code_coverage_started.php"]=>
+  array(4) {
+    [11]=>
+    int(1)
+    [12]=>
+    int(1)
+    [14]=>
+    int(2)
+    [15]=>
+    int(1)
+  }
+}
+array(1) {
+  ["%s/test/slow/ext_xdebug/code_coverage_started.php"]=>
+  array(7) {
+    [11]=>
+    int(1)
+    [12]=>
+    int(1)
+    [14]=>
+    int(2)
+    [15]=>
+    int(1)
+    [16]=>
+    int(1)
+    [17]=>
+    int(2)
+    [18]=>
+    int(1)
+  }
+}

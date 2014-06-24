@@ -236,6 +236,15 @@ bool Extension::IsLoaded(const String& name) {
     s_registered_extensions->end();
 }
 
+const static std::string
+  s_systemlibPhpName("systemlib.php"),
+  s_systemlibHhasName("systemlib.hhas.");
+
+bool Extension::IsSystemlibPath(const std::string& name) {
+  return !name.compare(0, s_systemlibPhpName.length(), s_systemlibPhpName) ||
+         !name.compare(0, s_systemlibHhasName.length(), s_systemlibHhasName);
+}
+
 Extension *Extension::GetExtension(const String& name) {
   assert(s_registered_extensions);
   ExtensionMap::iterator iter = s_registered_extensions->find(name.data());
@@ -292,13 +301,11 @@ void Extension::loadSystemlib(const std::string& name /*= "" */) {
   section += f_md5(n, false).substr(0, 12).data();
   std::string hhas, slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
-    std::string phpname("systemlib.php");
-    phpname += n;
+    std::string phpname = s_systemlibPhpName + n;
     CompileSystemlib(slib, phpname);
   }
   if (!hhas.empty()) {
-    std::string hhasname("systemlib.hhas.");
-    hhasname += n;
+    std::string hhasname = s_systemlibHhasName + n;
     CompileSystemlib(hhas, hhasname);
   }
 }

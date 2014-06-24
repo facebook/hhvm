@@ -35,6 +35,11 @@ function xdebug_call_line(): int;
 <<__Native("NoFCallBuiltin")>>
 function xdebug_call_function(): mixed;
 
+/**
+ * Returns whether code coverage has been started.
+ *
+ * @return bool - Returns whether code coverage is active.
+ */
 <<__Native>>
 function xdebug_code_coverage_started(): bool;
 
@@ -53,6 +58,12 @@ function xdebug_dump_superglobals(): void;
 <<__Native>>
 function xdebug_enable(): void;
 
+/**
+ * Returns a structure which contains information about which lines were
+ * executed in your script (including include files).
+ *
+ * @return array - Returns code coverage information
+ */
 <<__Native>>
 function xdebug_get_code_coverage(): array<string, array<int, int>>;
 
@@ -100,7 +111,23 @@ function xdebug_peak_memory_usage(): int;
 function xdebug_print_function_stack(string $message = 'user triggered',
                                      int $options = 0): void;
 
-<<__Native>>
+/**
+ * This function starts gathering the information for code coverage. The
+ * information that is collected consists of an two dimensional array with
+ * as primary index the executed filename and as secondary key the line
+ * number. The value in the elements represents how many times a line
+ * has been executed.
+ *
+ * Note that this is different from xdebug. Xdebug only records whether
+ * or not a line has been excuted, this implementation includes the number
+ * of times a line was executed.
+ *
+ * @param options - This is a bitmask that xdebug uses for options
+ *                  XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE. Neither of these
+ *                  options is supported in this implementation, and if provided
+ *                  a fatal error will be thrown.
+ */
+<<__Native("NoFCallBuiltin")>>
 function xdebug_start_code_coverage(int $options = 0): void;
 
 <<__Native>>
@@ -109,6 +136,14 @@ function xdebug_start_error_collection(): void;
 <<__Native>>
 function xdebug_start_trace(string $trace_file, int $options = 0): void;
 
+/**
+ * This function stops collecting information, the information in memory will
+ * be destroyed. If you pass "false" as argument, then the code coverage
+ * information will not be destroyed so that you can resume the gathering of
+ * information with the xdebug_start_code_coverage() function again.
+ *
+ * @param cleanup - If true, code coverage collected information is destroyed.
+ */
 <<__Native>>
 function xdebug_stop_code_coverage(bool $cleanup = true): void;
 

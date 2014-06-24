@@ -16,7 +16,10 @@
 */
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
+#include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -93,8 +96,10 @@ static Variant HHVM_FUNCTION(xdebug_call_function) {
   return String(fp->m_func->name()->data(), CopyString);
 }
 
-static bool HHVM_FUNCTION(xdebug_code_coverage_started)
-  XDEBUG_NOTIMPLEMENTED
+static bool HHVM_FUNCTION(xdebug_code_coverage_started) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  return ti->m_reqInjectionData.getCoverage();
+}
 
 static TypedValue* HHVM_FN(xdebug_debug_zval)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
@@ -111,8 +116,13 @@ static void HHVM_FUNCTION(xdebug_dump_superglobals)
 static void HHVM_FUNCTION(xdebug_enable)
   XDEBUG_NOTIMPLEMENTED
 
-static Array HHVM_FUNCTION(xdebug_get_code_coverage)
-  XDEBUG_NOTIMPLEMENTED
+static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  if (ti->m_reqInjectionData.getCoverage()) {
+    return ti->m_coverage->Report(false);
+  }
+  return Array::Create();
+}
 
 static Array HHVM_FUNCTION(xdebug_get_collected_errors,
                            bool clean /* = false */)
@@ -155,8 +165,26 @@ static void HHVM_FUNCTION(xdebug_print_function_stack,
                           int64_t options /* = 0 */)
   XDEBUG_NOTIMPLEMENTED
 
-static void HHVM_FUNCTION(xdebug_start_code_coverage, int64_t options /* = 0 */)
-  XDEBUG_NOTIMPLEMENTED
+static void HHVM_FUNCTION(xdebug_start_code_coverage,
+                          int64_t options /* = 0 */) {
+  // XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE not supported right now primarily
+  // because the internal CodeCoverage class does support either unexecuted line
+  // tracking or dead code analysis
+  if (options != 0) {
+    raise_error("XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE constants are not "
+                "currently supported.");
+    return;
+  }
+
+  // If we get here, turn on coverage
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  ti->m_reqInjectionData.setCoverage(true);
+  if (g_context->isNested()) {
+    raise_notice("Calling xdebug_start_code_coverage from a nested VM instance "
+                 "may cause unpredicable results");
+  }
+  throw VMSwitchModeBuiltin();
+}
 
 static void HHVM_FUNCTION(xdebug_start_error_collection)
   XDEBUG_NOTIMPLEMENTED
@@ -166,8 +194,14 @@ static void HHVM_FUNCTION(xdebug_start_trace,
                           int64_t options /* = 0 */)
   XDEBUG_NOTIMPLEMENTED
 
-static void HHVM_FUNCTION(xdebug_stop_code_coverage, bool cleanup /* = true */)
-  XDEBUG_NOTIMPLEMENTED
+static void HHVM_FUNCTION(xdebug_stop_code_coverage,
+                          bool cleanup /* = true */) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  ti->m_reqInjectionData.setCoverage(false);
+  if (cleanup) {
+    ti->m_coverage->Reset();
+  }
+}
 
 static void HHVM_FUNCTION(xdebug_stop_error_collection)
   XDEBUG_NOTIMPLEMENTED
@@ -182,6 +216,9 @@ static TypedValue* HHVM_FN(xdebug_var_dump)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
 
 ///////////////////////////////////////////////////////////////////////////////
+
+static const StaticString s_XDEBUG_CC_UNUSED("XDEBUG_CC_UNUSED");
+static const StaticString s_XDEBUG_CC_DEAD_CODE("XDEBUG_CC_DEAD_CODE");
 
 void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
   Hdf hdf = xdebug_hdf[XDEBUG_NAME];
@@ -210,7 +247,12 @@ void XDebugExtension::moduleInit() {
   if (!Enable) {
     return;
   }
-
+  Native::registerConstant<KindOfInt64>(
+    s_XDEBUG_CC_UNUSED.get(), k_XDEBUG_CC_UNUSED
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_XDEBUG_CC_DEAD_CODE.get(), k_XDEBUG_CC_DEAD_CODE
+  );
   HHVM_FE(xdebug_break);
   HHVM_FE(xdebug_call_class);
   HHVM_FE(xdebug_call_file);

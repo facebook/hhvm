@@ -55,6 +55,7 @@ namespace HPHP {
 class Extension : public IDebuggable {
 public:
   static bool IsLoaded(const String& name);
+  static bool IsSystemlibPath(const std::string& path);
   static Array GetLoadedExtensions();
   static Extension *GetExtension(const String& name);
 

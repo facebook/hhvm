@@ -138,8 +138,8 @@
     test_root: ../hhvm/quick_interp
   idiorm:
     url: https://github.com/j4mie/idiorm.git
-    branch: v1.4.1
-    commit: 11e964157a6a2c6128a0546673ad5e99ac1a62cd
+    branch: v1.5.1
+    commit: b0922d8719a94e3a0e0e4a0ca3876f4f91475dcf
     install_root: idiorm
     test_root: idiorm
   json_schema:
@@ -365,8 +365,8 @@
     test_root: mustache
   paris:
     url: https://github.com/j4mie/paris.git
-    branch: v1.4.2
-    commit: dd1a87544127874dce367f0252dcc81246dfc83b
+    branch: v1.5.2
+    commit: 1f7ec8a220f312a5282606910c22ec2c03cc1280
     install_root: paris
     test_root: paris
   pear:

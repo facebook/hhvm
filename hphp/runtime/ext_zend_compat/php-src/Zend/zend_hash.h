@@ -27,6 +27,7 @@
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/proxy-array.h"
+#include "hphp/runtime/base/array-iterator.h"
 
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
@@ -99,7 +100,7 @@ typedef struct _zend_hash_key {
 typedef zend_bool (*merge_checker_func_t)(HashTable *target_ht, void *source_data, zend_hash_key *hash_key, void *pParam);
 
 #ifdef HHVM
-typedef int32_t HashPosition;
+typedef HPHP::MArrayIter HashPosition;
 #else
 typedef Bucket* HashPosition;
 #endif

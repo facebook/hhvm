@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/parser/parser.h"
@@ -157,6 +158,12 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
   ret.set(s_classes,   Array::Create());
 
   return ret;
+}
+
+// TODO(ptc) This is horse--...play and should go somewhere else
+Array HHVM_FUNCTION(hphp_miarray) {
+  auto ad = MixedArray::MakeReserveIntMap(10);
+  return Array::attach(ad);
 }
 
 int get_modifiers(Attr attrs, bool cls) {
@@ -1257,6 +1264,7 @@ class ReflectionExtension : public Extension {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);
     HHVM_FE(hphp_get_extension_info);
+    HHVM_FE(hphp_miarray);
     HHVM_FE(hphp_get_original_class_name);
     HHVM_FE(hphp_get_property);
     HHVM_FE(hphp_get_static_property);

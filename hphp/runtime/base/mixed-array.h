@@ -57,7 +57,7 @@ public:
      * read or write the _count field! */
     union {
       int64_t ikey;
-      StringData* key;
+      StringData* skey;
     };
     // We store values here, but also some information local to this array:
     // data.m_aux.u_hash contains either 0 (for an int key) or a string
@@ -78,14 +78,18 @@ public:
       return data.hash();
     }
 
+    int32_t probe() const {
+      return hasIntKey() ? ikey : hash();
+    }
+
     void setStaticKey(StringData* k, strhash_t h) {
       assert(k->isStatic());
-      key = k;
+      skey = k;
       data.hash() = h | STRHASH_MSB;
     }
 
     void setStrKey(StringData* k, strhash_t h) {
-      key = k;
+      skey = k;
       data.hash() = h | STRHASH_MSB;
       k->incRefCount();
     }
@@ -122,6 +126,15 @@ public:
   static ArrayData* MakeReserveMixed(uint32_t capacity);
 
   /*
+   * Allocate a new, empty, request-local array with the same mode as
+   * `other' and with enough space reserved for `capacity' members, or
+   * if `capacity' is zero, with the same capacity as `other'.
+   *
+   * The returned array is already incref'd.
+   */
+  static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
+
+  /*
    * Allocate a packed MixedArray.  This is an array in packed
    * mode, containing `size' values, in the reverse order of the
    * `values' array.
@@ -134,6 +147,14 @@ public:
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
   static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
+
+  /*
+   * Allocate a new, empty, request-local array in int map mode, with
+   * enough space reserved for `capacity' members.
+   *
+   * The returned array is already incref'd.
+   */
+  static ArrayData* MakeReserveIntMap(uint32_t capacity);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -216,6 +237,7 @@ public:
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
+  // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr);
@@ -256,21 +278,50 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
+
+  template <ArrayKind aKind>
+  static const TypedValue* NvGetStrImpl(const ArrayData*, const StringData* k);
+  template <ArrayKind aKind>
+  static bool ExistsStrImpl(const ArrayData*, const StringData* k);
+  template <ArrayKind aKind>
+  static ArrayData* LvalStrImpl(ArrayData* ad, StringData* k, Variant*& ret,
+                                bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* LvalNewImpl(ArrayData*, Variant*& ret, bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* SetStrImpl(ArrayData*, StringData* k, Cell v, bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* SetRefIntImpl(ArrayData* ad, int64_t k, Variant& v,
+                                  bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* SetRefStrImpl(ArrayData* ad, StringData* k, Variant& v,
+                              bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* AddStrImpl(ArrayData*, StringData* k, Cell v, bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* RemoveStrImpl(ArrayData*, const StringData* k, bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* AppendImpl(ArrayData*, const Variant& v, bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* AppendRefImpl(ArrayData*, Variant& v, bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* AppendWithRefImpl(ArrayData*, const Variant& v, bool copy);
+  template <ArrayData::ArrayKind aKind>
+  static ArrayData* PopImpl(ArrayData* ad, Variant& value);
+  template <ArrayData::ArrayKind aKind>
+  static ArrayData* DequeueImpl(ArrayData* adInput, Variant& value);
+
+  template <ArrayKind aKind>
+  static void RenumberImpl(ArrayData*);
+  template <ArrayKind aKind>
+  static bool AdvanceMArrayIterImpl(ArrayData*, MArrayIter& fp);
+
 private:
   MixedArray* copyMixed() const;
   MixedArray* copyMixedAndResizeIfNeeded() const;
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
+
 public:
-
-  /**
-   * Main helper for AddNewElemC.  The semantics are slightly different from
-   * other helpers, but tuned for the opcode.  The value to set is passed by
-   * value; the caller has incref'd it if necessary, and this call *moves* it
-   * to its location in the array (caller must not decref).  If the value cannot
-   * be stored in the array, this helper decref's it.
-   */
-  static ArrayData* AddNewElemC(ArrayData* a, TypedValue value);
-
   // Elm's data.m_type == KindOfInvalid for deleted slots.
   static bool isTombstone(DataType t) {
     assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
@@ -291,6 +342,8 @@ public:
   static const uint32_t SmallHashSize = 1 << MinLgTableSize;
   static const uint32_t SmallMask = SmallHashSize - 1;
   static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+
+  static const uint32_t MaxLgTableSize = 32;
   static const uint64_t MaxHashSize = uint64_t(1) << 32;
   static const uint32_t MaxMask = MaxHashSize - 1;
   static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
@@ -318,6 +371,9 @@ private:
   friend struct MemoryProfile;
   friend struct EmptyArray;
   friend struct PackedArray;
+  friend class BaseMap;
+  friend class c_Map;
+  friend class c_ImmMap;
   enum class ClonePacked {};
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
@@ -329,6 +385,26 @@ public:
   static MixedArray* asMixed(ArrayData* ad);
   static const MixedArray* asMixed(const ArrayData* ad);
 
+  enum class Reason : uint8_t {
+    kForeachByRef,
+    kPrepend,
+    kPop,
+    kTakeByRef,
+    kSetRef,
+    kAppendRef,
+    kAppend,
+    kNvGetStr,
+    kExistsStr,
+    kSetStr,
+    kRemoveStr,
+    kDequeue,
+    kSort,
+    kNumericString,
+    kRenumber,
+  };
+  static void downgradeAndWarn(ArrayData* ad, const Reason r);
+  static void warnUsage(const Reason r);
+
 private:
   static void getElmKey(const Elm& e, TypedValue* out);
 
@@ -337,8 +413,8 @@ private:
 
   template<class CopyKeyValue>
   static MixedArray* CopyMixed(const MixedArray& other,
-                              AllocMode,
-                              CopyKeyValue);
+                               AllocMode,
+                               CopyKeyValue);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
 
   MixedArray() = delete;
@@ -429,7 +505,14 @@ private:
   ArrayData* zAppendImpl(RefData* data, int64_t* key_ptr);
 
   void adjustMArrayIter(ssize_t pos);
-  void erase(ssize_t pos);
+  void eraseNoCompact(ssize_t pos);
+  void erase(ssize_t pos) {
+    eraseNoCompact(pos);
+    if (m_size < m_used / 2) {
+      // Compact in order to keep elms from being overly sparse.
+      compact(false);
+    }
+  }
 
   MixedArray* copyImpl(MixedArray* target) const;
 
@@ -465,7 +548,7 @@ private:
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
    */
-  static MixedArray* Grow(MixedArray* old);
+  static MixedArray* Grow(MixedArray* old, uint32_t newCap, uint32_t newMask);
   static MixedArray* GrowPacked(MixedArray* old);
 
   /**
@@ -506,6 +589,7 @@ private:
   }
 
   bool isZombie() const { return m_used + 1 == 0; }
+  void setZombie() { m_used = -uint32_t{1}; }
 
 private:
   // Some of these are packed into qword-sized unions so we can
@@ -518,13 +602,8 @@ private:
     };
     uint64_t m_capAndUsed;
   };
-  union {
-    struct {
-      uint32_t m_tableMask; // Bitmask used when indexing into the hash table.
-      uint32_t m_hLoad;     // Hash table load (# of non-empty slots).
-    };
-    uint64_t m_maskAndLoad;
-  };
+  uint32_t m_tableMask;     // Bitmask used when indexing into the hash table.
+  UNUSED uint32_t m_unused2;
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 

@@ -116,7 +116,9 @@ let declare_file fn content =
   try
     Pos.file := fn ;
     Autocomplete.auto_complete := false;
-    let is_hh_file, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     let is_php = not is_hh_file in
     if is_hh_file
     then begin
@@ -155,7 +157,9 @@ let hh_check ?(check_mode=true) fn =
   Errors.try_
     begin fun () ->
 (*    let builtins = Parser.program lexer (Lexing.from_string Ast.builtins) in *)
-    let _, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     let ast = (*builtins @ *) ast in
     Parser_heap.ParserHeap.add fn ast;
     let funs, classes, typedefs, consts = make_funs_classes ast in
@@ -236,13 +240,18 @@ let autocomplete_result_to_json res =
            ]
 
 let hh_auto_complete fn =
+  AutocompleteService.attach_hooks();
   Autocomplete.auto_complete := true;
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.argument_global_type := None;
+  Autocomplete.auto_complete_pos := None;
+  Autocomplete.auto_complete_vars := SMap.empty;
   let content = Hashtbl.find files fn in
   try
-    let _, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -254,6 +263,7 @@ let hh_auto_complete fn =
           let nenv = Naming.empty in
           let tenv = Typing_env.empty fn in
           let c = Naming.class_ nenv c in
+          Typing_decl.class_decl c;
           let res = Typing.class_def tenv (snd c.Nast.c_name) c in
           res
       | _ -> ()
@@ -275,11 +285,15 @@ let hh_auto_complete fn =
         (fun _ res acc -> (autocomplete_result_to_json res) :: acc)
         result
         [] in
+    AutocompleteService.detach_hooks();
+    Autocomplete.auto_complete := false;
     output_json (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;
                           "internal_error",  JBool false;
                         ])
   with _ ->
+    AutocompleteService.detach_hooks();
+    Autocomplete.auto_complete := false;
     output_json (JAssoc [ "internal_error", JBool true;
                         ])
 
@@ -289,7 +303,9 @@ let hh_get_method_at_position fn line char =
   Find_refs.find_method_at_cursor_target := Some (line, char);
   let content = Hashtbl.find files fn in
   try
-    let _, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->

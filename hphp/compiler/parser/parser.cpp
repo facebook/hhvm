@@ -84,7 +84,7 @@
 #include "hphp/compiler/statement/goto_statement.h"
 #include "hphp/compiler/statement/label_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
-#include "hphp/compiler/statement/trait_require_statement.h"
+#include "hphp/compiler/statement/class_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
@@ -181,7 +181,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
       m_closureGenerator(false), m_nsState(SeenNothing),
       m_nsAliasTable(getAutoAliasedClasses(), [&] { return isAutoAliasOn(); }) {
-  string md5str = Eval::FileRepository::unitMd5(scanner.getMd5());
+  string md5str = FileRepository::unitMd5(scanner.getMd5());
   MD5 md5 = MD5(md5str.c_str());
 
   m_file = FileScopePtr(new FileScope(m_fileName, fileSize, md5));
@@ -958,6 +958,7 @@ void Parser::checkFunctionContext(string funcName,
 
   // let async modifier be mandatory
   if (funcContext.isAsync && !modifiers->isAsync()) {
+    invalidAwait();
     PARSE_ERROR("Function '%s' contains 'await' but is not declared as async.",
                 funcName.c_str());
   }
@@ -967,8 +968,10 @@ void Parser::checkFunctionContext(string funcName,
                 funcName.c_str());
   }
 
-  if (modifiers->isAsync() && funcContext.isGenerator) {
-    PARSE_ERROR("'yield' is not allowed in async functions.");
+  if (modifiers->isAsync() && !canBeAsyncOrGenerator(funcName, m_clsName)) {
+    PARSE_ERROR("cannot declare constructors, destructors, and "
+                    "magic methods such as '%s' as async",
+                funcName.c_str());
   }
 }
 
@@ -1297,8 +1300,8 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
   out->exp = expList;
 }
 
-void Parser::onTraitRequire(Token &out, Token &name, bool isExtends) {
-  out->stmt = NEW_STMT(TraitRequireStatement, name->text(), isExtends);
+void Parser::onClassRequire(Token &out, Token &name, bool isExtends) {
+  out->stmt = NEW_STMT(ClassRequireStatement, name->text(), isExtends);
 }
 
 void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {
@@ -1656,11 +1659,6 @@ bool Parser::setIsGenerator() {
     PARSE_ERROR("Generators cannot return values using \"return\"");
     return false;
   }
-  if (fc.isAsync) {
-    invalidYield();
-    PARSE_ERROR("'yield' is not allowed in async functions.");
-    return false;
-  }
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
     invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
@@ -1707,18 +1705,13 @@ bool Parser::setIsAsync() {
     return false;
   }
 
-  FunctionContext& fc = m_funcContexts.back();
-  if (fc.isGenerator) {
-    invalidAwait();
-    PARSE_ERROR("'await' is not allowed in generators.");
-    return false;
-  }
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
     invalidAwait();
     PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
                     "magic methods.");
   }
 
+  FunctionContext& fc = m_funcContexts.back();
   fc.isAsync = true;
   return true;
 }

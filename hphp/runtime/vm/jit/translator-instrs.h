@@ -161,9 +161,12 @@
   CASE(MIterFree) \
   CASE(Mod) \
   CASE(Pow) \
+  CASE(NameA) \
   CASE(NativeImpl) \
   CASE(NewArray) \
   CASE(NewCol) \
+  CASE(NewLikeArrayL) \
+  CASE(NewMixedArray) \
   CASE(NewPackedArray) \
   CASE(Nop) \
   CASE(Not) \

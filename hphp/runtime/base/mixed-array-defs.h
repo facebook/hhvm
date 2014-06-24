@@ -27,6 +27,25 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Return the payload from a ArrayData* that is kMixedKind.
+ */
+ALWAYS_INLINE
+MixedArray::Elm* mixedData(const MixedArray* arr) {
+  return reinterpret_cast<MixedArray::Elm*>(
+    const_cast<MixedArray*>(arr) + 1
+  );
+}
+
+ALWAYS_INLINE
+MixedArray* getArrayFromMixedData(const MixedArray::Elm* elms) {
+  auto* a = const_cast<MixedArray*>(
+    reinterpret_cast<const MixedArray*>(elms) - 1
+  );
+  assert(mixedData(a) == elms);
+  return a;
+}
+
 inline ArrayData::~ArrayData() {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(this);
@@ -45,8 +64,7 @@ ALWAYS_INLINE
 bool MixedArray::isFull() const {
   assert(!isPacked());
   assert(m_used <= m_cap);
-  assert(m_hLoad <= m_cap);
-  return m_used == m_cap || m_hLoad == m_cap;
+  return m_used == m_cap;
 }
 
 inline void MixedArray::initHash(int32_t* hash, size_t tableSize) {
@@ -108,7 +126,7 @@ void MixedArray::getElmKey(const Elm& e, TypedValue* out) {
     out->m_type = KindOfInt64;
     return;
   }
-  auto str = e.key;
+  auto str = e.skey;
   out->m_data.pstr = str;
   out->m_type = KindOfString;
   str->incRefCount();
@@ -146,9 +164,8 @@ void MixedArray::dupArrayElmWithRef(ssize_t pos,
 ALWAYS_INLINE
 MixedArray::Elm& MixedArray::allocElm(int32_t* ei) {
   assert(!validPos(*ei) && !isFull());
-  assert(m_size != 0 || m_used == 0);
+  assert(m_size == 0 || m_used != 0);
   ++m_size;
-  m_hLoad += (*ei == Empty);
   size_t i = m_used;
   (*ei) = i;
   m_used = i + 1;
@@ -157,14 +174,14 @@ MixedArray::Elm& MixedArray::allocElm(int32_t* ei) {
 }
 
 inline MixedArray* MixedArray::asMixed(ArrayData* ad) {
-  assert(ad->kind() == kMixedKind);
+  assert(ad->isMixed());
   auto a = static_cast<MixedArray*>(ad);
   assert(a->checkInvariants());
   return a;
 }
 
 inline const MixedArray* MixedArray::asMixed(const ArrayData* ad) {
-  assert(ad->kind() == kMixedKind);
+  assert(ad->isMixed());
   auto a = static_cast<const MixedArray*>(ad);
   assert(a->checkInvariants());
   return a;
@@ -241,12 +258,19 @@ ArrayData* MixedArray::addLvalImpl(K k, Variant*& ret) {
 //////////////////////////////////////////////////////////////////////
 
 struct MixedArray::ValIter {
+
+  ALWAYS_INLINE
+  static bool isMixed(const ArrayData::ArrayKind& kind) {
+    return kind == ArrayData::kMixedKind ||
+      kind == ArrayData::kIntMapKind;
+  }
+
   explicit ValIter(ArrayData* arr)
     : m_arr(arr)
     , m_kind(arr->m_kind)
   {
-    assert(m_kind == kMixedKind || m_kind == kPackedKind);
-    if (m_kind == kMixedKind) {
+    assert(isMixed(m_kind) || m_kind == kPackedKind);
+    if (isMixed(m_kind)) {
       m_iterMixed = asMixed(arr)->data();
       m_stopMixed = m_iterMixed + asMixed(arr)->m_used;
      } else {
@@ -259,8 +283,8 @@ struct MixedArray::ValIter {
      : m_arr(arr)
      , m_kind(arr->m_kind)
    {
-     assert(m_kind == kMixedKind || m_kind == kPackedKind);
-     if (m_kind == kMixedKind) {
+     assert(isMixed(m_kind) || m_kind == kPackedKind);
+     if (isMixed(m_kind)) {
        m_iterMixed = asMixed(arr)->data() + start_pos;
        m_stopMixed = asMixed(arr)->data() + asMixed(arr)->m_used;
        assert(m_iterMixed <= m_stopMixed);
@@ -272,22 +296,22 @@ struct MixedArray::ValIter {
    }
 
    TypedValue* current() const {
-     return UNLIKELY(m_kind == kMixedKind) ? &currentElm()->data
-                                           : m_iterPacked;
+     return UNLIKELY(isMixed(m_kind)) ? &currentElm()->data
+                                      : m_iterPacked;
    }
 
    Elm* currentElm() const {
-     assert(m_kind == kMixedKind);
+     assert(isMixed(m_kind));
      return m_iterMixed;
    }
 
    bool empty() const {
-     return m_kind == kMixedKind ? m_iterMixed == m_stopMixed
-                                 : m_iterPacked == m_stopPacked;
+     return isMixed(m_kind) ? m_iterMixed == m_stopMixed
+                            : m_iterPacked == m_stopPacked;
    }
 
    void advance() {
-     if (UNLIKELY(m_kind == kMixedKind)) {
+     if (UNLIKELY(isMixed(m_kind))) {
        do {
          ++m_iterMixed;
        } while (!empty() && MixedArray::isTombstone(m_iterMixed->data.m_type));
@@ -297,7 +321,7 @@ struct MixedArray::ValIter {
   }
 
   ssize_t currentPos() const {
-    if (m_kind == kMixedKind) return m_iterMixed - asMixed(m_arr)->data();
+    if (isMixed(m_kind)) return m_iterMixed - asMixed(m_arr)->data();
     return m_iterPacked - reinterpret_cast<TypedValue*>(m_arr + 1);
   }
 

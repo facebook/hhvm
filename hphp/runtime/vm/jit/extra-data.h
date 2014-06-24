@@ -232,6 +232,39 @@ struct FPushCufData : IRExtraData {
 };
 
 /*
+ * Information for REQ_RETRANSLATE stubs.
+ */
+struct ReqRetranslateData : IRExtraData {
+  TransFlags trflags;
+
+  explicit ReqRetranslateData(TransFlags trflags)
+    : trflags(trflags)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(trflags.packed);
+  }
+};
+
+/*
+ * Information for REQ_BIND_JMP stubs.
+ */
+struct ReqBindJmpData : IRExtraData {
+  Offset offset;
+  TransFlags trflags;
+
+  explicit ReqBindJmpData(const Offset& offset,
+                          TransFlags trflags = TransFlags{})
+    : offset(offset)
+    , trflags(trflags)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(offset, ',', trflags.packed);
+  }
+};
+
+/*
  * Information for the REQ_BIND_JMPCC stubs we create when a tracelet
  * ends with conditional jumps.
  */
@@ -249,9 +282,10 @@ struct ReqBindJccData : IRExtraData {
  */
 struct SideExitJccData : IRExtraData {
   Offset taken;
+  TransFlags trflags;
 
   std::string show() const {
-    return folly::to<std::string>(taken);
+    return folly::to<std::string>(taken, ',', trflags.packed);
   }
 };
 
@@ -315,15 +349,6 @@ struct StackOffset : IRExtraData {
   size_t cseHash() const { return std::hash<int32_t>()(offset); }
 
   int32_t offset;
-};
-
-/*
- * Bytecode offsets.
- */
-struct BCOffset : IRExtraData {
-  explicit BCOffset(Offset offset) : offset(offset) {}
-  std::string show() const { return folly::to<std::string>(offset); }
-  Offset offset;
 };
 
 struct ProfileStrData : IRExtraData {
@@ -833,7 +858,8 @@ X(LdStack,                      StackOffset);
 X(LdStackAddr,                  StackOffset);
 X(DecRefStack,                  StackOffset);
 X(DefInlineFP,                  DefInlineFPData);
-X(ReqBindJmp,                   BCOffset);
+X(ReqRetranslate,               ReqRetranslateData);
+X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslateOpt,            ReqRetransOptData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);

@@ -34,7 +34,6 @@
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 
@@ -258,7 +257,6 @@ public:
   bool profileSrcKey(const SrcKey& sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  Translator::TranslateResult translateTracelet(Tracelet& t);
   void traceCodeGen();
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
 
@@ -290,7 +288,8 @@ private:
   /*
    * Service request handlers.
    */
-  TCA bindJmp(TCA toSmash, SrcKey dest, JIT::ServiceRequest req, bool& smashed);
+  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req,
+              TransFlags trflags, bool& smashed);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
                      bool toTake,
@@ -306,14 +305,6 @@ private:
    * Emit trampoline to native C++ code.
    */
   TCA emitNativeTrampoline(TCA helperAddress);
-
-  /*
-   * Generate code for tracelet entry
-   */
-  void emitGuardChecks(SrcKey, const ChangeMap&,
-    const ChangeMap&, const RefDeps&, SrcRec&);
-  void emitResolvedDeps(const ChangeMap& resolvedDeps);
-  void checkRefs(SrcKey, const RefDeps&, SrcRec&);
 
   bool shouldTranslate() const {
     return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage;
@@ -422,8 +413,6 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
 PropInfo getFinalPropertyOffset(const NormalizedInstruction&,
                                 Class* contextClass,
                                 const MInstrInfo&);
-
-void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
 
 // Both emitIncStat()s push/pop flags but don't clobber any registers.
 extern void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,

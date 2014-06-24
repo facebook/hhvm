@@ -28,14 +28,11 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP {
+namespace HPHP { namespace JIT {
 
-namespace JIT {
-struct Tracelet;
 struct MCGenerator;
-}
-
-namespace JIT {
+struct ProfData;
+struct TransCFG;
 
 using boost::container::flat_map;
 using boost::container::flat_multimap;
@@ -373,8 +370,7 @@ struct RegionContext::PreLiveAR {
 /*
  * Select a compilation region corresponding to the given context.
  * The shape of the region selected is controlled by
- * RuntimeOption::EvalJitRegionSelector.  If the specified shape is
- * 'legacy', then the input argument t is used to build the region.
+ * RuntimeOption::EvalJitRegionSelector.
  *
  * This function may return nullptr.
  *
@@ -382,10 +378,7 @@ struct RegionContext::PreLiveAR {
  * returning nullptr causes it to use the current level 0 tracelet
  * analyzer.  Eventually we'd like this to completely replace analyze.
  */
-using TraceletFn = std::function<std::unique_ptr<Tracelet>()>;
-RegionDescPtr selectRegion(const RegionContext& context,
-                           TraceletFn tlet,
-                           TransKind kind);
+RegionDescPtr selectRegion(const RegionContext& context, TransKind kind);
 
 /*
  * Select a compilation region based on profiling information.  This
@@ -403,11 +396,24 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
                              bool profiling);
 
 /*
- * Create a compilation region corresponding to a tracelet created by
- * the old analyze() framework.
+ * Select the hottest trace beginning with triggerId.
  */
-RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const Tracelet& tlet);
+RegionDescPtr selectHotTrace(TransID triggerId,
+                             const ProfData* profData,
+                             TransCFG& cfg,
+                             TransIDSet& selectedSet,
+                             TransIDVec* selectedVec = nullptr);
+
+/*
+ * Create a region, beginning with triggerId, that includes as much of
+ * the TransCFG as possible.  Excludes multiple translations of the
+ * same SrcKey.
+ */
+RegionDescPtr selectWholeCFG(TransID triggerId,
+                             const ProfData* profData,
+                             TransCFG& cfg,
+                             TransIDSet& selectedSet,
+                             TransIDVec* selectedVec = nullptr);
 
 /*
  * Checks whether the type predictions at the beginning of block
@@ -425,12 +431,6 @@ void regionizeFunc(const Func*  func,
                    RegionVec&   regions);
 
 /*
- * Compare the two regions. If they differ in any way other than a being longer
- * than b, trace both regions.
- */
-void diffRegions(const RegionDesc& a, const RegionDesc& b);
-
-/*
  * Functions to map BlockIds to the TransIDs used when the block was
  * profiled.
  */
@@ -442,6 +442,7 @@ TransID getTransId(RegionDesc::BlockId blockId);
  */
 std::string show(RegionDesc::Location);
 std::string show(RegionDesc::TypePred);
+std::string show(const PostConditions&);
 std::string show(const RegionDesc::ReffinessPred&);
 std::string show(RegionContext::LiveType);
 std::string show(RegionContext::PreLiveAR);

@@ -1370,8 +1370,7 @@ Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_runni
   return result;
 }
 
-/* Fallback implementation of curl_multi_select() for
- * libcurl < 7.28.0 without FB's curl_multi_select() patch
+/* Fallback implementation of curl_multi_select()
  *
  * This allows the OSS build to work with older package
  * versions of libcurl, but will fail with file descriptors
@@ -1413,7 +1412,7 @@ static void hphp_curl_multi_select(CURLM *mh, int timeout_ms, int *ret) {
 #  define curl_multi_select_func hphp_curl_multi_select
 # endif
 #else
-#define curl_multi_select_func curl_multi_select
+#define curl_multi_select_func(mh, tm, ret) curl_multi_wait((mh), nullptr, 0, (tm), (ret))
 #endif
 
 Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,

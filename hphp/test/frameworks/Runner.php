@@ -17,6 +17,9 @@ class Runner {
   private string $fatal_information = "";
   private string $diff_information = "";
   private string $stat_information = "";
+  // Each PHPUnit process gets its' own tempdir to avoid race conditions
+  // between multiple runs
+  private ?string $temp_dir;
 
   private array<resource> $pipes = [];
   private ?resource $process = null;
@@ -183,6 +186,14 @@ class Runner {
 
     $this->test_information .= $status.PHP_EOL;
 
+    $fbmake_name = fbmake_test_name($this->framework, $test);
+    fbmake_json(Map {'op' => 'start', 'test' => $fbmake_name});
+    fbmake_json(
+      (Map {
+        'op' => 'test_done',
+        'test' => $fbmake_name,
+      })->setAll(fbmake_result_json($this->framework, $test, $status))
+    );
     $statuses = $this->framework->getCurrentTestStatuses();
 
     if ($statuses !== null &&
@@ -408,6 +419,12 @@ class Runner {
       $env = array_merge($env,
                          nullthrows($this->framework->getEnvVars())->toArray());
     }
+    $temp_dir = sys_get_temp_dir().'/hhvm_oss_'.
+      uniqid($this->framework->getName(), true);
+    mkdir($temp_dir);
+    $this->temp_dir = $temp_dir;
+    $env['TMPDIR'] = $temp_dir;
+
     $this->process = proc_open($this->actual_test_command, $descriptorspec,
                                $this->pipes, $this->framework->getTestPath(),
                                $env);
@@ -418,6 +435,17 @@ class Runner {
     fclose($this->pipes[0]);
     fclose($this->pipes[1]);
     fclose($this->pipes[2]);
+
+    $temp_dir = $this->temp_dir;
+    $this->temp_dir = null;
+    if ($temp_dir !== null) {
+      if (!file_exists($temp_dir)) {
+        throw new Exception(
+          'Temp directory already deleted in test '.$this->name
+        );
+      }
+      remove_dir_recursive($temp_dir);
+    }
 
     return proc_close($this->process) === -1 ? -1 : 0;
   }

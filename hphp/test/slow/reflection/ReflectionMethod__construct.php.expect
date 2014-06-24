@@ -1,0 +1,9 @@
+ReflectionException: Method ::noSuchMethod() does not exist
+ReflectionException: Method Foo::noSuchMethod() does not exist
+ReflectionException: Method Foo::noSuchMethod() does not exist
+bool(true)
+bool(true)
+string(6) "method"
+string(6) "method"
+string(6) "method"
+ReflectionException: Method Foo::() does not exist

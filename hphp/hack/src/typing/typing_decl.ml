@@ -64,9 +64,7 @@ let check_extend_kind env parent_pos parent_kind child_pos child_kind c =
       (* What is dissallowed *)
       let parent = Ast.string_of_class_kind parent_kind in
       let child  = Ast.string_of_class_kind child_kind in
-      let msg1 = child_pos, child^" cannot extend "^parent in
-      let msg2 = parent_pos, "This is "^parent in
-      Errors.add_list [msg1; msg2]
+      Errors.wrong_extend_kind child_pos child parent_pos parent
   | _ -> ()
 
 
@@ -126,9 +124,6 @@ let get_class_parents_and_traits env class_nast =
     List.fold_left (get_class_parent_or_trait class_nast) acc class_nast.c_uses in
   env, parents, is_complete
 
-let error_trait_req pos req =
-  Errors.add pos ("Failure to satisfy trait requirement: "^(Utils.strip_ns req))
-
 (* for non-traits, check that each used trait's requirements have been
  * satisfied; for traits, accumulate the requirements so that we can
  * successfully check the bodies of trait methods *)
@@ -143,7 +138,7 @@ let merge_parent_trait_reqs class_nast impls
     | Some parent_type when (class_nast.c_kind != Ast.Ctrait) ->
       SSet.iter begin fun req ->
         if SMap.mem req impls then () (* requirement satisfied *)
-        else error_trait_req parent_pos req
+        else Errors.trait_req parent_pos req
       end parent_type.tc_req_ancestors;
       env, req_ancestors, req_ancestors_extends
     | Some parent_type ->
@@ -155,7 +150,7 @@ let merge_parent_trait_reqs class_nast impls
 let get_trait_req class_nast impls (env, requirements, req_extends) hint =
   let parent_pos, req = unpack_hint hint in
   if class_nast.c_kind != Ast.Ctrait && not (SMap.mem req impls) then
-    error_trait_req parent_pos req;
+    Errors.trait_req parent_pos req;
   let requirements = SSet.add req requirements in
   let req_extends = SSet.add req req_extends in
   let env, req_type = Env.get_class_dep env req in
@@ -209,19 +204,11 @@ type class_env = {
     all_classes: SSet.t SMap.t;
   }
 
-let error_cyclic stack pos =
-  let stack = SSet.fold (fun x y -> (Utils.strip_ns x)^" "^y) stack "" in
-  Errors.add pos ("Cyclic class definition : "^stack)
-
-let error_final ~parent ~child =
-  Errors.add_list [child, "You cannot override this method";
-                   parent, "It was declared as final"]
-
 let check_if_cyclic class_env (pos, cid) =
   let stack = class_env.stack in
   let is_cyclic = SSet.mem cid stack in
   if is_cyclic
-  then error_cyclic stack pos;
+  then Errors.cyclic_class_def stack pos;
   is_cyclic
 
 let rec class_decl_if_missing_opt class_env = function
@@ -419,9 +406,7 @@ and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
     let static_position = Reason.to_pos reason_for_type in
     let dyn_method = SMap.find_unsafe method_name obj in
     let dyn_position = Reason.to_pos (fst dyn_method.ce_type) in
-    let msg_static = "The function "^method_name^" is static" in
-    let msg_dynamic = "It is defined as dynamic here" in
-    Errors.add_list [static_position, msg_static; dyn_position, msg_dynamic]
+    Errors.static_dynamic static_position dyn_position method_name
   end
   else ()
 
@@ -430,7 +415,7 @@ and constructor_decl env pcstr class_ =
     | None, Some cstr ->
         env, Some cstr
     | Some method_, Some { ce_final = true; ce_type = (r, _); _ } ->
-      error_final ~parent:(Reason.to_pos r) ~child:(fst method_.m_name);
+      Errors.override_final ~parent:(Reason.to_pos r) ~child:(fst method_.m_name);
       build_constructor env class_ method_
     | Some method_, _ ->
       build_constructor env class_ method_
@@ -444,6 +429,7 @@ and build_constructor env class_ method_ =
   let cstr = {
     ce_final = method_.m_final;
     ce_override = false ;
+    ce_synthesized = false;
     ce_visibility = vis;
     ce_type = ty;
     ce_origin = class_name;
@@ -479,23 +465,24 @@ and class_const_decl c (env, acc) (h, id, e) =
         )
       | Some h -> Typing_hint.hint env h
   in
-  let ce = { ce_final = true; ce_override = false;
+  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
              ce_visibility = Vpublic; ce_type = ty; ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add (snd id) ce acc in
   env, acc
 
-(* Every class, interface, and trait implicitly defines ::class to
+(* Every class, interface, and trait implicitly defines a ::class to
  * allow accessing its fully qualified name as a string *)
 and class_class_decl class_id =
   let pos, name = class_id in
   let reason = Reason.Rclass_class (pos, name) in
   {
-    ce_final      = false;
-    ce_override   = false;
-    ce_visibility = Vpublic;
-    ce_type       = (reason, Tprim Tstring);
-    ce_origin     = name;
+    ce_final       = false;
+    ce_override    = false;
+    ce_synthesized = true;
+    ce_visibility  = Vpublic;
+    ce_type        = (reason, Tprim Tstring);
+    ce_origin      = name;
   }
 
 and class_var_decl c (env, acc) cv =
@@ -506,7 +493,7 @@ and class_var_decl c (env, acc) cv =
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_override = false;
+  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
              ce_visibility = vis; ce_type = ty; ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add id ce acc in
@@ -519,7 +506,7 @@ and static_class_var_decl c (env, acc) cv =
       | Some ty -> Typing_hint.hint env ty in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_override = false;
+  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
              ce_visibility = vis; ce_type = ty; ce_origin = (snd c.c_name);
            }
   in
@@ -530,7 +517,7 @@ and static_class_var_decl c (env, acc) cv =
     | None
     | Some (_, Hmixed)
     | Some (_, Hoption _) -> ()
-    | _ -> Errors.add (fst cv.cv_id) "Please assign a value"
+    | _ -> Errors.missing_assign (fst cv.cv_id)
   end;
   env, acc
 
@@ -543,11 +530,11 @@ and method_decl c env m =
   let env, arity, params = Typing.make_params env true 0 m.m_params in
   let env, ret =
     match m.m_ret with
-    | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
-    | Some ret -> Typing_hint.hint env ret in
+      | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
+      | Some ret -> Typing_hint.hint env ret in
   let arity_max =
     if m.m_ddd then 1000 else
-    List.length m.m_params
+      List.length m.m_params
   in
   let env, tparams = lfold Typing.type_param env m.m_tparams in
   let ft = {
@@ -568,19 +555,15 @@ and method_check_override c m acc =
   let class_pos, class_id = c.c_name in
   let override = SMap.mem "Override" m.m_user_attributes in
   if m.m_visibility = Private && override then
-    Errors.add pos ((Utils.strip_ns class_id)^"::"^id
-               ^": combining private and override is nonsensical");
+    Errors.private_override pos class_id id;
   match SMap.get id acc with
     | Some { ce_final = is_final; ce_type = (r, _); _ } ->
       if is_final then
-        error_final ~parent:(Reason.to_pos r) ~child:pos;
+        Errors.override_final ~parent:(Reason.to_pos r) ~child:pos;
       false
     | None when override && c.c_kind = Ast.Ctrait -> true
     | None when override ->
-      Errors.add pos
-          ((Utils.strip_ns class_id)^"::"^id^"() should be an override; \
-           no non-private parent definition found \
-           or overridden parent is defined in non-<?hh code");
+      Errors.should_be_override pos class_id id;
       false
     | None -> false
 
@@ -592,10 +575,10 @@ and method_decl_acc c (env, acc) m =
     match SMap.get id acc, m.m_visibility with
       | Some { ce_visibility = Vprotected _ as parent_vis; _ }, Protected ->
         parent_vis
-    | _ -> visibility (snd c.c_name) m.m_visibility
+      | _ -> visibility (snd c.c_name) m.m_visibility
   in
   let ce = {
-    ce_final = m.m_final; ce_override = check_override;
+    ce_final = m.m_final; ce_override = check_override; ce_synthesized = false;
     ce_visibility = vis; ce_type = ty; ce_origin = snd (c.c_name);
   } in
   let acc = SMap.add id ce acc in
@@ -603,15 +586,8 @@ and method_decl_acc c (env, acc) m =
 
 and method_check_trait_overrides c id method_ce =
   if method_ce.ce_override then
-    let c_pos, c_name = c.c_name in
-    let err_msg =
-      ("Method "^(Utils.strip_ns c_name)^"::"^id^" is should be an override \
-        per the declaring trait; no non-private parent definition found \
-        or overridden parent is defined in non-<?hh code")
-    in Errors.add_list [
-      c_pos, err_msg;
-      (Reason.to_pos (fst method_ce.ce_type)), "Declaration of "^id^"() is here"
-    ]
+    Errors.override_per_trait
+      c.c_name id (Reason.to_pos (fst method_ce.ce_type))
 
 (*****************************************************************************)
 (* Dealing with typedefs *)

@@ -213,8 +213,8 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
         setupStepSuspend(fp, pc);
         removeLocationFilter();
       } else {
-        // Eager execution is supported only by async functions.
-        // We need to step over this opcode, then grab the created
+        // Eager execution in non-resumed mode is supported only by async
+        // functions. We need to step over this opcode, then grab the created
         // AsyncFunctionWaitHandle and setup stepping like we do for
         // OpAwait.
         assert(fp->func()->isAsyncFunction());

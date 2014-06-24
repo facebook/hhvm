@@ -20,12 +20,13 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
-#include "hphp/compiler/statement/trait_require_statement.h"
+#include "hphp/compiler/statement/class_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/hash.h"
 
@@ -485,7 +486,7 @@ public:
   void setPrevOpcode(Op op) { m_prevOpcode = op; }
   Op getPrevOpcode() const { return m_prevOpcode; }
   bool currentPositionIsReachable() {
-    return (m_ue.bcPos() == m_curFunc->base()
+    return (m_ue.bcPos() == m_curFunc->base
             || isJumpTarget(m_ue.bcPos())
             || (instrFlags(getPrevOpcode()) & TF) == 0);
   }

@@ -1035,6 +1035,15 @@ D:Arr = NewArray S0:ConstInt
 
   Allocate a new array with the expected capacity S0.
 
+D:Arr = NewMixedArray S0:ConstInt
+
+  Allocate a new array in mixed mode with the expected capacity S0.
+
+D:Arr = NewLikeArrayL S0:Arr S1:ConstInt
+
+  Allocate a new array in the same mode as S0 and with expected capacity S1,
+  unless S1 == 0, in which case the capacity is set to S0's size.
+
 D:Arr = NewPackedArray S0:ConstInt S1:StkPtr
 
   Allocate a new array by taking the top S0 elements off the stack given by S1.

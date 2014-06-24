@@ -97,7 +97,7 @@ let legacy_php_file_info = ref (fun fn ->
  * error_files is SSet.t of files that we failed to parse
  *)
 let parse check_mode (acc, errorl, error_files, php_files) fn =
-  let errorl', (is_hh_file, comments, ast) =
+  let errorl', {Parser_hack.is_hh_file; comments; ast} =
     Errors.do_ begin fun () -> 
       Parser_hack.from_file fn
     end

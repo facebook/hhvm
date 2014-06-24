@@ -131,9 +131,9 @@ and unify_ env r1 ty1 r2 ty2 =
         in
         if List.length argl1 <> List.length argl2
         then begin
-          Errors.add_list [p1, "This type has "^soi (List.length argl1)^
-                           " arguments";
-                   p2, "This one has "^soi (List.length argl2)];
+          let n1 = soi (List.length argl1) in
+          let n2 = soi (List.length argl2) in
+          Errors.type_arity_mismatch p1 n1 p2 n2;
           env, Tany
         end
         else
@@ -165,18 +165,14 @@ and unify_ env r1 ty1 r2 ty2 =
           let env, ty = unify env ty (r2, ty2) in
           env, snd ty
       | _ ->
-          (Errors.try_
+          (Errors.try_when
              (fun () -> TUtils.uerror r1 ty1 r2 ty2)
-             (fun l ->
+             ~when_: begin fun () ->
                match ty2 with
-               | Tapply ((_, y), _) when y = x ->
-                   let n = Utils.strip_ns (snd id) in
-                   let message1 = "Since "^n^" is not final" in
-                   let message2 = "this might not be a "^n in
-                   Errors.add_list
-                     (l @ [(fst id, message1); (Reason.to_pos r1, message2)])
-               | _ -> Errors.add_list l
-             )
+               | Tapply ((_, y), _) -> y = x
+               | _ -> false
+             end
+             ~do_:(fun error -> Errors.this_final id (Reason.to_pos r1) error)
           );
           env, Tany
         )
@@ -192,8 +188,9 @@ and unify_ env r1 ty1 r2 ty2 =
       then
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
-        Errors.add_list [p1, "This tuple has "^soi size1^" elements";
-                         p2, "This one has "^soi size2^" elements"];
+        let n1 = soi size1 in
+        let n2 = soi size2 in
+        Errors.tuple_arity_mismatch p1 n1 p2 n2;
         env, Tany
       else
         let env, tyl = lfold2 unify env tyl1 tyl2 in
@@ -205,8 +202,7 @@ and unify_ env r1 ty1 r2 ty2 =
   | Tanon (mand_arg, total_arg, id), Tfun ft ->
       if not (IMap.mem id env.Env.genv.Env.anons)
       then begin
-        Errors.add (Reason.to_pos r1)
-          "recursive call to an anonymous function";
+        Errors.anonymous_recursive_call (Reason.to_pos r1);
         env, Tany
       end
       else
@@ -214,8 +210,7 @@ and unify_ env r1 ty1 r2 ty2 =
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
         if mand_arg <> ft.ft_arity_min || total_arg <> ft.ft_arity_max
-        then Errors.add_list
-            [p1, ("Arity mismatch"); p2, "Because of this definition"];
+        then Errors.fun_arity_mismatch p1 p2;
         let env, ft = Inst.instantiate_ft env ft in
         let env, ret = anon env ft.ft_params in
         let env, _ = unify env ft.ft_ret ret in
@@ -250,7 +245,7 @@ and unify_funs env r1 ft1 r2 ft2 =
   let p = Reason.to_pos r2 in
   let p1 = Reason.to_pos r1 in
   if ft2.ft_arity_min <> ft1.ft_arity_min || ft2.ft_arity_max <> ft1.ft_arity_max
-  then Errors.add_list [p, ("Arity mismatch"); p1, "Because of this definition"];
+  then Errors.fun_arity_mismatch p p1;
   let env, params = unify_params env ft1.ft_params ft2.ft_params in
   let env, ret = unify env ft1.ft_ret ft2.ft_ret in
   env, { ft1 with ft_params = params; ft_ret = ret }

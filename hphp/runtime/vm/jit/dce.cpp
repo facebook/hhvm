@@ -203,7 +203,7 @@ bool findWeakActRecUses(const BlockList& blocks,
   auto const incWeak = [&] (const IRInstruction* inst, const SSATmp* src) {
     auto const frameInst = frameRoot(src->inst());
     if (frameInst->op() == DefInlineFP) {
-      ITRACE(3, "weak use of {} from {}\n", *frameInst->dst(), *inst);
+      ITRACE(3, "weak use of {} from {}\n", *frameInst, *inst);
       state[frameInst].incWeakUse();
     }
   };
@@ -227,11 +227,12 @@ bool findWeakActRecUses(const BlockList& blocks,
       break;
 
     /*
-     * You can use the stack without using the frame, and we can
-     * adjust the ReDefSP in this situation, but only if we're not in
-     * a resumable.  In a resumable, there is no relation between the
-     * main frame and the stack, so we can't modify this ReDefSP to
-     * work on the outer frame.
+     * You can use the stack inside an inlined callee without using
+     * the frame, and we can adjust the initial ReDefSP that comes at
+     * the start of the callee in this situation, but only if we're
+     * not in a resumable.  In a resumable, there is no relation
+     * between the main frame and the stack, so we can't modify this
+     * ReDefSP to work on the outer frame.
      */
     case ReDefSP:
       {
@@ -370,26 +371,45 @@ void performActRecFixups(const BlockList& blocks,
         break;
 
       /*
-       * If we're eliminating a DefInlineFP, the ReDefSP has a
-       * different logical stack depth, and should be done
-       * relative to the frame that enclosed the DefInlineFP.
+       * A ReDefSP that depends on a removable DefInlineFP needs to be
+       * adjusted.  Its current frame is going away, so we have to
+       * adjust it to depend on the outer frame, and have an offset
+       * relative to that frame.
        *
-       * Normally this ReDefSP is also going to be dead, so it
-       * wouldn't matter if we fix this up.  The case where it matters
-       * is if eliminated a frame but left something which uses the
-       * stack---for example, a Call instruction that the callee
-       * made---in this case, we still need stack space for the
-       * arguments, and the Call is still using the ReDefSP, so we
-       * need these changes.
+       * In the common cases this ReDefSP is also going to be dce'd,
+       * but we need to adjust it in case it isn't.
+       *
+       * The offset from the current frame (DefInlineFP) is a
+       * parameter to the ReDefSP.  To turn that into an effective
+       * offset from the outer frame we take the following: the
+       * returnSpOffset that we recorded in this DefInlineFP, plus
+       * whatever offset the ReDefSP had from the frame, plus the
+       * cells for the ActRec, minus the space for the frame had for
+       * locals or iterators.
+       *
+       * If this is the first ReDefSP in a callee, the spOffset here
+       * will be numSlotsInFrame, so it cancels out and we just use
+       * the return sp offset (plus the ActRec cells).  However, if
+       * it's the ReDefSP that comes /after/ an InlineReturn, the fact
+       * that it depends on a DefInlineFP (instead of a DefFP) means
+       * we're in a nested inlining situation, and it is depending on
+       * a stack defined inside the outer inlined callee.  In this
+       * case, its offset will potentially not just be
+       * numSlotsInFrame, because we may have more spills going on in
+       * the outer callee.
+       *
+       * It's easiest to understand this by ignoring the above
+       * particulars and thinking about what it should mean to adjust
+       * a ReDefSP whose frame is being eliminated in isolation.
        */
       case ReDefSP:
         {
           auto const fp = inst.src(1)->inst();
           if (fp->is(DefInlineFP) && state[fp].isDead()) {
             inst.setSrc(1, fp->src(2));
-            inst.setSrc(0, fp->src(1));
-            inst.extra<ReDefSP>()->spOffset =
-              fp->extra<DefInlineFP>()->retSPOff;
+            inst.extra<ReDefSP>()->spOffset +=
+              fp->extra<DefInlineFP>()->retSPOff + kNumActRecCells -
+              fp->extra<DefInlineFP>()->target->numSlotsInFrame();
           }
         }
         break;

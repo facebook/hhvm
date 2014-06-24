@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/autoload-handler.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/util/string-vsnprintf.h"

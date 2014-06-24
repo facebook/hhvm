@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle-defs.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
 
@@ -53,12 +54,23 @@ namespace {
       wait_handle->exitContext(ctx_idx);
     }
   }
+
+  void onIOWaitEnter() {
+  }
+
+  void onIOWaitExit() {
+    // The web request may have timed out while we were waiting for I/O.
+    // Fail early to avoid further execution of PHP code.
+    if (UNLIKELY(checkConditionFlags())) {
+      EventHook::CheckSurprise();
+    }
+  }
 }
 
 void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
 
-  exitContextQueue<false>(ctx_idx, m_runnableQueue);
+  exitContextVector(ctx_idx, m_runnableQueue);
 
   for (auto it : m_priorityQueueDefault) {
     exitContextQueue<true>(ctx_idx, it.second);
@@ -99,8 +111,8 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   while (!wait_handle->isFinished()) {
     // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.front();
-      m_runnableQueue.pop();
+      auto current = m_runnableQueue.back();
+      m_runnableQueue.pop_back();
       current->resume();
       continue;
     }
@@ -124,6 +136,8 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
     // Wait for pending external thread events...
     if (!m_externalThreadEvents.empty()) {
+      onIOWaitEnter();
+
       // ...but only until the next sleeper (from any context) finishes.
       AsioSession::TimePoint waketime;
       if (sleep_queue.empty()) {
@@ -145,14 +159,20 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
         // No received events means the next-to-wake sleeper timed us out.
         session->processSleepEvents();
       }
+
+      onIOWaitExit();
       continue;
     }
 
     // If we're here, then the only things left are sleepers.  Wait for one to
     // be ready (in any context).
     if (!m_sleepEvents.empty()) {
+      onIOWaitEnter();
+
       std::this_thread::sleep_until(sleep_queue.top()->getWakeTime());
       session->processSleepEvents();
+
+      onIOWaitExit();
       continue;
     }
 

@@ -46,7 +46,7 @@ class AsioContext {
     ActRec* getSavedFP() const { return m_savedFP; }
 
     void schedule(c_ResumableWaitHandle* wait_handle) {
-      m_runnableQueue.push(wait_handle);
+      m_runnableQueue.push_back(wait_handle);
     }
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
 
@@ -77,8 +77,8 @@ class AsioContext {
     // Frame pointer to the ActRec of the WaitHandle::join() call.
     ActRec* m_savedFP;
 
-    // queue of ResumableWaitHandles ready for immediate execution
-    smart::queue<c_ResumableWaitHandle*> m_runnableQueue;
+    // stack of ResumableWaitHandles ready for immediate execution
+    smart::vector<c_ResumableWaitHandle*> m_runnableQueue;
 
     // queue of RescheduleWaitHandles scheduled in default mode
     reschedule_priority_queue_t m_priorityQueueDefault;

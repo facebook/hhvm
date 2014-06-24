@@ -1815,7 +1815,7 @@ static void send_soap_server_fault(
   xmlChar *buf; int size;
   xmlDocDumpMemory(doc_return, &buf, &size);
   if (buf) {
-    echo(String((const char *)buf, size, CopyString));
+    g_context->write(String((const char *)buf, size, CopyString));
     xmlFree(buf);
   }
   xmlFreeDoc(doc_return);
@@ -2311,7 +2311,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
   }
   output_xml_header(soap_version);
   if (buf) {
-    echo(String((char*)buf, size, CopyString));
+    g_context->write(String((char*)buf, size, CopyString));
     xmlFree(buf);
   }
 }

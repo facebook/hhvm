@@ -348,12 +348,6 @@ borrowed_ptr<php::Local> findLocal(ISS& env, SString name) {
   return nullptr;
 }
 
-borrowed_ptr<php::Local> findLocalById(ISS& env, int32_t id) {
-  assert(id < env.ctx.func->locals.size());
-  mayReadLocal(env, id);
-  return borrow(env.ctx.func->locals[id]);
-}
-
 //////////////////////////////////////////////////////////////////////
 // iterators
 

@@ -29,12 +29,9 @@
 #include "hphp/util/map-walker.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/region-hot-trace.h"
-#include "hphp/runtime/vm/jit/region-whole-cfg.h"
 
 namespace HPHP { namespace JIT {
 
@@ -60,7 +57,6 @@ enum class RegionMode {
   Method,    // region with a whole method
   Tracelet,  // single-entry, multiple-exits region that ends on conditional
              // branches or when an instruction consumes a value of unknown type
-  Legacy,    // same as Tracelet, but using the legacy analyze() code
 };
 
 RegionMode regionMode() {
@@ -68,7 +64,6 @@ RegionMode regionMode() {
   if (s == ""        ) return RegionMode::None;
   if (s == "method"  ) return RegionMode::Method;
   if (s == "tracelet") return RegionMode::Tracelet;
-  if (s == "legacy"  ) return RegionMode::Legacy;
   FTRACE(1, "unknown region mode {}: using none\n", s);
   assert(false);
   return RegionMode::None;
@@ -300,164 +295,7 @@ void RegionDesc::Block::checkMetadata() const {
   }
 }
 
-//////////////////////////////////////////////////////////////////////
-
-RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const Tracelet& tlet) {
-  typedef RegionDesc::Block Block;
-
-  auto const region = std::make_shared<RegionDesc>();
-  SrcKey sk(tlet.m_sk);
-  auto const unit = tlet.func()->unit();
-
-  const Func* topFunc = nullptr;
-  Block* curBlock = nullptr;
-  auto newBlock = [&](SrcKey start, Offset spOff) {
-    assert(curBlock == nullptr || curBlock->length() > 0);
-    region->blocks.push_back(
-      std::make_shared<Block>(
-        start.func(), start.resumed(), start.offset(), 0, spOff));
-    Block* newCurBlock = region->blocks.back().get();
-    if (curBlock) {
-      region->addArc(curBlock->id(), newCurBlock->id());
-    }
-    curBlock = newCurBlock;
-  };
-  newBlock(sk, initSpOffset);
-
-  for (auto ni = tlet.m_instrStream.first; ni; ni = ni->next) {
-    assert(sk == ni->source);
-    assert(ni->unit() == unit);
-
-    Offset curSpOffset = initSpOffset + ni->stackOffset;
-
-    curBlock->addInstruction();
-    if ((curBlock->length() == 1 && ni->funcd != nullptr) ||
-        ni->funcd != topFunc) {
-      topFunc = ni->funcd;
-      curBlock->setKnownFunc(sk, topFunc);
-    }
-
-    if (ni->calleeTrace && !ni->calleeTrace->m_inliningFailed) {
-      assert(ni->op() == Op::FCall || ni->op() == Op::FCallD);
-      assert(ni->funcd == ni->calleeTrace->func());
-      // This should be translated as an inlined call. Insert the blocks of the
-      // callee in the region.
-      auto const& callee = *ni->calleeTrace;
-      curBlock->setInlinedCallee(ni->funcd);
-      SrcKey cSk = callee.m_sk;
-      auto const cUnit = callee.func()->unit();
-
-      // Note: the offsets of the inlined blocks aren't currently read
-      // for anything, so it's unclear whether they should be relative
-      // to the main function entry or the inlined function.  We're
-      // just doing this for now.
-      auto const initInliningSpOffset = curSpOffset;
-      newBlock(cSk,
-               initInliningSpOffset + callee.m_instrStream.first->stackOffset);
-
-      for (auto cni = callee.m_instrStream.first; cni; cni = cni->next) {
-        // Sometimes inlined callees trace through jumps that have a
-        // known taken/non-taken state based on the calling context:
-        if (cni->nextOffset != kInvalidOffset) {
-          curBlock->addInstruction();
-          cSk.setOffset(cni->nextOffset);
-          newBlock(cSk, initInliningSpOffset + ni->stackOffset);
-          continue;
-        }
-
-        assert(cSk == cni->source);
-        assert(cni->op() == OpRetC ||
-               cni->op() == OpRetV ||
-               cni->op() == OpCreateCont ||
-               cni->op() == OpAwait ||
-               cni->op() == OpNativeImpl ||
-               !instrIsNonCallControlFlow(cni->op()));
-
-        curBlock->addInstruction();
-        cSk.advance(cUnit);
-      }
-
-      if (ni->next) {
-        sk.advance(unit);
-        newBlock(sk, curSpOffset);
-      }
-      continue;
-    }
-
-    if (!ni->noOp && isFPassStar(ni->op())) {
-      curBlock->setParamByRef(sk, ni->preppedByRef);
-    }
-
-    if (ni->next && isJmp(ni->op())) {
-      Offset dest;
-      if (isUnconditionalJmp(ni->op())) {
-        // A Jmp that isn't the final instruction in a Tracelet means we traced
-        // through a forward jump in analyze. Update sk to point to the next NI
-        // in the stream.
-        dest = ni->offset() + ni->imm[0].u_BA;
-        assert(dest > sk.offset()); // We only trace for forward Jmps for now.
-      } else if (isConditionalJmp(ni->op())) {
-        // When tracing through a conditional jump, the next SrcKey offset
-        // is given by ni->nextOffset.
-        dest = ni->nextOffset;
-      } else {
-        not_reached();
-      }
-
-      sk.setOffset(dest);
-      // The Jmp terminates this block.
-      newBlock(sk, curSpOffset);
-    } else {
-      sk.advance(unit);
-    }
-  }
-
-  auto& frontBlock = *region->blocks.front();
-
-  // Add tracelet guards as predictions on the first instruction. Predictions
-  // and known types from static analysis will be applied by
-  // Translator::translateRegion.
-  for (auto const& dep : tlet.m_dependencies) {
-    if (dep.second->rtt.isVagueValue() ||
-        dep.second->location.isThis()) continue;
-
-    typedef RegionDesc R;
-    auto addPred = [&](const R::Location& loc) {
-      auto type = Type(dep.second->rtt);
-      frontBlock.addPredicted(tlet.m_sk, {loc, type});
-    };
-
-    switch (dep.first.space) {
-      case Location::Stack: {
-        uint32_t offsetFromSp = uint32_t(-dep.first.offset - 1);
-        uint32_t offsetFromFp = initSpOffset - offsetFromSp;
-        addPred(R::Location::Stack{offsetFromSp, offsetFromFp});
-        break;
-      }
-      case Location::Local:
-        addPred(R::Location::Local{uint32_t(dep.first.offset)});
-        break;
-
-      default: not_reached();
-    }
-  }
-
-  // Add reffiness dependencies as predictions on the first instruction.
-  for (auto const& dep : tlet.m_refDeps.m_arMap) {
-    RegionDesc::ReffinessPred pred{dep.second.m_mask,
-                                   dep.second.m_vals,
-                                   dep.first};
-    frontBlock.addReffinessPred(tlet.m_sk, pred);
-  }
-
-  FTRACE(2, "Converted Tracelet:\n{}\nInto RegionDesc:\n{}\n",
-         tlet.toString(), show(*region));
-  return region;
-}
-
 RegionDescPtr selectRegion(const RegionContext& context,
-                           TraceletFn tletFn,
                            TransKind kind) {
   auto const mode = regionMode();
 
@@ -475,10 +313,6 @@ RegionDescPtr selectRegion(const RegionContext& context,
           return selectMethod(context);
         case RegionMode::Tracelet:
           return selectTracelet(context, 0, kind == TransKind::Profile);
-        case RegionMode::Legacy: {
-          auto tlet = tletFn();
-          return selectTraceletLegacy(context.spOffset, *tlet);
-        }
       }
       not_reached();
     } catch (const std::exception& e) {
@@ -647,49 +481,6 @@ bool mapsEqual(const M& a, const M& b, SrcKey endSk, Cmp equal = Cmp(),
 }
 }
 
-void diffRegions(const RegionDesc& a, const RegionDesc& b) {
-  auto fail = [&](const std::string why) {
-    Trace::ftraceRelease("{:-^60}\nRegions differ: {}"
-                         "\ntracelet:\n{}\nlegacy:\n{}\n",
-                         "", why, show(a), show(b));
-  };
-  if (a.blocks.size() < b.blocks.size()) return fail("a has fewer blocks");
-
-  for (unsigned i = 0; i < b.blocks.size(); ++i) {
-    auto& ab = *a.blocks[i];
-    auto& bb = *b.blocks[i];
-    if (ab.func() != bb.func() ||
-        ab.start() != bb.start() ||
-        ab.length() < bb.length() ||
-        (i == 0 && ab.initialSpOffset() != bb.initialSpOffset())) {
-      return fail("block metadata differs");
-    }
-
-    auto const endSk = bb.last();
-    auto const ignore = IgnoreTypePred{ab.length() > bb.length()};
-    auto tpCmp = [](const RegionDesc::TypePred& a,
-                    const RegionDesc::TypePred& b) {
-      /* Different inner types are generally ok. */
-      return a.location == b.location &&
-        (a.type == b.type || (a.type.isBoxed() && b.type.isBoxed()));
-    };
-    if (!mapsEqual(ab.typePreds(), bb.typePreds(), endSk, tpCmp, ignore)) {
-      return fail("type predictions");
-    }
-
-    if (!mapsEqual(ab.paramByRefs(), bb.paramByRefs(), endSk)) {
-      return fail("param byrefs");
-    }
-    if (false && !mapsEqual(ab.reffinessPreds(), bb.reffinessPreds(), endSk)) {
-      return fail("reffiness preds");
-    }
-    if (!mapsEqual(ab.knownFuncs(), bb.knownFuncs(), endSk,
-                   std::equal_to<const Func*>(), IgnoreKnownFunc())) {
-      return fail("known funcs");
-    }
-  }
-}
-
 std::string show(RegionDesc::Location l) {
   switch (l.tag()) {
   case RegionDesc::Location::Tag::Local:
@@ -707,6 +498,14 @@ std::string show(RegionDesc::TypePred ta) {
     show(ta.location),
     ta.type.toString()
   ).str();
+}
+
+std::string show(const PostConditions& pconds) {
+  std::string ret;
+  for (const auto& postCond : pconds) {
+    folly::toAppend("  postcondition: ", show(postCond), "\n", &ret);
+  }
+  return ret;
 }
 
 std::string show(const RegionDesc::ReffinessPred& pred) {
@@ -813,9 +612,7 @@ std::string show(const RegionDesc::Block& b) {
     skIter.advance(b.unit());
   }
 
-  for (const auto& postCond : b.postConds()) {
-    folly::toAppend("  postcondition: ", show(postCond), "\n", &ret);
-  }
+  folly::toAppend(show(b.postConds()), &ret);
 
   return ret;
 }

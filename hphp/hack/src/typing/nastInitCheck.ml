@@ -36,43 +36,7 @@ type cvar_status =
   | Vnull (* The value is still potentially null *)
   | Vinit (* Yay! it has been initialized *)
 
-
-module Error = struct
-
-  let read_before_write (p, v) =
-    Errors.add p (
-    sl[
-    "Read access to $this->"; v; " before initialization"
-  ])
-
-  let no_construct_parent p =
-    Errors.add p (sl[
-    "You are extending a class that needs to be initialized\n";
-    "Make sure you call parent::__construct.\n"
-    ])
-
-  let not_initialized (p, c) =
-    if c = "parent::__construct" then no_construct_parent p else
-    Errors.add p (sl[
-    "The class member "; c;" is not always properly initialized\n";
-    "Make sure you systematically set $this->"; c;
-    " when the method __construct is called\n";
-    "Alternatively, you can define the type as optional (?...)\n"
-    ])
-
-  let call_before_init p cv =
-    Errors.add p (
-    sl([
-       "Until the initialization of $this is over,";
-       " you can only call private methods\n";
-        "The initialization is not over because ";
-     ] @
-       if cv = "parent::__construct"
-       then ["you forgot to call parent::__construct"]
-       else ["$this->"; cv; " can still potentially be null"])
-   )
-
-end
+let parent_init_cvar = "parent::__construct"
 
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
@@ -101,25 +65,30 @@ module Env = struct
       cvars   : SSet.t ;
     }
 
-  (* If we need to call parent::__construct, we treat it as if it was a class
-   * variable that needs to be initialized. It's a bit hacky but it works.
-   * The idea here is that if the parent needs to be initialized,
-   * we add a phone class variable called parent::__construct.
-   *)
-  let parent tenv cvars c =
-    if c.c_mode = Ast.Mdecl then cvars else
-    match c.c_extends with
-    | [] -> cvars
-    | (_, Happly ((_, parent), _)) :: _ ->
+  (* If we need to call parent::__construct, we treat it as if it were
+   * a class variable that needs to be initialized. It's a bit hacky
+   * but it works. The idea here is that if the parent needs to be
+   * initialized, we add a phony class variable. *)
+  let add_parent_construct c tenv cvars parent_hint =
+    match parent_hint with
+      | (_, Happly ((_, parent), _)) ->
         let _, class_ = Typing_env.get_class tenv parent in
         (match class_ with
-        | Some class_ when
-            class_.Typing_defs.tc_need_init &&
-            c.c_constructor <> None
-          -> SSet.add "parent::__construct" cvars
-        | _ -> cvars
+          | Some class_ when
+              class_.Typing_defs.tc_need_init && c.c_constructor <> None
+              -> SSet.add parent_init_cvar cvars
+          | _ -> cvars
         )
-    | _ -> cvars
+      | _ -> cvars
+
+  let parent tenv cvars c =
+    if c.c_mode = Ast.Mdecl then cvars
+    else
+      let cvars = match c.c_extends with
+        | [] -> cvars
+        | parent_hint :: _ -> add_parent_construct c tenv cvars parent_hint
+      in
+      List.fold_left (add_parent_construct c tenv) cvars c.c_req_extends
 
   let rec make tenv c =
     let tenv = Typing_env.set_root tenv (Typing_deps.Dep.Class (snd c.c_name)) in
@@ -131,31 +100,30 @@ module Env = struct
 
   and method_ acc m =
     if m.m_visibility <> Private then acc else
-    let name = snd m.m_name in
-    let acc = SMap.add name (ref (Todo m.m_body)) acc in
-    acc
+      let name = snd m.m_name in
+      let acc = SMap.add name (ref (Todo m.m_body)) acc in
+      acc
 
   and cvar acc cv =
     let cname = snd cv.cv_id in
     match cv.cv_type with
-    | Some (_, Hoption _) | Some (_, Hmixed) | None -> acc
-    | _ ->
+      | Some (_, Hoption _) | Some (_, Hmixed) | None -> acc
+      | _ ->
         match cv.cv_expr with
-        | Some _ -> acc
-        | _ ->
-            SSet.add cname acc
+          | Some _ -> acc
+          | _ -> SSet.add cname acc
 
   and parent_cvars tenv acc c =
-  List.fold_left begin fun acc parent ->
-    match parent with _, Happly ((_, parent), _) ->
-    let _, tc = Typing_env.get_class tenv parent in
-    (match tc with
-    | None -> acc
-    | Some { tc_members_init = members; _ } ->
-      SSet.union members acc
-    )
-    | _ -> acc
-  end acc (c.c_extends @ c.c_uses)
+    List.fold_left begin fun acc parent ->
+      match parent with _, Happly ((_, parent), _) ->
+        let _, tc = Typing_env.get_class tenv parent in
+        (match tc with
+          | None -> acc
+          | Some { tc_members_init = members; _ } ->
+            SSet.union members acc
+        )
+        | _ -> acc
+    end acc (c.c_extends @ c.c_uses @ c.c_req_extends @ c.c_req_implements)
 
   let get_method env m =
     SMap.get m env.methods
@@ -188,10 +156,7 @@ let rec class_decl tenv c =
 and class_ tenv c =
   if c.c_mode = Ast.Mdecl then () else begin
   match c.c_constructor with
-  | _ when
-      c.c_kind = Ast.Cinterface ||
-      c.c_kind = Ast.Ctrait
-    -> ()
+  | _ when c.c_kind = Ast.Cinterface -> ()
   | Some { m_unsafe = true; _ } -> ()
   | _ ->
       let p =
@@ -208,19 +173,18 @@ and class_ tenv c =
        * Because after that, it won't be reachable in the
        * sub-classes anymore.
        *)
-      if c.c_kind = Ast.Cabstract
+      if c.c_kind = Ast.Ctrait || c.c_kind = Ast.Cabstract
       then begin
-        let parent = "parent::__construct" in
         let has_constructor = c.c_constructor <> None in
-        let needs_parent_call = SSet.mem parent env.cvars in
-        let is_calling_parent = SSet.mem parent inits in
+        let needs_parent_call = SSet.mem parent_init_cvar env.cvars in
+        let is_calling_parent = SSet.mem parent_init_cvar inits in
         if has_constructor && needs_parent_call && not is_calling_parent
-        then Error.not_initialized (p, parent);
+        then Errors.not_initialized (p, parent_init_cvar);
       end
       else begin
         SSet.iter begin fun x ->
           if not (SSet.mem x inits)
-          then Error.not_initialized (p, x);
+          then Errors.not_initialized (p, x);
         end env.cvars
       end
   end
@@ -249,7 +213,7 @@ and stmt env acc st =
   match st with
   | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el)) ->
       let acc = List.fold_left expr acc el in
-      assign env acc "parent::__construct"
+      assign env acc parent_init_cvar
   | Expr e -> expr acc e
   | Break -> acc
   | Continue -> acc
@@ -324,7 +288,7 @@ and are_all_init env set =
 and check_all_init p env acc =
   SSet.iter begin fun cv ->
     if not (SSet.mem cv acc)
-    then Error.call_before_init p cv
+    then Errors.call_before_init p cv
   end env.cvars
 
 and exprl env acc l = List.fold_left (expr env) acc l
@@ -349,7 +313,7 @@ and expr_ env acc p e =
   | Lvar _ -> acc
   | Obj_get ((_, This), (_, Id (_, vx as v))) ->
       if SSet.mem vx env.cvars && not (SSet.mem vx acc)
-      then (Error.read_before_write v; acc)
+      then (Errors.read_before_write v; acc)
       else acc
   | Clone e -> expr acc e
   | Obj_get (e1, e2) ->

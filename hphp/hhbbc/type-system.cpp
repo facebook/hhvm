@@ -1330,6 +1330,7 @@ Type aval(SArray val) {
 Type aempty()         { return Type { BSArrE }; }
 Type sempty()         { return sval(s_empty.get()); }
 Type counted_aempty() { return Type { BCArrE }; }
+Type some_aempty()    { return Type { BArrE }; }
 
 Type subObj(res::Class val) {
   auto r = Type { BObj };

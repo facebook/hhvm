@@ -262,18 +262,11 @@ static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
 }
 
 static Array HHVM_FUNCTION(get_included_files) {
-  Array included_files = Array::Create();
-  int idx = 0;
-  for (auto& file: g_context->m_evaledFilesOrder) {
-    included_files.set(idx++, file->getFileName());
+  PackedArrayInit pai(g_context->m_evaledFilesOrder.size());
+  for (auto& file : g_context->m_evaledFilesOrder) {
+    pai.append(file->getFileName());
   }
-  return included_files;
-}
-
-
-static Array HHVM_FUNCTION(inclued_get_data) {
-  // TODO: Clearly this is not implemented...
-  return empty_array();
+  return pai.toArray();
 }
 
 static int64_t HHVM_FUNCTION(get_magic_quotes_gpc) {
@@ -761,19 +754,6 @@ static bool HHVM_FUNCTION(clock_gettime,
   return ret == 0;
 }
 
-static bool HHVM_FUNCTION(clock_settime,
-                          int64_t clk_id, int64_t sec, int64_t nsec) {
-#if defined(__APPLE__)
-  throw NotSupportedException(__func__, "feature not supported on OSX");
-#else
-  struct timespec ts;
-  ts.tv_sec = sec;
-  ts.tv_nsec = nsec;
-  int ret = clock_settime(clk_id, &ts);
-  return ret == 0;
-#endif
-}
-
 static int64_t HHVM_FUNCTION(cpu_get_count) {
   return Process::GetCPUCount();
 }
@@ -784,7 +764,10 @@ static String HHVM_FUNCTION(cpu_get_model) {
 
 Variant HHVM_FUNCTION(ini_get, const String& varname) {
   String value = empty_string();
-  IniSetting::Get(varname, value);
+  bool ret = IniSetting::Get(varname, value);
+  if (!ret) {
+    return false;
+  }
   return value;
 }
 
@@ -887,7 +870,7 @@ Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
 }
 
 static bool HHVM_FUNCTION(phpinfo, int64_t what /*=0 */) {
-  echo("HipHop\n");
+  g_context->write("HipHop\n");
   return false;
 }
 
@@ -1181,7 +1164,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(restore_include_path);
   HHVM_FE(set_include_path);
   HHVM_FE(get_included_files);
-  HHVM_FE(inclued_get_data);
   HHVM_FE(get_magic_quotes_gpc);
   HHVM_FE(get_magic_quotes_runtime);
   HHVM_FE(getenv);
@@ -1194,7 +1176,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(getrusage);
   HHVM_FE(clock_getres);
   HHVM_FE(clock_gettime);
-  HHVM_FE(clock_settime);
   HHVM_FE(cpu_get_count);
   HHVM_FE(cpu_get_model);
   HHVM_FE(ini_get);

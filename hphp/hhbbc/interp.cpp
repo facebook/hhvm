@@ -220,7 +220,13 @@ void in(ISS& env, const bc::Array& op) {
   push(env, aval(op.arr1));
 }
 
-void in(ISS& env, const bc::NewArray&) { push(env, TArr); }
+void in(ISS& env, const bc::NewArray& op) {
+  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
+}
+
+void in(ISS& env, const bc::NewMixedArray& op) {
+  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
+}
 
 void in(ISS& env, const bc::NewPackedArray& op) {
   auto elems = std::vector<Type>{};
@@ -237,6 +243,10 @@ void in(ISS& env, const bc::NewStructArray& op) {
     map[*rit] = popC(env);
   }
   push(env, carr_struct(std::move(map)));
+}
+
+void in(ISS& env, const bc::NewLikeArrayL&) {
+  push(env, counted_aempty());
 }
 
 void in(ISS& env, const bc::AddElemC& op) {
@@ -1057,6 +1067,12 @@ void in(ISS& env, const bc::IncDecL& op) {
   auto const newT = typeIncDec(op.subop, loc);
   auto const pre = isPre(op.subop);
 
+  // If it's a non-numeric string, this may cause it to exceed the max length.
+  if (!locCouldBeUninit(env, op.loc1) &&
+      !loc.couldBe(TStr)) {
+    nothrow(env);
+  }
+
   if (!pre) push(env, loc);
   setLoc(env, op.loc1, newT);
   if (pre)  push(env, newT);
@@ -1738,17 +1754,17 @@ void in(ISS& env, const bc::BareThis& op) {
 }
 
 void in(ISS& env, const bc::InitThisLoc& op) {
-  setLocRaw(env, findLocalById(env, op.arg1), TCell);
+  setLocRaw(env, op.loc1, TCell);
 }
 
 void in(ISS& env, const bc::StaticLoc& op) {
-  setLocRaw(env, findLocalById(env, op.arg1), TRef);
+  setLocRaw(env, op.loc1, TRef);
   push(env, TBool);
 }
 
 void in(ISS& env, const bc::StaticLocInit& op) {
   popC(env);
-  setLocRaw(env, findLocalById(env, op.arg1), TRef);
+  setLocRaw(env, op.loc1, TRef);
 }
 
 /*
@@ -1767,8 +1783,7 @@ void in(ISS& env, const bc::OODeclExists& op) {
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {
-  auto loc = findLocalById(env, op.arg1);
-  locAsCell(env, loc);
+  locAsCell(env, op.loc1);
   if (!options.HardTypeHints) return;
 
   /*
@@ -1783,10 +1798,10 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * references if it re-enters, even if Option::HardTypeHints is
    * on.
    */
-  auto const constraint = env.ctx.func->params[op.arg1].typeConstraint;
+  auto const constraint = env.ctx.func->params[op.loc1->id].typeConstraint;
   if (constraint.hasConstraint() && !constraint.isTypeVar()) {
     FTRACE(2, "     {}\n", constraint.fullName());
-    setLoc(env, loc, env.index.lookup_constraint(env.ctx, constraint));
+    setLoc(env, op.loc1, env.index.lookup_constraint(env.ctx, constraint));
   }
 }
 void in(ISS& env, const bc::VerifyRetTypeV& op) {}
@@ -1833,8 +1848,8 @@ void in(ISS& env, const bc::CreateCont& op) {
   push(env, TInitNull);
 }
 
-void in(ISS& env, const bc::ContEnter&) { popC(env); }
-void in(ISS& env, const bc::ContRaise&) { popC(env); }
+void in(ISS& env, const bc::ContEnter&) { popC(env); push(env, TInitCell); }
+void in(ISS& env, const bc::ContRaise&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::Yield&) {
   popC(env);

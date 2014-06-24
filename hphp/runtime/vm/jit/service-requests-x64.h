@@ -43,11 +43,18 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
 /*
  * "cb" may be either the main section or frozen section.
  */
-void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
-                      SrcKey dest);
+void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
+                 TransFlags trflags = TransFlags{});
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
                  SrcKey dest);
-void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest);
+void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
+                      SrcKey dest, TransFlags trflags = TransFlags{});
+
+/*
+ * Similar to the emitBindJ() series.  The address of the jmp is returned.
+ */
+TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
+                    SrcKey dest, TransFlags trflags);
 
 /*
  * Returns the amount by which rVmSp should be adjusted.

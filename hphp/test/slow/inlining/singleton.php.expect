@@ -1,0 +1,30 @@
+check_null_same made a C!
+object(C)#1 (0) {
+}
+object(C)#1 (0) {
+}
+check_null_same_loop made a C!
+object(C)#2 (0) {
+}
+object(C)#2 (0) {
+}
+check_null_nsame made a C!
+object(C)#3 (0) {
+}
+object(C)#3 (0) {
+}
+check_null_nsame_loop made a C!
+object(C)#4 (0) {
+}
+object(C)#4 (0) {
+}
+getSame made a C!
+object(C)#5 (0) {
+}
+object(C)#5 (0) {
+}
+getNSame made a C!
+object(C)#6 (0) {
+}
+object(C)#6 (0) {
+}

@@ -871,6 +871,7 @@ class Redis {
 
     // Introspection
     '_prefix' => [ 'alias' => 'prefix' ],
+    '_serialize' => [ 'alias' => 'serialize' ],
     '_unserialize' => [ 'alias' => 'unserialize' ],
 
     // Batch Ops

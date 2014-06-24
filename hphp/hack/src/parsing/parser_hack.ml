@@ -31,10 +31,12 @@ let init_env lb = {
   errors   = ref [];
 }
 
-type parser_return =
-  bool *                       (* True if we are dealing with a hack file *)
-  (Pos.t * string) list *      (* Comments *)
-  Ast.program
+type parser_return = {
+    (* True if we are dealing with a hack file *)
+    is_hh_file : bool;
+    comments   : (Pos.t * string) list;
+    ast        : Ast.program;
+  }
 
 (*****************************************************************************)
 (* Lexer (with backtracking) *)
@@ -387,8 +389,10 @@ let rec program content =
   let comments = !L.comment_list in
   L.comment_list := [];
   if !(env.errors) <> []
-  then Errors.add_list [List.hd (List.rev !(env.errors))];
-  !is_hh_file, comments, Namespaces.elaborate_defs ast
+  then Errors.parsing_error (List.hd (List.rev !(env.errors)));
+  let is_hh_file = !is_hh_file in
+  let ast = Namespaces.elaborate_defs ast in
+  {is_hh_file; comments; ast}
 
 (*****************************************************************************)
 (* Hack headers (strict, decl, partial) *)
@@ -3300,5 +3304,5 @@ and namespace_use_list env acc =
 
 let from_file filename =
   Pos.file := filename;
-  let content = Utils.cat filename in
+  let content = try Utils.cat filename with _ -> "" in
   program content

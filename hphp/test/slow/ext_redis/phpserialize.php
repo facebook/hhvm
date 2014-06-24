@@ -8,6 +8,7 @@ $r->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
 
 foreach ([null, true, false, 123, 456.0,
           "A string of words", [1,2,3]] as $val) {
+  var_dump($r->_serialize($val));
   $r->set('A', $val);
   var_dump($r->get('A'));
 }

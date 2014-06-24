@@ -112,12 +112,12 @@ TEST(JumpOpts, optimizeCondTraceExit) {
 
   auto bcoff1 = 10;
   auto sync1 = unit.gen(SyncABIRegs, marker, fp->dst(), sp->dst());
-  auto bind1 = unit.gen(ReqBindJmp, marker, BCOffset(bcoff1));
+  auto bind1 = unit.gen(ReqBindJmp, marker, ReqBindJmpData(bcoff1));
   taken->push_back({sync1, bind1});
 
   auto bcoff2 = 20;
   auto sync2 = unit.gen(SyncABIRegs, marker, fp->dst(), sp->dst());
-  auto bind2 = unit.gen(ReqBindJmp, marker, BCOffset(bcoff2));
+  auto bind2 = unit.gen(ReqBindJmp, marker, ReqBindJmpData(bcoff2));
   fallthru->push_back({sync2, bind2});
 
   optimizeJumps(unit);
@@ -153,7 +153,7 @@ TEST(JumpOpts, optimizeSideExitJcc) {
 
   auto bcoff = 10;
   auto sync = unit.gen(SyncABIRegs, marker, fp->dst(), sp->dst());
-  auto bind = unit.gen(ReqBindJmp, marker, BCOffset(bcoff));
+  auto bind = unit.gen(ReqBindJmp, marker, ReqBindJmpData(bcoff));
   taken->push_back({sync, bind});
 
   optimizeJumps(unit);
@@ -190,7 +190,7 @@ TEST(JumpOpts, optimizeSideExitCheck) {
 
   auto bcoff = 10;
   auto sync = unit.gen(SyncABIRegs, marker, fp->dst(), sp->dst());
-  auto bind = unit.gen(ReqBindJmp, marker, BCOffset(bcoff));
+  auto bind = unit.gen(ReqBindJmp, marker, ReqBindJmpData(bcoff));
   taken->push_back({sync, bind});
 
   optimizeJumps(unit);

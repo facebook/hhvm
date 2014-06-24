@@ -68,7 +68,7 @@ bool f_dangling_server_proxy_old_request() {
     return false;
   }
   transport->setResponse(code, "dangling_server_proxy_old_request");
-  echo(response.detach());
+  g_context->write(response.detach());
   return true;
 }
 
@@ -226,19 +226,6 @@ int64_t f_xbox_get_thread_time() {
     return time(nullptr) - handler->getLastResetTime();
   }
   throw Exception("Not an xbox worker!");
-}
-
-bool f_server_get_custom_bool_setting(const String& settingName,
-                                      bool defaultValue) {
-  bool retVal = false;
-  if (!RuntimeOption::GetServerCustomBoolSetting(settingName.toCppString(),
-                                                 retVal)) {
-    // The value isn't present in the CustomSettings section of config.hdf,
-    // so return the default value instead.
-    retVal = defaultValue;
-  }
-
-  return retVal;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

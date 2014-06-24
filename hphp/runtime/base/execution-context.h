@@ -43,7 +43,7 @@ struct RequestEventHandler;
 struct EventHook;
 struct PCFilter;
 struct Resumable;
-namespace Eval { struct PhpFile; }
+struct PhpFile;
 namespace JIT { struct Translator; }
 }
 
@@ -379,10 +379,13 @@ public:
   void requestExit();
 
   void pushLocalsAndIterators(const Func* f, int nparams = 0);
-  void enqueueAPCHandle(APCHandle* handle);
+  void enqueueAPCHandle(APCHandle* handle, size_t size);
 
 private:
-  std::vector<APCHandle*> m_apcHandles;
+  struct APCHandles {
+    size_t m_memSize = 0;
+    std::vector<APCHandle*> m_handles;
+  } m_apcHandles;
   void manageAPCHandle();
 
   enum class VectorLeaveCode {
@@ -443,6 +446,7 @@ OPCODES
 #undef O
 
   void contEnterImpl(IOP_ARGS);
+  void yield(IOP_ARGS, const Cell* key, const Cell& value);
   void asyncSuspendE(IOP_ARGS, int32_t iters);
   void asyncSuspendR(IOP_ARGS);
   void ret(IOP_ARGS);
@@ -504,11 +508,11 @@ public:
 
   hphp_hash_map<
     StringData*,
-    Eval::PhpFile*,
+    PhpFile*,
     string_data_hash,
     string_data_same
   > m_evaledFiles;
-  std::vector<Eval::PhpFile*> m_evaledFilesOrder;
+  std::vector<PhpFile*> m_evaledFilesOrder;
   std::vector<Unit*> m_createdFuncs;
 
   std::vector<Fault> m_faults;
@@ -520,15 +524,16 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  Eval::PhpFile* lookupPhpFile(
+  Unit* lookupPhpFile(
       StringData* path, const char* currentDir, bool* initial = nullptr);
   Unit* evalInclude(StringData* path,
                               const StringData* curUnitFilePath, bool* initial);
   Unit* evalIncludeRoot(StringData* path,
                                   InclOpFlags flags, bool* initial);
-  Eval::PhpFile* lookupIncludeRoot(StringData* path,
-                                         InclOpFlags flags, bool* initial,
-                                         Unit* unit = 0);
+  Unit* lookupIncludeRoot(StringData* path,
+                          InclOpFlags flags,
+                          bool* initial,
+                          Unit* unit);
   bool evalUnit(Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, Unit* unit);
   Unit* compileEvalString(StringData* code,

@@ -961,7 +961,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                      "hhvm.server.port", &ServerPort);
     Config::Bind(ServerBacklog, ini, server["Backlog"], 128);
     Config::Bind(ServerConnectionLimit, ini, server["ConnectionLimit"], 0);
-    Config::Bind(ServerThreadCount, ini, server["ThreadCount"], 50);
+    Config::Bind(ServerThreadCount, ini, server["ThreadCount"],
+                 Process::GetCPUCount() * 2);
     Config::Bind(ServerThreadRoundRobin, ini, server["ThreadRoundRobin"]);
     Config::Bind(ServerWarmupThrottleRequestCount, ini,
                  server["WarmupThrottleRequestCount"],

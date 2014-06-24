@@ -71,6 +71,7 @@ T* wordcpy(T* to, const T* from, size_t numT) {
   assert(numT < std::numeric_limits<int64_t>::max() &&
          (numT * sizeof(T)) % 8 == 0);
   size_t numWords = numT * sizeof(T) / 8;
+  assert(numWords != 0);
   auto d = (int64_t*)to;
   auto s = (int64_t*)from;
   do {

@@ -1342,8 +1342,6 @@ HELPER_TABLE(PROP)
 #undef PROP
 
 void HhbcTranslator::MInstrTranslator::emitCGetProp() {
-  assert(!m_ni.outLocal);
-
   const Class* knownCls = nullptr;
   const auto propInfo   = getPropertyOffset(m_ni, contextClass(), knownCls,
                                             m_mii, m_mInd, m_iInd);
@@ -2675,7 +2673,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
     SSATmp* sp = gen(SpillStack, std::make_pair(args.size(), &args[0]));
     gen(DeleteUnwinderException);
     gen(SyncABIRegs, m_irb.fp(), sp);
-    gen(ReqBindJmp, BCOffset(nextOff));
+    gen(ReqBindJmp, ReqBindJmpData(nextOff));
   }
 
   if (m_strTestResult) {

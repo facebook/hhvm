@@ -144,12 +144,6 @@ struct DynLocation {
   bool canBeAliased() const;
 };
 
-struct Tracelet;
-struct TraceletContext;
-
-// Return a summary string of the bytecode in a tracelet.
-std::string traceletShape(const Tracelet&);
-
 struct TranslationFailedExc : std::runtime_error {
   TranslationFailedExc(const char* file, int line)
     : std::runtime_error(folly::format("TranslationFailedExc @ {}:{}",
@@ -184,45 +178,6 @@ struct ControlFlowFailedExc : std::runtime_error {
   throw JIT::UnknownInputExc(__FILE__, __LINE__); \
 } while(0);
 
-struct GuardType {
-  explicit GuardType(DataType outer = KindOfAny,
-                     DataType inner = KindOfNone);
-  explicit GuardType(const RuntimeType& rtt);
-           GuardType(const GuardType& other);
-  const DataType   getOuterType() const;
-  const DataType   getInnerType() const;
-  const Class*     getSpecializedClass() const;
-  bool             isSpecific() const;
-  bool             isSpecialized() const;
-  bool             isRelaxed() const;
-  bool             isGeneric() const;
-  bool             isCounted() const;
-  bool             isMoreRefinedThan(const GuardType& other) const;
-  bool             mayBeUninit() const;
-  GuardType        getCountness() const;
-  GuardType        getCountnessInit() const;
-  DataTypeCategory getCategory() const;
-  GuardType        dropSpecialization() const;
-  RuntimeType      getRuntimeType() const;
-  bool             isEqual(GuardType other) const;
-  bool             hasArrayKind() const;
-  ArrayData::ArrayKind getArrayKind() const;
-
- private:
-  DataType outerType;
-  DataType innerType;
-  union {
-    const Class* klass;
-    struct {
-      bool arrayKindValid;
-      ArrayData::ArrayKind arrayKind;
-    };
-  };
-};
-
-typedef hphp_hash_map<Location,RuntimeType,Location> TypeMap;
-typedef hphp_hash_set<Location, Location> LocationSet;
-typedef hphp_hash_map<DynLocation*, GuardType> DynLocTypeMap;
 typedef hphp_hash_map<RegionDesc::BlockId, Block*> BlockIdToIRBlockMap;
 typedef hphp_hash_map<RegionDesc::BlockId,
                       RegionDesc::Block*> BlockIdToRegionBlockMap;
@@ -251,10 +206,10 @@ struct TranslArgs {
     : m_sk(sk)
     , m_align(align)
     , m_interp(false)
+    , m_dryRun(false)
     , m_setFuncBody(false)
     , m_transId(kInvalidTransID)
     , m_region(nullptr)
-    , m_dryRun(false)
   {}
 
   TranslArgs& sk(const SrcKey& sk) {
@@ -269,8 +224,16 @@ struct TranslArgs {
     m_interp = interp;
     return *this;
   }
+  TranslArgs& dryRun(bool dry) {
+    m_dryRun = dry;
+    return *this;
+  }
   TranslArgs& setFuncBody() {
     m_setFuncBody = true;
+    return *this;
+  }
+  TranslArgs& flags(TransFlags flags) {
+    m_flags = flags;
     return *this;
   }
   TranslArgs& transId(TransID transId) {
@@ -281,18 +244,15 @@ struct TranslArgs {
     m_region = region;
     return *this;
   }
-  TranslArgs& dryRun(bool dry) {
-    m_dryRun = dry;
-    return *this;
-  }
 
   SrcKey m_sk;
   bool m_align;
   bool m_interp;
+  bool m_dryRun;
   bool m_setFuncBody;
+  TransFlags m_flags;
   TransID m_transId;
   JIT::RegionDescPtr m_region;
-  bool m_dryRun;
 };
 
 class Translator;
@@ -307,42 +267,6 @@ struct Translator {
   JIT::UniqueStubs uniqueStubs;
 
 private:
-  friend struct TraceletContext;
-
-  void analyzeCallee(TraceletContext&,
-                     Tracelet& parent,
-                     NormalizedInstruction* fcall);
-  void handleAssertionEffects(Tracelet&,
-                              const NormalizedInstruction&,
-                              TraceletContext&,
-                              int currentStackOffset);
-  void getOutputs(Tracelet& t,
-                  NormalizedInstruction* ni,
-                  int& currentStackOffset,
-                  bool& varEnvTaint);
-  void relaxDeps(Tracelet& tclet, TraceletContext& tctxt);
-  void constrainDep(const DynLocation* loc,
-                    NormalizedInstruction* firstInstr,
-                    GuardType specType,
-                    GuardType& relxType);
-  DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
-                                                size_t opndIdx,
-                                                const GuardType& specType);
-  GuardType getOperandConstraintType(NormalizedInstruction* instr,
-                                     size_t                 opndIdx,
-                                     const GuardType&       specType);
-
-  void constrainOperandType(GuardType&             relxType,
-                            NormalizedInstruction* instr,
-                            size_t                 opndIdx,
-                            const GuardType&       specType);
-
-
-  RuntimeType liveType(Location l, const Unit &u, bool specialize = false);
-  RuntimeType liveType(const Cell* outer,
-                       const Location& l,
-                       bool specialize = false);
-
   void createBlockMaps(const RegionDesc&        region,
                        BlockIdToIRBlockMap&     blockIdToIRBlock,
                        BlockIdToRegionBlockMap& blockIdToRegionBlock);
@@ -374,7 +298,8 @@ public:
   typedef ProfSrcKeySet RegionBlacklist;
   TranslateResult translateRegion(const RegionDesc& region,
                                   bool bcControlFlow,
-                                  RegionBlacklist& interp);
+                                  RegionBlacklist& interp,
+                                  TransFlags trflags = TransFlags{});
 
 private:
   typedef std::map<TCA, TransID> TransDB;
@@ -403,7 +328,6 @@ public:
   static Lease& WriteLease() {
     return s_writeLease;
   }
-  static RuntimeType outThisObjectType();
 
   const TransDB& getTransDB() const {
     return m_transDB;
@@ -450,19 +374,6 @@ public:
     return m_srcDB;
   }
 
-  /*
-   * Create a Tracelet for the given SrcKey, which must actually be
-   * the current VM frame.
-   *
-   * XXX The analysis pass will inspect the live state of the VM stack
-   * as needed to determine the current types of in-flight values.
-   */
-  std::unique_ptr<Tracelet> analyze(SrcKey sk,
-                                    const TypeMap& = TypeMap(),
-                                    int32_t stackSlackUsedForInlining = 0);
-
-  void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
-                   Tracelet& t, TraceletContext& tas);
   static bool liveFrameIsPseudoMain();
 
   inline bool isTransDBEnabled() const {
@@ -482,7 +393,6 @@ private:
   std::unique_ptr<ProfData> m_profData;
 
 private:
-  int m_analysisDepth;
   bool m_useAHot;
 
 public:
@@ -498,11 +408,6 @@ public:
   }
   void setMode(TransKind mode) {
     m_mode = mode;
-  }
-
-  int analysisDepth() const {
-    assert(m_analysisDepth >= 0);
-    return m_analysisDepth;
   }
 
   bool useAHot() const {
@@ -673,8 +578,6 @@ bool outputIsPredicted(NormalizedInstruction& inst);
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller);
 int locPhysicalOffset(Location l, const Func* f = nullptr);
-bool shouldAnalyzeCallee(const NormalizedInstruction*, const FPIEnt*,
-                         const Op, const int);
 
 namespace InstrFlags {
 enum OutTypeConstraints {

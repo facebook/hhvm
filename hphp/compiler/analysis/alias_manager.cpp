@@ -1930,7 +1930,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
 
   switch (stype) {
   case Statement::KindOfUseTraitStatement:
-  case Statement::KindOfTraitRequireStatement:
+  case Statement::KindOfClassRequireStatement:
   case Statement::KindOfTraitPrecStatement:
   case Statement::KindOfTraitAliasStatement:
     return StatementPtr();

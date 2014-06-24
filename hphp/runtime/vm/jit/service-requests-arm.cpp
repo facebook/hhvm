@@ -32,7 +32,7 @@ using namespace vixl;
 namespace {
 
 void emitBindJ(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
-               JIT::ConditionCode cc, ServiceRequest req) {
+               ConditionCode cc, ServiceRequest req, TransFlags trflags) {
 
   TCA toSmash = cb.frontier();
   if (cb.base() == frozen.base()) {
@@ -42,10 +42,12 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
 
   mcg->setJmpTransID(toSmash);
 
-  TCA sr =  emitEphemeralServiceReq(frozen,
-                                    mcg->getFreeStub(frozen,
-                                                     &mcg->cgFixups()),
-                                    req, toSmash, dest.toAtomicInt());
+  TCA sr = emitEphemeralServiceReq(frozen,
+                                   mcg->getFreeStub(frozen,
+                                                    &mcg->cgFixups()),
+                                   req, toSmash,
+                                   dest.toAtomicInt(),
+                                   trflags.packed);
 
   MacroAssembler a { cb };
   if (cb.base() == frozen.base()) {
@@ -124,17 +126,17 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
 }
 
 void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest) {
-  emitBindJ(cb, frozen, dest, JIT::CC_None, REQ_BIND_JMP);
+  emitBindJ(cb, frozen, dest, JIT::CC_None, REQ_BIND_JMP, TransFlags{});
 }
 
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
                  SrcKey dest) {
-  emitBindJ(cb, frozen, dest, cc, REQ_BIND_JCC);
+  emitBindJ(cb, frozen, dest, cc, REQ_BIND_JCC, TransFlags{});
 }
 
 void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
                       JIT::ConditionCode cc) {
-  emitBindJ(cb, frozen, dest, cc, REQ_BIND_SIDE_EXIT);
+  emitBindJ(cb, frozen, dest, cc, REQ_BIND_SIDE_EXIT, TransFlags{});
 }
 
 //////////////////////////////////////////////////////////////////////

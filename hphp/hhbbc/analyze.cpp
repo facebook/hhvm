@@ -44,6 +44,7 @@ TRACE_SET_MOD(hhbbc);
 
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s_AsyncGenerator("AsyncGenerator");
 const StaticString s_Generator("Generator");
 const StaticString s_http_response_header("http_response_header");
 const StaticString s_php_errormsg("php_errormsg");
@@ -291,19 +292,18 @@ FuncAnalysis do_analyze(const Index& index,
 
   ai.closureUseTypes = std::move(collect.closureUseTypes);
 
-  /*
-   * Async functions always return WaitH<T>, where T is the type returned
-   * internally.
-   */
-  if (ctx.func->isAsync) {
-    ai.inferredReturn = wait_handle(index, ai.inferredReturn);
-  }
-
-  /*
-   * Generators always return Generator object.
-   */
   if (ctx.func->isGenerator) {
-    ai.inferredReturn = objExact(index.builtin_class(s_Generator.get()));
+    if (ctx.func->isAsync) {
+      // Async generators always return AsyncGenerator object.
+      ai.inferredReturn = objExact(index.builtin_class(s_AsyncGenerator.get()));
+    } else {
+      // Non-async generators always return Generator object.
+      ai.inferredReturn = objExact(index.builtin_class(s_Generator.get()));
+    }
+  } else if (ctx.func->isAsync) {
+    // Async functions always return WaitH<T>, where T is the type returned
+    // internally.
+    ai.inferredReturn = wait_handle(index, ai.inferredReturn);
   }
 
   /*

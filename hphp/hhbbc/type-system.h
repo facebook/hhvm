@@ -569,6 +569,11 @@ Type aempty();
 Type counted_aempty();
 
 /*
+ * Create an any-countedness empty array type.
+ */
+Type some_aempty();
+
+/*
  * Create types for objects or classes with some known constraint on
  * which res::Class is associated with them.
  */

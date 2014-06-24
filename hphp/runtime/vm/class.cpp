@@ -49,33 +49,6 @@ static FuncIdToClassMap* s_funcIdToClassMap;
 hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
               string_data_hash, string_data_isame> Class::s_extClassHash;
 
-const StringData* PreClass::manglePropName(const StringData* className,
-                                           const StringData* propName,
-                                           Attr              attrs) {
-  switch (attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
-  case AttrPublic: {
-    return propName;
-  }
-  case AttrProtected: {
-    std::string mangledName = "";
-    mangledName.push_back('\0');
-    mangledName.push_back('*');
-    mangledName.push_back('\0');
-    mangledName += propName->data();
-    return makeStaticString(mangledName);
-  }
-  case AttrPrivate: {
-    std::string mangledName = "";
-    mangledName.push_back('\0');
-    mangledName += className->data();
-    mangledName.push_back('\0');
-    mangledName += propName->data();
-    return makeStaticString(mangledName);
-  }
-  default: not_reached();
-  }
-}
-
 const Class* getOwningClassForFunc(const Func* f) {
   // currently we only populate s_funcIdToClassMap
   // when EvalPerfDataMap is true.
@@ -91,160 +64,9 @@ const Class* getOwningClassForFunc(const Func* f) {
 }
 
 //=============================================================================
-// PreClass::Prop.
-
-PreClass::Prop::Prop(PreClass* preClass,
-                     const StringData* n,
-                     Attr attrs,
-                     const StringData* typeConstraint,
-                     const StringData* docComment,
-                     const TypedValue& val,
-                     RepoAuthType repoAuthType)
-  : m_preClass(preClass)
-  , m_name(n)
-  , m_attrs(attrs)
-  , m_typeConstraint(typeConstraint)
-  , m_docComment(docComment)
-  , m_repoAuthType{repoAuthType}
-{
-  m_mangledName = manglePropName(preClass->name(), n, attrs);
-  memcpy(&m_val, &val, sizeof(TypedValue));
-}
-
-void PreClass::Prop::prettyPrint(std::ostream& out) const {
-  out << "Property ";
-  if (m_attrs & AttrStatic) { out << "static "; }
-  if (m_attrs & AttrPublic) { out << "public "; }
-  if (m_attrs & AttrProtected) { out << "protected "; }
-  if (m_attrs & AttrPrivate) { out << "private "; }
-  out << m_preClass->name()->data() << "::" << m_name->data() << " = ";
-  if (m_val.m_type == KindOfUninit) {
-    out << "<non-scalar>";
-  } else {
-    std::stringstream ss;
-    staticStreamer(&m_val, ss);
-    out << ss.str();
-  }
-  out << std::endl;
-}
-
-//=============================================================================
-// PreClass::Const.
-
-PreClass::Const::Const(PreClass* preClass, const StringData* n,
-                       const StringData* typeConstraint,
-                       const TypedValue& val, const StringData* phpCode)
-  : m_preClass(preClass), m_name(n), m_typeConstraint(typeConstraint),
-    m_phpCode(phpCode) {
-  memcpy(&m_val, &val, sizeof(TypedValue));
-}
-
-void PreClass::Const::prettyPrint(std::ostream& out) const {
-  out << "Constant " << m_preClass->name()->data() << "::" << m_name->data()
-      << " = ";
-  if (m_val.m_type == KindOfUninit) {
-    out << "<non-scalar>";
-  } else {
-    std::stringstream ss;
-    staticStreamer(&m_val, ss);
-    out << ss.str();
-  }
-  out << std::endl;
-}
-
-//=============================================================================
-// PreClass.
-
-PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
-                   const StringData* n, Attr attrs, const StringData* parent,
-                   const StringData* docComment, Id id, Hoistable hoistable)
-  : m_unit(unit)
-  , m_line1(line1)
-  , m_line2(line2)
-  , m_offset(o)
-  , m_id(id)
-  , m_attrs(attrs)
-  , m_hoistable(hoistable)
-  , m_name(n)
-  , m_parent(parent)
-  , m_docComment(docComment)
-{
-  m_namedEntity = Unit::GetNamedEntity(n);
-}
-
-PreClass::~PreClass() {
-  std::for_each(methods(), methods() + numMethods(), Func::destroy);
-}
-
-void PreClass::atomicRelease() {
-  delete this;
-}
-
-void PreClass::prettyPrint(std::ostream &out) const {
-  out << "Class ";
-  if (m_attrs & AttrAbstract) { out << "abstract "; }
-  if (m_attrs & AttrFinal) { out << "final "; }
-  if (m_attrs & AttrInterface) { out << "interface "; }
-  out << m_name->data() << " at " << m_offset;
-  if (m_hoistable == MaybeHoistable) {
-    out << " (maybe-hoistable)";
-  } else if (m_hoistable == AlwaysHoistable) {
-    out << " (always-hoistable)";
-  }
-  if (m_attrs & AttrUnique)     out << " (unique)";
-  if (m_attrs & AttrPersistent) out << " (persistent)";
-  if (m_id != -1) {
-    out << " (ID " << m_id << ")";
-  }
-  out << std::endl;
-
-  for (Func* const* it = methods(); it != methods() + numMethods(); ++it) {
-    out << " ";
-    (*it)->prettyPrint(out);
-  }
-  for (const Prop* it = properties();
-      it != properties() + numProperties();
-      ++it) {
-    out << " ";
-    it->prettyPrint(out);
-  }
-  for (const Const* it = constants();
-      it != constants() + numConstants();
-      ++it) {
-    out << " ";
-    it->prettyPrint(out);
-  }
-}
-
-const StaticString s_nativedata("__nativedata");
-void PreClass::setUserAttributes(const UserAttributeMap &ua) {
-  m_userAttributes = ua;
-  m_nativeDataInfo = nullptr;
-  if (!ua.size()) return;
-
-  // Check for <<__NativeData("Type")>>
-  auto it = ua.find(s_nativedata.get());
-  if (it == ua.end()) return;
-
-  TypedValue ndiInfo = it->second;
-  if (ndiInfo.m_type != KindOfArray) return;
-
-  // Use the first string label which references a registered type
-  // In practice, there should generally only be one item and
-  // it should be a string, but maybe that'll be extended...
-  for (ArrayIter it(ndiInfo.m_data.parr); it; ++it) {
-    Variant val = it.second();
-    if (!val.isString()) continue;
-    if ((m_nativeDataInfo = Native::getNativeDataInfo(val.toString().get()))) {
-      break;
-    }
-  }
-}
-
-//=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 392, "Change this only on purpose");
+static_assert(sizeof(Class) == 408, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
@@ -293,12 +115,12 @@ Class::Class(PreClass* preClass, Class* parent,
   setProperties();
   setInitializers();
   setClassVec();
-  checkTraitConstraints();
+  setRequirements();
   setNativeDataInfo();
 }
 
 Class::~Class() {
-  releaseRefs();
+  releaseRefs(); // must be called for Func-nulling side effects
 
   if (m_sPropCache) {
     for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
@@ -316,6 +138,12 @@ Class::~Class() {
   EnumCache::deleteValues(this);
 }
 
+/*
+ * releaseRefs() is called when a Class is put into the zombie state,
+ * to free any references to child classes, interfaces and traits Its
+ * safe to call multiple times, so is also called from the destructor
+ * (in case we bypassed the zombie state).
+ */
 void Class::releaseRefs() {
   /*
    * We have to be careful here.
@@ -350,6 +178,7 @@ void Class::releaseRefs() {
   m_numDeclInterfaces = 0;
   m_declInterfaces.reset();
   m_usedTraits.clear();
+  m_requirements.clear();
 }
 
 void Class::destroy() {
@@ -365,18 +194,22 @@ void Class::destroy() {
   // Only do this once.
   m_cachedClass = RDS::Link<Class*>(RDS::kInvalidHandle);
 
-  PreClass* pcls = m_preClass.get();
-  pcls->namedEntity()->removeClass(this);
   /*
-   * Regardless of refCount, this Class is now unusable.
-   * Release what we can immediately, to allow dependent
-   * classes to be freed.
-   * Needs to be under the lock, because multiple threads
-   * could call destroy
+   * Regardless of refCount, this Class is now unusable.  Remove it
+   * from the class list.
+   *
+   * Needs to be under the lock, because multiple threads could call
+   * destroy, or want to manipulate the class list.  (It's safe for
+   * other threads to concurrently read the class list without the
+   * lock.)
    */
-  releaseRefs();
+  auto const pcls = m_preClass.get();
+  pcls->namedEntity()->removeClass(this);
   Treadmill::enqueue(
-    [this] { if (!this->decAtomicCount()) this->atomicRelease(); }
+    [this] {
+      releaseRefs();
+      if (!this->decAtomicCount()) this->atomicRelease();
+    }
   );
 }
 
@@ -975,9 +808,9 @@ void Class::setSpecial() {
 
 void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
                                MethodToTraitListMap& importMethToTraitMap) {
-  const StringData* methName          = rule.getMethodName();
-  const StringData* selectedTraitName = rule.getSelectedTraitName();
-  auto otherTraitNames = rule.getOtherTraitNames();
+  auto methName          = rule.methodName();
+  auto selectedTraitName = rule.selectedTraitName();
+  auto otherTraitNames   = rule.otherTraitNames();
 
   auto methIter = importMethToTraitMap.find(methName);
   if (methIter == importMethToTraitMap.end()) {
@@ -1060,9 +893,9 @@ const Class::TraitAliasVec& Class::traitAliases() {
   auto const& preClassRules = m_preClass->traitAliasRules();
   if (m_traitAliases.size() != preClassRules.size()) {
     for (auto const& rule : preClassRules) {
-      addTraitAlias(rule.getTraitName(),
-                    rule.getOrigMethodName(),
-                    rule.getNewMethodName());
+      addTraitAlias(rule.traitName(),
+                    rule.origMethodName(),
+                    rule.newMethodName());
     }
   }
   return m_traitAliases;
@@ -1070,9 +903,9 @@ const Class::TraitAliasVec& Class::traitAliases() {
 
 void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
                                 MethodToTraitListMap& importMethToTraitMap) {
-  const StringData* traitName    = rule.getTraitName();
-  const StringData* origMethName = rule.getOrigMethodName();
-  const StringData* newMethName  = rule.getNewMethodName();
+  const StringData* traitName    = rule.traitName();
+  const StringData* origMethName = rule.origMethodName();
+  const StringData* newMethName  = rule.newMethodName();
 
   Class* traitCls = nullptr;
   if (traitName->empty()) {
@@ -1096,11 +929,11 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
 
   Attr ruleModifiers;
   if (origMethName == newMethName) {
-    ruleModifiers = rule.getModifiers();
+    ruleModifiers = rule.modifiers();
     setImportTraitMethodModifiers(importMethToTraitMap[origMethName],
                                   traitCls, ruleModifiers);
   } else {
-    ruleModifiers = rule.getModifiers();
+    ruleModifiers = rule.modifiers();
     TraitMethod traitMethod(traitCls, traitMeth, ruleModifiers);
     if (!Func::isSpecial(newMethName)) {
       importMethToTraitMap[newMethName].push_back(traitMethod);
@@ -1581,16 +1414,23 @@ void Class::setConstants() {
     const PreClass::Const* preConst = &m_preClass->constants()[i];
     ConstMap::Builder::iterator it2 = builder.find(preConst->name());
     if (it2 != builder.end()) {
-      if (!(builder[it2->second].m_class->attrs() & AttrInterface)) {
-        // Overlay ancestor's constant, only if it was not an interface const.
-        builder[it2->second].m_class = this;
-        builder[it2->second].m_val = preConst->val();
-      } else {
-        raise_error("Cannot override previously defined constant %s::%s in %s",
-                  builder[it2->second].m_class->name()->data(),
-                  preConst->name()->data(),
-                  m_preClass->name()->data());
+      auto definingClass = builder[it2->second].m_class;
+      // Forbid redefining constants from interfaces, but not superclasses.
+      // Constants from interfaces implemented by superclasses can be
+      // overridden.
+      if (definingClass->attrs() & AttrInterface) {
+        for (auto interface: declInterfaces()) {
+          if (interface->hasConstant(preConst->name())) {
+            raise_error("Cannot override previously defined constant "
+                        "%s::%s in %s",
+                        builder[it2->second].m_class->name()->data(),
+                        preConst->name()->data(),
+                        m_preClass->name()->data());
+          }
+        }
       }
+      builder[it2->second].m_class = this;
+      builder[it2->second].m_val = preConst->val();
     } else {
       // Append constant.
       Const constant;
@@ -2236,64 +2076,38 @@ void Class::setInterfaces() {
   checkInterfaceMethods();
 }
 
-void Class::setNativeDataInfo() {
-  for (auto cls = this; cls; cls = cls->parent()) {
-    if ((m_nativeDataInfo = cls->preClass()->nativeDataInfo())) {
-      m_instanceCtor = Native::nativeDataInstanceCtor;
-      m_instanceDtor = Native::nativeDataInstanceDtor;
-      break;
+void Class::setRequirements() {
+  RequirementMap::Builder reqBuilder;
+
+  if (m_parent.get() != nullptr) {
+    auto const& parentReqs = m_parent->allRequirements();
+    for (int i = 0, req_size = parentReqs.size(); i < req_size ; ++i) {
+      auto const& req = parentReqs[i];
+      reqBuilder.add(req->name(), req);
     }
   }
-}
 
-unsigned Class::loadUsedTraits(PreClass* preClass,
-                               std::vector<ClassPtr>& usedTraits) {
-  unsigned methodCount = 0;
-  for (auto const& traitName : preClass->usedTraits()) {
-    Class* classPtr = Unit::loadClass(traitName);
-    if (classPtr == nullptr) {
-      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
+    const Class* iface = m_interfaces[i];
+    auto const& ifaceReqs = iface->allRequirements();
+    for (int r = 0, req_size = ifaceReqs.size(); r < req_size ; ++r) {
+      auto const& req = ifaceReqs[r];
+      reqBuilder.add(req->name(), req);
     }
-    if (!(classPtr->attrs() & AttrTrait)) {
-      raise_error("%s cannot use %s - it is not a trait",
-                  preClass->name()->data(),
-                  classPtr->name()->data());
-    }
-
-
-    if (RuntimeOption::RepoAuthoritative) {
-      // In RepoAuthoritative mode (with the WholeProgram compiler
-      // optimizations), the contents of traits are flattened away into the
-      // preClasses of "use"r classes. Continuing here allows us to avoid
-      // unnecessarily attempting to re-import trait methods and
-      // properties, only to fail due to (surprise surprise!) the same
-      // method/property existing on m_preClass.
-      continue;
-    }
-
-    usedTraits.push_back(ClassPtr(classPtr));
-    methodCount += classPtr->m_methods.size();
-
-  }
-  // Trait aliases can increase method count. Get an estimate of
-  // the number of aliased functions.
-  for (auto const& rule : preClass->traitAliasRules()) {
-    auto origName = rule.getOrigMethodName();
-    auto newName = rule.getNewMethodName();
-    if (origName != newName) methodCount++;
   }
 
-  return methodCount;
-}
-
-void Class::checkTraitConstraints() const {
-
-  if (attrs() & AttrInterface) {
-    return; // nothing to do
+  for (auto const& ut : m_usedTraits) {
+    auto const usedTrait = ut.get();
+    auto const& traitReqs = usedTrait->allRequirements();
+    for (int i = 0, req_size = traitReqs.size(); i < req_size ; ++i) {
+      auto const& req = traitReqs[i];
+      reqBuilder.add(req->name(), req);
+    }
   }
 
   if (attrs() & AttrTrait) {
-    for (auto const& req : m_preClass->traitRequirements()) {
+    // Check that requirements are semantically valid
+    for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
       auto const reqCls = Unit::loadClass(reqName);
       if (!reqCls) {
@@ -2319,60 +2133,170 @@ void Class::checkTraitConstraints() const {
                       reqName->data());
         }
       }
+
+      reqBuilder.add(reqName, &req);
     }
-    return;
-  }
-
-  checkTraitConstraintsRec(usedTraitClasses(), nullptr);
-}
-
-void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
-                                     const StringData* recName) const {
-
-  if (!usedTraits.size()) { return; }
-
-  for (auto const& ut : usedTraits) {
-    auto const usedTrait = ut.get();
-    auto const ptrait = usedTrait->preClass();
-
-    for (auto const& req : ptrait->traitRequirements()) {
+  } else if (attrs() & AttrInterface) {
+    // Check that requirements are semantically valid
+    for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
-      if (req.is_extends()) {
-        auto reqExtCls = Unit::lookupClass(reqName);
-        // errors should've been raised for the following when the
-        // usedTrait was first loaded
-        assert(reqExtCls != nullptr);
-        assert(!(reqExtCls->attrs() & (AttrTrait | AttrInterface)));
-
-        if ((m_classVecLen < reqExtCls->m_classVecLen) ||
-            (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls)) {
-          raise_error(Strings::TRAIT_REQ_EXTENDS,
-                      m_preClass->name()->data(),
-                      reqName->data(),
-                      ptrait->name()->data(),
-                      ((recName == nullptr) ? "use" : recName->data()));
-        }
-        continue;
+      auto const reqCls = Unit::loadClass(reqName);
+      if (!reqCls) {
+        raise_error("'%s' required by interface '%s' cannot be loaded",
+                    reqName->data(),
+                    m_preClass->name()->data());
       }
 
-      assert(req.is_implements());
-      if (!ifaceofDirect(reqName)) {
+      assert(req.is_extends());
+      if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
+        raise_error("Interface '%s' requires extension of '%s', but %s "
+                    "is not an extendable class",
+                    m_preClass->name()->data(),
+                    reqName->data(),
+                    reqName->data());
+      }
+      reqBuilder.add(reqName, &req);
+    }
+  }
+
+  m_requirements.create(reqBuilder);
+  checkRequirementConstraints();
+}
+
+void Class::setNativeDataInfo() {
+  for (auto cls = this; cls; cls = cls->parent()) {
+    if ((m_nativeDataInfo = cls->preClass()->nativeDataInfo())) {
+      m_instanceCtor = Native::nativeDataInstanceCtor;
+      m_instanceDtor = Native::nativeDataInstanceDtor;
+      break;
+    }
+  }
+}
+
+unsigned Class::loadUsedTraits(PreClass* preClass,
+                               std::vector<ClassPtr>& usedTraits) {
+  unsigned methodCount = 0;
+  for (auto const& traitName : preClass->usedTraits()) {
+    Class* classPtr = Unit::loadClass(traitName);
+    if (classPtr == nullptr) {
+      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+    }
+    if (!(classPtr->attrs() & AttrTrait)) {
+      raise_error("%s cannot use %s - it is not a trait",
+                  preClass->name()->data(),
+                  classPtr->name()->data());
+    }
+
+    if (RuntimeOption::RepoAuthoritative) {
+      // In RepoAuthoritative mode (with the WholeProgram compiler
+      // optimizations), the contents of traits are flattened away into the
+      // preClasses of "use"r classes. Continuing here allows us to avoid
+      // unnecessarily attempting to re-import trait methods and
+      // properties, only to fail due to (surprise surprise!) the same
+      // method/property existing on m_preClass.
+      continue;
+    }
+
+    usedTraits.push_back(ClassPtr(classPtr));
+    methodCount += classPtr->m_methods.size();
+
+  }
+
+  if (!RuntimeOption::RepoAuthoritative) {
+    // Trait aliases can increase method count. Get an estimate of the
+    // number of aliased functions. This doesn't need to be done in
+    // RepoAuthoritative mode due to trait flattening ensuring that added
+    // methods are already present in the preclass.
+    for (auto const& rule : preClass->traitAliasRules()) {
+      auto origName = rule.origMethodName();
+      auto newName = rule.newMethodName();
+      if (origName != newName) methodCount++;
+    }
+  }
+  return methodCount;
+}
+
+void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  const {
+  assert(!(attrs() & (AttrInterface | AttrTrait)));
+
+  auto const reqName = req->name();
+  if (req->is_implements()) {
+    // "require implements" is only allowed on traits; in repo mode,
+    // m_usedTraits is expected to be empty, but errors due to unsatisfied
+    // "require implements" requirements are expected to be taken care of
+    // as part of RepoAuthoritative mode trait flattening.
+    assert(!RuntimeOption::RepoAuthoritative);
+    assert(m_usedTraits.size() > 0);
+
+    for (auto const& traitCls : m_usedTraits) {
+      if (traitCls->allRequirements().contains(reqName)) {
         raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
                     m_preClass->name()->data(),
                     reqName->data(),
-                    ptrait->name()->data(),
-                    ((recName == nullptr) ? "use" : recName->data()));
+                    traitCls->preClass()->name()->data(),
+                    "use");
+        return;
       }
+    }
+
+    always_assert(false); // requirements cannot spontaneously generate
+    return;
+  }
+
+  assert(req->is_extends());
+  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
+    const Class* iface = m_interfaces[i];
+    if (iface->allRequirements().contains(reqName)) {
+      raise_error("Class '%s' required to extend class '%s'"
+                  " by interface '%s'",
+                  m_preClass->name()->data(),
+                  reqName->data(),
+                  iface->preClass()->name()->data());
+      return;
     }
   }
 
-  // separate loop for recursive checks
-  for (auto const& ut : usedTraits) {
-    Class* usedTrait = ut.get();
-    checkTraitConstraintsRec(
-      usedTrait->usedTraitClasses(),
-      recName == nullptr ? usedTrait->preClass()->name() : recName
-    );
+  for (auto const& traitCls : m_usedTraits) {
+    if (traitCls->allRequirements().contains(reqName)) {
+      raise_error(Strings::TRAIT_REQ_EXTENDS,
+                  m_preClass->name()->data(),
+                  reqName->data(),
+                  traitCls->preClass()->name()->data(),
+                  "use");
+      return;
+    }
+  }
+
+  // calls to this method are expected to come as a result of an error due
+  // to a requirement coming from traits or interfaces
+  always_assert(false);
+}
+
+void Class::checkRequirementConstraints() const {
+
+  if (attrs() & (AttrInterface | AttrTrait)) {
+    return; // nothing to do
+  }
+
+  for (int i = 0, req_size = m_requirements.size(); i < req_size ; ++i) {
+    auto const& req = m_requirements[i];
+    auto const reqName = req->name();
+    if (req->is_implements()) {
+      if (UNLIKELY(!ifaceofDirect(reqName))) {
+        raiseUnsatisfiedRequirement(req);
+      }
+    } else {
+      auto reqExtCls = Unit::lookupClass(reqName);
+      // errors should've been raised for the following when the
+      // usedTrait was first loaded
+      assert(reqExtCls != nullptr);
+      assert(!(reqExtCls->attrs() & (AttrTrait | AttrInterface)));
+
+      if (UNLIKELY((m_classVecLen < reqExtCls->m_classVecLen) ||
+                   (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls))) {
+        raiseUnsatisfiedRequirement(req);
+      }
+    }
   }
 }
 

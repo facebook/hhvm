@@ -243,7 +243,7 @@ Klein\Tests\ServiceProviderTest::testBinder
 Klein\Tests\ServiceProviderTest::testConstructor
 .
 Klein\Tests\ServiceProviderTest::testEscapeCharacters
-F
+.
 Klein\Tests\ServiceProviderTest::testLayoutGetSet
 .
 Klein\Tests\ServiceProviderTest::testMagicGetSetExistsRemove

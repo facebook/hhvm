@@ -34,6 +34,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
            opc == ReDefSP ||
            opc == Call ||
            opc == CallArray ||
+           opc == ContEnter ||
            opc == SpillStack ||
            opc == SpillFrame ||
            opc == CufIterSpillFrame ||

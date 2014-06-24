@@ -92,6 +92,23 @@ inline const StringData* Func::originalFilename() const {
   return shared()->m_originalFilename;
 }
 
+inline const StringData* Func::filename() const {
+  // Builtins don't have filenames
+  if (isBuiltin()) {
+    return staticEmptyString();
+  }
+
+  // Use the original filename if it exists, otherwise grab the filename from
+  // the unit
+  const StringData* name = originalFilename();
+  if (!name) {
+    assert(m_unit);
+    name = m_unit->filepath();
+    assert(name);
+  }
+  return name;
+}
+
 inline int Func::line1() const {
   return shared()->m_line1;
 }

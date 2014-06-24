@@ -25,7 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class HttpServer : public Synchronizable, public TakeoverListener {
+class HttpServer : public Synchronizable, public TakeoverListener,
+                   public Server::ServerEventListener {
 public:
   static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
@@ -52,6 +53,8 @@ public:
   void watchDog();
 
   void takeoverShutdown() override;
+
+  void serverStopped(HPHP::Server* server) override;
 
   HPHP::Server *getPageServer() { return m_pageServer.get(); }
   void getSatelliteStats(std::vector<std::pair<std::string, int>> *stats);

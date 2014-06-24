@@ -383,6 +383,10 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   }
 }
 
+// a constant for arrayobjects that changes the way the array is
+// converted to an object
+const int64_t ARRAYOBJ_STD_PROP_LIST = 1;
+
 Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
@@ -411,9 +415,21 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
     assert(instanceof(c_SimpleXMLElement::classof()));
     return c_SimpleXMLElement::ToArray(this);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
+    bool visible, accessible, unset;
+    auto flags = this->getProp(
+      SystemLib::s_ArrayObjectClass, StaticString("flags").get(),
+      visible, accessible, unset);
+    if (UNLIKELY(!unset && flags->m_type == KindOfInt64 &&
+                 flags->m_data.num == ARRAYOBJ_STD_PROP_LIST)) {
+      Array ret(ArrayData::Create());
+      o_getArray(ret, true);
+      return ret;
+    }
     return convert_to_array(this, SystemLib::s_ArrayObjectClass);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
     return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
+  } else if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+    return Array::Create(Object(const_cast<ObjectData*>(this)));
   } else {
     Array ret(ArrayData::Create());
     o_getArray(ret, pubOnly);
@@ -421,10 +437,37 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
   }
 }
 
+namespace {
+
+size_t getPropertyIfAccessible(ObjectData* obj,
+                               Class* ctx,
+                               const StringData* key,
+                               bool getRef,
+                               Array& properties,
+                               size_t propLeft) {
+  bool visible, accessible, unset;
+  auto val = obj->getProp(ctx, key, visible, accessible, unset);
+  if (accessible && val->m_type != KindOfUninit && !unset) {
+    --propLeft;
+    if (getRef) {
+      if (val->m_type != KindOfRef) {
+        tvBox(val);
+      }
+      properties.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
+    } else {
+      properties.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
+    }
+  }
+  return propLeft;
+}
+
+}
+
 Array ObjectData::o_toIterArray(const String& context,
                                 bool getRef /* = false */) {
   Array* dynProps = nullptr;
-  size_t size = m_cls->declPropNumAccessible();
+  size_t accessibleProps = m_cls->declPropNumAccessible();
+  size_t size = accessibleProps;
   if (getAttribute(HasDynPropArr)) {
     dynProps = &dynPropArray();
     size += dynProps->size();
@@ -445,20 +488,23 @@ Array ObjectData::o_toIterArray(const String& context,
 
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
-      bool visible, accessible, unset;
-      auto val = getProp(ctx, key, visible, accessible, unset);
-      if (accessible && val->m_type != KindOfUninit && !unset) {
-        if (getRef) {
-          if (val->m_type != KindOfRef) {
-            tvBox(val);
-          }
-          retArray.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
-        } else {
-          retArray.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
-        }
-      }
+      accessibleProps = getPropertyIfAccessible(
+          this, ctx, key, getRef, retArray, accessibleProps);
     }
     klass = klass->parent();
+  }
+  if (!RuntimeOption::RepoAuthoritative && accessibleProps > 0) {
+    // we may have properties from traits
+    const auto* props = m_cls->declProperties();
+    auto numDeclProp = m_cls-> numDeclProperties();
+    for (size_t i = 0; i < numDeclProp; i++) {
+      const auto* key = props[i].m_name.get();
+      if (!retArray.get()->exists(key)) {
+        accessibleProps = getPropertyIfAccessible(
+            this, ctx, key, getRef, retArray, accessibleProps);
+        if (accessibleProps == 0) break;
+      }
+    }
   }
 
   // Now get dynamic properties.
@@ -626,6 +672,14 @@ inline Array getSerializeProps(const ObjectData* obj,
     // When ArrayIterator is casted to an array, it return it's array object,
     // however when it's being var_dump'd or print_r'd, it shows it's properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
+      Array ret(ArrayData::Create());
+      obj->o_getArray(ret);
+      return ret;
+    }
+
+    // Same with Closure, since it's a dynamic object but still has it's own
+    // different behavior for var_dump and cast to array
+    if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
       Array ret(ArrayData::Create());
       obj->o_getArray(ret);
       return ret;

@@ -160,8 +160,20 @@ Type typeIncDec(IncDecOp op, Type t) {
     if (t.subtypeOf(TDbl)) return TDbl;
 
     // Ints stay ints unless they can overflow to doubles
-    if (t.subtypeOf(TInt) && !overflowToDbl) return TInt;
+    if (t.subtypeOf(TInt)) {
+      return overflowToDbl ? TNum : TInt;
+    }
 
+    // Null goes to 1 on ++, stays null on --. Uninit is folded to init.
+    if (t.subtypeOf(TNull)) {
+      return isInc(op) ? ival(1) : TInitNull;
+    }
+
+    // No-op on bool, array, resource, object.
+    if (t.subtypeOfAny(TBool, TArr, TRes, TObj)) return t;
+
+    // Last unhandled case: strings. These result in Int|Str because of the
+    // behavior on strictly-numeric strings, and we can't express that yet.
     return TInitCell;
   }
 

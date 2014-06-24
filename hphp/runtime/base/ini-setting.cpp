@@ -72,7 +72,7 @@ static std::string dynamic_to_std_string(const folly::dynamic& v) {
     case folly::dynamic::Type::BOOL:
       return std::to_string(v.asBool());
     case folly::dynamic::Type::DOUBLE:
-      return std::to_string(v.asDouble());
+      return convDblToStrWithPhpFormat(v.asDouble());
     case folly::dynamic::Type::INT64:
       return std::to_string(v.asInt());
     case folly::dynamic::Type::STRING:
@@ -733,6 +733,15 @@ bool IniSetting::ResetSystemDefault(const std::string& name) {
     return false;
   }
   return ini_set(name, it->second, PHP_INI_SET_EVERY);
+}
+
+bool IniSetting::GetMode(const std::string& name, Mode& mode) {
+  auto cb = get_callback(name);
+  if (!cb) {
+    return false;
+  }
+  mode = cb->mode;
+  return true;
 }
 
 Array IniSetting::GetAll(const String& ext_name, bool details) {

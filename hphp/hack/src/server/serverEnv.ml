@@ -32,12 +32,8 @@ type env = {
     files_info     : FileInfo.t SMap.t;
     nenv           : Naming.env;
     errorl         : Errors.t;
-    (* skip errors at initialization *)
-    skip           : bool ref;
-    (* the strings in those sets represent filenames *)
+    (* the strings in the set represent filenames *)
     failed_parsing : SSet.t;
-    failed_decl    : SSet.t;
-    failed_check   : SSet.t;
   }
 
 (*****************************************************************************)
@@ -53,8 +49,8 @@ let die() =
 
 let list_files env oc =
   let acc = List.fold_right begin
-    fun p acc ->
-      let pos, _ = List.hd p in
+    fun error acc ->
+      let pos = Errors.get_pos error in
       SSet.add pos.Pos.pos_file acc
   end env.errorl SSet.empty in
   SSet.iter (fun (s) -> Printf.fprintf oc "%s\n" s) acc;

@@ -746,6 +746,16 @@ Type ldRefReturn(const IRInstruction* inst) {
   // Guarding on specialized types and uncommon unions like {Int|Bool} is
   // expensive enough that we only want to do it in situations where we've
   // manually confirmed the benefit.
+
+  if (inst->typeParam().strictSubtypeOf(Type::Obj) &&
+      inst->typeParam().getClass()->attrs() & AttrFinal &&
+      inst->typeParam().getClass()->isCollectionClass()) {
+    /*
+     * This case is needed for the minstr-translator.
+     * see MInstrTranslator::checkMIState().
+     */
+    return inst->typeParam();
+  }
   auto type = inst->typeParam().unspecialize();
 
   if (type.isKnownDataType())      return type;

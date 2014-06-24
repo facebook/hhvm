@@ -1,17 +1,17 @@
 %{
+// macros for bison
+#define YYSTYPE HPHP::HPHP_PARSER_NS::Token
+#define YYSTYPE_IS_TRIVIAL false
+#define YYLTYPE HPHP::Location
+#define YYLTYPE_IS_TRIVIAL true
+#define YYERROR_VERBOSE
+#define YYINITDEPTH 500
+#define YYLEX_PARAM _p
+
 #include "hphp/compiler/parser/parser.h"
 #include <boost/lexical_cast.hpp>
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
-
-// macros for bison
-#define YYSTYPE HPHP::HPHP_PARSER_NS::Token
-#define YYSTYPE_IS_TRIVIAL 1
-#define YYLTYPE HPHP::Location
-#define YYLTYPE_IS_TRIVIAL 1
-#define YYERROR_VERBOSE
-#define YYINITDEPTH 500
-#define YYLEX_PARAM _p
 
 #ifdef yyerror
 #undef yyerror
@@ -1455,9 +1455,9 @@ class_statement:
   | T_XHP_CHILDREN
     xhp_children_stmt ';'              { xhp_children_stmt(_p,$$,$2);}
   | T_REQUIRE T_EXTENDS fully_qualified_class_name  ';'
-                                       { _p->onTraitRequire($$, $3, true); }
+                                       { _p->onClassRequire($$, $3, true); }
   | T_REQUIRE T_IMPLEMENTS fully_qualified_class_name ';'
-                                       { _p->onTraitRequire($$, $3, false); }
+                                       { _p->onClassRequire($$, $3, false); }
   | T_USE trait_list ';'               { Token t; t.reset();
                                          _p->onTraitUse($$,$2,t); }
   | T_USE trait_list '{'
@@ -2755,16 +2755,22 @@ hh_typeargs_opt:
   |                                    { $$.reset(); }
 ;
 
-hh_type_list:
+hh_non_empty_type_list:
     hh_type                            { Token t; t.reset();
                                          _p->onTypeList($1, t);
                                          $$ = $1; }
-  | hh_type_list ',' hh_type           { _p->onTypeList($1, $3);
+  | hh_non_empty_type_list ',' hh_type { _p->onTypeList($1, $3);
                                          $$ = $1; }
 ;
 
+hh_type_list:
+    hh_non_empty_type_list
+    possible_comma                     { $$ = $1; }
+;
+
 hh_func_type_list:
-  hh_type_list ',' T_ELLIPSIS          { $$ = $1; }
+    hh_non_empty_type_list
+    ',' T_ELLIPSIS                     { $$ = $1; }
   | hh_type_list                       { $$ = $1; }
   | T_ELLIPSIS                         { $$.reset(); }
   |                                    { $$.reset(); }
@@ -2842,7 +2848,9 @@ hh_type:
                                         _p->onTypeList($7, $4);
                                         _p->onTypeAnnotation($$, $2, $7);
                                         _p->onTypeSpecialization($$, 'f'); }
-  | '(' hh_type_list ',' hh_type ')'  { only_in_hh_syntax(_p);
+  | '(' hh_type ','
+    hh_non_empty_type_list
+    possible_comma ')'                { only_in_hh_syntax(_p);
                                         _p->onTypeList($2, $4);
                                         Token t; t.reset(); t.setText("array");
                                         _p->onTypeAnnotation($$, t, $2);

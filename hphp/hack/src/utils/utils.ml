@@ -207,8 +207,8 @@ let rec make_list f n =
   else f() :: make_list f (n-1)
 
 let safe_ios p s =
-  try int_of_string s
-  with _ -> Errors.add p "Value is too large"; -1
+  try Some (int_of_string s)
+  with _ -> None
 
 let sl l =
   List.fold_right (^) l ""
@@ -312,4 +312,3 @@ let rec iter2_shortest f l1 l2 =
   match l1, l2 with
   | [], _ | _, [] -> ()
   | x1 :: rl1, x2 :: rl2 -> f x1 x2; iter2_shortest f rl1 rl2
-

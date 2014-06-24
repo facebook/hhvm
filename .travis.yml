@@ -14,7 +14,7 @@ services:
 
 # Commands before installing prerequisites
 before_script:
-  - time TRAVIS=1 ./configure_generic.sh
+  - time TRAVIS=1 ./configure_generic.sh -DENABLE_COTIRE=ON
 # for some tests
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time make -j 6
@@ -24,6 +24,9 @@ before_script:
   - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=hhvm"
   - export PDO_MYSQL_TEST_USER="travis"
   - export PDO_MYSQL_TEST_PASS=""
+# For PHP5 mysqli tests
+  - export MYSQL_TEST_USER="travis"
+  - export MYSQL_TEST_DB="hhvm"
 
 # The larger test suites (slow, zend) take longer than 50 minutes to run. Since
 # we have no way to change the timeout, we subdivide the jit/interp repo/normal

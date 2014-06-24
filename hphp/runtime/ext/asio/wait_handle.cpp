@@ -33,18 +33,11 @@ void c_WaitHandle::t___construct() {
 }
 
 void c_WaitHandle::ti_setonjoincallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set WaitHandle::onJoin: on_join_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnJoinCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnJoinCallback(callback);
 }
 
 Object c_WaitHandle::t_getwaithandle() {
-  const_assert(false);
+  always_assert(false);
 }
 
 // throws if cross-context cycle found

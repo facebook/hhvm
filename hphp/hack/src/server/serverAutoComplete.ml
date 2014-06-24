@@ -50,6 +50,8 @@ let restore() =
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.argument_global_type := None;
+  Autocomplete.auto_complete_pos := None;
+  Autocomplete.auto_complete_vars := SMap.empty;
   ()
       
 let setup() =
@@ -57,9 +59,12 @@ let setup() =
   Autocomplete.auto_complete_for_global := "";
   Autocomplete.auto_complete_result := SMap.empty;
   Autocomplete.argument_global_type := None;
+  Autocomplete.auto_complete_pos := None;
+  Autocomplete.auto_complete_vars := SMap.empty;
   ()
 
 let auto_complete env content oc =
+  AutocompleteService.attach_hooks();
   let funs, classes = ServerIdeUtils.declare content in
   let nenv = env.ServerEnv.nenv in
   let dummy_pos = Pos.none, Ident.foo in
@@ -100,4 +105,5 @@ let auto_complete env content oc =
     Printf.fprintf oc "%s\n" k; flush oc;
   end (List.rev result);
   restore();
+  AutocompleteService.detach_hooks();
   ()

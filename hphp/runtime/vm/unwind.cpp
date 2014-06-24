@@ -22,6 +22,9 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator.h"
+#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -169,51 +172,54 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     fp->getThis()->setNoDestruct();
   }
 
-  /*
-   * It is possible that locals have already been decref'd.
-   *
-   * Here's why:
-   *
-   *   - If a destructor for any of these things throws a php
-   *     exception, it's swallowed at the dtor boundary and we keep
-   *     running php.
-   *
-   *   - If the destructor for any of these things throws a fatal,
-   *     it's swallowed, and we set surprise flags to throw a fatal
-   *     from now on.
-   *
-   *   - If the second case happened and we have to run another
-   *     destructor, its enter hook will throw, but it will be
-   *     swallowed again.
-   *
-   *   - Finally, the exit hook for the returning function can
-   *     throw, but this happens last so everything is destructed.
-   *
-   *   - When that happens, exit hook sets localsDecRefd flag.
-   */
-  if (!fp->localsDecRefd()) {
-    try {
-      // Note that we must convert locals and the $this to
-      // uninit/zero during unwind.  This is because a backtrace
-      // from another destructing object during this unwind may try
-      // to read them.
-      frame_free_locals_unwind(fp, func->numLocals(), fault);
-    } catch (...) {}
-  }
+  auto const decRefLocals = [&] {
+    /*
+     * It is possible that locals have already been decref'd.
+     *
+     * Here's why:
+     *
+     *   - If a destructor for any of these things throws a php
+     *     exception, it's swallowed at the dtor boundary and we keep
+     *     running php.
+     *
+     *   - If the destructor for any of these things throws a fatal,
+     *     it's swallowed, and we set surprise flags to throw a fatal
+     *     from now on.
+     *
+     *   - If the second case happened and we have to run another
+     *     destructor, its enter hook will throw, but it will be
+     *     swallowed again.
+     *
+     *   - Finally, the exit hook for the returning function can
+     *     throw, but this happens last so everything is destructed.
+     *
+     *   - When that happens, exit hook sets localsDecRefd flag.
+     */
+    if (!fp->localsDecRefd()) {
+      try {
+        // Note that we must convert locals and the $this to
+        // uninit/zero during unwind.  This is because a backtrace
+        // from another destructing object during this unwind may try
+        // to read them.
+        frame_free_locals_unwind(fp, func->numLocals(), fault);
+      } catch (...) {}
+    }
+  };
 
   auto action = UnwindAction::Propagate;
 
   if (LIKELY(!fp->resumed())) {
+    decRefLocals();
     if (UNLIKELY(func->isAsyncFunction()) &&
         fault.m_faultType == Fault::Type::UserException) {
       // If in an eagerly executed async function, wrap the user exception
       // into a failed StaticWaitHandle and return it to the caller.
-      auto const e = fault.m_userException;
+      auto const exception = fault.m_userException;
+      auto const waitHandle = c_StaticWaitHandle::CreateFailed(exception);
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
       assert(stack.topTV() == &fp->m_r);
-      tvWriteObject(c_StaticWaitHandle::CreateFailed(e), &fp->m_r);
-      e->decRefCount();
+      cellCopy(make_tv<KindOfObject>(waitHandle), fp->m_r);
       action = UnwindAction::ResumeVM;
     } else {
       // Free ActRec.
@@ -224,17 +230,36 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     auto const waitHandle = frame_afwh(fp);
     if (fault.m_faultType == Fault::Type::UserException) {
       // Handle exception thrown by async function.
+      decRefLocals();
       waitHandle->fail(fault.m_userException);
       action = UnwindAction::ResumeVM;
-    } else {
-      // Fail the async function and let the C++ exception propagate.
-      waitHandle->fail(AsioSession::Get()->getAbruptInterruptException());
+    } else if (waitHandle->isRunning()) {
+      // Let the C++ exception propagate. If the current frame represents async
+      // function that is running, mark it as abruptly interrupted. Some opcodes
+      // like Await may change state of the async function just before exit hook
+      // decides to throw C++ exception.
+      decRefLocals();
+      waitHandle->failCpp();
     }
   } else if (func->isAsyncGenerator()) {
-    // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
+    auto const gen = frame_async_generator(fp);
+    if (fault.m_faultType == Fault::Type::UserException) {
+      // Handle exception thrown by async generator.
+      decRefLocals();
+      auto eagerResult = gen->fail(fault.m_userException);
+      if (eagerResult) {
+        stack.pushObjectNoRc(eagerResult);
+      }
+      action = UnwindAction::ResumeVM;
+    } else if (gen->isEagerlyExecuted() || gen->getWaitHandle()->isRunning()) {
+      // Fail the async generator and let the C++ exception propagate.
+      decRefLocals();
+      gen->failCpp();
+    }
   } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished.
-    frame_generator(fp)->finish();
+    decRefLocals();
+    frame_generator(fp)->fail();
   } else {
     not_reached();
   }
@@ -451,21 +476,24 @@ UnwindAction unwind(ActRec*& fp,
 
 const StaticString s_hphpd_break("hphpd_break");
 const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
+const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
 
 // Unwind the frame for a builtin.  Currently only used when switching
-// modes for hphpd_break and fb_enable_code_coverage.
+// modes for hphpd_break, fb_enable_code_coverage, and
+// xdebug_start_code_coverage
 void unwindBuiltinFrame() {
   auto& stack = vmStack();
   auto& fp = vmfp();
 
-  assert(fp->m_func->methInfo());
   assert(fp->m_func->name()->isame(s_hphpd_break.get()) ||
-         fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
+         fp->m_func->name()->isame(s_fb_enable_code_coverage.get()) ||
+         fp->m_func->name()->isame(s_xdebug_start_code_coverage.get()));
 
   // Free any values that may be on the eval stack.  We know there
   // can't be FPI regions and it can't be a generator body because
   // it's a builtin frame.
-  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp());
+  const int numSlots = fp->m_func->numSlotsInFrame();
+  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp()) - numSlots;
   while (stack.topTV() < evalTop) {
     stack.popTV();
   }
@@ -480,6 +508,7 @@ void unwindBuiltinFrame() {
   assert(pc != -1);
   fp = sfp;
   vmpc() = fp->m_func->unit()->at(pc);
+  stack.ndiscard(numSlots);
   stack.discardAR();
   stack.pushNull(); // return value
 }

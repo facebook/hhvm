@@ -242,8 +242,7 @@ let none = Rnone
 (* When the subtyping fails because of a constraint. *)
 (*****************************************************************************)
 
-let explain_generic_constraint reason name messagel =
+let explain_generic_constraint reason name error =
   let pos = to_pos reason in
-  Errors.add_list
-    (messagel @ [pos, "Considering the constraint on the type '"^name^"'"])
+  Errors.explain_constraint pos name error
 

@@ -594,7 +594,7 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
   return tokid;
 }
 
-int Scanner::read(char *text, int &result, int max) {
+int Scanner::read(char *text, yy_size_t &result, yy_size_t max) {
   if (m_stream) {
     if (!m_stream->eof()) {
       m_stream->read(text, max);
@@ -615,6 +615,14 @@ int Scanner::read(char *text, int &result, int max) {
   }
   return (result = 0);
 }
+
+int Scanner::read(char *text, int &result, yy_size_t max) {
+  yy_size_t tmp;
+  auto const ret = read(text, tmp, max);
+  result = tmp;
+  return ret;
+}
+
 
 void Scanner::error(const char* fmt, ...) {
   va_list ap;

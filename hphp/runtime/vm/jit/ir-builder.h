@@ -173,6 +173,11 @@ struct IRBuilder {
    */
   void setBlock(Offset offset, Block* block);
 
+  /*
+   * Clear the state associated with the given block.
+   */
+  void clearBlockState(Block* block);
+
  public:
   /*
    * To emit code to a block other than the current block, call pushBlock(),

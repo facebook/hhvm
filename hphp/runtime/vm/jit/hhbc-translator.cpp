@@ -439,6 +439,72 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
   m_lastBcOff = lastBcOff;
 }
 
+void HhbcTranslator::emitSingletonSProp(const Func* func,
+                                        const Op* clsOp,
+                                        const Op* propOp) {
+  assert(*clsOp == Op::String);
+  assert(*propOp == Op::String);
+
+  TransFlags trflags;
+  trflags.noinlineSingleton = true;
+
+  auto exitBlock = makeExit(trflags);
+  auto catchBlock = makeCatch();
+
+  // Pull the class and property names.
+  auto const unit = func->unit();
+  auto const clsName  = unit->lookupLitstrId(getImmPtr(clsOp,  0)->u_SA);
+  auto const propName = unit->lookupLitstrId(getImmPtr(propOp, 0)->u_SA);
+
+  // Make sure we have a valid class.
+  auto const cls = Unit::lookupClass(clsName);
+  if (UNLIKELY(!classHasPersistentRDS(cls))) {
+    PUNT(SingletonSProp-Persistent);
+  }
+
+  // Make sure the sprop is accessible from the singleton method's context.
+  bool visible, accessible;
+  cls->findSProp(func->cls(), propName, visible, accessible);
+
+  if (UNLIKELY(!visible || !accessible)) {
+    PUNT(SingletonSProp-Accessibility);
+  }
+
+  // Look up the static property.
+  auto const sprop   = ldClsPropAddrKnown(catchBlock, cns(cls), cns(propName));
+  auto const unboxed = gen(UnboxPtr, sprop);
+  auto const value   = gen(LdMem, unboxed->type().deref(), unboxed, cns(0));
+
+  // Side exit if the static property is null.
+  auto isnull = gen(IsType, Type::Null, value);
+  gen(JmpNZero, exitBlock, isnull);
+
+  // Return the singleton.
+  pushIncRef(value);
+}
+
+void HhbcTranslator::emitSingletonSLoc(const Func* func, const Op* op) {
+  assert(*op == Op::StaticLocInit);
+
+  TransFlags trflags;
+  trflags.noinlineSingleton = true;
+
+  auto exit = makeExit(trflags);
+  auto const name = func->unit()->lookupLitstrId(getImmPtr(op, 1)->u_SA);
+
+  // Side exit if the static local is uninitialized.
+  auto const box = gen(LdStaticLocCached, StaticLocName { func, name });
+  gen(CheckStaticLocInit, exit, box);
+
+  // Side exit if the static local is null.
+  auto value = gen(LdRef, Type::Cell, exit, box);
+  auto isnull = gen(IsType, Type::Null, value);
+  gen(JmpNZero, exit, isnull);
+
+  // Return the singleton.
+  pushIncRef(value);
+}
+
 void HhbcTranslator::emitPrint() {
   Type type = topC()->type();
   if (type.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Str)) {
@@ -547,6 +613,30 @@ void HhbcTranslator::emitNewArray(int capacity) {
   } else {
     push(gen(NewArray, cns(capacity)));
   }
+}
+
+void HhbcTranslator::emitNewMixedArray(int capacity) {
+  if (capacity == 0) {
+    push(cns(staticEmptyArray()));
+  } else {
+    push(gen(NewMixedArray, cns(capacity)));
+  }
+}
+
+void HhbcTranslator::emitNewLikeArrayL(int id, int capacity) {
+  auto const ldrefExit = makeExit();
+  auto const ldgblExit = makeExit();
+  auto const ld = ldLocInner(id, ldrefExit, ldgblExit, DataTypeSpecific);
+
+  SSATmp* arr;
+
+  if (ld->isA(Type::Arr)) {
+    arr = gen(NewLikeArray, ld, cns(capacity));
+  } else {
+    capacity = (capacity ? capacity : MixedArray::SmallSize);
+    arr = gen(NewArray, cns(capacity));
+  }
+  push(arr);
 }
 
 void HhbcTranslator::emitNewPackedArray(int numArgs) {
@@ -1538,7 +1628,7 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
     emitJmpCondHelper(offset, true, res);
   } else {
     gen(DecRef, src);
-    emitJmp(offset, true, nullptr);
+    emitJmpImpl(offset, JmpFlagBreakTracelet, nullptr);
   }
 }
 
@@ -1566,7 +1656,9 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
 
 void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   assert(!resumed());
-  assert(curFunc()->isNonAsyncGenerator());
+  assert(curFunc()->isGenerator());
+
+  if (curFunc()->isAsyncGenerator()) PUNT(CreateCont-AsyncGenerator);
 
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
@@ -1597,7 +1689,8 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
 void HhbcTranslator::emitContEnter(Offset returnOffset) {
   assert(curClass());
-  assert(curClass()->classof(c_Generator::classof()));
+  assert(curClass()->classof(c_AsyncGenerator::classof()) ||
+         curClass()->classof(c_Generator::classof()));
   assert(curFunc()->contains(returnOffset));
 
   // Load generator's FP and resume address.
@@ -1619,12 +1712,12 @@ void HhbcTranslator::emitContEnter(Offset returnOffset) {
   // Enter generator.
   auto returnBcOffset = returnOffset - curFunc()->base();
   gen(ContEnter, sp, m_irb->fp(), genFp, resumeAddr, cns(returnBcOffset));
-
-  // The top of the stack was consumed by the generator.
-  popC(DataTypeGeneric);
 }
 
-void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
+void HhbcTranslator::emitYieldReturnControl(Block* catchBlock) {
+  // Push return value of next()/send()/raise().
+  push(cns(Type::InitNull));
+
   auto const sp = spillStack();
   emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlock, true);
 
@@ -1651,12 +1744,16 @@ void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
 
   // Set state from Running to Started.
   gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-      cns(c_Generator::Started));
+      cns(BaseGenerator::State::Started));
 }
 
 void HhbcTranslator::emitYield(Offset resumeOffset) {
-  auto catchBlock = makeCatchNoSpill();
+  assert(resumed());
+  assert(curFunc()->isGenerator());
 
+  if (curFunc()->isAsyncGenerator()) PUNT(Yield-AsyncGenerator);
+
+  auto catchBlock = makeCatchNoSpill();
   emitYieldImpl(resumeOffset);
 
   // take a fast path if this generator has no yield k => v;
@@ -1676,10 +1773,15 @@ void HhbcTranslator::emitYield(Offset resumeOffset) {
   }
 
   // transfer control
-  emitResumedReturnControl(catchBlock);
+  emitYieldReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitYieldK(Offset resumeOffset) {
+  assert(resumed());
+  assert(curFunc()->isGenerator());
+
+  if (curFunc()->isAsyncGenerator()) PUNT(YieldK-AsyncGenerator);
+
   auto catchBlock = makeCatchNoSpill();
   emitYieldImpl(resumeOffset);
 
@@ -1694,11 +1796,13 @@ void HhbcTranslator::emitYieldK(Offset resumeOffset) {
   }
 
   // transfer control
-  emitResumedReturnControl(catchBlock);
+  emitYieldReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitContCheck(bool checkStarted) {
   assert(curClass());
+  assert(curClass()->classof(c_AsyncGenerator::classof()) ||
+         curClass()->classof(c_Generator::classof()));
   SSATmp* cont = gen(LdThis, m_irb->fp());
   gen(ContPreNext, makeExitSlow(), cont, cns(checkStarted));
 }
@@ -1761,7 +1865,7 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
 }
 
 void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
-                                Block* catchBlockNoSpill, Offset resumeOffset) {
+                                Offset resumeOffset) {
   assert(curFunc()->isAsync());
   assert(resumed());
   assert(child->isA(Type::Obj));
@@ -1782,7 +1886,9 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
 
   // Transfer control back to the scheduler.
   auto const sp = spillStack();
-  emitRetSurpriseCheck(m_irb->fp(), nullptr, catchBlockNoSpill, true);
+  push(cns(Type::InitNull));
+  emitRetSurpriseCheck(m_irb->fp(), nullptr, makeCatch(), true);
+  popC();
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
@@ -1793,8 +1899,9 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
 void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
   assert(curFunc()->isAsync());
 
+  if (curFunc()->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
+
   auto const catchBlock = makeCatch();
-  auto const catchBlockNoSpill = resumed() ? makeCatchNoSpill() : nullptr;
   auto const exitSlow   = makeExitSlow();
 
   if (!topC()->isA(Type::Obj)) PUNT(Await-NonObject);
@@ -1815,7 +1922,7 @@ void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
     },
     [&] { // Next: the wait handle is not finished, we need to suspend
       if (resumed()) {
-        emitAwaitR(child, catchBlock, catchBlockNoSpill, resumeOffset);
+        emitAwaitR(child, catchBlock, resumeOffset);
       } else {
         emitAwaitE(child, catchBlock, resumeOffset, numIters);
       }
@@ -2022,37 +2129,34 @@ void HhbcTranslator::emitDup() {
   pushIncRef(topC());
 }
 
-void HhbcTranslator::emitJmp(int32_t offset,
-                             bool breakTracelet,
-                             Block* catchBlock) {
+void HhbcTranslator::emitJmpImpl(int32_t offset,
+                                 JmpFlags flags,
+                                 Block* catchBlock) {
   // If surprise flags are set, exit trace and handle surprise
   bool backward = static_cast<uint32_t>(offset) <= bcOff();
   if (backward && catchBlock) {
     emitJmpSurpriseCheck(catchBlock);
   }
   if (genMode() == IRGenMode::CFG) {
-    // TODO(t3730057): Optimize away spillstacks and fallthrough
-    // jumps, either by doing something clever here or adding to
-    // jumpopts.
-    exceptionBarrier();
-    auto target = (breakTracelet
-                   || m_irb->blockIsIncompatible(offset))
+    if (flags & JmpFlagNextIsMerge) {
+      exceptionBarrier();
+    }
+    auto target =
+      (!m_irb->blockExists(offset) || m_irb->blockIsIncompatible(offset))
       ? makeExit(offset)
       : makeBlock(offset);
     assert(target != nullptr);
     gen(Jmp, target);
     return;
   }
-  if (!breakTracelet) return;
+  if (!(flags & JmpFlagBreakTracelet)) return;
   gen(Jmp, makeExit(offset));
 }
 
-void HhbcTranslator::emitJmp(int32_t offset,
-                             bool breakTracelet,
-                             bool noSurprise) {
-  emitJmp(offset, breakTracelet, noSurprise ? nullptr : makeCatch());
+void HhbcTranslator::emitJmp(int32_t offset, JmpFlags flags) {
+  emitJmpImpl(offset, flags,
+              flags & JmpFlagSurprise ? makeCatch() : nullptr);
 }
-
 
 SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
                                           bool negate,
@@ -2068,20 +2172,19 @@ SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
 void HhbcTranslator::emitJmpHelper(int32_t taken,
                                    int32_t next,
                                    bool negate,
-                                   bool bothPaths,
-                                   bool breaksTracelet,
+                                   JmpFlags flags,
                                    SSATmp* src) {
-  if (breaksTracelet) {
+  if (flags & JmpFlagBreakTracelet) {
     spillStack();
   }
-  if (genMode() == IRGenMode::CFG) {
+  if (genMode() == IRGenMode::CFG && (flags & JmpFlagNextIsMerge)) {
     // Before jumping to a merge point we have to ensure that the
     // stack pointer is sync'ed.  Without an ExceptionBarrier the
     // SpillStack can be removed by DCE (especially since merge points
     // start with a DefSP to block SP-chain walking).
     exceptionBarrier();
   }
-  auto const target  = (!bothPaths
+  auto const target  = (!(flags & JmpFlagBothPaths)
                         || m_irb->blockIsIncompatible(taken))
     ? makeExit(taken)
     : makeBlock(taken);
@@ -2098,16 +2201,14 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
   }
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken, Offset next, bool bothPaths,
-                              bool breaksTracelet) {
+void HhbcTranslator::emitJmpZ(Offset taken, Offset next, JmpFlags flags) {
   auto const src = popC();
-  emitJmpHelper(taken, next, true, bothPaths, breaksTracelet, src);
+  emitJmpHelper(taken, next, true, flags, src);
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, bool bothPaths,
-                               bool breaksTracelet) {
+void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, JmpFlags flags) {
   auto const src = popC();
-  emitJmpHelper(taken, next, false, bothPaths, breaksTracelet, src);
+  emitJmpHelper(taken, next, false, flags, src);
 }
 
 /*
@@ -3205,9 +3306,13 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   }
 }
 
+void HhbcTranslator::emitNameA() {
+  push(gen(LdClsName, popA()));
+}
+
 const StaticString
   s_count("count"),
-  s_getCustomBoolSettingFuncName("server_get_custom_bool_setting");
+  s_ini_get("ini_get");
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
@@ -3219,27 +3324,23 @@ SSATmp* HhbcTranslator::optimizedCallCount() {
   return gen(Count, makeCatch(), val);
 }
 
-SSATmp* HhbcTranslator::optimizedServerGetCustomBoolSetting() {
-  Type settingNameTmpType = topType(1);
-  Type defaultValueTmpType = topType(0);
+SSATmp* HhbcTranslator::optimizedCallIniGet() {
+  // Only generate the optimized version if the argument passed in is a
+  // static string so we can get the string value at JIT time.
+  if (!(topType(0) <= Type::StaticStr)) return nullptr;
 
-  // Only generate the optimized version if the types match exactly
-  if (!(settingNameTmpType <= Type::StaticStr) ||
-      !(defaultValueTmpType <= Type::Bool)) return nullptr;
-
-  auto const settingNameTmp = top(Type::Str, 1);
-  const StringData *settingName = settingNameTmp->strVal();
-
-  bool settingValue = false;
-  if (!RuntimeOption::GetServerCustomBoolSetting(settingName->toCppString(),
-                                                 settingValue)) {
-    // The value isn't present in the CustomSettings section of config.hdf so
-    // we will simply push the default value argument.
-    return top(Type::Bool, 0);
-  } else {
-    // We found the setting so return the value from config.hdf
-    return cns(settingValue);
+  // We can only optimize settings that are system wide since user level
+  // settings can be overridden during the execution of a request.
+  std::string settingName = top(Type::Str, 0)->strVal()->toCppString();
+  IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
+  if (!IniSetting::GetMode(settingName, mode) ||
+      !(mode & IniSetting::PHP_INI_SYSTEM)) {
+    return nullptr;
   }
+
+  std::string value;
+  IniSetting::Get(settingName, value);
+  return cns(makeStaticString(value));
 }
 
 bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
@@ -3247,11 +3348,11 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
                                            uint32_t numNonDefault) {
   SSATmp* res = nullptr;
   switch (numArgs) {
+    case 1:
+      if (func->name()->isame(s_ini_get.get())) res = optimizedCallIniGet();
+      break;
     case 2:
       if (func->name()->isame(s_count.get())) res = optimizedCallCount();
-      else if (func->name()->isame(s_getCustomBoolSettingFuncName.get())) {
-        res = optimizedServerGetCustomBoolSetting();
-      }
       break;
     default: break;
   }
@@ -3771,7 +3872,10 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
     // Mark generator as finished.
     gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-        cns(c_Generator::Done));
+        cns(BaseGenerator::State::Done));
+
+    // Push return value of next()/send()/raise().
+    push(cns(Type::InitNull));
 
     // Sync SP.
     sp = spillStack();
@@ -3796,6 +3900,8 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 }
 
 void HhbcTranslator::emitRetC(bool freeInline) {
+  if (curFunc()->isAsyncGenerator()) PUNT(RetC-AsyncGenerator);
+
   if (isInlining()) {
     assert(!resumed());
     emitRetFromInlined(Type::Cell);
@@ -4669,6 +4775,23 @@ void HhbcTranslator::destroyName(SSATmp* name) {
   popDecRef(name->type());
 }
 
+SSATmp* HhbcTranslator::ldClsPropAddrKnown(Block* catchBlock,
+                                           SSATmp* ssaCls,
+                                           SSATmp* ssaName) {
+  auto const cls = ssaCls->clsVal();
+
+  auto const repoTy = [&] {
+    if (!RuntimeOption::RepoAuthoritative) return RepoAuthType{};
+    auto const slot = cls->lookupSProp(ssaName->strVal());
+    return cls->staticPropRepoAuthType(slot);
+  }();
+
+  auto const ptrTy = convertToType(repoTy).ptr();
+
+  emitInitSProps(cls, catchBlock);
+  return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
+}
+
 SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
                                       SSATmp* ssaCls,
                                       SSATmp* ssaName,
@@ -4692,18 +4815,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
   }();
 
   if (sPropKnown) {
-    auto const cls = ssaCls->clsVal();
-
-    auto const repoTy = [&] {
-      if (!RuntimeOption::RepoAuthoritative) return RepoAuthType{};
-      auto const slot = cls->lookupSProp(ssaName->strVal());
-      return cls->staticPropRepoAuthType(slot);
-    }();
-
-    auto const ptrTy = convertToType(repoTy).ptr();
-
-    emitInitSProps(cls, catchBlock);
-    return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
+    return ldClsPropAddrKnown(catchBlock, ssaCls, ssaName);
   }
 
   if (raise) {
@@ -5899,10 +6011,17 @@ Block* HhbcTranslator::makeExit(Offset targetBcOff /* = -1 */) {
   return makeExit(targetBcOff, spillValues);
 }
 
+Block* HhbcTranslator::makeExit(TransFlags trflags) {
+  auto spillValues = peekSpillValues();
+  return makeExit(-1, spillValues, trflags);
+}
+
 Block* HhbcTranslator::makeExit(Offset targetBcOff,
-                                std::vector<SSATmp*>& spillValues) {
+                                std::vector<SSATmp*>& spillValues,
+                                TransFlags trflags) {
   if (targetBcOff == -1) targetBcOff = bcOff();
-  return makeExitImpl(targetBcOff, ExitFlag::JIT, spillValues, CustomExit{});
+  return makeExitImpl(targetBcOff, ExitFlag::JIT, spillValues,
+                      CustomExit{}, trflags);
 }
 
 Block* HhbcTranslator::makePseudoMainExit(Offset targetBcOff /* = -1 */) {
@@ -5972,7 +6091,8 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
 
 Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
                                     std::vector<SSATmp*>& stackValues,
-                                    const CustomExit& customFn) {
+                                    const CustomExit& customFn,
+                                    TransFlags trflags) {
   Offset curBcOff = bcOff();
   BCMarker currentMarker = makeMarker(curBcOff);
   m_irb->evalStack().swap(stackValues);
@@ -6031,7 +6151,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 
     if (!changesPC) {
       // If the op changes PC, InterpOneCF handles getting to the right place
-      gen(ReqBindJmp, BCOffset(interpSk.advanced().offset()));
+      gen(ReqBindJmp, ReqBindJmpData(interpSk.advanced().offset()));
     }
     return exit;
   }
@@ -6043,9 +6163,9 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
     // func, while context.initBcOffset is in the outer func, so
     // bindJmp will always work (and there's no guarantee that there
     // is an anchor translation, so we must not use ReqRetranslate).
-    gen(ReqRetranslate);
+    gen(ReqRetranslate, ReqRetranslateData(trflags));
   } else {
-    gen(ReqBindJmp, BCOffset(targetBcOff));
+    gen(ReqBindJmp, ReqBindJmpData(targetBcOff, trflags));
   }
   return exit;
 }
@@ -6379,14 +6499,14 @@ void HhbcTranslator::end(Offset nextPc) {
   setBcOff(nextPc, true);
   auto const sp = spillStack();
   gen(SyncABIRegs, m_irb->fp(), sp);
-  gen(ReqBindJmp, BCOffset(nextPc));
+  gen(ReqBindJmp, ReqBindJmpData(nextPc));
 }
 
-void HhbcTranslator::endBlock(Offset next) {
+void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
   if (m_irb->blockExists(next)) {
-    emitJmp(next,
-            false /* breakTracelet */,
-            nullptr);
+    emitJmpImpl(next,
+                nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
+                nullptr);
   }
 }
 

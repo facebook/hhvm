@@ -48,53 +48,29 @@ c_Generator::c_Generator(Class* cb)
 }
 
 c_Generator::~c_Generator() {
-  if (LIKELY(getState() == Done)) {
+  if (LIKELY(getState() == State::Done)) {
     return;
   }
 
+  assert(getState() != State::Running);
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
 
-  // Free locals, but don't trigger the EventHook for FunctionReturn
-  // since the generator has already been exited. We
-  // don't want redundant calls.
+  // Free locals, but don't trigger the EventHook for FunctionReturn since
+  // the generator has already been exited. We don't want redundant calls.
   ActRec* ar = actRec();
-  frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
+  frame_free_locals_inl_no_hook<false>(ar, ar->func()->numLocals());
 }
-
-//////////////////////////////////////////////////////////////////////
 
 void c_Generator::t___construct() {}
 
-void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
-                             const Cell& value) {
-  assert(getState() == Running);
-  resumable()->setResumeAddr(resumeAddr, resumeOffset);
-  cellSet(make_tv<KindOfInt64>(++m_index), m_key);
-  cellSet(value, m_value);
-  setState(Started);
-}
-
-void c_Generator::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
-                             const Cell& key, const Cell& value) {
-  assert(getState() == Running);
-  resumable()->setResumeAddr(resumeAddr, resumeOffset);
-  cellSet(key, m_key);
-  cellSet(value, m_value);
-  if (m_key.m_type == KindOfInt64) {
-    int64_t new_index = m_key.m_data.num;
-    m_index = new_index > m_index ? new_index : m_index;
-  }
-  setState(Started);
-}
-
 // Functions with native implementation.
-void c_Generator::t_next() { const_assert(false); }
-void c_Generator::t_send(const Variant& v) { const_assert(false); }
-void c_Generator::t_raise(const Variant& v) { const_assert(false); }
-bool c_Generator::t_valid() { const_assert(false); }
-Variant c_Generator::t_current() { const_assert(false); }
-Variant c_Generator::t_key() { const_assert(false); }
+void c_Generator::t_next() { always_assert(false); }
+void c_Generator::t_send(const Variant& v) { always_assert(false); }
+void c_Generator::t_raise(const Variant& v) { always_assert(false); }
+bool c_Generator::t_valid() { always_assert(false); }
+Variant c_Generator::t_current() { always_assert(false); }
+Variant c_Generator::t_key() { always_assert(false); }
 
 const StaticString s_next("next");
 void c_Generator::t_rewind() {
@@ -163,6 +139,34 @@ c_Generator *c_Generator::Clone(ObjectData* obj) {
   cellSet(thiz->m_value, cont->m_value);
 
   return cont;
+}
+
+void c_Generator::yield(Offset resumeOffset,
+                        const Cell* key, const Cell& value) {
+  assert(getState() == State::Running);
+  resumable()->setResumeAddr(nullptr, resumeOffset);
+
+  if (key) {
+    cellSet(*key, m_key);
+    tvRefcountedDecRefNZ(*key);
+    if (m_key.m_type == KindOfInt64) {
+      int64_t new_index = m_key.m_data.num;
+      m_index = new_index > m_index ? new_index : m_index;
+    }
+  } else {
+    cellSet(make_tv<KindOfInt64>(++m_index), m_key);
+  }
+  cellSet(value, m_value);
+  tvRefcountedDecRefNZ(value);
+
+  setState(State::Started);
+}
+
+void c_Generator::done() {
+  assert(getState() == State::Running);
+  cellSetNull(m_key);
+  cellSetNull(m_value);
+  setState(State::Done);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

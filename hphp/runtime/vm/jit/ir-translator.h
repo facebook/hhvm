@@ -23,7 +23,6 @@
 namespace HPHP {
 namespace JIT {
 struct NormalizedInstruction;
-struct Tracelet;
 struct Location;
 struct RuntimeType;
 }
@@ -32,8 +31,7 @@ namespace JIT {
 /*
  * RegionIter is a temporary class used to traverse a region of hhbc
  * instruction that may be more than just a straight-line series of
- * instructions. It is used by shouldIRInline to traverse both Tracelets and
- * RegionDescs.
+ * instructions. It is used by shouldIRInline to traverse RegionDescs.
  */
 struct RegionIter {
   virtual ~RegionIter() {}
@@ -44,8 +42,6 @@ struct RegionIter {
 };
 bool shouldIRInline(const Func* caller, const Func* callee,
                     RegionIter& iter);
-bool shouldIRInline(const Func* caller, const Func* callee,
-                    const JIT::Tracelet& tlet);
 
 /*
  * IRTranslator is used to convert hhbc instructions to a cfg of Blocks
@@ -57,15 +53,20 @@ struct IRTranslator {
   explicit IRTranslator(TransContext context);
 
   void translateInstr(const NormalizedInstruction& i);
-  void checkType(const JIT::Location& l, const JIT::RuntimeType& rtt,
-                 bool outerOnly);
-  void assertType(const JIT::Location&, const JIT::RuntimeType&);
+
+  /**
+   * Check if `i' is an FPush{Func,ClsMethod}D followed by an FCall{,D} to
+   * a function with a singleton pattern, and if so, inline it.  Returns true
+   * if this succeeds, else false.
+   */
+  bool tryTranslateSingletonInline(const NormalizedInstruction& i,
+                                   const Func* funcd);
+
   HhbcTranslator& hhbcTrans() { return m_hhbcTrans; }
 
  private:
   void translateInstrWork(const NormalizedInstruction& i);
   void interpretInstr(const NormalizedInstruction& i);
-  void passPredictedAndInferredTypes(const NormalizedInstruction& i);
 
   // Generated callers to HhbcTranslator.
   //

@@ -8,6 +8,10 @@ class OutputFormat {
   const int HUMAN = 1;
   const int HUMAN_VERBOSE = 2;
   const int CSV = 3;
+  // A stream of JSON objects in a format that Facebook's test systems
+  // understand. If you're a Facebook employee, take a look at the
+  // JsonTestRunner class for the format specification.
+  const int FBMAKE = 4;
 };
 
 class Options {
@@ -19,6 +23,7 @@ class Options {
   public static bool $force_redownload = false;
   public static bool $get_latest_framework_code = false;
   public static bool $generate_new_expect_file = false;
+  public static bool $include_flakey = false;
   public static ?string $zend_path = null;
   public static bool $all = false;
   public static bool $allexcept = false;
@@ -62,18 +67,33 @@ class Options {
       $framework_names->removeKey(0);
     }
 
+    if ($options->containsKey('flakey')) {
+      if ($options->containsKey('record')) {
+        error_and_exit('Can not use --flakey and --record together');
+      }
+      self::$include_flakey = true;
+    }
+
 
     if ($options->containsKey('csv')) {
       if ($options->containsKey('verbose')) {
-        // Can't be both summary and verbose.
-        error_and_exit("Cannot be --csv and --verbose together");
+        error_and_exit("Cannot use --csv and --verbose together");
+      }
+      if ($options->containsKey('fbmake')) {
+        error_and_exit("Cannot use --csv and --fbmake together");
       }
       self::$output_format = OutputFormat::CSV;
       // $tests[0] may not even be "summary", but it doesn't matter, we are
       // just trying to make the count right for $frameworks
       $framework_names->removeKey(0);
     } else if ($options->containsKey('verbose')) {
+      if ($options->containsKey('fbmake')) {
+        error_and_exit("Cannot use --fbmake and --verbose together");
+      }
       self::$output_format = OutputFormat::HUMAN_VERBOSE;
+      $framework_names->removeKey(0);
+    } else if ($options->containsKey('fbmake')) {
+      self::$output_format = OutputFormat::FBMAKE;
       $framework_names->removeKey(0);
     }
 

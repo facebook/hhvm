@@ -41,14 +41,7 @@ namespace {
 }
 
 void c_GenVectorWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set GenVectorWaitHandle::onCreate: on_create_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnGenVectorCreateCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnGenVectorCreateCallback(callback);
 }
 
 Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
@@ -98,10 +91,10 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
   }
 
   if (exception.isNull()) {
-    return c_StaticWaitHandle::CreateSucceeded(
-      make_tv<KindOfObject>(deps.get()));
+    return Object::attach(c_StaticWaitHandle::CreateSucceeded(
+      make_tv<KindOfObject>(deps.detach())));
   } else {
-    return c_StaticWaitHandle::CreateFailed(exception.get());
+    return Object::attach(c_StaticWaitHandle::CreateFailed(exception.detach()));
   }
 }
 

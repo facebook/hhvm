@@ -42,3 +42,8 @@ val get_implements:
   Typing_env.env * (Typing_defs.ty SMap.t * Typing_defs.ty SMap.t)
 
 val get_self_from_c: Typing_env.env -> Nast.class_ -> Typing_defs.ty
+
+val is_visible:
+  Typing_env.env ->
+  Typing_defs.visibility ->
+  Nast.class_id option -> (string * string) option

@@ -23,6 +23,7 @@
 #include "folly/Conv.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 
@@ -143,7 +144,26 @@ ProfileType m_profileType = ProfileType::Default;
 std::condition_variable m_waitq;
 std::mutex m_mutex;
 
-};
+std::vector<const Unit*> s_orphanedUnitsToDelete; // protected by m_mutex
+
+// NB: releases the lock.
+void cleanup(std::unique_lock<std::mutex> lock) {
+  assert(lock.owns_lock());
+  m_state = State::Waiting;
+  m_reqType = RequestType::None;
+  m_profileType = ProfileType::Default;
+  m_dump.clear();
+
+  std::vector<const Unit*> deleteQueue;
+  deleteQueue.swap(s_orphanedUnitsToDelete);
+  lock.unlock();
+
+  Treadmill::enqueue([deleteQueue] {
+    for (auto& u : deleteQueue) delete u;
+  });
+}
+
+}
 
 // static
 bool ProfileController::requestNext(ProfileType type) {
@@ -197,7 +217,7 @@ void ProfileController::cancelRequest() {
   // changing the state is enough to cancel the currently
   // active request; no VM thread will put their dump here
   // if the state is waiting
-  cleanup(lock);
+  cleanup(std::move(lock));
   m_waitq.notify_all();
 }
 
@@ -261,7 +281,7 @@ void ProfileController::waitForProfile(DumpFunc df) {
   }
   // otherwise, the profile is ours. process it and reset the state
   df(m_dump);
-  cleanup(lock);
+  cleanup(std::move(lock));
 }
 
 // static
@@ -289,14 +309,9 @@ ProfileType ProfileController::profileType() {
   return m_profileType;
 }
 
-// static
-void ProfileController::cleanup(const std::unique_lock<std::mutex>& lock) {
-  assert(lock.owns_lock());
-  m_state = State::Waiting;
-  m_reqType = RequestType::None;
-  m_profileType = ProfileType::Default;
-  m_dump.clear();
-  HPHP::Eval::FileRepository::deleteOrphanedUnits();
+void ProfileController::enqueueOrphanedUnit(const Unit* u) {
+  std::lock_guard<std::mutex> G(m_mutex);
+  s_orphanedUnitsToDelete.push_back(u);
 }
 
 }

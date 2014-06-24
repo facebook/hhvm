@@ -30,407 +30,30 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/vm/preclass.h"
 
 namespace HPHP {
 
-class ClassInfo;
-class ClassInfoVM;
-class MixedArray;
-class ObjectData;
+struct ClassInfo;
+struct ClassInfoVM;
+struct MixedArray;
+struct ObjectData;
 struct HhbcExtClassInfo;
-class Func;
-class FuncEmitter;
-class Unit;
-class UnitEmitter;
-class Class;
-class NamedEntity;
-class PreClass;
+struct Func;
+struct FuncEmitter;
+struct Unit;
+struct UnitEmitter;
+struct Class;
+struct NamedEntity;
+struct PreClass;
+struct Class;
+
 namespace Native { struct NativeDataInfo; }
 
-typedef hphp_hash_set<LowStringPtr,
-                      string_data_hash,
-                      string_data_isame> TraitNameSet;
-
-/*
- * User attributes on various runtime structures are stored in this
- * map, currently.
- */
-typedef hphp_hash_map<LowStringPtr,
-                      TypedValue,
-                      string_data_hash,
-                      string_data_isame> UserAttributeMap;
-
-using BuiltinCtorFunction = ObjectData* (*)(Class*);
-using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
-
-/*
- * A PreClass represents the source-level definition of a php class,
- * interface, or trait.  Includes things like the names of the parent
- * class (if any), and the names of any interfaces implemented or
- * traits used.  Also contains metadata about properties and methods
- * of the class.
- *
- * This is separate from an actual Class because in different requests
- * (depending on include order), the actual instantiation of a
- * PreClass may differ since names may have different meanings.  For
- * example, if the PreClass "extends Foo", and Foo is defined
- * differently in different requests, we will make a different Class.
- *
- * Hoistability:
- *
- *    When a Unit is loaded at run time, each PreClass in the Unit
- *    which is determined to be `hoistable' will be loaded by the
- *    runtime (in the order they appear in the source) before the
- *    Unit's pseudo-main is executed.  The hoistability rules ensure
- *    that loading a PreClass which is determined to be hoistable will
- *    never cause the autoload facility to be invoked.
- *
- *    A class is considered `hoistable' iff the following conditions
- *    apply:
- *
- *      - It's defined at the top level.
- *
- *      - There is no other definition for a class of the same name in
- *        its Unit.
- *
- *      - It uses no traits.  (It may however *be* a trait.)
- *
- *      - It implements no interfaces.  (It may however *be* an
- *        interface.)
- *
- *      - It has no parent OR
- *           The parent is hoistable and defined earlier in the unit OR
- *           The parent is already defined when the unit is required
- *
- *    The very last condition here (parent already defined when the
- *    unit is required) is not known at parse time.  This leads to the
- *    Maybe/Always split below.
- *
- *    Closures have a special kind of hoistability, ClosureHoistable,
- *    that requires them to be defined first, to avoid races if other
- *    threads are trying to load the same unit.
- *
- */
-struct PreClass : AtomicCountable {
-  friend class PreClassEmitter;
-
-  enum Hoistable {
-    NotHoistable,
-    Mergeable,
-    MaybeHoistable,
-    AlwaysHoistable,
-    ClosureHoistable
-  };
-
-  struct Prop {
-    Prop() {}
-    Prop(PreClass* preClass,
-         const StringData* n,
-         Attr attrs,
-         const StringData* typeConstraint,
-         const StringData* docComment,
-         const TypedValue& val,
-         RepoAuthType);
-
-    void prettyPrint(std::ostream& out) const;
-
-    PreClass* preClass() const { return m_preClass; }
-    const StringData* name() const { return m_name; }
-    StrNR nameStr() const { return StrNR(m_name); }
-    const StringData* mangledName() const { return m_mangledName; }
-    StrNR mangledNameRef() const { return StrNR(m_mangledName); }
-    Attr attrs() const { return m_attrs; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
-    RepoAuthType repoAuthType() const { return m_repoAuthType; }
-    const StringData* docComment() const { return m_docComment; }
-    const TypedValue& val() const { return m_val; }
-
-  private:
-    PreClass* m_preClass;
-    LowStringPtr m_name;
-    LowStringPtr m_mangledName;
-    Attr m_attrs;
-    LowStringPtr m_typeConstraint;
-    LowStringPtr m_docComment;
-    TypedValue m_val;
-    RepoAuthType m_repoAuthType;
-  };
-
-  struct Const {
-    Const() {}
-    Const(PreClass* preClass, const StringData* n,
-          const StringData* typeConstraint, const TypedValue& val,
-          const StringData* phpCode);
-
-    void prettyPrint(std::ostream& out) const;
-
-    PreClass* preClass() const { return m_preClass; }
-    const StringData* name() const { return m_name; }
-    StrNR nameStr() const { return StrNR(m_name); }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
-    const TypedValue& val() const { return m_val; }
-    const StringData* phpCode() const { return m_phpCode; }
-
-  private:
-    PreClass* m_preClass;
-    LowStringPtr m_name;
-    LowStringPtr m_typeConstraint;
-    TypedValue m_val;
-    LowStringPtr m_phpCode;
-  };
-
-  class TraitPrecRule {
-   public:
-    TraitPrecRule()
-      : m_methodName(nullptr)
-      , m_selectedTraitName(nullptr)
-    {}
-
-    TraitPrecRule(const StringData* selectedTraitName,
-                  const StringData* methodName) :
-        m_methodName(methodName), m_selectedTraitName(selectedTraitName),
-        m_otherTraitNames() {}
-
-    void addOtherTraitName(const StringData* traitName) {
-      m_otherTraitNames.insert(traitName);
-    }
-    const StringData* getMethodName() const { return m_methodName; }
-    const StringData* getSelectedTraitName() const {
-      return m_selectedTraitName;
-    }
-    TraitNameSet getOtherTraitNames() const {
-      return m_otherTraitNames;
-    }
-
-    template<class SerDe> void serde(SerDe& sd) {
-      sd(m_methodName)(m_selectedTraitName)(m_otherTraitNames);
-    }
-
-   private:
-    LowStringPtr m_methodName;
-    LowStringPtr m_selectedTraitName;
-    TraitNameSet m_otherTraitNames;
-  };
-
-  class TraitAliasRule {
-   public:
-    TraitAliasRule()
-      : m_traitName(nullptr)
-      , m_origMethodName(nullptr)
-      , m_newMethodName(nullptr)
-      , m_modifiers(AttrNone)
-    {}
-
-    TraitAliasRule(const StringData* traitName,
-                   const StringData* origMethodName,
-                   const StringData* newMethodName,
-                   Attr              modifiers) :
-        m_traitName(traitName),
-        m_origMethodName(origMethodName),
-        m_newMethodName(newMethodName),
-        m_modifiers(modifiers) {}
-
-    const StringData* getTraitName() const      { return m_traitName; }
-    const StringData* getOrigMethodName() const { return m_origMethodName; }
-    const StringData* getNewMethodName() const  { return m_newMethodName; }
-    Attr              getModifiers() const      { return m_modifiers; }
-
-    template<class SerDe> void serde(SerDe& sd) {
-      sd(m_traitName)(m_origMethodName)(m_newMethodName)(m_modifiers);
-    }
-
-   private:
-    LowStringPtr m_traitName;
-    LowStringPtr m_origMethodName;
-    LowStringPtr m_newMethodName;
-    Attr         m_modifiers;
-  };
-
-  struct TraitRequirement {
-   public:
-    // Solely for SerDe
-    TraitRequirement(): m_word(0) {}
-
-    explicit TraitRequirement(const StringData* req, bool isExtends) {
-      m_word = pack(req, isExtends);
-    }
-
-    const StringData* name() const {
-      return reinterpret_cast<const StringData*>(m_word & ~0x1);
-    }
-    bool is_extends() const { return m_word & 0x1; }
-    bool is_implements() const { return !is_extends(); }
-
-    // Deserialization version.
-    template<class SerDe>
-    typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd) {
-      const StringData* sd_name;
-      bool sd_is_extends;
-      sd(sd_name)(sd_is_extends);
-      m_word = pack(sd_name, sd_is_extends);
-    }
-
-    // Serialization version.
-    template<class SerDe>
-    typename std::enable_if<!SerDe::deserializing>::type serde(SerDe& sd) {
-      const StringData* sd_name = name();
-      bool sd_is_extends = is_extends();
-      sd(sd_name)(sd_is_extends);
-    }
-
-   private:
-    static uintptr_t pack(const StringData* req, bool isExtends) {
-      auto req_ptr = reinterpret_cast<uintptr_t>(req);
-      return isExtends ? (req_ptr | 0x1) : req_ptr;
-    }
-
-    uintptr_t m_word;
-  };
-
-  typedef FixedVector<LowStringPtr> InterfaceVec;
-  typedef FixedVector<LowStringPtr> UsedTraitVec;
-  typedef FixedVector<TraitRequirement> TraitRequirementsVec;
-  typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
-  typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
-
-  PreClass(Unit* unit, int line1, int line2, Offset o, const StringData* n,
-           Attr attrs, const StringData* parent, const StringData* docComment,
-           Id id, Hoistable hoistable);
-  ~PreClass();
-  void atomicRelease();
-
-  Unit* unit() const { return m_unit; }
-  int line1() const { return m_line1; }
-  int line2() const { return m_line2; }
-  Offset getOffset() const { return m_offset; }
-  const StringData* name() const { return m_name; }
-  StrNR nameStr() const { return StrNR(m_name); }
-  Attr attrs() const { return m_attrs; }
-  static Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
-  const StringData* parent() const { return m_parent; }
-  StrNR parentStr() const { return StrNR(m_parent); }
-  const StringData* docComment() const { return m_docComment; }
-  Id id() const { return m_id; }
-  const InterfaceVec& interfaces() const { return m_interfaces; }
-  const UsedTraitVec& usedTraits() const { return m_usedTraits; }
-  const TraitRequirementsVec& traitRequirements() const {
-    return m_traitRequirements;
-  }
-  const TraitPrecRuleVec& traitPrecRules() const { return m_traitPrecRules; }
-  const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
-  const UserAttributeMap& userAttributes() const { return m_userAttributes; }
-  bool isPersistent() const { return m_attrs & AttrPersistent; }
-  bool isBuiltin() const { return attrs() & AttrBuiltin; }
-
-  void setUserAttributes(const UserAttributeMap &ua);
-  const Native::NativeDataInfo* nativeDataInfo() const
-                                                 { return m_nativeDataInfo; }
-
-  /*
-   * Funcs, Consts, and Props all behave similarly. Define raw accessors
-   * foo() and numFoos() for people munging by hand, and ranges.
-   *
-   *   methods();   numMethods();    FuncRange allMethods();
-   *   constants(); numConstants();  ConstRange allConstants();
-   *   properties;  numProperties(); PropRange allProperties();
-   */
-
-#define DEF_ACCESSORS(Type, TypeName, fields, Fields)                   \
-  Type const* fields() const { return m_##fields.accessList(); }        \
-  Type*       mutable##Fields() { return m_##fields.mutableAccessList(); } \
-  size_t num##Fields()  const { return m_##fields.size(); }             \
-  typedef IterRange<Type const*> TypeName##Range;                       \
-  TypeName##Range all##Fields() const {                                 \
-    return TypeName##Range(fields(), fields() + m_##fields.size());     \
-  }
-
-  DEF_ACCESSORS(Func*, Func, methods, Methods)
-  DEF_ACCESSORS(Const, Const, constants, Constants)
-  DEF_ACCESSORS(Prop, Prop, properties, Properties)
-
-#undef DEF_ACCESSORS
-
-  bool hasMethod(const StringData* methName) const {
-    return m_methods.contains(methName);
-  }
-
-  bool hasProp(const StringData* propName) const {
-    return m_properties.contains(propName);
-  }
-
-  Func* lookupMethod(const StringData* methName) const {
-    Func* f = m_methods.lookupDefault(methName, nullptr);
-    assert(f != nullptr);
-    return f;
-  }
-
-  const Prop* lookupProp(const StringData* propName) const {
-    Slot s = m_properties.findIndex(propName);
-    assert(s != kInvalidSlot);
-    return &m_properties[s];
-  }
-
-  /*
-   * Extension builtin classes have custom creation and destruction
-   * routines.
-   */
-  BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
-  BuiltinDtorFunction instanceDtor() const { return m_instanceDtor; }
-
-  /*
-   * For a builtin class c_Foo, the builtinObjSize is the size of the
-   * object excluding ObjectData (sizeof(c_Foo) - sizeof(ObjectData)),
-   * and builtinODOffset is the offset of the ObjectData subobject in
-   * c_Foo.
-   */
-  uint32_t builtinObjSize() const { return m_builtinObjSize; }
-  int32_t builtinODOffset() const { return m_builtinODOffset; }
-
-  void prettyPrint(std::ostream& out) const;
-
-  NamedEntity* namedEntity() const { return m_namedEntity; }
-
-  static const StringData* manglePropName(const StringData* className,
-                                          const StringData* propName,
-                                          Attr              attrs);
-
-private:
-  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
-  typedef IndexedStringMap<Prop,true,Slot> PropMap;
-  typedef IndexedStringMap<Const,true,Slot> ConstMap;
-
-private:
-  Unit* m_unit;
-  NamedEntity* m_namedEntity;
-  int m_line1;
-  int m_line2;
-  Offset m_offset;
-  Id m_id;
-  uint32_t m_builtinObjSize{0};
-  int32_t m_builtinODOffset{0};
-  Attr m_attrs;
-  Hoistable m_hoistable;
-  LowStringPtr m_name;
-  LowStringPtr m_parent;
-  LowStringPtr m_docComment;
-  BuiltinCtorFunction m_instanceCtor = nullptr;
-  InterfaceVec m_interfaces;
-  UsedTraitVec m_usedTraits;
-  TraitRequirementsVec m_traitRequirements;
-  TraitPrecRuleVec m_traitPrecRules;
-  TraitAliasRuleVec m_traitAliasRules;
-  UserAttributeMap m_userAttributes;
-  const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
-  MethodMap m_methods;
-  PropMap m_properties;
-  ConstMap m_constants;
-  BuiltinDtorFunction m_instanceDtor = nullptr;
-};
-
-typedef AtomicSmartPtr<PreClass> PreClassPtr;
 typedef AtomicSmartPtr<Class> ClassPtr;
 
 /*
@@ -538,6 +161,7 @@ struct Class : AtomicCountable {
   typedef IndexedStringMap<LowClassPtr, true, int> InterfaceMap;
   typedef FixedStringMap<Slot, false, Slot> MethodMap;
   typedef FixedStringMapBuilder<Func*, Slot, false, Slot> MethodMapBuilder;
+  typedef IndexedStringMap<const PreClass::ClassRequirement*, true, int> RequirementMap;
 
   /* If set, runs during setMethods() */
   static void (*MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
@@ -578,14 +202,6 @@ struct Class : AtomicCountable {
    * freed immediately.
    */
   void atomicRelease();
-
-  /*
-   * releaseRefs() is called when a Class is put into the zombie state,
-   * to free any references to child classes, interfaces and traits
-   * Its safe to call multiple times, so is also called from the destructor
-   * (in case we bypassed the zombie state).
-   */
-  void releaseRefs();
 
   /*
    * isZombie() returns true if this class has been logically destroyed,
@@ -677,6 +293,7 @@ struct Class : AtomicCountable {
   bool needInitialization() const { return m_needInitialization; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
+  const RequirementMap& allRequirements() const { return m_requirements; }
   // See comment for m_usedTraits
   const std::vector<ClassPtr>& usedTraitClasses() const {
     return m_usedTraits;
@@ -855,12 +472,24 @@ struct Class : AtomicCountable {
   }
   LowClassPtr const* classVec() const { return m_classVec; }
 
-  static size_t preClassOff() { return offsetof(Class, m_preClass); }
-  static size_t classVecOff() { return offsetof(Class, m_classVec); }
-  static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
-  static Offset getMethodsOffset() { return offsetof(Class, m_methods); }
-  static ptrdiff_t invokeFuncOff() { return offsetof(Class, m_invoke); }
-  static size_t instanceBitsOff() { return offsetof(Class, m_instanceBits); }
+  static constexpr size_t preClassOff() {
+    return offsetof(Class, m_preClass);
+  }
+  static constexpr size_t classVecOff() {
+    return offsetof(Class, m_classVec);
+  }
+  static constexpr size_t classVecLenOff() {
+    return offsetof(Class, m_classVecLen);
+  }
+  static constexpr Offset getMethodsOffset() {
+    return offsetof(Class, m_methods);
+  }
+  static constexpr ptrdiff_t invokeFuncOff() {
+    return offsetof(Class, m_invoke);
+  }
+  static constexpr size_t instanceBitsOff() {
+    return offsetof(Class, m_instanceBits);
+  }
 
   /* Return pointer to start of malloced memory for 'this' */
   Func** mallocPtrFromThis() const;
@@ -903,6 +532,7 @@ private:
   ~Class();
 
 private:
+  void releaseRefs();
   void initialize(TypedValue*& sPropData) const;
   PropInitVec* initPropsImpl() const;
   TypedValue* initSPropsImpl() const;
@@ -957,9 +587,9 @@ private:
   void setInterfaces();
   void setClassVec();
   void setFuncVec(MethodMapBuilder& builder);
-  void checkTraitConstraints() const;
-  void checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
-                                const StringData* recName) const;
+  void setRequirements();
+  void checkRequirementConstraints() const;
+  void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();
 
   template<bool setParents> void setInstanceBitsImpl();
@@ -1023,6 +653,7 @@ private:
   uint32_t m_builtinODTailSize{0};
   PreClassPtr m_preClass;
   InterfaceMap m_interfaces;
+  RequirementMap m_requirements;
   // Bitmap of parent classes and implemented interfaces. Each bit
   // corresponds to a commonly used class name, determined during the
   // profiling warmup requests.

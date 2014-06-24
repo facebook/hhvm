@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <algorithm>
+#include <functional>
 #include "hphp/runtime/base/strings.h"
 
 #include "folly/Format.h"
@@ -26,6 +27,7 @@
 #include "hphp/util/stack-trace.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/bc-pattern.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -41,7 +43,6 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/tracelet.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"
@@ -79,78 +80,23 @@ TRACE_SET_MOD(hhir);
     }                                                   \
   } while (0)
 
+static JmpFlags instrJmpFlags(const NormalizedInstruction& ni) {
+  JmpFlags flags = JmpFlagNone;
+  if (ni.breaksTracelet) {
+    flags = flags | JmpFlagBreakTracelet;
+  }
+  if (ni.nextIsMerge) {
+    flags = flags | JmpFlagNextIsMerge;
+  }
+  if (ni.includeBothPaths) {
+    flags = flags | JmpFlagBothPaths;
+  }
+  return flags;
+}
+
 IRTranslator::IRTranslator(TransContext context)
   : m_hhbcTrans{context}
 {}
-
-void IRTranslator::checkType(const JIT::Location& l,
-                             const JIT::RuntimeType& rtt,
-                             bool outerOnly) {
-  // We can get invalid inputs as a side effect of reading invalid
-  // items out of BBs we truncate; they don't need guards.
-  if (rtt.isVagueValue() || l.isThis()) return;
-
-  switch (l.space) {
-    case Location::Stack: {
-      uint32_t stackOffset = locPhysicalOffset(l);
-      JIT::Type type = JIT::Type(rtt);
-      if (type <= Type::Cls) {
-        m_hhbcTrans.assertTypeStack(stackOffset, type);
-      } else {
-        m_hhbcTrans.guardTypeStack(stackOffset, type, outerOnly);
-      }
-      break;
-    }
-    case Location::Local:
-      m_hhbcTrans.guardTypeLocal(l.offset, Type(rtt), outerOnly);
-      break;
-
-    case Location::Iter:
-    case Location::Invalid:
-    case Location::Litstr:
-    case Location::Litint:
-    case Location::This:
-      not_reached();
-  }
-}
-
-void IRTranslator::assertType(const JIT::Location& l,
-                              const JIT::RuntimeType& rtt) {
-  if (rtt.isVagueValue()) return;
-
-  switch (l.space) {
-    case Location::Stack: {
-      // locPhysicalOffset returns positive offsets for stack values,
-      // relative to rVmSp
-      uint32_t stackOffset = locPhysicalOffset(l);
-      m_hhbcTrans.assertTypeStack(stackOffset, Type(rtt));
-      break;
-    }
-    case Location::Local:  // Stack frame's registers; offset == local register
-      m_hhbcTrans.assertTypeLocal(l.offset, Type(rtt));
-      break;
-
-    case Location::Invalid:           // Unknown location
-      HHIR_UNIMPLEMENTED(Invalid);
-      break;
-
-    case Location::Iter:              // Stack frame's iterators
-      HHIR_UNIMPLEMENTED(AssertType_Iter);
-      break;
-
-    case Location::Litstr:            // Literal string pseudo-location
-      HHIR_UNIMPLEMENTED(AssertType_Litstr);
-      break;
-
-    case Location::Litint:            // Literal int pseudo-location
-      HHIR_UNIMPLEMENTED(AssertType_Litint);
-      break;
-
-    case Location::This:
-      HHIR_UNIMPLEMENTED(AssertType_This);
-      break;
-  }
-}
 
 void
 IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
@@ -229,29 +175,26 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
 
   Offset takenOffset    = i.offset() + i.imm[0].u_BA;
   Offset fallthruOffset = i.offset() + instrLen((Op*)(i.pc()));
-  assert(i.breaksTracelet ||
-         i.nextOffset == takenOffset ||
-         i.nextOffset == fallthruOffset);
   assert(!i.includeBothPaths || !i.breaksTracelet);
 
+  auto jmpFlags = instrJmpFlags(i);
   if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
     if (op == OpJmpZ) {
-      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, i.includeBothPaths,
-                i.breaksTracelet);
+      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, jmpFlags);
     } else {
-      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, i.includeBothPaths,
-                i.breaksTracelet);
+      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, jmpFlags);
     }
     return;
   }
-  assert(i.nextOffset == takenOffset);
   // invert the branch
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, i.includeBothPaths,
-              i.breaksTracelet);
+    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, jmpFlags);
   } else {
-    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, i.includeBothPaths,
-              i.breaksTracelet);
+    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, jmpFlags);
+  }
+  if (i.nextOffset != takenOffset) {
+    always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
+    HHIR_EMIT(Jmp, takenOffset, jmpFlags);
   }
 }
 
@@ -348,11 +291,12 @@ void IRTranslator::translateConcatN(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateJmp(const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, false);
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA,
+            instrJmpFlags(i) | JmpFlagSurprise);
 }
 
 void IRTranslator::translateJmpNS(const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, true);
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, instrJmpFlags(i));
 }
 
 void
@@ -787,33 +731,6 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   return refuse("region doesn't end in RetC/RetV");
 }
 
-struct TraceletIter : public RegionIter {
-  explicit TraceletIter(const Tracelet& tlet)
-    : m_current(tlet.m_instrStream.first)
-  {}
-
-  bool finished() const { return m_current == nullptr; }
-
-  SrcKey sk() const {
-    assert(!finished());
-    return m_current->source;
-  }
-
-  void advance() {
-    assert(!finished());
-    m_current = m_current->next;
-  }
-
- private:
-  const NormalizedInstruction* m_current;
-};
-
-bool shouldIRInline(const Func* caller, const Func* callee,
-                    const Tracelet& tlet) {
-  TraceletIter iter(tlet);
-  return shouldIRInline(caller, callee, iter);
-}
-
 void
 IRTranslator::translateFCall(const NormalizedInstruction& i) {
   auto const numArgs = i.imm[0].u_IVA;
@@ -822,41 +739,6 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
   const Func* srcFunc = m_hhbcTrans.curFunc();
   Offset returnBcOffset =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
-
-  /*
-   * If we have a calleeTrace, we're going to see if we should inline
-   * the call.
-   */
-  if (i.calleeTrace) {
-    if (!i.calleeTrace->m_inliningFailed) {
-      assert(shouldIRInline(m_hhbcTrans.curFunc(), i.funcd, *i.calleeTrace));
-
-      m_hhbcTrans.beginInlining(numArgs, i.funcd, returnBcOffset, Type::Gen);
-      static const bool shapeStats = Stats::enabledAny() &&
-                                     getenv("HHVM_STATS_INLINESHAPE");
-      if (shapeStats) {
-        m_hhbcTrans.profileInlineFunctionShape(traceletShape(*i.calleeTrace));
-      }
-
-      for (auto* ni = i.calleeTrace->m_instrStream.first; ni; ni = ni->next) {
-        if (isAlwaysNop(ni->op())) {
-          // This might not be necessary---but for now it's preserving
-          // side effects of the call to readMetaData that used to
-          // exist here.
-          ni->noOp = true;
-        }
-        translateInstr(*ni);
-      }
-      return;
-    }
-
-    static const auto enabled = Stats::enabledAny() &&
-                                getenv("HHVM_STATS_FAILEDINL");
-    if (enabled) {
-      m_hhbcTrans.profileFunctionEntry("FailedCandidate");
-      m_hhbcTrans.profileFailedInlShape(traceletShape(*i.calleeTrace));
-    }
-  }
 
   HHIR_EMIT(FCall, numArgs, returnBcOffset, i.funcd,
             JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
@@ -1061,6 +943,133 @@ IRTranslator::translateDecodeCufIter(const NormalizedInstruction& i) {
   HHIR_EMIT(DecodeCufIter, i.imm[0].u_IVA, i.offset() + i.imm[1].u_BA);
 }
 
+bool
+IRTranslator::tryTranslateSingletonInline(const NormalizedInstruction& i,
+                                          const Func* funcd) {
+  using Atom = BCPattern::Atom;
+  using Captures = BCPattern::CaptureVec;
+
+  if (!funcd) return false;
+
+  // Make sure we have an acceptable FPush and non-null callee.
+  assert(i.op() == Op::FPushFuncD ||
+         i.op() == Op::FPushClsMethodD);
+
+  auto fcall = i.nextSk();
+
+  // Check if the next instruction is an acceptable FCall.
+  if ((fcall.op() != Op::FCall && fcall.op() != Op::FCallD) ||
+      funcd->isResumable() || funcd->isReturnRef()) {
+    return false;
+  }
+
+  // First, check for the static local singleton pattern...
+
+  // Lambda to check if CGetL and StaticLocInit refer to the same local.
+  auto has_same_local = [] (PC pc, const Captures& captures) {
+    if (captures.size() == 0) return false;
+
+    auto cgetl = (const Op*)pc;
+    auto sli = (const Op*)captures[0];
+
+    assert(*cgetl == Op::CGetL);
+    assert(*sli == Op::StaticLocInit);
+
+    return (getImm(sli, 0).u_IVA == getImm(cgetl, 0).u_IVA);
+  };
+
+  auto cgetl = Atom(Op::CGetL).onlyif(has_same_local);
+  auto retc  = Atom(Op::RetC);
+
+  // Look for a static local singleton pattern.
+  auto result = BCPattern {
+    Atom(Op::Null),
+    Atom(Op::StaticLocInit).capture(),
+    Atom(Op::IsTypeL),
+    Atom::alt(
+      Atom(Op::JmpZ).taken({cgetl, retc}),
+      Atom::seq(Atom(Op::JmpNZ), cgetl, retc)
+    )
+  }.ignore(
+    {Op::AssertRATL, Op::AssertRATStk}
+  ).matchAnchored(funcd);
+
+  if (result.found()) {
+    try {
+      hhbcTrans().emitSingletonSLoc(
+        funcd,
+        (const Op*)result.getCapture(0)
+      );
+    } catch (const FailedIRGen& e) {
+      return false;
+    } catch (const FailedCodeGen& e) {
+      return false;
+    }
+    TRACE(1, "[singleton-sloc] %s <- %s\n",
+        funcd->fullName()->data(),
+        fcall.func()->fullName()->data());
+    return true;
+  }
+
+  // Not found; check for the static property pattern.
+
+  // Factory for String atoms that are required to match another captured
+  // String opcode.
+  auto same_string_as = [&] (int i) {
+    return Atom(Op::String).onlyif([=] (PC pc, const Captures& captures) {
+      auto string1 = (const Op*)pc;
+      auto string2 = (const Op*)captures[i];
+      assert(*string1 == Op::String);
+      assert(*string2 == Op::String);
+
+      auto const unit = funcd->unit();
+      auto sd1 = unit->lookupLitstrId(getImmPtr(string1, 0)->u_SA);
+      auto sd2 = unit->lookupLitstrId(getImmPtr(string2, 0)->u_SA);
+
+      return (sd1 && sd1 == sd2);
+    });
+  };
+
+  auto stringProp = same_string_as(0);
+  auto stringCls  = same_string_as(1);
+  auto agetc = Atom(Op::AGetC);
+  auto cgets = Atom(Op::CGetS);
+
+  // Look for a class static singleton pattern.
+  result = BCPattern {
+    Atom(Op::String).capture(),
+    Atom(Op::String).capture(),
+    Atom(Op::AGetC),
+    Atom(Op::CGetS),
+    Atom(Op::IsTypeC),
+    Atom::alt(
+      Atom(Op::JmpZ).taken({stringProp, stringCls, agetc, cgets, retc}),
+      Atom::seq(Atom(Op::JmpNZ), stringProp, stringCls, agetc, cgets, retc)
+    )
+  }.ignore(
+    {Op::AssertRATL, Op::AssertRATStk}
+  ).matchAnchored(funcd);
+
+  if (result.found()) {
+    try {
+      hhbcTrans().emitSingletonSProp(
+        funcd,
+        (const Op*)result.getCapture(1),
+        (const Op*)result.getCapture(0)
+      );
+    } catch (const FailedIRGen& e) {
+      return false;
+    } catch (const FailedCodeGen& e) {
+      return false;
+    }
+    TRACE(1, "[singleton-sprop] %s <- %s\n",
+        funcd->fullName()->data(),
+        fcall.func()->fullName()->data());
+    return true;
+  }
+
+  return false;
+}
 
 /*
  * Generate HhbcTranslator method callers for all bytecodes, using its
@@ -1126,58 +1135,6 @@ IRTranslator::translateInstrWork(const NormalizedInstruction& i) {
   }
 }
 
-static bool isPop(Op opc) {
-  return opc == OpPopC || opc == OpPopR;
-}
-
-void
-IRTranslator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
-  if (!i.outStack || i.breaksTracelet) return;
-  auto const jitType = Type(i.outStack->rtt);
-
-  m_hhbcTrans.setBcOff(i.next->offset(), false);
-  if (shouldHHIRRelaxGuards()) {
-    if (i.outputPredicted) {
-      if (i.outputPredictionStatic && jitType.notCounted()) {
-        // If the prediction is from static analysis it really means jitType |
-        // InitNull. When jitType is an uncounted type, we know that the value
-        // will always be an uncounted type, so we assert that fact before
-        // doing the real check. This allows us to relax the CheckType away
-        // while still eliminating some refcounting operations.
-        m_hhbcTrans.assertTypeStack(0, Type::Uncounted);
-      }
-      m_hhbcTrans.checkTypeTopOfStack(jitType, i.next->offset());
-    }
-    return;
-  }
-
-  NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
-
-  if (u == NormalizedInstruction::OutputUse::Inferred) {
-    TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
-          jitType.toString().c_str());
-    m_hhbcTrans.assertTypeStack(0, jitType);
-
-  } else if (u == NormalizedInstruction::OutputUse::Used && i.outputPredicted) {
-    // If the value was predicted statically by the front-end, it
-    // means that it's either the predicted type or null.  In this
-    // case, if the predicted value is not ref-counted and it's simply
-    // going to be popped, then pass the information as an assertion
-    // that the type is not ref-counted.  This avoid both generating a
-    // type check and dec-refing the value.
-    if (i.outputPredictionStatic && isPop(i.next->op()) &&
-        !jitType.maybeCounted()) {
-      TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
-            jitType.toString().c_str());
-      m_hhbcTrans.assertTypeStack(0, JIT::Type::Uncounted);
-    } else {
-      TRACE(1, "irPassPredictedAndInferredTypes: output predicted as %s\n",
-            jitType.toString().c_str());
-      m_hhbcTrans.checkTypeTopOfStack(jitType, i.next->offset());
-    }
-  }
-}
-
 void IRTranslator::interpretInstr(const NormalizedInstruction& i) {
   FTRACE(5, "HHIR: BC Instr {}\n",  i.toString());
   m_hhbcTrans.emitInterpOne(i);
@@ -1206,11 +1163,6 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   // When profiling, we disable type predictions to avoid side exits
   assert(IMPLIES(JIT::tx->mode() == TransKind::Profile, !ni.outputPredicted));
 
-  if (ni.guardedThis) {
-    // Task #2067635: This should really generate an AssertThis
-    ht.setThisAvailable();
-  }
-
   ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
 
   auto pc = reinterpret_cast<const Op*>(ni.pc());
@@ -1228,8 +1180,6 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   } else {
     translateInstrWork(ni);
   }
-
-  passPredictedAndInferredTypes(ni);
 }
 
 }}

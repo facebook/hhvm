@@ -3198,19 +3198,19 @@
         },
         {
             "name": "PHP_MINOR_VERSION",
-            "value": 4
+            "value": 5
         },
         {
             "name": "PHP_RELEASE_VERSION",
-            "value": 999
+            "value": 99
         },
         {
             "name": "PHP_VERSION_ID",
-            "value": 50499
+            "value": 50599
         },
         {
             "name": "PHP_EXTRA_VERSION",
-            "value": ""
+            "value": "hhvm"
         },
         {
             "name": "PM_STR",

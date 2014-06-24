@@ -123,6 +123,16 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return info;
   }
 
+  case ContEnter: {
+    if (index == 0) {
+      // return value from call
+      return StackValueInfo { inst, Type::Gen };
+    }
+    auto info = getStackValue(inst->src(0), index);
+    info.spansCall = true;
+    return info;
+  }
+
   case SpillStack: {
     int64_t numPushed    = 0;
     int32_t numSpillSrcs = inst->numSrcs() - 2;
@@ -473,6 +483,8 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
 
     case Count:       return simplifyCount(inst);
     case CountArray:  return simplifyCountArray(inst);
+
+    case LdClsName:   return simplifyLdClsName(inst);
 
     case CallBuiltin: return simplifyCallBuiltin(inst);
 
@@ -2051,6 +2063,11 @@ SSATmp* Simplifier::simplifyCountArray(const IRInstruction* inst) {
   }
 
   return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLdClsName(const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  return src->isConst(Type::Cls) ? cns(src->clsVal()->name()) : nullptr;
 }
 
 SSATmp* Simplifier::simplifyCallBuiltin(const IRInstruction* inst) {

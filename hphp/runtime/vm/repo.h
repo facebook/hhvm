@@ -32,7 +32,7 @@
 
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/preclass-emit.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/litstr-repo-proxy.h"
 

@@ -735,7 +735,7 @@ bool TestCodeError::TestInvalidYield() {
   WithOpt w0(Option::EnableHipHopSyntax);
 
   VE(InvalidYield, "<?php function f() { yield 1; return 2; }");
-  VE(InvalidYield, "<?php async function f() { await f(); yield 1; }");
+  VE(InvalidYield, "<?php async function f() { yield 1; return await f(); }");
   VE(InvalidYield, "<?php yield 1; }");
   VE(InvalidYield, "<?php class X { function __get() { yield 1; } }");
   VE(InvalidYield, "<?php class X { function X() { yield 1; } }");

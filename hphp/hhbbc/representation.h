@@ -482,7 +482,7 @@ struct Class {
    * be flattened.
    */
   std::vector<LowStringPtr> usedTraitNames;
-  std::vector<PreClass::TraitRequirement> traitRequirements;
+  std::vector<PreClass::ClassRequirement> requirements;
   std::vector<PreClass::TraitPrecRule> traitPrecRules;
   std::vector<PreClass::TraitAliasRule> traitAliasRules;
 
@@ -538,6 +538,7 @@ std::string show(const Func&);
 std::string show(const Class&);
 std::string show(const Unit&);
 std::string show(const Program&);
+std::string local_string(borrowed_ptr<const php::Local>);
 
 //////////////////////////////////////////////////////////////////////
 

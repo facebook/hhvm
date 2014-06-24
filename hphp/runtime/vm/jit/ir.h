@@ -505,10 +505,13 @@ O(InitObjProps,                     ND, S(Obj),                          E|N) \
 O(CustomInstanceInit,        DAllocObj, S(Obj),                         Er|N) \
                                                                               \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
+O(LdClsName,              D(StaticStr), S(Cls),                            C) \
 O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
+O(NewLikeArray,                 D(Arr), S(Arr) C(Int),                 N|PRc) \
+O(NewMixedArray,                D(Arr), C(Int),                        N|PRc) \
 O(NewPackedArray,           DArrPacked, C(Int) S(StkPtr),        E|N|PRc|CRc) \
 O(NewStructArray,               D(Arr), S(StkPtr),               E|N|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \
@@ -627,7 +630,7 @@ O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(Shuffle,                          ND, SVar(Top),                        NF) \
 O(CreateCont,                   D(Obj), S(FramePtr) C(Int)                    \
                                           S(TCA,Nullptr) C(Int),     E|N|PRc) \
-O(ContEnter,                        ND, S(StkPtr)                             \
+O(ContEnter,                 D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(FramePtr)                         \
                                           S(TCA)                              \

@@ -88,6 +88,23 @@ inline std::string show(TransKind k) {
   not_reached();
 }
 
+/*
+ * Compact flags which may be threaded through a service request to provide
+ * hints or demands for retranslations.
+ */
+struct TransFlags {
+  explicit TransFlags(uint64_t flags = 0) : packed(flags) {}
+
+  union {
+    struct {
+      bool noinlineSingleton : 1;
+    };
+    uint64_t packed;
+  };
+};
+
+static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");
+
 }}
 
 #endif

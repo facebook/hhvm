@@ -32,7 +32,6 @@ SRC = \
   nast.ml\
   typing_defs.ml\
   typing_env.ml\
-  naming_error.ml\
   naming_heap.ml\
   naming_ast_helpers.ml\
   naming.ml\
@@ -201,9 +200,6 @@ autocomplete.ml: $(TOP)/globals/autocomplete.ml
 find_refs.ml: $(TOP)/globals/find_refs.ml
 	cp $(TOP)/globals/find_refs.ml .
 
-naming_error.ml: $(TOP)/naming/naming_error.ml
-	cp $(TOP)/naming/naming_error.ml .
-
 naming_ast_helpers.ml: $(TOP)/naming/naming_ast_helpers.ml
 	cp $^ .
 
@@ -282,7 +278,6 @@ clean::
 	rm -f nastVisitor.ml
 	rm -f nastCheck.ml
 	rm -f nastInitCheck.ml
-	rm -f naming_error.ml
 	rm -f naming_heap.ml
 	rm -f naming_ast_helpers.ml
 	rm -f naming.ml

@@ -178,7 +178,7 @@ private:
 
   void eraseAcc(Map::accessor &acc) {
     const char *pkey = acc->first;
-    m_apcStats.removeKey(strlen(pkey));
+    APCStats::getAPCStats().removeKey(strlen(pkey));
     m_vars.erase(acc);
     free((void *)pkey);
   }
@@ -208,7 +208,6 @@ private:
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;
   std::atomic<uint64_t> m_purgeCounter;
-  APCStats m_apcStats;
 };
 
 //////////////////////////////////////////////////////////////////////

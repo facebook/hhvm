@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +29,9 @@ inline void c_ResumableWaitHandle::resume() {
   switch (getKind()) {
     case Kind::AsyncFunction:
       static_cast<c_AsyncFunctionWaitHandle*>(this)->resume();
+      return;
+    case Kind::AsyncGenerator:
+      static_cast<c_AsyncGeneratorWaitHandle*>(this)->resume();
       return;
     default:
       not_reached();
@@ -38,6 +42,9 @@ inline void c_ResumableWaitHandle::exitContext(context_idx_t ctx_idx) {
   switch (getKind()) {
     case Kind::AsyncFunction:
       static_cast<c_AsyncFunctionWaitHandle*>(this)->exitContext(ctx_idx);
+      return;
+    case Kind::AsyncGenerator:
+      static_cast<c_AsyncGeneratorWaitHandle*>(this)->exitContext(ctx_idx);
       return;
     default:
       not_reached();

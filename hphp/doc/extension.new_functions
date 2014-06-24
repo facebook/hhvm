@@ -24,7 +24,6 @@ testing and some alternative PHP implementation.
 
 - clock_getres
 - clock_gettime
-- clock_settime
 
 - mysql_connect added connect_timeout_ms and query_timeout_ms
 - mysql_pconnect added connect_timeout_ms and query_timeout_ms

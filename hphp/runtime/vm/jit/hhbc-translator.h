@@ -44,6 +44,24 @@ enum class IRGenMode {
   CFG,
 };
 
+enum JmpFlags {
+  JmpFlagNone          = 0,
+  JmpFlagBreakTracelet = 1,
+  JmpFlagNextIsMerge   = 2,
+  JmpFlagBothPaths     = 4,
+  JmpFlagSurprise      = 8
+};
+
+inline JmpFlags operator|(JmpFlags f1, JmpFlags f2) {
+  return static_cast<JmpFlags>(
+    static_cast<unsigned>(f1) | static_cast<unsigned>(f2));
+}
+
+inline JmpFlags operator&(JmpFlags f1, JmpFlags f2) {
+  return static_cast<JmpFlags>(
+    static_cast<unsigned>(f1) & static_cast<unsigned>(f2));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -86,7 +104,7 @@ struct HhbcTranslator {
   IRGenMode genMode() const { return m_mode; }
 
   // End a bytecode block and do the right thing with fallthrough.
-  void endBlock(Offset next);
+  void endBlock(Offset next, bool nextIsMerge);
 
   void end();
   void end(Offset nextPc);
@@ -127,6 +145,9 @@ struct HhbcTranslator {
   void profileInlineFunctionShape(const std::string& str);
   void profileSmallFunctionShape(const std::string& str);
   void profileFailedInlShape(const std::string& str);
+  void emitSingletonSProp(const Func* func,
+                          const Op* clsOp, const Op* propOp);
+  void emitSingletonSLoc(const Func* func, const Op* op);
 
   // Other public functions for irtranslator.
   void setThisAvailable();
@@ -193,6 +214,8 @@ public:
   void emitInitThisLoc(int32_t id);
   void emitArray(int arrayId);
   void emitNewArray(int capacity);
+  void emitNewMixedArray(int capacity);
+  void emitNewLikeArrayL(int id, int capacity);
   void emitNewPackedArray(int n);
   void emitNewStructArray(uint32_t n, StringData** keys);
   void emitNewCol(int capacity);
@@ -262,11 +285,10 @@ public:
   void emitDup();
   void emitUnboxR();
   void emitUnbox();
-  void emitJmpZ(Offset taken, Offset next, bool bothPaths, bool breaksTracelet);
-  void emitJmpNZ(Offset taken, Offset next, bool bothPaths,
-                 bool breaksTracelet);
-  void emitJmp(int32_t offset, bool breakTracelet, Block* catchBlock);
-  void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
+  void emitJmpZ(Offset taken, Offset next, JmpFlags);
+  void emitJmpNZ(Offset taken, Offset next, JmpFlags);
+  void emitJmpImpl(int32_t offset, JmpFlags, Block* catchBlock);
+  void emitJmp(int32_t offset, JmpFlags);
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
   void emitLt()    { emitCmp(Lt);    }
@@ -362,6 +384,8 @@ public:
   void emitCastString();
   void emitCastArray();
   void emitCastObject();
+
+  void emitNameA();
 
   void emitSwitch(const ImmVector&, int64_t base, bool bounded);
   void emitSSwitch(const ImmVector&);
@@ -465,11 +489,10 @@ public:
   void emitIterBreak(const ImmVector& iv, uint32_t offset, bool breakTracelet);
   void emitVerifyParamType(uint32_t paramId);
 
-  void emitResumedReturnControl(Block* catchBlock);
-
-  // continuations
+  // generators
   void emitCreateCont(Offset resumeOffset);
   void emitContEnter(Offset returnOffset);
+  void emitYieldReturnControl(Block* catchBlock);
   void emitYieldImpl(Offset resumeOffset);
   void emitYield(Offset resumeOffset);
   void emitYieldK(Offset resumeOffset);
@@ -481,8 +504,7 @@ public:
   // async functions
   void emitAwaitE(SSATmp* child, Block* catchBlock, Offset resumeOffset,
                   int iters);
-  void emitAwaitR(SSATmp* child, Block* catchBlock, Block* catchBlockNoSpill,
-                  Offset resumeOffset);
+  void emitAwaitR(SSATmp* child, Block* catchBlock, Offset resumeOffset);
   void emitAwait(Offset resumeOffset, int iters);
 
   void emitStrlen();
@@ -720,6 +742,8 @@ private:
                             bool& checkForInt);
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
+  SSATmp* ldClsPropAddrKnown(Block* catchBlock,
+                             SSATmp* cls, SSATmp* name);
   SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls,
                         SSATmp* name, bool raise);
   void emitUnboxRAux();
@@ -731,8 +755,8 @@ private:
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
-  void emitJmpHelper(int32_t taken, int32_t next, bool negate,
-                     bool bothPaths, bool breaksTracelet, SSATmp* src);
+  void emitJmpHelper(int32_t taken, int32_t next, bool negate, JmpFlags,
+                     SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);
@@ -758,12 +782,15 @@ private:
 
   bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
                              uint32_t numNonDefault);
-  SSATmp* optimizedServerGetCustomBoolSetting();
+  SSATmp* optimizedCallIniGet();
   SSATmp* optimizedCallCount();
 
 private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff = -1);
-  Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);
+  Block* makeExit(TransFlags trflags);
+  Block* makeExit(Offset targetBcOff,
+                  std::vector<SSATmp*>& spillValues,
+                  TransFlags trflags = TransFlags{});
   Block* makeExitWarn(Offset targetBcOff, std::vector<SSATmp*>& spillValues,
                       const StringData* warning);
   Block* makeExitError(SSATmp* msg, Block* catchBlock);
@@ -830,7 +857,9 @@ private: // Exit trace creation routines.
   };
   typedef std::function<SSATmp* ()> CustomExit;
   Block* makeExitImpl(Offset targetBcOff, ExitFlag flag,
-                      std::vector<SSATmp*>& spillValues, const CustomExit&);
+                      std::vector<SSATmp*>& spillValues,
+                      const CustomExit& customFn,
+                      TransFlags trflags = TransFlags{});
 
 private:
   /*

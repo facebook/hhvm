@@ -82,8 +82,9 @@ struct CodeCache {
 
   DataBlock& data() { return m_data; }
 
-  // Read-only access for MCGenerator::dumpTCCode()
+  // Read-only access for MCGenerator::dumpTCCode()/dumpTCData()
   const CodeBlock& prof() const { return m_prof; }
+  const CodeBlock& hot() const { return m_hot; }
 
   void lock() { m_lock = true; }
   void unlock() { m_lock = false; }

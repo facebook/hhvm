@@ -74,5 +74,16 @@ let string t =
   Printf.sprintf "File %S, line %d, characters %d-%d:"
     t.pos_file line start end_
 
+let inside p line char_pos =
+  let first_line = p.pos_start.pos_lnum in
+  let last_line = p.pos_end.pos_lnum in
+  if first_line = last_line then
+    let _, start, end_ = info_pos p in
+    first_line = line && start <= char_pos && char_pos <= end_
+  else
+    if line = first_line then char_pos > (p.pos_start.pos_cnum - p.pos_start.pos_bol)
+    else if line = last_line then char_pos <= (p.pos_end.pos_cnum - p.pos_end.pos_bol)
+    else line > first_line && line < last_line
+
 let compare x y =
   String.compare (string x) (string y)

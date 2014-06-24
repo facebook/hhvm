@@ -364,6 +364,9 @@ void LibEventServer::stop() {
     // an error occured but we're in shutdown already, so ignore
   }
   m_dispatcherThread.waitForEnd();
+  for (auto listener: m_listeners) {
+    listener->serverStopped(this);
+  }
 
   evhttp_free(m_server);
   m_server = nullptr;

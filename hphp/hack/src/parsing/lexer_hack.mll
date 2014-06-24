@@ -391,7 +391,7 @@ and heredoc_token = parse
 
 and comment buf = parse
   | eof                { let pos = Pos.make lexbuf in
-                         Errors.add pos "unterminated comment";
+                         Errors.unterminated_comment pos;
                          pos, Buffer.contents buf
                        }
   | '\n'               { Lexing.new_line lexbuf;
@@ -410,7 +410,7 @@ and line_comment = parse
 
 and xhp_comment = parse
   | eof                { let pos = Pos.make lexbuf in
-                         Errors.add pos "unterminated xhp comment";
+                         Errors.unterminated_xhp_comment pos;
                          ()
                        }
   | '\n'               { Lexing.new_line lexbuf; xhp_comment lexbuf }
@@ -444,7 +444,7 @@ and string = parse
 
 and string_backslash = parse
   | eof                { let pos = Pos.make lexbuf in
-                         Errors.add pos "Unexpected end of file";
+                         Errors.unexpected_eof pos;
                          ()
                        }
   | '\n'               { Lexing.new_line lexbuf }

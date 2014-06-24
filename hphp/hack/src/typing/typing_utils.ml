@@ -53,24 +53,9 @@ let rec is_option env ty =
 let uerror r1 ty1 r2 ty2 =
   let ty1 = Typing_print.error ty1 in
   let ty2 = Typing_print.error ty2 in
-  Errors.add_list (
-    (Reason.to_string ("This is " ^ ty1) r1) @
+  Errors.unify_error
+    (Reason.to_string ("This is " ^ ty1) r1)
     (Reason.to_string ("It is incompatible with " ^ ty2) r2)
-  )
-
-(*****************************************************************************)
-(* Adding results to auto-completion  *)
-(*****************************************************************************)
-
-let add_auto_result env class_members =
-  Autocomplete.auto_complete_result :=
-    SMap.fold begin fun x class_elt acc ->
-      let ty = class_elt.ce_type in
-      let type_ = Typing_print.full_strip_ns env ty in
-      let pos = Reason.to_pos (fst ty) in
-      let sig_ = x^" "^type_ in
-      SMap.add sig_ (Autocomplete.make_result x pos type_) acc
-    end class_members SMap.empty
 
 let handle_class_type completion_type c =
   match completion_type, c.Typing_defs.tc_kind with
@@ -125,8 +110,7 @@ let save_infer env pos ty =
   match !infer_target with
   | None -> ()
   | Some (line, char_pos) ->
-      let l, start, end_ = Pos.info_pos pos in
-      if l = line && start <= char_pos && char_pos <= end_ && !infer_type = None
+      if Pos.inside pos line char_pos && !infer_type = None
       then begin
         infer_type := Some (Typing_print.full_strip_ns env ty);
         infer_pos := Some (Reason.to_pos (fst ty));
@@ -156,9 +140,7 @@ let apply_shape ~f env (r1, fdm1) (r2, fdm2) =
     | None ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in
-        Errors.add_list
-          [pos2, "The field '"^name^"' is missing";
-           pos1, "The field '"^name^"' is defined"];
+        Errors.missing_field pos2 pos1 name;
         env
     | Some ty2 ->
         f env ty1 ty2

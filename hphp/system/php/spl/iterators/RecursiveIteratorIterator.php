@@ -130,6 +130,10 @@ class RecursiveIteratorIterator implements OuterIterator {
    * @return     mixed   No value is returned.
    */
   public function next() {
+    $this->nextImpl();
+  }
+
+  private function nextImpl() {
     while ($this->nextInnerImpl() === self::NEXT_REPEAT) {
       /* loop */
     }
@@ -230,11 +234,11 @@ class RecursiveIteratorIterator implements OuterIterator {
     $it = $this->originalIterator;
     $this->iterators = array(array($it, self::STATE_START));
     $it->rewind();
-    if(!$this->inIteration) {
+    if (!$this->inIteration) {
       $this->beginIteration();
     }
 
-    $this->next();
+    $this->nextImpl();
     $this->inIteration = true;
   }
 
@@ -255,7 +259,7 @@ class RecursiveIteratorIterator implements OuterIterator {
       }
       $depth--;
     }
-    if($this->inIteration) {
+    if ($this->inIteration) {
       $this->endIteration();
     }
     $this->inIteration = false;

@@ -1,3 +1,6 @@
+NEXT
+ - All numeric comparisons involving NAN, except != and !==, are now false.
+
 "Mos Def" 11-Jun-2014
  - Turn on new tracelet region selector by default; analyze() is deprecated
  - Fix a bug in debugBacktrace with NativeImpl methods
@@ -39,9 +42,9 @@
  - Cut session_id() size by 1/2
  - Added 'Z' format string for pack/unpack
  - We now build on clang
- - Fix pcre cache to not fatal when full 
+ - Fix pcre cache to not fatal when full
  - Implement $php_errormsg
- - Adding -n CLI option to hhvm php mode 
+ - Adding -n CLI option to hhvm php mode
  - Fix substitution of invalid UTF8 sequences in htmlspecialchars
  - FastCGI: Use SCRIPT_FILENAME as the PHP script to run
  - Can create DateTimeZone's from abbreviations

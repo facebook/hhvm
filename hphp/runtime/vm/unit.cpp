@@ -24,11 +24,13 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/autoload-handler.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/disas.h"
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -950,10 +952,8 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              auto const efile = g_context->lookupIncludeRoot(s,
+              auto const unit = g_context->lookupIncludeRoot(s,
                 InclOpFlags::DocRoot, nullptr, this);
-              assert(efile);
-              Unit* unit = efile->unit();
               unit->initialMerge();
               m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
               break;
@@ -2171,7 +2171,7 @@ void UnitEmitter::addTrivialPseudoMain() {
   emitOp(OpInt);
   emitInt64(1);
   emitOp(OpRetC);
-  mfe->setMaxStackCells(1);
+  mfe->maxStackCells = 1;
   mfe->finish(bcPos(), false);
   recordFunction(mfe);
 
@@ -2381,7 +2381,7 @@ void UnitEmitter::recordSourceLocation(const Location* sLoc, Offset start) {
 }
 
 void UnitEmitter::recordFunction(FuncEmitter* fe) {
-  m_feTab.push_back(std::make_pair(fe->past(), fe));
+  m_feTab.push_back(std::make_pair(fe->past, fe));
 }
 
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
@@ -2659,7 +2659,7 @@ Unit* UnitEmitter::create() {
   }
   u->m_lineToOffsetRangeVecMap = createLineToOffsetMap(m_sourceLocTab, m_bclen);
   for (size_t i = 0; i < m_feTab.size(); ++i) {
-    assert(m_feTab[i].second->past() == m_feTab[i].first);
+    assert(m_feTab[i].second->past == m_feTab[i].first);
     assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());
     u->m_funcTable.push_back(
       FuncEntry(m_feTab[i].first, m_fMap.find(m_feTab[i].second)->second));

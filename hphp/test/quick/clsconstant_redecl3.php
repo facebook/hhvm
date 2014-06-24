@@ -11,7 +11,10 @@ abstract class B implements A {
 }
 
 class C extends B {
+  // This is actually fine. It wouldn't be if C directly implemented A
   const FOO = 'DOH';
 
   public function test() { echo self::FOO . "\n"; }
 }
+
+var_dump(C::FOO);

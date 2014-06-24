@@ -666,6 +666,13 @@ void __attribute__((weak)) __hot_end();
 static void NEVER_INLINE AT_END_OF_TEXT __attribute__((optimize("2")))
 hugifyText(char* from, char* to) {
 #if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
+  if (from > to || (to - from) < sizeof(uint64_t)) {
+    // This shouldn't happen if HHVM is behaving correctly (I think),
+    // but if it does then there is nothing to do and we should bail
+    // out early because the call to wordcpy() below can't handle
+    // zero size or negative sizes.
+    return;
+  }
   size_t sz = to - from;
   void* mem = malloc(sz);
   memcpy(mem, from, sz);
@@ -1309,12 +1316,11 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      HPHP::Eval::PhpFile* phpFile = g_context->lookupPhpFile(
+      auto const unit = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
-      if (phpFile == nullptr) {
+      if (unit == nullptr) {
         throw FileOpenException(po.lint);
       }
-      Unit* unit = phpFile->unit();
       const StringData* msg;
       int line;
       if (unit->compileTimeFatal(msg, line)) {
@@ -1516,10 +1522,6 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
 
 ///////////////////////////////////////////////////////////////////////////////
 // C++ ffi
-
-extern "C" void hphp_fatal_error(const char *s) {
-  throw_fatal(s);
-}
 
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {

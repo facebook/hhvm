@@ -139,8 +139,8 @@ struct ProfileController {
   static bool isTracking();
   static bool isProfiling();
   static ProfileType profileType();
-private:
-  static void cleanup(const std::unique_lock<std::mutex>& lock);
+
+  static void enqueueOrphanedUnit(const Unit*);
 };
 
 }

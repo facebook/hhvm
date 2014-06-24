@@ -55,9 +55,9 @@ File* FileStreamWrapper::open(const String& filename, const String& mode,
 
   if (options & File::USE_INCLUDE_PATH) {
     struct stat s;
-    String resolved_fname = Eval::resolveVmInclude(fname.get(), "", &s);
+    String resolved_fname = resolveVmInclude(fname.get(), "", &s);
     if (!resolved_fname.isNull()) {
-        fname = resolved_fname;
+      fname = resolved_fname;
     }
   }
 

@@ -36,9 +36,9 @@
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/vm/preclass-emit.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
@@ -97,12 +97,12 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
 
   // Each entry point for a DV funclet is the start of a basic
   // block.
-  for (auto& param : fe.params()) {
+  for (auto& param : fe.params) {
     if (param.hasDefaultValue()) markBlock(param.funcletOff);
   }
 
   // The main entry point is also a basic block start.
-  markBlock(fe.base());
+  markBlock(fe.base);
 
   /*
    * For each instruction, add it to the set if it must be the start
@@ -113,12 +113,12 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
    *   - Immediatelly following a control flow instruction, other than
    *     a call.
    */
-  auto offset = fe.base();
+  auto offset = fe.base;
   for (;;) {
     auto const bc = fe.ue().bc();
     auto const pc = reinterpret_cast<const Op*>(bc + offset);
     auto const nextOff = offset + instrLen(pc);
-    auto const atLast = nextOff == fe.past();
+    auto const atLast = nextOff == fe.past;
 
     if (instrIsNonCallControlFlow(*pc) && !atLast) {
       markBlock(nextOff);
@@ -150,7 +150,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
    *
    *   - Each fault or catch entry point begins a block.
    */
-  for (auto& eh : fe.ehtab()) {
+  for (auto& eh : fe.ehtab) {
     markBlock(eh.m_base);
     markBlock(eh.m_past);
     switch (eh.m_type) {
@@ -164,7 +164,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
   }
 
   // Now, each interval in blockStarts delinates a basic block.
-  blockStarts.insert(fe.past());
+  blockStarts.insert(fe.past);
   return blockStarts;
 }
 
@@ -219,7 +219,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
   ExnTreeInfo ret;
   auto nextExnNode = uint32_t{0};
 
-  for (auto& eh : fe.ehtab()) {
+  for (auto& eh : fe.ehtab) {
     auto node = folly::make_unique<php::ExnNode>();
     node->id = nextExnNode++;
     node->parent = nullptr;
@@ -251,7 +251,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
     ret.ehMap[&eh] = borrow(node);
 
     if (eh.m_parentIndex != -1) {
-      auto it = ret.ehMap.find(&fe.ehtab()[eh.m_parentIndex]);
+      auto it = ret.ehMap.find(&fe.ehtab[eh.m_parentIndex]);
       assert(it != end(ret.ehMap));
       node->parent = it->second;
       it->second->children.emplace_back(std::move(node));
@@ -260,7 +260,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
     }
   }
 
-  ret.faultFuncletStarts.insert(fe.past());
+  ret.faultFuncletStarts.insert(fe.past);
 
   return ret;
 }
@@ -622,15 +622,15 @@ template<class FindBlk>
 void link_entry_points(php::Func& func,
                        const FuncEmitter& fe,
                        FindBlk findBlock) {
-  func.dvEntries.resize(fe.params().size());
-  for (size_t i = 0, sz = fe.params().size(); i < sz; ++i) {
-    if (fe.params()[i].hasDefaultValue()) {
-      auto const dv = findBlock(fe.params()[i].funcletOff);
+  func.dvEntries.resize(fe.params.size());
+  for (size_t i = 0, sz = fe.params.size(); i < sz; ++i) {
+    if (fe.params[i].hasDefaultValue()) {
+      auto const dv = findBlock(fe.params[i].funcletOff);
       func.params[i].dvEntryPoint = dv;
       func.dvEntries[i] = dv;
     }
   }
-  func.mainEntry = findBlock(fe.base());
+  func.mainEntry = findBlock(fe.base);
 }
 
 void build_cfg(ParseUnitState& puState,
@@ -670,7 +670,7 @@ void build_cfg(ParseUnitState& puState,
     auto const bcStart = bc + *it;
     auto const bcStop  = bc + *boost::next(it);
 
-    if (auto const eh = findEH(fe.ehtab(), *it)) {
+    if (auto const eh = findEH(fe.ehtab, *it)) {
       auto it = exnTreeInfo.ehMap.find(eh);
       assert(it != end(exnTreeInfo.ehMap));
       block->exnNode = it->second;
@@ -689,7 +689,7 @@ void build_cfg(ParseUnitState& puState,
 }
 
 void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
-  for (auto& param : fe.params()) {
+  for (auto& param : fe.params) {
     func.params.push_back(
       php::Param {
         param.defaultValue,
@@ -699,7 +699,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         param.phpCode,
         param.userAttributes,
         param.builtinType,
-        param.ref(),
+        param.byRef,
         param.variadic
       }
     );
@@ -722,8 +722,8 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
     func.iters[i]->id = i;
   }
 
-  func.staticLocals.reserve(fe.svInfo().size());
-  for (auto& sv : fe.svInfo()) {
+  func.staticLocals.reserve(fe.staticVars.size());
+  for (auto& sv : fe.staticVars) {
     func.staticLocals.push_back(
       php::StaticLocalInfo { sv.name, sv.phpCode }
     );
@@ -735,35 +735,34 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
                                       borrowed_ptr<php::Class> cls,
                                       const FuncEmitter& fe) {
   FTRACE(2, "  func: {}\n",
-    fe.name()->data() && *fe.name()->data() ? fe.name()->data()
-                                            : "pseudomain");
+    fe.name->data() && *fe.name->data() ? fe.name->data() : "pseudomain");
 
   auto ret             = folly::make_unique<php::Func>();
-  ret->name            = fe.name();
+  ret->name            = fe.name;
   ret->srcInfo         = php::SrcInfo { fe.getLocation(),
-                                        fe.getDocComment() };
+                                        fe.docComment };
   ret->unit            = unit;
   ret->cls             = cls;
   ret->nextBlockId     = 0;
 
-  ret->attrs                  = fe.attrs();
-  ret->userAttributes         = fe.getUserAttributes();
-  ret->returnUserType         = fe.returnUserType();
-  ret->retTypeConstraint      = fe.returnTypeConstraint();
-  ret->originalFilename       = fe.originalFilename();
+  ret->attrs              = fe.attrs;
+  ret->userAttributes     = fe.userAttributes;
+  ret->returnUserType     = fe.retUserType;
+  ret->retTypeConstraint  = fe.retTypeConstraint;
+  ret->originalFilename   = fe.originalFilename;
 
-  ret->top                    = fe.top();
-  ret->isClosureBody          = fe.isClosureBody();
-  ret->isAsync                = fe.isAsync();
-  ret->isGenerator            = fe.isGenerator();
-  ret->isPairGenerator        = fe.isPairGenerator();
+  ret->top                = fe.top;
+  ret->isClosureBody      = fe.isClosureBody;
+  ret->isAsync            = fe.isAsync;
+  ret->isGenerator        = fe.isGenerator;
+  ret->isPairGenerator    = fe.isPairGenerator;
 
   /*
    * HNI-style native functions get some extra information.
    */
   if (fe.isHNINative()) {
     ret->nativeInfo             = folly::make_unique<php::NativeInfo>();
-    ret->nativeInfo->returnType = fe.getReturnType();
+    ret->nativeInfo->returnType = fe.returnType;
   }
 
   add_frame_variables(*ret, fe);
@@ -806,7 +805,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->usedTraitNames    = pce.usedTraits();
   ret->traitPrecRules    = pce.traitPrecRules();
   ret->traitAliasRules   = pce.traitAliasRules();
-  ret->traitRequirements = pce.traitRequirements();
+  ret->requirements      = pce.requirements();
 
   parse_methods(puState, borrow(ret), unit, pce);
 

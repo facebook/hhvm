@@ -1159,6 +1159,10 @@ void IRBuilder::startBlock(Block* block) {
 
 }
 
+void IRBuilder::clearBlockState(Block* block) {
+  m_state.clearBlock(block);
+}
+
 Block* IRBuilder::makeBlock(Offset offset) {
   auto it = m_offsetToBlockMap.find(offset);
   if (it == m_offsetToBlockMap.end()) {
@@ -1174,11 +1178,18 @@ bool IRBuilder::blockExists(Offset offset) {
 }
 
 bool IRBuilder::blockIsIncompatible(Offset offset) {
-  if (m_offsetSeen.count(offset)) return true;
+  if (m_offsetSeen.count(offset) && !RuntimeOption::EvalJitLoops) return true;
   auto it = m_offsetToBlockMap.find(offset);
   if (it == m_offsetToBlockMap.end()) return false;
   auto* block = it->second;
-  if (!it->second->empty()) return true;
+  if (!block->empty() && block->back().isBlockEnd()) {
+    // If a block is generated before one of its predecessors, then
+    // we were conservative and cleared it's FrameState in the beginning.
+    // So it should be compatible with everything.
+    assert(RuntimeOption::EvalJitLoops);
+    return false;
+  }
+  if (!block->empty()) return true;
   return !m_state.compatible(block);
 }
 

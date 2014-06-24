@@ -34,7 +34,8 @@ namespace HPHP {
  *  WaitableWaitHandle             - wait handle that can be waited for
  *   BlockableWaitHandle           - wait handle that can be blocked by other WH
  *    ResumableWaitHandle          - wait handle that can resume PHP execution
- *     AsyncFunctionWaitHandle     - async function-based asynchronous execution
+ *     AsyncFunctionWaitHandle     - async function-based async execution
+ *     AsyncGeneratorWaitHandle    - async generator-based async execution
  *    GenArrayWaitHandle           - wait handle representing an array of WHs
  *    GenMapWaitHandle             - wait handle representing an Map of WHs
  *    GenVectorWaitHandle          - wait handle representing an Vector of WHs
@@ -56,6 +57,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   enum class Kind : uint8_t {
     Static,
     AsyncFunction,
+    AsyncGenerator,
     GenArray,
     GenMap,
     GenVector,

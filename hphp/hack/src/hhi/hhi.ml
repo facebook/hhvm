@@ -50,3 +50,6 @@ let get_hhi_root () =
       let r = get_hhi_root_impl () in
       root := Some r;
       r
+
+let set_hhi_root_for_unit_test dir =
+  root := Some (Some dir)

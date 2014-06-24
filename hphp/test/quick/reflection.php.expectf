@@ -260,19 +260,19 @@ Class [ <user> class B extends A implements I, K, H, J ] {
   }
 
   - Methods [6] {
-    Method [ <user> public method methI ] {
+    Method [ <user, implements I> public method methI ] {
       @@ %s/test/quick/reflection.php 143 - 143
 
       - Parameters [0] {
       }
     }
-    Method [ <user> public method methJ ] {
+    Method [ <user, implements J> public method methJ ] {
       @@ %s/test/quick/reflection.php 144 - 144
 
       - Parameters [0] {
       }
     }
-    Method [ <user> public method methK ] {
+    Method [ <user, implements K> public method methK ] {
       @@ %s/test/quick/reflection.php 145 - 145
 
       - Parameters [0] {
@@ -284,13 +284,13 @@ Class [ <user> class B extends A implements I, K, H, J ] {
       - Parameters [0] {
       }
     }
-    Method [ <user> public method methH ] {
+    Method [ <user, inherits A> public method methH ] {
       @@ %s/test/quick/reflection.php 125 - 125
 
       - Parameters [0] {
       }
     }
-    Method [ <user> protected method methA ] {
+    Method [ <user, inherits A> protected method methA ] {
       @@ %s/test/quick/reflection.php 126 - 126
 
       - Parameters [0] {
@@ -354,7 +354,7 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#44 (1) {
+object(ReflectionClass)#43 (1) {
   ["obj":"ReflectionClass":private]=>
   NULL
 }
@@ -419,7 +419,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#56 (4) {
+object(B)#55 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -431,7 +431,7 @@ object(B)#56 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#56 (4) {
+object(B)#55 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

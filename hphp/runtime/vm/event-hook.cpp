@@ -334,7 +334,8 @@ void EventHook::onFunctionResume(const ActRec* ar) {
 }
 
 void EventHook::onFunctionSuspend(const ActRec* ar, bool suspendingResumed) {
-  ssize_t flags = CheckSurprise();
+  // TODO(#2329497) can't CheckSurprise() yet, unwinder frees suspended locals
+  ssize_t flags = GetConditionFlags();
   onFunctionExit(ar, nullptr, nullptr, flags);
 
   // Async profiler

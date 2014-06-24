@@ -445,6 +445,7 @@ public:
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \
+  F(bool, HHIRInlineSingletons,        true)                            \
   /* 1 (the default) gives most asserts. 2 adds less commonly           \
    * useful/more expensive asserts. */                                  \
   F(uint32_t, HHIRGenerateAsserts,     debug)                           \
@@ -458,9 +459,8 @@ public:
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
+  F(bool,     JitLoops,                false)                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
-  F(bool,     JitDryRuns,              false)                           \
-  F(bool,     JitCompareRegions,       false)                           \
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    "hottrace")                      \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
@@ -471,7 +471,6 @@ public:
   F(uint32_t, HotFuncThreshold,        80)                              \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \
-  F(bool, HHBCRelaxGuards,             true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \

@@ -74,7 +74,7 @@ let die str =
   close_out oc;
   exit 2
 
-let error l = die (Errors.pmsg_l l)
+let error l = die (Errors.to_string l)
 
 let parse_options () =
   let fn_ref = ref None in
@@ -139,12 +139,16 @@ let parse_file fn =
     let files = make_files contentl in
     List.fold_right begin fun (sub_fn, content) ast ->
       Pos.file := fn^"--"^sub_fn ;
-      let _, _, ast' = Parser_hack.program content in
+      let {Parser_hack.is_hh_file; comments; ast = ast'} =
+        Parser_hack.program content
+      in
       ast' @ ast
     end files []
   else begin
     Pos.file := fn ;
-    let _, _, ast = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program content
+    in
     ast
   end
 
@@ -175,7 +179,9 @@ let main_hack { filename; suggest; _ } =
   let errors, () =
     Errors.do_ begin fun () ->
       Pos.file := builtins_filename;
-      let _, _, ast_builtins = Parser_hack.program builtins in
+      let {Parser_hack.is_hh_file; comments; ast = ast_builtins} =
+        Parser_hack.program builtins
+      in
       Pos.file := filename;
       let ast_file = parse_file filename in
       let ast = ast_builtins @ ast_file in

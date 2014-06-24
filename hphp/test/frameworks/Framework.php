@@ -23,8 +23,9 @@ class Framework {
   private ?string $git_path;
   private ?string $git_commit;
   private ?string $git_branch;
-  private Set $blacklist;
-  private Set $clownylist;
+  private Set<string> $blacklist;
+  private Set<string> $clownylist;
+  private Set<string> $flakeylist;
   private array<array<string, string>> $pull_requests;
   private ?Set $individual_tests = null;
   private ?string $bootstrap_file = null;
@@ -72,7 +73,8 @@ class Framework {
     $this->setTestPath(Options::$framework_info[$name]["test_root"]);
     $this->setPullRequests(Options::getFrameworkInfo($name, "pull_requests"));
     $this->setBlacklist(Options::getFrameworkInfo($name, "blacklist"));
-    $this->setClownylist(Options::getFrameworkInfo($name, "clowns"));
+    $this->setClownylist(Options::getFrameworkInfo($name, 'clowns'));
+    $this->setFlakeylist(Options::getFrameworkInfo($name, 'flakey'));
     $this->setTestNamePattern(Options::getFrameworkInfo($name,
                                                         "test_name_regex"));
     $this->setTestFilePattern(Options::getFrameworkInfo($name,
@@ -222,6 +224,15 @@ class Framework {
     if ($clownylist !== null) {
       foreach ($clownylist as $test) {
         $this->clownylist[] = Options::$frameworks_root."/".$test;
+      }
+    }
+  }
+
+  private function setFlakeylist(?array<string> $flakeylist): void {
+    $this->flakeylist = Set { };
+    if ($flakeylist !== null && !Options::$include_flakey) {
+      foreach ($flakeylist as $test) {
+        $this->flakeylist[] = Options::$frameworks_root.'/'.$test;
       }
     }
   }
@@ -688,14 +699,42 @@ class Framework {
     }
   }
 
+  private function reenableTestFiles(): void {
+    $rdit = new RecursiveDirectoryIterator(
+      $this->install_root,
+      RecursiveDirectoryIterator::SKIP_DOTS
+    );
+    $riit = new RecursiveIteratorIterator(
+      $rdit,
+      RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($riit as $name => $fileinfo) {
+      if (($pos = strpos($name, '.disabled.hhvm')) !== false) {
+        $new_name = substr($name, 0, $pos);
+        rename($name, $new_name);
+      }
+    }
+  }
+
   private function disableTestFiles(): void {
-    $this->blacklist = $this->disable($this->blacklist,
-                                      ".disabled.hhvm.blacklist");
-    $this->clownylist = $this->disable($this->clownylist,
-                                     ".disabled.hhvm.clownylist");
+    $this->reenableTestFiles();
+    $this->blacklist = $this->disable(
+      $this->blacklist,
+      ".disabled.hhvm.blacklist"
+    );
+    $this->clownylist = $this->disable(
+      $this->clownylist,
+      ".disabled.hhvm.clownylist"
+    );
+    $this->flakeylist = $this->disable(
+      $this->flakeylist,
+      ".disabled.hhvm.flakeylist"
+    );
     verbose(count($this->blacklist)." files were blacklisted (auto fail) ".
             $this->name."...\n");
     verbose(count($this->clownylist)." files were clownylisted (no-op/no run) ".
+            $this->name."...\n");
+    verbose(count($this->flakeylist)." files were flakeylisted (no-op/no run) ".
             $this->name."...\n");
   }
 

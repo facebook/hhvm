@@ -128,6 +128,12 @@ public:
   static void InstallStopSignalHandlers(ServerPtr server);
 
 public:
+  class ServerEventListener {
+   public:
+    virtual ~ServerEventListener() {}
+    virtual void serverStopped(Server* server) {}
+  };
+
   /**
    * Constructor.
    */
@@ -159,6 +165,19 @@ public:
    */
   void setUrlChecker(const URLChecker& checker) {
     m_urlChecker = checker;
+  }
+
+  /**
+   * Add or remove a ServerEventListener.
+   */
+  void addServerEventListener(ServerEventListener* listener) {
+    m_listeners.push_back(listener);
+  }
+  void removeServerEventListener(ServerEventListener* listener) {
+    auto it = std::find(m_listeners.begin(), m_listeners.end(), listener);
+    if (it != m_listeners.end()) {
+      m_listeners.erase(it);
+    }
   }
 
   /**
@@ -250,6 +269,7 @@ protected:
   mutable Mutex m_mutex;
   RequestHandlerFactory m_handlerFactory;
   URLChecker m_urlChecker;
+  std::list<ServerEventListener*> m_listeners;
 
 private:
   RunStatus m_status;

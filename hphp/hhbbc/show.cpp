@@ -80,17 +80,17 @@ std::string array_string(SArray arr) {
   return str.str();
 }
 
-std::string local_string(borrowed_ptr<const php::Local> loc) {
-  return loc->name
-    ? folly::to<std::string>("$", loc->name->data())
-    : folly::to<std::string>("$<unnamed:", loc->id, ">");
-};
-
 }
 
 //////////////////////////////////////////////////////////////////////
 
 namespace php {
+
+std::string local_string(borrowed_ptr<const php::Local> loc) {
+  return loc->name
+    ? folly::to<std::string>("$", loc->name->data())
+    : folly::to<std::string>("$<unnamed:", loc->id, ">");
+};
 
 std::string show(const Block& block) {
   std::string ret;

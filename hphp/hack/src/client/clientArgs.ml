@@ -111,8 +111,6 @@ let parse_check_args cmd =
       " (mode) show the types for file specified";
     "--type-at-pos", Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
       " (mode) show type at a given position in file [filename:line:character]";
-    "--skip", Arg.Unit (set_mode MODE_SKIP),
-      " (mode) unsafe! ignore any existing errors";
     "--list-files", Arg.Unit (set_mode MODE_LIST_FILES),
       " (mode) list files with errors";
     "--auto-complete", Arg.Unit (set_mode MODE_AUTO_COMPLETE),
@@ -135,7 +133,9 @@ let parse_check_args cmd =
       " (mode) prints a list of all related classes or methods to the given class";
     "--inheritance-ancestors", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
       " (mode) prints a list of all related classes or methods to the given class";
-    "--version", Arg.Unit (set_mode MODE_VERSION),
+    "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
+      " (mode) show human-readable type info for the given name; output is not meant for machine parsing";
+     "--version", Arg.Unit (set_mode MODE_VERSION),
       " (mode) show version and exit\n";
 
     (* flags *)
@@ -165,8 +165,6 @@ let parse_check_args cmd =
       " (deprecated) equivalent to --from check_trunk";
     "--save-state", Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       " <file> debug mode (do not use)";
-    "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
-      " debug mode (do not use)";
   ] in
   let args = parse_without_command options usage "check" in
 
@@ -285,6 +283,7 @@ let parse_build_args () =
       Generates build files\n"
       Sys.argv.(0) in
   let steps = ref None in
+  let no_steps = ref None in
   let verbose = ref false in
   let serial = ref false in
   let test_dir = ref None in
@@ -299,6 +298,9 @@ let parse_build_args () =
     "--steps", Arg.String (fun x ->
       steps := Some (Str.split (Str.regexp ",") x)),
     " comma-separated list of build steps to run";
+    "--no-steps", Arg.String (fun x ->
+      no_steps := Some (Str.split (Str.regexp ",") x)),
+    " comma-separated list of build steps not to run";
     "--no-run-scripts", Arg.Clear run_scripts,
     " don't run unported arc build scripts";
     "--serial", Arg.Set serial,
@@ -329,6 +331,7 @@ let parse_build_args () =
   CBuild { ServerMsg.
            root = root;
            steps = !steps;
+           no_steps = !no_steps;
            run_scripts = !run_scripts;
            serial = !serial;
            test_dir = !test_dir;

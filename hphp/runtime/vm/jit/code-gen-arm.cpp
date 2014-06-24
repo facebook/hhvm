@@ -139,7 +139,6 @@ CALL_OPCODE(Box)
 CALL_OPCODE(ConvIntToStr)
 
 CALL_OPCODE(AllocObj)
-CALL_OPCODE(NewPackedArray)
 
 CALL_OPCODE(ConcatStrStr)
 CALL_OPCODE(ConcatIntStr)
@@ -187,6 +186,9 @@ CALL_OPCODE(LdArrFuncCtx)
 CALL_OPCODE(LdArrFPushCuf)
 CALL_OPCODE(LdStrFPushCuf)
 CALL_OPCODE(NewArray)
+CALL_OPCODE(NewMixedArray)
+CALL_OPCODE(NewLikeArray)
+CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(ClosureStaticLocInit)
@@ -1967,6 +1969,14 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.   Ldr   (rVmSp, rVmTl[RDS::kVmspOff]);
 
   emitServiceReq(m_mainCode, REQ_RESUME);
+}
+
+void CodeGenerator::cgLdClsName(IRInstruction* inst) {
+  auto const dstReg = x2a(dstLoc(0).reg());
+  auto const srcReg = x2a(srcLoc(0).reg());
+
+  m_as.   Ldr   (dstReg, srcReg[Class::preClassOff()]);
+  m_as.   Ldr   (dstReg, dstReg[PreClass::nameOffset()]);
 }
 
 //////////////////////////////////////////////////////////////////////

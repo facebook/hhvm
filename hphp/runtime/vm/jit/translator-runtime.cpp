@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/autoload-handler.h"
 
 namespace HPHP {
 
@@ -61,6 +62,16 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
 namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
+
+ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
+  ArrayData* r = a->append(tvAsCVarRef(&value), a->getCount() != 1);
+  if (UNLIKELY(r != a)) {
+    r->incRefCount();
+    decRefArr(a);
+  }
+  tvRefcountedDecRef(value);
+  return r;
+}
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,

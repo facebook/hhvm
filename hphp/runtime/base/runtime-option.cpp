@@ -83,11 +83,7 @@ std::string RuntimeOption::ServerUser;
 int RuntimeOption::MaxLoopCount = 0;
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
-bool RuntimeOption::ThrowBadTypeExceptions = false;
-bool RuntimeOption::ThrowTooManyArguments = false;
 bool RuntimeOption::WarnTooManyArguments = false;
-bool RuntimeOption::ThrowMissingArguments = false;
-bool RuntimeOption::ThrowInvalidArguments = false;
 bool RuntimeOption::EnableHipHopErrors = true;
 bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
@@ -742,11 +738,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(MaxLoopCount, ini, error["MaxLoopCount"], 0);
     Config::Bind(NoInfiniteRecursionDetection, ini,
                  error["NoInfiniteRecursionDetection"]);
-    Config::Bind(ThrowBadTypeExceptions, ini, error["ThrowBadTypeExceptions"]);
-    Config::Bind(ThrowTooManyArguments, ini, error["ThrowTooManyArguments"]);
     Config::Bind(WarnTooManyArguments, ini, error["WarnTooManyArguments"]);
-    Config::Bind(ThrowMissingArguments, ini, error["ThrowMissingArguments"]);
-    Config::Bind(ThrowInvalidArguments, ini, error["ThrowInvalidArguments"]);
     Config::Bind(EnableHipHopErrors, ini, error["EnableHipHopErrors"], true);
     Config::Bind(AssertActive, ini, error["AssertActive"]);
     Config::Bind(AssertWarning, ini, error["AssertWarning"]);

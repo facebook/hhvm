@@ -473,9 +473,7 @@ Variant f_mysql_async_query_result(const Variant& link_identifier) {
 }
 
 bool f_mysql_async_query_completed(const Variant& result) {
-  MySQLResult *res = result.toResource().getTyped<MySQLResult>
-    (!RuntimeOption::ThrowBadTypeExceptions,
-     !RuntimeOption::ThrowBadTypeExceptions);
+  auto const res = result.toResource().getTyped<MySQLResult>(true, true);
   return !res || res->get() == NULL;
 }
 

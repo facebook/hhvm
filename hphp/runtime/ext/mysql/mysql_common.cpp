@@ -79,10 +79,7 @@ MySQL *MySQL::Get(const Variant& link_identifier) {
   if (link_identifier.isNull()) {
     return GetDefaultConn();
   }
-  MySQL *mysql = link_identifier.toResource().getTyped<MySQL>
-    (!RuntimeOption::ThrowBadTypeExceptions,
-     !RuntimeOption::ThrowBadTypeExceptions);
-  return mysql;
+  return link_identifier.toResource().getTyped<MySQL>(true, true);
 }
 
 MYSQL *MySQL::GetConn(const Variant& link_identifier, MySQL **rconn /* = NULL */) {
@@ -334,9 +331,7 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
 // helpers
 
 MySQLResult *php_mysql_extract_result(const Variant& result) {
-  MySQLResult *res = result.toResource().getTyped<MySQLResult>
-    (!RuntimeOption::ThrowBadTypeExceptions,
-     !RuntimeOption::ThrowBadTypeExceptions);
+  auto const res = result.toResource().getTyped<MySQLResult>(true, true);
   if (res == nullptr || res->isInvalid()) {
     raise_warning("supplied argument is not a valid MySQL result resource");
     return nullptr;

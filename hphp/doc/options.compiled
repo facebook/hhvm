@@ -84,11 +84,7 @@ flood error logs.
     CallUserHandlerOnFatals = true
     MaxLoopCount = 0
     NoInfiniteRecursionDetection = false
-    ThrowBadTypeExceptions = false
-    ThrowTooManyArguments = false
     WarnTooManyArguments = false
-    ThrowMissingArguments = false
-    ThrowInvalidArguments = false
     EnableHipHopErrors = true
     NoticeFrequency = 1    # 1 out of these many notices to log
     WarningFrequency = 1   # 1 out of these many warnings to log

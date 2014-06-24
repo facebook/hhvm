@@ -528,7 +528,7 @@ void throw_missing_min_arguments_nr(const char *fn, int expected, int got,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  if (level == 2 || RuntimeOption::ThrowMissingArguments) {
+  if (level == 2) {
     if (expected == 1) {
       raise_error(Strings::MISSING_MIN_ARGUMENT, fn, got);
     } else {
@@ -550,7 +550,7 @@ void throw_missing_arguments_nr(const char *fn, int expected, int got,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  if (level == 2 || RuntimeOption::ThrowMissingArguments) {
+  if (level == 2) {
     if (expected == 1) {
       raise_error(Strings::MISSING_ARGUMENT, fn, "exactly", got);
     } else {
@@ -571,7 +571,7 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  if (level == 2 || RuntimeOption::ThrowTooManyArguments) {
+  if (level == 2) {
     raise_error("Too many arguments for %s(), expected %d", fn, num);
   } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
     raise_warning("Too many arguments for %s(), expected %d", fn, num);
@@ -603,13 +603,9 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
 void throw_bad_type_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  string msg;
+  std::string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-
-  if (RuntimeOption::ThrowBadTypeExceptions) {
-    throw InvalidOperandException(msg.c_str());
-  }
 
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
@@ -638,11 +634,6 @@ void throw_invalid_argument(const char *fmt, ...) {
   string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-
-  if (RuntimeOption::ThrowInvalidArguments) {
-    throw InvalidArgumentException(msg.c_str());
-  }
-
   raise_warning("Invalid argument: %s", msg.c_str());
 }
 

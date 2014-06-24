@@ -85,11 +85,7 @@ public:
   static int  MaxLoopCount;
   static int  MaxSerializedStringSize;
   static bool NoInfiniteRecursionDetection;
-  static bool ThrowBadTypeExceptions;
-  static bool ThrowTooManyArguments;
   static bool WarnTooManyArguments;
-  static bool ThrowMissingArguments;
-  static bool ThrowInvalidArguments;
   static bool EnableHipHopErrors;
   static bool AssertActive;
   static bool AssertWarning;

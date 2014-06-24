@@ -140,7 +140,10 @@ static bool HHVM_FUNCTION(xdebug_is_enabled)
   XDEBUG_NOTIMPLEMENTED
 
 static int64_t HHVM_FUNCTION(xdebug_memory_usage) {
-  return MM().getStats().usage;
+  // With jemalloc, the usage can go negative (see ext_std_options.cpp:831)
+  int64_t usage = MM().getStats().usage;
+  assert(use_jemalloc || usage >= 0);
+  return std::max<int64_t>(usage, 0);
 }
 
 static int64_t HHVM_FUNCTION(xdebug_peak_memory_usage) {

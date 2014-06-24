@@ -68,6 +68,57 @@ const Class* getOwningClassForFunc(const Func* f) {
 
 static_assert(sizeof(Class) == 408, "Change this only on purpose");
 
+namespace {
+
+/*
+ * Load used traits of PreClass `preClass', and append the trait Class*'s to
+ * 'usedTraits'. Returns an estimate of the method count of all used traits.
+ */
+unsigned loadUsedTraits(PreClass* preClass,
+                        std::vector<ClassPtr>& usedTraits) {
+  unsigned methodCount = 0;
+  for (auto const& traitName : preClass->usedTraits()) {
+    Class* classPtr = Unit::loadClass(traitName);
+    if (classPtr == nullptr) {
+      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+    }
+    if (!(classPtr->attrs() & AttrTrait)) {
+      raise_error("%s cannot use %s - it is not a trait",
+                  preClass->name()->data(),
+                  classPtr->name()->data());
+    }
+
+    if (RuntimeOption::RepoAuthoritative) {
+      // In RepoAuthoritative mode (with the WholeProgram compiler
+      // optimizations), the contents of traits are flattened away into the
+      // preClasses of "use"r classes. Continuing here allows us to avoid
+      // unnecessarily attempting to re-import trait methods and
+      // properties, only to fail due to (surprise surprise!) the same
+      // method/property existing on m_preClass.
+      continue;
+    }
+
+    usedTraits.push_back(ClassPtr(classPtr));
+    methodCount += classPtr->numMethods();
+
+  }
+
+  if (!RuntimeOption::RepoAuthoritative) {
+    // Trait aliases can increase method count. Get an estimate of the
+    // number of aliased functions. This doesn't need to be done in
+    // RepoAuthoritative mode due to trait flattening ensuring that added
+    // methods are already present in the preclass.
+    for (auto const& rule : preClass->traitAliasRules()) {
+      auto origName = rule.origMethodName();
+      auto newName = rule.newMethodName();
+      if (origName != newName) methodCount++;
+    }
+  }
+  return methodCount;
+}
+
+}
+
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
   auto  funcVecLen = (parent != nullptr ? parent->m_methods.size() : 0)
@@ -138,12 +189,6 @@ Class::~Class() {
   EnumCache::deleteValues(this);
 }
 
-/*
- * releaseRefs() is called when a Class is put into the zombie state,
- * to free any references to child classes, interfaces and traits Its
- * safe to call multiple times, so is also called from the destructor
- * (in case we bypassed the zombie state).
- */
 void Class::releaseRefs() {
   /*
    * We have to be careful here.
@@ -261,26 +306,6 @@ const Func* Class::getDeclaredCtor() const {
   return f->name() != sd86ctor ? f : nullptr;
 }
 
-/*
- * Check whether a Class from a previous request is available to be
- * defined.  The caller should check that it has the same preClass that is
- * being defined.  Being available means that the parent, the interfaces
- * and the traits are already defined (or become defined via autoload, if
- * tryAutoload is true).
- *
- * returns Avail::True - if it is available
- *         Avail::Fail - if it is impossible to define the class at this point
- *         Avail::False- if this particular Class* cant be defined at this point
- *
- * Note that Fail means that at least one of the parent, interfaces and
- * traits was not defined at all, while False means that at least one was
- * defined but did not correspond to this Class*
- *
- * The parent parameter is used for two purposes: first it avoids looking
- * up the active parent class for each potential Class*; and second its
- * used on Fail to return the problem class so the caller can report the
- * error correctly.
- */
 Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
   if (Class *ourParent = m_parent.get()) {
     if (!parent) {
@@ -358,7 +383,7 @@ void Class::initialize() const {
   }
 }
 
-Class::PropInitVec* Class::initPropsImpl() const {
+void Class::initProps() const {
   assert(m_pinitVec.size() > 0);
   assert(getPropData() == nullptr);
   // Copy initial values for properties to a new vector that can be used to
@@ -403,8 +428,6 @@ Class::PropInitVec* Class::initPropsImpl() const {
       tv->deepInit() = false;
     }
   }
-
-  return propVec;
 }
 
 Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
@@ -603,13 +626,6 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
   if (!ctx) return false;
 
   return prop.m_class->classof(ctx) || ctx->classof(prop.m_class);
-}
-
-TypedValue Class::getStaticPropInitVal(const SProp& prop) {
-  Class* declCls = prop.m_class;
-  Slot s = declCls->m_staticProperties.findIndex(prop.m_name);
-  assert(s != kInvalidSlot);
-  return declCls->m_staticProperties[s].m_val;
 }
 
 const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
@@ -1850,7 +1866,12 @@ void Class::importTraitStaticProp(Class*   trait,
       // If this static property was declared in a parent class, m_val
       // will be KindOfUninit, and we'll need to consult the appropriate
       // parent class to get the initial value.
-      prevPropVal = getStaticPropInitVal(prevProp);
+      auto const& prevSProps = prevProp.m_class->m_staticProperties;
+
+      auto prevPropInd = prevSProps.findIndex(prevProp.m_name);
+      assert(prevPropInd != kInvalidSlot);
+
+      prevPropVal = prevSProps[prevPropInd].m_val;
     }
     if (prevProp.m_attrs != traitProp.m_attrs ||
         !compatibleTraitPropInit(traitProp.m_val, prevPropVal)) {
@@ -1893,8 +1914,8 @@ void Class::addTraitPropInitializers(bool staticProps) {
   if (attrs() & AttrNoExpandTrait) return;
   for (unsigned t = 0; t < m_usedTraits.size(); t++) {
     Class* trait = m_usedTraits[t].get();
-    InitVec& traitInitVec = staticProps ? trait->m_sinitVec : trait->m_pinitVec;
-    InitVec& thisInitVec  = staticProps ? m_sinitVec : m_pinitVec;
+    auto& traitInitVec = staticProps ? trait->m_sinitVec : trait->m_pinitVec;
+    auto& thisInitVec  = staticProps ? m_sinitVec : m_pinitVec;
     // Insert trait's 86[ps]init into the current class, avoiding repetitions.
     for (unsigned m = 0; m < traitInitVec.size(); m++) {
       // Clone 86[ps]init methods, and set the class to the current class.
@@ -2171,49 +2192,6 @@ void Class::setNativeDataInfo() {
       break;
     }
   }
-}
-
-unsigned Class::loadUsedTraits(PreClass* preClass,
-                               std::vector<ClassPtr>& usedTraits) {
-  unsigned methodCount = 0;
-  for (auto const& traitName : preClass->usedTraits()) {
-    Class* classPtr = Unit::loadClass(traitName);
-    if (classPtr == nullptr) {
-      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
-    }
-    if (!(classPtr->attrs() & AttrTrait)) {
-      raise_error("%s cannot use %s - it is not a trait",
-                  preClass->name()->data(),
-                  classPtr->name()->data());
-    }
-
-    if (RuntimeOption::RepoAuthoritative) {
-      // In RepoAuthoritative mode (with the WholeProgram compiler
-      // optimizations), the contents of traits are flattened away into the
-      // preClasses of "use"r classes. Continuing here allows us to avoid
-      // unnecessarily attempting to re-import trait methods and
-      // properties, only to fail due to (surprise surprise!) the same
-      // method/property existing on m_preClass.
-      continue;
-    }
-
-    usedTraits.push_back(ClassPtr(classPtr));
-    methodCount += classPtr->m_methods.size();
-
-  }
-
-  if (!RuntimeOption::RepoAuthoritative) {
-    // Trait aliases can increase method count. Get an estimate of the
-    // number of aliased functions. This doesn't need to be done in
-    // RepoAuthoritative mode due to trait flattening ensuring that added
-    // methods are already present in the preclass.
-    for (auto const& rule : preClass->traitAliasRules()) {
-      auto origName = rule.origMethodName();
-      auto newName = rule.newMethodName();
-      if (origName != newName) methodCount++;
-    }
-  }
-  return methodCount;
 }
 
 void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  const {
@@ -2574,10 +2552,6 @@ void Class::initPropHandle() const {
   m_propDataCache.bind();
 }
 
-void Class::initProps() const {
-  initPropsImpl();
-}
-
 void Class::setPropData(PropInitVec* propData) const {
   assert(getPropData() == nullptr);
   initPropHandle();
@@ -2654,7 +2628,6 @@ RDS::Handle Class::sPropHandle(Slot index) const {
   return m_sPropCache[index].handle();
 }
 
-// True if a CPP extension class has opted into serialization.
 bool Class::isCppSerializable() const {
   assert(instanceCtor()); // Only call this on CPP classes
   auto info = clsInfo();

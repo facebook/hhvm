@@ -1090,7 +1090,7 @@ static void addClassConstantNames(const Class* cls, c_Set* st, size_t limit) {
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
     if (consts[i].m_class == cls) {
-      st->add(const_cast<StringData*>(consts[i].name()));
+      st->add(const_cast<StringData*>(consts[i].m_name.get()));
     }
   }
   if ((st->size() < limit) && cls->parent()) {
@@ -1655,7 +1655,7 @@ Array get_class_info(const String& name) {
       if (consts[i].m_class == cls) {
         Cell value = cls->clsCnsGet(consts[i].m_name);
         assert(value.m_type != KindOfUninit);
-        arr.set(consts[i].nameStr(), cellAsCVarRef(value));
+        arr.set(StrNR(consts[i].m_name), cellAsCVarRef(value));
       }
     }
 

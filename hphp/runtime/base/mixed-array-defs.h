@@ -18,10 +18,13 @@
 #define incl_HPHP_HPHP_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/mixed-array.h"
+
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/util/stacktrace-profiler.h"
+#include "hphp/util/word-mem.h"
 
 namespace HPHP {
 

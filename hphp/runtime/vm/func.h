@@ -962,8 +962,9 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
-#define OFF(f) static constexpr ptrdiff_t f##Off() {  \
-    return offsetof(Func, m_##f);                     \
+#define OFF(f)                          \
+  static constexpr ptrdiff_t f##Off() { \
+    return offsetof(Func, m_##f);       \
   }
   OFF(attrs)
   OFF(cls)

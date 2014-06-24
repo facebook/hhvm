@@ -2520,7 +2520,7 @@ void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
   auto const rdst = dstLoc(0).reg();
   auto& a = m_as;
 
-  a.   loadq  (rsrc[Class::invokeFuncOff()], rdst);
+  a.   loadq  (rsrc[Class::invokeOff()], rdst);
   a.   testq  (rdst, rdst);
   emitFwdJcc  (a, CC_Z, inst->taken());
 }
@@ -6119,7 +6119,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
 void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   auto clsReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
-  auto offset = Class::propdataOff() +
+  auto offset = Class::propDataCacheOff() +
                 RDS::Link<Class::PropInitVec*>::handleOff();
   m_as.  loadl(clsReg[offset], r32(dstReg));
   m_as.  loadq(rVmTl[dstReg], dstReg);

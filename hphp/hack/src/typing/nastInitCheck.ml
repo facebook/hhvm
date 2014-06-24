@@ -84,11 +84,11 @@ module Env = struct
   let parent tenv cvars c =
     if c.c_mode = Ast.Mdecl then cvars
     else
-      let cvars = match c.c_extends with
-        | [] -> cvars
-        | parent_hint :: _ -> add_parent_construct c tenv cvars parent_hint
-      in
-      List.fold_left (add_parent_construct c tenv) cvars c.c_req_extends
+      if c.c_kind = Ast.Ctrait
+      then List.fold_left (add_parent_construct c tenv) cvars c.c_req_extends
+      else match c.c_extends with
+      | [] -> cvars
+      | parent_hint :: _ -> add_parent_construct c tenv cvars parent_hint
 
   let rec make tenv c =
     let tenv = Typing_env.set_root tenv (Typing_deps.Dep.Class (snd c.c_name)) in
@@ -119,11 +119,9 @@ module Env = struct
         let _, tc = Typing_env.get_class tenv parent in
         (match tc with
           | None -> acc
-          | Some { tc_members_init = members; _ } ->
-            SSet.union members acc
-        )
+          | Some { tc_members_init = members; _ } -> SSet.union members acc)
         | _ -> acc
-    end acc (c.c_extends @ c.c_uses @ c.c_req_extends @ c.c_req_implements)
+    end acc (c.c_extends @ c.c_uses)
 
   let get_method env m =
     SMap.get m env.methods
@@ -166,13 +164,12 @@ and class_ tenv c =
       in
       let env = Env.make tenv c in
       let inits = constructor env c.c_constructor in
+
       Typing_suggest.save_initalized_members (snd c.c_name) inits;
-      (* When the class is abstract, and it has a constructor
-       * the only thing we are about is that the constructor
-       * calls parent::__construct if it is needed.
-       * Because after that, it won't be reachable in the
-       * sub-classes anymore.
-       *)
+      (* When the class is abstract, and it has a constructor the only
+       * thing we care about is that the constructor calls
+       * parent::__construct if it is needed. Because after that, it
+       * won't be reachable in the sub-classes anymore. *)
       if c.c_kind = Ast.Ctrait || c.c_kind = Ast.Cabstract
       then begin
         let has_constructor = c.c_constructor <> None in
@@ -191,19 +188,19 @@ and class_ tenv c =
 
 and constructor env cstr =
   match cstr with
-  | None -> SSet.empty
-  | Some cstr -> toplevel env SSet.empty cstr.m_body
+    | None -> SSet.empty
+    | Some cstr -> toplevel env SSet.empty cstr.m_body
 
 and assign env acc x =
   SSet.add x acc
 
 and assign_expr env acc e1 =
   match e1 with
-  | _, Obj_get ((_, This), (_, Id (_, y))) ->
+    | _, Obj_get ((_, This), (_, Id (_, y))) ->
       assign env acc y
-  | _, List el ->
+    | _, List el ->
       List.fold_left (assign_expr env) acc el
-  | _ -> acc
+    | _ -> acc
 
 and stmt env acc st =
   let expr = expr env in
@@ -211,24 +208,24 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match st with
-  | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el)) ->
+    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el)) ->
       let acc = List.fold_left expr acc el in
       assign env acc parent_init_cvar
-  | Expr e -> expr acc e
-  | Break -> acc
-  | Continue -> acc
-  | Throw (_, e) -> expr acc e
-  | Return (p, None) ->
+    | Expr e -> expr acc e
+    | Break -> acc
+    | Continue -> acc
+    | Throw (_, e) -> expr acc e
+    | Return (p, None) ->
       if are_all_init env acc
       then acc
       else raise (InitReturn acc)
-  | Return (p, Some x) ->
+    | Return (p, Some x) ->
       let acc = expr acc x in
       if are_all_init env acc
       then acc
       else raise (InitReturn acc)
-  | Static_var el -> List.fold_left expr acc el
-  | If (e1, b1, b2) ->
+    | Static_var el -> List.fold_left expr acc el
+    | If (e1, b1, b2) ->
       let acc = expr acc e1 in
       let is_term1 = Nast_terminality.Terminal.block b1 in
       let is_term2 = Nast_terminality.Terminal.block b2 in
@@ -239,24 +236,24 @@ and stmt env acc st =
       else if is_term2
       then SSet.union acc b1
       else SSet.union acc (SSet.inter b1 b2)
-  | Do (b, e) ->
+    | Do (b, e) ->
       let acc = block acc b in
       expr acc e
-  | While (e, _) ->
+    | While (e, _) ->
       expr acc e
-  | For (e1, _, _, _) ->
+    | For (e1, _, _, _) ->
       expr acc e1
-  | Switch (e, cl) ->
+    | Switch (e, cl) ->
       let acc = expr acc e in
       let _ = List.map (case acc) cl in
       let cl = List.filter (function c -> not (Nast_terminality.Terminal.case c)) cl in
       let cl = List.map (case acc) cl in
       let c = inter_list cl in
       SSet.union acc c
-  | Foreach (e, _, _) ->
+    | Foreach (e, _, _) ->
       let acc = expr acc e in
       acc
-  | Try (b, cl, fb) ->
+    | Try (b, cl, fb) ->
       let c = block acc b in
       let f = block acc fb in
       let _ = List.map (catch acc) cl in
@@ -271,8 +268,7 @@ and stmt env acc st =
 
 and toplevel env acc l =
   try List.fold_left (stmt env) acc l
-  with InitReturn acc ->
-    acc
+  with InitReturn acc -> acc
 
 and block env acc l =
   let acc_before_block = acc in

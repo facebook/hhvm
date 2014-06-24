@@ -754,19 +754,6 @@ static bool HHVM_FUNCTION(clock_gettime,
   return ret == 0;
 }
 
-static bool HHVM_FUNCTION(clock_settime,
-                          int64_t clk_id, int64_t sec, int64_t nsec) {
-#if defined(__APPLE__)
-  throw NotSupportedException(__func__, "feature not supported on OSX");
-#else
-  struct timespec ts;
-  ts.tv_sec = sec;
-  ts.tv_nsec = nsec;
-  int ret = clock_settime(clk_id, &ts);
-  return ret == 0;
-#endif
-}
-
 static int64_t HHVM_FUNCTION(cpu_get_count) {
   return Process::GetCPUCount();
 }
@@ -1189,7 +1176,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(getrusage);
   HHVM_FE(clock_getres);
   HHVM_FE(clock_gettime);
-  HHVM_FE(clock_settime);
   HHVM_FE(cpu_get_count);
   HHVM_FE(cpu_get_model);
   HHVM_FE(ini_get);

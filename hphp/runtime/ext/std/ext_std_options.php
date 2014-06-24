@@ -174,13 +174,6 @@ function clock_gettime(int $clk_id,
                        mixed &$sec,
                        mixed &$nsec): bool;
 
-/* Sets time of a system clock. "man 3 clock_settime" for more details.
- */
-<<__Native>>
-function clock_settime(int $clk_id,
-                       int $sec,
-                       int $nsec): bool;
-
 /* Gets number of processors.
  */
 <<__Native>>

@@ -34,7 +34,6 @@ function getopt($options, $longopts = null_variant) { }
 function getrusage($who = 0) { }
 function clock_getres($clk_id, &$sec, &$nsec) { }
 function clock_gettime($clk_id, &$sec, &$nsec) { }
-function clock_settime($clk_id, $sec, $nsec) { }
 function cpu_get_count() { }
 function cpu_get_model() { }
 function hphp_memory_get_interval_peak_usage(bool $real_usage = false): int { }

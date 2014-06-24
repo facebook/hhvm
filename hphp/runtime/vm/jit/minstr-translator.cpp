@@ -2538,7 +2538,7 @@ void HhbcTranslator::MInstrTranslator::emitUnsetElem() {
 #undef HELPER_TABLE
 
 void HhbcTranslator::MInstrTranslator::emitNotSuppNewElem() {
-  not_reached();
+  PUNT(NotSuppNewElem);
 }
 
 void HhbcTranslator::MInstrTranslator::emitVGetNewElem() {

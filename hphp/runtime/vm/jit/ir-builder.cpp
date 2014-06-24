@@ -855,6 +855,19 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     return constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
     return constrainValue(inst->getPassthroughValue(), tc);
+  } else if (inst->is(DefLabel)) {
+    auto changed = false;
+    auto dst = 0;
+    for (; dst < inst->numDsts(); dst++) {
+      if (val == inst->dst(dst)) break;
+    }
+    assert(dst != inst->numDsts());
+    for (auto& pred : inst->block()->preds()) {
+      assert(pred.inst()->is(Jmp));
+      auto src = pred.inst()->src(dst);
+      changed = constrainValue(src, tc) || changed;
+    }
+    return changed;
   } else {
     // Any instructions not special cased above produce a new value, so
     // there's no guard for us to constrain.

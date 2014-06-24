@@ -3484,12 +3484,7 @@ Variant c_DOMDocument::t_importnode(const Object& importednode,
 Variant c_DOMDocument::t_load(const String& filename,
                               int64_t options /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
-  String translated = File::TranslatePath(filename);
-  if (translated.empty()) {
-    raise_warning("Unable to read file: %s", filename.data());
-    return false;
-  }
-  return dom_parse_document(this, translated, options, DOM_LOAD_FILE);
+  return dom_parse_document(this, filename, options, DOM_LOAD_FILE);
 }
 
 Variant c_DOMDocument::t_loadhtml(const String& source) {
@@ -3499,12 +3494,7 @@ Variant c_DOMDocument::t_loadhtml(const String& source) {
 
 Variant c_DOMDocument::t_loadhtmlfile(const String& filename) {
   SYNC_VM_REGS_SCOPED();
-  String translated = File::TranslatePath(filename);
-  if (translated.empty()) {
-    raise_warning("Unable to read file: %s", filename.data());
-    return false;
-  }
-  return dom_load_html(this, translated, DOM_LOAD_FILE);
+  return dom_load_html(this, filename, DOM_LOAD_FILE);
 }
 
 Variant c_DOMDocument::t_loadxml(const String& source,
@@ -3555,19 +3545,13 @@ Variant c_DOMDocument::t_save(const String& file, int64_t options /* = 0 */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0, saveempty = 0;
 
-  String translated = File::TranslatePath(file);
-  if (translated.empty()) {
-    raise_warning("Invalid Filename");
-    return false;
-  }
-
   /* encoding handled by property on doc */
   format = m_formatoutput;
   if (options & LIBXML_SAVE_NOEMPTYTAG) {
     saveempty = xmlSaveNoEmptyTags;
     xmlSaveNoEmptyTags = 1;
   }
-  bytes = xmlSaveFormatFileEnc(translated.data(), docp, NULL, format);
+  bytes = xmlSaveFormatFileEnc(file.data(), docp, NULL, format);
   if (options & LIBXML_SAVE_NOEMPTYTAG) {
     xmlSaveNoEmptyTags = saveempty;
   }
@@ -3581,14 +3565,9 @@ Variant c_DOMDocument::t_savehtmlfile(const String& file) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0;
 
-  String translated = File::TranslatePath(file);
-  if (translated.empty()) {
-    raise_warning("Invalid Filename");
-    return false;
-  }
   /* encoding handled by property on doc */
   format = m_formatoutput;
-  bytes = htmlSaveFileFormat(translated.data(), docp, NULL, format);
+  bytes = htmlSaveFileFormat(file.data(), docp, NULL, format);
   if (bytes == -1) {
     return false;
   }

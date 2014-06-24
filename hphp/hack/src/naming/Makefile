@@ -5,7 +5,7 @@ TOP=..
 TARGET=lib
 
 SRC= nast.ml nastVisitor.ml \
- naming_error.ml naming_heap.ml \
+ naming_heap.ml \
  naming_ast_helpers.ml naming_hooks.ml naming.ml
 
 

@@ -101,7 +101,7 @@ int Socket::getLastError() {
 }
 
 bool Socket::open(const String& filename, const String& mode) {
-  throw NotSupportedException(__func__, "cannot open socket this way");
+  throw_not_supported(__func__, "cannot open socket this way");
 }
 
 bool Socket::close() {

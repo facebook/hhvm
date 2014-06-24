@@ -587,7 +587,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     break;
   case Type::VarExport:
   case Type::PHPOutput:
-    throw NestingLevelTooDeepException();
+    throw ExtendedException("Nesting level too deep - recursive dependency?");
   case Type::VarDump:
   case Type::DebugDump:
   case Type::DebuggerDump:

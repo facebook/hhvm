@@ -360,7 +360,11 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
 static Variant invoke_failed(const char *func,
                              bool fatal /* = true */) {
   if (fatal) {
-    throw InvalidFunctionCallException(func);
+    throw ExtendedException("(1) call the function without enough arguments OR "
+                            "(2) Unable to find function \"%s\" OR "
+                            "(3) function was not in invoke table OR "
+                            "(4) function was renamed to something else.",
+                            func);
   }
   raise_warning("call_user_func to non-existent function %s", func);
   return false;
@@ -432,10 +436,9 @@ void NEVER_INLINE throw_null_object_prop() {
 
 void NEVER_INLINE throw_invalid_property_name(const String& name) {
   if (!name.size()) {
-    throw EmptyObjectPropertyException();
-  } else {
-    throw NullStartObjectPropertyException();
+    raise_error("Cannot access empty property");
   }
+  raise_error("Cannot access property started with '\\0'");
 }
 
 void throw_instance_method_fatal(const char *name) {
@@ -734,7 +737,6 @@ static bool invoke_file_impl(Variant& res, const String& path, bool once,
 }
 
 static NEVER_INLINE Variant throw_missing_file(const char* file) {
-  if (file[0] == '\0') throw NoFileSpecifiedException();
   throw PhpFileDoesNotExistException(file);
 }
 

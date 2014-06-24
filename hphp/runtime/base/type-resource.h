@@ -103,7 +103,7 @@ public:
     T *px = dynamic_cast<T*>(cur);
     if (!px) {
       if (!badTypeOkay) {
-        throw InvalidObjectTypeException(classname_cstr());
+        throw_invalid_object_type(classname_cstr());
       }
       return nullptr;
     }

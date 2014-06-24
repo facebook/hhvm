@@ -144,7 +144,7 @@ void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src) {
   if (!ndi) return;
   assert(ndi == src->getVMClass()->getNativeDataInfo());
   if (!ndi->copy) {
-    throw NotImplementedException("NativeDataInfoCopy");
+    throw_not_implemented("NativeDataInfoCopy");
   }
   ndi->copy(dest, src);
 

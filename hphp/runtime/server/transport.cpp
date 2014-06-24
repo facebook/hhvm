@@ -335,7 +335,8 @@ bool Transport::splitHeader(const String& header, String &name, const char *&val
     }
   }
 
-  throw InvalidArgumentException("header", header.c_str());
+  throw ExtendedException(
+    "Invalid argument \"header\": [%s]", header.c_str());
 }
 
 void Transport::addHeaderNoLock(const char *name, const char *value) {

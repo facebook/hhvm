@@ -334,14 +334,14 @@ bool f_stream_register_wrapper(const String& protocol, const String& classname,
 
 bool f_stream_wrapper_register(const String& protocol, const String& classname,
                                int flags) {
-  std::unique_ptr<Stream::Wrapper> wrapper;
-  try {
-    wrapper = std::unique_ptr<Stream::Wrapper>(
-                   new UserStreamWrapper(protocol, classname, flags));
-  } catch (const InvalidArgumentException& e) {
-    raise_warning("%s", e.what());
+  auto const cls = Unit::loadClass(classname.get());
+  if (!cls) {
+    raise_warning("Undefined class: '%s'", classname.data());
     return false;
   }
+
+  auto wrapper = std::unique_ptr<Stream::Wrapper>(
+    new UserStreamWrapper(protocol, cls, flags));
   if (!Stream::registerRequestWrapper(protocol, std::move(wrapper))) {
     raise_warning("Unable to register protocol: %s\n", protocol.data());
     return false;

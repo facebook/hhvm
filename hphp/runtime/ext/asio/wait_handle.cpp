@@ -28,7 +28,7 @@ const StaticString s_result("<result>");
 const StaticString s_exception("<exception>");
 
 void c_WaitHandle::t___construct() {
-  throw NotSupportedException(
+  throw_not_supported(
       __func__, "WaitHandles cannot be constructed directly");
 }
 

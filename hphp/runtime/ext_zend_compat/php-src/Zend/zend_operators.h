@@ -497,7 +497,7 @@ public:
     return getHashTable();
   }
   HashTable* operator&() {
-    throw NotImplementedException(
+    throw_not_implemented(
       "Taking the address of the result of Z_ARRVAL is not "
       "supported at present");
   }

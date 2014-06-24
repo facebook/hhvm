@@ -747,7 +747,6 @@ struct Variant : private TypedValue {
     return m_data.pref->var();
   }
 
-  ObjectData *getArrayAccess() const;
   int64_t getNumData() const { return m_data.num; }
   void setEvalScalar();
 

@@ -1120,16 +1120,20 @@ LookupResult ExecutionContext::lookupCtorMethod(const Func*& f,
 }
 
 ObjectData* ExecutionContext::createObject(StringData* clsName,
-                                             const Variant& params,
-                                             bool init /* = true */) {
-  Class* class_ = Unit::loadClass(clsName);
+                                           const Variant& params,
+                                           bool init /* = true */) {
+  auto const class_ = Unit::loadClass(clsName);
   if (class_ == nullptr) {
-    throw ClassNotFoundException(
-      (std::string("unknown class ") + clsName->data()).c_str());
+    raise_error("unknown class %s", clsName->data());
   }
+  return createObject(class_, params, init);
+}
 
+ObjectData* ExecutionContext::createObject(const Class* class_,
+                                           const Variant& params,
+                                           bool init) {
   Object o;
-  o = newInstance(class_);
+  o = newInstance(const_cast<Class*>(class_));
   if (init) {
     auto ctor = class_->getCtor();
     if (!(ctor->attrs() & AttrPublic)) {

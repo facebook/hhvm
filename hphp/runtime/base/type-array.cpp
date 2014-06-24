@@ -105,9 +105,15 @@ Array &Array::operator+=(ArrayData *data) {
   return plusImpl(data);
 }
 
+NEVER_INLINE
+static void throw_bad_array_merge() {
+  throw ExtendedException("Invalid operand type was used: "
+                          "merging an array with NULL or non-array.");
+}
+
 Array &Array::operator+=(const Variant& var) {
   if (var.getType() != KindOfArray) {
-    throw BadArrayMergeException();
+    throw_bad_array_merge();
   }
   return operator+=(var.getArrayData());
 }
@@ -287,7 +293,7 @@ Array &Array::merge(const Array& arr) {
 
 Array &Array::plusImpl(ArrayData *data) {
   if (m_px == nullptr || data == nullptr) {
-    throw BadArrayMergeException();
+    throw_bad_array_merge();
   }
   if (!data->empty()) {
     if (m_px->empty()) {
@@ -304,7 +310,7 @@ Array &Array::plusImpl(ArrayData *data) {
 
 Array &Array::mergeImpl(ArrayData *data) {
   if (m_px == nullptr || data == nullptr) {
-    throw BadArrayMergeException();
+    throw_bad_array_merge();
   }
   if (!data->empty()) {
     ArrayBase::operator=(Array::attach(m_px->merge(data)));

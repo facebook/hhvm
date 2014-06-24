@@ -197,7 +197,7 @@ CPP;
     $qualified_name = empty($func['class']) ? '' : "{$func['class']}::";
     $qualified_name .= $func['name'];
     $ret .= <<<CPP
-  throw NotImplementedException("$qualified_name");
+  throw_not_implemented("$qualified_name");
 }
 
 

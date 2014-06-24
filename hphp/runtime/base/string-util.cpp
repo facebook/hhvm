@@ -211,7 +211,7 @@ String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
   if (strcasecmp(charset, "ISO-8859-1") == 0) {
     utf8 = false;
   } else if (strcasecmp(charset, "UTF-8")) {
-    throw NotImplementedException(charset);
+    throw_not_implemented(charset);
   }
 
   int len = input.size();
@@ -260,7 +260,7 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
   } else if (strcasecmp(charset, "ISO-8859-1") == 0) {
     flags &= ~STRING_HTML_ENCODE_UTF8;
   } else {
-    throw NotImplementedException(charset);
+    throw_not_implemented(charset);
   }
 
   const AsciiMap *am;
@@ -321,7 +321,7 @@ String StringUtil::HtmlDecode(const String& input, QuoteStyle quoteStyle,
                                  charset, all);
   if (!ret) {
     // null iff charset was not recognized
-    throw NotImplementedException(charset);
+    throw_not_implemented(charset);
     // (charset is not null, see assertion above)
   }
 

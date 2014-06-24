@@ -13,40 +13,41 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/exception.h"
+#ifndef incl_HPHP_EXCEPTIONS_H_
+#define incl_HPHP_EXCEPTIONS_H_
 
-#include "hphp/util/string-vsnprintf.h"
+#include <string>
+#include <cstdarg>
+
+#include "hphp/util/portability.h"
+#include "hphp/util/exception.h"
+#include "hphp/runtime/base/exceptions.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-Exception::Exception(const char *fmt, ...) {
-  va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
-}
+//////////////////////////////////////////////////////////////////////
 
-Exception::Exception(const std::string& msg)
-  : m_msg(msg) {
-}
-
-Exception::Exception(const Exception &e)
-  : m_msg(e.m_msg), m_what(e.m_what)
-{}
-
-void Exception::format(const char *fmt, va_list ap) {
-  string_vsnprintf(m_msg, fmt, ap);
-}
-
-Exception::~Exception() throw() {
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-const char *Exception::what() const throw() {
-  if (m_what.empty()) {
-    m_what = m_msg + "\n";
+struct AnalysisTimeFatalException : Exception {
+  AnalysisTimeFatalException(const char* file,
+                             int line,
+                             const char* msg, ...) ATTRIBUTE_PRINTF(4,5)
+    : m_file(file)
+    , m_line(line)
+  {
+    va_list ap;
+    va_start(ap, msg);
+    format(msg, ap);
+    va_end(ap);
   }
-  return m_what.c_str();
+
+  EXCEPTION_COMMON_IMPL(AnalysisTimeFatalException);
+
+  std::string m_file;
+  int m_line;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
-///////////////////////////////////////////////////////////////////////////////
-}
+#endif

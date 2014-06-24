@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "folly/ScopeGuard.h"
+#include "folly/String.h"
 
 #include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
@@ -169,7 +170,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
       if (RuntimeOption::EvalAuthoritativeMode) {
         // We could support this with compile-time string literals,
         // but it's not yet implemented.
-        throw NotSupportedException(__func__,
+        throw_not_supported(__func__,
           "assert with strings argument in RepoAuthoritative mode");
       }
       return eval_for_assert(fp, assertion.toString()).toBoolean();
@@ -195,7 +196,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
     raise_warning("%s", str.data());
   }
   if (s_option_data->assertBail) {
-    throw Assertion();
+    throw ExtendedException("An assertion was raised.");
   }
 
   return init_null();
@@ -219,7 +220,7 @@ static Array HHVM_FUNCTION(get_extension_funcs,
   // TODO Have loadSystemlib() or Native::registerBuiltinFunction
   // track this for us so that we can support this here and
   // in ReflectionExtesion
-  throw NotSupportedException(__func__, "extensions are built differently");
+  throw_not_supported(__func__, "extensions are built differently");
 }
 
 static Variant HHVM_FUNCTION(get_cfg_var, const String& option) {
@@ -710,7 +711,8 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
   memset(&usg, 0, sizeof(struct rusage));
 
   if (getrusage(who == 1 ? RUSAGE_CHILDREN : RUSAGE_SELF, &usg) == -1) {
-    throw SystemCallFailure("getrusage");
+    raise_error("getrusage returned %d: %s", errno,
+      folly::errnoStr(errno).c_str());
   }
 
   return Array(ArrayInit(17, ArrayInit::Mixed{}).
@@ -737,7 +739,7 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
 static bool HHVM_FUNCTION(clock_getres,
                           int64_t clk_id, VRefParam sec, VRefParam nsec) {
 #if defined(__APPLE__)
-  throw NotSupportedException(__func__, "feature not supported on OSX");
+  throw_not_supported(__func__, "feature not supported on OSX");
 #else
   struct timespec ts;
   int ret = clock_getres(clk_id, &ts);
@@ -905,7 +907,7 @@ static bool HHVM_FUNCTION(putenv, const String& setting) {
 
 static bool HHVM_FUNCTION(set_magic_quotes_runtime, bool new_setting) {
   if (new_setting) {
-    throw NotSupportedException(__func__, "not using magic quotes");
+    throw_not_supported(__func__, "not using magic quotes");
   }
   return true;
 }

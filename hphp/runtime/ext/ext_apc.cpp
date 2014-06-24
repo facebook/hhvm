@@ -24,6 +24,7 @@
 #include <memory>
 #include <set>
 #include <vector>
+#include <stdexcept>
 
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -60,7 +61,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
     TableType = TableTypes::ConcurrentTable;
   } else {
-    throw InvalidArgumentException("apc table type", "Invalid table type");
+    throw std::runtime_error("invalid apc table type");
   }
   EnableApcSerialize = Config::GetBool(ini, apc["EnableApcSerialize"], true);
   ExpireOnSets = Config::GetBool(ini, apc["ExpireOnSets"]);

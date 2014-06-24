@@ -434,7 +434,7 @@ bool c_SQLite3::t_createaggregate(const String& name, const Variant& step, const
 
 bool c_SQLite3::t_openblob(const String& table, const String& column, int64_t rowid,
                            const String& dbname /* = null_string */) {
-  throw NotSupportedException(__func__, "sqlite3 stream");
+  throw_not_supported(__func__, "sqlite3 stream");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

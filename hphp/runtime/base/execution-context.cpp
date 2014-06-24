@@ -613,11 +613,11 @@ const StaticString
   s_php_errormsg("php_errormsg");
 
 void ExecutionContext::handleError(const std::string& msg,
-                                       int errnum,
-                                       bool callUserHandler,
-                                       ErrorThrowMode mode,
-                                       const std::string& prefix,
-                                       bool skipFrame /* = false */) {
+                                   int errnum,
+                                   bool callUserHandler,
+                                   ErrorThrowMode mode,
+                                   const std::string& prefix,
+                                   bool skipFrame /* = false */) {
   SYNC_VM_REGS_SCOPED();
 
   auto newErrorState = ErrorState::ErrorRaised;
@@ -634,7 +634,7 @@ void ExecutionContext::handleError(const std::string& msg,
 
   ErrorStateHelper esh(this, newErrorState);
   auto const ee = skipFrame ?
-    ExtendedException(ExtendedException::SkipFrame::skipFrame, msg) :
+    ExtendedException(ExtendedException::SkipFrame{}, msg) :
     ExtendedException(msg);
   recordLastError(ee, errnum);
   bool handled = false;

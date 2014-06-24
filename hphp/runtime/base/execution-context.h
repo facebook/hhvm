@@ -475,6 +475,9 @@ public:
   LookupResult lookupCtorMethod(const Func*& f,
                                 const Class* cls,
                                 bool raise = false);
+  ObjectData* createObject(const Class* cls,
+                           const Variant& params,
+                           bool init);
   ObjectData* createObject(StringData* clsName,
                            const Variant& params,
                            bool init = true);

@@ -381,7 +381,7 @@ static void handle_exception_helper(bool& ret,
         !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
       Array stack = e.getBackTrace();
-      Array argv = make_packed_array(e.ExitCode, stack);
+      Array argv = make_packed_array(ExitException::ExitCode.load(), stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
   } catch (const PhpFileDoesNotExistException &e) {
@@ -391,16 +391,6 @@ static void handle_exception_helper(bool& ret,
     } else {
       Logger::Error("%s", e.getMessage().c_str());
     }
-    if (richErrorMsg) {
-      handle_exception_append_bt(errorMsg, e);
-    }
-  } catch (const UncatchableException &e) {
-    ret = false;
-    error = true;
-    errorMsg = e.getMessage();
-    errorMsg += "\n";
-    errorMsg += ExtendedLogger::StringOfStackTrace(e.getBackTrace());
-    Logger::Error("%s", errorMsg.c_str());
     if (richErrorMsg) {
       handle_exception_append_bt(errorMsg, e);
     }
@@ -1353,11 +1343,14 @@ static int execute_program_impl(int argc, char** argv) {
     char **new_argv;
     prepare_args(new_argc, new_argv, po.args, po.file.c_str());
 
-    if (!po.file.empty()) {
-      Repo::setCliFile(po.file);
-    } else if (new_argc > 0) {
-      Repo::setCliFile(new_argv[0]);
+    std::string const cliFile = !po.file.empty() ? po.file :
+                                new_argv[0] ? new_argv[0] : "";
+    if (po.mode != "debug" && cliFile.empty()) {
+      std::cerr << "Nothing to do. Either pass a .php file to run, or "
+        "use -m server\n";
+      return 1;
     }
+    Repo::setCliFile(cliFile);
 
     int ret = 0;
     hphp_process_init();

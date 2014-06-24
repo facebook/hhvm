@@ -345,7 +345,8 @@ bool APCLocalArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
 }
 
 ArrayData* APCLocalArray::NonSmartCopy(const ArrayData*) {
-  throw FatalErrorException("APCLocalArray::nonSmartCopy not implemented.");
+  raise_error("APCLocalArray::nonSmartCopy not implemented.");
+  return nullptr;
 }
 
 void APCLocalArray::Renumber(ArrayData*) {

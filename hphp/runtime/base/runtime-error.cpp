@@ -32,10 +32,8 @@ namespace HPHP {
  */
 
 void raise_error(const std::string &msg) {
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::ERROR);
+  auto const errnum = static_cast<int>(ErrorConstants::ErrorModes::ERROR);
   g_context->handleError(msg, errnum, false,
-                         RuntimeOption::CallUserHandlerOnFatals ?
-                         ExecutionContext::ErrorThrowMode::IfUnhandled :
                          ExecutionContext::ErrorThrowMode::Always,
                          "\nFatal error: ");
 }

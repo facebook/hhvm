@@ -790,7 +790,7 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
                                   input.size(), &error, TimeZone::GetDatabase(),
                                   TimeZone::GetTimeZoneInfoRaw);
 #else
-    throw NotImplementedException("timelib version too old");
+    throw_not_implemented("timelib version too old");
 #endif
   } else {
     t = timelib_strtotime((char*)input.data(), input.size(),
@@ -863,7 +863,7 @@ DateTime::diff(SmartResource<DateTime> datetime2, bool absolute) {
   SmartResource<DateInterval> di(NEWOBJ(DateInterval)(rel));
   return di;
 #else
-  throw NotImplementedException("timelib version too old");
+  throw_not_implemented("timelib version too old");
 #endif
 }
 

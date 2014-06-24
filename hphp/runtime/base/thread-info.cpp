@@ -143,7 +143,7 @@ void throw_infinite_recursion_exception() {
     // Reset profiler otherwise it might recurse further causing segfault
     DECLARE_THREAD_INFO
     info->m_profiler = nullptr;
-    throw UncatchableException("infinite recursion detected");
+    raise_error("infinite recursion detected");
   }
 }
 

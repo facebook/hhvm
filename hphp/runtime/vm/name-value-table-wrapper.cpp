@@ -170,32 +170,32 @@ NameValueTableWrapper::RemoveStr(ArrayData* ad, const StringData* k,
 
 ArrayData*
 NameValueTableWrapper::Append(ArrayData*, const Variant& v, bool copy) {
-  throw NotImplementedException("append on $GLOBALS");
+  throw_not_implemented("append on $GLOBALS");
 }
 
 ArrayData*
 NameValueTableWrapper::AppendRef(ArrayData*, Variant& v, bool copy) {
-  throw NotImplementedException("appendRef on $GLOBALS");
+  throw_not_implemented("appendRef on $GLOBALS");
 }
 
 ArrayData*
 NameValueTableWrapper::AppendWithRef(ArrayData*, const Variant& v, bool copy) {
-  throw NotImplementedException("appendWithRef on $GLOBALS");
+  throw_not_implemented("appendWithRef on $GLOBALS");
 }
 
 ArrayData*
 NameValueTableWrapper::PlusEq(ArrayData*, const ArrayData* elems) {
-  throw NotImplementedException("plus on $GLOBALS");
+  throw_not_implemented("plus on $GLOBALS");
 }
 
 ArrayData*
 NameValueTableWrapper::Merge(ArrayData*, const ArrayData* elems) {
-  throw NotImplementedException("merge on $GLOBALS");
+  throw_not_implemented("merge on $GLOBALS");
 }
 
 ArrayData*
 NameValueTableWrapper::Prepend(ArrayData*, const Variant& v, bool copy) {
-  throw NotImplementedException("prepend on $GLOBALS");
+  throw_not_implemented("prepend on $GLOBALS");
 }
 
 ssize_t NameValueTableWrapper::IterBegin(const ArrayData* ad) {

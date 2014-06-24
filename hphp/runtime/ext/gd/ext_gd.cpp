@@ -2953,7 +2953,7 @@ Array HHVM_FUNCTION(gd_info) {
 
 Variant HHVM_FUNCTION(imageloadfont, const String& file) {
   // TODO: ind = 5 + zend_list_insert(font, le_gd_font);
-  throw NotSupportedException(__func__, "NYI");
+  throw_not_supported(__func__, "NYI");
 #ifdef NEVER
   Variant stream;
   zval **file;
@@ -3895,7 +3895,7 @@ bool HHVM_FUNCTION(imagecopymerge, const Resource& dst_im,
                    src_x, src_y, src_w, src_h, pct);
   return true;
 #else
-  throw NotSupportedException(__func__, "HAVE_LIBGD15 undefined");
+  throw_not_supported(__func__, "HAVE_LIBGD15 undefined");
 #endif
 }
 

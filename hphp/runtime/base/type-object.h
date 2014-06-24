@@ -105,7 +105,7 @@ public:
     }
     if (!cur->instanceof(T::classof())) {
       if (!badTypeOkay) {
-        throw InvalidObjectTypeException(classname_cstr());
+        throw_invalid_object_type(classname_cstr());
       }
       return nullptr;
     }
@@ -155,7 +155,6 @@ public:
    * Input/Output
    */
   void serialize(VariableSerializer *serializer) const;
-  bool unserialize(std::istream &in);
 
   void setToDefaultObject();
 

@@ -3298,7 +3298,7 @@ static Variant _php_mb_regex_ereg_replace_exec(const Variant& pattern,
   }
 
   if (eval) {
-    throw NotSupportedException("ereg_replace", "dynamic coding");
+    throw_not_supported("ereg_replace", "dynamic coding");
   }
 
   /* do the actual work */

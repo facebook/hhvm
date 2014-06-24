@@ -21,13 +21,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 UserStreamWrapper::UserStreamWrapper(const String& name,
-                                     const String& clsname,
+                                     Class* cls,
                                      int flags)
-    : m_name(name) {
-  m_cls = Unit::loadClass(clsname.get());
-  if (!m_cls) {
-    throw InvalidArgumentException(0, "Undefined class '%s'", clsname.data());
-  }
+  : m_name(name)
+  , m_cls(cls)
+{
   m_isLocal = !(flags & k_STREAM_IS_URL);
 }
 

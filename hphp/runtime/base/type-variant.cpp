@@ -569,16 +569,6 @@ VarNR Variant::toKey() const {
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions
 
-ObjectData *Variant::getArrayAccess() const {
-  assert(is(KindOfObject));
-  ObjectData *obj = getObjectData();
-  assert(obj);
-  if (!obj->instanceof(SystemLib::s_ArrayAccessClass)) {
-    throw InvalidOperandException("not ArrayAccess objects");
-  }
-  return obj;
-}
-
 template <typename T>
 class LvalHelper {};
 
@@ -1042,13 +1032,13 @@ void Variant::unserialize(VariableUnserializer *uns,
             int subLen = 0;
             if (kdata[0] == '\0') {
               if (UNLIKELY(!ksize)) {
-                throw EmptyObjectPropertyException();
+                raise_error("Cannot access empty property");
               }
               // private or protected
               subLen = strlen(kdata + 1) + 2;
               if (UNLIKELY(subLen >= ksize)) {
                 if (subLen == ksize) {
-                  throw EmptyObjectPropertyException();
+                  raise_error("Cannot access empty property");
                 } else {
                   throw Exception("Mangled private object property");
                 }
@@ -1093,17 +1083,19 @@ void Variant::unserialize(VariableUnserializer *uns,
       String serialized;
       serialized.unserialize(uns, '{', '}');
 
-      Object obj;
-      try {
-        obj = create_object_only(clsName);
-      } catch (ClassNotFoundException &e) {
-        if (!uns->allowUnknownSerializableClass()) {
-          throw;
+      auto const obj = [&]() -> Object {
+        if (auto const cls = Unit::loadClass(clsName.get())) {
+          return g_context->createObject(cls, init_null_variant,
+            false /* init */);
         }
-        obj = create_object_only(s_PHP_Incomplete_Class);
-        obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
-        obj->o_set("serialized", serialized);
-      }
+        if (!uns->allowUnknownSerializableClass()) {
+          raise_error("unknown class %s", clsName.data());
+        }
+        Object ret = create_object_only(s_PHP_Incomplete_Class);
+        ret->o_set(s_PHP_Incomplete_Class_Name, clsName);
+        ret->o_set("serialized", serialized);
+        return ret;
+      }();
 
       if (!obj->instanceof(SystemLib::s_SerializableClass)) {
         raise_warning("Class %s has no unserializer",

@@ -210,8 +210,6 @@ TypedValue* methodWrapper(ActRec* ar);
 /**
  * Fallback method bound to declared methods with no matching
  * internal implementation.
- *
- * Throws a NotImplementedException
  */
 TypedValue* unimplementedWrapper(ActRec* ar);
 

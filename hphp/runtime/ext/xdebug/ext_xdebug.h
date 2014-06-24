@@ -82,7 +82,7 @@ namespace HPHP {
   XDEBUG_OPT(int, "var_display_max_depth", VarDisplayMaxDepth, 3)
 
 // TODO(#4489053) Remove when xdebug fully implemented
-#define XDEBUG_NOTIMPLEMENTED  { throw NotImplementedException(__FUNCTION__); }
+#define XDEBUG_NOTIMPLEMENTED  { throw_not_implemented(__FUNCTION__); }
 
 ///////////////////////////////////////////////////////////////////////////////
 const int64_t k_XDEBUG_CC_UNUSED = 1;

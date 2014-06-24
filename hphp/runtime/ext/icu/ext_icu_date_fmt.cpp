@@ -223,7 +223,7 @@ static String HHVM_STATIC_METHOD(IntlDateFormatter, formatObject,
                                  const Object& object, const Variant& format,
                                  const String& locale) {
   // TODO: Need IntlCalendar implemented first
-  throw NotImplementedException("IntlDateFormatter::formatObject");
+  throw_not_implemented("IntlDateFormatter::formatObject");
 }
 
 static int64_t HHVM_METHOD(IntlDateFormatter, getCalendar) {
@@ -301,7 +301,7 @@ static String HHVM_METHOD(IntlDateFormatter, getTimeZoneId) {
 
 static Object HHVM_METHOD(IntlDateFormatter, getCalendarObject) {
   // TODO: Need IntlCalendar implemented first
-  throw NotImplementedException("IntlDateFormatter::getCalendarObject");
+  throw_not_implemented("IntlDateFormatter::getCalendarObject");
 }
 
 static Object HHVM_METHOD(IntlDateFormatter, getTimeZone) {
@@ -420,7 +420,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, parse,
 
 static bool HHVM_METHOD(IntlDateFormatter, setCalendar, const Variant& which) {
   // TODO: Need IntlCalendar implemented first
-  throw NotImplementedException("IntlDateFormatter::setCalendar");
+  throw_not_implemented("IntlDateFormatter::setCalendar");
 }
 
 static bool HHVM_METHOD(IntlDateFormatter, setLenient, bool lenient) {

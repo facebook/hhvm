@@ -555,7 +555,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
         return false;
       }
 #else
-      throw NotImplementedException("mysql_async_connect_start");
+      throw_not_implemented("mysql_async_connect_start");
 #endif
     } else {
       if (!mySQL->connect(host, port, socket, username, password,
@@ -1374,7 +1374,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
     mySQL->m_async_query = query;
     return MySQLQueryReturn::OK;
 #else
-    throw NotImplementedException("mysql_async_query_start");
+    throw_not_implemented("mysql_async_query_start");
 #endif
   }
 

@@ -78,7 +78,7 @@ bool DateInterval::setInterval(const String& date_interval) {
   timelib_strtointerval((char*)date_interval.data(), date_interval.size(),
                         &start, &end, &di, &r, &errors);
 #else
-  throw NotImplementedException("timelib too old");
+  throw_not_implemented("timelib too old");
 #endif
 
   int error_count  = errors->error_count;

@@ -18,13 +18,14 @@
 
 #include <cstdint>
 #include <limits>
-
-#include <sys/time.h>
-#include <sys/resource.h>
+#include <stdexcept>
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
+
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #include "folly/String.h"
 
@@ -818,8 +819,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                  EnableEmitterStats);
     Config::Bind(RecordCodeCoverage, ini, eval["RecordCodeCoverage"]);
     if (EvalJit && RecordCodeCoverage) {
-      throw InvalidArgumentException(
-        "code coverage", "Code coverage is not supported for Eval.Jit=true");
+      throw std::runtime_error("Code coverage is not supported with "
+        "Eval.Jit=true");
     }
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, eval["CodeCoverageOutputFile"]);
@@ -1163,8 +1164,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       }
       for (unsigned int i = 0; i < VirtualHosts.size(); i++) {
         if (!VirtualHosts[i]->valid()) {
-          throw InvalidArgumentException("virtual host",
-                                         "missing prefix or pattern");
+          throw std::runtime_error("virtual host missing prefix or pattern");
         }
       }
     }

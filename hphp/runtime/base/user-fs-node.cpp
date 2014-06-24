@@ -31,8 +31,7 @@ UserFSNode::UserFSNode(Class* cls, const Variant& context /*= null */) {
   m_cls = cls;
   if (LookupResult::MethodFoundWithThis !=
       g_context->lookupCtorMethod(ctor, m_cls)) {
-    throw InvalidArgumentException(0, "Unable to call %s's constructor",
-                                   m_cls->name()->data());
+    raise_error("Unable to call %s'n constructor", m_cls->name()->data());
   }
 
   m_obj = ObjectData::newInstance(m_cls);
@@ -113,8 +112,8 @@ const Func* UserFSNode::lookupMethod(const StringData* name) {
   if (!f) return nullptr;
 
   if (f->attrs() & AttrStatic) {
-    throw InvalidArgumentException(0, "%s::%s() must not be declared static",
-                                   m_cls->name()->data(), name->data());
+    raise_error("%s::%s() must not be declared static",
+                m_cls->name()->data(), name->data());
   }
   return f;
 }

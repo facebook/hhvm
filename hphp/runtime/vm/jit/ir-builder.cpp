@@ -1068,6 +1068,9 @@ void IRBuilder::insertLocalPhis() {
         // same fp.
         auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
                                  local.type, LocalId(i), m_state.fp());
+        if (shouldConstrainGuards()) {
+          m_constraints.typeSrcs[ldLoc] = local.typeSource;
+        }
         pred->insert(pred->iteratorTo(e.inst()), ldLoc);
         blockToPhiTmpsMap[pred].push_back(ldLoc->dst());
       } else {

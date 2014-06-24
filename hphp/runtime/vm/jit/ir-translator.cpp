@@ -144,6 +144,9 @@ IRTranslator::translateLtGtOp(const NormalizedInstruction& i) {
 
   auto leftType = m_hhbcTrans.topType(1, DataTypeGeneric);
   auto rightType = m_hhbcTrans.topType(0, DataTypeGeneric);
+  if (!leftType.isKnownDataType() || !rightType.isKnownDataType()) {
+    HHIR_UNIMPLEMENTED(LtGtOp-UnknownInput);
+  }
   bool ok = equivDataTypes(leftType.toDataType(), rightType.toDataType()) &&
     leftType.subtypeOfAny(Type::Null, Type::Bool, Type::Int);
 

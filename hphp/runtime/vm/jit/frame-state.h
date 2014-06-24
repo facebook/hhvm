@@ -105,6 +105,7 @@ struct LocalStateHook {
 
   virtual void refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {}
   virtual void setLocalType(uint32_t id, Type type) {}
+  virtual void setLocalTypeSource(uint32_t id, SSATmp* typeSource) {}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -289,6 +290,7 @@ struct FrameState final : private LocalStateHook {
   void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
   void refineLocalType(uint32_t id, Type type, SSATmp* typeSource) override;
   void setLocalType(uint32_t id, Type type) override;
+  void setLocalTypeSource(uint32_t id, SSATmp* typeSource) override;
 
   LocalVec& locals(unsigned inlineIdx);
 

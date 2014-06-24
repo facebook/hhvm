@@ -151,7 +151,8 @@ void retypeLoad(IRInstruction* load, Type newType) {
 void visitLoad(IRInstruction* inst, const FrameState& state) {
   switch (inst->op()) {
     case LdLoc:
-    case LdLocAddr: {
+    case LdLocAddr:
+    case LdGbl: {
       auto const id = inst->extra<LocalId>()->locId;
       auto const newType = state.localType(id);
 

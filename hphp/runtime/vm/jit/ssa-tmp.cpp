@@ -35,7 +35,8 @@ namespace {
 int typeNeededWords(Type t) {
   assert(!t.equals(Type::Bottom));
 
-  if (t.subtypeOfAny(Type::Null, Type::ActRec, Type::RetAddr, Type::Nullptr)) {
+  if (t.subtypeOfAny(Type::Uninit, Type::InitNull,
+                     Type::ActRec, Type::RetAddr, Type::Nullptr)) {
     // These don't need a register because their values are static or unused.
     //
     // RetAddr doesn't take any register because currently we only target x86,
@@ -57,6 +58,12 @@ int typeNeededWords(Type t) {
   }
 
   assert(t <= Type::StackElem);
+
+  // XXX(t4592459): This will return 2 for Type::Null, even though it only
+  // needs 1 register (one for the type, none for the value). This is to work
+  // around limitations in codegen; see the task for details. It does mean we
+  // will be loading and storing garbage m_data for Null values but that's fine
+  // since m_data is undefined for Null values.
   return t.needsReg() ? 2 : 1;
 }
 }

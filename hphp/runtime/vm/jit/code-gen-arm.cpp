@@ -1265,13 +1265,16 @@ void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
     // though; the jump instruction will be written by some other code.
     m_as.   Tst   (typeReg, KindOfStringBit);
     cc = CC_NE;
-  } else if (type.equals(Type::UncountedInit)) {
+  } else if (type == Type::Null) {
+    m_as.   Cmp   (typeReg, KindOfNull);
+    cc = CC_LE;
+  } else if (type == Type::UncountedInit) {
     m_as.   Tst   (typeReg, KindOfUncountedInitBit);
     cc = CC_NE;
-  } else if (type.equals(Type::Uncounted)) {
+  } else if (type == Type::Uncounted) {
     m_as.   Cmp   (typeReg, KindOfRefCountThreshold);
     cc = CC_LE;
-  } else if (type.equals(Type::Cell)) {
+  } else if (type == Type::Cell) {
     m_as.   Cmp   (typeReg, KindOfRef);
     cc = CC_L;
   } else {

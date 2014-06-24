@@ -229,7 +229,9 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
 
     case LdGbl: {
       auto const type = inst->typeParam().relaxToGuardable();
-      hook.setLocalType(inst->extra<LdGbl>()->locId, type);
+      auto id = inst->extra<LdGbl>()->locId;
+      hook.setLocalType(id, type);
+      hook.setLocalTypeSource(id, inst->dst());
       break;
     }
     case StGbl: {
@@ -741,6 +743,11 @@ void FrameState::setLocalType(uint32_t id, Type type) {
   m_locals[id].value = nullptr;
   m_locals[id].type = type;
   m_locals[id].typeSource = nullptr;
+}
+
+void FrameState::setLocalTypeSource(uint32_t id, SSATmp* typeSrc) {
+  always_assert(id < m_locals.size());
+  m_locals[id].typeSource = typeSrc;
 }
 
 /*

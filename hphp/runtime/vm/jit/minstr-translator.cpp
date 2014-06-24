@@ -1256,9 +1256,7 @@ void HhbcTranslator::MInstrTranslator::emitRatchetRefs() {
         gen(DecRefMem, Type::Gen, m_misBase, cns(MISOFF(tvRef2)));
       }
       // Copy tvRef to tvRef2. Use mmx at some point
-      SSATmp* tvRef = gen(
-        LdMem, Type::Gen, m_misBase, cns(MISOFF(tvRef))
-      );
+      SSATmp* tvRef = gen(LdMem, Type::Gen, m_misBase, cns(MISOFF(tvRef)));
       gen(StMem, m_misBase, cns(MISOFF(tvRef2)), tvRef);
 
       // Reset tvRef.

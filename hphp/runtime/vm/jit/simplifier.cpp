@@ -1350,10 +1350,6 @@ SSATmp* Simplifier::simplifyIsType(const IRInstruction* inst) {
   // typeParam is specialized.
   if (typeMightRelax(src) && type.isSpecialized()) return nullptr;
 
-  // The comparisons below won't work for these cases covered by this
-  // assert, and we currently don't generate these types.
-  assert(type.isKnownUnboxedDataType());
-
   // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
   // and similarly for arrays. PHP treats both types of string the same, so if
   // the distinction matters to you here, be careful.

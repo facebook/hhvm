@@ -1808,20 +1808,23 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
            "We don't support guarding on CountedStr");
     emitTestTVType(m_as, KindOfStringBit, typeSrc);
     cc = CC_NZ;
-  } else if (type.equals(Type::UncountedInit)) {
+  } else if (type == Type::Null) {
+    emitCmpTVType(m_as, KindOfNull, typeSrc);
+    cc = CC_LE;
+  } else if (type == Type::UncountedInit) {
     emitTestTVType(m_as, KindOfUncountedInitBit, typeSrc);
     cc = CC_NZ;
-  } else if (type.equals(Type::Uncounted)) {
+  } else if (type == Type::Uncounted) {
     emitCmpTVType(m_as, KindOfRefCountThreshold, typeSrc);
     cc = CC_LE;
-  } else if (type.equals(Type::Cell)) {
+  } else if (type == Type::Cell) {
     assert(!m_curInst->is(LdRef));
     emitCmpTVType(m_as, KindOfRef, typeSrc);
     cc = CC_L;
-  } else if (type.equals(Type::Gen)) {
+  } else if (type == Type::Gen) {
     // nothing to check
     return;
-  } else if (type.equals(Type::InitCell)) {
+  } else if (type == Type::InitCell) {
     assert(m_curInst->is(LdRef));
     // nothing to check: Refs cannot contain Uninit or another Ref.
     return;
@@ -4059,8 +4062,14 @@ void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src, PhysLoc loc) {
     m_as.movdqu(srcReg0, refTVData(dst));
     return;
   }
+
+  assert(srcReg0 != InvalidReg);
   m_as.storeq(srcReg0, refTVData(dst));
-  emitStoreTVType(m_as, srcReg1, refTVType(dst));
+
+  if (src->type().needsValueReg()) {
+    assert(srcReg1 != InvalidReg);
+    emitStoreTVType(m_as, srcReg1, refTVType(dst));
+  }
 }
 
 template<class BaseRef>
@@ -4075,8 +4084,8 @@ void CodeGenerator::cgStore(BaseRef dst, SSATmp* src, PhysLoc srcLoc,
   if (width == Width::Full) {
     emitStoreTVType(m_as, type.toDataType(), refTVType(dst));
   }
-  if (src->isA(Type::Null)) return; // no need to store a value for null or
-                                      // uninit
+  if (!src->type().needsValueReg()) return; // no value to store
+
   auto memRef = refTVData(dst);
   auto srcReg = srcLoc.reg();
   if (srcReg == InvalidReg) {

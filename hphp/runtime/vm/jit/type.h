@@ -521,23 +521,16 @@ public:
   }
 
   /*
-   * Returns true if this value has a known constant DataType enum value.  If
-   * the type is exactly Type::Str or Type::Null it returns true anyway, even
-   * though it could be either KindOfStaticString or KindOfString, or
-   * KindOfUninit or KindOfNull, respectively.
-   *
-   * TODO(#3390819): this function should return false for Str and Null.
+   * Returns true iff there exists a DataType in the range [KindOfUninit,
+   * KindOfRef] that represents a non-strict supertype of this type.
    *
    * Pre: subtypeOf(StackElem)
    */
   bool isKnownDataType() const {
     assert(subtypeOf(StackElem));
 
-    // Some unions that correspond to single KindOfs.  And Type::Str
-    // and Type::Null for now for historical reasons.
-    if (subtypeOfAny(Str, Arr, Null, BoxedCell)) {
-      return true;
-    }
+    // Some unions that correspond to single KindOfs.
+    if (subtypeOfAny(Str, Arr, BoxedCell)) return true;
 
     return !isUnion();
   }
@@ -558,7 +551,7 @@ public:
   }
 
   bool needsValueReg() const {
-    return !subtypeOfAny(Uninit, InitNull, Nullptr);
+    return !subtypeOfAny(Null, Nullptr);
   }
 
   bool needsStaticBitCheck() const {
@@ -786,12 +779,10 @@ public:
   ////////// Methods for talking to other type systems in the VM //////////
 
   /*
-   * TODO(#3390819): this function does not exactly convert this type into a
-   * DataType in cases where a type does not exactly map to a DataType.  For
-   * example, Null.toDataType() returns KindOfNull, even though it could be
-   * KindOfUninit.
+   * Returns the most specific DataType that is a supertype of this
+   * type.
    *
-   * Try not to use this function in new code.
+   * pre: isKnownDataType()
    */
   DataType toDataType() const;
 

@@ -185,14 +185,12 @@ Type Type::unionOf(Type t1, Type t2) {
 
 DataType Type::toDataType() const {
   assert(!isPtr());
-  if (isBoxed()) {
-    return KindOfRef;
-  }
+  assert(isKnownDataType());
 
   // Order is important here: types must progress from more specific
   // to less specific to return the most specific DataType.
   if (subtypeOf(Uninit))        return KindOfUninit;
-  if (subtypeOf(Null))          return KindOfNull;
+  if (subtypeOf(InitNull))      return KindOfNull;
   if (subtypeOf(Bool))          return KindOfBoolean;
   if (subtypeOf(Int))           return KindOfInt64;
   if (subtypeOf(Dbl))           return KindOfDouble;
@@ -201,17 +199,24 @@ DataType Type::toDataType() const {
   if (subtypeOf(Arr))           return KindOfArray;
   if (subtypeOf(Obj))           return KindOfObject;
   if (subtypeOf(Res))           return KindOfResource;
+  if (subtypeOf(BoxedCell))     return KindOfRef;
   if (subtypeOf(Cls))           return KindOfClass;
-  if (subtypeOf(UncountedInit)) return KindOfUncountedInit;
-  if (subtypeOf(Uncounted))     return KindOfUncounted;
-  if (subtypeOf(Gen))           return KindOfAny;
-  not_reached();
+  always_assert_flog(false,
+                     "Bad Type {} in Type::toDataType()", *this);
 }
 
 RuntimeType Type::toRuntimeType() const {
   assert(!isPtr());
-  auto const outer = isBoxed() ? KindOfRef : toDataType();
-  auto const inner = isBoxed() ? innerType().toDataType() : KindOfNone;
+  auto fuzzyDataType = [](Type t) {
+    if (t.isKnownDataType()) return t.toDataType();
+    if (t <= UncountedInit)  return KindOfUncountedInit;
+    if (t <= Uncounted)      return KindOfUncounted;
+    if (t <= Gen)            return KindOfAny;
+    always_assert(false);
+  };
+
+  auto const outer = isBoxed() ? KindOfRef : fuzzyDataType(*this);
+  auto const inner = isBoxed() ? fuzzyDataType(innerType()) : KindOfNone;
   auto rtt = RuntimeType{outer, inner};
 
   if (isSpecialized()) {

@@ -55,6 +55,13 @@ TEST(Type, Null) {
   EXPECT_FALSE(Type::Null.subtypeOf(Type::InitNull));
   EXPECT_NE(Type::Null, Type::Uninit);
   EXPECT_NE(Type::Null, Type::InitNull);
+
+  EXPECT_TRUE(Type::Null.needsReg());
+  EXPECT_FALSE(Type::Uninit.needsReg());
+  EXPECT_FALSE(Type::InitNull.needsReg());
+  EXPECT_FALSE(Type::Null.needsValueReg());
+  EXPECT_FALSE(Type::Uninit.needsValueReg());
+  EXPECT_FALSE(Type::InitNull.needsValueReg());
 }
 
 TEST(Type, KnownDataType) {

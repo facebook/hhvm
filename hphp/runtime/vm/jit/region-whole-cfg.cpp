@@ -83,9 +83,18 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
         continue;
       }
 
+      // Break if dst requires reffiness checks.
+      // TODO(#2589970): Fix translateRegion to support mid-region reffiness
+      // checks
+      auto dstRegion = profData->transRegion(dst);
+      auto nRefDeps = dstRegion->blocks[0]->reffinessPreds().size();
+      if (nRefDeps > 0) {
+        continue;
+      }
+
       // Add the block and arc to region.
       addToRegion(dst);
-      auto dstBlockId = profData->transRegion(dst)->blocks.front().get()->id();
+      auto dstBlockId = dstRegion->blocks.front().get()->id();
       region->addArc(transBlocks[tid], dstBlockId);
 
       // Push the dst if we haven't already processed it.

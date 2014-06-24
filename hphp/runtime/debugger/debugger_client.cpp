@@ -729,7 +729,7 @@ void DebuggerClient::run() {
   }
 
   hphp_session_init();
-  ExecutionContext *context = hphp_context_init();
+  hphp_context_init();
   if (m_options.extension.empty()) {
     hphp_invoke_simple("", true); // warm-up only
   } else {
@@ -772,7 +772,7 @@ void DebuggerClient::run() {
   // Closing all proxy connections will force the local proxy to pop out of
   // it's wait, and eventually exit the main thread.
   closeAllConnections();
-  hphp_context_exit(context, false);
+  hphp_context_exit();
   hphp_session_exit();
 }
 

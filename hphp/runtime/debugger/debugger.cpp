@@ -212,10 +212,13 @@ void Debugger::InterruptRequestEnded(const char *url) {
 }
 
 void Debugger::InterruptPSPEnded(const char *url) {
-  TRACE(2, "Debugger::InterruptPSPEnded\n");
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
-    InterruptWithUrl(PSPEnded, url);
-  }
+  if (!RuntimeOption::EnableDebugger) return;
+  try {
+    TRACE(2, "Debugger::InterruptPSPEnded\n");
+    if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
+      InterruptWithUrl(PSPEnded, url);
+    }
+  } catch (const Eval::DebuggerException&) {}
 }
 
 // Primary entrypoint for the debugger from the VM. Called in response to a host

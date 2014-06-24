@@ -74,7 +74,7 @@ void RPCRequestHandler::initState() {
 }
 
 void RPCRequestHandler::cleanupState() {
-  hphp_context_exit(m_context, false);
+  hphp_context_exit();
   hphp_session_exit();
 }
 

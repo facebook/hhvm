@@ -627,7 +627,9 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (xhprof) {
     f_var_dump(HHVM_FN(json_encode)(f_xhprof_disable()));
   }
-  hphp_context_exit(g_context.getNoCheck(), true, true, program);
+  g_context->onShutdownPostSend();
+  Eval::Debugger::InterruptPSPEnded(program);
+  hphp_context_exit();
   hphp_session_exit();
   if (coverage && ti->m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
@@ -1727,23 +1729,12 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   return ret;
 }
 
-void hphp_context_exit(ExecutionContext *context, bool psp,
-                       bool shutdown /* = true */,
-                       const char *program /* = NULL */) {
-  if (psp) {
-    context->onShutdownPostSend();
-  }
-  if (RuntimeOption::EnableDebugger) {
-    try {
-      Eval::Debugger::InterruptPSPEnded(program);
-    } catch (const Eval::DebuggerException &e) {}
-  }
+void hphp_context_exit() {
+  auto const context = g_context.getNoCheck();
 
   // Run shutdown handlers. This may cause user code to run.
-  static_cast<ExecutionContext*>(context)->destructObjects();
-  if (shutdown) {
-    context->onRequestShutdown();
-  }
+  context->destructObjects();
+  context->onRequestShutdown();
 
   // Extensions could have shutdown handlers
   Extension::RequestShutdownModules();

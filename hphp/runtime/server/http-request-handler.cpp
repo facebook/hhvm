@@ -306,7 +306,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     } catch (...) {
       Logger::Error("Unhandled unknown server exception.");
     }
-    hphp_context_exit(g_context.getNoCheck(), true, true, transport->getUrl());
+    g_context->onShutdownPostSend();
+    Eval::Debugger::InterruptPSPEnded(transport->getUrl());
+    hphp_context_exit();
   }
   GetAccessLog().log(transport, vhost);
   /*
@@ -432,7 +434,9 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   }
 
   transport->onSendEnd();
-  hphp_context_exit(context, true, true, transport->getUrl());
+  context->onShutdownPostSend();
+  Eval::Debugger::InterruptPSPEnded(transport->getUrl());
+  hphp_context_exit();
   ServerStats::LogPage(file, code);
   return ret;
 }

@@ -91,8 +91,7 @@ bool hphp_invoke(ExecutionContext *context,
                  bool once,
                  bool warmupOnly,
                  bool richErrorMsg);
-void hphp_context_exit(ExecutionContext *context, bool psp,
-                       bool shutdown = true, const char *program = nullptr);
+void hphp_context_exit();
 
 void hphp_thread_exit();
 void hphp_session_exit();

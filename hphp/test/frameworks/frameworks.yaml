@@ -80,6 +80,11 @@
     commit: 73e5bbecbef311194085e30d8b7fd6516bc50425
     install_root: doctrine2
     test_root: doctrine2
+    clowns:
+      # Try to rm -rf sys_get_temp_dir():
+      - doctrine2/tests/Doctrine/Tests/ORM/Cache/FileLockRegionTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/XmlDriverTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
     # Stable is 7.26, but the test framework is lacking in 7.x

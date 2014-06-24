@@ -439,6 +439,11 @@ class Runner {
     $temp_dir = $this->temp_dir;
     $this->temp_dir = null;
     if ($temp_dir !== null) {
+      if (!file_exists($temp_dir)) {
+        throw new Exception(
+          'Temp directory already deleted in test '.$this->name
+        );
+      }
       remove_dir_recursive($temp_dir);
     }
 

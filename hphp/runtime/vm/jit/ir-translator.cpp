@@ -175,25 +175,26 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
 
   Offset takenOffset    = i.offset() + i.imm[0].u_BA;
   Offset fallthruOffset = i.offset() + instrLen((Op*)(i.pc()));
-  assert(i.breaksTracelet ||
-         i.nextOffset == takenOffset ||
-         i.nextOffset == fallthruOffset);
   assert(!i.includeBothPaths || !i.breaksTracelet);
 
+  auto jmpFlags = instrJmpFlags(i);
   if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
     if (op == OpJmpZ) {
-      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, instrJmpFlags(i));
+      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, jmpFlags);
     } else {
-      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, instrJmpFlags(i));
+      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, jmpFlags);
     }
     return;
   }
-  assert(i.nextOffset == takenOffset);
   // invert the branch
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, instrJmpFlags(i));
+    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, jmpFlags);
   } else {
-    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, instrJmpFlags(i));
+    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, jmpFlags);
+  }
+  if (i.nextOffset != takenOffset) {
+    always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
+    HHIR_EMIT(Jmp, takenOffset, jmpFlags);
   }
 }
 

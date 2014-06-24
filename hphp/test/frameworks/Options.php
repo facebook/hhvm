@@ -72,8 +72,8 @@ class Options {
         error_and_exit('Can not use --flakey and --record together');
       }
       self::$include_flakey = true;
+      $framework_names->removeKey(0);
     }
-
 
     if ($options->containsKey('csv')) {
       if ($options->containsKey('verbose')) {

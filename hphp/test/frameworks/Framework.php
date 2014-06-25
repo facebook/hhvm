@@ -310,11 +310,12 @@ class Framework {
 
   private function setTestCommand(bool $redirect = true): void {
     if ($this->test_command === null) {
-      $this->test_command = get_runtime_build()." ".__DIR__.
-                            "/vendor/bin/phpunit --debug";
-    } else {
-      $this->test_command .= " --debug";
+      $this->test_command =
+        get_runtime_build().
+        ' -c '.Options::$generated_ini_file.
+        ' '.__DIR__.'/vendor/bin/phpunit';
     }
+    $this->test_command .= ' --debug ';
     if ($this->config_file !== null) {
       $this->test_command .= " -c ".$this->config_file;
     }

@@ -30,12 +30,15 @@ class Options {
   public static bool $test_by_single_test = false;
   public static string $results_root = __DIR__.'/results';
   public static string $script_errors_file = __DIR__.'/results/_script.errors';
+  public static string $generated_ini_file = __DIR__.'/.generated.php.ini';
   public static array $framework_info = [];
   public static array $original_framework_info = [];
   public static int $num_threads = -1;
   public static bool $as_phpunit = false;
 
   public static function parse(OptionMap $options, array $argv): Vector {
+    $ini_settings = Map { };
+
     self::$framework_info = Spyc::YAMLLoad(__DIR__."/frameworks.yaml");
     self::$original_framework_info = self::$framework_info;
     // Put any script error to a file when we are in a mode like --csv and
@@ -54,7 +57,6 @@ class Options {
     // already set in $options. They are just artificats of $argv right now.
     // Although, there is a failsafe when checking if the framework exists that
     // would weed command line opts out too.
-
 
     // Can't run all the framework tests and "all but" at the same time
     if ($options->containsKey('all') && $options->containsKey('allexcept')) {
@@ -152,6 +154,12 @@ class Options {
       $framework_names->removeKey(0);
     }
 
+    if ($options->containsKey('isolate')) {
+      $ini_settings['hhvm.jit_enable_rename_function'] = true;
+      $ini_settings['auto_prepend_file'] = __DIR__.'/Isolation.php';
+      $framework_names->removeKey(0);
+    }
+
     if ($options->containsKey('redownload')) {
       if ($options->containsKey('latest')) {
         error_and_exit("Cannot use --redownload and --latest together");
@@ -179,6 +187,13 @@ class Options {
       self::$generate_new_expect_file = true;
       $framework_names->removeKey(0);
     }
+
+    $ini_string = '';
+    foreach ($ini_settings as $k => $v) {
+      $ini_string .= sprintf("%s=%s\n", $k, var_export($v, true));
+    }
+    verbose("Generated INI string: \n".$ini_string);
+    file_put_contents(self::$generated_ini_file, $ini_string);
 
     verbose("Script running...Be patient as some frameworks take a while with ".
             "a debug build of HHVM\n");

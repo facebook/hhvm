@@ -606,9 +606,12 @@ function oss_test_option_map(): OptionInfoMap {
     'as-phpunit'          => Pair {'',   "Run tests for a framework just ".
                                          "like it would be run normally with ".
                                          "PHPUnit"},
-    'numthreads:'          => Pair {'',   "The exact number of threads to use ".
+    'numthreads:'         => Pair {'',   "The exact number of threads to use ".
                                          "when running framework tests in ".
                                          "parallel"},
+    'isolate'             => Pair {'',   "Try to make tests that have ".
+                                         "external dependencies automatically ".
+                                         "fail"},
   };
 }
 

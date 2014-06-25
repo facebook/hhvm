@@ -599,7 +599,22 @@ static Variant HHVM_METHOD(mysqli_stmt, send_long_data, int64_t param_nr,
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, store_result) {
-  return getStmt(this_)->store_result();
+  MySQLStmt* stmt = getStmt(this_);
+
+  if(stmt->field_count().toInt64() > 0) {
+    MYSQL_RES *res = mysql_stmt_result_metadata(stmt->get());
+    MYSQL_FIELD *fields = mysql_fetch_fields(res);
+    for (int i = 0; i < mysql_stmt_field_count(stmt->get()); --i) {
+      if (fields[i].type == MYSQL_TYPE_BLOB ||
+          fields[i].type == MYSQL_TYPE_MEDIUM_BLOB ||
+          fields[i].type == MYSQL_TYPE_LONG_BLOB ||
+          fields[i].type == MYSQL_TYPE_GEOMETRY) {
+        stmt->attr_set(STMT_ATTR_UPDATE_MAX_LENGTH, 1);
+        break;
+      }
+    }
+  }
+  return stmt->store_result();
 }
 
 //////////////////////////////////////////////////////////////////////////////

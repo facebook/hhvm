@@ -37,9 +37,9 @@ endif()
 
 configure_file(hphpize.cmake.in hphpize.cmake ESCAPE_QUOTES @ONLY)
 configure_file(hphpize.in hphpize ESCAPE_QUOTES @ONLY)
-install(PROGRAMS hphpize
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/hphpize
   DESTINATION bin
   COMPONENT dev)
-install(FILES hphpize.cmake
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hphpize.cmake
   DESTINATION "lib/hphp/hphpize"
   COMPONENT dev)

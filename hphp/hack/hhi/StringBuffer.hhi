@@ -16,7 +16,7 @@
  */
 class StringBuffer {
 
-  public function append(?mixed $value): void;
+  public function append(mixed $value): void;
 
   public function detach(): string;
 }

@@ -152,12 +152,19 @@ struct Value {
    * one surviving reference, so we can move forward assuming the max
    * of the two.
    */
-  void merge(const Value& other) {
-    always_assert(fromLoad == other.fromLoad);
+  void merge(const Value& other, const IRUnit& unit) {
+    auto showFailure = [&] {
+      return folly::format(
+        "Failed to merge values in unit:\n{}\n{}\n{}\n",
+        show(*this), show(other), unit
+      ).str();
+    };
+
+    always_assert_log(fromLoad == other.fromLoad, showFailure);
     if (realCount > other.realCount) {
-      always_assert(other.fromLoad);
+      always_assert_log(other.fromLoad, showFailure);
     } else if (realCount < other.realCount) {
-      always_assert(fromLoad);
+      always_assert_log(fromLoad, showFailure);
       realCount = other.realCount;
     }
     auto minSize = std::min(pendingIncs.size(), other.pendingIncs.size());
@@ -675,7 +682,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         const bool existed = mergedValues.count(value);
         auto& mergedState = mergedValues[value];
         if (existed) {
-          mergedState.value.merge(inPair.second);
+          mergedState.value.merge(inPair.second, m_unit);
         } else {
           mergedState.value = inPair.second;
         }

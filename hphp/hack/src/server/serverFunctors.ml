@@ -64,7 +64,7 @@ module HackProgram : SERVER_PROGRAM = struct
     | None ->
         let env = ServerInit.init genv env next_files in
         if ServerArgs.check_mode genv.options
-        then Die
+        then (Exit (if env.errorl = [] then 0 else 1) : program_ret)
         else Continue env
     | Some dirname ->
         ServerConvert.go genv env root next_files dirname;

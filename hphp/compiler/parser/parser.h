@@ -393,10 +393,10 @@ private:
   void setHasNonEmptyReturn(ConstructPtr blame);
 
   void invalidYield();
-  bool setIsGenerator();
+  void setIsGenerator();
 
   void invalidAwait();
-  bool setIsAsync();
+  void setIsAsync();
 
   static bool canBeAsyncOrGenerator(string funcName, string clsName);
   void checkFunctionContext(string funcName,

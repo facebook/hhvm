@@ -797,7 +797,6 @@ void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
 void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
   if (op != T_ARRAY && !m_scanner.isHHSyntaxEnabled()) {
     PARSE_ERROR("Typed collection is not enabled");
-    return;
   }
   onUnaryOpExp(out, pairs, T_ARRAY, true);
 }
@@ -882,7 +881,6 @@ void Parser::onClassClass(Token &out, Token &cls, Token &name,
         "%s::class cannot be used for compile-time class name resolution",
         cls->text().c_str()
       );
-      return;
     }
   }
   if (cls->exp && !cls->exp->is(Expression::KindOfScalarExpression)) {
@@ -1599,7 +1597,6 @@ void Parser::setHasNonEmptyReturn(ConstructPtr blame) {
   if (fc.isGenerator) {
     Compiler::Error(Compiler::InvalidYield, blame);
     PARSE_ERROR("Generators cannot return values using \"return\"");
-    return;
   }
 
   fc.hasNonEmptyReturn = true;
@@ -1646,46 +1643,39 @@ bool Parser::canBeAsyncOrGenerator(string funcName, string clsName) {
   return true;
 }
 
-bool Parser::setIsGenerator() {
+void Parser::setIsGenerator() {
   if (m_funcContexts.empty()) {
     invalidYield();
     PARSE_ERROR("Yield can only be used inside a function");
-    return false;
   }
 
   FunctionContext& fc = m_funcContexts.back();
   if (fc.hasNonEmptyReturn) {
     invalidYield();
     PARSE_ERROR("Generators cannot return values using \"return\"");
-    return false;
   }
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
     invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
                 "magic methods");
-    return false;
   }
 
   fc.isGenerator = true;
-  return true;
 }
 
 void Parser::onYield(Token &out, Token &expr) {
-  if (setIsGenerator()) {
-    out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
-  }
+  setIsGenerator();
+  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
 }
 
 void Parser::onYieldPair(Token &out, Token &key, Token &val) {
-  if (setIsGenerator()) {
-    out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
-  }
+  setIsGenerator();
+  out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
 }
 
 void Parser::onYieldBreak(Token &out) {
-  if (setIsGenerator()) {
-    out->stmt = NEW_STMT(ReturnStatement, ExpressionPtr());
-  }
+  setIsGenerator();
+  out->stmt = NEW_STMT(ReturnStatement, ExpressionPtr());
 }
 
 void Parser::invalidAwait() {
@@ -1698,11 +1688,10 @@ void Parser::invalidAwait() {
   Compiler::Error(Compiler::InvalidAwait, exp);
 }
 
-bool Parser::setIsAsync() {
+void Parser::setIsAsync() {
   if (m_funcContexts.empty()) {
     invalidAwait();
     PARSE_ERROR("'await' can only be used inside a function");
-    return false;
   }
 
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
@@ -1713,14 +1702,12 @@ bool Parser::setIsAsync() {
 
   FunctionContext& fc = m_funcContexts.back();
   fc.isAsync = true;
-  return true;
 }
 
 
 void Parser::onAwait(Token &out, Token &expr) {
-  if (setIsAsync()) {
-    out->exp = NEW_EXP(AwaitExpression, expr->exp);
-  }
+  setIsAsync();
+  out->exp = NEW_EXP(AwaitExpression, expr->exp);
 }
 
 void Parser::onGlobal(Token &out, Token &expr) {
@@ -1792,7 +1779,6 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
   }
   if (value->exp && name->num()) {
     PARSE_ERROR("Key element cannot be a reference");
-    return;
   }
   checkAssignThis(name);
   checkAssignThis(value);
@@ -2393,7 +2379,6 @@ bool Parser::hasType(Token &type) {
   if (!type.text().empty()) {
     if (!m_scanner.isHHSyntaxEnabled()) {
       PARSE_ERROR("Type hint is not enabled");
-      return false;
     }
     return true;
   }

@@ -925,10 +925,17 @@ function msg_loop($num_tests, $queue) {
   $do_progress = Status::getMode() == Status::MODE_NORMAL &&
     Status::hasCursorControl();
   if ($do_progress) {
-    preg_match_all("/columns.([0-9]+);/",
-                   strtolower(exec('stty -a | grep columns')),
-                   $output);
-    $cols = $output[1][0];
+    $stty = strtolower(exec('stty -a | grep columns'));
+    preg_match_all("/columns ([0-9]+);/", $stty, $output);
+    if (!isset($output[1][0])) {
+      // because BSD has to be different
+      preg_match_all("/([0-9]+) columns;/", $stty, $output);
+    }
+    if (!isset($output[1][0])) {
+      $do_progress = false;
+    } else {
+      $cols = $output[1][0];
+    }
   }
 
   while (true) {

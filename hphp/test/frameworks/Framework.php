@@ -30,6 +30,8 @@ class Framework {
   private ?Set $individual_tests = null;
   private ?string $bootstrap_file = null;
   private ?string $config_file = null;
+  private TestFindMode $test_find_mode;
+  private bool $parallel;
 
   // $name, $parallel, $test_fine_mode, etc. are constructor promoted
   // Assume the framework unit tests will be run in parallel until otherwise
@@ -42,9 +44,37 @@ class Framework {
                               private ?string $test_command = null,
                               private ?Map $env_vars = null,
                               private ?Map $args_for_tests = null,
-                              private bool $parallel = true,
-                              private string $test_find_mode =
-                                TestFindModes::REFLECTION) {
+                              ?bool $parallel = null,
+                              ?string $test_find_mode = null) {
+    if (array_key_exists('test_find_mode', Options::$framework_info[$name])) {
+      if ($test_find_mode !== null) {
+        human(
+          Colors::RED.'WARNING'.Colors::NONE.
+          ': Using test_find_mode from YAML instead of PHP for '.$name."\n"
+        );
+      }
+      $this->test_find_mode =
+        Options::$framework_info[$name]['test_find_mode'];
+    } else if ($test_find_mode !== null) {
+      $this->test_find_mode = $test_find_mode;
+    } else {
+      $this->test_find_mode = TestFindModes::REFLECTION;
+    }
+    TestFindModes::assertIsValid($this->test_find_mode);
+
+    if (array_key_exists('sequential', Options::$framework_info[$name])) {
+      if ($parallel !== null) {
+        human(
+          Colors::RED.'WARNING'.Colors::NONE.
+          ': Using sequential from YAML instead of PHP for '.$name."\n"
+        );
+      }
+      $this->parallel = !Options::$framework_info[$name]['sequential'];
+    } else if ($parallel !== null) {
+      $this->parallel = $parallel;
+    } else {
+      $this->parallel = true;
+    }
 
     // Get framework information and set all needed properties. Beyond
     // the install root, git info, test roots, etc., the other

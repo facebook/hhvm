@@ -19,6 +19,9 @@
 #      /.*(\.phpt|Test[\d]*\.php|test[\d]*\.php)$/
 # config_file: a specific phpunit config file to use beyond phpunit.xml[.dist]
 # bootstrap_file: a specific bootstrap file to use
+# test_find_mode: How to find the tests - reflection (default), token, or phpt
+# sequential: run the tests sequentially - slower, but needed for tests with
+#     race conditions
 #
 # If you need to override the default constructed implementation of the
 # Framework class, then add the class to the framework_class_overrides
@@ -111,6 +114,8 @@
     install_root: facebook-php-sdk
     test_root: facebook-php-sdk
     test_file_regex: /.*(tests\.php)$/
+    test_find_mode: token
+    sequential: true
   fastroute:
     url: https://github.com/nikic/FastRoute.git
     branch: master
@@ -137,6 +142,8 @@
     commit: 4db19b75d9211e729ff277c238ef5de4bf658597
     install_root: guzzle4
     test_root: guzzle4
+    test_find_mode: token
+    sequential: true
   hhvmquickinterp:
     do_not_install: true
     test_root: ../hhvm/quick_interp
@@ -222,6 +229,7 @@
     commit: 11b927eb40b6646733ead7a9e3cd5f2e68a289b8
     install_root: joomla-cms
     test_root: joomla-cms
+    test_find_mode: token
     clowns:
       - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
@@ -297,12 +305,14 @@
     commit: 6e1f228ce82333b437402dafad049713eb3eeac6
     install_root: klein
     test_root: klein
+    test_find_mode: token
   kohana:
     url: https://github.com/kohana/kohana.git
     branch: "3.3/develop"
     commit: 61e12755bf9eb32af82808b26d58ccb73cf2a971
     install_root: kohana
     test_root: kohana
+    test_find_mode: token
   laravel:
     url: https://github.com/laravel/framework.git
     # Use the 4.1 branch instead of the 4.1.x tag because of pull request
@@ -335,6 +345,7 @@
     commit: 75b30dbc1ca0a41926784bd4d13fc889914aaa16
     install_root: magento2
     test_root: magento2/dev/tests/unit
+    test_find_mode: token
   mediawiki:
     # - Bad test data in wikimedia/mediawiki-core at the moment
     # - Some tests have @group database set incorrectly, so are ran anyway
@@ -370,6 +381,7 @@
     commit: 996c944fa2ddedddfaf0d276b913809d6a32fd85
     install_root: mustache
     test_root: mustache
+    test_find_mode: token
     flakey:
       - mustache/test/Mustache/Test/Cache/FilesystemCacheTest.php
   paris:
@@ -461,6 +473,7 @@
     commit: 3340c91def4c6d4f4c9f0784ac04b9ed09ec68ca
     install_root: pdepend
     test_root: pdepend
+    test_find_mode: token
   phpbb3:
     url: https://github.com/phpbb/phpbb.git
     # Stable is release-3.0.12, but we have pull requests in develop
@@ -501,6 +514,8 @@
     test_root: phpmyadmin
     # Larger timeout, no code coverage, no selenium testing
     config_file: phpmyadmin/phpunit.xml.hhvm
+    test_find_mode: token
+    sequential: true
   phpunit:
     url: https://github.com/fredemmott/phpunit.git
     # 4.2.x branch + https://github.com/sebastianbergmann/phpunit/pull/1288
@@ -588,6 +603,7 @@
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist
+    test_find_mode: token
     blacklist:
       # Intermittently hangs, takes > 24h
       - vfsstream/src/test/php/org/bovigo/vfs/vfsStreamWrapperWithoutRootTestCase.php
@@ -618,6 +634,7 @@
     commit: 2b718e20cfc22cd388ef3aeff0bc66302379ae02
     install_root: zf2
     test_root: zf2/tests
+    test_find_mode: token
     blacklist:
       - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php

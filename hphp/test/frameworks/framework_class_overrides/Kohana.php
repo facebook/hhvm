@@ -2,10 +2,6 @@
 require_once __DIR__.'/../Framework.php';
 
 class Kohana extends Framework {
-  public function __construct(string $name) {
-    parent::__construct($name, null, null, null, true, TestFindModes::TOKEN);
-  }
-
   protected function install(): void {
     parent::install();
     $root = nullthrows($this->getInstallRoot());

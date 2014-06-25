@@ -574,6 +574,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left T_LOGICAL_AND
 %right T_PRINT
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
+%right T_AWAIT T_YIELD
 %left '?' ':'
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND
@@ -671,8 +672,6 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_DIR
 %token T_NS_SEPARATOR
 
-%token T_YIELD
-
 %token T_XHP_LABEL
 %token T_XHP_TEXT
 %token T_XHP_ATTRIBUTE
@@ -704,7 +703,6 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_UNRESOLVED_NEWTYPE
 
 %token T_COMPILER_HALT_OFFSET
-%right T_AWAIT
 %token T_ASYNC
 
 %right T_FROM

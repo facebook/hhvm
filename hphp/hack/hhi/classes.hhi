@@ -49,9 +49,9 @@ class RuntimeException extends Exception {
 class OutOfBoundsException extends RuntimeException {
 }
 
-class AsyncGenerator<Tk, Tv, Ts> implements AsyncIterator<Tk, Tv> {
+class AsyncGenerator<Tk, Tv, Ts> implements AsyncKeyedIterator<Tk, Tv> {
   public function next(): Awaitable<?(Tk, Tv)> {}
-  public function send(Ts $v): Awaitable<?(Tk, Tv)> {}
+  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}
   public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}
 }
 

@@ -32,7 +32,11 @@ interface Iterator<Tv> extends Traversable<Tv> {
   public function valid(): bool;
 }
 
-interface AsyncIterator<Tk, Tv> {
+interface AsyncIterator<Tv> {
+  public function next(): Awaitable<?(mixed, Tv)>;
+}
+
+interface AsyncKeyedIterator<Tk, Tv> extends AsyncIterator<Tv> {
   public function next(): Awaitable<?(Tk, Tv)>;
 }
 

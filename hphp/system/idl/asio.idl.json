@@ -55,7 +55,7 @@
                 "CppCustomDelete"
             ],
             "ifaces": [
-                "HH\\AsyncIterator"
+                "HH\\AsyncKeyedIterator"
             ],
             "funcs": [
                 {

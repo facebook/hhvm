@@ -260,7 +260,7 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
   // Xenon
   if (flags & RequestInjectionData::XenonSignalFlag) {
-    Xenon::getInstance().log(true);
+    Xenon::getInstance().log(Xenon::EnterSample);
   }
 
   // User profiler
@@ -282,7 +282,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                                const Fault* fault, ssize_t flags) {
   // Xenon
   if (flags & RequestInjectionData::XenonSignalFlag) {
-    Xenon::getInstance().log(false);
+    Xenon::getInstance().log(Xenon::ExitSample);
   }
 
   // User profiler

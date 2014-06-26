@@ -18,6 +18,7 @@
 
 #include <thread>
 
+#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
@@ -26,6 +27,7 @@
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle-defs.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/ext/ext_xenon.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
@@ -65,7 +67,10 @@ namespace {
     // The web request may have timed out while we were waiting for I/O.
     // Fail early to avoid further execution of PHP code.
     if (UNLIKELY(checkConditionFlags())) {
-      EventHook::CheckSurprise();
+      ssize_t flags = EventHook::CheckSurprise();
+      if (flags & RequestInjectionData::XenonSignalFlag) {
+        Xenon::getInstance().log(Xenon::IOWaitSample);
+      }
     }
 
     if (UNLIKELY(session->hasOnIOWaitExitCallback())) {

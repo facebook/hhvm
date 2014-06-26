@@ -28,61 +28,73 @@ function wddx_add_vars(resource $packet_id, ...): bool;
 
 function wddx_deserialize($packet) : mixed {
   if (is_resource($packet)) {
-    $out = '';
-    while (!feof($packet)) {
-      $out .= fgets($packet);
-    }
-    return wddx_deserialize($out);
-  }
-  if (is_string($packet) && empty($packet)){
+    $packet = strval(stream_get_contents($packet));
+  } elseif (!is_string($packet)) {
+    trigger_error("wddx_deserialize(): " .
+      "Expecting parameter 1 to be a string or a stream", E_USER_WARNING);
     return null;
   }
 
-  if (is_string($packet)) {
-
-    $xml = simplexml_load_string($packet);
-    //php seems to accept malformed xml
-    $root = $xml->xpath("(/wddxPacket[@version='1.0'] |
-                          /wddxpacket[@version='1.0'] )/data");
-    return wddx_deserialize($root[0]);
+  if ( $packet === '' ) {
+    return null;
   }
 
-  $type = $packet->getName();
+  $xml = simplexml_load_string($packet);
+  if (!$xml) {
+    return null;
+  }
+  $root = $xml->xpath("(/wddxPacket[@version='1.0'] |
+                        /wddxpacket[@version='1.0'] )/data");
+  if (!count($root)) {
+    return null;
+  }
+  return _wddx_deserialize_recursive($root[0]);
+}
+
+/**
+ * Private function to walk the WDDX DOM tree
+ */
+function _wddx_deserialize_recursive($node) {
+  $type = $node->getName();
 
   //variables
   switch ($type) {
     case "string":
-      return (string) $packet;
+      return (string) $node;
     case "number":
-      $packet = (string) $packet;
-      if ((int) $packet == $packet) {
-        return (int) $packet;
+      $node = (string) $node;
+      if ((int) $node == $node) {
+        return (int) $node;
       }
-      return (float) $packet;
+      return (float) $node;
     case "boolean":
-      if (!empty($packet["value"])) {
-        return (((string) $packet["value"]) === 'true');
+      if (!empty($node["value"])) {
+        return (((string) $node["value"]) === 'true');
       }
       break;
     case "binary":
       return "binary data";
     case "dateTime":
-      $dateTime = new DateTime((string) $packet);
+      $dateTime = new DateTime((string) $node);
       return $dateTime->getTimestamp();
   }
 
   //setup for containers
   $array = array();
-  $subchildren = $packet->children();
+  $subchildren = $node->children();
 
   if ($type == "data") {
-    return wddx_deserialize($subchildren[0]);
+    if (count($subchildren)) {
+      return _wddx_deserialize_recursive($subchildren[0]);
+    } else {
+      return null;
+    }
   }
 
   //array
   if ($type == "array" ) {
     foreach ($subchildren as $subchild) {
-        array_push($array, wddx_deserialize($subchild));
+        array_push($array, _wddx_deserialize_recursive($subchild));
     }
     return $array;
   }
@@ -112,18 +124,22 @@ function wddx_deserialize($packet) : mixed {
       }
     }
     foreach ($subchildren as $subchild) {
-      $returnArray = wddx_deserialize($subchild);
+      $returnArray = _wddx_deserialize_recursive($subchild);
       if ($isObject) {
-        if ($isFirst) {
-          $isFirst = false;
-          continue;
-        }
-        foreach ($returnArray as $key => $value) {
-          $array->{$key} = $value;
+        if (is_object($returnArray)) {
+          if ($isFirst) {
+            $isFirst = false;
+            continue;
+          }
+          foreach ($returnArray as $key => $value) {
+            $array->{$key} = $value;
+          }
         }
       }
       else{
-        $array = $array + $returnArray;
+        if (is_array($returnArray)) {
+          $array = $array + $returnArray;
+        }
       }
     }
     return $array;
@@ -131,21 +147,26 @@ function wddx_deserialize($packet) : mixed {
 
   //var
   if ($type == "var" || $type == "field") {
+    if (!count($subchildren)) {
+      return null;
+    }
     $subchild = $subchildren[0];
-    if (!empty($packet["name"])) {
-      $key = (string)($packet["name"]);
-      $array[$key] = wddx_deserialize($subchild);
+    if (!empty($node["name"])) {
+      $key = (string)($node["name"]);
+      $array[$key] = _wddx_deserialize_recursive($subchild);
       if ($type == "field") {
         $subarray = array();
           foreach ($subchildren as $subchild) {
-              array_push($subarray, wddx_deserialize($subchild));
+              array_push($subarray, _wddx_deserialize_recursive($subchild));
           }
         $array[$key] = $subarray;
       }
       return $array;
     }
-    return wddx_deserialize($subchild);
+    return _wddx_deserialize_recursive($subchild);
   }
+
+  return null;
 }
 
 /**

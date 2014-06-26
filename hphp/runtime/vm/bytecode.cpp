@@ -4122,15 +4122,11 @@ OPTBLD_INLINE void ExecutionContext::iopGte(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void ExecutionContext::iopShl(IOP_ARGS) {
-  implCellBinOp(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
-    return make_tv<KindOfInt64>(cellToInt(c1) << cellToInt(c2));
-  });
+  implCellBinOp(IOP_PASS_ARGS, cellShl);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopShr(IOP_ARGS) {
-  implCellBinOp(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
-    return make_tv<KindOfInt64>(cellToInt(c1) >> cellToInt(c2));
-  });
+  implCellBinOp(IOP_PASS_ARGS, cellShr);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopSqrt(IOP_ARGS) {

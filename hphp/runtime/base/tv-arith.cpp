@@ -528,6 +528,14 @@ Cell cellBitXor(Cell c1, Cell c2) {
   );
 }
 
+Cell cellShl(Cell c1, Cell c2) {
+  return make_int(cellToInt(c1) << cellToInt(c2));
+}
+
+Cell cellShr(Cell c1, Cell c2) {
+  return make_int(cellToInt(c1) >> cellToInt(c2));
+}
+
 void cellAddEq(Cell& c1, Cell c2) {
   cellOpEq(AddEq(), c1, c2);
 }
@@ -572,6 +580,9 @@ void cellBitOrEq(Cell& c1, Cell c2) {
 void cellBitXorEq(Cell& c1, Cell c2) {
   cellBitOpEq(cellBitXor, c1, c2);
 }
+
+void cellShlEq(Cell& c1, Cell c2) { cellCopy(cellShl(c1, c2), c1); }
+void cellShrEq(Cell& c1, Cell c2) { cellCopy(cellShr(c1, c2), c1); }
 
 void cellInc(Cell& cell) { cellIncDecOp(Inc(), cell); }
 void cellIncO(Cell& cell) { cellIncDecOp(IncO(), cell); }

@@ -63,12 +63,22 @@ folly::Optional<Type> eval_const_divmod(Type t1, Type t2, Fun fun) {
   return folly::none;
 }
 
-Type bitwise_arith(Type t1, Type t2) {
+template<class Fun>
+Type bitwise_impl(Type t1, Type t2, Fun op) {
+  if (auto t = eval_const(t1, t2, op))          return *t;
   if (t1.subtypeOf(TStr) && t2.subtypeOf(TStr)) return TStr;
-  if (!t1.couldBe(TStr) || !t2.couldBe(TStr)) return TInt;
+  if (!t1.couldBe(TStr) || !t2.couldBe(TStr))   return TInt;
   return TInitCell;
 }
 
+template<class Fun>
+Type shift_impl(Type t1, Type t2, Fun op) {
+  t1 = typeToInt(t1);
+  t2 = typeToInt(t2);
+
+  if (auto const t = eval_const(t1, t2, op)) return *t;
+  return TInt;
+}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -100,7 +110,7 @@ template <class CellOp>
 Type typeSubMulImpl(Type t1, Type t2, CellOp op) {
   if (auto t = eval_const(t1, t2, op))          return *t;
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
-  return TInitCell;
+  return TInitPrim;
 }
 
 template <class CellOp>
@@ -108,7 +118,7 @@ Type typeSubMulImplO(Type t1, Type t2, CellOp op) {
   if (auto t = eval_const(t1, t2, op))          return *t;
   if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TNum;
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
-  return TInitCell;
+  return TInitPrim;
 }
 
 Type typeSub(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, cellSub); }
@@ -119,12 +129,12 @@ Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellMulO); }
 
 Type typeDiv(Type t1, Type t2) {
   if (auto t = eval_const_divmod(t1, t2, cellDiv)) return *t;
-  return TInitCell;
+  return TInitPrim;
 }
 
 Type typeMod(Type t1, Type t2) {
   if (auto t = eval_const_divmod(t1, t2, cellMod)) return *t;
-  return TInitCell;
+  return TInitPrim;
 }
 
 Type typePow(Type t1, Type t2) {
@@ -134,20 +144,12 @@ Type typePow(Type t1, Type t2) {
 
 //////////////////////////////////////////////////////////////////////
 
-Type typeBitAnd(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellBitAnd)) return *t;
-  return bitwise_arith(t1, t2);
-}
+Type typeBitAnd(Type t1, Type t2) { return bitwise_impl(t1, t2, cellBitAnd); }
+Type typeBitOr(Type t1, Type t2)  { return bitwise_impl(t1, t2, cellBitOr); }
+Type typeBitXor(Type t1, Type t2) { return bitwise_impl(t1, t2, cellBitXor); }
 
-Type typeBitOr(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellBitOr)) return *t;
-  return bitwise_arith(t1, t2);
-}
-
-Type typeBitXor(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellBitXor)) return *t;
-  return bitwise_arith(t1, t2);
-}
+Type typeShl(Type t1, Type t2) { return shift_impl(t1, t2, cellShl); }
+Type typeShr(Type t1, Type t2) { return shift_impl(t1, t2, cellShr); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -216,8 +218,8 @@ Type typeArithSetOp(SetOpOp op, Type lhs, Type rhs) {
     case SetOpOp::MulEqualO:   return typeMulO(lhs, rhs);
 
     case SetOpOp::ConcatEqual: return TStr;
-    case SetOpOp::SlEqual:     return TInt;
-    case SetOpOp::SrEqual:     return TInt;
+    case SetOpOp::SlEqual:     return typeShl(lhs, rhs);
+    case SetOpOp::SrEqual:     return typeShr(lhs, rhs);
   }
   not_reached();
 }

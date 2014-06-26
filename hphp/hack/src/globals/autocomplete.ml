@@ -10,9 +10,10 @@
 open Utils
 
 type autocomplete_result = {
-    pos  : Pos.t option;
-    ty   : string option;
-    name : string;
+    pos         : Pos.t;
+    ty          : string;
+    name        : string;
+    expected_ty : bool;
   }
 
 (*****************************************************************************)
@@ -20,7 +21,6 @@ type autocomplete_result = {
 (*****************************************************************************)
 
 let auto_complete = ref false
-let auto_complete_result = ref (SMap.empty: autocomplete_result SMap.t)
 (* The position we're autocompleting at. This is used so when we reach this
  * position in typing, we can recognize it and store types. Set in naming. *)
 let (auto_complete_pos: Pos.t option ref) = ref None
@@ -48,29 +48,12 @@ type autocomplete_type =
 | Acclass_get
 | Acvar
 
-let make_result_without_pos_or_type name = {
-    pos  = None;
-    ty   = None;
-    name = name;
-  }
-
-let make_result_without_type name p = {
-    pos  = Some p;
-    ty   = None;
-    name = name;
-  }
-
-let make_result name p ty = {
-    pos  = Some p;
-    ty   = Some ty;
-    name = name;
+let make_result name p ty expected_ty = {
+    pos         = p;
+    ty          = ty;
+    name        = name;
+    expected_ty = expected_ty;
   }
 
 let (argument_global_type: autocomplete_type option ref) = ref None
 let auto_complete_for_global = ref ""
-let auto_complete_suffix = "AUTO332"
-let suffix_len = String.length auto_complete_suffix
-let is_auto_complete x =
-  !auto_complete && String.length x >= suffix_len &&
-  let suffix = String.sub x (String.length x - suffix_len) suffix_len in
-  suffix = auto_complete_suffix

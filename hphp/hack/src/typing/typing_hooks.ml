@@ -21,6 +21,11 @@ let (cmethod_hooks: (Typing_defs.class_type -> Pos.t * string ->
 let (lvar_hooks: (Pos.t * Ident.t -> Typing_env.env ->
                   unit) list ref) = ref []
 
+let (fun_call_hooks: ((string option * Typing_defs.ty) list -> Pos.t list ->
+                      Typing_env.env -> unit) list ref) = ref []
+
+let (new_id_hooks: (Nast.class_id-> Typing_env.env ->  unit) list ref) = ref []
+
 let attach_smethod_hook hook =
   smethod_hooks := hook :: !smethod_hooks
 
@@ -32,6 +37,12 @@ let attach_id_hook hook =
 
 let attach_lvar_hook hook =
   lvar_hooks := hook :: !lvar_hooks
+
+let attach_fun_call_hook hook =
+  fun_call_hooks := hook :: !fun_call_hooks
+
+let attach_new_id_hook hook =
+  new_id_hooks := hook :: !new_id_hooks
 
 let dispatch_id_hook id =
   List.iter begin fun hook -> hook id end !id_hooks
@@ -45,8 +56,16 @@ let dispatch_cmethod_hook class_ id env cid =
 let dispatch_lvar_hook id env =
   List.iter begin fun hook -> hook id env end !lvar_hooks
 
+let dispatch_fun_call_hooks ft_params posl env =
+  List.iter begin fun hook -> hook ft_params posl env end !fun_call_hooks
+
+let dispatch_new_id_hook cid env =
+  List.iter begin fun hook -> hook cid env end !new_id_hooks
+
 let remove_all_hooks () =
   id_hooks := [];
   cmethod_hooks := [];
   smethod_hooks := [];
   lvar_hooks := [];
+  fun_call_hooks := [];
+  new_id_hooks := [];

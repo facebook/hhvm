@@ -14,24 +14,6 @@
 (*****************************************************************************)
 open Utils
 
-let restore() =
-  Autocomplete.auto_complete := false;
-  Autocomplete.auto_complete_for_global := "";
-  Autocomplete.auto_complete_result := SMap.empty;
-  Autocomplete.argument_global_type := None;
-  Autocomplete.auto_complete_pos := None;
-  Autocomplete.auto_complete_vars := SMap.empty;
-  ()
-      
-let setup() =
-  Autocomplete.auto_complete := true;
-  Autocomplete.auto_complete_for_global := "";
-  Autocomplete.auto_complete_result := SMap.empty;
-  Autocomplete.argument_global_type := None;
-  Autocomplete.auto_complete_pos := None;
-  Autocomplete.auto_complete_vars := SMap.empty;
-  ()
-
 let auto_complete env content oc =
   AutocompleteService.attach_hooks();
   let funs, classes = ServerIdeUtils.declare content in
@@ -48,31 +30,24 @@ let auto_complete env content oc =
   in
   let nenv = 
     { nenv with Naming.ifuns = ifuns; Naming.iclasses = iclasses } in
-  setup();
   ServerIdeUtils.fix_file_and_def content;
   let fun_names = SMap.keys nenv.Naming.ifuns in
   let class_names = SMap.keys nenv.Naming.ifuns in
   let result =
-    SMap.fold
-      (fun _ res acc ->
+    List.map
+      (fun res ->
         let name = res.Autocomplete.name in
         let pos = res.Autocomplete.pos in
         let ty = res.Autocomplete.ty in
-        let pos_string = match pos with
-          | None -> ""
-          | Some p -> Pos.string p in
-        let name = match ty with
-          | None -> name
-          | Some ty -> name^" "^ty in
-        (name, pos_string) :: acc)
+        let pos_string = Pos.string pos in
+        let name = name^" "^ty in
+        (name, pos_string))
       (AutocompleteService.get_results fun_names class_names)
-      []
   in
   ServerIdeUtils.revive funs classes;
   Printf.printf "Auto-complete\n"; flush stdout;
   List.iter begin fun (k, _) ->
     Printf.fprintf oc "%s\n" k; flush oc;
-  end (List.rev result);
-  restore();
+  end result;
   AutocompleteService.detach_hooks();
   ()

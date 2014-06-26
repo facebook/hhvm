@@ -41,7 +41,6 @@ let revive funs classes =
 let declare content =
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";
-  Autocomplete.auto_complete_result := SMap.empty;
   let declared_funs = ref SSet.empty in
   let declared_classes = ref SSet.empty in
   try 

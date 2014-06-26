@@ -11,34 +11,66 @@
 open Utils
 open Typing_defs
 
+type autocomplete_result = {
+    ty   : Typing_defs.ty;
+    name : string;
+    desc : string option
+  }
+
+let ac_env = ref None
+let ac_type = ref None
+let autocomplete_results = ref []
+
 let auto_complete_suffix = "AUTO332"
 let suffix_len = String.length auto_complete_suffix
 let is_auto_complete x =
-  String.length x >= suffix_len &&
-  let suffix = String.sub x (String.length x - suffix_len) suffix_len in
-  suffix = auto_complete_suffix
-
-let make_result name ty env =
-  let type_ = Typing_print.full_strip_ns env ty in
-  let pos = Reason.to_pos (fst ty) in
-  Autocomplete.make_result name pos type_
-
-let autocomplete_token ac_type x =
-  if Autocomplete.is_auto_complete (snd x)
+  if !autocomplete_results = []
   then begin
+    String.length x >= suffix_len &&
+    let suffix = String.sub x (String.length x - suffix_len) suffix_len in
+    suffix = auto_complete_suffix
+  end else
+    false
+
+let add_result name ty =
+  autocomplete_results :=
+    {
+      ty   = ty;
+      name = name;
+      desc = None;
+    } :: !autocomplete_results
+
+let add_result_with_desc name ty desc =
+  autocomplete_results :=
+    {
+      ty   = ty;
+      name = name;
+      desc = Some desc;
+    } :: !autocomplete_results
+
+let autocomplete_token ac_type env x =
+  if is_auto_complete (snd x)
+  then begin
+    ac_env := env;
+    Autocomplete.auto_complete_pos := Some (fst x);
     Autocomplete.argument_global_type := Some ac_type;
     Autocomplete.auto_complete_for_global := snd x
   end
-  
-let autocomplete_id = autocomplete_token Autocomplete.Acid
 
-let autocomplete_hint = autocomplete_token Autocomplete.Actype
+let autocomplete_id = autocomplete_token Autocomplete.Acid None
 
-let autocomplete_new = autocomplete_token Autocomplete.Acnew
+let autocomplete_hint = autocomplete_token Autocomplete.Actype None
+
+let autocomplete_new cid env =
+  match cid with
+  | Nast.CI sid -> autocomplete_token Autocomplete.Acnew (Some env) sid
+  | _ -> ()
 
 let autocomplete_method is_static class_ id env cid =
   if is_auto_complete (snd id)
   then begin
+    ac_env := Some env;
+    Autocomplete.auto_complete_pos := Some (fst id);
     Autocomplete.argument_global_type := Some Autocomplete.Acclass_get;
     let results =
       if is_static
@@ -53,14 +85,9 @@ let autocomplete_method is_static class_ id env cid =
           | _ -> false
       else true end results
     in
-    Autocomplete.auto_complete_result :=
-      SMap.fold begin fun x class_elt acc ->
-        let ty = class_elt.ce_type in
-        let type_ = Typing_print.full_strip_ns env ty in
-        let pos = Reason.to_pos (fst ty) in
-        let sig_ = x^" "^type_ in
-        SMap.add sig_ (Autocomplete.make_result x pos type_) acc
-      end results SMap.empty
+    SMap.iter begin fun x class_elt ->
+        add_result x class_elt.ce_type
+      end results
   end
 
 let autocomplete_smethod = autocomplete_method true
@@ -80,19 +107,17 @@ let autocomplete_lvar_naming id locals =
 let autocomplete_lvar_typing id env =
   if Some (fst id)= !(Autocomplete.auto_complete_pos)
   then begin
+    ac_env := Some env;
+    Autocomplete.auto_complete_pos := Some (fst id);
     (* Get the types of all the variables in scope at this point *)
-    Autocomplete.auto_complete_result :=
-      SMap.mapi begin fun x ident ->
-        let _, ty = Typing_env.get_local env ident in
-        make_result x ty env
-      end !Autocomplete.auto_complete_vars;
+    SMap.iter begin fun x ident ->
+      let _, ty = Typing_env.get_local env ident in
+      add_result x ty
+    end !Autocomplete.auto_complete_vars;
     (* Add $this if we're in a instance method *)
     let ty = Typing_env.get_self env in
     if not (Typing_env.is_static env) && (fst ty) <> Reason.Rnone
-    then Autocomplete.auto_complete_result :=
-           SMap.add "$this"
-                     (make_result "$this" ty env)
-                     !Autocomplete.auto_complete_result
+    then add_result "$this" ty
   end
 
 let should_complete_class completion_type class_kind =
@@ -106,15 +131,43 @@ let should_complete_class completion_type class_kind =
 let should_complete_fun completion_type =
   completion_type=Some Autocomplete.Acid
 
-let complete_global funs classes =
-  let results = ref SMap.empty in
+let get_constructor_ty c =
+  let return_ty =
+    Typing_reason.Rwitness c.Typing_defs.tc_pos,
+    Typing_defs.Tapply ((c.Typing_defs.tc_pos, c.Typing_defs.tc_name), [])
+  in
+  match c.Typing_defs.tc_construct with
+    | Some elt ->
+        begin match elt.ce_type with
+          | (_ as r, Tfun fun_) ->
+              (* We have a constructor defined, but the return type is void
+               * make it the object *)
+              let fun_ = { fun_ with Typing_defs.ft_ret = return_ty } in
+              r, Tfun fun_
+          | _ -> (* how can a constructor not be a function? *) assert false
+        end
+    | None ->
+        (* Nothing defined, so we need to fake the entire constructor *)
+        Typing_reason.Rwitness c.Typing_defs.tc_pos,
+        Typing_defs.Tfun {
+          Typing_defs.ft_pos       = c.Typing_defs.tc_pos;
+          Typing_defs.ft_unsafe    = false;
+          Typing_defs.ft_abstract  = false;
+          Typing_defs.ft_arity_min = 0;
+          Typing_defs.ft_arity_max = 0;
+          Typing_defs.ft_tparams   = [];
+          Typing_defs.ft_params    = [];
+          Typing_defs.ft_ret       = return_ty;
+        }
+
+let compute_complete_global funs classes =
   let completion_type = !Autocomplete.argument_global_type in
   let gname = Utils.strip_ns !Autocomplete.auto_complete_for_global in
-  let gname = 
-    String.sub gname 0 (String.length gname - Autocomplete.suffix_len)
+  let gname =
+    String.sub gname 0 (String.length gname - suffix_len)
   in
   let result_count = ref 0 in
-  begin try
+  try
     List.iter begin fun name ->
       if !result_count > 100 then raise Exit;
       if str_starts_with (strip_ns name) gname
@@ -122,17 +175,22 @@ let complete_global funs classes =
         | Some c
           when should_complete_class completion_type c.Typing_defs.tc_kind ->
             incr result_count;
-            let class_kind = c.Typing_defs.tc_kind in
-            let type_ = match class_kind with
-              | Ast.Cabstract -> "abstract class"
-              | Ast.Cnormal -> "class"
-              | Ast.Cinterface -> "interface"
-              | Ast.Ctrait -> "trait"
-            in
             let s = Utils.strip_ns name in
-            let pos = c.Typing_defs.tc_pos in
-            results :=
-              SMap.add s (Autocomplete.make_result s pos type_) !results
+            (match !ac_env with
+              | Some env when completion_type=Some Autocomplete.Acnew ->
+                  add_result s (get_constructor_ty c)
+              | _ ->
+                  let desc = match c.Typing_defs.tc_kind with
+                    | Ast.Cabstract -> "abstract class"
+                    | Ast.Cnormal -> "class"
+                    | Ast.Cinterface -> "interface"
+                    | Ast.Ctrait -> "trait"
+                  in
+                  let ty =
+                    Typing_reason.Rwitness c.Typing_defs.tc_pos,
+                    Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), [])
+                  in
+                  add_result_with_desc s ty desc)
         | _ -> ()
     end classes;
     if should_complete_fun completion_type
@@ -143,37 +201,113 @@ let complete_global funs classes =
         then match (Typing_env.Funs.get name) with
           | Some fun_ ->
             incr result_count;
-            let s = Utils.strip_ns name in
-            let it = Typing_reason.Rnone, Typing_defs.Tfun fun_ in
-            let type_ = Typing_print.full_strip_ns (Typing_env.empty "") it in
-            let sig_ = s^" "^type_ in
-            let pos = fun_.Typing_defs.ft_pos in
-            results :=
-              SMap.add sig_ (Autocomplete.make_result s pos type_) !results
+            let ty =
+              Typing_reason.Rwitness fun_.Typing_defs.ft_pos,
+              Typing_defs.Tfun fun_
+            in
+            add_result (Utils.strip_ns name) ty
           | _ -> ()
       end funs
     end
   with Exit -> ()
-  end;
-  !results
+
+let process_fun_call fun_args used_args env =
+  let is_target target_pos p =
+    let line, char_pos, _ = Pos.info_pos target_pos in
+    let start_line, start_col, end_col = Pos.info_pos p in
+    start_line = line && start_col <= char_pos && char_pos - 1 <= end_col
+  in
+  match !Autocomplete.auto_complete_pos with
+    | Some pos when !ac_type = None ->
+        (* This function gets called on the 'way up' of the recursion that
+         * processes args. Therefore, inner arguments will hit this function
+         * first, so we only care when we don't have a result yet. This has to
+         * happen on the way up because autocomplete pos needs to get set
+         * before this is called *)
+        let argument_index = ref (-1) in
+        let index = ref 0 in
+        List.iter begin fun arg ->
+          if is_target pos arg then argument_index := !index;
+          incr index
+        end used_args;
+        begin try
+          let _, arg_ty = List.nth fun_args !argument_index in
+          ac_type := Some arg_ty
+        with
+          | Failure _ ->
+              (* They're specifying too many args, so we'll accept anything *)
+              ac_type := Some (Typing_reason.Rnone, Typing_defs.Tany)
+          | Invalid_argument _ ->
+              (* Never matched at all*)
+              ()
+        end
+    | _ -> ()
+
+let rec result_matches_expected_ty ty =
+  match !ac_type, !ac_env with
+    | Some goal_type, Some env ->
+        (match goal_type, ty with
+          | (_, Tany), _ | _, (_, Tany) ->
+              (* Everything will just be a match so this is pointless *)
+              false
+          | _, (_, Tfun fun_) ->
+              (* if this is a function, we'll check if the return type
+               * is a good result as well TODO: stop after enough levels
+               * and explore methods on the objects as well *)
+              if Typing_subtype.is_sub_type env goal_type ty then true
+              else result_matches_expected_ty fun_.Typing_defs.ft_ret
+          | _ -> Typing_subtype.is_sub_type env goal_type ty)
+    | _ -> false
+
+
+let result_compare a b =
+  if a.Autocomplete.expected_ty = b.Autocomplete.expected_ty then
+    String.compare a.Autocomplete.name b.Autocomplete.name
+  else if a.Autocomplete.expected_ty then -1
+  else 1
 
 let get_results funs classes =
   let completion_type = !Autocomplete.argument_global_type in
-  if completion_type=Some Autocomplete.Acid ||
-     completion_type=Some Autocomplete.Acnew ||
-     completion_type=Some Autocomplete.Actype
-  then complete_global funs classes
-  else !Autocomplete.auto_complete_result
+  if completion_type = Some Autocomplete.Acid ||
+     completion_type = Some Autocomplete.Acnew ||
+     completion_type = Some Autocomplete.Actype
+  then compute_complete_global funs classes;
+  let results = !autocomplete_results in
+  let fake_env = Typing_env.empty "" in
+  let results = List.map begin fun x ->
+    let desc_string = match x.desc with
+      | Some s -> s
+      | None -> Typing_print.full_strip_ns fake_env (x.ty)
+    in
+    let expected_ty = result_matches_expected_ty x.ty in
+    let pos = Typing_reason.to_pos (fst x.ty) in
+    Autocomplete.make_result x.name pos desc_string expected_ty
+  end results in
+  List.sort result_compare results
+
+let reset () =
+  Autocomplete.auto_complete_for_global := "";
+  Autocomplete.argument_global_type := None;
+  Autocomplete.auto_complete_pos := None;
+  Autocomplete.auto_complete_vars := SMap.empty;
+  ac_env := None;
+  ac_type := None;
+  autocomplete_results := []
 
 let attach_hooks () =
+  reset();
+  Autocomplete.auto_complete := true;
   Typing_hooks.attach_id_hook autocomplete_id;
   Typing_hooks.attach_smethod_hook autocomplete_smethod;
   Typing_hooks.attach_cmethod_hook autocomplete_cmethod;
+  Typing_hooks.attach_lvar_hook autocomplete_lvar_typing;
+  Typing_hooks.attach_fun_call_hook process_fun_call;
+  Typing_hooks.attach_new_id_hook autocomplete_new;
   Naming_hooks.attach_hint_hook autocomplete_hint;
-  Naming_hooks.attach_new_id_hook autocomplete_new;
-  Naming_hooks.attach_lvar_hook autocomplete_lvar_naming;
-  Typing_hooks.attach_lvar_hook autocomplete_lvar_typing
+  Naming_hooks.attach_lvar_hook autocomplete_lvar_naming
 
 let detach_hooks () =
+  reset();
+  Autocomplete.auto_complete := false;
   Typing_hooks.remove_all_hooks();
   Naming_hooks.remove_all_hooks()

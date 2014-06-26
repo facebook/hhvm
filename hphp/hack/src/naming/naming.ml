@@ -1594,7 +1594,6 @@ and expr_ env = function
   | InstanceOf (e1, e2) ->
       N.InstanceOf (expr env e1, expr env e2)
   | New (x, el) ->
-      Naming_hooks.dispatch_new_id_hook x;
       N.New (make_class_id env x, exprl env el)
   | Efun (f, idl) ->
       let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in

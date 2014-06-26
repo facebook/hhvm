@@ -982,6 +982,7 @@ and expr_ is_lvalue env (p, e) =
       Async.overload_extract_from_awaitable env p rty
   | Special_func func -> special_func env p func
   | New (c, el) ->
+      Typing_hooks.dispatch_new_id_hook c env;
       Typing_utils.process_static_find_ref c (p, "__construct");
       let check_not_abstract = true in
       let env, ty = new_object ~check_not_abstract p env c el in
@@ -2150,6 +2151,7 @@ and call_ pos env fty el =
       call_ pos env fty el
   | _, (Tany | Tunresolved []) ->
       let env, _ = lmap expr env el in
+      Typing_hooks.dispatch_fun_call_hooks [] (List.map fst el) env;
       env, (Reason.Rnone, Tany)
   | r, Tunresolved tyl ->
       let env, retl = lmap (fun env ty -> call pos env ty el) env tyl in
@@ -2161,6 +2163,7 @@ and call_ pos env fty el =
       let pos_tyl = List.combine (List.map fst el) tyl in
       Typing_utils.process_arg_info ft.ft_params pos_tyl env;
       let env = wfold_left2 call_param env ft.ft_params pos_tyl in
+      Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst el) env;
       env, ft.ft_ret
   | r2, Tanon (arity_min, arity_max, id) ->
       let env, tyl = lmap expr env el in

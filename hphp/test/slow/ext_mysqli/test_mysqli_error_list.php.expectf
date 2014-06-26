@@ -1,0 +1,11 @@
+Notice: %s
+Array
+(
+    [0] => Array
+        (
+            [errno] => 1193
+            [sqlstate] => HY000
+            [error] => Unknown system variable 'a'
+        )
+
+)

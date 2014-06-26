@@ -59,7 +59,7 @@ class mysqli {
       case 'warning_count':
         return mysql_warning_count($conn);
       case 'error_list':
-        throw new Exception('Property '. $name .' is not implemented yet');
+        return $this->__get_error_list();
     }
 
     trigger_error('Undefined property: mysqli::$'. $name, E_USER_NOTICE);
@@ -324,6 +324,19 @@ class mysqli {
    */
   public function get_client_info(): string {
     return mysqli_get_client_info();
+  }
+
+  // The implementation of the getter for $error_list
+  private function __get_error_list(): array {
+    $result = array();
+    if ($this->errno) {
+      $result[] = array(
+        'errno' => $this->errno,
+        'sqlstate' => $this->sqlstate,
+        'error' => $this->error,
+      );
+    }
+    return $result;
   }
 
   /**

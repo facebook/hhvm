@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -182,7 +183,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
-        "/dump-apc-meta:   dump meta infomration for all objects in APC to\n"
+        "/dump-apc-info:   show basic APC stats\n"
+        "/dump-apc-meta:   dump meta information for all objects in APC to\n"
         "                  /tmp/apc_dump_meta\n"
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
@@ -884,6 +886,14 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
     }
     apc_dump("/tmp/apc_dump", keyOnly, false, waitSeconds);
     transport->sendString("Done");
+    return true;
+  }
+  if (cmd == "dump-apc-info") {
+    if (!apcExtension::Enable) {
+      transport->sendString("No APC\n");
+      return true;
+    }
+    transport->sendString(APCStats::getAPCStats().getStatsInfo());
     return true;
   }
   if (cmd == "dump-apc-meta") {

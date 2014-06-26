@@ -183,7 +183,12 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnResumableFailCallback())) {
-    session->onResumableFail(this, exception);
+    try {
+      session->onResumableFail(this, exception);
+    } catch (...) {
+      // TODO(#4557954) Make unwinder able to deal with new exceptions better.
+      handle_destructor_exception("AsyncFunctionWaitHandle fail callback");
+    }
   }
 
   auto const parentChain = getFirstParent();

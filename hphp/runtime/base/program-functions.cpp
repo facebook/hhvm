@@ -527,6 +527,9 @@ void handle_destructor_exception(const char* situation) {
   try {
     raise_debugging("%s", errorMsg.c_str());
   } catch (...) {
+    // TODO(#4557954): if the error handler raised a request time out here we
+    // should re-set the pending exception in s_threadInfo.
+
     // The user error handler fataled or threw an exception,
     // print out the error message directly to the log
     Logger::Warning("%s", errorMsg.c_str());

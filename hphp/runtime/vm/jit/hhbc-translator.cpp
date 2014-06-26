@@ -158,6 +158,12 @@ SSATmp* HhbcTranslator::pop(Type type, TypeConstraint tc) {
     uint32_t stackOff = m_irb->stackDeficit();
     m_irb->incStackDeficit();
     m_irb->constrainStack(stackOff, tc);
+
+    // pop() is usually called with Cell or Gen. Don't rely
+    // on the simplifier to get a better type for the LdStack.
+    auto const info = getStackValue(m_irb->sp(), stackOff);
+    type = std::min(type, info.knownType);
+
     auto value = gen(LdStack, type, StackOffset(stackOff), m_irb->sp());
     FTRACE(2, "HhbcTranslator popping {}\n", *value->inst());
     return value;

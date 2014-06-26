@@ -122,16 +122,14 @@ struct Value {
   }
 
   /*
-   * Merge other's state with this state, with the following
-   * conditions:
-   * 1. fromLoad must match between the two;
-   * 2. if realCounts do not match, the smaller must be fromLoad, and
-   *    the result count is the max of the incoming counts;
-   * 3. pendingIncs is truncated to the size of the smaller of the
-   *    two, then the sets at each index are merged.
+   * Merge other's state with this state.
    *
-   * Condition 2 handles cases where the refcount can't be proven to
-   * match, but can be conservatively assumed to be OK.  Consider:
+   * Precondition:
+   * If realCounts do not match, the lesser value must be fromLoad.  The idea
+   * is that fromLoad allows us to make more aggressive assumptions, so we
+   * shouldn't have both a higher count and fromLoad.
+   *
+   * For an example of where this is OK, consider:
    *
    * B0:
    *  t1 = LdLoc<0>
@@ -146,11 +144,16 @@ struct Value {
    * B2:
    *       ...
    *
-   * The count of t1 at B2 will be 1 if coming from B0, and 0 if
-   * coming from B1, due to the SpillStack.  However, the TakeStack
-   * marks t1 as fromLoad, which lets us know that there's at least
-   * one surviving reference, so we can move forward assuming the max
-   * of the two.
+   * The count of t1 at B2 will be 1 if coming from B0, and 0 if coming from
+   * B1, due to the SpillStack.  However, the TakeStack marks t1 as fromLoad,
+   * which lets us know that there's at least one surviving reference, so we
+   * can move forward assuming the max of the two.
+   *
+   * Postconditions:
+   * 1. realCount becomes the max of the incoming value;
+   * 2. fromLoad is set if either incoming value has it;
+   * 3. pendingIncs is truncated to the size of the smaller of the two, then
+   *    the sets at each index are merged.
    */
   void merge(const Value& other, const IRUnit& unit) {
     auto showFailure = [&] {
@@ -160,13 +163,14 @@ struct Value {
       ).str();
     };
 
-    always_assert_log(fromLoad == other.fromLoad, showFailure);
-    if (realCount > other.realCount) {
-      always_assert_log(other.fromLoad, showFailure);
-    } else if (realCount < other.realCount) {
-      always_assert_log(fromLoad, showFailure);
-      realCount = other.realCount;
-    }
+    always_assert_log(
+      IMPLIES(realCount > other.realCount, other.fromLoad) &&
+      IMPLIES(realCount < other.realCount, fromLoad),
+      showFailure);
+
+    fromLoad = fromLoad || other.fromLoad;
+    realCount = std::max(realCount, other.realCount);
+
     auto minSize = std::min(pendingIncs.size(), other.pendingIncs.size());
     pendingIncs.resize(minSize);
     for (unsigned i = 0; i < minSize; ++i) {

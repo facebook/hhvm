@@ -207,8 +207,10 @@ void VariableSerializer::write(double v) {
       m_buf->append(buf);
       free(buf);
     } else {
-      // PHP issues a warning: double INF/NAN does not conform to the
-      // JSON spec, encoded as 0.
+      if (std::isnan(v) || std::isinf(v)) {
+        json_set_last_error_code(json_error_codes::JSON_ERROR_INF_OR_NAN);
+      }
+
       m_buf->append('0');
     }
     break;
@@ -622,7 +624,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     }
     break;
   case Type::JSON:
-    raise_warning("json_encode(): recursion detected");
+    json_set_last_error_code(json_error_codes::JSON_ERROR_RECURSION);
     m_buf->append("null");
     break;
   default:

@@ -336,6 +336,12 @@ const char *json_get_last_error_msg() {
       return "Syntax error";
     case JSON_ERROR_UTF8:
       return "Malformed UTF-8 characters, possibly incorrectly encoded";
+    case json_error_codes::JSON_ERROR_RECURSION:
+      return "Recursion detected";
+    case json_error_codes::JSON_ERROR_INF_OR_NAN:
+      return "Inf and NaN cannot be JSON encoded";
+    case json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE:
+      return "Type is not supported";
     default:
       return "Unknown error";
   }

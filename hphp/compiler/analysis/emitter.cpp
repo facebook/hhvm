@@ -3021,7 +3021,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Statement::KindOfForEachStatement: {
         ForEachStatementPtr fe(static_pointer_cast<ForEachStatement>(node));
-        emitForeach(e, fe);
+        if (fe->isAwaitAs()) {
+          emitForeachAwaitAs(e, fe);
+        } else {
+          emitForeach(e, fe);
+        }
         return false;
       }
 
@@ -7682,7 +7686,7 @@ class ForeachIterGuard {
 
 void EmitterVisitor::emitForeachListAssignment(Emitter& e,
                                                ListAssignmentPtr la,
-                                               int vLocalId) {
+                                               std::function<void()> emitSrc) {
   std::vector<IndexChain*> indexChains;
   IndexChain workingChain;
   listAssignmentVisitLHS(e, la, workingChain, indexChains);
@@ -7691,10 +7695,7 @@ void EmitterVisitor::emitForeachListAssignment(Emitter& e,
     throw IncludeTimeFatalException(la, "Cannot use empty list");
   }
 
-  listAssignmentAssignElements(
-    e, indexChains,
-    [&] { emitVirtualLocal(vLocalId); }
-  );
+  listAssignmentAssignElements(e, indexChains, emitSrc);
 }
 
 void EmitterVisitor::emitForeach(Emitter& e,
@@ -7797,7 +7798,7 @@ void EmitterVisitor::emitForeach(Emitter& e,
       emitForeachListAssignment(
         e,
         ListAssignmentPtr(static_pointer_cast<ListAssignment>(val)),
-        valTempLocal
+        [&] { emitVirtualLocal(valTempLocal); }
       );
     } else {
       visit(val);
@@ -7821,7 +7822,7 @@ void EmitterVisitor::emitForeach(Emitter& e,
         emitForeachListAssignment(
           e,
           ListAssignmentPtr(static_pointer_cast<ListAssignment>(key)),
-          keyTempLocal
+          [&] { emitVirtualLocal(keyTempLocal); }
         );
       } else {
         emitVirtualLocal(keyTempLocal);
@@ -7880,6 +7881,110 @@ void EmitterVisitor::emitForeach(Emitter& e,
   }
   exit.set(e);
   m_curFunc->freeIterator(itId);
+}
+
+void EmitterVisitor::emitForeachAwaitAs(Emitter& e,
+                                        ForEachStatementPtr fe) {
+  assert(!fe->isStrong());
+  auto region = createRegion(fe, Region::Kind::LoopOrSwitch);
+  Label& exit = registerBreak(fe, region.get(), 1, false)->m_label;
+  Label& next = registerContinue(fe, region.get(), 1, false)->m_label;
+
+  // Evaluate the AsyncIterator object and store it into unnamed local.
+  auto const iterTempLocal = m_curFunc->allocUnnamedLocal();
+  emitVirtualLocal(iterTempLocal);
+  visit(fe->getArrayExp());
+  emitConvertToCell(e);
+  emitSet(e);
+  auto const iterTempStartUse = m_ue.bcPos();
+
+  // Make sure it actually is an AsyncIterator.
+  e.InstanceOfD(makeStaticString("HH\\AsyncIterator"));
+  e.JmpNZ(next);
+  e.String(makeStaticString(
+    "Unable to iterate non-AsyncIterator asynchronously"));
+  e.Fatal(FatalOp::Runtime);
+
+  // Start of the next iteration.
+  next.set(e);
+
+  // Await the next value.
+  emitVirtualLocal(iterTempLocal);
+  emitCGet(e);
+  emitConstMethodCallNoParams(e, "next");
+  e.Await(m_pendingIters.size());
+  auto const resultTempLocal = emitSetUnnamedL(e);
+
+  // Did we finish yet?
+  emitVirtualLocal(resultTempLocal);
+  emitIsType(e, IsTypeOp::Null);
+  e.JmpNZ(exit);
+
+  auto const populate = [&](ExpressionPtr target, int index) {
+    auto const emitSrc = [&] {
+      emitVirtualLocal(resultTempLocal);
+      m_evalStack.push(StackSym::I);
+      m_evalStack.setInt(index);
+      markElem(e);
+    };
+
+    if (target->is(Expression::KindOfListAssignment)) {
+      emitForeachListAssignment(
+        e,
+        ListAssignmentPtr(static_pointer_cast<ListAssignment>(target)),
+        emitSrc
+      );
+    } else {
+      // Obtain target to be set.
+      visit(target);
+
+      // Put $result[index] on the stack.
+      emitSrc();
+      emitCGet(e);
+
+      // Set target.
+      emitSet(e);
+      emitPop(e);
+    }
+  };
+
+  auto const resultTempStartUse = m_ue.bcPos();
+
+  // Set the key.
+  if (fe->getNameExp()) {
+    populate(fe->getNameExp(), 0);
+  }
+
+  // Set the value.
+  populate(fe->getValueExp(), 1);
+
+  newFaultRegionAndFunclet(resultTempStartUse, m_ue.bcPos(),
+                           new UnsetUnnamedLocalThunklet(resultTempLocal));
+  emitVirtualLocal(resultTempLocal);
+  emitUnset(e);
+
+  // Run body.
+  {
+    enterRegion(region);
+    SCOPE_EXIT { leaveRegion(region); };
+    if (fe->getBody()) visit(fe->getBody());
+  }
+
+  // Continue iteration.
+  e.Jmp(next);
+
+  // Exit cleanup.
+  exit.set(e);
+
+  emitVirtualLocal(resultTempLocal);
+  emitUnset(e);
+  m_curFunc->freeUnnamedLocal(resultTempLocal);
+
+  newFaultRegionAndFunclet(iterTempStartUse, m_ue.bcPos(),
+                           new UnsetUnnamedLocalThunklet(iterTempLocal));
+  emitVirtualLocal(iterTempLocal);
+  emitUnset(e);
+  m_curFunc->freeUnnamedLocal(iterTempLocal);
 }
 
 /**

@@ -246,7 +246,7 @@ public:
   void onExpStatement(Token &out, Token &expr);
   void onForEachStart();
   void onForEach(Token &out, Token &arr, Token &name, Token &value,
-                 Token &stmt);
+                 Token &stmt, bool awaitAs);
   void onTry(Token &out, Token &tryStmt, Token &className, Token &var,
              Token &catchStmt, Token &catches, Token &finallyStmt);
   void onTry(Token &out, Token &tryStmt, Token &finallyStmt);

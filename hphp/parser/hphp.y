@@ -932,7 +932,14 @@ statement:
     foreach_optional_arg ')'           { _p->onNewLabelScope(false);
                                          _p->pushLabelScope();}
     foreach_statement                  { _p->popLabelScope();
-                                         _p->onForEach($$,$3,$5,$6,$9);
+                                         _p->onForEach($$,$3,$5,$6,$9, false);
+                                         _p->onCompleteLabelScope(false);}
+  | T_FOREACH '(' expr
+    T_AWAIT T_AS foreach_variable
+    foreach_optional_arg ')'           { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
+    foreach_statement                  { _p->popLabelScope();
+                                         _p->onForEach($$,$3,$6,$7,$10, true);
                                          _p->onCompleteLabelScope(false);}
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}

@@ -1772,13 +1772,19 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 }
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
-                       Token &stmt) {
+                       Token &stmt, bool awaitAs) {
   if (dynamic_pointer_cast<FunctionCall>(name->exp) ||
       dynamic_pointer_cast<FunctionCall>(value->exp)) {
     PARSE_ERROR("Can't use return value in write context");
   }
   if (value->exp && name->num()) {
     PARSE_ERROR("Key element cannot be a reference");
+  }
+  if (awaitAs) {
+    if (name->num() || value->num()) {
+      PARSE_ERROR("Value element cannot be a reference if await as is used");
+    }
+    setIsAsync();
   }
   checkAssignThis(name);
   checkAssignThis(value);
@@ -1787,7 +1793,7 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                           dynamic_pointer_cast<StatementList>(stmt->stmt));
   }
   out->stmt = NEW_STMT(ForEachStatement, arr->exp, name->exp, name->num() == 1,
-                       value->exp, value->num() == 1, stmt->stmt);
+                       value->exp, value->num() == 1, awaitAs, stmt->stmt);
 }
 
 void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,

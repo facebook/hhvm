@@ -83,10 +83,6 @@ and sub_type env ty1 ty2 =
       fst (Unify.unify env ty1 ty2)
   | _, (_, Tunresolved tyl) ->
       List.fold_left (fun env x -> sub_type env ty1 x) env tyl
-  | _, (_, Tabstract (_, _, Some x)) ->
-      Errors.try_
-         (fun () -> fst (Unify.unify env ty1 ty2))
-         (fun _ -> sub_type env ty1 x)
   | (_, Tapply _), (r2, Tgeneric (x, Some ty2)) ->
       (Errors.try_
          (fun () -> sub_type env ty1 ty2)
@@ -244,6 +240,10 @@ and sub_type env ty1 ty2 =
           Errors.field_missing k p1 p2
       end fdm2;
       TUtils.apply_shape sub_type env (r1, fdm1) (r2, fdm2)
+  | _, (_, Tabstract (_, _, Some x)) ->
+      Errors.try_
+         (fun () -> fst (Unify.unify env ty1 ty2))
+         (fun _ -> sub_type env ty1 x)
   | _ -> fst (Unify.unify env ty1 ty2)
 
 and is_sub_type env ty1 ty2 =

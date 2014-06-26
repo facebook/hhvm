@@ -106,11 +106,10 @@ class ResourceData {
  *       String str; // smart-allocated objects are fine
  *    };
  *
- *    Then, the best choice is to use these two macros to make sure the object
+ *    Then, the best choice is to use this macro to make sure the object
  *    is always collected during request shutdown time:
  *
- *       DECLARE_OBJECT_ALLOCATION(T);
- *       IMPLEMENT_OBJECT_ALLOCATION(T);
+ *       DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T);
  *
  *    This object doesn't participate in sweep(), as object allocator doesn't
  *    have any callback installed.

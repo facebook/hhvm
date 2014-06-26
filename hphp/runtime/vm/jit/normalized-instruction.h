@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP {

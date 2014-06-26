@@ -14,19 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/util/trace.h"
-#include <algorithm>
-#include <vector>
+#include "hphp/runtime/vm/jit/region-selection.h"
+
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/inlining.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ref-deps.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
+
+#include "hphp/util/trace.h"
+
+#include <algorithm>
+#include <vector>
 
 namespace HPHP { namespace JIT {
 
@@ -210,6 +214,9 @@ RegionDescPtr RegionFormer::go() {
     // We successfully translated the instruction, so update m_sk.
     m_sk.advance(m_curBlock->unit());
 
+    auto const breakTracelet = m_inst.breaksTracelet ||
+      (m_profiling && instrBreaksProfileBB(&m_inst));
+
     if (inlineReturn) {
       // If we just translated a return from an inlined call, grab the updated
       // SrcKey from m_ht and clean up.
@@ -217,8 +224,7 @@ RegionDescPtr RegionFormer::go() {
       m_arStates.pop_back();
       m_blockFinished = true;
       continue;
-    } else if (m_inst.breaksTracelet ||
-               (m_profiling && instrBreaksProfileBB(&m_inst))) {
+    } else if (breakTracelet) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
       break;
     } else {
@@ -401,20 +407,11 @@ bool RegionFormer::traceThroughJmp() {
 }
 
 bool RegionFormer::tryInline() {
-  if (!RuntimeOption::RepoAuthoritative ||
-      (m_inst.op() != Op::FCall && m_inst.op() != Op::FCallD)) {
-    return false;
-  }
+  assert(m_inst.source == m_sk);
+  assert(m_inst.func() == curFunc());
+  assert(m_sk.resumed() == resumed());
 
-  if (resumed()) {
-    // Do not inline from a resumed function
-    return false;
-  }
-
-  if (curFunc()->isPseudoMain()) {
-    // TODO(#4238160): Hack inlining into pseudomain callsites is still buggy
-    return false;
-  }
+  if (!canInlineAt(m_inst, *m_region)) return false;
 
   auto refuse = [this](const std::string& str) {
     FTRACE(2, "selectTracelet not inlining {}: {}\n",
@@ -427,90 +424,6 @@ bool RegionFormer::tryInline() {
   }
 
   auto callee = m_inst.funcd;
-  if (!callee) {
-    return refuse("don't know callee");
-  }
-
-  if (callee == curFunc()) {
-    return refuse("call is recursive");
-  }
-
-  if (callee->hasVariadicCaptureParam()) {
-    // FIXME: this doesn't have to remove inlining
-    return refuse("callee has a variadic capture");
-  }
-
-  auto startOffset = callee->base();
-  auto const numArgs = m_inst.imm[0].u_IVA;
-  auto const numParams = callee->numParams();
-
-  // It's ok if numArgs doesn't match numParams as long as the gap can be
-  // filled in by dv funclets.
-  if (numArgs != numParams) {
-    if (numArgs > numParams) {
-      return refuse("numArgs greater than numParams of callee");
-    }
-
-    for (auto i = numArgs; i < numParams; ++i) {
-      auto const& param = callee->params()[i];
-      if (param.hasDefaultValue()) {
-        if (startOffset == callee->base()) startOffset = param.funcletOff;
-      } else {
-        return refuse("numArgs less than numParams of callee so we'd need to "
-                      "emit mising argument warnings");
-      }
-    }
-  }
-
-  // For analysis purposes, we require that the FPush* instruction is in the
-  // same region.
-  auto fpi = curFunc()->findFPI(m_sk.offset());
-  const SrcKey pushSk{curFunc(), fpi->m_fpushOff, resumed()};
-  int pushBlock = -1;
-  auto& blocks = m_region->blocks;
-  for (unsigned i = 0; i < blocks.size(); ++i) {
-    if (blocks[i]->contains(pushSk)) {
-      pushBlock = i;
-      break;
-    }
-  }
-  if (pushBlock == -1) {
-    return refuse("FPush* is not in the current region");
-  }
-
-  // Calls invalidate all live SSATmps, so don't allow any in the fpi region
-  auto findFCall = [&] {
-    for (unsigned i = pushBlock; i < blocks.size(); ++i) {
-      auto& block = *blocks[i];
-      auto sk = i == pushBlock ? pushSk.advanced() : block.start();
-      while (sk <= block.last()) {
-        if (sk == m_sk) return false;
-
-        auto op = sk.op();
-        if (isFCallStar(op) || op == Op::FCallBuiltin) return true;
-        sk.advance();
-      }
-    }
-    not_reached();
-  };
-  if (findFCall()) {
-    return refuse("fpi region contains another call");
-  }
-
-  switch (pushSk.op()) {
-    case OpFPushClsMethodD:
-      if (callee->mayHaveThis()) return refuse("callee may have this pointer");
-      // fallthrough
-    case OpFPushFuncD:
-    case OpFPushObjMethodD:
-    case OpFPushCtorD:
-    case OpFPushCtor:
-      break;
-
-    default:
-      return refuse(folly::format("unsupported push op {}",
-                                  opcodeToName(pushSk.op())).str());
-  }
 
   // Make sure the FPushOp wasn't interpreted.
   auto spillFrame = findSpillFrame(m_ht.irBuilder().sp());
@@ -518,11 +431,14 @@ bool RegionFormer::tryInline() {
     return refuse("couldn't find SpillFrame for FPushOp");
   }
 
+  auto numArgs = m_inst.imm[0].u_IVA;
+  auto numParams = callee->numParams();
+
   // Set up the region context, mapping stack slots in the caller to locals in
   // the callee.
   RegionContext ctx;
   ctx.func = callee;
-  ctx.bcOffset = startOffset;
+  ctx.bcOffset = callee->getEntryForNumArgs(numArgs);
   ctx.spOffset = callee->numSlotsInFrame();
   ctx.resumed = false;
   for (int i = 0; i < numArgs; ++i) {

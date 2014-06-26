@@ -595,10 +595,6 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     // TODO(#3331014): hack until more ARM codegen is working.
     return false;
   }
-  if (caller->isPseudoMain()) {
-    // TODO(#4238160): Hack inlining into pseudomain callsites is still buggy
-    return false;
-  }
 
   auto refuse = [&](const char* why) -> bool {
     FTRACE(1, "shouldIRInline: refusing {} <reason: {}> [NI = {}]\n",
@@ -624,24 +620,6 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   // support certain whitelisted instructions which we know won't
   // actually require this.
   bool const needCheckVVSafe = callee->attrs() & AttrMayUseVV;
-
-  if (callee->numIterators() != 0) {
-    return refuse("iterators");
-  }
-  if (callee->isMagic() || Func::isSpecial(callee->name())) {
-    return refuse("special or magic function");
-  }
-  if (callee->isResumable()) {
-    return refuse("resumables");
-  }
-  if (callee->maxStackCells() >= kStackCheckLeafPadding) {
-    return refuse("function stack depth too deep");
-  }
-  if (callee->isMethod() && callee->cls() == c_Generator::classof()) {
-    return refuse("Generator member function");
-  }
-
-  ////////////
 
   /*
    * Note: this code contains a stack of Func*'s and looks like it's

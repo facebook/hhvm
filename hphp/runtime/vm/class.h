@@ -863,8 +863,6 @@ private:
   ~Class();
 
   bool needsInitSProps() const;
-  void setPropData(PropInitVec* propData) const;
-  void setSPropData(TypedValue* sPropData) const;
 
   void importTraitMethod(const TraitMethod&  traitMethod,
                          const StringData*   methName,

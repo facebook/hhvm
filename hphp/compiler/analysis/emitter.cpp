@@ -2290,7 +2290,7 @@ private:
  * LHS, building up index chains and copying them into the top-level list as we
  * reach the leaves of the tree.
  */
-void EmitterVisitor::visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
+void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                                             IndexChain& indexChain,
                                             std::vector<IndexChain*>& all) {
   if (!exp) {
@@ -2305,7 +2305,7 @@ void EmitterVisitor::visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
     int n = lhs->getCount();
     for (int i = 0; i < n; ++i) {
       indexChain.push_back(i);
-      visitListAssignmentLHS(e, (*lhs)[i], indexChain, all);
+      listAssignmentVisitLHS(e, (*lhs)[i], indexChain, all);
       indexChain.pop_back();
     }
   } else {
@@ -2314,6 +2314,35 @@ void EmitterVisitor::visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
     all.push_back(new IndexChain(indexChain));
     visit(exp);
     emitClsIfSPropBase(e);
+  }
+}
+
+void EmitterVisitor::listAssignmentAssignElements(
+  Emitter& e,
+  std::vector<IndexChain*>& indexChains,
+  std::function<void()> emitSrc
+) {
+  for (int i = (int)indexChains.size() - 1; i >= 0; --i) {
+    IndexChain* currIndexChain = indexChains[i];
+    if (currIndexChain->empty()) {
+      continue;
+    }
+
+    if (emitSrc == nullptr) {
+      e.Null();
+    } else {
+      emitSrc();
+      for (int j = 0; j < (int)currIndexChain->size(); ++j) {
+        m_evalStack.push(StackSym::I);
+        m_evalStack.setInt((*currIndexChain)[j]);
+        markElem(e);
+      }
+      emitCGet(e);
+    }
+    emitSet(e);
+    emitPop(e);
+
+    delete currIndexChain;
   }
 }
 
@@ -4310,7 +4339,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ListAssignmentPtr la(static_pointer_cast<ListAssignment>(node));
         ExpressionPtr rhs = la->getArray();
 
-        // visitListAssignmentLHS should have handled this
+        // listAssignmentVisitLHS should have handled this
         assert(rhs);
 
         bool nullRHS = la->getRHSKind() == ListAssignment::Null;
@@ -4330,7 +4359,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // The helper function will populate indexChains.
         std::vector<IndexChain*> indexChains;
         IndexChain workingChain;
-        visitListAssignmentLHS(e, la, workingChain, indexChains);
+        listAssignmentVisitLHS(e, la, workingChain, indexChains);
 
         if (!simpleRHS && !la->isRhsFirst()) {
           assert(tempLocal == -1);
@@ -4339,32 +4368,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           start = m_ue.bcPos();
         }
 
-        // Assign elements, right-to-left
-        for (int i = (int)indexChains.size() - 1; i >= 0; --i) {
-          IndexChain* currIndexChain = indexChains[i];
-          if (currIndexChain->empty()) {
-            continue;
-          }
-
-          if (nullRHS) {
-            e.Null();
-          } else {
-            if (simpleRHS) {
-              visit(rhs);
-            } else {
-              emitVirtualLocal(tempLocal);
-            }
-            for (int j = 0; j < (int)currIndexChain->size(); ++j) {
-              m_evalStack.push(StackSym::I);
-              m_evalStack.setInt((*currIndexChain)[j]);
-              markElem(e);
-            }
-            emitCGet(e);
-          }
-          emitSet(e);
-          emitPop(e);
-
-          delete currIndexChain;
+        // Assign elements.
+        if (nullRHS) {
+          listAssignmentAssignElements(e, indexChains, nullptr);
+        } else if (simpleRHS) {
+          listAssignmentAssignElements(e, indexChains, [&] { visit(rhs); });
+        } else {
+          listAssignmentAssignElements(
+            e, indexChains,
+            [&] { emitVirtualLocal(tempLocal); }
+          );
         }
 
         // Leave the RHS on the stack
@@ -7672,30 +7685,16 @@ void EmitterVisitor::emitForeachListAssignment(Emitter& e,
                                                int vLocalId) {
   std::vector<IndexChain*> indexChains;
   IndexChain workingChain;
-  visitListAssignmentLHS(e, la, workingChain, indexChains);
+  listAssignmentVisitLHS(e, la, workingChain, indexChains);
 
   if (indexChains.size() == 0) {
     throw IncludeTimeFatalException(la, "Cannot use empty list");
   }
 
-  for (int i = (int)indexChains.size() - 1; i >= 0; --i) {
-    IndexChain* currIndexChain = indexChains[i];
-    if (currIndexChain->empty()) {
-      continue;
-    }
-
-    emitVirtualLocal(vLocalId);
-    for (int j = 0; j < (int)currIndexChain->size(); ++j) {
-      m_evalStack.push(StackSym::I);
-      m_evalStack.setInt((*currIndexChain)[j]);
-      markElem(e);
-    }
-    emitCGet(e);
-    emitSet(e);
-    emitPop(e);
-
-    delete currIndexChain;
-  }
+  listAssignmentAssignElements(
+    e, indexChains,
+    [&] { emitVirtualLocal(vLocalId); }
+  );
 }
 
 void EmitterVisitor::emitForeach(Emitter& e,

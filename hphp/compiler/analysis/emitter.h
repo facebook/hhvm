@@ -455,9 +455,13 @@ public:
   void fixReturnType(Emitter& e, FunctionCallPtr fn,
                      Func* builtinFunc = nullptr);
 
-  void visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
+  void listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
                               std::vector<IndexChain*>& chainList);
+  void listAssignmentAssignElements(Emitter& e,
+                                    std::vector<IndexChain*>& indexChains,
+                                    std::function<void()> emitSrc);
+
   void visitIfCondition(ExpressionPtr cond, Emitter& e, Label& tru, Label& fals,
                         bool truFallthrough);
   const SymbolicStack& getEvalStack() const { return m_evalStack; }

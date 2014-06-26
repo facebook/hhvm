@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -56,7 +57,7 @@ String ResourceData::o_toString() const {
 }
 
 Array ResourceData::o_toArray() const {
-  return empty_array();
+  return make_packed_array(Variant(const_cast<ResourceData*>(this)));
 }
 
 const StaticString s_Unknown("Unknown");
@@ -75,7 +76,7 @@ void ResourceData::serializeImpl(VariableSerializer *serializer) const {
   int saveId;
   serializer->getResourceInfo(saveName, saveId);
   serializer->setResourceInfo(o_getResourceName(), o_id);
-  o_toArray().serialize(serializer);
+  empty_array().serialize(serializer);
   serializer->setResourceInfo(saveName, saveId);
 }
 

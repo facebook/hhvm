@@ -232,9 +232,10 @@ function find_tests($files, array $options = null) {
     $file = preg_replace(',//+,', '/', realpath($file));
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
   }
+  $files = array_map('escapeshellarg', $files);
   $files = implode(' ', $files);
   $tests = explode("\n", shell_exec(
-      "find \"$files\" -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
+      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
   ));
   if (!$tests) {
     error(usage());

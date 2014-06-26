@@ -1,4 +1,4 @@
-resource(%d) of type (stream)
+resource(5) of type (stream)
 bool(false)
 int(8)
 string(21) "Type is not supported"

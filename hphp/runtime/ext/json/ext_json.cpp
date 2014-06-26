@@ -74,33 +74,14 @@ String HHVM_FUNCTION(json_last_error_msg) {
   return json_get_last_error_msg();
 }
 
-Variant HHVM_FUNCTION(json_encode, const Variant& value,
+String HHVM_FUNCTION(json_encode, const Variant& value,
                                   int64_t options /* = 0 */,
                                   int64_t depth /* = 512 */) {
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 
-  // Special case for resource since VariableSerializer does not take care of it
-  if (value.isResource()) {
-    json_set_last_error_code(json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE);
-
-    if (options & k_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-      return "null";
-    }
-
-    return false;
-  }
-
   VariableSerializer vs(VariableSerializer::Type::JSON, options);
-  String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
-
-  if ((json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE &&
-      (json_get_last_error_code() != json_error_codes::JSON_ERROR_UTF8)) &&
-      !(options & k_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
-    return false;
-  }
-
-  return json;
+  return vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
 }
 
 Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,

@@ -316,7 +316,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                  returnEncodeType == ReturnEncodeType::Serialize);
           try {
             response = (returnEncodeType == ReturnEncodeType::Json) ?
-                       HHVM_FN(json_encode)(funcRet).toString() :
+                       HHVM_FN(json_encode)(funcRet) :
                        f_serialize(funcRet);
           } catch (...) {
             serializeFailed = true;

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
 
+#include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
@@ -70,10 +71,10 @@ void c_RescheduleWaitHandle::run() {
     return;
   }
 
-  auto const parentChain = getFirstParent();
+  auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   tvWriteNull(&m_resultOrException);
-  c_BlockableWaitHandle::UnblockChain(parentChain);
+  parentChain.unblock();
 }
 
 String c_RescheduleWaitHandle::getName() {
@@ -115,9 +116,7 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // recursively move all wait handles blocked by us
-  for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-    pwh->exitContextBlocked(ctx_idx);
-  }
+  getParentChain().exitContext(ctx_idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

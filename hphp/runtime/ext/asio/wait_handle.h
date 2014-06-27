@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/asio/asio_blockable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,6 @@ namespace HPHP {
  * passed as an array member of GenArrayWaitHandle).
  */
 FORWARD_DECLARE_CLASS(WaitHandle);
-FORWARD_DECLARE_CLASS(BlockableWaitHandle);
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 FORWARD_DECLARE_CLASS(AsyncGeneratorWaitHandle);
 FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
@@ -155,11 +155,11 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     // !STATE_SUCCEEDED && !STATE_FAILED
     struct {
       // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
-      c_BlockableWaitHandle* m_firstParent;
+      AsioBlockableChain m_parentChain;
 
       union {
         // BlockableWaitHandle: STATE_BLOCKED
-        c_BlockableWaitHandle* m_nextParent;
+        AsioBlockable m_blockable;
 
         // ExternalThreadEventWaitHandle: STATE_WAITING
         // SleepWaitHandle: STATE_WAITING

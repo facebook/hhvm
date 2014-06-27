@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_BLOCKABLE_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
@@ -42,13 +43,11 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   ~c_BlockableWaitHandle() {}
 
  public:
-  static constexpr ptrdiff_t nextParentOff() {
-    return offsetof(c_BlockableWaitHandle, m_nextParent);
+  static constexpr ptrdiff_t blockableOff() {
+    return offsetof(c_BlockableWaitHandle, m_blockable);
   }
 
-  static void UnblockChain(c_BlockableWaitHandle* parentChain);
-  c_BlockableWaitHandle* unblock();
-  c_BlockableWaitHandle* getNextParent() { return m_nextParent; }
+  AsioBlockable* getBlockable() { return &m_blockable; }
 
   void exitContextBlocked(context_idx_t ctx_idx);
 

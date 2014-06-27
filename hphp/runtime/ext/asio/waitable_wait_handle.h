@@ -31,8 +31,8 @@ namespace HPHP {
  * wait handle if a result is not yet available. Once the wait handle finishes,
  * all blocked wait handles are notified.
  */
+class AsioBlockable;
 class AsioContext;
-FORWARD_DECLARE_CLASS(BlockableWaitHandle);
 FORWARD_DECLARE_CLASS(WaitableWaitHandle);
 class c_WaitableWaitHandle : public c_WaitHandle {
  public:
@@ -47,8 +47,8 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   Array t_getdependencystack();
 
  public:
-  static constexpr ptrdiff_t firstParentOff() {
-    return offsetof(c_WaitableWaitHandle, m_firstParent);
+  static constexpr ptrdiff_t parentChainOff() {
+    return offsetof(c_WaitableWaitHandle, m_parentChain);
   }
 
   context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
@@ -57,7 +57,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
     return AsioSession::Get()->getContext(getContextIdx());
   }
 
-  c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
+  AsioBlockableChain& getParentChain() { return m_parentChain; }
 
   void enterContext(context_idx_t ctx_idx);
   void join();
@@ -67,8 +67,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
 
   bool isInContext() { return getContextIdx(); }
-
-  c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
 
   c_WaitableWaitHandle* getChild();
   bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;

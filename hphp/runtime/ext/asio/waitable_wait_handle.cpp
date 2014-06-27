@@ -37,7 +37,7 @@ namespace HPHP {
 c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb)
     : c_WaitHandle(cb) {
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());
-  m_firstParent = nullptr;
+  m_parentChain.init();
 }
 
 c_WaitableWaitHandle::~c_WaitableWaitHandle() {
@@ -66,15 +66,7 @@ Array c_WaitableWaitHandle::t_getparents() {
     return empty_array();
   }
 
-  Array result = Array::Create();
-  c_BlockableWaitHandle* curr = m_firstParent;
-
-  while (curr) {
-    result.append(curr);
-    curr = curr->getNextParent();
-  }
-
-  return result;
+  return getParentChain().toArray();
 }
 
 // throws on context depth level overflows and cross-context cycles
@@ -182,16 +174,11 @@ Array c_WaitableWaitHandle::t_getdependencystack() {
     auto context_idx = wait_handle->getContextIdx();
 
     // 1. find parent in the same context
-    auto p = wait_handle->getFirstParent();
-    while (p) {
-      if ((p->getContextIdx() == context_idx) &&
-          visited.find(p->t_getid()) == visited.end()) {
-        wait_handle = p;
-        break;
-      }
-      p = p->getNextParent();
+    auto p = wait_handle->getParentChain().firstInContext(context_idx);
+    if (p && visited.find(p->t_getid()) == visited.end()) {
+      wait_handle = p;
+      continue;
     }
-    if (p) continue;
 
     // 2. cross the context boundary
     auto context = session->getContext(context_idx);

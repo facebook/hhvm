@@ -30,7 +30,8 @@ c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
   assert(!isDescendantOf(child));
 
   // Extend the linked list of parents.
-  m_nextParent = child->addParent(this);
+  auto& parentChain = child->getParentChain();
+  parentChain.addParent(m_blockable, AsioBlockable::Kind::BlockableWaitHandle);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

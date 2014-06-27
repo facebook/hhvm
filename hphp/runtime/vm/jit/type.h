@@ -110,7 +110,8 @@ namespace constToBits_detail {
   IRT(TCA,         1ULL << 52)                                          \
   IRT(ActRec,      1ULL << 53)                                          \
   IRT(RDSHandle,   1ULL << 54) /* RDS::Handle */                        \
-  IRT(Nullptr,     1ULL << 55)
+  IRT(Nullptr,     1ULL << 55)                                          \
+  IRT(ABC,         1ULL << 56) /* AsioBlockableChain */
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \

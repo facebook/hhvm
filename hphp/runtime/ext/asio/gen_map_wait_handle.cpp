@@ -19,6 +19,7 @@
 
 #include <hphp/runtime/ext/ext_collections.h>
 #include <hphp/runtime/ext/ext_closure.h>
+#include <hphp/runtime/ext/asio/asio_blockable.h>
 #include <hphp/runtime/ext/asio/asio_context.h>
 #include <hphp/runtime/ext/asio/asio_session.h>
 #include <hphp/runtime/ext/asio/static_wait_handle.h>
@@ -161,7 +162,7 @@ void c_GenMapWaitHandle::onUnblocked() {
     }
   }
 
-  auto const parentChain = getFirstParent();
+  auto parentChain = getParentChain();
   if (m_exception.isNull()) {
     setState(STATE_SUCCEEDED);
     tvWriteObject(m_deps.get(), &m_resultOrException);
@@ -172,7 +173,7 @@ void c_GenMapWaitHandle::onUnblocked() {
   }
 
   m_deps = nullptr;
-  UnblockChain(parentChain);
+  parentChain.unblock();
   decRefObj(this);
 }
 

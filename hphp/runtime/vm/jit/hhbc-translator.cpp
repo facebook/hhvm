@@ -3854,7 +3854,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     sp = gen(RetAdjustStack, m_irb->fp());
   } else if (func->isAsyncFunction()) {
     // Load the parent chain.
-    auto parentChain = gen(LdAsyncArFParent, m_irb->fp());
+    auto parentChain = gen(LdAsyncArParentChain, m_irb->fp());
 
     // Mark the async function as succeeded.
     auto succeeded = c_WaitHandle::toKindState(
@@ -3866,7 +3866,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(StAsyncArResult, m_irb->fp(), retVal);
 
     // Unblock parents.
-    gen(BWHUnblockChain, parentChain);
+    gen(ABCUnblock, parentChain);
 
     // Sync SP.
     sp = spillStack();

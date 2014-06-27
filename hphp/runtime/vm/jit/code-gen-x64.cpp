@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -289,7 +290,7 @@ CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
 CALL_OPCODE(CreateSSWH)
 CALL_OPCODE(AFWHPrepareChild)
-CALL_OPCODE(BWHUnblockChain)
+CALL_OPCODE(ABCUnblock)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
 CALL_OPCODE(NewLikeArray)
@@ -5761,10 +5762,10 @@ void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
   cgStore(asyncArReg[off], value, valueLoc, Width::Full);
 }
 
-void CodeGenerator::cgLdAsyncArFParent(IRInstruction* inst) {
+void CodeGenerator::cgLdAsyncArParentChain(IRInstruction* inst) {
   auto asyncArReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
-  const int64_t off = c_AsyncFunctionWaitHandle::firstParentOff()
+  const int64_t off = c_AsyncFunctionWaitHandle::parentChainOff()
                     - c_AsyncFunctionWaitHandle::arOff();
   m_as.loadq(asyncArReg[off], dstReg);
 }
@@ -5774,24 +5775,28 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
   auto childReg = srcLoc(1).reg();
   const int8_t blocked = c_WaitHandle::toKindState(
       c_WaitHandle::Kind::AsyncFunction, c_BlockableWaitHandle::STATE_BLOCKED);
-  const int64_t firstParentOff = c_WaitableWaitHandle::firstParentOff();
+  const int64_t firstParentOff = c_WaitableWaitHandle::parentChainOff()
+                               + AsioBlockableChain::firstParentOff();
   const int64_t stateToArOff = c_AsyncFunctionWaitHandle::stateOff()
                              - c_AsyncFunctionWaitHandle::arOff();
-  const int64_t nextParentToArOff = c_AsyncFunctionWaitHandle::nextParentOff()
+  const int64_t nextParentToArOff = c_AsyncFunctionWaitHandle::blockableOff()
+                                  + AsioBlockable::bitsOff()
                                   - c_AsyncFunctionWaitHandle::arOff();
   const int64_t childToArOff = c_AsyncFunctionWaitHandle::childOff()
                              - c_AsyncFunctionWaitHandle::arOff();
-  const int64_t objToArOff = -c_AsyncFunctionWaitHandle::arOff();
+  const int64_t blockableToArOff = c_AsyncFunctionWaitHandle::blockableOff()
+                                 - c_AsyncFunctionWaitHandle::arOff();
 
   // parent->setState(STATE_BLOCKED);
   m_as.storeb(blocked, parentArReg[stateToArOff]);
 
-  // parent->m_nextParent = child->m_firstParent;
+  // parent->m_blockable.m_bits = child->m_parentChain.m_firstParent|Kind::BWH;
+  assert(uint8_t(AsioBlockable::Kind::BlockableWaitHandle) == 0);
   m_as.loadq (childReg[firstParentOff], m_rScratch);
   m_as.storeq(m_rScratch, parentArReg[nextParentToArOff]);
 
-  // child->m_firstParent = parent;
-  m_as.lea   (parentArReg[objToArOff], m_rScratch);
+  // child->m_parentChain.m_firstParent = &parent->m_blockable;
+  m_as.lea   (parentArReg[blockableToArOff], m_rScratch);
   m_as.storeq(m_rScratch, childReg[firstParentOff]);
 
   // parent->m_child = child;

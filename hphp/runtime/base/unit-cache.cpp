@@ -136,7 +136,7 @@ NonRepoUnitCache s_nonRepoUnitCache;
  * When a unit is removed from the unit cache, we wait for a Treadmill round
  * before reclaiming it using this routine.
  *
- * If we have or are in the process of a collecting an hhprof dump than we need
+ * If we have or are in the process of a collecting an hhprof dump then we need
  * to keep these units around even longer, as they might be needed for symbol
  * resolution when that dump is collected by pprof.  In this case, we just pass
  * ownership to the ProfileControler module.
@@ -247,7 +247,8 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
    * avoid wasting time in the compiler (during server startup, many requests
    * hit the same code initial paths that are shared, and would all be
    * compiling the same files).  It's not 100% clear if this is the best way to
-   * handle that, idea though.
+   * handle that idea, though (tbb locks spin aggressively and are expected to
+   * be low contention).
    */
 
   /*

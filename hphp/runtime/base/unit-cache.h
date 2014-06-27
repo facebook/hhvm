@@ -41,15 +41,15 @@ struct StringData;
  * compile it over and over, but it does need to check whether the file has
  * changed.
  *
- * The `initial_opt' argument performs two functions:
+ * The `initial_opt' argument performs two functions, if non-null:
  *
- *    o If non-null, it is an output param indicating whether whether this was
- *      the first time this unit was found in this request.  (For example, if
- *      you are doing an include_once you need to know whether it was already
+ *    o It is an output param indicating whether whether this was the first
+ *      time this unit was found in this request.  (For example, if you are
+ *      doing an include_once you need to know whether it was already
  *      included.)
  *
- *    o If it's non-null, it means we should count this lookup as a
- *      request-local lookup for the current request.
+ *    o It means we should count this lookup as a request-local lookup for the
+ *      current request.
  *
  * May return nullptr if the Unit can't be loaded, and may throw exceptions or
  * fatal errors.

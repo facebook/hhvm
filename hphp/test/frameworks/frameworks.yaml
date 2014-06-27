@@ -101,9 +101,11 @@
       # Depends on previous
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFastFileStorageTest.php
   facebookphpsdk:
-    url: https://github.com/facebook/facebook-php-sdk.git
-    branch: v3.2.3
-    commit: 6714042fa2f5979d4c64c7d11fb4bcab16bdf6cb
+    # v3.2.3 from facebook/facebook-php-sdk and
+    # https://github.com/facebook/facebook-php-sdk/pull/184
+    url: https://github.com/fredemmott/facebook-php-sdk.git
+    branch: oauth-fix
+    commit: e4c2a3f7be7141f9d69d5521470487a6a1452162
     install_root: facebook-php-sdk
     test_root: facebook-php-sdk
     test_file_regex: /.*(tests\.php)$/

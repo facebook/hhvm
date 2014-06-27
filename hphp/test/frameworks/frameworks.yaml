@@ -44,6 +44,8 @@
     flakey:
       # mutates fixed location (__DIR__)
       - assetic/tests/Assetic/Test/Factory/AssetFactoryTest.php
+      # depends on http://ajax.googleapis.com
+      - assetic/tests/Assetic/Test/Asset/HttpAssetTest.php
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
     url: https://github.com/cakephp/cakephp

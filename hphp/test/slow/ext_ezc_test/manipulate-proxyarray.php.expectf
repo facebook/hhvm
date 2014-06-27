@@ -1,0 +1,7 @@
+array(1) {
+  [0]=>
+  object(EzcTestCloneable)#%d (0) {
+  }
+}
+EzcTestCloneable free_storage (clone 0)
+End

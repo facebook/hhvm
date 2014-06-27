@@ -209,6 +209,9 @@
       - joomla-framework/src/Joomla/Archive/Tests/Bzip2Test.php
       - joomla-framework/src/Joomla/Archive/Tests/GzipTest.php
       - joomla-framework/src/Joomla/Archive/Tests/ArchiveTest.php
+      - joomla-framework/src/Joomla/Filesystem/Tests/JFileTest.php
+      - joomla-framework/src/Joomla/Log/Tests/Logger/FormattedtextTest.php
+      - joomla-framework/src/Joomla/Log/Tests/Logger/W3cTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
     branch: "3.4-dev"
@@ -471,6 +474,7 @@
     flakey:
       # These mutate a fixed location on the local filesystem (__DIR__). This
       # makes the tests unreliable.
+      - phpbb3/tests/compress/compress_test.php
       - phpbb3/tests/mimetype/guesser_test.php
       - phpbb3/tests/template/subdir/includephp_from_subdir_test.php
       - phpbb3/tests/template/includephp_test.php

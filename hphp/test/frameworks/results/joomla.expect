@@ -586,36 +586,6 @@ JApplicationWebClientTest::test__construct
 I
 JApplicationWebClientTest::test__get
 I
-JFileTest::testCopy
-.
-JFileTest::testDelete
-.
-JFileTest::testMakeSafe with data set #0
-.
-JFileTest::testMakeSafe with data set #1
-.
-JFileTest::testMakeSafe with data set #2
-.
-JFileTest::testMakeSafe with data set #3
-.
-JFileTest::testMakeSafe with data set #4
-.
-JFileTest::testMakeSafe with data set #5
-.
-JFileTest::testMove
-.
-JFileTest::testRead
-I
-JFileTest::testStripExt with data set #0
-.
-JFileTest::testStripExt with data set #1
-.
-JFileTest::testStripExt with data set #2
-.
-JFileTest::testUpload
-I
-JFileTest::testWrite
-.
 JGithubHttpTest::test__Construct
 .
 JGoogleEmbedMapsTest::testAddMarker
@@ -5742,20 +5712,8 @@ Joomla\Log\Tests\Logger\EchoTest::testAddEntry03
 .
 Joomla\Log\Tests\Logger\EchoTest::testAddEntry04
 .
-Joomla\Log\Tests\Logger\FormattedtextTest::testAddEntry
-.
-Joomla\Log\Tests\Logger\FormattedtextTest::testConstructor01
-.
-Joomla\Log\Tests\Logger\FormattedtextTest::testConstructor02
-.
-Joomla\Log\Tests\Logger\FormattedtextTest::testConstructor03
-.
-Joomla\Log\Tests\Logger\FormattedtextTest::testConstructor04
-.
 Joomla\Log\Tests\Logger\SyslogTest::testAddEntry
 I
-Joomla\Log\Tests\Logger\W3cTest::testAddEntry
-.
 Joomla\Model\Tests\AbstractDatabaseModelTest::testSetDb
 .
 Joomla\Model\Tests\AbstractDatabaseModelTest::test__construct

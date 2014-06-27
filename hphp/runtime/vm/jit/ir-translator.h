@@ -24,7 +24,6 @@ namespace HPHP {
 namespace JIT {
 struct NormalizedInstruction;
 struct Location;
-struct RuntimeType;
 }
 namespace JIT {
 

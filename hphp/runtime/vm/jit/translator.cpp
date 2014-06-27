@@ -111,19 +111,6 @@ static uint32_t get_random()
 
 static const int kTooPolyRet = 6;
 
-bool
-isNormalPropertyAccess(const NormalizedInstruction& i,
-                       int propInput,
-                       int objInput) {
-  const LocationCode lcode = i.immVec.locationCode();
-  return
-    i.immVecM.size() == 1 &&
-    (lcode == LC || lcode == LL || lcode == LR || lcode == LH) &&
-    mcodeIsProp(i.immVecM[0]) &&
-    i.inputs[propInput]->isString() &&
-    i.inputs[objInput]->valueType() == KindOfObject;
-}
-
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
                            Class* ctx,
                            const Class*& baseClass,
@@ -131,17 +118,15 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
                            unsigned mInd, unsigned iInd) {
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
-    baseClass = ni.inputs[baseIndex]->rtt.isObject()
-      ? ni.inputs[baseIndex]->rtt.valueClass()
+    baseClass = ni.inputs[baseIndex]->rtt < Type::Obj
+      ? ni.inputs[baseIndex]->rtt.getClass()
       : nullptr;
   }
   if (!baseClass) return PropInfo();
 
-  if (!ni.inputs[iInd]->rtt.isString()) {
-    return PropInfo();
-  }
-  auto* const name = ni.inputs[iInd]->rtt.valueString();
-  if (!name) return PropInfo();
+  auto keyType = ni.inputs[iInd]->rtt;
+  if (!keyType.isConst(Type::Str)) return PropInfo();
+  auto const name = keyType.strVal();
 
   bool accessible;
   // If we are not in repo-authoriative mode, we need to check that
@@ -327,15 +312,15 @@ predictOutputs(const NormalizedInstruction* ni) {
     // anything ** double => double
     // double ** anything => double
     // anything ** anything => int
-    auto lhs = ni->inputs[0];
-    auto rhs = ni->inputs[1];
+    auto lhs = ni->inputs[0]->rtt;
+    auto rhs = ni->inputs[1]->rtt;
 
-    if (lhs->valueType() == KindOfInt64 && rhs->valueType() == KindOfInt64) {
+    if (lhs <= Type::Int && rhs <= Type::Int) {
       // Best guess, since overflowing isn't common
       return KindOfInt64;
     }
 
-    if (lhs->valueType() == KindOfDouble || rhs->valueType() == KindOfDouble) {
+    if (lhs <= Type::Dbl || rhs <= Type::Dbl) {
       return KindOfDouble;
     }
 
@@ -351,33 +336,16 @@ predictOutputs(const NormalizedInstruction* ni) {
     // Integers can produce integers if there's no residue, but $i / $j in
     // general produces a double. $i / 0 produces boolean false, so we have
     // actually check the result.
-    auto lhs = ni->inputs[0];
-    auto rhs = ni->inputs[1];
-
-    if (lhs->valueType() == KindOfDouble || rhs->valueType() == KindOfDouble) {
-      return KindOfDouble;
-    }
-
-    if (rhs->isLiteral()) {
-      if (ni->imm[1].u_I64A == 0) return KindOfBoolean;
-      if (ni->imm[1].u_I64A == 1) return lhs->valueType();
-
-      if (rhs->isLiteral()) {
-        return ni->imm[0].u_I64A % ni->imm[1].u_I64A ? KindOfDouble
-                                                     : KindOfInt64;
-      }
-    }
-
     return KindOfDouble;
   }
 
   if (ni->op() == OpAbs) {
-    if (ni->inputs[0]->valueType() == KindOfDouble) {
+    if (ni->inputs[0]->rtt <= Type::Dbl) {
       return KindOfDouble;
     }
 
     // some types can't be converted to integers and will return false here
-    if (ni->inputs[0]->valueType() == KindOfArray) {
+    if (ni->inputs[0]->rtt <= Type::Arr) {
       return KindOfBoolean;
     }
 
@@ -411,7 +379,9 @@ predictOutputs(const NormalizedInstruction* ni) {
      * since MInstrTranslator side exits in all uncommon cases.
      */
 
-    auto const inDt = ni->inputs[0]->rtt.valueType();
+    auto inType = ni->inputs[0]->rtt;
+    auto const inDt = inType.isKnownDataType() ? inType.toDataType()
+                                               : KindOfAny;
     // If the base is a string, the output is probably a string. Unless the
     // member code is MW, then we're either going to fatal or promote the
     // string to an array.
@@ -424,7 +394,7 @@ predictOutputs(const NormalizedInstruction* ni) {
         break;
 
       default:
-        baseType = Type(ni->inputs[1]->rtt);
+        baseType = ni->inputs[1]->rtt;
     }
     if (baseType <= Type::Str && ni->immVecM.size() == 1) {
       return ni->immVecM[0] == MW ? inDt : KindOfString;
@@ -438,8 +408,9 @@ predictOutputs(const NormalizedInstruction* ni) {
   static const double kAccept = 1.0;
   std::pair<DataType, double> pred = std::make_pair(KindOfAny, 0.0);
   if (op == OpCGetS) {
-    const StringData* propName = ni->inputs[1]->rtt.valueStringOrNull();
-    if (propName) {
+    auto nameType = ni->inputs[1]->rtt;
+    if (nameType.isConst(Type::Str)) {
+      auto propName = nameType.strVal();
       pred = predictType(TypeProfileKey(TypeProfileKey::StaticPropName,
                                         propName));
       TRACE(1, "prediction for static fields named %s: %d, %f\n",
@@ -1317,11 +1288,6 @@ bool outputDependsOnInput(const Op instr) {
   not_reached();
 }
 
-bool DynLocation::canBeAliased() const {
-  return isValue() &&
-    ((Translator::liveFrameIsPseudoMain() && isLocal()) || isRef());
-}
-
 const StaticString s_http_response_header("http_response_header");
 const StaticString s_php_errormsg("php_errormsg");
 const StaticString s_extract("extract");
@@ -1801,9 +1767,9 @@ Translator::translateRegion(const RegionDesc& region,
       std::vector<DynLocation> dynLocs;
       dynLocs.reserve(inputInfos.size());
       auto newDynLoc = [&](const InputInfo& ii) {
-        dynLocs.emplace_back(ii.loc, ht.rttFromLocation(ii.loc));
-        FTRACE(2, "rttFromLocation: {} -> {}\n",
-               ii.loc.pretty(), dynLocs.back().rtt.pretty());
+        dynLocs.emplace_back(ii.loc, ht.typeFromLocation(ii.loc));
+        FTRACE(2, "typeFromLocation: {} -> {}\n",
+               ii.loc.pretty(), dynLocs.back().rtt);
         return &dynLocs.back();
       };
       FTRACE(2, "populating inputs for {}\n", inst.toString());
@@ -1933,7 +1899,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Check the prediction. If the predicted type is less specific than what
       // is currently on the eval stack, checkType won't emit any code.
-      if (doPrediction && inst.outPred < ht.topType(0, DataTypeGeneric)) {
+      if (doPrediction && ht.topType(0, DataTypeGeneric).maybe(inst.outPred)) {
         ht.checkTypeStack(0, inst.outPred,
                           sk.advanced(block->unit()).offset());
       }

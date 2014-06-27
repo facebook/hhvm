@@ -229,13 +229,16 @@ RegionDescPtr RegionFormer::go() {
 
     // Since the current instruction is over, advance HhbcTranslator's sk
     // before emitting the prediction (if any).
-    if (doPrediction && m_inst.outPred < m_ht.topType(0, DataTypeGeneric)) {
+    if (doPrediction &&
+        m_ht.topType(0, DataTypeGeneric).maybe(m_inst.outPred)) {
       m_ht.setBcOff(m_sk.offset(), false);
       m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
     }
   }
 
-  printUnit(2, m_ht.unit(), " after tracelet formation ",
+  printUnit(2, m_ht.unit(),
+            inliningDepth() ? " after inlining tracelet formation "
+                            : " after tracelet formation ",
             nullptr, nullptr, m_ht.irBuilder().guards());
 
   if (m_region && !m_region->blocks.empty()) {
@@ -277,9 +280,9 @@ bool RegionFormer::prepareInstruction() {
 
   // Read types for all the inputs and apply MetaData.
   auto newDynLoc = [&](const InputInfo& ii) {
-    auto dl = m_inst.newDynLoc(ii.loc, m_ht.rttFromLocation(ii.loc));
-    FTRACE(2, "rttFromLocation: {} -> {}\n",
-           ii.loc.pretty(), dl->rtt.pretty());
+    auto dl = m_inst.newDynLoc(ii.loc, m_ht.typeFromLocation(ii.loc));
+    FTRACE(2, "typeFromLocation: {} -> {}\n",
+           ii.loc.pretty(), dl->rtt);
     return dl;
   };
 
@@ -579,27 +582,27 @@ void RegionFormer::truncateLiterals() {
  */
 bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
   auto& rtt = m_inst.inputs[i]->rtt;
-  if (ii.dontGuard || !rtt.isValue()) return true;
+  if (ii.dontGuard) return true;
 
-  if (m_profiling && rtt.isRef() &&
+  if (m_profiling && rtt.isBoxed() &&
       (m_region->blocks.size() > 1 || !m_region->blocks[0]->empty())) {
     // We don't want side exits when profiling, so only allow instructions that
     // consume refs at the beginning of the region.
     return false;
   }
 
-  if (!ii.dontBreak && !Type(rtt).isKnownDataType()) {
+  if (!ii.dontBreak && !rtt.isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
     FTRACE(1, "selectTracelet: {} tried to consume {}\n",
            m_inst.toString(), m_inst.inputs[i]->pretty());
     return false;
   }
 
-  if (!rtt.isRef() || m_inst.ignoreInnerType || ii.dontGuardInner) {
+  if (!rtt.isBoxed() || m_inst.ignoreInnerType || ii.dontGuardInner) {
     return true;
   }
 
-  if (!Type(rtt.innerType()).isKnownDataType()) {
+  if (!rtt.innerType().isKnownDataType()) {
     // Trying to consume a boxed value without a guess for the inner type.
     FTRACE(1, "selectTracelet: {} tried to consume ref {}\n",
            m_inst.toString(), m_inst.inputs[i]->pretty());

@@ -37,9 +37,6 @@ struct Func;
 
 namespace JIT {
 struct DynLocation;
-struct RuntimeType;
-}
-namespace JIT {
 
 namespace constToBits_detail {
   template<class T>
@@ -287,7 +284,6 @@ public:
     , m_extra(0)
   {}
 
-  explicit Type(const RuntimeType& rtt);
   explicit Type(const DynLocation* dl);
 
   size_t hash() const {
@@ -785,8 +781,6 @@ public:
    * pre: isKnownDataType()
    */
   DataType toDataType() const;
-
-  RuntimeType toRuntimeType() const;
 };
 
 typedef folly::Optional<Type> OptType;
@@ -864,9 +858,13 @@ struct TypeConstraint {
 
   static constexpr uint8_t kWantArrayKind = 0x1;
 
+  bool isSpecialized() const {
+    return category == DataTypeSpecialized || innerCat == DataTypeSpecialized;
+  }
+
   TypeConstraint& setWantArrayKind() {
     assert(!wantClass());
-    assert(category == DataTypeSpecialized);
+    assert(isSpecialized());
     m_specialized |= kWantArrayKind;
     return *this;
   }
@@ -876,7 +874,7 @@ struct TypeConstraint {
   TypeConstraint& setDesiredClass(const Class* cls) {
     assert(m_specialized == 0 ||
            desiredClass()->classof(cls) || cls->classof(desiredClass()));
-    assert(category == DataTypeSpecialized || innerCat == DataTypeSpecialized);
+    assert(isSpecialized());
     m_specialized = reinterpret_cast<uintptr_t>(cls);
     assert(wantClass());
     return *this;

@@ -23,7 +23,6 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/stats.h"

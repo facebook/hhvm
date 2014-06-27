@@ -177,7 +177,6 @@ enum Module {
  *
  * E.g.:
  *    (Location Stack 1)
- *    (RuntimeType (Location Stack 1) (Home (Location Local 1)))
  *
  * The repetitve prettyNode() templates are intended to aid
  * implementing pretty().
@@ -246,7 +245,7 @@ struct BumpRelease {
     if (m_live) tl_levels[m_mod] -= m_adjust;
   }
 
-  BumpRelease(BumpRelease&& o)
+  BumpRelease(BumpRelease&& o) noexcept
     : m_live(o.m_live)
     , m_mod(o.m_mod)
     , m_adjust(o.m_adjust)

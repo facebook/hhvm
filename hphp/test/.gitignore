@@ -8,6 +8,8 @@
 *.testfiles
 *.tests
 *.tmp
+*.log
+*.log.old
 /frameworks/composer.json.md5
 /frameworks/composer.lock
 /frameworks/composer.phar

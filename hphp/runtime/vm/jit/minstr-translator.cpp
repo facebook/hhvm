@@ -867,11 +867,42 @@ void HhbcTranslator::MInstrTranslator::emitIntermediateOp() {
   }
 }
 
+PropInfo HhbcTranslator::MInstrTranslator::getCurrentPropertyOffset(
+  const Class*& knownCls
+) {
+  auto info = getPropertyOffset(m_ni, contextClass(), knownCls,
+                                m_mii, m_mInd, m_iInd);
+  if (info.offset == -1) return info;
+
+  auto baseType = m_base->type().derefIfPtr();
+  always_assert_flog(
+    baseType < Type::Obj,
+    "Got property offset for base {} which isn't an object",
+    *m_base->inst()
+  );
+
+  auto baseCls = baseType.getClass();
+
+  // baseCls and knownCls may differ due to a number of factors but they must
+  // always be related to each other somehow.
+  always_assert_flog(
+    baseCls->classof(knownCls) || knownCls->classof(baseCls),
+    "Class mismatch between baseType({}) and knownCls({})",
+    baseCls->name()->data(), knownCls->name()->data()
+  );
+
+  if (m_irb.constrainValue(m_base, TypeConstraint(baseCls).setWeak())) {
+    // We can't use this specialized class without making a guard more
+    // expensive, so don't do it.
+    knownCls = nullptr;
+    return PropInfo{};
+  }
+  return info;
+}
+
 void HhbcTranslator::MInstrTranslator::emitProp() {
   const Class* knownCls = nullptr;
-  const auto propInfo   = getPropertyOffset(m_ni, contextClass(),
-                                            knownCls, m_mii,
-                                            m_mInd, m_iInd);
+  const auto propInfo   = getCurrentPropertyOffset(knownCls);
   auto mia = m_mii.getAttr(m_ni.immVecM[m_mInd]);
   if (propInfo.offset == -1 || (mia & Unset) ||
       mightCallMagicPropMethod(mia, knownCls, propInfo)) {
@@ -1341,8 +1372,7 @@ HELPER_TABLE(PROP)
 
 void HhbcTranslator::MInstrTranslator::emitCGetProp() {
   const Class* knownCls = nullptr;
-  const auto propInfo   = getPropertyOffset(m_ni, contextClass(), knownCls,
-                                            m_mii, m_mInd, m_iInd);
+  const auto propInfo   = getCurrentPropertyOffset(knownCls);
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(None, knownCls, propInfo)) {
@@ -1476,8 +1506,8 @@ void HhbcTranslator::MInstrTranslator::emitSetProp() {
 
   /* If we know the class for the current base, emit a direct property set. */
   const Class* knownCls = nullptr;
-  const auto propInfo   = getPropertyOffset(m_ni, contextClass(), knownCls,
-                                            m_mii, m_mInd, m_iInd);
+  const auto propInfo   = getCurrentPropertyOffset(knownCls);
+
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(Define, knownCls, propInfo)) {
     emitPropSpecialized(MIA_define, propInfo);
@@ -2230,7 +2260,7 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
   bool checkForInt;
   m_ht.checkStrictlyInteger(key, keyType, checkForInt);
   const DynLocation& base = *m_ni.inputs[m_mii.valCount()];
-  bool setRef = base.outerType() == KindOfRef;
+  bool setRef = base.rtt.isBoxed();
   typedef ArrayData* (*OpFunc)(ArrayData*, TypedValue*, TypedValue, RefData*);
   BUILD_OPTAB(keyType, checkForInt, setRef);
 
@@ -2729,11 +2759,11 @@ void HhbcTranslator::MInstrTranslator::prependToTraces(IRInstruction* inst) {
 }
 
 bool HhbcTranslator::MInstrTranslator::needFirstRatchet() const {
-  if (m_ni.inputs[m_mii.valCount()]->valueType() == KindOfArray) {
+  if (m_ni.inputs[m_mii.valCount()]->rtt.unbox() <= Type::Arr) {
     switch (m_ni.immVecM[0]) {
-    case MEC: case MEL: case MET: case MEI: return false;
-    case MPC: case MPL: case MPT: case MW:  return true;
-    default: not_reached();
+      case MEC: case MEL: case MET: case MEI: return false;
+      case MPC: case MPL: case MPT: case MW:  return true;
+      default: not_reached();
     }
   }
   return true;

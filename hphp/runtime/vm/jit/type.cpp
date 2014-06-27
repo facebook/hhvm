@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -203,44 +202,6 @@ DataType Type::toDataType() const {
   if (subtypeOf(Cls))           return KindOfClass;
   always_assert_flog(false,
                      "Bad Type {} in Type::toDataType()", *this);
-}
-
-RuntimeType Type::toRuntimeType() const {
-  assert(!isPtr());
-  auto fuzzyDataType = [](Type t) {
-    if (t.isKnownDataType()) return t.toDataType();
-    if (t <= UncountedInit)  return KindOfUncountedInit;
-    if (t <= Uncounted)      return KindOfUncounted;
-    if (t <= Gen)            return KindOfAny;
-    always_assert(false);
-  };
-
-  auto const outer = isBoxed() ? KindOfRef : fuzzyDataType(*this);
-  auto const inner = isBoxed() ? fuzzyDataType(innerType()) : KindOfNone;
-  auto rtt = RuntimeType{outer, inner};
-
-  if (isSpecialized()) {
-    if (subtypeOf(Type::Arr)) {
-      return hasArrayKind() ? rtt.setArrayKind(getArrayKind()) : rtt;
-    }
-    if (subtypeOf(Type::Obj)) {
-      return rtt.setKnownClass(getClass());
-    }
-  }
-
-  return rtt;
-}
-
-Type::Type(const RuntimeType& rtt)
-  : m_bits(bitsFromDataType(rtt.outerType(), rtt.innerType()))
-  , m_hasConstVal(false)
-  , m_class(nullptr)
-{
-  if (rtt.outerType() == KindOfObject && rtt.hasKnownClass()) {
-    m_class = rtt.knownClass();
-  } else if (rtt.outerType() == KindOfArray && rtt.hasArrayKind()) {
-    m_arrayInfo = makeArrayInfo(rtt.arrayKind(), nullptr);
-  }
 }
 
 Type::Type(const DynLocation* dl)

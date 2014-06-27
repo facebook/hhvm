@@ -16,12 +16,16 @@
 #ifndef incl_HPHP_TRACELET_H_
 #define incl_HPHP_TRACELET_H_
 
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <climits>
 #include <vector>
 
-#include "hphp/runtime/vm/jit/runtime-type.h"
+#include <boost/ptr_container/ptr_vector.hpp>
+
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
+struct Func;
+
 namespace JIT {
 
 struct NormalizedInstruction;
@@ -31,41 +35,16 @@ struct RefDeps {
     std::vector<bool> m_mask;
     std::vector<bool> m_vals;
 
-    std::string pretty() const {
-      std::ostringstream out;
-      out << "mask=";
-      for (size_t i = 0; i < m_mask.size(); ++i) {
-        out << (m_mask[i] ? "1" : "0");
-      }
-      out << " vals=";
-      for (size_t i = 0; i < m_vals.size(); ++i) {
-        out << (m_vals[i] ? "1" : "0");
-      }
-      return out.str();
-    }
+    std::string pretty() const;
   };
   typedef hphp_hash_map<int64_t, Record, int64_hash> ArMap;
   ArMap m_arMap;
 
   RefDeps() {}
 
-  void addDep(int entryArDelta, unsigned argNum, bool isRef) {
-    if (m_arMap.find(entryArDelta) == m_arMap.end()) {
-      m_arMap[entryArDelta] = Record();
-    }
-    Record& r = m_arMap[entryArDelta];
-    if (argNum >= r.m_mask.size()) {
-      assert(argNum >= r.m_vals.size());
-      r.m_mask.resize(argNum + 1);
-      r.m_vals.resize(argNum + 1);
-    }
-    r.m_mask[argNum] = true;
-    r.m_vals[argNum] = isRef;
-  }
+  void addDep(int entryArDelta, unsigned argNum, bool isRef);
 
-  size_t size() const {
-    return m_arMap.size();
-  }
+  size_t size() const { return m_arMap.size(); }
 };
 
 struct ActRecState {

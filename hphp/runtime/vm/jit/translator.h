@@ -34,12 +34,13 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
-#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -60,89 +61,6 @@ namespace JIT {
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
 struct NormalizedInstruction;
-
-// A DynLocation is a Location-in-execution: a location, along with
-// whatever is known about its runtime type.
-struct DynLocation {
-  Location    location;
-  RuntimeType rtt;
-
-  DynLocation(Location l, DataType t) : location(l), rtt(t) {}
-
-  DynLocation(Location l, RuntimeType t) : location(l), rtt(t) {}
-
-  DynLocation() : location(), rtt() {}
-
-  bool operator==(const DynLocation& r) const = delete;
-
-  // Hash function
-  size_t operator()(const DynLocation &dl) const {
-    uint64_t rtthash = rtt(rtt);
-    uint64_t locHash = location(location);
-    return rtthash ^ locHash;
-  }
-
-  std::string pretty() const {
-    return Trace::prettyNode("DynLocation", location, rtt);
-  }
-
-  // Punch through a bunch of frequently called rtt and location methods.
-  // While this is unlovely here, we use DynLocation in bazillions of
-  // places in the translator, and constantly saying ".rtt" is worse.
-  bool isString() const {
-    return rtt.isString();
-  }
-  bool isInt() const {
-    return rtt.isInt();
-  }
-  bool isDouble() const {
-    return rtt.isDouble();
-  }
-  bool isBoolean() const {
-    return rtt.isBoolean();
-  }
-  bool isRef() const {
-    return rtt.isRef();
-  }
-  bool isRefToObject() const {
-    return rtt.isRef() && innerType() == KindOfObject;
-  }
-  bool isValue() const {
-    return rtt.isValue();
-  }
-  bool isNull() const {
-    return rtt.isNull();
-  }
-  bool isObject() const {
-    return rtt.isObject();
-  }
-  bool isArray() const {
-    return rtt.isArray();
-  }
-  DataType valueType() const {
-    return rtt.valueType();
-  }
-  DataType innerType() const {
-    return rtt.innerType();
-  }
-  DataType outerType() const {
-    return rtt.outerType();
-  }
-
-  bool isStack() const {
-    return location.isStack();
-  }
-  bool isLocal() const {
-    return location.isLocal();
-  }
-  bool isLiteral() const {
-    return location.isLiteral();
-  }
-
-  // Uses the runtime state. True if this dynLocation can be overwritten by
-  // SetG's and SetM's.
-  bool canBeAliased() const;
-};
 
 struct TranslationFailedExc : std::runtime_error {
   TranslationFailedExc(const char* file, int line)
@@ -569,6 +487,56 @@ void populateImmediates(NormalizedInstruction&);
 bool instrMustInterp(const NormalizedInstruction&);
 bool isAlwaysNop(Op op);
 
+struct InputInfo {
+  explicit InputInfo(const Location &l)
+    : loc(l)
+    , dontBreak(false)
+    , dontGuard(l.isLiteral())
+    , dontGuardInner(false)
+  {}
+
+  std::string pretty() const {
+    std::string p = loc.pretty();
+    if (dontBreak) p += ":dc";
+    if (dontGuard) p += ":dg";
+    if (dontGuardInner) p += ":dgi";
+    return p;
+  }
+  Location loc;
+  /*
+   * if an input is unknowable, dont break the tracelet
+   * just to find its type. But still generate a guard
+   * if that will tell us its type.
+   */
+  bool     dontBreak;
+  /*
+   * never break the tracelet, or generate a guard on
+   * account of this input.
+   */
+  bool     dontGuard;
+  /*
+   * never guard the inner type if this input is KindOfRef
+   */
+  bool     dontGuardInner;
+};
+
+class InputInfos : public std::vector<InputInfo> {
+ public:
+  InputInfos() : needsRefCheck(false) {}
+
+  std::string pretty() const {
+    std::string retval;
+    for (size_t i = 0; i < size(); i++) {
+      retval += (*this)[i].pretty();
+      if (i != size() - 1) {
+        retval += std::string(" ");
+      }
+    }
+    return retval;
+  }
+  bool  needsRefCheck;
+};
+
 typedef std::function<Type(int)> LocalTypeFn;
 void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
                const Func* func, const LocalTypeFn& localType);
@@ -579,6 +547,28 @@ bool outputIsPredicted(NormalizedInstruction& inst);
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller);
 int locPhysicalOffset(Location l, const Func* f = nullptr);
+
+struct PropInfo {
+  PropInfo()
+    : offset(-1)
+    , repoAuthType{}
+  {}
+  explicit PropInfo(int offset, RepoAuthType repoAuthType)
+    : offset(offset)
+    , repoAuthType{repoAuthType}
+  {}
+
+  int offset;
+  RepoAuthType repoAuthType;
+};
+PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+                           Class* contextClass,
+                           const Class*& baseClass,
+                           const MInstrInfo& mii,
+                           unsigned mInd, unsigned iInd);
+PropInfo getFinalPropertyOffset(const NormalizedInstruction&,
+                                Class* contextClass,
+                                const MInstrInfo&);
 
 namespace InstrFlags {
 enum OutTypeConstraints {

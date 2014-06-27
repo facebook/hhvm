@@ -443,7 +443,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
   newTc.weak = origTc.weak;
 
   while (true) {
-    if (newTc.category == DataTypeSpecialized) {
+    if (newTc.isSpecialized()) {
       // We need to ask for the right kind of specialization, so grab it from
       // origTc.
       if (origTc.wantArrayKind()) newTc.setWantArrayKind();

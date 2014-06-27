@@ -25,6 +25,33 @@ namespace JIT {
 
 TRACE_SET_MOD(trans);
 
+std::string RefDeps::Record::pretty() const {
+  std::ostringstream out;
+  out << "mask=";
+  for (size_t i = 0; i < m_mask.size(); ++i) {
+    out << (m_mask[i] ? "1" : "0");
+  }
+  out << " vals=";
+  for (size_t i = 0; i < m_vals.size(); ++i) {
+    out << (m_vals[i] ? "1" : "0");
+  }
+  return out.str();
+}
+
+void RefDeps::addDep(int entryArDelta, unsigned argNum, bool isRef) {
+  if (m_arMap.find(entryArDelta) == m_arMap.end()) {
+    m_arMap[entryArDelta] = Record();
+  }
+  Record& r = m_arMap[entryArDelta];
+  if (argNum >= r.m_mask.size()) {
+    assert(argNum >= r.m_vals.size());
+    r.m_mask.resize(argNum + 1);
+    r.m_vals.resize(argNum + 1);
+  }
+  r.m_mask[argNum] = true;
+  r.m_vals[argNum] = isRef;
+}
+
 void
 ActRecState::pushFunc(const NormalizedInstruction& inst) {
   assert(isFPush(inst.op()));

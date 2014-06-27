@@ -32,7 +32,7 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
                                      evhttp_request *request,
                                      int workerId)
   : m_server(server), m_request(request), m_eventBasePostData(nullptr),
-    m_workerId(workerId), m_sendStarted(false), m_sendEnded(false) {
+    m_workerId(workerId), m_sendStarted(false) {
   // HttpProtocol::PrepareSystemVariables needs this
   evbuffer *buf = m_request->input_buffer;
   assert(buf);

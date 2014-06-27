@@ -555,11 +555,19 @@ Variant ScalarExpression::getVariant() const {
       return String(m_translated);
     case T_ONUMBER:
       if (RuntimeOption::IntsOverflowToInts) return getIntValue();
-      if (m_value.size() >= 2 &&
-          m_value[0] == '0' && std::tolower(m_value[1]) == 'x') {
-        return zend_hex_strtod(m_value.c_str(), nullptr);
+      if (m_value.size() > 1 && m_value[0] == '0') {
+        if (m_value.size() > 2) {
+          auto const second = std::tolower(m_value[1]);
+          if (second == 'x') {
+            return zend_hex_strtod(m_value.c_str(), nullptr);
+          } else if (second == 'b') {
+            return zend_bin_strtod(m_value.c_str(), nullptr);
+          }
+          // Fallthrough.
+        }
+        return zend_oct_strtod(m_value.c_str(), nullptr);
       }
-      // fallthrough
+      // Fallthrough.
     case T_DNUMBER:
       return String(m_value).toDouble();
     default:

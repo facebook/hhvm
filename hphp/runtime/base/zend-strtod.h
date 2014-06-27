@@ -29,6 +29,7 @@ char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign,
 double zend_strtod(const char *s00, const char **se);
 double zend_hex_strtod(const char *str, const char **endptr);
 double zend_oct_strtod(const char *str, const char **endptr);
+double zend_bin_strtod(const char *str, const char **endptr);
 int zend_startup_strtod(void);
 int zend_shutdown_strtod(void);
 

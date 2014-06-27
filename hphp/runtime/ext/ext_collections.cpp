@@ -47,6 +47,17 @@ static Object materializeImpl(ObjectData* obj) {
   return o;
 }
 
+static ALWAYS_INLINE
+const Cell container_as_cell(const Variant& container) {
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a container (array or collection)"));
+    throw e;
+  }
+  return cellContainer;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static void throwIntOOB(int64_t key, bool isVector = false)
@@ -763,6 +774,30 @@ Object c_Vector::t_addall(const Variant& iterable) {
       add(v.asCell());
     }
   }
+  return this;
+}
+
+Object c_Vector::t_addallkeysof(const Variant& container) {
+  if (container.isNull()) {
+    return this;
+  }
+
+  const auto& containerCell = container_as_cell(container);
+
+  auto sz = getContainerSize(containerCell);
+  ArrayIter iter(containerCell);
+  if (!sz || !iter) {
+    return this;
+  }
+  reserve(m_size + sz);
+
+  mutateAndBump();
+  assert(canMutateBuffer());
+  do {
+    addRaw(iter.first());
+    ++iter;
+  } while (iter);
+
   return this;
 }
 
@@ -4618,17 +4653,6 @@ BaseSet::php_fromItems(const Variant& iterable) {
   assert(!st->hasImmutableBuffer());
   st->addAll(iterable);
   return ret;
-}
-
-static ALWAYS_INLINE
-const Cell container_as_cell(const Variant& container) {
-  const auto& cellContainer = *container.asCell();
-  if (UNLIKELY(!isContainer(cellContainer))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a container (array or collection)"));
-    throw e;
-  }
-  return cellContainer;
 }
 
 template<class TSet>

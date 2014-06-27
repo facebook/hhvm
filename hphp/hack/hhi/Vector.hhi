@@ -155,6 +155,14 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function addAll(?Traversable<Tv> $it): Vector<Tv>;
 
   /**
+   * Adds the keys of the specified container to this Vector and returns
+   * the Vector.
+   */
+  public static function addAllKeysOf<Tv2>(
+    ?KeyedContainer<Tv,Tv2> $container,
+  ): Vector<Tv>;
+
+  /**
    * Removes the specified key from this Vector. This will cause elements
    * with higher keys to be renumbered.
    */

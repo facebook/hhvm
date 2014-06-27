@@ -21,6 +21,8 @@ function main() {
   $test("add", function ($v) { $v->add(42); });
   $test("append", function ($v) { $v->append(42); });
   $test("addAll", function ($v) { $v->addAll(Vector {42}); });
+  $test("addAllKeysOf",
+        function ($v) { $v->addAllKeysOf(Map {42 => 'foo', 43 => 'bar'}); });
   $test("pop", function ($v) { $v->pop(); });
   $test("resize", function ($v) { $v->resize(0, 0); });
   $test("clear", function ($v) { $v->clear(); });

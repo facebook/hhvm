@@ -489,6 +489,7 @@ class c_Vector : public BaseVector {
   void t___construct(const Variant& iterable = null_variant);
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
+  Object t_addallkeysof(const Variant& val);
   Object t_append(const Variant& val); // deprecated
   Variant t_pop();
   void t_resize(const Variant& sz, const Variant& value);

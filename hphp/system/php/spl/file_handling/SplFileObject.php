@@ -19,6 +19,7 @@ class SplFileObject extends SplFileInfo
   private $enclosure = '"';
   private $escape = '\\';
   private $flags;
+  private $filename;
   private $maxLineLen = 0;
   private $currentLineNum = 0;
   private $rsrc;
@@ -57,6 +58,7 @@ class SplFileObject extends SplFileInfo
         gettype($open_mode).' given'
       );
     }
+    $this->filename = $filename;
     $this->rsrc = fopen($filename, $open_mode, $use_include_path, $context);
   }
 
@@ -611,6 +613,10 @@ class SplFileObject extends SplFileInfo
    * @return     mixed   No value is returned.
    */
   public function seek($line_pos) {
+    if ($line_pos < 0) {
+      throw new LogicException("Can't seek file " .
+        $this->filename . " to negative line $line_pos");
+    }
     $this->rewind();
     for ($i = 0; $i < $line_pos; $i++) {
       $this->current();

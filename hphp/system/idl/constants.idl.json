@@ -1243,78 +1243,6 @@
             "value": 4
         },
         {
-            "name": "LIBXML_COMPACT",
-            "value": 65536
-        },
-        {
-            "name": "LIBXML_DOTTED_VERSION",
-            "value": "2.7.8"
-        },
-        {
-            "name": "LIBXML_DTDATTR",
-            "value": 8
-        },
-        {
-            "name": "LIBXML_DTDLOAD",
-            "value": 4
-        },
-        {
-            "name": "LIBXML_DTDVALID",
-            "value": 16
-        },
-        {
-            "name": "LIBXML_ERR_ERROR",
-            "value": 2
-        },
-        {
-            "name": "LIBXML_ERR_FATAL",
-            "value": 3
-        },
-        {
-            "name": "LIBXML_ERR_NONE",
-            "value": 0
-        },
-        {
-            "name": "LIBXML_ERR_WARNING",
-            "value": 1
-        },
-        {
-            "name": "LIBXML_HTML_NODEFDTD",
-            "value": 4
-        },
-        {
-            "name": "LIBXML_HTML_NOIMPLIED",
-            "value": 8192
-        },
-        {
-            "name": "LIBXML_NOBLANKS",
-            "value": 256
-        },
-        {
-            "name": "LIBXML_NOCDATA",
-            "value": 16384
-        },
-        {
-            "name": "LIBXML_NOEMPTYTAG",
-            "value": 4
-        },
-        {
-            "name": "LIBXML_NOENT",
-            "value": 2
-        },
-        {
-            "name": "LIBXML_NOERROR",
-            "value": 32
-        },
-        {
-            "name": "LIBXML_NONET",
-            "value": 2048
-        },
-        {
-            "name": "LIBXML_NOWARNING",
-            "value": 64
-        },
-                {
             "name": "ENT_HTML401",
             "value": 0
         },
@@ -1329,34 +1257,6 @@
         {
             "name": "ENT_HTML5",
             "value": 48
-        },
-        {
-            "name": "LIBXML_NOXMLDECL",
-            "value": 2
-        },
-        {
-            "name": "LIBXML_NSCLEAN",
-            "value": 8192
-        },
-        {
-            "name": "LIBXML_PARSEHUGE",
-            "value": 524288
-        },
-        {
-            "name": "LIBXML_PEDANTIC",
-            "value": 128
-        },
-        {
-            "name": "LIBXML_SCHEMA_CREATE",
-            "value": 1
-        },
-        {
-            "name": "LIBXML_VERSION",
-            "value": 20708
-        },
-        {
-            "name": "LIBXML_XINCLUDE",
-            "value": 1024
         },
         {
             "name": "LOCK_EX",

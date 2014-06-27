@@ -49,10 +49,10 @@ type t =
   | Rdynamic_yield of Pos.t * Pos.t * string * string
   | Rmap_append of Pos.t
 
-(* Translate a reason to a (pos, string) list, suitable for error_l. This 
+(* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
  * multiple locations meant that it needed to more than convert to a string *)
-let rec to_string prefix r = 
+let rec to_string prefix r =
   let p = to_pos r in
   match r with
   | Rnone              -> [(p, prefix)]
@@ -84,9 +84,9 @@ let rec to_string prefix r =
   | Rattr            _ -> [(p, prefix ^ " because it is used in an attribute")]
   | Rxhp             _ -> [(p, prefix ^ " because it is used as an XML element")]
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
-  | Rcoerced     (p1, p2, s)  -> 
+  | Rcoerced     (p1, p2, s)  ->
       [
-        (p, prefix); 
+        (p, prefix);
         (p2, "It was implicitly typed as "^s^" during this operation")
       ]
   | Rlost_info (s, r1, p2) ->
@@ -112,7 +112,7 @@ let rec to_string prefix r =
         (Pos.string yield_pos)
         implicit_name
         yield_name))]
-  | Rmap_append _ -> 
+  | Rmap_append _ ->
       [(p, prefix^" because you can only append a Pair<Tkey, Tvalue> to an \
       Map<Tkey, Tvalue>")]
 
@@ -184,6 +184,7 @@ type ureason =
   | URpair_access
   | URdynamic_yield
   | URnewtype_cstr
+  | URenum
 
 let string_of_ureason = function
   | URnone -> "Typing error"
@@ -219,6 +220,8 @@ let string_of_ureason = function
       "When using DynamicYield, yield*() methods should have type Awaitable"
   | URnewtype_cstr ->
       "Invalid constraint on newtype"
+  | URenum ->
+      "Constant does not match the type of the Enum it is in"
 
 let compare r1 r2 =
   match r1, r2 with
@@ -245,4 +248,3 @@ let none = Rnone
 let explain_generic_constraint reason name error =
   let pos = to_pos reason in
   Errors.explain_constraint pos name error
-

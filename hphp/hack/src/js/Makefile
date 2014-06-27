@@ -49,6 +49,7 @@ SRC = \
   typing_generic.ml\
   typing_ops.ml\
   typing_dynamic_yield.ml\
+  typing_enum.ml\
   typing_hint.ml\
   typing_suggest.ml\
   typing_async.ml\
@@ -151,6 +152,9 @@ typing_utils.ml: $(TOP)/typing/typing_utils.ml
 
 typing_dynamic_yield.ml: $(TOP)/typing/typing_dynamic_yield.ml
 	cp $(TOP)/typing/typing_dynamic_yield.ml .
+
+typing_enum.ml: $(TOP)/typing/typing_enum.ml
+	cp $(TOP)/typing/typing_enum.ml .
 
 typing_print.ml: $(TOP)/typing/typing_print.ml
 	cp $(TOP)/typing/typing_print.ml .
@@ -300,6 +304,7 @@ clean::
 	rm -f typing_hint.ml
 	rm -f typing_print.ml
 	rm -f typing_dynamic_yield.ml
+	rm -f typing_enum.ml
 	rm -f find_refs.ml
 	rm -f autocomplete.ml
 	rm -f nast_terminality.ml

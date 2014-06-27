@@ -219,6 +219,9 @@ val visibility_extends : string -> Pos.t -> Pos.t -> string -> unit
 val member_not_implemented : string -> Pos.t -> Pos.t -> Pos.t -> unit
 val override : Pos.t -> string -> Pos.t -> string -> error -> unit
 val missing_constructor : Pos.t -> unit
+val enum_constant_type_bad : Pos.t -> string -> Pos.t list -> unit
+val enum_type_bad : Pos.t -> string -> Pos.t list -> unit
+val enum_type_typedef_mixed : Pos.t -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

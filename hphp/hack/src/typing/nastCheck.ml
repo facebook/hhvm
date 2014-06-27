@@ -300,7 +300,7 @@ and hint_ env p = function
       let params =
         match tdef with
         | Typing_env.Typedef.Error -> []
-        | Typing_env.Typedef.Ok (_, x, _, _) -> x
+        | Typing_env.Typedef.Ok (_, x, _, _, _) -> x
       in
       check_params env p x params hl
   | Happly ((_, x), hl) ->

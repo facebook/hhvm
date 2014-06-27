@@ -353,6 +353,7 @@ and class_decl c =
     else dimpl
   in
   let env, tparams = lfold Typing.type_param env c.c_tparams in
+  let consts = Typing_enum.enum_class_decl_rewrite env impl consts in
   let tc = {
     tc_final = c.c_final;
     tc_abstract = is_abstract;
@@ -626,11 +627,9 @@ and type_typedef_naming_and_decl nenv tdef =
         env, Some constraint_type
   in
   let visibility =
-    if is_abstract
-    then Env.Typedef.Private filename
-    else Env.Typedef.Public
+    if is_abstract then Env.Typedef.Private else Env.Typedef.Public
   in
-  let tdecl = visibility, params, tcstr, concrete_type in
+  let tdecl = visibility, params, tcstr, concrete_type, pos in
   Env.add_typedef tid tdecl;
   Naming_heap.TypedefHeap.add tid decl;
   ()

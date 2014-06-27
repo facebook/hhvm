@@ -874,6 +874,27 @@ let missing_constructor pos =
   add pos "The constructor is not implemented"
 
 (*****************************************************************************)
+(* Enum checking *)
+(*****************************************************************************)
+
+let typedef_trail_entry pos = pos, "Typedef definition comes from here"
+
+let add_with_trail pos s trail =
+  add_list ((pos, s) :: List.map typedef_trail_entry trail)
+
+let enum_constant_type_bad pos ty trail =
+  add_with_trail pos ("Enum constants must be an int or string, not " ^ ty)
+    trail
+
+let enum_type_bad pos ty trail =
+  add_with_trail pos
+    ("Enums must have int, string, or mixed type, not " ^ ty)
+    trail
+
+let enum_type_typedef_mixed pos =
+  add pos "Can't use typedef that resolves to mixed in Enum"
+
+(*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)
 

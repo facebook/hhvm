@@ -39,9 +39,9 @@ module Typedef = struct
 
   type visibility =
     | Public
-    | Private of string
+    | Private
 
-  type tdef = visibility * Typing_defs.tparam list * ty option * ty
+  type tdef = visibility * Typing_defs.tparam list * ty option * ty * Pos.t
 
   type tdef_or_error =
     | Error

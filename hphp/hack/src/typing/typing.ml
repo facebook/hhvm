@@ -1083,7 +1083,7 @@ and anon_make anon_lenv p f =
   let is_typing_self = ref false in
   fun env tyl ->
     if !is_typing_self
-    then begin 
+    then begin
       Errors.anonymous_recursive p;
       env, (Reason.Rwitness p, Tany)
     end
@@ -2167,7 +2167,7 @@ and call_ pos env fty el =
       let anon = Env.get_anonymous env id in
       let fpos = Reason.to_pos r2 in
       (match anon with
-      | None -> 
+      | None ->
           Errors.anonymous_recursive_call pos;
           env, (Reason.Rnone, Tany)
       | Some anon ->
@@ -2680,7 +2680,8 @@ and class_def_ env_up c tc =
   SMap.iter (fun _ ty -> class_implements_type env c ty) dimpl;
   List.iter (class_var_def env false c) c.c_vars;
   List.iter (method_def env) c.c_methods;
-  List.iter (class_const_def env) c.c_consts;
+  let const_types = List.map (class_const_def env) c.c_consts in
+  Typing_enum.enum_class_check env tc c.c_consts const_types;
   class_constr_def env c;
   let env = Env.set_static env in
   List.iter (class_var_def env true c) c.c_static_vars;
@@ -2703,7 +2704,8 @@ and class_const_def env (h, id, e) =
     | Some h -> Typing_hint.hint env h
   in
   let env, ty' = expr env e in
-  ignore (Type.sub_type (fst id) Reason.URhint env ty ty')
+  ignore (Type.sub_type (fst id) Reason.URhint env ty ty');
+  ty'
 
 and class_constr_def env c =
   match c.c_constructor with

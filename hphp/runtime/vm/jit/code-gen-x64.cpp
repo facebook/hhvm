@@ -1972,6 +1972,13 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
 
   static_assert(sizeof(DataType) == 1, "");
 
+  if (typeReg == InvalidReg) {
+    auto const type = inst->src(0)->type();
+    auto const imm = type <= (Type::Bool | Type::Int | Type::Dbl | Type::Str);
+    m_as.    movl(Immed(imm), r32(dstReg));
+    return;
+  }
+
   m_as.   movzbl(rbyte(typeReg), r32(dstReg));
   m_as.   subl(KindOfBoolean, r32(dstReg));
   m_as.   subl(KindOfString - KindOfBoolean + 1, r32(dstReg));

@@ -614,3 +614,9 @@
       - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/ValueGeneratorTest.php
+  html5php:
+    url: https://github.com/Masterminds/html5-php.git
+    branch: master
+    commit: 45e0f801d896258022c6a70a7738b991cb19aafe
+    install_root: html5php
+    test_root: html5php      

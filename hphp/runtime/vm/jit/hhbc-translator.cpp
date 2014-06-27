@@ -3328,8 +3328,12 @@ SSATmp* HhbcTranslator::optimizedCallCount() {
 
 SSATmp* HhbcTranslator::optimizedCallIniGet() {
   // Only generate the optimized version if the argument passed in is a
-  // static string so we can get the string value at JIT time.
-  if (!(topType(0) <= Type::StaticStr)) return nullptr;
+  // static string with a constant literal value so we can get the string value
+  // at JIT time.
+  Type argType = topType(0);
+  if (!(argType <= Type::StaticStr) || !argType.isConst()) {
+      return nullptr;
+  }
 
   // We can only optimize settings that are system wide since user level
   // settings can be overridden during the execution of a request.

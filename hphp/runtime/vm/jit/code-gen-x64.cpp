@@ -4063,13 +4063,13 @@ void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src, PhysLoc loc) {
     return;
   }
 
-  assert(srcReg0 != InvalidReg);
-  m_as.storeq(srcReg0, refTVData(dst));
-
   if (src->type().needsValueReg()) {
-    assert(srcReg1 != InvalidReg);
-    emitStoreTVType(m_as, srcReg1, refTVType(dst));
+    assert(srcReg0 != InvalidReg);
+    m_as.storeq(srcReg0, refTVData(dst));
   }
+
+  assert(srcReg1 != InvalidReg);
+  emitStoreTVType(m_as, srcReg1, refTVType(dst));
 }
 
 template<class BaseRef>

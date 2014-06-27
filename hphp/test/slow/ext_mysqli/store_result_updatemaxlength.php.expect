@@ -1,0 +1,3 @@
+Before store_result(): int(0)
+
+After store_result(): int(1)

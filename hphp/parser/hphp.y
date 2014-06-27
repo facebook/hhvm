@@ -1852,6 +1852,7 @@ lambda_body:
 shape_keyname:
     T_CONSTANT_ENCAPSED_STRING        { validate_shape_keyname($1, _p);
                                         _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $1); }
+  | class_constant                    { $$ = $1 }
 ;
 
 non_empty_shape_pair_list:
@@ -2792,6 +2793,12 @@ hh_shape_member_type:
     T_CONSTANT_ENCAPSED_STRING
       T_DOUBLE_ARROW
       hh_type                      { validate_shape_keyname($1, _p); }
+ |  class_namespace_string_typeargs
+      T_DOUBLE_COLON
+      ident
+     T_DOUBLE_ARROW
+      hh_type                      { }
+
 ;
 
 hh_non_empty_shape_member_list:

@@ -1,2 +1,2 @@
 
-Fatal error: syntax error, unexpected T_VARIABLE, expecting ')' in %s on line 5
+Fatal error: syntax error, unexpected T_DOUBLE_ARROW, expecting T_DOUBLE_COLON in %s on line 5

@@ -1,11 +1,6 @@
 set(OCAMLC_FOUND FALSE)
 set(OCAMLC_OPT_SUFFIX "")
 
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  message(STATUS "Not on Linux, cannot build Hack typechecker")
-  return()
-endif()
-
 find_program(OCAMLC_EXECUTABLE ocamlc DOC "path to ocamlc")
 mark_as_advanced(OCAMLC_EXECUTABLE)
 

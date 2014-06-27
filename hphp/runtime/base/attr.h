@@ -100,7 +100,8 @@ enum Attr {
   // across all requests.               //       |          |         //
   AttrPersistent           = (1 << 17), //    X  |          |    X    //
                                         //       |          |         //
-  // FIXME: I have no documentation.    //       |          |         //
+  // Indicates that this property cannot be initialized on an ObjectData by
+  // simply memcpy-ing from the initializer vector.         |         //
   AttrDeepInit             = (1 << 18), //       |    X     |         //
                                         //       |          |         //
   // Set on functions to mark them as hot during PGO profiling.       //
@@ -126,7 +127,8 @@ enum Attr {
   // all constant arguments.            //       |          |         //
   AttrIsFoldable           = (1 << 26), //       |          |    X    //
                                         //       |          |         //
-  // FIXME: I have no documentation.    //       |          |         //
+  // Indicates that this function cannot be called with FCallBuiltin because it
+  // requires an ActRec argument.       //       |          |         //
   AttrNoFCallBuiltin       = (1 << 27), //       |          |    X    //
                                         //       |          |         //
   // Does this function have a `...' parameter?  |          |         //

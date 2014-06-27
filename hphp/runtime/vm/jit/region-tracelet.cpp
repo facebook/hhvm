@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
-#include "hphp/runtime/vm/jit/inlining.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -34,46 +34,17 @@
 
 namespace HPHP { namespace JIT {
 
-
 TRACE_SET_MOD(region);
 
 typedef hphp_hash_set<SrcKey, SrcKey::Hasher> InterpSet;
 
 namespace {
-struct RegionDescIter : public RegionIter {
-  explicit RegionDescIter(const RegionDesc& region)
-    : m_blocks(region.blocks)
-    , m_blockIter(region.blocks.begin())
-    , m_sk(m_blockIter == m_blocks.end() ? SrcKey() : (*m_blockIter)->start())
-  {}
-
-  bool finished() const { return m_blockIter == m_blocks.end(); }
-
-  SrcKey sk() const {
-    assert(!finished());
-    return m_sk;
-  }
-
-  void advance() {
-    assert(!finished());
-    assert(m_sk.func() == (*m_blockIter)->func());
-
-    if (m_sk == (*m_blockIter)->last()) {
-      ++m_blockIter;
-      if (!finished()) m_sk = (*m_blockIter)->start();
-    } else {
-      m_sk.advance();
-    }
-  }
-
- private:
-  const std::vector<RegionDesc::BlockPtr>& m_blocks;
-  std::vector<RegionDesc::BlockPtr>::const_iterator m_blockIter;
-  SrcKey m_sk;
-};
+///////////////////////////////////////////////////////////////////////////////
 
 struct RegionFormer {
-  RegionFormer(const RegionContext& ctx, InterpSet& interp, int inlineDepth,
+  RegionFormer(const RegionContext& ctx,
+               InterpSet& interp,
+               const InliningDecider& inl,
                bool profiling);
 
   RegionDescPtr go();
@@ -93,14 +64,13 @@ private:
   RefDeps m_refDeps;
   uint32_t m_numJmps;
 
-  const int m_inlineDepth;
+  InliningDecider m_inl;
   const bool m_profiling;
 
   const Func* curFunc() const;
   const Unit* curUnit() const;
   Offset curSpOffset() const;
   bool resumed() const;
-  int inliningDepth() const;
 
   bool prepareInstruction();
   void addInstruction();
@@ -111,8 +81,10 @@ private:
   void truncateLiterals();
 };
 
-RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
-                           int inlineDepth, bool profiling)
+RegionFormer::RegionFormer(const RegionContext& ctx,
+                           InterpSet& interp,
+                           const InliningDecider& inl,
+                           bool profiling)
   : m_ctx(ctx)
   , m_interp(interp)
   , m_sk(ctx.func, ctx.bcOffset, ctx.resumed)
@@ -129,7 +101,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
   , m_ht(m_irTrans.hhbcTrans())
   , m_arStates(1)
   , m_numJmps(0)
-  , m_inlineDepth(inlineDepth)
+  , m_inl(inl)
   , m_profiling(profiling)
 {}
 
@@ -147,10 +119,6 @@ Offset RegionFormer::curSpOffset() const {
 
 bool RegionFormer::resumed() const {
   return m_ht.resumed();
-}
-
-int RegionFormer::inliningDepth() const {
-  return m_inlineDepth + m_ht.inliningDepth();
 }
 
 RegionDescPtr RegionFormer::go() {
@@ -211,20 +179,23 @@ RegionDescPtr RegionFormer::go() {
       break;
     }
 
+    // If we just translated a return from an inlined call, grab the updated
+    // SrcKey from m_ht and clean up.
+    if (inlineReturn) {
+      m_inl.registerEndInlining(m_sk.func());
+      m_sk = m_ht.curSrcKey().advanced(curUnit());
+      m_arStates.pop_back();
+      m_blockFinished = true;
+      continue;
+    }
+
     // We successfully translated the instruction, so update m_sk.
     m_sk.advance(m_curBlock->unit());
 
     auto const breakTracelet = m_inst.breaksTracelet ||
       (m_profiling && instrBreaksProfileBB(&m_inst));
 
-    if (inlineReturn) {
-      // If we just translated a return from an inlined call, grab the updated
-      // SrcKey from m_ht and clean up.
-      m_sk = m_ht.curSrcKey().advanced(curUnit());
-      m_arStates.pop_back();
-      m_blockFinished = true;
-      continue;
-    } else if (breakTracelet) {
+    if (breakTracelet) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
       break;
     } else {
@@ -243,8 +214,9 @@ RegionDescPtr RegionFormer::go() {
   }
 
   printUnit(2, m_ht.unit(),
-            inliningDepth() ? " after inlining tracelet formation "
-                            : " after tracelet formation ",
+            m_inl.depth() || m_inl.disabled()
+              ? " after inlining tracelet formation "
+              : " after tracelet formation ",
             nullptr, nullptr, m_ht.irBuilder().guards());
 
   if (m_region && !m_region->blocks.empty()) {
@@ -357,7 +329,11 @@ void RegionFormer::addInstruction() {
 }
 
 bool RegionFormer::traceThroughJmp() {
-  bool inlining = inliningDepth();
+  // This flag means "if we are currently inlining, or we are generating a
+  // tracelet for inlining analysis".  The latter is the case when inlining is
+  // disabled (because our caller wants to peek at our region without us
+  // inlining ourselves).
+  bool inlining = m_inl.depth() || m_inl.disabled();
 
   // We only trace through unconditional jumps and conditional jumps with const
   // inputs while inlining.
@@ -411,17 +387,13 @@ bool RegionFormer::tryInline() {
   assert(m_inst.func() == curFunc());
   assert(m_sk.resumed() == resumed());
 
-  if (!canInlineAt(m_inst, *m_region)) return false;
+  if (!m_inl.canInlineAt(m_inst, *m_region)) return false;
 
   auto refuse = [this](const std::string& str) {
     FTRACE(2, "selectTracelet not inlining {}: {}\n",
            m_inst.toString(), str);
     return false;
   };
-
-  if (inliningDepth() >= RuntimeOption::EvalHHIRInliningMaxDepth) {
-    return refuse("inlining level would be too deep");
-  }
 
   auto callee = m_inst.funcd;
 
@@ -457,13 +429,12 @@ bool RegionFormer::tryInline() {
 
   FTRACE(1, "selectTracelet analyzing callee {} with context:\n{}",
          callee->fullName()->data(), show(ctx));
-  auto region = selectTracelet(ctx, inliningDepth() + 1, m_profiling);
+  auto region = selectTracelet(ctx, m_profiling, false /* noinline */);
   if (!region) {
     return refuse("failed to select region in callee");
   }
 
-  RegionDescIter iter(*region);
-  if (!shouldIRInline(curFunc(), callee, iter)) {
+  if (!m_inl.shouldInline(callee, *region)) {
     return refuse("shouldIRInline failed");
   }
   return true;
@@ -569,25 +540,21 @@ void RegionFormer::recordDependencies() {
   }
 
 }
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
-/*
- * Region selector that attempts to form the longest possible region using the
- * given context. The region will be broken before the first instruction that
- * attempts to consume an input with an insufficiently precise type, or after
- * most control flow instructions.
- *
- * May return a null region if the given RegionContext doesn't have
- * enough information to translate at least one instruction.
- */
-RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
-                             bool profiling) {
+RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
+                             bool allowInlining /* = true */) {
   Timer _t(Timer::selectTracelet);
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;
 
-  while (!(region = RegionFormer(ctx, interp, inlineDepth, profiling).go())) {
+  InliningDecider inl;
+  if (!allowInlining) inl.disable();
+
+  while (!(region = RegionFormer(ctx, interp, inl, profiling).go())) {
     ++tries;
   }
 
@@ -596,8 +563,8 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
     return RegionDescPtr { nullptr };
   }
 
-  FTRACE(1, "selectTracelet returning, inlineDepth {}, {} tries:\n{}\n",
-         inlineDepth, tries, show(*region));
+  FTRACE(1, "selectTracelet returning, inlining {}, {} tries:\n{}\n",
+         allowInlining ? "allowed" : "disallowed", tries, show(*region));
   if (region->blocks.back()->length() == 0) {
     // If the final block is empty because it would've only contained
     // instructions producing literal values, kill it.

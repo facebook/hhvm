@@ -86,73 +86,72 @@ namespace HPHP {
 namespace Trace {
 
 #define TRACE_MODULES \
-      TM(tprefix)     /* Meta: prefix with string */          \
+      TM(tprefix)     /* Meta: prefix with string */  \
       TM(traceAsync)  /* Meta: lazy writes to disk */ \
-      TM(trans)       \
-      TM(mcg)        \
-      TM(mcgstats)   \
-      TM(ringbuffer)  \
-      TM(ustubs)      \
-      TM(unwind)      \
-      TM(txlease)     \
-      TM(fixup)       \
-      TM(tcspace)     \
-      TM(targetcache) \
-      TM(treadmill)   \
-      TM(regalloc)    \
-      TM(bcinterp)    \
-      TM(interpOne)   \
-      TM(dispatchBB)  \
-      TM(refcount)    \
-      TM(asmx64)      \
-      TM(runtime)     \
-      TM(debugger)    \
-      TM(debuggerflow) \
-      TM(debuginfo)   \
-      TM(stats)       \
-      TM(emitter)     \
-      TM(hhbbc)       \
-      TM(hhbbc_index) \
-      TM(hhbbc_time)  \
-      TM(hhbbc_emit)  \
-      TM(hhbbc_dump)  \
-      TM(hhbbc_dce)   \
-      TM(hhbc)        \
-      TM(stat)        \
-      TM(fr)          \
-      TM(intercept)   \
-      TM(txdeps)      \
-      TM(typeProfile) \
-      TM(hhir)        \
-      TM(printir)     \
-      TM(pgo)         \
+      TM(asmx64)        \
+      TM(atomicvector)  \
+      TM(bcinterp)      \
+      TM(datablock)     \
+      TM(debugger)      \
+      TM(debuggerflow)  \
+      TM(debuginfo)     \
+      TM(dispatchBB)    \
+      TM(emitter)       \
+      TM(fixup)         \
+      TM(fr)            \
+      TM(gc)            \
+      TM(heap)          \
+      TM(hhas)          \
+      TM(hhbbc)         \
+      TM(hhbbc_dce)     \
+      TM(hhbbc_dump)    \
+      TM(hhbbc_emit)    \
+      TM(hhbbc_index)   \
+      TM(hhbbc_time)    \
+      TM(hhbc)          \
+      TM(hhir)          \
       TM(hhirTracelets) \
-      TM(gc)          \
-      TM(instancebits)\
-      TM(hhas)        \
-      TM(statgroups)  \
-      TM(minstr)      \
-      TM(region)      \
-      TM(atomicvector)\
-      TM(datablock)   \
-      TM(jittime)     \
-      TM(xenon)       \
-      TM(xls)         \
-      TM(rat)         \
-      TM(hhir_dce)    \
+      TM(hhir_dce)      \
       TM(hhir_refcount) \
+      TM(inlining)      \
+      TM(instancebits)  \
+      TM(intercept)     \
+      TM(interpOne)     \
+      TM(jittime)       \
+      TM(mcg)           \
+      TM(mcgstats)      \
+      TM(minstr)        \
+      TM(pgo)           \
+      TM(printir)       \
+      TM(rat)           \
+      TM(refcount)      \
+      TM(regalloc)      \
+      TM(region)        \
+      TM(ringbuffer)    \
+      TM(runtime)       \
+      TM(servicereq)    \
+      TM(smartalloc)    \
+      TM(stat)          \
+      TM(statgroups)    \
+      TM(stats)         \
+      TM(targetcache)   \
+      TM(tcspace)       \
+      TM(trans)         \
+      TM(treadmill)     \
+      TM(txdeps)        \
+      TM(txlease)       \
+      TM(typeProfile)   \
+      TM(unwind)        \
+      TM(ustubs)        \
+      TM(xenon)         \
+      TM(xls)           \
       /* Stress categories, to exercise rare paths */ \
-      TM(stress_txInterpPct)    \
-      TM(stress_txInterpSeed)   \
+      TM(stress_txInterpPct)  \
+      TM(stress_txInterpSeed) \
       /* Jit bisection interval */ \
-      TM(txOpBisectLow) \
-      TM(txOpBisectHigh) \
-      /* smart alloc */ \
-      TM(smartalloc) \
-      /* Heap tracing */ \
-      TM(heap) \
-      TM(servicereq) \
-      /* Temporary catetories, to save compilation time */ \
+      TM(txOpBisectLow)   \
+      TM(txOpBisectHigh)  \
+      /* Temporary categories, to save compilation time */ \
       TM(tmp0)  TM(tmp1)  TM(tmp2)  TM(tmp3)               \
       TM(tmp4)  TM(tmp5)  TM(tmp6)  TM(tmp7)               \
       TM(tmp8)  TM(tmp9)  TM(tmp10) TM(tmp11)              \

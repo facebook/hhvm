@@ -433,7 +433,6 @@ public:
   F(uint32_t, HHIRNumFreeRegs,         64)                              \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(uint32_t, HHIRInliningMaxCost,     13)                              \
-  F(uint32_t, HHIRAlwaysInlineMaxCost, 10)                              \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \

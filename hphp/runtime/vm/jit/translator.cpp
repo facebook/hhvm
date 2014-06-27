@@ -1675,6 +1675,7 @@ Translator::translateRegion(const RegionDesc& region,
         always_assert(RuntimeOption::EvalJitLoops ||
                       RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
         irb.clearBlockState(irBlock);
+        irb.state().clearCurrentLocals();
       }
       ht.irBuilder().startBlock(irBlock);
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);

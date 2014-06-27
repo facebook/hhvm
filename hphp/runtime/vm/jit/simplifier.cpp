@@ -1459,10 +1459,9 @@ SSATmp* Simplifier::simplifyConvToArr(const IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvArrToBool(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    if (src->arrVal()->empty()) {
-      return cns(false);
-    }
-    return cns(true);
+    // const_cast is safe. We're only making use of a cell helper.
+    auto arr = const_cast<ArrayData*>(src->arrVal());
+    return cns(cellToBool(make_tv<KindOfArray>(arr)));
   }
   return nullptr;
 }

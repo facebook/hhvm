@@ -5,7 +5,8 @@ TOP=..
 TARGET=lib
 
 SRC= clientEnv.ml clientExceptions.ml  clientUtils.ml colorFile.ml \
-  clientStop.ml clientColorFile.ml clientStart.ml clientCommand.ml \
+  clientStop.ml hackClientStop.ml \
+  clientColorFile.ml clientStart.ml clientCommand.ml \
   clientArgs.ml \
   clientBuild.ml clientProlog.ml clientStatus.ml clientCheckStatus.ml \
   clientMethodJumps.ml \
@@ -34,4 +35,3 @@ $(TARGET).cma: $(OBJS)
 
 $(TARGET).cmxa: $(OBJS:.cmo=.cmx) $(LIBS:.cma=.cmxa)
 	$(OCAMLOPT) -a -o $@ $^
-

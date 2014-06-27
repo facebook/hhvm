@@ -10,13 +10,16 @@
 
 type env = {
   root: Path.path;
-  wait: bool;
 }
 
-let main env =
-  if ClientUtils.server_exists env.root
-  then begin
-    HackClientStop.kill_server env.root;
-    ClientStart.start_server ~wait:env.wait env.root
-  end else Printf.fprintf stderr "Error: no server to restart for %s\n%!"
-    (Path.string_of_path env.root)
+module type STOP_CONFIG = sig
+  val server_desc : string
+  val server_name : string
+end
+
+module type STOP_COMMAND = sig
+  val kill_server : env -> unit
+  val main : env -> unit
+end
+
+module StopCommand (Config : STOP_CONFIG) : STOP_COMMAND

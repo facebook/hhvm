@@ -22,23 +22,23 @@ type env = {
 }
 
 let rec wait env =
-  begin try 
+  begin try
     Unix.sleep(1);
     ignore(ClientUtils.connect env.root);
     Printf.fprintf stderr "Done waiting!\n%!"
-  with 
+  with
   | Server_initializing ->
     Printf.fprintf stderr "Waiting for server to initialize\n%!";
     wait env
-  | e -> 
+  | e ->
     Printf.fprintf stderr
       "Error: something went wrong while waiting for the server to start up\n%s\n%!"
       (Printexc.to_string e);
     exit 77
   end
 
-let start_server env = 
-  Printf.fprintf stderr "Server launched for %s\n%!" 
+let start_server env =
+  Printf.fprintf stderr "Server launched for %s\n%!"
     (Path.string_of_path env.root);
   let hh_server =  Printf.sprintf "%s -d %s"
     (get_hhserver())
@@ -49,7 +49,7 @@ let start_server env =
   if env.wait then wait env;
   ()
 
-let should_start env = 
+let should_start env =
   if ClientUtils.server_exists env.root
   then begin
     try
@@ -60,45 +60,45 @@ let should_start env =
       ServerMsg.cmd_to_channel oc ServerMsg.PING;
       let response = ServerMsg.response_from_channel ic in
       ignore (Unix.alarm 0);
-      match response with 
+      match response with
       | ServerMsg.PONG -> false
-      | ServerMsg.SERVER_OUT_OF_DATE -> 
-          Printf.fprintf 
+      | ServerMsg.SERVER_OUT_OF_DATE ->
+          Printf.fprintf
             stderr
             "Replacing out of date server for %s\n%!"
             (Path.string_of_path env.root);
           ignore(Unix.sleep 1);
-          true 
-      | ServerMsg.SERVER_DYING 
+          true
+      | ServerMsg.SERVER_DYING
       | ServerMsg.NO_ERRORS
       | ServerMsg.ERRORS _
       | ServerMsg.DIRECTORY_MISMATCH _ ->
         let r = (ServerMsg.response_to_string response) in
         failwith ("Unexpected response from the server: "^r)
-    with 
-      | Server_busy -> 
-          Printf.fprintf 
-            stderr 
+    with
+      | Server_busy ->
+          Printf.fprintf
+            stderr
             "Replacing busy server for %s\n%!"
             (Path.string_of_path env.root);
-          ClientStop.kill_server env.root;
+          HackClientStop.kill_server env.root;
           true
-      | Server_initializing -> 
-          Printf.fprintf 
-            stderr 
+      | Server_initializing ->
+          Printf.fprintf
+            stderr
             "Found initializing server for %s\n%!"
             (Path.string_of_path env.root);
           false
-      | Server_cant_connect -> 
-          Printf.fprintf 
-            stderr 
+      | Server_cant_connect ->
+          Printf.fprintf
+            stderr
             "Replacing unresponsive server for %s\n%!"
             (Path.string_of_path env.root);
-          ClientStop.kill_server env.root;
+          HackClientStop.kill_server env.root;
           true
   end else true
 
-let main env = 
+let main env =
   if should_start env
   then start_server env
   else begin
@@ -110,5 +110,5 @@ let main env =
     exit 77
   end
 
-let start_server ?wait:(wait=false) root = 
+let start_server ?wait:(wait=false) root =
   start_server {root = root; wait = wait;}

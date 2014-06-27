@@ -153,7 +153,9 @@ struct Value {
    * 1. realCount becomes the max of the incoming value;
    * 2. fromLoad is set if either incoming value has it;
    * 3. pendingIncs is truncated to the size of the smaller of the two, then
-   *    the sets at each index are merged.
+   *    the sets at each index are merged. The two can differ when a value's
+   *    count is observed in one branch of a conditional but not the other, and
+   *    it's safe because any differences are resolved in mergeStates().
    */
   void merge(const Value& other, const IRUnit& unit) {
     auto showFailure = [&] {
@@ -205,7 +207,7 @@ struct Value {
   /* fromLoad represents whether or not the value came from a load
    * instruction. This optimization is based on the idea of producing and
    * consuming references, and most of our load instructions sometimes produce
-   * a reference and sometimes don't. Rather that splitting up all the loads
+   * a reference and sometimes don't. Rather than splitting up all the loads
    * into two flavors, we allow consumption of a value from a load even if
    * there appear to be no live references. */
   bool fromLoad;

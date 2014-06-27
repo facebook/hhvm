@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_shell.h"
+#include "hphp/util/mem.h"
 #include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
@@ -61,7 +62,7 @@ void CmdShell::onClient(DebuggerClient &client) {
 
 bool CmdShell::onServer(DebuggerProxy &proxy) {
   const char **argv =
-    (const char **)malloc((m_args.size() + 1) * sizeof(char*));
+    (const char **)mem_malloc_array(m_args.size() + 1, sizeof(char*));
   for (unsigned int i = 0; i < m_args.size(); i++) {
     argv[i] = (char*)m_args[i].c_str();
   }

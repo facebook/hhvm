@@ -515,8 +515,8 @@ static int parse_opts(const char * opts, int opts_len, opt_struct **result) {
     }
   }
 
-  opt_struct *paras = (opt_struct *)smart_malloc(sizeof(opt_struct) * count);
-  memset(paras, 0, sizeof(opt_struct) * count);
+  opt_struct *paras = (opt_struct *)smart_calloc(count, sizeof(opt_struct));
+
   *result = paras;
   while ((*opts >= 48 && *opts <= 57) ||  /* 0 - 9 */
          (*opts >= 65 && *opts <= 90) ||  /* A - Z */
@@ -585,7 +585,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
   static const StaticString s_argv("argv");
   Array vargv = php_global(s_argv).toArray();
   int argc = vargv.size();
-  char **argv = (char **)smart_malloc((argc+1) * sizeof(char*));
+  char **argv = (char **)smart_malloc_array(argc+1, sizeof(char*));
   std::vector<String> holders;
   int index = 0;
   for (ArrayIter iter(vargv); iter; ++iter) {

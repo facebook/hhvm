@@ -74,8 +74,10 @@ MemoryManager& MM();
  * pointer.
  */
 void* smart_malloc(size_t nbytes);
+void* smart_malloc_array(size_t nmemb, size_t bytes);
 void* smart_calloc(size_t count, size_t bytes);
 void* smart_realloc(void* ptr, size_t nbytes);
+void* smart_realloc_array(void* ptr, size_t nmemb, size_t nbytes);
 void  smart_free(void* ptr);
 
 /*
@@ -462,8 +464,10 @@ public:
 private:
   friend class StringData; // for enlist/delist access to m_strings
   friend void* smart_malloc(size_t nbytes);
+  friend void* smart_malloc_array(size_t nmemb, size_t bytes);
   friend void* smart_calloc(size_t count, size_t bytes);
   friend void* smart_realloc(void* ptr, size_t nbytes);
+  friend void* smart_realloc_array(void* ptr, size_t nmemb, size_t nbytes);
   friend void  smart_free(void* ptr);
 
   struct SmallNode;

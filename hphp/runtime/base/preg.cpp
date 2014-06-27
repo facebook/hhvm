@@ -348,7 +348,7 @@ static int *create_offset_array(const pcre_cache_entry *pce,
   }
   num_subpats++;
   size_offsets = num_subpats * 3;
-  return (int *)smart_malloc(size_offsets * sizeof(int));
+  return (int *)smart_malloc_array(size_offsets, sizeof(int));
 }
 
 /*

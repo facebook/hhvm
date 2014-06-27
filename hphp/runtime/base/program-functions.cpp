@@ -37,6 +37,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/embedded-data.h"
+#include "hphp/util/mem.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/light-process.h"
@@ -880,7 +881,7 @@ static void prepare_args(int &argc,
                          char **&argv,
                          const std::vector<std::string> &args,
                          const char *file) {
-  argv = (char **)malloc((args.size() + 2) * sizeof(char*));
+  argv = (char **)mem_malloc_array(args.size() + 2, sizeof(char*));
   argc = 0;
   if (file && *file) {
     argv[argc++] = (char*)file;

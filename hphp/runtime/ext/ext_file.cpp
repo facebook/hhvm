@@ -38,6 +38,7 @@
 #include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/mem.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/base/file-util.h"
 #include "folly/String.h"
@@ -793,7 +794,7 @@ bool f_is_writable(const String& filename) {
   } else {
     int groups = getgroups(0, NULL);
     if (groups > 0) {
-      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
+      gid_t *gids = (gid_t *)mem_malloc_array(groups, sizeof(gid_t));
       int n = getgroups(groups, gids);
       for (int i = 0; i < n; i++) {
         if (sb.st_gid == gids[i]) {
@@ -829,7 +830,7 @@ bool f_is_readable(const String& filename) {
   } else {
     int groups = getgroups(0, NULL);
     if (groups > 0) {
-      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
+      gid_t *gids = (gid_t *)mem_malloc_array(groups, sizeof(gid_t));
       int n = getgroups(groups, gids);
       for (int i = 0; i < n; i++) {
         if (sb.st_gid == gids[i]) {
@@ -860,7 +861,7 @@ bool f_is_executable(const String& filename) {
   } else {
     int groups = getgroups(0, NULL);
     if (groups > 0) {
-      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
+      gid_t *gids = (gid_t *)mem_malloc_array(groups, sizeof(gid_t));
       int n = getgroups(groups, gids);
       for (int i = 0; i < n; i++) {
         if (sb.st_gid == gids[i]) {

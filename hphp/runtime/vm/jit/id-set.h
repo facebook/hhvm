@@ -114,7 +114,7 @@ private:
     if (n <= m_cap * kBits) return bits();
     auto cap = (n + kBits - 1) / kBits;
     if (m_cap == 1) {
-      auto ptr = (size_t*)smart_malloc(cap * sizeof(size_t));
+      auto ptr = (size_t*)smart_malloc_array(cap, sizeof(size_t));
       ptr[0] = m_bits;
       m_bitsptr = ptr;
     } else {

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/util/mem.h"
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -879,7 +880,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
     return true;
   }
 
-  int *indices = (int *)malloc(sizeof(int) * count);
+  int *indices = (int *)mem_malloc_array(count, sizeof(int));
   for (int i = 0; i < count; i++) {
     indices[i] = i;
   }

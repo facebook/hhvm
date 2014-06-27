@@ -552,7 +552,30 @@ void* smart_malloc(size_t nbytes) {
   return mm.debugPostAllocate(mm.smartMalloc(size), 0, 0);
 }
 
+void* smart_malloc_array(size_t count, size_t nbytes)
+{
+  if (nbytes != 0u && SIZE_MAX / nbytes < count) {
+    errno = ENOMEM;
+    return NULL;
+  }
+
+  auto& mm = MM();
+  auto const totalBytes = std::max<size_t>(count * nbytes, 1);
+  if (totalBytes <= kMaxSmartSize) {
+    return smart_malloc(totalBytes);
+  }
+  auto const withExtra = mm.debugAddExtra(totalBytes);
+  return mm.debugPostAllocate(
+    mm.smartCallocBig(withExtra), 0, 0
+  );
+}
+
 void* smart_calloc(size_t count, size_t nbytes) {
+  if (nbytes != 0u && SIZE_MAX / nbytes < count) {
+    errno = ENOMEM;
+    return NULL;
+  }
+
   auto& mm = MM();
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
   if (totalBytes <= kMaxSmartSize) {
@@ -572,6 +595,22 @@ void* smart_realloc(void* ptr, size_t nbytes) {
     return nullptr;
   }
   return mm.smartRealloc(ptr, nbytes);
+}
+
+void* smart_realloc_array(void* ptr, size_t count, size_t nbytes) {
+  if (nbytes != 0u && SIZE_MAX / nbytes < count) {
+    errno = ENOMEM;
+    return NULL;
+  }
+  size_t total = nbytes * count;
+
+  auto& mm = MM();
+  if (!ptr) return smart_malloc(total);
+  if (!total) {
+    smart_free(ptr);
+    return nullptr;
+  }
+  return mm.smartRealloc(ptr, total);
 }
 
 void smart_free(void* ptr) {

@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include "hphp/util/assertions.h"
 #include "hphp/util/compact-sized-ptr.h"
+#include "hphp/util/mem.h"
 
 namespace HPHP {
 
@@ -56,7 +57,7 @@ struct FixedVector {
     }
 
     auto const ptr = neededSize > 0
-      ? static_cast<T*>(malloc(neededSize * sizeof(T)))
+      ? static_cast<T*>(mem_malloc_array(neededSize, sizeof(T)))
       : nullptr;
 
     size_t i = 0;

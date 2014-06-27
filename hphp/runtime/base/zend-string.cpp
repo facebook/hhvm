@@ -1669,8 +1669,8 @@ int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
     return -1;
   }
 
-  p1 = (int*)smart_malloc((l2+1) * sizeof(int));
-  p2 = (int*)smart_malloc((l2+1) * sizeof(int));
+  p1 = (int*)smart_malloc_array(l2+1, sizeof(int));
+  p2 = (int*)smart_malloc_array(l2+1, sizeof(int));
 
   for(i2=0;i2<=l2;i2++) {
     p1[i2] = i2*cost_ins;

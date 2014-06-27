@@ -34,11 +34,6 @@ Variant f_simplexml_load_file(const String& filename,
                               const String& class_name = "SimpleXMLElement",
                               int64_t options = 0, const String& ns = "",
                               bool is_prefix = false);
-Variant f_libxml_get_errors();
-Variant f_libxml_get_last_error();
-void f_libxml_clear_errors();
-bool f_libxml_use_internal_errors(bool use_errors = false);
-bool f_libxml_disable_entity_loader(bool disable = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXMLElement
@@ -136,20 +131,6 @@ class c_SimpleXMLElementIterator : public ExtObjectData {
 
 public:
   c_SimpleXMLElement* sxe;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class LibXMLError
-
-FORWARD_DECLARE_CLASS(LibXMLError);
-
-class c_LibXMLError : public ExtObjectData {
- public:
-  DECLARE_CLASS_NO_SWEEP(LibXMLError)
-
-  public: c_LibXMLError(Class* cls = c_LibXMLError::classof());
-  public: ~c_LibXMLError();
-  public: void t___construct();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

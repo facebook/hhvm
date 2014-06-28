@@ -156,6 +156,9 @@ Variant f_class_implements(const Variant& obj, bool autoload /* = true */) {
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
     if (!cls) {
+      String err = "class_implements(): Class %s does not exist";
+      if (autoload) err += " and could not be loaded";
+      raise_warning(err.c_str(), obj.toString().c_str());
       return false;
     }
   } else if (obj.isObject()) {
@@ -176,6 +179,9 @@ Variant f_class_parents(const Variant& obj, bool autoload /* = true */) {
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
     if (!cls) {
+      String err = "class_parents(): Class %s does not exist";
+      if (autoload) err += " and could not be loaded";
+      raise_warning(err.c_str(), obj.toString().c_str());
       return false;
     }
   } else if (obj.isObject()) {

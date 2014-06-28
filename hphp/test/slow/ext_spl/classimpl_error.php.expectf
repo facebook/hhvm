@@ -1,0 +1,7 @@
+Warning: class_implements(): Class bbb does not exist in %s
+
+Warning: class_implements(): Class bbb does not exist and could not be loaded in %s
+
+Warning: class_parents(): Class bbb does not exist in %s
+
+Warning: class_parents(): Class bbb does not exist and could not be loaded in %s

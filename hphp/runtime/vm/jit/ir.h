@@ -695,8 +695,7 @@ O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \
 O(CIterFree,                        ND, S(FramePtr),                   E|NNT) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(BaseG,                   D(PtrToGen), C(TCA)                                \
-                                          S(Str)                              \
-                                          S(PtrToCell),               E|N|Er) \
+                                          S(Str),                     E|N|Er) \
 O(PropX,                   D(PtrToGen), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \

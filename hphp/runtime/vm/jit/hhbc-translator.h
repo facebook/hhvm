@@ -594,15 +594,15 @@ private:
     void emitMapGet(SSATmp* key);
     void emitMapIsset();
 
-    // Generate a catch trace that does not perform any final DecRef operations
+    // Generate a catch block that does not perform any final DecRef operations
     // on scratch space, and return its first block.
     Block* makeEmptyCatch();
 
-    // Generate a catch trace that will contain DecRef instructions for tvRef
+    // Generate a catch block that will contain DecRef instructions for tvRef
     // and/or tvRef2 as required; return the first block.
     Block* makeCatch();
 
-    // Generate a catch trace that will free any scratch space used and perform
+    // Generate a catch block that will free any scratch space used and perform
     // a side-exit from a failed set operation, return the first block.
     Block* makeCatchSet();
 
@@ -617,7 +617,7 @@ private:
     SSATmp* getKey();
     SSATmp* getValue();
     SSATmp* getValAddr();
-    void    constrainBase(TypeConstraint tc, SSATmp* value = nullptr);
+    void    constrainBase(TypeConstraint tc);
     SSATmp* checkInitProp(SSATmp* baseAsObj,
                           SSATmp* propAddr,
                           PropInfo propOffset,

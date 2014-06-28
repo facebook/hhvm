@@ -259,6 +259,8 @@ void HhbcTranslator::MInstrTranslator::emit() {
 // Returns a pointer to the base of the current MInstrState struct, or
 // a null pointer if it's not needed.
 SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
+  assert(m_base && "genMisPtr called before emitBaseOp");
+
   if (m_needMIS) {
     return gen(LdMIStateAddr, m_misBase, cns(kReservedRSPSpillSpace));
   } else {
@@ -310,24 +312,25 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
     return;
   }
 
-  // DataTypeGeneric is used here because if we can't prove anything useful
-  // about the operation, this function doesn't care what the type is.
-  auto baseVal = getBase(DataTypeGeneric);
-  Type baseType = baseVal->type();
-  const bool baseArr = baseType <= Type::Arr;
-  const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
-  const bool isSetM = m_ni.mInstrOp() == OpSetM;
-  const bool isIssetM = m_ni.mInstrOp() == OpIssetM;
-  const bool isUnsetM = m_ni.mInstrOp() == OpUnsetM;
-  const bool isSingle = m_ni.immVecM.size() == 1;
+  Type baseType             = m_base->type().derefIfPtr();
+  const bool baseArr        = baseType <= Type::Arr;
+  const bool isCGetM        = m_ni.mInstrOp() == OpCGetM;
+  const bool isSetM         = m_ni.mInstrOp() == OpSetM;
+  const bool isIssetM       = m_ni.mInstrOp() == OpIssetM;
+  const bool isUnsetM       = m_ni.mInstrOp() == OpUnsetM;
+  const bool isSingle       = m_ni.immVecM.size() == 1;
   const bool unknownOffsets = mInstrHasUnknownOffsets(m_ni, contextClass());
 
   if (baseType.maybeBoxed() && !baseType.isBoxed()) {
     // We don't need to bother with weird base types.
     return;
   }
-  baseType = baseType.unbox();
 
+  // Type::unbox() is a little dangerous since it can be more specific than
+  // what LdRef actually returns, but in all cases where the base value comes
+  // from a LdRef, m_base will be the dest of that LdRef and unbox() will be a
+  // no-op here.
+  baseType = baseType.unbox();
 
   // CGetM or SetM with no unknown property offsets
   const bool simpleProp = !unknownOffsets && (isCGetM || isSetM);
@@ -365,20 +368,26 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
       simpleArrayIsset || simpleStringOp) {
     setNoMIState();
     if (simpleCollectionGet || simpleCollectionIsset) {
-      constrainBase(TypeConstraint(baseType.getClass()), baseVal);
+      constrainBase(TypeConstraint(baseType.getClass()));
     } else {
-      constrainBase(DataTypeSpecific, baseVal);
+      constrainBase(DataTypeSpecific);
     }
   }
 }
 
 void HhbcTranslator::MInstrTranslator::emitMPre() {
-  checkMIState();
-
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::minstr, 1)) {
     emitMTrace();
   }
 
+  // The base location is input 0 or 1, and the location code is stored
+  // separately from m_ni.immVecM, so input indices (iInd) and member indices
+  // (mInd) commonly differ.  Additionally, W members have no corresponding
+  // inputs, so it is necessary to track the two indices separately.
+  emitBaseOp();
+  ++m_iInd;
+
+  checkMIState();
   if (m_needMIS) {
     m_misBase = gen(DefMIStateBase);
     SSATmp* uninit = cns(Type::Uninit);
@@ -388,13 +397,6 @@ void HhbcTranslator::MInstrTranslator::emitMPre() {
       gen(StMem, m_misBase, cns(MISOFF(tvRef2)), uninit);
     }
   }
-
-  // The base location is input 0 or 1, and the location code is stored
-  // separately from m_ni.immVecM, so input indices (iInd) and member indices
-  // (mInd) commonly differ.  Additionally, W members have no corresponding
-  // inputs, so it is necessary to track the two indices separately.
-  emitBaseOp();
-  ++m_iInd;
 
   // Iterate over all but the last member, which is consumed by a final
   // operation.
@@ -508,20 +510,17 @@ SSATmp* HhbcTranslator::MInstrTranslator::getValAddr() {
   }
 }
 
-void HhbcTranslator::MInstrTranslator::constrainBase(TypeConstraint tc,
-                                                     SSATmp* value) {
-  if (!value) value = m_base;
-
+void HhbcTranslator::MInstrTranslator::constrainBase(TypeConstraint tc) {
   // Member operations only care about the inner type of the base if it's
   // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
-  auto baseType = value->type().derefIfPtr();
+  auto baseType = m_base->type().derefIfPtr();
 
   if (baseType.maybeBoxed()) {
     tc.innerCat = tc.category;
     tc.category = DataTypeCountness;
   }
-  m_irb.constrainValue(value, tc);
+  m_irb.constrainValue(m_base, tc);
 }
 
 SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
@@ -587,11 +586,8 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
   }
 
   // If the base is a box with a type that's changed, we need to bail out of
-  // the tracelet and retranslate. Doing an exit here is a little sketchy since
-  // we may have already emitted instructions with memory effects to initialize
-  // the MInstrState. These particular stores are harmless though, and the
-  // worst outcome here is that we'll end up doing the stores twice, once for
-  // this instruction and once at the beginning of the retranslation.
+  // the tracelet and retranslate. This is the first code emitted for the
+  // minstr so it's ok to side-exit here.
   Block* failedRef = baseType.isBoxed() ? m_ht.makeExit() : nullptr;
   if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
        mcodeIsProp(m_ni.immVecM[0])) ||
@@ -650,7 +646,7 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
   // constrain the base as appropriate.
 
   SSATmp* base = getInput(m_mii.valCount(), DataTypeGeneric);
-  auto baseType = base->type().unbox();
+  auto baseType = ldRefReturn(base->type().unbox());
   HPHP::Op op = m_ni.mInstrOp();
   bool readInst = (op == OpCGetM || op == OpIssetM);
   if ((op == OpSetM || readInst) &&
@@ -712,8 +708,7 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
 }
 
 void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
-  auto type = simpleCollectionOp();
-  switch (type) {
+  switch (simpleCollectionOp()) {
     case SimpleOp::None:
       return;
 
@@ -731,7 +726,8 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
     case SimpleOp::Map:
     case SimpleOp::Pair: {
       SSATmp* base = getInput(m_mii.valCount(), DataTypeGeneric);
-      auto baseType = base->type().unbox();
+      auto baseType = ldRefReturn(base->type().unbox());
+      always_assert(baseType < Type::Obj);
       constrainBase(TypeConstraint(baseType.getClass()));
       return;
     }
@@ -751,7 +747,7 @@ bool HhbcTranslator::MInstrTranslator::isSingleMember() {
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseH() {
-  m_base = gen(LdThis, m_irb.fp());
+  m_base = getBase(DataTypeSpecific);
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseN() {
@@ -761,8 +757,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseN() {
 }
 
 template <bool warn, bool define>
-static inline TypedValue* baseGImpl(TypedValue key,
-                                    MInstrState* mis) {
+static inline TypedValue* baseGImpl(TypedValue key) {
   TypedValue* base;
   StringData* name = prepareKey(key);
   SCOPE_EXIT { decRefStr(name); };
@@ -789,26 +784,26 @@ static inline TypedValue* baseGImpl(TypedValue key,
 }
 
 namespace MInstrHelpers {
-TypedValue* baseG(TypedValue key, MInstrState* mis) {
-  return baseGImpl<false, false>(key, mis);
+TypedValue* baseG(TypedValue key) {
+  return baseGImpl<false, false>(key);
 }
 
-TypedValue* baseGW(TypedValue key, MInstrState* mis) {
-  return baseGImpl<true, false>(key, mis);
+TypedValue* baseGW(TypedValue key) {
+  return baseGImpl<true, false>(key);
 }
 
-TypedValue* baseGD(TypedValue key, MInstrState* mis) {
-  return baseGImpl<false, true>(key, mis);
+TypedValue* baseGD(TypedValue key) {
+  return baseGImpl<false, true>(key);
 }
 
-TypedValue* baseGWD(TypedValue key, MInstrState* mis) {
-  return baseGImpl<true, true>(key, mis);
+TypedValue* baseGWD(TypedValue key) {
+  return baseGImpl<true, true>(key);
 }
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseG() {
   const MInstrAttr& mia = m_mii.getAttr(m_ni.immVec.locationCode());
-  typedef TypedValue* (*OpFunc)(TypedValue, MInstrState*);
+  typedef TypedValue* (*OpFunc)(TypedValue);
   using namespace MInstrHelpers;
   static const OpFunc opFuncs[] = {baseG, baseGW, baseGD, baseGWD};
   OpFunc opFunc = opFuncs[mia & MIA_base];
@@ -818,8 +813,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseG() {
   m_base = gen(BaseG,
                makeEmptyCatch(),
                cns(reinterpret_cast<TCA>(opFunc)),
-               gblName,
-               genMisPtr());
+               gblName);
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseS() {
@@ -828,12 +822,12 @@ void HhbcTranslator::MInstrTranslator::emitBaseS() {
   SSATmp* clsRef = getInput(kClassIdx, DataTypeGeneric /* will be a Cls */);
 
   /*
-   * Note, the base may be a pointer to a boxed type after this.  We
-   * don't unbox here, because we never are going to generate a
-   * special translation unless we know it's not boxed, and the C++
-   * helpers for generic dims currently always conditionally unbox.
+   * Note, the base may be a pointer to a boxed type after this.  We don't
+   * unbox here, because we never are going to generate a special translation
+   * unless we know it's not boxed, and the C++ helpers for generic dims
+   * currently always conditionally unbox.
    */
-  m_base = m_ht.ldClsPropAddr(makeCatch(), clsRef, key, true);
+  m_base = m_ht.ldClsPropAddr(makeEmptyCatch(), clsRef, key, true);
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseOp() {
@@ -1925,8 +1919,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::MInstrTranslator::emitCGetElem() {
   SSATmp* key = getKey();
 
-  SimpleOp simpleOpType = simpleCollectionOp();
-  switch (simpleOpType) {
+  switch (simpleCollectionOp()) {
   case SimpleOp::Array:
     m_result = emitArrayGet(key);
     break;
@@ -2154,8 +2147,7 @@ void HhbcTranslator::MInstrTranslator::emitMapIsset() {
 #undef HELPER_TABLE
 
 void HhbcTranslator::MInstrTranslator::emitIssetElem() {
-  SimpleOp simpleOpType = simpleCollectionOp();
-  switch (simpleOpType) {
+  switch (simpleCollectionOp()) {
   case SimpleOp::Array:
   case SimpleOp::ProfiledArray:
     emitArrayIsset();
@@ -2449,18 +2441,14 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
   SSATmp* value = getValue();
   SSATmp* key = getKey();
 
-  SimpleOp simpleOpType = simpleCollectionOp();
-  assert(simpleOpType != SimpleOp::PackedArray);
-  switch (simpleOpType) {
+  switch (simpleCollectionOp()) {
   case SimpleOp::Array:
   case SimpleOp::ProfiledArray:
     emitArraySet(key, value);
     break;
   case SimpleOp::PackedArray:
-    not_reached();
-    break;
   case SimpleOp::String:
-    not_reached();
+    always_assert(false && "Bad SimpleOp in emitSetElem");
     break;
   case SimpleOp::Vector:
     emitVectorSet(key, value);

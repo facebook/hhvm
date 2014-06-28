@@ -102,7 +102,7 @@ static const char* dlerror() {
 
 Extension::Extension(litstr name, const char *version /* = "" */)
     : m_hhvmAPIVersion(HHVM_API_VERSION)
-    , m_name(makeStaticString(name))
+    , m_name(name)
     , m_version(version ? version : "") {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
@@ -258,13 +258,13 @@ Array Extension::GetLoadedExtensions() {
   assert(s_registered_extensions);
   Array ret = Array::Create();
   for (auto& kv : *s_registered_extensions) {
-    if (!apcExtension::Enable && kv.second->m_name == s_apc) {
+    if (!apcExtension::Enable && kv.second->m_name == s_apc.toCppString()) {
       continue;
     }
-    if (!RuntimeOption::EnableXHP && kv.second->m_name == s_xhp) {
+    if (!RuntimeOption::EnableXHP && kv.second->m_name == s_xhp.toCppString()) {
       continue;
     }
-    ret.append(kv.second->m_name);
+    ret.append(String(kv.second->m_name));
   }
   return ret;
 }

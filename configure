@@ -5,7 +5,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ "$1" = '--help' ] || [ "$1" = '-h' ]; then
   echo "usage: $0 -Dvariable=argument ...\n"
   echo 'Variables: '
-  options=`cat $DIR/CMake/Options.cmake | grep option |
+  options=`cat $DIR/CMake/Options.cmake | grep option | sed -e 's/^[ \t]*//' |
            sed 's/\s*option(/  -D/; s/ "/=ON|OFF : /;  
                 s/" / : Default: /; s/)$//' | sort`
   options="  -DCMAKE_BUILD_TYPE=Debug|Release|RelWithDebInfo|MinSizeRel : Sets build type \

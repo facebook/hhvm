@@ -386,6 +386,7 @@ void FastCGITransport::onHeadersComplete() {
   m_httpVersion = getRawHeader(s_httpVersion);
   m_serverObject = getRawHeader(s_scriptName);
   m_pathTranslated = getRawHeader(s_pathTranslated);
+  m_scriptFilename = getRawHeader(s_scriptFilename);
   m_documentRoot = getRawHeader(s_documentRoot);
   if (!m_documentRoot.empty() &&
       m_documentRoot[m_documentRoot.length() - 1] != '/') {

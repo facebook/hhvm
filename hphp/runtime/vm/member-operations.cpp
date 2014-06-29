@@ -77,17 +77,28 @@ bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate /* = true */) {
   auto exists = objOffsetExists(base, offset);
 
+  // If offsetExists returns false, it's always right
   if (!exists) {
     return false;
   }
 
-  if (!base->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
-    return exists;
+  // If the object we're working with is an ArrayObject, then we need to check
+  // the value at `offset`. If it's null, then we return false.
+  if (base->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
+    TypedValue tvResult;
+    tvWriteUninit(&tvResult);
+    static StringData* sd__offsetGet = makeStaticString("offsetGet");
+
+    // We can't call the offsetGet method on `base` because users aren't expecting
+    // offsetGet to be called for `isset(...)` expressions, so call the method on
+    // the base ArrayObject class.
+    const Func* method = SystemLib::s_ArrayObjectClass->lookupMethod(sd__offsetGet);
+    assert(method != nullptr);
+    g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1, offset.asCell());
+    exists = is_not_null(tvAsVariant(&tvResult));
   }
 
-  TypedValue tvResult;
-  tvWriteUninit(&tvResult);
-  return is_not_null(tvAsVariant(objOffsetGet(tvResult, base, offset)));
+  return exists;
 }
 
 bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, const Variant& offset,

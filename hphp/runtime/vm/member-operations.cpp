@@ -19,6 +19,12 @@
 
 namespace HPHP {
 
+const StaticString
+  s_offsetGet("offsetGet"),
+  s_offsetSet("offsetSet"),
+  s_offsetUnset("offsetUnset"),
+  s_offsetExists("offsetExists");
+
 StringData* prepareAnyKey(TypedValue* tv) {
   if (IS_STRING_TYPE(tv->m_type)) {
     StringData* str = tv->m_data.pstr;
@@ -50,8 +56,7 @@ TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
   }
   TypedValue* result;
   assert(!base->isCollection());
-  static StringData* sd__offsetGet = makeStaticString("offsetGet");
-  const Func* method = base->methodNamed(sd__offsetGet);
+  const Func* method = base->methodNamed(s_offsetGet.get());
   assert(method != nullptr);
   g_context->invokeFuncFew(&tvRef, method, base, nullptr, 1, offset.asCell());
   result = &tvRef;
@@ -62,10 +67,8 @@ static bool objOffsetExists(ObjectData* base, const Variant& offset) {
   objArrayAccess(base);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
-  static StringData* sd__offsetExists
-    = makeStaticString("offsetExists");
   assert(!base->isCollection());
-  const Func* method = base->methodNamed(sd__offsetExists);
+  const Func* method = base->methodNamed(s_offsetExists.get());
   assert(method != nullptr);
   g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1,
                              offset.asCell());
@@ -77,17 +80,29 @@ bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate /* = true */) {
   auto exists = objOffsetExists(base, offset);
 
+  // If offsetExists returns false, it's always right
   if (!exists) {
     return false;
   }
 
-  if (!base->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
-    return exists;
+  // If the object we're working with is an ArrayObject, then we need to check
+  // the value at `offset`. If it's null, then we return false.
+  if (base->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
+    TypedValue tvResult;
+    tvWriteUninit(&tvResult);
+
+    // We can't call the offsetGet method on `base` because users aren't
+    // expecting offsetGet to be called for `isset(...)` expressions, so call
+    // the method on the base ArrayObject class.
+    const Func* method =
+      SystemLib::s_ArrayObjectClass->lookupMethod(s_offsetGet.get());
+    assert(method != nullptr);
+    g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1,
+                             offset.asCell());
+    exists = !(tvAsVariant(&tvResult).isNull());
   }
 
-  TypedValue tvResult;
-  tvWriteUninit(&tvResult);
-  return is_not_null(tvAsVariant(objOffsetGet(tvResult, base, offset)));
+  return exists;
 }
 
 bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, const Variant& offset,
@@ -114,9 +129,8 @@ void objOffsetSet(ObjectData* base, const Variant& offset, TypedValue* val,
   if (validate) {
     objArrayAccess(base);
   }
-  static StringData* sd__offsetSet = makeStaticString("offsetSet");
   assert(!base->isCollection());
-  const Func* method = base->methodNamed(sd__offsetSet);
+  const Func* method = base->methodNamed(s_offsetSet.get());
   assert(method != nullptr);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
@@ -127,10 +141,8 @@ void objOffsetSet(ObjectData* base, const Variant& offset, TypedValue* val,
 
 void objOffsetUnset(ObjectData* base, const Variant& offset) {
   objArrayAccess(base);
-  static StringData* sd__offsetUnset
-    = makeStaticString("offsetUnset");
   assert(!base->isCollection());
-  const Func* method = base->methodNamed(sd__offsetUnset);
+  const Func* method = base->methodNamed(s_offsetUnset.get());
   assert(method != nullptr);
   TypedValue tv;
   tvWriteUninit(&tv);

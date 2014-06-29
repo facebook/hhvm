@@ -157,7 +157,7 @@ static OpndType toReg32(const OpndType& x) { return x; }
 
 template<typename OpndType>
 static inline void verifyTVOff(const OpndType& op) { /* nop */ }
-static inline void verifyTVOff(const MemoryRef& mr) {
+static inline void verifyTVOff(MemoryRef mr) {
   DEBUG_ONLY auto disp = mr.r.disp;
   // Make sure that we're operating on the m_type field of a
   // TypedValue*.

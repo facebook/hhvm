@@ -1779,18 +1779,7 @@ Reg64 getDataPtrEnregistered(Asm& as, PhysReg dataSrc, Reg64 scratch) {
 
 // Enregister the memoryRef so it can be used with an offset by the
 // cmp instruction
-Reg64 getDataPtrEnregistered(Asm& as,
-                             MemoryRef dataSrc,
-                             Reg64 scratch) {
-  as.loadq(dataSrc, scratch);
-  return scratch;
-}
-
-// Enregister the indexedMemoryRef so it can be used with an offset by the
-// cmp instruction
-Reg64 getDataPtrEnregistered(Asm& as,
-                             IndexedMemoryRef dataSrc,
-                             Reg64 scratch) {
+Reg64 getDataPtrEnregistered(Asm& as, MemoryRef dataSrc, Reg64 scratch) {
   as.loadq(dataSrc, scratch);
   return scratch;
 }
@@ -4057,8 +4046,7 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   }
 }
 
-template<class BaseRef>
-void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src, PhysLoc loc) {
+void CodeGenerator::cgStoreTypedValue(MemoryRef dst, SSATmp* src, PhysLoc loc) {
   assert(src->type().needsReg());
   auto srcReg0 = loc.reg(0);
   auto srcReg1 = loc.reg(1);
@@ -4079,8 +4067,7 @@ void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src, PhysLoc loc) {
   emitStoreTVType(m_as, srcReg1, refTVType(dst));
 }
 
-template<class BaseRef>
-void CodeGenerator::cgStore(BaseRef dst, SSATmp* src, PhysLoc srcLoc,
+void CodeGenerator::cgStore(MemoryRef dst, SSATmp* src, PhysLoc srcLoc,
                             Width width) {
   Type type = src->type();
   if (type.needsReg()) {
@@ -4105,9 +4092,8 @@ void CodeGenerator::cgStore(BaseRef dst, SSATmp* src, PhysLoc srcLoc,
   }
 }
 
-template<class BaseRef>
-void
-CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, BaseRef base, Block* label) {
+void CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, MemoryRef base,
+                           Block* label) {
   Type type = dst->type();
   if (type.needsReg()) {
     return cgLoadTypedValue(dst, dstLoc, base, label);
@@ -4127,17 +4113,11 @@ CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, BaseRef base, Block* label) {
   }
 }
 
-static MemoryRef makeMemoryRef(Asm& as, Reg64 scratch, MemoryRef value) {
-  always_assert(false);
-  return value;
-}
-
-static MemoryRef makeMemoryRef(Asm& as,
-                               Reg64 scratch,
-                               IndexedMemoryRef value) {
+static MemoryRef makeMemoryRef(Asm& as, Reg64 scratch,
+                               MemoryRef value) {
+  always_assert(int(value.r.index) != -1);
   always_assert(value.r.scale == 1); //TASK(2731486): fix this... use imul?
-  if (value.r.base != scratch &&
-      value.r.index != scratch) {
+  if (value.r.base != scratch && value.r.index != scratch) {
     as.movq(value.r.base, scratch);
     value.r.base = scratch;
   }
@@ -4151,9 +4131,8 @@ static MemoryRef makeMemoryRef(Asm& as,
 
 // If label is not null and type is not Gen, this method generates a check
 // that bails to the label if the loaded typed value doesn't match dst type.
-template<class BaseRef>
 void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
-                                     BaseRef ref, Block* label) {
+                                     MemoryRef ref, Block* label) {
   Type type = dst->type();
   auto valueDstReg = dstLoc.reg(0);
   auto typeDstReg  = dstLoc.reg(1);
@@ -4177,9 +4156,8 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
   auto origRef = ref;
   ref = resolveRegCollision(typeDstReg, ref, isResolved);
   if (!isResolved) {
-    // An InvalidReg in the base of the returned IndexedMemoryRef means
     // there was a collision with the registers that could not be resolved.
-    // Re-enter with a MemoryRef (slow path).
+    // Re-enter with a non-indexed MemoryRef (slow path).
     cgLoadTypedValue(dst, dstLoc, makeMemoryRef(m_as, m_rScratch, origRef),
                      label);
     return;
@@ -4201,17 +4179,24 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
   m_as.loadq(refTVData(ref), valueDstReg);
 }
 
-// May return an invalid IndexedMemoryRef to signal that there is no
-// register conflict resolution. Callers should take proper action to
-// solve the issue (e.g. change the IndexedMemoryRef into a
-// MemoryRef).  In this case, isResolved is passed back as false, and
-// then returned IndexedMemoryRef should be ignored.
-IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
-                                                    IndexedMemoryRef memRef,
-                                                    bool& isResolved) {
+// May set isResolved = false to signal that there is no register conflict
+// resolution. Callers should take proper action to solve the issue (e.g.
+// change the indexed MemoryRef into a base+disp MemoryRef). In this case,
+// the returned MemoryRef should be ignored.
+MemoryRef CodeGenerator::resolveRegCollision(PhysReg dst, MemoryRef memRef,
+                                             bool& isResolved) {
   isResolved = true;
   Reg64 base = memRef.r.base;
   Reg64 index = memRef.r.index;
+  if (int(index) == -1) {
+    if (base == dst) {
+      assert(base != m_rScratch);
+      // use the scratch register instead
+      m_as.movq(base, m_rScratch);
+      return m_rScratch[memRef.r.disp];
+    }
+    return memRef;
+  }
   bool scratchTaken = (base == m_rScratch || index == m_rScratch);
   if (base == dst) {
     if (scratchTaken) {
@@ -4231,19 +4216,6 @@ IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
     // use the scratch register instead
     m_as.movq(index, m_rScratch);
     return base[m_rScratch + memRef.r.disp];
-  }
-  return memRef;
-}
-
-MemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
-                                             MemoryRef memRef,
-                                             bool& isResolved) {
-  isResolved = true;
-  if (memRef.r.base == dst) {
-    assert(memRef.r.base != m_rScratch);
-    // use the scratch register instead
-    m_as.movq(memRef.r.base, m_rScratch);
-    return m_rScratch[memRef.r.disp];
   }
   return memRef;
 }

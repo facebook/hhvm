@@ -193,7 +193,7 @@ template<> struct Gen<Reg8> {
 };
 
 template<> struct Gen<MemoryRef> {
-  static const std::vector<MemoryRef>& gen() {
+  static const std::vector<MemoryRef>& gen_mr() {
     static bool inited = false;
     static std::vector<MemoryRef> vec;
     if (inited) return vec;
@@ -207,17 +207,13 @@ template<> struct Gen<MemoryRef> {
     inited = true;
     return vec;
   }
-};
-
-template<> struct Gen<IndexedMemoryRef> {
-  static const std::vector<IndexedMemoryRef>& gen() {
+  static const std::vector<MemoryRef>& gen() {
     static bool inited = false;
-    static std::vector<IndexedMemoryRef> vec;
+    static std::vector<MemoryRef> vec;
     if (inited) return vec;
     auto& indexes = Gen<Reg64>::gen();
-    auto& mrs = Gen<MemoryRef>::gen();
+    auto& mrs = Gen<MemoryRef>::gen_mr();
     std::vector<int> scales = { 4 };
-
     for (auto& mr : mrs) {
       for (auto& idx : indexes) {
         if (idx == rsp) continue;
@@ -263,19 +259,14 @@ std::string expected_str(MemoryRef mr) {
   if (mr.r.disp != 0) {
     expected_disp_str(mr.r.disp, out);
   }
-  out << '(' << expected_str(mr.r.base) << ')';
-  return out.str();
-}
-
-std::string expected_str(IndexedMemoryRef imr) {
-  std::ostringstream out;
-  if (imr.r.disp != 0) {
-    expected_disp_str(imr.r.disp, out);
+  if (int(mr.r.index) != -1) {
+    out << '(' << expected_str(mr.r.base)
+        << ',' << expected_str(mr.r.index)
+        << ',' << mr.r.scale
+        << ')';
+  } else {
+    out << '(' << expected_str(mr.r.base) << ')';
   }
-  out << '(' << expected_str(imr.r.base)
-      << ',' << expected_str(imr.r.index)
-      << ',' << imr.r.scale
-      << ')';
   return out.str();
 }
 
@@ -342,24 +333,24 @@ typedef void (Asm::*OpR8R64)(Reg8, Reg64);
 typedef void (Asm::*OpMR64)(MemoryRef, Reg64);
 typedef void (Asm::*OpMR32)(MemoryRef, Reg32);
 typedef void (Asm::*OpMR8)(MemoryRef, Reg8);
-typedef void (Asm::*OpSMR64)(IndexedMemoryRef, Reg64);
-typedef void (Asm::*OpSMR32)(IndexedMemoryRef, Reg32);
-typedef void (Asm::*OpSMR8)(IndexedMemoryRef, Reg8);
+typedef void (Asm::*OpSMR64)(MemoryRef, Reg64);
+typedef void (Asm::*OpSMR32)(MemoryRef, Reg32);
+typedef void (Asm::*OpSMR8)(MemoryRef, Reg8);
 typedef void (Asm::*OpRM64)(Reg64, MemoryRef);
 typedef void (Asm::*OpRM32)(Reg32, MemoryRef);
 typedef void (Asm::*OpRM8)(Reg8, MemoryRef);
-typedef void (Asm::*OpRSM64)(Reg64, IndexedMemoryRef);
-typedef void (Asm::*OpRSM32)(Reg32, IndexedMemoryRef);
-typedef void (Asm::*OpRSM8)(Reg8, IndexedMemoryRef);
+typedef void (Asm::*OpRSM64)(Reg64, MemoryRef);
+typedef void (Asm::*OpRSM32)(Reg32, MemoryRef);
+typedef void (Asm::*OpRSM8)(Reg8, MemoryRef);
 typedef void (Asm::*OpIR64)(Immed, Reg64);
 typedef void (Asm::*OpIR32)(Immed, Reg32);
 typedef void (Asm::*OpIR8)(Immed, Reg8);
 typedef void (Asm::*OpIM64)(Immed, MemoryRef);
 typedef void (Asm::*OpIM32)(Immed, MemoryRef);
 typedef void (Asm::*OpIM16)(Immed, MemoryRef);
-typedef void (Asm::*OpISM64)(Immed, IndexedMemoryRef);
-typedef void (Asm::*OpISM32)(Immed, IndexedMemoryRef);
-typedef void (Asm::*OpISM16)(Immed, IndexedMemoryRef);
+typedef void (Asm::*OpISM64)(Immed, MemoryRef);
+typedef void (Asm::*OpISM32)(Immed, MemoryRef);
+typedef void (Asm::*OpISM16)(Immed, MemoryRef);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -816,7 +807,7 @@ callq 0x700(,%rbx,2)
 )");
 }
 
-TEST(Asm, IncDecIndexedMemoryRef) {
+TEST(Asm, IncDecIndexed) {
   TestDataBlock db(10 << 24);
   Asm a { db };
 

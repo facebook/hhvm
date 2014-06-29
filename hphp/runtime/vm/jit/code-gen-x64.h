@@ -92,29 +92,21 @@ private:
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };
-  template<class MemRef>
-  void cgStore(MemRef dst, SSATmp* src, PhysLoc src_loc, Width);
-  template<class MemRef>
-  void cgStoreTypedValue(MemRef dst, SSATmp* src, PhysLoc src_loc);
+  void cgStore(MemoryRef dst, SSATmp* src, PhysLoc src_loc, Width);
+  void cgStoreTypedValue(MemoryRef dst, SSATmp* src, PhysLoc src_loc);
 
   // helpers to load a value in dst. When label is not null a type check
   // is performed against value to ensure it is of the type expected by dst
-  template<class BaseRef>
-  void cgLoad(SSATmp* dst, PhysLoc dstLoc, BaseRef value,
+  void cgLoad(SSATmp* dst, PhysLoc dstLoc, MemoryRef value,
               Block* label = nullptr);
-  template<class BaseRef>
-  void cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc, BaseRef base,
+  void cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc, MemoryRef base,
                         Block* label = nullptr);
 
   // internal helpers to manage register conflicts from a source to a PhysReg
   // destination.
   // If the conflict cannot be resolved the out param isResolved is set to
   // false and the caller should take proper action
-  IndexedMemoryRef resolveRegCollision(PhysReg dst,
-                                       IndexedMemoryRef value,
-                                       bool& isResolved);
-  MemoryRef resolveRegCollision(PhysReg dst,
-                                MemoryRef value,
+  MemoryRef resolveRegCollision(PhysReg dst, MemoryRef value,
                                 bool& isResolved);
 
   template<class Loc1, class Loc2, class JmpFn>
@@ -367,14 +359,6 @@ inline MemoryRef refTVType(MemoryRef ref) {
 }
 
 inline MemoryRef refTVData(MemoryRef ref) {
-  return *(ref.r + TVOFF(m_data));
-}
-
-inline IndexedMemoryRef refTVType(IndexedMemoryRef ref) {
-  return *(ref.r + TVOFF(m_type));
-}
-
-inline IndexedMemoryRef refTVData(IndexedMemoryRef ref) {
   return *(ref.r + TVOFF(m_data));
 }
 

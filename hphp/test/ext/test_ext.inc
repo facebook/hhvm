@@ -13,5 +13,4 @@ RUN_TESTSUITE(TestExtApc);
 #ifdef HAVE_CUSTOM_LIBEVENT
 RUN_TESTSUITE(TestExtCurl);
 #endif
-RUN_TESTSUITE(TestExtMysql);
 RUN_TESTSUITE(TestExtServer);

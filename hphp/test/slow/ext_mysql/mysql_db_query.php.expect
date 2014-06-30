@@ -1,0 +1,1 @@
+mysql_db_query is not supported: Deprecated. Use mysql_query() instead.

@@ -63,6 +63,7 @@ ArrayData* ProxyArray::innerArr(const ArrayData* ad) {
 }
 
 ProxyArray* ProxyArray::Make(ArrayData* ad) {
+  assert_refcount_realistic_nz(ad->m_count);
   auto ret = static_cast<ProxyArray*>(MM().objMallocLogged(sizeof(ProxyArray)));
   ret->m_size            = -1;
   ret->m_kind            = kProxyKind;

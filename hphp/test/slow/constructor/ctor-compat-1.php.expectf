@@ -1,0 +1,2 @@
+
+Fatal error: Declaration of D::__construct() must be compatible with that of C::__construct() in %s on line 6

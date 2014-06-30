@@ -34,9 +34,9 @@ void zBoxAndProxy(TypedValue* arg) {
     ArrayData * inner_arr = inner->m_data.parr;
     if (inner_arr->isStatic() || inner_arr->hasMultipleRefs()) {
       ArrayData * tmp = inner_arr->copy();
+      tmp->incRefCount();
       inner_arr->decRefAndRelease();
       inner_arr = tmp;
-      inner_arr->incRefCount();
     }
     inner->m_data.parr = ProxyArray::Make(inner_arr);
   }

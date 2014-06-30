@@ -120,119 +120,156 @@ const TypedValue* ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
 
 ArrayData*
 ProxyArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->lval(k, ret, true);
+  } else {
+    auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData*
 ProxyArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->lval(k, ret, true);
+  } else {
+    auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData*
 ProxyArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->lvalNew(ret, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->lvalNew(ret, true);
+  } else {
+    auto r = innerArr(ad)->lvalNew(ret, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData* ProxyArray::SetInt(ArrayData* ad,
                               int64_t k,
                               Cell v,
                               bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->set(k,
-      tvAsCVarRef(&v), innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->set(k, tvAsCVarRef(&v), true);
+  } else {
+    auto r = innerArr(ad)->set(k,
+        tvAsCVarRef(&v), innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData* ProxyArray::SetStr(ArrayData* ad,
                               StringData* k,
                               Cell v,
                               bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->set(k,
-      tvAsCVarRef(&v), innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->set(k, tvAsCVarRef(&v), copy);
+  } else {
+    auto r = innerArr(ad)->set(k,
+        tvAsCVarRef(&v), innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData* ProxyArray::SetRefInt(ArrayData* ad,
                                  int64_t k,
                                  Variant& v,
                                  bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->setRef(k, v, true);
+  } else {
+    auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData* ProxyArray::SetRefStr(ArrayData* ad,
                                  StringData* k,
                                  Variant& v,
                                  bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->setRef(k, v, true);
+  } else {
+    auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData*
 ProxyArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->remove(k, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->remove(k, true);
+  } else {
+    auto r = innerArr(ad)->remove(k, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData*
 ProxyArray::RemoveStr(ArrayData* ad, const StringData* k,
                                  bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->remove(k, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->remove(k, true);
+  } else {
+    auto r = innerArr(ad)->remove(k, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData*
 ProxyArray::Copy(const ArrayData* ad) {
-  return Make(innerArr(ad)->copy());
+  return innerArr(ad)->copy();
 }
 
 ArrayData*
 ProxyArray::Append(ArrayData* ad, const Variant& v, bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->append(v, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->append(v, true);
+  } else {
+    auto r = innerArr(ad)->append(v, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData*
 ProxyArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->appendRef(v, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->appendRef(v, true);
+  } else {
+    auto r = innerArr(ad)->appendRef(v, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData*
 ProxyArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->appendWithRef(v, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->appendWithRef(v, true);
+  } else {
+    auto r = innerArr(ad)->appendWithRef(v, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 ArrayData*
 ProxyArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
-  auto const ret = ad->hasMultipleRefs() ? Copy(ad) : ad;
+  auto const ret = ad->hasMultipleRefs() ? Make(innerArr(ad))
+                                         : asProxyArray(ad);
   auto r = innerArr(ret)->plusEq(elems);
   reseatable(ad, r);
   return ad;
@@ -258,10 +295,13 @@ ArrayData* ProxyArray::Dequeue(ArrayData* ad, Variant &value) {
 }
 
 ArrayData* ProxyArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
-  ad = copy ? Copy(ad) : ad;
-  auto r = innerArr(ad)->prepend(v, innerArr(ad)->hasMultipleRefs());
-  reseatable(ad, r);
-  return ad;
+  if (copy) {
+    return innerArr(ad)->prepend(v, true);
+  } else {
+    auto r = innerArr(ad)->prepend(v, innerArr(ad)->hasMultipleRefs());
+    reseatable(ad, r);
+    return ad;
+  }
 }
 
 void ProxyArray::Renumber(ArrayData* ad) {

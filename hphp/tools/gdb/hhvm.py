@@ -127,8 +127,11 @@ class ArrayDataPrinter:
 
     def to_string(self):
         if self.kind == self.proxyKind():
-            return "ProxyArr: %s" % (self.val['m_ad'].dereference())
-        return "%d elements (kind==%d)" % (self.val['m_size'], self.kind)
+            return "ProxyArr: %s" % (
+                self.val['m_ref'].dereference()['m_tv']
+                        ['m_data']['parr'].dereference())
+        else:
+            return "%d elements (kind==%d)" % (self.val['m_size'], self.kind)
 
     def proxyKind(self):
         return gdb.lookup_global_symbol('HPHP::ArrayData::kProxyKind').value()

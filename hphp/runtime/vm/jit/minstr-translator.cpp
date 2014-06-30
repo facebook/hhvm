@@ -1481,8 +1481,11 @@ void HhbcTranslator::MInstrTranslator::emitSetProp() {
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(Define, knownCls, propInfo)) {
     emitPropSpecialized(MIA_define, propInfo);
-    SSATmp* cellPtr = gen(UnboxPtr, m_base);
-    SSATmp* oldVal = gen(LdMem, Type::Cell, cellPtr, cns(0));
+
+    auto const propTy = convertToType(propInfo.repoAuthType);
+    auto const cellTy = propTy.maybeBoxed() ? propTy.unbox() : propTy;
+    auto const cellPtr = propTy.maybeBoxed() ? gen(UnboxPtr, m_base) : m_base;
+    auto const oldVal = gen(LdMem, cellTy, cellPtr, cns(0));
 
     gen(IncRef, value);
     gen(StMem, cellPtr, cns(0), value);

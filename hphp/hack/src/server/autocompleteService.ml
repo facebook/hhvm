@@ -11,6 +11,16 @@
 open Utils
 open Typing_defs
 
+(* Results ready to be displayed to the user *)
+type complete_autocomplete_result = {
+    res_pos     : Pos.t;
+    res_ty      : string;
+    res_name    : string;
+    expected_ty : bool;
+  }
+
+(* Results that still need a typing environment to convert ty information
+   into strings *)
 type autocomplete_result = {
     ty   : Typing_defs.ty;
     name : string;
@@ -31,6 +41,26 @@ let is_auto_complete x =
     suffix = auto_complete_suffix
   end else
     false
+
+let autocomplete_result_to_json res =
+  let pos_to_json pos =
+    let line, start, end_ = Pos.info_pos pos in
+    let fn = Pos.filename pos in
+    Hh_json.JAssoc [ "filename",   Hh_json.JString fn;
+             "line",      Hh_json.JInt line;
+             "char_start", Hh_json.JInt start;
+             "char_end",   Hh_json.JInt end_;
+           ]
+  in
+  let name = res.res_name in
+  let pos = res.res_pos in
+  let ty = res.res_ty in
+  let expected_ty = res.expected_ty in
+  Hh_json.JAssoc [ "name", Hh_json.JString name;
+           "type", Hh_json.JString ty;
+           "pos", pos_to_json pos;
+           "expected_ty", Hh_json.JBool expected_ty;
+         ]
 
 let add_result name ty =
   autocomplete_results :=
@@ -261,9 +291,9 @@ let rec result_matches_expected_ty ty =
 
 
 let result_compare a b =
-  if a.Autocomplete.expected_ty = b.Autocomplete.expected_ty then
-    String.compare a.Autocomplete.name b.Autocomplete.name
-  else if a.Autocomplete.expected_ty then -1
+  if a.expected_ty = b.expected_ty then
+    String.compare a.res_name b.res_name
+  else if a.expected_ty then -1
   else 1
 
 let get_results funs classes =
@@ -281,7 +311,12 @@ let get_results funs classes =
     in
     let expected_ty = result_matches_expected_ty x.ty in
     let pos = Typing_reason.to_pos (fst x.ty) in
-    Autocomplete.make_result x.name pos desc_string expected_ty
+    {
+      res_pos     = pos;
+      res_ty      = desc_string;
+      res_name    = x.name;
+      expected_ty = expected_ty;
+    }
   end results in
   List.sort result_compare results
 

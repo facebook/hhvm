@@ -176,17 +176,6 @@ let hh_check ?(check_mode=true) fn =
       error [l]
     end
 
-let autocomplete_result_to_json res =
-  let name = res.Autocomplete.name in
-  let pos = res.Autocomplete.pos in
-  let ty = res.Autocomplete.ty in
-  let expected_ty = res.Autocomplete.expected_ty in
-  JAssoc [ "name", JString name;
-           "type", JString ty;
-           "pos", pos_to_json pos;
-           "expected_ty", JBool expected_ty;
-         ]
-
 let hh_auto_complete fn =
   AutocompleteService.attach_hooks();
   let content = Hashtbl.find files fn in
@@ -219,7 +208,9 @@ let hh_auto_complete fn =
       | Some Autocomplete.Acvar -> "var"
       | None -> "none" in
     let result = AutocompleteService.get_results [] [] in
-    let result = List.map autocomplete_result_to_json result in
+    let result =
+      List.map AutocompleteService.autocomplete_result_to_json result
+    in
     AutocompleteService.detach_hooks();
     output_json (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;

@@ -11,7 +11,7 @@ SRC= clientEnv.ml clientExceptions.ml  clientUtils.ml colorFile.ml \
   clientBuild.ml clientProlog.ml clientStatus.ml clientCheckStatus.ml \
   clientMethodJumps.ml \
   clientRestart.ml clientFindRefs.ml clientOutline.ml clientRefactor.ml \
-  clientMethodJumps.ml clientSearch.ml clientCheck.ml
+  clientAutocomplete.ml clientMethodJumps.ml clientSearch.ml clientCheck.ml
 
 
 INCLUDEDIRS=$(TOP)/utils \

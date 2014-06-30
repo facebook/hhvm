@@ -9,12 +9,6 @@
  *)
 open Utils
 
-type autocomplete_result = {
-    pos         : Pos.t;
-    ty          : string;
-    name        : string;
-    expected_ty : bool;
-  }
 
 (*****************************************************************************)
 (* Auto-complete mode *)
@@ -47,13 +41,6 @@ type autocomplete_type =
 | Actype
 | Acclass_get
 | Acvar
-
-let make_result name p ty expected_ty = {
-    pos         = p;
-    ty          = ty;
-    name        = name;
-    expected_ty = expected_ty;
-  }
 
 let (argument_global_type: autocomplete_type option ref) = ref None
 let auto_complete_for_global = ref ""

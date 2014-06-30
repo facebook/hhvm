@@ -136,7 +136,9 @@ let rec main args retries =
       let content = ClientUtils.read_stdin_to_string () in
       let command = ServerMsg.AUTOCOMPLETE content in
       ServerMsg.cmd_to_channel oc command;
-      print_all ic
+      let results = Marshal.from_channel ic in
+      ClientAutocomplete.go results args.output_json;
+      exit 0
     | MODE_OUTLINE ->
       let content = ClientUtils.read_stdin_to_string () in
       let ic, oc = connect args in

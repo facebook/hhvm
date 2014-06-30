@@ -115,6 +115,7 @@ private:
   std::unique_ptr<folly::IOBuf> m_currBody;
   std::unordered_map<std::string, std::string> m_requestHeaders;
   std::string m_pathTranslated;
+  std::string m_scriptFilename;
   std::string m_requestURI;
   std::string m_documentRoot;
   std::string m_remoteHost;

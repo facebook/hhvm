@@ -70,6 +70,10 @@ Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloadingAlternat
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloadingWithTargetDir
 .
+Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageDevAutoloading
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageDevAutoloadingDisabledByDefault
+.
 Composer\Test\Autoload\AutoloadGeneratorTest::testOverrideVendorsAutoloading
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testPSRToClassMapIgnoresNonExistingDir
@@ -104,6 +108,8 @@ Composer\Test\Autoload\ClassLoaderTest::testLoadClass with data set #4
 .
 Composer\Test\Autoload\ClassLoaderTest::testLoadClass with data set #5
 .
+Composer\Test\Autoload\ClassMapGeneratorTest::testAmbiguousReference
+.
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #0
 .
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #1
@@ -121,6 +127,8 @@ Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMapFinderSupport
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMapThrowsWhenDirectoryDoesNotExist
 .
 Composer\Test\Autoload\ClassMapGeneratorTest::testFindClassesThrowsWhenFileDoesNotExist
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testUnambiguousReference
 .
 Composer\Test\CacheTest::testRemoveFilesWhenCacheIsTooLarge
 .
@@ -262,11 +270,11 @@ Composer\Test\DependencyResolver\SolverTest::testInstallProvider
 .
 Composer\Test\DependencyResolver\SolverTest::testInstallRecursiveAliasDependencies
 .
-Composer\Test\DependencyResolver\SolverTest::testInstallReplacerOfMissingPackage
-.
 Composer\Test\DependencyResolver\SolverTest::testIssue265
 .
 Composer\Test\DependencyResolver\SolverTest::testLearnLiteralsWithSortedRuleLiterals
+.
+Composer\Test\DependencyResolver\SolverTest::testNoInstallReplacerOfMissingPackage
 .
 Composer\Test\DependencyResolver\SolverTest::testPickOlderIfNewerConflicts
 .
@@ -351,6 +359,8 @@ Composer\Test\Downloader\DownloadManagerTest::testDistOnlyPackageDownload
 Composer\Test\Downloader\DownloadManagerTest::testDistOnlyPackageDownloadWithSourcePreferred
 .
 Composer\Test\Downloader\DownloadManagerTest::testFullPackageDownload
+.
+Composer\Test\Downloader\DownloadManagerTest::testFullPackageDownloadFailover
 .
 Composer\Test\Downloader\DownloadManagerTest::testFullPackageDownloadWithSourcePreferred
 .
@@ -442,9 +452,13 @@ Composer\Test\Downloader\PearPackageExtractorTest::testShouldExtractPackage_2_1
 .
 Composer\Test\Downloader\PearPackageExtractorTest::testShouldPerformReplacements
 .
-Composer\Test\Downloader\PerforceDownloaderTest::testDoDownload
+Composer\Test\Downloader\PerforceDownloaderTest::testDoDownloadWithNoTag
 .
-Composer\Test\Downloader\PerforceDownloaderTest::testInitPerforceGetRepoConfig
+Composer\Test\Downloader\PerforceDownloaderTest::testDoDownloadWithTag
+.
+Composer\Test\Downloader\PerforceDownloaderTest::testInitPerforceDoesNothingIfPerforceAlreadySet
+.
+Composer\Test\Downloader\PerforceDownloaderTest::testInitPerforceInstantiatesANewPerforceObject
 .
 Composer\Test\Downloader\ZipDownloaderTest::testErrorMessages
 .
@@ -567,6 +581,14 @@ Composer\Test\InstallerTest::testIntegration with data set #38
 Composer\Test\InstallerTest::testIntegration with data set #39
 .
 Composer\Test\InstallerTest::testIntegration with data set #4
+.
+Composer\Test\InstallerTest::testIntegration with data set #40
+.
+Composer\Test\InstallerTest::testIntegration with data set #41
+.
+Composer\Test\InstallerTest::testIntegration with data set #42
+.
+Composer\Test\InstallerTest::testIntegration with data set #43
 .
 Composer\Test\InstallerTest::testIntegration with data set #5
 .
@@ -694,6 +716,50 @@ Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #8
 .
 Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #9
 .
+Composer\Test\Json\JsonFileTest::testDoubleEscapedUnicode
+.
+Composer\Test\Json\JsonFileTest::testEscape
+.
+Composer\Test\Json\JsonFileTest::testEscapedBackslashes
+.
+Composer\Test\Json\JsonFileTest::testEscapedSlashes
+.
+Composer\Test\Json\JsonFileTest::testEscapedUnicode
+.
+Composer\Test\Json\JsonFileTest::testFormatEmptyArray
+.
+Composer\Test\Json\JsonFileTest::testOnlyUnicode
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectArrayAsHash
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraComma
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraCommaInArray
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingColon
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingComma
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingCommaMultiline
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingQuotes
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectSingleQuotes
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectUnescapedBackslash
+.
+Composer\Test\Json\JsonFileTest::testParseErrorSkipsEscapedBackslash
+.
+Composer\Test\Json\JsonFileTest::testSchemaValidation
+.
+Composer\Test\Json\JsonFileTest::testSimpleJsonString
+.
+Composer\Test\Json\JsonFileTest::testTrailingBackslash
+.
+Composer\Test\Json\JsonFileTest::testUnicode
+.
+Composer\Test\Json\JsonFormatterTest::testUnicodeWithPrependedSlash
+.
 Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAdd
 .
 Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAddSubKeyInEmptyConfig
@@ -740,6 +806,8 @@ Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanInitializeFromScratc
 .
 Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanOverrideDeepRepos
 .
+Composer\Test\Json\JsonManipulatorTest::testAddRootSettingDoesNotBreakDots
+.
 Composer\Test\Json\JsonManipulatorTest::testRemoveConfigSettingCanRemoveSubKeyInHash
 .
 Composer\Test\Json\JsonManipulatorTest::testRemoveConfigSettingCanRemoveSubKeyInHashWithSiblings
@@ -747,6 +815,10 @@ Composer\Test\Json\JsonManipulatorTest::testRemoveConfigSettingCanRemoveSubKeyIn
 Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "fails on deep repos with borked texts"
 .
 Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "fails on deep repos with borked texts2"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on child having duplicate name"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on child having unmatched name"
 .
 Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on deep repos"
 .
@@ -763,6 +835,8 @@ Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works o
 Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones middle"
 .
 Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones unique"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on undefined ones"
 .
 Composer\Test\Json\JsonManipulatorTest::testUpdateMainKey
 .
@@ -871,6 +945,8 @@ Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #20
 Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #21
 .
 Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #22
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #23
 .
 Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #3
 .
@@ -998,9 +1074,13 @@ Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsExc
 .
 Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #4
 .
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #5
+.
 Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSkipsWarningDataWhenIgnoringErrors with data set #0
 .
 Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSkipsWarningDataWhenIgnoringErrors with data set #1
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSkipsWarningDataWhenIgnoringErrors with data set #2
 .
 Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSuccess with data set #0
 .
@@ -1011,6 +1091,8 @@ Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSuccess with dat
 Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadWarnings with data set #0
 .
 Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadWarnings with data set #1
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadWarnings with data set #2
 .
 Composer\Test\Package\LockerTest::testGetLockedPackages
 .
@@ -1302,7 +1384,11 @@ Composer\Test\Repository\Vcs\GitHubDriverTest::testPublicRepository
 .
 Composer\Test\Repository\Vcs\GitHubDriverTest::testPublicRepository2
 .
-Composer\Test\Repository\Vcs\PerforceDriverTest::testHasComposerFile
+Composer\Test\Repository\Vcs\PerforceDriverTest::testCleanup
+.
+Composer\Test\Repository\Vcs\PerforceDriverTest::testHasComposerFileReturnsFalseOnNoComposerFile
+.
+Composer\Test\Repository\Vcs\PerforceDriverTest::testHasComposerFileReturnsTrueWithOneOrMoreComposerFiles
 .
 Composer\Test\Repository\Vcs\PerforceDriverTest::testInitializeCapturesVariablesFromRepoConfig
 .
@@ -1502,6 +1588,8 @@ Composer\Test\Util\PerforceTest::testCheckStreamWithStream
 .
 Composer\Test\Util\PerforceTest::testCheckStreamWithoutStream
 .
+Composer\Test\Util\PerforceTest::testCleanupClientSpecShouldDeleteClient
+.
 Composer\Test\Util\PerforceTest::testConnectClient
 .
 Composer\Test\Util\PerforceTest::testGenerateP4Command
@@ -1578,9 +1666,9 @@ Composer\Test\Util\ProcessExecutorTest::testTimeout
 .
 Composer\Test\Util\RemoteFilesystemTest::testCallbackGetFileSize
 .
-Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyFailure404
-.
 Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyProgress
+.
+Composer\Test\Util\RemoteFilesystemTest::testCallbackGetPassesThrough404
 .
 Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl
 .
@@ -2091,6 +2179,8 @@ Composer\Test\Util\SvnTest::testCredentials with data set #0
 Composer\Test\Util\SvnTest::testCredentials with data set #1
 .
 Composer\Test\Util\SvnTest::testCredentials with data set #2
+.
+Composer\Test\Util\SvnTest::testCredentialsFromConfig
 .
 Composer\Test\Util\SvnTest::testInteractiveString
 .

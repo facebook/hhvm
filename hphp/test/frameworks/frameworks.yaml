@@ -71,12 +71,9 @@
     url: https://github.com/composer/composer.git
     # master is the only available branch
     branch: master
-    commit: 5d4900e79d5ea08118782345fb97e23e6ab1e4f0
+    commit: 8881cec1742cc7e56bfc0e33b08f785ae53b78dc
     install_root: composer
     test_root: composer
-    clowns:
-     # https://github.com/composer/composer/issues/3049 - fails on PHP5 too
-     - composer/tests/Composer/Test/Json/JsonFileTest.php
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
     # Stable is 2.4.2, but need master since we have pull requests.

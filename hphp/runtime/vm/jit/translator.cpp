@@ -1839,9 +1839,19 @@ Translator::translateRegion(const RegionDesc& region,
           // ...and also if this is the end of the block.
           if (i == block->length() - 1) return false;
 
+          auto nextSK = inst.nextSk();
+
+          // If the normal machinery is already inlining this function, don't
+          // do anything here.
+          if (i == block->length() - 2 &&
+              (nextSK.op() == Op::FCall || nextSK.op() == Op::FCallD) &&
+              block->inlinedCallee()) {
+            return false;
+          }
+
           // This is safe to do even if singleton inlining fails; we just won't
           // change topFunc in the next pass since hasNext() will return false.
-          if (knownFuncs.hasNext(inst.nextSk())) {
+          if (knownFuncs.hasNext(nextSK)) {
             topFunc = knownFuncs.next();
 
             // Detect a singleton pattern and inline it if found.

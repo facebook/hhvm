@@ -189,7 +189,9 @@ let retype_magic_func (env:Env.env) (ft:fun_type) (el:Nast.expr list) : Env.env 
     | env, None -> env, ft
     | env, Some (xs,ys) ->
         env, { ft with
-                 ft_tparams = ft.ft_tparams @ ys;
-                 ft_params = xs;
-                 ft_arity_min = List.length xs;
-                 ft_arity_max = List.length xs }
+          ft_tparams = ft.ft_tparams @ ys;
+          ft_params = xs;
+          ft_variadicity = Nast.FVnonVariadic;
+          ft_arity_min = List.length xs;
+          ft_arity_max = List.length xs;
+        }

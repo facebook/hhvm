@@ -51,17 +51,21 @@ and hint_ p env = function
       let paraml = List.map (fun x -> None, x) paraml in
       let env, ret = hint env h in
       let arity_min = List.length paraml in
-      let arity_max = if b then 1000 else arity_min in
+      let variadicity, arity_max =
+        if b then FVellipsis, 1000
+        else Nast.FVnonVariadic, arity_min
+      in
       env, Tfun {
-      ft_pos = p;
-      ft_unsafe = false;
-      ft_abstract = false;
-      ft_arity_min = arity_min;
-      ft_arity_max = arity_max;
-      ft_tparams = [];
-      ft_params = paraml;
-      ft_ret = ret;
-    }
+        ft_pos = p;
+        ft_unsafe = false;
+        ft_abstract = false;
+        ft_variadicity = variadicity;
+        ft_arity_min = arity_min;
+        ft_arity_max = arity_max;
+        ft_tparams = [];
+        ft_params = paraml;
+        ft_ret = ret;
+      }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
       Errors.tuple_syntax p;

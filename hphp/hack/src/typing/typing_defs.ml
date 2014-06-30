@@ -44,11 +44,11 @@ and ty_ =
   | Tabstract     of Nast.sid * ty list * ty option
   | Tapply        of Nast.sid * ty list (* Object type, ty list are the arguments *)
   | Ttuple        of ty list
-  (* an anonymous function, the number of mandatory arguments,
-   * the number of arguments in total, the identifier to type the body of the
-   * function. (The actual closure is stored in Typing_env.env.genv.anons)
-   *)
-  | Tanon         of int * int * Ident.t
+  (* an anonymous function, the variadicity, number of mandatory
+   * arguments, the number of arguments in total, the identifier to
+   * type the body of the function. (The actual closure is stored in
+   * Typing_env.env.genv.anons) *)
+  | Tanon         of Nast.fun_variadicity * int * int * Ident.t
   (* This is in the case where we are looking for an intersection
    * basically without this type, we could never infer that an array
    * is an array of mixed for example.
@@ -84,6 +84,7 @@ and fun_type = {
   ft_pos       : Pos.t;
   ft_unsafe    : bool            ;
   ft_abstract  : bool            ;
+  ft_variadicity: Nast.fun_variadicity;
   ft_arity_min : int             ;
   ft_arity_max : int             ;
   ft_tparams   : tparam list     ;

@@ -18,32 +18,46 @@ module Env = Typing_env
 module TDef = Typing_tdef
 module TUtils = Typing_utils
 
-(* This function checks that the method ft2 can be used to replace ft1 *)
-let rec subtype_funs_generic ~check_return env r1 ft1 r2 orig_ft2 =
-  let p = Reason.to_pos r2 in
-  let p1 = Reason.to_pos r1 in
-  let env, ft2 = Inst.instantiate_ft env orig_ft2 in
-  if ft2.ft_arity_min > ft1.ft_arity_min
-  then Errors.fun_too_many_args p p1;
-  if ft2.ft_arity_max < ft1.ft_arity_max
-  then Errors.fun_too_few_args p p1;
-  let env, _ = subtype_params env ft1.ft_params ft2.ft_params in
+(* This function checks that the method ft_sub can be used to replace
+ * (is a subtype of) ft_super *)
+let rec subtype_funs_generic ~check_return env r_super ft_super r_sub orig_ft_sub =
+  let p_sub = Reason.to_pos r_sub in
+  let p_super = Reason.to_pos r_super in
+  let env, ft_sub = Inst.instantiate_ft env orig_ft_sub in
+  if ft_sub.ft_arity_min > ft_super.ft_arity_min
+  then Errors.fun_too_many_args p_sub p_super;
+  (match ft_sub.ft_variadicity, ft_super.ft_variadicity with
+    | Nast.FVellipsis, Nast.FVvariadicArg ->
+      (* The HHVM runtime ignores "..." entirely, but knows about
+       * "...$args"; for contexts for which the runtime enforces method
+       * compatibility (currently, inheritance from abstract/interface
+       * methods), letting "..." override "...$args" would result in method
+       * compatibility errors at runtime. *)
+      Errors.fun_variadicity_hh_vs_php56 p_sub p_super;
+    | Nast.FVnonVariadic, Nast.FVnonVariadic ->
+      if ft_sub.ft_arity_max < ft_super.ft_arity_max
+      then Errors.fun_too_few_args p_sub p_super;
+    | Nast.FVnonVariadic, _ ->
+      Errors.fun_unexpected_nonvariadic p_sub p_super;
+    | _, _ -> ()
+  );
+  let env, _ = subtype_params env ft_super.ft_params ft_sub.ft_params in
   (* Checking that if the return type was defined in the parent class, it
    * is defined in the subclass too (requested by Gabe Levi).
    *)
   (* We agreed this was too painful for now, breaks too many things *)
-  (*  (match ft1.ft_ret, ft2.ft_ret with
+  (*  (match ft_super.ft_ret, ft_sub.ft_ret with
       | (_, Tany), _ -> ()
-      | (r1, ty), (r2, Tany) ->
-      let p1 = Reason.to_pos r1 in
-      let p2 = Reason.to_pos r2 in
-      error_l [p2, "Please add a return type";
-      p1, "Because we want to be consistent with this annotation"]
+      | (r_super, ty), (r_sub, Tany) ->
+      let p_super = Reason.to_pos r_super in
+      let p_sub = Reason.to_pos r_sub in
+      error_l [p_sub, "Please add a return type";
+      p_super, "Because we want to be consistent with this annotation"]
       | _ -> ()
       );
   *)
-  let env = if check_return then sub_type env ft1.ft_ret ft2.ft_ret else env in
-  let env, _ = Unify.unify_funs env r2 ft2 r2 orig_ft2 in
+  let env = if check_return then sub_type env ft_super.ft_ret ft_sub.ft_ret else env in
+  let env, _ = Unify.unify_funs env r_sub ft_sub r_sub orig_ft_sub in
   env
 
 (**

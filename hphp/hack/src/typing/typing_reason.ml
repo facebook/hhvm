@@ -48,6 +48,7 @@ type t =
   | Runknown_class of Pos.t
   | Rdynamic_yield of Pos.t * Pos.t * string * string
   | Rmap_append of Pos.t
+  | Rvar_param of Pos.t
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -84,6 +85,7 @@ let rec to_string prefix r =
   | Rattr            _ -> [(p, prefix ^ " because it is used in an attribute")]
   | Rxhp             _ -> [(p, prefix ^ " because it is used as an XML element")]
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
+  | Rvar_param       _ -> [(p, prefix ^ " that captures variadic func arguments")]
   | Rcoerced     (p1, p2, s)  ->
       [
         (p, prefix);
@@ -153,6 +155,7 @@ and to_pos = function
   | Runknown_class p -> p
   | Rdynamic_yield (p, _, _, _) -> p
   | Rmap_append p -> p
+  | Rvar_param p -> p
 
 type ureason =
   | URnone

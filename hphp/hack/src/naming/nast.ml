@@ -77,19 +77,19 @@ and class_var = {
   }
 
 and method_ = {
-    m_unsafe     : bool         ;
-    m_final      : bool         ;
-    m_abstract   : bool         ;
-    m_visibility : visibility   ;
-    m_name       : sid          ;
-    m_tparams    : tparam list  ;
-    m_ddd        : bool         ; (* finishes with ... *)
-    m_params     : fun_param list ;
-    m_body       : block        ;
-    m_user_attributes : Ast.user_attribute SMap.t;
-    m_ret        : hint option  ;
-    m_type       : Ast.fun_type ;
-  }
+  m_unsafe     : bool         ;
+  m_final      : bool         ;
+  m_abstract   : bool         ;
+  m_visibility : visibility   ;
+  m_name       : sid          ;
+  m_tparams    : tparam list  ;
+  m_variadic   : fun_variadicity;
+  m_params     : fun_param list;
+  m_body       : block        ;
+  m_user_attributes : Ast.user_attribute SMap.t;
+  m_ret        : hint option  ;
+  m_type       : Ast.fun_type ;
+}
 
 and visibility =
   | Private
@@ -97,25 +97,32 @@ and visibility =
   | Protected
 
 and is_reference = bool
+and is_variadic = bool
 and fun_param = {
-    param_hint : hint option;
-    param_is_reference : is_reference;
-    param_id : id;
-    param_name : string;
-    param_expr : expr option;
-  }
+  param_hint : hint option;
+  param_is_reference : is_reference;
+  param_is_variadic : is_variadic;
+  param_id : id;
+  param_name : string;
+  param_expr : expr option;
+}
+
+and fun_variadicity = (* does function take varying number of args? *)
+  | FVvariadicArg (* PHP5.6 ...$args finishes the func declaration *)
+  | FVellipsis    (* HH ... finishes the declaration; deprecate for ...$args? *)
+  | FVnonVariadic (* standard non variadic function *)
 
 and fun_ = {
-    f_mode   : Ast.mode;
-    f_unsafe : bool;
-    f_ret    : hint option;
-    f_name   : sid;
-    f_tparams: tparam list;
-    f_ddd    : bool; (* The function finishes with ... *)
-    f_params   : fun_param list;
-    f_body   : block;
-    f_type   : Ast.fun_type;
-  }
+  f_mode     : Ast.mode;
+  f_unsafe   : bool;
+  f_ret      : hint option;
+  f_name     : sid;
+  f_tparams  : tparam list;
+  f_variadic : fun_variadicity;
+  f_params   : fun_param list;
+  f_body     : block;
+  f_type     : Ast.fun_type;
+}
 
 and typedef = tparam list * hint option * hint
 

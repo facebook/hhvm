@@ -638,20 +638,22 @@ and method_decl c env m =
     match m.m_ret with
       | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
       | Some ret -> Typing_hint.hint env ret in
-  let arity_max =
-    if m.m_ddd then 1000 else
-      List.length m.m_params
+  let arity_max = match m.m_variadic with
+    | FVvariadicArg -> 1000
+    | FVellipsis -> 1000
+    | FVnonVariadic -> List.length m.m_params
   in
   let env, tparams = lfold Typing.type_param env m.m_tparams in
   let ft = {
-    ft_pos = fst m.m_name;
-    ft_unsafe    = m.m_unsafe;
-    ft_abstract  = m.m_abstract;
-    ft_arity_min = arity;
-    ft_arity_max = arity_max;
-    ft_tparams   = tparams;
-    ft_params    = params;
-    ft_ret       = ret;
+    ft_pos         = fst m.m_name;
+    ft_unsafe      = m.m_unsafe;
+    ft_abstract    = m.m_abstract;
+    ft_variadicity = m.m_variadic;
+    ft_arity_min   = arity;
+    ft_arity_max   = arity_max;
+    ft_tparams     = tparams;
+    ft_params      = params;
+    ft_ret         = ret;
   } in
   let ty = Reason.Rwitness (fst m.m_name), Tfun ft in
   env, ty

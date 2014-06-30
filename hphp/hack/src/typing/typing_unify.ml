@@ -203,10 +203,10 @@ and unify_ env r1 ty1 r2 ty2 =
         let env, tyl = lfold2 unify env tyl1 tyl2 in
         env, Ttuple tyl
   | Tmixed, Tmixed -> env, Tmixed
-  | Tanon (_, _, id1), Tanon (_, _, id2) when id1 = id2 -> env, ty1
+  | Tanon (_, _, _, id1), Tanon (_, _, _, id2) when id1 = id2 -> env, ty1
   | Tanon _, Tanon _ -> env, Tunresolved [r1, ty1; r2, ty2]
-  | Tfun ft, Tanon (mand_arg, total_arg, id)
-  | Tanon (mand_arg, total_arg, id), Tfun ft ->
+  | Tfun ft, Tanon (variadicity, mand_arg, total_arg, id)
+  | Tanon (variadicity, mand_arg, total_arg, id), Tfun ft ->
       if not (IMap.mem id env.Env.genv.Env.anons)
       then begin
         Errors.anonymous_recursive_call (Reason.to_pos r1);
@@ -216,7 +216,9 @@ and unify_ env r1 ty1 r2 ty2 =
         let anon = IMap.find_unsafe id env.Env.genv.Env.anons in
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
-        if mand_arg <> ft.ft_arity_min || total_arg <> ft.ft_arity_max
+        if mand_arg <> ft.ft_arity_min
+          || total_arg <> ft.ft_arity_max
+          || not (compatible_variadicities variadicity ft.ft_variadicity)
         then Errors.fun_arity_mismatch p1 p2;
         let env, ft = Inst.instantiate_ft env ft in
         let env, ret = anon env ft.ft_params in
@@ -234,6 +236,9 @@ and unify_ env r1 ty1 r2 ty2 =
   | _ ->
       TUtils.uerror r1 ty1 r2 ty2;
       env, Tany
+
+and compatible_variadicities v_anon v_ft =
+  v_anon = v_ft || (v_anon = Nast.FVellipsis && v_ft = Nast.FVvariadicArg)
 
 and unify_reason r1 r2 =
   if r1 = Reason.none then r2 else
@@ -268,7 +273,7 @@ and unify_params env l1 l2 =
       env, (name, x2) :: rl
 
 let unify_nofail env ty1 ty2 =
-  Errors.try_ 
+  Errors.try_
     (fun () -> unify env ty1 ty2)
     (fun _ ->
       let res = Env.fresh_type() in

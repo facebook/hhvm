@@ -983,7 +983,7 @@ and hint_function_params env =
   match L.token env.lb with
   | Trp ->
       ([], false)
-  | Topt_args ->
+  | Tellipsis ->
       hint_function_params_close env;
       ([], true)
   | _ ->
@@ -1014,7 +1014,7 @@ and hint_function_params_remain env =
         (h :: hl, has_dots)
   | Trp ->
       ([h], false)
-  | Topt_args ->
+  | Tellipsis ->
       hint_function_params_close env;
       ([h], true)
   | _ ->
@@ -1922,16 +1922,16 @@ and parameter_list env =
 and parameter_list_remain env =
   match L.token env.lb with
   | Trp -> []
-  | Topt_args ->
+  | Tellipsis ->
       [parameter_varargs env]
   | _ ->
       L.back env.lb;
       let error_state = !(env.errors) in
-      let p = param env in
+      let p = param ~variadic:false env in
       match L.token env.lb with
       | Trp ->
           [p]
-      | Topt_args ->
+      | Tellipsis ->
           [p ; parameter_varargs env]
       | Tcomma ->
           if !(env.errors) != error_state
@@ -1943,29 +1943,42 @@ and parameter_list_remain env =
 and parameter_varargs env =
   let pos = Pos.make env.lb in
   (match L.token env.lb with
-  | Tcomma ->
-      expect env Trp
-  | Trp ->
-      ()
-  | _ -> error_expect env ")"
-  );
+    | Tcomma -> expect env Trp; make_param_ellipsis pos
+    | Trp -> make_param_ellipsis pos;
+    | _ ->
+      L.back env.lb;
+      let p = param ~variadic:true env in
+      expect env Trp; p
+  )
+
+and make_param_ellipsis pos =
   { param_hint = None;
     param_is_reference = false;
+    param_is_variadic = true;
     param_id = (pos, "...");
     param_expr = None;
     param_modifier = None;
     param_user_attributes = SMap.empty;
   }
 
-and param env =
+and param ~variadic env  =
   let attrs = attribute env in
   let modifs = parameter_modifier env in
   let h = parameter_hint env in
-  ref_opt env;
-  let name = variable env in
+  let name = ref_variable env in
   let default = parameter_default env in
+  let default =
+    if variadic && default <> None then
+      let () = error env "Variadic arguments don't have default values" in
+      None
+    else default
+  in
+  if variadic && h <> None then
+    (* this shouldn't be encountered; ref_variable doesn't expect "..." *)
+    error env "Variadic arguments cannot (yet) have typehints";
   { param_hint = h;
     param_is_reference = false;
+    param_is_variadic = variadic;
     param_id = name;
     param_expr = default;
     param_modifier = modifs;
@@ -1991,7 +2004,7 @@ and parameter_hint env =
 and parameter_has_hint env =
   look_ahead env begin fun env ->
     match L.token env.lb with
-    | Topt_args | Tamp | Tlvar -> false
+    | Tellipsis | Tamp | Tlvar -> false
     | _ -> true
   end
 
@@ -2197,6 +2210,7 @@ and make_lambda_param : id -> fun_param = fun var_id ->
   {
     param_hint = None;
     param_is_reference = false;
+    param_is_variadic = false;
     param_id = var_id;
     param_expr = None;
     param_modifier = None;
@@ -2212,7 +2226,7 @@ and try_short_lambda env =
     let error_state = !(env.errors) in
     let param_list = parameter_list_remain env in
     if !(env.errors) != error_state then begin
-      env.errors := error_state; 
+      env.errors := error_state;
       None
     end else begin
       let ret = hint_return_opt env in

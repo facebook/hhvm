@@ -302,6 +302,9 @@ let spinner =
       str
     end
 
+(* ANSI escape sequence to clear whole line *)
+let clear_line_seq = "\r\x1b[0K"
+
 (*****************************************************************************)
 (* Same as List.iter2, except that we only iterate as far as the shortest
  * of both lists.

@@ -185,7 +185,7 @@ let rec main args retries =
         Unix.sleep(1);
         main args retries
       end else begin
-        Printf.fprintf stderr "%s Try again... %s\r" init_msg (Utils.spinner());
+        Printf.fprintf stderr "%s Try again...\n" init_msg;
         flush stderr;
       end
   | Server_cant_connect ->

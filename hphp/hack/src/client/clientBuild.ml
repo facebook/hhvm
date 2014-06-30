@@ -15,7 +15,7 @@ type env = ServerMsg.build_opts
 let rec connect env retries =
   try
     let result = ClientUtils.connect env.ServerMsg.root in
-    Printf.printf "\n%!";
+    Printf.printf "%s%!" Utils.clear_line_seq;
     result
   with
   | ClientExceptions.Server_cant_connect ->

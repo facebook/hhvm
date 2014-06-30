@@ -29,6 +29,7 @@ let connect ?user:(user=None) root =
     Unix.connect sock sockaddr ;
     let ic = Unix.in_channel_of_descr sock in
     let oc = Unix.out_channel_of_descr sock in
+    Printf.printf "%s%!" Utils.clear_line_seq;
     ic, oc
   with _ ->
     if not (Lock.check ~user root "init")

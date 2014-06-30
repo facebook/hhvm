@@ -481,8 +481,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     // NOTE: the peak memory usage monotonically increases, so there cannot
     // be a second OOM exception in one request.
     assert(stats.maxBytes > 0);
-    if (live && stats.peakUsage <= stats.maxBytes &&
-        stats.usage > stats.maxBytes) {
+    if (live && m_couldOOM && stats.usage > stats.maxBytes) {
       refreshStatsHelperExceeded();
     }
     // Check whether the process's active memory limit has been exceeded, and
@@ -513,6 +512,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     }
   }
 }
+
+inline void MemoryManager::resetCouldOOM() { m_couldOOM = true; }
 
 inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 

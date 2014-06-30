@@ -42,6 +42,16 @@ struct APCObject {
    */
   static APCHandle* Construct(ObjectData* data, size_t& size);
 
+  /**
+   * Makes an APCObject from an ObjectData*, returns its APCHandle.
+   * When createFromSer is false it returns nullptr if the object was to
+   * be stored in serialized form. The reason being that in that case the
+   * call was from a serialized form already and this was an attempt
+   * to see if better formats were possible.
+   */
+  static APCHandle* MakeShared(
+      ObjectData* data, size_t& size, bool inner, bool createFromSer = true);
+
   // Return an APCObject instance from a serialized version of the
   // object.  May return null.
   static APCHandle* MakeAPCObject(
@@ -67,6 +77,7 @@ struct APCObject {
 
 private:
   friend struct APCHandle;
+  friend struct APCCollection;
   friend size_t getMemSize(const APCObject*);
 
   struct Prop {

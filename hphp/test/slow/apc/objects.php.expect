@@ -1,0 +1,493 @@
+**** Object instance with simple properties
+object(C)#2 (2) {
+  ["x"]=>
+  int(3)
+  ["f"]=>
+  string(2) "hi"
+}
+object(C)#2 (2) {
+  ["x"]=>
+  int(3)
+  ["f"]=>
+  string(2) "hi"
+}
+**** Vector containing object reference
+object(HH\Vector)#3 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  object(C)#4 (2) {
+    ["x"]=>
+    int(3)
+    ["f"]=>
+    string(2) "hi"
+  }
+}
+object(HH\Vector)#3 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  object(C)#4 (2) {
+    ["x"]=>
+    int(3)
+    ["f"]=>
+    string(2) "hi"
+  }
+}
+modify previous instance from APC
+string(7) "MUTATED"
+object(HH\Vector)#3 (4) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(2)
+  [2]=>
+  object(C)#4 (2) {
+    ["x"]=>
+    int(3)
+    ["f"]=>
+    string(2) "hi"
+  }
+  [3]=>
+  string(2) "hi"
+}
+object(HH\Vector)#5 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  object(C)#6 (2) {
+    ["x"]=>
+    int(3)
+    ["f"]=>
+    string(2) "hi"
+  }
+}
+**** Vector containing non-refcounted values
+object(HH\Vector)#6 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(5) "hello"
+}
+object(HH\Vector)#6 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(5) "hello"
+}
+modify previous instance from APC
+string(7) "MUTATED"
+object(HH\Vector)#6 (3) {
+  [0]=>
+  int(100)
+  [1]=>
+  string(5) "hello"
+  [2]=>
+  string(2) "hi"
+}
+object(HH\Vector)#7 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(5) "hello"
+}
+**** Vector containing simple values
+object(HH\Vector)#8 (2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  string(5) "hello"
+}
+object(HH\Vector)#8 (2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  string(5) "hello"
+}
+modify previous instance from APC
+string(7) "MUTATED"
+object(HH\Vector)#8 (3) {
+  [0]=>
+  int(100)
+  [1]=>
+  string(5) "hello"
+  [2]=>
+  string(2) "hi"
+}
+object(HH\Vector)#9 (2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  string(5) "hello"
+}
+**** Map containing non-refcounted values
+object(HH\Map)#10 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+object(HH\Map)#10 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+modify previous instance from APC
+string(7) "MUTATED"
+object(HH\Map)#10 (3) {
+  ["a"]=>
+  int(100)
+  ["c"]=>
+  string(1) "d"
+  ["one"]=>
+  string(2) "hi"
+}
+object(HH\Map)#11 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+**** Map containing itself
+object(HH\Map)#12 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  object(HH\Map)#13 (2) {
+    ["a"]=>
+    string(1) "b"
+    ["c"]=>
+    string(1) "d"
+  }
+}
+object(HH\Map)#12 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  object(HH\Map)#13 (2) {
+    ["a"]=>
+    string(1) "b"
+    ["c"]=>
+    string(1) "d"
+  }
+}
+modify previous instance from APC
+string(7) "MUTATED"
+object(HH\Map)#12 (3) {
+  ["a"]=>
+  int(100)
+  ["c"]=>
+  object(HH\Map)#13 (2) {
+    ["a"]=>
+    string(1) "b"
+    ["c"]=>
+    string(1) "d"
+  }
+  ["one"]=>
+  string(2) "hi"
+}
+object(HH\Map)#14 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  object(HH\Map)#15 (2) {
+    ["a"]=>
+    string(1) "b"
+    ["c"]=>
+    string(1) "d"
+  }
+}
+**** Map containing a vector
+object(HH\Map)#15 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  object(HH\Vector)#16 (2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    string(5) "hello"
+  }
+}
+object(HH\Map)#15 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  object(HH\Vector)#16 (2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    string(5) "hello"
+  }
+}
+modify previous instance from APC
+string(7) "MUTATED"
+object(HH\Map)#15 (3) {
+  ["a"]=>
+  int(100)
+  ["c"]=>
+  object(HH\Vector)#16 (2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    string(5) "hello"
+  }
+  ["one"]=>
+  string(2) "hi"
+}
+object(HH\Map)#17 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  object(HH\Vector)#18 (2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    string(5) "hello"
+  }
+}
+**** Immutable Vector instance
+object(HH\ImmVector)#18 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(5) "hello"
+}
+object(HH\ImmVector)#18 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(5) "hello"
+}
+**** Immutable Map instance
+object(HH\ImmMap)#19 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+object(HH\ImmMap)#19 (2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+**** Object instance containg itself
+object(C)#20 (2) {
+  ["x"]=>
+  *RECURSION*
+  ["f"]=>
+  string(2) "hi"
+}
+object(C)#21 (2) {
+  ["x"]=>
+  *RECURSION*
+  ["f"]=>
+  string(2) "hi"
+}
+**** Object instance containg itself 2
+object(C)#24 (2) {
+  ["x"]=>
+  object(B)#25 (1) {
+    ["f"]=>
+    *RECURSION*
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+object(C)#26 (2) {
+  ["x"]=>
+  object(B)#27 (1) {
+    ["f"]=>
+    *RECURSION*
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+**** Object instance containg itself 3
+object(C)#31 (2) {
+  ["x"]=>
+  object(B)#32 (1) {
+    ["f"]=>
+    object(HH\Vector)#33 (1) {
+      [0]=>
+      *RECURSION*
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+object(C)#34 (2) {
+  ["x"]=>
+  object(B)#35 (1) {
+    ["f"]=>
+    object(HH\Vector)#36 (1) {
+      [0]=>
+      *RECURSION*
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+**** Object instance containg itself 4
+object(C)#40 (2) {
+  ["x"]=>
+  object(B)#41 (1) {
+    ["f"]=>
+    object(HH\Vector)#42 (1) {
+      [0]=>
+      *RECURSION*
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+object(C)#43 (2) {
+  ["x"]=>
+  object(B)#44 (1) {
+    ["f"]=>
+    object(HH\Vector)#45 (1) {
+      [0]=>
+      *RECURSION*
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+**** Object instance containg itself 5
+object(C)#50 (2) {
+  ["x"]=>
+  object(B)#51 (1) {
+    ["f"]=>
+    object(HH\Vector)#52 (1) {
+      [0]=>
+      object(B)#53 (1) {
+        ["f"]=>
+        NULL
+      }
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+object(C)#50 (2) {
+  ["x"]=>
+  object(B)#51 (1) {
+    ["f"]=>
+    object(HH\Vector)#52 (1) {
+      [0]=>
+      object(B)#53 (1) {
+        ["f"]=>
+        NULL
+      }
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+**** Object instance containg Vector instace with simple values
+object(C)#53 (2) {
+  ["x"]=>
+  object(B)#54 (1) {
+    ["f"]=>
+    object(HH\Vector)#55 (3) {
+      [0]=>
+      int(10)
+      [1]=>
+      string(2) "hi"
+      [2]=>
+      string(5) "hello"
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+object(C)#53 (2) {
+  ["x"]=>
+  object(B)#54 (1) {
+    ["f"]=>
+    object(HH\Vector)#55 (3) {
+      [0]=>
+      int(10)
+      [1]=>
+      string(2) "hi"
+      [2]=>
+      string(5) "hello"
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+**** Object instance containg collections instaces
+object(C)#57 (2) {
+  ["x"]=>
+  object(B)#58 (1) {
+    ["f"]=>
+    object(HH\Map)#59 (3) {
+      ["k"]=>
+      int(10)
+      ["k1"]=>
+      string(2) "hi"
+      ["k2"]=>
+      object(HH\Vector)#60 (2) {
+        [0]=>
+        int(100)
+        [1]=>
+        string(5) "hello"
+      }
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+object(C)#57 (2) {
+  ["x"]=>
+  object(B)#58 (1) {
+    ["f"]=>
+    object(HH\Map)#59 (3) {
+      ["k"]=>
+      int(10)
+      ["k1"]=>
+      string(2) "hi"
+      ["k2"]=>
+      object(HH\Vector)#60 (2) {
+        [0]=>
+        int(100)
+        [1]=>
+        string(5) "hello"
+      }
+    }
+  }
+  ["f"]=>
+  string(2) "hi"
+}
+**** Set instance
+object(HH\Set)#58 (4) {
+  int(1)
+  string(2) "hi"
+  int(4)
+  string(5) "hello"
+}
+object(HH\Set)#58 (4) {
+  int(1)
+  string(2) "hi"
+  int(4)
+  string(5) "hello"
+}
+**** Set instance with int-like strings
+object(HH\Set)#59 (2) {
+  int(123)
+  string(3) "123"
+}
+object(HH\Set)#59 (2) {
+  int(123)
+  string(3) "123"
+}
+**** Make sure delete is ok

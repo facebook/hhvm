@@ -18,22 +18,99 @@
 #define incl_HPHP_APC_HANDLE_DEFS_H_
 
 #include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void APCHandle::unreferenceRoot(size_t size) {
-  assert(size >= 0);
-  if (!getUncounted()) {
+  if (!isUncounted()) {
     realDecRef();
   } else {
+    if (size == 0) {
+      // it's unlikely we have a nested uncounted array but in case, we
+      // compute the size on delete. For uncounted strings this is a
+      // pretty cheap operation
+      size = getMemSize(this);
+    }
     g_context->enqueueAPCHandle(this, size);
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Traverse a php object calling the 'checker' function on each element.
+ * If the 'checker' function returns true the walk stops.
+ * This is a shallow walk so only one level is analyzed.
+ * ByRef elements are dereferenced given that is the APC behavior.
+ * Return true if the walk was aborted, false otherwise.
+ */
+template<class Fun>
+bool traverseData(const Variant& data, Fun checker) {
+  switch (data.getType()) {
+  case KindOfArray: {
+    ArrayData* arr = data.getArrayData();
+    for (ArrayIter iter(arr); iter; ++iter) {
+      const Variant& var = iter.secondRef();
+      if (checker(var)) return true;
+    }
+    return false;
+  }
+  case KindOfObject: {
+    ObjectData* obj = data.getObjectData();
+    auto colType = obj->getCollectionType();
+    switch (colType) {
+    case Collection::Type::InvalidType:
+      return traverseData(obj->o_toArray(), checker);
+    case Collection::Type::VectorType:
+    case Collection::Type::ImmVectorType:
+      return traverseData(
+          static_cast<BaseVector*>(obj)->arrayData(), checker);
+    case Collection::Type::MapType:
+    case Collection::Type::ImmMapType:
+    case Collection::Type::SetType:
+    case Collection::Type::ImmSetType:
+      return traverseData(
+          static_cast<HashCollection*>(obj)->arrayData()->asArrayData(),
+          checker);
+    case Collection::Type::PairType:
+      if (checker(tvAsCVarRef(static_cast<c_Pair*>(obj)->get(0)))) {
+        return true;
+      }
+      return checker(tvAsCVarRef(static_cast<c_Pair*>(obj)->get(1)));
+    }
+  }
+  case KindOfResource:
+    return checker(data.getResourceData());
+  default:
+    // do nothing
+    return false;
+  }
+}
+
+/*
+ * Traverse a php object calling the 'checker' function on each element
+ * recursively.
+ * If the 'checker' function returns true the walk stops.
+ * Perform a depth-first walk.
+ */
+template<class Fun>
+bool traverseDataRecursive(const Variant& data, Fun checker) {
+  bool result = traverseData(data,
+      [&](const Variant& v) {
+        if (!checker(v)) {
+          return traverseDataRecursive(v, checker);
+        }
+        return true;
+      }
+  );
+  return result;
+}
+
 }
 
 #endif

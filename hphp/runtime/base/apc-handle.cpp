@@ -19,9 +19,10 @@
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
-#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 
@@ -89,7 +90,8 @@ StringCase:
       }
 
       assert(!s->isStatic()); // would've been handled above
-      if (!inner && apcExtension::UseUncounted) {
+      if (apcExtension::UseUncounted &&
+          (apcExtension::OptimizeSerialization || !inner)) {
         StringData* st = StringData::MakeUncounted(s->slice());
         APCTypedValue* value = new APCTypedValue(st);
         size = sizeof(APCTypedValue) + st->size();
@@ -112,9 +114,11 @@ StringCase:
       return APCArray::MakeShared();
 
     case KindOfObject:
-      return unserializeObj ?
-          APCObject::Construct(source.getObjectData(), size) :
-          APCObject::MakeShared(apc_serialize(source), size);
+      return apcExtension::OptimizeSerialization ?
+          APCObject::MakeShared(source.getObjectData(), size, inner) :
+          unserializeObj ?
+              APCObject::Construct(source.getObjectData(), size) :
+              APCObject::MakeShared(apc_serialize(source), size);
 
     default:
       return nullptr;
@@ -151,7 +155,7 @@ Variant APCHandle::toLocal() {
 }
 
 void APCHandle::deleteShared() {
-  assert(!getUncounted());
+  assert(!isUncounted());
   switch (m_type) {
     case KindOfBoolean:
     case KindOfInt64:
@@ -190,7 +194,7 @@ APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
 }
 
 void APCTypedValue::deleteUncounted() {
-  assert(m_handle.getUncounted());
+  assert(m_handle.isUncounted());
   DataType type = m_handle.getType();
   assert(type == KindOfString || type == KindOfArray);
   if (type == KindOfString) {
@@ -282,14 +286,10 @@ inline
 void DataWalker::objectFeature(
     ObjectData* pobj,
     DataFeature& features) const {
-  // REVIEW: right now collections always stop the walk, not clear
-  // if they should do so moving forward. Revisit...
-  // Notice that worst case scenario here we will be serializing things
-  // that we could keep in better format so it should not break anything
   if (pobj->isCollection()) {
     features.m_hasCollection = true;
   } else if ((m_features & LookupFeature::DetectSerializable) &&
-             pobj->instanceof(SystemLib::s_SerializableClass)) {
+      pobj->instanceof(SystemLib::s_SerializableClass)) {
     features.m_serializable = true;
   }
 }
@@ -303,10 +303,11 @@ bool DataWalker::canStopWalk(DataFeature& features) const {
     features.hasObjectOrResource() ||
     !(m_features & LookupFeature::HasObjectOrResource);
   auto defaultChecks =
-      features.isCircular() || features.hasCollection() ||
-      features.hasSerializableReference();
+    features.isCircular() || features.hasCollection() ||
+    features.hasSerializableReference();
   return refCountCheck && objectCheck && defaultChecks;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }

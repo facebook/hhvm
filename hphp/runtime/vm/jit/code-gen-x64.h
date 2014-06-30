@@ -33,15 +33,13 @@ struct CodeGenerator : public JIT::CodeGenerator {
   typedef JIT::X64Assembler Asm;
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& coldCode,
-                CodeBlock& frozenCode, JIT::MCGenerator* mcg,
-                CodegenState& state)
+                CodeBlock& frozenCode, CodegenState& state)
     : m_unit(unit)
     , m_mainCode(mainCode)
     , m_coldCode(coldCode)
     , m_frozenCode(frozenCode)
     , m_as(mainCode)
     , m_acold(coldCode)
-    , m_mcg(mcg)
     , m_state(state)
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
@@ -336,7 +334,6 @@ private:
   CodeBlock&          m_frozenCode;
   Asm                 m_as;  // current "main" assembler
   Asm                 m_acold; // for cold code
-  MCGenerator*        m_mcg;
   CodegenState&       m_state;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated

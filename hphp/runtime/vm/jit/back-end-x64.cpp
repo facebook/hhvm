@@ -116,10 +116,9 @@ struct BackEnd : public JIT::BackEnd {
                                        CodeBlock& mainCode,
                                        CodeBlock& coldCode,
                                        CodeBlock& frozenCode,
-                                       MCGenerator* mcg,
                                        CodegenState& state) override {
     return new X64::CodeGenerator(unit, mainCode, coldCode,
-                                  frozenCode, mcg, state);
+                                  frozenCode, state);
   }
 
   void moveToAlign(CodeBlock& cb,

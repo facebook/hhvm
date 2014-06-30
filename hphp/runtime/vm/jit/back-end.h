@@ -101,7 +101,6 @@ class BackEnd {
                                           CodeBlock& mainCode,
                                           CodeBlock& coldCode,
                                           CodeBlock& frozenCode,
-                                          MCGenerator* mcg,
                                           CodegenState& state) = 0;
   virtual void moveToAlign(CodeBlock& cb,
                            MoveToAlignFlags alignment

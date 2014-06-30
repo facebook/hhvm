@@ -1801,11 +1801,9 @@ void MCGenerator::traceCodeGen() {
     unit.collectPostConditions();
   }
 
-  auto regs = allocateRegs(unit);
-  assert(checkRegisters(unit, regs)); // calls checkCfg internally.
-
   recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier(), false);
-  genCode(unit, this, regs);
+  always_assert(this == mcg);
+  genCode(unit);
 
   m_numHHIRTrans++;
 }

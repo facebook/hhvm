@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/check.h"
 
 namespace HPHP {
 namespace JIT {
@@ -65,14 +66,13 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
 }
 
 static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
-                     CodeBlock& frozenCode, MCGenerator* mcg,
+                     CodeBlock& frozenCode,
                      CodegenState& state, Block* block,
                      std::vector<TransBCMapping>* bcMap) {
   FTRACE(6, "genBlock: {}\n", block->id());
   std::unique_ptr<CodeGenerator> cg(mcg->backEnd().newCodeGenerator(unit, cb,
                                                                     coldCode,
                                                                     frozenCode,
-                                                                    mcg,
                                                                     state));
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
@@ -101,10 +101,10 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
   }
 }
 
-static void genCodeImpl(IRUnit& unit,
-                        JIT::MCGenerator* mcg,
-                        const RegAllocInfo& regs,
-                        AsmInfo* asmInfo) {
+static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
+  auto regs = allocateRegs(unit);
+  assert(checkRegisters(unit, regs)); // calls checkCfg internally.
+  Timer _t(Timer::codeGen);
   LiveRegs live_regs = computeLiveRegs(unit, regs);
   CodegenState state(unit, regs, live_regs, asmInfo);
 
@@ -199,7 +199,7 @@ static void genCodeImpl(IRUnit& unit,
         state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
       }
 
-      genBlock(unit, cb, coldCode, *frozenCode, mcg, state, block, bcMap);
+      genBlock(unit, cb, coldCode, *frozenCode, state, block, bcMap);
       auto nextFlow = block->next();
       if (nextFlow && nextFlow != nextLinear) {
         mcg->backEnd().emitFwdJmp(cb, nextFlow, state);
@@ -315,19 +315,17 @@ static void genCodeImpl(IRUnit& unit,
     coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
     mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
   }
+  if (asmInfo) {
+    printUnit(kCodeGenLevel, unit, " after code gen ", &regs, asmInfo);
+  }
 }
 
-void genCode(IRUnit& unit,
-             JIT::MCGenerator* mcg,
-             const RegAllocInfo& regs) {
-  Timer _t(Timer::codeGen);
-
+void genCode(IRUnit& unit) {
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    genCodeImpl(unit, mcg, regs, &ai);
-    printUnit(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
+    genCodeImpl(unit, &ai);
   } else {
-    genCodeImpl(unit, mcg, regs, nullptr);
+    genCodeImpl(unit, nullptr);
   }
 }
 

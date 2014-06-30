@@ -31,15 +31,13 @@ namespace HPHP { namespace JIT { namespace ARM {
 struct CodeGenerator : public JIT::CodeGenerator {
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& coldCode,
-                CodeBlock& frozenCode, JIT::MCGenerator* mcg,
-                CodegenState& state)
+                CodeBlock& frozenCode, CodegenState& state)
       : m_unit(unit)
       , m_mainCode(mainCode)
       , m_coldCode(coldCode)
       , m_frozenCode(frozenCode)
       , m_as(mainCode)
       , m_acold(coldCode)
-      , m_mcg(mcg)
       , m_state(state)
       , m_curInst(nullptr)
     {
@@ -142,7 +140,6 @@ struct CodeGenerator : public JIT::CodeGenerator {
   CodeBlock&                  m_frozenCode;
   vixl::MacroAssembler        m_as;
   vixl::MacroAssembler        m_acold;
-  MCGenerator*                m_mcg;
   CodegenState&               m_state;
   IRInstruction*              m_curInst;
 };

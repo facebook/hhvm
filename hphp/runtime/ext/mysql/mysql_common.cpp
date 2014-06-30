@@ -616,8 +616,10 @@ MySQLResult::~MySQLResult() {
 }
 
 void MySQLResult::sweep() {
-  close();
-  // Note that ~MySQLResult is *not* going to run when we are swept.
+  if (m_res) {
+    mysql_free_result(m_res);
+    m_res = nullptr;
+  }
 }
 
 void MySQLResult::addRow() {

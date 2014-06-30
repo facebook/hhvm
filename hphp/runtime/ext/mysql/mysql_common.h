@@ -201,10 +201,7 @@ public:
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   void close() {
-    if (m_res) {
-      mysql_free_result(m_res);
-      m_res = NULL;
-    }
+    sweep();
     if (isLocalized()) {
       m_rows.clear();
     }

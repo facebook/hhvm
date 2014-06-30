@@ -41,15 +41,7 @@ PredVector computePreds(Vunit& unit) {
 void optimizeJmps(Vunit& unit) {
   auto isEmpty = [&](Vlabel b, Vinstr::Opcode op) {
     auto& code = unit.blocks[b].code;
-    switch (code.size()) {
-      case 1:
-        return code[0].op == op;
-      case 2:
-        return code[0].op == Vinstr::point &&
-               code[1].op == op;
-      default:
-        return false;
-    }
+    return code.size() == 1 && op == code[0].op;
   };
   bool changed = false;
   bool ever_changed = false;

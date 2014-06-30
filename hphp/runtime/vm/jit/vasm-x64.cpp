@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 TRACE_SET_MOD(hhir);
 
@@ -137,7 +138,7 @@ private:
   void emit(copy i);
   void emit(copy2& i);
   void emit(eagersync& i);
-  void emit(copyargs& i) { /* lowered by vasm-xls */ }
+  void emit(copyargs& i) { always_assert(false); }
   void emit(end& i) {}
   void emit(ldimm& i);
   void emit(fallback& i);
@@ -150,7 +151,7 @@ private:
   void emit(mcprep& i);
   void emit(nocatch& i);
   void emit(nop& i) { a->nop(); }
-  void emit(phidef& i) { /* nothing to do */ }
+  void emit(phidef& i) { always_assert(false); }
   void emit(phijmp& i) { always_assert(false); }
   void emit(point& i) { meta->points[i.p] = a->frontier(); }
   void emit(resume& i) { emitServiceReq(a->code(), REQ_RESUME); }
@@ -611,6 +612,7 @@ void Vgen::emit(smart::vector<Vlabel>& labels) {
   smart::vector<smart::vector<TcaRange>> block_ranges(areas.size());
   for (auto& r : block_ranges) r.resize(unit.blocks.size());
   for (int i = 0, n = labels.size(); i < n; ++i) {
+    assert(check(unit.blocks[labels[i]]));
     auto b = labels[i];
     auto& block = unit.blocks[b];
     X64Assembler as { area(block.area).code };
@@ -733,11 +735,11 @@ void Vgen::emit(loadq& i) {
 // check that each block has exactly one terminal instruction at the end.
 bool Vgen::check(Vblock& block) {
   assert(!block.code.empty());
-  for (int i = 0, n = block.code.size(); i < n; ++i) {
-    DEBUG_ONLY auto& instr = block.code[i];
-    if (i < n-1) assert(!isBlockEnd(instr));
-    else assert(isBlockEnd(instr));
+  auto n = block.code.size();
+  for (size_t i = 0; i < n - 1; ++i) {
+    assert(!isBlockEnd(block.code[i]));
   }
+  assert(isBlockEnd(block.code[n - 1]));
   return true;
 }
 }
@@ -771,8 +773,14 @@ smart::vector<Vlabel> layoutBlocks(Vunit& m_unit) {
 
 void Vasm::finish(const Abi& abi) {
   if (m_unit.hasVrs()) {
+    Timer _t(Timer::vasm_xls);
     allocateRegisters(m_unit, abi);
   }
+  if (m_unit.blocks.size() > 1) {
+    Timer _t(Timer::vasm_jumps);
+    optimizeJmps(m_unit);
+  }
+  Timer _t(Timer::vasm_gen);
   auto blocks = layoutBlocks(m_unit);
   Vgen(m_unit, m_areas, m_meta).emit(blocks);
 }
@@ -807,14 +815,9 @@ std::string format(Vreg r) {
 }
 
 Vtuple findDefs(const Vunit& unit, Vlabel b) {
-  for (auto const& inst : unit.blocks[b].code) {
-    if (inst.op == Vinstr::phidef) {
-      return inst.phidef_.defs;
-    }
-    assert(inst.op == Vinstr::point); // skip this
-  }
-  assert(false);
-  not_reached();
+  assert(!unit.blocks[b].code.empty() &&
+         unit.blocks[b].code.front().op == Vinstr::phidef);
+  return unit.blocks[b].code.front().phidef_.defs;
 }
 
 }}}

@@ -448,7 +448,9 @@ void Vxls::allocate() {
       return (inst.op == Vinstr::copy && is_nop(inst.copy_)) ||
              (inst.op == Vinstr::copy2 && is_nop(inst.copy2_)) ||
              (inst.op == Vinstr::movq && is_nop(inst.movq_)) ||
-             (inst.op == Vinstr::lea && is_nop(inst.lea_));
+             (inst.op == Vinstr::lea && is_nop(inst.lea_)) ||
+             (inst.op == Vinstr::copyargs) || // we lowered it
+             (inst.op == Vinstr::phidef); // we lowered it
     });
     code.erase(end, code.end());
   }

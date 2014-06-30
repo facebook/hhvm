@@ -1,0 +1,136 @@
+<HTML>
+<HEAD>
+  <TITLE>Neotonic ClearSilver License</TITLE>
+  <link REL="SHORTCUT ICON" HREF="/img/logo/cs.ico">
+<script src="http://www.google-analytics.com/urchin.js"
+type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-166884-2";
+urchinTracker();
+</script>
+<style><!--
+body { font-family:Arial,Helvetica; font-size:small; }
+td { font-family:Arial,Helvetica; font-size:small; }
+h1 { font-size:medium; color:#168461; }
+h2 { font-size:small; color:#168461; }
+h3 { font-size:small; color:#168461; }
+h4 { font-size:small; color:#168461; }
+pre { font-size:small; }
+code { font-size:small; color:#d24502; }
+tt { font-size:small; color:#d24502; }
+.ex { font-size:small; color:#d24502; }
+
+.menu_s { color:white; text-decoration:none; border-bottom:1px solid black; background:#26A491;}
+.sub_s { color:black; text-decoration:none; border-bottom:1px solid black; background:#dddddd;}
+.menu { color:black; text-decoration:none; }
+.menu:hover {text-decoration:underline;} 
+
+.hlink{text-decoration:none; color:black} 
+
+.ahlink{text-decoration:none; color:white}
+.ahlink:hover {text-decoration:underline; color:white}
+//--></style>
+</HEAD>
+<BODY BGCOLOR=#FFFFFF>
+<TABLE CELLSPACING=0 CELLPADDING=4 WIDTH=100%>
+<TR><TD VALIGN=BOTTOM><A HREF="/"><IMG BORDER=0 WIDTH=119 HEIGHT=23 SRC="/img/logo/clearsilverlogo.gif"></A></TD>
+<TD ALIGN=CENTER>
+</TD>
+</TABLE>
+	<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=0 WIDTH=100%>
+<TR><TD BGCOLOR="#000000"><IMG HEIGHT=1 WIDTH=1 SRC="/img/misc/dot_clear.gif"></TD></TR>
+<TR><TD BGCOLOR="#26A491"><IMG HEIGHT=2 WIDTH=1 SRC="/img/misc/dot_clear.gif"></TD></TR>
+<TR><TD ALIGN=RIGHT BGCOLOR=#26A491><font color=white><b>
+  <A CLASS=ahlink HREF="/">home</A>
+ |
+  <A CLASS=ahlink HREF="/news.hdf">news</A>
+ |
+  <A CLASS=ahlink HREF="/docs/">documentation</A>
+ |
+  <A CLASS=ahlink HREF="/downloads/">downloads</A>
+ |
+  <A CLASS=ahlink HREF="/discussion.hdf">discussion</A>
+ |
+  <A CLASS=ahlink HREF="/examples.hdf">projects</A>
+ |
+  <b><A CLASS=hlink HREF="/license.hdf">license</A></b>
+&nbsp;</TD></TR>
+<TR><TD BGCOLOR="#26A491"><IMG HEIGHT=2 WIDTH=1 SRC="/img/misc/dot_clear.gif"></TD></TR>
+<TR><TD BGCOLOR="#000000"><IMG HEIGHT=1 WIDTH=1 SRC="/img/misc/dot_clear.gif"></TD></TR>
+</TABLE>
+<TABLE BORDER=0 WIDTH=100% CELLSPACING=0 CELLPADDING=0>
+<TR>
+  <TD BGCOLOR="#EEEEEE" WIDTH=1 ROWSPAN=2><IMG WIDTH=3 HEIGHT=1 SRC="/img/misc/dot_clear.gif"></TD>
+  <TD WIDTH=150 HEIGHT=100% VALIGN=TOP BGCOLOR=#EEEEEE>
+  <IMG WIDTH=150 HEIGHT=1 SRC="/img/misc/dot_clear.gif"><br>
+&nbsp;
+<CENTER>
+<b>What is ClearSilver?</b>
+</CENTER>
+&nbsp;<br>
+<font size=-1>
+ClearSilver is a fast and powerful
+<b>HTML templating system</b>.
+<p>ClearSilver is <b>language neutral</b>, allowing you to seamlessly
+mix C, C++, Python, Perl, Java, PHP, and any other programming
+language you use, all in the same site, or even the same
+page.
+<p>ClearSilver is <b>fast</b>, avoiding the problems created by
+language-specific template systems written in slow script languages
+such as Python or Perl.
+<p>ClearSilver is <b>easy to use</b>. Unlike XML/XSLT, which are
+complicated to setup and understand. You'll quickly find that
+ClearSilver is the easiest way to develop dynamic webpages.
+</font>
+  <br>&nbsp;
+  </TD>
+  <TD BGCOLOR="#000000" WIDTH=1><IMG WIDTH=0 HEIGHT=1 SRC="/img/misc/dot_clear.gif"></TD>
+  <TD WIDTH=1% ROWSPAN=2>&nbsp;&nbsp;</TD>
+  <TD ROWSPAN=2 ALIGN=LEFT VALIGN=TOP> &nbsp;<br>
+<font size=-1>
+Copyright 2001-2009 Brandon Long
+<p>
+ClearSilver is now licensed under the New BSD License.
+<p>
+<pre style="font-size:medium">
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</pre>
+<p>
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</font>
+ </TD>
+</TR>
+</TABLE>
+<TABLE WIDTH=100% CELLSPACING=0 CELLPADDING=0>
+<TR><TD BGCOLOR="#000000"><IMG HEIGHT=1 WIDTH=1 SRC="/img/misc/dot_clear.gif"></TD></TR>
+</TABLE>
+&nbsp;<br>
+<CENTER><font size=-1>Copyright &copy; 2009 <A HREF="http://www.fiction.net/blong/">Brandon Long</A>, All rights reserved.</CENTER>
+</BODY>
+</HTML>
+<!-- 0.001:0 -->

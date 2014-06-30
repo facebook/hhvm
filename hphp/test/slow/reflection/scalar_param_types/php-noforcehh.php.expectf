@@ -1,6 +1,6 @@
 string(%d) "exception 'ReflectionException' with message 'Class int does not exist' in :
 Stack trace:
-#0 (): ReflectionClass->__construct()
+#0 (): ReflectionClass->__construct('int')
 #1 %s/test/slow/reflection/scalar_param_types/php-noforcehh.php(8): ReflectionParameter->getClass()
 #2 {main}"
 string(3) "int"

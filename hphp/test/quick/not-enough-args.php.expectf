@@ -9,7 +9,7 @@ one
 
 Fatal error: Uncaught exception 'Exception' with message '2, two() expects exactly 2 parameters, 1 given' in %s/test/quick/not-enough-args.php:8
 Stack trace:
-#0 %s/test/quick/not-enough-args.php(4): error_handler()
-#1 %s/test/quick/not-enough-args.php(17): two()
+#0 %s/test/quick/not-enough-args.php(4): error_handler(2, 'two() expects exactly 2 parameters, 1 given')
+#1 %s/test/quick/not-enough-args.php(17): two(1)
 #2 %s/test/quick/not-enough-args.php(20): main()
 #3 {main}

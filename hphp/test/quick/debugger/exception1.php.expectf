@@ -29,7 +29,7 @@ continue
 Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:11
 Stack trace:
 #0 (1): throw_exception()
-#1 (1): include()
+#1 (1): include('')
 #2 {main}
 exception MyException
 Breakpoint 1 set right before throwing MyException
@@ -45,7 +45,7 @@ continue
 Hit a php exception : exception 'MyException' with message '' in %s/exception1.php:15
 Stack trace:
 #0 (1): throw_myexception()
-#1 (1): include()
+#1 (1): include('')
 #2 {main}
 exception error
 Breakpoint 1 set right after an error
@@ -78,7 +78,7 @@ continue
 Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:29
 Stack trace:
 #0 (1): Outer\throw_exception()
-#1 (1): include()
+#1 (1): include('')
 #2 {main}
 exception \Outer\MyException
 Breakpoint 1 set right before throwing Outer\MyException
@@ -94,7 +94,7 @@ continue
 Hit a php exception : exception 'Outer\MyException' with message '' in %s/exception1.php:33
 Stack trace:
 #0 (1): Outer\throw_myexception()
-#1 (1): include()
+#1 (1): include('')
 #2 {main}
 exception error
 Breakpoint 1 set right after an error
@@ -127,7 +127,7 @@ continue
 Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:47
 Stack trace:
 #0 (1): Outer\Inner\throw_exception()
-#1 (1): include()
+#1 (1): include('')
 #2 {main}
 exception Outer\Inner\MyException
 Breakpoint 1 set right before throwing Outer\Inner\MyException
@@ -143,7 +143,7 @@ continue
 Hit a php exception : exception 'Outer\Inner\MyException' with message '' in %s/exception1.php:51
 Stack trace:
 #0 (1): Outer\Inner\throw_myexception()
-#1 (1): include()
+#1 (1): include('')
 #2 {main}
 exception error
 Breakpoint 1 set right after an error

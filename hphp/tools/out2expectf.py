@@ -9,7 +9,8 @@ import sys
 
 for test in sys.argv[1:]:
     if not test.endswith('.php'):
-        print ("%s doesn\'t end in .php. Pass the .php file to this script." % test)
+        print ("%s doesn\'t end in .php. Pass the .php file to this script." %
+               test)
         sys.exit(1)
 
     try:
@@ -19,11 +20,17 @@ for test in sys.argv[1:]:
         continue
 
     try:
-        data = re.sub('string\(\d+\) "/data[^ ]*/hphp', 'string(%d) "%s', data)
-        data = re.sub('/data[^ ]*/hphp', '%s', data)
+        # the first match has to be in a try incase there is bad unicode
+        re.sub('a', r'a', data)
     except UnicodeDecodeError:
         print ("%s has invalid unicode, skipping" % test)
         continue
+
+    # try to do relative paths
+    data = re.sub('string\(\d+\) "(#\d+) /[^ ]*/hphp', r'string(%d) "\1 %s',
+                  data)
+    data = re.sub('string\(\d+\) "/[^ ]*/hphp', r'string(%d) "%s', data)
+    data = re.sub('/[^ ]*/hphp', '%s', data)
 
     # The debugger prints the path given on the command line, which is often
     # relative. All such debugger tests live under something/debugger/foo.php.
@@ -35,6 +42,10 @@ for test in sys.argv[1:]:
 
     # Closure names change
     data = re.sub('Closure\$\$[0-9a-f]+\$', 'Closure$$%s$', data)
-    file(test + '.expectf', 'w').write(data)
+    if '%' in data:
+        name = test + '.expectf'
+    else:
+        name = test + '.expect'
 
-    print ('Copied %s.out to %s.expectf' % (test, test))
+    file(name, 'w').write(data)
+    print ('Copied %s.out to %s' % (test, name))

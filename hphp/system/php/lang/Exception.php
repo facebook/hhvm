@@ -154,11 +154,25 @@ class Exception {
     $s = "";
     foreach ($this->getTrace() as $frame) {
       if (!is_array($frame)) continue;
+
+      $args = array();
+      foreach ($frame['args'] as $arg) {
+        if (is_null($arg)) $args[] = 'NULL';
+        elseif (is_array($arg)) $args[] = 'Array';
+        elseif (is_object($arg)) $args[] = 'Object('.get_class($arg).')';
+        elseif (is_bool($arg)) $args[] = $arg ? 'true' : 'false';
+        elseif (is_int($arg) || is_double($arg)) $args[] = $arg;
+        else {
+          $str = (string)$arg;
+          $args[] = "'" . $str . "'";
+        }
+      }
+
       $s .= "#$i " .
         (isset($frame['file']) ? $frame['file'] : "") . "(" .
         (isset($frame['line']) ? $frame['line'] : "") . "): " .
         (isset($frame['class']) ? $frame['class'] . $frame['type'] : "") .
-        $frame['function'] . "()\n";
+        $frame['function'] . "(" . implode(', ', $args) . ")\n";
       $i++;
     }
     $s .= "#$i {main}";

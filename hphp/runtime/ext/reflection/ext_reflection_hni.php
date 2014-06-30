@@ -238,9 +238,13 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
 
-  abstract public function getAttributesRecursive(): array;
+  public function getAttributesRecursive(): array {
+    return $this->getAttributes();
+  }
 
-  abstract public function getAttributeRecursive($name);
+  public function getAttributeRecursive($name) {
+    return $this->getAttribute($name);
+  }
 
   <<__Native>>
   public function getNumberOfParameters(): int;
@@ -612,14 +616,6 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       return new ReflectionClass($cls);
     }
     return null;
-  }
-
-  public function getAttributesRecursive(): array {
-    return $this->getAttributes();
-  }
-
-  public function getAttributeRecursive($name) {
-    return $this->getAttribute($name);
   }
 }
 

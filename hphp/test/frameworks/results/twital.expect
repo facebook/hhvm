@@ -1,0 +1,254 @@
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #0
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #1
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #10
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #11
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #12
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #13
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #14
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #2
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #3
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #4
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #5
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #6
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #7
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #8
+.
+Goetas\Twital\Tests\CoreAttributeTest::testVisitAttribute with data set #9
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testInvalidVisitAttribute with data set #0
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testInvalidVisitAttribute with data set #1
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #0
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #1
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #10
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #11
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #12
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #13
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #14
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #2
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #3
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #4
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #5
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #6
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #7
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #8
+.
+Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #9
+.
+Goetas\Twital\Tests\Event\SourceEventTest::testBase
+.
+Goetas\Twital\Tests\Event\SourceEventTest::testBaseSetter
+.
+Goetas\Twital\Tests\Event\TemplateEventTest::testBase
+.
+Goetas\Twital\Tests\Event\TemplateEventTest::testBaseSetter
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #0
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #1
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #10
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #11
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #12
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #2
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #3
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #4
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #5
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #6
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #7
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #8
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressions with data set #9
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #0
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #1
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #2
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #3
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #4
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #5
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #6
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #7
+.
+Goetas\Twital\Tests\ExpressionParserTest::testExpressionsWithLimit with data set #8
+.
+Goetas\Twital\Tests\ExpressionParserTest::testWrongExpressions with data set #0
+.
+Goetas\Twital\Tests\ExpressionParserTest::testWrongExpressions with data set #1
+.
+Goetas\Twital\Tests\ExpressionParserTest::testWrongExpressions with data set #2
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #0
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #1
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #10
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #11
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #12
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #13
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #14
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #15
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #16
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #17
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #2
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #3
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #4
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #5
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #6
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #7
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #8
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testHTML5SourceAdapter with data set #9
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testListenerPriority
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #0
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #1
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #10
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #11
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #12
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #13
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #14
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #15
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #16
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #17
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #2
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #3
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #4
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #5
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #6
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #7
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #8
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXHTMLSourceAdapter with data set #9
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #0
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #1
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #10
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #11
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #12
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #13
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #14
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #15
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #16
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #17
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #2
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #3
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #4
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #5
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #6
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #7
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #8
+.
+Goetas\Twital\Tests\FullCompatibilityTwigTest::testXMLSourceAdapter with data set #9
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testDefaultAdapters
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testExists
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testExistsWithBaseLoader
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testInternalLoader
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testNonExistsWithBaseLoader
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testNonTwitalFile
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testRegexAdapters with data set #0
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testRegexAdapters with data set #1
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testRegexAdapters with data set #2
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testRegexAdapters with data set #3
+.
+Goetas\Twital\Tests\TwitalLoaderTest::testTwitalFile
+.

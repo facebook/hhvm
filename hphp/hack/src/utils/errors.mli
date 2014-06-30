@@ -183,7 +183,7 @@ val non_object_member : string -> Pos.t -> string -> Pos.t -> unit
 val null_container : Pos.t -> (Pos.t * string) list -> unit
 val option_mixed : Pos.t -> unit
 val wrong_extend_kind : Pos.t -> string -> Pos.t -> string -> unit
-val unsatisfied_req : Pos.t -> string -> unit
+val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
 val cyclic_class_def : Utils.SSet.t -> Pos.t -> unit
 val override_final : parent:Pos.t -> child:Pos.t -> unit
 val should_be_override : Pos.t -> string -> string -> unit

@@ -1332,11 +1332,9 @@ and call_parent_construct pos env el =
                        as trait) ->
               (match trait_most_concrete_req_class trait env with
                 | None -> Errors.parent_in_trait pos; default
-                | Some tc_parent ->
-                  (* FIXME: should bind in correct params *)
-                  let r = Reason.Rwitness pos in
-                  let fake_parent_ty = trait_fake_parent_ty pos tc_parent env in
-                  check_parent_construct pos env el (r, fake_parent_ty)
+                | Some (tc_parent, parent_ty) ->
+                  (* let r = Reason.Rwitness pos in *)
+                  check_parent_construct pos env el parent_ty
               )
             | Some self_tc ->
               if not self_tc.tc_members_fully_known
@@ -1983,17 +1981,18 @@ and class_id p env cid =
  * the 'require extends' must belong to the same inheritance hierarchy
  * and one of them should be the child of all the others *)
 and trait_most_concrete_req_class trait env =
-  SSet.fold (fun name acc ->
+  SMap.fold (fun name ty acc ->
     let keep = match acc with
-      | Some c -> SMap.mem name c.tc_ancestors
+      | Some (c, _ty) -> SMap.mem name c.tc_ancestors
       | None -> false
     in
     if keep then acc
     else
       let env, class_ = Env.get_class env name in
       (match class_ with
-        | None | Some { tc_kind = Ast.Cinterface; _ } -> acc
-        | Some c -> assert (c.tc_kind <> Ast.Ctrait); Some c
+        | None
+        | Some { tc_kind = Ast.Cinterface; _ } -> acc
+        | Some c -> assert (c.tc_kind <> Ast.Ctrait); Some (c, ty)
       )
   ) trait.tc_req_ancestors None
 
@@ -2018,12 +2017,12 @@ and static_class_id p env = function
               | None ->
                 Errors.parent_in_trait p;
                 env, (Reason.Rwitness p, Tany)
-              | Some parent ->
+              | Some (tc_parent, parent_ty) ->
+                (* inside a trait, parent is "this", but with the type
+                 * of the most concrete class that the trait has
+                 * "require extend"-ed *)
                 let r = Reason.Rwitness p in
-                let fake_parent = trait_fake_parent_ty p parent env in
-                (* in a trait, parent is "this", but with the type of the most
-                 * concrete class the trait 'require extend's *)
-                env, (r, Tgeneric ("this", Some (r, fake_parent)))
+                env, (r, Tgeneric ("this", Some parent_ty))
             )
           | _ ->
             let parent = Env.get_parent env in
@@ -2126,7 +2125,6 @@ and is_visible env vis cid =
               if SSet.mem x my_class.tc_extends
                 || SSet.mem self_id their_class.tc_extends
                 || SSet.mem x my_class.tc_req_ancestors_extends
-                || SSet.mem self_id their_class.tc_req_ancestors (* needed? *)
                 || not my_class.tc_members_fully_known
               then None
               else Some (

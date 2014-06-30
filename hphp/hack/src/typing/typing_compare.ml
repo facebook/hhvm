@@ -185,7 +185,7 @@ module CompareTypes = struct
     | Some x1, Some x2 -> class_elt acc x1 x2
     | _ -> acc
 
-  and implements acc imp1 imp2 = smap ty acc imp1 imp2
+  and ancestry acc imp1 imp2 = smap ty acc imp1 imp2
 
   and class_ (subst, same) c1 c2 =
     let same =
@@ -198,8 +198,7 @@ module CompareTypes = struct
       c1.tc_name = c2.tc_name &&
       SSet.compare c1.tc_members_init c2.tc_members_init = 0 &&
       SSet.compare c1.tc_extends c2.tc_extends = 0 &&
-      SSet.compare c1.tc_req_ancestors_extends c2.tc_req_ancestors_extends = 0 &&
-      SSet.compare c1.tc_req_ancestors c2.tc_req_ancestors = 0
+      SSet.compare c1.tc_req_ancestors_extends c2.tc_req_ancestors_extends = 0
     in
     let acc = subst, same in
     let acc = tparam_list acc c1.tc_tparams c2.tc_tparams in
@@ -209,8 +208,12 @@ module CompareTypes = struct
     let acc = members acc c1.tc_methods c2.tc_methods in
     let acc = members acc c1.tc_smethods c2.tc_smethods in
     let acc = constructor acc c1.tc_construct c2.tc_construct in
-    let acc = implements acc c1.tc_ancestors c2.tc_ancestors in
-    let acc = implements acc c1.tc_ancestors_checked_when_concrete c2.tc_ancestors_checked_when_concrete in
+    let acc = ancestry acc c1.tc_req_ancestors c2.tc_req_ancestors in
+    let acc = ancestry acc c1.tc_ancestors c2.tc_ancestors in
+    let acc = ancestry acc
+      c1.tc_ancestors_checked_when_concrete
+      c2.tc_ancestors_checked_when_concrete
+    in
     acc
 
 end
@@ -464,7 +467,7 @@ let class_big_diff class1 class2 =
   class1.tc_tparams <> class2.tc_tparams ||
   SMap.compare class1.tc_ancestors class2.tc_ancestors <> 0 ||
   SMap.compare class1.tc_ancestors_checked_when_concrete class2.tc_ancestors_checked_when_concrete <> 0 ||
-  SSet.compare class1.tc_req_ancestors class2.tc_req_ancestors <> 0 ||
+  SMap.compare class1.tc_req_ancestors class2.tc_req_ancestors <> 0 ||
   SSet.compare class1.tc_req_ancestors_extends class2.tc_req_ancestors_extends <> 0 ||
   SSet.compare class1.tc_extends class2.tc_extends <> 0
 

@@ -184,6 +184,8 @@ type ureason =
   | URpair_access
   | URdynamic_yield
   | URnewtype_cstr
+  | URclass_req
+  | URclass_req_merge
   | URenum
 
 let string_of_ureason = function
@@ -220,6 +222,8 @@ let string_of_ureason = function
       "When using DynamicYield, yield*() methods should have type Awaitable"
   | URnewtype_cstr ->
       "Invalid constraint on newtype"
+  | URclass_req -> "Unable to satisfy trait/interface requirement"
+  | URclass_req_merge -> "Incompatible trait/interface requirements"
   | URenum ->
       "Constant does not match the type of the Enum it is in"
 

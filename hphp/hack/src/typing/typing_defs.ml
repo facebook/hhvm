@@ -134,8 +134,8 @@ and class_type = {
   (* Ancestors that have to be checked when the class becomes
    * concrete. *)
   tc_ancestors_checked_when_concrete  : ty SMap.t;
-  tc_req_ancestors       : SSet.t;
-  tc_req_ancestors_extends         : SSet.t; (* the extends of req_ancestors *)
+  tc_req_ancestors       : ty SMap.t;
+  tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
   tc_user_attributes     : Ast.user_attribute SMap.t;
 }

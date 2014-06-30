@@ -324,7 +324,7 @@ module PrintClass = struct
     let tc_ancestors = ancestors_smap c.tc_ancestors in
     let tc_ancestors_checked_when_concrete =
       ancestors_smap c.tc_ancestors_checked_when_concrete in
-    let tc_req_ancestors = sset c.tc_req_ancestors in
+    let tc_req_ancestors = ancestors_smap c.tc_req_ancestors in
     let tc_req_ancestors_extends = sset c.tc_req_ancestors_extends in
     let tc_extends = sset c.tc_extends in
     let tc_user_attributes = user_attribute_smap c.tc_user_attributes in

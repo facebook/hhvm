@@ -686,8 +686,11 @@ let wrong_extend_kind child_pos child parent_pos parent =
   let msg2 = parent_pos, "This is "^parent in
   add_list [msg1; msg2]
 
-let unsatisfied_req pos req =
-  add pos ("Failure to satisfy requirement: "^(Utils.strip_ns req))
+let unsatisfied_req parent_pos req_name req_pos =
+  let s1 = "Failure to satisfy requirement: "^(Utils.strip_ns req_name) in
+  let s2 = "Required here" in
+  if req_pos = parent_pos then add parent_pos s1
+  else add_list [parent_pos, s1; req_pos, s2]
 
 let cyclic_class_def stack pos =
   let stack = SSet.fold (fun x y -> (Utils.strip_ns x)^" "^y) stack "" in

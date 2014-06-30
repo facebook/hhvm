@@ -37,8 +37,13 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
       $flags = ($flags === null) ? $array->getFlags() : $flags;
     } else if (is_object($array)) {
       $this->storage = get_object_vars($array);
-    } else {
+    } else if (is_array($array)) {
       $this->storage = (array) $array;
+    } else {
+      $this->storage = array();
+      throw new InvalidArgumentException(
+        "Passed variable is not an array or object, using empty array instead"
+      );
     }
     $this->flags = ($flags === null) ? 0 : $flags;
     reset($this->storage);

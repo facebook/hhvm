@@ -440,13 +440,25 @@ Profiler::~Profiler() {
     }
 }
 
-void Profiler::beginFrameEx() {} // called right before a function call
-void Profiler::endFrameEx() {}   // called right after a function is finished
-void Profiler::writeStats(Array &ret) {}
+/*
+ * Called right before a function call.
+ */
+void Profiler::beginFrameEx(const char *symbol) {
+}
+
+/*
+ * Called right after a function is finished.
+ */
+void Profiler::endFrameEx(const TypedValue *retval,
+                          const char *_symbol) {
+} 
+
+void Profiler::writeStats(Array &ret) {
+}
 
 void Profiler::endAllFrames() {
     while (m_stack) {
-      endFrame(nullptr, true);
+      endFrame(nullptr, nullptr, true);
     }
 }
 
@@ -500,19 +512,21 @@ void Profiler::beginFrame(const char *symbol) {
   current->m_recursion = recursion_level;
 
   m_func_hash_counters[current->m_hash_code]++;
-  beginFrameEx();
+  beginFrameEx(symbol);
 }
 
 /**
  * End top of the stack.
  */
-void Profiler::endFrame(const char *symbol, bool endMain) {
+void Profiler::endFrame(const TypedValue *retval,
+                        const char *symbol,
+                        bool endMain) {
   if (m_stack) {
     // special case for main() frame that's only ended by endAllFrames()
     if (!endMain && m_stack->m_parent == nullptr) {
       return;
     }
-    endFrameEx();
+    endFrameEx(retval, symbol);
     m_func_hash_counters[m_stack->m_hash_code]--;
     releaseFrame();
   }
@@ -568,12 +582,13 @@ public:
     print_output();
   }
 
-  virtual void beginFrameEx() {
+  virtual void beginFrameEx(const char *symbol) override {
     m_stack->m_tsc_start = cpuCycles();
     m_stack->m_vtsc_start = vtsc(m_MHz);
   }
 
-  virtual void endFrameEx() {
+  virtual void endFrameEx(const TypedValue *retval,
+                          const char *symbol) override {
     CountMap &counts = m_stats[m_stack->m_name];
     counts.count++;
     counts.tsc += cpuCycles() - m_stack->m_tsc_start;
@@ -634,7 +649,7 @@ public:
   explicit HierarchicalProfiler(int flags) : m_flags(flags) {
   }
 
-  virtual void beginFrameEx() {
+  virtual void beginFrameEx(const char *symbol) override {
     m_stack->m_tsc_start = cpuCycles();
 
     if (m_flags & TrackCPU) {
@@ -651,7 +666,8 @@ public:
     }
   }
 
-  virtual void endFrameEx() {
+  virtual void endFrameEx(const TypedValue *retval,
+                          const char *given_symbol) override {
     char symbol[512];
     m_stack->getStack(2, symbol, sizeof(symbol));
     CountMap &counts = m_stats[symbol];
@@ -674,7 +690,7 @@ public:
     }
   }
 
-  virtual void writeStats(Array &ret) {
+  virtual void writeStats(Array &ret) override {
     extractStats(ret, m_stats, m_flags, m_MHz);
   }
 
@@ -983,15 +999,17 @@ class TraceProfiler : public Profiler {
     return true;
   }
 
-  virtual void beginFrame(const char *symbol) {
+  virtual void beginFrame(const char *symbol) override {
     doTrace(symbol, false);
   }
 
-  virtual void endFrame(const char *symbol, bool endMain = false) {
+  virtual void endFrame(const TypedValue *retval,
+                        const char *symbol,
+                        bool endMain = false) override {
     doTrace(symbol, true);
   }
 
-  virtual void endAllFrames() {
+  virtual void endAllFrames() override {
     if (m_traceBuffer && m_nextTraceEntry < m_traceBufferSize - 1) {
       collectStats(nullptr, true, m_finalEntry);
       m_traceBufferFilled = true;
@@ -1044,7 +1062,7 @@ class TraceProfiler : public Profiler {
     walker.walk(begin, end, final, stats);
   }
 
-  virtual void writeStats(Array &ret) {
+  virtual void writeStats(Array &ret) override {
     TraceData my_begin;
     collectStats(my_begin);
     walkTrace(m_traceBuffer, m_traceBuffer + m_nextTraceEntry, &m_finalEntry,
@@ -1132,15 +1150,16 @@ public:
     m_sampling_interval_tsc = SAMPLING_INTERVAL * m_MHz;
   }
 
-  virtual void beginFrameEx() {
+  virtual void beginFrameEx(const char *symbol) override {
     sample_check();
   }
 
-  virtual void endFrameEx() {
+  virtual void endFrameEx(const TypedValue *retvalue,
+                          const char *symbol) override {
     sample_check();
   }
 
-  virtual void writeStats(Array &ret) {
+  virtual void writeStats(Array &ret) override {
     for (StatsMap::const_iterator iter = m_stats.begin();
          iter != m_stats.end(); ++iter) {
       Array arr;
@@ -1239,7 +1258,7 @@ class MemoProfiler : public Profiler {
   }
 
  private:
-  virtual void beginFrame(const char *symbol) {
+  virtual void beginFrame(const char *symbol) override {
     VMRegAnchor _;
     ActRec *ar = vmfp();
     Frame f(symbol);
@@ -1261,7 +1280,9 @@ class MemoProfiler : public Profiler {
     m_stack.push_back(f);
   }
 
-  virtual void endFrame(const char *symbol, bool endMain = false) {
+  virtual void endFrame(const TypedValue *retval,
+                        const char *symbol,
+                        bool endMain = false) override {
     if (m_stack.empty()) {
       fprintf(stderr, "STACK IMBALANCE empty %s\n", symbol);
       return;
@@ -1331,11 +1352,11 @@ class MemoProfiler : public Profiler {
     }
   }
 
-  virtual void endAllFrames() {
+  virtual void endAllFrames() override {
     // Nothing to do for this profiler since all work is done as we go.
   }
 
-  virtual void writeStats(Array &ret) {
+  virtual void writeStats(Array &ret) override {
     fprintf(stderr, "writeStats start\n");
     // RetSame: the return value is the same instance every time
     // HasThis: call has a this argument
@@ -1596,7 +1617,7 @@ void f_xhprof_frame_end() {
 #ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {
-    prof->endFrame(nullptr);
+    prof->endFrame(nullptr, nullptr);
   }
 #endif
 }
@@ -1668,12 +1689,15 @@ const int64_t k_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY = IHaveInfiniteMemory;
 ///////////////////////////////////////////////////////////////////////////////
 // injected code
 
-void begin_profiler_frame(Profiler *p, const char *symbol) {
+void begin_profiler_frame(Profiler *p,
+                          const char *symbol) {
   p->beginFrame(symbol);
 }
 
-void end_profiler_frame(Profiler *p, const char *symbol) {
-  p->endFrame(symbol);
+void end_profiler_frame(Profiler *p,
+                        const TypedValue *retval,
+                        const char *symbol) {
+  p->endFrame(retval, symbol);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

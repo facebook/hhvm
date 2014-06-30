@@ -38,8 +38,11 @@ static StaticString s_name("name");
 static StaticString s_return("return");
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
-extern void begin_profiler_frame(Profiler *p, const char *symbol);
-extern void end_profiler_frame(Profiler *p, const char *symbol);
+extern void begin_profiler_frame(Profiler *p,
+                                 const char *symbol);
+extern void end_profiler_frame(Profiler *p,
+                               const TypedValue *retval,
+                               const char *symbol);
 
 void EventHook::Enable() {
   ThreadInfo::s_threadInfo->m_reqInjectionData.setEventHookFlag();
@@ -299,6 +302,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
       // onFunctionEnter. That's okay, though... we tolerate this in
       // TraceProfiler.
       end_profiler_frame(profiler,
+                         retval,
                          GetFunctionNameForProfiler(ar->func(), NormalFunc));
     }
 #endif

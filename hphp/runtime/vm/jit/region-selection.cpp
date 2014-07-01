@@ -97,6 +97,19 @@ void RegionDesc::addArc(BlockId src, BlockId dst) {
   arcs.push_back({src, dst});
 }
 
+void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
+  for (auto& block : blocks) {
+    if (block->id() == oldId) {
+      block->setId(newId);
+      break;
+    }
+  }
+  for (auto& arc : arcs) {
+    if (arc.src == oldId) arc.src = newId;
+    if (arc.dst == oldId) arc.dst = newId;
+  }
+}
+
 void RegionDesc::setSideExitingBlock(BlockId bid) {
   sideExitingBlocks.insert(bid);
 }

@@ -1668,6 +1668,7 @@ Translator::translateRegion(const RegionDesc& region,
     if (ht.genMode() == IRGenMode::CFG) {
       Block* irBlock = blockIdToIRBlock[blockId];
       if (blockHasUnprocessedPred(region, blockId, processedBlocks)) {
+        always_assert(RuntimeOption::EvalJitLoops);
         irb.clearBlockState(irBlock);
       }
       ht.irBuilder().startBlock(irBlock);

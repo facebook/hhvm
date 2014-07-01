@@ -74,6 +74,7 @@ struct RegionDesc {
     return blocks.back().get();
   }
   void addArc(BlockId src, BlockId dst);
+  void renumberBlock(BlockId oldId, BlockId newId);
   void setSideExitingBlock(BlockId bid);
   bool isSideExitingBlock(BlockId bid) const;
   std::vector<BlockPtr> blocks;

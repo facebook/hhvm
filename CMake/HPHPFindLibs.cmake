@@ -141,6 +141,12 @@ if (LIBSQLITE_INCLUDE_DIR)
   include_directories(${LIBSQLITE_INCLUDE_DIR})
 endif ()
 
+# libdouble-conversion
+find_package(DoubleConversion)
+if (DOUBLE_CONVERSION_INCLUDE_DIR)
+  include_directories(${DOUBLE_CONVERSION_INCLUDE_DIR})
+endif ()
+
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
@@ -399,6 +405,11 @@ macro(hphp_link target)
     target_link_libraries(${target} ${LIBICONV_LIBRARY})
   endif()
 
+  if (DOUBLE_CONVERSION_LIBRARY)
+    target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
+  else() 
+    target_link_libraries(${target} double-conversion)
+  endif()
 
   if (LINUX)
     target_link_libraries(${target} ${CAP_LIB})
@@ -461,7 +472,6 @@ macro(hphp_link target)
   target_link_libraries(${target} fastlz)
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} lz4)
-  target_link_libraries(${target} double-conversion)
   target_link_libraries(${target} folly)
   target_link_libraries(${target} zip_static)
 

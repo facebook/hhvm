@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/util/logger.h"
 
@@ -56,9 +57,10 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
                                      int64_t limit /* = 0 */) {
   bool provide_object = options & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
-  return g_context->debugBacktrace(
-    false, false, provide_object, nullptr, ignore_args, limit
-  );
+  return createBacktrace(BacktraceArgs()
+                         .withThis(provide_object)
+                         .ignoreArgs(ignore_args)
+                         .setLimit(limit));
 }
 
 /**
@@ -95,8 +97,10 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
                               int64_t limit /* = 0 */) {
   Array bt;
   StringBuffer buf;
-  bt = g_context->debugBacktrace(skip, false, false, nullptr,
-                                   ignore_args, limit);
+  bt = createBacktrace(BacktraceArgs()
+                       .skipTop(skip)
+                       .ignoreArgs(ignore_args)
+                       .setLimit(limit));
   int i = 0;
   for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
     Array frame = it.second().toArray();

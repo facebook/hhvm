@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/backtrace.h"
 
 namespace HPHP {
 
@@ -46,7 +47,7 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   computeBacktrace();
 }
 
-Array ExtendedException::getBackTrace() const {
+Array ExtendedException::getBacktrace() const {
   return Array(m_btp.get());
 }
 
@@ -55,7 +56,7 @@ const StaticString s_file("file"), s_line("line");
 std::pair<String, int> ExtendedException::getFileAndLine() const {
   String file = empty_string();
   int line = 0;
-  Array bt = getBackTrace();
+  Array bt = getBacktrace();
   if (!bt.empty()) {
     Array top = bt.rvalAt(0).toArray();
     if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
@@ -65,7 +66,10 @@ std::pair<String, int> ExtendedException::getFileAndLine() const {
 }
 
 void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
-  m_btp = g_context->debugBacktrace(skipFrame, true).get();
+  Array bt = createBacktrace(BacktraceArgs()
+                          .skipTop(skipFrame)
+                          .withSelf());
+  m_btp = bt.get();
 }
 
 //////////////////////////////////////////////////////////////////////

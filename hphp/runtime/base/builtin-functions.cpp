@@ -46,6 +46,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/request-injection-data.h"
+#include "hphp/runtime/base/backtrace.h"
 
 #include <limits>
 #include <algorithm>
@@ -656,13 +657,17 @@ Exception* generate_request_timeout_exception() {
     "entire web request took longer than ";
   exceptionMsg += folly::to<std::string>(data.getTimeout());
   exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
-  Array exceptionStack = g_context->debugBacktrace(false, true, true);
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
   ret = new RequestTimeoutException(exceptionMsg, exceptionStack);
   return ret;
 }
 
 Exception* generate_memory_exceeded_exception() {
-  Array exceptionStack = g_context->debugBacktrace(false, true, true);
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack);
 }

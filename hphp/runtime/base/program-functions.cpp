@@ -63,6 +63,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/system/constants.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/backtrace.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -336,7 +337,7 @@ enum class ContextOfException {
 
 static void handle_exception_append_bt(std::string& errorMsg,
                                        const ExtendedException& e) {
-  Array bt = e.getBackTrace();
+  Array bt = e.getBacktrace();
   if (!bt.empty()) {
     errorMsg += ExtendedLogger::StringOfStackTrace(bt);
   }
@@ -381,7 +382,7 @@ static void handle_exception_helper(bool& ret,
     } else if (where != ContextOfException::Handler &&
         !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
-      Array stack = e.getBackTrace();
+      Array stack = e.getBacktrace();
       Array argv = make_packed_array(ExitException::ExitCode.load(), stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
@@ -1324,8 +1325,9 @@ static int execute_program_impl(int argc, char** argv) {
         VMParserFrame parserFrame;
         parserFrame.filename = po.lint.c_str();
         parserFrame.lineNumber = line;
-        Array bt = g_context->debugBacktrace(false, true,
-                                               false, &parserFrame);
+        Array bt = createBacktrace(BacktraceArgs()
+                                   .withSelf()
+                                   .setParserFrame(&parserFrame));
         throw FatalErrorException(msg->data(), bt);
       }
     } catch (FileOpenException &e) {

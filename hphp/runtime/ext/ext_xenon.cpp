@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include <signal.h>
 #include <vector>
@@ -296,8 +297,11 @@ void XenonRequestLocalData::log(Xenon::SampleType t) {
   Array snapshot;
   snapshot.set(s_time, now, true);
   bool skipFirst = (t == Xenon::EnterSample) ? true : false;
-  snapshot.set(s_phpStack, g_context->debugBacktrace(skipFirst, true, false,
-    nullptr, true), true);
+  Array bt = createBacktrace(BacktraceArgs()
+                             .skipTop(skipFirst)
+                             .withSelf()
+                             .ignoreArgs());
+  snapshot.set(s_phpStack, bt, true);
   snapshot.set(s_asyncStack, logAsyncStack(), true);
   snapshot.set(s_isWait, (t == Xenon::IOWaitSample));
   m_stackSnapshots.append(snapshot);

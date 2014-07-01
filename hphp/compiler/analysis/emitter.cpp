@@ -8472,7 +8472,7 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
           not_reached();
       }
 
-      // debugBacktrace has off-by-one bug when determining whether we are
+      // Backtrace has off-by-one bug when determining whether we are
       // in returning opcode; add Nop to avoid it
       ue.emitOp(OpNop);
       ue.emitOp(OpRetC);

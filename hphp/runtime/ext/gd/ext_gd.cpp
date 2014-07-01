@@ -1401,8 +1401,7 @@ static struct gfxinfo *php_handle_xbm(const Resource& stream) {
   return result;
 }
 
-static struct gfxinfo *php_handle_ico(const Resource& stream)
-{
+static struct gfxinfo *php_handle_ico(const Resource& stream) {
   struct gfxinfo *result = NULL;
   String dim;
   const unsigned char *s;
@@ -1423,8 +1422,7 @@ static struct gfxinfo *php_handle_ico(const Resource& stream)
   result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
   CHECK_ALLOC_R(result, (sizeof(struct gfxinfo)), NULL);
 
-  while (num_icons > 0)
-  {
+  while (num_icons > 0) {
     dim = f_fread(stream, 16);
     if (dim.length() != 16) {
       break;
@@ -1432,8 +1430,7 @@ static struct gfxinfo *php_handle_ico(const Resource& stream)
 
     s = (unsigned char *)dim.c_str();
 
-    if ((((unsigned int)s[7]) << 8) + ((unsigned int)s[6]) >= result->bits)
-    {
+    if ((((unsigned int)s[7]) << 8) + ((unsigned int)s[6]) >= result->bits) {
       result->width  = (unsigned int)s[0];
       result->height = (unsigned int)s[1];
       result->bits   = (((unsigned int)s[7]) << 8) + ((unsigned int)s[6]);

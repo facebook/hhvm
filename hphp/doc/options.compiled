@@ -320,9 +320,6 @@ These are experimental LFU settings.
     DnsCache {
       Enable = false
       TTL = 600   # in seconds
-      KeyMaturityThreshold = 20
-      MaximumCapacity = 0
-      KeyFrequencyUpdatePeriod = 1000
     }
 
     # Light process has very little forking cost, because they are pre-forked
@@ -570,7 +567,6 @@ next requests.
     Memory = false
     Malloc = false
     APC = false
-    APCKey = false
     SQL = false
     SQLTable = false
     NetworkIO = false

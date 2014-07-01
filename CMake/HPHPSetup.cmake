@@ -155,8 +155,11 @@ add_definitions(-DHPHP_OSS=1)
 # later versions of binutils don't play well without automake
 add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
 
+if (NOT LIBSQLITE3_LIBRARY)
+  include_directories("${TP_DIR}/libsqlite3")
+endif()
+
 include_directories("${TP_DIR}/fastlz")
-include_directories("${TP_DIR}/libsqlite3")
 include_directories("${TP_DIR}/timelib")
 include_directories("${TP_DIR}/libafdt/src")
 include_directories("${TP_DIR}/libmbfl")

@@ -289,9 +289,13 @@ if (ELF_GETSHDRSTRNDX)
   add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
 endif()
 
-find_package(Libpam)
-if (PAM_INCLUDE_PATH)
-  include_directories(${PAM_INCLUDE_PATH})
+# For some reason imap-uw is using libpam on OSX, so we need to include it as
+# an indirect dependency
+if (APPLE)
+  find_package(Libpam)
+  if (PAM_INCLUDE_PATH)
+    include_directories(${PAM_INCLUDE_PATH})
+  endif()
 endif()
 
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)

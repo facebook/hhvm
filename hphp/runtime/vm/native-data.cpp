@@ -136,6 +136,9 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   if (ndi->sweep) {
     prependSweepNode(getSweepNode(obj));
   }
+  if (UNLIKELY(cls->callsCustomInstanceInit())) {
+    obj->callCustomInstanceInit();
+  }
   return obj;
 }
 

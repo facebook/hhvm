@@ -9,12 +9,9 @@
  *)
 
 (*****************************************************************************)
-(* Module used to type DynamicYield
- * Each class that uses the DynamicYield trait or which extends a class that
- * uses the DynamicYield trait implicitly defines a few methods. If it
- * explicitly defines a yieldFoo method, then it implicitly also defines genFoo,
- * prepareFoo, and getFoo (unless any of those methods are explicitly defined).
- * It does this with __call().
+(* Module used to enforce that Enum subclasses are used reasonably.
+ * Exports the Enum type as the type of all constants, checks that constants
+ * have the proper type, and restricts what types can be used for enums.
  *)
 (*****************************************************************************)
 open Nast

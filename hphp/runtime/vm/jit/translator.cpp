@@ -1588,6 +1588,8 @@ static bool isMergePoint(Offset offset, const RegionDesc& region) {
       for (auto arc : region.arcs) {
         if (arc.dst == bid) inCount++;
       }
+      // NB: The initial block has an invisible "entry arc".
+      if (block == region.blocks[0]) ++inCount;
       if (inCount >= 2) return true;
     }
   }

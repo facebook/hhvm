@@ -177,15 +177,26 @@ FuncAnalysis do_analyze(const Index& index,
    * (i.e. each dv init and the main entry), and all of them count as
    * places the function could be entered, so they all must be visited
    * at least once (add them to incompleteQ).
+   *
+   * If we're entering at a DV-init, all higher parameter locals must
+   * be Uninit.  It is also possible that the DV-init is reachable
+   * from within the function with these parameter locals already
+   * initialized (although the normal php emitter can't do this), but
+   * that case is handled normally when iterating below.
    */
   auto const entryState = entry_state(index, ctx, clsAnalysis, knownArgs);
   if (!knownArgs) {
-    for (auto& param : ctx.func->params) {
-      if (auto const dv = param.dvEntryPoint) {
+    auto const numParams = ctx.func->params.size();
+    for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
+      if (auto const dv = ctx.func->params[paramId].dvEntryPoint) {
         ai.bdata[dv->id].stateIn = entryState;
         incompleteQ.insert(rpoId(dv));
+        for (auto locId = paramId; locId < numParams; ++locId) {
+          ai.bdata[dv->id].stateIn.locals[locId] = TUninit;
+        }
       }
     }
+
     ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
     incompleteQ.insert(rpoId(ctx.func->mainEntry));
   } else {

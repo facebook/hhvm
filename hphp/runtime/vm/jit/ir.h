@@ -225,6 +225,11 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           C(Int)                              \
                                           S(Int)                              \
                                           S(Int),                          E) \
+O(CheckRefs,                        ND, S(Func)                               \
+                                          S(Int)                              \
+                                          C(Int)                              \
+                                          S(Int)                              \
+                                          S(Int),                        B|E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(TrackLoc,                         ND, S(Gen),                            E) \
 O(BeginCatch,                       ND, NA,                                E) \

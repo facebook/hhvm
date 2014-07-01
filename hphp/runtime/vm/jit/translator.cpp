@@ -1694,12 +1694,13 @@ Translator::translateRegion(const RegionDesc& region,
         }
       }
 
-      // Emit reffiness guards. For now, we only support reffiness guards at
-      // the beginning of the region.
       while (refPreds.hasNext(sk)) {
-        assert(sk == startSk);
         auto const& pred = refPreds.next();
-        ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
+        if (isFirstRegionInstr) {
+          ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
+        } else {
+          ht.checkRefs(pred.arSpOffset, pred.mask, pred.vals, sk.offset());
+        }
       }
 
       // Finish emitting guards, and emit profiling counters.

@@ -4349,10 +4349,13 @@ static uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   return retval;
 }
 
-void HhbcTranslator::guardRefs(int64_t entryArDelta,
-                               const std::vector<bool>& mask,
-                               const std::vector<bool>& vals) {
-  int32_t actRecOff = cellsToBytes(entryArDelta);
+void HhbcTranslator::refCheckHelper(int64_t entryArDelta,
+                                    const std::vector<bool>& mask,
+                                    const std::vector<bool>& vals,
+                                    Offset dest /* = -1 */) {
+   int32_t actRecOff = cellsToBytes(entryArDelta +
+                                    m_irb->stackDeficit() -
+                                    m_irb->evalStack().size());
   SSATmp* funcPtr = gen(LdARFuncPtr, m_irb->sp(), cns(actRecOff));
   SSATmp* nParams = nullptr;
 
@@ -4371,15 +4374,26 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
     }
 
     uint64_t vals64 = packBitVec(vals, i);
-    gen(
-      GuardRefs,
-      funcPtr,
-      nParams,
-      cns(i),
-      cns(mask64),
-      cns(vals64)
-    );
+    if (dest == -1) {
+      gen(GuardRefs, funcPtr, nParams, cns(i), cns(mask64), cns(vals64));
+    } else {
+      gen(CheckRefs, makeExit(dest), funcPtr, nParams, cns(i),
+          cns(mask64), cns(vals64));
+    }
   }
+}
+
+void HhbcTranslator::guardRefs(int64_t entryArDelta,
+                               const std::vector<bool>& mask,
+                               const std::vector<bool>& vals) {
+  refCheckHelper(entryArDelta, mask, vals);
+}
+
+void HhbcTranslator::checkRefs(int64_t entryArDelta,
+                               const std::vector<bool>& mask,
+                               const std::vector<bool>& vals,
+                               Offset dest) {
+  refCheckHelper(entryArDelta, mask, vals, dest);
 }
 
 void HhbcTranslator::endGuards() {

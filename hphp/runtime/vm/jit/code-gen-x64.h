@@ -84,6 +84,9 @@ private:
   void cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
                         Block* label = nullptr);
 
+  template <class JmpFn>
+  void emitReffinessTest(IRInstruction* inst, JmpFn doJcc);
+
   template<class Loc1, class Loc2, class JmpFn>
   void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc);
 

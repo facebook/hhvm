@@ -89,17 +89,6 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       break;
     }
 
-    // Break if block is not the first and requires reffiness checks.
-    // Task #2589970: fix translateRegion to support mid-region reffiness checks
-    if (prevId != kInvalidTransID) {
-      auto nRefDeps = blockRegion->entry()->reffinessPreds().size();
-      if (nRefDeps > 0) {
-        FTRACE(2, "selectHotTrace: breaking region because of refDeps ({}) at "
-               "Translation {}\n", nRefDeps, tid);
-        break;
-      }
-    }
-
     // Break if block is not the first and it corresponds to the main
     // function body entry.  This is to prevent creating multiple
     // large regions containing the function body (starting at various

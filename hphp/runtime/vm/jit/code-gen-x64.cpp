@@ -4604,7 +4604,8 @@ void CodeGenerator::cgCheckDefinedClsEq(IRInstruction* inst) {
   v << jcc{CC_NZ, {label(inst->next()), label(inst->taken())}};
 }
 
-void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
+template <class JmpFn>
+void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
   assert(inst->numSrcs() == 5);
 
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
@@ -4633,7 +4634,6 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(vals64Reg != InvalidReg || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
-  auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
   auto& v = vmain();
 
   auto thenBody = [&](Vout& v) {
@@ -4686,7 +4686,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
         v << cmpli{(int32_t)vals64, bitsVal2};
       }
     }
-    v << fallbackcc{cond, destSK};
+    doJcc(v, cond);
   };
 
   if (firstBitNum == 0) {
@@ -4704,16 +4704,31 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       // are refs, or all params are non-refs, so if vals64
       // isn't 0 and isnt mask64, there's no possibility of
       // a match
-      v << fallbackcc{CC_LE, destSK};
+      doJcc(v, CC_LE);
       thenBody(v);
     } else {
       ifThenElse(v, CC_NLE, thenBody, /* else */ [&](Vout& v) {
           //   If not special builtin...
           v << testlim{AttrVariadicByRef, funcPtrReg[Func::attrsOff()]};
-          v << fallbackcc{vals64 ? CC_Z : CC_NZ, destSK};
+          doJcc(v, vals64 ? CC_Z : CC_NZ);
         });
     }
   }
+}
+
+void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
+  emitReffinessTest(inst,
+    [&](Vout& v, ConditionCode cc) {
+      auto const destSK = SrcKey(curFunc(), inst->marker().bcOff(), resumed());
+      v << fallbackcc{cc, destSK};
+    });
+}
+
+void CodeGenerator::cgCheckRefs(IRInstruction* inst)  {
+  emitReffinessTest(inst,
+    [&](Vout& v, ConditionCode cc) {
+      emitFwdJcc(v, cc, inst->taken());
+    });
 }
 
 void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {

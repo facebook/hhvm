@@ -623,9 +623,11 @@ and expr_ is_lvalue env (p, e) =
   | Array (x :: rl as l) ->
       check_consistent_fields x rl;
       let env, value = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
-      let env, values = lfold field_value env l in
+      let env, values =
+        fold_left_env (apply_for_env_fold field_value) env [] l in
       let has_unknown = List.exists (fun (_, ty) -> ty = Tany) values in
-      let env, values = lfold TUtils.unresolved env values in
+      let env, values =
+        fold_left_env (apply_for_env_fold TUtils.unresolved) env [] values in
       let unify_value = Type.unify p Reason.URarray_value in
       let env, value =
         if has_unknown (* If one of the values comes from PHP land,
@@ -640,8 +642,10 @@ and expr_ is_lvalue env (p, e) =
           env, (Reason.Rwitness p, Tarray (true, Some value, None))
       | Nast.AFkvalue _ ->
           let env, key = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
-          let env, keys = lfold field_key env l in
-          let env, keys = lfold TUtils.unresolved env keys in
+          let env, keys =
+            fold_left_env (apply_for_env_fold field_key) env [] l in
+          let env, keys =
+            fold_left_env (apply_for_env_fold TUtils.unresolved) env [] keys in
           let unify_key = Type.unify p Reason.URarray_key in
           let env, key = fold_left_env unify_key env key keys in
           env, (Reason.Rwitness p, Tarray (true, Some key, Some value))

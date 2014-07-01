@@ -147,6 +147,12 @@ if (DOUBLE_CONVERSION_INCLUDE_DIR)
   include_directories(${DOUBLE_CONVERSION_INCLUDE_DIR})
 endif ()
 
+# liblz4
+find_package(LZ4)
+if (LZ4_INCLUDE_DIR)
+  include_directories(${LZ4_INCLUDE_DIR})
+endif()
+
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
@@ -405,12 +411,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${LIBICONV_LIBRARY})
   endif()
 
-  if (DOUBLE_CONVERSION_LIBRARY)
-    target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
-  else() 
-    target_link_libraries(${target} double-conversion)
-  endif()
-
   if (LINUX)
     target_link_libraries(${target} ${CAP_LIB})
   endif()
@@ -468,10 +468,21 @@ macro(hphp_link target)
   else()
     target_link_libraries(${target} sqlite3)
   endif()
+  
+  if (DOUBLE_CONVERSION_LIBRARY)
+    target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
+  else() 
+    target_link_libraries(${target} double-conversion)
+  endif()
+
+  if (LZ4_LIBRARY)
+    target_link_libraries(${target} ${LZ4_LIBRARY})
+  else()
+    target_link_libraries(${target} lz4)
+  endif()
 
   target_link_libraries(${target} fastlz)
   target_link_libraries(${target} timelib)
-  target_link_libraries(${target} lz4)
   target_link_libraries(${target} folly)
   target_link_libraries(${target} zip_static)
 

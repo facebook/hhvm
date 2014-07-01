@@ -660,6 +660,8 @@ private:
   UnitMergeInfo* m_mergeInfo{nullptr};
   unsigned m_cacheOffset{0};
   int8_t m_repoId{-1};
+  // m_mergeState is read without a lock, but only written to under the
+  // UnitInit lock.
   uint8_t m_mergeState{UnitMergeStateUnmerged};
   uint8_t m_cacheMask{0};
   bool m_mergeOnly{false};

@@ -886,106 +886,132 @@ static SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
 
 void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
-  if (LIKELY(m_mergeState == UnitMergeStateUnmerged)) {
-    if (RuntimeOption::EvalPerfDataMap) {
-      Debug::DebugInfo::recordDataMap(
-        this, this + 1, folly::format("Unit-{}", m_filepath->data()).str());
-    }
-    int state = 0;
-    bool needsCompact = false;
-    m_mergeState = UnitMergeStateMerging;
+  if (m_mergeState != UnitMergeStateUnmerged) return;
 
-    bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
-    for (MutableFuncRange fr(nonMainFuncs()); !fr.empty();) {
-      Func* f = fr.popFront();
-      if (allFuncsUnique) {
-        allFuncsUnique = (f->attrs() & AttrUnique);
-      }
-      loadFunc(f);
-      if (RDS::isPersistentHandle(f->funcHandle())) {
+  if (RuntimeOption::EvalPerfDataMap) {
+    Debug::DebugInfo::recordDataMap(
+      this, this + 1, folly::format("Unit-{}", m_filepath->data()).str());
+  }
+  int state = 0;
+  bool needsCompact = false;
+  m_mergeState = UnitMergeStateMerging;
+
+  bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
+  for (MutableFuncRange fr(nonMainFuncs()); !fr.empty();) {
+    Func* f = fr.popFront();
+    if (allFuncsUnique) {
+      allFuncsUnique = (f->attrs() & AttrUnique);
+    }
+    loadFunc(f);
+    if (RDS::isPersistentHandle(f->funcHandle())) {
+      needsCompact = true;
+    }
+  }
+  if (allFuncsUnique) state |= UnitMergeStateUniqueFuncs;
+
+  if (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) {
+    /*
+     * The mergeables array begins with the hoistable Func*s,
+     * followed by the (potentially) hoistable Class*s.
+     *
+     * If the Unit is merge only, it then contains enough information
+     * to simulate executing the pseudomain. Normally, this is just
+     * the Class*s that might not be hoistable. In RepoAuthoritative
+     * mode it also includes assignments of the form:
+     *  $GLOBALS[string-literal] = scalar;
+     * defines of the form:
+     *  define(string-literal, scalar);
+     * and requires.
+     *
+     * These cases are differentiated using the bottom 3 bits
+     * of the pointer. In the case of a define or a global,
+     * the pointer will be followed by a TypedValue representing
+     * the value being defined/assigned.
+     */
+    int ix = m_mergeInfo->m_firstHoistablePreClass;
+    int end = m_mergeInfo->m_firstMergeablePreClass;
+    while (ix < end) {
+      PreClass* pre = (PreClass*)m_mergeInfo->mergeableObj(ix++);
+      if (pre->attrs() & AttrUnique) {
         needsCompact = true;
       }
-    }
-    if (allFuncsUnique) state |= UnitMergeStateUniqueFuncs;
-    if (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) {
+
       /*
-       * The mergeables array begins with the hoistable Func*s,
-       * followed by the (potentially) hoistable Class*s.
+       * Closure classes must be defined before anything else in the Unit.  The
+       * ClosureHoistable flag keeps them ahead of any other classes, but in
+       * mergeImpl we're going to define functions before we define classes, so
+       * we do them first here.
        *
-       * If the Unit is merge only, it then contains enough information
-       * to simulate executing the pseudomain. Normally, this is just
-       * the Class*s that might not be hoistable. In RepoAuthoritative
-       * mode it also includes assignments of the form:
-       *  $GLOBALS[string-literal] = scalar;
-       * defines of the form:
-       *  define(string-literal, scalar);
-       * and requires.
+       * If these functions are persistent, it's possible another thread could
+       * call one of those functions before we define the closures, and try to
+       * use closure classes that don't exist yet.
        *
-       * These cases are differentiated using the bottom 3 bits
-       * of the pointer. In the case of a define or a global,
-       * the pointer will be followed by a TypedValue representing
-       * the value being defined/assigned.
+       * Note that this is a special case of a more general race we have in
+       * this unit merging code right now.  For example, if a unit defines
+       * multiple persistent functions, it's possible another thread may call
+       * one of them before we've finished defining the other ones.  In
+       * practice that race is much less likely to cause problems, because the
+       * other thread will generally invoke the autoloader and then find out
+       * its defined by the time that's done.
        */
-      int ix = m_mergeInfo->m_firstHoistablePreClass;
-      int end = m_mergeInfo->m_firstMergeablePreClass;
-      while (ix < end) {
-        PreClass* pre = (PreClass*)m_mergeInfo->mergeableObj(ix++);
-        if (pre->attrs() & AttrUnique) {
-          needsCompact = true;
-        }
+      if (pre->hoistability() == PreClass::ClosureHoistable) {
+        DEBUG_ONLY auto const cls = defClass(pre, false /* failIsFatal */);
+        always_assert(cls != nullptr);
       }
-      if (isMergeOnly()) {
-        ix = m_mergeInfo->m_firstMergeablePreClass;
-        end = m_mergeInfo->m_mergeablesSize;
-        while (ix < end) {
-          void *obj = m_mergeInfo->mergeableObj(ix);
-          UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
-          switch (k) {
-            case UnitMergeKindUniqueDefinedClass:
-            case UnitMergeKindDone:
-              not_reached();
-            case UnitMergeKindClass:
-              if (((PreClass*)obj)->attrs() & AttrUnique) {
-                needsCompact = true;
-              }
-              break;
-            case UnitMergeKindReqDoc: {
-              StringData* s = (StringData*)((char*)obj - (int)k);
-              auto const unit = lookupUnit(
-                SourceRootInfo::RelativeToPhpRoot(StrNR(s)).get(),
-                "",
-                nullptr /* initial_opt */
-              );
-              unit->initialMerge();
-              m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
-              break;
-            }
-            case UnitMergeKindPersistentDefine:
-              needsCompact = true;
-            case UnitMergeKindDefine: {
-              StringData* s = (StringData*)((char*)obj - (int)k);
-              auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
-              ix += sizeof(*v) / sizeof(void*);
-              v->rdsHandle() = makeCnsHandle(
-                s, k == UnitMergeKindPersistentDefine);
-              if (k == UnitMergeKindPersistentDefine) {
-                mergeCns(RDS::handleToRef<TypedValue>(v->rdsHandle()),
-                         v, s);
-              }
-              break;
-            }
-            case UnitMergeKindGlobal:
-              // Skip over the value of the global, embedded in mergeableData
-              ix += sizeof(TypedValueAux) / sizeof(void*);
-              break;
-          }
-          ix++;
-        }
-      }
-      if (needsCompact) state |= UnitMergeStateNeedsCompact;
     }
-    m_mergeState = UnitMergeStateMerged | state;
+
+    if (isMergeOnly()) {
+      ix = m_mergeInfo->m_firstMergeablePreClass;
+      end = m_mergeInfo->m_mergeablesSize;
+      while (ix < end) {
+        void *obj = m_mergeInfo->mergeableObj(ix);
+        UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
+        switch (k) {
+          case UnitMergeKindUniqueDefinedClass:
+          case UnitMergeKindDone:
+            not_reached();
+          case UnitMergeKindClass:
+            if (static_cast<PreClass*>(obj)->attrs() & AttrUnique) {
+              needsCompact = true;
+            }
+            break;
+          case UnitMergeKindReqDoc: {
+            StringData* s = (StringData*)((char*)obj - (int)k);
+            auto const unit = lookupUnit(
+              SourceRootInfo::RelativeToPhpRoot(StrNR(s)).get(),
+              "",
+              nullptr /* initial_opt */
+            );
+            unit->initialMerge();
+            m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
+            break;
+          }
+          case UnitMergeKindPersistentDefine:
+            needsCompact = true;
+          case UnitMergeKindDefine: {
+            StringData* s = (StringData*)((char*)obj - (int)k);
+            auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
+            ix += sizeof(*v) / sizeof(void*);
+            v->rdsHandle() = makeCnsHandle(
+              s, k == UnitMergeKindPersistentDefine);
+            if (k == UnitMergeKindPersistentDefine) {
+              mergeCns(RDS::handleToRef<TypedValue>(v->rdsHandle()),
+                       v, s);
+            }
+            break;
+          }
+          case UnitMergeKindGlobal:
+            // Skip over the value of the global, embedded in mergeableData
+            ix += sizeof(TypedValueAux) / sizeof(void*);
+            break;
+        }
+        ix++;
+      }
+    }
+    if (needsCompact) state |= UnitMergeStateNeedsCompact;
   }
+
+  m_mergeState = UnitMergeStateMerged | state;
 }
 
 const Cell* Unit::lookupCns(const StringData* cnsName) {

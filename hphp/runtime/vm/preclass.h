@@ -96,8 +96,9 @@ using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
  *    split below.
  *
  *    Closures have a special kind of hoistability, ClosureHoistable, that
- *    requires them to be defined first, to avoid races if other threads are
- *    trying to load the same unit.
+ *    requires them to be defined first (before any other classes or
+ *    functions), to avoid races if other threads are trying to load the same
+ *    unit.  See the comments in Unit::initialMerge for more information.
  *
  */
 struct PreClass : AtomicCountable {
@@ -283,16 +284,17 @@ public:
   /*
    * Basic info.
    */
-  Unit*             unit()        const { return m_unit; }
-  NamedEntity*      namedEntity() const { return m_namedEntity; }
-  int               line1()       const { return m_line1; }
-  int               line2()       const { return m_line2; }
-  Offset            getOffset()   const { return m_offset; }
-  Id                id()          const { return m_id; }
-  Attr              attrs()       const { return m_attrs; }
-  const StringData* name()        const { return m_name; }
-  const StringData* parent()      const { return m_parent; }
-  const StringData* docComment()  const { return m_docComment; }
+  Unit*             unit()         const { return m_unit; }
+  NamedEntity*      namedEntity()  const { return m_namedEntity; }
+  int               line1()        const { return m_line1; }
+  int               line2()        const { return m_line2; }
+  Offset            getOffset()    const { return m_offset; }
+  Id                id()           const { return m_id; }
+  Attr              attrs()        const { return m_attrs; }
+  const StringData* name()         const { return m_name; }
+  const StringData* parent()       const { return m_parent; }
+  const StringData* docComment()   const { return m_docComment; }
+  Hoistable         hoistability() const { return m_hoistable; }
 
   /*
    * For a builtin class c_Foo:

@@ -87,7 +87,7 @@ let autocomplete_token ac_type env x =
     Autocomplete.auto_complete_for_global := snd x
   end
 
-let autocomplete_id = autocomplete_token Autocomplete.Acid None
+let autocomplete_id id env = autocomplete_token Autocomplete.Acid (Some env) id
 
 let autocomplete_hint = autocomplete_token Autocomplete.Actype None
 

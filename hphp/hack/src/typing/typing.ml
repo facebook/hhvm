@@ -717,10 +717,10 @@ and expr_ is_lvalue env (p, e) =
       let env = string2 env idl in
       env, (Reason.Rwitness p, Tprim Tstring)
   | Fun_id x ->
-      Typing_hooks.dispatch_id_hook x;
+      Typing_hooks.dispatch_id_hook x env;
       fun_type_of_id env x
   | Id ((cst_pos, cst_name) as id) ->
-      Typing_hooks.dispatch_id_hook id;
+      Typing_hooks.dispatch_id_hook id env;
       (match Env.get_gconst env cst_name with
       | None when Env.is_strict env ->
           Errors.unbound_global cst_pos;
@@ -1420,7 +1420,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       end
   | Fun_id x
   | Id x ->
-      Typing_hooks.dispatch_id_hook x;
+      Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x in
       let env, fty = Env.expand_type env fty in
       let env, fty = Inst.instantiate_fun env fty el in

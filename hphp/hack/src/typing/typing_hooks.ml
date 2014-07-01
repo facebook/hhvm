@@ -8,7 +8,7 @@
  *
  *)
 
-let (id_hooks: (Pos.t * string -> unit) list ref) = ref []
+let (id_hooks: (Pos.t * string -> Typing_env.env -> unit) list ref) = ref []
 
 let (smethod_hooks: (Typing_defs.class_type -> Pos.t * string ->
                      Typing_env.env -> Nast.class_id option ->
@@ -44,8 +44,8 @@ let attach_fun_call_hook hook =
 let attach_new_id_hook hook =
   new_id_hooks := hook :: !new_id_hooks
 
-let dispatch_id_hook id =
-  List.iter begin fun hook -> hook id end !id_hooks
+let dispatch_id_hook id env =
+  List.iter begin fun hook -> hook id env end !id_hooks
 
 let dispatch_smethod_hook class_ id env cid =
   List.iter begin fun hook -> hook class_ id env cid end !smethod_hooks

@@ -211,6 +211,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_requirements = m_requirements;
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
+  pc->m_enumBaseTy = m_enumBaseTy;
 
   // Set user attributes.
   [&] {
@@ -300,6 +301,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_userAttributes)
     (m_propMap)
     (m_constMap)
+    (m_enumBaseTy)
     ;
 }
 

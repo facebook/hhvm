@@ -119,7 +119,8 @@ void sweepNativeData() {
  */
 ObjectData* nativeDataInstanceCtor(Class* cls) {
   Attr attrs = cls->attrs();
-  if (UNLIKELY(attrs & (AttrAbstract | AttrInterface | AttrTrait))) {
+  if (UNLIKELY(attrs &
+               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
     ObjectData::raiseAbstractClassError(cls);
   }
   auto ndi = cls->getNativeDataInfo();

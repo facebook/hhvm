@@ -143,6 +143,35 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
   return name;
 }
 
+bool TypeConstraint::compat(const TypeConstraint& other) const {
+  if (other.isExtended() || isExtended()) {
+    /*
+     * Rely on the ahead of time typechecker---checking here can
+     * make it harder to convert a base class or interface to <?hh,
+     * because derived classes that are still <?php would all need
+     * to be modified.
+     */
+    return true;
+  }
+
+  if (m_typeName == other.m_typeName) {
+    return true;
+  }
+
+  if (m_typeName && other.m_typeName) {
+    if (m_typeName->isame(other.m_typeName)) {
+      return true;
+    }
+
+    const Class* cls = Unit::lookupClass(m_typeName);
+    const Class* otherCls = Unit::lookupClass(other.m_typeName);
+
+    return cls && otherCls && cls == otherCls;
+  }
+
+  return false;
+}
+
 namespace {
 
 /*
@@ -167,16 +196,100 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
   return def;
 }
 
+/*
+ * Look up a TypeAliasReq or a Class for the supplied NamedEntity
+ * (which must be the NamedEntity for `name'), invoking autoload if
+ * necessary.
+ *
+ * This is useful when looking up a type annotation that could be either a
+ * type alias or an enum class; enum classes are strange in that it
+ * *is* possible to have an instance of them even if they are not defined.
+ */
+std::pair<const TypeAliasReq *, Class *> getTypeAliasOrClassWithAutoload(
+    const NamedEntity* ne,
+    const StringData* name) {
+
+  auto def = ne->getCachedTypeAlias();
+  Class *klass = nullptr;
+  if (!def) {
+    klass = Unit::lookupClass(ne);
+    // We don't have the class or the typedef, so autoload.
+    if (!klass) {
+      String nameStr(const_cast<StringData*>(name));
+      if (AutoloadHandler::s_instance->autoloadClassOrType(nameStr)) {
+        // Autoload succeeded, try to grab a typedef and if that doesn't work,
+        // a class.
+        def = ne->getCachedTypeAlias();
+        if (!def) {
+          klass = Unit::lookupClass(ne);
+        }
+      }
+    }
+  }
+
+  return std::make_pair(def, klass);
+}
+
+}
+
+DataType TypeConstraint::underlyingDataTypeResolved() const {
+  assert(!isSelf() && !isParent());
+  if (!hasConstraint()) return KindOfAny;
+
+  DataType t = underlyingDataType();
+  // If we aren't a class or type alias, nothing special to do
+  if (!isObjectOrTypeAlias()) return t;
+
+  auto p = getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
+  auto td = p.first;
+  auto c = p.second;
+
+  // See if this is a type alias
+  if (td) {
+    if (td->kind != KindOfObject) {
+      t = td->kind;
+    } else {
+      c = td->klass;
+    }
+  }
+
+  // If the underlying type is a class, see if it is an enum and get that
+  if (c && isEnum(c)) {
+    t = c->enumBaseTy();
+  }
+
+  return t;
 }
 
 bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
   assert(tv->m_type != KindOfObject); // this checks when tv is not an object
   assert(!isSelf() && !isParent());
 
-  auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
-  if (!td) return false;
-  if (td->nullable && tv->m_type == KindOfNull) return true;
-  return td->kind == KindOfAny || equivDataTypes(td->kind, tv->m_type);
+  auto p = getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
+  auto td = p.first;
+  auto c = p.second;
+
+  // Common case is that we actually find the alias:
+  if (td) {
+    if (td->nullable && tv->m_type == KindOfNull) return true;
+    return td->kind == KindOfAny || equivDataTypes(td->kind, tv->m_type);
+  }
+
+  // Otherwise, this isn't a proper type alias, but it *might* be a
+  // first-class enum. Check if the type is an enum and check the
+  // constraint if it is. We only need to do this when the underlying
+  // type is not an object, since only int and string can be enums.
+  if (c && isEnum(c)) {
+    auto dt = c->enumBaseTy();
+    // For an enum, if the underlying type is mixed, we still require
+    // it is either an int or a string!
+    if (dt == KindOfAny) {
+      return tv->m_type == KindOfInt64 || IS_STRING_TYPE(tv->m_type);
+    } else {
+      return equivDataTypes(dt, tv->m_type);
+    }
+  }
+  return false;
 }
 
 bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {

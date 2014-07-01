@@ -129,7 +129,8 @@ class ObjectData {
       return ctor(cls);
     }
     Attr attrs = cls->attrs();
-    if (UNLIKELY(attrs & (AttrAbstract | AttrInterface | AttrTrait))) {
+    if (UNLIKELY(attrs &
+                 (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
       raiseAbstractClassError(cls);
     }
     size_t nProps = cls->numDeclProperties();

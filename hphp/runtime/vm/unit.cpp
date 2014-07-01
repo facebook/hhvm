@@ -719,6 +719,21 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
 
 namespace {
 
+TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
+  // If the class is an enum, pull out the actual base type.
+  if (isEnum(klass)) {
+    return TypeAliasReq { klass->enumBaseTy(),
+                          thisType->nullable,
+                          nullptr,
+                          thisType->name };
+  } else {
+    return TypeAliasReq { KindOfObject,
+                          thisType->nullable,
+                          klass,
+                          thisType->name };
+  }
+}
+
 TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
   /*
    * If this type alias is a KindOfObject and the name on the right
@@ -757,10 +772,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
   auto targetNE = NamedEntity::get(typeName);
 
   if (auto klass = Unit::lookupClass(targetNE)) {
-    return TypeAliasReq { KindOfObject,
-                          thisType->nullable,
-                          klass,
-                          thisType->name };
+    return typeAliasFromClass(thisType, klass);
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
@@ -774,10 +786,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Unit::lookupClass(targetNE)) {
-      return TypeAliasReq { KindOfObject,
-                            thisType->nullable,
-                            klass,
-                            thisType->name };
+      return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
       return TypeAliasReq { targetTd->kind,

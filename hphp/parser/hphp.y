@@ -678,7 +678,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_XHP_CATEGORY
 %token T_XHP_CATEGORY_LABEL
 %token T_XHP_CHILDREN
-%token T_XHP_ENUM
+%token T_ENUM
 %token T_XHP_REQUIRED
 
 %token T_TRAIT
@@ -746,6 +746,7 @@ top_statement:
     statement                          { _p->nns($1.num(), $1.text()); $$ = $1;}
   | function_declaration_statement     { _p->nns(); $$ = $1;}
   | class_declaration_statement        { _p->nns(); $$ = $1;}
+  | enum_declaration_statement         { _p->nns(); $$ = $1;}
   | trait_declaration_statement        { _p->nns(); $$ = $1;}
   | hh_type_alias_statement            { $$ = $1; }
   | T_HALT_COMPILER '(' ')' ';'        { _p->onHaltCompiler();
@@ -772,7 +773,7 @@ ident:
   | T_XHP_CATEGORY                     { $$ = $1;}
   | T_XHP_CHILDREN                     { $$ = $1;}
   | T_XHP_REQUIRED                     { $$ = $1;}
-  | T_XHP_ENUM                         { $$ = $1;}
+  | T_ENUM                             { $$ = $1;}
   | T_WHERE                            { $$ = $1;}
   | T_JOIN                             { $$ = $1;}
   | T_ON                               { $$ = $1;}
@@ -1054,6 +1055,24 @@ function_declaration_statement:
                                          _p->onCompleteLabelScope(true);}
 ;
 
+enum_declaration_statement:
+    T_ENUM
+    ident                              { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onClassStart(T_ENUM,$2);}
+    ':' hh_type
+    hh_opt_constraint
+    '{' enum_statement_list '}'        { _p->onEnum($$,$2,$5,$8,0); }
+
+  | non_empty_user_attributes
+    T_ENUM
+    ident                              { $3.setText(_p->nsDecl($3.text()));
+                                         _p->onClassStart(T_ENUM,$3);}
+    ':' hh_type
+    hh_opt_constraint
+    '{' enum_statement_list '}'        { _p->onEnum($$,$3,$6,$9,&$1); }
+
+;
+
 class_declaration_statement:
     class_entry_type
     class_decl_name                    { $2.setText(_p->nsDecl($2.text()));
@@ -1066,7 +1085,7 @@ class_declaration_statement:
                                            stmts = $7;
                                          }
                                          _p->onClass($$,$1.num(),$2,$4,$5,
-                                                     stmts,0);
+                                                     stmts,0,nullptr);
                                          if (_p->peekClass()) {
                                            _p->xhpResetAttributes();
                                          }
@@ -1084,7 +1103,7 @@ class_declaration_statement:
                                            stmts = $8;
                                          }
                                          _p->onClass($$,$2.num(),$3,$5,$6,
-                                                     stmts,&$1);
+                                                     stmts,&$1,nullptr);
                                          if (_p->peekClass()) {
                                            _p->xhpResetAttributes();
                                          }
@@ -1115,7 +1134,7 @@ trait_declaration_statement:
     '{' class_statement_list '}'       { Token t_ext;
                                          t_ext.reset();
                                          _p->onClass($$,T_TRAIT,$2,t_ext,$4,
-                                                     $6, 0);
+                                                     $6, 0, nullptr);
                                          _p->popClass();
                                          _p->popTypeScope();}
   | non_empty_user_attributes
@@ -1126,7 +1145,7 @@ trait_declaration_statement:
     '{' class_statement_list '}'       { Token t_ext;
                                          t_ext.reset();
                                          _p->onClass($$,T_TRAIT,$3,t_ext,$5,
-                                                     $7, &$1);
+                                                     $7, &$1, nullptr);
                                          _p->popClass();
                                          _p->popTypeScope();}
 ;
@@ -1415,6 +1434,21 @@ static_var_list:
   | T_VARIABLE '=' static_expr         { _p->onStaticVariable($$,0,$1,&$3);}
 ;
 
+enum_statement_list:
+    enum_statement_list
+    enum_statement                     { _p->onClassStatement($$, $1, $2);}
+  |                                    { $$.reset();}
+;
+enum_statement:
+    enum_constant_declaration ';'      { _p->onClassVariableStart
+                                         ($$,NULL,$1,NULL);}
+;
+enum_constant_declaration:
+    hh_name_with_type '='
+    static_expr                         { _p->onClassConstant($$,0,$1,$3);}
+;
+
+
 class_statement_list:
     class_statement_list
     class_statement                    { _p->onClassStatement($$, $1, $2);}
@@ -1523,7 +1557,7 @@ xhp_attribute_decl_type:
                                             the type code as appropriate. */
                                          $$ = 5; $$.setText($1);}
   | T_VAR                              { $$ = 6;}
-  | T_XHP_ENUM '{'
+  | T_ENUM '{'
     xhp_attribute_enum '}'             { $$ = $3; $$ = 7;}
   | T_CALLABLE                         { $$ = 9; }
 ;

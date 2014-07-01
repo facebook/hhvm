@@ -7365,6 +7365,7 @@ void EmitterVisitor::emitClass(Emitter& e,
               cNode->isTrait()     ? AttrTrait     :
               cNode->isAbstract()  ? AttrAbstract  :
               cNode->isFinal()     ? AttrFinal     :
+              cNode->isEnum()      ? AttrEnum      :
                                      AttrNone;
   if (Option::WholeProgram) {
     if (!cNode->isRedeclaring() &&
@@ -7400,6 +7401,7 @@ void EmitterVisitor::emitClass(Emitter& e,
           || cNode->getUsedTraitNames().size()
           || cNode->getClassRequiredExtends().size()
           || cNode->getClassRequiredImplements().size()
+          || cNode->isEnum()
          ) {
         hoistable = PreClass::Mergeable;
       } else if (firstInterface &&
@@ -7620,6 +7622,14 @@ void EmitterVisitor::emitClass(Emitter& e,
     bool added UNUSED = pce->addMethod(fe);
     assert(added);
     postponeCinit(is, fe, nonScalarConstVec);
+  }
+
+  // If this is an enum, get its type constraint.
+  if (cNode->isEnum()) {
+    ClassStatementPtr cs = static_pointer_cast<ClassStatement>(is);
+    auto const typeConstraint =
+      determine_type_constraint_from_annot(cs->getEnumBaseTy(), true);
+    pce->setEnumBaseTy(typeConstraint);
   }
 }
 

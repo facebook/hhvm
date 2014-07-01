@@ -839,6 +839,8 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     );
   }
 
+  ret->enumBaseTy = pce.enumBaseTy();
+
   return ret;
 }
 

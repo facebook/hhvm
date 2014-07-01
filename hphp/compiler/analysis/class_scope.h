@@ -63,6 +63,7 @@ public:
     KindOfObjectClass,
     KindOfAbstractClass,
     KindOfFinalClass,
+    KindOfEnum,
     KindOfInterface,
     KindOfTrait
   };
@@ -344,6 +345,7 @@ public:
   bool isAbstract() const { return m_kindOf == KindOfAbstractClass ||
                                    m_kindOf == KindOfTrait; }
   bool isTrait() const { return m_kindOf == KindOfTrait; }
+  bool isEnum() const { return m_kindOf == KindOfEnum; }
   bool hasProperty(const std::string &name) const;
   bool hasConst(const std::string &name) const;
 

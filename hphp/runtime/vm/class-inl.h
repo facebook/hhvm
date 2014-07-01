@@ -339,6 +339,10 @@ inline const Native::NativeDataInfo* Class::getNativeDataInfo() const {
   return m_nativeDataInfo;
 }
 
+inline DataType Class::enumBaseTy() const {
+  return m_enumBaseTy;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline Attr classKindAsAttr(ClassKind kind) {
@@ -349,12 +353,16 @@ inline bool isTrait(const Class* cls) {
   return cls->attrs() & AttrTrait;
 }
 
+inline bool isEnum(const Class* cls) {
+  return cls->attrs() & AttrEnum;
+}
+
 inline bool isInterface(const Class* cls) {
   return cls->attrs() & AttrInterface;
 }
 
 inline bool isNormalClass(const Class* cls ) {
-  return !(cls->attrs() & (AttrTrait | AttrInterface));
+  return !(cls->attrs() & (AttrTrait | AttrInterface | AttrEnum));
 }
 
 inline bool classHasPersistentRDS(const Class* cls) {

@@ -159,7 +159,7 @@ static int getNextTokenType(int t) {
     case T_STRING:
     case T_XHP_CHILDREN:
     case T_XHP_REQUIRED:
-    case T_XHP_ENUM:
+    case T_ENUM:
     case T_ARRAY:
     case T_FROM:
     case T_IN:
@@ -299,11 +299,11 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"insteadof"            { RETTOKEN(T_INSTEADOF);}
 <ST_IN_SCRIPTING>"extends"              { RETTOKEN(T_EXTENDS);}
 <ST_IN_SCRIPTING>"implements"           { RETTOKEN(T_IMPLEMENTS);}
+<ST_IN_SCRIPTING>"enum"                 { XHP_ONLY_KEYWORD(T_ENUM); }
 <ST_IN_SCRIPTING>"attribute"            { XHP_ONLY_KEYWORD(T_XHP_ATTRIBUTE); }
 <ST_IN_SCRIPTING>"category"             { XHP_ONLY_KEYWORD(T_XHP_CATEGORY); }
 <ST_IN_SCRIPTING>"children"             { XHP_ONLY_KEYWORD(T_XHP_CHILDREN); }
 <ST_IN_SCRIPTING>"required"             { XHP_ONLY_KEYWORD(T_XHP_REQUIRED); }
-<ST_IN_SCRIPTING>"enum"                 { XHP_ONLY_KEYWORD(T_XHP_ENUM); }
 
 <ST_IN_SCRIPTING>"->" {
         STEPPOS(T_OBJECT_OPERATOR);

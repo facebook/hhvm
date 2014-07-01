@@ -47,10 +47,11 @@ ClassStatement::ClassStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  int type, const string &name, const string &parent,
  ExpressionListPtr base, const string &docComment, StatementListPtr stmt,
- ExpressionListPtr attrList)
+ ExpressionListPtr attrList,
+ TypeAnnotationPtr enumBaseTy)
   : InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassStatement),
                        name, base, docComment, stmt, attrList),
-    m_type(type), m_ignored(false) {
+    m_type(type), m_ignored(false), m_enumBaseTy(enumBaseTy) {
   m_parent = toLower(parent);
   m_originalParent = parent;
 }
@@ -72,6 +73,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   case T_ABSTRACT:  kindOf = ClassScope::KindOfAbstractClass; break;
   case T_FINAL:     kindOf = ClassScope::KindOfFinalClass;    break;
   case T_TRAIT:     kindOf = ClassScope::KindOfTrait;         break;
+  case T_ENUM:      kindOf = ClassScope::KindOfEnum;          break;
   default:
     assert(false);
   }

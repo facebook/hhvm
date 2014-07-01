@@ -123,7 +123,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // Class.
 
-static_assert(sizeof(Class) == 408, "Change this only on purpose");
+static_assert(sizeof(Class) == 416, "Change this only on purpose");
 
 namespace {
 
@@ -1577,6 +1577,7 @@ Class::Class(PreClass* preClass, Class* parent,
   setClassVec();
   setRequirements();
   setNativeDataInfo();
+  setEnumType();
 }
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
@@ -2559,6 +2560,18 @@ void Class::setRequirements() {
 
   m_requirements.create(reqBuilder);
   checkRequirementConstraints();
+}
+
+void Class::setEnumType() {
+  if (attrs() & AttrEnum) {
+    m_enumBaseTy = m_preClass->enumBaseTy().underlyingDataTypeResolved();
+    // Make sure we've loaded a valid underlying type
+    if (!IS_INT_TYPE(m_enumBaseTy) && !IS_STRING_TYPE(m_enumBaseTy) &&
+        m_enumBaseTy != KindOfAny) {
+      raise_error("Invalid base type for enum %s",
+                  m_preClass->name()->data());
+    }
+  }
 }
 
 void Class::setNativeDataInfo() {

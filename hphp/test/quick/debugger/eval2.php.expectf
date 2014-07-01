@@ -22,7 +22,7 @@ $_ = "don't want to see this"
 Hit a php exception : exception 'Exception' with message 'don't want to see this' in %s/eval2.php:8
 Stack trace:
 #0 (1): throwSomething()
-#1 (1): include('')
+#1 (1): include()
 #2 {main}
 p $_
 "don't want to see this"

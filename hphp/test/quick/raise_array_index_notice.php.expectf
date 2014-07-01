@@ -8,9 +8,9 @@ Caught the rain
 2
 3
 
-Fatal error: Uncaught exception 'Exception' with message '' in %s/test/quick/raise_array_index_notice.php:5
+Fatal error: Uncaught exception 'Exception' with message '' in %s/raise_array_index_notice.php:5
 Stack trace:
-#0 %s/test/quick/raise_array_index_notice.php(16): errorHandler(8, 'Undefined index: 4', '%s/test/quick/raise_array_index_notice.php', 16)
-#1 %s/test/quick/raise_array_index_notice.php(26): rain()
-#2 %s/test/quick/raise_array_index_notice.php(30): main()
+#0 %s/raise_array_index_notice.php(16): errorHandler()
+#1 %s/raise_array_index_notice.php(26): rain()
+#2 %s/raise_array_index_notice.php(30): main()
 #3 {main}

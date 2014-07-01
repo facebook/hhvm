@@ -1,6 +1,6 @@
 string(7) "finally"
 
-Fatal error: Uncaught exception 'Exception' with message 'ex' in %s/test/slow/finally/try_finally_001.php:4
+Fatal error: %s
 Stack trace:
-#0 %s/test/slow/finally/try_finally_001.php(10): foo('finally')
+#0 %stry_finally_001.php(%d): foo()
 #1 {main}

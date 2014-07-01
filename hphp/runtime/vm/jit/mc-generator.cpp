@@ -1478,6 +1478,27 @@ MCGenerator::getNativeTrampoline(TCA helperAddr) {
   return emitNativeTrampoline(helperAddr);
 }
 
+// Get the address of the literal val in the global data section.
+// If it's not there, add it to the map in m_fixups, which will
+// be committed to m_literals when m_fixups.process() is called.
+const uint64_t*
+MCGenerator::allocLiteral(uint64_t val) {
+  auto it = m_literals.find(val);
+  if (it != m_literals.end()) {
+    assert(*it->second == val);
+    return it->second;
+  }
+  auto& pending = m_fixups.m_literals;
+  it = pending.find(val);
+  if (it != pending.end()) {
+    assert(*it->second == val);
+    return it->second;
+  }
+  auto addr = allocData<uint64_t>(sizeof(uint64_t), 1);
+  *addr = val;
+  return pending[val] = addr;
+}
+
 bool
 MCGenerator::reachedTranslationLimit(SrcKey sk,
                                      const SrcRec& srcRec) const {
@@ -1540,6 +1561,9 @@ CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
   }
   m_pendingJmpTransIDs.clear();
 
+  mcg->literals().insert(m_literals.begin(), m_literals.end());
+  m_literals.clear();
+
   /*
    * Currently these are only used by the relocator,
    * so there's nothing left to do here.
@@ -1557,6 +1581,7 @@ CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
     m_inProgressTailJumps.swap(*inProgressTailBranches);
   }
   assert(m_inProgressTailJumps.empty());
+  assert(empty());
 }
 
 void CodeGenFixups::clear() {
@@ -1569,6 +1594,7 @@ void CodeGenFixups::clear() {
   m_bcMap.clear();
   m_alignFixups.clear();
   m_inProgressTailJumps.clear();
+  m_literals.clear();
 }
 
 bool CodeGenFixups::empty() const {
@@ -1581,7 +1607,8 @@ bool CodeGenFixups::empty() const {
     m_codePointers.empty() &&
     m_bcMap.empty() &&
     m_alignFixups.empty() &&
-    m_inProgressTailJumps.empty();
+    m_inProgressTailJumps.empty() &&
+    m_literals.empty();
 }
 
 void
@@ -1845,6 +1872,7 @@ void MCGenerator::initUniqueStubs() {
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code).
                             hot(m_tx.useAHot()));
   m_tx.uniqueStubs = mcg->backEnd().emitUniqueStubs();
+  m_fixups.process(nullptr); // in case we generated literals
 }
 
 void MCGenerator::registerCatchBlock(CTCA ip, TCA block) {

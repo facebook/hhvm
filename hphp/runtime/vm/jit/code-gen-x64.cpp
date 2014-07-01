@@ -375,9 +375,9 @@ void CodeGenerator::emitLoadImm(Asm& as, int64_t val, PhysReg dstReg) {
     if (val == 0) {
       as.pxor(dstReg, dstReg);
     } else {
-      // Can't move immediate directly into XMM register, so use m_rScratch
-      as.emitImmReg(val, m_rScratch);
-      emitMovRegReg(as, m_rScratch, dstReg);
+      // Can't move immediate directly into XMM register, load a literal
+      auto addr = mcg->allocLiteral(val);
+      as.movsd(rip[(intptr_t)addr], dstReg);
     }
   }
 }
@@ -2172,15 +2172,13 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   auto src = inst->src(0);
   auto srcReg = prepXMMReg(m_as, src, srcLoc(0), rCgXMM0);
   auto dstReg = dstLoc(0).reg();
-  auto rIndef = rAsm; // not clobbered by emitLoadImm()
 
   constexpr uint64_t maxULongAsDouble  = 0x43F0000000000000LL;
   constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
 
-  m_as.    emitImmReg   (1, rIndef);
-  m_as.    rorq         (1, rIndef); // rIndef = 0x8000000000000000
+  auto indef_ref = rip[(intptr_t)mcg->allocLiteral(0x8000000000000000LL)];
   m_as.    cvttsd2siq   (srcReg, dstReg);
-  m_as.    cmpq         (rIndef, dstReg);
+  m_as.    cmpq         (indef_ref, dstReg);
 
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
     // result > max signed int or unordered
@@ -2211,7 +2209,7 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
           // because it's possible that src0 == LONG_MAX in which case
           // cvttsd2siq will yeild an indefiniteInteger, which we would
           // like to make zero)
-          a.    xorq             (rIndef, dstReg);
+          a.    xorq             (indef_ref, dstReg);
         });
       });
     });
@@ -2878,15 +2876,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
                  0xdeadbeef;
       if (src->type().needsValueReg() ||
           RuntimeOption::EvalHHIRGenerateAsserts) {
-        if (r.isGP()) {
-          // never needs scratch register
-          m_as.emitImmReg(imm, r);
-        } else {
-          // load imm -> simd.  We could do this without a scratch
-          // using a pc-relative load.
-          m_as.emitImmReg(imm, rTmp);
-          emitMovRegReg(m_as, rTmp, r);
-        }
+        emitLoadImm(m_as, imm, r);
       }
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {

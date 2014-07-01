@@ -950,6 +950,7 @@ public:
   void movsd (RegXMM x, RegXMM y)           { instrRR(instr_movsd,  x, y); }
   void movsd (RegXMM x, MemoryRef m)        { instrRM(instr_movsd,  x, m); }
   void movsd (MemoryRef m, RegXMM x)        { instrMR(instr_movsd,  m, x); }
+  void movsd (RIPRelativeRef m, RegXMM x)   { instrMR(instr_movsd,  m, x); }
   void lddqu (MemoryRef m, RegXMM x)        { instrMR(instr_lddqu, m, x); }
   void unpcklpd(RegXMM s, RegXMM d)         { instrRR(instr_unpcklpd, d, s); }
 
@@ -2046,6 +2047,10 @@ private:
   void instrMR(X64Instr op,
                RIPRelativeRef m,
                Reg64 r)            { emitMR(op, URIP(m), rn(r),
+                                            sz::qword, true); }
+  void instrMR(X64Instr op,
+               RIPRelativeRef m,
+               RegXMM r)           { emitMR(op, URIP(m), rn(r),
                                             sz::qword, true); }
 
   void instrIR(X64Instr op, Immed64 i, Reg64 r) {

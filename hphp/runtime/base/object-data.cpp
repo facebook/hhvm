@@ -1901,6 +1901,12 @@ RefData* ObjectData::zGetProp(Class* ctx, const StringData* key,
                               bool& visible, bool& accessible,
                               bool& unset) {
   auto tv = getProp(ctx, key, visible, accessible, unset);
+  if (tv == 0) {
+    /*
+     * Protect against unknown object properties.
+     */
+    return nullptr;
+  }
   if (tv->m_type != KindOfRef) {
     tvBox(tv);
   }

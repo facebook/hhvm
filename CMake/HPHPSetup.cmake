@@ -167,6 +167,10 @@ if (NOT LZ4_LIBRARY)
   include_directories("${TP_DIR}/lz4")
 endif()
 
+if (NOT LIBZIP_INCLUDE_DIR_ZIP)
+  include_directories("${TP_DIR}/libzip")
+endif()
+
 include_directories("${TP_DIR}/fastlz")
 include_directories("${TP_DIR}/timelib")
 include_directories("${TP_DIR}/libafdt/src")
@@ -174,7 +178,6 @@ include_directories("${TP_DIR}/libmbfl")
 include_directories("${TP_DIR}/libmbfl/mbfl")
 include_directories("${TP_DIR}/libmbfl/filter")
 include_directories("${TP_DIR}/folly")
-include_directories("${TP_DIR}/libzip")
 include_directories(${TP_DIR})
 
 include_directories(${HPHP_HOME}/hphp)

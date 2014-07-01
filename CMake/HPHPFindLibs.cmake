@@ -153,6 +153,12 @@ if (LZ4_INCLUDE_DIR)
   include_directories(${LZ4_INCLUDE_DIR})
 endif()
 
+# libzip
+find_package(LibZip)
+if (LIBZIP_INCLUDE_DIR_ZIP AND LIBZIP_INCLUDE_DIR_ZIPCONF)
+  include_directories(${LIBZIP_INCLUDE_DIR_ZIP} ${LIBZIP_INCLUDE_DIR_ZIPCONF})
+endif()
+
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
@@ -451,7 +457,7 @@ macro(hphp_link target)
   if (LIBUODBC_LIBRARIES)
     target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
   endif()
-
+ 
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
@@ -480,11 +486,16 @@ macro(hphp_link target)
   else()
     target_link_libraries(${target} lz4)
   endif()
+  
+  if (LIBZIP_INCLUDE_DIR_ZIP)
+    target_link_libraries(${target} zip)
+  else()
+    target_link_libraries(${target} zip_static)
+  endif()
 
   target_link_libraries(${target} fastlz)
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
-  target_link_libraries(${target} zip_static)
 
   target_link_libraries(${target} afdt)
   target_link_libraries(${target} mbfl)

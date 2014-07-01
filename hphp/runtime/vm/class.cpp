@@ -517,7 +517,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
 }
 
 void Class::initSProps() const {
-  assert(needsInitSProps());
+  assert(needsInitSProps() || m_sPropCacheInit.isPersistent());
 
   // Initialize static props for parent.
   Class* parent = this->parent();

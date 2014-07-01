@@ -56,11 +56,12 @@ module HackCheckerUtils : CHECKER_UTILS = struct
 end
 
 module type STATUS_CHECKER = sig
-  val check_status : client_check_env -> unit
+  val check_status : (ClientEnv.client_check_env -> in_channel * out_channel)
+    -> client_check_env -> unit
 end
 
 module StatusChecker (CheckerUtils : CHECKER_UTILS) : STATUS_CHECKER = struct
-  let check_status (args:client_check_env) =
+  let check_status connect (args:client_check_env) =
     Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ -> raise Server_busy));
     ignore(Unix.alarm 6);
 
@@ -76,7 +77,7 @@ module StatusChecker (CheckerUtils : CHECKER_UTILS) : STATUS_CHECKER = struct
         CheckerUtils.start_server args;
       raise Server_missing
     end;
-    let ic, oc = ClientUtils.connect args.root in
+    let ic, oc = connect args in
     ServerMsg.cmd_to_channel oc (ServerMsg.STATUS args.root);
     let response = ServerMsg.response_from_channel ic in
     ignore (Unix.alarm 0);
@@ -103,10 +104,10 @@ module StatusChecker (CheckerUtils : CHECKER_UTILS) : STATUS_CHECKER = struct
       flush stdout;
       raise Server_directory_mismatch
     | ServerMsg.SERVER_DYING ->
-      Printf.printf "Server has been killed for %s\n" 
+      Printf.printf "Server has been killed for %s\n"
         (Path.string_of_path args.root);
       exit 2
-    | ServerMsg.PONG -> 
+    | ServerMsg.PONG ->
         Printf.printf "Why on earth did the server respond with a pong?\n%!";
         exit 2
 end

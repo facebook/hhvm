@@ -27,6 +27,8 @@
 
 #include "file.h"
 
+#include "hphp/util/mem.h"
+
 #ifndef  lint
 FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
 #endif  /* lint */
@@ -179,7 +181,7 @@ out:
   }
 
   /* Third, try to get magic file relative to dll location */
-  dllpath = malloc(sizeof(*dllpath) * (MAX_PATH + 1));
+  dllpath = mem_malloc_array(sizeof(*dllpath), MAX_PATH + 1);
   dllpath[MAX_PATH] = 0;  /* just in case long path gets truncated and not null terminated */
   if (GetModuleFileNameA(NULL, dllpath, MAX_PATH)) {
     PathRemoveFileSpecA(dllpath);

@@ -160,7 +160,7 @@ static const char *BuildCharSet(CharSet *cset, const char *format) {
 
   cset->chars = (char *)smart_malloc(end - format - 1);
   if (nranges > 0) {
-    cset->ranges = (::Range*)smart_malloc(sizeof(::Range) * nranges);
+    cset->ranges = (::Range*)smart_malloc_array(nranges, sizeof(::Range));
   } else {
     cset->ranges = nullptr;
   }
@@ -310,7 +310,7 @@ static int ValidateFormat(const char *format, int numVars, int *totalSubs) {
    * a variable is multiply assigned or left unassigned.
    */
   if (numVars > nspace) {
-    nassign = (int*)smart_malloc(sizeof(int) * numVars);
+    nassign = (int*)smart_malloc_array(numVars, sizeof(int));
     nspace = numVars;
   }
   for (i = 0; i < nspace; i++) {
@@ -493,12 +493,12 @@ xpgCheckDone:
           nspace += STATIC_LIST_SIZE;
         }
         if (nassign == staticAssign) {
-          nassign = (int*)smart_malloc(nspace * sizeof(int));
+          nassign = (int*)smart_malloc_array(nspace, sizeof(int));
           for (i = 0; i < STATIC_LIST_SIZE; ++i) {
             nassign[i] = staticAssign[i];
           }
         } else {
-          nassign = (int*)smart_realloc((void *)nassign, nspace * sizeof(int));
+          nassign = (int*)smart_realloc_array((void *)nassign, nspace, sizeof(int));
         }
         for (i = value; i < nspace; i++) {
           nassign[i] = 0;

@@ -413,7 +413,7 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
   // Handle the uncommon case where the caller passed a callback
   // and two or more containers
   ArrayIter* iters =
-    (ArrayIter*)smart_malloc(sizeof(ArrayIter) * (_argv.size() + 1));
+    (ArrayIter*)smart_malloc_array(_argv.size() + 1, sizeof(ArrayIter));
   size_t numIters = 0;
   SCOPE_EXIT {
     while (numIters--) iters[numIters].~ArrayIter();
@@ -1599,7 +1599,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   assert(smallestPos < count);
   // Allocate a TypedValue array and copy 'a' and the contents of 'argv'
   TypedValue* containers =
-    (TypedValue*)smart_malloc(count * sizeof(TypedValue));
+    (TypedValue*)smart_malloc_array(count, sizeof(TypedValue));
   tvCopy(*a.asCell(), containers[0]);
   int pos = 1;
   for (ArrayIter argvIter(argv); argvIter; ++argvIter, ++pos) {

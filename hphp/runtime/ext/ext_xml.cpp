@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/mem.h"
 #include <expat.h>
 
 #define XML_MAXLEVEL 255
@@ -725,7 +726,7 @@ int64_t f_xml_parse_into_struct(const Resource& parser, const String& data, VRef
   index = Array::Create();
   p->info.assignRef(index);
   p->level = 0;
-  p->ltags = (char**)malloc(XML_MAXLEVEL * sizeof(char*));
+  p->ltags = (char**)mem_malloc_array(XML_MAXLEVEL, sizeof(char*));
 
   XML_SetDefaultHandler(p->parser, _xml_defaultHandler);
   XML_SetElementHandler(p->parser, _xml_startElementHandler,

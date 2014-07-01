@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_ldap.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/util/mem.h"
 #include "hphp/util/thread-local.h"
 #include "folly/String.h"
 #include <lber.h>
@@ -148,8 +149,8 @@ static bool php_ldap_do_modify(const Resource& link, const String& dn, const Arr
 
   int num_attribs = entry.size();
   LDAPMod **ldap_mods =
-    (LDAPMod **)malloc((num_attribs+1) * sizeof(LDAPMod *));
-  int *num_berval = (int*)malloc(num_attribs * sizeof(int));
+    (LDAPMod **)mem_malloc_array(num_attribs+1, sizeof(LDAPMod *));
+  int *num_berval = (int*)mem_malloc_array(num_attribs, sizeof(int));
 
   ArrayIter iter(entry);
   int num_values;
@@ -195,7 +196,7 @@ static bool php_ldap_do_modify(const Resource& link, const String& dn, const Arr
 
     num_berval[i] = num_values;
     ldap_mods[i]->mod_bvalues =
-      (struct berval**)malloc((num_values + 1) * sizeof(struct berval *));
+      (struct berval**)mem_malloc_array(num_values + 1, sizeof(struct berval *));
 
     /* allow for arrays with one element, no allowance for arrays with
        none but probably not required, gerrit thomson. */
@@ -353,8 +354,8 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
       ldap_filter = (char*)sfilter.data();
     }
 
-    LdapLink **lds = (LdapLink**)malloc(nlinks * sizeof(LdapLink*));
-    int *rcs = (int*)malloc(nlinks * sizeof(int));
+    LdapLink **lds = (LdapLink**)mem_malloc_array(nlinks, sizeof(LdapLink*));
+    int *rcs = (int*)mem_malloc_array(nlinks, sizeof(int));
 
     ArrayIter iter(link.toArray());
     ArrayIter iterdn(base_dn.toArray());
@@ -880,7 +881,7 @@ bool f_ldap_set_option(const Variant& link, int option, const Variant& newval) {
         raise_warning("Expected non-empty array value for this option");
         return false;
       }
-      ctrls = (LDAPControl**)malloc((1 + ncontrols) * sizeof(*ctrls));
+      ctrls = (LDAPControl**)mem_malloc_array(1 + ncontrols, sizeof(*ctrls));
       *ctrls = NULL;
       ctrlp = ctrls;
       Array stringHolder;

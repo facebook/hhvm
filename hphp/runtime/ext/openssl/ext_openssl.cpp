@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/mem.h"
 
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
@@ -2050,9 +2051,9 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     }
   }
 
-  EVP_PKEY **pkeys = (EVP_PKEY**)malloc(nkeys * sizeof(*pkeys));
-  int *eksl = (int*)malloc(nkeys * sizeof(*eksl));
-  unsigned char **eks = (unsigned char **)malloc(nkeys * sizeof(*eks));
+  EVP_PKEY **pkeys = (EVP_PKEY**)mem_malloc_array(nkeys, sizeof(*pkeys));
+  int *eksl = (int*)mem_malloc_array(nkeys, sizeof(*eksl));
+  unsigned char **eks = (unsigned char **)mem_malloc_array(nkeys, sizeof(*eks));
   memset(eks, 0, sizeof(*eks) * nkeys);
   std::vector<Resource> holder;
 

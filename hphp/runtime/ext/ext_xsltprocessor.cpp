@@ -6,6 +6,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/util/mem.h"
 #include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
@@ -36,10 +37,10 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
       return nullptr;
     }
 
-    value = (xmlChar*)malloc(str_len * sizeof(xmlChar));
+    value = (xmlChar*)mem_malloc_array(str_len, sizeof(xmlChar));
     snprintf((char*)value, str_len, "'%s'", string);
   } else {
-    value = (xmlChar*)malloc(str_len * sizeof(xmlChar));
+    value = (xmlChar*)mem_malloc_array(str_len, sizeof(xmlChar));
     snprintf((char*)value, str_len, "\"%s\"", string);
   }
 

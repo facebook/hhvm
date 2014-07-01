@@ -382,7 +382,7 @@ bool ODBCCursor::exec_prepared_query(const Array params)
     num_rows = cur_array.size();
 
     // allocate buffer we'll pass to odbc
-    input[i] = (SQLCHAR*)smart_malloc(num_rows * param->col_size);
+    input[i] = (SQLCHAR*)smart_malloc_array(num_rows, param->col_size);
 
     // copy each element of our input array to the buffer
     for (int j=0; j < num_rows; j++) {
@@ -434,7 +434,7 @@ bool ODBCCursor::bind_buffer()
     row_size += column->total_column_size();
     columns_.append(Resource(column));
   }
-  buffer_ = (SQLPOINTER)smart_malloc(row_size * per_fetch_rows);
+  buffer_ = (SQLPOINTER)smart_malloc_array(row_size, per_fetch_rows);
 
   // since this buffer can be quite big
   if (buffer_ == nullptr) {

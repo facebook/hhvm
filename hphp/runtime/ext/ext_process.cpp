@@ -32,6 +32,7 @@
 #include "hphp/util/light-process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/mem.h"
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/plain-file.h"
@@ -61,7 +62,7 @@ static char **build_envp(const Array& envs, std::vector<String> &senvs) {
   char **envp = NULL;
   int size = envs.size();
   if (size) {
-    envp = (char **)malloc((size + 1) * sizeof(char *));
+    envp = (char **)mem_malloc_array(size + 1, sizeof(char *));
     int i = 0;
     for (ArrayIter iter(envs); iter; ++iter, ++i) {
       StringBuffer nvpair;
@@ -139,7 +140,7 @@ void f_pcntl_exec(const String& path, const Array& args /* = null_array */,
   // build argumnent list
   std::vector<String> sargs; // holding those char *
   int size = args.size();
-  char **argv = (char **)malloc((size + 2) * sizeof(char *));
+  char **argv = (char **)mem_malloc_array(size + 2, sizeof(char *));
   *argv = (char *)path.data();
   int i = 1;
   if (size) {

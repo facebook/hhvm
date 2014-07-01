@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/ext_soap.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/util/mem.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -2001,7 +2002,7 @@ static void get_position_ex(int dimension, const char* str, int** pos) {
 }
 
 static int* get_position(int dimension, const char* str) {
-  int *pos = (int*)malloc(sizeof(int) * dimension);
+  int *pos = (int*)mem_malloc_array(dimension, sizeof(int));
   get_position_ex(dimension, str, &pos);
   return pos;
 }
@@ -2168,7 +2169,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
         array_type += value.data();
       }
 
-      dims = (int*)malloc(sizeof(int) * dimension);
+      dims = (int*)mem_malloc_array(dimension, sizeof(int));
       dims[0] = i;
       Array el = data.toArray();
       for (i = 1; i < dimension; i++) {
@@ -2260,13 +2261,13 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
                    elementType->encode->details.type_str.c_str(), array_type);
 
       array_size += lexical_cast<string>(i);
-      dims = (int*)malloc(sizeof(int) * dimension);
+      dims = (int*)mem_malloc_array(dimension, sizeof(int));
       dims[0] = i;
     } else {
 
       enc = get_array_type(xmlParam, data, array_type);
       array_size += lexical_cast<string>(i);
-      dims = (int*)malloc(sizeof(int) * dimension);
+      dims = (int*)mem_malloc_array(dimension, sizeof(int));
       dims[0] = i;
     }
 

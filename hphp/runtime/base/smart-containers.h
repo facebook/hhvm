@@ -87,7 +87,7 @@ struct Allocator {
   }
 
   pointer allocate(size_type num, const void* = 0) {
-    pointer ret = (pointer)smart_malloc(num * sizeof(T));
+    pointer ret = (pointer)smart_malloc_array(num, sizeof(T));
     return ret;
   }
 

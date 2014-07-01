@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/intl-convert.h"
+#include "hphp/util/mem.h"
 
 #include <cstdint>
 #include <cstdlib>
@@ -54,7 +55,7 @@ void intl_convert_utf8_to_utf16(UChar** target, int* target_len,
   }
 
   // Allocate memory for the destination buffer (it will be zero-terminated).
-  dst_buf = (UChar *)malloc((dst_len + 1) * sizeof(UChar));
+  dst_buf = (UChar *)mem_malloc_array(dst_len + 1, sizeof(UChar));
 
   /* Convert source string from UTF-8 to UTF-16. */
   *status = U_ZERO_ERROR;

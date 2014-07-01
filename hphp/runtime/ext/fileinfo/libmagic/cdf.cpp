@@ -34,6 +34,8 @@
 
 #include "file.h"
 
+#include "hphp/util/mem.h"
+
 #ifndef lint
 FILE_RCSID("@(#)$File: cdf.c,v 1.53 2013/02/26 16:20:42 christos Exp $")
 #endif
@@ -794,7 +796,7 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
   } else {
     *maxcount = sh.sh_properties;
     inp = CAST(cdf_property_info_t *,
-        malloc(*maxcount * sizeof(*inp)));
+               HPHP::mem_malloc_array(*maxcount, sizeof(*inp)));
   }
   if (inp == NULL)
     goto out;

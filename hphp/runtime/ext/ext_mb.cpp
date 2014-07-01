@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/system/constants.h"
+#include "hphp/util/mem.h"
 
 extern "C" {
 #include <mbfl/mbfl_convert.h>
@@ -266,7 +267,7 @@ struct MBGlobals final : RequestEventHandler {
       list = default_detect_order_list;
       n = default_detect_order_list_size;
     }
-    entry = (mbfl_no_encoding *)malloc(n * sizeof(int));
+    entry = (mbfl_no_encoding *)mem_malloc_array(n, sizeof(int));
     current_detect_order_list = entry;
     current_detect_order_list_size = n;
     while (n > 0) {
@@ -1479,7 +1480,7 @@ static Variant php_mb_numericentity_exec(const String& str, const Variant& convm
     Array convs = convmap.toArray();
     mapsize = convs.size();
     if (mapsize > 0) {
-      iconvmap = (int*)malloc(mapsize * sizeof(int));
+      iconvmap = (int*)mem_malloc_array(mapsize, sizeof(int));
       int *mapelm = iconvmap;
       for (ArrayIter iter(convs); iter; ++iter) {
         *mapelm++ = iter.second().toInt32();

@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/mem.h"
 #include "hphp/parser/parser.h"
 #include "folly/Bits.h"
 #include <iostream>
@@ -1773,7 +1774,7 @@ void Class::setProperties() {
   m_staticProperties.create(curSPropMap);
 
   m_sPropCache = (RDS::Link<TypedValue>*)
-    malloc(numStaticProperties() * sizeof(*m_sPropCache));
+    mem_malloc_array(numStaticProperties(), sizeof(*m_sPropCache));
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
     new (&m_sPropCache[i]) RDS::Link<TypedValue>(RDS::kInvalidHandle);
   }
@@ -2517,7 +2518,7 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
     unsigned sz = m_size = piv.size();
     if (sz) sz = folly::nextPowTwo(sz);
     free(m_data);
-    m_data = (TypedValueAux*)malloc(sz * sizeof(*m_data));
+    m_data = (TypedValueAux*)mem_malloc_array(sz, sizeof(*m_data));
     assert(m_data);
     memcpy(m_data, piv.m_data, piv.size() * sizeof(*m_data));
   }

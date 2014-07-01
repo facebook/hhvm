@@ -27,7 +27,7 @@
 #define CFI2(x, y)     /* not used on OSX */
 #define CFI3C(x, y, z) /* not used on OSX */
 #define ETCH_ALIGNMENT .align 4 // on OSX this is 2^value
-#define ETCH_SECTION   .section .text,
+#define ETCH_SECTION   .text
 #define ETCH_SIZE      /* not used on OSX */
 #define ETCH_NAME(x)   _##x
 #define ETCH_LABEL(x)  .L##_##x

@@ -26,6 +26,7 @@ UserStreamWrapper::UserStreamWrapper(const String& name,
   : m_name(name)
   , m_cls(cls)
 {
+  assert(m_cls != nullptr);
   m_isLocal = !(flags & k_STREAM_IS_URL);
 }
 

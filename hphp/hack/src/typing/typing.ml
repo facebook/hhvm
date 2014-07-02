@@ -1633,6 +1633,11 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       let env, ety1 = Env.expand_type env ty1 in
       array_get is_lvalue p env ty1 ety1 e2 ty2
+  | Tabstract (_, _, Some ty) ->
+      let env, ety = Env.expand_type env ty in
+      Errors.try_
+        (fun () -> array_get is_lvalue p env ty ety e2 ty2)
+        (fun _ -> error_array env p ety1)
   | _ -> error_array env p ety1
 
 and array_append is_lvalue p env ty1 =
@@ -1659,6 +1664,10 @@ and array_append is_lvalue p env ty1 =
   | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       array_append is_lvalue p env ty1
+  | Tabstract (_, _, Some ty) ->
+      Errors.try_
+        (fun () -> array_append is_lvalue p env ty)
+        (fun _ -> error_array_append env p ety1)
   | _ ->
       error_array_append env p ety1
 
@@ -2259,6 +2268,8 @@ and binop p env bop p1 ty1 p2 ty2 =
           env, (Reason.Rarith_ret p, Tprim Tint)
       | rty1, _ ->
           (* Either side is unknown, unknown *)
+          (* TODO um, what? This seems very wrong, particularly where "newtype
+           * as" is concerned. *)
           env, rty1)
   | Ast.Slash ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -2294,9 +2305,14 @@ and binop p env bop p1 ty1 p2 ty2 =
       env, (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte  | Ast.Gt  | Ast.Gte  ->
       let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
-      if (SubType.is_sub_type env ty_num ty1) && (SubType.is_sub_type env ty_num ty2)
+      let ty_string = (Reason.Rcomp p, Tprim Nast.Tstring) in
+      let both_sub ty =
+        SubType.is_sub_type env ty ty1 && SubType.is_sub_type env ty ty2 in
+      if both_sub ty_num || both_sub ty_string
       then env, (Reason.Rcomp p, Tprim Tbool)
       else
+        (* TODO this is questionable; PHP's semantics for conversions with "<"
+         * are pretty crazy and we may want to just disallow this? *)
         let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
         env, (Reason.Rcomp p, Tprim Tbool)
   | Ast.Dot ->
@@ -2307,8 +2323,8 @@ and binop p env bop p1 ty1 p2 ty2 =
   | Ast.BArbar ->
       env, (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Amp  | Ast.Bar  | Ast.Ltlt  | Ast.Gtgt ->
-      let env, ty1 = Type.unify p Reason.URnone env ty1 (Reason.Rbitwise p1, Tprim Tint) in
-      let env, ty2 = Type.unify p Reason.URnone env ty2 (Reason.Rbitwise p2, Tprim Tint) in
+      let env = Type.sub_type p Reason.URnone env (Reason.Rbitwise p1, Tprim Tint) ty1 in
+      let env = Type.sub_type p Reason.URnone env (Reason.Rbitwise p2, Tprim Tint) ty2 in
       env, (Reason.Rbitwise_ret p, Tprim Tint)
   | Ast.Eq _ ->
       assert false

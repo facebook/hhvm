@@ -260,6 +260,7 @@ and sub_string p env ty2 =
       List.fold_left (sub_string p) env tyl
   | (_, Tprim _) ->
       env
+  | (_, Tabstract (_, _, Some ty))
   | (_, Tgeneric (_, Some ty)) ->
       sub_string p env ty
   | (r2, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->

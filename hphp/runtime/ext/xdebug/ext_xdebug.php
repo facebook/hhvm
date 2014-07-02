@@ -4,8 +4,14 @@
 <<__Native>>
 function xdebug_break(): bool;
 
-<<__Native>>
-function xdebug_call_class(): string;
+/**
+ * This function returns the name of the class from which the current
+ * function/method was called from.
+ *
+ * @return mixed - Returns the calling class or false if called at the top level
+ */
+<<__Native("NoFCallBuiltin")>>
+function xdebug_call_class(): mixed;
 
 /**
  * This function returns the filename that contains the function/method that

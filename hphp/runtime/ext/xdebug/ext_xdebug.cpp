@@ -55,8 +55,20 @@ static ActRec *get_call_fp(Offset *off = nullptr) {
 static bool HHVM_FUNCTION(xdebug_break)
   XDEBUG_NOTIMPLEMENTED
 
-static String HHVM_FUNCTION(xdebug_call_class)
-  XDEBUG_NOTIMPLEMENTED
+static Variant HHVM_FUNCTION(xdebug_call_class) {
+  // PHP5 xdebug returns false if the callee is top-level
+  ActRec *fp = get_call_fp();
+  if (fp == nullptr) {
+    return false;
+  }
+
+  // PHP5 xdebug returns "" for no class
+  Class* cls = fp->m_func->cls();
+  if (!cls) {
+    return staticEmptyString();
+  }
+  return String(cls->name()->data(), CopyString);
+}
 
 static String HHVM_FUNCTION(xdebug_call_file) {
   // PHP5 xdebug returns the top-level file if the callee is top-level

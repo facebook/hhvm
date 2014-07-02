@@ -62,6 +62,7 @@ type token =
   | Tminus
   | Tstar
   | Tslash
+  | Tbslash
   | Txor
   | Tlcb
   | Trcb
@@ -96,6 +97,12 @@ type token =
   | Theredoc
   | Txhpname
   | Tref
+  | Tspace
+  | Topen_comment
+  | Tclose_comment
+  | Tline_comment
+  | Topen_xhp_comment
+  | Tclose_xhp_comment
 
 (* Fake tokens *)
   | Tyield
@@ -169,6 +176,7 @@ let token_to_string = function
   | Tminus        -> "-"
   | Tstar         -> "*"
   | Tslash        -> "/"
+  | Tbslash       -> "\\"
   | Txor          -> "^"
   | Tlcb          -> "{"
   | Trcb          -> "}"
@@ -228,6 +236,12 @@ let token_to_string = function
   | Tfallthrough  -> "fallthrough"
   | Tnewline      -> "newline"
   | Tany          -> "any"
+  | Tspace        -> "space"
+  | Topen_comment -> "open_comment"
+  | Tclose_comment -> "close_comment"
+  | Tline_comment  -> "line_comment"
+  | Topen_xhp_comment -> "open_xhp_comment"
+  | Tclose_xhp_comment -> "close_xhp_comment"
 
 }
 
@@ -509,3 +523,97 @@ and look_for_open_cb = parse
   | '\n'               { Lexing.new_line lexbuf; look_for_open_cb lexbuf }
   | '{'                { () }
   | _                  { look_for_open_cb lexbuf }
+
+and format_token = parse
+  | ' '                { Tspace        }
+  | '\n'               { Tnewline      }
+  | "/*"               { Topen_comment }
+  | "*/"               { Tclose_comment }
+  | "//"               { Tline_comment }
+  | "#"                { Tline_comment }
+  | '\"'               { Tdquote       }
+  | '''                { Tquote        }
+  | "<<<"              { Theredoc      }
+  | int                { Tint          }
+  | float              { Tfloat        }
+  | '@'                { Tat           }
+  | "?>"               { Tclose_php    }
+  | word_part          { Tword         }
+  | lvar               { Tlvar         }
+  | '$'                { Tdollar       }
+  | '`'                { Tbacktick     }
+  | "<?php"            { Tphp          }
+  | "<?hh"             { Thh           }
+  | '('                { Tlp           }
+  | ')'                { Trp           }
+  | ';'                { Tsc           }
+  | ':'                { Tcolon        }
+  | "::"               { Tcolcol       }
+  | ','                { Tcomma        }
+  | '='                { Teq           }
+  | "|="               { Tbareq        }
+  | "+="               { Tpluseq       }
+  | "*="               { Tstareq       }
+  | "/="               { Tslasheq      }
+  | ".="               { Tdoteq        }
+  | "-="               { Tminuseq      }
+  | "%="               { Tpercenteq    }
+  | "^="               { Txoreq        }
+  | "&="               { Tampeq        }
+  | "<<="              { Tlshifteq     }
+  | ">>="              { Trshifteq     }
+  | "=="               { Teqeq         }
+  | "==="              { Teqeqeq       }
+  | "!="               { Tdiff         }
+  | "!=="              { Tdiff2        }
+  | '|'                { Tbar          }
+  | "||"               { Tbarbar       }
+  | "&&"               { Tampamp       }
+  | '+'                { Tplus         }
+  | '-'                { Tminus        }
+  | '*'                { Tstar         }
+  | '/'                { Tslash        }
+  | '\\'               { Tbslash       }
+  | '^'                { Txor          }
+  | '%'                { Tpercent      }
+  | '{'                { Tlcb          }
+  | '}'                { Trcb          }
+  | '['                { Tlb           }
+  | ']'                { Trb           }
+  | '.'                { Tdot          }
+  | "<="               { Tlte          }
+  | '<'                { Tlt           }
+  | '>'                { Tgt           }
+  | ">="               { Tgte          }
+  | "<<"               { Tltlt         }
+  | "=>"               { Tsarrow       }
+  | "->"               { Tarrow        }
+  | "==>"              { Tlambda       }
+  | '!'                { Tem           }
+  | '?'                { Tqm           }
+  | '&'                { Tamp          }
+  | '~'                { Ttild         }
+  | "++"               { Tincr         }
+  | "--"               { Tdecr         }
+  | "_"                { Tunderscore   }
+  | "..."              { Topt_args     }
+  | eof                { Teof          }
+  | _                  { Terror        }
+
+and format_xhptoken = parse
+  | eof                { Teof        }
+  | '\n'               { Tnewline    }
+  | ' '                { Tspace      }
+  | '<'                { Tlt         }
+  | '>'                { Tgt         }
+  | '{'                { Tlcb        }
+  | '}'                { Trcb        }
+  | '/'                { Tslash      }
+  | '\"'               { Tdquote     }
+  | "/*"               { Topen_comment      }
+  | "*/"               { Tclose_comment     }
+  | "//"               { Tline_comment      }
+  | word               { Tword              }
+  | "<!--"             { Topen_xhp_comment  }
+  | "-->"              { Tclose_xhp_comment }
+  | _                  { Terror             }

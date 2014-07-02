@@ -124,6 +124,10 @@ hh_single.bc: $(LIBS) $(OBJS) hh_single_type_check.cmo
 hh_single.opt: $(LIBS:.cma=.cmxa) $(OBJS:.cmo=.cmx) hh_single_type_check.cmx
 	$(OCAMLOPT) -o $@ $(SYSLIBS:.cma=.cmxa)  $^
 
+hh_format.bc: $(LIBS) $(OBJS) hh_format.cmo
+	$(OCAMLC) -custom -o $@ $(SYSLIBS) $^
+hh_format.opt: $(LIBS:.cma=.cmxa) $(OBJS:.cmo=.cmx) hh_format.cmx
+	$(OCAMLOPT) -o $@ $(SYSLIBS:.cma=.cmxa)  $^
 
 hh_server.bc: $(LIBS) $(OBJS) hh_server.cmo
 	$(OCAMLC) $(SECTCREATE) -custom -o $@ $(SYSLIBS) $^

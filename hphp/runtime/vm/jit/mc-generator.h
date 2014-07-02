@@ -107,8 +107,8 @@ struct CodeGenFixups {
 };
 
 struct RelocationInfo {
-  RelocationInfo(TCA start, TCA end, TCA dest) :
-      m_start(start), m_end(end), m_dest(dest) {}
+  RelocationInfo(TCA start, TCA end) :
+      m_start(start), m_end(end) {}
 
   TCA start() const { return m_start; }
   TCA end() const { return m_end; }
@@ -127,7 +127,7 @@ struct RelocationInfo {
  private:
   TCA m_start;
   TCA m_end;
-  TCA m_dest;
+  TCA m_dest{nullptr};
   size_t m_destSize{size_t(-1)};
   /*
    * maps from src address, to range of destination addresse

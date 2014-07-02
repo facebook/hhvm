@@ -2214,8 +2214,14 @@ void MCGenerator::setJmpTransID(TCA jmp) {
 }
 
 void RelocationInfo::recordAddress(TCA src, TCA dest, int range) {
-  assert(m_destSize == size_t(-1) || dest - m_dest >= m_destSize);
-  m_destSize = dest - m_dest;
+  if (!m_dest) {
+    assert(m_destSize == size_t(-1));
+    m_dest = dest;
+    m_destSize = range;
+  } else {
+    assert(dest - m_dest + range >= m_destSize);
+    m_destSize = dest - m_dest + range;
+  }
   m_adjustedAddresses.emplace(src, std::make_pair(dest, range));
 }
 

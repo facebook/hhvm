@@ -166,7 +166,8 @@ class BackEnd {
    * and return the size of the relocated code (which may be different
    * due to alignment padding, or shrinking branches etc
    */
-  virtual size_t relocate(RelocationInfo& rel, CodeGenFixups& fixups) {
+  virtual size_t relocate(RelocationInfo& rel, CodeBlock& dest,
+                          CodeGenFixups& fixups) {
     always_assert(false);
   }
   /*

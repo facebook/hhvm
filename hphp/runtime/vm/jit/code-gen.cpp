@@ -259,14 +259,12 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     SrcRec* sr = mcg->tx().getSrcRec(sk);
 
     auto& be = mcg->backEnd();
-    RelocationInfo mainRel(mainCode.base(), mainCode.frontier(),
-                           mainCodeIn.frontier());
-    mainCodeIn.skip(be.relocate(mainRel, mcg->cgFixups()));
+    RelocationInfo mainRel(mainCode.base(), mainCode.frontier());
+    be.relocate(mainRel, mainCodeIn, mcg->cgFixups());
 
-    RelocationInfo coldRel(coldCode.base(), coldCode.frontier(),
-                           coldCodeIn.frontier());
+    RelocationInfo coldRel(coldCode.base(), coldCode.frontier());
 
-    coldCodeIn.skip(be.relocate(coldRel, mcg->cgFixups()));
+    be.relocate(coldRel, coldCodeIn, mcg->cgFixups());
 
     be.adjustForRelocation(mainRel.dest(),
                            mainRel.dest() + mainRel.destSize(),

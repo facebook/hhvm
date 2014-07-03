@@ -54,7 +54,6 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 void ProcessInit() {
   // Create the global mcg object
   JIT::mcg = new JIT::MCGenerator();
-  JIT::tx = &JIT::mcg->tx();
   JIT::mcg->initUniqueStubs();
   JIT::mcg->code.unprotect();
 

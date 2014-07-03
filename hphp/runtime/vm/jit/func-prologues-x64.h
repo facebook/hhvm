@@ -63,7 +63,7 @@ inline bool funcPrologueHasGuard(JIT::TCA prologue, const Func* func) {
 
 inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
   assert(arch() == Arch::X64);
-  if (!prologue || prologue == tx->uniqueStubs.fcallHelperThunk) {
+  if (!prologue || prologue == mcg->tx().uniqueStubs.fcallHelperThunk) {
     return prologue;
   }
   return prologue -

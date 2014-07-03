@@ -129,7 +129,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   acold.  Mov  (argReg(0), rVmFp);
 
   auto fixupAddr =
-    emitCallWithinTC(acold, tx->uniqueStubs.functionEnterHelper);
+      emitCallWithinTC(acold, mcg->tx().uniqueStubs.functionEnterHelper);
   mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
   mcg->backEnd().emitSmashableJump(coldCode, mainCode.frontier(), CC_None);
 }
@@ -155,12 +155,12 @@ void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
 //////////////////////////////////////////////////////////////////////
 
 void emitTransCounterInc(vixl::MacroAssembler& a) {
-  if (!tx->isTransDBEnabled()) return;
+  if (!mcg->tx().isTransDBEnabled()) return;
 
   // TODO(#3057328): this is not thread-safe. This should be a "load-exclusive,
   // increment, store-exclusive, loop" sequence, but vixl doesn't yet support
   // the exclusive-access instructions.
-  a.   Mov   (rAsm, tx->getTransCounterAddr());
+  a.   Mov   (rAsm, mcg->tx().getTransCounterAddr());
   a.   Ldr   (rAsm2, rAsm[0]);
   a.   Add   (rAsm2, rAsm2, 1);
   a.   Str   (rAsm2, rAsm[0]);

@@ -1164,7 +1164,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
                                          ni.offset(), ni.toString(),
                                          ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(IMPLIES(JIT::tx->mode() == TransKind::Profile, !ni.outputPredicted));
+  assert(IMPLIES(mcg->tx().mode() == TransKind::Profile, !ni.outputPredicted));
 
   ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
 

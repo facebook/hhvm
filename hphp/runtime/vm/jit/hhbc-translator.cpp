@@ -4113,7 +4113,8 @@ void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
   // We really do want to check for exact equality here: if type is StaticStr
   // there's nothing for us to do, and we don't support guarding on CountedStr.
   if (type != Type::Str ||
-      (tx->mode() != TransKind::Profile && tx->mode() != TransKind::Optimize)) {
+      (mcg->tx().mode() != TransKind::Profile &&
+       mcg->tx().mode() != TransKind::Optimize)) {
     return doGuard(type);
   }
 

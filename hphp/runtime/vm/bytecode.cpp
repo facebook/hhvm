@@ -113,7 +113,6 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 using std::string;
 
-using JIT::tx;
 using JIT::mcg;
 
 #if DEBUG
@@ -127,7 +126,7 @@ TRACE_SET_MOD(bcinterp);
 // ActRec.
 static bool isReturnHelper(void* address) {
   auto tcAddr = reinterpret_cast<JIT::TCA>(address);
-  auto& u = tx->uniqueStubs;
+  auto& u = mcg->tx().uniqueStubs;
   return tcAddr == u.retHelper ||
          tcAddr == u.genRetHelper ||
          tcAddr == u.retInlHelper ||
@@ -152,9 +151,9 @@ void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
 }
 
 void ActRec::setReturnVMExit() {
-  assert(isReturnHelper(tx->uniqueStubs.callToExit));
+  assert(isReturnHelper(mcg->tx().uniqueStubs.callToExit));
   m_sfp = nullptr;
-  m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.callToExit);
+  m_savedRip = reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.callToExit);
   m_soff = 0;
 }
 
@@ -2635,7 +2634,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   ar->initNumArgs(0);
   assert(vmfp());
   assert(!vmfp()->hasInvName());
-  ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
+  ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   pushLocalsAndIterators(func);
   if (!vmfp()->hasVarEnv()) {
     vmfp()->setVarEnv(VarEnv::createLocal(vmfp()));
@@ -2996,10 +2995,10 @@ void ExecutionContext::preventReturnsToTC() {
                  ar->m_func->fullName()->data());
         if (ar->resumed()) {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx->uniqueStubs.genRetHelper);
+            reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.genRetHelper);
         } else {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
+            reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.retHelper);
         }
         assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
       }
@@ -6285,7 +6284,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCall(IOP_ARGS) {
   DECODE_IVA(numArgs);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
+  ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     profileAllArguments(ar);
@@ -6306,7 +6305,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
   }
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
+  ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     profileAllArguments(ar);
@@ -6382,7 +6381,7 @@ bool ExecutionContext::doFCallArray(PC& pc, int numStackValues,
     TRACE(3, "FCallArray: pc %p func %p base %d\n", vmpc(),
           vmfp()->unit()->entry(),
           int(vmfp()->m_func->base()));
-    ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
+    ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
 
     if (UNLIKELY((CallArrOnInvalidContainer::WarnAndContinue == onInvalid)
                  && func->anyByRef())) {
@@ -7118,7 +7117,7 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   BaseGenerator* gen = this_base_generator(vmfp());
   assert(gen->getState() == BaseGenerator::State::Running);
   ActRec* genAR = gen->actRec();
-  genAR->setReturn(vmfp(), pc, tx->uniqueStubs.genRetHelper);
+  genAR->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.genRetHelper);
 
   vmfp() = genAR;
 

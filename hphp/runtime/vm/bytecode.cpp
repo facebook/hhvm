@@ -1573,7 +1573,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
                         from->m_data.pref->m_count >= 2)) {
         refDup(*from, *to);
       } else {
-        if (doCufRefParamChecks) {
+        if (doCufRefParamChecks && f->mustBeRef(i)) {
           try {
             raise_warning("Parameter %d to %s() expected to be a reference, "
                           "value given", i + 1, f->fullName()->data());

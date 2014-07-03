@@ -481,20 +481,22 @@ const StaticString s_extract("extract");
 const StaticString s_extractNative("__SystemLib\\extract");
 const StaticString s_current("current");
 const StaticString s_key("key");
+const StaticString s_array_multisort("array_multisort");
 
 bool Func::mustBeRef(int32_t arg) const {
   if (!byRef(arg)) return false;
   if (arg == 0) {
     if (UNLIKELY(m_attrs & AttrBuiltin)) {
       // This hacks mustBeRef() to return false for the first parameter of
-      // extract(), current(), and key(). These functions try to take their
-      // first parameter by reference but they also allow expressions that
-      // cannot be taken by reference (ex. an array literal).
+      // extract(), current(), key(), and array_multisort(). These functions
+      // try to take their first parameter by reference but they also allow
+      // expressions that cannot be taken by reference (ex. an array literal).
       // TODO Task #4442937: Come up with a cleaner way to do this.
       if (name() == s_extract.get() && !cls()) return false;
       if (name() == s_extractNative.get() && !cls()) return false;
       if (name() == s_current.get() && !cls()) return false;
       if (name() == s_key.get() && !cls()) return false;
+      if (name() == s_array_multisort.get() && !cls()) return false;
     }
   }
   return

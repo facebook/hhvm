@@ -6,7 +6,7 @@ TARGET=utils
 
 SRC= hh_json.ml \
      path.ml pos.ml \
-     tmp.ml build_id.ml \
+     sysConfig.ml tmp.ml build_id.ml \
      ident.ml \
      printSignal.ml ttyColor.ml \
      sys_utils.ml \

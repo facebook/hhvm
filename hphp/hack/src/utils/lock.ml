@@ -76,8 +76,8 @@ let check ?user:(user=None) root file : bool =
 
 let find_all_locks file : (string * Path.path) list =
   let cmd = Printf.sprintf "find \
-    `find /tmp/ -type d -name 'hh_server_*' 2> /dev/null` \
-    -name '*.%s'" file in
+    `find /tmp/ -type d -name '%s_*' 2> /dev/null` \
+    -name '*.%s'" SysConfig.temp_base file in
   let in_ = Unix.open_process_in cmd in
   let results = ref [] in
   begin try
@@ -87,8 +87,8 @@ let find_all_locks file : (string * Path.path) list =
   with End_of_file -> () end;
   let results = !results in
   let parse_result acc result =
-    let regexp_str = Printf.sprintf "^%s/hh_server_\\([^/]*\\)/.*"
-      Tmp.temp_dir_name in
+    let regexp_str = Printf.sprintf "^%s/%s_\\([^/]*\\)/.*"
+      Tmp.temp_dir_name SysConfig.temp_base in
     if Str.string_match (Str.regexp regexp_str) result 0
     then
       let user = Str.matched_group 1 result in

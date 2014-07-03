@@ -90,6 +90,7 @@ struct CodeGenFixups {
   std::set<TCA*> m_codePointers;
   std::vector<TransBCMapping> m_bcMap;
   std::multimap<TCA,std::pair<int,int>> m_alignFixups;
+  GrowableVector<IncomingBranch> m_inProgressTailJumps;
 
   CodeBlock* m_tletMain{nullptr};
   CodeBlock* m_tletCold{nullptr};
@@ -101,7 +102,7 @@ struct CodeGenFixups {
     m_tletFrozen = frozen;
   }
 
-  void process();
+  void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
   bool empty() const;
   void clear();
 };

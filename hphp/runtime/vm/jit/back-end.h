@@ -184,7 +184,7 @@ class BackEnd {
    * Adjust the contents of fixups, sr, and asmInfo based on the relocation
    * already performed on rel.
    */
-  virtual void adjustForRelocation(SrcRec* sr, AsmInfo* asmInfo,
+  virtual void adjustForRelocation(AsmInfo* asmInfo,
                                    RelocationInfo& rel, CodeGenFixups& fixups) {
     always_assert(false);
   }

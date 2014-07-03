@@ -2,12 +2,7 @@
 
 class _SplPriorityQueueHeap extends SplMaxHeap {
   public function compare($a, $b) {
-    if ($a['priority'] > $b['priority']) {
-      return 1;
-    } else if ($a['priority'] < $b['priority']) {
-      return -1;
-    }
-    return 0;
+    return parent::compare($a['priority'], $b['priority']);
   }
 
   public function top() {

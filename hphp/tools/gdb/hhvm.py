@@ -185,15 +185,20 @@ class ObjectDataPrinter:
         dp = self.cls['m_declProperties']
         if not dp:
             return self._iterator(0,0,0,0)
-        mv = dp['m_vec']
-        if not mv:
-            return self._iterator(0,0,0,0)
 
-        return self._iterator(self.val, self.cls, mv, mv + dp['m_map']['m_extra'])
+        # FIXME: dp['m_vec'] no longer exists
+        return self._iterator(0,0,0,0)
+
+#        mv = dp['m_vec']
+#        if not mv:
+#            return self._iterator(0,0,0,0)
+#
+#        return self._iterator(self.val, self.cls, mv, mv + dp['m_map']['m_extra'])
 
     def to_string(self):
+        ls = LowStringPtrPrinter(self.cls['m_preClass']['m_px']['m_name'])
         return "Object of class %s @ 0x%x" % (
-            string_data_val(self.cls['m_preClass']['m_px']['m_name']),
+            string_data_val(ls.to_string_data()),
             self.val.address)
 
 class SmartPtrPrinter:
@@ -239,10 +244,14 @@ class LowStringPtrPrinter:
         self.val = val
 
     def to_string(self):
-        ptr = self.val['m_raw'].cast(gdb.lookup_type('HPHP::StringData').pointer())
+        ptr = self.to_string_data()
         if ptr:
-            return "LowStringPtr '%s'" % string_data_val(ptr.dereference())
-        return "LowStringPtr(Null)"
+            return "LowStringPtr '%s'" % str
+        else:
+            return "LowStringPtr(Null)"
+
+    def to_string_data(self):
+        return self.val['m_raw'].cast(gdb.lookup_type('HPHP::StringData').pointer())
 
 class LowClassPtrPrinter:
     RECOGNIZE = '^HPHP::(LowPtr<HPHP::Class.*>|LowClassPtr)$'
@@ -251,10 +260,13 @@ class LowClassPtrPrinter:
         self.val = val
 
     def to_string(self):
-        ptr = self.val['m_raw'].cast(gdb.lookup_type('HPHP::Class').pointer())
+        ptr = self.to_class()
         if ptr:
             return "LowClassPtr '%s'" % ptr
         return "LowClassPtr(Null)"
+
+    def to_class(self):
+        return self.val['m_raw'].cast(gdb.lookup_type('HPHP::Class').pointer())
 
 class RefDataPrinter:
     RECOGNIZE = '^HPHP::RefData$'
@@ -278,7 +290,8 @@ class ClassPrinter:
         self.val = val
 
     def to_string(self):
-        return "Class %s" % string_data_val(self.val['m_preClass']['m_px']['m_name'])
+        ls = LowStringPtrPrinter(self.val['m_preClass']['m_px']['m_name'])
+        return "Class %s" % string_data_val(ls.to_string_data())
 
 printer_classes = [
     TypedValuePrinter,

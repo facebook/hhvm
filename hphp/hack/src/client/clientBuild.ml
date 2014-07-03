@@ -41,9 +41,19 @@ let main env =
   then ClientStart.start_server env.ServerMsg.root;
   let ic, oc = connect env num_build_retries in
   ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env);
-  try
-    while true do
-      print_endline (input_line ic)
-    done
-  with End_of_file ->
-    ()
+  let response = ServerMsg.response_from_channel ic in
+  match response with
+  | ServerMsg.SERVER_OUT_OF_DATE ->
+    Printf.printf
+      "Hack server is out of date, but it likely just exited. Try again.\n%!"
+  | ServerMsg.PONG -> (* successful case *)
+    begin
+      try
+        while true do
+          print_endline (input_line ic)
+        done
+      with End_of_file ->
+        ()
+    end
+  | resp -> Printf.printf "Unexpected server response %s.\n%!"
+    (ServerMsg.response_to_string resp)

@@ -3459,7 +3459,7 @@ static Variant _php_mb_regex_ereg_search_exec(const String& pattern,
                                               int mode) {
   int n, i, err, pos, len, beg, end;
   OnigUChar *str;
-  OnigSyntaxType *syntax = NULL;
+  OnigSyntaxType *syntax = MBSTRG(regex_default_syntax);
   OnigOptionType noption;
 
   noption = MBSTRG(regex_default_options);

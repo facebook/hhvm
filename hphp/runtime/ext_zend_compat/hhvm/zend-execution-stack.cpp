@@ -22,7 +22,7 @@
 
 namespace HPHP {
 
-static __thread RequestLocal<ZendExecutionStack> tl_stack;
+IMPLEMENT_STATIC_REQUEST_LOCAL(ZendExecutionStack, tl_stack);
 
 ZendExecutionStack & ZendExecutionStack::getStack() {
   return *tl_stack.get();

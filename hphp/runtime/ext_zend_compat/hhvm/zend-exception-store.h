@@ -59,7 +59,7 @@ class ZendExceptionStore final : public RequestEventHandler {
 
   private:
     std::exception_ptr m_ptr;
-    static __thread RequestLocal<ZendExceptionStore> tl_instance;
+    DECLARE_STATIC_REQUEST_LOCAL(ZendExceptionStore, tl_instance);
 };
 
 }

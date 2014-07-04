@@ -58,6 +58,11 @@ inline uintptr_t tlsBase() {
 // icc 13.0.0 appears to support it as well but we end up with
 // assembler warnings of unknown importance about incorrect section
 // types
+//
+// So we use __thread on gcc, icc and clang, unless we are on OSX. On OSX, we
+// use our own emulation. Use the DECLARE_THREAD_LOCAL() and
+// IMPLEMENT_THREAD_LOCAL() macros to access either __thread or the emulation
+// as appropriate.
 
 #if !defined(NO_TLS) && !defined(__APPLE__) &&                  \
   ((__llvm__ && __clang__) ||                                   \
@@ -97,20 +102,24 @@ inline void ThreadLocalSetValue(pthread_key_t key, const void* value) {
  * between different threads (hence no locking) but those variables are not
  * on stack in local scope. To use it, just do something like this,
  *
- *   ThreadLocal<MyClass> static_object;
+ *   IMPLEMENT_THREAD_LOCAL(MyClass, static_object);
  *     static_object->data_ = ...;
  *     static_object->doSomething();
  *
- *   ThreadLocal<int> static_number;
+ *   IMPLEMENT_THREAD_LOCAL(int, static_number);
  *     int value = *static_number;
  *
- * So, syntax-wise it's similar to pointers. T can be primitive types, and if
- * it's a class, there has to be a default constructor.
+ * So, syntax-wise it's similar to pointers. The type parameter can be a
+ * primitive types. If it's a class, there has to be a default constructor.
  */
 
 ///////////////////////////////////////////////////////////////////////////////
 #if defined(USE_GCC_FAST_TLS)
 
+/**
+ * We keep a linked list of destructors in ThreadLocalManager to be called on
+ * thread exit. ThreadLocalNode is a node in this list.
+ */
 template <typename T>
 struct ThreadLocalNode {
   T * m_p;
@@ -145,6 +154,10 @@ void ThreadLocalOnThreadExit(void * p) {
   pNode->m_p = nullptr;
 }
 
+/**
+ * The USE_GCC_FAST_TLS implementation of ThreadLocal is just a lazy-initialized
+ * pointer wrapper. In this case, we have one ThreadLocal object per thread.
+ */
 template<typename T>
 struct ThreadLocal {
   T *get() const {
@@ -189,6 +202,11 @@ void ThreadLocal<T>::create() {
   m_node.m_p = new T();
 }
 
+/**
+ * ThreadLocalNoCheck is a pointer wrapper like ThreadLocal, except that it is
+ * explicitly initialized with getCheck(), rather than being initialized when
+ * it is first dereferenced.
+ */
 template<typename T>
 struct ThreadLocalNoCheck {
   T *getCheck() const NEVER_INLINE;
@@ -376,6 +394,11 @@ void ThreadLocalOnThreadExit(void *p) {
   delete (T*)p;
 }
 
+/**
+ * This is the emulation version of ThreadLocal. In this case, the ThreadLocal
+ * object is a true global, and the get() method returns a thread-dependent
+ * pointer from pthread's thread-specific data management.
+ */
 template<typename T>
 class ThreadLocal {
 public:
@@ -587,6 +610,9 @@ public:
   pthread_key_t m_key;
 };
 
+/**
+ * The emulation version of the thread-local macros
+ */
 #define DECLARE_THREAD_LOCAL(T, f) ThreadLocal<T> f
 #define IMPLEMENT_THREAD_LOCAL(T, f) ThreadLocal<T> f
 

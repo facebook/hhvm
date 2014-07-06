@@ -90,7 +90,7 @@ Variant f_apc_exists(const String& cache_type, int64_t cache_id = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_apc_cache_info(int64_t cache_id = 0, bool limited = false);
+Variant f_apc_cache_info(const String& cache_type = "", bool limited = false);
 Array f_apc_sma_info(bool limited = false);
 
 ///////////////////////////////////////////////////////////////////////////////

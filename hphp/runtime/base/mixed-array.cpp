@@ -78,7 +78,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
 
 ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
-  capacity = (capacity ? capacity : other->m_size);
+  capacity = (capacity ? capacity : other->size());
 
   if (other->m_kind == kPackedKind) {
     return MixedArray::MakeReserve(capacity);

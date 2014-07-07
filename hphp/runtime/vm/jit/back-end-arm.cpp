@@ -478,7 +478,8 @@ struct BackEnd : public JIT::BackEnd {
                                 ? 'x' : 'w')
                   : (vixl::FPRegister(reg).size() == vixl::kSRegSize
                      ? 's' : 'd');
-    os << prefix << int(RegNumber(reg));
+    vixl::CPURegister r = reg;
+    os << prefix << r.code();
   }
 
   void disasmRange(std::ostream& os, int indent, bool dumpIR, TCA begin,

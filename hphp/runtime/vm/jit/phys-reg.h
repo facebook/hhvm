@@ -30,10 +30,6 @@ namespace HPHP { namespace JIT {
  * To make it possible to use it with the assembler conveniently, it
  * can be implicitly converted to and from Reg64.  If you want to use
  * it as a 32 bit register call r32(physReg).
- *
- * The implicit conversion to RegNumber is historical: it exists
- * for backward-compatibility with the old-style asm-x64.h api
- * (e.g. store_reg##_disp_reg##).
  */
 struct PhysReg {
  private:
@@ -54,20 +50,15 @@ struct PhysReg {
   explicit constexpr PhysReg() : n(-1) {}
   constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
   constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kSIMDOffset) {}
-  explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
+  explicit constexpr PhysReg(Reg32 r) : n(int(r)) {}
 
   constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
   constexpr /* implicit */ PhysReg(vixl::FPRegister r)
     : n(r.code() + kSIMDOffset) {}
 
-  explicit constexpr PhysReg(RegNumber r) : n(int(r)) {}
-
   /* implicit */ operator Reg64() const {
     assert(isGP() || n == -1);
     return Reg64(n);
-  }
-  constexpr /* implicit */ operator RegNumber() const {
-    return n < kSIMDOffset ? RegNumber(n) : RegNumber(n - kSIMDOffset);
   }
   /* implicit */ operator RegXMM() const {
     assert(isSIMD() || n == -1);
@@ -197,6 +188,11 @@ private:
 
   int8_t n;
 };
+
+inline Reg8 rbyte(PhysReg r) { return Reg8(int(Reg64(r))); }
+inline Reg16 r16(PhysReg r) { return Reg16(int(Reg64(r))); }
+inline Reg32 r32(PhysReg r) { return Reg32(int(Reg64(r))); }
+inline Reg64 r64(PhysReg r) { return Reg64(r); }
 
 constexpr PhysReg InvalidReg;
 

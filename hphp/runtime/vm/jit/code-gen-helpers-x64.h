@@ -108,18 +108,16 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
  */
 template<typename T>
 inline void
-emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
-            RegNumber reg) {
+emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 reg) {
   uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
-  a.    fs().loadq(baseless(virtualAddress), r64(reg));
+  a.    fs().loadq(baseless(virtualAddress), reg);
 }
 
 #else // USE_GCC_FAST_TLS
 
 template<typename T>
 inline void
-emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
-            RegNumber reg) {
+emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
   PhysRegSaver(a, kGPCallerSaved); // we don't know for sure what's alive
   a.    emitImmReg(datum.m_key, argNumToRegName[0]);
   const TCA addr = (TCA)pthread_getspecific;
@@ -130,7 +128,7 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
     a.    call(reg::rax);
   }
   if (reg != reg::rax) {
-    a.    movq(reg::rax, r64(reg));
+    a.    movq(reg::rax, dest);
   }
 }
 
@@ -178,7 +176,7 @@ void jccBlock(Asm& a, Lambda body) {
 
 inline MemoryRef lookupDestructor(X64Assembler& a, PhysReg typeReg,
                                   PhysReg scratch) {
-  assert(typeReg != r32(argNumToRegName[0]));
+  assert(typeReg != argNumToRegName[0]);
   assert(scratch != argNumToRegName[0]);
 
   static_assert((KindOfString        >> kShiftDataTypeToDestrIndex == 1) &&

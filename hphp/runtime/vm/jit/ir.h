@@ -320,6 +320,12 @@ O(LtInt,                       D(Bool), S(Int) S(Int),                     C) \
 O(LteInt,                      D(Bool), S(Int) S(Int),                     C) \
 O(EqInt,                       D(Bool), S(Int) S(Int),                     C) \
 O(NeqInt,                      D(Bool), S(Int) S(Int),                     C) \
+O(GtDbl,                       D(Bool), S(Dbl) S(Dbl),                     C) \
+O(GteDbl,                      D(Bool), S(Dbl) S(Dbl),                     C) \
+O(LtDbl,                       D(Bool), S(Dbl) S(Dbl),                     C) \
+O(LteDbl,                      D(Bool), S(Dbl) S(Dbl),                     C) \
+O(EqDbl,                       D(Bool), S(Dbl) S(Dbl),                     C) \
+O(NeqDbl,                      D(Bool), S(Dbl) S(Dbl),                     C) \
 O(Floor,                        D(Dbl), S(Dbl),                            C) \
 O(Ceil,                         D(Dbl), S(Dbl),                            C) \
 O(InstanceOfBitmask,           D(Bool), S(Cls) CStr,                       C) \
@@ -912,6 +918,16 @@ bool isIntQueryOp(Opcode opc);
  * Return the int-query opcode for the given non-int-query opcode
  */
 Opcode queryToIntQueryOp(Opcode opc);
+
+/*
+ * Return true if opc is a dbl comparison operator
+ */
+bool isDblQueryOp(Opcode opc);
+
+/*
+ * Return the dbl-query opcode for the given non-dbl-query opcode
+ */
+Opcode queryToDblQueryOp(Opcode opc);
 
 /*
  * A "fusable query op" is any instruction returning Type::Bool that

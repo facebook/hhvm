@@ -638,13 +638,20 @@ const X64Instr instr_nop =     { { 0xF1,0xF1,0xF1,0x00,0xF1,0x90 }, 0x0500  };
 const X64Instr instr_shld =    { { 0xA5,0xF1,0xA4,0x00,0xF1,0xF1 }, 0x0082  };
 const X64Instr instr_shrd =    { { 0xAD,0xF1,0xAC,0x00,0xF1,0xF1 }, 0x0082  };
 const X64Instr instr_int3 =    { { 0xF1,0xF1,0xF1,0x00,0xF1,0xCC }, 0x0500  };
-const X64Instr instr_roundsd   { { 0xF1,0xF1,0x0b,0x00,0xF1,0xF1 }, 0x64112 };
+const X64Instr instr_roundsd = { { 0xF1,0xF1,0x0b,0x00,0xF1,0xF1 }, 0x64112 };
+const X64Instr instr_cmpsd =   { { 0xF1,0xF1,0xC2,0xF1,0xF1,0xF1 }, 0x10112 };
 
 enum class RoundDirection : ssize_t {
   nearest  = 0,
   floor    = 1,
   ceil     = 2,
   truncate = 3,
+};
+
+enum class ComparisonPred : uint8_t {
+  // True if...
+  eq_ord = 0,    // ...operands are ordered AND equal
+  ne_unord = 4,  // ...operands are unordered OR unequal
 };
 
 enum ConditionCode {
@@ -960,6 +967,10 @@ public:
 
   void roundsd (RoundDirection d, RegXMM src, RegXMM dst) {
     emitIRR(instr_roundsd, rn(dst), rn(src), ssize_t(d));
+  }
+
+  void cmpsd(RegXMM src, RegXMM dst, ComparisonPred pred) {
+    emitIRR(instr_cmpsd, rn(dst), rn(src), ssize_t(pred));
   }
 
   /*

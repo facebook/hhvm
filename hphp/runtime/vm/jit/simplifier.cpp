@@ -1215,6 +1215,16 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, const IRInstruction* inst,
     return newInst(queryToIntQueryOp(opName), src1, src2);
   }
 
+  // Dbl-dbl or dbl-int comparison lower to dbl-comparison
+  if (!isDblQueryOp(opName) &&
+      (type1 <= Type::Dbl || type2 <= Type::Dbl) &&
+      (type1.subtypeOfAny(Type::Int, Type::Dbl) &&
+       type2.subtypeOfAny(Type::Int, Type::Dbl))) {
+    return newInst(queryToDblQueryOp(opName),
+                   gen(ConvCellToDbl, src1),
+                   gen(ConvCellToDbl, src2));
+  }
+
   // ---------------------------------------------------------------------
   // For same-type cmps, canonicalize any constants to the right
   // Then stop - there are no more simplifications left
@@ -1829,8 +1839,6 @@ SSATmp* Simplifier::simplifyCondJmp(const IRInstruction* inst) {
     auto src1Type = srcInst->src(0)->type();
     auto src2Type = srcInst->src(1)->type();
     return ((src1Type <= Type::Int && src2Type <= Type::Int) ||
-            ((src1Type <= Type::Int || src1Type <= Type::Dbl) &&
-             (src2Type <= Type::Int || src2Type <= Type::Dbl)) ||
             (src1Type <= Type::Bool && src2Type <= Type::Bool) ||
             (src1Type <= Type::Cls && src2Type <= Type::Cls));
   };

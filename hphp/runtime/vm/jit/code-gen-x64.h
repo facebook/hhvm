@@ -158,6 +158,8 @@ private:
   void cgReqBindJccInt(IRInstruction* inst);  // helper
   void cgExitJccInt(IRInstruction* inst); // helper
   void emitCmpInt(IRInstruction* inst, ConditionCode);
+  void emitCmpEqDbl(IRInstruction* inst, ComparisonPred);
+  void emitCmpRelDbl(IRInstruction* inst, ConditionCode, bool);
   void cgCmpHelper(IRInstruction* inst,
                    void (Asm::*setter)(Reg8),
                    int64_t (*str_cmp_str)(StringData*, StringData*),
@@ -187,7 +189,6 @@ private:
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
-  void doubleCmp(Asm& a, RegXMM xmmReg0, RegXMM xmmReg1);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);

@@ -490,14 +490,24 @@ D:Bool = NSame S0:Gen S1:Gen
   (Object,String) pairs, and do not throw. Note that Same and NSame never
   re-enter or throw, for any types.
 
-D:Bool = GtInt   S0:{Int} S1:{Int}
-D:Bool = GteInt  S0:{Int} S1:{Int}
-D:Bool = LtInt   S0:{Int} S1:{Int}
-D:Bool = LteInt  S0:{Int} S1:{Int}
-D:Bool = EqInt   S0:{Int} S1:{Int}
-D:Bool = NeqInt  S0:{Int} S1:{Int}
+D:Bool = GtInt   S0:Int S1:Int
+D:Bool = GteInt  S0:Int S1:Int
+D:Bool = LtInt   S0:Int S1:Int
+D:Bool = LteInt  S0:Int S1:Int
+D:Bool = EqInt   S0:Int S1:Int
+D:Bool = NeqInt  S0:Int S1:Int
 
   Perform 64-bit integer comparisons.
+
+D:Bool = GtDbl   S0:Dbl S1:Dbl
+D:Bool = GteDbl  S0:Dbl S1:Dbl
+D:Bool = LtDbl   S0:Dbl S1:Dbl
+D:Bool = LteDbl  S0:Dbl S1:Dbl
+D:Bool = EqDbl   S0:Dbl S1:Dbl
+D:Bool = NeqDbl  S0:Dbl S1:Dbl
+
+  Perform comparisons of doubles. Comparisons that are unordered according to
+  IEEE 754 (such as when at least one operand is NaN) result in false.
 
 D:Bool = InstanceOf S0:Cls S1:{Cls|Nullptr}
 

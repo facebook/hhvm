@@ -6986,6 +6986,9 @@ bool EmitterVisitor::emitSystemLibVarEnvFunc(Emitter& e,
     emitFuncCall(e, call,
                  "__SystemLib\\extract", call->getParams());
     return true;
+  } else if (call->isCallToFunction("parse_str")) {
+    emitFuncCall(e, call, "__SystemLib\\parse_str", call->getParams());
+    return true;
   } else if (call->isCallToFunction("compact")) {
     emitFuncCall(e, call,
                  "__SystemLib\\compact_sl", call->getParams());

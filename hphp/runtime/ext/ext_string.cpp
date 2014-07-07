@@ -1530,16 +1530,6 @@ Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = n
   return result.detach();
 }
 
-void f_parse_str(const String& str, VRefParam arr /* = null */) {
-  Array result = Array::Create();
-  HttpProtocol::DecodeParameters(result, str.data(), str.size());
-  if (!arr.isReferenced()) {
-    HHVM_FN(__SystemLib_extract)(result);
-    return;
-  }
-  arr = result;
-}
-
 Variant f_setlocale(int _argc, int category, const Variant& locale, const Array& _argv /* = null_array */) {
   Array argv = _argv;
   if (locale.is(KindOfArray)) {

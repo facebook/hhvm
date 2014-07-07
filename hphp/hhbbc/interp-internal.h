@@ -33,6 +33,8 @@ TRACE_SET_MOD(hhbbc);
 
 const StaticString s_extract("extract");
 const StaticString s_extract_sl("__SystemLib\\extract");
+const StaticString s_parse_str("parse_str");
+const StaticString s_parse_str_sl("__SystemLib\\parse_str");
 const StaticString s_compact("compact");
 const StaticString s_compact_sl("__SystemLib\\compact_sl");
 const StaticString s_get_defined_vars("get_defined_vars");
@@ -130,9 +132,14 @@ void unsetUnknownLocal(ISS& env) {
 }
 
 void specialFunctionEffects(ISS& env, SString name) {
-  // extract() trashes the local variable environment.
-  if (name->isame(s_extract_sl.get())
-      || (!options.DisallowDynamicVarEnvFuncs && name->isame(s_extract.get()))) {
+  auto special_fn = [&] (const StaticString& fn1, const StaticString& fn2) {
+    return name->isame(fn1.get()) ||
+      (!options.DisallowDynamicVarEnvFuncs && name->isame(fn2.get()));
+  };
+
+  // extract() and parse_str() can trash the local variable environment.
+  if (special_fn(s_extract_sl, s_extract) ||
+      special_fn(s_parse_str_sl, s_parse_str)) {
     readUnknownLocals(env);
     killLocals(env);
     return;
@@ -140,11 +147,8 @@ void specialFunctionEffects(ISS& env, SString name) {
   // compact() and get_defined_vars() read the local variable
   // environment.  We could check which locals for compact, but for
   // now we just include them all.
-  if (name->isame(s_get_defined_vars_sl.get()) ||
-      name->isame(s_compact_sl.get()) ||
-      (!options.DisallowDynamicVarEnvFuncs && name->isame(s_compact.get())) ||
-      (!options.DisallowDynamicVarEnvFuncs && name->isame(s_get_defined_vars.get()))
-     ) {
+  if (special_fn(s_get_defined_vars_sl, s_get_defined_vars) ||
+      special_fn(s_compact_sl, s_compact)) {
     readUnknownLocals(env);
     return;
   }

@@ -387,7 +387,9 @@ bool RegionFormer::tryInline() {
   assert(m_inst.func() == curFunc());
   assert(m_sk.resumed() == resumed());
 
-  if (!m_inl.canInlineAt(m_inst, *m_region)) return false;
+  if (!m_inl.canInlineAt(m_inst.source, m_inst.funcd, *m_region)) {
+    return false;
+  }
 
   auto refuse = [this](const std::string& str) {
     FTRACE(2, "selectTracelet not inlining {}: {}\n",
@@ -551,7 +553,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
   RegionDescPtr region;
   uint32_t tries = 1;
 
-  InliningDecider inl;
+  InliningDecider inl(ctx.func);
   if (!allowInlining) inl.disable();
 
   while (!(region = RegionFormer(ctx, interp, inl, profiling).go())) {

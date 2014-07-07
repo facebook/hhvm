@@ -38,13 +38,14 @@ TRACE_SET_MOD(inlining);
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool traceRefusal(const char* name, const Func* callee,
-                  const char* why, const SrcKey& sk) {
+bool traceRefusal(const Func* caller, const Func* callee, const char* why) {
   if (Trace::enabled) {
     UNUSED auto calleeName = callee ? callee->fullName()->data()
                                     : "(unknown)";
-    FTRACE(1, "{}: refusing {} <reason: {}> [NI = {}]\n",
-           name, calleeName, why, sk.showInst());
+    assert(caller);
+
+    FTRACE(1, "InliningDecider: refusing {}() <- {}{}\t<reason: {}>\n",
+           caller->fullName()->data(), calleeName, callee ? "()" : "", why);
   }
   return false;
 }
@@ -56,17 +57,15 @@ bool traceRefusal(const char* name, const Func* callee,
  * Check if the funcd of `inst' has any characteristics which prevent inlining,
  * without peeking into its bytecode or regions.
  */
-bool isCalleeInlinable(const NormalizedInstruction& inst) {
-  auto callee = inst.funcd;
-
+bool isCalleeInlinable(const SrcKey& callSK, const Func* callee) {
   auto refuse = [&] (const char* why) {
-    return traceRefusal("canInlineAt", callee, why, inst.source);
+    return traceRefusal(callSK.func(), callee, why);
   };
 
   if (!callee) {
     return refuse("callee not known");
   }
-  if (callee == inst.func()) {
+  if (callee == callSK.func()) {
     return refuse("call is recursive");
   }
   if (callee->hasVariadicCaptureParam()) {
@@ -93,15 +92,15 @@ bool isCalleeInlinable(const NormalizedInstruction& inst) {
 /*
  * Check that we don't have any missing or extra arguments.
  */
-bool checkNumArgs(const NormalizedInstruction& inst) {
-  assert(inst.funcd);
-  auto callee = inst.funcd;
+bool checkNumArgs(const SrcKey& callSK, const Func* callee) {
+  assert(callee);
 
   auto refuse = [&] (const char* why) {
-    return traceRefusal("canInlineAt", callee, why, inst.source);
+    return traceRefusal(callSK.func(), callee, why);
   };
 
-  auto const numArgs = inst.imm[0].u_IVA;
+  auto pc = reinterpret_cast<const Op*>(callSK.pc());
+  auto const numArgs = getImm(pc, 0).u_IVA;
   auto const numParams = callee->numParams();
 
   if (numArgs > numParams) {
@@ -126,23 +125,22 @@ bool checkNumArgs(const NormalizedInstruction& inst) {
  * We refuse to inline if the corresponding FPush is not found in the same
  * region as the FCall, or if other calls are made between the two.
  */
-bool checkFPIRegion(const NormalizedInstruction& inst,
+bool checkFPIRegion(const SrcKey& callSK, const Func* callee,
                     const RegionDesc& region) {
-  assert(inst.funcd);
-  auto callee = inst.funcd;
+  assert(callee);
 
   auto refuse = [&] (const char* why) {
-    return traceRefusal("canInlineAt", callee, why, inst.source);
+    return traceRefusal(callSK.func(), callee, why);
   };
 
   // Check that the FPush instruction is in the same region, and that our FCall
   // is reachable from it.
   //
   // TODO(#4603302) Fix this once SrcKeys can appear multiple times in a region.
-  auto fpi = inst.func()->findFPI(inst.offset());
-  const SrcKey pushSK { inst.func(),
+  auto fpi = callSK.func()->findFPI(callSK.offset());
+  const SrcKey pushSK { callSK.func(),
                         fpi->m_fpushOff,
-                        inst.source.resumed() };
+                        callSK.resumed() };
   int pushBlock = -1;
 
   for (unsigned i = 0; i < region.blocks.size(); ++i) {
@@ -177,18 +175,18 @@ bool checkFPIRegion(const NormalizedInstruction& inst,
   for (unsigned i = pushBlock; i < region.blocks.size(); ++i) {
     auto const& block = *region.blocks[i];
 
-    auto sk = (i == pushBlock ? pushSK.advanced()
-                              : block.start());
-    while (sk <= block.last()) {
+    auto iterSK = (i == pushBlock ? pushSK.advanced()
+                                  : block.start());
+    while (iterSK <= block.last()) {
       // We're all set once we've hit the to-be-inlined FCall.
-      if (sk == inst.source) return true;
+      if (iterSK == callSK) return true;
 
-      auto op = sk.op();
+      auto op = iterSK.op();
 
       if (isFCallStar(op) || op == Op::FCallBuiltin) {
         return refuse("FPI region contains another call");
       }
-      sk.advance();
+      iterSK.advance();
     }
   }
 
@@ -198,8 +196,8 @@ bool checkFPIRegion(const NormalizedInstruction& inst,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool InliningDecider::canInlineAt(const NormalizedInstruction& inst,
-                                  const RegionDesc& region) {
+bool InliningDecider::canInlineAt(const SrcKey& callSK, const Func* callee,
+                                  const RegionDesc& region) const {
   if (!RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
@@ -212,8 +210,8 @@ bool InliningDecider::canInlineAt(const NormalizedInstruction& inst,
   if (arch() == Arch::ARM) return false;
 
   // We can only inline at normal FCalls.
-  if (inst.op() != Op::FCall &&
-      inst.op() != Op::FCallD) {
+  if (callSK.op() != Op::FCall &&
+      callSK.op() != Op::FCallD) {
     return false;
   }
 
@@ -221,14 +219,14 @@ bool InliningDecider::canInlineAt(const NormalizedInstruction& inst,
   // support for these---it has no way to redefine stack pointers relative to
   // the frame pointer, because in a resumed function the frame pointer points
   // into the heap instead of into the eval stack.
-  if (inst.source.resumed()) return false;
+  if (callSK.resumed()) return false;
 
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
-  if (inst.func()->isPseudoMain()) return false;
+  if (callSK.func()->isPseudoMain()) return false;
 
-  if (!isCalleeInlinable(inst) ||
-      !checkNumArgs(inst) ||
-      !checkFPIRegion(inst, region)) {
+  if (!isCalleeInlinable(callSK, callee) ||
+      !checkNumArgs(callSK, callee) ||
+      !checkFPIRegion(callSK, callee, region)) {
     return false;
   }
 
@@ -336,12 +334,12 @@ bool InliningDecider::shouldInline(const Func* callee,
 
   // Tracing return lambdas.
   auto refuse = [&] (const char* why) {
-    return traceRefusal(__FUNCTION__, callee, why, sk);
+    return traceRefusal(m_topFunc, callee, why);
   };
 
   auto accept = [&, this] (const char* kind) {
-    FTRACE(1, "{}: inlining {} <reason: {}>\n",
-           __FUNCTION__, callee->fullName()->data(), kind);
+    FTRACE(1, "InliningDecider: inlining {}() <- {}()\t<reason: {}>\n",
+           m_topFunc->fullName()->data(), callee->fullName()->data(), kind);
 
     // Update our context.
     m_costStack.push_back(cost);

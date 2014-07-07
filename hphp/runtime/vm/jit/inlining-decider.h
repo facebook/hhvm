@@ -23,11 +23,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Func;
+struct SrcKey;
 
 namespace JIT {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct NormalizedInstruction;
 struct RegionDesc;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,6 +56,8 @@ struct RegionDesc;
  */
 struct InliningDecider {
 
+  explicit InliningDecider(const Func* func) : m_topFunc(func) {}
+
   /////////////////////////////////////////////////////////////////////////////
   // Getters and setters.
 
@@ -79,9 +81,9 @@ struct InliningDecider {
   // Core API.
 
   /*
-   * Can we perform inlining at `inst' from within `region'?
+   * Can we perform inlining of `callee' at `callSK' from within `region'?
    *
-   * This is a shallow check---it asks whether `inst' is an FCall{,D} with an
+   * This is a shallow check---it asks whether `callSK' is an FCall{,D} with an
    * appropriate FPush* in the same region, and verifies that the call does not
    * block inlining (e.g., due to missing arguments, recursion, resumable
    * callee, etc.).  It does not peek into the callee's bytecode or regions,
@@ -94,12 +96,12 @@ struct InliningDecider {
    * NOTE: Inlining will fail during translation if the FPush was interpreted.
    * It is up to the client to ensure that this is not the case.
    */
-  bool canInlineAt(const NormalizedInstruction& inst,
-                   const RegionDesc& region);
+  bool canInlineAt(const SrcKey& callSK, const Func* callee,
+                   const RegionDesc& region) const;
 
   /*
    * Check that `region' of `callee' can be inlined (possibly via other inlined
-   * callees) into the toplevel caller whose region is being selected.
+   * callees) into m_topFunc.
    *
    * If this function returns true, we guarantee (contingent on InliningDecider
    * being used correctly) that it is safe and possible to inline the callee;
@@ -109,8 +111,7 @@ struct InliningDecider {
    * If inlining is not performed when true is returned, registerEndInlining()
    * must be called immediately to correctly reset the internal inlining costs.
    */
-  bool shouldInline(const Func* callee,
-                    const RegionDesc& region);
+  bool shouldInline(const Func* callee, const RegionDesc& region);
 
   /*
    * Update internal state for when an inlining event ends.
@@ -122,6 +123,9 @@ struct InliningDecider {
   void registerEndInlining(const Func* callee);
 
 private:
+  // The function being inlined into.
+  const Func* const m_topFunc;
+
   // If set, the decider will always refuse inlining.
   bool m_disabled{false};
 

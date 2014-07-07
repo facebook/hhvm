@@ -14,8 +14,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/extension.h"
+
+#include <cstdio>
+
+#include "hphp/util/exception.h"
+#include "hphp/util/assertions.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -25,7 +29,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
-#include "hphp/util/exception.h"
 
 #ifdef HAVE_LIBDL
 # include <dlfcn.h>
@@ -281,9 +284,21 @@ void Extension::CompileSystemlib(const std::string &slib,
   // encountered during systemlib compilation have valid filename pointers
   // which won't be the case for now unless these pointers are long-lived.
   auto const moduleName = makeStaticString(name.c_str());
-  Unit *unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                        moduleName->data());
-  assert(unit);
+  auto const unit = compile_systemlib_string(slib.c_str(), slib.size(),
+                                             moduleName->data());
+  always_assert_flog(unit, "No unit created for systemlib `{}'", name);
+
+  const StringData* msg;
+  int line;
+  if (unit->compileTimeFatal(msg, line) ||
+      unit->parseFatal(msg, line)) {
+    std::fprintf(stderr, "Systemlib `%s' contains a fataling unit: %s, %d\n",
+                 name.c_str(),
+                 msg->data(),
+                 line);
+    _Exit(0);
+  }
+
   unit->merge();
   s_systemlib_units.push_back(unit);
 }
@@ -294,12 +309,13 @@ void Extension::CompileSystemlib(const std::string &slib,
  *
  * If {name} is not passed, then {m_name} is assumed.
  */
-void Extension::loadSystemlib(const std::string& name /*= "" */) {
+void Extension::loadSystemlib(const std::string& name) {
   std::string n = name.empty() ?
     std::string(m_name.data(), m_name.size()) : name;
   std::string section("ext.");
   section += f_md5(n, false).substr(0, 12).data();
-  std::string hhas, slib = get_systemlib(&hhas, section, m_dsoName);
+  std::string hhas;
+  std::string slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
     std::string phpname = s_systemlibPhpName + n;
     CompileSystemlib(slib, phpname);

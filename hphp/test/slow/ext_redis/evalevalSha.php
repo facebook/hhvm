@@ -11,6 +11,7 @@ $r->setOption(Redis::OPT_PREFIX, $prefix);
 foreach (['eval', 'evaluate'] as $method) {
     echo $method . "\n";
     var_dump($r->$method('return 42')); // Return integer -> 42
+    var_dump($r->$method('return false')); // Return false
     // Return results as array()
     var_dump($r->$method('return {1,2,{3,4,{"a","b"}}}'));
     // Script with parameters -> OK

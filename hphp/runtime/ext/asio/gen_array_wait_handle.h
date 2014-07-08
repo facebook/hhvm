@@ -61,6 +61,11 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   ssize_t m_iterPos;
 };
 
+inline c_GenArrayWaitHandle* c_WaitHandle::asGenArray() {
+  assert(getKind() == Kind::GenArray);
+  return static_cast<c_GenArrayWaitHandle*>(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

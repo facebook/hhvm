@@ -80,6 +80,11 @@ class c_ExternalThreadEventWaitHandle
   static const uint8_t STATE_WAITING = 2;
 };
 
+inline c_ExternalThreadEventWaitHandle* c_WaitHandle::asExternalThreadEvent() {
+  assert(getKind() == Kind::ExternalThreadEvent);
+  return static_cast<c_ExternalThreadEventWaitHandle*>(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -60,6 +60,7 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/system/constants.h"
 #include "hphp/runtime/base/config.h"
 
@@ -1799,6 +1800,8 @@ void hphp_process_exit() {
   for (InitFiniNode *in = extra_process_exit; in; in = in->next) {
     in->func();
   }
+  delete JIT::mcg;
+  JIT::mcg = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

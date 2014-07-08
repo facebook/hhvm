@@ -7,6 +7,7 @@ HHVM should be used together with a FastCGI-based webserver like [nginx](https:/
 * HHVM page: http://hhvm.com
 * Hack page: http://hacklang.org
 
+
 ## FAQ
 
 Our [FAQ](https://github.com/facebook/hhvm/wiki/FAQ) has answers to many common questions about HHVM, from [general questions](https://github.com/facebook/hhvm/wiki/FAQ#general) to questions geared towards those that want to [use](https://github.com/facebook/hhvm/wiki/FAQ#users) or [contribute](https://github.com/facebook/hhvm/wiki/FAQ#contributors) to HHVM.
@@ -28,6 +29,7 @@ If you want to host a website:
 * Run `sudo /etc/init.d/hhvm start`
 * Visit your site at http://.../index.php
 
+
 ## Contributing
 
 We'd love to have your help in making HHVM better.
@@ -46,6 +48,7 @@ All the open issues tagged [php5 incompatibility](https://github.com/facebook/hh
 HHVM is licensed under the PHP and Zend licenses except as otherwise noted.
 
 The Hack typechecker (`hphp/hack`) is licensed under the BSD license (`hphp/hack/LICENSE`) with an additional grant of patent rights (`hphp/hack/PATENTS`) except as otherwise noted.
+
 
 ## Reporting Crashes
 

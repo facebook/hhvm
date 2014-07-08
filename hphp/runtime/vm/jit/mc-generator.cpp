@@ -483,21 +483,6 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != m_tx.uniqueStubs.fcallHelperThunk
         && backEnd().funcPrologueHasGuard(prologues[i], func)) {
-      if (debug) {
-        /*
-         * Unit's are sometimes created racily, in which case all
-         * but the first are destroyed immediately. In that case,
-         * the Funcs of the destroyed Units never need their
-         * prologues smashing, and it would be a lock rank violation
-         * to take the write lease here.
-         * In all other cases, Funcs are destroyed via a delayed path
-         * (treadmill) and the rank violation isn't an issue.
-         */
-        if (!writer) {
-          writer.reset(new LeaseHolder(Translator::WriteLease(),
-                       LeaseAcquire::BLOCKING));
-        }
-      }
       mcg->backEnd().funcPrologueSmashGuard(prologues[i], func);
     }
   }

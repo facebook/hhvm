@@ -105,6 +105,76 @@ const char* getContextName(const Class* ctx) {
 } // unnamed namespace
 //////////////////////////////////////////////////////////////////////
 
+template <class Block>
+void CodeGenerator::ifBlock(ConditionCode cc, Block taken,
+                            bool unlikely) {
+  if (unlikely) return unlikelyIfBlock(cc, taken);
+
+  Label done;
+  m_as.jcc(ccNegate(cc), done);
+  taken(m_as);
+  asm_label(m_as, done);
+}
+
+template <class Block>
+void CodeGenerator::unlikelyIfBlock(ConditionCode cc, Block unlikely) {
+  if (m_as.base() == m_acold.base()) {
+    Label done;
+    m_as.jcc(ccNegate(cc), done);
+    unlikely(m_as);
+    asm_label(m_as, done);
+  } else {
+    Label unlikelyLabel, done;
+    m_as.jcc(cc, unlikelyLabel);
+    asm_label(m_acold, unlikelyLabel);
+    unlikely(m_acold);
+    m_acold.jmp(done);
+    asm_label(m_as, done);
+  }
+}
+
+template <class Then, class Else>
+void CodeGenerator::ifThenElse(Asm& a, ConditionCode cc, Then thenBlock,
+                               Else elseBlock) {
+  Label elseLabel, done;
+  a.jcc8(ccNegate(cc), elseLabel);
+  thenBlock(a);
+  a.jmp8(done);
+  asm_label(a, elseLabel);
+  elseBlock(a);
+  asm_label(a, done);
+}
+
+template <class Then, class Else>
+void CodeGenerator::ifThenElse(ConditionCode cc, Then thenBlock,
+                               Else elseBlock, bool unlikely) {
+  if (unlikely) return unlikelyIfThenElse(cc, thenBlock, elseBlock);
+
+  ifThenElse(m_as, cc, thenBlock, elseBlock);
+}
+
+template <class Then, class Else>
+void CodeGenerator::unlikelyIfThenElse(ConditionCode cc, Then unlikely,
+                                       Else elseBlock) {
+  if (m_as.base() == m_acold.base()) {
+    Label elseLabel, done;
+    m_as.jcc8(ccNegate(cc), elseLabel);
+    unlikely(m_as);
+    m_as.jmp8(done);
+    asm_label(m_as, elseLabel);
+    elseBlock(m_as);
+    asm_label(m_as, done);
+  } else {
+    Label unlikelyLabel, done;
+    m_as.jcc(cc, unlikelyLabel);
+    elseBlock(m_as);
+    asm_label(m_acold, unlikelyLabel);
+    unlikely(m_acold);
+    m_acold.jmp(done);
+    asm_label(m_as, done);
+  }
+}
+
 /*
  * Select a scratch register to use in the given instruction, prefering the
  * lower registers which don't require a REX prefix.  The selected register

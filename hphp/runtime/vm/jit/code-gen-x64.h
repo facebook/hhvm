@@ -247,14 +247,7 @@ private:
    * true.
    */
   template <class Block>
-  void ifBlock(ConditionCode cc, Block taken, bool unlikely = false) {
-    if (unlikely) return unlikelyIfBlock(cc, taken);
-
-    Label done;
-    m_as.jcc(ccNegate(cc), done);
-    taken(m_as);
-    asm_label(m_as, done);
-  }
+  void ifBlock(ConditionCode cc, Block taken, bool unlikely = false);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling
@@ -264,66 +257,22 @@ private:
    * Passes the proper assembler to use to the unlikely function.
    */
   template <class Block>
-  void unlikelyIfBlock(ConditionCode cc, Block unlikely) {
-    if (m_as.base() == m_acold.base()) {
-      Label done;
-      m_as.jcc(ccNegate(cc), done);
-      unlikely(m_as);
-      asm_label(m_as, done);
-    } else {
-      Label unlikelyLabel, done;
-      m_as.jcc(cc, unlikelyLabel);
-      asm_label(m_acold, unlikelyLabel);
-      unlikely(m_acold);
-      m_acold.jmp(done);
-      asm_label(m_as, done);
-    }
-  }
+  void unlikelyIfBlock(ConditionCode cc, Block unlikely);
 
   // Generate an if-then-else block
   template <class Then, class Else>
-  void ifThenElse(Asm& a, ConditionCode cc, Then thenBlock, Else elseBlock) {
-    Label elseLabel, done;
-    a.jcc8(ccNegate(cc), elseLabel);
-    thenBlock(a);
-    a.jmp8(done);
-    asm_label(a, elseLabel);
-    elseBlock(a);
-    asm_label(a, done);
-  }
+  void ifThenElse(Asm& a, ConditionCode cc, Then thenBlock, Else elseBlock);
 
   // Generate an if-then-else block into m_as.
   template <class Then, class Else>
   void ifThenElse(ConditionCode cc, Then thenBlock, Else elseBlock,
-                  bool unlikely = false) {
-    if (unlikely) return unlikelyIfThenElse(cc, thenBlock, elseBlock);
-
-    ifThenElse(m_as, cc, thenBlock, elseBlock);
-  }
+                  bool unlikely = false);
 
   /*
    * Same as ifThenElse except the first block is off in acold
    */
   template <class Then, class Else>
-  void unlikelyIfThenElse(ConditionCode cc, Then unlikely, Else elseBlock) {
-    if (m_as.base() == m_acold.base()) {
-      Label elseLabel, done;
-      m_as.jcc8(ccNegate(cc), elseLabel);
-      unlikely(m_as);
-      m_as.jmp8(done);
-      asm_label(m_as, elseLabel);
-      elseBlock(m_as);
-      asm_label(m_as, done);
-    } else {
-      Label unlikelyLabel, done;
-      m_as.jcc(cc, unlikelyLabel);
-      elseBlock(m_as);
-      asm_label(m_acold, unlikelyLabel);
-      unlikely(m_acold);
-      m_acold.jmp(done);
-      asm_label(m_as, done);
-    }
-  }
+  void unlikelyIfThenElse(ConditionCode cc, Then unlikely, Else elseBlock);
 
   // This is for printing partially-generated traces when debugging
   void print() const;

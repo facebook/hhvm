@@ -73,6 +73,10 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
     auto tid = worklist.top();
     worklist.pop();
 
+    if (breaksRegion(*(profData->transLastInstr(tid)))) {
+      continue;
+    }
+
     for (auto const arc : cfg.outArcs(tid)) {
       auto dst = arc->dst();
 

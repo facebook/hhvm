@@ -11,3 +11,5 @@
 val get_hhi_root : unit -> Path.path option
 
 val set_hhi_root_for_unit_test : Path.path -> unit
+
+val touch : unit -> unit

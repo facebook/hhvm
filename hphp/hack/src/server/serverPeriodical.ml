@@ -64,6 +64,7 @@ let call_before_sleeping = Periodical.check
 (* A little file heater *)
 let file_heater (root:Path.path) () =
   Printf.printf "Running the heater\n"; flush stdout;
+  Hhi.touch ();
   let cmd =
     "find "^Path.string_of_path root^"/ -name \"*.php\" | xargs cat > /tmp/files 2> /dev/null"
   in

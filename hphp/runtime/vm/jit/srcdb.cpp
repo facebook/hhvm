@@ -76,7 +76,7 @@ void SrcRec::emitFallbackJump(CodeBlock& cb, ConditionCode cc /* = -1 */) {
 
   // We'll need to know the location of this jump later so we can
   // patch it to new translations added to the chain.
-  m_inProgressTailJumps.push_back(incoming);
+  mcg->cgFixups().m_inProgressTailJumps.push_back(incoming);
 }
 
 void SrcRec::emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen,
@@ -88,10 +88,11 @@ void SrcRec::emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen,
   auto incoming = cc < 0 ? IncomingBranch::jmpFrom(toSmash)
                          : IncomingBranch::jccFrom(toSmash);
 
-  m_inProgressTailJumps.push_back(incoming);
+  mcg->cgFixups().m_inProgressTailJumps.push_back(incoming);
 }
 
-void SrcRec::newTranslation(TCA newStart) {
+void SrcRec::newTranslation(TCA newStart,
+                            GrowableVector<IncomingBranch>& tailBranches) {
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
   assert(m_translations.size() <= RuntimeOption::EvalJitMaxTranslations);
@@ -124,8 +125,7 @@ void SrcRec::newTranslation(TCA newStart) {
 
   // This is the new tail translation, so store the fallback jump list
   // in case we translate this again.
-  m_tailFallbackJumps.swap(m_inProgressTailJumps);
-  m_inProgressTailJumps.clear();
+  m_tailFallbackJumps.swap(tailBranches);
 }
 
 void SrcRec::addDebuggerGuard(TCA dbgGuard, TCA dbgBranchGuardSrc) {

@@ -91,9 +91,6 @@ int locPhysicalOffset(Location l, const Func* f) {
   return -((l.offset + 1) * iterInflator + localsToSkip);
 }
 
-// The global Translator object.
-Translator* tx;
-
 bool Translator::liveFrameIsPseudoMain() {
   ActRec* ar = (ActRec*)vmfp();
   return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();

@@ -65,7 +65,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
        */
       VMRegAnchor _(ar);
       if (g_context->doFCall(ar, vmpc())) {
-        return tx->uniqueStubs.resumeHelperRet;
+        return mcg->tx().uniqueStubs.resumeHelperRet;
       }
       // We've been asked to skip the function body
       // (fb_intercept). frame, stack and pc have
@@ -75,7 +75,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
     }
     setupAfterPrologue(ar, sp);
     assert(ar == vmRegsUnsafe().fp);
-    return tx->uniqueStubs.resumeHelper;
+    return mcg->tx().uniqueStubs.resumeHelper;
   } catch (...) {
     /*
       The return address is set to __fcallHelperThunk,
@@ -107,7 +107,7 @@ TCA funcBodyHelper(ActRec* fp, void* sp) {
   TCA tca = mcg->getCallArrayPrologue(func);
 
   if (!tca) {
-    tca = tx->uniqueStubs.resumeHelper;
+    tca = mcg->tx().uniqueStubs.resumeHelper;
   }
   tl_regState = VMRegState::DIRTY;
   return tca;

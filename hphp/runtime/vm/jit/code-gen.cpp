@@ -255,9 +255,6 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       printUnit(kRelocationLevel, unit, " before relocation ", &regs, asmInfo);
     }
 
-    SrcKey sk(unit.context().func, unit.bcOff(), unit.context().resumed);
-    SrcRec* sr = mcg->tx().getSrcRec(sk);
-
     auto& be = mcg->backEnd();
     RelocationInfo mainRel(mainCode.base(), mainCode.frontier());
     be.relocate(mainRel, mainCodeIn, mcg->cgFixups());
@@ -278,8 +275,8 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       be.adjustForRelocation(frozenStart, frozenCode->frontier(),
                              mainRel, mcg->cgFixups());
     }
-    be.adjustForRelocation(sr, asmInfo, coldRel, mcg->cgFixups());
-    be.adjustForRelocation(sr, asmInfo, mainRel, mcg->cgFixups());
+    be.adjustForRelocation(asmInfo, coldRel, mcg->cgFixups());
+    be.adjustForRelocation(asmInfo, mainRel, mcg->cgFixups());
 
     if (asmInfo) {
       static int64_t mainDeltaTot = 0, coldDeltaTot = 0;
@@ -300,7 +297,7 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
                                 coldDelta, coldDeltaTot);
     }
 #ifndef NDEBUG
-    auto& ip = sr->inProgressTailJumps();
+    auto& ip = mcg->cgFixups().m_inProgressTailJumps;
     for (size_t i = 0; i < ip.size(); ++i) {
       const auto& ib = ip[i];
       assert(!mainCode.contains(ib.toSmash()));

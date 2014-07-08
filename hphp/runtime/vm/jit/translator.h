@@ -173,9 +173,6 @@ struct TranslArgs {
   JIT::RegionDescPtr m_region;
 };
 
-class Translator;
-extern Translator* tx;
-
 /*
  * Translator annotates a tracelet with input/output locations/types.
  */

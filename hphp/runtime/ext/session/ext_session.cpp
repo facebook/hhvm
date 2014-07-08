@@ -1032,7 +1032,7 @@ public:
       if (key.isString()) {
         String skey = key.toString();
         buf.append(skey);
-        if (skey.find(PS_DELIMITER) >= 0) {
+        if (skey.find(PS_DELIMITER) >= 0 || skey.find(PS_UNDEF_MARKER) >= 0) {
           return String();
         }
         buf.append(PS_DELIMITER);

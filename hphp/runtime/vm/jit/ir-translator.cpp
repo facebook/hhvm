@@ -147,8 +147,9 @@ IRTranslator::translateLtGtOp(const NormalizedInstruction& i) {
   if (!leftType.isKnownDataType() || !rightType.isKnownDataType()) {
     HHIR_UNIMPLEMENTED(LtGtOp-UnknownInput);
   }
-  bool ok = equivDataTypes(leftType.toDataType(), rightType.toDataType()) &&
-    leftType.subtypeOfAny(Type::Null, Type::Bool, Type::Int);
+  bool ok =
+    leftType.subtypeOfAny (Type::Null, Type::Bool, Type::Int, Type::Dbl) &&
+    rightType.subtypeOfAny(Type::Null, Type::Bool, Type::Int, Type::Dbl);
 
   HHIR_UNIMPLEMENTED_WHEN(!ok, LtGtOp);
   switch (op) {
@@ -1164,7 +1165,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
                                          ni.offset(), ni.toString(),
                                          ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(IMPLIES(JIT::tx->mode() == TransKind::Profile, !ni.outputPredicted));
+  assert(IMPLIES(mcg->tx().mode() == TransKind::Profile, !ni.outputPredicted));
 
   ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
 

@@ -205,6 +205,12 @@ bool isQueryOp(Opcode opc) {
   case LteInt:
   case EqInt:
   case NeqInt:
+  case GtDbl:
+  case GteDbl:
+  case LtDbl:
+  case LteDbl:
+  case EqDbl:
+  case NeqDbl:
   case Same:
   case NSame:
   case InstanceOfBitmask:
@@ -231,8 +237,23 @@ bool isIntQueryOp(Opcode opc) {
   }
 }
 
+bool isDblQueryOp(Opcode opc) {
+  switch (opc) {
+  case GtDbl:
+  case GteDbl:
+  case LtDbl:
+  case LteDbl:
+  case EqDbl:
+  case NeqDbl:
+    return true;
+  default:
+    return false;
+  }
+}
+
 bool isFusableQueryOp(Opcode opc) {
-  return isQueryOp(opc) && opc != IsType && opc != IsNType;
+  return isQueryOp(opc) && !isDblQueryOp(opc) &&
+    opc != IsType && opc != IsNType;
 }
 
 bool isQueryJmpOp(Opcode opc) {
@@ -370,12 +391,21 @@ Opcode negateQueryOp(Opcode opc) {
   case LteInt:              return GtInt;
   case EqInt:               return NeqInt;
   case NeqInt:              return EqInt;
+  case EqDbl:               return NeqDbl;
+  case NeqDbl:              return EqDbl;
   case Same:                return NSame;
   case NSame:               return Same;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
   case NInstanceOfBitmask:  return InstanceOfBitmask;
   case IsType:              return IsNType;
   case IsNType:             return IsType;
+  case GtDbl:
+  case GteDbl:
+  case LtDbl:
+  case LteDbl:
+    // Negating dbl relational ops probably isn't what you want:
+    // (X < Y) != !(X >= Y)  --  when NaN gets involved
+    always_assert(false);
   default:                  always_assert(0);
   }
 }
@@ -395,6 +425,12 @@ Opcode commuteQueryOp(Opcode opc) {
   case LteInt:return GteInt;
   case EqInt: return EqInt;
   case NeqInt:return NeqInt;
+  case GtDbl: return LtDbl;
+  case GteDbl:return LteDbl;
+  case LtDbl: return GtDbl;
+  case LteDbl:return GteDbl;
+  case EqDbl: return EqDbl;
+  case NeqDbl:return NeqDbl;
   case Same:  return Same;
   case NSame: return NSame;
   default:      always_assert(0);
@@ -410,6 +446,12 @@ Opcode queryToIntQueryOp(Opcode opc) {
   case Lte:   return LteInt;
   case Eq:    return EqInt;
   case Neq:   return NeqInt;
+  case GtDbl: return GtInt;
+  case GteDbl:return GteInt;
+  case LtDbl: return LtInt;
+  case LteDbl:return LteInt;
+  case EqDbl: return EqInt;
+  case NeqDbl:return NeqInt;
   case JmpGt:    return JmpGtInt;
   case JmpGte:   return JmpGteInt;
   case JmpLt:    return JmpLtInt;
@@ -428,6 +470,25 @@ Opcode queryToIntQueryOp(Opcode opc) {
   case ReqBindJmpLte:   return ReqBindJmpLteInt;
   case ReqBindJmpEq:    return ReqBindJmpEqInt;
   case ReqBindJmpNeq:   return ReqBindJmpNeqInt;
+  default: always_assert(0);
+  }
+}
+
+Opcode queryToDblQueryOp(Opcode opc) {
+  assert(isQueryOp(opc));
+  switch (opc) {
+  case Gt:    return GtDbl;
+  case Gte:   return GteDbl;
+  case Lt:    return LtDbl;
+  case Lte:   return LteDbl;
+  case Eq:    return EqDbl;
+  case Neq:   return NeqDbl;
+  case GtInt: return GtDbl;
+  case GteInt:return GteDbl;
+  case LtInt: return LtDbl;
+  case LteInt:return LteDbl;
+  case EqInt: return EqDbl;
+  case NeqInt:return NeqDbl;
   default: always_assert(0);
   }
 }

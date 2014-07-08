@@ -443,12 +443,12 @@ struct BackEnd : public JIT::BackEnd {
     }
   }
 
-  void adjustForRelocation(SrcRec* sr, AsmInfo* asmInfo,
+  void adjustForRelocation(AsmInfo* asmInfo,
                            RelocationInfo& rel,
                            CodeGenFixups& fixups) override {
     assert(rel.relocated());
 
-    auto& ip = sr->inProgressTailJumps();
+    auto& ip = fixups.m_inProgressTailJumps;
     for (size_t i = 0; i < ip.size(); ++i) {
       IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
       if (TCA adjusted = rel.adjustedAddressAfter(ib.toSmash())) {

@@ -69,6 +69,12 @@ bool HHVM_FUNCTION(class_alias, const String& original, const String& alias,
     raise_warning("Class %s not found", original.data());
     return false;
   }
+  if (origClass->isBuiltin()) {
+    raise_warning(
+      "First argument of class_alias() must be a name of user defined class");
+    return false;
+  }
+
   return Unit::aliasClass(origClass, alias.get());
 }
 

@@ -291,14 +291,16 @@ let str_starts_with long short =
   with Invalid_argument _ ->
     false
 
-let spinner =
+
+let (spinner, spinner_used) =
   let state = ref 0 in
-  fun () ->
+  (fun () ->
     begin
-      let str = List.nth ["-"; "\\"; "|"; "/"] (!state) in
-      state := (!state + 1) mod 4;
+      let str = List.nth ["-"; "\\"; "|"; "/"] (!state mod 4) in
+      state := !state + 1;
       str
-    end
+    end),
+  (fun () -> !state <> 0)
 
 (* ANSI escape sequence to clear whole line *)
 let clear_line_seq = "\r\x1b[0K"

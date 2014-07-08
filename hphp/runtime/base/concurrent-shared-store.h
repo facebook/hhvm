@@ -70,6 +70,49 @@ struct StoreValue {
   }
 };
 
+/*
+ * Hold info about an entry in APC.
+ * Typically used as a temporary holder to collect info or stats around
+ * APC entries.
+ */
+struct EntryInfo {
+
+  enum class EntryType {
+    Unknown,
+    Uncounted,
+    UncountedString,
+    APCString,
+    UncountedArray,
+    SerializedArray,
+    APCArray,
+    APCObject,
+    SerializedObject,
+  };
+  static EntryType getAPCType(const APCHandle* handle);
+
+  EntryInfo(const char* apckey,
+            bool inMem,
+            int32_t size,
+            int64_t ttl,
+            EntryType type)
+      : key(strdup(apckey))
+      , inMem(inMem)
+      , size(size)
+      , ttl(ttl)
+      , type(type)
+  {}
+
+  ~EntryInfo() {
+    free((void*)key);
+  }
+
+  const char* key;
+  bool inMem;
+  int32_t size;
+  int64_t ttl;
+  EntryType type;
+};
+
 struct ConcurrentTableSharedStore {
   struct KeyValuePair {
     KeyValuePair() : value(nullptr), sAddr(nullptr) {}
@@ -111,13 +154,14 @@ struct ConcurrentTableSharedStore {
   bool constructPrime(const Variant& v, KeyValuePair& item);
   void primeDone();
 
-  // debug support
+  // This functionality is for debugging and should not be called regularly
   enum class DumpMode {
     keyOnly=0,
     keyAndValue=1,
     keyAndMeta=2
   };
   void dump(std::ostream& out, DumpMode dumpMode, int waitSeconds);
+  void getEntriesInfo(std::vector<EntryInfo>& entries);
 
 private:
 
@@ -188,13 +232,22 @@ private:
   void addToExpirationQueue(const char* key, int64_t etime);
 
   bool handleUpdate(const String& key, APCHandle* svar);
-  bool handlePromoteObj(const String& key, APCHandle* svar, const Variant& valye);
+  bool handlePromoteObj(
+      const String& key, APCHandle* svar, const Variant& value);
   APCHandle* unserialize(const String& key, const StoreValue* sval);
 
   // helpers for dumping APC
-  void dumpKeyOnly(std::ostream& out);
+  static void dumpKeyOnly(std::ostream& out, std::vector<EntryInfo>& entries);
+  static void dumpKeyAndMeta(
+      std::ostream& out, std::vector<EntryInfo>& entries);
+  // this call is outrageously expensive and hooked up to an admin command
+  // to be used for rare debugging cases.
+  // Do NOT use it for regular debugging or monitoring particularly on
+  // production given it keeps the APC table locked for more than 30 seconds.
+  // That is, the machine will not be able to respond to any request for more
+  // than 30 seconds.
+  // You have to be really desperate to dump few G of data to disk!!
   void dumpKeyAndValue(std::ostream& out);
-  void dumpKeyAndMeta(std::ostream& out);
 
 private:
   int m_id;

@@ -143,9 +143,9 @@ struct IfCountNotStatic {
 
 
 void emitTransCounterInc(Asm& a) {
-  if (!tx->isTransDBEnabled()) return;
+  if (!mcg->tx().isTransDBEnabled()) return;
 
-  a.    movq (tx->getTransCounterAddr(), rAsm);
+  a.    movq (mcg->tx().getTransCounterAddr(), rAsm);
   a.    lock ();
   a.    incq (*rAsm);
 }
@@ -348,7 +348,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   a.  jnz  (coldCode.frontier());
 
   acold.  movq  (rVmFp, argNumToRegName[0]);
-  emitCall(acold, tx->uniqueStubs.functionEnterHelper);
+  emitCall(acold, mcg->tx().uniqueStubs.functionEnterHelper);
   mcg->recordSyncPoint(coldCode.frontier(),
                        fixup.m_pcOffset, fixup.m_spOffset);
   acold.  jmp   (mainCode.frontier());

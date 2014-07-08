@@ -415,15 +415,6 @@ PhysReg CodeGenerator::prepXMMReg(Asm& as, const SSATmp* src,
   return rtmp;
 }
 
-void CodeGenerator::doubleCmp(Asm& a, RegXMM xmmReg0, RegXMM xmmReg1) {
-  a.    ucomisd(xmmReg0, xmmReg1);
-  ifThen(a, CC_P, [&] {
-    // PF means the doubles were unordered. We treat this as !equal, so
-    // clear ZF.
-    a.    orq  (1, m_rScratch);
-  });
-}
-
 void CodeGenerator::emitCompare(IRInstruction* inst) {
   auto src0 = inst->src(0);
   auto src1 = inst->src(1);
@@ -435,35 +426,27 @@ void CodeGenerator::emitCompare(IRInstruction* inst) {
   // can't generate CMP instructions correctly for anything that isn't
   // a bool or a numeric, and we can't mix bool/numerics because
   // -1 == true in PHP, but not in HHIR binary representation
-  if (!(((type0 <= Type::Int || type0 <= Type::Dbl) &&
-         (type1 <= Type::Int || type1 <= Type::Dbl)) ||
+  if (!((type0 <= Type::Int  && type1 <= Type::Int) ||
         (type0 <= Type::Bool && type1 <= Type::Bool) ||
-        (type0 <= Type::Cls && type1 <= Type::Cls))) {
+        (type0 <= Type::Cls  && type1 <= Type::Cls))) {
     CG_PUNT(emitCompare);
   }
-  if (type0 <= Type::Dbl || type1 <= Type::Dbl) {
-    PhysReg reg0 = prepXMMReg(m_as, src0, loc0, rCgXMM0);
-    PhysReg reg1 = prepXMMReg(m_as, src1, loc1, rCgXMM1);
-    assert(reg0 != rCgXMM1 && reg1 != rCgXMM0);
-    doubleCmp(m_as, reg0, reg1);
-  } else {
-    auto reg0 = loc0.reg();
-    auto reg1 = loc1.reg();
+  auto reg0 = loc0.reg();
+  auto reg1 = loc1.reg();
 
-    if (reg1 == InvalidReg) {
-      if (type0 <= Type::Bool) {
-        m_as.    cmpb (src1->boolVal(), rbyte(reg0));
-      } else {
-        m_as.    cmpq (safe_cast<int32_t>(src1->intVal()), reg0);
-      }
+  if (reg1 == InvalidReg) {
+    if (type0 <= Type::Bool) {
+      m_as.    cmpb (src1->boolVal(), rbyte(reg0));
     } else {
-      // Note the reverse syntax in the assembler.
-      // This cmp will compute reg0 - reg1
-      if (type0 <= Type::Bool) {
-        m_as.    cmpb (rbyte(reg1), rbyte(reg0));
-      } else {
-        m_as.    cmpq (reg1, reg0);
-      }
+      m_as.    cmpq (safe_cast<int32_t>(src1->intVal()), reg0);
+    }
+  } else {
+    // Note the reverse syntax in the assembler.
+    // This cmp will compute reg0 - reg1
+    if (type0 <= Type::Bool) {
+      m_as.    cmpb (rbyte(reg1), rbyte(reg0));
+    } else {
+      m_as.    cmpq (reg1, reg0);
     }
   }
 }
@@ -1630,20 +1613,7 @@ void CodeGenerator::cgCmpHelper(
   //  or to a resource.
   // strings are canonicalized to the left, ints to the right
   else if (typeIsSON(type1) && typeIsSON(type2)) {
-    if (type1 <= Type::Dbl || type2 <= Type::Dbl) {
-      if ((type1 <= Type::Dbl || type1 <= Type::Int) &&
-          (type2 <= Type::Dbl || type2 <= Type::Int)) {
-        PhysReg srcReg1 = prepXMMReg(m_as, src1, loc1, rCgXMM0);
-        PhysReg srcReg2 = prepXMMReg(m_as, src2, loc2, rCgXMM1);
-        assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
-        doubleCmp(m_as, srcReg1, srcReg2);
-        setFromFlags();
-      } else {
-        CG_PUNT(cgOpCmpHelper_Dbl);
-      }
-    }
-
-    else if (type1 <= Type::Str) {
+    if (type1 <= Type::Str) {
       // string cmp string is dealt with in case 1
       // string cmp double is punted above
 
@@ -1763,6 +1733,62 @@ void CodeGenerator::cgLtInt(IRInstruction* inst)  { emitCmpInt(inst, CC_L); }
 void CodeGenerator::cgGtInt(IRInstruction* inst)  { emitCmpInt(inst, CC_G); }
 void CodeGenerator::cgLteInt(IRInstruction* inst) { emitCmpInt(inst, CC_LE); }
 void CodeGenerator::cgGteInt(IRInstruction* inst) { emitCmpInt(inst, CC_GE); }
+
+void CodeGenerator::emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred) {
+  auto dstReg = dstLoc(0).reg();
+  auto srcReg0 = prepXMMReg(m_as, inst->src(0), srcLoc(0), rCgXMM0);
+  auto srcReg1 = prepXMMReg(m_as, inst->src(1), srcLoc(1), rCgXMM1);
+
+  m_as.  movsd   (srcReg1, rCgXMM2);
+  m_as.  cmpsd   (srcReg0, rCgXMM2, pred);
+  m_as.  movq_xr (rCgXMM2, dstReg);
+  m_as.  andb    (1, rbyte(dstReg));
+}
+
+void CodeGenerator::emitCmpRelDbl(IRInstruction* inst, ConditionCode cc,
+                                  bool flipOperands) {
+  auto dstReg = dstLoc(0).reg();
+  auto srcReg0 = prepXMMReg(m_as, inst->src(0), srcLoc(0), rCgXMM0);
+  auto srcReg1 = prepXMMReg(m_as, inst->src(1), srcLoc(1), rCgXMM1);
+
+  if (flipOperands) {
+    std::swap(srcReg0, srcReg1);
+  }
+
+  m_as.  ucomisd  (srcReg0, srcReg1);
+  m_as.  setcc    (cc, rbyte(dstReg));
+}
+
+void CodeGenerator::cgEqDbl(IRInstruction* inst)  {
+  emitCmpEqDbl(inst, ComparisonPred::eq_ord);
+}
+void CodeGenerator::cgNeqDbl(IRInstruction* inst) {
+  emitCmpEqDbl(inst, ComparisonPred::ne_unord);
+}
+void CodeGenerator::cgLtDbl(IRInstruction* inst)  {
+  // This is a little tricky, because "unordered" is a thing.
+  //
+  //         ZF  PF  CF
+  // x ?= y   1   1   1
+  // x <  y   0   0   1
+  // x == y   1   0   0
+  // x >  y   0   0   0
+  //
+  // This trick lets us avoid needing to handle the unordered case specially.
+  // The condition codes B and BE are true if CF == 1, which it is in the
+  // unordered case, and that'll give incorrect results. So we just invert the
+  // condition code (A and AE don't get set if CF == 1) and flip the operands.
+  emitCmpRelDbl(inst, CC_A, true);
+}
+void CodeGenerator::cgGtDbl(IRInstruction* inst)  {
+  emitCmpRelDbl(inst, CC_A, false);
+}
+void CodeGenerator::cgLteDbl(IRInstruction* inst) {
+  emitCmpRelDbl(inst, CC_AE, true);
+}
+void CodeGenerator::cgGteDbl(IRInstruction* inst) {
+  emitCmpRelDbl(inst, CC_AE, false);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Type check operators

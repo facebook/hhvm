@@ -29,7 +29,6 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
-using JIT::tx;
 using JIT::mcg;
 
 // Hook called from the bytecode interpreter before every opcode executed while
@@ -111,7 +110,7 @@ static void blacklistRangesInJit(const Unit* unit,
        it != offsets.end(); ++it) {
     for (PC pc = unit->at(it->m_base); pc < unit->at(it->m_past);
          pc += instrLen((Op*)pc)) {
-      tx->addDbgBLPC(pc);
+      mcg->tx().addDbgBLPC(pc);
     }
   }
   if (!mcg->addDbgGuards(unit)) {
@@ -181,7 +180,7 @@ static void addBreakPointFuncEntry(const Func* f) {
         f->fullName()->data(), f->unit(), base, pc);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (tx->addDbgBLPC(pc)) {
+    if (mcg->tx().addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
       if (!mcg->addDbgGuard(f, base, false)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
@@ -241,7 +240,7 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
   PC pc = unit->at(offset);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (tx->addDbgBLPC(pc)) {
+    if (mcg->tx().addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
       if (!mcg->addDbgGuards(unit)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");

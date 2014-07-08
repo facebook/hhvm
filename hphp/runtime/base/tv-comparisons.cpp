@@ -336,6 +336,10 @@ struct Eq {
       od2->o_getArray(ar2, false);
       return ar1->equal(ar2.get(), false);
     }
+    if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
+      // First comparison already proves they are different
+      return false;
+    }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return ar1->equal(ar2.get(), false);
@@ -372,6 +376,9 @@ struct Lt {
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
       return c_DateTime::GetTimestamp(od1) < c_DateTime::GetTimestamp(od2);
+    }
+    if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
+      return false;
     }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
@@ -412,6 +419,9 @@ struct Gt {
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
       return c_DateTime::GetTimestamp(od1) > c_DateTime::GetTimestamp(od2);
+    }
+    if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
+      return false;
     }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());

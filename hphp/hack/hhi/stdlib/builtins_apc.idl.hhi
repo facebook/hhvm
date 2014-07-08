@@ -13,7 +13,7 @@ function apc_store($key, $var, $ttl = 0, $cache_id = 0) { }
 function apc_fetch($key, &$success = null, $cache_id = 0) { }
 function apc_delete($key, $cache_id = 0) { }
 function apc_compile_file($filename, $atomic = true, $cache_id = 0) { }
-function apc_cache_info($cache_id = 0, $limited = false) { }
+function apc_cache_info($cache_type = "", $limited = false) { }
 function apc_clear_cache($cache_id = 0) { }
 function apc_define_constants($key, $constants, $case_sensitive = true, $cache_id = 0) { }
 function apc_load_constants($key, $case_sensitive = true, $cache_id = 0) { }

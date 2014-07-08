@@ -13,7 +13,7 @@ open ClientExceptions
 
 let connect args =
   let ic, oc = ClientUtils.connect args.root in
-  if not (args.output_json) then
+  if not (args.output_json) && Utils.spinner_used() then
     Printf.fprintf stderr "%s%!" Utils.clear_line_seq;
   (ic, oc)
 

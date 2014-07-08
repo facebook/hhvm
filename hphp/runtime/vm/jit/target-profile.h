@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 
 namespace HPHP {
@@ -98,10 +98,10 @@ struct TargetProfile {
    * attached for some reason.).
    */
   bool profiling() const {
-    return tx->mode() == TransKind::Profile;
+    return mcg->tx().mode() == TransKind::Profile;
   }
   bool optimizing() const {
-    return tx->mode() == TransKind::Optimize && m_link.bound();
+    return mcg->tx().mode() == TransKind::Optimize && m_link.bound();
   }
 
   /*
@@ -119,7 +119,7 @@ private:
   static RDS::Link<T> createLink(const TransContext& context,
                                  BCMarker marker,
                                  const StringData* name) {
-    switch (tx->mode()) {
+    switch (mcg->tx().mode()) {
     case TransKind::Profile:
       return RDS::bind<T>(
         RDS::Profile {

@@ -70,6 +70,7 @@ constexpr Reg64 rAsm         = reg::r10;
 constexpr Reg64 rCgGP        = reg::r11;
 constexpr RegXMM rCgXMM0     = reg::xmm6;
 constexpr RegXMM rCgXMM1     = reg::xmm7;
+constexpr RegXMM rCgXMM2     = reg::xmm5;
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -121,7 +122,7 @@ const RegSet kXMMCallerSaved = RegSet()
   | RegSet(reg::xmm2)
   | RegSet(reg::xmm3)
   | RegSet(reg::xmm4)
-  | RegSet(reg::xmm5)
+  //| RegSet(reg::xmm5) rCgXmm2
   //| RegSet(reg::xmm6) rCgXMM0
   //| RegSet(reg::xmm7) rCgXMM1
   | RegSet(reg::xmm8)
@@ -145,6 +146,7 @@ const RegSet kXMMUnreserved = RegSet()
 const RegSet kXMMReserved = RegSet()
   | RegSet(rCgXMM0)
   | RegSet(rCgXMM1)
+  | RegSet(rCgXMM2)
   ;
 
 const RegSet kCallerSaved = RegSet()

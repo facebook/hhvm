@@ -1,6 +1,6 @@
 <?php
 
-require('../HHVMExpectTest.php');
+require(__DIR__.'/../HHVMExpectTest.php');
 
 final class QuickInterpTest extends HHVMExpectTest {
   /**

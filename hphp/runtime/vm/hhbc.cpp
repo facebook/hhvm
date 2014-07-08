@@ -852,7 +852,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
 #define READOFF() do {                                              \
   Offset _value = *(Offset*)it;                                     \
   out << " " << _value;                                             \
-  if (u != nullptr && _value >= 0) {                                \
+  if (u != nullptr) {                                               \
     out << " (" << u->offsetOf(iStart + _value) << ")";             \
   }                                                                 \
   it += sizeof(Offset);                                             \

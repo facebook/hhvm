@@ -168,6 +168,8 @@ distclean:: clean
 bin:
 ifeq ($(OS), Linux)
 	objcopy --add-section hhi=../bin/hhi.tar.gz hh_server.opt ../bin/hh_server
+else
+	cp hh_server.opt ../bin/hh_server
 endif
 	cp hh_client.opt ../bin/hh_client
 	cp hh_single.opt ../bin/hh_single_type_check

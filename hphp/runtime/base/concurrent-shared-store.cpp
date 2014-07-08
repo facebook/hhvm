@@ -67,6 +67,34 @@ std::string ConcurrentTableSharedStore::GetSkeleton(const String& key) {
   return ret;
 }
 
+EntryInfo::EntryType EntryInfo::getAPCType(const APCHandle* handle) {
+  DataType type = handle->getType();
+  if (!IS_REFCOUNTED_TYPE(type)) {
+    return EntryInfo::EntryType::Uncounted;
+  }
+  switch (type) {
+  case KindOfString:
+    if (handle->getUncounted()) {
+      return EntryInfo::EntryType::UncountedString;
+    }
+    return EntryInfo::EntryType::APCString;
+  case KindOfArray:
+    if (handle->getUncounted()) {
+      return EntryInfo::EntryType::UncountedArray;
+    } else if (handle->getSerializedArray()) {
+      return EntryInfo::EntryType::SerializedArray;
+    }
+    return EntryInfo::EntryType::APCArray;
+  case KindOfObject:
+    if (handle->getIsObj()) {
+      return EntryInfo::EntryType::APCObject;
+    }
+    return EntryInfo::EntryType::SerializedObject;
+  default:
+    return EntryInfo::EntryType::Unknown;
+  }
+}
+
 bool ConcurrentTableSharedStore::clear() {
   if (apcExtension::ConcurrentTableLockFree) {
     return false;
@@ -559,9 +587,39 @@ void ConcurrentTableSharedStore::primeDone() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// debugging support
+// debugging and info/stats support
+
+void ConcurrentTableSharedStore::getEntriesInfo(
+    std::vector<EntryInfo>& entries) {
+  int64_t curr_time = time(nullptr);
+  entries.reserve(m_vars.size() + 1000);
+  {
+    WriteLock l(m_lock);
+    for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
+      const auto key = iter->first;
+      const auto sval = &iter->second;
+
+      int32_t size;
+      EntryInfo::EntryType type = EntryInfo::EntryType::Unknown;
+      if (sval->inMem()) {
+        size = sval->size;
+        type = EntryInfo::getAPCType(sval->var);
+      } else {
+        size = sval->getSerializedSize();
+      }
+      int64_t ttl = 0;
+      if (sval->expiry) {
+        ttl = sval->expiry - curr_time;
+        if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
+      }
+      entries.emplace_back(key, sval->var != nullptr, size, ttl, type);
+    }
+  }
+}
 
 void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
+  WriteLock l(m_lock);
+  out << "Total " << m_vars.size() << std::endl;
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
     const char *key = iter->first;
     out << key;
@@ -589,46 +647,28 @@ void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
   }
 }
 
-void ConcurrentTableSharedStore::dumpKeyOnly(std::ostream & out) {
-  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
-    out << (const char*) iter->first << std::endl;
+void ConcurrentTableSharedStore::dumpKeyOnly(
+    std::ostream & out, std::vector<EntryInfo>& entries) {
+  for (auto& entry: entries) {
+    out << entry.key << std::endl;
   }
 }
 
-void ConcurrentTableSharedStore::dumpKeyAndMeta(std::ostream & out) {
-  out << "key inmem size ttl" << std::endl;
-  int64_t curr_time = time(nullptr);
-  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
-    const char *key = iter->first;
-    const StoreValue *sval = &iter->second;
-    size_t size;
-    int64_t ttl;
-    if (sval->inMem()) {
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
-      Variant value = sval->var->toLocal();
-      String valS(vs.serialize(value, true));
-      size = valS.size();
-    } else {
-      size = sval->getSerializedSize();
-    }
-    if (sval->expiry) {
-      ttl = sval->expiry - curr_time;
-    } else {
-      ttl = 0;
-    }
-    out << key << " "
-        << (int) sval->inMem() << " "
-        << size << " "
-        << ttl << std::endl;
+void ConcurrentTableSharedStore::dumpKeyAndMeta(
+    std::ostream & out, std::vector<EntryInfo>& entries) {
+  out << "key inmem size ttl type" << std::endl;
+  for (auto& entry: entries) {
+    out << entry.key << " "
+        << static_cast<int32_t>(entry.inMem) << " "
+        << entry.size << " "
+        << entry.ttl << " "
+        << static_cast<int32_t>(entry.type) << std::endl;
   }
 }
 
 void ConcurrentTableSharedStore::dump(std::ostream & out,
                                       enum DumpMode dumpMode,
                                       int waitSeconds) {
-  // Use write lock here to prevent concurrent ops running in parallel from
-  // invalidatint the iterator.
-  // This functionality is for debugging and should not be called regularly
   if (apcExtension::ConcurrentTableLockFree) {
     m_lockingFlag = true;
     int begin = time(nullptr);
@@ -637,21 +677,18 @@ void ConcurrentTableSharedStore::dump(std::ostream & out,
       sleep(1);
     }
   }
-  WriteLock l(m_lock);
   Logger::Info("dumping apc");
-  out << "Total " << m_vars.size() << std::endl;
-  switch (dumpMode) {
-    case DumpMode::keyOnly:
-      dumpKeyOnly(out);
-      break;
-    case DumpMode::keyAndValue:
-      dumpKeyAndValue(out);
-      break;
-    case DumpMode::keyAndMeta:
-      dumpKeyAndMeta(out);
-      break;
-    default:
-      Logger::Info("unknown dumper style");
+  if (dumpMode == DumpMode::keyAndValue) {
+    dumpKeyAndValue(out);
+  } else {
+    std::vector<EntryInfo> entries;
+    getEntriesInfo(entries);
+    if (dumpMode == DumpMode::keyOnly) {
+      dumpKeyOnly(out, entries);
+    } else {
+      assert(dumpMode == DumpMode::keyAndMeta);
+      dumpKeyAndMeta(out, entries);
+    }
   }
   Logger::Info("dumping apc done");
   if (apcExtension::ConcurrentTableLockFree) {

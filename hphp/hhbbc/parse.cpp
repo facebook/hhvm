@@ -455,8 +455,8 @@ void populate_block(ParseUnitState& puState,
   auto defcls = [&] (const Bytecode& b) {
     puState.defClsMap[b.DefCls.arg1] = &func;
   };
-  auto nopdefcls = [&] (const Bytecode& b) {
-    puState.defClsMap[b.NopDefCls.arg1] = &func;
+  auto defclsnop = [&] (const Bytecode& b) {
+    puState.defClsMap[b.DefClsNop.arg1] = &func;
   };
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.str2].insert(&func);
@@ -515,7 +515,7 @@ void populate_block(ParseUnitState& puState,
       IMM_##imms                                      \
       new (&b.opcode) bc::opcode { IMM_ARG_##imms };  \
       if (Op::opcode == Op::DefCls)    defcls(b);     \
-      if (Op::opcode == Op::NopDefCls) nopdefcls(b);  \
+      if (Op::opcode == Op::DefClsNop) defclsnop(b);  \
       if (Op::opcode == Op::CreateCl)  createcl(b);   \
       blk.hhbcs.push_back(std::move(b));              \
       assert(pc == next);                             \

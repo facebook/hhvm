@@ -215,39 +215,6 @@ IRTranslator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
 }
 
 void
-IRTranslator::translateUnboxR(const NormalizedInstruction& i) {
-  if (i.noOp) {
-    // statically proved to be unboxed -- just pass that info to the IR
-    TRACE(1, "HHIR: translateUnboxR: output inferred to be Cell\n");
-    m_hhbcTrans.assertTypeStack(0, JIT::Type::Cell);
-  } else {
-    HHIR_EMIT(UnboxR);
-  }
-}
-
-void IRTranslator::translateUnboxRNop(const NormalizedInstruction& i) {
-  TRACE(1, "HHIR: translateUnboxR: output inferred to be Cell\n");
-  assert(i.noOp);
-  m_hhbcTrans.assertTypeStack(0, JIT::Type::Cell);
-}
-
-void
-IRTranslator::translateBoxR(const NormalizedInstruction& i) {
-  if (i.noOp) {
-    // statically proved to be unboxed -- just pass that info to the IR
-    TRACE(1, "HHIR: translateBoxR: output inferred to be Box\n");
-    m_hhbcTrans.assertTypeStack(0, JIT::Type::BoxedCell);
-  } else {
-    HHIR_UNIMPLEMENTED(BoxR);
-  }
-}
-
-void IRTranslator::translateBoxRNop(const NormalizedInstruction& i) {
-  assert(i.noOp);
-  m_hhbcTrans.assertTypeStack(0, JIT::Type::BoxedCell);
-}
-
-void
 IRTranslator::translateInitProp(const NormalizedInstruction& i) {
   HHIR_EMIT(InitProp, i.imm[0].u_SA, static_cast<InitPropOp>(i.imm[1].u_OA));
 }
@@ -455,31 +422,24 @@ void IRTranslator::translateDefCls(const NormalizedInstruction& i) {
   HHIR_EMIT(DefCls, cid, i.source.offset());
 }
 
-void IRTranslator::translateNopDefCls(const NormalizedInstruction&) {}
-
 void
 IRTranslator::translateFPassCOp(const NormalizedInstruction& i) {
   auto const op = i.op();
-  if (i.noOp) return;
-  if (i.preppedByRef && (op == OpFPassCW || op == OpFPassCE)) {
-    // These cases might have to raise a warning or an error
-    HHIR_UNIMPLEMENTED(FPassCW_FPassCE_byref);
-  } else {
-    HHIR_EMIT(FPassCOp);
-  }
+  always_assert(op == OpFPassCW || op == OpFPassCE);
+
+  // These cases might have to raise a warning or an error
+  HHIR_UNIMPLEMENTED_WHEN(i.preppedByRef, FPassCW_FPassCE_byref);
+
+  // Nothing to do otherwise.
 }
 
 void
 IRTranslator::translateFPassV(const NormalizedInstruction& i) {
-  if (i.preppedByRef || i.noOp) {
+  if (i.preppedByRef) {
     TRACE(1, "HHIR: translateFPassV: noOp\n");
     return;
   }
   HHIR_EMIT(FPassV);
-}
-
-void IRTranslator::translateFPassVNop(const NormalizedInstruction& i) {
-  assert(i.noOp);
 }
 
 void
@@ -959,7 +919,9 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
     ht.emitDbgAssertRetAddr();
   }
 
-  if (instrMustInterp(ni) || ni.interp) {
+  if (isAlwaysNop(ni.op())) {
+    // Do nothing
+  } else if (instrMustInterp(ni) || ni.interp) {
     interpretInstr(ni);
   } else {
     translateInstrWork(ni);

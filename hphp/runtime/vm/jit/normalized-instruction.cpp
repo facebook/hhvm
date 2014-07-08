@@ -34,7 +34,6 @@ NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
     , preppedByRef(false)
     , outputPredicted(false)
     , ignoreInnerType(false)
-    , noOp(false)
     , interp(false)
     , inlineReturn(false) {
   memset(imm, 0, sizeof(imm));

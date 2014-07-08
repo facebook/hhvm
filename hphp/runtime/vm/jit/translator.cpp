@@ -456,7 +456,6 @@ static const struct {
 
   /*** 1. Basic instructions ***/
 
-  { OpNop,         {None,             None,         OutNone,           0 }},
   { OpPopA,        {Stack1,           None,         OutNone,          -1 }},
   { OpPopC,        {Stack1|
                     DontGuardStack1,  None,         OutNone,          -1 }},
@@ -470,9 +469,7 @@ static const struct {
   { OpBox,         {Stack1,           Stack1,       OutVInput,         0 }},
   { OpUnbox,       {Stack1,           Stack1,       OutCInput,         0 }},
   { OpBoxR,        {Stack1,           Stack1,       OutVInput,         0 }},
-  { OpBoxRNop,     {None,             None,         OutNone,           0 }},
   { OpUnboxR,      {Stack1,           Stack1,       OutCInput,         0 }},
-  { OpUnboxRNop,   {None,             None,         OutNone,           0 }},
 
   /*** 2. Literal and constant instructions ***/
 
@@ -683,10 +680,8 @@ static const struct {
   { OpFPushCufSafe,{StackTop2|DontGuardAny,
                                       StackTop2|FStack, OutFPushCufSafe,
                                                          kNumActRecCells }},
-  { OpFPassC,      {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput,    0 }},
-  { OpFPassVNop,   {None,             None,         OutNone,           0 }},
   { OpFPassV,      {Stack1|FuncdRef,  Stack1,       OutUnknown,        0 }},
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
   { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL,        1 }},
@@ -742,7 +737,6 @@ static const struct {
   { OpDefFunc,     {None,             None,         OutNone,           0 }},
   { OpDefTypeAlias,{None,             None,         OutNone,           0 }},
   { OpDefCls,      {None,             None,         OutNone,           0 }},
-  { OpNopDefCls,   {None,             None,         OutNone,           0 }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean,        0 }},
 
   /*** 13. Miscellaneous instructions ***/
@@ -946,13 +940,18 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
   return doPrediction;
 }
 
+/*
+ * Some bytecodes are always no-ops but kept around for various reasons (mostly
+ * stack flavor safety).
+ */
 bool isAlwaysNop(Op op) {
-  if (isTypeAssert(op)) return true;
   switch (op) {
-  case Op::UnboxRNop:
   case Op::BoxRNop:
-  case Op::FPassVNop:
+  case Op::DefClsNop:
   case Op::FPassC:
+  case Op::FPassVNop:
+  case Op::Nop:
+  case Op::UnboxRNop:
     return true;
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
@@ -1100,6 +1099,8 @@ void getInputsImpl(SrcKey startSk,
 #ifdef USE_TRACE
   const SrcKey& sk = ni->source;
 #endif
+  if (isAlwaysNop(ni->op())) return;
+
   assert(inputs.empty());
   always_assert_flog(
     instrInfo.count(ni->op()),
@@ -1783,8 +1784,7 @@ Translator::translateRegion(const RegionDesc& region,
       for (auto const& ii : inputInfos) {
         inst.inputs.push_back(newDynLoc(ii));
       }
-      if (isAlwaysNop(inst.op())) inst.noOp = true;
-      if (!inst.noOp && inputInfos.needsRefCheck) {
+      if (inputInfos.needsRefCheck) {
         assert(byRefs.hasNext(sk));
         inst.preppedByRef = byRefs.next();
       }

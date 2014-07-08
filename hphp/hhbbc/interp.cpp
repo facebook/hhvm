@@ -1699,7 +1699,7 @@ void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 
 void in(ISS& env, const bc::DefFunc&)      {}
 void in(ISS& env, const bc::DefCls&)       {}
-void in(ISS& env, const bc::NopDefCls&)    {}
+void in(ISS& env, const bc::DefClsNop&)    {}
 void in(ISS& env, const bc::DefCns&)       { popC(env); push(env, TBool); }
 void in(ISS& env, const bc::DefTypeAlias&) {}
 

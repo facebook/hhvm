@@ -6817,7 +6817,7 @@ OPTBLD_INLINE void ExecutionContext::iopDefCls(IOP_ARGS) {
   Unit::defClass(c);
 }
 
-OPTBLD_INLINE void ExecutionContext::iopNopDefCls(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDefClsNop(IOP_ARGS) {
   NEXT();
   DECODE_IVA(cid);
 }

@@ -2342,9 +2342,6 @@ void HhbcTranslator::emitFPassR() {
   emitUnboxRAux();
 }
 
-void HhbcTranslator::emitFPassCOp() {
-}
-
 void HhbcTranslator::emitFPassV() {
   Block* exit = makeExit();
   SSATmp* tmp = popV();
@@ -5898,10 +5895,6 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
 }
 
 std::string HhbcTranslator::showStack() const {
-  if (isInlining()) {
-    return folly::format("{:*^80}\n",
-                         " I don't understand inlining stacks yet ").str();
-  }
   std::ostringstream out;
   auto header = [&](const std::string& str) {
     out << folly::format("+{:-^82}+\n", str);

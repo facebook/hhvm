@@ -62,11 +62,6 @@ struct NormalizedInstruction {
   bool ignoreInnerType:1;
 
   /*
-   * instruction is statically known to have no effect, e.g. unboxing a Cell
-   */
-  bool noOp:1;
-
-  /*
    * Used with HHIR. Instruction shoud be interpreted, because previous attempt
    * to translate it has failed.
    */

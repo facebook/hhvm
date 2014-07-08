@@ -7487,7 +7487,7 @@ void EmitterVisitor::emitClass(Emitter& e,
     e.DefCls(pce->id());
   } else {
     // To attach the line number to for error reporting.
-    e.NopDefCls(pce->id());
+    e.DefClsNop(pce->id());
   }
   e.setTempLocation(LocationPtr());
   for (int i = firstInterface; i < nInterfaces; ++i) {

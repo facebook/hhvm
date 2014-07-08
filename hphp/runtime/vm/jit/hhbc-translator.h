@@ -296,7 +296,6 @@ public:
   void emitNeq()   { emitCmp(Neq);   }
   void emitSame()  { emitCmp(Same);  }
   void emitNSame() { emitCmp(NSame); }
-  void emitFPassCOp();
   void emitFPassR();
   void emitFPassV();
   void emitFPushCufIter(int32_t numParams, int32_t itId);
@@ -376,7 +375,6 @@ public:
   void emitVerifyRetTypeV();
   void emitInstanceOfD(int classNameStrId);
   void emitInstanceOf();
-  void emitNop() {}
   void emitCastBool();
   void emitCastInt();
   void emitCastDouble();

@@ -266,12 +266,6 @@ bool RegionFormer::prepareInstruction() {
 
   for (auto const& ii : inputInfos) m_inst.inputs.push_back(newDynLoc(ii));
 
-  // This may not be necessary, but for now it's preserving
-  // side-effects that the call to readMetaData used to have.
-  if (isAlwaysNop(m_inst.op())) {
-    m_inst.noOp = true;
-  }
-
   // This reads valueClass from the inputs so it used to need to
   // happen after readMetaData.  But now readMetaData is gone ...
   annotate(&m_inst);
@@ -282,7 +276,7 @@ bool RegionFormer::prepareInstruction() {
     if (!consumeInput(i, inputInfos[i])) return false;
   }
 
-  if (!m_inst.noOp && inputInfos.needsRefCheck) {
+  if (inputInfos.needsRefCheck) {
     // Reffiness guards are always at the beginning of the trace for now, so
     // calculate the delta from the original sp to the ar.
     auto argNum = m_inst.imm[0].u_IVA;

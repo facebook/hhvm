@@ -535,6 +535,33 @@ PHP_FUNCTION(ezc_array_set)
 
 /* }}} */
 
+/* {{{ proto mixed ezc_get_error_reporting()
+ * Use the zend construct EG(error_reporting) in rval context.
+ */
+PHP_FUNCTION(ezc_get_error_reporting)
+{
+  int old_error_reporting = EG(error_reporting);
+
+  RETVAL_LONG(old_error_reporting);
+}
+/* }}} */
+
+/* {{{ proto mixed ezc_set_error_reporting(integer $val)
+ * Use the zend construct EG(error_reporting) in rval and then lval context.
+ */
+PHP_FUNCTION(ezc_set_error_reporting)
+{
+  int old_error_reporting = EG(error_reporting);
+  int new_error_reporting = 0;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_error_reporting) == FAILURE) {
+    RETURN_FALSE;
+  }
+  EG(error_reporting) = new_error_reporting;
+  RETVAL_LONG(old_error_reporting);
+}
+/* }}} */
+
 /* {{{ EzcTestCloneable_create_object */
 static zend_object_value EzcTestCloneable_create_object(zend_class_entry *ce TSRMLS_DC)
 {
@@ -697,6 +724,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_ezc_array_set, 0)
   ZEND_ARG_INFO(0, key)
   ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_get_error_reporting, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_set_error_reporting, 0)
+  ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ ezc_test_functions[]
@@ -718,6 +752,8 @@ const zend_function_entry ezc_test_functions[] = {
   PHP_FE(ezc_array_val_set, arginfo_ezc_array_val_set)
   PHP_FE(ezc_create_cloneable_in_array, arginfo_ezc_create_cloneable_in_array)
   PHP_FE(ezc_array_set, arginfo_ezc_array_set)
+  PHP_FE(ezc_get_error_reporting, arginfo_ezc_get_error_reporting)
+  PHP_FE(ezc_set_error_reporting, arginfo_ezc_set_error_reporting)
   PHP_FE_END
 };
 /* }}} */

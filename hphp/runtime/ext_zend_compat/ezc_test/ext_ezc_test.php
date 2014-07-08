@@ -91,3 +91,14 @@ function ezc_array_set(array &$a, mixed $key, mixed $value): mixed;
  * object_init_ex(). */
 <<__Native("ZendCompat")>>
 function ezc_create_cloneable_in_array(): mixed;
+
+/* Get the EG(error_reporting) value.
+ */
+<<__Native("ZendCompat")>>
+function ezc_get_error_reporting(): mixed;
+
+/* Set the EG(error_reporting) value, returning the old value.
+ */
+<<__Native("ZendCompat")>>
+function ezc_set_error_reporting(int $error_reporting): mixed;
+

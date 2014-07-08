@@ -145,7 +145,6 @@ bad_tests = (
     # broken in contbuild for unknown reasons
     '/ext/standard/tests/strings/bug51059.php',
     '/ext/posix/tests/posix_kill_basic.php',
-    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPath_basic.php',
     '/tests/classes/unset_properties.php',
     '/ext/pcntl/tests/pcntl_wait.php',
 

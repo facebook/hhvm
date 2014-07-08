@@ -303,8 +303,11 @@ endif()
 
 find_package(LibDwarf REQUIRED)
 include_directories(${LIBDWARF_INCLUDE_DIRS})
-if (LIBDWARF_HAVE_ENCODE_LEB128)
-  add_definitions("-DHAVE_LIBDWARF_20130729")
+if (LIBDWARF_CONST_NAME)
+  add_definitions("-DLIBDWARF_CONST_NAME")
+endif()
+if (LIBDWARF_USE_INIT_C)
+  add_definitions("-DLIBDWARF_USE_INIT_C")
 endif()
 
 find_package(LibElf REQUIRED)
@@ -313,13 +316,9 @@ if (ELF_GETSHDRSTRNDX)
   add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
 endif()
 
-# For some reason imap-uw is using libpam on OSX, so we need to include it as
-# an indirect dependency
-if (APPLE)
-  find_package(Libpam)
-  if (PAM_INCLUDE_PATH)
-    include_directories(${PAM_INCLUDE_PATH})
-  endif()
+find_package(Libpam)
+if (PAM_INCLUDE_PATH)
+  include_directories(${PAM_INCLUDE_PATH})
 endif()
 
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)

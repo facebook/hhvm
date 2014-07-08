@@ -371,9 +371,13 @@ private:
   friend struct MemoryProfile;
   friend struct EmptyArray;
   friend struct PackedArray;
+  friend class HashCollection;
   friend class BaseMap;
   friend class c_Map;
   friend class c_ImmMap;
+  friend class BaseSet;
+  friend class c_Set;
+  friend class c_ImmSet;
   enum class ClonePacked {};
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };

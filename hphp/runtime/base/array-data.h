@@ -410,6 +410,7 @@ protected:
   friend class BaseVector;
   friend class c_Vector;
   friend class c_ImmVector;
+  friend class HashCollection;
   friend class BaseMap;
   friend class c_Map;
   friend class c_ImmMap;

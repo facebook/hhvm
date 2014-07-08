@@ -612,6 +612,8 @@ function oss_test_option_map(): OptionInfoMap {
     'isolate'             => Pair {'',   "Try to make tests that have ".
                                          "external dependencies automatically ".
                                          "fail"},
+    'toran-proxy:'        => Pair {'',   "URL of Toran Proxy to use for ".
+                                         "dependencies"},
   };
 }
 

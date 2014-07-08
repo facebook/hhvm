@@ -210,6 +210,8 @@ bad_tests = (
     '/ext/standard/tests/file/copy_variation8.php',
 
     # flaky: t3851970
+    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPath_basic.php',
+    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPathname_basic.php',
     '/ext/standard/tests/general_functions/proc_open02.php',
     '/ext/ftp/tests/bug39458.php',
     '/ext/standard/tests/file/rename_variation3.php',

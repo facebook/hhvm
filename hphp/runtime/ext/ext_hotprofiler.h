@@ -90,8 +90,16 @@ public:
   /**
    * Subclass can do extra work by overriding these two virtual functions.
    */
-  virtual void beginFrameEx(); // called right before a function call
-  virtual void endFrameEx();   // called right after a function is finished
+
+  /**
+   * Called right before a function call.
+   */
+  virtual void beginFrameEx(const char *symbol);
+
+  /**
+   * Called right after a function is finished.
+   */
+  virtual void endFrameEx(const TypedValue *retval, const char *symbol);
 
   /**
    * Final results.
@@ -106,7 +114,8 @@ public:
   /**
    * End top of the stack.
    */
-  virtual void endFrame(const char *symbol,
+  virtual void endFrame(const TypedValue *retval,
+                        const char *symbol,
                         bool endMain = false) __attribute__ ((noinline)) ;
 
   virtual void endAllFrames();

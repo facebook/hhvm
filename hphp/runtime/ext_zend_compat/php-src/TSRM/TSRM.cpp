@@ -22,9 +22,10 @@ struct tsrm_resource_type {
   int done;
 };
 
-static std::vector<tsrm_resource_type> resource_types_table;
-
-HPHP::ThreadLocal<TSRMStorageVector> tsrm_thread_resources;
+namespace HPHP {
+  static std::vector<tsrm_resource_type> resource_types_table;
+  IMPLEMENT_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
+}
 
 #define TSRM_ERROR(args)
 
@@ -33,49 +34,52 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
   TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new resource id, %d bytes", size));
 
   /* obtain a resource id */
-  resource_types_table.resize(resource_types_table.size() + 1);
-  *rsrc_id = TSRM_SHUFFLE_RSRC_ID(resource_types_table.size() - 1);
+  HPHP::resource_types_table.resize(HPHP::resource_types_table.size() + 1);
+  *rsrc_id = TSRM_SHUFFLE_RSRC_ID(HPHP::resource_types_table.size() - 1);
   TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtained resource id %d", *rsrc_id));
 
   /* store the new resource type in the resource sizes table */
-  resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;
-  resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
-  resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
-  resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
+  HPHP::resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;
+  HPHP::resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
+  HPHP::resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
+  HPHP::resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
 
   TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", *rsrc_id));
   return *rsrc_id;
 }
 
-void * ts_init_resource(int id)
-{
-  assert(id != 0);
-  TSRMLS_FETCH();
-  TSRMStorageVector & vec = *tsrm_thread_resources;
-  if (vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id)) {
-    vec.resize(TSRM_UNSHUFFLE_RSRC_ID(id) + 1);
-  }
-  tsrm_resource_type & type = resource_types_table.at(TSRM_UNSHUFFLE_RSRC_ID(id));
-  if (vec[TSRM_UNSHUFFLE_RSRC_ID(id)] == nullptr) {
-    vec[TSRM_UNSHUFFLE_RSRC_ID(id)] = malloc(type.size);
-    if (type.ctor) {
-      type.ctor(vec[TSRM_UNSHUFFLE_RSRC_ID(id)] TSRMLS_CC);
+namespace HPHP {
+  void * ts_init_resource(int id)
+  {
+    assert(id != 0);
+    TSRMLS_FETCH();
+    HPHP::TSRMStorageVector & vec = *HPHP::tsrm_thread_resources;
+    if (vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id)) {
+      vec.resize(TSRM_UNSHUFFLE_RSRC_ID(id) + 1);
     }
+    tsrm_resource_type & type = HPHP::resource_types_table.at(TSRM_UNSHUFFLE_RSRC_ID(id));
+    if (vec[TSRM_UNSHUFFLE_RSRC_ID(id)] == nullptr) {
+      vec[TSRM_UNSHUFFLE_RSRC_ID(id)] = malloc(type.size);
+      if (type.ctor) {
+        type.ctor(vec[TSRM_UNSHUFFLE_RSRC_ID(id)] TSRMLS_CC);
+      }
+    }
+    return vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
   }
-  return vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
 }
 
 void ts_free_id(ts_rsrc_id id)
 {
-  TSRMStorageVector & vec = *tsrm_thread_resources;
+  HPHP::TSRMStorageVector & vec = *HPHP::tsrm_thread_resources;
   int j = TSRM_UNSHUFFLE_RSRC_ID(id);
   assert(id != 0);
   TSRMLS_FETCH();
-  if (vec.size() <= j && vec[j] != nullptr) {
-    if (resource_types_table[j].dtor) {
-      resource_types_table[j].dtor(vec[j] TSRMLS_CC);
+  if (j < vec.size() && vec[j] != nullptr) {
+    if (HPHP::resource_types_table[j].dtor) {
+      HPHP::resource_types_table[j].dtor(vec[j] TSRMLS_CC);
     }
     free(vec[j]);
+    vec[j] = nullptr;
   }
 }
 

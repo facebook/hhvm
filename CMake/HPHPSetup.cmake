@@ -51,6 +51,7 @@ endif()
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
+  message(STATUS "Build type not specified: cmake build type Release.")
 endif()
 
 # Look for the chrpath tool so we can warn if it's not there

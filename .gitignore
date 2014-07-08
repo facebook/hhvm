@@ -75,6 +75,10 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+# CPack
+CPackConfig.cmake
+CPackSourceConfig.cmake
+
 # Ninja
 .ninja_deps
 .ninja_log

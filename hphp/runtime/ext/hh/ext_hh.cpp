@@ -17,7 +17,10 @@
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
-#include "hphp/runtime/base/file-repository.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/autoload-handler.h"
 
 namespace HPHP {
@@ -45,8 +48,7 @@ bool HHVM_FUNCTION(autoload_set_paths,
 }
 
 bool HHVM_FUNCTION(could_include, const String& file) {
-  struct stat s;
-  return !resolveVmInclude(file.get(), "", &s).isNull();
+  return lookupUnit(file.get(), "", nullptr /* initial_opt */) != nullptr;
 }
 
 static class HHExtension : public Extension {

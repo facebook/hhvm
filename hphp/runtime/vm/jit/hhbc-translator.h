@@ -30,7 +30,6 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
-#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -132,7 +131,7 @@ struct HhbcTranslator {
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void assertType(const RegionDesc::Location& loc, Type type);
   void checkType(const RegionDesc::Location& loc, Type type, Offset dest);
-  RuntimeType rttFromLocation(const Location& loc);
+  Type typeFromLocation(const Location& loc);
 
   // Inlining-related functions.
   void beginInlining(unsigned numArgs,
@@ -528,7 +527,7 @@ public:
 
 private:
   /*
-   * MInstrTranslator is responsible for translating one of the vector
+   * MInstrTranslator is responsible for translating one of the m-instr
    * instructions (CGetM, SetM, IssetM, etc..) into hhir.
    */
   struct MInstrTranslator {
@@ -625,6 +624,7 @@ private:
                           bool warn,
                           bool define);
     Class* contextClass() const;
+    PropInfo getCurrentPropertyOffset(const Class*& cls);
 
     /*
      * genStk is a wrapper around IRBuilder::gen() to deal with instructions

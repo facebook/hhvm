@@ -46,7 +46,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -79,6 +79,8 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator.h"
+#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
@@ -111,7 +113,6 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 using std::string;
 
-using JIT::tx;
 using JIT::mcg;
 
 #if DEBUG
@@ -125,7 +126,7 @@ TRACE_SET_MOD(bcinterp);
 // ActRec.
 static bool isReturnHelper(void* address) {
   auto tcAddr = reinterpret_cast<JIT::TCA>(address);
-  auto& u = tx->uniqueStubs;
+  auto& u = mcg->tx().uniqueStubs;
   return tcAddr == u.retHelper ||
          tcAddr == u.genRetHelper ||
          tcAddr == u.retInlHelper ||
@@ -150,9 +151,9 @@ void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
 }
 
 void ActRec::setReturnVMExit() {
-  assert(isReturnHelper(tx->uniqueStubs.callToExit));
+  assert(isReturnHelper(mcg->tx().uniqueStubs.callToExit));
   m_sfp = nullptr;
-  m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.callToExit);
+  m_savedRip = reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.callToExit);
   m_soff = 0;
 }
 
@@ -846,18 +847,19 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
   assert(fp->resumed());
   auto const sfp = fp->sfp();
   if (sfp) {
-    // The non-reentrant case occurs when a generator is resumed via ContEnter
-    // or ContRaise opcode. These opcodes leave a single value on the stack
-    // that becomes part of the generator's stack. So we find the caller's FP,
-    // compensate for its locals and iterators, and then we've found the base
-    // of the generator's stack.
-    assert(fp->func()->isNonAsyncGenerator());
+    // The non-reentrant case occurs when a non-async or async generator is
+    // resumed via ContEnter or ContRaise opcode. These opcodes leave a single
+    // value on the stack that becomes part of the generator's stack. So we
+    // find the caller's FP, compensate for its locals and iterators, and then
+    // we've found the base of the generator's stack.
+    assert(fp->func()->isGenerator());
     return (TypedValue*)sfp - sfp->func()->numSlotsInFrame();
   } else {
-    // The reentrant case occurs when asio scheduler resumes an async function.
-    // We simply use the top of stack of the previous VM frame (since the
-    // ActRec, locals, and iters for this frame do not reside on the VM stack).
-    assert(fp->func()->isAsyncFunction());
+    // The reentrant case occurs when asio scheduler resumes an async function
+    // or async generator. We simply use the top of stack of the previous VM
+    // frame (since the ActRec, locals, and iters for this frame do not reside
+    // on the VM stack).
+    assert(fp->func()->isAsync());
     return g_context.getNoCheck()->m_nestedVMs.back().sp;
   }
 }
@@ -1117,16 +1119,20 @@ LookupResult ExecutionContext::lookupCtorMethod(const Func*& f,
 }
 
 ObjectData* ExecutionContext::createObject(StringData* clsName,
-                                             const Variant& params,
-                                             bool init /* = true */) {
-  Class* class_ = Unit::loadClass(clsName);
+                                           const Variant& params,
+                                           bool init /* = true */) {
+  auto const class_ = Unit::loadClass(clsName);
   if (class_ == nullptr) {
-    throw ClassNotFoundException(
-      (std::string("unknown class ") + clsName->data()).c_str());
+    raise_error("unknown class %s", clsName->data());
   }
+  return createObject(class_, params, init);
+}
 
+ObjectData* ExecutionContext::createObject(const Class* class_,
+                                           const Variant& params,
+                                           bool init) {
   Object o;
-  o = newInstance(class_);
+  o = newInstance(const_cast<Class*>(class_));
   if (init) {
     auto ctor = class_->getCtor();
     if (!(ctor->attrs() & AttrPublic)) {
@@ -1418,6 +1424,7 @@ static inline void checkNativeStack() {
  */
 ALWAYS_INLINE
 static void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
+  assert(f);
   auto const info = ThreadInfo::s_threadInfo.getNoCheck();
   /*
    * Check whether func's maximum stack usage would overflow the stack.
@@ -1457,89 +1464,160 @@ static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
   stack.popAR();
 }
 
-static bool prepareArrayArgs(ActRec* ar, const Cell& args,
-                             Stack& stack,
-                             bool doCufRefParamChecks,
-                             TypedValue* retval) {
-  assert(ar != nullptr);
+static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell&args,
+                                               Stack& stack, int nregular) {
+  assert(ar != nullptr && ar->hasInvName());
   assert(!cellIsNull(&args));
-  assert(stack.top() == (void*) ar);
-  const Func* f = ar->m_func;
-  assert(f);
-
-  assert(!ar->hasExtraArgs());
-  // invName should be non-NULL only if calling __call or __callStatic
-  assert(!(ar->hasInvName())
-         || f->name()->isame(s___call.get())
-         || f->name()->isame(s___callStatic.get()));
-
+  assert(nregular >= 0);
+  assert((stack.top() + nregular) == (void*) ar);
   assert(isContainer(args));
-  int nargs = getContainerSize(args);
-  assert(!ar->hasVarEnv() || (nargs == 0));
-  if (UNLIKELY(ar->hasInvName())) {
-    stack.pushStringNoRc(ar->getInvName());
-    if (args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
+  DEBUG_ONLY const Func* f = ar->m_func;
+  assert(f &&
+         (f->name()->isame(s___call.get()) ||
+          f->name()->isame(s___callStatic.get())));
+
+  // We'll need to make this the first argument
+  StringData* invName = ar->getInvName();
+  ar->setVarEnv(nullptr);
+  assert(!ar->hasVarEnv() && !ar->hasInvName());
+
+  auto nargs = getContainerSize(args);
+
+  if (UNLIKELY(0 == nargs)) {
+    // We need to make an array containing all the arguments passed by
+    // the caller and put it where the second argument is.
+    auto argArray = Array::attach(
+      nregular
+      ? MixedArray::MakePacked(
+        nregular, reinterpret_cast<TypedValue*>(ar) - nregular)
+      : staticEmptyArray()
+    );
+
+    // Remove the arguments from the stack; they were moved into the
+    // array so we don't need to decref.
+    stack.ndiscard(nregular);
+
+    // Move invName to where the first argument belongs, no need
+    // to incRef/decRef since we are transferring ownership
+    assert(stack.top() == (void*) ar);
+    stack.pushStringNoRc(invName);
+
+    // Move argArray to where the second argument belongs. We've already
+    // incReffed the array above so we don't need to do it here.
+    stack.pushArrayNoRc(argArray.detach());
+  } else {
+    if (nregular == 0
+        && args.m_type == KindOfArray
+        && args.m_data.parr->isVectorData()) {
+      assert(stack.top() == (void*) ar);
+      stack.pushStringNoRc(invName);
       stack.pushArray(args.m_data.parr);
     } else {
-      PackedArrayInit ai(getContainerSize(args));
+      PackedArrayInit ai(nargs + nregular);
+      for (int i = 0; i < nregular; ++i) {
+        // appendWithRef bumps the refcount and splits if necessary, to
+        // compensate for the upcoming pop from the stack
+        ai.appendWithRef(tvAsVariant(stack.top()));
+        stack.popTV();
+      }
+      assert(stack.top() == (void*) ar);
+      stack.pushStringNoRc(invName);
       for (ArrayIter iter(args); iter; ++iter) {
         ai.appendWithRef(iter.secondRefPlus());
       }
       stack.pushArray(ai.create());
     }
-    ar->setVarEnv(0);
-    ar->initNumArgs(2);
+  }
+
+  ar->setNumArgs(2);
+}
+
+// offset is the number of params already on the stack to which the
+// contents of args are to be added; for call_user_func_array, this is
+// always 0; for unpacked arguments, it may be greater if normally passed
+// params precede the unpack.
+static bool prepareArrayArgs(ActRec* ar, const Cell& args,
+                             Stack& stack,
+                             int nregular,
+                             bool doCufRefParamChecks,
+                             TypedValue* retval) {
+  assert(ar != nullptr);
+  assert(!cellIsNull(&args));
+  assert(nregular >= 0);
+  assert((stack.top() + nregular) == (void*) ar);
+  const Func* f = ar->m_func;
+  assert(f);
+
+  assert(!ar->hasExtraArgs());
+
+  assert(isContainer(args));
+  int nargs = nregular + getContainerSize(args);
+  assert(!ar->hasVarEnv() || (0 == nargs));
+  if (UNLIKELY(ar->hasInvName())) {
+    shuffleMagicArrayArgs(ar, args, stack, nregular);
     return true;
   }
 
   int nparams = f->numNonVariadicParams();
-
+  int nextra_regular = std::max(nregular - nparams, 0);
   ArrayIter iter(args);
-  for (int i = 0; iter && i < nparams; ++i, ++iter) {
-    TypedValue* from = const_cast<TypedValue*>(
-      iter.secondRefPlus().asTypedValue());
-    TypedValue* to = stack.allocTV();
-    if (LIKELY(!f->byRef(i))) {
-      cellDup(*tvToCell(from), *to);
-    } else if (LIKELY(from->m_type == KindOfRef &&
-                      from->m_data.pref->m_count >= 2)) {
-      refDup(*from, *to);
-    } else {
-      if (doCufRefParamChecks) {
-        try {
-          raise_warning("Parameter %d to %s() expected to be a reference, "
-                        "value given", i + 1, f->fullName()->data());
-        } catch (...) {
-          // If the user error handler throws an exception, discard the
-          // uninitialized value(s) at the top of the eval stack so that the
-          // unwinder doesn't choke
-          stack.discard();
-          cleanupParamsAndActRec(stack, ar, nullptr, &i);
-          if (retval) { tvWriteNull(retval); }
-          throw;
+  if (LIKELY(nextra_regular == 0)) {
+    for (int i = nregular; iter && (i < nparams); ++i, ++iter) {
+      TypedValue* from = const_cast<TypedValue*>(
+        iter.secondRefPlus().asTypedValue());
+      TypedValue* to = stack.allocTV();
+      if (LIKELY(!f->byRef(i))) {
+        cellDup(*tvToCell(from), *to);
+      } else if (LIKELY(from->m_type == KindOfRef &&
+                        from->m_data.pref->m_count >= 2)) {
+        refDup(*from, *to);
+      } else {
+        if (doCufRefParamChecks && f->mustBeRef(i)) {
+          try {
+            raise_warning("Parameter %d to %s() expected to be a reference, "
+                          "value given", i + 1, f->fullName()->data());
+          } catch (...) {
+            // If the user error handler throws an exception, discard the
+            // uninitialized value(s) at the top of the eval stack so that the
+            // unwinder doesn't choke
+            stack.discard();
+            cleanupParamsAndActRec(stack, ar, nullptr, &i);
+            if (retval) { tvWriteNull(retval); }
+            throw;
+          }
+          if (skipCufOnInvalidParams) {
+            stack.discard();
+            cleanupParamsAndActRec(stack, ar, nullptr, &i);
+            if (retval) { tvWriteNull(retval); }
+            return false;
+          }
         }
-        if (skipCufOnInvalidParams) {
-          stack.discard();
-          cleanupParamsAndActRec(stack, ar, nullptr, &i);
-          if (retval) { tvWriteNull(retval); }
-          return false;
-        }
+        cellDup(*tvToCell(from), *to);
       }
-      cellDup(*tvToCell(from), *to);
+    }
+
+    if (LIKELY(!iter)) {
+      // argArray was exhausted, so there are no "extra" arguments but there
+      // may be a deficit of non-variadic arguments, and the need to push an
+      // empty array for the variadic argument ... that work is left to
+      // prepareFuncEntry
+      ar->initNumArgs(nargs);
+      return true;
     }
   }
-  if (LIKELY(!iter)) {
-    // argArray was exhausted, so there are no "extra" arguments but there
-    // may be a deficit of non-variadic arguments, and the need to push an
-    // empty array for the variadic argument ... that work is left to
-    // prepareFuncEntry
-    ar->initNumArgs(nargs);
-    return true;
-  }
 
-  // argArray was not exhausted, and there are "extra" arguments
+  // there are "extra" arguments; passed as standard arguments prior to the
+  // ... unpack operator and/or still remaining in argArray
   assert(nargs > nparams);
+  assert(nextra_regular > 0 || !!iter);
   if (LIKELY(f->discardExtraArgs())) {
+    if (UNLIKELY(nextra_regular > 0)) {
+      // if unpacking, any regularly passed arguments on the stack
+      // in excess of those expected by the function need to be discarded
+      // in addition to the ones held in the arry
+      do { stack.popTV(); } while (--nextra_regular);
+    }
+
     // the extra args are not used in the function; no reason to add them
     // to the stack
     ar->initNumArgs(f->numParams());
@@ -1551,7 +1629,25 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
   if (f->attrs() & AttrMayUseVV) {
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
     PackedArrayInit ai(extra);
-    for (int i = 0; i < extra; ++i, ++iter) {
+    if (UNLIKELY(nextra_regular > 0)) {
+      for (int i = 0; i < nextra_regular; ++i) {
+        TypedValue* to = extraArgs->getExtraArg(i);
+        const TypedValue* from = stack.top();
+        if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
+          refDup(*from, *to);
+        } else {
+          cellDup(*tvToCell(from), *to);
+        }
+        if (hasVarParam) {
+          // appendWithRef bumps the refcount: this accounts for the fact
+          // that the extra args values went from being present on the stack
+          // to being in (both) ExtraArgs and the variadic args
+          ai.appendWithRef(tvAsCVarRef(from));
+        }
+        stack.discard();
+      }
+    }
+    for (int i = nextra_regular; i < extra; ++i, ++iter) {
       TypedValue* to = extraArgs->getExtraArg(i);
       const TypedValue* from = iter.secondRefPlus().asTypedValue();
       if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
@@ -1577,11 +1673,21 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
   } else {
     assert(hasVarParam);
     if (nparams == 0
-        && args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
+        && nextra_regular == 0
+        && args.m_type == KindOfArray
+        && args.m_data.parr->isVectorData()) {
       stack.pushArray(args.m_data.parr);
     } else {
       PackedArrayInit ai(extra);
-      for (int i = 0; i < extra; ++i, ++iter) {
+      if (UNLIKELY(nextra_regular > 0)) {
+        for (int i = 0; i < nextra_regular; ++i) {
+          // appendWithRef bumps the refcount and splits if necessary,
+          // to compensate for the upcoming pop from the stack
+          ai.appendWithRef(tvAsVariant(stack.top()));
+          stack.popTV();
+        }
+      }
+      for (int i = nextra_regular; i < extra; ++i, ++iter) {
         // appendWithRef bumps the refcount to compensate for the
         // eventual decref of arrayArgs.
         ai.appendWithRef(iter.secondRefPlus());
@@ -1720,7 +1826,7 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr,
                                           Resumable* resumable,
                                           ObjectData* exception) {
   assert(enterFnAr);
-  assert(enterFnAr->func()->isAsyncFunction());
+  assert(enterFnAr->func()->isAsync());
   assert(enterFnAr->resumed());
   assert(resumable);
 
@@ -1979,7 +2085,8 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
       : args;
     auto prepResult = prepareArrayArgs(
       ar, prepArgs,
-      vmStack(), (bool) (flags & InvokeCuf), retval);
+      vmStack(), 0,
+      (bool) (flags & InvokeCuf), retval);
     if (UNLIKELY(!prepResult)) {
       assert(KindOfNull == retval->m_type);
       return;
@@ -2129,8 +2236,8 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   enterVM(fp, StackArgsState::Untrimmed, resumable, exception);
 }
 
-void ExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
-  Func* func = unit->getMain();
+void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
+  auto const func = unit->getMain();
   invokeFunc(retval, func, init_null_variant, nullptr, nullptr,
              m_globalVarEnv, nullptr, InvokePseudoMain);
 }
@@ -2154,7 +2261,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   if (LIKELY(prevFp != nullptr)) {
     if (prevSp) {
       if (UNLIKELY(fp->resumed())) {
-        assert(fp->func()->isNonAsyncGenerator());
+        assert(fp->func()->isGenerator());
         *prevSp = (TypedValue*)prevFp - prevFp->func()->numSlotsInFrame();
       } else {
         *prevSp = (TypedValue*)(fp + 1);
@@ -2492,126 +2599,6 @@ const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
   return ci;
 }
 
-Unit* ExecutionContext::lookupPhpFile(StringData* path,
-                                      const char* currentDir,
-                                      bool* initial_opt) {
-  bool init;
-  bool &initial = initial_opt ? *initial_opt : init;
-  initial = true;
-
-  struct stat s;
-  auto const spath = resolveVmInclude(path, currentDir, &s);
-  if (spath.isNull()) return nullptr;
-
-  // Check if this file has already been included.
-  auto it = m_evaledFiles.find(spath.get());
-  PhpFile* efile = nullptr;
-  if (it != end(m_evaledFiles)) {
-    // We found it! Return the unit.
-    efile = it->second;
-    initial = false;
-    return efile->unit();
-  }
-  // We didn't find it, so try the realpath.
-  bool alreadyResolved =
-    RuntimeOption::RepoAuthoritative ||
-    (!RuntimeOption::CheckSymLink && (spath[0] == '/'));
-  bool hasRealpath = false;
-  String rpath;
-  if (!alreadyResolved) {
-    std::string rp = StatCache::realpath(spath.data());
-    if (rp.size() != 0) {
-      rpath = StringData::Make(rp.data(), rp.size(), CopyString);
-      if (!rpath.same(spath)) {
-        hasRealpath = true;
-        it = m_evaledFiles.find(rpath.get());
-        if (it != m_evaledFiles.end()) {
-          // We found it! Update the mapping for spath and
-          // return the unit.
-          efile = it->second;
-          m_evaledFiles[spath.get()] = efile;
-          m_evaledFilesOrder.push_back(efile);
-          spath.get()->incRefCount();
-          initial = false;
-          return efile->unit();
-        }
-      }
-    }
-  }
-  // This file hasn't been included yet, so we need to parse the file
-  efile = FileRepository::checkoutFile(
-    hasRealpath ? rpath.get() : spath.get(), s);
-  if (efile && initial_opt) {
-    // if initial_opt is not set, this shouldn't be recorded as a
-    // per request fetch of the file.
-    if (RDS::testAndSetBit(efile->getId())) {
-      initial = false;
-    }
-    // if parsing was successful, update the mappings for spath and
-    // rpath (if it exists).
-    m_evaledFilesOrder.push_back(efile);
-    m_evaledFiles[spath.get()] = efile;
-    spath.get()->incRefCount();
-    // Don't incRef efile; checkoutFile() already counted it.
-    if (hasRealpath) {
-      m_evaledFiles[rpath.get()] = efile;
-      rpath.get()->incRefCount();
-    }
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
-  }
-  return efile ? efile->unit() : nullptr;
-}
-
-Unit* ExecutionContext::evalInclude(StringData* path,
-                                      const StringData* curUnitFilePath,
-                                      bool* initial) {
-  namespace fs = boost::filesystem;
-  if (curUnitFilePath) {
-    fs::path currentUnit(curUnitFilePath->data());
-    fs::path currentDir(currentUnit.branch_path());
-    return lookupPhpFile(path, currentDir.string().c_str(), initial);
-  }
-  return lookupPhpFile(path, "", initial);
-}
-
-Unit* ExecutionContext::evalIncludeRoot(
-    StringData* path, InclOpFlags flags, bool* initial) {
-  return lookupIncludeRoot(path, flags, initial, nullptr);
-}
-
-Unit* ExecutionContext::lookupIncludeRoot(StringData* path,
-                                          InclOpFlags flags,
-                                          bool* initial,
-                                          Unit* unit) {
-  String absPath;
-  if (flags & InclOpFlags::Relative) {
-    namespace fs = boost::filesystem;
-    if (!unit) unit = vmfp()->m_func->unit();
-    fs::path currentUnit(unit->filepath()->data());
-    fs::path currentDir(currentUnit.branch_path());
-    absPath = currentDir.string() + '/';
-    TRACE(2, "lookupIncludeRoot(%s): relative -> %s\n",
-          path->data(),
-          absPath.data());
-  } else {
-    assert(flags & InclOpFlags::DocRoot);
-    absPath = SourceRootInfo::GetCurrentPhpRoot();
-    TRACE(2, "lookupIncludeRoot(%s): docRoot -> %s\n",
-          path->data(),
-          absPath.data());
-  }
-
-  absPath += StrNR(path);
-
-  auto const it = m_evaledFiles.find(absPath.get());
-  if (it != end(m_evaledFiles)) {
-    if (initial) *initial = false;
-    return it->second->unit();
-  }
-
-  return lookupPhpFile(absPath.get(), "", initial);
-}
-
 /*
   Instantiate hoistable classes and functions.
   If there is any more work left to do, setup a
@@ -2647,7 +2634,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   ar->initNumArgs(0);
   assert(vmfp());
   assert(!vmfp()->hasInvName());
-  ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
+  ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   pushLocalsAndIterators(func);
   if (!vmfp()->hasVarEnv()) {
     vmfp()->setVarEnv(VarEnv::createLocal(vmfp()));
@@ -3008,10 +2995,10 @@ void ExecutionContext::preventReturnsToTC() {
                  ar->m_func->fullName()->data());
         if (ar->resumed()) {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx->uniqueStubs.genRetHelper);
+            reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.genRetHelper);
         } else {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
+            reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.retHelper);
         }
         assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
       }
@@ -4119,15 +4106,11 @@ OPTBLD_INLINE void ExecutionContext::iopGte(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void ExecutionContext::iopShl(IOP_ARGS) {
-  implCellBinOp(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
-    return make_tv<KindOfInt64>(cellToInt(c1) << cellToInt(c2));
-  });
+  implCellBinOp(IOP_PASS_ARGS, cellShl);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopShr(IOP_ARGS) {
-  implCellBinOp(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
-    return make_tv<KindOfInt64>(cellToInt(c1) >> cellToInt(c2));
-  });
+  implCellBinOp(IOP_PASS_ARGS, cellShr);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopSqrt(IOP_ARGS) {
@@ -4622,6 +4605,19 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     // Mark the async function as succeeded and store the return value.
     assert(!sfp);
     frame_afwh(vmfp())->ret(retval);
+  } else if (vmfp()->func()->isAsyncGenerator()) {
+    // Mark the async generator as finished.
+    assert(IS_NULL_TYPE(retval.m_type));
+    auto const gen = frame_async_generator(vmfp());
+    auto const eagerResult = gen->ret();
+    if (eagerResult) {
+      // Eager execution => return StaticWaitHandle.
+      assert(sfp);
+      vmStack().pushObjectNoRc(eagerResult);
+    } else {
+      // Resumed execution => return control to the scheduler.
+      assert(!sfp);
+    }
   } else if (vmfp()->func()->isNonAsyncGenerator()) {
     // Mark the generator as finished and store the return value.
     assert(IS_NULL_TYPE(retval.m_type));
@@ -6288,7 +6284,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCall(IOP_ARGS) {
   DECODE_IVA(numArgs);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
+  ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     profileAllArguments(ar);
@@ -6309,7 +6305,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
   }
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
+  ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     profileAllArguments(ar);
@@ -6346,23 +6342,30 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   tvCopy(ret, *vmStack().allocTV());
 }
 
-bool ExecutionContext::doFCallArray(PC& pc) {
-  ActRec* ar = (ActRec*)(vmStack().top() + 1);
-  assert(ar->numArgs() == 1);
+bool ExecutionContext::doFCallArray(PC& pc, int numStackValues,
+                                    CallArrOnInvalidContainer onInvalid) {
+  assert(numStackValues >= 1);
+  ActRec* ar = (ActRec*)(vmStack().top() + numStackValues);
+  assert(ar->numArgs() == numStackValues);
 
   Cell* c1 = vmStack().topC();
   if (UNLIKELY(!isContainer(*c1))) {
-    if (skipCufOnInvalidParams) {
-      // task #1756122
-      // this is what we /should/ do, but our code base depends
-      // on the broken behavior of casting the second arg to an
-      // array.
-      cleanupParamsAndActRec(vmStack(), ar, nullptr, nullptr);
-      vmStack().pushNull();
-      raise_warning("call_user_func_array() expects parameter 2 to be array");
-      return false;
-    } else {
-      tvCastToArrayInPlace(c1);
+    switch (onInvalid) {
+      case CallArrOnInvalidContainer::CastToArray:
+        tvCastToArrayInPlace(c1);
+        break;
+      case CallArrOnInvalidContainer::WarnAndReturnNull:
+        vmStack().pushNull();
+        cleanupParamsAndActRec(vmStack(), ar, nullptr, nullptr);
+        raise_warning("call_user_func_array() expects parameter 2 to be array");
+        return false;
+      case CallArrOnInvalidContainer::WarnAndContinue:
+        tvRefcountedDecRef(c1);
+        // argument_unpacking RFC dictates "containers and Traversables"
+        raise_debugging("Only containers may be unpacked");
+        c1->m_type = KindOfArray;
+        c1->m_data.parr = staticEmptyArray();
+        break;
     }
   }
 
@@ -6370,6 +6373,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
   {
     Cell args = *c1;
     vmStack().discard(); // prepareArrayArgs will push arguments onto the stack
+    numStackValues--;
     SCOPE_EXIT { tvRefcountedDecRef(&args); };
     checkStack(vmStack(), func, 0);
 
@@ -6377,9 +6381,17 @@ bool ExecutionContext::doFCallArray(PC& pc) {
     TRACE(3, "FCallArray: pc %p func %p base %d\n", vmpc(),
           vmfp()->unit()->entry(),
           int(vmfp()->m_func->base()));
-    ar->setReturn(vmfp(), pc, tx->uniqueStubs.retHelper);
+    ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
 
-    auto prepResult = prepareArrayArgs(ar, args, vmStack(),
+    if (UNLIKELY((CallArrOnInvalidContainer::WarnAndContinue == onInvalid)
+                 && func->anyByRef())) {
+      raise_error("Unpacking unsupported for calls to functions that"
+                  " take any arguments by reference");
+      vmStack().pushNull();
+      return false;
+    }
+
+    auto prepResult = prepareArrayArgs(ar, args, vmStack(), numStackValues,
                                        /* ref param checks */ true, nullptr);
     if (UNLIKELY(!prepResult)) {
       vmStack().pushNull(); // return value is null if args are invalid
@@ -6400,14 +6412,24 @@ bool ExecutionContext::doFCallArrayTC(PC pc) {
   assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  auto const ret = doFCallArray(pc);
+  auto const ret = doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopFCallArray(IOP_ARGS) {
   NEXT();
-  (void)doFCallArray(pc);
+  (void)doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
+}
+
+OPTBLD_INLINE void ExecutionContext::iopFCallUnpack(IOP_ARGS) {
+  ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
+  NEXT();
+  DECODE_IVA(numArgs);
+  assert(numArgs == ar->numArgs());
+  checkStack(vmStack(), ar->m_func, 0);
+  (void) doFCallArray(pc, numArgs,
+                      CallArrOnInvalidContainer::WarnAndContinue);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopCufSafeArray(IOP_ARGS) {
@@ -6676,24 +6698,42 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
         flags & InclOpFlags::Fatal ? "Fatal" : "",
         path.data());
 
-  Unit* u = flags & (InclOpFlags::DocRoot|InclOpFlags::Relative) ?
-    ec->evalIncludeRoot(path.get(), flags, &initial) :
-    ec->evalInclude(path.get(), vmfp()->m_func->unit()->filepath(), &initial);
+  auto curUnitFilePath = [&] {
+    namespace fs = boost::filesystem;
+    fs::path currentUnit(vmfp()->m_func->unit()->filepath()->data());
+    fs::path currentDir(currentUnit.branch_path());
+    return currentDir.string();
+  };
+
+  auto const unit = [&] {
+    if (flags & InclOpFlags::Relative) {
+      String absPath = curUnitFilePath() + '/';
+      absPath += path;
+      return lookupUnit(absPath.get(), "", &initial);
+    }
+    if (flags & InclOpFlags::DocRoot) {
+      return lookupUnit(
+        SourceRootInfo::RelativeToPhpRoot(path).get(), "", &initial);
+    }
+    return lookupUnit(path.get(), curUnitFilePath().c_str(), &initial);
+  }();
+
   vmStack().popC();
-  if (u == nullptr) {
+  if (unit == nullptr) {
     if (flags & InclOpFlags::Fatal) {
       raise_error("File not found: %s", path.data());
     } else {
       raise_warning("File not found: %s", path.data());
     }
     vmStack().pushFalse();
+    return;
+  }
+
+  if (!(flags & InclOpFlags::Once) || initial) {
+    ec->evalUnit(unit, pc, EventHook::PseudoMain);
   } else {
-    if (!(flags & InclOpFlags::Once) || initial) {
-      ec->evalUnit(u, pc, EventHook::PseudoMain);
-    } else {
-      Stats::inc(Stats::PseudoMain_Guarded);
-      vmStack().pushTrue();
-    }
+    Stats::inc(Stats::PseudoMain_Guarded);
+    vmStack().pushTrue();
   }
 }
 
@@ -7016,41 +7056,45 @@ const StaticString s_this("this");
 
 OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   NEXT();
-  assert(!vmfp()->resumed());
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  auto const numSlots = func->numSlotsInFrame();
+  auto const resumeOffset = func->unit()->offsetOf(pc);
+  assert(!fp->resumed());
+  assert(func->isGenerator());
 
-  const auto resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
-
-  // Create the Generator object. Create takes care of copying local
+  // Create the {Async,}Generator object. Create takes care of copying local
   // variables and iterators.
-  auto cont = c_Generator::Create<false>(vmfp(),
-                                         vmfp()->func()->numSlotsInFrame(),
-                                         nullptr,
-                                         resumeOffset);
+  auto const gen = func->isAsync()
+    ? static_cast<BaseGenerator*>(
+        c_AsyncGenerator::Create(fp, numSlots, nullptr, resumeOffset))
+    : static_cast<BaseGenerator*>(
+        c_Generator::Create<false>(fp, numSlots, nullptr, resumeOffset));
 
   // Call the FunctionSuspend hook. Keep the generator on the stack so that
   // the unwinder could free it if the hook fails.
-  vmStack().pushObjectNoRc(cont);
-  EventHook::FunctionSuspend(cont->actRec(), false);
+  vmStack().pushObjectNoRc(gen);
+  EventHook::FunctionSuspend(gen->actRec(), false);
   vmStack().discard();
 
   // Grab caller info from ActRec.
-  ActRec* sfp = vmfp()->sfp();
-  Offset soff = vmfp()->m_soff;
+  ActRec* sfp = fp->sfp();
+  Offset soff = fp->m_soff;
 
   // Free ActRec and store the return value.
-  vmStack().ndiscard(vmfp()->m_func->numSlotsInFrame());
+  vmStack().ndiscard(numSlots);
   vmStack().ret();
-  tvCopy(make_tv<KindOfObject>(cont), *vmStack().topTV());
-  assert(vmStack().topTV() == &vmfp()->m_r);
+  tvCopy(make_tv<KindOfObject>(gen), *vmStack().topTV());
+  assert(vmStack().topTV() == &fp->m_r);
 
   // Return control to the caller.
   vmfp() = sfp;
-  pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+  pc = LIKELY(sfp != nullptr) ? sfp->func()->getEntry() + soff : nullptr;
 }
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {
   auto const obj = fp->getThis();
-  assert(/*obj->instanceof(c_AsyncGenerator::classof()) ||*/
+  assert(obj->instanceof(c_AsyncGenerator::classof()) ||
          obj->instanceof(c_Generator::classof()));
   return static_cast<BaseGenerator*>(obj);
 }
@@ -7070,15 +7114,15 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
 
   // Do linkage of the generator's AR.
   assert(vmfp()->hasThis());
-  c_Generator* cont = this_generator(vmfp());
-  assert(cont->getState() == BaseGenerator::State::Running);
-  ActRec* contAR = cont->actRec();
-  contAR->setReturn(vmfp(), pc, tx->uniqueStubs.genRetHelper);
+  BaseGenerator* gen = this_base_generator(vmfp());
+  assert(gen->getState() == BaseGenerator::State::Running);
+  ActRec* genAR = gen->actRec();
+  genAR->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.genRetHelper);
 
-  vmfp() = contAR;
+  vmfp() = genAR;
 
-  assert(contAR->func()->contains(cont->resumable()->resumeOffset()));
-  pc = contAR->func()->unit()->at(cont->resumable()->resumeOffset());
+  assert(genAR->func()->contains(gen->resumable()->resumeOffset()));
+  pc = genAR->func()->unit()->at(gen->resumable()->resumeOffset());
   SYNC();
   EventHook::FunctionResume(vmfp());
 }
@@ -7102,22 +7146,33 @@ OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
   assert(func->isGenerator());
 
   if (!func->isAsync()) {
+    // Non-async generator.
     assert(fp->sfp());
     frame_generator(fp)->yield(resumeOffset, key, value);
 
     // Push return value of next()/send()/raise().
     vmStack().pushNull();
   } else {
-    not_reached();
+    // Async generator.
+    auto const gen = frame_async_generator(fp);
+    auto const eagerResult = gen->yield(resumeOffset, key, value);
+    if (eagerResult) {
+      // Eager execution => return StaticWaitHandle.
+      assert(fp->sfp());
+      vmStack().pushObjectNoRc(eagerResult);
+    } else {
+      // Resumed execution => return control to the scheduler.
+      assert(!fp->sfp());
+    }
   }
 
-  EventHook::FunctionSuspend(vmfp(), true);
+  EventHook::FunctionSuspend(fp, true);
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();
   Offset soff = fp->m_soff;
 
-  // Return control to the next()/send()/raise() caller.$a
+  // Return control to the next()/send()/raise() caller.
   vmfp() = sfp;
   pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
@@ -7142,7 +7197,7 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
   NEXT();
   DECODE_IVA(checkStarted);
-  this_generator(vmfp())->preNext(checkStarted);
+  this_base_generator(vmfp())->preNext(checkStarted);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContValid(IOP_ARGS) {
@@ -7167,7 +7222,7 @@ OPTBLD_INLINE void ExecutionContext::iopContCurrent(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   assert(!vmfp()->resumed());
-  assert(vmfp()->func()->isAsync());
+  assert(vmfp()->func()->isAsyncFunction());
   const auto func = vmfp()->m_func;
   const auto resumeOffset = func->unit()->offsetOf(pc);
 
@@ -7208,9 +7263,11 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
 }
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
-  assert(vmfp()->resumed());
-  assert(vmfp()->func()->isAsync());
-  assert(!vmfp()->sfp());
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  auto const resumeOffset = func->unit()->offsetOf(pc);
+  assert(fp->resumed());
+  assert(func->isAsync());
 
   // Obtain child
   Cell& value = *vmStack().topC();
@@ -7218,17 +7275,37 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   assert(value.m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
   auto const child = static_cast<c_WaitableWaitHandle*>(value.m_data.pobj);
 
-  // Await child and suspend the async function. May throw.
-  auto const resumeOffset = vmfp()->func()->unit()->offsetOf(pc);
-  frame_afwh(vmfp())->await(resumeOffset, child);
-  vmStack().discard();
+  // Await child and suspend the async function/generator. May throw.
+  if (!func->isGenerator()) {
+    // Async function.
+    assert(!fp->sfp());
+    frame_afwh(fp)->await(resumeOffset, child);
+    vmStack().discard();
+  } else {
+    // Async generator.
+    auto const gen = frame_async_generator(fp);
+    auto const eagerResult = gen->await(resumeOffset, child);
+    vmStack().discard();
+    if (eagerResult) {
+      // Eager execution => return AsyncGeneratorWaitHandle.
+      assert(fp->sfp());
+      vmStack().pushObjectNoRc(eagerResult);
+    } else {
+      // Resumed execution => return control to the scheduler.
+      assert(!fp->sfp());
+    }
+  }
 
   // Call the FunctionSuspend hook.
-  EventHook::FunctionSuspend(vmfp(), true);
+  EventHook::FunctionSuspend(fp, true);
 
-  // Transfer control back to the scheduler.
-  vmfp() = nullptr;
-  pc = nullptr;
+  // Grab caller info from ActRec.
+  ActRec* sfp = fp->sfp();
+  Offset soff = fp->m_soff;
+
+  // Return control to the caller or scheduler.
+  vmfp() = sfp;
+  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopAwait(IOP_ARGS) {

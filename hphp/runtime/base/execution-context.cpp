@@ -42,7 +42,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -511,10 +511,14 @@ void ExecutionContext::executeFunctions(const Array& funcs) {
 
 void ExecutionContext::onShutdownPreSend() {
   // in case obStart was called without obFlush
-  SCOPE_EXIT { obFlushAll(); };
+  SCOPE_EXIT {
+    try { obFlushAll(); } catch (...) {}
+  };
 
   if (!m_shutdowns.isNull() && m_shutdowns.exists(ShutDown)) {
-    SCOPE_EXIT { m_shutdowns.remove(ShutDown); };
+    SCOPE_EXIT {
+      try { m_shutdowns.remove(ShutDown); } catch (...) {}
+    };
     executeFunctions(m_shutdowns[ShutDown].toArray());
   }
 }
@@ -523,17 +527,16 @@ extern void ext_session_request_shutdown();
 
 void ExecutionContext::onShutdownPostSend() {
   ServerStats::SetThreadMode(ServerStats::ThreadMode::PostProcessing);
+  MM().resetCouldOOM();
   try {
     try {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
       if (!m_shutdowns.isNull()) {
         if (m_shutdowns.exists(PostSend)) {
-          SCOPE_EXIT { m_shutdowns.remove(PostSend); };
+          SCOPE_EXIT {
+            try { m_shutdowns.remove(PostSend); } catch (...) {}
+          };
           executeFunctions(m_shutdowns[PostSend].toArray());
-        }
-        if (m_shutdowns.exists(CleanUp)) {
-          SCOPE_EXIT { m_shutdowns.remove(CleanUp); };
-          executeFunctions(m_shutdowns[CleanUp].toArray());
         }
       }
     } catch (...) {
@@ -611,11 +614,11 @@ const StaticString
   s_php_errormsg("php_errormsg");
 
 void ExecutionContext::handleError(const std::string& msg,
-                                       int errnum,
-                                       bool callUserHandler,
-                                       ErrorThrowMode mode,
-                                       const std::string& prefix,
-                                       bool skipFrame /* = false */) {
+                                   int errnum,
+                                   bool callUserHandler,
+                                   ErrorThrowMode mode,
+                                   const std::string& prefix,
+                                   bool skipFrame /* = false */) {
   SYNC_VM_REGS_SCOPED();
 
   auto newErrorState = ErrorState::ErrorRaised;
@@ -632,7 +635,7 @@ void ExecutionContext::handleError(const std::string& msg,
 
   ErrorStateHelper esh(this, newErrorState);
   auto const ee = skipFrame ?
-    ExtendedException(ExtendedException::SkipFrame::skipFrame, msg) :
+    ExtendedException(ExtendedException::SkipFrame{}, msg) :
     ExtendedException(msg);
   recordLastError(ee, errnum);
   bool handled = false;
@@ -671,17 +674,9 @@ void ExecutionContext::handleError(const std::string& msg,
 
     if (errorNeedsLogging(errnum)) {
       DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee.getMessage()));
-      String file = empty_string();
-      int line = 0;
-      if (RuntimeOption::InjectedStackTrace) {
-        Array bt = ee.getBackTrace();
-        if (!bt.empty()) {
-          Array top = bt.rvalAt(0).toArray();
-          if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-          if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
-        }
-      }
-      Logger::Log(Logger::LogError, prefix.c_str(), ee, file.c_str(), line);
+      auto fileAndLine = ee.getFileAndLine();
+      Logger::Log(Logger::LogError, prefix.c_str(), ee,
+                  fileAndLine.first.c_str(), fileAndLine.second);
     }
   }
 }
@@ -731,24 +726,17 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 bool ExecutionContext::onFatalError(const Exception &e) {
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
   recordLastError(e, errnum);
-  String file = empty_string();
-  int line = 0;
+
   bool silenced = false;
-  if (RuntimeOption::InjectedStackTrace) {
-    if (auto const ee = dynamic_cast<const ExtendedException *>(&e)) {
-      silenced = ee->isSilent();
-      Array bt = ee->getBackTrace();
-      if (!bt.empty()) {
-        Array top = bt.rvalAt(0).toArray();
-        if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-        if (top.exists(s_line)) line = top.rvalAt(s_line).toInt32();
-      }
-    }
+  auto fileAndLine = std::make_pair(empty_string(), 0);
+  if (auto const ee = dynamic_cast<const ExtendedException *>(&e)) {
+    silenced = ee->isSilent();
+    fileAndLine = ee->getFileAndLine();
   }
   // need to silence even with the AlwaysLogUnhandledExceptions flag set
   if (!silenced && RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, "\nFatal error: ", e,
-                file.c_str(), line);
+                fileAndLine.first.c_str(), fileAndLine.second);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
@@ -756,7 +744,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, "\nFatal error: ", e,
-                file.c_str(), line);
+                fileAndLine.first.c_str(), fileAndLine.second);
   }
   return handled;
 }

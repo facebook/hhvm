@@ -41,8 +41,8 @@ fi
 $SED -i -r \
      -e 's/(T_\w+)\s+=\s+([0-9]+)\s*,?/YYTOKEN(\2, \1)/g' \
      -e "s/\s+enum\s+yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num,\n#endif\n   YYTOKEN_MAP/" \
-     -e "s/#ifndef YY_COMPILER_H.*//g" \
-     -e "s/# define YY_COMPILER_H.*//g" \
+     -e "s/#ifndef YY_COMPILER_.*//g" \
+     -e "s/# define YY_COMPILER_.*//g" \
     ${OUTHEADER}
 
 # remove the include guard's #endif (-e doesn't work for this)

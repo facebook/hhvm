@@ -10,7 +10,7 @@
  */
 
 interface PlainSprintf {
-  public function format_s(?mixed $s): string;
+  public function format_s(mixed $s): string;
 }
 
 function sprintf(FormatString<PlainSprintf> $f, ...): string {

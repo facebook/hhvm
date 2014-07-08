@@ -427,6 +427,7 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case ConvCellToInt: return simplifyConvCellToInt(inst);
     case ConvCellToDbl: return simplifyConvCellToDbl(inst);
     case ConvObjToBool: return simplifyConvObjToBool(inst);
+    case ConvCellToObj: return simplifyConvCellToObj(inst);
     case Floor:         return simplifyFloor(inst);
     case Ceil:          return simplifyCeil(inst);
     case UnboxPtr:      return simplifyUnboxPtr(inst);
@@ -1214,6 +1215,16 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, const IRInstruction* inst,
     return newInst(queryToIntQueryOp(opName), src1, src2);
   }
 
+  // Dbl-dbl or dbl-int comparison lower to dbl-comparison
+  if (!isDblQueryOp(opName) &&
+      (type1 <= Type::Dbl || type2 <= Type::Dbl) &&
+      (type1.subtypeOfAny(Type::Int, Type::Dbl) &&
+       type2.subtypeOfAny(Type::Int, Type::Dbl))) {
+    return newInst(queryToDblQueryOp(opName),
+                   gen(ConvCellToDbl, src1),
+                   gen(ConvCellToDbl, src2));
+  }
+
   // ---------------------------------------------------------------------
   // For same-type cmps, canonicalize any constants to the right
   // Then stop - there are no more simplifications left
@@ -1349,10 +1360,6 @@ SSATmp* Simplifier::simplifyIsType(const IRInstruction* inst) {
   // typeParam is specialized.
   if (typeMightRelax(src) && type.isSpecialized()) return nullptr;
 
-  // The comparisons below won't work for these cases covered by this
-  // assert, and we currently don't generate these types.
-  assert(type.isKnownUnboxedDataType());
-
   // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
   // and similarly for arrays. PHP treats both types of string the same, so if
   // the distinction matters to you here, be careful.
@@ -1462,10 +1469,9 @@ SSATmp* Simplifier::simplifyConvToArr(const IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvArrToBool(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    if (src->arrVal()->empty()) {
-      return cns(false);
-    }
-    return cns(true);
+    // const_cast is safe. We're only making use of a cell helper.
+    auto arr = const_cast<ArrayData*>(src->arrVal());
+    return cns(cellToBool(make_tv<KindOfArray>(arr)));
   }
   return nullptr;
 }
@@ -1688,6 +1694,12 @@ SSATmp* Simplifier::simplifyConvObjToBool(const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* Simplifier::simplifyConvCellToObj(const IRInstruction* inst) {
+  if (inst->src(0)->isA(Type::Obj)) return inst->src(0);
+
+  return nullptr;
+}
+
 template<class Oper>
 SSATmp* Simplifier::simplifyRoundCommon(const IRInstruction* inst, Oper op) {
   auto const src  = inst->src(0);
@@ -1827,8 +1839,6 @@ SSATmp* Simplifier::simplifyCondJmp(const IRInstruction* inst) {
     auto src1Type = srcInst->src(0)->type();
     auto src2Type = srcInst->src(1)->type();
     return ((src1Type <= Type::Int && src2Type <= Type::Int) ||
-            ((src1Type <= Type::Int || src1Type <= Type::Dbl) &&
-             (src2Type <= Type::Int || src2Type <= Type::Dbl)) ||
             (src1Type <= Type::Bool && src2Type <= Type::Bool) ||
             (src1Type <= Type::Cls && src2Type <= Type::Cls));
   };

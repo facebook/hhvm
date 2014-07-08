@@ -28,19 +28,20 @@ const StaticString s_result("<result>");
 const StaticString s_exception("<exception>");
 
 void c_WaitHandle::t___construct() {
-  throw NotSupportedException(
+  throw_not_supported(
       __func__, "WaitHandles cannot be constructed directly");
 }
 
+void c_WaitHandle::ti_setoniowaitentercallback(const Variant& callback) {
+  AsioSession::Get()->setOnIOWaitEnterCallback(callback);
+}
+
+void c_WaitHandle::ti_setoniowaitexitcallback(const Variant& callback) {
+  AsioSession::Get()->setOnIOWaitExitCallback(callback);
+}
+
 void c_WaitHandle::ti_setonjoincallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set WaitHandle::onJoin: on_join_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnJoinCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnJoinCallback(callback);
 }
 
 Object c_WaitHandle::t_getwaithandle() {

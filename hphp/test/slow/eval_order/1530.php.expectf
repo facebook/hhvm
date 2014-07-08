@@ -1,0 +1,8 @@
+Warning: class_implements(): Class A does not exist in %s
+bool(false)
+string(1) "A"
+array(1) {
+  ["I"]=>
+  string(1) "I"
+}
+bool(true)

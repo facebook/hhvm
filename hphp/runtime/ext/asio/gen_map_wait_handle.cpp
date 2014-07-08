@@ -41,14 +41,7 @@ namespace {
 }
 
 void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set GenMapWaitHandle::onCreate: on_create_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnGenMapCreateCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnGenMapCreateCallback(callback);
 }
 
 Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {

@@ -135,6 +135,30 @@ add_definitions(${LIBXSLT_DEFINITIONS})
 find_package(EXPAT REQUIRED)
 include_directories(${EXPAT_INCLUDE_DIRS})
 
+# libsqlite3
+find_package(LibSQLite)
+if (LIBSQLITE_INCLUDE_DIR)
+  include_directories(${LIBSQLITE_INCLUDE_DIR})
+endif ()
+
+# libdouble-conversion
+find_package(DoubleConversion)
+if (DOUBLE_CONVERSION_INCLUDE_DIR)
+  include_directories(${DOUBLE_CONVERSION_INCLUDE_DIR})
+endif ()
+
+# liblz4
+find_package(LZ4)
+if (LZ4_INCLUDE_DIR)
+  include_directories(${LZ4_INCLUDE_DIR})
+endif()
+
+# libzip
+find_package(LibZip)
+if (LIBZIP_INCLUDE_DIR_ZIP AND LIBZIP_INCLUDE_DIR_ZIPCONF)
+  include_directories(${LIBZIP_INCLUDE_DIR_ZIP} ${LIBZIP_INCLUDE_DIR_ZIPCONF})
+endif()
+
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
@@ -289,9 +313,13 @@ if (ELF_GETSHDRSTRNDX)
   add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
 endif()
 
-find_package(Libpam)
-if (PAM_INCLUDE_PATH)
-  include_directories(${PAM_INCLUDE_PATH})
+# For some reason imap-uw is using libpam on OSX, so we need to include it as
+# an indirect dependency
+if (APPLE)
+  find_package(Libpam)
+  if (PAM_INCLUDE_PATH)
+    include_directories(${PAM_INCLUDE_PATH})
+  endif()
 endif()
 
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
@@ -373,6 +401,9 @@ macro(hphp_link target)
   target_link_libraries(${target} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${CURL_LIBRARIES})
   target_link_libraries(${target} ${LIBGLOG_LIBRARY})
+  if (LIBJSONC_LIBRARY)
+    target_link_libraries(${target} ${LIBJSONC_LIBRARY})
+  endif()
 
   if (LibXed_LIBRARY)
     target_link_libraries(${target} ${LibXed_LIBRARY})
@@ -385,7 +416,6 @@ macro(hphp_link target)
   if (LIBICONV_LIBRARY)
     target_link_libraries(${target} ${LIBICONV_LIBRARY})
   endif()
-
 
   if (LINUX)
     target_link_libraries(${target} ${CAP_LIB})
@@ -427,7 +457,7 @@ macro(hphp_link target)
   if (LIBUODBC_LIBRARIES)
     target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
   endif()
-
+ 
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
@@ -439,13 +469,33 @@ macro(hphp_link target)
     target_link_libraries(${target} ${RT_LIB})
   endif()
 
+  if (LIBSQLITE3_LIBRARY)
+    target_link_libraries(${target} ${LIBSQLITE3_LIBRARY})
+  else()
+    target_link_libraries(${target} sqlite3)
+  endif()
+  
+  if (DOUBLE_CONVERSION_LIBRARY)
+    target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
+  else() 
+    target_link_libraries(${target} double-conversion)
+  endif()
+
+  if (LZ4_LIBRARY)
+    target_link_libraries(${target} ${LZ4_LIBRARY})
+  else()
+    target_link_libraries(${target} lz4)
+  endif()
+  
+  if (LIBZIP_LIBRARY)
+    target_link_libraries(${target} ${LIBZIP_LIBRARY})
+  else()
+    target_link_libraries(${target} zip_static)
+  endif()
+
   target_link_libraries(${target} fastlz)
   target_link_libraries(${target} timelib)
-  target_link_libraries(${target} sqlite3)
-  target_link_libraries(${target} lz4)
-  target_link_libraries(${target} double-conversion)
   target_link_libraries(${target} folly)
-  target_link_libraries(${target} zip_static)
 
   target_link_libraries(${target} afdt)
   target_link_libraries(${target} mbfl)

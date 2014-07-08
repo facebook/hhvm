@@ -153,7 +153,7 @@ module HintCycle = struct
     | Hoption h -> hint stack params h
     | Hfun (hl,_, h) -> hintl stack params hl; hint stack params h
     | Happly ((_, x), []) when SSet.mem x stack ->
-        Errors.add  p "Cyclic constraint"
+        Errors.cyclic_constraint p
     | Happly ((_, x), []) when SMap.mem x params ->
         let stack = SSet.add x stack in
         (match SMap.get x params with

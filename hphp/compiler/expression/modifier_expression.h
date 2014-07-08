@@ -35,6 +35,8 @@ public:
   int getCount() const { return m_modifiers.size();}
   int operator[](int index);
 
+  bool hasDuplicates() const;
+
   /**
    * Whether the modifiers combine to mean public, including the implicit
    * public access that occurs when none of public|private|protected are

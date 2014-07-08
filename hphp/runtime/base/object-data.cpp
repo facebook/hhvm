@@ -383,6 +383,10 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   }
 }
 
+// a constant for arrayobjects that changes the way the array is
+// converted to an object
+const int64_t ARRAYOBJ_STD_PROP_LIST = 1;
+
 Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
@@ -411,9 +415,23 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
     assert(instanceof(c_SimpleXMLElement::classof()));
     return c_SimpleXMLElement::ToArray(this);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
+    bool visible, accessible, unset;
+    auto flags = this->getProp(
+      SystemLib::s_ArrayObjectClass, StaticString("flags").get(),
+      visible, accessible, unset);
+    if (UNLIKELY(!unset && flags->m_type == KindOfInt64 &&
+                 flags->m_data.num == ARRAYOBJ_STD_PROP_LIST)) {
+      Array ret(ArrayData::Create());
+      o_getArray(ret, true);
+      return ret;
+    }
     return convert_to_array(this, SystemLib::s_ArrayObjectClass);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
     return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
+  } else if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+    return Array::Create(Object(const_cast<ObjectData*>(this)));
+  } else if (UNLIKELY(instanceof(c_DateTime::classof()))) {
+    return ((c_DateTime*) this)->t___debuginfo();
   } else {
     Array ret(ArrayData::Create());
     o_getArray(ret, pubOnly);
@@ -656,6 +674,14 @@ inline Array getSerializeProps(const ObjectData* obj,
     // When ArrayIterator is casted to an array, it return it's array object,
     // however when it's being var_dump'd or print_r'd, it shows it's properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
+      Array ret(ArrayData::Create());
+      obj->o_getArray(ret);
+      return ret;
+    }
+
+    // Same with Closure, since it's a dynamic object but still has it's own
+    // different behavior for var_dump and cast to array
+    if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
       Array ret(ArrayData::Create());
       obj->o_getArray(ret);
       return ret;

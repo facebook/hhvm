@@ -13,7 +13,6 @@ node's purpose. Listed values are defaults, unless examples.
     RuntimeErrorReportingLevel = 8191
     Header = false
     HeaderMangle = 0
-    InjectedStackTrace = true
     NativeStackTrace = true
     MaxMessagesPerRequest = -1
 
@@ -25,7 +24,7 @@ PHP fatal errors, and AlwaysLogUnhandledExceptions will make sure they get
 logged even if a user's error handler is installed for them. We also provided
 RuntimeErrorReportingLevel for compatibility with PHP.
 
-- Header, InjectedStackTrace, NativeStackTrace
+- Header, NativeStackTrace
 
 These settings control log line formats. Header includes timestamp, process id,
 thread id, request id (counted from 1 since server starts), message id
@@ -37,8 +36,6 @@ and printed on every line of logging right after header. These stacktraces can
 be translated into human readable frames by running "-m translate" with the
 compiled program. (2) PHP stacktrace from code injection. Generated C++ code
 injects stacktrace preparation code into every frame of functions and methods.
-InjectedStackTrace can turn on this PHP stacktrace, which sometimes is cleaner
-than the C++ stacktrace, which can be turned on and off by NativeStackTrace.
 
 - HeaderMangle
 
@@ -84,11 +81,7 @@ flood error logs.
     CallUserHandlerOnFatals = true
     MaxLoopCount = 0
     NoInfiniteRecursionDetection = false
-    ThrowBadTypeExceptions = false
-    ThrowTooManyArguments = false
     WarnTooManyArguments = false
-    ThrowMissingArguments = false
-    ThrowInvalidArguments = false
     EnableHipHopErrors = true
     NoticeFrequency = 1    # 1 out of these many notices to log
     WarningFrequency = 1   # 1 out of these many warnings to log
@@ -327,9 +320,6 @@ These are experimental LFU settings.
     DnsCache {
       Enable = false
       TTL = 600   # in seconds
-      KeyMaturityThreshold = 20
-      MaximumCapacity = 0
-      KeyFrequencyUpdatePeriod = 1000
     }
 
     # Light process has very little forking cost, because they are pre-forked
@@ -577,7 +567,6 @@ next requests.
     Memory = false
     Malloc = false
     APC = false
-    APCKey = false
     SQL = false
     SQLTable = false
     NetworkIO = false
@@ -607,7 +596,6 @@ next requests.
 
   Debug {
     FullBacktrace = false
-    ServerStackTrace = false
     ServerErrorMessage = false
     TranslateSource = false
 
@@ -621,7 +609,7 @@ next requests.
     CoreDumpReportDirectory = /tmp
   }
 
-- FullBacktrace, ServerStackTrace, ServerErrorMessage, TranslateSource
+- FullBacktrace, ServerErrorMessage, TranslateSource
 
 These settings turn on error messages in HTTP responses with detailed
 stacktrace information. TranslateSource will translate C++ file and line

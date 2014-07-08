@@ -41,30 +41,18 @@ module Error = struct
     let pos = Reason.to_pos (fst class_elt.ce_type) in
     let parent_vis = TUtils.string_of_visibility parent_class_elt.ce_visibility in
     let vis = TUtils.string_of_visibility class_elt.ce_visibility in
-    let msg1 = pos, "This member visibility is: " ^ vis in
-    let msg2 = parent_pos, parent_vis ^ " was expected" in
-    Errors.add_list [msg1; msg2]
+    Errors.visibility_extends vis pos parent_pos parent_vis
 
   (* Method missing *)
   let member_not_implemented member_name parent_pos pos defn_pos =
-    let msg1 = pos, "This object doesn't implement the method "^member_name in
-    let msg2 = parent_pos, "Which is required by this interface" in
-    let msg3 = defn_pos, "As defined here" in
-    Errors.add_list [msg1; msg2; msg3]
+    Errors.member_not_implemented member_name parent_pos pos defn_pos
 
   (* Incompatible override *)
   let override (parent_pos, parent_name) (pos, name) error_message_l =
-    let msg1 = pos, ("This object is of type "^(strip_ns name)) in
-    let msg2 = parent_pos,
-      ("It is incompatible with this object of type "^(strip_ns parent_name)^
-       "\nbecause some of their methods are incompatible."^
-       "\nRead the following to see why:"
-      ) in
-    (* This is a cascading error message *)
-    Errors.add_list (msg1 :: msg2 :: error_message_l)
+    Errors.override parent_pos parent_name pos name error_message_l
 
   let missing_constructor pos =
-    Errors.add pos "The constructor is not implemented"
+    Errors.missing_constructor pos
 
 end
 
@@ -209,4 +197,4 @@ let check_implements env parent_type type_ =
       let class_ = pos, class_, tparaml in
       Errors.try_
         (fun () -> check_class_implements env parent_class class_)
-        (fun errorl -> Error.override parent_name name errorl)
+        (fun error -> Error.override parent_name name error)

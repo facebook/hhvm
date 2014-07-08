@@ -63,6 +63,7 @@ namespace {
 
 const StaticString s_construct("__construct");
 const StaticString s_call("__call");
+const StaticString s_get("__get");
 const StaticString s_callStatic("__callStatic");
 const StaticString s_86ctor("86ctor");
 
@@ -352,8 +353,10 @@ struct ClassInfo {
    */
   bool hasMagicCall              = false;
   bool hasMagicCallStatic        = false;
+  bool hasMagicGet               = false;
   bool derivedHasMagicCall       = false;
   bool derivedHasMagicCallStatic = false;
+  bool derivedHasMagicGet        = false;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -417,6 +420,15 @@ bool Class::couldBeOverriden() const {
     [] (SString) { return true; },
     [] (borrowed_ptr<ClassInfo> cinfo) {
       return !(cinfo->cls->attrs & AttrNoOverride);
+    }
+  );
+}
+
+bool Class::couldHaveMagicGet() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return cinfo->derivedHasMagicGet;
     }
   );
 }
@@ -946,11 +958,15 @@ void define_func_families(IndexData& index) {
   }
 }
 
-void mark_magic_on_parents(ClassInfo& cinfo, bool call, bool callStatic) {
-  if (call) cinfo.derivedHasMagicCall = true;
+void mark_magic_on_parents(ClassInfo& cinfo,
+                           bool call,
+                           bool callStatic,
+                           bool get) {
+  if (call)       cinfo.derivedHasMagicCall = true;
   if (callStatic) cinfo.derivedHasMagicCallStatic = true;
+  if (get)        cinfo.derivedHasMagicGet = true;
   if (cinfo.parent) {
-    mark_magic_on_parents(*cinfo.parent, call, callStatic);
+    mark_magic_on_parents(*cinfo.parent, call, callStatic, get);
   }
 }
 
@@ -959,11 +975,13 @@ void find_magic_methods(IndexData& index) {
     auto& methods         = cinfo->methods;
     auto const call       = methods.find(s_call.get()) != end(methods);
     auto const callStatic = methods.find(s_callStatic.get()) != end(methods);
+    auto const get        = methods.find(s_get.get()) != end(methods);
 
     cinfo->hasMagicCall       = call;
     cinfo->hasMagicCallStatic = callStatic;
-    if (call || callStatic) {
-      mark_magic_on_parents(*cinfo, call, callStatic);
+    cinfo->hasMagicGet        = get;
+    if (call || callStatic || get) {
+      mark_magic_on_parents(*cinfo, call, callStatic, get);
     }
   }
 }

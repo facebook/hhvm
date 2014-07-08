@@ -295,6 +295,12 @@ PUNT_OPCODE(Lt)
 PUNT_OPCODE(Lte)
 PUNT_OPCODE(Eq)
 PUNT_OPCODE(Neq)
+PUNT_OPCODE(GtDbl)
+PUNT_OPCODE(GteDbl)
+PUNT_OPCODE(LtDbl)
+PUNT_OPCODE(LteDbl)
+PUNT_OPCODE(EqDbl)
+PUNT_OPCODE(NeqDbl)
 PUNT_OPCODE(LtX)
 PUNT_OPCODE(GtX)
 PUNT_OPCODE(GteX)
@@ -623,7 +629,7 @@ void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
                                             TCA tca) {
   auto stackOff = m_curInst->marker().spOff();
   auto pcOff = m_curInst->marker().bcOff() - m_curInst->marker().func()->base();
-  m_mcg->recordSyncPoint(tca, pcOff, stackOff);
+  mcg->recordSyncPoint(tca, pcOff, stackOff);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1172,7 +1178,7 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
     assert_not_implemented(args.numStackArgs() == 0);
     info.rspOffset = args.numStackArgs();
   } else if (!m_curInst->is(Call, CallArray, ContEnter)) {
-    m_mcg->registerCatchBlock(a.frontier(), nullptr);
+    mcg->registerCatchBlock(a.frontier(), nullptr);
   }
 
   vixl::CPURegister armDst0(dstReg0);
@@ -1265,13 +1271,16 @@ void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
     // though; the jump instruction will be written by some other code.
     m_as.   Tst   (typeReg, KindOfStringBit);
     cc = CC_NE;
-  } else if (type.equals(Type::UncountedInit)) {
+  } else if (type == Type::Null) {
+    m_as.   Cmp   (typeReg, KindOfNull);
+    cc = CC_LE;
+  } else if (type == Type::UncountedInit) {
     m_as.   Tst   (typeReg, KindOfUncountedInitBit);
     cc = CC_NE;
-  } else if (type.equals(Type::Uncounted)) {
+  } else if (type == Type::Uncounted) {
     m_as.   Cmp   (typeReg, KindOfRefCountThreshold);
     cc = CC_LE;
-  } else if (type.equals(Type::Cell)) {
+  } else if (type == Type::Cell) {
     m_as.   Cmp   (typeReg, KindOfRef);
     cc = CC_L;
   } else {
@@ -1310,7 +1319,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
     rFP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-      auto const destSR = m_mcg->tx().getSrcRec(destSK);
+      auto const destSR = mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -1325,7 +1334,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-      auto const destSR = m_mcg->tx().getSrcRec(destSK);
+      auto const destSR = mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -1458,7 +1467,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-  auto const destSR = m_mcg->tx().getSrcRec(destSK);
+  auto const destSR = mcg->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -1544,7 +1553,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assert(m_unit.bcOff() == inst->marker().bcOff());
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-  auto const destSR = m_mcg->tx().getSrcRec(destSK);
+  auto const destSR = mcg->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
 }
 
@@ -1722,7 +1731,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
   assert(info.afterCall);
 
-  m_mcg->registerCatchBlock(info.afterCall, m_as.frontier());
+  mcg->registerCatchBlock(info.afterCall, m_as.frontier());
 
   assert(info.rspOffset == 0);
   RegSaver regSaver(info.savedRegs);

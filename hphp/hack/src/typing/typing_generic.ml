@@ -129,7 +129,6 @@ let no_generic p local_var_id env =
   match IsGeneric.ty ty with
   | None -> env
   | Some x -> 
-      Errors.add p ("This static variable cannot use the parameter "^
-                    x^".");
+      Errors.generic_static p x;
       env
 

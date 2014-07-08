@@ -149,10 +149,26 @@ TEST(Simplifier, JumpFuse) {
   }
 
   {
-    // JmpNZero(Neq(X, Y)) --> JmpNeq(X, Y)
+    // JmpNZero(Neq(X:Int, Y:Int)) --> JmpNeqInt(X, Y)
     auto taken = unit.defBlock();
-    auto x = unit.gen(Conjure, dummy, Type::Dbl);
-    auto y = unit.gen(Conjure, dummy, Type::Dbl);
+    auto x = unit.gen(Conjure, dummy, Type::Int);
+    auto y = unit.gen(Conjure, dummy, Type::Int);
+
+    auto neq = unit.gen(Neq, dummy, x->dst(), y->dst());
+    auto jmp = unit.gen(JmpNZero, dummy, taken, neq->dst());
+    auto result = sim.simplify(jmp, false);
+
+    EXPECT_EQ(nullptr, result.dst);
+    EXPECT_EQ(2, result.instrs.size());
+    EXPECT_FALSE(result.instrs[0]->isControlFlow());  // dead Neq
+    EXPECT_MATCH(result.instrs[1], JmpNeqInt, taken, x->dst(), y->dst());
+  }
+
+  {
+    // JmpNZero(Neq(X:Cls, Y:Cls)) --> JmpNeq(X, Y)
+    auto taken = unit.defBlock();
+    auto x = unit.gen(Conjure, dummy, Type::Bool);
+    auto y = unit.gen(Conjure, dummy, Type::Bool);
 
     auto neq = unit.gen(Neq, dummy, x->dst(), y->dst());
     auto jmp = unit.gen(JmpNZero, dummy, taken, neq->dst());
@@ -161,6 +177,34 @@ TEST(Simplifier, JumpFuse) {
     EXPECT_EQ(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
     EXPECT_MATCH(result.instrs[0], JmpNeq, taken, x->dst(), y->dst());
+  }
+}
+
+TEST(Simplifier, DoubleCmp) {
+  IRUnit unit{test_context};
+  Simplifier sim{unit};
+  BCMarker dummy = BCMarker::Dummy();
+
+  // Lt(X:Dbl, Y:Int) --> LtDbl(X, ConvIntToDbl(Y))
+  {
+    auto x = unit.gen(Conjure, dummy, Type::Dbl);
+    auto y = unit.gen(Conjure, dummy, Type::Int);
+    auto lt = unit.gen(Lt, dummy, x->dst(), y->dst());
+    auto result = sim.simplify(lt, false);
+
+    auto conv = result.instrs[0];
+    EXPECT_MATCH(conv, ConvIntToDbl, y->dst());
+    EXPECT_MATCH(result.instrs[1], LtDbl, x->dst(), conv->dst());
+    EXPECT_EQ(result.instrs[1]->dst(), result.dst);
+  }
+
+  // Lt(X:Dbl, 10) --> LtDbl(X, 10.0)
+  {
+    auto x  = unit.gen(Conjure, dummy, Type::Dbl);
+    auto lt = unit.gen(Lt, dummy, x->dst(), unit.cns(10));
+    auto result = sim.simplify(lt, false);
+
+    EXPECT_MATCH(result.instrs[0], LtDbl, x->dst(), unit.cns(10.0));
   }
 }
 

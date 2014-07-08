@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/file-stream-wrapper.h"
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/directory.h"

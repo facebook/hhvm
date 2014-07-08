@@ -103,7 +103,8 @@ static CType ttype_to_ctype(TType x) {
     case T_FLOAT:
       return C_FLOAT;
     default:
-      throw InvalidArgumentException("unknown TType", x);
+      raise_error("unknown TType %d", static_cast<int>(x));
+      not_reached();
   }
 }
 
@@ -129,15 +130,16 @@ static TType ctype_to_ttype(CType x) {
     case C_STRUCT:
       return T_STRUCT;
     case C_LIST:
-        return T_LIST;
+      return T_LIST;
     case C_SET:
-        return T_SET;
+      return T_SET;
     case C_MAP:
-        return T_MAP;
+      return T_MAP;
     case C_FLOAT:
-        return T_FLOAT;
+      return T_FLOAT;
     default:
-        throw InvalidArgumentException("unknown CType", x);
+      raise_error("unknown CType %d", static_cast<int>(x));
+      not_reached();
   }
 }
 
@@ -375,7 +377,7 @@ class CompactWriter {
           break;
 
         default:
-          throw InvalidArgumentException("unknown TType", type);
+          raise_error("unknown TType %d", static_cast<int>(type));
       }
     }
 
@@ -720,7 +722,8 @@ class CompactReader {
           return readSet(spec);
 
         default:
-          throw InvalidArgumentException("unknown TType", type);
+          raise_error("unknown TType %d", static_cast<int>(type));
+          not_reached();
       }
     }
 
@@ -815,7 +818,7 @@ class CompactReader {
           break;
 
         default:
-          throw InvalidArgumentException("unknown TType", type);
+          raise_error("unknown TType %d", static_cast<int>(type));
       }
     }
 

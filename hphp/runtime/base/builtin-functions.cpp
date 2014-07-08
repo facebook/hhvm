@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -360,7 +360,11 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
 static Variant invoke_failed(const char *func,
                              bool fatal /* = true */) {
   if (fatal) {
-    throw InvalidFunctionCallException(func);
+    throw ExtendedException("(1) call the function without enough arguments OR "
+                            "(2) Unable to find function \"%s\" OR "
+                            "(3) function was not in invoke table OR "
+                            "(4) function was renamed to something else.",
+                            func);
   }
   raise_warning("call_user_func to non-existent function %s", func);
   return false;
@@ -432,10 +436,9 @@ void NEVER_INLINE throw_null_object_prop() {
 
 void NEVER_INLINE throw_invalid_property_name(const String& name) {
   if (!name.size()) {
-    throw EmptyObjectPropertyException();
-  } else {
-    throw NullStartObjectPropertyException();
+    raise_error("Cannot access empty property");
   }
+  raise_error("Cannot access property started with '\\0'");
 }
 
 void throw_instance_method_fatal(const char *name) {
@@ -528,7 +531,7 @@ void throw_missing_min_arguments_nr(const char *fn, int expected, int got,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  if (level == 2 || RuntimeOption::ThrowMissingArguments) {
+  if (level == 2) {
     if (expected == 1) {
       raise_error(Strings::MISSING_MIN_ARGUMENT, fn, got);
     } else {
@@ -550,7 +553,7 @@ void throw_missing_arguments_nr(const char *fn, int expected, int got,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  if (level == 2 || RuntimeOption::ThrowMissingArguments) {
+  if (level == 2) {
     if (expected == 1) {
       raise_error(Strings::MISSING_ARGUMENT, fn, "exactly", got);
     } else {
@@ -571,7 +574,7 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  if (level == 2 || RuntimeOption::ThrowTooManyArguments) {
+  if (level == 2) {
     raise_error("Too many arguments for %s(), expected %d", fn, num);
   } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
     raise_warning("Too many arguments for %s(), expected %d", fn, num);
@@ -603,13 +606,9 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
 void throw_bad_type_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  string msg;
+  std::string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-
-  if (RuntimeOption::ThrowBadTypeExceptions) {
-    throw InvalidOperandException(msg.c_str());
-  }
 
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
@@ -638,11 +637,6 @@ void throw_invalid_argument(const char *fmt, ...) {
   string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-
-  if (RuntimeOption::ThrowInvalidArguments) {
-    throw InvalidArgumentException(msg.c_str());
-  }
-
   raise_warning("Invalid argument: %s", msg.c_str());
 }
 
@@ -662,19 +656,13 @@ Exception* generate_request_timeout_exception() {
     "entire web request took longer than ";
   exceptionMsg += folly::to<std::string>(data.getTimeout());
   exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
-  Array exceptionStack;
-  if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_context->debugBacktrace(false, true, true);
-  }
+  Array exceptionStack = g_context->debugBacktrace(false, true, true);
   ret = new RequestTimeoutException(exceptionMsg, exceptionStack);
   return ret;
 }
 
 Exception* generate_memory_exceeded_exception() {
-  Array exceptionStack;
-  if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_context->debugBacktrace(false, true, true);
-  }
+  Array exceptionStack = g_context->debugBacktrace(false, true, true);
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack);
 }
@@ -740,8 +728,7 @@ String concat4(const String& s1, const String& s2, const String& s3,
 static bool invoke_file_impl(Variant& res, const String& path, bool once,
                              const char *currentDir) {
   bool initial;
-  auto const u = g_context->lookupPhpFile(path.get(),
-    currentDir, &initial);
+  auto const u = lookupUnit(path.get(), currentDir, &initial);
   if (u == nullptr) return false;
   if (!once || initial) {
     g_context->invokeUnit(res.asTypedValue(), u);
@@ -750,7 +737,6 @@ static bool invoke_file_impl(Variant& res, const String& path, bool once,
 }
 
 static NEVER_INLINE Variant throw_missing_file(const char* file) {
-  if (file[0] == '\0') throw NoFileSpecifiedException();
   throw PhpFileDoesNotExistException(file);
 }
 

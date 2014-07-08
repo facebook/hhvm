@@ -342,10 +342,10 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
 
   and typedef = function
     | Typing_env.Typedef.Error as x -> x
-    | Typing_env.Typedef.Ok (is_abstract, tparams, tcstr, h) ->
+    | Typing_env.Typedef.Ok (is_abstract, tparams, tcstr, h, pos) ->
         let tparams = List.map type_param tparams in
         let tcstr = ty_opt tcstr in
-        let tdef = (is_abstract, tparams, tcstr, ty h) in
+        let tdef = (is_abstract, tparams, tcstr, ty h, pos) in
         Typing_env.Typedef.Ok tdef
 end
 

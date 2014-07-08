@@ -1,0 +1,487 @@
+= test_call_array_equivalent =
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* regular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* variadic
+string(1) "a"
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+* C::stRegular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::stVariadic
+string(1) "a"
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+* C::__callStatic for stMagic
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+* C::__construct
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::regular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::variadic
+string(1) "a"
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+* C::__call for magic
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+= test_call_array_equivalent =
+object(HH\Vector)#1 (3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* regular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* variadic
+string(1) "a"
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+* C::stRegular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::stVariadic
+string(1) "a"
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+* C::__callStatic for stMagic
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+* C::__construct
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::regular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::variadic
+string(1) "a"
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+* C::__call for magic
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+= test_param_mix =
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* variadic
+string(16) "passed regularly"
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::stVariadic
+string(16) "passed regularly"
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+* C::__callStatic for stMagic
+array(4) {
+  [0]=>
+  string(16) "passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::variadic
+string(16) "passed regularly"
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+* C::__call for magic
+array(4) {
+  [0]=>
+  string(16) "passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+
+* variadic
+string(16) "passed regularly"
+array(4) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* variadic
+string(16) "passed regularly"
+array(4) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::stVariadic
+string(16) "passed regularly"
+array(4) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* C::__callStatic for stMagic
+array(5) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(16) "passed regularly"
+  [2]=>
+  string(1) "a"
+  [3]=>
+  string(1) "b"
+  [4]=>
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::variadic
+string(16) "passed regularly"
+array(4) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* C::__call for magic
+array(5) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(16) "passed regularly"
+  [2]=>
+  string(1) "a"
+  [3]=>
+  string(1) "b"
+  [4]=>
+  string(1) "c"
+}
+
+= test_param_mix =
+object(HH\Vector)#1 (3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* variadic
+string(16) "passed regularly"
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::stVariadic
+string(16) "passed regularly"
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+* C::__callStatic for stMagic
+array(4) {
+  [0]=>
+  string(16) "passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::variadic
+string(16) "passed regularly"
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+* C::__call for magic
+array(4) {
+  [0]=>
+  string(16) "passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+
+* variadic
+string(16) "passed regularly"
+array(4) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* variadic
+string(16) "passed regularly"
+array(4) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::stVariadic
+string(16) "passed regularly"
+array(4) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* C::__callStatic for stMagic
+array(5) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(16) "passed regularly"
+  [2]=>
+  string(1) "a"
+  [3]=>
+  string(1) "b"
+  [4]=>
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::variadic
+string(16) "passed regularly"
+array(4) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+* C::__call for magic
+array(5) {
+  [0]=>
+  string(21) "also passed regularly"
+  [1]=>
+  string(16) "passed regularly"
+  [2]=>
+  string(1) "a"
+  [3]=>
+  string(1) "b"
+  [4]=>
+  string(1) "c"
+}
+
+Done

@@ -246,7 +246,7 @@ public:
   void onExpStatement(Token &out, Token &expr);
   void onForEachStart();
   void onForEach(Token &out, Token &arr, Token &name, Token &value,
-                 Token &stmt);
+                 Token &stmt, bool awaitAs);
   void onTry(Token &out, Token &tryStmt, Token &className, Token &var,
              Token &catchStmt, Token &catches, Token &finallyStmt);
   void onTry(Token &out, Token &tryStmt, Token &finallyStmt);
@@ -348,7 +348,7 @@ private:
     {}
 
     void checkFinalAssertions() {
-      assert(!isGenerator || (!isAsync && !hasNonEmptyReturn));
+      assert(!isGenerator || !hasNonEmptyReturn);
     }
 
     bool hasNonEmptyReturn; // function contains a non-empty return statement
@@ -393,10 +393,10 @@ private:
   void setHasNonEmptyReturn(ConstructPtr blame);
 
   void invalidYield();
-  bool setIsGenerator();
+  void setIsGenerator();
 
   void invalidAwait();
-  bool setIsAsync();
+  void setIsAsync();
 
   static bool canBeAsyncOrGenerator(string funcName, string clsName);
   void checkFunctionContext(string funcName,

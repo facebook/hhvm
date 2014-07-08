@@ -16,7 +16,7 @@ type env = {
 let main env =
   if ClientUtils.server_exists env.root
   then begin
-    ClientStop.kill_server env.root;
+    HackClientStop.kill_server env.root;
     ClientStart.start_server ~wait:env.wait env.root
   end else Printf.fprintf stderr "Error: no server to restart for %s\n%!"
     (Path.string_of_path env.root)

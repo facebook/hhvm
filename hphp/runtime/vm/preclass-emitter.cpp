@@ -19,9 +19,11 @@
 
 #include "folly/Memory.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
 
@@ -87,12 +89,12 @@ void PreClassEmitter::addInterface(const StringData* n) {
 }
 
 bool PreClassEmitter::addMethod(FuncEmitter* method) {
-  MethodMap::const_iterator it = m_methodMap.find(method->name());
+  MethodMap::const_iterator it = m_methodMap.find(method->name);
   if (it != m_methodMap.end()) {
     return false;
   }
   m_methods.push_back(method);
-  m_methodMap[method->name()] = method;
+  m_methodMap[method->name] = method;
   return true;
 }
 
@@ -187,6 +189,8 @@ void PreClassEmitter::setBuiltinClassInfo(const ClassInfo* info,
   m_builtinODOffset = extents.odOffsetBytes;
 }
 
+const StaticString s_nativedata("__nativedata");
+
 PreClass* PreClassEmitter::create(Unit& unit) const {
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&
@@ -207,7 +211,31 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_requirements = m_requirements;
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
-  pc->setUserAttributes(m_userAttributes);
+
+  // Set user attributes.
+  [&] {
+    pc->m_userAttributes = m_userAttributes;
+    pc->m_nativeDataInfo = nullptr;
+    if (!m_userAttributes.size()) return;
+
+    // Check for <<__NativeData("Type")>>.
+    auto it = m_userAttributes.find(s_nativedata.get());
+    if (it == m_userAttributes.end()) return;
+
+    TypedValue ndiInfo = it->second;
+    if (ndiInfo.m_type != KindOfArray) return;
+
+    // Use the first string label which references a registered type.  In
+    // practice, there should generally only be one item and it should be a
+    // string, but maybe that'll be extended...
+    for (ArrayIter it(ndiInfo.m_data.parr); it; ++it) {
+      Variant val = it.second();
+      if (!val.isString()) continue;
+
+      pc->m_nativeDataInfo = Native::getNativeDataInfo(val.toString().get());
+      if (pc->m_nativeDataInfo) break;
+    }
+  }();
 
   PreClass::MethodMap::Builder methodBuild;
   for (MethodVec::const_iterator it = m_methods.begin();

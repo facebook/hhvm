@@ -91,6 +91,27 @@ object(HH\ImmVector)#4 (3) {
   [2]=>
   int(3)
 }
+------ addAllKeysOf -------
+object(HH\Vector)#3 (5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(42)
+  [4]=>
+  int(43)
+}
+object(HH\ImmVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
 ------ pop -------
 object(HH\Vector)#3 (2) {
   [0]=>

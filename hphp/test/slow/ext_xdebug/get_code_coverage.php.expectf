@@ -1,0 +1,41 @@
+float(0.425)
+float(2.925)
+float(5.425)
+float(7.925)
+float(10.425)
+float(12.925)
+float(0.425)
+float(2.925)
+float(5.425)
+float(7.925)
+float(10.425)
+float(12.925)
+float(15.425)
+float(17.925)
+float(20.425)
+float(22.925)
+array(1) {
+  ["%s/test/slow/ext_xdebug/get_code_coverage.php"]=>
+  array(10) {
+    [2]=>
+    int(1)
+    [5]=>
+    int(16)
+    [6]=>
+    int(16)
+    [9]=>
+    int(36)
+    [10]=>
+    int(32)
+    [11]=>
+    int(18)
+    [12]=>
+    int(2)
+    [14]=>
+    int(2)
+    [15]=>
+    int(2)
+    [17]=>
+    int(1)
+  }
+}

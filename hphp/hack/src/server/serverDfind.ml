@@ -45,19 +45,16 @@ let dfind genv (root:Path.path) retries =
 
 let dfind genv root = dfind genv root 20
 
-let rec get_updates_ (acc_php, acc_js, hhconfig_changed) genv root =
+let rec get_updates_ (acc_php, acc_js) genv root =
   let diff = dfind genv root in
   let diff_php = SSet.filter Find.is_php_path diff in
   let diff_js = SSet.filter Find.is_js_path diff in
-  let hhconfig_changed = hhconfig_changed ||
-    SSet.exists (fun x -> Filename.check_suffix x ".hhconfig") diff in
   if SSet.is_empty diff
-  then acc_php, acc_js, hhconfig_changed
+  then acc_php, acc_js
   else begin
     let acc_php = SSet.union diff_php acc_php in
     let acc_js = SSet.union diff_js acc_js in
-    get_updates_ (acc_php, acc_js, hhconfig_changed) genv root
+    get_updates_ (acc_php, acc_js) genv root
   end
 
-let get_updates genv root =
-  get_updates_ (SSet.empty, SSet.empty, false) genv root
+let get_updates genv root = get_updates_ (SSet.empty, SSet.empty) genv root

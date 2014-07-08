@@ -18,13 +18,14 @@
 
 #include <cstdint>
 #include <limits>
-
-#include <sys/time.h>
-#include <sys/resource.h>
+#include <stdexcept>
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
+
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #include "folly/String.h"
 
@@ -70,8 +71,6 @@ std::string RuntimeOption::LogFileSymLink;
 int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
-bool RuntimeOption::InjectedStackTrace = true;
-int RuntimeOption::InjectedStackTraceLimit = -1;
 bool RuntimeOption::NoSilencer = false;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
@@ -83,11 +82,7 @@ std::string RuntimeOption::ServerUser;
 int RuntimeOption::MaxLoopCount = 0;
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
-bool RuntimeOption::ThrowBadTypeExceptions = false;
-bool RuntimeOption::ThrowTooManyArguments = false;
 bool RuntimeOption::WarnTooManyArguments = false;
-bool RuntimeOption::ThrowMissingArguments = false;
-bool RuntimeOption::ThrowInvalidArguments = false;
 bool RuntimeOption::EnableHipHopErrors = true;
 bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
@@ -278,7 +273,6 @@ int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
 bool RuntimeOption::TranslateLeakStackTrace = false;
 bool RuntimeOption::NativeStackTrace = false;
 bool RuntimeOption::FullBacktrace = false;
-bool RuntimeOption::ServerStackTrace = false;
 bool RuntimeOption::ServerErrorMessage = false;
 bool RuntimeOption::TranslateSource = false;
 bool RuntimeOption::RecordInput = false;
@@ -373,14 +367,6 @@ bool RuntimeOption::GetServerCustomBoolSetting(const std::string &settingName,
 
 static inline std::string regionSelectorDefault() {
   return "tracelet";
-}
-
-static inline bool hhirBytecodeControlFlowDefault() {
-#ifdef HHVM_BYTECODE_CONTROL_FLOW
-  return true;
-#else
-  return false;
-#endif
 }
 
 static inline bool pgoDefault() {
@@ -665,11 +651,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     ));
 
     Config::Bind(Logger::LogHeader, ini, logger["Header"]);
-    bool logInjectedStackTrace = Config::GetBool(ini, logger["InjectedStackTrace"]);
-    if (logInjectedStackTrace) {
-      Logger::SetTheLogger(new ExtendedLogger());
-      ExtendedLogger::EnabledByDefault = true;
-    }
     Config::Bind(Logger::LogNativeStackTrace, ini, logger["NativeStackTrace"],
                  true);
     Config::Bind(Logger::MaxMessagesPerRequest, ini,
@@ -750,11 +731,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(MaxLoopCount, ini, error["MaxLoopCount"], 0);
     Config::Bind(NoInfiniteRecursionDetection, ini,
                  error["NoInfiniteRecursionDetection"]);
-    Config::Bind(ThrowBadTypeExceptions, ini, error["ThrowBadTypeExceptions"]);
-    Config::Bind(ThrowTooManyArguments, ini, error["ThrowTooManyArguments"]);
     Config::Bind(WarnTooManyArguments, ini, error["WarnTooManyArguments"]);
-    Config::Bind(ThrowMissingArguments, ini, error["ThrowMissingArguments"]);
-    Config::Bind(ThrowInvalidArguments, ini, error["ThrowInvalidArguments"]);
     Config::Bind(EnableHipHopErrors, ini, error["EnableHipHopErrors"], true);
     Config::Bind(AssertActive, ini, error["AssertActive"]);
     Config::Bind(AssertWarning, ini, error["AssertWarning"]);
@@ -842,8 +819,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                  EnableEmitterStats);
     Config::Bind(RecordCodeCoverage, ini, eval["RecordCodeCoverage"]);
     if (EvalJit && RecordCodeCoverage) {
-      throw InvalidArgumentException(
-        "code coverage", "Code coverage is not supported for Eval.Jit=true");
+      throw std::runtime_error("Code coverage is not supported with "
+        "Eval.Jit=true");
     }
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, eval["CodeCoverageOutputFile"]);
@@ -1159,10 +1136,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                  "./lightprocess");
     Config::Bind(LightProcessCount, ini, server["LightProcessCount"], 0);
 
-    Config::Bind(InjectedStackTrace, ini, server["InjectedStackTrace"], true);
-    Config::Bind(InjectedStackTraceLimit, ini,
-                 server["InjectedStackTraceLimit"], -1);
-
     Config::Bind(ForceServerNameToHeader, ini,
                  server["ForceServerNameToHeader"]);
 
@@ -1191,8 +1164,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       }
       for (unsigned int i = 0; i < VirtualHosts.size(); i++) {
         if (!VirtualHosts[i]->valid()) {
-          throw InvalidArgumentException("virtual host",
-                                         "missing prefix or pattern");
+          throw std::runtime_error("virtual host missing prefix or pattern");
         }
       }
     }
@@ -1302,7 +1274,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(TranslateLeakStackTrace, ini,
                  debug["TranslateLeakStackTrace"]);
     Config::Bind(FullBacktrace, ini, debug["FullBacktrace"]);
-    Config::Bind(ServerStackTrace, ini, debug["ServerStackTrace"]);
     Config::Bind(ServerErrorMessage, ini, debug["ServerErrorMessage"]);
     Config::Bind(TranslateSource, ini, debug["TranslateSource"]);
     Config::Bind(RecordInput, ini, debug["RecordInput"]);

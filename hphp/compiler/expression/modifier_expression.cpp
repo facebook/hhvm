@@ -72,6 +72,19 @@ bool ModifierExpression::hasModifier(int modifier) const {
   return false;
 }
 
+bool ModifierExpression::hasDuplicates() const {
+  std::set<int> seen;
+  for (unsigned int i = 0; i < m_modifiers.size(); i++) {
+    if (seen.find(m_modifiers[i]) != seen.end()) {
+      return true;
+    }
+
+    seen.insert(m_modifiers[i]);
+  }
+
+  return false;
+}
+
 bool ModifierExpression::isExplicitlyPublic() const {
   return hasModifier(T_PUBLIC);
 }

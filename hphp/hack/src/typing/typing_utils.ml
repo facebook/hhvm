@@ -53,28 +53,9 @@ let rec is_option env ty =
 let uerror r1 ty1 r2 ty2 =
   let ty1 = Typing_print.error ty1 in
   let ty2 = Typing_print.error ty2 in
-  Errors.add_list (
-    (Reason.to_string ("This is " ^ ty1) r1) @
+  Errors.unify_error
+    (Reason.to_string ("This is " ^ ty1) r1)
     (Reason.to_string ("It is incompatible with " ^ ty2) r2)
-  )
-
-let handle_class_type completion_type c =
-  match completion_type, c.Typing_defs.tc_kind with
-  | Some Autocomplete.Acid, Ast.Cnormal
-  | Some Autocomplete.Acid, Ast.Cabstract
-  | Some Autocomplete.Acnew, Ast.Cnormal
-  | Some Autocomplete.Actype, _ -> true
-  | _ -> false
-
-let should_complete_fun completion_type name =
-  match (Typing_env.Funs.get name) with
-  | Some _ when completion_type = (Some Autocomplete.Acid) -> true
-  | _ -> false
-
-let should_complete_class completion_type name =
-  match (Typing_env.Classes.get name) with
-  | Some c when handle_class_type completion_type c -> true
-  | _ -> false
 
 let is_argument_info_target p =
   match !argument_info_target with
@@ -141,9 +122,7 @@ let apply_shape ~f env (r1, fdm1) (r2, fdm2) =
     | None ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in
-        Errors.add_list
-          [pos2, "The field '"^name^"' is missing";
-           pos1, "The field '"^name^"' is defined"];
+        Errors.missing_field pos2 pos1 name;
         env
     | Some ty2 ->
         f env ty1 ty2

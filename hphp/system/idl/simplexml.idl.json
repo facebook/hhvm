@@ -104,79 +104,6 @@
                     "desc": "You may use this optional parameter so that simplexml_load_file() will return an object of the specified class. That class should extend the SimpleXMLElement class."
                 }
             ]
-        },
-        {
-            "name": "libxml_get_errors",
-            "desc": "Retrieve array of errors.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Returns an array with LibXMLError objects if there are any errors in the buffer, or an empty array otherwise."
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "libxml_get_last_error",
-            "desc": "Retrieve last error from libxml.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Returns a LibXMLError object if there is any error in the buffer, FALSE otherwise."
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "libxml_clear_errors",
-            "desc": "libxml_clear_errors() clears the libxml error buffer.",
-            "flags": [
-            ],
-            "return": {
-                "type": null,
-                "desc": "No value is returned."
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "libxml_use_internal_errors",
-            "desc": "libxml_use_internal_errors() allows you to disable standard libxml errors and enable user error handling.",
-            "flags": [
-                "ParamCoerceModeNull"
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "This function returns the previous value of use_errors."
-            },
-            "args": [
-                {
-                    "name": "use_errors",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "Whether to enable user error handling."
-                }
-            ]
-        },
-        {
-            "name": "libxml_disable_entity_loader",
-            "desc": "Disable\/enable the ability to load external entities.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "Returns the previous value."
-            },
-            "args": [
-                {
-                    "name": "disable",
-                    "type": "Boolean",
-                    "value": "true",
-                    "desc": "Disable (TRUE) or enable (FALSE) libxml extensions (such as DOM, XMLWriter and XMLReader) to load external entities."
-                }
-            ]
         }
     ],
     "classes": [
@@ -582,27 +509,6 @@
                             "name": "name",
                             "type": "Variant"
                         }
-                    ]
-                }
-            ],
-            "consts": [
-            ]
-        },
-        {
-            "name": "LibXMLError",
-            "desc": null,
-            "flags": [
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
                     ]
                 }
             ],

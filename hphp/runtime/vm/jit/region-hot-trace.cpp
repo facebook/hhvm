@@ -135,6 +135,11 @@ RegionDescPtr selectHotTrace(TransID triggerId,
   // This can go away once task #4157613 is done.
   hphp_hash_map<RegionDesc::BlockId, SrcKeySet> succSKSet;
 
+  // Maps from BlockIds to accumulated post conditions for that block.
+  // Used to determine if we can add branch-over edges by checking the
+  // pre-conditions of the successor block.
+  hphp_hash_map<RegionDesc::BlockId, PostConditions> blockPostConds;
+
   while (!selectedSet.count(tid)) {
 
     RegionDescPtr blockRegion = profData->transRegion(tid);
@@ -202,7 +207,8 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       }
     }
     if (region->blocks.size() > 0) {
-      auto newBlockId  = blockRegion->blocks.front().get()->id();
+      auto& newBlock   = blockRegion->blocks.front();
+      auto newBlockId  = newBlock->id();
       auto predBlockId = region->blocks.back().get()->id();
       if (!RuntimeOption::EvalHHIRBytecodeControlFlow) {
         region->addArc(predBlockId, newBlockId);
@@ -226,7 +232,8 @@ RegionDescPtr selectHotTrace(TransID triggerId,
           if (cfg.hasArc(otherTransId, newTransId) &&
               !other.get()->inlinedCallee() &&
               // Task #4157613 will allow the following check to go away
-              !succSKSet[otherBlockId].count(newBlockSrcKey)) {
+              !succSKSet[otherBlockId].count(newBlockSrcKey) &&
+              preCondsAreSatisfied(newBlock, blockPostConds[otherBlockId])) {
             region->addArc(otherBlockId, newBlockId);
             succSKSet[otherBlockId].insert(newBlockSrcKey);
           }
@@ -236,7 +243,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
               cfg.hasArc(newTransId, otherTransId) &&
               // Task #4157613 will allow the following check to go away
               !succSKSet[newBlockId].count(otherBlockSrcKey)) {
-            region->addArc(newTransId, otherTransId);
+            region->addArc(newBlockId, otherBlockId);
             succSKSet[newBlockId].insert(otherBlockSrcKey);
           }
         }
@@ -270,6 +277,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     discardPoppedTypes(accumPostConds,
                        blockRegion->blocks[0]->initialSpOffset());
     mergePostConds(accumPostConds, lastNewBlock->postConds());
+    blockPostConds[lastNewBlock->id()] = accumPostConds;
 
     TransCFG::ArcPtrVec possibleOutArcs;
     for (auto arc : outArcs) {

@@ -574,6 +574,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left T_LOGICAL_AND
 %right T_PRINT
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
+%right T_AWAIT T_YIELD
 %left '?' ':'
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND
@@ -671,8 +672,6 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_DIR
 %token T_NS_SEPARATOR
 
-%token T_YIELD
-
 %token T_XHP_LABEL
 %token T_XHP_TEXT
 %token T_XHP_ATTRIBUTE
@@ -704,7 +703,6 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_UNRESOLVED_NEWTYPE
 
 %token T_COMPILER_HALT_OFFSET
-%right T_AWAIT
 %token T_ASYNC
 
 %right T_FROM
@@ -934,7 +932,14 @@ statement:
     foreach_optional_arg ')'           { _p->onNewLabelScope(false);
                                          _p->pushLabelScope();}
     foreach_statement                  { _p->popLabelScope();
-                                         _p->onForEach($$,$3,$5,$6,$9);
+                                         _p->onForEach($$,$3,$5,$6,$9, false);
+                                         _p->onCompleteLabelScope(false);}
+  | T_FOREACH '(' expr
+    T_AWAIT T_AS foreach_variable
+    foreach_optional_arg ')'           { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
+    foreach_statement                  { _p->popLabelScope();
+                                         _p->onForEach($$,$3,$6,$7,$10, true);
                                          _p->onCompleteLabelScope(false);}
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
@@ -1854,6 +1859,7 @@ lambda_body:
 shape_keyname:
     T_CONSTANT_ENCAPSED_STRING        { validate_shape_keyname($1, _p);
                                         _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $1); }
+  | class_constant                    { $$ = $1 }
 ;
 
 non_empty_shape_pair_list:
@@ -2755,16 +2761,22 @@ hh_typeargs_opt:
   |                                    { $$.reset(); }
 ;
 
-hh_type_list:
+hh_non_empty_type_list:
     hh_type                            { Token t; t.reset();
                                          _p->onTypeList($1, t);
                                          $$ = $1; }
-  | hh_type_list ',' hh_type           { _p->onTypeList($1, $3);
+  | hh_non_empty_type_list ',' hh_type { _p->onTypeList($1, $3);
                                          $$ = $1; }
 ;
 
+hh_type_list:
+    hh_non_empty_type_list
+    possible_comma                     { $$ = $1; }
+;
+
 hh_func_type_list:
-  hh_type_list ',' T_ELLIPSIS          { $$ = $1; }
+    hh_non_empty_type_list
+    ',' T_ELLIPSIS                     { $$ = $1; }
   | hh_type_list                       { $$ = $1; }
   | T_ELLIPSIS                         { $$.reset(); }
   |                                    { $$.reset(); }
@@ -2788,6 +2800,12 @@ hh_shape_member_type:
     T_CONSTANT_ENCAPSED_STRING
       T_DOUBLE_ARROW
       hh_type                      { validate_shape_keyname($1, _p); }
+ |  class_namespace_string_typeargs
+      T_DOUBLE_COLON
+      ident
+     T_DOUBLE_ARROW
+      hh_type                      { }
+
 ;
 
 hh_non_empty_shape_member_list:
@@ -2842,7 +2860,9 @@ hh_type:
                                         _p->onTypeList($7, $4);
                                         _p->onTypeAnnotation($$, $2, $7);
                                         _p->onTypeSpecialization($$, 'f'); }
-  | '(' hh_type_list ',' hh_type ')'  { only_in_hh_syntax(_p);
+  | '(' hh_type ','
+    hh_non_empty_type_list
+    possible_comma ')'                { only_in_hh_syntax(_p);
                                         _p->onTypeList($2, $4);
                                         Token t; t.reset(); t.setText("array");
                                         _p->onTypeAnnotation($$, t, $2);

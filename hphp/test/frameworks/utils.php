@@ -5,7 +5,7 @@ require_once __DIR__.'/Options.php';
 class TimeoutException extends Exception {
 }
 
-const INSTALL_TIMEOUT_SECS = 10 * 60; // 10 minutes
+const INSTALL_TIMEOUT_SECS = 600;
 const NETWORK_RETRIES = 3;
 
 // For determining number of processes
@@ -36,9 +36,9 @@ function remove_dir_recursive(string $root_dir) {
 
   foreach ($files as $fileinfo) {
     if ($fileinfo->isDir()) {
-      rmdir($fileinfo->getRealPath());
+      rmdir($fileinfo->getPathname());
     } else {
-      unlink($fileinfo->getRealPath());
+      unlink($fileinfo->getPathname());
     }
   }
 
@@ -346,7 +346,10 @@ function run_install_impl(string $proc, string $path, ?Map $env): ?int
   // If you have this set, it probably points to hhvm objects, not OSS
   // objects. Misses here seem to be a huge slowdown, causing problems with
   // fbmake timeouts.
-  if (array_key_exists('GIT_ALTERNATE_OBJECT_DIRECTORIES', $env_arr)) {
+  if (
+    $env_arr !== null &&
+    array_key_exists('GIT_ALTERNATE_OBJECT_DIRECTORIES', $env_arr)
+  ) {
     unset($env_arr['GIT_ALTERNATE_OBJECT_DIRECTORIES']);
   }
 

@@ -45,7 +45,7 @@ void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
   a.    movq   (rVmSp, rAsm);  // copy to destroy
   a.    andq   (stackMask, rAsm);
   a.    subq   (funcDepth + Stack::sSurprisePageSize, rAsm);
-  a.    jl     (tx->uniqueStubs.stackOverflowHelper);
+  a.    jl     (mcg->tx().uniqueStubs.stackOverflowHelper);
 }
 
 /*
@@ -102,7 +102,7 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   } else {
     a.  cmpq   (funcImm.l(), rStashedAR[AROFF(m_func)]);
   }
-  a.    jnz    (tx->uniqueStubs.funcPrologueRedispatch);
+  a.    jnz    (mcg->tx().uniqueStubs.funcPrologueRedispatch);
 
   assert(funcPrologueToGuard(a.frontier(), func) == aStart);
   assert(funcPrologueHasGuard(a.frontier(), func));
@@ -129,13 +129,13 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   Asm a { mcg->code.main() };
 
-  if (tx->mode() == TransKind::Proflogue) {
+  if (mcg->tx().mode() == TransKind::Proflogue) {
     assert(func->shouldPGO());
-    TransID transId  = tx->profData()->curTransID();
-    auto counterAddr = tx->profData()->transCounterAddr(transId);
+    TransID transId  = mcg->tx().profData()->curTransID();
+    auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
     a.movq(counterAddr, rAsm);
     a.decq(rAsm[0]);
-    tx->profData()->setProfiling(func->getFuncId());
+    mcg->tx().profData()->setProfiling(func->getFuncId());
   }
 
   // Note: you're not allowed to use rVmSp around here for anything in
@@ -369,7 +369,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
     }
     emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
   }
-  mcg->cgFixups().process();
+  mcg->cgFixups().process(nullptr);
   return start;
 }
 

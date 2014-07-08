@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -158,6 +159,10 @@ struct ConstantExistsChecker {
 };
 }
 
+const StaticString
+  s_file("file"),
+  s_line("line");
+
 template <class T>
 AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
                                                      const String& kind,
@@ -187,17 +192,23 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
         VMRegAnchor _;
         bool initial;
         auto const ec = g_context.getNoCheck();
-        Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
-        if (u) {
+        auto const unit = lookupUnit(fName.get(), "", &initial);
+        if (unit) {
           if (initial) {
             TypedValue retval;
-            ec->invokeFunc(&retval, u->getMain(), init_null_variant,
+            ec->invokeFunc(&retval, unit->getMain(), init_null_variant,
                            nullptr, nullptr, nullptr, nullptr,
                            ExecutionContext::InvokePseudoMain);
             tvRefcountedDecRef(&retval);
           }
           ok = true;
         }
+      } catch (ExtendedException& ee) {
+        auto fileAndLine = ee.getFileAndLine();
+        err = (fileAndLine.first.empty()) ? ee.getMessage()
+          : folly::format("{0} in {1} on line {2}",
+                          ee.getMessage(), fileAndLine.first.c_str(),
+                          fileAndLine.second).str();
       } catch (Exception& e) {
         err = e.getMessage();
       } catch (Object& e) {

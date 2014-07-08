@@ -62,9 +62,9 @@ void for_each(const std::vector<Item>& inputs, Func func) {
     workers.push_back(std::thread([&] {
       try {
         hphp_session_init();
-        auto const context = hphp_context_init();
+        hphp_context_init();
         SCOPE_EXIT {
-          hphp_context_exit(context, false /* psp */);
+          hphp_context_exit();
           hphp_session_exit();
           hphp_thread_exit();
         };
@@ -116,9 +116,9 @@ map(const std::vector<Item>& inputs, Func func) {
     workers.push_back(std::thread([&] {
       try {
         hphp_session_init();
-        auto const context = hphp_context_init();
+        hphp_context_init();
         SCOPE_EXIT {
-          hphp_context_exit(context, false /* psp */);
+          hphp_context_exit();
           hphp_session_exit();
           hphp_thread_exit();
         };

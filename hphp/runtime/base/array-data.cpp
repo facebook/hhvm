@@ -102,6 +102,16 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
     MixedArray::entry                           \
   },
 
+#define DISPATCH_INTMAP_SPECIALIZED(entry)      \
+  { PackedArray::entry,                         \
+    MixedArray::entry,                          \
+    APCLocalArray::entry,                       \
+    EmptyArray::entry,                          \
+    NameValueTableWrapper::entry,               \
+    ProxyArray::entry,                          \
+    MixedArray::entry##Impl<ArrayData::kIntMapKind>   \
+  },
+
 /*
  * "Copy/grow" semantics:
  *
@@ -159,7 +169,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   must not be an integer-like string.  Returns nullptr if the key
    *   is not in the array.
    */
-  DISPATCH(NvGetStr)
+  DISPATCH_INTMAP_SPECIALIZED(NvGetStr)
 
   /*
    * void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos)
@@ -184,7 +194,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   be an integer-like string.  This function has copy/grow
    *   semantics.
    */
-  DISPATCH(SetStr)
+  DISPATCH_INTMAP_SPECIALIZED(SetStr)
 
   /*
    * size_t Vsize(const ArrayData*)
@@ -233,7 +243,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   supplied string key.  The string must not be an integer-like
    *   string.
    */
-  DISPATCH(ExistsStr)
+  DISPATCH_INTMAP_SPECIALIZED(ExistsStr)
 
   /*
    * ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& out, bool copy)
@@ -252,7 +262,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   to point to it.  The string `key' may not be an integer-like
    *   string.  This function has copy/grow semantics.
    */
-  DISPATCH(LvalStr)
+  DISPATCH_INTMAP_SPECIALIZED(LvalStr)
 
   /*
    * ArrayData* LvalNew(ArrayData*, Variant*& out, bool copy)
@@ -263,7 +273,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   function sets out to point to the lvalBlackHole.  This function
    *   has copy/grow semantics.
    */
-  DISPATCH(LvalNew)
+  DISPATCH_INTMAP_SPECIALIZED(LvalNew)
 
   /*
    * ArrayData* SetRefInt(ArrayData*, int64_t key, Variant& v, bool copy)
@@ -272,7 +282,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   boxed, and then insert a KindOfRef that points to v's RefData.
    *   This function has copy/grow semantics.
    */
-  DISPATCH(SetRefInt)
+  DISPATCH_INTMAP_SPECIALIZED(SetRefInt)
 
   /*
    * ArrayData* SetRefStr(ArrayData*, StringData* key, Variant& v, bool copy)
@@ -282,7 +292,7 @@ extern const ArrayFunctions g_array_funcs = {
    *  then insert a KindOfRef that points to v's RefData.  This
    *  function has copy/grow semantics.
    */
-  DISPATCH(SetRefStr)
+  DISPATCH_INTMAP_SPECIALIZED(SetRefStr)
 
   /*
    * ArrayData* AddInt(ArrayData*, int64_t key, Cell, bool copy)
@@ -294,7 +304,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   operation more efficient.
    */
   DISPATCH(SetInt)
-  DISPATCH(SetStr)
+  DISPATCH_INTMAP_SPECIALIZED(SetStr)
 
   /*
    * ArrayData* RemoveInt(ArrayData*, int64_t key, bool copy)
@@ -312,7 +322,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   entry for that element, this function does not remove it, and
    *   may or may not cow.  This function has copy/grow semantics.
    */
-  DISPATCH(RemoveStr)
+  DISPATCH_INTMAP_SPECIALIZED(RemoveStr)
 
   /*
    * ssize_t IterBegin(const ArrayData*)
@@ -370,7 +380,7 @@ extern const ArrayFunctions g_array_funcs = {
    *
    *   Pre: fp.getContainer() == ad
    */
-  DISPATCH(AdvanceMArrayIter)
+  DISPATCH_INTMAP_SPECIALIZED(AdvanceMArrayIter)
 
   /*
    * ArrayData* EscalateForSort(ArrayData*)
@@ -471,7 +481,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   integer key.  If there is no next available integer key, no
    *   value is appended.  This function has copy/grow semantics.
    */
-  DISPATCH(Append)
+  DISPATCH_INTMAP_SPECIALIZED(Append)
 
   /*
    * ArrayData* AppendRef(ArrayData*, Variant& v, bool copy)
@@ -482,7 +492,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   If there is no next available integer key, this function does
    *   not append a value.  This function has copy/grow semantics.
    */
-  DISPATCH(AppendRef)
+  DISPATCH_INTMAP_SPECIALIZED(AppendRef)
 
   /*
    * ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy)
@@ -494,7 +504,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   referenced"---i.e. if `v' is already KindOfRef and
    *   RefData::isReferenced is true.
    */
-  DISPATCH(AppendWithRef)
+  DISPATCH_INTMAP_SPECIALIZED(AppendWithRef)
 
   /*
    * ArrayData* PlusEq(ArrayData*, const ArrayData* elems)
@@ -524,7 +534,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   `value'.  This function may return a new (not yet incref'd)
    *   array if it decided to COW due to hasMultipleRefs().
    */
-  DISPATCH(Pop)
+  DISPATCH_INTMAP_SPECIALIZED(Pop)
 
   /*
    * ArrayData* Dequeue(ArrayData*, Variant& value)
@@ -533,7 +543,7 @@ extern const ArrayFunctions g_array_funcs = {
    *   `value'.  This function may return a new (not yet incref'd)
    *   array if it decided to COW due to hasMultipleRefs().
    */
-  DISPATCH(Dequeue)
+  DISPATCH_INTMAP_SPECIALIZED(Dequeue)
 
   /*
    * ArrayData* Prepend(ArrayData*, const Variant& `v', bool copy)
@@ -548,7 +558,7 @@ extern const ArrayFunctions g_array_funcs = {
    *
    *   Renumber integer keys on the array in place.
    */
-  DISPATCH(Renumber)
+  DISPATCH_INTMAP_SPECIALIZED(Renumber)
 
   /*
    * void OnSetEvalScalar(ArrayData*)
@@ -601,6 +611,7 @@ extern const ArrayFunctions g_array_funcs = {
 };
 
 #undef DISPATCH
+#undef DISPATCH_INTMAP_SPECIALIZED
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -67,7 +67,8 @@ using DVFuncletsVec = std::vector<std::pair<int, Offset>>;
  *
  * If the function is a closure, the Func is preceded by a Func* which points
  * to the next cloned closures (closures are cloned in order to transplant them
- * into different implementation contexts).
+ * into different implementation contexts).  This pointer is considered
+ * mutable, even on const Funcs.
  *
  * All Funcs are also followed by a variable number of function prologue
  * pointers.  Six are statically allocated as part of the Func object, but more
@@ -422,6 +423,11 @@ struct Func {
   bool byRef(int32_t arg) const;
 
   /*
+   * Whether any parameters /may/ be taken by reference.
+   */
+  bool anyByRef() const;
+
+  /*
    * Whether the arg-th parameter /must/ be taken by reference.
    *
    * Some builtins take positional or variadic arguments only optionally by
@@ -612,7 +618,7 @@ struct Func {
   // Closures.                                                          [const]
 
   /*
-   * Is this function the body of a Closure object?
+   * Is this function the body (i.e., __invoke() method) of a Closure object?
    *
    * (All PHP anonymous functions are Closure objects.)
    */
@@ -624,6 +630,27 @@ struct Func {
    */
   bool isClonedClosure() const;
 
+private:
+  /*
+   * Closures are allocated with an extra pointer before the Func object
+   * itself.  These are used to chain clones of these closures with different
+   * Class contexts.
+   *
+   * We consider this extra pointer to be a mutable member of Func, hence the
+   * `const' specifier here.
+   *
+   * @requires: isClosureBody()
+   */
+  Func*& nextClonedClosure() const;
+
+  /*
+   * Find the clone of this closure with `cls' as its context.
+   *
+   * Return nullptr if this is not a closure or if no such clone exists.
+   */
+  Func* findCachedClone(Class* cls) const;
+
+public:
 
   /////////////////////////////////////////////////////////////////////////////
   // Resumables.                                                        [const]
@@ -940,8 +967,9 @@ struct Func {
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
-#define OFF(f) static constexpr ptrdiff_t f##Off() {  \
-    return offsetof(Func, m_##f);                     \
+#define OFF(f)                          \
+  static constexpr ptrdiff_t f##Off() { \
+    return offsetof(Func, m_##f);       \
   }
   OFF(attrs)
   OFF(cls)
@@ -1025,36 +1053,16 @@ private:
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
+  //
+  // These are all used at emit-time, and should be outsourced to FuncEmitter.
 
 private:
-  /*
-   * Func initialization/creation helpers.
-   */
   void init(int numParams);
   void initPrologues(int numParams);
   void setFullName(int numParams);
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
-
-  /*
-   * The __invoke() methods of Closure objects (colloquially just "closures")
-   * are allocated with an extra pointer before the Func object itself.  These
-   * are used to chain clones of these closures with different Class contexts.
-   *
-   * The `const' specifier here is a bit of a lie since we return a non-const
-   * reference to the aforementioned pointer.
-   *
-   * @requires: isClosureBody()
-   */
-  Func*& nextClonedClosure() const;
-
-  /*
-   * Find the clone of this closure with `cls' as its context.
-   *
-   * Return nullptr if this is not a closure or if no such clone exists.
-   */
-  Func* findCachedClone(Class* cls) const;
 
 
   /////////////////////////////////////////////////////////////////////////////

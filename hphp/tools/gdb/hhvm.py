@@ -127,8 +127,11 @@ class ArrayDataPrinter:
 
     def to_string(self):
         if self.kind == self.proxyKind():
-            return "ProxyArr: %s" % (self.val['m_ad'].dereference())
-        return "%d elements (kind==%d)" % (self.val['m_size'], self.kind)
+            return "ProxyArr: %s" % (
+                self.val['m_ref'].dereference()['m_tv']
+                        ['m_data']['parr'].dereference())
+        else:
+            return "%d elements (kind==%d)" % (self.val['m_size'], self.kind)
 
     def proxyKind(self):
         return gdb.lookup_global_symbol('HPHP::ArrayData::kProxyKind').value()
@@ -182,15 +185,20 @@ class ObjectDataPrinter:
         dp = self.cls['m_declProperties']
         if not dp:
             return self._iterator(0,0,0,0)
-        mv = dp['m_vec']
-        if not mv:
-            return self._iterator(0,0,0,0)
 
-        return self._iterator(self.val, self.cls, mv, mv + dp['m_map']['m_extra'])
+        # FIXME: dp['m_vec'] no longer exists
+        return self._iterator(0,0,0,0)
+
+#        mv = dp['m_vec']
+#        if not mv:
+#            return self._iterator(0,0,0,0)
+#
+#        return self._iterator(self.val, self.cls, mv, mv + dp['m_map']['m_extra'])
 
     def to_string(self):
+        ls = LowStringPtrPrinter(self.cls['m_preClass']['m_px']['m_name'])
         return "Object of class %s @ 0x%x" % (
-            string_data_val(self.cls['m_preClass']['m_px']['m_name']),
+            string_data_val(ls.to_string_data()),
             self.val.address)
 
 class SmartPtrPrinter:
@@ -229,6 +237,37 @@ class SmartPtrPrinter:
             return "SmartPtr<%s>" % tag
         return "SmartPtr<%s>(Null)" % tag
 
+class LowStringPtrPrinter:
+    RECOGNIZE = '^HPHP::(LowPtr<HPHP::StringData.*>|LowStringPtr)$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        ptr = self.to_string_data()
+        if ptr:
+            return "LowStringPtr '%s'" % str
+        else:
+            return "LowStringPtr(Null)"
+
+    def to_string_data(self):
+        return self.val['m_raw'].cast(gdb.lookup_type('HPHP::StringData').pointer())
+
+class LowClassPtrPrinter:
+    RECOGNIZE = '^HPHP::(LowPtr<HPHP::Class.*>|LowClassPtr)$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        ptr = self.to_class()
+        if ptr:
+            return "LowClassPtr '%s'" % ptr
+        return "LowClassPtr(Null)"
+
+    def to_class(self):
+        return self.val['m_raw'].cast(gdb.lookup_type('HPHP::Class').pointer())
+
 class RefDataPrinter:
     RECOGNIZE = '^HPHP::RefData$'
     def __init__(self, val):
@@ -251,7 +290,8 @@ class ClassPrinter:
         self.val = val
 
     def to_string(self):
-        return "Class %s" % string_data_val(self.val['m_preClass']['m_px']['m_name'])
+        ls = LowStringPtrPrinter(self.val['m_preClass']['m_px']['m_name'])
+        return "Class %s" % string_data_val(ls.to_string_data())
 
 printer_classes = [
     TypedValuePrinter,
@@ -259,6 +299,8 @@ printer_classes = [
     ArrayDataPrinter,
     ObjectDataPrinter,
     SmartPtrPrinter,
+    LowStringPtrPrinter,
+    LowClassPtrPrinter,
     RefDataPrinter,
     ResourceDataPrinter,
     ClassPrinter,

@@ -229,7 +229,9 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
 
     case LdGbl: {
       auto const type = inst->typeParam().relaxToGuardable();
-      hook.setLocalType(inst->extra<LdGbl>()->locId, type);
+      auto id = inst->extra<LdGbl>()->locId;
+      hook.setLocalType(id, type);
+      hook.setLocalTypeSource(id, inst->dst());
       break;
     }
     case StGbl: {
@@ -499,7 +501,14 @@ bool FrameState::compatible(Block* block) {
   // Probably because the other incoming edge is unreachable.
   if (it == m_snapshots.end()) return true;
   auto& snapshot = it->second;
-  if (m_fpValue != snapshot.fpValue) return false;
+  if (m_fpValue != snapshot.fpValue) {
+    DEBUG_ONLY auto fpRoot       =
+      IRInstruction::framePassthroughRoot(m_fpValue);
+    DEBUG_ONLY auto snapshotRoot =
+      IRInstruction::framePassthroughRoot(snapshot.fpValue);
+
+    assert(fpRoot == snapshotRoot);
+  }
 
   assert(m_locals.size() == snapshot.locals.size());
   for (int i = 0; i < m_locals.size(); ++i) {
@@ -552,14 +561,16 @@ void FrameState::load(Snapshot& state) {
  * types are combined using Type::unionOf.
  */
 void FrameState::merge(Snapshot& state) {
-  // cannot merge fp or spOffset state, so assert they match
-  assert(state.fpValue == m_fpValue);
+  // cannot merge spOffset state, so assert they match
   assert(state.spOffset == m_spOffset);
   assert(state.curFunc == m_curFunc);
   if (state.spValue != m_spValue) {
     // we have two different sp definitions but we know they're equal
     // because spOffset matched.
     state.spValue = nullptr;
+  }
+  if (state.fpValue != m_fpValue) {
+    state.fpValue = IRInstruction::frameCommonRoot(state.fpValue, m_fpValue);
   }
   // this is available iff it's available in both states
   state.thisAvailable &= m_thisAvailable;
@@ -741,6 +752,11 @@ void FrameState::setLocalType(uint32_t id, Type type) {
   m_locals[id].value = nullptr;
   m_locals[id].type = type;
   m_locals[id].typeSource = nullptr;
+}
+
+void FrameState::setLocalTypeSource(uint32_t id, SSATmp* typeSrc) {
+  always_assert(id < m_locals.size());
+  m_locals[id].typeSource = typeSrc;
 }
 
 /*

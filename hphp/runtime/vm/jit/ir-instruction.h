@@ -360,6 +360,9 @@ struct IRInstruction {
   bool isTerminal() const;
   bool hasEdges() const { return JIT::hasEdges(op()); }
   bool isPassthrough() const;
+  bool isFramePassthrough() const;
+  static SSATmp* framePassthroughRoot(SSATmp* ssa);
+  static SSATmp* frameCommonRoot(SSATmp* fp1, SSATmp* fp2);
   SSATmp* getPassthroughValue() const;
   bool killsSources() const;
   bool killsSource(int srcNo) const;

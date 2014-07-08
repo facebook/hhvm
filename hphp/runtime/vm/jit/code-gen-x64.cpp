@@ -415,15 +415,6 @@ PhysReg CodeGenerator::prepXMMReg(Asm& as, const SSATmp* src,
   return rtmp;
 }
 
-void CodeGenerator::doubleCmp(Asm& a, RegXMM xmmReg0, RegXMM xmmReg1) {
-  a.    ucomisd(xmmReg0, xmmReg1);
-  ifThen(a, CC_P, [&] {
-    // PF means the doubles were unordered. We treat this as !equal, so
-    // clear ZF.
-    a.    orq  (1, m_rScratch);
-  });
-}
-
 void CodeGenerator::emitCompare(IRInstruction* inst) {
   auto src0 = inst->src(0);
   auto src1 = inst->src(1);
@@ -435,35 +426,27 @@ void CodeGenerator::emitCompare(IRInstruction* inst) {
   // can't generate CMP instructions correctly for anything that isn't
   // a bool or a numeric, and we can't mix bool/numerics because
   // -1 == true in PHP, but not in HHIR binary representation
-  if (!(((type0 <= Type::Int || type0 <= Type::Dbl) &&
-         (type1 <= Type::Int || type1 <= Type::Dbl)) ||
+  if (!((type0 <= Type::Int  && type1 <= Type::Int) ||
         (type0 <= Type::Bool && type1 <= Type::Bool) ||
-        (type0 <= Type::Cls && type1 <= Type::Cls))) {
+        (type0 <= Type::Cls  && type1 <= Type::Cls))) {
     CG_PUNT(emitCompare);
   }
-  if (type0 <= Type::Dbl || type1 <= Type::Dbl) {
-    PhysReg reg0 = prepXMMReg(m_as, src0, loc0, rCgXMM0);
-    PhysReg reg1 = prepXMMReg(m_as, src1, loc1, rCgXMM1);
-    assert(reg0 != rCgXMM1 && reg1 != rCgXMM0);
-    doubleCmp(m_as, reg0, reg1);
-  } else {
-    auto reg0 = loc0.reg();
-    auto reg1 = loc1.reg();
+  auto reg0 = loc0.reg();
+  auto reg1 = loc1.reg();
 
-    if (reg1 == InvalidReg) {
-      if (type0 <= Type::Bool) {
-        m_as.    cmpb (src1->boolVal(), rbyte(reg0));
-      } else {
-        m_as.    cmpq (safe_cast<int32_t>(src1->intVal()), reg0);
-      }
+  if (reg1 == InvalidReg) {
+    if (type0 <= Type::Bool) {
+      m_as.    cmpb (src1->boolVal(), rbyte(reg0));
     } else {
-      // Note the reverse syntax in the assembler.
-      // This cmp will compute reg0 - reg1
-      if (type0 <= Type::Bool) {
-        m_as.    cmpb (rbyte(reg1), rbyte(reg0));
-      } else {
-        m_as.    cmpq (reg1, reg0);
-      }
+      m_as.    cmpq (safe_cast<int32_t>(src1->intVal()), reg0);
+    }
+  } else {
+    // Note the reverse syntax in the assembler.
+    // This cmp will compute reg0 - reg1
+    if (type0 <= Type::Bool) {
+      m_as.    cmpb (rbyte(reg1), rbyte(reg0));
+    } else {
+      m_as.    cmpq (reg1, reg0);
     }
   }
 }
@@ -549,7 +532,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
   assert(info.afterCall);
 
-  m_mcg->registerCatchBlock(info.afterCall, m_as.frontier());
+  mcg->registerCatchBlock(info.afterCall, m_as.frontier());
 
   emitIncStat(m_mainCode, Stats::TC_CatchTrace);
 
@@ -997,18 +980,21 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 
   auto* taken = m_curInst->taken();
   if (taken && taken->isCatch()) {
-    always_assert(sync != SyncOptions::kNoSyncPoint);
-    always_assert_log(
+    always_assert_flog(
+      sync != SyncOptions::kNoSyncPoint,
+      "cgCallHelper called with kNoSyncPoint but inst has a catch block: {}\n",
+      *m_curInst
+    );
+    always_assert_flog(
       taken->catchMarker() == m_curInst->marker(),
-      [&] {
-        return folly::format("Catch trace doesn't match fixup:\n"
-                             "Instruction: {}\n"
-                             "Catch trace: {}\n"
-                             "Fixup      : {}\n",
-                             m_curInst->toString(),
-                             taken->catchMarker().show(),
-                             m_curInst->marker().show()).str();
-      });
+      "Catch trace doesn't match fixup:\n"
+      "Instruction: {}\n"
+      "Catch trace: {}\n"
+      "Fixup      : {}\n",
+      m_curInst->toString(),
+      taken->catchMarker().show(),
+      m_curInst->marker().show()
+    );
 
     auto& info = m_state.catches[taken];
     assert(!info.afterCall);
@@ -1020,7 +1006,7 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
     // throw. Register a null catch trace to indicate this to the
     // unwinder. Call and CallArray don't have catch blocks because they smash
     // all live values and optimizations are aware of this.
-    m_mcg->registerCatchBlock(a.frontier(), nullptr);
+    mcg->registerCatchBlock(a.frontier(), nullptr);
   }
 
   // copy the call result to the destination register(s)
@@ -1627,20 +1613,7 @@ void CodeGenerator::cgCmpHelper(
   //  or to a resource.
   // strings are canonicalized to the left, ints to the right
   else if (typeIsSON(type1) && typeIsSON(type2)) {
-    if (type1 <= Type::Dbl || type2 <= Type::Dbl) {
-      if ((type1 <= Type::Dbl || type1 <= Type::Int) &&
-          (type2 <= Type::Dbl || type2 <= Type::Int)) {
-        PhysReg srcReg1 = prepXMMReg(m_as, src1, loc1, rCgXMM0);
-        PhysReg srcReg2 = prepXMMReg(m_as, src2, loc2, rCgXMM1);
-        assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
-        doubleCmp(m_as, srcReg1, srcReg2);
-        setFromFlags();
-      } else {
-        CG_PUNT(cgOpCmpHelper_Dbl);
-      }
-    }
-
-    else if (type1 <= Type::Str) {
+    if (type1 <= Type::Str) {
       // string cmp string is dealt with in case 1
       // string cmp double is punted above
 
@@ -1761,6 +1734,62 @@ void CodeGenerator::cgGtInt(IRInstruction* inst)  { emitCmpInt(inst, CC_G); }
 void CodeGenerator::cgLteInt(IRInstruction* inst) { emitCmpInt(inst, CC_LE); }
 void CodeGenerator::cgGteInt(IRInstruction* inst) { emitCmpInt(inst, CC_GE); }
 
+void CodeGenerator::emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred) {
+  auto dstReg = dstLoc(0).reg();
+  auto srcReg0 = prepXMMReg(m_as, inst->src(0), srcLoc(0), rCgXMM0);
+  auto srcReg1 = prepXMMReg(m_as, inst->src(1), srcLoc(1), rCgXMM1);
+
+  m_as.  movsd   (srcReg1, rCgXMM2);
+  m_as.  cmpsd   (srcReg0, rCgXMM2, pred);
+  m_as.  movq_xr (rCgXMM2, dstReg);
+  m_as.  andb    (1, rbyte(dstReg));
+}
+
+void CodeGenerator::emitCmpRelDbl(IRInstruction* inst, ConditionCode cc,
+                                  bool flipOperands) {
+  auto dstReg = dstLoc(0).reg();
+  auto srcReg0 = prepXMMReg(m_as, inst->src(0), srcLoc(0), rCgXMM0);
+  auto srcReg1 = prepXMMReg(m_as, inst->src(1), srcLoc(1), rCgXMM1);
+
+  if (flipOperands) {
+    std::swap(srcReg0, srcReg1);
+  }
+
+  m_as.  ucomisd  (srcReg0, srcReg1);
+  m_as.  setcc    (cc, rbyte(dstReg));
+}
+
+void CodeGenerator::cgEqDbl(IRInstruction* inst)  {
+  emitCmpEqDbl(inst, ComparisonPred::eq_ord);
+}
+void CodeGenerator::cgNeqDbl(IRInstruction* inst) {
+  emitCmpEqDbl(inst, ComparisonPred::ne_unord);
+}
+void CodeGenerator::cgLtDbl(IRInstruction* inst)  {
+  // This is a little tricky, because "unordered" is a thing.
+  //
+  //         ZF  PF  CF
+  // x ?= y   1   1   1
+  // x <  y   0   0   1
+  // x == y   1   0   0
+  // x >  y   0   0   0
+  //
+  // This trick lets us avoid needing to handle the unordered case specially.
+  // The condition codes B and BE are true if CF == 1, which it is in the
+  // unordered case, and that'll give incorrect results. So we just invert the
+  // condition code (A and AE don't get set if CF == 1) and flip the operands.
+  emitCmpRelDbl(inst, CC_A, true);
+}
+void CodeGenerator::cgGtDbl(IRInstruction* inst)  {
+  emitCmpRelDbl(inst, CC_A, false);
+}
+void CodeGenerator::cgLteDbl(IRInstruction* inst) {
+  emitCmpRelDbl(inst, CC_AE, true);
+}
+void CodeGenerator::cgGteDbl(IRInstruction* inst) {
+  emitCmpRelDbl(inst, CC_AE, false);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Type check operators
 ///////////////////////////////////////////////////////////////////////////////
@@ -1776,18 +1805,7 @@ Reg64 getDataPtrEnregistered(Asm& as, PhysReg dataSrc, Reg64 scratch) {
 
 // Enregister the memoryRef so it can be used with an offset by the
 // cmp instruction
-Reg64 getDataPtrEnregistered(Asm& as,
-                             MemoryRef dataSrc,
-                             Reg64 scratch) {
-  as.loadq(dataSrc, scratch);
-  return scratch;
-}
-
-// Enregister the indexedMemoryRef so it can be used with an offset by the
-// cmp instruction
-Reg64 getDataPtrEnregistered(Asm& as,
-                             IndexedMemoryRef dataSrc,
-                             Reg64 scratch) {
+Reg64 getDataPtrEnregistered(Asm& as, MemoryRef dataSrc, Reg64 scratch) {
   as.loadq(dataSrc, scratch);
   return scratch;
 }
@@ -1805,20 +1823,23 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
            "We don't support guarding on CountedStr");
     emitTestTVType(m_as, KindOfStringBit, typeSrc);
     cc = CC_NZ;
-  } else if (type.equals(Type::UncountedInit)) {
+  } else if (type == Type::Null) {
+    emitCmpTVType(m_as, KindOfNull, typeSrc);
+    cc = CC_LE;
+  } else if (type == Type::UncountedInit) {
     emitTestTVType(m_as, KindOfUncountedInitBit, typeSrc);
     cc = CC_NZ;
-  } else if (type.equals(Type::Uncounted)) {
+  } else if (type == Type::Uncounted) {
     emitCmpTVType(m_as, KindOfRefCountThreshold, typeSrc);
     cc = CC_LE;
-  } else if (type.equals(Type::Cell)) {
+  } else if (type == Type::Cell) {
     assert(!m_curInst->is(LdRef));
     emitCmpTVType(m_as, KindOfRef, typeSrc);
     cc = CC_L;
-  } else if (type.equals(Type::Gen)) {
+  } else if (type == Type::Gen) {
     // nothing to check
     return;
-  } else if (type.equals(Type::InitCell)) {
+  } else if (type == Type::InitCell) {
     assert(m_curInst->is(LdRef));
     // nothing to check: Refs cannot contain Uninit or another Ref.
     return;
@@ -1905,7 +1926,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
   emitTypeTest(type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-      auto const destSR = m_mcg->tx().getSrcRec(destSK);
+      auto const destSR = mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(m_mainCode, ccNegate(cc));
     });
 }
@@ -1965,6 +1986,13 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
   static_assert(KindOfResource > KindOfString, "fix checks for IsScalar");
 
   static_assert(sizeof(DataType) == 1, "");
+
+  if (typeReg == InvalidReg) {
+    auto const type = inst->src(0)->type();
+    auto const imm = type <= (Type::Bool | Type::Int | Type::Dbl | Type::Str);
+    m_as.    movl(Immed(imm), r32(dstReg));
+    return;
+  }
 
   m_as.   movzbl(rbyte(typeReg), r32(dstReg));
   m_as.   subl(KindOfBoolean, r32(dstReg));
@@ -2517,7 +2545,7 @@ void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
   auto const rdst = dstLoc(0).reg();
   auto& a = m_as;
 
-  a.   loadq  (rsrc[Class::invokeFuncOff()], rdst);
+  a.   loadq  (rsrc[Class::invokeOff()], rdst);
   a.   testq  (rdst, rdst);
   emitFwdJcc  (a, CC_Z, inst->taken());
 }
@@ -2595,7 +2623,7 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
 
   // Emit service request to smash address of SrcKey into 'addr'.
-  TCA* addrPtr = m_mcg->allocData<TCA>(sizeof(TCA), 1);
+  TCA* addrPtr = mcg->allocData<TCA>(sizeof(TCA), 1);
   emitReqBindAddr(*addrPtr, data->sk);
 
   // Load the maybe bound address.
@@ -2637,7 +2665,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    jae(def);
     }
 
-    TCA* table = m_mcg->allocData<TCA>(sizeof(TCA), data->cases);
+    TCA* table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
     m_as.   lea(rip[(intptr_t)table], m_rScratch);
     assert(((int32_t*)m_as.frontier())[-1] + m_as.frontier() == (TCA)table);
     m_as.   jmp(m_rScratch[indexReg*8]);
@@ -2664,14 +2692,14 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   auto data = inst->extra<LdSSwitchDestFast>();
 
-  auto table = m_mcg->allocData<SSwitchMap>(64);
+  auto table = mcg->allocData<SSwitchMap>(64);
   new (table) SSwitchMap(data->numCases);
   for (int64_t i = 0; i < data->numCases; ++i) {
     table->add(data->cases[i].str, nullptr);
     TCA* addr = table->find(data->cases[i].str);
     emitReqBindAddr(*addr, SrcKey(curFunc(), data->cases[i].dest, resumed()));
   }
-  TCA* def = m_mcg->allocData<TCA>(sizeof(TCA), 1);
+  TCA* def = mcg->allocData<TCA>(sizeof(TCA), 1);
   emitReqBindAddr(*def, SrcKey(curFunc(), data->defaultOff, resumed()));
 
   cgCallHelper(m_as,
@@ -2698,9 +2726,9 @@ static TCA sswitchHelperSlow(TypedValue typedVal,
 void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
   auto data = inst->extra<LdSSwitchDestSlow>();
 
-  auto strtab = m_mcg->allocData<const StringData*>(
+  auto strtab = mcg->allocData<const StringData*>(
     sizeof(const StringData*), data->numCases);
-  auto jmptab = m_mcg->allocData<TCA>(sizeof(TCA), data->numCases + 1);
+  auto jmptab = mcg->allocData<TCA>(sizeof(TCA), data->numCases + 1);
   for (int i = 0; i < data->numCases; ++i) {
     strtab[i] = data->cases[i].str;
     emitReqBindAddr(jmptab[i],
@@ -2733,7 +2761,7 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
 void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const calleeFP = srcLoc(0).reg();
   auto const callerFP = srcLoc(2).reg();
-  auto const fakeRet  = m_mcg->tx().uniqueStubs.retInlHelper;
+  auto const fakeRet  = mcg->tx().uniqueStubs.retInlHelper;
   auto const retBCOff = inst->extra<DefInlineFP>()->retBCOff;
 
   m_as.    storeq (callerFP, calleeFP[AROFF(m_sfp)]);
@@ -2951,7 +2979,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assert(m_unit.bcOff() == inst->marker().bcOff());
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-  auto const destSR = m_mcg->tx().getSrcRec(destSK);
+  auto const destSR = mcg->tx().getSrcRec(destSK);
 
   auto trflags = inst->extra<ReqRetranslate>()->trflags;
 
@@ -3064,8 +3092,8 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   PhysRegSaverStub saver(a, toSave);
 
   auto const target = numLocals > kNumFreeLocalsHelpers
-    ? m_mcg->tx().uniqueStubs.freeManyLocalsHelper
-    : m_mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
+    ? mcg->tx().uniqueStubs.freeManyLocalsHelper
+    : mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
   a.lea(rFp[-numLocals * sizeof(TypedValue)], r14);
   a.call(target);
@@ -3081,7 +3109,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
  */
 bool CodeGenerator::decRefDestroyIsUnlikely(OptDecRefProfile& profile,
                                             Type type) {
-  auto const kind = m_mcg->tx().mode();
+  auto const kind = mcg->tx().mode();
   if (kind != TransKind::Profile && kind != TransKind::Optimize) return true;
 
   // For a profiling key, we use:
@@ -3264,7 +3292,7 @@ void CodeGenerator::cgDecRefStaticType(Type type,
       type, dataReg, [&] (Asm& a) {
         // Emit the call to release in m_acold
         cgCallHelper(a,
-                     m_mcg->getDtorCall(type.toDataType()),
+                     mcg->getDtorCall(type.toDataType()),
                      kVoidDest,
                      SyncOptions::kSyncPoint,
                      argGroup()
@@ -3653,7 +3681,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   cgCallHelper(
     m_as,
     CppCall::direct(
-      reinterpret_cast<void (*)()>(m_mcg->tx().uniqueStubs.fcallArrayHelper)),
+      reinterpret_cast<void (*)()>(mcg->tx().uniqueStubs.fcallArrayHelper)),
     kVoidDest,
     SyncOptions::kSyncPoint,
     argGroup()
@@ -4044,8 +4072,7 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   }
 }
 
-template<class BaseRef>
-void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src, PhysLoc loc) {
+void CodeGenerator::cgStoreTypedValue(MemoryRef dst, SSATmp* src, PhysLoc loc) {
   assert(src->type().needsReg());
   auto srcReg0 = loc.reg(0);
   auto srcReg1 = loc.reg(1);
@@ -4056,12 +4083,17 @@ void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src, PhysLoc loc) {
     m_as.movdqu(srcReg0, refTVData(dst));
     return;
   }
-  m_as.storeq(srcReg0, refTVData(dst));
+
+  if (src->type().needsValueReg()) {
+    assert(srcReg0 != InvalidReg);
+    m_as.storeq(srcReg0, refTVData(dst));
+  }
+
+  assert(srcReg1 != InvalidReg);
   emitStoreTVType(m_as, srcReg1, refTVType(dst));
 }
 
-template<class BaseRef>
-void CodeGenerator::cgStore(BaseRef dst, SSATmp* src, PhysLoc srcLoc,
+void CodeGenerator::cgStore(MemoryRef dst, SSATmp* src, PhysLoc srcLoc,
                             Width width) {
   Type type = src->type();
   if (type.needsReg()) {
@@ -4072,8 +4104,8 @@ void CodeGenerator::cgStore(BaseRef dst, SSATmp* src, PhysLoc srcLoc,
   if (width == Width::Full) {
     emitStoreTVType(m_as, type.toDataType(), refTVType(dst));
   }
-  if (src->isA(Type::Null)) return; // no need to store a value for null or
-                                      // uninit
+  if (!src->type().needsValueReg()) return; // no value to store
+
   auto memRef = refTVData(dst);
   auto srcReg = srcLoc.reg();
   if (srcReg == InvalidReg) {
@@ -4086,9 +4118,8 @@ void CodeGenerator::cgStore(BaseRef dst, SSATmp* src, PhysLoc srcLoc,
   }
 }
 
-template<class BaseRef>
-void
-CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, BaseRef base, Block* label) {
+void CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, MemoryRef base,
+                           Block* label) {
   Type type = dst->type();
   if (type.needsReg()) {
     return cgLoadTypedValue(dst, dstLoc, base, label);
@@ -4108,17 +4139,11 @@ CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, BaseRef base, Block* label) {
   }
 }
 
-static MemoryRef makeMemoryRef(Asm& as, Reg64 scratch, MemoryRef value) {
-  always_assert(false);
-  return value;
-}
-
-static MemoryRef makeMemoryRef(Asm& as,
-                               Reg64 scratch,
-                               IndexedMemoryRef value) {
+static MemoryRef makeMemoryRef(Asm& as, Reg64 scratch,
+                               MemoryRef value) {
+  always_assert(int(value.r.index) != -1);
   always_assert(value.r.scale == 1); //TASK(2731486): fix this... use imul?
-  if (value.r.base != scratch &&
-      value.r.index != scratch) {
+  if (value.r.base != scratch && value.r.index != scratch) {
     as.movq(value.r.base, scratch);
     value.r.base = scratch;
   }
@@ -4132,9 +4157,8 @@ static MemoryRef makeMemoryRef(Asm& as,
 
 // If label is not null and type is not Gen, this method generates a check
 // that bails to the label if the loaded typed value doesn't match dst type.
-template<class BaseRef>
 void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
-                                     BaseRef ref, Block* label) {
+                                     MemoryRef ref, Block* label) {
   Type type = dst->type();
   auto valueDstReg = dstLoc.reg(0);
   auto typeDstReg  = dstLoc.reg(1);
@@ -4158,9 +4182,8 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
   auto origRef = ref;
   ref = resolveRegCollision(typeDstReg, ref, isResolved);
   if (!isResolved) {
-    // An InvalidReg in the base of the returned IndexedMemoryRef means
     // there was a collision with the registers that could not be resolved.
-    // Re-enter with a MemoryRef (slow path).
+    // Re-enter with a non-indexed MemoryRef (slow path).
     cgLoadTypedValue(dst, dstLoc, makeMemoryRef(m_as, m_rScratch, origRef),
                      label);
     return;
@@ -4182,17 +4205,24 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
   m_as.loadq(refTVData(ref), valueDstReg);
 }
 
-// May return an invalid IndexedMemoryRef to signal that there is no
-// register conflict resolution. Callers should take proper action to
-// solve the issue (e.g. change the IndexedMemoryRef into a
-// MemoryRef).  In this case, isResolved is passed back as false, and
-// then returned IndexedMemoryRef should be ignored.
-IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
-                                                    IndexedMemoryRef memRef,
-                                                    bool& isResolved) {
+// May set isResolved = false to signal that there is no register conflict
+// resolution. Callers should take proper action to solve the issue (e.g.
+// change the indexed MemoryRef into a base+disp MemoryRef). In this case,
+// the returned MemoryRef should be ignored.
+MemoryRef CodeGenerator::resolveRegCollision(PhysReg dst, MemoryRef memRef,
+                                             bool& isResolved) {
   isResolved = true;
   Reg64 base = memRef.r.base;
   Reg64 index = memRef.r.index;
+  if (int(index) == -1) {
+    if (base == dst) {
+      assert(base != m_rScratch);
+      // use the scratch register instead
+      m_as.movq(base, m_rScratch);
+      return m_rScratch[memRef.r.disp];
+    }
+    return memRef;
+  }
   bool scratchTaken = (base == m_rScratch || index == m_rScratch);
   if (base == dst) {
     if (scratchTaken) {
@@ -4212,19 +4242,6 @@ IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
     // use the scratch register instead
     m_as.movq(index, m_rScratch);
     return base[m_rScratch + memRef.r.disp];
-  }
-  return memRef;
-}
-
-MemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
-                                             MemoryRef memRef,
-                                             bool& isResolved) {
-  isResolved = true;
-  if (memRef.r.base == dst) {
-    assert(memRef.r.base != m_rScratch);
-    // use the scratch register instead
-    m_as.movq(memRef.r.base, m_rScratch);
-    return m_rScratch[memRef.r.disp];
   }
   return memRef;
 }
@@ -4501,7 +4518,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
 
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.frontier(), pcOff,
          stackOff);
-  m_mcg->recordSyncPoint(as.frontier(), pcOff, stackOff);
+  mcg->recordSyncPoint(as.frontier(), pcOff, stackOff);
 }
 
 void CodeGenerator::cgLdMIStateAddr(IRInstruction* inst) {
@@ -4767,7 +4784,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-  auto const destSR = m_mcg->tx().getSrcRec(destSK);
+  auto const destSR = mcg->tx().getSrcRec(destSK);
 
   auto thenBody = [&](Asm& a) {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -5380,7 +5397,7 @@ void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
 void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   Block*     label = inst->taken();
   TransID  transId = inst->extra<CheckCold>()->transId;
-  auto counterAddr = m_mcg->tx().profData()->transCounterAddr(transId);
+  auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
 
   emitLoadImm(m_as, uint64_t(counterAddr), m_rScratch);
   m_as.decq(m_rScratch[0]);
@@ -5989,7 +6006,7 @@ void CodeGenerator::cgCIterFree(IRInstruction* inst) {
 
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   auto data = inst->extra<NewStructData>();
-  StringData** table = m_mcg->allocData<StringData*>(sizeof(StringData*),
+  StringData** table = mcg->allocData<StringData*>(sizeof(StringData*),
                                                       data->numKeys);
   memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
   MixedArray* (*f)(uint32_t, StringData**, const TypedValue*) =
@@ -6017,7 +6034,7 @@ void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
 
 void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
   TransID  transId = inst->extra<TransIDData>()->transId;
-  auto counterAddr = m_mcg->tx().profData()->transCounterAddr(transId);
+  auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
   emitLoadImm(m_as, uint64_t(counterAddr), m_rScratch);
   m_as.decq(m_rScratch[0]);
 }
@@ -6116,7 +6133,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
 void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   auto clsReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
-  auto offset = Class::propdataOff() +
+  auto offset = Class::propDataCacheOff() +
                 RDS::Link<Class::PropInitVec*>::handleOff();
   m_as.  loadl(clsReg[offset], r32(dstReg));
   m_as.  loadq(rVmTl[dstReg], dstReg);

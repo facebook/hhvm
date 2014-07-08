@@ -389,7 +389,7 @@ let rec program content =
   let comments = !L.comment_list in
   L.comment_list := [];
   if !(env.errors) <> []
-  then Errors.add_list [List.hd (List.rev !(env.errors))];
+  then Errors.parsing_error (List.hd (List.rev !(env.errors)));
   let is_hh_file = !is_hh_file in
   let ast = Namespaces.elaborate_defs ast in
   {is_hh_file; comments; ast}

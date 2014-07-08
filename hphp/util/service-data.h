@@ -198,6 +198,8 @@ class ExportedTimeSeries {
   void addValue(int64_t value, int64_t times);
   void addValueAggregated(int64_t sum, int64_t nsamples);
 
+  int64_t getSum();
+
   void exportAll(const std::string& prefix,
                  std::map<std::string, int64_t>& statsMap);
 

@@ -26,7 +26,9 @@
 #include <set>
 #include <utility>
 #include <vector>
+
 #include "hphp/compiler/analysis/alias_manager.h"
+#include "hphp/compiler/analysis/exceptions.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/code_error.h"

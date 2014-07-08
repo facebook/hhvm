@@ -473,6 +473,7 @@ protected:
   int m_responseTotalSize; // including added headers
   int m_responseSentSize;
   int64_t m_flushTimeUs;
+  bool m_sendEnded;
 
   std::vector<int> m_chunksSentSizes;
 

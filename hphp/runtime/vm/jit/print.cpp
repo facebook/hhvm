@@ -448,7 +448,7 @@ void print(std::ostream& os, const IRUnit& unit,
   auto const layout = layoutBlocks(unit);
   auto const& blocks = layout.blocks;
 
-  if (dumpIREnabled(kExtraLevel)) printOpcodeStats(os, blocks);
+  if (dumpIREnabled(kExtraExtraLevel)) printOpcodeStats(os, blocks);
 
   // Print the block CFG above the actual code.
   os << "digraph G {\n";

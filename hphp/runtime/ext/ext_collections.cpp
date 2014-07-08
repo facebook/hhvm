@@ -24,6 +24,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 
 #include <folly/ScopeGuard.h>
 #include <algorithm>
@@ -44,6 +45,17 @@ static Object materializeImpl(ObjectData* obj) {
   Object o = col;
   col->init(VarNR(obj));
   return o;
+}
+
+static ALWAYS_INLINE
+const Cell container_as_cell(const Variant& container) {
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a container (array or collection)"));
+    throw e;
+  }
+  return cellContainer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -238,9 +250,9 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) {
     throw e;
   }
   TVector* nv = NEWOBJ(TVector);
-  assert(nv->canMutateBuffer());
   uint32_t sz = m_size;
   int32_t version = m_version;
+  assert(nv->canMutateBuffer());
   for (uint32_t i = 0; i < sz; ++i) {
     auto args = makeArgs(m_data[i], i);
     bool b = invokeAndCastToBool(ctx, args.size(), &args[0]);
@@ -573,8 +585,9 @@ Array BaseVector::toArrayImpl() const {
   // either (1) this array has never been exposed outside of the Vector
   // implementation, in which case we know it's not referenced outside by
   // anything outside the Vector implementation, or (2) this array has been
-  // exposed by the Vector implementation, in which case m_pos is already 0
-  // (and COW semantics ensures that m_pos couldn't be changed by user code).
+  // exposed by the Vector implementation, in which case m_pos already points
+  // to the first element (and COW semantics ensures that m_pos couldn't have
+  // been changed by user code).
   assert(m_size);
   if (ad->m_pos != 0) {
     ad->m_pos = 0;
@@ -630,15 +643,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   m_data = packedData(MixedArray::MakeReserve(newCap));
   m_capacity = packedCodeToCap(arrayData()->m_packedCapCode);
   arrayData()->m_size = m_size;
-  if (oldAd->hasMultipleRefs()) {
-    auto* dst = m_data;
-    auto* src = oldBuf;
-    auto* stop = src + m_size;
-    for (; src != stop; ++src, ++dst) {
-      cellDup(*src, *dst);
-    }
-    oldAd->decRefCount();
-  } else {
+  if (LIKELY(!oldAd->hasMultipleRefs())) {
     std::memcpy(m_data, oldBuf, m_size * sizeof(TypedValue));
     // Mark oldAd as having 0 elements so that the array release logic doesn't
     // decRef the elements (since we teleported the elements to a new array)
@@ -647,6 +652,14 @@ void BaseVector::reserveImpl(uint32_t newCap) {
     oldAd->m_size = 0;
     oldAd->m_pos = ArrayData::invalid_index;
     decRefArr(oldAd);
+  } else {
+    auto* dst = m_data;
+    auto* src = oldBuf;
+    auto* stop = src + m_size;
+    for (; src != stop; ++src, ++dst) {
+      cellDup(*src, *dst);
+    }
+    oldAd->decRefCount();
   }
 }
 
@@ -671,7 +684,6 @@ BaseVector::BaseVector(Class* cls)
  */
 BaseVector::~BaseVector() {
   decRefArr(arrayData());
-  m_data = packedData(staticEmptyArray());
 }
 
 NEVER_INLINE
@@ -762,6 +774,30 @@ Object c_Vector::t_addall(const Variant& iterable) {
       add(v.asCell());
     }
   }
+  return this;
+}
+
+Object c_Vector::t_addallkeysof(const Variant& container) {
+  if (container.isNull()) {
+    return this;
+  }
+
+  const auto& containerCell = container_as_cell(container);
+
+  auto sz = getContainerSize(containerCell);
+  ArrayIter iter(containerCell);
+  if (!sz || !iter) {
+    return this;
+  }
+  reserve(m_size + sz);
+
+  mutateAndBump();
+  assert(canMutateBuffer());
+  do {
+    addRaw(iter.first());
+    ++iter;
+  } while (iter);
+
   return this;
 }
 
@@ -1523,7 +1559,46 @@ c_ImmVector::c_ImmVector(Class* cls) : BaseVector(cls) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static int32_t empty_map_hash_slot = BaseMap::Empty;
+/**
+ * The Map implementation makes use of s_theEmptyMixedArray, a special static
+ * empty array that has all of MixedArray's fields initialized to convenient
+ * values. This "static empty mixed array" is only used internally within the
+ * Map implementation and it's never exposed outside of the Map implementation.
+ * hashTab()[0] is set to Empty so that the find() method won't find anything,
+ * and m_cap is set to 0 so that any attempt to add an element will trigger a
+ * grow operation.
+ *
+ * Using this static empty mixed array allows us to always assume m_data is
+ * non-null, and it is better than calling MakeReserveMixed because it avoids
+ * doing any allocation.
+ */
+
+std::aligned_storage<
+  sizeof(MixedArray) + sizeof(int32_t),
+  alignof(MixedArray)
+>::type s_theEmptyMixedArray;
+
+struct BaseMap::EmptyMixedInitializer {
+  EmptyMixedInitializer() {
+    void* vpEmpty = &s_theEmptyMixedArray;
+
+    auto const ad   = static_cast<MixedArray*>(vpEmpty);
+    ad->m_kind      = ArrayData::kEmptyKind;
+    ad->m_size      = 0;
+    ad->m_pos       = ArrayData::invalid_index;
+    ad->m_count     = 0;
+    ad->m_used      = 0;
+    ad->m_cap       = 0;
+    ad->m_tableMask = 0;
+    ad->m_nextKI    = 0;
+    ad->hashTab()[0] = Empty;
+
+    ad->setStatic();
+  }
+};
+BaseMap::EmptyMixedInitializer BaseMap::s_empty_mixed_initializer;
+
+///////////////////////////////////////////////////////////////////////////////
 
 c_Map::c_Map(Class* cls) : BaseMap(cls) {
   o_subclassData.u16 = Collection::MapType;
@@ -1531,43 +1606,13 @@ c_Map::c_Map(Class* cls) : BaseMap(cls) {
 
 // Protected (Internal)
 
-BaseMap::BaseMap(Class* cls) : ExtCollectionObjectData(cls) {
-  uint32_t used = 0;
-  uint32_t cap = 0;
-  uint32_t tableMask = 0;
-  int32_t version = 0;
-  m_size = 0;
-  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
-  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
-  m_data = nullptr;
-  m_hash = &empty_map_hash_slot;
+BaseMap::BaseMap(Class* cls)
+    : ExtCollectionObjectData(cls)
+    , m_size(0), m_version(0), m_data(mixedData(staticEmptyMixedArray())) {
 }
 
 BaseMap::~BaseMap() {
-  if (!hasImmutableBuffer() && m_data) {
-    assert(m_immCopy.isNull());
-    deleteElms();
-    freeData();
-  }
-}
-
-void BaseMap::freeData() {
-  assert(!hasImmutableBuffer());
-  if (m_data) {
-    MM().objFreeLogged(
-      m_data, size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t));
-  }
-}
-
-void BaseMap::deleteElms() {
-  assert(!hasImmutableBuffer());
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    tvRefcountedDecRef(&e->data);
-    if (e->hasStrKey()) {
-      decRefStr(e->skey);
-    }
-  }
+  decRefArr(arrayData());
 }
 
 void c_Map::t___construct(const Variant& iterable /* = null_variant */) {
@@ -1576,16 +1621,45 @@ void c_Map::t___construct(const Variant& iterable /* = null_variant */) {
 }
 
 Array BaseMap::php_toArray() const {
-  ArrayInit ai(m_size, ArrayInit::Mixed{});
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    if (e->hasIntKey()) {
-      ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
-    } else {
-      ai.set(String(StrNR(e->skey)).toKey(), tvAsCVarRef(&e->data));
-    }
+  if (!m_size) {
+    return empty_array();
   }
-  return ai.toArray();
+  if (UNLIKELY(intLikeStrKeys())) {
+    // In the rare case where this Map contains integer-like string keys,
+    // instead of exposing this Map's buffer we return a MixedArray copy of
+    // the buffer with the int-like string keys converted to integers. This
+    // is important because int-like string keys cannot be accessed by user
+    // code via the brackets operator (i.e. "$c[$k]").
+    ArrayInit ai(m_size, ArrayInit::Mixed{});
+    auto* eLimit = elmLimit();
+    for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+      if (e->hasIntKey()) {
+        ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
+      } else {
+        ai.set(String(StrNR(e->skey)).toKey(), tvAsCVarRef(&e->data));
+      }
+    }
+    return ai.toArray();
+  }
+  auto ad = const_cast<ArrayData*>(
+    reinterpret_cast<const ArrayData*>(arrayData())
+  );
+  // When Map:toArray() returns a non-empty array, we want the returned
+  // array to have its internal cursor pointing at the first element, so we
+  // set m_pos accordingly here. It's safe to write to m_pos even if ad's
+  // refcount is greater than 1 because we know one of the following is true:
+  // either (1) this array has never been exposed outside of the Map
+  // implementation, in which case we know it's not referenced outside by
+  // anything outside the Map implementation, or (2) this array has been
+  // exposed by the Map implementation, in which case m_pos was already set
+  // to point to the first element (and COW semantics ensures that m_pos
+  // couldn't have been changed by user code).
+  assert(m_size);
+  auto firstPos = nthElmPos(0);
+  if (ad->m_pos != firstPos) {
+    ad->m_pos = firstPos;
+  }
+  return Array(ad);
 }
 
 template<typename TMap>
@@ -1594,30 +1668,13 @@ typename std::enable_if<
 BaseMap::Clone(ObjectData* obj) {
   auto thiz = static_cast<TMap*>(obj);
   auto target = static_cast<TMap*>(obj->cloneImpl());
-
-  if (!thiz->m_size) return target;
-
-  assert(target->m_size == 0);
-  assert(thiz->m_used != 0);
-  target->m_capAndUsed = thiz->m_capAndUsed;
-  target->m_tableMask = thiz->m_tableMask;
-  target->m_size = thiz->m_size;
-  auto needed =
-    size_t(thiz->m_cap) * sizeof(Elm) + thiz->hashSize() * sizeof(int32_t);
-  target->m_data = (Elm*)MM().objMallocLogged(needed);
-  target->m_hash = (int32_t*)(target->m_data + target->m_cap);
-  wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
-
-  auto* eLimit = thiz->elmLimit();
-  auto* te = target->data();
-  for (auto* e = thiz->data(); e != eLimit; ++e, ++te) {
-    if (isTombstone(e)) {
-      te->data.m_type = e->data.m_type;
-    } else {
-      dupElm(*e, *te);
-    }
+  if (!thiz->m_size) {
+    return target;
   }
-
+  thiz->arrayData()->incRefCount();
+  target->m_size = thiz->m_size;
+  target->m_data = thiz->m_data;
+  target->setIntLikeStrKeys(thiz->intLikeStrKeys());
   return target;
 }
 
@@ -1625,36 +1682,26 @@ c_Map* c_Map::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_Map>(obj);
 }
 
-void BaseMap::copyBuffer() {
-  assert(hasImmutableBuffer());
-  if (!m_size) {
-    uint32_t used = 0;
-    uint32_t cap = 0;
-    m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
-    m_tableMask = 0;
-    m_data = nullptr;
-    m_hash = &empty_map_hash_slot;
-    m_immCopy.reset();
+void BaseMap::mutateImpl() {
+  assert(arrayData()->hasMultipleRefs());
+  dropImmCopy();
+  if (canMutateBuffer()) {
     return;
   }
-  auto needed = size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t);
-  auto* newData = (Elm*)MM().objMallocLogged(needed);
-  assert(newData);
-  auto* newHash = (int32_t*)(newData + m_cap);
-  assert(newHash);
-  wordcpy(newHash, m_hash, hashSize());
-  auto* eLimit = elmLimit();
-  auto* te = newData;
-  for (auto* e = firstElm(); e != eLimit; ++e, ++te) {
-    if (isTombstone(e)) {
-      te->data.m_type = e->data.m_type;
-    } else {
-      dupElm(*e, *te);
-    }
+  if (!m_size) {
+    arrayData()->decRefCount();
+    m_size = 0;
+    m_data = mixedData(staticEmptyMixedArray());
+    setIntLikeStrKeys(false);
+    return;
   }
-  m_data = newData;
-  m_hash = newHash;
-  m_immCopy.reset();
+  auto* oldAd = arrayData();
+  m_data = mixedData(
+    reinterpret_cast<MixedArray*>(MixedArray::Copy(oldAd))
+  );
+  arrayData()->incRefCount();
+  assert(oldAd->hasMultipleRefs());
+  oldAd->decRefCount();
 }
 
 void BaseMap::init(const Variant& t) {
@@ -1687,11 +1734,12 @@ Object c_Map::t_addall(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
+  auto oldCap = cap();
   reserve(m_size + sz); // presume minimum key collisions
   for (; iter; ++iter) {
     add(iter.second());
   }
-  compactIfNecessary(); // ... and compact back if that was incorrect
+  adjustAfterReserve(oldCap); // ... and shrink back if that was incorrect
   return this;
 }
 
@@ -1711,21 +1759,12 @@ void c_Map::t_reserve(const Variant& sz) {
 }
 
 Object c_Map::t_clear() {
-  if (!hasImmutableBuffer()) {
-    deleteElms();
-    freeData();
-  } else {
-    m_immCopy.reset();
-  }
-  uint32_t used = 0;
-  uint32_t cap = 0;
-  uint32_t tableMask = 0;
-  int32_t version = m_version + 1;
+  ++m_version;
+  dropImmCopy();
+  decRefArr(arrayData());
+  m_data = mixedData(staticEmptyMixedArray());
   m_size = 0;
-  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
-  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
-  m_data = nullptr;
-  m_hash = &empty_map_hash_slot;
+  setIntLikeStrKeys(false);
   return this;
 }
 
@@ -2001,21 +2040,17 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
   auto* mp = NEWOBJ(TMap)();
   Object obj = mp;
   if (!m_size) return obj;
-  assert(m_used != 0);
-  mp->deleteElms();
-  mp->freeData();
-  mp->m_cap = m_cap;
-  mp->m_tableMask = m_tableMask;
-  mp->m_size = m_size;
-  auto needed =
-    size_t(mp->m_cap) * sizeof(Elm) + mp->hashSize() * sizeof(int32_t);
-  mp->m_data = (Elm*)MM().objMallocLogged(needed);
-  mp->m_hash = (int32_t*)(mp->m_data + mp->m_cap);
+  assert(posLimit() != 0);
+  assert(hashSize() > 0);
+  assert(mp->arrayData() == staticEmptyMixedArray());
+  mp->m_data = mixedData(
+    reinterpret_cast<MixedArray*>(MixedArray::MakeReserveMixed(cap()))
+  );
+  mp->setIntLikeStrKeys(intLikeStrKeys());
   wordcpy(mp->hashTab(), hashTab(), hashSize());
   uint32_t used = posLimit();
-  mp->m_used = 0;
   int32_t version = m_version;
-  for (uint32_t i = 0; i < used; mp->m_used = ++i) {
+  for (uint32_t i = 0; i < used; ++i, mp->incPosLimit()) {
     const Elm& e = data()[i];
     Elm& ne = mp->data()[i];
     if (isTombstone(i)) {
@@ -2034,6 +2069,7 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
     }
     ne.ikey = e.ikey;
     ne.data.hash() = e.data.hash();
+    mp->incSize();
   }
   return obj;
 }
@@ -2130,9 +2166,9 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
     mutateAndBump();
     version = m_version;
     e = iter_elm(ipos);
-    int32_t* pp = (e->hasIntKey()
-                   ? findForInsert(e->ikey)
-                   : findForInsert(e->skey, e->skey->hash()));
+    ssize_t pp = (e->hasIntKey()
+                   ? findForRemove(e->ikey)
+                   : findForRemove(e->skey, e->skey->hash()));
     eraseNoCompact(pp);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
@@ -2140,7 +2176,7 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
   }
 
   assert(m_size <= size);
-  compactIfNecessary();
+  adjustIfDensityTooLow();
   return this;
 }
 
@@ -2220,17 +2256,20 @@ BaseMap::php_take(const Variant& n) {
   }
   size_t sz = size_t(len);
   mp->reserve(sz);
-  mp->m_size = mp->m_used = sz;
+  mp->setSize(sz);
+  mp->setPosLimit(sz);
   auto table = mp->hashTab();
-  auto mask = mp->m_tableMask;
+  auto mask = mp->tableMask();
   for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(frPos)) {
-      assert(frPos + 1 < m_used);
-      ++frPos;
-    }
+    frPos = skipTombstonesUnsafe(frPos);
     auto& toE = mp->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
+    if (toE.hasIntKey()) {
+      mp->updateNextKI(toE.ikey);
+    } else {
+      mp->updateIntLikeStrKeys(toE.skey);
+    }
   }
   return obj;
 }
@@ -2299,18 +2338,21 @@ BaseMap::php_skip(const Variant& n) {
   size_t sz = size_t(m_size) - size_t(len);
   assert(sz);
   mp->reserve(sz);
-  mp->m_size = mp->m_used = sz;
+  mp->setSize(sz);
+  mp->setPosLimit(sz);
   uint32_t frPos = nthElmPos(len);
   auto table = mp->hashTab();
-  auto mask = mp->m_tableMask;
+  auto mask = mp->tableMask();
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(frPos)) {
-      assert(frPos + 1 < m_used);
-      ++frPos;
-    }
+    frPos = skipTombstonesUnsafe(frPos);
     auto& toE = mp->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
+    if (toE.hasIntKey()) {
+      mp->updateNextKI(toE.ikey);
+    } else {
+      mp->updateIntLikeStrKeys(toE.skey);
+    }
   }
   return obj;
 }
@@ -2379,18 +2421,21 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
   auto* mp = NEWOBJ(TMap)();
   Object obj = mp;
   mp->reserve(sz);
-  mp->m_size = mp->m_used = sz;
+  mp->setSize(sz);
+  mp->setPosLimit(sz);
   uint32_t frPos = nthElmPos(skipAmt);
   auto table = mp->hashTab();
-  auto mask = mp->m_tableMask;
+  auto mask = mp->tableMask();
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(frPos)) {
-      assert(frPos + 1 < m_used);
-      ++frPos;
-    }
+    frPos = skipTombstonesUnsafe(frPos);
     auto& toE = mp->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
+    if (toE.hasIntKey()) {
+      mp->updateNextKI(toE.ikey);
+    } else {
+      mp->updateIntLikeStrKeys(toE.skey);
+    }
   }
   return obj;
 }
@@ -2562,9 +2607,7 @@ BaseMap::php_mapFromItems(const Variant& iterable) {
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   auto* target = NEWOBJ(TMap)();
   Object ret = target;
-  if (sz) {
-    target->reserve(sz);
-  }
+  target->reserve(sz);
   for (; iter; ++iter) {
     Variant v = iter.second();
     TypedValue* tv = v.asCell();
@@ -2625,8 +2668,8 @@ template<typename TMap>
 collectionDeepCopyBaseMap(TMap* mp) {
   mp = TMap::Clone(mp);
   Object o = Object::attach(mp);
+  mp->mutate();
   uint used = mp->posLimit();
-  assert(!mp->hasImmutableBuffer());
   for (uint32_t i = 0; i < used; ++i) {
     if (mp->isTombstone(i)) continue;
     auto* e = &mp->data()[i];
@@ -2744,12 +2787,12 @@ Variant BaseMap::pop() {
       if (!isTombstone(e)) break;
     }
     Variant ret = tvAsCVarRef(&e->data);
-    int32_t* ei;
+    ssize_t ei;
     if (e->hasIntKey()) {
-      ei = findForInsert(e->ikey);
+      ei = findForRemove(e->ikey);
     } else {
       assert(e->hasStrKey());
-      ei = findForInsert(e->skey, e->skey->hash());
+      ei = findForRemove(e->skey, e->skey->hash());
     }
     erase(ei);
     return ret;
@@ -2769,12 +2812,12 @@ Variant BaseMap::popFront() {
       if (!isTombstone(e)) break;
     }
     Variant ret = tvAsCVarRef(&e->data);
-    int32_t* ei;
+    ssize_t ei;
     if (e->hasIntKey()) {
-      ei = findForInsert(e->ikey);
+      ei = findForRemove(e->ikey);
     } else {
       assert(e->hasStrKey());
-      ei = findForInsert(e->skey, e->skey->hash());
+      ei = findForRemove(e->skey, e->skey->hash());
     }
     erase(ei);
     return ret;
@@ -2787,16 +2830,16 @@ Variant BaseMap::popFront() {
 
 void BaseMap::remove(int64_t key) {
   mutateAndBump();
-  auto* p = findForInsert(key);
-  if (validPos(*p)) {
+  auto p = findForRemove(key);
+  if (validPos(p)) {
     erase(p);
   }
 }
 
 void BaseMap::remove(StringData* key) {
   mutateAndBump();
-  auto* p = findForInsert(key, key->hash());
-  if (validPos(*p)) {
+  auto p = findForRemove(key, key->hash());
+  if (validPos(p)) {
     erase(p);
   }
 }
@@ -2841,16 +2884,16 @@ static bool hitIntKey(const BaseMap::Elm& e, int64_t ki) {
 template <class Hit>
 ALWAYS_INLINE
 ssize_t BaseMap::findImpl(size_t h0, Hit hit) const {
-  size_t tableMask = m_tableMask;
+  size_t mask = tableMask();
   auto* elms = data();
   auto* hashtable = hashTab();
   for (size_t probeIndex = h0, i = 1;; ++i) {
-    ssize_t pos = hashtable[probeIndex & tableMask];
+    ssize_t pos = hashtable[probeIndex & mask];
     if ((validPos(pos) && hit(*fetchElm(elms, pos))) || pos == Empty) {
       return pos;
     }
     probeIndex += i;
-    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
+    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
   }
 }
 
@@ -2872,7 +2915,7 @@ ALWAYS_INLINE
 int32_t* BaseMap::findForInsertImpl(size_t h0, Hit hit) const {
   // mask, probe, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto. Test carefully.
-  size_t mask = m_tableMask;
+  size_t mask = tableMask();
   auto* elms = data();
   auto* hashtable = hashTab();
   int32_t* ret = nullptr;
@@ -2913,7 +2956,9 @@ ALWAYS_INLINE int32_t*
 BaseMap::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
   for (size_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
-    if (!validPos(*ei)) return ei;
+    if (!validPos(*ei)) {
+      return ei;
+    }
     probe += i;
     assert(i <= mask && probe == h0 + (i + i*i) / 2);
   }
@@ -2921,7 +2966,7 @@ BaseMap::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
 
 ALWAYS_INLINE
 int32_t* BaseMap::findForNewInsert(size_t h0) const {
-  return findForNewInsert(hashTab(), m_tableMask, h0);
+  return findForNewInsert(hashTab(), tableMask(), h0);
 }
 
 template <bool raw>
@@ -2930,8 +2975,8 @@ void BaseMap::setImpl(int64_t h, const TypedValue* val) {
   if (!raw) {
     mutate();
   }
-  assert(!hasImmutableBuffer());
   assert(val->m_type != KindOfRef);
+  assert(canMutateBuffer());
 retry:
   auto* p = findForInsert(h);
   assert(p);
@@ -2949,12 +2994,13 @@ retry:
     makeRoom();
     goto retry;
   }
-  auto& e = allocElm(p);
-  cellDup(*val, e.data);
-  e.setIntKey(h);
   if (!raw) {
     ++m_version;
   }
+  auto& e = allocElm(p);
+  cellDup(*val, e.data);
+  e.setIntKey(h);
+  updateNextKI(h);
 }
 
 template <bool raw>
@@ -2962,10 +3008,10 @@ void BaseMap::setImpl(StringData* key, const TypedValue* val) {
   if (!raw) {
     mutate();
   }
-  assert(!hasImmutableBuffer());
   assert(val->m_type != KindOfRef);
-  strhash_t h = key->hash();
+  assert(canMutateBuffer());
 retry:
+  strhash_t h = key->hash();
   auto* p = findForInsert(key, h);
   assert(p);
   if (validPos(*p)) {
@@ -2982,12 +3028,13 @@ retry:
     makeRoom();
     goto retry;
   }
-  auto& e = allocElm(p);
-  cellDup(*val, e.data);
-  e.setStrKey(key, h);
   if (!raw) {
     ++m_version;
   }
+  auto& e = allocElm(p);
+  cellDup(*val, e.data);
+  e.setStrKey(key, h);
+  updateIntLikeStrKeys(key);
 }
 
 void BaseMap::setRaw(int64_t h, const TypedValue* val) {
@@ -3006,147 +3053,187 @@ void BaseMap::set(StringData* key, const TypedValue* val) {
   setImpl<false>(key, val);
 }
 
-void BaseMap::eraseNoCompact(int32_t* pos) {
-  assert(!hasImmutableBuffer());
-  assert(validPos(*pos) && !isTombstone(*pos));
-  assert(data());
-  auto* elms = data();
-  auto& e = *fetchElm(elms, *pos);
-  // Mark the hash slot as a tombstone.
-  *pos = Tombstone;
-  // Decref the key if it's a string.
-  if (e.hasStrKey()) {
-    decRefStr(e.skey);
-  }
-  // Mark the Elm as a tombstone.
-  TypedValue* tv = &e.data;
-  DataType oldType = tv->m_type;
-  uint64_t oldDatum = tv->m_data.num;
-  tv->m_type = KindOfInvalid;
+void BaseMap::eraseNoCompact(ssize_t pos) {
+  assert(canMutateBuffer());
+  assert(validPos(pos) && !isTombstone(pos));
+  assert(m_size > 0);
+  // We're removing an element, so we make sure m_pos is not pointing at
+  // garbage by setting it to invalid_index
+  arrayData()->m_pos = ArrayData::invalid_index;
+  ((MixedArray*)arrayData())->eraseNoCompact(pos);
   --m_size;
-  // Don't adjust m_used. This frees us from having to explicitly keep track
-  // of hash load, since we can instead rely on the isFull() condition to
-  // trigger a grow/compact before hash load gets too high.
-  assert(m_used <= m_cap);
-  // Finally, decref the old value
-  tvRefcountedDecRefHelper(oldType, oldDatum);
-}
-
-void BaseMap::erase(int32_t* pos) {
-  assert(!hasImmutableBuffer());
-  eraseNoCompact(pos);
-  // Compact in order to keep elms from being overly sparse. In general,
-  // Map's implement tries to avoid letting Elm density drop below 50%.
-  compactIfNecessary();
 }
 
 NEVER_INLINE void BaseMap::makeRoom() {
   assert(isFull());
+  assert(posLimit() == cap());
   if (LIKELY(!isDensityTooLow())) {
-    if (UNLIKELY(m_cap == MaxSize)) {
+    if (UNLIKELY(cap() == MaxSize)) {
       throwTooLarge();
     }
-    grow(m_cap ? m_cap*2 : SmallSize, m_cap ? m_tableMask*2+1 : SmallMask);
+    grow(cap() ? cap()*2 : SmallSize, cap() ? tableMask()*2+1 : SmallMask);
   } else {
     compact();
   }
+  assert(canMutateBuffer());
+  assert(m_immCopy.isNull());
   assert(!isFull());
 }
 
 NEVER_INLINE void BaseMap::reserve(int64_t sz) {
-  assert(m_size <= m_used && m_used <= m_cap);
-  uint32_t newCap, newMask;
-  if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
-    throwReserveTooLarge();
-  }
-  // Compute the new capacity and new hash mask if we need to grow or bail
-  // out if there is nothing to do.
-  if (sz > int64_t(m_cap)) {
-    // The requested capacity is greater than the current capacity. Compute
-    // the smallest allowed capacity that is sufficient.
-    auto lgSize = BaseMap::SmallLgTableSize;
-    for (newCap = BaseMap::SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
+  assert(m_size <= posLimit() && posLimit() <= cap());
+  uint32_t newCap;
+  uint32_t newMask;
+  if (LIKELY(sz > int64_t(cap()))) {
+    if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
+      throwReserveTooLarge();
+    }
+    // Fast path: The requested capacity is greater than the current capacity.
+    // Grow to the smallest allowed capacity that is sufficient.
+    auto lgSize = MinLgTableSize;
+    for (newCap = SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
     newMask = (size_t(1U) << lgSize) - 1;
-    assert(lgSize <= MaxLgTableSize && newCap > m_cap);
+    assert(lgSize <= MaxLgTableSize && newCap > cap());
+    // Fall through to the call to grow() below
+  } else if (LIKELY(!hasTombstones())) {
+    // Fast path: There are no tombstones and the requested capacity is less
+    // than or equal to the current capacity. Do nothing and return.
+    return;
+  } else if (sz + int64_t(posLimit() - m_size) <= int64_t(cap()) ||
+             isDensityTooLow()) {
+    // If we reach this case, then either (1) density is too low (this is
+    // possible because of methods like retain()), in which case we compact
+    // to make room and return, OR (2) density is not too low and either
+    // sz < m_size or there's enough room to add sz-m_size elements, in
+    // which case we do nothing and return.
+    adjustIfDensityTooLow();
+    assert(sz + int64_t(posLimit() - m_size) <= int64_t(cap()));
+    return;
   } else {
-    // If sz <= m_size or if the Map can accommodate sz-m_size additional
-    // elements without growing or compacting, then there is nothing to do.
-    if (sz <= int64_t(m_size) ||
-        size_t(m_used) + size_t(sz - m_size) <= size_t(m_cap)) return;
-    // Otherwise prepare to double the current capacity
-    assert(0 < sz && sz <= int64_t(m_cap));
-    assert(m_cap < MaxSize && m_tableMask != 0);
-    newCap = m_cap * 2;
-    newMask = m_tableMask * 2 + 1;
+    // If we reach this case, then density is not too low and sz > m_size and
+    // there is not enough room to add sz-m_size elements. While would could
+    // compact to make room, it's better for Hysteresis if we grow capacity
+    // by 2x instead.
+    assert(!isDensityTooLow());
+    assert(sz + int64_t(posLimit() - m_size) > int64_t(cap()));
+    assert(cap() < MaxSize && tableMask() != 0);
+    newCap = cap() * 2;
+    newMask = tableMask() * 2 + 1;
+    assert(0 < sz && sz <= int64_t(newCap));
+    // Fall through to the call to grow() below
   }
-  // Perform the grow operation.
   grow(newCap, newMask);
+  assert(canMutateBuffer());
+}
+
+ALWAYS_INLINE
+void BaseMap::resizeHelper(uint32_t newCap) {
+  assert(newCap >= m_size);
+  assert(m_immCopy.isNull());
+  // Allocate a new ArrayData with the specified capacity and dup
+  // all the elements (without copying over tombstones).
+  auto* ad = (arrayData() == staticEmptyMixedArray()) ?
+    reinterpret_cast<MixedArray*>(MixedArray::MakeReserveMixed(newCap)) :
+    MixedArray::CopyReserve((MixedArray*)arrayData(), newCap);
+  decRefArr(arrayData());
+  m_data = mixedData(ad);
+  assert(canMutateBuffer());
 }
 
 void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
-  assert(m_size <= m_used && m_used <= m_cap);
-  assert(newCap >= SmallSize && newMask >= SmallMask);
-  size_t newHashSize = size_t(newMask) + 1;
-  assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
-  assert(m_size <= newCap && newCap <= MaxSize);
-  auto* oldData = data();
-  auto oldHashSize = oldData ? hashSize() : 0;
-  auto oldCap = m_cap;
-  auto needed = size_t(newCap) * sizeof(Elm) + newHashSize * sizeof(int32_t);
-  auto* data = (Elm*)MM().objMallocLogged(needed);
-  auto* table = (int32_t*)(data + size_t(newCap));
-  m_data = data;
-  m_hash = table;
-  m_tableMask = newMask;
-  auto oldUsed DEBUG_ONLY = m_used;
-  m_capAndUsed = (uint64_t(newCap) << 32) | uint64_t(m_size);
-  initHash(table, newHashSize);
-  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(frPos, oldData)) {
-      assert(frPos + 1 < oldUsed);
-      ++frPos;
-    }
-    copyElm(oldData[frPos], data[toPos]);
-    *findForNewInsert(table, newMask, data[toPos].probe()) = toPos;
-  }
-  if (!hasImmutableBuffer()) {
-    if (oldData) {
-      MM().objFreeLogged(
-        oldData, size_t(oldCap) * sizeof(Elm) + oldHashSize * sizeof(int32_t));
-    }
+  assert(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
+  assert(SmallSize <= newCap && newCap <= MaxSize);
+  assert(m_size <= newCap);
+  assert(newMask > 0 && ((newMask+1) & newMask) == 0);
+  assert(newMask == folly::nextPowTwo<uint64_t>(newCap) - 1);
+  assert(newCap == computeMaxElms(newMask));
+  auto* oldAd = arrayData();
+  dropImmCopy();
+  if (m_size > 0 && !oldAd->hasMultipleRefs()) {
+    // MixedArray::Grow can only handle non-empty cases where the
+    // buffer's refcount is 1.
+    m_data = mixedData(MixedArray::Grow((MixedArray*)oldAd, newCap, newMask));
+    arrayData()->incRefCount();
+    decRefArr(oldAd);
   } else {
-    // In this case we don't own the oldData buffer, so we don't free
-    // it and we incRef all of the elements
-    for (uint32_t p = 0; p < m_size; ++p) {
-      tvRefcountedIncRef(&data[p].data);
-      if (data[p].hasStrKey()) data[p].skey->incRefCount();
-    }
-    m_immCopy.reset();
+    // For cases where m_size is zero or the buffer's refcount is
+    // greater than 1, call resizeHelper().
+    resizeHelper(newCap);
   }
-  assert(!hasImmutableBuffer());
+  assert(canMutateBuffer());
+  assert(m_immCopy.isNull());
 }
 
 void BaseMap::compact() {
-  assert(!hasImmutableBuffer());
   assert(isDensityTooLow());
-  auto* elms = data();
-  assert(elms);
-  auto mask = m_tableMask;
-  size_t tableSize = hashSize();
-  auto table = hashTab();
-  initHash(table, tableSize);
-  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(frPos, elms)) {
-      assert(frPos + 1 < m_used);
-      ++frPos;
-    }
-    auto& toE = elms[toPos];
-    if (toPos != frPos) {
-      copyElm(elms[frPos], toE);
-    }
-    *findForNewInsert(table, mask, toE.probe()) = toPos;
+  dropImmCopy();
+  if (!arrayData()->hasMultipleRefs()) {
+    // MixedArray::compact can only handle cases where the buffer's
+    // refcount is 1.
+    ((MixedArray*)arrayData())->compact(false);
+  } else {
+    // For cases where the buffer's refcount is greater than 1, call
+    // resizeHelper().
+    resizeHelper(cap());
   }
-  m_used = m_size;
+  assert(canMutateBuffer());
+  assert(m_immCopy.isNull());
+  assert(!isDensityTooLow());
+}
+
+void BaseMap::shrink(uint32_t oldCap /* = 0 */) {
+  assert(isCapacityTooHigh() && (oldCap == 0 || oldCap < cap()));
+  assert(m_size <= posLimit() && posLimit() <= cap());
+  dropImmCopy();
+  uint32_t newCap;
+  if (oldCap != 0) {
+    // If an old capacity was specified, use that
+    newCap = oldCap;
+    assert(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
+  } else {
+    if (m_size == 0 && nextKI() == 0) {
+      decRefArr(arrayData());
+      m_data = mixedData(staticEmptyMixedArray());
+      return;
+    }
+    // If no old capacity was provided, we compute the largest capacity
+    // where m_size/cap() is less than or equal to 0.5 for good hysteresis
+    size_t doubleSz = size_t(m_size) * 2;
+    uint32_t capThreshold = (doubleSz < size_t(MaxSize)) ? doubleSz : MaxSize;
+    for (newCap = SmallSize * 2; newCap < capThreshold; newCap <<= 1) {}
+  }
+  assert(SmallSize <= newCap && newCap <= MaxSize);
+  assert(m_size <= newCap);
+  auto* oldAd = arrayData();
+  if (!oldAd->hasMultipleRefs()) {
+    // If the buffer's refcount is 1, we can teleport the elements
+    // to a new buffer
+    auto* oldBuf = data();
+    auto oldUsed = posLimit();
+    auto oldNextKI = nextKI();
+    auto* data = mixedData(
+      reinterpret_cast<MixedArray*>(MixedArray::MakeReserveMixed(newCap))
+    );
+    m_data = data;
+    auto* table = (int32_t*)(data + size_t(newCap));
+    arrayData()->m_size = m_size;
+    setPosLimit(m_size);
+    setNextKI(oldNextKI);
+    for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+      frPos = skipTombstonesUnsafe(frPos, oldUsed, oldBuf);
+      copyElm(oldBuf[frPos], data[toPos]);
+      *findForNewInsert(table, tableMask(), data[toPos].probe()) = toPos;
+    }
+    ((MixedArray*)oldAd)->setZombie();
+    decRefArr(oldAd);
+  } else {
+    // For cases where the buffer's refcount is greater than 1, call
+    // resizeHelper()
+    resizeHelper(newCap);
+  }
+  assert(canMutateBuffer());
+  assert(m_immCopy.isNull());
+  assert(!isCapacityTooHigh());
 }
 
 void BaseMap::throwBadKeyType() {
@@ -3163,7 +3250,6 @@ Array BaseMap::ToArray(const ObjectData* obj) {
 bool BaseMap::ToBool(const ObjectData* obj) {
   return static_cast<const BaseMap*>(obj)->toBoolImpl();
 }
-
 
 struct MapKeyAccessor {
   typedef const BaseMap::Elm& ElmT;
@@ -3204,7 +3290,7 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
     return GenericSort;
   }
   auto* start = data();
-  auto* end = data() + m_used;
+  auto* end = data() + posLimit();
   bool allInts UNUSED = true;
   bool allStrs UNUSED = true;
   for (;;) {
@@ -3238,7 +3324,11 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
     copyElm(*end, *start);
   }
   done:
-  m_used = start - data();
+  setPosLimit(start - data());
+  // The logic above possibly moved elements and tombstones around within
+  // the buffer, so we make sure m_pos is not pointing at garbage by setting
+  // it to invalid_index
+  arrayData()->m_pos = ArrayData::invalid_index;
   assert(!hasTombstones());
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
@@ -3251,18 +3341,15 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
  * postSort() runs after the sort has been performed. For c_Map,
  * postSort() handles rebuilding the hash.
  */
-void BaseMap::postSort() {
+void BaseMap::postSort() {  // Must provide the nothrow guarantee
   assert(m_size > 0);
   auto const table = hashTab();
   initHash(table, hashSize());
-  {
-    auto mask = m_tableMask;
-    auto data = this->data();
-    for (uint32_t pos = 0; pos < m_used; ++pos) {
-      auto& e = data[pos];
-      auto ei = findForNewInsert(table, mask, e.probe());
-      *ei = pos;
-    }
+  auto mask = tableMask();
+  auto data = this->data();
+  for (uint32_t pos = 0; pos < posLimit(); ++pos) {
+    auto& e = data[pos];
+    *findForNewInsert(table, mask, e.probe()) = pos;
   }
 }
 
@@ -3270,10 +3357,10 @@ void BaseMap::postSort() {
   case flag: {                                                  \
     if (ascending) {                                            \
       cmp_type##Compare<acc_type, flag, true> comp;             \
-        HPHP::Sort::sort(data(), data() + m_size, comp);        \
+      HPHP::Sort::sort(data(), data() + m_size, comp);          \
     } else {                                                    \
       cmp_type##Compare<acc_type, flag, false> comp;            \
-        HPHP::Sort::sort(data(), data() + m_size, comp);        \
+      HPHP::Sort::sort(data(), data() + m_size, comp);          \
     }                                                           \
     break;                                                      \
   }
@@ -3439,18 +3526,18 @@ void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 // This function will create a immutable copy of this Map (if it doesn't
 // already exist) and then return it
 Object c_Map::getImmutableCopy() {
-  if (!hasImmutableBuffer()) {
-    assert(m_immCopy.isNull());
+  if (m_immCopy.isNull()) {
     auto* mp = NEWOBJ(c_ImmMap)();
     m_immCopy = mp;
-    mp->m_data = m_data;
-    mp->m_hash = m_hash;
+    arrayData()->incRefCount();
     mp->m_size = m_size;
-    mp->m_used = m_used;
-    mp->m_cap = m_cap;
-    mp->m_tableMask = m_tableMask;
     mp->m_version = m_version;
+    mp->m_data = m_data;
+    mp->setIntLikeStrKeys(intLikeStrKeys());
   }
+  assert(!m_immCopy.isNull());
+  assert(m_data == static_cast<c_ImmMap*>(m_immCopy.get())->m_data);
+  assert(arrayData()->hasMultipleRefs());
   return m_immCopy;
 }
 
@@ -3551,6 +3638,7 @@ void BaseMap::Unserialize(ObjectData* obj,
       if (UNLIKELY(validPos(*p))) goto do_unserialize;
       e = &mp->allocElm(p);
       e->setIntKey(h);
+      mp->updateNextKI(h);
     } else if (k.isString()) {
       auto key = k.getStringData();
       auto h = key->hash();
@@ -3560,6 +3648,7 @@ void BaseMap::Unserialize(ObjectData* obj,
       if (UNLIKELY(validPos(*p))) goto do_unserialize;
       e = &mp->allocElm(p);
       e->setStrKey(key, h);
+      mp->updateIntLikeStrKeys(key);
     } else {
       throw Exception("Invalid key");
     }
@@ -3656,6 +3745,8 @@ c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
 ///////////////////////////////////////////////////////////////////////////////
 // BaseSet
 
+static int32_t empty_set_hash_slot = BaseSet::Empty;
+
 // Public
 
 void BaseSet::copyBuffer() {
@@ -3666,10 +3757,11 @@ void BaseSet::copyBuffer() {
     m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
     m_tableMask = 0;
     m_data = nullptr;
-    m_hash = &empty_map_hash_slot;
+    m_hash = &empty_set_hash_slot;
     m_immCopy.reset();
     return;
   }
+  assert(hashSize() > 0);
   auto needed = size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t);
   auto* newData = (Elm*)MM().objMallocLogged(needed);
   assert(newData);
@@ -4154,6 +4246,7 @@ BaseSet::Clone(ObjectData* obj) {
 
   assert(target->m_size == 0);
   assert(thiz->m_used != 0);
+  assert(thiz->hashSize() > 0);
   target->m_capAndUsed = thiz->m_capAndUsed;
   target->m_tableMask = thiz->m_tableMask;
   target->m_size = thiz->m_size;
@@ -4175,8 +4268,6 @@ BaseSet::Clone(ObjectData* obj) {
 
   return target;
 }
-
-static int32_t empty_set_hash_slot = BaseSet::Empty;
 
 bool BaseSet::php_contains(const Variant& key) {
   DataType t = key.getType();
@@ -4562,17 +4653,6 @@ BaseSet::php_fromItems(const Variant& iterable) {
   assert(!st->hasImmutableBuffer());
   st->addAll(iterable);
   return ret;
-}
-
-static ALWAYS_INLINE
-const Cell container_as_cell(const Variant& container) {
-  const auto& cellContainer = *container.asCell();
-  if (UNLIKELY(!isContainer(cellContainer))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a container (array or collection)"));
-    throw e;
-  }
-  return cellContainer;
 }
 
 template<class TSet>
@@ -6128,7 +6208,7 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
       // if the element is a value-type (anything other than objects and
       // resources) we need to sever any buffer sharing that might be going on
       auto* mp = static_cast<c_Map*>(obj);
-      if (UNLIKELY(mp->hasImmutableBuffer() &&
+      if (UNLIKELY(!mp->canMutateBuffer() &&
                    ret->m_type != KindOfObject &&
                    ret->m_type != KindOfResource)) {
         mp->mutate();

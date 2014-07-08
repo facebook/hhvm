@@ -244,6 +244,10 @@ void RequestInjectionData::onTimeout() {
   m_timerActive.store(false, std::memory_order_relaxed);
 }
 
+/*
+ * NB: this function must be nothrow when `seconds' is zero.  RPCRequestHandler
+ * makes use of this.
+ */
 void RequestInjectionData::setTimeout(int seconds) {
 #ifndef __APPLE__
   m_timeoutSeconds = seconds > 0 ? seconds : 0;

@@ -108,10 +108,10 @@ Array HHVM_FUNCTION(ob_list_handlers) {
 }
 bool HHVM_FUNCTION(output_add_rewrite_var, const String& name,
                                            const String& value) {
-  throw NotSupportedException(__func__, "bad coding style");
+  throw_not_supported(__func__, "bad coding style");
 }
 bool HHVM_FUNCTION(output_reset_rewrite_vars) {
-  throw NotSupportedException(__func__, "bad coding style");
+  throw_not_supported(__func__, "bad coding style");
 }
 
 void HHVM_FUNCTION(hphp_crash_log, const String& name, const String& value) {

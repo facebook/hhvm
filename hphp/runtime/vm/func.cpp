@@ -47,7 +47,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
 
-using JIT::tx;
 using JIT::mcg;
 
 const StringData* Func::s___call       = makeStaticString("__call");
@@ -256,7 +255,7 @@ void Func::initPrologues(int numParams) {
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
 
-  if (tx == nullptr) {
+  if (mcg == nullptr) {
     m_funcBody = nullptr;
     for (int i = 0; i < numPrologues; i++) {
       m_prologueTable[i] = nullptr;
@@ -264,7 +263,7 @@ void Func::initPrologues(int numParams) {
     return;
   }
 
-  auto const& stubs = tx->uniqueStubs;
+  auto const& stubs = mcg->tx().uniqueStubs;
 
   m_funcBody = stubs.funcBodyHelperThunk;
 
@@ -446,6 +445,22 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Parameters.
 
+bool Func::anyByRef() const {
+  if (m_refBitVal || (m_attrs & AttrVariadicByRef)) {
+    return true;
+  }
+
+  if (UNLIKELY(numParams() >= kBitsPerQword)) {
+    auto limit = ((uint32_t) numParams() / kBitsPerQword);
+    for (int i = 0; i < limit; ++i) {
+      if (shared()->m_refBitPtr[i]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool Func::byRef(int32_t arg) const {
   const uint64_t* ref = &m_refBitVal;
   assert(arg >= 0);
@@ -465,20 +480,22 @@ const StaticString s_extract("extract");
 const StaticString s_extractNative("__SystemLib\\extract");
 const StaticString s_current("current");
 const StaticString s_key("key");
+const StaticString s_array_multisort("array_multisort");
 
 bool Func::mustBeRef(int32_t arg) const {
   if (!byRef(arg)) return false;
   if (arg == 0) {
     if (UNLIKELY(m_attrs & AttrBuiltin)) {
       // This hacks mustBeRef() to return false for the first parameter of
-      // extract(), current(), and key(). These functions try to take their
-      // first parameter by reference but they also allow expressions that
-      // cannot be taken by reference (ex. an array literal).
+      // extract(), current(), key(), and array_multisort(). These functions
+      // try to take their first parameter by reference but they also allow
+      // expressions that cannot be taken by reference (ex. an array literal).
       // TODO Task #4442937: Come up with a cleaner way to do this.
       if (name() == s_extract.get() && !cls()) return false;
       if (name() == s_extractNative.get() && !cls()) return false;
       if (name() == s_current.get() && !cls()) return false;
       if (name() == s_key.get() && !cls()) return false;
+      if (name() == s_array_multisort.get() && !cls()) return false;
     }
   }
   return
@@ -604,7 +621,7 @@ int Func::numPrologues() const {
 }
 
 void Func::resetPrologue(int numParams) {
-  auto const& stubs = tx->uniqueStubs;
+  auto const& stubs = mcg->tx().uniqueStubs;
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 

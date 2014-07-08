@@ -144,10 +144,6 @@ void Object::serialize(VariableSerializer *serializer) const {
   }
 }
 
-bool Object::unserialize(std::istream &in) {
-  throw NotImplementedException(__func__);
-}
-
 void Object::setToDefaultObject() {
   raise_warning(Strings::CREATING_DEFAULT_OBJECT);
   operator=(SystemLib::AllocStdClassObject());

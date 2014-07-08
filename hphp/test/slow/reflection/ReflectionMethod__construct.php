@@ -36,4 +36,8 @@ var_dump((new ReflectionMethod('Foo', 'method'))->getName());
 var_dump((new ReflectionMethod(new Foo(), 'method'))->getName());
 var_dump((new ReflectionMethod('Foo::method'))->getName());
 // Look for method '' in class 'Foo'
-var_dump((new ReflectionMethod('Foo', null))->getName());
+try {
+  var_dump((new ReflectionMethod('Foo', null))->getName());
+} catch (ReflectionException $ex) {
+  echo 'ReflectionException: ', $ex->getMessage(), "\n";
+}

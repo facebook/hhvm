@@ -73,8 +73,6 @@ public:
   static int LogHeaderMangle;
   static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;
-  static bool InjectedStackTrace;
-  static int InjectedStackTraceLimit; // limit the size of the backtrace
   static bool NoSilencer;
   static bool CallUserHandlerOnFatals;
   static bool ThrowExceptionOnBadMethodCall;
@@ -85,11 +83,7 @@ public:
   static int  MaxLoopCount;
   static int  MaxSerializedStringSize;
   static bool NoInfiniteRecursionDetection;
-  static bool ThrowBadTypeExceptions;
-  static bool ThrowTooManyArguments;
   static bool WarnTooManyArguments;
-  static bool ThrowMissingArguments;
-  static bool ThrowInvalidArguments;
   static bool EnableHipHopErrors;
   static bool AssertActive;
   static bool AssertWarning;
@@ -279,7 +273,6 @@ public:
   static bool TranslateLeakStackTrace;
   static bool NativeStackTrace;
   static bool FullBacktrace;
-  static bool ServerStackTrace;
   static bool ServerErrorMessage;
   static bool TranslateSource;
   static bool RecordInput;
@@ -430,7 +423,7 @@ public:
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitPseudomain,               jitPseudomainDefault())          \
-  F(bool, HHIRBytecodeControlFlow,     hhirBytecodeControlFlowDefault())\
+  F(bool, HHIRBytecodeControlFlow,     true)                            \
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
@@ -461,8 +454,6 @@ public:
   /* Region compiler flags */                                           \
   F(bool,     JitLoops,                false)                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
-  F(bool,     JitDryRuns,              false)                           \
-  F(bool,     JitCompareRegions,       false)                           \
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    "hottrace")                      \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
@@ -473,7 +464,6 @@ public:
   F(uint32_t, HotFuncThreshold,        80)                              \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \
-  F(bool, HHBCRelaxGuards,             true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \

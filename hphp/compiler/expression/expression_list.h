@@ -75,6 +75,8 @@ public:
   void markParams(bool noRefWrapper);
 
   void setCollectionType(Collection::Type cType);
+  void setContainsUnpack() { m_argUnpack = true; };
+  bool containsUnpack() const { return m_argUnpack; }
 
   virtual bool canonCompare(ExpressionPtr e) const;
 
@@ -92,6 +94,7 @@ private:
   ExpressionPtrVec m_exps;
   bool m_arrayElements;
   int m_collectionType;
+  bool m_argUnpack;
   ListKind m_kind;
 };
 

@@ -102,7 +102,7 @@ static const char* dlerror() {
 
 Extension::Extension(litstr name, const char *version /* = "" */)
     : m_hhvmAPIVersion(HHVM_API_VERSION)
-    , m_name(makeStaticString(name))
+    , m_name(name)
     , m_version(version ? version : "") {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
@@ -236,6 +236,15 @@ bool Extension::IsLoaded(const String& name) {
     s_registered_extensions->end();
 }
 
+const static std::string
+  s_systemlibPhpName("systemlib.php"),
+  s_systemlibHhasName("systemlib.hhas.");
+
+bool Extension::IsSystemlibPath(const std::string& name) {
+  return !name.compare(0, s_systemlibPhpName.length(), s_systemlibPhpName) ||
+         !name.compare(0, s_systemlibHhasName.length(), s_systemlibHhasName);
+}
+
 Extension *Extension::GetExtension(const String& name) {
   assert(s_registered_extensions);
   ExtensionMap::iterator iter = s_registered_extensions->find(name.data());
@@ -249,13 +258,13 @@ Array Extension::GetLoadedExtensions() {
   assert(s_registered_extensions);
   Array ret = Array::Create();
   for (auto& kv : *s_registered_extensions) {
-    if (!apcExtension::Enable && kv.second->m_name == s_apc) {
+    if (!apcExtension::Enable && kv.second->m_name == s_apc.toCppString()) {
       continue;
     }
-    if (!RuntimeOption::EnableXHP && kv.second->m_name == s_xhp) {
+    if (!RuntimeOption::EnableXHP && kv.second->m_name == s_xhp.toCppString()) {
       continue;
     }
-    ret.append(kv.second->m_name);
+    ret.append(String(kv.second->m_name));
   }
   return ret;
 }
@@ -292,13 +301,11 @@ void Extension::loadSystemlib(const std::string& name /*= "" */) {
   section += f_md5(n, false).substr(0, 12).data();
   std::string hhas, slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
-    std::string phpname("systemlib.php");
-    phpname += n;
+    std::string phpname = s_systemlibPhpName + n;
     CompileSystemlib(slib, phpname);
   }
   if (!hhas.empty()) {
-    std::string hhasname("systemlib.hhas.");
-    hhasname += n;
+    std::string hhasname = s_systemlibHhasName + n;
     CompileSystemlib(hhas, hhasname);
   }
 }

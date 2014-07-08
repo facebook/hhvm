@@ -255,9 +255,10 @@ void MemoryManager::refreshStatsHelper() {
   refreshStats();
 }
 
-void MemoryManager::refreshStatsHelperExceeded() const {
+void MemoryManager::refreshStatsHelperExceeded() {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_reqInjectionData.setMemExceededFlag();
+  m_couldOOM = false;
 }
 
 #ifdef USE_JEMALLOC
@@ -297,6 +298,8 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
+
+  resetCouldOOM();
 }
 
 /*

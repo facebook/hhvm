@@ -1,0 +1,2 @@
+File "iface_require_extends3.php", line 6, characters 22-27:
+Only traits may use 'require implements'

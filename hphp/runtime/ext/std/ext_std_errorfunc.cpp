@@ -73,10 +73,7 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
  * "callee".
  */
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
-  if (RuntimeOption::InjectedStackTrace) {
-    return g_context->getCallerInfo();
-  }
-  return empty_array();
+  return g_context->getCallerInfo();
 }
 
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
@@ -96,56 +93,51 @@ const StaticString
 
 String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
                               int64_t limit /* = 0 */) {
-  if (RuntimeOption::InjectedStackTrace) {
-    Array bt;
-    StringBuffer buf;
-    bt = g_context->debugBacktrace(skip, false, false, nullptr,
-                                     ignore_args, limit);
-    int i = 0;
-    for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
-      Array frame = it.second().toArray();
-      buf.append('#');
-      buf.append(i);
-      if (i < 10) buf.append(' ');
-      buf.append(' ');
-      if (frame.exists(s_class)) {
-        buf.append(frame->get(s_class).toString());
-        buf.append(frame->get(s_type).toString());
-      }
-      buf.append(frame->get(s_function).toString());
-      buf.append("(");
-      if (!ignore_args) {
-        bool first = true;
-        for (ArrayIter it(frame->get(s_args).toArray());
-            !it.end();
-            it.next()) {
-          if (!first) {
-            buf.append(", ");
-          } else {
-            first = false;
-          }
-          try {
-            buf.append(it.second().toString());
-          } catch (FatalErrorException& fe) {
-            buf.append(fe.getMessage());
-          }
+  Array bt;
+  StringBuffer buf;
+  bt = g_context->debugBacktrace(skip, false, false, nullptr,
+                                   ignore_args, limit);
+  int i = 0;
+  for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
+    Array frame = it.second().toArray();
+    buf.append('#');
+    buf.append(i);
+    if (i < 10) buf.append(' ');
+    buf.append(' ');
+    if (frame.exists(s_class)) {
+      buf.append(frame->get(s_class).toString());
+      buf.append(frame->get(s_type).toString());
+    }
+    buf.append(frame->get(s_function).toString());
+    buf.append("(");
+    if (!ignore_args) {
+      bool first = true;
+      for (ArrayIter it(frame->get(s_args).toArray());
+          !it.end();
+          it.next()) {
+        if (!first) {
+          buf.append(", ");
+        } else {
+          first = false;
+        }
+        try {
+          buf.append(it.second().toString());
+        } catch (FatalErrorException& fe) {
+          buf.append(fe.getMessage());
         }
       }
-      buf.append(")");
-      if (frame.exists(s_file)) {
-        buf.append(" called at [");
-        buf.append(frame->get(s_file).toString());
-        buf.append(':');
-        buf.append(frame->get(s_line).toString());
-        buf.append(']');
-      }
-      buf.append('\n');
     }
-    return buf.detach();
-  } else {
-    StackTrace st;
-    return String(st.toString());
+    buf.append(")");
+    if (frame.exists(s_file)) {
+      buf.append(" called at [");
+      buf.append(frame->get(s_file).toString());
+      buf.append(':');
+      buf.append(frame->get(s_line).toString());
+      buf.append(']');
+    }
+    buf.append('\n');
   }
+  return buf.detach();
 }
 
 Array HHVM_FUNCTION(error_get_last) {

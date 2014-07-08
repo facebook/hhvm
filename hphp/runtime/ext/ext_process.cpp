@@ -442,13 +442,18 @@ private:
   FILE *m_proc;
 };
 
-String f_shell_exec(const String& cmd) {
+Variant f_shell_exec(const String& cmd) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(cmd.c_str());
-  if (!fp) return empty_string();
+  if (!fp) return init_null();
   StringBuffer sbuf;
   sbuf.read(fp);
-  return sbuf.detach();
+  auto ret = sbuf.detach();
+  if (ret.empty() && !RuntimeOption::EnableHipHopSyntax) {
+    // Match php5
+    return init_null();
+  }
+  return ret;
 }
 
 String f_exec(const String& command, VRefParam output /* = null */,

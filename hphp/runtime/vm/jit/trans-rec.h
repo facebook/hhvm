@@ -72,7 +72,6 @@ struct TransRec {
            TCA                         _afrozenStart,
            uint32_t                    _afrozenLen,
            RegionDescPtr               region = RegionDescPtr(),
-           const Tracelet*             tlet = nullptr,
            std::vector<TransBCMapping> _bcMapping =
              std::vector<TransBCMapping>());
 

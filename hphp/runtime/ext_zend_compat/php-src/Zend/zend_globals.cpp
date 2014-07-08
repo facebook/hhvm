@@ -25,4 +25,3 @@ HashTable& EG_persistent_list() {
 HashTable& EG_symbol_table() {
   return *HPHP::get_global_variables()->asArrayData();
 }
-int& EG_exit_status() { return HPHP::ExitException::ExitCode; }

@@ -596,11 +596,11 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
   indented(out, [&] {
     for (auto& prec : precRules) {
       out.fmtln("{}::{} insteadof{};",
-        prec.getSelectedTraitName()->data(),
-        prec.getMethodName()->data(),
+        prec.selectedTraitName()->data(),
+        prec.methodName()->data(),
         [&]() -> std::string {
           auto ret = std::string{};
-          for (auto& name : prec.getOtherTraitNames()) {
+          for (auto& name : prec.otherTraitNames()) {
             ret += folly::format(" {}", name->data()).str();
           }
           return ret;
@@ -609,13 +609,13 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
     }
     for (auto& alias : aliasRules) {
       out.fmtln("{}{} as{}{};",
-        alias.getTraitName()->empty()
+        alias.traitName()->empty()
           ? std::string{}
-          : folly::format("{}::", alias.getTraitName()->data()).str(),
-        alias.getOrigMethodName()->data(),
-        opt_attrs(AttrContext::TraitImport, alias.getModifiers()),
-        alias.getNewMethodName() != alias.getOrigMethodName()
-          ? std::string(" ") + alias.getNewMethodName()->data()
+          : folly::format("{}::", alias.traitName()->data()).str(),
+        alias.origMethodName()->data(),
+        opt_attrs(AttrContext::TraitImport, alias.modifiers()),
+        alias.newMethodName() != alias.origMethodName()
+          ? std::string(" ") + alias.newMethodName()->data()
           : std::string{}
       );
     }

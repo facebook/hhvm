@@ -1,0 +1,33 @@
+begin baz
+constructing in baz
+begin bar
+constructing in bar
+foo 42
+bar 42
+baz 42
+42 1764 74088
+foo 43
+bar 43
+baz 43
+43 1849 79507
+foo 44
+bar 44
+baz 44
+44 1936 85184
+foo 45
+bar 45
+baz 45
+foo 46
+bar 46
+baz 46
+46 2116 97336
+foo 47
+bar 47
+baz 47
+47 2209 103823
+foo 48
+bar 48
+destructing in bar
+end bar
+destructing in baz
+end baz

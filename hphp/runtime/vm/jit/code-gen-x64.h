@@ -33,15 +33,13 @@ struct CodeGenerator : public JIT::CodeGenerator {
   typedef JIT::X64Assembler Asm;
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& coldCode,
-                CodeBlock& frozenCode, JIT::MCGenerator* mcg,
-                CodegenState& state)
+                CodeBlock& frozenCode, CodegenState& state)
     : m_unit(unit)
     , m_mainCode(mainCode)
     , m_coldCode(coldCode)
     , m_frozenCode(frozenCode)
     , m_as(mainCode)
     , m_acold(coldCode)
-    , m_mcg(mcg)
     , m_state(state)
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
@@ -92,29 +90,21 @@ private:
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };
-  template<class MemRef>
-  void cgStore(MemRef dst, SSATmp* src, PhysLoc src_loc, Width);
-  template<class MemRef>
-  void cgStoreTypedValue(MemRef dst, SSATmp* src, PhysLoc src_loc);
+  void cgStore(MemoryRef dst, SSATmp* src, PhysLoc src_loc, Width);
+  void cgStoreTypedValue(MemoryRef dst, SSATmp* src, PhysLoc src_loc);
 
   // helpers to load a value in dst. When label is not null a type check
   // is performed against value to ensure it is of the type expected by dst
-  template<class BaseRef>
-  void cgLoad(SSATmp* dst, PhysLoc dstLoc, BaseRef value,
+  void cgLoad(SSATmp* dst, PhysLoc dstLoc, MemoryRef value,
               Block* label = nullptr);
-  template<class BaseRef>
-  void cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc, BaseRef base,
+  void cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc, MemoryRef base,
                         Block* label = nullptr);
 
   // internal helpers to manage register conflicts from a source to a PhysReg
   // destination.
   // If the conflict cannot be resolved the out param isResolved is set to
   // false and the caller should take proper action
-  IndexedMemoryRef resolveRegCollision(PhysReg dst,
-                                       IndexedMemoryRef value,
-                                       bool& isResolved);
-  MemoryRef resolveRegCollision(PhysReg dst,
-                                MemoryRef value,
+  MemoryRef resolveRegCollision(PhysReg dst, MemoryRef value,
                                 bool& isResolved);
 
   template<class Loc1, class Loc2, class JmpFn>
@@ -168,6 +158,8 @@ private:
   void cgReqBindJccInt(IRInstruction* inst);  // helper
   void cgExitJccInt(IRInstruction* inst); // helper
   void emitCmpInt(IRInstruction* inst, ConditionCode);
+  void emitCmpEqDbl(IRInstruction* inst, ComparisonPred);
+  void emitCmpRelDbl(IRInstruction* inst, ConditionCode, bool);
   void cgCmpHelper(IRInstruction* inst,
                    void (Asm::*setter)(Reg8),
                    int64_t (*str_cmp_str)(StringData*, StringData*),
@@ -197,7 +189,6 @@ private:
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
-  void doubleCmp(Asm& a, RegXMM xmmReg0, RegXMM xmmReg1);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
@@ -344,7 +335,6 @@ private:
   CodeBlock&          m_frozenCode;
   Asm                 m_as;  // current "main" assembler
   Asm                 m_acold; // for cold code
-  MCGenerator*        m_mcg;
   CodegenState&       m_state;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
@@ -367,14 +357,6 @@ inline MemoryRef refTVType(MemoryRef ref) {
 }
 
 inline MemoryRef refTVData(MemoryRef ref) {
-  return *(ref.r + TVOFF(m_data));
-}
-
-inline IndexedMemoryRef refTVType(IndexedMemoryRef ref) {
-  return *(ref.r + TVOFF(m_type));
-}
-
-inline IndexedMemoryRef refTVData(IndexedMemoryRef ref) {
   return *(ref.r + TVOFF(m_data));
 }
 

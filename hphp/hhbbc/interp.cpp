@@ -376,27 +376,8 @@ void in(ISS& env, const bc::BitXor& op) { arithImpl(env, op, typeBitXor); }
 void in(ISS& env, const bc::AddO& op)   { arithImpl(env, op, typeAddO); }
 void in(ISS& env, const bc::SubO& op)   { arithImpl(env, op, typeSubO); }
 void in(ISS& env, const bc::MulO& op)   { arithImpl(env, op, typeMulO); }
-
-template<class Op, class Fun>
-void shiftImpl(ISS& env, const Op& op, Fun fop) {
-  constprop(env);
-  auto const v1 = tv(typeToInt(popC(env)));
-  auto const v2 = tv(typeToInt(popC(env)));
-  if (v1 && v2) {
-    return push(env, eval_cell([&] {
-      return make_tv<KindOfInt64>(fop(cellToInt(*v2), cellToInt(*v1)));
-    }));
-  }
-  push(env, TInt);
-}
-
-void in(ISS& env, const bc::Shl& op) {
-  shiftImpl(env, op, [&] (int64_t a, int64_t b) { return a << b; });
-}
-
-void in(ISS& env, const bc::Shr& op) {
-  shiftImpl(env, op, [&] (int64_t a, int64_t b) { return a >> b; });
-}
+void in(ISS& env, const bc::Shl& op)    { arithImpl(env, op, typeShl); }
+void in(ISS& env, const bc::Shr& op)    { arithImpl(env, op, typeShr); }
 
 void in(ISS& env, const bc::BitNot& op) {
   auto const t = popC(env);
@@ -1523,6 +1504,19 @@ void in(ISS& env, const bc::FCallD& op) {
 
 void in(ISS& env, const bc::FCallArray& op) {
   popF(env);
+  auto const ar = fpiPop(env);
+  specialFunctionEffects(env, ar);
+  if (ar.func) {
+    return push(env, env.index.lookup_return_type(env.ctx, *ar.func));
+  }
+  push(env, TInitGen);
+}
+
+void in(ISS& env, const bc::FCallUnpack& op) {
+  // FCallUnpack has pretty much the same effects as FCallArray, just with
+  // potentially more than one argument. It's possible that we can share
+  // more code with FCall and FCallArray here.
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) { popF(env); }
   auto const ar = fpiPop(env);
   specialFunctionEffects(env, ar);
   if (ar.func) {

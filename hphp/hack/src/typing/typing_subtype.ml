@@ -24,11 +24,9 @@ let rec subtype_funs_generic ~check_return env r1 ft1 r2 orig_ft2 =
   let p1 = Reason.to_pos r1 in
   let env, ft2 = Inst.instantiate_ft env orig_ft2 in
   if ft2.ft_arity_min > ft1.ft_arity_min
-  then Errors.add_list [p, ("Too many mandatory arguments");
-                        p1, "Because of this definition"];
+  then Errors.fun_too_many_args p p1;
   if ft2.ft_arity_max < ft1.ft_arity_max
-  then Errors.add_list [p, ("Too few arguments");
-                        p1, "Because of this definition"];
+  then Errors.fun_too_few_args p p1;
   let env, _ = subtype_params env ft1.ft_params ft2.ft_params in
   (* Checking that if the return type was defined in the parent class, it
    * is defined in the subclass too (requested by Gabe Levi).
@@ -85,10 +83,6 @@ and sub_type env ty1 ty2 =
       fst (Unify.unify env ty1 ty2)
   | _, (_, Tunresolved tyl) ->
       List.fold_left (fun env x -> sub_type env ty1 x) env tyl
-  | _, (_, Tabstract (_, _, Some x)) ->
-      Errors.try_
-         (fun () -> fst (Unify.unify env ty1 ty2))
-         (fun _ -> sub_type env ty1 x)
   | (_, Tapply _), (r2, Tgeneric (x, Some ty2)) ->
       (Errors.try_
          (fun () -> sub_type env ty1 ty2)
@@ -125,16 +119,17 @@ and sub_type env ty1 ty2 =
         | None -> env
         | Some class_ ->
           let subtype_req_ancestor =
-            if class_.tc_kind = Ast.Ctrait then
-            (* a trait is never the runtime type, but it can be used as
-             * a constraint if it has requirements for its using
-             * classes *)
+            if class_.tc_kind = Ast.Ctrait || class_.tc_kind = Ast.Cinterface then
+              (* a trait is never the runtime type, but it can be used as
+               * a constraint if it has requirements for its using
+               * classes *)
               let pos = (fst x2) in
               let env, ret = SSet.fold begin fun elt acc ->
                 match acc with
                   | _, Some _ -> acc
                   | env, None ->
-                    Errors.try_ begin fun () ->                        
+                    Errors.try_ begin fun () ->
+                      (* FIXME: need to actually use the type *)
                       let candidate_ty = (p2, Tapply ((pos, elt), tyl2)) in
                       env, Some (sub_type env ty1 candidate_ty)
                     end (fun _ -> acc)
@@ -155,13 +150,8 @@ and sub_type env ty1 ty2 =
                   in
                   if List.length class_.tc_tparams <> List.length tyl2
                   then
-                    Errors.add (Reason.to_pos p2)
-                      ("Expected " ^
-                          (match List.length class_.tc_tparams with
-                            | 0 -> "no type parameter"
-                            | 1 -> "a type parameter"
-                            | n -> string_of_int n ^ " type parameters"
-                          ));
+                    Errors.expected_tparam
+                      (Reason.to_pos p2) (List.length class_.tc_tparams);
                   let subst = Inst.make_subst class_.tc_tparams tyl2 in
                   let env, up_obj = Inst.instantiate subst env up_obj in
                   sub_type env ty1 up_obj
@@ -248,10 +238,13 @@ and sub_type env ty1 ty2 =
         then
           let p1 = Reason.to_pos r1 in
           let p2 = Reason.to_pos r2 in
-          Errors.add_list [p2, "The field '"^k^"' is defined";
-                           p1, "The field '"^k^"' is missing"]
+          Errors.field_missing k p1 p2
       end fdm2;
       TUtils.apply_shape sub_type env (r1, fdm1) (r2, fdm2)
+  | _, (_, Tabstract (_, _, Some x)) ->
+      Errors.try_
+         (fun () -> fst (Unify.unify env ty1 ty2))
+         (fun _ -> sub_type env ty1 x)
   | _ -> fst (Unify.unify env ty1 ty2)
 
 and is_sub_type env ty1 ty2 =
@@ -267,6 +260,7 @@ and sub_string p env ty2 =
       List.fold_left (sub_string p) env tyl
   | (_, Tprim _) ->
       env
+  | (_, Tabstract (_, _, Some ty))
   | (_, Tgeneric (_, Some ty)) ->
       sub_string p env ty
   | (r2, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
@@ -278,16 +272,12 @@ and sub_string p env ty2 =
       | None -> env
       | Some {tc_name = "\\Stringish"; _} -> env
       | Some tc when SMap.mem "\\Stringish" tc.tc_ancestors -> env
-      | Some _ -> Errors.add_list [
-          p, "You cannot use this object as a string";
-          Reason.to_pos r2, "This object doesn't implement __toString"];
+      | Some _ ->
+          Errors.object_string p (Reason.to_pos r2);
           env
       )
   | (_, Tany) when Env.is_strict env ->
-      Errors.add_list [
-      p,
-      "You cannot use this object as a string, it is an untyped value"
-    ];
+      Errors.untyped_string p;
       env
   | _, Tany ->
       env (* Unifies with anything *)

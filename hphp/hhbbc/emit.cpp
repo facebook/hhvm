@@ -497,11 +497,11 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.phpCode = param.phpCode;
       pinfo.userAttributes = param.userAttributes;
       pinfo.builtinType = param.builtinType;
-      pinfo.setRef(param.byRef);
+      pinfo.byRef = param.byRef;
       pinfo.variadic = param.isVariadic;
       fe.appendParam(func.locals[id]->name, pinfo);
       if (auto const dv = param.dvEntryPoint) {
-        fe.setParamFuncletOff(id, info.blockInfo[dv->id].offset);
+        fe.params[id].funcletOff = info.blockInfo[dv->id].offset;
       }
     } else {
       if (loc->name) {
@@ -518,7 +518,7 @@ void emit_locals_and_params(FuncEmitter& fe,
   fe.setNumIterators(func.iters.size());
 
   for (auto& sv : func.staticLocals) {
-    fe.addStaticVar(Func::SVInfo { sv.name, sv.phpCode });
+    fe.staticVars.push_back(Func::SVInfo {sv.name, sv.phpCode});
   }
 }
 
@@ -550,7 +550,7 @@ void emit_eh_region(FuncEmitter& fe,
   } else {
     eh.m_parentIndex = -1;
   }
-  parentIndexMap[region] = fe.ehtab().size() - 1;
+  parentIndexMap[region] = fe.ehtab.size() - 1;
 
   match<void>(
     region->node->info,
@@ -726,13 +726,13 @@ void emit_ehent_tree(FuncEmitter& fe,
   for (auto& r : regions) {
     emit_eh_region(fe, r, info.blockInfo, parentIndexMap);
   }
-  fe.setEhTabIsSorted();
+  fe.setEHTabIsSorted();
 }
 
 void emit_finish_func(const php::Func& func,
                       FuncEmitter& fe,
                       const EmitBcInfo& info) {
-  if (info.containsCalls) fe.setContainsCalls();
+  if (info.containsCalls) fe.containsCalls = true;;
 
   for (auto& fpi : info.fpiRegions) {
     auto& e = fe.addFPIEnt();
@@ -744,24 +744,22 @@ void emit_finish_func(const php::Func& func,
   emit_locals_and_params(fe, func, info);
   emit_ehent_tree(fe, func, info);
 
-  fe.setUserAttributes(func.userAttributes);
-  fe.setReturnUserType(func.returnUserType);
-  fe.setOriginalFilename(func.originalFilename);
-  fe.setIsClosureBody(func.isClosureBody);
-  fe.setIsAsync(func.isAsync);
-  fe.setIsGenerator(func.isGenerator);
-  fe.setIsPairGenerator(func.isPairGenerator);
+  fe.userAttributes = func.userAttributes;
+  fe.retUserType = func.returnUserType;
+  fe.originalFilename = func.originalFilename;
+  fe.isClosureBody = func.isClosureBody;
+  fe.isAsync = func.isAsync;
+  fe.isGenerator = func.isGenerator;
+  fe.isPairGenerator = func.isPairGenerator;
   if (func.nativeInfo) {
-    fe.setReturnType(func.nativeInfo->returnType);
+    fe.returnType = func.nativeInfo->returnType;
   }
-  fe.setReturnTypeConstraint(func.retTypeConstraint);
+  fe.retTypeConstraint = func.retTypeConstraint;
 
-  fe.setMaxStackCells(
-    info.maxStackDepth +
-      fe.numLocals() +
-      fe.numIterators() * kNumIterCells +
-      info.maxFpiDepth * kNumActRecCells
-  );
+  fe.maxStackCells = info.maxStackDepth +
+                     fe.numLocals() +
+                     fe.numIterators() * kNumIterCells +
+                     info.maxFpiDepth * kNumActRecCells;
 
   fe.finish(fe.ue().bcPos(), false /* load */);
   fe.ue().recordFunction(&fe);

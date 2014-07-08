@@ -35,23 +35,14 @@ namespace HPHP {
     throw *this; \
   }
 
-class Exception : public std::exception {
-public:
-  Exception(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+struct Exception : std::exception {
+  explicit Exception() = default;
+  explicit Exception(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   explicit Exception(const std::string& msg);
   Exception(const Exception &e);
-  Exception();
 
-  /**
-   * Subclass can call this function to format variable length of parameters.
-   *
-   * class MyException : public Exception {
-   * public:
-   *   MyException(const char *fmt, ...) {
-   *     va_list ap; va_start(ap, fmt); Format(fmt, ap); va_end(ap);
-   *   }
-   * };
-   */
+  // Try not to use this function (or the other varargs-based things) in new
+  // code.  (You probably shouldn't be using Exception directly either.)
   void format(const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
 
   void setMessage(const char *msg) { m_msg = msg ? msg : "";}
@@ -74,7 +65,6 @@ public:
   const std::string &getMessage() const { return m_msg;}
 
 protected:
-  mutable bool m_handled;
   mutable std::string m_msg;
   mutable std::string m_what;
 };

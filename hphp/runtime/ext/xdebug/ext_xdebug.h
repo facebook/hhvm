@@ -28,6 +28,11 @@ namespace HPHP {
 #define XDEBUG_NAME "xdebug-not-done"
 #define XDEBUG_VERSION NO_EXTENSION_VERSION_YET
 
+// TODO(#4489053) Document these
+// Differences b/w xdebug:
+//  extended_info, coverage_enable:
+//    unused because enabling/disabling these would have no effect on hhvm
+//    since we can toggle tracking the required information at runtime
 #define XDEBUG_CFG \
   XDEBUG_OPT(bool, "auto_trace", AutoTrace, false) \
   XDEBUG_OPT(int, "cli_color", CliColor, 0) \
@@ -36,12 +41,10 @@ namespace HPHP {
   XDEBUG_OPT(int, "collect_params", CollectParams, 0) \
   XDEBUG_OPT(bool, "collect_return", CollectReturn, false) \
   XDEBUG_OPT(bool, "collect_vars", CollectVars, false) \
-  XDEBUG_OPT(bool, "coverage_enable", CoverageEnable, true) \
   XDEBUG_OPT(bool, "default_enable", DefaultEnable, true) \
   XDEBUG_OPT(bool, "dump_globals", DumpGlobals, true) \
   XDEBUG_OPT(bool, "dump_once", DumpOnce, true) \
   XDEBUG_OPT(bool, "dump_undefined", DumpUndefined, false) \
-  XDEBUG_OPT(bool, "extended_info", ExendedInfo, true) \
   XDEBUG_OPT(string, "file_link_format", FileLinkFormat, "") \
   XDEBUG_OPT(bool, "force_display_errors", ForceDisplayErrors, false) \
   XDEBUG_OPT(int, "force_error_reporting", ForceErrorReporting, 0) \
@@ -79,8 +82,11 @@ namespace HPHP {
   XDEBUG_OPT(int, "var_display_max_depth", VarDisplayMaxDepth, 3)
 
 // TODO(#4489053) Remove when xdebug fully implemented
-#define XDEBUG_NOTIMPLEMENTED  { throw NotImplementedException(__FUNCTION__); }
+#define XDEBUG_NOTIMPLEMENTED  { throw_not_implemented(__FUNCTION__); }
 
+///////////////////////////////////////////////////////////////////////////////
+const int64_t k_XDEBUG_CC_UNUSED = 1;
+const int64_t k_XDEBUG_CC_DEAD_CODE = 2;
 ///////////////////////////////////////////////////////////////////////////////
 
 class XDebugExtension : public Extension {

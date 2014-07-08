@@ -260,7 +260,7 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
   // Xenon
   if (flags & RequestInjectionData::XenonSignalFlag) {
-    Xenon::getInstance().log(true);
+    Xenon::getInstance().log(Xenon::EnterSample);
   }
 
   // User profiler
@@ -282,7 +282,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                                const Fault* fault, ssize_t flags) {
   // Xenon
   if (flags & RequestInjectionData::XenonSignalFlag) {
-    Xenon::getInstance().log(false);
+    Xenon::getInstance().log(Xenon::ExitSample);
   }
 
   // User profiler
@@ -291,7 +291,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // side exit in an inlined callee, we want to make sure to skip the exit
   // event to avoid unbalancing the call stack.
   if ((flags & RequestInjectionData::EventHookFlag) &&
-      (JIT::TCA)ar->m_savedRip != JIT::tx->uniqueStubs.retInlHelper) {
+      (JIT::TCA)ar->m_savedRip != JIT::mcg->tx().uniqueStubs.retInlHelper) {
 #ifdef HOTPROFILER
     Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr) {

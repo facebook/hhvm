@@ -30,14 +30,9 @@ namespace JIT {
 
 
 struct DynLocation;
-struct Tracelet;
 
-// A NormalizedInstruction has been decorated with its typed inputs and
-// outputs.
+// A NormalizedInstruction has been decorated with its typed inputs.
 struct NormalizedInstruction {
-  NormalizedInstruction* next;
-  NormalizedInstruction* prev;
-
   SrcKey source;
   const Func* funcd; // The Func in the topmost AR on the stack. Guaranteed to
                      // be accurate. Don't guess about this. Note that this is
@@ -47,15 +42,7 @@ struct NormalizedInstruction {
   const Unit* m_unit;
 
   std::vector<DynLocation*> inputs;
-  DynLocation* outStack;
-  DynLocation* outLocal;
-  DynLocation* outLocal2; // Used for IterInitK, MIterInitK, IterNextK,
-                          //   MIterNextK
-  DynLocation* outStack2; // Used for CGetL2
-  DynLocation* outStack3; // Used for CGetL3
   Type         outPred;
-  std::vector<Location> deadLocs; // locations that die at the end of this
-                             // instruction
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
@@ -63,19 +50,6 @@ struct NormalizedInstruction {
   // The member codes for the M-vector.
   std::vector<MemberCode> immVecM;
 
-  /*
-   * On certain FCalls, we can inspect the callee and generate a
-   * tracelet with information about what happens over there.
-   *
-   * The HHIR translator uses this to possibly inline callees.
-   */
-  std::unique_ptr<Tracelet> calleeTrace;
-
-  unsigned checkedInputs;
-  // StackOff: logical delta at *start* of this instruction to
-  // stack at tracelet entry.
-  int stackOffset;
-  int sequenceNum;
   Offset nextOffset; // for intra-trace* non-call control-flow instructions,
                      // this is the offset of the next instruction in the trace*
   bool breaksTracelet:1;
@@ -84,18 +58,7 @@ struct NormalizedInstruction {
   bool changesPC:1;
   bool preppedByRef:1;
   bool outputPredicted:1;
-  bool outputPredictionStatic:1;
   bool ignoreInnerType:1;
-
-  /*
-   * guardedThis indicates that we know that ar->m_this is
-   * a valid $this. eg:
-   *
-   *   $this->foo = 1; # needs to check that $this is non-null
-   *   $this->bar = 2; # can skip the check
-   *   return 5;       # can decRef ar->m_this unconditionally
-   */
-  bool guardedThis:1;
 
   /*
    * instruction is statically known to have no effect, e.g. unboxing a Cell
@@ -125,24 +88,6 @@ struct NormalizedInstruction {
   NormalizedInstruction();
   NormalizedInstruction(SrcKey, const Unit*);
   ~NormalizedInstruction();
-
-  void markInputInferred(int i) {
-    if (i < 32) checkedInputs |= 1u << i;
-  }
-
-  bool inputWasInferred(int i) const {
-    return i < 32 && ((checkedInputs >> i) & 1);
-  }
-
-  enum class OutputUse {
-    Used,
-    Unused,
-    Inferred,
-    DoesntCare
-  };
-  OutputUse getOutputUsage(const DynLocation* output) const;
-  bool isOutputUsed(const DynLocation* output) const;
-  bool isAnyOutputUsed() const;
 
   std::string toString() const;
 

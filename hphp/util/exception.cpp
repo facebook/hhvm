@@ -20,23 +20,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Exception::Exception(const char *fmt, ...)
-  : m_handled(false) {
+Exception::Exception(const char *fmt, ...) {
   va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
 }
 
 Exception::Exception(const std::string& msg)
-  : m_handled(false), m_msg(msg) {
+  : m_msg(msg) {
 }
 
 Exception::Exception(const Exception &e)
-  : m_handled(true), m_msg(e.m_msg), m_what(e.m_what) {
-  e.m_handled = true;
-}
-
-Exception::Exception()
-    : m_handled(true) {
-}
+  : m_msg(e.m_msg), m_what(e.m_what)
+{}
 
 void Exception::format(const char *fmt, va_list ap) {
   string_vsnprintf(m_msg, fmt, ap);

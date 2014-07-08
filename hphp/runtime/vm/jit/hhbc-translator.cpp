@@ -158,6 +158,12 @@ SSATmp* HhbcTranslator::pop(Type type, TypeConstraint tc) {
     uint32_t stackOff = m_irb->stackDeficit();
     m_irb->incStackDeficit();
     m_irb->constrainStack(stackOff, tc);
+
+    // pop() is usually called with Cell or Gen. Don't rely
+    // on the simplifier to get a better type for the LdStack.
+    auto const info = getStackValue(m_irb->sp(), stackOff);
+    type = std::min(type, info.knownType);
+
     auto value = gen(LdStack, type, StackOffset(stackOff), m_irb->sp());
     FTRACE(2, "HhbcTranslator popping {}\n", *value->inst());
     return value;
@@ -317,13 +323,12 @@ void HhbcTranslator::beginInlining(unsigned numParams,
                                         target});
   updateMarker();
 
-  always_assert_log(
+  always_assert_flog(
     findSpillFrame(calleeSP),
-    [&] {
-      return folly::format("Couldn't find SpillFrame for inlined call on sp {}."
-                           " Was the FPush instruction interpreted?\n{}",
-                           *calleeSP->inst(), m_irb->unit().toString()).str();
-    });
+    "Couldn't find SpillFrame for inlined call on sp {}."
+    " Was the FPush instruction interpreted?\n{}",
+    *calleeSP->inst(), m_irb->unit()
+  );
 
   auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP, m_irb->fp());
   gen(
@@ -704,12 +709,13 @@ void HhbcTranslator::emitAddElemC() {
 
   // val is teleported from the stack to the array, so we don't have to do any
   // refcounting.
+  auto const catchBlock = makeCatch();
   auto const val = popC(DataTypeGeneric);
   auto const key = popC();
   auto const arr = popC();
   // The AddElem* instructions decref their args, so don't decref pop'ed
   // values.
-  push(gen(op, arr, key, val));
+  push(gen(op, catchBlock, arr, key, val));
 }
 
 void HhbcTranslator::emitAddNewElemC() {
@@ -717,10 +723,11 @@ void HhbcTranslator::emitAddNewElemC() {
     return emitInterpOne(Type::Arr, 2);
   }
 
+  auto const catchBlock = makeCatch();
   auto const val = popC();
   auto const arr = popC();
   // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
-  push(gen(AddNewElem, arr, val));
+  push(gen(AddNewElem, catchBlock, arr, val));
 }
 
 void HhbcTranslator::emitNewCol(int type, int size) {
@@ -1656,7 +1663,9 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
 
 void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   assert(!resumed());
-  assert(curFunc()->isNonAsyncGenerator());
+  assert(curFunc()->isGenerator());
+
+  if (curFunc()->isAsyncGenerator()) PUNT(CreateCont-AsyncGenerator);
 
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
@@ -1687,7 +1696,8 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
 void HhbcTranslator::emitContEnter(Offset returnOffset) {
   assert(curClass());
-  assert(curClass()->classof(c_Generator::classof()));
+  assert(curClass()->classof(c_AsyncGenerator::classof()) ||
+         curClass()->classof(c_Generator::classof()));
   assert(curFunc()->contains(returnOffset));
 
   // Load generator's FP and resume address.
@@ -1745,8 +1755,12 @@ void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
 }
 
 void HhbcTranslator::emitYield(Offset resumeOffset) {
-  auto catchBlock = makeCatchNoSpill();
+  assert(resumed());
+  assert(curFunc()->isGenerator());
 
+  if (curFunc()->isAsyncGenerator()) PUNT(Yield-AsyncGenerator);
+
+  auto catchBlock = makeCatchNoSpill();
   emitYieldImpl(resumeOffset);
 
   // take a fast path if this generator has no yield k => v;
@@ -1770,6 +1784,11 @@ void HhbcTranslator::emitYield(Offset resumeOffset) {
 }
 
 void HhbcTranslator::emitYieldK(Offset resumeOffset) {
+  assert(resumed());
+  assert(curFunc()->isGenerator());
+
+  if (curFunc()->isAsyncGenerator()) PUNT(YieldK-AsyncGenerator);
+
   auto catchBlock = makeCatchNoSpill();
   emitYieldImpl(resumeOffset);
 
@@ -1789,6 +1808,8 @@ void HhbcTranslator::emitYieldK(Offset resumeOffset) {
 
 void HhbcTranslator::emitContCheck(bool checkStarted) {
   assert(curClass());
+  assert(curClass()->classof(c_AsyncGenerator::classof()) ||
+         curClass()->classof(c_Generator::classof()));
   SSATmp* cont = gen(LdThis, m_irb->fp());
   gen(ContPreNext, makeExitSlow(), cont, cns(checkStarted));
 }
@@ -1884,6 +1905,8 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
 
 void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
   assert(curFunc()->isAsync());
+
+  if (curFunc()->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
 
   auto const catchBlock = makeCatch();
   auto const exitSlow   = makeExitSlow();
@@ -2705,12 +2728,17 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
     }
   }
 
-  auto const ssaCls =
-    persistentCls ? cns(cls)
-                  : gen(LdClsCached, makeCatch(), cns(className));
-  auto const obj =
-    fastAlloc ? emitAllocObjFast(cls)
-              : gen(AllocObj, makeCatch(), ssaCls);
+  auto ssaCls = persistentCls ? cns(cls)
+                              : gen(LdClsCached, makeCatch(), cns(className));
+  if (!ssaCls->isConst() && uniqueCls) {
+    // If the Class is unique but not persistent, it's safe to use it as a
+    // const after the LdClsCached, which will throw if the class can't be
+    // defined.
+    ssaCls = cns(cls);
+  }
+
+  auto const obj = fastAlloc ? emitAllocObjFast(cls)
+                             : gen(AllocObj, makeCatch(), ssaCls);
   gen(IncRef, obj);
   emitFPushCtorCommon(ssaCls, obj, func, numParams);
 }
@@ -3310,8 +3338,12 @@ SSATmp* HhbcTranslator::optimizedCallCount() {
 
 SSATmp* HhbcTranslator::optimizedCallIniGet() {
   // Only generate the optimized version if the argument passed in is a
-  // static string so we can get the string value at JIT time.
-  if (!(topType(0) <= Type::StaticStr)) return nullptr;
+  // static string with a constant literal value so we can get the string value
+  // at JIT time.
+  Type argType = topType(0);
+  if (!(argType <= Type::StaticStr) || !argType.isConst()) {
+      return nullptr;
+  }
 
   // We can only optimize settings that are system wide since user level
   // settings can be overridden during the execution of a request.
@@ -3884,6 +3916,8 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 }
 
 void HhbcTranslator::emitRetC(bool freeInline) {
+  if (curFunc()->isAsyncGenerator()) PUNT(RetC-AsyncGenerator);
+
   if (isInlining()) {
     assert(!resumed());
     emitRetFromInlined(Type::Cell);
@@ -4079,7 +4113,8 @@ void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
   // We really do want to check for exact equality here: if type is StaticStr
   // there's nothing for us to do, and we don't support guarding on CountedStr.
   if (type != Type::Str ||
-      (tx->mode() != TransKind::Profile && tx->mode() != TransKind::Optimize)) {
+      (mcg->tx().mode() != TransKind::Profile &&
+       mcg->tx().mode() != TransKind::Optimize)) {
     return doGuard(type);
   }
 
@@ -4233,57 +4268,38 @@ void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
 }
 
 /*
- * Creates a RuntimeType struct from a program location. This needs access to
- * more than just the location's type because RuntimeType includes known
- * constant values. All accesses to the stack and locals use DataTypeGeneric so
- * this function should only be used for inspecting state; when the values are
- * actually used they must be constrained further.
+ * Returns the Type of the given location. All accesses to the stack and locals
+ * use DataTypeGeneric so this function should only be used for inspecting
+ * state; when the values are actually used they must be constrained further.
  */
-RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
-  Type t;
-  SSATmp* val = nullptr;
+Type HhbcTranslator::typeFromLocation(const Location& loc) {
   switch (loc.space) {
     case Location::Stack: {
       auto i = loc.offset;
       assert(i >= 0);
       if (i < m_irb->evalStack().size()) {
-        val = top(DataTypeGeneric, i);
-        t = val->type();
+        return top(DataTypeGeneric, i)->type();
       } else {
         auto stackVal =
           getStackValue(m_irb->sp(),
                         i - m_irb->evalStack().size() + m_irb->stackDeficit());
-        val = stackVal.value;
-        t = stackVal.knownType;
-        if (!val && t == Type::StackElem) return RuntimeType(KindOfAny);
+        return stackVal.knownType;
       }
     } break;
     case Location::Local: {
       auto l = loc.offset;
-      val = m_irb->localValue(l, DataTypeGeneric);
-      t = val ? val->type() : m_irb->localType(l, DataTypeGeneric);
+      return m_irb->localType(l, DataTypeGeneric);
     } break;
     case Location::Litstr:
-      return RuntimeType(curUnit()->lookupLitstrId(loc.offset));
+      return Type::cns(curUnit()->lookupLitstrId(loc.offset));
     case Location::Litint:
-      return RuntimeType(loc.offset);
+      return Type::cns(loc.offset);
     case Location::This:
-      return RuntimeType(KindOfObject, KindOfNone, curFunc()->cls());
-    case Location::Invalid:
-    case Location::Iter:
-      not_reached();
-  }
+      return Type::Obj.specialize(curFunc()->cls());
 
-  assert(IMPLIES(val, val->type().equals(t)));
-  if (val && val->isConst()) {
-    // RuntimeType holds constant Bool, Int, Str, and Cls.
-    if (val->isA(Type::Bool)) return RuntimeType(val->boolVal());
-    if (val->isA(Type::Int))  return RuntimeType(val->intVal());
-    if (val->isA(Type::Str))  return RuntimeType(val->strVal());
-    if (val->isA(Type::Cls))  return RuntimeType(val->clsVal());
+    default:
+      always_assert(false && "Bad location in typeFromLocation");
   }
-
-  return t.toRuntimeType();
 }
 
 static uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
@@ -4686,12 +4702,9 @@ void HhbcTranslator::emitCastInt() {
 }
 
 void HhbcTranslator::emitCastObject() {
+  auto catchBlock = makeCatch();
   SSATmp* src = popC();
-  if (src->isA(Type::Obj)) {
-    push(src);
-  } else {
-    push(gen(ConvCellToObj, src));
-  }
+  push(gen(ConvCellToObj, catchBlock, src));
 }
 
 void HhbcTranslator::emitCastString() {
@@ -5201,7 +5214,7 @@ folly::Optional<Type> HhbcTranslator::ratToAssertType(RepoAuthType rat) const {
     {
       auto ty = [&] {
         auto const cls = Unit::lookupUniqueClass(rat.clsName());
-        return classIsPersistentOrCtxParent(cls)
+        return classIsUniqueOrCtxParent(cls)
           ? Type::Obj.specialize(cls)
           : Type::Obj;
       }();

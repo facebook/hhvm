@@ -127,28 +127,30 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 #endif
 
 #include "hphp/util/thread-local.h"
-typedef std::vector<void*> TSRMStorageVector;
-extern HPHP::ThreadLocal<TSRMStorageVector> tsrm_thread_resources;
-void * ts_init_resource(int id);
+namespace HPHP {
+  typedef std::vector<void*> TSRMStorageVector;
+  extern DECLARE_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
+  void * ts_init_resource(int id);
 
-static inline void * ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {
-	void * ret;
-	assert(id != 0);
-	if (TSRM_UNEXPECTED(vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id))) {
-		return ts_init_resource(id);
-	} else {
-		ret = vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
-		if (TSRM_UNEXPECTED(ret == nullptr)) {
-			return ts_init_resource(id);
-		} else {
-			return ret;
-		}
-	}
+  static inline void * ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {
+    void * ret;
+    assert(id != 0);
+    if (TSRM_UNEXPECTED(vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id))) {
+      return ts_init_resource(id);
+    } else {
+      ret = vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
+      if (TSRM_UNEXPECTED(ret == nullptr)) {
+        return ts_init_resource(id);
+      } else {
+        return ret;
+      }
+    }
+  }
 }
 
 static inline void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id) {
-	assert(th_id == NULL); // unimplemented
-	return ts_resource_from_vector(*tsrm_thread_resources, id);
+  assert(th_id == NULL); // unimplemented
+  return HPHP::ts_resource_from_vector(*HPHP::tsrm_thread_resources, id);
 }
 
 #else
@@ -200,11 +202,12 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 
 #ifdef HHVM
 
-#define TSRMLS_FETCH()    void ***tsrm_ls = reinterpret_cast<void***>(tsrm_thread_resources.get())
+#define TSRMLS_FETCH()    void ***tsrm_ls = reinterpret_cast<void***>(HPHP::tsrm_thread_resources.get())
 #define TSRMLS_FETCH_FROM_CTX(ctx)    void ***tsrm_ls = (void ***) ctx
 #define TSRMLS_SET_CTX(ctx)    ctx = (void ***) tsrm_ls
 #define TSRMG(id, type, element) \
-	(static_cast<type>(ts_resource_from_vector(*reinterpret_cast<TSRMStorageVector*>(tsrm_ls), id))->element)
+  (static_cast<type>(HPHP::ts_resource_from_vector( \
+    *reinterpret_cast<HPHP::TSRMStorageVector*>(tsrm_ls), id))->element)
 #else /*non-HHVM*/
 
 #define TSRMLS_FETCH()      void ***tsrm_ls = (void ***) ts_resource_ex(0, NULL)

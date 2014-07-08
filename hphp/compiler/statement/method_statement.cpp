@@ -234,11 +234,14 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
          m_modifiers->isPrivate()) > 1) {
       m_modifiers->parseTimeFatal(
         Compiler::InvalidAttribute,
-        "%s: method %s::%s()",
-        Strings::PICK_ACCESS_MODIFIER,
-        classScope->getOriginalName().c_str(),
-        getOriginalName().c_str()
+        Strings::PICK_ACCESS_MODIFIER
       );
+    }
+
+    if (m_modifiers->hasDuplicates()) {
+      m_modifiers->parseTimeFatal(
+        Compiler::InvalidAttribute,
+        Strings::PICK_ACCESS_MODIFIER);
     }
 
     if (classScope->isInterface()) {

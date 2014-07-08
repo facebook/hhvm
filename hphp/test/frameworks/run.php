@@ -561,6 +561,8 @@ function oss_test_option_map(): OptionInfoMap {
                                         "except for the ones listed. The ".
                                         "tests must be at the end of the ".
                                         "command argument list."},
+    'flakey'              => Pair {'',  'Include tests that intermittently '.
+                                        'fail.'},
     'timeout:'            => Pair {'',  "The maximum amount of time, in secs, ".
                                         "to allow a individual test to run.".
                                         "Default is 60 seconds."},
@@ -604,9 +606,12 @@ function oss_test_option_map(): OptionInfoMap {
     'as-phpunit'          => Pair {'',   "Run tests for a framework just ".
                                          "like it would be run normally with ".
                                          "PHPUnit"},
-    'numthreads:'          => Pair {'',   "The exact number of threads to use ".
+    'numthreads:'         => Pair {'',   "The exact number of threads to use ".
                                          "when running framework tests in ".
                                          "parallel"},
+    'isolate'             => Pair {'',   "Try to make tests that have ".
+                                         "external dependencies automatically ".
+                                         "fail"},
   };
 }
 

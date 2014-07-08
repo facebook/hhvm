@@ -63,9 +63,9 @@ bool SocketConnection::isBusy() const {
 }
 
 void SocketConnection::notifyPendingShutdown() {
-  // By default this never gets called since isBusy() returns false
-  // unconditionally.
-  not_reached();
+}
+
+void SocketConnection::closeWhenIdle() {
 }
 
 void SocketConnection::dropConnection() {
@@ -76,4 +76,3 @@ void SocketConnection::dumpConnectionState(uint8_t loglevel) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

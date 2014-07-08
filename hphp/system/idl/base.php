@@ -893,7 +893,7 @@ function generateFuncCPPImplementation($func, $f, $prefix = 'f_') {
     fprintf($f, ', CArrRef _argv /* = null_array */');
   }
   fprintf($f, ") {\n");
-  fprintf($f, "  throw NotImplementedException(__func__);\n");
+  fprintf($f, "  throw_not_implemented(__func__);\n");
   fprintf($f, "}\n\n");
 }
 

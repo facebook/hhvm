@@ -55,6 +55,7 @@ namespace HPHP {
 class Extension : public IDebuggable {
 public:
   static bool IsLoaded(const String& name);
+  static bool IsSystemlibPath(const std::string& path);
   static Array GetLoadedExtensions();
   static Extension *GetExtension(const String& name);
 
@@ -86,7 +87,7 @@ public:
   // override these functions to implement module specific init/shutdown
   // sequences and information display.
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {}
-  virtual void moduleInfo(Array &info) { info.set(m_name, true);}
+  virtual void moduleInfo(Array &info) { info.set(String(m_name), true);}
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}
   virtual void threadInit() {}
@@ -98,7 +99,7 @@ public:
     m_dsoName = name;
   }
 
-  const String & getName() const {
+  const std::string& getName() const {
     return m_name;
   }
 
@@ -107,12 +108,12 @@ private:
   // this module was built against.
   int64_t m_hhvmAPIVersion;
 
-  const String m_name;
+  std::string m_name;
   std::string m_version;
   std::string m_dsoName;
 };
 
-#define HHVM_API_VERSION 20131007L
+#define HHVM_API_VERSION 20140702L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \

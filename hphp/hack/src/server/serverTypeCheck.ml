@@ -230,6 +230,7 @@ let type_check genv env =
   let nenv = env.nenv in
 
   (* COMPUTES WHAT MUST BE REDECLARED  *)
+  let fast = reparse fast files_info env.failed_decl in
   let fast = add_old_decls env.files_info fast in
 
   let t2 = Unix.gettimeofday() in
@@ -262,28 +263,16 @@ let type_check genv env =
 
   (* DECLARING TYPES: merging results of the 2 phases *)
   let fast = SMap.fold SMap.add fast fast_redecl_phase2 in
-  let to_recheck = to_redecl_phase2 in
+  let to_recheck = SSet.union env.failed_decl to_redecl_phase2 in
   let to_recheck = SSet.union to_recheck1 to_recheck in
   let to_recheck = SSet.union to_recheck2 to_recheck in
 
   (* TYPE CHECKING *)
+  let to_recheck = SSet.union to_recheck env.failed_check in
   let fast = reparse fast files_info to_recheck in
   let errorl', failed_check = Typing_check_service.go genv.workers fast in
 
-  let failed = failed_parsing in
-  let failed = SSet.union failed_naming failed in
-  let failed = SSet.union failed_decl failed in
-  let failed = SSet.union failed_check failed in
-
-  let old_errors = List.filter begin fun err ->
-    match err with
-    | [] -> assert false
-    | (pos, _) :: _ ->
-      let filename = Pos.filename pos in
-      not (SSet.mem filename failed) && not (SMap.mem filename fast)
-  end env.errorl in
-
-  let errorl = List.rev_append (List.rev_append errorl' errorl) old_errors in
+  let errorl = List.rev (List.rev_append errorl' errorl) in
 
   let t2 = Unix.gettimeofday() in
   Printf.printf "Type-check: %f\n" (t2 -. t); flush stdout;
@@ -292,7 +281,9 @@ let type_check genv env =
   { files_info = files_info;
     nenv = nenv;
     errorl = errorl;
-    failed_parsing = SSet.empty;
+    failed_parsing = SSet.union failed_naming failed_parsing;
+    failed_decl = failed_decl;
+    failed_check = failed_check;
   }
 
 (*****************************************************************************)

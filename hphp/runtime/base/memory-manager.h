@@ -459,6 +459,14 @@ public:
   bool startStatsInterval();
   bool stopStatsInterval();
 
+  /*
+   * Reset whether or not we should raise an OOM fatal if we exceed the memory
+   * limit for the request.  After an OOM fatal, the memory manager refuses to
+   * raise another OOM error until this flag has been reset, to try to avoid
+   * getting OOMs during the initial OOM processing.
+   */
+  void resetCouldOOM();
+
 private:
   friend class StringData; // for enlist/delist access to m_strings
   friend void* smart_malloc(size_t nbytes);
@@ -499,7 +507,7 @@ private:
   void refreshStatsHelper();
   void refreshStats();
   template<bool live> void refreshStatsImpl(MemoryUsageStats& stats);
-  void refreshStatsHelperExceeded() const;
+  void refreshStatsHelperExceeded();
 #ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
   template<bool callerSavesActualSize>
@@ -525,6 +533,7 @@ private:
   SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
   bool m_statsIntervalActive;
+  bool m_couldOOM{true};
   std::vector<void*> m_slabs;
 
 #ifdef USE_JEMALLOC

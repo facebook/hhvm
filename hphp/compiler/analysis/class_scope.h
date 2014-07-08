@@ -33,6 +33,7 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/exceptions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

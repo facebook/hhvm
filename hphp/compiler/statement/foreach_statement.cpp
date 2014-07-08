@@ -32,10 +32,10 @@ using namespace HPHP;
 ForEachStatement::ForEachStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr array, ExpressionPtr name, bool nameRef,
- ExpressionPtr value, bool valueRef, StatementPtr stmt)
+ ExpressionPtr value, bool valueRef, bool awaitAs, StatementPtr stmt)
   : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ForEachStatement)),
     m_array(array), m_name(name), m_value(value), m_ref(valueRef),
-    m_stmt(stmt) {
+    m_awaitAs(awaitAs), m_stmt(stmt) {
   if (!m_value) {
     m_value = m_name;
     m_ref = nameRef;
@@ -177,6 +177,7 @@ void ForEachStatement::outputCodeModel(CodeGenerator &cg) {
 void ForEachStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("foreach (");
   m_array->outputPHP(cg, ar);
+  if (m_awaitAs) cg_printf(" await");
   cg_printf(" as ");
   if (m_name) {
     m_name->outputPHP(cg, ar);

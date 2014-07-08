@@ -40,7 +40,7 @@ let print_errorl use_json el oc =
     if el = []
     then output_string oc "No errors!\n"
     else
-      let sl = List.map Errors.pmsg_l el in
+      let sl = List.map Errors.to_string el in
       let sl = uniq (List.sort String.compare sl) in
       List.iter begin fun s ->
         if !debug then begin

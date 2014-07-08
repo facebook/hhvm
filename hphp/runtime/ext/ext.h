@@ -66,7 +66,6 @@
 #include "hphp/runtime/ext/ext_xml.h"
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/ext_xmlwriter.h"
-#include "hphp/runtime/ext/ext_xsltprocessor.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 
 #endif // incl_EXT_LIST_EXT_H_

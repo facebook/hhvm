@@ -50,9 +50,7 @@ bool TestExtMysql::RunTests(const std::string &which) {
   RUN_TEST(test_mysql_insert_id);
   RUN_TEST(test_mysql_stat);
   RUN_TEST(test_mysql_thread_id);
-  RUN_TEST(test_mysql_create_db);
   RUN_TEST(test_mysql_select_db);
-  RUN_TEST(test_mysql_drop_db);
   RUN_TEST(test_mysql_affected_rows);
   RUN_TEST(test_mysql_set_timeout);
 #ifdef MYSQL_MILLISECOND_TIMEOUT
@@ -60,10 +58,8 @@ bool TestExtMysql::RunTests(const std::string &which) {
 #endif
   RUN_TEST(test_mysql_query);
   RUN_TEST(test_mysql_unbuffered_query);
-  RUN_TEST(test_mysql_db_query);
   RUN_TEST(test_mysql_list_dbs);
   RUN_TEST(test_mysql_list_tables);
-  RUN_TEST(test_mysql_list_fields);
   RUN_TEST(test_mysql_list_processes);
   RUN_TEST(test_mysql_db_name);
   RUN_TEST(test_mysql_tablename);
@@ -240,27 +236,9 @@ bool TestExtMysql::test_mysql_thread_id() {
   return Count(true);
 }
 
-bool TestExtMysql::test_mysql_create_db() {
-  try {
-    f_mysql_create_db("");
-  } catch (const NotSupportedException& e) {
-    return Count(true);
-  }
-  return Count(false);
-}
-
 bool TestExtMysql::test_mysql_select_db() {
   // tested in mysql_info
   return Count(true);
-}
-
-bool TestExtMysql::test_mysql_drop_db() {
-  try {
-    f_mysql_drop_db("");
-  } catch (const NotSupportedException& e) {
-    return Count(true);
-  }
-  return Count(false);
 }
 
 bool TestExtMysql::test_mysql_affected_rows() {
@@ -367,15 +345,6 @@ bool TestExtMysql::test_mysql_unbuffered_query() {
   return Count(true);
 }
 
-bool TestExtMysql::test_mysql_db_query() {
-  try {
-    f_mysql_db_query("", "");
-  } catch (const NotSupportedException& e) {
-    return Count(true);
-  }
-  return Count(false);
-}
-
 bool TestExtMysql::test_mysql_list_dbs() {
   static const StaticString s_Database("Database");
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
@@ -394,17 +363,6 @@ bool TestExtMysql::test_mysql_list_tables() {
   VERIFY(!table.toArray()[String("Tables_in_") + TEST_DATABASE].
     toString().empty());
   return Count(true);
-}
-
-bool TestExtMysql::test_mysql_list_fields() {
-  try {
-    Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME,
-                                   TEST_PASSWORD);
-    f_mysql_list_fields(TEST_DATABASE, "test");
-  } catch (const NotSupportedException& e) {
-    return Count(true);
-  }
-  return Count(false);
 }
 
 bool TestExtMysql::test_mysql_list_processes() {

@@ -116,10 +116,9 @@ struct BackEnd : public JIT::BackEnd {
                                        CodeBlock& mainCode,
                                        CodeBlock& coldCode,
                                        CodeBlock& frozenCode,
-                                       MCGenerator* mcg,
                                        CodegenState& state) override {
     return new X64::CodeGenerator(unit, mainCode, coldCode,
-                                  frozenCode, mcg, state);
+                                  frozenCode, state);
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -271,9 +270,9 @@ struct BackEnd : public JIT::BackEnd {
     return true;
   }
 
-  size_t relocate(RelocationInfo& rel, CodeGenFixups& fixups) override {
+  size_t relocate(RelocationInfo& rel, CodeBlock& destBlock,
+                  CodeGenFixups& fixups) override {
     TCA src = rel.start();
-    TCA dest = rel.dest();
     size_t range = rel.end() - src;
     bool hasInternalRefs = false;
     bool internalRefsNeedUpdating = false;
@@ -285,20 +284,18 @@ struct BackEnd : public JIT::BackEnd {
       int destRange = 0;
       auto af = fixups.m_alignFixups.equal_range(src);
       while (af.first != af.second) {
-        if (!isSmashable(dest,
-                         af.first->second.first, af.first->second.second)) {
-          DataBlock tmp;
-          tmp.init(dest, kCacheLineSize, "");
-          prepareForSmashImpl(tmp,
-                              af.first->second.first, af.first->second.second);
-          destRange += tmp.frontier() - dest;
-          dest = tmp.frontier();
+        TCA tmp = destBlock.frontier();
+        prepareForSmashImpl(destBlock,
+                            af.first->second.first, af.first->second.second);
+        if (destBlock.frontier() != tmp) {
+          destRange += destBlock.frontier() - tmp;
           internalRefsNeedUpdating = true;
         }
         ++af.first;
       }
 
-      memcpy(dest, src, di.size());
+      TCA dest = destBlock.frontier();
+      destBlock.bytes(di.size(), src);
       DecodedInstruction d2(dest);
       if (di.hasPicOffset()) {
         /*
@@ -351,10 +348,12 @@ struct BackEnd : public JIT::BackEnd {
       } else {
         dest += d2.size();
       }
+      assert(dest <= destBlock.frontier());
+      destBlock.setFrontier(dest);
       src += di.size();
     }
 
-    rel.recordAddress(src, dest, 0);
+    rel.recordAddress(src, destBlock.frontier(), 0);
 
     if (hasInternalRefs && internalRefsNeedUpdating) {
       src = rel.start();
@@ -374,7 +373,7 @@ struct BackEnd : public JIT::BackEnd {
           always_assert(newImmediate);
         }
         if (newImmediate || newPicAddress) {
-          dest = rel.adjustedAddressAfter(src);
+          TCA dest = rel.adjustedAddressAfter(src);
           DecodedInstruction d2(dest);
           if (newPicAddress) {
             d2.setPicAddress(newPicAddress);
@@ -444,12 +443,12 @@ struct BackEnd : public JIT::BackEnd {
     }
   }
 
-  void adjustForRelocation(SrcRec* sr, AsmInfo* asmInfo,
+  void adjustForRelocation(AsmInfo* asmInfo,
                            RelocationInfo& rel,
                            CodeGenFixups& fixups) override {
     assert(rel.relocated());
 
-    auto& ip = sr->inProgressTailJumps();
+    auto& ip = fixups.m_inProgressTailJumps;
     for (size_t i = 0; i < ip.size(); ++i) {
       IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
       if (TCA adjusted = rel.adjustedAddressAfter(ib.toSmash())) {

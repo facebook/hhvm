@@ -130,10 +130,6 @@ bool File::IsVirtualDirectory(const String& filename) {
     StaticContentCache::TheFileCache->dirExists(filename.data(), false);
 }
 
-bool File::IsPlainFilePath(const String& filename) {
-  return filename.find("://") == String::npos;
-}
-
 Resource File::Open(const String& filename, const String& mode,
                     int options /* = 0 */,
                     const Variant& context /* = null */) {
@@ -390,10 +386,10 @@ int File::putc(char c) {
 
 bool File::seek(int64_t offset, int whence /* = SEEK_SET */) {
   if (whence != SEEK_CUR) {
-    throw NotSupportedException(__func__, "cannot seek other than SEEK_CUR");
+    throw_not_supported(__func__, "cannot seek other than SEEK_CUR");
   }
   if (offset < 0) {
-    throw NotSupportedException(__func__, "cannot seek backwards");
+    throw_not_supported(__func__, "cannot seek backwards");
   }
   if (offset > 0) {
     int64_t avail = bufferedLen();
@@ -421,15 +417,15 @@ bool File::seek(int64_t offset, int whence /* = SEEK_SET */) {
 }
 
 int64_t File::tell() {
-  throw NotSupportedException(__func__, "cannot tell");
+  throw_not_supported(__func__, "cannot tell");
 }
 
 bool File::eof() {
-  throw NotSupportedException(__func__, "cannot test eof");
+  throw_not_supported(__func__, "cannot test eof");
 }
 
 bool File::rewind() {
-  throw NotSupportedException(__func__, "cannot rewind");
+  throw_not_supported(__func__, "cannot rewind");
 }
 
 bool File::flush() {
@@ -437,7 +433,7 @@ bool File::flush() {
 }
 
 bool File::truncate(int64_t size) {
-  throw NotSupportedException(__func__, "cannot truncate");
+  throw_not_supported(__func__, "cannot truncate");
 }
 
 bool File::lock(int operation) {

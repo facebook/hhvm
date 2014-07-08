@@ -57,7 +57,6 @@ namespace HPHP { namespace JIT {
 //////////////////////////////////////////////////////////////////////
 
 struct MemoryRef;
-struct IndexedMemoryRef;
 struct RIPRelativeRef;
 struct ScaledIndex;
 struct ScaledIndexDisp;
@@ -90,10 +89,10 @@ struct Reg64 {
   explicit constexpr operator int() const { return rn; }
 
   MemoryRef operator[](intptr_t disp) const;
-  IndexedMemoryRef operator[](Reg64) const;
-  IndexedMemoryRef operator[](ScaledIndex) const;
-  IndexedMemoryRef operator[](ScaledIndexDisp) const;
-  IndexedMemoryRef operator[](DispReg) const;
+  MemoryRef operator[](Reg64) const;
+  MemoryRef operator[](ScaledIndex) const;
+  MemoryRef operator[](ScaledIndexDisp) const;
+  MemoryRef operator[](DispReg) const;
 
   constexpr bool operator==(Reg64 o) const { return rn == o.rn; }
   constexpr bool operator!=(Reg64 o) const { return rn != o.rn; }
@@ -224,9 +223,14 @@ struct IndexedDispReg {
     , index(sr.index)
     , scale(sr.scale)
     , disp(0)
-  {
-    assert(int(base) != -1 && "invalid register");
-  }
+  {}
+
+  explicit IndexedDispReg(DispReg r)
+    : base(r.base)
+    , index(r64(RegNumber(-1)))
+    , scale(1)
+    , disp(r.disp)
+  {}
 
   // Constructor for baseless()
   explicit IndexedDispReg(ScaledIndexDisp sid)
@@ -236,8 +240,8 @@ struct IndexedDispReg {
     , disp(sid.disp)
   {}
 
-  IndexedMemoryRef operator*() const;
-  IndexedMemoryRef operator[](intptr_t disp) const;
+  MemoryRef operator*() const;
+  MemoryRef operator[](intptr_t disp) const;
 
   IndexedDispReg operator+(intptr_t disp) const {
     auto ret = *this;
@@ -254,7 +258,7 @@ struct IndexedDispReg {
   Reg64 base;
   Reg64 index;
   int scale;
-  intptr_t disp;
+  intptr_t disp; // TODO #4613274: should be int32_t
 };
 
 // rip+x
@@ -272,19 +276,14 @@ struct DispRIP {
     return DispRIP(disp - x);
   }
 
-  intptr_t disp;
-};
-
-// *(reg + reg*x + y)
-struct IndexedMemoryRef {
-  explicit IndexedMemoryRef(IndexedDispReg r) : r(r) {}
-  IndexedDispReg r;
+  intptr_t disp; // TODO #4613274: should be int32_t
 };
 
 // *(reg + x)
 struct MemoryRef {
-  explicit MemoryRef(DispReg r) : r(r) {}
-  DispReg r;
+  explicit MemoryRef(DispReg dr) : r(dr) {}
+  explicit MemoryRef(IndexedDispReg idr) : r(idr) {}
+  IndexedDispReg r;
 };
 
 // *(rip + x)
@@ -293,11 +292,11 @@ struct RIPRelativeRef {
   DispRIP r;
 };
 
-inline IndexedMemoryRef IndexedDispReg::operator*() const {
-  return IndexedMemoryRef(*this);
+inline MemoryRef IndexedDispReg::operator*() const {
+  return MemoryRef(*this);
 }
 
-inline IndexedMemoryRef IndexedDispReg::operator[](intptr_t x) const {
+inline MemoryRef IndexedDispReg::operator[](intptr_t x) const {
   return *(*this + x);
 }
 
@@ -342,19 +341,19 @@ inline MemoryRef Reg64::operator[](intptr_t disp) const {
   return *(*this + disp);
 }
 
-inline IndexedMemoryRef Reg64::operator[](Reg64 idx) const {
+inline MemoryRef Reg64::operator[](Reg64 idx) const {
   return *(*this + idx * 1);
 }
 
-inline IndexedMemoryRef Reg64::operator[](ScaledIndex si) const {
+inline MemoryRef Reg64::operator[](ScaledIndex si) const {
   return *(*this + si);
 }
 
-inline IndexedMemoryRef Reg64::operator[](DispReg dr) const {
+inline MemoryRef Reg64::operator[](DispReg dr) const {
   return *(*this + ScaledIndex(dr.base, 0x1) + dr.disp);
 }
 
-inline IndexedMemoryRef Reg64::operator[](ScaledIndexDisp sid) const {
+inline MemoryRef Reg64::operator[](ScaledIndexDisp sid) const {
   return *(*this + sid.si + sid.disp);
 }
 
@@ -367,7 +366,7 @@ inline RIPRelativeRef RegRIP::operator[](intptr_t disp) const {
  * possibly with a scaled index, but no base register.
  */
 inline MemoryRef baseless(intptr_t disp) { return *(DispReg { disp }); }
-inline IndexedMemoryRef baseless(ScaledIndexDisp sid) {
+inline MemoryRef baseless(ScaledIndexDisp sid) {
   return *(IndexedDispReg { sid });
 }
 
@@ -639,13 +638,20 @@ const X64Instr instr_nop =     { { 0xF1,0xF1,0xF1,0x00,0xF1,0x90 }, 0x0500  };
 const X64Instr instr_shld =    { { 0xA5,0xF1,0xA4,0x00,0xF1,0xF1 }, 0x0082  };
 const X64Instr instr_shrd =    { { 0xAD,0xF1,0xAC,0x00,0xF1,0xF1 }, 0x0082  };
 const X64Instr instr_int3 =    { { 0xF1,0xF1,0xF1,0x00,0xF1,0xCC }, 0x0500  };
-const X64Instr instr_roundsd   { { 0xF1,0xF1,0x0b,0x00,0xF1,0xF1 }, 0x64112 };
+const X64Instr instr_roundsd = { { 0xF1,0xF1,0x0b,0x00,0xF1,0xF1 }, 0x64112 };
+const X64Instr instr_cmpsd =   { { 0xF1,0xF1,0xC2,0xF1,0xF1,0xF1 }, 0x10112 };
 
 enum class RoundDirection : ssize_t {
   nearest  = 0,
   floor    = 1,
   ceil     = 2,
   truncate = 3,
+};
+
+enum class ComparisonPred : uint8_t {
+  // True if...
+  eq_ord = 0,    // ...operands are ordered AND equal
+  ne_unord = 4,  // ...operands are unordered OR unequal
 };
 
 enum ConditionCode {
@@ -793,23 +799,17 @@ public:
 
 #define BYTE_LOAD_OP(name, instr)                                     \
   void name##b(MemoryRef m, Reg8 r)        { instrMR(instr, m, r); }  \
-  void name##b(IndexedMemoryRef m, Reg8 r) { instrMR(instr, m, r); }
 
 #define LOAD_OP(name, instr)                                          \
   void name##q(MemoryRef m, Reg64 r) { instrMR(instr, m, r); }        \
   void name##l(MemoryRef m, Reg32 r) { instrMR(instr, m, r); }        \
   void name##w(MemoryRef m, Reg16 r) { instrMR(instr, m, r); }        \
-  void name##q(IndexedMemoryRef m, Reg64 r) { instrMR(instr, m, r); } \
-  void name##l(IndexedMemoryRef m, Reg32 r) { instrMR(instr, m, r); } \
-  void name##w(IndexedMemoryRef m, Reg16 r) { instrMR(instr, m, r); } \
   void name##q(RIPRelativeRef m, Reg64 r) { instrMR(instr, m, r); } \
   BYTE_LOAD_OP(name, instr##b)
 
 #define BYTE_STORE_OP(name, instr)                                    \
   void name##b(Reg8 r, MemoryRef m)        { instrRM(instr, r, m); }  \
-  void name##b(Reg8 r, IndexedMemoryRef m) { instrRM(instr, r, m); }  \
   void name##b(Immed i, MemoryRef m)       { instrIM8(instr, i, m); } \
-  void name##b(Immed i, IndexedMemoryRef m){ instrIM8(instr, i, m); }
 
 #define STORE_OP(name, instr)                                           \
   void name##w(Immed i, MemoryRef m) { instrIM16(instr, i, m); }        \
@@ -817,11 +817,6 @@ public:
   void name##w(Reg16 r, MemoryRef m) { instrRM(instr, r, m); }          \
   void name##l(Reg32 r, MemoryRef m) { instrRM(instr, r, m); }          \
   void name##q(Reg64 r, MemoryRef m) { instrRM(instr, r, m); }          \
-  void name##w(Immed i, IndexedMemoryRef m) { instrIM16(instr, i, m); } \
-  void name##l(Immed i, IndexedMemoryRef m) { instrIM32(instr, i, m); } \
-  void name##w(Reg16 r, IndexedMemoryRef m) { instrRM(instr, r, m); }   \
-  void name##l(Reg32 r, IndexedMemoryRef m) { instrRM(instr, r, m); }   \
-  void name##q(Reg64 r, IndexedMemoryRef m) { instrRM(instr, r, m); }   \
   BYTE_STORE_OP(name, instr ## b)
 
 #define BYTE_REG_OP(name, instr)                              \
@@ -842,10 +837,6 @@ public:
    */
 #define IMM64_STORE_OP(name, instr)             \
   void name##q(Immed i, MemoryRef m) {          \
-    return instrIM(instr, i, m);                \
-  }                                             \
-                                                \
-  void name##q(Immed i, IndexedMemoryRef m) {   \
     return instrIM(instr, i, m);                \
   }
 
@@ -899,8 +890,6 @@ public:
   // exactly the same as movzbl but takes an extra byte.
   void loadzbl(MemoryRef m, Reg32 r)        { instrMR(instr_movzbx,
                                                       m, rbyte(r)); }
-  void loadzbl(IndexedMemoryRef m, Reg32 r) { instrMR(instr_movzbx,
-                                                      m, rbyte(r)); }
   void movzbl(Reg8 src, Reg32 dest)         { emitRR32(instr_movzbx,
                                                        rn(src), rn(dest)); }
   void movsbl(Reg8 src, Reg32 dest)         { emitRR(instr_movsbx,
@@ -908,12 +897,9 @@ public:
 
   void loadsbq(MemoryRef m, Reg64 r)        { instrMR(instr_movsbx,
                                                       m, r); }
-  void loadsbq(IndexedMemoryRef m, Reg64 r) { instrMR(instr_movsbx,
-                                                      m, r); }
   void movsbq(Reg8 src, Reg64 dest)         { emitRR(instr_movsbx,
                                                        rn(src), rn(dest)); }
 
-  void lea(IndexedMemoryRef p, Reg64 reg) { instrMR(instr_lea, p, reg); }
   void lea(MemoryRef p, Reg64 reg)        { instrMR(instr_lea, p, reg); }
   void lea(RIPRelativeRef p, Reg64 reg)   { instrMR(instr_lea, p, reg); }
 
@@ -956,29 +942,15 @@ public:
   void decl(MemoryRef m) { instrM32(instr_dec, m); }
   void decw(MemoryRef m) { instrM16(instr_dec, m); }
 
-  void incq(IndexedMemoryRef m) { instrM(instr_inc,  m); }
-  void incl(IndexedMemoryRef m) { instrM32(instr_inc, m); }
-  void incw(IndexedMemoryRef m) { instrM16(instr_inc, m); }
-  void decq(IndexedMemoryRef m) { instrM(instr_dec,  m); }
-  void decl(IndexedMemoryRef m) { instrM32(instr_dec, m); }
-  void decw(IndexedMemoryRef m) { instrM16(instr_dec, m); }
-
   void movdqu(RegXMM x, MemoryRef m)        { instrRM(instr_movdqu, x, m); }
-  void movdqu(RegXMM x, IndexedMemoryRef m) { instrRM(instr_movdqu, x, m); }
   void movdqu(MemoryRef m, RegXMM x)        { instrMR(instr_movdqu, m, x); }
-  void movdqu(IndexedMemoryRef m, RegXMM x) { instrMR(instr_movdqu, m, x); }
   void movdqa(RegXMM x, RegXMM y)           { instrRR(instr_movdqa, x, y); }
   void movdqa(RegXMM x, MemoryRef m)        { instrRM(instr_movdqa, x, m); }
-  void movdqa(RegXMM x, IndexedMemoryRef m) { instrRM(instr_movdqa, x, m); }
   void movdqa(MemoryRef m, RegXMM x)        { instrMR(instr_movdqa, m, x); }
-  void movdqa(IndexedMemoryRef m, RegXMM x) { instrMR(instr_movdqa, m, x); }
   void movsd (RegXMM x, RegXMM y)           { instrRR(instr_movsd,  x, y); }
   void movsd (RegXMM x, MemoryRef m)        { instrRM(instr_movsd,  x, m); }
-  void movsd (RegXMM x, IndexedMemoryRef m) { instrRM(instr_movsd,  x, m); }
   void movsd (MemoryRef m, RegXMM x)        { instrMR(instr_movsd,  m, x); }
-  void movsd (IndexedMemoryRef m, RegXMM x) { instrMR(instr_movsd,  m, x); }
   void lddqu (MemoryRef m, RegXMM x)        { instrMR(instr_lddqu, m, x); }
-  void lddqu (IndexedMemoryRef m, RegXMM x) { instrMR(instr_lddqu, m, x); }
   void unpcklpd(RegXMM s, RegXMM d)         { instrRR(instr_unpcklpd, d, s); }
 
   void rorq  (Immed i, Reg64 r) { instrIR(instr_ror, i, r); }
@@ -997,6 +969,10 @@ public:
     emitIRR(instr_roundsd, rn(dst), rn(src), ssize_t(d));
   }
 
+  void cmpsd(RegXMM src, RegXMM dst, ComparisonPred pred) {
+    emitIRR(instr_cmpsd, rn(dst), rn(src), ssize_t(pred));
+  }
+
   /*
    * Control-flow directives.  Primitive labeling/patching facilities
    * are available, as well as slightly higher-level ones via the
@@ -1010,11 +986,9 @@ public:
 
   void jmp(Reg64 r)            { instrR(instr_jmp, r); }
   void jmp(MemoryRef m)        { instrM(instr_jmp, m); }
-  void jmp(IndexedMemoryRef m) { instrM(instr_jmp, m); }
   void call(Reg64 r)           { instrR(instr_call, r); }
   void call(MemoryRef m)       { instrM(instr_call, m); }
   void call(RIPRelativeRef m)  { instrM(instr_call, m); }
-  void call(IndexedMemoryRef m){ instrM(instr_call, m); }
 
   void jmp8(CodeAddress dest)  { emitJ8(instr_jmp, ssize_t(dest)); }
 
@@ -2017,11 +1991,10 @@ private:
   RegNumber rn(RegXMM x) { return RegNumber(x); }
 
   // Wraps a bunch of the emit* functions to make using them with the
-  // typed wrappers more terse.  TODO: we should have these replace
+  // typed wrappers more terse. We should have these replace
   // the emit functions eventually.
 
-#define UMR(m)  rn(m.r.base), reg::noreg, sz::byte, m.r.disp
-#define UIMR(m) rn(m.r.base), rn(m.r.index), m.r.scale, m.r.disp
+#define UMR(m) rn(m.r.base), rn(m.r.index), m.r.scale, m.r.disp
 #define URIP(m) reg::noreg, reg::noreg, sz::byte, m.r.disp
 
   void instrR(X64Instr   op, Reg64  r)           { emitR(op,    rn(r));        }
@@ -2034,13 +2007,10 @@ private:
   void instrRR(X64Instr  op, Reg8   x, Reg8   y) { emitRR8(op,  rn(x), rn(y)); }
   void instrRR(X64Instr  op, RegXMM x, RegXMM y) { emitRR(op,   rn(x), rn(y)); }
   void instrM(X64Instr   op, MemoryRef m)        { emitM(op,    UMR(m));       }
-  void instrM(X64Instr   op, IndexedMemoryRef m) { emitM(op,    UIMR(m));      }
   void instrM(X64Instr   op, RIPRelativeRef m)   { emitM(op,    URIP(m),
                                                          sz::qword, true);     }
   void instrM32(X64Instr op, MemoryRef m)        { emitM32(op,  UMR(m));       }
-  void instrM32(X64Instr op, IndexedMemoryRef m) { emitM32(op,  UIMR(m));      }
   void instrM16(X64Instr op, MemoryRef m)        { emitM16(op,  UMR(m));       }
-  void instrM16(X64Instr op, IndexedMemoryRef m) { emitM16(op,  UIMR(m));      }
 
   void instrRM(X64Instr op,
                Reg64 r,
@@ -2055,23 +2025,8 @@ private:
                Reg8 r,
                MemoryRef m)        { emitRM8(op, UMR(m), rn(r)); }
   void instrRM(X64Instr op,
-               Reg64 r,
-               IndexedMemoryRef m) { emitRM(op, UIMR(m), rn(r)); }
-  void instrRM(X64Instr op,
-               Reg32 r,
-               IndexedMemoryRef m) { emitRM32(op, UIMR(m), rn(r)); }
-  void instrRM(X64Instr op,
-               Reg16 r,
-               IndexedMemoryRef m) { emitRM16(op, UIMR(m), rn(r)); }
-  void instrRM(X64Instr op,
-               Reg8 r,
-               IndexedMemoryRef m) { emitRM8(op, UIMR(m), rn(r)); }
-  void instrRM(X64Instr op,
                RegXMM x,
                MemoryRef m)        { emitRM(op, UMR(m), rn(x)); }
-  void instrRM(X64Instr op,
-               RegXMM x,
-               IndexedMemoryRef m) { emitRM(op, UIMR(m), rn(x)); }
 
   void instrMR(X64Instr op,
                MemoryRef m,
@@ -2086,23 +2041,8 @@ private:
                MemoryRef m,
                Reg8 r)             { emitMR8(op, UMR(m), rn(r)); }
   void instrMR(X64Instr op,
-               IndexedMemoryRef m,
-               Reg64 r)            { emitMR(op, UIMR(m), rn(r)); }
-  void instrMR(X64Instr op,
-               IndexedMemoryRef m,
-               Reg32 r)            { emitMR32(op, UIMR(m), rn(r)); }
-  void instrMR(X64Instr op,
-               IndexedMemoryRef m,
-               Reg16 r)            { emitMR16(op, UIMR(m), rn(r)); }
-  void instrMR(X64Instr op,
-               IndexedMemoryRef m,
-               Reg8 r)             { emitMR8(op, UIMR(m), rn(r)); }
-  void instrMR(X64Instr op,
                MemoryRef m,
                RegXMM x)           { emitMR(op, UMR(m), rn(x)); }
-  void instrMR(X64Instr op,
-               IndexedMemoryRef m,
-               RegXMM x)           { emitMR(op, UIMR(m), rn(x)); }
   void instrMR(X64Instr op,
                RIPRelativeRef m,
                Reg64 r)            { emitMR(op, URIP(m), rn(r),
@@ -2137,21 +2077,7 @@ private:
     emitIM8(op, UMR(m), i.b());
   }
 
-  void instrIM(X64Instr op, Immed i, IndexedMemoryRef m) {
-    emitIM(op, UIMR(m), i.q());
-  }
-  void instrIM32(X64Instr op, Immed i, IndexedMemoryRef m) {
-    emitIM32(op, UIMR(m), i.l());
-  }
-  void instrIM16(X64Instr op, Immed i, IndexedMemoryRef m) {
-    emitIM16(op, UIMR(m), i.w());
-  }
-  void instrIM8(X64Instr op, Immed i, IndexedMemoryRef m) {
-    emitIM8(op, UIMR(m), i.b());
-  }
-
 #undef UMR
-#undef UIMR
 #undef URIP
 
   CodeBlock& codeBlock;

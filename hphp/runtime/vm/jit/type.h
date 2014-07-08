@@ -37,9 +37,6 @@ struct Func;
 
 namespace JIT {
 struct DynLocation;
-struct RuntimeType;
-}
-namespace JIT {
 
 namespace constToBits_detail {
   template<class T>
@@ -287,7 +284,6 @@ public:
     , m_extra(0)
   {}
 
-  explicit Type(const RuntimeType& rtt);
   explicit Type(const DynLocation* dl);
 
   size_t hash() const {
@@ -521,23 +517,16 @@ public:
   }
 
   /*
-   * Returns true if this value has a known constant DataType enum value.  If
-   * the type is exactly Type::Str or Type::Null it returns true anyway, even
-   * though it could be either KindOfStaticString or KindOfString, or
-   * KindOfUninit or KindOfNull, respectively.
-   *
-   * TODO(#3390819): this function should return false for Str and Null.
+   * Returns true iff there exists a DataType in the range [KindOfUninit,
+   * KindOfRef] that represents a non-strict supertype of this type.
    *
    * Pre: subtypeOf(StackElem)
    */
   bool isKnownDataType() const {
     assert(subtypeOf(StackElem));
 
-    // Some unions that correspond to single KindOfs.  And Type::Str
-    // and Type::Null for now for historical reasons.
-    if (subtypeOfAny(Str, Arr, Null, BoxedCell)) {
-      return true;
-    }
+    // Some unions that correspond to single KindOfs.
+    if (subtypeOfAny(Str, Arr, BoxedCell)) return true;
 
     return !isUnion();
   }
@@ -558,7 +547,7 @@ public:
   }
 
   bool needsValueReg() const {
-    return !subtypeOfAny(Uninit, InitNull, Nullptr);
+    return !subtypeOfAny(Null, Nullptr);
   }
 
   bool needsStaticBitCheck() const {
@@ -786,16 +775,12 @@ public:
   ////////// Methods for talking to other type systems in the VM //////////
 
   /*
-   * TODO(#3390819): this function does not exactly convert this type into a
-   * DataType in cases where a type does not exactly map to a DataType.  For
-   * example, Null.toDataType() returns KindOfNull, even though it could be
-   * KindOfUninit.
+   * Returns the most specific DataType that is a supertype of this
+   * type.
    *
-   * Try not to use this function in new code.
+   * pre: isKnownDataType()
    */
   DataType toDataType() const;
-
-  RuntimeType toRuntimeType() const;
 };
 
 typedef folly::Optional<Type> OptType;
@@ -873,9 +858,13 @@ struct TypeConstraint {
 
   static constexpr uint8_t kWantArrayKind = 0x1;
 
+  bool isSpecialized() const {
+    return category == DataTypeSpecialized || innerCat == DataTypeSpecialized;
+  }
+
   TypeConstraint& setWantArrayKind() {
     assert(!wantClass());
-    assert(category == DataTypeSpecialized);
+    assert(isSpecialized());
     m_specialized |= kWantArrayKind;
     return *this;
   }
@@ -885,7 +874,7 @@ struct TypeConstraint {
   TypeConstraint& setDesiredClass(const Class* cls) {
     assert(m_specialized == 0 ||
            desiredClass()->classof(cls) || cls->classof(desiredClass()));
-    assert(category == DataTypeSpecialized || innerCat == DataTypeSpecialized);
+    assert(isSpecialized());
     m_specialized = reinterpret_cast<uintptr_t>(cls);
     assert(wantClass());
     return *this;

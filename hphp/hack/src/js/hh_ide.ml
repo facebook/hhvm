@@ -176,75 +176,8 @@ let hh_check ?(check_mode=true) fn =
       error [l]
     end
 
-let complete_global completion_type fn =
-  let result = ref SMap.empty in
-  let deps = !(Typing_deps.deps) in
-  Typing_deps.DSet.iter begin fun dep ->
-    result :=
-      (match dep with
-      | Typing_deps.Dep.Class s when
-        Typing_utils.should_complete_class completion_type s ->
-        (match (Typing_env.Classes.get s) with
-        | Some c ->
-            let type_ = (match c.Typing_defs.tc_kind with
-            | Ast.Cabstract -> "abstract class"
-            | Ast.Cnormal -> "class"
-            | Ast.Cinterface -> "interface"
-            | Ast.Ctrait -> "trait") in
-            let s = Utils.strip_ns s in
-            SMap.add s (Autocomplete.make_result s Pos.none type_)
-                !result
-        | None -> !result)
-      | Typing_deps.Dep.Fun s when
-        Typing_utils.should_complete_fun completion_type s ->
-        (match (Typing_env.Funs.get s) with
-        | Some fun_ ->
-            let s = Utils.strip_ns s in
-            let it = (Typing_reason.Rnone, Typing_defs.Tfun fun_) in
-            let type_ = Typing_print.full_strip_ns (Typing_env.empty fn) it in
-            let sig_ = s^" "^type_ in
-            SMap.add sig_ (Autocomplete.make_result s Pos.none type_)
-                !result
-        | None -> !result)
-      | _ -> !result
-      )
-  end deps;
-  !result
-
-let should_complete_global = function
-| Some Autocomplete.Acid
-| Some Autocomplete.Acnew
-| Some Autocomplete.Actype -> true
-| _ -> false
-
-let autocomplete_result_to_json res =
-  let name = res.Autocomplete.name in
-  let pos = res.Autocomplete.pos in
-  let ty = res.Autocomplete.ty in
-  match pos, ty with
-  | None, None ->
-      JAssoc [ "name", JString name;
-             ]
-  | Some p, None ->
-      JAssoc [ "name", JString name;
-               "pos", pos_to_json p;
-             ]
-  | None, Some type_ ->
-      JAssoc [ "name", JString name;
-               "type", JString type_;
-             ]
-  | Some p, Some type_ ->
-    JAssoc [ "name", JString name;
-             "type", JString type_;
-             "pos", pos_to_json p;
-           ]
-
 let hh_auto_complete fn =
   AutocompleteService.attach_hooks();
-  Autocomplete.auto_complete := true;
-  Autocomplete.auto_complete_result := SMap.empty;
-  Autocomplete.auto_complete_for_global := "";
-  Autocomplete.argument_global_type := None;
   let content = Hashtbl.find files fn in
   try
     let {Parser_hack.is_hh_file; comments; ast} =
@@ -261,6 +194,7 @@ let hh_auto_complete fn =
           let nenv = Naming.empty in
           let tenv = Typing_env.empty fn in
           let c = Naming.class_ nenv c in
+          Typing_decl.class_decl c;
           let res = Typing.class_def tenv (snd c.Nast.c_name) c in
           res
       | _ -> ()
@@ -273,15 +207,10 @@ let hh_auto_complete fn =
       | Some Autocomplete.Acclass_get -> "class_get"
       | Some Autocomplete.Acvar -> "var"
       | None -> "none" in
-    let result = if should_complete_global !Autocomplete.argument_global_type then
-      complete_global !Autocomplete.argument_global_type fn
-    else
-      !(Autocomplete.auto_complete_result)
+    let result = AutocompleteService.get_results [] [] in
+    let result =
+      List.map AutocompleteService.autocomplete_result_to_json result
     in
-    let result = SMap.fold
-        (fun _ res acc -> (autocomplete_result_to_json res) :: acc)
-        result
-        [] in
     AutocompleteService.detach_hooks();
     output_json (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;

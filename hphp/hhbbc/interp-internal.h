@@ -425,21 +425,20 @@ void killThisProps(ISS& env) {
  * that could result from reading a property $this->name.
  *
  * Note that this may include types that the property itself cannot
- * actually contain, due to the effects of a possible __get
- * function.  For now we handle that case by just returning
- * InitCell, rather than detecting if $this could have a magic
- * getter.  TODO(#3669480).
+ * actually contain, due to the effects of a possible __get function.
  */
 folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
   auto const t = thisPropRaw(env, name);
   if (!t) return folly::none;
-
   if (t->couldBe(TUninit)) {
-    // Could come out of __get.
-    return TInitCell;
+    auto const rthis = thisType(env);
+    if (!rthis || dobj_of(*rthis).cls.couldHaveMagicGet()) {
+      return TInitCell;
+    }
   }
-  if (t->subtypeOf(TCell)) return *t;
-  return TInitCell;
+  return !t->subtypeOf(TCell) ? TInitCell :
+          t->subtypeOf(TUninit) ? TInitNull :
+          remove_uninit(*t);
 }
 
 /*

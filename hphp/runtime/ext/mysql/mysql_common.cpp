@@ -79,10 +79,7 @@ MySQL *MySQL::Get(const Variant& link_identifier) {
   if (link_identifier.isNull()) {
     return GetDefaultConn();
   }
-  MySQL *mysql = link_identifier.toResource().getTyped<MySQL>
-    (!RuntimeOption::ThrowBadTypeExceptions,
-     !RuntimeOption::ThrowBadTypeExceptions);
-  return mysql;
+  return link_identifier.toResource().getTyped<MySQL>(true, true);
 }
 
 MYSQL *MySQL::GetConn(const Variant& link_identifier, MySQL **rconn /* = NULL */) {
@@ -334,9 +331,7 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
 // helpers
 
 MySQLResult *php_mysql_extract_result(const Variant& result) {
-  MySQLResult *res = result.toResource().getTyped<MySQLResult>
-    (!RuntimeOption::ThrowBadTypeExceptions,
-     !RuntimeOption::ThrowBadTypeExceptions);
+  auto const res = result.toResource().getTyped<MySQLResult>(true, true);
   if (res == nullptr || res->isInvalid()) {
     raise_warning("supplied argument is not a valid MySQL result resource");
     return nullptr;
@@ -560,7 +555,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
         return false;
       }
 #else
-      throw NotImplementedException("mysql_async_connect_start");
+      throw_not_implemented("mysql_async_connect_start");
 #endif
     } else {
       if (!mySQL->connect(host, port, socket, username, password,
@@ -621,8 +616,10 @@ MySQLResult::~MySQLResult() {
 }
 
 void MySQLResult::sweep() {
-  close();
-  // Note that ~MySQLResult is *not* going to run when we are swept.
+  if (m_res) {
+    mysql_free_result(m_res);
+    m_res = nullptr;
+  }
 }
 
 void MySQLResult::addRow() {
@@ -1379,7 +1376,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
     mySQL->m_async_query = query;
     return MySQLQueryReturn::OK;
 #else
-    throw NotImplementedException("mysql_async_query_start");
+    throw_not_implemented("mysql_async_query_start");
 #endif
   }
 

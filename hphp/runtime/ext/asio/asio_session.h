@@ -32,7 +32,6 @@ FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
 FORWARD_DECLARE_CLASS(ResumableWaitHandle);
-FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 
 class AsioSession {
   public:
@@ -102,33 +101,21 @@ class AsioSession {
     void initAbruptInterruptException();
 
     // WaitHandle callbacks:
-    void setOnJoinCallback(ObjectData* on_join) {
-      assert(!on_join || on_join->instanceof(c_Closure::classof()));
-      m_onJoinCallback = on_join;
-    }
+    void setOnIOWaitEnterCallback(const Variant& callback);
+    void setOnIOWaitExitCallback(const Variant& callback);
+    void setOnJoinCallback(const Variant& callback);
+    bool hasOnIOWaitEnterCallback() { return m_onIOWaitEnterCallback.get(); }
+    bool hasOnIOWaitExitCallback() { return m_onIOWaitExitCallback.get(); }
     bool hasOnJoinCallback() { return m_onJoinCallback.get(); }
-    void onJoin(c_WaitHandle* wait_handle);
+    void onIOWaitEnter();
+    void onIOWaitExit();
+    void onJoin(c_WaitHandle* waitHandle);
 
     // ResumableWaitHandle callbacks:
-    void setOnResumableCreateCallback(ObjectData* on_start) {
-      assert(!on_start || on_start->instanceof(c_Closure::classof()));
-      m_onResumableCreateCallback = on_start;
-      updateEventHookState();
-    }
-    void setOnResumableAwaitCallback(ObjectData* on_await) {
-      assert(!on_await || on_await->instanceof(c_Closure::classof()));
-      m_onResumableAwaitCallback = on_await;
-      updateEventHookState();
-    }
-    void setOnResumableSuccessCallback(ObjectData* on_success) {
-      assert(!on_success || on_success->instanceof(c_Closure::classof()));
-      m_onResumableSuccessCallback = on_success;
-      updateEventHookState();
-    }
-    void setOnResumableFailCallback(ObjectData* on_fail) {
-      assert(!on_fail || on_fail->instanceof(c_Closure::classof()));
-      m_onResumableFailCallback = on_fail;
-    }
+    void setOnResumableCreateCallback(const Variant& callback);
+    void setOnResumableAwaitCallback(const Variant& callback);
+    void setOnResumableSuccessCallback(const Variant& callback);
+    void setOnResumableFailCallback(const Variant& callback);
     bool hasOnResumableCreateCallback() { return m_onResumableCreateCallback.get(); }
     bool hasOnResumableAwaitCallback() { return m_onResumableAwaitCallback.get(); }
     bool hasOnResumableSuccessCallback() { return m_onResumableSuccessCallback.get(); }
@@ -140,28 +127,38 @@ class AsioSession {
     void updateEventHookState();
 
     // GenArrayWaitHandle callbacks:
-    void setOnGenArrayCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::classof()));
-      m_onGenArrayCreateCallback = on_create;
-    }
+    void setOnGenArrayCreateCallback(const Variant& callback);
     bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
-    void onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, const Variant& dependencies);
+    void onGenArrayCreate(c_GenArrayWaitHandle* waitHandle, const Variant& dependencies);
 
     // GenMapWaitHandle callbacks:
-    void setOnGenMapCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::classof()));
-      m_onGenMapCreateCallback = on_create;
-    }
+    void setOnGenMapCreateCallback(const Variant& callback);
     bool hasOnGenMapCreateCallback() { return m_onGenMapCreateCallback.get(); }
-    void onGenMapCreate(c_GenMapWaitHandle* wait_handle, const Variant& dependencies);
+    void onGenMapCreate(c_GenMapWaitHandle* waitHandle, const Variant& dependencies);
 
     // GenVectorWaitHandle callbacks:
-    void setOnGenVectorCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::classof()));
-      m_onGenVectorCreateCallback = on_create;
-    }
+    void setOnGenVectorCreateCallback(const Variant& callback);
     bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
-    void onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, const Variant& dependencies);
+    void onGenVectorCreate(c_GenVectorWaitHandle* waitHandle, const Variant& dependencies);
+
+    // ExternalThreadEventWaitHandle callbacks:
+    void setOnExternalThreadEventCreateCallback(const Variant& callback);
+    void setOnExternalThreadEventSuccessCallback(const Variant& callback);
+    void setOnExternalThreadEventFailCallback(const Variant& callback);
+    bool hasOnExternalThreadEventCreateCallback() { return m_onExternalThreadEventCreateCallback.get(); }
+    bool hasOnExternalThreadEventSuccessCallback() { return m_onExternalThreadEventSuccessCallback.get(); }
+    bool hasOnExternalThreadEventFailCallback() { return m_onExternalThreadEventFailCallback.get(); }
+    void onExternalThreadEventCreate(c_ExternalThreadEventWaitHandle* waitHandle);
+    void onExternalThreadEventSuccess(c_ExternalThreadEventWaitHandle* waitHandle, const Variant& result);
+    void onExternalThreadEventFail(c_ExternalThreadEventWaitHandle* waitHandle, const Object& exception);
+
+    // SleepWaitHandle callbacks:
+    void setOnSleepCreateCallback(const Variant& callback);
+    void setOnSleepSuccessCallback(const Variant& callback);
+    bool hasOnSleepCreateCallback() { return m_onSleepCreateCallback.get(); }
+    bool hasOnSleepSuccessCallback() { return m_onSleepSuccessCallback.get(); }
+    void onSleepCreate(c_SleepWaitHandle* waitHandle);
+    void onSleepSuccess(c_SleepWaitHandle* waitHandle);
 
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
@@ -175,6 +172,8 @@ class AsioSession {
 
     Object m_abruptInterruptException;
 
+    Object m_onIOWaitEnterCallback;
+    Object m_onIOWaitExitCallback;
     Object m_onJoinCallback;
     Object m_onResumableCreateCallback;
     Object m_onResumableAwaitCallback;
@@ -183,6 +182,11 @@ class AsioSession {
     Object m_onGenArrayCreateCallback;
     Object m_onGenMapCreateCallback;
     Object m_onGenVectorCreateCallback;
+    Object m_onExternalThreadEventCreateCallback;
+    Object m_onExternalThreadEventSuccessCallback;
+    Object m_onExternalThreadEventFailCallback;
+    Object m_onSleepCreateCallback;
+    Object m_onSleepSuccessCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

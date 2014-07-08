@@ -19,6 +19,6 @@
 
 namespace HPHP {
 
-__thread RequestLocal<ZendExceptionStore> ZendExceptionStore::tl_instance;
+IMPLEMENT_REQUEST_LOCAL(ZendExceptionStore, ZendExceptionStore::tl_instance);
 
 }

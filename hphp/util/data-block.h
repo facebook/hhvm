@@ -61,7 +61,7 @@ struct DataBlock {
   DataBlock(const DataBlock& other) = delete;
   DataBlock& operator=(const DataBlock& other) = delete;
 
-  DataBlock(DataBlock&& other)
+  DataBlock(DataBlock&& other) noexcept
     : m_base(other.m_base)
     , m_frontier(other.m_frontier)
     , m_size(other.m_size)
@@ -197,6 +197,7 @@ struct DataBlock {
   }
 
   void skip(size_t nbytes) {
+    assertCanEmit(nbytes);
     alloc<uint8_t>(1, nbytes);
   }
 

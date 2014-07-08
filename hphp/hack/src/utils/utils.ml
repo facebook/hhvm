@@ -160,13 +160,8 @@ let smap_env f env m =
     env, SMap.add x y acc
  ) m (env, SMap.empty)
 
-let rec lfold f env l =
-  match l with
-  | [] -> env, []
-  | x :: rl ->
-      let env, x = f env x in
-      let env, rl = lfold f env rl in
-      env, x :: rl
+(* This is a significant misnomer... you may want fold_left_env instead. *)
+let lfold = lmap
 
 let rec lfold2 f env l1 l2 =
   match l1, l2 with
@@ -193,13 +188,16 @@ let rec wfold_left2 f env l1 l2 =
       let env = f env x1 x2 in
       wfold_left2 f env rl1 rl2
 
+let apply_for_env_fold f env acc x =
+  let env, x = f env x in
+  env, x :: acc
+
 let rec fold_left_env f env acc l =
   match l with
   | [] -> env, acc
   | x :: rl ->
       let env, acc = f env acc x in
-      let env, acc = fold_left_env f env acc rl in
-      env, acc
+      fold_left_env f env acc rl
 
 let rec make_list f n =
   if n = 0
@@ -207,8 +205,8 @@ let rec make_list f n =
   else f() :: make_list f (n-1)
 
 let safe_ios p s =
-  try int_of_string s
-  with _ -> Errors.add p "Value is too large"; -1
+  try Some (int_of_string s)
+  with _ -> None
 
 let sl l =
   List.fold_right (^) l ""
@@ -293,14 +291,19 @@ let str_starts_with long short =
   with Invalid_argument _ ->
     false
 
-let spinner =
+
+let (spinner, spinner_used) =
   let state = ref 0 in
-  fun () ->
+  (fun () ->
     begin
-      let str = List.nth ["-"; "\\"; "|"; "/"] (!state) in
-      state := (!state + 1) mod 4;
+      let str = List.nth ["-"; "\\"; "|"; "/"] (!state mod 4) in
+      state := !state + 1;
       str
-    end
+    end),
+  (fun () -> !state <> 0)
+
+(* ANSI escape sequence to clear whole line *)
+let clear_line_seq = "\r\x1b[0K"
 
 (*****************************************************************************)
 (* Same as List.iter2, except that we only iterate as far as the shortest
@@ -312,4 +315,3 @@ let rec iter2_shortest f l1 l2 =
   match l1, l2 with
   | [], _ | _, [] -> ()
   | x1 :: rl1, x2 :: rl2 -> f x1 x2; iter2_shortest f rl1 rl2
-

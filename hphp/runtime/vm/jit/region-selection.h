@@ -32,7 +32,6 @@ namespace HPHP { namespace JIT {
 
 struct MCGenerator;
 struct ProfData;
-struct Tracelet;
 struct TransCFG;
 
 using boost::container::flat_map;
@@ -75,6 +74,7 @@ struct RegionDesc {
     return blocks.back().get();
   }
   void addArc(BlockId src, BlockId dst);
+  void renumberBlock(BlockId oldId, BlockId newId);
   void setSideExitingBlock(BlockId bid);
   bool isSideExitingBlock(BlockId bid) const;
   std::vector<BlockPtr> blocks;
@@ -371,8 +371,7 @@ struct RegionContext::PreLiveAR {
 /*
  * Select a compilation region corresponding to the given context.
  * The shape of the region selected is controlled by
- * RuntimeOption::EvalJitRegionSelector.  If the specified shape is
- * 'legacy', then the input argument t is used to build the region.
+ * RuntimeOption::EvalJitRegionSelector.
  *
  * This function may return nullptr.
  *
@@ -380,10 +379,7 @@ struct RegionContext::PreLiveAR {
  * returning nullptr causes it to use the current level 0 tracelet
  * analyzer.  Eventually we'd like this to completely replace analyze.
  */
-using TraceletFn = std::function<std::unique_ptr<Tracelet>()>;
-RegionDescPtr selectRegion(const RegionContext& context,
-                           TraceletFn tlet,
-                           TransKind kind);
+RegionDescPtr selectRegion(const RegionContext& context, TransKind kind);
 
 /*
  * Select a compilation region based on profiling information.  This
@@ -399,13 +395,6 @@ RegionDescPtr selectHotRegion(TransID transId,
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
                              bool profiling);
-
-/*
- * Create a compilation region corresponding to a tracelet created by
- * the old analyze() framework.
- */
-RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const Tracelet& tlet);
 
 /*
  * Select the hottest trace beginning with triggerId.
@@ -441,12 +430,6 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 void regionizeFunc(const Func*  func,
                    MCGenerator* mcg,
                    RegionVec&   regions);
-
-/*
- * Compare the two regions. If they differ in any way other than a being longer
- * than b, trace both regions.
- */
-void diffRegions(const RegionDesc& a, const RegionDesc& b);
 
 /*
  * Functions to map BlockIds to the TransIDs used when the block was

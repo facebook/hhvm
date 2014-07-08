@@ -32,7 +32,6 @@ SRC = \
   nast.ml\
   typing_defs.ml\
   typing_env.ml\
-  naming_error.ml\
   naming_heap.ml\
   naming_ast_helpers.ml\
   naming.ml\
@@ -50,6 +49,7 @@ SRC = \
   typing_generic.ml\
   typing_ops.ml\
   typing_dynamic_yield.ml\
+  typing_enum.ml\
   typing_hint.ml\
   typing_suggest.ml\
   typing_async.ml\
@@ -153,6 +153,9 @@ typing_utils.ml: $(TOP)/typing/typing_utils.ml
 typing_dynamic_yield.ml: $(TOP)/typing/typing_dynamic_yield.ml
 	cp $(TOP)/typing/typing_dynamic_yield.ml .
 
+typing_enum.ml: $(TOP)/typing/typing_enum.ml
+	cp $(TOP)/typing/typing_enum.ml .
+
 typing_print.ml: $(TOP)/typing/typing_print.ml
 	cp $(TOP)/typing/typing_print.ml .
 
@@ -200,9 +203,6 @@ autocomplete.ml: $(TOP)/globals/autocomplete.ml
 
 find_refs.ml: $(TOP)/globals/find_refs.ml
 	cp $(TOP)/globals/find_refs.ml .
-
-naming_error.ml: $(TOP)/naming/naming_error.ml
-	cp $(TOP)/naming/naming_error.ml .
 
 naming_ast_helpers.ml: $(TOP)/naming/naming_ast_helpers.ml
 	cp $^ .
@@ -282,7 +282,6 @@ clean::
 	rm -f nastVisitor.ml
 	rm -f nastCheck.ml
 	rm -f nastInitCheck.ml
-	rm -f naming_error.ml
 	rm -f naming_heap.ml
 	rm -f naming_ast_helpers.ml
 	rm -f naming.ml
@@ -305,6 +304,7 @@ clean::
 	rm -f typing_hint.ml
 	rm -f typing_print.ml
 	rm -f typing_dynamic_yield.ml
+	rm -f typing_enum.ml
 	rm -f find_refs.ml
 	rm -f autocomplete.ml
 	rm -f nast_terminality.ml

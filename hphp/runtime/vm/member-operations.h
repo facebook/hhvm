@@ -239,7 +239,7 @@ inline int64_t ElemStringPre(TypedValue key) {
   } else if (LIKELY(IS_STRING_TYPE(key.m_type))) {
     return key.m_data.pstr->toInt64(10);
   } else {
-    raise_warning("String offset cast occurred");
+    raise_notice("String offset cast occurred");
     return cellAsCVarRef(key).toInt64();
   }
 }

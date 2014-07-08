@@ -104,6 +104,10 @@ function set_include_path(mixed $new_include_path): string;
 <<__Native>>
 function get_included_files(): array;
 
+function get_required_files(): array {
+  return get_included_files();
+}
+
 /* Returns the current configuration setting of magic_quotes_gpc  Keep in mind
  * that attempting to set magic_quotes_gpc at runtime will not work.  For more
  * information about magic_quotes, see this security section.
@@ -173,13 +177,6 @@ function clock_getres(int $clk_id,
 function clock_gettime(int $clk_id,
                        mixed &$sec,
                        mixed &$nsec): bool;
-
-/* Sets time of a system clock. "man 3 clock_settime" for more details.
- */
-<<__Native>>
-function clock_settime(int $clk_id,
-                       int $sec,
-                       int $nsec): bool;
 
 /* Gets number of processors.
  */

@@ -22,7 +22,7 @@
             ],
             "return": {
                 "type": "Object",
-                "desc": "An AsyncFunctionWaitHandle that is running in a specified context"
+                "desc": "A ResumableWaitHandle that is running in a specified context"
             },
             "args": [
                 {
@@ -39,13 +39,81 @@
             ],
             "return": {
                 "type": "Object",
-                "desc": "An AsyncFunctionWaitHandle that is running in the current context"
+                "desc": "A ResumableWaitHandle that is running in the current context"
             },
             "args": [
             ]
         }
     ],
     "classes": [
+        {
+            "name": "AsyncGenerator",
+            "desc": "A generator that can be iterated asynchronously",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep",
+                "CppCustomDelete"
+            ],
+            "ifaces": [
+                "HH\\AsyncKeyedIterator"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "desc": "Continue asynchronous iteration",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "send",
+                    "desc": "Continue asynchronous iteration with value",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "A value to be received by yield expression"
+                        }
+                    ]
+                },
+                {
+                    "name": "raise",
+                    "desc": "Continue asynchronous iteration with raised exception",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "exception",
+                            "type": "Object",
+                            "desc": "An exception to be thrown by yield expression"
+                        }
+                    ]
+                }
+            ]
+        },
         {
             "name": "WaitHandle",
             "desc": "A wait handle representing asynchronous operation",
@@ -70,6 +138,42 @@
                     ]
                 },
                 {
+                    "name": "setOnIOWaitEnterCallback",
+                    "desc": "Set callback for when the scheduler enters I/O wait",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when I/O wait is entered"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnIOWaitExitCallback",
+                    "desc": "Set callback for when the scheduler exits I/O wait",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when I/O wait is exited"
+                        }
+                    ]
+                },
+                {
                     "name": "setOnJoinCallback",
                     "desc": "Set callback for when join() is called",
                     "flags": [
@@ -81,7 +185,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_join_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on join()"
                         }
@@ -309,7 +413,7 @@
             "funcs": [
                 {
                     "name": "setOnCreateCallback",
-                    "desc": "Set callback to be called when an AsyncFunctionWaitHandle is created",
+                    "desc": "Set callback to be called when a ResumableWaitHandle is created",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -319,9 +423,9 @@
                     },
                     "args": [
                         {
-                            "name": "on_create_cb",
+                            "name": "callback",
                             "type": "Variant",
-                            "desc": "A Closure to be called when an AsyncFunctionWaitHandle is created"
+                            "desc": "A Closure to be called when a ResumableWaitHandle is created"
                         }
                     ]
                 },
@@ -337,7 +441,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_await_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called when an async function blockingly await"
                         }
@@ -345,7 +449,7 @@
                 },
                 {
                     "name": "setOnSuccessCallback",
-                    "desc": "Set callback to be called when an async function finishes successfully",
+                    "desc": "Set callback to be called when a ResumableWaitHandle finishes successfully",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -355,15 +459,15 @@
                     },
                     "args": [
                         {
-                            "name": "on_success_cb",
+                            "name": "callback",
                             "type": "Variant",
-                            "desc": "A Closure to be called when an async function finishes"
+                            "desc": "A Closure to be called when a ResumableWaitHandle finishes"
                         }
                     ]
                 },
                 {
                     "name": "setOnFailCallback",
-                    "desc": "Set callback to be called when an async function fails",
+                    "desc": "Set callback to be called when a ResumableWaitHandle fails",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -373,9 +477,9 @@
                     },
                     "args": [
                         {
-                            "name": "on_fail_cb",
+                            "name": "callback",
                             "type": "Variant",
-                            "desc": "A Closure to be called when an async function fails"
+                            "desc": "A Closure to be called when a ResumableWaitHandle fails"
                         }
                     ]
                 }
@@ -391,6 +495,30 @@
                 "IsFinal",
                 "NoDefaultSweep",
                 "CppCustomDelete"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "AsyncGeneratorWaitHandle",
+            "parent": "ResumableWaitHandle",
+            "desc": "A wait handle representing asynchronous execution of async generator",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -447,7 +575,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_create_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on creation"
                         }
@@ -496,7 +624,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_create_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on creation"
                         }
@@ -545,7 +673,7 @@
                     },
                     "args": [
                         {
-                            "name": "on_create_cb",
+                            "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on creation"
                         }
@@ -627,6 +755,42 @@
                             "desc": "Non-negative number of microseconds to sleep for"
                         }
                     ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback to be called when a SleepWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when a SleepWaitHandle is created"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnSuccessCallback",
+                    "desc": "Set callback to be called when a SleepWaitHandle finishes successfully",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when a SleepWaitHandle finishes"
+                        }
+                    ]
                 }
             ],
             "consts": [
@@ -645,14 +809,57 @@
             ],
             "funcs": [
                 {
-                    "name": "__construct",
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback to be called when an ExternalThreadEventWaitHandle is created",
                     "flags": [
-                        "IsPrivate"
+                        "IsStatic",
+                        "HipHopSpecific"
                     ],
                     "return": {
                         "type": null
                     },
                     "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an ExternalThreadEventWaitHandle is created"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnSuccessCallback",
+                    "desc": "Set callback to be called when an ExternalThreadEventWaitHandle finishes successfully",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an ExternalThreadEventWaitHandle finishes"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnFailCallback",
+                    "desc": "Set callback to be called when an ExternalThreadEventWaitHandle fails",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an ExternalThreadEventWaitHandle fails"
+                        }
                     ]
                 }
             ]

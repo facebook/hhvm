@@ -419,7 +419,8 @@ class Runner {
       $env = array_merge($env,
                          nullthrows($this->framework->getEnvVars())->toArray());
     }
-    $temp_dir = sys_get_temp_dir().'/hhvm_oss_'.uniqid('', true);
+    $temp_dir = sys_get_temp_dir().'/hhvm_oss_'.
+      uniqid($this->framework->getName(), true);
     mkdir($temp_dir);
     $this->temp_dir = $temp_dir;
     $env['TMPDIR'] = $temp_dir;
@@ -435,7 +436,16 @@ class Runner {
     fclose($this->pipes[1]);
     fclose($this->pipes[2]);
 
-    remove_dir_recursive(nullthrows($this->temp_dir));
+    $temp_dir = $this->temp_dir;
+    $this->temp_dir = null;
+    if ($temp_dir !== null) {
+      if (!file_exists($temp_dir)) {
+        throw new Exception(
+          'Temp directory already deleted in test '.$this->name
+        );
+      }
+      remove_dir_recursive($temp_dir);
+    }
 
     return proc_close($this->process) === -1 ? -1 : 0;
   }

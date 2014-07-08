@@ -150,9 +150,6 @@ struct ExecutionContext {
   enum ShutdownType {
     ShutDown,
     PostSend,
-    CleanUp,
-
-    ShutdownTypeCount
   };
 
   enum class ErrorThrowMode {
@@ -478,6 +475,9 @@ public:
   LookupResult lookupCtorMethod(const Func*& f,
                                 const Class* cls,
                                 bool raise = false);
+  ObjectData* createObject(const Class* cls,
+                           const Variant& params,
+                           bool init);
   ObjectData* createObject(StringData* clsName,
                            const Variant& params,
                            bool init = true);
@@ -508,11 +508,11 @@ public:
 
   hphp_hash_map<
     StringData*,
-    PhpFile*,
+    Unit*,
     string_data_hash,
     string_data_same
   > m_evaledFiles;
-  std::vector<PhpFile*> m_evaledFilesOrder;
+  std::vector<const StringData*> m_evaledFilesOrder;
   std::vector<Unit*> m_createdFuncs;
 
   std::vector<Fault> m_faults;
@@ -524,18 +524,8 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  Unit* lookupPhpFile(
-      StringData* path, const char* currentDir, bool* initial = nullptr);
-  Unit* evalInclude(StringData* path,
-                              const StringData* curUnitFilePath, bool* initial);
-  Unit* evalIncludeRoot(StringData* path,
-                                  InclOpFlags flags, bool* initial);
-  Unit* lookupIncludeRoot(StringData* path,
-                          InclOpFlags flags,
-                          bool* initial,
-                          Unit* unit);
   bool evalUnit(Unit* unit, PC& pc, int funcType);
-  void invokeUnit(TypedValue* retval, Unit* unit);
+  void invokeUnit(TypedValue* retval, const Unit* unit);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
   StrNR createFunction(const String& args, const String& code);
@@ -571,13 +561,21 @@ public:
   PCFilter* m_lastLocFilter;
   bool m_dbgNoBreak;
   bool doFCall(ActRec* ar, PC& pc);
-  bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
   const Variant& getEvaledArg(const StringData* val, const String& namespacedName);
   String getLastErrorPath() const { return m_lastErrorPath; }
   int getLastErrorLine() const { return m_lastErrorLine; }
 
 private:
+  enum class CallArrOnInvalidContainer {
+    // task #1756122: warning and returning null is what we /should/ always
+    // do in call_user_func_array, but some code depends on the broken
+    // behavior of casting the list of args to FCallArray to an array.
+    CastToArray,
+    WarnAndReturnNull,
+    WarnAndContinue
+  };
+  bool doFCallArray(PC& pc, int stkSize, CallArrOnInvalidContainer);
   enum class StackArgsState { // tells prepareFuncEntry how much work to do
     // the stack may contain more arguments than the function expects
     Untrimmed,

@@ -35,12 +35,14 @@ using namespace HPHP;
 ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                                ListKind kind)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ExpressionList)),
-    m_arrayElements(false), m_collectionType(0), m_kind(kind) {
+    m_arrayElements(false), m_collectionType(0), m_argUnpack(false),
+    m_kind(kind) {
 }
 
 ExpressionPtr ExpressionList::clone() {
   ExpressionListPtr exp(new ExpressionList(*this));
   Expression::deepCopy(exp);
+  assert(exp->m_argUnpack == this->m_argUnpack);
   exp->m_exps.clear();
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     exp->m_exps.push_back(Clone(m_exps[i]));
@@ -57,7 +59,7 @@ void ExpressionList::toLower() {
 
 void ExpressionList::setContext(Context context) {
   Expression::setContext(context);
-  if (m_kind == ListKindParam && context & UnsetContext) {
+  if (m_kind == ListKindParam && (context & UnsetContext)) {
     for (unsigned int i = m_exps.size(); i--; ) {
       if (m_exps[i]) {
         m_exps[i]->setContext(UnsetContext);

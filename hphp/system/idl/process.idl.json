@@ -315,7 +315,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "The output from the executed command."
             },
             "args": [

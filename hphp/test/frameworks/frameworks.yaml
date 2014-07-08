@@ -12,12 +12,16 @@
 # pull_requests: a list of maps of pull requests (see pear)
 # blacklist: a list of tests that will cause the runner to behave badly
 # clowns: a list of tests that are clowny (e.g. fail both HHVM and Zend)
+# flakey: a list of tests that intermently fail
 # test_name_regex: A custom regex for test names beyond the normal default:
 #      /[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\".*?\"|#[0-9]+))?/
 # test_file_regex: A custom regex for test file names beyond the normal default:
 #      /.*(\.phpt|Test[\d]*\.php|test[\d]*\.php)$/
 # config_file: a specific phpunit config file to use beyond phpunit.xml[.dist]
 # bootstrap_file: a specific bootstrap file to use
+# test_find_mode: How to find the tests - reflection (default), token, or phpt
+# sequential: run the tests sequentially - slower, but needed for tests with
+#     race conditions
 #
 # If you need to override the default constructed implementation of the
 # Framework class, then add the class to the framework_class_overrides
@@ -40,8 +44,11 @@
       # release of 1.1.2; test is fixed in master, but we want to test
       # latest stable
       - assetic/tests/Assetic/Test/Filter/GoogleClosure/CompilerApiFilterTest.php
-      # Flakey - mutates fixed location (__DIR__)
+    flakey:
+      # mutates fixed location (__DIR__)
       - assetic/tests/Assetic/Test/Factory/AssetFactoryTest.php
+      # depends on http://ajax.googleapis.com
+      - assetic/tests/Assetic/Test/Asset/HttpAssetTest.php
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
     url: https://github.com/cakephp/cakephp
@@ -64,12 +71,9 @@
     url: https://github.com/composer/composer.git
     # master is the only available branch
     branch: master
-    commit: 5d4900e79d5ea08118782345fb97e23e6ab1e4f0
+    commit: 8881cec1742cc7e56bfc0e33b08f785ae53b78dc
     install_root: composer
     test_root: composer
-    clowns:
-     # https://github.com/composer/composer/issues/3049 - fails on PHP5 too
-     - composer/tests/Composer/Test/Json/JsonFileTest.php
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
     # Stable is 2.4.2, but need master since we have pull requests.
@@ -78,6 +82,11 @@
     commit: 73e5bbecbef311194085e30d8b7fd6516bc50425
     install_root: doctrine2
     test_root: doctrine2
+    clowns:
+      # Try to rm -rf sys_get_temp_dir():
+      - doctrine2/tests/Doctrine/Tests/ORM/Cache/FileLockRegionTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/XmlDriverTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
     # Stable is 7.26, but the test framework is lacking in 7.x
@@ -88,17 +97,22 @@
     test_root: drupal/core
     clowns:
       - drupal/core/modules/views/tests/Drupal/views/Tests/ViewsDataHelperTest.php
-      # Flakey, test has a race condition
+    flakey:
+      # test has a race condition
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php
       # Depends on previous
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFastFileStorageTest.php
   facebookphpsdk:
-    url: https://github.com/facebook/facebook-php-sdk.git
-    branch: v3.2.3
-    commit: 6714042fa2f5979d4c64c7d11fb4bcab16bdf6cb
+    # v3.2.3 from facebook/facebook-php-sdk and
+    # https://github.com/facebook/facebook-php-sdk/pull/184
+    url: https://github.com/fredemmott/facebook-php-sdk.git
+    branch: oauth-fix
+    commit: e4c2a3f7be7141f9d69d5521470487a6a1452162
     install_root: facebook-php-sdk
     test_root: facebook-php-sdk
     test_file_regex: /.*(tests\.php)$/
+    test_find_mode: token
+    sequential: true
   fastroute:
     url: https://github.com/nikic/FastRoute.git
     branch: master
@@ -114,7 +128,7 @@
     commit: fa0046309160ea52aeed51b5608adfd263dfa0a2
     install_root: guzzle
     test_root: guzzle
-    clowns:
+    flakey:
       # Depends on external resource (example.com), unreliable
       - guzzle/tests/Guzzle/Tests/Plugin/Async/AsyncPluginTest.php
   guzzle4:
@@ -125,6 +139,8 @@
     commit: 4db19b75d9211e729ff277c238ef5de4bf658597
     install_root: guzzle4
     test_root: guzzle4
+    test_find_mode: token
+    sequential: true
   hhvmquickinterp:
     do_not_install: true
     test_root: ../hhvm/quick_interp
@@ -150,10 +166,6 @@
     install_root: joomla-framework
     test_root: joomla-framework
     clowns:
-      # Uses fixed location on filesystem (__DIR__) - can't be run in parallel
-      - joomla-framework/src/Joomla/Archive/Tests/Bzip2Test.php
-      - joomla-framework/src/Joomla/Archive/Tests/GzipTest.php
-      - joomla-framework/src/Joomla/Archive/Tests/ArchiveTest.php
       # These are subtests which need their own composer set and aren't run
       # by their travis setup
       - joomla-framework/src/Joomla/Google/Tests/JGoogleAuthOauth2Test.php
@@ -200,12 +212,21 @@
       - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleOptionsTest.php
       - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleTelTest.php
       - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleUrlTest.php
+    flakey:
+      # Uses fixed location on filesystem (__DIR__) - can't be run in parallel
+      - joomla-framework/src/Joomla/Archive/Tests/Bzip2Test.php
+      - joomla-framework/src/Joomla/Archive/Tests/GzipTest.php
+      - joomla-framework/src/Joomla/Archive/Tests/ArchiveTest.php
+      - joomla-framework/src/Joomla/Filesystem/Tests/JFileTest.php
+      - joomla-framework/src/Joomla/Log/Tests/Logger/FormattedtextTest.php
+      - joomla-framework/src/Joomla/Log/Tests/Logger/W3cTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
     branch: "3.4-dev"
     commit: 11b927eb40b6646733ead7a9e3cd5f2e68a289b8
     install_root: joomla-cms
     test_root: joomla-cms
+    test_find_mode: token
     clowns:
       - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
@@ -281,12 +302,14 @@
     commit: 6e1f228ce82333b437402dafad049713eb3eeac6
     install_root: klein
     test_root: klein
+    test_find_mode: token
   kohana:
     url: https://github.com/kohana/kohana.git
     branch: "3.3/develop"
     commit: 61e12755bf9eb32af82808b26d58ccb73cf2a971
     install_root: kohana
     test_root: kohana
+    test_find_mode: token
   laravel:
     url: https://github.com/laravel/framework.git
     # Use the 4.1 branch instead of the 4.1.x tag because of pull request
@@ -295,7 +318,7 @@
     commit: 1faf4c8508378b0b102d148c53c322a8048b16dd
     install_root: laravel
     test_root: laravel
-    clowns:
+    flakey:
       # If the system clock crosses a whole-second boundary
       # (eg :00.999 => :01.000), these tests fail.
       - laravel/tests/Database/DatabaseEloquentRelationTest.php
@@ -319,13 +342,14 @@
     commit: 75b30dbc1ca0a41926784bd4d13fc889914aaa16
     install_root: magento2
     test_root: magento2/dev/tests/unit
+    test_find_mode: token
   mediawiki:
     # - Bad test data in wikimedia/mediawiki-core at the moment
     # - Some tests have @group database set incorrectly, so are ran anyway
     url: https://github.com/fredemmott/mediawiki-core.git
     # When we move back to mediawiki-core, stable branch is wmf/1.22wmf22
     branch: hhvm-fix
-    commit: f5e7ff5
+    commit: f5e7ff5328e783b2b20a829f6506fc1f2f988f02
     install_root: mediawiki-core
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/
@@ -354,8 +378,8 @@
     commit: 996c944fa2ddedddfaf0d276b913809d6a32fd85
     install_root: mustache
     test_root: mustache
-    clowns:
-      # This test fails if sys_get_temp_dir().'/mustache-test/foo' exists.
+    test_find_mode: token
+    flakey:
       - mustache/test/Mustache/Test/Cache/FilesystemCacheTest.php
   paris:
     url: https://github.com/j4mie/paris.git
@@ -367,7 +391,7 @@
     url: https://github.com/pear/pear-core.git
     # master is the best branch for pear
     branch: master
-    commit: 15dd8a6cceb520226a6546dd09b740cdc3ea4d4c
+    commit: def22219cfd80fab6f8f8c982fcabbbe9fb41917
     install_root: pear-core
     test_root: pear-core
     test_file_regex: /.*(\.phpt)$/
@@ -446,6 +470,7 @@
     commit: 3340c91def4c6d4f4c9f0784ac04b9ed09ec68ca
     install_root: pdepend
     test_root: pdepend
+    test_find_mode: token
   phpbb3:
     url: https://github.com/phpbb/phpbb.git
     # Stable is release-3.0.12, but we have pull requests in develop
@@ -460,8 +485,10 @@
       #   find . -name '*.php' | grep -v vendor/ | xargs -n 1 -P 32 hhvm -l
       # We pass it, but it's slow, and not a unit test, so skip it
       - phpbb3/tests/lint_test.php
+    flakey:
       # These mutate a fixed location on the local filesystem (__DIR__). This
       # makes the tests unreliable.
+      - phpbb3/tests/compress/compress_test.php
       - phpbb3/tests/mimetype/guesser_test.php
       - phpbb3/tests/template/subdir/includephp_from_subdir_test.php
       - phpbb3/tests/template/includephp_test.php
@@ -484,6 +511,8 @@
     test_root: phpmyadmin
     # Larger timeout, no code coverage, no selenium testing
     config_file: phpmyadmin/phpunit.xml.hhvm
+    test_find_mode: token
+    sequential: true
   phpunit:
     url: https://github.com/fredemmott/phpunit.git
     # 4.2.x branch + https://github.com/sebastianbergmann/phpunit/pull/1288
@@ -513,7 +542,7 @@
     commit: 3a5d12166b38d059a96c232d809332e7f3e60d9d
     install_root: reactphp
     test_root: reactphp
-    clowns:
+    flakey:
       # Intentionally racy and flakey: $this->assertRunFasterThan(0.005)
       - reactphp/tests/EventLoop/StreamSelectLoopTest.php
   silverstripe:
@@ -525,7 +554,7 @@
     commit: 3b3cda59d2d8a1618ed66c5d9fd1d76395040ddd
     install_root: silverstripe
     test_root: silverstripe
-    clowns:
+    flakey:
       # Mutates fixed location on local filesystem (within checkout directory),
       # doesn't support multiple concurrent runs.
       - silverstripe/framework/tests/view/SSViewerCacheBlockTest.php
@@ -571,6 +600,7 @@
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist
+    test_find_mode: token
     blacklist:
       # Intermittently hangs, takes > 24h
       - vfsstream/src/test/php/org/bovigo/vfs/vfsStreamWrapperWithoutRootTestCase.php
@@ -585,6 +615,7 @@
     clowns:
       # Needs a local memcache server
       - yii/tests/framework/caching/CMemCacheTest.php
+    flakey:
       # These mutate fixed locations (relative to the checkout directory) on the
       # local file system - can't run multiple instance at the same time
       # reliably.
@@ -600,7 +631,20 @@
     commit: 2b718e20cfc22cd388ef3aeff0bc66302379ae02
     install_root: zf2
     test_root: zf2/tests
+    test_find_mode: token
     blacklist:
       - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/ValueGeneratorTest.php
+  html5php:
+    url: https://github.com/Masterminds/html5-php.git
+    branch: master
+    commit: 45e0f801d896258022c6a70a7738b991cb19aafe
+    install_root: html5php
+    test_root: html5php      
+  twital:
+    url: https://github.com/goetas/twital.git
+    branch: master
+    commit: 9f5d2f66bea26fc590ec003f2488568b34bafe72
+    install_root: twital
+    test_root: twital

@@ -44,6 +44,7 @@ TRACE_SET_MOD(hhbbc);
 
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s_AsyncGenerator("AsyncGenerator");
 const StaticString s_Generator("Generator");
 const StaticString s_http_response_header("http_response_header");
 const StaticString s_php_errormsg("php_errormsg");
@@ -176,15 +177,26 @@ FuncAnalysis do_analyze(const Index& index,
    * (i.e. each dv init and the main entry), and all of them count as
    * places the function could be entered, so they all must be visited
    * at least once (add them to incompleteQ).
+   *
+   * If we're entering at a DV-init, all higher parameter locals must
+   * be Uninit.  It is also possible that the DV-init is reachable
+   * from within the function with these parameter locals already
+   * initialized (although the normal php emitter can't do this), but
+   * that case is handled normally when iterating below.
    */
   auto const entryState = entry_state(index, ctx, clsAnalysis, knownArgs);
   if (!knownArgs) {
-    for (auto& param : ctx.func->params) {
-      if (auto const dv = param.dvEntryPoint) {
+    auto const numParams = ctx.func->params.size();
+    for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
+      if (auto const dv = ctx.func->params[paramId].dvEntryPoint) {
         ai.bdata[dv->id].stateIn = entryState;
         incompleteQ.insert(rpoId(dv));
+        for (auto locId = paramId; locId < numParams; ++locId) {
+          ai.bdata[dv->id].stateIn.locals[locId] = TUninit;
+        }
       }
     }
+
     ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
     incompleteQ.insert(rpoId(ctx.func->mainEntry));
   } else {
@@ -291,19 +303,18 @@ FuncAnalysis do_analyze(const Index& index,
 
   ai.closureUseTypes = std::move(collect.closureUseTypes);
 
-  /*
-   * Async functions always return WaitH<T>, where T is the type returned
-   * internally.
-   */
-  if (ctx.func->isAsync) {
-    ai.inferredReturn = wait_handle(index, ai.inferredReturn);
-  }
-
-  /*
-   * Generators always return Generator object.
-   */
   if (ctx.func->isGenerator) {
-    ai.inferredReturn = objExact(index.builtin_class(s_Generator.get()));
+    if (ctx.func->isAsync) {
+      // Async generators always return AsyncGenerator object.
+      ai.inferredReturn = objExact(index.builtin_class(s_AsyncGenerator.get()));
+    } else {
+      // Non-async generators always return Generator object.
+      ai.inferredReturn = objExact(index.builtin_class(s_Generator.get()));
+    }
+  } else if (ctx.func->isAsync) {
+    // Async functions always return WaitH<T>, where T is the type returned
+    // internally.
+    ai.inferredReturn = wait_handle(index, ai.inferredReturn);
   }
 
   /*

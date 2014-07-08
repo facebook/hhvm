@@ -68,7 +68,7 @@ const char* const ASYNC_WITHOUT_BODY =
   "Cannot declare %s method %s::%s() async; async is only meaningful"
   " when it modifies a method body";
 const char* const PICK_ACCESS_MODIFIER =
-  "Cannot declare more than one access modifier";
+  "Multiple access type modifiers are not allowed";
 const char* const TRAITS_UNKNOWN_TRAIT =
   "Unknown trait '%s'";
 const char* const TRAITS_UNKNOWN_TRAIT_METHOD =

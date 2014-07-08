@@ -10,37 +10,45 @@ namespace and path.
 The basic assumption guiding HHVM's JIT is that while PHP is a dynamically
 typed language, the types flowing through PHP programs aren't very dynamic in
 practice. We observe the types present at runtime and generate machine code
-specialized to operate on these types, insert runtime typechecks where
+specialized to operate on these types, inserting runtime typechecks where
 appropriate to verify assumptions made at compile time.
 
 ## Region Selection
 
-The first step in translating some HHBC into machine code is deciding exactly
-which code to translate, in a process called region selection. The size and
-shape of regions depend on many factors, but they are typically no more than
-one basic block. There are a number of different ways to select a region, all
-producing a `RegionDesc` struct in the end (defined in
+The first step in translating HHBC into machine code is deciding exactly which
+code to translate, in a process called region selection. The size and shape of
+regions depend on many factors, ranging from a single HHBC instruction up to an
+entire function with complex control flow. There are a number of different ways
+to select a region, all producing a `RegionDesc` struct in the end (defined in
 [region-selection.h](../../runtime/vm/jit/region-selection.h)). `RegionDesc`
-contains a list of `RegionDesc::Block` structs, and each Block represents a
+contains a list of `RegionDesc::Block` structs, and each `Block` represents a
 basic block of bytecodes by holding a starting offset and length in
-instructions. The list of Blocks must be kept sorted in reverse post
-order. Blocks also contain optional metadata about the code they contain and
-the state of the VM before, during, and after execution of that code. This
-metadata includes type predictions, parameter reffiness predictions, statically
-known call destinations, and certain postconditions.
+instructions. The list of `Block`s is kept sorted in reverse post order. Blocks
+also contain optional metadata about the code they contain and the state of the
+VM before, during, and after execution of that code. This metadata includes
+type predictions, parameter reffiness predictions, statically known call
+destinations, and certain postconditions.
 
 ### Tracelet Region Selection
 
-The primary region selection method is known as the tracelet region selector
-(for the source of the name "tracelet," read the "Legacy Analysis Code"
-section). This code lives in
+The first-gear region selector is the tracelet region selector. The name
+"tracelet" is somewhat vestigal, and refers to a region of HHBC typically no
+larger than a single basic block. This code lives in
 [region-tracelet.cpp](../../runtime/vm/jit/region-tracelet.cpp), and its goal
-is to select a simple region using nothing but the live VM state.
+is to select a region given only the current live VM state - most importantly
+the current program counter and the types of all locals and eval stack
+slots. `HhbcTranslator` (see the "HHIR" section) is used to simulate execution
+of the bytecode using types instead of values, continuing until a control flow
+instruction is encountered or an instruction attempts to consume a value of an
+unknown type. These rules are not absolute; there are a number of
+exceptions. If an unconditional forward Jmp is encountered, the tracelet will
+continue at the Jmp's destination. In addition, certain bytecodes (such as PopC
+and IsTypeC) are able to operate on generic values and don't cause a tracelet
+to terminate due to imprecise types.
 
-### Hottrace Region Selection
+### PGO and Hottrace Region Selection
 
-### Method Region Selection
-
+HHVM's JIT supports
 
 ## Region Translation
 
@@ -166,8 +174,98 @@ be on the VM evaluation stack: all PHP-visible types plus the runtime-internal
   --------------|--------------------
   StackElem     | `{Gen+Cls}`
 
-### CFGs
+### Values, Instructions, and Blocks
 
+An HHIR program is made up of `Blocks`, each containing one or more
+`IRInstructions`, each of which produces and consumes zero or more `SSATmp`
+values. These structures are defined in
+[block.h](../../runtime/vm/jit/block.h),
+[ir-instruction.h](../../runtime/vm/jit/ir-instruction.h), and
+[ssa-tmp.h](../../runtime/vm/jit/ssa-tmp.h), respectively.
+
+An `SSATmp` has a type, an SSA id, and a pointer to the `IRInstruction` that
+defined it. Every `SSATmp` is defined by exactly one `IRInstruction`, though
+one `IRInstruction` may define more than one `SSATmp`. Every instruction has an
+`Opcode`, indicating the operation it represents, and a `BCMarker`, which
+contains information about the HHBC instruction it is part of. Depending on the
+opcode of the instruction, it may also have one or more `SSATmp*` sources, one
+or more `SSATmp*` dests, one or more `Edge*`s to other `Blocks`, a `Type`
+parameter (known as a typeParam), and an `IRExtraData` struct to hold
+compile-time constants. `IRInstructions` are typically created with the
+`IRBuilder::gen()` method, which takes an `Opcode`, `BCMarker`, and then a
+variadic number of arguments representing the other properties of the
+instruction.
+
+A `Block` represents a basic block in a control flow graph. A pointer to one
+`Block` is stored in `IRUnit` as the entry point to the program; all other
+`Block`s must be reached by traversing the CFG. Certain instructions are "block
+end" instructions, meaning they must be the last instruction in their `Block`
+and they contain one or more `Edge`s to other `Block`s. `Jmp` is the simplest
+block end instruction; it represents an unconditional jump to a destination
+block. `CheckType` is an example of an instruction with two `Edge`s: "taken"
+and "next". It compares the runtime type of its source value to its typeParam,
+jumping to taken block if the type doesn't match, and jumping the next block if
+it does.
+
+While block end instructions may only exist at the end of a `Block`, there are
+two instructions that may only exist at the beginning of a `Block`: `DefLabel`
+and `BeginCatch`. `DefLabel` serves as a phi-node, joining values at control
+flow merge points. `BeginCatch` marks the beginning of a "catch block", which
+will be covered in more detail later.
+
+### Control Flow
+
+HHIR can represent arbitrary control flow graphs, though most optimization
+passes do not currently support loops. In place of traditional phi-nodes, HHIR
+uses `Jmp` instructions that take sources and pass them to `DefLabel`
+instructions. Consider the following program that performs some numerical
+computation:
+
+```
+B1:
+  t1:Int = ...
+  JmpZero t1:Int -> B3
+ -> B2
+
+B2:
+  t2:Int = AddInt t1:Int 5
+  Jmp t2:Int -> B4
+
+B3:
+  t3:Dbl = ConvIntToDbl t1:Int
+  t4:Dbl = MulDbl t3:Dbl 3.14
+  Jmp t4:Dbl -> B4
+
+B4:
+  t5:{Int|Dbl} = DefLabel
+  ...
+```
+
+After control flow splits at the end of B1, B2 and B3 each do their own
+computation and then pass the result to the `DefLabel` at the join point,
+B4. This is equivalent to the following phi-node: `t5:{Int|Dbl} = phi(B2 ->
+t2:Int, B3 -> t4:Dbl)`
+
+## Optimizations
+
+A number of basic optimizations are performed on each instruction by
+`IRBuilder` as it is generated and added to its `Block`: common sub-expression
+elimination, pre-optimization, and simplification. The CSE is fairly standard:
+the instruction and its sources are checked against a hash table to determine
+if the entire instruction can be replaced by an existing instruction performing
+the same computation. Pre-optimization performs simple optimizations based on
+tracked state in `IRBuilder`, such as replacing a `LdLoc` instruction with a
+use of an already known value for that local variable. Simplification comes
+last, and contains any optimizations that only require inspecting an
+instruction and its sources. This is primarily constant folding but also
+includes things like eliminating `CheckType` instructions that are known at
+compile-time to succeed. Both pre-optimization and simplification may return an
+already-defined value to use instead of the new instruction, or they may
+generate one or more different instructions to use in place of the original.
+
+Once the initial translation pass is complete, a series of more involved
+optimizations are run on the entire CFG. These are described in detail in
+[jit-optimizations.md](jit-optimizations.md).
 
 ## Machine Code Generation
 
@@ -178,11 +276,3 @@ be on the VM evaluation stack: all PHP-visible types plus the runtime-internal
 #### x86-64
 
 #### ARM64
-
-## Legacy Analysis Code
-
-The `Translator` class, in
-[translator.cpp](../../runtime/vm/jit/translator.cpp) contains a mixture of
-legacy code that's on the way out and new code intended to be its
-replacement. `Translator::analyze()` performs roughly the same duties as the
-tracelet region selector, using an older, simpler IR.

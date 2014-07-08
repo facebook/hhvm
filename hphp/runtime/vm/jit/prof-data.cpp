@@ -22,7 +22,6 @@
 #include "folly/MapUtil.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
@@ -339,7 +338,7 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
   assert(region);
   DEBUG_ONLY size_t nBlocks = region->blocks.size();
   assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
-  region->blocks.front()->setId(transId);
+  region->renumberBlock(region->blocks[0]->id(), transId);
 
   region->blocks.back()->setPostConditions(pconds);
   auto const startSk = region->blocks.front()->start();

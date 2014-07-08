@@ -15,6 +15,9 @@ set(CXX_SOURCES "class_map.cpp" "systemlib.cpp")
 
 add_library(hphp_system STATIC ${CXX_SOURCES})
 
+auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
+HHVM_PUBLIC_HEADERS(system ${files})
+
 # Needed to force system/constants.h to generate prior to files which need it
 if (ENABLE_ZEND_COMPAT)
   add_dependencies(hphp_ext_zend_compat hphp_system)

@@ -22,6 +22,9 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/async_generator.h"
+#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -239,7 +242,20 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       waitHandle->failCpp();
     }
   } else if (func->isAsyncGenerator()) {
-    // Do nothing. AsyncGeneratorWaitHandle will handle the exception.
+    auto const gen = frame_async_generator(fp);
+    if (fault.m_faultType == Fault::Type::UserException) {
+      // Handle exception thrown by async generator.
+      decRefLocals();
+      auto eagerResult = gen->fail(fault.m_userException);
+      if (eagerResult) {
+        stack.pushObjectNoRc(eagerResult);
+      }
+      action = UnwindAction::ResumeVM;
+    } else if (gen->isEagerlyExecuted() || gen->getWaitHandle()->isRunning()) {
+      // Fail the async generator and let the C++ exception propagate.
+      decRefLocals();
+      gen->failCpp();
+    }
   } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished.
     decRefLocals();
@@ -460,21 +476,24 @@ UnwindAction unwind(ActRec*& fp,
 
 const StaticString s_hphpd_break("hphpd_break");
 const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
+const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
 
 // Unwind the frame for a builtin.  Currently only used when switching
-// modes for hphpd_break and fb_enable_code_coverage.
+// modes for hphpd_break, fb_enable_code_coverage, and
+// xdebug_start_code_coverage
 void unwindBuiltinFrame() {
   auto& stack = vmStack();
   auto& fp = vmfp();
 
-  assert(fp->m_func->methInfo());
   assert(fp->m_func->name()->isame(s_hphpd_break.get()) ||
-         fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
+         fp->m_func->name()->isame(s_fb_enable_code_coverage.get()) ||
+         fp->m_func->name()->isame(s_xdebug_start_code_coverage.get()));
 
   // Free any values that may be on the eval stack.  We know there
   // can't be FPI regions and it can't be a generator body because
   // it's a builtin frame.
-  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp());
+  const int numSlots = fp->m_func->numSlotsInFrame();
+  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp()) - numSlots;
   while (stack.topTV() < evalTop) {
     stack.popTV();
   }
@@ -489,6 +508,7 @@ void unwindBuiltinFrame() {
   assert(pc != -1);
   fp = sfp;
   vmpc() = fp->m_func->unit()->at(pc);
+  stack.ndiscard(numSlots);
   stack.discardAR();
   stack.pushNull(); // return value
 }

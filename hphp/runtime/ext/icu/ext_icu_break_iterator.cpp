@@ -134,7 +134,7 @@ static Variant HHVM_METHOD(IntlBreakIterator, getLocale, int64_t locale_type) {
 
 static Object HHVM_METHOD(IntlBreakIterator, getPartsIterator,
                           const String& key_type) {
-  throw NotImplementedException("IntlBreakIterator::getPartsIterator");
+  throw_not_implemented("IntlBreakIterator::getPartsIterator");
 }
 
 static Variant HHVM_METHOD(IntlBreakIterator, getText) {
@@ -352,7 +352,7 @@ static Variant HHVM_METHOD(IntlRuleBasedBreakIterator, getBinaryRules) {
 //////////////////////////////////////////////////////////////////////////////
 
 static Object HHVM_METHOD(IntlPartsIterator, getBreakIterator) {
-  throw NotImplementedException("IntlPartsIterator::getBreakIterator");
+  throw_not_implemented("IntlPartsIterator::getBreakIterator");
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -78,7 +78,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   public function lastInsertId(): int { }
   public function mapRows() { }
   public function vectorRows() { }
-  public function mapRowsTyped(): Vector<Map<string, ?mixed>> { }
+  public function mapRowsTyped(): Vector<Map<string, mixed>> { }
   public function vectorRowsTyped() { }
  /* Can't put a return type for rowBlocks as it will ask that the type is
   * iterable because of the usage and then we can't have the AsyncMysqlRowBlock
@@ -120,10 +120,10 @@ class AsyncMysqlRow implements MysqlRow {
   public function isNull(mixed $field): bool { }
   public function fieldType(mixed $field): int { }
   public function count(): int { }
-  public function getIterator(): KeyedIterator<string, ?mixed> { }
+  public function getIterator(): KeyedIterator<string, mixed> { }
 }
 /* actually returned from AsyncMysqlRow::getIterator
-class AsyncMysqlRowIterator implements KeyedIterator<string, ?mixed> {
+class AsyncMysqlRowIterator implements KeyedIterator<string, mixed> {
   public function __construct() { }
   public function valid() { }
   public function next() { }
@@ -132,7 +132,7 @@ class AsyncMysqlRowIterator implements KeyedIterator<string, ?mixed> {
   public function rewind() { }
 }
 */
-interface MysqlRow extends Countable, KeyedTraversable<string, ?mixed>, IteratorAggregate<?mixed>
+interface MysqlRow extends Countable, KeyedTraversable<string, mixed>, IteratorAggregate<mixed>
 {
   public function getFieldAsInt(mixed $field): int;
   public function getFieldAsDouble(mixed $field): float;
@@ -140,5 +140,5 @@ interface MysqlRow extends Countable, KeyedTraversable<string, ?mixed>, Iterator
   public function fieldType(mixed $field): int;
   public function isNull(mixed $field): bool;
   public function count(): int;
-  public function getIterator(): KeyedIterator<string, ?mixed>;
+  public function getIterator(): KeyedIterator<string, mixed>;
 }

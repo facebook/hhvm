@@ -29,7 +29,6 @@ TransRec::TransRec(SrcKey                      _src,
                    TCA                         _afrozenStart,
                    uint32_t                    _afrozenLen,
                    RegionDescPtr               region,
-                   const Tracelet*             tlet,
                    std::vector<TransBCMapping> _bcMapping)
   : bcMapping(_bcMapping)
   , funcName(_src.func()->fullName()->data())
@@ -47,9 +46,6 @@ TransRec::TransRec(SrcKey                      _src,
 {
   if (funcName.empty()) funcName = "Pseudo-main";
 
-  // If we have a Tracelet but not region, convert the Tracelet to a RegionDesc
-  // to keep the rest of this method simple.
-  if (tlet && !region) region = selectTraceletLegacy(liveSpOff(), *tlet);
   if (!region) return;
 
   assert(!region->blocks.empty());

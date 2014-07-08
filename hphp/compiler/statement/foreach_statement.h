@@ -28,7 +28,8 @@ class ForEachStatement : public LoopStatement {
 public:
   ForEachStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                    ExpressionPtr array, ExpressionPtr name, bool nameRef,
-                   ExpressionPtr value, bool valueRef, StatementPtr stmt);
+                   ExpressionPtr value, bool valueRef, bool awaitAs,
+                   StatementPtr stmt);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
@@ -43,11 +44,14 @@ public:
   }
 
   bool isStrong() const { return m_ref; }
+  bool isAwaitAs() const { return m_awaitAs; }
+
 private:
   ExpressionPtr m_array;
   ExpressionPtr m_name;
   ExpressionPtr m_value;
   bool m_ref;
+  bool m_awaitAs;
   StatementPtr m_stmt;
 };
 

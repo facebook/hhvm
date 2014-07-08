@@ -31,7 +31,7 @@
 #include "hphp/parser/parser.h"
 #include "hphp/util/lock.h"
 
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/util/trace.h"
 
 using namespace HPHP::Trace;

@@ -132,7 +132,7 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
     // even if it's empty, still need to call for warmup
     hphp_invoke_simple("", true); // not to run the 1st file if compiled
   } else {
-    hphp_invoke_simple(options.extension);
+    hphp_invoke_simple(options.extension, false /* warmup only */);
   }
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_reqInjectionData.setDebugger(true);
@@ -141,7 +141,7 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
     Debugger::InterruptSessionStarted(options.fileName.c_str());
   }
   if (!options.fileName.empty()) {
-    hphp_invoke_simple(options.fileName);
+    hphp_invoke_simple(options.fileName, false /* warmup only */);
   }
   {
     DebuggerDummyEnv dde;
@@ -212,10 +212,13 @@ void Debugger::InterruptRequestEnded(const char *url) {
 }
 
 void Debugger::InterruptPSPEnded(const char *url) {
-  TRACE(2, "Debugger::InterruptPSPEnded\n");
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
-    InterruptWithUrl(PSPEnded, url);
-  }
+  if (!RuntimeOption::EnableDebugger) return;
+  try {
+    TRACE(2, "Debugger::InterruptPSPEnded\n");
+    if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
+      InterruptWithUrl(PSPEnded, url);
+    }
+  } catch (const Eval::DebuggerException&) {}
 }
 
 // Primary entrypoint for the debugger from the VM. Called in response to a host
@@ -518,7 +521,7 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   m_proxyMap.erase(dummySid);
   // Clear the debugger blacklist PC upon last detach if JIT is used
   if (RuntimeOption::EvalJit && countConnectedProxy() == 0) {
-    JIT::tx->clearDbgBL();
+    JIT::mcg->tx().clearDbgBL();
   }
 }
 

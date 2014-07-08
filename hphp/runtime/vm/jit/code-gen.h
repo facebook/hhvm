@@ -58,6 +58,25 @@ struct AsmInfo {
 
 typedef StateVector<IRInstruction, RegSet> LiveRegs;
 
+struct CatchInfo {
+  /* afterCall is the address after the call instruction that this catch trace
+   * belongs to. It's the key used to look up catch traces by the
+   * unwinder, since it's the value of %rip during unwinding. */
+  TCA afterCall;
+
+  /* savedRegs contains the caller-saved registers that were pushed onto the
+   * C++ stack at the time of the call. The catch trace will pop these
+   * registers (in the same order as PhysRegSaver's destructor) before doing
+   * any real work to restore the register state from before the call. */
+  RegSet savedRegs;
+
+  /* rspOffset is the number of bytes pushed on the C++ stack after the
+   * registers in savedRegs were saved, typically from function calls with >6
+   * arguments. The catch trace will adjust rsp by this amount before popping
+   * anything in savedRegs. */
+  Offset rspOffset;
+};
+
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
@@ -104,9 +123,9 @@ struct CodegenState {
 
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);
 
-void genCode(IRUnit&                 unit,
-             MCGenerator*            mcg,
-             const RegAllocInfo&     regs);
+// Allocate registers and generate machine code. Mutates the global
+// singleton MCGenerator (adds code, allocates data, adds fixups).
+void genCode(IRUnit&);
 
 struct CodeGenerator {
   virtual ~CodeGenerator() {}

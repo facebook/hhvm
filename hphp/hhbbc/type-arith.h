@@ -61,6 +61,8 @@ Type typeMulO(Type, Type);
 Type typeBitAnd(Type, Type);
 Type typeBitOr(Type, Type);
 Type typeBitXor(Type, Type);
+Type typeShl(Type, Type);
+Type typeShr(Type, Type);
 
 Type typeIncDec(IncDecOp, Type);
 

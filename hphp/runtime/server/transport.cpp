@@ -50,7 +50,7 @@ Transport::Transport()
     m_headerCallbackDone(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
     m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
-    m_flushTimeUs(0), m_sendContentType(true),
+    m_flushTimeUs(0), m_sendEnded(false), m_sendContentType(true),
     m_compression(true), m_compressor(nullptr), m_isSSL(false),
     m_compressionDecision(CompressionDecision::NotDecidedYet),
     m_threadType(ThreadType::RequestThread) {
@@ -335,7 +335,8 @@ bool Transport::splitHeader(const String& header, String &name, const char *&val
     }
   }
 
-  throw InvalidArgumentException("header", header.c_str());
+  throw ExtendedException(
+    "Invalid argument \"header\": [%s]", header.c_str());
 }
 
 void Transport::addHeaderNoLock(const char *name, const char *value) {
@@ -809,6 +810,13 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
                               bool chunked /* = false */,
                               const char *codeInfo /* = "" */
                               ) {
+  // There are post-send functions that can run. Any output from them should
+  // be ignored as it doesn't make sense to try and send data after the
+  // request has ended.
+  if (m_sendEnded) {
+    return;
+  }
+
   if (!compressed && RuntimeOption::ForceChunkedEncoding) {
     chunked = true;
   }
@@ -886,6 +894,8 @@ void Transport::onSendEnd() {
     {ServiceData::StatsType::SUM});
   httpResponseStats->addValue(1);
   onSendEndImpl();
+  // Record that we have ended the request so any further output is discarded.
+  m_sendEnded = true;
 }
 
 void Transport::redirect(const char *location, int code /* = 302 */,

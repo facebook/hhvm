@@ -1,0 +1,8 @@
+string(5) "class"
+string(2) "I2"
+NULL
+string(5) "class"
+string(2) "I1"
+string(%s) "Undefined interface: I2 in %s/test/slow/autoload/autoload-fail-e.inc on line 3"
+
+Fatal error: Undefined interface: I1 in %s/test/slow/autoload/autoload-fail-hoist.php on line 23

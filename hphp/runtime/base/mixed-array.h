@@ -57,7 +57,7 @@ public:
      * read or write the _count field! */
     union {
       int64_t ikey;
-      StringData* key;
+      StringData* skey;
     };
     // We store values here, but also some information local to this array:
     // data.m_aux.u_hash contains either 0 (for an int key) or a string
@@ -78,14 +78,18 @@ public:
       return data.hash();
     }
 
+    int32_t probe() const {
+      return hasIntKey() ? ikey : hash();
+    }
+
     void setStaticKey(StringData* k, strhash_t h) {
       assert(k->isStatic());
-      key = k;
+      skey = k;
       data.hash() = h | STRHASH_MSB;
     }
 
     void setStrKey(StringData* k, strhash_t h) {
-      key = k;
+      skey = k;
       data.hash() = h | STRHASH_MSB;
       k->incRefCount();
     }
@@ -338,6 +342,8 @@ public:
   static const uint32_t SmallHashSize = 1 << MinLgTableSize;
   static const uint32_t SmallMask = SmallHashSize - 1;
   static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+
+  static const uint32_t MaxLgTableSize = 32;
   static const uint64_t MaxHashSize = uint64_t(1) << 32;
   static const uint32_t MaxMask = MaxHashSize - 1;
   static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
@@ -365,6 +371,9 @@ private:
   friend struct MemoryProfile;
   friend struct EmptyArray;
   friend struct PackedArray;
+  friend class BaseMap;
+  friend class c_Map;
+  friend class c_ImmMap;
   enum class ClonePacked {};
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
@@ -496,7 +505,14 @@ private:
   ArrayData* zAppendImpl(RefData* data, int64_t* key_ptr);
 
   void adjustMArrayIter(ssize_t pos);
-  void erase(ssize_t pos);
+  void eraseNoCompact(ssize_t pos);
+  void erase(ssize_t pos) {
+    eraseNoCompact(pos);
+    if (m_size < m_used / 2) {
+      // Compact in order to keep elms from being overly sparse.
+      compact(false);
+    }
+  }
 
   MixedArray* copyImpl(MixedArray* target) const;
 
@@ -532,7 +548,7 @@ private:
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
    */
-  static MixedArray* Grow(MixedArray* old);
+  static MixedArray* Grow(MixedArray* old, uint32_t newCap, uint32_t newMask);
   static MixedArray* GrowPacked(MixedArray* old);
 
   /**
@@ -573,6 +589,7 @@ private:
   }
 
   bool isZombie() const { return m_used + 1 == 0; }
+  void setZombie() { m_used = -uint32_t{1}; }
 
 private:
   // Some of these are packed into qword-sized unions so we can

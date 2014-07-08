@@ -22,10 +22,10 @@ if (OCAMLC_FOUND)
   add_custom_target(
     hack
     ALL
-    COMMAND make depend &&
+    COMMAND $(MAKE) depend &&
       env OPTBIN="${OCAMLC_OPT_SUFFIX}"
           OCAMLCFLAGS_EXTRA="${hackcflags}"
-          make
+          $(MAKE)
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
 endif()

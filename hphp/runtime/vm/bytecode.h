@@ -64,15 +64,8 @@ void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
   case SetOpOp::AndEqual:       cellBitAndEq(*lhs, *rhs); return;
   case SetOpOp::OrEqual:        cellBitOrEq(*lhs, *rhs);  return;
   case SetOpOp::XorEqual:       cellBitXorEq(*lhs, *rhs); return;
-
-  case SetOpOp::SlEqual:
-    cellCastToInt64InPlace(lhs);
-    lhs->m_data.num <<= cellToInt(*rhs);
-    return;
-  case SetOpOp::SrEqual:
-    cellCastToInt64InPlace(lhs);
-    lhs->m_data.num >>= cellToInt(*rhs);
-    return;
+  case SetOpOp::SlEqual:        cellShlEq(*lhs, *rhs); return;
+  case SetOpOp::SrEqual:        cellShrEq(*lhs, *rhs); return;
   case SetOpOp::PlusEqualO:     cellAddEqO(*lhs, *rhs); return;
   case SetOpOp::MinusEqualO:    cellSubEqO(*lhs, *rhs); return;
   case SetOpOp::MulEqualO:      cellMulEqO(*lhs, *rhs); return;

@@ -644,22 +644,29 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{LNUM} {
+        // Hex literals shouldn't match.
+        assert(yyleng <= 2 || std::tolower(yytext[1]) != 'x');
+
+        auto const octal = yyleng > 1 && yytext[0] == '0';
+
         errno = 0;
         strtoll(yytext, NULL, 0);
-        if (errno == ERANGE) {
-                if (_scanner->isHHFile()) {
-                        _scanner->error("Dec number is too big: %s", yytext);
-                        RETTOKEN(T_HH_ERROR);
-                }
-                RETTOKEN(T_ONUMBER);
-        } else {
-                RETTOKEN(T_LNUMBER);
+
+        if (errno != ERANGE) RETTOKEN(T_LNUMBER);
+
+        if (_scanner->isHHFile() && !octal){
+                _scanner->error("Dec number is too big: %s", yytext);
+                RETTOKEN(T_HH_ERROR);
         }
+
+        RETTOKEN(T_ONUMBER);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{HNUM} {
+        // Check for literals that don't fit in 64-bits.
         errno = 0;
         strtoull(yytext, NULL, 16);
+
         if (errno == ERANGE) {
                 if (_scanner->isHHFile()) {
                         _scanner->error("Hex number is too big: %s", yytext);
@@ -667,13 +674,26 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
                 }
                 RETTOKEN(T_ONUMBER);
         } else {
+                // Check for literals that fit, but set the sign bit.
+                errno = 0;
+                strtoll(yytext, NULL, 16);
+                if (errno == ERANGE) {
+                        RETTOKEN(T_ONUMBER);
+                }
                 RETTOKEN(T_LNUMBER);
         }
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{BNUM} {
+        assert(yyleng > 2);
+        assert(yytext[0] == '0' && std::tolower(yytext[1]) == 'b');
+
+        // Need to skip over 0b for strto[u]ll.
+        auto const text = yytext + 2;
+
+        // Check for literals that don't fit in 64-bits.
         errno = 0;
-        strtoull(yytext + 2 /* skip over 0b */, NULL, 2);
+        strtoull(text, NULL, 2);
         if (errno == ERANGE) {
                 _scanner->error("Bin number is too big: %s", yytext);
                 if (_scanner->isHHFile()) {
@@ -681,6 +701,12 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
                 }
                 RETTOKEN(T_ONUMBER);
         } else {
+                // Check for literals that fit, but set the sign bit.
+                errno = 0;
+                strtoll(text, NULL, 2);
+                if (errno == ERANGE) {
+                        RETTOKEN(T_ONUMBER);
+                }
                 RETTOKEN(T_LNUMBER);
         }
 }

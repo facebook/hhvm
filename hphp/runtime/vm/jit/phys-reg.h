@@ -105,19 +105,19 @@ struct PhysReg {
     assert(type() == GP);
     return *(*this + p);
   }
-  IndexedMemoryRef operator[](Reg64 i) const {
+  MemoryRef operator[](Reg64 i) const {
     assert(type() == GP);
     return *(*this + i);
   }
-  IndexedMemoryRef operator[](ScaledIndex s) const {
+  MemoryRef operator[](ScaledIndex s) const {
     assert(type() == GP);
     return *(*this + s);
   }
-  IndexedMemoryRef operator[](ScaledIndexDisp s) const {
+  MemoryRef operator[](ScaledIndexDisp s) const {
     assert(type() == GP);
     return *(*this + s.si + s.disp);
   }
-  IndexedMemoryRef operator[](DispReg dr) const {
+  MemoryRef operator[](DispReg dr) const {
     assert(type() == GP);
     return *(*this + ScaledIndex(dr.base, 0x1) + dr.disp);
   }
@@ -372,7 +372,7 @@ struct PhysRegSaverParity {
   static void emitPops(X64Assembler& as, RegSet regs);
 
   PhysRegSaverParity(const PhysRegSaverParity&) = delete;
-  PhysRegSaverParity(PhysRegSaverParity&&) = default;
+  PhysRegSaverParity(PhysRegSaverParity&&) noexcept = default;
   PhysRegSaverParity& operator=(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity& operator=(PhysRegSaverParity&&) = default;
 

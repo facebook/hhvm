@@ -835,7 +835,7 @@ public:
 
   CURL *get(bool nullOkay = false) {
     if (m_cp == nullptr && !nullOkay) {
-      throw NullPointerException();
+      throw_null_pointer_exception();
     }
     return m_cp;
   }
@@ -1316,7 +1316,7 @@ public:
 
   CURLM *get() {
     if (m_multi == nullptr) {
-      throw NullPointerException();
+      throw_null_pointer_exception();
     }
     return m_multi;
   }

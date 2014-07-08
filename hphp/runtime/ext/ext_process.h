@@ -52,7 +52,7 @@ int64_t f_pcntl_wtermsig(int status);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String f_shell_exec(const String& cmd);
+Variant f_shell_exec(const String& cmd);
 String f_exec(const String& command, VRefParam output = uninit_null(),
               VRefParam return_var = uninit_null());
 void f_passthru(const String& command, VRefParam return_var = uninit_null());

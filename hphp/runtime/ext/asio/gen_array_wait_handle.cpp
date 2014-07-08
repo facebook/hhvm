@@ -42,14 +42,7 @@ namespace {
 }
 
 void c_GenArrayWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() &&
-      (!callback.isObject() ||
-       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set GenArrayWaitHandle::onCreate: on_create_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnGenArrayCreateCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnGenArrayCreateCallback(callback);
 }
 
 NEVER_INLINE __attribute__((noreturn))

@@ -1,0 +1,2 @@
+File "enum_7.php", line 11, characters 20-23:
+Enum constants must be an int or string, not a bool

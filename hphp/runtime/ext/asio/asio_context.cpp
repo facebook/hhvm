@@ -18,6 +18,7 @@
 
 #include <thread>
 
+#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
@@ -26,6 +27,8 @@
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle-defs.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/ext/ext_xenon.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
 
@@ -53,12 +56,33 @@ namespace {
       wait_handle->exitContext(ctx_idx);
     }
   }
+
+  inline void onIOWaitEnter(AsioSession* session) {
+    if (UNLIKELY(session->hasOnIOWaitEnterCallback())) {
+      session->onIOWaitEnter();
+    }
+  }
+
+  inline void onIOWaitExit(AsioSession* session) {
+    // The web request may have timed out while we were waiting for I/O.
+    // Fail early to avoid further execution of PHP code.
+    if (UNLIKELY(checkConditionFlags())) {
+      ssize_t flags = EventHook::CheckSurprise();
+      if (flags & RequestInjectionData::XenonSignalFlag) {
+        Xenon::getInstance().log(Xenon::IOWaitSample);
+      }
+    }
+
+    if (UNLIKELY(session->hasOnIOWaitExitCallback())) {
+      session->onIOWaitExit();
+    }
+  }
 }
 
 void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
 
-  exitContextQueue<false>(ctx_idx, m_runnableQueue);
+  exitContextVector(ctx_idx, m_runnableQueue);
 
   for (auto it : m_priorityQueueDefault) {
     exitContextQueue<true>(ctx_idx, it.second);
@@ -99,8 +123,8 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   while (!wait_handle->isFinished()) {
     // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.front();
-      m_runnableQueue.pop();
+      auto current = m_runnableQueue.back();
+      m_runnableQueue.pop_back();
       current->resume();
       continue;
     }
@@ -134,7 +158,9 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
       // Wait if necessary.
       if (LIKELY(!ete_queue->hasReceived())) {
+        onIOWaitEnter(session);
         ete_queue->receiveSomeUntil(waketime);
+        onIOWaitExit(session);
       }
 
       if (ete_queue->hasReceived()) {
@@ -145,13 +171,17 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
         // No received events means the next-to-wake sleeper timed us out.
         session->processSleepEvents();
       }
+
       continue;
     }
 
     // If we're here, then the only things left are sleepers.  Wait for one to
     // be ready (in any context).
     if (!m_sleepEvents.empty()) {
+      onIOWaitEnter(session);
       std::this_thread::sleep_until(sleep_queue.top()->getWakeTime());
+      onIOWaitExit(session);
+
       session->processSleepEvents();
       continue;
     }

@@ -301,7 +301,7 @@ Variant HHVM_FUNCTION(gzdecode, const String& data, int limit) {
 /////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(zlib_get_coding_type) {
-  throw NotSupportedException(__func__, "no use");
+  throw_not_supported(__func__, "no use");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

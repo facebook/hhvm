@@ -2131,6 +2131,19 @@ FCallArray    [F]  ->  [R]
   function associated with the current FPI (the callee), transfers the elements
   of $1 (which must be an array) to the callee as parameters, pops the current
   FPI off of the FPI stack, and then invokes the dispatcher to call the callee.
+
+  When the callee returns, it will transfer the return value onto the caller's
+  evaluation stack using the R flavor.
+
+FCallUnpack <num params> [F..F] -> [R]
+
+  FPI call with params and array. This instruction gets the bytecode address of
+  the function associated with the current FPI (the callee), transfers the top
+  %1 - 1 values from the stack to the callee as parameters, transfers the
+  elements of the last value on the stack (which must be an array) to the
+  callee as parameters, pops the current FPI off of the FPI stack, and then
+  invokes the dispatcher to call the callee.
+
   When the callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
 

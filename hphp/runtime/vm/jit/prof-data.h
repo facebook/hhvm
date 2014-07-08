@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP { namespace JIT {

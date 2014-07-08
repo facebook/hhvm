@@ -122,16 +122,14 @@ struct Value {
   }
 
   /*
-   * Merge other's state with this state, with the following
-   * conditions:
-   * 1. fromLoad must match between the two;
-   * 2. if realCounts do not match, the smaller must be fromLoad, and
-   *    the result count is the max of the incoming counts;
-   * 3. pendingIncs is truncated to the size of the smaller of the
-   *    two, then the sets at each index are merged.
+   * Merge other's state with this state.
    *
-   * Condition 2 handles cases where the refcount can't be proven to
-   * match, but can be conservatively assumed to be OK.  Consider:
+   * Precondition:
+   * If realCounts do not match, the lesser value must be fromLoad.  The idea
+   * is that fromLoad allows us to make more aggressive assumptions, so we
+   * shouldn't have both a higher count and fromLoad.
+   *
+   * For an example of where this is OK, consider:
    *
    * B0:
    *  t1 = LdLoc<0>
@@ -146,20 +144,35 @@ struct Value {
    * B2:
    *       ...
    *
-   * The count of t1 at B2 will be 1 if coming from B0, and 0 if
-   * coming from B1, due to the SpillStack.  However, the TakeStack
-   * marks t1 as fromLoad, which lets us know that there's at least
-   * one surviving reference, so we can move forward assuming the max
-   * of the two.
+   * The count of t1 at B2 will be 1 if coming from B0, and 0 if coming from
+   * B1, due to the SpillStack.  However, the TakeStack marks t1 as fromLoad,
+   * which lets us know that there's at least one surviving reference, so we
+   * can move forward assuming the max of the two.
+   *
+   * Postconditions:
+   * 1. realCount becomes the max of the incoming value;
+   * 2. fromLoad is set if either incoming value has it;
+   * 3. pendingIncs is truncated to the size of the smaller of the two, then
+   *    the sets at each index are merged. The two can differ when a value's
+   *    count is observed in one branch of a conditional but not the other, and
+   *    it's safe because any differences are resolved in mergeStates().
    */
-  void merge(const Value& other) {
-    always_assert(fromLoad == other.fromLoad);
-    if (realCount > other.realCount) {
-      always_assert(other.fromLoad);
-    } else if (realCount < other.realCount) {
-      always_assert(fromLoad);
-      realCount = other.realCount;
-    }
+  void merge(const Value& other, const IRUnit& unit) {
+    auto showFailure = [&] {
+      return folly::format(
+        "Failed to merge values in unit:\n{}\n{}\n{}\n",
+        show(*this), show(other), unit
+      ).str();
+    };
+
+    always_assert_log(
+      IMPLIES(realCount > other.realCount, other.fromLoad) &&
+      IMPLIES(realCount < other.realCount, fromLoad),
+      showFailure);
+
+    fromLoad = fromLoad || other.fromLoad;
+    realCount = std::max(realCount, other.realCount);
+
     auto minSize = std::min(pendingIncs.size(), other.pendingIncs.size());
     pendingIncs.resize(minSize);
     for (unsigned i = 0; i < minSize; ++i) {
@@ -194,7 +207,7 @@ struct Value {
   /* fromLoad represents whether or not the value came from a load
    * instruction. This optimization is based on the idea of producing and
    * consuming references, and most of our load instructions sometimes produce
-   * a reference and sometimes don't. Rather that splitting up all the loads
+   * a reference and sometimes don't. Rather than splitting up all the loads
    * into two flavors, we allow consumption of a value from a load even if
    * there appear to be no live references. */
   bool fromLoad;
@@ -675,7 +688,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         const bool existed = mergedValues.count(value);
         auto& mergedState = mergedValues[value];
         if (existed) {
-          mergedState.value.merge(inPair.second);
+          mergedState.value.merge(inPair.second, m_unit);
         } else {
           mergedState.value = inPair.second;
         }

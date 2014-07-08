@@ -10,10 +10,15 @@
 
 open ClientEnv
 open ClientExceptions
-open ClientUtils
+
+let connect args =
+  let ic, oc = ClientUtils.connect args.root in
+  if not (args.output_json) && Utils.spinner_used() then
+    Printf.fprintf stderr "%s%!" Utils.clear_line_seq;
+  (ic, oc)
 
 let get_list_files (args:client_check_env): string list =
-  let ic, oc = connect args.root in
+  let ic, oc = connect args in
   ServerMsg.cmd_to_channel oc ServerMsg.LIST_FILES;
   let res = ref [] in
   try
@@ -59,21 +64,21 @@ let rec main args retries =
       List.iter (Printf.printf "%s\n") infol
     | MODE_COLORING file ->
         let file = expand_path file in
-        let ic, oc = connect args.root in
+        let ic, oc = connect args in
         let command = ServerMsg.PRINT_TYPES file in
         ServerMsg.cmd_to_channel oc command;
         let pos_type_l = Marshal.from_channel ic in
         ClientColorFile.go file args.output_json pos_type_l;
         exit 0
     | MODE_FIND_CLASS_REFS name ->
-        let ic, oc = connect args.root in
+        let ic, oc = connect args in
         let command = ServerMsg.FIND_REFS (ServerMsg.Class name) in
         ServerMsg.cmd_to_channel oc command;
         let results = Marshal.from_channel ic in
         ClientFindRefs.go results args.output_json;
         exit 0
     | MODE_FIND_REFS name ->
-        let ic, oc = connect args.root in
+        let ic, oc = connect args in
         let pieces = Str.split (Str.regexp "::") name in
         let action =
           try
@@ -102,7 +107,7 @@ let rec main args retries =
         with _ ->
           Printf.fprintf stderr "Invalid position\n"; exit 1
       in
-      let ic, oc = connect args.root in
+      let ic, oc = connect args in
       let content = ClientUtils.read_stdin_to_string () in
       let command = ServerMsg.IDENTIFY_FUNCTION (content, line, char) in
       ServerMsg.cmd_to_channel oc command;
@@ -122,53 +127,55 @@ let rec main args retries =
           Printf.fprintf stderr "Invalid position\n"; exit 1
       in
       let fn = expand_path fn in
-      let ic, oc = connect args.root in
+      let ic, oc = connect args in
       ServerMsg.cmd_to_channel oc (ServerMsg.INFER_TYPE (fn, line, char));
       let (_, ty) = Marshal.from_channel ic in
       print_endline ty
     | MODE_AUTO_COMPLETE ->
-      let ic, oc = connect args.root in
+      let ic, oc = connect args in
       let content = ClientUtils.read_stdin_to_string () in
       let command = ServerMsg.AUTOCOMPLETE content in
       ServerMsg.cmd_to_channel oc command;
-      print_all ic
+      let results = Marshal.from_channel ic in
+      ClientAutocomplete.go results args.output_json;
+      exit 0
     | MODE_OUTLINE ->
       let content = ClientUtils.read_stdin_to_string () in
-      let ic, oc = connect args.root in
+      let ic, oc = connect args in
       let command = ServerMsg.OUTLINE content in
       ServerMsg.cmd_to_channel oc command;
       let results = Marshal.from_channel ic in
       ClientOutline.go results args.output_json;
       exit 0
     | MODE_METHOD_JUMP_CHILDREN class_ ->
-      let ic, oc = connect args.root in
+      let ic, oc = connect args in
       let command = ServerMsg.METHOD_JUMP (class_, true) in
       ServerMsg.cmd_to_channel oc command;
       let results = Marshal.from_channel ic in
       ClientMethodJumps.go results true args.output_json;
       exit 0
     | MODE_METHOD_JUMP_ANCESTORS class_ ->
-      let ic, oc = connect args.root in
+      let ic, oc = connect args in
       let command = ServerMsg.METHOD_JUMP (class_, false) in
       ServerMsg.cmd_to_channel oc command;
       let results = Marshal.from_channel ic in
       ClientMethodJumps.go results false args.output_json;
       exit 0
-    | MODE_STATUS -> ClientCheckStatus.check_status args
+    | MODE_STATUS -> ClientCheckStatus.check_status connect args
     | MODE_VERSION ->
       Printf.printf "%s\n" (Build_id.build_id_ohai);
     | MODE_SAVE_STATE filename ->
-        let ic, oc = connect args.root in
+        let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SAVE_STATE filename);
         let response = input_line ic in
         Printf.printf "%s\n" response;
         flush stdout
     | MODE_SHOW classname ->
-        let ic, oc = connect args.root in
+        let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SHOW classname);
         print_all ic
     | MODE_SEARCH query ->
-        let ic, oc = connect args.root in
+        let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SEARCH query);
         let results = Marshal.from_channel ic in
         ClientSearch.go results args.output_json;
@@ -185,7 +192,7 @@ let rec main args retries =
         Unix.sleep(1);
         main args retries
       end else begin
-        Printf.fprintf stderr "%s Try again... %s\r" init_msg (Utils.spinner());
+        Printf.fprintf stderr "%s Try again...\n" init_msg;
         flush stderr;
       end
   | Server_cant_connect ->

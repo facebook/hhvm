@@ -16,41 +16,102 @@
 */
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
+#include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool HHVM_FUNCTION(xdebug_break)
-  XDEBUG_NOTIMPLEMENTED
+static const StaticString s_CALL_FN_MAIN("{main}");
 
-static String HHVM_FUNCTION(xdebug_call_class)
-  XDEBUG_NOTIMPLEMENTED
-
-static String HHVM_FUNCTION(xdebug_call_file) {
+/*
+ * Returns the frame of the callee's callee. Useful for the xdebug_call_*
+ * functions. Only returns nullptr if the callee is the top level pseudo-main
+ *
+ * If an offset pointer is passed, we store in it it the pc offset of the
+ * call to the callee.
+ */
+static ActRec *get_call_fp(Offset *off = nullptr) {
   // We want the frame of our callee's callee
   VMRegAnchor _; // Ensure consistent state for vmfp
   ActRec* fp0 = g_context->getPrevVMState(vmfp());
   assert(fp0);
-  ActRec* fp1 = g_context->getPrevVMState(fp0);
+  ActRec* fp1 = g_context->getPrevVMState(fp0, off);
 
-  //  In PHP5 xdebug, a top level call returns the top level file
-  if (!fp1 && fp0->m_func->isPseudoMain()) {
-    fp1 = fp0;
+  // fp1 should only be NULL if fp0 is the top-level pseudo-main
+  if (!fp1) {
+    assert(fp0->m_func->isPseudoMain());
+    fp1 = nullptr;
   }
-  assert(fp1);
-
-  const char* filename = fp1->m_func->filename()->data();
-  return String(filename, CopyString);
+  return fp1;
 }
 
-static int64_t HHVM_FUNCTION(xdebug_call_line)
+///////////////////////////////////////////////////////////////////////////////
+
+static bool HHVM_FUNCTION(xdebug_break)
   XDEBUG_NOTIMPLEMENTED
 
-static bool HHVM_FUNCTION(xdebug_code_coverage_started)
-  XDEBUG_NOTIMPLEMENTED
+static Variant HHVM_FUNCTION(xdebug_call_class) {
+  // PHP5 xdebug returns false if the callee is top-level
+  ActRec *fp = get_call_fp();
+  if (fp == nullptr) {
+    return false;
+  }
+
+  // PHP5 xdebug returns "" for no class
+  Class* cls = fp->m_func->cls();
+  if (!cls) {
+    return staticEmptyString();
+  }
+  return String(cls->name()->data(), CopyString);
+}
+
+static String HHVM_FUNCTION(xdebug_call_file) {
+  // PHP5 xdebug returns the top-level file if the callee is top-level
+  ActRec *fp = get_call_fp();
+  if (fp == nullptr) {
+    VMRegAnchor _; // Ensure consistent state for vmfp
+    fp = g_context->getPrevVMState(vmfp());
+    assert(fp);
+  }
+  return String(fp->m_func->filename()->data(), CopyString);
+}
+
+static int64_t HHVM_FUNCTION(xdebug_call_line) {
+  // PHP5 xdebug returns 0 when it can't determine the line number
+  Offset pc;
+  ActRec *fp = get_call_fp(&pc);
+  if (fp == nullptr) {
+    return 0;
+  }
+
+  Unit *unit = fp->m_func->unit();
+  assert(unit);
+  return unit->getLineNumber(pc);
+}
+
+static Variant HHVM_FUNCTION(xdebug_call_function) {
+  // PHP5 xdebug returns false if the callee is top-level
+  ActRec *fp = get_call_fp();
+  if (fp == nullptr) {
+    return false;
+  }
+
+  // PHP5 xdebug returns "{main}" for pseudo-main
+  if (fp->m_func->isPseudoMain()) {
+    return s_CALL_FN_MAIN;
+  }
+  return String(fp->m_func->name()->data(), CopyString);
+}
+
+static bool HHVM_FUNCTION(xdebug_code_coverage_started) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  return ti->m_reqInjectionData.getCoverage();
+}
 
 static TypedValue* HHVM_FN(xdebug_debug_zval)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
@@ -67,8 +128,13 @@ static void HHVM_FUNCTION(xdebug_dump_superglobals)
 static void HHVM_FUNCTION(xdebug_enable)
   XDEBUG_NOTIMPLEMENTED
 
-static Array HHVM_FUNCTION(xdebug_get_code_coverage)
-  XDEBUG_NOTIMPLEMENTED
+static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  if (ti->m_reqInjectionData.getCoverage()) {
+    return ti->m_coverage->Report(false);
+  }
+  return Array::Create();
+}
 
 static Array HHVM_FUNCTION(xdebug_get_collected_errors,
                            bool clean /* = false */)
@@ -96,7 +162,10 @@ static bool HHVM_FUNCTION(xdebug_is_enabled)
   XDEBUG_NOTIMPLEMENTED
 
 static int64_t HHVM_FUNCTION(xdebug_memory_usage) {
-  return MM().getStats().usage;
+  // With jemalloc, the usage can go negative (see ext_std_options.cpp:831)
+  int64_t usage = MM().getStats().usage;
+  assert(use_jemalloc || usage >= 0);
+  return std::max<int64_t>(usage, 0);
 }
 
 static int64_t HHVM_FUNCTION(xdebug_peak_memory_usage) {
@@ -108,8 +177,26 @@ static void HHVM_FUNCTION(xdebug_print_function_stack,
                           int64_t options /* = 0 */)
   XDEBUG_NOTIMPLEMENTED
 
-static void HHVM_FUNCTION(xdebug_start_code_coverage, int64_t options /* = 0 */)
-  XDEBUG_NOTIMPLEMENTED
+static void HHVM_FUNCTION(xdebug_start_code_coverage,
+                          int64_t options /* = 0 */) {
+  // XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE not supported right now primarily
+  // because the internal CodeCoverage class does support either unexecuted line
+  // tracking or dead code analysis
+  if (options != 0) {
+    raise_error("XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE constants are not "
+                "currently supported.");
+    return;
+  }
+
+  // If we get here, turn on coverage
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  ti->m_reqInjectionData.setCoverage(true);
+  if (g_context->isNested()) {
+    raise_notice("Calling xdebug_start_code_coverage from a nested VM instance "
+                 "may cause unpredicable results");
+  }
+  throw VMSwitchModeBuiltin();
+}
 
 static void HHVM_FUNCTION(xdebug_start_error_collection)
   XDEBUG_NOTIMPLEMENTED
@@ -119,8 +206,14 @@ static void HHVM_FUNCTION(xdebug_start_trace,
                           int64_t options /* = 0 */)
   XDEBUG_NOTIMPLEMENTED
 
-static void HHVM_FUNCTION(xdebug_stop_code_coverage, bool cleanup /* = true */)
-  XDEBUG_NOTIMPLEMENTED
+static void HHVM_FUNCTION(xdebug_stop_code_coverage,
+                          bool cleanup /* = true */) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  ti->m_reqInjectionData.setCoverage(false);
+  if (cleanup) {
+    ti->m_coverage->Reset();
+  }
+}
 
 static void HHVM_FUNCTION(xdebug_stop_error_collection)
   XDEBUG_NOTIMPLEMENTED
@@ -135,6 +228,9 @@ static TypedValue* HHVM_FN(xdebug_var_dump)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
 
 ///////////////////////////////////////////////////////////////////////////////
+
+static const StaticString s_XDEBUG_CC_UNUSED("XDEBUG_CC_UNUSED");
+static const StaticString s_XDEBUG_CC_DEAD_CODE("XDEBUG_CC_DEAD_CODE");
 
 void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
   Hdf hdf = xdebug_hdf[XDEBUG_NAME];
@@ -163,10 +259,16 @@ void XDebugExtension::moduleInit() {
   if (!Enable) {
     return;
   }
-
+  Native::registerConstant<KindOfInt64>(
+    s_XDEBUG_CC_UNUSED.get(), k_XDEBUG_CC_UNUSED
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_XDEBUG_CC_DEAD_CODE.get(), k_XDEBUG_CC_DEAD_CODE
+  );
   HHVM_FE(xdebug_break);
   HHVM_FE(xdebug_call_class);
   HHVM_FE(xdebug_call_file);
+  HHVM_FE(xdebug_call_function);
   HHVM_FE(xdebug_call_line);
   HHVM_FE(xdebug_code_coverage_started);
   HHVM_FE(xdebug_debug_zval);

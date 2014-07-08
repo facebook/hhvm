@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/ext/extension.h"
 
 #include "hphp/util/logger.h"
 
@@ -108,10 +109,13 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
   }
 }
 
-Array CodeCoverage::Report() {
+Array CodeCoverage::Report(bool sys /* = true */) {
   Array ret = Array::Create();
   for (CodeCoverageMap::const_iterator iter = m_hits.begin();
        iter != m_hits.end(); ++iter) {
+    if (!sys && Extension::IsSystemlibPath(iter->first)) {
+      continue;
+    }
     const std::vector<int> &lines = iter->second;
     Array tmp = Array::Create();
     for (int i = 1; i < (int)lines.size(); i++) {

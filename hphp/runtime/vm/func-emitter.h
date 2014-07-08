@@ -45,23 +45,28 @@ struct UnitClassEmitter;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Builder pattern Func-creation class.
+ * Bag of Func's fields used to emit Funcs.
  */
 struct FuncEmitter {
-  struct ParamInfo: public Func::ParamInfo {
-    ParamInfo() : m_ref(false) {}
 
-    void setRef(bool ref) { m_ref = ref; }
-    bool ref() const { return m_ref; }
+  /////////////////////////////////////////////////////////////////////////////
+  // Types.
 
-    template<class SerDe> void serde(SerDe& sd) {
+  struct ParamInfo : public Func::ParamInfo {
+    ParamInfo()
+      : byRef(false)
+    {}
+
+    template<class SerDe>
+    void serde(SerDe& sd) {
       Func::ParamInfo* parent = this;
       parent->serde(sd);
-      sd(m_ref);
+      sd(byRef);
     }
 
-  private:
-    bool m_ref; // True if parameter is passed by reference.
+    // Whether the parameter is passed by reference.  This field is absent from
+    // Func::ParamInfo because we store it in a bitfield on Func.
+    bool byRef;
   };
 
   typedef std::vector<ParamInfo> ParamInfoVec;
@@ -69,223 +74,239 @@ struct FuncEmitter {
   typedef std::vector<EHEnt> EHEntVec;
   typedef std::vector<FPIEnt> FPIEntVec;
 
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Initialization and completion.
+
   FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n);
   FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
               PreClassEmitter* pce);
   ~FuncEmitter();
 
-  void init(int line1, int line2, Offset base, Attr attrs, bool top,
-            const StringData* docComment);
+  /*
+   * Just set some fields when we start and stop emitting.
+   */
+  void init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
+            const StringData* docComment_);
   void finish(Offset past, bool load);
+
+  /*
+   * Commit this function to a repo.
+   */
+  void commit(RepoTxn& txn) const;
+
+  /*
+   * Instantiate a runtime Func*.
+   */
+  Func* create(Unit& unit, PreClass* preClass = nullptr) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
-  EHEnt& addEHEnt();
-  FPIEnt& addFPIEnt();
-  void setEhTabIsSorted();
 
-  Id newLocal();
-  void appendParam(const StringData* name, const ParamInfo& info);
-  void setParamFuncletOff(Id id, Offset off) {
-    m_params[id].funcletOff = off;
-  }
-  void allocVarId(const StringData* name);
-  Id lookupVarId(const StringData* name) const;
-  bool hasVar(const StringData* name) const;
-  Id numParams() const { return m_params.size(); }
+  /////////////////////////////////////////////////////////////////////////////
+  // Metadata.
 
   /*
-   * Return type constraints will eventually be runtime-enforced
-   * return types, but for now are unused.
+   * Get the associated Unit and PreClass emitters.
    */
-  void setReturnTypeConstraint(const TypeConstraint retTypeConstraint) {
-    m_retTypeConstraint = retTypeConstraint;
-  }
-  const TypeConstraint& returnTypeConstraint() const {
-    return m_retTypeConstraint;
-  }
+  UnitEmitter& ue() const;
+  PreClassEmitter* pce() const;
 
   /*
-   * Return "user types" are string-format specifications of return
-   * types only used for reflection purposes.
+   * XXX: What are these for?
    */
-  void setReturnUserType(const StringData* retUserType) {
-    m_retUserType = retUserType;
-  }
-  const StringData* returnUserType() const {
-    return m_retUserType;
-  }
+  int sn() const;
+  Id id() const;
 
   /*
-   * Returns whether this FuncEmitter represents an HNI function with
-   * a native implementation.
+   * XXX: Set the whatever these things are.
    */
-  bool isHNINative() const { return getReturnType() != KindOfInvalid; }
+  void setIds(int sn, Id id);
 
-  Id numIterators() const { return m_numIterators; }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Locals, iterators, and parameters.
+
+  /*
+   * Count things.
+   */
+  Id numLocals() const;
+  Id numIterators() const;
+  Id numLiveIterators() const;
+
+  /*
+   * Set things.
+   */
   void setNumIterators(Id numIterators);
-  Id allocIterator();
-  void freeIterator(Id id);
-  Id numLiveIterators() { return m_nextFreeIterator; }
-  void setNumLiveIterators(Id id) { m_nextFreeIterator = id; }
+  void setNumLiveIterators(Id id);
 
+  /*
+   * Check existence of, look up, and allocate named locals.
+   */
+  bool hasVar(const StringData* name) const;
+  Id lookupVarId(const StringData* name) const;
+  void allocVarId(const StringData* name);
+
+  /*
+   * Allocate and free unnamed locals.
+   */
   Id allocUnnamedLocal();
   void freeUnnamedLocal(Id id);
-  Id numLocals() const { return m_numLocals; }
-  void setNumLocals(Id numLocals);
-  const Func::NamedLocalsMap::Builder& localNameMap() const {
-    return m_localNames;
-  }
-
-  void setMaxStackCells(int cells) { m_maxStackCells = cells; }
-  void addStaticVar(Func::SVInfo svInfo);
-  const SVInfoVec& svInfo() const { return m_staticVars; }
-
-  UnitEmitter& ue() const { return m_ue; }
-  PreClassEmitter* pce() const { return m_pce; }
-  void setIds(int sn, Id id) {
-    m_sn = sn;
-    m_id = id;
-  }
-  int sn() const { return m_sn; }
-  Id id() const {
-    assert(m_pce == nullptr);
-    return m_id;
-  }
-  Offset base() const { return m_base; }
-  Offset past() const { return m_past; }
-  const StringData* name() const { return m_name; }
-  const ParamInfoVec& params() const { return m_params; }
-  const EHEntVec& ehtab() const { return m_ehtab; }
-  EHEntVec& ehtab() { return m_ehtab; }
-  const FPIEntVec& fpitab() const { return m_fpitab; }
-
-  void setAttrs(Attr attrs) { m_attrs = attrs; }
-  Attr attrs() const { return m_attrs; }
-  bool isVariadic() const {
-    return m_params.size() && m_params[(m_params.size() - 1)].isVariadic();
-  }
-
-  void setTop(bool top) { m_top = top; }
-  bool top() const { return m_top; }
-
-  bool isPseudoMain() const { return m_name->empty(); }
-
-  void setIsClosureBody(bool isClosureBody) { m_isClosureBody = isClosureBody; }
-  bool isClosureBody() const { return m_isClosureBody; }
-
-  void setIsGenerator(bool isGenerator) { m_isGenerator = isGenerator; }
-  bool isGenerator() const { return m_isGenerator; }
-
-  bool isMethod() const {
-    return !isPseudoMain() && (bool)pce();
-  }
-
-  void setIsPairGenerator(bool b) { m_isPairGenerator = b; }
-  bool isPairGenerator() const { return m_isPairGenerator; }
-
-  void setContainsCalls() { m_containsCalls = true; }
-
-  void setIsAsync(bool isAsync) { m_isAsync = isAsync; }
-  bool isAsync() const { return m_isAsync; }
-
-  void addUserAttribute(const StringData* name, TypedValue tv);
-  void setUserAttributes(UserAttributeMap map) {
-    m_userAttributes = std::move(map);
-  }
-  const UserAttributeMap& getUserAttributes() const {
-    return m_userAttributes;
-  }
-  bool hasUserAttribute(const StringData* name) const {
-    auto it = m_userAttributes.find(name);
-    return it != m_userAttributes.end();
-  }
-  int parseNativeAttributes(Attr &attrs) const;
-
-  void commit(RepoTxn& txn) const;
-  Func* create(Unit& unit, PreClass* preClass = nullptr) const;
-
-  void setBuiltinFunc(const ClassInfo::MethodInfo* info,
-      BuiltinFunction bif, BuiltinFunction nif, Offset base);
-  void setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
-                      Attr attrs, Offset base);
-
-  void setOriginalFilename(const StringData* name) {
-    m_originalFilename = name;
-  }
-  const StringData* originalFilename() const { return m_originalFilename; }
 
   /*
-   * Return types used for HNI functions with a native C++
-   * implementation.
+   * Allocate and free iterators.
    */
-  void setReturnType(DataType dt) { m_returnType = dt; }
-  DataType getReturnType() const { return m_returnType; }
+  Id allocIterator();
+  void freeIterator(Id id);
 
-  void setDocComment(const char *dc) {
-    m_docComment = makeStaticString(dc);
-  }
-  const StringData* getDocComment() const {
-    return m_docComment;
-  }
+  /*
+   * Add a parameter and corresponding named local.
+   */
+  void appendParam(const StringData* name, const ParamInfo& info);
 
-  void setLocation(int l1, int l2) {
-    m_line1 = l1;
-    m_line2 = l2;
-  }
+  /*
+   * Get the local variable name -> id map.
+   */
+  const Func::NamedLocalsMap::Builder& localNameMap() const;
 
-  std::pair<int,int> getLocation() const {
-    return std::make_pair(m_line1, m_line2);
-  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Unit tables.
+
+  /*
+   * Add entries to the EH and FPI tables, and return them by reference.
+   */
+  EHEnt& addEHEnt();
+  FPIEnt& addFPIEnt();
 
 private:
+  /*
+   * Private table sort routines; called at finish()-time.
+   */
   void sortEHTab();
   void sortFPITab(bool load);
 
+public:
+  /*
+   * Declare that the EH table was created in sort-order and doesn't need to be
+   * resorted at finish() time.
+   */
+  void setEHTabIsSorted();
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Helper accessors.                                                  [const]
+
+  /*
+   * Is the function a psuedomain, a method, variadic (i.e., takes a `...'
+   * parameter), or an HNI function with a native implementation?
+   */
+  bool isPseudoMain() const;
+  bool isMethod() const;
+  bool isVariadic() const;
+  bool isHNINative() const;
+
+  /*
+   * @returns: std::make_pair(line1, line2)
+   */
+  std::pair<int,int> getLocation() const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Complex setters.
+  //
+  // XXX: Some of these should be moved to the emitter (esp. the
+  // setBuiltinFunc() methods).
+
+  /*
+   * Shorthand for setting `line1' and `line2' because typing is hard.
+   */
+  void setLocation(int l1, int l2);
+
+  /*
+   * Pulls native and system attributes out of the user attributes map.
+   *
+   * System attributes are returned by reference through `attrs_', and native
+   * attributes are returned as an integer.
+   */
+  int parseNativeAttributes(Attr& attrs_) const;
+
+  /*
+   * Pull fields for builtin functions out of a MethodInfo object.
+   */
+  void setBuiltinFunc(const ClassInfo::MethodInfo* info,
+                      BuiltinFunction bif, BuiltinFunction nif,
+                      Offset base_);
+
+  /*
+   * Set some fields for builtin functions.
+   */
+  void setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
+                      Attr attrs_, Offset base_);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Properties.
+
+private:
+  /*
+   * Metadata.
+   */
   UnitEmitter& m_ue;
   PreClassEmitter* m_pce;
+
   int m_sn;
   Id m_id;
-  Offset m_base;
-  Offset m_past;
-  int m_line1;
-  int m_line2;
-  LowStringPtr m_name;
 
-  ParamInfoVec m_params;
+public:
+  /*
+   * Func fields.
+   */
+  Offset base;
+  Offset past;
+  int line1;
+  int line2;
+  LowStringPtr name;
+  bool top;
+  Attr attrs;
+
+  ParamInfoVec params;
+  SVInfoVec staticVars;
+  int maxStackCells;
+
+  DataType returnType;
+  TypeConstraint retTypeConstraint;
+  LowStringPtr retUserType;
+
+  EHEntVec ehtab;
+  FPIEntVec fpitab;
+
+  bool isClosureBody;
+  bool isAsync;
+  bool isGenerator;
+  bool isPairGenerator;
+  bool containsCalls;
+
+  LowStringPtr docComment;
+  LowStringPtr originalFilename;
+
+  UserAttributeMap userAttributes;
+
+private:
+  /*
+   * FuncEmitter-managed state.
+   */
   Func::NamedLocalsMap::Builder m_localNames;
   Id m_numLocals;
   int m_numUnnamedLocals;
   int m_activeUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
-  int m_maxStackCells;
-  SVInfoVec m_staticVars;
-
-  TypeConstraint m_retTypeConstraint;
-  LowStringPtr m_retUserType;
-
-  EHEntVec m_ehtab;
-  bool m_ehTabSorted;
-  FPIEntVec m_fpitab;
-
-  Attr m_attrs;
-  DataType m_returnType;
-  bool m_top;
-  LowStringPtr m_docComment;
-  bool m_isClosureBody;
-  bool m_isAsync;
-  bool m_isGenerator;
-  bool m_isPairGenerator;
-  bool m_containsCalls;
-
-  UserAttributeMap m_userAttributes;
 
   const ClassInfo::MethodInfo* m_info;
   BuiltinFunction m_builtinFuncPtr;
   BuiltinFunction m_nativeFuncPtr;
 
-  LowStringPtr m_originalFilename;
+  bool m_ehTabSorted;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -331,5 +352,9 @@ FRP_OPS
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#define incl_HPHP_VM_FUNC_EMITTER_INL_H_
+#include "hphp/runtime/vm/func-emitter-inl.h"
+#undef incl_HPHP_VM_FUNC_EMITTER_INL_H_
 
 #endif // incl_HPHP_VM_FUNC_EMITTER_H_

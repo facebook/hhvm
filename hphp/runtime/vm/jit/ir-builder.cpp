@@ -89,7 +89,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (shouldConstrainGuards()) {
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
-    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocAddr)) {
+    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocAddr, LdGbl)) {
       auto const locId = inst->extra<LocalId>()->locId;
       m_constraints.typeSrcs[inst] = localTypeSource(locId);
       if (inst->is(AssertLoc, CheckLoc)) {
@@ -217,7 +217,8 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
 
   if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
-    return gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
+    gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
+    return inst->src(0);
   }
 
   return preOptimizeCheckTypeOp(
@@ -315,7 +316,8 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const locId = inst->extra<AssertLoc>()->locId;
 
   if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
-    return gen(AssertType, inst->typeParam(), prevValue);
+    gen(AssertType, inst->typeParam(), prevValue);
+    return inst->src(0);
   }
 
   auto* typeSrc = localTypeSource(locId);
@@ -762,10 +764,11 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   Indent _i;
 
   auto inst = val->inst();
-  if (inst->is(LdLoc, LdLocAddr)) {
-    // We've hit a LdLoc(Addr). If the source of the value is non-null and not
-    // a FramePtr, it's a real value that was killed by a Call. The value won't
-    // be live but it's ok to use it to track down the guard.
+  if (inst->is(LdLoc, LdLocAddr, LdGbl)) {
+    // We've hit a LdLoc, LdLocAddr, or LdGbl. If the value's type source is
+    // non-null and not a FramePtr, it's a real value that was killed by a
+    // Call. The value won't be live but it's ok to use it to track down the
+    // guard.
 
     auto source = get_required(m_constraints.typeSrcs, inst);
     if (!source) {
@@ -853,6 +856,19 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     return constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
     return constrainValue(inst->getPassthroughValue(), tc);
+  } else if (inst->is(DefLabel)) {
+    auto changed = false;
+    auto dst = 0;
+    for (; dst < inst->numDsts(); dst++) {
+      if (val == inst->dst(dst)) break;
+    }
+    assert(dst != inst->numDsts());
+    for (auto& pred : inst->block()->preds()) {
+      assert(pred.inst()->is(Jmp));
+      auto src = pred.inst()->src(dst);
+      changed = constrainValue(src, tc) || changed;
+    }
+    return changed;
   } else {
     // Any instructions not special cased above produce a new value, so
     // there's no guard for us to constrain.
@@ -1066,6 +1082,9 @@ void IRBuilder::insertLocalPhis() {
         // same fp.
         auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
                                  local.type, LocalId(i), m_state.fp());
+        if (shouldConstrainGuards()) {
+          m_constraints.typeSrcs[ldLoc] = local.typeSource;
+        }
         pred->insert(pred->iteratorTo(e.inst()), ldLoc);
         blockToPhiTmpsMap[pred].push_back(ldLoc->dst());
       } else {
@@ -1182,14 +1201,6 @@ bool IRBuilder::blockIsIncompatible(Offset offset) {
   auto it = m_offsetToBlockMap.find(offset);
   if (it == m_offsetToBlockMap.end()) return false;
   auto* block = it->second;
-  if (!block->empty() && block->back().isBlockEnd()) {
-    // If a block is generated before one of its predecessors, then
-    // we were conservative and cleared it's FrameState in the beginning.
-    // So it should be compatible with everything.
-    assert(RuntimeOption::EvalJitLoops);
-    return false;
-  }
-  if (!block->empty()) return true;
   return !m_state.compatible(block);
 }
 

@@ -33,6 +33,12 @@ namespace HPHP {
 
 namespace {
 
+NEVER_INLINE ATTRIBUTE_NORETURN
+void throw_bad_array_operand() {
+  throw ExtendedException("Invalid operand type was used: "
+                          "cannot perform this operation with arrays");
+}
+
 Cell make_int(int64_t n) { return make_tv<KindOfInt64>(n); }
 Cell make_dbl(double d)  { return make_tv<KindOfDouble>(d); }
 
@@ -49,7 +55,7 @@ TypedNum numericConvHelper(Cell cell) {
   case KindOfNull:         return make_int(0);
   case KindOfObject:       return make_int(cell.m_data.pobj->o_toInt64());
   case KindOfResource:     return make_int(cell.m_data.pres->o_toInt64());
-  case KindOfArray:        throw BadArrayOperandException();
+  case KindOfArray:        throw_bad_array_operand();
   default:                 break;
   }
   not_reached();
@@ -128,7 +134,7 @@ struct Sub {
   Cell operator()(int64_t a, int64_t b) const { return make_int(a - b); }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
-    throw BadArrayOperandException();
+    throw_bad_array_operand();
   }
 };
 
@@ -139,7 +145,7 @@ struct Mul {
   Cell operator()(int64_t a, int64_t b) const { return make_int(a * b); }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
-    throw BadArrayOperandException();
+    throw_bad_array_operand();
   }
 };
 
@@ -173,7 +179,7 @@ struct Div {
   }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
-    throw BadArrayOperandException();
+    throw_bad_array_operand();
   }
 };
 
@@ -249,7 +255,7 @@ struct SubEq {
   double  operator()(double  a, double  b) const { return a - b; }
 
   ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
-    throw BadArrayOperandException();
+    throw_bad_array_operand();
   }
 };
 
@@ -260,7 +266,7 @@ struct MulEq {
   double  operator()(double  a, double  b) const { return a * b; }
 
   ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
-    throw BadArrayOperandException();
+    throw_bad_array_operand();
   }
 };
 
@@ -528,6 +534,14 @@ Cell cellBitXor(Cell c1, Cell c2) {
   );
 }
 
+Cell cellShl(Cell c1, Cell c2) {
+  return make_int(cellToInt(c1) << cellToInt(c2));
+}
+
+Cell cellShr(Cell c1, Cell c2) {
+  return make_int(cellToInt(c1) >> cellToInt(c2));
+}
+
 void cellAddEq(Cell& c1, Cell c2) {
   cellOpEq(AddEq(), c1, c2);
 }
@@ -572,6 +586,9 @@ void cellBitOrEq(Cell& c1, Cell c2) {
 void cellBitXorEq(Cell& c1, Cell c2) {
   cellBitOpEq(cellBitXor, c1, c2);
 }
+
+void cellShlEq(Cell& c1, Cell c2) { cellCopy(cellShl(c1, c2), c1); }
+void cellShrEq(Cell& c1, Cell c2) { cellCopy(cellShr(c1, c2), c1); }
 
 void cellInc(Cell& cell) { cellIncDecOp(Inc(), cell); }
 void cellIncO(Cell& cell) { cellIncDecOp(IncO(), cell); }

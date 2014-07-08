@@ -173,6 +173,12 @@ struct Class {
   bool couldBeOverriden() const;
 
   /*
+   * Whether this class (or its subtypes) could possibly have have
+   * certain magic methods.
+   */
+  bool couldHaveMagicGet() const;
+
+  /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
    * If there is no common ancestor folly::none is returned
    */

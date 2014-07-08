@@ -1,0 +1,8 @@
+<?php
+
+$memcache = new Memcache;
+$memcache->addServer('localhost', 11211);
+$version = $memcache->getVersion();
+if (!$version) {
+  echo "SKIP No Memcached running";
+}

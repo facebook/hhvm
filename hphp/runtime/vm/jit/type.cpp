@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -185,14 +184,12 @@ Type Type::unionOf(Type t1, Type t2) {
 
 DataType Type::toDataType() const {
   assert(!isPtr());
-  if (isBoxed()) {
-    return KindOfRef;
-  }
+  assert(isKnownDataType());
 
   // Order is important here: types must progress from more specific
   // to less specific to return the most specific DataType.
   if (subtypeOf(Uninit))        return KindOfUninit;
-  if (subtypeOf(Null))          return KindOfNull;
+  if (subtypeOf(InitNull))      return KindOfNull;
   if (subtypeOf(Bool))          return KindOfBoolean;
   if (subtypeOf(Int))           return KindOfInt64;
   if (subtypeOf(Dbl))           return KindOfDouble;
@@ -201,41 +198,10 @@ DataType Type::toDataType() const {
   if (subtypeOf(Arr))           return KindOfArray;
   if (subtypeOf(Obj))           return KindOfObject;
   if (subtypeOf(Res))           return KindOfResource;
+  if (subtypeOf(BoxedCell))     return KindOfRef;
   if (subtypeOf(Cls))           return KindOfClass;
-  if (subtypeOf(UncountedInit)) return KindOfUncountedInit;
-  if (subtypeOf(Uncounted))     return KindOfUncounted;
-  if (subtypeOf(Gen))           return KindOfAny;
-  not_reached();
-}
-
-RuntimeType Type::toRuntimeType() const {
-  assert(!isPtr());
-  auto const outer = isBoxed() ? KindOfRef : toDataType();
-  auto const inner = isBoxed() ? innerType().toDataType() : KindOfNone;
-  auto rtt = RuntimeType{outer, inner};
-
-  if (isSpecialized()) {
-    if (subtypeOf(Type::Arr)) {
-      return hasArrayKind() ? rtt.setArrayKind(getArrayKind()) : rtt;
-    }
-    if (subtypeOf(Type::Obj)) {
-      return rtt.setKnownClass(getClass());
-    }
-  }
-
-  return rtt;
-}
-
-Type::Type(const RuntimeType& rtt)
-  : m_bits(bitsFromDataType(rtt.outerType(), rtt.innerType()))
-  , m_hasConstVal(false)
-  , m_class(nullptr)
-{
-  if (rtt.outerType() == KindOfObject && rtt.hasKnownClass()) {
-    m_class = rtt.knownClass();
-  } else if (rtt.outerType() == KindOfArray && rtt.hasArrayKind()) {
-    m_arrayInfo = makeArrayInfo(rtt.arrayKind(), nullptr);
-  }
+  always_assert_flog(false,
+                     "Bad Type {} in Type::toDataType()", *this);
 }
 
 Type::Type(const DynLocation* dl)

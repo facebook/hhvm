@@ -265,6 +265,21 @@
                     ]
                 },
                 {
+                    "name": "addAllKeysOf",
+                    "flags": [
+                    ],
+                    "desc": "Adds the keys of the specified KeyedContainer to the end of this Vector using the next available integer keys.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "container",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "pop",
                     "flags": [
                     ],

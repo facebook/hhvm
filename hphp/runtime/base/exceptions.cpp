@@ -14,29 +14,27 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/runtime-option.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
 
-int ExitException::ExitCode = 0;
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+std::atomic<int> ExitException::ExitCode{0};  // XXX: this should not be static
 
 ExtendedException::ExtendedException() : Exception() {
-  m_silent = false;
   computeBacktrace();
 }
 
 ExtendedException::ExtendedException(const std::string &msg) {
   m_msg = msg;
-  m_silent = false;
   computeBacktrace();
 }
 
 ExtendedException::ExtendedException(SkipFrame, const std::string &msg) {
   m_msg = msg;
-  m_silent = false;
   computeBacktrace(true);
 }
 
@@ -45,9 +43,32 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   va_start(ap, fmt);
   format(fmt, ap);
   va_end(ap);
-  m_silent = false;
   computeBacktrace();
 }
+
+Array ExtendedException::getBackTrace() const {
+  return Array(m_btp.get());
+}
+
+const StaticString s_file("file"), s_line("line");
+
+std::pair<String, int> ExtendedException::getFileAndLine() const {
+  String file = empty_string();
+  int line = 0;
+  Array bt = getBackTrace();
+  if (!bt.empty()) {
+    Array top = bt.rvalAt(0).toArray();
+    if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
+    if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
+  }
+  return std::make_pair(file, line);
+}
+
+void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
+  m_btp = g_context->debugBacktrace(skipFrame, true).get();
+}
+
+//////////////////////////////////////////////////////////////////////
 
 ParseTimeFatalException::ParseTimeFatalException(const char* file, int line,
                                                  const char* msg, ...)
@@ -55,41 +76,31 @@ ParseTimeFatalException::ParseTimeFatalException(const char* file, int line,
   va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
 }
 
-AnalysisTimeFatalException::AnalysisTimeFatalException(
-  const char* file, int line,
-  const char* msg, ...)
-    : m_file(file), m_line(line) {
-  va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
-}
-
 FatalErrorException::FatalErrorException(int, const char *msg, ...) {
   va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
 }
 
-FatalErrorException::FatalErrorException(const std::string &msg,
-                                         const Array& backtrace) {
-  m_msg = msg;
-  m_btp = backtrace.get();
-}
+FatalErrorException::FatalErrorException(const std::string& msg,
+                                         const Array& backtrace)
+  : ExtendedException(msg, backtrace.get())
+{}
 
-Array ExtendedException::getBackTrace() const {
-  return Array(m_btp.get());
-}
-
-/**
- * This must be done in the constructor.
- * If you wait too long, getFP() will be NULL.
- */
-void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
-  m_btp = g_context->debugBacktrace(skipFrame, true).get();
-}
-
-InvalidArgumentException::InvalidArgumentException(int, const char *fmt, ...) {
-  va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
-}
+//////////////////////////////////////////////////////////////////////
 
 void throw_null_pointer_exception() {
-  throw NullPointerException();
+  throw ExtendedException("A null object pointer was used.");
+}
+
+void throw_invalid_object_type(const char* clsName) {
+  throw ExtendedException("Unexpected object type %s.", clsName);
+}
+
+void throw_not_implemented(const char* feature) {
+  throw ExtendedException("%s is not implemented yet.", feature);
+}
+
+void throw_not_supported(const char* feature, const char* reason) {
+  throw ExtendedException("%s is not supported: %s", feature, reason);
 }
 
 void intrusive_ptr_add_ref(ArrayData* a) {

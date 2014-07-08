@@ -20,3 +20,8 @@ val program : string -> parser_return
 (* Parses a file *)
 val from_file : string -> parser_return
 
+type saved_lb
+type assoc
+val save_lexbuf_state: Lexing.lexbuf -> saved_lb
+val restore_lexbuf_state: Lexing.lexbuf -> saved_lb -> unit
+val get_priority: Lexer_hack.token -> assoc * int

@@ -64,7 +64,7 @@ let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
     end
   in
   List.fold_left
-    begin fun (errors, failed) l ->
+    begin fun (errors, failed) error ->
     (* It is important to add the file that is the cause of the failure.
      * What can happen is that during a declaration phase, we realize
      * that a parent class is outdated. When this happens, we redeclare
@@ -72,11 +72,11 @@ let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
      * where the error occurs might be different from the file we
      * are declaring right now.
      *)
-      let file_with_error = Pos.filename (fst (List.hd l)) in
+      let file_with_error = Errors.filename error in
       assert (file_with_error <> "");
       let failed = SSet.add file_with_error failed in
       let failed = SSet.add fn failed in
-      l :: errors, failed
+      error :: errors, failed
     end (errors, failed) decl_errors
 
 (*****************************************************************************)

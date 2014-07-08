@@ -24,19 +24,12 @@ module SubType = Typing_subtype
 
 let sub_type p ur env ty1 ty2 =
   let env = { env with Env.pos = p } in
-  Errors.try_
+  Errors.try_add_err p (Reason.string_of_ureason ur)
     (fun () -> SubType.sub_type env ty1 ty2)
-    (fun l ->
-      Errors.add_list ((p, Reason.string_of_ureason ur) :: l);
-      env
-    )
+    (fun () -> env)
 
 let unify p ur env ty1 ty2 =
   let env = { env with Env.pos = p } in
-  Errors.try_ 
+  Errors.try_add_err p (Reason.string_of_ureason ur)
     (fun () -> Unify.unify env ty1 ty2)
-    (fun l ->
-      Errors.add_list ((p, Reason.string_of_ureason ur) :: l);
-      env, (Reason.Rwitness p, Tany)
-    )
-
+    (fun () -> env, (Reason.Rwitness p, Tany))

@@ -18,10 +18,15 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibDL DEFAULT_MSG
 SET(CMAKE_REQUIRED_LIBRARIES dl)
 INCLUDE(CheckCSourceRuns)
 CHECK_C_SOURCE_RUNS("#include <dlfcn.h>
+#include <stdlib.h>
 void testfunc() {}
 int main() {
   testfunc();
-  return dyslm(0, \"_testfunc\") != (void*)0;
+  if (dlsym(0, \"_testfunc\") != (void*)0) {
+    return EXIT_SUCCESS;
+  } else {
+    return EXIT_FAILURE;
+  }
 }" LIBDL_NEEDS_UNDERSCORE)
 
 mark_as_advanced(LIBDL_INCLUDE_DIRS LIBDL_LIBRARIES LIBDL_NEEDS_UNDERSCORE)

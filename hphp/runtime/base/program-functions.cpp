@@ -78,7 +78,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/arch.h"
-#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
@@ -381,7 +381,7 @@ static void handle_exception_helper(bool& ret,
         !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
       Array stack = e.getBackTrace();
-      Array argv = make_packed_array(e.ExitCode, stack);
+      Array argv = make_packed_array(ExitException::ExitCode.load(), stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
   } catch (const PhpFileDoesNotExistException &e) {
@@ -391,21 +391,6 @@ static void handle_exception_helper(bool& ret,
     } else {
       Logger::Error("%s", e.getMessage().c_str());
     }
-    if (richErrorMsg) {
-      handle_exception_append_bt(errorMsg, e);
-    }
-  } catch (const UncatchableException &e) {
-    ret = false;
-    error = true;
-    errorMsg = "";
-    if (RuntimeOption::ServerStackTrace) {
-      errorMsg = e.what();
-    } else if (RuntimeOption::InjectedStackTrace) {
-      errorMsg = e.getMessage();
-      errorMsg += "\n";
-      errorMsg += ExtendedLogger::StringOfStackTrace(e.getBackTrace());
-    }
-    Logger::Error("%s", errorMsg.c_str());
     if (richErrorMsg) {
       handle_exception_append_bt(errorMsg, e);
     }
@@ -527,6 +512,9 @@ void handle_destructor_exception(const char* situation) {
   try {
     raise_debugging("%s", errorMsg.c_str());
   } catch (...) {
+    // TODO(#4557954): if the error handler raised a request time out here we
+    // should re-set the pending exception in s_threadInfo.
+
     // The user error handler fataled or threw an exception,
     // print out the error message directly to the log
     Logger::Warning("%s", errorMsg.c_str());
@@ -596,7 +584,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     serverArr.set(s_argc, php_global(s_argc));
     serverArr.set(s_PWD, g_context->getCwd());
     char hostname[1024];
-    if (!gethostname(hostname, 1024)) {
+    if (RuntimeOption::ServerExecutionMode() && !gethostname(hostname, 1024)) {
       serverArr.set(s_HOSTNAME, String(hostname, CopyString));
     }
 
@@ -639,7 +627,9 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (xhprof) {
     f_var_dump(HHVM_FN(json_encode)(f_xhprof_disable()));
   }
-  hphp_context_exit(g_context.getNoCheck(), true, true, program);
+  g_context->onShutdownPostSend();
+  Eval::Debugger::InterruptPSPEnded(program);
+  hphp_context_exit();
   hphp_session_exit();
   if (coverage && ti->m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
@@ -666,6 +656,13 @@ void __attribute__((weak)) __hot_end();
 static void NEVER_INLINE AT_END_OF_TEXT __attribute__((optimize("2")))
 hugifyText(char* from, char* to) {
 #if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
+  if (from > to || (to - from) < sizeof(uint64_t)) {
+    // This shouldn't happen if HHVM is behaving correctly (I think),
+    // but if it does then there is nothing to do and we should bail
+    // out early because the call to wordcpy() below can't handle
+    // zero size or negative sizes.
+    return;
+  }
   size_t sz = to - from;
   void* mem = malloc(sz);
   memcpy(mem, from, sz);
@@ -1303,13 +1300,19 @@ static int execute_program_impl(int argc, char** argv) {
   compile_file(0, 0, MD5(), 0);
 
   if (!po.lint.empty()) {
+    Logger::LogHeader = false;
+    Logger::LogLevel = Logger::LogInfo;
+    Logger::UseCronolog = false;
+    Logger::UseLogFile = true;
+    Logger::SetNewOutput(nullptr);
+
     if (po.isTempFile) {
       tempFile = po.lint;
     }
 
     hphp_process_init();
     try {
-      auto const unit = g_context->lookupPhpFile(
+      auto const unit = lookupUnit(
         makeStaticString(po.lint.c_str()), "", nullptr);
       if (unit == nullptr) {
         throw FileOpenException(po.lint);
@@ -1348,11 +1351,14 @@ static int execute_program_impl(int argc, char** argv) {
     char **new_argv;
     prepare_args(new_argc, new_argv, po.args, po.file.c_str());
 
-    if (!po.file.empty()) {
-      Repo::setCliFile(po.file);
-    } else if (new_argc > 0) {
-      Repo::setCliFile(new_argv[0]);
+    std::string const cliFile = !po.file.empty() ? po.file :
+                                new_argv[0] ? new_argv[0] : "";
+    if (po.mode != "debug" && cliFile.empty()) {
+      std::cerr << "Nothing to do. Either pass a .php file to run, or "
+        "use -m server\n";
+      return 1;
     }
+    Repo::setCliFile(cliFile);
 
     int ret = 0;
     hphp_process_init();
@@ -1415,7 +1421,7 @@ static int execute_program_impl(int argc, char** argv) {
         execute_command_line_begin(new_argc, new_argv,
                                    po.xhprofFlags, po.config);
         ret = 255;
-        if (hphp_invoke_simple(file)) {
+        if (hphp_invoke_simple(file, false /* warmup only */)) {
           ret = ExitException::ExitCode;
         }
         execute_command_line_end(po.xhprofFlags, true, file.c_str());
@@ -1664,20 +1670,22 @@ ExecutionContext *hphp_context_init() {
   return context;
 }
 
-bool hphp_invoke_simple(const std::string &filename,
-                        bool warmupOnly /* = false */) {
+bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
   bool error;
   string errorMsg;
   return hphp_invoke(g_context.getNoCheck(), filename, false, null_array,
-                     uninit_null(), "", "", error, errorMsg, true, warmupOnly);
+                     uninit_null(), "", "", error, errorMsg,
+                     true /* once */,
+                     warmupOnly,
+                     false /* richErrorMsg */);
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, const Array& funcParams, VRefParam funcRet,
                  const string &reqInitFunc, const string &reqInitDoc,
                  bool &error, string &errorMsg,
-                 bool once /* = true */, bool warmupOnly /* = false */,
-                 bool richErrorMsg /* = false */) {
+                 bool once, bool warmupOnly,
+                 bool richErrorMsg) {
   bool isServer = RuntimeOption::ServerExecutionMode();
   error = false;
 
@@ -1727,23 +1735,12 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   return ret;
 }
 
-void hphp_context_exit(ExecutionContext *context, bool psp,
-                       bool shutdown /* = true */,
-                       const char *program /* = NULL */) {
-  if (psp) {
-    context->onShutdownPostSend();
-  }
-  if (RuntimeOption::EnableDebugger) {
-    try {
-      Eval::Debugger::InterruptPSPEnded(program);
-    } catch (const Eval::DebuggerException &e) {}
-  }
+void hphp_context_exit() {
+  auto const context = g_context.getNoCheck();
 
   // Run shutdown handlers. This may cause user code to run.
-  static_cast<ExecutionContext*>(context)->destructObjects();
-  if (shutdown) {
-    context->onRequestShutdown();
-  }
+  context->destructObjects();
+  context->onRequestShutdown();
 
   // Extensions could have shutdown handlers
   Extension::RequestShutdownModules();

@@ -283,6 +283,7 @@ let parse_build_args () =
       Generates build files\n"
       Sys.argv.(0) in
   let steps = ref None in
+  let no_steps = ref None in
   let verbose = ref false in
   let serial = ref false in
   let test_dir = ref None in
@@ -297,6 +298,9 @@ let parse_build_args () =
     "--steps", Arg.String (fun x ->
       steps := Some (Str.split (Str.regexp ",") x)),
     " comma-separated list of build steps to run";
+    "--no-steps", Arg.String (fun x ->
+      no_steps := Some (Str.split (Str.regexp ",") x)),
+    " comma-separated list of build steps not to run";
     "--no-run-scripts", Arg.Clear run_scripts,
     " don't run unported arc build scripts";
     "--serial", Arg.Set serial,
@@ -327,6 +331,7 @@ let parse_build_args () =
   CBuild { ServerMsg.
            root = root;
            steps = !steps;
+           no_steps = !no_steps;
            run_scripts = !run_scripts;
            serial = !serial;
            test_dir = !test_dir;

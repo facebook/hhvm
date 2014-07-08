@@ -59,11 +59,19 @@ public:
   static const std::string &GetCurrentSourceRoot() {
     return s_path.isNull() ? RuntimeOption::SourceRoot : *s_path;
   }
-  static const std::string &GetCurrentPhpRoot() {
-    return s_phproot.isNull() ? initPhpRoot() : *s_phproot;
+
+  static String RelativeToPhpRoot(const String& path) {
+    String ret = GetCurrentSourceRoot();
+    ret += path;
+    return ret;
   }
 
   Eval::DSandboxInfo getSandboxInfo() const;
+
+private:
+  static const std::string& GetCurrentPhpRoot() {
+    return s_phproot.isNull() ? initPhpRoot() : *s_phproot;
+  }
 
 private:
   String m_user;

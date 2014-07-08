@@ -309,18 +309,18 @@ IMPLEMENT_REQUEST_LOCAL(SystemlibSessionInstance,
 Func* SystemlibSessionModule::lookupFunc(Class *cls, StringData *fname) {
   Func *f = cls->lookupMethod(fname);
   if (!f) {
-    throw InvalidArgumentException(0, "class %s must declare method %s()",
-                                   m_classname, fname->data());
+    raise_error("class %s must declare method %s()",
+                m_classname, fname->data());
   }
 
   if (f->attrs() & AttrStatic) {
-    throw InvalidArgumentException(0, "%s::%s() must not be declared static",
-                                   m_classname, fname->data());
+    raise_error("%s::%s() must not be declared static",
+                m_classname, fname->data());
   }
 
   if (f->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) {
-    throw InvalidArgumentException(0, "%s::%s() must be declared public",
-                                   m_classname, fname->data());
+    raise_error("%s::%s() must be declared public",
+                m_classname, fname->data());
   }
 
   return f;
@@ -329,34 +329,31 @@ Func* SystemlibSessionModule::lookupFunc(Class *cls, StringData *fname) {
 void SystemlibSessionModule::lookupClass() {
   Class *cls;
   if (!(cls = Unit::loadClass(String(m_classname, CopyString).get()))) {
-    throw InvalidArgumentException(0, "Unable to locate systemlib class '%s'",
-                                   m_classname);
+    raise_error("Unable to locate systemlib class '%s'", m_classname);
   }
 
   if (cls->attrs() & (AttrTrait|AttrInterface)) {
-    throw InvalidArgumentException(0, "'%s' must be a real class, "
-                                      "not an interface or trait", m_classname);
+    raise_error("'%s' must be a real class, not an interface or trait",
+      m_classname);
   }
 
   if (!s_SHIClass) {
     s_SHIClass = Unit::lookupClass(s_SessionHandlerInterface.get());
     if (!s_SHIClass) {
-      throw InvalidArgumentException(0, "Unable to locate '%s' interface",
-                                        s_SessionHandlerInterface.data());
+      raise_error("Unable to locate '%s' interface",
+                  s_SessionHandlerInterface.data());
     }
   }
 
   if (!cls->classof(s_SHIClass)) {
-    throw InvalidArgumentException(0, "SystemLib session module '%s' "
-                                      "must implement '%s'",
-                                      m_classname,
-                                      s_SessionHandlerInterface.data());
+    raise_error("SystemLib session module '%s' must implement '%s'",
+                m_classname,
+                s_SessionHandlerInterface.data());
   }
 
   if (LookupResult::MethodFoundWithThis !=
       g_context->lookupCtorMethod(m_ctor, cls)) {
-    throw InvalidArgumentException(0, "Unable to call %s's constructor",
-                                   m_classname);
+    raise_error("Unable to call %s's constructor", m_classname);
   }
 
   m_open    = lookupFunc(cls, s_open.get());
@@ -1035,7 +1032,7 @@ public:
       if (key.isString()) {
         String skey = key.toString();
         buf.append(skey);
-        if (skey.find(PS_DELIMITER) >= 0) {
+        if (skey.find(PS_DELIMITER) >= 0 || skey.find(PS_UNDEF_MARKER) >= 0) {
           return String();
         }
         buf.append(PS_DELIMITER);

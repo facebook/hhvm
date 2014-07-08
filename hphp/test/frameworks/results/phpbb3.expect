@@ -210,22 +210,6 @@ phpbb_class_loader_test::test_resolve_cached
 .
 phpbb_class_loader_test::test_resolve_path
 .
-phpbb_compress_test::test_compress_tar with data set #0
-.
-phpbb_compress_test::test_compress_tar with data set #1
-.
-phpbb_compress_test::test_compress_tar with data set #2
-.
-phpbb_compress_test::test_compress_zip
-.
-phpbb_compress_test::test_extract_tar with data set #0
-.
-phpbb_compress_test::test_extract_tar with data set #1
-.
-phpbb_compress_test::test_extract_tar with data set #2
-.
-phpbb_compress_test::test_extract_zip
-.
 phpbb_config_db_test::test_delete
 S
 phpbb_config_db_test::test_delete_write_read_cacheable

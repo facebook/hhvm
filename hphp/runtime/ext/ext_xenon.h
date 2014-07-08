@@ -63,6 +63,13 @@
 namespace HPHP {
 class Xenon {
   public:
+
+    enum SampleType {
+      IOWaitSample,  // sample was taken during a function that is wait time
+      EnterSample,   // sample was during CPU time at the start of a function
+      ExitSample,    // sample was during CPU time at the end of a function
+    };
+
     static Xenon& getInstance(void);
 
     Xenon();
@@ -72,7 +79,7 @@ class Xenon {
 
     void start(uint64_t msec);
     void stop();
-    void log(bool skipFirst);
+    void log(SampleType t);
     void surpriseAll();
     void onTimer();
 

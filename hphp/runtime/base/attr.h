@@ -143,6 +143,10 @@ enum Attr {
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
 
+inline Attr& operator|=(Attr& a, const Attr& b) {
+  return (a = Attr((int)a | (int)b));
+}
+
 inline const char* attrToVisibilityStr(Attr attr) {
   return (attr & AttrPrivate)   ? "private"   :
          (attr & AttrProtected) ? "protected" : "public";

@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/server/virtual-host.h"
 
+#include <stdexcept>
+
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -190,7 +192,7 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
     rule.encode_backrefs = Config::GetBool(ini, hdf["encode_backrefs"], false);
 
     if (rule.pattern.empty() || rule.to.empty()) {
-      throw InvalidArgumentException("rewrite rule", "(empty pattern or to)");
+      throw std::runtime_error("Invalid rewrite rule: (empty pattern or to)");
     }
     Hdf rewriteConds = hdf["conditions"];
     for (Hdf chdf = rewriteConds.firstChild(); chdf.exists();
@@ -200,7 +202,7 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
       RewriteCond &cond = rule.rewriteConds.back();
       cond.pattern = format_pattern(Config::GetString(ini, chdf["pattern"], ""), true);
       if (cond.pattern.empty()) {
-        throw InvalidArgumentException("rewrite rule", "(empty cond pattern)");
+        throw std::runtime_error("Invalid rewrite rule: (empty cond pattern)");
       }
       const char *type = Config::Get(ini, chdf["type"]);
       if (type) {
@@ -209,8 +211,8 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
         } else if (strcasecmp(type, "request") == 0) {
           cond.type = RewriteCond::Type::Request;
         } else {
-          throw InvalidArgumentException("rewrite rule",
-                                         "(invalid cond type)");
+          throw std::runtime_error("Invalid rewrite rule: (invalid "
+            "cond type)");
         }
       } else {
         cond.type = RewriteCond::Type::Request;
@@ -250,8 +252,8 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
         pattern = format_pattern(pattern, false);
       }
     } else if (!names.empty()) {
-      throw InvalidArgumentException
-        ("log filter", "(cannot specify both params and pattern)");
+      throw std::runtime_error("Invalid log filter: (cannot specify "
+        "both params and pattern)");
     }
 
     filter.namePattern = pattern;

@@ -143,9 +143,9 @@ struct IfCountNotStatic {
 
 
 void emitTransCounterInc(Asm& a) {
-  if (!tx->isTransDBEnabled()) return;
+  if (!mcg->tx().isTransDBEnabled()) return;
 
-  a.    movq (tx->getTransCounterAddr(), rAsm);
+  a.    movq (mcg->tx().getTransCounterAddr(), rAsm);
   a.    lock ();
   a.    incq (*rAsm);
 }
@@ -290,6 +290,15 @@ void emitCall(Asm& a, CppCall call) {
   not_reached();
 }
 
+void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref) {
+  if (imm.fits(sz::dword)) {
+    as.storeq(imm.l(), ref); // sign-extend to 64-bit then storeq
+  } else {
+    as.storel(int32_t(imm.q()), ref);
+    as.storel(int32_t(imm.q() >> 32), MemoryRef(ref.r + 4));
+  }
+}
+
 void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
   if (cc == CC_None) {
     a.   jmp(dest);
@@ -339,16 +348,63 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   a.  jnz  (coldCode.frontier());
 
   acold.  movq  (rVmFp, argNumToRegName[0]);
-  emitCall(acold, tx->uniqueStubs.functionEnterHelper);
+  emitCall(acold, mcg->tx().uniqueStubs.functionEnterHelper);
   mcg->recordSyncPoint(coldCode.frontier(),
                        fixup.m_pcOffset, fixup.m_spOffset);
   acold.  jmp   (mainCode.frontier());
 }
 
-template<class Mem>
-void emitCmpClass(Asm& as, Reg64 reg, Mem mem) {
-  auto size = sizeof(LowClassPtr);
+void emitLoadReg(Asm& as, MemoryRef mem, PhysReg reg) {
+  assert(reg != InvalidReg);
+  if (reg.isGP()) {
+    as. loadq(mem, reg);
+  } else {
+    as. movsd(mem, reg);
+  }
+}
 
+void emitStoreReg(Asm& as, PhysReg reg, MemoryRef mem) {
+  assert(reg != InvalidReg);
+  if (reg.isGP()) {
+    as. storeq(reg, mem);
+  } else {
+    as. movsd(reg, mem);
+  }
+}
+
+void emitLdLowPtr(Asm& as, MemoryRef mem, PhysReg reg, size_t size) {
+  assert(reg != InvalidReg && reg.isGP());
+  if (size == 8) {
+    as.loadq(mem, reg);
+  } else if (size == 4) {
+    as.loadl(mem, r32(reg));
+  } else {
+    not_implemented();
+  }
+}
+
+void emitCmpClass(Asm& as, const Class* c, MemoryRef mem) {
+  auto size = sizeof(LowClassPtr);
+  auto imm = Immed64(c);
+
+  if (size == 8) {
+    if (imm.fits(sz::dword)) {
+      as.cmpq(imm.l(), mem);
+    } else {
+      // Use a scratch.  We could do this without rAsm using two immediate
+      // 32-bit compares (and two branches).
+      as.emitImmReg(imm, rAsm);
+      as.cmpq(rAsm, mem);
+    }
+  } else if (size == 4) {
+    as.cmpl(imm.l(), mem);
+  } else {
+    not_implemented();
+  }
+}
+
+void emitCmpClass(Asm& as, Reg64 reg, MemoryRef mem) {
+  auto size = sizeof(LowClassPtr);
   if (size == 8) {
     as.   cmpq    (reg, mem);
   } else if (size == 4) {
@@ -357,8 +413,6 @@ void emitCmpClass(Asm& as, Reg64 reg, Mem mem) {
     not_implemented();
   }
 }
-
-template void emitCmpClass<MemoryRef>(Asm& as, Reg64 reg, MemoryRef mem);
 
 void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2) {
   auto size = sizeof(LowClassPtr);

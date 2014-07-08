@@ -64,8 +64,7 @@ String concat4(const String& s1, const String& s2, const String& s3,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void NEVER_INLINE throw_invalid_property_name(const String& name)
-  ATTRIBUTE_NORETURN;
+void NEVER_INLINE throw_invalid_property_name(const String& name);
 void NEVER_INLINE throw_null_object_prop();
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
@@ -165,22 +164,14 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
  */
 void handle_destructor_exception(const char* situation = "Destructor");
 
-/**
- * If RuntimeOption::ThrowBadTypeExceptions is on, we are running in
- * a restrictive mode that's not compatible with PHP, and this will throw.
- * If RuntimeOption::ThrowBadTypeExceptions is off, we will log a
- * warning and swallow the error.
+/*
+ * Deprecated wrappers for raising certain types of warnings.
+ *
+ * Don't use in new code.
  */
 void throw_bad_type_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 void throw_expected_array_exception();
 void throw_expected_array_or_collection_exception();
-
-/**
- * If RuntimeOption::ThrowInvalidArguments is on, we are running in
- * a restrictive mode that's not compatible with PHP, and this will throw.
- * If RuntimeOption::ThrowInvalidArguments is off, we will log a
- * warning and swallow the error.
- */
 void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2)
    __attribute__((cold));
 

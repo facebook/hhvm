@@ -65,6 +65,8 @@ all::
 
 .PHONY:: clean distclean beforedepend depend
 
+.NOTPARALLEL:
+
 .ml.cmo:
 	$(OCAMLC)  -c $<
 .mli.cmi:

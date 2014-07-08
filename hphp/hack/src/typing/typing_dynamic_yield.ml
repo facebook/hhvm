@@ -182,9 +182,6 @@ let check_yield_visibility env c =
   if not uses_dy_directly then List.iter begin fun m ->
     match (parse_yield_name (snd m.m_name), m.m_visibility) with
       | (Some _, Private) ->
-          Errors.add_list [
-            fst m.m_name,
-            "DynamicYield cannot see private methods in subclasses"
-         ]
+          Errors.dynamic_yield_private (fst m.m_name)
       | _ -> ()
   end c.c_methods

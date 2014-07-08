@@ -23,12 +23,15 @@ class Framework {
   private ?string $git_path;
   private ?string $git_commit;
   private ?string $git_branch;
-  private Set $blacklist;
-  private Set $clownylist;
+  private Set<string> $blacklist;
+  private Set<string> $clownylist;
+  private Set<string> $flakeylist;
   private array<array<string, string>> $pull_requests;
   private ?Set $individual_tests = null;
   private ?string $bootstrap_file = null;
   private ?string $config_file = null;
+  private TestFindMode $test_find_mode;
+  private bool $parallel;
 
   // $name, $parallel, $test_fine_mode, etc. are constructor promoted
   // Assume the framework unit tests will be run in parallel until otherwise
@@ -41,9 +44,37 @@ class Framework {
                               private ?string $test_command = null,
                               private ?Map $env_vars = null,
                               private ?Map $args_for_tests = null,
-                              private bool $parallel = true,
-                              private string $test_find_mode =
-                                TestFindModes::REFLECTION) {
+                              ?bool $parallel = null,
+                              ?string $test_find_mode = null) {
+    if (array_key_exists('test_find_mode', Options::$framework_info[$name])) {
+      if ($test_find_mode !== null) {
+        human(
+          Colors::RED.'WARNING'.Colors::NONE.
+          ': Using test_find_mode from YAML instead of PHP for '.$name."\n"
+        );
+      }
+      $this->test_find_mode =
+        Options::$framework_info[$name]['test_find_mode'];
+    } else if ($test_find_mode !== null) {
+      $this->test_find_mode = $test_find_mode;
+    } else {
+      $this->test_find_mode = TestFindModes::REFLECTION;
+    }
+    TestFindModes::assertIsValid($this->test_find_mode);
+
+    if (array_key_exists('sequential', Options::$framework_info[$name])) {
+      if ($parallel !== null) {
+        human(
+          Colors::RED.'WARNING'.Colors::NONE.
+          ': Using sequential from YAML instead of PHP for '.$name."\n"
+        );
+      }
+      $this->parallel = !Options::$framework_info[$name]['sequential'];
+    } else if ($parallel !== null) {
+      $this->parallel = $parallel;
+    } else {
+      $this->parallel = true;
+    }
 
     // Get framework information and set all needed properties. Beyond
     // the install root, git info, test roots, etc., the other
@@ -72,7 +103,8 @@ class Framework {
     $this->setTestPath(Options::$framework_info[$name]["test_root"]);
     $this->setPullRequests(Options::getFrameworkInfo($name, "pull_requests"));
     $this->setBlacklist(Options::getFrameworkInfo($name, "blacklist"));
-    $this->setClownylist(Options::getFrameworkInfo($name, "clowns"));
+    $this->setClownylist(Options::getFrameworkInfo($name, 'clowns'));
+    $this->setFlakeylist(Options::getFrameworkInfo($name, 'flakey'));
     $this->setTestNamePattern(Options::getFrameworkInfo($name,
                                                         "test_name_regex"));
     $this->setTestFilePattern(Options::getFrameworkInfo($name,
@@ -226,6 +258,15 @@ class Framework {
     }
   }
 
+  private function setFlakeylist(?array<string> $flakeylist): void {
+    $this->flakeylist = Set { };
+    if ($flakeylist !== null && !Options::$include_flakey) {
+      foreach ($flakeylist as $test) {
+        $this->flakeylist[] = Options::$frameworks_root.'/'.$test;
+      }
+    }
+  }
+
   private function setPullRequests(
     ?array<int, array<string, string>> $pull_requests
   ): void {
@@ -269,11 +310,12 @@ class Framework {
 
   private function setTestCommand(bool $redirect = true): void {
     if ($this->test_command === null) {
-      $this->test_command = get_runtime_build()." ".__DIR__.
-                            "/vendor/bin/phpunit --debug";
-    } else {
-      $this->test_command .= " --debug";
+      $this->test_command =
+        get_runtime_build().
+        ' -c '.Options::$generated_ini_file.
+        ' '.__DIR__.'/vendor/bin/phpunit';
     }
+    $this->test_command .= ' --debug ';
     if ($this->config_file !== null) {
       $this->test_command .= " -c ".$this->config_file;
     }
@@ -688,14 +730,42 @@ class Framework {
     }
   }
 
+  private function reenableTestFiles(): void {
+    $rdit = new RecursiveDirectoryIterator(
+      $this->install_root,
+      RecursiveDirectoryIterator::SKIP_DOTS
+    );
+    $riit = new RecursiveIteratorIterator(
+      $rdit,
+      RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($riit as $name => $fileinfo) {
+      if (($pos = strpos($name, '.disabled.hhvm')) !== false) {
+        $new_name = substr($name, 0, $pos);
+        rename($name, $new_name);
+      }
+    }
+  }
+
   private function disableTestFiles(): void {
-    $this->blacklist = $this->disable($this->blacklist,
-                                      ".disabled.hhvm.blacklist");
-    $this->clownylist = $this->disable($this->clownylist,
-                                     ".disabled.hhvm.clownylist");
+    $this->reenableTestFiles();
+    $this->blacklist = $this->disable(
+      $this->blacklist,
+      ".disabled.hhvm.blacklist"
+    );
+    $this->clownylist = $this->disable(
+      $this->clownylist,
+      ".disabled.hhvm.clownylist"
+    );
+    $this->flakeylist = $this->disable(
+      $this->flakeylist,
+      ".disabled.hhvm.flakeylist"
+    );
     verbose(count($this->blacklist)." files were blacklisted (auto fail) ".
             $this->name."...\n");
     verbose(count($this->clownylist)." files were clownylisted (no-op/no run) ".
+            $this->name."...\n");
+    verbose(count($this->flakeylist)." files were flakeylisted (no-op/no run) ".
             $this->name."...\n");
   }
 

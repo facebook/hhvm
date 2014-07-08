@@ -717,6 +717,7 @@ std::string Scanner::escape(const char *str, int len, char quote_type) const {
             case 'r':  output += '\r'; break;
             case 'v':  output += '\v'; break;
             case 'f':  output += '\f'; break;
+            case 'e':  output += '\e'; break;
             case '\\': output += '\\'; break;
             case '$':  output += '$';  break;
             case '"':

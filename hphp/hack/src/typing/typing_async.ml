@@ -22,12 +22,7 @@ let enforce_not_awaitable env p ty =
    * about since that's all you can get in this case (I think). *)
   | _, Tunresolved [r, Tapply ((_, "\\Awaitable"), _)]
   | r, Tapply ((_, "\\Awaitable"), _) ->
-      Errors.add_list [
-        p, "This expression is of type Awaitable, but it's "^
-        "either being discarded or used in a dangerous way before "^
-        "being awaited";
-        Reason.to_pos r, "This is why I think it is Awaitable"
-      ]
+    Errors.discarded_awaitable p (Reason.to_pos r)
   | _ -> ()
 
 (* We would like to pretend that the wait_for*() functions are overloaded like
@@ -100,10 +95,7 @@ let gena env p ty =
         (fun () -> Type.sub_type p Reason.URawait env expected_ty (r, ty))
         (fun _ ->
           let ty_str = Typing_print.error ty in
-          Errors.add_list [
-          p, "gena expects an array";
-          Reason.to_pos r, "It is incompatible with " ^ ty_str;
-        ];
+          Errors.gena_expects_array p (Reason.to_pos r) ty_str;
           env
         )
     in

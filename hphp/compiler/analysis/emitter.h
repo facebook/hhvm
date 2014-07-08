@@ -455,9 +455,13 @@ public:
   void fixReturnType(Emitter& e, FunctionCallPtr fn,
                      Func* builtinFunc = nullptr);
 
-  void visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
+  void listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
                               std::vector<IndexChain*>& chainList);
+  void listAssignmentAssignElements(Emitter& e,
+                                    std::vector<IndexChain*>& indexChains,
+                                    std::function<void()> emitSrc);
+
   void visitIfCondition(ExpressionPtr cond, Emitter& e, Label& tru, Label& fals,
                         bool truFallthrough);
   const SymbolicStack& getEvalStack() const { return m_evalStack; }
@@ -486,7 +490,7 @@ public:
   void setPrevOpcode(Op op) { m_prevOpcode = op; }
   Op getPrevOpcode() const { return m_prevOpcode; }
   bool currentPositionIsReachable() {
-    return (m_ue.bcPos() == m_curFunc->base()
+    return (m_ue.bcPos() == m_curFunc->base
             || isJumpTarget(m_ue.bcPos())
             || (instrFlags(getPrevOpcode()) & TF) == 0);
   }
@@ -785,8 +789,9 @@ public:
   void emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e,
                                  ListAssignmentPtr la,
-                                 int vLocalId);
+                                 std::function<void()> emitSrc);
   void emitForeach(Emitter& e, ForEachStatementPtr fe);
+  void emitForeachAwaitAs(Emitter& e, ForEachStatementPtr fe);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e,
                          const char* msg,

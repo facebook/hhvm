@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
@@ -94,7 +95,7 @@ void IRUnit::collectPostConditions() {
   // This function is only correct when given a single-exit region, as in
   // TransKind::Profile.  Furthermore, its output is only used to guide
   // formation of profile-driven regions.
-  assert(tx->mode() == TransKind::Profile);
+  assert(mcg->tx().mode() == TransKind::Profile);
   assert(m_postConds.empty());
   Timer _t(Timer::collectPostConditions);
 

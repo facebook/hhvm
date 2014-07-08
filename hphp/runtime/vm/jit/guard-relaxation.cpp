@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -33,7 +34,7 @@ using Trace::Indent;
 bool shouldHHIRRelaxGuards() {
   return RuntimeOption::EvalHHIRRelaxGuards &&
     (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
-     tx->mode() == TransKind::Optimize);
+     mcg->tx().mode() == TransKind::Optimize);
 }
 
 /* For each possible dest type, determine if its type might relax. */
@@ -151,7 +152,8 @@ void retypeLoad(IRInstruction* load, Type newType) {
 void visitLoad(IRInstruction* inst, const FrameState& state) {
   switch (inst->op()) {
     case LdLoc:
-    case LdLocAddr: {
+    case LdLocAddr:
+    case LdGbl: {
       auto const id = inst->extra<LocalId>()->locId;
       auto const newType = state.localType(id);
 
@@ -442,7 +444,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
   newTc.weak = origTc.weak;
 
   while (true) {
-    if (newTc.category == DataTypeSpecialized) {
+    if (newTc.isSpecialized()) {
       // We need to ask for the right kind of specialization, so grab it from
       // origTc.
       if (origTc.wantArrayKind()) newTc.setWantArrayKind();

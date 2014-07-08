@@ -66,7 +66,7 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
   // Initialize the region and bookkeeping.
   addToRegion(triggerId);
   worklist.push(triggerId);
-  selectedSet.insert(triggerId);
+  visited.insert(triggerId);
 
   // Traverse the CFG depth-first, adding blocks that meet the conditions.
   while (!worklist.empty()) {

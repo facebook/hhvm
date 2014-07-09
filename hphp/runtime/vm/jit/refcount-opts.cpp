@@ -925,10 +925,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeAllLocals();
       consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
-      consumeAllLocals();
+      consumeCurrentLocals();
     } else if (m_inst->is(CreateCont, CreateAFWH)) {
       consumeInputs();
-      consumeAllLocals();
+      consumeCurrentLocals();
       auto frame = frameRoot(m_inst->src(0)->inst());
       consumeFrame(m_state.frames.live.at(frame));
       defineOutputs();
@@ -966,6 +966,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
     return it->second.mainThis;
   }
 
+  /*
+   * Consumes all local values, including those in callers if we're inlined.
+   */
   void consumeAllLocals() {
     ITRACE(3, "consuming all locals\n");
     Indent _i;
@@ -974,6 +977,19 @@ struct SinkPointAnalyzer : private LocalStateHook {
         if (value) consumeValue(value);
       }
     );
+  }
+
+  /*
+   * Consumes all locals in the current frame, not including inline callers.
+   */
+  void consumeCurrentLocals() {
+    ITRACE(3, "consume current frame locals\n");
+    Indent _i;
+    for (uint32_t i = 0, n = m_frameState.func()->numLocals(); i < n; ++i) {
+      if (auto value = m_frameState.localValue(i)) {
+        consumeValue(value);
+      }
+    }
   }
 
   void consumeInputs() {

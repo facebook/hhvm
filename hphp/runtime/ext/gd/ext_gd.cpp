@@ -404,6 +404,8 @@ static const char php_sig_jp2[12] =
    (char)0x6a, (char)0x50, (char)0x20, (char)0x20,
    (char)0x0d, (char)0x0a, (char)0x87, (char)0x0a};
 static const char php_sig_iff[4] = {'F','O','R','M'};
+static const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01,
+                                    (char)0x00};
 
 static struct gfxinfo *php_handle_gif(const Resource& stream) {
   struct gfxinfo *result = NULL;
@@ -468,7 +470,7 @@ static struct gfxinfo *php_handle_bmp (const Resource& stream) {
     result->width = (((unsigned int)s[5]) << 8) + ((unsigned int)s[4]);
     result->height = (((unsigned int)s[7]) << 8) + ((unsigned int)s[6]);
     result->bits = ((unsigned int)s[11]);
-  } else if (size > 12 && (size <= 64 || size == 108)) {
+  } else if (size > 12 && (size <= 64 || size == 108 || size == 124)) {
     result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
     CHECK_ALLOC_R(result, sizeof(struct gfxinfo), NULL);
     result->width = (((unsigned int)s[7]) << 24) +
@@ -1400,6 +1402,46 @@ static struct gfxinfo *php_handle_xbm(const Resource& stream) {
   return result;
 }
 
+static struct gfxinfo *php_handle_ico(const Resource& stream) {
+  struct gfxinfo *result = nullptr;
+  String dim;
+  const unsigned char *s;
+  int num_icons = 0;
+
+  dim = f_fread(stream, 2);
+  if (dim.length() != 2) {
+    return nullptr;
+  }
+
+  s = (unsigned char *)dim.c_str();
+  num_icons = (((unsigned int)s[1]) << 8) + ((unsigned int)s[0]);
+
+  if (num_icons < 1 || num_icons > 255) {
+    return nullptr;
+  }
+
+  result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
+  CHECK_ALLOC_R(result, (sizeof(struct gfxinfo)), nullptr);
+
+  while (num_icons > 0) {
+    dim = f_fread(stream, 16);
+    if (dim.length() != 16) {
+      break;
+    }
+
+    s = (unsigned char *)dim.c_str();
+
+    if ((((unsigned int)s[7]) << 8) + ((unsigned int)s[6]) >= result->bits) {
+      result->width  = (unsigned int)s[0];
+      result->height = (unsigned int)s[1];
+      result->bits   = (((unsigned int)s[7]) << 8) + ((unsigned int)s[6]);
+    }
+    num_icons--;
+  }
+
+  return result;
+}
+
 /* Convert internal image_type to mime type */
 static char *php_image_type_to_mime_type(int image_type) {
   switch( image_type) {
@@ -1415,7 +1457,7 @@ static char *php_image_type_to_mime_type(int image_type) {
   case IMAGE_FILETYPE_PSD:
     return "image/psd";
   case IMAGE_FILETYPE_BMP:
-    return "image/bmp";
+    return "image/x-ms-bmp";
   case IMAGE_FILETYPE_TIFF_II:
   case IMAGE_FILETYPE_TIFF_MM:
     return "image/tiff";
@@ -1429,6 +1471,8 @@ static char *php_image_type_to_mime_type(int image_type) {
     return "image/jp2";
   case IMAGE_FILETYPE_XBM:
     return "image/xbm";
+  case IMAGE_FILETYPE_ICO:
+    return "image/vnd.microsoft.icon";
   default:
   case IMAGE_FILETYPE_UNKNOWN:
     return "application/octet-stream"; /* suppose binary format */
@@ -1488,9 +1532,10 @@ static int php_getimagetype(const Resource& stream) {
     return IMAGE_FILETYPE_TIFF_II;
   } else if (!memcmp(fileType.c_str(), php_sig_tif_mm, 4)) {
     return IMAGE_FILETYPE_TIFF_MM;
-  }
-  if (!memcmp(fileType.c_str(), php_sig_iff, 4)) {
+  } else if (!memcmp(fileType.c_str(), php_sig_iff, 4)) {
     return IMAGE_FILETYPE_IFF;
+  } else if (!memcmp(fileType.c_str(), php_sig_ico, 4)) {
+    return IMAGE_FILETYPE_ICO;
   }
 
   data = file->read(8);
@@ -1584,6 +1629,8 @@ String HHVM_FUNCTION(image_type_to_extension,
     return include_dot ? String(".jb2") : String("jb2");
   case IMAGE_FILETYPE_XBM:
     return include_dot ? String(".xbm") : String("xbm");
+  case IMAGE_FILETYPE_ICO:
+    return include_dot ? String(".ico") : String("ico");
   default:
     return ret;
   }
@@ -1600,12 +1647,11 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
   int itype = 0;
   struct gfxinfo *result = NULL;
   if (imageinfo.isReferenced()) {
-    imageinfo = uninit_null();
+    imageinfo = Array::Create();
   }
 
   Variant stream = f_fopen(filename, "rb");
   if (same(stream, false)) {
-    raise_warning("failed to open stream: %s", filename.c_str());
     return false;
   }
   itype = php_getimagetype(stream.toResource());
@@ -1665,6 +1711,9 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
     break;
   case IMAGE_FILETYPE_XBM:
     result = php_handle_xbm(stream.toResource());
+    break;
+  case IMAGE_FILETYPE_ICO:
+    result = php_handle_ico(stream.toResource());
     break;
   default:
   case IMAGE_FILETYPE_UNKNOWN:

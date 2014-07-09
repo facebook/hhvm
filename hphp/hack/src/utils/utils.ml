@@ -144,7 +144,6 @@ let imap_inter_list = function
   | x :: rl ->
       List.fold_left imap_inter x rl
 
-
 let partition_smap f m =
   SMap.fold (
   fun x ty (acc1, acc2) ->
@@ -290,20 +289,6 @@ let str_starts_with long short =
     long = short
   with Invalid_argument _ ->
     false
-
-
-let (spinner, spinner_used) =
-  let state = ref 0 in
-  (fun () ->
-    begin
-      let str = List.nth ["-"; "\\"; "|"; "/"] (!state mod 4) in
-      state := !state + 1;
-      str
-    end),
-  (fun () -> !state <> 0)
-
-(* ANSI escape sequence to clear whole line *)
-let clear_line_seq = "\r\x1b[0K"
 
 (*****************************************************************************)
 (* Same as List.iter2, except that we only iterate as far as the shortest

@@ -10,7 +10,7 @@
 open ClientEnv
 open ClientExceptions
 
-module C = TtyColor
+module C = Tty
 
 let print_reason_color ~(first:bool) ((p, s): Pos.t * string) =
   let line, start, end_ = Pos.info_pos p in

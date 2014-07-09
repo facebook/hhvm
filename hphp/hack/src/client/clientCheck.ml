@@ -13,8 +13,8 @@ open ClientExceptions
 
 let connect args =
   let ic, oc = ClientUtils.connect args.root in
-  if not (args.output_json) && Utils.spinner_used() then
-    Printf.fprintf stderr "%s%!" Utils.clear_line_seq;
+  if not args.output_json && Tty.spinner_used() then
+    Tty.print_clear_line stderr;
   (ic, oc)
 
 let get_list_files (args:client_check_env): string list =
@@ -53,10 +53,10 @@ let rec main args retries =
   let has_timed_out = match args.timeout with
     | None -> false
     | Some t -> Unix.time() > t
-  in if has_timed_out
-  then begin
-      Printf.fprintf stderr "Error: hh_client hit timeout, giving up!\n%!";
-      exit 7
+  in
+  if has_timed_out then begin
+    Printf.fprintf stderr "Error: hh_client hit timeout, giving up!\n%!";
+    exit 7
   end else try
     match args.mode with
     | MODE_LIST_FILES ->
@@ -187,7 +187,7 @@ let rec main args retries =
                      "just started this can take some time." in
       if args.retry_if_init
       then begin
-        Printf.fprintf stderr "%s Retrying... %s\r" init_msg (Utils.spinner());
+        Printf.fprintf stderr "%s Retrying... %s\r" init_msg (Tty.spinner());
         flush stderr;
         Unix.sleep(1);
         main args retries
@@ -199,7 +199,7 @@ let rec main args retries =
       if retries > 1
       then begin
         Printf.fprintf stderr "Error: could not connect to hh_server, retrying... %s\r"
-          (Utils.spinner());
+          (Tty.spinner());
         flush stderr;
         Unix.sleep(1);
         main args (retries-1)
@@ -212,7 +212,7 @@ let rec main args retries =
       if retries > 1
       then begin
         Printf.fprintf stderr "Error: hh_server is busy, retrying... %s\r"
-          (Utils.spinner());
+          (Tty.spinner());
         flush stderr;
         Unix.sleep(1);
         main args (retries-1)
@@ -251,7 +251,7 @@ let rec main args retries =
       if retries > 1
       then begin
         Printf.fprintf stderr "Error: hh_server disconnected or crashed, retrying... %s\r"
-          (Utils.spinner());
+          (Tty.spinner());
         flush stderr;
         Unix.sleep(1);
         main args (retries-1)

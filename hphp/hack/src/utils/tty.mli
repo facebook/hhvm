@@ -27,4 +27,14 @@ type style =
  * Print a sequence of colorized strings to stdout, using ANSI color escapes
  * codes.
  *)
-val print: (style * string) list -> unit
+val print : (style * string) list -> unit
+
+(* These two functions provide a four-state TTY-friendly spinner that
+ * a client can output between sleeps if it happens to be waiting on
+ * a busy server (e.g. one that's initializing) *)
+val spinner : unit -> string
+val spinner_used : unit -> bool
+
+(* Output a "clear current line" escape sequence to out_channel if it's
+ * a TTY and a newline otherwise *)
+val print_clear_line : out_channel -> unit

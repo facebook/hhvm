@@ -26,7 +26,7 @@ let rec connect env retries =
       Try 'hh start your_directory'\n";
     exit 2
   | ClientExceptions.Server_initializing ->
-    Printf.printf "Server still initializing. %s\r%!" (Utils.spinner());
+    Printf.printf "Server still initializing. %s\r%!" (Tty.spinner());
     if retries > 0
     then (
       Unix.sleep(1);

@@ -12,7 +12,7 @@
 (* Section defining the colors we are going to use *)
 (*****************************************************************************)
 
-module C = TtyColor
+module C = Tty
 module Json = Hh_json
 let err_clr       = C.Bold C.Red       (* Unchecked code *)
 let checked_clr   = C.Normal C.Green   (* Checked code *)

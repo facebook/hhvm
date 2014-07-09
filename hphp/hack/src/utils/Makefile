@@ -8,7 +8,7 @@ SRC= hh_json.ml \
      path.ml pos.ml \
      sysConfig.ml tmp.ml build_id.ml \
      ident.ml \
-     printSignal.ml ttyColor.ml \
+     printSignal.ml tty.ml \
      sys_utils.ml \
      utils.ml \
      errors.ml \

@@ -42,3 +42,21 @@ let print_one (c,s) =
   Printf.printf "\x1b[%sm%s\x1b[0m" (style_num c) (s)
 
 let print strs = List.iter print_one strs
+
+let (spinner, spinner_used) =
+  let state = ref 0 in
+  (fun () ->
+    begin
+      let str = List.nth ["-"; "\\"; "|"; "/"] (!state mod 4) in
+      state := !state + 1;
+      str
+    end),
+  (fun () -> !state <> 0)
+
+(* ANSI escape sequence to clear whole line *)
+let clear_line_seq = "\r\x1b[0K"
+
+let print_clear_line chan =
+  if Unix.isatty (Unix.descr_of_out_channel chan)
+  then Printf.fprintf chan "%s%!" clear_line_seq
+  else Printf.fprintf chan "\n%!"

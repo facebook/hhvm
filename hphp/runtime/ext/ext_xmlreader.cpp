@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
-
+#include "hphp/runtime/ext/libxml/ext_libxml.h"
 
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
@@ -59,33 +59,6 @@ const int64_t q_XMLReader$$SUBST_ENTITIES = XML_PARSER_SUBST_ENTITIES;
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static String _xmlreader_get_valid_file_path(const char *source) {
-  int isFileUri = 0;
-
-  xmlURI *uri = xmlCreateURI();
-  xmlChar *escsource = xmlURIEscapeStr((xmlChar*)source, (xmlChar*)":");
-  xmlParseURIReference(uri, (char*)escsource);
-  xmlFree(escsource);
-
-  if (uri->scheme != NULL) {
-    /* absolute file uris - libxml only supports localhost or empty host */
-    if (strncasecmp(source, "file:///",8) == 0) {
-      isFileUri = 1;
-      source += 7;
-    } else if (strncasecmp(source, "file://localhost/",17) == 0) {
-      isFileUri = 1;
-      source += 16;
-    }
-  }
-
-  String file_dest = String(source, CopyString);
-  if ((uri->scheme == NULL || isFileUri)) {
-    file_dest = File::TranslatePath(file_dest);
-  }
-  xmlFreeURI(uri);
-  return file_dest;
-}
-
 static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
                                             xmlRelaxNGValidityErrorFunc error_func,
                                             xmlRelaxNGValidityWarningFunc warn_func )
@@ -96,7 +69,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
 
   switch (type) {
     case XMLREADER_LOAD_FILE:
-      valid_file = _xmlreader_get_valid_file_path(source.c_str());
+      valid_file = libxml_get_valid_file_path(source.c_str());
       if (valid_file.empty()) {
         return NULL;
       }
@@ -150,7 +123,7 @@ bool c_XMLReader::t_open(const String& uri, const String& encoding /*= null_stri
     return false;
   }
 
-  String valid_file = _xmlreader_get_valid_file_path(uri.c_str());
+  String valid_file = libxml_get_valid_file_path(uri.c_str());
   xmlTextReaderPtr reader = NULL;
 
   if (!valid_file.empty()) {

@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/zend-url.h"
 
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
@@ -155,6 +156,31 @@ void libxml_add_error(const std::string &msg) {
   error_copy.str1 = nullptr;
   error_copy.str2 = nullptr;
   error_copy.str3 = nullptr;
+}
+
+String libxml_get_valid_file_path(const char *source) {
+  return libxml_get_valid_file_path(String(source, CopyString));
+}
+
+String libxml_get_valid_file_path(const String & source) {
+  bool isFileUri = false;
+  bool isUri = false;
+
+  String file_dest(source);
+
+  Url url;
+  if (url_parse(url, file_dest.data(), file_dest.size())) {
+    isUri = true;
+    if (url.scheme.same(s_file)) {
+      file_dest = StringUtil::UrlDecode(url.path, false);
+      isFileUri = true;
+    }
+  }
+
+  if (!isUri || url.scheme.empty() || isFileUri) {
+    file_dest = File::TranslatePath(file_dest);
+  }
+  return file_dest;
 }
 
 static void libxml_error_handler(void* userData, xmlErrorPtr error) {

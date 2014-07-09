@@ -136,6 +136,17 @@ public:
   static String UrlEncode(const String& input, bool encodePlus = true);
   static String UrlDecode(const String& input, bool decodePlus = true);
 
+  /** 
+   * Determine if a string looks like a file URL. Does not check for validity.
+   */
+  static bool IsFileUrl(const String& input);
+
+  /**
+   * Determine if a string is a valid local file URL. If it is, the decoded
+   * path part is returned. If it is not, an empty string is returned.
+   */
+  static String DecodeFileUrl(const String& input);
+  
   /**
    * Formatting.
    */

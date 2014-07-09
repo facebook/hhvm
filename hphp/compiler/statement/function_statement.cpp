@@ -80,6 +80,13 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
     fs->setPersistent(Option::PersistenceHook(fs, scope));
   }
 
+  if (m_name == "__autoload") {
+    if (m_params && m_params->getCount() != 1) {
+      parseTimeFatal(Compiler::InvalidMagicMethod,
+                     "__autoload() must take exactly 1 argument");
+    }
+  }
+
   if (fs->isNative()) {
     if (getStmts()) {
       parseTimeFatal(Compiler::InvalidAttribute,

@@ -16,79 +16,79 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
-#include "folly/MapUtil.h"
-
 #include <cinttypes>
-#include <stdint.h>
 #include <assert.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <strstream>
-#include <stdio.h>
 #include <stdarg.h>
-#include <string>
-#include <queue>
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <unistd.h>
 #include <unwind.h>
-#include <unordered_set>
 
 #include <algorithm>
 #include <exception>
 #include <memory>
+#include <queue>
+#include <string>
+#include <strstream>
+#include <unordered_set>
 #include <vector>
 
 #include "folly/Format.h"
+#include "folly/MapUtil.h"
 #include "folly/String.h"
 
 #include "hphp/util/abi-cxx.h"
-#include "hphp/util/disasm.h"
 #include "hphp/util/bitops.h"
+#include "hphp/util/cycles.h"
 #include "hphp/util/debug.h"
+#include "hphp/util/disasm.h"
 #include "hphp/util/maphuge.h"
+#include "hphp/util/meta.h"
+#include "hphp/util/process.h"
 #include "hphp/util/rank.h"
+#include "hphp/util/repo-schema.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/meta.h"
-#include "hphp/util/process.h"
-#include "hphp/util/repo-schema.h"
-#include "hphp/util/cycles.h"
 
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/php-debug.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option-guard.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 #include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/debug-guards.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
-#include "hphp/runtime/vm/jit/debug-guards.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/php-debug.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
@@ -1639,7 +1639,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         }
 
         FTRACE(2, "translateRegion finished with result {}\n",
-               Translator::translateResultName(result));
+               Translator::ResultName(result));
       } catch (ControlFlowFailedExc& cfe) {
         FTRACE(2, "translateRegion with control flow failed: '{}'\n",
                cfe.what());

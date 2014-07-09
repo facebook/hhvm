@@ -13,35 +13,34 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/translator.h"
 
-// Translator front-end: parse instruction stream into basic blocks, decode
-// and normalize instructions. Propagate run-time type info to instructions
-// to annotate their inputs and outputs with types.
 #include <cinttypes>
 #include <assert.h>
-#include <stdint.h>
 #include <stdarg.h>
+#include <stdint.h>
 
-#include <vector>
-#include <string>
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
-#include "folly/Optional.h"
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
+#include "folly/Optional.h"
 
-#include "hphp/util/trace.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/util/trace.h"
+
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -68,8 +67,8 @@ namespace {
 TRACE_SET_MOD(trans);
 }
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
+///////////////////////////////////////////////////////////////////////////////
 
 Lease Translator::s_writeLease;
 
@@ -1423,7 +1422,7 @@ void populateImmediates(NormalizedInstruction& inst) {
   }
 }
 
-const char* Translator::translateResultName(TranslateResult r) {
+const char* Translator::ResultName(TranslateResult r) {
   static const char* const names[] = {
     "Failure",
     "Retry",
@@ -1635,14 +1634,14 @@ Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
                             RegionBlacklist& toInterp,
                             TransFlags trflags) {
-  const Timer translateRegionTimer(Timer::translateRegion);
+  assert(!region.blocks.empty());
 
+  const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
+
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   IRBuilder& irb = ht.irBuilder();
-  assert(!region.blocks.empty());
-  const SrcKey startSk = region.blocks.front()->start();
-  auto profilingFunc = false;
+  auto const startSk = region.blocks.front()->start();
 
   BlockIdToIRBlockMap     blockIdToIRBlock;
   BlockIdToRegionBlockMap blockIdToRegionBlock;
@@ -1689,18 +1688,19 @@ Translator::translateRegion(const RegionDesc& region,
       // attributed to this instruction.
       ht.setBcOff(sk.offset(), false);
 
-      // Emit prediction guards. If this is the first instruction in the
-      // region the guards will go to a retranslate request. Otherwise, they'll
-      // go to a side exit.
-      bool isFirstRegionInstr = block == region.blocks.front() && i == 0;
+      // Emit prediction guards. If this is the first instruction in the region
+      // the guards will go to a retranslate request. Otherwise, they'll go to
+      // a side exit.
+      bool isFirstRegionInstr = (block == region.blocks.front() && i == 0);
       if (isFirstRegionInstr) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
 
+      // Emit type guards.
       while (typePreds.hasNext(sk)) {
         auto const& pred = typePreds.next();
         auto type = pred.type;
         auto loc  = pred.location;
         if (type <= Type::Cls) {
-          // Do not generate guards for class; instead assert the type
+          // Do not generate guards for class; instead assert the type.
           assert(loc.tag() == RegionDesc::Location::Tag::Stack);
           ht.assertType(loc, type);
         } else if (isFirstRegionInstr) {
@@ -1719,6 +1719,7 @@ Translator::translateRegion(const RegionDesc& region,
         ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
       }
 
+      // Finish emitting guards, and emit profiling counters.
       if (isFirstRegionInstr) {
         ht.endGuards();
         if (RuntimeOption::EvalJitTransCounters) {
@@ -1726,14 +1727,12 @@ Translator::translateRegion(const RegionDesc& region,
         }
 
         if (m_mode == TransKind::Profile) {
-          profilingFunc = true;
           if (block->func()->isEntry(block->start().offset())) {
             ht.emitCheckCold(m_profData->curTransID());
           } else {
             ht.emitIncProfCounter(m_profData->curTransID());
           }
         }
-
         ht.emitRB(Trace::RBTypeTraceletBody, sk);
       }
 
@@ -1744,8 +1743,8 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
-      inst.breaksTracelet =
-        i == block->length() - 1 && block == region.blocks.back();
+      inst.breaksTracelet = (i == block->length() - 1 &&
+                             block == region.blocks.back());
       inst.changesPC = opcodeChangesPC(inst.op());
       inst.funcd = topFunc;
       if (instrIsNonCallControlFlow(inst.op()) && !inst.breaksTracelet) {
@@ -1766,15 +1765,15 @@ Translator::translateRegion(const RegionDesc& region,
       inst.interp = toInterp.count(ProfSrcKey{profTransId, sk});
 
       InputInfos inputInfos;
-      getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
-          return ht.irBuilder().localType(i, DataTypeGeneric);
-        });
+      getInputs(startSk, inst, inputInfos, block->func(), [&] (int i) {
+        return irb.localType(i, DataTypeGeneric);
+      });
 
       // Populate the NormalizedInstruction's input vector, using types from
       // HhbcTranslator.
       std::vector<DynLocation> dynLocs;
       dynLocs.reserve(inputInfos.size());
-      auto newDynLoc = [&](const InputInfo& ii) {
+      auto newDynLoc = [&] (const InputInfo& ii) {
         dynLocs.emplace_back(ii.loc, ht.typeFromLocation(ii.loc));
         FTRACE(2, "typeFromLocation: {} -> {}\n",
                ii.loc.pretty(), dynLocs.back().rtt);
@@ -1941,7 +1940,9 @@ Translator::translateRegion(const RegionDesc& region,
 
   try {
     translatorTraceCodeGen();
-    if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
+    if (m_mode == TransKind::Profile) {
+      profData()->setProfiling(startSk.func()->getFuncId());
+    }
   } catch (const FailedCodeGen& exn) {
     SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
     ProfSrcKey psk{exn.profTransId, sk};
@@ -2097,7 +2098,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   return func;
 }
 
-} // HPHP::JIT
+///////////////////////////////////////////////////////////////////////////////
+}
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
@@ -2116,4 +2118,5 @@ void invalidatePath(const std::string& path) {
   });
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }

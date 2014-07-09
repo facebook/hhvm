@@ -2319,8 +2319,7 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
  * but with a shorter encoding (eg testb(val, mr))
  * if possible.
  */
-template <typename M>
-void testimm(Asm& as, uint32_t val, const M& mr) {
+void testimm(Asm& as, uint32_t val, MemoryRef mr) {
   int off = 0;
   auto v = val;
   while (v > 0xff && !(v & 0xff)) {

@@ -136,7 +136,14 @@ static int accessSyscall(
     if (UNLIKELY(boost::istarts_with(uri_or_path.data(), "file://"))) {
       path = uri_or_path.substr(sizeof("file://") - 1);
     }
-    return ::access(File::TranslatePathWithFileCache(path).data(), mode);
+    String filepath = path;
+    if (path.charAt(0) != '/') {
+        String cwd = g_context->getCwd();
+        filepath = cwd + "/" + path;
+        if (!cwd.empty() && cwd[cwd.length() - 1] == '/') {
+            filepath = cwd + path;
+        }
+    }
   }
   return w->access(uri_or_path, mode);
 }

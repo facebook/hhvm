@@ -42,6 +42,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
            opc == RetAdjustStack ||
            opc == InterpOne ||
            opc == InterpOneCF ||
+           opc == Mov ||
            opc == CheckStk ||
            opc == GuardStk ||
            opc == AssertStk ||

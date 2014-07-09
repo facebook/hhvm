@@ -1110,12 +1110,21 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
              dstLoc(0).reg(), dstLoc(0).reg(1));
     return;
   }
+  auto const src = inst->src(0);
+
   auto sreg = srcLoc(0).reg();
   auto dreg = dstLoc(0).reg();
-  if (sreg == InvalidReg) {
-    emitLoadImm(m_as, inst->src(0)->rawVal(), dreg);
-  } else {
+
+  if (sreg != InvalidReg && dreg != InvalidReg) {
     emitMovRegReg(m_as, sreg, dreg);
+  } else if (sreg == InvalidReg && dreg != InvalidReg) {
+    // It won't have a raw value if it's null.
+    auto const stype = src->type();
+    assert(stype.hasRawVal() || stype <= Type::Null);
+    auto const raw = stype.hasRawVal() ? src->rawVal() : 0;
+    emitLoadImm(m_as, raw, dreg);
+  } else {
+    assert(sreg == InvalidReg && dreg == InvalidReg);
   }
 }
 

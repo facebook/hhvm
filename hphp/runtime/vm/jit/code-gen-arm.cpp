@@ -1293,7 +1293,7 @@ void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
   }
   doJcc(cc);
   if (type < Type::Obj) {
-    assert(type.getClass()->attrs() & AttrFinal);
+    assert(type.getClass()->attrs() & AttrNoOverride);
     auto dataReg = enregister(m_as, dataSrc, rAsm);
     emitLdLowPtr(m_as, rAsm, dataReg[ObjectData::getVMClassOffset()],
                  sizeof(LowClassPtr));

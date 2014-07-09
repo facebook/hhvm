@@ -1939,7 +1939,7 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc,
 
   if (type < Type::Obj) {
     // emit the specific class test
-    assert(type.getClass()->attrs() & AttrFinal);
+    assert(type.getClass()->attrs() & AttrNoOverride);
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     emitCmpClass(m_as, type.getClass(), reg[ObjectData::getVMClassOffset()]);
     doJcc(CC_E);

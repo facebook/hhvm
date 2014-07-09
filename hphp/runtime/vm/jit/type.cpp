@@ -632,8 +632,9 @@ Type liveTVType(const TypedValue* tv) {
 
   if (tv->m_type == KindOfObject) {
     Class* cls = tv->m_data.pobj->getVMClass();
-    // We only allow specialization on final classes for now.
-    if (cls && !(cls->attrs() & AttrFinal)) cls = nullptr;
+    // We only allow specialization on classes that can't be
+    // overridden for now.
+    if (cls && !(cls->attrs() & AttrNoOverride)) cls = nullptr;
     return Type::Obj.specialize(cls);
   }
   if (tv->m_type == KindOfArray) {

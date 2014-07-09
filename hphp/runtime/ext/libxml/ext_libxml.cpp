@@ -16,8 +16,10 @@
 */
 
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
-#include "hphp/runtime/base/request-local.h"
+
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/zend-url.h"
 
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
@@ -235,6 +237,31 @@ void php_libxml_node_free_resource(xmlNodePtr node) {
       }
     }
   }
+}
+
+String libxml_get_valid_file_path(const char* source) {
+  return libxml_get_valid_file_path(String(source, CopyString));
+}
+
+String libxml_get_valid_file_path(const String& source) {
+  bool isFileUri = false;
+  bool isUri = false;
+
+  String file_dest(source);
+
+  Url url;
+  if (url_parse(url, file_dest.data(), file_dest.size())) {
+    isUri = true;
+    if (url.scheme.same(s_file)) {
+      file_dest = StringUtil::UrlDecode(url.path, false);
+      isFileUri = true;
+    }
+  }
+
+  if (!isUri || url.scheme.empty() || isFileUri) {
+    file_dest = File::TranslatePath(file_dest);
+  }
+  return file_dest;
 }
 
 static void libxml_error_handler(void* userData, xmlErrorPtr error) {

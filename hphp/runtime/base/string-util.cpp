@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <vector>
 #include "hphp/zend/zend-html.h"
+#include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -375,6 +376,32 @@ String StringUtil::UrlDecode(const String& input,
   return decodePlus ?
     url_decode(input.data(), input.size()) :
     url_raw_decode(input.data(), input.size());
+}
+
+bool StringUtil::IsFileUrl(const String& input) {
+  return string_strncasecmp(
+    input.data(), input.size(),
+    "file://", sizeof("file://") - 1,
+    sizeof("file://") - 1) == 0;
+}
+
+String StringUtil::DecodeFileUrl(const String& input) {
+  Url url;
+  if (!url_parse(url, input.data(), input.size())) {
+    return null_string;
+  }
+  if (bstrcasecmp(url.scheme.data(), url.scheme.size(),
+        "file", sizeof("file")-1) != 0) {
+    // Not file scheme
+    return null_string;
+  }
+  if (url.host.size() > 0
+      && bstrcasecmp(url.host.data(), url.host.size(),
+        "localhost", sizeof("localhost")-1) != 0) {
+    // Not localhost or empty host
+    return null_string;
+  }
+  return url_raw_decode(url.path.data(), url.path.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

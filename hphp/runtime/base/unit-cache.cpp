@@ -30,6 +30,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -274,8 +275,6 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
 //////////////////////////////////////////////////////////////////////
 // resolveVmInclude callbacks
 
-const StaticString s_file_url("file://");
-
 struct ResolveIncludeContext {
   String path;    // translated path of the file
   struct stat* s; // stat for the file
@@ -315,7 +314,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   }
 
   // handle file://
-  if (file.substr(0, 7) == s_file_url) {
+  if (StringUtil::IsFileUrl(file)) {
     return findFileWrapper(file.substr(7), ctx);
   }
 

@@ -27,27 +27,17 @@ namespace HPHP {
 
 inline void c_ResumableWaitHandle::resume() {
   switch (getKind()) {
-    case Kind::AsyncFunction:
-      static_cast<c_AsyncFunctionWaitHandle*>(this)->resume();
-      return;
-    case Kind::AsyncGenerator:
-      static_cast<c_AsyncGeneratorWaitHandle*>(this)->resume();
-      return;
-    default:
-      not_reached();
+    case Kind::AsyncFunction:  return asAsyncFunction()->resume();
+    case Kind::AsyncGenerator: return asAsyncGenerator()->resume();
+    default:                   not_reached();
   }
 }
 
 inline void c_ResumableWaitHandle::exitContext(context_idx_t ctx_idx) {
   switch (getKind()) {
-    case Kind::AsyncFunction:
-      static_cast<c_AsyncFunctionWaitHandle*>(this)->exitContext(ctx_idx);
-      return;
-    case Kind::AsyncGenerator:
-      static_cast<c_AsyncGeneratorWaitHandle*>(this)->exitContext(ctx_idx);
-      return;
-    default:
-      not_reached();
+    case Kind::AsyncFunction:  return asAsyncFunction()->exitContext(ctx_idx);
+    case Kind::AsyncGenerator: return asAsyncGenerator()->exitContext(ctx_idx);
+    default:                   not_reached();
   }
 }
 

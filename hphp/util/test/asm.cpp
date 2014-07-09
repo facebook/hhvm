@@ -647,7 +647,7 @@ TEST(Asm, CMov) {
   Asm a { db };
   a.   testq  (rax, rax);
   a.   cload_reg64_disp_reg64(CC_Z, rax, 0, rax);
-  a.   cload_reg64_disp_reg32(CC_Z, rax, 0, rax);
+  a.   cload_reg64_disp_reg32(CC_Z, rax, 0, eax);
   expect_asm(a, R"(
 test %rax, %rax
 cmovzq (%rax), %rax

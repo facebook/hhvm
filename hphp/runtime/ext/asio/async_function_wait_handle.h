@@ -101,6 +101,11 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
   static const int8_t STATE_RUNNING   = 4;
 };
 
+inline c_AsyncFunctionWaitHandle* c_WaitHandle::asAsyncFunction() {
+  assert(getKind() == Kind::AsyncFunction);
+  return static_cast<c_AsyncFunctionWaitHandle*>(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -11,6 +11,18 @@
 external get_embedded_hhi_data : string -> string option =
   "get_embedded_hhi_data"
 
+(* OCaml handles the value restriction much better than SML. <3 *)
+let root = ref None
+
+let touch_root r =
+  let r = Path.string_of_path r in
+  ignore (Unix.system ("find \"" ^ r ^ "\" -name *.hhi -exec touch '{}' ';'"))
+
+let touch () =
+  match !root with
+  | Some (Some r) -> touch_root r
+  | _ -> ()
+
 (* There are several verify-use race conditions here (and in Hack's file
  * handling in general, really). Running the server as root is likely to be a
  * security risk. Be careful. *)
@@ -21,6 +33,7 @@ let extract data =
   output_string oc data;
   flush oc;
   ignore (Unix.close_process_out oc);
+  touch_root path;
   path
 
 let extract_embedded () =
@@ -36,9 +49,6 @@ let get_hhi_root_impl () =
   match extract_embedded () with
   | Some path -> Some path
   | None -> extract_external ()
-
-(* OCaml handles the value restriction much better than SML. <3 *)
-let root = ref None
 
 (* We want this to be idempotent so that later code can check if a given file
  * came from the hhi unarchive directory or not, to provide better error

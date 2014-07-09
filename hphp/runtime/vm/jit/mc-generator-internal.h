@@ -142,11 +142,11 @@ static_assert(sizeof(DataType) == 1,
               "Your DataType has an unsupported size.");
 static inline Reg8 toByte(const Reg32& x)   { return rbyte(x); }
 static inline Reg8 toByte(const Reg64& x)   { return rbyte(x); }
-static inline Reg8 toByte(PhysReg x)        { return rbyte(x); }
+static inline Reg8 toByte(PhysReg x)        { return rbyte(Reg64(x)); }
 
 static inline Reg32 toReg32(const Reg64& x) { return r32(x); }
 static inline Reg32 toReg32(const Reg8& x)  { return r32(x); }
-static inline Reg32 toReg32(PhysReg x)      { return r32(x); }
+static inline Reg32 toReg32(PhysReg x)      { return r32(Reg64(x)); }
 
 // For other operand types, let whatever conversions (or compile
 // errors) exist handle it.
@@ -225,7 +225,7 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
     emitStoreTVType(a, type, dest[disp + TVOFF(m_type)]);
   }
   if (!IS_NULL_TYPE(type)) {
-    assert(val != reg::noreg);
+    assert(val != InvalidReg);
     a.  storeq(val, dest[disp + TVOFF(m_data)]);
   }
 }
@@ -247,12 +247,10 @@ emitCopyTo(X64Assembler& a,
            PhysReg scratch) {
   assert(src != scratch);
   // This is roughly how gcc compiles this.  Blow off m_aux.
-  auto s64 = r64(scratch);
-  auto s32 = r32(scratch);
-  a.    loadq  (src[srcOff + TVOFF(m_data)], s64);
-  a.    storeq (s64, dest[destOff + TVOFF(m_data)]);
-  emitLoadTVType(a, src[srcOff + TVOFF(m_type)], s32);
-  emitStoreTVType(a, s32, dest[destOff + TVOFF(m_type)]);
+  a.    loadq  (src[srcOff + TVOFF(m_data)], scratch);
+  a.    storeq (scratch, dest[destOff + TVOFF(m_data)]);
+  emitLoadTVType(a, src[srcOff + TVOFF(m_type)], r32(scratch));
+  emitStoreTVType(a, r32(scratch), dest[destOff + TVOFF(m_type)]);
 }
 
 // Pops the return address pushed by fcall and stores it into the

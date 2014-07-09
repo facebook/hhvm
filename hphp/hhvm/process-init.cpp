@@ -55,7 +55,6 @@ void ProcessInit() {
   // Create the global mcg object
   JIT::mcg = new JIT::MCGenerator();
   JIT::mcg->initUniqueStubs();
-  JIT::mcg->code.unprotect();
 
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the

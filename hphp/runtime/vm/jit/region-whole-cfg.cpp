@@ -66,12 +66,16 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
   // Initialize the region and bookkeeping.
   addToRegion(triggerId);
   worklist.push(triggerId);
-  selectedSet.insert(triggerId);
+  visited.insert(triggerId);
 
   // Traverse the CFG depth-first, adding blocks that meet the conditions.
   while (!worklist.empty()) {
     auto tid = worklist.top();
     worklist.pop();
+
+    if (breaksRegion(*(profData->transLastInstr(tid)))) {
+      continue;
+    }
 
     for (auto const arc : cfg.outArcs(tid)) {
       auto dst = arc->dst();

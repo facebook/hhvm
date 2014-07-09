@@ -41,6 +41,7 @@ namespace HPHP { namespace JIT {
 
 typedef X64Assembler Asm;
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
+typedef hphp_hash_map<uint64_t,const uint64_t*> LiteralMap;
 
 struct TReqInfo;
 struct Label;
@@ -91,6 +92,7 @@ struct CodeGenFixups {
   std::vector<TransBCMapping> m_bcMap;
   std::multimap<TCA,std::pair<int,int>> m_alignFixups;
   GrowableVector<IncomingBranch> m_inProgressTailJumps;
+  LiteralMap m_literals;
 
   CodeBlock* m_tletMain{nullptr};
   CodeBlock* m_tletCold{nullptr};
@@ -171,6 +173,7 @@ public:
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
   CodeGenFixups& cgFixups() { return m_fixups; }
+  LiteralMap& literals() { return m_literals; }
   void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
 
   DataBlock& globalData() { return code.data(); }
@@ -207,6 +210,11 @@ public:
   T* allocData(Args&&... args) {
     return code.data().alloc<T>(std::forward<Args>(args)...);
   }
+
+  /*
+   * Allocate a literal value in the global data section.
+   */
+  const uint64_t* allocLiteral(uint64_t val);
 
   /*
    * enterTC is the main entry point for the translator from the
@@ -361,6 +369,7 @@ private:
   Debug::DebugInfo   m_debugInfo;
   FreeStubList       m_freeStubs;
   CodeGenFixups      m_fixups;
+  LiteralMap         m_literals;
 
   // asize + acoldsize + afrozensize + gdatasize + trampolinesblocksize
   size_t             m_totalSize;

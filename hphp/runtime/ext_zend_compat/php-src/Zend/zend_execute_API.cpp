@@ -158,11 +158,22 @@ namespace {
 
 int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC) /* {{{ */
 {
-  assert(fci->object_ptr == nullptr);
-
   // mostly from vm_call_user_func
   HPHP::ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
+
+  if (fci->object_ptr != nullptr) {
+    HPHP::TypedValue *tv = fci->object_ptr->tv();
+    if (tv->m_type == HPHP::KindOfObject) {
+      obj = tv->m_data.pobj;
+      if (obj) {
+        cls = obj->getVMClass();
+      }
+    } else {
+      assert(!"zend_call_function not given an object");
+    }
+  }
+
   HPHP::CallerFrame cf;
   HPHP::StringData* invName = nullptr;
   const HPHP::Func* f = HPHP::vm_decode_function(

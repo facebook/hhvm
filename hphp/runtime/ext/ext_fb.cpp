@@ -919,7 +919,27 @@ bool f_fb_intercept(const String& name, const Variant& handler,
   return register_intercept(name, handler, data);
 }
 
+
 const StaticString s_extract("extract");
+const StaticString s_extract_sl("__SystemLib\\extract");
+const StaticString s_parse_str("parse_str");
+const StaticString s_parse_str_sl("__SystemLib\\parse_str");
+const StaticString s_compact("compact");
+const StaticString s_compact_sl("__SystemLib\\compact_sl");
+const StaticString s_get_defined_vars("get_defined_vars");
+const StaticString s_get_defined_vars_sl("__SystemLib\\get_defined_vars");
+
+bool is_dangerous_varenv_function(const StringData* name) {
+  return
+    name->isame(s_extract.get()) ||
+    name->isame(s_extract_sl.get()) ||
+    name->isame(s_parse_str.get()) ||
+    name->isame(s_parse_str_sl.get()) ||
+    name->isame(s_compact.get()) ||
+    name->isame(s_compact_sl.get()) ||
+    name->isame(s_get_defined_vars.get()) ||
+    name->isame(s_get_defined_vars_sl.get());
+}
 
 bool f_fb_rename_function(const String& orig_func_name, const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
@@ -935,10 +955,11 @@ bool f_fb_rename_function(const String& orig_func_name, const String& new_func_n
     return false;
   }
 
-  if (orig_func_name.get()->isame(s_extract.get())) {
+  if (is_dangerous_varenv_function(orig_func_name.get())) {
     raise_warning(
-        "fb_rename_function(%s, %s) failed: rename of extract not allowed!",
-        orig_func_name.data(), new_func_name.data());
+      "fb_rename_function(%s, %s) failed: rename of functions that "
+      "affect variable environments is not allowed",
+      orig_func_name.data(), new_func_name.data());
     return false;
   }
 

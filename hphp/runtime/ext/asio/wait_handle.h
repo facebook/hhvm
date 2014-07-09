@@ -50,6 +50,14 @@ namespace HPHP {
  */
 FORWARD_DECLARE_CLASS(WaitHandle);
 FORWARD_DECLARE_CLASS(BlockableWaitHandle);
+FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
+FORWARD_DECLARE_CLASS(AsyncGeneratorWaitHandle);
+FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
+FORWARD_DECLARE_CLASS(GenMapWaitHandle);
+FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
+FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
+FORWARD_DECLARE_CLASS(SleepWaitHandle);
+FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
@@ -124,6 +132,15 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   void setContextVectorIndex(uint32_t idx) {
     m_ctxVecIndex = idx;
   }
+
+  c_AsyncFunctionWaitHandle* asAsyncFunction();
+  c_AsyncGeneratorWaitHandle* asAsyncGenerator();
+  c_GenArrayWaitHandle* asGenArray();
+  c_GenMapWaitHandle* asGenMap();
+  c_GenVectorWaitHandle* asGenVector();
+  c_RescheduleWaitHandle* asReschedule();
+  c_SleepWaitHandle* asSleep();
+  c_ExternalThreadEventWaitHandle* asExternalThreadEvent();
 
   // The code in the TC will depend on the values of these constants.
   // See emitAwait().

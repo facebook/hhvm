@@ -50,6 +50,6 @@
  *)
 open ServerFunctors
 
-module HackServer = ServerMain (HackProgram) 
+module HackServer = ServerMain (HackProgram.Program)
 
 let () = HackServer.start ()

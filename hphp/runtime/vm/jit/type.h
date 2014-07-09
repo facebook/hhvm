@@ -820,6 +820,13 @@ Type convertToType(RepoAuthType ty);
  */
 Type refineType(Type oldType, Type newType);
 
+/*
+ * Return the dest type for a LdRef with the given typeParam.
+ *
+ * pre: srcType.notBoxed()
+ */
+Type ldRefReturn(Type typeParam);
+
 //////////////////////////////////////////////////////////////////////
 
 struct TypeConstraint {

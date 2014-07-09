@@ -176,6 +176,7 @@ let collect_defs ast =
 let main_hack { filename; suggest; _ } =
   SharedMem.init();
   Typing.debug := true;
+  Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
   let errors, () =
     Errors.do_ begin fun () ->
       Pos.file := builtins_filename;

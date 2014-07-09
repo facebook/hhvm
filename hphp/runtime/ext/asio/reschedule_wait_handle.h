@@ -63,6 +63,11 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
   static const int8_t STATE_SCHEDULED = 2;
 };
 
+inline c_RescheduleWaitHandle* c_WaitHandle::asReschedule() {
+  assert(getKind() == Kind::Reschedule);
+  return static_cast<c_RescheduleWaitHandle*>(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

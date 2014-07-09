@@ -79,8 +79,6 @@ private: // These should be created using ArgGroup.
 
   explicit ArgDesc(Kind kind, Immed64 imm)
     : m_kind(kind)
-    , m_srcReg(InvalidReg)
-    , m_dstReg(reg::noreg)
     , m_imm64(imm)
     , m_zeroExtend(false)
     , m_done(false)
@@ -89,7 +87,6 @@ private: // These should be created using ArgGroup.
   explicit ArgDesc(Kind kind, PhysReg srcReg, Immed disp)
     : m_kind(kind)
     , m_srcReg(srcReg)
-    , m_dstReg(reg::noreg)
     , m_disp32(disp)
     , m_zeroExtend(false)
     , m_done(false)

@@ -1289,6 +1289,8 @@ const StaticString s_http_response_header("http_response_header");
 const StaticString s_php_errormsg("php_errormsg");
 const StaticString s_extract("extract");
 const StaticString s_extractNative("__SystemLib\\extract");
+const StaticString s_parse_str("parse_str");
+const StaticString s_parse_strNative("__SystemLib\\parse_str");
 
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
@@ -1302,8 +1304,11 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
 
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {
-    return unit->lookupLitstrId(id)->isame(s_extract.get())
-    || unit->lookupLitstrId(id)->isame(s_extractNative.get());
+    auto const str = unit->lookupLitstrId(id);
+    return str->isame(s_extract.get()) ||
+           str->isame(s_extractNative.get()) ||
+           str->isame(s_parse_str.get()) ||
+           str->isame(s_parse_strNative.get());
   };
 
   if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
@@ -1588,6 +1593,8 @@ static bool isMergePoint(Offset offset, const RegionDesc& region) {
       for (auto arc : region.arcs) {
         if (arc.dst == bid) inCount++;
       }
+      // NB: The initial block has an invisible "entry arc".
+      if (block == region.blocks[0]) ++inCount;
       if (inCount >= 2) return true;
     }
   }
@@ -1665,8 +1672,10 @@ Translator::translateRegion(const RegionDesc& region,
     if (ht.genMode() == IRGenMode::CFG) {
       Block* irBlock = blockIdToIRBlock[blockId];
       if (blockHasUnprocessedPred(region, blockId, processedBlocks)) {
-        always_assert(RuntimeOption::EvalJitLoops);
+        always_assert(RuntimeOption::EvalJitLoops ||
+                      RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
         irb.clearBlockState(irBlock);
+        irb.state().clearCurrentLocals();
       }
       ht.irBuilder().startBlock(irBlock);
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);

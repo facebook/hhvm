@@ -169,6 +169,11 @@ CodeCache::CodeCache()
   m_data.init(base, kGDataSize, "gdata");
   base += kGDataSize;
 
+  // The default on linux for the newly allocated memory is read/write/exec
+  // but on some systems its just read/write. Call unprotect to ensure that
+  // the memory is marked executable.
+  unprotect();
+
   assert(base - m_base <= allocationSize);
   assert(base - m_base + kRoundUp > allocationSize);
 }

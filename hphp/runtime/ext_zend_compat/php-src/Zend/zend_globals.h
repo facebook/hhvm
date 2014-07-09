@@ -189,8 +189,6 @@ struct _zend_executor_globals {
 
   JMP_BUF *bailout;
 
-  int error_reporting;
-  int orig_error_reporting;
   int exit_status;
 
   zend_op_array *active_op_array;
@@ -330,7 +328,6 @@ struct _zend_php_scanner_globals {
   G(zend_error_handling_t, error_handling)  \
   G(HashTable*, function_table)             \
   G(int64_t, precision)                     \
-  G(int, error_reporting)                   \
   G(HashTable*, active_symbol_table)        \
   G(zend_class_entry*, scope)               \
   G(zval**, return_value_ptr_ptr)           \
@@ -346,6 +343,24 @@ struct _zend_php_scanner_globals {
   std::add_lvalue_reference<TYPE>::type EG_ ## MEMBER();
 EG_DEFAULT
 #undef G
+
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * EG_error_reporting() must have both lval and rval semantics,
+ * but has to use the appropriate getter/setter into the guts of HHVM.
+ */
+
+struct ZendWrappedErrorReporting {
+  void operator=(int newLevel);
+  /* implicit */ operator int() const;
+};
+extern ZendWrappedErrorReporting g_zend_wrapped_error_reporting;
+
+///////////////////////////////////////////////////////////////////////////////
+}
+#define EG_error_reporting() HPHP::g_zend_wrapped_error_reporting
 
 zend_vm_stack& EG_argument_stack();
 _zend_execute_data*& EG_current_execute_data();

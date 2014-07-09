@@ -252,8 +252,7 @@ void emitCall(Asm& a, TCA dest) {
       // assumes the data section is near the current code section.  Since
       // this sequence is directly in-line, rip-relative like this is
       // more compact than loading a 64-bit immediate.
-      TCA* addr = mcg->allocData<TCA>(sizeof(TCA), 1);
-      *addr = dest;
+      auto addr = mcg->allocLiteral((uint64_t)dest);
       a.call(rip[(intptr_t)addr]);
       assert(((int32_t*)a.frontier())[-1] + a.frontier() == (TCA)addr);
     }

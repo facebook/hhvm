@@ -708,29 +708,6 @@ Type stkReturn(const IRInstruction* inst, int dstId,
   return Type::StkPtr;
 }
 
-Type ldRefReturn(const IRInstruction* inst) {
-  // Guarding on specialized types and uncommon unions like {Int|Bool} is
-  // expensive enough that we only want to do it in situations where we've
-  // manually confirmed the benefit.
-
-  if (inst->typeParam().strictSubtypeOf(Type::Obj) &&
-      inst->typeParam().getClass()->attrs() & AttrFinal &&
-      inst->typeParam().getClass()->isCollectionClass()) {
-    /*
-     * This case is needed for the minstr-translator.
-     * see MInstrTranslator::checkMIState().
-     */
-    return inst->typeParam();
-  }
-  auto type = inst->typeParam().unspecialize();
-
-  if (type.isKnownDataType())      return type;
-  if (type <= Type::UncountedInit) return Type::UncountedInit;
-  if (type <= Type::Uncounted)     return Type::Uncounted;
-  always_assert(type <= Type::Cell);
-  return Type::Cell;
-}
-
 Type thisReturn(const IRInstruction* inst) {
   auto fpInst = inst->src(0)->inst();
 
@@ -788,6 +765,31 @@ Type arrElemReturn(const IRInstruction* inst) {
   return Type::Gen;
 }
 
+}
+
+Type ldRefReturn(Type typeParam) {
+  assert(typeParam.notBoxed());
+  // Guarding on specialized types and uncommon unions like {Int|Bool} is
+  // expensive enough that we only want to do it in situations where we've
+  // manually confirmed the benefit.
+
+  if (typeParam.strictSubtypeOf(Type::Obj) &&
+      typeParam.getClass()->attrs() & AttrFinal &&
+      typeParam.getClass()->isCollectionClass()) {
+    /*
+     * This case is needed for the minstr-translator.
+     * see MInstrTranslator::checkMIState().
+     */
+    return typeParam;
+  }
+
+  auto type = typeParam.unspecialize();
+
+  if (type.isKnownDataType())      return type;
+  if (type <= Type::UncountedInit) return Type::UncountedInit;
+  if (type <= Type::Uncounted)     return Type::Uncounted;
+  always_assert(type <= Type::Cell);
+  return Type::Cell;
 }
 
 Type boxType(Type t) {
@@ -895,7 +897,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DArrPacked      return Type::Arr.specialize(ArrayData::kPackedKind);
-#define DLdRef          return ldRefReturn(inst);
+#define DLdRef          return ldRefReturn(inst->typeParam());
 #define DThis           return thisReturn(inst);
 #define DMulti          return Type::Bottom;
 #define DStk(in)        return stkReturn(inst, dstId, \

@@ -60,6 +60,11 @@ class c_SleepWaitHandle : public c_WaitableWaitHandle {
   static const int8_t STATE_WAITING = 2;
 };
 
+inline c_SleepWaitHandle* c_WaitHandle::asSleep() {
+  assert(getKind() == Kind::Sleep);
+  return static_cast<c_SleepWaitHandle*>(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

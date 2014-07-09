@@ -61,6 +61,11 @@ class c_GenMapWaitHandle : public c_BlockableWaitHandle {
   ssize_t m_iterPos;
 };
 
+inline c_GenMapWaitHandle* c_WaitHandle::asGenMap() {
+  assert(getKind() == Kind::GenMap);
+  return static_cast<c_GenMapWaitHandle*>(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -697,31 +697,29 @@ ALWAYS_INLINE MixedArray* staticEmptyMixedArray() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// class BaseMap
+// class HashCollection
 
-/**
- * BaseMap is a hash-table implementation with int and string keys only.
- * It doesn't represent any PHP-land class; that job is delegated to its
- * c_-prefixed child classes.
- */
-class BaseMap : public ExtCollectionObjectData {
+class HashCollection : public ExtCollectionObjectData {
  public:
+  explicit HashCollection(Class* cls);
+
   typedef MixedArray::Elm Elm;
 
  protected:
   uint32_t m_size;       // Number of values
-  int32_t m_version;     // Version number (high bit used to indicate if
-                         //   this Map might contain int-like string keys)
+  int32_t m_version;     // Version number (high bit used to indicate if this
+                         //   collection might contain int-like string keys)
   Elm* m_data;           // Elm store.
 
-  // A pointer to a ImmMap which with it shares the buffer.
+  // A pointer to an immutable collection that shares its buffer with
+  // this collection.
   Object m_immCopy;
 
-  // Read the high bit of m_version to tell if this Map might contain
-  // int-like string keys. If this method returns false it is safe to
-  // assume that no int-like strings keys are present. If this method
-  // returns true that means there _might_ be int-like string keys,
-  // but there might not be.
+ protected:
+  // Read the high bit of m_version to tell if this collection might contain
+  // int-like string keys. If this method returns false it is safe to assume
+  // that no int-like strings keys are present. If this method returns true
+  // that means there _might_ be int-like string keys, but there might not be.
   bool intLikeStrKeys() const { return (bool)(m_version & 0x80000000UL); }
   // Beware: calling this method can invalidate iterators, so use with
   // caution
@@ -734,35 +732,32 @@ class BaseMap : public ExtCollectionObjectData {
   }
 
  public:
-  static const int32_t Empty      = MixedArray::Empty;
-  static const int32_t Tombstone  = MixedArray::Tombstone;
+  static const int32_t Empty           = MixedArray::Empty;
+  static const int32_t Tombstone       = MixedArray::Tombstone;
 
-  // Load factor scaler. If C is the power-of-2 hashtable capacity and L is
-  // LoadScale, then we can accommodate up to C-C/L elements before needing
-  // to grow. So LoadScale=2 gives a maximum load factor of 0.5, LoadScale=4
-  // gives a maximum load factor of 0.75, and LoadScale=8 gives a maximum load
-  // factor of 0.875 load factor. We use powers of 2 so that we can use bit-
-  // shifting and bit-masking instructions instead of multiply and divide
-  // instructions.
-  static const uint32_t LoadScale = MixedArray::LoadScale;
-
-  // If a Map has a hash table allocated, the smallest hash table size we
-  // support is 4 (2^2). Note that the hash table size is always the hash
-  // mask plus 1.
+  static const uint32_t LoadScale      = MixedArray::LoadScale;
   static const uint32_t MinLgTableSize = MixedArray::MinLgTableSize;
-  static const uint32_t SmallMask = MixedArray::SmallMask;
-  static const uint32_t SmallSize = MixedArray::SmallSize;
-
-  // The largest hash table size we support is 4294967296 (2^32).
+  static const uint32_t SmallMask      = MixedArray::SmallMask;
+  static const uint32_t SmallSize      = MixedArray::SmallSize;
   static const uint32_t MaxLgTableSize = MixedArray::MaxLgTableSize;
-  static const uint64_t MaxHashSize = MixedArray::MaxHashSize;
-  static const uint32_t MaxMask = MixedArray::MaxMask;
-  static const uint32_t MaxSize = MixedArray::MaxSize;
-
-  // Map can only guarantee that it won't throw "cannot add element"
-  // exceptions if m_size <= MaxSize / 2. Therefore, we only allow
+  static const uint64_t MaxHashSize    = MixedArray::MaxHashSize;
+  static const uint32_t MaxMask        = MixedArray::MaxMask;
+  static const uint32_t MaxSize        = MixedArray::MaxSize;
+  // HashCollections can only guarantee that it won't throw "cannot add
+  // element" exceptions if m_size <= MaxSize / 2. Therefore, we only allow
   // reserve() to make room for up to MaxSize / 2 elements.
   static const uint32_t MaxReserveSize = MaxSize / 2;
+
+  static void copyElm(const Elm& frE, Elm& toE) {
+    memcpy(&toE, &frE, sizeof(Elm));
+  }
+
+  static void dupElm(const Elm& frE, Elm& toE) {
+    assert(!isTombstoneType(frE.data.m_type));
+    memcpy(&toE, &frE, sizeof(Elm));
+    if (toE.hasStrKey()) toE.skey->incRefCount();
+    tvRefcountedIncRef(&toE.data);
+  }
 
  protected:
   inline Elm* data() { return m_data; }
@@ -849,79 +844,88 @@ class BaseMap : public ExtCollectionObjectData {
 
   // We use this funny-looking helper to make g++ use lea and shl
   // instructions instead of imul when indexing into m_data
-  inline static const BaseMap::Elm* fetchElm(const Elm* data, int64_t pos) {
+  inline static const HashCollection::Elm*
+  fetchElm(const Elm* data, int64_t pos) {
     assert(sizeof(Elm) == 24);
     assert(sizeof(int64_t) == 8);
     int64_t index = 3 * pos;
     int64_t* ptr = (int64_t*)data;
     return (const Elm*)(&ptr[index]);
   }
-  inline static BaseMap::Elm* fetchElm(Elm* data, int64_t pos) {
+  inline static HashCollection::Elm*
+  fetchElm(Elm* data, int64_t pos) {
     return (Elm*)fetchElm((const Elm*)data, pos);
   }
 
-  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
-  static void throwTooLarge() ATTRIBUTE_NORETURN;
-  static void throwReserveTooLarge() ATTRIBUTE_NORETURN;
-  static int32_t* warnUnbalanced(size_t n, int32_t* ei);
+  void throwTooLarge() ATTRIBUTE_NORETURN;
+  void throwReserveTooLarge() ATTRIBUTE_NORETURN;
+  int32_t* warnUnbalanced(size_t n, int32_t* ei) const;
+
+  /**
+   * Raises a warning if the set contains an int and a string with the same
+   * numeric value: e.g. Set {'123', 123}. It's a no-op otherwise.
+   */
+  void warnOnStrIntDup() const;
 
  public:
-  TypedValue* at(int64_t key) const;
-  TypedValue* at(StringData* key) const;
-  TypedValue* get(int64_t key) const;
-  TypedValue* get(StringData* key) const;
-
-  void add(const TypedValue* val);
-  void add(const Variant& val) { add(val.asCell()); }
-
-  Variant pop();
-  Variant popFront();
-  void remove(int64_t key);
-  void remove(StringData* key);
-  bool contains(int64_t key) const;
-  bool contains(StringData* key) const;
   int getVersion() const {
     return m_version;
   }
   int64_t size() const {
     return m_size;
   }
+
+  bool contains(int64_t key) const;
+  bool contains(StringData* key) const;
+
+ protected:
   bool toBoolImpl() const {
     return (m_size != 0);
   }
 
-  template<class TMap>
-  typename std::enable_if<
-    std::is_base_of<BaseMap, TMap>::value, TMap*>::type
-  static Clone(ObjectData* obj);
+  template <class Hit>
+  ssize_t findImpl(size_t h0, Hit) const;
+  ssize_t find(int64_t h) const;
+  ssize_t find(const StringData* s, strhash_t prehash) const;
 
-  // template<class TMap>
-  // typename std::enable_if<
-  //   std::is_base_of<BaseMap, TMap>::value, TMap*>::type
-  // static DeepCopy(TMap* mp);
+  template <class Hit>
+  int32_t* findForInsertImpl(size_t h0, Hit) const;
+  int32_t* findForInsert(int64_t h) const;
+  int32_t* findForInsert(const StringData* s, strhash_t prehash) const;
 
-  static Array ToArray(const ObjectData* obj);
-  static bool ToBool(const ObjectData* obj);
-  template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
-  static void OffsetSet(ObjectData* obj, const TypedValue* key,
-                        const TypedValue* val);
-  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  static bool OffsetContains(ObjectData* obj, const TypedValue* key);
-  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
+  ssize_t findForRemove(int64_t h) {
+    assert(canMutateBuffer());
+    return arrayData()->findForRemove(h, false);
+  }
 
-  enum EqualityFlavor { OrderMatters, OrderIrrelevant };
+  ssize_t findForRemove(const StringData* s, strhash_t prehash) {
+    assert(canMutateBuffer());
+    return arrayData()->findForRemove(s, prehash);
+  }
 
-  static bool Equals(EqualityFlavor eq,
-                     const ObjectData* obj1, const ObjectData* obj2);
+  int32_t* findForNewInsert(size_t h0) const;
+  int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
+ public:
+  /**
+   * canMutateBuffer() indicates whether it is currently safe to directly
+   * modify this HashCollection's buffer. canMutateBuffer() is vacuously
+   * true for buffers with zero capacity (i.e. the staticEmptyMixedArray()
+   * case) because you can't meaningfully mutate zero-capacity buffer
+   * without first doing a grow. This may seem weird, but its actually
+   * much smoother in practice than the alternative of returning false
+   * for such cases.
+   */
+  bool canMutateBuffer() const {
+    auto* a = arrayData();
+    bool b = (a == staticEmptyMixedArray() || !a->hasMultipleRefs());
+    assert(IMPLIES(a != staticEmptyMixedArray() && b, m_immCopy.isNull()));
+    assert(IMPLIES(!b, a->hasMultipleRefs()));
+    return b;
+  }
 
   static uint32_t sizeOffset() {
-    return offsetof(BaseMap, m_size);
+    return offsetof(HashCollection, m_size);
   }
 
   static bool validPos(ssize_t pos) {
@@ -934,12 +938,12 @@ class BaseMap : public ExtCollectionObjectData {
     static_assert(Empty == -1, "");
   }
 
-  // The skipTombstonesUnsafe helper functions assume that either the
-  // specified location is not a tombstone OR that there is at least
+  // The skipTombstonesNoBoundsCheck helper functions assume that either
+  // the specified location is not a tombstone OR that there is at least
   // one non-tombstone after the specified position.
 
   static int32_t
-  skipTombstonesUnsafe(int32_t pos, int32_t posLimit, const Elm* data) {
+  skipTombstonesNoBoundsCheck(int32_t pos, int32_t posLimit, const Elm* data) {
     assert(pos < posLimit);
     while (isTombstone(pos, data)) {
       ++pos;
@@ -948,8 +952,8 @@ class BaseMap : public ExtCollectionObjectData {
     return pos;
   }
 
-  int32_t skipTombstonesUnsafe(int32_t pos) {
-    return skipTombstonesUnsafe(pos, posLimit(), m_data);
+  int32_t skipTombstonesNoBoundsCheck(int32_t pos) {
+    return skipTombstonesNoBoundsCheck(pos, posLimit(), m_data);
   }
 
   inline const Elm* firstElmImpl() const {
@@ -1014,89 +1018,14 @@ class BaseMap : public ExtCollectionObjectData {
     wordfill(table, Empty, tableSize);
   }
 
-  void init(const Variant& t);
+  void remove(int64_t key);
+  void remove(StringData* key);
 
-  template <class Hit>
-  ssize_t findImpl(size_t h0, Hit) const;
-  ssize_t find(int64_t h) const;
-  ssize_t find(const StringData* s, strhash_t prehash) const;
-
-  template <class Hit>
-  int32_t* findForInsertImpl(size_t h0, Hit) const;
-  int32_t* findForInsert(int64_t h) const;
-  int32_t* findForInsert(const StringData* s, strhash_t prehash) const;
-
-  ssize_t findForRemove(int64_t h) {
-    assert(canMutateBuffer());
-    return arrayData()->findForRemove(h, false);
-  }
-
-  ssize_t findForRemove(const StringData* s, strhash_t prehash) {
-    assert(canMutateBuffer());
-    return arrayData()->findForRemove(s, prehash);
-  }
-
-  int32_t* findForNewInsert(size_t h0) const;
-  int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
-
-  template<bool raw>
-  void setImpl(int64_t h, const TypedValue* val);
-  template<bool raw>
-  void setImpl(StringData* key, const TypedValue* data);
-
-  // setRaw() assigns a value to the specified key in this Map, but doesn't
-  // check for an immutable buffer and doesn't increment m_version, so it's
-  // only safe to use in some cases. If you're not sure, use set() instead.
-  void setRaw(int64_t h, const TypedValue* data);
-  void setRaw(StringData* key, const TypedValue* data);
-  void setRaw(int64_t h, const Variant& data) {
-    setRaw(h, data.asCell());
-  }
-  void setRaw(StringData* key, const Variant& data) {
-    setRaw(key, data.asCell());
-  }
-  void setRaw(const TypedValue* key, const TypedValue* data) {
-    assert(key->m_type != KindOfRef);
-    if (key->m_type == KindOfInt64) {
-      setRaw(key->m_data.num, data);
-    } else if (IS_STRING_TYPE(key->m_type)) {
-      setRaw(key->m_data.pstr, data);
-    } else {
-      throwBadKeyType();
-    }
-  }
-  void setRaw(const Variant& key, const Variant& data) {
-    setRaw(key.asCell(), data.asCell());
-  }
-
-  void set(int64_t h, const TypedValue* data);
-  void set(StringData* key, const TypedValue* data);
-  void set(int64_t h, const Variant& data) {
-    set(h, data.asCell());
-  }
-  void set(StringData* key, const Variant& data) {
-    set(key, data.asCell());
-  }
-  void set(const TypedValue* key, const TypedValue* data) {
-    assert(key->m_type != KindOfRef);
-    if (key->m_type == KindOfInt64) {
-      set(key->m_data.num, data);
-    } else if (IS_STRING_TYPE(key->m_type)) {
-      set(key->m_data.pstr, data);
-    } else {
-      throwBadKeyType();
-    }
-  }
-  void set(const Variant& key, const Variant& data) {
-    set(key.asCell(), data.asCell());
-  }
-
- protected:
   void eraseNoCompact(ssize_t pos);
 
   void erase(ssize_t pos) {
     eraseNoCompact(pos);
-    adjustIfDensityTooLow();
+    compactOrShrinkIfDensityTooLow();
   }
 
   bool isFull() { return posLimit() == cap(); }
@@ -1112,20 +1041,20 @@ class BaseMap : public ExtCollectionObjectData {
     // Return true if current capacity at least 8x greater than m_size AND
     // if current capacity is at least 8x greater than the minimum capacity
     bool b = ((uint64_t(cap()) >= uint64_t(m_size) * 8) &&
-              (cap() >= BaseMap::SmallSize * 8));
+              (cap() >= HashCollection::SmallSize * 8));
     assert(IMPLIES(m_data == mixedData(staticEmptyMixedArray()), !b));
     assert(IMPLIES(cap() == 0, !b));
     return b;
   }
 
-  // grow() will increase the capacity of this Map; newCap must be greater
-  // than or equal to the current capacity and newCap/newMask must satisfy
-  // all the usual cap/mask invariants.
+  // grow() will increase the capacity of this HashCollection; newCap must
+  // be greater than or equal to the current capacity and newCap/newMask must
+  // satisfy all the usual cap/mask invariants.
   void grow(uint32_t newCap, uint32_t newMask);
 
   // resizeHelper() dups all of the elements (not copying tombstones) to a
   // new buffer of the specified capacity and decRefs the old buffer. This
-  // method can be used to decrease this Map's capacity.
+  // method can be used to decrease this HashCollection's capacity.
   void resizeHelper(uint32_t newCap);
 
   // This method will increase capacity or compact as needed to make
@@ -1137,14 +1066,14 @@ class BaseMap : public ExtCollectionObjectData {
   // is only called when isDensityTooLow() is true
   void compact();
 
-  // This method reduces this Map's capacity; it asserts that it is
-  // only called when isCapacityTooHigh() is true.
+  // This method reduces this HashCollection's capacity; it asserts that it
+  // is only called when isCapacityTooHigh() is true.
   void shrink(uint32_t cap = 0);
 
   // In general this method should be called after one or more elements
   // have been removed. If density is too low, it will shrink or compact
-  // this Map as appropriate.
-  void adjustIfDensityTooLow() {
+  // this HashCollection as appropriate.
+  void compactOrShrinkIfDensityTooLow() {
     if (UNLIKELY(isDensityTooLow())) {
       if (isCapacityTooHigh()) {
         shrink();
@@ -1156,14 +1085,14 @@ class BaseMap : public ExtCollectionObjectData {
 
   // In general this method should be called after a speculative reserve
   // and zero or more adds have been performed. If capacity is too high,
-  // it will shrink this Map.
-  void adjustAfterReserve(uint32_t oldCap) {
+  // it will shrink this HashCollection.
+  void shrinkIfCapacityTooHigh(uint32_t oldCap) {
     if (UNLIKELY(isCapacityTooHigh() && cap() > oldCap)) {
       shrink(oldCap);
     }
   }
 
-  BaseMap::Elm& allocElm(int32_t* ei) {
+  HashCollection::Elm& allocElm(int32_t* ei) {
     assert(canMutateBuffer());
     assert(ei && !validPos(*ei) && m_size <= posLimit() && posLimit() < cap());
     size_t i = posLimit();
@@ -1173,27 +1102,16 @@ class BaseMap : public ExtCollectionObjectData {
     return *fetchElm(data(), i);
   }
 
- public:
+  HashCollection::Elm& allocElmFront(int32_t* ei);
+
   // This method will grow or compact as needed in preparation for
   // repeatedly adding new elements until m_size >= sz.
   void reserve(int64_t sz);
 
-  static void copyElm(const Elm& frE, Elm& toE) {
-    memcpy(&toE, &frE, sizeof(Elm));
-  }
-
-  static void dupElm(const Elm& frE, Elm& toE) {
-    assert(!isTombstoneType(frE.data.m_type));
-    memcpy(&toE, &frE, sizeof(Elm));
-    if (toE.hasStrKey()) toE.skey->incRefCount();
-    tvRefcountedIncRef(&toE.data);
-  }
-
-  // The iter functions below facilitate iteration over Maps and ImmMaps.
+  // The iter functions below facilitate iteration over Sets and ImmSets.
   // Iterators cannot store Elm pointers (because it's possible for m_data
-  // to change without bumping m_version when a Map is using shared immutable
-  // buffer and an existing element is overwritten via assignment). Iterators
-  // track their position in terms of _bytes_ from the beginning of the buffer
+  // to change without bumping m_version in some cases). Iterators track
+  // their position in terms of _bytes_ from the beginning of the buffer
   // since it requires less computation overall.
 
   ssize_t iter_limit() const {
@@ -1258,11 +1176,11 @@ class BaseMap : public ExtCollectionObjectData {
 
   uint32_t nthElmPos(size_t n) const {
     if (LIKELY(!hasTombstones())) {
-      // Fast path: Map contains no tombstones
+      // Fast path: HashCollection contains no tombstones
       return n;
     }
-    // Slow path: Map has at least one tombstone, so we need to
-    // count forward
+    // Slow path: AssoCollection has at least one tombstone,
+    // so we need to count forward
     // TODO Task# 4281431: If n > m_size/2 we could get better
     // performance by starting at the end of the buffer and
     // walking backward.
@@ -1283,46 +1201,13 @@ class BaseMap : public ExtCollectionObjectData {
     return pos;
   }
 
-  enum SortFlavor { IntegerSort, StringSort, GenericSort };
-
- protected: // BaseMap is an abstract class
-  explicit BaseMap(Class* cls);
-  ~BaseMap();
-
- private:
-  template <typename AccessorT>
-  SortFlavor preSort(const AccessorT& acc, bool checkTypes);
-  void postSort();
-
  public:
-  void asort(int sort_flags, bool ascending);
-  void ksort(int sort_flags, bool ascending);
-  bool uasort(const Variant& cmp_function);
-  bool uksort(const Variant& cmp_function);
-
-  static void throwBadKeyType() ATTRIBUTE_NORETURN;
-
   /**
-   * canMutateBuffer() indicates whether it is currently safe to directly
-   * modify this Map's buffer. canMutateBuffer() is vacuously true for
-   * buffers with zero capacity (i.e. the staticEmptyMixedArray() case)
-   * because you can't meaningfully mutate zero-capacity buffer without
-   * first doing a grow. This may seem weird, but its actually much smoother
-   * in practice than the alternative of returning false for such cases.
-   */
-  bool canMutateBuffer() const {
-    auto* a = arrayData();
-    bool b = (a == staticEmptyMixedArray() || !a->hasMultipleRefs());
-    assert(IMPLIES(a != staticEmptyMixedArray() && b, m_immCopy.isNull()));
-    assert(IMPLIES(!b, a->hasMultipleRefs()));
-    return b;
-  }
-
-  /**
-   * mutate() must be called before doing anything that mutates this
-   * Map's buffer, unless it can be proven that canMutateBuffer() is
-   * true. mutate() takes care of updating m_immCopy and making a copy
-   * of this Map's buffer if needed.
+   * mutate() must be called before doing anything that mutates
+   * this HashCollection's buffer, unless it can be proven that
+   * canMutateBuffer() is true. mutate() takes care of updating
+   * m_immCopy and making a copy of this HashCollection's buffer
+   * if needed.
    */
   void mutate() {
     assert(IMPLIES(!m_immCopy.isNull(), arrayData()->hasMultipleRefs()));
@@ -1340,7 +1225,7 @@ class BaseMap : public ExtCollectionObjectData {
 
   void dropImmCopy() {
     assert(m_immCopy.isNull() ||
-           (m_data == ((BaseMap*)m_immCopy.get())->m_data &&
+           (m_data == ((HashCollection*)m_immCopy.get())->m_data &&
             arrayData()->hasMultipleRefs()));
     m_immCopy.reset();
   }
@@ -1350,6 +1235,138 @@ class BaseMap : public ExtCollectionObjectData {
    * Copy the buffer and reset the immutable copy.
    */
   void mutateImpl();
+
+ public:
+  Array toArrayImpl() const;
+
+ private:
+  struct EmptyMixedInitializer;
+  static EmptyMixedInitializer s_empty_mixed_initializer;
+
+ public:
+  enum SortFlavor { IntegerSort, StringSort, GenericSort };
+
+ private:
+  template <typename AccessorT>
+  SortFlavor preSort(const AccessorT& acc, bool checkTypes);
+  void postSort();
+
+ public:
+  void asort(int sort_flags, bool ascending);
+  void ksort(int sort_flags, bool ascending);
+  bool uasort(const Variant& cmp_function);
+  bool uksort(const Variant& cmp_function);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class BaseMap
+
+/**
+ * BaseMap is a hash-table implementation with int and string keys only.
+ * It doesn't represent any PHP-land class; that job is delegated to its
+ * c_-prefixed child classes.
+ */
+class BaseMap : public HashCollection {
+ protected:
+  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
+
+ public:
+  TypedValue* at(int64_t key) const;
+  TypedValue* at(StringData* key) const;
+  TypedValue* get(int64_t key) const;
+  TypedValue* get(StringData* key) const;
+
+  void add(const TypedValue* val);
+  void add(const Variant& val) { add(val.asCell()); }
+
+  Variant pop();
+  Variant popFront();
+
+  template<class TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, TMap*>::type
+  static Clone(ObjectData* obj);
+
+  static Array ToArray(const ObjectData* obj);
+  static bool ToBool(const ObjectData* obj);
+  template <bool throwOnMiss>
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
+  static void OffsetSet(ObjectData* obj, const TypedValue* key,
+                        const TypedValue* val);
+  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, const TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
+
+  enum EqualityFlavor { OrderMatters, OrderIrrelevant };
+
+  static bool Equals(EqualityFlavor eq,
+                     const ObjectData* obj1, const ObjectData* obj2);
+
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type);
+
+  void init(const Variant& t);
+
+  template<bool raw>
+  void setImpl(int64_t h, const TypedValue* val);
+  template<bool raw>
+  void setImpl(StringData* key, const TypedValue* data);
+
+  // setRaw() assigns a value to the specified key in this Map, but doesn't
+  // check for an immutable buffer and doesn't increment m_version, so it's
+  // only safe to use in some cases. If you're not sure, use set() instead.
+  void setRaw(int64_t h, const TypedValue* data);
+  void setRaw(StringData* key, const TypedValue* data);
+  void setRaw(int64_t h, const Variant& data) {
+    setRaw(h, data.asCell());
+  }
+  void setRaw(StringData* key, const Variant& data) {
+    setRaw(key, data.asCell());
+  }
+  void setRaw(const TypedValue* key, const TypedValue* data) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type == KindOfInt64) {
+      setRaw(key->m_data.num, data);
+    } else if (IS_STRING_TYPE(key->m_type)) {
+      setRaw(key->m_data.pstr, data);
+    } else {
+      throwBadKeyType();
+    }
+  }
+  void setRaw(const Variant& key, const Variant& data) {
+    setRaw(key.asCell(), data.asCell());
+  }
+
+  void set(int64_t h, const TypedValue* data);
+  void set(StringData* key, const TypedValue* data);
+  void set(int64_t h, const Variant& data) {
+    set(h, data.asCell());
+  }
+  void set(StringData* key, const Variant& data) {
+    set(key, data.asCell());
+  }
+  void set(const TypedValue* key, const TypedValue* data) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type == KindOfInt64) {
+      set(key->m_data.num, data);
+    } else if (IS_STRING_TYPE(key->m_type)) {
+      set(key->m_data.pstr, data);
+    } else {
+      throwBadKeyType();
+    }
+  }
+  void set(const Variant& key, const Variant& data) {
+    set(key.asCell(), data.asCell());
+  }
+
+ protected: // BaseMap is an abstract class
+  explicit BaseMap(Class* cls);
+  ~BaseMap();
+
+ public:
+  static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
  private:
   template<class TMap>
@@ -1382,7 +1399,6 @@ class BaseMap : public ExtCollectionObjectData {
   Variant php_at(const Variant& key) const;
   Variant php_get(const Variant& key) const;
   bool php_contains(const Variant& key) const;
-  Array php_toArray() const;
   Array php_toKeysArray() const;
   Array php_toValuesArray() const;
   Object php_values() const;
@@ -1456,9 +1472,6 @@ class BaseMap : public ExtCollectionObjectData {
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   static php_mapFromArray(const Variant& arr);
-
-  struct EmptyMixedInitializer;
-  static EmptyMixedInitializer s_empty_mixed_initializer;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1613,337 +1626,13 @@ class c_MapIterator : public ExtObjectData {
 
 /**
  * BaseSet is a hash-table implementation of the Set ADT. It doesn't represent
- * any PHP-land class. That job is delegated to its child classes.
- *
- * BaseSet uses a power of two for the table size and quadratic probing to
- * resolve hash collisions, similar to MixedArray and BaseMap.
+ * any PHP-land class. That job is delegated to its c_-prefixed child classes.
  */
-class BaseSet : public ExtCollectionObjectData {
+class BaseSet : public HashCollection {
  public:
-  struct Elm {
-    // data.m_type == KindOfInvalid if this is an empty slot in the
-    // Set (e.g. after a value is deleted).
-    TypedValueAux data;
-
-    inline int32_t hash() const { return data.hash(); }
-    inline int32_t probe() const { return hasInt() ? data.m_data.num : hash(); }
-
-    inline bool hasStr() const { return IS_STRING_TYPE(data.m_type); }
-    inline bool hasInt() const { return data.m_type == KindOfInt64; }
-
-    inline void setStr(StringData* k, strhash_t h) {
-      k->incRefCount();
-      data.m_data.pstr = k;
-      data.m_type = KindOfString;
-      data.hash() = h | STRHASH_MSB;
-    }
-    inline void setInt(int64_t k) {
-      data.m_data.num = k;
-      data.m_type = KindOfInt64;
-      data.hash() = 0;
-    }
-
-    static constexpr size_t dataOff() {
-      return offsetof(Elm, data);
-    }
-  };
-
- protected:
-  uint32_t m_size;          // Number of values
-  union {
-    struct {
-      uint32_t m_used;      // Number of currently used Elm slots (values or
-                            // tombstones)
-      uint32_t m_cap;       // Maximum number of Elm slots we can use without
-                            // having to grow
-    };
-    uint64_t m_capAndUsed;
-  };
-  union {
-    struct {
-      uint32_t m_tableMask; // Bitmask used when indexing into the hash table
-      int32_t m_version;    // Version number; used to keep track if the
-                            // collection has been modified during iteration
-    };
-    uint64_t m_maskAndVersion;
-  };
-  Elm* m_data;              // Elm store.
-  int32_t* m_hash;          // Hash table.
-  // A pointer to a ImmSet which with it shares the buffer.
-  Object m_immCopy;
-
- public:
-  static const int32_t Empty      = -1;
-  static const int32_t Tombstone  = -2;
-
-  static const uint LoadScale = 4;
-
-  static const uint32_t SmallLgTableSize = 2;
-  static const uint32_t SmallMask = (size_t(1) << SmallLgTableSize) - 1;
-  static const uint32_t SmallSize = SmallMask - SmallMask / LoadScale;
-
-  static const uint32_t MaxLgTableSize = 32;
-  static const uint32_t MaxMask = (size_t(1) << MaxLgTableSize) - 1;
-  static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
-
-  static const uint32_t MaxReserveSize = MaxSize / 2;
-
- private:
-  void deleteElms();
-  void freeData();
-
- protected:
-  Elm* data() { return m_data; }
-  const Elm* data() const { return m_data; }
-  int32_t* hashTab() const { return (int32_t*)m_hash; }
-  uint32_t posLimit() const { return m_used; }
-
-  static void throwTooLarge() ATTRIBUTE_NORETURN;
-  static void throwReserveTooLarge() ATTRIBUTE_NORETURN;
-  static int32_t* warnUnbalanced(size_t n, int32_t* ei);
-
- public:
-  int getVersion() const {
-    return m_version;
-  }
-  int64_t size() const {
-    return m_size;
-  }
-
-  static uint sizeOffset() {
-    return offsetof(BaseSet, m_size);
-  }
-
-  static bool validPos(ssize_t pos) {
-    return pos >= 0;
-    static_assert(ssize_t(Empty) == ssize_t(-1), "");
-  }
-
-  static bool validPos(int32_t pos) {
-    return pos >= 0;
-    static_assert(Empty == -1, "");
-  }
-
-  inline const Elm* firstElmImpl() const {
-    const Elm* e = data();
-    const Elm* eLimit = elmLimit();
-    for (; e != eLimit && isTombstone(e); ++e) {}
-    return (Elm*)e;
-  }
-  inline Elm* firstElm() {
-    return (Elm*)firstElmImpl();
-  }
-  inline const Elm* firstElm() const {
-    return firstElmImpl();
-  }
-
-  inline Elm* elmLimit() {
-    return data() + posLimit();
-  }
-  inline const Elm* elmLimit() const {
-    return data() + posLimit();
-  }
-
-  inline static Elm* nextElm(Elm* e, Elm* eLimit) {
-    assert(e != eLimit);
-    for (++e; e != eLimit && isTombstone(e); ++e) {}
-    return e;
-  }
-  inline static const Elm* nextElm(const Elm* e, const Elm* eLimit) {
-    return (const Elm*)nextElm((Elm*)e, (Elm*)eLimit);
-  }
-
-  static bool isTombstoneType(DataType t) {
-    assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
-    return t < KindOfUninit;
-    static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
-  }
-
-  static bool isTombstone(const Elm* e) {
-    return isTombstoneType(e->data.m_type);
-  }
-
-  static bool isTombstone(ssize_t pos, const Elm* data) {
-    return isTombstoneType(data[pos].data.m_type);
-  }
-
-  bool isTombstone(ssize_t pos) const {
-    assert(size_t(pos) <= m_used);
-    return isTombstone(pos, data());
-  }
-
-  bool hasTombstones() const { return m_size != m_used; }
-
-  size_t hashSize() const {
-    return size_t(m_tableMask) + 1;
-  }
-
-  static uint32_t computeMaxElms(uint32_t tableMask) {
-    return tableMask - tableMask / LoadScale;
-  }
-
-  static void initHash(int32_t* table, size_t tableSize) {
-    wordfill(table, Empty, tableSize);
-  }
-
-  template <class Hit>
-  ssize_t findImpl(size_t h0, Hit) const;
-  ssize_t find(int64_t h) const;
-  ssize_t find(const StringData* s, strhash_t prehash) const;
-
-  template <class Hit>
-  int32_t* findForInsertImpl(size_t h0, Hit) const;
-  int32_t* findForInsert(int64_t h) const;
-  int32_t* findForInsert(const StringData* s, strhash_t prehash) const;
-
-  int32_t* findForNewInsert(size_t h0) const;
-  int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
-
-  // eraseNoCompact removes the specified element, but doesn't check for an
-  // immutable buffer, doesn't increment m_version, and doesn't perform
-  // compaction, so callers need to take care of these things.
-  void eraseNoCompact(int32_t* pos);
-
-  // erase removes the specified element, but doesn't check for an
-  // immutable buffer and doesn't increment m_version, so callers need
-  // to take care of these things.
-  void erase(int32_t* pos);
-
-  bool isFull() { return m_used == m_cap; }
-
-  bool isDensityTooLow() const {
-    bool b = (m_size < m_used / 2);
-    assert(IMPLIES(m_data == nullptr, !b));
-    assert(IMPLIES(m_cap == 0, !b));
-    return b;
-  }
-
-  // This method will grow or compact as needed to make room to add
-  // one new element.
-  void makeRoom();
-
-  void grow(uint32_t newCap, uint32_t newMask);
-  void compact();
-  void compactIfNecessary() { if (isDensityTooLow()) compact(); }
-
-  BaseSet::Elm& allocElm(int32_t* ei) {
-    assert(!hasImmutableBuffer());
-    assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
-    size_t i = m_used;
-    (*ei) = i;
-    m_used = i + 1;
-    ++m_size;
-    return data()[i];
-  }
-
-  BaseSet::Elm& allocElmFront(int32_t* ei);
-
- public:
-  // This method will grow or compact as needed in preparation for
-  // repeatedly adding new elements until m_size >= sz.
-  void reserve(int64_t sz);
-
-  static void copyElm(const Elm& frE, Elm& toE) {
-    memcpy(&toE, &frE, sizeof(Elm));
-  }
-
-  static void dupElm(const Elm& frE, Elm& toE) {
-    assert(!isTombstoneType(frE.data.m_type));
-    memcpy(&toE, &frE, sizeof(Elm));
-    tvRefcountedIncRef(&toE.data);
-  }
-
-  // The iter functions below facilitate iteration over Sets and ImmSets.
-  // Iterators cannot store Elm pointers (because it's possible for m_data
-  // to change without bumping m_version in some cases). Iterators track
-  // their position in terms of _bytes_ from the beginning of the buffer
-  // since it requires less computation overall.
-
-  ssize_t iter_limit() const {
-    assert(sizeof(Elm) == 16);
-    return (ssize_t)m_used << 4;
-  }
-
-  bool iter_valid(ssize_t ipos) const {
-    return ipos != iter_limit();
-  }
-
-  bool iter_valid(ssize_t ipos, ssize_t limit) const {
-    assert(limit == iter_limit());
-    return ipos != limit;
-  }
-
-  const Elm* iter_elm(ssize_t ipos) const {
-    assert(iter_valid(ipos));
-    return (const Elm*)((ssize_t)data() + ipos);
-  }
-
-  ssize_t iter_begin() const {
-    ssize_t limit = iter_limit();
-    ssize_t ipos = 0;
-    for (; ipos != limit; ipos += sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
-      if (!isTombstone(e)) break;
-    }
-    return ipos;
-  }
-
-  ssize_t iter_next(ssize_t ipos) const {
-    ssize_t limit = iter_limit();
-    for (ipos += sizeof(Elm); ipos < limit; ipos += sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
-      if (!isTombstone(e)) return ipos;
-    }
-    return limit;
-  }
-
-  ssize_t iter_prev(ssize_t ipos) const {
-    ssize_t orig_ipos = ipos;
-    for (ipos -= sizeof(Elm); ipos >= 0; ipos -= sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
-      if (!isTombstone(e)) return ipos;
-    }
-    return orig_ipos;
-  }
-
-  Variant iter_key(ssize_t ipos) const {
-    return tvAsCVarRef(iter_value(ipos));
-  }
-
-  const TypedValue* iter_value(ssize_t ipos) const {
-    assert(iter_valid(ipos));
-    return &iter_elm(ipos)->data;
-  }
-
-  uint32_t nthElmPos(size_t n) {
-    if (LIKELY(!hasTombstones())) {
-      // Fast path: Set contains no tombstones
-      return n;
-    }
-    // Slow path: Set has at least one tombstone, so we need to
-    // count forward
-    // TODO Task# 4281431: If n > m_size/2 we could get better
-    // performance by starting at the end of the buffer and
-    // walking backward.
-    if (n >= m_size) {
-      return m_used;
-    }
-    uint32_t pos = 0;
-    for (;;) {
-      while (isTombstone(pos)) {
-        assert(pos + 1 < m_used);
-        ++pos;
-      }
-      if (n <= 0) break;
-      --n;
-      assert(pos + 1 < m_used);
-      ++pos;
-    }
-    return pos;
-  }
-
   void addAllKeysOf(const Cell& container);
   void addAll(const Variant& t);
+
   void init(const Variant& t);
 
   template <bool raw>
@@ -1998,12 +1687,6 @@ class BaseSet : public ExtCollectionObjectData {
   Variant pop();
   Variant popFront();
 
-  void remove(int64_t key);
-  void remove(StringData* key);
-
-  bool contains(int64_t key) const;
-  bool contains(StringData* key) const;
-
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, TSet*>::type
@@ -2022,22 +1705,7 @@ class BaseSet : public ExtCollectionObjectData {
   static void Unserialize(const char* setType, ObjectData* obj,
                           VariableUnserializer* uns, int64_t sz, char type);
 
-  bool hasImmutableBuffer() const { return !m_immCopy.isNull(); }
-
-  /**
-   * Should be called by any operation that mutates the set, since
-   * we might need to make a copy of the buffer before mutating it.
-   */
-  void mutate() { if (hasImmutableBuffer()) copyBuffer(); }
-
-  void mutateAndBump() { mutate(); ++m_version; }
-
  protected:
-  /**
-   * Copy the buffer and reset the immutable copy.
-   */
-  void copyBuffer();
-
   // PHP-land methods exported by child classes.
 
   bool    php_isEmpty() { return !toBoolImpl(); }
@@ -2054,7 +1722,6 @@ class BaseSet : public ExtCollectionObjectData {
 
   Object  php_lazy() { return SystemLib::AllocLazyIterableViewObject(this); }
   bool    php_contains(const Variant& key);
-  Array   php_toArray() { return toArrayImpl(); }
   Array   php_toKeysArray() { return php_toValuesArray(); }
   Array   php_toValuesArray();
   Object  php_getIterator();
@@ -2136,15 +1803,6 @@ class BaseSet : public ExtCollectionObjectData {
 
  private:
   // Helpers
-
-  /**
-   * Raises a warning if the set contains an int and a string with the same
-   * numeric value: e.g. Set {'123', 123}. It's a no-op otherwise.
-   */
-  void warnOnStrIntDup() const;
-
-  Array toArrayImpl() const;
-  bool toBoolImpl() const { return (m_size != 0); }
 
   static void throwBadValueType() ATTRIBUTE_NORETURN;
 
@@ -2416,12 +2074,12 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
     return 2;
   }
 
-  static uint dataOffset() { return offsetof(c_Pair, elm0); }
+  static uint32_t dataOffset() { return offsetof(c_Pair, elm0); }
 
  private:
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
-  uint m_size;
+  uint32_t m_size;
 
   // TODO Can we add something here to make sure elm0 is 16-byte aligned?
   TypedValue elm0;

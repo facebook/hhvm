@@ -41,16 +41,11 @@ c_BlockableWaitHandle* c_BlockableWaitHandle::unblock() {
 
   // notify subclass that we are no longer blocked
   switch (getKind()) {
-    case Kind::AsyncFunction:
-      static_cast<c_AsyncFunctionWaitHandle*>(this)->onUnblocked(); break;
-    case Kind::AsyncGenerator:
-      static_cast<c_AsyncGeneratorWaitHandle*>(this)->onUnblocked(); break;
-    case Kind::GenArray:
-      static_cast<c_GenArrayWaitHandle*>(this)->onUnblocked(); break;
-    case Kind::GenMap:
-      static_cast<c_GenMapWaitHandle*>(this)->onUnblocked(); break;
-    case Kind::GenVector:
-      static_cast<c_GenVectorWaitHandle*>(this)->onUnblocked(); break;
+    case Kind::AsyncFunction:  asAsyncFunction()->onUnblocked(); break;
+    case Kind::AsyncGenerator: asAsyncGenerator()->onUnblocked(); break;
+    case Kind::GenArray:       asGenArray()->onUnblocked(); break;
+    case Kind::GenMap:         asGenMap()->onUnblocked(); break;
+    case Kind::GenVector:      asGenVector()->onUnblocked(); break;
     case Kind::Static:
     case Kind::Reschedule:
     case Kind::Sleep:

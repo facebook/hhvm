@@ -9,8 +9,26 @@
  *)
 
 module HackConfig : ClientStop.STOP_CONFIG = struct
+  type response = ServerMsg.response
+
   let server_desc = "Hack"
+
   let server_name = "hh_server"
+
+  let kill_cmd_to_channel oc =
+    ServerMsg.cmd_to_channel oc ServerMsg.KILL
+
+  let response_from_channel = ServerMsg.response_from_channel
+
+  let response_to_string = ServerMsg.response_to_string
+
+  let is_expected = function
+    | ServerMsg.SERVER_OUT_OF_DATE
+    | ServerMsg.SERVER_DYING ->
+        true
+    | _ ->
+        false
+
 end
 
 module HackStopCommand = ClientStop.StopCommand (HackConfig)
@@ -18,4 +36,4 @@ module HackStopCommand = ClientStop.StopCommand (HackConfig)
 let main = HackStopCommand.main
 
 let kill_server root =
-  HackStopCommand.kill_server { ClientStop.root = root; }
+  HackStopCommand.kill_server { ClientStop.root }

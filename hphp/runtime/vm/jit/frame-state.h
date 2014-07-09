@@ -175,6 +175,8 @@ struct FrameState final : private LocalStateHook {
    */
   void clearCse();
 
+  void clearCurrentLocals() { clearLocals(*this); }
+
   /*
    * Check current state for compatibility (matching types of
    * stack/locals) with the state at block.

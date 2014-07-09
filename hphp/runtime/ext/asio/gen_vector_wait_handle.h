@@ -61,6 +61,11 @@ class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
   int64_t m_iterPos;
 };
 
+inline c_GenVectorWaitHandle* c_WaitHandle::asGenVector() {
+  assert(getKind() == Kind::GenVector);
+  return static_cast<c_GenVectorWaitHandle*>(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

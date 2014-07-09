@@ -1560,13 +1560,13 @@ c_ImmVector::c_ImmVector(Class* cls) : BaseVector(cls) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * The Map implementation makes use of s_theEmptyMixedArray, a special static
- * empty array that has all of MixedArray's fields initialized to convenient
- * values. This "static empty mixed array" is only used internally within the
- * Map implementation and it's never exposed outside of the Map implementation.
- * hashTab()[0] is set to Empty so that the find() method won't find anything,
- * and m_cap is set to 0 so that any attempt to add an element will trigger a
- * grow operation.
+ * The HashCollection implementation makes use of s_theEmptyMixedArray, a
+ * special static empty array that has all of MixedArray's fields initialized
+ * to convenient values.  This "static empty mixed array" is only used
+ * internally within the HashCollection implementation and it's never exposed
+ * outside of the HashCollection implementation.  hashTab()[0] is set to Empty
+ * so that the find() method won't find anything, and m_cap is set to 0 so that
+ * any attempt to add an element will trigger a grow operation.
  *
  * Using this static empty mixed array allows us to always assume m_data is
  * non-null, and it is better than calling MakeReserveMixed because it avoids
@@ -1578,7 +1578,7 @@ std::aligned_storage<
   alignof(MixedArray)
 >::type s_theEmptyMixedArray;
 
-struct BaseMap::EmptyMixedInitializer {
+struct HashCollection::EmptyMixedInitializer {
   EmptyMixedInitializer() {
     void* vpEmpty = &s_theEmptyMixedArray;
 
@@ -1596,7 +1596,477 @@ struct BaseMap::EmptyMixedInitializer {
     ad->setStatic();
   }
 };
-BaseMap::EmptyMixedInitializer BaseMap::s_empty_mixed_initializer;
+
+HashCollection::EmptyMixedInitializer
+HashCollection::s_empty_mixed_initializer;
+
+HashCollection::HashCollection(Class* cls)
+    : ExtCollectionObjectData(cls)
+    , m_size(0), m_version(0), m_data(mixedData(staticEmptyMixedArray())) {
+}
+
+Array HashCollection::toArrayImpl() const {
+  if (!m_size) {
+    return empty_array();
+  }
+  if (UNLIKELY(intLikeStrKeys())) {
+    // In the rare case where this collection contains integer-like string
+    // keys, instead of exposing this collection's buffer we return a copy
+    // of the buffer with the int-like string keys converted to integers.
+    // This is important because int-like string keys cannot be accessed by
+    // user code via the brackets operator (i.e. "$c[$k]").
+    ArrayInit ai(m_size, ArrayInit::Mixed{});
+    auto* eLimit = elmLimit();
+    for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+      if (e->hasIntKey()) {
+        ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
+      } else {
+        assert(e->hasStrKey());
+        ai.set(String(StrNR(e->skey)).toKey(), tvAsCVarRef(&e->data));
+      }
+    }
+    Array arr = ai.toArray();
+    // If both a given integer x and its equivalent string presentation
+    // were both keys in the collection, we better warn the user.
+    if (UNLIKELY(arr.length() < m_size)) warnOnStrIntDup();
+    return arr;
+  }
+  auto ad = const_cast<ArrayData*>(
+    reinterpret_cast<const ArrayData*>(arrayData())
+  );
+  // When HashCollection:toArray() returns a non-empty array, we want the
+  // returned array to have its internal cursor pointing at the first element,
+  // so we set m_pos accordingly here. It's safe to write to m_pos even if
+  // ad's refcount is greater than 1 because we know one of the following is
+  // true: either (1) this array has never been exposed outside of the
+  // HashCollection implementation, in which case we know it's not referenced
+  // outside by anything outside the AssoCollection implementation, or (2) this
+  // array has been exposed by the AssoCollection implementation, in which case
+  // m_pos was already set to point to the first element (and COW semantics
+  // ensures that m_pos couldn't have been changed by user code).
+  assert(m_size);
+  auto firstPos = nthElmPos(0);
+  if (ad->m_pos != firstPos) {
+    ad->m_pos = firstPos;
+  }
+  return Array(ad);
+}
+
+void HashCollection::mutateImpl() {
+  assert(arrayData()->hasMultipleRefs());
+  dropImmCopy();
+  if (canMutateBuffer()) {
+    return;
+  }
+  if (!m_size) {
+    arrayData()->decRefCount();
+    m_size = 0;
+    m_data = mixedData(staticEmptyMixedArray());
+    setIntLikeStrKeys(false);
+    return;
+  }
+  auto* oldAd = arrayData();
+  m_data = mixedData(
+    reinterpret_cast<MixedArray*>(MixedArray::Copy(oldAd))
+  );
+  arrayData()->incRefCount();
+  assert(oldAd->hasMultipleRefs());
+  oldAd->decRefCount();
+}
+
+NEVER_INLINE
+void HashCollection::throwTooLarge() {
+  assert(o_getClassName().size() == 6);
+  static const size_t reserveSize = 130;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.bufferSlice().ptr;
+  int sz = sprintf(
+    buf,
+    "%s object has reached its maximum capacity of %u element "
+    "slots and does not have room to add a new element",
+    o_getClassName().data() + 3, // strip "HH\" prefix
+    MaxSize
+  );
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
+}
+
+NEVER_INLINE
+void HashCollection::throwReserveTooLarge() {
+  assert(o_getClassName().size() == 6);
+  static const size_t reserveSize = 80;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.bufferSlice().ptr;
+  int sz = sprintf(
+    buf,
+    "%s does not support reserving room for more than %u elements",
+    o_getClassName().data() + 3, // strip "HH\" prefix
+    MaxReserveSize
+  );
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
+}
+
+NEVER_INLINE
+int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
+  if (n > size_t(RuntimeOption::MaxArrayChain)) {
+    raise_error("%s is too unbalanced (%lu)",
+                o_getClassName().data() + 3, // strip "HH\" prefix
+                n);
+  }
+  return ei;
+}
+
+void HashCollection::remove(int64_t key) {
+  mutateAndBump();
+  auto p = findForRemove(key);
+  if (validPos(p)) {
+    erase(p);
+  }
+}
+
+void HashCollection::remove(StringData* key) {
+  mutateAndBump();
+  auto p = findForRemove(key, key->hash());
+  if (validPos(p)) {
+    erase(p);
+  }
+}
+
+bool HashCollection::contains(int64_t key) const {
+  return find(key) != Empty;
+}
+
+bool HashCollection::contains(StringData* key) const {
+  return find(key, key->hash()) != Empty;
+}
+
+static bool hitStringKey(const HashCollection::Elm& e,
+                         const StringData* s, int32_t hash) {
+  // hitStringKey() should only be called on an Elm that is referenced by a
+  // hash table entry. HashCollection guarantees that when it adds a hash
+  // table entry that it always sets it to refer to a valid element. Likewise
+  // when it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!HashCollection::isTombstone(&e));
+  return hash == e.hash() && (s == e.skey || s->same(e.skey));
+}
+
+static bool hitIntKey(const HashCollection::Elm& e, int64_t ki) {
+  // hitIntKey() should only be called on an Elm that is referenced by a
+  // hash table entry. HashCollection guarantees that when it adds a hash
+  // table entry that it always sets it to refer to a valid element. Likewise
+  // when it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!HashCollection::isTombstone(&e));
+  return e.ikey == ki && e.hasIntKey();
+}
+
+// Quadratic probe is:
+//
+//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
+//
+// Use 1/2 for c1 and c2. In combination with a table size that is a power of
+// 2, this guarantees a probe sequence of length tableSize that probes all
+// table elements exactly once.
+
+template <class Hit>
+ALWAYS_INLINE
+ssize_t HashCollection::findImpl(size_t h0, Hit hit) const {
+  size_t mask = tableMask();
+  auto* elms = data();
+  auto* hashtable = hashTab();
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    ssize_t pos = hashtable[probeIndex & mask];
+    if ((validPos(pos) && hit(*fetchElm(elms, pos))) || pos == Empty) {
+      return pos;
+    }
+    probeIndex += i;
+    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
+  }
+}
+
+ssize_t HashCollection::find(int64_t ki) const {
+  return findImpl(ki, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
+}
+
+ssize_t
+HashCollection::find(const StringData* s, strhash_t prehash) const {
+  auto h = prehash | STRHASH_MSB;
+  return findImpl(prehash, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
+}
+
+template <class Hit>
+ALWAYS_INLINE
+int32_t* HashCollection::findForInsertImpl(size_t h0, Hit hit) const {
+  // mask, probe, and pos are explicitly 64-bit, because performance
+  // regressed when they were 32-bit types via auto. Test carefully.
+  size_t mask = tableMask();
+  auto* elms = data();
+  auto* hashtable = hashTab();
+  int32_t* ret = nullptr;
+  for (size_t probe = h0, i = 1;; ++i) {
+    auto ei = &hashtable[probe & mask];
+    ssize_t pos = *ei;
+    if (validPos(pos)) {
+      if (hit(*fetchElm(elms, pos))) {
+        return ei;
+      }
+    } else {
+      if (!ret) ret = ei;
+      if (pos == Empty) {
+        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
+      }
+    }
+    probe += i;
+    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+  }
+}
+
+int32_t* HashCollection::findForInsert(int64_t ki) const {
+  return findForInsertImpl(ki, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
+}
+
+int32_t* HashCollection::findForInsert(
+  const StringData* s, strhash_t prehash) const {
+  auto h = prehash | STRHASH_MSB;
+  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
+}
+
+// findForNewInsert() is only safe to use if you know for sure that the
+// key is not already present in the HashCollection.
+ALWAYS_INLINE int32_t* HashCollection::findForNewInsert(
+  int32_t* table, size_t mask, size_t h0) const {
+  for (size_t i = 1, probe = h0;; ++i) {
+    auto ei = &table[probe & mask];
+    if (!validPos(*ei)) {
+      return ei;
+    }
+    probe += i;
+    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+  }
+}
+
+ALWAYS_INLINE
+int32_t* HashCollection::findForNewInsert(size_t h0) const {
+  return findForNewInsert(hashTab(), tableMask(), h0);
+}
+
+void HashCollection::eraseNoCompact(ssize_t pos) {
+  assert(canMutateBuffer());
+  assert(validPos(pos) && !isTombstone(pos));
+  assert(m_size > 0);
+  // We're removing an element, so we make sure m_pos is not pointing at
+  // garbage by setting it to invalid_index
+  arrayData()->m_pos = ArrayData::invalid_index;
+  ((MixedArray*)arrayData())->eraseNoCompact(pos);
+  --m_size;
+}
+
+NEVER_INLINE void HashCollection::makeRoom() {
+  assert(isFull());
+  assert(posLimit() == cap());
+  if (LIKELY(!isDensityTooLow())) {
+    if (UNLIKELY(cap() == MaxSize)) {
+      throwTooLarge();
+    }
+    grow(cap() ? cap()*2 : SmallSize, cap() ? tableMask()*2+1 : SmallMask);
+  } else {
+    compact();
+  }
+  assert(canMutateBuffer());
+  assert(m_immCopy.isNull());
+  assert(!isFull());
+}
+
+NEVER_INLINE void HashCollection::reserve(int64_t sz) {
+  assert(m_size <= posLimit() && posLimit() <= cap());
+  uint32_t newCap;
+  uint32_t newMask;
+  if (LIKELY(sz > int64_t(cap()))) {
+    if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
+      throwReserveTooLarge();
+    }
+    // Fast path: The requested capacity is greater than the current capacity.
+    // Grow to the smallest allowed capacity that is sufficient.
+    auto lgSize = MinLgTableSize;
+    for (newCap = SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
+    newMask = (size_t(1U) << lgSize) - 1;
+    assert(lgSize <= MaxLgTableSize && newCap > cap());
+    // Fall through to the call to grow() below
+  } else if (LIKELY(!hasTombstones())) {
+    // Fast path: There are no tombstones and the requested capacity is less
+    // than or equal to the current capacity. Do nothing and return.
+    return;
+  } else if (sz + int64_t(posLimit() - m_size) <= int64_t(cap()) ||
+             isDensityTooLow()) {
+    // If we reach this case, then either (1) density is too low (this is
+    // possible because of methods like retain()), in which case we compact
+    // to make room and return, OR (2) density is not too low and either
+    // sz < m_size or there's enough room to add sz-m_size elements, in
+    // which case we do nothing and return.
+    compactOrShrinkIfDensityTooLow();
+    assert(sz + int64_t(posLimit() - m_size) <= int64_t(cap()));
+    return;
+  } else {
+    // If we reach this case, then density is not too low and sz > m_size and
+    // there is not enough room to add sz-m_size elements. While would could
+    // compact to make room, it's better for Hysteresis if we grow capacity
+    // by 2x instead.
+    assert(!isDensityTooLow());
+    assert(sz + int64_t(posLimit() - m_size) > int64_t(cap()));
+    assert(cap() < MaxSize && tableMask() != 0);
+    newCap = cap() * 2;
+    newMask = tableMask() * 2 + 1;
+    assert(0 < sz && sz <= int64_t(newCap));
+    // Fall through to the call to grow() below
+  }
+  grow(newCap, newMask);
+  assert(canMutateBuffer());
+}
+
+ALWAYS_INLINE
+void HashCollection::resizeHelper(uint32_t newCap) {
+  assert(newCap >= m_size);
+  assert(m_immCopy.isNull());
+  // Allocate a new ArrayData with the specified capacity and dup
+  // all the elements (without copying over tombstones).
+  auto* ad = (arrayData() == staticEmptyMixedArray()) ?
+    reinterpret_cast<MixedArray*>(MixedArray::MakeReserveMixed(newCap)) :
+    MixedArray::CopyReserve((MixedArray*)arrayData(), newCap);
+  decRefArr(arrayData());
+  m_data = mixedData(ad);
+  assert(canMutateBuffer());
+}
+
+void HashCollection::grow(uint32_t newCap, uint32_t newMask) {
+  assert(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
+  assert(SmallSize <= newCap && newCap <= MaxSize);
+  assert(m_size <= newCap);
+  assert(newMask > 0 && ((newMask+1) & newMask) == 0);
+  assert(newMask == folly::nextPowTwo<uint64_t>(newCap) - 1);
+  assert(newCap == computeMaxElms(newMask));
+  auto* oldAd = arrayData();
+  dropImmCopy();
+  if (m_size > 0 && !oldAd->hasMultipleRefs()) {
+    // MixedArray::Grow can only handle non-empty cases where the
+    // buffer's refcount is 1.
+    m_data = mixedData(MixedArray::Grow((MixedArray*)oldAd, newCap, newMask));
+    arrayData()->incRefCount();
+    decRefArr(oldAd);
+  } else {
+    // For cases where m_size is zero or the buffer's refcount is
+    // greater than 1, call resizeHelper().
+    resizeHelper(newCap);
+  }
+  assert(canMutateBuffer());
+  assert(m_immCopy.isNull());
+}
+
+void HashCollection::compact() {
+  assert(isDensityTooLow());
+  dropImmCopy();
+  if (!arrayData()->hasMultipleRefs()) {
+    // MixedArray::compact can only handle cases where the buffer's
+    // refcount is 1.
+    ((MixedArray*)arrayData())->compact(false);
+  } else {
+    // For cases where the buffer's refcount is greater than 1, call
+    // resizeHelper().
+    resizeHelper(cap());
+  }
+  assert(canMutateBuffer());
+  assert(m_immCopy.isNull());
+  assert(!isDensityTooLow());
+}
+
+void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
+  assert(isCapacityTooHigh() && (oldCap == 0 || oldCap < cap()));
+  assert(m_size <= posLimit() && posLimit() <= cap());
+  dropImmCopy();
+  uint32_t newCap;
+  if (oldCap != 0) {
+    // If an old capacity was specified, use that
+    newCap = oldCap;
+    assert(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
+  } else {
+    if (m_size == 0 && nextKI() == 0) {
+      decRefArr(arrayData());
+      m_data = mixedData(staticEmptyMixedArray());
+      return;
+    }
+    // If no old capacity was provided, we compute the largest capacity
+    // where m_size/cap() is less than or equal to 0.5 for good hysteresis
+    size_t doubleSz = size_t(m_size) * 2;
+    uint32_t capThreshold = (doubleSz < size_t(MaxSize)) ? doubleSz : MaxSize;
+    for (newCap = SmallSize * 2; newCap < capThreshold; newCap <<= 1) {}
+  }
+  assert(SmallSize <= newCap && newCap <= MaxSize);
+  assert(m_size <= newCap);
+  auto* oldAd = arrayData();
+  if (!oldAd->hasMultipleRefs()) {
+    // If the buffer's refcount is 1, we can teleport the elements
+    // to a new buffer
+    auto* oldBuf = data();
+    auto oldUsed = posLimit();
+    auto oldNextKI = nextKI();
+    auto* data = mixedData(
+      reinterpret_cast<MixedArray*>(MixedArray::MakeReserveMixed(newCap))
+    );
+    m_data = data;
+    auto* table = (int32_t*)(data + size_t(newCap));
+    arrayData()->m_size = m_size;
+    setPosLimit(m_size);
+    setNextKI(oldNextKI);
+    for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+      frPos = skipTombstonesNoBoundsCheck(frPos, oldUsed, oldBuf);
+      copyElm(oldBuf[frPos], data[toPos]);
+      *findForNewInsert(table, tableMask(), data[toPos].probe()) = toPos;
+    }
+    ((MixedArray*)oldAd)->setZombie();
+    decRefArr(oldAd);
+  } else {
+    // For cases where the buffer's refcount is greater than 1, call
+    // resizeHelper()
+    resizeHelper(newCap);
+  }
+  assert(canMutateBuffer());
+  assert(m_immCopy.isNull());
+  assert(!isCapacityTooHigh());
+}
+
+HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
+  assert(ei && !validPos(*ei) && m_size <= posLimit() && posLimit() < cap());
+  // Move the existing elements to make element slot 0 available.
+  memmove(data() + 1, data(), posLimit() * sizeof(Elm));
+  incPosLimit();
+  // Update the hashtable to reflect the fact that everything was moved
+  // over one position
+  auto* hash = hashTab();
+  auto* hashEnd = hash + hashSize();
+  for (; hash != hashEnd; ++hash) {
+    if (validPos(*hash)) {
+      ++(*hash);
+    }
+  }
+  // Set the hash entry we found to point to element slot 0.
+  (*ei) = 0;
+  // Store the value into element slot 0.
+  ++m_size;
+  return data()[0];
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1606,9 +2076,7 @@ c_Map::c_Map(Class* cls) : BaseMap(cls) {
 
 // Protected (Internal)
 
-BaseMap::BaseMap(Class* cls)
-    : ExtCollectionObjectData(cls)
-    , m_size(0), m_version(0), m_data(mixedData(staticEmptyMixedArray())) {
+BaseMap::BaseMap(Class* cls) : HashCollection(cls) {
 }
 
 BaseMap::~BaseMap() {
@@ -1618,48 +2086,6 @@ BaseMap::~BaseMap() {
 void c_Map::t___construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
-}
-
-Array BaseMap::php_toArray() const {
-  if (!m_size) {
-    return empty_array();
-  }
-  if (UNLIKELY(intLikeStrKeys())) {
-    // In the rare case where this Map contains integer-like string keys,
-    // instead of exposing this Map's buffer we return a MixedArray copy of
-    // the buffer with the int-like string keys converted to integers. This
-    // is important because int-like string keys cannot be accessed by user
-    // code via the brackets operator (i.e. "$c[$k]").
-    ArrayInit ai(m_size, ArrayInit::Mixed{});
-    auto* eLimit = elmLimit();
-    for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-      if (e->hasIntKey()) {
-        ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
-      } else {
-        ai.set(String(StrNR(e->skey)).toKey(), tvAsCVarRef(&e->data));
-      }
-    }
-    return ai.toArray();
-  }
-  auto ad = const_cast<ArrayData*>(
-    reinterpret_cast<const ArrayData*>(arrayData())
-  );
-  // When Map:toArray() returns a non-empty array, we want the returned
-  // array to have its internal cursor pointing at the first element, so we
-  // set m_pos accordingly here. It's safe to write to m_pos even if ad's
-  // refcount is greater than 1 because we know one of the following is true:
-  // either (1) this array has never been exposed outside of the Map
-  // implementation, in which case we know it's not referenced outside by
-  // anything outside the Map implementation, or (2) this array has been
-  // exposed by the Map implementation, in which case m_pos was already set
-  // to point to the first element (and COW semantics ensures that m_pos
-  // couldn't have been changed by user code).
-  assert(m_size);
-  auto firstPos = nthElmPos(0);
-  if (ad->m_pos != firstPos) {
-    ad->m_pos = firstPos;
-  }
-  return Array(ad);
 }
 
 template<typename TMap>
@@ -1680,28 +2106,6 @@ BaseMap::Clone(ObjectData* obj) {
 
 c_Map* c_Map::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_Map>(obj);
-}
-
-void BaseMap::mutateImpl() {
-  assert(arrayData()->hasMultipleRefs());
-  dropImmCopy();
-  if (canMutateBuffer()) {
-    return;
-  }
-  if (!m_size) {
-    arrayData()->decRefCount();
-    m_size = 0;
-    m_data = mixedData(staticEmptyMixedArray());
-    setIntLikeStrKeys(false);
-    return;
-  }
-  auto* oldAd = arrayData();
-  m_data = mixedData(
-    reinterpret_cast<MixedArray*>(MixedArray::Copy(oldAd))
-  );
-  arrayData()->incRefCount();
-  assert(oldAd->hasMultipleRefs());
-  oldAd->decRefCount();
 }
 
 void BaseMap::init(const Variant& t) {
@@ -1735,11 +2139,11 @@ Object c_Map::t_addall(const Variant& iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   auto oldCap = cap();
-  reserve(m_size + sz); // presume minimum key collisions
+  reserve(m_size + sz); // presume minimum key collisions ...
   for (; iter; ++iter) {
     add(iter.second());
   }
-  adjustAfterReserve(oldCap); // ... and shrink back if that was incorrect
+  shrinkIfCapacityTooHigh(oldCap); // ... and shrink back if that was incorrect
   return this;
 }
 
@@ -1793,9 +2197,8 @@ Object BaseMap::php_keys() const {
       vec->m_data[j].m_data.num = e->ikey;
       vec->m_data[j].m_type = KindOfInt64;
     } else {
-      e->skey->incRefCount();
-      vec->m_data[j].m_data.pstr = e->skey;
-      vec->m_data[j].m_type = KindOfString;
+      assert(e->hasStrKey());
+      cellDup(make_tv<KindOfString>(e->skey), vec->m_data[j]);
     }
   }
   return obj;
@@ -1897,9 +2300,9 @@ Object c_Map::t_remove(const Variant& key) {
 
 Object c_Map::t_removekey(const Variant& key) { return t_remove(key); }
 
-Array c_ImmMap::t_toarray() { return php_toArray(); }
+Array c_ImmMap::t_toarray() { return toArrayImpl(); }
 
-Array c_Map::t_toarray() { return php_toArray(); }
+Array c_Map::t_toarray() { return toArrayImpl(); }
 
 Object BaseMap::php_values() const {
   auto* target = NEWOBJ(c_Vector)();
@@ -1927,6 +2330,7 @@ Array BaseMap::php_toKeysArray() const {
     if (e->hasIntKey()) {
       ai.append(int64_t{e->ikey});
     } else {
+      assert(e->hasStrKey());
       ai.append(VarNR(e->skey));
     }
   }
@@ -1970,6 +2374,7 @@ BaseMap::php_differenceByKey(const Variant& it) {
       if (e->hasIntKey()) {
         target->remove((int64_t)e->ikey);
       } else {
+        assert(e->hasStrKey());
         target->remove(e->skey);
       }
     }
@@ -2007,18 +2412,18 @@ Object c_ImmMap::t_getiterator() { return php_getIterator(); }
 
 Object c_Map::t_getiterator() { return php_getIterator(); }
 
-ALWAYS_INLINE
-static std::array<TypedValue, 2> makeArgsFromMapKeyAndValue(
-  const BaseMap::Elm& e) {
+ALWAYS_INLINE static std::array<TypedValue, 2>
+makeArgsFromMapKeyAndValue(const HashCollection::Elm& e) {
   return std::array<TypedValue, 2> {{
-    (e.hasIntKey() ? make_tv<KindOfInt64>(e.ikey)
-     : make_tv<KindOfString>(e.skey)),
+    (e.hasIntKey()
+      ? make_tv<KindOfInt64>(e.ikey)
+      : make_tv<KindOfString>(e.skey)),
     e.data
   }};
 }
 
-ALWAYS_INLINE
-static std::array<TypedValue, 1> makeArgsFromMapValue(const BaseMap::Elm& e) {
+ALWAYS_INLINE static std::array<TypedValue, 1>
+makeArgsFromMapValue(const HashCollection::Elm& e) {
   // note that this is a potentially unnecessary copy
   // that might be reinterpret_cast ed away
   // http://stackoverflow.com/questions/11205186/treat-c-cstyle-array-as-stdarray
@@ -2119,6 +2524,7 @@ BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
     if (e->hasIntKey()) {
       mp->setRaw(e->ikey, &e->data);
     } else {
+      assert(e->hasStrKey());
       mp->setRaw(e->skey, &e->data);
     }
   }
@@ -2176,7 +2582,7 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
   }
 
   assert(m_size <= size);
-  adjustIfDensityTooLow();
+  compactOrShrinkIfDensityTooLow();
   return this;
 }
 
@@ -2201,8 +2607,8 @@ BaseMap::php_zip(const Variant& iterable) const {
     return obj;
   }
   mp->reserve(std::min(sz, size_t(m_size)));
-  uint used = posLimit();
-  for (uint i = 0; i < used && iter; ++i) {
+  uint32_t used = posLimit();
+  for (uint32_t i = 0; i < used && iter; ++i) {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
@@ -2216,6 +2622,7 @@ BaseMap::php_zip(const Variant& iterable) const {
     if (e.hasIntKey()) {
       mp->setRaw(e.ikey, &tv);
     } else {
+      assert(e.hasStrKey());
       mp->setRaw(e.skey, &tv);
     }
     ++iter;
@@ -2261,13 +2668,14 @@ BaseMap::php_take(const Variant& n) {
   auto table = mp->hashTab();
   auto mask = mp->tableMask();
   for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    frPos = skipTombstonesUnsafe(frPos);
+    frPos = skipTombstonesNoBoundsCheck(frPos);
     auto& toE = mp->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
     if (toE.hasIntKey()) {
       mp->updateNextKI(toE.ikey);
     } else {
+      assert(toE.hasStrKey());
       mp->updateIntLikeStrKeys(toE.skey);
     }
   }
@@ -2306,6 +2714,7 @@ BaseMap::php_takeWhile(const Variant& fn) {
     if (e->hasIntKey()) {
       mp->setRaw(e->ikey, &e->data);
     } else {
+      assert(e->hasStrKey());
       mp->setRaw(e->skey, &e->data);
     }
   }
@@ -2344,13 +2753,14 @@ BaseMap::php_skip(const Variant& n) {
   auto table = mp->hashTab();
   auto mask = mp->tableMask();
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    frPos = skipTombstonesUnsafe(frPos);
+    frPos = skipTombstonesNoBoundsCheck(frPos);
     auto& toE = mp->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
     if (toE.hasIntKey()) {
       mp->updateNextKI(toE.ikey);
     } else {
+      assert(toE.hasStrKey());
       mp->updateIntLikeStrKeys(toE.skey);
     }
   }
@@ -2393,6 +2803,7 @@ BaseMap::php_skipWhile(const Variant& fn) {
     if (e->hasIntKey()) {
       mp->setRaw(e->ikey, &e->data);
     } else {
+      assert(e->hasStrKey());
       mp->setRaw(e->skey, &e->data);
     }
   }
@@ -2427,13 +2838,14 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
   auto table = mp->hashTab();
   auto mask = mp->tableMask();
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    frPos = skipTombstonesUnsafe(frPos);
+    frPos = skipTombstonesNoBoundsCheck(frPos);
     auto& toE = mp->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
     if (toE.hasIntKey()) {
       mp->updateNextKI(toE.ikey);
     } else {
+      assert(toE.hasStrKey());
       mp->updateIntLikeStrKeys(toE.skey);
     }
   }
@@ -2497,7 +2909,7 @@ BaseMap::php_concat(const Variant& iterable) {
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
   auto* vec = NEWOBJ(TVector)();
   Object obj = vec;
-  uint sz = m_size;
+  uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
   assert(vec->canMutateBuffer());
   vec->setSize(sz);
@@ -2545,6 +2957,7 @@ Variant BaseMap::php_firstKey() {
   if (e->hasIntKey()) {
     return e->ikey;
   } else {
+    assert(e->hasStrKey());
     return e->skey;
   }
 }
@@ -2593,6 +3006,7 @@ Variant BaseMap::php_lastKey() {
   if (m_data[pos].hasIntKey()) {
     return m_data[pos].ikey;
   } else {
+    assert(m_data[pos].hasStrKey());
     return m_data[pos].skey;
   }
 }
@@ -2669,7 +3083,7 @@ collectionDeepCopyBaseMap(TMap* mp) {
   mp = TMap::Clone(mp);
   Object o = Object::attach(mp);
   mp->mutate();
-  uint used = mp->posLimit();
+  uint32_t used = mp->posLimit();
   for (uint32_t i = 0; i < used; ++i) {
     if (mp->isTombstone(i)) continue;
     auto* e = &mp->data()[i];
@@ -2694,45 +3108,6 @@ void BaseMap::throwOOB(int64_t key) {
 NEVER_INLINE
 void BaseMap::throwOOB(StringData* key) {
   throwStrOOB(key);
-}
-
-NEVER_INLINE
-void BaseMap::throwTooLarge() {
-  static const size_t reserveSize = 130;
-  String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
-  int sz = sprintf(buf,
-                   "Map object has reached its maximum capacity of "
-                   "%u element slots and does not have room to add a "
-                   "new element",
-                   MaxSize);
-  assert(sz <= reserveSize);
-  msg.setSize(sz);
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
-  throw e;
-}
-
-NEVER_INLINE
-void BaseMap::throwReserveTooLarge() {
-  static const size_t reserveSize = 80;
-  String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
-  int sz = sprintf(buf,
-                   "Map does not support reserving room for more than "
-                   "%u elements",
-                   MaxReserveSize);
-  assert(sz <= reserveSize);
-  msg.setSize(sz);
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
-  throw e;
-}
-
-NEVER_INLINE
-int32_t* BaseMap::warnUnbalanced(size_t n, int32_t* ei) {
-  if (n > size_t(RuntimeOption::MaxArrayChain)) {
-    raise_error("Map is too unbalanced (%lu)", n);
-  }
-  return ei;
 }
 
 TypedValue* BaseMap::at(int64_t key) const {
@@ -2828,147 +3203,6 @@ Variant BaseMap::popFront() {
   }
 }
 
-void BaseMap::remove(int64_t key) {
-  mutateAndBump();
-  auto p = findForRemove(key);
-  if (validPos(p)) {
-    erase(p);
-  }
-}
-
-void BaseMap::remove(StringData* key) {
-  mutateAndBump();
-  auto p = findForRemove(key, key->hash());
-  if (validPos(p)) {
-    erase(p);
-  }
-}
-
-bool BaseMap::contains(int64_t key) const {
-  return find(key) != Empty;
-}
-
-bool BaseMap::contains(StringData* key) const {
-  return find(key, key->hash()) != Empty;
-}
-
-static bool hitStringKey(const BaseMap::Elm& e, const StringData* s,
-                         int32_t hash) {
-  // hitStringKey() should only be called on an Elm that is referenced by a
-  // hash table entry. c_Map guarantees that when it adds a hash table
-  // entry that it always sets it to refer to a valid element. Likewise when
-  // it removes an element it always removes the corresponding hash entry.
-  // Therefore the assertion below must hold.
-  assert(!BaseMap::isTombstone(&e));
-  return hash == e.hash() && (s == e.skey || s->same(e.skey));
-}
-
-static bool hitIntKey(const BaseMap::Elm& e, int64_t ki) {
-  // hitIntKey() should only be called on an Elm that is referenced by a
-  // hash table entry. c_Map guarantees that when it adds a hash table
-  // entry that it always sets it to refer to a valid element. Likewise when
-  // it removes an element it always removes the corresponding hash entry.
-  // Therefore the assertion below must hold.
-  assert(!BaseMap::isTombstone(&e));
-  return e.ikey == ki && e.hasIntKey();
-}
-
-// Quadratic probe is:
-//
-//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
-//
-// Use 1/2 for c1 and c2. In combination with a table size that is a power of
-// 2, this guarantees a probe sequence of length tableSize that probes all
-// table elements exactly once.
-
-template <class Hit>
-ALWAYS_INLINE
-ssize_t BaseMap::findImpl(size_t h0, Hit hit) const {
-  size_t mask = tableMask();
-  auto* elms = data();
-  auto* hashtable = hashTab();
-  for (size_t probeIndex = h0, i = 1;; ++i) {
-    ssize_t pos = hashtable[probeIndex & mask];
-    if ((validPos(pos) && hit(*fetchElm(elms, pos))) || pos == Empty) {
-      return pos;
-    }
-    probeIndex += i;
-    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
-  }
-}
-
-ssize_t BaseMap::find(int64_t ki) const {
-  return findImpl(ki, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-ssize_t BaseMap::find(const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findImpl(prehash, [s, h] (const Elm& e) {
-    return hitStringKey(e, s, h);
-  });
-}
-
-template <class Hit>
-ALWAYS_INLINE
-int32_t* BaseMap::findForInsertImpl(size_t h0, Hit hit) const {
-  // mask, probe, and pos are explicitly 64-bit, because performance
-  // regressed when they were 32-bit types via auto. Test carefully.
-  size_t mask = tableMask();
-  auto* elms = data();
-  auto* hashtable = hashTab();
-  int32_t* ret = nullptr;
-  for (size_t probe = h0, i = 1;; ++i) {
-    auto ei = &hashtable[probe & mask];
-    ssize_t pos = *ei;
-    if (validPos(pos)) {
-      if (hit(*fetchElm(elms, pos))) {
-        return ei;
-      }
-    } else {
-      if (!ret) ret = ei;
-      if (pos == Empty) {
-        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
-      }
-    }
-    probe += i;
-    assert(i <= mask && probe == h0 + (i + i*i) / 2);
-  }
-}
-
-int32_t* BaseMap::findForInsert(int64_t ki) const {
-  return findForInsertImpl(ki, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-int32_t* BaseMap::findForInsert(const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
-    return hitStringKey(e, s, h);
-  });
-}
-
-// findForNewInsert() is only safe to use if you know for sure that the
-// key is not already present in the Map.
-ALWAYS_INLINE int32_t*
-BaseMap::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
-  for (size_t i = 1, probe = h0;; ++i) {
-    auto ei = &table[probe & mask];
-    if (!validPos(*ei)) {
-      return ei;
-    }
-    probe += i;
-    assert(i <= mask && probe == h0 + (i + i*i) / 2);
-  }
-}
-
-ALWAYS_INLINE
-int32_t* BaseMap::findForNewInsert(size_t h0) const {
-  return findForNewInsert(hashTab(), tableMask(), h0);
-}
-
 template <bool raw>
 ALWAYS_INLINE
 void BaseMap::setImpl(int64_t h, const TypedValue* val) {
@@ -3053,189 +3287,6 @@ void BaseMap::set(StringData* key, const TypedValue* val) {
   setImpl<false>(key, val);
 }
 
-void BaseMap::eraseNoCompact(ssize_t pos) {
-  assert(canMutateBuffer());
-  assert(validPos(pos) && !isTombstone(pos));
-  assert(m_size > 0);
-  // We're removing an element, so we make sure m_pos is not pointing at
-  // garbage by setting it to invalid_index
-  arrayData()->m_pos = ArrayData::invalid_index;
-  ((MixedArray*)arrayData())->eraseNoCompact(pos);
-  --m_size;
-}
-
-NEVER_INLINE void BaseMap::makeRoom() {
-  assert(isFull());
-  assert(posLimit() == cap());
-  if (LIKELY(!isDensityTooLow())) {
-    if (UNLIKELY(cap() == MaxSize)) {
-      throwTooLarge();
-    }
-    grow(cap() ? cap()*2 : SmallSize, cap() ? tableMask()*2+1 : SmallMask);
-  } else {
-    compact();
-  }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isFull());
-}
-
-NEVER_INLINE void BaseMap::reserve(int64_t sz) {
-  assert(m_size <= posLimit() && posLimit() <= cap());
-  uint32_t newCap;
-  uint32_t newMask;
-  if (LIKELY(sz > int64_t(cap()))) {
-    if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
-      throwReserveTooLarge();
-    }
-    // Fast path: The requested capacity is greater than the current capacity.
-    // Grow to the smallest allowed capacity that is sufficient.
-    auto lgSize = MinLgTableSize;
-    for (newCap = SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
-    newMask = (size_t(1U) << lgSize) - 1;
-    assert(lgSize <= MaxLgTableSize && newCap > cap());
-    // Fall through to the call to grow() below
-  } else if (LIKELY(!hasTombstones())) {
-    // Fast path: There are no tombstones and the requested capacity is less
-    // than or equal to the current capacity. Do nothing and return.
-    return;
-  } else if (sz + int64_t(posLimit() - m_size) <= int64_t(cap()) ||
-             isDensityTooLow()) {
-    // If we reach this case, then either (1) density is too low (this is
-    // possible because of methods like retain()), in which case we compact
-    // to make room and return, OR (2) density is not too low and either
-    // sz < m_size or there's enough room to add sz-m_size elements, in
-    // which case we do nothing and return.
-    adjustIfDensityTooLow();
-    assert(sz + int64_t(posLimit() - m_size) <= int64_t(cap()));
-    return;
-  } else {
-    // If we reach this case, then density is not too low and sz > m_size and
-    // there is not enough room to add sz-m_size elements. While would could
-    // compact to make room, it's better for Hysteresis if we grow capacity
-    // by 2x instead.
-    assert(!isDensityTooLow());
-    assert(sz + int64_t(posLimit() - m_size) > int64_t(cap()));
-    assert(cap() < MaxSize && tableMask() != 0);
-    newCap = cap() * 2;
-    newMask = tableMask() * 2 + 1;
-    assert(0 < sz && sz <= int64_t(newCap));
-    // Fall through to the call to grow() below
-  }
-  grow(newCap, newMask);
-  assert(canMutateBuffer());
-}
-
-ALWAYS_INLINE
-void BaseMap::resizeHelper(uint32_t newCap) {
-  assert(newCap >= m_size);
-  assert(m_immCopy.isNull());
-  // Allocate a new ArrayData with the specified capacity and dup
-  // all the elements (without copying over tombstones).
-  auto* ad = (arrayData() == staticEmptyMixedArray()) ?
-    reinterpret_cast<MixedArray*>(MixedArray::MakeReserveMixed(newCap)) :
-    MixedArray::CopyReserve((MixedArray*)arrayData(), newCap);
-  decRefArr(arrayData());
-  m_data = mixedData(ad);
-  assert(canMutateBuffer());
-}
-
-void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
-  assert(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
-  assert(SmallSize <= newCap && newCap <= MaxSize);
-  assert(m_size <= newCap);
-  assert(newMask > 0 && ((newMask+1) & newMask) == 0);
-  assert(newMask == folly::nextPowTwo<uint64_t>(newCap) - 1);
-  assert(newCap == computeMaxElms(newMask));
-  auto* oldAd = arrayData();
-  dropImmCopy();
-  if (m_size > 0 && !oldAd->hasMultipleRefs()) {
-    // MixedArray::Grow can only handle non-empty cases where the
-    // buffer's refcount is 1.
-    m_data = mixedData(MixedArray::Grow((MixedArray*)oldAd, newCap, newMask));
-    arrayData()->incRefCount();
-    decRefArr(oldAd);
-  } else {
-    // For cases where m_size is zero or the buffer's refcount is
-    // greater than 1, call resizeHelper().
-    resizeHelper(newCap);
-  }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-}
-
-void BaseMap::compact() {
-  assert(isDensityTooLow());
-  dropImmCopy();
-  if (!arrayData()->hasMultipleRefs()) {
-    // MixedArray::compact can only handle cases where the buffer's
-    // refcount is 1.
-    ((MixedArray*)arrayData())->compact(false);
-  } else {
-    // For cases where the buffer's refcount is greater than 1, call
-    // resizeHelper().
-    resizeHelper(cap());
-  }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isDensityTooLow());
-}
-
-void BaseMap::shrink(uint32_t oldCap /* = 0 */) {
-  assert(isCapacityTooHigh() && (oldCap == 0 || oldCap < cap()));
-  assert(m_size <= posLimit() && posLimit() <= cap());
-  dropImmCopy();
-  uint32_t newCap;
-  if (oldCap != 0) {
-    // If an old capacity was specified, use that
-    newCap = oldCap;
-    assert(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
-  } else {
-    if (m_size == 0 && nextKI() == 0) {
-      decRefArr(arrayData());
-      m_data = mixedData(staticEmptyMixedArray());
-      return;
-    }
-    // If no old capacity was provided, we compute the largest capacity
-    // where m_size/cap() is less than or equal to 0.5 for good hysteresis
-    size_t doubleSz = size_t(m_size) * 2;
-    uint32_t capThreshold = (doubleSz < size_t(MaxSize)) ? doubleSz : MaxSize;
-    for (newCap = SmallSize * 2; newCap < capThreshold; newCap <<= 1) {}
-  }
-  assert(SmallSize <= newCap && newCap <= MaxSize);
-  assert(m_size <= newCap);
-  auto* oldAd = arrayData();
-  if (!oldAd->hasMultipleRefs()) {
-    // If the buffer's refcount is 1, we can teleport the elements
-    // to a new buffer
-    auto* oldBuf = data();
-    auto oldUsed = posLimit();
-    auto oldNextKI = nextKI();
-    auto* data = mixedData(
-      reinterpret_cast<MixedArray*>(MixedArray::MakeReserveMixed(newCap))
-    );
-    m_data = data;
-    auto* table = (int32_t*)(data + size_t(newCap));
-    arrayData()->m_size = m_size;
-    setPosLimit(m_size);
-    setNextKI(oldNextKI);
-    for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-      frPos = skipTombstonesUnsafe(frPos, oldUsed, oldBuf);
-      copyElm(oldBuf[frPos], data[toPos]);
-      *findForNewInsert(table, tableMask(), data[toPos].probe()) = toPos;
-    }
-    ((MixedArray*)oldAd)->setZombie();
-    decRefArr(oldAd);
-  } else {
-    // For cases where the buffer's refcount is greater than 1, call
-    // resizeHelper()
-    resizeHelper(newCap);
-  }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isCapacityTooHigh());
-}
-
 void BaseMap::throwBadKeyType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
     "Only integer keys and string keys may be used with Maps"));
@@ -3244,15 +3295,15 @@ void BaseMap::throwBadKeyType() {
 
 Array BaseMap::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
-  return static_cast<const BaseMap*>(obj)->php_toArray();
+  return static_cast<const BaseMap*>(obj)->toArrayImpl();
 }
 
 bool BaseMap::ToBool(const ObjectData* obj) {
   return static_cast<const BaseMap*>(obj)->toBoolImpl();
 }
 
-struct MapKeyAccessor {
-  typedef const BaseMap::Elm& ElmT;
+struct AssocKeyAccessor {
+  typedef const HashCollection::Elm& ElmT;
   bool isInt(ElmT elm) const { return elm.hasIntKey(); }
   bool isStr(ElmT elm) const { return elm.hasStrKey(); }
   int64_t getInt(ElmT elm) const { return elm.ikey; }
@@ -3266,8 +3317,8 @@ struct MapKeyAccessor {
   }
 };
 
-struct MapValAccessor {
-  typedef const BaseMap::Elm& ElmT;
+struct AssocValAccessor {
+  typedef const HashCollection::Elm& ElmT;
   bool isInt(ElmT elm) const { return elm.data.m_type == KindOfInt64; }
   bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.data.m_type); }
   int64_t getInt(ElmT elm) const { return elm.data.m_data.num; }
@@ -3283,7 +3334,8 @@ struct MapValAccessor {
  * comparator and avoid performing type checks during the actual sort.
  */
 template <typename AccessorT>
-BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
+BaseMap::SortFlavor
+HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
   if (!checkTypes && !hasTombstones()) {
     // No need to loop over the elements, we're done
@@ -3341,7 +3393,7 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
  * postSort() runs after the sort has been performed. For c_Map,
  * postSort() handles rebuilding the hash.
  */
-void BaseMap::postSort() {  // Must provide the nothrow guarantee
+void HashCollection::postSort() {  // Must provide the nothrow guarantee
   assert(m_size > 0);
   auto const table = hashTab();
   initHash(table, hashSize());
@@ -3395,16 +3447,16 @@ void BaseMap::postSort() {  // Must provide the nothrow guarantee
     postSort();                                                 \
   } while(0)
 
-void BaseMap::asort(int sort_flags, bool ascending) {
+void HashCollection::asort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
   mutateAndBump();
-  SORT_BODY(MapValAccessor);
+  SORT_BODY(AssocValAccessor);
 }
 
-void BaseMap::ksort(int sort_flags, bool ascending) {
+void HashCollection::ksort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
   mutateAndBump();
-  SORT_BODY(MapKeyAccessor);
+  SORT_BODY(AssocKeyAccessor);
 }
 
 #undef SORT_CASE
@@ -3431,16 +3483,16 @@ void BaseMap::ksort(int sort_flags, bool ascending) {
     return true;                                                \
   } while (0)
 
-bool BaseMap::uasort(const Variant& cmp_function) {
+bool HashCollection::uasort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
   mutateAndBump();
-  USER_SORT_BODY(MapValAccessor);
+  USER_SORT_BODY(AssocValAccessor);
 }
 
-bool BaseMap::uksort(const Variant& cmp_function) {
+bool HashCollection::uksort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
   mutateAndBump();
-  USER_SORT_BODY(MapKeyAccessor);
+  USER_SORT_BODY(AssocKeyAccessor);
 }
 
 #undef USER_SORT_BODY
@@ -3556,9 +3608,9 @@ bool BaseMap::Equals(EqualityFlavor eq,
       // obj1 and obj2 must have the exact same set of keys, and the values
       // for each key must compare equal (==). This equality behavior
       // matches that of == on two PHP (associative) arrays.
-      for (uint i = 0; i < mp1->posLimit(); ++i) {
+      for (uint32_t i = 0; i < mp1->posLimit(); ++i) {
         if (mp1->isTombstone(i)) continue;
-        const BaseMap::Elm& e = mp1->data()[i];
+        const HashCollection::Elm& e = mp1->data()[i];
         TypedValue* tv2;
         if (e.hasIntKey()) {
           tv2 = mp2->get(e.ikey);
@@ -3575,8 +3627,8 @@ bool BaseMap::Equals(EqualityFlavor eq,
       // obj1 and obj2 must compare equal according to OrderIrrelevant;
       // additionally, the (identical) keys of obj1 and obj2 must be in the
       // same iteration order.
-      uint compared = 0;
-      for (uint ix1 = 0, ix2 = 0;
+      uint32_t compared = 0;
+      for (uint32_t ix1 = 0, ix2 = 0;
            ix1 < mp1->posLimit() && ix2 < mp2->posLimit() ; ) {
 
         auto tomb1 = mp1->isTombstone(ix1);
@@ -3588,8 +3640,8 @@ bool BaseMap::Equals(EqualityFlavor eq,
           continue;
         }
 
-        const BaseMap::Elm& e1 = mp1->data()[ix1];
-        const BaseMap::Elm& e2 = mp2->data()[ix2];
+        const HashCollection::Elm& e1 = mp1->data()[ix1];
+        const HashCollection::Elm& e2 = mp2->data()[ix2];
 
         if (e1.hasIntKey()) {
           if (!e2.hasIntKey() ||
@@ -3745,42 +3797,7 @@ c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
 ///////////////////////////////////////////////////////////////////////////////
 // BaseSet
 
-static int32_t empty_set_hash_slot = BaseSet::Empty;
-
 // Public
-
-void BaseSet::copyBuffer() {
-  assert(hasImmutableBuffer());
-  if (!m_size) {
-    uint32_t used = 0;
-    uint32_t cap = 0;
-    m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
-    m_tableMask = 0;
-    m_data = nullptr;
-    m_hash = &empty_set_hash_slot;
-    m_immCopy.reset();
-    return;
-  }
-  assert(hashSize() > 0);
-  auto needed = size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t);
-  auto* newData = (Elm*)MM().objMallocLogged(needed);
-  assert(newData);
-  auto* newHash = (int32_t*)(newData + m_cap);
-  assert(newHash);
-  wordcpy(newHash, m_hash, hashSize());
-  auto* eLimit = elmLimit();
-  auto* te = newData;
-  for (auto* e = firstElm(); e != eLimit; ++e, ++te) {
-    if (isTombstone(e)) {
-      te->data.m_type = e->data.m_type;
-    } else {
-      dupElm(*e, *te);
-    }
-  }
-  m_data = newData;
-  m_hash = newHash;
-  m_immCopy.reset();
-}
 
 void BaseSet::addAllKeysOf(const Cell& container) {
   assert(isContainer(container));
@@ -3792,9 +3809,10 @@ void BaseSet::addAllKeysOf(const Cell& container) {
   mutateAndBump();
   // In theory we could be deferring the version bump above because all the
   // elements of iter could already be present in the set.
-  reserve(m_size + sz);
+  auto oldCap = cap();
+  reserve(m_size + sz); // presume minimum collisions ...
   for (; iter; ++iter) { addRaw(iter.first()); }
-  compactIfNecessary();
+  shrinkIfCapacityTooHigh(oldCap); // ... and shrink back if that was incorrect
 }
 
 void BaseSet::addAll(const Variant& t) {
@@ -3812,12 +3830,14 @@ void BaseSet::addAll(const Variant& t) {
   // insertion loop only if the size has increased. However, as presently
   // constituted, such an ->addAll() call is a time bomb and a no-op,
   if (LIKELY(!iter.hasIteratorObj())) {
-    reserve(m_size + sz);  // presume that iter is not one value sz times ...
+    auto oldCap = cap();
+    reserve(m_size + sz); // presume minimum collisions ...
     do {
       addRaw(iter.secondRefPlus());
       ++iter;
     } while (iter);
-    compactIfNecessary(); // ... and compact back if we're wrong
+    // ... and shrink back if that was incorrect
+    shrinkIfCapacityTooHigh(oldCap);
   } else {
     assert(sz == 0); // iter is an Iterable with unknown number of elements
     do {
@@ -3852,7 +3872,10 @@ void BaseSet::addImpl(int64_t h) {
     p = findForInsert(h);
   }
   auto& e = allocElm(p);
-  e.setInt(h);
+  e.setIntKey(h);
+  e.data.m_type = KindOfInt64;
+  e.data.m_data.num = h;
+  updateNextKI(h);
   if (!raw) {
     ++m_version;
   }
@@ -3875,7 +3898,11 @@ void BaseSet::addImpl(StringData *key) {
     p = findForInsert(key, h);
   }
   auto& e = allocElm(p);
-  e.setStr(key, h);
+  // This increments the string's refcount twice, once for
+  // the key and once for the value
+  e.setStrKey(key, h);
+  cellDup(make_tv<KindOfString>(key), e.data);
+  updateIntLikeStrKeys(key);
   if (!raw) {
     ++m_version;
   }
@@ -3897,27 +3924,6 @@ void BaseSet::add(StringData *key) {
   addImpl<false>(key);
 }
 
-BaseSet::Elm& BaseSet::allocElmFront(int32_t* ei) {
-  assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
-  // Move the existing elements to make element slot 0 available.
-  memmove(data() + 1, data(), m_used * sizeof(Elm));
-  ++m_used;
-  // Update the hashtable to reflect the fact that everything was moved
-  // over one position
-  auto* hash = hashTab();
-  auto* hashEnd = hash + hashSize();
-  for (; hash != hashEnd; ++hash) {
-    if (validPos(*hash)) {
-      ++(*hash);
-    }
-  }
-  // Set the hash entry we found to point to element slot 0.
-  (*ei) = 0;
-  // Store the value into element slot 0.
-  ++m_size;
-  return data()[0];
-}
-
 void BaseSet::addFront(int64_t h) {
   mutate();
   auto* p = findForInsert(h);
@@ -3935,7 +3941,10 @@ void BaseSet::addFront(int64_t h) {
     p = findForInsert(h);
   }
   auto& e = allocElmFront(p);
-  e.setInt(h);
+  e.setIntKey(h);
+  e.data.m_type = KindOfInt64;
+  e.data.m_data.num = h;
+  updateNextKI(h);
   ++m_version;
 }
 
@@ -3952,7 +3961,11 @@ void BaseSet::addFront(StringData *key) {
     p = findForInsert(key, h);
   }
   auto& e = allocElmFront(p);
-  e.setStr(key, h);
+  // This increments the string's refcount twice, once for
+  // the key and once for the value
+  e.setStrKey(key, h);
+  cellDup(make_tv<KindOfString>(key), e.data);
+  updateIntLikeStrKeys(key);
   ++m_version;
 }
 
@@ -3965,12 +3978,13 @@ Variant BaseSet::pop() {
       if (!isTombstone(e)) break;
     }
     Variant ret = tvAsCVarRef(&e->data);
-    int32_t* ei;
-    if (e->hasInt()) {
-      ei = findForInsert(e->data.m_data.num);
+    ssize_t ei;
+    if (e->hasIntKey()) {
+      ei = findForRemove(e->data.m_data.num);
     } else {
+      assert(e->hasStrKey());
       auto* key = e->data.m_data.pstr;
-      ei = findForInsert(key, key->hash());
+      ei = findForRemove(key, key->hash());
     }
     erase(ei);
     return ret;
@@ -3990,12 +4004,13 @@ Variant BaseSet::popFront() {
       if (!isTombstone(e)) break;
     }
     Variant ret = tvAsCVarRef(&e->data);
-    int32_t* ei;
-    if (e->hasInt()) {
-      ei = findForInsert(e->data.m_data.num);
+    ssize_t ei;
+    if (e->hasIntKey()) {
+      ei = findForRemove(e->data.m_data.num);
     } else {
+      assert(e->hasStrKey());
       auto* key = e->data.m_data.pstr;
-      ei = findForInsert(key, key->hash());
+      ei = findForRemove(key, key->hash());
     }
     erase(ei);
     return ret;
@@ -4003,22 +4018,6 @@ Variant BaseSet::popFront() {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Cannot pop empty Set"));
     throw e;
-  }
-}
-
-void BaseSet::remove(int64_t key) {
-  mutateAndBump();
-  auto* p = findForInsert(key);
-  if (validPos(*p)) {
-    erase(p);
-  }
-}
-
-void BaseSet::remove(StringData* key) {
-  mutateAndBump();
-  auto* p = findForInsert(key, key->hash());
-  if (validPos(*p)) {
-    erase(p);
   }
 }
 
@@ -4036,114 +4035,6 @@ void BaseSet::throwNoIndexAccess() {
   throw e;
 }
 
-NEVER_INLINE void BaseSet::makeRoom() {
-  assert(isFull());
-  if (LIKELY(!isDensityTooLow())) {
-    if (UNLIKELY(m_cap == MaxSize)) {
-      throwTooLarge();
-    }
-    grow(m_cap ? m_cap*2 : SmallSize, m_cap ? m_tableMask*2+1 : SmallMask);
-  } else {
-    compact();
-  }
-  assert(!isFull());
-}
-
-NEVER_INLINE void BaseSet::reserve(int64_t sz) {
-  assert(m_size <= m_used && m_used <= m_cap);
-  uint32_t newCap, newMask;
-  if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
-    throwReserveTooLarge();
-  }
-  // Compute the new capacity and new hash mask if we need to grow or bail
-  // out if there is nothing to do.
-  if (sz > int64_t(m_cap)) {
-    // The requested capacity is greater than the current capacity. Compute
-    // the smallest allowed capacity that is sufficient.
-    auto lgSize = BaseSet::SmallLgTableSize;
-    for (newCap = BaseSet::SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
-    newMask = (size_t(1U) << lgSize) - 1;
-    assert(lgSize <= MaxLgTableSize && newCap > m_cap);
-  } else {
-    // If sz <= m_size or if the Set can accommodate sz-m_size additional
-    // elements without growing or compacting, then there is nothing to do.
-    if (sz <= int64_t(m_size) ||
-        size_t(m_used) + size_t(sz - m_size) <= size_t(m_cap)) return;
-    // Otherwise prepare to double the current capacity
-    assert(0 < sz && sz <= int64_t(m_cap));
-    assert(m_cap < MaxSize && m_tableMask != 0);
-    newCap = m_cap * 2;
-    newMask = m_tableMask * 2 + 1;
-  }
-  // Perform the grow operation.
-  grow(newCap, newMask);
-}
-
-void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
-  assert(m_size <= m_used && m_used <= m_cap);
-  assert(newCap >= SmallSize && newMask >= SmallMask);
-  size_t newHashSize = size_t(newMask) + 1;
-  assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
-  assert(m_size <= newCap && newCap <= MaxSize);
-  auto* oldData = data();
-  auto oldHashSize = oldData ? hashSize() : 0;
-  auto oldCap = m_cap;
-  auto needed = size_t(newCap) * sizeof(Elm) + newHashSize * sizeof(int32_t);
-  auto* data = (Elm*)MM().objMallocLogged(needed);
-  auto* table = (int32_t*)(data + size_t(newCap));
-  m_data = data;
-  m_hash = table;
-  m_tableMask = newMask;
-  auto oldUsed DEBUG_ONLY = m_used;
-  m_capAndUsed = (uint64_t(newCap) << 32) | uint64_t(m_size);
-  initHash(table, newHashSize);
-  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(frPos, oldData)) {
-      assert(frPos + 1 < oldUsed);
-      ++frPos;
-    }
-    copyElm(oldData[frPos], data[toPos]);
-    *findForNewInsert(table, newMask, data[toPos].probe()) = toPos;
-  }
-  if (!hasImmutableBuffer()) {
-    if (oldData) {
-      MM().objFreeLogged(
-        oldData, size_t(oldCap) * sizeof(Elm) + oldHashSize * sizeof(int32_t));
-    }
-  } else {
-    // In this case we don't own the oldData buffer, so we don't free
-    // it and we incRef all of the elements
-    for (uint32_t toPos = 0; toPos < m_size; ++toPos) {
-      tvRefcountedIncRef(&data[toPos].data);
-    }
-    m_immCopy.reset();
-  }
-  assert(!hasImmutableBuffer());
-}
-
-void BaseSet::compact() {
-  assert(!hasImmutableBuffer());
-  assert(isDensityTooLow());
-  auto* elms = data();
-  assert(elms);
-  auto mask = m_tableMask;
-  size_t tableSize = hashSize();
-  auto table = hashTab();
-  initHash(table, tableSize);
-  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(frPos, elms)) {
-      assert(frPos + 1 < m_used);
-      ++frPos;
-    }
-    auto& toE = elms[toPos];
-    if (toPos != frPos) {
-      copyElm(elms[frPos], toE);
-    }
-    *findForNewInsert(table, mask, toE.probe()) = toPos;
-  }
-  m_used = m_size;
-}
-
 Array BaseSet::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
   return static_cast<const BaseSet*>(obj)->toArrayImpl();
@@ -4156,18 +4047,18 @@ bool BaseSet::ToBool(const ObjectData* obj) {
 // This function will create a immutable copy of this Set (if it doesn't
 // already exist) and then return it
 Object c_Set::getImmutableCopy() {
-  if (!hasImmutableBuffer()) {
-    assert(m_immCopy.isNull());
+  if (m_immCopy.isNull()) {
     auto* st = NEWOBJ(c_ImmSet)();
     m_immCopy = st;
-    st->m_data = m_data;
-    st->m_hash = m_hash;
+    arrayData()->incRefCount();
     st->m_size = m_size;
-    st->m_used = m_used;
-    st->m_cap = m_cap;
-    st->m_tableMask = m_tableMask;
     st->m_version = m_version;
+    st->m_data = m_data;
+    st->setIntLikeStrKeys(intLikeStrKeys());
   }
+  assert(!m_immCopy.isNull());
+  assert(m_data == static_cast<c_ImmSet*>(m_immCopy.get())->m_data);
+  assert(arrayData()->hasMultipleRefs());
   return m_immCopy;
 }
 
@@ -4178,10 +4069,10 @@ bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 
   auto* eLimit = st1->elmLimit();
   for (auto* e = st1->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    if (e->hasInt()) {
+    if (e->hasIntKey()) {
       if (!st2->contains(e->data.m_data.num)) return false;
     } else {
-      assert(e->hasStr());
+      assert(e->hasStrKey());
       if (!st2->contains(e->data.m_data.pstr)) return false;
     }
   }
@@ -4202,37 +4093,36 @@ void BaseSet::Unserialize(const char* setType, ObjectData* obj,
     // This will make the unserializer to reserve an id for the element
     // but won't allow referencing the element via 'r' or 'R'.
     k.unserialize(uns, Uns::Mode::ColKey);
+    int32_t* p;
+    Elm* e = nullptr;
     if (k.isInteger()) {
       auto h = k.toInt64();
-      auto p = st->findForInsert(h);
-      assert(p);
+      p = st->findForInsert(h);
       // Check to be robust against manually crafted inputs with conflicting
       // elements
       if (UNLIKELY(validPos(*p))) continue;
-      auto& e = st->allocElm(p);
-      e.setInt(h);
+      e = &st->allocElm(p);
+      e->setIntKey(h);
+      e->data.m_type = KindOfInt64;
+      e->data.m_data.num = h;
+      st->updateNextKI(h);
     } else if (k.isString()) {
       auto key = k.getStringData();
       auto h = key->hash();
-      auto p = st->findForInsert(key, h);
-      assert(p);
+      p = st->findForInsert(key, h);
       // Check to be robust against manually crafted inputs with conflicting
       // elements
       if (UNLIKELY(validPos(*p))) continue;
-      auto& e = st->allocElm(p);
-      e.setStr(key, h);
+      e = &st->allocElm(p);
+      // This increments the string's refcount twice, once for
+      // the key and once for the value
+      e->setStrKey(key, h);
+      cellDup(make_tv<KindOfString>(key), e->data);
+      st->updateIntLikeStrKeys(key);
     } else {
       throw Exception("%s values must be integers or strings", setType);
     }
   }
-}
-
-bool BaseSet::contains(int64_t key) const {
-  return find(key) != Empty;
-}
-
-bool BaseSet::contains(StringData* key) const {
-  return find(key, key->hash()) != Empty;
 }
 
 template<class TSet>
@@ -4241,31 +4131,13 @@ typename std::enable_if<
 BaseSet::Clone(ObjectData* obj) {
   auto thiz = static_cast<TSet*>(obj);
   auto target = static_cast<TSet*>(obj->cloneImpl());
-
-  if (!thiz->m_size) return target;
-
-  assert(target->m_size == 0);
-  assert(thiz->m_used != 0);
-  assert(thiz->hashSize() > 0);
-  target->m_capAndUsed = thiz->m_capAndUsed;
-  target->m_tableMask = thiz->m_tableMask;
-  target->m_size = thiz->m_size;
-  auto needed =
-    size_t(thiz->m_cap) * sizeof(Elm) + thiz->hashSize() * sizeof(int32_t);
-  target->m_data = (Elm*)MM().objMallocLogged(needed);
-  target->m_hash = (int32_t*)(target->m_data + target->m_cap);
-  wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
-
-  for (ssize_t i = 0; i < thiz->posLimit(); ++i) {
-    Elm& e = thiz->data()[i];
-    Elm& te = target->data()[i];
-    if (isTombstone(&e)) {
-      te.data.m_type = e.data.m_type;
-    } else {
-      dupElm(e, te);
-    }
+  if (!thiz->m_size) {
+    return target;
   }
-
+  thiz->arrayData()->incRefCount();
+  target->m_size = thiz->m_size;
+  target->m_data = thiz->m_data;
+  target->setIntLikeStrKeys(thiz->intLikeStrKeys());
   return target;
 }
 
@@ -4323,10 +4195,14 @@ BaseSet::php_map(const Variant& callback) {
     throw e;
   }
   auto* st = NEWOBJ(TSet)();
-  assert(!st->hasImmutableBuffer());
   Object obj = st;
   if (!m_size) return obj;
-  st->reserve(posLimit()); // presume callback maintains size ...
+  assert(posLimit() != 0);
+  assert(hashSize() > 0);
+  assert(st->arrayData() == staticEmptyMixedArray());
+  auto oldCap = st->cap();
+  st->reserve(posLimit()); // presume minimum collisions ...
+  assert(st->canMutateBuffer());
   for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
     auto* e = iter_elm(ipos);
     TypedValue tvCbRet;
@@ -4337,7 +4213,8 @@ BaseSet::php_map(const Variant& callback) {
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
     st->addRaw(&tvCbRet);
   }
-  st->compactIfNecessary(); // ... and compact if we were wrong
+  // ... and shrink back if that was incorrect
+  st->shrinkIfCapacityTooHigh(oldCap);
   return obj;
 }
 
@@ -4354,7 +4231,7 @@ BaseSet::php_filter(const Variant& callback) {
     throw e;
   }
   auto* st = NEWOBJ(TSet)();
-  assert(!st->hasImmutableBuffer());
+  assert(st->canMutateBuffer());
   Object obj = st;
   if (!m_size) return obj;
   // we don't st->reserve, because we don't know how selective callback will be
@@ -4367,10 +4244,10 @@ BaseSet::php_filter(const Variant& callback) {
     }
     if (!b) continue;
     e = iter_elm(ipos);
-    if (e->hasInt()) {
+    if (e->hasIntKey()) {
       st->addRaw(e->data.m_data.num);
     } else {
-      assert(e->hasStr());
+      assert(e->hasStrKey());
       st->addRaw(e->data.m_data.pstr);
     }
   }
@@ -4416,21 +4293,16 @@ Object BaseSet::php_retain(const Variant& callback) {
     mutateAndBump();
     version = m_version;
     e = iter_elm(ipos);
-    int32_t* pp;
-    if (e->hasInt()) {
-      pp = findForInsert(e->data.m_data.num);
-    } else {
-      assert(e->hasStr());
-      auto const sd = e->data.m_data.pstr;
-      pp = findForInsert(sd, sd->hash());
-    }
+    ssize_t pp = (e->hasIntKey()
+                   ? findForRemove(e->ikey)
+                   : findForRemove(e->skey, e->skey->hash()));
     eraseNoCompact(pp);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
   }
   assert(m_size <= size);
-  compactIfNecessary();
+  compactOrShrinkIfDensityTooLow();
   return this;
 }
 
@@ -4459,17 +4331,21 @@ BaseSet::php_take(const Variant& n) {
   }
   size_t sz = size_t(len);
   st->reserve(sz);
-  st->m_size = st->m_used = sz;
+  st->setSize(sz);
+  st->setPosLimit(sz);
   auto table = st->hashTab();
-  auto mask = st->m_tableMask;
+  auto mask = st->tableMask();
   for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(frPos)) {
-      assert(frPos + 1 < m_used);
-      ++frPos;
-    }
+    frPos = skipTombstonesNoBoundsCheck(frPos);
     auto& toE = st->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
+    if (toE.hasIntKey()) {
+      st->updateNextKI(toE.ikey);
+    } else {
+      assert(toE.hasStrKey());
+      st->updateIntLikeStrKeys(toE.skey);
+    }
   }
   return obj;
 }
@@ -4487,7 +4363,7 @@ BaseSet::php_takeWhile(const Variant& fn) {
     throw e;
   }
   auto* st = NEWOBJ(TSet);
-  assert(!st->hasImmutableBuffer());
+  assert(st->canMutateBuffer());
   Object obj = st;
   if (!m_size) return obj;
   uint32_t used = posLimit();
@@ -4495,7 +4371,7 @@ BaseSet::php_takeWhile(const Variant& fn) {
   if (checkVersion) {
     version = m_version;
   }
-  for (uint i = 0; i < used; ++i) {
+  for (uint32_t i = 0; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm* e = &data()[i];
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
@@ -4506,10 +4382,10 @@ BaseSet::php_takeWhile(const Variant& fn) {
     }
     if (!b) continue;
     e = &data()[i];
-    if (e->hasInt()) {
+    if (e->hasIntKey()) {
       st->addRaw(e->data.m_data.num);
     } else {
-      assert(e->hasStr());
+      assert(e->hasStrKey());
       st->addRaw(e->data.m_data.pstr);
     }
   }
@@ -4542,18 +4418,25 @@ BaseSet::php_skip(const Variant& n) {
   size_t sz = size_t(m_size) - size_t(len);
   assert(sz);
   st->reserve(sz);
-  st->m_size = st->m_used = sz;
+  st->setSize(sz);
+  st->setPosLimit(sz);
   uint32_t frPos = nthElmPos(len);
   auto table = st->hashTab();
-  auto mask = st->m_tableMask;
+  auto mask = st->tableMask();
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
     while (isTombstone(frPos)) {
-      assert(frPos + 1 < m_used);
+      assert(frPos + 1 < posLimit());
       ++frPos;
     }
     auto& toE = st->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
+    if (toE.hasIntKey()) {
+      st->updateNextKI(toE.ikey);
+    } else {
+      assert(toE.hasStrKey());
+      st->updateIntLikeStrKeys(toE.skey);
+    }
   }
   return obj;
 }
@@ -4571,12 +4454,12 @@ BaseSet::php_skipWhile(const Variant& fn) {
     throw e;
   }
   auto* st = NEWOBJ(TSet)();
-  assert(!st->hasImmutableBuffer());
+  assert(st->canMutateBuffer());
   Object obj = st;
   if (!m_size) return obj;
   uint32_t used = posLimit();
   // we don't st->reserve(), because we don't know how selective fn will be
-  uint i = 0;
+  uint32_t i = 0;
   int32_t version UNUSED;
   if (checkVersion) {
     version = m_version;
@@ -4595,10 +4478,10 @@ BaseSet::php_skipWhile(const Variant& fn) {
   for (; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm& e = data()[i];
-    if (e.hasInt()) {
+    if (e.hasIntKey()) {
       st->addRaw(e.data.m_data.num);
     } else {
-      assert(e.hasStr());
+      assert(e.hasStrKey());
       st->addRaw(e.data.m_data.pstr);
     }
   }
@@ -4627,18 +4510,22 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
   auto* st = NEWOBJ(TSet)();
   Object obj = st;
   st->reserve(sz);
-  st->m_size = st->m_used = sz;
+  st->setSize(sz);
+  st->setPosLimit(sz);
   uint32_t frPos = nthElmPos(skipAmt);
   auto table = st->hashTab();
-  auto mask = st->m_tableMask;
+  auto mask = st->tableMask();
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(frPos)) {
-      assert(frPos + 1 < m_used);
-      ++frPos;
-    }
+    frPos = skipTombstonesNoBoundsCheck(frPos);
     auto& toE = st->m_data[toPos];
     dupElm(m_data[frPos], toE);
     *findForNewInsert(table, mask, toE.probe()) = toPos;
+    if (toE.hasIntKey()) {
+      st->updateNextKI(toE.ikey);
+    } else {
+      assert(toE.hasStrKey());
+      st->updateIntLikeStrKeys(toE.skey);
+    }
   }
   return obj;
 }
@@ -4650,7 +4537,7 @@ typename std::enable_if<
 BaseSet::php_fromItems(const Variant& iterable) {
   auto* st = NEWOBJ(TSet)();
   Object ret = st;
-  assert(!st->hasImmutableBuffer());
+  assert(st->canMutateBuffer());
   st->addAll(iterable);
   return ret;
 }
@@ -4681,15 +4568,16 @@ BaseSet::php_fromArray(const Variant& arr) {
     throw e;
   }
   auto* st = NEWOBJ(TSet)();
-  assert(!st->hasImmutableBuffer());
+  assert(st->canMutateBuffer());
   Object ret = st;
   ArrayData* ad = arr.getArrayData();
-  st->reserve(ad->size()); // presume that ad is not one value repeated ...
+  auto oldCap = st->cap();
+  st->reserve(ad->size()); // presume minimum collisions ...
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     st->addRaw(ad->getValueRef(pos));
   }
-  st->compactIfNecessary(); // ... and compact if we were wrong
+  st->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
   return ret;
 }
 
@@ -4699,7 +4587,8 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
   auto* st = NEWOBJ(TSet)();
-  assert(!st->hasImmutableBuffer());
+  assert(st->canMutateBuffer());
+  auto oldCap = st->cap();
   Object ret = st;
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant arr = iter.second();
@@ -4709,67 +4598,37 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
       throw e;
     }
     ArrayData* ad = arr.getArrayData();
-    // if needed, the correct size can be calculated in a separate loop
-    st->reserve(st->size() + ad->size());
+    st->reserve(st->size() + ad->size()); // presume minimum collisions ...
     for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
          pos = ad->iter_advance(pos)) {
       st->addRaw(ad->getValueRef(pos));
     }
   }
-  st->compactIfNecessary(); // all arrays could contain one value ... repeated
+  st->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
   return ret;
 }
 
 // Protected (Internal)
 
-BaseSet::BaseSet(Class* cls) : ExtCollectionObjectData(cls) {
-  uint32_t used = 0;
-  uint32_t cap = 0;
-  uint32_t tableMask = 0;
-  int32_t version = 0;
-  m_size = 0;
-  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
-  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
-  m_data = nullptr;
-  m_hash = &empty_set_hash_slot;
+BaseSet::BaseSet(Class* cls) : HashCollection(cls) {
 }
 
 BaseSet::~BaseSet() {
-  if (m_data && !hasImmutableBuffer()) {
-    assert(m_immCopy.isNull());
-    deleteElms();
-    freeData();
-  }
+  decRefArr(arrayData());
 }
-
-void BaseSet::freeData() {
-  if (m_data) {
-    MM().objFreeLogged(
-      m_data, size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t));
-  }
-}
-
-void BaseSet::deleteElms() {
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    tvRefcountedDecRef(&e->data);
-  }
-}
-
-// Private
 
 NEVER_INLINE
-void BaseSet::warnOnStrIntDup() const {
+void HashCollection::warnOnStrIntDup() const {
   smart::hash_set<int64_t> seenVals;
 
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     int64_t newVal = 0;
 
-    if (e->hasInt()) {
+    if (e->hasIntKey()) {
       newVal = e->data.m_data.num;
     } else {
-      assert(e->hasStr());
+      assert(e->hasStrKey());
       // isStriclyInteger() puts the int value in newVal as a side effect.
       if (!e->data.m_data.pstr->isStrictlyInteger(newVal)) continue;
     }
@@ -4788,210 +4647,6 @@ void BaseSet::warnOnStrIntDup() const {
     seenVals.insert(newVal);
   }
   // Do nothing if no 'duplicates' were found.
-}
-
-Array BaseSet::toArrayImpl() const {
-  ArrayInit ai(m_size, ArrayInit::Mixed{});
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    if (e->hasInt()) {
-      ai.set(e->data.m_data.num, tvAsCVarRef(&e->data));
-    } else {
-      assert(e->hasStr());
-      ai.setKeyUnconverted(e->data.m_data.pstr, tvAsCVarRef(&e->data));
-    }
-  }
-
-  Array arr = ai.toArray();
-
-  // If both '123' and 123 are present in the set, we better warn the user.
-  if (UNLIKELY(arr.length() < m_size)) warnOnStrIntDup();
-  return arr;
-}
-
-NEVER_INLINE
-void BaseSet::throwTooLarge() {
-  static const size_t reserveSize = 130;
-  String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
-  int sz = sprintf(buf,
-                   "Set object has reached its maximum capacity of "
-                   "%u element slots and does not have room to add a "
-                   "new element",
-                   MaxSize);
-  assert(sz <= reserveSize);
-  msg.setSize(sz);
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
-  throw e;
-}
-
-NEVER_INLINE
-void BaseSet::throwReserveTooLarge() {
-  static const size_t reserveSize = 80;
-  String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
-  int sz = sprintf(buf,
-                   "Set does not support reserving room for more than "
-                   "%u elements",
-                   MaxReserveSize);
-  assert(sz <= reserveSize);
-  msg.setSize(sz);
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
-  throw e;
-}
-
-NEVER_INLINE
-int32_t* BaseSet::warnUnbalanced(size_t n, int32_t* ei) {
-  if (n > size_t(RuntimeOption::MaxArrayChain)) {
-    raise_error("Set is too unbalanced (%lu)", n);
-  }
-  return ei;
-}
-
-static bool hitString(const BaseSet::Elm& e, const StringData* s,
-                      int32_t hash) {
-  // hitString() should only be called on an Elm that is referenced by a
-  // hash table entry. c_Set guarantees that when it adds a hash table
-  // entry that it always sets it to refer to a valid element. Likewise when
-  // it removes an element it always removes the corresponding hash entry.
-  // Therefore the assertion below must hold.
-  assert(!BaseSet::isTombstone(&e));
-  return hash == e.hash() && e.hasStr() &&
-         (s == e.data.m_data.pstr || s->same(e.data.m_data.pstr));
-}
-
-static bool hitInt(const BaseSet::Elm& e, int64_t ki) {
-  // hitInt() should only be called on an Elm that is referenced by a
-  // hash table entry. c_Set guarantees that when it adds a hash table
-  // entry that it always sets it to refer to a valid element. Likewise when
-  // it removes an element it always removes the corresponding hash entry.
-  // Therefore the assertion below must hold.
-  assert(!BaseSet::isTombstone(&e));
-  return e.hasInt() && e.data.m_data.num == ki;
-}
-
-// Quadratic probe is:
-//
-//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
-//
-// Use 1/2 for c1 and c2. In combination with a table size that is a power of
-// 2, this guarantees a probe sequence of length tableSize that probes all
-// table elements exactly once.
-
-template <class Hit>
-ALWAYS_INLINE
-ssize_t BaseSet::findImpl(size_t h0, Hit hit) const {
-  size_t tableMask = m_tableMask;
-  auto* elms = data();
-  auto* hashtable = hashTab();
-  for (size_t probeIndex = h0, i = 1;; ++i) {
-    ssize_t pos = hashtable[probeIndex & tableMask];
-    if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
-      return pos;
-    }
-    probeIndex += i;
-    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
-  }
-}
-
-ssize_t BaseSet::find(int64_t ki) const {
-  return findImpl(ki, [ki] (const Elm& e) {
-    return hitInt(e, ki);
-  });
-}
-
-ssize_t BaseSet::find(const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findImpl(prehash, [s, h] (const Elm& e) {
-    return hitString(e, s, h);
-  });
-}
-
-template <class Hit>
-ALWAYS_INLINE
-int32_t* BaseSet::findForInsertImpl(size_t h0, Hit hit) const {
-  // mask, probe, and pos are explicitly 64-bit, because performance
-  // regressed when they were 32-bit types via auto. Test carefully.
-  size_t mask = m_tableMask;
-  auto* elms = data();
-  auto* hashtable = hashTab();
-  int32_t* ret = nullptr;
-  for (size_t probe = h0, i = 1;; ++i) {
-    auto ei = &hashtable[probe & mask];
-    ssize_t pos = *ei;
-    if (validPos(pos)) {
-      if (hit(elms[pos])) {
-        return ei;
-      }
-    } else {
-      if (!ret) ret = ei;
-      if (pos == Empty) {
-        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
-      }
-    }
-    probe += i;
-    assert(i <= mask && probe == h0 + (i + i*i) / 2);
-  }
-}
-
-int32_t* BaseSet::findForInsert(int64_t ki) const {
-  return findForInsertImpl(ki, [ki] (const Elm& e) {
-    return hitInt(e, ki);
-  });
-}
-
-int32_t* BaseSet::findForInsert(const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
-    return hitString(e, s, h);
-  });
-}
-
-// findForNewInsert() is only safe to use if you know for sure that the
-// key is not already present in the Set.
-ALWAYS_INLINE int32_t*
-BaseSet::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
-  for (size_t i = 1, probe = h0;; ++i) {
-    auto ei = &table[probe & mask];
-    if (!validPos(*ei)) return ei;
-    probe += i;
-    assert(i <= mask && probe == h0 + (i + i*i) / 2);
-  }
-}
-
-ALWAYS_INLINE
-int32_t* BaseSet::findForNewInsert(size_t h0) const {
-  return findForNewInsert(hashTab(), m_tableMask, h0);
-}
-
-void BaseSet::eraseNoCompact(int32_t* pos) {
-  assert(!hasImmutableBuffer());
-  assert(validPos(*pos) && !isTombstone(*pos));
-  assert(data());
-  auto* elms = data();
-  auto& e = elms[*pos];
-  // Mark the hash slot as a tombstone.
-  *pos = Tombstone;
-  // Mark the Elm as a tombstone.
-  TypedValue* tv = &e.data;
-  DataType oldType = tv->m_type;
-  uint64_t oldDatum = tv->m_data.num;
-  tv->m_type = KindOfInvalid;
-  --m_size;
-  // Don't adjust m_used. This frees us from having to explicitly keep track
-  // of hash load, since we can instead rely on the isFull() condition to
-  // trigger a grow/compact before hash load gets too high.
-  assert(m_used <= m_cap);
-  // Finally, decref the old value
-  tvRefcountedDecRefHelper(oldType, oldDatum);
-}
-
-void BaseSet::erase(int32_t* pos) {
-  assert(!hasImmutableBuffer());
-  eraseNoCompact(pos);
-  // Compact in order to keep elms from being overly sparse. In general,
-  // Set's implement tries to avoid letting Elm density drop below 50%.
-  compactIfNecessary();
 }
 
 void BaseSet::throwBadValueType() {
@@ -5045,21 +4700,12 @@ void c_Set::t_reserve(const Variant& sz) {
 }
 
 Object c_Set::t_clear() {
-  if (!hasImmutableBuffer()) {
-    deleteElms();
-    freeData();
-  } else {
-    m_immCopy.reset();
-  }
-  uint32_t used = 0;
-  uint32_t cap = 0;
-  uint32_t tableMask = 0;
-  int32_t version = m_version + 1;
+  ++m_version;
+  dropImmCopy();
+  decRefArr(arrayData());
+  m_data = mixedData(staticEmptyMixedArray());
   m_size = 0;
-  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
-  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
-  m_data = nullptr;
-  m_hash = &empty_set_hash_slot;
+  setIntLikeStrKeys(false);
   return this;
 }
 
@@ -5088,7 +4734,7 @@ bool c_Set::t_contains(const Variant& key) {
 }
 
 Array c_Set::t_toarray() {
-  return BaseSet::php_toArray();
+  return BaseSet::toArrayImpl();
 }
 
 Array c_Set::t_tokeysarray() {
@@ -5176,7 +4822,7 @@ BaseSet::php_concat(const Variant& iterable) {
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
   auto* vec = NEWOBJ(TVector)();
   Object obj = vec;
-  uint sz = m_size;
+  uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
   assert(vec->canMutateBuffer());
   vec->setSize(sz);
@@ -5311,7 +4957,7 @@ bool c_ImmSet::t_contains(const Variant& key) {
 }
 
 Array c_ImmSet::t_toarray() {
-  return BaseSet::php_toArray();
+  return BaseSet::toArrayImpl();
 }
 
 Array c_ImmSet::t_tokeysarray() {
@@ -5699,7 +5345,7 @@ Object c_Pair::t_takewhile(const Variant& callback) {
   }
   auto* vec = NEWOBJ(c_Vector)();
   Object obj = vec;
-  for (uint i = 0; i < 2; ++i) {
+  for (uint32_t i = 0; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
     vec->addRaw(&getElms()[i]);
   }
@@ -5737,7 +5383,7 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
   }
   auto* vec = NEWOBJ(c_Vector)();
   Object obj = vec;
-  uint i = 0;
+  uint32_t i = 0;
   for (; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
   }

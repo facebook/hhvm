@@ -268,7 +268,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
 
     /* MInstrTranslator helpers */
-    {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},
+    {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}}},
     {PropX,    fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
     {PropDX,   fssa(0), DSSA, SSync,

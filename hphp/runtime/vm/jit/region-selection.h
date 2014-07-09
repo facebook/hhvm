@@ -424,6 +424,12 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
                           const PostConditions& prevPostConds);
 
 /*
+ * This function returns true for control-flow bytecode instructions that
+ * are not supported in the middle of a region yet.
+ */
+bool breaksRegion(Op opc);
+
+/*
  * Creates regions covering all existing profile translations for
  * func, and returns them in the regions vector.
  */

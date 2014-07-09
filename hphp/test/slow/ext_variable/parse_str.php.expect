@@ -1,0 +1,8 @@
+global scope
+parse_data(): a=1&b=2&c=3
+isset b=2
+
+within function
+parse_data(): a=1&b=2&c=3
+isset b=2
+isset b=2

@@ -75,6 +75,11 @@ class c_AsyncGeneratorWaitHandle : public c_ResumableWaitHandle {
   static const int8_t STATE_RUNNING   = 4;
 };
 
+inline c_AsyncGeneratorWaitHandle* c_WaitHandle::asAsyncGenerator() {
+  assert(getKind() == Kind::AsyncGenerator);
+  return static_cast<c_AsyncGeneratorWaitHandle*>(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

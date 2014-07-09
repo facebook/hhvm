@@ -2186,30 +2186,6 @@
                     "desc": "This parameter restricts the returned metaphone key to phonemes characters in length. The default value of 0 means no restriction."
                 }
             ]
-        },
-        {
-            "name": "parse_str",
-            "desc": "Parses str as if it were the query string passed via a URL and sets variables in the current scope.\n\nTo get the current QUERY_STRING, you may use the variable $_SERVER['QUERY_STRING']. Also, you may want to read the section on variables from external sources.\n\nThe magic_quotes_gpc setting affects the output of this function, as parse_str() uses the same mechanism that PHP uses to populate the $_GET, $_POST, etc. variables.",
-            "flags": [
-            ],
-            "return": {
-                "type": null,
-                "desc": "No value is returned."
-            },
-            "args": [
-                {
-                    "name": "str",
-                    "type": "String",
-                    "desc": "The input string."
-                },
-                {
-                    "name": "arr",
-                    "type": "Variant",
-                    "value": "null",
-                    "desc": "If the second parameter arr is present, variables are stored in this variable as array elements instead.",
-                    "ref": true
-                }
-            ]
         }
     ],
     "classes": [

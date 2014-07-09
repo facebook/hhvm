@@ -408,6 +408,34 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
   return true;
 }
 
+bool breaksRegion(Op opc) {
+  switch (opc) {
+    case OpMIterNext:
+    case OpMIterNextK:
+    case OpSwitch:
+    case OpSSwitch:
+    case OpCreateCont:
+    case OpYield:
+    case OpYieldK:
+    case OpRetC:
+    case OpRetV:
+    case OpExit:
+    case OpFatal:
+    case OpMIterInit:
+    case OpMIterInitK:
+    case OpIterBreak:
+    case OpDecodeCufIter:
+    case OpThrow:
+    case OpUnwind:
+    case OpEval:
+    case OpNativeImpl:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 

@@ -597,7 +597,8 @@ class Redis {
     array_unshift($args, $numKeys);
     array_unshift($args, $script);
     $this->processArrayCommand($cmd, $args);
-    return $this->processVariantResponse();
+    $response = $this->processVariantResponse();
+    return ($response !== NULL) ? $response : false;
   }
 
   public function evaluate($script, array $args = [], $numKeys = 0) {

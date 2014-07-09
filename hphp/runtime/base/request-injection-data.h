@@ -98,6 +98,7 @@ struct RequestInjectionData {
   std::string m_errorLog;
   bool m_trackErrors;
   int64_t m_socketDefaultTimeout;
+  std::string m_userAgent;
   std::vector<std::string> m_allowedDirectories;
   bool m_safeFileAccess;
 
@@ -136,6 +137,8 @@ struct RequestInjectionData {
   int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
   int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
+  std::string getUserAgent() { return m_userAgent; }
+  void setUserAgent(std::string userAgent) { m_userAgent = userAgent; }
   std::vector<std::string> getAllowedDirectories() const {
     return m_allowedDirectories;
   }

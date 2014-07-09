@@ -75,18 +75,13 @@ private:
   CallDest callDestDbl(const IRInstruction*) const;
 
   // Main call helper:
-  CallHelperInfo cgCallHelper(Asm& a,
-                              CppCall call,
-                              const CallDest& dstInfo,
-                              SyncOptions sync,
-                              ArgGroup& args,
-                              RegSet toSave);
+  void cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
+                    SyncOptions sync, ArgGroup& args, RegSet toSave);
+
   // Overload to make the toSave RegSet optional:
-  CallHelperInfo cgCallHelper(Asm& a,
-                              CppCall call,
-                              const CallDest& dstInfo,
-                              SyncOptions sync,
-                              ArgGroup& args);
+  void cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
+                    SyncOptions sync, ArgGroup& args);
+
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };

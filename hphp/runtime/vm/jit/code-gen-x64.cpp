@@ -991,28 +991,20 @@ CallDest CodeGenerator::callDestDbl(const IRInstruction* inst) const {
   return { DestType::Dbl, loc.reg(0), loc.reg(1) };
 }
 
-CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
-                                           CppCall call,
-                                           const CallDest& dstInfo,
-                                           SyncOptions sync,
-                                           ArgGroup& args) {
+void CodeGenerator::cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
+                                 SyncOptions sync, ArgGroup& args) {
   return cgCallHelper(a, call, dstInfo, sync, args,
-    m_state.liveRegs[m_curInst]);
+                      m_state.liveRegs[m_curInst]);
 }
 
-CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
-                                           CppCall call,
-                                           const CallDest& dstInfo,
-                                           SyncOptions sync,
-                                           ArgGroup& args,
-                                           RegSet toSave) {
+void CodeGenerator::cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
+                                 SyncOptions sync, ArgGroup& args,
+                                 RegSet toSave) {
   assert(m_curInst->isNative());
 
   auto const destType = dstInfo.type;
   auto const dstReg0  = dstInfo.reg0;
   auto const dstReg1  = dstInfo.reg1;
-
-  CallHelperInfo ret;
 
   // Save the caller-saved registers that are live across this
   // instruction. The number of regs to save and the number of args
@@ -1040,7 +1032,6 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
   } else {
     emitCall(a, call);
   }
-  ret.returnAddress = a.frontier();
   if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
     // if we are profiling the heap, we always need to sync because
     // regs need to be correct during smart allocations no matter
@@ -1106,7 +1097,6 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
     if (dstReg0 != InvalidReg) emitMovRegReg(a, reg::xmm0, dstReg0);
     break;
   }
-  return ret;
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {

@@ -33,11 +33,6 @@ enum class SyncOptions {
   kSmashableAndSyncPoint,
 };
 
-// Returned information from cgCallHelper
-struct CallHelperInfo {
-  TCA returnAddress;
-};
-
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
   explicit AsmInfo(const IRUnit& unit)

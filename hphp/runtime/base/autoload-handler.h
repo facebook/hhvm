@@ -33,7 +33,8 @@ class AutoloadHandler final : public RequestEventHandler {
     Failure,
     Success,
     StopAutoloading,
-    ContinueAutoloading
+    ContinueAutoloading,
+    RetryAutoloading
   };
 
   struct HandlerBundle {
@@ -75,7 +76,20 @@ public:
   void removeAllHandlers();
   bool isRunning();
 
-  bool invokeHandler(const String& className, bool forceSplStack = false);
+  bool autoloadClass(const String& className, bool forceSplStack = false);
+  bool autoloadClassPHP5Impl(const String& className, bool forceSplStack);
+
+  /**
+   * autoloadClassOrType() tries to autoload either a class or a type alias
+   * with the specified name. This method avoids calling the failure callback
+   * until one of the following happens: (1) we tried to autoload the specified
+   * name from both the 'class' and 'type' maps but for each map either nothing
+   * was found or the file we included did not define a class or type alias
+   * with the specified name, or (2) there was an uncaught exception or fatal
+   * error during an include operation.
+   */
+  bool autoloadClassOrType(const String& className);
+
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
   bool autoloadType(const String& name);
@@ -83,9 +97,49 @@ public:
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
 private:
+  /**
+   * This method may return Success or Failure.
+   */
+  template <class T>
+  Result loadFromMapImpl(const String& name, const String& kind, bool toLower,
+                         const T &checkExists, Variant& err);
+
+  /**
+   * This method may return ContinueAutoloading, StopAutoloading, or
+   * RetryAutoloading.
+   */
+  Result invokeFailureCallback(const Variant& func, const String& kind,
+                               const String& name, const Variant& err);
+
+  /**
+   * loadFromMap() will call the failure callback if the specified name is not
+   * present in the specified map, or if there is an entry in the map but there
+   * was an error during the include operation. loadFromMap() will also retry
+   * loading the specified name from the map if the failure callback returned
+   * boolean true. Note that calling this method may throw if the failure
+   * callback throws an exception or raises a fatal error.
+   *
+   * This method may return Success, Failure, ContinueAutoloading, or
+   * StopAutoloading. If the failure callback was called, this method will not
+   * return Failure.
+   */
   template <class T>
   Result loadFromMap(const String& name, const String& kind, bool toLower,
                      const T &checkExists);
+
+  /**
+   * loadFromMapPartial() will call the failure callback if there is an error
+   * during the include operation, but otherwise it will not call the failure
+   * callback.
+   *
+   * This method may return Success, Failure, ContinueAutoloading,
+   * StopAutoloading, or RetryAutoloading. If the failure callback was called,
+   * this method will not return Failure.
+   */
+  template <class T>
+  Result loadFromMapPartial(const String& className, const String& kind,
+                            bool toLower, const T &checkExists, Variant& err);
+
   static String getSignature(const Variant& handler);
 
   Array m_map;

@@ -897,7 +897,7 @@ Class* lookupKnownClass(Class** cache, const StringData* clsName) {
   Class* cls = *cache;
   assert(!cls); // the caller should already have checked
 
-  AutoloadHandler::s_instance->invokeHandler(
+  AutoloadHandler::s_instance->autoloadClass(
     StrNR(const_cast<StringData*>(clsName)));
   cls = *cache;
 

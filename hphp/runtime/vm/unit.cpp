@@ -722,24 +722,24 @@ static TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
                           thisType->name };
   }
 
-  if (auto klass = Unit::loadClass(typeName)) {
-    return TypeAliasReq { KindOfObject,
-                          thisType->nullable,
-                          klass,
-                          thisType->name };
+  if (AutoloadHandler::s_instance->autoloadClassOrType(
+        StrNR(const_cast<StringData*>(typeName))
+      )) {
+    if (auto klass = Unit::lookupClass(targetNE)) {
+      return TypeAliasReq { KindOfObject,
+                            thisType->nullable,
+                            klass,
+                            thisType->name };
+    }
+    if (auto targetTd = targetNE->getCachedTypeAlias()) {
+      return TypeAliasReq { targetTd->kind,
+                            thisType->nullable || targetTd->nullable,
+                            targetTd->klass,
+                            thisType->name };
+    }
   }
 
-  if (auto targetTd = getTypeAliasWithAutoload(targetNE, typeName)) {
-    return TypeAliasReq { targetTd->kind,
-                          thisType->nullable || targetTd->nullable,
-                          targetTd->klass,
-                          thisType->name };
-  }
-
-  return TypeAliasReq { KindOfInvalid,
-                        false,
-                        nullptr,
-                        nullptr };
+  return TypeAliasReq { KindOfInvalid, false, nullptr, nullptr };
 }
 
 void Unit::defTypeAlias(Id id) {
@@ -831,7 +831,7 @@ Class* Unit::loadClass(const NamedEntity* ne,
 Class* Unit::loadMissingClass(const NamedEntity* ne,
                               const StringData* name) {
   VMRegAnchor _;
-  AutoloadHandler::s_instance->invokeHandler(
+  AutoloadHandler::s_instance->autoloadClass(
     StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
 }

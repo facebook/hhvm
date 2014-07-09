@@ -1,0 +1,1 @@
+--ffile=hphp/test/slow/autoload/autoload-type-alias-bug-1.inc --ffile=test/slow/autoload/autoload-type-alias-bug-1.inc --ffile=hphp/test/slow/autoload/autoload-type-alias-bug-2.inc --ffile=test/slow/autoload/autoload-type-alias-bug-2.inc

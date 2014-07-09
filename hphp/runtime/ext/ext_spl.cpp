@@ -328,7 +328,7 @@ Variant f_spl_autoload_functions() {
 }
 
 void f_spl_autoload_call(const String& class_name) {
-  AutoloadHandler::s_instance->invokeHandler(class_name, true);
+  AutoloadHandler::s_instance->autoloadClass(class_name, true);
 }
 
 namespace {

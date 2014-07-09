@@ -451,11 +451,7 @@ struct Unit {
    * Returns: nullptr if the class is not yet defined in this request.
    */
   static Class *lookupClass(const NamedEntity *ne) {
-    Class* cls;
-    if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
-      return cls;
-    }
-    return nullptr;
+    return ne->getCachedClass();
   }
 
   /*

@@ -279,6 +279,8 @@ public:
   static bool Uksort(ArrayData*, const Variant& cmp_function);
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
+  static void WarnAndSort(ArrayData*, int sort_flags, bool ascending);
+  static bool WarnAndUsort(ArrayData*, const Variant& cmp_function);
 
 
   template <ArrayKind aKind>
@@ -405,6 +407,7 @@ public:
     kRemoveStr,
     kDequeue,
     kSort,
+    kUsort,
     kNumericString,
     kRenumber,
   };

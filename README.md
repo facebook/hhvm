@@ -1,11 +1,14 @@
 # HHVM
 
+[HHVM page](http://hhvm.com) |
+[Hacklang page](http://hacklang.org) |
+[General group](https://www.facebook.com/groups/hhvm.general/) |
+[Dev group](https://www.facebook.com/groups/hhvm.dev/?ref=br_tf) |
+[Twitter](http://twitter.com/HipHopVM)
+
 HHVM (aka the HipHop Virtual Machine) is an open-source virtual machine designed for executing programs written in [Hack](http://hacklang.org) and PHP. HHVM uses a just-in-time compilation approach to achieve superior performance while maintaining the flexibility that PHP developers are accustomed to. To date, HHVM (and its predecessor HPHPc before it) has realized over a 9x increase in web request throughput and over a 5x reduction in memory consumption for Facebook compared with the PHP 5.2 engine + APC.
 
 HHVM should be used together with a FastCGI-based webserver like [nginx](https://github.com/facebook/hhvm/wiki/FastCGI#making-it-work-with-nginx) or [apache](https://github.com/facebook/hhvm/wiki/FastCGI#making-it-work-with-apache).
-
-* HHVM page: http://hhvm.com
-* Hack page: http://hacklang.org
 
 
 ## FAQ

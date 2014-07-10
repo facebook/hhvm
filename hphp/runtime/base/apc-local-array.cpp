@@ -313,14 +313,19 @@ bool APCLocalArray::Uasort(ArrayData*, const Variant& cmp_function) {
 }
 
 ssize_t APCLocalArray::IterBegin(const ArrayData* ad) {
+  return 0;
+}
+
+ssize_t APCLocalArray::IterLast(const ArrayData* ad) {
   auto a = asSharedArray(ad);
-  return a->m_size > 0 ? 0 : invalid_index;
+  auto n = a->m_size;
+  return n > 0 ? ssize_t(n - 1) : 0;
 }
 
 ssize_t APCLocalArray::IterEnd(const ArrayData* ad) {
   auto a = asSharedArray(ad);
   auto n = a->m_size;
-  return n > 0 ? ssize_t(n - 1) : invalid_index;
+  return n;
 }
 
 ssize_t APCLocalArray::IterAdvance(const ArrayData* ad, ssize_t prev) {
@@ -329,9 +334,10 @@ ssize_t APCLocalArray::IterAdvance(const ArrayData* ad, ssize_t prev) {
 }
 
 ssize_t APCLocalArray::IterRewind(const ArrayData* ad, ssize_t prev) {
-  assert(prev >= 0 && prev < asSharedArray(ad)->m_size);
+  auto a = asSharedArray(ad);
+  assert(prev >= 0 && prev < a->m_size);
   ssize_t next = prev - 1;
-  return next >= 0 ? next : invalid_index;
+  return next >= 0 ? next : a->m_size;
 }
 
 bool APCLocalArray::ValidMArrayIter(const ArrayData* ad,

@@ -224,7 +224,7 @@ void c_GenArrayWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
 
   // recursively import current child
   {
-    assert(m_iterPos != ArrayData::invalid_index);
+    assert(m_iterPos != m_deps->iter_end());
     auto const current = tvAssertCell(
       m_deps->getValueRef(m_iterPos).asTypedValue());
 
@@ -239,8 +239,9 @@ void c_GenArrayWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
 
   // try to import other children
   try {
-    for (ssize_t iter_pos = m_deps->iter_advance(m_iterPos);
-         iter_pos != ArrayData::invalid_index;
+    auto iter_limit = m_deps->iter_end();
+    for (size_t iter_pos = m_deps->iter_advance(m_iterPos);
+         iter_pos != iter_limit;
          iter_pos = m_deps->iter_advance(iter_pos)) {
 
       auto const current = tvAssertCell(

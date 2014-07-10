@@ -76,6 +76,7 @@ struct APCLocalArray : private ArrayData
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static bool IsVectorData(const ArrayData* ad);
   static ssize_t IterBegin(const ArrayData*);
+  static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);
@@ -105,7 +106,7 @@ public:
   ssize_t iterAdvanceImpl(ssize_t prev) const {
     assert(prev >= 0 && prev < m_size);
     ssize_t next = prev + 1;
-    return next < m_size ? next : invalid_index;
+    return next < m_size ? next : m_size;
   }
 
   // Only explicit conversions are allowed to and from ArrayData*.

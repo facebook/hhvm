@@ -66,7 +66,7 @@ ProxyArray* ProxyArray::Make(ArrayData* ad) {
   auto ret = static_cast<ProxyArray*>(MM().objMallocLogged(sizeof(ProxyArray)));
   ret->m_size            = -1;
   ret->m_kind            = kProxyKind;
-  ret->m_pos             = ArrayData::invalid_index;
+  ret->m_pos             = 0;
   ret->m_count           = 1;
   ret->m_destructor      = ZvalPtrDtor;
   ret->m_ref             = RefData::Make(make_tv<KindOfArray>(ad));
@@ -320,6 +320,10 @@ ArrayData* ProxyArray::Escalate(const ArrayData* ad) {
 
 ssize_t ProxyArray::IterBegin(const ArrayData* ad) {
   return innerArr(ad)->iter_begin();
+}
+
+ssize_t ProxyArray::IterLast(const ArrayData* ad) {
+  return innerArr(ad)->iter_last();
 }
 
 ssize_t ProxyArray::IterEnd(const ArrayData* ad) {

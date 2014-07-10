@@ -325,35 +325,43 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH_INTMAP_SPECIALIZED(RemoveStr)
 
   /*
-   * ssize_t IterBegin(const ArrayData*)
    * ssize_t IterEnd(const ArrayData*)
    *
-   *   Array positions are represented as an opaque ssize_t.
-   *   IterBegin returns the position of the first element in the
-   *   array, and IterEnd returns the position of the last element in
-   *   the array.  Either function may return ArrayData::invalid_index
-   *   if there is no first or last element.
+   *   Returns the canonical invalid position for this array.  Note
+   *   that if elements are added or removed from the array, the value
+   *   of the array's canonical invalid position may change.
+   *
+   * ssize_t IterBegin(const ArrayData*)
+   *
+   *   Returns the position of the first element, or the canonical
+   *   invalid position if this array is empty.
+   *
+   * ssize_t IterLast(const ArrayData*)
+   *
+   *   Returns the position of the last element, or the canonical
+   *   invalid position if this array is empty.
    */
   DISPATCH(IterBegin)
+  DISPATCH(IterLast)
   DISPATCH(IterEnd)
 
   /*
-   * ssize_t IterAdvance(const ArrayData*, ssize_t pos)
+   * ssize_t IterAdvance(const ArrayData*, size_t pos)
    *
-   *   Advance `pos' to the next position in the array.  `pos' may be
-   *   invalid_index, in which case this function returns the position
-   *   of the first element in the array.  Returns invalid_index if
-   *   there is no next position in the array.
+   *   Returns the position of the element that comes after pos, or the
+   *   canonical invalid position if there are no more elements after pos.
+   *   If pos is the canonical invalid position, this method will return
+   *   the canonical invalid position.
    */
   DISPATCH(IterAdvance)
 
   /*
-   * ssize_t IterRewind(const ArrayData*, ssize_t pos)
+   * ssize_t IterRewind(const ArrayData*, size_t pos)
    *
-   *   Move `pos' to the position of the previous element in the
-   *   array.  `pos' may be invalid_index, in which case this function
-   *   returns invalid_index.  Returns invalid_index if there is no
-   *   previous position in the array.
+   *   Returns the position of the element that comes before pos, or the
+   *   canonical invalid position if there are no elements before pos. If
+   *   pos is the canonical invalid position, no guarantees are made about
+   *   what this method returns.
    */
   DISPATCH(IterRewind)
 
@@ -719,23 +727,24 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
 
 Variant ArrayData::reset() {
   setPosition(iter_begin());
-  return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
-}
-
-Variant ArrayData::prev() {
-  if (m_pos != invalid_index) {
-    setPosition(iter_rewind(m_pos));
-    if (m_pos != invalid_index) {
-      return getValue(m_pos);
-    }
-  }
-  return Variant(false);
+  return m_pos != iter_end() ? getValue(m_pos) : Variant(false);
 }
 
 Variant ArrayData::next() {
-  if (m_pos != invalid_index) {
-    setPosition(iter_advance(m_pos));
-    if (m_pos != invalid_index) {
+  // We call iter_advance() without checking if m_pos is the canonical invalid
+  // position. This is okay, since all IterAdvance() impls handle this
+  // correctly, but it means that EmptyArray::IterAdvance() is reachable.
+  setPosition(iter_advance(m_pos));
+  return m_pos != iter_end() ? getValue(m_pos) : Variant(false);
+}
+
+Variant ArrayData::prev() {
+  // We only call iter_rewind() if m_pos is not the canonical invalid position.
+  // Thus, EmptyArray::IterRewind() is not reachable.
+  auto pos_limit = iter_end();
+  if (m_pos != pos_limit) {
+    setPosition(iter_rewind(m_pos));
+    if (m_pos != pos_limit) {
       return getValue(m_pos);
     }
   }
@@ -743,20 +752,20 @@ Variant ArrayData::next() {
 }
 
 Variant ArrayData::end() {
-  setPosition(iter_end());
-  return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
+  setPosition(iter_last());
+  return m_pos != iter_end() ? getValue(m_pos) : Variant(false);
 }
 
 Variant ArrayData::key() const {
-  return m_pos != invalid_index ? getKey(m_pos) : uninit_null();
+  return m_pos != iter_end() ? getKey(m_pos) : uninit_null();
 }
 
 Variant ArrayData::value(int32_t &pos) const {
-  return pos != invalid_index ? getValue(pos) : Variant(false);
+  return pos != iter_end() ? getValue(pos) : Variant(false);
 }
 
 Variant ArrayData::current() const {
-  return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
+  return m_pos != iter_end() ? getValue(m_pos) : Variant(false);
 }
 
 const StaticString
@@ -764,7 +773,7 @@ const StaticString
   s_key("key");
 
 Variant ArrayData::each() {
-  if (m_pos != invalid_index) {
+  if (m_pos != iter_end()) {
     ArrayInit ret(4, ArrayInit::Mixed{});
     Variant key(getKey(m_pos));
     Variant value(getValue(m_pos));

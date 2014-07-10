@@ -87,6 +87,7 @@ template<class T>
 T* wordfill(T* ptr, T value, size_t numT) {
   assert(numT < std::numeric_limits<int64_t>::max() &&
          (numT * sizeof(T)) % 8 == 0);
+  assert(numT != 0);
   auto numWords = numT * sizeof(T) / 8;
   auto d = (int64_t*)ptr;
   do {

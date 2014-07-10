@@ -71,7 +71,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
   always_assert(ht->isProxyArray());
   HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
   proxy->escalate();
-  for (HPHP::MArrayIter pos(proxy->innerRef());pos.advance();) {
+  for (HPHP::MArrayIter pos(proxy->innerRef()); pos.advance();) {
     void * data = proxy->proxyGet(pos);
     int result = apply_func(data, arg TSRMLS_CC);
 
@@ -177,7 +177,7 @@ ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyL
 
 ZEND_API ulong zend_hash_next_free_element(const HashTable *ht) {
   // TODO: What the caller really wants here is MixedArray::m_nextKI
-  // Previously ht->iter_end() + 1 was returned, but that will give some
+  // Previously ht->iter_end() was returned, but that will give some
   // vaguely related number like MixedArray::m_used or APCLocalArray::m_size,
   // certainly not the key of the next append operation.
   not_implemented();

@@ -44,7 +44,7 @@ struct EmptyArray::Initializer {
     auto const ad   = static_cast<ArrayData*>(vpEmpty);
     ad->m_kind      = ArrayData::kEmptyKind;
     ad->m_size      = 0;
-    ad->m_pos       = ArrayData::invalid_index;
+    ad->m_pos       = 0;
     ad->m_count     = 0;
     ad->setStatic();
   }
@@ -69,11 +69,12 @@ const Variant& EmptyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   not_reached();
 }
 
-// Iterators can't be advanced or rewinded, because we have no valid
-// iterators.
+// EmptyArray::IterAdvance() is reachable; see ArrayData::next() for details
 ssize_t EmptyArray::IterAdvance(const ArrayData*, ssize_t prev) {
-  not_reached();
+  return 0;
 }
+
+// EmptyArray::IterRewind() is NOT reachable; see ArrayData::prev() for details
 ssize_t EmptyArray::IterRewind(const ArrayData*, ssize_t prev) {
   not_reached();
 }

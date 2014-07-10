@@ -25,7 +25,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 ssize_t ArrayCommon::ReturnInvalidIndex(const ArrayData*) {
-  return ArrayData::invalid_index;
+  return 0;
 }
 
 bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
@@ -36,12 +36,13 @@ bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   }
   assert(fp.getContainer() == ad);
   if (fp.getResetFlag()) return false;
-  return fp.m_pos != ArrayData::invalid_index;
+  return fp.m_pos != (ad->isPacked() ? ad->getSize()
+                                     : MixedArray::asMixed(ad)->iterLimit());
 }
 
 ArrayData* ArrayCommon::Pop(ArrayData* a, Variant &value) {
   if (!a->empty()) {
-    auto const pos = a->iter_end();
+    auto const pos = a->iter_last();
     value = a->getValue(pos);
     return a->remove(a->getKey(pos), a->hasMultipleRefs());
   }

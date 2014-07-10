@@ -1150,13 +1150,13 @@ void IRBuilder::startBlock(Block* block) {
 
   if (block->empty()) {
     if (block != m_curBlock) {
+      assert(m_curBlock);
+      m_state.pauseBlock(m_curBlock);
       if (m_state.compatible(block)) {
-        m_state.pauseBlock(m_curBlock);
         m_state.pauseBlock(block);
       } else {
         m_state.clearCse();
       }
-      assert(m_curBlock);
       auto& prev = m_curBlock->back();
       if (!prev.hasEdges()) {
         gen(Jmp, block);

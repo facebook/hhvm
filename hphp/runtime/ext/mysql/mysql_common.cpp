@@ -1137,17 +1137,6 @@ Variant MySQLStmt::reset() {
   return !mysql_stmt_reset(m_stmt);
 }
 
-Variant MySQLStmt::store_result() {
-  VALIDATE_PREPARED
-  return !mysql_stmt_store_result(m_stmt);
-}
-
-Variant MySQLStmt::send_long_data(int64_t param_idx, const String& data) {
-  VALIDATE_PREPARED
-  return !mysql_stmt_send_long_data(m_stmt, param_idx, data.c_str(),
-                                    data.size());
-}
-
 Variant MySQLStmt::result_metadata() {
   VALIDATE_PREPARED
 
@@ -1169,6 +1158,22 @@ Variant MySQLStmt::result_metadata() {
   tvRefcountedDecRef(&ret);
 
   return obj;
+}
+
+Variant MySQLStmt::send_long_data(int64_t param_idx, const String& data) {
+  VALIDATE_PREPARED
+  return !mysql_stmt_send_long_data(m_stmt, param_idx, data.c_str(),
+                                    data.size());
+}
+
+Variant MySQLStmt::sqlstate() {
+  VALIDATE_STMT
+  return String(mysql_stmt_sqlstate(m_stmt), CopyString);
+}
+
+Variant MySQLStmt::store_result() {
+  VALIDATE_PREPARED
+  return !mysql_stmt_store_result(m_stmt);
 }
 
 #undef VALIDATE_STMT

@@ -581,6 +581,10 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_param_count) {
   return getStmt(this_)->param_count();
 }
 
+static Variant HHVM_METHOD(mysqli_stmt, hh_sqlstate) {
+  return getStmt(this_)->sqlstate();
+}
+
 static Variant HHVM_METHOD(mysqli_stmt, hh_store_result) {
   return getStmt(this_)->store_result();
 }
@@ -704,6 +708,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli_stmt, hh_insert_id);
     HHVM_ME(mysqli_stmt, hh_num_rows);
     HHVM_ME(mysqli_stmt, hh_param_count);
+    HHVM_ME(mysqli_stmt, hh_sqlstate);
     HHVM_ME(mysqli_stmt, hh_store_result);
     HHVM_ME(mysqli_stmt, prepare);
     HHVM_ME(mysqli_stmt, reset);

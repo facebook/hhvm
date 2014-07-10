@@ -328,6 +328,7 @@ public:
   Variant reset();
   Variant result_metadata();
   Variant send_long_data(int64_t param_idx, const String& data);
+  Variant sqlstate();
   Variant store_result();
 
 protected:

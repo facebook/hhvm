@@ -79,6 +79,7 @@ struct PackedArray {
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
   static ssize_t IterBegin(const ArrayData*);
+  static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);

@@ -511,8 +511,10 @@ Array ObjectData::o_toIterArray(const String& context,
 
   // Now get dynamic properties.
   if (dynProps) {
-    ssize_t iter = dynProps->get()->iter_begin();
-    while (iter != ArrayData::invalid_index) {
+    auto ad = dynProps->get();
+    ssize_t iter = ad->iter_begin();
+    auto pos_limit = ad->iter_end();
+    while (iter != pos_limit) {
       TypedValue key;
       dynProps->get()->nvGetKey(&key, iter);
       iter = dynProps->get()->iter_advance(iter);
@@ -1070,7 +1072,9 @@ void ObjectData::DeleteObject(ObjectData* objectData) {
 Object ObjectData::FromArray(ArrayData* properties) {
   ObjectData* retval = ObjectData::newInstance(SystemLib::s_stdclassClass);
   auto& dynArr = retval->reserveProperties(properties->size());
-  for (ssize_t pos = properties->iter_begin(); pos != ArrayData::invalid_index;
+  auto pos_limit = properties->iter_end();
+  for (ssize_t pos = properties->iter_begin();
+       pos != pos_limit;
        pos = properties->iter_advance(pos)) {
     auto const value = properties->getValueRef(pos);
     TypedValue key;
@@ -1847,9 +1851,10 @@ void ObjectData::cloneSet(ObjectData* clone) {
     auto& dynProps = dynPropArray();
     auto& cloneProps = clone->reserveProperties(dynProps.size());
 
-    ssize_t iter = dynProps.get()->iter_begin();
-    while (iter != ArrayData::invalid_index) {
-      auto const props = dynProps.get();
+    auto const props = dynProps.get();
+    ssize_t iter = props->iter_begin();
+    auto pos_limit = props->iter_end();
+    while (iter != pos_limit) {
       assert(MixedArray::asMixed(props));
 
       TypedValue key;
@@ -1876,7 +1881,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
       }
 
       tvDupFlattenVars(val, ret, cloneProps.get());
-      iter = MixedArray::IterAdvance(dynProps.get(), iter);
+      iter = MixedArray::IterAdvance(props, iter);
     }
   }
 }

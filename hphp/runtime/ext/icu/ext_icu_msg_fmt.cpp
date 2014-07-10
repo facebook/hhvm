@@ -263,8 +263,8 @@ bool MessageFormatter::mapArgs(std::vector<icu::Formattable>& types,
   int32_t count = args.size(), arg_num = 0;
   types.resize(count);
   names.resize(count);
-  for (auto idx = args->iter_begin();
-       idx != ArrayData::invalid_index;
+  auto idx_limit = args->iter_end();
+  for (auto idx = args->iter_begin(); idx != idx_limit;
        idx = args->iter_advance(idx), ++arg_num) {
     auto key = args->getKey(idx);
     icu::Formattable::Type type = icu::Formattable::kObject; // unknown

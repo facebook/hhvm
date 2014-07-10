@@ -216,8 +216,8 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
   SCOPE_EXIT{ smart_free(sortIndex); };
 
   // Translate input hash to sortable index
-  for (ssize_t pos = hash->iter_begin();
-       pos != ArrayData::invalid_index;
+  auto pos_limit = hash->iter_end();
+  for (ssize_t pos = hash->iter_begin(); pos != pos_limit;
        pos = hash->iter_advance(pos)) {
     Variant val(hash->getValue(pos));
 

@@ -54,8 +54,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
   auto const ad    = smartAllocArray(cap, mask);
 
   ad->m_kindAndSize = kMixedKind << 24; // zero's size
-  ad->m_posAndCount = uint64_t{1} << 32 |
-                        static_cast<uint32_t>(ArrayData::invalid_index);
+  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
   ad->m_capAndUsed  = cap;
   ad->m_tableMask   = mask;
   ad->m_nextKI      = 0;
@@ -66,7 +65,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
 
   assert(ad->m_kind == kMixedKind);
   assert(ad->m_size == 0);
-  assert(ad->m_pos == ArrayData::invalid_index);
+  assert(ad->m_pos == 0);
   assert(ad->m_count == 1);
   assert(ad->m_cap == cap);
   assert(ad->m_used == 0);
@@ -94,8 +93,7 @@ ArrayData* MixedArray::MakeReserveIntMap(uint32_t capacity) {
   auto const ad    = smartAllocArray(cap, mask);
 
   ad->m_kindAndSize = kIntMapKind << 24; // zero's size
-  ad->m_posAndCount = uint64_t{1} << 32 |
-                        static_cast<uint32_t>(ArrayData::invalid_index);
+  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
   ad->m_capAndUsed  = cap;
   ad->m_tableMask   = mask;
   ad->m_nextKI      = 0;
@@ -106,7 +104,7 @@ ArrayData* MixedArray::MakeReserveIntMap(uint32_t capacity) {
 
   assert(ad->m_kind == kIntMapKind);
   assert(ad->m_size == 0);
-  assert(ad->m_pos == ArrayData::invalid_index);
+  assert(ad->m_pos == 0);
   assert(ad->m_count == 1);
   assert(ad->m_cap == cap);
   assert(ad->m_used == 0);
@@ -133,7 +131,8 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
     ad = MakePackedHelper(size, values);
   }
 
-  ad->m_posAndCount = uint64_t{1} << 32;
+  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
+
   // Append values by moving -- Caller assumes we update refcount.
   // Values are in reverse order since they come from the stack, which
   // grows down.
@@ -166,7 +165,6 @@ MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-
 MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
                                  const TypedValue* values) {
   assert(size > 0);
@@ -178,7 +176,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
 
   auto const shiftedSize = uint64_t{size} << 32;
   ad->m_kindAndSize      = shiftedSize | kMixedKind << 24;
-  ad->m_posAndCount      = uint64_t{1} << 32;
+  ad->m_posAndCount      = uint64_t{1} << 32; // zero's pos
   ad->m_capAndUsed       = shiftedSize | cap;
   ad->m_tableMask        = mask;
   ad->m_nextKI           = 0;
@@ -229,7 +227,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const otherKind = other.m_kind;
 
   ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | otherKind << 24;
-  ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
+  ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos); // zero's count
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = other.m_nextKI;
@@ -598,7 +596,7 @@ bool MixedArray::checkInvariants() const {
   // Non-zombie:
   assert(m_size <= m_used);
   assert(m_used <= m_cap);
-  if (m_pos != invalid_index) {
+  if (m_pos != m_used) {
     assert(size_t(m_pos) < m_used);
     assert(!isTombstone(data()[m_pos].data.m_type));
   }
@@ -610,54 +608,61 @@ bool MixedArray::checkInvariants() const {
 // Iteration.
 
 inline ssize_t MixedArray::prevElm(Elm* elms, ssize_t ei) const {
-  assert(ei <= ssize_t(m_used));
+  assert(ei < ssize_t(m_used));
   while (ei > 0) {
     --ei;
     if (!isTombstone(elms[ei].data.m_type)) {
       return ei;
     }
   }
-  return invalid_index;
+  return m_used;
 }
 
 ssize_t MixedArray::IterBegin(const ArrayData* ad) {
   auto a = asMixed(ad);
-  return a->nextElm(a->data(), invalid_index);
+  return a->nextElm(a->data(), -1);
+}
+
+ssize_t MixedArray::IterLast(const ArrayData* ad) {
+  auto a = asMixed(ad);
+  auto* elms = a->data();
+  ssize_t ei = a->m_used;
+  while (ei > 0) {
+    --ei;
+    if (!isTombstone(elms[ei].data.m_type)) {
+      return ei;
+    }
+  }
+  return a->m_used;
 }
 
 ssize_t MixedArray::IterEnd(const ArrayData* ad) {
   auto a = asMixed(ad);
-  return a->prevElm(a->data(), a->m_used);
+  return a->m_used;
 }
 
 ssize_t MixedArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
-  // Since m_used is always less than 2^32 and invalid_index == -1,
-  // we can save a check by doing an unsigned comparison instead
-  // of a signed comparison.
-  if (size_t(++pos) < a->m_used && !isTombstone(a->data()[pos].data.m_type)) {
+  ++pos;
+  if (pos >= a->m_used) return a->m_used;
+  if (!isTombstone(a->data()[pos].data.m_type)) {
     return pos;
   }
   return a->iter_advance_helper(pos);
-  static_assert(invalid_index == -1, "");
 }
 
 // caller has already incremented pos but encountered a tombstone
 ssize_t MixedArray::iter_advance_helper(ssize_t next_pos) const {
   Elm* elms = data();
-  // Since m_used is always less than 2^32 and invalid_index == -1,
-  // we can save a check by doing an unsigned comparison instead of
-  // a signed comparison.
   for (auto limit = m_used; size_t(next_pos) < limit; ++next_pos) {
     if (!isTombstone(elms[next_pos].data.m_type)) {
       return next_pos;
     }
   }
-  return invalid_index;
+  return m_used;
 }
 
 ssize_t MixedArray::IterRewind(const ArrayData* ad, ssize_t pos) {
-  if (pos == invalid_index) return invalid_index;
   auto a = asMixed(ad);
   return a->prevElm(a->data(), pos);
 }
@@ -667,7 +672,7 @@ size_t MixedArray::Vsize(const ArrayData*) { not_reached(); }
 const Variant& MixedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assert(a->checkInvariants());
-  assert(pos != invalid_index);
+  assert(pos != a->m_used);
   auto& e = a->data()[pos];
   assert(!isTombstone(e.data.m_type));
   return tvAsCVarRef(&e.data);
@@ -780,7 +785,7 @@ int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
         return ei;
       }
     } else if (pos == Empty) {
-        return ei;
+      return ei;
     }
     probeIndex += i;
     assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
@@ -865,7 +870,7 @@ ssize_t MixedArray::findForRemove(int64_t ki, bool updateNext) {
       },
       [this, ki, updateNext] (Elm& e) {
         assert(ki == e.ikey);
-        // Match PHP 5.3.1 semantics
+        // Conform to PHP5 behavior
         // Hacky: don't removed the unsigned cast, else g++ can optimize away
         // the check for == 0x7fff..., since there is no signed int k
         // for which k-1 == 0x7fff...
@@ -1129,7 +1134,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newCap, uint32_t newMask) {
   auto const oldUsed        = old->m_used;
 
   ad->m_kindAndSize     = uint64_t{oldSize} << 32 | oldKind << 24;
-  ad->m_posAndCount     = oldPosUnsigned;
+  ad->m_posAndCount     = oldPosUnsigned; // zero's count
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = old->m_nextKI;
@@ -1187,35 +1192,59 @@ struct ElmKey {
 void MixedArray::compact(bool renumber /* = false */) {
   assert(!isPacked());
   ElmKey mPos;
-  if (m_pos != invalid_index) {
-    // Cache key for element associated with m_pos in order to update m_pos
-    // below.
-    assert(size_t(m_pos) < m_used);
-    auto& e = data()[m_pos];
-    mPos.hash = e.hasIntKey() ? 0 : e.hash();
-    mPos.skey = e.skey;
-  } else {
-    // Silence compiler warnings.
-    mPos.hash = 0;
-    mPos.skey = nullptr;
-  }
 
+  bool updatePosAfterCompact;
+  bool hasStrongIters;
   TinyVector<ElmKey,3> siKeys;
-  auto const checkingStrongIterators = strong_iterators_exist();
-  if (UNLIKELY(checkingStrongIterators)) {
-    for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
-      if (miEnt.array != this) return;
-      auto const ei = miEnt.iter->m_pos;
-      if (ei != invalid_index) {
+
+  // Prep work before beginning the compaction process
+  if (LIKELY(!renumber)) {
+    if ((updatePosAfterCompact = (m_pos != 0 && m_pos != m_used))) {
+      // Cache key for element associated with m_pos in order to
+      // update m_pos after the compaction has been performed.
+      // We only need to do this if m_pos is nonzero and is not
+      // the canonical invalid position.
+      assert(size_t(m_pos) < m_used);
+      auto& e = data()[m_pos];
+      mPos.hash = e.hasIntKey() ? 0 : e.hash();
+      mPos.skey = e.skey;
+    } else {
+      if (m_pos == m_used) {
+        // If m_pos is the canonical invalid position, we need to update
+        // it to what the new canonical invalid position will be after
+        // compaction
+        m_pos = m_size;
+      }
+      mPos.hash = 0;
+      mPos.skey = nullptr;
+    }
+    if (UNLIKELY((hasStrongIters = strong_iterators_exist()))) {
+      for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
+        if (miEnt.array != this) return;
+        if (miEnt.iter->getResetFlag()) return;
+        auto const ei = miEnt.iter->m_pos;
+        if (ei == m_used) return;
         auto& e = data()[ei];
         siKeys.push_back(ElmKey(e.hash(), e.skey));
-      }
-    });
-  }
-
-  if (renumber) {
+      });
+    }
+  } else {
+    // To conform to PHP5 behavior, when array's integer keys are renumbered
+    // we invalidate all strong iterators and we reset the array's internal
+    // cursor (even if the array is empty or has no integer keys).
+    if (UNLIKELY(strong_iterators_exist())) {
+      free_strong_iterators(this);
+    }
+    m_pos = 0;
+    mPos.hash = 0;
+    mPos.skey = nullptr;
+    updatePosAfterCompact = false;
+    hasStrongIters = false;
+    // Set m_nextKI to 0 for now to prepare for renumbering integer keys
     m_nextKI = 0;
   }
+
+  // Perform compaction
   auto elms = data();
   auto mask = m_tableMask;
   size_t tableSize = mask + 1;
@@ -1230,39 +1259,52 @@ void MixedArray::compact(bool renumber /* = false */) {
     if (toPos != frPos) {
       toE = elms[frPos];
     }
-    if (renumber && !toE.hasStrKey()) {
+    if (UNLIKELY(renumber && !toE.hasStrKey())) {
       toE.ikey = m_nextKI++;
     }
     auto ie = findForNewInsert(table, mask,
                                toE.hasIntKey() ? toE.ikey : toE.hash());
     *ie = toPos;
   }
-  m_used = m_size;
-  if (m_pos != invalid_index) {
-    // Update m_pos, now that compaction is complete.
-    if (mPos.hash) {
-      m_pos = ssize_t(find(mPos.skey, mPos.hash));
-    } else {
-      m_pos = ssize_t(find(mPos.ikey));
-    }
+
+  if (updatePosAfterCompact) {
+    // Update m_pos, now that compaction is complete
+    m_pos = mPos.hash ? ssize_t(find(mPos.skey, mPos.hash))
+                      : ssize_t(find(mPos.ikey));
   }
 
-  // Update strong iterators, now that compaction is complete.
-  if (LIKELY(!checkingStrongIterators)) return;
+  if (LIKELY(!hasStrongIters)) {
+    // In the common case there aren't any strong iterators, so we
+    // can just update m_used and return
+    m_used = m_size;
+    return;
+  }
 
+  // Update strong iterators now that compaction is complete. Note
+  // that we wait to update m_used until after we've updated the
+  // strong iterators because we need to consult what the _old_ value
+  // of m_used before compaction was performed.
   int key = 0;
-  for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
-    if (miEnt.array != this) return;
-    auto const iter = miEnt.iter;
-    if (iter->m_pos == invalid_index) return;
-    auto& k = siKeys[key];
-    key++;
-    if (k.hash) { // string key
-      iter->m_pos = ssize_t(find(k.skey, k.hash));
-    } else { // int key
-      iter->m_pos = ssize_t(find(k.ikey));
+  for_each_strong_iterator(
+    [&] (MIterTable::Ent& miEnt) {
+      if (miEnt.array != this) return;
+      auto const iter = miEnt.iter;
+      if (iter->getResetFlag()) return;
+      if (iter->m_pos == m_used) {
+        // If this iterator was set to the _old_ canonical invalid position,
+        // we need to update it to the _new_ canonical invalid position after
+        // compaction.
+        iter->m_pos = m_size;
+        return;
+      }
+      auto& k = siKeys[key];
+      key++;
+      iter->m_pos = k.hash ? ssize_t(find(k.skey, k.hash))
+                           : ssize_t(find(k.ikey));
     }
-  });
+  );
+  // Finally, update m_used and return
+  m_used = m_size;
 }
 
 bool MixedArray::nextInsert(const Variant& data) {
@@ -1548,18 +1590,21 @@ MixedArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 
 NEVER_INLINE
 void MixedArray::adjustMArrayIter(ssize_t pos) {
+  assert(pos >= 0 && pos < m_used);
   ssize_t eIPrev = Tombstone;
   for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
     if (miEnt.array != this) return;
     auto const iter = miEnt.iter;
+    if (iter->getResetFlag()) return;
     if (iter->m_pos == pos) {
       if (eIPrev == Tombstone) {
         // eIPrev will actually be used, so properly initialize it with the
-        // previous element before pos, or invalid_index if pos is the first
-        // element.
+        // previous element before pos (or an invalid position if pos was the
+        // first element).
         eIPrev = prevElm(data(), pos);
       }
-      if (eIPrev == Empty) {
+
+      if (eIPrev == m_used) {
         iter->setResetFlag(true);
       }
       iter->m_pos = eIPrev;
@@ -1672,7 +1717,7 @@ MixedArray::NvGetStrImpl<ArrayData::kIntMapKind>(const ArrayData* ad,
 
 void MixedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   auto a = asMixed(ad);
-  assert(pos != ArrayData::invalid_index);
+  assert(pos != a->m_used);
   assert(!isTombstone(a->data()[pos].data.m_type));
   getElmKey(a->data()[pos], out);
 }
@@ -1795,7 +1840,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   // the key for element associated with src->m_pos so that we can
   // properly initialize ad->m_pos below.
   ElmKey mPos;
-  if (src->m_pos != invalid_index) {
+  if (src->m_pos != src->m_used) {
     assert(size_t(src->m_pos) < src->m_used);
     auto& e = srcElm[src->m_pos];
     mPos.hash = e.hasIntKey() ? 0 : e.hash();
@@ -1815,7 +1860,6 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
     if (hasIntKey) {
       dstElm->setIntKey(srcElm->ikey);
     } else {
-      srcElm->skey->incRefCount();
       dstElm->setStrKey(srcElm->skey, hash);
     }
     *ad->findForNewInsert(table, mask, hash) = i;
@@ -1824,7 +1868,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   }
 
   // Now that we have finished copying the elements, update ad->m_pos
-  if (src->m_pos != invalid_index) {
+  if (src->m_pos != src->m_used) {
     ad->m_pos = mPos.hash
       ? ssize_t(ad->find(mPos.skey, mPos.hash))
       : ssize_t(ad->find(mPos.ikey));
@@ -1986,8 +2030,9 @@ ArrayData* MixedArray::PopImpl(ArrayData* ad, Variant& value) {
     MixedArray::downgradeAndWarn(a, Reason::kPop);
   }
   auto elms = a->data();
-  ssize_t pos = IterEnd(a);
-  if (validPos(pos)) {
+  if (a->m_size) {
+    ssize_t pos = IterLast(a);
+    assert(pos >= 0 && pos < a->m_used);
     auto& e = elms[pos];
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
@@ -1998,9 +2043,9 @@ ArrayData* MixedArray::PopImpl(ArrayData* ad, Variant& value) {
   } else {
     value = uninit_null();
   }
-  // To conform to PHP behavior, the pop operation resets the array's
+  // To conform to PHP5 behavior, the pop operation resets the array's
   // internal iterator.
-  a->m_pos = a->nextElm(elms, invalid_index);
+  a->m_pos = a->nextElm(elms, -1);
   return a;
 }
 
@@ -2019,27 +2064,23 @@ ArrayData* MixedArray::DequeueImpl(ArrayData* adInput, Variant& value) {
   if (aKind != kMixedKind) {
     MixedArray::downgradeAndWarn(a, Reason::kDequeue);
   }
-  // To conform to PHP behavior, we invalidate all strong iterators when an
-  // element is removed from the beginning of the array.
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(a);
-  }
   auto elms = a->data();
-  ssize_t pos = a->nextElm(elms, invalid_index);
-  if (validPos(pos)) {
+  if (a->m_size) {
+    ssize_t pos = a->nextElm(elms, -1);
+    assert(pos >= 0 && pos < a->m_used);
     auto& e = elms[pos];
+    assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
     auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash()) :
                 a->findForRemove(e.ikey, false);
     assert(pos2 == pos);
     a->erase(pos2);
-    a->compact(true);
   } else {
     value = uninit_null();
   }
-  // To conform to PHP behavior, the dequeue operation resets the array's
-  // internal iterator
-  a->m_pos = a->nextElm(elms, invalid_index);
+  // Even if the array is empty, for PHP5 conformity we need call
+  // compact() because it has side-effects that are important
+  a->compact(true);
   return a;
 }
 
@@ -2053,12 +2094,6 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
   if (a->hasMultipleRefs()) a = a->copyMixedAndResizeIfNeeded();
   if (UNLIKELY(a->m_kind != kMixedKind)) {
     MixedArray::downgradeAndWarn(a, Reason::kPrepend);
-  }
-
-  // To conform to PHP behavior, we invalidate all strong iterators when an
-  // element is added to the beginning of the array.
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(a);
   }
 
   auto elms = a->data();
@@ -2080,9 +2115,6 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
 
   // Renumber.
   a->compact(true);
-  // To conform to PHP behavior, the prepend operation resets the array's
-  // internal iterator
-  a->m_pos = a->nextElm(elms, invalid_index);
   return a;
 }
 
@@ -2131,15 +2163,16 @@ bool MixedArray::AdvanceMArrayIterImpl(ArrayData* ad, MArrayIter& fp) {
   Elm* elms = a->data();
   if (fp.getResetFlag()) {
     fp.setResetFlag(false);
-    fp.m_pos = invalid_index;
-  } else if (fp.m_pos == invalid_index) {
+    fp.m_pos = a->nextElm(elms, -1);
+  } else if (fp.m_pos == a->m_used) {
+    return false;
+  } else {
+    fp.m_pos = a->nextElm(elms, fp.m_pos);
+  }
+  if (fp.m_pos == a->m_used) {
     return false;
   }
-  fp.m_pos = a->nextElm(elms, fp.m_pos);
-  if (fp.m_pos == invalid_index) {
-    return false;
-  }
-  // To conform to PHP behavior, we need to set the internal
+  // To conform to PHP5 behavior, we need to set the internal
   // cursor to point to the next element.
   a->m_pos = a->nextElm(elms, fp.m_pos);
   return true;

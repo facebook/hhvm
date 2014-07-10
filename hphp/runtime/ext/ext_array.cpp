@@ -896,9 +896,8 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
   if (cell_array->m_type == KindOfArray) {
     if (array.toArray()->isVectorData()) {
       if (!_argv.empty()) {
-        auto pos_limit = _argv->iter_end();
-        for (ssize_t pos = _argv->iter_last(); pos != pos_limit;
-             pos = _argv->iter_rewind(pos)) {
+        for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
+          pos = _argv->iter_rewind(pos)) {
           array.wrapped().toArrRef().prepend(_argv->getValueRef(pos));
         }
       }
@@ -908,8 +907,8 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
         Array newArray;
         newArray.append(var);
         if (!_argv.empty()) {
-          auto pos_limit = _argv->iter_end();
-          for (ssize_t pos = _argv->iter_begin(); pos != pos_limit;
+          for (ssize_t pos = _argv->iter_begin();
+               pos != ArrayData::invalid_index;
                pos = _argv->iter_advance(pos)) {
             newArray.append(_argv->getValueRef(pos));
           }
@@ -940,8 +939,7 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
     case Collection::VectorType: {
       auto* vec = static_cast<c_Vector*>(obj);
       if (!_argv.empty()) {
-        auto pos_limit = _argv->iter_end();
-        for (ssize_t pos = _argv->iter_last(); pos != pos_limit;
+        for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
              pos = _argv->iter_rewind(pos)) {
           vec->addFront(_argv->getValueRef(pos).asCell());
         }
@@ -952,8 +950,7 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
     case Collection::SetType: {
       auto* st = static_cast<c_Set*>(obj);
       if (!_argv.empty()) {
-        auto pos_limit = _argv->iter_end();
-        for (ssize_t pos = _argv->iter_last(); pos != pos_limit;
+        for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
              pos = _argv->iter_rewind(pos)) {
           st->addFront(_argv->getValueRef(pos).asCell());
         }

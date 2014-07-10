@@ -51,6 +51,8 @@ struct ArrayData {
     kNumKinds     // insert new values before kNumKinds.
   };
 
+  static constexpr ssize_t invalid_index = -1;
+
 protected:
   /*
    * NOTE: MixedArray no longer calls this constructor.  If you change
@@ -172,8 +174,8 @@ public:
   Variant each();
 
   bool isHead()            const { return m_pos == iter_begin(); }
-  bool isTail()            const { return m_pos == iter_last(); }
-  bool isInvalid()         const { return m_pos == iter_end(); }
+  bool isTail()            const { return m_pos == iter_end(); }
+  bool isInvalid()         const { return m_pos == invalid_index; }
 
   /**
    * Testing whether a key exists.
@@ -269,9 +271,7 @@ public:
   ArrayData *remove(const String& k, bool copy);
   ArrayData *remove(const Variant& k, bool copy);
 
-  // See the documentation for IterEnd, IterBegin, etc. in array-data.cpp
   ssize_t iter_begin() const;
-  ssize_t iter_last() const;
   ssize_t iter_end() const;
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
@@ -496,7 +496,6 @@ struct ArrayFunctions {
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k, bool copy);
   ssize_t (*iterBegin[NK])(const ArrayData*);
-  ssize_t (*iterLast[NK])(const ArrayData*);
   ssize_t (*iterEnd[NK])(const ArrayData*);
   ssize_t (*iterAdvance[NK])(const ArrayData*, ssize_t pos);
   ssize_t (*iterRewind[NK])(const ArrayData*, ssize_t pos);

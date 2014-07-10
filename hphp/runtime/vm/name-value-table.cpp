@@ -308,19 +308,11 @@ NameValueTable::Iterator::Iterator(const NameValueTable* tab)
 }
 
 NameValueTable::Iterator
-NameValueTable::Iterator::getLast(const NameValueTable* tab) {
-  Iterator it;
-  it.m_tab = tab;
-  it.m_idx = tab->m_tabMask + 1;
-  it.prev();
-  return it;
-}
-
-NameValueTable::Iterator
 NameValueTable::Iterator::getEnd(const NameValueTable* tab) {
   Iterator it;
   it.m_tab = tab;
   it.m_idx = tab->m_tabMask + 1;
+  it.prev();
   return it;
 }
 
@@ -341,7 +333,7 @@ NameValueTable::Iterator::Iterator(const NameValueTable* tab,
 }
 
 ssize_t NameValueTable::Iterator::toInteger() const {
-  const ssize_t invalid = m_tab->m_tabMask + 1;
+  const ssize_t invalid = ArrayData::invalid_index;
   return valid() ? m_idx : invalid;
 }
 
@@ -361,14 +353,6 @@ const TypedValue* NameValueTable::Iterator::curVal() const {
 
 void NameValueTable::Iterator::next() {
   size_t const sz = m_tab->m_tabMask + 1;
-  if (m_idx + 1 >= sz) {
-    m_idx = sz;
-    return;
-  }
-  ++m_idx;
-  if (LIKELY(!atEmpty())) {
-    return;
-  }
   do {
     ++m_idx;
   } while (size_t(m_idx) < sz && atEmpty());

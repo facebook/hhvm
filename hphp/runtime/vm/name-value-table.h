@@ -46,7 +46,6 @@ struct ActRec;
 struct NameValueTable : private boost::noncopyable {
   struct Iterator {
     explicit Iterator(const NameValueTable* tab);
-    static Iterator getLast(const NameValueTable* tab);
     static Iterator getEnd(const NameValueTable* tab);
 
     /*

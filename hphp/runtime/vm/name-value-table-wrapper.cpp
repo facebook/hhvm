@@ -43,10 +43,9 @@ size_t NameValueTableWrapper::Vsize(const ArrayData* ad) {
   // KindOfUninit.
   auto a = asNVTW(ad);
   size_t count = 0;
-  auto iter_limit = IterEnd(a);
   for (auto iter = IterBegin(a);
-       iter != iter_limit;
-       iter = IterAdvance(a, iter)) {
+      iter != invalid_index;
+      iter = IterAdvance(a, iter)) {
     ++count;
   }
   return count;
@@ -205,11 +204,6 @@ ssize_t NameValueTableWrapper::IterBegin(const ArrayData* ad) {
   return iter.toInteger();
 }
 
-ssize_t NameValueTableWrapper::IterLast(const ArrayData* ad) {
-  auto a = asNVTW(ad);
-  return NameValueTable::Iterator::getLast(a->m_tab).toInteger();
-}
-
 ssize_t NameValueTableWrapper::IterEnd(const ArrayData* ad) {
   auto a = asNVTW(ad);
   return NameValueTable::Iterator::getEnd(a->m_tab).toInteger();
@@ -235,7 +229,7 @@ NameValueTableWrapper::ValidMArrayIter(const ArrayData* ad,
   assert(fp.getContainer() == ad);
   auto a = asNVTW(ad);
   if (fp.getResetFlag()) return false;
-  if (fp.m_pos == IterEnd(a)) return false;
+  if (fp.m_pos == invalid_index) return false;
   NameValueTable::Iterator iter(a->m_tab, fp.m_pos);
   return iter.valid();
 }

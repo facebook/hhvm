@@ -930,10 +930,12 @@ class HashCollection : public ExtCollectionObjectData {
 
   static bool validPos(ssize_t pos) {
     return pos >= 0;
+    static_assert(ssize_t(Empty) == ssize_t(-1), "");
   }
 
   static bool validPos(int32_t pos) {
     return pos >= 0;
+    static_assert(Empty == -1, "");
   }
 
   // The skipTombstonesNoBoundsCheck helper functions assume that either

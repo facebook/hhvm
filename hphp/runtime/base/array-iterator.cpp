@@ -58,15 +58,18 @@ ArrayIter::ArrayIter(const Array& array) {
   arrInit(array.get());
 }
 
-ArrayIter::ArrayIter(ObjectData* obj) {
+ArrayIter::ArrayIter(ObjectData* obj)
+  : m_pos(ArrayData::invalid_index) {
   objInit<true>(obj);
 }
 
-ArrayIter::ArrayIter(ObjectData* obj, NoInc) {
+ArrayIter::ArrayIter(ObjectData* obj, NoInc)
+  : m_pos(ArrayData::invalid_index) {
   objInit<false>(obj);
 }
 
-ArrayIter::ArrayIter(const Object& obj) {
+ArrayIter::ArrayIter(const Object& obj)
+  : m_pos(ArrayData::invalid_index) {
   objInit<true>(obj.get());
 }
 
@@ -99,6 +102,8 @@ void ArrayIter::arrInit(const ArrayData* arr) {
   if (arr) {
     arr->incRefCount();
     m_pos = arr->iter_begin();
+  } else {
+    m_pos = ArrayData::invalid_index;
   }
 }
 
@@ -369,9 +374,9 @@ Variant ArrayIter::firstHelper() {
 
 Variant ArrayIter::second() {
   if (LIKELY(hasArrayData())) {
+    assert(m_pos != ArrayData::invalid_index);
     const ArrayData* ad = getArrayData();
     assert(ad);
-    assert(m_pos != ad->iter_end());
     return ad->getValue(m_pos);
   }
   switch (getCollectionType()) {
@@ -425,17 +430,17 @@ const Variant& ArrayIter::secondRef() {
     throw FatalErrorException("taking reference on iterator objects");
   }
   assert(hasArrayData());
+  assert(m_pos != ArrayData::invalid_index);
   const ArrayData* ad = getArrayData();
   assert(ad);
-  assert(m_pos != ad->iter_end());
   return ad->getValueRef(m_pos);
 }
 
 const Variant& ArrayIter::secondRefPlus() {
   if (LIKELY(hasArrayData())) {
+    assert(m_pos != ArrayData::invalid_index);
     const ArrayData* ad = getArrayData();
     assert(ad);
-    assert(m_pos != ad->iter_end());
     return ad->getValueRef(m_pos);
   }
   switch (getCollectionType()) {
@@ -1478,7 +1483,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   auto const arrIter = &iter->arr();
   auto const arr = APCLocalArray::asSharedArray(ad);
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
-  if (UNLIKELY(pos == ad->getSize())) {
+  if (UNLIKELY(pos == ArrayData::invalid_index)) {
     if (UNLIKELY(arr->hasExactlyOneRef())) {
       return iter_next_free_apc(iter, arr);
     }

@@ -170,7 +170,6 @@ public:
   static ArrayData* Escalate(const ArrayData* ad);
 
   static ssize_t IterBegin(const ArrayData*);
-  static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);

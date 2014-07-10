@@ -225,7 +225,6 @@ public:
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ssize_t IterBegin(const ArrayData*);
-  static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
@@ -335,7 +334,7 @@ public:
   // 32-bit ints than it does for 64-bit ints. As such, we have deliberately
   // chosen to use ssize_t in some places where ideally we *should* have used
   // int32_t.
-  static const int32_t Empty      = -1;
+  static const int32_t Empty      = -1; // == ArrayData::invalid_index
   static const int32_t Tombstone  = -2;
 
   // Use a minimum of an 4-element hash table.  Valid range: [2..32]
@@ -449,9 +448,8 @@ private:
         return ei;
       }
     }
-    return m_used;
+    return invalid_index;
   }
-
   ssize_t prevElm(Elm* elms, ssize_t ei) const;
 
   // Assert a bunch of invariants about this array then return true.

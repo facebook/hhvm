@@ -36,7 +36,6 @@ namespace HPHP {
 bool PackedArray::checkInvariants(const ArrayData* arr) {
   assert(arr->isPacked());
   assert(arr->m_size <= packedCodeToCap(arr->m_packedCapCode));
-  assert(arr->m_pos >= 0 && arr->m_pos <= arr->m_size);
   static_assert(ArrayData::kPackedKind == 0, "");
   // Note that m_pos < m_size is not an invariant, because an array
   // that grows will only adjust m_size to zero on the old array.
@@ -115,11 +114,6 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
   }
 
   old->m_size = 0;
-  if (debug) {
-    // For debug builds, set m_pos to 0 as well to make the
-    // asserts in checkInvariants() happy.
-    old->m_pos = 0;
-  }
 
   assert(ad->checkInvariants());
   assert(!ad->isFull());
@@ -230,11 +224,6 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
   // smaller than subtracting sizeof(ArrayData) from rax to return.
   auto const oldSize = old->m_size;
   old->m_size = 0;
-  if (debug) {
-    // For debug builds, set m_pos to 0 as well to make the
-    // asserts in checkInvariants() happy.
-    old->m_pos = 0;
-  }
   std::memcpy(packedData(ad), packedData(old), oldSize * sizeof(TypedValue));
 
   // TODO(#2926276): it would be good to refactor callers to expect
@@ -410,9 +399,9 @@ ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
 
   ad->m_posAndCount = static_cast<uint32_t>(arr->m_pos);
   auto data = reinterpret_cast<TypedValue*>(ad + 1);
-  auto pos_limit = arr->iter_end();
-  for (auto pos = arr->iter_begin(); pos != pos_limit;
-       pos = arr->iter_advance(pos), ++data) {
+  for (auto pos = arr->iter_begin();
+      pos != ArrayData::invalid_index;
+      pos = arr->iter_advance(pos), ++data) {
     tvDupFlattenVars(arr->getValueRef(pos).asTypedValue(), data, arr);
   }
 
@@ -456,10 +445,11 @@ ArrayData* MixedArray::MakeReserve(uint32_t capacity) {
     ad = MakeReserveSlow(capacity);
   }
 
-  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
+  ad->m_posAndCount = uint64_t{1} << 32 |
+                        static_cast<uint32_t>(ArrayData::invalid_index);
 
   assert(ad->m_count == 1);
-  assert(ad->m_pos == 0);
+  assert(ad->m_pos == ArrayData::invalid_index);
   assert(PackedArray::checkInvariants(ad));
   return ad;
 }
@@ -504,7 +494,7 @@ const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
 
 void PackedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   assert(checkInvariants(ad));
-  assert(pos != ad->m_size);
+  assert(pos != ArrayData::invalid_index);
   out->m_data.num = pos;
   out->m_type = KindOfInt64;
 }
@@ -513,7 +503,7 @@ size_t PackedArray::Vsize(const ArrayData*) { not_reached(); }
 
 const Variant& PackedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   assert(checkInvariants(ad));
-  assert(pos != ad->m_size);
+  assert(pos != ArrayData::invalid_index);
   return tvAsCVarRef(&packedData(ad)[pos]);
 }
 
@@ -561,6 +551,10 @@ ArrayData* PackedArray::LvalNew(ArrayData* adIn, Variant*& ret, bool copy) {
   if (UNLIKELY(!ad)) {
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(ad);
     return MixedArray::LvalNew(mixed, ret, copy);
+  }
+
+  if (ad->m_pos == ArrayData::invalid_index) {
+    ad->m_pos = ad->m_size;
   }
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;
@@ -659,50 +653,43 @@ PackedArray::RemoveStr(ArrayData* adIn, const StringData*, bool) {
 
 ssize_t PackedArray::IterBegin(const ArrayData* ad) {
   assert(checkInvariants(ad));
-  return 0;
-}
-
-ssize_t PackedArray::IterLast(const ArrayData* ad) {
-  assert(checkInvariants(ad));
-  return ad->m_size ? ad->m_size - 1 : 0;
+  return ad->m_size ? 0 : ArrayData::invalid_index;
 }
 
 ssize_t PackedArray::IterEnd(const ArrayData* ad) {
   assert(checkInvariants(ad));
-  return ad->m_size;
+  static_assert(ArrayData::invalid_index == -1, "");
+  return static_cast<ssize_t>(ad->m_size) - 1;
 }
 
 ssize_t PackedArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
   assert(checkInvariants(ad));
-  if (pos < ad->m_size) {
-    ++pos;
+  if (size_t(++pos) < ad->m_size) {
+    return pos;
   }
-  return pos;
+  return ArrayData::invalid_index;
 }
 
 ssize_t PackedArray::IterRewind(const ArrayData* ad, ssize_t pos) {
   assert(checkInvariants(ad));
-  if (pos > 0) {
-    return pos - 1;
-  }
-  return ad->m_size;
+  if (pos == ArrayData::invalid_index) return ArrayData::invalid_index;
+  return pos - 1;
 }
 
 bool PackedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   assert(checkInvariants(ad));
   if (fp.getResetFlag()) {
     fp.setResetFlag(false);
-    fp.m_pos = 0;
-  } else if (fp.m_pos == ad->m_size) {
-    return false;
-  } else {
-    fp.m_pos = IterAdvance(ad, fp.m_pos);
-  }
-  if (fp.m_pos == ad->m_size) {
+    fp.m_pos = ArrayData::invalid_index;
+  } else if (fp.m_pos == ArrayData::invalid_index) {
     return false;
   }
-  // We set ad's internal cursor to point to the next element
-  // to conform with PHP5 behavior
+  fp.m_pos = IterAdvance(ad, fp.m_pos);
+  if (fp.m_pos == ArrayData::invalid_index) {
+    return false;
+  }
+  // To conform to PHP behavior, we need to set the internal
+  // cursor to point to the next element.
   ad->m_pos = IterAdvance(ad, fp.m_pos);
   return true;
 }
@@ -716,6 +703,9 @@ ArrayData* PackedArray::Append(ArrayData* adIn, const Variant& v, bool copy) {
     return MixedArray::Append(mixed, v, copy);
   }
 
+  if (ad->m_pos == ArrayData::invalid_index) {
+    ad->m_pos = ad->m_size;
+  }
   auto& dst = packedData(ad)[ad->m_size++];
   cellDup(*v.asCell(), dst);
   // TODO(#3888164): restructure this so we don't need KindOfUninit checks.
@@ -734,6 +724,9 @@ ArrayData* PackedArray::AppendRef(ArrayData* adIn,
     return MixedArray::AppendRef(mixed, v, copy);
   }
 
+  if (ad->m_pos == ArrayData::invalid_index) {
+    ad->m_pos = ad->m_size;
+  }
   auto& dst = packedData(ad)[ad->m_size++];
   dst.m_data.pref = v.asRef()->m_data.pref;
   dst.m_type = KindOfRef;
@@ -753,6 +746,9 @@ ArrayData* PackedArray::AppendWithRef(ArrayData* adIn,
     return MixedArray::AppendRef(mixed, const_cast<Variant&>(v), copy);
   }
 
+  if (ad->m_pos == ArrayData::invalid_index) {
+    ad->m_pos = ad->m_size;
+  }
   auto& dst = packedData(ad)[ad->m_size++];
   dst.m_type = KindOfNull;
   tvAsVariant(&dst).setWithRef(v);
@@ -782,14 +778,12 @@ ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
 }
 
 static void adjustMArrayIter(ArrayData* ad, ssize_t pos) {
-  assert(ad->isPacked());
   for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
     if (miEnt.array != ad) return;
     auto const iter = miEnt.iter;
-    if (iter->getResetFlag()) return;
     if (iter->m_pos == pos) {
-      if (pos <= 0) {
-        iter->m_pos = ad->getSize();
+      if (pos - 1 < 0) {
+        iter->m_pos = ArrayData::invalid_index;
         iter->setResetFlag(true);
       } else {
         iter->m_pos = pos - 1;
@@ -804,8 +798,8 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   auto const ad = adIn->hasMultipleRefs() ? Copy(adIn) : adIn;
 
   if (UNLIKELY(ad->m_size == 0)) {
-    assert(ad->m_pos == 0);
     value = uninit_null();
+    ad->m_pos = ArrayData::invalid_index;
     return ad;
   }
 
@@ -818,7 +812,7 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   auto const oldType = tv.m_type;
   auto const oldDatum = tv.m_data.num;
   ad->m_size = oldSize - 1;
-  ad->m_pos = 0;
+  ad->m_pos = oldSize - 1 > 0 ? 0 : ArrayData::invalid_index;
   tvRefcountedDecRefHelper(oldType, oldDatum);
   return ad;
 }
@@ -835,6 +829,7 @@ ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
 
   if (UNLIKELY(ad->m_size == 0)) {
     value = uninit_null();
+    ad->m_pos = ArrayData::invalid_index;
     return ad;
   }
 
@@ -845,7 +840,7 @@ ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
   value = std::move(tvAsVariant(data)); // no incref+decref
   std::memmove(data, data + 1, n * sizeof *data);
   ad->m_size = n;
-  ad->m_pos = 0;
+  ad->m_pos = n > 0 ? 0 : ArrayData::invalid_index;
   return ad;
 }
 

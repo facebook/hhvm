@@ -253,10 +253,6 @@ inline ssize_t ArrayData::iter_begin() const {
   return g_array_funcs.iterBegin[m_kind](this);
 }
 
-inline ssize_t ArrayData::iter_last() const {
-  return g_array_funcs.iterLast[m_kind](this);
-}
-
 inline ssize_t ArrayData::iter_end() const {
   return g_array_funcs.iterEnd[m_kind](this);
 }

@@ -345,8 +345,7 @@ Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */)
   }
 
   Array ret = Array::Create();
-  auto pos_limit = input->iter_end();
-  for (ssize_t pos = input->iter_last(); pos != pos_limit;
+  for (ssize_t pos = input->iter_end(); pos != ArrayData::invalid_index;
        pos = input->iter_rewind(pos)) {
     Variant key(input->getKey(pos));
     if (preserve_keys || key.isString()) {
@@ -381,8 +380,7 @@ Variant ArrayUtil::Shuffle(const Array& input) {
 
   std::vector<ssize_t> indices;
   indices.reserve(count);
-  auto pos_limit = input->iter_end();
-  for (ssize_t pos = input->iter_begin(); pos != pos_limit;
+  for (ssize_t pos = input->iter_begin(); pos != ArrayData::invalid_index;
        pos = input->iter_advance(pos)) {
     indices.push_back(pos);
   }
@@ -420,8 +418,7 @@ Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
 
   std::vector<ssize_t> indices;
   indices.reserve(count);
-  auto pos_limit = input->iter_end();
-  for (ssize_t pos = input->iter_begin(); pos != pos_limit;
+  for (ssize_t pos = input->iter_begin(); pos != ArrayData::invalid_index;
        pos = input->iter_advance(pos)) {
     indices.push_back(pos);
   }

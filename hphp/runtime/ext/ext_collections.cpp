@@ -577,7 +577,22 @@ Array BaseVector::toArrayImpl() const {
   if (!m_size) {
     return empty_array();
   }
-  return Array(const_cast<ArrayData*>(arrayData()));
+  auto ad = const_cast<ArrayData*>(arrayData());
+  // When Vector::toArray() returns a non-empty array, we want the returned
+  // array to have its internal cursor pointing at the first element, so we
+  // set m_pos accordingly here. It's safe to write to m_pos even if ad's
+  // refcount is greater than 1 because we know one of the following is true:
+  // either (1) this array has never been exposed outside of the Vector
+  // implementation, in which case we know it's not referenced outside by
+  // anything outside the Vector implementation, or (2) this array has been
+  // exposed by the Vector implementation, in which case m_pos already points
+  // to the first element (and COW semantics ensures that m_pos couldn't have
+  // been changed by user code).
+  assert(m_size);
+  if (ad->m_pos != 0) {
+    ad->m_pos = 0;
+  }
+  return Array(ad);
 }
 
 NEVER_INLINE
@@ -608,6 +623,9 @@ void BaseVector::addFront(const TypedValue* val) {
 Variant BaseVector::popFront() {
   if (m_size) {
     mutateAndBump();
+    // We're removing an element, so we make sure m_pos is not pointing at
+    // garbage by setting it to invalid_index
+    arrayData()->m_pos = ArrayData::invalid_index;
     Variant ret(tvAsCVarRef(&m_data[0]), Variant::CellCopy());
     decSize();
     memmove(m_data, m_data+1, m_size * sizeof(TypedValue));
@@ -632,6 +650,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
     assert(oldAd != staticEmptyArray());
     assert(oldAd->isPacked());
     oldAd->m_size = 0;
+    oldAd->m_pos = ArrayData::invalid_index;
     decRefArr(oldAd);
   } else {
     auto* dst = m_data;
@@ -790,6 +809,9 @@ Object c_Vector::t_append(const Variant& val) {
 Variant c_Vector::t_pop() {
   if (m_size) {
     mutateAndBump();
+    // We're removing an element, so we make sure m_pos is not pointing at
+    // garbage by setting it to invalid_index
+    arrayData()->m_pos = ArrayData::invalid_index;
     decSize();
     return Variant(tvAsCVarRef(&m_data[m_size]), Variant::CellCopy());
   } else {
@@ -839,6 +861,9 @@ void c_Vector::t_resize(const Variant& sz, const Variant& value) {
   ++m_version;
   uint32_t requestedSize = (uint32_t)intSz;
   if (m_size > requestedSize) {
+    // We're removing elements, so we make sure m_pos is not pointing at
+    // garbage by setting it to invalid_index
+    arrayData()->m_pos = ArrayData::invalid_index;
     do {
       decSize();
       tvRefcountedDecRef(&m_data[m_size]);
@@ -917,6 +942,9 @@ Object c_Vector::t_removekey(const Variant& key) {
     return this;
   }
   mutateAndBump();
+  // We're removing an element, so we make sure m_pos is not pointing at
+  // garbage by setting it to invalid_index
+  arrayData()->m_pos = ArrayData::invalid_index;
   uint64_t datum = m_data[k].m_data.num;
   DataType t = m_data[k].m_type;
   if (k+1 < m_size) {
@@ -1000,6 +1028,9 @@ void c_Vector::t_splice(const Variant& offset, const Variant& len /* = null */,
     endPos = sz;
   }
   mutateAndBump();
+  // We're removing elements, so we make sure m_pos is not pointing at
+  // garbage by setting it to invalid_index
+  arrayData()->m_pos = ArrayData::invalid_index;
   // Null out each element before decreffing it. We need to do this in case
   // a __destruct method reenters and accesses this Vector object.
   for (int64_t i = startPos; i < endPos; ++i) {
@@ -1235,7 +1266,7 @@ Object c_Vector::ti_fromarray(const Variant& arr) {
   auto* data = target->m_data;
   ssize_t pos = ad->iter_begin();
   for (uint32_t i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
-    assert(pos != ad->iter_end());
+    assert(pos != ArrayData::invalid_index);
     cellDup(*(ad->getValueRef(pos).asCell()), data[i]);
   }
   return ret;
@@ -1409,6 +1440,7 @@ Variant c_VectorIterator::t_key() {
 }
 
 bool c_VectorIterator::t_valid() {
+  assert(m_pos >= 0);
   BaseVector* vec = m_obj.get();
   return vec && (m_pos < (ssize_t)vec->m_size);
 }
@@ -1553,7 +1585,7 @@ struct HashCollection::EmptyMixedInitializer {
     auto const ad   = static_cast<MixedArray*>(vpEmpty);
     ad->m_kind      = ArrayData::kEmptyKind;
     ad->m_size      = 0;
-    ad->m_pos       = 0;
+    ad->m_pos       = ArrayData::invalid_index;
     ad->m_count     = 0;
     ad->m_used      = 0;
     ad->m_cap       = 0;
@@ -1602,8 +1634,21 @@ Array HashCollection::toArrayImpl() const {
   auto ad = const_cast<ArrayData*>(
     reinterpret_cast<const ArrayData*>(arrayData())
   );
+  // When HashCollection:toArray() returns a non-empty array, we want the
+  // returned array to have its internal cursor pointing at the first element,
+  // so we set m_pos accordingly here. It's safe to write to m_pos even if
+  // ad's refcount is greater than 1 because we know one of the following is
+  // true: either (1) this array has never been exposed outside of the
+  // HashCollection implementation, in which case we know it's not referenced
+  // outside by anything outside the AssoCollection implementation, or (2) this
+  // array has been exposed by the AssoCollection implementation, in which case
+  // m_pos was already set to point to the first element (and COW semantics
+  // ensures that m_pos couldn't have been changed by user code).
   assert(m_size);
-  assert(ad->m_pos == nthElmPos(0));
+  auto firstPos = nthElmPos(0);
+  if (ad->m_pos != firstPos) {
+    ad->m_pos = firstPos;
+  }
   return Array(ad);
 }
 
@@ -1823,7 +1868,10 @@ void HashCollection::eraseNoCompact(ssize_t pos) {
   assert(canMutateBuffer());
   assert(validPos(pos) && !isTombstone(pos));
   assert(m_size > 0);
-  arrayData()->eraseNoCompact(pos);
+  // We're removing an element, so we make sure m_pos is not pointing at
+  // garbage by setting it to invalid_index
+  arrayData()->m_pos = ArrayData::invalid_index;
+  ((MixedArray*)arrayData())->eraseNoCompact(pos);
   --m_size;
 }
 
@@ -1897,7 +1945,7 @@ void HashCollection::resizeHelper(uint32_t newCap) {
   // all the elements (without copying over tombstones).
   auto* ad = (arrayData() == staticEmptyMixedArray()) ?
     reinterpret_cast<MixedArray*>(MixedArray::MakeReserveMixed(newCap)) :
-    MixedArray::CopyReserve(arrayData(), newCap);
+    MixedArray::CopyReserve((MixedArray*)arrayData(), newCap);
   decRefArr(arrayData());
   m_data = mixedData(ad);
   assert(canMutateBuffer());
@@ -1915,7 +1963,7 @@ void HashCollection::grow(uint32_t newCap, uint32_t newMask) {
   if (m_size > 0 && !oldAd->hasMultipleRefs()) {
     // MixedArray::Grow can only handle non-empty cases where the
     // buffer's refcount is 1.
-    m_data = mixedData(MixedArray::Grow(oldAd, newCap, newMask));
+    m_data = mixedData(MixedArray::Grow((MixedArray*)oldAd, newCap, newMask));
     arrayData()->incRefCount();
     decRefArr(oldAd);
   } else {
@@ -1933,7 +1981,7 @@ void HashCollection::compact() {
   if (!arrayData()->hasMultipleRefs()) {
     // MixedArray::compact can only handle cases where the buffer's
     // refcount is 1.
-    arrayData()->compact(false);
+    ((MixedArray*)arrayData())->compact(false);
   } else {
     // For cases where the buffer's refcount is greater than 1, call
     // resizeHelper().
@@ -1987,7 +2035,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
       copyElm(oldBuf[frPos], data[toPos]);
       *findForNewInsert(table, tableMask(), data[toPos].probe()) = toPos;
     }
-    oldAd->setZombie();
+    ((MixedArray*)oldAd)->setZombie();
     decRefArr(oldAd);
   } else {
     // For cases where the buffer's refcount is greater than 1, call
@@ -2004,8 +2052,8 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
   // Move the existing elements to make element slot 0 available.
   memmove(data() + 1, data(), posLimit() * sizeof(Elm));
   incPosLimit();
-  // Update the hashtable to reflect the fact that everything was
-  // moved over one position
+  // Update the hashtable to reflect the fact that everything was moved
+  // over one position
   auto* hash = hashTab();
   auto* hashEnd = hash + hashSize();
   for (; hash != hashEnd; ++hash) {
@@ -2015,11 +2063,8 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
   }
   // Set the hash entry we found to point to element slot 0.
   (*ei) = 0;
-  // Adjust m_pos so that is points at this new first element.
-  arrayData()->m_pos = 0;
-  // Adjust size to reflect that we're adding a new element.
-  incSize();
   // Store the value into element slot 0.
+  ++m_size;
   return data()[0];
 }
 
@@ -2397,7 +2442,7 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
                "Parameter must be a valid callback"));
     throw e;
   }
-  TMap* mp = NEWOBJ(TMap)();
+  auto* mp = NEWOBJ(TMap)();
   Object obj = mp;
   if (!m_size) return obj;
   assert(posLimit() != 0);
@@ -2408,38 +2453,28 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
   );
   mp->setIntLikeStrKeys(intLikeStrKeys());
   wordcpy(mp->hashTab(), hashTab(), hashSize());
-  {
-    uint32_t used = posLimit();
-    int32_t version = m_version;
-    uint32_t i = 0;
-    // When the loop below finishes or when an exception is thrown,
-    // make sure that posLimit() get set to the correct value and
-    // that m_pos gets set to point to the first element.
-    SCOPE_EXIT {
-      mp->setPosLimit(i);
-      mp->arrayData()->m_pos = mp->nthElmPos(0);
-    };
-    for (; i < used; ++i) {
-      const Elm& e = data()[i];
-      Elm& ne = mp->data()[i];
-      if (isTombstone(i)) {
-        ne.data.m_type = e.data.m_type;
-        continue;
-      }
-      TypedValue* tv = &ne.data;
-      auto args = makeArgs(e);
-      g_context->invokeFuncFew(tv, ctx, args.size(), &(args[0]));
-      if (UNLIKELY(version != m_version)) {
-        tvRefcountedDecRef(tv);
-        throw_collection_modified();
-      }
-      if (e.hasStrKey()) {
-        e.skey->incRefCount();
-      }
-      ne.ikey = e.ikey;
-      ne.data.hash() = e.data.hash();
-      mp->incSize();
+  uint32_t used = posLimit();
+  int32_t version = m_version;
+  for (uint32_t i = 0; i < used; ++i, mp->incPosLimit()) {
+    const Elm& e = data()[i];
+    Elm& ne = mp->data()[i];
+    if (isTombstone(i)) {
+      ne.data.m_type = e.data.m_type;
+      continue;
     }
+    TypedValue* tv = &ne.data;
+    auto args = makeArgs(e);
+    g_context->invokeFuncFew(tv, ctx, args.size(), &(args[0]));
+    if (UNLIKELY(version != m_version)) {
+      tvRefcountedDecRef(tv);
+      throw_collection_modified();
+    }
+    if (e.hasStrKey()) {
+      e.skey->incRefCount();
+    }
+    ne.ikey = e.ikey;
+    ne.data.hash() = e.data.hash();
+    mp->incSize();
   }
   return obj;
 }
@@ -3023,8 +3058,7 @@ BaseMap::php_mapFromArray(const Variant& arr) {
   auto* mp = NEWOBJ(TMap)();
   Object ret = mp;
   ArrayData* ad = arr.getArrayData();
-  auto pos_limit = ad->iter_end();
-  for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
+  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
     auto* tv = ad->getValueRef(pos).asCell();
@@ -3343,11 +3377,10 @@ HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
   }
   done:
   setPosLimit(start - data());
-  // The logic above possibly moved elements and tombstones around
-  // within the buffer, so we make sure m_pos is not pointing at
-  // garbage by resetting it. The logic above ensures that the first
-  // slot is not a tombstone, so it's safe to set m_pos to 0.
-  arrayData()->m_pos = 0;
+  // The logic above possibly moved elements and tombstones around within
+  // the buffer, so we make sure m_pos is not pointing at garbage by setting
+  // it to invalid_index
+  arrayData()->m_pos = ArrayData::invalid_index;
   assert(!hasTombstones());
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
@@ -4540,8 +4573,7 @@ BaseSet::php_fromArray(const Variant& arr) {
   ArrayData* ad = arr.getArrayData();
   auto oldCap = st->cap();
   st->reserve(ad->size()); // presume minimum collisions ...
-  ssize_t pos_limit = ad->iter_end();
-  for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
+  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     st->addRaw(ad->getValueRef(pos));
   }
@@ -4567,8 +4599,7 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
     }
     ArrayData* ad = arr.getArrayData();
     st->reserve(st->size() + ad->size()); // presume minimum collisions ...
-    ssize_t pos_limit = ad->iter_end();
-    for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
+    for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
          pos = ad->iter_advance(pos)) {
       st->addRaw(ad->getValueRef(pos));
     }

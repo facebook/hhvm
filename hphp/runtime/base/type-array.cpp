@@ -830,8 +830,7 @@ void Array::SortImpl(std::vector<int> &indices, const Array& source,
   opaque.cmp_func = cmp_func;
   opaque.data = data;
   opaque.positions.reserve(count);
-  auto pos_limit = source->iter_end();
-  for (ssize_t pos = source->iter_begin(); pos != pos_limit;
+  for (ssize_t pos = source->iter_begin(); pos != ArrayData::invalid_index;
        pos = source->iter_advance(pos)) {
     opaque.positions.push_back(pos);
   }
@@ -876,8 +875,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
     opaque.positions.reserve(size);
     const Array& arr = *opaque.array;
     if (!arr.empty()) {
-      auto pos_limit = arr->iter_end();
-      for (ssize_t pos = arr->iter_begin(); pos != pos_limit;
+      for (ssize_t pos = arr->iter_begin(); pos != ArrayData::invalid_index;
            pos = arr->iter_advance(pos)) {
         opaque.positions.push_back(pos);
       }

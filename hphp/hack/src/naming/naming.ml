@@ -502,9 +502,7 @@ module Env = struct
       else begin
         let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
         Errors.error_name_already_bound hhi_root x p p';
-        let y = p, Ident.make x in
-        env := SMap.add x y !env;
-        y
+        p', y
       end
     end
     else

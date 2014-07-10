@@ -117,7 +117,7 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 reg) {
 
 template<typename T>
 inline void
-emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
+emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 reg) {
   PhysRegSaver(a, kGPCallerSaved); // we don't know for sure what's alive
   a.    emitImmReg(datum.m_key, argNumToRegName[0]);
   const TCA addr = (TCA)pthread_getspecific;
@@ -128,7 +128,7 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
     a.    call(reg::rax);
   }
   if (reg != reg::rax) {
-    a.    movq(reg::rax, dest);
+    a.    movq(reg::rax, reg);
   }
 }
 

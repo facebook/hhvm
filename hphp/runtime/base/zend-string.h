@@ -265,11 +265,8 @@ String string_convert_hebrew_string(const String& str, int max_chars_per_line,
  * Calculates and adjusts "start" and "length" according to string's length.
  * This function determines how those two parameters are interpreted in varies
  * substr-related functions.
- *
- * The parameter strict controls whether to disallow the empty sub-string
- * after the end.
  */
-bool string_substr_check(int len, int &f, int &l, bool strict = true);
+bool string_substr_check(int len, int &f, int &l);
 
 /**
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',

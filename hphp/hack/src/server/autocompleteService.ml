@@ -11,12 +11,25 @@
 open Utils
 open Typing_defs
 
+(* Details about functions to be added in json output *)
+type func_param_result = {
+    param_name : string;
+    param_ty   : string;
+  }
+
+type func_details_result = {
+    params    : func_param_result list;
+    return_ty : string;
+    min_arity : int;
+  }
+
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
-    res_pos     : Pos.t;
-    res_ty      : string;
-    res_name    : string;
-    expected_ty : bool;
+    res_pos      : Pos.t;
+    res_ty       : string;
+    res_name     : string;
+    expected_ty  : bool;
+    func_details : func_details_result option;
   }
 
 (* Results that still need a typing environment to convert ty information
@@ -52,6 +65,18 @@ let autocomplete_result_to_json res =
              "char_end",   Hh_json.JInt end_;
            ]
   in
+  let func_param_to_json param =
+    Hh_json.JAssoc [ "name", Hh_json.JString param.param_name;
+                     "type", Hh_json.JString param.param_ty]
+  in
+  let func_details_to_json details =
+    match details with
+     | Some fd -> Hh_json.JAssoc [ "min_arity", Hh_json.JInt fd.min_arity;
+             "return_type", Hh_json.JString fd.return_ty;
+             "params", Hh_json.JList (List.map func_param_to_json fd.params)
+           ]
+     | None -> Hh_json.JNull
+  in
   let name = res.res_name in
   let pos = res.res_pos in
   let ty = res.res_ty in
@@ -59,6 +84,7 @@ let autocomplete_result_to_json res =
   Hh_json.JAssoc [ "name", Hh_json.JString name;
            "type", Hh_json.JString ty;
            "pos", pos_to_json pos;
+           "func_details", func_details_to_json res.func_details;
            "expected_ty", Hh_json.JBool expected_ty;
          ]
 
@@ -309,13 +335,30 @@ let get_results funs classes =
       | Some s -> s
       | None -> Typing_print.full_strip_ns fake_env (x.ty)
     in
+    let func_details = match x.ty with
+      | (_, Tfun ft) -> Some {
+          return_ty = Typing_print.full_strip_ns fake_env ft.ft_ret;
+          min_arity = ft.ft_arity_min;
+          params    = List.map begin fun (name, pty) ->
+            {
+              param_name = (match name with
+                | Some n -> n
+                | None -> ""
+              );
+              param_ty   = Typing_print.full_strip_ns fake_env pty;
+            }
+          end ft.ft_params;
+        }
+      | _ -> None
+    in
     let expected_ty = result_matches_expected_ty x.ty in
     let pos = Typing_reason.to_pos (fst x.ty) in
     {
-      res_pos     = pos;
-      res_ty      = desc_string;
-      res_name    = x.name;
-      expected_ty = expected_ty;
+      res_pos      = pos;
+      res_ty       = desc_string;
+      res_name     = x.name;
+      expected_ty  = expected_ty;
+      func_details = func_details;
     }
   end results in
   List.sort result_compare results

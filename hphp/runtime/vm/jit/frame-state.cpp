@@ -182,11 +182,6 @@ void FrameState::update(const IRInstruction* inst) {
       }
     }
   }
-
-  // Save state for each block at the end.
-  if (inst->isTerminal()) {
-    save(inst->block());
-  }
 }
 
 static const StaticString s_php_errormsg("php_errormsg");

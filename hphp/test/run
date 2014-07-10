@@ -967,7 +967,11 @@ function run_test($options, $test) {
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
 
-  $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
+  if (is_executable('/usr/bin/timeout')) {
+    $hhvm = '/usr/bin/timeout 300 '.$hhvm;
+  } else {
+    $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
+  }
 
   if (isset($options['repo'])) {
     if ($test_ext === 'hhas' ||

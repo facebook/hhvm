@@ -1555,8 +1555,26 @@ class mysqli_stmt {
    *
    * @return bool -
    */
+  public function store_result(): mixed {
+    // First we need to set the MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH attribute in
+    // some cases.
+    $result = $this->result_metadata();
+    $fields = $result->fetch_fields();
+    foreach ($fields as $field) {
+      if ($field->type == MYSQLI_TYPE_BLOB ||
+          $field->type == MYSQLI_TYPE_MEDIUM_BLOB ||
+          $field->type == MYSQLI_TYPE_LONG_BLOB ||
+          $field->type == MYSQLI_TYPE_GEOMETRY) {
+        $this->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1);
+        break;
+      }
+    }
+
+    return $this->hh_store_result();
+  }
+
   <<__Native>>
-  public function store_result(): mixed;
+  public function hh_store_result(): mixed;
 
 }
 

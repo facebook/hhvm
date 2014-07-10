@@ -459,6 +459,20 @@ let hh_arg_info fn line char =
                         "internal_error",   JBool false;
                       ])
 
+let hh_format contents start end_ =
+  let result = Format_hack.region start end_ contents in
+  let error, result, internal_error = match result with
+    | Format_hack.Php_or_decl -> "Php_or_decl", "", false
+    | Format_hack.Parsing_error _ -> "Parsing_error", "", false
+    | Format_hack.Internal_error -> "", "", true
+    | Format_hack.Success s -> "", s, false
+  in
+  output_json (JAssoc [ "error_message", JString error;
+                        "result", JString result;
+                        "internal_error",   JBool internal_error;
+                      ])
+
+
 let (hh_check: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_check
 let (hh_add_file: (string, string -> string -> unit) Js.meth_callback) = Js.wrap_callback hh_add_file
 let (hh_auto_complete: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_auto_complete
@@ -471,6 +485,8 @@ let (hh_find_lvar_refs: (string, string -> int -> int -> Js.js_string Js.t) Js.m
 let (hh_get_method_calls: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_get_method_calls
 let (hh_get_method_name: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_get_method_at_position
 let (hh_arg_info: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_arg_info
+let (hh_format: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_format
+
 
 let export_fun0 f fname =
   Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
@@ -513,3 +529,4 @@ let () = export_fun3 hh_find_lvar_refs "hh_find_lvar_refs" "hh_ide.str[1](x)" "y
 let () = export_fun1 hh_get_method_calls "hh_get_method_calls" "hh_ide.str[1](x)"
 let () = export_fun3 hh_get_method_name "hh_get_method_name" "hh_ide.str[1](x)" "y" "z"
 let () = export_fun3 hh_arg_info "hh_arg_info" "hh_ide.str[1](x)" "y" "z"
+let () = export_fun3 hh_format "hh_format" "hh_ide.str[1](x)" "y" "z"

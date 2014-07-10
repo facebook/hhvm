@@ -193,15 +193,15 @@ private:
 
   bool decRefDestroyIsUnlikely(OptDecRefProfile& profile, Type type);
   template <typename F>
-  Address cgCheckStaticBitAndDecRef(Type type,
+  Address cgCheckStaticBitAndDecRef(Asm& a, Type type,
                                     PhysReg dataReg,
                                     F destroy);
-  Address cgCheckStaticBitAndDecRef(Type type,
+  Address cgCheckStaticBitAndDecRef(Asm& a, Type type,
                                     PhysReg dataReg);
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64_t offset);
-  void cgDecRefStaticType(Type type,
+  void cgDecRefStaticType(Asm& a, Type type,
                           PhysReg dataReg,
                           bool genZeroCheck);
   void cgDecRefDynamicType(PhysReg typeReg,

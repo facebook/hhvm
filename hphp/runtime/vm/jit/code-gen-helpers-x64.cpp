@@ -181,14 +181,14 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
 }
 
 void emitAssertFlagsNonNegative(Asm& as) {
-  ifThen(as, CC_NGE, [&] { as.ud2(); });
+  ifThen(as, CC_NGE, [&](Asm& a) { a.ud2(); });
 }
 
 void emitAssertRefCount(Asm& as, PhysReg base) {
   as.cmpl(HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NLE, [&] {
-    as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
-    ifThen(as, CC_NBE, [&] { as.ud2(); });
+  ifThen(as, CC_NLE, [&](Asm& a) {
+    a.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
+    ifThen(a, CC_NBE, [&](Asm& a) { a.ud2(); });
   });
 }
 

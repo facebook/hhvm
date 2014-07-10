@@ -227,7 +227,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
     if (!(func->attrs() & AttrStatic)) {
       a.shrq(1, rAsm);
-      ifThen(a, CC_NBE, [&] {
+      ifThen(a, CC_NBE, [&](Asm& a) {
         a.shlq(1, rAsm);
         emitIncRefCheckNonStatic(a, rAsm, KindOfObject);
       });

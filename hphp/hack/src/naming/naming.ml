@@ -1381,7 +1381,7 @@ and exprl env l = List.map (expr env) l
 and oexpr env e = opt (expr env) e
 and expr env (p, e) = p, expr_ env e
 and expr_ env = function
-  | Array l -> N.Array (List.map (afield env) l)
+  | Array l -> N.Array (rev_rev_map (afield env) l)
   | Collection (id, l) -> begin
     let p, cn = Namespaces.elaborate_id ((fst env).namespace) id in
     match cn with
@@ -1705,7 +1705,7 @@ and attrl env l = List.map (attr env) l
 and attr env (x, e) = x, expr env e
 
 and string2 env idl =
-  List.rev (List.rev_map (expr env) idl)
+  rev_rev_map (expr env) idl
 
 (*****************************************************************************)
 (* Typedefs *)

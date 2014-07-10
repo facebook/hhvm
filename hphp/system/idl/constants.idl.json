@@ -3090,7 +3090,7 @@
         },
         {
             "name": "PHP_VERSION",
-            "value": "5.5.99-hiphop"
+            "value": "5.6.99-hhvm"
         },
         {
             "name": "PHP_MAJOR_VERSION",
@@ -3098,7 +3098,7 @@
         },
         {
             "name": "PHP_MINOR_VERSION",
-            "value": 5
+            "value": 6
         },
         {
             "name": "PHP_RELEASE_VERSION",
@@ -3106,7 +3106,7 @@
         },
         {
             "name": "PHP_VERSION_ID",
-            "value": 50599
+            "value": 50699
         },
         {
             "name": "PHP_EXTRA_VERSION",

@@ -1,10 +1,10 @@
-string(13) "5.5.99-hiphop"
+string(11) "5.6.99-hhvm"
 string(11) "PHP_VERSION"
 string(1) "c"
 string(1) "B"
 array(1) {
   [0]=>
-  string(13) "5.5.99-hiphop"
+  string(11) "5.6.99-hhvm"
 }
 string(18) "array(PHP_VERSION)"
 array(1) {
@@ -12,13 +12,13 @@ array(1) {
   string(1) "c"
 }
 string(8) "array(B)"
-string(13) "5.5.99-hiphop"
+string(11) "5.6.99-hhvm"
 string(11) "PHP_VERSION"
 string(1) "c"
 string(1) "B"
 array(1) {
   [0]=>
-  string(13) "5.5.99-hiphop"
+  string(11) "5.6.99-hhvm"
 }
 string(18) "array(PHP_VERSION)"
 array(1) {

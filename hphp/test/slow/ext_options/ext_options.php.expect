@@ -16,7 +16,7 @@ bool(false)
 string(8) "50000000"
 string(2) "30"
 string(2) "40"
-string(13) "5.5.99-hiphop"
+string(11) "5.6.99-hhvm"
 string(3) "1.0"
 string(7) "2.2.0b1"
 bool(false)

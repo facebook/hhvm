@@ -3900,8 +3900,11 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
 
-  // Drop reference to this resumable.
+  // Drop reference to this resumable. The reference to the object storing
+  // the frame is implicitly owned by the execution. TakeRef is used to inform
+  // the refcount optimizer about this fact.
   if (resumableObj != nullptr) {
+    gen(TakeRef, resumableObj);
     gen(DecRef, resumableObj);
   }
 

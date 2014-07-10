@@ -579,6 +579,7 @@ O(DecRef,                           ND, S(Gen),                  NNT|E|K|CRc) \
 O(DecRefNZ,                         ND, S(Gen),                        E|CRc) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
                                           C(Int),                  NNT|E|CRc) \
+O(TakeRef,                          ND, S(Gen),                           NF) \
 O(DefLabel,                     DMulti, NA,                                E) \
 O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr) S(FramePtr),  NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
@@ -661,7 +662,7 @@ O(AFWHBlockOn,                      ND, S(FramePtr) S(Obj),            E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
-O(LdResumableArObj,             D(Obj), S(FramePtr),                   C|PRc) \
+O(LdResumableArObj,             D(Obj), S(FramePtr),                       C) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           C(Int)                              \
                                           S(TCA,Nullptr)                      \

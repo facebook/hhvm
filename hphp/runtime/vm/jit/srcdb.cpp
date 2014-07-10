@@ -51,11 +51,13 @@ void IncomingBranch::patch(TCA dest) {
   switch (type()) {
     case Tag::JMP: {
       mcg->backEnd().smashJmp(toSmash(), dest);
+      mcg->getDebugInfo()->recordRelocMap(toSmash(), dest, "Arc-2");
       break;
     }
 
     case Tag::JCC: {
       mcg->backEnd().smashJcc(toSmash(), dest);
+      mcg->getDebugInfo()->recordRelocMap(toSmash(), dest, "Arc-1");
       break;
     }
 

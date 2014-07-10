@@ -987,6 +987,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(Eval ## name, ini, eval[#name], defaultVal);
     EVALFLAGS()
 #undef F
+    if (EvalPerfRelocate > 0) {
+      setRelocateRequests(EvalPerfRelocate);
+    }
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),

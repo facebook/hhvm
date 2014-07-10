@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/atomic-vector.h"
@@ -58,6 +59,11 @@ static int64_t numRequests;
 bool __thread standardRequest = true;
 static std::atomic<bool> singleJitLock;
 static std::atomic<int> singleJitRequests;
+static std::atomic<int> relocateRequests;
+
+void setRelocateRequests(int32_t n) {
+  relocateRequests.store(n);
+}
 
 namespace {
 
@@ -190,6 +196,10 @@ void profileRequestStart() {
     if (!ThreadInfo::s_threadInfo.isNull()) {
       ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
     }
+  }
+
+  if (standardRequest && relocateRequests > 0 && !--relocateRequests) {
+    jit::mcg->liveRelocate(true);
   }
 }
 

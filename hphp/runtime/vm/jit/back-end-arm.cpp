@@ -172,6 +172,10 @@ struct BackEnd : public jit::BackEnd {
     return arm::emitServiceReqWork(cb, start, flags, req, argv);
   }
 
+  size_t reusableStubSize() const override {
+    return arm::reusableStubSize();
+  }
+
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
                      SrcKey sk) override {
     if (RuntimeOption::EvalJitTransCounters) {

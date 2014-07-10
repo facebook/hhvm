@@ -125,6 +125,8 @@ struct IncomingBranch {
     ADDR,
   };
 
+  using Opaque = CompactTaggedPtr<void>::Opaque;
+
   static IncomingBranch jmpFrom(TCA from) {
     return IncomingBranch(Tag::JMP, from);
   }
@@ -134,6 +136,11 @@ struct IncomingBranch {
   static IncomingBranch addr(TCA* from) {
     return IncomingBranch(Tag::ADDR, TCA(from));
   }
+
+  Opaque getOpaque() const {
+    return m_ptr.getOpaque();
+  }
+  explicit IncomingBranch(CompactTaggedPtr<void>::Opaque v) : m_ptr(v) {}
 
   Tag type()        const { return m_ptr.tag(); }
   TCA toSmash()     const { return TCA(m_ptr.ptr()); }

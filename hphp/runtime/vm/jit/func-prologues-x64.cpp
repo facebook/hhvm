@@ -366,6 +366,16 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
     }
     emitBindJ(mainCode, frozenCode, CC_None, SrcKey(func, func->base(), false));
   }
+  if (RuntimeOption::EvalPerfRelocate) {
+    GrowableVector<IncomingBranch> incomingBranches;
+    SrcKey sk = SrcKey(func, dvs[0].second, false);
+    mcg->recordPerfRelocMap(start, mainCode.frontier(),
+                            frozenCode.frontier(), frozenCode.frontier(),
+                            sk, 0,
+                            incomingBranches,
+                            mcg->cgFixups());
+  }
+
   mcg->cgFixups().process(nullptr);
   return start;
 }

@@ -43,6 +43,8 @@ namespace x64 {
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
 
+size_t reusableStubSize();
+
 /*
  * "cb" may be either the main section or frozen section.
  */

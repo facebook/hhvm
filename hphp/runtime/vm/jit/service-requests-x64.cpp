@@ -125,6 +125,10 @@ void padStub(CodeBlock& stub) {
 
 //////////////////////////////////////////////////////////////////////
 
+size_t reusableStubSize() {
+  return maxStubSpace();
+}
+
 void
 emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
                    const ServiceReqArgVec& argv) {

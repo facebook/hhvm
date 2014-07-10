@@ -27,30 +27,25 @@ TRACE_SET_MOD(ustubs);
 //////////////////////////////////////////////////////////////////////
 
 TCA UniqueStubs::add(const char* name, TCA start) {
-  auto const inACold = start > mcg->code.cold().base();
-  UNUSED auto const stop = inACold ? mcg->code.cold().frontier()
-    : mcg->code.main().frontier();
+  auto& cb = mcg->code.blockFor(start);
 
-  FTRACE(1, "unique stub: {} {} -- {:4} bytes: {}\n",
-         inACold ? "acold @ "
-         : "  ahot @  ",
+  FTRACE(1, "unique stub: {} @ {} -- {:4} bytes: {}\n",
+         cb.name(),
          static_cast<void*>(start),
-         static_cast<size_t>(stop - start),
+         static_cast<size_t>(cb.frontier() - start),
          name);
 
   ONTRACE(2,
           [&]{
             Disasm dasm(Disasm::Options().indent(4));
             std::ostringstream os;
-            dasm.disasm(os, start, stop);
+            dasm.disasm(os, start, cb.frontier());
             FTRACE(2, "{}\n", os.str());
           }()
          );
 
   mcg->recordGdbStub(
-    mcg->code.blockFor(start),
-    start,
-    strdup(folly::format("HHVM::{}", name).str().c_str())
+    cb, start, strdup(folly::sformat("HHVM::{}", name).c_str())
   );
   return start;
 }

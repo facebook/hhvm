@@ -467,15 +467,10 @@ MCGenerator::translate(const TranslArgs& args) {
   Func* func = const_cast<Func*>(args.m_sk.func());
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
                             .profile(m_tx.mode() == TransKind::Profile)
-                            .hot((func->attrs() & AttrHot) && m_tx.useAHot()));
+                            .hot(RuntimeOption::EvalHotFuncCount &&
+                                 (func->attrs() & AttrHot) && m_tx.useAHot()));
 
-  if (args.m_align) {
-    mcg->backEnd().moveToAlign(code.main(),
-                               MoveToAlignFlags::kNonFallthroughAlign);
-  }
-
-  TCA start = code.main().frontier();
-  translateWork(args);
+  auto start = translateWork(args);
 
   if (args.m_setFuncBody) {
     func->setFuncBody(start);
@@ -631,14 +626,18 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
 
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
                             .profile(m_tx.mode() == TransKind::Proflogue)
-                            .hot((func->attrs() & AttrHot) && m_tx.useAHot()));
+                            .hot(RuntimeOption::EvalHotFuncCount &&
+                                 (func->attrs() & AttrHot) && m_tx.useAHot()));
 
+  assert(m_fixups.empty());
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
   if (((uintptr_t)code.main().frontier() & backEnd().cacheLineMask()) >=
       (backEnd().cacheLineSize() / 2)) {
     backEnd().moveToAlign(code.main(), MoveToAlignFlags::kCacheLineAlign);
   }
+  m_fixups.m_alignFixups.emplace(
+    code.main().frontier(), std::make_pair(backEnd().cacheLineSize() / 2, 0));
 
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
   // prologues, this is just a possible prologue.
@@ -647,14 +646,9 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   TCA realColdStart   = mcg->code.realCold().frontier();
   TCA realFrozenStart = mcg->code.realFrozen().frontier();
 
-  auto const skFuncBody = [&] {
-    assert(m_fixups.empty());
-    auto ret = backEnd().emitFuncPrologue(code.main(), code.cold(), func,
-                                          funcIsMagic, nPassed,
-                                          start, aStart);
-    m_fixups.process(nullptr);
-    return ret;
-  }();
+  auto const skFuncBody = backEnd().emitFuncPrologue(
+    code.main(), code.cold(), func, funcIsMagic, nPassed, start, aStart);
+  m_fixups.process(nullptr);
 
   assert(backEnd().funcPrologueHasGuard(start, func));
   TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
@@ -922,11 +916,13 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   }
 
   TCA stub = emitEphemeralServiceReq(code.frozen(),
-                                     getFreeStub(code.frozen(), nullptr),
+                                     getFreeStub(code.frozen(),
+                                                 &mcg->cgFixups()),
                                      REQ_BIND_JMPCC_SECOND,
                                      RipRelative(toSmash),
                                      offWillDefer, cc);
 
+  mcg->cgFixups().process(nullptr);
   smashed = true;
   assert(Translator::WriteLease().amOwner());
   /*
@@ -1381,13 +1377,13 @@ TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
     always_assert(m_freeStubs.m_list == nullptr ||
                   code.isValidCodeAddress(TCA(m_freeStubs.m_list)));
     TRACE(1, "recycle stub %p\n", ret);
-    if (fixups) {
-      fixups->m_reusedStubs.emplace_back(ret);
-    }
   } else {
     ret = frozen.frontier();
     Stats::inc(Stats::Astub_New);
     TRACE(1, "alloc new stub %p\n", ret);
+  }
+  if (fixups) {
+    fixups->m_reusedStubs.emplace_back(ret);
   }
   return ret;
 }
@@ -1530,7 +1526,8 @@ template <typename T> void ClearContainer(T& container) {
 }
 
 void
-CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
+CodeGenFixups::process_only(
+  GrowableVector<IncomingBranch>* inProgressTailBranches) {
   for (uint i = 0; i < m_pendingFixups.size(); i++) {
     TCA tca = m_pendingFixups[i].m_tca;
     assert(mcg->isValidCodeAddress(tca));
@@ -1555,21 +1552,6 @@ CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
     m_inProgressTailJumps.swap(*inProgressTailBranches);
   }
   assert(m_inProgressTailJumps.empty());
-
-  /*
-   * Currently these are only used by the relocator,
-   * so there's nothing left to do here.
-   *
-   * Once we try to relocate live code, we'll need to
-   * store compact forms of these for later.
-   */
-  ClearContainer(m_reusedStubs);
-  ClearContainer(m_addressImmediates);
-  ClearContainer(m_codePointers);
-  ClearContainer(m_bcMap);
-  ClearContainer(m_alignFixups);
-
-  assert(empty());
 }
 
 void CodeGenFixups::clear() {
@@ -1599,13 +1581,18 @@ bool CodeGenFixups::empty() const {
     m_literals.empty();
 }
 
-void
+TCA
 MCGenerator::translateWork(const TranslArgs& args) {
   Timer _t(Timer::translate);
   auto sk = args.m_sk;
 
   SKTRACE(1, sk, "translateWork\n");
   assert(m_tx.getSrcDB().find(sk));
+
+  if (args.m_align) {
+    mcg->backEnd().moveToAlign(code.main(),
+                               MoveToAlignFlags::kNonFallthroughAlign);
+  }
 
   TCA        start             = code.main().frontier();
   TCA        coldStart         = code.cold().frontier();
@@ -1752,7 +1739,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   if (args.m_dryRun) {
     resetState();
-    return;
+    return start;
   }
 
   if (transKindToRecord == TransKind::Interp) {
@@ -1760,6 +1747,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
     FTRACE(1, "emitting dispatchBB interp request for failed translation\n");
     backEnd().emitInterpReq(code.main(), code.cold(), sk);
     // Fall through.
+  }
+
+  if (args.m_align) {
+    m_fixups.m_alignFixups.emplace(
+      start, std::make_pair(backEnd().cacheLineSize() - 1, 0));
   }
 
   if (RuntimeOption::EvalProfileBC) {
@@ -1816,6 +1808,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease("%s", getUsageString().c_str());
   }
+
+  return start;
 }
 
 void MCGenerator::traceCodeGen() {

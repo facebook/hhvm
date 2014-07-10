@@ -649,8 +649,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
   // This is under the printir tracemod because it mostly shows you IR and
   // machine code, not vasm and machine code (not implemented).
-  bool shouldUpdateAsmInfo = !!m_asmInfo
-    && Trace::moduleEnabledRelease(HPHP::Trace::printir, kCodeGenLevel);
+  bool shouldUpdateAsmInfo = !!m_asmInfo;
 
   std::vector<TransBCMapping>* bcmap = nullptr;
   if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {

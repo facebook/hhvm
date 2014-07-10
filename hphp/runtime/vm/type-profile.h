@@ -72,6 +72,7 @@ inline bool isStandardRequest() {
   return standardRequest;
 }
 
+void setRelocateRequests(int32_t n);
 //////////////////////////////////////////////////////////////////////
 
 }

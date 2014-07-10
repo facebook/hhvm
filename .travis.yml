@@ -14,6 +14,8 @@ services:
 
 # Commands before installing prerequisites
 before_script:
+# we can't compile with this system version
+  - time sudo apt-get remove libsqlite3-dev
   - time TRAVIS=1 ./configure_generic.sh -DENABLE_COTIRE=ON
 # for some tests
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR

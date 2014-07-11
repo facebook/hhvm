@@ -219,6 +219,8 @@ void RequestInjectionData::threadInit() {
 
   // Filesystem and Streams Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "user_agent", "", &m_userAgent);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_socket_timeout",
                    std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
                    &m_socketDefaultTimeout);

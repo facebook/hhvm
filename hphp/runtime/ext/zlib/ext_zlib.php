@@ -361,7 +361,7 @@ function nzuncompress(string $compressed): mixed;
  * @return string - The compressed data, or FALSE on error
  */
 <<__Native, __HipHopSpecific>>
-function lz4compress(string $uncompressed): mixed;
+function lz4_compress(string $uncompressed): mixed;
 
 /**
  * This function compresses the given string using the lz4lib data format, which
@@ -372,7 +372,7 @@ function lz4compress(string $uncompressed): mixed;
  * @return string - The compressed data, or FALSE on error
  */
 <<__Native, __HipHopSpecific>>
-function lz4hccompress(string $uncompressed): mixed;
+function lz4_hccompress(string $uncompressed): mixed;
 
 /**
  * This function uncompresses the given string given that it is in the lz4lib
@@ -384,7 +384,7 @@ function lz4hccompress(string $uncompressed): mixed;
  * @return string - The uncompressed data or FALSE on error
  */
 <<__Native, __HipHopSpecific>>
-function lz4uncompress(string $compressed): mixed;
+function lz4_uncompress(string $compressed): mixed;
 
 /**
  * Implementation detail for zlib.inflate stream filter.

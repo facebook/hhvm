@@ -622,7 +622,7 @@ int VarintDecode(const char** src, int max_size) {
   return val;
 }
 
-Variant HHVM_FUNCTION(lz4compress, const String& uncompressed) {
+Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed) {
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
@@ -644,7 +644,7 @@ Variant HHVM_FUNCTION(lz4compress, const String& uncompressed) {
   return s;
 }
 
-Variant HHVM_FUNCTION(lz4hccompress, const String& uncompressed) {
+Variant HHVM_FUNCTION(lz4_hccompress, const String& uncompressed) {
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
@@ -666,7 +666,7 @@ Variant HHVM_FUNCTION(lz4hccompress, const String& uncompressed) {
   return s;
 }
 
-Variant HHVM_FUNCTION(lz4uncompress, const String& compressed) {
+Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
   const char* compressed_ptr = compressed.data();
   int dsize = VarintDecode(&compressed_ptr, compressed.size());
   if (dsize < 0) {
@@ -819,9 +819,9 @@ class ZlibExtension : public Extension {
 #endif
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);
-    HHVM_FE(lz4compress);
-    HHVM_FE(lz4hccompress);
-    HHVM_FE(lz4uncompress);
+    HHVM_FE(lz4_compress);
+    HHVM_FE(lz4_hccompress);
+    HHVM_FE(lz4_uncompress);
 
     HHVM_ME(__SystemLib_ChunkedInflator, eof);
     HHVM_ME(__SystemLib_ChunkedInflator, inflateChunk);

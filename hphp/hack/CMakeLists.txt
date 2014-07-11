@@ -19,6 +19,11 @@ if (OCAMLC_FOUND)
     list(APPEND hackcflags -ccopt -L${pth} -cclib -l${libname})
   endforeach()
 
+  # Xcode/Ninja generators undefined MAKE
+  if(NOT MAKE)
+    set(MAKE make)
+  endif()
+
   add_custom_target(
     hack
     ALL

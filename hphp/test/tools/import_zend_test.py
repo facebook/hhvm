@@ -974,7 +974,7 @@ def walk(filename, dest_subdir):
 
         file(full_dest_filename + '.skipif', 'w').write(skipif)
 
-    test = sections['FILE']
+    test = sections['FILE'] + "\n"
 
     if 'POST' in sections:
         test = test.replace(

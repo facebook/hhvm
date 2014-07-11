@@ -361,7 +361,7 @@ function nzuncompress(string $compressed): mixed;
  * @return string - The compressed data, or FALSE on error
  */
 <<__Native, __HipHopSpecific>>
-function lz4_compress(string $uncompressed): mixed;
+function lz4_compress(string $uncompressed, bool $high = false): mixed;
 
 /**
  * This function compresses the given string using the lz4lib data format, which

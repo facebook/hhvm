@@ -623,6 +623,9 @@ int VarintDecode(const char** src, int max_size) {
 }
 
 Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed, bool high /* = false */) {
+  if(high) {
+	return f_lz4_hccompress(uncompressed);
+  }
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
@@ -634,14 +637,8 @@ Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed, bool high /* = f
 
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
-  int csize = 0;
-
-  if(high) {
-	  csize = LZ4_compressHC(uncompressed.data(), compressed, uncompressed.size());
-  } else {
-	  csize = LZ4_compress(uncompressed.data(), compressed, uncompressed.size());
-  }
-
+  int csize = LZ4_compress(uncompressed.data(),
+      compressed, uncompressed.size());
   if (csize < 0) {
     return false;
   }

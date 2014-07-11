@@ -333,8 +333,7 @@ private:
                             const TCA start,
                             bool exit, bool inPrologue);
 
-  void recordBCInstr(uint32_t op, const CodeBlock& cb,
-                     const TCA addr, bool cold);
+  void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 
   /*
    * TC dump helpers

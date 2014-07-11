@@ -642,7 +642,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   recordGdbTranslation(skFuncBody, func,
                        code.main(), aStart,
                        false, true);
-  recordBCInstr(OpFuncPrologue, code.main(), start, false);
+  recordBCInstr(OpFuncPrologue, aStart, code.main().frontier(), false);
 
   return start;
 }
@@ -1705,6 +1705,23 @@ MCGenerator::translateWork(const TranslArgs& args) {
     // Fall through.
   }
 
+  if (RuntimeOption::EvalProfileBC) {
+    auto* unit = sk.unit();
+    TransBCMapping prev{};
+    for (auto& cur : m_fixups.m_bcMap) {
+      if (!cur.aStart) continue;
+      if (prev.aStart) {
+        if (prev.bcStart < unit->bclen()) {
+          recordBCInstr(unit->entry()[prev.bcStart],
+                        prev.aStart, cur.aStart, false);
+        }
+      } else {
+        recordBCInstr(OpTraceletGuard, start, cur.aStart, false);
+      }
+      prev = cur;
+    }
+  }
+
   recordGdbTranslation(sk, sk.func(), code.main(), start,
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), coldStart,
@@ -1765,7 +1782,6 @@ void MCGenerator::traceCodeGen() {
     unit.collectPostConditions();
   }
 
-  recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier(), false);
   always_assert(this == mcg);
   genCode(unit);
 
@@ -1890,12 +1906,12 @@ static Debug::TCRange rangeFrom(const CodeBlock& cb, const TCA addr,
 }
 
 void MCGenerator::recordBCInstr(uint32_t op,
-                                const CodeBlock& cb,
                                 const TCA addr,
+                                const TCA end,
                                 bool cold) {
-  if (addr != cb.frontier()) {
-    m_debugInfo.recordBCInstr(Debug::TCRange(addr, cb.frontier(),
-                                             cold), op);
+  if (addr != end) {
+    m_debugInfo.recordBCInstr(
+      Debug::TCRange(addr, end, cold), op);
   }
 }
 

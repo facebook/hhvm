@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-helpers.h"
 #include "hphp/runtime/base/execution-context.h"
 
 /*

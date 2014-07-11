@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP {

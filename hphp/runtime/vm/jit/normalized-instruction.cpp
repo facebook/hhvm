@@ -13,12 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
+///////////////////////////////////////////////////////////////////////////////
 
 NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
     : source(sk)
@@ -89,4 +91,26 @@ SrcKey NormalizedInstruction::nextSk() const {
   return source.advanced(m_unit);
 }
 
-} } // HPHP::JIT
+///////////////////////////////////////////////////////////////////////////////
+
+void populateImmediates(NormalizedInstruction& inst) {
+  auto offset = 1;
+  for (int i = 0; i < numImmediates(inst.op()); ++i) {
+    if (immType(inst.op(), i) == RATA) {
+      auto rataPc = inst.pc() + offset;
+      inst.imm[i].u_RATA = decodeRAT(inst.unit(), rataPc);
+    } else {
+      inst.imm[i] = getImm(reinterpret_cast<const Op*>(inst.pc()), i);
+    }
+    offset += immSize(reinterpret_cast<const Op*>(inst.pc()), i);
+  }
+  if (hasImmVector(*reinterpret_cast<const Op*>(inst.pc()))) {
+    inst.immVec = getImmVector(reinterpret_cast<const Op*>(inst.pc()));
+  }
+  if (inst.op() == OpFCallArray) {
+    inst.imm[0].u_IVA = 1;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}}

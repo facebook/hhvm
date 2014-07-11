@@ -20,6 +20,7 @@
 
 namespace HPHP { namespace JIT {
 ///////////////////////////////////////////////////////////////////////////////
+// Translator accessors.
 
 inline JIT::IRTranslator* Translator::irTrans() const {
   return m_irTrans.get();
@@ -41,6 +42,7 @@ inline SrcRec* Translator::getSrcRec(const SrcKey& sk) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Translator configuration.
 
 inline TransKind Translator::mode() const {
   return m_mode;
@@ -59,6 +61,7 @@ inline void Translator::setUseAHot(bool val) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// TransDB.
 
 inline bool Translator::isTransDBEnabled() {
   return debug || RuntimeOption::EvalDumpTC;
@@ -92,6 +95,103 @@ inline TransID Translator::getCurrentTransID() const {
 
 inline Lease& Translator::WriteLease() {
   return s_writeLease;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Control flow information.
+
+inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
+  switch (op) {
+    case Op::Jmp:
+    case Op::JmpNS:
+    case Op::JmpZ:
+    case Op::JmpNZ:
+    case Op::Switch:
+    case Op::SSwitch:
+    case Op::CreateCont:
+    case Op::Yield:
+    case Op::YieldK:
+    case Op::Await:
+    case Op::RetC:
+    case Op::RetV:
+    case Op::Exit:
+    case Op::Fatal:
+    case Op::IterNext:
+    case Op::IterNextK:
+    case Op::MIterNext:
+    case Op::MIterNextK:
+    case Op::WIterNext:
+    case Op::WIterNextK:
+    case Op::IterInit: // May branch to fail case.
+    case Op::IterInitK: // Ditto
+    case Op::MIterInit: // Ditto
+    case Op::MIterInitK: // Ditto
+    case Op::WIterInit: // Ditto
+    case Op::WIterInitK: // Ditto
+    case Op::DecodeCufIter: // Ditto
+    case Op::IterBreak:
+    case Op::Throw:
+    case Op::Unwind:
+    case Op::Eval:
+    case Op::NativeImpl:
+    case Op::BreakTraceHint:
+      return ControlFlowInfo::BreaksBB;
+    case Op::FCall:
+    case Op::FCallD:
+    case Op::FCallArray:
+    case Op::FCallUnpack:
+    case Op::ContEnter:
+    case Op::ContRaise:
+    case Op::Incl:
+    case Op::InclOnce:
+    case Op::Req:
+    case Op::ReqOnce:
+    case Op::ReqDoc:
+      return ControlFlowInfo::ChangesPC;
+    default:
+      return ControlFlowInfo::None;
+  }
+}
+
+inline bool opcodeChangesPC(const Op op) {
+  return opcodeControlFlowInfo(op) >= ControlFlowInfo::ChangesPC;
+}
+
+inline bool opcodeBreaksBB(const Op op) {
+  return opcodeControlFlowInfo(op) == ControlFlowInfo::BreaksBB;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Input and output information.
+
+inline std::string InputInfo::pretty() const {
+  std::string p = loc.pretty();
+  if (dontBreak) p += ":dc";
+  if (dontGuard) p += ":dg";
+  if (dontGuardInner) p += ":dgi";
+  return p;
+}
+
+inline std::string InputInfoVec::pretty() const {
+  std::string retval;
+  for (size_t i = 0; i < size(); i++) {
+    retval += (*this)[i].pretty();
+    if (i != size() - 1) {
+      retval += std::string(" ");
+    }
+  }
+  return retval;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// InstrFlags.
+
+namespace InstrFlags {
+
+inline Operands operator|(const Operands& l, const Operands& r) {
+  return Operands(int(r) | int(l));
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@
 #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
 
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/util/trace.h"

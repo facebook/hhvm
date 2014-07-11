@@ -23,8 +23,9 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
-#include "hphp/runtime/vm/jit/write-lease.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 
 namespace HPHP { namespace JIT { namespace X64 {
 

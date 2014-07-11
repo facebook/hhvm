@@ -19,6 +19,7 @@
 
 #include "folly/MapUtil.h"
 
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP {

@@ -14,9 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
-#include <limits>
 #include "hphp/runtime/vm/jit/translator-inline.h"
+
+#include <limits>
 
 namespace HPHP {
 namespace JIT {

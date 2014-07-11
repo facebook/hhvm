@@ -1,0 +1,2 @@
+<?php
+if (!file_exists('/dev/zero')) print "skip";

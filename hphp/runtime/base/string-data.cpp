@@ -19,19 +19,21 @@
 #include <cmath>
 #include <utility>
 
-#include "hphp/runtime/base/apc-string.h"
-#include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/safe-cast.h"
+#include "hphp/util/stacktrace-profiler.h"
+
+#include "hphp/runtime/base/apc-string.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-strtod.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
 
@@ -39,27 +41,22 @@ namespace HPHP {
 
 namespace {
 
-NEVER_INLINE void throw_string_too_large2(size_t len);
-NEVER_INLINE void throw_string_too_large2(size_t len) {
+NEVER_INLINE void throw_string_too_large(size_t len);
+NEVER_INLINE void throw_string_too_large(size_t len) {
   raise_error("String length exceeded 2^31-2: %zu", len);
 }
 
-NEVER_INLINE void throw_string_too_large(uint32_t len);
-NEVER_INLINE void throw_string_too_large(uint32_t len) {
-  throw_string_too_large2(size_t{len});
-}
-
 ALWAYS_INLINE
-std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
-  auto const needed = static_cast<uint32_t>(sizeof(StringData) + len + 1);
+std::pair<StringData*,uint32_t> allocFlatForLen(size_t len) {
+  if (UNLIKELY(len > StringData::MaxSize)) {
+    throw_string_too_large(len);
+  }
+
+  auto const needed = safe_cast<uint32_t>(sizeof(StringData) + len + 1);
   if (LIKELY(needed <= kMaxSmartSize)) {
     auto const cap = MemoryManager::smartSizeClass(needed);
     auto const sd  = static_cast<StringData*>(MM().smartMallocSizeLogged(cap));
     return std::make_pair(sd, cap);
-  }
-
-  if (UNLIKELY(needed > StringData::MaxSize + sizeof(StringData) + 1)) {
-    throw_string_too_large(len);
   }
 
   auto const cap = needed;
@@ -215,12 +212,16 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   return ret;
 }
 
-StringData* StringData::Make(const char* data, CopyStringMode) {
-  return Make(StringSlice(data, strlen(data)), CopyString);
+StringData* StringData::Make(const char* data, size_t len, CopyStringMode) {
+  if (UNLIKELY(len > StringData::MaxSize)) {
+    throw_string_too_large(len);
+  }
+
+  return Make(StringSlice(data, len), CopyString);
 }
 
-StringData* StringData::MakeMalloced(const char* data, int len) {
-  if (UNLIKELY(uint32_t(len) > MaxSize)) {
+StringData* StringData::MakeMalloced(const char* data, size_t len) {
+  if (UNLIKELY(len > MaxSize)) {
     throw_string_too_large(len);
   }
 
@@ -248,7 +249,7 @@ StringData* StringData::MakeMalloced(const char* data, int len) {
   return ret;
 }
 
-StringData* StringData::Make(int reserveLen) {
+StringData* StringData::Make(size_t reserveLen) {
   auto const allocRet = allocFlatForLen(reserveLen);
   auto const sd       = allocRet.first;
   auto const cap      = allocRet.second;
@@ -265,6 +266,16 @@ StringData* StringData::Make(int reserveLen) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+StringData* StringData::Make(char* data, size_t len, AttachStringMode) {
+  if (UNLIKELY(len > StringData::MaxSize)) {
+    throw_string_too_large(len);
+  }
+  auto const sd = Make(StringSlice(data, len), CopyString);
+  free(data);
+  assert(sd->checkSane());
+  return sd;
+}
 
 StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const len      = r1.len + r2.len;
@@ -377,7 +388,7 @@ StringData* StringData::append(StringSlice range) {
     throw_string_too_large(len);
   }
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
-    throw_string_too_large2(size_t(len) + size_t(m_len));
+    throw_string_too_large(size_t(len) + size_t(m_len));
   }
 
   auto const newLen = m_len + len;
@@ -416,7 +427,7 @@ StringData* StringData::append(StringSlice r1, StringSlice r2) {
     throw_string_too_large(len);
   }
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
-    throw_string_too_large2(size_t(len) + size_t(m_len));
+    throw_string_too_large(size_t(len) + size_t(m_len));
   }
 
   auto const newLen = m_len + len;
@@ -460,7 +471,7 @@ StringData* StringData::append(StringSlice r1,
     throw_string_too_large(len);
   }
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
-    throw_string_too_large2(size_t(len) + size_t(m_len));
+    throw_string_too_large(size_t(len) + size_t(m_len));
   }
 
   auto const newLen = m_len + len;
@@ -498,7 +509,7 @@ StringData* StringData::append(StringSlice r1,
 
 //////////////////////////////////////////////////////////////////////
 
-StringData* StringData::reserve(int cap) {
+StringData* StringData::reserve(size_t cap) {
   assert(!isImmutable() && !hasMultipleRefs() && cap >= 0);
   assert(isFlat());
 
@@ -521,7 +532,7 @@ StringData* StringData::reserve(int cap) {
   return ret;
 }
 
-StringData* StringData::shrink(int len) {
+StringData* StringData::shrink(size_t len) {
   assert(!isImmutable() && !hasMultipleRefs() && len >= 0);
   assert(isFlat());
   assert(len <= m_len);
@@ -543,7 +554,7 @@ StringData* StringData::shrink(int len) {
 }
 
 // State transition from Mode::Shared to Mode::Flat.
-StringData* StringData::escalate(uint32_t cap) {
+StringData* StringData::escalate(size_t cap) {
   assert(isShared() && !isStatic() && cap >= m_len);
 
   auto const sd = Make(cap);

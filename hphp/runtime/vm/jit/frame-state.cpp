@@ -423,9 +423,11 @@ void FrameState::dropLocalRefsInnerTypes(LocalStateHook& hook) const {
 
 ///// Methods for managing and merge block state /////
 void FrameState::startBlock(Block* block) {
-  auto it = m_snapshots.find(block);
-  assert(IMPLIES(block->numPreds() > 0,
-                 it != m_snapshots.end() || RuntimeOption::EvalJitLoops));
+  auto const it = m_snapshots.find(block);
+  DEBUG_ONLY auto const predsAllowed =
+    it != m_snapshots.end() || block->isEntry() || RuntimeOption::EvalJitLoops;
+  assert(IMPLIES(block->numPreds() > 0, predsAllowed));
+
   if (it != m_snapshots.end()) {
     load(it->second);
     ITRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));

@@ -160,6 +160,10 @@ inline const TypedValue* ArrayData::nvGet(int64_t ikey) const {
   return g_array_funcs.nvGetInt[m_kind](this, ikey);
 }
 
+inline const TypedValue* ArrayData::nvGetConverted(int64_t ikey) const {
+  return g_array_funcs.nvGetIntConverted[m_kind](this, ikey);
+}
+
 inline const TypedValue* ArrayData::nvGet(const StringData* skey) const {
   return g_array_funcs.nvGetStr[m_kind](this, skey);
 }

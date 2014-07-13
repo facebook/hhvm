@@ -167,7 +167,7 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   int64_t n;
   auto const result = !key->isStrictlyInteger(n) ? base->nvGet(key)
-                                                 : base->nvGet(n);
+                                                 : base->nvGetConverted(n);
   return result ? result : null_variant.asTypedValue();
 }
 

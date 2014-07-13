@@ -441,7 +441,7 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ?
-         getDefaultIfNullCell(a->nvGet(i), def) :
+         getDefaultIfNullCell(a->nvGetConverted(i), def) :
          getDefaultIfNullCell(a->nvGet(key), def);
 }
 

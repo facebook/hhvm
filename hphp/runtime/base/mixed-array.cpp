@@ -1691,6 +1691,12 @@ const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
+const TypedValue* MixedArray::NvGetIntConverted(const ArrayData* ad,
+                                                int64_t ki) {
+  MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+  return NvGetInt(ad, ki);
+}
+
 const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
                                        const StringData* k) {
   return NvGetStrImpl<kMixedKind>(ad, k);

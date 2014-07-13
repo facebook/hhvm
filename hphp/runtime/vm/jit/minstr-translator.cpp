@@ -1214,7 +1214,9 @@ static const TypedValue* elemArrayNotFound(const StringData* k) {
 
 static inline const TypedValue* checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) : a->nvGet(key);
+  return UNLIKELY(key->isStrictlyInteger(i))
+    ? a->nvGetConverted(i)
+    : a->nvGet(key);
 }
 
 static inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {

@@ -163,6 +163,24 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetInt)
 
   /*
+   * const TypedValue* NvGetIntConverted(const ArrayData*, int64_t key)
+   *
+   *   Lookup a value in an array using an integer key. Signifies that the key
+   *   was originally a numeric-string key that was converted to int.
+   *   Returns nullptr if the key is not in the array.
+   */
+  {
+    PackedArray::NvGetInt,
+    MixedArray::NvGetInt,
+    APCLocalArray::NvGetInt,
+    EmptyArray::NvGetInt,
+    NameValueTableWrapper::NvGetInt,
+    ProxyArray::NvGetInt,
+    /* IntMapArray */
+    MixedArray::NvGetIntConverted
+  },
+
+  /*
    * const TypedValue* NvGetStr(const ArrayData*, const StringData*)
    *
    *   Lookup a value in an array using a string key.  The string key

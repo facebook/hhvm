@@ -327,7 +327,7 @@ let get_results funs classes =
     let func_details = match x.ty with
       | (_, Tfun ft) -> Some {
           return_ty = Typing_print.full_strip_ns fake_env ft.ft_ret;
-          min_arity = ft.ft_arity_min;
+          min_arity = arity_min ft.ft_arity;
           params    = List.map begin fun (name, pty) ->
             {
               param_name = (match name with

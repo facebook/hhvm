@@ -163,15 +163,13 @@ let has_type env x =
 let make_ft env p params ret_ty =
   let arity = List.length params in
   {
-    ft_pos         = p;
-    ft_unsafe      = false;
-    ft_abstract    = false;
-    ft_variadicity = Nast.FVnonVariadic;
-    ft_arity_min   = arity;
-    ft_arity_max   = arity;
-    ft_tparams     = [];
-    ft_params      = params;
-    ft_ret         = ret_ty;
+    ft_pos      = p;
+    ft_unsafe   = false;
+    ft_abstract = false;
+    ft_arity    = Fstandard (arity, arity);
+    ft_tparams  = [];
+    ft_params   = params;
+    ft_ret      = ret_ty;
   }
 
 let rec debug stack env (r, ty) =

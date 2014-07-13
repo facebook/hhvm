@@ -3,7 +3,7 @@
 // Due to inheriting from an interface, this code fatals in HHVM.
 
 interface I1 {
-  public function meth(...$args);
+  public function meth(...$args): void;
 }
 
 class C1 implements I1 {

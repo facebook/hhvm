@@ -44,11 +44,10 @@ and ty_ =
   | Tabstract     of Nast.sid * ty list * ty option
   | Tapply        of Nast.sid * ty list (* Object type, ty list are the arguments *)
   | Ttuple        of ty list
-  (* an anonymous function, the variadicity, number of mandatory
-   * arguments, the number of arguments in total, the identifier to
+  (* an anonymous function, the fun arity, the identifier to
    * type the body of the function. (The actual closure is stored in
    * Typing_env.env.genv.anons) *)
-  | Tanon         of Nast.fun_variadicity * int * int * Ident.t
+  | Tanon         of fun_arity * Ident.t
   (* This is in the case where we are looking for an intersection
    * basically without this type, we could never infer that an array
    * is an array of mixed for example.
@@ -84,13 +83,21 @@ and fun_type = {
   ft_pos       : Pos.t;
   ft_unsafe    : bool            ;
   ft_abstract  : bool            ;
-  ft_variadicity: Nast.fun_variadicity;
-  ft_arity_min : int             ;
-  ft_arity_max : int             ;
+  ft_arity     : fun_arity       ;
   ft_tparams   : tparam list     ;
   ft_params    : fun_params      ;
   ft_ret       : ty              ;
 }
+
+(* Arity informaton for a fun_type; indicating the minimum number of
+ * args expected by the function and the maximum number of args for
+ * standard, non-variadic functions or the type of variadic argument taken *)
+and fun_arity =
+  | Fstandard of int * int (* min ; max *)
+  (* PHP5.6-style ...$args finishes the func declaration *)
+  | Fvariadic of int       (* min *)
+  (* HH-style ... anonymous variadic arg; body presumably uses func_get_args *)
+  | Fellipsis of int       (* min *)
 
 and fun_params = (string option * ty) list
 
@@ -145,6 +152,9 @@ and tparam = Ast.id * ty option
 
 (* The identifier for this *)
 let this = Ident.make "$this"
+
+let arity_min ft_arity : int = match ft_arity with
+  | Fstandard (min, _) | Fvariadic min | Fellipsis min -> min
 
 (*****************************************************************************)
 (* Infer-type-at-point mode *)

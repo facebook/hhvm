@@ -624,7 +624,8 @@ let tuple_arity_mismatch p1 n1 p2 n2 =
             p2, "This one has "^n2^" elements"]
 
 let fun_arity_mismatch p1 p2 =
-  add_list [p1, ("Arity mismatch"); p2, "Because of this definition"]
+  add_list [p1, "Number of arguments doesn't match";
+            p2, "Because of this definition"]
 
 let discarded_awaitable p1 p2 =
   add_list [

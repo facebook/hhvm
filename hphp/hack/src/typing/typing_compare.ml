@@ -115,8 +115,8 @@ module CompareTypes = struct
     | Tunresolved tyl1, Tunresolved tyl2
     | Ttuple tyl1, Ttuple tyl2 ->
         tyl acc tyl1 tyl2
-    | Tanon (w1, x1, y1, z1), Tanon (w2, x2, y2, z2) ->
-        subst, same && w1 = w2 && x1 = x2 && y1 = y2 && z1 = z2
+    | Tanon (arity1, id1), Tanon (arity2, id2) ->
+        subst, same && arity1 = arity2 && id1 = id2
     | Tshape fdm1, Tshape fdm2 ->
         SMap.fold begin fun name v1 acc ->
           match SMap.get name fdm2 with
@@ -144,12 +144,9 @@ module CompareTypes = struct
     let acc = tparam_list acc ft1.ft_tparams ft2.ft_tparams in
     let acc = fun_params acc ft1.ft_params ft2.ft_params in
     let subst, same = ty acc ft1.ft_ret ft2.ft_ret in
-    subst,
-    same && ft1.ft_unsafe = ft2.ft_unsafe &&
+    subst, same && ft1.ft_unsafe = ft2.ft_unsafe &&
         ft1.ft_abstract = ft2.ft_abstract &&
-        ft1.ft_variadicity = ft2.ft_variadicity &&
-        ft1.ft_arity_min = ft2.ft_arity_min &&
-        ft1.ft_arity_max = ft2.ft_arity_max
+        ft1.ft_arity = ft2.ft_arity
 
   and fun_params acc params1 params2 =
     if List.length params1 <> List.length params2

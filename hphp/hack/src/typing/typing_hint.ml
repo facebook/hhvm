@@ -51,17 +51,15 @@ and hint_ p env = function
       let paraml = List.map (fun x -> None, x) paraml in
       let env, ret = hint env h in
       let arity_min = List.length paraml in
-      let variadicity, arity_max =
-        if b then FVellipsis, 1000
-        else Nast.FVnonVariadic, arity_min
+      let arity = if b
+        then Fellipsis arity_min
+        else Fstandard (arity_min, arity_min)
       in
       env, Tfun {
         ft_pos = p;
         ft_unsafe = false;
         ft_abstract = false;
-        ft_variadicity = variadicity;
-        ft_arity_min = arity_min;
-        ft_arity_max = arity_max;
+        ft_arity = arity;
         ft_tparams = [];
         ft_params = paraml;
         ft_ret = ret;

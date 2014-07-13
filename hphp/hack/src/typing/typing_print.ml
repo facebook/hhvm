@@ -191,13 +191,11 @@ module Full = struct
     )
 
   and fun_type st env o ft =
-    (match ft.ft_tparams, ft.ft_variadicity with
-      | [], Nast.FVnonVariadic -> ()
+    (match ft.ft_tparams, ft.ft_arity with
+      | [], Fstandard _ -> ()
       | [], _ -> o "<...>";
-      | l, var -> o "<";
-        list_sep o ", " (tparam o) l;
-        if var <> Nast.FVnonVariadic then o "...";
-        o ">"
+      | l, Fstandard _ -> o "<"; list_sep o ", " (tparam o) l; o ">"
+      | l, _ -> o "<"; list_sep o ", " (tparam o) l; o "..."; o ">"
     );
     o "("; list_sep o ", " (fun_param st env o) ft.ft_params; o "): ";
     ty st env o ft.ft_ret
@@ -367,10 +365,11 @@ module PrintFun = struct
       | Some s -> s in
     s ^ " " ^ (Full.to_string tenv ty) ^ ", "
 
-  let fvariadicity = function
-    | Nast.FVnonVariadic -> "non-variadic"
-    | Nast.FVvariadicArg -> "variadic: ...$arg-style (PHP 5.6)"
-    | Nast.FVellipsis    -> "variadic: ...-style (Hack)"
+  let farity = function
+    | Fstandard (min, max) -> Printf.sprintf "non-variadic: %d to %d" min max
+    | Fvariadic min ->
+      Printf.sprintf "variadic: ...$arg-style (PHP 5.6); min: %d" min
+    | Fellipsis min -> Printf.sprintf "variadic: ...-style (Hack); min: %d" min
 
   let fparams l =
     List.fold_right (fun x acc -> (fparam x)^acc) l ""
@@ -379,18 +378,14 @@ module PrintFun = struct
     let ft_pos = PrintClass.pos f.ft_pos in
     let ft_unsafe = bool f.ft_unsafe in
     let ft_abstract = bool f.ft_abstract in
-    let ft_variadicity = fvariadicity f.ft_variadicity in
-    let ft_arity_min = int f.ft_arity_min in
-    let ft_arity_max = int f.ft_arity_max in
+    let ft_arity = farity f.ft_arity in
     let ft_tparams = PrintClass.tparam_list f.ft_tparams in
     let ft_params = fparams f.ft_params in
     let ft_ret = Full.to_string tenv f.ft_ret in
     "ft_pos: "^ft_pos^"\n"^
     "ft_unsafe: "^ft_unsafe^"\n"^
     "ft_abstract: "^ft_abstract^"\n"^
-    "ft_variadicity: "^ft_variadicity^"\n"^
-    "ft_arity_min: "^ft_arity_min^"\n"^
-    "ft_arity_max: "^ft_arity_max^"\n"^
+    "ft_arity: "^ft_arity^"\n"^
     "ft_tparams: "^ft_tparams^"\n"^
     "ft_params: "^ft_params^"\n"^
     "ft_ret: "^ft_ret^"\n"^

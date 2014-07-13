@@ -107,7 +107,7 @@ let rec fun_decl f =
   ()
 
 and fun_decl_in_env env f =
-  let env, arity, params = make_params env true 0 f.f_params in
+  let env, arity_min, params = make_params env true 0 f.f_params in
   let env, ret_ty = match f.f_ret with
     (* If there is no return type annotation, we clearly should make it Tany
      * but also want a witness so that we can point *somewhere* in event of
@@ -115,19 +115,17 @@ and fun_decl_in_env env f =
      * nothing. *)
     | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
     | Some ty -> Typing_hint.hint env ty in
-  let arity_max = match f.f_variadic with
-    | FVvariadicArg -> 1000
-    | FVellipsis -> 1000
-    | FVnonVariadic -> List.length f.f_params
+  let arity = match f.f_variadic with
+    | FVvariadicArg -> Fvariadic (arity_min)
+    | FVellipsis    -> Fellipsis (arity_min)
+    | FVnonVariadic -> Fstandard (arity_min, List.length f.f_params)
   in
   let env, tparams = lfold type_param env f.f_tparams in
   let ft = {
     ft_pos         = fst f.f_name;
     ft_unsafe      = false;
     ft_abstract    = false;
-    ft_variadicity = f.f_variadic;
-    ft_arity_min   = arity;
-    ft_arity_max   = arity_max;
+    ft_arity       = arity;
     ft_tparams     = tparams;
     ft_params      = params;
     ft_ret         = ret_ty;
@@ -805,9 +803,7 @@ and expr_ is_lvalue env (p, e) =
               ft_pos = pos;
               ft_unsafe = false;
               ft_abstract = false;
-              ft_variadicity = Nast.FVnonVariadic;
-              ft_arity_min = 1;
-              ft_arity_max = 1;
+              ft_arity = Fstandard (1, 1);
               ft_tparams = [];
               ft_params = fty.ft_params;
               ft_ret = fty.ft_ret;
@@ -1026,7 +1022,7 @@ and expr_ is_lvalue env (p, e) =
       let anon = anon_make env.Env.lenv p f in
       let env, anon_id = Env.add_anonymous env anon in
       if Env.is_strict env then () else ignore (anon env ft.ft_params);
-      env, (Reason.Rwitness p, Tanon (ft.ft_variadicity, ft.ft_arity_min, ft.ft_arity_max, anon_id))
+      env, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
       let env, obj = expr env (fst sid, New (CI sid, [])) in
       let env, attr_tyl = lfold expr env (List.map snd attrl) in
@@ -1776,9 +1772,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
                 let subst = Inst.make_subst class_.tc_tparams paraml in
                 let env, ft_ret = Inst.instantiate subst env ft.ft_ret in
                 let ft = { ft with
-                  ft_variadicity = FVellipsis;
-                  ft_arity_min = 0;
-                  ft_arity_max = 1000;
+                  ft_arity = Fellipsis 0;
                   ft_tparams = []; ft_params = [];
                   ft_ret = ft_ret;
                 } in
@@ -1923,8 +1917,7 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                      * direct calls to $inst->__call are also
                      * valid.  *)
                     let ft = {ft with
-                      ft_variadicity = FVellipsis;
-                      ft_arity_min = 0; ft_arity_max = 1000;
+                      ft_arity = Fellipsis 0;
                       ft_tparams = []; ft_params = [];
                       ft_ret = ft_ret;
                     } in
@@ -2156,28 +2149,31 @@ and is_visible env vis cid =
             | _, _ -> None
         )
 
-and check_arity env pos pos_def arity variadicity arity_min arity_max =
-  if arity < arity_min then
+and check_arity env pos pos_def (arity:int) (exp_arity:fun_arity) =
+  let exp_min = (Typing_defs.arity_min exp_arity) in
+  if arity < exp_min then
     Errors.typing_too_few_args pos pos_def;
-  match variadicity with
-    | FVnonVariadic ->
-      if arity > arity_max && Env.get_mode env <> Ast.Mdecl
+  match exp_arity with
+    | Fstandard (_, exp_max) ->
+      if (arity > exp_max) && (Env.get_mode env <> Ast.Mdecl)
       then Errors.typing_too_many_args pos pos_def;
-    | FVvariadicArg | FVellipsis -> ()
+    | Fvariadic _ | Fellipsis _ -> ()
 
 (* The variadic capture argument is an array listing the passed
  * variable arguments for the purposes of the function body; callsites
  * should not unify with it *)
 and non_variadic_ft_params env ft =
-  if ft.ft_variadicity = FVvariadicArg then
-    match List.rev ft.ft_params with
-      | [] -> assert false; (* variadic arg means one param *)
-      | (_, (_, Tarray (_, _, None))) :: params ->
-          (* expected variadic argument *)
-        env, List.rev params
-      | _ :: params ->
-        env, List.rev params
-  else env, ft.ft_params
+  (* fixme: do something smarter with the hints here *)
+  match ft.ft_arity with
+    | Fvariadic _ ->
+      (match List.rev ft.ft_params with
+        | [] -> assert false; (* variadic arg means one param *)
+        | (_, (_, Tarray (_, _, None))) :: params ->
+        (* expected variadic argument *)
+          env, List.rev params
+        | _ :: params ->
+          env, List.rev params)
+    | _ -> env, ft.ft_params
 
 and call pos env fty el =
   let env, ty = call_ pos env fty el in
@@ -2205,8 +2201,7 @@ and call_ pos env fty el =
       TUtils.in_var env (r, Tunresolved retl)
   | r2, Tfun ft ->
       let pos_def = Reason.to_pos r2 in
-      let () = check_arity env pos pos_def (List.length el)
-        ft.ft_variadicity ft.ft_arity_min ft.ft_arity_max in
+      let () = check_arity env pos pos_def (List.length el) ft.ft_arity in
       let env, params = non_variadic_ft_params env ft in
       let env, tyl = lfold expr env el in
       let pos_tyl = List.combine (List.map fst el) tyl in
@@ -2214,7 +2209,7 @@ and call_ pos env fty el =
       let env = wfold_left2 call_param env params pos_tyl in
       Typing_hooks.dispatch_fun_call_hooks params (List.map fst el) env;
       env, ft.ft_ret
-  | r2, Tanon (variadicity, arity_min, arity_max, id) ->
+  | r2, Tanon (arity, id) ->
       let env, tyl = lmap expr env el in
       let anon = Env.get_anonymous env id in
       let fpos = Reason.to_pos r2 in
@@ -2223,8 +2218,7 @@ and call_ pos env fty el =
           Errors.anonymous_recursive_call pos;
           env, (Reason.Rnone, Tany)
         | Some anon ->
-          let () = check_arity env pos fpos (List.length tyl)
-            variadicity arity_min arity_max in
+          let () = check_arity env pos fpos (List.length tyl) arity in
           let tyl = List.map (fun x -> None, x) tyl in
           anon env tyl)
   | _, Tarray _ when not (Env.is_strict env) ->

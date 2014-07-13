@@ -18,6 +18,8 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
 
+#include <sys/errno.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

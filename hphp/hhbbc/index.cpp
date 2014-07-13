@@ -1107,7 +1107,7 @@ Type context_sensitive_return_type(const Index& index,
   auto const callInsensitiveType = finfo->returnTy;
 
   constexpr auto max_interp_nexting_level = 2;
-  static thread_local uint32_t interp_nesting_level{0};
+  static __thread uint32_t interp_nesting_level;
 
   // TODO(#3788877): more heuristics here would be useful.  (And even
   // functions without params might be worth interpreting in a

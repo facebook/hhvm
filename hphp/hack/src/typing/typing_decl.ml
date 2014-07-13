@@ -638,10 +638,15 @@ and method_decl c env m =
     match m.m_ret with
       | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
       | Some ret -> Typing_hint.hint env ret in
-  let arity = match m.m_variadic with
-    | FVvariadicArg -> Fvariadic arity_min
-    | FVellipsis    -> Fellipsis arity_min
-    | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
+  let env, arity = match m.m_variadic with
+    | FVvariadicArg param ->
+      assert param.param_is_variadic;
+      assert (param.param_expr = None);
+      let r = Reason.Rvar_param (fst param.param_id) in
+      let env, (p_name, p_ty) = Typing.make_param_ty env r param in
+      env, Fvariadic (arity_min, (p_name, p_ty))
+    | FVellipsis    -> env, Fellipsis arity_min
+    | FVnonVariadic -> env, Fstandard (arity_min, List.length m.m_params)
   in
   let env, tparams = lfold Typing.type_param env m.m_tparams in
   let ft = {

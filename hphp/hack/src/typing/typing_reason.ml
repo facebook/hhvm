@@ -85,7 +85,7 @@ let rec to_string prefix r =
   | Rattr            _ -> [(p, prefix ^ " because it is used in an attribute")]
   | Rxhp             _ -> [(p, prefix ^ " because it is used as an XML element")]
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
-  | Rvar_param       _ -> [(p, prefix ^ " that captures variadic func arguments")]
+  | Rvar_param       _ -> [(p, prefix ^ " (variadic argument)")]
   | Rcoerced     (p1, p2, s)  ->
       [
         (p, prefix);

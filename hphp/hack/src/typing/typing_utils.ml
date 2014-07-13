@@ -21,7 +21,7 @@ module Env = Typing_env
 
 let not_implemented _ = failwith "Function not implemented"
 
-type expand_typedef = 
+type expand_typedef =
     Env.env -> Reason.t -> string -> ty list -> Env.env * ty
 
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
@@ -77,7 +77,7 @@ let process_arg_info fun_args used_args env =
       argument_info_position := result
     );
   ()
-  
+
 let process_static_find_ref cid mid =
   match cid with
   | Nast.CI c -> Find_refs.process_class_ref (fst c) (snd c) (Some (snd mid))

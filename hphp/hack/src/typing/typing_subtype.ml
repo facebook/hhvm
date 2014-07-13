@@ -40,7 +40,19 @@ let rec subtype_funs_generic ~check_return env r_super ft_super r_sub orig_ft_su
     | Fstandard _, _ -> Errors.fun_unexpected_nonvariadic p_sub p_super;
     | _, _ -> ()
   );
-  let env, _ = subtype_params env ft_super.ft_params ft_sub.ft_params in
+
+  (* We are dissallowing contravariant arguments, they are not supported
+   * by the runtime *)
+  (* However, if we are polymorphic in the upper-class we have to be
+   * polymorphic in the subclass. *)
+  let env, var_opt = match ft_sub.ft_arity, ft_super.ft_arity with
+    | Fvariadic (_, (n_super, var_super)), Fvariadic (_, (n_sub, var_sub)) ->
+      let env, var = Unify.unify env var_super var_sub in
+      env, Some (n_super, var)
+    | _ -> env, None
+  in
+  let env, _ =
+    Unify.unify_params env ft_super.ft_params ft_sub.ft_params var_opt in
   (* Checking that if the return type was defined in the parent class, it
    * is defined in the subclass too (requested by Gabe Levi).
    *)
@@ -295,21 +307,16 @@ and sub_string p env ty2 =
   | _, Tobject -> env
   | _ -> fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 
-and subtype_params env l1 l2 =
-  match l1, l2 with
-  | [], l | l, [] -> env, l
-  | (name1, x1) :: rl1, (name2, x2) :: rl2 ->
-      (* We are dissalowing contravariant arguments, they are not supported
-       * by the runtime
-       *)
-      (* However, if we are polymorphic in the upper-class we have to be
-         polymorphic in the subclass.
-       *)
-      let name = if name1 = name2 then name1 else None in
-      let env = { env with Env.pos = Reason.to_pos (fst x1) } in
-      let env, _ = Unify.unify env x1 x2 in
-      let env, rl = Unify.unify_params env rl1 rl2 in
-      env, (name, x2) :: rl
+(* and subtype_params env l_super l_sub def_super = *)
+(*   match l_super, l_sub with *)
+(*   | l, [] -> env, l *)
+(*   | [], l -> *)
+(*   | (name_super, x_super) :: rl_super, (name_sub, x_sub) :: rl_sub -> *)
+(*     let name = if name_super = name_sub then name_super else None in *)
+(*     let env = { env with Env.pos = Reason.to_pos (fst x_super) } in *)
+(*     let env, _ = Unify.unify env x_super x_sub in *)
+(*     let env, rl = Unify.unify_params env rl_super rl_sub in *)
+(*     env, (name, x_sub) :: rl *)
 
 let subtype_funs = subtype_funs_generic ~check_return:true
 let subtype_funs_no_return = subtype_funs_generic ~check_return:false

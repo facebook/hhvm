@@ -367,7 +367,7 @@ module PrintFun = struct
 
   let farity = function
     | Fstandard (min, max) -> Printf.sprintf "non-variadic: %d to %d" min max
-    | Fvariadic min ->
+    | Fvariadic (min, _) ->
       Printf.sprintf "variadic: ...$arg-style (PHP 5.6); min: %d" min
     | Fellipsis min -> Printf.sprintf "variadic: ...-style (Hack); min: %d" min
 

@@ -376,6 +376,16 @@ let ref_variable env =
   ref_opt env;
   variable env
 
+(* &...$arg *)
+let ref_param env =
+  ref_opt env;
+  let is_variadic = match L.token env.lb with
+    | Tellipsis -> true
+    | _ -> L.back env.lb; false
+  in
+  let var = variable env in
+  is_variadic, var
+
 (*****************************************************************************)
 (* Entry point *)
 (*****************************************************************************)
@@ -1965,17 +1975,19 @@ and param ~variadic env  =
   let attrs = attribute env in
   let modifs = parameter_modifier env in
   let h = parameter_hint env in
-  let name = ref_variable env in
+  let variadic_after_hint, name = ref_param env in
+  assert ((not variadic_after_hint) || (not variadic));
+  let variadic = variadic || variadic_after_hint in
   let default = parameter_default env in
   let default =
     if variadic && default <> None then
       let () = error env "Variadic arguments don't have default values" in
       None
-    else default
-  in
-  if variadic && h <> None then
-    (* this shouldn't be encountered; ref_variable doesn't expect "..." *)
-    error env "Variadic arguments cannot (yet) have typehints";
+    else default in
+  if variadic_after_hint then begin
+    expect env Trp;
+    L.back env.lb
+  end else ();
   { param_hint = h;
     param_is_reference = false;
     param_is_variadic = variadic;

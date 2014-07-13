@@ -142,11 +142,22 @@ module CompareTypes = struct
   and fun_type acc ft1 ft2 =
     let acc = pos acc ft1.ft_pos ft2.ft_pos in
     let acc = tparam_list acc ft1.ft_tparams ft2.ft_tparams in
+    let acc = fun_arity acc ft1.ft_arity ft2.ft_arity in
     let acc = fun_params acc ft1.ft_params ft2.ft_params in
     let subst, same = ty acc ft1.ft_ret ft2.ft_ret in
-    subst, same && ft1.ft_unsafe = ft2.ft_unsafe &&
-        ft1.ft_abstract = ft2.ft_abstract &&
-        ft1.ft_arity = ft2.ft_arity
+    subst, same &&
+      ft1.ft_unsafe = ft2.ft_unsafe && ft1.ft_abstract = ft2.ft_abstract
+
+  and fun_arity acc arity1 arity2 =
+    let subst, same = acc in
+    match arity1, arity2 with
+    | Fvariadic (min1, (_, ty1)), Fvariadic (min2, (_, ty2)) ->
+      let subst, same = ty acc ty1 ty2 in
+      subst, same && min1 = min2
+    | Fellipsis min1, Fellipsis min2 -> subst, same && min1 = min2
+    | Fstandard (min1, max1), Fstandard (min2, max2) ->
+      subst, same && min1 = min2 && max1 = max2
+    | _, _ -> subst, false
 
   and fun_params acc params1 params2 =
     if List.length params1 <> List.length params2

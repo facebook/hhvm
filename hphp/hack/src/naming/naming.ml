@@ -1155,23 +1155,22 @@ and kind (final, abs, vis) = function
   | Protected -> final, abs, N.Protected
 
 and fun_paraml env l =
-  let variadicity, l = determine_variadicity l in
-  let _ = List.fold_left check_repetition SSet.empty l in
+  let _names = List.fold_left check_repetition SSet.empty l in
+  let variadicity, l = determine_variadicity env l in
   variadicity, List.map (fun_param env) l
 
-and determine_variadicity l =
+and determine_variadicity env l =
   match l with
     | [] -> N.FVnonVariadic, []
     | [x] -> (
       match x.param_is_variadic, x.param_id with
         | false, _ -> N.FVnonVariadic, [x]
-        | true, (_, "...") ->
-          (* NOTE: param is removed from the list *)
-          N.FVellipsis, []
-        | true, _ -> N.FVvariadicArg, [x]
+        (* NOTE: variadic params are removed from the list *)
+        | true, (_, "...") -> N.FVellipsis, []
+        | true, _ -> N.FVvariadicArg (fun_param env x), []
     )
     | x :: rl ->
-      let variadicity, rl = determine_variadicity rl in
+      let variadicity, rl = determine_variadicity env rl in
       variadicity, x :: rl
 
 and fun_param env param =

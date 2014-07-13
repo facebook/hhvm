@@ -95,11 +95,13 @@ and fun_type = {
 and fun_arity =
   | Fstandard of int * int (* min ; max *)
   (* PHP5.6-style ...$args finishes the func declaration *)
-  | Fvariadic of int       (* min *)
+  | Fvariadic of int * fun_param (* min ; variadic param type *)
   (* HH-style ... anonymous variadic arg; body presumably uses func_get_args *)
   | Fellipsis of int       (* min *)
 
-and fun_params = (string option * ty) list
+and fun_param = (string option * ty)
+
+and fun_params = fun_param list
 
 and class_elt = {
   ce_final       : bool;
@@ -154,7 +156,7 @@ and tparam = Ast.id * ty option
 let this = Ident.make "$this"
 
 let arity_min ft_arity : int = match ft_arity with
-  | Fstandard (min, _) | Fvariadic min | Fellipsis min -> min
+  | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis min -> min
 
 (*****************************************************************************)
 (* Infer-type-at-point mode *)

@@ -237,12 +237,12 @@ and unify_ env r1 ty1 r2 ty2 =
 
 and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
   match anon_arity, func_arity with
-    | Fellipsis a_min, Fvariadic f_min when ellipsis_is_variadic ->
+    | Fellipsis a_min, Fvariadic (f_min, _) when ellipsis_is_variadic ->
       (* we want to allow use the "..." syntax in the declaration of
        * anonymous function types to match named variadic arguments
        * of the "...$args" form as well as unnamed ones *)
       a_min = f_min
-    | Fvariadic a_min, Fvariadic f_min
+    | Fvariadic (a_min, _), Fvariadic (f_min, _)
     | Fellipsis a_min, Fellipsis f_min ->
       a_min = f_min
     | Fstandard (a_min, a_max), Fstandard (f_min, f_max) ->
@@ -267,18 +267,36 @@ and unify_funs env r1 ft1 r2 ft2 =
   let p1 = Reason.to_pos r1 in
   if not (unify_arities ~ellipsis_is_variadic:false ft1.ft_arity ft2.ft_arity)
   then Errors.fun_arity_mismatch p p1;
-  let env, params = unify_params env ft1.ft_params ft2.ft_params in
+  let env, var_opt, arity = match ft1.ft_arity, ft2.ft_arity with
+    | Fvariadic (_, (n1, var_ty1)), Fvariadic (min, (_n2, var_ty2)) ->
+      let env, var = unify env var_ty1 var_ty2 in
+      env, Some (n1, var), Fvariadic (min, (n1, var))
+    | ar1, ar2 ->
+      env, None, ar1
+  in
+  let env, params = unify_params env ft1.ft_params ft2.ft_params var_opt in
   let env, ret = unify env ft1.ft_ret ft2.ft_ret in
-  env, { ft1 with ft_params = params; ft_ret = ret }
+  env, { ft1 with
+    ft_arity = arity;
+    ft_params = params;
+    ft_ret = ret;
+  }
 
-and unify_params env l1 l2 =
-  match l1, l2 with
-  | [], l | l, [] -> env, l
-  | (name1, x1) :: rl1, (name2, x2) :: rl2 ->
+and unify_params env l1 l2 var1_opt =
+  match l1, l2, var1_opt with
+  | [], l, None -> env, l
+  | [], (name2, x2) :: rl2, Some (name1, v1) ->
+    let name = if name1 = name2 then name1 else None in
+    let env = { env with Env.pos = Reason.to_pos (fst x2) } in
+    let env, _ = unify env x2 v1 in
+    let env, rl = unify_params env [] rl2 var1_opt in
+    env, (name, x2) :: rl
+  | l, [], _ -> env, l
+  | (name1, x1) :: rl1, (name2, x2) :: rl2, _ ->
     let name = if name1 = name2 then name1 else None in
     let env = { env with Env.pos = Reason.to_pos (fst x1) } in
     let env, _ = unify env x2 x1 in
-    let env, rl = unify_params env rl1 rl2 in
+    let env, rl = unify_params env rl1 rl2 var1_opt in
     env, (name, x2) :: rl
 
 let unify_nofail env ty1 ty2 =

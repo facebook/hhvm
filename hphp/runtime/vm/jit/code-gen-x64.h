@@ -155,8 +155,7 @@ private:
   void emitCmpInt(IRInstruction* inst, ConditionCode);
   void emitCmpEqDbl(IRInstruction* inst, ComparisonPred);
   void emitCmpRelDbl(IRInstruction* inst, ConditionCode, bool);
-  void cgCmpHelper(IRInstruction* inst,
-                   void (Asm::*setter)(Reg8),
+  void cgCmpHelper(IRInstruction* inst, ConditionCode,
                    int64_t (*str_cmp_str)(StringData*, StringData*),
                    int64_t (*str_cmp_int)(StringData*, int64_t),
                    int64_t (*str_cmp_obj)(StringData*, ObjectData*),

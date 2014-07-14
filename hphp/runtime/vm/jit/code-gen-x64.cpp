@@ -1605,8 +1605,8 @@ inline int64_t ccmp_lte(A a, B b) { return !ccmp_more(a, b); }
 template <typename A, typename B>
 inline int64_t ccmp_gte(A a, B b) { return !ccmp_less(a, b); }
 
-#define CG_OP_CMP(inst, setter, name)                                   \
-  cgCmpHelper(inst, &Asm:: setter, ccmp_ ## name, ccmp_ ## name,        \
+#define CG_OP_CMP(inst, cc, name)                                   \
+  cgCmpHelper(inst, cc, ccmp_ ## name, ccmp_ ## name,               \
               ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
 
 // SON - string, object, or number
@@ -1616,7 +1616,7 @@ static bool typeIsSON(Type t) {
 
 void CodeGenerator::cgCmpHelper(
           IRInstruction* inst,
-          void (Asm::*setter)(Reg8),
+          ConditionCode cc,
           int64_t (*str_cmp_str)(StringData*, StringData*),
           int64_t (*str_cmp_int)(StringData*, int64_t),
           int64_t (*str_cmp_obj)(StringData*, ObjectData*),
@@ -1637,9 +1637,6 @@ void CodeGenerator::cgCmpHelper(
   auto src2Reg = loc2.reg();
   auto dstReg  = dstLoc(0).reg();
 
-  auto setFromFlags = [&] {
-    (m_as.*setter)(rbyte(dstReg));
-  };
   // It is possible that some pass has been done after simplification; if such
   // a pass invalidates our invariants, then just punt.
 
@@ -1669,7 +1666,7 @@ void CodeGenerator::cgCmpHelper(
     } else {
       m_as.    cmpb (rbyte(src2Reg), rbyte(src1Reg));
     }
-    setFromFlags();
+    m_as.setcc(cc, rbyte(dstReg));
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1731,59 +1728,59 @@ void CodeGenerator::cgCmpHelper(
 }
 
 void CodeGenerator::cgEq(IRInstruction* inst) {
-  CG_OP_CMP(inst, sete, equal);
+  CG_OP_CMP(inst, CC_E, equal);
 }
 
 void CodeGenerator::cgEqX(IRInstruction* inst) {
-  CG_OP_CMP(inst, sete, equal);
+  CG_OP_CMP(inst, CC_E, equal);
 }
 
 void CodeGenerator::cgNeq(IRInstruction* inst) {
-  CG_OP_CMP(inst, setne, nequal);
+  CG_OP_CMP(inst, CC_NE, nequal);
 }
 
 void CodeGenerator::cgNeqX(IRInstruction* inst) {
-  CG_OP_CMP(inst, setne, nequal);
+  CG_OP_CMP(inst, CC_NE, nequal);
 }
 
 void CodeGenerator::cgSame(IRInstruction* inst) {
-  CG_OP_CMP(inst, sete, same);
+  CG_OP_CMP(inst, CC_E, same);
 }
 
 void CodeGenerator::cgNSame(IRInstruction* inst) {
-  CG_OP_CMP(inst, setne, nsame);
+  CG_OP_CMP(inst, CC_NE, nsame);
 }
 
 void CodeGenerator::cgLt(IRInstruction* inst) {
-  CG_OP_CMP(inst, setl, less);
+  CG_OP_CMP(inst, CC_L, less);
 }
 
 void CodeGenerator::cgLtX(IRInstruction* inst) {
-  CG_OP_CMP(inst, setl, less);
+  CG_OP_CMP(inst, CC_L, less);
 }
 
 void CodeGenerator::cgGt(IRInstruction* inst) {
-  CG_OP_CMP(inst, setg, more);
+  CG_OP_CMP(inst, CC_G, more);
 }
 
 void CodeGenerator::cgGtX(IRInstruction* inst) {
-  CG_OP_CMP(inst, setg, more);
+  CG_OP_CMP(inst, CC_G, more);
 }
 
 void CodeGenerator::cgLte(IRInstruction* inst) {
-  CG_OP_CMP(inst, setle, lte);
+  CG_OP_CMP(inst, CC_LE, lte);
 }
 
 void CodeGenerator::cgLteX(IRInstruction* inst) {
-  CG_OP_CMP(inst, setle, lte);
+  CG_OP_CMP(inst, CC_LE, lte);
 }
 
 void CodeGenerator::cgGte(IRInstruction* inst) {
-  CG_OP_CMP(inst, setge, gte);
+  CG_OP_CMP(inst, CC_GE, gte);
 }
 
 void CodeGenerator::cgGteX(IRInstruction* inst) {
-  CG_OP_CMP(inst, setge, gte);
+  CG_OP_CMP(inst, CC_GE, gte);
 }
 
 void CodeGenerator::emitCmpInt(IRInstruction* inst, ConditionCode cc) {

@@ -1691,6 +1691,12 @@ const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
+const TypedValue* MixedArray::NvGetIntConverted(const ArrayData* ad,
+                                                int64_t ki) {
+  MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+  return NvGetInt(ad, ki);
+}
+
 const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
                                        const StringData* k) {
   return NvGetStrImpl<kMixedKind>(ad, k);
@@ -1872,6 +1878,10 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
     ad->m_pos = mPos.hash
       ? ssize_t(ad->find(mPos.skey, mPos.hash))
       : ssize_t(ad->find(mPos.ikey));
+  } else {
+    // If src->m_pos is equal to src's canonical invalid position, then
+    // set ad->m_pos to ad's canonical invalid position.
+    ad->m_pos = ad->m_size;
   }
 
   // Set new used value (we've removed any tombstones).

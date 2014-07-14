@@ -300,3 +300,7 @@ let rec iter2_shortest f l1 l2 =
   match l1, l2 with
   | [], _ | _, [] -> ()
   | x1 :: rl1, x2 :: rl2 -> f x1 x2; iter2_shortest f rl1 rl2
+
+(* We may want to replace this with a tail-recursive map at some point,
+ * factoring here so we have a clean way to grep. *)
+let rev_rev_map f l = List.rev (List.rev_map f l)

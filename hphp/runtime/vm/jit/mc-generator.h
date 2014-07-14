@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
@@ -333,8 +334,7 @@ private:
                             const TCA start,
                             bool exit, bool inPrologue);
 
-  void recordBCInstr(uint32_t op, const CodeBlock& cb,
-                     const TCA addr, bool cold);
+  void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 
   /*
    * TC dump helpers

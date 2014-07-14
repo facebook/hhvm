@@ -251,8 +251,8 @@ bool RegionFormer::prepareInstruction() {
   populateImmediates(m_inst);
   m_ht.setBcOff(m_sk.offset(), false);
 
-  InputInfos inputInfos;
-  getInputs(m_startSk, m_inst, inputInfos, m_curBlock->func(), [&](int i) {
+  InputInfoVec inputInfos;
+  getInputs(m_startSk, m_inst, inputInfos, [&] (int i) {
     return m_ht.irBuilder().localType(i, DataTypeGeneric);
   });
 

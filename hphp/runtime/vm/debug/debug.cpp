@@ -207,6 +207,7 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
     }
     fprintf(m_perfMap, "%lx %x %s\n",
             uintptr_t(range.begin()), range.size(), name);
+    fflush(m_perfMap);
   }
 }
 

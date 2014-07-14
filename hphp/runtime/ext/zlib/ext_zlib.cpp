@@ -676,13 +676,23 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
     return false;
   }
 
+  int inSize = compressed.size() - (compressed_ptr - compressed.data());
   String s = String(dsize, ReserveString);
   char *uncompressed = s.bufferSlice().ptr;
-  int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
+#ifdef LZ4_MAX_INPUT_SIZE
+  int ret = LZ4_decompress_safe(compressed_ptr, uncompressed, inSize, dsize);
 
-  if (ret <= 0) {
+  if (ret != dsize) {
     return false;
   }
+#else
+  int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
+
+  if (ret <= 0 || ret > inSize) {
+    return false;
+  }
+#endif
+
   s.setSize(dsize);
   return s;
 }

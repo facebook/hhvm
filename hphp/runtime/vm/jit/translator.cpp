@@ -13,39 +13,43 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/translator.h"
 
-// Translator front-end: parse instruction stream into basic blocks, decode
-// and normalize instructions. Propagate run-time type info to instructions
-// to annotate their inputs and outputs with types.
 #include <cinttypes>
 #include <assert.h>
-#include <stdint.h>
 #include <stdarg.h>
+#include <stdint.h>
 
-#include <vector>
-#include <string>
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
-#include "folly/Optional.h"
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
+#include "folly/Optional.h"
 
-#include "hphp/util/trace.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/trace.h"
+
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
+
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
@@ -53,34 +57,23 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/type-profile.h"
 
 #define KindOfUnknown DontUseKindOfUnknownInThisFile
 #define KindOfInvalid DontUseKindOfInvalidInThisFile
 
-namespace {
 TRACE_SET_MOD(trans);
-}
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
+///////////////////////////////////////////////////////////////////////////////
 
 Lease Translator::s_writeLease;
 
-/*
- * locPhysicalOffset --
- *
- *   Return offset, in cells, of this location from its base
- *   pointer. It needs a function descriptor to see how many locals
- *   to skip for iterators; if the current frame pointer is not the context
- *   you're looking for, be sure to pass in a non-default f.
- */
 int locPhysicalOffset(Location l, const Func* f) {
   f = f ? f : liveFunc();
   assert_not_implemented(l.space == Location::Stack ||
@@ -109,8 +102,7 @@ static uint32_t get_random()
 static const int kTooPolyRet = 6;
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
-                           Class* ctx,
-                           const Class*& baseClass,
+                           Class* ctx, const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd) {
   if (mInd == 0) {
@@ -161,13 +153,12 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
 }
 
 PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
-                                Class* context,
-                                const MInstrInfo& mii) {
+                                Class* ctx, const MInstrInfo& mii) {
   unsigned mInd = ni.immVecM.size() - 1;
   unsigned iInd = mii.valCount() + 1 + mInd;
 
   const Class* cls = nullptr;
-  return getPropertyOffset(ni, context, cls, mii, mInd, iInd);
+  return getPropertyOffset(ni, ctx, cls, mii, mInd, iInd);
 }
 
 static folly::Optional<DataType>
@@ -940,10 +931,6 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
   return doPrediction;
 }
 
-/*
- * Some bytecodes are always no-ops but kept around for various reasons (mostly
- * stack flavor safety).
- */
 bool isAlwaysNop(Op op) {
   switch (op) {
   case Op::BoxRNop:
@@ -1063,19 +1050,6 @@ static void addMVectorInputs(NormalizedInstruction& ni,
                         "inputs, %d locals\n", stackCount, localCount);
 }
 
-void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
-               const Func* func, const LocalTypeFn& localType) {
-  // MCGenerator expected top of stack to be index -1, with indexes growing
-  // down from there. hhir defines top of stack to be index 0, with indexes
-  // growing up from there. To compensate we start with a stack offset of 1 and
-  // negate the index of any stack input after the call to getInputs.
-  int stackOff = 1;
-  getInputsImpl(startSk, &inst, stackOff, infos, func, localType);
-  for (auto& info : infos) {
-    if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
-  }
-}
-
 /*
  * getInputsImpl --
  *   Returns locations for this instruction's inputs.
@@ -1090,11 +1064,11 @@ void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
  *     Truncate the tracelet at the preceding instruction, which must
  *     exists because *something* modified something in it.
  */
+static
 void getInputsImpl(SrcKey startSk,
                    NormalizedInstruction* ni,
                    int& currentStackOffset,
-                   InputInfos& inputs,
-                   const Func* func,
+                   InputInfoVec& inputs,
                    const LocalTypeFn& localType) {
 #ifdef USE_TRACE
   const SrcKey& sk = ni->source;
@@ -1221,6 +1195,19 @@ void getInputsImpl(SrcKey startSk,
   }
 }
 
+void getInputs(SrcKey startSk, NormalizedInstruction& inst,
+               InputInfoVec& infos, const LocalTypeFn& localType) {
+  // MCGenerator expected top of stack to be index -1, with indexes growing
+  // down from there. hhir defines top of stack to be index 0, with indexes
+  // growing up from there. To compensate we start with a stack offset of 1 and
+  // negate the index of any stack input after the call to getInputs.
+  int stackOff = 1;
+  getInputsImpl(startSk, &inst, stackOff, infos, localType);
+  for (auto& info : infos) {
+    if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
+  }
+}
+
 bool dontGuardAnyInputs(Op op) {
   switch (op) {
 #define CASE(iNm) case Op ## iNm:
@@ -1236,8 +1223,8 @@ bool dontGuardAnyInputs(Op op) {
 #undef CASE
 }
 
-bool outputDependsOnInput(const Op instr) {
-  switch (instrInfo[instr].type) {
+bool outputDependsOnInput(const Op op) {
+  switch (instrInfo[op].type) {
     case OutNull:
     case OutNullUninit:
     case OutString:
@@ -1339,15 +1326,15 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
   return false;
 }
 
-bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
-  if (instrIsNonCallControlFlow(instr->op()) ||
-      instr->outputPredicted ||
-      instr->op() == OpAwait || // may branch to scheduler and suspend execution
-      instr->op() == OpClsCnsD) { // side exits if misses in the RDS
+bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
+  if (instrIsNonCallControlFlow(inst->op()) ||
+      inst->outputPredicted ||
+      inst->op() == OpAwait || // may branch to scheduler and suspend execution
+      inst->op() == OpClsCnsD) { // side exits if misses in the RDS
     return true;
   }
   // In profiling mode, don't trace through a control flow merge point
-  if (instr->func()->anyBlockEndsAt(instr->offset())) {
+  if (inst->func()->anyBlockEndsAt(inst->offset())) {
     return true;
   }
   return false;
@@ -1404,26 +1391,7 @@ Translator::addDbgBLPC(PC pc) {
   return true;
 }
 
-void populateImmediates(NormalizedInstruction& inst) {
-  auto offset = 1;
-  for (int i = 0; i < numImmediates(inst.op()); ++i) {
-    if (immType(inst.op(), i) == RATA) {
-      auto rataPc = inst.pc() + offset;
-      inst.imm[i].u_RATA = decodeRAT(inst.unit(), rataPc);
-    } else {
-      inst.imm[i] = getImm(reinterpret_cast<const Op*>(inst.pc()), i);
-    }
-    offset += immSize(reinterpret_cast<const Op*>(inst.pc()), i);
-  }
-  if (hasImmVector(*reinterpret_cast<const Op*>(inst.pc()))) {
-    inst.immVec = getImmVector(reinterpret_cast<const Op*>(inst.pc()));
-  }
-  if (inst.op() == OpFCallArray) {
-    inst.imm[0].u_IVA = 1;
-  }
-}
-
-const char* Translator::translateResultName(TranslateResult r) {
+const char* Translator::ResultName(TranslateResult r) {
   static const char* const names[] = {
     "Failure",
     "Retry",
@@ -1635,14 +1603,14 @@ Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
                             RegionBlacklist& toInterp,
                             TransFlags trflags) {
-  const Timer translateRegionTimer(Timer::translateRegion);
+  assert(!region.blocks.empty());
 
+  const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
+
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   IRBuilder& irb = ht.irBuilder();
-  assert(!region.blocks.empty());
-  const SrcKey startSk = region.blocks.front()->start();
-  auto profilingFunc = false;
+  auto const startSk = region.blocks.front()->start();
 
   BlockIdToIRBlockMap     blockIdToIRBlock;
   BlockIdToRegionBlockMap blockIdToRegionBlock;
@@ -1689,18 +1657,19 @@ Translator::translateRegion(const RegionDesc& region,
       // attributed to this instruction.
       ht.setBcOff(sk.offset(), false);
 
-      // Emit prediction guards. If this is the first instruction in the
-      // region the guards will go to a retranslate request. Otherwise, they'll
-      // go to a side exit.
-      bool isFirstRegionInstr = block == region.blocks.front() && i == 0;
+      // Emit prediction guards. If this is the first instruction in the region
+      // the guards will go to a retranslate request. Otherwise, they'll go to
+      // a side exit.
+      bool isFirstRegionInstr = (block == region.blocks.front() && i == 0);
       if (isFirstRegionInstr) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
 
+      // Emit type guards.
       while (typePreds.hasNext(sk)) {
         auto const& pred = typePreds.next();
         auto type = pred.type;
         auto loc  = pred.location;
         if (type <= Type::Cls) {
-          // Do not generate guards for class; instead assert the type
+          // Do not generate guards for class; instead assert the type.
           assert(loc.tag() == RegionDesc::Location::Tag::Stack);
           ht.assertType(loc, type);
         } else if (isFirstRegionInstr) {
@@ -1719,6 +1688,7 @@ Translator::translateRegion(const RegionDesc& region,
         ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
       }
 
+      // Finish emitting guards, and emit profiling counters.
       if (isFirstRegionInstr) {
         ht.endGuards();
         if (RuntimeOption::EvalJitTransCounters) {
@@ -1726,14 +1696,12 @@ Translator::translateRegion(const RegionDesc& region,
         }
 
         if (m_mode == TransKind::Profile) {
-          profilingFunc = true;
           if (block->func()->isEntry(block->start().offset())) {
             ht.emitCheckCold(m_profData->curTransID());
           } else {
             ht.emitIncProfCounter(m_profData->curTransID());
           }
         }
-
         ht.emitRB(Trace::RBTypeTraceletBody, sk);
       }
 
@@ -1744,8 +1712,8 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
-      inst.breaksTracelet =
-        i == block->length() - 1 && block == region.blocks.back();
+      inst.breaksTracelet = (i == block->length() - 1 &&
+                             block == region.blocks.back());
       inst.changesPC = opcodeChangesPC(inst.op());
       inst.funcd = topFunc;
       if (instrIsNonCallControlFlow(inst.op()) && !inst.breaksTracelet) {
@@ -1765,16 +1733,16 @@ Translator::translateRegion(const RegionDesc& region,
       // this is true.
       inst.interp = toInterp.count(ProfSrcKey{profTransId, sk});
 
-      InputInfos inputInfos;
-      getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
-          return ht.irBuilder().localType(i, DataTypeGeneric);
-        });
+      InputInfoVec inputInfos;
+      getInputs(startSk, inst, inputInfos, [&] (int i) {
+        return irb.localType(i, DataTypeGeneric);
+      });
 
       // Populate the NormalizedInstruction's input vector, using types from
       // HhbcTranslator.
       std::vector<DynLocation> dynLocs;
       dynLocs.reserve(inputInfos.size());
-      auto newDynLoc = [&](const InputInfo& ii) {
+      auto newDynLoc = [&] (const InputInfo& ii) {
         dynLocs.emplace_back(ii.loc, ht.typeFromLocation(ii.loc));
         FTRACE(2, "typeFromLocation: {} -> {}\n",
                ii.loc.pretty(), dynLocs.back().rtt);
@@ -1940,8 +1908,10 @@ Translator::translateRegion(const RegionDesc& region,
   irGenTimer.end();
 
   try {
-    translatorTraceCodeGen();
-    if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
+    mcg->traceCodeGen();
+    if (m_mode == TransKind::Profile) {
+      profData()->setProfiling(startSk.func()->getFuncId());
+    }
   } catch (const FailedCodeGen& exn) {
     SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
     ProfSrcKey psk{exn.profTransId, sk};
@@ -2097,7 +2067,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   return func;
 }
 
-} // HPHP::JIT
+///////////////////////////////////////////////////////////////////////////////
+}
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
@@ -2116,4 +2087,5 @@ void invalidatePath(const std::string& path) {
   });
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }

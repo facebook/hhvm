@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP {
@@ -737,7 +738,7 @@ private:
   void emitEmptyMem(SSATmp* ptr);
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
   void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
-                            bool& checkForInt);
+                            bool& checkForInt, bool& converted);
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
   SSATmp* ldClsPropAddrKnown(Block* catchBlock,

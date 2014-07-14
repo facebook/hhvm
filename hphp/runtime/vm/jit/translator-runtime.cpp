@@ -441,12 +441,19 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ?
-         getDefaultIfNullCell(a->nvGet(i), def) :
+         getDefaultIfNullCell(a->nvGetConverted(i), def) :
          getDefaultIfNullCell(a->nvGet(key), def);
 }
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
+}
+
+TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
+  if (UNLIKELY(a->isIntMapArray())) {
+    MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+  }
+  return arrayIdxI(a, key, def);
 }
 
 const StaticString s_idx("idx");

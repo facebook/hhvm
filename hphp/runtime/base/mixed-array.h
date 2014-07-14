@@ -222,6 +222,7 @@ public:
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static const TypedValue* NvGetIntConverted(const ArrayData*, int64_t ki);
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ssize_t IterBegin(const ArrayData*);

@@ -13,12 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_NORMALIZED_INSTRUCTION_H_
 #define incl_HPHP_NORMALIZED_INSTRUCTION_H_
 
-#include <vector>
-
 #include <memory>
+#include <vector>
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -26,13 +26,14 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP {
-namespace JIT {
-
+namespace HPHP { namespace JIT {
+///////////////////////////////////////////////////////////////////////////////
 
 struct DynLocation;
 
-// A NormalizedInstruction has been decorated with its typed inputs.
+/*
+ * A NormalizedInstruction has been decorated with its typed inputs.
+ */
 struct NormalizedInstruction {
   SrcKey source;
   const Func* funcd; // The Func in the topmost AR on the stack. Guaranteed to
@@ -43,7 +44,7 @@ struct NormalizedInstruction {
   const Unit* m_unit;
 
   std::vector<DynLocation*> inputs;
-  Type         outPred;
+  Type outPred;
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
@@ -100,5 +101,15 @@ struct NormalizedInstruction {
   smart::vector<smart::unique_ptr<DynLocation>> m_dynLocs;
 };
 
-} } // HPHP::JIT
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Populates `imm' on `inst'.
+ *
+ * Assumes that inst.source and inst.unit have been properly set.
+ */
+void populateImmediates(NormalizedInstruction& inst);
+
+///////////////////////////////////////////////////////////////////////////////
+}}
 #endif

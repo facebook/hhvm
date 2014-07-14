@@ -1415,6 +1415,11 @@ DecRefNZ S0:Gen
   This instruction can be used for more efficient code when it is provable that
   the reference count cannot go to zero.
 
+TakeRef S0:Gen
+
+  Produce reference, but do not modify the reference count. Used to inform
+  refcount optimizer about implicitly owned references.
+
 
 13. Misc
 

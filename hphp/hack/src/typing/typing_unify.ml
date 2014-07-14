@@ -94,7 +94,7 @@ and unify_ env r1 ty1 r2 ty2 =
   | Tprim x, Tprim y ->
       (match x, y with
       | x, y when x = y ->
-	        env, Tprim x
+          env, Tprim x
       | _ ->
           TUtils.uerror r1 ty1 r2 ty2;
           env, Tany
@@ -141,17 +141,24 @@ and unify_ env r1 ty1 r2 ty2 =
           env, Tapply (id, argl)
   | Tabstract (((p1, x1) as id), argl1, tcstr1),
       Tabstract ((p2, x2), argl2, tcstr2) when String.compare x1 x2 = 0 ->
-        assert (List.length argl1 = List.length argl2);
-        let env, tcstr =
-          match tcstr1, tcstr2 with
-          | None, None -> env, None
-          | Some x1, Some x2 ->
-              let env, x = unify env x1 x2 in
-              env, Some x
-          | _ -> assert false
-        in
-        let env, argl = lfold2 unify env argl1 argl2 in
-        env, Tabstract (id, argl, tcstr)
+        if List.length argl1 <> List.length argl2
+        then begin
+          let n1 = soi (List.length argl1) in
+          let n2 = soi (List.length argl2) in
+          Errors.type_arity_mismatch p1 n1 p2 n2;
+          env, Tany
+        end
+        else
+          let env, tcstr =
+            match tcstr1, tcstr2 with
+            | None, None -> env, None
+            | Some x1, Some x2 ->
+                let env, x = unify env x1 x2 in
+                env, Some x
+            | _ -> assert false
+          in
+          let env, argl = lfold2 unify env argl1 argl2 in
+          env, Tabstract (id, argl, tcstr)
   | Tgeneric (x1, None), Tgeneric (x2, None) when x1 = x2 ->
       env, Tgeneric (x1, None)
   | Tgeneric (x1, Some ty1), Tgeneric (x2, Some ty2) when x1 = x2 ->

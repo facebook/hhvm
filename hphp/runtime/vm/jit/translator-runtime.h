@@ -154,6 +154,7 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key);
 bool ak_exist_int_obj(ObjectData* obj, int64_t key);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
+TypedValue arrayIdxIc(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 

@@ -1289,6 +1289,8 @@ class mysqli_stmt {
         return $this->hh_affected_rows();
       case 'errno':
         return $this->hh_errno();
+      case 'error_list':
+        return $this->__get_error_list();
       case 'error':
         return $this->hh_error();
       case 'field_count':
@@ -1299,6 +1301,8 @@ class mysqli_stmt {
         return $this->hh_num_rows();
       case 'param_count':
         return $this->hh_param_count();
+      case 'sqlstate':
+        return $this->hh_sqlstate();
     }
 
     trigger_error('Undefined property: mysqli_stmt::$'. $name, E_USER_NOTICE);
@@ -1318,6 +1322,20 @@ class mysqli_stmt {
       'Trying to clone an uncloneable object of class mysqli_stmt'
     );
   }
+
+  // The implementation of the getter for $error_list
+  private function __get_error_list(): array {
+    $result = array();
+    if ($this->errno) {
+      $result[] = array(
+        'errno' => $this->errno,
+        'sqlstate' => $this->sqlstate,
+        'error' => $this->error,
+      );
+    }
+    return $result;
+  }
+
 
   <<__Native>>
   private function hh_affected_rows(): mixed;
@@ -1342,6 +1360,9 @@ class mysqli_stmt {
 
   <<__Native>>
   private function hh_param_count(): mixed;
+
+  <<__Native>>
+  private function hh_sqlstate(): mixed;
 
   /**
    * Used to get the current value of a statement attribute
@@ -1555,8 +1576,26 @@ class mysqli_stmt {
    *
    * @return bool -
    */
+  public function store_result(): mixed {
+    // First we need to set the MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH attribute in
+    // some cases.
+    $result = $this->result_metadata();
+    $fields = $result->fetch_fields();
+    foreach ($fields as $field) {
+      if ($field->type == MYSQLI_TYPE_BLOB ||
+          $field->type == MYSQLI_TYPE_MEDIUM_BLOB ||
+          $field->type == MYSQLI_TYPE_LONG_BLOB ||
+          $field->type == MYSQLI_TYPE_GEOMETRY) {
+        $this->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1);
+        break;
+      }
+    }
+
+    return $this->hh_store_result();
+  }
+
   <<__Native>>
-  public function store_result(): mixed;
+  public function hh_store_result(): mixed;
 
 }
 

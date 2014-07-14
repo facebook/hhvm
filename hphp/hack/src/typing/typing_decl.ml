@@ -81,7 +81,7 @@ let check_extend_kind env parent_pos parent_kind child_pos child_kind c =
 (*****************************************************************************)
 let desugar_class_hint = function
   | (_, Happly ((pos, class_name), type_parameters)) ->
-      pos, class_name, type_parameters
+    pos, class_name, type_parameters
   | _ -> assert false
 
 let check_arity pos class_name class_type class_parameters =
@@ -237,11 +237,11 @@ let declared_class_req class_nast impls (env, requirements, req_extends) hint =
   let req_extends = SSet.add req_name req_extends in
   let env, req_type = Env.get_class_dep env req_name in
   match req_type with
-    | None ->
-      (* The class lives in PHP : error?? *)
+    | None -> (* The class lives in PHP : error?? *)
       let requirements = SMap.add req_name req_ty requirements in
       env, requirements, req_extends
-    | Some parent_type ->
+    | Some parent_type -> (* The parent class lives in Hack *)
+
       (* since the req is declared on this class, we should
        * emphatically *not* substitute: a require extends Foo<T> is
        * going to be this class's <T> *)
@@ -251,8 +251,14 @@ let declared_class_req class_nast impls (env, requirements, req_extends) hint =
         req_ty ex_ty_opt req_pos in
       let requirements = SMap.add req_name merged requirements in
 
-      (* The parent class lives in Hack *)
-      env, requirements, SSet.union req_extends parent_type.tc_extends
+      let req_extends = SSet.union parent_type.tc_extends req_extends in
+      (* the req may be of an interface that has reqs of its own; the
+       * flattened ancestry required by *those* reqs need to be added
+       * in to, e.g., interpret accesses to protected functions inside
+       * traits *)
+      let req_extends =
+        SSet.union parent_type.tc_req_ancestors_extends req_extends in
+      env, requirements, req_extends
 
 let get_class_requirements env class_nast impls =
   let req_ancestors = SMap.empty in

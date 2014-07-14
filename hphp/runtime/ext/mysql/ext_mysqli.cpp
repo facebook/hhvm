@@ -581,6 +581,14 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_param_count) {
   return getStmt(this_)->param_count();
 }
 
+static Variant HHVM_METHOD(mysqli_stmt, hh_sqlstate) {
+  return getStmt(this_)->sqlstate();
+}
+
+static Variant HHVM_METHOD(mysqli_stmt, hh_store_result) {
+  return getStmt(this_)->store_result();
+}
+
 static Variant HHVM_METHOD(mysqli_stmt, prepare, const String& query) {
   return getStmt(this_)->prepare(query);
 }
@@ -596,10 +604,6 @@ static Variant HHVM_METHOD(mysqli_stmt, result_metadata) {
 static Variant HHVM_METHOD(mysqli_stmt, send_long_data, int64_t param_nr,
                            const String& data) {
   return getStmt(this_)->send_long_data(param_nr, data);
-}
-
-static Variant HHVM_METHOD(mysqli_stmt, store_result) {
-  return getStmt(this_)->store_result();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -704,11 +708,12 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli_stmt, hh_insert_id);
     HHVM_ME(mysqli_stmt, hh_num_rows);
     HHVM_ME(mysqli_stmt, hh_param_count);
+    HHVM_ME(mysqli_stmt, hh_sqlstate);
+    HHVM_ME(mysqli_stmt, hh_store_result);
     HHVM_ME(mysqli_stmt, prepare);
     HHVM_ME(mysqli_stmt, reset);
     HHVM_ME(mysqli_stmt, result_metadata);
     HHVM_ME(mysqli_stmt, send_long_data);
-    HHVM_ME(mysqli_stmt, store_result);
 
     HHVM_FE(mysqli_get_client_version);
     //HHVM_FE(mysqli_get_client_stats);

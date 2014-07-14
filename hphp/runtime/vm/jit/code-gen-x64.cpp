@@ -45,26 +45,27 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
-#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/target-profile.h"
 
 using HPHP::JIT::TCA;
 
@@ -241,6 +242,7 @@ NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
+NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
 
 CALL_OPCODE(AddElemStrKey)
@@ -1108,12 +1110,21 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
              dstLoc(0).reg(), dstLoc(0).reg(1));
     return;
   }
+  auto const src = inst->src(0);
+
   auto sreg = srcLoc(0).reg();
   auto dreg = dstLoc(0).reg();
-  if (sreg == InvalidReg) {
-    emitLoadImm(m_as, inst->src(0)->rawVal(), dreg);
-  } else {
+
+  if (sreg != InvalidReg && dreg != InvalidReg) {
     emitMovRegReg(m_as, sreg, dreg);
+  } else if (sreg == InvalidReg && dreg != InvalidReg) {
+    // It won't have a raw value if it's null.
+    auto const stype = src->type();
+    assert(stype.hasRawVal() || stype <= Type::Null);
+    auto const raw = stype.hasRawVal() ? src->rawVal() : 0;
+    emitLoadImm(m_as, raw, dreg);
+  } else {
+    assert(sreg == InvalidReg && dreg == InvalidReg);
   }
 }
 

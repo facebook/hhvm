@@ -2035,13 +2035,18 @@ void HhbcTranslator::emitArrayIdx() {
 
   KeyType arrayKeyType;
   bool checkForInt;
-  checkStrictlyInteger(key, arrayKeyType, checkForInt);
+  bool converted;
+  checkStrictlyInteger(key, arrayKeyType, checkForInt, converted);
 
   TCA opFunc;
   if (checkForInt) {
     opFunc = (TCA)&arrayIdxSi;
   } else if (KeyType::Int == arrayKeyType) {
-    opFunc = (TCA)&arrayIdxI;
+    if (converted) {
+      opFunc = (TCA)&arrayIdxIc;
+    } else {
+      opFunc = (TCA)&arrayIdxI;
+    }
   } else {
     assert(KeyType::Str == arrayKeyType);
     opFunc = (TCA)&arrayIdxS;
@@ -3900,8 +3905,11 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
 
-  // Drop reference to this resumable.
+  // Drop reference to this resumable. The reference to the object storing
+  // the frame is implicitly owned by the execution. TakeRef is used to inform
+  // the refcount optimizer about this fact.
   if (resumableObj != nullptr) {
+    gen(TakeRef, resumableObj);
     gen(DecRef, resumableObj);
   }
 
@@ -6499,8 +6507,9 @@ void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
 }
 
 void HhbcTranslator::checkStrictlyInteger(
-    SSATmp*& key, KeyType& keyType, bool& checkForInt) {
+    SSATmp*& key, KeyType& keyType, bool& checkForInt, bool& converted) {
   checkForInt = false;
+  converted = false;
   if (key->isA(Type::Int)) {
     keyType = KeyType::Int;
   } else {
@@ -6509,6 +6518,7 @@ void HhbcTranslator::checkStrictlyInteger(
     if (key->isConst()) {
       int64_t i;
       if (key->strVal()->isStrictlyInteger(i)) {
+        converted = true;
         keyType = KeyType::Int;
         key = cns(i);
       }

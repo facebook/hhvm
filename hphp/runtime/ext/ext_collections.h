@@ -598,7 +598,7 @@ class c_VectorIterator : public ExtObjectData {
 
  private:
   SmartPtr<BaseVector> m_obj;
-  ssize_t m_pos;
+  uint32_t m_pos;
   int32_t m_version;
 
   friend class BaseVector;
@@ -1106,70 +1106,66 @@ class HashCollection : public ExtCollectionObjectData {
   // repeatedly adding new elements until m_size >= sz.
   void reserve(int64_t sz);
 
-  // The iter functions below facilitate iteration over Sets and ImmSets.
+  // The iter functions below facilitate iteration over HashCollections.
   // Iterators cannot store Elm pointers (because it's possible for m_data
-  // to change without bumping m_version in some cases). Iterators track
-  // their position in terms of _bytes_ from the beginning of the buffer
-  // since it requires less computation overall.
+  // to change without bumping m_version in some cases), so indices are
+  // used instead.
 
-  ssize_t iter_limit() const {
-    return (ssize_t)fetchElm((Elm*)nullptr, posLimit());
+  bool iter_valid(ssize_t pos) const {
+    return pos < (ssize_t)posLimit();
   }
 
-  bool iter_valid(ssize_t ipos) const {
-    return ipos != iter_limit();
+  bool iter_valid(ssize_t pos, ssize_t limit) const {
+    assert(limit == (ssize_t)posLimit());
+    return pos < limit;
   }
 
-  bool iter_valid(ssize_t ipos, ssize_t limit) const {
-    assert(limit == iter_limit());
-    return ipos != limit;
-  }
-
-  const Elm* iter_elm(ssize_t ipos) const {
-    assert(iter_valid(ipos));
-    return (const Elm*)((ssize_t)data() + ipos);
+  const Elm* iter_elm(ssize_t pos) const {
+    assert(iter_valid(pos));
+    return fetchElm(data(), pos);
   }
 
   ssize_t iter_begin() const {
-    ssize_t limit = iter_limit();
-    ssize_t ipos = 0;
-    for (; ipos != limit; ipos += sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
+    ssize_t limit = posLimit();
+    ssize_t pos = 0;
+    for (; pos != limit; ++pos) {
+      auto* e = iter_elm(pos);
       if (!isTombstone(e)) break;
     }
-    return ipos;
+    return pos;
   }
 
-  ssize_t iter_next(ssize_t ipos) const {
-    ssize_t limit = iter_limit();
-    for (ipos += sizeof(Elm); ipos < limit; ipos += sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
-      if (!isTombstone(e)) return ipos;
+  ssize_t iter_next(ssize_t pos) const {
+    ssize_t limit = posLimit();
+    for (++pos; pos < limit; ++pos) {
+      auto* e = iter_elm(pos);
+      if (!isTombstone(e)) return pos;
     }
     return limit;
   }
 
-  ssize_t iter_prev(ssize_t ipos) const {
-    ssize_t orig_ipos = ipos;
-    for (ipos -= sizeof(Elm); ipos >= 0; ipos -= sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
-      if (!isTombstone(e)) return ipos;
+  ssize_t iter_prev(ssize_t pos) const {
+    ssize_t orig_pos = pos;
+    while (pos > 0) {
+      --pos;
+      auto* e = iter_elm(pos);
+      if (!isTombstone(e)) return pos;
     }
-    return orig_ipos;
+    return orig_pos;
   }
 
-  Variant iter_key(ssize_t ipos) const {
-    assert(iter_valid(ipos));
-    auto* e = iter_elm(ipos);
+  Variant iter_key(ssize_t pos) const {
+    assert(iter_valid(pos));
+    auto* e = iter_elm(pos);
     if (e->hasStrKey()) {
       return e->skey;
     }
     return (int64_t)e->ikey;
   }
 
-  const TypedValue* iter_value(ssize_t ipos) const {
-    assert(iter_valid(ipos));
-    return &iter_elm(ipos)->data;
+  const TypedValue* iter_value(ssize_t pos) const {
+    assert(iter_valid(pos));
+    return &iter_elm(pos)->data;
   }
 
   uint32_t nthElmPos(size_t n) const {
@@ -1614,7 +1610,7 @@ class c_MapIterator : public ExtObjectData {
 
  private:
   SmartPtr<BaseMap> m_obj;
-  ssize_t m_pos;
+  uint32_t m_pos;
   int32_t m_version;
 
   friend class BaseMap;
@@ -1958,7 +1954,7 @@ class c_SetIterator : public ExtObjectData {
 
  private:
   SmartPtr<BaseSet> m_obj;
-  ssize_t m_pos;
+  uint32_t m_pos;
   int32_t m_version;
 
   friend class BaseSet;
@@ -2122,7 +2118,7 @@ class c_PairIterator : public ExtObjectData {
 
  private:
   SmartPtr<c_Pair> m_obj;
-  ssize_t m_pos;
+  uint32_t m_pos;
 
   friend class c_Pair;
 };

@@ -1394,7 +1394,7 @@ Variant c_VectorIterator::t_current() {
   if (UNLIKELY(m_version != vec->getVersion())) {
     throw_collection_modified();
   }
-  if (!vec->contains(m_pos)) {
+  if (m_pos >= vec->m_size) {
     throw_iterator_not_valid();
   }
   return tvAsCVarRef(&vec->m_data[m_pos]);
@@ -1402,15 +1402,15 @@ Variant c_VectorIterator::t_current() {
 
 Variant c_VectorIterator::t_key() {
   BaseVector* vec = m_obj.get();
-  if (!vec->contains(m_pos)) {
+  if (m_pos >= vec->m_size) {
     throw_iterator_not_valid();
   }
-  return m_pos;
+  return (int64_t)m_pos;
 }
 
 bool c_VectorIterator::t_valid() {
   BaseVector* vec = m_obj.get();
-  return vec && (m_pos < (ssize_t)vec->m_size);
+  return vec && (m_pos < vec->m_size);
 }
 
 void c_VectorIterator::t_next() {
@@ -2477,15 +2477,15 @@ BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
   if (!m_size) return obj;
 
   int32_t version = m_version;
-  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
-    auto* e = iter_elm(ipos);
+  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
+    auto* e = iter_elm(pos);
     auto args = makeArgs(*e);
     bool b = invokeAndCastToBool(ctx, args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
     if (!b) continue;
-    e = iter_elm(ipos);
+    e = iter_elm(pos);
     if (e->hasIntKey()) {
       mp->setRaw(e->ikey, &e->data);
     } else {
@@ -2523,8 +2523,8 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
   }
   auto size = m_size;
   if (!size) { return this; }
-  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
-    auto* e = iter_elm(ipos);
+  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
+    auto* e = iter_elm(pos);
     auto args = makeArgs(*e);
     int32_t version = m_version;
     bool b = invokeAndCastToBool(ctx, args.size(), &(args[0]));
@@ -2536,7 +2536,7 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
     }
     mutateAndBump();
     version = m_version;
-    e = iter_elm(ipos);
+    e = iter_elm(pos);
     ssize_t pp = (e->hasIntKey()
                    ? findForRemove(e->ikey)
                    : findForRemove(e->skey, e->skey->hash()));
@@ -2666,8 +2666,8 @@ BaseMap::php_takeWhile(const Variant& fn) {
   if (checkVersion) {
     version = m_version;
   }
-  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
-    auto* e = iter_elm(ipos);
+  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
+    auto* e = iter_elm(pos);
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
     if (checkVersion) {
       if (UNLIKELY(version != m_version)) {
@@ -2675,7 +2675,7 @@ BaseMap::php_takeWhile(const Variant& fn) {
       }
     }
     if (!b) continue;
-    e = iter_elm(ipos);
+    e = iter_elm(pos);
     if (e->hasIntKey()) {
       mp->setRaw(e->ikey, &e->data);
     } else {
@@ -2751,9 +2751,9 @@ BaseMap::php_skipWhile(const Variant& fn) {
   if (checkVersion) {
     version = m_version;
   }
-  ssize_t ipos;
-  for (ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
-    auto* e = iter_elm(ipos);
+  ssize_t pos;
+  for (pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
+    auto* e = iter_elm(pos);
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
     if (checkVersion) {
       if (UNLIKELY(version != m_version)) {
@@ -2763,7 +2763,7 @@ BaseMap::php_skipWhile(const Variant& fn) {
     if (!b) break;
   }
   auto* eLimit = elmLimit();
-  auto* e = iter_elm(ipos);
+  auto* e = iter_elm(pos);
   for (; e != eLimit; e = nextElm(e, eLimit)) {
     if (e->hasIntKey()) {
       mp->setRaw(e->ikey, &e->data);
@@ -4170,8 +4170,8 @@ BaseSet::php_map(const Variant& callback) {
   auto oldCap = st->cap();
   st->reserve(posLimit()); // presume minimum collisions ...
   assert(st->canMutateBuffer());
-  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
-    auto* e = iter_elm(ipos);
+  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
+    auto* e = iter_elm(pos);
     TypedValue tvCbRet;
     int32_t pVer = m_version;
     g_context->invokeFuncFew(&tvCbRet, ctx, 1, &e->data);
@@ -4203,14 +4203,14 @@ BaseSet::php_filter(const Variant& callback) {
   if (!m_size) return obj;
   // we don't st->reserve, because we don't know how selective callback will be
   int32_t version = m_version;
-  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
-    auto* e = iter_elm(ipos);
+  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
+    auto* e = iter_elm(pos);
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
     if (!b) continue;
-    e = iter_elm(ipos);
+    e = iter_elm(pos);
     if (e->hasIntKey()) {
       st->addRaw(e->data.m_data.num);
     } else {
@@ -4249,9 +4249,9 @@ Object BaseSet::php_retain(const Variant& callback) {
   }
   auto size = m_size;
   if (!size) { return this; }
-  for (ssize_t ipos = iter_begin(); iter_valid(ipos); ipos = iter_next(ipos)) {
+  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     int32_t version = m_version;
-    auto* e = iter_elm(ipos);
+    auto* e = iter_elm(pos);
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
@@ -4259,7 +4259,7 @@ Object BaseSet::php_retain(const Variant& callback) {
     if (b) { continue; }
     mutateAndBump();
     version = m_version;
-    e = iter_elm(ipos);
+    e = iter_elm(pos);
     ssize_t pp = (e->hasIntKey()
                    ? findForRemove(e->ikey)
                    : findForRemove(e->skey, e->skey->hash()));
@@ -5549,7 +5549,7 @@ Variant c_PairIterator::t_key() {
   if (!pair->contains(m_pos)) {
     throw_iterator_not_valid();
   }
-  return m_pos;
+  return (int64_t)m_pos;
 }
 
 bool c_PairIterator::t_valid() {

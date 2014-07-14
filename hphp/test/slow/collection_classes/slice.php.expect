@@ -51,15 +51,15 @@ c => 3
 LazySliceKeyedIterable
 e => 5
 LazySliceKeyedIterable
-LazySliceIterable
+LazySliceKeyedIterable
 2
 3
-LazySliceIterable
+LazySliceKeyedIterable
 5
-LazySliceIterable
-LazySliceIterable
+LazySliceKeyedIterable
+LazySliceKeyedIterable
 2
 3
-LazySliceIterable
+LazySliceKeyedIterable
 5
-LazySliceIterable
+LazySliceKeyedIterable

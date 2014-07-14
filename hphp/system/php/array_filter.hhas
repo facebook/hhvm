@@ -10,12 +10,6 @@ not_array:
           CGetL $arr
           InstanceOfD "HH\\KeyedTraversable"
           JmpNZ start_kt
-          CGetL $arr
-          InstanceOfD "HH\\Set"
-          JmpNZ start_kt
-          CGetL $arr
-          InstanceOfD "HH\\ImmSet"
-          JmpNZ start_kt
           String "array_filter() expects parameter 1 to be an array or collection"
           Jmp warning
 bad_param2:

@@ -2988,6 +2988,17 @@
                     ]
                 },
                 {
+                    "name": "keys",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the keys of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "values",
                     "flags": [
                     ],
@@ -3144,6 +3155,28 @@
                     ]
                 },
                 {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap built from the keys and values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -3225,7 +3258,37 @@
                     ]
                 },
                 {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set of the values produced by applying the specified callback on each key and value from this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set of all the values from this Set for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
                     "flags": [
                     ],
                     "desc": "Returns a Set of all the values from this Set for which the specified callback returns true.",
@@ -3244,6 +3307,21 @@
                     "flags": [
                     ],
                     "desc": "Ensures that this Set contains only values for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retainWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this Set contains only keys/values for which the specified callback returns true when passed the key and the value.",
                     "return": {
                         "type": "Object"
                     },
@@ -3375,10 +3453,32 @@
                     ]
                 },
                 {
+                    "name": "firstKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first key from this Set, or null if this Vector is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "lastValue",
                     "flags": [
                     ],
                     "desc": "Returns the last value from this Set, or null if this Set is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last key from this Set, or null if this Set is empty.",
                     "return": {
                         "type": "Variant"
                     },
@@ -3610,6 +3710,17 @@
                     ]
                 },
                 {
+                    "name": "keys",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the keys of this ImmSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "values",
                     "flags": [
                     ],
@@ -3673,6 +3784,28 @@
                     "flags": [
                     ],
                     "desc": "Returns a ImmVector built from the values of this ImmSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this ImmSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap built from the keys and values of this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -3761,7 +3894,37 @@
                     ]
                 },
                 {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmSet of the values produced by applying the specified callback on each key and value from this ImmSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmSet of all the values from this ImmSet for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
                     "flags": [
                     ],
                     "desc": "Returns a ImmSet of all the values from this ImmSet for which the specified callback returns true.",
@@ -3896,10 +4059,32 @@
                     ]
                 },
                 {
+                    "name": "firstKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first key from this ImmSet, or null if this ImmSet is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "lastValue",
                     "flags": [
                     ],
                     "desc": "Returns the last value from this ImmSet, or null if this ImmSet is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last key from this ImmSet, or null if this ImmSet is empty.",
                     "return": {
                         "type": "Variant"
                     },

@@ -32,16 +32,13 @@
   bool t___isset(Variant name);                      \
   Variant t___unset(Variant name)
 
-#define DECLARE_ITERABLE_MATERIALIZE_METHODS()       \
+#define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
   Object t_tovector();                               \
-  Object t_toimmvector();                          \
+  Object t_toimmvector();                            \
+  Object t_tomap();                                  \
+  Object t_toimmmap();                               \
   Object t_toset();                                  \
   Object t_toimmset()
-
-#define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
-  DECLARE_ITERABLE_MATERIALIZE_METHODS();            \
-  Object t_tomap();                                  \
-  Object t_toimmmap()
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,12 +95,12 @@ class BaseVector : public ExtCollectionObjectData {
   template<class TVector, class MakeArgs>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_map(const Variant& callback, MakeArgs);
+  php_map(const Variant& callback, MakeArgs) const;
 
   template<class TVector, class MakeArgs>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_filter(const Variant& callback, MakeArgs);
+  php_filter(const Variant& callback, MakeArgs) const;
 
   template<class TVector>
   typename std::enable_if<
@@ -1480,6 +1477,7 @@ class c_Map : public BaseMap {
   bool t_isempty();
   int64_t t_count();
   Object t_items();
+  Object t_values();
   Object t_keys();
   Object t_lazy();
   Variant t_at(const Variant& key); // const
@@ -1494,8 +1492,6 @@ class c_Map : public BaseMap {
   Array t_tokeysarray();
   Array t_tovaluesarray();
   DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
-  Object t_values();
-  Object t_differencebykey(const Variant& it);
   Object t_getiterator();
   Object t_map(const Variant& callback);
   Object t_mapwithkey(const Variant& callback);
@@ -1517,6 +1513,7 @@ class c_Map : public BaseMap {
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromarray(const Variant& arr); // deprecated
+  Object t_differencebykey(const Variant& it);
   Object t_immutable();
 
  protected:
@@ -1681,10 +1678,17 @@ class BaseSet : public HashCollection {
   // Static methods
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
-  static void throwNoIndexAccess() ATTRIBUTE_NORETURN;
+  static void throwNoMutableIndexAccess() ATTRIBUTE_NORETURN;
 
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
+
+  template <bool throwOnMiss>
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
+  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, const TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
@@ -1706,23 +1710,28 @@ class BaseSet : public HashCollection {
     return o;
   }
 
-  Object  php_lazy() { return SystemLib::AllocLazyIterableViewObject(this); }
-  bool    php_contains(const Variant& key);
+  Object  php_lazy() {
+    return SystemLib::AllocLazyKeyedIterableViewObject(this);
+  }
+  Variant php_at(const Variant& key) const;
+  Variant php_get(const Variant& key) const;
+  bool    php_contains(const Variant& key) const;
   Array   php_toKeysArray() { return php_toValuesArray(); }
   Array   php_toValuesArray();
   Object  php_getIterator();
 
-  template<class TSet>
+  template<class TSet, class MakeArgs>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_map(const Variant& callback);
+  php_map(const Variant& callback, MakeArgs) const;
 
-  template<class TSet>
+  template<class TSet, class MakeArgs>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_filter(const Variant& callback);
+  php_filter(const Variant& callback, MakeArgs) const;
 
-  Object php_retain(const Variant& callback);
+  template<class MakeArgs>
+  Object php_retain(const Variant& callback, MakeArgs);
 
   template<class TSet>
   typename std::enable_if<
@@ -1829,17 +1838,21 @@ class c_Set : public BaseSet {
   int64_t t_count();
   Object t_items();
   Object t_values();
+  Object t_keys();
   Object t_lazy();
   bool t_contains(const Variant& key);
   Object t_remove(const Variant& key);
   Array t_toarray();
   Array t_tokeysarray();
   Array t_tovaluesarray();
-  DECLARE_ITERABLE_MATERIALIZE_METHODS();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
   Object t_getiterator();
   Object t_map(const Variant& callback);
+  Object t_mapwithkey(const Variant& callback);
   Object t_filter(const Variant& callback);
+  Object t_filterwithkey(const Variant& callback);
   Object t_retain(const Variant& callback);
+  Object t_retainwithkey(const Variant& callback);
   Object t_zip(const Variant& iterable);
   Object t_take(const Variant& n);
   Object t_takewhile(const Variant& callback);
@@ -1848,7 +1861,9 @@ class c_Set : public BaseSet {
   Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
+  Variant t_firstkey();
   Variant t_lastvalue();
+  Variant t_lastkey();
   Object t_removeall(const Variant& iterable);
   Object t_difference(const Variant& iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -1886,11 +1901,14 @@ class c_ImmSet : public BaseSet {
   int64_t t_count();
   Object t_items();
   Object t_values();
+  Object t_keys();
   Object t_lazy();
   bool t_contains(const Variant& key);
   Object t_getiterator();
   Object t_map(const Variant& callback);
+  Object t_mapwithkey(const Variant& callback);
   Object t_filter(const Variant& callback);
+  Object t_filterwithkey(const Variant& callback);
   Object t_zip(const Variant& iterable);
   Object t_take(const Variant& n);
   Object t_takewhile(const Variant& callback);
@@ -1899,14 +1917,16 @@ class c_ImmSet : public BaseSet {
   Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
+  Variant t_firstkey();
   Variant t_lastvalue();
+  Variant t_lastkey();
 
   // Materialization methods.
   Array t_toarray();
   Array t_tokeysarray();
   Array t_tovaluesarray();
 
-  DECLARE_ITERABLE_MATERIALIZE_METHODS();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
 
   DECLARE_COLLECTION_MAGIC_METHODS();
 

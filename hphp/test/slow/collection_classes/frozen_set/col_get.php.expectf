@@ -1,4 +1,0 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message '[] operator not supported for accessing elements of Sets' in %s:7
-Stack trace:
-#0 %s(10): main()
-#1 {main}

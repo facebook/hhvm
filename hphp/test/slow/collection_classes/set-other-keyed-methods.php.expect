@@ -1,0 +1,210 @@
+==== Set ====
+object(HH\Map)#2 (4) {
+  [5]=>
+  int(5)
+  ["a"]=>
+  string(1) "a"
+  [0]=>
+  int(0)
+  [""]=>
+  string(0) ""
+}
+object(HH\ImmMap)#2 (4) {
+  [5]=>
+  int(5)
+  ["a"]=>
+  string(1) "a"
+  [0]=>
+  int(0)
+  [""]=>
+  string(0) ""
+}
+object(HH\Map)#3 (4) {
+  [5]=>
+  int(5)
+  ["a"]=>
+  string(1) "a"
+  [0]=>
+  int(0)
+  [""]=>
+  string(0) ""
+}
+object(HH\ImmMap)#4 (4) {
+  [5]=>
+  int(5)
+  ["a"]=>
+  string(1) "a"
+  [0]=>
+  int(0)
+  [""]=>
+  string(0) ""
+}
+----
+object(HH\Map)#6 (4) {
+  [11]=>
+  int(11)
+  ["aba"]=>
+  string(3) "aba"
+  [1]=>
+  int(1)
+  ["b"]=>
+  string(1) "b"
+}
+object(HH\ImmMap)#8 (4) {
+  [11]=>
+  int(11)
+  ["aba"]=>
+  string(3) "aba"
+  [1]=>
+  int(1)
+  ["b"]=>
+  string(1) "b"
+}
+object(HH\Map)#11 (4) {
+  [5]=>
+  int(11)
+  ["a"]=>
+  string(3) "aba"
+  [0]=>
+  int(1)
+  [""]=>
+  string(1) "b"
+}
+object(HH\ImmMap)#14 (4) {
+  [5]=>
+  int(11)
+  ["a"]=>
+  string(3) "aba"
+  [0]=>
+  int(1)
+  [""]=>
+  string(1) "b"
+}
+----
+object(HH\Vector)#14 (4) {
+  [0]=>
+  int(5)
+  [1]=>
+  string(1) "a"
+  [2]=>
+  int(0)
+  [3]=>
+  string(0) ""
+}
+object(HH\Vector)#16 (4) {
+  [0]=>
+  int(5)
+  [1]=>
+  string(1) "a"
+  [2]=>
+  int(0)
+  [3]=>
+  string(0) ""
+}
+int(5)
+string(0) ""
+==== ImmSet ====
+object(HH\Map)#17 (4) {
+  [5]=>
+  int(5)
+  ["a"]=>
+  string(1) "a"
+  [0]=>
+  int(0)
+  [""]=>
+  string(0) ""
+}
+object(HH\ImmMap)#17 (4) {
+  [5]=>
+  int(5)
+  ["a"]=>
+  string(1) "a"
+  [0]=>
+  int(0)
+  [""]=>
+  string(0) ""
+}
+object(HH\Map)#18 (4) {
+  [5]=>
+  int(5)
+  ["a"]=>
+  string(1) "a"
+  [0]=>
+  int(0)
+  [""]=>
+  string(0) ""
+}
+object(HH\ImmMap)#19 (4) {
+  [5]=>
+  int(5)
+  ["a"]=>
+  string(1) "a"
+  [0]=>
+  int(0)
+  [""]=>
+  string(0) ""
+}
+----
+object(HH\Map)#21 (4) {
+  [11]=>
+  int(11)
+  ["aba"]=>
+  string(3) "aba"
+  [1]=>
+  int(1)
+  ["b"]=>
+  string(1) "b"
+}
+object(HH\ImmMap)#23 (4) {
+  [11]=>
+  int(11)
+  ["aba"]=>
+  string(3) "aba"
+  [1]=>
+  int(1)
+  ["b"]=>
+  string(1) "b"
+}
+object(HH\Map)#26 (4) {
+  [5]=>
+  int(11)
+  ["a"]=>
+  string(3) "aba"
+  [0]=>
+  int(1)
+  [""]=>
+  string(1) "b"
+}
+object(HH\ImmMap)#29 (4) {
+  [5]=>
+  int(11)
+  ["a"]=>
+  string(3) "aba"
+  [0]=>
+  int(1)
+  [""]=>
+  string(1) "b"
+}
+----
+object(HH\ImmVector)#29 (4) {
+  [0]=>
+  int(5)
+  [1]=>
+  string(1) "a"
+  [2]=>
+  int(0)
+  [3]=>
+  string(0) ""
+}
+object(HH\Vector)#31 (4) {
+  [0]=>
+  int(5)
+  [1]=>
+  string(1) "a"
+  [2]=>
+  int(0)
+  [3]=>
+  string(0) ""
+}
+int(5)
+string(0) ""

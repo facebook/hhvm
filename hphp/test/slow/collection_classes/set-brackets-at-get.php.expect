@@ -1,0 +1,52 @@
+int(5)
+string(1) "a"
+int(0)
+string(0) ""
+int(5)
+string(1) "a"
+int(0)
+string(0) ""
+----
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+----
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+----
+Only integer values and string values may be used with Sets
+Integer key 3 is not defined
+String key "b" is not defined
+Only integer values and string values may be used with Sets
+Integer key 3 is not defined
+String key "b" is not defined
+----
+Only integer values and string values may be used with Sets
+bool(false)
+bool(false)
+Only integer values and string values may be used with Sets
+bool(false)
+bool(false)
+----
+Only integer values and string values may be used with Sets
+bool(true)
+bool(true)
+Only integer values and string values may be used with Sets
+bool(true)
+bool(true)
+----
+object(HH\Set)#1 (2) {
+  int(0)
+  string(0) ""
+}

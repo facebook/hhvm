@@ -1,0 +1,36 @@
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+int(123)
+string(1) "a"
+object(HH\Set)#1 (5) {
+  int(5)
+  string(1) "a"
+  int(0)
+  string(0) ""
+  int(123)
+}
+----
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+[] operator cannot be used to modify elements of a Set
+Cannot modify immutable object of type HH\ImmSet
+string(1) "a"
+object(HH\ImmSet)#10 (4) {
+  int(5)
+  string(1) "a"
+  int(0)
+  string(0) ""
+}

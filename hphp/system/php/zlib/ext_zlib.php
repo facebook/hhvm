@@ -7,9 +7,9 @@
  * 
  */
 function lz4compress(string $uncompressed) {
-	trigger_error("lz4compress is now depreciated in favour of lz4_compress", 
-								E_USER_WARNING);
-	lz4_compress($uncompressed);
+  trigger_error("lz4compress is now depreciated in favour of lz4_compress", 
+                 E_USER_WARNING);
+  lz4_compress($uncompressed);
 }
 
 /**
@@ -19,9 +19,9 @@ function lz4compress(string $uncompressed) {
  * 
  */
 function lz4hccompress(string $uncompressed) {
-	trigger_error("lz4hccompress is now depreciated in favour of lz4_hccompress", 
-								E_USER_WARNING);
-	lz4_hccompress($uncompressed);
+  trigger_error("lz4hccompress is now depreciated in favour of lz4_hccompress", 
+                E_USER_WARNING);
+  lz4_hccompress($uncompressed);
 }
 
 /**
@@ -31,7 +31,7 @@ function lz4hccompress(string $uncompressed) {
  * 
  */
 function lz4uncompress(string $compressed) {
-	trigger_error("lz4uncompress is now depreciated in favour of lz4_uncompress", 
-								E_USER_WARNING);
-	lz4_uncompress($compressed);
+  trigger_error("lz4uncompress is now depreciated in favour of lz4_uncompress", 
+                E_USER_WARNING);
+  lz4_uncompress($compressed);
 }

@@ -106,7 +106,7 @@ public:
   /**
    * Get memory usage in MB by a process.
    */
-  static int GetProcessRSS(pid_t pid);
+  static int64_t GetProcessRSS(pid_t pid);
 
   /**
    * Current thread's identifier.

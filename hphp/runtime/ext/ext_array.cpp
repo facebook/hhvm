@@ -2132,9 +2132,8 @@ php_sort(VRefParam container, int sort_flags,
       return true;
     }
     // other collections are not supported:
-    //  - mapping types require associative sort
-    //  - frozen types are not to be modified
-    //  - set types are not ordered
+    //  - Maps and Sets require associative sort
+    //  - Immutable collections are not to be modified
   }
   throw_expected_array_or_collection_exception();
   return false;
@@ -2159,9 +2158,10 @@ php_asort(VRefParam container, int sort_flags,
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == Collection::MapType) {
-      BaseMap* mp = static_cast<BaseMap*>(obj);
-      mp->asort(sort_flags, ascending);
+    if (obj->getCollectionType() == Collection::MapType ||
+        obj->getCollectionType() == Collection::SetType) {
+      HashCollection* hc = static_cast<HashCollection*>(obj);
+      hc->asort(sort_flags, ascending);
       return true;
     }
   }
@@ -2179,9 +2179,10 @@ php_ksort(VRefParam container, int sort_flags, bool ascending) {
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == Collection::MapType) {
-      BaseMap* mp = static_cast<BaseMap*>(obj);
-      mp->ksort(sort_flags, ascending);
+    if (obj->getCollectionType() == Collection::MapType ||
+        obj->getCollectionType() == Collection::SetType) {
+      HashCollection* hc = static_cast<HashCollection*>(obj);
+      hc->ksort(sort_flags, ascending);
       return true;
     }
   }
@@ -2247,9 +2248,8 @@ bool f_usort(VRefParam container, const Variant& cmp_function) {
       return vec->usort(cmp_function);
     }
     // other collections are not supported:
-    //  - mapping types require associative sort
-    //  - frozen types are not to be modified
-    //  - set types are not ordered
+    //  - Maps and Sets require associative sort
+    //  - Immutable collections are not to be modified
   }
   throw_expected_array_or_collection_exception();
   return false;
@@ -2268,10 +2268,14 @@ bool f_uasort(VRefParam container, const Variant& cmp_function) {
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == Collection::MapType) {
-      BaseMap* mp = static_cast<BaseMap*>(obj);
-      return mp->uasort(cmp_function);
+    if (obj->getCollectionType() == Collection::MapType ||
+        obj->getCollectionType() == Collection::SetType) {
+      HashCollection* hc = static_cast<HashCollection*>(obj);
+      return hc->uasort(cmp_function);
     }
+    // other collections are not supported:
+    //  - Vectors require a non-associative sort
+    //  - Immutable collections are not to be modified
   }
   throw_expected_array_or_collection_exception();
   return false;
@@ -2285,10 +2289,14 @@ bool f_uksort(VRefParam container, const Variant& cmp_function) {
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == Collection::MapType) {
-      BaseMap* mp = static_cast<BaseMap*>(obj);
-      return mp->uksort(cmp_function);
+    if (obj->getCollectionType() == Collection::MapType ||
+        obj->getCollectionType() == Collection::SetType) {
+      HashCollection* hc = static_cast<HashCollection*>(obj);
+      return hc->uksort(cmp_function);
     }
+    // other collections are not supported:
+    //  - Vectors require a non-associative sort
+    //  - Immutable collections are not to be modified
   }
   throw_expected_array_or_collection_exception();
   return false;

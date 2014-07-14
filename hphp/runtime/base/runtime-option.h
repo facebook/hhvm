@@ -112,6 +112,12 @@ public:
   static int ServerBacklog;
   static int ServerConnectionLimit;
   static int ServerThreadCount;
+  static bool EnableMemoryProtector;
+  static int ProdServerPort;
+  static int64_t MemoryThreshold;
+  static int MemProtectorWaitBeforeStart;
+  static int MemoryCheckFreq;
+  static int QueuedJobsReleaseRate;
   static int ServerWarmupThrottleRequestCount;
   static bool ServerThreadRoundRobin;
   static int ServerThreadDropCacheTimeoutSeconds;

@@ -112,6 +112,12 @@ int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
+int64_t RuntimeOption::MemoryThreshold = -1;
+int RuntimeOption::MemProtectorWaitBeforeStart = 100000;
+int RuntimeOption::MemoryCheckFreq = 3000;
+bool RuntimeOption::EnableMemoryProtector = false;
+int RuntimeOption::ProdServerPort = 80;
+int RuntimeOption::QueuedJobsReleaseRate = 3;
 bool RuntimeOption::ServerThreadRoundRobin = false;
 int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
@@ -940,6 +946,21 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(ServerConnectionLimit, ini, server["ConnectionLimit"], 0);
     Config::Bind(ServerThreadCount, ini, server["ThreadCount"],
                  Process::GetCPUCount() * 2);
+
+    // for memory protector
+    Config::Bind(MemoryThreshold, ini,
+        server["MemoryThreshold"], -1);
+    Config::Bind(MemoryCheckFreq, ini,
+        server["MemoryCheckFreq"], 3000);
+    Config::Bind(QueuedJobsReleaseRate, ini,
+        server["QueuedJobsReleaseRate"], 3);
+    Config::Bind(EnableMemoryProtector, ini,
+        server["EnableMemoryProtector"], false);
+    Config::Bind(MemProtectorWaitBeforeStart, ini,
+        server["MemProtectorWaitBeforeStart"], 100000);
+    Config::Bind(ProdServerPort, ini,
+        server["ProdServerPort"], 80);
+
     Config::Bind(ServerThreadRoundRobin, ini, server["ThreadRoundRobin"]);
     Config::Bind(ServerWarmupThrottleRequestCount, ini,
                  server["WarmupThrottleRequestCount"],

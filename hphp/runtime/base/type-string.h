@@ -176,14 +176,14 @@ public:
     }
   }
   // attach to binary malloc'ed string
-  String(char* s, int length, AttachStringMode mode) {
+  String(char* s, size_t length, AttachStringMode mode) {
     if (s) {
       m_px = StringData::Make(s, length, mode);
       m_px->setRefCount(1);
     }
   }
   // make copy of binary binary string
-  String(const char *s, int length, CopyStringMode mode) {
+  String(const char *s, size_t length, CopyStringMode mode) {
     if (s) {
       m_px = StringData::Make(s, length, mode);
       m_px->setRefCount(1);
@@ -197,7 +197,7 @@ public:
     }
   }
   // make an empty string with cap reserve bytes, plus 1 for '\0'
-  String(int cap, ReserveStringMode mode) {
+  String(size_t cap, ReserveStringMode mode) {
     m_px = StringData::Make(cap);
     m_px->setRefCount(1);
   }
@@ -226,16 +226,17 @@ public:
     m_px->setSize(len);
     return *this;
   }
-  const String& shrink(int len) {
+  const String& shrink(size_t len) {
     assert(m_px);
-    if (m_px->size() - len > kMinShrinkThreshold) {
+    if (len < m_px->size() && m_px->size() - len > kMinShrinkThreshold) {
       StringBase::operator=(m_px->shrink(len));
     } else {
+      assert(len < StringData::MaxSize);
       m_px->setSize(len);
     }
     return *this;
   }
-  MutableSlice reserve(int size) {
+  MutableSlice reserve(size_t size) {
     if (!m_px) return MutableSlice("", 0);
     auto const tmp = m_px->reserve(size);
     if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);

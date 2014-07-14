@@ -928,7 +928,7 @@ String f_utf8_decode(const String& data) {
 }
 
 String f_utf8_encode(const String& data) {
-  const auto maxSize = data.size() * 4;
+  auto const maxSize = safe_cast<size_t>(data.size()) * 4;
   String str = String(maxSize, ReserveString);
   char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;

@@ -45,8 +45,12 @@ struct Options {
    * Functions that we should assume may be used with fb_intercept.
    * Functions that aren't named in this list may be optimized with
    * the assumption they aren't intercepted, in whole_program mode.
+   *
+   * If AllFuncsInterceptable, it's as if this list contains every function in
+   * the program.
    */
   std::set<std::string,stdltistr> InterceptableFunctions;
+  bool AllFuncsInterceptable = false;
 
   //////////////////////////////////////////////////////////////////////
 

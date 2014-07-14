@@ -18,9 +18,8 @@ process, though.
 A HHVM server can be configured to allow remote debugging with option
 Eval.Debugger.EnableDebuggerServer. This creates a new debug-only
 endpoint to which debugger clients may connect on the port specified
-by Eval.Debugger.DebuggerServerPort (default 8089). The class
-DebuggerServer is responsible for setting up and listening for
-connections on this endpoint.
+by Eval.Debugger.Port (default 8089). The class DebuggerServer is
+responsible for setting up and listening for connections on this endpoint.
 
 
 1.1 The Proxy

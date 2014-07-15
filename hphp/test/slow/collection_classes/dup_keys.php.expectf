@@ -1,0 +1,21 @@
+Warning: Map::toArray() for a map containing both int(42) and string('42') in %s/test/slow/collection_classes/dup_keys.php on line 5
+object(HH\Map)#1 (2) {
+  ["42"]=>
+  string(2) "65"
+  [42]=>
+  int(65)
+}
+array(1) {
+  [42]=>
+  int(65)
+}
+
+Warning: Set::toArray() for a set containing both int(42) and string('42') in %s/test/slow/collection_classes/dup_keys.php on line 7
+object(HH\Set)#2 (2) {
+  string(2) "42"
+  int(42)
+}
+array(1) {
+  [42]=>
+  int(42)
+}

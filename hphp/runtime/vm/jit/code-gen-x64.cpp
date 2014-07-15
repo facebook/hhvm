@@ -111,20 +111,13 @@ template <class Block>
 void CodeGenerator::ifBlock(ConditionCode cc, Block taken,
                             bool unlikely) {
   if (unlikely) return unlikelyIfBlock(cc, taken);
-
-  Label done;
-  m_as.jcc(ccNegate(cc), done);
-  taken(m_as);
-  asm_label(m_as, done);
+  ifThen(m_as, cc, taken);
 }
 
 template <class Block>
 void CodeGenerator::unlikelyIfBlock(ConditionCode cc, Block unlikely) {
   if (m_as.base() == m_acold.base()) {
-    Label done;
-    m_as.jcc(ccNegate(cc), done);
-    unlikely(m_as);
-    asm_label(m_as, done);
+    ifThen(m_as, cc, unlikely);
   } else {
     Label unlikelyLabel, done;
     m_as.jcc(cc, unlikelyLabel);
@@ -583,8 +576,8 @@ void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     m_as.testq (srcReg, srcReg);
-    ifThen(m_as, CC_Z, [&] {
-      m_as.ud2();
+    ifThen(m_as, CC_Z, [&](Asm& a) {
+      a.ud2();
     });
   }
   emitMovRegReg(m_as, srcReg, dstReg);
@@ -2257,9 +2250,9 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
     a.    pxor               (rCgXMM1, rCgXMM1);
     a.    ucomisd            (rCgXMM1, srcReg);
 
-    ifThen(a, CC_B, [&] {
+    ifThen(a, CC_B, [&](Asm& a) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
-      ifThen(a, CC_NP, [&] {
+      ifThen(a, CC_NP, [&](Asm& a) {
         emitLoadImm(a, maxULongAsDouble, rCgXMM1);
         a.   ucomisd    (rCgXMM1, srcReg);
         ifThenElse(a, CC_B, [&](Asm& a) {
@@ -3053,23 +3046,23 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
 
 void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc) {
   assert(type.maybeCounted());
-  auto increfMaybeStatic = [&] {
+  auto increfMaybeStatic = [&](Asm& a) {
     auto base = srcLoc.reg(0);
     if (!type.needsStaticBitCheck()) {
-      emitIncRef(m_as, base);
+      emitIncRef(a, base);
     } else {
-      m_as.cmpl(0, base[FAST_REFCOUNT_OFFSET]);
+      a.cmpl(0, base[FAST_REFCOUNT_OFFSET]);
       static_assert(UncountedValue < 0 && StaticValue < 0, "");
-      ifThen(m_as, CC_NS, [&] { emitIncRef(m_as, base); });
+      ifThen(a, CC_NS, [&](Asm& a) { emitIncRef(a, base); });
     }
   };
 
   if (type.isKnownDataType()) {
     assert(IS_REFCOUNTED_TYPE(type.toDataType()));
-    increfMaybeStatic();
+    increfMaybeStatic(m_as);
   } else {
     emitCmpTVType(m_as, KindOfRefCountThreshold, srcLoc.reg(1));
-    ifThen(m_as, CC_NLE, [&] { increfMaybeStatic(); });
+    ifThen(m_as, CC_NLE, [&](Asm& a) { increfMaybeStatic(a); });
   }
 }
 
@@ -3089,7 +3082,7 @@ void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
   auto& a = m_as;
 
   a.    testb  (0x1, rbyte(src));
-  ifThen(a, CC_Z, [&] {
+  ifThen(a, CC_Z, [&](Asm& a) {
     emitIncRef(a, src);
   });
 }
@@ -3107,11 +3100,11 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   // Load AR->m_this into m_rScratch
   m_as.loadq(fpReg[AROFF(m_this)], scratchReg);
 
-  auto decrefIfAvailable = [&] {
+  auto decrefIfAvailable = [&](Asm& a) {
     // Check if this is available and we're not in a static context instead
-    m_as.testb(1, rbyte(scratchReg));
-    ifThen(m_as, CC_Z, [&] {
-      cgDecRefStaticType(
+    a.testb(1, rbyte(scratchReg));
+    ifThen(a, CC_Z, [&](Asm& a) {
+      cgDecRefStaticType(a,
         Type::Obj,
         scratchReg,
         true /* genZeroCheck */
@@ -3122,9 +3115,9 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   if (curFunc()->isPseudoMain()) {
     // In pseudo-mains, emit check for presence of m_this
     m_as.testq(scratchReg, scratchReg);
-    ifThen(m_as, CC_NZ, [&] { decrefIfAvailable(); });
+    ifThen(m_as, CC_NZ, [&](Asm& a) { decrefIfAvailable(a); });
   } else {
-    decrefIfAvailable();
+    decrefIfAvailable(m_as);
   }
 }
 
@@ -3241,7 +3234,7 @@ struct CheckValid<void(*)(Asm&)> {
 //               emitted; NULL otherwise.
 //
 template <typename F>
-Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
+Address CodeGenerator::cgCheckStaticBitAndDecRef(Asm& a, Type type,
                                                  PhysReg dataReg,
                                                  F destroyImpl) {
   always_assert(type.maybeCounted());
@@ -3252,10 +3245,10 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
     hasDestroy ? decRefDestroyIsUnlikely(profile, type) : false;
 
   if (hasDestroy) {
-    emitIncStat(m_mainCode, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
-                                            : Stats::TC_DecRef_Likely_Decl);
+    emitIncStat(a.code(), unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
+                                          : Stats::TC_DecRef_Likely_Decl);
   } else {
-    emitIncStat(m_mainCode, Stats::TC_DecRef_NZ);
+    emitIncStat(a.code(), Stats::TC_DecRef_NZ);
   }
 
   auto destroy = [&](Asm& a) {
@@ -3268,10 +3261,10 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
   };
 
   if (!type.needsStaticBitCheck()) {
-    m_as.decl(dataReg[FAST_REFCOUNT_OFFSET]);
+    a.decl(dataReg[FAST_REFCOUNT_OFFSET]);
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(m_as);
+      emitAssertFlagsNonNegative(a);
     }
 
     if (hasDestroy) ifBlock(CC_E, destroy, unlikelyDestroy);
@@ -3298,21 +3291,22 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
   };
 
   if (hasDestroy) {
-    m_as.cmpl(1, dataReg[FAST_REFCOUNT_OFFSET]);
+    a.cmpl(1, dataReg[FAST_REFCOUNT_OFFSET]);
     ifThenElse(CC_E, destroy, static_check_and_decl, unlikelyDestroy);
     return addrToPatch;
-  } else if (type.needsStaticBitCheck()) {
-    m_as.cmpl(0, dataReg[FAST_REFCOUNT_OFFSET]);
+  }
+  if (type.needsStaticBitCheck()) {
+    a.cmpl(0, dataReg[FAST_REFCOUNT_OFFSET]);
   }
 
-  static_check_and_decl(m_as);
+  static_check_and_decl(a);
 
   return addrToPatch;
 }
 
-Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
+Address CodeGenerator::cgCheckStaticBitAndDecRef(Asm& a, Type type,
                                                  PhysReg dataReg) {
-  return cgCheckStaticBitAndDecRef(type, dataReg, (void (*)(Asm&))nullptr);
+  return cgCheckStaticBitAndDecRef(a, type, dataReg, (void (*)(Asm&))nullptr);
 }
 
 //
@@ -3336,7 +3330,7 @@ Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg, int64_t offset) {
 //
 // Generates dec-ref of a typed value with statically known type.
 //
-void CodeGenerator::cgDecRefStaticType(Type type,
+void CodeGenerator::cgDecRefStaticType(Asm& a, Type type,
                                        PhysReg dataReg,
                                        bool genZeroCheck) {
   assert(type != Type::Cell && type != Type::Gen);
@@ -3349,7 +3343,7 @@ void CodeGenerator::cgDecRefStaticType(Type type,
   // which is tested below
   Address patchStaticCheck = nullptr;
   if (genZeroCheck) {
-    patchStaticCheck = cgCheckStaticBitAndDecRef(
+    patchStaticCheck = cgCheckStaticBitAndDecRef(a,
       type, dataReg, [&] (Asm& a) {
         // Emit the call to release in m_acold
         cgCallHelper(a,
@@ -3360,11 +3354,11 @@ void CodeGenerator::cgDecRefStaticType(Type type,
                      .reg(dataReg));
       });
   } else {
-    patchStaticCheck = cgCheckStaticBitAndDecRef(type, dataReg);
+    patchStaticCheck = cgCheckStaticBitAndDecRef(a, type, dataReg);
   }
 
   if (patchStaticCheck) {
-    m_as.patchJcc8(patchStaticCheck, m_as.frontier());
+    a.patchJcc8(patchStaticCheck, a.frontier());
   }
 }
 
@@ -3382,7 +3376,7 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
   Address patchStaticCheck;
   if (genZeroCheck) {
     patchStaticCheck =
-      cgCheckStaticBitAndDecRef(
+      cgCheckStaticBitAndDecRef(m_as,
         Type::Cell, dataReg,
         [&] (Asm& a) {
           // load destructor fptr
@@ -3396,8 +3390,7 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
                        .reg(dataReg));
         });
   } else {
-    patchStaticCheck =
-      cgCheckStaticBitAndDecRef(Type::Cell, dataReg);
+    patchStaticCheck = cgCheckStaticBitAndDecRef(m_as, Type::Cell, dataReg);
   }
 
   // Patch checks to jump around the DecRef
@@ -3424,7 +3417,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 
   // Emit check for UncountedValue or StaticValue and the actual DecRef
   Address patchStaticCheck =
-      cgCheckStaticBitAndDecRef(Type::Cell, scratchReg, [&](Asm& a) {
+      cgCheckStaticBitAndDecRef(m_as, Type::Cell, scratchReg, [&](Asm& a) {
         // Emit call to release in m_acold
         a.lea(baseReg[offset], scratchReg);
         cgCallHelper(a,
@@ -3457,7 +3450,7 @@ void CodeGenerator::cgDecRefMem(Type type,
     cgDecRefDynamicTypeMem(baseReg, offset);
   } else if (type.maybeCounted()) {
     m_as.loadq(baseReg[offset + TVOFF(m_data)], scratchReg);
-    cgDecRefStaticType(type, scratchReg, true);
+    cgDecRefStaticType(m_as, type, scratchReg, true);
   }
 }
 
@@ -3473,7 +3466,7 @@ void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   if (!isRefCounted(src)) return;
   Type type = src->type();
   if (type.isKnownDataType()) {
-    cgDecRefStaticType(type, srcLoc(0).reg(), genZeroCheck);
+    cgDecRefStaticType(m_as, type, srcLoc(0).reg(), genZeroCheck);
   } else {
     cgDecRefDynamicType(srcLoc(0).reg(1), srcLoc(0).reg(0), genZeroCheck);
   }
@@ -3507,17 +3500,17 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_this))]);
 
   m_as.shrq    (1, m_rScratch);
-  ifThen(m_as, CC_NBE, [this] {
-      m_as.shlq(1, m_rScratch);
-      emitIncRef(m_as, m_rScratch);
+  ifThen(m_as, CC_NBE, [this](Asm& a) {
+      a.shlq(1, m_rScratch);
+      emitIncRef(a, m_rScratch);
     });
   m_as.loadq   (fpReg[itOff + CufIter::nameOff()], m_rScratch);
   m_as.testq    (m_rScratch, m_rScratch);
-  ifThen(m_as, CC_NZ, [this] {
-      m_as.cmpl(0, m_rScratch[FAST_REFCOUNT_OFFSET]);
+  ifThen(m_as, CC_NZ, [this](Asm& a) {
+      a.cmpl(0, m_rScratch[FAST_REFCOUNT_OFFSET]);
       static_assert(UncountedValue < 0 && StaticValue < 0, "");
-      ifThen(m_as, CC_NS, [&] { emitIncRef(m_as, m_rScratch); });
-      m_as.orq (ActRec::kInvNameBit, m_rScratch);
+      ifThen(a, CC_NS, [&](Asm& a) { emitIncRef(a, m_rScratch); });
+      a.orq (ActRec::kInvNameBit, m_rScratch);
     });
   m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_invName))]);
   m_as.storel  (safe_cast<int32_t>(nArgs),
@@ -5513,8 +5506,8 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
   emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)],
                base[TVOFF(m_data)],
     [&](ConditionCode cc) {
-      ifThen(m_as, ccNegate(cc), [&] {
-        cgCallHelper(m_as,
+      ifThen(m_as, ccNegate(cc), [&](Asm& a) {
+        cgCallHelper(a,
                      CppCall::direct(tvBox),
                      callDest(dstReg),
                      SyncOptions::kNoSyncPoint,
@@ -6113,7 +6106,7 @@ void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
                srcLoc(0).reg(1),
                srcLoc(0).reg(0),
                [&](ConditionCode cc) {
-                 ifThen(m_as, ccNegate(cc), [&] { m_as.ud2(); });
+                 ifThen(m_as, ccNegate(cc), [&](Asm& a) { a.ud2(); });
                });
 }
 
@@ -6136,8 +6129,8 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
     m_as.emitImmReg(imm, m_rScratch);
     m_as.cmpq(m_rScratch, *rsp);
   }
-  ifThen(m_as, CC_NE, [&] {
-     m_as.ud2();
+  ifThen(m_as, CC_NE, [&](Asm& a) {
+     a.ud2();
   });
 }
 
@@ -6157,7 +6150,7 @@ void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
   // The native call for this instruction is the slow path that does
   // proper subtype checking. The comparison above is just to
   // short-circuit the overhead when the Classes are an exact match.
-  ifThen(m_as, CC_NE, [&]{ cgCallNative(m_as, inst); });
+  ifThen(m_as, CC_NE, [&](Asm& a){ cgCallNative(a, inst); });
 }
 
 void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {

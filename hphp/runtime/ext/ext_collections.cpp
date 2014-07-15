@@ -428,7 +428,7 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    auto* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
     pair->incRefCount();
     pair->initAdd(&m_data[i]);
     pair->initAdd(v);
@@ -674,7 +674,32 @@ void BaseVector::throwBadKeyType() {
   throw e;
 }
 
+static bool canUseArrayForVector(const Variant& t) {
+  if (!t.isArray()) return false;
+  auto array = t.getArrayData();
+  if (!array->isPacked()) return false;
+  if (array->isStatic() || array->isUncounted()) return true;
+  ArrayIter iter(array);
+  if (!iter) return false;
+  do {
+    if (iter.secondRefPlus().asTypedValue()->m_type == KindOfRef) {
+      return false;
+    }
+    ++iter;
+  } while (iter);
+  return true;
+}
+
 void BaseVector::init(const Variant& t) {
+  if (canUseArrayForVector(t)) {
+    ArrayData* arr = t.getArrayData();
+    arr->incRefCount();
+    m_data = packedData(arr);
+    m_size = arr->size();
+    m_capacity = arr->m_packedCapCode;
+    m_version = 0;
+    return;
+  }
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
   if (sz) { reserve(sz); }
@@ -2063,7 +2088,36 @@ c_Map* c_Map::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_Map>(obj);
 }
 
+static bool canUseArrayForMap(const Variant& t, bool& setIntLikeStrKeys) {
+  if (!t.isArray()) return false;
+  auto array = t.getArrayData();
+  if(!array->isMixed()) return false;
+  bool noRefCheck = array->isStatic() || array->isUncounted();
+  ArrayIter iter(array);
+  if (!iter) return false;
+  do {
+    auto key = iter.first();
+    if (key.isString() && !setIntLikeStrKeys) {
+      int64_t ignore;
+      if (key.asCStrRef().get()->isStrictlyInteger(ignore)) {
+        setIntLikeStrKeys = true;
+      }
+    }
+    if (!noRefCheck &&
+        iter.secondRefPlus().asTypedValue()->m_type == KindOfRef) {
+      return false;
+    }
+    ++iter;
+  } while (iter);
+  return true;
+}
+
 void BaseMap::init(const Variant& t) {
+  bool intLikeStrKeys = false;
+  if (canUseArrayForMap(t, intLikeStrKeys)) {
+    initWithArray(MixedArray::asMixed(t.getArrayData()), intLikeStrKeys);
+    return;
+  }
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
   if (sz) {
@@ -2577,7 +2631,7 @@ BaseMap::php_zip(const Variant& iterable) const {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
-    auto* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
     Object pairObj = pair;
     pair->initAdd(&e.data);
     pair->initAdd(v);
@@ -3814,7 +3868,51 @@ void BaseSet::addAll(const Variant& t) {
   }
 }
 
+static bool canUseArrayForSet(const Variant& t, bool& setIntLikeStrKeys) {
+  if (!t.isArray()) return false;
+  auto array = t.getArrayData();
+  if(!array->isMixed()) return false;
+  bool noRefCheck = array->isStatic() || array->isUncounted();
+  ArrayIter iter(array);
+  if (!iter) return false;
+  do {
+    auto key = iter.first();
+    if (key.isString() && !setIntLikeStrKeys) {
+      int64_t ignore;
+      if (key.asCStrRef().get()->isStrictlyInteger(ignore)) {
+        setIntLikeStrKeys = true;
+      }
+    }
+    auto val = iter.secondRefPlus();
+    if (!noRefCheck && val.asTypedValue()->m_type == KindOfRef) {
+      return false;
+    }
+    if (key.asTypedValue()->m_type != val.asTypedValue()->m_type ||
+        (key.asTypedValue()->m_type != KindOfInt64 &&
+         key.asTypedValue()->m_type != KindOfString &&
+         key.asTypedValue()->m_type != KindOfStaticString)) {
+      // take care of the KindOfString vs KindOfStaticString case
+      if (!((key.asTypedValue()->m_type == KindOfString &&
+             val.asTypedValue()->m_type == KindOfStaticString) ||
+            (key.asTypedValue()->m_type == KindOfStaticString &&
+             val.asTypedValue()->m_type == KindOfString))) {
+        return false;
+      }
+    }
+    if (key.asTypedValue()->m_data.num != val.asTypedValue()->m_data.num) {
+      return false;
+    }
+    ++iter;
+  } while (iter);
+  return true;
+}
+
 void BaseSet::init(const Variant& t) {
+  bool intLikeStrKeys = false;
+  if (canUseArrayForSet(t, intLikeStrKeys)) {
+    initWithArray(MixedArray::asMixed(t.getArrayData()), intLikeStrKeys);
+    return;
+  }
   addAll(t);
 }
 
@@ -4586,6 +4684,14 @@ BaseSet::~BaseSet() {
   decRefArr(arrayData());
 }
 
+void HashCollection::initWithArray(MixedArray* data, bool intLikeStrKeys) {
+  data->incRefCount();
+  m_data = mixedData(data);
+  m_size = data->size();
+  m_version = 0;
+  if (intLikeStrKeys) setIntLikeStrKeys(true);
+}
+
 NEVER_INLINE
 void HashCollection::warnOnStrIntDup() const {
   smart::hash_set<int64_t> seenVals;
@@ -4632,7 +4738,7 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
 }
 
 void c_Set::t___construct(const Variant& iterable /* = null_variant */) {
-  addAll(iterable);
+  init(iterable);
 }
 
 Object c_Set::t_add(const Variant& val) {
@@ -4898,7 +5004,7 @@ c_Set* c_Set::Clone(ObjectData* obj) {
 // ImmSet
 
 void c_ImmSet::t___construct(const Variant& iterable /* = null_variant */) {
-  addAll(iterable);
+  init(iterable);
 }
 
 bool c_ImmSet::t_isempty() {
@@ -5041,6 +5147,15 @@ void c_SetIterator::t_rewind() {
 
 c_Pair::c_Pair(Class* cb)
   : ExtObjectDataFlags(cb)
+  , m_size(2)
+{
+  o_subclassData.u16 = Collection::PairType;
+  tvWriteNull(&elm0);
+  tvWriteNull(&elm1);
+}
+
+c_Pair::c_Pair(NoInit, Class* cb)
+  : ExtObjectDataFlags(cb)
   , m_size(0)
 {
   o_subclassData.u16 = Collection::PairType;
@@ -5057,7 +5172,7 @@ c_Pair::~c_Pair() {
   }
 }
 
-void c_Pair::t___construct() {
+void c_Pair::t___construct(int _argc, const Array& _argv /* = null_array */) {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
     "Pairs cannot be created using the new operator"));
   throw e;
@@ -5271,7 +5386,7 @@ Object c_Pair::t_zip(const Variant& iterable) {
     if (vec->m_capacity <= vec->m_size) {
       vec->grow();
     }
-    auto* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
     pair->incRefCount();
     pair->initAdd(&getElms()[i]);
     pair->initAdd(v);
@@ -6134,7 +6249,7 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
     case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
     case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
-    case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
+    case Collection::PairType: obj = NEWOBJ(c_Pair)(c_Pair::NoInit{}); break;
     case Collection::ImmVectorType: obj = NEWOBJ(c_ImmVector)(); break;
     case Collection::ImmMapType: obj = NEWOBJ(c_ImmMap)(); break;
     case Collection::ImmSetType: obj = NEWOBJ(c_ImmSet)(); break;

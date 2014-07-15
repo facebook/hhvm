@@ -4123,6 +4123,7 @@
                         "type": null
                     },
                     "flags": [
+                        "VariableArguments"
                     ],
                     "args": [
                     ]

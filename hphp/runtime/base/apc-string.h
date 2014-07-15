@@ -36,7 +36,7 @@ struct APCString {
   // Return the PHP string from the APC one
   static Variant MakeString(APCHandle* handle) {
     assert(handle->getType() == KindOfString);
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return APCTypedValue::fromHandle(handle)->getStringData();
     }
     return StringData::Make(APCString::fromHandle(handle));

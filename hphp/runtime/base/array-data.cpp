@@ -431,7 +431,16 @@ extern const ArrayFunctions g_array_funcs = {
    *   Sort an array, by values, and then assign new keys to the
    *   elements in the resulting array.
    */
-  DISPATCH(Sort)
+  {
+    PackedArray::Sort,
+    MixedArray::Sort,
+    APCLocalArray::Sort,
+    EmptyArray::Sort,
+    NameValueTableWrapper::Sort,
+    ProxyArray::Sort,
+    /* IntMapArray */
+    MixedArray::WarnAndSort
+  },
 
   /*
    * void Asort(int sort_flags, bool ascending)
@@ -458,7 +467,16 @@ extern const ArrayFunctions g_array_funcs = {
    *   function (in the variant).  Returns false if the user-defined
    *   comparison function modifies the array we are sorting.
    */
-  DISPATCH(Usort)
+  {
+    PackedArray::Usort,
+    MixedArray::Usort,
+    APCLocalArray::Usort,
+    EmptyArray::Usort,
+    NameValueTableWrapper::Usort,
+    ProxyArray::Usort,
+    /* IntMapArray */
+    MixedArray::WarnAndUsort
+  },
 
   /*
    * bool Uasort(ArrayData*, const Variant&)

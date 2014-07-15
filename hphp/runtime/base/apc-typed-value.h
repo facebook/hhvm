@@ -101,12 +101,12 @@ public:
 
   StringData* getStringData() const {
     assert(m_handle.is(KindOfStaticString) ||
-           (m_handle.getUncounted() && m_handle.is(KindOfString)));
+           (m_handle.isUncounted() && m_handle.is(KindOfString)));
     return m_data.str;
   }
 
   ArrayData* getArrayData() const {
-    assert(m_handle.getUncounted() && m_handle.is(KindOfArray));
+    assert(m_handle.isUncounted() && m_handle.is(KindOfArray));
     return m_data.arr;
   }
 

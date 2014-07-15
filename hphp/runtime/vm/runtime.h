@@ -30,14 +30,6 @@ namespace HPHP {
 struct HhbcExtFuncInfo;
 struct HhbcExtClassInfo;
 
-ObjectData* newVectorHelper(int nElms);
-ObjectData* newMapHelper(int nElms);
-ObjectData* newSetHelper(int nElms);
-ObjectData* newImmVectorHelper(int nElms);
-ObjectData* newImmMapHelper(int nElms);
-ObjectData* newImmSetHelper(int nElms);
-ObjectData* newPairHelper();
-
 StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);

@@ -446,6 +446,9 @@ const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
     if (key.isNull()) return m_px->get(staticEmptyString(), error);
     int64_t n;
     if (!key.get()->isStrictlyInteger(n)) {
+      if (UNLIKELY(m_px->isIntMapArray())) {
+        MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+      }
       return m_px->get(key, error);
     } else {
       return m_px->get(n, error);
@@ -477,6 +480,9 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
       int64_t n;
       if (!(flags & AccessFlags::Key) &&
           key.asTypedValue()->m_data.pstr->isStrictlyInteger(n)) {
+        if (UNLIKELY(m_px->isIntMapArray())) {
+          MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+        }
         return m_px->get(n, flags & AccessFlags::Error);
       }
     }

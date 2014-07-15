@@ -1084,6 +1084,10 @@ void MixedArray::warnUsage(const Reason r) {
     raise_warning("Trying to sort an IntMap array which will re-order keys. "
                   "Downgrading to normal array");
     break;
+  case Reason::kUsort:
+    raise_warning("Trying to usort an IntMap array which will re-order keys. "
+                  "Downgrading to normal array");
+    break;
   case Reason::kNumericString:
     raise_warning("Trying to use a strictly numeric string key with an IntMap "
                   "array which only supports integer keys. "

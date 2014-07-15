@@ -39,7 +39,8 @@ struct APCArray {
   static APCHandle* MakeShared(ArrayData* data,
                                size_t& size,
                                bool inner,
-                               bool unserializeObj);
+                               bool unserializeObj,
+                               bool createIfSer = true);
   static APCHandle* MakeShared();
 
   static Variant MakeArray(APCHandle* handle);

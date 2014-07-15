@@ -125,7 +125,7 @@ void AsioSession::setOnJoinCallback(const Variant& callback) {
 void AsioSession::onIOWaitEnter() {
   runCallback(
     m_onIOWaitEnterCallback,
-    Array::Create(),
+    empty_array(),
     "WaitHandle::onIOWaitEnter"
   );
 }
@@ -133,7 +133,7 @@ void AsioSession::onIOWaitEnter() {
 void AsioSession::onIOWaitExit() {
   runCallback(
     m_onIOWaitExitCallback,
-    Array::Create(),
+    empty_array(),
     "WaitHandle::onIOWaitExit"
   );
 }
@@ -141,7 +141,7 @@ void AsioSession::onIOWaitExit() {
 void AsioSession::onJoin(c_WaitHandle* waitHandle) {
   runCallback(
     m_onJoinCallback,
-    Array::Create(waitHandle),
+    make_packed_array(waitHandle),
     "WaitHandle::onJoin"
   );
 }

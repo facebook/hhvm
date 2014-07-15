@@ -1291,10 +1291,6 @@ class FreeObj {
  */
 static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
                                    TypedValue* valOut, TypedValue* keyOut) {
-  valOut = tvToCell(valOut);
-  if (keyOut) {
-    keyOut = tvToCell(keyOut);
-  }
   ArrayIter::Type itType;
   {
     FreeObj fo;
@@ -1364,6 +1360,10 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
   TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator or Object\n",
         __func__, dest, obj, ctx);
   Collection::Type type = obj->getCollectionType();
+  valOut = tvToCell(valOut);
+  if (keyOut) {
+    keyOut = tvToCell(keyOut);
+  }
   switch (type) {
     case Collection::VectorType:
       return iterInit<c_Vector, ArrayIter::Versionable>(

@@ -57,8 +57,8 @@ if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
   # libdwarf makes breaking changes occasionally and doesn't provide an easy
   # way to test for them. The following checks should detect the changes and
   # pass that information on accordingly.
-  INCLUDE(CheckCSourceCompiles)
-  CHECK_C_SOURCE_COMPILES("#include <libdwarf.h>
+  INCLUDE(CheckCXXSourceCompiles)
+  CHECK_CXX_SOURCE_COMPILES("#include <libdwarf.h>
   int dwarfCallback(const char * a, int b, Dwarf_Unsigned c,
   Dwarf_Unsigned d, Dwarf_Unsigned e, Dwarf_Unsigned f,
   Dwarf_Unsigned * g, Dwarf_Ptr h, int * i) {}
@@ -68,7 +68,7 @@ int main() {
 }" DW_INIT_C)
 
   if (NOT DW_INIT_C)
-	CHECK_C_SOURCE_COMPILES("#include <libdwarf.h>
+	CHECK_CXX_SOURCE_COMPILES("#include <libdwarf.h>
   int dwarfCallback(const char * a, int b, Dwarf_Unsigned c,
   Dwarf_Unsigned d, Dwarf_Unsigned e, Dwarf_Unsigned f,
   Dwarf_Unsigned * g, Dwarf_Ptr h, int * i) {}

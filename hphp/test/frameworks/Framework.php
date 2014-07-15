@@ -731,6 +731,14 @@ class Framework {
   }
 
   private function reenableTestFiles(): void {
+    if ($this->install_root === null) {
+      // Fake framework, eg 'hhvmquickinterp'
+      return;
+    }
+    invariant(
+      $this->install_root,
+      'install root should be a valid path or null'
+    );
     $rdit = new RecursiveDirectoryIterator(
       $this->install_root,
       RecursiveDirectoryIterator::SKIP_DOTS

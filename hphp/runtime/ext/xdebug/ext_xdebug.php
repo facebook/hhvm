@@ -159,6 +159,11 @@ function xdebug_stop_error_collection(): void;
 <<__Native>>
 function xdebug_stop_trace(): void;
 
+/**
+ * Returns the current time index since the starting of the script in seconds.
+ *
+ * @return float - Returns the current time index
+ */
 <<__Native>>
 function xdebug_time_index(): float;
 

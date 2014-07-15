@@ -110,6 +110,8 @@ public:
 
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf);
   virtual void moduleInit();
+  virtual void requestInit();
+  virtual void requestShutdown();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

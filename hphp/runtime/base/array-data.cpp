@@ -206,6 +206,24 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(SetInt)
 
   /*
+   * ArrayData* SetIntConverted(ArrayData*, int64_t key, Cell v, bool copy)
+   *
+   *   Set a value in the array for an integer key. Signifies that the key
+   *   was originally a numeric-string key that was converted to int.
+   *   This function has copy/grow semantics.
+   */
+  {
+    PackedArray::SetInt,
+    MixedArray::SetInt,
+    APCLocalArray::SetInt,
+    EmptyArray::SetInt,
+    NameValueTableWrapper::SetInt,
+    ProxyArray::SetInt,
+    /* IntMapArray */
+    MixedArray::SetIntConverted
+  },
+
+  /*
    * ArrayData* SetStr(ArrayData*, StringData*, Cell v, bool copy)
    *
    *   Set a value in the array for a string key.  The string must not

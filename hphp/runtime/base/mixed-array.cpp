@@ -1478,6 +1478,13 @@ ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v,
   return a->update(k, v);
 }
 
+ArrayData* MixedArray::SetIntConverted(ArrayData* ad, int64_t k, Cell v,
+                                       bool copy) {
+  assert(ad->isIntMapArray());
+  MixedArray::downgradeAndWarn(ad, Reason::kNumericString);
+  return MixedArray::SetInt(ad, k, v, copy);
+}
+
 ArrayData*
 MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
   return SetStrImpl<kMixedKind>(ad, k, v, copy);

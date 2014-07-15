@@ -2219,13 +2219,21 @@ static inline ArrayData* uncheckedSet(ArrayData* a,
   return g_array_funcs.setInt[a->kind()](a, key, value, copy);
 }
 
+
+static inline ArrayData* uncheckedSetConverted(ArrayData* a,
+                                               int64_t key,
+                                               Cell value,
+                                               bool copy) {
+  return g_array_funcs.setIntConverted[a->kind()](a, key, value, copy);
+}
+
 static inline ArrayData* checkedSet(ArrayData* a,
                                     StringData* key,
                                     Cell value,
                                     bool copy) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i))
-    ? uncheckedSet(a, i, value, copy)
+    ? uncheckedSetConverted(a, i, value, copy)
     : uncheckedSet(a, key, value, copy);
 }
 

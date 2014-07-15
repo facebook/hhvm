@@ -1784,9 +1784,8 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Unit")
-             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB,"
-                " mainReturn BLOB, mergeable INTEGER,"
-                "lines BLOB, typeAliases BLOB, UNIQUE (md5));";
+             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB, data BLOB,"
+                "UNIQUE (md5));";
     txn.exec(ssCreate.str());
   }
   {
@@ -1876,24 +1875,22 @@ void UnitRepoProxy::InsertUnitStmt
                            const TypedValue* mainReturn, bool mergeOnly,
                            const LineTable& lines,
                            const std::vector<TypeAlias>& typeAliases) {
-  BlobEncoder linesBlob;
-  BlobEncoder typeAliasesBlob;
+  BlobEncoder dataBlob;
 
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Unit")
-             << " VALUES(NULL, @md5, @bc, "
-                " @mainReturn, @mergeable, @lines, @typeAliases);";
+             << " VALUES(NULL, @md5, @bc, @data);";
     txn.prepare(*this, ssInsert.str());
   }
   RepoTxnQuery query(txn, *this);
   query.bindMd5("@md5", md5);
   query.bindBlob("@bc", (const void*)bc, bclen);
-  query.bindTypedValue("@mainReturn", *mainReturn);
-  query.bindBool("@mergeable", mergeOnly);
-  query.bindBlob("@lines", linesBlob(lines), /* static */ true);
-  query.bindBlob("@typeAliases",
-                 typeAliasesBlob(typeAliases), /* static */ true);
+  dataBlob(*mainReturn)
+          (mergeOnly)
+          (lines)
+          (typeAliases);
+  query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
   unitSn = query.getInsertedRowid();
 }
@@ -1904,8 +1901,7 @@ bool UnitRepoProxy::GetUnitStmt
     RepoTxn txn(m_repo);
     if (!prepared()) {
       std::stringstream ssSelect;
-      ssSelect << "SELECT unitSn,bc,mainReturn,mergeable,"
-                  "lines,typeAliases FROM "
+      ssSelect << "SELECT unitSn,bc,data FROM "
                << m_repo.table(m_repoId, "Unit")
                << " WHERE md5 == @md5;";
       txn.prepare(*this, ssSelect.str());
@@ -1918,21 +1914,24 @@ bool UnitRepoProxy::GetUnitStmt
     }
     int64_t unitSn;                          /**/ query.getInt64(0, unitSn);
     const void* bc; size_t bclen;            /**/ query.getBlob(1, bc, bclen);
-    TypedValue value;                        /**/ query.getTypedValue(2, value);
-    bool mergeable;                          /**/ query.getBool(3, mergeable);
-    BlobDecoder linesBlob =                  /**/ query.getBlob(4);
-    BlobDecoder typeAliasesBlob =            /**/ query.getBlob(5);
+    BlobDecoder dataBlob =                   /**/ query.getBlob(2);
+
     ue.setRepoId(m_repoId);
     ue.setSn(unitSn);
     ue.setBc((const unsigned char*)bc, bclen);
-    ue.setMainReturn(&value);
-    ue.setMergeOnly(mergeable);
 
+    TypedValue mainReturn;
+    bool mergeOnly;
     LineTable lines;
-    linesBlob(lines);
-    ue.setLines(lines);
 
-    typeAliasesBlob(ue.m_typeAliases);
+    dataBlob(mainReturn)
+            (mergeOnly)
+            (lines)
+            (ue.m_typeAliases);
+
+    ue.setMainReturn(&mainReturn);
+    ue.setMergeOnly(mergeOnly);
+    ue.setLines(lines);
 
     txn.commit();
   } catch (RepoExc& re) {

@@ -1,0 +1,28 @@
+int(17)
+string(24) "image/vnd.microsoft.icon"
+string(4) ".ico"
+string(3) "ico"
+array(5) {
+  [0]=>
+  int(48)
+  [1]=>
+  int(48)
+  [2]=>
+  int(17)
+  [3]=>
+  string(22) "width="48" height="48""
+  ["mime"]=>
+  string(24) "image/vnd.microsoft.icon"
+}
+array(5) {
+  [0]=>
+  int(32)
+  [1]=>
+  int(32)
+  [2]=>
+  int(17)
+  [3]=>
+  string(22) "width="32" height="32""
+  ["mime"]=>
+  string(24) "image/vnd.microsoft.icon"
+}

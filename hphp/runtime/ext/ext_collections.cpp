@@ -428,7 +428,7 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    auto* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
     pair->incRefCount();
     pair->initAdd(&m_data[i]);
     pair->initAdd(v);
@@ -2631,7 +2631,7 @@ BaseMap::php_zip(const Variant& iterable) const {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
-    auto* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
     Object pairObj = pair;
     pair->initAdd(&e.data);
     pair->initAdd(v);
@@ -5147,6 +5147,15 @@ void c_SetIterator::t_rewind() {
 
 c_Pair::c_Pair(Class* cb)
   : ExtObjectDataFlags(cb)
+  , m_size(2)
+{
+  o_subclassData.u16 = Collection::PairType;
+  tvWriteNull(&elm0);
+  tvWriteNull(&elm1);
+}
+
+c_Pair::c_Pair(NoInit, Class* cb)
+  : ExtObjectDataFlags(cb)
   , m_size(0)
 {
   o_subclassData.u16 = Collection::PairType;
@@ -5163,7 +5172,7 @@ c_Pair::~c_Pair() {
   }
 }
 
-void c_Pair::t___construct() {
+void c_Pair::t___construct(int _argc, const Array& _argv /* = null_array */) {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
     "Pairs cannot be created using the new operator"));
   throw e;
@@ -5377,7 +5386,7 @@ Object c_Pair::t_zip(const Variant& iterable) {
     if (vec->m_capacity <= vec->m_size) {
       vec->grow();
     }
-    auto* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
     pair->incRefCount();
     pair->initAdd(&getElms()[i]);
     pair->initAdd(v);
@@ -6240,7 +6249,7 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
     case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
     case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
-    case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
+    case Collection::PairType: obj = NEWOBJ(c_Pair)(c_Pair::NoInit{}); break;
     case Collection::ImmVectorType: obj = NEWOBJ(c_ImmVector)(); break;
     case Collection::ImmMapType: obj = NEWOBJ(c_ImmMap)(); break;
     case Collection::ImmSetType: obj = NEWOBJ(c_ImmSet)(); break;

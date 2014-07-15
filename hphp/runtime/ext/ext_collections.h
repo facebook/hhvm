@@ -1980,9 +1980,12 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   DECLARE_CLASS_NO_SWEEP(Pair)
 
  public:
+  enum class NoInit {};
+
   explicit c_Pair(Class* cls = c_Pair::classof());
+  explicit c_Pair(NoInit, Class* cls = c_Pair::classof());
   ~c_Pair();
-  void t___construct();
+  void t___construct(int _argc, const Array& _argv = null_array);
   bool t_isempty();
   int64_t t_count();
   Object t_items();

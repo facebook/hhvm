@@ -402,6 +402,8 @@ bool VarEnv::unset(const StringData* name) {
   return true;
 }
 
+static const StaticString s_closure_var("0Closure");
+
 Array VarEnv::getDefinedVariables() const {
   Array ret = Array::Create();
 
@@ -409,6 +411,10 @@ Array VarEnv::getDefinedVariables() const {
   for (; iter.valid(); iter.next()) {
     auto const sd = iter.curKey();
     auto const tv = iter.curVal();
+    // Closures have an interal 0Closure variable (see emitter.cpp:6539)
+    if (s_closure_var.equal(sd)) {
+      continue;
+    }
     if (tvAsCVarRef(tv).isReferenced()) {
       ret.setWithRef(StrNR(sd).asString(), tvAsCVarRef(tv));
     } else {

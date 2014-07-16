@@ -622,7 +622,8 @@ int VarintDecode(const char** src, int max_size) {
   return val;
 }
 
-Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed, bool high /* = false */) {
+Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
+                                    bool high /* = false */) {
   if(high) {
     return f_lz4_hccompress(uncompressed);
   }

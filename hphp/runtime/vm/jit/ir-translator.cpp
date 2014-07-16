@@ -184,17 +184,17 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
   auto jmpFlags = instrJmpFlags(i);
   if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
     if (op == OpJmpZ) {
-      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, jmpFlags);
+      HHIR_EMIT(JmpZ,  takenOffset, jmpFlags);
     } else {
-      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, jmpFlags);
+      HHIR_EMIT(JmpNZ, takenOffset, jmpFlags);
     }
     return;
   }
   // invert the branch
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, jmpFlags);
+    HHIR_EMIT(JmpNZ, fallthruOffset, jmpFlags);
   } else {
-    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, jmpFlags);
+    HHIR_EMIT(JmpZ,  fallthruOffset, jmpFlags);
   }
   if (i.nextOffset != takenOffset) {
     always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg");

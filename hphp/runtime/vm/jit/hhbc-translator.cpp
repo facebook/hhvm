@@ -2182,7 +2182,6 @@ SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
 }
 
 void HhbcTranslator::emitJmpHelper(int32_t taken,
-                                   int32_t next,
                                    bool negate,
                                    JmpFlags flags,
                                    SSATmp* src) {
@@ -2204,23 +2203,16 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
   gen(negate ? JmpZero : JmpNZero, target, boolSrc);
-
-  // TODO(t3730079): This block is probably redundant with the
-  // fallthrough logic in translateRegion.  Try removing the guards
-  // against conditional jumps there as well as this.
-  if (genMode() == IRGenMode::CFG && m_irb->blockIsIncompatible(next)) {
-    gen(Jmp, makeExit(next));
-  }
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken, Offset next, JmpFlags flags) {
+void HhbcTranslator::emitJmpZ(Offset taken, JmpFlags flags) {
   auto const src = popC();
-  emitJmpHelper(taken, next, true, flags, src);
+  emitJmpHelper(taken, true, flags, src);
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, JmpFlags flags) {
+void HhbcTranslator::emitJmpNZ(Offset taken, JmpFlags flags) {
   auto const src = popC();
-  emitJmpHelper(taken, next, false, flags, src);
+  emitJmpHelper(taken, false, flags, src);
 }
 
 /*

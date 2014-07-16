@@ -221,6 +221,7 @@ public:
    * escalated array data.
    */
   ArrayData *set(int64_t k, const Variant& v, bool copy);
+  ArrayData *setConverted(int64_t k, const Variant& v, bool copy);
   ArrayData *set(StringData* k, const Variant& v, bool copy);
 
   ArrayData *setRef(int64_t k, Variant& v, bool copy);
@@ -479,6 +480,7 @@ struct ArrayFunctions {
   const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
+  ArrayData* (*setIntConverted[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
                            bool copy);
   size_t (*vsize[NK])(const ArrayData*);

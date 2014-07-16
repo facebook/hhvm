@@ -238,6 +238,7 @@ public:
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
+  static ArrayData* SetIntConverted(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);

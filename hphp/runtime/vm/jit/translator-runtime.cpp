@@ -97,7 +97,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // if appropriate
   int64_t intkey;
   ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
-                      ad->set(intkey, tvAsCVarRef(&value), copy) :
+                      ad->setConverted(intkey, tvAsCVarRef(&value), copy) :
                       ad->set(key, tvAsCVarRef(&value), copy);
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
@@ -395,6 +395,9 @@ ALWAYS_INLINE
 static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
+    if (UNLIKELY(arr->isIntMapArray())) {
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+    }
     return arr->exists(n);
   }
   return arr->exists(key);

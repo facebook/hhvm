@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/util/text-util.h"
 
 #include <folly/ScopeGuard.h>
 #include <algorithm>
@@ -4701,17 +4702,24 @@ void HashCollection::warnOnStrIntDup() const {
     int64_t newVal = 0;
 
     if (e->hasIntKey()) {
-      newVal = e->data.m_data.num;
+      newVal = e->ikey;
     } else {
       assert(e->hasStrKey());
       // isStriclyInteger() puts the int value in newVal as a side effect.
-      if (!e->data.m_data.pstr->isStrictlyInteger(newVal)) continue;
+      if (!e->skey->isStrictlyInteger(newVal)) continue;
     }
 
     if (seenVals.find(newVal) != seenVals.end()) {
+      auto cls = getVMClass()->name()->toCppString();
+      auto pos = cls.rfind('\\');
+      if (pos != std::string::npos) {
+        cls = cls.substr(pos + 1);
+      }
       raise_warning(
-        "Set::toArray() for a set containing both int(%" PRId64 ") "
+        "%s::toArray() for a %s containing both int(%" PRId64 ") "
         "and string('%" PRId64 "')",
+        cls.c_str(),
+        toLower(cls).c_str(),
         newVal,
         newVal
       );

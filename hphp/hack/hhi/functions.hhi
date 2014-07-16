@@ -48,8 +48,10 @@ function strval($v): string;
 function boolval($v): bool;
 
 // enum helpers
-function fb_get_enum_values(string $class, bool $recurse): array;
-function fb_get_enum_names(string $class, bool $recurse): array;
+// null $class means to use the get_called_class() context
+function fb_get_enum_values(?string $class, bool $recurse): array;
+// null $class means to use the get_called_class() context
+function fb_get_enum_names(?string $class, bool $recurse): array;
 
 function get_class_constants($class_name): array;
 

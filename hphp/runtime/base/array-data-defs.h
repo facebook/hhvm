@@ -176,6 +176,11 @@ inline ArrayData* ArrayData::set(int64_t k, const Variant& v, bool copy) {
   return g_array_funcs.setInt[m_kind](this, k, *v.asCell(), copy);
 }
 
+inline ArrayData* ArrayData::setConverted(int64_t k, const Variant& v,
+                                          bool copy) {
+  return g_array_funcs.setIntConverted[m_kind](this, k, *v.asCell(), copy);
+}
+
 inline ArrayData* ArrayData::set(StringData* k, const Variant& v, bool copy) {
   return g_array_funcs.setStr[m_kind](this, k, *v.asCell(), copy);
 }

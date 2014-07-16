@@ -22,7 +22,6 @@ val unexpected_eof : Pos.t -> unit
 val missing_field : Pos.t -> Pos.t -> string -> unit
 val generic_class_var : Pos.t -> unit
 val explain_constraint : Pos.t -> string -> error -> unit
-val too_many_args : Pos.t -> unit
 val unexpected_arrow : Pos.t -> string -> unit
 val missing_arrow : Pos.t -> string -> unit
 val disallowed_xhp_type : Pos.t -> string -> unit
@@ -53,8 +52,8 @@ val tparam_with_tparam : Pos.t -> string -> unit
 val shadowed_type_param : Pos.t -> Pos.t -> string -> unit
 val missing_typehint : Pos.t -> unit
 val expected_variable : Pos.t -> unit
-val too_few_arguments : Pos.t -> unit
-val too_many_arguments : Pos.t -> unit
+val naming_too_few_arguments : Pos.t -> unit
+val naming_too_many_arguments : Pos.t -> unit
 val expected_collection : Pos.t -> string -> unit
 val illegal_CLASS : Pos.t -> unit
 val dynamic_method_call : Pos.t -> unit
@@ -164,6 +163,8 @@ val implement_abstract : Pos.t -> Pos.t -> string -> unit
 val generic_static : Pos.t -> string -> unit
 val fun_too_many_args : Pos.t -> Pos.t -> unit
 val fun_too_few_args : Pos.t -> Pos.t -> unit
+val fun_unexpected_nonvariadic : Pos.t -> Pos.t -> unit
+val fun_variadicity_hh_vs_php56 : Pos.t -> Pos.t -> unit
 val expected_tparam : Pos.t -> int -> unit
 val field_missing : string -> Pos.t -> Pos.t -> unit
 val object_string : Pos.t -> Pos.t -> unit

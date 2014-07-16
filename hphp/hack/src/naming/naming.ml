@@ -693,7 +693,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       | [] -> N.Harray (None, None)
       | [x] -> N.Harray (Some (hint env x), None)
       | [x; y] -> N.Harray (Some (hint env x), Some (hint env y))
-      | _ -> Errors.too_many_args p; N.Hany
+      | _ -> Errors.naming_too_many_arguments p; N.Hany
       )
   | "integer" ->
       Errors.integer_instead_of_int p;
@@ -1117,7 +1117,7 @@ and method_ env m =
   let lenv = Env.empty_local() in
   let genv = extend_params genv m.m_tparams in
   let env = genv, lenv in
-  let has_ddd, paraml = fun_paraml env m.m_params in
+  let variadicity, paraml = fun_paraml env m.m_params in
   let name = Env.new_const env m.m_name in
   let acc = false, false, N.Public in
   let final, abs, vis = List.fold_left kind acc m.m_kind in
@@ -1142,7 +1142,7 @@ and method_ env m =
        m_body       = body   ;
        m_user_attributes = attrs;
        m_ret        = ret    ;
-       m_ddd        = has_ddd;
+       m_variadic   = variadicity;
        m_type       = method_type;
      })
 
@@ -1155,22 +1155,23 @@ and kind (final, abs, vis) = function
   | Protected -> final, abs, N.Protected
 
 and fun_paraml env l =
-  let has_ddd, l = ddd l in
-  let _ = List.fold_left check_repetition SSet.empty l in
-  has_ddd, List.map (fun_param env) l
+  let _names = List.fold_left check_repetition SSet.empty l in
+  let variadicity, l = determine_variadicity env l in
+  variadicity, List.map (fun_param env) l
 
-(* ddd stands for dot dot dot (...) *)
-and ddd l =
+and determine_variadicity env l =
   match l with
-  | [] -> false, []
-  | [x] -> (
-      match (x.param_id) with
-      | (_, "...") -> true, []
-      | (_, _) -> false, [x]
-     )
-  | x :: rl ->
-      let ddd, rl = ddd rl in
-      ddd, x :: rl
+    | [] -> N.FVnonVariadic, []
+    | [x] -> (
+      match x.param_is_variadic, x.param_id with
+        | false, _ -> N.FVnonVariadic, [x]
+        (* NOTE: variadic params are removed from the list *)
+        | true, (_, "...") -> N.FVellipsis, []
+        | true, _ -> N.FVvariadicArg (fun_param env x), []
+    )
+    | x :: rl ->
+      let variadicity, rl = determine_variadicity env rl in
+      variadicity, x :: rl
 
 and fun_param env param =
   let x = Env.new_lvar env param.param_id in
@@ -1178,6 +1179,7 @@ and fun_param env param =
   let ty = opt (hint env) param.param_hint in
   { N.param_hint = ty;
     param_is_reference = param.param_is_reference;
+    param_is_variadic = param.param_is_variadic;
     param_id = x;
     param_name = snd param.param_id;
     param_expr = eopt;
@@ -1200,7 +1202,7 @@ and fun_ genv f =
   let lenv = Env.empty_local () in
   let env = genv, lenv in
   let h = opt (hint ~allow_this:true env) f.f_ret in
-  let has_ddd, paraml = fun_paraml env f.f_params in
+  let variadicity, paraml = fun_paraml env f.f_params in
   let x = Env.fun_id env f.f_name in
   let unsafe = is_unsafe_body f.f_body in
   List.iter check_constraint f.f_tparams;
@@ -1218,7 +1220,7 @@ and fun_ genv f =
       f_tparams = f_tparams;
       f_params = paraml;
       f_body = body;
-      f_ddd = has_ddd;
+      f_variadic = variadicity;
       f_type = f.f_type;
     } in
   fun_
@@ -1397,13 +1399,13 @@ and expr_ env = function
       | "\\Pair" ->
         (match l with
           | [] ->
-              Errors.too_few_arguments p;
+              Errors.naming_too_few_arguments p;
               N.Any
           | e1::e2::[] ->
             let pn = "Pair" in
             N.Pair (afield_value env pn e1, afield_value env pn e2)
           | _ ->
-              Errors.too_many_arguments p;
+              Errors.naming_too_many_arguments p;
               N.Any
         )
       | _ ->
@@ -1460,36 +1462,36 @@ and expr_ env = function
       N.Call (N.Cnormal, (p, N.Id (p, "echo")), List.map (expr env) el)
   | Call ((p, Id (_, "call_user_func")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
       | f :: el ->
           N.Call (N.Cuser_func, expr env f, List.map (expr env) el)
       )
   | Call ((p, Id (_, "fun")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_, String (p2, s)] when String.contains s ':' ->
         Errors.illegal_meth_fun p; N.Any
       | [_, String x] -> N.Fun_id (Env.fun_id env x)
       | [p, _] ->
           Errors.illegal_fun p;
           N.Any
-      | _ -> Errors.too_many_arguments p; N.Any
+      | _ -> Errors.naming_too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "inst_meth")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
-      | [_] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
+      | [_] -> Errors.naming_too_few_arguments p; N.Any
       | instance::(_, String meth)::[] ->
         N.Method_id (expr env instance, meth)
       | (p, _)::(_)::[] ->
         Errors.illegal_inst_meth p;
         N.Any
-      | _ -> Errors.too_many_arguments p; N.Any
+      | _ -> Errors.naming_too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "meth_caller")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
-      | [_] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
+      | [_] -> Errors.naming_too_few_arguments p; N.Any
       | e1::e2::[] ->
           (match (expr env e1), (expr env e2) with
           | (_, N.String cl), (_, N.String meth)
@@ -1499,12 +1501,12 @@ and expr_ env = function
             Errors.illegal_meth_caller p;
             N.Any
           )
-      | _ -> Errors.too_many_arguments p; N.Any
+      | _ -> Errors.naming_too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "class_meth")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
-      | [_] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
+      | [_] -> Errors.naming_too_few_arguments p; N.Any
       | e1::e2::[] ->
           (match (expr env e1), (expr env e2) with
           | (_, N.String cl), (_, N.String meth)
@@ -1514,7 +1516,7 @@ and expr_ env = function
             Errors.illegal_class_meth p;
             N.Any
           )
-      | _ -> Errors.too_many_arguments p; N.Any
+      | _ -> Errors.naming_too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "assert")), el) ->
       if List.length el <> 1
@@ -1526,7 +1528,7 @@ and expr_ env = function
           let el = List.map (expr env) el in
           N.Assert (N.AE_invariant (expr env st, expr env format, el))
         | _ ->
-          Errors.too_few_arguments p;
+          Errors.naming_too_few_arguments p;
           N.Any
       )
   | Call ((p, Id (_, "invariant_violation")), el) ->
@@ -1535,12 +1537,12 @@ and expr_ env = function
         let el = List.map (expr env) el in
         N.Assert (N.AE_invariant_violation (expr env format, el))
       | _ ->
-        Errors.too_few_arguments p;
+        Errors.naming_too_few_arguments p;
         N.Any
       )
   | Call ((p, Id (_, "tuple")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
       | el -> N.List (List.map (expr env) el)
       )
   | Call ((p, Id (_, "gena")), el) ->
@@ -1634,7 +1636,7 @@ and expr_ env = function
 and expr_lambda env f =
   let h = opt (hint ~allow_this:true env) f.f_ret in
   let unsafe = List.mem Unsafe f.f_body in
-  let has_ddd, paraml = fun_paraml env f.f_params in
+  let variadicity, paraml = fun_paraml env f.f_params in
   let body = block env f.f_body in
   {
     N.f_unsafe = unsafe;
@@ -1644,7 +1646,7 @@ and expr_lambda env f =
     f_params = paraml;
     f_tparams = [];
     f_body = body;
-    f_ddd = has_ddd;
+    f_variadic = variadicity;
     f_type = f.f_type;
   }
 

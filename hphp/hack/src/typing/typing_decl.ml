@@ -633,25 +633,30 @@ and visibility cid = function
   | Private   -> Vprivate cid
 
 and method_decl c env m =
-  let env, arity, params = Typing.make_params env true 0 m.m_params in
+  let env, arity_min, params = Typing.make_params env true 0 m.m_params in
   let env, ret =
     match m.m_ret with
       | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
       | Some ret -> Typing_hint.hint env ret in
-  let arity_max =
-    if m.m_ddd then 1000 else
-      List.length m.m_params
+  let env, arity = match m.m_variadic with
+    | FVvariadicArg param ->
+      assert param.param_is_variadic;
+      assert (param.param_expr = None);
+      let r = Reason.Rvar_param (fst param.param_id) in
+      let env, (p_name, p_ty) = Typing.make_param_ty env r param in
+      env, Fvariadic (arity_min, (p_name, p_ty))
+    | FVellipsis    -> env, Fellipsis arity_min
+    | FVnonVariadic -> env, Fstandard (arity_min, List.length m.m_params)
   in
   let env, tparams = lfold Typing.type_param env m.m_tparams in
   let ft = {
-    ft_pos = fst m.m_name;
-    ft_unsafe    = m.m_unsafe;
-    ft_abstract  = m.m_abstract;
-    ft_arity_min = arity;
-    ft_arity_max = arity_max;
-    ft_tparams   = tparams;
-    ft_params    = params;
-    ft_ret       = ret;
+    ft_pos      = fst m.m_name;
+    ft_unsafe   = m.m_unsafe;
+    ft_abstract = m.m_abstract;
+    ft_arity    = arity;
+    ft_tparams  = tparams;
+    ft_params   = params;
+    ft_ret      = ret;
   } in
   let ty = Reason.Rwitness (fst m.m_name), Tfun ft in
   env, ty

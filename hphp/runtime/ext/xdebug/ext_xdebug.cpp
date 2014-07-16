@@ -21,12 +21,29 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static const StaticString s_CALL_FN_MAIN("{main}");
+
+struct XdebugRequestData final : RequestEventHandler {
+  void requestInit() override {
+    m_init_time = Timer::GetCurrentTimeMicros();
+  }
+
+  void requestShutdown() override {
+    m_init_time = 0;
+  }
+
+  int64_t m_init_time;
+};
+
+IMPLEMENT_STATIC_REQUEST_LOCAL(XdebugRequestData, s_request);
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Returns the frame of the callee's callee. Useful for the xdebug_call_*
@@ -221,8 +238,10 @@ static void HHVM_FUNCTION(xdebug_stop_error_collection)
 static void HHVM_FUNCTION(xdebug_stop_trace)
   XDEBUG_NOTIMPLEMENTED
 
-static double HHVM_FUNCTION(xdebug_time_index)
-  XDEBUG_NOTIMPLEMENTED
+static double HHVM_FUNCTION(xdebug_time_index) {
+  int64_t micro = Timer::GetCurrentTimeMicros() - s_request->m_init_time;
+  return micro * 1.0e-6;
+}
 
 static TypedValue* HHVM_FN(xdebug_var_dump)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
@@ -297,6 +316,18 @@ void XDebugExtension::moduleInit() {
   HHVM_FE(xdebug_time_index);
   HHVM_FE(xdebug_var_dump);
   loadSystemlib("xdebug");
+}
+
+void XDebugExtension::requestInit() {
+  if (Enable) {
+    s_request->requestInit();
+  }
+}
+
+void XDebugExtension::requestShutdown() {
+  if (Enable) {
+    s_request->requestShutdown();
+  }
 }
 
 // Non-bind config options and edge-cases

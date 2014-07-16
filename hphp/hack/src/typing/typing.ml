@@ -98,6 +98,17 @@ let gconst_decl cst =
 (* Handling function/method arguments *)
 (*****************************************************************************)
 
+let rec wfold_left_default f (env, def1) l1 l2  =
+  match l1, def1, l2 with
+  | _, _, [] -> env
+  | [], None, _ -> env
+  | [], Some d1, x2 :: rl2 ->
+    let env = f env d1 x2 in
+    wfold_left_default f (env, def1) [] rl2
+  | x1 :: rl1, _, x2 :: rl2 ->
+    let env = f env x1 x2 in
+    wfold_left_default f (env, def1) rl1 rl2
+
 let rec fun_decl f =
   let env = Typing_env.empty (Pos.filename (fst f.f_name)) in
   let env = Env.set_mode env f.f_mode in
@@ -107,7 +118,8 @@ let rec fun_decl f =
   ()
 
 and fun_decl_in_env env f =
-  let env, arity, params = make_params env true 0 f.f_params in
+  let mandatory_init = true in
+  let env, arity_min, params = make_params env mandatory_init 0 f.f_params in
   let env, ret_ty = match f.f_ret with
     (* If there is no return type annotation, we clearly should make it Tany
      * but also want a witness so that we can point *somewhere* in event of
@@ -115,20 +127,24 @@ and fun_decl_in_env env f =
      * nothing. *)
     | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
     | Some ty -> Typing_hint.hint env ty in
-  let arity_max =
-    if f.f_ddd then 1000 else
-    List.length f.f_params
+  let env, arity = match f.f_variadic with
+    | FVvariadicArg param ->
+      assert param.param_is_variadic;
+      assert (param.param_expr = None);
+      let env, (p_name, p_ty) = make_param_ty env Reason.Rnone param in
+      env, Fvariadic (arity_min, (p_name, p_ty))
+    | FVellipsis    -> env, Fellipsis (arity_min)
+    | FVnonVariadic -> env, Fstandard (arity_min, List.length f.f_params)
   in
   let env, tparams = lfold type_param env f.f_tparams in
   let ft = {
-    ft_pos = fst f.f_name;
-    ft_unsafe = false;
-    ft_abstract = false;
-    ft_arity_min = arity;
-    ft_arity_max = arity_max;
-    ft_tparams = tparams;
-    ft_params = params;
-    ft_ret = ret_ty;
+    ft_pos         = fst f.f_name;
+    ft_unsafe      = false;
+    ft_abstract    = false;
+    ft_arity       = arity;
+    ft_tparams     = tparams;
+    ft_params      = params;
+    ft_ret         = ret_ty;
   } in
   env, ft
 
@@ -136,19 +152,25 @@ and type_param env (x, y) =
   let env, y = opt Typing_hint.hint env y in
   env, (x, y)
 
-and check_default p mandatory e =
+and check_default pos mandatory e =
   if not mandatory && e = None
-  then Errors.previous_default p
+  then Errors.previous_default pos
   else ()
 
 (* Functions building the types for the parameters of a function *)
 (* It's not completely trivial because of optional arguments  *)
 and make_param env mandatory arity param =
-  let env, ty = make_param_type (fun() -> any) env param in
-  if Env.is_decl env then () else begin
-    check_default (fst param.param_id) mandatory param.param_expr;
-  end;
-  let mandatory = mandatory && param.param_expr = None in
+  let env, ty = make_param_ty env Reason.Rnone param in
+  let mandatory =
+    if param.param_is_variadic then begin
+      assert(param.param_expr = None);
+      false
+    end else begin
+      if Env.is_decl env then ()
+      else check_default (fst param.param_id) mandatory param.param_expr;
+      mandatory && param.param_expr = None
+    end
+  in
   let arity = if mandatory then arity + 1 else arity in
   env, arity, mandatory, ty
 
@@ -160,58 +182,77 @@ and make_params env mandatory arity paraml =
       let env, arity, rest = make_params env mandatory arity rl in
       env, arity, ty :: rest
 
+(* externally exposed convenience wrapper *)
+and make_param_ty env reason param =
+  make_param_type_ ~for_body:false (fun() -> reason, Tany) env param
+
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
  * introduce the type of the arguments of the function in the environment
  * Let's take an example, we want to check the code of foo:
  *
  * function foo(int $x): int {
- *   // CALL TO make_arg_type on (int $x)
+ *   // CALL TO make_param_type on (int $x)
  *   // Now we know that the type of $x is int
  *
  *   return $x; // in the environment $x is an int, the code is correct
  * }
  *)
-and make_param_type default env param =
+and make_param_type_ ~for_body default env param =
+  let param_pos = (fst param.param_id) in
   let env, ty =
     match param.param_hint with
-      (* if the type is missing, use the default one (an unbound type variable) *)
-    | None ->
-        let default_type = default() in
-        let r = Reason.Rwitness (fst param.param_id) in
-        env, (r, snd default_type)
-    | Some (p, (Hprim Tvoid)) ->
-        let r = Reason.Rwitness (fst param.param_id) in
+      | None ->
+        (* if the type is missing, use the default one (an unbound
+         * type variable) *)
+        let _r, ty = default() in
+        let r = Reason.Rwitness param_pos in
+        env, (r, ty)
+      | Some (p, (Hprim Tvoid)) ->
+        let r = Reason.Rwitness param_pos in
         Errors.void_parameter p;
         env, (r, Tany)
-          (* if the code is strict, use the type-hint *)
-    | Some x when Env.is_strict env  -> Typing_hint.hint env x
-          (* This code is there because we use to be more tolerant in partial-mode
-           * we use to allow (A $x = null) as an argument instead of (?A $x = null)
-           * for the transition, we give this error message, that explains what's
-           * going on, that dispite the the (= null) users are now required to
-           * use the optional type (write ?A instead of A).
-           *)
-    | Some (_, (Hoption _ | Hmixed) as x) -> Typing_hint.hint env x
-    | Some x ->
+      (* if the code is strict, use the type-hint *)
+      | Some x when Env.is_strict env -> Typing_hint.hint env x
+      (* This code is there because we used to be more tolerant in
+       * partial-mode we use to allow (A $x = null) as an argument
+       * instead of (?A $x = null) for the transition, we give this error
+       * message, that explains what's going on, that despite the the (=
+       * null) users are now required to use the optional type (write ?A
+       * instead of A).  *)
+      | Some (_, (Hoption _ | Hmixed) as x) -> Typing_hint.hint env x
+      | Some x ->
         match (param.param_expr) with
-        | Some (null_pos, Null) when not (Env.is_decl env) ->
+          | Some (null_pos, Null) when not (Env.is_decl env) ->
             Errors.nullable_parameter (fst x);
             Typing_suggest.save_qm (fst x);
             let env, ty = Typing_hint.hint env x in
             env, (Reason.Rwitness null_pos, Toption ty)
-        | Some _ | None -> Typing_hint.hint env x
+          | Some _ | None -> Typing_hint.hint env x
+  in
+  let ty = match ty with
+    | r, t when param.param_is_variadic && for_body ->
+      (* when checking the body of a function with a variadic
+       * argument, "f(C ...$args)", $args is an array<C> ... *)
+      let r = Reason.Rvar_param param_pos in
+      let is_local = true in
+      let arr_values = r, t in
+      r, Tarray (is_local, Some arr_values, None)
+    | r, t when param.param_is_variadic ->
+      (* ... but when checking a call to such a function: "f($a, $b)",
+       * both $a and $b must be of type C *)
+      Reason.Rvar_param param_pos, t
+    | x -> x
   in
   let ty =
     match ty with
-    | r, Tarray (_, x1, x2) ->
+      | r, Tarray (_, x1, x2) ->
         (* if an array is passed by reference, we don't want to trigger
-         * the copy on write
-         *)
+         * the copy on write *)
         r, Tarray (param.param_is_reference, x1, x2)
-    | x -> x
+      | x -> x
   in
-  TUtils.save_infer env (fst param.param_id) ty;
+  TUtils.save_infer env param_pos ty;
   env, (Some param.param_name, ty)
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
@@ -250,12 +291,17 @@ and fun_def env _ f =
         match f.f_ret with
         | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
         | Some ret -> Typing_hint.hint env ret in
-      let env, params = lfold (make_param_type Env.fresh_type) env f.f_params in
-      let env = List.fold_left2 bind_param env params f.f_params in
+      let f_params = match f.f_variadic with
+        | FVvariadicArg param -> param :: f.f_params
+        | _ -> f.f_params
+      in
+      let env, params =
+        lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
+      let env = List.fold_left2 bind_param env params f_params in
       let env = fun_ env f.f_unsafe (f.f_ret <> None) hret (fst f.f_name) f.f_body f.f_type in
       let env = solve_todos env in
       if Env.is_strict env then begin
-        List.iter2 (check_param env) f.f_params params;
+        List.iter2 (check_param env) f_params params;
         match f.f_ret with
         | None -> suggest_return env (fst f.f_name) hret
         | Some _ -> ()
@@ -788,8 +834,7 @@ and expr_ is_lvalue env (p, e) =
               ft_pos = pos;
               ft_unsafe = false;
               ft_abstract = false;
-              ft_arity_min = 1;
-              ft_arity_max = 1;
+              ft_arity = Fstandard (1, 1);
               ft_tparams = [];
               ft_params = fty.ft_params;
               ft_ret = fty.ft_ret;
@@ -1008,7 +1053,7 @@ and expr_ is_lvalue env (p, e) =
       let anon = anon_make env.Env.lenv p f in
       let env, anon_id = Env.add_anonymous env anon in
       if Env.is_strict env then () else ignore (anon env ft.ft_params);
-      env, (Reason.Rwitness p, Tanon (ft.ft_arity_min, ft.ft_arity_max, anon_id))
+      env, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
       let env, obj = expr env (fst sid, New (CI sid, [])) in
       let env, attr_tyl = lfold expr env (List.map snd attrl) in
@@ -1757,8 +1802,8 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
                 (* xxx: is there a need to subst in "this" *)
                 let subst = Inst.make_subst class_.tc_tparams paraml in
                 let env, ft_ret = Inst.instantiate subst env ft.ft_ret in
-                let ft = {ft with
-                  ft_arity_min = 0; ft_arity_max = 1000;
+                let ft = { ft with
+                  ft_arity = Fellipsis 0;
                   ft_tparams = []; ft_params = [];
                   ft_ret = ft_ret;
                 } in
@@ -1903,7 +1948,7 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                      * direct calls to $inst->__call are also
                      * valid.  *)
                     let ft = {ft with
-                      ft_arity_min = 0; ft_arity_max = 1000;
+                      ft_arity = Fellipsis 0;
                       ft_tparams = []; ft_params = [];
                       ft_ret = ft_ret;
                     } in
@@ -2135,13 +2180,23 @@ and is_visible env vis cid =
             | _, _ -> None
         )
 
-and check_arity env pos pos_def arity arity_min arity_max =
-  if arity > arity_max && Env.get_mode env <> Ast.Mdecl
-  then
-    Errors.typing_too_many_args pos pos_def;
-  if arity < arity_min then
+and check_arity env pos pos_def (arity:int) (exp_arity:fun_arity) =
+  let exp_min = (Typing_defs.arity_min exp_arity) in
+  if arity < exp_min then
     Errors.typing_too_few_args pos pos_def;
-  ()
+  match exp_arity with
+    | Fstandard (_, exp_max) ->
+      if (arity > exp_max) && (Env.get_mode env <> Ast.Mdecl)
+      then Errors.typing_too_many_args pos pos_def;
+    | Fvariadic _ | Fellipsis _ -> ()
+
+(* The variadic capture argument is an array listing the passed
+ * variable arguments for the purposes of the function body; callsites
+ * should not unify with it *)
+and variadic_param env ft =
+  match ft.ft_arity with
+    | Fvariadic (_, p_ty) -> env, Some p_ty
+    | Fellipsis _ | Fstandard _ -> env, None
 
 and call pos env fty el =
   let env, ty = call_ pos env fty el in
@@ -2169,23 +2224,24 @@ and call_ pos env fty el =
       TUtils.in_var env (r, Tunresolved retl)
   | r2, Tfun ft ->
       let pos_def = Reason.to_pos r2 in
-      check_arity env pos pos_def (List.length el) ft.ft_arity_min ft.ft_arity_max;
+      let () = check_arity env pos pos_def (List.length el) ft.ft_arity in
+      let env, var_param = variadic_param env ft in
       let env, tyl = lfold expr env el in
       let pos_tyl = List.combine (List.map fst el) tyl in
       Typing_utils.process_arg_info ft.ft_params pos_tyl env;
-      let env = wfold_left2 call_param env ft.ft_params pos_tyl in
+      let env = wfold_left_default call_param (env, var_param) ft.ft_params pos_tyl in
       Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst el) env;
       env, ft.ft_ret
-  | r2, Tanon (arity_min, arity_max, id) ->
+  | r2, Tanon (arity, id) ->
       let env, tyl = lmap expr env el in
       let anon = Env.get_anonymous env id in
       let fpos = Reason.to_pos r2 in
       (match anon with
-      | None ->
+        | None ->
           Errors.anonymous_recursive_call pos;
           env, (Reason.Rnone, Tany)
-      | Some anon ->
-          check_arity env pos fpos (List.length tyl) arity_min arity_max;
+        | Some anon ->
+          let () = check_arity env pos fpos (List.length tyl) arity in
           let tyl = List.map (fun x -> None, x) tyl in
           anon env tyl)
   | _, Tarray _ when not (Env.is_strict env) ->
@@ -2781,19 +2837,24 @@ and method_def env m =
     | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
     | Some ret -> Typing_hint.hint env ret in
   let env = DynamicYield.method_def env m.m_name ret in
-  let env, params = lfold (make_param_type Env.fresh_type) env m.m_params in
+  let m_params = match m.m_variadic with
+    | FVvariadicArg param -> param :: m.m_params
+    | _ -> m.m_params
+  in
+  let env, params =
+    lfold (make_param_type_ ~for_body:true Env.fresh_type) env m_params in
   if Env.is_strict env then begin
-    List.iter2 (check_param env) m.m_params params;
+    List.iter2 (check_param env) m_params params;
   end;
-  let env  = List.fold_left2 bind_param env params m.m_params in
+  let env  = List.fold_left2 bind_param env params m_params in
   let env = fun_ ~abstract:m.m_abstract env m.m_unsafe (m.m_ret <> None)
       ret (fst m.m_name) m.m_body m.m_type in
   let env = List.fold_left (fun env f -> f env) env (Env.get_todo env) in
   match m.m_ret with
-  | None when Env.is_strict env && snd m.m_name <> "__destruct" ->
+    | None when Env.is_strict env && snd m.m_name <> "__destruct" ->
       (* if we are in strict mode, the only case where we don't want to enforce
        * a return type is when the method is a destructor
        *)
       suggest_return env (fst m.m_name) ret
-  | None
-  | Some _ -> ()
+    | None
+    | Some _ -> ()

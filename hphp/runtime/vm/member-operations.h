@@ -867,7 +867,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   bool copy) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
-    return a->set(n, cellAsCVarRef(*value), copy);
+    return a->setConverted(n, cellAsCVarRef(*value), copy);
   }
   return a->set(StrNR(key), cellAsCVarRef(*value), copy);
 }
@@ -1507,6 +1507,9 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
   if (!key->isStrictlyInteger(n)) {
     return a->remove(StrNR(key), copy);
   } else {
+    if (UNLIKELY(a->isIntMapArray())) {
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+    }
     return a->remove(n, copy);
   }
 }

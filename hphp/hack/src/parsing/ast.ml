@@ -151,10 +151,12 @@ and method_ = {
   }
 
 and is_reference = bool
+and is_variadic = bool
 
 and fun_param = {
     param_hint : hint option;
     param_is_reference : is_reference;
+    param_is_variadic : is_variadic;
     param_id : id;
     param_expr : expr option;
    (* implicit field via constructor parameter.

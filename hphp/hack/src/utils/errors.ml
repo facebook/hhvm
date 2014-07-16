@@ -62,9 +62,6 @@ let explain_constraint pos name (error: error) =
   [pos, "Considering the constraint on the type '"^name^"'"]
 )
 
-let too_many_args pos =
-  add pos "Too many arguments"
-
 let unexpected_arrow pos cname =
   add pos ("Keys may not be specified for " ^ cname ^ " initialization")
 
@@ -200,10 +197,10 @@ let missing_typehint p =
 let expected_variable p =
   add p "Was expecting a variable name"
 
-let too_few_arguments p =
+let naming_too_few_arguments p =
   add p "Too few arguments"
 
-let too_many_arguments p =
+let naming_too_many_arguments p =
   add p "Too many arguments"
 
 let expected_collection p cn =
@@ -563,22 +560,27 @@ let trait_final pos =
   add pos "Traits cannot be final"
 
 let implement_abstract p1 p2 x =
-  add_list [
-  p1,
-  "This class must provide an implementation for the abstract method "^x;
-  p2,
-  "The abstract method "^x^" is defined here";
-]
+  let s_meth = "abstract method "^x in
+  add_list [p1, "This class must provide an implementation for the "^s_meth;
+            p2, "The "^s_meth^" is defined here"]
 
 let generic_static p x =
   add p ("This static variable cannot use the type parameter "^x^".")
 
 let fun_too_many_args p1 p2 =
-  add_list [p1, ("Too many mandatory arguments");
+  add_list [p1, "Too many mandatory arguments";
             p2, "Because of this definition"]
 
 let fun_too_few_args p1 p2 =
-  add_list [p1, ("Too few arguments");
+  add_list [p1, "Too few arguments";
+            p2, "Because of this definition"]
+
+let fun_unexpected_nonvariadic p1 p2 =
+  add_list [p1, "Should have a variadic argument";
+            p2, "Because of this definition"]
+
+let fun_variadicity_hh_vs_php56 p1 p2 =
+  add_list [p1, "Variadic arguments: ...-style is not a subtype of ...$args";
             p2, "Because of this definition"]
 
 let expected_tparam pos n =
@@ -599,10 +601,7 @@ let object_string p1 p2 =
   p2, "This object doesn't implement __toString"]
 
 let untyped_string p =
-  add_list [
-  p,
-  "You cannot use this object as a string, it is an untyped value"
-]
+  add p "You cannot use this object as a string, it is an untyped value"
 
 let type_param_arity pos x n =
   add pos ("The type "^x^" expects "^n^" parameters")
@@ -611,8 +610,7 @@ let cyclic_typedef p =
   add p "Cyclic typedef"
 
 let type_arity_mismatch p1 n1 p2 n2 =
-  add_list [p1, "This type has "^n1^
-            " arguments";
+  add_list [p1, "This type has "^n1^" arguments";
             p2, "This one has "^n2]
 
 let this_final id p2 (error: error) =
@@ -626,7 +624,8 @@ let tuple_arity_mismatch p1 n1 p2 n2 =
             p2, "This one has "^n2^" elements"]
 
 let fun_arity_mismatch p1 p2 =
-  add_list [p1, ("Arity mismatch"); p2, "Because of this definition"]
+  add_list [p1, "Number of arguments doesn't match";
+            p2, "Because of this definition"]
 
 let discarded_awaitable p1 p2 =
   add_list [

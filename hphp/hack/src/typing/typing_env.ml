@@ -65,39 +65,39 @@ type funs    = Funs.t
 type classes = Classes.t
 
 type fake_members = {
-    last_call : Pos.t option;
-    invalid   : SSet.t;
-    valid     : SSet.t;
-  }
+  last_call : Pos.t option;
+  invalid   : SSet.t;
+  valid     : SSet.t;
+}
 
 type local = ty list * ty
 type local_env = fake_members * local IMap.t
 
 type env = {
-    pos     : Pos.t      ;
-    tenv    : ty  IMap.t ;
-    subst   : int IMap.t ;
-    lenv    : local_env ;
-    genv    : genv       ;
-    todo    : tfun list  ;
-    pclasses : SSet.t;
-    pfuns    : SSet.t;
-  }
+  pos     : Pos.t      ;
+  tenv    : ty  IMap.t ;
+  subst   : int IMap.t ;
+  lenv    : local_env ;
+  genv    : genv       ;
+  todo    : tfun list  ;
+  pclasses : SSet.t;
+  pfuns    : SSet.t;
+}
 
 and genv = {
-    mode    : Ast.mode;
-    return  : ty         ;
-    parent  : ty         ;
-    self_id : string     ;
-    self    : ty         ;
-    static  : bool       ;
-    has_yield : bool     ;
-    allow_null_as_void : bool;
-    f_type  : Ast.fun_type;
-    anons   : anon IMap.t;
-    droot   : Typing_deps.Dep.variant option  ;
-    file    : string;
-  }
+  mode    : Ast.mode;
+  return  : ty         ;
+  parent  : ty         ;
+  self_id : string     ;
+  self    : ty         ;
+  static  : bool       ;
+  has_yield : bool     ;
+  allow_null_as_void : bool;
+  f_type  : Ast.fun_type;
+  anons   : anon IMap.t;
+  droot   : Typing_deps.Dep.variant option  ;
+  file    : string;
+}
 
 (* An anonymous function
  * the environment + the fun parameters + the captured identifiers
@@ -163,14 +163,13 @@ let has_type env x =
 let make_ft env p params ret_ty =
   let arity = List.length params in
   {
-   ft_pos = p;
-   ft_unsafe    = false;
-   ft_abstract  = false;
-   ft_arity_min = arity;
-   ft_arity_max = arity;
-   ft_tparams   = [];
-   ft_params    = params;
-   ft_ret       = ret_ty;
+    ft_pos      = p;
+    ft_unsafe   = false;
+    ft_abstract = false;
+    ft_arity    = Fstandard (arity, arity);
+    ft_tparams  = [];
+    ft_params   = params;
+    ft_ret      = ret_ty;
   }
 
 let rec debug stack env (r, ty) =

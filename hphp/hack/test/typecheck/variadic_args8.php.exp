@@ -1,0 +1,6 @@
+File "variadic_args8.php", line 7, characters 18-21:
+Invalid argument
+File "variadic_args8.php", line 3, characters 23-28:
+This is a string
+File "variadic_args8.php", line 5, characters 19-23:
+It is incompatible with an int (variadic argument)

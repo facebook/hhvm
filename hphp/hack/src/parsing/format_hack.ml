@@ -1169,7 +1169,7 @@ and hint env = wrap env begin function
           end;
           hint_parameter env
       )
-  | Topt_args ->
+  | Tellipsis ->
       last_token env
   | Tlp ->
       last_token env;
@@ -1235,7 +1235,7 @@ and fun_param env =
     then space env
   in
   seq env [attribute; space_opt; modifier_list; space_opt; hint; space_opt];
-  seq env [opt_tok Tamp; opt_tok Topt_args; opt_tok Tlvar];
+  seq env [opt_tok Tamp; opt_tok Tellipsis; opt_tok Tlvar];
   try_token env Teq (seq_fun [space; last_token; space; expr])
 
 and return_type env =

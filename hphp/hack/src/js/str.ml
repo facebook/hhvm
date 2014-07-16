@@ -10,7 +10,13 @@
 
 let last_result = ref None
 
-let regexp = Regexp.regexp
+let regexp s =
+  (* In js_of_ocaml, the regex library follows javascript syntax instead
+   * of the Ocaml rules. This is a hack to convert our existing regexes.
+   * (It covers all our current regexes, but not every possible regex). *)
+  let s = Regexp.global_replace (Regexp.regexp "\\\\\\(") s "(" in
+  let s = Regexp.global_replace (Regexp.regexp "\\\\\\)") s ")" in
+  Regexp.regexp s
 
 let string_match re s n =
   let result = Regexp.string_match re s n in

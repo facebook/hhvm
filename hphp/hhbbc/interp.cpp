@@ -776,6 +776,7 @@ void in(ISS& env, const bc::VGetN&) {
                          bc::VGetL { loc });
     }
   }
+  popC(env);
   boxUnknownLocal(env);
   push(env, TRef);
 }

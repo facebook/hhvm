@@ -360,7 +360,7 @@ function nzuncompress(string $compressed): mixed;
  *
  * @return string - The compressed data, or FALSE on error
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function lz4_compress(string $uncompressed, bool $high = false): mixed;
 
 /**
@@ -383,7 +383,7 @@ function lz4_hccompress(string $uncompressed): mixed;
  *
  * @return string - The uncompressed data or FALSE on error
  */
-<<__Native, __HipHopSpecific>>
+<<__Native>>
 function lz4_uncompress(string $compressed): mixed;
 
 /**

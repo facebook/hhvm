@@ -50,6 +50,132 @@
       # depends on http://ajax.googleapis.com
       - assetic/tests/Assetic/Test/Asset/HttpAssetTest.php
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
+  Aura.Autoload:
+    url: https://github.com/auraphp/Aura.Autoload.git
+    branch: develop-2
+    commit: de48ebccced7e8e91ae354bca32145247cd02662
+    install_root: Aura.Autoload
+    test_root: tests
+  Aura.Auth:
+    url: https://github.com/auraphp/Aura.Auth.git
+    branch: develop-2
+    commit: ad03ef05c008fabf759e976877bc8ce09a46534a
+    install_root: Aura.Auth
+    test_root: tests
+  Aura.Cli:
+    url: https://github.com/auraphp/Aura.Cli.git
+    branch: develop-2
+    commit: 6c0df0ee77c8cd5e73fa607e7216b9ce6c5e7ff9
+    install_root: Aura.Cli
+    test_root: tests
+  Aura.Di:
+    url: https://github.com/auraphp/Aura.Di.git
+    branch: develop-2
+    commit: 5246645db7b369861e952fb9c3b7701d36c646f3
+    install_root: Aura.Di
+    test_root: tests
+  Aura.Dispatcher:
+    url: https://github.com/auraphp/Aura.Dispatcher.git
+    branch: develop-2
+    commit: 292dc3c50bb7d371483376f9bac1fac500c0b18c
+    install_root: Aura.Dispatcher
+    test_root: tests
+  Aura.Filter:
+    url: https://github.com/auraphp/Aura.Filter.git
+    branch: develop-2
+    commit: 723b9eec6d03a96b203ea6f8c6591d3e7e9338a1
+    install_root: Aura.Filter
+    test_root: tests
+  Aura.Html:
+    url: https://github.com/auraphp/Aura.Html.git
+    branch: develop-2
+    commit: c5f275b3d171fea37226bfa67bcbecfefba6d484
+    install_root: Aura.Html
+    test_root: tests
+  Aura.Http:
+    url: https://github.com/auraphp/Aura.Http.git
+    branch: develop
+    commit: 5768db4076ab2020dc3b9b9dca58667510ea77b2
+    install_root: Aura.Http
+    test_root: tests
+  Aura.Includer:
+    url: https://github.com/auraphp/Aura.Includer.git
+    branch: develop-2
+    commit: c23e849b216af2479b57888b7dcef1a12e924cc6
+    install_root: Aura.Includer
+    test_root: tests
+  Aura.Input:
+    url: https://github.com/auraphp/Aura.Input.git
+    branch: develop
+    commit: fb7521cfeb2f1d12dd8196ffd6bcde544e056c50
+    install_root: Aura.Input
+    test_root: tests
+  Aura.Intl:
+    url: https://github.com/auraphp/Aura.Intl.git
+    branch: develop
+    commit: 0e2beb3a49e8b50b002456ca63bf4d0136a71279
+    install_root: Aura.Intl
+    test_root: tests
+  Aura.Marshal:
+    url: https://github.com/auraphp/Aura.Marshal.git
+    branch: develop
+    commit: b43efaec0b735fc5634bb0bb9aeef0fdda5c403d
+    install_root: Aura.Marshal
+    test_root: tests
+  Aura.Router:
+    url: https://github.com/auraphp/Aura.Router.git
+    branch: develop-2
+    commit: 6ca7112ece71ad81731bb3209c91dbd0324c4812
+    install_root: Aura.Router
+    test_root: tests
+  Aura.Session:
+    url: https://github.com/auraphp/Aura.Session.git
+    branch: develop-2
+    commit: dbb826068219232d3f5fe6e14783d8560ba89b3d
+    install_root: Aura.Session
+    test_root: tests
+  Aura.Signal:
+    url: https://github.com/auraphp/Aura.Signal.git
+    branch: develop
+    commit: 28b0b07d433fc8126344ab94b4222fcb3cf9f193
+    install_root: Aura.Signal
+    test_root: tests
+  Aura.Sql:
+    url: https://github.com/auraphp/Aura.Sql.git
+    branch: develop-2
+    commit: 9fcaf3a78b7e1d5fa3436dd52ffe1a1c7161f44a
+    install_root: Aura.Sql
+    test_root: tests
+  Aura.SqlQuery:
+    url: https://github.com/auraphp/Aura.SqlQuery.git
+    branch: develop-2
+    commit: 83e69257652f52a7de90470dd6c40b9a313bf499
+    install_root: Aura.SqlQuery
+    test_root: tests
+  Aura.SqlSchema:
+    url: https://github.com/auraphp/Aura.SqlSchema.git
+    branch: develop-2
+    commit: e0f999dd71a1a3ba78813c03625d81b53a0250b2
+    install_root: Aura.SqlSchema
+    test_root: tests
+  Aura.Uri:
+    url: https://github.com/auraphp/Aura.Uri.git
+    branch: develop
+    commit: 9908a01b87e2dcdcbaa73d0a1ca444cce7ad4bee
+    install_root: Aura.Uri
+    test_root: tests
+  Aura.View:
+    url: https://github.com/auraphp/Aura.View.git
+    branch: develop-2
+    commit: 8bf100a9392c1757555ecccd52c1453d0478efff
+    install_root: Aura.View
+    test_root: tests
+  Aura.Web:
+    url: https://github.com/auraphp/Aura.Web.git
+    branch: develop-2
+    commit: 6347ac036423a1cdbc4980c615d6e47f002e391a
+    install_root: Aura.Web
+    test_root: tests
   cakephp3:
     url: https://github.com/cakephp/cakephp
     branch: 3.0

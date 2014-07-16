@@ -2,8 +2,9 @@
 
 /**
  *
- * Provide compatibility for renamed lz4 function -
- * lz4compress is now lz4_compress
+ * This is a wrapper function as lz4compress is now lz4_compress
+ *
+ * https://github.com/facebook/hhvm/pull/3169 - 11/07/2014
  * 
  */
 function lz4compress(string $uncompressed) {
@@ -14,8 +15,9 @@ function lz4compress(string $uncompressed) {
 
 /**
  *
- * Provide compatibility for renamed lz4 function -
- * lz4hccompress is now lz4_hccompress
+ * This is a wrapper function as lz4hccompress is now lz4_hccompress
+ *
+ * https://github.com/facebook/hhvm/pull/3169 - 11/07/2014
  * 
  */
 function lz4hccompress(string $uncompressed) {
@@ -26,8 +28,9 @@ function lz4hccompress(string $uncompressed) {
 
 /**
  *
- * Provide compatibility for renamed lz4 function -
- * lz4uncompress is now lz4_uncompress
+ * This is a wrapper function as lz4uncompress is now lz4_uncompress
+ *
+ * https://github.com/facebook/hhvm/pull/3169 - 11/07/2014
  * 
  */
 function lz4uncompress(string $compressed) {

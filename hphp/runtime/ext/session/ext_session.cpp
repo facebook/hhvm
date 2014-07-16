@@ -773,9 +773,7 @@ private:
       m_fd = ::open(buf, O_CREAT | O_RDWR | O_BINARY, m_filemode);
 
       if (m_fd != -1) {
-#ifdef PHP_WIN32
         flock(m_fd, LOCK_EX);
-#endif
 
 #ifdef F_SETFD
 # ifndef FD_CLOEXEC

@@ -153,6 +153,9 @@
   hhvmquickinterp:
     do_not_install: true
     test_root: ../hhvm/quick_interp
+  hhvmquickjit:
+    do_not_install: true
+    test_root: ../hhvm/quick_jit
   idiorm:
     url: https://github.com/j4mie/idiorm.git
     branch: v1.4.1

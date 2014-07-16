@@ -13,8 +13,9 @@ open Typing_defs
 
 (* Details about functions to be added in json output *)
 type func_param_result = {
-    param_name : string;
-    param_ty   : string;
+    param_name     : string;
+    param_ty       : string;
+    param_variadic : bool;
   }
 
 type func_details_result = {
@@ -67,13 +68,15 @@ let autocomplete_result_to_json res =
   in
   let func_param_to_json param =
     Hh_json.JAssoc [ "name", Hh_json.JString param.param_name;
-                     "type", Hh_json.JString param.param_ty]
+                     "type", Hh_json.JString param.param_ty;
+                     "variadic", Hh_json.JBool param.param_variadic;
+                   ]
   in
   let func_details_to_json details =
     match details with
      | Some fd -> Hh_json.JAssoc [ "min_arity", Hh_json.JInt fd.min_arity;
              "return_type", Hh_json.JString fd.return_ty;
-             "params", Hh_json.JList (List.map func_param_to_json fd.params)
+             "params", Hh_json.JList (List.map func_param_to_json fd.params);
            ]
      | None -> Hh_json.JNull
   in
@@ -325,18 +328,25 @@ let get_results funs classes =
       | None -> Typing_print.full_strip_ns fake_env (x.ty)
     in
     let func_details = match x.ty with
-      | (_, Tfun ft) -> Some {
+      | (_, Tfun ft) ->
+        let param_to_record ?(is_variadic=false) (name, pty) =
+          {
+            param_name     = (match name with
+                               | Some n -> n
+                               | None -> "");
+            param_ty       = Typing_print.full_strip_ns fake_env pty;
+            param_variadic = is_variadic;
+          }
+        in
+        Some {
           return_ty = Typing_print.full_strip_ns fake_env ft.ft_ret;
           min_arity = arity_min ft.ft_arity;
-          params    = List.map begin fun (name, pty) ->
-            {
-              param_name = (match name with
-                | Some n -> n
-                | None -> ""
-              );
-              param_ty   = Typing_print.full_strip_ns fake_env pty;
-            }
-          end ft.ft_params;
+          params    = List.map param_to_record ft.ft_params @
+            (match ft.ft_arity with
+               | Fellipsis _ -> let empty = (None, (Reason.none, Tany)) in
+                                [param_to_record ~is_variadic:true empty]
+               | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
+               | Fstandard _ -> [])
         }
       | _ -> None
     in

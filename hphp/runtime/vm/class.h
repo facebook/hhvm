@@ -895,7 +895,7 @@ private:
                      const StringData* origMethName,
                      const StringData* newMethName);
 
-  void checkInterfaceMethods();
+  void checkMethods(const Class* cls);
   void methodOverrideCheck(const Func* parentMethod, const Func* method);
 
   static bool compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2);

@@ -5,6 +5,8 @@ IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
   message(FATAL_ERROR "HHVM requires a 64bit OS")
 ENDIF()
 
+include(GNUInstallDirs)
+
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")

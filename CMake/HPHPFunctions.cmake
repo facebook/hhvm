@@ -1,3 +1,5 @@
+include(GNUInstallDirs)
+
 function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
 
   if ("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
@@ -163,14 +165,15 @@ function(HHVM_INSTALL TARGET DEST)
       endif()
     endif()
   endif()
-  install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${DEST}\" TYPE ${TY} FILES \"${LOC}\")")
+  string(TOUPPER ${DEST} DEST_UPPER)
+  install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${DEST_UPPER}DIR}\" TYPE ${TY} FILES \"${LOC}\")")
 endfunction(HHVM_INSTALL)
 
 function(HHVM_PUBLIC_HEADERS TARGET)
   install(
     CODE "INCLUDE(\"${HPHP_HOME}/CMake/HPHPFunctions.cmake\")
       HHVM_INSTALL_HEADERS(${TARGET} ${HPHP_HOME}
-      \"${CMAKE_INSTALL_PREFIX}/include\" ${ARGN})"
+      \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}\" ${ARGN})"
     COMPONENT dev)
 endfunction()
 

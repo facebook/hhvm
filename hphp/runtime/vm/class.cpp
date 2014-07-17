@@ -2590,7 +2590,6 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
                     reqName->data(),
                     traitCls->preClass()->name()->data(),
                     "use");
-        return;
       }
     }
 
@@ -2607,7 +2606,6 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
                   m_preClass->name()->data(),
                   reqName->data(),
                   iface->preClass()->name()->data());
-      return;
     }
   }
 
@@ -2618,7 +2616,6 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
                   reqName->data(),
                   traitCls->preClass()->name()->data(),
                   "use");
-      return;
     }
   }
 
@@ -2642,13 +2639,24 @@ void Class::checkRequirementConstraints() const {
       }
     } else {
       auto reqExtCls = Unit::lookupClass(reqName);
-      // errors should've been raised for the following when the
-      // usedTrait was first loaded
-      assert(reqExtCls != nullptr);
-      assert(!(reqExtCls->attrs() & (AttrTrait | AttrInterface)));
+      if (UNLIKELY(
+            (reqExtCls == nullptr) ||
+            (reqExtCls->attrs() & (AttrTrait | AttrInterface)))) {
+        // If this class is being created from scratch from the PreClass
+        // for the first time in this request, then errors would already
+        // have been raised when the trait/interface from which the
+        // requirement came was loaded. If however we're subject to the
+        // whims of Class::avail() and reusing a Class, the failure of the
+        // lookup indicates that the requirement was not satisfied in the
+        // previous request; if the requirement had been satisfied, the
+        // appropriate reqExtCls would again loaded via the class parent
+        // and interfaces checked in Class::avail()
+        raiseUnsatisfiedRequirement(req);
+      }
 
-      if (UNLIKELY((m_classVecLen < reqExtCls->m_classVecLen) ||
-                   (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls))) {
+      if (UNLIKELY(
+            (m_classVecLen < reqExtCls->m_classVecLen) ||
+            (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls))) {
         raiseUnsatisfiedRequirement(req);
       }
     }

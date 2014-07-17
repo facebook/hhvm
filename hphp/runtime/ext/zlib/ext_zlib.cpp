@@ -638,8 +638,8 @@ Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
 
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
-  int csize = LZ4_compress(uncompressed.data(),
-      compressed, uncompressed.size());
+  int csize = LZ4_compress(uncompressed.data(), compressed,
+      uncompressed.size());
   if (csize < 0) {
     return false;
   }

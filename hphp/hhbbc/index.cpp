@@ -480,7 +480,8 @@ bool Func::same(const Func& o) const {
 SString Func::name() const {
   return match<SString>(
     val,
-    [&] (SString s) { return s; },
+    [&] (FuncName s) { return s.name; },
+    [&] (MethodName s) { return s.name; },
     [&] (borrowed_ptr<FuncInfo> fi) { return fi->func->name; },
     [&] (borrowed_ptr<FuncFamily> fa) {
       auto const name = fa->possibleFuncs.front()->func->name;
@@ -494,11 +495,22 @@ SString Func::name() const {
   );
 }
 
+bool Func::cantBeMagicCall() const {
+  return match<bool>(
+    val,
+    [&] (FuncName s)                  { return true; },
+    [&] (MethodName s)                { return false; },
+    [&] (borrowed_ptr<FuncInfo> fi)   { return true; },
+    [&] (borrowed_ptr<FuncFamily> fa) { return true; }
+  );
+}
+
 std::string show(const Func& f) {
   std::string ret = f.name()->data();
   match<void>(
     f.val,
-    [&] (SString) {},
+    [&] (Func::FuncName) {},
+    [&] (Func::MethodName) {},
     [&] (borrowed_ptr<FuncInfo> fi) { ret += "*"; },
     [&] (borrowed_ptr<FuncFamily> fa) { ret += "+"; }
   );
@@ -1201,6 +1213,58 @@ Type context_sensitive_return_type(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
+PrepKind func_param_prep(borrowed_ptr<const php::Func> func,
+                         uint32_t paramId) {
+  if (func->attrs & AttrInterceptable) return PrepKind::Unknown;
+  if (paramId >= func->params.size()) {
+    if (func->attrs & AttrVariadicByRef) {
+      return PrepKind::Ref;
+    }
+    return PrepKind::Val;
+  }
+  return func->params[paramId].byRef ? PrepKind::Ref : PrepKind::Val;
+}
+
+template<class PossibleFuncRange>
+PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
+  if (begin(range) == end(range)) {
+    /*
+     * We can assume it's by value, because either we're calling a function
+     * that doesn't exist (about to fatal), or we're going to an __call (which
+     * never takes parameters by reference).
+     *
+     * Or if we've got AllFuncsInterceptable we need to assume someone could
+     * rename a function to the new name.
+     */
+    return options.AllFuncsInterceptable ? PrepKind::Unknown : PrepKind::Val;
+  }
+
+  struct FuncFind {
+    using F = borrowed_ptr<const php::Func>;
+    static F get(std::pair<SString,F> p) { return p.second; }
+    static F get(borrowed_ptr<FuncInfo> finfo) { return finfo->func; }
+  };
+
+  folly::Optional<PrepKind> prep;
+  for (auto& item : range) {
+    switch (func_param_prep(FuncFind::get(item), paramId)) {
+    case PrepKind::Unknown:
+      return PrepKind::Unknown;
+    case PrepKind::Ref:
+      if (prep && *prep != PrepKind::Ref) return PrepKind::Unknown;
+      prep = PrepKind::Ref;
+      break;
+    case PrepKind::Val:
+      if (prep && *prep != PrepKind::Val) return PrepKind::Unknown;
+      prep = PrepKind::Val;
+      break;
+    }
+  }
+  return *prep;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1326,15 +1390,19 @@ res::Class Index::builtin_class(SString name) const {
   return *rcls;
 }
 
-folly::Optional<res::Func> Index::resolve_method(Context ctx,
-                                                 Type clsType,
-                                                 SString name) const {
+res::Func Index::resolve_method(Context ctx,
+                                Type clsType,
+                                SString name) const {
+  auto name_only = [&] {
+    return res::Func { this, res::Func::MethodName { name } };
+  };
+
   if (!clsType.strictSubtypeOf(TCls)) {
-    return folly::none;
+    return name_only();
   }
   auto const dcls  = dcls_of(clsType);
   auto const cinfo = dcls.cls.val.right();
-  if (!cinfo) return folly::none;
+  if (!cinfo) return name_only();
 
   /*
    * Whether or not the context class has a private method with the
@@ -1365,8 +1433,8 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
    * Look up the method in the target class.
    */
   auto const methIt = cinfo->methods.find(name);
-  if (methIt == end(cinfo->methods)) return folly::none;
-  if (methIt->second.func->attrs & AttrInterceptable) return folly::none;
+  if (methIt == end(cinfo->methods)) return name_only();
+  if (methIt->second.func->attrs & AttrInterceptable) return name_only();
   auto const ftarget = methIt->second.func;
 
   // We need to revisit the hasPrivateAncestor code if we start being
@@ -1389,7 +1457,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
       ctx.cls != ftarget->cls) {
     if (could_be_related(ctx.cls, cinfo->cls)) {
       if (contextHasPrivateWithSameName()) {
-        return folly::none;
+        return name_only();
       }
     }
   }
@@ -1455,23 +1523,25 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
   switch (dcls.type) {
   case DCls::Exact:
     if (cinfo->hasMagicCall || cinfo->hasMagicCallStatic) {
-      if (couldBeInaccessible()) return folly::none;
+      if (couldBeInaccessible()) return name_only();
     }
     return do_resolve(ftarget);
   case DCls::Sub:
     if (cinfo->derivedHasMagicCall || cinfo->derivedHasMagicCallStatic) {
-      if (couldBeInaccessible()) return folly::none;
+      if (couldBeInaccessible()) return name_only();
     }
     if (ftarget->attrs & AttrNoOverride) {
       return do_resolve(ftarget);
     }
-    if (!options.FuncFamilies) return folly::none;
+    if (!options.FuncFamilies) return name_only();
 
     {
       auto const famIt = cinfo->methodFamilies.find(name);
-      if (famIt == end(cinfo->methodFamilies)) return folly::none;
+      if (famIt == end(cinfo->methodFamilies)) {
+        return name_only();
+      }
       if (famIt->second->containsInterceptables) {
-        return folly::none;
+        return name_only();
       }
       return res::Func { this, famIt->second };
     }
@@ -1490,7 +1560,9 @@ folly::Optional<res::Func> Index::resolve_ctor(Context ctx,
 template<class FuncRange>
 res::Func
 Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
-  auto name_only = [&] { return res::Func { this, name }; };
+  auto name_only = [&] {
+    return res::Func { this, res::Func::FuncName { name } };
+  };
 
   if (begin(funcs) == end(funcs))              return name_only();
   if (boost::next(begin(funcs)) != end(funcs)) return name_only();
@@ -1606,9 +1678,8 @@ Type Index::lookup_class_constant(Context ctx,
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
-    [&] (SString s) {
-      return TInitGen;
-    },
+    [&] (res::Func::FuncName s) { return TInitGen; },
+    [&] (res::Func::MethodName s) { return TInitGen; },
     [&] (borrowed_ptr<FuncInfo> finfo) {
       add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);
       return finfo->returnTy;
@@ -1627,7 +1698,10 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
 Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
-    [&] (SString s) {
+    [&] (res::Func::FuncName) {
+      return lookup_return_type(callCtx.caller, rfunc);
+    },
+    [&] (res::Func::MethodName) {
       return lookup_return_type(callCtx.caller, rfunc);
     },
     [&] (borrowed_ptr<FuncInfo> finfo) {
@@ -1665,48 +1739,31 @@ bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
   return it != end(m_data->funcInfo) ? it->second.thisAvailable : false;
 }
 
-// Parameter preparation modes never change during analysis, so
-// there's no need to register a dependency.
 PrepKind Index::lookup_param_prep(Context ctx,
                                   res::Func rfunc,
                                   uint32_t paramId) const {
-
-  auto finfo_prep = [&] (borrowed_ptr<const FuncInfo> finfo) {
-    if (paramId >= finfo->func->params.size()) {
-      if (finfo->func->attrs & AttrVariadicByRef) {
-        return PrepKind::Ref;
-      }
-      return PrepKind::Val;
-    }
-    return finfo->func->params[paramId].byRef ? PrepKind::Ref
-                                              : PrepKind::Val;
-  };
-
   return match<PrepKind>(
     rfunc.val,
-    [&] (SString s) {
-      return PrepKind::Unknown;
+    [&] (res::Func::FuncName s) {
+      return prep_kind_from_set(find_range(m_data->funcs, s.name), paramId);
+    },
+    [&] (res::Func::MethodName s) {
+      /*
+       * If we think it's supposed to be PrepKind::Ref, we still can't be sure
+       * unless we go though some effort to guarantee that it can't be going to
+       * an __call function magically (which will never take anything by ref).
+       */
+      auto const kind = prep_kind_from_set(
+        find_range(m_data->methods, s.name),
+        paramId
+      );
+      return kind == PrepKind::Ref ? PrepKind::Unknown : kind;
     },
     [&] (borrowed_ptr<FuncInfo> finfo) {
-      return finfo_prep(finfo);
+      return func_param_prep(finfo->func, paramId);
     },
     [&] (borrowed_ptr<FuncFamily> fam) {
-      folly::Optional<PrepKind> prep;
-      for (auto& f : fam->possibleFuncs) {
-        switch (finfo_prep(f)) {
-        case PrepKind::Unknown:
-          return PrepKind::Unknown;
-        case PrepKind::Ref:
-          if (prep && *prep != PrepKind::Ref) return PrepKind::Unknown;
-          prep = PrepKind::Ref;
-          break;
-        case PrepKind::Val:
-          if (prep && *prep != PrepKind::Val) return PrepKind::Unknown;
-          prep = PrepKind::Val;
-          break;
-        }
-      }
-      return *prep;
+      return prep_kind_from_set(fam->possibleFuncs, paramId);
     }
   );
 }
@@ -1798,7 +1855,14 @@ void refine_propstate(Container& cont,
   }
   for (auto& kv : state) {
     auto& target = it->second[kv.first];
-    assert(kv.second.subtypeOf(target));
+    always_assert_flog(
+      kv.second.subtypeOf(target),
+      "PropState refinement failed on {}::${} -- {} was not a subtype of {}\n",
+      cls->name->data(),
+      kv.first->data(),
+      show(kv.second),
+      show(target)
+    );
     target = kv.second;
   }
 }

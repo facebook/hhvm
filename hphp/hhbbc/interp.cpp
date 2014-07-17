@@ -1232,16 +1232,18 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 }
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
-  auto obj = popC(env);
-  folly::Optional<res::Class> rcls;
-  if (is_opt(obj)) obj = unopt(obj);
-  if (obj.strictSubtypeOf(TObj)) rcls = dcls_of(objcls(obj)).cls;
+  auto t1 = popC(env);
+  if (is_opt(t1)) t1 = unopt(t1);
+  auto const clsTy = t1.strictSubtypeOf(TObj) ? objcls(t1) : TCls;
+  auto const rcls = [&]() -> folly::Optional<res::Class> {
+    if (clsTy.strictSubtypeOf(TCls)) return dcls_of(clsTy).cls;
+    return folly::none;
+  }();
+
   fpiPush(env, ActRec {
     FPIKind::ObjMeth,
     rcls,
-    obj.subtypeOf(TObj)
-      ? env.index.resolve_method(env.ctx, objcls(obj), op.str2)
-      : folly::none
+    env.index.resolve_method(env.ctx, clsTy, op.str2)
   });
 }
 
@@ -1259,9 +1261,11 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
 
 void in(ISS& env, const bc::FPushClsMethodD& op) {
   auto const rcls = env.index.resolve_class(env.ctx, op.str3);
-  auto const rfun =
-    rcls ? env.index.resolve_method(env.ctx, clsExact(*rcls), op.str2)
-         : folly::none;
+  auto const rfun = env.index.resolve_method(
+    env.ctx,
+    rcls ? clsExact(*rcls) : TCls,
+    op.str2
+  );
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun });
 }
 
@@ -1269,10 +1273,11 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
   auto const t1 = popA(env);
   auto const t2 = popC(env);
   auto const v2 = tv(t2);
-  auto const rfunc =
-    v2 && v2->m_type == KindOfStaticString
-      ? env.index.resolve_method(env.ctx, t1, v2->m_data.pstr)
-      : folly::none;
+
+  folly::Optional<res::Func> rfunc;
+  if (v2 && v2->m_type == KindOfStaticString) {
+    rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
+  }
   folly::Optional<res::Class> rcls;
   if (t1.strictSubtypeOf(TCls)) rcls = dcls_of(t1).cls;
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc });
@@ -1481,18 +1486,13 @@ void in(ISS& env, const bc::FCall& op) {
       // fallthrough
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
-      /*
-       * If we have a resolved func and it's a class method (or
-       * ctor), we currently must also have a resolved class.  This
-       * could change later, but this code will need to be revisited
-       * in that case, so assert.
-       */
-      always_assert(ar.cls.hasValue() &&
-        "resolved func without a resolved class");
-      return reduce(
-        env,
-        bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
-      );
+      if (ar.cls.hasValue() && ar.func->cantBeMagicCall()) {
+        return reduce(
+          env,
+          bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
+        );
+      }
+      // fallthrough
     }
   }
 

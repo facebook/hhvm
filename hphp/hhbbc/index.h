@@ -198,11 +198,10 @@ private:
  * This is an abstraction layer to represent possible runtime function
  * resolutions.
  *
- * Internally, this may only know the name of the function, or we may
- * know exactly which source-code-level function it refers to, or we
- * may only have ruled it down to one of a few functions in a class
- * hierarchy.  The interpreter can treat all these cases the same way
- * using this.
+ * Internally, this may only know the name of the function (or method), or we
+ * may know exactly which source-code-level function it refers to, or we may
+ * only have ruled it down to one of a few functions in a class hierarchy.  The
+ * interpreter can treat all these cases the same way using this.
  */
 struct Func {
   /*
@@ -219,9 +218,29 @@ struct Func {
    */
   SString name() const;
 
+  /*
+   * Returns whether this resolved function could possibly be going through a
+   * magic call, in the magic way.
+   *
+   * That is, if was resolved as part of a direct call to an __call method,
+   * this will say true.  If it was resolved as part as some normal method
+   * call, and we haven't proven that there's no way an __call dispatch could
+   * be involved, this will say false.
+   */
+  bool cantBeMagicCall() const;
+
 private:
   friend struct ::HPHP::HHBBC::Index;
-  using Rep = boost::variant< SString
+  struct FuncName {
+    bool operator==(FuncName o) const { return name == o.name; }
+    SString name;
+  };
+  struct MethodName {
+    bool operator==(MethodName o) const { return name == o.name; }
+    SString name;
+  };
+  using Rep = boost::variant< FuncName
+                            , MethodName
                             , borrowed_ptr<FuncInfo>
                             , borrowed_ptr<FuncFamily>
                             >;
@@ -373,14 +392,9 @@ struct Index {
    * Try to resolve a class method named `name' with a given Context
    * and class type.
    *
-   * Returns: folly::none if we can't figure out which function this
-   * would call.
-   *
    * Pre: clsType.subtypeOf(TCls)
    */
-  folly::Optional<res::Func> resolve_method(Context,
-                                            Type clsType,
-                                            SString name) const;
+  res::Func resolve_method(Context, Type clsType, SString name) const;
 
   /*
    * Try to resolve a class constructor for the supplied class.

@@ -1,4 +1,4 @@
-object(Closure)#%d (1) {
+object(Closure%s)#%d (1) {
   ["static"]=>
   array(1) {
     ["x"]=>

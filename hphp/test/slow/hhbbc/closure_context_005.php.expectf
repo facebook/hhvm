@@ -6,9 +6,26 @@ array(3) {
   [2]=>
   int(3)
 }
-object(Closure$Foo::f;%s)#3 (0) {
+object(Closure%s)#3 (1) {
+  ["this"]=>
+  object(Foo)#1 (1) {
+    ["prop":"Foo":private]=>
+    array(3) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(2)
+      [2]=>
+      int(3)
+    }
+  }
 }
 NULL
-object(Closure$Foo::f;%s)#3 (0) {
+object(Closure%s)#3 (1) {
+  ["this"]=>
+  object(Foo)#1 (1) {
+    ["prop":"Foo":private]=>
+    NULL
+  }
 }
 NULL

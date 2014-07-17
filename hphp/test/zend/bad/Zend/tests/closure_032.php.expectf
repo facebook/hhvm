@@ -35,7 +35,7 @@ Array
             [function] => test
             [args] => Array
                 (
-                    [0] => Closure Object
+                    [0] => Closure%s Object
                         (
                             [parameter] => Array
                                 (
@@ -50,4 +50,4 @@ Array
 
 )
 #0  {closure}(23) called at [%s:%d]
-#1  test(Closure Object ()) called at [%s:%d]
+#1  test(Closure%s Object ()) called at [%s:%d]

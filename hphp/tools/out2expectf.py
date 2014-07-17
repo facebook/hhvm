@@ -34,7 +34,14 @@ for test in sys.argv[1:]:
     data = re.sub(' [0-9]+_[0-9]+\(', ' %d_%d(', data)
 
     # Closure names change
-    data = re.sub('Closure\$\$[0-9a-f]+\$', 'Closure$$%s$', data)
-    file(test + '.expectf', 'w').write(data)
+    data = re.sub('Closure\$\$[0-9a-f]+\$', 'Closure%s', data)
 
+    # Closure class name
+    data = re.sub('string\(7\) "Closure"', 'string(%d) "Closure%s"', data)
+
+    # Left over Closure class names
+    data = re.sub('Closure(?!%s)', 'Closure%s', data)
+
+    # Write out the expectf file
+    file(test + '.expectf', 'w').write(data)
     print ('Copied %s.out to %s.expectf' % (test, test))

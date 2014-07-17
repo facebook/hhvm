@@ -1815,7 +1815,7 @@ String ObjectData::invokeToString() {
     // recoverable error
     raise_recoverable_error(
       "Object of class %s could not be converted to string",
-      m_cls->preClass()->name()->data()
+      classname_cstr()
     );
     // If the user error handler decides to allow execution to continue,
     // we return the empty string.

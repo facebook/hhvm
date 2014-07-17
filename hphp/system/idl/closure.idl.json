@@ -21,6 +21,16 @@
                     ],
                     "args": [
                     ]
+                },
+                {
+                    "name": "__debuginfo",
+                    "return": {
+                        "type": "StringMap"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
                 }
             ],
             "consts": [

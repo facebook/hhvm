@@ -59,6 +59,8 @@ class c_Closure : public ExtObjectDataFlags<ObjectData::HasClone> {
 public: // ObjectData overrides
   void t___construct(); // must not be called for Closures
 
+  Array t___debuginfo();
+
 public:
 
   const Func* getInvokeFunc() { return m_func; }

@@ -14,5 +14,5 @@ array(2) {
   [1]=>
   string(3) "foo"
 }
-object(Closure)#%d (0) {
+object(Closure%s)#%d (0) {
 }

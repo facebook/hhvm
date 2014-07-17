@@ -11,6 +11,6 @@ Closure::__invoke
 bool(true)
 Closure::__invoke
 bool(true)
-Closure::__invoke
+Closure%s::__invoke
 bool(true)
-Closure::__invoke
+Closure%s::__invoke

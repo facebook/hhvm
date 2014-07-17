@@ -5440,23 +5440,7 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
   // TODO(4599368): if dealing with an unpack, would need to kick out of
   // the pass-by-ref behavior and defer that to FCallUnpack
 
-  PassByRefKind passByRefKind = getPassByRefKind(exp);
-  if (Option::WholeProgram && !exp->hasAnyContext(Expression::InvokeArgument |
-                                                  Expression::RefParameter)) {
-    if (exp->hasContext(Expression::RefValue)) {
-      if (passByRefKind == PassByRefKind::AllowCell ||
-          m_evalStack.get(m_evalStack.size() - 1) != StackSym::C) {
-        emitVGet(e);
-        e.FPassVNop(paramId);
-        return;
-      }
-    } else {
-      emitCGet(e);
-      e.FPassC(paramId);
-      return;
-    }
-  }
-  emitFPass(e, paramId, passByRefKind);
+  emitFPass(e, paramId, getPassByRefKind(exp));
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,

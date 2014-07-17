@@ -967,7 +967,9 @@ def walk(filename, dest_subdir):
         file(full_dest_filename+'.ini', 'w').write(exp)
 
     if 'SKIPIF' in sections:
-        skipif = sections['SKIPIF']
+        skipif = sections['SKIPIF'].strip()
+        if skipif[:2] != '<?':
+          skipif = '<?php' + skipif
 
         if '/ext/standard/tests/strings/fprintf_' in full_dest_filename:
             skipif = skipif.replace('dump.txt', dest_filename + '.txt')

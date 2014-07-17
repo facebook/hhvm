@@ -1164,11 +1164,7 @@ void IRBuilder::startBlock(Block* block) {
     if (block != m_curBlock) {
       assert(m_curBlock);
       m_state.pauseBlock(m_curBlock);
-      if (m_state.compatible(block)) {
-        m_state.pauseBlock(block);
-      } else {
-        m_state.clearCse();
-      }
+      m_state.pauseBlock(block);
       auto& prev = m_curBlock->back();
       if (!prev.hasEdges()) {
         gen(Jmp, block);
@@ -1209,11 +1205,7 @@ bool IRBuilder::blockExists(Offset offset) {
 }
 
 bool IRBuilder::blockIsIncompatible(Offset offset) {
-  if (m_offsetSeen.count(offset) && !RuntimeOption::EvalJitLoops) return true;
-  auto it = m_offsetToBlockMap.find(offset);
-  if (it == m_offsetToBlockMap.end()) return false;
-  auto* block = it->second;
-  return !m_state.compatible(block);
+  return m_offsetSeen.count(offset) && !RuntimeOption::EvalJitLoops;
 }
 
 void IRBuilder::recordOffset(Offset offset) {

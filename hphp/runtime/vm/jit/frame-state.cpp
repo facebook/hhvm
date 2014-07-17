@@ -492,32 +492,6 @@ void FrameState::save(Block* block) {
   }
 }
 
-bool FrameState::compatible(Block* block) {
-  auto it = m_snapshots.find(block);
-  // If we didn't find a snapshot, it's because we never saved one.
-  // Probably because the other incoming edge is unreachable.
-  if (it == m_snapshots.end()) return true;
-  auto& snapshot = it->second;
-  if (m_fpValue != snapshot.fpValue) {
-    DEBUG_ONLY auto fpRoot       =
-      IRInstruction::framePassthroughRoot(m_fpValue);
-    DEBUG_ONLY auto snapshotRoot =
-      IRInstruction::framePassthroughRoot(snapshot.fpValue);
-
-    assert(fpRoot == snapshotRoot);
-  }
-
-  assert(m_locals.size() == snapshot.locals.size());
-
-  // TODO(t3730468): We don't check the stack here, because we always
-  // spill the stack on all paths leading up to a merge, and insert a
-  // DefSP at the merge point to block walking the use-def chain past
-  // it.  It would be better to do proper type analysis on the stack
-  // values flowing in and insert phis or exits as needed.
-
-  return true;
-}
-
 const FrameState::LocalVec& FrameState::localsForBlock(Block* b) const {
   auto bit = m_snapshots.find(b);
   assert(bit != m_snapshots.end());
@@ -557,6 +531,7 @@ void FrameState::merge(Snapshot& state) {
   }
   if (state.fpValue != m_fpValue) {
     state.fpValue = IRInstruction::frameCommonRoot(state.fpValue, m_fpValue);
+    assert(state.fpValue);
   }
   // this is available iff it's available in both states
   state.thisAvailable &= m_thisAvailable;

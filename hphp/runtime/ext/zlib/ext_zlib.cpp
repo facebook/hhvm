@@ -624,7 +624,7 @@ int VarintDecode(const char** src, int max_size) {
 
 Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
                                     bool high /* = false */) {
-  if(high) {
+  if (high) {
     return f_lz4_hccompress(uncompressed);
   }
   int bufsize = LZ4_compressBound(uncompressed.size());

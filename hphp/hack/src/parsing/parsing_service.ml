@@ -34,11 +34,6 @@ module AddDeps = struct
 
   and class_ c =
     let name = snd c.c_name in
-    if SMap.mem "Injectable" c.c_user_attributes ||
-       SMap.mem "InjectableSingleton" c.c_user_attributes
-    then begin
-      Typing_deps.add_idep (Some (Dep.Class name)) Dep.Injectable;
-    end;
     List.iter (hint name) c.c_extends;
     List.iter (hint name) c.c_implements;
     List.iter (class_def name) c.c_body
@@ -98,7 +93,7 @@ let legacy_php_file_info = ref (fun fn ->
  *)
 let parse check_mode (acc, errorl, error_files, php_files) fn =
   let errorl', {Parser_hack.is_hh_file; comments; ast} =
-    Errors.do_ begin fun () -> 
+    Errors.do_ begin fun () ->
       Parser_hack.from_file fn
     end
   in
@@ -107,15 +102,15 @@ let parse check_mode (acc, errorl, error_files, php_files) fn =
     AddDeps.program ast;
     let funs, classes, types, consts = get_defs ast in
     Parser_heap.ParserHeap.add fn ast;
-    let defs = 
-      {FileInfo.funs; classes; types; consts; comments; 
+    let defs =
+      {FileInfo.funs; classes; types; consts; comments;
        consider_names_just_for_autoload = false}
     in
     let acc = SMap.add fn defs acc in
     let errorl = List.rev_append errorl' errorl in
     let error_files =
       if errorl' = []
-      then error_files 
+      then error_files
       else SSet.add fn error_files
     in
     acc, errorl, error_files, php_files

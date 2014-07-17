@@ -137,7 +137,7 @@ and class_type = {
   tc_scvars              : class_elt SMap.t;
   tc_methods             : class_elt SMap.t;
   tc_smethods            : class_elt SMap.t;
-  tc_construct           : class_elt option ;
+  tc_construct           : class_elt option * bool;
   (* This includes all the classes, interfaces and traits this class is
    * using. *)
   tc_ancestors           : ty SMap.t ;

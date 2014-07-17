@@ -192,9 +192,10 @@ module CompareTypes = struct
   and members acc m1 m2 = smap class_elt acc m1 m2
 
   and constructor acc c1 c2 =
-    match c1, c2 with
-    | Some x1, Some x2 -> class_elt acc x1 x2
-    | _ -> acc
+    let subst, same = match (fst c1), (fst c2) with
+      | Some x1, Some x2 -> class_elt acc x1 x2
+      | _ -> acc
+    in subst, same && (snd c1 = snd c2)
 
   and ancestry acc imp1 imp2 = smap ty acc imp1 imp2
 
@@ -356,7 +357,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_scvars                = SMap.map class_elt tc.tc_scvars      ;
       tc_methods               = SMap.map class_elt tc.tc_methods     ;
       tc_smethods              = SMap.map class_elt tc.tc_smethods    ;
-      tc_construct             = opt_map class_elt tc.tc_construct    ;
+      tc_construct             = opt_map class_elt (fst tc.tc_construct), (snd tc.tc_construct);
       tc_ancestors             = SMap.map ty tc.tc_ancestors          ;
       tc_ancestors_checked_when_concrete    = SMap.map ty tc.tc_ancestors_checked_when_concrete ;
       tc_user_attributes       = tc.tc_user_attributes                ;

@@ -30,33 +30,6 @@ let is_private = function
   | _ -> false
 
 (*****************************************************************************)
-(* Errors *)
-(*****************************************************************************)
-
-module Error = struct
-
-  (* Incompatible visibilities *)
-  let visibility parent_class_elt class_elt =
-    let parent_pos = Reason.to_pos (fst parent_class_elt.ce_type) in
-    let pos = Reason.to_pos (fst class_elt.ce_type) in
-    let parent_vis = TUtils.string_of_visibility parent_class_elt.ce_visibility in
-    let vis = TUtils.string_of_visibility class_elt.ce_visibility in
-    Errors.visibility_extends vis pos parent_pos parent_vis
-
-  (* Method missing *)
-  let member_not_implemented member_name parent_pos pos defn_pos =
-    Errors.member_not_implemented member_name parent_pos pos defn_pos
-
-  (* Incompatible override *)
-  let override (parent_pos, parent_name) (pos, name) error_message_l =
-    Errors.override parent_pos parent_name pos name error_message_l
-
-  let missing_constructor pos =
-    Errors.missing_constructor pos
-
-end
-
-(*****************************************************************************)
 (* Given a map of members, check that the overriding is correct.
  * Please note that 'members' has a very general meaning here.
  * It can be class variables, methods, static methods etc ... The same logic
@@ -76,7 +49,12 @@ let check_visibility parent_class_elt class_elt =
   | Vprivate _   , Vprivate _
   | Vprotected _ , Vprotected _
   | Vprotected _ , Vpublic       -> ()
-  | _ -> Error.visibility parent_class_elt class_elt
+  | _ ->
+    let parent_pos = Reason.to_pos (fst parent_class_elt.ce_type) in
+    let pos = Reason.to_pos (fst class_elt.ce_type) in
+    let parent_vis = TUtils.string_of_visibility parent_class_elt.ce_visibility in
+    let vis = TUtils.string_of_visibility class_elt.ce_visibility in
+    Errors.visibility_extends vis pos parent_pos parent_vis
 
 (* Check that all the required members are implemented *)
 let check_members_implemented parent_reason reason parent_members members =
@@ -85,7 +63,7 @@ let check_members_implemented parent_reason reason parent_members members =
     | Vprivate _ -> ()
     | _ when not (SMap.mem member_name members) ->
         let defn_reason = Reason.to_pos (fst class_elt.ce_type) in
-        Error.member_not_implemented member_name parent_reason reason defn_reason
+        Errors.member_not_implemented member_name parent_reason reason defn_reason
     | _ -> ()
   end parent_members
 
@@ -152,15 +130,21 @@ let make_all_members class_ = [
 
 (* When an interface defines a constructor, we check that they are compatible *)
 let check_constructors env parent_class class_ =
-  if parent_class.tc_kind <> Ast.Cinterface then () else
-  match parent_class.tc_construct, class_.tc_construct with
-  | None, _ -> ()
-  | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
-  | Some parent_cstr, None ->
-      let pos = fst parent_cstr.ce_type in
-      Error.missing_constructor (Reason.to_pos pos)
-  | Some parent_cstr, Some cstr ->
-      check_override env parent_class class_ parent_cstr cstr
+  if parent_class.tc_kind = Ast.Cinterface || (snd parent_class.tc_construct)
+  then (
+    Utils.dn (
+      Printf.sprintf "check_constructors %s for parent %s"
+        class_.tc_name parent_class.tc_name
+    );
+    match (fst parent_class.tc_construct), (fst class_.tc_construct) with
+      | None, _ -> ()
+      | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
+      | Some parent_cstr, None ->
+        let pos = fst parent_cstr.ce_type in
+        Errors.missing_constructor (Reason.to_pos pos)
+      | Some parent_cstr, Some cstr ->
+        check_override env parent_class class_ parent_cstr cstr
+  ) else ()
 
 let check_class_implements env parent_class class_ =
   let parent_pos, parent_class, parent_tparaml = parent_class in
@@ -198,4 +182,7 @@ let check_implements env parent_type type_ =
       let class_ = pos, class_, tparaml in
       Errors.try_
         (fun () -> check_class_implements env parent_class class_)
-        (fun error -> Error.override parent_name name error)
+        (fun errorl ->
+          let p_name_pos, p_name_str = parent_name in
+          let name_pos, name_str = name in
+          Errors.override p_name_pos p_name_str name_pos name_str errorl)

@@ -29,7 +29,7 @@ type env = Env.env
 (*****************************************************************************)
 
 type inherited = {
-    ih_cstr     : class_elt option ;
+    ih_cstr     : class_elt option * bool;
     ih_consts   : class_elt SMap.t ;
     ih_cvars    : class_elt SMap.t ;
     ih_scvars   : class_elt SMap.t ;
@@ -38,7 +38,7 @@ type inherited = {
   }
 
 let empty = {
-  ih_cstr     = None;
+  ih_cstr     = None, false;
   ih_consts   = SMap.empty;
   ih_cvars    = SMap.empty;
   ih_scvars   = SMap.empty;
@@ -101,12 +101,13 @@ let add_methods methods' acc =
 let add_members members acc =
   SMap.fold SMap.add members acc
 
-let add_constructor cstr acc =
-  match (cstr, acc) with
-  | None, _ -> acc
-  | Some ce, Some acce when ce.ce_synthesized && not acce.ce_synthesized
-      -> acc
-  | _ -> cstr
+let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
+  let ce = match cstr, acc with
+    | None, _ -> acc
+    | Some ce, Some acce when ce.ce_synthesized && not acce.ce_synthesized ->
+      acc
+    | _ -> cstr
+  in ce, cstr_consist || acc_consist
 
 let add_inherited inherited acc = {
   ih_cstr     = add_constructor inherited.ih_cstr acc.ih_cstr;
@@ -140,15 +141,15 @@ let make_substitution ?this:(this=None) pos class_name class_type class_paramete
       let this_ty = (fst this, Tgeneric ("this", Some this)) in
       Inst.make_subst_with_this this_ty class_type.tc_tparams class_parameters
 
-let constructor env subst = function
-  | None -> env, None
+let constructor env subst (cstr, consistent) = match cstr with
+  | None -> env, (None, consistent)
   | Some ce ->
     let env, ty = Inst.instantiate subst env ce.ce_type in
-    env, Some {ce with ce_type = ty}
+    env, (Some {ce with ce_type = ty}, consistent)
 
 let map_inherited f inh =
   {
-    ih_cstr     = opt_map f inh.ih_cstr;
+    ih_cstr     = (opt_map f (fst inh.ih_cstr)), (snd inh.ih_cstr);
     ih_consts   = SMap.map f inh.ih_consts;
     ih_cvars    = SMap.map f inh.ih_cvars;
     ih_scvars   = SMap.map f inh.ih_scvars;

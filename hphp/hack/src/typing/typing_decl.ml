@@ -407,7 +407,7 @@ and class_decl c =
   SMap.iter (check_static_method m) sm;
   let parent_cstr = inherited.Typing_inherit.ih_cstr in
   let env, cstr = constructor_decl env parent_cstr c in
-  let need_init = match cstr with
+  let need_init = match (fst cstr) with
     | None
     | Some {ce_type = (_, Tfun ({ft_abstract = true; _})); _} -> false
     | _ -> true in
@@ -528,17 +528,17 @@ and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
   end
   else ()
 
-and constructor_decl env pcstr class_ =
+and constructor_decl env (pcstr, pcompat) class_ =
   match class_.c_constructor, pcstr with
-    | None, Some cstr ->
-        env, Some cstr
-    | Some method_, Some { ce_final = true; ce_type = (r, _); _ } ->
+    | None, Some _ -> env, (pcstr, pcompat)
+    | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
       Errors.override_final ~parent:(Reason.to_pos r) ~child:(fst method_.m_name);
-      build_constructor env class_ method_
+      let env, cstr = build_constructor env class_ method_ in
+      env, (cstr, pcompat)
     | Some method_, _ ->
-      build_constructor env class_ method_
-    | None, _ ->
-        env, None
+      let env, cstr = build_constructor env class_ method_ in
+      env, (cstr, pcompat)
+    | None, _ -> env, (None, pcompat)
 
 and build_constructor env class_ method_ =
   let env, ty = method_decl class_ env method_ in
@@ -546,7 +546,7 @@ and build_constructor env class_ method_ =
   let vis = visibility class_name method_.m_visibility in
   let cstr = {
     ce_final = method_.m_final;
-    ce_override = false ;
+    ce_override = false;
     ce_synthesized = false;
     ce_visibility = vis;
     ce_type = ty;

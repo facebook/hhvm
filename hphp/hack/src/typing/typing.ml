@@ -2198,14 +2198,14 @@ and call_construct p env class_ params el =
   let env, cstr = Env.get_construct env class_ in
   let mode = env.Env.genv.Env.mode in
   Find_refs.process_find_refs (Some class_.tc_name) "__construct" p;
-  match cstr with
-  | None ->
+  match (fst cstr) with
+    | None ->
       if el <> [] &&
         (mode = Ast.Mstrict || mode = Ast.Mpartial) &&
         class_.tc_members_fully_known
       then Errors.constructor_no_args p;
       fst (lfold expr env el)
-  | Some { ce_visibility = vis; ce_type = m; _ } ->
+    | Some { ce_visibility = vis; ce_type = m; _ } ->
       check_visibility p env (Reason.to_pos (fst m), vis) None;
       let subst = Inst.make_subst class_.tc_tparams params in
       let env, m = Inst.instantiate subst env m in

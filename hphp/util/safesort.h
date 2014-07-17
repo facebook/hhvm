@@ -85,21 +85,28 @@
  * The safesort algorithm below is based on LLVM's libc++ implementation
  * of std::sort.
  *
- * The key difference is that safesort is safe to use with a comparator
+ * One key difference is that safesort is safe to use with a comparator
  * that does not impose a strict weak ordering on the elements (whereas
  * std::sort may crash or go into infinite loops for such comparators).
  * Safesoft is also "exception safe", leaving the array in a consistent
  * state in the event that the comparator throws. This is important for
- * HipHop for several reasons. Some of the builtin comparators in PHP do
+ * HHVM for several reasons. Some of the builtin comparators in PHP do
  * not impose a strict weak ordereding (ex. SORT_REGULAR over strings).
  * Also, user code can supply comparators that behave inconsistently or
  * throw exceptions.
- * 
+ *
  * In cases where the comparator does not impose a strict weak ordering
  * or the comparator throws, no guarantees are made about the order of
  * the elements produced the sort algorithm, though the algorithm still
  * upholds a weaker guarantee that the result will be some permutation
  * of the input.
+ *
+ * Another import difference is that safesort assumes the comparator
+ * returns true if the left argument is GREATER than the right argument.
+ * This is the opposite of what the STL's sort implementation does, and
+ * we do it because it helps HHVM be more compatible with existing PHP
+ * programs that (inadvertantly) depend on unspecified behavior of the
+ * PHP5 implementation.
  */
 
 #ifndef incl_HPHP_SAFESORT_H_
@@ -110,54 +117,54 @@
 namespace HPHP {
 namespace Sort {
 
-template <class CompT, class IterT>
-void sort3(IterT x, IterT y, IterT z, CompT c) {
+template <class GtCompT, class IterT>
+void sort3(IterT x, IterT y, IterT z, GtCompT gt) {
   using std::swap;
-  if (!c(*y, *x)) {
-    if (!c(*z, *y))
+  if (!gt(*x, *y)) {
+    if (!gt(*y, *z))
       return;
     swap(*y, *z);
-    if (c(*y, *x)) {
+    if (gt(*x, *y)) {
       swap(*x, *y);
     }
     return;
   }
-  if (c(*z, *y)) {
+  if (gt(*y, *z)) {
     swap(*x, *z);
     return;
   }
   swap(*x, *y);
-  if (c(*z, *y)) {
+  if (gt(*y, *z)) {
     swap(*y, *z);
   }
 }
 
-template <class CompT, class IterT>
-void sort4(IterT x1, IterT x2, IterT x3, IterT x4, CompT c) {
+template <class GtCompT, class IterT>
+void sort4(IterT x1, IterT x2, IterT x3, IterT x4, GtCompT gt) {
   using std::swap;
-  sort3<CompT>(x1, x2, x3, c);
-  if (c(*x4, *x3)) {
+  sort3<GtCompT>(x1, x2, x3, gt);
+  if (gt(*x3, *x4)) {
     swap(*x3, *x4);
-    if (c(*x3, *x2)) {
+    if (gt(*x2, *x3)) {
       swap(*x2, *x3);
-      if (c(*x2, *x1)) {
+      if (gt(*x1, *x2)) {
         swap(*x1, *x2);
       }
     }
   }
 }
 
-template <class CompT, class IterT>
-void sort5(IterT x1, IterT x2, IterT x3, IterT x4, IterT x5, CompT c) {
+template <class GtCompT, class IterT>
+void sort5(IterT x1, IterT x2, IterT x3, IterT x4, IterT x5, GtCompT gt) {
   using std::swap;
-  sort4<CompT>(x1, x2, x3, x4, c);
-  if (c(*x5, *x4)) {
+  sort4<GtCompT>(x1, x2, x3, x4, gt);
+  if (gt(*x4, *x5)) {
     swap(*x4, *x5);
-    if (c(*x4, *x3)) {
+    if (gt(*x3, *x4)) {
       swap(*x3, *x4);
-      if (c(*x3, *x2)) {
+      if (gt(*x2, *x3)) {
         swap(*x2, *x3);
-        if (c(*x2, *x1)) {
+        if (gt(*x1, *x2)) {
           swap(*x1, *x2);
         }
       }
@@ -165,8 +172,8 @@ void sort5(IterT x1, IterT x2, IterT x3, IterT x4, IterT x5, CompT c) {
   }
 }
 
-template <class CompT, class IterT>
-void insertion_sort(IterT first, IterT last, CompT comp) {
+template <class GtCompT, class IterT>
+void insertion_sort(IterT first, IterT last, GtCompT gt) {
   typedef typename std::iterator_traits<IterT>::value_type value_type;
   typedef typename std::iterator_traits<IterT>::difference_type
     difference_type;
@@ -185,7 +192,7 @@ void insertion_sort(IterT first, IterT last, CompT comp) {
     // If this element is not less than the element
     // immediately before it, then we can leave this
     // element where it is for now
-    if (!comp(*i, *j))
+    if (!gt(*j, *i))
       continue;
     // Scan backward one element at a time looking
     // for the earliest element that *i is less than
@@ -195,7 +202,7 @@ void insertion_sort(IterT first, IterT last, CompT comp) {
       }
       IterT k = j;
       --k;
-      if (!comp(*i, *k)) {
+      if (!gt(*k, *i)) {
         break;
       }
       j = k;
@@ -215,7 +222,7 @@ void insertion_sort(IterT first, IterT last, CompT comp) {
     // If this element is not less than the element
     // immediately before it, then we can leave this
     // element where it is for now
-    if (!comp(*i, *j))
+    if (!gt(*j, *i))
       continue;
     // Scan backward two elements at a time looking
     // for the earliest element that *i is less than
@@ -229,20 +236,20 @@ void insertion_sort(IterT first, IterT last, CompT comp) {
           // if *i is less than *first
           IterT m = j;
           --m;
-          if (comp(*i, *m)) {
+          if (gt(*m, *i)) {
             j = m;
           }
-        } 
+        }
         break;
       }
       // Move backward by two
       IterT k = j-2;
-      if (!comp(*i, *k)) {
+      if (!gt(*k, *i)) {
         // If (*i < *k) is false, we know that *(k+1) or
         // *(k+2) is the element we are looking for.
         IterT m = k;
         ++m;
-        if (comp(*i, *m)) {
+        if (gt(*m, *i)) {
           j = m;
         }
         break;
@@ -260,8 +267,8 @@ void insertion_sort(IterT first, IterT last, CompT comp) {
   }
 }
 
-template <class CompT, class IterT>
-void sort(IterT first, IterT last, CompT comp) {
+template <class GtCompT, class IterT>
+void sort(IterT first, IterT last, GtCompT gt) {
   typedef typename std::iterator_traits<IterT>::difference_type
     difference_type;
   using std::swap;
@@ -269,7 +276,7 @@ void sort(IterT first, IterT last, CompT comp) {
     difference_type len = last - first;
     // For small numbers of elements, use insertion sort
     if (len <= 16) {
-      insertion_sort<CompT>(first, last, comp);
+      insertion_sort<GtCompT>(first, last, gt);
       return;
     }
     // Find a pivot
@@ -281,10 +288,10 @@ void sort(IterT first, IterT last, CompT comp) {
       if (len >= 1000) {
         // Compute the median of 5
         delta /= 2;
-        sort5<CompT>(first, first + delta, pivot, pivot+delta, lm1, comp);
+        sort5<GtCompT>(first, first + delta, pivot, pivot+delta, lm1, gt);
       } else {
         // Compute the median of 3
-        sort3<CompT>(first, pivot, lm1, comp);
+        sort3<GtCompT>(first, pivot, lm1, gt);
       }
       // Temporarily move the pivot to the second position
       swap(*(first+1), *pivot);
@@ -295,9 +302,9 @@ void sort(IterT first, IterT last, CompT comp) {
     // because they've already been put in the right place by the
     // call to sort3/sort5 above
     IterT i = first+2;
-    IterT j = last-1; 
+    IterT j = last-1;
     for (;;) {
-      while (comp(*i, *pivot)) {
+      while (gt(*pivot, *i)) {
         ++i;
         if (UNLIKELY(i == j)) {
           goto done;
@@ -307,7 +314,7 @@ void sort(IterT first, IterT last, CompT comp) {
       if (UNLIKELY(i == j)) {
         goto done;
       }
-      while (comp(*pivot, *j)) {
+      while (gt(*j, *pivot)) {
         --j;
         if (UNLIKELY(i == j)) {
           goto done;
@@ -326,10 +333,10 @@ void sort(IterT first, IterT last, CompT comp) {
     // right parition in [i,last). Sort smaller partition with recursive
     // call and sort the larger partition with tail recursion elimination
     if ((i-1) - first < last - i) {
-      sort<CompT>(first, i-1, comp);
+      sort<GtCompT>(first, i-1, gt);
       first = i;
     } else {
-      sort<CompT>(i, last, comp);
+      sort<GtCompT>(i, last, gt);
       last = i-1;
     }
   }

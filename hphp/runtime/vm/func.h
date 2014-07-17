@@ -58,6 +58,44 @@ using BuiltinFunction = TypedValue* (*)(ActRec* ar);
 using DVFuncletsVec = std::vector<std::pair<int, Offset>>;
 
 ///////////////////////////////////////////////////////////////////////////////
+// EH and FPI tables.
+
+/*
+ * Exception handler table entry.
+ */
+struct EHEnt {
+  enum class Type {
+    Catch,
+    Fault
+  };
+  typedef std::vector<std::pair<Id, Offset>> CatchVec;
+
+  Type m_type;
+  Offset m_base;
+  Offset m_past;
+  int m_iterId;
+  bool m_itRef;
+  int m_parentIndex;
+  Offset m_fault;
+  CatchVec m_catches;
+
+  template<class SerDe> void serde(SerDe& sd);
+};
+
+/*
+ * Function parameter info region table entry.
+ */
+struct FPIEnt {
+  Offset m_fpushOff;
+  Offset m_fcallOff;
+  Offset m_fpOff; // evaluation stack depth to current frame pointer
+  int m_parentIndex;
+  int m_fpiDepth;
+
+  template<class SerDe> void serde(SerDe& sd);
+};
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Metadata about a PHP function or method.
@@ -1076,9 +1114,9 @@ private:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Properties.
+  // Data members.
   //
-  // The fields of Fucn are organized in reverse order of frequency of use.
+  // The fields of Func are organized in reverse order of frequency of use.
   // Do not re-order with checking perf!
 
 private:

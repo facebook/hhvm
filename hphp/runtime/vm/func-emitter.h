@@ -40,7 +40,7 @@ struct PreClass;
 struct StringData;
 
 struct PreClassEmitter;
-struct UnitClassEmitter;
+struct UnitEmitter;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -245,7 +245,7 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Properties.
+  // Data members.
 
 private:
   /*
@@ -314,10 +314,10 @@ private:
 /*
  * Proxy for converting in-repo function representations into FuncEmitters.
  */
-class FuncRepoProxy : public RepoProxy {
+struct FuncRepoProxy : public RepoProxy {
   friend class Func;
   friend class FuncEmitter;
-public:
+
   explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);

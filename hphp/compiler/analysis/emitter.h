@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/hash.h"
 
 #include <deque>

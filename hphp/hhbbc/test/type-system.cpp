@@ -34,7 +34,7 @@
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/runtime/vm/as.h"
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 namespace HPHP { namespace HHBBC {
 

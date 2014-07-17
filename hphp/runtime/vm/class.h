@@ -949,7 +949,7 @@ public:
   // hot, and must be the last member.
 
 public:
-  Class* m_nextClass{nullptr}; // used by Unit
+  Class* m_nextClass{nullptr}; // used by NamedEntity
 
 private:
   // Objects with the <<__NativeData("T")>> UA are allocated with extra space

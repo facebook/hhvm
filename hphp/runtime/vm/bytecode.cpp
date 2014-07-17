@@ -899,7 +899,7 @@ Cell ExecutionContext::lookupClsCns(const NamedEntity* ne,
 
 Cell ExecutionContext::lookupClsCns(const StringData* cls,
                                       const StringData* cns) {
-  return lookupClsCns(Unit::GetNamedEntity(cls), cls, cns);
+  return lookupClsCns(NamedEntity::get(cls), cls, cns);
 }
 
 // Look up the method specified by methodName from the class specified by cls
@@ -4230,7 +4230,7 @@ OPTBLD_INLINE bool ExecutionContext::cellInstanceOf(
 
 ALWAYS_INLINE
 bool ExecutionContext::iopInstanceOfHelper(const StringData* str1, Cell* c2) {
-  const NamedEntity* rhs = Unit::GetNamedEntity(str1, false);
+  const NamedEntity* rhs = NamedEntity::get(str1, false);
   // Because of other codepaths, an un-normalized name might enter the
   // table without a Class* so we need to check if it's there.
   if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
@@ -7818,7 +7818,7 @@ void ExecutionContext::requestInit() {
   MemoryProfile::startProfiling();
 
 #ifdef DEBUG
-  Class* cls = Unit::GetNamedEntity(s_stdclass.get())->clsList();
+  Class* cls = NamedEntity::get(s_stdclass.get())->clsList();
   assert(cls);
   assert(cls == SystemLib::s_stdclassClass);
 #endif

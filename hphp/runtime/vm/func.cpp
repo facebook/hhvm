@@ -280,7 +280,7 @@ void Func::setFullName(int numParams) {
       std::string(m_cls->name()->data()) + "::" + m_name->data());
   } else {
     m_fullName = m_name;
-    m_namedEntity = Unit::GetNamedEntity(m_name);
+    m_namedEntity = NamedEntity::get(m_name);
   }
   if (RuntimeOption::EvalPerfDataMap) {
     int numPre = isClosureBody() ? 1 : 0;

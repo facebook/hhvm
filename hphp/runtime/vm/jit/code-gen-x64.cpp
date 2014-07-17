@@ -2440,7 +2440,7 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
 void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
   auto const dst  = dstLoc(0).reg();
   auto const name = inst->extra<LdFuncCachedData>()->name;
-  auto const ch   = Unit::GetNamedEntity(name)->getFuncHandle();
+  auto const ch   = NamedEntity::get(name)->getFuncHandle();
   auto& a = m_as;
 
   if (dst == InvalidReg) {
@@ -2476,7 +2476,7 @@ void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
 void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
   auto const dstReg    = dstLoc(0).reg();
   auto const extra     = inst->extra<LdFuncCachedU>();
-  auto const hFunc     = Unit::GetNamedEntity(extra->name)->getFuncHandle();
+  auto const hFunc     = NamedEntity::get(extra->name)->getFuncHandle();
 
   auto& a = m_as;
 
@@ -4797,7 +4797,7 @@ void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
 void CodeGenerator::cgCheckDefinedClsEq(IRInstruction* inst) {
   auto const clsName = inst->extra<CheckDefinedClsEq>()->clsName;
   auto const cls     = inst->extra<CheckDefinedClsEq>()->cls;
-  auto const ch      = Unit::GetNamedEntity(clsName)->getClassHandle();
+  auto const ch      = NamedEntity::get(clsName)->getClassHandle();
   auto clsImm = Immed64(cls);
   if (clsImm.fits(sz::dword)) {
     m_as.cmpq(clsImm.l(), rVmTl[ch]);
@@ -5160,7 +5160,7 @@ void CodeGenerator::cgLdClsPropAddrKnown(IRInstruction* inst) {
 RDS::Handle CodeGenerator::cgLdClsCachedCommon(
   IRInstruction* inst) {
   const StringData* className = inst->src(0)->strVal();
-  auto ch = Unit::GetNamedEntity(className)->getClassHandle();
+  auto ch = NamedEntity::get(className)->getClassHandle();
   auto dstReg = dstLoc(0).reg();
   if (dstReg == InvalidReg) {
     m_as. cmpq   (0, rVmTl[ch]);
@@ -5234,7 +5234,7 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
     SyncOptions::kSyncPoint,
     argGroup()
       .addr(rVmTl, safe_cast<int32_t>(link.handle()))
-      .immPtr(Unit::GetNamedEntity(extra->clsName))
+      .immPtr(NamedEntity::get(extra->clsName))
       .immPtr(extra->clsName)
       .immPtr(extra->cnsName)
   );

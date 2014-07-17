@@ -784,13 +784,13 @@ Type ldRefReturn(Type typeParam) {
     return typeParam;
   }
 
-  auto type = typeParam.unspecialize();
+  auto const type = typeParam.unspecialize();
 
   if (type.isKnownDataType())      return type;
   if (type <= Type::UncountedInit) return Type::UncountedInit;
   if (type <= Type::Uncounted)     return Type::Uncounted;
   always_assert(type <= Type::Cell);
-  return Type::Cell;
+  return Type::InitCell;
 }
 
 Type boxType(Type t) {

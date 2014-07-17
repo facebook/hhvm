@@ -39,4 +39,27 @@ function main() {
   $i->foo();
   $i->bar();
 }
+
+function reflect_requirements($name) {
+  $rc = new ReflectionClass($name);
+  if ($rc->isInterface()) {
+    echo 'interface';
+  } else if ($rc->isTrait()) {
+    echo 'trait';
+  } else if ($rc->isAbstract()) {
+    echo 'abstract class';
+  } else {
+    echo 'class';
+  }
+  echo ' ', $rc->getName(), ' requires:', "\n";
+  var_dump($rc->getRequirementNames());
+}
+
+function reflection() {
+  echo '-------', __FUNCTION__, '-------', "\n";
+  reflect_requirements(I3::class);
+  reflect_requirements(C3::class);
+  reflect_requirements(C4::class);
+}
 main();
+reflection();

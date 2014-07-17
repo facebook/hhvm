@@ -1536,11 +1536,25 @@ class ReflectionClass implements Reflector, Serializable {
    *                     ReflectionClass objects.
    */
   public function getInterfaces(): array<string, ReflectionClass> {
-    $ret = array();
-    foreach ($this->getInterfaceNames() as $name) {
-      $ret[$name] = new ReflectionClass($name);
-    }
-    return $ret;
+    return $this->getReflectionClassesFromNames($this->getInterfaceNames());
+  }
+
+  /**
+   * Gets the list of implemented interfaces/inherited classes needed to
+   * implement an interface / use a trait. Empty array for abstract and
+   * concrete classes.
+   */
+  <<__Native>>
+  public function getRequirementNames(): array<string>;
+
+  /**
+   * Gets ReflectionClass-es for the requirements of this class
+   *
+   * @return  An associative array of requirements, with keys as
+   *          requirement names and the array values as ReflectionClass objects.
+   */
+  public function getRequirements(): array<string, ReflectionClass> {
+    return $this->getReflectionClassesFromNames($this->getRequirementNames());
   }
 
   /**
@@ -1581,8 +1595,15 @@ class ReflectionClass implements Reflector, Serializable {
    *                     Returns NULL in case of an error.
    */
   public function getTraits(): array<string, ReflectionClass> {
+    return $this->getReflectionClassesFromNames($this->getTraitNames());
+  }
+
+  /**
+   * Helper for the get{Traits,Interfaces,Requirements} methods
+   */
+  private function getReflectionClassesFromNames(array<string> $names) {
     $ret = array();
-    foreach ($this->getTraitNames() as $name) {
+    foreach ($names as $name) {
       $ret[$name] = new ReflectionClass($name);
     }
     return $ret;

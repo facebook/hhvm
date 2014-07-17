@@ -1,2 +1,15 @@
 C1 Super::foo
 C2 Param::foo
+-------reflection-------
+trait T1 requires:
+array(2) {
+  [0]=>
+  string(5) "Super"
+  [1]=>
+  string(2) "I1"
+}
+trait T2 requires:
+array(1) {
+  [0]=>
+  string(5) "Param"
+}

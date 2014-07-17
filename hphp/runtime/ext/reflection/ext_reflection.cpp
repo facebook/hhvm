@@ -947,6 +947,28 @@ static Variant HHVM_METHOD(ReflectionClass, getDocComment) {
   }
 }
 
+static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (!(cls->attrs() & (AttrTrait | AttrInterface))) {
+    // requirements are applied to abstract/concrete classes when they use
+    // a trait / implement an interface
+    return empty_array();
+  }
+
+  auto const& requirements = cls->allRequirements();
+  auto numReqs = requirements.size();
+  if (numReqs == 0) {
+    return empty_array();
+  }
+
+  PackedArrayInit pai(numReqs);
+  for (int i = 0; i < numReqs; ++i) {
+    auto const& req = requirements[i];
+    pai.append(const_cast<StringData*>(req->name()));
+  }
+  return pai.toArray();
+}
+
 static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
@@ -1322,6 +1344,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionClass, getEndLine);
     HHVM_ME(ReflectionClass, getDocComment);
     HHVM_ME(ReflectionClass, getInterfaceNames);
+    HHVM_ME(ReflectionClass, getRequirementNames);
     HHVM_ME(ReflectionClass, getTraitNames);
     HHVM_ME(ReflectionClass, getTraitAliases);
 

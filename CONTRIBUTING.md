@@ -16,3 +16,4 @@ Please add appropriate test cases as you make changes; see [here](hphp/test) for
 
  * IRC:[#hhvm on freenode](http://webchat.freenode.net/?channels=hhvm)
  * [Issue tracker](http://github.com/facebook/hiphop-php/issues)
+ * [Code review](https://reviews.facebook.net/)

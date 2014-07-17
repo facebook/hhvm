@@ -124,7 +124,7 @@
 
 (defconst hack-types
   (eval-when-compile
-    (regexp-opt '("array" "bool" "char" "float" "int" "mixed" "object" "string" "void")))
+    (regexp-opt '("array" "bool" "char" "float" "int" "mixed" "string" "void")))
   "Hack types.")
 
 (defconst hack-special-methods
@@ -325,10 +325,6 @@
   (setq case-fold-search t)
   
   (setq-local compile-command (concat hack-client-binary "--from emacs"))
-  
-  (define-key hack-mode-map (kbd "M-RET") 'recompile)
-  (define-key hack-mode-map (kbd "M-<up>") 'next-error)
-  (define-key hack-mode-map (kbd "M-<down>") 'previous-error)
   
   (add-hook 'completion-at-point-functions 'hack-completion nil t) 
 

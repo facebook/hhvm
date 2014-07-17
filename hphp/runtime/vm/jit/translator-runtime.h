@@ -190,8 +190,8 @@ void lookupClsMethodHelper(Class* cls,
                            ActRec* ar,
                            ActRec* fp);
 
-void checkFrame(ActRec* fp, Cell* sp, bool checkLocals);
-void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip);
+void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
+void traceCallback(ActRec* fp, Cell* sp, Offset pcOff, void* rip);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);

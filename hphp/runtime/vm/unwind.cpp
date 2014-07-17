@@ -58,7 +58,7 @@ std::string describeFault(const Fault& f) {
 void discardStackTemps(const ActRec* const fp,
                        Stack& stack,
                        Offset const bcOffset) {
-  FTRACE(2, "discardStackTemps with fp {} sp {} pc {}\n",
+  ITRACE(2, "discardStackTemps with fp {} sp {} pc {}\n",
          implicit_cast<const void*>(fp),
          implicit_cast<void*>(stack.top()),
          bcOffset);
@@ -71,19 +71,19 @@ void discardStackTemps(const ActRec* const fp,
         assert(ar->hasThis());
         ar->getThis()->setNoDestruct();
       }
-      FTRACE(2, "  unwind pop AR : {}\n",
+      ITRACE(2, "  unwind pop AR : {}\n",
              implicit_cast<void*>(stack.top()));
       stack.popAR();
     },
     [&] (TypedValue* tv) {
       assert(tv == stack.top());
-      FTRACE(2, "  unwind pop TV : {}\n",
+      ITRACE(2, "  unwind pop TV : {}\n",
              implicit_cast<void*>(stack.top()));
       stack.popTV();
     }
   );
 
-  FTRACE(2, "discardStackTemps ends with sp = {}\n",
+  ITRACE(2, "discardStackTemps ends with sp = {}\n",
          implicit_cast<void*>(stack.top()));
 }
 
@@ -92,7 +92,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
                            PC& pc,
                            Fault& fault) {
   auto const func = fp->m_func;
-  FTRACE(1, "checkHandlers: func {} ({})\n",
+  ITRACE(1, "checkHandlers: func {} ({})\n",
          func->fullName()->data(),
          func->unit()->filepath()->data());
 
@@ -109,7 +109,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
       fault.m_handledCount++;
       switch (eh->m_type) {
       case EHEnt::Type::Fault:
-        FTRACE(1, "checkHandlers: entering fault at {}: save {}\n",
+        ITRACE(1, "checkHandlers: entering fault at {}: save {}\n",
                eh->m_fault,
                func->unit()->offsetOf(pc));
         pc = func->unit()->entry() + eh->m_fault;
@@ -123,14 +123,14 @@ UnwindAction checkHandlers(const EHEnt* eh,
             ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
           auto const obj = fault.m_userException;
           for (auto& idOff : eh->m_catches) {
-            FTRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
+            ITRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
             auto handler = func->unit()->at(idOff.second);
             auto const cls = Unit::lookupClass(
               func->unit()->lookupNamedEntityId(idOff.first)
             );
             if (!cls || !obj->instanceof(cls)) continue;
 
-            FTRACE(1, "checkHandlers: entering catch at {}\n", idOff.second);
+            ITRACE(1, "checkHandlers: entering catch at {}\n", idOff.second);
             pc = handler;
             DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
             return UnwindAction::ResumeVM;
@@ -155,9 +155,10 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   auto const prevFp = fp->sfp();
   auto const soff = fp->m_soff;
 
-  FTRACE(1, "tearDownFrame: {} ({})\n  fp {} prevFp {}\n",
+  ITRACE(1, "tearDownFrame: {} ({})\n",
          func->fullName()->data(),
-         func->unit()->filepath()->data(),
+         func->unit()->filepath()->data());
+  ITRACE(1, "  fp {} prevFp {}\n",
          implicit_cast<void*>(fp),
          implicit_cast<void*>(prevFp));
 
@@ -369,9 +370,9 @@ UnwindAction unwind(ActRec*& fp,
                     Stack& stack,
                     PC& pc,
                     Fault fault) {
-  FTRACE(1, "entering unwinder for fault: {}\n", describeFault(fault));
+  ITRACE(1, "entering unwinder for fault: {}\n", describeFault(fault));
   SCOPE_EXIT {
-    FTRACE(1, "leaving unwinder for fault: {}\n", describeFault(fault));
+    ITRACE(1, "leaving unwinder for fault: {}\n", describeFault(fault));
   };
 
   for (;;) {
@@ -397,7 +398,7 @@ UnwindAction unwind(ActRec*& fp,
       discard = true;
     }
 
-    FTRACE(1, "unwind: func {}, raiseOffset {} fp {}\n",
+    ITRACE(1, "unwind: func {}, raiseOffset {} fp {}\n",
            fp->m_func->name()->data(),
            fault.m_raiseOffset,
            implicit_cast<void*>(fp));
@@ -466,7 +467,7 @@ UnwindAction unwind(ActRec*& fp,
     g_context->m_faults.back() = fault;
 
     if (lastFrameForNesting) {
-      FTRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
+      ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
       break;
     }
   }
@@ -518,7 +519,7 @@ void pushFault(Exception* e) {
   f.m_faultType = Fault::Type::CppException;
   f.m_cppException = e;
   g_context->m_faults.push_back(f);
-  FTRACE(1, "pushing new fault: {}\n", describeFault(f));
+  ITRACE(1, "pushing new fault: {}\n", describeFault(f));
 }
 
 void pushFault(const Object& o) {
@@ -527,7 +528,7 @@ void pushFault(const Object& o) {
   f.m_userException = o.get();
   f.m_userException->incRefCount();
   g_context->m_faults.push_back(f);
-  FTRACE(1, "pushing new fault: {}\n", describeFault(f));
+  ITRACE(1, "pushing new fault: {}\n", describeFault(f));
 }
 
 UnwindAction enterUnwinder() {
@@ -545,7 +546,8 @@ UnwindAction enterUnwinder() {
 }
 
 UnwindAction exception_handler() noexcept {
-  FTRACE(1, "unwind exception_handler\n");
+  ITRACE(1, "unwind exception_handler\n");
+  Trace::Indent _i;
 
   checkVMRegState();
 
@@ -560,7 +562,7 @@ UnwindAction exception_handler() noexcept {
    */
   catch (const VMPrepareUnwind&) {
     Fault fault = g_context->m_faults.back();
-    FTRACE(1, "unwind: restoring offset {}\n", vmpc());
+    ITRACE(1, "unwind: restoring offset {}\n", vmpc());
     return unwind(
       vmfp(),
       vmStack(),

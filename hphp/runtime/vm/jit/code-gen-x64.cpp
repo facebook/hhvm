@@ -227,7 +227,6 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
 
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
-NOOP_OPCODE(DefSP)
 NOOP_OPCODE(TrackLoc)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(AssertStk)
@@ -553,6 +552,16 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   a.    jmp    (jccStub);
 }
 
+void CodeGenerator::cgDefSP(IRInstruction* inst) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts && !inst->marker().resumed()) {
+    // Verify that rbx == rbp - spOff
+    m_as.lea(rbp[-cellsToBytes(inst->extra<StackOffset>()->offset)],
+             m_rScratch);
+    m_as.cmpq(m_rScratch, rbx);
+    ifBlock(CC_NE, [](Asm& a) { a.ud2(); });
+  }
+}
+
 void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
   if (!inst->taken()) return;
   auto reg = srcLoc(0).reg(0);
@@ -829,6 +838,11 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
         a.    push(rTmp);
         break;
 
+      case ArgDesc::Kind::IpRel:
+        a.    lea (rip[arg.imm().q()], rTmp);
+        a.    push(rTmp);
+        break;
+
       case ArgDesc::Kind::None:
         a.    push(rax);
         if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -905,6 +919,8 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
       }
     } else if (kind == ArgDesc::Kind::Addr) {
       a.    addq   (arg.disp(), dst);
+    } else if (kind == ArgDesc::Kind::IpRel) {
+      a.    lea (rip[arg.imm().q()], dst);
     } else if (arg.isZeroExtend()) {
       a.    movzbl (rbyte(dst), r32(dst));
     } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
@@ -2633,7 +2649,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == mcg->tx().uniqueStubs.callToExit) {
     return;
   }
-  checkFrame(fp, sp, /*checkLocals*/ false);
+  checkFrame(fp, sp, /*fullCheck*/ false, 0);
   assert(sp <= (Cell*)fp || fp->resumed());
   // check return value if stack not empty
   if (sp < (Cell*)fp) assertTv(sp);
@@ -6176,7 +6192,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
     auto const sk = extra.sk;
     args.imm(extra.type);
     args.imm(sk.toAtomicInt());
-    args.immPtr(m_as.frontier());
+    args.ipRel(m_as.frontier());
     helper = (TCA)Trace::ringbufferEntry;
   }
 

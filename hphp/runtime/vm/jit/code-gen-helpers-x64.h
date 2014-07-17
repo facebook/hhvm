@@ -74,7 +74,7 @@ void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
 
 void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm);
 
-void emitTraceCall(CodeBlock& cb, int64_t pcOff);
+void emitTraceCall(CodeBlock& cb, Offset pcOff);
 
 /*
  * Tests the surprise flags for the current thread. Should be used

@@ -696,7 +696,7 @@ Cell lookupCnsUHelper(const TypedValue* tv,
 
 //////////////////////////////////////////////////////////////////////
 
-void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
+void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
   const Func* func = fp->m_func;
   func->validate();
   if (func->cls()) {
@@ -708,26 +708,34 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   // TODO: validate this pointer from actrec
   int numLocals = func->numLocals();
   assert(sp <= (Cell*)fp - func->numSlotsInFrame() || fp->resumed());
-  if (checkLocals) {
-    int numParams = func->numParams();
-    for (int i = 0; i < numLocals; i++) {
-      if (i >= numParams && fp->resumed() && i < func->numNamedLocals()) {
-        continue;
-      }
-      assert(tvIsPlausible(*frame_local(fp, i)));
+
+  if (!fullCheck) return;
+
+  int numParams = func->numParams();
+  for (int i = 0; i < numLocals; i++) {
+    if (i >= numParams && fp->resumed() && i < func->numNamedLocals()) {
+      continue;
     }
+    assert(tvIsPlausible(*frame_local(fp, i)));
   }
-  // We unfortunately can't do the same kind of check for the stack
-  // without knowing about FPI regions, because it may contain
-  // ActRecs.
+
+  visitStackElems(
+    fp, sp, bcOff,
+    [](const ActRec* ar) {
+      ar->func()->validate();
+    },
+    [](const TypedValue* tv) {
+      assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+    }
+  );
 }
 
-void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
-  if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhirTracelets)) {
+void traceCallback(ActRec* fp, Cell* sp, Offset pcOff, void* rip) {
+  if (Trace::moduleEnabled(Trace::hhirTracelets)) {
     FTRACE(0, "{} {} {} {} {}\n",
            fp->m_func->fullName()->data(), pcOff, rip, fp, sp);
   }
-  checkFrame(fp, sp, /*checkLocals*/true);
+  checkFrame(fp, sp, /*fullCheck*/true, pcOff);
 }
 
 enum class OnFail { Warn, Fatal };

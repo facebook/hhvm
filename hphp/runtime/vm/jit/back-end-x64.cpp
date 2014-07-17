@@ -193,7 +193,7 @@ struct BackEnd : public JIT::BackEnd {
     a.    popf  ();
   }
 
-  void emitTraceCall(CodeBlock& cb, int64_t pcOff) override {
+  void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
     X64::emitTraceCall(cb, pcOff);
   }
 

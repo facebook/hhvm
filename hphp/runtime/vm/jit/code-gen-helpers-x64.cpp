@@ -315,7 +315,7 @@ void emitRB(X64Assembler& a,
   a.    call((TCA)Trace::ringbufferMsg);
 }
 
-void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
+void emitTraceCall(CodeBlock& cb, Offset pcOff) {
   Asm a { cb };
   // call to a trace function
   a.    lea    (rip[(int64_t)a.frontier()], rcx);

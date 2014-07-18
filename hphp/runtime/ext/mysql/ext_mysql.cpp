@@ -107,21 +107,26 @@ bool f_mysql_set_timeout(int query_timeout_ms /* = -1 */,
 }
 
 String f_mysql_escape_string(const String& unescaped_string) {
-  char *new_str = (char *)malloc(unescaped_string.size() * 2 + 1);
-  int new_len = mysql_escape_string(new_str, unescaped_string.data(),
+  String new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
+  unsigned long new_len = mysql_escape_string(new_str.bufferSlice().begin(),
+                                    unescaped_string.data(),
                                     unescaped_string.size());
-  return String(new_str, new_len, AttachString);
+  new_str.shrink(new_len);
+  return new_str;
 }
 
 Variant f_mysql_real_escape_string(const String& unescaped_string,
                                    const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn) {
-    char *new_str = (char *)malloc(unescaped_string.size() * 2 + 1);
-    int new_len = mysql_real_escape_string(conn, new_str,
-                                           unescaped_string.data(),
-                                           unescaped_string.size());
-    return String(new_str, new_len, AttachString);
+    String new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
+    unsigned long new_len = mysql_real_escape_string(conn,
+                                      new_str.bufferSlice().begin(),
+                                      unescaped_string.data(),
+                                      unescaped_string.size());
+
+    new_str.shrink(new_len);
+    return new_str;
   }
   return false;
 }

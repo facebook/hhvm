@@ -57,15 +57,6 @@ let is_auto_complete x =
     false
 
 let autocomplete_result_to_json res =
-  let pos_to_json pos =
-    let line, start, end_ = Pos.info_pos pos in
-    let fn = Pos.filename pos in
-    Hh_json.JAssoc [ "filename",   Hh_json.JString fn;
-             "line",      Hh_json.JInt line;
-             "char_start", Hh_json.JInt start;
-             "char_end",   Hh_json.JInt end_;
-           ]
-  in
   let func_param_to_json param =
     Hh_json.JAssoc [ "name", Hh_json.JString param.param_name;
                      "type", Hh_json.JString param.param_ty;
@@ -86,7 +77,7 @@ let autocomplete_result_to_json res =
   let expected_ty = res.expected_ty in
   Hh_json.JAssoc [ "name", Hh_json.JString name;
            "type", Hh_json.JString ty;
-           "pos", pos_to_json pos;
+           "pos", Pos.json pos;
            "func_details", func_details_to_json res.func_details;
            "expected_ty", Hh_json.JBool expected_ty;
          ]

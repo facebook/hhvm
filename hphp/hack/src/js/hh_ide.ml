@@ -31,15 +31,6 @@ external to_byte_jsstring: string -> Js.js_string Js.t = "caml_js_from_byte_stri
 let output_json json =
   to_byte_jsstring (json_to_string json)
 
-let pos_to_json pos =
-  let line, start, end_ = Pos.info_pos pos in
-  let fn = Pos.filename pos in
-  JAssoc [ "filename",   JString fn;
-           "line",       JInt line;
-           "char_start", JInt start;
-           "char_end",   JInt end_;
-         ]
-
 let error el =
   let res =
     if el = [] then
@@ -273,7 +264,7 @@ let hh_get_method_at_position fn line char =
             | Find_refs.LocalVar -> "local" in
           JAssoc [ "name",           JString res.Find_refs.name;
                    "result_type",    JString result_type;
-                   "pos",            pos_to_json res.Find_refs.pos;
+                   "pos",            Pos.json res.Find_refs.pos;
                    "internal_error", JBool false;
                  ]
       | _ -> JAssoc [ "internal_error", JBool false;
@@ -343,7 +334,7 @@ let hh_find_lvar_refs file line char =
     clean();
     Find_refs.find_refs_target := Some (line, char);
     ignore (hh_check ~check_mode:false file);
-    let res_list = List.map pos_to_json !Find_refs.find_refs_result in
+    let res_list = List.map Pos.json !Find_refs.find_refs_result in
     clean();
     output_json (JAssoc [ "positions",      JList res_list;
                           "internal_error", JBool false;
@@ -367,7 +358,7 @@ let hh_infer_type file line char =
 let hh_infer_pos file line char =
   let pos, _ = infer_at_pos file line char in
   let output = match pos with
-  | Some pos -> JAssoc [ "pos",            pos_to_json pos;
+  | Some pos -> JAssoc [ "pos",            Pos.json pos;
                          "internal_error", JBool false;
                        ]
   | None -> JAssoc [ "internal_error", JBool false;
@@ -382,7 +373,7 @@ let hh_file_summary fn =
     let res_list = List.map begin fun (pos, name, type_) ->
       JAssoc [ "name", JString name;
                "type", JString type_;
-               "pos",  pos_to_json pos;
+               "pos",  Pos.json pos;
              ]
       end outline in
     output_json (JAssoc [ "summary",          JList res_list;
@@ -422,7 +413,7 @@ let hh_get_method_calls fn =
   let results = !Typing_defs.accumulate_method_calls_result in
   let results = List.map begin fun (p, name) ->
     JAssoc [ "method_name", JString name;
-             "pos",         pos_to_json p;
+             "pos",         Pos.json p;
            ]
     end results in
   Typing_defs.accumulate_method_calls := false;

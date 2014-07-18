@@ -139,8 +139,9 @@ let rec main args retries =
       in
       let ic, oc = connect args in
       ServerMsg.cmd_to_channel oc (ServerMsg.INFER_TYPE (fn, line, char));
-      let (_, ty) = Marshal.from_channel ic in
-      print_endline ty
+      let (pos, ty) = Marshal.from_channel ic in
+      ClientTypeAtPos.go pos ty args.output_json;
+      exit 0
     | MODE_AUTO_COMPLETE ->
       let ic, oc = connect args in
       let content = ClientUtils.read_stdin_to_string () in

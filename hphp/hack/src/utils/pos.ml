@@ -74,6 +74,15 @@ let string t =
   Printf.sprintf "File %S, line %d, characters %d-%d:"
     t.pos_file line start end_
 
+let json pos =
+    let line, start, end_ = info_pos pos in
+    let fn = filename pos in
+    Hh_json.JAssoc [ "filename",   Hh_json.JString fn;
+             "line",       Hh_json.JInt line;
+             "char_start", Hh_json.JInt start;
+             "char_end",   Hh_json.JInt end_;
+           ]
+
 let inside p line char_pos =
   let first_line = p.pos_start.pos_lnum in
   let last_line = p.pos_end.pos_lnum in

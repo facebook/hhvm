@@ -150,12 +150,9 @@
     test_root: guzzle4
     test_find_mode: token
     sequential: true
-  hhvmquickinterp:
+  hhvmquicktests:
     do_not_install: true
-    test_root: ../hhvm/quick_interp
-  hhvmquickjit:
-    do_not_install: true
-    test_root: ../hhvm/quick_jit
+    test_root: ../hhvm/quick
   idiorm:
     url: https://github.com/j4mie/idiorm.git
     branch: v1.4.1

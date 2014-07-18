@@ -2,7 +2,14 @@
 
 require(__DIR__.'/../HHVMExpectTest.php');
 
-final class QuickJitTest extends HHVMExpectTest {
+final class HHVMQuickTest extends HHVMExpectTest {
+  /**
+   * @dataProvider quickTestsProvider
+   */
+  public function testQuickInterp(...$paths) {
+    $this->runTests('-m interp', $paths);
+  }
+
   /**
    * @dataProvider quickTestsProvider
    */

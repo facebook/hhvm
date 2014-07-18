@@ -126,7 +126,7 @@ and instantiate subst env (r, ty) =
                     )
                 end
           in
-          env, (r, snd x_ty)
+          env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty)
       | None ->
           match ty_opt with
           | None -> env, (r, ty)

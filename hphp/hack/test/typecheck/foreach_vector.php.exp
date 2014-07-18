@@ -2,5 +2,13 @@ File "foreach_vector.php", line 22, characters 10-13:
 Typing error
 File "foreach_vector.php", line 22, characters 10-13:
 This is a num (int/float) because this is used in an arithmetic operation
-File "builtins.hhi", line 10, characters 56-57:
+File "foreach_vector.php", line 19, characters 19-21:
 It is incompatible with an object of type Foo
+File "builtins.hhi", line 20, characters 47-48:
+  via this generic Tv
+File "builtins.hhi", line 17, characters 54-55:
+  via this generic Tv
+File "builtins.hhi", line 14, characters 62-63:
+  via this generic Tv
+File "builtins.hhi", line 10, characters 56-57:
+  via this generic Tv

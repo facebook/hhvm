@@ -49,6 +49,7 @@ type t =
   | Rdynamic_yield of Pos.t * Pos.t * string * string
   | Rmap_append of Pos.t
   | Rvar_param of Pos.t
+  | Rinstantiate of t * string * t
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -117,6 +118,9 @@ let rec to_string prefix r =
   | Rmap_append _ ->
       [(p, prefix^" because you can only append a Pair<Tkey, Tvalue> to an \
       Map<Tkey, Tvalue>")]
+  | Rinstantiate (r_orig, generic_name, r_inst) ->
+      (to_string prefix r_orig) @
+        (to_string ("  via this generic " ^ generic_name) r_inst)
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -156,6 +160,7 @@ and to_pos = function
   | Rdynamic_yield (p, _, _, _) -> p
   | Rmap_append p -> p
   | Rvar_param p -> p
+  | Rinstantiate (_, _, r) -> to_pos r
 
 type ureason =
   | URnone

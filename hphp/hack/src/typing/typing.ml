@@ -2794,9 +2794,9 @@ and class_implements env c1 h =
   class_implements_type env c1 ctype2
 
 and class_implements_type env c1 ctype2 =
-  let env, params = lfold begin fun env ((_, s), param) ->
+  let env, params = lfold begin fun env ((p, s), param) ->
     let env, param = opt Typing_hint.hint env param in
-    env, (Reason.Rnone, Tgeneric (s, param))
+    env, (Reason.Rwitness p, Tgeneric (s, param))
   end env c1.c_tparams
   in
   let r = Reason.Rwitness (fst (c1.c_name)) in

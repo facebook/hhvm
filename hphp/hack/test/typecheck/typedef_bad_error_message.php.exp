@@ -1,0 +1,8 @@
+File "typedef_bad_error_message.php", line 6, characters 10-24:
+Invalid return type
+File "typedef_bad_error_message.php", line 5, characters 20-22:
+This is an int
+File "typedef_bad_error_message.php", line 3, characters 23-23:
+  via this generic T
+File "typedef_bad_error_message.php", line 6, characters 19-22:
+It is incompatible with a string

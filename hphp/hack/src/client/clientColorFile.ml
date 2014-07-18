@@ -50,8 +50,11 @@ let to_json input =
 (* The entry point. *)
 (*****************************************************************************)
 
-let go filename output_json pos_type_l =
-  let str = Utils.cat filename in
+let go file_input output_json pos_type_l =
+  let str = match file_input with
+    | ServerMsg.FileName filename -> Utils.cat filename
+    | ServerMsg.FileContent content -> content
+  in
   let results = ColorFile.go str pos_type_l in
   if output_json then
     print_endline (Json.json_to_string (to_json results))

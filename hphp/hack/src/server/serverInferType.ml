@@ -16,7 +16,7 @@ let go (fn, line, char) oc =
   in
   clean ();
   Typing_defs.infer_target := Some (line, char);
-  ServerIdeUtils.recheck [fn];
+  ServerIdeUtils.check_file_input fn;
   let pos = match !Typing_defs.infer_pos with
     | None -> "(unknown)"
     | Some pos -> Pos.string pos in

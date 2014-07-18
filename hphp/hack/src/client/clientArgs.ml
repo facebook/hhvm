@@ -110,13 +110,13 @@ let parse_check_args cmd =
     "--types", Arg.String (fun x -> set_mode (MODE_SHOW_TYPES x) ()),
       " (mode) show the types for file specified";
     "--type-at-pos", Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
-      " (mode) show type at a given position in file [filename:line:character]";
+      " (mode) show type at a given position in file [line:character]";
     "--list-files", Arg.Unit (set_mode MODE_LIST_FILES),
       " (mode) list files with errors";
     "--auto-complete", Arg.Unit (set_mode MODE_AUTO_COMPLETE),
       " (mode) auto-completes the text on stdin";
     "--color", Arg.String (fun x -> set_mode (MODE_COLORING x) ()),
-      " (mode) pretty prints the file content showing what is checked";
+      " (mode) pretty prints the file content showing what is checked (give '-' for stdin)";
     "--find-refs", Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
       " (mode) finds references of the provided method name";
     "--find-class-refs", Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),

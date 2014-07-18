@@ -63,12 +63,19 @@ let rec main args retries =
       let infol = get_list_files args in
       List.iter (Printf.printf "%s\n") infol
     | MODE_COLORING file ->
-        let file = expand_path file in
         let ic, oc = connect args in
-        let command = ServerMsg.PRINT_TYPES file in
+        let file_input = match file with
+          | "-" ->
+            let content = ClientUtils.read_stdin_to_string () in
+            ServerMsg.FileContent content
+          | _ ->
+            let file = expand_path file in
+            ServerMsg.FileName file
+        in
+        let command = ServerMsg.PRINT_TYPES file_input in
         ServerMsg.cmd_to_channel oc command;
         let pos_type_l = Marshal.from_channel ic in
-        ClientColorFile.go file args.output_json pos_type_l;
+        ClientColorFile.go file_input args.output_json pos_type_l;
         exit 0
     | MODE_FIND_CLASS_REFS name ->
         let ic, oc = connect args in
@@ -121,12 +128,15 @@ let rec main args retries =
         try
           match tpos with
           | [filename; line; char] ->
-              filename, int_of_string line, int_of_string char
+              let fn = expand_path filename in
+              ServerMsg.FileName fn, int_of_string line, int_of_string char
+          | [line; char] ->
+              let content = ClientUtils.read_stdin_to_string () in
+              ServerMsg.FileContent content, int_of_string line, int_of_string char
           | _ -> raise Exit
         with _ ->
           Printf.fprintf stderr "Invalid position\n"; exit 1
       in
-      let fn = expand_path fn in
       let ic, oc = connect args in
       ServerMsg.cmd_to_channel oc (ServerMsg.INFER_TYPE (fn, line, char));
       let (_, ty) = Marshal.from_channel ic in

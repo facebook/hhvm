@@ -27,7 +27,7 @@ type program_ret =
 module type SERVER_PROGRAM = sig
   val init : genv -> env -> Path.path -> program_ret
   val recheck: genv -> env -> (SSet.t * SSet.t) -> string list ref -> program_ret
-  val infer: (string * int * int) -> out_channel -> unit
+  val infer: (ServerMsg.file_input * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
   val name: string

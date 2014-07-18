@@ -218,11 +218,48 @@ Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
   return string_numeric_to_base(v, tobase);
 }
 
+static DataType convert_for_pow(const Variant& val,
+                                int64_t& ival, double& dval) {
+  switch (val.getType()) {
+    case KindOfNull:
+    case KindOfUninit:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfResource:
+    case KindOfObject:
+      ival = val.toInt64();
+      return KindOfInt64;
+
+    case KindOfDouble:
+      dval = val.toDouble();
+      return KindOfDouble;
+
+    case KindOfString:
+    case KindOfStaticString: {
+      auto dt = val.toNumeric(ival, dval, true);
+      if ((dt != KindOfInt64) && (dt != KindOfDouble)) {
+        ival = 0;
+        return KindOfInt64;
+      }
+      return dt;
+    }
+
+    case KindOfArray:
+      // Not reachable since f_pow() deals with these base cases first
+    default:
+      // Unknown data type
+      raise_error("Unsupported operand types");
+      return KindOfUnknown; // Not Reached
+  }
+}
+
 Variant f_pow(const Variant& base, const Variant& exp) {
   int64_t bint, eint;
   double bdbl, edbl;
-  DataType bt = base.toNumeric(bint, bdbl, true);
-  DataType et = exp.toNumeric(eint, edbl, true);
+  if (base.isArray()) return 0LL;
+  DataType bt = convert_for_pow(base, bint, bdbl);
+  if (exp.isArray()) return 1LL;
+  DataType et = convert_for_pow(exp,  eint, edbl);
   if (bt == KindOfInt64 && et == KindOfInt64 && eint >= 0) {
     if (eint == 0) return 1LL;
     if (bint == 0) return 0LL;
@@ -246,11 +283,21 @@ Variant f_pow(const Variant& base, const Variant& exp) {
       }
     }
   }
+
+  // We'll have already raised a notice in convert_for_pow
+  // so avoid re-raising the notice here.
+  auto const silent_val_to_double = [&](const Variant& v) {
+    if (v.isObject() && !v.toObject()->castableToNumber()) {
+      return 1.0;
+    }
+    return v.toDouble();
+  };
+
   if (bt != KindOfDouble) {
-    bdbl = base.toDouble();
+    bdbl = silent_val_to_double(base);
   }
   if (et != KindOfDouble) {
-    edbl = exp.toDouble();
+    edbl = silent_val_to_double(exp);
   }
   return pow(bdbl, edbl);
 }

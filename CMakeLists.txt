@@ -5,8 +5,6 @@ IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
   message(FATAL_ERROR "HHVM requires a 64bit OS")
 ENDIF()
 
-include(GNUInstallDirs)
-
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")
@@ -29,5 +27,5 @@ add_subdirectory(hphp)
 file(GLOB HHVM_CMAKE_FILES "CMake/*.cmake")
 install(
   FILES ${HHVM_CMAKE_FILES}
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/hphp/CMake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/hphp/CMake"
   COMPONENT dev)

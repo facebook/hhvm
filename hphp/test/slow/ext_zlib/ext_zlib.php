@@ -80,22 +80,22 @@ $c = nzcompress($empty);
 $d = nzuncompress($c);
 VERIFY($d == $empty);
 
-VS(lz4uncompress(lz4compress("testing lz4compress")),
-    "testing lz4compress");
+VS(lz4_uncompress(lz4_compress("testing lz4_compress")),
+    "testing lz4_compress");
 
-VS(lz4uncompress(lz4hccompress("testing lz4hccompress")),
-    "testing lz4hccompress");
+VS(lz4_uncompress(lz4_hccompress("testing lz4_hccompress")),
+    "testing lz4_hccompress");
 
 // first test uncompressing invalid string
 $s = "invalid compressed string";
-$v = lz4uncompress($s);
+$v = lz4_uncompress($s);
 VERIFY($v == false);
 
 // try uncompressing empty string
 $empty = "";
-$v = lz4uncompress($empty);
+$v = lz4_uncompress($empty);
 VERIFY($v == false);
 
-$c = lz4compress($empty);
-$d = lz4uncompress($c);
+$c = lz4_compress($empty);
+$d = lz4_uncompress($c);
 VERIFY($d == $empty);

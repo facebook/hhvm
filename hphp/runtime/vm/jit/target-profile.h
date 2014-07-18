@@ -131,7 +131,7 @@ private:
       );
 
     case TransKind::Optimize:
-      if (marker.m_profTransID != kInvalidTransID) {
+      if (isValidTransID(marker.m_profTransID)) {
         return RDS::attach<T>(
           RDS::Profile {
             marker.m_profTransID, // transId from profiling translation

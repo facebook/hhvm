@@ -89,7 +89,6 @@ struct FormatVisitor {
   }
   void imm(Stats::StatCounter c) { str << sep() << Stats::g_counterNames[c]; }
   void imm(Vlabel b) { str << sep() << "B" << size_t(b); }
-  void imm(TransID id) { str << sep() << id; }
   void imm(const Func* func) {
     str << sep();
     if (func) {

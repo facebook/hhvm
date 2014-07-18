@@ -2503,7 +2503,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto& v = vmain();
   emitServiceReq(v, nullptr, REQ_RETRANSLATE_OPT, {
     {ServiceReqArgInfo::Immediate, {sk.toAtomicInt()}},
-    {ServiceReqArgInfo::Immediate, {extra->transId}}
+    {ServiceReqArgInfo::Immediate, {static_cast<uint64_t>(extra->transId)}}
   });
 }
 

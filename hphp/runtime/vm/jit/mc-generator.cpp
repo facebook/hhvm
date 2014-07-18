@@ -1639,7 +1639,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         assert(!region->empty());
       } else {
         TransID transId = args.m_transId;
-        assert(transId != kInvalidTransID);
+        assert(isValidTransID(transId));
         region = selectHotRegion(transId, this);
         assert(region);
         if (region && region->empty()) region = nullptr;

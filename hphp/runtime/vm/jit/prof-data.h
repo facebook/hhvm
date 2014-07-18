@@ -176,7 +176,7 @@ public:
   ProfData(const ProfData&)            = delete;
   ProfData& operator=(const ProfData&) = delete;
 
-  TransID                 numTrans()                  const;
+  uint32_t                numTrans()                  const;
   TransID                 curTransID()                const;
 
   bool                    hasTransRec(TransID id)     const;

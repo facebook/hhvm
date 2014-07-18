@@ -198,7 +198,7 @@ uint32_t ProfData::numTrans() const {
 }
 
 TransID ProfData::curTransID() const {
-  return numTrans();
+  return static_cast<TransID>(numTrans());
 }
 
 bool ProfData::hasTransRec(TransID id) const {

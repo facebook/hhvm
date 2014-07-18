@@ -8,7 +8,6 @@ SRC = \
   deriving_Json_Str.ml\
   hh_json.ml\
   ide.ml\
-  str.ml\
   pos.ml\
   ident.ml\
   errors.ml\

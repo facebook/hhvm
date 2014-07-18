@@ -1011,7 +1011,9 @@ and expr_ is_lvalue env (p, e) =
       | r, Tapply ((p, "\\_AsyncWaitHandle"), [rty]) ->
           env, rty
       | _ ->
-          let rty = r, Tapply ((p, "\\Continuation"), [rty]) in
+          (* TODO(#4534682) Fully support Generator *)
+          let rty = r, Tapply ((p, "\\Generator"),
+            [Reason.Rnone, Tprim Tint; rty; Reason.Rnone, Tprim Tvoid]) in
           let env = Type.sub_type (fst e) (Reason.URyield) env (Env.get_return env) rty in
           let env = Env.forget_members env p in
           (* the return type of yield could be anything, it depends on the value

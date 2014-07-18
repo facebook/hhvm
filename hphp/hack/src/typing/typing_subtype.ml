@@ -129,13 +129,25 @@ and sub_type env ty1 ty2 =
       let env = Env.set_allow_null_as_void env in
       let env = sub_type env ty1 ty2 in
       Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
-  | (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty1]))),
-    (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty2]))) ->
+  | (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty1]))),
+    (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty2]))) ->
       sub_type env ty1 ty2
   | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty1; vty1]))),
     (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty2; vty2]))) ->
       let env = sub_type env kty1 kty2 in
       sub_type env vty1 vty2
+  | (_, (Tapply ((_, "\\Generator"), [tk1; tv1; ts1]))),
+    (_, (Tapply ((_, "\\Generator"), [tk2; tv2; ts2]))) ->
+      (* Currently, we are only covariant in the type of the value yielded. I
+       * think we could also be covariant in the type of the key yielded and
+       * also *contravariant* in the type of the value sent in, but since this
+       * code is new and no one is relying on those two yet, let's see if we can
+       * get away with being invariant and if anyone complains we can
+       * reconsider. TODO(#4534682) come back to this. *)
+      let env = sub_type env tv1 tv2 in
+      let env, _ = Unify.unify env tk1 tk2 in
+      let env, _ = Unify.unify env ts1 ts2 in
+      env
   | (p1, (Tapply (x1, tyl1) as ty1_)), (p2, (Tapply (x2, tyl2) as ty2_)) ->
     let cid1, cid2 = (snd x1), (snd x2) in
     if cid1 = cid2 then fst (Unify.unify env ety1 ety2)

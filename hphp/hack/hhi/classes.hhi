@@ -55,13 +55,13 @@ class AsyncGenerator<Tk, Tv, Ts> implements AsyncKeyedIterator<Tk, Tv> {
   public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}
 }
 
-class Continuation<Tv> implements KeyedIterator<int, Tv> {
+class Generator<Tk, Tv, Ts> implements KeyedIterator<Tk, Tv> {
   public function getOrigFuncName(): string {}
   public function current(): Tv {}
-  public function key(): int {}
+  public function key(): Tk {}
   public function valid(): bool {}
   public function next(): void {}
-  public function send($v): void {}
+  public function send(?Ts $v): void {}
   public function raise(Exception $e): void {}
   public function rewind(): void {}
   public function getLabel(): int {}
@@ -70,8 +70,8 @@ class Continuation<Tv> implements KeyedIterator<int, Tv> {
   public function get_arg(int $index): mixed {}
 }
 
-class Generator<Tv> extends Continuation<Tv> {
-}
+// TODO(#4534682) Kill Continuation
+type Continuation<Tv> = Generator<int, Tv, void>;
 
 abstract class WaitHandle<T> implements Awaitable<T> {
   public function getWaitHandle(): this {}

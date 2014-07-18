@@ -661,16 +661,16 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   }
 
   /*
-   * Make a table of the methods on this class, excluding interface
-   * methods.
+   * Make a table of the methods on this class, excluding interface methods.
    *
-   * Duplicate method names override parent methods, unless the parent
-   * method is final and the class is not a __MockClass, in which case
-   * this class definitely would fatal if ever defined.
+   * Duplicate method names override parent methods, unless the parent method
+   * is final and the class is not a __MockClass, in which case this class
+   * definitely would fatal if ever defined.
    *
-   * Note: we're leaving non-overridden privates in their subclass
-   * method table, here.  This isn't currently "wrong", because
-   * calling it would be a fatal.  TODO: re-evaluate this idea.
+   * Note: we're leaving non-overridden privates in their subclass method
+   * table, here.  This isn't currently "wrong", because calling it would be a
+   * fatal, but note that resolve_method needs to be pretty careful about
+   * privates and overriding in general.
    */
   if (!isIface) {
     for (auto& m : rparent->cls->methods) {
@@ -682,8 +682,6 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
         if (ent.func->attrs & AttrPrivate) {
           ent.hasPrivateAncestor =
             ent.hasPrivateAncestor || ent.func->cls != rleaf->cls;
-        } else {
-          assert(!(ent.func->attrs & AttrNoOverride));
         }
       }
       ent.func = borrow(m);
@@ -1000,7 +998,21 @@ void find_magic_methods(IndexData& index) {
   }
 }
 
-void mark_no_override(IndexData& index) {
+// We want const qualifiers on various index data structures for php object
+// pointers, but during index creation time we need to manipulate some of their
+// attributes (changing the representation).  These little wrappers keep the
+// const_casting out of the main line of code below.
+template<class PhpObject>
+void add_attribute(borrowed_ptr<const PhpObject> obj, Attr attr) {
+  const_cast<borrowed_ptr<PhpObject>>(obj)->attrs = obj->attrs | attr;
+}
+template<class PhpObject>
+void remove_attribute(borrowed_ptr<const PhpObject> obj, Attr attr) {
+  auto const newAttrs = static_cast<Attr>(obj->attrs & ~attr);
+  const_cast<borrowed_ptr<PhpObject>>(obj)->attrs = newAttrs;
+}
+
+void mark_no_override_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->subclassList.size() == 1 &&
         !(cinfo->cls->attrs & AttrInterface)) {
@@ -1008,8 +1020,37 @@ void mark_no_override(IndexData& index) {
       if (!(cinfo->cls->attrs & AttrNoOverride)) {
         FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
       }
-      const_cast<borrowed_ptr<php::Class>>(cinfo->cls)->attrs =
-        cinfo->cls->attrs | AttrNoOverride;
+      add_attribute(cinfo->cls, AttrNoOverride);
+    }
+  }
+}
+
+void mark_no_override_functions(IndexData& index) {
+  // First, mark every (non-interface, non-special) method as AttrNoOverride.
+  for (auto& meth : index.methods) {
+    if (meth.second->cls->attrs & AttrInterface) continue;
+    if (is_special_method_name(meth.second->name)) continue;
+    add_attribute(meth.second, AttrNoOverride);
+  }
+
+  // Then run through every ClassInfo, and for each of its parent classes clear
+  // the AttrNoOverride flag if it has a different Func with the same name.
+  for (auto& cinfo : index.allClassInfos) {
+    for (auto& ancestor : cinfo->baseList) {
+      if (ancestor == cinfo.get()) continue;
+
+      for (auto& derivedMethod : cinfo->methods) {
+        auto const it = ancestor->methods.find(derivedMethod.first);
+        if (it == end(ancestor->methods)) continue;
+        if (it->second.func != derivedMethod.second.func) {
+          if (it->second.func->attrs & AttrNoOverride) {
+            FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
+              it->second.func->cls->name->data(),
+              it->second.func->name->data());
+          }
+          remove_attribute(it->second.func, AttrNoOverride);
+        }
+      }
     }
   }
 }
@@ -1289,12 +1330,17 @@ Index::Index(borrowed_ptr<php::Program> program)
     }
   }
 
+  // Part of the index building routines happens before the various asserted
+  // index invariants hold.  These each may depend on computations from
+  // previous functions, so be careful changing the order here.
   compute_subclass_list(*m_data);
-  define_func_families(*m_data);
-  find_magic_methods(*m_data);
+  mark_no_override_functions(*m_data);
+  define_func_families(*m_data);        // uses AttrNoOverride functions
+  find_magic_methods(*m_data);          // uses the subclass lists
+
   check_invariants(*m_data);
 
-  mark_no_override(*m_data);
+  mark_no_override_classes(*m_data);
   mark_unique_type_aliases(*m_data);
 }
 

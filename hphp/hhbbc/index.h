@@ -167,7 +167,8 @@ struct Class {
    * Returns whether this type has the no override attribute, that is, if it
    * is a final class (explicitly marked by the user or known by the static
    * analysis).
-   * When returning false the class is guaranteed to be final. When returning
+   *
+   * When returning false the class is guaranteed to be final.  When returning
    * true the system cannot tell though the class may still be final.
    */
   bool couldBeOverriden() const;

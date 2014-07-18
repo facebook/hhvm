@@ -745,7 +745,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->cls             = cls;
   ret->nextBlockId     = 0;
 
-  ret->attrs              = fe.attrs;
+  ret->attrs              = static_cast<Attr>(fe.attrs & ~AttrNoOverride);
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType;
   ret->retTypeConstraint  = fe.retTypeConstraint;
@@ -794,7 +794,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->closureContextCls = nullptr;
   ret->parentName        = pce.parentName()->empty() ? nullptr
                                                      : pce.parentName();
-  ret->attrs             = pce.attrs();
+  ret->attrs             = static_cast<Attr>(pce.attrs() & ~AttrNoOverride);
   ret->hoistability      = pce.hoistability();
   ret->userAttributes    = pce.userAttributes();
 

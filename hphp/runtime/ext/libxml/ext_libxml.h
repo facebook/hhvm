@@ -24,6 +24,9 @@ namespace HPHP {
 
 bool libxml_use_internal_error();
 void libxml_add_error(const std::string &msg);
+String libxml_get_valid_file_path(const String & source);
+String libxml_get_valid_file_path(const char *source);
+
 
 #define LIBXML_SAVE_NOEMPTYTAG 1<<2
 

@@ -16,8 +16,13 @@
 */
 
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
+#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/zend-url.h"
 
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
@@ -30,10 +35,24 @@
 #include <libxml/xmlschemas.h>
 #endif
 
+#include <memory>
+#include <cstring>
+
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
 static xmlParserInputBufferPtr
-libxml_input_buffer(const char *URI, xmlCharEncoding enc);
+libxml_create_input_buffer(const char *URI, xmlCharEncoding enc);
+
+static xmlOutputBufferPtr
+libxml_create_output_buffer(const char *URI,
+  xmlCharEncodingHandlerPtr encoder, int compression ATTRIBUTE_UNUSED);
+
+static Resource libxml_streams_IO_open_wrapper(
+    const char *filename, const char* mode, bool read_only);
+static int libxml_streams_IO_read(void *context, char *buffer, int len);
+static int libxml_streams_IO_write(void *context, const char *buffer, int len);
+static int libxml_streams_IO_close(void *context);
 
 class xmlErrorVec : public std::vector<xmlError> {
 public:
@@ -59,16 +78,19 @@ struct LibXmlRequestData final : RequestEventHandler {
     m_use_error = false;
     m_errors.reset();
     m_entity_loader_disabled = false;
+    m_streams_context = uninit_null();
   }
 
   void requestShutdown() override {
     m_use_error = false;
     m_errors.reset();
+    m_streams_context = uninit_null();
   }
 
   bool m_entity_loader_disabled;
   bool m_use_error;
   xmlErrorVec m_errors;
+  Variant m_streams_context;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, tl_libxml_request_data);
@@ -136,6 +158,31 @@ void libxml_add_error(const std::string &msg) {
   error_copy.str3 = nullptr;
 }
 
+String libxml_get_valid_file_path(const char *source) {
+  return libxml_get_valid_file_path(String(source, CopyString));
+}
+
+String libxml_get_valid_file_path(const String & source) {
+  bool isFileUri = false;
+  bool isUri = false;
+
+  String file_dest(source);
+
+  Url url;
+  if (url_parse(url, file_dest.data(), file_dest.size())) {
+    isUri = true;
+    if (url.scheme.same(s_file)) {
+      file_dest = StringUtil::UrlDecode(url.path, false);
+      isFileUri = true;
+    }
+  }
+
+  if (!isUri || url.scheme.empty() || isFileUri) {
+    file_dest = File::TranslatePath(file_dest);
+  }
+  return file_dest;
+}
+
 static void libxml_error_handler(void* userData, xmlErrorPtr error) {
   xmlErrorVec* error_list = &tl_libxml_request_data->m_errors;
 
@@ -197,14 +244,6 @@ bool HHVM_FUNCTION(libxml_use_internal_errors, bool use_errors) {
   return ret;
 }
 
-static xmlParserInputBufferPtr
-libxml_input_buffer(const char *URI, xmlCharEncoding enc) {
-  if (tl_libxml_request_data->m_entity_loader_disabled) {
-    return nullptr;
-  }
-  return __xmlParserInputBufferCreateFilename(URI, enc);
-}
-
 bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
   bool old = tl_libxml_request_data->m_entity_loader_disabled;
 
@@ -212,6 +251,139 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
 
   return old;
 }
+
+void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
+  tl_libxml_request_data->m_streams_context = context;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Callbacks
+//
+// Note that these stream callbacks may re-enter the VM via a user-defined
+// stream wrapper. The VM state should be synced using VMRegAnchor by the
+// caller, before entering libxml2.
+
+static Resource libxml_streams_IO_open_wrapper(
+    const char *filename, const char* mode, bool read_only)
+{
+  String strFilename = StringData::Make(filename, CopyString);
+  /* FIXME: PHP calls stat() here if the wrapper has a non-null stat handler,
+   * in order to skip the open of a missing file, thus suppressing warnings.
+   * Our stat handlers are virtual, so there's no easy way to tell if stat
+   * is supported, so instead we will just call stat() for plain files, since
+   * of the default transports, only plain files have support for stat().
+   */
+  if (read_only) {
+    int pathIndex = 0;
+    Stream::Wrapper * wrapper = Stream::getWrapperFromURI(strFilename, &pathIndex);
+    if (dynamic_cast<FileStreamWrapper*>(wrapper)) {
+      if (!f_file_exists(strFilename)) {
+        return Resource();
+      }
+    }
+  }
+
+  // PHP unescapes the URI here, but that should properly be done by the wrapper.
+  // The wrapper should expect a valid URI, e.g. file:///foo%20bar
+  return File::Open(strFilename, mode, 0,
+      tl_libxml_request_data->m_streams_context);
+}
+
+static int libxml_streams_IO_read(void *context, char *buffer, int len) {
+  Resource stream = (ResourceData*)context;
+  assert(len >= 0);
+  Variant ret = f_fread(stream, len);
+  if (ret.is(KindOfString)) {
+    const String & str = ret.asCStrRef();
+    if (str.size() <= len) {
+      std::memcpy(buffer, str.data(), str.size());
+      return str.size();
+    } else {
+      return -1;
+    }
+  } else {
+    return -1;
+  }
+}
+
+static int libxml_streams_IO_write(void *context, const char *buffer, int len) {
+  Resource stream = (ResourceData*)context;
+  String strBuffer = StringData::Make(buffer, len, CopyString);
+  Variant ret = f_fwrite(stream, strBuffer);
+  if (ret.is(KindOfInt64) && ret.asInt64Val() < INT_MAX) {
+    return (int)ret.asInt64Val();
+  } else {
+    return -1;
+  }
+}
+
+static int libxml_streams_IO_close(void *context) {
+  if (MemoryManager::sweeping()) {
+    // Stream wrappers close themselves on sweep, so there's nothing to do here
+    return 0;
+  }
+  Resource stream = (ResourceData*)context;
+  int ret = f_fclose(stream) ? 0 : -1;
+  stream.get()->decRefAndRelease();
+  return ret;
+}
+
+static xmlParserInputBufferPtr
+libxml_create_input_buffer(const char *URI, xmlCharEncoding enc) {
+  if (tl_libxml_request_data->m_entity_loader_disabled) {
+    return nullptr;
+  }
+
+  if (URI == nullptr) {
+    return nullptr;
+  }
+
+  Resource stream = libxml_streams_IO_open_wrapper(URI, "rb", true);
+
+  if (stream.isInvalid()) {
+    return nullptr;
+  }
+
+  // Allocate the Input buffer front-end.
+  xmlParserInputBufferPtr ret = xmlAllocParserInputBuffer(enc);
+  if (ret != nullptr) {
+    stream.get()->incRefCount();
+    ret->context = (void*)stream.get();
+    ret->readcallback = libxml_streams_IO_read;
+    ret->closecallback = libxml_streams_IO_close;
+  }
+
+  return ret;
+}
+
+static xmlOutputBufferPtr
+libxml_create_output_buffer(const char *URI,
+                              xmlCharEncodingHandlerPtr encoder,
+                              int compression ATTRIBUTE_UNUSED)
+{
+  if (URI == nullptr) {
+    return nullptr;
+  }
+  // PHP unescapes the URI here, but that should properly be done by the wrapper.
+  // The wrapper should expect a valid URI, e.g. file:///foo%20bar
+  Resource stream = libxml_streams_IO_open_wrapper(URI, "wb", false);
+  if (stream.isInvalid()) {
+    return nullptr;
+  }
+  // Allocate the Output buffer front-end.
+  xmlOutputBufferPtr ret = xmlAllocOutputBuffer(encoder);
+  if (ret != nullptr) {
+    stream.get()->incRefCount();
+    ret->context = (void*)stream.get();
+    ret->writecallback = libxml_streams_IO_write;
+    ret->closecallback = libxml_streams_IO_close;
+  }
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Extension
 
 class LibXMLExtension : public Extension {
   public:
@@ -276,11 +448,13 @@ class LibXMLExtension : public Extension {
       HHVM_FE(libxml_clear_errors);
       HHVM_FE(libxml_use_internal_errors);
       HHVM_FE(libxml_disable_entity_loader);
+      HHVM_FE(libxml_set_streams_context);
 
       loadSystemlib();
 
       s_LibXMLError_class = Unit::lookupClass(s_LibXMLError.get());
-      xmlParserInputBufferCreateFilenameDefault(libxml_input_buffer);
+      xmlParserInputBufferCreateFilenameDefault(libxml_create_input_buffer);
+      xmlOutputBufferCreateFilenameDefault(libxml_create_output_buffer);
     }
 
     void requestInit() override {

@@ -633,33 +633,6 @@ static xmlNsPtr dom_get_ns(xmlNodePtr nodep, const char *uri, int *errorcode,
   return nsptr;
 }
 
-static String _dom_get_valid_file_path(const char *source) {
-  int isFileUri = 0;
-
-  xmlURI *uri = xmlCreateURI();
-  xmlChar *escsource = xmlURIEscapeStr((xmlChar*)source, (xmlChar*)":");
-  xmlParseURIReference(uri, (char*)escsource);
-  xmlFree(escsource);
-
-  if (uri->scheme != NULL) {
-    /* absolute file uris - libxml only supports localhost or empty host */
-    if (strncasecmp(source, "file:///",8) == 0) {
-      isFileUri = 1;
-      source += 7;
-    } else if (strncasecmp(source, "file://localhost/",17) == 0) {
-      isFileUri = 1;
-      source += 16;
-    }
-  }
-
-  String file_dest = String(source, CopyString);
-  if ((uri->scheme == NULL || isFileUri)) {
-    file_dest = File::TranslatePath(file_dest);
-  }
-  xmlFreeURI(uri);
-  return file_dest;
-}
-
 static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
                                      char *source, int source_len,
                                      int options) {
@@ -676,7 +649,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   xmlInitParser();
 
   if (mode == DOM_LOAD_FILE) {
-    String file_dest = _dom_get_valid_file_path(source);
+    String file_dest = libxml_get_valid_file_path(source);
     if (!file_dest.empty()) {
       ctxt = xmlCreateFileParserCtxt(file_dest.data());
     }
@@ -824,7 +797,7 @@ static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
   switch (type) {
   case DOM_LOAD_FILE:
     {
-      String valid_file = _dom_get_valid_file_path(source.data());
+      String valid_file = libxml_get_valid_file_path(source.data());
       if (valid_file.empty()) {
         raise_warning("Invalid RelaxNG file source");
         return false;
@@ -883,7 +856,7 @@ static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
   switch (type) {
   case DOM_LOAD_FILE:
     {
-      String valid_file = _dom_get_valid_file_path(source.data());
+      String valid_file = libxml_get_valid_file_path(source.data());
       if (valid_file.empty()) {
         raise_warning("Invalid Schema file source");
         return false;
@@ -3484,12 +3457,7 @@ Variant c_DOMDocument::t_importnode(const Object& importednode,
 Variant c_DOMDocument::t_load(const String& filename,
                               int64_t options /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
-  String translated = File::TranslatePath(filename);
-  if (translated.empty()) {
-    raise_warning("Unable to read file: %s", filename.data());
-    return false;
-  }
-  return dom_parse_document(this, translated, options, DOM_LOAD_FILE);
+  return dom_parse_document(this, filename, options, DOM_LOAD_FILE);
 }
 
 Variant c_DOMDocument::t_loadhtml(const String& source) {
@@ -3499,12 +3467,7 @@ Variant c_DOMDocument::t_loadhtml(const String& source) {
 
 Variant c_DOMDocument::t_loadhtmlfile(const String& filename) {
   SYNC_VM_REGS_SCOPED();
-  String translated = File::TranslatePath(filename);
-  if (translated.empty()) {
-    raise_warning("Unable to read file: %s", filename.data());
-    return false;
-  }
-  return dom_load_html(this, translated, DOM_LOAD_FILE);
+  return dom_load_html(this, filename, DOM_LOAD_FILE);
 }
 
 Variant c_DOMDocument::t_loadxml(const String& source,
@@ -3555,19 +3518,13 @@ Variant c_DOMDocument::t_save(const String& file, int64_t options /* = 0 */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0, saveempty = 0;
 
-  String translated = File::TranslatePath(file);
-  if (translated.empty()) {
-    raise_warning("Invalid Filename");
-    return false;
-  }
-
   /* encoding handled by property on doc */
   format = m_formatoutput;
   if (options & LIBXML_SAVE_NOEMPTYTAG) {
     saveempty = xmlSaveNoEmptyTags;
     xmlSaveNoEmptyTags = 1;
   }
-  bytes = xmlSaveFormatFileEnc(translated.data(), docp, NULL, format);
+  bytes = xmlSaveFormatFileEnc(file.data(), docp, NULL, format);
   if (options & LIBXML_SAVE_NOEMPTYTAG) {
     xmlSaveNoEmptyTags = saveempty;
   }
@@ -3581,14 +3538,9 @@ Variant c_DOMDocument::t_savehtmlfile(const String& file) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0;
 
-  String translated = File::TranslatePath(file);
-  if (translated.empty()) {
-    raise_warning("Invalid Filename");
-    return false;
-  }
   /* encoding handled by property on doc */
   format = m_formatoutput;
-  bytes = htmlSaveFileFormat(translated.data(), docp, NULL, format);
+  bytes = htmlSaveFileFormat(file.data(), docp, NULL, format);
   if (bytes == -1) {
     return false;
   }

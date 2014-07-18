@@ -17,11 +17,12 @@
 
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
-
+#include "hphp/runtime/ext/libxml/ext_libxml.h"
 
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
@@ -58,33 +59,6 @@ const int64_t q_XMLReader$$SUBST_ENTITIES = XML_PARSER_SUBST_ENTITIES;
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static String _xmlreader_get_valid_file_path(const char *source) {
-  int isFileUri = 0;
-
-  xmlURI *uri = xmlCreateURI();
-  xmlChar *escsource = xmlURIEscapeStr((xmlChar*)source, (xmlChar*)":");
-  xmlParseURIReference(uri, (char*)escsource);
-  xmlFree(escsource);
-
-  if (uri->scheme != NULL) {
-    /* absolute file uris - libxml only supports localhost or empty host */
-    if (strncasecmp(source, "file:///",8) == 0) {
-      isFileUri = 1;
-      source += 7;
-    } else if (strncasecmp(source, "file://localhost/",17) == 0) {
-      isFileUri = 1;
-      source += 16;
-    }
-  }
-
-  String file_dest = String(source, CopyString);
-  if ((uri->scheme == NULL || isFileUri)) {
-    file_dest = File::TranslatePath(file_dest);
-  }
-  xmlFreeURI(uri);
-  return file_dest;
-}
-
 static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
                                             xmlRelaxNGValidityErrorFunc error_func,
                                             xmlRelaxNGValidityWarningFunc warn_func )
@@ -95,7 +69,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
 
   switch (type) {
     case XMLREADER_LOAD_FILE:
-      valid_file = _xmlreader_get_valid_file_path(source.c_str());
+      valid_file = libxml_get_valid_file_path(source.c_str());
       if (valid_file.empty()) {
         return NULL;
       }
@@ -139,6 +113,7 @@ void c_XMLReader::t___construct() {
 }
 
 bool c_XMLReader::t_open(const String& uri, const String& encoding /*= null_string*/, int64_t options /*= 0*/) {
+  SYNC_VM_REGS_SCOPED();
   if (m_ptr) {
     t_close();
   }
@@ -148,7 +123,7 @@ bool c_XMLReader::t_open(const String& uri, const String& encoding /*= null_stri
     return false;
   }
 
-  String valid_file = _xmlreader_get_valid_file_path(uri.c_str());
+  String valid_file = libxml_get_valid_file_path(uri.c_str());
   xmlTextReaderPtr reader = NULL;
 
   if (!valid_file.empty()) {
@@ -211,6 +186,7 @@ bool c_XMLReader::t_xml(const String& source, const String& encoding /*= null_st
 }
 
 void c_XMLReader::close_impl() {
+  SYNC_VM_REGS_SCOPED();
   if (m_ptr) {
     xmlFreeTextReader(m_ptr);
     m_ptr = NULL;
@@ -231,6 +207,7 @@ bool c_XMLReader::t_close() {
 }
 
 bool c_XMLReader::t_read() {
+  SYNC_VM_REGS_SCOPED();
   if (m_ptr) {
     int ret = xmlTextReaderRead(m_ptr);
     if (ret == -1) {
@@ -245,6 +222,7 @@ bool c_XMLReader::t_read() {
 }
 
 bool c_XMLReader::t_next(const String& localname /*= null_string*/) {
+  SYNC_VM_REGS_SCOPED();
   if (m_ptr) {
     int ret = xmlTextReaderNext(m_ptr);
     while (!localname.empty() && ret == 1) {
@@ -265,6 +243,7 @@ bool c_XMLReader::t_next(const String& localname /*= null_string*/) {
 }
 
 String c_XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
+  SYNC_VM_REGS_SCOPED();
   char *retchar = NULL;
   if (m_ptr) {
     retchar = (char *)internal_function(m_ptr);
@@ -291,6 +270,7 @@ String c_XMLReader::t_readouterxml() {
 }
 
 bool c_XMLReader::bool_func_no_arg(xmlreader_read_int_t internal_function) {
+  SYNC_VM_REGS_SCOPED();
   if (m_ptr) {
     int ret = internal_function(m_ptr);
     if (ret == 1) {
@@ -301,6 +281,7 @@ bool c_XMLReader::bool_func_no_arg(xmlreader_read_int_t internal_function) {
 }
 
 Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_char_t internal_function) {
+  SYNC_VM_REGS_SCOPED();
 
   if (value.empty()) {
     raise_warning("Argument cannot be an empty string");
@@ -326,6 +307,7 @@ Variant c_XMLReader::t_getattribute(const String& name) {
 }
 
 Variant c_XMLReader::t_getattributeno(int64_t index) {
+  SYNC_VM_REGS_SCOPED();
   char *retchar = NULL;
   if (m_ptr) {
     retchar = (char *)xmlTextReaderGetAttributeNo(m_ptr, index);
@@ -340,6 +322,7 @@ Variant c_XMLReader::t_getattributeno(int64_t index) {
 }
 
 Variant c_XMLReader::t_getattributens(const String& name, const String& namespaceURI) {
+  SYNC_VM_REGS_SCOPED();
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
@@ -362,6 +345,7 @@ Variant c_XMLReader::t_getattributens(const String& name, const String& namespac
 }
 
 bool c_XMLReader::t_movetoattribute(const String& name) {
+  SYNC_VM_REGS_SCOPED();
   if (name.empty()) {
     raise_warning("Attribute Name is required");
     return false;
@@ -377,6 +361,7 @@ bool c_XMLReader::t_movetoattribute(const String& name) {
 }
 
 bool c_XMLReader::t_movetoattributeno(int64_t index) {
+  SYNC_VM_REGS_SCOPED();
   if (m_ptr) {
     int ret = xmlTextReaderMoveToAttributeNo(m_ptr, index);
     if (ret == 1) {
@@ -387,6 +372,7 @@ bool c_XMLReader::t_movetoattributeno(int64_t index) {
 }
 
 bool c_XMLReader::t_movetoattributens(const String& name, const String& namespaceURI) {
+  SYNC_VM_REGS_SCOPED();
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
@@ -435,6 +421,7 @@ Variant c_XMLReader::t_lookupnamespace(const String& prefix) {
 }
 
 bool c_XMLReader::t_setschema(const String& source) {
+  SYNC_VM_REGS_SCOPED();
   if (source.empty()) {
     raise_warning("Schema data source is required");
     return false;
@@ -463,6 +450,7 @@ bool c_XMLReader::t_setparserproperty(int64_t property, bool value) {
 }
 
 bool c_XMLReader::set_relaxng_schema(String source, int type) {
+  SYNC_VM_REGS_SCOPED();
   if (source.empty()) {
     raise_warning("Schema data source is required");
     return false;
@@ -609,6 +597,7 @@ Variant c_XMLReader::t___get(Variant name) {
 Variant c_XMLReader::t_expand(const Object& basenode /* = null */) {
   p_DOMDocument doc;
   xmlDocPtr docp = nullptr;
+  SYNC_VM_REGS_SCOPED();
 
   if (!basenode.isNull()) {
     c_DOMNode *dombasenode = basenode.getTyped<c_DOMNode>();

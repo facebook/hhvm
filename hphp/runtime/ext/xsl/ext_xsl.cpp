@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/util/string-vsnprintf.h"
 
 #include <libxslt/xslt.h>
@@ -49,7 +50,6 @@ const int64_t k_XSL_SECPREF_DEFAULT           = 44;
 // helpers
 
 static xmlChar *xslt_string_to_xpathexpr(const char *);
-static String xslt_get_valid_file_path(const String&);
 static void xslt_ext_function_php(xmlXPathParserContextPtr, int, int);
 static void xslt_ext_function_string_php(xmlXPathParserContextPtr, int);
 static void xslt_ext_function_object_php(xmlXPathParserContextPtr, int);
@@ -251,27 +251,6 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
   }
 
   return value;
-}
-
-static String xslt_get_valid_file_path(const String& source) {
-  String translated;
-
-  xmlURIPtr uri = xmlCreateURI();
-  xmlChar *escsource = xmlURIEscapeStr((xmlChar*)source.c_str(), (xmlChar*)":");
-  xmlParseURIReference(uri, (char*)escsource);
-  xmlFree(escsource);
-  if (uri->scheme != nullptr) {
-    if (strncasecmp(source.c_str(), "file:///", 8) == 0) {
-      translated = File::TranslatePath(String(source.substr(7), CopyString));
-    } else if (strncasecmp(source.c_str(), "file://localhost/", 17) == 0) {
-      translated = File::TranslatePath(String(source.substr(16), CopyString));
-    }
-  } else {
-    translated = File::TranslatePath(String (source, CopyString));
-  }
-  xmlFreeURI(uri);
-
-  return translated;
 }
 
 static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
@@ -637,7 +616,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToURI,
     c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
     data->m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
 
-    String translated = xslt_get_valid_file_path(uri);
+    String translated = libxml_get_valid_file_path(uri);
     if (translated.empty()) {
       raise_warning("Invalid URI");
       return false;

@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/string-util.h"
 #include "folly/String.h"
 #include <poll.h>
 #include <sys/time.h>
@@ -687,16 +688,19 @@ bool SSLSocket::checkLiveness() {
 ///////////////////////////////////////////////////////////////////////////////
 // Certificate
 
-const StaticString s_file("file://");
-
 BIO *Certificate::ReadData(const Variant& var, bool *file /* = NULL */) {
   if (var.isString() || var.isObject()) {
     String svar = var.toString();
-    if (svar.substr(0, 7) == s_file) {
+    if (StringUtil::IsFileUrl(svar)) {
+      String decoded = StringUtil::DecodeFileUrl(svar);
+      if (decoded.empty()) {
+        raise_warning("invalid file URL, %s", svar.data());
+        return nullptr;
+      }
       if (file) *file = true;
-      BIO *ret = BIO_new_file((char*)svar.substr(7).data(), "r");
+      BIO *ret = BIO_new_file(decoded.data(), "r");
       if (ret == nullptr) {
-        raise_warning("error opening the file, %s", svar.data());
+        raise_warning("error opening the file, %s", decoded.data());
       }
       return ret;
     }

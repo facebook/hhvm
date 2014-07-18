@@ -5209,12 +5209,15 @@ folly::Optional<Type> HhbcTranslator::ratToAssertType(RepoAuthType rat) const {
   case T::ExactObj:
   case T::SubObj:
     {
-      auto ty = [&] {
-        auto const cls = Unit::lookupUniqueClass(rat.clsName());
-        return classIsUniqueOrCtxParent(cls)
-          ? Type::Obj.specialize(cls)
-          : Type::Obj;
-      }();
+      auto ty = Type::Obj;
+      auto const cls = Unit::lookupUniqueClass(rat.clsName());
+      if (classIsUniqueOrCtxParent(cls)) {
+        if (rat.tag() == T::OptExactObj || rat.tag() == T::ExactObj) {
+          ty = ty.specializeExact(cls);
+        } else {
+          ty = ty.specialize(cls);
+        }
+      }
       if (rat.tag() == T::OptExactObj || rat.tag() == T::OptSubObj) {
         ty = ty | Type::InitNull;
       }

@@ -177,6 +177,36 @@ class Type {
   // valid.
   enum class ArrayInfo : uintptr_t {};
 
+  // Tag that tells us if we're exactly equal to, or a subtype of a Class*.
+  enum class ClassTag : uint8_t { Sub, Exact };
+
+  // A const Class* with the low bit set if this is an exact type,
+  // otherwise a subtype.
+  struct ClassInfo {
+    ClassInfo(const Class* cls, ClassTag tag)
+        : m_bits(reinterpret_cast<uintptr_t>(cls)) {
+      assert((m_bits & 1) == 0);
+      switch (tag) {
+        case ClassTag::Sub:
+          break;
+        case ClassTag::Exact:
+          m_bits |= 1;
+          break;
+      }
+    }
+
+    const Class* get() const {
+      return reinterpret_cast<const Class*>(m_bits & ~1);
+    }
+
+    bool isExact() const { return m_bits & 1; }
+
+    bool operator==(const ClassInfo& rhs) const { return m_bits == rhs.m_bits; }
+
+  private:
+    uintptr_t m_bits;
+  };
+
   bits_t m_bits:63;
   bool m_hasConstVal:1;
 
@@ -196,7 +226,7 @@ class Type {
     TypedValue* m_ptrVal;
 
     // Specialization for object classes and arrays.
-    const Class* m_class;
+    ClassInfo m_class;
     ArrayInfo m_arrayInfo;
   };
 
@@ -239,10 +269,10 @@ class Type {
     assert(checkValid());
   }
 
-  explicit Type(bits_t bits, const Class* klass)
+  explicit Type(bits_t bits, ClassInfo classInfo)
     : m_bits(bits)
     , m_hasConstVal(false)
-    , m_class(klass)
+    , m_class(classInfo)
   {
     assert(checkValid());
   }
@@ -267,6 +297,7 @@ class Type {
   struct Union;
   struct Intersect;
   struct ArrayOps;
+  struct ClassOps;
 
 public:
 # define IRT(name, ...) static const Type name;
@@ -598,8 +629,13 @@ public:
   }
 
   Type specialize(const Class* klass) const {
-    assert(canSpecializeClass() && m_class == nullptr);
-    return Type(m_bits, klass);
+    assert(canSpecializeClass() && getClass() == nullptr);
+    return Type(m_bits, ClassInfo(klass, ClassTag::Sub));
+  }
+
+  Type specializeExact(const Class* klass) const {
+    assert(canSpecializeClass() && getClass() == nullptr);
+    return Type(m_bits, ClassInfo(klass, ClassTag::Exact));
   }
 
   Type specialize(ArrayData::ArrayKind arrayKind) const {
@@ -623,7 +659,12 @@ public:
 
   const Class* getClass() const {
     assert(canSpecializeClass());
-    return m_class;
+    return m_class.get();
+  }
+
+  const Class* getExactClass() const {
+    assert(canSpecializeClass() || subtypeOf(Type::Cls));
+    return (m_hasConstVal || m_class.isExact()) ? getClass() : nullptr;
   }
 
   bool hasArrayKind() const {

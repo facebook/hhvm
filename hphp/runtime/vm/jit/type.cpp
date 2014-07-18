@@ -118,21 +118,24 @@ std::string Type::toString() const {
   std::vector<std::string> parts;
   if (isSpecialized()) {
     if (canSpecializeClass()) {
-      assert(m_class);
-      parts.push_back(folly::to<std::string>(Type(m_bits & kAnyObj).toString(),
-                                             '<', m_class->name()->data(),
-                                             '>'));
+      assert(getClass());
+
+      auto const base = Type(m_bits & kAnyObj).toString();
+      auto const exact = getExactClass() ? "=" : "<=";
+      auto const name = getClass()->name()->data();
+      auto const partStr = folly::to<std::string>(base, exact, name);
+
+      parts.push_back(partStr);
       t -= AnyObj;
     } else if (canSpecializeArray()) {
-      auto str = folly::to<std::string>(
-        Type(m_bits & kAnyArr).toString(), '<');
+      auto str = folly::to<std::string>(Type(m_bits & kAnyArr).toString());
       if (hasArrayKind()) {
+        str += "=";
         str += ArrayData::kindToString(getArrayKind());
       }
       if (auto ty = getArrayType()) {
         str += folly::to<std::string>(':', show(*ty));
       }
-      str += '>';
       parts.push_back(str);
       t -= AnyArr;
     } else {
@@ -240,28 +243,27 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
   }
 }
 
-namespace {
 // ClassOps and ArrayOps are used below to write code that can perform set
 // operations on both Class and ArrayKind specializations.
-struct ClassOps {
-  static bool subtypeOf(const Class* a, const Class* b) {
-    return a->classof(b);
+struct Type::ClassOps {
+  static bool subtypeOf(ClassInfo a, ClassInfo b) {
+    return a.get()->classof(b.get());
   }
 
-  static folly::Optional<const Class*> commonAncestor(const Class* a,
-                                                      const Class* b) {
-    if (!isNormalClass(a) || !isNormalClass(b)) return folly::none;
-    if (auto result = a->commonAncestor(b)) return result;
+  static folly::Optional<ClassInfo> commonAncestor(ClassInfo a,
+                                                   ClassInfo b) {
+    if (!isNormalClass(a.get()) || !isNormalClass(b.get())) return folly::none;
+    if (auto result = a.get()->commonAncestor(b.get())) {
+      return ClassInfo(result, ClassTag::Sub);
+    }
 
     return folly::none;
   }
 
-  static folly::Optional<const Class*> intersect(const Class* a,
-                                                 const Class* b) {
+  static folly::Optional<ClassInfo> intersect(ClassInfo a, ClassInfo b) {
     return folly::none;
   }
 };
-}
 
 struct Type::ArrayOps {
   static bool subtypeOf(ArrayInfo a, ArrayInfo b) {
@@ -290,11 +292,6 @@ struct Type::ArrayOps {
              ata ? ata : atb;
     }();
     if (ty || sameKind) return makeArrayInfo(sameKind, ty);
-    return folly::none;
-  }
-
-  static folly::Optional<ArrayData::ArrayKind> okind(ArrayInfo in) {
-    if (arrayKindValid(in)) return kind(in);
     return folly::none;
   }
 
@@ -328,6 +325,12 @@ struct Type::ArrayOps {
     if (!atb) return makeArrayInfo(aka, ata /* could be null */);
     if (!ata) return makeArrayInfo(aka, atb /* could be null */);
     return makeArrayInfo(aka, ata == atb ? ata : nullptr);
+  }
+
+private:
+  static folly::Optional<ArrayData::ArrayKind> okind(ArrayInfo in) {
+    if (arrayKindValid(in)) return kind(in);
+    return folly::none;
   }
 };
 
@@ -449,9 +452,9 @@ Type Type::combine(bits_t newBits, Type a, Type b) {
   // If both types are eligible for the same kind of specialization and at
   // least one is specialized, delegate to Oper::combineSame.
   if (a.canSpecializeClass() && b.canSpecializeClass()) {
-    folly::Optional<const Class*> aClass, bClass;
-    if (a.getClass()) aClass = a.getClass();
-    if (b.getClass()) bClass = b.getClass();
+    folly::Optional<ClassInfo> aClass, bClass;
+    if (a.getClass()) aClass = a.m_class;
+    if (b.getClass()) bClass = b.m_class;
 
     return Oper::template combineSame<ClassOps>(newBits, kAnyObj,
                                                 aClass, bClass);
@@ -583,8 +586,21 @@ bool Type::subtypeOf(Type t2) const {
   // a subtype of t2's specialization.
   if (t2.isSpecialized()) {
     if (t2.canSpecializeClass()) {
-      return !canSpecializeClass() ||
-        (m_class != nullptr && m_class->classof(t2.m_class));
+      if (!isSpecialized()) return false;
+
+      //  Obj=A <:  Obj=A
+      // Obj<=A <: Obj<=A
+      if (m_class.isExact() == t2.m_class.isExact() &&
+          getClass() == t2.getClass()) {
+        return true;
+      }
+
+      //      A <: B
+      // ----------------
+      //  Obj=A <: Obj<=B
+      // Obj<=A <: Obj<=B
+      if (!t2.m_class.isExact()) return getClass()->classof(t2.getClass());
+      return false;
     }
 
     assert(t2.canSpecializeArray());
@@ -736,7 +752,7 @@ Type allocObjReturn(const IRInstruction* inst) {
     case CustomInstanceInit:
     case AllocObj:
       return inst->src(0)->isConst()
-        ? Type::Obj.specialize(inst->src(0)->clsVal())
+        ? Type::Obj.specializeExact(inst->src(0)->clsVal())
         : Type::Obj;
     default:
       always_assert(false && "Invalid opcode returning AllocObj");
@@ -851,17 +867,25 @@ Type convertToType(RepoAuthType ty) {
     return Type::Arr;
 
   case T::SubObj:
-  case T::ExactObj:
+  case T::ExactObj: {
+    auto const base = Type::Obj;
     if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
-      return Type::Obj.specialize(cls);
+      return ty.tag() == T::ExactObj ?
+        base.specializeExact(cls) :
+        base.specialize(cls);
     }
-    return Type::Obj;
+    return base;
+  }
   case T::OptSubObj:
-  case T::OptExactObj:
+  case T::OptExactObj: {
+    auto const base = Type::Obj | Type::InitNull;
     if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
-      return Type::Obj.specialize(cls) | Type::InitNull;
+      return ty.tag() == T::OptExactObj ?
+        base.specializeExact(cls) :
+        base.specialize(cls);
     }
-    return Type::Obj | Type::InitNull;
+    return base;
+  }
   }
   not_reached();
 }

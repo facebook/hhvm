@@ -634,7 +634,8 @@ Variant f_str_ireplace(const Variant& search, const Variant& replace, const Vari
   return ret;
 }
 
-Variant f_substr_replace(const Variant& str, const Variant& replacement, const Variant& start,
+Variant f_substr_replace(const Variant& str, const Variant& replacement,
+                         const Variant& start,
                          const Variant& length /* = 0x7FFFFFFF */) {
   if (!str.is(KindOfArray)) {
     String repl;
@@ -662,8 +663,20 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
                           repl);
   }
 
+  // 'start' and 'length' can be arrays (in which case we step through them in
+  // sync with stepping through 'str'), or not arrays, in which case we convert
+  // them to ints and always use those.
   Array ret;
   Array strArr = str.toArray();
+  folly::Optional<int> opStart;
+  folly::Optional<int> opLength;
+  if (!start.isArray()) {
+    opStart = start.toInt32();
+  }
+  if (!length.isArray()) {
+    opLength = length.toInt32();
+  }
+
   Array startArr = start.toArray();
   Array lengthArr = length.toArray();
   ArrayIter startIter(startArr);
@@ -672,10 +685,21 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
   if (replacement.is(KindOfArray)) {
     Array replArr = replacement.toArray();
     ArrayIter replIter(replArr);
-    for (ArrayIter iter(strArr); iter;
-         ++iter, ++startIter, ++lengthIter) {
-      int nStart = startIter.second().toInt32();
-      int nLength = lengthIter.second().toInt32();
+    for (ArrayIter iter(strArr); iter; ++iter) {
+      auto str = iter.second().toString();
+      // If 'start' or 'length' are arrays and we've gone past the end, default
+      // to 0 for start and the length of the input string for length.
+      int nStart =
+        (opStart.hasValue()
+         ? opStart.value()
+         : (startIter ? startIter.second().toInt32() : 0));
+      int nLength =
+        (opLength.hasValue()
+         ? opLength.value()
+         : (lengthIter ? lengthIter.second().toInt32() : str.length()));
+      if (startIter) ++startIter;
+      if (lengthIter) ++lengthIter;
+
       String repl;
       if (replIter) {
         repl = replIter.second().toString();
@@ -683,16 +707,25 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
       } else {
         repl = empty_string();
       }
-      auto s2 = string_replace(iter.second().toString(), nStart, nLength, repl);
+      auto s2 = string_replace(str, nStart, nLength, repl);
       ret.append(s2);
     }
   } else {
     String repl = replacement.toString();
-    for (ArrayIter iter(strArr); iter;
-         ++iter, ++startIter, ++lengthIter) {
-      int nStart = startIter.second().toInt32();
-      int nLength = lengthIter.second().toInt32();
-      auto s2 = string_replace(iter.second().toString(), nStart, nLength, repl);
+    for (ArrayIter iter(strArr); iter; ++iter) {
+      auto str = iter.second().toString();
+      int nStart =
+        (opStart.hasValue()
+         ? opStart.value()
+         : (startIter ? startIter.second().toInt32() : 0));
+      int nLength =
+        (opLength.hasValue()
+         ? opLength.value()
+         : (lengthIter ? lengthIter.second().toInt32() : str.length()));
+      if (startIter) ++startIter;
+      if (lengthIter) ++lengthIter;
+
+      auto s2 = string_replace(str, nStart, nLength, repl);
       ret.append(s2);
     }
   }

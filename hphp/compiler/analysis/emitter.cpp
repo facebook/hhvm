@@ -4812,8 +4812,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
           ssClsName, PreClass::ClosureHoistable);
+
+        auto const attrs = AttrNoOverride | AttrUnique | AttrPersistent;
+
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
-                  AttrUnique | AttrPersistent, parentName, nullptr);
+                  attrs, parentName, nullptr);
 
         // Instance properties---one for each use var, and one for
         // each static local.

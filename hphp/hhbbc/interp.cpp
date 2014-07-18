@@ -1350,7 +1350,7 @@ void in(ISS& env, const bc::FPassN& op) {
     // This could change the type of any local.
     popC(env);
     killLocals(env);
-    return push(env, TGen);
+    return push(env, TInitGen);
   case PrepKind::Val: return reduce(env, bc::CGetN {},
                                          bc::FPassC { op.arg1 });
   case PrepKind::Ref: return reduce(env, bc::VGetN {},
@@ -1385,7 +1385,7 @@ void in(ISS& env, const bc::FPassS& op) {
         }
       }
     }
-    return push(env, TGen);
+    return push(env, TInitGen);
   case PrepKind::Val:
     return reduce(env, bc::CGetS {}, bc::FPassC { op.arg1 });
   case PrepKind::Ref:
@@ -1396,7 +1396,7 @@ void in(ISS& env, const bc::FPassS& op) {
 void in(ISS& env, const bc::FPassV& op) {
   nothrow(env);
   switch (prepKind(env, op.arg1)) {
-  case PrepKind::Unknown: popV(env); return push(env, TGen);
+  case PrepKind::Unknown: popV(env); return push(env, TInitGen);
   case PrepKind::Val:     popV(env); return push(env, TInitCell);
   case PrepKind::Ref:     assert(topT(env).subtypeOf(TRef)); return;
   }
@@ -1405,10 +1405,10 @@ void in(ISS& env, const bc::FPassV& op) {
 void in(ISS& env, const bc::FPassR& op) {
   nothrow(env);
   if (topT(env).subtypeOf(TCell)) return reduce(env, bc::UnboxRNop {},
-                                                      bc::FPassC { op.arg1 });
+                                                     bc::FPassC { op.arg1 });
   if (topT(env).subtypeOf(TRef))  return impl(env, bc::FPassV { op.arg1 });
   switch (prepKind(env, op.arg1)) {
-  case PrepKind::Unknown:      popR(env); return push(env, TGen);
+  case PrepKind::Unknown:      popR(env); return push(env, TInitGen);
   case PrepKind::Val:          popR(env); return push(env, TInitCell);
   case PrepKind::Ref:          popR(env); return push(env, TRef);
   }

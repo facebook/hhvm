@@ -903,6 +903,36 @@ let enum_type_typedef_mixed pos =
   add pos "Can't use typedef that resolves to mixed in Enum"
 
 (*****************************************************************************)
+(* Shape checking *)
+(*****************************************************************************)
+let invalid_shape_field_name p =
+  add p
+    "Was expecting a constant string or class constant (for shape access)"
+
+let invalid_shape_field_type p ty =
+  add p
+    ("Only string and int constants can be used for shape fields, " ^
+        "but found " ^ ty)
+
+let invalid_shape_field_literal key_pos witness_pos =
+  add_list [key_pos, "Shape uses literal string as field name";
+            witness_pos, "But expected a class constant"]
+
+let invalid_shape_field_const key_pos witness_pos =
+  add_list [key_pos, "Shape uses class constant as field name";
+            witness_pos, "But expected a literal string"]
+
+let shape_field_class_mismatch key_pos witness_pos key_class witness_class =
+  add_list
+    [key_pos, "Shape field name is class constant from " ^ key_class;
+     witness_pos, "But expected constant from " ^ witness_class]
+
+let shape_field_type_mismatch key_pos witness_pos key_ty witness_ty =
+  add_list
+    [key_pos, "Shape field name is " ^ key_ty ^ " class constant";
+     witness_pos, "But expected " ^ witness_ty]
+
+(*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)
 

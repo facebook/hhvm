@@ -54,6 +54,8 @@ module type MapSig = sig
   val choose : 'a t -> key * 'a
   val keys: 'a t -> key list
   val values: 'a t -> 'a list
+
+  val map_env: ('c -> 'a -> 'c * 'b) -> 'c -> 'a t -> 'c * 'b t
   (* use only in testing code *)
   val elements: 'a t -> (key * 'a) list
 end
@@ -82,6 +84,14 @@ module MyMap: functor (Ord: Map.OrderedType)
     let keys m = fold (fun k v acc -> k :: acc) m []
     let values m = fold (fun k v acc -> v :: acc) m []
     let elements m = fold (fun k v acc -> (k,v)::acc) m []
+
+    let map_env f env m =
+      fold (
+        fun x y (env, acc) ->
+          let env, y = f env y in
+          env, add x y acc
+      ) m (env, empty)
+
   end
 
 module SMap = MyMap(String)
@@ -155,13 +165,6 @@ let partition_smap f m =
     then SMap.add x ty acc1, acc2
     else acc1, SMap.add x ty acc2
  ) m (SMap.empty, SMap.empty)
-
-let smap_env f env m =
-  SMap.fold (
-  fun x y (env, acc) ->
-    let env, y = f env y in
-    env, SMap.add x y acc
- ) m (env, SMap.empty)
 
 (* This is a significant misnomer... you may want fold_left_env instead. *)
 let lfold = lmap

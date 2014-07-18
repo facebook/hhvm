@@ -225,6 +225,12 @@ val missing_constructor : Pos.t -> unit
 val enum_constant_type_bad : Pos.t -> string -> Pos.t list -> unit
 val enum_type_bad : Pos.t -> string -> Pos.t list -> unit
 val enum_type_typedef_mixed : Pos.t -> unit
+val invalid_shape_field_name : Pos.t -> unit
+val invalid_shape_field_type : Pos.t -> string -> unit
+val invalid_shape_field_literal : Pos.t -> Pos.t -> unit
+val invalid_shape_field_const : Pos.t -> Pos.t -> unit
+val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
+val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

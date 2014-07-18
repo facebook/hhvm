@@ -192,7 +192,7 @@ let chown_privates owner = apply_fn_to_class_elts (chown_private owner)
 let inherit_hack_class c env p class_name class_type argl =
   let self = Typing.get_self_from_c env c in
   let subst = make_substitution ~this:(Some self) p class_name class_type argl in
-  let instantiate = smap_env (Inst.instantiate_ce subst) in
+  let instantiate = SMap.map_env (Inst.instantiate_ce subst) in
   let class_type =
     match class_type.tc_kind with
     | Ast.Ctrait ->
@@ -222,7 +222,7 @@ let inherit_hack_class c env p class_name class_type argl =
 let inherit_hack_class_constants_only env p class_name class_type argl =
   let subst = make_substitution p class_name class_type argl in
   let env, consts =
-    smap_env (Inst.instantiate_ce subst) env class_type.tc_consts in
+    SMap.map_env (Inst.instantiate_ce subst) env class_type.tc_consts in
   let result = { empty with
     ih_consts   = consts;
   } in

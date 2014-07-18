@@ -75,7 +75,7 @@ and ty_ =
    * Tobject is currently used to type code like: ../test/typecheck/return_unknown_class.php
    *)
   | Tobject
-  | Tshape of ty SMap.t
+  | Tshape of ty Nast.ShapeMap.t
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)

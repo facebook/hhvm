@@ -65,7 +65,7 @@ and fully_expand_ seen env = function
       Tapply (x, tyl)
   | Tobject as x -> x
   | Tshape fdm ->
-      Tshape (SMap.map (fully_expand seen env) fdm)
+      Tshape (Nast.ShapeMap.map (fully_expand seen env) fdm)
 
 and fully_expand_opt seen env x = opt_map (fully_expand seen env) x
 

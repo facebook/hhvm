@@ -138,7 +138,7 @@ let check_members env parent_class class_ parent_members members =
 
 (* Instantiation basically applies the substitution *)
 let instantiate_members subst env members =
-  smap_env (Inst.instantiate_ce subst) env members
+  SMap.map_env (Inst.instantiate_ce subst) env members
 
 (* TODO constant inheritance is broken. We don't inherit constants that
  * come from interfaces. *)

@@ -408,7 +408,7 @@ and expr_ env acc p e =
       let acc = exprl acc l in
       exprl acc el
   | Shape fdm ->
-      SMap.fold begin fun _ v acc ->
+      ShapeMap.fold begin fun _ v acc ->
         expr acc v
       end fdm acc
 

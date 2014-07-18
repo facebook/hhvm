@@ -960,14 +960,7 @@ and expr_ is_lvalue env (p, e) =
       let env  = condition env false c in
       let env, ty2 = expr env e2 in
       Unify.unify_nofail env ty1 ty2
-  | Class_const (CIparent, mid) ->
-      let env, cty = static_class_id p env CIparent in
-      obj_get false env cty mid (fun x -> x)
-  | Class_const (cid, mid) ->
-      Typing_utils.process_static_find_ref cid mid;
-      let env, cty = static_class_id p env cid in
-      let env, cty = Env.expand_type env cty in
-      class_get ~is_method:false ~is_const:true env cty mid cid
+  | Class_const (cid, mid) -> class_const env p (cid, mid)
   | Class_get (x, (_, y))
       when Env.FakeMembers.get_static env x y <> None ->
         let env, local = Env.FakeMembers.make_static p env x y in
@@ -1074,10 +1067,21 @@ and expr_ is_lvalue env (p, e) =
        *)
       env, obj
   | Shape fdm ->
-      let env, fdm = smap_env expr env fdm in
+      let env, fdm = ShapeMap.map_env expr env fdm in
       (* allow_inter adds a type-variable *)
-      let env, fdm = smap_env TUtils.unresolved env fdm in
+      let env, fdm = ShapeMap.map_env TUtils.unresolved env fdm in
+      check_shape_keys_validity env p (ShapeMap.keys fdm);
       env, (Reason.Rwitness p, Tshape fdm)
+
+and class_const env p = function
+  | (CIparent, mid) ->
+      let env, cty = static_class_id p env CIparent in
+      obj_get false env cty mid (fun x -> x)
+  | (cid, mid) ->
+      Typing_utils.process_static_find_ref cid mid;
+      let env, cty = static_class_id p env cid in
+      let env, cty = Env.expand_type env cty in
+      class_get ~is_method:false ~is_const:true env cty mid cid
 
 (*****************************************************************************)
 (* Anonymous functions. *)
@@ -1228,6 +1232,64 @@ and convert_array_as_tuple p env ty2 =
   then env, (r2, Tany)
   else env, ty2
 
+and shape_field_name p = function
+  | String name -> SFlit name
+  | Class_const (CI x, y) -> SFclass_const (x, y)
+  | _ -> Errors.invalid_shape_field_name p;
+    SFlit (p, "")
+
+and shape_field_pos = function
+  | SFlit (p, _) -> p
+  | SFclass_const ((cls_pos, _), (member_pos, _)) -> Pos.btw cls_pos member_pos
+
+and check_shape_keys_validity env pos keys =
+    (* If the key is a class constant, get its class name and type. *)
+    let get_field_info key =
+      let key_pos = shape_field_pos key in
+      key_pos,
+      (match key with
+        | SFlit _ -> None
+        | SFclass_const (_, cls as x, y) ->
+          let _, (_, ty) = class_const env pos (CI x, y) in
+          (match ty with
+            | Tprim Tint | Tprim Tstring -> ()
+            | _ -> Errors.invalid_shape_field_type key_pos
+                      (Typing_print.error ty));
+          Some (cls, ty))
+    in
+
+    let check_field (witness_pos, witness_info) key =
+      let key_pos, key_info = get_field_info key in
+      match witness_info, key_info with
+        | Some _, None -> Errors.invalid_shape_field_literal key_pos witness_pos
+        | None, Some _ -> Errors.invalid_shape_field_const key_pos witness_pos
+        | None, None -> ()
+        | Some (cls1, ty1), Some (cls2, ty2) ->
+          if cls1 <> cls2 then
+            Errors.shape_field_class_mismatch
+              key_pos witness_pos (strip_ns cls2) (strip_ns cls1);
+          if ty1 <> ty2 then
+            Errors.shape_field_type_mismatch
+              key_pos witness_pos
+              (Typing_print.error ty2) (Typing_print.error ty1)
+    in
+
+    (* Sort the keys by their positions since the error messages will make
+     * more sense if we take the one that appears first as canonical and if
+     * they are processed in source order. *)
+    let cmp_keys x y = Pos.compare (shape_field_pos x) (shape_field_pos y) in
+    let keys = List.sort cmp_keys keys in
+
+    match keys with
+      | [] -> ()
+      | witness :: rest_keys ->
+        List.iter (check_field (get_field_info witness)) rest_keys
+
+and typedef_def env = function
+  | _, _, (pos, Hshape fdm) ->
+    check_shape_keys_validity env pos (ShapeMap.keys fdm)
+  | _ -> ()
+
 and assign p env e1 ty2 =
   let env, ty2 = convert_array_as_tuple p env ty2 in
   match e1 with
@@ -1327,12 +1389,15 @@ and assign p env e1 ty2 =
           env, ty2
       | _ -> env, ty2
       )
-  | _, Array_get ((_, Lvar (_, lvar)) as shape, Some (_, String (_, field))) ->
+  | _, Array_get ((_, Lvar (_, lvar)) as shape, Some (p1, (String _ as e)))
+  | _, Array_get ((_, Lvar (_, lvar)) as shape,
+                  Some (p1, (Class_const (CI _, _) as e))) ->
       (* In the case of an assignment of the form $x['new_field'] = ...;
        * $x could be a shape where the field 'new_field' is not yet defined.
        * When that is the case we want to add the field to its type.
        *)
       let env, shape_ty = expr env shape in
+      let field = shape_field_name p1 e in
       let env, shape_ty = TUtils.grow_shape p e1 field ty2 env shape_ty in
       let env = Env.set_local env lvar shape_ty in
 
@@ -1649,18 +1714,13 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
           env, (Reason.Rwitness p, Tany)
       )
   | Tshape fdm ->
-      (match e2 with
-      | p, String (_, name) ->
-          (match SMap.get name fdm with
-          | None ->
-              Errors.undefined_field p name;
+    let p, e2' = e2 in
+    let field = shape_field_name p e2' in
+    (match ShapeMap.get field fdm with
+      | None -> Errors.undefined_field p (TUtils.get_shape_field_name field);
               env, (Reason.Rwitness p, Tany)
           | Some ty -> env, ty
           )
-      | p, _ ->
-          Errors.shape_access p;
-          env, (Reason.Rwitness p, Tany)
-      )
   | Toption _ ->
       Errors.null_container p
         (Reason.to_string

@@ -25,6 +25,7 @@ open Typing_defs
 open Typing_deps
 
 module Env = Typing_env
+module ShapeMap = Nast.ShapeMap
 
 (*****************************************************************************)
 (* Module comparing types "modulo" positions.
@@ -118,8 +119,8 @@ module CompareTypes = struct
     | Tanon (arity1, id1), Tanon (arity2, id2) ->
         subst, same && arity1 = arity2 && id1 = id2
     | Tshape fdm1, Tshape fdm2 ->
-        SMap.fold begin fun name v1 acc ->
-          match SMap.get name fdm2 with
+        ShapeMap.fold begin fun name v1 acc ->
+          match ShapeMap.get name fdm2 with
           | None -> default
           | Some v2 ->
               ty acc v1 v2
@@ -297,7 +298,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Tabstract (sid, xl, x) ->
         Tabstract (string_id sid, List.map (ty) xl, ty_opt x)
     | Tobject as x         -> x
-    | Tshape fdm           -> Tshape (SMap.map ty fdm)
+    | Tshape fdm           -> Tshape (ShapeMap.map ty fdm)
 
   and ty_opt x = opt_map ty x
 

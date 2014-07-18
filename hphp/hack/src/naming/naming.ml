@@ -19,6 +19,7 @@ open Utils
 open Ast
 
 module N = Nast
+module ShapeMap = N.ShapeMap
 
 (*****************************************************************************)
 (* The types *)
@@ -605,6 +606,13 @@ let hint_no_typedef env = function
   | _, Happly (x, _) -> no_typedef env x
   | _ -> ()
 
+let convert_shape_name env = function
+  | SFlit (pos, s) -> (pos, N.SFlit (pos, s))
+  | SFclass_const (x, (pos, y)) ->
+    let class_name = Env.class_name env x in
+    (pos, N.SFclass_const (class_name, (pos, y)))
+
+
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
@@ -637,13 +645,14 @@ and hint_ ~allow_this is_static_var p env x =
   | Hoption h -> N.Hoption (hint env h)
   | Hfun (hl, opt, h) -> N.Hfun (List.map (hint env) hl, opt, hint env h)
   | Happly ((_, x) as id, hl) -> hint_id ~allow_this env is_static_var id hl
-  | Hshape fdl -> N.Hshape begin
+  | Hshape fdl -> N.Hshape
+    begin
       List.fold_left begin fun fdm (pname, h) ->
-        let pos, name = pname in
-        if SMap.mem name fdm
+        let pos, name = convert_shape_name env pname in
+        if ShapeMap.mem name fdm
         then Errors.fd_name_already_bound pos;
-        SMap.add name (hint env h) fdm
-      end SMap.empty fdl
+        ShapeMap.add name (hint env h) fdm
+      end ShapeMap.empty fdl
   end
 
 and hint_id ~allow_this env is_static_var (p, x as id) hl =
@@ -1611,11 +1620,11 @@ and expr_ env = function
   | Xml (x, al, el) -> N.Xml (Env.class_name env x, attrl env al, List.map (expr env) el)
   | Shape fdl ->
       N.Shape begin List.fold_left begin fun fdm (pname, value) ->
-        let pos, name = pname in
-        if SMap.mem name fdm
+        let pos, name = convert_shape_name env pname in
+        if ShapeMap.mem name fdm
         then Errors.fd_name_already_bound pos;
-        SMap.add name (expr env value) fdm
-      end SMap.empty fdl
+        ShapeMap.add name (expr env value) fdm
+      end ShapeMap.empty fdl
       end
 
 and expr_lambda env f =

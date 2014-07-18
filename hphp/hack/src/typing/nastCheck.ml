@@ -235,7 +235,7 @@ module CheckFunctionType = struct
         liter expr f_type (e1 :: e2 :: el);
         ()
     | _, Shape fdm ->
-        SMap.iter (fun _ v -> expr f_type v) fdm;
+        ShapeMap.iter (fun _ v -> expr f_type v) fdm;
         ()
 
 end
@@ -312,7 +312,7 @@ and hint_ env p = function
       );
       ()
   | Hshape fdl ->
-      SMap.iter (fun _ v -> hint env v) fdl
+      ShapeMap.iter (fun _ v -> hint env v) fdl
 
 and check_params env p x params hl =
   let arity = List.length params in
@@ -668,7 +668,7 @@ and expr_ env = function
       liter expr env el;
       ()
   | Shape fdm ->
-      SMap.iter (fun _ v -> expr env v) fdm
+      ShapeMap.iter (fun _ v -> expr env v) fdm
 
 and case env = function
   | Default b -> block env b

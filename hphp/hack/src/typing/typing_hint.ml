@@ -77,5 +77,5 @@ and hint_ p env = function
       let env, tyl = lfold hint env hl in
       env, Ttuple tyl
   | Hshape fdm ->
-      let env, fdm = smap_env hint env fdm in
+      let env, fdm = ShapeMap.map_env hint env fdm in
       env, Tshape fdm

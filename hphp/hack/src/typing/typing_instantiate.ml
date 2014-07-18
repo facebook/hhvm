@@ -199,7 +199,7 @@ and instantiate_ p subst env = function
       env, Tapply (x, tyl)
   | Tobject -> env, Tobject
   | Tshape fdm ->
-      let env, fdm = smap_env (instantiate subst) env fdm in
+      let env, fdm = Nast.ShapeMap.map_env (instantiate subst) env fdm in
       env, Tshape fdm
 
 and instantiate_ce subst env ({ ce_type = x; _ } as ce) =

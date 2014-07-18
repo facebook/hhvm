@@ -22,6 +22,8 @@ val fun_def:
 val class_def:
   Typing_env.env -> 'a -> Nast.class_ -> unit
 
+val typedef_def:
+  Typing_env.env -> Nast.typedef -> unit
 
 val expr:
   Typing_env.env -> Nast.expr -> Typing_env.env * Typing_defs.ty

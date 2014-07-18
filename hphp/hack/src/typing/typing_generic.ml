@@ -8,10 +8,10 @@
  *
  *)
 
-open Utils
 open Typing_defs
 
 module Env = Typing_env
+module ShapeMap = Nast.ShapeMap
 
 
 (* Module checking if a type is generic, I like to use an exception for this sort
@@ -49,7 +49,7 @@ end = struct
     | Tunresolved tyl -> List.iter ty tyl
     | Tobject -> ()
     | Tshape fdm ->
-        SMap.iter (fun _ v -> ty v) fdm
+        ShapeMap.iter (fun _ v -> ty v) fdm
 
   and ty_opt = function None -> () | Some x -> ty x
 
@@ -111,10 +111,10 @@ let rename env old_name new_name ty_to_rename =
         env, (r, Tunresolved l)
     | Tobject -> env, (r, Tobject)
     | Tshape fdm ->
-        let env, fdm = SMap.fold (fun k v (env, fdm) ->
+        let env, fdm = ShapeMap.fold (fun k v (env, fdm) ->
           let env, v = ty env v in
-          env, SMap.add k v fdm
-        ) fdm (env, SMap.empty) in
+          env, ShapeMap.add k v fdm
+        ) fdm (env, ShapeMap.empty) in
         env, (r, Tshape fdm ))
 
   and ty_opt env = function

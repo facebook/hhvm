@@ -192,7 +192,11 @@ and hint_ =
   | Happly of id * hint list
   | Hshape of shape_field list
 
-and shape_field = pstring * hint
+and shape_field_name =
+  | SFlit of pstring
+  | SFclass_const of id * pstring
+
+and shape_field = shape_field_name * hint
 
 and stmt =
   | Unsafe
@@ -222,7 +226,7 @@ and block = stmt list
 and expr = Pos.t * expr_
 and expr_ =
   | Array of afield list
-  | Shape of (pstring * expr) list
+  | Shape of (shape_field_name * expr) list
   | Collection of id * afield list
   | Null
   | True

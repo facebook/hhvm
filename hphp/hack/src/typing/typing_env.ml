@@ -172,6 +172,10 @@ let make_ft env p params ret_ty =
     ft_ret      = ret_ty;
   }
 
+let get_shape_field_name = function
+  | SFlit (_, s) -> s
+  | SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
+
 let rec debug stack env (r, ty) =
   let o = print_string in
   (match r with Reason.Rlost_info _ -> o "~lost" | _ -> ());
@@ -226,8 +230,8 @@ let rec debug stack env (r, ty) =
         | _, ty -> debug stack env ty)
   | Tobject -> o "object"
   | Tshape fdm -> o "shape(";
-      SMap.iter begin fun k v ->
-        o k; o " => "; debug stack env v
+      ShapeMap.iter begin fun k v ->
+        o (get_shape_field_name k); o " => "; debug stack env v
       end fdm;
       o ")"
 

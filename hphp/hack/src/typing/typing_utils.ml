@@ -14,6 +14,7 @@ open Autocomplete
 
 module Reason = Typing_reason
 module Env = Typing_env
+module ShapeMap = Nast.ShapeMap
 
 (*****************************************************************************)
 (* Importing what is necessary *)
@@ -115,14 +116,16 @@ let rec find_pos p_default tyl =
  *)
 (*****************************************************************************)
 
+let get_shape_field_name = Env.get_shape_field_name
+
 let apply_shape ~f env (r1, fdm1) (r2, fdm2) =
-  SMap.fold begin fun name ty1 env ->
-    match SMap.get name fdm2 with
+  ShapeMap.fold begin fun name ty1 env ->
+    match ShapeMap.get name fdm2 with
     | None when is_option env ty1 -> env
     | None ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in
-        Errors.missing_field pos2 pos1 name;
+        Errors.missing_field pos2 pos1 (get_shape_field_name name);
         env
     | Some ty2 ->
         f env ty1 ty2
@@ -225,7 +228,7 @@ let rec grow_shape pos lvalue field_name ty env shape =
   let _, shape = Env.expand_type env shape in
   match shape with
   | _, Tshape fields ->
-      let fields = SMap.add field_name ty fields in
+      let fields = ShapeMap.add field_name ty fields in
       let result = Reason.Rwitness pos, Tshape fields in
       env, result
   | _, Tunresolved tyl ->

@@ -15,7 +15,6 @@
  *)
 (*****************************************************************************)
 
-open Utils
 open Nast
 
 (*****************************************************************************)
@@ -47,7 +46,7 @@ class type ['a] nast_visitor_type = object
   method on_while : 'a -> Nast.expr -> Nast.block -> 'a
   method on_as_expr : 'a -> as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
-  method on_shape : 'a -> expr SMap.t -> 'a
+  method on_shape : 'a -> expr ShapeMap.t -> 'a
   method on_valCollection : 'a -> string -> expr list -> 'a
   method on_keyValCollection : 'a -> string -> field list -> 'a
   method on_this : 'a -> 'a
@@ -246,7 +245,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
     List.fold_left this#on_afield acc afl
 
   method on_shape acc sm =
-    SMap.fold begin fun _ e acc ->
+    ShapeMap.fold begin fun _ e acc ->
       let acc = this#on_expr acc e in
       acc
     end sm acc

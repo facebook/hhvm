@@ -718,7 +718,7 @@ and type_typedef_naming_and_decl nenv tdef =
     | Ast.Alias x -> false
     | Ast.NewType x -> true
   in
-  let params, tcstr, concrete_type =
+  let (params, tcstr, concrete_type) as ntdef =
     Naming.typedef nenv tdef in
   let decl = is_abstract, params, concrete_type in
   let filename = Pos.filename pos in
@@ -740,6 +740,7 @@ and type_typedef_naming_and_decl nenv tdef =
     if is_abstract then Env.Typedef.Private else Env.Typedef.Public
   in
   let tdecl = visibility, params, tcstr, concrete_type, pos in
+  Typing.typedef_def env ntdef;
   Env.add_typedef tid tdecl;
   Naming_heap.TypedefHeap.add tid decl;
   ()

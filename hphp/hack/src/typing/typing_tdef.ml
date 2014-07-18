@@ -105,7 +105,7 @@ and check_typedef seen env (r, t) =
   | Tunresolved _ -> assert false
   | Tobject -> ()
   | Tshape tym ->
-      SMap.iter (fun _ v -> check_typedef seen env v) tym
+      Nast.ShapeMap.iter (fun _ v -> check_typedef seen env v) tym
 
 and check_typedef_list seen env x =
   List.iter (check_typedef seen env) x

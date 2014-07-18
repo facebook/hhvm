@@ -17,6 +17,7 @@ module Unify = Typing_unify
 module Env = Typing_env
 module TDef = Typing_tdef
 module TUtils = Typing_utils
+module ShapeMap = Nast.ShapeMap
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super *)
@@ -256,12 +257,12 @@ and sub_type env ty1 ty2 =
   | (r1, Tfun ft1), (r2, Tfun ft2) ->
       subtype_funs_generic ~check_return:true env r1 ft1 r2 ft2
   | (r1, Tshape fdm1), (r2, Tshape fdm2) ->
-      SMap.iter begin fun k _ ->
-        if not (SMap.mem k fdm1)
+      ShapeMap.iter begin fun k _ ->
+        if not (ShapeMap.mem k fdm1)
         then
           let p1 = Reason.to_pos r1 in
           let p2 = Reason.to_pos r2 in
-          Errors.field_missing k p1 p2
+          Errors.field_missing (TUtils.get_shape_field_name k) p1 p2
       end fdm2;
       TUtils.apply_shape sub_type env (r1, fdm1) (r2, fdm2)
   | _, (_, Tabstract (_, _, Some x)) ->

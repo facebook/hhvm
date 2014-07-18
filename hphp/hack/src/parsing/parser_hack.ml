@@ -3040,13 +3040,14 @@ and shape_field env =
   let value = expr { env with priority = 0 } in
   name, value
 
-and shape_field_name env =
-  expect env Tquote;
-  let pos = Pos.make env.lb in
-  let absolute_pos = env.lb.Lexing.lex_curr_pos in
-  match expr_string env pos absolute_pos with
-  | _, String s -> s
-  | _ -> assert false
+ and shape_field_name env =
+   let pos, e = expr env in
+   match e with
+   | String p -> SFlit p
+   | Class_const (id, ps) -> SFclass_const (id, ps)
+   | _ -> error_expect env "string literal or class constant";
+     SFlit (pos, "")
+
 
 (*****************************************************************************)
 (* Array access ($my_array[]|$my_array[_]) *)
@@ -3250,18 +3251,10 @@ and typedef_shape_field_list_remain env =
           [fd]
 
 and typedef_shape_field env =
-  let name = typedef_shape_field_name env in
+  let name = shape_field_name env in
   expect env Tsarrow;
   let ty = hint env in
   name, ty
-
-and typedef_shape_field_name env =
-  expect env Tquote;
-  let pos = Pos.make env.lb in
-  let absolute_pos = env.lb.Lexing.lex_curr_pos in
-  match expr_string env pos absolute_pos with
-  | _, String s -> s
-  | _ -> assert false
 
 (*****************************************************************************)
 (* Namespaces *)

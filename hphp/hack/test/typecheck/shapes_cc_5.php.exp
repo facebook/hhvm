@@ -1,0 +1,4 @@
+File "shapes_cc_5.php", line 18, characters 36-40:
+Shape field name is an int class constant
+File "shapes_cc_5.php", line 18, characters 22-26:
+But expected a string

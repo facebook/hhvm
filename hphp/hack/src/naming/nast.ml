@@ -21,6 +21,28 @@ type call_type =
   | Cnormal    (* when the call looks like f() *)
   | Cuser_func (* when the call looks like call_user_func(...) *)
 
+
+type shape_field_name =
+  | SFlit of pstring
+  | SFclass_const of sid * pstring
+
+module ShapeField = struct
+  type t = shape_field_name
+  (* We include span information in shape_field_name to improve error
+   * messages, but we don't want it being used in the comparison, so
+   * we have to write our own compare. *)
+  let compare x y =
+    match x, y with
+      | SFlit _, SFclass_const _ -> -1
+      | SFclass_const _, SFlit _ -> 1
+      | SFlit (_, s1), SFlit (_, s2) -> Pervasives.compare s1 s2
+      | SFclass_const ((_, s1), (_, s1')), SFclass_const ((_, s2), (_, s2')) ->
+        Pervasives.compare (s1, s1') (s2, s2')
+
+end
+
+module ShapeMap = MyMap(ShapeField)
+
 type hint = Pos.t * hint_
 and hint_ =
   | Hany
@@ -32,7 +54,7 @@ and hint_ =
   | Hoption of hint
   | Hfun of hint list * bool * hint
   | Happly of sid * hint list
-  | Hshape of hint SMap.t
+  | Hshape of hint ShapeMap.t
 
 and tprim =
   | Tvoid
@@ -166,7 +188,7 @@ and expr = Pos.t * expr_
 and expr_ =
   | Any
   | Array of afield list
-  | Shape of expr SMap.t
+  | Shape of expr ShapeMap.t
   | ValCollection of string * expr list
   | KeyValCollection of string * field list
   | This

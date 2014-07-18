@@ -543,6 +543,7 @@ Type mcodeKey(MIS& env) {
 
   case MW:
   case NumMemberCodes:
+    always_assert(0);
     break;
   }
   not_reached();
@@ -1251,6 +1252,7 @@ void miFinal(MIS& env, const bc::CGetM& op) {
     // MW is a fatal.
     miPop(env);
     push(env, TInitCell);
+    return;
   }
   return miFinalCGetElem(env);
 }

@@ -17,219 +17,411 @@
 #ifndef incl_HPHP_VM_UNIT_EMITTER_H_
 #define incl_HPHP_VM_UNIT_EMITTER_H_
 
+#include "hphp/parser/location.h"
+
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/preclass.h"
+#include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/md5.h"
+
+#include <list>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct FuncEmitter;
+struct PreClassEmitter;
+struct StringData;
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Pre-runtime representation of Unit used to emit bytecode and instantiate
+ * runtime Units.
+ */
 struct UnitEmitter {
   friend class UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Constructor and destructor.
+  // Initialization and execution.
 
   explicit UnitEmitter(const MD5& md5);
   ~UnitEmitter();
 
-  bool isASystemLib() const {
-    static const char systemlib_prefix[] = "/:systemlib";
-    return !strncmp(getFilepath()->data(),
-                    systemlib_prefix,
-                    sizeof systemlib_prefix - 1);
-  }
+  /*
+   * Commit this unit to a repo.
+   */
+  void commit(UnitOrigin unitOrigin);
 
-  void addTrivialPseudoMain();
+  /*
+   * Insert this unit in a repo as part of transaction `txn'.
+   */
+  bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
 
-  int repoId() const { return m_repoId; }
-  void setRepoId(int repoId) { m_repoId = repoId; }
-  int64_t sn() const { return m_sn; }
-  void setSn(int64_t sn) { m_sn = sn; }
-  const unsigned char* bc() const { return m_bc; }
-  Offset bcPos() const { return (Offset)m_bclen; }
+  /*
+   * Instatiate a runtime Unit*.
+   */
+  Unit* create();
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Basic data.
+
+  /*
+   * The MD5 hash of the Unit.
+   */
+  const MD5& md5() const;
+
+  /*
+   * Bytecode pointer and current emit position.
+   */
+  const unsigned char* bc() const;
+  Offset bcPos() const;
+
+  /*
+   * Set the bytecode pointer by allocating a copy of `bc' with size `bclen'.
+   *
+   * Not safe to call with m_bc as the argument because we free our current
+   * bytecode stream before allocating a copy of `bc'.
+   */
   void setBc(const unsigned char* bc, size_t bclen);
-  const StringData* getFilepath() const { return m_filepath; }
-  void setFilepath(const StringData* filepath) { m_filepath = filepath; }
 
-  void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
-  void setMergeOnly(bool b) { m_mergeOnly = b; }
-  const MD5& md5() const { return m_md5; }
-  Id addTypeAlias(const TypeAlias& td);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Litstrs and Arrays.
+
+  /*
+   * Look up a static string or array by ID.
+   */
+  const StringData* lookupLitstr(Id id) const;
+  const ArrayData* lookupArray(Id id) const;
+
+  /*
+   * Merge a literal string into either the global LitstrTable or the table for
+   * the Unit.
+   */
   Id mergeLitstr(const StringData* litstr);
+
+  /*
+   * Merge a literal string into the table for the Unit.
+   */
   Id mergeUnitLitstr(const StringData* litstr);
+
+  /*
+   * Merge a scalar array into the Unit.
+   *
+   * When `key' is provided, it should be the serialization of `a'; when not
+   * provided, the array is serialized in the call.
+   */
   Id mergeArray(const ArrayData* a);
   Id mergeArray(const ArrayData* a, const std::string& key);
 
-  const StringData* lookupLitstr(Id id) const;
-  const ArrayData* lookupArray(Id id) const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // FuncEmitters.
+
+  /*
+   * The Unit's pseudomain emitter.
+   */
   FuncEmitter* getMain();
-  void initMain(int line1, int line2);
-  FuncEmitter* newFuncEmitter(const StringData* n);
-  void appendTopEmitter(FuncEmitter* func);
-  FuncEmitter* newMethodEmitter(const StringData* n, PreClassEmitter* pce);
-  PreClassEmitter* newPreClassEmitter(const StringData* n,
-                                      PreClass::Hoistable hoistable);
-  PreClassEmitter* pce(Id preClassId) { return m_pceVec[preClassId]; }
-  const PreClassEmitter* pce(Id preClassId) const {
-    return m_pceVec[preClassId];
-  }
-  size_t numPreClasses() const { return m_pceVec.size(); }
-  const std::vector<FuncEmitter*>& fevec() const { return m_fes; }
-  const std::vector<TypeAlias>& typeAliases() const { return m_typeAliases; }
 
   /*
-   * Record source location information for the last chunk of bytecode
-   * added to this UnitEmitter.  Adjacent regions associated with the
-   * same source line will be collapsed as this is created.
+   * Const reference to all of the Unit's FuncEmitters.
    */
-  void recordSourceLocation(const Location *sLoc, Offset start);
+  const std::vector<FuncEmitter*>& fevec() const;
 
   /*
-   * Return the SrcLocTable for this unit emitter, if it has one.
-   * Otherwise an empty table is returned.
-   */
-  SourceLocTable createSourceLocTable() const;
-
-  /*
-   * Returns whether this unit emitter contains full SourceLoc
-   * information.
-   */
-  bool hasSourceLocInfo() const { return !m_sourceLocTab.empty(); }
-
-  /*
-   * Returns access to this UnitEmitter's LineTable.  Generally
-   * UnitEmitters loaded from a production repo will have a line table
-   * instead of a full SourceLocTable.
-   */
-  const LineTable& lineTable() const { return m_lineTable; }
-
-  /*
-   * Adds a new FuncEmitter to the unit.  You can only do this once
-   * for the FuncEmitter (after you are done setting it up).  Also,
-   * all FuncEmitter's added to the unit must not overlap.
+   * Create the pseudomain emitter for the Unit.
    *
-   * Takes ownership of `fe'.
+   * @requires: fevec().size() == 0
    */
-  void recordFunction(FuncEmitter *fe);
+  void initMain(int line1, int line2);
 
-private:
-  template<class T>
-  void emitImpl(T n, int64_t pos) {
-    auto *c = (unsigned char*)&n;
-    if (pos == -1) {
-      // Make sure m_bc is large enough.
-      while (m_bclen + sizeof(T) > m_bcmax) {
-        m_bc = (unsigned char*)realloc(m_bc, m_bcmax << 1);
-        m_bcmax <<= 1;
-      }
-      memcpy(&m_bc[m_bclen], c, sizeof(T));
-      m_bclen += sizeof(T);
-    } else {
-      assert(pos + sizeof(T) <= m_bclen);
-      for (uint i = 0; i < sizeof(T); ++i) {
-        m_bc[pos + i] = c[i];
-      }
-    }
-  }
+  /*
+   * Create a trivial (i.e., Int 1; RetC) pseudomain emitter for the Unit.
+   *
+   * @requires: fevec().size() == 0
+   */
+  void addTrivialPseudoMain();
 
-public:
-  void emitOp(Op op, int64_t pos = -1) {
-    emitByte((unsigned char)op, pos);
-  }
-  void emitByte(unsigned char n, int64_t pos = -1) { emitImpl(n, pos); }
-  void emitInt32(int n, int64_t pos = -1) { emitImpl(n, pos); }
-  template<typename T> void emitIVA(T n) {
-    if (LIKELY((n & 0x7f) == n)) {
-      emitByte((unsigned char)n << 1);
-    } else {
-      assert((n & 0x7fffffff) == n);
-      emitInt32((n << 1) | 0x1);
-    }
-  }
-  void emitInt64(int64_t n, int64_t pos = -1) { emitImpl(n, pos); }
-  void emitDouble(double n, int64_t pos = -1) { emitImpl(n, pos); }
-  bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
-  void commit(UnitOrigin unitOrigin);
+  /*
+   * Create a new FuncEmitter and add it to the FE vector.
+   */
+  FuncEmitter* newFuncEmitter(const StringData* name);
+
+  /*
+   * Create a new FuncEmitter for the method given by `name' and `pce'.
+   *
+   * Does /not/ add it to the FE vector.
+   */
+  FuncEmitter* newMethodEmitter(const StringData* name, PreClassEmitter* pce);
+
+  /*
+   * Add `fe' to the FE vector.
+   */
+  void appendTopEmitter(FuncEmitter* fe);
+
+  /*
+   * Finish adding a FuncEmitter to the Unit and record its bytecode range.
+   *
+   * This can only be done once for each FuncEmitter, after it is added to the
+   * FE vector.  None of the bytecode ranges of FuncEmitters added to the Unit
+   * are allowed to overlap.
+   *
+   * Takes logical ownership of `fe'.
+   */
+  void recordFunction(FuncEmitter* fe);
+
+  /*
+   * Create a new function for `fe'.
+   *
+   * This should only be called from fe->create(), and just constructs a new
+   * Func* and records it as emitted from `fe'.
+   */
   Func* newFunc(const FuncEmitter* fe, Unit& unit, PreClass* preClass,
                 int line1, int line2, Offset base, Offset past,
                 const StringData* name, Attr attrs, bool top,
                 const StringData* docComment, int numParams,
                 bool needsNextClonedClosure);
-  Unit* create();
-  void returnSeen() { m_returnSeen = true; }
-  void pushMergeableClass(PreClassEmitter* e);
-  void pushMergeableInclude(Unit::MergeKind kind, const StringData* unitName);
-  void insertMergeableInclude(int ix, Unit::MergeKind kind, Id id);
-  void pushMergeableDef(Unit::MergeKind kind,
-                        const StringData* name, const TypedValue& tv);
-  void insertMergeableDef(int ix, Unit::MergeKind kind,
-                          Id id, const TypedValue& tv);
-
-private:
-  void setLines(const LineTable& lines);
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Properties.
+  // PreClassEmitters.
+
+  /*
+   * Number of PreClassEmitters in the Unit.
+   */
+  size_t numPreClasses() const;
+
+  /*
+   * The PreClassEmitter for `preClassId'.
+   */
+  const PreClassEmitter* pce(Id preClassId) const;
+  PreClassEmitter* pce(Id preClassId);
+
+  /*
+   * Create a new PreClassEmitter and add it to the PCE vector.
+   *
+   * @see: PreClass::Hoistable
+   */
+  PreClassEmitter* newPreClassEmitter(const StringData* name,
+                                      PreClass::Hoistable hoistable);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Type aliases.
+
+  /*
+   * Const reference to all of the Unit's type aliases.
+   */
+  const std::vector<TypeAlias>& typeAliases() const;
+
+  /*
+   * Add a new type alias to the Unit.
+   */
+  Id addTypeAlias(const TypeAlias& td);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Source locations.
+
+  /*
+   * Return a copy of the SrcLocTable for the Unit, if it has one; otherwise,
+   * return an empty table.
+   */
+  SourceLocTable createSourceLocTable() const;
+
+  /*
+   * Does this Unit contain full source location information?
+   *
+   * Generally, UnitEmitters loaded from a production repo will have a
+   * LineTable only instead of a full SourceLocTable.
+   */
+  bool hasSourceLocInfo() const;
+
+  /*
+   * Const reference to the Unit's LineTable.
+   */
+  const LineTable& lineTable() const;
+
+  /*
+   * Record source location information for the last chunk of bytecode added to
+   * this UnitEmitter.
+   *
+   * Adjacent regions associated with the same source line will be collapsed as
+   * this is created.
+   */
+  void recordSourceLocation(const Location* sLoc, Offset start);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Mergeables.
+  //
+  // See unit.h for documentation of Unit merging.
+
+  /*
+   * Append a PreClassEmitter to the UnitEmitter's list of mergeables.
+   */
+  void pushMergeableClass(PreClassEmitter* e);
+
+  /*
+   * Add a Unit include to the UnitEmitter's list of mergeables.
+   *
+   * The `push' flavor first merges the litstr `unitName', and then appends the
+   * mergeable object reference to the list.  The `insert' flavor inserts the
+   * mergeable (kind, id) at `ix' in the list.
+   */
+  void pushMergeableInclude(Unit::MergeKind kind, const StringData* unitName);
+  void insertMergeableInclude(int ix, Unit::MergeKind kind, Id id);
+
+  /*
+   * Add a constant definition to the UnitEmitter's list of mergeables.
+   *
+   * The `push' flavor first merges the litstr `unitName', and then appends the
+   * mergeable object reference to the list.  The `insert' flavor inserts the
+   * mergeable (kind, id) at `ix' in the list.
+   *
+   * The mergeable value is appended or inserted likewise.
+   */
+  void pushMergeableDef(Unit::MergeKind kind, const StringData* name,
+                        const TypedValue& tv);
+  void insertMergeableDef(int ix, Unit::MergeKind kind, Id id,
+                          const TypedValue& tv);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Bytecode emit.
+  //
+  // These methods emit values to bc() at bcPos() and then updates bcPos(),
+  // realloc-ing the bytecode region if necessary.
+
+  void emitOp(Op op, int64_t pos = -1);
+  void emitByte(unsigned char n, int64_t pos = -1);
+
+  void emitInt32(int n, int64_t pos = -1);
+  void emitInt64(int64_t n, int64_t pos = -1);
+  void emitDouble(double n, int64_t pos = -1);
+
+  template<typename T>
+  void emitIVA(T n);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Other methods.
+
+  /*
+   * Is this a Unit for a systemlib?
+   */
+  bool isASystemLib() const;
 
 private:
-  int m_repoId;
-  int64_t m_sn;
-  static const size_t BCMaxInit = 4096; // Initial bytecode size.
-  size_t m_bcmax;
+  /*
+   * Bytecode emit implementation.
+   */
+  template<class T>
+  void emitImpl(T n, int64_t pos);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Data members.
+
+private:
+  // Initial bytecode size.
+  static const size_t BCMaxInit = 4096;
+
+public:
+  int m_repoId{-1};
+  int64_t m_sn{-1};
+  const StringData* m_filepath{nullptr};
+
+  bool m_mergeOnly{false};
+  bool m_returnSeen{false};
+  TypedValue m_mainReturn;
+
+private:
+  MD5 m_md5;
+
   unsigned char* m_bc;
   size_t m_bclen;
-  TypedValue m_mainReturn;
-  const StringData* m_filepath;
-  MD5 m_md5;
-  typedef hphp_hash_map<const StringData*, Id,
-                        string_data_hash, string_data_same> LitstrMap;
-  LitstrMap m_litstr2id;
+  size_t m_bcmax;
+
+  int m_nextFuncSn;
+
+  /*
+   * Litstr tables.
+   */
+  hphp_hash_map<const StringData*, Id,
+                string_data_hash, string_data_same> m_litstr2id;
   std::vector<const StringData*> m_litstrs;
-  typedef hphp_hash_map<std::string, Id, string_hash> ArrayIdMap;
-  ArrayIdMap m_array2id;
+
+  /*
+   * Scalar array tables.
+   */
   struct ArrayVecElm {
     std::string serialized;
     const ArrayData* array;
   };
-  typedef std::vector<ArrayVecElm> ArrayVec;
-  ArrayVec m_arrays;
-  int m_nextFuncSn;
-  bool m_mergeOnly;
-  typedef std::vector<FuncEmitter*> FeVec;
-  FeVec m_fes;
-  typedef hphp_hash_map<const FuncEmitter*, const Func*,
-                        pointer_hash<FuncEmitter> > FMap;
-  FMap m_fMap;
-  typedef std::vector<PreClassEmitter*> PceVec;
-  typedef std::list<Id> IdList;
-  PceVec m_pceVec;
-  typedef hphp_hash_set<const StringData*, string_data_hash,
-                        string_data_isame> HoistedPreClassSet;
-  HoistedPreClassSet m_hoistablePreClassSet;
-  IdList m_hoistablePceIdList;
-  typedef std::vector<std::pair<Unit::MergeKind, Id> > MergeableStmtVec;
-  MergeableStmtVec m_mergeableStmts;
-  std::vector<std::pair<Id,TypedValue> > m_mergeableValues;
-  bool m_allClassesHoistable;
-  bool m_returnSeen;
+  hphp_hash_map<std::string, Id, string_hash> m_array2id;
+  std::vector<ArrayVecElm> m_arrays;
+
   /*
-   * m_sourceLocTab and m_feTab are interval maps.  Each entry encodes
-   * an open-closed range of bytecode offsets.
-   *
-   * The m_sourceLocTab is keyed by the start of each half-open range.
-   * This is to allow appending new bytecode offsets that are part of
-   * the same range to coalesce.
-   *
-   * The m_feTab is keyed by the past-the-end offset.  This is the
-   * format we'll want it in when we go to create a Unit.
+   * Type alias table.
    */
-  std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
-  std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
-  LineTable m_lineTable;
   std::vector<TypeAlias> m_typeAliases;
+
+  /*
+   * FuncEmitter tables.
+   */
+  std::vector<FuncEmitter*> m_fes;
+  hphp_hash_map<const FuncEmitter*, const Func*,
+                pointer_hash<FuncEmitter>> m_fMap;
+
+  /*
+   * PreClassEmitter table.
+   */
+  std::vector<PreClassEmitter*> m_pceVec;
+
+  /*
+   * Hoistability tables.
+   */
+  bool m_allClassesHoistable;
+  hphp_hash_set<const StringData*,
+                string_data_hash,
+                string_data_isame> m_hoistablePreClassSet;
+  std::list<Id> m_hoistablePceIdList;
+
+  /*
+   * Mergeables tables.
+   */
+  std::vector<std::pair<Unit::MergeKind, Id>> m_mergeableStmts;
+  std::vector<std::pair<Id, TypedValue>> m_mergeableValues;
+
+  /*
+   * Source location tables.
+   *
+   * Each entry encodes an open-closed range of bytecode offsets.
+   *
+   * The m_sourceLocTab is keyed by the start of each half-open range.  This is
+   * to allow appending new bytecode offsets that are part of the same range to
+   * coalesce.
+   *
+   * The m_feTab and m_lineTable are keyed by the past-the-end offset.  This is
+   * the format we'll want them in when we go to create a Unit.
+   */
+  std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
+  std::vector<std::pair<Offset,const FuncEmitter*>> m_feTab;
+  LineTable m_lineTable;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -311,7 +503,7 @@ struct UnitRepoProxy : public RepoProxy {
     InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn,
                 int ix, Unit::MergeKind kind,
-                Id id, TypedValue *value);
+                Id id, TypedValue* value);
   };
   class GetUnitMergeablesStmt : public RepoProxy::Stmt {
    public:
@@ -371,5 +563,9 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#define incl_HPHP_VM_UNIT_EMITTER_INL_H_
+#include "hphp/runtime/vm/unit-emitter-inl.h"
+#undef incl_HPHP_VM_UNIT_EMITTER_INL_H_
 
 #endif // incl_HPHP_VM_UNIT_EMITTER_H_

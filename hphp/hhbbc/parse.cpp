@@ -907,11 +907,11 @@ void find_additional_metadata(const ParseUnitState& puState,
 
 std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, ue.isASystemLib()};
-  FTRACE(2, "parse_unit {}\n", ue.getFilepath()->data());
+  FTRACE(2, "parse_unit {}\n", ue.m_filepath->data());
 
   auto ret      = folly::make_unique<php::Unit>();
   ret->md5      = ue.md5();
-  ret->filename = ue.getFilepath();
+  ret->filename = ue.m_filepath;
 
   ParseUnitState puState;
   if (ue.hasSourceLocInfo()) {

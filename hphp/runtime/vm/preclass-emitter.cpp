@@ -155,8 +155,8 @@ void PreClassEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
 void PreClassEmitter::commit(RepoTxn& txn) const {
   Repo& repo = Repo::get();
   PreClassRepoProxy& pcrp = repo.pcrp();
-  int repoId = m_ue.repoId();
-  int64_t usn = m_ue.sn();
+  int repoId = m_ue.m_repoId;
+  int64_t usn = m_ue.m_sn;
   pcrp.insertPreClass(repoId)
       .insert(*this, txn, usn, m_id, m_name, m_hoistable);
 
@@ -369,7 +369,7 @@ void PreClassRepoProxy::GetPreClassesStmt
     txn.prepare(*this, ssSelect.str());
   }
   RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", ue.sn());
+  query.bindInt64("@unitSn", ue.m_sn);
   do {
     query.step();
     if (query.row()) {

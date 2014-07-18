@@ -19,34 +19,37 @@
 
 #include "hphp/parser/location.h"
 
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/type-string.h"
-
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
-#include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
 
+#include "hphp/util/fixed-vector.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/md5.h"
+#include "hphp/util/mutex.h"
 #include "hphp/util/range.h"
-#include "hphp/util/tiny-vector.h"
 
-#include <memory>
+#include <map>
+#include <ostream>
+#include <string>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ActRec;
+struct Array;
+struct ArrayData;
+struct Class;
 struct Func;
-struct FuncDict;
-struct FuncEmitter;
-struct PreClassEmitter;
-struct Repo;
-struct Unit;
+struct PreClass;
+struct String;
+struct StringData;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Unit enums.
@@ -325,7 +328,7 @@ public:
   /*
    * Repo ID and serial number.
    */
-  int repoId() const;
+  int repoID() const;
   int64_t sn() const;
 
   /*
@@ -522,8 +525,7 @@ public:
    * Also always fatals if a type alias already exists in this request with the
    * same name as that of `preClass', regardless of the value of `failIsFatal'.
    */
-  static Class* defClass(const HPHP::PreClass* preClass,
-                         bool failIsFatal = true);
+  static Class* defClass(const PreClass* preClass, bool failIsFatal = true);
 
   /*
    * Set the NamedEntity for `alias' to refer to the Class `original' in this
@@ -757,8 +759,6 @@ public:
 
   /*
    * Replace the Unit?
-   *
-   * TODO(#4724494): Looks like this is only used for ReqDoc; let's kill it.
    */
   void* replaceUnit() const;
 

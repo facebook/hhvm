@@ -2068,7 +2068,7 @@ void parse_class(AsmState& as) {
  */
 void parse_filepath(AsmState& as) {
   auto const str = read_litstr(as);
-  as.ue->setFilepath(str);
+  as.ue->m_filepath = str;
   as.in.expectWs(';');
 }
 
@@ -2168,7 +2168,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
                              const char* filename, const MD5& md5) {
   std::unique_ptr<UnitEmitter> ue(new UnitEmitter(md5));
   StringData* sd = makeStaticString(filename);
-  ue->setFilepath(sd);
+  ue->m_filepath = sd;
 
   try {
     std::istringstream instr(std::string(code, codeLen));
@@ -2177,7 +2177,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
     parse(as);
   } catch (const std::exception& e) {
     ue.reset(new UnitEmitter(md5));
-    ue->setFilepath(sd);
+    ue->m_filepath = sd;
     ue->initMain(1, 1);
     ue->emitOp(OpString);
     ue->emitInt32(ue->mergeLitstr(makeStaticString(e.what())));

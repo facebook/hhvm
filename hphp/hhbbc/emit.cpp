@@ -923,7 +923,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
-  ue->setFilepath(unit.filename);
+  ue->m_filepath = unit.filename;
 
   EmitUnitState state { index };
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);
@@ -940,9 +940,9 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
    * this.)
    */
   if (is_systemlib) {
-    ue->setMergeOnly(true);
+    ue->m_mergeOnly = true;
     auto const tv = make_tv<KindOfInt64>(1);
-    ue->setMainReturn(&tv);
+    ue->m_mainReturn = tv;
   } else {
     /*
      * TODO(#3017265): UnitEmitter is very coupled to emitter.cpp, and
@@ -950,7 +950,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
      * quite clear.  If you don't set returnSeen things relating to
      * hoistability break.
      */
-    ue->returnSeen();
+    ue->m_returnSeen = true;
   }
 
   emit_pseudomain(state, *ue, unit);

@@ -319,7 +319,7 @@ bool Repo::findFile(const char *path, const std::string &root, MD5& md5) {
 }
 
 bool Repo::insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn) {
-  const StringData* path = ue->getFilepath();
+  const StringData* path = ue->m_filepath;
   const MD5& md5 = ue->md5();
   int repoId = repoIdForNewUnit(unitOrigin);
   if (repoId == RepoIdInvalid) {
@@ -346,7 +346,7 @@ void Repo::commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue) {
     int repoId = repoIdForNewUnit(unitOrigin);
     if (repoId != RepoIdInvalid) {
       TRACE(3, "Failed to commit md5 for '%s' to '%s': %s\n",
-               ue->getFilepath()->data(), repoName(repoId).c_str(),
+               ue->m_filepath->data(), repoName(repoId).c_str(),
                re.msg().c_str());
     }
   }

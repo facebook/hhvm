@@ -2443,7 +2443,7 @@ void EmitterVisitor::assignFinallyVariableIds() {
 
 void EmitterVisitor::visit(FileScopePtr file) {
   const std::string& filename = file->getName();
-  m_ue.setFilepath(makeStaticString(filename));
+  m_ue.m_filepath = makeStaticString(filename);
 
   FunctionScopePtr func(file->getPseudoMain());
   if (!func) return;
@@ -2517,7 +2517,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           visit(s);
           if (notMergeOnly) {
             tvWriteUninit(&mainReturn);
-            m_ue.returnSeen();
+            m_ue.m_returnSeen = true;
             continue;
           }
 
@@ -2539,7 +2539,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
               assert(!IS_REFCOUNTED_TYPE(v.getType()));
             }
             mainReturn = *v.asCell();
-            m_ue.returnSeen();
+            m_ue.m_returnSeen = true;
           }
           break;
         case Statement::KindOfExpStatement:
@@ -2608,7 +2608,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     }
 
     if (!notMergeOnly) {
-      m_ue.setMergeOnly(true);
+      m_ue.m_mergeOnly = true;
       if (mainReturn.m_type == KindOfInvalid) {
         tvWriteUninit(&mainReturn);
         if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
@@ -2617,7 +2617,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           tvAsVariant(&mainReturn) = 1;
         }
       }
-      m_ue.setMainReturn(&mainReturn);
+      m_ue.m_mainReturn = mainReturn;
     }
 
     // Pseudo-main returns the integer value 1 by default. If the
@@ -6409,7 +6409,7 @@ void EmitterVisitor::emitPostponedMeths() {
           meth,
           "Cannot redeclare %s() (previously declared in %s:%d)",
           meth->getOriginalName().c_str(),
-          oldFunc->second->ue().getFilepath()->data(),
+          oldFunc->second->ue().m_filepath->data(),
           oldFunc->second->getLocation().second);
       }
       m_topMethodEmitted.emplace(meth->getOriginalName(), fe);
@@ -8343,7 +8343,7 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
     // Replace the unit with an empty one, but preserve its file path.
     UnitEmitter* nue = new UnitEmitter(md5);
     nue->initMain(sLoc->line0, sLoc->line1);
-    nue->setFilepath(ue->getFilepath());
+    nue->m_filepath = ue->m_filepath;
     delete ue;
     ue = nue;
 
@@ -8372,7 +8372,7 @@ static std::unique_ptr<UnitEmitter>
 emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
                        ssize_t numBuiltinFuncs) {
   auto ue = folly::make_unique<UnitEmitter>(s_nativeFuncMD5);
-  ue->setFilepath(s_systemlibNativeFunc.get());
+  ue->m_filepath = s_systemlibNativeFunc.get();
   ue->addTrivialPseudoMain();
 
   Attr attrs = AttrBuiltin | AttrUnique | AttrPersistent;
@@ -8514,7 +8514,7 @@ static std::unique_ptr<UnitEmitter>
 emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                         ssize_t numBuiltinClasses) {
   auto ue = folly::make_unique<UnitEmitter>(s_nativeClassMD5);
-  ue->setFilepath(s_systemlibNativeCls.get());
+  ue->m_filepath = s_systemlibNativeCls.get();
   ue->addTrivialPseudoMain();
 
   ContMethMap asyncGenMethods;

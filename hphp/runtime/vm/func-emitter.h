@@ -76,7 +76,7 @@ struct FuncEmitter {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Initialization and completion.
+  // Initialization and execution.
 
   FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n);
   FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,

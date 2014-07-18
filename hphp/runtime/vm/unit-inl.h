@@ -18,6 +18,10 @@
 #error "unit-inl.h should only be included by unit.h"
 #endif
 
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/vm/litstr-table.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // SourceLoc.
@@ -121,7 +125,7 @@ inline void** Unit::MergeInfo::mergeableData(int idx) {
 ///////////////////////////////////////////////////////////////////////////////
 // Basic accessors.
 
-inline int Unit::repoId() const {
+inline int Unit::repoID() const {
   return m_repoId;
 }
 

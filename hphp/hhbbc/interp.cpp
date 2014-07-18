@@ -1492,6 +1492,36 @@ void in(ISS& env, const bc::FPassM& op) {
   assert(!env.flags.canConstProp);
 }
 
+void pushCallReturnType(ISS& env, const Type& ty) {
+  if (ty == TBottom) {
+    // The callee function never returns.  It might throw, or loop
+    // forever.
+    calledNoReturn(env);
+    // Right now we need to continue in some semi-sane state in
+    // case we are in the middle of an FPI region or something
+    // that must finish.  But we can't push a TBottom (there are
+    // no values in that set), so we push something meaningless.
+    return push(env, TInitGen);
+  }
+  return push(env, ty);
+}
+
+void fcallKnownImpl(ISS& env, uint32_t numArgs) {
+  auto const ar = fpiPop(env);
+  always_assert(ar.func.hasValue());
+  specialFunctionEffects(env, ar);
+
+  std::vector<Type> args(numArgs);
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    args[numArgs - i - 1] = popF(env);
+  }
+  auto const ty = env.index.lookup_return_type(
+    CallContext { env.ctx, args },
+    *ar.func
+  );
+  pushCallReturnType(env, ty);
+}
+
 void in(ISS& env, const bc::FCall& op) {
   auto const ar = fpiTop(env);
   if (ar.func) {
@@ -1508,8 +1538,9 @@ void in(ISS& env, const bc::FCall& op) {
     case FPIKind::Ctor:
       /*
        * Need to be wary of old-style ctors. We could get into the situation
-       * where we're constructing class D extends B, and B has an old-style ctor
-       * but D::B also exists.
+       * where we're constructing class D extends B, and B has an old-style
+       * ctor but D::B also exists.  (So in this case we'll skip the
+       * fcallKnownImpl stuff.)
        */
       if (!ar.func->name()->isame(s_construct.get()) &&
           !ar.func->name()->isame(s_86ctor.get())) {
@@ -1524,7 +1555,10 @@ void in(ISS& env, const bc::FCall& op) {
           bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
         );
       }
-      // fallthrough
+
+      // If we didn't return a reduce above, we still can compute a
+      // partially-known FCall effect with our res::Func.
+      return fcallKnownImpl(env, op.arg1);
     }
   }
 
@@ -1535,54 +1569,32 @@ void in(ISS& env, const bc::FCall& op) {
 }
 
 void in(ISS& env, const bc::FCallD& op) {
-  auto const ar = fpiPop(env);
+  auto const ar = fpiTop(env);
+  if (ar.func) return fcallKnownImpl(env, op.arg1);
   specialFunctionEffects(env, ar);
-  if (ar.func) {
-    std::vector<Type> args(op.arg1);
-    for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-      args[op.arg1 - i - 1] = popF(env);
-    }
-    auto const ty = env.index.lookup_return_type(
-      CallContext { env.ctx, args },
-      *ar.func
-    );
-    if (ty == TBottom) {
-      // The callee function never returns.  It might throw, or loop
-      // forever.
-      calledNoReturn(env);
-      // Right now we need to continue in some semi-sane state in
-      // case we are in the middle of an FPI region or something
-      // that must finish.  But we can't push a TBottom (there are
-      // no values in that set), so we push something meaningless.
-      return push(env, TInitGen);
-    }
-    return push(env, ty);
-  }
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   push(env, TInitGen);
 }
 
-void in(ISS& env, const bc::FCallArray& op) {
-  popF(env);
+void fcallArrayImpl(ISS& env) {
   auto const ar = fpiPop(env);
   specialFunctionEffects(env, ar);
   if (ar.func) {
-    return push(env, env.index.lookup_return_type(env.ctx, *ar.func));
+    auto const ty = env.index.lookup_return_type(env.ctx, *ar.func);
+    pushCallReturnType(env, ty);
+    return;
   }
-  push(env, TInitGen);
+  return push(env, TInitGen);
+}
+
+void in(ISS& env, const bc::FCallArray& op) {
+  popF(env);
+  fcallArrayImpl(env);
 }
 
 void in(ISS& env, const bc::FCallUnpack& op) {
-  // FCallUnpack has pretty much the same effects as FCallArray, just with
-  // potentially more than one argument. It's possible that we can share
-  // more code with FCall and FCallArray here.
   for (auto i = uint32_t{0}; i < op.arg1; ++i) { popF(env); }
-  auto const ar = fpiPop(env);
-  specialFunctionEffects(env, ar);
-  if (ar.func) {
-    return push(env, env.index.lookup_return_type(env.ctx, *ar.func));
-  }
-  push(env, TInitGen);
+  fcallArrayImpl(env);
 }
 
 void in(ISS& env, const bc::FCallBuiltin& op) {

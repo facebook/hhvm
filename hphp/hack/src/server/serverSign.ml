@@ -44,14 +44,10 @@ let checksum v =
   let v = Digest.to_hex v in
   v
 
-let sum_fun = function
-  | None -> None
-  | Some x -> Some (checksum x)
+let sum_fun = opt_map checksum
 
 (* In case of a class, we dump the entire type. *)
-let sum_class = function
-  | None -> None
-  | Some c -> Some (Typing_print.class_ c)
+let sum_class = opt_map Typing_print.class_
 
 (*****************************************************************************)
 (* Primitive used to store the state of the server (checkout hh_compare.ml)
@@ -69,7 +65,7 @@ let error_save e =
   flush stdout;
   text
 
-let dump_state env genv = 
+let dump_state env genv =
   (* this is used mostly to debug hh build issues *)
   let data = env, genv.options in
   data

@@ -182,7 +182,7 @@ and normalize_ = function
   | Tunresolved _ | Tany -> raise Exit
   | Tmixed -> Tmixed                       (* ' with Nothing (mixed type) *)
   | Tarray (is_local, k, v) -> begin
-    try Tarray (is_local, normalize_opt k, normalize_opt v)
+    try Tarray (is_local, opt_map normalize k, opt_map normalize v)
     with Exit -> Tarray (false, None, None)
   end
   | Tgeneric _ as x -> x
@@ -216,8 +216,6 @@ and normalize_ = function
   | Tobject -> raise Exit
   | Tabstract _ -> raise Exit
   | Tshape _ -> raise Exit
-
-and normalize_opt = function None -> None | Some x -> Some (normalize x)
 
 let normalize ty =
   try

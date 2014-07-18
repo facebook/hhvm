@@ -581,13 +581,6 @@ let check_constraint ((pos, name), _) =
   then Errors.this_reserved pos
   else if name.[0] <> 'T' then Errors.start_with_T pos
 
-(* One of the rare cases where I don't work with a functional
- * environment ...
- * normally opt f env x returns env, Some (f x) when x is <> None
- * but in this case I want it to return x
-*)
-let opt f x = match x with None -> None | Some x -> Some (f x)
-
 let check_repetition s param =
   let x = snd param.param_id in
   if SSet.mem x s
@@ -718,11 +711,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         let tparaml = (fst env).type_paraml in
         let tparaml = List.map begin fun (param_pos, param_name) ->
           let _, cstr = get_constraint env param_name in
-          let cstr =
-              match cstr with
-              | None -> None
-              | Some h -> Some (hint env h)
-            in
+          let cstr = opt_map (hint env) cstr in
           param_pos, N.Habstr (param_name, cstr)
         end tparaml in
         N.Habstr ("this", Some (fst cid, N.Happly (cid, tparaml))))
@@ -741,7 +730,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       if hl <> [] then
       Errors.tparam_with_tparam p x;
       let env, gen_constraint = get_constraint env x in
-      N.Habstr (x, opt (hint env) gen_constraint)
+      N.Habstr (x, opt_map (hint env) gen_constraint)
   | _ ->
       (* In the future, when we have proper covariant support, we can
        * allow "this" to instantiate any covariant type variable. For
@@ -791,13 +780,9 @@ let add_abstract m = {m with N.m_abstract = true}
 
 let add_abstractl methods = List.map add_abstract methods
 
-let add_abstractopt = function
-  | None -> None
-  | Some m -> Some (add_abstract m)
-
 let interface c constructor methods smethods =
   if c.c_kind <> Cinterface then constructor, methods, smethods else
-  let constructor = add_abstractopt constructor in
+  let constructor = opt_map add_abstract constructor in
   let methods  = add_abstractl methods in
   let smethods = add_abstractl smethods in
   constructor, methods, smethods
@@ -921,7 +906,7 @@ and type_paraml env tparams =
     tparams in
   List.rev ret
 
-and type_param env (x, y) = x, opt (hint env) y
+and type_param env (x, y) = x, opt_map (hint env) y
 
 and class_use env x acc =
   match x with
@@ -987,7 +972,7 @@ and class_var_static env x acc =
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
   | ClassVars (kl, h, cvl) when List.mem Static kl ->
-    let h = opt (hint ~is_static_var:true env) h in
+    let h = opt_map (hint ~is_static_var:true env) h in
     let cvl = List.map (class_var_ env) cvl in
     let cvl = List.map (fill_cvar kl h) cvl in
     cvl @ acc
@@ -1003,7 +988,7 @@ and class_var env x acc =
   | ClassVars (kl, h, cvl) when not (List.mem Static kl) ->
     (* there are no covariance issues with private members *)
     let allow_this = (List.mem Private kl) in
-    let h = opt (hint ~allow_this:allow_this env) h in
+    let h = opt_map (hint ~allow_this:allow_this env) h in
     let cvl = List.map (class_var_ env) cvl in
     let cvl = List.map (fill_cvar kl h) cvl in
     cvl @ acc
@@ -1065,17 +1050,17 @@ and const_def h env (x, e) =
           let h = Some (hint env h) in
           h, Env.new_const env x, expr env e)
   | Ast.Mpartial ->
-      let h = opt (hint env) h in
+      let h = opt_map (hint env) h in
       h, Env.new_const env x, expr env e
   | Ast.Mdecl ->
-      let h = opt (hint env) h in
+      let h = opt_map (hint env) h in
       h, Env.new_const env x, (fst e, N.Null)
 
 and class_var_ env (x, e) =
   let id = Env.new_const env x in
   let e =
     match (fst env).in_mode with
-    | Ast.Mstrict | Ast.Mpartial -> opt (expr env) e
+    | Ast.Mstrict | Ast.Mpartial -> opt_map (expr env) e
     (* Consider every member variable defined in a class in decl mode to be
      * initalized by giving it a magic value of type Tany (you can't actually
      * write this cast in PHP). Classes might inherit from our decl mode class
@@ -1131,7 +1116,7 @@ and method_ env m =
     | Ast.Mdecl -> [] in
   let attrs = m.m_user_attributes in
   let method_type = m.m_type in
-  let ret = opt (hint ~allow_this:true env) m.m_ret in
+  let ret = opt_map (hint ~allow_this:true env) m.m_ret in
   N.({ m_unsafe     = unsafe ;
        m_final      = final  ;
        m_visibility = vis    ;
@@ -1175,8 +1160,8 @@ and determine_variadicity env l =
 
 and fun_param env param =
   let x = Env.new_lvar env param.param_id in
-  let eopt = opt (expr env) param.param_expr in
-  let ty = opt (hint env) param.param_hint in
+  let eopt = opt_map (expr env) param.param_expr in
+  let ty = opt_map (hint env) param.param_hint in
   { N.param_hint = ty;
     param_is_reference = param.param_is_reference;
     param_is_variadic = param.param_is_variadic;
@@ -1201,7 +1186,7 @@ and fun_ genv f =
   let genv = Env.make_fun_genv genv tparams f in
   let lenv = Env.empty_local () in
   let env = genv, lenv in
-  let h = opt (hint ~allow_this:true env) f.f_ret in
+  let h = opt_map (hint ~allow_this:true env) f.f_ret in
   let variadicity, paraml = fun_paraml env f.f_params in
   let x = Env.fun_id env f.f_name in
   let unsafe = is_unsafe_body f.f_body in
@@ -1380,7 +1365,7 @@ and static_var env = function
   | e -> expr env e
 
 and exprl env l = List.map (expr env) l
-and oexpr env e = opt (expr env) e
+and oexpr env e = opt_map (expr env) e
 and expr env (p, e) = p, expr_ env e
 and expr_ env = function
   | Array l -> N.Array (rev_rev_map (afield env) l)
@@ -1634,7 +1619,7 @@ and expr_ env = function
       end
 
 and expr_lambda env f =
-  let h = opt (hint ~allow_this:true env) f.f_ret in
+  let h = opt_map (hint ~allow_this:true env) f.f_ret in
   let unsafe = List.mem Unsafe f.f_body in
   let variadicity, paraml = fun_paraml env f.f_params in
   let body = block env f.f_body in
@@ -1717,11 +1702,7 @@ let typedef genv tdef =
   let ty = match tdef.t_kind with Alias t | NewType t -> t in
   let cstrs = class_constraints genv tdef.t_tparams in
   let env = Env.make_typedef_env genv cstrs tdef in
-  let tconstraint =
-    match tdef.t_constraint with
-    | None -> None
-    | Some h -> Some (hint env h)
-  in
+  let tconstraint = opt_map (hint env) tdef.t_constraint in
   List.iter check_constraint tdef.t_tparams;
   let tparaml = type_paraml env tdef.t_tparams in
   List.iter begin function
@@ -1754,7 +1735,7 @@ let check_constant cst =
 
 let global_const genv cst =
   let env = Env.make_const_env genv cst in
-  let hint = opt (hint env) cst.cst_type in
+  let hint = opt_map (hint env) cst.cst_type in
   let e = match cst.cst_kind with
   | Ast.Cst_const -> check_constant cst; Some (expr env cst.cst_value)
   (* Define allows any expression, so don't call check_constant. Furthermore it

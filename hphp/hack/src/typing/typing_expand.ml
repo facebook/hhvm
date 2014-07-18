@@ -67,9 +67,7 @@ and fully_expand_ seen env = function
   | Tshape fdm ->
       Tshape (SMap.map (fully_expand seen env) fdm)
 
-and fully_expand_opt seen env = function
-  | None -> None
-  | Some x -> Some (fully_expand seen env x)
+and fully_expand_opt seen env x = opt_map (fully_expand seen env) x
 
 (*****************************************************************************)
 (* External API *)

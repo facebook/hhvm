@@ -148,9 +148,7 @@ let constructor env subst = function
 
 let map_inherited f inh =
   {
-    ih_cstr = (match inh.ih_cstr with
-    | None -> None
-    | Some x -> Some (f x));
+    ih_cstr     = opt_map f inh.ih_cstr;
     ih_consts   = SMap.map f inh.ih_consts;
     ih_cvars    = SMap.map f inh.ih_cvars;
     ih_scvars   = SMap.map f inh.ih_scvars;

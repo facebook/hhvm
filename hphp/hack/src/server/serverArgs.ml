@@ -107,11 +107,7 @@ let populate_options () =
   let check_mode = !check_mode || !json_mode; in
   (* Conversion mode implies check *)
   let check_mode = check_mode || !convert_dir <> None in
-  let convert =
-    match !convert_dir with
-    | None -> None
-    | Some dir -> Some (Path.mk_path dir)
-  in
+  let convert = Utils.opt_map Path.mk_path (!convert_dir) in
   (match !root with
   | "" ->
       Printf.fprintf stderr "You must specify a root directory!\n";

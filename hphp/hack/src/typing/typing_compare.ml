@@ -298,9 +298,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Tobject as x         -> x
     | Tshape fdm           -> Tshape (SMap.map ty fdm)
 
-  and ty_opt = function
-    | None -> None
-    | Some x -> Some (ty x)
+  and ty_opt x = opt_map ty x
 
   and fun_type ft =
     { ft with
@@ -342,15 +340,11 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_scvars                = SMap.map class_elt tc.tc_scvars      ;
       tc_methods               = SMap.map class_elt tc.tc_methods     ;
       tc_smethods              = SMap.map class_elt tc.tc_smethods    ;
-      tc_construct             = constructor tc.tc_construct          ;
+      tc_construct             = opt_map class_elt tc.tc_construct    ;
       tc_ancestors             = SMap.map ty tc.tc_ancestors          ;
       tc_ancestors_checked_when_concrete    = SMap.map ty tc.tc_ancestors_checked_when_concrete ;
       tc_user_attributes       = tc.tc_user_attributes                ;
     }
-
-  and constructor = function
-    | None   -> None
-    | Some c -> Some (class_elt c)
 
   and typedef = function
     | Typing_env.Typedef.Error as x -> x

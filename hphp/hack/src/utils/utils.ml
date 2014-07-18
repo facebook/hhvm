@@ -102,6 +102,10 @@ let opt f env = function
   | None -> env, None
   | Some x -> let env, x = f env x in env, Some x
 
+let opt_map f = function
+  | None -> None
+  | Some x -> Some (f x)
+
 let default x y f =
   match y with
   | None -> x

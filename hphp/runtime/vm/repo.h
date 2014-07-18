@@ -102,7 +102,8 @@ public:
    * Return a vector of (filepath, MD5) for every unit in central
    * repo.
    */
-  std::vector<std::pair<std::string,MD5>> enumerateUnits();
+  std::vector<std::pair<std::string,MD5>> enumerateUnits(
+    int repoId, bool preloadOnly, bool warn);
 
   /*
    * Load the repo-global metadata table, including the global litstr

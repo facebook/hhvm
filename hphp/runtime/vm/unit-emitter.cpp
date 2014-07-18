@@ -447,7 +447,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       auto lines = createLineTable(m_sourceLocTab, m_bclen);
       urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
                                     &m_mainReturn, m_mergeOnly, m_isHHFile,
-                                    lines, m_typeAliases);
+                                    m_preloadPriority, lines, m_typeAliases);
     }
     int64_t usn = m_sn;
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
@@ -710,7 +710,8 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Unit")
-             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB, data BLOB,"
+             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, preload INTEGER, "
+                "bc BLOB, data BLOB, "
                 "UNIQUE (md5));";
     txn.exec(ssCreate.str());
   }
@@ -799,18 +800,20 @@ void UnitRepoProxy::InsertUnitStmt
                   ::insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
                            const unsigned char* bc, size_t bclen,
                            const TypedValue* mainReturn, bool mergeOnly,
-                           bool isHHFile, const LineTable& lines,
+                           bool isHHFile, int preloadPriority,
+                           const LineTable& lines,
                            const std::vector<TypeAlias>& typeAliases) {
   BlobEncoder dataBlob;
 
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Unit")
-             << " VALUES(NULL, @md5, @bc, @data);";
+             << " VALUES(NULL, @md5, @preload, @bc, @data);";
     txn.prepare(*this, ssInsert.str());
   }
   RepoTxnQuery query(txn, *this);
   query.bindMd5("@md5", md5);
+  query.bindInt("@preload", preloadPriority);
   query.bindBlob("@bc", (const void*)bc, bclen);
   dataBlob(*mainReturn)
           (mergeOnly)
@@ -828,7 +831,7 @@ bool UnitRepoProxy::GetUnitStmt
     RepoTxn txn(m_repo);
     if (!prepared()) {
       std::stringstream ssSelect;
-      ssSelect << "SELECT unitSn,bc,data FROM "
+      ssSelect << "SELECT unitSn,preload,bc,data FROM "
                << m_repo.table(m_repoId, "Unit")
                << " WHERE md5 == @md5;";
       txn.prepare(*this, ssSelect.str());
@@ -839,12 +842,14 @@ bool UnitRepoProxy::GetUnitStmt
     if (!query.row()) {
       return true;
     }
-    int64_t unitSn;                          /**/ query.getInt64(0, unitSn);
-    const void* bc; size_t bclen;            /**/ query.getBlob(1, bc, bclen);
-    BlobDecoder dataBlob =                   /**/ query.getBlob(2);
+    int64_t unitSn;                     /**/ query.getInt64(0, unitSn);
+    int preloadPriority;                /**/ query.getInt(1, preloadPriority);
+    const void* bc; size_t bclen;       /**/ query.getBlob(2, bc, bclen);
+    BlobDecoder dataBlob =              /**/ query.getBlob(3);
 
     ue.m_repoId = m_repoId;
     ue.m_sn = unitSn;
+    ue.m_preloadPriority = preloadPriority;
     ue.setBc((const unsigned char*)bc, bclen);
 
     TypedValue mainReturn;

@@ -190,7 +190,7 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   }
 
   return parallel::map(
-    Repo::get().enumerateUnits(),
+    Repo::get().enumerateUnits(RepoIdCentral, false, true),
     [&] (const std::pair<std::string,MD5>& kv) {
       return Repo::get().urp().loadEmitter(kv.first, kv.second);
     }

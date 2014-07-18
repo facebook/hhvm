@@ -916,6 +916,7 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
   auto ret      = folly::make_unique<php::Unit>();
   ret->md5      = ue.md5();
   ret->filename = ue.m_filepath;
+  ret->preloadPriority = ue.m_preloadPriority;
 
   ParseUnitState puState;
   if (ue.hasSourceLocInfo()) {

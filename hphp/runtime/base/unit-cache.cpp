@@ -22,12 +22,14 @@
 #include <string>
 #include <ctime>
 #include <cstdlib>
+#include <thread>
 
 #include "folly/ScopeGuard.h"
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/rank.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/assertions.h"
+#include "hphp/util/process.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/string-util.h"
@@ -36,6 +38,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/profile-dump.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -457,6 +460,56 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   }
 
   return cunit.unit;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void preloadRepo() {
+  auto& repo = Repo::get();
+  auto units = repo.enumerateUnits(RepoIdLocal, true, false);
+  if (units.size() == 0) {
+    units = repo.enumerateUnits(RepoIdCentral, true, false);
+  }
+  if (!units.size()) return;
+
+  std::vector<std::thread> workers;
+  auto numWorkers = Process::GetCPUCount();
+  // Compute a batch size that causes each thread to process approximately 16
+  // batches.  Even if the batches are somewhat imbalanced in what they contain,
+  // the straggler workers are very unlikey to take more than 10% longer than
+  // the first worker to finish.
+  size_t batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
+  std::atomic<size_t> index{0};
+  for (auto worker = 0; worker < numWorkers; ++worker) {
+    workers.push_back(std::thread([&] {
+      hphp_session_init();
+      hphp_context_init();
+
+      while (true) {
+        auto begin = index.fetch_add(batchSize);
+        auto end = std::min(begin + batchSize, units.size());
+        if (begin >= end) break;
+        auto unitCount = end - begin;
+        for (auto i = size_t{0}; i < unitCount; ++i) {
+          auto& kv = units[begin + i];
+          try {
+            lookupUnit(String(RuntimeOption::SourceRoot + kv.first).get(),
+                       "", nullptr);
+          } catch (...) {
+            // swallow errors silently
+          }
+        }
+      }
+
+      hphp_context_exit();
+      hphp_session_exit();
+      hphp_thread_exit();
+
+    }));
+  }
+  for (auto& worker : workers) {
+    worker.join();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -483,6 +483,7 @@ bool RuntimeOption::RepoCommit = true;
 bool RuntimeOption::RepoDebugInfo = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
 // perf-sensitive.
+bool RuntimeOption::RepoPreload;
 
 bool RuntimeOption::SandboxMode = false;
 std::string RuntimeOption::SandboxPattern;
@@ -923,6 +924,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       Config::Bind(RepoCommit, ini, repo["Commit"], true);
       Config::Bind(RepoDebugInfo, ini, repo["DebugInfo"], true);
       Config::Bind(RepoAuthoritative, ini, repo["Authoritative"], false);
+      Config::Bind(RepoPreload, ini, repo["Preload"], RepoAuthoritative);
     }
 
     // NB: after we know the value of RepoAuthoritative.

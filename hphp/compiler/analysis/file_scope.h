@@ -182,6 +182,9 @@ public:
   void setHHFile();
   bool isHHFile() const { return m_isHHFile; }
 
+  void setPreloadPriority(int p) { m_preloadPriority = p; }
+  int preloadPriority() const { return m_preloadPriority; }
+
   void analyzeProgram(AnalysisResultPtr ar);
   void analyzeIncludes(AnalysisResultPtr ar);
   void analyzeIncludesHelper(AnalysisResultPtr ar);
@@ -213,6 +216,7 @@ private:
   unsigned m_includeState : 2;
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
+  int m_preloadPriority;
 
   std::vector<int> m_attributes;
   std::string m_fileName;

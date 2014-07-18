@@ -926,6 +926,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
+  ue->m_preloadPriority = unit.preloadPriority;
 
   EmitUnitState state { index };
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);

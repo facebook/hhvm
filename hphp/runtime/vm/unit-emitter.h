@@ -348,6 +348,7 @@ public:
   bool m_mergeOnly{false};
   bool m_isHHFile{false};
   bool m_returnSeen{false};
+  int m_preloadPriority{0};
   TypedValue m_mainReturn;
 
 private:
@@ -470,6 +471,7 @@ struct UnitRepoProxy : public RepoProxy {
                 const TypedValue* mainReturn,
                 bool mergeOnly,
                 bool isHHFile,
+                int preloadPriority,
                 const LineTable& lines,
                 const std::vector<TypeAlias>&);
   };

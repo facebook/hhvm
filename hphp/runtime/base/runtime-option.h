@@ -525,6 +525,7 @@ public:
   static bool RepoCommit;
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;
+  static bool RepoPreload;
 
   // Sandbox options
   static bool SandboxMode;

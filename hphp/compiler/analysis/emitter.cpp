@@ -8444,6 +8444,7 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
   MethodStatementPtr msp(dynamic_pointer_cast<MethodStatement>(
                          fsp->getPseudoMain()->getStmt()));
   UnitEmitter* ue = new UnitEmitter(md5);
+  ue->m_preloadPriority = fsp->preloadPriority();
   const Location* sLoc = msp->getLocation().get();
   ue->initMain(sLoc->line0, sLoc->line1);
   EmitterVisitor ev(*ue);
@@ -8962,6 +8963,28 @@ void emitAllHHBC(AnalysisResultPtr ar) {
 
   JobQueueDispatcher<EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());
+
+  auto setPreloadPriority = [ar](const std::string& f, int p) {
+    auto fs = ar->findFileScope(f);
+    if (fs) fs->setPreloadPriority(p);
+  };
+
+  /*
+   * Mark files that are referenced from the autoload map
+   * so they get preloaded via preloadRepo.
+   * Higher priorities are preloaded first.
+   * Classes, then functions, then constants mimics
+   * the order of our existing warmup scripts
+   */
+  for (const auto& ent : Option::AutoloadConstMap) {
+    setPreloadPriority(ent.second, 1);
+  }
+  for (const auto& ent : Option::AutoloadFuncMap) {
+    setPreloadPriority(ent.second, 2);
+  }
+  for (const auto& ent : Option::AutoloadClassMap) {
+    setPreloadPriority(ent.second, 3);
+  }
 
   dispatcher.start();
   ar->visitFiles(addEmitterWorker, &dispatcher);

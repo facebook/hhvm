@@ -62,6 +62,7 @@ if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
 
   MACRO(CHECK_LIBDWARF_INIT init params var)
     # Check for the existence of this particular init function.
+    unset(INIT_EXISTS CACHE)
     CHECK_FUNCTION_EXISTS(${init} INIT_EXISTS)
     if (INIT_EXISTS)
       set(LIBDWARF_USE_INIT_C ${var})

@@ -1191,6 +1191,8 @@ Variant f_mb_convert_case(const String& str, int mode,
   const char *enc = NULL;
   if (encoding.empty()) {
     enc = mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
+  } else {
+    enc = encoding.data();
   }
 
   unsigned int ret_len;

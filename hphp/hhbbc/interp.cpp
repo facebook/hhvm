@@ -86,8 +86,6 @@ OPCODES
  * only be chaining to a single bytecode (or flag effects can be
  * hard to reason about), and shouldn't set any flags prior to that.
  *
- * Note: nested reduce would probably be nice to have later for FPassR.
- *
  * constprop with impl() should only occur on the last thing in the
  * impl list.  This isn't checked, but we'll ignore a canConstProp
  * flag anywhere earlier.
@@ -1401,17 +1399,40 @@ void in(ISS& env, const bc::FPassS& op) {
 void in(ISS& env, const bc::FPassV& op) {
   nothrow(env);
   switch (prepKind(env, op.arg1)) {
-  case PrepKind::Unknown: popV(env); return push(env, TInitGen);
-  case PrepKind::Val:     popV(env); return push(env, TInitCell);
-  case PrepKind::Ref:     assert(topT(env).subtypeOf(TRef)); return;
+  case PrepKind::Unknown:
+    popV(env);
+    return push(env, TInitGen);
+  case PrepKind::Val:
+    return reduce(env, bc::Unbox {}, bc::FPassC { op.arg1 });
+  case PrepKind::Ref:
+    return reduce(env, bc::FPassVNop { op.arg1 });
   }
 }
 
 void in(ISS& env, const bc::FPassR& op) {
   nothrow(env);
-  if (topT(env).subtypeOf(TCell)) return reduce(env, bc::UnboxRNop {},
-                                                     bc::FPassC { op.arg1 });
-  if (topT(env).subtypeOf(TRef))  return impl(env, bc::FPassV { op.arg1 });
+  auto const t1 = topT(env);
+  if (t1.subtypeOf(TCell)) {
+    return reduce(env, bc::UnboxRNop {},
+                       bc::FPassC { op.arg1 });
+  }
+
+  // If it's known to be a ref, this behaves like FPassV, except we need to do
+  // it slightly differently to keep stack flavors correct.
+  if (t1.subtypeOf(TRef)) {
+    switch (prepKind(env, op.arg1)) {
+    case PrepKind::Unknown:
+      popV(env);
+      return push(env, TInitGen);
+    case PrepKind::Val:
+      return reduce(env, bc::UnboxR {}, bc::FPassC { op.arg1 });
+    case PrepKind::Ref:
+      return reduce(env, bc::BoxRNop {}, bc::FPassVNop { op.arg1 });
+    }
+    not_reached();
+  }
+
+  // Here we don't know if it is going to be a cell or a ref.
   switch (prepKind(env, op.arg1)) {
   case PrepKind::Unknown:      popR(env); return push(env, TInitGen);
   case PrepKind::Val:          popR(env); return push(env, TInitCell);

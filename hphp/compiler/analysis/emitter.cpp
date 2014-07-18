@@ -4401,9 +4401,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         } else {
           e.FCall(numParams);
         }
-        if (Option::WholeProgram) {
-          fixReturnType(e, om);
-        }
         return true;
       }
 
@@ -7459,7 +7456,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       e.FCall(numParams);
     }
   }
-  if (Option::WholeProgram || fcallBuiltin) {
+  if (fcallBuiltin) {
     fixReturnType(e, node, fcallBuiltin);
   }
 }
@@ -7693,11 +7690,6 @@ void EmitterVisitor::emitClass(Emitter& e,
             var = static_pointer_cast<SimpleVariable>(exp);
           }
 
-          auto sym = var->getSymbol();
-          bool maybePersistent = Option::WholeProgram &&
-            pce->attrs() & AttrPersistent &&
-            sym && !sym->isIndirectAltered() && sym->isStatic();
-
           auto const propName = makeStaticString(var->getName());
           auto const propDoc = Option::GenerateDocComments ?
             makeStaticString(var->getDocComment()) : staticEmptyString();
@@ -7712,7 +7704,6 @@ void EmitterVisitor::emitClass(Emitter& e,
             if (vNode->isScalar()) {
               initScalar(tvVal, vNode);
             } else {
-              maybePersistent = false;
               tvWriteUninit(&tvVal);
               if (!(declAttrs & AttrStatic)) {
                 if (requiresDeepInit(vNode)) {
@@ -7732,7 +7723,6 @@ void EmitterVisitor::emitClass(Emitter& e,
           } else {
             tvWriteNull(&tvVal);
           }
-          if (maybePersistent) propAttrs = propAttrs | AttrPersistent;
           bool added UNUSED =
             pce->addProperty(propName, propAttrs, typeConstraint,
                              propDoc, &tvVal, RepoAuthType{});

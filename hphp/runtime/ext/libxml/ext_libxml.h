@@ -19,11 +19,16 @@
 #define incl_HPHP_EXT_LIBXML_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include <libxml/parser.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool libxml_use_internal_error();
 void libxml_add_error(const std::string &msg);
+
+void php_libxml_node_free(xmlNodePtr node);
+void php_libxml_node_free_resource(xmlNodePtr node);
 
 #define LIBXML_SAVE_NOEMPTYTAG 1<<2
 

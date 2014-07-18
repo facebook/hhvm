@@ -708,9 +708,8 @@ int lintTarget(const CompilerOptions &po) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
-  int ret = 0;
-
+static void wholeProgramPasses(const CompilerOptions& po,
+                               AnalysisResultPtr ar) {
   if (!po.noTypeInference) {
     Option::GenerateInferredTypes = true;
   }
@@ -723,6 +722,12 @@ int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
     Timer timer(Timer::WallTime, "analyze includes");
     ar->analyzeIncludes();
   }
+}
+
+int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
+  int ret = 0;
+
+  wholeProgramPasses(po, ar);
 
   if (Option::GenerateInferredTypes) {
     Timer timer(Timer::WallTime, "inferring types");
@@ -863,7 +868,9 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
   Option::AutoInline = -1;
 
   if (po.optimizeLevel > 0) {
-    ret = analyzeTarget(po, ar);
+    ret = 0;
+    wholeProgramPasses(po, ar);
+    ar->analyzeProgramFinal();
   }
 
   Timer timer(Timer::WallTime, type);

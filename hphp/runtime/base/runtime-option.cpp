@@ -112,7 +112,7 @@ int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
-int64_t RuntimeOption::MemoryThreshold = -1;
+int64_t RuntimeOption::MemoryThreshold = 0;
 int RuntimeOption::MemProtectorWaitBeforeStart = 100000;
 int RuntimeOption::MemoryCheckFreq = 3000;
 bool RuntimeOption::EnableMemoryProtector = false;
@@ -949,7 +949,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
     // for memory protector
     Config::Bind(MemoryThreshold, ini,
-        server["MemoryThreshold"], -1);
+        server["MemoryThreshold"], 0);
     Config::Bind(MemoryCheckFreq, ini,
         server["MemoryCheckFreq"], 3000);
     Config::Bind(QueuedJobsReleaseRate, ini,

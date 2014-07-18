@@ -71,7 +71,10 @@ static Array convert_to_array(const ObjectData* obj, HPHP::Class* cls) {
     cls, s_storage.get(),
     visible, accessible, unset
   );
-  assert(visible && accessible && !unset);
+  // We currently do not special case ArrayObjects / ArrayIterators in
+  // reflectionClass. Until, either ArrayObject moves to HNI or a special
+  // case is added to reflection unset should be turned off.
+  assert(visible && accessible /* && !unset */);
   return tvAsCVarRef(prop).toArray();
 }
 
@@ -1812,7 +1815,7 @@ String ObjectData::invokeToString() {
     // recoverable error
     raise_recoverable_error(
       "Object of class %s could not be converted to string",
-      m_cls->preClass()->name()->data()
+      classname_cstr()
     );
     // If the user error handler decides to allow execution to continue,
     // we return the empty string.

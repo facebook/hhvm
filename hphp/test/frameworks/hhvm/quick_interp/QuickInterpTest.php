@@ -6,8 +6,8 @@ final class QuickInterpTest extends HHVMExpectTest {
   /**
    * @dataProvider quickTestsProvider
    */
-  public function testQuickInterp(/* ... $paths */) {
-    $this->runTests('-m interp', func_get_args());
+  public function testQuickInterp(...$paths) {
+    $this->runTests('-m interp', $paths);
   }
 
   public function quickTestsProvider() {

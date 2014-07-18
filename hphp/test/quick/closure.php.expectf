@@ -8,11 +8,21 @@ Args: 888 500
 #0  funk(888, 500) called at %s:17]
 #1  {closure}(888) called at %s:28]
 #2  main() called at %s:33]
-object(Closure$%s)#1 (2) {
-  ["use_by_val":"Closure$%s":private]=>
-  int(123)
-  ["use_by_ref":"Closure$%s":private]=>
-  &int(4000)
+object(Closure%s)#1 (2) {
+  ["static"]=>
+  array(2) {
+    ["use_by_val"]=>
+    int(123)
+    ["use_by_ref"]=>
+    &int(4000)
+  }
+  ["parameter"]=>
+  array(2) {
+    ["$arg"]=>
+    string(10) "<required>"
+    ["$dv"]=>
+    string(10) "<optional>"
+  }
 }
 int(123)
 int(4000)

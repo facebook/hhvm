@@ -956,6 +956,9 @@ def walk(filename, dest_subdir):
                     '\nNotice: '+match_rest_of_line, exp)
             exp = re.sub(r'object\((\w+)\)#\d+', 'object(\\1)#%d', exp)
 
+            exp = re.sub('string\(7\) "Closure"', 'string(%d) "Closure%s"', exp)
+            exp = re.sub('Closure(?!%s)', 'Closure%s', exp)
+
             sections[key] = exp
 
     if sections.has_key('EXPECT'):
@@ -1122,6 +1125,10 @@ def walk(filename, dest_subdir):
         test = test.replace('/parse.ini', '/bug46347.ini')
     if '/ext/standard/tests/file/parse_ini_file.php' in full_dest_filename:
         test = test.replace('/parse.ini', '/parse_ini_file.ini')
+    if '/Zend/tests/closure_016.php' in full_dest_filename:
+        # undo closure% only for first two instances
+        exp = exp.replace('Closure%s::', 'Closure::', 2)
+        file(full_dest_filename + '.expectf', 'w').write(exp)
     if '/ext/mysqli/tests/' in full_dest_filename:
 
         (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))

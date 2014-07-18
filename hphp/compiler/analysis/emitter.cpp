@@ -2553,8 +2553,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 StringData *name;
                 TypedValue tv;
                 if (func->isSimpleDefine(&name, &tv)) {
-                  UnitMergeKind k = func->isDefineWithoutImpl(ar) ?
-                    UnitMergeKindPersistentDefine : UnitMergeKindDefine;
+                  auto k = func->isDefineWithoutImpl(ar)
+                    ? Unit::MergeKind::PersistentDefine
+                    : Unit::MergeKind::Define;
                   if (tv.m_type == KindOfUninit) {
                     tv.m_type = KindOfNull;
                   }
@@ -2570,7 +2571,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 StringData *name;
                 TypedValue tv;
                 if (ae->isSimpleGlobalAssign(&name, &tv)) {
-                  m_ue.pushMergeableDef(UnitMergeKindGlobal, name, tv);
+                  m_ue.pushMergeableDef(Unit::MergeKind::Global, name, tv);
                   visit(s);
                   continue;
                 }
@@ -2585,9 +2586,8 @@ void EmitterVisitor::visit(FileScopePtr file) {
                       FunctionScopeRawPtr ps DEBUG_ONLY =
                         sl->getFunctionScope();
                       assert(ps && ps->inPseudoMain());
-                      UnitMergeKind kind = UnitMergeKindReqDoc;
                       m_ue.pushMergeableInclude(
-                        kind,
+                        Unit::MergeKind::ReqDoc,
                         makeStaticString(inc->includePath()));
                       visit(s);
                       continue;

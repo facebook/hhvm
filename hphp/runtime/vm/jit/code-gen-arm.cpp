@@ -1901,7 +1901,7 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   auto dstReg = x2a(dstLoc(0).reg());
   auto const name = inst->extra<LdFuncCachedData>()->name;
-  auto const ch = Unit::GetNamedEntity(name)->getFuncHandle();
+  auto const ch = NamedEntity::get(name)->getFuncHandle();
   vixl::Label noLookup;
 
   if (!dstReg.IsValid()) {

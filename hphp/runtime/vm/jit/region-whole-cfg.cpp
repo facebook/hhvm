@@ -57,6 +57,9 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
       region->blocks.insert(region->blocks.end(),
                             transRegion->blocks.begin(),
                             transRegion->blocks.end());
+      region->arcs.insert(region->arcs.end(),
+                          transRegion->arcs.begin(),
+                          transRegion->arcs.end());
       selectedSet.insert(tid);
       if (selectedVec) selectedVec->push_back(tid);
       srcKeyToTransID[sk] = tid;
@@ -99,8 +102,9 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
 
       // Add the block and arc to region.
       addToRegion(dst);
+      auto predBlockId = profData->transRegion(tid)->blocks.back().get()->id();
       auto dstBlockId = dstRegion->blocks.front().get()->id();
-      region->addArc(transBlocks[tid], dstBlockId);
+      region->addArc(predBlockId, dstBlockId);
 
       // Push the dst if we haven't already processed it.
       if (visited.count(dst) == 0) {

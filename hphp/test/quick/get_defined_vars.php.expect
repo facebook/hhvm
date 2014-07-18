@@ -2,6 +2,14 @@ array(1) {
   ["a"]=>
   int(500)
 }
+array(3) {
+  ["local"]=>
+  int(0)
+  ["usevar"]=>
+  int(0)
+  ["arg1"]=>
+  int(1)
+}
 array(2) {
   ["a"]=>
   &int(20)

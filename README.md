@@ -25,7 +25,7 @@ You can install a [prebuilt package](https://github.com/facebook/hhvm/wiki/Prebu
 
 You can run standalone programs just by passing them to hhvm: `hhvm my_script.php`.
 
-If you want to host a website: 
+If you want to host a website:
 * Install your favorite webserver
 * Install our [package](https://github.com/facebook/hhvm/wiki/Prebuilt%20Packages%20for%20HHVM)
 * Start your webserver
@@ -35,20 +35,7 @@ If you want to host a website:
 
 ## Contributing
 
-We'd love to have your help in making HHVM better.
-
-You must sign a [Contributor License Agreement](http://code.facebook.com/cla) before your changes can be accepted.
-
-You will be prompted to accept the CLA when you submit your pull request.
-
-If you prefer to submit a paper copy, then you can print the [pdf](https://github.com/facebook/hhvm/raw/master/hphp/doc/FB_Individual_CLA.pdf) and send it to <cla@fb.com>.
-
-If you run into problems, please open an [issue](http://github.com/facebook/hhvm/issues), or better yet, [fork us and send a pull request](https://github.com/facebook/hhvm/pulls). Join us on [#hhvm on freenode](http://webchat.freenode.net/?channels=hhvm).
-
-If you want to help but don't know where to start, try fixing some of the [PHP5 tests that don't pass](hphp/test/zend/bad). You can run them with [hphp/test/run](hphp/test/run). When they work, move them to [zend/good](hphp/test/zend/good) and send a pull request.
-
-All the open issues tagged [php5 incompatibility](https://github.com/facebook/hhvm/issues?labels=php5+incompatibility&page=1&state=open) are real issues reported by the community in existing PHP code and [frameworks](https://github.com/facebook/hhvm/wiki/OSS-PHP-Frameworks-Unit-Testing:-General) that could use some attention. Please add appropriate test cases as you make changes; see [here](hphp/test) for more information. Travis-CI is integrated with this GitHub project and will provide test results automatically on all pulls.
-
+We'd love to have your help in making HHVM better. If you're interested, please read our [guide to contributing](CONTRIBUTING.md).
 
 ## License
 

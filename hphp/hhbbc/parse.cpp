@@ -36,9 +36,9 @@
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"

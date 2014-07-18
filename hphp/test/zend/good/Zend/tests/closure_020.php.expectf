@@ -1,0 +1,18 @@
+object(foo)#%d (2) {
+  ["test":"foo":private]=>
+  int(3)
+  ["a"]=>
+  object(Closure%s)#%d (2) {
+    ["static"]=>
+    array(1) {
+      ["a"]=>
+      *RECURSION*
+    }
+    ["this"]=>
+    *RECURSION*
+  }
+}
+bool(true)
+bool(true)
+
+Fatal error: %s

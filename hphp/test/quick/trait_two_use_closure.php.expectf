@@ -1,6 +1,12 @@
-object(Closure$A::b%S)#2 (0) {
+object(Closure%s)#2 (1) {
+  ["this"]=>
+  object(E)#1 (0) {
+  }
 }
 string(1) "d"
-object(Closure$A::b%S)#2 (0) {
+object(Closure%s)#2 (1) {
+  ["this"]=>
+  object(F)#1 (0) {
+  }
 }
 string(1) "d"

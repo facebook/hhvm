@@ -122,6 +122,7 @@ void parse_options(int argc, char** argv) {
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
     ("disallow-dyn-var-env-funcs",
                                 po::value(&options.DisallowDynamicVarEnvFuncs))
+    ("all-funcs-interceptable", po::value(&options.AllFuncsInterceptable))
     ;
 
   po::options_description all;

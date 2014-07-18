@@ -277,8 +277,9 @@ Variant f_hex2bin(const String& str) {
   return ret.detach();
 }
 
+extern const StaticString s_nl;
+
 const StaticString
-  s_nl("\n"),
   s_br("<br />\n"),
   s_non_xhtml_br("<br>\n");
 

@@ -1108,7 +1108,7 @@ void raiseMissingArgument(const Func* func, int got) {
 }
 
 RDS::Handle lookupClsRDSHandle(const StringData* name) {
-  return Unit::GetNamedEntity(name)->getClassHandle();
+  return NamedEntity::get(name)->getClassHandle();
 }
 
 //////////////////////////////////////////////////////////////////////

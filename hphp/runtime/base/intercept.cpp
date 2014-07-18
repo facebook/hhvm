@@ -190,8 +190,8 @@ void unregister_intercept_flag(const String& name, char *flag) {
 void rename_function(const String& old_name, const String& new_name) {
   auto const old = old_name.get();
   auto const n3w = new_name.get();
-  auto const oldNe = const_cast<NamedEntity*>(Unit::GetNamedEntity(old));
-  auto const newNe = const_cast<NamedEntity*>(Unit::GetNamedEntity(n3w));
+  auto const oldNe = const_cast<NamedEntity*>(NamedEntity::get(old));
+  auto const newNe = const_cast<NamedEntity*>(NamedEntity::get(n3w));
 
   Func* func = Unit::lookupFunc(oldNe);
   if (!func) {

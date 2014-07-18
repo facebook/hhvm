@@ -63,7 +63,7 @@ class XMLWriter {
   public function writeElement($name, $content = null) { }
   public function endElement() { }
   public function fullEndElement() { }
-  public function startAttributens($prefix, $name, $uri) { }
+  public function startAttributeNS($prefix, $name, $uri) { }
   public function startAttribute($name) { }
   public function writeAttributeNS($prefix, $name, $uri, $content) { }
   public function writeAttribute($name, $value) { }

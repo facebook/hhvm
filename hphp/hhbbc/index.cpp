@@ -761,8 +761,9 @@ void add_unit_to_index(IndexData& index,
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
 
-      if (imethIt != end(imethodMap) &&
-          imethIt->second.count(m->name->data())) {
+      if (options.AllFuncsInterceptable ||
+          (imethIt != end(imethodMap) &&
+           imethIt->second.count(m->name->data()))) {
         m->attrs = m->attrs | AttrInterceptable;
       }
     }
@@ -773,7 +774,8 @@ void add_unit_to_index(IndexData& index,
   }
 
   for (auto& f : unit.funcs) {
-    if (options.InterceptableFunctions.count(f->name->data())) {
+    if (options.AllFuncsInterceptable ||
+        options.InterceptableFunctions.count(f->name->data())) {
       f->attrs = f->attrs | AttrInterceptable;
     }
     index.funcs.insert({f->name, borrow(f)});

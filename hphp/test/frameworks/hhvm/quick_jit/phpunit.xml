@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<phpunit>
+  <testsuites>
+    <testsuite name="HHVM Quick Interp">
+      <directory>.</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>

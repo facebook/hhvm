@@ -849,7 +849,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   }
   if (cmd == "vm-namedentities") {
     std::ostringstream result;
-    result << Unit::GetNamedEntityTableSize();
+    result << NamedEntity::tableSize();
     transport->sendString(result.str());
     return true;
   }

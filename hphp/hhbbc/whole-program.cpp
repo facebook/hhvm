@@ -24,7 +24,7 @@
 #include "folly/Memory.h"
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"

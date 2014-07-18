@@ -404,7 +404,7 @@ bool Process::IsUnderGDB() {
   return CommandStartsWith(GetParentProcessId(), "gdb ");
 }
 
-int Process::GetProcessRSS(pid_t pid) {
+int64_t Process::GetProcessRSS(pid_t pid) {
   string name = "/proc/" + boost::lexical_cast<string>(pid) + "/status";
 
   string status;

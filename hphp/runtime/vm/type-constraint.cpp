@@ -89,7 +89,7 @@ void TypeConstraint::init() {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
           this, m_typeName->data());
     m_type = { KindOfObject, MetaType::Precise };
-    m_namedEntity = Unit::GetNamedEntity(m_typeName);
+    m_namedEntity = NamedEntity::get(m_typeName);
     TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
     return;
   }
@@ -143,13 +143,16 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
   return name;
 }
 
+namespace {
+
 /*
- * Note:
+ * Look up a TypeAliasReq for the supplied NamedEntity (which must be the
+ * NamedEntity for `name'), invoking autoload if necessary for types but not
+ * for classes.
  *
- * We don't need to autoload classes because you can't have an
- * instance of a class if it's not defined.  However, we need to
- * autoload typedefs because they can affect whether the
- * VerifyParamType would succeed.
+ * We don't need to autoload classes because it is impossible to have an
+ * instance of a class if it's not defined.  However, we need to autoload
+ * typedefs because they can affect whether VerifyParamType would succeed.
  */
 const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
                                              const StringData* name) {
@@ -162,6 +165,8 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
     def = ne->getCachedTypeAlias();
   }
   return def;
+}
+
 }
 
 bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {

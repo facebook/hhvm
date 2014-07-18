@@ -383,7 +383,7 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 }
 
 bool FuncChecker::checkString(PC pc, Id id) {
-  return unit()->checkStringId(id);
+  return unit()->isLitstrId(id);
 }
 
 /**

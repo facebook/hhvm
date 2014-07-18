@@ -33,7 +33,12 @@ let rec connect env retries =
       Unix.sleep 1;
       connect env (retries - 1)
     end
-    else exit 2
+    else begin
+      if Tty.spinner_used() then Tty.print_clear_line stdout;
+      Printf.printf "Waited >%ds for hack server initialization. Try again.\n%!"
+        num_build_retries;
+      exit 2
+    end
 
 let main env =
   (* Check if a server is up *)

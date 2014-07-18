@@ -211,7 +211,7 @@ void Repo::saveGlobalData(GlobalData newData) {
 
   // TODO(#3521039): we could just put the litstr table in the same
   // blob as the above and delete LitstrRepoProxy.
-  LitstrTable::get().insert(txn, UnitOrigin::File);
+  LitstrTable::get().insert(txn);
 
   txn.commit();
 }

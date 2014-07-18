@@ -2,8 +2,13 @@ object(foo)#1 (2) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure$foo::x;%s)#2 (1) {
-    ["a":"Closure$foo::x;%s":private]=>
+  object(Closure%s)#2 (2) {
+    ["static"]=>
+    array(1) {
+      ["a"]=>
+      *RECURSION*
+    }
+    ["this"]=>
     *RECURSION*
   }
 }

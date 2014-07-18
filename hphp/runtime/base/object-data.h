@@ -248,6 +248,10 @@ class ObjectData {
     return true;
   }
 
+  bool castableToNumber() const {
+    return getAttribute(CallToImpl) && !isCollection();
+  }
+
   int64_t o_toInt64() const {
     if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
       return o_toInt64Impl();

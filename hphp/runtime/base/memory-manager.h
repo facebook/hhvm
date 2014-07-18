@@ -335,6 +335,14 @@ public:
   static uint32_t smartSizeClass(uint32_t requested);
 
   /*
+   * Return a lower bound estimate of the capacity that will be returned
+   * for the requested size.
+   */
+  static uint32_t estimateSmartCap(uint32_t requested) {
+    return requested <= kMaxSmartSize ? smartSizeClass(requested) : requested;
+  }
+
+  /*
    * Allocate/deallocate a smart-allocated memory block in a given
    * small size class.  You must be able to tell the deallocation
    * function how big the allocation was.

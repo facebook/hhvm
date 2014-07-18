@@ -285,8 +285,8 @@ public:
   void emitDup();
   void emitUnboxR();
   void emitUnbox();
-  void emitJmpZ(Offset taken, Offset next, JmpFlags);
-  void emitJmpNZ(Offset taken, Offset next, JmpFlags);
+  void emitJmpZ(Offset taken, JmpFlags);
+  void emitJmpNZ(Offset taken, JmpFlags);
   void emitJmpImpl(int32_t offset, JmpFlags, Block* catchBlock);
   void emitJmp(int32_t offset, JmpFlags);
   void emitGt()    { emitCmp(Gt);    }
@@ -754,8 +754,7 @@ private:
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
-  void emitJmpHelper(int32_t taken, int32_t next, bool negate, JmpFlags,
-                     SSATmp* src);
+  void emitJmpHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);

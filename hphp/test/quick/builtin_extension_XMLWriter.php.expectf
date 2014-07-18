@@ -31,7 +31,7 @@ array(43) {
   [11]=>
   string(14) "fullEndElement"
   [12]=>
-  string(16) "startAttributens"
+  string(16) "startAttributeNS"
   [13]=>
   string(14) "startAttribute"
   [14]=>
@@ -129,7 +129,7 @@ array(43) {
   [11]=>
   string(14) "fullEndElement"
   [12]=>
-  string(16) "startAttributens"
+  string(16) "startAttributeNS"
   [13]=>
   string(14) "startAttribute"
   [14]=>

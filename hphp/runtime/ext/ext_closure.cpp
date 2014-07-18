@@ -32,6 +32,55 @@ void c_Closure::t___construct() {
   raise_error("Can't create a Closure directly");
 }
 
+static StaticString
+  s_this("this"),
+  s_varprefix("$"),
+  s_parameter("parameter"),
+  s_required("<required>"),
+  s_optional("<optional>");
+
+Array c_Closure::t___debuginfo() {
+  Array ret = Array::Create();
+
+  // Serialize 'use' parameters
+  if (auto propValues = propVec()) {
+    Array use;
+
+    auto propsInfo = getVMClass()->declProperties();
+    for (int i = 0; i < getVMClass()->numDeclProperties(); ++i) {
+      TypedValue* value = &propValues[i];
+      use.setWithRef(Variant(StrNR(propsInfo[i].m_name)), tvAsCVarRef(value));
+    }
+
+    if (!use.empty()) {
+      ret.set(s_static, use);
+    }
+  }
+
+  // Serialize function parameters
+  if (m_func->numParams()) {
+   Array params;
+   for (int i = 0; i < m_func->numParams(); ++i) {
+      StrNR name(StringData::Make(s_varprefix.get(), m_func->localNames()[i]));
+      bool optional = m_func->params()[i].phpCode;
+      if (auto mi = m_func->methInfo()) {
+        optional = optional || mi->parameters[i]->valueText;
+      }
+
+      params.set(name, optional ? s_optional : s_required);
+    }
+
+    ret.set(s_parameter, params);
+  }
+
+  // Serialize 'this' object
+  if (hasThis()) {
+    ret.set(s_this, Object(getThis()));
+  }
+
+  return ret;
+}
+
 const StaticString s_uuinvoke("__invoke");
 
 void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {

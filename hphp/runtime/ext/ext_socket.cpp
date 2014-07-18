@@ -1084,10 +1084,10 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
         return Resource(sock);
       }
 
-      // socket had an error earlier, we need to remove it from persistent
-      // storage, close it, and create a new one
-      g_persistentResources->remove("socket", key.c_str());
+      // socket had an error earlier, we need to close it, remove it from
+      // persistent storage, and create a new one (in that order)
       sock->close();
+      g_persistentResources->remove("socket", key.c_str());
     }
   }
 

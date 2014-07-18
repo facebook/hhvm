@@ -27,8 +27,8 @@
 #include "folly/io/IOBufQueue.h"
 #include "thrift/lib/cpp/async/TEventBaseManager.h"
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
-#include "ti/proxygen/lib/workers/WorkerThread.h"
-#include "ti/proxygen/lib/services/Acceptor.h"
+#include "proxygen/lib/workers/WorkerThread.h"
+#include "proxygen/lib/services/Acceptor.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/util/job-queue.h"
 

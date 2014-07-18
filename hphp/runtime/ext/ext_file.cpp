@@ -1568,7 +1568,7 @@ Variant f_scandir(const String& directory, bool descending /* = false */,
   std::vector<String> names;
   while (true) {
     auto name = dir->read();
-    if (!name.toBoolean()) {
+    if (same(name, false)) {
       break;
     }
     names.push_back(name.toString());

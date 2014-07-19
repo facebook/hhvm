@@ -4,7 +4,30 @@ NEXT
  - Initial support for PHP5.6 argument unpacking: f($x, $y, ...$args)
  - hhi files are embedded in the hh_server binary
  - removed trampolines and the Eval.JitTrampolines option
- - PHP_VERSION is now 5.6
+
+"Outkast" 17-July 2014
+  - PHP_VERSION is now 5.6
+  - Introduce Dbl specific relational IR opcodes
+  - Expose APC info to admin port
+  - Improve Zend compatibility in the reflection API
+  - Implement xdebug_call_class
+  - Hack: first version of formatter
+  - Convert ext/xsl to HNI
+  - Hack: improve init time
+  - Remove JIT::RuntimeType
+  - Fix floating-point overflow for binary, octal and hex literals
+  - Collections: Vector::addAllKeysOf
+  - Hack can build on OSX now
+  - Fix await/yield operator precedence
+  - Fix various xcontroller issues
+  - Enable HHIRBytecodeControlFlow by default
+  - Various changes/fixes to WholeCFG region selector
+  - Introduce async generators
+  - Kill clock_settime
+  - Fix Memcache::get($keys) when $keys is an array
+  - Implement xdebug_call_function
+  - Change order of wait handle processing from FIFO to LIFO
+  - Add Redis::_serialize()
 
 "Mos Def" 11-Jun-2014
  - Turn on new tracelet region selector by default; analyze() is deprecated

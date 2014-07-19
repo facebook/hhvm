@@ -2256,8 +2256,7 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
                                : uncheckedSet(a, key, value, copy);
   if (converted) {
     if (UNLIKELY(ret->isIntMapArray())) {
-      // warn after operation since there may have been a copy
-      MixedArray::downgradeAndWarn(ret, MixedArray::Reason::kNumericString);
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
     }
   }
 

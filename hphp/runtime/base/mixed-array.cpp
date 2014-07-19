@@ -1029,69 +1029,50 @@ void MixedArray::downgradeAndWarn(ArrayData* ad, const Reason r) {
 void MixedArray::warnUsage(const Reason r) {
   switch (r) {
   case Reason::kForeachByRef:
-    raise_warning("Trying to foreach by reference over an IntMap array which "
-                  "does not support taking elements by reference. Downgrading "
-                  "to normal array");
+    raise_warning("Foreach by reference over a miarray, converting to array");
     break;
   case Reason::kPrepend:
-    raise_warning("Trying to prepend to an IntMap array. "
-                  "Downgrading to normal array");
+    raise_warning("Using array_unshift on a miarray, converting to array");
     break;
   case Reason::kPop:
-    raise_warning("Trying to pop from an IntMap array. "
-                  "Downgrading to normal array");
+    raise_warning("Using array_pop on a miarray, converting to array");
     break;
   case Reason::kTakeByRef:
-    raise_warning("Trying to take an element by reference from an IntMap array "
-                  "which does not support taking elements by reference. "
-                  "Downgrading to normal array");
+    raise_warning("Taking an element by reference from a miarray, "
+                  "converting to array");
     break;
   case Reason::kSetRef:
-    raise_warning("Trying to add a reference value to an IntMap array which "
-                  "does not support references. Downgrading to normal array");
+    raise_warning("Adding a reference to a miarray, converting to array");
     break;
   case Reason::kAppendRef:
-    raise_warning("Trying to append a reference to IntMap array which does not "
-                  "support reference values nor appending. Downgrading to "
-                  "normal array");
+    raise_warning("Appending a reference to a miarray, converting to array");
     break;
   case Reason::kAppend:
-    raise_warning("Trying to append to IntMap array which does not support "
-                  "appending to. Downgrading to normal array");
+    raise_warning("Appending to a miarray, converting to array");
     break;
   case Reason::kNvGetStr:
-    raise_warning("Trying to read string key on IntMap array which only has "
-                  "integer keys. Downgrading to normal array");
+    raise_warning("Reading string key from a miarray, converting to array");
     break;
   case Reason::kExistsStr:
-    raise_warning("Trying to check for existence of string on IntMap array "
-                  "which only supports integer keys. Downgrading to normal "
-                  "array");
+    raise_warning("Reading string key from a miarray, converting to array");
     break;
   case Reason::kSetStr:
-    raise_warning("Trying to add a string key to IntMap array which only has "
-                  "integer keys. Downgrading to normal array");
+    raise_warning("Adding a string key to a miarray, converting to array");
     break;
   case Reason::kRemoveStr:
-    raise_warning("Trying to remove a string key from IntMap array which only "
-                  "has integer keys. Downgrading to normal array");
+    raise_warning("Removing a string key from a miarray, converting to array");
     break;
   case Reason::kDequeue:
-    raise_warning("Trying to dequeue from an IntMap array. "
-                  "Downgrading to normal array");
+    raise_warning("Using array_shift on a miarray, converting to array");
     break;
   case Reason::kSort:
-    raise_warning("Trying to sort an IntMap array which will re-order keys. "
-                  "Downgrading to normal array");
+    raise_warning("Using sort on a miarray, converting to array");
     break;
   case Reason::kUsort:
-    raise_warning("Trying to usort an IntMap array which will re-order keys. "
-                  "Downgrading to normal array");
+    raise_warning("Using usort on a miarray, converting to array");
     break;
   case Reason::kNumericString:
-    raise_warning("Trying to use a strictly numeric string key with an IntMap "
-                  "array which only supports integer keys. "
-                  "Downgrading to normal array");
+    raise_warning("An integer-like string key used with a miarray");
     break;
   case Reason::kRenumber:
     raise_warning("Trying to renumber IntMap array keys. "
@@ -1481,7 +1462,7 @@ ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v,
 ArrayData* MixedArray::SetIntConverted(ArrayData* ad, int64_t k, Cell v,
                                        bool copy) {
   assert(ad->isIntMapArray());
-  MixedArray::downgradeAndWarn(ad, Reason::kNumericString);
+  MixedArray::warnUsage(Reason::kNumericString);
   return MixedArray::SetInt(ad, k, v, copy);
 }
 

@@ -22,6 +22,32 @@
 namespace HPHP { namespace JIT {
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Populates `imm' on `inst'.
+ *
+ * Assumes that inst.source and inst.unit have been properly set.
+ */
+static void populateImmediates(NormalizedInstruction& inst) {
+  auto offset = 1;
+  for (int i = 0; i < numImmediates(inst.op()); ++i) {
+    if (immType(inst.op(), i) == RATA) {
+      auto rataPc = inst.pc() + offset;
+      inst.imm[i].u_RATA = decodeRAT(inst.unit(), rataPc);
+    } else {
+      inst.imm[i] = getImm(reinterpret_cast<const Op*>(inst.pc()), i);
+    }
+    offset += immSize(reinterpret_cast<const Op*>(inst.pc()), i);
+  }
+  if (hasImmVector(*reinterpret_cast<const Op*>(inst.pc()))) {
+    inst.immVec = getImmVector(reinterpret_cast<const Op*>(inst.pc()));
+  }
+  if (inst.op() == OpFCallArray) {
+    inst.imm[0].u_IVA = 1;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
     : source(sk)
     , funcd(nullptr)
@@ -32,18 +58,17 @@ NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
     , breaksTracelet(false)
     , includeBothPaths(false)
     , nextIsMerge(false)
-    , changesPC(false)
+    , changesPC(opcodeChangesPC(sk.op()))
     , preppedByRef(false)
     , outputPredicted(false)
     , ignoreInnerType(false)
     , interp(false)
     , inlineReturn(false) {
   memset(imm, 0, sizeof(imm));
+  populateImmediates(*this);
 }
 
-NormalizedInstruction::NormalizedInstruction()
-    : NormalizedInstruction(SrcKey{}, nullptr)
-  {}
+NormalizedInstruction::NormalizedInstruction() { }
 
 NormalizedInstruction::~NormalizedInstruction() { }
 
@@ -89,27 +114,6 @@ std::string NormalizedInstruction::toString() const {
 
 SrcKey NormalizedInstruction::nextSk() const {
   return source.advanced(m_unit);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void populateImmediates(NormalizedInstruction& inst) {
-  auto offset = 1;
-  for (int i = 0; i < numImmediates(inst.op()); ++i) {
-    if (immType(inst.op(), i) == RATA) {
-      auto rataPc = inst.pc() + offset;
-      inst.imm[i].u_RATA = decodeRAT(inst.unit(), rataPc);
-    } else {
-      inst.imm[i] = getImm(reinterpret_cast<const Op*>(inst.pc()), i);
-    }
-    offset += immSize(reinterpret_cast<const Op*>(inst.pc()), i);
-  }
-  if (hasImmVector(*reinterpret_cast<const Op*>(inst.pc()))) {
-    inst.immVec = getImmVector(reinterpret_cast<const Op*>(inst.pc()));
-  }
-  if (inst.op() == OpFCallArray) {
-    inst.imm[0].u_IVA = 1;
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

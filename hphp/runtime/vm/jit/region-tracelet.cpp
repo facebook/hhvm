@@ -246,9 +246,7 @@ bool RegionFormer::prepareInstruction() {
   m_inst.breaksTracelet = opcodeBreaksBB(m_inst.op()) ||
                             (dontGuardAnyInputs(m_inst.op()) &&
                              opcodeChangesPC(m_inst.op()));
-  m_inst.changesPC = opcodeChangesPC(m_inst.op());
   m_inst.funcd = m_arStates.back().knownFunc();
-  populateImmediates(m_inst);
   m_ht.setBcOff(m_sk.offset(), false);
 
   InputInfoVec inputInfos;

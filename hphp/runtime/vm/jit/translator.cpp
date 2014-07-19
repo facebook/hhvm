@@ -1714,13 +1714,11 @@ Translator::translateRegion(const RegionDesc& region,
       NormalizedInstruction inst(sk, block->unit());
       inst.breaksTracelet = (i == block->length() - 1 &&
                              block == region.blocks.back());
-      inst.changesPC = opcodeChangesPC(inst.op());
       inst.funcd = topFunc;
       if (instrIsNonCallControlFlow(inst.op()) && !inst.breaksTracelet) {
         assert(b < region.blocks.size());
         inst.nextOffset = region.blocks[b+1]->start().offset();
       }
-      populateImmediates(inst);
       inst.nextIsMerge = nextIsMerge(inst, region);
       if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
         // TODO(t3730617): Could extend this logic to other

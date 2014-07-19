@@ -102,14 +102,5 @@ struct NormalizedInstruction {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Populates `imm' on `inst'.
- *
- * Assumes that inst.source and inst.unit have been properly set.
- */
-void populateImmediates(NormalizedInstruction& inst);
-
-///////////////////////////////////////////////////////////////////////////////
 }}
 #endif

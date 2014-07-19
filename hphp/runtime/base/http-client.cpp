@@ -191,9 +191,9 @@ int HttpClient::request(const char* verb,
     curl_easy_setopt(cp, CURLOPT_POST,          1);
     curl_easy_setopt(cp, CURLOPT_POSTFIELDS,    data);
     curl_easy_setopt(cp, CURLOPT_POSTFIELDSIZE, size);
-    if (verb != nullptr) {
-      curl_easy_setopt(cp, CURLOPT_CUSTOMREQUEST, verb);
-    }
+  }
+  if (verb != nullptr) {
+    curl_easy_setopt(cp, CURLOPT_CUSTOMREQUEST, verb);
   }
 
   if (responseHeaders) {

@@ -361,7 +361,7 @@ inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
 
   auto* result = ElemDArrayPre<keyType>(baseArr, key);
 
-  if (reffy && UNLIKELY(baseArr->isIntMapArray())) {
+  if (reffy && UNLIKELY(baseArr->isIntMapArray() || baseArr->isStrMapArray())) {
     // Downgrade and warn after the operation in case we copied
     MixedArray::downgradeAndWarn(baseArr.get(), MixedArray::Reason::kSetRef);
   }
@@ -1508,7 +1508,8 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
     return a->remove(StrNR(key), copy);
   } else {
     if (UNLIKELY(a->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
     }
     return a->remove(n, copy);
   }

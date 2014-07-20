@@ -114,6 +114,34 @@ ArrayData* MixedArray::MakeReserveIntMap(uint32_t capacity) {
   return ad;
 }
 
+ArrayData* MixedArray::MakeReserveStrMap(uint32_t capacity) {
+  auto const cmret = computeCapAndMask(capacity);
+  auto const cap   = cmret.first;
+  auto const mask  = cmret.second;
+  auto const ad    = smartAllocArray(cap, mask);
+
+  ad->m_kindAndSize = kStrMapKind << 24; // zero's size
+  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
+  ad->m_capAndUsed  = cap;
+  ad->m_tableMask   = mask;
+  ad->m_nextKI      = 0;
+
+  auto const data = reinterpret_cast<Elm*>(ad + 1);
+  auto const hash = reinterpret_cast<int32_t*>(data + cap);
+  wordfill(hash, Empty, mask + 1);
+
+  assert(ad->m_kind == kStrMapKind);
+  assert(ad->m_size == 0);
+  assert(ad->m_pos == 0);
+  assert(ad->m_count == 1);
+  assert(ad->m_cap == cap);
+  assert(ad->m_used == 0);
+  assert(ad->m_nextKI == 0);
+  assert(ad->m_tableMask == mask);
+  assert(ad->checkInvariants());
+  return ad;
+}
+
 ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
   ArrayData* ad;
@@ -899,9 +927,21 @@ MixedArray::findForRemove(const StringData* s, strhash_t prehash) {
 }
 
 bool MixedArray::ExistsInt(const ArrayData* ad, int64_t k) {
+  return ExistsIntImpl<kMixedKind>(ad, k);
+}
+
+template <ArrayData::ArrayKind aKind>
+ALWAYS_INLINE
+bool MixedArray::ExistsIntImpl(const ArrayData* ad, int64_t k) {
+  if (aKind == kStrMapKind) {
+    MixedArray::warnUsage(Reason::kExistsInt, aKind);
+  }
   auto a = asMixed(ad);
   return validPos(a->find(k));
 }
+
+template bool
+MixedArray::ExistsIntImpl<ArrayData::kStrMapKind>(const ArrayData*, int64_t);
 
 bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return MixedArray::ExistsStrImpl<kMixedKind>(ad, k);
@@ -911,7 +951,7 @@ template <ArrayData::ArrayKind aKind>
 ALWAYS_INLINE
 bool MixedArray::ExistsStrImpl(const ArrayData* ad, const StringData* k) {
   if (aKind != kMixedKind) {
-    MixedArray::warnUsage(Reason::kExistsStr);
+    MixedArray::warnUsage(Reason::kExistsStr, aKind);
   }
   auto a = asMixed(ad);
   return validPos(a->find(k, k->hash()));
@@ -1021,65 +1061,80 @@ NEVER_INLINE MixedArray* MixedArray::resize() {
 }
 
 void MixedArray::downgradeAndWarn(ArrayData* ad, const Reason r) {
-  assert(ad->m_kind == kIntMapKind);
+  assert(ad->isIntMapArray() || ad->isStrMapArray());
+  MixedArray::warnUsage(r, ad->m_kind);
   ad->m_kind = kMixedKind;
-  MixedArray::warnUsage(r);
 }
 
-void MixedArray::warnUsage(const Reason r) {
+void MixedArray::warnUsage(const Reason r, const ArrayKind kind) {
+  assert(kind == kIntMapKind || kind == kStrMapKind);
+  auto arrayName = kind == kIntMapKind ? "miarray" : "msarray";
   switch (r) {
   case Reason::kForeachByRef:
-    raise_warning("Foreach by reference over a miarray, converting to array");
+    raise_warning("Foreach by reference over a %s, converting to array",
+                  arrayName);
     break;
   case Reason::kPrepend:
-    raise_warning("Using array_unshift on a miarray, converting to array");
+    raise_warning("Using array_unshift on a %s, converting to array",
+                  arrayName);
     break;
   case Reason::kPop:
-    raise_warning("Using array_pop on a miarray, converting to array");
+    raise_warning("Using array_pop on a %s, converting to array", arrayName);
     break;
   case Reason::kTakeByRef:
-    raise_warning("Taking an element by reference from a miarray, "
-                  "converting to array");
+    raise_warning("Taking an element by reference from a %s, "
+                  "converting to array", arrayName);
     break;
   case Reason::kSetRef:
-    raise_warning("Adding a reference to a miarray, converting to array");
+    raise_warning("Adding a reference to a %s, converting to array", arrayName);
     break;
   case Reason::kAppendRef:
-    raise_warning("Appending a reference to a miarray, converting to array");
+    raise_warning("Appending a reference to a %s, converting to array",
+                  arrayName);
     break;
   case Reason::kAppend:
-    raise_warning("Appending to a miarray, converting to array");
+    raise_warning("Appending to a %s, converting to array", arrayName);
+    break;
+  case Reason::kNvGetInt:
+    raise_warning("Reading int key from a msarray, converting to array");
     break;
   case Reason::kNvGetStr:
     raise_warning("Reading string key from a miarray, converting to array");
     break;
+  case Reason::kExistsInt:
+    raise_warning("Reading int key from a msarray, converting to array");
+    break;
   case Reason::kExistsStr:
     raise_warning("Reading string key from a miarray, converting to array");
     break;
+  case Reason::kSetInt:
+    raise_warning("Adding an int key to a msarray, converting to array");
+    break;
   case Reason::kSetStr:
     raise_warning("Adding a string key to a miarray, converting to array");
+    break;
+  case Reason::kRemoveInt:
+    raise_warning("Removing an int key from a msarray, converting to array");
     break;
   case Reason::kRemoveStr:
     raise_warning("Removing a string key from a miarray, converting to array");
     break;
   case Reason::kDequeue:
-    raise_warning("Using array_shift on a miarray, converting to array");
+    raise_warning("Using array_shift on a %s, converting to array", arrayName);
     break;
   case Reason::kSort:
-    raise_warning("Using sort on a miarray, converting to array");
+    raise_warning("Using sort on a %s, converting to array", arrayName);
     break;
   case Reason::kUsort:
-    raise_warning("Using usort on a miarray, converting to array");
+    raise_warning("Using usort on a %s, converting to array", arrayName);
     break;
   case Reason::kNumericString:
     raise_warning("An integer-like string key used with a miarray");
     break;
   case Reason::kRenumber:
-    raise_warning("Trying to renumber IntMap array keys. "
-                  "Downgrading to normal array");
+    raise_warning("Trying to renumber keys on a %s, converting to array",
+                  arrayName);
     break;
-  default:
-    assert(false);
   }
 }
 
@@ -1380,14 +1435,28 @@ ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t* key_ptr) {
 
 ArrayData* MixedArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
                               bool copy) {
+  return LvalIntImpl<kMixedKind>(ad, k, ret, copy);
+}
+
+template <ArrayData::ArrayKind aKind>
+ALWAYS_INLINE
+ArrayData* MixedArray::LvalIntImpl(ArrayData* ad, int64_t k, Variant*& ret,
+                                   bool copy) {
   auto a = asMixed(ad);
   if (copy) {
     a = a->copyMixedAndResizeIfNeeded();
   } else {
     a = a->resizeIfNeeded();
   }
+  if (aKind == kStrMapKind) {
+    MixedArray::downgradeAndWarn(a, Reason::kSetInt);
+  }
   return a->addLvalImpl(k, ret);
 }
+
+template ArrayData*
+MixedArray::LvalIntImpl<ArrayData::kStrMapKind>(ArrayData* ad, int64_t k,
+                                                Variant*& ret, bool copy);
 
 ArrayData* MixedArray::LvalStr(ArrayData* ad,
                               StringData* key,
@@ -1451,18 +1520,33 @@ template ArrayData*
 MixedArray::LvalNewImpl<ArrayData::kIntMapKind>(ArrayData* ad, Variant*& ret,
                                                 bool copy);
 
-ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v,
-                              bool copy) {
+template ArrayData*
+MixedArray::LvalNewImpl<ArrayData::kStrMapKind>(ArrayData* ad, Variant*& ret,
+                                                bool copy);
+
+ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
+  return SetIntImpl<kMixedKind>(ad, k, v, copy);
+}
+
+template <ArrayData::ArrayKind aKind>
+ALWAYS_INLINE ArrayData*
+MixedArray::SetIntImpl(ArrayData* ad, int64_t k, Cell v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
+  if (aKind == kStrMapKind) {
+    MixedArray::downgradeAndWarn(a, Reason::kSetInt);
+  }
   return a->update(k, v);
 }
+
+template ArrayData*
+MixedArray::SetIntImpl<ArrayData::kStrMapKind>(ArrayData*, int64_t, Cell, bool);
 
 ArrayData* MixedArray::SetIntConverted(ArrayData* ad, int64_t k, Cell v,
                                        bool copy) {
   assert(ad->isIntMapArray());
-  MixedArray::warnUsage(Reason::kNumericString);
+  MixedArray::warnUsage(Reason::kNumericString, ad->m_kind);
   return MixedArray::SetInt(ad, k, v, copy);
 }
 
@@ -1508,6 +1592,10 @@ template ArrayData*
 MixedArray::SetRefIntImpl<ArrayData::kIntMapKind>(ArrayData* ad, int64_t k,
                                                   Variant& v, bool copy);
 
+template ArrayData*
+MixedArray::SetRefIntImpl<ArrayData::kStrMapKind>(ArrayData* ad, int64_t k,
+                                                  Variant& v, bool copy);
+
 ArrayData*
 MixedArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
   return SetRefStrImpl<kMixedKind>(ad, k, v, copy);
@@ -1527,6 +1615,10 @@ MixedArray::SetRefStrImpl(ArrayData* ad, StringData* k, Variant& v, bool copy) {
 
 template ArrayData*
 MixedArray::SetRefStrImpl<ArrayData::kIntMapKind>(ArrayData* ad, StringData* k,
+                                                  Variant& v, bool copy);
+
+template ArrayData*
+MixedArray::SetRefStrImpl<ArrayData::kStrMapKind>(ArrayData* ad, StringData* k,
                                                   Variant& v, bool copy);
 
 ArrayData*
@@ -1631,12 +1723,25 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
 }
 
 ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+  return RemoveIntImpl<kMixedKind>(ad, k, copy);
+}
+
+template <ArrayData::ArrayKind aKind>
+ALWAYS_INLINE ArrayData*
+MixedArray::RemoveIntImpl(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
+  if (aKind == kStrMapKind) {
+    MixedArray::warnUsage(Reason::kRemoveInt, aKind);
+  }
   auto pos = a->findForRemove(k, false);
   if (validPos(pos)) a->erase(pos);
   return a;
 }
+
+template ArrayData*
+MixedArray::RemoveIntImpl<ArrayData::kStrMapKind>(ArrayData* ad, int64_t k,
+                                                  bool copy);
 
 ArrayData*
 MixedArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
@@ -1678,14 +1783,27 @@ ArrayData* MixedArray::CopyWithStrongIterators(const ArrayData* ad) {
 // non-variant interface
 
 const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
+  return NvGetIntImpl<kMixedKind>(ad, ki);
+}
+
+template <ArrayData::ArrayKind aKind>
+ALWAYS_INLINE
+const TypedValue* MixedArray::NvGetIntImpl(const ArrayData* ad, int64_t ki) {
+  if (aKind != kMixedKind) {
+    MixedArray::warnUsage(Reason::kNvGetInt, aKind);
+  }
   auto a = asMixed(ad);
   auto i = a->find(ki);
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
+template const TypedValue*
+MixedArray::NvGetIntImpl<ArrayData::kStrMapKind>(const ArrayData* ad,
+                                                 int64_t ki);
+
 const TypedValue* MixedArray::NvGetIntConverted(const ArrayData* ad,
                                                 int64_t ki) {
-  MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+  MixedArray::warnUsage(MixedArray::Reason::kNumericString, kIntMapKind);
   return NvGetInt(ad, ki);
 }
 
@@ -1699,7 +1817,7 @@ ALWAYS_INLINE
 const TypedValue* MixedArray::NvGetStrImpl(const ArrayData* ad,
                                            const StringData* k) {
   if (aKind != kMixedKind) {
-    MixedArray::warnUsage(Reason::kNvGetStr);
+    MixedArray::warnUsage(Reason::kNvGetStr, aKind);
   }
   auto a = asMixed(ad);
   auto i = a->find(k, k->hash());
@@ -1745,7 +1863,9 @@ ArrayData* MixedArray::AppendImpl(ArrayData* ad, const Variant& v, bool copy) {
 template ArrayData*
 MixedArray::AppendImpl<ArrayData::kIntMapKind>(ArrayData* ad, const Variant& v,
                                                bool copy);
-
+template ArrayData*
+MixedArray::AppendImpl<ArrayData::kStrMapKind>(ArrayData* ad, const Variant& v,
+                                               bool copy);
 
 ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   return AppendRefImpl<kMixedKind>(ad, v, copy);
@@ -1775,7 +1895,8 @@ ArrayData* MixedArray::AppendRefImpl(ArrayData* ad, Variant& v, bool copy) {
 
 template ArrayData*
 MixedArray::AppendRefImpl<ArrayData::kIntMapKind>(ArrayData*, Variant&, bool);
-
+template ArrayData*
+MixedArray::AppendRefImpl<ArrayData::kStrMapKind>(ArrayData*, Variant&, bool);
 
 ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
                                      bool copy) {
@@ -1797,6 +1918,9 @@ ArrayData* MixedArray::AppendWithRefImpl(ArrayData* ad, const Variant& v,
 
 template ArrayData*
 MixedArray::AppendWithRefImpl<ArrayData::kIntMapKind>(ArrayData*,
+                                                      const Variant&, bool);
+template ArrayData*
+MixedArray::AppendWithRefImpl<ArrayData::kStrMapKind>(ArrayData*,
                                                       const Variant&, bool);
 
 /*
@@ -2053,6 +2177,8 @@ ArrayData* MixedArray::PopImpl(ArrayData* ad, Variant& value) {
 
 template
 ArrayData* MixedArray::PopImpl<ArrayData::kIntMapKind>(ArrayData*, Variant&);
+template
+ArrayData* MixedArray::PopImpl<ArrayData::kStrMapKind>(ArrayData*, Variant&);
 
 ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   return DequeueImpl<kMixedKind>(adInput, value);
@@ -2088,6 +2214,8 @@ ArrayData* MixedArray::DequeueImpl(ArrayData* adInput, Variant& value) {
 
 template ArrayData*
 MixedArray::DequeueImpl<ArrayData::kIntMapKind>(ArrayData*, Variant&);
+template ArrayData*
+MixedArray::DequeueImpl<ArrayData::kStrMapKind>(ArrayData*, Variant&);
 
 ArrayData* MixedArray::Prepend(ArrayData* adInput,
                               const Variant& v,
@@ -2128,12 +2256,13 @@ template <ArrayData::ArrayKind aKind>
 ALWAYS_INLINE
 void MixedArray::RenumberImpl(ArrayData* ad) {
   if (aKind != kMixedKind) {
-    MixedArray::warnUsage(Reason::kRenumber);
+    MixedArray::warnUsage(Reason::kRenumber, aKind);
   }
   asMixed(ad)->compact(true);
 }
 
 template void MixedArray::RenumberImpl<ArrayData::kIntMapKind>(ArrayData*);
+template void MixedArray::RenumberImpl<ArrayData::kStrMapKind>(ArrayData*);
 
 void MixedArray::OnSetEvalScalar(ArrayData* ad) {
   auto a = asMixed(ad);
@@ -2183,7 +2312,9 @@ bool MixedArray::AdvanceMArrayIterImpl(ArrayData* ad, MArrayIter& fp) {
 template bool
 MixedArray::AdvanceMArrayIterImpl<ArrayData::kIntMapKind>(ArrayData* ad,
                                                           MArrayIter& fp);
-
+template bool
+MixedArray::AdvanceMArrayIterImpl<ArrayData::kStrMapKind>(ArrayData* ad,
+                                                          MArrayIter& fp);
 
 //////////////////////////////////////////////////////////////////////
 

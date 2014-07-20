@@ -48,6 +48,7 @@ struct ArrayData {
     kNvtwKind,    // NameValueTableWrapper
     kProxyKind,   // ProxyArray
     kIntMapKind,  // IntMapArray, int keys, maybe holes, similar to MixedArray
+    kStrMapKind,  // StrMapArray, string keys, mixed values, like MixedArray
     kNumKinds     // insert new values before kNumKinds.
   };
 
@@ -141,13 +142,16 @@ public:
    * Specific kind querying operators.
    */
   bool isPacked() const { return m_kind == kPackedKind; }
-  // All logic should treat kMixedKind the same as kIntMapKind except
-  // for logic specific to kIntMapKind in which case use isIntMapArray()
-  bool isMixed() const { return m_kind == kMixedKind || m_kind == kIntMapKind; }
+  // All logic should treat kMixedKind the same as kIntMapKind/kStrMapKind
+  // except for logic specific to kIntMapKind/kStrMapKind in which case
+  // you can use isIntMapArray() or isStrMapArray()
+  bool isMixed() const { return m_kind == kMixedKind || m_kind == kIntMapKind ||
+                                m_kind == kStrMapKind; }
   bool isSharedArray() const { return m_kind == kSharedKind; }
   bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
   bool isIntMapArray() const { return m_kind == kIntMapKind; }
+  bool isStrMapArray() const { return m_kind == kStrMapKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.

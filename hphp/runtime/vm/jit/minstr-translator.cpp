@@ -1232,7 +1232,8 @@ static inline const TypedValue* elemArrayImpl(TypedValue* a,
   auto const ad = a->m_data.parr;
   if (converted) {
     if (UNLIKELY(ad->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
     }
   }
   auto const ret = checkForInt ? checkedGet(ad, key)
@@ -1739,7 +1740,8 @@ template<KeyType keyType, bool checkForInt, bool converted>
 static inline TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   if (converted) {
     if (UNLIKELY(a->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
     }
   }
   auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
@@ -2068,7 +2070,8 @@ static inline uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
                 "Should have only been converted if KeyType is now an int");
   if (converted) {
     if (UNLIKELY(a->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
     }
   }
   auto const value = checkForInt ? checkedGet(a, key) : a->nvGet(key);
@@ -2256,7 +2259,8 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
                                : uncheckedSet(a, key, value, copy);
   if (converted) {
     if (UNLIKELY(ret->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
     }
   }
 

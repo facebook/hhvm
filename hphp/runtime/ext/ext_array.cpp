@@ -2391,7 +2391,8 @@ Variant f_hphp_array_idx(const Variant& search, const Variant& key, const Varian
       if (UNLIKELY(arr->isIntMapArray())) {
         int64_t n;
         if (key.isString() && key.getStringData()->isStrictlyInteger(n)) {
-          MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+          MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                                ArrayData::kIntMapKind);
         }
       }
       VarNR index = key.toKey();

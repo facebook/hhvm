@@ -149,12 +149,13 @@ public:
   static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
 
   /*
-   * Allocate a new, empty, request-local array in int map mode, with
+   * Allocate a new, empty, request-local array in int map/string map mode, with
    * enough space reserved for `capacity' members.
    *
    * The returned array is already incref'd.
    */
   static ArrayData* MakeReserveIntMap(uint32_t capacity);
+  static ArrayData* MakeReserveStrMap(uint32_t capacity);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -287,7 +288,14 @@ public:
   template <ArrayKind aKind>
   static const TypedValue* NvGetStrImpl(const ArrayData*, const StringData* k);
   template <ArrayKind aKind>
+  static const TypedValue* NvGetIntImpl(const ArrayData*, int64_t ki);
+  template <ArrayKind aKind>
+  static bool ExistsIntImpl(const ArrayData*, int64_t k);
+  template <ArrayKind aKind>
   static bool ExistsStrImpl(const ArrayData*, const StringData* k);
+  template <ArrayKind aKind>
+  static ArrayData* LvalIntImpl(ArrayData* ad, int64_t k, Variant*& ret,
+                                bool copy);
   template <ArrayKind aKind>
   static ArrayData* LvalStrImpl(ArrayData* ad, StringData* k, Variant*& ret,
                                 bool copy);
@@ -296,6 +304,8 @@ public:
   template <ArrayKind aKind>
   static ArrayData* SetStrImpl(ArrayData*, StringData* k, Cell v, bool copy);
   template <ArrayKind aKind>
+  static ArrayData* SetIntImpl(ArrayData*, int64_t k, Cell v, bool copy);
+  template <ArrayKind aKind>
   static ArrayData* SetRefIntImpl(ArrayData* ad, int64_t k, Variant& v,
                                   bool copy);
   template <ArrayKind aKind>
@@ -303,6 +313,8 @@ public:
                               bool copy);
   template <ArrayKind aKind>
   static ArrayData* AddStrImpl(ArrayData*, StringData* k, Cell v, bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* RemoveIntImpl(ArrayData*, int64_t k, bool copy);
   template <ArrayKind aKind>
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData* k, bool copy);
   template <ArrayKind aKind>
@@ -402,9 +414,13 @@ public:
     kSetRef,
     kAppendRef,
     kAppend,
+    kNvGetInt,
     kNvGetStr,
+    kExistsInt,
     kExistsStr,
+    kSetInt,
     kSetStr,
+    kRemoveInt,
     kRemoveStr,
     kDequeue,
     kSort,
@@ -413,7 +429,7 @@ public:
     kRenumber,
   };
   static void downgradeAndWarn(ArrayData* ad, const Reason r);
-  static void warnUsage(const Reason r);
+  static void warnUsage(const Reason r, const ArrayKind kind);
 
 private:
   static void getElmKey(const Elm& e, TypedValue* out);

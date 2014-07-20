@@ -166,6 +166,11 @@ Array HHVM_FUNCTION(hphp_miarray) {
   return Array::attach(ad);
 }
 
+Array HHVM_FUNCTION(hphp_msarray) {
+  auto ad = MixedArray::MakeReserveStrMap(10);
+  return Array::attach(ad);
+}
+
 int get_modifiers(Attr attrs, bool cls) {
   int php_modifier = 0;
   if (attrs & AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
@@ -1287,6 +1292,7 @@ class ReflectionExtension : public Extension {
     HHVM_FE(hphp_create_object_without_constructor);
     HHVM_FE(hphp_get_extension_info);
     HHVM_FE(hphp_miarray);
+    HHVM_FE(hphp_msarray);
     HHVM_FE(hphp_get_original_class_name);
     HHVM_FE(hphp_get_property);
     HHVM_FE(hphp_get_static_property);

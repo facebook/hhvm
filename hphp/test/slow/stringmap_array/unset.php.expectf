@@ -1,0 +1,10 @@
+array(1) {
+  ["bar"]=>
+  int(2)
+}
+
+Warning: Removing an int key from a msarray, converting to array in %s/unset.php on line 14
+
+Warning: Removing an int key from a msarray, converting to array in %s/unset.php on line 4
+
+Warning: Appending to a msarray, converting to array in %s/unset.php on line 18

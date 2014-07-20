@@ -396,7 +396,8 @@ static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
     if (UNLIKELY(arr->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
     }
     return arr->exists(n);
   }
@@ -454,7 +455,8 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
 
 TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
   if (UNLIKELY(a->isIntMapArray())) {
-    MixedArray::warnUsage(MixedArray::Reason::kNumericString);
+    MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                          ArrayData::kIntMapKind);
   }
   return arrayIdxI(a, key, def);
 }

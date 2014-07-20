@@ -1323,7 +1323,7 @@ class ReflectionClass implements Reflector, Serializable {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  final public function inNamespace(): bool {
+  public function inNamespace(): bool {
     return strrpos($this->getName(), '\\') !== false;
   }
 
@@ -1335,7 +1335,7 @@ class ReflectionClass implements Reflector, Serializable {
    *
    * @return     string   The namespace name.
    */
-  final public function getNamespaceName(): string {
+  public function getNamespaceName(): string {
     $name = $this->getName();
     $pos = strrpos($name, '\\');
     return ($pos === false) ? '' : substr($name, 0, $pos);
@@ -1349,7 +1349,7 @@ class ReflectionClass implements Reflector, Serializable {
    *
    * @return     string  The short name of the function.
    */
-  final public function getShortName(): string {
+  public function getShortName(): string {
     $name = $this->getName();
     $pos = strrpos($name, '\\');
     return ($pos === false) ? $name : substr($name, $pos + 1);

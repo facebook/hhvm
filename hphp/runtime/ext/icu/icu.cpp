@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 
 #include <unicode/uloc.h>
@@ -34,9 +35,7 @@ void IntlError::setError(UErrorCode code, const char *format, ...) {
   if (format) {
     va_list args;
     va_start(args, format);
-    char message[1024];
-    int message_len = vsnprintf(message, sizeof(message), format, args);
-    m_errorMessage = std::string(message, message_len);
+    string_vsnprintf(m_errorMessage, format, args);
     va_end(args);
   }
 

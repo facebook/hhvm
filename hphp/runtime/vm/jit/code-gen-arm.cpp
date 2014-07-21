@@ -1031,18 +1031,19 @@ static void shuffleArgs(vixl::MacroAssembler& a,
   PhysReg::Map<PhysReg> moves;
   PhysReg::Map<ArgDesc*> argDescs;
 
-  for (size_t i = 0; i < args.numRegArgs(); i++) {
-    auto kind = args[i].kind();
+  for (size_t i = 0; i < args.numGpArgs(); i++) {
+    auto& arg = args.gpArg(i);
+    auto kind = arg.kind();
     if (!(kind == ArgDesc::Kind::Reg  ||
           kind == ArgDesc::Kind::Addr ||
           kind == ArgDesc::Kind::TypeReg)) {
       continue;
     }
-    auto dstReg = args[i].dstReg();
-    auto srcReg = args[i].srcReg();
+    auto dstReg = arg.dstReg();
+    auto srcReg = arg.srcReg();
     if (dstReg != srcReg) {
       moves[dstReg] = srcReg;
-      argDescs[dstReg] = &args[i];
+      argDescs[dstReg] = &arg;
     }
     switch (call.kind()) {
     case CppCall::Kind::Indirect:
@@ -1092,17 +1093,17 @@ static void shuffleArgs(vixl::MacroAssembler& a,
     }
   }
 
-  for (size_t i = 0; i < args.numRegArgs(); ++i) {
-    if (!args[i].done()) {
-      auto kind = args[i].kind();
-      auto dstReg = x2a(args[i].dstReg());
-      if (kind == ArgDesc::Kind::Imm) {
-        a.  Mov  (dstReg, args[i].imm().q());
-      } else if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
-        // Should have already been done
-      } else {
-        not_implemented();
-      }
+  for (size_t i = 0; i < args.numGpArgs(); ++i) {
+    auto& arg = args.gpArg(i);
+    if (arg.done()) continue;
+    auto kind = arg.kind();
+    auto dstReg = x2a(arg.dstReg());
+    if (kind == ArgDesc::Kind::Imm) {
+      a.  Mov  (dstReg, arg.imm().q());
+    } else if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
+      // Should have already been done
+    } else {
+      not_implemented();
     }
   }
 }
@@ -1159,8 +1160,8 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
   saver.emitPushes(a);
   SCOPE_EXIT { saver.emitPops(a); };
 
-  for (size_t i = 0; i < args.numRegArgs(); i++) {
-    args[i].setDstReg(PhysReg{argReg(i)});
+  for (size_t i = 0; i < args.numGpArgs(); i++) {
+    args.gpArg(i).setDstReg(PhysReg{argReg(i)});
   }
   shuffleArgs(a, args, call);
 

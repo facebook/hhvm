@@ -749,13 +749,14 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
   PhysReg::Map<PhysReg> moves;
   PhysReg::Map<ArgDesc*> argDescs;
 
-  for (size_t i = 0; i < args.numRegArgs(); ++i) {
-    if (shuffleArgsPlanningHelper(moves, argDescs, args[i])) {
+  for (size_t i = 0; i < args.numGpArgs(); ++i) {
+    auto& arg = args.gpArg(i);
+    if (shuffleArgsPlanningHelper(moves, argDescs, arg)) {
       continue;
     }
     switch (call.kind()) {
     case CppCall::Kind::Indirect:
-      if (args[i].dstReg() == call.reg()) {
+      if (arg.dstReg() == call.reg()) {
         // an indirect call uses an argument register for the func ptr.
         // Use rax instead and update the CppCall
         moves[reg::rax] = call.reg();
@@ -768,8 +769,8 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
       break;
     }
   }
-  for (size_t i = 0; i < args.numSIMDRegArgs(); ++i) {
-    shuffleArgsPlanningHelper(moves, argDescs, args.regSIMD(i));
+  for (size_t i = 0; i < args.numSimdArgs(); ++i) {
+    shuffleArgsPlanningHelper(moves, argDescs, args.simdArg(i));
   }
 
   // The caller may be using rCgGP directly, or indirectly via m_rScratch.
@@ -781,7 +782,7 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
   // before the shuffles below in case the shuffles would clobber any of the
   // srcRegs here.
   for (int i = args.numStackArgs() - 1; i >= 0; --i) {
-    auto& arg = args.stk(i);
+    auto& arg = args.stkArg(i);
     auto srcReg = arg.srcReg();
     assert(arg.dstReg() == InvalidReg);
     switch (arg.kind()) {
@@ -890,30 +891,30 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
   // load-effective address and zero extending for bools.
   // Ignore args that have been handled by the
   // move above.
-  for (size_t i = 0; i < args.numRegArgs(); ++i) {
-    if (!args[i].done()) {
-      ArgDesc::Kind kind = args[i].kind();
-      PhysReg dst = args[i].dstReg();
-      assert(dst.isGP());
-      if (kind == ArgDesc::Kind::Imm) {
-        a.emitImmReg(args[i].imm().q(), dst);
-      } else if (kind == ArgDesc::Kind::TypeReg) {
-        if (kTypeShiftBits > 0) {
-          a.    shlq   (kTypeShiftBits, dst);
-        }
-      } else if (kind == ArgDesc::Kind::Addr) {
-        a.    addq   (args[i].disp(), dst);
-      } else if (args[i].isZeroExtend()) {
-        a.    movzbl (rbyte(dst), r32(dst));
-      } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
-                 kind == ArgDesc::Kind::None) {
-        a.emitImmReg(0xbadbadbadbadbad, dst);
+  for (size_t i = 0; i < args.numGpArgs(); ++i) {
+    auto& arg = args.gpArg(i);
+    if (arg.done()) continue;
+    ArgDesc::Kind kind = arg.kind();
+    PhysReg dst = arg.dstReg();
+    assert(dst.isGP());
+    if (kind == ArgDesc::Kind::Imm) {
+      a.emitImmReg(arg.imm().q(), dst);
+    } else if (kind == ArgDesc::Kind::TypeReg) {
+      if (kTypeShiftBits > 0) {
+        a.    shlq   (kTypeShiftBits, dst);
       }
+    } else if (kind == ArgDesc::Kind::Addr) {
+      a.    addq   (arg.disp(), dst);
+    } else if (arg.isZeroExtend()) {
+      a.    movzbl (rbyte(dst), r32(dst));
+    } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
+               kind == ArgDesc::Kind::None) {
+      a.emitImmReg(0xbadbadbadbadbad, dst);
     }
   }
 
-  for (size_t i = 0; i < args.numSIMDRegArgs(); ++i) {
-    auto &arg = args.regSIMD(i);
+  for (size_t i = 0; i < args.numSimdArgs(); ++i) {
+    auto &arg = args.simdArg(i);
     if (arg.done()) continue;
     auto kind = arg.kind();
     auto dst = arg.dstReg();
@@ -1012,11 +1013,11 @@ void CodeGenerator::cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
   PhysRegSaverParity regSaver(1 + args.numStackArgs(), a, toSave);
 
   // Assign registers to the arguments then prepare them for the call.
-  for (size_t i = 0; i < args.numRegArgs(); i++) {
-    args[i].setDstReg(argNumToRegName[i]);
+  for (size_t i = 0; i < args.numGpArgs(); i++) {
+    args.gpArg(i).setDstReg(argNumToRegName[i]);
   }
-  for (size_t i = 0; i < args.numSIMDRegArgs(); i++) {
-    args.regSIMD(i).setDstReg(argNumToSIMDRegName[i]);
+  for (size_t i = 0; i < args.numSimdArgs(); i++) {
+    args.simdArg(i).setDstReg(argNumToSIMDRegName[i]);
   }
   regSaver.bytesPushed(shuffleArgs(a, args, call));
 
@@ -2942,7 +2943,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // move a src known type to a dest register
-      //         a.emitImmReg(args[i].imm().q(), dst);
+      //         a.emitImmReg(arg.imm().q(), dst);
       assert(src->type().isKnownDataType());
       m_as.emitImmReg(src->type().toDataType(), rd.reg(1));
     }

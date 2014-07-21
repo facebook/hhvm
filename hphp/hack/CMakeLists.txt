@@ -34,11 +34,11 @@ if (OCAMLC_FOUND)
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
 
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/hh_client
+  install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
     DESTINATION bin
     COMPONENT dev)
 
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/hh_server
+  install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_server
     DESTINATION bin
     COMPONENT dev)
 endif()

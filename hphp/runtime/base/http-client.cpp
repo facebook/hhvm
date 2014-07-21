@@ -171,14 +171,12 @@ int HttpClient::request(const char* verb,
     }
   }
 
-  std::vector<String> headers; // holding those temporary strings
   curl_slist *slist = nullptr;
   if (requestHeaders) {
     for (HeaderMap::const_iterator iter = requestHeaders->begin();
          iter != requestHeaders->end(); ++iter) {
       for (unsigned int i = 0; i < iter->second.size(); i++) {
         String header = iter->first + ": " + iter->second[i];
-        headers.push_back(header);
         slist = curl_slist_append(slist, header.data());
       }
     }
@@ -197,7 +195,7 @@ int HttpClient::request(const char* verb,
     curl_easy_setopt(cp, CURLOPT_CUSTOMREQUEST, verb);
 
     if (strcasecmp(verb, "HEAD") == 0) {
-        curl_easy_setopt(cp, CURLOPT_NOBODY, 1);
+      curl_easy_setopt(cp, CURLOPT_NOBODY, 1);
     }
   }
 

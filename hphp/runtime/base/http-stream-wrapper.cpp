@@ -76,7 +76,7 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
 
       for (ArrayIter it(lines); it; ++it) {
         Array parts = StringUtil::Explode(
-          it.second().toString(), ": ").toArray();
+          it.second().toString(), ":").toArray();
         headers.set(parts.rvalAt(0), parts.rvalAt(1));
       }
     }

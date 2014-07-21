@@ -496,7 +496,7 @@ private:
   ClassScopePtr findSingleTraitWithMethod(AnalysisResultPtr ar,
                                           const std::string &methodName) const;
 
-  ClassScope::TraitMethodList removeSpareTraitAbstractMethods();
+  void removeSpareTraitAbstractMethods(AnalysisResultPtr ar);
 
   bool usesTrait(const std::string &traitName) const;
 

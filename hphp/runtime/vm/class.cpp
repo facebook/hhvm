@@ -2339,54 +2339,57 @@ void Class::setInitializers() {
   m_callsCustomInstanceInit = method && method->isBuiltin();
 }
 
-// Checks if interface/trait methods are OK:
+// Checks if interface methods are OK:
 //  - there's no requirement if this is a trait, interface, or abstract class
 //  - a non-abstract class must implement all methods from interfaces it
 //    declares to implement (either directly or indirectly), arity must be
 //    compatible (at least as many parameters, additional parameters must have
 //    defaults), and typehints must be compatible
-void Class::checkMethods(const Class* cls) {
-  for (size_t m = 0; m < cls->m_methods.size(); m++) {
-    Func* imeth = cls->getMethod(m);
-    const StringData* methName = imeth->name();
+void Class::checkInterfaceMethods() {
+  for (int i = 0, size = m_interfaces.size(); i < size; i++) {
+    const Class* iface = m_interfaces[i];
 
-    // Skip special methods
-    if (Func::isSpecial(methName)) continue;
+    for (size_t m = 0; m < iface->m_methods.size(); m++) {
+      Func* imeth = iface->getMethod(m);
+      const StringData* methName = imeth->name();
 
-    Func* meth = lookupMethod(methName);
+      // Skip special methods
+      if (Func::isSpecial(methName)) continue;
 
-    if (attrs() & (AttrTrait | AttrInterface | AttrAbstract)) {
-      if (meth == nullptr) {
-        // Skip unimplemented method.
-        continue;
+      Func* meth = lookupMethod(methName);
+
+      if (attrs() & (AttrTrait | AttrInterface | AttrAbstract)) {
+        if (meth == nullptr) {
+          // Skip unimplemented method.
+          continue;
+        }
+      } else {
+        // Verify that method is not abstract within concrete class.
+        if (meth == nullptr || (meth->attrs() & AttrAbstract)) {
+          raise_error("Class %s contains abstract method (%s) and "
+                      "must therefore be declared abstract or implement "
+                      "the remaining methods", name()->data(),
+                      methName->data());
+        }
       }
-    } else {
-      // Verify that method is not abstract within concrete class.
-      if (meth == nullptr || (meth->attrs() & AttrAbstract)) {
-        raise_error("Class %s contains abstract method (%s) and "
-                    "must therefore be declared abstract or implement "
-                    "the remaining methods", name()->data(),
-                    methName->data());
+      bool ifaceStaticMethod = imeth->attrs() & AttrStatic;
+      bool classStaticMethod = meth->attrs() & AttrStatic;
+      if (classStaticMethod != ifaceStaticMethod) {
+        raise_error("Cannot make %sstatic method %s::%s() %sstatic "
+                    "in class %s",
+                    ifaceStaticMethod ? "" : "non-",
+                    iface->m_preClass->name()->data(), methName->data(),
+                    classStaticMethod ? "" : "non-",
+                    m_preClass->name()->data());
       }
+      if ((imeth->attrs() & AttrPublic) &&
+          !(meth->attrs() & AttrPublic)) {
+        raise_error("Access level to %s::%s() must be public "
+                    "(as in interface %s)", m_preClass->name()->data(),
+                    methName->data(), iface->m_preClass->name()->data());
+      }
+      checkDeclarationCompat(m_preClass.get(), meth, imeth);
     }
-    bool ifaceStaticMethod = imeth->attrs() & AttrStatic;
-    bool classStaticMethod = meth->attrs() & AttrStatic;
-    if (classStaticMethod != ifaceStaticMethod) {
-      raise_error("Cannot make %sstatic method %s::%s() %sstatic "
-                  "in class %s",
-                  ifaceStaticMethod ? "" : "non-",
-                  cls->m_preClass->name()->data(), methName->data(),
-                  classStaticMethod ? "" : "non-",
-                  m_preClass->name()->data());
-    }
-    if (isInterface(cls) &&
-        (imeth->attrs() & AttrPublic) &&
-        !(meth->attrs() & AttrPublic)) {
-      raise_error("Access level to %s::%s() must be public "
-                  "(as in interface %s)", m_preClass->name()->data(),
-                  methName->data(), cls->m_preClass->name()->data());
-    }
-    checkDeclarationCompat(m_preClass.get(), meth, imeth);
   }
 }
 
@@ -2468,13 +2471,7 @@ void Class::setInterfaces() {
   }
 
   m_interfaces.create(interfacesBuilder);
-
-  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
-    checkMethods(m_interfaces[i]);
-  }
-  for (int i = 0, size = m_usedTraits.size(); i < size; ++i) {
-    checkMethods(m_usedTraits[i].get());
-  }
+  checkInterfaceMethods();
 }
 
 void Class::setRequirements() {

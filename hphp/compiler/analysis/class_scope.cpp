@@ -749,11 +749,8 @@ void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
 // This method removes trait abstract methods that are either:
 //   1) implemented by other traits
 //   2) duplicate
-// Returns a list of deleted abstract methods
-ClassScope::TraitMethodList ClassScope::removeSpareTraitAbstractMethods() {
+void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
   assert(Option::WholeProgram);
-
-  TraitMethodList abstractMethods;
   for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
        iter != m_importMethToTraitMap.end(); iter++) {
 
@@ -781,7 +778,6 @@ ClassScope::TraitMethodList ClassScope::removeSpareTraitAbstractMethods() {
           traitIter->m_modifiers : traitIter->m_method->getModifiers();
         if (modifiers->isAbstract()) {
           if (hasNonAbstractMeth || !firstAbstractMeth) {
-            abstractMethods.push_back(*traitIter);
             tMethList.erase(traitIter);
           }
           firstAbstractMeth = false;
@@ -789,8 +785,6 @@ ClassScope::TraitMethodList ClassScope::removeSpareTraitAbstractMethods() {
       }
     }
   }
-
-  return abstractMethods;
 }
 
 void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
@@ -879,7 +873,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   applyTraitRules(ar);
 
   // Remove trait abstract methods provided by other traits and duplicates
-  TraitMethodList abstractMethods = removeSpareTraitAbstractMethods();
+  removeSpareTraitAbstractMethods(ar);
 
   // Apply precedence of current class over used traits
   for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
@@ -892,7 +886,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   }
 
   std::map<string, MethodStatementPtr> importedTraitMethods;
-  std::map<string, const TraitMethod*> importedTraitsByOrigName;
   std::vector<std::pair<string,const TraitMethod*>> importedTraitsWithOrigName;
 
   // Actually import the methods
@@ -926,7 +919,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
         toLower(((TraitAliasStatement*)traitMethIter->m_ruleStmt.get())->
                       getMethodName()) : iter->first;
       importedTraitMethods[sourceName] = MethodStatementPtr();
-      importedTraitsByOrigName[sourceName] = &*traitMethIter;
       importedTraitsWithOrigName.push_back(
         make_pair(sourceName, &*traitMethIter));
     }
@@ -956,33 +948,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     if (newMeth) {
       importedTraitMethods[sourceName] = newMeth;
     }
-  }
-
-  // Check that all abstract methods are correctly implemented
-  for (auto abstractMethod : abstractMethods) {
-    auto importedMethod =
-      importedTraitsByOrigName.find(abstractMethod.m_originalName);
-    if (importedMethod == importedTraitsByOrigName.end()) {
-      continue;
-    }
-
-    ExpressionListPtr iparams = abstractMethod.m_method->getParams();
-    ExpressionListPtr aparams = importedMethod->second->m_method->getParams();
-
-    int iparamCount = iparams ? iparams->getCount() : 0;
-    int aparamCount = aparams ? iparams->getCount() : 0;
-
-    // There are other cases, such as type mismatch, but those are handled by
-    // Class::checkMethods
-    if (iparamCount != aparamCount) {
-      getStmt()->analysisTimeFatal(
-        Compiler::InvalidDerivation,
-        "Declaration of %s() must be compatible with %s()",
-        abstractMethod.m_method->getOriginalFullName().c_str(),
-        importedMethod->second->m_method->getOriginalFullName().c_str()
-      );
-    }
-
   }
 
   // Import trait properties

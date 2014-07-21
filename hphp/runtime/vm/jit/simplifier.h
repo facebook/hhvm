@@ -141,6 +141,7 @@ private:
   SSATmp* simplifyLdCtx(const IRInstruction*);
   SSATmp* simplifyLdClsCtx(const IRInstruction*);
   SSATmp* simplifyLdObjClass(const IRInstruction*);
+  SSATmp* simplifyLdObjInvoke(const IRInstruction*);
   SSATmp* simplifyGetCtxFwdCall(const IRInstruction* inst);
   SSATmp* simplifyConvClsToCctx(const IRInstruction* inst);
   SSATmp* simplifySpillStack(const IRInstruction* inst);

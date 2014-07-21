@@ -467,6 +467,7 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case LdCtx:        return simplifyLdCtx(inst);
     case LdClsCtx:     return simplifyLdClsCtx(inst);
     case LdObjClass:   return simplifyLdObjClass(inst);
+    case LdObjInvoke:  return simplifyLdObjInvoke(inst);
     case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
     case ConvClsToCctx: return simplifyConvClsToCctx(inst);
 
@@ -539,6 +540,19 @@ SSATmp* Simplifier::simplifyLdObjClass(const IRInstruction* inst) {
 
   if (auto const exact = ty.getExactClass()) return cns(exact);
   return nullptr;
+}
+
+const StaticString s_invoke("__invoke");
+
+SSATmp* Simplifier::simplifyLdObjInvoke(const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (!src->isConst()) return nullptr;
+
+  auto const cls = src->clsVal();
+  if (!RDS::isPersistentHandle(cls->classHandle())) return nullptr;
+
+  auto const meth = cls->lookupMethod(s_invoke.get());
+  return meth != nullptr ? cns(meth) : nullptr;
 }
 
 SSATmp* Simplifier::simplifyGetCtxFwdCall(const IRInstruction* inst) {

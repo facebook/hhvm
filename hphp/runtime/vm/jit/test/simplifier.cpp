@@ -272,7 +272,7 @@ TEST(Simplifier, Count) {
 TEST(Simplifier, LdObjClass) {
   IRUnit unit{test_context};
   Simplifier sim{unit};
-  auto dummy = BCMarker::Dummy();
+  auto const dummy = BCMarker::Dummy();
   auto const cls = SystemLib::s_IteratorClass;
 
   // LdObjClass t1:Obj<=C doesn't simplify
@@ -292,6 +292,32 @@ TEST(Simplifier, LdObjClass) {
     auto result = sim.simplify(load, false);
     EXPECT_EQ(result.dst->clsVal(), cls);
     EXPECT_EQ(result.instrs.size(), 0);
+  }
+}
+
+TEST(Simplifier, LdObjInvoke) {
+  IRUnit unit{test_context};
+  Simplifier sim{unit};
+  auto const dummy = BCMarker::Dummy();
+  auto const taken = unit.defBlock();
+
+  // LdObjInvoke t1:Cls doesn't simplify
+  {
+    auto type = Type::Cls;
+    auto cls = unit.gen(Conjure, dummy, type);
+    auto load = unit.gen(LdObjInvoke, dummy, taken, cls->dst());
+    auto result = sim.simplify(load, false);
+    EXPECT_NO_CHANGE(result);
+  }
+
+  // LdObjInvoke t1:Cls(C), where C is persistent but has no __invoke
+  // doesn't simplify.
+  {
+    auto type = Type::cns(SystemLib::s_IteratorClass);
+    auto cls = unit.gen(Conjure, dummy, type);
+    auto load = unit.gen(LdObjInvoke, dummy, taken, cls->dst());
+    auto result = sim.simplify(load, false);
+    EXPECT_NO_CHANGE(result);
   }
 }
 

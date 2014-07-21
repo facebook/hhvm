@@ -830,7 +830,7 @@ class Framework {
       // Use the timeout to avoid curl SlowTimer timeouts and problems
       $dependencies_install_cmd = get_runtime_build();
       // Only put this timeout if we are using hhvm
-      if (Options::$zend_path === null) {
+      if (Options::$php_path === null) {
         $dependencies_install_cmd .= " -v ResourceLimit.SocketDefaultTimeout".
                                      "=30";
       }
@@ -852,13 +852,13 @@ class Framework {
           if (any_dir_empty_one_level($fw_vendor_dir)) {
             remove_dir_recursive(nullthrows($this->install_root));
             error_and_exit("Couldn't download dependencies for ".$this->name.
-                           ". Removing framework. You can try the --zend ".
+                           ". Removing framework. You can try the --with-php".
                            "option.\n");
           }
         } else { // No vendor directory. Dependencies could not have been gotten
           remove_dir_recursive(nullthrows($this->install_root));
           error_and_exit("Couldn't download dependencies for ".$this->name.
-                         ". Removing framework. You can try the --zend ".
+                         ". Removing framework. You can try the --with-php".
                          "option.\n");
         }
       }

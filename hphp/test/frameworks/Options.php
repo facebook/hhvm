@@ -24,7 +24,7 @@ class Options {
   public static bool $get_latest_framework_code = false;
   public static bool $generate_new_expect_file = false;
   public static bool $include_flakey = false;
-  public static ?string $zend_path = null;
+  public static ?string $php_path = null;
   public static bool $all = false;
   public static bool $allexcept = false;
   public static bool $test_by_single_test = false;
@@ -146,11 +146,8 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    if ($options->containsKey('zend')) {
-      verbose("Will try Zend if necessary. If Zend doesn't work, the script ".
-              "will still continue; the particular framework on which Zend ".
-           "was attempted may not be available though.\n");
-       self::$zend_path = (string) $options['zend'];
+    if ($options->containsKey('with-php')) {
+       self::$php_path = (string) $options['with-php'];
       $framework_names->removeKey(0);
       $framework_names->removeKey(0);
     }

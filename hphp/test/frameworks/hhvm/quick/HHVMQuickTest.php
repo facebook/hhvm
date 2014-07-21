@@ -13,8 +13,22 @@ final class HHVMQuickTest extends HHVMExpectTest {
   /**
    * @dataProvider quickTestsProvider
    */
+  public function testQuickInterpRepo(...$paths) {
+    $this->runTests('-m interp -r', $paths);
+  }
+
+  /**
+   * @dataProvider quickTestsProvider
+   */
   public function testQuickJit(...$paths) {
     $this->runTests('-m jit', $paths);
+  }
+
+  /**
+   * @dataProvider quickTestsProvider
+   */
+  public function testQuickJitRepo(...$paths) {
+    $this->runTests('-m jit -r', $paths);
   }
 
   public function quickTestsProvider() {

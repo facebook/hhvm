@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <iterator>
 
 #include "folly/Optional.h"
 
@@ -81,39 +82,47 @@ OPCODES
  * reduction (i.e. the bytecode can be replaced by some other
  * bytecode as an optimization).
  *
- * The chained-to bytecodes should not take branches, or do strength
- * reduction.  If they use impl themselves, the outer impl() should
- * only be chaining to a single bytecode (or flag effects can be
- * hard to reason about), and shouldn't set any flags prior to that.
- *
- * constprop with impl() should only occur on the last thing in the
- * impl list.  This isn't checked, but we'll ignore a canConstProp
- * flag anywhere earlier.
+ * The chained-to bytecodes should not take branches.  Also, constprop with
+ * impl() will only occur on the last thing in the impl list---earlier opcodes
+ * may set the canConstProp flag, but it will have no effect.
  */
 
-template<class T> void impl(ISS& env, const T& t) {
-  FTRACE(3, "    (impl {}\n", show(Bytecode { t }));
-  env.flags.wasPEI       = true;
-  env.flags.canConstProp = false;
-  // Keep whatever mayReadLocals was set to.
-  in(env, t);
-}
+template<class... Ts>
+void impl(ISS& env, Ts&&... ts) {
+  std::vector<Bytecode> bcs = { std::forward<Ts>(ts)... };
 
-template<class T, class... Ts>
-void impl(ISS& env, const T& t, Ts&&... ts) {
-  impl(env, t);
+  folly::Optional<std::vector<Bytecode>> currentReduction;
 
-  assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
-         "you can't use impl with branching opcodes before last position");
-  assert(!env.flags.strengthReduced);
+  for (auto it = begin(bcs); it != end(bcs); ++it) {
+    assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
+           "you can't use impl with branching opcodes before last position");
 
-  auto const wasPEI = env.flags.wasPEI;
+    auto const wasPEI = env.flags.wasPEI;
 
-  impl(env, std::forward<Ts>(ts)...);
+    FTRACE(3, "    (impl {}\n", show(*it));
+    env.flags.wasPEI          = true;
+    env.flags.canConstProp    = false;
+    env.flags.strengthReduced = folly::none;
+    default_dispatch(env, *it);
 
-  // If any of the opcodes in the impl list said they could throw,
-  // then the whole thing could throw.
-  env.flags.wasPEI = env.flags.wasPEI || wasPEI;
+    if (env.flags.strengthReduced) {
+      if (!currentReduction) {
+        currentReduction = std::vector<Bytecode>{};
+        currentReduction->assign(begin(bcs), it);
+      }
+      std::copy(begin(*env.flags.strengthReduced),
+                end(*env.flags.strengthReduced),
+                std::back_inserter(*currentReduction));
+    } else if (currentReduction) {
+      currentReduction->push_back(*it);
+    }
+
+    // If any of the opcodes in the impl list said they could throw,
+    // then the whole thing could throw.
+    env.flags.wasPEI = env.flags.wasPEI || wasPEI;
+  }
+
+  env.flags.strengthReduced = currentReduction;
 }
 
 /*
@@ -125,7 +134,9 @@ void impl(ISS& env, const T& t, Ts&&... ts) {
 template<class... Bytecodes>
 void reduce(ISS& env, const Bytecodes&... hhbc) {
   impl(env, hhbc...);
-  env.flags.strengthReduced = std::vector<Bytecode> { hhbc... };
+  if (!env.flags.strengthReduced) {
+    env.flags.strengthReduced = std::vector<Bytecode> { hhbc... };
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -90,13 +90,15 @@ let name_already_bound x p1 p2 =
 let method_name_already_bound p name =
   add p ("Method name already bound: "^name)
 
-let error_name_already_bound hhi_root x p1 p2 =
-(* hhi_root =
-*)
-  let x = Utils.strip_ns x in
+let error_name_already_bound hhi_root name name_prev p p_prev =
+  (* hhi_root = *)
+  let name = Utils.strip_ns name in
+  let name_prev = Utils.strip_ns name_prev in
   let errs = [
-    p1, "Name already bound: "^x;
-    p2, "Previous definition is here"
+    p, "Name already bound: "^name;
+    p_prev, (if String.compare name name_prev == 0
+      then "Previous definition is here"
+      else "Previous definition "^name_prev^" differs only in capitalization ")
   ] in
   let hhi_msg =
     "This appears to be defined in an hhi file included in your project "^
@@ -107,10 +109,10 @@ let error_name_already_bound hhi_root x p1 p2 =
   (* unsafe_opt since init stack will refuse to continue if we don't have an
    * hhi root. *)
   let errs =
-    if str_starts_with p1.Pos.pos_file hhi_root
-    then errs @ [p2, hhi_msg]
-    else if str_starts_with p2.Pos.pos_file hhi_root
-    then errs @ [p1, hhi_msg]
+    if str_starts_with p.Pos.pos_file hhi_root
+    then errs @ [p_prev, hhi_msg]
+    else if str_starts_with p_prev.Pos.pos_file hhi_root
+    then errs @ [p, hhi_msg]
     else errs in
   add_list errs
 
@@ -326,6 +328,10 @@ let field_kinds p1 p2 =
 
 let unbound_name_typing pos name =
   add pos ("Unbound name, Typing: "^(strip_ns name))
+
+let did_you_mean_naming pos name suggest_pos suggest_name =
+  add_list [pos, "Could not find "^(strip_ns name) ;
+            suggest_pos, "Did you mean "^(strip_ns suggest_name)^"?"]
 
 let previous_default p =
   add p

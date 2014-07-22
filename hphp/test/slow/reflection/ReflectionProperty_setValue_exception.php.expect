@@ -1,0 +1,2 @@
+Cannot access non-public member cls::priv
+Cannot access non-public member cls::s_priv

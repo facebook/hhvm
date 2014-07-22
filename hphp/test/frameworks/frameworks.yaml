@@ -48,8 +48,7 @@
       # mutates fixed location (__DIR__)
       - assetic/tests/Assetic/Test/Factory/AssetFactoryTest.php
       # depends on http://ajax.googleapis.com
-      - assetic/tests/Assetic/Test/Asset/HttpAssetTest.php
-  # Stable (2.x) doesn't use phpunit, so targetting the next major release
+      - assetic/tests/Assetic/Test/Asset/HttpAssetTest.php  
   Aura.Autoload:
     url: https://github.com/auraphp/Aura.Autoload.git
     branch: develop-2
@@ -176,6 +175,7 @@
     commit: 6347ac036423a1cdbc4980c615d6e47f002e391a
     install_root: Aura.Web
     test_root: tests
+  # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
     url: https://github.com/cakephp/cakephp
     branch: 3.0

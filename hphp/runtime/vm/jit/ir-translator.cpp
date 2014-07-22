@@ -547,7 +547,8 @@ IRTranslator::translateIterInit(const NormalizedInstruction& i) {
             i.imm[0].u_IVA,
             targetOffset,
             i.imm[2].u_IVA,
-            invertCond);
+            invertCond,
+            instrJmpFlags(i));
 }
 
 void
@@ -560,7 +561,8 @@ IRTranslator::translateIterInitK(const NormalizedInstruction& i) {
             targetOffset,
             i.imm[2].u_IVA,
             i.imm[3].u_IVA,
-            invertCond);
+            invertCond,
+            instrJmpFlags(i));
 }
 
 void
@@ -572,7 +574,8 @@ IRTranslator::translateIterNext(const NormalizedInstruction& i) {
             i.imm[0].u_IVA,
             targetOffset,
             i.imm[2].u_IVA,
-            invertCond);
+            invertCond,
+            instrJmpFlags(i));
 }
 
 void
@@ -585,7 +588,8 @@ IRTranslator::translateIterNextK(const NormalizedInstruction& i) {
             targetOffset,
             i.imm[2].u_IVA,
             i.imm[3].u_IVA,
-            invertCond);
+            invertCond,
+            instrJmpFlags(i));
 }
 
 void
@@ -593,7 +597,8 @@ IRTranslator::translateMIterInit(const NormalizedInstruction& i) {
   HHIR_EMIT(MIterInit,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
-            i.imm[2].u_IVA);
+            i.imm[2].u_IVA,
+            instrJmpFlags(i));
 }
 
 void
@@ -602,7 +607,8 @@ IRTranslator::translateMIterInitK(const NormalizedInstruction& i) {
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
             i.imm[2].u_IVA,
-            i.imm[3].u_IVA);
+            i.imm[3].u_IVA,
+            instrJmpFlags(i));
 }
 
 void
@@ -611,7 +617,8 @@ IRTranslator::translateMIterNext(const NormalizedInstruction& i) {
   HHIR_EMIT(MIterNext,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
-            i.imm[2].u_IVA);
+            i.imm[2].u_IVA,
+            instrJmpFlags(i));
 }
 
 void
@@ -621,7 +628,8 @@ IRTranslator::translateMIterNextK(const NormalizedInstruction& i) {
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
             i.imm[2].u_IVA,
-            i.imm[3].u_IVA);
+            i.imm[3].u_IVA,
+            instrJmpFlags(i));
 }
 
 void
@@ -633,7 +641,8 @@ IRTranslator::translateWIterInit(const NormalizedInstruction& i) {
             i.imm[0].u_IVA,
             targetOffset,
             i.imm[2].u_IVA,
-            invertCond);
+            invertCond,
+            instrJmpFlags(i));
 }
 
 void
@@ -646,7 +655,8 @@ IRTranslator::translateWIterInitK(const NormalizedInstruction& i) {
             targetOffset,
             i.imm[2].u_IVA,
             i.imm[3].u_IVA,
-            invertCond);
+            invertCond,
+            instrJmpFlags(i));
 }
 
 void
@@ -658,7 +668,8 @@ IRTranslator::translateWIterNext(const NormalizedInstruction& i) {
             i.imm[0].u_IVA,
             targetOffset,
             i.imm[2].u_IVA,
-            invertCond);
+            invertCond,
+            instrJmpFlags(i));
 }
 
 void
@@ -671,7 +682,8 @@ IRTranslator::translateWIterNextK(const NormalizedInstruction& i) {
             targetOffset,
             i.imm[2].u_IVA,
             i.imm[3].u_IVA,
-            invertCond);
+            invertCond,
+            instrJmpFlags(i));
 }
 
 void
@@ -684,7 +696,8 @@ IRTranslator::translateIterBreak(const NormalizedInstruction& i) {
 void
 IRTranslator::translateDecodeCufIter(const NormalizedInstruction& i) {
 
-  HHIR_EMIT(DecodeCufIter, i.imm[0].u_IVA, i.offset() + i.imm[1].u_BA);
+  HHIR_EMIT(DecodeCufIter, i.imm[0].u_IVA, i.offset() + i.imm[1].u_BA,
+            instrJmpFlags(i));
 }
 
 bool

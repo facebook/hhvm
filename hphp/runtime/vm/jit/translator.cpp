@@ -1542,7 +1542,6 @@ static void findSuccOffsets(const RegionDesc&              region,
  */
 static bool containsBothSuccs(const OffsetSet&             succOffsets,
                               const NormalizedInstruction& inst) {
-  assert(inst.op() == OpJmpZ || inst.op() == OpJmpNZ);
   if (inst.breaksTracelet) return false;
   Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
   Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
@@ -1730,11 +1729,7 @@ Translator::translateRegion(const RegionDesc& region,
         inst.nextOffset = region.blocks[b+1]->start().offset();
       }
       inst.nextIsMerge = nextIsMerge(inst, region);
-      if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
-        // TODO(t3730617): Could extend this logic to other
-        // conditional control flow ops, e.g., IterNext, etc.
-        inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
-      }
+      inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
 
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if

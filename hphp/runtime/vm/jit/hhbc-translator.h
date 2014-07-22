@@ -435,53 +435,66 @@ public:
   void emitIterInit(uint32_t iterId,
                     int targetOffset,
                     uint32_t valLocalId,
-                    bool invertCond);
+                    bool invertCond,
+                    JmpFlags jmpFlags);
   void emitIterInitK(uint32_t iterId,
                      int targetOffset,
                      uint32_t valLocalId,
                      uint32_t keyLocalId,
-                     bool invertCond);
+                     bool invertCond,
+                     JmpFlags jmpFlags);
   void emitIterNext(uint32_t iterId,
                     int targetOffset,
                     uint32_t valLocalId,
-                    bool invertCond);
+                    bool invertCond,
+                    JmpFlags jmpFlags);
   void emitIterNextK(uint32_t iterId,
                      int targetOffset,
                      uint32_t valLocalId,
                      uint32_t keyLocalId,
-                     bool invertCond);
-  void emitMIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+                     bool invertCond,
+                     JmpFlags jmpFlags);
+  void emitMIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId,
+                     JmpFlags jmpFlags);
   void emitMIterInitK(uint32_t iterId,
-                     int targetOffset,
-                     uint32_t valLocalId,
-                     uint32_t keyLocalId);
-  void emitMIterNext(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+                      int targetOffset,
+                      uint32_t valLocalId,
+                      uint32_t keyLocalId,
+                      JmpFlags jmpFlags);
+  void emitMIterNext(uint32_t iterId, int targetOffset, uint32_t valLocalId,
+                     JmpFlags jmpFlags);
   void emitMIterNextK(uint32_t iterId,
-                     int targetOffset,
-                     uint32_t valLocalId,
-                     uint32_t keyLocalId);
+                      int targetOffset,
+                      uint32_t valLocalId,
+                      uint32_t keyLocalId,
+                      JmpFlags jmpFlags);
   void emitWIterInit(uint32_t iterId,
                      int targetOffset,
                      uint32_t valLocalId,
-                     bool invertCond);
+                     bool invertCond,
+                     JmpFlags jmpFlags);
   void emitWIterInitK(uint32_t iterId,
                       int targetOffset,
                       uint32_t valLocalId,
                       uint32_t keyLocalId,
-                      bool invertCond);
+                      bool invertCond,
+                      JmpFlags jmpFlags);
   void emitWIterNext(uint32_t iterId,
                      int targetOffset,
                      uint32_t valLocalId,
-                     bool invertCond);
+                     bool invertCond,
+                     JmpFlags jmpFlags);
   void emitWIterNextK(uint32_t iterId,
                       int targetOffset,
                       uint32_t valLocalId,
                       uint32_t keyLocalId,
-                      bool invertCond);
+                      bool invertCond,
+                      JmpFlags jmpFlags);
 
   void emitIterFree(uint32_t iterId);
   void emitMIterFree(uint32_t iterId);
-  void emitDecodeCufIter(uint32_t iterId, int targetOffset);
+  void emitDecodeCufIter(uint32_t iterId, int targetOffset,
+                    JmpFlags jmpFlags);
   void emitCIterFree(uint32_t iterId);
   void emitIterBreak(const ImmVector& iv, uint32_t offset, bool breakTracelet);
   void emitVerifyParamType(uint32_t paramId);
@@ -752,15 +765,15 @@ private:
   void emitDecRefLocalsInline();
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
-  SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
-  void emitJmpHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
+  SSATmp* emitJmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
-  SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);
+  SSATmp* emitIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc,
+                             bool invertCond);
   BCMarker makeMarker(Offset bcOff);
   void updateMarker();
   template<class Lambda>
-  SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
+  SSATmp* emitMIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck(Block* catchBlock);
   void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,

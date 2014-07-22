@@ -1,0 +1,28 @@
+array(2) {
+  [0]=>
+  string(7) "global1"
+  [1]=>
+  string(7) "global2"
+}
+array(2) {
+  [0]=>
+  string(8) "func1var"
+  [1]=>
+  string(11) "func1inner2"
+}
+array(1) {
+  [0]=>
+  string(8) "func2var"
+}
+array(3) {
+  [0]=>
+  string(4) "arg1"
+  [1]=>
+  string(8) "func1var"
+  [2]=>
+  string(7) "global1"
+}
+array(0) {
+}
+array(0) {
+}

@@ -157,8 +157,30 @@ static Array HHVM_FUNCTION(xdebug_get_collected_errors,
                            bool clean /* = false */)
   XDEBUG_NOTIMPLEMENTED
 
-static Array HHVM_FUNCTION(xdebug_get_declared_vars)
-  XDEBUG_NOTIMPLEMENTED
+static const StaticString s_closure_varname("0Closure");
+
+static Array HHVM_FUNCTION(xdebug_get_declared_vars) {
+  // Grab the callee function
+  VMRegAnchor _; // Ensure consistent state for vmfp
+  ActRec* fp = g_context->getPrevVMState(vmfp());
+  assert(fp);
+  const Func* func = fp->func();
+
+  // Add each named local to the returned array. Note that since this function
+  // is supposed to return all _declared_ variables in scope, which includes
+  // variables that have been unset.
+  const Id numNames = func->numNamedLocals();
+  PackedArrayInit vars(numNames);
+  for (Id i = 0; i < numNames; ++i) {
+    assert(func->lookupVarId(func->localVarName(i)) == i);
+    String varname(func->localVarName(i)->data(), CopyString);
+    // Skip the internal closure "0Closure" variable
+    if (!s_closure_varname.equal(varname)) {
+      vars.append(varname);
+    }
+  }
+  return vars.toArray();
+}
 
 static Array HHVM_FUNCTION(xdebug_get_function_stack)
   XDEBUG_NOTIMPLEMENTED

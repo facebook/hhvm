@@ -33,6 +33,7 @@ namespace HPHP {
 //  extended_info, coverage_enable:
 //    unused because enabling/disabling these would have no effect on hhvm
 //    since we can toggle tracking the required information at runtime
+//  collect_vars: Unused because we can always get the variables at runtime
 #define XDEBUG_CFG \
   XDEBUG_OPT(bool, "auto_trace", AutoTrace, false) \
   XDEBUG_OPT(int, "cli_color", CliColor, 0) \
@@ -40,7 +41,6 @@ namespace HPHP {
   XDEBUG_OPT(bool, "collect_includes", CollectIncludes, true) \
   XDEBUG_OPT(int, "collect_params", CollectParams, 0) \
   XDEBUG_OPT(bool, "collect_return", CollectReturn, false) \
-  XDEBUG_OPT(bool, "collect_vars", CollectVars, false) \
   XDEBUG_OPT(bool, "default_enable", DefaultEnable, true) \
   XDEBUG_OPT(bool, "dump_globals", DumpGlobals, true) \
   XDEBUG_OPT(bool, "dump_once", DumpOnce, true) \

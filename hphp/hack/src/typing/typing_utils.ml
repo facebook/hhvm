@@ -10,7 +10,6 @@
 
 open Utils
 open Typing_defs
-open Autocomplete
 
 module Reason = Typing_reason
 module Env = Typing_env
@@ -57,27 +56,6 @@ let uerror r1 ty1 r2 ty2 =
   Errors.unify_error
     (Reason.to_string ("This is " ^ ty1) r1)
     (Reason.to_string ("It is incompatible with " ^ ty2) r2)
-
-let is_argument_info_target p =
-  match !argument_info_target with
-  | None -> false
-  | Some (line, char_pos) ->
-      let start_line, start_col, end_col = Pos.info_pos p in
-      start_line = line && start_col <= char_pos && char_pos - 1 <= end_col
-
-let process_arg_info fun_args used_args env =
-  if !argument_info_target <> None && !argument_info_expected = None then
-    let _, result = List.fold_left begin fun (index, result) arg ->
-      let result =
-        if is_argument_info_target (fst arg) then Some index else result in
-      index + 1, result
-    end (0, None) used_args in
-    if result <> None then (
-      argument_info_expected := Some (List.map begin
-          fun (x,y) -> x, Typing_print.full_strip_ns env y end fun_args);
-      argument_info_position := result
-    );
-  ()
 
 let process_static_find_ref cid mid =
   match cid with

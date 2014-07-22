@@ -83,6 +83,7 @@ type command =
 | REFACTOR of refactor_action
 | SEARCH of string
 | SUGGEST of string list
+| ARGUMENT_INFO of string * int * int
 
 let cmd_to_channel (oc:out_channel) (cmd:command): unit =
   Printf.fprintf oc "%s\n" Build_id.build_id_ohai;

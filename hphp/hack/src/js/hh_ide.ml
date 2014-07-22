@@ -423,32 +423,18 @@ let hh_get_method_calls fn =
                       ])
 
 let hh_arg_info fn line char =
-  Autocomplete.argument_info_target :=  Some (line, char);
-  Autocomplete.argument_info_expected := None;
-  Autocomplete.argument_info_position := None;
+  ArgumentInfoService.attach_hooks (line, char);
   ignore (hh_check ~check_mode:false fn);
-  let pos, expected =
-    match !Autocomplete.argument_info_position,
-          !Autocomplete.argument_info_expected with
-    | Some pos, Some expected -> pos, expected
-    | _ ->(-1),[]
+  let result = ArgumentInfoService.get_result() in
+  let result = match result with
+    | Some result -> result
+    | None -> (-1), []
   in
-  let expected = List.map begin fun (str1, str2) ->
-    let str1 = match str1 with
-    | Some str1 -> str1
-    | None -> ""
-    in
-    JAssoc [ "name",  JString str1;
-             "type",  JString str2;
-           ]
-    end expected in
-  Autocomplete.argument_info_target := None;
-  Autocomplete.argument_info_expected := None;
-  Autocomplete.argument_info_position := None;
-  output_json (JAssoc [ "cursor_arg_index", JInt pos;
-                        "args",             JList expected;
-                        "internal_error",   JBool false;
-                      ])
+  ArgumentInfoService.detach_hooks();
+  let json_res =
+    ("internal_error", JBool false) :: ArgumentInfoService.to_json result
+  in
+  output_json (JAssoc json_res)
 
 let hh_format contents start end_ =
   let result = Format_hack.region start end_ contents in

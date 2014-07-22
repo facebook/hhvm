@@ -142,6 +142,24 @@ let rec main args retries =
       let (pos, ty) = Marshal.from_channel ic in
       ClientTypeAtPos.go pos ty args.output_json;
       exit 0
+    | MODE_ARGUMENT_INFO arg ->
+      let tpos = Str.split (Str.regexp ":") arg in
+      let line, char =
+        try
+          match tpos with
+          | [line; char] ->
+              int_of_string line, int_of_string char
+          | _ -> raise Exit
+        with _ ->
+          Printf.fprintf stderr "Invalid position\n"; exit 1
+      in
+      let ic, oc = connect args in
+      let content = ClientUtils.read_stdin_to_string () in
+      ServerMsg.cmd_to_channel oc
+          (ServerMsg.ARGUMENT_INFO (content, line, char));
+      let results = Marshal.from_channel ic in
+      ClientArgumentInfo.go results args.output_json;
+      exit 0
     | MODE_AUTO_COMPLETE ->
       let ic, oc = connect args in
       let content = ClientUtils.read_stdin_to_string () in

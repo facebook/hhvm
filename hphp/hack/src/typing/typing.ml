@@ -2286,7 +2286,6 @@ and call_ pos env fty el =
       let env, var_param = variadic_param env ft in
       let env, tyl = lfold expr env el in
       let pos_tyl = List.combine (List.map fst el) tyl in
-      Typing_utils.process_arg_info ft.ft_params pos_tyl env;
       let env = wfold_left_default call_param (env, var_param) ft.ft_params pos_tyl in
       Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst el) env;
       env, ft.ft_ret

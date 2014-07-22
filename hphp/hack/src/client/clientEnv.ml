@@ -28,6 +28,7 @@ type client_mode =
 | MODE_REFACTOR
 | MODE_FIND_CLASS_REFS of string
 | MODE_SEARCH of string
+| MODE_ARGUMENT_INFO of string
 
 type client_check_env = {
   mode: client_mode;

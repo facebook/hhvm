@@ -157,7 +157,6 @@ struct HhbcTranslator {
   void emitInterpOne(folly::Optional<Type> t, int popped, int pushed,
                      InterpOneData& id);
   std::string showStack() const;
-  bool hasExit() const { return m_hasExit; }
 
 public:
   /*
@@ -966,11 +965,6 @@ private:
   // True if we're on the last HHBC opcode that will be emitted for
   // this tracelet.
   bool m_lastBcOff;
-
-  // True if we've emitted an instruction that already handled
-  // end-of-tracelet duties.  (E.g. emitRetC, etc.)  If it's not true,
-  // we'll create a generic ReqBindJmp instruction after we're done.
-  bool m_hasExit;
 
   /*
    * The FPI stack is used for inlining---when we start inlining at an

@@ -77,7 +77,6 @@ HhbcTranslator::HhbcTranslator(TransContext context)
                                context.resumed,
                                context.func } }
   , m_lastBcOff{false}
-  , m_hasExit{false}
   , m_mode{IRGenMode::Trace}
 {
   updateMarker();
@@ -1689,9 +1688,6 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
-
-  // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitContEnter(Offset returnOffset) {
@@ -1732,7 +1728,6 @@ void HhbcTranslator::emitYieldReturnControl(Block* catchBlock) {
   auto const fp = gen(FreeActRec, m_irb->fp());
 
   gen(RetCtrl, RetCtrlData(true), sp, fp, retAddr);
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
@@ -2568,9 +2563,6 @@ void HhbcTranslator::emitNativeImpl() {
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
-
-  // Flag that this trace has a Ret instruction so no ExitTrace is needed
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitFPushActRec(SSATmp* func,
@@ -3903,9 +3895,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
   // Return control to the caller.
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
-
-  // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitRetC(bool freeInline) {
@@ -4032,7 +4021,6 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
   gen(SyncABIRegs, m_irb->fp(), stack);
 
   gen(JmpSwitchDest, data, index);
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
@@ -4080,7 +4068,6 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
   auto const stack = spillStack();
   gen(SyncABIRegs, m_irb->fp(), stack);
   gen(JmpIndirect, dest);
-  m_hasExit = true;
 }
 
 void HhbcTranslator::setThisAvailable() {
@@ -6470,8 +6457,6 @@ void HhbcTranslator::end() {
 }
 
 void HhbcTranslator::end(Offset nextPc) {
-  if (m_hasExit) return;
-
   if (nextPc >= curFunc()->past()) {
     // We have fallen off the end of the func's bytecodes. This happens
     // when the function's bytecodes end with an unconditional

@@ -1598,6 +1598,17 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
   return isMergePoint(fallthruOffset, region);
 }
 
+/*
+ * True if there are no outgoing arcs from the block.
+ */
+static bool blockEndsRegion(RegionDesc::BlockId blockId,
+                            const RegionDesc& region) {
+  for (auto const& arc : region.arcs) {
+    if (arc.src == blockId) return false;
+  }
+  return true;
+}
+
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
@@ -1876,6 +1887,9 @@ Translator::translateRegion(const RegionDesc& region,
             ht.prepareForSideExit();
           }
           ht.endBlock(nextOffset, inst.nextIsMerge);
+        }
+        if (blockEndsRegion(blockId, region)) {
+          ht.end();
         }
       }
 

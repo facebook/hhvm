@@ -697,6 +697,8 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 
 %token T_COLLECTION
 %token T_SHAPE
+%token T_MIARRAY
+%token T_MSARRAY
 %token T_TYPE
 %token T_UNRESOLVED_TYPE
 %token T_NEWTYPE
@@ -1772,6 +1774,7 @@ expr_no_variable:
   | scalar                             { $$ = $1; }
   | array_literal                      { $$ = $1; }
   | shape_literal                      { $$ = $1; }
+  | map_array_literal                  { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | closure_expression                 { $$ = $1;}
@@ -1908,6 +1911,11 @@ collection_literal:
     '{' collection_init '}'            { Token t;
                                          _p->onName(t,$1,Parser::StringName);
                                          BEXP($$,t,$3,T_COLLECTION);}
+;
+
+map_array_literal:
+    T_MIARRAY '(' map_array_init ')'    { _p->onMapArray($$,$3,T_MIARRAY);}
+  | T_MSARRAY '(' map_array_init ')'    { _p->onMapArray($$,$3,T_MSARRAY);}
 ;
 
 static_collection_literal:
@@ -2663,6 +2671,17 @@ non_empty_static_collection_init:
   | static_expr T_DOUBLE_ARROW
     static_expr                        { _p->onCollectionPair($$,  0,&$1,$3);}
   | static_expr                        { _p->onCollectionPair($$,  0,  0,$1);}
+;
+
+map_array_init:
+    non_empty_map_array_init
+    possible_comma                     { $$ = $1;}
+  |                                    { _p->onEmptyMapArray($$);}
+;
+non_empty_map_array_init:
+    non_empty_map_array_init
+    ',' expr T_DOUBLE_ARROW expr       { _p->onMapArrayPair($$,&$1,&$3,$5);}
+  | expr T_DOUBLE_ARROW expr           { _p->onMapArrayPair($$,  0,&$1,$3);}
 ;
 
 encaps_list:

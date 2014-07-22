@@ -161,6 +161,8 @@
   CASE(NewCol) \
   CASE(NewLikeArrayL) \
   CASE(NewMixedArray) \
+  CASE(NewMIArray) \
+  CASE(NewMSArray) \
   CASE(NewPackedArray) \
   CASE(Not) \
   CASE(Null) \

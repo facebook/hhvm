@@ -1037,6 +1037,18 @@ NewMixedArray <capacity hint>    []  ->  [C:Arr]
   it onto the stack. The implementation may make use of the hint in %1 to
   pre-size the array. The hint %1 must be greater than or equal to 0.
 
+NewMIArray <capacity hint>    []  ->  [C:Arr]
+
+  New array in int map mode, with a capacity hint. Creates a new array and
+  pushes it onto the stack. The implementation may make use of the hint in %1 to
+  pre-size the array. The hint %1 must be greater than or equal to 0.
+
+NewMSArray <capacity hint>    []  ->  [C:Arr]
+
+  New array in string map mode, with a capacity hint. Creates a new array and
+  pushes it onto the stack. The implementation may make use of the hint in %1 to
+  pre-size the array. The hint %1 must be greater than or equal to 0.
+
 NewLikeArrayL <local variable id> <capacity hint>   []  ->  [C:Arr]
 
   New array with the same kind as the array stored in the local variable %1.

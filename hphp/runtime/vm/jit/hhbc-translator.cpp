@@ -627,6 +627,16 @@ void HhbcTranslator::emitNewMixedArray(int capacity) {
   }
 }
 
+void HhbcTranslator::emitNewMIArray(int capacity) {
+  // TODO(t4757263) staticEmptyArray() for IntMap
+  push(gen(NewMIArray, cns(capacity)));
+}
+
+void HhbcTranslator::emitNewMSArray(int capacity) {
+  // TODO(t4757263) staticEmptyArray() for StrMap
+  push(gen(NewMSArray, cns(capacity)));
+}
+
 void HhbcTranslator::emitNewLikeArrayL(int id, int capacity) {
   auto const ldrefExit = makeExit();
   auto const ldgblExit = makeExit();

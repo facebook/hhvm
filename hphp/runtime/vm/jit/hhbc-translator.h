@@ -214,6 +214,8 @@ public:
   void emitArray(int arrayId);
   void emitNewArray(int capacity);
   void emitNewMixedArray(int capacity);
+  void emitNewMIArray(int capacity);
+  void emitNewMSArray(int capacity);
   void emitNewLikeArrayL(int id, int capacity);
   void emitNewPackedArray(int n);
   void emitNewStructArray(uint32_t n, StringData** keys);

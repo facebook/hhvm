@@ -183,6 +183,9 @@ public:
                    bool ref);
   void onEmptyCollection(Token &out);
   void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
+  void onEmptyMapArray(Token &out);
+  void onMapArrayPair(Token &out, Token *pairs, Token *name, Token &value);
+  void onMapArray(Token &out, Token &pairs, int op);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void onClassClass(Token &out, Token &cls, Token &name, bool text);

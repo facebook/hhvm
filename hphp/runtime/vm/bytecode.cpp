@@ -3575,6 +3575,20 @@ OPTBLD_INLINE void ExecutionContext::iopNewMixedArray(IOP_ARGS) {
   }
 }
 
+OPTBLD_INLINE void ExecutionContext::iopNewMIArray(IOP_ARGS) {
+  NEXT();
+  DECODE_IVA(capacity);
+  // TODO(t4757263) staticEmptyArray() for IntMap
+  vmStack().pushArrayNoRc(MixedArray::MakeReserveIntMap(capacity));
+}
+
+OPTBLD_INLINE void ExecutionContext::iopNewMSArray(IOP_ARGS) {
+  NEXT();
+  DECODE_IVA(capacity);
+  // TODO(t4757263) staticEmptyArray() for StrMap
+  vmStack().pushArrayNoRc(MixedArray::MakeReserveStrMap(capacity));
+}
+
 OPTBLD_INLINE void ExecutionContext::iopNewLikeArrayL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);

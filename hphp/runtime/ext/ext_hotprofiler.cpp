@@ -1516,15 +1516,12 @@ private:
 
 bool ProfilerFactory::EnableNetworkProfiler = false;
 
-#ifdef HOTPROFILER
 IMPLEMENT_STATIC_REQUEST_LOCAL(ProfilerFactory, s_factory);
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // main functions
 
 void f_hotprofiler_enable(int level) {
-#ifdef HOTPROFILER
   long flags = 0;
   if (level == ProfilerFactory::Hierarchical) {
     flags = TrackBuiltins;
@@ -1533,38 +1530,25 @@ void f_hotprofiler_enable(int level) {
     flags = TrackBuiltins | TrackMemory;
   }
   s_factory->start((ProfilerFactory::Level)level, flags);
-#endif
 }
 
 Variant f_hotprofiler_disable() {
-#ifdef HOTPROFILER
   return s_factory->stop();
-#else
-  return init_null();
-#endif
 }
 
 void f_phprof_enable(int flags /* = 0 */) {
-#ifdef HOTPROFILER
   s_factory->start(ProfilerFactory::Hierarchical, flags);
-#endif
 }
 
 Variant f_phprof_disable() {
-#ifdef HOTPROFILER
   return s_factory->stop();
-#else
-  return init_null();
-#endif
 }
 
 void f_fb_setprofile(const Variant& callback) {
-#ifdef HOTPROFILER
   if (ThreadInfo::s_threadInfo->m_profiler != nullptr) {
     // phpprof is enabled, don't let PHP code override it
     return;
   }
-#endif
   g_context->m_setprofileCallback = callback;
   if (callback.isNull()) {
     HPHP::EventHook::Disable();
@@ -1574,27 +1558,22 @@ void f_fb_setprofile(const Variant& callback) {
 }
 
 void f_xhprof_frame_begin(const String& name) {
-#ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {
     s_factory->cacheString(name);
     prof->beginFrame(name.data());
   }
-#endif
 }
 
 void f_xhprof_frame_end() {
-#ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {
     prof->endFrame(nullptr, nullptr);
   }
-#endif
 }
 
 void f_xhprof_enable(int flags/* = 0 */,
                      const Array& args /* = null_array */) {
-#ifdef HOTPROFILER
 #ifdef CLOCK_THREAD_CPUTIME_ID
   bool missingClockGetTimeNS =
     Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
@@ -1612,15 +1591,10 @@ void f_xhprof_enable(int flags/* = 0 */,
   } else {
     s_factory->start(ProfilerFactory::Hierarchical, flags);
   }
-#endif
 }
 
 Variant f_xhprof_disable() {
-#ifdef HOTPROFILER
   return s_factory->stop();
-#else
-  return init_null();
-#endif
 }
 
 void f_xhprof_network_enable() {
@@ -1632,17 +1606,11 @@ Variant f_xhprof_network_disable() {
 }
 
 void f_xhprof_sample_enable() {
-#ifdef HOTPROFILER
   s_factory->start(ProfilerFactory::Sample, 0);
-#endif
 }
 
 Variant f_xhprof_sample_disable() {
-#ifdef HOTPROFILER
   return s_factory->stop();
-#else
-  return init_null();
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,7 +20,7 @@ fi
 BUILDINFO_FILE="$FBMAKE_PRE_COMMAND_OUTDIR/hphp-build-info.cpp"
 REPO_SCHEMA_H="$FBMAKE_PRE_COMMAND_OUTDIR/hphp-repo-schema.h"
 
-GIT_TLD=$(git rev-parse --show-toplevel)
+GIT_TLD=$(git rev-parse --show-toplevel 2>/dev/null)
 GIT="yes"
 if [ x"$GIT_TLD" = x"" ]; then
   GIT_TLD=$DIR/../../

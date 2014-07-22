@@ -87,6 +87,9 @@ void RequestInjectionData::threadInit() {
                    "arg_separator.output", "&",
                    &m_argSeparatorOutput);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "arg_separator.input", "&",
+                   &m_argSeparatorInput);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,

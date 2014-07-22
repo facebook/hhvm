@@ -149,3 +149,8 @@ conversion inside the condition of an if statement or similar.
 
 (7) All fatals prevent further PHP code from executing, including __destruct
 methods. N.B.: exit() is a fatal.
+
+(8) Loading of external entities in the libxml extension is disabled by default
+for security reasons. It can be re-enabled on a per-protocol basis (file, http,
+compress.zlib, etc...) with a comma-separated list in the ini setting
+hhvm.libxml.ext_entity_whitelist.

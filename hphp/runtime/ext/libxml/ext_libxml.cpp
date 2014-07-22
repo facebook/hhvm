@@ -17,9 +17,13 @@
 
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 
+#include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
@@ -31,10 +35,13 @@
 #include <libxml/xmlschemas.h>
 #endif
 
-namespace HPHP {
+#include <memory>
+#include <cstring>
 
-static xmlParserInputBufferPtr
-libxml_input_buffer(const char *URI, xmlCharEncoding enc);
+TRACE_SET_MOD(libxml);
+
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
 class xmlErrorVec : public std::vector<xmlError> {
 public:
@@ -44,13 +51,13 @@ public:
 
   void reset() {
     clearErrors();
-    xmlErrorVec().swap(*this);
+    clear();
   }
 
 private:
   void clearErrors() {
-    for (int64_t i = 0; i < size(); i++) {
-      xmlResetError(&at(i));
+    for (auto& error : *this) {
+      xmlResetError(&error);
     }
   }
 };
@@ -60,21 +67,24 @@ struct LibXmlRequestData final : RequestEventHandler {
     m_use_error = false;
     m_errors.reset();
     m_entity_loader_disabled = false;
+    m_streams_context = uninit_null();
   }
 
   void requestShutdown() override {
     m_use_error = false;
     m_errors.reset();
+    m_streams_context = uninit_null();
   }
 
   bool m_entity_loader_disabled;
   bool m_use_error;
   xmlErrorVec m_errors;
+  Variant m_streams_context;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, tl_libxml_request_data);
 
-static Class * s_LibXMLError_class;
+static Class* s_LibXMLError_class;
 
 const StaticString
   s_LibXMLError("LibXMLError"),
@@ -110,6 +120,183 @@ const StaticString
   s_LIBXML_ERR_WARNING("LIBXML_ERR_WARNING"),
   s_LIBXML_ERR_ERROR("LIBXML_ERR_ERROR"),
   s_LIBXML_ERR_FATAL("LIBXML_ERR_FATAL");
+
+///////////////////////////////////////////////////////////////////////////////
+// Callbacks and helpers
+//
+// Note that these stream callbacks may re-enter the VM via a user-defined
+// stream wrapper. The VM state should be synced using VMRegAnchor by the
+// caller, before entering libxml2.
+
+static Resource libxml_streams_IO_open_wrapper(
+    const char *filename, const char* mode, bool read_only)
+{
+  ITRACE(1, "libxml_open_wrapper({}, {}, {})\n", filename, mode, read_only);
+  Trace::Indent _i;
+
+  String strFilename = StringData::Make(filename, CopyString);
+  /* FIXME: PHP calls stat() here if the wrapper has a non-null stat handler,
+   * in order to skip the open of a missing file, thus suppressing warnings.
+   * Our stat handlers are virtual, so there's no easy way to tell if stat
+   * is supported, so instead we will just call stat() for plain files, since
+   * of the default transports, only plain files have support for stat().
+   */
+  if (read_only) {
+    int pathIndex = 0;
+    Stream::Wrapper * wrapper = Stream::getWrapperFromURI(strFilename,
+                                                          &pathIndex);
+    if (dynamic_cast<FileStreamWrapper*>(wrapper)) {
+      if (!f_file_exists(strFilename)) {
+        return Resource();
+      }
+    }
+  }
+
+  // PHP unescapes the URI here, but that should properly be done by the
+  // wrapper.  The wrapper should expect a valid URI, e.g. file:///foo%20bar
+  return File::Open(strFilename, mode, 0,
+      tl_libxml_request_data->m_streams_context);
+}
+
+int libxml_streams_IO_read(void* context, char* buffer, int len) {
+  ITRACE(1, "libxml_IO_read({}, {}, {})\n", context, (void*)buffer, len);
+  Trace::Indent _i;
+
+  Resource stream(static_cast<ResourceData*>(context));
+  assert(len >= 0);
+  Variant ret = f_fread(stream, len);
+  if (ret.isString()) {
+    const String& str = ret.asCStrRef();
+    if (str.size() <= len) {
+      std::memcpy(buffer, str.data(), str.size());
+      return str.size();
+    }
+  }
+
+  return -1;
+}
+
+int libxml_streams_IO_write(void* context, const char* buffer, int len) {
+  ITRACE(1, "libxml_IO_write({}, {}, {})\n", context, (void*)buffer, len);
+  Trace::Indent _i;
+
+  Resource stream(static_cast<ResourceData*>(context));
+  String strBuffer(StringData::Make(buffer, len, CopyString));
+  Variant ret = f_fwrite(stream, strBuffer);
+  if (ret.isInteger() && ret.asInt64Val() < INT_MAX) {
+    return (int)ret.asInt64Val();
+  } else {
+    return -1;
+  }
+}
+
+int libxml_streams_IO_close(void* context) {
+  ITRACE(1, "libxml_IO_close({}), sweeping={}\n",
+         context, MemoryManager::sweeping());
+  Trace::Indent _i;
+
+  if (MemoryManager::sweeping()) {
+    // Stream wrappers close themselves on sweep, so there's nothing to do here
+    return 0;
+  }
+
+  Resource stream(static_cast<ResourceData*>(context));
+  // Release the reference owned by context. Guaranteed to not go to zero since
+  // we just created one belonging to stream.
+  stream.get()->decRefCount();
+
+  return f_fclose(stream) ? 0 : -1;
+}
+
+static xmlExternalEntityLoader s_default_entity_loader = nullptr;
+
+/*
+ * A whitelist of protocols allowed to be use in xml external entities. Note
+ * that accesses to this set are not synchronized, so it must not be modified
+ * after module initialization.
+ */
+static std::unordered_set<
+  const StringData*,
+  string_data_hash,
+  string_data_isame
+> s_ext_entity_whitelist;
+
+static bool allow_ext_entity_protocol(const String& protocol) {
+  return s_ext_entity_whitelist.count(protocol.get());
+}
+
+static xmlParserInputPtr libxml_ext_entity_loader(const char *url,
+                                                  const char *id,
+                                                  xmlParserCtxtPtr context) {
+  ITRACE(1, "libxml_ext_entity_loader({}, {}, {})\n",
+         url, id, (void*)context);
+  Trace::Indent _i;
+
+  auto protocol = Stream::getWrapperProtocol(url);
+  if (!allow_ext_entity_protocol(protocol)) {
+    raise_warning("Protocol '%s' for external XML entity '%s' is disabled for"
+                  " security reasons. This may be changed using the"
+                  " hhvm.libxml.ext_entity_whitelist ini setting.",
+                  protocol.c_str(), url);
+    return nullptr;
+  }
+
+  return s_default_entity_loader(url, id, context);
+}
+
+static xmlParserInputBufferPtr
+libxml_create_input_buffer(const char* URI, xmlCharEncoding enc) {
+  ITRACE(1, "libxml_create_input_buffer({}, {})\n", URI, static_cast<int>(enc));
+  Trace::Indent _i;
+
+ if (tl_libxml_request_data->m_entity_loader_disabled || !URI) return nullptr;
+
+  Resource stream = libxml_streams_IO_open_wrapper(URI, "rb", true);
+  if (stream.isInvalid()) return nullptr;
+
+  // Allocate the Input buffer front-end.
+  xmlParserInputBufferPtr ret = xmlAllocParserInputBuffer(enc);
+  if (ret != nullptr) {
+    stream.get()->incRefCount();
+    ret->context = stream.get();
+    ret->readcallback = libxml_streams_IO_read;
+    ret->closecallback = libxml_streams_IO_close;
+  }
+
+  return ret;
+}
+
+static xmlOutputBufferPtr
+libxml_create_output_buffer(const char *URI,
+                            xmlCharEncodingHandlerPtr encoder,
+                            int compression ATTRIBUTE_UNUSED)
+{
+  ITRACE(1, "libxml_create_output_buffer({}, {}, {})\n",
+         URI, (void*)encoder, compression);
+  Trace::Indent _i;
+
+  if (URI == nullptr) {
+    return nullptr;
+  }
+  // PHP unescapes the URI here, but that should properly be done by the
+  // wrapper.  The wrapper should expect a valid URI, e.g. file:///foo%20bar
+  Resource stream = libxml_streams_IO_open_wrapper(URI, "wb", false);
+  if (stream.isInvalid()) {
+    return nullptr;
+  }
+  // Allocate the Output buffer front-end.
+  xmlOutputBufferPtr ret = xmlAllocOutputBuffer(encoder);
+  if (ret != nullptr) {
+    stream.get()->incRefCount();
+    ret->context = stream.get();
+    ret->writecallback = libxml_streams_IO_write;
+    ret->closecallback = libxml_streams_IO_close;
+  }
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 bool libxml_use_internal_error() {
   return tl_libxml_request_data->m_use_error;
@@ -325,14 +512,6 @@ bool HHVM_FUNCTION(libxml_use_internal_errors, bool use_errors) {
   return ret;
 }
 
-static xmlParserInputBufferPtr
-libxml_input_buffer(const char *URI, xmlCharEncoding enc) {
-  if (tl_libxml_request_data->m_entity_loader_disabled) {
-    return nullptr;
-  }
-  return __xmlParserInputBufferCreateFilename(URI, enc);
-}
-
 bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
   bool old = tl_libxml_request_data->m_entity_loader_disabled;
 
@@ -340,6 +519,13 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
 
   return old;
 }
+
+void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
+  tl_libxml_request_data->m_streams_context = context;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Extension
 
 class LibXMLExtension : public Extension {
   public:
@@ -354,6 +540,22 @@ class LibXMLExtension : public Extension {
     inline static void cnsStr(const StaticString & name, const char * value) {
       Native::registerConstant<KindOfStaticString>(
           name.get(), StaticString(value).get());
+    }
+
+    void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+      Hdf libxml = config["Eval"]["Libxml"];
+
+      // Grab the external entity whitelist and set up the map, then register
+      // the callback for external entity loading. data: is always supported
+      // since it doesn't reference data outside of the current document.
+      std::vector<std::string> whitelist;
+      auto whitelistStr = Config::GetString(ini, libxml["ExtEntityWhitelist"]);
+      folly::split(',', whitelistStr, whitelist, true);
+
+      s_ext_entity_whitelist.insert(makeStaticString("data"));
+      for (auto const& str : whitelist) {
+        s_ext_entity_whitelist.insert(makeStaticString(str));
+      }
     }
 
     void moduleInit() override {
@@ -404,11 +606,18 @@ class LibXMLExtension : public Extension {
       HHVM_FE(libxml_clear_errors);
       HHVM_FE(libxml_use_internal_errors);
       HHVM_FE(libxml_disable_entity_loader);
+      HHVM_FE(libxml_set_streams_context);
 
       loadSystemlib();
 
       s_LibXMLError_class = Unit::lookupClass(s_LibXMLError.get());
-      xmlParserInputBufferCreateFilenameDefault(libxml_input_buffer);
+
+      // Set up callbacks to support stream wrappers for reading and writing
+      // xml files and loading external entities.
+      xmlParserInputBufferCreateFilenameDefault(libxml_create_input_buffer);
+      xmlOutputBufferCreateFilenameDefault(libxml_create_output_buffer);
+      s_default_entity_loader = xmlGetExternalEntityLoader();
+      xmlSetExternalEntityLoader(libxml_ext_entity_loader);
     }
 
     void requestInit() override {

@@ -717,8 +717,8 @@ int64_t f_xml_parse(const Resource& parser, const String& data, bool is_final /*
 
 int64_t f_xml_parse_into_struct(const Resource& parser, const String& data, VRefParam values,
                             VRefParam index /* = null */) {
+  SYNC_VM_REGS_SCOPED();
   int ret;
-  VMRegAnchor _;
   XmlParser * p = parser.getTyped<XmlParser>();
   values = Array::Create();
   p->data.assignRef(values);

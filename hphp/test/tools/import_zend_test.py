@@ -148,7 +148,6 @@ bad_tests = (
     '/ext/xsl/tests/bug49634.php',
     '/ext/xsl/tests/bug54446_with_ini.php',
     '/ext/xsl/tests/xsl-phpinfo.php',
-    '/ext/xsl/tests/xslt008.php',
     '/ext/xsl/tests/xslt009.php',
     '/ext/xsl/tests/xsltprocessor_getParameter-wrongparam.php',
     '/ext/xsl/tests/xsltprocessor_removeParameter-wrongparams.php',

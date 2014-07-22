@@ -176,6 +176,7 @@ good/ext/xsl/tests/xslt003.php.expectf -diff
 good/ext/xsl/tests/xslt005.php.expectf -diff
 good/ext/xsl/tests/xslt006.php.expectf -diff
 good/ext/xsl/tests/xslt007.php.expectf -diff
+good/ext/xsl/tests/xslt008.php.expectf -diff
 good/ext/xsl/tests/xslt012.php.expectf -diff
 good/ext/xsl/tests/xslt.xsl.gz -diff
 bad/tests/basic/022.php -diff

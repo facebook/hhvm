@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -41,7 +41,14 @@ class SimpleXMLElement {
   public function __unset($name) { }
 }
 class LibXMLError {
+  // php.net/manual/en/class.libxmlerror.php
   public function __construct() { }
+  public int $level;
+  public int $code;
+  public int $column;
+  public string $message;
+  public string $file;
+  public int $line;
 }
 class SimpleXMLElementIterator {
   public function __construct() { }

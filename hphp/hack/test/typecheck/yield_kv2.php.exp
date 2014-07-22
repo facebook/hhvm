@@ -1,0 +1,6 @@
+File "yield_kv2.php", line 4, characters 3-7:
+Invalid yield
+File "yield_kv2.php", line 3, characters 25-27:
+This is an int
+File "yield_kv2.php", line 4, characters 9-13:
+It is incompatible with a string

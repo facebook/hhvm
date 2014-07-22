@@ -1596,7 +1596,7 @@ and expr_ env = function
   | Call (e, el) ->
       N.Call (N.Cnormal, expr env e, List.map (expr env) el)
   | Yield_break -> N.Yield_break
-  | Yield e -> N.Yield (expr env e)
+  | Yield e -> N.Yield (afield env e)
   | Await e -> N.Await (expr env e)
   | List el -> N.List (exprl env el)
   | Expr_list el -> N.Expr_list (exprl env el)

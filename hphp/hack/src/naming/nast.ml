@@ -213,7 +213,7 @@ and expr_ =
   | String2 of expr list * string
   | Special_func of special_func
   | Yield_break
-  | Yield of expr
+  | Yield of afield
   | Await of expr
   | List of expr list
   | Pair of expr * expr

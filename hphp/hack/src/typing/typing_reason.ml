@@ -41,6 +41,7 @@ type t =
   | Rattr          of Pos.t
   | Rxhp           of Pos.t
   | Rret_div       of Pos.t
+  | Ryield         of Pos.t
   | Rlost_info     of string * t * Pos.t
   | Rcoerced       of Pos.t * Pos.t * string
   | Rformat        of Pos.t * string * t
@@ -86,6 +87,7 @@ let rec to_string prefix r =
   | Rattr            _ -> [(p, prefix ^ " because it is used in an attribute")]
   | Rxhp             _ -> [(p, prefix ^ " because it is used as an XML element")]
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
+  | Ryield           _ -> [(p, prefix ^ " because functions with \"yield\" implicitly return Generator")]
   | Rvar_param       _ -> [(p, prefix ^ " (variadic argument)")]
   | Rcoerced     (p1, p2, s)  ->
       [
@@ -152,6 +154,7 @@ and to_pos = function
   | Rattr        p -> p
   | Rxhp         p -> p
   | Rret_div     p -> p
+  | Ryield       p -> p
   | Rcoerced    (p, _, _) -> p
   | Rlost_info (_, r, _) -> to_pos r
   | Rformat      (p, _, _) -> p
@@ -209,7 +212,7 @@ let string_of_ureason = function
   | URvalue -> "The values of this Map are incompatible"
   | URif -> "The two branches of ? must have the same type"
   | URawait -> "await can only operate on an Awaitable"
-  | URyield -> "Some values passed to yield are incompatible"
+  | URyield -> "Invalid yield"
   | URxhp -> "Invalid xhp value"
   | URarray_get -> "Invalid index type for this array"
   | URmap_get -> "Invalid index type for this Map"

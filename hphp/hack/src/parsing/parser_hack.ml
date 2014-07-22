@@ -2514,8 +2514,8 @@ and expr_yield env start =
         Pos.btw start end_, Yield_break
     | _ ->
         L.back env.lb;
-        let e = expr env in
-        Pos.btw start (fst e), Yield e
+        let af = array_field env in
+        start, Yield af
   end
 
 and expr_await env start =

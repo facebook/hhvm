@@ -101,7 +101,7 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
  * NativeImpl is a special operation in the sense that it must be the
  * only opcode in a function body, and also functions as the return.
  */
-int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
+void emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
   if (false) { // typecheck
     ActRec* ar = nullptr;
@@ -155,7 +155,10 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   a.   loadq  (rVmFp[AROFF(m_sfp)], rVmFp);
 
   emitRB(a, Trace::RBTypeFuncExit, func->fullName()->data());
-  return sizeof(ActRec) + cellsToBytes(nLocalCells-1);
+  auto adjust = safe_cast<int>(sizeof(ActRec) + cellsToBytes(nLocalCells-1));
+  if (adjust) {
+    a.  addq(adjust, rVmSp);
+  }
 }
 
 static int maxStubSpace() {
@@ -354,9 +357,9 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
   return toSmash;
 }
 
-int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
-                     CodeBlock& frozenCode, SrcKey srcKey,
-                     const Func* funcd, int numArgs) {
+void emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
+                  CodeBlock& frozenCode, SrcKey srcKey,
+                  const Func* funcd, int numArgs) {
   // If this is a call to a builtin and we don't need any argument
   // munging, we can skip the prologue system and do it inline.
   if (isNativeImplCall(funcd, numArgs)) {
@@ -386,7 +389,6 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
   emitLea(a, rVmSp[cellsToBytes(numArgs)], rStashedAR);
   emitBindCallHelper(mainCode, frozenCode, srcKey, funcd, numArgs);
-  return 0;
 }
 
 

@@ -72,8 +72,7 @@ void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
 void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
 
-void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
-            RegSet toSave = RegSet());
+void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm);
 
 void emitTraceCall(CodeBlock& cb, int64_t pcOff);
 

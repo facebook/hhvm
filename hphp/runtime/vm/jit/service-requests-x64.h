@@ -57,11 +57,11 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
                     SrcKey dest, TransFlags trflags);
 
 /*
- * Returns the amount by which rVmSp should be adjusted.
+ * Emits a REQ_BIND_CALL service request, and adjusts rVmSp after the call.
  */
-int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
-                     CodeBlock& frozenCode, SrcKey srcKey,
-                     const Func* funcd, int numArgs);
+void emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
+                  CodeBlock& frozenCode, SrcKey srcKey,
+                  const Func* funcd, int numArgs);
 
 }}}
 

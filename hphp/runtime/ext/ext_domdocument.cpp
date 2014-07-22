@@ -634,7 +634,7 @@ static xmlNsPtr dom_get_ns(xmlNodePtr nodep, const char *uri, int *errorcode,
 }
 
 static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
-                                     char *source, int source_len,
+                                     const String& source,
                                      int options) {
   xmlDocPtr ret = NULL;
   xmlParserCtxtPtr ctxt = NULL;
@@ -651,27 +651,37 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   if (mode == DOM_LOAD_FILE) {
     String file_dest = libxml_get_valid_file_path(source);
     if (!file_dest.empty()) {
-      ctxt = xmlCreateFileParserCtxt(file_dest.data());
+      // This is considerably more verbose than just using
+      // xmlCreateFileParserCtxt, but it allows us to bypass the external
+      // entity loading path, which is locked down by default for security
+      // reasons.
+      auto stream = File::Open(file_dest, "rb");
+      if (!stream.isInvalid()) {
+        ctxt = xmlCreateIOParserCtxt(nullptr, nullptr,
+                                     libxml_streams_IO_read,
+                                     libxml_streams_IO_close,
+                                     stream.get(),
+                                     XML_CHAR_ENCODING_NONE);
+
+        // We're storing a reference in the xmlParserCtxt
+        if (ctxt) stream.get()->incRefCount();
+      }
     }
   } else {
-    ctxt = xmlCreateMemoryParserCtxt(source, source_len);
+    ctxt = xmlCreateMemoryParserCtxt(source.data(), source.size());
   }
 
-  if (ctxt == NULL) {
-    return NULL;
-  }
+  if (ctxt == nullptr) return nullptr;
 
-  /* If loading from memory, we need to set the base directory
-     for the document */
+  /* If loading from memory, we need to set the base directory for the
+   * document */
   if (mode != DOM_LOAD_FILE) {
     String directory = g_context->getCwd();
     if (!directory.empty()) {
-      if (ctxt->directory != NULL) {
-        xmlFree((char *) ctxt->directory);
-      }
-      if (directory[directory.size() - 1] != '/') {
-        directory += "/";
-      }
+      if (ctxt->directory != nullptr) xmlFree(ctxt->directory);
+
+      if (directory[directory.size() - 1] != '/') directory += "/";
+
       ctxt->directory =
         (char*)xmlCanonicPath((const xmlChar*)directory.c_str());
     }
@@ -712,9 +722,16 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
     if (ctxt->recovery) {
       HHVM_FN(error_reporting)(old_error_reporting);
     }
-    /* If loading from memory, set the base reference uri for the document */
-    if (ret && ret->URL == NULL && ctxt->directory != NULL) {
-      ret->URL = xmlStrdup((xmlChar*)ctxt->directory);
+    if (ret && ret->URL == nullptr) {
+      if (mode == DOM_LOAD_FILE) {
+        ret->URL = xmlStrdup((xmlChar*)source.c_str());
+      } else {
+        /* If loading from memory, set the base reference uri for the
+         * document */
+        if (ctxt->directory != nullptr) {
+          ret->URL = xmlStrdup((xmlChar*)ctxt->directory);
+        }
+      }
     }
   } else {
     ret = NULL;
@@ -734,8 +751,7 @@ static Variant dom_parse_document(c_DOMDocument *domdoc, const String& source,
     return false;
   }
   xmlDoc *newdoc =
-    dom_document_parser(domdoc, mode, (char*)source.data(), source.length(),
-                        options);
+    dom_document_parser(domdoc, mode, source, options);
   if (!newdoc) {
     return false;
   }
@@ -3353,12 +3369,7 @@ Variant c_DOMDocument::t_importnode(const Object& importednode,
 Variant c_DOMDocument::t_load(const String& filename,
                               int64_t options /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
-  String translated = File::TranslatePath(filename);
-  if (translated.empty()) {
-    raise_warning("Unable to read file: %s", filename.data());
-    return false;
-  }
-  return dom_parse_document(this, translated, options, DOM_LOAD_FILE);
+  return dom_parse_document(this, filename, options, DOM_LOAD_FILE);
 }
 
 Variant c_DOMDocument::t_loadhtml(const String& source) {
@@ -3368,12 +3379,7 @@ Variant c_DOMDocument::t_loadhtml(const String& source) {
 
 Variant c_DOMDocument::t_loadhtmlfile(const String& filename) {
   SYNC_VM_REGS_SCOPED();
-  String translated = File::TranslatePath(filename);
-  if (translated.empty()) {
-    raise_warning("Unable to read file: %s", filename.data());
-    return false;
-  }
-  return dom_load_html(this, translated, DOM_LOAD_FILE);
+  return dom_load_html(this, filename, DOM_LOAD_FILE);
 }
 
 Variant c_DOMDocument::t_loadxml(const String& source,
@@ -3424,19 +3430,13 @@ Variant c_DOMDocument::t_save(const String& file, int64_t options /* = 0 */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0, saveempty = 0;
 
-  String translated = File::TranslatePath(file);
-  if (translated.empty()) {
-    raise_warning("Invalid Filename");
-    return false;
-  }
-
   /* encoding handled by property on doc */
   format = m_formatoutput;
   if (options & LIBXML_SAVE_NOEMPTYTAG) {
     saveempty = xmlSaveNoEmptyTags;
     xmlSaveNoEmptyTags = 1;
   }
-  bytes = xmlSaveFormatFileEnc(translated.data(), docp, NULL, format);
+  bytes = xmlSaveFormatFileEnc(file.data(), docp, nullptr, format);
   if (options & LIBXML_SAVE_NOEMPTYTAG) {
     xmlSaveNoEmptyTags = saveempty;
   }
@@ -3450,14 +3450,9 @@ Variant c_DOMDocument::t_savehtmlfile(const String& file) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0;
 
-  String translated = File::TranslatePath(file);
-  if (translated.empty()) {
-    raise_warning("Invalid Filename");
-    return false;
-  }
   /* encoding handled by property on doc */
   format = m_formatoutput;
-  bytes = htmlSaveFileFormat(translated.data(), docp, NULL, format);
+  bytes = htmlSaveFileFormat(file.data(), docp, nullptr, format);
   if (bytes == -1) {
     return false;
   }

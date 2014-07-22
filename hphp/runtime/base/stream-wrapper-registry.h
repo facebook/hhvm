@@ -33,6 +33,8 @@ bool disableWrapper(const String& scheme);
 bool restoreWrapper(const String& scheme);
 bool registerRequestWrapper(const String& scheme, std::unique_ptr<Wrapper> wrapper);
 Array enumWrappers();
+
+String getWrapperProtocol(const char* url, int* pathIndex = nullptr);
 Wrapper* getWrapper(const String& scheme, bool warn = true);
 Wrapper* getWrapperFromURI(const String& uri,
                            int* pathIndex = nullptr, bool warn = true);

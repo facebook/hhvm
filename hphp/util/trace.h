@@ -35,7 +35,7 @@
  * env TRACE=mcg:1,bcinterp:3,tmp0:1 ./hhvm/hhvm ...
  *
  * In a source file, select the compilation unit's module by calling the
- * TRACE_SET_MODE macro. E.g.,
+ * TRACE_SET_MOD macro. E.g.,
  *
  *   TRACE_SET_MOD(mcg);
  *
@@ -118,6 +118,7 @@ namespace Trace {
       TM(intercept)     \
       TM(interpOne)     \
       TM(jittime)       \
+      TM(libxml)        \
       TM(mcg)           \
       TM(mcgstats)      \
       TM(minstr)        \

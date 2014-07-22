@@ -58,7 +58,9 @@ static StreamContext* get_stream_context(const Variant& stream_or_context);
 Variant f_stream_context_create(const Array& options /* = null_array */,
                                 const Array& params /* = null_array */) {
   if (!options.isNull() && !StreamContext::validateOptions(options)) {
-    return false;
+    raise_warning("options should have the form "
+                  "[\"wrappername\"][\"optionname\"] = $value");
+    return Resource(NEWOBJ(StreamContext)(HPHP::null_array, HPHP::null_array));
   }
   return Resource(NEWOBJ(StreamContext)(options, params));
 }

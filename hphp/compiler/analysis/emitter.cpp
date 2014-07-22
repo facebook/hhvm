@@ -2847,43 +2847,6 @@ bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
 }
 
 bool EmitterVisitor::visit(ConstructPtr node) {
-  bool ret = visitImpl(node);
-  if (!Option::WholeProgram || !ret) return ret;
-  ExpressionPtr e = dynamic_pointer_cast<Expression>(node);
-  if (!e || e->isScalar()) return ret;
-  DataType dt = KindOfUnknown;
-  if (!e->maybeInited()) {
-    dt = KindOfUninit;
-  } else if (node->isNonNull()) {
-    TypePtr act = e->getActualType();
-    if (!act) return ret;
-    dt = act->getDataType();
-    if (dt == KindOfUnknown) return ret;
-  } else {
-    return ret;
-  }
-  char sym = m_evalStack.top();
-  if (StackSym::GetMarker(sym)) return ret;
-  switch (StackSym::GetSymFlavor(sym)) {
-    case StackSym::C:
-      m_evalStack.setNotRef();
-      m_evalStack.setKnownType(dt);
-      break;
-    case StackSym::L:
-      if (dt == KindOfUninit ||
-          !e->maybeRefCounted() ||
-          (e->is(Expression::KindOfSimpleVariable) &&
-           !static_pointer_cast<SimpleVariable>(e)->couldBeAliased())) {
-        m_evalStack.setNotRef();
-      }
-      m_evalStack.setKnownType(dt);
-      break;
-  }
-
-  return ret;
-}
-
-bool EmitterVisitor::visitImpl(ConstructPtr node) {
   if (!node) return false;
 
   Emitter e(node, m_ue, *this);
@@ -4444,20 +4407,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.FCallUnpack(numParams);
         } else {
           e.FCall(numParams);
-        }
-
-        bool inferred = false;
-        if (Option::WholeProgram && Option::GenerateInferredTypes) {
-          FunctionScopePtr fs = ne->getFuncScope();
-          if (fs && !fs->getReturnType()) {
-            m_evalStack.setKnownType(KindOfNull, false /* it's inferred */);
-            m_evalStack.setNotRef();
-            inferred = true;
-          }
-        }
-        if (!inferred) {
-          m_evalStack.setKnownType(KindOfNull, true /* it's predicted */);
-          m_evalStack.setNotRef();
         }
         e.PopR();
         return true;
@@ -7371,29 +7320,6 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   e.DefTypeAlias(id);
 }
 
-static RepoAuthType repoAuthTypeForHphpcType(DataType dtype) {
-  if (!Option::WholeProgram) return RepoAuthType{};
-  switch (dtype) {
-  case KindOfBoolean:
-    return RepoAuthType{RepoAuthType::Tag::OptBool};
-  case KindOfInt64:
-    return RepoAuthType{RepoAuthType::Tag::OptInt};
-  case KindOfDouble:
-    return RepoAuthType{RepoAuthType::Tag::OptDbl};
-  case KindOfArray:
-    return RepoAuthType{RepoAuthType::Tag::OptArr};
-  case KindOfObject:
-    return RepoAuthType{RepoAuthType::Tag::OptObj};
-  case KindOfString:
-  case KindOfStaticString:
-    return RepoAuthType{RepoAuthType::Tag::OptStr};
-  case KindOfResource:
-    return RepoAuthType{RepoAuthType::Tag::OptRes};
-  default:
-    return RepoAuthType{};
-  }
-}
-
 void EmitterVisitor::emitClass(Emitter& e,
                                ClassScopePtr cNode,
                                bool toplevel) {
@@ -7541,17 +7467,6 @@ void EmitterVisitor::emitClass(Emitter& e,
           }
 
           auto sym = var->getSymbol();
-          /*
-           * Translate what hphpc can infer about a property type into
-           * a RepoAuthType for the runtime.  The type hphpc has
-           * implies non-uninit, but is always nullable.
-           *
-           * Note: for hphpc's types it appears this doesn't actually
-           * imply the type is unboxed, either.
-           */
-          auto const hphpcType = repoAuthTypeForHphpcType(
-            sym ? sym->getFinalType()->getDataType() : KindOfInvalid);
-
           bool maybePersistent = Option::WholeProgram &&
             pce->attrs() & AttrPersistent &&
             sym && !sym->isIndirectAltered() && sym->isStatic();
@@ -7593,7 +7508,7 @@ void EmitterVisitor::emitClass(Emitter& e,
           if (maybePersistent) propAttrs = propAttrs | AttrPersistent;
           bool added UNUSED =
             pce->addProperty(propName, propAttrs, typeConstraint,
-                             propDoc, &tvVal, hphpcType);
+                             propDoc, &tvVal, RepoAuthType{});
           assert(added);
         }
       } else if (ClassConstantPtr cc =

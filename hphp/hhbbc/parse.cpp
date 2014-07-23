@@ -758,9 +758,11 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isPairGenerator    = fe.isPairGenerator;
 
   /*
-   * HNI-style native functions get some extra information.
+   * Builtin functions get some extra information.  The returnType flag is only
+   * non-KindOfInvalid for these, but note that something may be a builtin and
+   * still have a KindOfInvalid return type.
    */
-  if (fe.isHNINative()) {
+  if (fe.attrs & AttrBuiltin) {
     ret->nativeInfo             = folly::make_unique<php::NativeInfo>();
     ret->nativeInfo->returnType = fe.returnType;
   }

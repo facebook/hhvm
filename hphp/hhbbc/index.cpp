@@ -1721,10 +1721,21 @@ Type Index::lookup_class_constant(Context ctx,
   return TInitCell;
 }
 
+const StaticString s_array_map("array_map");
+const StaticString s_array_filter("array_filter");
+
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
-    [&] (res::Func::FuncName s) { return TInitGen; },
+    [&] (res::Func::FuncName s) {
+      // The HHAS systemlib functions are not currently visible to hhbbc, but
+      // we know they can't return references.
+      if (s.name->isame(s_array_map.get()) ||
+          s.name->isame(s_array_filter.get())) {
+        return TInitCell;
+      }
+      return TInitGen;
+    },
     [&] (res::Func::MethodName s) { return TInitGen; },
     [&] (borrowed_ptr<FuncInfo> finfo) {
       add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);

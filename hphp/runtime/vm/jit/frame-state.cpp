@@ -30,13 +30,12 @@ namespace JIT {
 using Trace::Indent;
 
 FrameState::FrameState(IRUnit& unit, BCMarker marker)
-  : FrameState(unit, marker.spOff(), marker.func(), marker.func()->numLocals())
+  : FrameState(unit, marker.spOff(), marker.func())
 {
   assert(!marker.isDummy());
 }
 
-FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
-                       uint32_t numLocals)
+FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
   : m_unit(unit)
   , m_curFunc(func)
   , m_spValue(nullptr)
@@ -46,7 +45,7 @@ FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
   , m_frameSpansCall(false)
   , m_stackDeficit(0)
   , m_evalStack()
-  , m_locals(numLocals)
+  , m_locals(func ? func->numLocals() : 0)
   , m_enableCse(false)
   , m_snapshots()
 {

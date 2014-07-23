@@ -132,8 +132,7 @@ struct LocalStateHook {
  */
 struct FrameState final : private LocalStateHook {
   FrameState(IRUnit& unit, BCMarker firstMarker);
-  FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
-             uint32_t numLocals);
+  FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func);
 
   FrameState(const FrameState&) = delete;
   FrameState& operator=(const FrameState&) = delete;

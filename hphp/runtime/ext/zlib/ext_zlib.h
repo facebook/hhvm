@@ -53,8 +53,8 @@ Variant HHVM_FUNCTION(qlzcompress, const String& data, int level = 1);
 Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level = 1);
 #endif
 #ifdef HAVE_SNAPPY
-Variant HHVM_FUNCTION(sncompress, const String& data);
-Variant HHVM_FUNCTION(snuncompress, const String& data);
+Variant HHVM_FUNCTION(snappy_compress, const String& data);
+Variant HHVM_FUNCTION(snappy_uncompress, const String& data);
 #endif
 Variant HHVM_FUNCTION(nzcompress, const String& uncompressed);
 Variant HHVM_FUNCTION(nzuncompress, const String& compressed);

@@ -116,3 +116,6 @@ hphp/system/php/spl/miscellaneous/autoload.php
 
 # This provides a temporary workaround for renamed lz4 methods
 hphp/system/php/zlib/ext_zlib.php
+
+# This provides a temporary workaround for renamed snappy methods
+hphp/system/php/zlib/ext_zlib-snappy.php

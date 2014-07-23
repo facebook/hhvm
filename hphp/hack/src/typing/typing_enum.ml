@@ -40,7 +40,7 @@ let enum_check_const env ty_exp (_, (p, _), _) t =
     | Tprim Tint | Tprim Tstring -> ()
     (* Need to allow Tany, since we might not have the types *)
     | Tany -> ()
-    | _ -> Errors.enum_constant_type_bad (Reason.to_pos r)
+    | _ -> Errors.enum_constant_type_bad p (Reason.to_pos r)
             (Typing_print.error t') trail)
 
 

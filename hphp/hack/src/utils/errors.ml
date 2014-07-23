@@ -893,16 +893,18 @@ let missing_constructor pos =
 
 let typedef_trail_entry pos = pos, "Typedef definition comes from here"
 
-let add_with_trail pos s trail =
-  add_list ((pos, s) :: List.map typedef_trail_entry trail)
+let add_with_trail errs trail =
+ add_list (errs @ List.map typedef_trail_entry trail)
 
-let enum_constant_type_bad pos ty trail =
-  add_with_trail pos ("Enum constants must be an int or string, not " ^ ty)
+let enum_constant_type_bad pos ty_pos ty trail =
+  add_with_trail
+    [pos, "Enum constants must be an int or string";
+     ty_pos, "Not " ^ ty]
     trail
 
 let enum_type_bad pos ty trail =
-  add_with_trail pos
-    ("Enums must have int, string, or mixed type, not " ^ ty)
+  add_with_trail
+    [pos, "Enums must have int, string, or mixed type, not " ^ ty]
     trail
 
 let enum_type_typedef_mixed pos =

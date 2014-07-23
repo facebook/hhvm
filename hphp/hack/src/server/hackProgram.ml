@@ -98,13 +98,15 @@ module Program : Server.SERVER_PROGRAM = struct
         let qual_name = if name.[0] = '\\' then name
           else ("\\"^name) in
         let nenv = env.nenv in
-        (match SMap.get qual_name nenv.Naming.iclasses with
-        | Some (p, _) -> output_string oc ((Pos.string p)^"\n")
-        | None -> output_string oc "Missing from nenv\n");
+        (match SMap.get (Naming.canon_key qual_name) (snd nenv.Naming.iclasses) with
+          | None -> output_string oc "Missing from nenv\n"
+          | Some canon ->
+            let p, _ = SMap.find_unsafe canon (fst nenv.Naming.iclasses) in
+            output_string oc ((Pos.string p)^"\n")
+        );
         let class_ = Typing_env.Classes.get qual_name in
         (match class_ with
-        | None ->
-            output_string oc "Missing from Typing_env\n"
+        | None -> output_string oc "Missing from Typing_env\n"
         | Some c ->
             let class_str = Typing_print.class_ c in
             output_string oc (class_str^"\n")

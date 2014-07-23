@@ -303,12 +303,11 @@ void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
 
 void emitRB(X64Assembler& a,
             Trace::RingBufferType t,
-            const char* msg,
-            RegSet toSave) {
+            const char* msg) {
   if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
     return;
   }
-  PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);
+  PhysRegSaver save(a, kSpecialCrossTraceRegs);
   int arg = 0;
   a.    emitImmReg((uintptr_t)msg, argNumToRegName[arg++]);
   a.    emitImmReg(strlen(msg), argNumToRegName[arg++]);

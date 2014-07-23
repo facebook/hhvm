@@ -30,7 +30,7 @@ val unterminated_comment : Pos.t -> unit
 val unterminated_xhp_comment : Pos.t -> unit
 val name_already_bound : string -> Pos.t -> Pos.t -> unit
 val method_name_already_bound : Pos.t -> string -> unit
-val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
+val error_name_already_bound : string -> string -> string -> Pos.t -> Pos.t -> unit
 val unbound_name : Pos.t -> string -> unit
 val different_scope : Pos.t -> string -> Pos.t -> unit
 val undefined : Pos.t -> string -> unit
@@ -88,6 +88,7 @@ val expecting_return_type_hint : Pos.t -> unit
 val expecting_return_type_hint_suggest : Pos.t -> string -> unit
 val field_kinds : Pos.t -> Pos.t -> unit
 val unbound_name_typing : Pos.t -> string -> unit
+val did_you_mean_naming : Pos.t -> string -> Pos.t -> string -> unit
 val previous_default : Pos.t -> unit
 val void_parameter : Pos.t -> unit
 val nullable_parameter : Pos.t -> unit

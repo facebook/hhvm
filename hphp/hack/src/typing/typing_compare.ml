@@ -267,6 +267,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rattr p                -> Rattr (pos p)
     | Rxhp p                 -> Rxhp (pos p)
     | Rret_div p             -> Rret_div (pos p)
+    | Ryield p               -> Ryield (pos p)
     | Rlost_info (s, r1, p2) -> Rlost_info (s, reason r1, pos p2)
     | Rcoerced (p1, p2, x)   -> Rcoerced (pos p1, pos p2, x)
     | Rformat (p1, s, r)     -> Rformat (pos p1, s, reason r)

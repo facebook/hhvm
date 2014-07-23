@@ -126,6 +126,10 @@ module CheckFunctionType = struct
 
   and catch f_type (_, _, b) = block f_type b
 
+  and afield f_type = function
+    | AFvalue e -> expr f_type e
+    | AFkvalue (e1, e2) -> expr2 f_type (e1, e2)
+
   and expr f_type (p, e) =
     expr_ p f_type e
 
@@ -136,7 +140,6 @@ module CheckFunctionType = struct
 
   and expr_ p f_type exp = match f_type, exp with
     | _, Any -> ()
-    | _, Array _
     | _, Fun_id _
     | _, Method_id _
     | _, Smethod_id _
@@ -146,9 +149,12 @@ module CheckFunctionType = struct
     | _, Class_get _
     | _, Class_const _
     | _, Lvar _ -> ()
+    | _, Array afl ->
+        liter afield f_type afl;
+        ()
     | _, ValCollection (_, el) ->
-      liter expr f_type el;
-      ()
+        liter expr f_type el;
+        ()
     | _, KeyValCollection (_, fdl) ->
         liter expr2 f_type fdl;
         ()
@@ -211,7 +217,7 @@ module CheckFunctionType = struct
         | Gen_array_va_rec el -> liter expr f_type el);
       ()
     | Ast.FSync, Yield_break -> ()
-    | Ast.FSync, Yield e -> expr f_type e; ()
+    | Ast.FSync, Yield af -> afield f_type af; ()
     | Ast.FSync, Special_func func ->
       (match func with
         | Gena e
@@ -552,6 +558,10 @@ and as_expr env = function
       expr env e2;
       ()
 
+and afield env = function
+  | AFvalue e -> expr env e
+  | AFkvalue (e1, e2) -> expr env e1; expr env e2;
+
 and block env stl =
   liter stmt env stl
 
@@ -560,7 +570,6 @@ and expr env (_, e) =
 
 and expr_ env = function
   | Any
-  | Array _
   | Fun_id _
   | Method_id _
   | Smethod_id _
@@ -570,6 +579,9 @@ and expr_ env = function
   | Class_get _
   | Class_const _
   | Lvar _ -> ()
+  | Array afl ->
+      liter afield env afl;
+      ()
   | ValCollection (_, el) ->
       liter expr env el;
       ()
@@ -612,7 +624,7 @@ and expr_ env = function
     ()
   | Yield e ->
       env.t_is_gen := true;
-      expr env e;
+      afield env e;
       ()
   | Await e ->
       expr env e;

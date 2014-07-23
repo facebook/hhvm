@@ -103,10 +103,6 @@ if(ALWAYS_ASSERT)
   add_definitions(-DALWAYS_ASSERT=1)
 endif()
 
-if(HOTPROFILER)
-  add_definitions(-DHOTPROFILER=1)
-endif()
-
 if(EXECUTION_PROFILER)
   add_definitions(-DEXECUTION_PROFILER=1)
 endif()

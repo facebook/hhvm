@@ -997,30 +997,21 @@ and expr_ is_lvalue env (p, e) =
       env, (Reason.Rwitness p, Tany)
   | Yield_break ->
       env, (Reason.Rwitness p, Tany)
-  | Yield e ->
+  | Yield af ->
       let env = Env.set_has_yield env in
-      let r = Reason.Rwitness p in
-      let env, rty = expr env e in
-      (* If we are yielding WaitHandles, then we don't need to check the return
-       * type, since result() does that. Furthermore, we know what type the
-       * preparer will send to this continuation based on the type variable of
-       * the WaitHandle
+      let r = Reason.Ryield p in
+      let env, key = field_key env af in
+      let env, value = field_value env af in
+      (* TODO(#4534682) Fully support Generator *)
+      let rty = r, Tapply ((p, "\\Generator"),
+        [key; value; Reason.Rnone, Tprim Tvoid]) in
+      let env =
+        Type.sub_type p (Reason.URyield) env (Env.get_return env) rty in
+      let env = Env.forget_members env p in
+      (* the return type of yield could be anything, it depends on the value
+       * sent to the continuation.
        *)
-      let env, erty = Env.expand_type env rty in
-      (match erty with
-      | r, Tapply ((p, "\\_AsyncWaitHandle"), [rty]) ->
-          env, rty
-      | _ ->
-          (* TODO(#4534682) Fully support Generator *)
-          let rty = r, Tapply ((p, "\\Generator"),
-            [Reason.Rnone, Tprim Tint; rty; Reason.Rnone, Tprim Tvoid]) in
-          let env = Type.sub_type (fst e) (Reason.URyield) env (Env.get_return env) rty in
-          let env = Env.forget_members env p in
-          (* the return type of yield could be anything, it depends on the value
-           * sent to the continuation.
-           *)
-          env, (r, Tany)
-      )
+      env, (r, Tany)
   | Await e ->
       let env, rty = expr env e in
       Async.overload_extract_from_awaitable env p rty
@@ -2099,7 +2090,12 @@ and trait_most_concrete_req_class trait env =
       (match class_ with
         | None
         | Some { tc_kind = Ast.Cinterface; _ } -> acc
-        | Some c -> assert (c.tc_kind <> Ast.Ctrait); Some (c, ty)
+        | Some { tc_kind = Ast.Ctrait; _ } ->
+          (* this is an error case for which the nastCheck spits out
+           * an error, but does *not* currently remove the offending
+           * 'require extends' or 'require implements' *)
+          acc
+        | Some c -> Some (c, ty)
       )
   ) trait.tc_req_ancestors None
 
@@ -2107,7 +2103,7 @@ and trait_fake_parent_ty pos parent_tc env =
   let self_ty = Env.get_self env in
   match self_ty with
     | (_, Tapply (_, tyl)) ->
-        (* FIXME: fake parent type copies the typelist *)
+      (* FIXME: fake parent type copies the typelist *)
       Tapply ((pos, parent_tc.tc_name), tyl)
     | _ -> failwith ("Internal error; expected to find self as "
                      ^parent_tc.tc_name)

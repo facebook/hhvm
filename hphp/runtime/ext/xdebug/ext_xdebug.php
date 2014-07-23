@@ -76,7 +76,13 @@ function xdebug_get_code_coverage(): array<string, array<int, int>>;
 <<__Native>>
 function xdebug_get_collected_errors(bool $clean = false): array<string>;
 
-<<__Native>>
+/**
+ * Returns an array where each element is a variable name which is defined in
+ * the current scope.
+ *
+ * @return array - Returns the declared variables
+ */
+<<__Native("NoFCallBuiltin")>>
 function xdebug_get_declared_vars(): array<string>;
 
 <<__Native>>

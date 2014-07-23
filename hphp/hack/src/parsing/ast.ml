@@ -243,7 +243,7 @@ and expr_ =
   | Float of pstring
   | String of pstring
   | String2 of expr list * pstring
-  | Yield of expr
+  | Yield of afield
   | Yield_break
   | Await of expr
   | List of expr list

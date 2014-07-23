@@ -1,0 +1,4 @@
+File "capitalization3.php", line 7, characters 7-15:
+Name already bound: CAMELCASE
+File "capitalization3.php", line 3, characters 7-15:
+Previous definition CamelCase differs only in capitalization 

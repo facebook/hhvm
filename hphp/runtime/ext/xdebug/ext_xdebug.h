@@ -33,13 +33,36 @@ namespace HPHP {
 //  extended_info, coverage_enable:
 //    unused because enabling/disabling these would have no effect on hhvm
 //    since we can toggle tracking the required information at runtime
+//  collect_vars:
+//    Unused because we can always get the variables at runtime
+//  collect_assignments:
+//    Currently unimplemented as hhvm does not have infrastructure for this.
+//  collect_memory, collect_time:
+//    Added options specifying whether or not we should collect memory
+//    information and function start times for stack traces. These require
+//    profiling, which takes a lot of memory and slows things down, so these
+//    are disabled by default. If off, 0 will be displayed.
+//  framebuf_size:
+//    Added option specifying the initial number of frames the frame buffer will
+//    hold when xdebug needs to turn frame tracing/profiling on. By default this
+//    takes on 100,000, which is significantly smaller than the 2 million frames
+//    provided by the internal trace profiler, which is good, since it is very
+//    easy to turn on a feature requiring tracing/profiling support, and a huge
+//    memory hit is not expected.
+//  framebuf_expansion:
+//    Added option specifying the amount to increase the framebuffer by each
+//    time we have to resize. The previous size is multiplied by this number.
+//    By default this takes on the value 1.5 which is slightly higher than
+//    the internal trace profiler due to the decrease in initial buffer size.
 #define XDEBUG_CFG \
   XDEBUG_OPT(bool, "auto_trace", AutoTrace, false) \
   XDEBUG_OPT(int, "cli_color", CliColor, 0) \
   XDEBUG_OPT(bool, "collect_assignments", CollectAssignments, false) \
   XDEBUG_OPT(bool, "collect_includes", CollectIncludes, true) \
+  XDEBUG_OPT(bool, "collect_memory", CollectMemory, false) \
   XDEBUG_OPT(int, "collect_params", CollectParams, 0) \
   XDEBUG_OPT(bool, "collect_return", CollectReturn, false) \
+  XDEBUG_OPT(bool, "collect_time", CollectTime, false) \
   XDEBUG_OPT(bool, "collect_vars", CollectVars, false) \
   XDEBUG_OPT(bool, "default_enable", DefaultEnable, true) \
   XDEBUG_OPT(bool, "dump_globals", DumpGlobals, true) \
@@ -48,6 +71,8 @@ namespace HPHP {
   XDEBUG_OPT(string, "file_link_format", FileLinkFormat, "") \
   XDEBUG_OPT(bool, "force_display_errors", ForceDisplayErrors, false) \
   XDEBUG_OPT(int, "force_error_reporting", ForceErrorReporting, 0) \
+  XDEBUG_OPT(size_t, "framebuf_size", FramebufSize, 100000) \
+  XDEBUG_OPT(double, "framebuf_expansion", FramebufExpansion, 1.5) \
   XDEBUG_OPT(int, "halt_level", HaltLevel, 0) \
   XDEBUG_OPT(string, "ide_key", IdeKey, "") \
   XDEBUG_OPT(string, "manual_url", ManualUrl, "http://www.php.net") \

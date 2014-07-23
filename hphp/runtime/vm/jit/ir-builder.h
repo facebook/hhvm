@@ -144,20 +144,6 @@ struct IRBuilder {
   bool blockExists(Offset offset);
 
   /*
-   * True if translating the block at offset is incompatible with the
-   * current state.  This is possible if the target block has already
-   * been translated, or if the types of guarded locals do not match.
-   *
-   * TODO(t3730468): Should we check guarded stack types here as well?
-   */
-  bool blockIsIncompatible(Offset offset);
-
-  /*
-   * Note that we've seen this offset as the start of a block.
-   */
-  void recordOffset(Offset offset);
-
-  /*
    * Clear the map from bytecode offsets to Blocks.
    */
   void resetOffsetMapping();
@@ -501,15 +487,6 @@ private:
   // TODO(t3730559): Offset is used here since it's passed from
   // emitJmp*, but SrcKey might be better in case of inlining.
   smart::flat_map<Offset,Block*> m_offsetToBlockMap;
-
-  // Track the offsets of every bytecode block that is started by
-  // translateRegion.
-  //
-  // TODO(t3730581): Slightly redundant with m_offsetToBlockMap, but
-  // not completely.  It is used to prevent translating backward
-  // branches to blocks on the main trace.  We should be able to kill
-  // this eventually.
-  smart::flat_set<Offset> m_offsetSeen;
 };
 
 /*

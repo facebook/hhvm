@@ -1542,7 +1542,6 @@ static void findSuccOffsets(const RegionDesc&              region,
  */
 static bool containsBothSuccs(const OffsetSet&             succOffsets,
                               const NormalizedInstruction& inst) {
-  assert(inst.op() == OpJmpZ || inst.op() == OpJmpNZ);
   if (inst.breaksTracelet) return false;
   Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
   Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
@@ -1598,6 +1597,17 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
   return isMergePoint(fallthruOffset, region);
 }
 
+/*
+ * True if there are no outgoing arcs from the block.
+ */
+static bool blockEndsRegion(RegionDesc::BlockId blockId,
+                            const RegionDesc& region) {
+  for (auto const& arc : region.arcs) {
+    if (arc.src == blockId) return false;
+  }
+  return true;
+}
+
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
@@ -1650,7 +1660,6 @@ Translator::translateRegion(const RegionDesc& region,
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
     }
-    ht.irBuilder().recordOffset(sk.offset());
 
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Update bcOff here so any guards or assertions from metadata are
@@ -1720,11 +1729,7 @@ Translator::translateRegion(const RegionDesc& region,
         inst.nextOffset = region.blocks[b+1]->start().offset();
       }
       inst.nextIsMerge = nextIsMerge(inst, region);
-      if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
-        // TODO(t3730617): Could extend this logic to other
-        // conditional control flow ops, e.g., IterNext, etc.
-        inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
-      }
+      inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
 
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if
@@ -1877,6 +1882,9 @@ Translator::translateRegion(const RegionDesc& region,
             ht.prepareForSideExit();
           }
           ht.endBlock(nextOffset, inst.nextIsMerge);
+        }
+        if (blockEndsRegion(blockId, region)) {
+          ht.end();
         }
       }
 

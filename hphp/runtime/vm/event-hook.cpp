@@ -271,13 +271,11 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar);
     }
-#ifdef HOTPROFILER
     Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr) {
       begin_profiler_frame(profiler,
                            GetFunctionNameForProfiler(ar->func(), funcType));
     }
-#endif
   }
 }
 
@@ -295,7 +293,6 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // event to avoid unbalancing the call stack.
   if ((flags & RequestInjectionData::EventHookFlag) &&
       (JIT::TCA)ar->m_savedRip != JIT::mcg->tx().uniqueStubs.retInlHelper) {
-#ifdef HOTPROFILER
     Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr) {
       // NB: we don't have a function type flag to match what we got in
@@ -305,7 +302,6 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                          retval,
                          GetFunctionNameForProfiler(ar->func(), NormalFunc));
     }
-#endif
 
     if (shouldRunUserProfiler(ar->func())) {
       if (ThreadInfo::s_threadInfo->m_pendingException != nullptr) {

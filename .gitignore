@@ -83,3 +83,7 @@ CPackSourceConfig.cmake
 .ninja_deps
 .ninja_log
 *.ninja
+
+# windows files
+*.exe
+*.rc

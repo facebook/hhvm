@@ -26,6 +26,10 @@ if (APPLE)
 elseif (IS_AARCH64)
   set(HHVM_ANCHOR_SYMS
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
+elseif(CYGWIN)
+  set(ENABLE_FASTCGI 0)
+  set(HHVM_ANCHOR_SYMS
+  -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 else()
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
@@ -76,10 +80,37 @@ include(HPHPCompiler)
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
-add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS -DFOLLY_HAVE_WEAK_SYMBOLS=1)
+# check for weak symbols
+INCLUDE(CheckCSourceCompiles) 
+CHECK_C_SOURCE_COMPILES("
+    extern \"C\" void configure_link_extern_weak_test() __attribute__((weak));
+    int main(int argc, char** argv) {
+        return configure_link_extern_weak_test == nullptr;
+    }
+"
+    FOLLY_HAVE_WEAK_SYMBOLS
+)
+
+if(FOLLY_HAVE_WEAK_SYMBOLS)
+  add_definitions(-DFOLLY_HAVE_WEAK_SYMBOLS=1)
+else()
+  add_definitions(-DFOLLY_HAVE_WEAK_SYMBOLS=0)
+endif()
+
+add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS)
 
 if (LINUX)
   add_definitions(-D_GNU_SOURCE)
+endif()
+
+# cygwin headers are easily confused
+if(CYGWIN)
+  add_definitions(-D_GLIBCXX_USE_C99=1)
+endif()
+
+if(MSVC OR CYGWIN OR MINGW)
+  add_definitions(-DNOUSER=1 -DGLOG_NO_ABBREVIATED_SEVERITIES)
+  add_definitions(-DWIN32_LEAN_AND_MEAN)
 endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
@@ -111,7 +142,7 @@ if(ENABLE_FULL_SETLINE)
   add_definitions(-DENABLE_FULL_SETLINE=1)
 endif()
 
-if(APPLE OR FREEBSD)
+if(APPLE OR FREEBSD OR CYGWIN OR MSVC OR MINGW)
   add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 

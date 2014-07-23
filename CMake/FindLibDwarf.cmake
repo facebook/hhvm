@@ -23,6 +23,7 @@ find_path (DWARF_INCLUDE_DIR
     /usr/include
     /usr/include/libdwarf
     /usr/local/include
+    /usr/local/include/libdwarf
     /opt/local/include
     /sw/include
     ENV CPATH) # PATH and INCLUDE will also work
@@ -33,7 +34,7 @@ endif ()
 
 find_library (LIBDWARF_LIBRARIES
   NAMES
-    dwarf
+    dwarf libdwarf
   PATHS
     /usr/lib
     /usr/local/lib

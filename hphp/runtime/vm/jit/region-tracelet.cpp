@@ -213,6 +213,14 @@ RegionDescPtr RegionFormer::go() {
     }
   }
 
+  // If we failed while trying to inline, trigger retry without inlining.
+  if (m_region && !m_region->blocks.empty() && m_ht.isInlining()) {
+    FTRACE(2, "selectTracelet: Failed while inlining; retrying:\n{}\n{}",
+           show(*m_region), m_ht.unit());
+    m_inl.disable();
+    m_region.reset();
+  }
+
   printUnit(2, m_ht.unit(),
             m_inl.depth() || m_inl.disabled()
               ? " after inlining tracelet formation "
@@ -220,13 +228,6 @@ RegionDescPtr RegionFormer::go() {
             nullptr, nullptr, m_ht.irBuilder().guards());
 
   if (m_region && !m_region->blocks.empty()) {
-    always_assert_log(
-      !m_ht.isInlining(),
-      [&] {
-        return folly::format("Tried to end region while inlining:\n{}\n{}",
-                             show(*m_region), m_ht.unit()).str();
-      });
-
     m_ht.end(m_sk.offset());
     recordDependencies();
     truncateLiterals();

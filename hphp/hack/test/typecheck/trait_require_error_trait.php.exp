@@ -1,0 +1,2 @@
+File "trait_require_error_trait.php", line 15, characters 19-21:
+TR1 is not a class. It is a trait.

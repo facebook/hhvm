@@ -2090,7 +2090,12 @@ and trait_most_concrete_req_class trait env =
       (match class_ with
         | None
         | Some { tc_kind = Ast.Cinterface; _ } -> acc
-        | Some c -> assert (c.tc_kind <> Ast.Ctrait); Some (c, ty)
+        | Some { tc_kind = Ast.Ctrait; _ } ->
+          (* this is an error case for which the nastCheck spits out
+           * an error, but does *not* currently remove the offending
+           * 'require extends' or 'require implements' *)
+          acc
+        | Some c -> Some (c, ty)
       )
   ) trait.tc_req_ancestors None
 
@@ -2098,7 +2103,7 @@ and trait_fake_parent_ty pos parent_tc env =
   let self_ty = Env.get_self env in
   match self_ty with
     | (_, Tapply (_, tyl)) ->
-        (* FIXME: fake parent type copies the typelist *)
+      (* FIXME: fake parent type copies the typelist *)
       Tapply ((pos, parent_tc.tc_name), tyl)
     | _ -> failwith ("Internal error; expected to find self as "
                      ^parent_tc.tc_name)

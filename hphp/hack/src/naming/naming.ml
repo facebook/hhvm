@@ -38,54 +38,55 @@ type class_cache = Nast.class_ option Utils.SMap.t ref
  *)
 type positioned_ident = (Pos.t * Ident.t)
 type map = positioned_ident SMap.t
+type canon_names_map = string SMap.t
+let canon_key = String.lowercase
 
 (* <T as A>, A is a type constraint *)
 type type_constraint = hint option
 
 type genv = {
-    (* strict? decl? partial? *)
-    in_mode: Ast.mode;
+  (* strict? decl? partial? *)
+  in_mode: Ast.mode;
 
-    (* are we in the body of a try statement? *)
-    in_try: bool;
+  (* are we in the body of a try statement? *)
+  in_try: bool;
 
-    (* are we in the body of a non-static member function? *)
-    in_member_fun: bool;
+  (* are we in the body of a non-static member function? *)
+  in_member_fun: bool;
 
-    (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>
-       The field type_params knows T1 .. Tn. It is able to
-       find out about the constraint on these paramters.
-     *)
-    type_params: type_constraint SMap.t;
+  (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
+   * type_params knows T1 .. Tn. It is able to find out about the
+   * constraint on these parameters. *)
+  type_params: type_constraint SMap.t;
 
-    (* The parameters is their original order
-     * Necessary to type "this".
-     *)
-    type_paraml: Ast.id list;
+  (* The parameters is their original order
+   * Necessary to type "this".
+   *)
+  type_paraml: Ast.id list;
 
-    (* Set of class names defined, and their position *)
-    classes: map ref;
+  (* Set of class names defined, and their positions *)
+  classes: (map * canon_names_map) ref;
 
-    (* Set of function names defined, and their positions *)
-    funs: map ref;
+  (* Set of function names defined, and their positions *)
+  funs: map ref;
 
-    (* Set of typedef names defined, and their position *)
-    typedefs: map ref;
+  (* Set of typedef names defined, and their position *)
+  typedefs: map ref;
 
-    (* Set of constant names defined, and their position *)
-    gconsts: map ref;
+  (* Set of constant names defined, and their position *)
+  gconsts: map ref;
 
-    (* The name of the current class, None if we are in a function *)
-    cclass: Ast.id option;
+  (* The name of the current class, None if we are in a function *)
+  cclass: Ast.id option;
 
-    (* Normally we don't need to add dependencies at this stage, but there
-     * are edge cases when we do.  *)
-    droot: Typing_deps.Dep.variant option;
+  (* Normally we don't need to add dependencies at this stage, but there
+   * are edge cases when we do.  *)
+  droot: Typing_deps.Dep.variant option;
 
-    (* Namespace environment, e.g., what namespace we're in and what use
-     * declarations are in play. *)
-    namespace: Namespace_env.env;
-  }
+  (* Namespace environment, e.g., what namespace we're in and what use
+   * declarations are in play. *)
+  namespace: Namespace_env.env;
+}
 
 (* How to behave when we see an unbound name.  Either we raise an
    error, or we call a function first and continue if it can resolve
@@ -148,11 +149,11 @@ type lenv = {
 
 (* The environment VISIBLE to the outside world. *)
 type env = {
-    iclasses: map;
-    ifuns: map;
-    itypedefs: map;
-    iconsts: map;
-  }
+  iclasses: map * canon_names_map;
+  ifuns: map;
+  itypedefs: map;
+  iconsts: map;
+}
 
 (**
  * Returns the list of classes which have been seen.
@@ -160,7 +161,7 @@ type env = {
  * world.
  *)
 let get_classes env =
-  SMap.fold (fun key _ acc -> key :: acc) env.iclasses []
+  SMap.fold (fun key _ acc -> key :: acc) (fst env.iclasses) []
 
 (*****************************************************************************)
 (* Predefined names *)
@@ -190,7 +191,7 @@ let predef_tests = List.fold_right SSet.add predef_tests_list SSet.empty
 (*****************************************************************************)
 
 let empty = {
-  iclasses  = SMap.empty;
+  iclasses  = SMap.empty, SMap.empty;
   ifuns     = !predef_funs;
   itypedefs = SMap.empty;
   iconsts   = SMap.empty;
@@ -303,33 +304,48 @@ module Env = struct
     let env  = genv, lenv in
     env
 
-(* Helper used to write in different environments
- * consts, fun_names, class_names
- *)
   let new_var env (p, x) =
     if SMap.mem x !env
     then begin
       let p', _ = SMap.find_unsafe x !env in
       let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-      Errors.error_name_already_bound hhi_root x p p'
+      Errors.error_name_already_bound hhi_root x x p p'
     end;
     let y = p, Ident.make x in
     env := SMap.add x y !env;
     y
 
-  let var genv env (p, x) =
+  let lookup genv env (p, x) =
     let v = SMap.get x !env in
     match v with
     | None ->
-        (match genv.in_mode with
-        | Ast.Mstrict ->
-            Errors.unbound_name p x
+      (match genv.in_mode with
+        | Ast.Mstrict -> Errors.unbound_name p x
         | Ast.Mdecl | Ast.Mpartial -> ()
-        );
-        p, Ident.make x
+      );
+      p, Ident.make x
     | Some v -> p, snd v
 
-(* Is called bad_style, but it is still an error ... Whatever *)
+  let canonicalize genv env_and_names (p, name) =
+    let env, canon_names = !env_and_names in
+    if SMap.mem name env then (p, name)
+    else (
+      let name_key = canon_key name in
+      match SMap.get name_key canon_names with
+        | Some canonical ->
+          let p_canon, _ = SMap.find_unsafe canonical env in
+          Errors.did_you_mean_naming p name p_canon canonical;
+          (* Recovering from the capitalization error means
+           * returning the name in its canonical form *)
+          p, canonical
+        | None ->
+          (match genv.in_mode with
+            | Ast.Mstrict -> Errors.unbound_name p name
+            | Ast.Mdecl | Ast.Mpartial -> ());
+          p, name
+    )
+
+  (* Is called bad_style, but it is still an error ... Whatever *)
   let bad_style env (p, x) =
     let p' = SMap.get x !(env.all_locals) in
     match p' with None -> assert false | Some p' ->
@@ -344,11 +360,11 @@ module Env = struct
     List.iter (fun x -> Hashtbl.add h x true) l;
     fun x -> Hashtbl.mem h x
 
-(* Adds a local variable, without any check *)
+  (* Adds a local variable, without any check *)
   let add_lvar (_, lenv) (_, name) (p, x) =
     lenv.locals := SMap.add name (p, x) !(lenv.locals)
 
-(* Saves the position of local variables if we're in find refs mode*)
+  (* Saves the position of local variables if we're in find refs mode*)
   let save_ref x p lenv =
     Find_refs.process_var_ref p x;
     (* If we've already located the target and name of this var is
@@ -384,7 +400,7 @@ module Env = struct
         end;
     ()
 
-(* Defines a new local variable *)
+  (* Defines a new local variable *)
   let new_lvar (_, lenv) (p, x) =
     let lcl = SMap.get x !(lenv.locals) in
     match lcl with
@@ -417,7 +433,7 @@ module Env = struct
     | UBMErr -> Errors.undefined p x; p, Ident.make x
     | UBMFunc f -> f (p, x)
 
-(* Function used to name a local variable *)
+  (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
     if is_superglobal x && genv.in_mode = Ast.Mpartial
     then p, Ident.tmp()
@@ -432,7 +448,7 @@ module Env = struct
       | None -> p, Ident.tmp()
 
   let get_name genv namespace x =
-    ignore (var genv namespace x); x
+    ignore (lookup genv namespace x); x
 
   (* For dealing with namespace fallback on functions and constants. *)
   let elaborate_and_get_name_with_fallback mk_dep genv genv_sect x =
@@ -475,7 +491,7 @@ module Env = struct
 
   let class_name (genv, _) x =
     let x = Namespaces.elaborate_id genv.namespace x in
-    get_name genv genv.classes x
+    canonicalize genv genv.classes x
 
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_fallback
@@ -495,6 +511,24 @@ module Env = struct
       | Ast.Mstrict -> raise exn
       | Ast.Mpartial | Ast.Mdecl -> x
 
+  let resilient_new_canon_var env_and_names (p, name) =
+    let env, canon_names = !env_and_names in
+    let name_key = canon_key name in
+    match SMap.get name_key canon_names with
+      | Some canonical ->
+        let p', id = SMap.find_unsafe canonical env in
+        if Pos.compare p p' = 0 then (p, id)
+        else begin
+          let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
+          Errors.error_name_already_bound hhi_root name canonical p p';
+          p', id
+        end
+      | None ->
+        let pos_and_id = p, Ident.make name in
+        env_and_names :=
+          SMap.add name pos_and_id env, SMap.add name_key name canon_names;
+        pos_and_id
+
   let resilient_new_var env (p, x) =
     if SMap.mem x !env
     then begin
@@ -502,7 +536,7 @@ module Env = struct
       if Pos.compare p p' = 0 then (p, y)
       else begin
         let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-        Errors.error_name_already_bound hhi_root x p p';
+        Errors.error_name_already_bound hhi_root x x p p';
         p', y
       end
     end
@@ -516,10 +550,10 @@ module Env = struct
     ignore (resilient_new_var genv.funs x)
 
   let new_class_id genv x =
-    ignore (resilient_new_var genv.classes x)
+    ignore (resilient_new_canon_var genv.classes x)
 
   let new_typedef_id genv x =
-    let v = resilient_new_var genv.classes x in
+    let v = resilient_new_canon_var genv.classes x in
     genv.typedefs := SMap.add (snd x) v !(genv.typedefs);
     ()
 
@@ -548,17 +582,27 @@ end
 
 let remove_decls env (funs, classes, typedefs, consts) =
   let funs = SSet.diff funs predef_tests in
-  let ifuns    = SSet.fold SMap.remove funs env.ifuns       in
-  let iclasses = SSet.fold SMap.remove classes env.iclasses in
-  let iclasses = SSet.fold SMap.remove typedefs iclasses in
+  let ifuns = SSet.fold SMap.remove funs env.ifuns in
+  let canonicalize_set = (fun elt acc -> SSet.add (canon_key elt) acc) in
+  let class_namekeys = SSet.fold canonicalize_set classes SSet.empty in
+  let typedef_namekeys = SSet.fold canonicalize_set typedefs SSet.empty in
+  let iclassmap, iclassnames = env.iclasses in
+  let iclassmap, iclassnames =
+    SSet.fold SMap.remove classes iclassmap,
+    SSet.fold SMap.remove class_namekeys iclassnames
+  in
+  let iclassmap, iclassnames =
+    SSet.fold SMap.remove typedefs iclassmap,
+    SSet.fold SMap.remove typedef_namekeys iclassnames
+  in
   let itypedefs = SSet.fold SMap.remove typedefs env.itypedefs in
   let iconsts = SSet.fold SMap.remove consts env.iconsts in
   {
    ifuns     = ifuns;
-   iclasses  = iclasses;
+   iclasses  = iclassmap, iclassnames;
    itypedefs = itypedefs;
    iconsts   = iconsts;
- }
+  }
 
 (*****************************************************************************)
 (* Helpers *)
@@ -588,12 +632,6 @@ let check_repetition s param =
   then Errors.already_bound (fst param.param_id) x;
   SSet.add x s
 
-(* Check that the implemented interface exists *)
-let implement env x =
-  match snd x with
-  | Happly (x, _) -> ignore (Env.class_name env x)
-  | _ -> ()
-
 (* Check that a name is not a typedef *)
 let no_typedef (genv, _) cid =
   let (pos, name) = Namespaces.elaborate_id genv.namespace cid in
@@ -611,7 +649,6 @@ let convert_shape_name env = function
   | SFclass_const (x, (pos, y)) ->
     let class_name = Env.class_name env x in
     (pos, N.SFclass_const (class_name, (pos, y)))
-
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
@@ -846,7 +883,10 @@ let rec class_constraints genv tparams =
 and class_ genv c =
   let cstrs    = class_constraints genv c.c_tparams in
   let env      = Env.make_class_env genv cstrs c in
-  class_check env c;
+  (* Checking for a code smell *)
+  List.iter check_constraint c.c_tparams;
+  List.iter (hint_no_typedef env) c.c_extends;
+  List.iter (hint_no_typedef env) c.c_implements;
   let name     = Env.class_name env c.c_name in
   let smethods = List.fold_right (class_static_method env) c.c_body [] in
   let svars    = List.fold_right (class_var_static env) c.c_body [] in
@@ -855,8 +895,7 @@ and class_ genv c =
   let v_names  = List.fold_right SSet.add v_names SSet.empty in
   let sm_names = List.map (fun x -> snd x.N.m_name) smethods in
   let sm_names = List.fold_right SSet.add sm_names SSet.empty in
-  List.iter (hint_no_typedef env) c.c_extends;
-  let parent   = List.map (hint ~allow_this:true env) c.c_extends in
+  let parents  = List.map (hint ~allow_this:true env) c.c_extends in
   let fmethod  = class_method env sm_names v_names in
   let methods  = List.fold_right fmethod c.c_body [] in
   let uses     = List.fold_right (class_use env) c.c_body [] in
@@ -864,8 +903,7 @@ and class_ genv c =
     (class_require env c.c_kind) c.c_body ([], []) in
   let tparam_l  = type_paraml env c.c_tparams in
   let consts   = List.fold_right (class_const env) c.c_body [] in
-  List.iter (hint_no_typedef env) c.c_implements;
-  let implements  = List.map (hint ~allow_this:true env) c.c_implements in
+  let implements = List.map (hint ~allow_this:true env) c.c_implements in
   let constructor = List.fold_left (constructor env) None c.c_body in
   let constructor, methods, smethods =
     interface c constructor methods smethods in
@@ -880,7 +918,7 @@ and class_ genv c =
     N.c_kind           = c.c_kind;
     N.c_name           = name;
     N.c_tparams        = tparam_l;
-    N.c_extends        = parent;
+    N.c_extends        = parents;
     N.c_uses           = uses;
     N.c_req_extends    = req_extends;
     N.c_req_implements = req_implements;
@@ -893,14 +931,6 @@ and class_ genv c =
     N.c_methods        = methods;
     N.c_user_attributes = c.c_user_attributes;
   }
-
-and class_check env c =
-  (* Checking all the parents exist *)
-  List.iter (implement env) c.c_extends;
-  List.iter (implement env) c.c_implements;
-  (* Checking for a code smell *)
-  List.iter check_constraint c.c_tparams;
-  ()
 
 and type_paraml env tparams =
   let _, ret = List.fold_left
@@ -922,8 +952,8 @@ and class_use env x acc =
   | Attributes _ -> acc
   | Const _ -> acc
   | ClassUse h ->
-      hint_no_typedef env h;
-      hint ~allow_this:true env h :: acc
+    hint_no_typedef env h;
+    hint ~allow_this:true env h :: acc
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
   | Method _ -> acc
@@ -1566,7 +1596,7 @@ and expr_ env = function
   | Call (e, el) ->
       N.Call (N.Cnormal, expr env e, List.map (expr env) el)
   | Yield_break -> N.Yield_break
-  | Yield e -> N.Yield (expr env e)
+  | Yield e -> N.Yield (afield env e)
   | Await e -> N.Await (expr env e)
   | List el -> N.List (exprl env el)
   | Expr_list el -> N.Expr_list (exprl env el)
@@ -1813,7 +1843,7 @@ let ndecl_file fn
    * and the naming environment is in a sane state.
    *)
   let failed = add_files_to_rename nenv failed funs nenv.ifuns in
-  let failed = add_files_to_rename nenv failed classes nenv.iclasses in
+  let failed = add_files_to_rename nenv failed classes (fst nenv.iclasses) in
   let failed = add_files_to_rename nenv failed types nenv.itypedefs in
   let failed = add_files_to_rename nenv failed consts nenv.iconsts in
   List.rev_append l errorl, SSet.add fn failed, nenv

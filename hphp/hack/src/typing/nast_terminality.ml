@@ -33,7 +33,6 @@ end = struct
             AE_invariant ((_, False), _, _) |
             AE_invariant_violation _))
     | Expr (_, Call (Cnormal, (_, Id (_, "exit")), _)) -> raise Exit
-    | Expr (_, Yield (_, Special_func sf)) -> special_func sf
     | If (_, b1, b2) ->
       (try terminal inside_case b1; () with Exit ->
         terminal inside_case b2)
@@ -57,12 +56,6 @@ end = struct
     | Fallthrough
     | Expr _
     | Static_var _ -> ()
-
-  and special_func = function
-    | Gena _
-    | Genva _
-    | Gen_array_rec _
-    | Gen_array_va_rec _ -> ()
 
   and terminal_catchl inside_case = function
     | [] -> raise Exit
@@ -121,7 +114,6 @@ end = struct
             AE_invariant ((_, False), _, _) |
             AE_invariant_violation _))
     | Expr (_, Call (Cnormal, (_, Id (_, "exit")), _)) -> raise Exit
-    | Expr (_, Yield (_, Special_func sf)) -> special_func sf
     | If (_, b1, b2) ->
       (try terminal b1; () with Exit ->
         terminal b2)
@@ -138,12 +130,6 @@ end = struct
     | Noop
     | Expr _
     | Static_var _ -> ()
-
-  and special_func = function
-    | Gena _
-    | Genva _
-    | Gen_array_rec _
-    | Gen_array_va_rec _ -> ()
 
   and terminal_catchl = function
     | [] -> raise Exit

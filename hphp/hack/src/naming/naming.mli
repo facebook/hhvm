@@ -22,11 +22,14 @@ open Utils
  * mapped here in ifuns to a freshly created unique integer identifier.
  *)
 type env = {
-    iclasses  : (Pos.t * Ident.t) SMap.t;
-    ifuns     : (Pos.t * Ident.t) SMap.t;
-    itypedefs : (Pos.t * Ident.t) SMap.t;
-    iconsts   : (Pos.t * Ident.t) SMap.t;
-  }
+  iclasses  : ((Pos.t * Ident.t) SMap.t) * (String.t SMap.t);
+  ifuns     : (Pos.t * Ident.t) SMap.t;
+  itypedefs : (Pos.t * Ident.t) SMap.t;
+  iconsts   : (Pos.t * Ident.t) SMap.t;
+}
+
+(* Canonicalizes a key *)
+val canon_key: String.t -> String.t
 
 (* The empty naming environment *)
 val empty: env
@@ -39,8 +42,8 @@ val empty: env
  * passed as parameters to this old environment.
 *)
 val make_env:
-    env -> 
-      funs:Ast.id list -> 
+    env ->
+      funs:Ast.id list ->
       classes:Ast.id list ->
       typedefs:Ast.id list ->
       consts:Ast.id list -> env

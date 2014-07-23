@@ -129,6 +129,10 @@ struct Stats {
   std::atomic<uint64_t> uniqueFunctions;
   std::atomic<uint64_t> totalClasses;
   std::atomic<uint64_t> totalFunctions;
+  std::atomic<uint64_t> persistentSPropsPub;
+  std::atomic<uint64_t> persistentSPropsProt;
+  std::atomic<uint64_t> persistentSPropsPriv;
+  std::atomic<uint64_t> totalSProps;
   TypeStat returns;
   TypeStat privateProps;
   TypeStat privateStatics;
@@ -203,13 +207,22 @@ std::string show(const Stats& stats) {
     "    persistent_funcs:  {: >8}\n"
     "       total_classes:  {: >8}\n"
     "      unique_classes:  {: >8}\n"
-    "  persistent_classes:  {: >8}\n",
+    "  persistent_classes:  {: >8}\n"
+    "\n"
+    "        total_sprops:      {: >8}\n"
+    "   persistent_sprops_pub:  {: >8}\n"
+    "   persistent_sprops_prot: {: >8}\n"
+    "   persistent_sprops_priv: {: >8}\n",
     stats.totalFunctions.load(),
     stats.uniqueFunctions.load(),
     stats.persistentFunctions.load(),
     stats.totalClasses.load(),
     stats.uniqueClasses.load(),
-    stats.persistentClasses.load()
+    stats.persistentClasses.load(),
+    stats.totalSProps.load(),
+    stats.persistentSPropsPub.load(),
+    stats.persistentSPropsProt.load(),
+    stats.persistentSPropsPriv.load()
   );
 
   ret += "\n";
@@ -459,6 +472,16 @@ void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   }
   for (auto& kv : index.lookup_private_statics(&cls)) {
     add_type(stats.privateStatics, kv.second);
+  }
+  for (auto& prop : cls.properties) {
+    if (prop.attrs & AttrStatic) {
+      ++stats.totalSProps;
+      if (prop.attrs & AttrPersistent) {
+        if (prop.attrs & AttrPublic)    ++stats.persistentSPropsPub;
+        if (prop.attrs & AttrProtected) ++stats.persistentSPropsProt;
+        if (prop.attrs & AttrPrivate)   ++stats.persistentSPropsPriv;
+      }
+    }
   }
 }
 

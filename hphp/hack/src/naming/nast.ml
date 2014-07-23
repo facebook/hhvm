@@ -66,37 +66,37 @@ and tprim =
   | Tresource
 
 and class_ = {
-    c_mode           : Ast.mode         ;
-    c_final          : bool             ;
-    c_is_xhp         : bool;
-    c_kind           : Ast.class_kind   ;
-    c_name           : sid              ;
+  c_mode           : Ast.mode         ;
+  c_final          : bool             ;
+  c_is_xhp         : bool;
+  c_kind           : Ast.class_kind   ;
+  c_name           : sid              ;
     (* The type parameters of a class A<T> (T is the parameter) *)
-    c_tparams        : tparam list      ;
-    c_extends        : hint list        ;
-    c_uses           : hint list        ;
-    c_req_extends    : hint list        ;
-    c_req_implements : hint list        ;
-    c_implements     : hint list        ;
-    c_consts         : class_const list ;
-    c_static_vars    : class_var list   ;
-    c_vars           : class_var list   ;
-    c_constructor    : method_ option   ;
-    c_static_methods : method_ list     ;
-    c_methods        : method_ list     ;
-    c_user_attributes : Ast.user_attribute SMap.t;
-  }
+  c_tparams        : tparam list      ;
+  c_extends        : hint list        ;
+  c_uses           : hint list        ;
+  c_req_extends    : hint list        ;
+  c_req_implements : hint list        ;
+  c_implements     : hint list        ;
+  c_consts         : class_const list ;
+  c_static_vars    : class_var list   ;
+  c_vars           : class_var list   ;
+  c_constructor    : method_ option   ;
+  c_static_methods : method_ list     ;
+  c_methods        : method_ list     ;
+  c_user_attributes : Ast.user_attribute SMap.t;
+}
 
 and tparam = sid * hint option
 
 and class_const = hint option * sid * expr
 and class_var = {
-    cv_final      : bool        ;
-    cv_visibility : visibility  ;
-    cv_type       : hint option ;
-    cv_id         : sid         ;
-    cv_expr       : expr option ;
-  }
+  cv_final      : bool        ;
+  cv_visibility : visibility  ;
+  cv_type       : hint option ;
+  cv_id         : sid         ;
+  cv_expr       : expr option ;
+}
 
 and method_ = {
   m_unsafe     : bool         ;
@@ -213,7 +213,7 @@ and expr_ =
   | String2 of expr list * string
   | Special_func of special_func
   | Yield_break
-  | Yield of expr
+  | Yield of afield
   | Await of expr
   | List of expr list
   | Pair of expr * expr

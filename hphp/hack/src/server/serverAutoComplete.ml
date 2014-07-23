@@ -24,12 +24,11 @@ let auto_complete env content oc =
     end funs nenv.Naming.ifuns
   in
   let iclasses =
-    SSet.fold begin fun x acc ->
-      SMap.add x dummy_pos acc
+    SSet.fold begin fun x (classmap, canon_names) ->
+      SMap.add x dummy_pos classmap, SMap.add (Naming.canon_key x) x canon_names
     end classes nenv.Naming.iclasses
   in
-  let nenv =
-    { nenv with Naming.ifuns = ifuns; Naming.iclasses = iclasses } in
+  let nenv = { nenv with Naming.ifuns = ifuns; Naming.iclasses = iclasses } in
   ServerIdeUtils.fix_file_and_def content;
   let fun_names = SMap.keys nenv.Naming.ifuns in
   let class_names = SMap.keys nenv.Naming.ifuns in

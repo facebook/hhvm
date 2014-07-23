@@ -70,7 +70,7 @@ class type ['a] nast_visitor_type = object
   method on_string2 : 'a -> expr list -> string -> 'a
   method on_special_func : 'a -> special_func -> 'a
   method on_yield_break : 'a -> 'a
-  method on_yield : 'a -> expr -> 'a
+  method on_yield : 'a -> afield -> 'a
   method on_await : 'a -> expr -> 'a
   method on_list : 'a -> expr list -> 'a
   method on_pair : 'a -> expr -> expr -> 'a
@@ -304,7 +304,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
     | Gen_array_va_rec el -> List.fold_left this#on_expr acc el
 
   method on_yield_break acc = acc
-  method on_yield acc e = this#on_expr acc e
+  method on_yield acc e = this#on_afield acc e
   method on_await acc e = this#on_expr acc e
   method on_list acc el = List.fold_left this#on_expr acc el
 

@@ -3784,17 +3784,10 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     return;
   }
 
-  auto const srcKey = m_curInst->marker().sk();
-  auto const adjust = emitBindCall(m_mainCode,
-                                   m_coldCode,
-                                   m_frozenCode,
-                                   srcKey,
-                                   extra->callee,
-                                   extra->numParams);
   assert(dstLoc(0).reg() == rVmSp);
-  if (adjust) {
-    a.  addq   (adjust, rVmSp);
-  }
+  auto const srcKey = m_curInst->marker().sk();
+  emitBindCall(m_mainCode, m_coldCode, m_frozenCode, srcKey, extra->callee,
+               extra->numParams);
 }
 
 void CodeGenerator::cgCastStk(IRInstruction *inst) {

@@ -225,6 +225,64 @@ public:
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////
+struct ProfilerFactory final : RequestEventHandler {
+  enum Level {
+    Simple       = 1,
+    Hierarchical = 2,
+    Memory       = 3,
+    Trace        = 4,
+    Memo         = 5,
+    Sample       = 620002, // Rockfort's zip code
+  };
+
+  static bool EnableNetworkProfiler;
+
+public:
+  ProfilerFactory() : m_profiler(nullptr) {
+  }
+
+  ~ProfilerFactory() {
+    stop();
+  }
+
+  Profiler *getProfiler() {
+    return m_profiler;
+  }
+
+  void requestInit() override {}
+  void requestShutdown() override {
+    stop();
+    m_artificialFrameNames.reset();
+  }
+
+  /**
+   * Attempts to start profiling in the current thread. Returns true on success
+   * or false on failure.
+   */
+  bool start(Level level, long flags);
+
+  /**
+   * Will stop profiling if currently profiling, regardless of how it was
+   * started.
+   */
+  Variant stop();
+
+  /**
+   * The whole purpose to make sure "const char *" is safe to take on these
+   * strings.
+   */
+  void cacheString(const String& name) {
+    m_artificialFrameNames.append(name);
+  }
+
+private:
+  Profiler *m_profiler;
+  Array m_artificialFrameNames;
+};
+
+DECLARE_EXTERN_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
+
 }
 
 #endif // incl_HPHP_EXT_HOTPROFILER_H_

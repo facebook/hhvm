@@ -1418,105 +1418,64 @@ class MemoProfiler : public Profiler {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// ProfilerFactory
 
-struct ProfilerFactory final : RequestEventHandler {
-  enum Level {
-    Simple       = 1,
-    Hierarchical = 2,
-    Memory       = 3,
-    Trace        = 4,
-    Memo         = 5,
-    Sample       = 620002, // Rockfort's zip code
-  };
-
-  static bool EnableNetworkProfiler;
-
-public:
-  ProfilerFactory() : m_profiler(nullptr) {
+bool ProfilerFactory::start(Level level, long flags) {
+  if (m_profiler != nullptr) {
+    return false;
   }
 
-  ~ProfilerFactory() {
-    stop();
+  switch (level) {
+  case Simple:
+    m_profiler = new SimpleProfiler();
+    break;
+  case Hierarchical:
+    m_profiler = new HierarchicalProfiler(flags);
+    break;
+  case Sample:
+    m_profiler = new SampleProfiler();
+    break;
+  case Trace:
+    m_profiler = new TraceProfiler(flags);
+    break;
+  case Memo:
+    m_profiler = new MemoProfiler(flags);
+    break;
+  default:
+    throw_invalid_argument("level: %d", level);
+    return false;
   }
-
-  Profiler *getProfiler() {
-    return m_profiler;
-  }
-
-  void requestInit() override {}
-  void requestShutdown() override {
-    stop();
-    m_artificialFrameNames.reset();
-  }
-
-  void start(Level level, long flags) {
-    if (!RuntimeOption::EnableHotProfiler) {
-      return;
-    }
+  if (m_profiler->m_successful) {
     // This will be disabled automatically when the thread completes the request
     HPHP::EventHook::Enable();
-    if (m_profiler == nullptr) {
-      switch (level) {
-      case Simple:
-        m_profiler = new SimpleProfiler();
-        break;
-      case Hierarchical:
-        m_profiler = new HierarchicalProfiler(flags);
-        break;
-      case Sample:
-        m_profiler = new SampleProfiler();
-        break;
-      case Trace:
-        m_profiler = new TraceProfiler(flags);
-        break;
-      case Memo:
-        m_profiler = new MemoProfiler(flags);
-        break;
-      default:
-        throw_invalid_argument("level: %d", level);
-        return;
-      }
-      if (m_profiler->m_successful) {
-        m_profiler->beginFrame("main()");
-        ThreadInfo::s_threadInfo->m_profiler = m_profiler;
-      } else {
-        delete m_profiler;
-        m_profiler = nullptr;
-      }
-    }
+    m_profiler->beginFrame("main()");
+    ThreadInfo::s_threadInfo->m_profiler = m_profiler;
+    return true;
+  } else {
+    delete m_profiler;
+    m_profiler = nullptr;
+    return false;
   }
+}
 
-  Variant stop() {
-    if (m_profiler) {
-      m_profiler->endAllFrames();
+Variant ProfilerFactory::stop() {
+  if (m_profiler) {
+    m_profiler->endAllFrames();
 
-      Array ret;
-      m_profiler->writeStats(ret);
-      delete m_profiler;
-      m_profiler = nullptr;
-      ThreadInfo::s_threadInfo->m_profiler = nullptr;
+    Array ret;
+    m_profiler->writeStats(ret);
+    delete m_profiler;
+    m_profiler = nullptr;
+    ThreadInfo::s_threadInfo->m_profiler = nullptr;
 
-      return ret;
-    }
-    return init_null();
+    return ret;
   }
-
-  /**
-   * The whole purpose to make sure "const char *" is safe to take on these
-   * strings.
-   */
-  void cacheString(const String& name) {
-    m_artificialFrameNames.append(name);
-  }
-
-private:
-  Profiler *m_profiler;
-  Array m_artificialFrameNames;
-};
+  return init_null();
+}
 
 bool ProfilerFactory::EnableNetworkProfiler = false;
 
-IMPLEMENT_STATIC_REQUEST_LOCAL(ProfilerFactory, s_factory);
+IMPLEMENT_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 
 ///////////////////////////////////////////////////////////////////////////////
 // main functions
@@ -1529,19 +1488,23 @@ void f_hotprofiler_enable(int level) {
     level = ProfilerFactory::Hierarchical;
     flags = TrackBuiltins | TrackMemory;
   }
-  s_factory->start((ProfilerFactory::Level)level, flags);
+  if (RuntimeOption::EnableHotProfiler) {
+    s_profiler_factory->start((ProfilerFactory::Level)level, flags);
+  }
 }
 
 Variant f_hotprofiler_disable() {
-  return s_factory->stop();
+  return s_profiler_factory->stop();
 }
 
 void f_phprof_enable(int flags /* = 0 */) {
-  s_factory->start(ProfilerFactory::Hierarchical, flags);
+  if (RuntimeOption::EnableHotProfiler) {
+    s_profiler_factory->start(ProfilerFactory::Hierarchical, flags);
+  }
 }
 
 Variant f_phprof_disable() {
-  return s_factory->stop();
+  return s_profiler_factory->stop();
 }
 
 void f_fb_setprofile(const Variant& callback) {
@@ -1560,7 +1523,7 @@ void f_fb_setprofile(const Variant& callback) {
 void f_xhprof_frame_begin(const String& name) {
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {
-    s_factory->cacheString(name);
+    s_profiler_factory->cacheString(name);
     prof->beginFrame(name.data());
   }
 }
@@ -1574,6 +1537,9 @@ void f_xhprof_frame_end() {
 
 void f_xhprof_enable(int flags/* = 0 */,
                      const Array& args /* = null_array */) {
+  if (!RuntimeOption::EnableHotProfiler) {
+    return;
+  }
 #ifdef CLOCK_THREAD_CPUTIME_ID
   bool missingClockGetTimeNS =
     Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
@@ -1587,14 +1553,14 @@ void f_xhprof_enable(int flags/* = 0 */,
     flags |= TrackCPU;
   }
   if (flags & XhpTrace) {
-    s_factory->start(ProfilerFactory::Trace, flags);
+    s_profiler_factory->start(ProfilerFactory::Trace, flags);
   } else {
-    s_factory->start(ProfilerFactory::Hierarchical, flags);
+    s_profiler_factory->start(ProfilerFactory::Hierarchical, flags);
   }
 }
 
 Variant f_xhprof_disable() {
-  return s_factory->stop();
+  return s_profiler_factory->stop();
 }
 
 void f_xhprof_network_enable() {
@@ -1606,11 +1572,16 @@ Variant f_xhprof_network_disable() {
 }
 
 void f_xhprof_sample_enable() {
-  s_factory->start(ProfilerFactory::Sample, 0);
+  if (RuntimeOption::EnableHotProfiler) {
+    s_profiler_factory->start(ProfilerFactory::Sample, 0);
+  } else {
+    raise_warning("Cannot start the xhprof sampler when the hotprofiler is "
+                  "disabled.");
+  }
 }
 
 Variant f_xhprof_sample_disable() {
-  return s_factory->stop();
+  return s_profiler_factory->stop();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

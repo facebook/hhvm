@@ -80,8 +80,6 @@ type env = {
   lenv    : local_env ;
   genv    : genv       ;
   todo    : tfun list  ;
-  pclasses : SSet.t;
-  pfuns    : SSet.t;
 }
 
 and genv = {
@@ -258,8 +256,6 @@ let empty file = {
   subst   = IMap.empty;
   lenv    = empty_local;
   todo    = [];
-  pclasses = SSet.empty;
-  pfuns = SSet.empty;
   genv    = {
     mode    = Ast.Mstrict;
     return  = fresh_type();
@@ -298,7 +294,6 @@ let add_fun x ft =
 let add_wclass env x =
   let dep = Dep.Class x in
   Typing_deps.add_idep env.genv.droot dep;
-  let env = { env with pclasses = SSet.add x env.pclasses } in
   env
 
 (* When we want to type something with a fresh typing environment *)
@@ -418,7 +413,6 @@ let get_fn_type env = env.genv.f_type
 let get_fun env x =
   let dep = Dep.Fun x in
   Typing_deps.add_idep env.genv.droot dep;
-  let env = { env with pfuns = SSet.add x env.pfuns } in
   env, Funs.get x
 
 let set_has_yield ?(value=true) env =

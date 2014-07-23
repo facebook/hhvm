@@ -433,8 +433,6 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
     return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
   } else if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
     return Array::Create(Object(const_cast<ObjectData*>(this)));
-  } else if (UNLIKELY(instanceof(c_DateTime::classof()))) {
-    return ((c_DateTime*) this)->t___debuginfo();
   } else {
     Array ret(ArrayData::Create());
     o_getArray(ret, pubOnly);

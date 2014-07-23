@@ -30,12 +30,12 @@ void XDebugProfiler::ensureBufferSpace() {
   }
 
   // The initial buffer size is 0
-  size_t new_buf_size = (m_frameBufferSize == 0)?
+  uint64_t new_buf_size = (m_frameBufferSize == 0)?
     XDebugExtension::FramebufSize :
     m_frameBufferSize * XDebugExtension::FramebufExpansion;
 
   try {
-    size_t new_buf_bytes = new_buf_size * sizeof(FrameData);
+    uint64_t new_buf_bytes = new_buf_size * sizeof(FrameData);
     m_frameBuffer = (FrameData*) smart_realloc((void*) m_frameBuffer,
                                                new_buf_bytes);
     m_frameBufferSize = new_buf_size;

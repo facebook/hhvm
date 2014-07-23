@@ -97,9 +97,9 @@ private:
   virtual inline void writeStats(Array &ret) {}
 
   FrameData* m_frameBuffer;
-  size_t m_frameBufferSize;
-  size_t m_nextFrameIdx;
-  size_t m_tracingStartIdx;
+  uint64_t m_frameBufferSize;
+  uint64_t m_nextFrameIdx;
+  uint64_t m_tracingStartIdx;
   bool m_tracingEnabled;
   bool m_profilingEnabled;
 };

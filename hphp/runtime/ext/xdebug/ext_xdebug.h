@@ -71,7 +71,7 @@ namespace HPHP {
   XDEBUG_OPT(string, "file_link_format", FileLinkFormat, "") \
   XDEBUG_OPT(bool, "force_display_errors", ForceDisplayErrors, false) \
   XDEBUG_OPT(int, "force_error_reporting", ForceErrorReporting, 0) \
-  XDEBUG_OPT(size_t, "framebuf_size", FramebufSize, 100000) \
+  XDEBUG_OPT(uint64_t, "framebuf_size", FramebufSize, 100000) \
   XDEBUG_OPT(double, "framebuf_expansion", FramebufExpansion, 1.5) \
   XDEBUG_OPT(int, "halt_level", HaltLevel, 0) \
   XDEBUG_OPT(string, "ide_key", IdeKey, "") \

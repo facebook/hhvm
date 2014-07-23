@@ -33,7 +33,7 @@ function snappy_uncompress(string $data): mixed;
 <<__HipHopSpecific>>
 function sncompress(string $data) {
   trigger_error("sncompress is now depreciated in favour of snappy_compress",
-                 E_USER_WARNING);
+                 E_USER_DEPRECATED);
   return snappy_compress($data);
 }
 
@@ -47,6 +47,6 @@ function sncompress(string $data) {
 <<__HipHopSpecific>>
 function snuncompress(string $data) {
   trigger_error("snuncompress is now depreciated in favour of snappy_uncompress",
-                E_USER_WARNING);
+                E_USER_DEPRECATED);
   return snappy_uncompress($data);
 }

@@ -496,7 +496,7 @@ Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level /* = 1 */) {
 
 #ifdef HAVE_SNAPPY
 
-Variant HHVM_FUNCTION(sncompress, const String& data) {
+Variant HHVM_FUNCTION(snappy_compress, const String& data) {
   size_t size;
   char *compressed =
     (char *)malloc(snappy::MaxCompressedLength(data.size()) + 1);
@@ -507,7 +507,7 @@ Variant HHVM_FUNCTION(sncompress, const String& data) {
   return String(compressed, size, AttachString);
 }
 
-Variant HHVM_FUNCTION(snuncompress, const String& data) {
+Variant HHVM_FUNCTION(snappy_uncompress, const String& data) {
   size_t dsize;
 
   snappy::GetUncompressedLength(data.data(), data.size(), &dsize);
@@ -828,8 +828,8 @@ class ZlibExtension : public Extension {
     HHVM_FE(qlzuncompress);
 #endif
 #ifdef HAVE_SNAPPY
-    HHVM_FE(sncompress);
-    HHVM_FE(snuncompress);
+    HHVM_FE(snappy_compress);
+    HHVM_FE(snappy_uncompress);
 #endif
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);

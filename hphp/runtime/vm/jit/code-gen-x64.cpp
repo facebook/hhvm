@@ -65,6 +65,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 using HPHP::JIT::TCA;
 
@@ -127,6 +128,18 @@ void CodeGenerator::unlikelyIfBlock(ConditionCode cc, Block unlikely) {
   }
 }
 
+template <class Then>
+void unlikelyIfThen(Vout& vmain, Vout& vcold, ConditionCode cc, Then then) {
+  auto unlikely = vcold.makeBlock();
+  auto done = vmain.makeBlock();
+  vmain << jcc{cc, {done, unlikely}};
+  vcold = unlikely;
+  then(vcold);
+  if (!vcold.closed()) vcold << jmp{done};
+  vmain = done;
+}
+
+// Generate an if-then-else block
 template <class Then, class Else>
 void CodeGenerator::ifThenElse(Asm& a, ConditionCode cc, Then thenBlock,
                                Else elseBlock) {
@@ -192,6 +205,23 @@ PhysReg CodeGenerator::selectScratchReg(IRInstruction* inst) {
     return selectedReg;
   }
   return rCgGP;
+}
+
+// Generate an if-then-else block
+template <class Then, class Else>
+void CodeGenerator::ifThenElse(Vout& v, ConditionCode cc,
+                               Then thenBlock, Else elseBlock) {
+  auto thenLabel = v.makeBlock();
+  auto elseLabel = v.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {elseLabel, thenLabel}};
+  v = thenLabel;
+  thenBlock(v);
+  if (!v.closed()) v << jmp{done};
+  v = elseLabel;
+  elseBlock(v);
+  if (!v.closed()) v << jmp{done};
+  v = done;
 }
 
 void CodeGenerator::cgInst(IRInstruction* inst) {
@@ -433,19 +463,7 @@ void CodeGenerator::emitFwdJcc(ConditionCode cc, Block* target) {
 }
 
 void CodeGenerator::emitLoadImm(Asm& as, int64_t val, PhysReg dstReg) {
-  assert(dstReg != InvalidReg);
-  if (dstReg.isGP()) {
-    as.emitImmReg(val, dstReg);
-  } else {
-    assert(dstReg.isSIMD());
-    if (val == 0) {
-      as.pxor(dstReg, dstReg);
-    } else {
-      // Can't move immediate directly into XMM register, load a literal
-      auto addr = mcg->allocLiteral(val);
-      as.movsd(rip[(intptr_t)addr], dstReg);
-    }
-  }
+  Vauto().main(as) << ldimm{val, dstReg};
 }
 
 /*
@@ -457,7 +475,7 @@ void CodeGenerator::emitLoadImm(Asm& as, int64_t val, PhysReg dstReg) {
  * they're emitted in 'as'.
  * TODO: #3634984, #3727837 This function must die.
  */
-PhysReg CodeGenerator::prepXMMReg(Asm& as, const SSATmp* src,
+PhysReg CodeGenerator::prepXMMReg(Vout& v, const SSATmp* src,
                                   const PhysLoc& srcLoc, RegXMM rtmp) {
   assert(src->isA(Type::Bool) || src->isA(Type::Int) || src->isA(Type::Dbl));
   always_assert(srcLoc.reg() != InvalidReg);
@@ -470,15 +488,19 @@ PhysReg CodeGenerator::prepXMMReg(Asm& as, const SSATmp* src,
 
   // Case 2: src Dbl stored in GP reg
   if (src->isA(Type::Dbl)) {
-    emitMovRegReg(as, rsrc, rtmp);
+    v << copy{rsrc, rtmp};
     return rtmp;
   }
 
   // Case 2.b: Bool or Int stored in GP reg
-  zeroExtendIfBool(as, src, rsrc);
-  as.pxor(rtmp, rtmp);
-  as.cvtsi2sd(rsrc, rtmp);
+  zeroExtendIfBool(v, src, rsrc);
+  v << cvtsi2sd{rsrc, rtmp};
   return rtmp;
+}
+
+PhysReg CodeGenerator::prepXMMReg(Asm& a, const SSATmp* src,
+                                  const PhysLoc& srcLoc, RegXMM rtmp) {
+  return prepXMMReg(Vauto().main(a), src, srcLoc, rtmp);
 }
 
 void CodeGenerator::emitCompare(IRInstruction* inst) {
@@ -2249,47 +2271,51 @@ asm_label(a, out);
 }
 
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
+  Vauto vasm;
+  Vout& vmain = vasm.main(m_mainCode);
+  Vout& vcold = vasm.cold(m_coldCode);
+
   auto src = inst->src(0);
-  auto srcReg = prepXMMReg(m_as, src, srcLoc(0), rCgXMM0);
+  auto srcReg = prepXMMReg(vmain, src, srcLoc(0), rCgXMM0);
   auto dstReg = dstLoc(0).reg();
 
   constexpr uint64_t maxULongAsDouble  = 0x43F0000000000000LL;
   constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
 
-  auto indef_ref = rip[(intptr_t)mcg->allocLiteral(0x8000000000000000LL)];
-  m_as.    cvttsd2siq   (srcReg, dstReg);
-  m_as.    cmpq         (indef_ref, dstReg);
+  auto rIndef = m_rScratch;
+  vmain << ldimm{0x8000000000000000LL, rIndef};
+  vmain << cvttsd2siq{srcReg, dstReg};
+  vmain << cmpq{rIndef, dstReg};
 
-  unlikelyIfBlock(CC_E, [&] (Asm& a) {
+  unlikelyIfThen(vmain, vcold, CC_E, [&] (Vout& v) {
     // result > max signed int or unordered
-    a.    pxor               (rCgXMM1, rCgXMM1);
-    a.    ucomisd            (rCgXMM1, srcReg);
+    v << ldimm{0, rCgXMM1};
+    v << ucomisd{rCgXMM1, srcReg};
 
-    ifThen(a, CC_B, [&](Asm& a) {
+    ifThen(v, CC_B, [&](Vout& v) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
-      ifThen(a, CC_NP, [&](Asm& a) {
-        emitLoadImm(a, maxULongAsDouble, rCgXMM1);
-        a.   ucomisd    (rCgXMM1, srcReg);
-        ifThenElse(a, CC_B, [&](Asm& a) {
+      ifThen(v, CC_NP, [&](Vout& v) {
+        v << ldimm{maxULongAsDouble, rCgXMM1};
+        v << ucomisd{rCgXMM1, srcReg};
+        ifThenElse(v, CC_B, [&](Vout& v) {
           // src0 > ULONG_MAX
-          a.    xorq    (dstReg, dstReg);
-
-        }, [&](Asm& a) {
+          v << ldimm{0, dstReg};
+        }, [&](Vout& v) {
           // 0 < src0 <= ULONG_MAX
-          emitLoadImm(a, maxLongAsDouble, rCgXMM1);
-          emitMovRegReg(a, srcReg, rCgXMM0);
+          v << ldimm{maxLongAsDouble, rCgXMM1};
+          v << copy{srcReg, rCgXMM0};
 
           // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
           // 0 < src0 - ULONG_MAX <= LONG_MAX
-          a.    subsd            (rCgXMM1, rCgXMM0);
-          a.    cvttsd2siq       (rCgXMM0, dstReg);
+          v << subsd{rCgXMM1, rCgXMM0, rCgXMM0};
+          v << cvttsd2siq{rCgXMM0, dstReg};
 
           // We want to simulate integer overflow so we take the resulting
           // integer and flip its sign bit (NB: we don't use orq here
           // because it's possible that src0 == LONG_MAX in which case
           // cvttsd2siq will yeild an indefiniteInteger, which we would
           // like to make zero)
-          a.    xorq             (indef_ref, dstReg);
+          v << xorq{rIndef, dstReg, dstReg};
         });
       });
     });
@@ -4920,10 +4946,10 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       thenBody(m_as);
     } else {
       ifThenElse(CC_NLE, thenBody, /* else */ [&](Asm& a) {
-          //   If not special builtin...
-          a.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
-          destSR->emitFallbackJump(m_mainCode, vals64 ? CC_Z : CC_NZ);
-        });
+        //   If not special builtin...
+        a.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
+        destSR->emitFallbackJump(m_mainCode, vals64 ? CC_Z : CC_NZ);
+      });
     }
   }
 }
@@ -5709,7 +5735,7 @@ void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
     switch (size) {
       case sz::byte:  m_as.storeb(rbyte(srcReg), dst); break;
       case sz::dword: m_as.storel(r32(srcReg), dst); break;
-      case sz::qword: m_as.storeq(r64(srcReg), dst); break;
+      case sz::qword: m_as.storeq(srcReg, dst); break;
       default:        not_implemented();
     }
   }
@@ -6129,15 +6155,17 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   // a bytecode's translation, which should never begin with FreeActRec or
   // RetCtrl.
   always_assert(!inst->is(FreeActRec, RetCtrl));
+  Vauto vasm;
+  auto v = vasm.main(m_as);
   Immed64 imm = (uintptr_t)enterTCServiceReq;
   if (imm.fits(sz::dword)) {
-    m_as.cmpq(imm.l(), *rsp);
+    v << cmpqim{imm.l(), *rsp};
   } else {
-    m_as.emitImmReg(imm, m_rScratch);
-    m_as.cmpq(m_rScratch, *rsp);
+    v << ldimm{imm, m_rScratch};
+    v << cmpqm{m_rScratch, *rsp};
   }
-  ifThen(m_as, CC_NE, [&](Asm& a) {
-     a.ud2();
+  ifThen(v, CC_NE, [&](Vout& v) {
+     v << ud2{};
   });
 }
 

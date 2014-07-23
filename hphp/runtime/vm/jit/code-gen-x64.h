@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 namespace HPHP { namespace JIT { namespace X64 {
+struct Vout;
 
 // Cache alignment is required for mutable instructions to make sure
 // mutations don't "tear" on remote cpus.
@@ -180,6 +181,8 @@ private:
   void emitLoadImm(Asm& as, int64_t val, PhysReg dstReg);
   PhysReg prepXMMReg(Asm& as, const SSATmp* src, const PhysLoc& srcLoc,
                      RegXMM rXMMScratch);
+  PhysReg prepXMMReg(Vout&, const SSATmp* src, const PhysLoc& srcLoc,
+                     RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
@@ -252,10 +255,14 @@ private:
    */
   template <class Block>
   void unlikelyIfBlock(ConditionCode cc, Block unlikely);
+  template <class Block>
+  void unlikelyIfBlock(Vout&, Vout&, ConditionCode cc, Block unlikely);
 
   // Generate an if-then-else block
   template <class Then, class Else>
   void ifThenElse(Asm& a, ConditionCode cc, Then thenBlock, Else elseBlock);
+  template <class Then, class Else>
+  void ifThenElse(Vout&, ConditionCode cc, Then thenBlock, Else elseBlock);
 
   // Generate an if-then-else block into m_as.
   template <class Then, class Else>

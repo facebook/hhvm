@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP {
 struct Func;
@@ -147,6 +148,7 @@ void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2);
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
 
 void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);
+void zeroExtendIfBool(Vout& as, const SSATmp* src, Vreg reg);
 
 ConditionCode opToConditionCode(Opcode opc);
 

@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP {
 namespace JIT {
@@ -34,6 +35,18 @@ void ifThen(JIT::X64Assembler& a, ConditionCode cc, Then thenBlock) {
   a.jcc8(ccNegate(cc), done);
   thenBlock(a);
   asm_label(a, done);
+}
+
+template <class Then>
+void ifThen(X64::Vout& v, ConditionCode cc, Then thenBlock) {
+  using namespace X64;
+  auto then = v.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {done, then}};
+  v = then;
+  thenBlock(v);
+  if (!v.closed()) v << jmp{done};
+  v = done;
 }
 
 // Helper structs for jcc vs. jcc8.

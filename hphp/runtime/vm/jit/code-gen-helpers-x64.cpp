@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP { namespace JIT { namespace X64 {
 
@@ -445,7 +446,15 @@ void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   }
 }
 
-void zeroExtendIfBool(CodeGenerator::Asm& as, const SSATmp* src, PhysReg reg) {
+void zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
+  if (src->isA(Type::Bool) && reg.isValid()) {
+    // zero-extend the bool from a byte to a quad
+    // note: movzbl actually extends the value to 64 bits.
+    v << movzbl{reg, reg};
+  }
+}
+
+void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg) {
   if (src->isA(Type::Bool) && reg != InvalidReg) {
     // zero-extend the bool from a byte to a quad
     // note: movzbl actually extends the value to 64 bits.

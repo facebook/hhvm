@@ -260,7 +260,7 @@ void print(const SSATmp* tmp) {
  */
 static constexpr auto kIndent = 4;
 
-static void disasmRange(std::ostream& os, TCA begin, TCA end) {
+void disasmRange(std::ostream& os, TCA begin, TCA end) {
   mcg->backEnd().disasmRange(os, kIndent, dumpIREnabled(kExtraLevel),
                              begin, end);
 }

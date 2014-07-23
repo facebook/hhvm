@@ -23,8 +23,7 @@
 namespace HPHP { namespace JIT {
 
 
-bool cycleHasSIMDReg(const CycleInfo& cycle,
-                     PhysReg::Map<PhysReg>& moves) {
+bool cycleHasSIMDReg(const CycleInfo& cycle, MovePlan& moves) {
   auto& first = cycle.node;
   auto node = first;
   do {
@@ -34,8 +33,7 @@ bool cycleHasSIMDReg(const CycleInfo& cycle,
   return false;
 }
 
-smart::vector<MoveInfo> doRegMoves(PhysReg::Map<PhysReg>& moves,
-                                   PhysReg rTmp) {
+smart::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   constexpr auto N = 64;
   assert(std::max(X64::abi.all().size(), ARM::abi.all().size()) == N);
   smart::vector<MoveInfo> howTo;

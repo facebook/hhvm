@@ -253,6 +253,16 @@ UNUSED const Abi abi {
   kCalleeSaved    // calleeSaved
 };
 
+auto const vasm_gp = RegSet(rAsm).add(rCgGP);
+auto const vasm_simd = RegSet(rCgXMM0).add(rCgXMM1).add(rCgXMM2);
+UNUSED const Abi vasm_abi {
+  .gpUnreserved = vasm_gp,
+  .gpReserved = X64::abi.gp() - vasm_gp,
+  .simdUnreserved = vasm_simd,
+  .simdReserved = X64::abi.simd() - vasm_simd,
+  .calleeSaved = X64::abi.calleeSaved
+};
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

@@ -98,6 +98,11 @@ inline std::ostream& operator<<(std::ostream& os, TypeConstraint tc) {
   return os << tc.toString();
 }
 
+void disasmRange(std::ostream& os, TCA begin, TCA end);
+inline void disasmRange(std::ostream& os, TcaRange r) {
+  return disasmRange(os, r.begin(), r.end());
+}
+
 }}
 
 #endif

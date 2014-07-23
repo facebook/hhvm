@@ -15,8 +15,7 @@
 */
 #include "hphp/runtime/vm/repo.h"
 
-#include <folly/Format.h>
-#include <folly/experimental/Singleton.h>
+#include "folly/Format.h"
 
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
@@ -71,7 +70,6 @@ bool Repo::prefork() {
   if (!t_dh.isNull()) {
     t_dh.destroy();
   }
-  folly::SingletonVault::singleton()->destroyInstances();
   s_lock.lock();
   if (s_nRepos > 0) {
     s_lock.unlock();

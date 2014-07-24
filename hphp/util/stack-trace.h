@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "hphp/util/portability.h"
+#include "hphp/util/compatibility.h"
 
 #include <dlfcn.h>
 

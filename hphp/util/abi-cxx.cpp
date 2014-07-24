@@ -25,11 +25,14 @@
 #include <unordered_map>
 
 #include <cxxabi.h>
+#if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(__MSC_VER))
 #include <execinfo.h>
+#endif
 
 #include "folly/Format.h"
 
 #include "hphp/util/functional.h"
+#include "hphp/util/compatibility.h"
 
 namespace HPHP {
 

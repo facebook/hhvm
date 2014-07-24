@@ -35,18 +35,18 @@ namespace HPHP {
  * cheap, although they may be convenient.
  */
 
-template <class _T, class _U,
-          class _V = std::hash<_T>,
-          class _W = std::equal_to<_T> >
-struct hphp_hash_map : std::unordered_map<_T,_U,_V,_W> {
-  hphp_hash_map() : std::unordered_map<_T,_U,_V,_W>(0) {}
+template <class T, class U,
+          class V = std::hash<T>,
+          class W = std::equal_to<T> >
+struct hphp_hash_map : std::unordered_map<T,U,V,W> {
+  hphp_hash_map() : std::unordered_map<T,U,V,W>(0) {}
 };
 
-template <class _T,
-          class _V = std::hash<_T>,
-          class _W = std::equal_to<_T> >
-struct hphp_hash_set : std::unordered_set<_T,_V,_W> {
-  hphp_hash_set() : std::unordered_set<_T,_V,_W>(0) {}
+template <class T,
+          class V = std::hash<T>,
+          class W = std::equal_to<T> >
+struct hphp_hash_set : std::unordered_set<T,V,W> {
+  hphp_hash_set() : std::unordered_set<T,V,W>(0) {}
 };
 
 //////////////////////////////////////////////////////////////////////

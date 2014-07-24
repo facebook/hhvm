@@ -999,19 +999,15 @@ and expr_ is_lvalue env (p, e) =
       env, (Reason.Rwitness p, Tany)
   | Yield af ->
       let env = Env.set_has_yield env in
-      let r = Reason.Ryield p in
       let env, key = field_key env af in
       let env, value = field_value env af in
-      (* TODO(#4534682) Fully support Generator *)
-      let rty = r, Tapply ((p, "\\Generator"),
-        [key; value; Reason.Rnone, Tprim Tvoid]) in
+      let send = Env.fresh_type () in
+      let rty =
+        Reason.Ryield_gen p, Tapply ((p, "\\Generator"), [key; value; send]) in
       let env =
         Type.sub_type p (Reason.URyield) env (Env.get_return env) rty in
       let env = Env.forget_members env p in
-      (* the return type of yield could be anything, it depends on the value
-       * sent to the continuation.
-       *)
-      env, (r, Tany)
+      env, (Reason.Ryield_send p, Toption send)
   | Await e ->
       let env, rty = expr env e in
       Async.overload_extract_from_awaitable env p rty

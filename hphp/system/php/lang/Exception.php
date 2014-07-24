@@ -9,12 +9,12 @@
  */
 class Exception {
   protected $message = '';  // exception message
+  private $string = '';     // php5 has this, we don't use it
   protected $code = 0;      // user defined exception code
-  protected $previous = null;
   protected $file;          // source filename of exception
   protected $line;          // source line of exception
-  protected $trace;         // full stacktrace
-  private $inited = false;
+  private $trace;           // full stacktrace
+  private $previous = null;
 
   private static $traceOpts = 0;
 
@@ -25,15 +25,14 @@ class Exception {
    * calling __construct just to make sure $this->trace is always populated.
    */
   final function __init__() {
-    if ($this->inited) {
+    if (isset($this->trace)) {
       return;
     }
     $this->initTrace();
-    $this->inited = true;
   }
 
   private function __check_init($context) {
-    if (!$this->inited) {
+    if (!isset($this->trace)) {
       trigger_error($context.': exception object not initialized', E_USER_WARNING);
       return false;
     } else {

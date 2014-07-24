@@ -917,10 +917,11 @@ let invalid_shape_field_name p =
   add p
     "Was expecting a constant string or class constant (for shape access)"
 
-let invalid_shape_field_type p ty =
-  add p
-    ("Only string and int constants can be used for shape fields, " ^
-        "but found " ^ ty)
+let invalid_shape_field_type pos ty_pos ty trail =
+  add_with_trail
+    [pos, "A shape field name must be an int or string";
+     ty_pos, "Not " ^ ty]
+    trail
 
 let invalid_shape_field_literal key_pos witness_pos =
   add_list [key_pos, "Shape uses literal string as field name";

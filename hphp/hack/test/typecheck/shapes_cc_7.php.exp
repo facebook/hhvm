@@ -1,2 +1,4 @@
 File "shapes_cc_7.php", line 18, characters 36-40:
-Only string and int constants can be used for shape fields, but found a bool
+A shape field name must be an int or string
+File "shapes_cc_7.php", line 14, characters 9-12:
+Not a bool

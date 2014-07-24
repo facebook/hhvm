@@ -1063,7 +1063,7 @@ and expr_ is_lvalue env (p, e) =
       let env, fdm = ShapeMap.map_env expr env fdm in
       (* allow_inter adds a type-variable *)
       let env, fdm = ShapeMap.map_env TUtils.unresolved env fdm in
-      check_shape_keys_validity env p (ShapeMap.keys fdm);
+      let env = check_shape_keys_validity env p (ShapeMap.keys fdm) in
       env, (Reason.Rwitness p, Tshape fdm)
 
 and class_const env p = function
@@ -1237,34 +1237,39 @@ and shape_field_pos = function
 
 and check_shape_keys_validity env pos keys =
     (* If the key is a class constant, get its class name and type. *)
-    let get_field_info key =
+    let get_field_info env key =
       let key_pos = shape_field_pos key in
-      key_pos,
       (match key with
-        | SFlit _ -> None
+        | SFlit _ -> env, key_pos, None
         | SFclass_const (_, cls as x, y) ->
-          let _, (_, ty) = class_const env pos (CI x, y) in
-          (match ty with
-            | Tprim Tint | Tprim Tstring -> ()
-            | _ -> Errors.invalid_shape_field_type key_pos
-                      (Typing_print.error ty));
-          Some (cls, ty))
+          let env, ty = class_const env pos (CI x, y) in
+          let env = Typing_enum.check_valid_array_key_type
+            Errors.invalid_shape_field_type ~allow_any:false
+            env key_pos ty in
+          env, key_pos, Some (cls, ty))
     in
 
-    let check_field (witness_pos, witness_info) key =
-      let key_pos, key_info = get_field_info key in
-      match witness_info, key_info with
-        | Some _, None -> Errors.invalid_shape_field_literal key_pos witness_pos
-        | None, Some _ -> Errors.invalid_shape_field_const key_pos witness_pos
-        | None, None -> ()
+    let check_field witness_pos witness_info env key =
+      let env, key_pos, key_info = get_field_info env key in
+      (match witness_info, key_info with
+        | Some _, None ->
+          Errors.invalid_shape_field_literal key_pos witness_pos; env
+        | None, Some _ ->
+          Errors.invalid_shape_field_const key_pos witness_pos; env
+        | None, None -> env
         | Some (cls1, ty1), Some (cls2, ty2) ->
           if cls1 <> cls2 then
             Errors.shape_field_class_mismatch
               key_pos witness_pos (strip_ns cls2) (strip_ns cls1);
-          if ty1 <> ty2 then
-            Errors.shape_field_type_mismatch
-              key_pos witness_pos
-              (Typing_print.error ty2) (Typing_print.error ty1)
+          (* We want to use our own error message here instead of the normal
+           * unification one. *)
+          Errors.try_
+            (fun () -> Unify.iunify env ty1 ty2)
+            (fun _ ->
+              Errors.shape_field_type_mismatch
+                key_pos witness_pos
+                (Typing_print.error (snd ty2)) (Typing_print.error (snd ty1));
+              env))
     in
 
     (* Sort the keys by their positions since the error messages will make
@@ -1274,13 +1279,14 @@ and check_shape_keys_validity env pos keys =
     let keys = List.sort cmp_keys keys in
 
     match keys with
-      | [] -> ()
+      | [] -> env
       | witness :: rest_keys ->
-        List.iter (check_field (get_field_info witness)) rest_keys
+        let env, pos, info = get_field_info env witness in
+        List.fold_left (check_field pos info) env rest_keys
 
 and typedef_def env = function
   | _, _, (pos, Hshape fdm) ->
-    check_shape_keys_validity env pos (ShapeMap.keys fdm)
+    ignore (check_shape_keys_validity env pos (ShapeMap.keys fdm))
   | _ -> ()
 
 and assign p env e1 ty2 =
@@ -2815,7 +2821,7 @@ and class_def_ env_up c tc =
   List.iter (class_var_def env false c) c.c_vars;
   List.iter (method_def env) c.c_methods;
   let const_types = List.map (class_const_def env) c.c_consts in
-  Typing_enum.enum_class_check env tc c.c_consts const_types;
+  let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
   class_constr_def env c;
   let env = Env.set_static env in
   List.iter (class_var_def env true c) c.c_static_vars;

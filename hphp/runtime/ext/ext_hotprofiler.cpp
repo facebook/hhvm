@@ -30,6 +30,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
 #include <sys/time.h>
@@ -1420,7 +1421,9 @@ class MemoProfiler : public Profiler {
 ///////////////////////////////////////////////////////////////////////////////
 // ProfilerFactory
 
-bool ProfilerFactory::start(Level level, long flags) {
+bool ProfilerFactory::start(Level level,
+                            long flags,
+                            bool beginFrame /* = true */) {
   if (m_profiler != nullptr) {
     return false;
   }
@@ -1441,6 +1444,9 @@ bool ProfilerFactory::start(Level level, long flags) {
   case Memo:
     m_profiler = new MemoProfiler(flags);
     break;
+  case XDebug:
+    m_profiler = new XDebugProfiler();
+    break;
   default:
     throw_invalid_argument("level: %d", level);
     return false;
@@ -1448,8 +1454,10 @@ bool ProfilerFactory::start(Level level, long flags) {
   if (m_profiler->m_successful) {
     // This will be disabled automatically when the thread completes the request
     HPHP::EventHook::Enable();
-    m_profiler->beginFrame("main()");
     ThreadInfo::s_threadInfo->m_profiler = m_profiler;
+    if (beginFrame) {
+      m_profiler->beginFrame("main()");
+    }
     return true;
   } else {
     delete m_profiler;

@@ -37,11 +37,6 @@ namespace HPHP {
 //    Unused because we can always get the variables at runtime
 //  collect_assignments:
 //    Currently unimplemented as hhvm does not have infrastructure for this.
-//  collect_memory, collect_time:
-//    Added options specifying whether or not we should collect memory
-//    information and function start times for stack traces. These require
-//    profiling, which takes a lot of memory and slows things down, so these
-//    are disabled by default. If off, 0 will be displayed.
 //  framebuf_size:
 //    Added option specifying the initial number of frames the frame buffer will
 //    hold when xdebug needs to turn frame tracing/profiling on. By default this
@@ -59,10 +54,8 @@ namespace HPHP {
   XDEBUG_OPT(int, "cli_color", CliColor, 0) \
   XDEBUG_OPT(bool, "collect_assignments", CollectAssignments, false) \
   XDEBUG_OPT(bool, "collect_includes", CollectIncludes, true) \
-  XDEBUG_OPT(bool, "collect_memory", CollectMemory, false) \
   XDEBUG_OPT(int, "collect_params", CollectParams, 0) \
   XDEBUG_OPT(bool, "collect_return", CollectReturn, false) \
-  XDEBUG_OPT(bool, "collect_time", CollectTime, false) \
   XDEBUG_OPT(bool, "collect_vars", CollectVars, false) \
   XDEBUG_OPT(bool, "default_enable", DefaultEnable, true) \
   XDEBUG_OPT(bool, "dump_globals", DumpGlobals, true) \
@@ -99,12 +92,22 @@ namespace HPHP {
   XDEBUG_OPT(bool, "show_mem_delta", ShowMemDelta, false) \
   XDEBUG_OPT(bool, "trace_enable_trigger", TraceEnableTrigger, false) \
   XDEBUG_OPT(int, "trace_format", TraceFormat, 0) \
-  XDEBUG_OPT(bool, "trace_options", TraceOptions, 0 ) \
+  XDEBUG_OPT(bool, "trace_options", TraceOptions, false) \
   XDEBUG_OPT(string, "trace_output_dir", TraceOutputDir, "/tmp") \
   XDEBUG_OPT(string, "trace_output_name", TraceOutputName, "trace.%c") \
   XDEBUG_OPT(int, "var_display_max_children", VarDisplayMaxChildren, 128) \
   XDEBUG_OPT(int, "var_display_max_data", VarDisplayMaxData, 512) \
   XDEBUG_OPT(int, "var_display_max_depth", VarDisplayMaxDepth, 3)
+
+// Options that notify the profiler on change
+//  collect_memory, collect_time:
+//    Added options specifying whether or not we should collect memory
+//    information and function start times for stack traces. These require
+//    profiling, which takes a lot of memory and slows things down, so these
+//    are disabled by default. If off, 0 will be displayed.
+#define XDEBUG_PROF_CFG \
+  XDEBUG_OPT(bool, "collect_memory", CollectMemory, false) \
+  XDEBUG_OPT(bool, "collect_time", CollectTime, false)
 
 // TODO(#4489053) Remove when xdebug fully implemented
 #define XDEBUG_NOTIMPLEMENTED  { throw_not_implemented(__FUNCTION__); }
@@ -112,6 +115,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 const int64_t k_XDEBUG_CC_UNUSED = 1;
 const int64_t k_XDEBUG_CC_DEAD_CODE = 2;
+const int64_t k_XDEBUG_TRACE_APPEND = 1;
+const int64_t k_XDEBUG_TRACE_COMPUTERIZED = 2;
+const int64_t k_XDEBUG_TRACE_HTML = 4;
+const int64_t k_XDEBUG_TRACE_NAKED_FILENAME = 8;
+const int64_t k_XDEBUG_PROFILE_APPEND = 1;
 ///////////////////////////////////////////////////////////////////////////////
 
 class XDebugExtension : public Extension {
@@ -121,6 +129,7 @@ public:
   // Standard config options
   #define XDEBUG_OPT(T, name, sym, val) static T sym;
   XDEBUG_CFG
+  XDEBUG_PROF_CFG
   #undef XDEBUG_OPT
 
   // Config options that aren't bound or are other edge cases
@@ -132,6 +141,29 @@ public:
   static string DumpRequest;
   static string DumpServer;
   static string DumpSession;
+
+  // Returns true iff the passed trigger is set as a cookie or as a GET/POST
+  // parameter
+  static bool isTriggerSet(const String& trigger);
+
+  // Returns true if profiling is required by the extension settings or the
+  // environment
+  static inline bool isProfilingNeeded() {
+    return ProfilerEnable ||
+           (ProfilerEnableTrigger && isTriggerSet("XDEBUG_TRACE"));
+  }
+
+  // Returns true if tracing is required by the extension settings or the
+  // environment
+  static inline bool isTracingNeeded() {
+    return AutoTrace || (TraceEnableTrigger && isTriggerSet("XDEBUG_TRACE"));
+  }
+
+  // Returns true if a profiler should be attached to the current thread
+  static inline bool isProfilerNeeded() {
+    return CollectTime || CollectMemory || isProfilingNeeded() ||
+           isTracingNeeded();
+  }
 
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf);
   virtual void moduleInit();

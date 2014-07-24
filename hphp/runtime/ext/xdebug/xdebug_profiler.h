@@ -42,14 +42,7 @@ struct FrameData {
 // TODO(#4489053) consider allowing user to set the maximum buffer size
 class XDebugProfiler : public Profiler {
 public:
-  explicit XDebugProfiler(bool tracingEnabled, bool profilingEnabled)
-    : m_frameBuffer(nullptr)
-    , m_frameBufferSize(0)
-    , m_nextFrameIdx(0)
-    , m_tracingEnabled(tracingEnabled)
-    , m_profilingEnabled(profilingEnabled)
-  {};
-
+  explicit XDebugProfiler() {}
   ~XDebugProfiler() {
     if (m_profilingEnabled) {
       writeProfilingResults();
@@ -60,9 +53,36 @@ public:
     smart_free(m_frameBuffer);
   }
 
+  // Whether or not the profiler is collecting data
+  inline bool isCollecting() {
+    return m_profilingEnabled || m_tracingEnabled || m_collectMemory ||
+           m_collectTime;
+  }
+
+  // Set memory/time collecting
+  inline void setCollectMemory(bool collect) { m_collectMemory = collect; }
+  inline void setCollectTime(bool collect) { m_collectTime = collect; }
+
+  // Enables profiling. Profiling cannot be disabled.
+  void enableProfiling(const String& filename, int64_t opts);
+  inline bool isProfiling() { return m_profilingEnabled; }
+  inline const String getProfilingFilename() { return m_profilingFilename; }
+
   // Enable/disable tracing
-  void enableTracing();
-  void disableTracing() XDEBUG_NOTIMPLEMENTED
+  void enableTracing(const String& filename, int64_t opts);
+  void disableTracing();
+  inline bool isTracing() { return m_tracingEnabled; }
+  inline const String getTracingFilename() { return m_tracingFilename; }
+
+  // Functions called on frame begin/end
+  virtual void beginFrame(const char* symbol);
+  virtual void endFrame(const TypedValue* retVal,
+                        const char* symbol,
+                        bool endMain = false);
+  virtual inline void endAllFrames() {}
+
+  // xdebug has no need to write stats to php array
+  virtual inline void writeStats(Array &ret) {}
 
   // TODO (#4489053) Iteration up the stack
   inline void begin() XDEBUG_NOTIMPLEMENTED
@@ -81,27 +101,24 @@ private:
   // event and retVal is the returned value
   void recordFrame(const TypedValue* retVal);
 
-  // Functions called on frame begin/end
-  virtual void beginFrame(const char* symbol);
-  virtual void endFrame(const TypedValue* retVal,
-                        const char* symbol,
-                        bool endMain = false);
-  virtual inline void endAllFrames() {}
-
   // Called on profiler destruction, writes the profiling results.
-  // TODO(#4489053) Implement
-  void writeProfilingResults()
-    XDEBUG_NOTIMPLEMENTED
+  void writeProfilingResults();
 
-  // xdebug has no need to write stats to php array
-  virtual inline void writeStats(Array &ret) {}
+  FrameData* m_frameBuffer = nullptr;
+  uint64_t m_frameBufferSize = 0;
+  uint64_t m_nextFrameIdx = 0;
 
-  FrameData* m_frameBuffer;
-  uint64_t m_frameBufferSize;
-  uint64_t m_nextFrameIdx;
-  uint64_t m_tracingStartIdx;
-  bool m_tracingEnabled;
-  bool m_profilingEnabled;
+  bool m_collectMemory = false;
+  bool m_collectTime = false;
+
+  bool m_profilingEnabled = false;
+  int64_t m_profilingOpts = 0;
+  String m_profilingFilename;
+
+  bool m_tracingEnabled = false;
+  uint64_t m_tracingStartIdx = 0;
+  int64_t m_tracingOpts = 0;
+  String m_tracingFilename;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

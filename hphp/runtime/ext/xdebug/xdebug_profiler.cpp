@@ -54,6 +54,9 @@ void XDebugProfiler::ensureBufferSpace() {
 
 void XDebugProfiler::collectFrameData(FrameData& frameData,
                                       const TypedValue* retVal) {
+  // If we're not collecting any data, this shouldn't be running
+  assert(isCollecting());
+
   VMRegAnchor _; // Ensure consistent state for vmfp and vmpc
   ActRec* fp = vmfp();
   bool is_func_begin = retVal == nullptr;
@@ -71,7 +74,7 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
 
   // Time is stored if collect_time is enabled, but it only need to be
   // collected on function exit if tracing
-  if (XDebugExtension::CollectTime && (is_func_begin || m_tracingEnabled)) {
+  if (m_collectTime && (is_func_begin || m_tracingEnabled)) {
     frameData.time = Timer::GetCurrentTimeMicros();
   } else {
     frameData.time = 0;
@@ -79,7 +82,7 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
 
   // Memory usage is stored if collect_memory is enabled, but it only
   // needs to be collected on function exit if tracing
-  if (XDebugExtension::CollectMemory && (is_func_begin || m_tracingEnabled)) {
+  if (m_collectMemory && (is_func_begin || m_tracingEnabled)) {
     frameData.memory_usage = MM().getStats().usage;
   } else {
     frameData.memory_usage = 0;
@@ -124,10 +127,30 @@ void XDebugProfiler::endFrame(const TypedValue* retVal,
   }
 }
 
-void XDebugProfiler::enableTracing() {
+void XDebugProfiler::enableProfiling(const String& filename, int64_t opts) {
+  assert(!m_profilingEnabled);
+  m_profilingEnabled = true;
+  m_profilingFilename = filename;
+  m_profilingOpts = opts;
+}
+
+void XDebugProfiler::enableTracing(const String& filename, int64_t opts) {
   assert(!m_tracingEnabled);
   m_tracingEnabled = true;
   m_tracingStartIdx = m_nextFrameIdx;
+  m_tracingFilename = filename;
+  m_tracingOpts = opts;
+}
+
+void XDebugProfiler::writeProfilingResults() {
+  // TODO(#4489053) Implement
+  m_profilingEnabled = false;
+}
+
+// TODO(#4489053) Output to a tracing file. We should try to save space by
+// removing trace data
+void XDebugProfiler::disableTracing() {
+  m_tracingEnabled = false;
 }
 
 }

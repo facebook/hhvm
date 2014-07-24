@@ -99,18 +99,18 @@ and class_var = {
 }
 
 and method_ = {
-  m_unsafe     : bool         ;
-  m_final      : bool         ;
-  m_abstract   : bool         ;
-  m_visibility : visibility   ;
-  m_name       : sid          ;
-  m_tparams    : tparam list  ;
-  m_variadic   : fun_variadicity;
-  m_params     : fun_param list;
-  m_body       : block        ;
-  m_user_attributes : Ast.user_attribute SMap.t;
-  m_ret        : hint option  ;
-  m_type       : Ast.fun_type ;
+  m_unsafe          : bool                      ;
+  m_final           : bool                      ;
+  m_abstract        : bool                      ;
+  m_visibility      : visibility                ;
+  m_name            : sid                       ;
+  m_tparams         : tparam list               ;
+  m_variadic        : fun_variadicity           ;
+  m_params          : fun_param list            ;
+  m_body            : block                     ;
+  m_user_attributes : Ast.user_attribute SMap.t ;
+  m_ret             : hint option               ;
+  m_type            : Ast.fun_type              ;
 }
 
 and visibility =
@@ -149,11 +149,11 @@ and fun_ = {
 and typedef = tparam list * hint option * hint
 
 and gconst = {
-    cst_mode: Ast.mode;
-    cst_name: Ast.id;
-    cst_type: hint option;
-    cst_value: expr option;
-  }
+  cst_mode: Ast.mode;
+  cst_name: Ast.id;
+  cst_type: hint option;
+  cst_value: expr option;
+}
 
 and stmt =
   | Expr of expr

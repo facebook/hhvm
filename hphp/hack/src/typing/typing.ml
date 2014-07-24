@@ -120,13 +120,17 @@ let rec fun_decl f =
 and fun_decl_in_env env f =
   let mandatory_init = true in
   let env, arity_min, params = make_params env mandatory_init 0 f.f_params in
-  let env, ret_ty = match f.f_ret with
-    (* If there is no return type annotation, we clearly should make it Tany
-     * but also want a witness so that we can point *somewhere* in event of
-     * error. The function name itself isn't great, but is better than
-     * nothing. *)
-    | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
-    | Some ty -> Typing_hint.hint env ty in
+  let env, ret_ty = match f.f_ret, f.f_type with
+    (* If there is no return type annotation, we clearly should make
+     * it Tany but also want a witness so that we can point *somewhere*
+     * in event of error. The function name itself isn't great, but is
+     * better than nothing. *)
+    | None, Ast.FSync -> env, (Reason.Rwitness (fst f.f_name), Tany)
+    | None, Ast.FAsync ->
+      let pos = fst f.f_name in
+      env, (Reason.Rasync_ret pos,
+            Tapply ((pos, "\\Awaitable"), [(Reason.Rwitness pos, Tany)]))
+    | Some ty, _ -> Typing_hint.hint env ty in
   let env, arity = match f.f_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;

@@ -13,45 +13,46 @@
 (* The reason why something is expected to have a certain type *)
 type t =
   | Rnone
-  | Rwitness    of Pos.t
-  | Ridx    of Pos.t (* Used as an index *)
-  | Ridx_vector of Pos.t (* Used as an index, in the Vector case *)
-  | Rappend    of Pos.t (* Used to append element to an array *)
-  | Rfield    of Pos.t (* Array accessed with a static string index *)
-  | Rforeach  of Pos.t (* Because it is iterated in a foreach loop *)
-  | Raccess   of Pos.t
-  | Rcall     of Pos.t
-  | Rarith    of Pos.t
-  | Rarith_ret of Pos.t
-  | Rstring2   of Pos.t
-  | Rcomp      of Pos.t
-  | Rconcat    of Pos.t
-  | Rconcat_ret of Pos.t
-  | Rlogic      of Pos.t
-  | Rlogic_ret  of Pos.t
-  | Rbitwise    of Pos.t
-  | Rbitwise_ret of Pos.t
-  | Rstmt        of Pos.t
-  | Rno_return   of Pos.t
+  | Rwitness         of Pos.t
+  | Ridx             of Pos.t (* Used as an index *)
+  | Ridx_vector      of Pos.t (* Used as an index, in the Vector case *)
+  | Rappend          of Pos.t (* Used to append element to an array *)
+  | Rfield           of Pos.t (* Array accessed with a static string index *)
+  | Rforeach         of Pos.t (* Because it is iterated in a foreach loop *)
+  | Raccess          of Pos.t
+  | Rcall            of Pos.t
+  | Rarith           of Pos.t
+  | Rarith_ret       of Pos.t
+  | Rstring2         of Pos.t
+  | Rcomp            of Pos.t
+  | Rconcat          of Pos.t
+  | Rconcat_ret      of Pos.t
+  | Rlogic           of Pos.t
+  | Rlogic_ret       of Pos.t
+  | Rbitwise         of Pos.t
+  | Rbitwise_ret     of Pos.t
+  | Rstmt            of Pos.t
+  | Rno_return       of Pos.t
   | Rno_return_async of Pos.t
-  | Rhint          of Pos.t
-  | Rnull_check    of Pos.t
-  | Rnot_in_cstr   of Pos.t
-  | Rthrow         of Pos.t
-  | Rattr          of Pos.t
-  | Rxhp           of Pos.t
-  | Rret_div       of Pos.t
-  | Ryield_gen     of Pos.t
-  | Ryield_send    of Pos.t
-  | Rlost_info     of string * t * Pos.t
-  | Rcoerced       of Pos.t * Pos.t * string
-  | Rformat        of Pos.t * string * t
-  | Rclass_class   of Pos.t * string
-  | Runknown_class of Pos.t
-  | Rdynamic_yield of Pos.t * Pos.t * string * string
-  | Rmap_append of Pos.t
-  | Rvar_param of Pos.t
-  | Rinstantiate of t * string * t
+  | Rasync_ret       of Pos.t
+  | Rhint            of Pos.t
+  | Rnull_check      of Pos.t
+  | Rnot_in_cstr     of Pos.t
+  | Rthrow           of Pos.t
+  | Rattr            of Pos.t
+  | Rxhp             of Pos.t
+  | Rret_div         of Pos.t
+  | Ryield_gen       of Pos.t
+  | Ryield_send      of Pos.t
+  | Rlost_info       of string * t * Pos.t
+  | Rcoerced         of Pos.t * Pos.t * string
+  | Rformat          of Pos.t * string * t
+  | Rclass_class     of Pos.t * string
+  | Runknown_class   of Pos.t
+  | Rdynamic_yield   of Pos.t * Pos.t * string * string
+  | Rmap_append      of Pos.t
+  | Rvar_param       of Pos.t
+  | Rinstantiate     of t * string * t
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -81,6 +82,7 @@ let rec to_string prefix r =
   | Rstmt            _ -> [(p, prefix ^ " because this is a statement")]
   | Rno_return       _ -> [(p, prefix ^ " because this function implicitly returns void")]
   | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns Awaitable<void>")]
+  | Rasync_ret       _ -> [(p, prefix ^ " (result of 'async function')")]
   | Rhint            _ -> [(p, prefix)]
   | Rnull_check      _ -> [(p, prefix ^ " because this was checked to see if the value was null")]
   | Rnot_in_cstr     _ -> [(p, prefix ^ " because it is not always defined in __construct")]
@@ -149,6 +151,7 @@ and to_pos = function
   | Rstmt        p -> p
   | Rno_return   p -> p
   | Rno_return_async p -> p
+  | Rasync_ret   p -> p
   | Rhint        p -> p
   | Rnull_check  p -> p
   | Rnot_in_cstr p -> p

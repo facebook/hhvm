@@ -260,6 +260,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rstmt p                -> Rstmt (pos p)
     | Rno_return p           -> Rno_return (pos p)
     | Rno_return_async p     -> Rno_return_async (pos p)
+    | Rasync_ret p           -> Rasync_ret (pos p)
     | Rhint p                -> Rhint (pos p)
     | Rnull_check p          -> Rnull_check (pos p)
     | Rnot_in_cstr p         -> Rnot_in_cstr (pos p)

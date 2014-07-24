@@ -635,9 +635,13 @@ and visibility cid = function
 and method_decl c env m =
   let env, arity_min, params = Typing.make_params env true 0 m.m_params in
   let env, ret =
-    match m.m_ret with
-      | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
-      | Some ret -> Typing_hint.hint env ret in
+    match m.m_ret, m.m_type with
+      | None, Ast.FSync -> env, (Reason.Rwitness (fst m.m_name), Tany)
+      | None, Ast.FAsync ->
+        let pos = fst m.m_name in
+        env, (Reason.Rasync_ret pos,
+              Tapply ((pos, "\\Awaitable"), [(Reason.Rwitness pos, Tany)]))
+      | Some ret, _ -> Typing_hint.hint env ret in
   let env, arity = match m.m_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;

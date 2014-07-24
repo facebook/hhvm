@@ -423,7 +423,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
  */
 RegionDescPtr selectWholeCFG(TransID triggerId,
                              const ProfData* profData,
-                             TransCFG& cfg,
+                             const TransCFG& cfg,
                              TransIDSet& selectedSet,
                              TransIDVec* selectedVec = nullptr);
 

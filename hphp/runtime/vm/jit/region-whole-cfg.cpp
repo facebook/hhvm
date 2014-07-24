@@ -32,57 +32,36 @@ TRACE_SET_MOD(pgo);
 using boost::container::flat_set;
 using boost::container::flat_map;
 
-/*
- * Constructs a region, beginning with triggerId, that includes as much of the
- * TransCFG as possible.  Excludes multiple translations of the same SrcKey.
- */
-RegionDescPtr selectWholeCFG(TransID triggerId,
-                             const ProfData* profData,
-                             TransCFG& cfg,
-                             TransIDSet& selectedSet,
-                             TransIDVec* selectedVec) {
-  auto region = std::make_shared<RegionDesc>();
-  selectedSet.clear();
-  if (selectedVec) selectedVec->clear();
+struct DFS {
+  DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv)
+      : profData(p)
+      , cfg(c)
+      , selectedSet(ts)
+      , selectedVec(tv)
+      , region(std::make_shared<RegionDesc>())
+    {}
 
-  std::stack<TransID> worklist;
-  flat_set<TransID> visited;
-  flat_map<SrcKey, TransID> srcKeyToTransID;
-  flat_map<TransID, RegionDesc::BlockId> transBlocks;
-
-  auto addToRegion = [&](TransID tid) {
-    if (!visited.count(tid)) {
-      auto transRegion = profData->transRegion(tid);
-      auto sk = profData->transSrcKey(tid);
-      region->blocks.insert(region->blocks.end(),
-                            transRegion->blocks.begin(),
-                            transRegion->blocks.end());
-      region->arcs.insert(region->arcs.end(),
-                          transRegion->arcs.begin(),
-                          transRegion->arcs.end());
-      selectedSet.insert(tid);
-      if (selectedVec) selectedVec->push_back(tid);
-      srcKeyToTransID[sk] = tid;
-      transBlocks[tid] = transRegion->blocks.front().get()->id();
-    }
-  };
-
-  // Initialize the region and bookkeeping.
-  addToRegion(triggerId);
-  worklist.push(triggerId);
-  visited.insert(triggerId);
-
-  // Traverse the CFG depth-first, adding blocks that meet the conditions.
-  while (!worklist.empty()) {
-    auto tid = worklist.top();
-    worklist.pop();
+  RegionDescPtr go(TransID tid) {
+    auto sk = profData->transSrcKey(tid);
+    srcKeyToTransID[sk] = tid;
+    visiting.insert(tid);
+    visited.insert(tid);
 
     if (breaksRegion(*(profData->transLastInstr(tid)))) {
-      continue;
+      select(tid);
+      visiting.erase(tid);
+      return region;
     }
 
     for (auto const arc : cfg.outArcs(tid)) {
       auto dst = arc->dst();
+
+      // If dst is in the visiting set then this arc forms a cycle. Don't
+      // include it unless we've asked for loops.
+      if (!RuntimeOption::EvalJitLoops &&
+          visiting.find(dst) != visiting.end()) {
+        continue;
+      }
 
       // Don't select dst if SrcKey has already been used for a different
       // TransID.
@@ -101,19 +80,59 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
       }
 
       // Add the block and arc to region.
-      addToRegion(dst);
       auto predBlockId = profData->transRegion(tid)->blocks.back().get()->id();
       auto dstBlockId = dstRegion->blocks.front().get()->id();
       region->addArc(predBlockId, dstBlockId);
 
       // Push the dst if we haven't already processed it.
       if (visited.count(dst) == 0) {
-        worklist.push(dst);
-        visited.insert(dst);
+        go(dst);
       }
     }
+
+    select(tid);
+    visiting.erase(tid);
+    return region;
   }
-  return region;
+
+ private:
+  void select(TransID tid) {
+    auto transRegion = profData->transRegion(tid);
+    region->blocks.insert(region->blocks.begin(),
+                          transRegion->blocks.begin(),
+                          transRegion->blocks.end());
+    region->arcs.insert(region->arcs.begin(),
+                        transRegion->arcs.begin(),
+                        transRegion->arcs.end());
+    selectedSet.insert(tid);
+    if (selectedVec) selectedVec->insert(selectedVec->begin(), tid);
+  }
+
+ private:
+  const ProfData* profData;
+  const TransCFG& cfg;
+  TransIDSet& selectedSet;
+  TransIDVec* selectedVec;
+
+  RegionDescPtr region;
+
+  std::unordered_set<TransID> visiting;
+  flat_set<TransID> visited;
+  flat_map<SrcKey, TransID> srcKeyToTransID;
+};
+
+/*
+ * Constructs a region, beginning with triggerId, that includes as much of the
+ * TransCFG as possible.  Excludes multiple translations of the same SrcKey.
+ */
+RegionDescPtr selectWholeCFG(TransID triggerId,
+                             const ProfData* profData,
+                             const TransCFG& cfg,
+                             TransIDSet& selectedSet,
+                             TransIDVec* selectedVec) {
+  selectedSet.clear();
+  if (selectedVec) selectedVec->clear();
+  return DFS(profData, cfg, selectedSet, selectedVec).go(triggerId);
 }
 
 }}

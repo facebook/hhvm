@@ -1660,6 +1660,7 @@ Translator::translateRegion(const RegionDesc& region,
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
     }
+    ht.irBuilder().recordOffset(sk.offset());
 
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Update bcOff here so any guards or assertions from metadata are

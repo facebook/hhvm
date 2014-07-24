@@ -6126,16 +6126,24 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
-  assert(!inst->src(0)->isConst());
-  auto objClassReg = srcLoc(0).reg();
-  SSATmp* constraint = inst->src(1);
-  auto constraintReg = srcLoc(1).reg();
+  auto const objClass = inst->src(0);
+  auto const objClassReg = srcLoc(0).reg();
+  auto const constraint = inst->src(1);
+  auto const constraintReg = srcLoc(1).reg();
 
   if (constraintReg == InvalidReg) {
-    auto imm = Immed64(constraint->clsVal());
-    m_as.  cmpq(imm.l(), objClassReg);
-  } else {
+    if (objClassReg != InvalidReg) {
+      m_as.  cmpq(Immed64(constraint->clsVal()).l(), objClassReg);
+    } else {
+      // Both constant.
+      if (objClass->clsVal() == constraint->clsVal()) return;
+      return cgCallNative(m_as, inst);
+    }
+  } else if (objClassReg != InvalidReg) {
     m_as.  cmpq(constraintReg, objClassReg);
+  } else {
+    // Reverse the args because cmpq can only have a constant in the LHS.
+    m_as.  cmpq(Immed64(objClass->clsVal()).l(), constraintReg);
   }
 
   // The native call for this instruction is the slow path that does

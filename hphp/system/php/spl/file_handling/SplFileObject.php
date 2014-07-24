@@ -621,6 +621,10 @@ class SplFileObject extends SplFileInfo
     for ($i = 0; $i < $line_pos; $i++) {
       $this->current();
       $this->next();
+      if ($this->eof()) {
+        $this->currentLineNum--;
+        break;
+      }
     }
     $this->current();
   }

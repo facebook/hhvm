@@ -81,8 +81,7 @@ include(HPHPFunctions)
 include(HPHPFindLibs)
 
 # check for weak symbols
-INCLUDE(CheckCSourceCompiles) 
-CHECK_C_SOURCE_COMPILES("
+CHECK_CXX_SOURCE_COMPILES("
     extern \"C\" void configure_link_extern_weak_test() __attribute__((weak));
     int main(int argc, char** argv) {
         return configure_link_extern_weak_test == nullptr;

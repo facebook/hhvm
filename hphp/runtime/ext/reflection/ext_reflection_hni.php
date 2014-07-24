@@ -837,10 +837,24 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * @return     mixed   Returns the method result.
    */
   public function invokeArgs($obj, $args): mixed {
-    // XXX: is array_values necessary here?
     if ($this->isStatic()) {
       $obj = null;
+    } else {
+      if (!$obj) {
+        $name = $this->originalClass.'::'.$this->getName();
+        throw new ReflectionException(
+          "Trying to invoke non static method $name() without an object",
+        );
+      }
+
+      if (!$obj instanceof $this->originalClass) {
+        throw new ReflectionException(
+          'Given object is not an instance of the class this '.
+            'method was declared in',
+        );
+      }
     }
+
     return hphp_invoke_method($obj, $this->originalClass, $this->getName(),
                               array_values($args));
   }

@@ -1654,6 +1654,9 @@ Translator::translateRegion(const RegionDesc& region,
         always_assert(RuntimeOption::EvalJitLoops ||
                       RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
         irb.clearBlockState(irBlock);
+
+        // TODO(#4075847) Optimizations with loops.
+        irb.setRegionTopoOrder(false);
       }
       BCMarker marker(sk, block->initialSpOffset(), profTransId);
       ht.irBuilder().startBlock(irBlock, marker);

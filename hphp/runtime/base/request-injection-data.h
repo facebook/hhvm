@@ -90,6 +90,7 @@ struct RequestInjectionData {
   // Things corresponding to user setable INI settings
   std::string m_maxMemory;
   std::string m_argSeparatorOutput;
+  std::string m_argSeparatorInput;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
   std::vector<std::string> m_include_paths;

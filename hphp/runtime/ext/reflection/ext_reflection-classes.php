@@ -745,7 +745,7 @@ class ReflectionProperty implements Reflector {
       return null;
     }
     // Can be removed once we support ParamCoerceMode in PHP
-    if (gettype($obj) != "object") {
+    if (!is_object($obj)) {
       trigger_error('ReflectionProperty::getValue() expects parameter 1'
          . ' to be object, ' . gettype($obj) . ' given', E_USER_WARNING);
       return null;
@@ -777,6 +777,12 @@ class ReflectionProperty implements Reflector {
       $value = $obj;
       $obj = null;
     }
+    if (!$this->isAccessible()) {
+      throw new ReflectionException(
+        "Cannot access non-public member " . $this->class .
+        "::" . $this->getName()
+      );
+    }
     if ($this->isStatic()) {
       hphp_set_static_property(
         $this->info['class'],
@@ -792,7 +798,7 @@ class ReflectionProperty implements Reflector {
         return null;
       }
       // Can be removed once we support ParamCoerceMode in PHP
-      if (gettype($obj) != "object") {
+      if (!is_object($obj)) {
         trigger_error('ReflectionProperty::setValue() expects parameter 1'
           . ' to be object, ' . gettype($obj) . ' given', E_USER_WARNING);
         return null;
@@ -853,6 +859,10 @@ class ReflectionProperty implements Reflector {
       return self::stripHHPrefix($this->info['type']);
     }
     return '';
+  }
+
+  private function isAccessible() {
+    return ($this->isPublic() || $this->forceAccessible);
   }
 }
 

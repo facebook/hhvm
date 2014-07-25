@@ -304,9 +304,15 @@ static struct limitlist {
   { RLIMIT_STACK,   "stack" },
   //{ RLIMIT_VMEM,    "virtualmem" },
   { RLIMIT_AS,      "totalmem" },
+#ifdef RLIMIT_RSS
   { RLIMIT_RSS,     "rss" },
+#endif
+#ifdef RLIMIT_NPROC
   { RLIMIT_NPROC,   "maxproc" },
+#endif
+#ifdef RLIMIT_MEMLOCK
   { RLIMIT_MEMLOCK, "memlock" },
+#endif
   { RLIMIT_CPU,     "cpu" },
   { RLIMIT_FSIZE,   "filesize" },
   { RLIMIT_NOFILE,  "openfiles" },

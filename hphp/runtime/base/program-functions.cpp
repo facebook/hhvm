@@ -1297,9 +1297,14 @@ static int execute_program_impl(int argc, char** argv) {
       if (stackSizeMinimum > rlim.rlim_max) {
         rlim.rlim_max = stackSizeMinimum;
       }
+#ifdef __CYGWIN__
+      Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
+                    stackSizeMinimum);
+#else
       if (setrlimit(RLIMIT_STACK, &rlim)) {
         Logger::Error("failed to set stack limit to %zd\n", stackSizeMinimum);
       }
+#endif
     }
   }
 

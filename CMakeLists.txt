@@ -27,5 +27,5 @@ add_subdirectory(hphp)
 file(GLOB HHVM_CMAKE_FILES "CMake/*.cmake")
 install(
   FILES ${HHVM_CMAKE_FILES}
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/hphp/CMake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/hphp/CMake"
   COMPONENT dev)

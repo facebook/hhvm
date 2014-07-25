@@ -249,6 +249,8 @@ type assoc =
 
 let priorities = [
   (* Lowest priority *)
+  (NonAssoc, [Tyield]);
+  (NonAssoc, [Tawait]);
   (Left, [Tinclude; Tinclude_once; Teval; Trequire; Trequire_once]);
   (Left, [Tcomma]);
   (Right, [Tprint]);
@@ -267,8 +269,6 @@ let priorities = [
   (NonAssoc, [Tinstanceof]);
   (Right, [Ttild; Tincr; Tdecr; Tcast]);
   (Right, [Tat; Tref]);
-  (NonAssoc, [Tyield]);
-  (NonAssoc, [Tawait]);
   (Left, [Tlp]);
   (NonAssoc, [Tnew; Tclone]);
   (Left, [Tlb]);

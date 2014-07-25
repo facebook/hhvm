@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl     /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,8 +9,8 @@
  *
  */
 function apache_note($note_name, $note_value = null) { }
-function apache_request_headers() { }
-function apache_response_headers() { }
+function apache_request_headers(): array<string, string> { }
+function apache_response_headers(): array<string, string> { }
 function apache_setenv($variable, $value, $walk_to_top = false) { }
 function getallheaders() { }
 function virtual($filename) { }

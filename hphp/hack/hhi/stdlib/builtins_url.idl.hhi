@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl    /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -12,7 +12,7 @@ function base64_decode($data, $strict = false) { }
 function base64_encode($data) { }
 function get_headers($url, $format = 0) { }
 function get_meta_tags($filename, $use_include_path = false) { }
-function http_build_query($formdata, $numeric_prefix = null, $arg_separator = null) { }
+function http_build_query($formdata, $numeric_prefix = null, $arg_separator = null): string { }
 function parse_url($url, $component = -1) { }
 function rawurldecode($str) { }
 function rawurlencode($str) { }

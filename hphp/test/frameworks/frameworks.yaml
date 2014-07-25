@@ -556,11 +556,8 @@
       - reactphp/tests/EventLoop/StreamSelectLoopTest.php
   silverstripe:
     url: https://github.com/silverstripe/silverstripe-installer.git
-    # Needed to go beyond the most likely stable 3.1.2 in order
-    # to pull request code added.
-    # https://github.com/silverstripe/silverstripe-framework/pull/2819
-    branch: master
-    commit: 3b3cda59d2d8a1618ed66c5d9fd1d76395040ddd
+    branch: "3.1"
+    commit: b3acbcfa5f3637c412bd36113e41dcf48b564fc5
     install_root: silverstripe
     test_root: silverstripe
     flakey:

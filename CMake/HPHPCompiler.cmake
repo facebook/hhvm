@@ -39,9 +39,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(GNUCC_PLAT_OPT "-mcrc32")
   endif()
 
-  # Use -Og with Debug builds in gcc >= 4.8
-  set(CMAKE_C_FLAGS_DEBUG    "-Og -g")
-  set(CMAKE_CXX_FLAGS_DEBUG  "-Og -g")
+  # No optimizations for debug builds.
+  set(CMAKE_C_FLAGS_DEBUG    "-O0 -ggdb")
+  set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -ggdb")
 
   # Generic GCC flags and Optional flags
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")

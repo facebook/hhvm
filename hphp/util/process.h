@@ -22,7 +22,13 @@
 #include <cstdio>
 
 #include <sys/types.h>
+#if defined(__CYGWIN__) || defined(__MINGW__)
+#include <pthread.h>
+#elif defined(_MSC_VER)
+#include <windows.h>
+#else
 #include <sys/syscall.h>
+#endif
 #include <unistd.h>
 
 namespace HPHP {
@@ -142,6 +148,10 @@ public:
     syscall(SYS_thr_self, &tid);
     return (pid_t) tid;
 # endif
+#elif defined(__CYGWIN__) || defined(__MINGW__)
+    return (long)pthread_self();
+#elif defined(_MSC_VER)
+  return GetCurrentThreadId();
 #else
     return syscall(SYS_gettid);
 #endif

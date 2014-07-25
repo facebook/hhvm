@@ -19,9 +19,9 @@ option(DISABLE_HARDWARE_COUNTERS "Disable hardware counters (for XenU systems)" 
 option(ENABLE_TRACE "Enable tracing in release build" OFF)
 option(CPACK_GENERATOR "Enable build of distribution packages using CPack" OFF)
 
-IF (NOT APPLE)
+IF (NOT APPLE AND NOT CYGWIN)
   option(ENABLE_ZEND_COMPAT "Enable Zend source compatibility" ON)
-ENDIF (NOT APPLE)
+ENDIF (NOT APPLE AND NOT CYGWIN)
 
 option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
 

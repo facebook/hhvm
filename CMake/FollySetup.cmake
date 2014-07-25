@@ -26,3 +26,8 @@ if (FEATURES_H_INCLUDE_DIR)
   include_directories("${FEATURES_H_INCLUDE_DIR}")
   add_definitions("-DFOLLY_HAVE_FEATURES_H=1")
 endif()
+
+if(CYGWIN)
+# cygwin has c99 issues with cxx compiler and headers
+  add_definitions("-D_GLIBCXX_USE_C99_DYNAMIC")
+endif()

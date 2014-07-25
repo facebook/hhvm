@@ -1,0 +1,3 @@
+<?php
+require('require_env.inc');
+

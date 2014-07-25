@@ -1,0 +1,9 @@
+bool(true)
+bool(true)
+Array
+(
+    [0] => 1
+    [id] => 1
+    [1] => test
+    [name] => test
+)

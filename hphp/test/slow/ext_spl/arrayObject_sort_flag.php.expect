@@ -1,0 +1,33 @@
+ArrayObject Object
+(
+    [storage:ArrayObject:private] => Array
+        (
+            [0] => c
+            [1a] => 3
+            [c] => a
+            [b] => b
+        )
+
+)
+ArrayObject Object
+(
+    [storage:ArrayObject:private] => Array
+        (
+            [c] => a
+            [b] => b
+            [0] => c
+            [1a] => 3
+        )
+
+)
+ArrayObject Object
+(
+    [storage:ArrayObject:private] => Array
+        (
+            [1a] => 3
+            [c] => a
+            [b] => b
+            [0] => c
+        )
+
+)

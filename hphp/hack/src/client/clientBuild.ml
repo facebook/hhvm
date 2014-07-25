@@ -29,9 +29,13 @@ let rec connect env retries =
     end
     else exit 2
   | ClientExceptions.Server_initializing ->
-    Tty.print_clear_line stdout;
     Printf.printf
-      "Hack server still initializing. (will wait %d more seconds) %s\r%!"
+      (* This extra space before the \r is here to erase the spinner
+         when the length of this line decreases (but by at most 1!) as
+         it ticks down. We don't want to rely on Tty.print_clear_line
+         --- it would emit newlines when stdout is not a tty, and
+         obviate the effect of the \r. *)
+      "Hack server still initializing. (will wait %d more seconds) %s \r%!"
       retries (Tty.spinner());
     if retries > 0
     then begin

@@ -10,15 +10,43 @@
  *
  * @return string - The compressed string or FALSE if an error occurred.
  */
-<<__Native, __HipHopSpecific>>
-function sncompress(string $data): mixed;
+<<__Native>>
+function snappy_compress(string $data): mixed;
 
 /**
  * This function uncompress a compressed string.
  *
- * @param string $data - The data compressed by sncompress()
+ * @param string $data - The data compressed by snappy_compress()
  *
  * @return string - The decompressed string or FALSE if an error occurred.
  */
-<<__Native, __HipHopSpecific>>
-function snuncompress(string $data): mixed;
+<<__Native>>
+function snappy_uncompress(string $data): mixed;
+
+/**
+ *
+ * This is a wrapper function as sncompress is now snappy_compress
+ *
+ * https://github.com/facebook/hhvm/pull/3258 - 23/07/2014
+ *
+ */
+<<__HipHopSpecific>>
+function sncompress(string $data) {
+  trigger_error("sncompress is now depreciated in favour of snappy_compress",
+                 E_USER_DEPRECATED);
+  return snappy_compress($data);
+}
+
+/**
+ *
+ * This is a wrapper function as snuncompress is now snappy_uncompress
+ *
+ * https://github.com/facebook/hhvm/pull/3258 - 23/07/2014
+ *
+ */
+<<__HipHopSpecific>>
+function snuncompress(string $data) {
+  trigger_error("snuncompress is now depreciated in favour of snappy_uncompress",
+                E_USER_DEPRECATED);
+  return snappy_uncompress($data);
+}

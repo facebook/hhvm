@@ -30,6 +30,7 @@
 #include <sys/syscall.h>
 #endif
 #include <unistd.h>
+#include <pthread.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

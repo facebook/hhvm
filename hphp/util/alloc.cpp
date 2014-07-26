@@ -101,7 +101,7 @@ void init_stack_limits(pthread_attr_t* attr) {
   }
 
   // stackaddr is not base, but top of the stack. Yes, really.
-  stackaddr -= stacksize;
+  stackaddr = ((char*) stackaddr) - stacksize;
 #endif
 
   // Get the guard page's size, because the stack address returned

@@ -19,6 +19,8 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/timer.h"
 
+#include <sys/errno.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

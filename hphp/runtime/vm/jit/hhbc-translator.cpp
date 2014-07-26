@@ -1406,18 +1406,18 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
 }
 
 template<class Lambda>
-SSATmp* HhbcTranslator::emitIterInitCommon(int offset, JmpFlags jmpFlags,
+void HhbcTranslator::emitIterInitCommon(int offset, JmpFlags jmpFlags,
                                            Lambda genFunc,
                                            bool invertCond) {
   auto const src = popC();
   auto const type = src->type();
   if (!type.subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);
   auto const res = genFunc(src);
-  return emitJmpCondHelper(offset, !invertCond, jmpFlags, res);
+  emitJmpCondHelper(offset, !invertCond, jmpFlags, res);
 }
 
 template<class Lambda>
-SSATmp* HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
+void HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
                                             Lambda genFunc) {
   auto exit = makeExit();
 
@@ -1430,7 +1430,7 @@ SSATmp* HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
   SSATmp* res = genFunc(src);
   SSATmp* out = popV();
   gen(DecRef, out);
-  return emitJmpCondHelper(offset, true, jmpFlags, res);
+  emitJmpCondHelper(offset, true, jmpFlags, res);
 }
 
 void HhbcTranslator::emitIterInit(uint32_t iterId,
@@ -2180,10 +2180,10 @@ void HhbcTranslator::emitJmp(int32_t offset, JmpFlags flags) {
               flags & JmpFlagSurprise ? makeCatch() : nullptr);
 }
 
-SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t taken,
-                                          bool negate,
-                                          JmpFlags flags,
-                                          SSATmp* src) {
+void HhbcTranslator::emitJmpCondHelper(int32_t taken,
+                                       bool negate,
+                                       JmpFlags flags,
+                                       SSATmp* src) {
   if (flags & JmpFlagBreakTracelet) {
     spillStack();
   }
@@ -2201,7 +2201,7 @@ SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t taken,
   assert(target != nullptr);
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
-  return gen(negate ? JmpZero : JmpNZero, target, boolSrc);
+  gen(negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
 void HhbcTranslator::emitJmpZ(Offset taken, JmpFlags flags) {

@@ -765,15 +765,15 @@ private:
   void emitDecRefLocalsInline();
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
-  SSATmp* emitJmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
+  void emitJmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
-  SSATmp* emitIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc,
-                             bool invertCond);
+  void emitIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc,
+                          bool invertCond);
   BCMarker makeMarker(Offset bcOff);
   void updateMarker();
   template<class Lambda>
-  SSATmp* emitMIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc);
+  void emitMIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck(Block* catchBlock);
   void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,

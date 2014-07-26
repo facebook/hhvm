@@ -208,7 +208,7 @@
         },
         {
             "name": "CRYPT_BLOWFISH",
-            "value": 0
+            "value": 1
         },
         {
             "name": "CRYPT_EXT_DES",

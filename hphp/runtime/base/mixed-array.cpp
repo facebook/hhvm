@@ -1068,6 +1068,14 @@ void MixedArray::downgradeAndWarn(ArrayData* ad, const Reason r) {
 
 void MixedArray::warnUsage(const Reason r, const ArrayKind kind) {
   assert(kind == kIntMapKind || kind == kStrMapKind);
+  if (!RuntimeOption::EvalHackArrayWarnFrequency) {
+    return;
+  }
+  static __thread uint32_t numWarnings = 0;
+  numWarnings++;
+  if (numWarnings % RuntimeOption::EvalHackArrayWarnFrequency != 0) {
+    return;
+  }
   auto arrayName = kind == kIntMapKind ? "miarray" : "msarray";
   switch (r) {
   case Reason::kForeachByRef:

@@ -393,6 +393,11 @@ public:
          E_WARNING if soft type hint fails; note that in repo mode the
          error handler is not allowed to resume on recoverable errors */ \
   F(int32_t, CheckReturnTypeHints,     2)                               \
+  /* HackArrayWarnFrequency:
+     0 - no warnings
+     [1-UINT32_MAX] - raise warning every X times
+  */                                                                    \
+  F(uint32_t, HackArrayWarnFrequency,  0)                               \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

@@ -25,10 +25,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Frame data gathered on function enter/exit.
+// TODO(#4489053) Should look into reducing size
 struct FrameData {
-  const Func* func; // So we can grab its name and filename later
-  int64_t line;
+  const Func* func;
   int64_t time;
+  Offset line; // For begin frames, the line called from
   // We don't need all 64 bits for memory_usage and we need to save space as
   // this struct is massive and we allocate a ton of them. The TraceProfiler
   // in ext_hotprofiler.cpp does the same.
@@ -36,7 +37,7 @@ struct FrameData {
   bool is_func_begin : 1; // Whether or not this is an enter event
   // If is_func_begin, then this will be the serialized aruments. Otherwise it
   // will be the serialized return value
-  const char* context_str;
+  const StringData* context_str;
 };
 
 // TODO(#4489053) consider allowing user to set the maximum buffer size
@@ -66,13 +67,17 @@ public:
   // Enables profiling. Profiling cannot be disabled.
   void enableProfiling(const String& filename, int64_t opts);
   inline bool isProfiling() { return m_profilingEnabled; }
-  inline const String getProfilingFilename() { return m_profilingFilename; }
+  inline const String getProfilingFilename() {
+    return m_profilingEnabled ? m_profilingFilename : empty_string();
+  }
 
   // Enable/disable tracing
   void enableTracing(const String& filename, int64_t opts);
   void disableTracing();
   inline bool isTracing() { return m_tracingEnabled; }
-  inline const String getTracingFilename() { return m_tracingFilename; }
+  inline const String getTracingFilename() {
+    return m_tracingEnabled ? m_tracingFilename : empty_string();
+  }
 
   // Functions called on frame begin/end
   virtual void beginFrame(const char* symbol);
@@ -101,8 +106,34 @@ private:
   // event and retVal is the returned value
   void recordFrame(const TypedValue* retVal);
 
+  // Used when we have both the beginning and end frame data
+  struct Frame {
+    FrameData& begin;
+    FrameData& end;
+    explicit Frame(FrameData& beginFrame, FrameData& endFrame)
+      : begin(beginFrame), end(endFrame) {}
+  };
+
   // Called on profiler destruction, writes the profiling results.
   void writeProfilingResults();
+
+  // Writes a stack frame's profiling information to the profiling file. The
+  // frame's begin frame data starts at startIdx in the internal buffer. Returns
+  // the index in the internal buffer of the frame's end frame data or -1 if
+  // an error occurred.
+  ssize_t writeProfilingFrame(ssize_t startIdx);
+
+  // Writes the given frame in cachegrind format to the given file
+  void writeCachegrindFrame(const Frame& frame,
+                            const std::vector<Frame>& children,
+                            int64_t childrenCost,
+                            bool isTopPseudoMain);
+
+  // Writes the given function's filename in cachegrind format
+  void writeCachegrindFuncFileName(const Func* func);
+
+  // Writes the given function's name in cachegrind format
+  void writeCachegrindFuncName(const Func* func, bool isTopPseudoMain);
 
   FrameData* m_frameBuffer = nullptr;
   uint64_t m_frameBufferSize = 0;
@@ -114,6 +145,7 @@ private:
   bool m_profilingEnabled = false;
   int64_t m_profilingOpts = 0;
   String m_profilingFilename;
+  FILE* m_profilingFile;
 
   bool m_tracingEnabled = false;
   uint64_t m_tracingStartIdx = 0;

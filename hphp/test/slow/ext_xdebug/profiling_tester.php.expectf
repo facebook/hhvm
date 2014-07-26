@@ -1,0 +1,136 @@
+string(%d) "version: 1
+creator: xdebug 
+cmd: %s/test/slow/ext_xdebug/profiling_testee.inc
+part: 1
+positions: line
+
+events: Time
+
+fl=%s/test/slow/ext_xdebug/profiling_testee_helper.inc
+fn=foobarbaz
+3 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee_helper.inc
+fn=include::%s/test/slow/ext_xdebug/profiling_testee_helper.inc
+1 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee_helper.inc
+cfn=foobarbaz
+calls=1 0 0
+7 %d
+
+fl=php:internal
+fn=php::xdebug_call_file
+23 %d
+
+fl=php:internal
+fn=php::var_dump
+0 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=Baz::86ctor
+14 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=Baz::boo
+19 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=Baz::boo
+19 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=Baz::boo
+19 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=Baz::bar
+15 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=Baz::boo
+calls=1 0 0
+16 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=Baz::boo
+calls=1 0 0
+17 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=Baz::boo
+calls=1 0 0
+17 %d
+
+fl=php:internal
+fn=php::var_dump
+0 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=bar
+10 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=foo
+5 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=bar
+calls=1 0 0
+6 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=foo
+5 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=foo
+calls=1 0 0
+7 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn=foo
+5 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=foo
+calls=1 0 0
+7 %d
+
+fl=php:internal
+fn=php::var_dump
+0 %d
+
+fl=%s/test/slow/ext_xdebug/profiling_testee.inc
+fn={main}
+
+Summary: %d
+
+1 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee_helper.inc
+cfn=include::%s/test/slow/ext_xdebug/profiling_testee_helper.inc
+calls=1 0 0
+3 %d
+cfl=php:internal
+cfn=php::xdebug_call_file
+calls=1 0 0
+23 %d
+cfl=php:internal
+cfn=php::var_dump
+calls=1 0 0
+23 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=Baz::86ctor
+calls=1 0 0
+24 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=Baz::bar
+calls=1 0 0
+24 %d
+cfl=php:internal
+cfn=php::var_dump
+calls=1 0 0
+25 %d
+cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
+cfn=foo
+calls=1 0 0
+26 %d
+cfl=php:internal
+cfn=php::var_dump
+calls=1 0 0
+26 %d
+
+"

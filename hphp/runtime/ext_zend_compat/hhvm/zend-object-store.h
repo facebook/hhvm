@@ -36,8 +36,14 @@ class ZendObjectStore final : public RequestEventHandler {
       : m_free_list_head(0)
     {}
 
-    virtual void requestInit() {};
+    virtual void requestInit() {}
     virtual void requestShutdown();
+
+    // Defer shutdown until after other requestShutdown hooks are done
+    // freeing their objects.
+    virtual int priority() const {
+      return 10;
+    }
 
     zend_object_handle insertObject(void *object,
         zend_objects_store_dtor_t dtor,

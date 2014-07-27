@@ -1,4 +1,4 @@
-# Zend Extension Source Compatability Layer
+# Zend Extension Source Compatibility Layer
 
 If you want to compile your existing zend extension against HHVM, you can use
 these headers. The runtimes are similar enough that we can just map the macros

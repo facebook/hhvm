@@ -265,7 +265,8 @@ class ReflectionParameter implements Reflector {
       'hh\int' => 1,
       'hh\float' => 1,
       'hh\string' => 1,
-      'array' => 1
+      'array' => 1,
+      'callable' => 1,
     );
     if (isset($nonClassTypehints[$ltype])) {
       return null;

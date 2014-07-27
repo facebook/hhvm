@@ -1853,13 +1853,13 @@ lambda_expression:
 lambda_body:
     T_LAMBDA_ARROW expr               { $$ = _p->onExprForLambda($2);}
   | T_LAMBDA_ARROW
-    '{' inner_statement_list '}'      { $$ = $3;}
+    '{' inner_statement_list '}'      { $$ = $3; }
 ;
 
 shape_keyname:
     T_CONSTANT_ENCAPSED_STRING        { validate_shape_keyname($1, _p);
                                         _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $1); }
-  | class_constant                    { $$ = $1 }
+  | class_constant                    { $$ = $1; }
 ;
 
 non_empty_shape_pair_list:

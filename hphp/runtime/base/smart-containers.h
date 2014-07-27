@@ -96,8 +96,9 @@ struct Allocator {
     ::new ((void*)p) U(std::forward<Args>(args)...);
   }
 
-  void destroy(pointer p) {
-    p->~T();
+  template<class U>
+  void destroy(U* p) {
+    p->~U();
   }
 
   void deallocate(pointer p, size_type num) {

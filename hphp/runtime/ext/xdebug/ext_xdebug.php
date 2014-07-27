@@ -192,7 +192,7 @@ function xdebug_start_error_collection(): void;
  * @return mixed - The filename returned by xdebug_get_tracefile_name() or false
  *                 on failure.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function xdebug_start_trace(mixed $trace_file = null, int $options = 0): mixed;
 
 /**
@@ -215,7 +215,7 @@ function xdebug_stop_error_collection(): void;
  * @return mixed - If tracing was started, the file the trace was saved to.
  *                 Otherwise, false.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function xdebug_stop_trace(): mixed;
 
 /**

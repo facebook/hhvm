@@ -21,6 +21,8 @@
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/ext_hotprofiler.h"
 
+#include "hphp/runtime/ext/ext_datetime.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -52,6 +54,11 @@ public:
       disableTracing();
     }
     smart_free(m_frameBuffer);
+  }
+
+  // Set the time to use a base when computing time elapsed
+  void setBaseTime(int64_t baseTime) {
+    m_baseTime = baseTime;
   }
 
   // Whether or not the profiler is collecting data
@@ -106,6 +113,63 @@ private:
   // event and retVal is the returned value
   void recordFrame(const TypedValue* retVal);
 
+  // Helper used to convert a microseconds since epoch into the format xdebug
+  // uses: microseconds since request init, as a double
+  inline double timeSinceBase(int64_t time) {
+    return (time - m_baseTime) * 1.0e-6;
+  }
+
+  // Helper that writes a timestamp in the given file in the format used by
+  // xdebug
+  inline void fprintTimestamp(FILE* f) {
+    DateTime now(time(nullptr));
+    fprintf(f, "[%d-%02d-%02d %02d:%02d:%02d]",
+            now.year(), now.month(), now.day(),
+            now.hour(), now.minute(), now.second());
+  }
+
+  // The different types of tracefile output
+  enum class TraceOutputType {
+    NORMAL,
+    COMPUTERIZED,
+    HTML
+  };
+
+  // Write the tracing results in normal/computerized/html format. A template is
+  // used to prevent unnecessary runtime casing.
+  template <TraceOutputType outputType>
+  void writeTracingResults();
+
+  template <TraceOutputType outputType>
+  void writeTracingResultsHeader();
+
+  template <TraceOutputType outputType>
+  void writeTracingResultsFooter();
+
+  // Write a given frame in normal/computerized/html format. The frame is at
+  // stack level level and its' begin frame starts at startIdx in the internal
+  // buffer. Its parent begin frame is passed. Returns the index of the frame's
+  // end frame in the internal buffer, or -1 if there was no end frame.
+  template <TraceOutputType outputType>
+  int64_t writeTracingFrame(int64_t level,
+                            int64_t startIdx,
+                            const FrameData* parentBegin);
+
+  template <TraceOutputType outputType>
+  void writeTracingTime(int64_t time);
+
+  template<TraceOutputType outputType>
+  void writeTracingMemory(int64_t memory);
+
+  template <TraceOutputType outputType>
+  void writeTracingIndent(int64_t level);
+
+  template<TraceOutputType outputType>
+  void writeTracingFuncName(FrameData& frame, bool isTopPseudoMain);
+
+  template <TraceOutputType outputType>
+  void writeTracingCallsite(FrameData& frame, const FrameData* parent);
+
   // Used when we have both the beginning and end frame data
   struct Frame {
     FrameData& begin;
@@ -121,7 +185,7 @@ private:
   // frame's begin frame data starts at startIdx in the internal buffer. Returns
   // the index in the internal buffer of the frame's end frame data or -1 if
   // an error occurred.
-  ssize_t writeProfilingFrame(ssize_t startIdx);
+  int64_t writeProfilingFrame(int64_t startIdx);
 
   // Writes the given frame in cachegrind format to the given file
   void writeCachegrindFrame(const Frame& frame,
@@ -136,8 +200,9 @@ private:
   void writeCachegrindFuncName(const Func* func, bool isTopPseudoMain);
 
   FrameData* m_frameBuffer = nullptr;
-  uint64_t m_frameBufferSize = 0;
-  uint64_t m_nextFrameIdx = 0;
+  int64_t m_frameBufferSize = 0;
+  int64_t m_nextFrameIdx = 0;
+  int64_t m_baseTime = 0;
 
   bool m_collectMemory = false;
   bool m_collectTime = false;
@@ -148,9 +213,15 @@ private:
   FILE* m_profilingFile;
 
   bool m_tracingEnabled = false;
-  uint64_t m_tracingStartIdx = 0;
   int64_t m_tracingOpts = 0;
+  int64_t m_tracingStartIdx = 0;
+  std::vector<FrameData> m_tracingStartFrameData;
   String m_tracingFilename;
+  FILE* m_tracingFile;
+
+  // When writing the tracing file with show_mem_delta we need a reference to
+  // the previous begin frame
+  FrameData* m_tracingPrevBegin = nullptr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

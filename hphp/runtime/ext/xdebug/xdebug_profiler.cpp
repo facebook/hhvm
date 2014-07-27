@@ -32,12 +32,12 @@ void XDebugProfiler::ensureBufferSpace() {
   }
 
   // The initial buffer size is 0
-  uint64_t new_buf_size = (m_frameBufferSize == 0)?
+  int64_t new_buf_size = (m_frameBufferSize == 0)?
     XDebugExtension::FramebufSize :
     m_frameBufferSize * XDebugExtension::FramebufExpansion;
 
   try {
-    uint64_t new_buf_bytes = new_buf_size * sizeof(FrameData);
+    int64_t new_buf_bytes = new_buf_size * sizeof(FrameData);
     m_frameBuffer = (FrameData*) smart_realloc((void*) m_frameBuffer,
                                                new_buf_bytes);
     m_frameBufferSize = new_buf_size;
@@ -71,9 +71,9 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
 
     // Need the previous frame in order to get the call line. If we cannot
     // get the previous frame, default to 0
-    const ActRec* prevFp = fp->sfp();
+    Offset offset;
+    const ActRec* prevFp = g_context->getPrevVMState(fp, &offset);
     if (prevFp != nullptr) {
-      Offset offset = prevFp->func()->base() + fp->m_soff;
       frameData.line = prevFp->unit()->getLineNumber(offset);
     } else {
       frameData.line = 0;
@@ -83,18 +83,18 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
     frameData.line = 0;
   }
 
-  // Time is stored if profiling or collect_time is enabled, but it only
-  // need to be collected on function exit if tracing or profiling
+  // Time is stored if profiling, tracing, or collect_time is enabled, but it
+  // only needs to be collected on function exit if profiling.
   if (m_profilingEnabled ||
-      (m_collectTime && (is_func_begin || m_tracingEnabled))) {
+      (is_func_begin && (m_collectTime || m_tracingEnabled))) {
     frameData.time = Timer::GetCurrentTimeMicros();
   } else {
     frameData.time = 0;
   }
 
-  // Memory usage is stored if collect_memory is enabled, but it only
-  // needs to be collected on function exit if tracing
-  if (m_collectMemory && (is_func_begin || m_tracingEnabled)) {
+  // Memory usage is stored on function begin if tracing or if collect_memory
+  // is enabled
+  if (is_func_begin && (m_tracingEnabled || m_collectMemory)) {
     frameData.memory_usage = MM().getStats().usage;
   } else {
     frameData.memory_usage = 0;
@@ -139,20 +139,255 @@ void XDebugProfiler::endFrame(const TypedValue* retVal,
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Tracing
+
 void XDebugProfiler::enableTracing(const String& filename, int64_t opts) {
   assert(!m_tracingEnabled);
+
+  // Attempt to open the passed filename. php5 xdebug doesn't enable tracing
+  // if we cannot open the file, so we need to open it now as opposed to when we
+  // actually do the writing in order to ensure we handle this case. We keep the
+  // file handle open in order to ensure we can still write on tracing stop
+  FILE* file;
+  if (opts & k_XDEBUG_TRACE_APPEND) {
+    file = fopen(filename.data(), "a");
+  } else {
+    file = fopen(filename.data(), "w");
+  }
+
+  // If file is null, opening the passed filename failed. php5 xdebug doesn't
+  // do anything in this case, but we should probably notify the user
+  if (file == nullptr) {
+    raise_warning("xdebug profiler failed to open tracing file %s for writing.",
+                  filename.data());
+    return;
+  }
+
   m_tracingEnabled = true;
   m_tracingStartIdx = m_nextFrameIdx;
   m_tracingFilename = filename;
+  m_tracingFile = file;
   m_tracingOpts = opts;
+
+  // If we're not at the top level, need to grab the call sites for each frame
+  // on the stack.
+  VMRegAnchor _;
+  Offset offset;
+  ActRec* fp = vmfp();
+  while ((fp = g_context->getPrevVMState(fp, &offset)) != nullptr) {
+    FrameData frame;
+    frame.func = fp->func();
+    frame.line = fp->unit()->getLineNumber(offset);
+    m_tracingStartFrameData.push_back(frame);
+  }
 }
 
-
-// TODO(#4489053) Output to a tracing file. We should try to save space by
+// TODO(#4489053) If we aren't profiling, we should try to save space by
 // removing trace data
 void XDebugProfiler::disableTracing() {
+  if (m_tracingOpts & k_XDEBUG_TRACE_COMPUTERIZED) {
+    writeTracingResults<TraceOutputType::COMPUTERIZED>();
+  } else if (m_tracingOpts & k_XDEBUG_TRACE_HTML) {
+    writeTracingResults<TraceOutputType::HTML>();
+  } else {
+    writeTracingResults<TraceOutputType::NORMAL>();
+  }
+
+  // Cleanup
   m_tracingEnabled = false;
+  m_tracingStartFrameData.clear();
+  fclose(m_tracingFile);
 }
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingResults() {
+  int64_t buf_idx = m_tracingStartIdx;
+  int64_t level = m_tracingStartFrameData.size();
+
+  // We don't necessarily start at a top-level frame so we need to continue
+  // iterating until we run out of frames
+  writeTracingResultsHeader<outputType>();
+  while (buf_idx < m_nextFrameIdx) {
+    assert(level >= 0);
+    if (!m_frameBuffer[buf_idx].is_func_begin) {
+      buf_idx++;
+      level--;
+      continue;
+    }
+
+    // Grab the precomputed frame data for this level
+    FrameData* frameData = (level > 0)?
+      &m_tracingStartFrameData[level - 1] :
+      nullptr;
+
+    // Write the current frame at this level
+    int64_t end;
+    if ((end = writeTracingFrame<outputType>(level, buf_idx, frameData)) < 0) {
+      break;
+    }
+    buf_idx = end + 1;
+  }
+  writeTracingResultsFooter<outputType>();
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingResultsHeader() {
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      fprintf(m_tracingFile, "TRACE START");
+      fprintTimestamp(m_tracingFile);
+      fprintf(m_tracingFile, "\n");
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingResultsFooter() {
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      fprintf(m_tracingFile, "TRACE END");
+      fprintTimestamp(m_tracingFile);
+      fprintf(m_tracingFile, "\n");
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+int64_t XDebugProfiler::writeTracingFrame(int64_t level,
+                                          int64_t startIdx,
+                                          const FrameData* parentBegin) {
+  FrameData& begin = m_frameBuffer[startIdx];
+  assert(begin.is_func_begin);
+
+  writeTracingTime<outputType>(begin.time);
+  writeTracingMemory<outputType>(begin.memory_usage);
+  writeTracingIndent<outputType>(level);
+  writeTracingFuncName<outputType>(begin, level == 0);
+  writeTracingCallsite<outputType>(begin, parentBegin);
+  fprintf(m_tracingFile, "\n");
+
+  // This is needed to determine the delta memory usage
+  m_tracingPrevBegin = &begin;
+
+  // Iterate over children
+  int64_t buf_idx = startIdx + 1;
+  while (buf_idx < m_nextFrameIdx) {
+    // TODO(#4489053) If collect_return and !is_func_begin, write return value
+    if (!m_frameBuffer[buf_idx].is_func_begin) {
+      return buf_idx;
+    }
+
+    // Recursively write the child
+    int64_t end;
+    if ((end = writeTracingFrame<outputType>(level + 1, buf_idx, &begin)) < 0) {
+      return -1;
+    }
+    buf_idx = end + 1;
+  }
+
+  // If we get here, there was no end frame. Since the user can stop the trace
+  // at any time, this isn't an error.
+  return -1;
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingTime(int64_t time) {
+  // TODO(#4489053) Support other types of output types
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      fprintf(m_tracingFile, "%10.4f ", timeSinceBase(time));
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingMemory(int64_t memory) {
+  // TODO(#4489053) Support other types of output types
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      fprintf(m_tracingFile, "%10lu ", memory);
+      // Delta Memory (since the last begin frame)
+      if (XDebugExtension::ShowMemDelta) {
+        if (m_tracingPrevBegin != nullptr) {
+          int64_t prev_usage = m_tracingPrevBegin->memory_usage;
+          fprintf(m_tracingFile, "%+8ld", memory - prev_usage);
+        } else {
+          fprintf(m_tracingFile, "        ");
+        }
+      }
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingIndent(int64_t level) {
+  // TODO(#4489053) Support other types of output types
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      for (int i = 0; i < level + 1; i++) {
+        fprintf(m_tracingFile, "  ");
+      }
+      fprintf(m_tracingFile, "-> ");
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingFuncName(FrameData& frame,
+                                          bool isTopPseudoMain) {
+  // TODO(#4489053) If collect_params, write the arguments
+  // TODO(#4489053) Support other types of output types
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      if (isTopPseudoMain) {
+        fprintf(m_tracingFile, "{main} ");
+      } else if (frame.func->isPseudoMain()) {
+        fprintf(m_tracingFile, "include(%s) ", frame.func->filename()->data());
+      } else {
+        fprintf(m_tracingFile, "%s() ", frame.func->fullName()->data());
+      }
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingCallsite(FrameData& frame,
+                                          const FrameData* parent) {
+  if (parent == nullptr) {
+    return;
+  }
+
+  // TODO(#4489053) Support other types of output types
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      fprintf(m_tracingFile, "%s", parent->func->filename()->data());
+      fprintf(m_tracingFile, ":%d", frame.line);
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Profiling
 
@@ -178,8 +413,8 @@ void XDebugProfiler::enableProfiling(const String& filename, int64_t opts) {
   // If file is null, opening the passed filename failed. php5 xdebug doesn't
   // do anything in this case, but we should probaly notify the user
   if (file == nullptr) {
-    raise_warning("xdebug profiler failed to open file %s for writing.",
-                  filename.data());
+    raise_warning("xdebug profiler failed to open profiling file %s for "
+                  "writing.", filename.data());
     return;
   }
 
@@ -215,7 +450,7 @@ void XDebugProfiler::writeProfilingResults() {
   fclose(m_profilingFile);
 }
 
-ssize_t XDebugProfiler::writeProfilingFrame(ssize_t startIdx) {
+int64_t XDebugProfiler::writeProfilingFrame(int64_t startIdx) {
   assert(m_frameBuffer[startIdx].is_func_begin);
 
   // We need to store the child calls so we don't have to find
@@ -227,21 +462,21 @@ ssize_t XDebugProfiler::writeProfilingFrame(ssize_t startIdx) {
   int64_t children_cost = 0; // Time spent in children
 
   // Iterate until we find the end frame
-  ssize_t buf_idx = startIdx + 1;
+  int64_t buf_idx = startIdx + 1;
   while (buf_idx < m_nextFrameIdx) {
     FrameData& frame_data = m_frameBuffer[buf_idx];
     if (frame_data.is_func_begin) {
       // This is the beginning of a child frame, recursively write it
-      ssize_t end_idx = writeProfilingFrame(buf_idx);
-      if (end_idx < 0) {
+      int64_t end;
+      if ((end = writeProfilingFrame(buf_idx)) < 0) {
         break;
       }
 
       // Record the children cost, then push it onto the children list
-      FrameData& end_frame_data = m_frameBuffer[end_idx];
+      FrameData& end_frame_data = m_frameBuffer[end];
       children_cost += end_frame_data.time - frame_data.time;
       children.push_back(Frame(frame_data, end_frame_data));
-      buf_idx = end_idx + 1;
+      buf_idx = end + 1;
     } else {
       // This is the end frame, write it then return its index
       const Frame frame(m_frameBuffer[startIdx], frame_data);

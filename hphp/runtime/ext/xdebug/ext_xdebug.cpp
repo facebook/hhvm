@@ -310,6 +310,7 @@ static void attach_xdebug_profiler() {
     }
     profiler->setCollectMemory(XDebugExtension::CollectMemory);
     profiler->setCollectTime(XDebugExtension::CollectTime);
+    profiler->setBaseTime(s_request->m_init_time);
   } else {
     raise_error("Could not start xdebug profiler. Another profiler is "
                 "likely already attached to this thread.");
@@ -566,16 +567,21 @@ static void HHVM_FUNCTION(xdebug_stop_error_collection)
   XDEBUG_NOTIMPLEMENTED
 
 static Variant HHVM_FUNCTION(xdebug_stop_trace) {
-  if (s_request->m_profiler_attached) {
-    XDebugProfiler* profiler = xdebug_profiler();
-    if (profiler->isTracing()) {
-      String filename = profiler->getTracingFilename();
-      profiler->disableTracing();
-      detach_xdebug_profiler_if_needed();
-      return filename;
-    }
+  if (!s_request->m_profiler_attached) {
+    return false;
   }
-  return false;
+
+  XDebugProfiler* profiler = xdebug_profiler();
+  if (!profiler->isTracing()) {
+    return false;
+  }
+
+  // End with xdebug_stop_trace()
+  profiler->endFrame(init_null().asTypedValue(), nullptr, false);
+  String filename = profiler->getTracingFilename();
+  profiler->disableTracing();
+  detach_xdebug_profiler_if_needed();
+  return filename;
 }
 
 static double HHVM_FUNCTION(xdebug_time_index) {

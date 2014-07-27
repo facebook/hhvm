@@ -434,6 +434,11 @@ bool ExecutionContext::removeShutdownFunction(const Variant& function,
   return ret;
 }
 
+bool ExecutionContext::hasShutdownFunctions(ShutdownType type) {
+  return !m_shutdowns.isNull() && m_shutdowns.exists(type) &&
+    m_shutdowns[type].toArray().size() >= 1;
+}
+
 Variant ExecutionContext::pushUserErrorHandler(const Variant& function,
                                                    int error_types) {
   Variant ret;

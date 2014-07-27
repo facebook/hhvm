@@ -1755,17 +1755,23 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   return ret;
 }
 
-void hphp_context_exit() {
-  auto const context = g_context.getNoCheck();
-
+void hphp_context_shutdown() {
   // Run shutdown handlers. This may cause user code to run.
+  auto const context = g_context.getNoCheck();
   context->destructObjects();
   context->onRequestShutdown();
 
   // Extensions could have shutdown handlers
   Extension::RequestShutdownModules();
+}
+
+void hphp_context_exit(bool shutdown /* = true */) {
+  if (shutdown) {
+    hphp_context_shutdown();
+  }
 
   // Clean up a bunch of request state. No user code after this point.
+  auto const context = g_context.getNoCheck();
   context->requestExit();
   context->obProtect(false);
   context->obEndAll();

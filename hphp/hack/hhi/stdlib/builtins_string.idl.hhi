@@ -23,9 +23,9 @@ function strtoupper($str) { }
 function ucfirst($str) { }
 function lcfirst($str) { }
 function ucwords($str) { }
-function trim($str, $charlist = HPHP_TRIM_CHARLIST): string { }
-function ltrim($str, $charlist = HPHP_TRIM_CHARLIST): string { }
-function rtrim($str, $charlist = HPHP_TRIM_CHARLIST): string { }
+function trim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
+function ltrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
+function rtrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function chop($str, $charlist = HPHP_TRIM_CHARLIST) { }
 function explode($delimiter, $str, $limit = 0x7FFFFFFF) { }
 function join($glue, $pieces = null_variant) { }

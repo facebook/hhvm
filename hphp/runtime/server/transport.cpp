@@ -805,11 +805,11 @@ bool Transport::setHeaderCallback(const Variant& callback) {
   return true;
 }
 
-void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
-                              bool compressed /* = false */,
-                              bool chunked /* = false */,
-                              const char *codeInfo /* = "" */
-                              ) {
+void Transport::sendRaw(void *data, int size, int code /* = 200 */,
+                        bool compressed /* = false */,
+                        bool chunked /* = false */,
+                        const char *codeInfo /* = "" */
+                       ) {
   // There are post-send functions that can run. Any output from them should
   // be ignored as it doesn't make sense to try and send data after the
   // request has ended.
@@ -820,6 +820,13 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
   if (!compressed && RuntimeOption::ForceChunkedEncoding) {
     chunked = true;
   }
+
+  // I don't think there is any need to send an empty chunk, other than sending
+  // out headers earlier, which seems to be a useless feature.
+  if (size == 0 && (chunked || m_chunkedEncoding)) {
+    return;
+  }
+
   if (m_chunkedEncoding) {
     chunked = true;
     assert(!compressed);
@@ -828,11 +835,16 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
     assert(!compressed);
   }
 
-  // I don't think there is any need to send an empty chunk, other than sending
-  // out headers earlier, which seems to be a useless feature.
-  if (chunked && size == 0) {
-    return;
-  }
+  sendRawInternal(data, size, code, compressed, codeInfo);
+}
+
+void Transport::sendRawInternal(const void *data, int size,
+                                int code /* = 200 */,
+                                bool compressed /* = false */,
+                                const char *codeInfo /* = "" */
+                               ) {
+
+  bool chunked = m_chunkedEncoding;
 
   if (!m_headerCallbackDone && !cellIsNull(&m_headerCallback)) {
     // We could use m_headerSent here, however it seems we can still
@@ -875,19 +887,15 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
   }
 }
 
-void Transport::sendRaw(void *data, int size, int code /* = 200 */,
-                        bool compressed /* = false */,
-                        bool chunked /* = false */,
-                        const char *codeInfo /* = "" */
-                        ) {
-  sendRawLocked(data, size, code, compressed, chunked, codeInfo);
-}
-
 void Transport::onSendEnd() {
   if (m_compressor && m_chunkedEncoding) {
     bool compressed = false;
     StringHolder response = prepareResponse("", 0, compressed, true);
     sendImpl(response.data(), response.size(), m_responseCode, true);
+  }
+  if (!m_headerSent) {
+    m_compressionDecision = CompressionDecision::ShouldNot;
+    sendRawInternal("", 0);
   }
   auto httpResponseStats = ServiceData::createTimeseries(
     folly::to<std::string>(HTTP_RESPONSE_STATS_PREFIX, getResponseCode()),
@@ -902,7 +910,7 @@ void Transport::redirect(const char *location, int code /* = 302 */,
                          const char *info) {
   addHeaderImpl("Location", location);
   setResponse(code, info);
-  sendStringLocked("Moved", code);
+  sendString("Moved", code);
 }
 
 void Transport::onFlushProgress(int writtenSize, int64_t delayUs) {

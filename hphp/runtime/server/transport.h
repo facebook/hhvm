@@ -373,21 +373,13 @@ public:
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
   bool setHeaderCallback(const Variant& callback);
+  void sendRaw(void *data, int size, int code = 200,
+               bool compressed = false, bool chunked = false,
+               const char *codeInfo = nullptr);
 private:
-  void sendRawLocked(void *data, int size, int code = 200,
-                     bool compressed = false, bool chunked = false,
-                     const char *codeInfo = nullptr);
-public:
-  virtual void sendRaw(void *data, int size, int code = 200,
-                       bool compressed = false, bool chunked = false,
+  void sendRawInternal(const void *data, int size, int code = 200,
+                       bool compressed = false,
                        const char *codeInfo = nullptr);
-private:
-  void sendStringLocked(const char *data, int code = 200,
-                        bool compressed = false, bool chunked = false,
-                        const char * codeInfo = nullptr) {
-    sendRawLocked((void*)data, strlen(data), code, compressed, chunked,
-                  codeInfo);
-  }
 public:
   void sendString(const char *data, int code = 200, bool compressed = false,
                   bool chunked = false,

@@ -1773,6 +1773,8 @@ void MCGenerator::traceCodeGen() {
 
   finishPass(" after initial translation ", kIRLevel);
 
+  always_assert(IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops));
+
   // Task #4075847: enable optimizations with loops
   if (!(RuntimeOption::EvalJitLoops && m_tx.mode() == TransKind::Optimize)) {
     optimize(unit, ht.irBuilder(), m_tx.mode());

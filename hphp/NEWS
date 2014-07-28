@@ -1,5 +1,4 @@
 NEXT
- - All numeric comparisons involving NAN, except != and !==, are now false.
  - Interface requirements (similar to trait requirements) enforced
  - Initial support for PHP5.6 argument unpacking: f($x, $y, ...$args)
  - hhi files are embedded in the hh_server binary
@@ -28,6 +27,38 @@ NEXT
   - Implement xdebug_call_function
   - Change order of wait handle processing from FIFO to LIFO
   - Add Redis::_serialize()
+
+"Notorious B.I.G." 25-Jun-2014
+ - Remove Translator::analyze (replaced by tracelet region selector)
+ - Allow empty keys in hash_hmac() and hash_hmac_file()
+ - Interface requirements supported in parser
+ - Implement xdebug_{peak_,}memory_usage
+ - Inline singleton-pattern functions
+ - Cleanup in PhpFile and FileRepository
+ - Fix mysqli_query return value for query without result
+ - Implement xdebug_call_file
+ - Add fastlz support to memcached extension
+ - Fix ini_get to return false for non-supported settings
+ - Fix PHP version constants
+ - All numeric comparisons involving NAN, except != and !==, are now false.
+ - Implement xdebug_call_line
+ - Optimize ini_get
+ - Remove dump-file-repo admin command
+ - Fix stdclass promotion of static private properties
+ - Remove unused locals in global dce (HHBBC)
+ - Get mockery at 100%
+ - Fix casting resource to object
+ - Relocate code to arbitrary alignment
+ - Always let the first character through for camelcase searching
+ - Implement xdebug configuration options
+ - Convert ext/memcache to HNI
+ - Match php5's memcache getoption
+ - ./configure --help now has all the options
+ - mysqli: return false on non-selects
+ - Don't include bt_handler or killpg in backtraces
+ - Don't buffer overrun on bad DNS TXT records
+ - Fixed property access to DOM and XMLReader classes
+ - Add support for ParamCoerceModeFalse
 
 "Mos Def" 11-Jun-2014
  - Turn on new tracelet region selector by default; analyze() is deprecated

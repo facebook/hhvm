@@ -37,6 +37,8 @@ static const struct { const char* str; Timer::Name name; } s_names[] = {
 };
 
 static int64_t getCPUTimeNanos() {
+  if (!RuntimeOption::EvalJitTimer) return -1;
+
 #ifdef CLOCK_THREAD_CPUTIME_ID
   auto const ns = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (ns != -1) return ns;
@@ -58,11 +60,13 @@ Timer::Timer(Name name)
 }
 
 Timer::~Timer() {
-  if (m_finished) return;
+  if (!RuntimeOption::EvalJitTimer || m_finished) return;
   end();
 }
 
 void Timer::end() {
+  if (!RuntimeOption::EvalJitTimer) return;
+
   assert(!m_finished);
   auto const finish = getCPUTimeNanos();
   auto const elapsed = finish - m_start;

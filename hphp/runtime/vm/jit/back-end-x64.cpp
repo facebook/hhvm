@@ -871,7 +871,6 @@ static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
 }
 
 static size_t ctr;
-const char* area_names[] = { "main", "cold", "frozen" };
 
 auto const vasm_gp = x64::abi.gpUnreserved | RegSet(rAsm).add(r11);
 auto const vasm_simd = x64::kXMMRegs;

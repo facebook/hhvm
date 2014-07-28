@@ -25,7 +25,7 @@
 
 namespace HPHP { namespace jit {
 
-std::string show(x64::Vreg64 r);
+std::string show(x64::Vreg r);
 std::string show(x64::Vptr p);
 std::string show(const x64::Vunit& unit, const x64::Vinstr& inst);
 
@@ -38,6 +38,9 @@ std::string show(const x64::Vunit& unit);
 
 // print the cfg digraph followed by a code listing
 void printUnit(std::string caption, const x64::Vunit& unit);
+
+// main, cold, frozen
+extern const char* area_names[];
 
 } }
 

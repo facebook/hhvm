@@ -30,6 +30,7 @@ using namespace x64;
 using Trace::RingBufferType;
 using Trace::ringbufferName;
 
+const char* area_names[] = { "main", "cold", "frozen" };
 namespace {
 
 // Visitor class to format the operands of a Vinstr. There are
@@ -71,6 +72,9 @@ struct FormatVisitor {
     } else {
       str << "nullptr";
     }
+  }
+  void imm(TransFlags f) {
+    if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
   }
 
   template<class R> void across(R r) { print(r); }
@@ -133,8 +137,16 @@ struct FormatVisitor {
 };
 }
 
-std::string show(Vreg64 r) {
-  if (r.isPhys()) return reg::regname(r);
+std::string show(Vreg r) {
+  if (!r.isValid()) return "%?";
+  if (r.isPhys()) {
+    if (r.isGP()) {
+      Reg64 gpr = r;
+      return reg::regname(gpr);
+    }
+    RegXMM xmm = r;
+    return reg::regname(xmm);
+  }
   std::ostringstream str;
   str << "%" << size_t(r);
   return str.str();
@@ -188,12 +200,8 @@ std::string show(const Vunit& unit, const Vinstr& inst) {
 void printBlock(std::ostream& out, const Vunit& unit,
                 const PredVector& preds, Vlabel b) {
   auto& block = unit.blocks[b];
-  out << folly::format("B{: <11} area={}, preds=", size_t(b), int(block.area));
-  auto delim = "";
-  for (auto p: preds[b]) {
-    out << delim << 'B' << size_t(p);
-    delim = ",";
-  }
+  out << folly::format("B{: <11} {}", size_t(b), area_names[int(block.area)]);
+  for (auto p : preds[b]) out << ", B" << size_t(p);
   out << "\n";
   for (auto& inst : block.code) {
     out << "  " << show(unit, inst) << "\n";

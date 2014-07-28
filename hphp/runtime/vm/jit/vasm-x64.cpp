@@ -241,7 +241,7 @@ private:
   void emit(push& i) { a->push(i.s); }
   void emit(pushl& i) { a->pushl(i.s); }
   void emit(pushm& i) { a->push(i.s); }
-  void emit(roundsd& i) { unary(i); a->roundsd(i.dir, i.s, i.d); }
+  void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
   void emit(rorqi& i) { binary(i); a->rorq(i.s0, i.d); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }

@@ -26,6 +26,7 @@ namespace x64 {
 struct Vunit;
 struct Vinstr;
 struct Vblock;
+struct Vreg;
 }
 struct Abi;
 
@@ -57,6 +58,7 @@ private:
 };
 
 enum class VregKind : uint8_t { Any, Gpr, Simd };
+enum class AreaIndex: unsigned { Main, Cold, Frozen, Max };
 
 // holds information generated while assembling final code;
 // designed to outlive instances of Vunit and Vasm.

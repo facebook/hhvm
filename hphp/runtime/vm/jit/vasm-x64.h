@@ -677,8 +677,6 @@ struct Vinstr {
 #undef O
 };
 
-enum class AreaIndex: unsigned { Main, Cold, Frozen, Max };
-
 struct Vblock {
   explicit Vblock(AreaIndex area) : area(area) {}
   AreaIndex area;

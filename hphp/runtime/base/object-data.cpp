@@ -84,7 +84,7 @@ static_assert(sizeof(ObjectData) == use_lowptr ? 16 : 32,
 //////////////////////////////////////////////////////////////////////
 
 bool ObjectData::destruct() {
-  if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
+  if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
     g_context->m_liveBCObjs.erase(this);
   }
   if (!noDestruct()) {

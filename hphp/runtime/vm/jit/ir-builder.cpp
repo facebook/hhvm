@@ -1204,14 +1204,6 @@ bool IRBuilder::blockExists(Offset offset) {
   return m_offsetToBlockMap.count(offset);
 }
 
-bool IRBuilder::blockIsIncompatible(Offset offset) {
-  return m_offsetSeen.count(offset) && !RuntimeOption::EvalJitLoops;
-}
-
-void IRBuilder::recordOffset(Offset offset) {
-  m_offsetSeen.insert(offset);
-}
-
 void IRBuilder::resetOffsetMapping() {
   m_offsetToBlockMap.clear();
 }

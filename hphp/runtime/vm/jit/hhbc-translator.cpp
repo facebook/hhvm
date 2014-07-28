@@ -2163,10 +2163,8 @@ void HhbcTranslator::emitJmpImpl(int32_t offset,
     if (flags & JmpFlagNextIsMerge) {
       exceptionBarrier();
     }
-    auto target =
-      (!m_irb->blockExists(offset) || m_irb->blockIsIncompatible(offset))
-      ? makeExit(offset)
-      : makeBlock(offset);
+    auto target = m_irb->blockExists(offset) ? makeBlock(offset)
+                                             : makeExit(offset);
     assert(target != nullptr);
     gen(Jmp, target);
     return;
@@ -2194,10 +2192,8 @@ void HhbcTranslator::emitJmpCondHelper(int32_t taken,
     // start with a DefSP to block SP-chain walking).
     exceptionBarrier();
   }
-  auto const target  = (!(flags & JmpFlagBothPaths)
-                        || m_irb->blockIsIncompatible(taken))
-    ? makeExit(taken)
-    : makeBlock(taken);
+  auto const target = (flags & JmpFlagBothPaths) ? makeBlock(taken)
+                                                 : makeExit(taken);
   assert(target != nullptr);
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);

@@ -183,7 +183,8 @@ private:
 
   static bool certHandler(const std::string &server_name,
                           const std::string& key_file,
-                          const std::string& cert_file);
+                          const std::string& cert_file,
+                          bool duplicate);
 
   JobQueueDispatcher<LibEventWorker> m_dispatcher;
   AsyncFunc<LibEventServer> m_dispatcherThread;

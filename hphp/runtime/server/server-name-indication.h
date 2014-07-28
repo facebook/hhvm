@@ -33,14 +33,17 @@ public:
 
   /**
    * The certificate handler function takes the "name" of the server and
-   * the paths to the key and certificate.  It should load the keypair,
-   * and if valid, add it to the server's SNI map (either via insertSNICtx
-   * or it's own structure).
+   * the paths to the key and certificate.  The boolean argument indicates if
+   * the specified certificate file points was already loaded (eg: multiple
+   * symlinks in the cert directory to the same cert).
+   *
+   * It should load the keypair, and if valid, add it to the server's
+   * SNI map (either via insertSNICtx or it's own structure).
    *
    * Returns true if the cert was added
    */
   typedef std::function<bool(const std::string&, const std::string&,
-                             const std::string&)> CertHanlderFn;
+                             const std::string&, bool)> CertHanlderFn;
 
   /**
    * Loads all valid key pairs in cert_dir and invokes the handler.
@@ -55,7 +58,8 @@ public:
    * load()
    *
    */
-  static bool loadFromFile(const std::string &name, CertHanlderFn certHandler);
+  static bool loadFromFile(const std::string &name, bool duplicate,
+                           CertHanlderFn certHandler);
 
   /**
    * Inserts a mapping from name:ctx in the global map used in the
@@ -78,7 +82,7 @@ private:
   static bool setCTXFromMemory(SSL*, const std::string&);
   static bool setCTXFromFile(SSL*, const std::string&);
   static void find_server_names(const std::string &,
-                                std::vector<std::string> &);
+                                std::vector<std::pair<std::string, bool>> &);
   static bool ends_with(const std::string &, const std::string &);
   static bool fileIsValid(const std::string &);
 };

@@ -1,5 +1,6 @@
 <?php
 $_ENV[LC_ALL] = en_US.utf8;;
+_filter_snapshot_globals();
 
 /* Prototype  : string setlocale (int $category , string $locale [,string $..] )
  *            : string setlocale(int $category , array $locale);  

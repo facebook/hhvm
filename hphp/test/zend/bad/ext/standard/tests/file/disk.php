@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 
 var_dump(disk_free_space());
 var_dump(disk_total_space());

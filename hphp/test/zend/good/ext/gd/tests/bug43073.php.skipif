@@ -1,5 +1,7 @@
 <?php
-// Gets a meaningless off-by-one error
-echo "skip";
+	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+	if(!function_exists('imagettftext')) die('skip imagettftext() not available');
 
-if (!gd_info()['FreeType Support']) echo 'skip';
+	include dirname(__FILE__) . '/func.inc';
+	if(version_compare(get_freetype_version(), '2.4.10') >= 0) die('skip for freetype < 2.4.10');
+?>

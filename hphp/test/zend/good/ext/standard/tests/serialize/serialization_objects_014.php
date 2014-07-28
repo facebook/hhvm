@@ -1,6 +1,4 @@
 <?php
-ini_set('error_reporting ',  E_ALL & ~E_STRICT);
-
 /* Prototype  : proto string serialize(mixed variable)
  * Description: Returns a string representation of variable (which can later be unserialized) 
  * Source code: ext/standard/var.c

@@ -1,6 +1,4 @@
 <?php
-ini_set('error_reporting', 0);
-
 class test {
         function extend_zend_ptr_stack($count,$a,$b,$c,$d,$e) {
                 if ($count>0) $this->extend_zend_ptr_stack($count -

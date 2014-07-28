@@ -1,4 +1,4 @@
-object(ClassOne)#1 (2) {
+object(ClassOne)#%d (2) {
   ["a"]=>
   int(1)
   ["storage":"ArrayObject":private]=>
@@ -6,7 +6,7 @@ object(ClassOne)#1 (2) {
   }
 }
 int(1)
-object(ClassOne)#2 (2) {
+object(ClassOne)#%d (2) {
   ["a"]=>
   int(1)
   ["storage":"ArrayObject":private]=>

@@ -183,12 +183,12 @@ string(11) "hello world"
 -- Iteration 21 --
 Warning: %s
 NULL
-object(classA)#1 (0) {
+object(classA)#%d (0) {
 }
 
 Warning: %s
 NULL
-object(classA)#1 (0) {
+object(classA)#%d (0) {
 }
 
 -- Iteration 22 --

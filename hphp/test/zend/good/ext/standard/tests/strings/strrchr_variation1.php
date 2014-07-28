@@ -12,7 +12,7 @@ $needle = array(
   //regular strings
   "l",
   "L",
-  "HELLO",
+  "HELLO", 
   "hEllo",
 
   //escape characters
@@ -28,13 +28,13 @@ $needle = array(
   "\0",
   NULL,
   null,
-
+  
   //boolean false
   FALSE,
   false,
 
   //empty string
-  "",
+  "",  
 
   //special chars
   " ",
@@ -56,8 +56,8 @@ $needle = array(
   ">",
   "=>",
   "?",
-  "@",
-  "@hEllo",
+  "@", 
+  "@hEllo", 
 
   "12345", //decimal numeric string
   "\x23",  //hexadecimal numeric string

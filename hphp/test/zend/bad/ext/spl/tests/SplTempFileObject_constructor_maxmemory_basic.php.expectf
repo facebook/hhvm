@@ -1,4 +1,4 @@
-object(SplTempFileObject)#1 (5) {
+object(SplTempFileObject)#%d (5) {
   ["pathName":"SplFileInfo":private]=>
   string(25) "php://temp/maxmemory:1024"
   ["fileName":"SplFileInfo":private]=>

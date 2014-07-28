@@ -1,4 +1,4 @@
-object(bar)#1 (6) {
+object(bar)#%d (6) {
   ["c1"]=>
   int(1)
   ["c2"]=>

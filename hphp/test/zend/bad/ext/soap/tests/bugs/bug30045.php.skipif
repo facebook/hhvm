@@ -1,0 +1,4 @@
+<?php 
+  if (!extension_loaded('soap')) die('skip soap extension not available');
+  if (!extension_loaded('simplexml')) die('skip simplexml extension not available');
+?>

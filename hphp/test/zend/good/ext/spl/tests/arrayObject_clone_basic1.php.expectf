@@ -8,7 +8,7 @@ array(4) {
   ["p2"]=>
   string(34) "new element added to a after clone"
 }
-object(ArrayObject)#1 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
@@ -19,7 +19,7 @@ object(ArrayObject)#1 (1) {
     string(24) "new element added to aa1"
   }
 }
-object(ArrayObject)#2 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>

@@ -1,6 +1,4 @@
 <?php
-ini_set('open_basedir', .);
-
 $dir = "globtest1";
 $dir2 = "globtest2";
 mkdir($dir);

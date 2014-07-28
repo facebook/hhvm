@@ -5,7 +5,7 @@
 */
 
 /* Test strrchr() function by passing heredoc string containing special chars for haystack
- * and with various needles
+ * and with various needles 
 */
 
 echo "*** Testing strrchr() function: with heredoc strings ***\n";

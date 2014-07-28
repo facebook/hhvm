@@ -1,0 +1,29 @@
+bool(false)
+resource(%d) of type (file_info)
+resource(%d) of type (file_info)
+bool(false)
+
+Notice: %s
+Warning: %s
+
+Notice: %s
+Warning: %s
+
+Notice: %s
+Warning: %s
+
+Notice: %s
+Warning: %s
+
+Notice: %s
+Warning: %s
+
+Notice: %s
+Warning: %s
+
+Notice: %s
+Warning: %s
+
+Warning: %s
+DONE: testing dir with files
+===DONE===

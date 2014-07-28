@@ -3,7 +3,7 @@ In UsesMagic::__set(a,changed)
 In UsesMagic::__set(dynamic,new)
 In UsesMagic::__set(dynamic,new.changed)
   Original wrapped object:
-object(C)#1 (4) {
+object(C)#%d (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -14,11 +14,11 @@ object(C)#1 (4) {
   string(6) "secret"
 }
   Wrapping ArrayObject:
-object(UsesMagic)#2 (2) {
+object(UsesMagic)#%d (2) {
   ["b"]=>
   string(29) "This should appear in storage"
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (4) {
+  object(C)#%d (4) {
     ["a"]=>
     int(1)
     ["b"]=>
@@ -38,7 +38,7 @@ NULL
 In UsesMagic::__get(dynamic)
 NULL
   Original wrapped object:
-object(C)#1 (4) {
+object(C)#%d (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -49,11 +49,11 @@ object(C)#1 (4) {
   string(6) "secret"
 }
   Wrapping ArrayObject:
-object(UsesMagic)#2 (2) {
+object(UsesMagic)#%d (2) {
   ["b"]=>
   string(29) "This should appear in storage"
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (4) {
+  object(C)#%d (4) {
     ["a"]=>
     int(1)
     ["b"]=>
@@ -73,7 +73,7 @@ bool(false)
 In UsesMagic::__isset(dynamic)
 bool(false)
   Original wrapped object:
-object(C)#1 (4) {
+object(C)#%d (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -84,11 +84,11 @@ object(C)#1 (4) {
   string(6) "secret"
 }
   Wrapping ArrayObject:
-object(UsesMagic)#2 (2) {
+object(UsesMagic)#%d (2) {
   ["b"]=>
   string(29) "This should appear in storage"
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (4) {
+  object(C)#%d (4) {
     ["a"]=>
     int(1)
     ["b"]=>
@@ -105,7 +105,7 @@ In UsesMagic::__unset(a)
 In UsesMagic::__unset(nonexistent)
 In UsesMagic::__unset(dynamic)
   Original wrapped object:
-object(C)#1 (4) {
+object(C)#%d (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -116,11 +116,11 @@ object(C)#1 (4) {
   string(6) "secret"
 }
   Wrapping ArrayObject:
-object(UsesMagic)#2 (2) {
+object(UsesMagic)#%d (2) {
   ["b"]=>
   string(29) "This should appear in storage"
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (4) {
+  object(C)#%d (4) {
     ["a"]=>
     int(1)
     ["b"]=>

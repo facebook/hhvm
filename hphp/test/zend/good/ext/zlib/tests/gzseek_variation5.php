@@ -1,5 +1,5 @@
 <?php
-$f = "gzseek_variation5.gz";
+$f = "temp3.txt.gz";
 $h = gzopen($f, 'w'); 
 $str1 = "This is the first line.";
 $str2 = "This is the second line.";

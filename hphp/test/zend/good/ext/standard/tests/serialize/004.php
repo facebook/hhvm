@@ -1,8 +1,4 @@
 <?php
-ini_set('serialize_precision', 100);
-
-ini_set('precision', 12);
-
 error_reporting (E_ALL);
 $a      = array(4);
 $str    = serialize($a);

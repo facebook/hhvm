@@ -174,9 +174,23 @@ if ($ss == "\$'") {
 }
 
 
-echo "Testing uniqid: ";
+echo "Testing uniqid(true): ";
+$str = "prefix";
+$ui1 = uniqid($str, true);
+$ui2 = uniqid($str, true);
+
+$len = 29;
+
+if (strlen($ui1) == strlen($ui2) && strlen($ui1) == $len && $ui1 != $ui2) {
+	echo("passed\n");
+} else {
+	echo("failed!\n");
+}
+
+echo "Testing uniqid(false): ";
 $str = "prefix";
 $ui1 = uniqid($str);
+usleep( 1 );
 $ui2 = uniqid($str);
 
 $len = strncasecmp(PHP_OS, 'CYGWIN', 6) ? 19 : 29;

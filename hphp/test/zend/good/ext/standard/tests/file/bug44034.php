@@ -1,6 +1,4 @@
 <?php
-ini_set('allow_url_fopen', 1);
-
 
 $urls = array();
 $urls[] = "data://text/plain,foo\r\nbar\r\n";

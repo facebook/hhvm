@@ -1,0 +1,6 @@
+<?php
+extension_loaded("zlib") or die("skip");
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+	die("skip not for windows");
+}
+?>

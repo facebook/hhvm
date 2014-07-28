@@ -1,14 +1,6 @@
 <?php
-ini_set('allow_url_include', 1);
-
-ini_set('allow_url_fopen', 0);
-
 class test {
-    private $data = '<?php
-ini_set('allow_url_include', 1);
-
-ini_set('allow_url_fopen', 0);
- echo "Hello World\n";?>';
+    private $data = '<?php echo "Hello World\n";?>';
 	private $pos;
 	private $stream = null;
 

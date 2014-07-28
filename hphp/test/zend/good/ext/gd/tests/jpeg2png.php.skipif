@@ -1,3 +1,12 @@
 <?php
-if (!gd_info()['PNG Support']) echo 'skip';
-if (!gd_info()['JPEG Support']) echo 'skip';
+	if (!extension_loaded('gd')) {
+		die("skip gd extension not available.");
+	}
+
+	if (!function_exists("imagecreatefrompng") || !function_exists("imagepng")) {
+		die("skip png support unavailable");
+	}
+	if (!function_exists("imagecreatefromjpeg") || !function_exists("imagejpeg")) {
+		die("skip jpeg support unavailable");
+	}
+?>

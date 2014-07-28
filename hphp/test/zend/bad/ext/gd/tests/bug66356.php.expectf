@@ -1,0 +1,19 @@
+resource(%d) of type (gd)
+resource(%d) of type (gd)
+Array
+(
+    [x] => a
+    [y] => 12b
+    [width] => 10
+    [height] => 10
+)
+
+Warning: %s
+ in %sbug66356.php on line %d
+bool(false)
+resource(%d) of type (gd)
+resource(%d) of type (gd)
+
+Warning: %s
+ in %sbug66356.php on line %d
+bool(false)

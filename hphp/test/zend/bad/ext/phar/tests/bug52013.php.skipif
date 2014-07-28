@@ -1,0 +1,4 @@
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("zlib")) die("skip test needs zlib extension enabled to compress archives with gzip");
+?>

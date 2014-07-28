@@ -221,7 +221,7 @@ RegionDescPtr RegionFormer::go() {
     m_region.reset();
   }
 
-  printUnit(2, m_ht.unit(),
+  printUnit(kTraceletLevel, m_ht.unit(),
             m_inl.depth() || m_inl.disabled()
               ? " after inlining tracelet formation "
               : " after tracelet formation ",

@@ -1059,8 +1059,33 @@ and class_method env sids cv_ids x acc =
       method_ env m :: acc
   | Method _ -> acc
 
+and check_constant_expr (pos, e) =
+  match e with
+  | Id _ | Null | True | False | Int _
+  | Float _ | String _
+  | String2 ([], _) -> ()
+  | Class_const ((_, cls), _) when cls <> "static" -> ()
+
+  | Unop ((Uplus | Uminus | Utild | Unot), e) -> check_constant_expr e
+  | Binop (op, e1, e2) ->
+    (* Only assignment is invalid *)
+    (match op with
+      | Eq _ -> Errors.illegal_constant pos
+      | _ ->
+        check_constant_expr e1;
+        check_constant_expr e2)
+  | Eif (e1, e2, e3) ->
+    check_constant_expr e1;
+    ignore (opt_map check_constant_expr e2);
+    check_constant_expr e3
+
+  | String2 ((var_pos, _) :: _, _) ->
+      Errors.local_const var_pos
+  | _ -> Errors.illegal_constant pos
+
 and const_defl h env l = List.map (const_def h env) l
 and const_def h env (x, e) =
+  check_constant_expr e;
   match (fst env).in_mode with
   | Ast.Mstrict ->
       (* TODO THIS IS A BUG!!!! You should always try to guess the type of
@@ -1068,10 +1093,9 @@ and const_def h env (x, e) =
        *)
       (match h with
       | None ->
-          (* Whenever the type is "obvious", no need to add a type-hint
-             if you add a case here, make sure you add it in the type-checker too
-             cf class_const_decl in typing.ml
-           *)
+          (* Whenever the type is "obvious", no need to add a
+             type-hint if you add a case here, make sure you add it in
+             the type-checker too cf class_const_decl in typing.ml *)
           (match snd e with
           | String _
           | String2 ([], _)
@@ -1762,15 +1786,7 @@ let check_constant cst =
       Errors.add_a_typehint (fst cst.cst_name)
   | None
   | Some _ -> ());
-  match snd cst.cst_value with
-  | Id _ | Null | True | False | Int _
-  | Float _ | String _
-  | Class_const _
-  | Unop ((Uplus | Uminus), _)
-  | String2 ([], _) -> ()
-  | String2 ((var_pos, _) :: _, _) ->
-      Errors.local_const var_pos
-  | _ -> Errors.illegal_constant (fst cst.cst_value)
+  check_constant_expr cst.cst_value
 
 let global_const genv cst =
   let env = Env.make_const_env genv cst in

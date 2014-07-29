@@ -117,6 +117,7 @@ bad_tests = (
     '/ext/spl/tests/SplFileObject_fgetcsv_escape_basic.php',
     '/ext/spl/tests/SplFileObject_fgetcsv_escape_default.php',
     '/ext/spl/tests/SplFileObject_fgetcsv_enclosure_basic.php',
+    '/ext/spl/tests/SplFileObject_setCsvControl_error001.php',
     '/ext/phar/tests/019.php',
 
     # these tests use each other's data

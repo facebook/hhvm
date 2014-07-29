@@ -40,7 +40,7 @@ struct Config {
 
   static void Parse(const std::string &config, IniSettingMap &ini, Hdf &hdf);
 
-  /** Prefer the Bind() over the GetFoo() as it makes ini_get() work too */
+  /** Prefer the Bind() over the GetFoo() as it makes ini_get() work too. */
   static void Bind(bool& loc, const IniSettingMap &ini,
                    const Hdf& config, const bool defValue = false);
   static void Bind(const char*& loc, const IniSettingMap &ini,
@@ -67,6 +67,38 @@ struct Config {
                    const Hdf& config, const double defValue = 0);
   static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
                    const Hdf& config);
+
+  /**
+   * These Bind()s should be used for ini settings. Specifically, they should
+   * be used when the bound setting is needed before the main ini processing
+   * pass. Unlike IniSetting::Bind, these bindings will fetch the value in
+   * an ini setting if it is set otherwise it will use the defValue.
+   */
+  static void Bind(bool& loc, const IniSettingMap &ini,
+                   const std::string name, const bool defValue = false);
+  static void Bind(const char*& loc, const IniSettingMap &ini,
+                   const std::string name, const char *defValue = nullptr);
+  static void Bind(std::string& loc, const IniSettingMap &ini,
+                   const std::string name, const std::string defValue = "");
+  static void Bind(char& loc, const IniSettingMap &ini,
+                   const std::string name, const char defValue = 0);
+  static void Bind(unsigned char& loc,const IniSettingMap &ini,
+                   const std::string name, const unsigned char defValue = 0);
+  static void Bind(int16_t& loc, const IniSettingMap &ini,
+                   const std::string name, const int16_t defValue = 0);
+  static void Bind(uint16_t& loc, const IniSettingMap &ini,
+                   const std::string name, const uint16_t defValue = 0);
+  static void Bind(int32_t& loc, const IniSettingMap &ini,
+                   const std::string name, const int32_t defValue = 0);
+  static void Bind(uint32_t& loc, const IniSettingMap &ini,
+                   const std::string name, const uint32_t defValue = 0);
+  static void Bind(int64_t& loc, const IniSettingMap &ini,
+                   const std::string name, const int64_t defValue = 0);
+  static void Bind(uint64_t& loc, const IniSettingMap &ini,
+                   const std::string name, const uint64_t defValue = 0);
+  static void Bind(double& loc, const IniSettingMap &ini,
+                   const std::string name, const double defValue = 0);
+
 
   static bool GetBool(const IniSettingMap &ini, const Hdf& config,
                       const bool defValue = false);

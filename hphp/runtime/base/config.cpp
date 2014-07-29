@@ -102,6 +102,17 @@ void Config::Bind(T& loc, const IniSetting::Map &ini, const Hdf& config, \
   loc = Get##METHOD(ini, config, defValue); \
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
                    IniName(config), &loc); \
+} \
+void Config::Bind(T& loc, const IniSetting::Map &ini, std::string name, \
+                  const T defValue /* = 0ish */) { \
+  auto* value = ini.get_ptr(name); \
+  if (value && value->isString()) { \
+    ini_on_update(value->data(), loc); \
+  } else { \
+    loc = defValue; \
+  } \
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
+                   name, &loc); \
 }
 
 CONFIG_BODY(bool, Bool)

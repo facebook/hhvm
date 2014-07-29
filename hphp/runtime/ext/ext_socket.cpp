@@ -380,12 +380,12 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
     return false;
   }
 
-  Array ret;
-  ret.set(0, Resource(new Socket(fds_array[0], domain, nullptr, 0, 0.0,
-                                 s_socktype_generic)));
-  ret.set(1, Resource(new Socket(fds_array[1], domain, nullptr, 0, 0.0,
-                                 s_socktype_generic)));
-  fd = ret;
+  fd = make_packed_array(
+    Resource(new Socket(fds_array[0], domain, nullptr, 0, 0.0,
+                        s_socktype_generic)),
+    Resource(new Socket(fds_array[1], domain, nullptr, 0, 0.0,
+                        s_socktype_generic))
+  );
   return true;
 }
 
@@ -397,7 +397,6 @@ const StaticString
 
 Variant f_socket_get_option(const Resource& socket, int level, int optname) {
   Socket *sock = socket.getTyped<Socket>();
-  Array ret;
   socklen_t optlen;
 
   switch (optname) {
@@ -411,8 +410,10 @@ Variant f_socket_get_option(const Resource& socket, int level, int optname) {
         return false;
       }
 
-      ret.set(s_l_onoff, linger_val.l_onoff);
-      ret.set(s_l_linger, linger_val.l_linger);
+      return make_map_array(
+        s_l_onoff, linger_val.l_onoff,
+        s_l_linger, linger_val.l_linger
+      );
     }
     break;
 
@@ -425,8 +426,10 @@ Variant f_socket_get_option(const Resource& socket, int level, int optname) {
         SOCKET_ERROR(sock, "unable to retrieve socket option", errno);
         return false;
       }
-      ret.set(s_sec,  (int)tv.tv_sec);
-      ret.set(s_usec, (int)tv.tv_usec);
+      return make_map_array(
+        s_sec,  (int)tv.tv_sec,
+        s_usec, (int)tv.tv_usec
+      );
     }
     break;
 
@@ -441,7 +444,7 @@ Variant f_socket_get_option(const Resource& socket, int level, int optname) {
       return other_val;
     }
   }
-  return ret;
+  not_reached();
 }
 
 bool f_socket_getpeername(const Resource& socket, VRefParam address,
@@ -668,10 +671,10 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
     }
     if (hasData.size() > 0) {
       if (!write.isNull()) {
-        write = Array::Create();
+        write = empty_array();
       }
       if (!except.isNull()) {
-        except = Array::Create();
+        except = empty_array();
       }
       read = hasData;
       return hasData.size();
@@ -1256,12 +1259,11 @@ Variant f_getaddrinfo(const String& host, const String& port, int family /* = 0 
   Array ret = Array::Create();
 
   for (res = res0; res; res = res->ai_next) {
-    Array data = Array::Create();
-    Array sockinfo = Array::Create();
-
-    data.set(s_family, res->ai_family);
-    data.set(s_socktype, res->ai_socktype);
-    data.set(s_protocol, res->ai_protocol);
+    Array data = make_map_array(
+      s_family, res->ai_family,
+      s_socktype, res->ai_socktype,
+      s_protocol, res->ai_protocol
+    );
 
     switch (res->ai_addr->sa_family) {
       case AF_INET:
@@ -1270,8 +1272,13 @@ Variant f_getaddrinfo(const String& host, const String& port, int family /* = 0 
         String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
         if (!buffer.empty()) {
           a = (struct sockaddr_in *)res->ai_addr;
-          sockinfo.set(s_address, buffer);
-          sockinfo.set(s_port, ntohs(a->sin_port));
+          data.set(
+            s_sockaddr,
+            make_map_array(
+              s_address, buffer,
+              s_port, ntohs(a->sin_port)
+            )
+          );
         }
         break;
       }
@@ -1281,16 +1288,22 @@ Variant f_getaddrinfo(const String& host, const String& port, int family /* = 0 
         String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
         if (!buffer.empty()) {
           a = (struct sockaddr_in6 *)res->ai_addr;
-          sockinfo.set(s_address, buffer);
-          sockinfo.set(s_port, ntohs(a->sin6_port));
-          sockinfo.set(s_flow_info, (int32_t)a->sin6_flowinfo);
-          sockinfo.set(s_scope_id, (int32_t)a->sin6_scope_id);
+          data.set(
+            s_sockaddr,
+            make_map_array(
+              s_address, buffer,
+              s_port, ntohs(a->sin6_port),
+              s_flow_info, (int32_t)a->sin6_flowinfo,
+              s_scope_id, (int32_t)a->sin6_scope_id
+            )
+          );
         }
         break;
       }
+      default:
+        data.set(s_sockaddr, empty_array());
+        break;
     }
-
-    data.set(s_sockaddr, (sockinfo.empty() ? Array() : sockinfo));
 
     ret.append(data);
   }

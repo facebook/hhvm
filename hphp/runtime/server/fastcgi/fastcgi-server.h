@@ -53,7 +53,7 @@ public:
     apache::thrift::async::TAsyncSocket::UniquePtr sock,
     const apache::thrift::transport::TSocketAddress* peerAddress,
     const std::string& nextProtocolName,
-    const facebook::proxygen::TransportInfo& tinfo) override;
+    facebook::proxygen::TransportInfo& tinfo) override;
   virtual void onConnectionsDrained() override;
 
 private:

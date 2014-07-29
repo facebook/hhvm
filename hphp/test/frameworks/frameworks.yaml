@@ -556,7 +556,7 @@
       - reactphp/tests/EventLoop/StreamSelectLoopTest.php
   silverstripe:
     url: https://github.com/silverstripe/silverstripe-installer.git
-    branch: "3.1"
+    branch: "3.1.5"
     commit: b3acbcfa5f3637c412bd36113e41dcf48b564fc5
     install_root: silverstripe
     test_root: silverstripe

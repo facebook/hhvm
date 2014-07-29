@@ -53,7 +53,7 @@ void FastCGIAcceptor::onNewConnection(
     apache::thrift::async::TAsyncSocket::UniquePtr sock,
     const apache::thrift::transport::TSocketAddress* peerAddress,
     const std::string& nextProtocolName,
-    facebook::proxygen::TransportInfo& tinfo)
+    const facebook::proxygen::TransportInfo& tinfo)
 {
   TSocketAddress localAddress;
   try {

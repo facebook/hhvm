@@ -145,6 +145,13 @@ type lenv = {
      * See expr_lambda for details.
      *)
     unbound_mode: unbound_mode;
+
+    (* The presence of "yield" in the function body changes the type of the
+     * function into a generator, with no other syntactic indications
+     * elsewhere. For the sanity of the typechecker, we flatten this out into
+     * fun_type, but need to track if we've seen a "yield" in order to do so.
+     *)
+    has_yield: bool ref;
   }
 
 (* The environment VISIBLE to the outside world. *)
@@ -208,6 +215,7 @@ module Env = struct
     pending_locals = ref SMap.empty;
     find_refs_target_name = ref None;
     unbound_mode = UBMErr;
+    has_yield = ref false;
   }
 
   let empty_global env = {
@@ -1160,6 +1168,13 @@ and fill_cvar kl ty x =
     | Protected -> { x with N.cv_visibility = N.Protected }
  ) x kl
 
+and fun_type env ft =
+  match !((snd env).has_yield), ft with
+  | false, Ast.FSync -> N.FSync
+  | false, Ast.FAsync -> N.FAsync
+  | true, Ast.FSync -> N.FGenerator
+  | true, Ast.FAsync -> N.FAsync (* TODO #4534682 async generators *)
+
 and method_ env m =
   let genv, lenv = env in
   let lenv = Env.empty_local() in
@@ -1178,7 +1193,7 @@ and method_ env m =
         block env m.m_body
     | Ast.Mdecl -> [] in
   let attrs = m.m_user_attributes in
-  let method_type = m.m_type in
+  let method_type = fun_type env m.m_type in
   let ret = opt_map (hint ~allow_this:true env) m.m_ret in
   N.({ m_unsafe     = unsafe ;
        m_final      = final  ;
@@ -1260,6 +1275,7 @@ and fun_ genv f =
     | Ast.Mstrict | Ast.Mpartial -> block env f.f_body
     | Ast.Mdecl -> []
   in
+  let f_type = fun_type env f.f_type in
   let fun_ =
     { N.f_unsafe = unsafe;
       f_mode = f.f_mode;
@@ -1269,7 +1285,7 @@ and fun_ genv f =
       f_params = paraml;
       f_body = body;
       f_variadic = variadicity;
-      f_type = f.f_type;
+      f_type = f_type;
     } in
   fun_
 
@@ -1619,8 +1635,8 @@ and expr_ env = function
         List.map (expr env) el)
   | Call (e, el) ->
       N.Call (N.Cnormal, expr env e, List.map (expr env) el)
-  | Yield_break -> N.Yield_break
-  | Yield e -> N.Yield (afield env e)
+  | Yield_break -> (snd env).has_yield := true; N.Yield_break
+  | Yield e -> (snd env).has_yield := true; N.Yield (afield env e)
   | Await e -> N.Await (expr env e)
   | List el -> N.List (exprl env el)
   | Expr_list el -> N.Expr_list (exprl env el)
@@ -1686,6 +1702,7 @@ and expr_lambda env f =
   let unsafe = List.mem Unsafe f.f_body in
   let variadicity, paraml = fun_paraml env f.f_params in
   let body = block env f.f_body in
+  let f_type = fun_type env f.f_type in
   {
     N.f_unsafe = unsafe;
     f_mode = (fst env).in_mode;
@@ -1695,7 +1712,7 @@ and expr_lambda env f =
     f_tparams = [];
     f_body = body;
     f_variadic = variadicity;
-    f_type = f.f_type;
+    f_type = f_type;
   }
 
 and make_class_id env cid =

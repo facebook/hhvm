@@ -125,8 +125,9 @@ and fun_decl_in_env env f =
      * it Tany but also want a witness so that we can point *somewhere*
      * in event of error. The function name itself isn't great, but is
      * better than nothing. *)
-    | None, Ast.FSync -> env, (Reason.Rwitness (fst f.f_name), Tany)
-    | None, Ast.FAsync ->
+    | None, FGenerator (* XXX should we return Generator<Any,Any,Any> here? *)
+    | None, FSync -> env, (Reason.Rwitness (fst f.f_name), Tany)
+    | None, FAsync ->
       let pos = fst f.f_name in
       env, (Reason.Rasync_ret pos,
             Tapply ((pos, "\\Awaitable"), [(Reason.Rwitness pos, Tany)]))
@@ -331,12 +332,10 @@ and fun_ ?(abstract=false) env unsafe has_ret hret pos b fun_type =
     else fun_implicit_return env pos ret b fun_type
   end
 
-and fun_implicit_return env pos ret b fun_type =
-  (* an implicit return means the return value can be null *)
-  if Env.has_yield env then env
-  else if fun_type = Ast.FSync
-  then implicit_return_noasync pos env ret
-  else implicit_return_async b pos env ret (Reason.Rno_return_async pos)
+and fun_implicit_return env pos ret b = function
+  | FSync -> implicit_return_noasync pos env ret
+  | FAsync -> implicit_return_async b pos env ret (Reason.Rno_return_async pos)
+  | FGenerator -> env
 
 (* A function without a terminal block has an implicit return null *)
 and implicit_return_noasync p env ret =
@@ -424,8 +423,9 @@ and stmt env = function
       else LEnv.intersect env parent_lenv lenv1 lenv2
   | Return (p, None) ->
       let rty = match Env.get_fn_type env with
-        | Ast.FSync -> (Reason.Rwitness p, Tprim Tvoid)
-        | Ast.FAsync -> (Reason.Rwitness p, Tapply ((p, "\\Awaitable"), [(Reason.Rwitness p, Toption (Env.fresh_type ()))])) in
+        | FSync -> (Reason.Rwitness p, Tprim Tvoid)
+        | FGenerator -> any (* Caught in NastCheck *)
+        | FAsync -> (Reason.Rwitness p, Tapply ((p, "\\Awaitable"), [(Reason.Rwitness p, Toption (Env.fresh_type ()))])) in
       let expected_return = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env expected_return rty in
@@ -434,8 +434,9 @@ and stmt env = function
       let pos = fst e in
       let env, rty = expr env e in
       let rty = match Env.get_fn_type env with
-        | Ast.FSync -> rty
-        | Ast.FAsync -> (Reason.Rwitness p), Tapply ((p, "\\Awaitable"), [rty]) in
+        | FSync -> rty
+        | FGenerator -> any (* Caught in NastCheck *)
+        | FAsync -> (Reason.Rwitness p), Tapply ((p, "\\Awaitable"), [rty]) in
       let expected_return = Env.get_return env in
       (match snd (Env.expand_type env expected_return) with
       | r, Tprim Tvoid ->
@@ -1002,7 +1003,6 @@ and expr_ is_lvalue env (p, e) =
   | Yield_break ->
       env, (Reason.Rwitness p, Tany)
   | Yield af ->
-      let env = Env.set_has_yield env in
       let env, key = field_key env af in
       let env, value = field_value env af in
       let send = Env.fresh_type () in

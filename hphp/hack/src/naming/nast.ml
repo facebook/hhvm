@@ -110,8 +110,14 @@ and method_ = {
   m_body            : block                     ;
   m_user_attributes : Ast.user_attribute SMap.t ;
   m_ret             : hint option               ;
-  m_type            : Ast.fun_type              ;
+  m_type            : fun_type                  ;
 }
+
+and fun_type =
+  | FSync
+  | FGenerator
+  | FAsync
+  (* TODO #4534682 Support AsyncGenerator *)
 
 and visibility =
   | Private
@@ -143,7 +149,7 @@ and fun_ = {
   f_variadic : fun_variadicity;
   f_params   : fun_param list;
   f_body     : block;
-  f_type     : Ast.fun_type;
+  f_type     : fun_type;
 }
 
 and typedef = tparam list * hint option * hint

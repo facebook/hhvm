@@ -636,8 +636,9 @@ and method_decl c env m =
   let env, arity_min, params = Typing.make_params env true 0 m.m_params in
   let env, ret =
     match m.m_ret, m.m_type with
-      | None, Ast.FSync -> env, (Reason.Rwitness (fst m.m_name), Tany)
-      | None, Ast.FAsync ->
+      | None, FGenerator (* XXX should we return Generator<Any,Any,Any> here? *)
+      | None, FSync -> env, (Reason.Rwitness (fst m.m_name), Tany)
+      | None, FAsync ->
         let pos = fst m.m_name in
         env, (Reason.Rasync_ret pos,
               Tapply ((pos, "\\Awaitable"), [(Reason.Rwitness pos, Tany)]))

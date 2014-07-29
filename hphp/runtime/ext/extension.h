@@ -25,6 +25,9 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/bytecode.h"
 
+#include <set>
+#include <string>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -95,6 +98,13 @@ public:
   virtual void requestInit() {}
   virtual void requestShutdown() {}
 
+  typedef std::set<std::string> DependencySet;
+  typedef std::map<Extension*, DependencySet> DependencySetMap;
+  virtual const DependencySet getDeps() const {
+    // No dependencies by default
+    return DependencySet();
+  }
+
   void setDSOName(const std::string &name) {
     m_dsoName = name;
   }
@@ -104,6 +114,8 @@ public:
   }
 
 private:
+  static void SortDependencies();
+
   // Indicates which version of the HHVM Extension API
   // this module was built against.
   int64_t m_hhvmAPIVersion;

@@ -62,9 +62,6 @@ let explain_constraint pos name (error: error) =
   [pos, "Considering the constraint on the type '"^name^"'"]
 )
 
-let too_many_args pos =
-  add pos "Too many arguments"
-
 let unexpected_arrow pos cname =
   add pos ("Keys may not be specified for " ^ cname ^ " initialization")
 
@@ -93,13 +90,15 @@ let name_already_bound x p1 p2 =
 let method_name_already_bound p name =
   add p ("Method name already bound: "^name)
 
-let error_name_already_bound hhi_root x p1 p2 =
-(* hhi_root =
-*)
-  let x = Utils.strip_ns x in
+let error_name_already_bound hhi_root name name_prev p p_prev =
+  (* hhi_root = *)
+  let name = Utils.strip_ns name in
+  let name_prev = Utils.strip_ns name_prev in
   let errs = [
-    p1, "Name already bound: "^x;
-    p2, "Previous definition is here"
+    p, "Name already bound: "^name;
+    p_prev, (if String.compare name name_prev == 0
+      then "Previous definition is here"
+      else "Previous definition "^name_prev^" differs only in capitalization ")
   ] in
   let hhi_msg =
     "This appears to be defined in an hhi file included in your project "^
@@ -110,10 +109,10 @@ let error_name_already_bound hhi_root x p1 p2 =
   (* unsafe_opt since init stack will refuse to continue if we don't have an
    * hhi root. *)
   let errs =
-    if str_starts_with p1.Pos.pos_file hhi_root
-    then errs @ [p2, hhi_msg]
-    else if str_starts_with p2.Pos.pos_file hhi_root
-    then errs @ [p1, hhi_msg]
+    if str_starts_with p.Pos.pos_file hhi_root
+    then errs @ [p_prev, hhi_msg]
+    else if str_starts_with p_prev.Pos.pos_file hhi_root
+    then errs @ [p, hhi_msg]
     else errs in
   add_list errs
 
@@ -200,10 +199,10 @@ let missing_typehint p =
 let expected_variable p =
   add p "Was expecting a variable name"
 
-let too_few_arguments p =
+let naming_too_few_arguments p =
   add p "Too few arguments"
 
-let too_many_arguments p =
+let naming_too_many_arguments p =
   add p "Too many arguments"
 
 let expected_collection p cn =
@@ -329,6 +328,10 @@ let field_kinds p1 p2 =
 
 let unbound_name_typing pos name =
   add pos ("Unbound name, Typing: "^(strip_ns name))
+
+let did_you_mean_naming pos name suggest_pos suggest_name =
+  add_list [pos, "Could not find "^(strip_ns name) ;
+            suggest_pos, "Did you mean "^(strip_ns suggest_name)^"?"]
 
 let previous_default p =
   add p
@@ -563,22 +566,27 @@ let trait_final pos =
   add pos "Traits cannot be final"
 
 let implement_abstract p1 p2 x =
-  add_list [
-  p1,
-  "This class must provide an implementation for the abstract method "^x;
-  p2,
-  "The abstract method "^x^" is defined here";
-]
+  let s_meth = "abstract method "^x in
+  add_list [p1, "This class must provide an implementation for the "^s_meth;
+            p2, "The "^s_meth^" is defined here"]
 
 let generic_static p x =
   add p ("This static variable cannot use the type parameter "^x^".")
 
 let fun_too_many_args p1 p2 =
-  add_list [p1, ("Too many mandatory arguments");
+  add_list [p1, "Too many mandatory arguments";
             p2, "Because of this definition"]
 
 let fun_too_few_args p1 p2 =
-  add_list [p1, ("Too few arguments");
+  add_list [p1, "Too few arguments";
+            p2, "Because of this definition"]
+
+let fun_unexpected_nonvariadic p1 p2 =
+  add_list [p1, "Should have a variadic argument";
+            p2, "Because of this definition"]
+
+let fun_variadicity_hh_vs_php56 p1 p2 =
+  add_list [p1, "Variadic arguments: ...-style is not a subtype of ...$args";
             p2, "Because of this definition"]
 
 let expected_tparam pos n =
@@ -599,10 +607,7 @@ let object_string p1 p2 =
   p2, "This object doesn't implement __toString"]
 
 let untyped_string p =
-  add_list [
-  p,
-  "You cannot use this object as a string, it is an untyped value"
-]
+  add p "You cannot use this object as a string, it is an untyped value"
 
 let type_param_arity pos x n =
   add pos ("The type "^x^" expects "^n^" parameters")
@@ -611,8 +616,7 @@ let cyclic_typedef p =
   add p "Cyclic typedef"
 
 let type_arity_mismatch p1 n1 p2 n2 =
-  add_list [p1, "This type has "^n1^
-            " arguments";
+  add_list [p1, "This type has "^n1^" arguments";
             p2, "This one has "^n2]
 
 let this_final id p2 (error: error) =
@@ -626,7 +630,8 @@ let tuple_arity_mismatch p1 n1 p2 n2 =
             p2, "This one has "^n2^" elements"]
 
 let fun_arity_mismatch p1 p2 =
-  add_list [p1, ("Arity mismatch"); p2, "Because of this definition"]
+  add_list [p1, "Number of arguments doesn't match";
+            p2, "Because of this definition"]
 
 let discarded_awaitable p1 p2 =
   add_list [
@@ -686,8 +691,11 @@ let wrong_extend_kind child_pos child parent_pos parent =
   let msg2 = parent_pos, "This is "^parent in
   add_list [msg1; msg2]
 
-let unsatisfied_req pos req =
-  add pos ("Failure to satisfy requirement: "^(Utils.strip_ns req))
+let unsatisfied_req parent_pos req_name req_pos =
+  let s1 = "Failure to satisfy requirement: "^(Utils.strip_ns req_name) in
+  let s2 = "Required here" in
+  if req_pos = parent_pos then add parent_pos s1
+  else add_list [parent_pos, s1; req_pos, s2]
 
 let cyclic_class_def stack pos =
   let stack = SSet.fold (fun x y -> (Utils.strip_ns x)^" "^y) stack "" in
@@ -885,20 +893,53 @@ let missing_constructor pos =
 
 let typedef_trail_entry pos = pos, "Typedef definition comes from here"
 
-let add_with_trail pos s trail =
-  add_list ((pos, s) :: List.map typedef_trail_entry trail)
+let add_with_trail errs trail =
+ add_list (errs @ List.map typedef_trail_entry trail)
 
-let enum_constant_type_bad pos ty trail =
-  add_with_trail pos ("Enum constants must be an int or string, not " ^ ty)
+let enum_constant_type_bad pos ty_pos ty trail =
+  add_with_trail
+    [pos, "Enum constants must be an int or string";
+     ty_pos, "Not " ^ ty]
     trail
 
 let enum_type_bad pos ty trail =
-  add_with_trail pos
-    ("Enums must have int, string, or mixed type, not " ^ ty)
+  add_with_trail
+    [pos, "Enums must have int, string, or mixed type, not " ^ ty]
     trail
 
 let enum_type_typedef_mixed pos =
   add pos "Can't use typedef that resolves to mixed in Enum"
+
+(*****************************************************************************)
+(* Shape checking *)
+(*****************************************************************************)
+let invalid_shape_field_name p =
+  add p
+    "Was expecting a constant string or class constant (for shape access)"
+
+let invalid_shape_field_type pos ty_pos ty trail =
+  add_with_trail
+    [pos, "A shape field name must be an int or string";
+     ty_pos, "Not " ^ ty]
+    trail
+
+let invalid_shape_field_literal key_pos witness_pos =
+  add_list [key_pos, "Shape uses literal string as field name";
+            witness_pos, "But expected a class constant"]
+
+let invalid_shape_field_const key_pos witness_pos =
+  add_list [key_pos, "Shape uses class constant as field name";
+            witness_pos, "But expected a literal string"]
+
+let shape_field_class_mismatch key_pos witness_pos key_class witness_class =
+  add_list
+    [key_pos, "Shape field name is class constant from " ^ key_class;
+     witness_pos, "But expected constant from " ^ witness_class]
+
+let shape_field_type_mismatch key_pos witness_pos key_ty witness_ty =
+  add_list
+    [key_pos, "Shape field name is " ^ key_ty ^ " class constant";
+     witness_pos, "But expected " ^ witness_ty]
 
 (*****************************************************************************)
 (* Printing *)

@@ -14,11 +14,12 @@ services:
 
 # Commands before installing prerequisites
 before_script:
+# we can't compile with this system version
+  - time sudo apt-get remove libsqlite3-dev
   - time TRAVIS=1 ./configure_generic.sh -DENABLE_COTIRE=ON
 # for some tests
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time make -j 6
-  - cd hphp/test/zend/good/ext/curl/tests/responder && ../../../../../../../hhvm/hhvm -m server -p 8444 &
 # mysql configuration for unit-tests
   - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
   - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=hhvm"
@@ -84,7 +85,7 @@ env:
   - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/Z.*#'"
 
 # Main test script
-script: time PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8444" hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
+script: time hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 
 # Notifications
 # The default is to send email on all failures and changed success

@@ -12,7 +12,7 @@ abstract class Enum<T> {
 }
 
 newtype foo = bar;
-class Foo {
+class C1 {
   const foo FOO = truthy_foo;
 }
 
@@ -20,6 +20,6 @@ class Foo {
 <?hh // strict
 
 // Should fail because foo isn't an int or a string
-class Bar extends Enum<foo> {
-  const foo FOO = Foo::FOO;
+class C2 extends Enum<foo> {
+  const foo FOO = C1::FOO;
 }

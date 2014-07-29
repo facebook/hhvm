@@ -166,6 +166,11 @@ Array HHVM_FUNCTION(hphp_miarray) {
   return Array::attach(ad);
 }
 
+Array HHVM_FUNCTION(hphp_msarray) {
+  auto ad = MixedArray::MakeReserveStrMap(10);
+  return Array::attach(ad);
+}
+
 int get_modifiers(Attr attrs, bool cls) {
   int php_modifier = 0;
   if (attrs & AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
@@ -947,6 +952,28 @@ static Variant HHVM_METHOD(ReflectionClass, getDocComment) {
   }
 }
 
+static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (!(cls->attrs() & (AttrTrait | AttrInterface))) {
+    // requirements are applied to abstract/concrete classes when they use
+    // a trait / implement an interface
+    return empty_array();
+  }
+
+  auto const& requirements = cls->allRequirements();
+  auto numReqs = requirements.size();
+  if (numReqs == 0) {
+    return empty_array();
+  }
+
+  PackedArrayInit pai(numReqs);
+  for (int i = 0; i < numReqs; ++i) {
+    auto const& req = requirements[i];
+    pai.append(const_cast<StringData*>(req->name()));
+  }
+  return pai.toArray();
+}
+
 static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
@@ -1265,6 +1292,7 @@ class ReflectionExtension : public Extension {
     HHVM_FE(hphp_create_object_without_constructor);
     HHVM_FE(hphp_get_extension_info);
     HHVM_FE(hphp_miarray);
+    HHVM_FE(hphp_msarray);
     HHVM_FE(hphp_get_original_class_name);
     HHVM_FE(hphp_get_property);
     HHVM_FE(hphp_get_static_property);
@@ -1322,6 +1350,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionClass, getEndLine);
     HHVM_ME(ReflectionClass, getDocComment);
     HHVM_ME(ReflectionClass, getInterfaceNames);
+    HHVM_ME(ReflectionClass, getRequirementNames);
     HHVM_ME(ReflectionClass, getTraitNames);
     HHVM_ME(ReflectionClass, getTraitAliases);
 

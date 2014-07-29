@@ -22,10 +22,10 @@ module SubType = Typing_subtype
 (* Exporting. *)
 (*****************************************************************************)
 
-let sub_type p ur env ty1 ty2 =
+let sub_type p ur env ty_super ty_sub =
   let env = { env with Env.pos = p } in
   Errors.try_add_err p (Reason.string_of_ureason ur)
-    (fun () -> SubType.sub_type env ty1 ty2)
+    (fun () -> SubType.sub_type env ty_super ty_sub)
     (fun () -> env)
 
 let unify p ur env ty1 ty2 =

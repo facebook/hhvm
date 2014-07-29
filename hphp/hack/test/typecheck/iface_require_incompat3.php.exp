@@ -1,0 +1,4 @@
+File "iface_require_incompat3.php", line 11, characters 20-21:
+Failure to satisfy requirement: Super
+File "iface_require_incompat3.php", line 6, characters 19-23:
+Required here

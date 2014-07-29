@@ -1,31 +1,50 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
-PROJECT(hphp C CXX ASM)
 
-IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
-  message(FATAL_ERROR "HHVM requires a 64bit OS")
-ENDIF()
-
+# includes
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
-if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")
-  message(FATAL_ERROR "third-party/CMakeLists.txt missing. "
+# package information
+SET(PACKAGE_NAME      "hhvm")
+SET(PACKAGE_VERSION   "3.1.0")
+SET(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+SET(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
+SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")
+
+PROJECT(${PACKAGE_NAME} C CXX ASM)
+
+MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_PREFIX)
+IF(APPLE)
+  MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
+    CMAKE_OSX_DEPLOYMENT_TARGET
+    CMAKE_OSX_SYSROOT)
+ENDIF()
+
+# Check architecture OS
+IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+  MESSAGE(FATAL_ERROR "HHVM requires a 64bit OS")
+ENDIF()
+
+# 3rd party library
+IF(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")
+  MESSAGE(FATAL_ERROR "third-party/CMakeLists.txt missing. "
                       "Try updating your submodule with:
 rm -r third-party
 git submodule update --init --recursive
 ")
-endif()
+ENDIF()
 
-include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
-include(CheckFunctionExists)
+INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
+INCLUDE(CheckFunctionExists)
 
-set(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR})
-set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
+SET(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR})
+SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 
-add_subdirectory(third-party)
-add_subdirectory(hphp)
+ADD_SUBDIRECTORY(third-party)
+ADD_SUBDIRECTORY(hphp)
 
-file(GLOB HHVM_CMAKE_FILES "CMake/*.cmake")
-install(
+# modules / depends
+FILE(GLOB HHVM_CMAKE_FILES "CMake/*.cmake")
+INSTALL(
   FILES ${HHVM_CMAKE_FILES}
   DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/hphp/CMake"
   COMPONENT dev)

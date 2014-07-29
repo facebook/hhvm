@@ -1,4 +1,4 @@
-object(SplDoublyLinkedList)#1 (2) {
+object(SplDoublyLinkedList)#%d (2) {
   [%u|b%"flags":%u|b%"SplDoublyLinkedList":private]=>
   int(0)
   [%u|b%"dllist":%u|b%"SplDoublyLinkedList":private]=>

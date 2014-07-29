@@ -183,9 +183,7 @@ static void PrepareEnv(Array& env, Transport *transport) {
   bool isServer = RuntimeOption::ServerExecutionMode();
   if (isServer) {
     env.set(s_HPHP_SERVER, 1);
-#ifdef HOTPROFILER
     env.set(s_HPHP_HOTPROFILER, 1);
-#endif
   }
 
   // Do this last so it can overwrite all the previous settings

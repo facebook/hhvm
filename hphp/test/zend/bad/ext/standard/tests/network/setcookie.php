@@ -1,6 +1,4 @@
 <?php
-ini_set('date.timezone', UTC);
-
 setcookie('name');
 setcookie('name', 'value');
 setcookie('name', 'space value');

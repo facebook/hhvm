@@ -1,0 +1,4 @@
+<?php
+	if (!function_exists("file_get_contents"))
+		die ("skip file_get_contents function is not found");
+?>

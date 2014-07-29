@@ -1,6 +1,7 @@
-Parse error: %s in %s(%d) : runtime-created function on line 1
 
-Parse error: %s %s(%d) : runtime-created function on line 1
+Fatal error: %s
+
+Fatal error: %s
 bool(false)
 int(2)
 bool(false)

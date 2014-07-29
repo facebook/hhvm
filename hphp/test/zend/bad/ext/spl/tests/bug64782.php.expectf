@@ -1,4 +1,4 @@
-object(SplFileObject)#1 (%d) {
+object(SplFileObject)#%d (%d) {
   ["pathName":"SplFileInfo":private]=>
   string(%d) "%s/bug64782.php"
   ["fileName":"SplFileInfo":private]=>

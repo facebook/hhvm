@@ -328,6 +328,7 @@ public:
   Variant reset();
   Variant result_metadata();
   Variant send_long_data(int64_t param_idx, const String& data);
+  Variant sqlstate();
   Variant store_result();
 
 protected:
@@ -340,7 +341,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
-MySQLResult *php_mysql_extract_result(const Variant& result);
+MySQLResult *php_mysql_extract_result(const Resource& result);
 
 
 enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
@@ -350,7 +351,7 @@ enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
 #define PHP_MYSQL_FIELD_TYPE  4
 #define PHP_MYSQL_FIELD_FLAGS 5
 
-Variant php_mysql_field_info(const Variant& result, int field, int entry_type);
+Variant php_mysql_field_info(const Resource& result, int field, int entry_type);
 Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
                                      String username, String password,
                                      String database, int client_flags,
@@ -375,7 +376,7 @@ Variant php_mysql_do_query_and_get_result(const String& query, const Variant& li
 #define PHP_MYSQL_NUM    1 << 1
 #define PHP_MYSQL_BOTH   (PHP_MYSQL_ASSOC|PHP_MYSQL_NUM)
 
-Variant php_mysql_fetch_hash(const Variant& result, int result_type);
+Variant php_mysql_fetch_hash(const Resource& result, int result_type);
 
 Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field);
 Variant mysql_makevalue(const String& data, enum_field_types field_type);

@@ -19,6 +19,11 @@ if (OCAMLC_FOUND)
     list(APPEND hackcflags -ccopt -L${pth} -cclib -l${libname})
   endforeach()
 
+  # Xcode/Ninja generators undefined MAKE
+  if(NOT MAKE)
+    set(MAKE make)
+  endif()
+
   add_custom_target(
     hack
     ALL
@@ -28,4 +33,12 @@ if (OCAMLC_FOUND)
           $(MAKE)
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
+
+  install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
+    DESTINATION bin
+    COMPONENT dev)
+
+  install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_server
+    DESTINATION bin
+    COMPONENT dev)
 endif()

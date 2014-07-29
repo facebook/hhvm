@@ -249,6 +249,8 @@ type assoc =
 
 let priorities = [
   (* Lowest priority *)
+  (NonAssoc, [Tyield]);
+  (NonAssoc, [Tawait]);
   (Left, [Tinclude; Tinclude_once; Teval; Trequire; Trequire_once]);
   (Left, [Tcomma]);
   (Right, [Tprint]);
@@ -267,8 +269,6 @@ let priorities = [
   (NonAssoc, [Tinstanceof]);
   (Right, [Ttild; Tincr; Tdecr; Tcast]);
   (Right, [Tat; Tref]);
-  (NonAssoc, [Tyield]);
-  (NonAssoc, [Tawait]);
   (Left, [Tlp]);
   (NonAssoc, [Tnew; Tclone]);
   (Left, [Tlb]);
@@ -375,6 +375,16 @@ let variable env =
 let ref_variable env =
   ref_opt env;
   variable env
+
+(* &...$arg *)
+let ref_param env =
+  ref_opt env;
+  let is_variadic = match L.token env.lb with
+    | Tellipsis -> true
+    | _ -> L.back env.lb; false
+  in
+  let var = variable env in
+  is_variadic, var
 
 (*****************************************************************************)
 (* Entry point *)
@@ -983,7 +993,7 @@ and hint_function_params env =
   match L.token env.lb with
   | Trp ->
       ([], false)
-  | Topt_args ->
+  | Tellipsis ->
       hint_function_params_close env;
       ([], true)
   | _ ->
@@ -1014,7 +1024,7 @@ and hint_function_params_remain env =
         (h :: hl, has_dots)
   | Trp ->
       ([h], false)
-  | Topt_args ->
+  | Tellipsis ->
       hint_function_params_close env;
       ([h], true)
   | _ ->
@@ -1922,16 +1932,16 @@ and parameter_list env =
 and parameter_list_remain env =
   match L.token env.lb with
   | Trp -> []
-  | Topt_args ->
+  | Tellipsis ->
       [parameter_varargs env]
   | _ ->
       L.back env.lb;
       let error_state = !(env.errors) in
-      let p = param env in
+      let p = param ~variadic:false env in
       match L.token env.lb with
       | Trp ->
           [p]
-      | Topt_args ->
+      | Tellipsis ->
           [p ; parameter_varargs env]
       | Tcomma ->
           if !(env.errors) != error_state
@@ -1943,29 +1953,44 @@ and parameter_list_remain env =
 and parameter_varargs env =
   let pos = Pos.make env.lb in
   (match L.token env.lb with
-  | Tcomma ->
-      expect env Trp
-  | Trp ->
-      ()
-  | _ -> error_expect env ")"
-  );
+    | Tcomma -> expect env Trp; make_param_ellipsis pos
+    | Trp -> make_param_ellipsis pos;
+    | _ ->
+      L.back env.lb;
+      let p = param ~variadic:true env in
+      expect env Trp; p
+  )
+
+and make_param_ellipsis pos =
   { param_hint = None;
     param_is_reference = false;
+    param_is_variadic = true;
     param_id = (pos, "...");
     param_expr = None;
     param_modifier = None;
     param_user_attributes = SMap.empty;
   }
 
-and param env =
+and param ~variadic env  =
   let attrs = attribute env in
   let modifs = parameter_modifier env in
   let h = parameter_hint env in
-  ref_opt env;
-  let name = variable env in
+  let variadic_after_hint, name = ref_param env in
+  assert ((not variadic_after_hint) || (not variadic));
+  let variadic = variadic || variadic_after_hint in
   let default = parameter_default env in
+  let default =
+    if variadic && default <> None then
+      let () = error env "Variadic arguments don't have default values" in
+      None
+    else default in
+  if variadic_after_hint then begin
+    expect env Trp;
+    L.back env.lb
+  end else ();
   { param_hint = h;
     param_is_reference = false;
+    param_is_variadic = variadic;
     param_id = name;
     param_expr = default;
     param_modifier = modifs;
@@ -1991,7 +2016,7 @@ and parameter_hint env =
 and parameter_has_hint env =
   look_ahead env begin fun env ->
     match L.token env.lb with
-    | Topt_args | Tamp | Tlvar -> false
+    | Tellipsis | Tamp | Tlvar -> false
     | _ -> true
   end
 
@@ -2197,6 +2222,7 @@ and make_lambda_param : id -> fun_param = fun var_id ->
   {
     param_hint = None;
     param_is_reference = false;
+    param_is_variadic = false;
     param_id = var_id;
     param_expr = None;
     param_modifier = None;
@@ -2212,7 +2238,7 @@ and try_short_lambda env =
     let error_state = !(env.errors) in
     let param_list = parameter_list_remain env in
     if !(env.errors) != error_state then begin
-      env.errors := error_state; 
+      env.errors := error_state;
       None
     end else begin
       let ret = hint_return_opt env in
@@ -2488,8 +2514,8 @@ and expr_yield env start =
         Pos.btw start end_, Yield_break
     | _ ->
         L.back env.lb;
-        let e = expr env in
-        Pos.btw start (fst e), Yield e
+        let af = array_field env in
+        start, Yield af
   end
 
 and expr_await env start =
@@ -3014,13 +3040,14 @@ and shape_field env =
   let value = expr { env with priority = 0 } in
   name, value
 
-and shape_field_name env =
-  expect env Tquote;
-  let pos = Pos.make env.lb in
-  let absolute_pos = env.lb.Lexing.lex_curr_pos in
-  match expr_string env pos absolute_pos with
-  | _, String s -> s
-  | _ -> assert false
+ and shape_field_name env =
+   let pos, e = expr env in
+   match e with
+   | String p -> SFlit p
+   | Class_const (id, ps) -> SFclass_const (id, ps)
+   | _ -> error_expect env "string literal or class constant";
+     SFlit (pos, "")
+
 
 (*****************************************************************************)
 (* Array access ($my_array[]|$my_array[_]) *)
@@ -3224,18 +3251,10 @@ and typedef_shape_field_list_remain env =
           [fd]
 
 and typedef_shape_field env =
-  let name = typedef_shape_field_name env in
+  let name = shape_field_name env in
   expect env Tsarrow;
   let ty = hint env in
   name, ty
-
-and typedef_shape_field_name env =
-  expect env Tquote;
-  let pos = Pos.make env.lb in
-  let absolute_pos = env.lb.Lexing.lex_curr_pos in
-  match expr_string env pos absolute_pos with
-  | _, String s -> s
-  | _ -> assert false
 
 (*****************************************************************************)
 (* Namespaces *)

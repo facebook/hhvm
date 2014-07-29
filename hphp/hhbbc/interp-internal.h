@@ -391,6 +391,14 @@ folly::Optional<Type> selfCls(ISS& env) {
   return folly::none;
 }
 
+folly::Optional<Type> selfClsExact(ISS& env) {
+  if (!env.ctx.cls) return folly::none;
+  if (auto const rcls = env.index.resolve_class(env.ctx, env.ctx.cls->name)) {
+    return clsExact(*rcls);
+  }
+  return folly::none;
+}
+
 //////////////////////////////////////////////////////////////////////
 // properties on $this
 

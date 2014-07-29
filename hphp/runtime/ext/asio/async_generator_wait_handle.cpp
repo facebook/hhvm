@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 
+#include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/async_generator.h"
@@ -137,10 +138,10 @@ void c_AsyncGeneratorWaitHandle::await(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncGeneratorWaitHandle::ret(Cell& result) {
-  auto const parentChain = getFirstParent();
+  auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
-  UnblockChain(parentChain);
+  parentChain.unblock();
   decRefObj(m_generator);
   decRefObj(this);
 }
@@ -151,20 +152,20 @@ void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
     session->onResumableFail(this, exception);
   }
 
-  auto const parentChain = getFirstParent();
+  auto parentChain = getParentChain();
   setState(STATE_FAILED);
   cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
-  UnblockChain(parentChain);
+  parentChain.unblock();
   decRefObj(m_generator);
   decRefObj(this);
 }
 
 void c_AsyncGeneratorWaitHandle::failCpp() {
   auto const exception = AsioSession::Get()->getAbruptInterruptException();
-  auto const parentChain = getFirstParent();
+  auto parentChain = getParentChain();
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);
-  UnblockChain(parentChain);
+  parentChain.unblock();
   decRefObj(m_generator);
   decRefObj(this);
 }
@@ -237,9 +238,7 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
 
     case STATE_SCHEDULED:
       // Recursively move all wait handles blocked by us.
-      for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-        pwh->exitContextBlocked(ctx_idx);
-      }
+      getParentChain().exitContext(ctx_idx);
 
       // Move us to the parent context.
       setContextIdx(getContextIdx() - 1);

@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <iterator>
 
 #include "folly/Optional.h"
 
@@ -81,41 +82,47 @@ OPCODES
  * reduction (i.e. the bytecode can be replaced by some other
  * bytecode as an optimization).
  *
- * The chained-to bytecodes should not take branches, or do strength
- * reduction.  If they use impl themselves, the outer impl() should
- * only be chaining to a single bytecode (or flag effects can be
- * hard to reason about), and shouldn't set any flags prior to that.
- *
- * Note: nested reduce would probably be nice to have later for FPassR.
- *
- * constprop with impl() should only occur on the last thing in the
- * impl list.  This isn't checked, but we'll ignore a canConstProp
- * flag anywhere earlier.
+ * The chained-to bytecodes should not take branches.  Also, constprop with
+ * impl() will only occur on the last thing in the impl list---earlier opcodes
+ * may set the canConstProp flag, but it will have no effect.
  */
 
-template<class T> void impl(ISS& env, const T& t) {
-  FTRACE(3, "    (impl {}\n", show(Bytecode { t }));
-  env.flags.wasPEI       = true;
-  env.flags.canConstProp = false;
-  // Keep whatever mayReadLocals was set to.
-  in(env, t);
-}
+template<class... Ts>
+void impl(ISS& env, Ts&&... ts) {
+  std::vector<Bytecode> bcs = { std::forward<Ts>(ts)... };
 
-template<class T, class... Ts>
-void impl(ISS& env, const T& t, Ts&&... ts) {
-  impl(env, t);
+  folly::Optional<std::vector<Bytecode>> currentReduction;
 
-  assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
-         "you can't use impl with branching opcodes before last position");
-  assert(!env.flags.strengthReduced);
+  for (auto it = begin(bcs); it != end(bcs); ++it) {
+    assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
+           "you can't use impl with branching opcodes before last position");
 
-  auto const wasPEI = env.flags.wasPEI;
+    auto const wasPEI = env.flags.wasPEI;
 
-  impl(env, std::forward<Ts>(ts)...);
+    FTRACE(3, "    (impl {}\n", show(*it));
+    env.flags.wasPEI          = true;
+    env.flags.canConstProp    = false;
+    env.flags.strengthReduced = folly::none;
+    default_dispatch(env, *it);
 
-  // If any of the opcodes in the impl list said they could throw,
-  // then the whole thing could throw.
-  env.flags.wasPEI = env.flags.wasPEI || wasPEI;
+    if (env.flags.strengthReduced) {
+      if (!currentReduction) {
+        currentReduction = std::vector<Bytecode>{};
+        currentReduction->assign(begin(bcs), it);
+      }
+      std::copy(begin(*env.flags.strengthReduced),
+                end(*env.flags.strengthReduced),
+                std::back_inserter(*currentReduction));
+    } else if (currentReduction) {
+      currentReduction->push_back(*it);
+    }
+
+    // If any of the opcodes in the impl list said they could throw,
+    // then the whole thing could throw.
+    env.flags.wasPEI = env.flags.wasPEI || wasPEI;
+  }
+
+  env.flags.strengthReduced = currentReduction;
 }
 
 /*
@@ -127,7 +134,9 @@ void impl(ISS& env, const T& t, Ts&&... ts) {
 template<class... Bytecodes>
 void reduce(ISS& env, const Bytecodes&... hhbc) {
   impl(env, hhbc...);
-  env.flags.strengthReduced = std::vector<Bytecode> { hhbc... };
+  if (!env.flags.strengthReduced) {
+    env.flags.strengthReduced = std::vector<Bytecode> { hhbc... };
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -164,6 +173,9 @@ void in(ISS& env, const bc::Box&) {
 
 void in(ISS& env, const bc::BoxR&) {
   nothrow(env);
+  if (topR(env).subtypeOf(TRef)) {
+    return reduce(env, bc::BoxRNop {});
+  }
   popR(env);
   push(env, TRef);
 }
@@ -733,15 +745,28 @@ void in(ISS& env, const bc::CGetS&) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
   if (vname && vname->m_type == KindOfStaticString &&
       self && tcls.subtypeOf(*self)) {
     if (auto const ty = selfPropAsCell(env, vname->m_data.pstr)) {
       // Only nothrow when we know it's a private declared property
       // (and thus accessible here).
       nothrow(env);
+
+      // We can only constprop here if we know for sure this is exactly the
+      // correct class.  The reason for this is that you could have a LSB class
+      // attempting to access a private static in a derived class with the same
+      // name as a private static in this class, which is supposed to fatal at
+      // runtime (for an example see test/quick/static_sprop2.php).
+      auto const selfExact = selfClsExact(env);
+      if (selfExact && tcls.subtypeOf(*selfExact)) {
+        constprop(env);
+      }
+
       return push(env, *ty);
     }
   }
+
   push(env, TInitCell);
 }
 
@@ -760,6 +785,7 @@ void in(ISS& env, const bc::VGetN&) {
                          bc::VGetL { loc });
     }
   }
+  popC(env);
   boxUnknownLocal(env);
   push(env, TRef);
 }
@@ -925,7 +951,18 @@ void in(ISS& env, const bc::InstanceOf& op) {
     return reduce(env, bc::PopC {},
                        bc::InstanceOfD { v1->m_data.pstr });
   }
-  // Ignoring t1-is-an-object case.
+
+  if (t1.strictSubtypeOf(TObj)) {
+    auto const dobj = dobj_of(t1);
+    switch (dobj.type) {
+    case DObj::Sub:
+      break;
+    case DObj::Exact:
+      return reduce(env, bc::PopC {},
+                         bc::InstanceOfD { dobj.cls.name() });
+    }
+  }
+
   popC(env);
   popC(env);
   push(env, TBool);
@@ -1204,16 +1241,18 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 }
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
-  auto obj = popC(env);
-  folly::Optional<res::Class> rcls;
-  if (is_opt(obj)) obj = unopt(obj);
-  if (obj.strictSubtypeOf(TObj)) rcls = dcls_of(objcls(obj)).cls;
+  auto t1 = popC(env);
+  if (is_opt(t1)) t1 = unopt(t1);
+  auto const clsTy = t1.strictSubtypeOf(TObj) ? objcls(t1) : TCls;
+  auto const rcls = [&]() -> folly::Optional<res::Class> {
+    if (clsTy.strictSubtypeOf(TCls)) return dcls_of(clsTy).cls;
+    return folly::none;
+  }();
+
   fpiPush(env, ActRec {
     FPIKind::ObjMeth,
     rcls,
-    obj.subtypeOf(TObj)
-      ? env.index.resolve_method(env.ctx, objcls(obj), op.str2)
-      : folly::none
+    env.index.resolve_method(env.ctx, clsTy, op.str2)
   });
 }
 
@@ -1231,9 +1270,11 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
 
 void in(ISS& env, const bc::FPushClsMethodD& op) {
   auto const rcls = env.index.resolve_class(env.ctx, op.str3);
-  auto const rfun =
-    rcls ? env.index.resolve_method(env.ctx, clsExact(*rcls), op.str2)
-         : folly::none;
+  auto const rfun = env.index.resolve_method(
+    env.ctx,
+    rcls ? clsExact(*rcls) : TCls,
+    op.str2
+  );
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun });
 }
 
@@ -1241,10 +1282,11 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
   auto const t1 = popA(env);
   auto const t2 = popC(env);
   auto const v2 = tv(t2);
-  auto const rfunc =
-    v2 && v2->m_type == KindOfStaticString
-      ? env.index.resolve_method(env.ctx, t1, v2->m_data.pstr)
-      : folly::none;
+
+  folly::Optional<res::Func> rfunc;
+  if (v2 && v2->m_type == KindOfStaticString) {
+    rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
+  }
   folly::Optional<res::Class> rcls;
   if (t1.strictSubtypeOf(TCls)) rcls = dcls_of(t1).cls;
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc });
@@ -1322,7 +1364,7 @@ void in(ISS& env, const bc::FPassN& op) {
     // This could change the type of any local.
     popC(env);
     killLocals(env);
-    return push(env, TGen);
+    return push(env, TInitGen);
   case PrepKind::Val: return reduce(env, bc::CGetN {},
                                          bc::FPassC { op.arg1 });
   case PrepKind::Ref: return reduce(env, bc::VGetN {},
@@ -1357,7 +1399,7 @@ void in(ISS& env, const bc::FPassS& op) {
         }
       }
     }
-    return push(env, TGen);
+    return push(env, TInitGen);
   case PrepKind::Val:
     return reduce(env, bc::CGetS {}, bc::FPassC { op.arg1 });
   case PrepKind::Ref:
@@ -1368,19 +1410,42 @@ void in(ISS& env, const bc::FPassS& op) {
 void in(ISS& env, const bc::FPassV& op) {
   nothrow(env);
   switch (prepKind(env, op.arg1)) {
-  case PrepKind::Unknown: popV(env); return push(env, TGen);
-  case PrepKind::Val:     popV(env); return push(env, TInitCell);
-  case PrepKind::Ref:     assert(topT(env).subtypeOf(TRef)); return;
+  case PrepKind::Unknown:
+    popV(env);
+    return push(env, TInitGen);
+  case PrepKind::Val:
+    return reduce(env, bc::Unbox {}, bc::FPassC { op.arg1 });
+  case PrepKind::Ref:
+    return reduce(env, bc::FPassVNop { op.arg1 });
   }
 }
 
 void in(ISS& env, const bc::FPassR& op) {
   nothrow(env);
-  if (topT(env).subtypeOf(TCell)) return reduce(env, bc::UnboxRNop {},
-                                                      bc::FPassC { op.arg1 });
-  if (topT(env).subtypeOf(TRef))  return impl(env, bc::FPassV { op.arg1 });
+  auto const t1 = topT(env);
+  if (t1.subtypeOf(TCell)) {
+    return reduce(env, bc::UnboxRNop {},
+                       bc::FPassC { op.arg1 });
+  }
+
+  // If it's known to be a ref, this behaves like FPassV, except we need to do
+  // it slightly differently to keep stack flavors correct.
+  if (t1.subtypeOf(TRef)) {
+    switch (prepKind(env, op.arg1)) {
+    case PrepKind::Unknown:
+      popV(env);
+      return push(env, TInitGen);
+    case PrepKind::Val:
+      return reduce(env, bc::UnboxR {}, bc::FPassC { op.arg1 });
+    case PrepKind::Ref:
+      return reduce(env, bc::BoxRNop {}, bc::FPassVNop { op.arg1 });
+    }
+    not_reached();
+  }
+
+  // Here we don't know if it is going to be a cell or a ref.
   switch (prepKind(env, op.arg1)) {
-  case PrepKind::Unknown:      popR(env); return push(env, TGen);
+  case PrepKind::Unknown:      popR(env); return push(env, TInitGen);
   case PrepKind::Val:          popR(env); return push(env, TInitCell);
   case PrepKind::Ref:          popR(env); return push(env, TRef);
   }
@@ -1427,6 +1492,36 @@ void in(ISS& env, const bc::FPassM& op) {
   assert(!env.flags.canConstProp);
 }
 
+void pushCallReturnType(ISS& env, const Type& ty) {
+  if (ty == TBottom) {
+    // The callee function never returns.  It might throw, or loop
+    // forever.
+    calledNoReturn(env);
+    // Right now we need to continue in some semi-sane state in
+    // case we are in the middle of an FPI region or something
+    // that must finish.  But we can't push a TBottom (there are
+    // no values in that set), so we push something meaningless.
+    return push(env, TInitGen);
+  }
+  return push(env, ty);
+}
+
+void fcallKnownImpl(ISS& env, uint32_t numArgs) {
+  auto const ar = fpiPop(env);
+  always_assert(ar.func.hasValue());
+  specialFunctionEffects(env, ar);
+
+  std::vector<Type> args(numArgs);
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    args[numArgs - i - 1] = popF(env);
+  }
+  auto const ty = env.index.lookup_return_type(
+    CallContext { env.ctx, args },
+    *ar.func
+  );
+  pushCallReturnType(env, ty);
+}
+
 void in(ISS& env, const bc::FCall& op) {
   auto const ar = fpiTop(env);
   if (ar.func) {
@@ -1443,8 +1538,9 @@ void in(ISS& env, const bc::FCall& op) {
     case FPIKind::Ctor:
       /*
        * Need to be wary of old-style ctors. We could get into the situation
-       * where we're constructing class D extends B, and B has an old-style ctor
-       * but D::B also exists.
+       * where we're constructing class D extends B, and B has an old-style
+       * ctor but D::B also exists.  (So in this case we'll skip the
+       * fcallKnownImpl stuff.)
        */
       if (!ar.func->name()->isame(s_construct.get()) &&
           !ar.func->name()->isame(s_86ctor.get())) {
@@ -1453,18 +1549,16 @@ void in(ISS& env, const bc::FCall& op) {
       // fallthrough
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
-      /*
-       * If we have a resolved func and it's a class method (or
-       * ctor), we currently must also have a resolved class.  This
-       * could change later, but this code will need to be revisited
-       * in that case, so assert.
-       */
-      always_assert(ar.cls.hasValue() &&
-        "resolved func without a resolved class");
-      return reduce(
-        env,
-        bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
-      );
+      if (ar.cls.hasValue() && ar.func->cantBeMagicCall()) {
+        return reduce(
+          env,
+          bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
+        );
+      }
+
+      // If we didn't return a reduce above, we still can compute a
+      // partially-known FCall effect with our res::Func.
+      return fcallKnownImpl(env, op.arg1);
     }
   }
 
@@ -1475,54 +1569,32 @@ void in(ISS& env, const bc::FCall& op) {
 }
 
 void in(ISS& env, const bc::FCallD& op) {
-  auto const ar = fpiPop(env);
+  auto const ar = fpiTop(env);
+  if (ar.func) return fcallKnownImpl(env, op.arg1);
   specialFunctionEffects(env, ar);
-  if (ar.func) {
-    std::vector<Type> args(op.arg1);
-    for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-      args[op.arg1 - i - 1] = popF(env);
-    }
-    auto const ty = env.index.lookup_return_type(
-      CallContext { env.ctx, args },
-      *ar.func
-    );
-    if (ty == TBottom) {
-      // The callee function never returns.  It might throw, or loop
-      // forever.
-      calledNoReturn(env);
-      // Right now we need to continue in some semi-sane state in
-      // case we are in the middle of an FPI region or something
-      // that must finish.  But we can't push a TBottom (there are
-      // no values in that set), so we push something meaningless.
-      return push(env, TInitGen);
-    }
-    return push(env, ty);
-  }
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   push(env, TInitGen);
 }
 
-void in(ISS& env, const bc::FCallArray& op) {
-  popF(env);
+void fcallArrayImpl(ISS& env) {
   auto const ar = fpiPop(env);
   specialFunctionEffects(env, ar);
   if (ar.func) {
-    return push(env, env.index.lookup_return_type(env.ctx, *ar.func));
+    auto const ty = env.index.lookup_return_type(env.ctx, *ar.func);
+    pushCallReturnType(env, ty);
+    return;
   }
-  push(env, TInitGen);
+  return push(env, TInitGen);
+}
+
+void in(ISS& env, const bc::FCallArray& op) {
+  popF(env);
+  fcallArrayImpl(env);
 }
 
 void in(ISS& env, const bc::FCallUnpack& op) {
-  // FCallUnpack has pretty much the same effects as FCallArray, just with
-  // potentially more than one argument. It's possible that we can share
-  // more code with FCall and FCallArray here.
   for (auto i = uint32_t{0}; i < op.arg1; ++i) { popF(env); }
-  auto const ar = fpiPop(env);
-  specialFunctionEffects(env, ar);
-  if (ar.func) {
-    return push(env, env.index.lookup_return_type(env.ctx, *ar.func));
-  }
-  push(env, TInitGen);
+  fcallArrayImpl(env);
 }
 
 void in(ISS& env, const bc::FCallBuiltin& op) {
@@ -1699,7 +1771,7 @@ void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 
 void in(ISS& env, const bc::DefFunc&)      {}
 void in(ISS& env, const bc::DefCls&)       {}
-void in(ISS& env, const bc::NopDefCls&)    {}
+void in(ISS& env, const bc::DefClsNop&)    {}
 void in(ISS& env, const bc::DefCns&)       { popC(env); push(env, TBool); }
 void in(ISS& env, const bc::DefTypeAlias&) {}
 
@@ -1823,15 +1895,11 @@ void in(ISS& env, const bc::CreateCl& op) {
     for (auto i = uint32_t{0}; i < nargs; ++i) {
       usedVars[nargs - i - 1] = popT(env);
     }
-
-    // TODO(#3363851): this shouldn't be a loop
-    for (auto& c : clsPair.second) {
-      merge_closure_use_vars_into(
-        env.collect.closureUseTypes,
-        c,
-        usedVars
-      );
-    }
+    merge_closure_use_vars_into(
+      env.collect.closureUseTypes,
+      clsPair.second,
+      usedVars
+    );
   }
 
   return push(env, objExact(clsPair.first));

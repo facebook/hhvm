@@ -35,7 +35,7 @@ PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
                    const StringData* n, Attr attrs, const StringData* parent,
                    const StringData* docComment, Id id, Hoistable hoistable)
   : m_unit(unit)
-  , m_namedEntity(Unit::GetNamedEntity(n))
+  , m_namedEntity(NamedEntity::get(n))
   , m_line1(line1)
   , m_line2(line2)
   , m_offset(o)

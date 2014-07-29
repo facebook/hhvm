@@ -30,13 +30,12 @@ namespace JIT {
 using Trace::Indent;
 
 FrameState::FrameState(IRUnit& unit, BCMarker marker)
-  : FrameState(unit, marker.spOff(), marker.func(), marker.func()->numLocals())
+  : FrameState(unit, marker.spOff(), marker.func())
 {
   assert(!marker.isDummy());
 }
 
-FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
-                       uint32_t numLocals)
+FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
   : m_unit(unit)
   , m_curFunc(func)
   , m_spValue(nullptr)
@@ -46,7 +45,7 @@ FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
   , m_frameSpansCall(false)
   , m_stackDeficit(0)
   , m_evalStack()
-  , m_locals(numLocals)
+  , m_locals(func ? func->numLocals() : 0)
   , m_enableCse(false)
   , m_snapshots()
 {
@@ -181,11 +180,6 @@ void FrameState::update(const IRInstruction* inst) {
         cseKill(inst->src(i));
       }
     }
-  }
-
-  // Save state for each block at the end.
-  if (inst->isTerminal()) {
-    save(inst->block());
   }
 }
 
@@ -428,9 +422,11 @@ void FrameState::dropLocalRefsInnerTypes(LocalStateHook& hook) const {
 
 ///// Methods for managing and merge block state /////
 void FrameState::startBlock(Block* block) {
-  auto it = m_snapshots.find(block);
-  assert(IMPLIES(block->numPreds() > 0,
-                 it != m_snapshots.end() || RuntimeOption::EvalJitLoops));
+  auto const it = m_snapshots.find(block);
+  DEBUG_ONLY auto const predsAllowed =
+    it != m_snapshots.end() || block->isEntry() || RuntimeOption::EvalJitLoops;
+  assert(IMPLIES(block->numPreds() > 0, predsAllowed));
+
   if (it != m_snapshots.end()) {
     load(it->second);
     ITRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));
@@ -495,43 +491,6 @@ void FrameState::save(Block* block) {
   }
 }
 
-bool FrameState::compatible(Block* block) {
-  auto it = m_snapshots.find(block);
-  // If we didn't find a snapshot, it's because we never saved one.
-  // Probably because the other incoming edge is unreachable.
-  if (it == m_snapshots.end()) return true;
-  auto& snapshot = it->second;
-  if (m_fpValue != snapshot.fpValue) {
-    DEBUG_ONLY auto fpRoot       =
-      IRInstruction::framePassthroughRoot(m_fpValue);
-    DEBUG_ONLY auto snapshotRoot =
-      IRInstruction::framePassthroughRoot(snapshot.fpValue);
-
-    assert(fpRoot == snapshotRoot);
-  }
-
-  assert(m_locals.size() == snapshot.locals.size());
-  for (int i = 0; i < m_locals.size(); ++i) {
-    // Enforce strict equality of types for now.  Eventually we could
-    // relax this depending on downstream operations.
-    //
-    // TODO(t3729135): We don't bother to check values here because we
-    // clear the CSE table at any merge.  Eventually we will support
-    // phis instead.
-    if (m_locals[i].type != snapshot.locals[i].type) {
-      return false;
-    }
-  }
-
-  // TODO(t3730468): We don't check the stack here, because we always
-  // spill the stack on all paths leading up to a merge, and insert a
-  // DefSP at the merge point to block walking the use-def chain past
-  // it.  It would be better to do proper type analysis on the stack
-  // values flowing in and insert phis or exits as needed.
-
-  return true;
-}
-
 const FrameState::LocalVec& FrameState::localsForBlock(Block* b) const {
   auto bit = m_snapshots.find(b);
   assert(bit != m_snapshots.end());
@@ -571,6 +530,7 @@ void FrameState::merge(Snapshot& state) {
   }
   if (state.fpValue != m_fpValue) {
     state.fpValue = IRInstruction::frameCommonRoot(state.fpValue, m_fpValue);
+    assert(state.fpValue);
   }
   // this is available iff it's available in both states
   state.thisAvailable &= m_thisAvailable;

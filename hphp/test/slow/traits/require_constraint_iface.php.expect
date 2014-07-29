@@ -1,2 +1,14 @@
 C4::foo
 C4::bar
+-------reflection-------
+interface I3 requires:
+array(1) {
+  [0]=>
+  string(2) "C2"
+}
+abstract class C3 requires:
+array(0) {
+}
+class C4 requires:
+array(0) {
+}

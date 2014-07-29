@@ -482,7 +482,7 @@ class Status {
     array_push(self::$results, array(
       'name' => $test,
       'status' => 'failed',
-      'details' => (string)@file_get_contents("$test.diff")
+      'details' => self::utf8Sanitize(@file_get_contents("$test.diff")),
     ));
     self::send(self::MSG_TEST_FAIL, $test);
   }
@@ -525,7 +525,7 @@ class Status {
     $start = array('op' => 'start', 'test' => $test);
     $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
     if ($status == 'failed') {
-      $end['details'] = (string)@file_get_contents("$test.diff");
+      $end['details'] = self::utf8Sanitize(@file_get_contents("$test.diff"));
     }
     self::say($start, $end);
   }
@@ -545,6 +545,53 @@ class Status {
   public static function hasCursorControl() {
     return !getenv("TRAVIS")
       && !exec('stty -a | grep -e "\\berase = <undef>"');
+  }
+
+  public static function utf8Sanitize($str) {
+    if (class_exists('UConverter')) {
+      return UConverter::transcode($str, 'UTF-8', 'UTF-8');
+    }
+
+    // UConverter is PHP5.5 or later
+    // Do the equivalent using a slower user-space implementation
+    $ret = '';
+    $len = strlen($str);
+    $pos = 0;
+    while ($pos < $len) {
+      $c = $str[$pos];
+      $co = ord($c);
+      if ($co < 0x80) {
+        // U+0000 - U+007F ASCII
+        $ret .= $c;
+        ++$pos;
+      } elseif ((($co & 0xE0) == 0xC0) &&
+                (($len - $pos) > 1) &&
+                ((ord($str[$pos+1]) & 0xC0) == 0x80)) {
+        // U+0080 - U+07FF Lower Basic Multilingual Plane
+        $ret .= substr($str, $pos, 2);
+        $pos += 2;
+      } elseif ((($co & 0xF0) == 0xE0) &&
+                (($len - $pos) > 2) &&
+                ((ord($str[$pos+1]) & 0xC0) == 0x80) &&
+                ((ord($str[$pos+2]) & 0xC0) == 0x80)) {
+        // U+0800 - U+FFFF Upper Basic Multilingual Plane
+        $ret .= substr($std, $pos, 3);
+        $pos += 3;
+      } elseif ((($co & 0xF8) == 0xF0) &&
+                (($len - $pos) > 3) &&
+                ((ord($str[$pos+1]) & 0xC0) == 0x80) &&
+                ((ord($str[$pos+2]) & 0xC0) == 0x80) &&
+                ((ord($str[$pos+3]) & 0xC0) == 0x80)) {
+        // U+010000 - U+10FFFF Supplementary Multilingual Planes
+        $ret .= substr($str, $pos, 4);
+        $pos += 4;
+      } else {
+        // Invalid UTF8
+        $ret .= "\xEF\xBF\xBD"; // U+FFFD REPLACEMENT CHARACTER
+        ++$pos;
+      }
+    }
+    return $ret;
   }
 
   public static function jsonEncode($data) {
@@ -967,7 +1014,11 @@ function run_test($options, $test) {
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
 
-  $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
+  if (is_executable('/usr/bin/timeout')) {
+    $hhvm = '/usr/bin/timeout 300 '.$hhvm;
+  } else {
+    $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
+  }
 
   if (isset($options['repo'])) {
     if ($test_ext === 'hhas' ||

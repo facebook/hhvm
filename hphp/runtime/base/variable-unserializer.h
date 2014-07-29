@@ -18,6 +18,7 @@
 #define incl_HPHP_VARIABLE_UNSERIALIZER_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/smart-containers.h"
 
 namespace HPHP {

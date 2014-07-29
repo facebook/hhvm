@@ -22,6 +22,7 @@
 #include <folly/String.h>
 
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
@@ -125,7 +126,7 @@ void AsioSession::setOnJoinCallback(const Variant& callback) {
 void AsioSession::onIOWaitEnter() {
   runCallback(
     m_onIOWaitEnterCallback,
-    Array::Create(),
+    empty_array(),
     "WaitHandle::onIOWaitEnter"
   );
 }
@@ -133,7 +134,7 @@ void AsioSession::onIOWaitEnter() {
 void AsioSession::onIOWaitExit() {
   runCallback(
     m_onIOWaitExitCallback,
-    Array::Create(),
+    empty_array(),
     "WaitHandle::onIOWaitExit"
   );
 }
@@ -141,7 +142,7 @@ void AsioSession::onIOWaitExit() {
 void AsioSession::onJoin(c_WaitHandle* waitHandle) {
   runCallback(
     m_onJoinCallback,
-    Array::Create(waitHandle),
+    make_packed_array(waitHandle),
     "WaitHandle::onJoin"
   );
 }
@@ -229,6 +230,24 @@ void AsioSession::updateEventHookState() {
   } else {
     EventHook::DisableAsync();
   }
+}
+
+void AsioSession::setOnAwaitAllCreateCallback(const Variant& callback) {
+  m_onAwaitAllCreateCallback = checkCallback(
+    callback,
+    "AwaitAllWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onAwaitAllCreate(
+  c_AwaitAllWaitHandle* waitHandle,
+  const Variant &dependencies
+) {
+  runCallback(
+    m_onAwaitAllCreateCallback,
+    make_packed_array(waitHandle, dependencies),
+    "AwaitAllWaitHandle::onCreate"
+  );
 }
 
 void AsioSession::setOnGenArrayCreateCallback(const Variant& callback) {

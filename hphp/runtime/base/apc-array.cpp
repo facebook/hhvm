@@ -31,28 +31,107 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+inline
+bool chekVisited(PointerSet& visited, void* pvar) {
+  if (visited.find(pvar) != visited.end()) {
+    return true;
+  }
+  visited.insert(pvar);
+  return false;
+}
+}
+
 APCHandle* APCArray::MakeShared(ArrayData* arr,
                                 size_t& size,
                                 bool inner,
-                                bool unserializeObj) {
-  if (!inner) {
-    // only need to call traverseData() on the toplevel array
-    DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
-    DataWalker::DataFeature features = walker.traverseData(arr);
-    if (features.isCircular() || features.hasCollection()) {
-      String s = apc_serialize(arr);
-      APCHandle* handle = APCString::MakeShared(KindOfArray, s.get(), size);
-      handle->setSerializedArray();
-      handle->mustCache();
-      return handle;
-    }
+                                bool unserializeObj,
+                                bool createIfSer) {
+  bool serialize = false;
+  bool uncounted = true;
+  if (apcExtension::OptimizeSerialization) {
+    if (!inner) {
+      // at the top level need to check for circular references and
+      // uncounted arrays.
+      // If there is "circularity" we serialize and so we never re-enter.
+      // If it is uncounted we also never re-enter as the creation of
+      // uncounted arrays never creates APC objects.
+      // If we are *not* uncounted though it may still be the case that a
+      // nested array can be uncounted (thus the 'else' part)
+      PointerSet visited;
+      visited.insert(reinterpret_cast<void*>(arr));
+      traverseDataRecursive(arr,
+          [&](const Variant& var) {
+            if (var.isReferenced()) {
+              Variant *pvar = var.getRefData();
+              if (chekVisited(visited, pvar)) {
+                serialize = true;
+                uncounted = false;
+                return true;
+              }
+            }
 
-    if (apcExtension::UseUncounted &&
-        !features.hasObjectOrResource() &&
-        !arr->empty()) {
-      size = getMemSize(arr) + sizeof(APCTypedValue);
-      return APCTypedValue::MakeSharedArray(arr);
+            DataType type = var.getType();
+            if (type == KindOfObject) {
+              uncounted = false;
+              auto data = var.getObjectData();
+              if (chekVisited(visited, reinterpret_cast<void*>(data))) {
+                serialize = true;
+                return true;
+              }
+            } else if (type == KindOfResource) {
+              serialize = true;
+              uncounted = false;
+              return true;
+            }
+            return false;
+          }
+      );
+    } else {
+      // if it is *not* an outermost array it means that the
+      // container did not have any circular references neither was a
+      // serializable object.
+      // It also means the container cannot be an uncounted array.
+      // We can still be an uncounted inner array though
+      traverseDataRecursive(arr,
+          [&](const Variant& var) {
+            DataType type = var.getType();
+            if (type == KindOfObject || type == KindOfResource) {
+              uncounted = false;
+              return true;
+            }
+            return false;
+          }
+      );
     }
+    uncounted = uncounted && !arr->empty();
+  } else {
+    uncounted = false;
+    if (!inner) {
+      // only need to call traverseData() on the toplevel array
+      DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
+      DataWalker::DataFeature features = walker.traverseData(arr);
+      serialize = features.isCircular() || features.hasCollection();
+      uncounted = !features.hasObjectOrResource() && !arr->empty();
+    }
+  }
+
+  if (serialize) {
+    // collection call into this to see if they can get some optimized
+    // array form (uncounted or apc). When that is not the case there
+    // is no point to serialize because the collection itself will
+    // serialize
+    if (!createIfSer) return nullptr;
+    String s = apc_serialize(arr);
+    APCHandle* handle = APCString::MakeShared(KindOfArray, s.get(), size);
+    handle->setSerializedArray();
+    handle->mustCache();
+    return handle;
+  }
+
+  if (uncounted && apcExtension::UseUncounted) {
+    size = getMemSize(arr) + sizeof(APCTypedValue);
+    return APCTypedValue::MakeSharedArray(arr);
   }
 
   if (arr->isVectorData()) {
@@ -134,9 +213,9 @@ APCHandle* APCArray::MakePackedShared(ArrayData* arr,
 }
 
 Variant APCArray::MakeArray(APCHandle* handle) {
-  if (handle->getUncounted()) {
+  if (handle->isUncounted()) {
     return APCTypedValue::fromHandle(handle)->getArrayData();
-  } else if (handle->getSerializedArray()) {
+  } else if (handle->isSerializedArray()) {
     StringData* serArr = APCString::fromHandle(handle)->getStringData();
     return apc_unserialize(serArr->data(), serArr->size());
   }
@@ -144,21 +223,22 @@ Variant APCArray::MakeArray(APCHandle* handle) {
 }
 
 void APCArray::Delete(APCHandle* handle) {
-  handle->getSerializedArray() ? delete APCString::fromHandle(handle)
-                               : delete APCArray::fromHandle(handle);
+  assert(!handle->isUncounted());
+  handle->isSerializedArray() ? delete APCString::fromHandle(handle)
+                              : delete APCArray::fromHandle(handle);
 }
 
 APCArray::~APCArray() {
   if (isPacked()) {
     APCHandle** v = vals();
     for (size_t i = 0, n = m_size; i < n; i++) {
-      v[i]->unreference();
+      v[i]->unreferenceRoot(0);
     }
   } else {
     Bucket* bks = buckets();
     for (int i = 0; i < m.m_num; i++) {
-      bks[i].key->unreference();
-      bks[i].val->unreference();
+      bks[i].key->unreferenceRoot(0);
+      bks[i].val->unreferenceRoot(0);
     }
   }
 }
@@ -178,8 +258,15 @@ void APCArray::add(APCHandle *key, APCHandle *val) {
         k->getInt64() : k->getStringData()->hash()) & m.m_capacity_mask;
   } else {
     assert(key->is(KindOfString));
-    APCString *k = APCString::fromHandle(key);
-    hash_pos = k->getStringData()->hash() & m.m_capacity_mask;
+    StringData* elKey;
+    if (key->isUncounted()) {
+      auto* k = APCTypedValue::fromHandle(key);
+      elKey = k->getStringData();
+    } else {
+      auto* k = APCString::fromHandle(key);
+      elKey = k->getStringData();
+    }
+    hash_pos = elKey->hash() & m.m_capacity_mask;
   }
 
   int& hp = hash()[hash_pos];
@@ -200,8 +287,15 @@ ssize_t APCArray::indexOf(const StringData* key) const {
       }
     } else {
       assert(b[bucket].key->is(KindOfString));
-      APCString *k = APCString::fromHandle(b[bucket].key);
-      if (key->same(k->getStringData())) {
+      StringData* elKey;
+      if (b[bucket].key->isUncounted()) {
+        auto* k = APCTypedValue::fromHandle(b[bucket].key);
+        elKey = k->getStringData();
+      } else {
+        auto* k = APCString::fromHandle(b[bucket].key);
+        elKey = k->getStringData();
+      }
+      if (key->same(elKey)) {
         return bucket;
       }
     }

@@ -18,12 +18,14 @@
 
 #include <memory>
 #include <utility>
-#include <boost/container/flat_map.hpp>
 #include <vector>
+
+#include <boost/container/flat_map.hpp>
 
 #include "folly/Format.h"
 
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -390,11 +392,20 @@ RegionDescPtr selectHotRegion(TransID transId,
                               MCGenerator* mcg);
 
 /*
- * Select a compilation region using roughly the same heuristics as the old
+ * Select a compilation region as long as possible using the given context.
+ * The region will be broken before the first instruction that attempts to
+ * consume an input with an insufficiently precise type, or after most control
+ * flow instructions.  This uses roughly the same heuristics as the old
  * analyze() framework.
+ *
+ * May return a null region if the given RegionContext doesn't have enough
+ * information to translate at least one instruction.
+ *
+ * The `allowInlining' flag should be disabled when we are selecting a tracelet
+ * whose shape will be analyzed by the InliningDecider.
  */
-RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
-                             bool profiling);
+RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
+                             bool allowInlining = true);
 
 /*
  * Select the hottest trace beginning with triggerId.
@@ -412,7 +423,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
  */
 RegionDescPtr selectWholeCFG(TransID triggerId,
                              const ProfData* profData,
-                             TransCFG& cfg,
+                             const TransCFG& cfg,
                              TransIDSet& selectedSet,
                              TransIDVec* selectedVec = nullptr);
 

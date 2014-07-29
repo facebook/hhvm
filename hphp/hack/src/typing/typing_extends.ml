@@ -138,7 +138,7 @@ let check_members env parent_class class_ parent_members members =
 
 (* Instantiation basically applies the substitution *)
 let instantiate_members subst env members =
-  smap_env (Inst.instantiate_ce subst) env members
+  SMap.map_env (Inst.instantiate_ce subst) env members
 
 (* TODO constant inheritance is broken. We don't inherit constants that
  * come from interfaces. *)
@@ -155,6 +155,7 @@ let check_constructors env parent_class class_ =
   if parent_class.tc_kind <> Ast.Cinterface then () else
   match parent_class.tc_construct, class_.tc_construct with
   | None, _ -> ()
+  | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
   | Some parent_cstr, None ->
       let pos = fst parent_cstr.ce_type in
       Error.missing_constructor (Reason.to_pos pos)

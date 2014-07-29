@@ -1,3 +1,4 @@
+---------- test_standard_function ----------
 frap claptrap
 ----HANDLER----
 string(4) "frap"
@@ -60,6 +61,86 @@ array(5) {
 }
 
 frap claptrap
+---------- test_variadic_function ----------
+var_frap claptrap array(1) {
+  [0]=>
+  string(4) "blah"
+}
+----HANDLER----
+string(8) "var_frap"
+NULL
+array(2) {
+  [0]=>
+  string(8) "claptrap"
+  [1]=>
+  string(4) "blah"
+}
+string(4) "data"
+bool(true)
+---------------
+----HANDLER----
+string(8) "var_frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "callfunc"
+}
+string(4) "data"
+bool(true)
+---------------
+----HANDLER----
+string(8) "var_frap"
+NULL
+array(2) {
+  [0]=>
+  string(8) "claptrap"
+  [1]=>
+  string(4) "blah"
+}
+NULL
+bool(true)
+---------------
+var_frap claptrap array(1) {
+  [0]=>
+  string(4) "blah"
+}
+----HANDLER----
+string(8) "var_frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "callfunc"
+}
+NULL
+bool(true)
+---------------
+var_frap callfunc array(0) {
+}
+Closure! wooooo
+magic call! string(12) "i_dont_exist"
+array(5) {
+  [0]=>
+  string(8) "var_frap"
+  [1]=>
+  NULL
+  [2]=>
+  array(2) {
+    [0]=>
+    string(8) "claptrap"
+    [1]=>
+    string(4) "blah"
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+var_frap claptrap array(1) {
+  [0]=>
+  string(4) "blah"
+}
+---------- test_methods ----------
 static frap Blark
 static frap Blark
 static frap SubBlark

@@ -731,6 +731,14 @@ class Framework {
   }
 
   private function reenableTestFiles(): void {
+    if ($this->install_root === null) {
+      // Fake framework, eg 'hhvmquickinterp'
+      return;
+    }
+    invariant(
+      $this->install_root,
+      'install root should be a valid path or null'
+    );
     $rdit = new RecursiveDirectoryIterator(
       $this->install_root,
       RecursiveDirectoryIterator::SKIP_DOTS
@@ -793,11 +801,36 @@ class Framework {
     verbose("composer.json found in: $composer_json_path\n");
     // Check to see if composer dependencies are necessary to run the test
     if ($composer_json_path !== null) {
+      if (Options::$toran_proxy !== null) {
+        verbose("Modifying composer.json to use Toran Proxy");
+        $composer_config = json_decode(
+          file_get_contents($composer_json_path.'/composer.json'),
+          /* assoc = */ true,
+        );
+        $repos = [
+          ['packagist' => false],
+          ['type' => 'composer', 'url' => Options::$toran_proxy],
+        ];
+        foreach ($composer_config['repositories'] as $repo) {
+          if (array_key_exists('packagist', $repo)) {
+            continue;
+          }
+          if (isset($repo['type']) && $repo['type'] === 'composer') {
+            continue;
+          }
+          $repos[] = $repo;
+        }
+        $composer_config['repositories'] = $repos;
+        file_put_contents(
+          $composer_json_path.'/composer.json',
+          json_encode($composer_config)
+        );
+      }
       verbose("Retrieving dependencies for framework ".$this->name.".....\n");
       // Use the timeout to avoid curl SlowTimer timeouts and problems
       $dependencies_install_cmd = get_runtime_build();
       // Only put this timeout if we are using hhvm
-      if (Options::$zend_path === null) {
+      if (Options::$php_path === null) {
         $dependencies_install_cmd .= " -v ResourceLimit.SocketDefaultTimeout".
                                      "=30";
       }
@@ -819,13 +852,13 @@ class Framework {
           if (any_dir_empty_one_level($fw_vendor_dir)) {
             remove_dir_recursive(nullthrows($this->install_root));
             error_and_exit("Couldn't download dependencies for ".$this->name.
-                           ". Removing framework. You can try the --zend ".
+                           ". Removing framework. You can try the --with-php".
                            "option.\n");
           }
         } else { // No vendor directory. Dependencies could not have been gotten
           remove_dir_recursive(nullthrows($this->install_root));
           error_and_exit("Couldn't download dependencies for ".$this->name.
-                         ". Removing framework. You can try the --zend ".
+                         ". Removing framework. You can try the --with-php".
                          "option.\n");
         }
       }

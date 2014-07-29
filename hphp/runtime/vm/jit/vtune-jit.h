@@ -24,7 +24,6 @@ namespace HPHP { namespace JIT {
 void reportTraceletToVtune(const Unit* unit,
                            const Func* func,
                            const TransRec& transRec);
-void reportTrampolineToVtune(void* begin, size_t size);
 
 }}
 

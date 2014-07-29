@@ -1,6 +1,8 @@
-File "continuation_null.php", line 13, characters 9-12:
-Some values passed to yield are incompatible
+File "continuation_null.php", line 13, characters 3-7:
+Invalid yield
 File "continuation_null.php", line 12, characters 30-33:
 This is void
+File "builtins.hhi", line 39, characters 40-41:
+  via this generic Tv
 File "continuation_null.php", line 13, characters 9-12:
 It is incompatible with a nullable type

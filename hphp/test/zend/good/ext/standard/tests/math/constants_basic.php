@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 echo "M_E= ";
 var_dump(M_E);
 echo "M_LOG2E= ";

@@ -11,12 +11,26 @@
 open Utils
 open Typing_defs
 
+(* Details about functions to be added in json output *)
+type func_param_result = {
+    param_name     : string;
+    param_ty       : string;
+    param_variadic : bool;
+  }
+
+type func_details_result = {
+    params    : func_param_result list;
+    return_ty : string;
+    min_arity : int;
+  }
+
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
-    res_pos     : Pos.t;
-    res_ty      : string;
-    res_name    : string;
-    expected_ty : bool;
+    res_pos      : Pos.t;
+    res_ty       : string;
+    res_name     : string;
+    expected_ty  : bool;
+    func_details : func_details_result option;
   }
 
 (* Results that still need a typing environment to convert ty information
@@ -43,14 +57,19 @@ let is_auto_complete x =
     false
 
 let autocomplete_result_to_json res =
-  let pos_to_json pos =
-    let line, start, end_ = Pos.info_pos pos in
-    let fn = Pos.filename pos in
-    Hh_json.JAssoc [ "filename",   Hh_json.JString fn;
-             "line",      Hh_json.JInt line;
-             "char_start", Hh_json.JInt start;
-             "char_end",   Hh_json.JInt end_;
+  let func_param_to_json param =
+    Hh_json.JAssoc [ "name", Hh_json.JString param.param_name;
+                     "type", Hh_json.JString param.param_ty;
+                     "variadic", Hh_json.JBool param.param_variadic;
+                   ]
+  in
+  let func_details_to_json details =
+    match details with
+     | Some fd -> Hh_json.JAssoc [ "min_arity", Hh_json.JInt fd.min_arity;
+             "return_type", Hh_json.JString fd.return_ty;
+             "params", Hh_json.JList (List.map func_param_to_json fd.params);
            ]
+     | None -> Hh_json.JNull
   in
   let name = res.res_name in
   let pos = res.res_pos in
@@ -58,7 +77,8 @@ let autocomplete_result_to_json res =
   let expected_ty = res.expected_ty in
   Hh_json.JAssoc [ "name", Hh_json.JString name;
            "type", Hh_json.JString ty;
-           "pos", pos_to_json pos;
+           "pos", Pos.json pos;
+           "func_details", func_details_to_json res.func_details;
            "expected_ty", Hh_json.JBool expected_ty;
          ]
 
@@ -161,11 +181,10 @@ let should_complete_class completion_type class_kind =
 let should_complete_fun completion_type =
   completion_type=Some Autocomplete.Acid
 
-let get_constructor_ty c =
-  let return_ty =
-    Typing_reason.Rwitness c.Typing_defs.tc_pos,
-    Typing_defs.Tapply ((c.Typing_defs.tc_pos, c.Typing_defs.tc_name), [])
-  in
+let get_constructor_ty c env =
+  let pos = c.Typing_defs.tc_pos in
+  let reason = Typing_reason.Rwitness pos in
+  let return_ty = reason, Typing_defs.Tapply ((pos, c.Typing_defs.tc_name), []) in
   match c.Typing_defs.tc_construct with
     | Some elt ->
         begin match elt.ce_type with
@@ -178,17 +197,7 @@ let get_constructor_ty c =
         end
     | None ->
         (* Nothing defined, so we need to fake the entire constructor *)
-        Typing_reason.Rwitness c.Typing_defs.tc_pos,
-        Typing_defs.Tfun {
-          Typing_defs.ft_pos       = c.Typing_defs.tc_pos;
-          Typing_defs.ft_unsafe    = false;
-          Typing_defs.ft_abstract  = false;
-          Typing_defs.ft_arity_min = 0;
-          Typing_defs.ft_arity_max = 0;
-          Typing_defs.ft_tparams   = [];
-          Typing_defs.ft_params    = [];
-          Typing_defs.ft_ret       = return_ty;
-        }
+      reason, Typing_defs.Tfun (Typing_env.make_ft env pos [] return_ty)
 
 let compute_complete_global funs classes =
   let completion_type = !Autocomplete.argument_global_type in
@@ -208,7 +217,7 @@ let compute_complete_global funs classes =
             let s = Utils.strip_ns name in
             (match !ac_env with
               | Some env when completion_type=Some Autocomplete.Acnew ->
-                  add_result s (get_constructor_ty c)
+                  add_result s (get_constructor_ty c env)
               | _ ->
                   let desc = match c.Typing_defs.tc_kind with
                     | Ast.Cabstract -> "abstract class"
@@ -309,13 +318,37 @@ let get_results funs classes =
       | Some s -> s
       | None -> Typing_print.full_strip_ns fake_env (x.ty)
     in
+    let func_details = match x.ty with
+      | (_, Tfun ft) ->
+        let param_to_record ?(is_variadic=false) (name, pty) =
+          {
+            param_name     = (match name with
+                               | Some n -> n
+                               | None -> "");
+            param_ty       = Typing_print.full_strip_ns fake_env pty;
+            param_variadic = is_variadic;
+          }
+        in
+        Some {
+          return_ty = Typing_print.full_strip_ns fake_env ft.ft_ret;
+          min_arity = arity_min ft.ft_arity;
+          params    = List.map param_to_record ft.ft_params @
+            (match ft.ft_arity with
+               | Fellipsis _ -> let empty = (None, (Reason.none, Tany)) in
+                                [param_to_record ~is_variadic:true empty]
+               | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
+               | Fstandard _ -> [])
+        }
+      | _ -> None
+    in
     let expected_ty = result_matches_expected_ty x.ty in
     let pos = Typing_reason.to_pos (fst x.ty) in
     {
-      res_pos     = pos;
-      res_ty      = desc_string;
-      res_name    = x.name;
-      expected_ty = expected_ty;
+      res_pos      = pos;
+      res_ty       = desc_string;
+      res_name     = x.name;
+      expected_ty  = expected_ty;
+      func_details = func_details;
     }
   end results in
   List.sort result_compare results

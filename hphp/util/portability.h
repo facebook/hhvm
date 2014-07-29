@@ -87,7 +87,7 @@ namespace HPHP {
     __attribute__((__section__(".text.keep")))
 #else
 # define KEEP_SECTION \
-    __attribute__((__section__(".text.keep,")))
+    __attribute__((__section__(".text,.text.keep")))
 #endif
 
 //////////////////////////////////////////////////////////////////////

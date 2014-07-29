@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/ext/asio/asio_external_thread_event.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
+#include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
@@ -126,10 +127,10 @@ void c_ExternalThreadEventWaitHandle::process() {
     m_event->unserialize(result);
   } catch (const Object& exception) {
     assert(exception->instanceof(SystemLib::s_ExceptionClass));
-    auto const parentChain = getFirstParent();
+    auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);
-    c_BlockableWaitHandle::UnblockChain(parentChain);
+    parentChain.unblock();
 
     auto session = AsioSession::Get();
     if (UNLIKELY(session->hasOnExternalThreadEventFailCallback())) {
@@ -137,19 +138,19 @@ void c_ExternalThreadEventWaitHandle::process() {
     }
     return;
   } catch (...) {
-    auto const parentChain = getFirstParent();
+    auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(AsioSession::Get()->getAbruptInterruptException(),
                   &m_resultOrException);
-    c_BlockableWaitHandle::UnblockChain(parentChain);
+    parentChain.unblock();
     throw;
   }
 
   assert(cellIsPlausible(result));
-  auto const parentChain = getFirstParent();
+  auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
-  c_BlockableWaitHandle::UnblockChain(parentChain);
+  parentChain.unblock();
 
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnExternalThreadEventSuccessCallback())) {
@@ -186,9 +187,7 @@ void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // Recursively move all wait handles blocked by us.
-  for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-    pwh->exitContextBlocked(ctx_idx);
-  }
+  getParentChain().exitContext(ctx_idx);
 }
 
 void c_ExternalThreadEventWaitHandle::registerToContext() {

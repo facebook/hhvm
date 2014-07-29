@@ -496,7 +496,7 @@ Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level /* = 1 */) {
 
 #ifdef HAVE_SNAPPY
 
-Variant HHVM_FUNCTION(sncompress, const String& data) {
+Variant HHVM_FUNCTION(snappy_compress, const String& data) {
   size_t size;
   char *compressed =
     (char *)malloc(snappy::MaxCompressedLength(data.size()) + 1);
@@ -507,7 +507,7 @@ Variant HHVM_FUNCTION(sncompress, const String& data) {
   return String(compressed, size, AttachString);
 }
 
-Variant HHVM_FUNCTION(snuncompress, const String& data) {
+Variant HHVM_FUNCTION(snappy_uncompress, const String& data) {
   size_t dsize;
 
   snappy::GetUncompressedLength(data.data(), data.size(), &dsize);
@@ -622,7 +622,11 @@ int VarintDecode(const char** src, int max_size) {
   return val;
 }
 
-Variant HHVM_FUNCTION(lz4compress, const String& uncompressed) {
+Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
+                                    bool high /* = false */) {
+  if (high) {
+    return f_lz4_hccompress(uncompressed);
+  }
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
@@ -644,7 +648,7 @@ Variant HHVM_FUNCTION(lz4compress, const String& uncompressed) {
   return s;
 }
 
-Variant HHVM_FUNCTION(lz4hccompress, const String& uncompressed) {
+Variant HHVM_FUNCTION(lz4_hccompress, const String& uncompressed) {
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
@@ -666,20 +670,30 @@ Variant HHVM_FUNCTION(lz4hccompress, const String& uncompressed) {
   return s;
 }
 
-Variant HHVM_FUNCTION(lz4uncompress, const String& compressed) {
+Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
   const char* compressed_ptr = compressed.data();
   int dsize = VarintDecode(&compressed_ptr, compressed.size());
   if (dsize < 0) {
     return false;
   }
 
+  int inSize = compressed.size() - (compressed_ptr - compressed.data());
   String s = String(dsize, ReserveString);
   char *uncompressed = s.bufferSlice().ptr;
-  int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
+#ifdef LZ4_MAX_INPUT_SIZE
+  int ret = LZ4_decompress_safe(compressed_ptr, uncompressed, inSize, dsize);
 
-  if (ret <= 0) {
+  if (ret != dsize) {
     return false;
   }
+#else
+  int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
+
+  if (ret <= 0 || ret > inSize) {
+    return false;
+  }
+#endif
+
   s.setSize(dsize);
   return s;
 }
@@ -814,14 +828,14 @@ class ZlibExtension : public Extension {
     HHVM_FE(qlzuncompress);
 #endif
 #ifdef HAVE_SNAPPY
-    HHVM_FE(sncompress);
-    HHVM_FE(snuncompress);
+    HHVM_FE(snappy_compress);
+    HHVM_FE(snappy_uncompress);
 #endif
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);
-    HHVM_FE(lz4compress);
-    HHVM_FE(lz4hccompress);
-    HHVM_FE(lz4uncompress);
+    HHVM_FE(lz4_compress);
+    HHVM_FE(lz4_hccompress);
+    HHVM_FE(lz4_uncompress);
 
     HHVM_ME(__SystemLib_ChunkedInflator, eof);
     HHVM_ME(__SystemLib_ChunkedInflator, inflateChunk);

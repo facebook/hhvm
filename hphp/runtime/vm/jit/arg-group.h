@@ -127,28 +127,25 @@ struct ArgGroup {
     : m_inst(inst), m_regs(regs), m_override(nullptr)
   {}
 
-  size_t numRegArgs() const { return m_regArgs.size(); }
-  size_t numSIMDRegArgs() const { return m_regSIMDArgs.size(); }
+  size_t numGpArgs() const { return m_gpArgs.size(); }
+  size_t numSimdArgs() const { return m_simdArgs.size(); }
   size_t numStackArgs() const { return m_stkArgs.size(); }
 
-  ArgDesc& reg(size_t i) {
-    assert(i < m_regArgs.size());
-    return m_regArgs[i];
+  ArgDesc& gpArg(size_t i) {
+    assert(i < m_gpArgs.size());
+    return m_gpArgs[i];
   }
-  ArgDesc& regSIMD(size_t i) {
-    assert(i < m_regSIMDArgs.size());
-    return m_regSIMDArgs[i];
+  ArgDesc& simdArg(size_t i) {
+    assert(i < m_simdArgs.size());
+    return m_simdArgs[i];
   }
-  ArgDesc& operator[](size_t i) {
-    return reg(i);
-  }
-  ArgDesc& stk(size_t i) {
+  ArgDesc& stkArg(size_t i) {
     assert(i < m_stkArgs.size());
     return m_stkArgs[i];
   }
 
   ArgGroup& imm(Immed64 imm) {
-    push_arg(ArgDesc(ArgDesc::Kind::Imm, imm));
+    push_gp(ArgDesc(ArgDesc::Kind::Imm, imm));
     return *this;
   }
 
@@ -159,21 +156,21 @@ struct ArgGroup {
   ArgGroup& immPtr(std::nullptr_t) { return imm(0); }
 
   ArgGroup& reg(PhysReg reg) {
-    push_arg(ArgDesc(ArgDesc::Kind::Reg, PhysReg(reg), -1));
+    push_gp(ArgDesc(ArgDesc::Kind::Reg, PhysReg(reg), -1));
     return *this;
   }
 
   ArgGroup& addr(PhysReg base, Immed off) {
-    push_arg(ArgDesc(ArgDesc::Kind::Addr, base, off));
+    push_gp(ArgDesc(ArgDesc::Kind::Addr, base, off));
     return *this;
   }
 
   ArgGroup& ssa(int i, bool isFP = false) {
     ArgDesc arg(m_inst->src(i), m_regs.src(i));
     if (isFP) {
-      push_SIMDarg(arg);
+      push_simd(arg);
     } else {
-      push_arg(arg);
+      push_gp(arg);
     }
     return *this;
   }
@@ -185,7 +182,7 @@ struct ArgGroup {
     // If there's exactly one register argument slot left, the whole TypedValue
     // goes on the stack instead of being split between a register and the
     // stack.
-    if (m_regArgs.size() == X64::kNumRegisterArgs - 1) {
+    if (m_gpArgs.size() == X64::kNumRegisterArgs - 1) {
       m_override = &m_stkArgs;
     }
     packed_tv ? type(i).ssa(i) : ssa(i).type(i);
@@ -202,22 +199,22 @@ struct ArgGroup {
   }
 
 private:
-  void push_arg(const ArgDesc& arg) {
+  void push_gp(const ArgDesc& arg) {
     // If m_override is set, use it unconditionally. Otherwise, select
-    // m_regArgs or m_stkArgs depending on how many args we've already pushed.
+    // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
     ArgVec* args = m_override;
     if (!args) {
-      args = m_regArgs.size() < X64::kNumRegisterArgs ? &m_regArgs : &m_stkArgs;
+      args = m_gpArgs.size() < X64::kNumRegisterArgs ? &m_gpArgs : &m_stkArgs;
     }
     args->push_back(arg);
   }
 
-  void push_SIMDarg(const ArgDesc& arg) {
-    // See push_arg above
+  void push_simd(const ArgDesc& arg) {
+    // See push_gp above
     ArgVec* args = m_override;
     if (!args) {
-      args = m_regSIMDArgs.size() < X64::kNumSIMDRegisterArgs
-           ? &m_regSIMDArgs : &m_stkArgs;
+      args = m_simdArgs.size() < X64::kNumSIMDRegisterArgs
+           ? &m_simdArgs : &m_stkArgs;
     }
     args->push_back(arg);
   }
@@ -226,12 +223,12 @@ private:
    * For passing the m_type field of a TypedValue.
    */
   ArgGroup& type(int i) {
-    push_arg(ArgDesc(m_inst->src(i), m_regs.src(i), false));
+    push_gp(ArgDesc(m_inst->src(i), m_regs.src(i), false));
     return *this;
   }
 
   ArgGroup& none() {
-    push_arg(ArgDesc(ArgDesc::Kind::None, InvalidReg, -1));
+    push_gp(ArgDesc(ArgDesc::Kind::None, InvalidReg, -1));
     return *this;
   }
 
@@ -247,8 +244,8 @@ private:
   const IRInstruction* m_inst;
   const RegAllocInfo::RegMap& m_regs;
   ArgVec* m_override; // used to force args to go into a specific ArgVec
-  ArgVec m_regArgs; // INTEGER class args
-  ArgVec m_regSIMDArgs; // SSE class args
+  ArgVec m_gpArgs; // INTEGER class args
+  ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
 };
 

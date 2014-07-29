@@ -1,4 +1,4 @@
-File "enum_6.php--use.php", line 5, characters 24-26:
+File "enum_6.php--use.php", line 5, characters 23-25:
 Enums must have int, string, or mixed type, not a bool
 File "enum_6.php--def.php", line 7, characters 9-11:
 Typedef definition comes from here

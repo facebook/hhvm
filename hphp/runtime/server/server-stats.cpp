@@ -886,11 +886,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   w->writeEntry("debug", "no");
 #endif
 
-#ifdef HOTPROFILER
   w->writeEntry("hotprofiler", "yes");
-#else
-  w->writeEntry("hotprofiler", "no");
-#endif
 
   timeval up;
   up.tv_sec = now - HttpServer::StartTime;

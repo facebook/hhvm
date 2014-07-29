@@ -1,8 +1,4 @@
 <?php
-ini_set('mail.log ',  /tmp/mail.log);
-
-ini_set('sendmail_path', tee /tmp/mail.out >/dev/null);
-
 date_default_timezone_set("UTC");
 
 $logfile = ini_get("mail.log");

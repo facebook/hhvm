@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/hash.h"
 
 #include <deque>
@@ -447,7 +448,6 @@ public:
   ~EmitterVisitor();
 
   bool visit(ConstructPtr c);
-  bool visitImpl(ConstructPtr c);
   void visitKids(ConstructPtr c);
   void visit(FileScopePtr file);
   void assignLocalVariableIds(FunctionScopePtr fs);

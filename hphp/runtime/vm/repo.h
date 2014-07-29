@@ -30,13 +30,14 @@
 #include <sys/types.h>
 #include <pwd.h>
 
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/litstr-repo-proxy.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
 class Repo : public RepoProxy {
   static SimpleMutex s_lock;
@@ -95,7 +96,7 @@ public:
   Unit* loadUnit(const std::string& name, const MD5& md5);
   bool findFile(const char* path, const std::string& root, MD5& md5);
   bool insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
-  void commitMd5(UnitOrigin unitOrigin, UnitEmitter *ue);
+  void commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue);
 
   /*
    * Return a vector of (filepath, MD5) for every unit in central

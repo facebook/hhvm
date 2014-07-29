@@ -32,6 +32,7 @@
 namespace HPHP {
 struct Func;
 namespace JIT {
+struct Fixup;
 struct SSATmp;
 namespace X64 {
 
@@ -71,8 +72,7 @@ void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
 void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
 
-void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
-            RegSet toSave = RegSet());
+void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm);
 
 void emitTraceCall(CodeBlock& cb, int64_t pcOff);
 
@@ -108,9 +108,9 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
  */
 template<typename T>
 inline void
-emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 reg) {
+emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
   uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
-  a.    fs().loadq(baseless(virtualAddress), reg);
+  a.    fs().loadq(baseless(virtualAddress), dest);
 }
 
 #else // USE_GCC_FAST_TLS
@@ -127,7 +127,7 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
     a.    movq(addr, reg::rax);
     a.    call(reg::rax);
   }
-  if (reg != reg::rax) {
+  if (dest != reg::rax) {
     a.    movq(reg::rax, dest);
   }
 }

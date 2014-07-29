@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/stat-cache.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
@@ -133,8 +134,11 @@ static int accessSyscall(
 
   if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
     String path(uri_or_path);
-    if (UNLIKELY(boost::istarts_with(uri_or_path.data(), "file://"))) {
-      path = uri_or_path.substr(sizeof("file://") - 1);
+    if (UNLIKELY(StringUtil::IsFileUrl(uri_or_path.data()))) {
+      path = StringUtil::DecodeFileUrl(uri_or_path);
+      if (path.empty()) {
+        return -1;
+      }
     }
     return ::access(File::TranslatePathWithFileCache(path).data(), mode);
   }
@@ -1568,7 +1572,7 @@ Variant f_scandir(const String& directory, bool descending /* = false */,
   std::vector<String> names;
   while (true) {
     auto name = dir->read();
-    if (!name.toBoolean()) {
+    if (same(name, false)) {
       break;
     }
     names.push_back(name.toString());

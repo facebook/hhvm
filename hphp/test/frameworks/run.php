@@ -475,8 +475,8 @@ INTRO;
     # Run all framework tests.
     % hhvm run.php --all
 
-    # Run all framework tests using zend for alternative options for downloads.
-    % hhvm run.php --all --zend ~/zend55/bin/php
+    # Run all framework tests using another PHP binary
+    % hhvm run.php --all --with-php ~/php55/bin/php
 
     # Run all framework tests forcing the download of all the frameworks and
     # creating new expected output files for all of the frameworks
@@ -568,9 +568,9 @@ function oss_test_option_map(): OptionInfoMap {
                                         "Default is 60 seconds."},
     'verbose'             => Pair {'v', "For a lot of messages about what is ".
                                         "going on."},
-    'zend:'               => Pair {'',  "Use zend to run the tests ".
-                                        "Currently, zend must be installed ".
-                                        "and the path to the zend binary".
+    'with-php:'           => Pair {'',  "Use php to run the tests ".
+                                        "Currently, php must be installed ".
+                                        "and the path to the php binary".
                                         "specified."},
     'redownload'          => Pair {'',  "Forces a redownload of the framework ".
                                         "code and dependencies. This uses ".
@@ -612,6 +612,8 @@ function oss_test_option_map(): OptionInfoMap {
     'isolate'             => Pair {'',   "Try to make tests that have ".
                                          "external dependencies automatically ".
                                          "fail"},
+    'toran-proxy:'        => Pair {'',   "URL of Toran Proxy to use for ".
+                                         "dependencies"},
   };
 }
 

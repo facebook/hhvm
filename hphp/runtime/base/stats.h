@@ -205,9 +205,6 @@ enum StatCounter {
 extern const char* g_counterNames[kNumStatCounters];
 extern __thread uint64_t tl_counters[kNumStatCounters];
 
-extern __thread uint64_t tl_helper_counters[];
-extern std::atomic<const char*> helperNames[];
-
 inline bool enabled() {
   return Trace::moduleEnabled(Trace::stats, 1);
 }

@@ -1,0 +1,6 @@
+File "variadic_args6.php", line 9, characters 16-20:
+Invalid argument
+File "variadic_args6.php", line 3, characters 23-28:
+This is a string
+File "variadic_args6.php", line 5, characters 16-20:
+It is incompatible with an array (used like a vector) (variadic argument)

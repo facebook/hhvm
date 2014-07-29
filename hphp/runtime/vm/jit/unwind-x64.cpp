@@ -32,8 +32,8 @@
 // libgcc exports this for registering eh information for
 // dynamically-loaded objects.  The pointer is to data in the format
 // you find in a .eh_frame section.
-extern "C" void __register_frame(void*);
-extern "C" void __deregister_frame(void*);
+extern "C" void __register_frame(const void*);
+extern "C" void __deregister_frame(const void*);
 
 TRACE_SET_MOD(unwind);
 

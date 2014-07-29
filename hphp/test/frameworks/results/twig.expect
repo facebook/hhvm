@@ -589,7 +589,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #98
 Twig_Tests_IntegrationTest::testIntegration with data set #99
 .
 Twig_Tests_LexerTest::testBigNumbers
-S
+.
 Twig_Tests_LexerTest::testBracketsNesting
 .
 Twig_Tests_LexerTest::testLineDirective
@@ -707,7 +707,7 @@ Twig_Tests_Loader_FilesystemTest::testSecurity with data set #8
 Twig_Tests_Loader_FilesystemTest::testSecurity with data set #9
 .
 Twig_Tests_NativeExtensionTest::testGetProperties
-S
+.
 Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #0
 .
 Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #1

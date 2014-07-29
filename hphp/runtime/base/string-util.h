@@ -137,6 +137,17 @@ public:
   static String UrlDecode(const String& input, bool decodePlus = true);
 
   /**
+   * Determine if a string looks like a file URL. Does not check for validity.
+   */
+  static bool IsFileUrl(const String& input);
+
+  /**
+   * Determine if a string is a valid local file URL. If it is, the decoded
+   * path part is returned. If it is not, an empty string is returned.
+   */
+  static String DecodeFileUrl(const String& input);
+
+  /**
    * Formatting.
    */
   static String MoneyFormat(const char *format, double value);

@@ -669,7 +669,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(Eval,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(DefFunc,         ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
-  O(NopDefCls,       ONE(IVA),         NOV,             NOV,        NF) \
+  O(DefClsNop,       ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(DefTypeAlias,    ONE(IVA),         NOV,             NOV,        NF) \
   O(This,            NA,               NOV,             ONE(CV),    NF) \
@@ -752,8 +752,7 @@ enum AcoldOp {
 
 #define HIGH_OPCODES \
   O(FuncPrologue) \
-  O(TraceletGuard) \
-  O(NativeTrampoline)
+  O(TraceletGuard)
 
 enum HighOp {
   OpHighStart = OpAcoldCount-1,

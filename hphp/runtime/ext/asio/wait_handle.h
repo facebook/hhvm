@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/asio/asio_blockable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,6 +37,8 @@ namespace HPHP {
  *    ResumableWaitHandle          - wait handle that can resume PHP execution
  *     AsyncFunctionWaitHandle     - async function-based async execution
  *     AsyncGeneratorWaitHandle    - async generator-based async execution
+ *    AwaitAllWaitHandle           - wait handle representing a collection of
+ *                                     WHs, does not propagate results
  *    GenArrayWaitHandle           - wait handle representing an array of WHs
  *    GenMapWaitHandle             - wait handle representing an Map of WHs
  *    GenVectorWaitHandle          - wait handle representing an Vector of WHs
@@ -49,9 +52,9 @@ namespace HPHP {
  * passed as an array member of GenArrayWaitHandle).
  */
 FORWARD_DECLARE_CLASS(WaitHandle);
-FORWARD_DECLARE_CLASS(BlockableWaitHandle);
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 FORWARD_DECLARE_CLASS(AsyncGeneratorWaitHandle);
+FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
 FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
@@ -66,6 +69,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     Static,
     AsyncFunction,
     AsyncGenerator,
+    AwaitAll,
     GenArray,
     GenMap,
     GenVector,
@@ -76,7 +80,6 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
 
   explicit c_WaitHandle(Class* cls = c_WaitHandle::classof())
     : ExtObjectDataFlags(cls)
-    , m_resultOrException(make_tv<KindOfNull>())
   {}
   ~c_WaitHandle() {}
 
@@ -135,6 +138,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
 
   c_AsyncFunctionWaitHandle* asAsyncFunction();
   c_AsyncGeneratorWaitHandle* asAsyncGenerator();
+  c_AwaitAllWaitHandle* asAwaitAll();
   c_GenArrayWaitHandle* asGenArray();
   c_GenMapWaitHandle* asGenMap();
   c_GenVectorWaitHandle* asGenVector();
@@ -155,11 +159,11 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     // !STATE_SUCCEEDED && !STATE_FAILED
     struct {
       // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
-      c_BlockableWaitHandle* m_firstParent;
+      AsioBlockableChain m_parentChain;
 
       union {
         // BlockableWaitHandle: STATE_BLOCKED
-        c_BlockableWaitHandle* m_nextParent;
+        AsioBlockable m_blockable;
 
         // ExternalThreadEventWaitHandle: STATE_WAITING
         // SleepWaitHandle: STATE_WAITING

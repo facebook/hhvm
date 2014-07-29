@@ -22,8 +22,6 @@
 
 namespace HPHP {
 
-const size_t kTrampolinesBlockSize = 8 << 12;
-
 struct CodeCache {
   enum class Selection {
     Default,   // 'main'
@@ -44,7 +42,6 @@ struct CodeCache {
     body("main", m_main);
     body("prof", m_prof);
     body("cold", m_cold);
-    body("trampolines", m_trampolines);
     body("frozen", m_frozen);
   }
 
@@ -69,8 +66,6 @@ struct CodeCache {
   const CodeBlock& cold() const {
     return const_cast<CodeCache&>(*this).cold();
   }
-  CodeBlock& trampolines()             { return m_trampolines; }
-  const CodeBlock& trampolines() const { return m_trampolines; }
 
   CodeBlock& frozen();
   const CodeBlock& frozen() const {
@@ -118,7 +113,6 @@ private:
   CodeBlock m_cold;        // used for cold or one time use code
   CodeBlock m_hot;         // used for hot code of AttrHot functions
   CodeBlock m_prof;        // used for hot code of profiling translations
-  CodeBlock m_trampolines; // used to enable static calls to distant code
   CodeBlock m_frozen;      // used for code that is (almost) never used
   DataBlock m_data;        // data to be used by translated code
   bool      m_lock;        // don't allow access to main() or cold()

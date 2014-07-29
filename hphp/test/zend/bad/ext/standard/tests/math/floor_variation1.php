@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype  : float floor  ( float $value  )
  * Description: Round fractions down.
  * Source code: ext/standard/math.c

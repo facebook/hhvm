@@ -633,33 +633,6 @@ static xmlNsPtr dom_get_ns(xmlNodePtr nodep, const char *uri, int *errorcode,
   return nsptr;
 }
 
-static String _dom_get_valid_file_path(const char *source) {
-  int isFileUri = 0;
-
-  xmlURI *uri = xmlCreateURI();
-  xmlChar *escsource = xmlURIEscapeStr((xmlChar*)source, (xmlChar*)":");
-  xmlParseURIReference(uri, (char*)escsource);
-  xmlFree(escsource);
-
-  if (uri->scheme != NULL) {
-    /* absolute file uris - libxml only supports localhost or empty host */
-    if (strncasecmp(source, "file:///",8) == 0) {
-      isFileUri = 1;
-      source += 7;
-    } else if (strncasecmp(source, "file://localhost/",17) == 0) {
-      isFileUri = 1;
-      source += 16;
-    }
-  }
-
-  String file_dest = String(source, CopyString);
-  if ((uri->scheme == NULL || isFileUri)) {
-    file_dest = File::TranslatePath(file_dest);
-  }
-  xmlFreeURI(uri);
-  return file_dest;
-}
-
 static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
                                      char *source, int source_len,
                                      int options) {
@@ -676,7 +649,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   xmlInitParser();
 
   if (mode == DOM_LOAD_FILE) {
-    String file_dest = _dom_get_valid_file_path(source);
+    String file_dest = libxml_get_valid_file_path(source);
     if (!file_dest.empty()) {
       ctxt = xmlCreateFileParserCtxt(file_dest.data());
     }
@@ -824,7 +797,7 @@ static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
   switch (type) {
   case DOM_LOAD_FILE:
     {
-      String valid_file = _dom_get_valid_file_path(source.data());
+      String valid_file = libxml_get_valid_file_path(source.data());
       if (valid_file.empty()) {
         raise_warning("Invalid RelaxNG file source");
         return false;
@@ -883,7 +856,7 @@ static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
   switch (type) {
   case DOM_LOAD_FILE:
     {
-      String valid_file = _dom_get_valid_file_path(source.data());
+      String valid_file = libxml_get_valid_file_path(source.data());
       if (valid_file.empty()) {
         raise_warning("Invalid Schema file source");
         return false;
@@ -924,110 +897,6 @@ static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
   xmlSchemaFreeValidCtxt(vptr);
 
   return is_valid == 0;
-}
-
-static void php_libxml_node_free(xmlNodePtr node) {
-  if (node) {
-    switch (node->type) {
-    case XML_ATTRIBUTE_NODE:
-      xmlFreeProp((xmlAttrPtr) node);
-      break;
-    case XML_ENTITY_DECL:
-    case XML_ELEMENT_DECL:
-    case XML_ATTRIBUTE_DECL:
-      break;
-    case XML_NOTATION_NODE:
-      /* These require special handling */
-      if (node->name != NULL) {
-        xmlFree((char *) node->name);
-      }
-      if (((xmlEntityPtr) node)->ExternalID != NULL) {
-        xmlFree((char *) ((xmlEntityPtr) node)->ExternalID);
-      }
-      if (((xmlEntityPtr) node)->SystemID != NULL) {
-        xmlFree((char *) ((xmlEntityPtr) node)->SystemID);
-      }
-      xmlFree(node);
-      break;
-    case XML_NAMESPACE_DECL:
-      if (node->ns) {
-        xmlFreeNs(node->ns);
-        node->ns = NULL;
-      }
-      node->type = XML_ELEMENT_NODE;
-    default:
-      xmlFreeNode(node);
-    }
-  }
-}
-
-static void php_libxml_node_free_list(xmlNodePtr node) {
-  xmlNodePtr curnode;
-
-  if (node != NULL) {
-    curnode = node;
-    while (curnode != NULL) {
-      node = curnode;
-      switch (node->type) {
-      /* Skip property freeing for the following types */
-      case XML_NOTATION_NODE:
-        break;
-      case XML_ENTITY_REF_NODE:
-        php_libxml_node_free_list((xmlNodePtr) node->properties);
-        break;
-      case XML_ATTRIBUTE_NODE:
-        if ((node->doc != NULL) &&
-            (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
-          xmlRemoveID(node->doc, (xmlAttrPtr) node);
-        }
-      case XML_ATTRIBUTE_DECL:
-      case XML_DTD_NODE:
-      case XML_DOCUMENT_TYPE_NODE:
-      case XML_ENTITY_DECL:
-      case XML_NAMESPACE_DECL:
-      case XML_TEXT_NODE:
-        php_libxml_node_free_list(node->children);
-        break;
-      default:
-        php_libxml_node_free_list(node->children);
-        php_libxml_node_free_list((xmlNodePtr) node->properties);
-      }
-
-      curnode = node->next;
-      xmlUnlinkNode(node);
-      node->doc = NULL;
-      php_libxml_node_free(node);
-    }
-  }
-}
-
-void php_libxml_node_free_resource(xmlNodePtr node) {
-  if (node) {
-    switch (node->type) {
-    case XML_DOCUMENT_NODE:
-    case XML_HTML_DOCUMENT_NODE:
-      break;
-    default:
-      if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
-        php_libxml_node_free_list((xmlNodePtr) node->children);
-        switch (node->type) {
-        /* Skip property freeing for the following types */
-        case XML_ATTRIBUTE_DECL:
-        case XML_DTD_NODE:
-        case XML_DOCUMENT_TYPE_NODE:
-        case XML_ENTITY_DECL:
-        case XML_ATTRIBUTE_NODE:
-        case XML_NAMESPACE_DECL:
-        case XML_TEXT_NODE:
-          break;
-        default:
-          php_libxml_node_free_list((xmlNodePtr) node->properties);
-        }
-        node->doc = NULL;
-        php_libxml_node_free(node);
-      }
-    }
-  }
 }
 
 static xmlNodePtr php_dom_free_xinclude_node(xmlNodePtr cur) {

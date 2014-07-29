@@ -5,7 +5,7 @@
  * Alias to functions: 
  */
 
-include(__DIR__ . '/data.inc');
+include(dirname(__FILE__) . '/data.inc');
 
 echo "*** Testing gzinflate() : error conditions ***\n";
 

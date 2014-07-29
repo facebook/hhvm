@@ -17,33 +17,59 @@ module Unify = Typing_unify
 module Env = Typing_env
 module TDef = Typing_tdef
 module TUtils = Typing_utils
+module ShapeMap = Nast.ShapeMap
 
-(* This function checks that the method ft2 can be used to replace ft1 *)
-let rec subtype_funs_generic ~check_return env r1 ft1 r2 orig_ft2 =
-  let p = Reason.to_pos r2 in
-  let p1 = Reason.to_pos r1 in
-  let env, ft2 = Inst.instantiate_ft env orig_ft2 in
-  if ft2.ft_arity_min > ft1.ft_arity_min
-  then Errors.fun_too_many_args p p1;
-  if ft2.ft_arity_max < ft1.ft_arity_max
-  then Errors.fun_too_few_args p p1;
-  let env, _ = subtype_params env ft1.ft_params ft2.ft_params in
+(* This function checks that the method ft_sub can be used to replace
+ * (is a subtype of) ft_super *)
+let rec subtype_funs_generic ~check_return env r_super ft_super r_sub orig_ft_sub =
+  let p_sub = Reason.to_pos r_sub in
+  let p_super = Reason.to_pos r_super in
+  let env, ft_sub = Inst.instantiate_ft env orig_ft_sub in
+  if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
+  then Errors.fun_too_many_args p_sub p_super;
+  (match ft_sub.ft_arity, ft_super.ft_arity with
+    | Fellipsis _, Fvariadic _ ->
+      (* The HHVM runtime ignores "..." entirely, but knows about
+       * "...$args"; for contexts for which the runtime enforces method
+       * compatibility (currently, inheritance from abstract/interface
+       * methods), letting "..." override "...$args" would result in method
+       * compatibility errors at runtime. *)
+      Errors.fun_variadicity_hh_vs_php56 p_sub p_super;
+    | Fstandard (_, sub_max), Fstandard (_, super_max) ->
+      if sub_max < super_max
+      then Errors.fun_too_few_args p_sub p_super;
+    | Fstandard _, _ -> Errors.fun_unexpected_nonvariadic p_sub p_super;
+    | _, _ -> ()
+  );
+
+  (* We are dissallowing contravariant arguments, they are not supported
+   * by the runtime *)
+  (* However, if we are polymorphic in the upper-class we have to be
+   * polymorphic in the subclass. *)
+  let env, var_opt = match ft_sub.ft_arity, ft_super.ft_arity with
+    | Fvariadic (_, (n_super, var_super)), Fvariadic (_, (n_sub, var_sub)) ->
+      let env, var = Unify.unify env var_super var_sub in
+      env, Some (n_super, var)
+    | _ -> env, None
+  in
+  let env, _ =
+    Unify.unify_params env ft_super.ft_params ft_sub.ft_params var_opt in
   (* Checking that if the return type was defined in the parent class, it
    * is defined in the subclass too (requested by Gabe Levi).
    *)
   (* We agreed this was too painful for now, breaks too many things *)
-  (*  (match ft1.ft_ret, ft2.ft_ret with
+  (*  (match ft_super.ft_ret, ft_sub.ft_ret with
       | (_, Tany), _ -> ()
-      | (r1, ty), (r2, Tany) ->
-      let p1 = Reason.to_pos r1 in
-      let p2 = Reason.to_pos r2 in
-      error_l [p2, "Please add a return type";
-      p1, "Because we want to be consistent with this annotation"]
+      | (r_super, ty), (r_sub, Tany) ->
+      let p_super = Reason.to_pos r_super in
+      let p_sub = Reason.to_pos r_sub in
+      error_l [p_sub, "Please add a return type";
+      p_super, "Because we want to be consistent with this annotation"]
       | _ -> ()
       );
   *)
-  let env = if check_return then sub_type env ft1.ft_ret ft2.ft_ret else env in
-  let env, _ = Unify.unify_funs env r2 ft2 r2 orig_ft2 in
+  let env = if check_return then sub_type env ft_super.ft_ret ft_sub.ft_ret else env in
+  let env, _ = Unify.unify_funs env r_sub ft_sub r_sub orig_ft_sub in
   env
 
 (**
@@ -103,13 +129,25 @@ and sub_type env ty1 ty2 =
       let env = Env.set_allow_null_as_void env in
       let env = sub_type env ty1 ty2 in
       Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
-  | (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty1]))),
-    (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty2]))) ->
+  | (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty1]))),
+    (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty2]))) ->
       sub_type env ty1 ty2
   | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty1; vty1]))),
     (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty2; vty2]))) ->
       let env = sub_type env kty1 kty2 in
       sub_type env vty1 vty2
+  | (_, (Tapply ((_, "\\Generator"), [tk1; tv1; ts1]))),
+    (_, (Tapply ((_, "\\Generator"), [tk2; tv2; ts2]))) ->
+      (* Currently, we are only covariant in the type of the value yielded. I
+       * think we could also be covariant in the type of the key yielded and
+       * also *contravariant* in the type of the value sent in, but since this
+       * code is new and no one is relying on those two yet, let's see if we can
+       * get away with being invariant and if anyone complains we can
+       * reconsider. TODO(#4534682) come back to this. *)
+      let env = sub_type env tv1 tv2 in
+      let env, _ = Unify.unify env tk1 tk2 in
+      let env, _ = Unify.unify env ts1 ts2 in
+      env
   | (p1, (Tapply (x1, tyl1) as ty1_)), (p2, (Tapply (x2, tyl2) as ty2_)) ->
     let cid1, cid2 = (snd x1), (snd x2) in
     if cid1 = cid2 then fst (Unify.unify env ety1 ety2)
@@ -120,18 +158,16 @@ and sub_type env ty1 ty2 =
         | Some class_ ->
           let subtype_req_ancestor =
             if class_.tc_kind = Ast.Ctrait || class_.tc_kind = Ast.Cinterface then
-              (* a trait is never the runtime type, but it can be used as
-               * a constraint if it has requirements for its using
+              (* a trait is never the runtime type, but it can be used
+               * as a constraint if it has requirements for its using
                * classes *)
-              let pos = (fst x2) in
-              let env, ret = SSet.fold begin fun elt acc ->
+              let env, ret = SMap.fold begin fun elt elt_type acc ->
                 match acc with
                   | _, Some _ -> acc
                   | env, None ->
                     Errors.try_ begin fun () ->
-                      (* FIXME: need to actually use the type *)
-                      let candidate_ty = (p2, Tapply ((pos, elt), tyl2)) in
-                      env, Some (sub_type env ty1 candidate_ty)
+                      let _, elt_ty = elt_type in
+                      env, Some (sub_type env ty1 (p2, elt_ty))
                     end (fun _ -> acc)
               end class_.tc_req_ancestors (env, None) in
               ret
@@ -233,12 +269,12 @@ and sub_type env ty1 ty2 =
   | (r1, Tfun ft1), (r2, Tfun ft2) ->
       subtype_funs_generic ~check_return:true env r1 ft1 r2 ft2
   | (r1, Tshape fdm1), (r2, Tshape fdm2) ->
-      SMap.iter begin fun k _ ->
-        if not (SMap.mem k fdm1)
+      ShapeMap.iter begin fun k _ ->
+        if not (ShapeMap.mem k fdm1)
         then
           let p1 = Reason.to_pos r1 in
           let p2 = Reason.to_pos r2 in
-          Errors.field_missing k p1 p2
+          Errors.field_missing (TUtils.get_shape_field_name k) p1 p2
       end fdm2;
       TUtils.apply_shape sub_type env (r1, fdm1) (r2, fdm2)
   | _, (_, Tabstract (_, _, Some x)) ->
@@ -284,21 +320,16 @@ and sub_string p env ty2 =
   | _, Tobject -> env
   | _ -> fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 
-and subtype_params env l1 l2 =
-  match l1, l2 with
-  | [], l | l, [] -> env, l
-  | (name1, x1) :: rl1, (name2, x2) :: rl2 ->
-      (* We are dissalowing contravariant arguments, they are not supported
-       * by the runtime
-       *)
-      (* However, if we are polymorphic in the upper-class we have to be
-         polymorphic in the subclass.
-       *)
-      let name = if name1 = name2 then name1 else None in
-      let env = { env with Env.pos = Reason.to_pos (fst x1) } in
-      let env, _ = Unify.unify env x1 x2 in
-      let env, rl = Unify.unify_params env rl1 rl2 in
-      env, (name, x2) :: rl
+(* and subtype_params env l_super l_sub def_super = *)
+(*   match l_super, l_sub with *)
+(*   | l, [] -> env, l *)
+(*   | [], l -> *)
+(*   | (name_super, x_super) :: rl_super, (name_sub, x_sub) :: rl_sub -> *)
+(*     let name = if name_super = name_sub then name_super else None in *)
+(*     let env = { env with Env.pos = Reason.to_pos (fst x_super) } in *)
+(*     let env, _ = Unify.unify env x_super x_sub in *)
+(*     let env, rl = Unify.unify_params env rl_super rl_sub in *)
+(*     env, (name, x_sub) :: rl *)
 
 let subtype_funs = subtype_funs_generic ~check_return:true
 let subtype_funs_no_return = subtype_funs_generic ~check_return:false

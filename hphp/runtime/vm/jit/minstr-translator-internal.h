@@ -95,17 +95,16 @@ inline unsigned buildBitmask(T c, Args... args) {
 // getKeyType determines the KeyType to be used as a template argument
 // to helper functions.
 inline KeyType getKeyType(const SSATmp* key) {
-  auto DEBUG_ONLY keyType = key->type();
+  DEBUG_ONLY auto const keyType = key->type();
   assert(keyType.notBoxed());
-  assert(keyType.isKnownDataType() || keyType.equals(Type::Cell));
 
-  if (key->isA(Type::Str)) {
-    return KeyType::Str;
-  } else if (key->isA(Type::Int)) {
-    return KeyType::Int;
-  } else {
-    return KeyType::Any;
-  }
+  assert(keyType.isKnownDataType() ||
+         keyType == Type::InitCell ||
+         keyType == Type::Cell);
+
+  if (key->isA(Type::Str)) return KeyType::Str;
+  if (key->isA(Type::Int)) return KeyType::Int;
+  return KeyType::Any;
 }
 
 // like getKeyType, but for cases where we don't have an Int

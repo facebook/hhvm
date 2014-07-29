@@ -12,6 +12,11 @@ if [ "$1" = "darwin" ]; then
       awk '{ if ($2=="g") print $8 }' | \
       $GEN_EXT_HHVM \
       $2 $5 $4 $DIR/../../system/idl/*.idl.json
+elif [ "$1" = "cygwin" ]; then
+  objdump --section=".text" -t $3 | \
+      awk '{ if(NF > 1) print $NF }' | \
+      $GEN_EXT_HHVM \
+      $2 $5 $4 $DIR/../../system/idl/*.idl.json
 else
   readelf -s -W $3 | grep 'FUNC.*GLOBAL' | \
       sed -e 's/^.*DEFAULT[0-9 ]*//' | \

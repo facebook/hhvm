@@ -16,7 +16,9 @@
 
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/stack-trace.h"
+#if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(__MSC_VER))
 #include <execinfo.h>
+#endif
 #include <algorithm>
 
 namespace HPHP {

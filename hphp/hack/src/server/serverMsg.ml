@@ -49,6 +49,10 @@ type refactor_action =
 | MethodRename of string * string * string (* class_name * old_name * new_name*)
 | FunctionRename of string * string (* old_name * new_name *)
 
+type file_input =
+| FileName of string
+| FileContent of string
+
 type insert_patch = {
   pos: Pos.t;
   text: string;
@@ -61,7 +65,7 @@ type patch =
 
 type command =
 | ERROR_OUT_OF_DATE
-| PRINT_TYPES of string
+| PRINT_TYPES of file_input
 | STATUS of Path.path
 | LIST_FILES
 | AUTOCOMPLETE of string
@@ -75,10 +79,11 @@ type command =
 | IDENTIFY_FUNCTION of string * int * int
 | OUTLINE of string
 | METHOD_JUMP of (string * bool)
-| INFER_TYPE of string * int * int (* filename, line, char *)
+| INFER_TYPE of file_input * int * int (* filename|content, line, char *)
 | REFACTOR of refactor_action
 | SEARCH of string
 | SUGGEST of string list
+| ARGUMENT_INFO of string * int * int
 
 let cmd_to_channel (oc:out_channel) (cmd:command): unit =
   Printf.fprintf oc "%s\n" Build_id.build_id_ohai;

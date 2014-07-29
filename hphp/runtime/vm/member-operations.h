@@ -167,7 +167,7 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   int64_t n;
   auto const result = !key->isStrictlyInteger(n) ? base->nvGet(key)
-                                                 : base->nvGet(n);
+                                                 : base->nvGetConverted(n);
   return result ? result : null_variant.asTypedValue();
 }
 
@@ -354,12 +354,17 @@ inline TypedValue* ElemDArrayPre<KeyType::Any>(Array& base, TypedValue key) {
 /**
  * ElemD when base is an Array
  */
-template <bool warn, KeyType keyType>
+template <bool warn, bool reffy, KeyType keyType>
 inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
   auto& baseArr = tvAsVariant(base).asArrRef();
   bool defined = !warn || baseArr.exists(keyAsValue(key));
 
   auto* result = ElemDArrayPre<keyType>(baseArr, key);
+
+  if (reffy && UNLIKELY(baseArr->isIntMapArray() || baseArr->isStrMapArray())) {
+    // Downgrade and warn after the operation in case we copied
+    MixedArray::downgradeAndWarn(baseArr.get(), MixedArray::Reason::kSetRef);
+  }
 
   if (warn) {
     if (!defined) {
@@ -444,7 +449,8 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
                                    SystemLib::s_ArrayObjectClass->nameStr());
     // ArrayObject should have the 'storage' property...
     assert(storage != nullptr);
-    return ElemDArray<false /* warn */, keyType>(storage->asTypedValue(), key);
+    return ElemDArray<false /* warn */, reffy,
+      keyType>(storage->asTypedValue(), key);
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(scratchKey));
 }
@@ -474,7 +480,7 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfString:
     return ElemDString<warn, keyType>(base, key);
   case KindOfArray:
-    return ElemDArray<warn, keyType>(base, key);
+    return ElemDArray<warn, reffy, keyType>(base, key);
   case KindOfObject:
     return ElemDObject<reffy, keyType>(tvRef, base, key);
   default:
@@ -861,7 +867,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   bool copy) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
-    return a->set(n, cellAsCVarRef(*value), copy);
+    return a->setConverted(n, cellAsCVarRef(*value), copy);
   }
   return a->set(StrNR(key), cellAsCVarRef(*value), copy);
 }
@@ -1132,7 +1138,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfArray: {
-    result = ElemDArray<MoreWarnings, KeyType::Any>(base, key);
+    result = ElemDArray<MoreWarnings, /*reffy*/ false, KeyType::Any>(base, key);
     result = tvToCell(result);
     SETOP_BODY_CELL(result, op, rhs);
     break;
@@ -1386,7 +1392,8 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfArray: {
-    TypedValue* result = ElemDArray<MoreWarnings, KeyType::Any>(base, key);
+    TypedValue* result =
+      ElemDArray<MoreWarnings, /* reffy */ false, KeyType::Any>(base, key);
     IncDecBody<setResult>(op, tvToCell(result), &dest);
     break;
   }
@@ -1500,6 +1507,10 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
   if (!key->isStrictlyInteger(n)) {
     return a->remove(StrNR(key), copy);
   } else {
+    if (UNLIKELY(a->isIntMapArray())) {
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
+    }
     return a->remove(n, copy);
   }
 }

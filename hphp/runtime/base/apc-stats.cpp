@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/base/apc-collection.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,24 +55,27 @@ size_t getMemSize(const APCHandle* handle) {
     return sizeof(APCHandle);
   }
   if (t == KindOfString) {
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getStringData());
     }
     return getMemSize(APCString::fromHandle(handle));
   }
   if (t == KindOfArray) {
-    if (handle->getSerializedArray()) {
+    if (handle->isSerializedArray()) {
       return getMemSize(APCString::fromHandle(handle));
     }
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getArrayData());
     }
     return getMemSize(APCArray::fromHandle(handle));
   }
   if (t == KindOfObject) {
-    if (handle->getIsObj()) {
+    if (handle->isCollection()) {
+      return getMemSize(APCCollection::fromHandle(handle));
+    }
+    if (handle->isObj()) {
       return getMemSize(APCObject::fromHandle(handle));
     }
     return getMemSize(APCString::fromHandle(handle));
@@ -112,6 +116,11 @@ size_t getMemSize(const APCObject* obj) {
     if (prop->val) size += getMemSize(prop->val);
   }
   return size;
+}
+
+inline
+size_t getMemSize(const APCCollection* obj) {
+  return sizeof(APCCollection) + obj->m_size;
 }
 
 size_t getMemSize(const ArrayData* arr) {
@@ -265,6 +274,7 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
                                      , m_uncArray(nullptr)
                                      , m_serObject(nullptr)
                                      , m_apcObject(nullptr)
+                                     , m_apcColl(nullptr)
                                      , m_setValues(nullptr)
                                      , m_delValues(nullptr)
                                      , m_replValues(nullptr)
@@ -277,6 +287,7 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
   m_uncArray = ServiceData::createCounter("apc.type_unc_array");
   m_serObject = ServiceData::createCounter("apc.type_ser_object");
   m_apcObject = ServiceData::createCounter("apc.type_apc_object");
+  m_apcColl = ServiceData::createCounter("apc.type_apc_collection");
 
   m_setValues = ServiceData::createCounter("apc.set_values");
   m_delValues = ServiceData::createCounter("apc.deleted_values");
@@ -403,23 +414,25 @@ void APCDetailedStats::addType(APCHandle* handle) {
   }
   switch (type) {
   case KindOfString:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       m_uncString->increment();
     } else {
       m_apcString->increment();
     }
     return;
   case KindOfArray:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       m_uncArray->increment();
-    } else if (handle->getSerializedArray()) {
+    } else if (handle->isSerializedArray()) {
       m_serArray->increment();
     } else {
       m_apcArray->increment();
     }
     return;
   case KindOfObject:
-    if (handle->getIsObj()) {
+    if (handle->isCollection()) {
+      m_apcColl->increment();
+    } else if (handle->isObj()) {
       m_apcObject->increment();
     } else {
       m_serObject->increment();
@@ -442,23 +455,25 @@ void APCDetailedStats::removeType(APCHandle* handle) {
   }
   switch (type) {
   case KindOfString:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       m_uncString->decrement();
     } else {
       m_apcString->decrement();
     }
     return;
   case KindOfArray:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       m_uncArray->decrement();
-    } else if (handle->getSerializedArray()) {
+    } else if (handle->isSerializedArray()) {
       m_serArray->decrement();
     } else {
       m_apcArray->decrement();
     }
     return;
   case KindOfObject:
-    if (handle->getIsObj()) {
+    if (handle->isCollection()) {
+      m_apcColl->decrement();
+    } else  if (handle->isObj()) {
       m_apcObject->decrement();
     } else {
       m_serObject->decrement();

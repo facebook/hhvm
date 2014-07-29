@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/backtrace.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,7 +26,7 @@
   void ExtendedLogger::LOGLEVEL(const char *fmt, ...) {                \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     if (!ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = g_context->debugBacktrace();                          \
+      Array bt = createBacktrace(BacktraceArgs());                     \
       if (!bt.empty()) {                                               \
         va_list ap; va_start(ap, fmt);                                 \
         Logger::LogEscapeMore(Log ## LOGLEVEL, fmt, ap);               \
@@ -41,7 +42,7 @@
   void ExtendedLogger::LOGLEVEL(const std::string &msg) {              \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     if (!ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = g_context->debugBacktrace();                          \
+      Array bt = createBacktrace(BacktraceArgs());                     \
       if (!bt.empty()) {                                               \
         Logger::Log(Log ## LOGLEVEL, msg, nullptr, true, true);        \
         Log(Log ## LOGLEVEL, bt);                                      \
@@ -73,7 +74,7 @@ void ExtendedLogger::log(LogLevelType level, const char *type,
   Logger::log(level, type, e, file, line);
 
   if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
-    Log(level, ee->getBackTrace());
+    Log(level, ee->getBacktrace());
   }
 }
 
@@ -81,7 +82,7 @@ void ExtendedLogger::log(LogLevelType level, const std::string &msg,
                          const StackTrace *stackTrace,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
-  Array bt = g_context->debugBacktrace();
+  Array bt = createBacktrace(BacktraceArgs());
   if (!bt.empty()) {
     Logger::log(level, msg, stackTrace, escape, escape);
     Log(level, bt, escape, escapeMore);

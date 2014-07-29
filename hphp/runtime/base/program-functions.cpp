@@ -63,6 +63,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/system/constants.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/backtrace.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -86,6 +87,12 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/compiler/builtin_symbols.h"
+
+#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#undef NOUSER
+#include <windows.h>
+#include <winuser.h>
+#endif
 
 using namespace boost::program_options;
 using std::cout;
@@ -336,7 +343,7 @@ enum class ContextOfException {
 
 static void handle_exception_append_bt(std::string& errorMsg,
                                        const ExtendedException& e) {
-  Array bt = e.getBackTrace();
+  Array bt = e.getBacktrace();
   if (!bt.empty()) {
     errorMsg += ExtendedLogger::StringOfStackTrace(bt);
   }
@@ -381,7 +388,7 @@ static void handle_exception_helper(bool& ret,
     } else if (where != ContextOfException::Handler &&
         !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
-      Array stack = e.getBackTrace();
+      Array stack = e.getBacktrace();
       Array argv = make_packed_array(ExitException::ExitCode.load(), stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
@@ -1290,9 +1297,14 @@ static int execute_program_impl(int argc, char** argv) {
       if (stackSizeMinimum > rlim.rlim_max) {
         rlim.rlim_max = stackSizeMinimum;
       }
+#ifdef __CYGWIN__
+      Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
+                    stackSizeMinimum);
+#else
       if (setrlimit(RLIMIT_STACK, &rlim)) {
         Logger::Error("failed to set stack limit to %zd\n", stackSizeMinimum);
       }
+#endif
     }
   }
 
@@ -1324,8 +1336,9 @@ static int execute_program_impl(int argc, char** argv) {
         VMParserFrame parserFrame;
         parserFrame.filename = po.lint.c_str();
         parserFrame.lineNumber = line;
-        Array bt = g_context->debugBacktrace(false, true,
-                                               false, &parserFrame);
+        Array bt = createBacktrace(BacktraceArgs()
+                                   .withSelf()
+                                   .setParserFrame(&parserFrame));
         throw FatalErrorException(msg->data(), bt);
       }
     } catch (FileOpenException &e) {
@@ -1511,12 +1524,18 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
   embedded_data desc;
   if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
 
+#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+  string ret = systemlib_split(std::string(
+                                (const char*)LockResource(desc.m_handle),
+                                desc.m_len), hhas);
+#else
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";
   ifs.seekg(desc.m_start, std::ios::beg);
   std::unique_ptr<char[]> data(new char[desc.m_len]);
   ifs.read(data.get(), desc.m_len);
   string ret = systemlib_split(string(data.get(), desc.m_len), hhas);
+#endif
   return ret;
 }
 

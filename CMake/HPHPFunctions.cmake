@@ -96,19 +96,30 @@ macro(MYSQL_SOCKET_SEARCH)
 endmacro()
 
 function(append_systemlib TARGET SOURCE SECTNAME)
-  if (APPLE)
-    set(${TARGET}_SLIBS ${${TARGET}_SLIBS} -Wl,-sectcreate,__text,${SECTNAME},${SOURCE} PARENT_SCOPE)
+  if(CYGWIN OR MSVC OR MINGW)
+    # for each library append the following line to embed.rc
+    # $sectionname RCDATA "$source"
+    add_custom_command(TARGET generate_rc
+      COMMAND echo "${SECTNAME} RCDATA \"${SOURCE}\"" >> embed.rc
+      COMMENT "Adding ${SOURCE} as ${SECTNAME} to embed.rc"
+      VERBATIM)
   else()
-    set(${TARGET}_SLIBS ${${TARGET}_SLIBS} "--add-section" "${SECTNAME}=${SOURCE}" PARENT_SCOPE)
+    if (APPLE)
+      set(${TARGET}_SLIBS ${${TARGET}_SLIBS} -Wl,-sectcreate,__text,${SECTNAME},${SOURCE} PARENT_SCOPE)
+    else()
+      set(${TARGET}_SLIBS ${${TARGET}_SLIBS} "--add-section" "${SECTNAME}=${SOURCE}" PARENT_SCOPE)
+    endif()
+    # Add the systemlib file to the "LINK_DEPENDS" for the systemlib, this will cause it
+    # to be relinked and the systemlib re-embedded
+    set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${SOURCE})
   endif()
-  # Add the systemlib file to the "LINK_DEPENDS" for the systemlib, this will cause it
-  # to be relinked and the systemlib re-embedded
-  set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${SOURCE})
 endfunction(append_systemlib)
 
 function(embed_systemlibs TARGET DEST)
   if (APPLE)
     target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
+  elseif(CYGWIN OR MSVC OR MINGW)
+    set_source_files_properties(embed.rc PROPERTIES GENERATED TRUE)
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"

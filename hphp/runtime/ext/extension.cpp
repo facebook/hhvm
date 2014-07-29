@@ -30,10 +30,11 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
 
-#ifdef HAVE_LIBDL
-# include <dlfcn.h>
 #include <map>
 #include <vector>
+
+#ifdef HAVE_LIBDL
+# include <dlfcn.h>
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1
 # endif
@@ -57,7 +58,12 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(redis, NO_EXTENSION_VERSION_YET);
 
 typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
 static ExtensionMap *s_registered_extensions = NULL;
+
+typedef std::vector<Extension*> OrderedExtensionVector;
+static OrderedExtensionVector s_ordered_extensions;
+
 static bool s_modules_initialised = false;
+static bool s_extensions_sorted = false;
 static std::vector<Unit*> s_systemlib_units;
 
 // just to make valgrind cleaner
@@ -112,7 +118,76 @@ Extension::Extension(litstr name, const char *version /* = "" */)
   }
   assert(s_registered_extensions->find(name) ==
          s_registered_extensions->end());
+  assert(!s_extensions_sorted);
   (*s_registered_extensions)[name] = this;
+}
+
+inline Extension* findResolvedExt(const Extension::DependencySetMap& unresolved,
+                                  const Extension::DependencySet& resolved) {
+  if (unresolved.empty()) return nullptr;
+
+  for (auto& ed : unresolved) {
+    Extension* ret = ed.first;
+    for (auto& req : ed.second) {
+      if (resolved.find(req) == resolved.end()) {
+        // Something we depend on still isn't resolved, try another
+        ret = nullptr;
+        break;
+      }
+    }
+    if (ret) return ret;
+  }
+  return nullptr;
+}
+
+void Extension::SortDependencies() {
+  assert(s_registered_extensions);
+  s_ordered_extensions.clear();
+
+  DependencySet resolved;
+  DependencySetMap unresolved;
+
+  // First pass, identify the easy(common) case of modules
+  // with no dependencies and put that at the front of the list
+  // defer all other for slower resolution
+  for (auto& kv : *s_registered_extensions) {
+    auto ext = kv.second;
+    auto deps = ext->getDeps();
+    if (deps.empty()) {
+      s_ordered_extensions.push_back(ext);
+      resolved.insert(kv.first);
+      continue;
+    }
+    unresolved[ext] = deps;
+  }
+
+  // Second pass, check each remaining extension against
+  // their dependency list until they have all been loaded
+  while (auto ext = findResolvedExt(unresolved, resolved)) {
+    s_ordered_extensions.push_back(ext);
+    resolved.insert(ext->m_name);
+    unresolved.erase(ext);
+  }
+
+  if (UNLIKELY(!unresolved.empty())) {
+    // Alerts user to cirular dependency in extensions
+    // e.g. Unable to resovle dependencies for extension(s):
+    //         A(depends: B) B(depends: C) C(depends: A)
+
+    std::stringstream ss;
+    ss << "Unable to resolve dependencies for extension(s):";
+    for (auto& kv : unresolved) {
+      ss << " " << kv.first->m_name << "(depends:";
+      for (auto& req : kv.second) {
+        ss << " " << req;
+      }
+      ss << ")";
+    }
+    throw Exception(ss.str());
+  }
+
+  assert(s_ordered_extensions.size() == s_registered_extensions->size());
+  s_extensions_sorted = true;
 }
 
 void Extension::LoadModules(const IniSetting::Map& ini, Hdf hdf) {
@@ -126,6 +201,12 @@ void Extension::LoadModules(const IniSetting::Map& ini, Hdf hdf) {
     }
     if (extLoc[0] != '/') {
       extLoc = path + "/" + extLoc;
+    }
+
+    if (s_extensions_sorted) {
+      // If we load a new extension, we need to invalidate the current sorting
+      s_ordered_extensions.clear();
+      s_extensions_sorted = false;
     }
 
     // Extensions are self-registering,
@@ -157,8 +238,12 @@ void Extension::LoadModules(const IniSetting::Map& ini, Hdf hdf) {
 
   // Invoke Extension::moduleLoad() callbacks
   assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->moduleLoad(ini, hdf);
+
+  if (!s_extensions_sorted) SortDependencies();
+  assert(s_extensions_sorted);
+
+  for (auto& ext : s_ordered_extensions) {
+    ext->moduleLoad(ini, hdf);
   }
 }
 
@@ -174,37 +259,42 @@ void Extension::InitModules() {
     RuntimeOption::EvalDumpBytecode = wasDB;
   };
   SystemLib::s_inited = false;
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->moduleInit();
+  assert(s_extensions_sorted);
+  for (auto& ext : s_ordered_extensions) {
+    ext->moduleInit();
   }
   s_modules_initialised = true;
 }
 
 void Extension::ThreadInitModules() {
-  assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->threadInit();
+  // This can actually happen both before and after LoadModules()
+  if (!s_extensions_sorted) SortDependencies();
+  assert(s_extensions_sorted);
+  for (auto& ext : s_ordered_extensions) {
+    ext->threadInit();
   }
 }
 
 void Extension::ThreadShutdownModules() {
-  assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->threadShutdown();
+  assert(s_extensions_sorted);
+  for (auto it = s_ordered_extensions.rbegin();
+       it != s_ordered_extensions.rend(); ++it) {
+    (*it)->threadShutdown();
   }
 }
 
 void Extension::RequestInitModules() {
-  assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->requestInit();
+  assert(s_extensions_sorted);
+  for (auto& ext : s_ordered_extensions) {
+    ext->requestInit();
   }
 }
 
 void Extension::RequestShutdownModules() {
-  assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->requestShutdown();
+  assert(s_extensions_sorted);
+  for (auto it = s_ordered_extensions.rbegin();
+       it != s_ordered_extensions.rend(); ++it) {
+    (*it)->requestShutdown();
   }
 }
 
@@ -213,11 +303,14 @@ bool Extension::ModulesInitialised() {
 }
 
 void Extension::ShutdownModules() {
-  assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->moduleShutdown();
+  assert(s_extensions_sorted);
+  for (auto it = s_ordered_extensions.rbegin();
+       it != s_ordered_extensions.rend(); ++it) {
+    (*it)->moduleShutdown();
   }
   s_registered_extensions->clear();
+  s_ordered_extensions.clear();
+  s_extensions_sorted = false;
 }
 
 const StaticString

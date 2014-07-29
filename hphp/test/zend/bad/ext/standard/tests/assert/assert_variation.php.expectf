@@ -47,7 +47,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  &object(c1)#1 (0) {
+  &object(c1)#%d (0) {
   }
   [1]=>
   string(6) "assert"

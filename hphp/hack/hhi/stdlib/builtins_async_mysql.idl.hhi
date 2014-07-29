@@ -47,8 +47,14 @@ define('MYSQL_TYPE_GEOMETRY', 0);
 define('MYSQL_TYPE_NULL', 0);
 class AsyncMysqlClient {
   public function __construct() { }
+  static public function setPoolsConnectionLimit(int $limit) { }
   static public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1) { }
   static public function adoptConnection($connection) { }
+}
+class AsyncConnectionPool {
+  public function __construct(array $options) { }
+  public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = "") { }
+  public function getPoolStats(): array { }
 }
 class AsyncMysqlConnection {
   public function __construct() { }
@@ -59,6 +65,8 @@ class AsyncMysqlConnection {
   public function serverInfo() { }
   public function host() { }
   public function port() { }
+  public function setReusable(bool $reusable) { }
+  public function isReusable(): bool { }
 }
 abstract class AsyncMysqlResult {
   public function __construct() { }

@@ -24,7 +24,7 @@
 #include "folly/Memory.h"
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"
@@ -189,38 +189,37 @@ WorkItem work_item_for(Context ctx) {
     WorkItem { WorkType::Class, Context { ctx.unit, nullptr, ctx.cls } };
 }
 
-void optimize(Index& index, php::Program& program) {
-  assert(check(program));
-  trace_time tracer("optimize");
-  SCOPE_EXIT { state_after("optimize", program); };
+
+/*
+ * Algorithm:
+ *
+ * Start by running an analyze pass on every class or free function.
+ * During analysis, information about functions or classes will be
+ * requested from the Index, which initially won't really know much,
+ * but will record a dependency.  This part is done in parallel: no
+ * passes are mutating anything, just reading from the Index.
+ *
+ * After a pass, we do a single-threaded "update" step to prepare
+ * for the next pass: for each function or class that was analyzed,
+ * note the facts we learned that may aid analyzing other functions
+ * in the program, and register them in the index.
+ *
+ * If any of these facts are more useful than they used to be, add
+ * all the Contexts that had a dependency on the new information to
+ * the work list again, in case they can do better based on the new
+ * fact.  (This only applies to function analysis information right
+ * now.)
+ *
+ * Repeat until the work list is empty.
+ */
+void analyze_iteratively(Index& index, php::Program& program) {
+  trace_time tracer("analyze iteratively");
 
   // Counters, just for debug printing.
   std::atomic<uint32_t> total_funcs{0};
   std::atomic<uint32_t> total_classes{0};
   auto round = uint32_t{0};
 
-  /*
-   * Algorithm:
-   *
-   * Start by running an analyze pass on every class or free function.
-   * During analysis, information about functions or classes will be
-   * requested from the Index, which initially won't really know much,
-   * but will record a dependency.  This part is done in parallel: no
-   * passes are mutating anything, just reading from the Index.
-   *
-   * After a pass, we do a single-threaded "update" step to prepare
-   * for the next pass: for each function or class that was analyzed,
-   * note the facts we learned that may aid analyzing other functions
-   * in the program, and register them in the index.
-   *
-   * If any of these facts are more useful than they used to be, add
-   * all the Contexts that had a dependency on the new information to
-   * the work list again, in case they can do better based on the new
-   * fact.  (This only applies to function analysis information right
-   * now.)
-   *
-   * Repeat until the work list is empty.
-   */
   auto work = initial_work(program);
   while (!work.empty()) {
     auto const results = [&] {
@@ -293,21 +292,23 @@ void optimize(Index& index, php::Program& program) {
     Trace::traceRelease("total class visits %u\n", total_classes.load());
     Trace::traceRelease("total function visits %u\n", total_funcs.load());
   }
+}
 
-  /*
-   * Finally, use the results of all these iterations to perform
-   * optimization.  This reanalyzes every function using our
-   * now-very-updated Index, and then runs optimize_func with the
-   * results.
-   *
-   * We do this in parallel: all the shared information is queried out
-   * of the index, and each thread is allowed to modify the bytecode
-   * for the function it is looking at.
-   *
-   * NOTE: currently they can't modify anything other than the
-   * bytecode/Blocks, because other threads may be doing unlocked
-   * queries to php::Func and php::Class structures.
-   */
+/*
+ * Finally, use the results of all these iterations to perform
+ * optimization.  This reanalyzes every function using our
+ * now-very-updated Index, and then runs optimize_func with the
+ * results.
+ *
+ * We do this in parallel: all the shared information is queried out
+ * of the index, and each thread is allowed to modify the bytecode
+ * for the function it is looking at.
+ *
+ * NOTE: currently they can't modify anything other than the
+ * bytecode/Blocks, because other threads may be doing unlocked
+ * queries to php::Func and php::Class structures.
+ */
+void final_pass(Index& index, php::Program& program) {
   trace_time final_pass("final pass");
   index.freeze();
   parallel::for_each(
@@ -363,7 +364,12 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   state_after("parse", *program);
 
   Index index{borrow(program)};
-  if (!options.NoOptimizations) optimize(index, *program);
+  if (!options.NoOptimizations) {
+    assert(check(*program));
+    analyze_iteratively(index, *program);
+    final_pass(index, *program);
+    state_after("optimize", *program);
+  }
 
   debug_dump_program(index, *program);
   print_stats(index, *program);

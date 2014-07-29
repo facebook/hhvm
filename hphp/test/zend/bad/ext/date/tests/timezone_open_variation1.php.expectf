@@ -15,17 +15,7 @@ bool(false)
 Warning: %s
 bool(false)
 
--- int -12345 --
-
-Warning: %s
-bool(false)
-
 -- float 10.5 --
-
-Warning: %s
-bool(false)
-
--- float -10.5 --
 
 Warning: %s
 bool(false)

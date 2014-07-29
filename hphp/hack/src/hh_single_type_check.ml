@@ -51,13 +51,15 @@ let builtins = "<?hh // decl\n"^
   "final class Set<Tv> extends ConstSet<Tv> {}\n"^
   "final class ImmSet<Tv> extends ConstSet<Tv> {}\n"^
   "class Exception { public function __construct(string $x) {} }\n"^
-  "interface Continuation<Tv> implements Iterator<Tv> { \n"^
+  "class Generator<Tk, Tv, Ts> implements KeyedIterator<Tk, Tv> {\n"^
   "  public function next(): void;\n"^
   "  public function current(): Tv;\n"^
-  "  public function key(): int;\n"^
+  "  public function key(): Tk;\n"^
   "  public function rewind(): void;\n"^
   "  public function valid(): bool;\n"^
+  "  public function send(?Ts $v): void;\n"^
   "}\n"^
+  "type Continuation<Tv> = Generator<int, Tv, void>;\n"^
   "final class Pair<Tk, Tv> extends Indexish<int,mixed> {public function isEmpty(): bool {}}\n"^
   "interface Stringish {public function __toString(): string {}}\n"^
   "interface XHPChild {}\n"^

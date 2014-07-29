@@ -25,13 +25,13 @@ module Dep = Typing_deps.Dep
 
 (* Module used to represent serialized classes *)
 module Class = struct
-  type t = class_type
+  type t = Typing_defs.class_type
   let prefix = Prefix.make()
 end
 
 (* a function type *)
 module Fun = struct
-  type t = fun_type
+  type t = Typing_defs.fun_type
   let prefix = Prefix.make()
 end
 
@@ -65,39 +65,36 @@ type funs    = Funs.t
 type classes = Classes.t
 
 type fake_members = {
-    last_call : Pos.t option;
-    invalid   : SSet.t;
-    valid     : SSet.t;
-  }
+  last_call : Pos.t option;
+  invalid   : SSet.t;
+  valid     : SSet.t;
+}
 
 type local = ty list * ty
 type local_env = fake_members * local IMap.t
 
 type env = {
-    pos     : Pos.t      ;
-    tenv    : ty  IMap.t ;
-    subst   : int IMap.t ;
-    lenv    : local_env ;
-    genv    : genv       ;
-    todo    : tfun list  ;
-    pclasses : SSet.t;
-    pfuns    : SSet.t;
-  }
+  pos     : Pos.t      ;
+  tenv    : ty  IMap.t ;
+  subst   : int IMap.t ;
+  lenv    : local_env ;
+  genv    : genv       ;
+  todo    : tfun list  ;
+}
 
 and genv = {
-    mode    : Ast.mode;
-    return  : ty         ;
-    parent  : ty         ;
-    self_id : string     ;
-    self    : ty         ;
-    static  : bool       ;
-    has_yield : bool     ;
-    allow_null_as_void : bool;
-    f_type  : Ast.fun_type;
-    anons   : anon IMap.t;
-    droot   : Typing_deps.Dep.variant option  ;
-    file    : string;
-  }
+  mode    : Ast.mode;
+  return  : ty         ;
+  parent  : ty         ;
+  self_id : string     ;
+  self    : ty         ;
+  static  : bool       ;
+  allow_null_as_void : bool;
+  f_type  : Nast.fun_type;
+  anons   : anon IMap.t;
+  droot   : Typing_deps.Dep.variant option  ;
+  file    : string;
+}
 
 (* An anonymous function
  * the environment + the fun parameters + the captured identifiers
@@ -163,15 +160,18 @@ let has_type env x =
 let make_ft env p params ret_ty =
   let arity = List.length params in
   {
-   ft_pos = p;
-   ft_unsafe    = false;
-   ft_abstract  = false;
-   ft_arity_min = arity;
-   ft_arity_max = arity;
-   ft_tparams   = [];
-   ft_params    = params;
-   ft_ret       = ret_ty;
+    ft_pos      = p;
+    ft_unsafe   = false;
+    ft_abstract = false;
+    ft_arity    = Fstandard (arity, arity);
+    ft_tparams  = [];
+    ft_params   = params;
+    ft_ret      = ret_ty;
   }
+
+let get_shape_field_name = function
+  | SFlit (_, s) -> s
+  | SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
 let rec debug stack env (r, ty) =
   let o = print_string in
@@ -227,8 +227,8 @@ let rec debug stack env (r, ty) =
         | _, ty -> debug stack env ty)
   | Tobject -> o "object"
   | Tshape fdm -> o "shape(";
-      SMap.iter begin fun k v ->
-        o k; o " => "; debug stack env v
+      ShapeMap.iter begin fun k v ->
+        o (get_shape_field_name k); o " => "; debug stack env v
       end fdm;
       o ")"
 
@@ -255,8 +255,6 @@ let empty file = {
   subst   = IMap.empty;
   lenv    = empty_local;
   todo    = [];
-  pclasses = SSet.empty;
-  pfuns = SSet.empty;
   genv    = {
     mode    = Ast.Mstrict;
     return  = fresh_type();
@@ -264,9 +262,8 @@ let empty file = {
     self    = Reason.none, Tany;
     static  = false;
     parent  = Reason.none, Tany;
-    has_yield = false;
     allow_null_as_void = false;
-    f_type  = Ast.FSync;
+    f_type  = FSync;
     anons   = IMap.empty;
     droot   = None;
     file    = file;
@@ -295,13 +292,12 @@ let add_fun x ft =
 let add_wclass env x =
   let dep = Dep.Class x in
   Typing_deps.add_idep env.genv.droot dep;
-  let env = { env with pclasses = SSet.add x env.pclasses } in
   env
 
 (* When we want to type something with a fresh typing environment *)
 let fresh_tenv env f =
   let genv = env.genv in
-  let genv = { genv with has_yield = false; allow_null_as_void = false } in
+  let genv = { genv with allow_null_as_void = false } in
   f { env with todo = []; tenv = IMap.empty; genv = genv }
 
 let get_class env x =
@@ -403,7 +399,6 @@ let with_return env f =
   let env = f env in
   set_return env ret
 
-let has_yield env = env.genv.has_yield
 let allow_null_as_void env = env.genv.allow_null_as_void
 let is_static env = env.genv.static
 let get_self env = env.genv.self
@@ -415,11 +410,7 @@ let get_fn_type env = env.genv.f_type
 let get_fun env x =
   let dep = Dep.Fun x in
   Typing_deps.add_idep env.genv.droot dep;
-  let env = { env with pfuns = SSet.add x env.pfuns } in
   env, Funs.get x
-
-let set_has_yield ?(value=true) env =
-  {env with genv = {env.genv with has_yield = value }}
 
 let set_allow_null_as_void ?(allow=true) env =
   let genv = env.genv in
@@ -702,15 +693,12 @@ let anon anon_lenv env f =
   (* Setting up the environment. *)
   let old_lenv = env.lenv in
   let old_return = get_return env in
-  let old_has_yield = env.genv.has_yield in
   let outer_f_type = get_fn_type env in
-  let env = set_has_yield ~value:false env in
   let env = { env with lenv = anon_lenv } in
   (* Typing *)
   let env, result = f env in
   (* Cleaning up the environment. *)
   let env = { env with lenv = old_lenv } in
-  let env = set_has_yield ~value:old_has_yield env in
   let env = set_return env old_return in
   let env = set_fn_type env outer_f_type in
   env, result

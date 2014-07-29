@@ -75,18 +75,13 @@ private:
   CallDest callDestDbl(const IRInstruction*) const;
 
   // Main call helper:
-  CallHelperInfo cgCallHelper(Asm& a,
-                              CppCall call,
-                              const CallDest& dstInfo,
-                              SyncOptions sync,
-                              ArgGroup& args,
-                              RegSet toSave);
+  void cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
+                    SyncOptions sync, ArgGroup& args, RegSet toSave);
+
   // Overload to make the toSave RegSet optional:
-  CallHelperInfo cgCallHelper(Asm& a,
-                              CppCall call,
-                              const CallDest& dstInfo,
-                              SyncOptions sync,
-                              ArgGroup& args);
+  void cgCallHelper(Asm& a, CppCall call, const CallDest& dstInfo,
+                    SyncOptions sync, ArgGroup& args);
+
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };
@@ -160,8 +155,7 @@ private:
   void emitCmpInt(IRInstruction* inst, ConditionCode);
   void emitCmpEqDbl(IRInstruction* inst, ComparisonPred);
   void emitCmpRelDbl(IRInstruction* inst, ConditionCode, bool);
-  void cgCmpHelper(IRInstruction* inst,
-                   void (Asm::*setter)(Reg8),
+  void cgCmpHelper(IRInstruction* inst, ConditionCode,
                    int64_t (*str_cmp_str)(StringData*, StringData*),
                    int64_t (*str_cmp_int)(StringData*, int64_t),
                    int64_t (*str_cmp_obj)(StringData*, ObjectData*),
@@ -198,15 +192,15 @@ private:
 
   bool decRefDestroyIsUnlikely(OptDecRefProfile& profile, Type type);
   template <typename F>
-  Address cgCheckStaticBitAndDecRef(Type type,
+  Address cgCheckStaticBitAndDecRef(Asm& a, Type type,
                                     PhysReg dataReg,
                                     F destroy);
-  Address cgCheckStaticBitAndDecRef(Type type,
+  Address cgCheckStaticBitAndDecRef(Asm& a, Type type,
                                     PhysReg dataReg);
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64_t offset);
-  void cgDecRefStaticType(Type type,
+  void cgDecRefStaticType(Asm& a, Type type,
                           PhysReg dataReg,
                           bool genZeroCheck);
   void cgDecRefDynamicType(PhysReg typeReg,

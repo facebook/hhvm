@@ -18,7 +18,9 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/url-file.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include <memory>
 
 namespace HPHP {
@@ -50,18 +52,20 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
   std::unique_ptr<UrlFile> file;
   StreamContext *ctx = !context.isResource() ? nullptr :
                         context.toResource().getTyped<StreamContext>();
-  if (!ctx || ctx->getOptions().isNull() ||
-      ctx->getOptions()[s_http].isNull()) {
-    file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)());
-  } else {
+  Array headers;
+  String method = s_GET;
+  String post_data = null_string;
+  int max_redirs = 20;
+  int timeout = -1;
+  bool ignore_errors = false;
+
+  if (ctx && !ctx->getOptions().isNull() &&
+      !ctx->getOptions()[s_http].isNull()) {
     Array opts = ctx->getOptions()[s_http].toArray();
-    String method = s_GET;
     if (opts.exists(s_method)) {
       method = opts[s_method].toString();
     }
-    Array headers;
     if (opts.exists(s_header)) {
-
       Array lines;
       if (opts[s_header].isString()) {
         lines = StringUtil::Explode(
@@ -72,30 +76,35 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
 
       for (ArrayIter it(lines); it; ++it) {
         Array parts = StringUtil::Explode(
-          it.second().toString(), ": ").toArray();
+          it.second().toString(), ":").toArray();
         headers.set(parts.rvalAt(0), parts.rvalAt(1));
       }
     }
     if (opts.exists(s_user_agent) && !headers.exists(s_User_Agent)) {
       headers.set(s_User_Agent, opts[s_user_agent]);
     }
-    int max_redirs = 20;
     if (opts.exists(s_max_redirects)) {
       max_redirs = opts[s_max_redirects].toInt64();
     }
-    int timeout = -1;
     if (opts.exists(s_timeout)) {
       timeout = opts[s_timeout].toInt64();
     }
-    bool ignore_errors = false;
     if (opts.exists(s_ignore_errors)) {
       ignore_errors = opts[s_ignore_errors].toBoolean();
     }
-    file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)(method.data(), headers,
-                                                    opts[s_content].toString(),
-                                                    max_redirs, timeout,
-                                                    ignore_errors));
+    post_data = opts[s_content].toString();
   }
+
+  if (!headers.exists(s_User_Agent)) {
+    auto default_user_agent = ThreadInfo::s_threadInfo.getNoCheck()
+      ->m_reqInjectionData.getUserAgent();
+    if (!default_user_agent.empty()) {
+      headers.set(s_User_Agent, default_user_agent);
+    }
+  }
+  file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)(method.data(), headers,
+                                                  post_data, max_redirs,
+                                                  timeout, ignore_errors));
   bool ret = file->open(filename, mode);
   if (!ret) {
     raise_warning("Failed to open %s (%s)", filename.data(),

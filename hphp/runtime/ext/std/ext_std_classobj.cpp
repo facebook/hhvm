@@ -277,6 +277,8 @@ Variant HHVM_FUNCTION(get_called_class) {
         Variant::StaticStrInit{});
     }
   }
+
+  raise_warning("get_called_class() called from outside a class");
   return Variant(false);
 }
 

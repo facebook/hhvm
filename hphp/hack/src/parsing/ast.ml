@@ -151,10 +151,12 @@ and method_ = {
   }
 
 and is_reference = bool
+and is_variadic = bool
 
 and fun_param = {
     param_hint : hint option;
     param_is_reference : is_reference;
+    param_is_variadic : is_variadic;
     param_id : id;
     param_expr : expr option;
    (* implicit field via constructor parameter.
@@ -190,7 +192,11 @@ and hint_ =
   | Happly of id * hint list
   | Hshape of shape_field list
 
-and shape_field = pstring * hint
+and shape_field_name =
+  | SFlit of pstring
+  | SFclass_const of id * pstring
+
+and shape_field = shape_field_name * hint
 
 and stmt =
   | Unsafe
@@ -220,7 +226,7 @@ and block = stmt list
 and expr = Pos.t * expr_
 and expr_ =
   | Array of afield list
-  | Shape of (pstring * expr) list
+  | Shape of (shape_field_name * expr) list
   | Collection of id * afield list
   | Null
   | True
@@ -237,7 +243,7 @@ and expr_ =
   | Float of pstring
   | String of pstring
   | String2 of expr list * pstring
-  | Yield of expr
+  | Yield of afield
   | Yield_break
   | Await of expr
   | List of expr list

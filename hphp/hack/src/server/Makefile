@@ -17,7 +17,8 @@ SRC= serverArgs.ml serverEnv.ml \
  serverInit.ml serverConvert.ml findRefsService.ml serverFindRefs.ml \
  serverRefactor.ml serverInferType.ml \
  fileOutline.ml serverFileOutline.ml methodJumps.ml serverMethodJumps.ml \
- serverSearch.ml serverFunctors.ml hackProgram.ml
+ argumentInfoService.ml \
+ serverArgumentInfo.ml serverSearch.ml serverFunctors.ml hackProgram.ml
 
 
 INCLUDEDIRS=$(TOP)/utils \

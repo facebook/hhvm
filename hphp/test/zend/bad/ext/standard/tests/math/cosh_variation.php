@@ -1,6 +1,4 @@
 <?php
-ini_set('precision ',  10);
-
 /* 
  * proto float cosh(float number)
  * Function is implemented in ext/standard/math.c

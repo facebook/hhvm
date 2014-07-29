@@ -13,41 +13,46 @@
 (* The reason why something is expected to have a certain type *)
 type t =
   | Rnone
-  | Rwitness    of Pos.t
-  | Ridx    of Pos.t (* Used as an index *)
-  | Ridx_vector of Pos.t (* Used as an index, in the Vector case *)
-  | Rappend    of Pos.t (* Used to append element to an array *)
-  | Rfield    of Pos.t (* Array accessed with a static string index *)
-  | Rforeach  of Pos.t (* Because it is iterated in a foreach loop *)
-  | Raccess   of Pos.t
-  | Rcall     of Pos.t
-  | Rarith    of Pos.t
-  | Rarith_ret of Pos.t
-  | Rstring2   of Pos.t
-  | Rcomp      of Pos.t
-  | Rconcat    of Pos.t
-  | Rconcat_ret of Pos.t
-  | Rlogic      of Pos.t
-  | Rlogic_ret  of Pos.t
-  | Rbitwise    of Pos.t
-  | Rbitwise_ret of Pos.t
-  | Rstmt        of Pos.t
-  | Rno_return   of Pos.t
+  | Rwitness         of Pos.t
+  | Ridx             of Pos.t (* Used as an index *)
+  | Ridx_vector      of Pos.t (* Used as an index, in the Vector case *)
+  | Rappend          of Pos.t (* Used to append element to an array *)
+  | Rfield           of Pos.t (* Array accessed with a static string index *)
+  | Rforeach         of Pos.t (* Because it is iterated in a foreach loop *)
+  | Raccess          of Pos.t
+  | Rcall            of Pos.t
+  | Rarith           of Pos.t
+  | Rarith_ret       of Pos.t
+  | Rstring2         of Pos.t
+  | Rcomp            of Pos.t
+  | Rconcat          of Pos.t
+  | Rconcat_ret      of Pos.t
+  | Rlogic           of Pos.t
+  | Rlogic_ret       of Pos.t
+  | Rbitwise         of Pos.t
+  | Rbitwise_ret     of Pos.t
+  | Rstmt            of Pos.t
+  | Rno_return       of Pos.t
   | Rno_return_async of Pos.t
-  | Rhint          of Pos.t
-  | Rnull_check    of Pos.t
-  | Rnot_in_cstr   of Pos.t
-  | Rthrow         of Pos.t
-  | Rattr          of Pos.t
-  | Rxhp           of Pos.t
-  | Rret_div       of Pos.t
-  | Rlost_info     of string * t * Pos.t
-  | Rcoerced       of Pos.t * Pos.t * string
-  | Rformat        of Pos.t * string * t
-  | Rclass_class   of Pos.t * string
-  | Runknown_class of Pos.t
-  | Rdynamic_yield of Pos.t * Pos.t * string * string
-  | Rmap_append of Pos.t
+  | Rasync_ret       of Pos.t
+  | Rhint            of Pos.t
+  | Rnull_check      of Pos.t
+  | Rnot_in_cstr     of Pos.t
+  | Rthrow           of Pos.t
+  | Rattr            of Pos.t
+  | Rxhp             of Pos.t
+  | Rret_div         of Pos.t
+  | Ryield_gen       of Pos.t
+  | Ryield_send      of Pos.t
+  | Rlost_info       of string * t * Pos.t
+  | Rcoerced         of Pos.t * Pos.t * string
+  | Rformat          of Pos.t * string * t
+  | Rclass_class     of Pos.t * string
+  | Runknown_class   of Pos.t
+  | Rdynamic_yield   of Pos.t * Pos.t * string * string
+  | Rmap_append      of Pos.t
+  | Rvar_param       of Pos.t
+  | Rinstantiate     of t * string * t
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -77,6 +82,7 @@ let rec to_string prefix r =
   | Rstmt            _ -> [(p, prefix ^ " because this is a statement")]
   | Rno_return       _ -> [(p, prefix ^ " because this function implicitly returns void")]
   | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns Awaitable<void>")]
+  | Rasync_ret       _ -> [(p, prefix ^ " (result of 'async function')")]
   | Rhint            _ -> [(p, prefix)]
   | Rnull_check      _ -> [(p, prefix ^ " because this was checked to see if the value was null")]
   | Rnot_in_cstr     _ -> [(p, prefix ^ " because it is not always defined in __construct")]
@@ -84,6 +90,9 @@ let rec to_string prefix r =
   | Rattr            _ -> [(p, prefix ^ " because it is used in an attribute")]
   | Rxhp             _ -> [(p, prefix ^ " because it is used as an XML element")]
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
+  | Ryield_gen       _ -> [(p, prefix ^ " because functions with \"yield\" implicitly return Generator")]
+  | Ryield_send      _ -> [(p, prefix ^ " ($generator->send() can always send a null back to a \"yield\")")]
+  | Rvar_param       _ -> [(p, prefix ^ " (variadic argument)")]
   | Rcoerced     (p1, p2, s)  ->
       [
         (p, prefix);
@@ -115,6 +124,9 @@ let rec to_string prefix r =
   | Rmap_append _ ->
       [(p, prefix^" because you can only append a Pair<Tkey, Tvalue> to an \
       Map<Tkey, Tvalue>")]
+  | Rinstantiate (r_orig, generic_name, r_inst) ->
+      (to_string prefix r_orig) @
+        (to_string ("  via this generic " ^ generic_name) r_inst)
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -139,6 +151,7 @@ and to_pos = function
   | Rstmt        p -> p
   | Rno_return   p -> p
   | Rno_return_async p -> p
+  | Rasync_ret   p -> p
   | Rhint        p -> p
   | Rnull_check  p -> p
   | Rnot_in_cstr p -> p
@@ -146,6 +159,8 @@ and to_pos = function
   | Rattr        p -> p
   | Rxhp         p -> p
   | Rret_div     p -> p
+  | Ryield_gen   p -> p
+  | Ryield_send  p -> p
   | Rcoerced    (p, _, _) -> p
   | Rlost_info (_, r, _) -> to_pos r
   | Rformat      (p, _, _) -> p
@@ -153,6 +168,8 @@ and to_pos = function
   | Runknown_class p -> p
   | Rdynamic_yield (p, _, _, _) -> p
   | Rmap_append p -> p
+  | Rvar_param p -> p
+  | Rinstantiate (_, _, r) -> to_pos r
 
 type ureason =
   | URnone
@@ -184,6 +201,8 @@ type ureason =
   | URpair_access
   | URdynamic_yield
   | URnewtype_cstr
+  | URclass_req
+  | URclass_req_merge
   | URenum
 
 let string_of_ureason = function
@@ -199,7 +218,7 @@ let string_of_ureason = function
   | URvalue -> "The values of this Map are incompatible"
   | URif -> "The two branches of ? must have the same type"
   | URawait -> "await can only operate on an Awaitable"
-  | URyield -> "Some values passed to yield are incompatible"
+  | URyield -> "Invalid yield"
   | URxhp -> "Invalid xhp value"
   | URarray_get -> "Invalid index type for this array"
   | URmap_get -> "Invalid index type for this Map"
@@ -220,6 +239,8 @@ let string_of_ureason = function
       "When using DynamicYield, yield*() methods should have type Awaitable"
   | URnewtype_cstr ->
       "Invalid constraint on newtype"
+  | URclass_req -> "Unable to satisfy trait/interface requirement"
+  | URclass_req_merge -> "Incompatible trait/interface requirements"
   | URenum ->
       "Constant does not match the type of the Enum it is in"
 

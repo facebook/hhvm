@@ -1,15 +1,15 @@
 <?php
-file_put_contents('SplFileObject_setCsvControl_error001.csv',
+file_put_contents('csv_control_data.csv',
 <<<CDATA
 'groene appelen'|10
 'gele bananen'|20
 'rode kersen'|30
 CDATA
 );
-$s = new SplFileObject('SplFileObject_setCsvControl_error001.csv');
+$s = new SplFileObject('csv_control_data.csv');
 $s->setFlags(SplFileObject::READ_CSV);
 $s->setCsvControl('||');
 ?>
 <?php
-unlink('SplFileObject_setCsvControl_error001.csv');
+unlink('csv_control_data.csv');
 ?>

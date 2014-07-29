@@ -235,12 +235,12 @@ let make_tokenizer next_token env =
   if pos >= env.stop then Teof else
   let tok = next_token env.lexbuf in
   let new_pos = env.lexbuf.Lexing.lex_curr_pos in
-  env.silent := (new_pos < env.from || pos >= env.to_ - 1);
+  env.silent := (new_pos <= env.from || pos >= env.to_ - 1);
   env.last_token := tok;
   let str_value = Lexing.lexeme env.lexbuf in
   env.last_str := str_value;
   (* Splitting the token (-from) *)
-  if pos < env.from && new_pos >= env.from
+  if pos < env.from && new_pos > env.from
   then begin
     let sub_size = new_pos - env.from + 1 in
     let str_size = String.length str_value in
@@ -1169,7 +1169,7 @@ and hint env = wrap env begin function
           end;
           hint_parameter env
       )
-  | Topt_args ->
+  | Tellipsis ->
       last_token env
   | Tlp ->
       last_token env;
@@ -1235,7 +1235,7 @@ and fun_param env =
     then space env
   in
   seq env [attribute; space_opt; modifier_list; space_opt; hint; space_opt];
-  seq env [opt_tok Tamp; opt_tok Topt_args; opt_tok Tlvar];
+  seq env [opt_tok Tamp; opt_tok Tellipsis; opt_tok Tlvar];
   try_token env Teq (seq_fun [space; last_token; space; expr])
 
 and return_type env =

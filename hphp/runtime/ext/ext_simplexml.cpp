@@ -17,9 +17,10 @@
 
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include <vector>
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
-#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -495,6 +496,7 @@ static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
                        sxe->iter.isprefix)) {
             if (nodendx == member.toInt64()) {
               xmlUnlinkNode((xmlNodePtr) attr);
+              php_libxml_node_free_resource((xmlNodePtr) attr);
               break;
             }
             nodendx++;
@@ -510,6 +512,7 @@ static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
               match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix,
                        sxe->iter.isprefix)) {
             xmlUnlinkNode((xmlNodePtr) attr);
+            php_libxml_node_free_resource((xmlNodePtr) attr);
             break;
           }
           attr = anext;
@@ -525,6 +528,7 @@ static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
         node = sxe_get_element_by_offset(sxe, member.toInt64(), node, nullptr);
         if (node) {
           xmlUnlinkNode(node);
+          php_libxml_node_free_resource(node);
         }
       } else {
         node = node->children;
@@ -536,6 +540,7 @@ static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
 
           if (!xmlStrcmp(node->name, (xmlChar*)member.toString().data())) {
             xmlUnlinkNode(node);
+            php_libxml_node_free_resource(node);
           }
 
 next_iter:
@@ -1004,6 +1009,7 @@ next_iter:
         xmlNodePtr tempnode;
         while ((tempnode = (xmlNodePtr) newnode->children)) {
           xmlUnlinkNode(tempnode);
+          php_libxml_node_free_resource(tempnode);
         }
         change_node_zval(newnode, value);
       }

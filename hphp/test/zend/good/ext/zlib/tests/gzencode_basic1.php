@@ -9,7 +9,7 @@
  * Test basic function of gzencode
  */
 
-include(__DIR__ . '/data.inc');
+include(dirname(__FILE__) . '/data.inc');
 
 echo "*** Testing gzencode() : basic functionality ***\n";
 

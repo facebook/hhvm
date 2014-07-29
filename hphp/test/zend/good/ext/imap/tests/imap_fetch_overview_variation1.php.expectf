@@ -106,7 +106,7 @@ NULL
 Warning: %s
 NULL
 
--- Testing with first argument value: object(classA)#1 (0) {
+-- Testing with first argument value: object(classA)#%d (0) {
 }
 
 Warning: %s

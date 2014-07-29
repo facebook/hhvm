@@ -2443,7 +2443,7 @@ void EmitterVisitor::assignFinallyVariableIds() {
 
 void EmitterVisitor::visit(FileScopePtr file) {
   const std::string& filename = file->getName();
-  m_ue.setFilepath(makeStaticString(filename));
+  m_ue.m_filepath = makeStaticString(filename);
 
   FunctionScopePtr func(file->getPseudoMain());
   if (!func) return;
@@ -2517,7 +2517,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           visit(s);
           if (notMergeOnly) {
             tvWriteUninit(&mainReturn);
-            m_ue.returnSeen();
+            m_ue.m_returnSeen = true;
             continue;
           }
 
@@ -2539,7 +2539,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
               assert(!IS_REFCOUNTED_TYPE(v.getType()));
             }
             mainReturn = *v.asCell();
-            m_ue.returnSeen();
+            m_ue.m_returnSeen = true;
           }
           break;
         case Statement::KindOfExpStatement:
@@ -2553,8 +2553,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 StringData *name;
                 TypedValue tv;
                 if (func->isSimpleDefine(&name, &tv)) {
-                  UnitMergeKind k = func->isDefineWithoutImpl(ar) ?
-                    UnitMergeKindPersistentDefine : UnitMergeKindDefine;
+                  auto k = func->isDefineWithoutImpl(ar)
+                    ? Unit::MergeKind::PersistentDefine
+                    : Unit::MergeKind::Define;
                   if (tv.m_type == KindOfUninit) {
                     tv.m_type = KindOfNull;
                   }
@@ -2570,7 +2571,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 StringData *name;
                 TypedValue tv;
                 if (ae->isSimpleGlobalAssign(&name, &tv)) {
-                  m_ue.pushMergeableDef(UnitMergeKindGlobal, name, tv);
+                  m_ue.pushMergeableDef(Unit::MergeKind::Global, name, tv);
                   visit(s);
                   continue;
                 }
@@ -2585,9 +2586,8 @@ void EmitterVisitor::visit(FileScopePtr file) {
                       FunctionScopeRawPtr ps DEBUG_ONLY =
                         sl->getFunctionScope();
                       assert(ps && ps->inPseudoMain());
-                      UnitMergeKind kind = UnitMergeKindReqDoc;
                       m_ue.pushMergeableInclude(
-                        kind,
+                        Unit::MergeKind::ReqDoc,
                         makeStaticString(inc->includePath()));
                       visit(s);
                       continue;
@@ -2608,7 +2608,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     }
 
     if (!notMergeOnly) {
-      m_ue.setMergeOnly(true);
+      m_ue.m_mergeOnly = true;
       if (mainReturn.m_type == KindOfInvalid) {
         tvWriteUninit(&mainReturn);
         if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
@@ -2617,7 +2617,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           tvAsVariant(&mainReturn) = 1;
         }
       }
-      m_ue.setMainReturn(&mainReturn);
+      m_ue.m_mainReturn = mainReturn;
     }
 
     // Pseudo-main returns the integer value 1 by default. If the
@@ -2847,43 +2847,6 @@ bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
 }
 
 bool EmitterVisitor::visit(ConstructPtr node) {
-  bool ret = visitImpl(node);
-  if (!Option::WholeProgram || !ret) return ret;
-  ExpressionPtr e = dynamic_pointer_cast<Expression>(node);
-  if (!e || e->isScalar()) return ret;
-  DataType dt = KindOfUnknown;
-  if (!e->maybeInited()) {
-    dt = KindOfUninit;
-  } else if (node->isNonNull()) {
-    TypePtr act = e->getActualType();
-    if (!act) return ret;
-    dt = act->getDataType();
-    if (dt == KindOfUnknown) return ret;
-  } else {
-    return ret;
-  }
-  char sym = m_evalStack.top();
-  if (StackSym::GetMarker(sym)) return ret;
-  switch (StackSym::GetSymFlavor(sym)) {
-    case StackSym::C:
-      m_evalStack.setNotRef();
-      m_evalStack.setKnownType(dt);
-      break;
-    case StackSym::L:
-      if (dt == KindOfUninit ||
-          !e->maybeRefCounted() ||
-          (e->is(Expression::KindOfSimpleVariable) &&
-           !static_pointer_cast<SimpleVariable>(e)->couldBeAliased())) {
-        m_evalStack.setNotRef();
-      }
-      m_evalStack.setKnownType(dt);
-      break;
-  }
-
-  return ret;
-}
-
-bool EmitterVisitor::visitImpl(ConstructPtr node) {
   if (!node) return false;
 
   Emitter e(node, m_ue, *this);
@@ -4445,20 +4408,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         } else {
           e.FCall(numParams);
         }
-
-        bool inferred = false;
-        if (Option::WholeProgram && Option::GenerateInferredTypes) {
-          FunctionScopePtr fs = ne->getFuncScope();
-          if (fs && !fs->getReturnType()) {
-            m_evalStack.setKnownType(KindOfNull, false /* it's inferred */);
-            m_evalStack.setNotRef();
-            inferred = true;
-          }
-        }
-        if (!inferred) {
-          m_evalStack.setKnownType(KindOfNull, true /* it's predicted */);
-          m_evalStack.setNotRef();
-        }
         e.PopR();
         return true;
       }
@@ -4812,8 +4761,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
           ssClsName, PreClass::ClosureHoistable);
+
+        auto const attrs = AttrNoOverride | AttrUnique | AttrPersistent;
+
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
-                  AttrUnique | AttrPersistent, parentName, nullptr);
+                  attrs, parentName, nullptr);
 
         // Instance properties---one for each use var, and one for
         // each static local.
@@ -5437,23 +5389,7 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
   // TODO(4599368): if dealing with an unpack, would need to kick out of
   // the pass-by-ref behavior and defer that to FCallUnpack
 
-  PassByRefKind passByRefKind = getPassByRefKind(exp);
-  if (Option::WholeProgram && !exp->hasAnyContext(Expression::InvokeArgument |
-                                                  Expression::RefParameter)) {
-    if (exp->hasContext(Expression::RefValue)) {
-      if (passByRefKind == PassByRefKind::AllowCell ||
-          m_evalStack.get(m_evalStack.size() - 1) != StackSym::C) {
-        emitVGet(e);
-        e.FPassVNop(paramId);
-        return;
-      }
-    } else {
-      emitCGet(e);
-      e.FPassC(paramId);
-      return;
-    }
-  }
-  emitFPass(e, paramId, passByRefKind);
+  emitFPass(e, paramId, getPassByRefKind(exp));
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,
@@ -6406,7 +6342,7 @@ void EmitterVisitor::emitPostponedMeths() {
           meth,
           "Cannot redeclare %s() (previously declared in %s:%d)",
           meth->getOriginalName().c_str(),
-          oldFunc->second->ue().getFilepath()->data(),
+          oldFunc->second->ue().m_filepath->data(),
           oldFunc->second->getLocation().second);
       }
       m_topMethodEmitted.emplace(meth->getOriginalName(), fe);
@@ -7384,29 +7320,6 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   e.DefTypeAlias(id);
 }
 
-static RepoAuthType repoAuthTypeForHphpcType(DataType dtype) {
-  if (!Option::WholeProgram) return RepoAuthType{};
-  switch (dtype) {
-  case KindOfBoolean:
-    return RepoAuthType{RepoAuthType::Tag::OptBool};
-  case KindOfInt64:
-    return RepoAuthType{RepoAuthType::Tag::OptInt};
-  case KindOfDouble:
-    return RepoAuthType{RepoAuthType::Tag::OptDbl};
-  case KindOfArray:
-    return RepoAuthType{RepoAuthType::Tag::OptArr};
-  case KindOfObject:
-    return RepoAuthType{RepoAuthType::Tag::OptObj};
-  case KindOfString:
-  case KindOfStaticString:
-    return RepoAuthType{RepoAuthType::Tag::OptStr};
-  case KindOfResource:
-    return RepoAuthType{RepoAuthType::Tag::OptRes};
-  default:
-    return RepoAuthType{};
-  }
-}
-
 void EmitterVisitor::emitClass(Emitter& e,
                                ClassScopePtr cNode,
                                bool toplevel) {
@@ -7487,7 +7400,7 @@ void EmitterVisitor::emitClass(Emitter& e,
     e.DefCls(pce->id());
   } else {
     // To attach the line number to for error reporting.
-    e.NopDefCls(pce->id());
+    e.DefClsNop(pce->id());
   }
   e.setTempLocation(LocationPtr());
   for (int i = firstInterface; i < nInterfaces; ++i) {
@@ -7554,17 +7467,6 @@ void EmitterVisitor::emitClass(Emitter& e,
           }
 
           auto sym = var->getSymbol();
-          /*
-           * Translate what hphpc can infer about a property type into
-           * a RepoAuthType for the runtime.  The type hphpc has
-           * implies non-uninit, but is always nullable.
-           *
-           * Note: for hphpc's types it appears this doesn't actually
-           * imply the type is unboxed, either.
-           */
-          auto const hphpcType = repoAuthTypeForHphpcType(
-            sym ? sym->getFinalType()->getDataType() : KindOfInvalid);
-
           bool maybePersistent = Option::WholeProgram &&
             pce->attrs() & AttrPersistent &&
             sym && !sym->isIndirectAltered() && sym->isStatic();
@@ -7606,7 +7508,7 @@ void EmitterVisitor::emitClass(Emitter& e,
           if (maybePersistent) propAttrs = propAttrs | AttrPersistent;
           bool added UNUSED =
             pce->addProperty(propName, propAttrs, typeConstraint,
-                             propDoc, &tvVal, hphpcType);
+                             propDoc, &tvVal, RepoAuthType{});
           assert(added);
         }
       } else if (ClassConstantPtr cc =
@@ -8340,7 +8242,7 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
     // Replace the unit with an empty one, but preserve its file path.
     UnitEmitter* nue = new UnitEmitter(md5);
     nue->initMain(sLoc->line0, sLoc->line1);
-    nue->setFilepath(ue->getFilepath());
+    nue->m_filepath = ue->m_filepath;
     delete ue;
     ue = nue;
 
@@ -8369,7 +8271,7 @@ static std::unique_ptr<UnitEmitter>
 emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
                        ssize_t numBuiltinFuncs) {
   auto ue = folly::make_unique<UnitEmitter>(s_nativeFuncMD5);
-  ue->setFilepath(s_systemlibNativeFunc.get());
+  ue->m_filepath = s_systemlibNativeFunc.get();
   ue->addTrivialPseudoMain();
 
   Attr attrs = AttrBuiltin | AttrUnique | AttrPersistent;
@@ -8469,7 +8371,7 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
           not_reached();
       }
 
-      // debugBacktrace has off-by-one bug when determining whether we are
+      // Backtrace has off-by-one bug when determining whether we are
       // in returning opcode; add Nop to avoid it
       ue.emitOp(OpNop);
       ue.emitOp(OpRetC);
@@ -8511,7 +8413,7 @@ static std::unique_ptr<UnitEmitter>
 emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                         ssize_t numBuiltinClasses) {
   auto ue = folly::make_unique<UnitEmitter>(s_nativeClassMD5);
-  ue->setFilepath(s_systemlibNativeCls.get());
+  ue->m_filepath = s_systemlibNativeCls.get();
   ue->addTrivialPseudoMain();
 
   ContMethMap asyncGenMethods;

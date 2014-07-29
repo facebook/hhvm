@@ -44,17 +44,6 @@ bool is_closure(const php::Class&);
 bool could_have_magic_bool_conversion(Type);
 
 /*
- * A mask of which types of special functions a class has.
- */
-enum class MethodMask : uint32_t {
-  Internal_86pinit = 0x1,
-  Internal_86sinit = 0x2,
-};
-inline bool contains(MethodMask mask, MethodMask val) {
-  return static_cast<uint32_t>(mask) & static_cast<uint32_t>(val);
-}
-
-/*
  * Returns method named "name" if it exists.
  */
 borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class>,

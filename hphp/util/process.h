@@ -22,8 +22,15 @@
 #include <cstdio>
 
 #include <sys/types.h>
+#if defined(__CYGWIN__) || defined(__MINGW__)
+#include <pthread.h>
+#elif defined(_MSC_VER)
+#include <windows.h>
+#else
 #include <sys/syscall.h>
+#endif
 #include <unistd.h>
+#include <pthread.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,7 +113,7 @@ public:
   /**
    * Get memory usage in MB by a process.
    */
-  static int GetProcessRSS(pid_t pid);
+  static int64_t GetProcessRSS(pid_t pid);
 
   /**
    * Current thread's identifier.
@@ -142,6 +149,10 @@ public:
     syscall(SYS_thr_self, &tid);
     return (pid_t) tid;
 # endif
+#elif defined(__CYGWIN__) || defined(__MINGW__)
+    return (long)pthread_self();
+#elif defined(_MSC_VER)
+  return GetCurrentThreadId();
 #else
     return syscall(SYS_gettid);
 #endif

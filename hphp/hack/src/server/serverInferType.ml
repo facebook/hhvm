@@ -16,13 +16,9 @@ let go (fn, line, char) oc =
   in
   clean ();
   Typing_defs.infer_target := Some (line, char);
-  ServerIdeUtils.recheck [fn];
-  let pos = match !Typing_defs.infer_pos with
-    | None -> "(unknown)"
-    | Some pos -> Pos.string pos in
-  let ty = match !Typing_defs.infer_type with
-    | None -> "(unknown)"
-    | Some ty -> ty in
+  ServerIdeUtils.check_file_input fn;
+  let pos = !Typing_defs.infer_pos in
+  let ty = !Typing_defs.infer_type in
   clean ();
   Marshal.to_channel oc (pos, ty) [];
   flush oc

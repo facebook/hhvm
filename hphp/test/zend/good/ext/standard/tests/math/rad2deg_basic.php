@@ -1,6 +1,4 @@
 <?php
-ini_set('precision ',  14);
-
 /* 
  * proto float rad2deg(float number)
  * Function is implemented in ext/standard/math.c

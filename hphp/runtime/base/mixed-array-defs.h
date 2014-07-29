@@ -172,7 +172,6 @@ MixedArray::Elm& MixedArray::allocElm(int32_t* ei) {
   size_t i = m_used;
   (*ei) = i;
   m_used = i + 1;
-  if (m_pos == invalid_index) m_pos = i;
   return data()[i];
 }
 

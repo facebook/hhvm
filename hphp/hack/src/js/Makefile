@@ -8,7 +8,6 @@ SRC = \
   deriving_Json_Str.ml\
   hh_json.ml\
   ide.ml\
-  str.ml\
   pos.ml\
   ident.ml\
   errors.ml\
@@ -64,6 +63,7 @@ SRC = \
   pp.ml\
   colorFile.ml\
   fileOutline.ml\
+  format_hack.ml\
   hh_ide.ml
 
 INCLUDEDIRS=$(shell ocamlfind -query js_of_ocaml)
@@ -92,6 +92,9 @@ deploy: hh_ide.js
 #TODO: a bid sad to do that, can probably just reuse the lib.cma
 lexer_hack.ml: $(TOP)/parsing/lexer_hack.ml
 	cp $(TOP)/parsing/lexer_hack.ml .
+
+format_hack.ml: $(TOP)/parsing/format_hack.ml
+        cp $(TOP)/parsing/format_hack.ml .
 
 parser_hack.ml: $(TOP)/parsing/parser_hack.ml
 	cp $(TOP)/parsing/parser_hack.ml .
@@ -314,6 +317,7 @@ clean::
 	rm -f parser_hack.ml
 	rm -f typing_unify.ml
 	rm -f fileOutline.ml
+	rm -f format_hack.ml
 
 # legacy
 clean::

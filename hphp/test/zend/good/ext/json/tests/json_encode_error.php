@@ -2,7 +2,7 @@
 /* Prototype  : string json_encode  ( mixed $value  [, int $options=0  ] )
  * Description: Returns the JSON representation of a value
  * Source code: ext/json/php_json.c
- * Alias to functions:
+ * Alias to functions: 
  */
 
 echo "*** Testing json_encode() : error conditions ***\n";

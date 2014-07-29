@@ -149,12 +149,13 @@ public:
   static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
 
   /*
-   * Allocate a new, empty, request-local array in int map mode, with
+   * Allocate a new, empty, request-local array in int map/string map mode, with
    * enough space reserved for `capacity' members.
    *
    * The returned array is already incref'd.
    */
   static ArrayData* MakeReserveIntMap(uint32_t capacity);
+  static ArrayData* MakeReserveStrMap(uint32_t capacity);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -222,9 +223,11 @@ public:
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static const TypedValue* NvGetIntConverted(const ArrayData*, int64_t ki);
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ssize_t IterBegin(const ArrayData*);
+  static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
@@ -236,6 +239,7 @@ public:
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
+  static ArrayData* SetIntConverted(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
@@ -277,12 +281,21 @@ public:
   static bool Uksort(ArrayData*, const Variant& cmp_function);
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
+  static void WarnAndSort(ArrayData*, int sort_flags, bool ascending);
+  static bool WarnAndUsort(ArrayData*, const Variant& cmp_function);
 
 
   template <ArrayKind aKind>
   static const TypedValue* NvGetStrImpl(const ArrayData*, const StringData* k);
   template <ArrayKind aKind>
+  static const TypedValue* NvGetIntImpl(const ArrayData*, int64_t ki);
+  template <ArrayKind aKind>
+  static bool ExistsIntImpl(const ArrayData*, int64_t k);
+  template <ArrayKind aKind>
   static bool ExistsStrImpl(const ArrayData*, const StringData* k);
+  template <ArrayKind aKind>
+  static ArrayData* LvalIntImpl(ArrayData* ad, int64_t k, Variant*& ret,
+                                bool copy);
   template <ArrayKind aKind>
   static ArrayData* LvalStrImpl(ArrayData* ad, StringData* k, Variant*& ret,
                                 bool copy);
@@ -291,6 +304,8 @@ public:
   template <ArrayKind aKind>
   static ArrayData* SetStrImpl(ArrayData*, StringData* k, Cell v, bool copy);
   template <ArrayKind aKind>
+  static ArrayData* SetIntImpl(ArrayData*, int64_t k, Cell v, bool copy);
+  template <ArrayKind aKind>
   static ArrayData* SetRefIntImpl(ArrayData* ad, int64_t k, Variant& v,
                                   bool copy);
   template <ArrayKind aKind>
@@ -298,6 +313,8 @@ public:
                               bool copy);
   template <ArrayKind aKind>
   static ArrayData* AddStrImpl(ArrayData*, StringData* k, Cell v, bool copy);
+  template <ArrayKind aKind>
+  static ArrayData* RemoveIntImpl(ArrayData*, int64_t k, bool copy);
   template <ArrayKind aKind>
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData* k, bool copy);
   template <ArrayKind aKind>
@@ -334,7 +351,7 @@ public:
   // 32-bit ints than it does for 64-bit ints. As such, we have deliberately
   // chosen to use ssize_t in some places where ideally we *should* have used
   // int32_t.
-  static const int32_t Empty      = -1; // == ArrayData::invalid_index
+  static const int32_t Empty      = -1;
   static const int32_t Tombstone  = -2;
 
   // Use a minimum of an 4-element hash table.  Valid range: [2..32]
@@ -378,6 +395,7 @@ private:
   friend class BaseSet;
   friend class c_Set;
   friend class c_ImmSet;
+  friend class c_AwaitAllWaitHandle;
   enum class ClonePacked {};
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
@@ -397,17 +415,22 @@ public:
     kSetRef,
     kAppendRef,
     kAppend,
+    kNvGetInt,
     kNvGetStr,
+    kExistsInt,
     kExistsStr,
+    kSetInt,
     kSetStr,
+    kRemoveInt,
     kRemoveStr,
     kDequeue,
     kSort,
+    kUsort,
     kNumericString,
     kRenumber,
   };
   static void downgradeAndWarn(ArrayData* ad, const Reason r);
-  static void warnUsage(const Reason r);
+  static void warnUsage(const Reason r, const ArrayKind kind);
 
 private:
   static void getElmKey(const Elm& e, TypedValue* out);
@@ -448,8 +471,9 @@ private:
         return ei;
       }
     }
-    return invalid_index;
+    return m_used;
   }
+
   ssize_t prevElm(Elm* elms, ssize_t ei) const;
 
   // Assert a bunch of invariants about this array then return true.

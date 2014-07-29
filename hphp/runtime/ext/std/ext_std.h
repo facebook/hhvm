@@ -16,6 +16,7 @@ class StandardExtension : public Extension {
     initNetwork();
     initOptions();
     initOutput();
+    initString();
     initVariable();
   }
 
@@ -25,6 +26,7 @@ class StandardExtension : public Extension {
   void initNetwork();
   void initOptions();
   void initOutput();
+  void initString();
   void initVariable();
 };
 

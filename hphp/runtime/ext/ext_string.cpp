@@ -277,8 +277,9 @@ Variant f_hex2bin(const String& str) {
   return ret.detach();
 }
 
+extern const StaticString s_nl;
+
 const StaticString
-  s_nl("\n"),
   s_br("<br />\n"),
   s_non_xhtml_br("<br>\n");
 
@@ -633,7 +634,8 @@ Variant f_str_ireplace(const Variant& search, const Variant& replace, const Vari
   return ret;
 }
 
-Variant f_substr_replace(const Variant& str, const Variant& replacement, const Variant& start,
+Variant f_substr_replace(const Variant& str, const Variant& replacement,
+                         const Variant& start,
                          const Variant& length /* = 0x7FFFFFFF */) {
   if (!str.is(KindOfArray)) {
     String repl;
@@ -661,8 +663,20 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
                           repl);
   }
 
+  // 'start' and 'length' can be arrays (in which case we step through them in
+  // sync with stepping through 'str'), or not arrays, in which case we convert
+  // them to ints and always use those.
   Array ret;
   Array strArr = str.toArray();
+  folly::Optional<int> opStart;
+  folly::Optional<int> opLength;
+  if (!start.isArray()) {
+    opStart = start.toInt32();
+  }
+  if (!length.isArray()) {
+    opLength = length.toInt32();
+  }
+
   Array startArr = start.toArray();
   Array lengthArr = length.toArray();
   ArrayIter startIter(startArr);
@@ -671,10 +685,21 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
   if (replacement.is(KindOfArray)) {
     Array replArr = replacement.toArray();
     ArrayIter replIter(replArr);
-    for (ArrayIter iter(strArr); iter;
-         ++iter, ++startIter, ++lengthIter) {
-      int nStart = startIter.second().toInt32();
-      int nLength = lengthIter.second().toInt32();
+    for (ArrayIter iter(strArr); iter; ++iter) {
+      auto str = iter.second().toString();
+      // If 'start' or 'length' are arrays and we've gone past the end, default
+      // to 0 for start and the length of the input string for length.
+      int nStart =
+        (opStart.hasValue()
+         ? opStart.value()
+         : (startIter ? startIter.second().toInt32() : 0));
+      int nLength =
+        (opLength.hasValue()
+         ? opLength.value()
+         : (lengthIter ? lengthIter.second().toInt32() : str.length()));
+      if (startIter) ++startIter;
+      if (lengthIter) ++lengthIter;
+
       String repl;
       if (replIter) {
         repl = replIter.second().toString();
@@ -682,16 +707,25 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
       } else {
         repl = empty_string();
       }
-      auto s2 = string_replace(iter.second().toString(), nStart, nLength, repl);
+      auto s2 = string_replace(str, nStart, nLength, repl);
       ret.append(s2);
     }
   } else {
     String repl = replacement.toString();
-    for (ArrayIter iter(strArr); iter;
-         ++iter, ++startIter, ++lengthIter) {
-      int nStart = startIter.second().toInt32();
-      int nLength = lengthIter.second().toInt32();
-      auto s2 = string_replace(iter.second().toString(), nStart, nLength, repl);
+    for (ArrayIter iter(strArr); iter; ++iter) {
+      auto str = iter.second().toString();
+      int nStart =
+        (opStart.hasValue()
+         ? opStart.value()
+         : (startIter ? startIter.second().toInt32() : 0));
+      int nLength =
+        (opLength.hasValue()
+         ? opLength.value()
+         : (lengthIter ? lengthIter.second().toInt32() : str.length()));
+      if (startIter) ++startIter;
+      if (lengthIter) ++lengthIter;
+
+      auto s2 = string_replace(str, nStart, nLength, repl);
       ret.append(s2);
     }
   }
@@ -1145,6 +1179,30 @@ Variant f_substr_count(const String& haystack, const String& needle, int offset 
   return count;
 }
 
+namespace {
+  bool string_strspn_check(int inputLength, int &start, int &scanLength) {
+    if (start < 0) {
+      start += inputLength;
+      if (start < 0) {
+        start = 0;
+      }
+    } else if (start > inputLength) {
+      return false;
+    }
+
+    if (scanLength < 0) {
+      scanLength += (inputLength - start);
+      if (scanLength < 0) {
+        scanLength = 0;
+      }
+    }
+    if (scanLength > inputLength - start) {
+      scanLength = inputLength - start;
+    }
+    return true;
+  }
+}
+
 Variant f_strspn(const String& str1, const String& str2, int start /* = 0 */,
                  int length /* = 0x7FFFFFFF */) {
   const char *s1 = str1.data();
@@ -1152,7 +1210,7 @@ Variant f_strspn(const String& str1, const String& str2, int start /* = 0 */,
   int s1_len = str1.size();
   int s2_len = str2.size();
 
-  if (!string_substr_check(s1_len, start, length)) {
+  if (!string_strspn_check(s1_len, start, length)) {
     return false;
   }
 
@@ -1171,7 +1229,7 @@ Variant f_strcspn(const String& str1, const String& str2, int start /* = 0 */,
   int s1_len = str1.size();
   int s2_len = str2.size();
 
-  if (!string_substr_check(s1_len, start, length)) {
+  if (!string_strspn_check(s1_len, start, length)) {
     return false;
   }
 

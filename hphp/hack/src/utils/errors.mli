@@ -22,7 +22,6 @@ val unexpected_eof : Pos.t -> unit
 val missing_field : Pos.t -> Pos.t -> string -> unit
 val generic_class_var : Pos.t -> unit
 val explain_constraint : Pos.t -> string -> error -> unit
-val too_many_args : Pos.t -> unit
 val unexpected_arrow : Pos.t -> string -> unit
 val missing_arrow : Pos.t -> string -> unit
 val disallowed_xhp_type : Pos.t -> string -> unit
@@ -31,7 +30,7 @@ val unterminated_comment : Pos.t -> unit
 val unterminated_xhp_comment : Pos.t -> unit
 val name_already_bound : string -> Pos.t -> Pos.t -> unit
 val method_name_already_bound : Pos.t -> string -> unit
-val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
+val error_name_already_bound : string -> string -> string -> Pos.t -> Pos.t -> unit
 val unbound_name : Pos.t -> string -> unit
 val different_scope : Pos.t -> string -> Pos.t -> unit
 val undefined : Pos.t -> string -> unit
@@ -53,8 +52,8 @@ val tparam_with_tparam : Pos.t -> string -> unit
 val shadowed_type_param : Pos.t -> Pos.t -> string -> unit
 val missing_typehint : Pos.t -> unit
 val expected_variable : Pos.t -> unit
-val too_few_arguments : Pos.t -> unit
-val too_many_arguments : Pos.t -> unit
+val naming_too_few_arguments : Pos.t -> unit
+val naming_too_many_arguments : Pos.t -> unit
 val expected_collection : Pos.t -> string -> unit
 val illegal_CLASS : Pos.t -> unit
 val dynamic_method_call : Pos.t -> unit
@@ -89,6 +88,7 @@ val expecting_return_type_hint : Pos.t -> unit
 val expecting_return_type_hint_suggest : Pos.t -> string -> unit
 val field_kinds : Pos.t -> Pos.t -> unit
 val unbound_name_typing : Pos.t -> string -> unit
+val did_you_mean_naming : Pos.t -> string -> Pos.t -> string -> unit
 val previous_default : Pos.t -> unit
 val void_parameter : Pos.t -> unit
 val nullable_parameter : Pos.t -> unit
@@ -164,6 +164,8 @@ val implement_abstract : Pos.t -> Pos.t -> string -> unit
 val generic_static : Pos.t -> string -> unit
 val fun_too_many_args : Pos.t -> Pos.t -> unit
 val fun_too_few_args : Pos.t -> Pos.t -> unit
+val fun_unexpected_nonvariadic : Pos.t -> Pos.t -> unit
+val fun_variadicity_hh_vs_php56 : Pos.t -> Pos.t -> unit
 val expected_tparam : Pos.t -> int -> unit
 val field_missing : string -> Pos.t -> Pos.t -> unit
 val object_string : Pos.t -> Pos.t -> unit
@@ -183,7 +185,7 @@ val non_object_member : string -> Pos.t -> string -> Pos.t -> unit
 val null_container : Pos.t -> (Pos.t * string) list -> unit
 val option_mixed : Pos.t -> unit
 val wrong_extend_kind : Pos.t -> string -> Pos.t -> string -> unit
-val unsatisfied_req : Pos.t -> string -> unit
+val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
 val cyclic_class_def : Utils.SSet.t -> Pos.t -> unit
 val override_final : parent:Pos.t -> child:Pos.t -> unit
 val should_be_override : Pos.t -> string -> string -> unit
@@ -221,9 +223,15 @@ val visibility_extends : string -> Pos.t -> Pos.t -> string -> unit
 val member_not_implemented : string -> Pos.t -> Pos.t -> Pos.t -> unit
 val override : Pos.t -> string -> Pos.t -> string -> error -> unit
 val missing_constructor : Pos.t -> unit
-val enum_constant_type_bad : Pos.t -> string -> Pos.t list -> unit
+val enum_constant_type_bad : Pos.t -> Pos.t -> string -> Pos.t list -> unit
 val enum_type_bad : Pos.t -> string -> Pos.t list -> unit
 val enum_type_typedef_mixed : Pos.t -> unit
+val invalid_shape_field_name : Pos.t -> unit
+val invalid_shape_field_type : Pos.t -> Pos.t -> string -> Pos.t list -> unit
+val invalid_shape_field_literal : Pos.t -> Pos.t -> unit
+val invalid_shape_field_const : Pos.t -> Pos.t -> unit
+val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
+val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

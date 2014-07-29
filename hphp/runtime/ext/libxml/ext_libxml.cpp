@@ -16,10 +16,11 @@
 */
 
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/request-event-handler.h"
 
-#include <libxml/parser.h>
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/zend-url.h"
+
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
@@ -134,6 +135,133 @@ void libxml_add_error(const std::string &msg) {
   error_copy.str1 = nullptr;
   error_copy.str2 = nullptr;
   error_copy.str3 = nullptr;
+}
+
+void php_libxml_node_free(xmlNodePtr node) {
+  if (node) {
+    switch (node->type) {
+    case XML_ATTRIBUTE_NODE:
+      xmlFreeProp((xmlAttrPtr) node);
+      break;
+    case XML_ENTITY_DECL:
+    case XML_ELEMENT_DECL:
+    case XML_ATTRIBUTE_DECL:
+      break;
+    case XML_NOTATION_NODE:
+      /* These require special handling */
+      if (node->name != NULL) {
+        xmlFree((char *) node->name);
+      }
+      if (((xmlEntityPtr) node)->ExternalID != NULL) {
+        xmlFree((char *) ((xmlEntityPtr) node)->ExternalID);
+      }
+      if (((xmlEntityPtr) node)->SystemID != NULL) {
+        xmlFree((char *) ((xmlEntityPtr) node)->SystemID);
+      }
+      xmlFree(node);
+      break;
+    case XML_NAMESPACE_DECL:
+      if (node->ns) {
+        xmlFreeNs(node->ns);
+        node->ns = NULL;
+      }
+      node->type = XML_ELEMENT_NODE;
+    default:
+      xmlFreeNode(node);
+    }
+  }
+}
+
+static void php_libxml_node_free_list(xmlNodePtr node) {
+  xmlNodePtr curnode;
+
+  if (node != NULL) {
+    curnode = node;
+    while (curnode != NULL) {
+      node = curnode;
+      switch (node->type) {
+      /* Skip property freeing for the following types */
+      case XML_NOTATION_NODE:
+        break;
+      case XML_ENTITY_REF_NODE:
+        php_libxml_node_free_list((xmlNodePtr) node->properties);
+        break;
+      case XML_ATTRIBUTE_NODE:
+        if ((node->doc != NULL) &&
+            (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
+          xmlRemoveID(node->doc, (xmlAttrPtr) node);
+        }
+      case XML_ATTRIBUTE_DECL:
+      case XML_DTD_NODE:
+      case XML_DOCUMENT_TYPE_NODE:
+      case XML_ENTITY_DECL:
+      case XML_NAMESPACE_DECL:
+      case XML_TEXT_NODE:
+        php_libxml_node_free_list(node->children);
+        break;
+      default:
+        php_libxml_node_free_list(node->children);
+        php_libxml_node_free_list((xmlNodePtr) node->properties);
+      }
+
+      curnode = node->next;
+      xmlUnlinkNode(node);
+      php_libxml_node_free(node);
+    }
+  }
+}
+
+void php_libxml_node_free_resource(xmlNodePtr node) {
+  if (node) {
+    switch (node->type) {
+    case XML_DOCUMENT_NODE:
+    case XML_HTML_DOCUMENT_NODE:
+      break;
+    default:
+      if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
+        php_libxml_node_free_list((xmlNodePtr) node->children);
+        switch (node->type) {
+        /* Skip property freeing for the following types */
+        case XML_ATTRIBUTE_DECL:
+        case XML_DTD_NODE:
+        case XML_DOCUMENT_TYPE_NODE:
+        case XML_ENTITY_DECL:
+        case XML_ATTRIBUTE_NODE:
+        case XML_NAMESPACE_DECL:
+        case XML_TEXT_NODE:
+          break;
+        default:
+          php_libxml_node_free_list((xmlNodePtr) node->properties);
+        }
+        php_libxml_node_free(node);
+      }
+    }
+  }
+}
+
+String libxml_get_valid_file_path(const char* source) {
+  return libxml_get_valid_file_path(String(source, CopyString));
+}
+
+String libxml_get_valid_file_path(const String& source) {
+  bool isFileUri = false;
+  bool isUri = false;
+
+  String file_dest(source);
+
+  Url url;
+  if (url_parse(url, file_dest.data(), file_dest.size())) {
+    isUri = true;
+    if (url.scheme.same(s_file)) {
+      file_dest = StringUtil::UrlDecode(url.path, false);
+      isFileUri = true;
+    }
+  }
+
+  if (!isUri || url.scheme.empty() || isFileUri) {
+    file_dest = File::TranslatePath(file_dest);
+  }
+  return file_dest;
 }
 
 static void libxml_error_handler(void* userData, xmlErrorPtr error) {

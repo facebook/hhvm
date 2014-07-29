@@ -1,6 +1,4 @@
 <?php
-ini_set('open_basedir', .);
-
 require_once "open_basedir.inc";
 $initdir = getcwd();
 test_open_basedir_before("rename");

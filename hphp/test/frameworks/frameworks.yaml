@@ -102,6 +102,15 @@
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php
       # Depends on previous
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFastFileStorageTest.php
+  ezpublish-kernel:
+    # Latests community stable is 2014.05, however it is lacking fixes to make tests run on hhvm:
+    # https://github.com/ezsystems/ezpublish-kernel/commit/c7cf7b24c440f83e42c878581b91990d47be278a
+    # new release with these fixes expected in August.
+    url: https://github.com/ezsystems/ezpublish-kernel.git
+    branch: master
+    commit: 571700fe2bd02a9868f23b55634717d8db4151de
+    install_root: ezpublish-kernel
+    test_root: ezpublish-kernel
   facebookphpsdk:
     # v3.2.3 from facebook/facebook-php-sdk and
     # https://github.com/facebook/facebook-php-sdk/pull/184
@@ -141,9 +150,9 @@
     test_root: guzzle4
     test_find_mode: token
     sequential: true
-  hhvmquickinterp:
+  hhvmquicktests:
     do_not_install: true
-    test_root: ../hhvm/quick_interp
+    test_root: ../hhvm/quick
   idiorm:
     url: https://github.com/j4mie/idiorm.git
     branch: v1.4.1

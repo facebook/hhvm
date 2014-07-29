@@ -863,8 +863,6 @@ private:
   ~Class();
 
   bool needsInitSProps() const;
-  void setPropData(PropInitVec* propData) const;
-  void setSPropData(TypedValue* sPropData) const;
 
   void importTraitMethod(const TraitMethod&  traitMethod,
                          const StringData*   methName,
@@ -951,7 +949,7 @@ public:
   // hot, and must be the last member.
 
 public:
-  Class* m_nextClass{nullptr}; // used by Unit
+  Class* m_nextClass{nullptr}; // used by NamedEntity
 
 private:
   // Objects with the <<__NativeData("T")>> UA are allocated with extra space

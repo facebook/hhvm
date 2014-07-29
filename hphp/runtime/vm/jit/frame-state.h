@@ -132,8 +132,7 @@ struct LocalStateHook {
  */
 struct FrameState final : private LocalStateHook {
   FrameState(IRUnit& unit, BCMarker firstMarker);
-  FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
-             uint32_t numLocals);
+  FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func);
 
   FrameState(const FrameState&) = delete;
   FrameState& operator=(const FrameState&) = delete;
@@ -176,12 +175,6 @@ struct FrameState final : private LocalStateHook {
   void clearCse();
 
   void clearCurrentLocals() { clearLocals(*this); }
-
-  /*
-   * Check current state for compatibility (matching types of
-   * stack/locals) with the state at block.
-   */
-  bool compatible(Block*);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }

@@ -25,6 +25,7 @@ open Typing_defs
 open Typing_deps
 
 module Env = Typing_env
+module ShapeMap = Nast.ShapeMap
 
 (*****************************************************************************)
 (* Module comparing types "modulo" positions.
@@ -115,11 +116,11 @@ module CompareTypes = struct
     | Tunresolved tyl1, Tunresolved tyl2
     | Ttuple tyl1, Ttuple tyl2 ->
         tyl acc tyl1 tyl2
-    | Tanon (x1, y1, z1), Tanon (x2, y2, z2) ->
-        subst, same && x1 = x2 && y1 = y2 && z1 = z2
+    | Tanon (arity1, id1), Tanon (arity2, id2) ->
+        subst, same && arity1 = arity2 && id1 = id2
     | Tshape fdm1, Tshape fdm2 ->
-        SMap.fold begin fun name v1 acc ->
-          match SMap.get name fdm2 with
+        ShapeMap.fold begin fun name v1 acc ->
+          match ShapeMap.get name fdm2 with
           | None -> default
           | Some v2 ->
               ty acc v1 v2
@@ -142,14 +143,22 @@ module CompareTypes = struct
   and fun_type acc ft1 ft2 =
     let acc = pos acc ft1.ft_pos ft2.ft_pos in
     let acc = tparam_list acc ft1.ft_tparams ft2.ft_tparams in
+    let acc = fun_arity acc ft1.ft_arity ft2.ft_arity in
     let acc = fun_params acc ft1.ft_params ft2.ft_params in
     let subst, same = ty acc ft1.ft_ret ft2.ft_ret in
-    subst,
-    same &&
-    ft1.ft_unsafe = ft2.ft_unsafe &&
-    ft1.ft_abstract = ft2.ft_abstract &&
-    ft1.ft_arity_min = ft2.ft_arity_min &&
-    ft1.ft_arity_max = ft2.ft_arity_max
+    subst, same &&
+      ft1.ft_unsafe = ft2.ft_unsafe && ft1.ft_abstract = ft2.ft_abstract
+
+  and fun_arity acc arity1 arity2 =
+    let subst, same = acc in
+    match arity1, arity2 with
+    | Fvariadic (min1, (_, ty1)), Fvariadic (min2, (_, ty2)) ->
+      let subst, same = ty acc ty1 ty2 in
+      subst, same && min1 = min2
+    | Fellipsis min1, Fellipsis min2 -> subst, same && min1 = min2
+    | Fstandard (min1, max1), Fstandard (min2, max2) ->
+      subst, same && min1 = min2 && max1 = max2
+    | _, _ -> subst, false
 
   and fun_params acc params1 params2 =
     if List.length params1 <> List.length params2
@@ -185,7 +194,7 @@ module CompareTypes = struct
     | Some x1, Some x2 -> class_elt acc x1 x2
     | _ -> acc
 
-  and implements acc imp1 imp2 = smap ty acc imp1 imp2
+  and ancestry acc imp1 imp2 = smap ty acc imp1 imp2
 
   and class_ (subst, same) c1 c2 =
     let same =
@@ -198,8 +207,7 @@ module CompareTypes = struct
       c1.tc_name = c2.tc_name &&
       SSet.compare c1.tc_members_init c2.tc_members_init = 0 &&
       SSet.compare c1.tc_extends c2.tc_extends = 0 &&
-      SSet.compare c1.tc_req_ancestors_extends c2.tc_req_ancestors_extends = 0 &&
-      SSet.compare c1.tc_req_ancestors c2.tc_req_ancestors = 0
+      SSet.compare c1.tc_req_ancestors_extends c2.tc_req_ancestors_extends = 0
     in
     let acc = subst, same in
     let acc = tparam_list acc c1.tc_tparams c2.tc_tparams in
@@ -209,8 +217,12 @@ module CompareTypes = struct
     let acc = members acc c1.tc_methods c2.tc_methods in
     let acc = members acc c1.tc_smethods c2.tc_smethods in
     let acc = constructor acc c1.tc_construct c2.tc_construct in
-    let acc = implements acc c1.tc_ancestors c2.tc_ancestors in
-    let acc = implements acc c1.tc_ancestors_checked_when_concrete c2.tc_ancestors_checked_when_concrete in
+    let acc = ancestry acc c1.tc_req_ancestors c2.tc_req_ancestors in
+    let acc = ancestry acc c1.tc_ancestors c2.tc_ancestors in
+    let acc = ancestry acc
+      c1.tc_ancestors_checked_when_concrete
+      c2.tc_ancestors_checked_when_concrete
+    in
     acc
 
 end
@@ -248,6 +260,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rstmt p                -> Rstmt (pos p)
     | Rno_return p           -> Rno_return (pos p)
     | Rno_return_async p     -> Rno_return_async (pos p)
+    | Rasync_ret p           -> Rasync_ret (pos p)
     | Rhint p                -> Rhint (pos p)
     | Rnull_check p          -> Rnull_check (pos p)
     | Rnot_in_cstr p         -> Rnot_in_cstr (pos p)
@@ -255,6 +268,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rattr p                -> Rattr (pos p)
     | Rxhp p                 -> Rxhp (pos p)
     | Rret_div p             -> Rret_div (pos p)
+    | Ryield_gen p           -> Ryield_gen (pos p)
+    | Ryield_send p          -> Ryield_send (pos p)
     | Rlost_info (s, r1, p2) -> Rlost_info (s, reason r1, pos p2)
     | Rcoerced (p1, p2, x)   -> Rcoerced (pos p1, pos p2, x)
     | Rformat (p1, s, r)     -> Rformat (pos p1, s, reason r)
@@ -262,6 +277,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Runknown_class p       -> Runknown_class (pos p)
     | Rdynamic_yield (p1, p2, s1, s2) -> Rdynamic_yield(pos p1, pos p2, s1, s2)
     | Rmap_append p          -> Rmap_append (pos p)
+    | Rvar_param p           -> Rvar_param (pos p)
+    | Rinstantiate (r1,x,r2) -> Rinstantiate (reason r1, x, reason r2)
 
   let string_id (p, x) = pos p, x
 
@@ -284,11 +301,9 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Tabstract (sid, xl, x) ->
         Tabstract (string_id sid, List.map (ty) xl, ty_opt x)
     | Tobject as x         -> x
-    | Tshape fdm           -> Tshape (SMap.map ty fdm)
+    | Tshape fdm           -> Tshape (ShapeMap.map ty fdm)
 
-  and ty_opt = function
-    | None -> None
-    | Some x -> Some (ty x)
+  and ty_opt x = opt_map ty x
 
   and fun_type ft =
     { ft with
@@ -330,15 +345,11 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_scvars                = SMap.map class_elt tc.tc_scvars      ;
       tc_methods               = SMap.map class_elt tc.tc_methods     ;
       tc_smethods              = SMap.map class_elt tc.tc_smethods    ;
-      tc_construct             = constructor tc.tc_construct          ;
+      tc_construct             = opt_map class_elt tc.tc_construct    ;
       tc_ancestors             = SMap.map ty tc.tc_ancestors          ;
       tc_ancestors_checked_when_concrete    = SMap.map ty tc.tc_ancestors_checked_when_concrete ;
       tc_user_attributes       = tc.tc_user_attributes                ;
     }
-
-  and constructor = function
-    | None   -> None
-    | Some c -> Some (class_elt c)
 
   and typedef = function
     | Typing_env.Typedef.Error as x -> x
@@ -464,7 +475,7 @@ let class_big_diff class1 class2 =
   class1.tc_tparams <> class2.tc_tparams ||
   SMap.compare class1.tc_ancestors class2.tc_ancestors <> 0 ||
   SMap.compare class1.tc_ancestors_checked_when_concrete class2.tc_ancestors_checked_when_concrete <> 0 ||
-  SSet.compare class1.tc_req_ancestors class2.tc_req_ancestors <> 0 ||
+  SMap.compare class1.tc_req_ancestors class2.tc_req_ancestors <> 0 ||
   SSet.compare class1.tc_req_ancestors_extends class2.tc_req_ancestors_extends <> 0 ||
   SSet.compare class1.tc_extends class2.tc_extends <> 0
 

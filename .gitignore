@@ -1,7 +1,9 @@
 *.[oad]
 *.hhbc
 .mkdir
+.DS_Store
 hphp.log
+/build
 
 /hphp/test/test
 /hphp/test/test_fast.inc
@@ -41,31 +43,18 @@ hphp.log
 /hphp/ffi/java/classes
 /hphp/ffi/java/hphp_ffi_java.h
 
-CMakeFiles
-CMakeCache.txt
-cmake_install.cmake
-install_manifest.txt
-
+/bin
 /output_gd/
 
+# tags files
 /hphp/TAGS
+tags
+TAGS
 
 # old directories with makefiles
 /hphp/submodules
 /hphp/third_party
-
 /third-party/libzip/libzip.dylib
-
-# Generated makefiles
-/hphp/runtime/ext_hhvm/Makefile
-/hphp/test/Makefile
-/hphp/hack/Makefile
-/hphp/hphp/Makefile
-/hphp/hhvm/Makefile
-/hphp/compiler/Makefile
-/hphp/Makefile
-/Makefile
-/bin
 
 # eclipse files
 .project
@@ -79,6 +68,22 @@ install_manifest.txt
 .syntastic_cpp_config
 *~
 
-# tags files
-tags
-TAGS
+# CMake
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# CPack
+CPackConfig.cmake
+CPackSourceConfig.cmake
+
+# Ninja
+.ninja_deps
+.ninja_log
+*.ninja
+
+# windows files
+*.exe
+*.rc

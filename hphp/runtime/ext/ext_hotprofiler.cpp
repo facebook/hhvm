@@ -30,6 +30,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
 #include <sys/time.h>
@@ -1418,113 +1419,76 @@ class MemoProfiler : public Profiler {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// ProfilerFactory
 
-struct ProfilerFactory final : RequestEventHandler {
-  enum Level {
-    Simple       = 1,
-    Hierarchical = 2,
-    Memory       = 3,
-    Trace        = 4,
-    Memo         = 5,
-    Sample       = 620002, // Rockfort's zip code
-  };
-
-  static bool EnableNetworkProfiler;
-
-public:
-  ProfilerFactory() : m_profiler(nullptr) {
+bool ProfilerFactory::start(Level level,
+                            long flags,
+                            bool beginFrame /* = true */) {
+  if (m_profiler != nullptr) {
+    return false;
   }
 
-  ~ProfilerFactory() {
-    stop();
+  switch (level) {
+  case Simple:
+    m_profiler = new SimpleProfiler();
+    break;
+  case Hierarchical:
+    m_profiler = new HierarchicalProfiler(flags);
+    break;
+  case Sample:
+    m_profiler = new SampleProfiler();
+    break;
+  case Trace:
+    m_profiler = new TraceProfiler(flags);
+    break;
+  case Memo:
+    m_profiler = new MemoProfiler(flags);
+    break;
+  case XDebug:
+    m_profiler = new XDebugProfiler();
+    break;
+  default:
+    throw_invalid_argument("level: %d", level);
+    return false;
   }
-
-  Profiler *getProfiler() {
-    return m_profiler;
-  }
-
-  void requestInit() override {}
-  void requestShutdown() override {
-    stop();
-    m_artificialFrameNames.reset();
-  }
-
-  void start(Level level, long flags) {
-    if (!RuntimeOption::EnableHotProfiler) {
-      return;
-    }
+  if (m_profiler->m_successful) {
     // This will be disabled automatically when the thread completes the request
     HPHP::EventHook::Enable();
-    if (m_profiler == nullptr) {
-      switch (level) {
-      case Simple:
-        m_profiler = new SimpleProfiler();
-        break;
-      case Hierarchical:
-        m_profiler = new HierarchicalProfiler(flags);
-        break;
-      case Sample:
-        m_profiler = new SampleProfiler();
-        break;
-      case Trace:
-        m_profiler = new TraceProfiler(flags);
-        break;
-      case Memo:
-        m_profiler = new MemoProfiler(flags);
-        break;
-      default:
-        throw_invalid_argument("level: %d", level);
-        return;
-      }
-      if (m_profiler->m_successful) {
-        m_profiler->beginFrame("main()");
-        ThreadInfo::s_threadInfo->m_profiler = m_profiler;
-      } else {
-        delete m_profiler;
-        m_profiler = nullptr;
-      }
+    ThreadInfo::s_threadInfo->m_profiler = m_profiler;
+    if (beginFrame) {
+      m_profiler->beginFrame("main()");
     }
+    return true;
+  } else {
+    delete m_profiler;
+    m_profiler = nullptr;
+    return false;
   }
+}
 
-  Variant stop() {
-    if (m_profiler) {
-      m_profiler->endAllFrames();
+Variant ProfilerFactory::stop() {
+  if (m_profiler) {
+    m_profiler->endAllFrames();
 
-      Array ret;
-      m_profiler->writeStats(ret);
-      delete m_profiler;
-      m_profiler = nullptr;
-      ThreadInfo::s_threadInfo->m_profiler = nullptr;
+    Array ret;
+    m_profiler->writeStats(ret);
+    delete m_profiler;
+    m_profiler = nullptr;
+    ThreadInfo::s_threadInfo->m_profiler = nullptr;
 
-      return ret;
-    }
-    return init_null();
+    return ret;
   }
-
-  /**
-   * The whole purpose to make sure "const char *" is safe to take on these
-   * strings.
-   */
-  void cacheString(const String& name) {
-    m_artificialFrameNames.append(name);
-  }
-
-private:
-  Profiler *m_profiler;
-  Array m_artificialFrameNames;
-};
+  return init_null();
+}
 
 bool ProfilerFactory::EnableNetworkProfiler = false;
 
-#ifdef HOTPROFILER
-IMPLEMENT_STATIC_REQUEST_LOCAL(ProfilerFactory, s_factory);
-#endif
+IMPLEMENT_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 
 ///////////////////////////////////////////////////////////////////////////////
 // main functions
 
 void f_hotprofiler_enable(int level) {
-#ifdef HOTPROFILER
   long flags = 0;
   if (level == ProfilerFactory::Hierarchical) {
     flags = TrackBuiltins;
@@ -1532,39 +1496,30 @@ void f_hotprofiler_enable(int level) {
     level = ProfilerFactory::Hierarchical;
     flags = TrackBuiltins | TrackMemory;
   }
-  s_factory->start((ProfilerFactory::Level)level, flags);
-#endif
+  if (RuntimeOption::EnableHotProfiler) {
+    s_profiler_factory->start((ProfilerFactory::Level)level, flags);
+  }
 }
 
 Variant f_hotprofiler_disable() {
-#ifdef HOTPROFILER
-  return s_factory->stop();
-#else
-  return init_null();
-#endif
+  return s_profiler_factory->stop();
 }
 
 void f_phprof_enable(int flags /* = 0 */) {
-#ifdef HOTPROFILER
-  s_factory->start(ProfilerFactory::Hierarchical, flags);
-#endif
+  if (RuntimeOption::EnableHotProfiler) {
+    s_profiler_factory->start(ProfilerFactory::Hierarchical, flags);
+  }
 }
 
 Variant f_phprof_disable() {
-#ifdef HOTPROFILER
-  return s_factory->stop();
-#else
-  return init_null();
-#endif
+  return s_profiler_factory->stop();
 }
 
 void f_fb_setprofile(const Variant& callback) {
-#ifdef HOTPROFILER
   if (ThreadInfo::s_threadInfo->m_profiler != nullptr) {
     // phpprof is enabled, don't let PHP code override it
     return;
   }
-#endif
   g_context->m_setprofileCallback = callback;
   if (callback.isNull()) {
     HPHP::EventHook::Disable();
@@ -1574,27 +1529,25 @@ void f_fb_setprofile(const Variant& callback) {
 }
 
 void f_xhprof_frame_begin(const String& name) {
-#ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {
-    s_factory->cacheString(name);
+    s_profiler_factory->cacheString(name);
     prof->beginFrame(name.data());
   }
-#endif
 }
 
 void f_xhprof_frame_end() {
-#ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {
     prof->endFrame(nullptr, nullptr);
   }
-#endif
 }
 
 void f_xhprof_enable(int flags/* = 0 */,
                      const Array& args /* = null_array */) {
-#ifdef HOTPROFILER
+  if (!RuntimeOption::EnableHotProfiler) {
+    return;
+  }
 #ifdef CLOCK_THREAD_CPUTIME_ID
   bool missingClockGetTimeNS =
     Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
@@ -1608,19 +1561,14 @@ void f_xhprof_enable(int flags/* = 0 */,
     flags |= TrackCPU;
   }
   if (flags & XhpTrace) {
-    s_factory->start(ProfilerFactory::Trace, flags);
+    s_profiler_factory->start(ProfilerFactory::Trace, flags);
   } else {
-    s_factory->start(ProfilerFactory::Hierarchical, flags);
+    s_profiler_factory->start(ProfilerFactory::Hierarchical, flags);
   }
-#endif
 }
 
 Variant f_xhprof_disable() {
-#ifdef HOTPROFILER
-  return s_factory->stop();
-#else
-  return init_null();
-#endif
+  return s_profiler_factory->stop();
 }
 
 void f_xhprof_network_enable() {
@@ -1632,17 +1580,16 @@ Variant f_xhprof_network_disable() {
 }
 
 void f_xhprof_sample_enable() {
-#ifdef HOTPROFILER
-  s_factory->start(ProfilerFactory::Sample, 0);
-#endif
+  if (RuntimeOption::EnableHotProfiler) {
+    s_profiler_factory->start(ProfilerFactory::Sample, 0);
+  } else {
+    raise_warning("Cannot start the xhprof sampler when the hotprofiler is "
+                  "disabled.");
+  }
 }
 
 Variant f_xhprof_sample_disable() {
-#ifdef HOTPROFILER
-  return s_factory->stop();
-#else
-  return init_null();
-#endif
+  return s_profiler_factory->stop();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

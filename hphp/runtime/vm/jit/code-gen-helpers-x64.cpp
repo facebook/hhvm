@@ -181,14 +181,14 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
 }
 
 void emitAssertFlagsNonNegative(Asm& as) {
-  ifThen(as, CC_NGE, [&] { as.ud2(); });
+  ifThen(as, CC_NGE, [&](Asm& a) { a.ud2(); });
 }
 
 void emitAssertRefCount(Asm& as, PhysReg base) {
   as.cmpl(HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NLE, [&] {
-    as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
-    ifThen(as, CC_NBE, [&] { as.ud2(); });
+  ifThen(as, CC_NLE, [&](Asm& a) {
+    a.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
+    ifThen(a, CC_NBE, [&](Asm& a) { a.ud2(); });
   });
 }
 
@@ -240,22 +240,17 @@ void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {
 }
 
 void emitCall(Asm& a, TCA dest) {
-  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
+  if (a.jmpDeltaFits(dest)) {
     a.    call(dest);
   } else {
-    dest = mcg->getNativeTrampoline(dest);
-    if (a.jmpDeltaFits(dest)) {
-      a.call(dest);
-    } else {
-      // can't do a near call; store address in data section.
-      // call by loading the address using rip-relative addressing.  This
-      // assumes the data section is near the current code section.  Since
-      // this sequence is directly in-line, rip-relative like this is
-      // more compact than loading a 64-bit immediate.
-      auto addr = mcg->allocLiteral((uint64_t)dest);
-      a.call(rip[(intptr_t)addr]);
-      assert(((int32_t*)a.frontier())[-1] + a.frontier() == (TCA)addr);
-    }
+    // can't do a near call; store address in data section.
+    // call by loading the address using rip-relative addressing.  This
+    // assumes the data section is near the current code section.  Since
+    // this sequence is directly in-line, rip-relative like this is
+    // more compact than loading a 64-bit immediate.
+    auto addr = mcg->allocLiteral((uint64_t)dest);
+    a.call(rip[(intptr_t)addr]);
+    assert(((int32_t*)a.frontier())[-1] + a.frontier() == (TCA)addr);
   }
 }
 
@@ -308,12 +303,11 @@ void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
 
 void emitRB(X64Assembler& a,
             Trace::RingBufferType t,
-            const char* msg,
-            RegSet toSave) {
+            const char* msg) {
   if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
     return;
   }
-  PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);
+  PhysRegSaver save(a, kSpecialCrossTraceRegs);
   int arg = 0;
   a.    emitImmReg((uintptr_t)msg, argNumToRegName[arg++]);
   a.    emitImmReg(strlen(msg), argNumToRegName[arg++]);

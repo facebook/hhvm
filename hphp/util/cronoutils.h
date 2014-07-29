@@ -115,10 +115,6 @@
 #define mkdir _mkdir
 #endif
 
-#if !HAVE_LOCALIME_R
-struct tm *localtime_r(const time_t *, struct tm *) throw ();
-#endif
-
 /* Some operating systems don't declare getopt() */
 
 #ifdef NEED_GETOPT_DEFS

@@ -366,6 +366,20 @@ class Redis {
     return $this->processBooleanResponse();
   }
 
+  /* Sets ---------------------------------------------------------------- */
+
+  public function sRandMember($key, $count = null) {
+    $args = [$key];
+    if ($count !== null) {
+       $args[] = $count;
+    }
+    $this->processArrayCommand('SRANDMEMBER', $args);
+    if ($count !== null) {
+       return $this->processVectorResponse(true);
+    }
+    return $this->processStringResponse();
+  }
+
   /* zSets --------------------------------------------------------------- */
 
   public function zAdd($key, $score, $value/*, $scoreN, $valueN */) {
@@ -597,7 +611,8 @@ class Redis {
     array_unshift($args, $numKeys);
     array_unshift($args, $script);
     $this->processArrayCommand($cmd, $args);
-    return $this->processVariantResponse();
+    $response = $this->processVariantResponse();
+    return ($response !== NULL) ? $response : false;
   }
 
   public function evaluate($script, array $args = [], $numKeys = 0) {
@@ -833,8 +848,6 @@ class Redis {
     'sgetmembers' => [ 'alias' => 'smembers' ],
     'smove' => [ 'format' => 'kkv', 'return' => '1' ],
     'spop' => [ 'format' => 'k', 'return' => 'Serialized' ],
-    'srandmember' => [ 'format' => 'kl', 'return' => 'Serialized',
-                       'default' => [ 1 => 1 ] ],
     'srem' => [ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
                 'return' => 'Long' ],
     'sremove' => [ 'alias' => 'srem' ],

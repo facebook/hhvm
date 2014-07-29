@@ -297,6 +297,7 @@ class BaseVector : public ExtCollectionObjectData {
   explicit BaseVector(Class* cls);
   /*virtual*/ ~BaseVector();
 
+  Cell* data() const { return tvAssertCell(m_data); }
   void grow();
   void reserveImpl(uint32_t newCap);
 
@@ -467,6 +468,7 @@ class BaseVector : public ExtCollectionObjectData {
   friend class BaseMap;
   friend class BaseSet;
   friend class c_Pair;
+  friend class c_AwaitAllWaitHandle;
 
   template<class TVector>
   friend ObjectData* collectionDeepCopyBaseVector(TVector* vec);
@@ -598,7 +600,7 @@ class c_VectorIterator : public ExtObjectData {
 
  private:
   SmartPtr<BaseVector> m_obj;
-  ssize_t m_pos;
+  uint32_t m_pos;
   int32_t m_version;
 
   friend class BaseVector;
@@ -731,6 +733,11 @@ class HashCollection : public ExtCollectionObjectData {
     }
   }
 
+  // Initialize a HashCollection with an array by using the array
+  // directly. Subclasses are responsible to ensure the array was properly
+  // shaped in order to be used 'as-is".
+  void initWithArray(MixedArray* data, bool intLikeStrKeys);
+
  public:
   static const int32_t Empty           = MixedArray::Empty;
   static const int32_t Tombstone       = MixedArray::Tombstone;
@@ -763,17 +770,6 @@ class HashCollection : public ExtCollectionObjectData {
   inline Elm* data() { return m_data; }
   inline const Elm* data() const { return m_data; }
   inline int32_t* hashTab() const { return (int32_t*)(m_data + cap()); }
-
-  MixedArray* arrayData() {
-    auto* ret = getArrayFromMixedData(m_data);
-    assert(ret == staticEmptyMixedArray() || ret->isMixed());
-    return ret;
-  }
-  const MixedArray* arrayData() const {
-    auto* ret = getArrayFromMixedData(m_data);
-    assert(ret == staticEmptyMixedArray() || ret->isMixed());
-    return ret;
-  }
 
   void setSize(uint32_t sz) {
     assert(sz <= cap());
@@ -924,18 +920,27 @@ class HashCollection : public ExtCollectionObjectData {
     return b;
   }
 
+  MixedArray* arrayData() {
+    auto* ret = getArrayFromMixedData(m_data);
+    assert(ret == staticEmptyMixedArray() || ret->isMixed());
+    return ret;
+  }
+  const MixedArray* arrayData() const {
+    auto* ret = getArrayFromMixedData(m_data);
+    assert(ret == staticEmptyMixedArray() || ret->isMixed());
+    return ret;
+  }
+
   static uint32_t sizeOffset() {
     return offsetof(HashCollection, m_size);
   }
 
   static bool validPos(ssize_t pos) {
     return pos >= 0;
-    static_assert(ssize_t(Empty) == ssize_t(-1), "");
   }
 
   static bool validPos(int32_t pos) {
     return pos >= 0;
-    static_assert(Empty == -1, "");
   }
 
   // The skipTombstonesNoBoundsCheck helper functions assume that either
@@ -1108,70 +1113,66 @@ class HashCollection : public ExtCollectionObjectData {
   // repeatedly adding new elements until m_size >= sz.
   void reserve(int64_t sz);
 
-  // The iter functions below facilitate iteration over Sets and ImmSets.
+  // The iter functions below facilitate iteration over HashCollections.
   // Iterators cannot store Elm pointers (because it's possible for m_data
-  // to change without bumping m_version in some cases). Iterators track
-  // their position in terms of _bytes_ from the beginning of the buffer
-  // since it requires less computation overall.
+  // to change without bumping m_version in some cases), so indices are
+  // used instead.
 
-  ssize_t iter_limit() const {
-    return (ssize_t)fetchElm((Elm*)nullptr, posLimit());
+  bool iter_valid(ssize_t pos) const {
+    return pos < (ssize_t)posLimit();
   }
 
-  bool iter_valid(ssize_t ipos) const {
-    return ipos != iter_limit();
+  bool iter_valid(ssize_t pos, ssize_t limit) const {
+    assert(limit == (ssize_t)posLimit());
+    return pos < limit;
   }
 
-  bool iter_valid(ssize_t ipos, ssize_t limit) const {
-    assert(limit == iter_limit());
-    return ipos != limit;
-  }
-
-  const Elm* iter_elm(ssize_t ipos) const {
-    assert(iter_valid(ipos));
-    return (const Elm*)((ssize_t)data() + ipos);
+  const Elm* iter_elm(ssize_t pos) const {
+    assert(iter_valid(pos));
+    return fetchElm(data(), pos);
   }
 
   ssize_t iter_begin() const {
-    ssize_t limit = iter_limit();
-    ssize_t ipos = 0;
-    for (; ipos != limit; ipos += sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
+    ssize_t limit = posLimit();
+    ssize_t pos = 0;
+    for (; pos != limit; ++pos) {
+      auto* e = iter_elm(pos);
       if (!isTombstone(e)) break;
     }
-    return ipos;
+    return pos;
   }
 
-  ssize_t iter_next(ssize_t ipos) const {
-    ssize_t limit = iter_limit();
-    for (ipos += sizeof(Elm); ipos < limit; ipos += sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
-      if (!isTombstone(e)) return ipos;
+  ssize_t iter_next(ssize_t pos) const {
+    ssize_t limit = posLimit();
+    for (++pos; pos < limit; ++pos) {
+      auto* e = iter_elm(pos);
+      if (!isTombstone(e)) return pos;
     }
     return limit;
   }
 
-  ssize_t iter_prev(ssize_t ipos) const {
-    ssize_t orig_ipos = ipos;
-    for (ipos -= sizeof(Elm); ipos >= 0; ipos -= sizeof(Elm)) {
-      auto* e = iter_elm(ipos);
-      if (!isTombstone(e)) return ipos;
+  ssize_t iter_prev(ssize_t pos) const {
+    ssize_t orig_pos = pos;
+    while (pos > 0) {
+      --pos;
+      auto* e = iter_elm(pos);
+      if (!isTombstone(e)) return pos;
     }
-    return orig_ipos;
+    return orig_pos;
   }
 
-  Variant iter_key(ssize_t ipos) const {
-    assert(iter_valid(ipos));
-    auto* e = iter_elm(ipos);
+  Variant iter_key(ssize_t pos) const {
+    assert(iter_valid(pos));
+    auto* e = iter_elm(pos);
     if (e->hasStrKey()) {
       return e->skey;
     }
     return (int64_t)e->ikey;
   }
 
-  const TypedValue* iter_value(ssize_t ipos) const {
-    assert(iter_valid(ipos));
-    return &iter_elm(ipos)->data;
+  const TypedValue* iter_value(ssize_t pos) const {
+    assert(iter_valid(pos));
+    return &iter_elm(pos)->data;
   }
 
   uint32_t nthElmPos(size_t n) const {
@@ -1379,6 +1380,7 @@ class BaseMap : public HashCollection {
   friend class c_Map;
   friend class c_ImmMap;
   friend class ArrayIter;
+  friend class c_AwaitAllWaitHandle;
   friend class c_GenMapWaitHandle;
 
   static void compileTimeAssertions() {
@@ -1616,7 +1618,7 @@ class c_MapIterator : public ExtObjectData {
 
  private:
   SmartPtr<BaseMap> m_obj;
-  ssize_t m_pos;
+  uint32_t m_pos;
   int32_t m_version;
 
   friend class BaseMap;
@@ -1813,6 +1815,7 @@ class BaseSet : public HashCollection {
   friend class c_Set;
   friend class c_Map;
   friend class ArrayIter;
+  friend class APCCollection;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
@@ -1960,7 +1963,7 @@ class c_SetIterator : public ExtObjectData {
 
  private:
   SmartPtr<BaseSet> m_obj;
-  ssize_t m_pos;
+  uint32_t m_pos;
   int32_t m_version;
 
   friend class BaseSet;
@@ -1980,9 +1983,12 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   DECLARE_CLASS_NO_SWEEP(Pair)
 
  public:
+  enum class NoInit {};
+
   explicit c_Pair(Class* cls = c_Pair::classof());
+  explicit c_Pair(NoInit, Class* cls = c_Pair::classof());
   ~c_Pair();
-  void t___construct();
+  void t___construct(int _argc, const Array& _argv = null_array);
   bool t_isempty();
   int64_t t_count();
   Object t_items();
@@ -2124,7 +2130,7 @@ class c_PairIterator : public ExtObjectData {
 
  private:
   SmartPtr<c_Pair> m_obj;
-  ssize_t m_pos;
+  uint32_t m_pos;
 
   friend class c_Pair;
 };

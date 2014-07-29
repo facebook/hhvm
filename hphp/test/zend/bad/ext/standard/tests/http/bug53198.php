@@ -1,8 +1,4 @@
 <?php
-ini_set('from', teste@teste.pt);
-
-ini_set('allow_url_fopen', 1);
-
 require 'server.inc';
 
 function do_test() {

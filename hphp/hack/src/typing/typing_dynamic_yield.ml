@@ -110,15 +110,18 @@ and contains_dynamic_yield_interface = SSet.mem "\\IUseDynamicYield"
 and implements_dynamic_yield_interface ancestors = SMap.mem "\\IUseDynamicYield" ancestors
 and is_dynamic_yield name = (name = "\\DynamicYield")
 
+and remove_prefix prefix str =
+  if str_starts_with str prefix
+  then begin
+    let prefix_len = String.length prefix in
+    Some (String.sub str prefix_len ((String.length str) - prefix_len))
+  end else None
+
 and parse_yield_name name =
-  if Str.string_match (Str.regexp "^yield\\(.*\\)") name 0
-  then Some (Str.matched_group 1 name)
-  else None
+  remove_prefix "yield" name
 
 and parse_get_name name =
-  if Str.string_match (Str.regexp "^get\\(.*\\)") name 0
-  then Some (Str.matched_group 1 name)
-  else None
+  remove_prefix "get" name
 
 and add name ce acc =
   match SMap.get name acc with

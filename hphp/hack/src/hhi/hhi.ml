@@ -37,9 +37,7 @@ let extract data =
   path
 
 let extract_embedded () =
-  match get_embedded_hhi_data Sys.executable_name with
-  | None -> None
-  | Some data -> Some (extract data)
+  Utils.opt_map extract (get_embedded_hhi_data Sys.executable_name)
 
 let extract_external () =
   let path = (Filename.dirname Sys.executable_name) ^ "/../hhi.tar.gz" in

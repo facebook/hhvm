@@ -16,79 +16,80 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
-#include "folly/MapUtil.h"
-
 #include <cinttypes>
-#include <stdint.h>
 #include <assert.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <strstream>
-#include <stdio.h>
 #include <stdarg.h>
-#include <string>
-#include <queue>
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <unistd.h>
 #include <unwind.h>
-#include <unordered_set>
 
 #include <algorithm>
 #include <exception>
 #include <memory>
+#include <queue>
+#include <string>
+#include <strstream>
+#include <unordered_set>
 #include <vector>
 
 #include "folly/Format.h"
+#include "folly/MapUtil.h"
 #include "folly/String.h"
 
 #include "hphp/util/abi-cxx.h"
-#include "hphp/util/disasm.h"
 #include "hphp/util/bitops.h"
+#include "hphp/util/cycles.h"
 #include "hphp/util/debug.h"
+#include "hphp/util/disasm.h"
 #include "hphp/util/maphuge.h"
+#include "hphp/util/meta.h"
+#include "hphp/util/process.h"
 #include "hphp/util/rank.h"
+#include "hphp/util/repo-schema.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/meta.h"
-#include "hphp/util/process.h"
-#include "hphp/util/repo-schema.h"
-#include "hphp/util/cycles.h"
 
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/php-debug.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option-guard.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 #include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/debug-guards.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
-#include "hphp/runtime/vm/jit/debug-guards.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/php-debug.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
@@ -642,7 +643,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   recordGdbTranslation(skFuncBody, func,
                        code.main(), aStart,
                        false, true);
-  recordBCInstr(OpFuncPrologue, code.main(), start, false);
+  recordBCInstr(OpFuncPrologue, aStart, code.main().frontier(), false);
 
   return start;
 }
@@ -1407,62 +1408,6 @@ MCGenerator::syncWork() {
   Stats::inc(Stats::TC_Sync);
 }
 
-TCA
-MCGenerator::emitNativeTrampoline(TCA helperAddr) {
-  auto& trampolines = code.trampolines();
-  if (!trampolines.canEmit(kExpectedPerTrampolineSize)) {
-    // not enough space to emit a trampoline, so just return the
-    // helper address and emitCall will the emit the right sequence
-    // to call it indirectly
-    TRACE(1, "Ran out of space to emit a trampoline for %p\n", helperAddr);
-    return helperAddr;
-  }
-
-  uint32_t index = m_numNativeTrampolines++;
-  TCA trampAddr = trampolines.frontier();
-  if (Stats::enabled()) {
-    emitIncStat(trampolines, &Stats::tl_helper_counters[0], index);
-    auto name = getNativeFunctionName(helperAddr);
-    const size_t limit = 50;
-    if (name.size() > limit) {
-      name[limit] = '\0';
-    }
-
-    // The duped string lives until process death intentionally.
-    Stats::helperNames[index].store(strdup(name.c_str()),
-                                    std::memory_order_release);
-  }
-
-  Asm a { trampolines };
-  // Move the 64-bit immediate address to rax, then jmp. If clobbering
-  // rax is a problem, we could do an rip-relative call with the address
-  // stored in the data section with no extra registers; but it has
-  // worse memory locality.
-  a.    emitImmReg(helperAddr, rax);
-  a.    jmp    (rax);
-  a.    ud2(); // hint that the jump doesn't go here.
-
-  m_trampolineMap[helperAddr] = trampAddr;
-  recordBCInstr(OpNativeTrampoline, trampolines, trampAddr, false);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
-  }
-
-  return trampAddr;
-}
-
-TCA
-MCGenerator::getNativeTrampoline(TCA helperAddr) {
-  if (!RuntimeOption::EvalJitTrampolines && !Stats::enabled()) {
-    return helperAddr;
-  }
-  auto const trampAddr = (TCA)folly::get_default(m_trampolineMap, helperAddr);
-  if (trampAddr) {
-    return trampAddr;
-  }
-  return emitNativeTrampoline(helperAddr);
-}
-
 // Get the address of the literal val in the global data section.
 // If it's not there, add it to the map in m_fixups, which will
 // be committed to m_literals when m_fixups.process() is called.
@@ -1695,7 +1640,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         }
 
         FTRACE(2, "translateRegion finished with result {}\n",
-               Translator::translateResultName(result));
+               Translator::ResultName(result));
       } catch (ControlFlowFailedExc& cfe) {
         FTRACE(2, "translateRegion with control flow failed: '{}'\n",
                cfe.what());
@@ -1761,6 +1706,23 @@ MCGenerator::translateWork(const TranslArgs& args) {
     // Fall through.
   }
 
+  if (RuntimeOption::EvalProfileBC) {
+    auto* unit = sk.unit();
+    TransBCMapping prev{};
+    for (auto& cur : m_fixups.m_bcMap) {
+      if (!cur.aStart) continue;
+      if (prev.aStart) {
+        if (prev.bcStart < unit->bclen()) {
+          recordBCInstr(unit->entry()[prev.bcStart],
+                        prev.aStart, cur.aStart, false);
+        }
+      } else {
+        recordBCInstr(OpTraceletGuard, start, cur.aStart, false);
+      }
+      prev = cur;
+    }
+  }
+
   recordGdbTranslation(sk, sk.func(), code.main(), start,
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), coldStart,
@@ -1811,6 +1773,8 @@ void MCGenerator::traceCodeGen() {
 
   finishPass(" after initial translation ", kIRLevel);
 
+  always_assert(IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops));
+
   // Task #4075847: enable optimizations with loops
   if (!(RuntimeOption::EvalJitLoops && m_tx.mode() == TransKind::Optimize)) {
     optimize(unit, ht.irBuilder(), m_tx.mode());
@@ -1821,7 +1785,6 @@ void MCGenerator::traceCodeGen() {
     unit.collectPostConditions();
   }
 
-  recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier(), false);
   always_assert(this == mcg);
   genCode(unit);
 
@@ -1830,7 +1793,6 @@ void MCGenerator::traceCodeGen() {
 
 MCGenerator::MCGenerator()
   : m_backEnd(newBackEnd())
-  , m_numNativeTrampolines(0)
   , m_numHHIRTrans(0)
   , m_catchTraceMap(128)
 {
@@ -1947,12 +1909,12 @@ static Debug::TCRange rangeFrom(const CodeBlock& cb, const TCA addr,
 }
 
 void MCGenerator::recordBCInstr(uint32_t op,
-                                const CodeBlock& cb,
                                 const TCA addr,
+                                const TCA end,
                                 bool cold) {
-  if (addr != cb.frontier()) {
-    m_debugInfo.recordBCInstr(Debug::TCRange(addr, cb.frontier(),
-                                             cold), op);
+  if (addr != end) {
+    m_debugInfo.recordBCInstr(
+      Debug::TCRange(addr, end, cold), op);
   }
 }
 
@@ -2136,16 +2098,6 @@ bool MCGenerator::dumpTCCode(const char* filename) {
   if (result) {
     count = code.frozen().used();
     result = (fwrite(code.frozen().base(), 1, count, afrozenFile) == count);
-  }
-  if (result) {
-    for (auto const& pair : m_trampolineMap) {
-      void* helperAddr = pair.first;
-      void* trampAddr = pair.second;
-      auto functionName = getNativeFunctionName(helperAddr);
-      fprintf(helperAddrFile,"%10p %10p %s\n",
-              trampAddr, helperAddr,
-              functionName.c_str());
-    }
   }
   return result;
 }

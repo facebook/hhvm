@@ -52,7 +52,7 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
   if (!cal) { return; }
   SCOPE_EXIT { if (cal && calOwned) delete cal; };
 
-  const icu::TimeZone *tz = IntlTimeZone::ParseArg(timezone,
+  icu::TimeZone *tz = IntlTimeZone::ParseArg(timezone,
                                                    "datefmt_create",
                                                    s_intl_error.get());
   if (!tz) { return; }
@@ -89,7 +89,7 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
     obj->setCalendar(*cal);
   }
   if (tz) {
-    obj->setTimeZone(*tz);
+    obj->adoptTimeZone(tz);
   }
 
   m_date_type = datetype;

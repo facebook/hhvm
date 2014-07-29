@@ -1,3 +1,4 @@
-Parse error: %s error%sin %s on line %d
+
+Fatal error: %s
 string(6) "flush!"
 string(6) "close!"

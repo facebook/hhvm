@@ -113,4 +113,6 @@ hphp/system/php/spl/iterators/NoRewindIterator.php
 hphp/system/php/spl/iterators/RecursiveIteratorIterator.php
 hphp/system/php/spl/miscellaneous/ArrayObject.php
 hphp/system/php/spl/miscellaneous/autoload.php
-hphp/system/php/string/wordwrap.php
+
+# This provides a temporary workaround for renamed lz4 methods
+hphp/system/php/zlib/ext_zlib.php

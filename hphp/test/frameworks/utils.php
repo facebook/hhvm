@@ -258,15 +258,15 @@ function get_subclasses_of(string $parent): Vector {
 function get_runtime_build(bool $use_php = false): string {
   $build = "";
 
-  // FIX: Should we try to install a vanilla zend binary here instead of
-  // relying on user to specify a path? Should we try to determine if zend
+  // FIX: Should we try to install a vanilla php binary here instead of
+  // relying on user to specify a path? Should we try to determine if php
   // is already installed via a $PATH variable?
-  if (Options::$zend_path !== null) {
-    if (!file_exists(Options::$zend_path)) {
-      error_and_exit("Zend build does not exists. Are you sure your path is ".
+  if (Options::$php_path !== null) {
+    if (!file_exists(Options::$php_path)) {
+      error_and_exit("PHP build does not exists. Are you sure your path is ".
                      "right?");
     }
-    $build = Options::$zend_path;
+    $build = Options::$php_path;
   } else {
     $fbcode_root_dir = __DIR__.'/../../..';
     $oss_root_dir = __DIR__.'/../..';

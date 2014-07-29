@@ -1,4 +1,4 @@
-object(Foo)#1 (1) {
+object(Foo)#%d (1) {
   ["bar"]=>
   string(3) "bat"
 }

@@ -128,19 +128,11 @@ CodeCache::CodeCache()
 
   numa_interleave(base, m_totalSize);
 
-  TRACE(1, "init atrampolines @%p\n", base);
-
-  m_trampolines.init(base, kTrampolinesBlockSize, "trampolines");
-
-  auto misalign = kTrampolinesBlockSize;
-
   if (kAHotSize) {
     TRACE(1, "init ahot @%p\n", base);
     m_hot.init(base, kAHotSize, "hot");
     enhugen(base, kAHotSize >> 20);
     base += kAHotSize;
-    m_hot.skip(misalign);
-    misalign = 0;
   }
 
   TRACE(1, "init a @%p\n", base);
@@ -149,8 +141,6 @@ CodeCache::CodeCache()
   enhugen(base, RuntimeOption::EvalTCNumHugeHotMB);
   m_mainBase = base;
   base += kASize;
-  m_main.skip(misalign);
-  misalign = 0;
 
   TRACE(1, "init aprof @%p\n", base);
   m_prof.init(base, kAProfSize, "prof");
@@ -179,16 +169,12 @@ CodeCache::CodeCache()
 }
 
 CodeCache::~CodeCache() {
-  int result = munmap(m_trampolines.base(), m_totalSize);
-  if (result != 0) {
-    perror("freeSlab: munmap");
-  }
 }
 
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
   always_assert(!m_lock);
   return JIT::codeBlockChoose(addr, m_main, m_hot, m_prof,
-                              m_cold, m_trampolines, m_frozen);
+                              m_cold, m_frozen);
 }
 
 size_t CodeCache::totalUsed() const {

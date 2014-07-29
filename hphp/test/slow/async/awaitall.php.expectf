@@ -1,0 +1,70 @@
+children only
+<await-all> 1
+before: 0:0,
+after : 0:1,
+<result> 0
+before: 
+after : 
+<result> 0
+before: 
+after : 
+<await-all> 2
+before: 0:0,1:0,
+after : 0:1,1:1,
+<await-all> 1
+before: 0:0,
+after : 0:1,
+<result> 0
+before: 
+after : 
+<result> 0
+before: 
+after : 
+<await-all> 2
+before: 0:0,1:0,
+after : 0:1,1:1,
+<await-all> 1
+before: 0:0,
+after : 0:1,
+<await-all> 1
+before: 0:0,
+after : 0:1,
+<result> 0
+before: 
+after : 
+<await-all> 2
+before: 0:0,1:0,
+after : 0:1,1:1,
+<await-all> 2
+before: 0:0,2:0,
+after : 0:1,2:1,
+<await-all> 2
+before: 0:0,zero:0,
+after : 0:1,zero:1,
+<await-all> 2
+before: 0:0,1:0,
+after : 0:1,1:1,
+<await-all> 2
+before: 0:0,2:0,
+after : 0:1,2:1,
+<await-all> 31
+before: 0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0,14:0,15:0,16:0,17:0,18:0,19:0,20:0,21:0,22:0,23:0,24:0,25:0,26:0,27:0,28:0,29:0,30:0,
+after : 0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1,14:1,15:1,16:1,17:1,18:1,19:1,20:1,21:1,22:1,23:1,24:1,25:1,26:1,27:1,28:1,29:1,30:1,
+parents
+<await-all> 4
+before: 0:0,1:1,2:1,3:0,
+after : 0:1,1:1,2:1,3:1,
+<await-all> 4
+before: 0:0,1:1,2:1,3:0,
+after : 0:1,1:1,2:1,3:1,
+<await-all> 9
+before: 0:0,1:0,2:1,3:0,4:0,5:0,6:0,7:0,8:0,
+after : 0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,
+grandchildren
+4	0110
+4	0110
+9	001000000
+4	1111
+4	1111
+9	111111111
+done

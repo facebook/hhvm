@@ -56,7 +56,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-bool string_substr_check(int len, int &f, int &l, bool strict /* = true */) {
+bool string_substr_check(int len, int &f, int &l) {
   if (l < 0 && -l > len) {
     return false;
   } else if (l > len) {
@@ -80,7 +80,7 @@ bool string_substr_check(int len, int &f, int &l, bool strict /* = true */) {
       f = 0;
     }
   }
-  if (f > len || (f == len && strict)) {
+  if (f >= len) {
     return false;
   }
 
@@ -480,8 +480,35 @@ String string_replace(const char *s, int len, int start, int length,
                       const char *replacement, int len_repl) {
   assert(s);
   assert(replacement);
-  if (!string_substr_check(len, start, length, false)) {
-    return empty_string();
+  assert(len >= 0);
+
+  // if "start" position is negative, count start position from the end
+  // of the string
+  if (start < 0) {
+    start = len + start;
+    if (start < 0) {
+      start = 0;
+    }
+  }
+  if (start > len) {
+    start = len;
+  }
+  // if "length" position is negative, set it to the length
+  // needed to stop that many chars from the end of the string
+  if (length < 0) {
+    length = (len - start) + length;
+    if (length < 0) {
+      length = 0;
+    }
+  }
+  // check if length is too large
+  if (length > len) {
+    length = len;
+  }
+  // check if the length is too large adjusting for non-zero start
+  // Write this way instead of start + length > len to avoid overflow
+  if (length > len - start) {
+    length = len - start;
   }
 
   String retString(len + len_repl - length, ReserveString);

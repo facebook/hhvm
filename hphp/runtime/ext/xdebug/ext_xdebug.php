@@ -76,7 +76,13 @@ function xdebug_get_code_coverage(): array<string, array<int, int>>;
 <<__Native>>
 function xdebug_get_collected_errors(bool $clean = false): array<string>;
 
-<<__Native>>
+/**
+ * Returns an array where each element is a variable name which is defined in
+ * the current scope.
+ *
+ * @return array - Returns the declared variables
+ */
+<<__Native("NoFCallBuiltin")>>
 function xdebug_get_declared_vars(): array<string>;
 
 <<__Native>>
@@ -85,14 +91,27 @@ function xdebug_get_function_stack(): array<mixed>;
 <<__Native>>
 function xdebug_get_headers(): array<string>;
 
+/**
+ * Returns the name of the file which is used to save profile information to.
+ *
+ * @return mixed - Returns the profile information filename or false if
+ *                 profiling is disabled.
+ */
 <<__Native>>
-function xdebug_get_profiler_filename(): string;
+function xdebug_get_profiler_filename(): mixed;
 
 <<__Native>>
 function xdebug_get_stack_depth(): int;
 
+/**
+ * Returns the name of the file which is used to trace the output of this script
+ * too. This is useful when xdebug.auto_trace is enabled.
+ *
+ * @return mixed - Returns the name of the function trace file or false if
+ *                 tracing isn't enabled.
+ */
 <<__Native>>
-function xdebug_get_tracefile_name(): string;
+function xdebug_get_tracefile_name(): mixed;
 
 <<__Native>>
 function xdebug_is_enabled(): bool;
@@ -139,8 +158,42 @@ function xdebug_start_code_coverage(int $options = 0): void;
 <<__Native>>
 function xdebug_start_error_collection(): void;
 
-<<__Native>>
-function xdebug_start_trace(string $trace_file, int $options = 0): void;
+/**
+ * Start tracing function calls from this point to the file in the trace_file
+ * parameter. If no filename is given, then the trace file will be placed
+ * in the directory as configured by the xdebug.trace_output_dir setting.
+ * In case a file name is given as first parameter, the name is relative to the
+ * current working directory. This current working directory might be different
+ * than you expect it to be, so please use an absolute path in case you specify
+ * a file name. Use the PHP function getcwd() to figure out what the current
+ * working directory is.
+ *
+ * The name of the trace file is "{trace_file}.xt". If xdebug.auto_trace is
+ * enabled, then the format of the filename is "{filename}.xt" where the
+ * "{filename}" part depends on the xdebug.trace_output_name setting. The
+ * options parameter is a bitfield; currently there are four options:
+ *   XDEBUG_TRACE_APPEND (1)
+ *    makes the trace file open in append mode rather than overwrite mode
+ *   XDEBUG_TRACE_COMPUTERIZED (2)
+ *    creates a trace file with the format as described under 1
+ *    "xdebug.trace_format".
+ *   XDEBUG_TRACE_HTML (4)
+ *    creates a trace file as an HTML table
+ *   XDEBUG_TRACE_NAKED_FILENAME (8)
+ *    Normally, Xdebug always adds ".xt" to the end of the filename that you
+ *    pass in as first argument to this function. With the
+ *    XDEBUG_TRACE_NAKED_FILENAME flag set, ".xt" is not added.
+ *
+ *  The settings xdebug.collect_includes, xdebug.collect_params and
+ *  xdebug.collect_return influence what information is logged to the trace
+ *  file and the setting xdebug.trace_format influences the format of the trace
+ *  file.
+ *
+ * @return mixed - The filename returned by xdebug_get_tracefile_name() or false
+ *                 on failure.
+ */
+<<__Native("NoFCallBuiltin")>>
+function xdebug_start_trace(mixed $trace_file = null, int $options = 0): mixed;
 
 /**
  * This function stops collecting information, the information in memory will
@@ -156,11 +209,30 @@ function xdebug_stop_code_coverage(bool $cleanup = true): void;
 <<__Native>>
 function xdebug_stop_error_collection(): void;
 
-<<__Native>>
-function xdebug_stop_trace(): void;
+/**
+ * Stop tracing function calls and closes the trace file.
+ *
+ * @return mixed - If tracing was started, the file the trace was saved to.
+ *                 Otherwise, false.
+ */
+<<__Native("NoFCallBuiltin")>>
+function xdebug_stop_trace(): mixed;
 
+/**
+ * Returns the current time index since the starting of the script in seconds.
+ *
+ * @return float - Returns the current time index
+ */
 <<__Native>>
 function xdebug_time_index(): float;
 
 <<__Native("ActRec")>>
 function xdebug_var_dump(mixed $var, ...): void;
+
+/**
+ * Should only be needed when request parameters are being manipulated, such
+ * as in unit tests. Checks to see if any of the trigger $_GET, $_POST, or
+ * $_COOKIE variables are set, and starts the xdebug profiler if necessary.
+ */
+<<__Native>>
+function _xdebug_check_trigger_vars(): void;

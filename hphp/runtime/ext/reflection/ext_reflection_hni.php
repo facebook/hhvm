@@ -397,6 +397,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
 <<__Native>>
 function hphp_miarray(): array;
+<<__Native>>
+function hphp_msarray(): array;
 
 
 /**
@@ -835,10 +837,24 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * @return     mixed   Returns the method result.
    */
   public function invokeArgs($obj, $args): mixed {
-    // XXX: is array_values necessary here?
     if ($this->isStatic()) {
       $obj = null;
+    } else {
+      if (!$obj) {
+        $name = $this->originalClass.'::'.$this->getName();
+        throw new ReflectionException(
+          "Trying to invoke non static method $name() without an object",
+        );
+      }
+
+      if (!$obj instanceof $this->originalClass) {
+        throw new ReflectionException(
+          'Given object is not an instance of the class this '.
+            'method was declared in',
+        );
+      }
     }
+
     return hphp_invoke_method($obj, $this->originalClass, $this->getName(),
                               array_values($args));
   }
@@ -1321,7 +1337,7 @@ class ReflectionClass implements Reflector, Serializable {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  final public function inNamespace(): bool {
+  public function inNamespace(): bool {
     return strrpos($this->getName(), '\\') !== false;
   }
 
@@ -1333,7 +1349,7 @@ class ReflectionClass implements Reflector, Serializable {
    *
    * @return     string   The namespace name.
    */
-  final public function getNamespaceName(): string {
+  public function getNamespaceName(): string {
     $name = $this->getName();
     $pos = strrpos($name, '\\');
     return ($pos === false) ? '' : substr($name, 0, $pos);
@@ -1347,7 +1363,7 @@ class ReflectionClass implements Reflector, Serializable {
    *
    * @return     string  The short name of the function.
    */
-  final public function getShortName(): string {
+  public function getShortName(): string {
     $name = $this->getName();
     $pos = strrpos($name, '\\');
     return ($pos === false) ? $name : substr($name, $pos + 1);
@@ -1536,11 +1552,25 @@ class ReflectionClass implements Reflector, Serializable {
    *                     ReflectionClass objects.
    */
   public function getInterfaces(): array<string, ReflectionClass> {
-    $ret = array();
-    foreach ($this->getInterfaceNames() as $name) {
-      $ret[$name] = new ReflectionClass($name);
-    }
-    return $ret;
+    return $this->getReflectionClassesFromNames($this->getInterfaceNames());
+  }
+
+  /**
+   * Gets the list of implemented interfaces/inherited classes needed to
+   * implement an interface / use a trait. Empty array for abstract and
+   * concrete classes.
+   */
+  <<__Native>>
+  public function getRequirementNames(): array<string>;
+
+  /**
+   * Gets ReflectionClass-es for the requirements of this class
+   *
+   * @return  An associative array of requirements, with keys as
+   *          requirement names and the array values as ReflectionClass objects.
+   */
+  public function getRequirements(): array<string, ReflectionClass> {
+    return $this->getReflectionClassesFromNames($this->getRequirementNames());
   }
 
   /**
@@ -1581,8 +1611,15 @@ class ReflectionClass implements Reflector, Serializable {
    *                     Returns NULL in case of an error.
    */
   public function getTraits(): array<string, ReflectionClass> {
+    return $this->getReflectionClassesFromNames($this->getTraitNames());
+  }
+
+  /**
+   * Helper for the get{Traits,Interfaces,Requirements} methods
+   */
+  private function getReflectionClassesFromNames(array<string> $names) {
     $ret = array();
-    foreach ($this->getTraitNames() as $name) {
+    foreach ($names as $name) {
       $ret[$name] = new ReflectionClass($name);
     }
     return $ret;

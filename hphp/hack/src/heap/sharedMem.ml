@@ -280,13 +280,13 @@ module NoCache = functor(Value:Value.Type) -> struct
     let key = Key.make_old Value.prefix x in
     Old.get key
 
-  let get_old_batch xs = 
+  let get_old_batch xs =
     SSet.fold begin fun str_key acc ->
       let key = Key.make_old Value.prefix str_key in
       SMap.add str_key (Old.get key) acc
     end xs SMap.empty
 
-  let remove_batch xs = 
+  let remove_batch xs =
     SSet.iter begin fun str_key ->
       let key = Key.make Value.prefix str_key in
       New.remove key
@@ -295,13 +295,23 @@ module NoCache = functor(Value:Value.Type) -> struct
   let oldify_batch xs =
     SSet.iter begin fun str_key ->
       let key = Key.make Value.prefix str_key in
-      New.oldify key
+      if New.mem key
+      then
+        New.oldify key
+      else
+        let key = Key.make_old Value.prefix str_key in
+        Old.remove key
     end xs
 
   let revive_batch xs =
     SSet.iter begin fun str_key ->
-      let key = Key.make_old Value.prefix str_key in
-      Old.revive key
+      let old_key = Key.make_old Value.prefix str_key in
+      if Old.mem old_key
+      then
+        Old.revive old_key
+      else
+        let key = Key.make Value.prefix str_key in
+        New.remove key
     end xs
 
   let get_batch xs = 
@@ -571,7 +581,13 @@ module WithCache = functor(Value:Value.Type) -> struct
       L2.remove key;
     end keys
 
-  let revive_batch = Direct.revive_batch
+  let revive_batch keys =
+    Direct.revive_batch keys;
+    SSet.iter begin fun x ->
+      let x = Key.make Value.prefix x in
+      L1.remove x;
+      L2.remove x;
+    end keys
 
   let remove_batch xs = SSet.iter remove xs
 

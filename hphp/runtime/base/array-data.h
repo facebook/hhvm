@@ -48,10 +48,9 @@ struct ArrayData {
     kNvtwKind,    // NameValueTableWrapper
     kProxyKind,   // ProxyArray
     kIntMapKind,  // IntMapArray, int keys, maybe holes, similar to MixedArray
+    kStrMapKind,  // StrMapArray, string keys, mixed values, like MixedArray
     kNumKinds     // insert new values before kNumKinds.
   };
-
-  static constexpr ssize_t invalid_index = -1;
 
 protected:
   /*
@@ -143,13 +142,16 @@ public:
    * Specific kind querying operators.
    */
   bool isPacked() const { return m_kind == kPackedKind; }
-  // All logic should treat kMixedKind the same as kIntMapKind except
-  // for logic specific to kIntMapKind in which case use isIntMapArray()
-  bool isMixed() const { return m_kind == kMixedKind || m_kind == kIntMapKind; }
+  // All logic should treat kMixedKind the same as kIntMapKind/kStrMapKind
+  // except for logic specific to kIntMapKind/kStrMapKind in which case
+  // you can use isIntMapArray() or isStrMapArray()
+  bool isMixed() const { return m_kind == kMixedKind || m_kind == kIntMapKind ||
+                                m_kind == kStrMapKind; }
   bool isSharedArray() const { return m_kind == kSharedKind; }
   bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
   bool isIntMapArray() const { return m_kind == kIntMapKind; }
+  bool isStrMapArray() const { return m_kind == kStrMapKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -174,8 +176,8 @@ public:
   Variant each();
 
   bool isHead()            const { return m_pos == iter_begin(); }
-  bool isTail()            const { return m_pos == iter_end(); }
-  bool isInvalid()         const { return m_pos == invalid_index; }
+  bool isTail()            const { return m_pos == iter_last(); }
+  bool isInvalid()         const { return m_pos == iter_end(); }
 
   /**
    * Testing whether a key exists.
@@ -193,6 +195,7 @@ public:
    * relying on this, but try not to in new code.)
    */
   const TypedValue* nvGet(int64_t k) const;
+  const TypedValue* nvGetConverted(int64_t k) const;
   const TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos) const;
 
@@ -222,6 +225,7 @@ public:
    * escalated array data.
    */
   ArrayData *set(int64_t k, const Variant& v, bool copy);
+  ArrayData *setConverted(int64_t k, const Variant& v, bool copy);
   ArrayData *set(StringData* k, const Variant& v, bool copy);
 
   ArrayData *setRef(int64_t k, Variant& v, bool copy);
@@ -271,7 +275,9 @@ public:
   ArrayData *remove(const String& k, bool copy);
   ArrayData *remove(const Variant& k, bool copy);
 
+  // See the documentation for IterEnd, IterBegin, etc. in array-data.cpp
   ssize_t iter_begin() const;
+  ssize_t iter_last() const;
   ssize_t iter_end() const;
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
@@ -474,9 +480,11 @@ struct ArrayFunctions {
   static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
   void (*release[NK])(ArrayData*);
   const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
+  const TypedValue* (*nvGetIntConverted[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
+  ArrayData* (*setIntConverted[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
                            bool copy);
   size_t (*vsize[NK])(const ArrayData*);
@@ -496,6 +504,7 @@ struct ArrayFunctions {
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k, bool copy);
   ssize_t (*iterBegin[NK])(const ArrayData*);
+  ssize_t (*iterLast[NK])(const ArrayData*);
   ssize_t (*iterEnd[NK])(const ArrayData*);
   ssize_t (*iterAdvance[NK])(const ArrayData*, ssize_t pos);
   ssize_t (*iterRewind[NK])(const ArrayData*, ssize_t pos);

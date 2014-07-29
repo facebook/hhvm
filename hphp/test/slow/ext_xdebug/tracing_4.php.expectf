@@ -1,0 +1,41 @@
+string(%d) "/tmp/trace.%d.xt"
+string(%d) "/tmp/trace.%d.xt"
+string(%d) "TRACE START[%d-%d-%d %d:%d:%d]
+%w%f%w%d     -> xdebug_start_trace() %s/test/slow/ext_xdebug/tracing_4.php:2
+%w%f%w%d     -> include(%s/test/slow/ext_xdebug/tracing.inc) %s/test/slow/ext_xdebug/tracing_4.php:3
+%w%f%w%d       -> var_dump() %s/test/slow/ext_xdebug/tracing.inc:3
+%w%f%w%d       -> include(%s/test/slow/ext_xdebug/tracing_helper.inc) %s/test/slow/ext_xdebug/tracing.inc:4
+%w%f%w%d         -> bee() %s/test/slow/ext_xdebug/tracing_helper.inc:7
+%w%f%w%d       -> Foo::86ctor() %s/test/slow/ext_xdebug/tracing.inc:21
+%w%f%w%d       -> Foo::bar() %s/test/slow/ext_xdebug/tracing.inc:21
+%w%f%w%d         -> Foo::bar() %s/test/slow/ext_xdebug/tracing.inc:9
+%w%f%w%d           -> Foo::bar() %s/test/slow/ext_xdebug/tracing.inc:9
+%w%f%w%d             -> Foo::bar() %s/test/slow/ext_xdebug/tracing.inc:9
+%w%f%w%d               -> baz() %s/test/slow/ext_xdebug/tracing.inc:8
+%w%f%w%d                 -> boo() %s/test/slow/ext_xdebug/tracing.inc:14
+%w%f%w%d                 -> boo() %s/test/slow/ext_xdebug/tracing.inc:14
+%w%f%w%d                 -> boo() %s/test/slow/ext_xdebug/tracing.inc:15
+%w%f%w%d       -> boo() %s/test/slow/ext_xdebug/tracing.inc:22
+%w%f%w%d       -> bee() %s/test/slow/ext_xdebug/tracing.inc:23
+%w%f%w%d     -> xdebug_stop_trace() %s/test/slow/ext_xdebug/tracing_4.php:4
+TRACE END[%d-%d-%d %d:%d:%d]
+TRACE START[%d-%d-%d %d:%d:%d]
+%w%f%w%d     -> xdebug_start_trace() %s/test/slow/ext_xdebug/tracing_4.php:5
+%w%f%w%d     -> include(%s/test/slow/ext_xdebug/tracing.inc) %s/test/slow/ext_xdebug/tracing_4.php:6
+%w%f%w%d       -> var_dump() %s/test/slow/ext_xdebug/tracing.inc:3
+%w%f%w%d       -> include(%s/test/slow/ext_xdebug/tracing_helper.inc) %s/test/slow/ext_xdebug/tracing.inc:4
+%w%f%w%d         -> bee() %s/test/slow/ext_xdebug/tracing_helper.inc:7
+%w%f%w%d       -> Foo::86ctor() %s/test/slow/ext_xdebug/tracing.inc:21
+%w%f%w%d       -> Foo::bar() %s/test/slow/ext_xdebug/tracing.inc:21
+%w%f%w%d         -> Foo::bar() %s/test/slow/ext_xdebug/tracing.inc:9
+%w%f%w%d           -> Foo::bar() %s/test/slow/ext_xdebug/tracing.inc:9
+%w%f%w%d             -> Foo::bar() %s/test/slow/ext_xdebug/tracing.inc:9
+%w%f%w%d               -> baz() %s/test/slow/ext_xdebug/tracing.inc:8
+%w%f%w%d                 -> boo() %s/test/slow/ext_xdebug/tracing.inc:14
+%w%f%w%d                 -> boo() %s/test/slow/ext_xdebug/tracing.inc:14
+%w%f%w%d                 -> boo() %s/test/slow/ext_xdebug/tracing.inc:15
+%w%f%w%d       -> boo() %s/test/slow/ext_xdebug/tracing.inc:22
+%w%f%w%d       -> bee() %s/test/slow/ext_xdebug/tracing.inc:23
+%w%f%w%d     -> xdebug_stop_trace() %s/test/slow/ext_xdebug/tracing_4.php:7
+TRACE END[%d-%d-%d %d:%d:%d]
+"

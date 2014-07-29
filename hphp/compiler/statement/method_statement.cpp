@@ -370,6 +370,11 @@ void MethodStatement::setSpecialMethod(ClassScopePtr classScope) {
     classScope->setAttribute(ClassScope::HasConstructor);
   } else if (m_name == "__destruct") {
     classScope->setAttribute(ClassScope::HasDestructor);
+    if (m_params && m_params->getCount()) {
+      parseTimeFatal(Compiler::InvalidMagicMethod,
+        "Method %s::%s() cannot take any arguments",
+        m_originalClassName.c_str(), m_originalName.c_str());
+    }
   } else if (m_name == "__get") {
     classScope->setAttribute(ClassScope::HasUnknownPropGetter);
     numArgs = 1;
@@ -393,6 +398,12 @@ void MethodStatement::setSpecialMethod(ClassScopePtr classScope) {
     classScope->setAttribute(ClassScope::HasInvokeMethod);
   } else if (m_name == "__tostring") {
     numArgs = 0;
+  } else if (m_name == "__clone") {
+    if (m_params && m_params->getCount()) {
+      parseTimeFatal(Compiler::InvalidMagicMethod,
+        "Method %s::%s() cannot accept any arguments",
+        m_originalClassName.c_str(), m_originalName.c_str());
+    }
   }
   if (numArgs >= 0) {
     // Fatal if the number of arguments is wrong

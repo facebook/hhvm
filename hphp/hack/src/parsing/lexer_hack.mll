@@ -86,7 +86,7 @@ type token =
   | Tdecr
   | Tunderscore
   | Trequired
-  | Topt_args
+  | Tellipsis
   | Tdollar
   | Tpercent
   | Teof
@@ -132,7 +132,7 @@ let yyback n lexbuf =
   Lexing.(
   lexbuf.lex_curr_pos <- lexbuf.lex_curr_pos - n;
   let currp = lexbuf.lex_curr_p in
-  lexbuf.lex_curr_p <- 
+  lexbuf.lex_curr_p <-
     { currp with pos_cnum = currp.pos_cnum - n }
  )
 
@@ -199,7 +199,7 @@ let token_to_string = function
   | Tincr         -> "++"
   | Tdecr         -> "--"
   | Tunderscore   -> "_"
-  | Topt_args     -> "..."
+  | Tellipsis     -> "..."
   | Tdollar       -> "$"
   | Tpercent      -> "%"
   | Tquote        -> "'"
@@ -346,7 +346,7 @@ rule token = parse
   | "--"               { Tdecr        }
   | "_"                { Tunderscore  }
   | "@required"        { Trequired    }
-  | "..."              { Topt_args    }
+  | "..."              { Tellipsis    }
   | unsafe             { Tunsafe      }
   | fallthrough        { Tfallthrough }
   | eof                { Teof         }
@@ -596,7 +596,7 @@ and format_token = parse
   | "++"               { Tincr         }
   | "--"               { Tdecr         }
   | "_"                { Tunderscore   }
-  | "..."              { Topt_args     }
+  | "..."              { Tellipsis     }
   | eof                { Teof          }
   | _                  { Terror        }
 

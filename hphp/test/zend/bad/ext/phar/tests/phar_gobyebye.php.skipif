@@ -1,0 +1,4 @@
+<?php
+if (defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip");
+if (!extension_loaded("phar")) die("skip");
+?>

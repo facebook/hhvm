@@ -40,14 +40,5 @@ c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
   enterContextImpl(ctx_idx);
 }
 
-inline c_BlockableWaitHandle*
-c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* parent) {
-  assert(!isFinished());
-
-  auto prev = m_firstParent;
-  m_firstParent = parent;
-  return prev;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

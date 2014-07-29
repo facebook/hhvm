@@ -105,7 +105,7 @@ and check_typedef seen env (r, t) =
   | Tunresolved _ -> assert false
   | Tobject -> ()
   | Tshape tym ->
-      SMap.iter (fun _ v -> check_typedef seen env v) tym
+      Nast.ShapeMap.iter (fun _ v -> check_typedef seen env v) tym
 
 and check_typedef_list seen env x =
   List.iter (check_typedef seen env) x
@@ -113,6 +113,9 @@ and check_typedef_list seen env x =
 and check_fun_typedef seen env ft =
   check_typedef_tparam_list seen env ft.ft_tparams;
   check_typedef_fun_param_list seen env ft.ft_params;
+  (match ft.ft_arity with
+    | Fvariadic (_, p) -> check_typedef_fun_param seen env p
+    | _ -> ());
   check_typedef seen env ft.ft_ret;
   ()
 

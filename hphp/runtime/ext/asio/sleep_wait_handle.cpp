@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/sleep_wait_handle.h"
 
+#include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
@@ -77,10 +78,10 @@ void c_SleepWaitHandle::process() {
     unregisterFromContext();
   }
 
-  auto const parentChain = getFirstParent();
+  auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   tvWriteNull(&m_resultOrException);
-  c_BlockableWaitHandle::UnblockChain(parentChain);
+  parentChain.unblock();
 
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnSleepSuccessCallback())) {
@@ -117,9 +118,7 @@ void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // Recursively move all wait handles blocked by us.
-  for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-    pwh->exitContextBlocked(ctx_idx);
-  }
+  getParentChain().exitContext(ctx_idx);
 }
 
 void c_SleepWaitHandle::registerToContext() {

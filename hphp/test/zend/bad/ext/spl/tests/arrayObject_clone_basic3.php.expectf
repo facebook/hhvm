@@ -1,4 +1,4 @@
-object(C)#1 (5) {
+object(C)#%d (5) {
   ["p"]=>
   string(9) "C::p.orig"
   ["dynamic1"]=>
@@ -10,9 +10,9 @@ object(C)#1 (5) {
   ["new.oAO"]=>
   string(38) "new element added to $outerArrayObject"
 }
-object(ArrayObject)#2 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (5) {
+  object(C)#%d (5) {
     ["p"]=>
     string(9) "C::p.orig"
     ["dynamic1"]=>
@@ -25,11 +25,11 @@ object(ArrayObject)#2 (1) {
     string(38) "new element added to $outerArrayObject"
   }
 }
-object(ArrayObject)#3 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
-  object(ArrayObject)#2 (1) {
+  object(ArrayObject)#%d (1) {
     ["storage":"ArrayObject":private]=>
-    object(C)#1 (5) {
+    object(C)#%d (5) {
       ["p"]=>
       string(9) "C::p.orig"
       ["dynamic1"]=>
@@ -43,7 +43,7 @@ object(ArrayObject)#3 (1) {
     }
   }
 }
-object(ArrayObject)#4 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {
     ["p"]=>

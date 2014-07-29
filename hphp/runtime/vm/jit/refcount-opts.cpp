@@ -876,11 +876,11 @@ struct SinkPointAnalyzer : private LocalStateHook {
       m_takenState = nullptr;
     }
 
-    if (m_inst->is(IncRef, IncRefCtx)) {
+    if (m_inst->is(IncRef, IncRefCtx, TakeRef)) {
       auto* src = m_inst->src(0);
 
-      // We only consider an IncRef optimizable if it's not an IncRefCtx and
-      // the value doesn't have an optimized count of 0. This prevents any
+      // We only consider an IncRef optimizable if it's not an IncRefCtx/TakeRef
+      // and the value doesn't have an optimized count of 0. This prevents any
       // subsequent instructions from taking in a source with count 0.
       if (src->type().maybeCounted()) {
         auto& valState = m_state.values[canonical(src)];
@@ -925,10 +925,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeAllLocals();
       consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
-      consumeAllLocals();
+      consumeCurrentLocals();
     } else if (m_inst->is(CreateCont, CreateAFWH)) {
       consumeInputs();
-      consumeAllLocals();
+      consumeCurrentLocals();
       auto frame = frameRoot(m_inst->src(0)->inst());
       consumeFrame(m_state.frames.live.at(frame));
       defineOutputs();
@@ -966,6 +966,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
     return it->second.mainThis;
   }
 
+  /*
+   * Consumes all local values, including those in callers if we're inlined.
+   */
   void consumeAllLocals() {
     ITRACE(3, "consuming all locals\n");
     Indent _i;
@@ -974,6 +977,19 @@ struct SinkPointAnalyzer : private LocalStateHook {
         if (value) consumeValue(value);
       }
     );
+  }
+
+  /*
+   * Consumes all locals in the current frame, not including inline callers.
+   */
+  void consumeCurrentLocals() {
+    ITRACE(3, "consume current frame locals\n");
+    Indent _i;
+    for (uint32_t i = 0, n = m_frameState.func()->numLocals(); i < n; ++i) {
+      if (auto value = m_frameState.localValue(i)) {
+        consumeValue(value);
+      }
+    }
   }
 
   void consumeInputs() {
@@ -1755,12 +1771,12 @@ void eliminateRefcounts(IRUnit& unit, const SinkPointsMap& info,
   ITRACE(2, "\n");
 }
 
-/* After this pass completes, we don't need the TakeStack instructions anymore.
- * this pass converts them to Nop, and dce removes them. */
-void eliminateTakeStacks(const BlockList& blocks) {
+/* After this pass completes, we don't need the TakeStack/TakeRef instructions
+ * anymore. This pass converts them to Nop, and dce removes them. */
+void eliminateTakes(const BlockList& blocks) {
   for (auto b : blocks) {
     for (auto& inst : *b) {
-      if (inst.op() == TakeStack) {
+      if (inst.is(TakeStack, TakeRef)) {
         inst.convertToNop();
       }
     }
@@ -1824,7 +1840,7 @@ void optimizeRefcounts(IRUnit& unit, FrameState&& fs) {
 
   sinkIncRefs(unit, sinkPoints, ids);
   eliminateRefcounts(unit, sinkPoints, ids);
-  eliminateTakeStacks(blocks);
+  eliminateTakes(blocks);
 
   if (RuntimeOption::EvalHHIRValidateRefCount) {
     BlockMap after;

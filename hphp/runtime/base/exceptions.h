@@ -63,7 +63,7 @@ struct ExtendedException : Exception {
 
   EXCEPTION_COMMON_IMPL(ExtendedException);
 
-  Array getBackTrace() const;
+  Array getBacktrace() const;
   std::pair<String,int> getFileAndLine() const;
 
   // a silent exception does not have its exception message logged

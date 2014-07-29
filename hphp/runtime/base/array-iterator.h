@@ -79,7 +79,7 @@ struct ArrayIter {
    * Constructors.  Note that sometimes ArrayIter objects are created
    * without running their C++ constructor.  (See new_iter_array.)
    */
-  ArrayIter() : m_pos(ArrayData::invalid_index) {
+  ArrayIter() {
     m_data = nullptr;
   }
   explicit ArrayIter(const ArrayData* data);
@@ -87,8 +87,6 @@ struct ArrayIter {
     setArrayData(data);
     if (data) {
       m_pos = data->iter_begin();
-    } else {
-      m_pos = ArrayData::invalid_index;
     }
   }
   explicit ArrayIter(const MixedArray*) = delete;
@@ -132,7 +130,8 @@ struct ArrayIter {
   void operator++() { next(); }
   bool end() {
     if (LIKELY(hasArrayData())) {
-      return m_pos == ArrayData::invalid_index;
+      auto* ad = getArrayData();
+      return !ad || m_pos == ad->iter_end();
     }
     return endHelper();
   }
@@ -142,7 +141,7 @@ struct ArrayIter {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
       assert(ad);
-      assert(m_pos != ArrayData::invalid_index);
+      assert(m_pos != ad->iter_end());
       m_pos = ad->iter_advance(m_pos);
       return;
     }
@@ -154,7 +153,7 @@ struct ArrayIter {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
       assert(ad);
-      assert(m_pos != ArrayData::invalid_index);
+      assert(m_pos != ad->iter_end());
       return ad->getKey(m_pos);
     }
     return firstHelper();
@@ -162,7 +161,7 @@ struct ArrayIter {
   Variant firstHelper();
   void nvFirst(TypedValue* out) {
     const ArrayData* ad = getArrayData();
-    assert(ad && m_pos != ArrayData::invalid_index);
+    assert(ad && m_pos != ad->iter_end());
     const_cast<ArrayData*>(ad)->nvGetKey(out, m_pos);
   }
 
@@ -187,7 +186,7 @@ struct ArrayIter {
   // Inline version of secondRef.  Only for use in iterator helpers.
   const TypedValue* nvSecond() const {
     const ArrayData* ad = getArrayData();
-    assert(ad && m_pos != ArrayData::invalid_index);
+    assert(ad && m_pos != ad->iter_end());
     return ad->getValueRef(m_pos).asTypedValue();
   }
 
@@ -378,6 +377,8 @@ private:
     ObjectData* m_obj;
   };
  public:
+  // m_pos is used by the array implementation to track the current position
+  // in the array. Beware that when m_data is null, m_pos is uninitialized.
   ssize_t m_pos;
  private:
   int m_version;
@@ -551,8 +552,8 @@ private:
     ArrayData* m_data;
   };
 public:
-  // m_pos is an opaque value used by the array implementation to track the
-  // current position in the array.
+  // m_pos is used by the array implementation to track the current position
+  // in the array.
   ssize_t m_pos;
 private:
   // m_container keeps track of which array we're "registered" with. Normally

@@ -94,7 +94,7 @@ and unify_ env r1 ty1 r2 ty2 =
   | Tprim x, Tprim y ->
       (match x, y with
       | x, y when x = y ->
-	        env, Tprim x
+          env, Tprim x
       | _ ->
           TUtils.uerror r1 ty1 r2 ty2;
           env, Tany
@@ -141,17 +141,24 @@ and unify_ env r1 ty1 r2 ty2 =
           env, Tapply (id, argl)
   | Tabstract (((p1, x1) as id), argl1, tcstr1),
       Tabstract ((p2, x2), argl2, tcstr2) when String.compare x1 x2 = 0 ->
-        assert (List.length argl1 = List.length argl2);
-        let env, tcstr =
-          match tcstr1, tcstr2 with
-          | None, None -> env, None
-          | Some x1, Some x2 ->
-              let env, x = unify env x1 x2 in
-              env, Some x
-          | _ -> assert false
-        in
-        let env, argl = lfold2 unify env argl1 argl2 in
-        env, Tabstract (id, argl, tcstr)
+        if List.length argl1 <> List.length argl2
+        then begin
+          let n1 = soi (List.length argl1) in
+          let n2 = soi (List.length argl2) in
+          Errors.type_arity_mismatch p1 n1 p2 n2;
+          env, Tany
+        end
+        else
+          let env, tcstr =
+            match tcstr1, tcstr2 with
+            | None, None -> env, None
+            | Some x1, Some x2 ->
+                let env, x = unify env x1 x2 in
+                env, Some x
+            | _ -> assert false
+          in
+          let env, argl = lfold2 unify env argl1 argl2 in
+          env, Tabstract (id, argl, tcstr)
   | Tgeneric (x1, None), Tgeneric (x2, None) when x1 = x2 ->
       env, Tgeneric (x1, None)
   | Tgeneric (x1, Some ty1), Tgeneric (x2, Some ty2) when x1 = x2 ->
@@ -196,10 +203,10 @@ and unify_ env r1 ty1 r2 ty2 =
         let env, tyl = lfold2 unify env tyl1 tyl2 in
         env, Ttuple tyl
   | Tmixed, Tmixed -> env, Tmixed
-  | Tanon (_, _, id1), Tanon (_, _, id2) when id1 = id2 -> env, ty1
+  | Tanon (_, id1), Tanon (_, id2) when id1 = id2 -> env, ty1
   | Tanon _, Tanon _ -> env, Tunresolved [r1, ty1; r2, ty2]
-  | Tfun ft, Tanon (mand_arg, total_arg, id)
-  | Tanon (mand_arg, total_arg, id), Tfun ft ->
+  | Tfun ft, Tanon (anon_arity, id)
+  | Tanon (anon_arity, id), Tfun ft ->
       if not (IMap.mem id env.Env.genv.Env.anons)
       then begin
         Errors.anonymous_recursive_call (Reason.to_pos r1);
@@ -209,7 +216,7 @@ and unify_ env r1 ty1 r2 ty2 =
         let anon = IMap.find_unsafe id env.Env.genv.Env.anons in
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
-        if mand_arg <> ft.ft_arity_min || total_arg <> ft.ft_arity_max
+        if not (unify_arities ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
         then Errors.fun_arity_mismatch p1 p2;
         let env, ft = Inst.instantiate_ft env ft in
         let env, ret = anon env ft.ft_params in
@@ -228,12 +235,26 @@ and unify_ env r1 ty1 r2 ty2 =
       TUtils.uerror r1 ty1 r2 ty2;
       env, Tany
 
+and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
+  match anon_arity, func_arity with
+    | Fellipsis a_min, Fvariadic (f_min, _) when ellipsis_is_variadic ->
+      (* we want to allow use the "..." syntax in the declaration of
+       * anonymous function types to match named variadic arguments
+       * of the "...$args" form as well as unnamed ones *)
+      a_min = f_min
+    | Fvariadic (a_min, _), Fvariadic (f_min, _)
+    | Fellipsis a_min, Fellipsis f_min ->
+      a_min = f_min
+    | Fstandard (a_min, a_max), Fstandard (f_min, f_max) ->
+      a_min = f_min && a_max = f_max
+    | _, _ -> false
+
 and unify_reason r1 r2 =
   if r1 = Reason.none then r2 else
-  if r2 = Reason.none then r1 else
-  let c = Reason.compare r1 r2 in
-  if c <= 0 then r1
-  else r2
+    if r2 = Reason.none then r1 else
+      let c = Reason.compare r1 r2 in
+      if c <= 0 then r1
+      else r2
 
 and iunify env ty1 ty2 =
   let env, _ = unify env ty1 ty2 in
@@ -244,24 +265,42 @@ and iunify env ty1 ty2 =
 and unify_funs env r1 ft1 r2 ft2 =
   let p = Reason.to_pos r2 in
   let p1 = Reason.to_pos r1 in
-  if ft2.ft_arity_min <> ft1.ft_arity_min || ft2.ft_arity_max <> ft1.ft_arity_max
+  if not (unify_arities ~ellipsis_is_variadic:false ft1.ft_arity ft2.ft_arity)
   then Errors.fun_arity_mismatch p p1;
-  let env, params = unify_params env ft1.ft_params ft2.ft_params in
+  let env, var_opt, arity = match ft1.ft_arity, ft2.ft_arity with
+    | Fvariadic (_, (n1, var_ty1)), Fvariadic (min, (_n2, var_ty2)) ->
+      let env, var = unify env var_ty1 var_ty2 in
+      env, Some (n1, var), Fvariadic (min, (n1, var))
+    | ar1, ar2 ->
+      env, None, ar1
+  in
+  let env, params = unify_params env ft1.ft_params ft2.ft_params var_opt in
   let env, ret = unify env ft1.ft_ret ft2.ft_ret in
-  env, { ft1 with ft_params = params; ft_ret = ret }
+  env, { ft1 with
+    ft_arity = arity;
+    ft_params = params;
+    ft_ret = ret;
+  }
 
-and unify_params env l1 l2 =
-  match l1, l2 with
-  | [], l | l, [] -> env, l
-  | (name1, x1) :: rl1, (name2, x2) :: rl2 ->
-      let name = if name1 = name2 then name1 else None in
-      let env = { env with Env.pos = Reason.to_pos (fst x1) } in
-      let env, _ = unify env x2 x1 in
-      let env, rl = unify_params env rl1 rl2 in
-      env, (name, x2) :: rl
+and unify_params env l1 l2 var1_opt =
+  match l1, l2, var1_opt with
+  | [], l, None -> env, l
+  | [], (name2, x2) :: rl2, Some (name1, v1) ->
+    let name = if name1 = name2 then name1 else None in
+    let env = { env with Env.pos = Reason.to_pos (fst x2) } in
+    let env, _ = unify env x2 v1 in
+    let env, rl = unify_params env [] rl2 var1_opt in
+    env, (name, x2) :: rl
+  | l, [], _ -> env, l
+  | (name1, x1) :: rl1, (name2, x2) :: rl2, _ ->
+    let name = if name1 = name2 then name1 else None in
+    let env = { env with Env.pos = Reason.to_pos (fst x1) } in
+    let env, _ = unify env x2 x1 in
+    let env, rl = unify_params env rl1 rl2 var1_opt in
+    env, (name, x2) :: rl
 
 let unify_nofail env ty1 ty2 =
-  Errors.try_ 
+  Errors.try_
     (fun () -> unify env ty1 ty2)
     (fun _ ->
       let res = Env.fresh_type() in

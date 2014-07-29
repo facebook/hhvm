@@ -27,22 +27,28 @@ let is_enum ancestors =
       else Some ty_exp
     | _ -> None
 
-let enum_check_const env ty_exp (_, (p, _), _) t =
+(* Check that a type is something that can be used as an array index
+ * (int or string), blowing through typedefs to do it. Takes a function
+ * to call to report the error if it isn't. *)
+let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
+  let env, (r, t'), trail = Typing_tdef.force_expand_typedef env t in
+  (match t' with
+    | Tprim Tint | Tprim Tstring -> ()
+    | Tany when allow_any -> ()
+    | _ -> f_fail p (Reason.to_pos r) (Typing_print.error t') trail);
+  env
+
+let enum_check_const ty_exp env (_, (p, _), _) t =
   (* Constants need to be subtypes of the enum type *)
   let env = Typing_ops.sub_type p Reason.URenum env ty_exp t in
-
-  let env, (r, t'), trail = Typing_tdef.force_expand_typedef env t in
   (* Make sure the underlying type of the constant is an int
    * or a string. This matters because we need to only allow
    * int and string constants (since only they can be array
    * indexes). *)
-  (match t' with
-    | Tprim Tint | Tprim Tstring -> ()
-    (* Need to allow Tany, since we might not have the types *)
-    | Tany -> ()
-    | _ -> Errors.enum_constant_type_bad (Reason.to_pos r)
-            (Typing_print.error t') trail)
-
+  (* Need to allow Tany, since we might not have the types *)
+  check_valid_array_key_type
+    Errors.enum_constant_type_bad
+    ~allow_any:true env p t
 
 (* If a class is a subclass of Enum<T>, check that the types of all of
  * the constants are compatible with T.
@@ -66,9 +72,9 @@ let enum_class_check env tc consts const_types =
           | _ -> Errors.enum_type_bad (Reason.to_pos r)
                    (Typing_print.error ty_exp') trail);
 
-        List.iter2 (enum_check_const env ty_exp) consts const_types
+        List.fold_left2 (enum_check_const ty_exp) env consts const_types
 
-    | None -> ()
+    | None -> env
 
 (* If a class is an Enum, we give all of the constants in the class
  * the type of the Enum. We don't do this for Enum<mixed>, since that

@@ -87,6 +87,9 @@ void RequestInjectionData::threadInit() {
                    "arg_separator.output", "&",
                    &m_argSeparatorOutput);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "arg_separator.input", "&",
+                   &m_argSeparatorInput);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
@@ -218,6 +221,8 @@ void RequestInjectionData::threadInit() {
                    ), &m_errorLog);
 
   // Filesystem and Streams Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "user_agent", "", &m_userAgent);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_socket_timeout",
                    std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),

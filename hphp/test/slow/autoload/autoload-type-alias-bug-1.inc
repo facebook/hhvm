@@ -1,0 +1,2 @@
+<?hh
+type Bar = Foo;

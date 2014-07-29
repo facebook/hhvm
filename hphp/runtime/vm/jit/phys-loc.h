@@ -150,7 +150,11 @@ public:
    */
   uint32_t offset(int idx) const {
     assert(m_kind == kSpill);
-    return (m_slots[idx] + 1) * sizeof(uint64_t);
+    return disp(m_slots[idx]);
+  }
+
+  static uint32_t disp(uint32_t slot) {
+    return (slot + 1) * sizeof(uint64_t);
   }
 
   /*

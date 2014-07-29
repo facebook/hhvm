@@ -15,7 +15,7 @@ function dangling_server_proxy_old_request() { }
 function pagelet_server_is_enabled() { }
 function pagelet_server_task_start($url, $headers = null, $post_data = null, $files = null) { }
 function pagelet_server_task_status($task) { }
-function pagelet_server_task_result($task, &$headers, &$code, $timeout_ms = 0) { }
+function pagelet_server_task_result($task, &$headers, &$code, $timeout_ms = 0): string { }
 function pagelet_server_flush() { }
 function xbox_send_message($msg, &$ret, $timeout_ms, $host = "localhost") { }
 function xbox_post_message($msg, $host = "localhost") { }

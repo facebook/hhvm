@@ -40,6 +40,8 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
 
   auto documentRoot = transport->getDocumentRoot();
   if (!documentRoot.empty()) {
+    m_user = "__builtin";
+    m_sandbox = "default";
     // The transport take precedence over the config file
     m_path = documentRoot;
     *s_path.getCheck() = documentRoot;

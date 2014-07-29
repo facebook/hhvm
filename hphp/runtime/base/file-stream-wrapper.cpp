@@ -22,6 +22,7 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/system/constants.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/string-util.h"
 #include <memory>
 
 namespace HPHP {
@@ -45,9 +46,16 @@ MemFile* FileStreamWrapper::openFromCache(const String& filename,
 
 File* FileStreamWrapper::open(const String& filename, const String& mode,
                               int options, const Variant& context) {
-  String fname =
-    !strncmp(filename.data(), "file://", sizeof("file://") - 1)
-    ? filename.substr(sizeof("file://") - 1) : filename;
+  String fname;
+  if (StringUtil::IsFileUrl(filename)) {
+    fname = StringUtil::DecodeFileUrl(filename);
+    if (fname.empty()) {
+      raise_warning("invalid file:// URL");
+      return nullptr;
+    }
+  } else {
+    fname = filename;
+  }
 
   if (MemFile *file = openFromCache(fname, mode)) {
     return file;

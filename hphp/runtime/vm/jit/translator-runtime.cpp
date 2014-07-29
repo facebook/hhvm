@@ -97,7 +97,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // if appropriate
   int64_t intkey;
   ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
-                      ad->set(intkey, tvAsCVarRef(&value), copy) :
+                      ad->setConverted(intkey, tvAsCVarRef(&value), copy) :
                       ad->set(key, tvAsCVarRef(&value), copy);
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
@@ -395,6 +395,10 @@ ALWAYS_INLINE
 static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
+    if (UNLIKELY(arr->isIntMapArray())) {
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
+    }
     return arr->exists(n);
   }
   return arr->exists(key);
@@ -441,12 +445,20 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ?
-         getDefaultIfNullCell(a->nvGet(i), def) :
+         getDefaultIfNullCell(a->nvGetConverted(i), def) :
          getDefaultIfNullCell(a->nvGet(key), def);
 }
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
+}
+
+TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
+  if (UNLIKELY(a->isIntMapArray())) {
+    MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                          ArrayData::kIntMapKind);
+  }
+  return arrayIdxI(a, key, def);
 }
 
 const StaticString s_idx("idx");
@@ -897,7 +909,7 @@ Class* lookupKnownClass(Class** cache, const StringData* clsName) {
   Class* cls = *cache;
   assert(!cls); // the caller should already have checked
 
-  AutoloadHandler::s_instance->invokeHandler(
+  AutoloadHandler::s_instance->autoloadClass(
     StrNR(const_cast<StringData*>(clsName)));
   cls = *cache;
 
@@ -1098,7 +1110,7 @@ void raiseMissingArgument(const Func* func, int got) {
 }
 
 RDS::Handle lookupClsRDSHandle(const StringData* name) {
-  return Unit::GetNamedEntity(name)->getClassHandle();
+  return NamedEntity::get(name)->getClassHandle();
 }
 
 //////////////////////////////////////////////////////////////////////

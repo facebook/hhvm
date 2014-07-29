@@ -29,7 +29,7 @@ array(5) {
   string(7) "string1"
 }
 bool(true)
-object(sample)#1 (2) {
+object(sample)#%d (2) {
   ["number"]=>
   int(233)
   ["string"]=>

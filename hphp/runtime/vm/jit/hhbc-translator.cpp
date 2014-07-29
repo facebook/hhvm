@@ -77,7 +77,6 @@ HhbcTranslator::HhbcTranslator(TransContext context)
                                context.resumed,
                                context.func } }
   , m_lastBcOff{false}
-  , m_hasExit{false}
   , m_mode{IRGenMode::Trace}
 {
   updateMarker();
@@ -1407,17 +1406,19 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
 }
 
 template<class Lambda>
-SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc,
+void HhbcTranslator::emitIterInitCommon(int offset, JmpFlags jmpFlags,
+                                           Lambda genFunc,
                                            bool invertCond) {
   auto const src = popC();
   auto const type = src->type();
   if (!type.subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);
   auto const res = genFunc(src);
-  return emitJmpCondHelper(offset, !invertCond, res);
+  emitJmpCondHelper(offset, !invertCond, jmpFlags, res);
 }
 
 template<class Lambda>
-SSATmp* HhbcTranslator::emitMIterInitCommon(int offset, Lambda genFunc) {
+void HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
+                                            Lambda genFunc) {
   auto exit = makeExit();
 
   SSATmp* src = topV();
@@ -1429,15 +1430,16 @@ SSATmp* HhbcTranslator::emitMIterInitCommon(int offset, Lambda genFunc) {
   SSATmp* res = genFunc(src);
   SSATmp* out = popV();
   gen(DecRef, out);
-  return emitJmpCondHelper(offset, true, res);
+  emitJmpCondHelper(offset, true, jmpFlags, res);
 }
 
 void HhbcTranslator::emitIterInit(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId,
-                                  bool invertCond) {
+                                  bool invertCond,
+                                  JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
-  emitIterInitCommon(offset, [&] (SSATmp* src) {
+  emitIterInitCommon(offset, jmpFlags, [&] (SSATmp* src) {
       return gen(IterInit,
                  Type::Bool,
                  catchBlock,
@@ -1452,9 +1454,10 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId,
-                                   bool invertCond) {
+                                   bool invertCond,
+                                   JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
-  emitIterInitCommon(offset, [&] (SSATmp* src) {
+  emitIterInitCommon(offset, jmpFlags, [&] (SSATmp* src) {
       return gen(IterInitK,
                  Type::Bool,
                  catchBlock,
@@ -1468,7 +1471,8 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
 void HhbcTranslator::emitIterNext(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId,
-                                  bool invertCond) {
+                                  bool invertCond,
+                                  JmpFlags jmpFlags) {
   SSATmp* res = gen(
     IterNext,
     Type::Bool,
@@ -1476,14 +1480,15 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, invertCond, res);
+  emitJmpCondHelper(offset, invertCond, jmpFlags, res);
 }
 
 void HhbcTranslator::emitIterNextK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId,
-                                   bool invertCond) {
+                                   bool invertCond,
+                                   JmpFlags jmpFlags) {
   SSATmp* res = gen(
     IterNextK,
     Type::Bool,
@@ -1491,16 +1496,17 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, invertCond, res);
+  emitJmpCondHelper(offset, invertCond, jmpFlags, res);
 }
 
 void HhbcTranslator::emitWIterInit(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
-                                   bool invertCond) {
+                                   bool invertCond,
+                                   JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
   emitIterInitCommon(
-    offset, [&] (SSATmp* src) {
+    offset, jmpFlags, [&] (SSATmp* src) {
       return gen(WIterInit,
                  Type::Bool,
                  catchBlock,
@@ -1515,10 +1521,11 @@ void HhbcTranslator::emitWIterInitK(uint32_t iterId,
                                     int offset,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId,
-                                    bool invertCond) {
+                                    bool invertCond,
+                                    JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
   emitIterInitCommon(
-    offset, [&] (SSATmp* src) {
+    offset, jmpFlags, [&] (SSATmp* src) {
       return gen(WIterInitK,
                  Type::Bool,
                  catchBlock,
@@ -1532,7 +1539,8 @@ void HhbcTranslator::emitWIterInitK(uint32_t iterId,
 void HhbcTranslator::emitWIterNext(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
-                                   bool invertCond) {
+                                   bool invertCond,
+                                   JmpFlags jmpFlags) {
   SSATmp* res = gen(
     WIterNext,
     Type::Bool,
@@ -1540,14 +1548,15 @@ void HhbcTranslator::emitWIterNext(uint32_t iterId,
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, invertCond, res);
+  emitJmpCondHelper(offset, invertCond, jmpFlags, res);
 }
 
 void HhbcTranslator::emitWIterNextK(uint32_t iterId,
                                     int offset,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId,
-                                    bool invertCond) {
+                                    bool invertCond,
+                                    JmpFlags jmpFlags) {
   SSATmp* res = gen(
     WIterNextK,
     Type::Bool,
@@ -1555,14 +1564,15 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, invertCond, res);
+  emitJmpCondHelper(offset, invertCond, jmpFlags, res);
 }
 
 void HhbcTranslator::emitMIterInit(uint32_t iterId,
-                                  int offset,
-                                  uint32_t valLocalId) {
+                                   int offset,
+                                   uint32_t valLocalId,
+                                   JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
-  emitMIterInitCommon(offset, [&] (SSATmp* src) {
+  emitMIterInitCommon(offset, jmpFlags, [&] (SSATmp* src) {
     return gen(
       MIterInit,
       Type::Bool,
@@ -1575,11 +1585,12 @@ void HhbcTranslator::emitMIterInit(uint32_t iterId,
 }
 
 void HhbcTranslator::emitMIterInitK(uint32_t iterId,
-                                   int offset,
-                                   uint32_t valLocalId,
-                                   uint32_t keyLocalId) {
+                                    int offset,
+                                    uint32_t valLocalId,
+                                    uint32_t keyLocalId,
+                                    JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
-  emitMIterInitCommon(offset, [&] (SSATmp* src) {
+  emitMIterInitCommon(offset, jmpFlags, [&] (SSATmp* src) {
     return gen(
       MIterInitK,
       Type::Bool,
@@ -1593,27 +1604,29 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
 
 void HhbcTranslator::emitMIterNext(uint32_t iterId,
                                    int offset,
-                                   uint32_t valLocalId) {
+                                   uint32_t valLocalId,
+                                   JmpFlags jmpFlags) {
   SSATmp* res = gen(
     MIterNext,
     Type::Bool,
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, false, res);
+  emitJmpCondHelper(offset, false, jmpFlags, res);
 }
 
 void HhbcTranslator::emitMIterNextK(uint32_t iterId,
                                     int offset,
                                     uint32_t valLocalId,
-                                    uint32_t keyLocalId) {
+                                    uint32_t keyLocalId,
+                                    JmpFlags jmpFlags) {
   SSATmp* res = gen(
     MIterNextK,
     Type::Bool,
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, false, res);
+  emitJmpCondHelper(offset, false, jmpFlags, res);
 }
 
 void HhbcTranslator::emitIterFree(uint32_t iterId) {
@@ -1624,7 +1637,8 @@ void HhbcTranslator::emitMIterFree(uint32_t iterId) {
   gen(MIterFree, IterId(iterId), m_irb->fp());
 }
 
-void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
+void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset,
+                                       JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
   SSATmp* src = popC();
   Type type = src->type();
@@ -1632,7 +1646,7 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
     SSATmp* res = gen(DecodeCufIter, Type::Bool,
                       IterId(iterId), catchBlock, src, m_irb->fp());
     gen(DecRef, src);
-    emitJmpCondHelper(offset, true, res);
+    emitJmpCondHelper(offset, true, jmpFlags, res);
   } else {
     gen(DecRef, src);
     emitJmpImpl(offset, JmpFlagBreakTracelet, nullptr);
@@ -1689,9 +1703,6 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
-
-  // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitContEnter(Offset returnOffset) {
@@ -1732,7 +1743,6 @@ void HhbcTranslator::emitYieldReturnControl(Block* catchBlock) {
   auto const fp = gen(FreeActRec, m_irb->fp());
 
   gen(RetCtrl, RetCtrlData(true), sp, fp, retAddr);
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
@@ -2035,13 +2045,18 @@ void HhbcTranslator::emitArrayIdx() {
 
   KeyType arrayKeyType;
   bool checkForInt;
-  checkStrictlyInteger(key, arrayKeyType, checkForInt);
+  bool converted;
+  checkStrictlyInteger(key, arrayKeyType, checkForInt, converted);
 
   TCA opFunc;
   if (checkForInt) {
     opFunc = (TCA)&arrayIdxSi;
   } else if (KeyType::Int == arrayKeyType) {
-    opFunc = (TCA)&arrayIdxI;
+    if (converted) {
+      opFunc = (TCA)&arrayIdxIc;
+    } else {
+      opFunc = (TCA)&arrayIdxI;
+    }
   } else {
     assert(KeyType::Str == arrayKeyType);
     opFunc = (TCA)&arrayIdxS;
@@ -2148,10 +2163,8 @@ void HhbcTranslator::emitJmpImpl(int32_t offset,
     if (flags & JmpFlagNextIsMerge) {
       exceptionBarrier();
     }
-    auto target =
-      (!m_irb->blockExists(offset) || m_irb->blockIsIncompatible(offset))
-      ? makeExit(offset)
-      : makeBlock(offset);
+    auto target = m_irb->blockExists(offset) ? makeBlock(offset)
+                                             : makeExit(offset);
     assert(target != nullptr);
     gen(Jmp, target);
     return;
@@ -2165,22 +2178,10 @@ void HhbcTranslator::emitJmp(int32_t offset, JmpFlags flags) {
               flags & JmpFlagSurprise ? makeCatch() : nullptr);
 }
 
-SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
-                                          bool negate,
-                                          SSATmp* src) {
-  spillStack();
-
-  auto const target  = makeExit(offset);
-  auto const boolSrc = gen(ConvCellToBool, src);
-  gen(DecRef, src);
-  return gen(negate ? JmpZero : JmpNZero, target, boolSrc);
-}
-
-void HhbcTranslator::emitJmpHelper(int32_t taken,
-                                   int32_t next,
-                                   bool negate,
-                                   JmpFlags flags,
-                                   SSATmp* src) {
+void HhbcTranslator::emitJmpCondHelper(int32_t taken,
+                                       bool negate,
+                                       JmpFlags flags,
+                                       SSATmp* src) {
   if (flags & JmpFlagBreakTracelet) {
     spillStack();
   }
@@ -2191,31 +2192,22 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
     // start with a DefSP to block SP-chain walking).
     exceptionBarrier();
   }
-  auto const target  = (!(flags & JmpFlagBothPaths)
-                        || m_irb->blockIsIncompatible(taken))
-    ? makeExit(taken)
-    : makeBlock(taken);
+  auto const target = (flags & JmpFlagBothPaths) ? makeBlock(taken)
+                                                 : makeExit(taken);
   assert(target != nullptr);
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
   gen(negate ? JmpZero : JmpNZero, target, boolSrc);
-
-  // TODO(t3730079): This block is probably redundant with the
-  // fallthrough logic in translateRegion.  Try removing the guards
-  // against conditional jumps there as well as this.
-  if (genMode() == IRGenMode::CFG && m_irb->blockIsIncompatible(next)) {
-    gen(Jmp, makeExit(next));
-  }
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken, Offset next, JmpFlags flags) {
+void HhbcTranslator::emitJmpZ(Offset taken, JmpFlags flags) {
   auto const src = popC();
-  emitJmpHelper(taken, next, true, flags, src);
+  emitJmpCondHelper(taken, true, flags, src);
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, JmpFlags flags) {
+void HhbcTranslator::emitJmpNZ(Offset taken, JmpFlags flags) {
   auto const src = popC();
-  emitJmpHelper(taken, next, false, flags, src);
+  emitJmpCondHelper(taken, false, flags, src);
 }
 
 /*
@@ -2340,9 +2332,6 @@ void HhbcTranslator::emitAKExists() {
 
 void HhbcTranslator::emitFPassR() {
   emitUnboxRAux();
-}
-
-void HhbcTranslator::emitFPassCOp() {
 }
 
 void HhbcTranslator::emitFPassV() {
@@ -2578,9 +2567,6 @@ void HhbcTranslator::emitNativeImpl() {
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
-
-  // Flag that this trace has a Ret instruction so no ExitTrace is needed
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitFPushActRec(SSATmp* func,
@@ -3324,7 +3310,9 @@ void HhbcTranslator::emitNameA() {
 
 const StaticString
   s_count("count"),
-  s_ini_get("ini_get");
+  s_ini_get("ini_get"),
+  s_get_class("get_class"),
+  s_get_called_class("get_called_class");
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
@@ -3359,13 +3347,52 @@ SSATmp* HhbcTranslator::optimizedCallIniGet() {
   return cns(makeStaticString(value));
 }
 
+SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {
+  auto const curCls = curClass();
+  auto const curName = [&] {
+    return curCls != nullptr ? cns(curCls->name()) : nullptr;
+  };
+
+  if (numNonDefault == 0) return curName();
+
+  assert(numNonDefault == 1);
+
+  auto const val = topC(0);
+
+  if (val->isA(Type::Null)) return curName();
+
+  // get_class($this) is just get_called_class().
+  if (val->inst()->is(LdThis)) return optimizedCallGetCalledClass();
+
+  auto const ty = val->type();
+  if (!(ty < Type::Obj)) return nullptr;
+  if (auto const exact = ty.getExactClass()) return cns(exact->name());
+  return nullptr;
+}
+
+SSATmp* HhbcTranslator::optimizedCallGetCalledClass() {
+  if (!curClass()) return nullptr;
+
+  auto const ctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+  auto const cls = gen(LdClsCtx, ctx);
+  return gen(LdClsName, cls);
+}
+
 bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
                                            uint32_t numArgs,
                                            uint32_t numNonDefault) {
   SSATmp* res = nullptr;
   switch (numArgs) {
+    case 0:
+      if (func->name()->isame(s_get_called_class.get())) {
+        res = optimizedCallGetCalledClass();
+      }
+      break;
     case 1:
       if (func->name()->isame(s_ini_get.get())) res = optimizedCallIniGet();
+      else if (func->name()->isame(s_get_class.get())) {
+        res = optimizedCallGetClass(numNonDefault);
+      }
       break;
     case 2:
       if (func->name()->isame(s_count.get())) res = optimizedCallCount();
@@ -3857,7 +3884,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     sp = gen(RetAdjustStack, m_irb->fp());
   } else if (func->isAsyncFunction()) {
     // Load the parent chain.
-    auto parentChain = gen(LdAsyncArFParent, m_irb->fp());
+    auto parentChain = gen(LdAsyncArParentChain, m_irb->fp());
 
     // Mark the async function as succeeded.
     auto succeeded = c_WaitHandle::toKindState(
@@ -3869,7 +3896,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(StAsyncArResult, m_irb->fp(), retVal);
 
     // Unblock parents.
-    gen(BWHUnblockChain, parentChain);
+    gen(ABCUnblock, parentChain);
 
     // Sync SP.
     sp = spillStack();
@@ -3903,16 +3930,16 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
 
-  // Drop reference to this resumable.
+  // Drop reference to this resumable. The reference to the object storing
+  // the frame is implicitly owned by the execution. TakeRef is used to inform
+  // the refcount optimizer about this fact.
   if (resumableObj != nullptr) {
+    gen(TakeRef, resumableObj);
     gen(DecRef, resumableObj);
   }
 
   // Return control to the caller.
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
-
-  // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitRetC(bool freeInline) {
@@ -4039,7 +4066,6 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
   gen(SyncABIRegs, m_irb->fp(), stack);
 
   gen(JmpSwitchDest, data, index);
-  m_hasExit = true;
 }
 
 void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
@@ -4087,7 +4113,6 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
   auto const stack = spillStack();
   gen(SyncABIRegs, m_irb->fp(), stack);
   gen(JmpIndirect, dest);
-  m_hasExit = true;
 }
 
 void HhbcTranslator::setThisAvailable() {
@@ -5212,12 +5237,15 @@ folly::Optional<Type> HhbcTranslator::ratToAssertType(RepoAuthType rat) const {
   case T::ExactObj:
   case T::SubObj:
     {
-      auto ty = [&] {
-        auto const cls = Unit::lookupUniqueClass(rat.clsName());
-        return classIsUniqueOrCtxParent(cls)
-          ? Type::Obj.specialize(cls)
-          : Type::Obj;
-      }();
+      auto ty = Type::Obj;
+      auto const cls = Unit::lookupUniqueClass(rat.clsName());
+      if (classIsUniqueOrCtxParent(cls)) {
+        if (rat.tag() == T::OptExactObj || rat.tag() == T::ExactObj) {
+          ty = ty.specializeExact(cls);
+        } else {
+          ty = ty.specialize(cls);
+        }
+      }
       if (rat.tag() == T::OptExactObj || rat.tag() == T::OptSubObj) {
         ty = ty | Type::InitNull;
       }
@@ -5898,10 +5926,6 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
 }
 
 std::string HhbcTranslator::showStack() const {
-  if (isInlining()) {
-    return folly::format("{:*^80}\n",
-                         " I don't understand inlining stacks yet ").str();
-  }
   std::ostringstream out;
   auto header = [&](const std::string& str) {
     out << folly::format("+{:-^82}+\n", str);
@@ -6478,8 +6502,6 @@ void HhbcTranslator::end() {
 }
 
 void HhbcTranslator::end(Offset nextPc) {
-  if (m_hasExit) return;
-
   if (nextPc >= curFunc()->past()) {
     // We have fallen off the end of the func's bytecodes. This happens
     // when the function's bytecodes end with an unconditional
@@ -6506,8 +6528,9 @@ void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
 }
 
 void HhbcTranslator::checkStrictlyInteger(
-    SSATmp*& key, KeyType& keyType, bool& checkForInt) {
+    SSATmp*& key, KeyType& keyType, bool& checkForInt, bool& converted) {
   checkForInt = false;
+  converted = false;
   if (key->isA(Type::Int)) {
     keyType = KeyType::Int;
   } else {
@@ -6516,6 +6539,7 @@ void HhbcTranslator::checkStrictlyInteger(
     if (key->isConst()) {
       int64_t i;
       if (key->strVal()->isStrictlyInteger(i)) {
+        converted = true;
         keyType = KeyType::Int;
         key = cns(i);
       }

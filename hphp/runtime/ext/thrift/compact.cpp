@@ -836,18 +836,21 @@ class CompactReader {
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
         ret = NEWOBJ(c_Map)();
+        auto const data = ret.getObjectData();
+        if (size) static_cast<BaseMap*>(data)->reserve(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
           Variant value = readField(valueSpec, valueType);
-          collectionSet(ret.getObjectData(), key.asCell(), value.asCell());
+          BaseMap::OffsetSet(data, key.asCell(), value.asCell());
         }
       } else {
-        ret = Array::Create();
+        ArrayInit ainit(size, ArrayInit::Mixed{});
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
           Variant value = readField(valueSpec, valueType);
-          ret.toArrRef().set(key, value);
+          ainit.set(key, value);
         }
+        ret = ainit.toArray();
       }
 
       readCollectionEnd();
@@ -867,6 +870,7 @@ class CompactReader {
       if (format.equal(PHPTransport::s_collection)) {
         auto const pvec = NEWOBJ(c_Vector)();
         ret = pvec;
+        if (size) pvec->reserve(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
           pvec->t_add(value);
@@ -895,6 +899,7 @@ class CompactReader {
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
         p_Set set_ret = NEWOBJ(c_Set)();
+        if (size) set_ret->reserve(size);
 
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);

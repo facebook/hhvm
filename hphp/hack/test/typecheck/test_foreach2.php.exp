@@ -2,5 +2,11 @@ File "test_foreach2.php", line 14, characters 12-13:
 Invalid return type
 File "test_foreach2.php", line 12, characters 37-39:
 This is an int
-File "builtins.hhi", line 14, characters 62-63:
+File "test_foreach2.php", line 12, characters 24-29:
 It is incompatible with a string
+File "builtins.hhi", line 25, characters 49-50:
+  via this generic Tv
+File "builtins.hhi", line 19, characters 54-55:
+  via this generic Tv
+File "builtins.hhi", line 14, characters 62-63:
+  via this generic Tv

@@ -484,7 +484,15 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
 int process(const CompilerOptions &po) {
   if (po.coredump) {
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__MINGW__) || defined(_MSC_VER)
+/**
+ * Windows actually does core dump size and control at a system, not an app
+ * level.  So we do nothing here and are at the mercy of Dr. Watson
+ *
+ * Cygwin has a compat layer in place and does its own core dumping, so we
+ * still call setrlimit for core dumps
+ */
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__CYGWIN__)
     struct rlimit rl;
     getrlimit(RLIMIT_CORE, &rl);
     rl.rlim_cur = 80000000LL;

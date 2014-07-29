@@ -95,6 +95,7 @@ void ElfWriter::initStrtab() {
   addSectionString("");
 }
 
+#if defined(LIBDWARF_USE_INIT_C) || defined(FACEBOOK)
 bool ElfWriter::initDwarfProducer() {
   Dwarf_Error error = 0;
   /* m_dwarfProducer is the handle used for interaction for libdwarf */
@@ -116,6 +117,27 @@ bool ElfWriter::initDwarfProducer() {
   }
   return true;
 }
+#else
+bool ElfWriter::initDwarfProducer() {
+  Dwarf_Error error = 0;
+  auto ret = dwarf_producer_init(
+    DW_DLC_WRITE | DW_DLC_SIZE_64 | DW_DLC_SYMBOLIC_RELOCATIONS,
+    g_dwarfCallback,
+    nullptr,
+    nullptr,
+    reinterpret_cast<Dwarf_Ptr>(this),
+    "x86_64",
+    "V2",
+    nullptr,
+    &m_dwarfProducer,
+    &error);
+  if (ret != DW_DLV_OK) {
+    logError("Unable to create dwarf producer");
+    return false;
+  }
+  return true;
+}
+#endif
 
 Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
   Dwarf_Error error = 0;

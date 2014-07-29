@@ -19,6 +19,7 @@ open Utils
 open Ast
 
 module N = Nast
+module ShapeMap = N.ShapeMap
 
 (*****************************************************************************)
 (* The types *)
@@ -37,54 +38,55 @@ type class_cache = Nast.class_ option Utils.SMap.t ref
  *)
 type positioned_ident = (Pos.t * Ident.t)
 type map = positioned_ident SMap.t
+type canon_names_map = string SMap.t
+let canon_key = String.lowercase
 
 (* <T as A>, A is a type constraint *)
 type type_constraint = hint option
 
 type genv = {
-    (* strict? decl? partial? *)
-    in_mode: Ast.mode;
+  (* strict? decl? partial? *)
+  in_mode: Ast.mode;
 
-    (* are we in the body of a try statement? *)
-    in_try: bool;
+  (* are we in the body of a try statement? *)
+  in_try: bool;
 
-    (* are we in the body of a non-static member function? *)
-    in_member_fun: bool;
+  (* are we in the body of a non-static member function? *)
+  in_member_fun: bool;
 
-    (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>
-       The field type_params knows T1 .. Tn. It is able to
-       find out about the constraint on these paramters.
-     *)
-    type_params: type_constraint SMap.t;
+  (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
+   * type_params knows T1 .. Tn. It is able to find out about the
+   * constraint on these parameters. *)
+  type_params: type_constraint SMap.t;
 
-    (* The parameters is their original order
-     * Necessary to type "this".
-     *)
-    type_paraml: Ast.id list;
+  (* The parameters is their original order
+   * Necessary to type "this".
+   *)
+  type_paraml: Ast.id list;
 
-    (* Set of class names defined, and their position *)
-    classes: map ref;
+  (* Set of class names defined, and their positions *)
+  classes: (map * canon_names_map) ref;
 
-    (* Set of function names defined, and their positions *)
-    funs: map ref;
+  (* Set of function names defined, and their positions *)
+  funs: map ref;
 
-    (* Set of typedef names defined, and their position *)
-    typedefs: map ref;
+  (* Set of typedef names defined, and their position *)
+  typedefs: map ref;
 
-    (* Set of constant names defined, and their position *)
-    gconsts: map ref;
+  (* Set of constant names defined, and their position *)
+  gconsts: map ref;
 
-    (* The name of the current class, None if we are in a function *)
-    cclass: Ast.id option;
+  (* The name of the current class, None if we are in a function *)
+  cclass: Ast.id option;
 
-    (* Normally we don't need to add dependencies at this stage, but there
-     * are edge cases when we do.  *)
-    droot: Typing_deps.Dep.variant option;
+  (* Normally we don't need to add dependencies at this stage, but there
+   * are edge cases when we do.  *)
+  droot: Typing_deps.Dep.variant option;
 
-    (* Namespace environment, e.g., what namespace we're in and what use
-     * declarations are in play. *)
-    namespace: Namespace_env.env;
-  }
+  (* Namespace environment, e.g., what namespace we're in and what use
+   * declarations are in play. *)
+  namespace: Namespace_env.env;
+}
 
 (* How to behave when we see an unbound name.  Either we raise an
    error, or we call a function first and continue if it can resolve
@@ -143,15 +145,22 @@ type lenv = {
      * See expr_lambda for details.
      *)
     unbound_mode: unbound_mode;
+
+    (* The presence of "yield" in the function body changes the type of the
+     * function into a generator, with no other syntactic indications
+     * elsewhere. For the sanity of the typechecker, we flatten this out into
+     * fun_type, but need to track if we've seen a "yield" in order to do so.
+     *)
+    has_yield: bool ref;
   }
 
 (* The environment VISIBLE to the outside world. *)
 type env = {
-    iclasses: map;
-    ifuns: map;
-    itypedefs: map;
-    iconsts: map;
-  }
+  iclasses: map * canon_names_map;
+  ifuns: map;
+  itypedefs: map;
+  iconsts: map;
+}
 
 (**
  * Returns the list of classes which have been seen.
@@ -159,7 +168,7 @@ type env = {
  * world.
  *)
 let get_classes env =
-  SMap.fold (fun key _ acc -> key :: acc) env.iclasses []
+  SMap.fold (fun key _ acc -> key :: acc) (fst env.iclasses) []
 
 (*****************************************************************************)
 (* Predefined names *)
@@ -189,7 +198,7 @@ let predef_tests = List.fold_right SSet.add predef_tests_list SSet.empty
 (*****************************************************************************)
 
 let empty = {
-  iclasses  = SMap.empty;
+  iclasses  = SMap.empty, SMap.empty;
   ifuns     = !predef_funs;
   itypedefs = SMap.empty;
   iconsts   = SMap.empty;
@@ -206,6 +215,7 @@ module Env = struct
     pending_locals = ref SMap.empty;
     find_refs_target_name = ref None;
     unbound_mode = UBMErr;
+    has_yield = ref false;
   }
 
   let empty_global env = {
@@ -302,33 +312,48 @@ module Env = struct
     let env  = genv, lenv in
     env
 
-(* Helper used to write in different environments
- * consts, fun_names, class_names
- *)
   let new_var env (p, x) =
     if SMap.mem x !env
     then begin
       let p', _ = SMap.find_unsafe x !env in
       let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-      Errors.error_name_already_bound hhi_root x p p'
+      Errors.error_name_already_bound hhi_root x x p p'
     end;
     let y = p, Ident.make x in
     env := SMap.add x y !env;
     y
 
-  let var genv env (p, x) =
+  let lookup genv env (p, x) =
     let v = SMap.get x !env in
     match v with
     | None ->
-        (match genv.in_mode with
-        | Ast.Mstrict ->
-            Errors.unbound_name p x
+      (match genv.in_mode with
+        | Ast.Mstrict -> Errors.unbound_name p x
         | Ast.Mdecl | Ast.Mpartial -> ()
-        );
-        p, Ident.make x
+      );
+      p, Ident.make x
     | Some v -> p, snd v
 
-(* Is called bad_style, but it is still an error ... Whatever *)
+  let canonicalize genv env_and_names (p, name) =
+    let env, canon_names = !env_and_names in
+    if SMap.mem name env then (p, name)
+    else (
+      let name_key = canon_key name in
+      match SMap.get name_key canon_names with
+        | Some canonical ->
+          let p_canon, _ = SMap.find_unsafe canonical env in
+          Errors.did_you_mean_naming p name p_canon canonical;
+          (* Recovering from the capitalization error means
+           * returning the name in its canonical form *)
+          p, canonical
+        | None ->
+          (match genv.in_mode with
+            | Ast.Mstrict -> Errors.unbound_name p name
+            | Ast.Mdecl | Ast.Mpartial -> ());
+          p, name
+    )
+
+  (* Is called bad_style, but it is still an error ... Whatever *)
   let bad_style env (p, x) =
     let p' = SMap.get x !(env.all_locals) in
     match p' with None -> assert false | Some p' ->
@@ -343,11 +368,11 @@ module Env = struct
     List.iter (fun x -> Hashtbl.add h x true) l;
     fun x -> Hashtbl.mem h x
 
-(* Adds a local variable, without any check *)
+  (* Adds a local variable, without any check *)
   let add_lvar (_, lenv) (_, name) (p, x) =
     lenv.locals := SMap.add name (p, x) !(lenv.locals)
 
-(* Saves the position of local variables if we're in find refs mode*)
+  (* Saves the position of local variables if we're in find refs mode*)
   let save_ref x p lenv =
     Find_refs.process_var_ref p x;
     (* If we've already located the target and name of this var is
@@ -383,7 +408,7 @@ module Env = struct
         end;
     ()
 
-(* Defines a new local variable *)
+  (* Defines a new local variable *)
   let new_lvar (_, lenv) (p, x) =
     let lcl = SMap.get x !(lenv.locals) in
     match lcl with
@@ -416,7 +441,7 @@ module Env = struct
     | UBMErr -> Errors.undefined p x; p, Ident.make x
     | UBMFunc f -> f (p, x)
 
-(* Function used to name a local variable *)
+  (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
     if is_superglobal x && genv.in_mode = Ast.Mpartial
     then p, Ident.tmp()
@@ -431,7 +456,7 @@ module Env = struct
       | None -> p, Ident.tmp()
 
   let get_name genv namespace x =
-    ignore (var genv namespace x); x
+    ignore (lookup genv namespace x); x
 
   (* For dealing with namespace fallback on functions and constants. *)
   let elaborate_and_get_name_with_fallback mk_dep genv genv_sect x =
@@ -474,7 +499,7 @@ module Env = struct
 
   let class_name (genv, _) x =
     let x = Namespaces.elaborate_id genv.namespace x in
-    get_name genv genv.classes x
+    canonicalize genv genv.classes x
 
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_fallback
@@ -494,6 +519,24 @@ module Env = struct
       | Ast.Mstrict -> raise exn
       | Ast.Mpartial | Ast.Mdecl -> x
 
+  let resilient_new_canon_var env_and_names (p, name) =
+    let env, canon_names = !env_and_names in
+    let name_key = canon_key name in
+    match SMap.get name_key canon_names with
+      | Some canonical ->
+        let p', id = SMap.find_unsafe canonical env in
+        if Pos.compare p p' = 0 then (p, id)
+        else begin
+          let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
+          Errors.error_name_already_bound hhi_root name canonical p p';
+          p', id
+        end
+      | None ->
+        let pos_and_id = p, Ident.make name in
+        env_and_names :=
+          SMap.add name pos_and_id env, SMap.add name_key name canon_names;
+        pos_and_id
+
   let resilient_new_var env (p, x) =
     if SMap.mem x !env
     then begin
@@ -501,10 +544,8 @@ module Env = struct
       if Pos.compare p p' = 0 then (p, y)
       else begin
         let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-        Errors.error_name_already_bound hhi_root x p p';
-        let y = p, Ident.make x in
-        env := SMap.add x y !env;
-        y
+        Errors.error_name_already_bound hhi_root x x p p';
+        p', y
       end
     end
     else
@@ -517,10 +558,10 @@ module Env = struct
     ignore (resilient_new_var genv.funs x)
 
   let new_class_id genv x =
-    ignore (resilient_new_var genv.classes x)
+    ignore (resilient_new_canon_var genv.classes x)
 
   let new_typedef_id genv x =
-    let v = resilient_new_var genv.classes x in
+    let v = resilient_new_canon_var genv.classes x in
     genv.typedefs := SMap.add (snd x) v !(genv.typedefs);
     ()
 
@@ -549,17 +590,27 @@ end
 
 let remove_decls env (funs, classes, typedefs, consts) =
   let funs = SSet.diff funs predef_tests in
-  let ifuns    = SSet.fold SMap.remove funs env.ifuns       in
-  let iclasses = SSet.fold SMap.remove classes env.iclasses in
-  let iclasses = SSet.fold SMap.remove typedefs iclasses in
+  let ifuns = SSet.fold SMap.remove funs env.ifuns in
+  let canonicalize_set = (fun elt acc -> SSet.add (canon_key elt) acc) in
+  let class_namekeys = SSet.fold canonicalize_set classes SSet.empty in
+  let typedef_namekeys = SSet.fold canonicalize_set typedefs SSet.empty in
+  let iclassmap, iclassnames = env.iclasses in
+  let iclassmap, iclassnames =
+    SSet.fold SMap.remove classes iclassmap,
+    SSet.fold SMap.remove class_namekeys iclassnames
+  in
+  let iclassmap, iclassnames =
+    SSet.fold SMap.remove typedefs iclassmap,
+    SSet.fold SMap.remove typedef_namekeys iclassnames
+  in
   let itypedefs = SSet.fold SMap.remove typedefs env.itypedefs in
   let iconsts = SSet.fold SMap.remove consts env.iconsts in
   {
    ifuns     = ifuns;
-   iclasses  = iclasses;
+   iclasses  = iclassmap, iclassnames;
    itypedefs = itypedefs;
    iconsts   = iconsts;
- }
+  }
 
 (*****************************************************************************)
 (* Helpers *)
@@ -583,24 +634,11 @@ let check_constraint ((pos, name), _) =
   then Errors.this_reserved pos
   else if name.[0] <> 'T' then Errors.start_with_T pos
 
-(* One of the rare cases where I don't work with a functional
- * environment ...
- * normally opt f env x returns env, Some (f x) when x is <> None
- * but in this case I want it to return x
-*)
-let opt f x = match x with None -> None | Some x -> Some (f x)
-
 let check_repetition s param =
   let x = snd param.param_id in
   if SSet.mem x s
   then Errors.already_bound (fst param.param_id) x;
   SSet.add x s
-
-(* Check that the implemented interface exists *)
-let implement env x =
-  match snd x with
-  | Happly (x, _) -> ignore (Env.class_name env x)
-  | _ -> ()
 
 (* Check that a name is not a typedef *)
 let no_typedef (genv, _) cid =
@@ -613,6 +651,12 @@ let no_typedef (genv, _) cid =
 let hint_no_typedef env = function
   | _, Happly (x, _) -> no_typedef env x
   | _ -> ()
+
+let convert_shape_name env = function
+  | SFlit (pos, s) -> (pos, N.SFlit (pos, s))
+  | SFclass_const (x, (pos, y)) ->
+    let class_name = Env.class_name env x in
+    (pos, N.SFclass_const (class_name, (pos, y)))
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
@@ -646,13 +690,14 @@ and hint_ ~allow_this is_static_var p env x =
   | Hoption h -> N.Hoption (hint env h)
   | Hfun (hl, opt, h) -> N.Hfun (List.map (hint env) hl, opt, hint env h)
   | Happly ((_, x) as id, hl) -> hint_id ~allow_this env is_static_var id hl
-  | Hshape fdl -> N.Hshape begin
+  | Hshape fdl -> N.Hshape
+    begin
       List.fold_left begin fun fdm (pname, h) ->
-        let pos, name = pname in
-        if SMap.mem name fdm
+        let pos, name = convert_shape_name env pname in
+        if ShapeMap.mem name fdm
         then Errors.fd_name_already_bound pos;
-        SMap.add name (hint env h) fdm
-      end SMap.empty fdl
+        ShapeMap.add name (hint env h) fdm
+      end ShapeMap.empty fdl
   end
 
 and hint_id ~allow_this env is_static_var (p, x as id) hl =
@@ -695,7 +740,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       | [] -> N.Harray (None, None)
       | [x] -> N.Harray (Some (hint env x), None)
       | [x; y] -> N.Harray (Some (hint env x), Some (hint env y))
-      | _ -> Errors.too_many_args p; N.Hany
+      | _ -> Errors.naming_too_many_arguments p; N.Hany
       )
   | "integer" ->
       Errors.integer_instead_of_int p;
@@ -720,11 +765,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         let tparaml = (fst env).type_paraml in
         let tparaml = List.map begin fun (param_pos, param_name) ->
           let _, cstr = get_constraint env param_name in
-          let cstr =
-              match cstr with
-              | None -> None
-              | Some h -> Some (hint env h)
-            in
+          let cstr = opt_map (hint env) cstr in
           param_pos, N.Habstr (param_name, cstr)
         end tparaml in
         N.Habstr ("this", Some (fst cid, N.Happly (cid, tparaml))))
@@ -743,7 +784,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       if hl <> [] then
       Errors.tparam_with_tparam p x;
       let env, gen_constraint = get_constraint env x in
-      N.Habstr (x, opt (hint env) gen_constraint)
+      N.Habstr (x, opt_map (hint env) gen_constraint)
   | _ ->
       (* In the future, when we have proper covariant support, we can
        * allow "this" to instantiate any covariant type variable. For
@@ -793,13 +834,9 @@ let add_abstract m = {m with N.m_abstract = true}
 
 let add_abstractl methods = List.map add_abstract methods
 
-let add_abstractopt = function
-  | None -> None
-  | Some m -> Some (add_abstract m)
-
 let interface c constructor methods smethods =
   if c.c_kind <> Cinterface then constructor, methods, smethods else
-  let constructor = add_abstractopt constructor in
+  let constructor = opt_map add_abstract constructor in
   let methods  = add_abstractl methods in
   let smethods = add_abstractl smethods in
   constructor, methods, smethods
@@ -854,7 +891,10 @@ let rec class_constraints genv tparams =
 and class_ genv c =
   let cstrs    = class_constraints genv c.c_tparams in
   let env      = Env.make_class_env genv cstrs c in
-  class_check env c;
+  (* Checking for a code smell *)
+  List.iter check_constraint c.c_tparams;
+  List.iter (hint_no_typedef env) c.c_extends;
+  List.iter (hint_no_typedef env) c.c_implements;
   let name     = Env.class_name env c.c_name in
   let smethods = List.fold_right (class_static_method env) c.c_body [] in
   let svars    = List.fold_right (class_var_static env) c.c_body [] in
@@ -863,8 +903,7 @@ and class_ genv c =
   let v_names  = List.fold_right SSet.add v_names SSet.empty in
   let sm_names = List.map (fun x -> snd x.N.m_name) smethods in
   let sm_names = List.fold_right SSet.add sm_names SSet.empty in
-  List.iter (hint_no_typedef env) c.c_extends;
-  let parent   = List.map (hint ~allow_this:true env) c.c_extends in
+  let parents  = List.map (hint ~allow_this:true env) c.c_extends in
   let fmethod  = class_method env sm_names v_names in
   let methods  = List.fold_right fmethod c.c_body [] in
   let uses     = List.fold_right (class_use env) c.c_body [] in
@@ -872,8 +911,7 @@ and class_ genv c =
     (class_require env c.c_kind) c.c_body ([], []) in
   let tparam_l  = type_paraml env c.c_tparams in
   let consts   = List.fold_right (class_const env) c.c_body [] in
-  List.iter (hint_no_typedef env) c.c_implements;
-  let implements  = List.map (hint ~allow_this:true env) c.c_implements in
+  let implements = List.map (hint ~allow_this:true env) c.c_implements in
   let constructor = List.fold_left (constructor env) None c.c_body in
   let constructor, methods, smethods =
     interface c constructor methods smethods in
@@ -888,7 +926,7 @@ and class_ genv c =
     N.c_kind           = c.c_kind;
     N.c_name           = name;
     N.c_tparams        = tparam_l;
-    N.c_extends        = parent;
+    N.c_extends        = parents;
     N.c_uses           = uses;
     N.c_req_extends    = req_extends;
     N.c_req_implements = req_implements;
@@ -901,14 +939,6 @@ and class_ genv c =
     N.c_methods        = methods;
     N.c_user_attributes = c.c_user_attributes;
   }
-
-and class_check env c =
-  (* Checking all the parents exist *)
-  List.iter (implement env) c.c_extends;
-  List.iter (implement env) c.c_implements;
-  (* Checking for a code smell *)
-  List.iter check_constraint c.c_tparams;
-  ()
 
 and type_paraml env tparams =
   let _, ret = List.fold_left
@@ -923,15 +953,15 @@ and type_paraml env tparams =
     tparams in
   List.rev ret
 
-and type_param env (x, y) = x, opt (hint env) y
+and type_param env (x, y) = x, opt_map (hint env) y
 
 and class_use env x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
   | ClassUse h ->
-      hint_no_typedef env h;
-      hint ~allow_this:true env h :: acc
+    hint_no_typedef env h;
+    hint ~allow_this:true env h :: acc
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
   | Method _ -> acc
@@ -989,7 +1019,7 @@ and class_var_static env x acc =
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
   | ClassVars (kl, h, cvl) when List.mem Static kl ->
-    let h = opt (hint ~is_static_var:true env) h in
+    let h = opt_map (hint ~is_static_var:true env) h in
     let cvl = List.map (class_var_ env) cvl in
     let cvl = List.map (fill_cvar kl h) cvl in
     cvl @ acc
@@ -1005,7 +1035,7 @@ and class_var env x acc =
   | ClassVars (kl, h, cvl) when not (List.mem Static kl) ->
     (* there are no covariance issues with private members *)
     let allow_this = (List.mem Private kl) in
-    let h = opt (hint ~allow_this:allow_this env) h in
+    let h = opt_map (hint ~allow_this:allow_this env) h in
     let cvl = List.map (class_var_ env) cvl in
     let cvl = List.map (fill_cvar kl h) cvl in
     cvl @ acc
@@ -1037,8 +1067,33 @@ and class_method env sids cv_ids x acc =
       method_ env m :: acc
   | Method _ -> acc
 
+and check_constant_expr (pos, e) =
+  match e with
+  | Id _ | Null | True | False | Int _
+  | Float _ | String _
+  | String2 ([], _) -> ()
+  | Class_const ((_, cls), _) when cls <> "static" -> ()
+
+  | Unop ((Uplus | Uminus | Utild | Unot), e) -> check_constant_expr e
+  | Binop (op, e1, e2) ->
+    (* Only assignment is invalid *)
+    (match op with
+      | Eq _ -> Errors.illegal_constant pos
+      | _ ->
+        check_constant_expr e1;
+        check_constant_expr e2)
+  | Eif (e1, e2, e3) ->
+    check_constant_expr e1;
+    ignore (opt_map check_constant_expr e2);
+    check_constant_expr e3
+
+  | String2 ((var_pos, _) :: _, _) ->
+      Errors.local_const var_pos
+  | _ -> Errors.illegal_constant pos
+
 and const_defl h env l = List.map (const_def h env) l
 and const_def h env (x, e) =
+  check_constant_expr e;
   match (fst env).in_mode with
   | Ast.Mstrict ->
       (* TODO THIS IS A BUG!!!! You should always try to guess the type of
@@ -1046,10 +1101,9 @@ and const_def h env (x, e) =
        *)
       (match h with
       | None ->
-          (* Whenever the type is "obvious", no need to add a type-hint
-             if you add a case here, make sure you add it in the type-checker too
-             cf class_const_decl in typing.ml
-           *)
+          (* Whenever the type is "obvious", no need to add a
+             type-hint if you add a case here, make sure you add it in
+             the type-checker too cf class_const_decl in typing.ml *)
           (match snd e with
           | String _
           | String2 ([], _)
@@ -1067,17 +1121,17 @@ and const_def h env (x, e) =
           let h = Some (hint env h) in
           h, Env.new_const env x, expr env e)
   | Ast.Mpartial ->
-      let h = opt (hint env) h in
+      let h = opt_map (hint env) h in
       h, Env.new_const env x, expr env e
   | Ast.Mdecl ->
-      let h = opt (hint env) h in
+      let h = opt_map (hint env) h in
       h, Env.new_const env x, (fst e, N.Null)
 
 and class_var_ env (x, e) =
   let id = Env.new_const env x in
   let e =
     match (fst env).in_mode with
-    | Ast.Mstrict | Ast.Mpartial -> opt (expr env) e
+    | Ast.Mstrict | Ast.Mpartial -> opt_map (expr env) e
     (* Consider every member variable defined in a class in decl mode to be
      * initalized by giving it a magic value of type Tany (you can't actually
      * write this cast in PHP). Classes might inherit from our decl mode class
@@ -1114,12 +1168,19 @@ and fill_cvar kl ty x =
     | Protected -> { x with N.cv_visibility = N.Protected }
  ) x kl
 
+and fun_type env ft =
+  match !((snd env).has_yield), ft with
+  | false, Ast.FSync -> N.FSync
+  | false, Ast.FAsync -> N.FAsync
+  | true, Ast.FSync -> N.FGenerator
+  | true, Ast.FAsync -> N.FAsync (* TODO #4534682 async generators *)
+
 and method_ env m =
   let genv, lenv = env in
   let lenv = Env.empty_local() in
   let genv = extend_params genv m.m_tparams in
   let env = genv, lenv in
-  let has_ddd, paraml = fun_paraml env m.m_params in
+  let variadicity, paraml = fun_paraml env m.m_params in
   let name = Env.new_const env m.m_name in
   let acc = false, false, N.Public in
   let final, abs, vis = List.fold_left kind acc m.m_kind in
@@ -1132,8 +1193,8 @@ and method_ env m =
         block env m.m_body
     | Ast.Mdecl -> [] in
   let attrs = m.m_user_attributes in
-  let method_type = m.m_type in
-  let ret = opt (hint ~allow_this:true env) m.m_ret in
+  let method_type = fun_type env m.m_type in
+  let ret = opt_map (hint ~allow_this:true env) m.m_ret in
   N.({ m_unsafe     = unsafe ;
        m_final      = final  ;
        m_visibility = vis    ;
@@ -1144,7 +1205,7 @@ and method_ env m =
        m_body       = body   ;
        m_user_attributes = attrs;
        m_ret        = ret    ;
-       m_ddd        = has_ddd;
+       m_variadic   = variadicity;
        m_type       = method_type;
      })
 
@@ -1157,29 +1218,31 @@ and kind (final, abs, vis) = function
   | Protected -> final, abs, N.Protected
 
 and fun_paraml env l =
-  let has_ddd, l = ddd l in
-  let _ = List.fold_left check_repetition SSet.empty l in
-  has_ddd, List.map (fun_param env) l
+  let _names = List.fold_left check_repetition SSet.empty l in
+  let variadicity, l = determine_variadicity env l in
+  variadicity, List.map (fun_param env) l
 
-(* ddd stands for dot dot dot (...) *)
-and ddd l =
+and determine_variadicity env l =
   match l with
-  | [] -> false, []
-  | [x] -> (
-      match (x.param_id) with
-      | (_, "...") -> true, []
-      | (_, _) -> false, [x]
-     )
-  | x :: rl ->
-      let ddd, rl = ddd rl in
-      ddd, x :: rl
+    | [] -> N.FVnonVariadic, []
+    | [x] -> (
+      match x.param_is_variadic, x.param_id with
+        | false, _ -> N.FVnonVariadic, [x]
+        (* NOTE: variadic params are removed from the list *)
+        | true, (_, "...") -> N.FVellipsis, []
+        | true, _ -> N.FVvariadicArg (fun_param env x), []
+    )
+    | x :: rl ->
+      let variadicity, rl = determine_variadicity env rl in
+      variadicity, x :: rl
 
 and fun_param env param =
   let x = Env.new_lvar env param.param_id in
-  let eopt = opt (expr env) param.param_expr in
-  let ty = opt (hint env) param.param_hint in
+  let eopt = opt_map (expr env) param.param_expr in
+  let ty = opt_map (hint env) param.param_hint in
   { N.param_hint = ty;
     param_is_reference = param.param_is_reference;
+    param_is_variadic = param.param_is_variadic;
     param_id = x;
     param_name = snd param.param_id;
     param_expr = eopt;
@@ -1201,8 +1264,8 @@ and fun_ genv f =
   let genv = Env.make_fun_genv genv tparams f in
   let lenv = Env.empty_local () in
   let env = genv, lenv in
-  let h = opt (hint ~allow_this:true env) f.f_ret in
-  let has_ddd, paraml = fun_paraml env f.f_params in
+  let h = opt_map (hint ~allow_this:true env) f.f_ret in
+  let variadicity, paraml = fun_paraml env f.f_params in
   let x = Env.fun_id env f.f_name in
   let unsafe = is_unsafe_body f.f_body in
   List.iter check_constraint f.f_tparams;
@@ -1212,6 +1275,7 @@ and fun_ genv f =
     | Ast.Mstrict | Ast.Mpartial -> block env f.f_body
     | Ast.Mdecl -> []
   in
+  let f_type = fun_type env f.f_type in
   let fun_ =
     { N.f_unsafe = unsafe;
       f_mode = f.f_mode;
@@ -1220,8 +1284,8 @@ and fun_ genv f =
       f_tparams = f_tparams;
       f_params = paraml;
       f_body = body;
-      f_ddd = has_ddd;
-      f_type = f.f_type;
+      f_variadic = variadicity;
+      f_type = f_type;
     } in
   fun_
 
@@ -1380,10 +1444,10 @@ and static_var env = function
   | e -> expr env e
 
 and exprl env l = List.map (expr env) l
-and oexpr env e = opt (expr env) e
+and oexpr env e = opt_map (expr env) e
 and expr env (p, e) = p, expr_ env e
 and expr_ env = function
-  | Array l -> N.Array (List.map (afield env) l)
+  | Array l -> N.Array (rev_rev_map (afield env) l)
   | Collection (id, l) -> begin
     let p, cn = Namespaces.elaborate_id ((fst env).namespace) id in
     match cn with
@@ -1399,13 +1463,13 @@ and expr_ env = function
       | "\\Pair" ->
         (match l with
           | [] ->
-              Errors.too_few_arguments p;
+              Errors.naming_too_few_arguments p;
               N.Any
           | e1::e2::[] ->
             let pn = "Pair" in
             N.Pair (afield_value env pn e1, afield_value env pn e2)
           | _ ->
-              Errors.too_many_arguments p;
+              Errors.naming_too_many_arguments p;
               N.Any
         )
       | _ ->
@@ -1462,36 +1526,36 @@ and expr_ env = function
       N.Call (N.Cnormal, (p, N.Id (p, "echo")), List.map (expr env) el)
   | Call ((p, Id (_, "call_user_func")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
       | f :: el ->
           N.Call (N.Cuser_func, expr env f, List.map (expr env) el)
       )
   | Call ((p, Id (_, "fun")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_, String (p2, s)] when String.contains s ':' ->
         Errors.illegal_meth_fun p; N.Any
       | [_, String x] -> N.Fun_id (Env.fun_id env x)
       | [p, _] ->
           Errors.illegal_fun p;
           N.Any
-      | _ -> Errors.too_many_arguments p; N.Any
+      | _ -> Errors.naming_too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "inst_meth")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
-      | [_] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
+      | [_] -> Errors.naming_too_few_arguments p; N.Any
       | instance::(_, String meth)::[] ->
         N.Method_id (expr env instance, meth)
       | (p, _)::(_)::[] ->
         Errors.illegal_inst_meth p;
         N.Any
-      | _ -> Errors.too_many_arguments p; N.Any
+      | _ -> Errors.naming_too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "meth_caller")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
-      | [_] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
+      | [_] -> Errors.naming_too_few_arguments p; N.Any
       | e1::e2::[] ->
           (match (expr env e1), (expr env e2) with
           | (_, N.String cl), (_, N.String meth)
@@ -1501,12 +1565,12 @@ and expr_ env = function
             Errors.illegal_meth_caller p;
             N.Any
           )
-      | _ -> Errors.too_many_arguments p; N.Any
+      | _ -> Errors.naming_too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "class_meth")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
-      | [_] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
+      | [_] -> Errors.naming_too_few_arguments p; N.Any
       | e1::e2::[] ->
           (match (expr env e1), (expr env e2) with
           | (_, N.String cl), (_, N.String meth)
@@ -1516,7 +1580,7 @@ and expr_ env = function
             Errors.illegal_class_meth p;
             N.Any
           )
-      | _ -> Errors.too_many_arguments p; N.Any
+      | _ -> Errors.naming_too_many_arguments p; N.Any
       )
   | Call ((p, Id (_, "assert")), el) ->
       if List.length el <> 1
@@ -1528,7 +1592,7 @@ and expr_ env = function
           let el = List.map (expr env) el in
           N.Assert (N.AE_invariant (expr env st, expr env format, el))
         | _ ->
-          Errors.too_few_arguments p;
+          Errors.naming_too_few_arguments p;
           N.Any
       )
   | Call ((p, Id (_, "invariant_violation")), el) ->
@@ -1537,12 +1601,12 @@ and expr_ env = function
         let el = List.map (expr env) el in
         N.Assert (N.AE_invariant_violation (expr env format, el))
       | _ ->
-        Errors.too_few_arguments p;
+        Errors.naming_too_few_arguments p;
         N.Any
       )
   | Call ((p, Id (_, "tuple")), el) ->
       (match el with
-      | [] -> Errors.too_few_arguments p; N.Any
+      | [] -> Errors.naming_too_few_arguments p; N.Any
       | el -> N.List (List.map (expr env) el)
       )
   | Call ((p, Id (_, "gena")), el) ->
@@ -1571,8 +1635,8 @@ and expr_ env = function
         List.map (expr env) el)
   | Call (e, el) ->
       N.Call (N.Cnormal, expr env e, List.map (expr env) el)
-  | Yield_break -> N.Yield_break
-  | Yield e -> N.Yield (expr env e)
+  | Yield_break -> (snd env).has_yield := true; N.Yield_break
+  | Yield e -> (snd env).has_yield := true; N.Yield (afield env e)
   | Await e -> N.Await (expr env e)
   | List el -> N.List (exprl env el)
   | Expr_list el -> N.Expr_list (exprl env el)
@@ -1626,18 +1690,19 @@ and expr_ env = function
   | Xml (x, al, el) -> N.Xml (Env.class_name env x, attrl env al, List.map (expr env) el)
   | Shape fdl ->
       N.Shape begin List.fold_left begin fun fdm (pname, value) ->
-        let pos, name = pname in
-        if SMap.mem name fdm
+        let pos, name = convert_shape_name env pname in
+        if ShapeMap.mem name fdm
         then Errors.fd_name_already_bound pos;
-        SMap.add name (expr env value) fdm
-      end SMap.empty fdl
+        ShapeMap.add name (expr env value) fdm
+      end ShapeMap.empty fdl
       end
 
 and expr_lambda env f =
-  let h = opt (hint ~allow_this:true env) f.f_ret in
+  let h = opt_map (hint ~allow_this:true env) f.f_ret in
   let unsafe = List.mem Unsafe f.f_body in
-  let has_ddd, paraml = fun_paraml env f.f_params in
+  let variadicity, paraml = fun_paraml env f.f_params in
   let body = block env f.f_body in
+  let f_type = fun_type env f.f_type in
   {
     N.f_unsafe = unsafe;
     f_mode = (fst env).in_mode;
@@ -1646,8 +1711,8 @@ and expr_lambda env f =
     f_params = paraml;
     f_tparams = [];
     f_body = body;
-    f_ddd = has_ddd;
-    f_type = f.f_type;
+    f_variadic = variadicity;
+    f_type = f_type;
   }
 
 and make_class_id env cid =
@@ -1707,7 +1772,7 @@ and attrl env l = List.map (attr env) l
 and attr env (x, e) = x, expr env e
 
 and string2 env idl =
-  List.rev (List.rev_map (expr env) idl)
+  rev_rev_map (expr env) idl
 
 (*****************************************************************************)
 (* Typedefs *)
@@ -1717,11 +1782,7 @@ let typedef genv tdef =
   let ty = match tdef.t_kind with Alias t | NewType t -> t in
   let cstrs = class_constraints genv tdef.t_tparams in
   let env = Env.make_typedef_env genv cstrs tdef in
-  let tconstraint =
-    match tdef.t_constraint with
-    | None -> None
-    | Some h -> Some (hint env h)
-  in
+  let tconstraint = opt_map (hint env) tdef.t_constraint in
   List.iter check_constraint tdef.t_tparams;
   let tparaml = type_paraml env tdef.t_tparams in
   List.iter begin function
@@ -1742,19 +1803,11 @@ let check_constant cst =
       Errors.add_a_typehint (fst cst.cst_name)
   | None
   | Some _ -> ());
-  match snd cst.cst_value with
-  | Id _ | Null | True | False | Int _
-  | Float _ | String _
-  | Class_const _
-  | Unop ((Uplus | Uminus), _)
-  | String2 ([], _) -> ()
-  | String2 ((var_pos, _) :: _, _) ->
-      Errors.local_const var_pos
-  | _ -> Errors.illegal_constant (fst cst.cst_value)
+  check_constant_expr cst.cst_value
 
 let global_const genv cst =
   let env = Env.make_const_env genv cst in
-  let hint = opt (hint env) cst.cst_type in
+  let hint = opt_map (hint env) cst.cst_type in
   let e = match cst.cst_kind with
   | Ast.Cst_const -> check_constant cst; Some (expr env cst.cst_value)
   (* Define allows any expression, so don't call check_constant. Furthermore it
@@ -1823,7 +1876,7 @@ let ndecl_file fn
    * and the naming environment is in a sane state.
    *)
   let failed = add_files_to_rename nenv failed funs nenv.ifuns in
-  let failed = add_files_to_rename nenv failed classes nenv.iclasses in
+  let failed = add_files_to_rename nenv failed classes (fst nenv.iclasses) in
   let failed = add_files_to_rename nenv failed types nenv.itypedefs in
   let failed = add_files_to_rename nenv failed consts nenv.iconsts in
   List.rev_append l errorl, SSet.add fn failed, nenv

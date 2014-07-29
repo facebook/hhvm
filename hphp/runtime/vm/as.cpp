@@ -88,14 +88,16 @@
 #include "folly/Range.h"
 
 #include "hphp/util/md5.h"
-#include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/vm/as-shared.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/func-emitter.h"
-#include "hphp/runtime/vm/preclass-emitter.h"
+
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/vm/as-shared.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/system/systemlib.h"
 
 TRACE_SET_MOD(hhas);
@@ -2066,7 +2068,7 @@ void parse_class(AsmState& as) {
  */
 void parse_filepath(AsmState& as) {
   auto const str = read_litstr(as);
-  as.ue->setFilepath(str);
+  as.ue->m_filepath = str;
   as.in.expectWs(';');
 }
 
@@ -2166,7 +2168,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
                              const char* filename, const MD5& md5) {
   std::unique_ptr<UnitEmitter> ue(new UnitEmitter(md5));
   StringData* sd = makeStaticString(filename);
-  ue->setFilepath(sd);
+  ue->m_filepath = sd;
 
   try {
     std::istringstream instr(std::string(code, codeLen));
@@ -2175,7 +2177,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
     parse(as);
   } catch (const std::exception& e) {
     ue.reset(new UnitEmitter(md5));
-    ue->setFilepath(sd);
+    ue->m_filepath = sd;
     ue->initMain(1, 1);
     ue->emitOp(OpString);
     ue->emitInt32(ue->mergeLitstr(makeStaticString(e.what())));

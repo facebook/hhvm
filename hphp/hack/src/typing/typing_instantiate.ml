@@ -82,9 +82,15 @@ and instantiate_ft env ft =
   let subst = make_subst ft.ft_tparams tvarl in
   let names, params = List.split ft.ft_params in
   let env, params = lfold (instantiate subst) env params in
+  let env, arity = match ft.ft_arity with
+    | Fvariadic (min, (name, var_ty)) ->
+      let env, var_ty = instantiate subst env var_ty in
+      env, Fvariadic (min, (name, var_ty))
+    | _ -> env, ft.ft_arity
+  in
   let env, ret  = instantiate subst env ft.ft_ret in
   let params = List.map2 (fun x y -> x, y) names params in
-  env, { ft with ft_params = params; ft_ret = ret }
+  env, { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
 
 and check_constraint env ty x_ty =
   let env, ety = Env.expand_type env ty in
@@ -120,7 +126,7 @@ and instantiate subst env (r, ty) =
                     )
                 end
           in
-          env, (r, snd x_ty)
+          env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty)
       | None ->
           match ty_opt with
           | None -> env, (r, ty)
@@ -168,9 +174,15 @@ and instantiate_ p subst env = function
       end subst ft.ft_tparams in
       let names, params = List.split ft.ft_params in
       let env, params = lfold (instantiate subst) env params in
+      let env, arity = match ft.ft_arity with
+        | Fvariadic (min, (name, var_ty)) ->
+          let env, var_ty = instantiate subst env var_ty in
+          env, Fvariadic (min, (name, var_ty))
+        | _ -> env, ft.ft_arity
+      in
       let env, ret  = instantiate subst env ft.ft_ret in
       let params = List.map2 (fun x y -> x, y) names params in
-      env, Tfun { ft with ft_params = params; ft_ret = ret }
+      env, Tfun { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
   | Tabstract (x, tyl, tcstr) ->
       let env, tcstr =
         match tcstr with
@@ -187,7 +199,7 @@ and instantiate_ p subst env = function
       env, Tapply (x, tyl)
   | Tobject -> env, Tobject
   | Tshape fdm ->
-      let env, fdm = smap_env (instantiate subst) env fdm in
+      let env, fdm = Nast.ShapeMap.map_env (instantiate subst) env fdm in
       env, Tshape fdm
 
 and instantiate_ce subst env ({ ce_type = x; _ } as ce) =

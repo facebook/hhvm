@@ -1,0 +1,8 @@
+File "shapes_cc_8.php--use.php", line 5, characters 22-28:
+A shape field name must be an int or string
+File "shapes_cc_8.php--def.php", line 6, characters 9-11:
+Not a bool
+File "shapes_cc_8.php--def.php", line 4, characters 9-11:
+Typedef definition comes from here
+File "shapes_cc_8.php--newtype.php", line 4, characters 9-11:
+Typedef definition comes from here

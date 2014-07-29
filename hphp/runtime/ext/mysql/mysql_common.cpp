@@ -330,8 +330,8 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-MySQLResult *php_mysql_extract_result(const Variant& result) {
-  auto const res = result.toResource().getTyped<MySQLResult>(true, true);
+MySQLResult *php_mysql_extract_result(const Resource& result) {
+  auto const res = result.getTyped<MySQLResult>(true, true);
   if (res == nullptr || res->isInvalid()) {
     raise_warning("supplied argument is not a valid MySQL result resource");
     return nullptr;
@@ -385,7 +385,8 @@ const char *php_mysql_get_field_name(int field_type) {
   return "unknown";
 }
 
-Variant php_mysql_field_info(const Variant& result, int field, int entry_type) {
+Variant php_mysql_field_info(const Resource& result, int field,
+                             int entry_type) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == NULL) return false;
 
@@ -1137,17 +1138,6 @@ Variant MySQLStmt::reset() {
   return !mysql_stmt_reset(m_stmt);
 }
 
-Variant MySQLStmt::store_result() {
-  VALIDATE_PREPARED
-  return !mysql_stmt_store_result(m_stmt);
-}
-
-Variant MySQLStmt::send_long_data(int64_t param_idx, const String& data) {
-  VALIDATE_PREPARED
-  return !mysql_stmt_send_long_data(m_stmt, param_idx, data.c_str(),
-                                    data.size());
-}
-
 Variant MySQLStmt::result_metadata() {
   VALIDATE_PREPARED
 
@@ -1169,6 +1159,22 @@ Variant MySQLStmt::result_metadata() {
   tvRefcountedDecRef(&ret);
 
   return obj;
+}
+
+Variant MySQLStmt::send_long_data(int64_t param_idx, const String& data) {
+  VALIDATE_PREPARED
+  return !mysql_stmt_send_long_data(m_stmt, param_idx, data.c_str(),
+                                    data.size());
+}
+
+Variant MySQLStmt::sqlstate() {
+  VALIDATE_STMT
+  return String(mysql_stmt_sqlstate(m_stmt), CopyString);
+}
+
+Variant MySQLStmt::store_result() {
+  VALIDATE_PREPARED
+  return !mysql_stmt_store_result(m_stmt);
 }
 
 #undef VALIDATE_STMT
@@ -1221,7 +1227,7 @@ static bool php_mysql_read_rows(MYSQL *mysql, const Variant& result) {
   unsigned char *cp;
   unsigned int fields = mysql->field_count;
   NET *net = &mysql->net;
-  MySQLResult *res = php_mysql_extract_result(result);
+  MySQLResult *res = php_mysql_extract_result(result.toResource());
 
   if ((pkt_len = cli_safe_read(mysql)) == packet_error) {
     return false;
@@ -1492,7 +1498,7 @@ Variant php_mysql_do_query_and_get_result(const String& query, const Variant& li
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-Variant php_mysql_fetch_hash(const Variant& result, int result_type) {
+Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
   if ((result_type & PHP_MYSQL_BOTH) == 0) {
     throw_invalid_argument("result_type: %d", result_type);
     return false;

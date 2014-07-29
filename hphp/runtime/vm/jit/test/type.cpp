@@ -98,6 +98,13 @@ TEST(Type, ToString) {
   EXPECT_EQ("Int", Type::Int.toString());
   EXPECT_EQ("Cell", Type::Cell.toString());
   EXPECT_EQ("BoxedDbl", Type::BoxedDbl.toString());
+
+
+  auto const sub = Type::Obj.specialize(SystemLib::s_IteratorClass);
+  auto const exact = Type::Obj.specializeExact(SystemLib::s_IteratorClass);
+
+  EXPECT_EQ("Obj<=Iterator", sub.toString());
+  EXPECT_EQ("Obj=Iterator", exact.toString());
 }
 
 TEST(Type, Boxes) {
@@ -234,7 +241,7 @@ TEST(Type, RelaxType) {
   inner.innerCat = DataTypeSpecialized;
   inner.category = DataTypeSpecific;
   auto type = Type::Obj.specialize(SystemLib::s_IteratorClass).box();
-  EXPECT_EQ("BoxedObj<Iterator>", type.toString());
+  EXPECT_EQ("BoxedObj<=Iterator", type.toString());
   EXPECT_EQ(type, relaxType(type, inner));
 }
 
@@ -261,6 +268,38 @@ TEST(Type, Specialized) {
   EXPECT_GT(packed, Type::Bottom);
 
   EXPECT_TRUE(Type::Int <= (packed | Type::Int));
+}
+
+TEST(Type, SpecializedObjects) {
+  auto const A = SystemLib::s_IteratorClass;
+  auto const B = SystemLib::s_TraversableClass;
+  EXPECT_TRUE(A->classof(B));
+
+  auto const obj = Type::Obj;
+  auto const exactA = obj.specializeExact(A);
+  auto const exactB = obj.specializeExact(B);
+  auto const subA = obj.specialize(A);
+  auto const subB = obj.specialize(B);
+
+  EXPECT_EQ(exactA.getClass(), A);
+  EXPECT_EQ(subA.getClass(), A);
+
+  EXPECT_EQ(exactA.getExactClass(), A);
+  EXPECT_EQ(subA.getExactClass(), nullptr);
+
+  EXPECT_LE(exactA, exactA);
+  EXPECT_LE(subA, subA);
+
+  EXPECT_LT(exactA, obj);
+  EXPECT_LT(subA, obj);
+
+  EXPECT_LT(exactA, subA);
+
+  EXPECT_LT(exactA, subB);
+  EXPECT_LT(subA, subB);
+
+  EXPECT_FALSE(exactA <= exactB);
+  EXPECT_FALSE(subA <= exactB);
 }
 
 TEST(Type, Const) {
@@ -337,7 +376,7 @@ TEST(Type, Const) {
   EXPECT_NE(ratArray1, ratArray2);
 
   auto packedRat = packedArray & ratArray1;
-  EXPECT_EQ("Arr<PackedKind:N([Str])>", packedRat.toString());
+  EXPECT_EQ("Arr=PackedKind:N([Str])", packedRat.toString());
   EXPECT_TRUE(packedRat <= packedArray);
   EXPECT_TRUE(packedRat < packedArray);
   EXPECT_TRUE(packedRat <= ratArray1);

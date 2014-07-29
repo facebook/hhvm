@@ -29,6 +29,7 @@ Ad-hoc rules for typing some common idioms
 *)
 
 open Typing_defs
+open Utils
 
 module Env = Typing_env
 module Reason = Typing_reason
@@ -46,16 +47,13 @@ let magic_method_name input =
 
 let map_fst f (x,y) = (f x, y)
 let map_snd f (x,y) = (x, f y)
-let map_opt f = function
-  | Some x -> Some (f x)
-  | None -> None
 
 let rec map_ty_ f t =
   match t with
     | Tarray (a,ot,ot') -> f (Tarray (a,
-                                     (map_opt (map_ty f) ot),
-                                     (map_opt (map_ty f) ot')))
-    | Tgeneric (a,ot) -> f (Tgeneric (a, map_opt (map_ty f) ot))
+                                     (opt_map (map_ty f) ot),
+                                     (opt_map (map_ty f) ot')))
+    | Tgeneric (a,ot) -> f (Tgeneric (a, opt_map (map_ty f) ot))
     | Toption t -> f (Toption (map_ty f t))
     | Tapply (x, ts) -> f (Tapply (x, List.map (map_ty f) ts))
     | Ttuple ts -> f (Ttuple (List.map (map_ty f) ts))
@@ -188,8 +186,9 @@ let retype_magic_func (env:Env.env) (ft:fun_type) (el:Nast.expr list) : Env.env 
   in match f env ft.ft_params el with
     | env, None -> env, ft
     | env, Some (xs,ys) ->
-        env, { ft with
-                 ft_tparams = ft.ft_tparams @ ys;
-                 ft_params = xs;
-                 ft_arity_min = List.length xs;
-                 ft_arity_max = List.length xs }
+      let num_params = List.length xs in
+      env, { ft with
+        ft_tparams = ft.ft_tparams @ ys;
+        ft_params  = xs;
+        ft_arity   = Fstandard (num_params, num_params);
+      }

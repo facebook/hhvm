@@ -141,7 +141,7 @@ void ProcessInit() {
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
-    Class *cls = Unit::GetNamedEntity(s_##cls.get())->clsList();       \
+    Class *cls = NamedEntity::get(s_##cls.get())->clsList();       \
     assert(!hhbc_ext_class_count || cls);                               \
     SystemLib::s_##cls##Class = cls;                                    \
   }
@@ -156,7 +156,7 @@ void ProcessInit() {
   for (long long i = 0; i < hhbc_ext_class_count; ++i) {
     const HhbcExtClassInfo* info = hhbc_ext_classes + i;
     const StringData* name = makeStaticString(info->m_name);
-    const NamedEntity* ne = Unit::GetNamedEntity(name);
+    const NamedEntity* ne = NamedEntity::get(name);
     Class* cls = Unit::lookupClass(ne);
     assert(cls);
     *(info->m_clsPtr) = cls;

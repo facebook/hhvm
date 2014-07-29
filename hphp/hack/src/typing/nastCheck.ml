@@ -29,87 +29,47 @@ open Autocomplete
 
 module Env = Typing_env
 
-module CheckGenerator = struct
-
-  let rec stmt = function
-    | Return (p, _) ->
-        Errors.return_in_gen p
-    | Throw (p, _) -> ()
-    | Noop
-    | Fallthrough
-    | Break | Continue
-    | Expr _
-    | Static_var _ -> ()
-    | If (_, b1, b2) ->
-        block b1;
-        block b2;
-        ()
-    | Do (b, _) ->
-        block b;
-        ()
-    | While (_, b) ->
-        block b;
-        ()
-    | For (_, _, _, b) ->
-        block b;
-        ()
-    | Switch (_, cl) ->
-        List.iter case cl;
-        ()
-    | Foreach (_, _, b) ->
-        block b;
-        ()
-    | Try (b, cl, fb) ->
-        block b;
-        List.iter catch cl;
-        block fb;
-        ()
-
-  and block stl =
-    List.iter stmt stl
-
-  and case = function
-    | Default b -> block b
-    | Case (_, b) ->
-        block b;
-        ()
-
-  and catch (_, _, b) = block b
-
-end
-
 module CheckFunctionType = struct
-  let rec stmt f_type = function
-    | Return (_, None) -> ()
-    | Return (_, Some e)
-    | Throw (_, e)
-    | Expr e ->
+  let rec stmt f_type st = match f_type, st with
+    | FSync, Return (_, None)
+    | FAsync, Return (_, None) -> ()
+    | FSync, Return (_, Some e)
+    | FAsync, Return (_, Some e) ->
         expr f_type e;
         ()
-    | Noop
-    | Fallthrough
-    | Break | Continue -> ()
-    | Static_var _ -> ()
-    | If (_, b1, b2) ->
+    | FGenerator, Return (p, _) ->
+        (* TODO #4534682 Support "return;" in generators *)
+        Errors.return_in_gen p;
+        ()
+
+    | _, Throw (_, e)
+    | _, Expr e ->
+        expr f_type e;
+        ()
+    | _, Noop
+    | _, Fallthrough
+    | _, Break | _, Continue -> ()
+    | _, Static_var _ -> ()
+    | _, If (_, b1, b2) ->
         block f_type b1;
         block f_type b2;
         ()
-    | Do (b, _) ->
+    | _, Do (b, _) ->
         block f_type b;
         ()
-    | While (_, b) ->
+    | _, While (_, b) ->
         block f_type b;
         ()
-    | For (_, _, _, b) ->
+    | _, For (_, _, _, b) ->
         block f_type b;
         ()
-    | Switch (_, cl) ->
+    | _, Switch (_, cl) ->
         liter case f_type cl;
         ()
-    | Foreach (_, _, b) ->
+    | _, Foreach (_, _, b) ->
         block f_type b;
         ()
-    | Try (b, cl, fb) ->
+    | _, Try (b, cl, fb) ->
         block f_type b;
         liter catch f_type cl;
         block f_type fb;
@@ -126,6 +86,10 @@ module CheckFunctionType = struct
 
   and catch f_type (_, _, b) = block f_type b
 
+  and afield f_type = function
+    | AFvalue e -> expr f_type e
+    | AFkvalue (e1, e2) -> expr2 f_type (e1, e2)
+
   and expr f_type (p, e) =
     expr_ p f_type e
 
@@ -136,7 +100,6 @@ module CheckFunctionType = struct
 
   and expr_ p f_type exp = match f_type, exp with
     | _, Any -> ()
-    | _, Array _
     | _, Fun_id _
     | _, Method_id _
     | _, Smethod_id _
@@ -146,9 +109,12 @@ module CheckFunctionType = struct
     | _, Class_get _
     | _, Class_const _
     | _, Lvar _ -> ()
+    | _, Array afl ->
+        liter afield f_type afl;
+        ()
     | _, ValCollection (_, el) ->
-      liter expr f_type el;
-      ()
+        liter expr f_type el;
+        ()
     | _, KeyValCollection (_, fdl) ->
         liter expr2 f_type fdl;
         ()
@@ -201,26 +167,30 @@ module CheckFunctionType = struct
         expr f_type e;
         ()
     | _, Efun (f, _) -> ()
-    | Ast.FAsync, Yield_break
-    | Ast.FAsync, Yield _ -> Errors.yield_in_async_function p
-    | Ast.FAsync, Special_func func ->
+
+    | FAsync, Yield_break
+    | FAsync, Yield _ -> Errors.yield_in_async_function p
+
+    | FGenerator, Yield_break -> ()
+    | FGenerator, Yield af -> afield f_type af; ()
+
+    (* Should never happen, presence of either of these should force at least
+     * FGenerator. *)
+    | FSync, Yield_break
+    | FSync, Yield _ -> assert false
+
+    | FGenerator, Await _
+    | FSync, Await _ -> Errors.await_in_sync_function p
+
+    | FAsync, Await e -> expr f_type e; ()
+
+    | _, Special_func func ->
       (match func with
         | Gena e
         | Gen_array_rec e -> expr f_type e
         | Genva el
         | Gen_array_va_rec el -> liter expr f_type el);
       ()
-    | Ast.FSync, Yield_break -> ()
-    | Ast.FSync, Yield e -> expr f_type e; ()
-    | Ast.FSync, Special_func func ->
-      (match func with
-        | Gena e
-        | Gen_array_rec e -> expr f_type e
-        | Genva el
-        | Gen_array_va_rec el -> liter expr f_type el);
-      ()
-    | Ast.FSync, Await _ -> Errors.await_in_sync_function p
-    | Ast.FAsync, Await e -> expr f_type e; ()
     | _, Xml (_, attrl, el) ->
         List.iter (fun (_, e) -> expr f_type e) attrl;
         liter expr f_type el;
@@ -235,13 +205,12 @@ module CheckFunctionType = struct
         liter expr f_type (e1 :: e2 :: el);
         ()
     | _, Shape fdm ->
-        SMap.iter (fun _ v -> expr f_type v) fdm;
+        ShapeMap.iter (fun _ v -> expr f_type v) fdm;
         ()
 
 end
 
 type env = {
-  t_is_gen: bool ref;
   t_is_finally: bool ref;
   class_name: string option;
   class_kind: Ast.class_kind option;
@@ -263,21 +232,18 @@ let is_magic =
 let rec fun_ tenv f =
   if f.f_mode = Ast.Mdecl || !auto_complete then () else begin
   let tenv = Typing_env.set_root tenv (Dep.Fun (snd f.f_name)) in
-  let env = { t_is_gen = ref false; t_is_finally = ref false;
+  let env = { t_is_finally = ref false;
               class_name = None; class_kind = None;
               tenv = tenv } in
   func env f
   end
 
 and func env f =
-  let old_gen = !(env.t_is_gen) in
   let env = { env with tenv = Env.set_mode env.tenv f.f_mode } in
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;
   block env f.f_body;
-  CheckFunctionType.block f.f_type f.f_body;
-  if !(env.t_is_gen) then CheckGenerator.block f.f_body;
-  env.t_is_gen := old_gen
+  CheckFunctionType.block f.f_type f.f_body
 
 and hint env (p, h) =
   hint_ env p h
@@ -312,7 +278,7 @@ and hint_ env p = function
       );
       ()
   | Hshape fdl ->
-      SMap.iter (fun _ v -> hint env v) fdl
+      ShapeMap.iter (fun _ v -> hint env v) fdl
 
 and check_params env p x params hl =
   let arity = List.length params in
@@ -329,7 +295,7 @@ and class_ tenv c =
   if c.c_mode = Ast.Mdecl || !auto_complete then () else begin
   let cname = Some (snd c.c_name) in
   let tenv = Typing_env.set_root tenv (Dep.Class (snd c.c_name)) in
-  let env = { t_is_gen = ref false; t_is_finally = ref false;
+  let env = { t_is_finally = ref false;
               class_name = cname;
               class_kind = Some c.c_kind;
               tenv = tenv } in
@@ -464,13 +430,10 @@ and check__toString m is_static =
 
 and method_ (env, is_static) m =
   check__toString m is_static;
-  let old_gen = !(env.t_is_gen) in
   liter fun_param env m.m_params;
   block env m.m_body;
   maybe hint env m.m_ret;
   CheckFunctionType.block m.m_type m.m_body;
-  if !(env.t_is_gen)
-  then CheckGenerator.block m.m_body;
   if m.m_body <> [] && m.m_abstract
   then Errors.abstract_with_body m.m_name;
   if m.m_body = [] && not m.m_abstract
@@ -483,7 +446,6 @@ and method_ (env, is_static) m =
       then Errors.dangerous_method_name p
       else ()
   | None -> assert false);
-  env.t_is_gen := old_gen;
   ()
 
 and fun_param env param =
@@ -552,6 +514,10 @@ and as_expr env = function
       expr env e2;
       ()
 
+and afield env = function
+  | AFvalue e -> expr env e
+  | AFkvalue (e1, e2) -> expr env e1; expr env e2;
+
 and block env stl =
   liter stmt env stl
 
@@ -560,7 +526,6 @@ and expr env (_, e) =
 
 and expr_ env = function
   | Any
-  | Array _
   | Fun_id _
   | Method_id _
   | Smethod_id _
@@ -570,6 +535,9 @@ and expr_ env = function
   | Class_get _
   | Class_const _
   | Lvar _ -> ()
+  | Array afl ->
+      liter afield env afl;
+      ()
   | ValCollection (_, el) ->
       liter expr env el;
       ()
@@ -611,8 +579,7 @@ and expr_ env = function
         liter expr env el);
     ()
   | Yield e ->
-      env.t_is_gen := true;
-      expr env e;
+      afield env e;
       ()
   | Await e ->
       expr env e;
@@ -658,17 +625,14 @@ and expr_ env = function
   | New (_, el) ->
       liter expr env el
   | Efun (f, _) ->
-    let is_gen_copy = !(env.t_is_gen) in
-      env.t_is_gen := false;
       func env f;
-      env.t_is_gen := is_gen_copy;
       ()
   | Xml (_, attrl, el) ->
       liter attribute env attrl;
       liter expr env el;
       ()
   | Shape fdm ->
-      SMap.iter (fun _ v -> expr env v) fdm
+      ShapeMap.iter (fun _ v -> expr env v) fdm
 
 and case env = function
   | Default b -> block env b
@@ -688,8 +652,7 @@ and attribute env (_, e) =
   ()
 
 let typedef tenv name (_, params, h) =
-  let env = { t_is_gen = ref false;
-              t_is_finally = ref false;
+  let env = { t_is_finally = ref false;
               class_name = None; class_kind = None;
               tenv = tenv } in
   hint env h;

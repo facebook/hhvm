@@ -10,10 +10,10 @@
 
 open Utils
 open Typing_defs
-open Autocomplete
 
 module Reason = Typing_reason
 module Env = Typing_env
+module ShapeMap = Nast.ShapeMap
 
 (*****************************************************************************)
 (* Importing what is necessary *)
@@ -21,7 +21,7 @@ module Env = Typing_env
 
 let not_implemented _ = failwith "Function not implemented"
 
-type expand_typedef = 
+type expand_typedef =
     Env.env -> Reason.t -> string -> ty list -> Env.env * ty
 
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
@@ -57,27 +57,6 @@ let uerror r1 ty1 r2 ty2 =
     (Reason.to_string ("This is " ^ ty1) r1)
     (Reason.to_string ("It is incompatible with " ^ ty2) r2)
 
-let is_argument_info_target p =
-  match !argument_info_target with
-  | None -> false
-  | Some (line, char_pos) ->
-      let start_line, start_col, end_col = Pos.info_pos p in
-      start_line = line && start_col <= char_pos && char_pos - 1 <= end_col
-
-let process_arg_info fun_args used_args env =
-  if !argument_info_target <> None && !argument_info_expected = None then
-    let _, result = List.fold_left begin fun (index, result) arg ->
-      let result =
-        if is_argument_info_target (fst arg) then Some index else result in
-      index + 1, result
-    end (0, None) used_args in
-    if result <> None then (
-      argument_info_expected := Some (List.map begin
-          fun (x,y) -> x, Typing_print.full_strip_ns env y end fun_args);
-      argument_info_position := result
-    );
-  ()
-  
 let process_static_find_ref cid mid =
   match cid with
   | Nast.CI c -> Find_refs.process_class_ref (fst c) (snd c) (Some (snd mid))
@@ -115,14 +94,16 @@ let rec find_pos p_default tyl =
  *)
 (*****************************************************************************)
 
+let get_shape_field_name = Env.get_shape_field_name
+
 let apply_shape ~f env (r1, fdm1) (r2, fdm2) =
-  SMap.fold begin fun name ty1 env ->
-    match SMap.get name fdm2 with
+  ShapeMap.fold begin fun name ty1 env ->
+    match ShapeMap.get name fdm2 with
     | None when is_option env ty1 -> env
     | None ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in
-        Errors.missing_field pos2 pos1 name;
+        Errors.missing_field pos2 pos1 (get_shape_field_name name);
         env
     | Some ty2 ->
         f env ty1 ty2
@@ -225,7 +206,7 @@ let rec grow_shape pos lvalue field_name ty env shape =
   let _, shape = Env.expand_type env shape in
   match shape with
   | _, Tshape fields ->
-      let fields = SMap.add field_name ty fields in
+      let fields = ShapeMap.add field_name ty fields in
       let result = Reason.Rwitness pos, Tshape fields in
       env, result
   | _, Tunresolved tyl ->

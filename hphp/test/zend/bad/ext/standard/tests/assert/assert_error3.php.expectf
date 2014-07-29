@@ -1,4 +1,5 @@
-Parse error: syntax error, unexpected '$' in %s(3) : assert code on line 1
+
+Fatal error: %s
 
 Fatal error: %s
 0 $ 0 in %s on line 3

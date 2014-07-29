@@ -36,9 +36,9 @@
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
@@ -455,8 +455,8 @@ void populate_block(ParseUnitState& puState,
   auto defcls = [&] (const Bytecode& b) {
     puState.defClsMap[b.DefCls.arg1] = &func;
   };
-  auto nopdefcls = [&] (const Bytecode& b) {
-    puState.defClsMap[b.NopDefCls.arg1] = &func;
+  auto defclsnop = [&] (const Bytecode& b) {
+    puState.defClsMap[b.DefClsNop.arg1] = &func;
   };
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.str2].insert(&func);
@@ -515,7 +515,7 @@ void populate_block(ParseUnitState& puState,
       IMM_##imms                                      \
       new (&b.opcode) bc::opcode { IMM_ARG_##imms };  \
       if (Op::opcode == Op::DefCls)    defcls(b);     \
-      if (Op::opcode == Op::NopDefCls) nopdefcls(b);  \
+      if (Op::opcode == Op::DefClsNop) defclsnop(b);  \
       if (Op::opcode == Op::CreateCl)  createcl(b);   \
       blk.hhbcs.push_back(std::move(b));              \
       assert(pc == next);                             \
@@ -745,7 +745,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->cls             = cls;
   ret->nextBlockId     = 0;
 
-  ret->attrs              = fe.attrs;
+  ret->attrs              = static_cast<Attr>(fe.attrs & ~AttrNoOverride);
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType;
   ret->retTypeConstraint  = fe.retTypeConstraint;
@@ -758,9 +758,11 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isPairGenerator    = fe.isPairGenerator;
 
   /*
-   * HNI-style native functions get some extra information.
+   * Builtin functions get some extra information.  The returnType flag is only
+   * non-KindOfInvalid for these, but note that something may be a builtin and
+   * still have a KindOfInvalid return type.
    */
-  if (fe.isHNINative()) {
+  if (fe.attrs & AttrBuiltin) {
     ret->nativeInfo             = folly::make_unique<php::NativeInfo>();
     ret->nativeInfo->returnType = fe.returnType;
   }
@@ -794,7 +796,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->closureContextCls = nullptr;
   ret->parentName        = pce.parentName()->empty() ? nullptr
                                                      : pce.parentName();
-  ret->attrs             = pce.attrs();
+  ret->attrs             = static_cast<Attr>(pce.attrs() & ~AttrNoOverride);
   ret->hoistability      = pce.hoistability();
   ret->userAttributes    = pce.userAttributes();
 
@@ -907,11 +909,11 @@ void find_additional_metadata(const ParseUnitState& puState,
 
 std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, ue.isASystemLib()};
-  FTRACE(2, "parse_unit {}\n", ue.getFilepath()->data());
+  FTRACE(2, "parse_unit {}\n", ue.m_filepath->data());
 
   auto ret      = folly::make_unique<php::Unit>();
   ret->md5      = ue.md5();
-  ret->filename = ue.getFilepath();
+  ret->filename = ue.m_filepath;
 
   ParseUnitState puState;
   if (ue.hasSourceLocInfo()) {

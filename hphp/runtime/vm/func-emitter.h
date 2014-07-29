@@ -40,7 +40,7 @@ struct PreClass;
 struct StringData;
 
 struct PreClassEmitter;
-struct UnitClassEmitter;
+struct UnitEmitter;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +76,7 @@ struct FuncEmitter {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Initialization and completion.
+  // Initialization and execution.
 
   FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n);
   FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
@@ -203,7 +203,6 @@ public:
   bool isPseudoMain() const;
   bool isMethod() const;
   bool isVariadic() const;
-  bool isHNINative() const;
 
   /*
    * @returns: std::make_pair(line1, line2)
@@ -245,7 +244,7 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Properties.
+  // Data members.
 
 private:
   /*
@@ -314,10 +313,10 @@ private:
 /*
  * Proxy for converting in-repo function representations into FuncEmitters.
  */
-class FuncRepoProxy : public RepoProxy {
+struct FuncRepoProxy : public RepoProxy {
   friend class Func;
   friend class FuncEmitter;
-public:
+
   explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);

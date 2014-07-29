@@ -215,6 +215,13 @@ void MixedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   SORT_BODY(ValAccessor, true);
 }
 
+void MixedArray::WarnAndSort(ArrayData* ad, int sort_flags, bool ascending) {
+  assert(ad->kind() != kMixedKind);
+  MixedArray::downgradeAndWarn(ad, Reason::kSort);
+  auto a = asMixed(ad);
+  SORT_BODY(ValAccessor, true);
+}
+
 void MixedArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asMixed(ad);
   SORT_BODY(ValAccessor, false);
@@ -259,6 +266,13 @@ bool MixedArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
 }
 
 bool MixedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
+  auto a = asMixed(ad);
+  USER_SORT_BODY(ValAccessor, true);
+}
+
+bool MixedArray::WarnAndUsort(ArrayData* ad, const Variant& cmp_function) {
+  assert(ad->kind() != kMixedKind);
+  MixedArray::downgradeAndWarn(ad, Reason::kUsort);
   auto a = asMixed(ad);
   USER_SORT_BODY(ValAccessor, true);
 }

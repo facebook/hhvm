@@ -547,12 +547,6 @@ public:
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
                          bool* fromVMEntry = nullptr);
-  Array debugBacktrace(bool skip = false,
-                       bool withSelf = false,
-                       bool withThis = false,
-                       VMParserFrame* parserFrame = nullptr,
-                       bool ignoreArgs = false,
-                       int limit = 0);
   VarEnv* getVarEnv(int frame = 0);
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);

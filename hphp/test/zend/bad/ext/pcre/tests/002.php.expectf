@@ -18,7 +18,7 @@ NULL
 
 Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in %s on line 12
 
-Parse error: %s in %s002.php(12) : regexp code on line 1
+Fatal error: %s
 
 Fatal error: %s
 for ($ in %s002.php on line 12

@@ -582,15 +582,15 @@ array(3) {
     object(Exception)#1 (7) {
       ["message":protected]=>
       string(4) "test"
+      ["string":"Exception":private]=>
+      string(0) ""
       ["code":protected]=>
       int(0)
-      ["previous":protected]=>
-      NULL
       ["file":protected]=>
       string(%d) "%s"
       ["line":protected]=>
       int(16)
-      ["trace":protected]=>
+      ["trace":"Exception":private]=>
       array(2) {
         [0]=>
         array(4) {
@@ -617,8 +617,8 @@ array(3) {
           }
         }
       }
-      ["inited":"Exception":private]=>
-      bool(true)
+      ["previous":"Exception":private]=>
+      NULL
     }
   }
 }

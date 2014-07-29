@@ -32,8 +32,15 @@ struct RequestEventHandler {
   virtual void requestInit() = 0;
   virtual void requestShutdown() = 0;
 
-  // Priority of request shutdown call. Lower priority value means
-  // requestShutdown is called earlier than higher priority values.
+  /*
+   * Priority of request shutdown call. Lower priority values are called
+   * earlier than higher priority values. Since priorities are only meaningful
+   * due to how they relate to each other, it's important to consider existing
+   * overrides when overriding this (add your handler here if you do):
+   *
+   * 10: ZendObjectStore
+   *       (in runtime/ext_zend_compat/hhvm/zend-object-store.h)
+   */
   virtual int priority() const { return 0; }
 
   void setInited(bool inited) { m_inited = inited; }

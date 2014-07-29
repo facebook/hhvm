@@ -1,4 +1,4 @@
-object(book)#2 (2) {
+object(book)#%d (2) {
   ["a"]=>
   string(5) "Blaat"
   ["b"]=>

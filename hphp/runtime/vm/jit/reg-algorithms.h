@@ -24,7 +24,6 @@
 
 namespace HPHP { namespace JIT {
 
-
 struct CycleInfo {
   PhysReg node;
   int length;
@@ -40,7 +39,6 @@ struct MoveInfo {
   PhysReg m_src, m_dst;
 };
 
-
 bool cycleHasSIMDReg(const CycleInfo& cycle,
                      PhysReg::Map<PhysReg>& moves);
 
@@ -52,7 +50,8 @@ bool cycleHasSIMDReg(const CycleInfo& cycle,
 // is legal for rTmp to be a source for some other destination. Since rTmp
 // cannot be a destination, it cannot be in a copy-cycle, so its value will
 // be read before we deal with cycles.
-smart::vector<MoveInfo> doRegMoves(PhysReg::Map<PhysReg>& moves, PhysReg rTmp);
+typedef PhysReg::Map<PhysReg> MovePlan;
+smart::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 
 }}
 

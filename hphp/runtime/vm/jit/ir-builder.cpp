@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/assertions.h"
 
@@ -50,7 +51,7 @@ IRBuilder::IRBuilder(Offset initialSpOffsetFromFp,
                      const Func* func)
   : m_unit(unit)
   , m_simplifier(unit)
-  , m_state(unit, initialSpOffsetFromFp, func, func->numLocals())
+  , m_state(unit, initialSpOffsetFromFp, func)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_constrainGuards(shouldHHIRRelaxGuards())
@@ -657,6 +658,11 @@ void IRBuilder::reoptimize() {
   always_assert(m_savedBlocks.empty());
   always_assert(!m_curWhere);
 
+  auto const changed = splitCriticalEdges(m_unit);
+  if (changed) {
+    printUnit(6, m_unit, "after splitting critical edges for reoptimize");
+  }
+
   m_state.clear();
   m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
@@ -693,13 +699,19 @@ void IRBuilder::reoptimize() {
 
       if (dst != tmp) {
         // The result of optimization has a different destination than the inst.
-        // Generate a mov(tmp->dst) to get result into dst. If we get here then
-        // assume the last instruction in the block isn't a guard. If it was,
-        // we would have to insert the mov on the fall-through edge.
+        // Generate a mov(tmp->dst) to get result into dst.
         assert(inst->op() != DefLabel);
-        assert(block->empty() || !block->back().isBlockEnd());
+        assert(block->empty() || !block->back().isBlockEnd() || inst->next());
         auto src = tmp->inst()->is(Mov) ? tmp->inst()->src(0) : tmp;
-        appendInstruction(m_unit.mov(dst, src, inst->marker()));
+        if (inst->next()) {
+          // If the last instruction is a guard, insert the mov on the
+          // fall-through edge (inst->next()).
+          auto nextBlk = inst->next();
+          nextBlk->insert(nextBlk->begin(),
+                          m_unit.mov(dst, src, inst->marker()));
+        } else {
+          appendInstruction(m_unit.mov(dst, src, inst->marker()));
+        }
       }
 
       if (inst->block() == nullptr && inst->isBlockEnd()) {
@@ -1150,13 +1162,9 @@ void IRBuilder::startBlock(Block* block) {
 
   if (block->empty()) {
     if (block != m_curBlock) {
-      if (m_state.compatible(block)) {
-        m_state.pauseBlock(m_curBlock);
-        m_state.pauseBlock(block);
-      } else {
-        m_state.clearCse();
-      }
       assert(m_curBlock);
+      m_state.pauseBlock(m_curBlock);
+      m_state.pauseBlock(block);
       auto& prev = m_curBlock->back();
       if (!prev.hasEdges()) {
         gen(Jmp, block);
@@ -1194,18 +1202,6 @@ Block* IRBuilder::makeBlock(Offset offset) {
 
 bool IRBuilder::blockExists(Offset offset) {
   return m_offsetToBlockMap.count(offset);
-}
-
-bool IRBuilder::blockIsIncompatible(Offset offset) {
-  if (m_offsetSeen.count(offset) && !RuntimeOption::EvalJitLoops) return true;
-  auto it = m_offsetToBlockMap.find(offset);
-  if (it == m_offsetToBlockMap.end()) return false;
-  auto* block = it->second;
-  return !m_state.compatible(block);
-}
-
-void IRBuilder::recordOffset(Offset offset) {
-  m_offsetSeen.insert(offset);
 }
 
 void IRBuilder::resetOffsetMapping() {

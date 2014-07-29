@@ -23,13 +23,6 @@ let (auto_complete_pos: Pos.t option ref) = ref None
  * not available, but we can use this map to relate names to types *)
 let auto_complete_vars = ref (SMap.empty: Ident.t SMap.t)
 
-(*****************************************************************************)
-(* Argument info mode *)
-(*****************************************************************************)
-let (argument_info_target: (int * int) option ref) = ref None
-let (argument_info_expected: ((string option * string) list) option ref) = ref None
-let (argument_info_position: int option ref) = ref None
-
 
 (*****************************************************************************)
 (* Returns true if this is the identifier we want to auto-complete *)

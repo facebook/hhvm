@@ -14,6 +14,10 @@ if (APPLE)
   set(EXT_HHVM_OS "darwin")
 endif()
 
+if (CYGWIN)
+  set(EXT_HHVM_OS "cygwin")
+endif()
+
 macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH SOURCE_REL
       BUILD_TARGET)
   set(SOURCE_ABS "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_REL}")

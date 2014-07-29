@@ -1,0 +1,2 @@
+string(%d) "/tmp/trace.%d.xt"
+string(%d) "/tmp/trace.%d.xt"

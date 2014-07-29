@@ -3890,7 +3890,7 @@ DefCls <class id>    []  ->  []
   already bound, this instruction does nothing. If another class is already
   bound to the associated name, this instruction throws a fatal error.
 
-NopDefCls <class id>  []  ->  []
+DefClsNop <class id>  []  ->  []
 
   For always-hoistable classes (which are automatically defined when the unit
   is loaded). This instruction is used as a marker for the location in a

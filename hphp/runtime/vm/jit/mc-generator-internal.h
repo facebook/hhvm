@@ -32,7 +32,7 @@ template <class Then>
 void ifThen(JIT::X64Assembler& a, ConditionCode cc, Then thenBlock) {
   Label done;
   a.jcc8(ccNegate(cc), done);
-  thenBlock();
+  thenBlock(a);
   asm_label(a, done);
 }
 
@@ -209,7 +209,7 @@ emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
   if (RefData::tvOffset() == 0) {
     a.    cload_reg64_disp_reg64(CC_E, reg, TVOFF(m_data), reg);
   } else {
-    ifThen(a, CC_E, [&] {
+    ifThen(a, CC_E, [&](X64Assembler& a) {
       a.  loadq(reg[TVOFF(m_data)], reg);
       a.  addq(RefData::tvOffset(), reg);
     });

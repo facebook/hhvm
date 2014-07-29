@@ -1,0 +1,6 @@
+File "yield_send4.php", line 7, characters 5-6:
+Invalid argument
+File "yield_send4.php", line 5, characters 39-41:
+This is an int
+File "yield_send4.php", line 3, characters 13-16:
+It is incompatible with a bool

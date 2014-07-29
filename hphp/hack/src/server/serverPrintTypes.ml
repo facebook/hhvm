@@ -16,7 +16,7 @@ module SE = ServerEnv
 let go fn genv env ic oc =
   assert (!(Typing_defs.type_acc) = []);
   Typing_defs.accumulate_types := true;
-  ServerIdeUtils.recheck [fn];
+  ServerIdeUtils.check_file_input fn;
   let result = !(Typing_defs.type_acc) in
   Typing_defs.accumulate_types := false;
   Typing_defs.type_acc := [];

@@ -11,7 +11,6 @@ testing and some alternative PHP implementation.
 - hphp_output_global_state
 - hphp_set_error_page
 
-- hphp_service_thread_started
 - hphp_thread_is_warmup_enabled
 - hphp_thread_set_warmup_enabled
 - hphp_get_thread_id

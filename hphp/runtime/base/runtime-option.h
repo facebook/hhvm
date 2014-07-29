@@ -238,8 +238,6 @@ public:
   static std::string RequestInitDocument;
   static std::string AutoPrependFile;
   static std::string AutoAppendFile;
-  static std::vector<std::string> ThreadDocuments;
-  static std::vector<std::string> ThreadLoopDocuments;
 
   static bool SafeFileAccess;
   static std::vector<std::string> AllowedDirectories;

@@ -180,17 +180,6 @@ HttpServer::HttpServer()
       return;
     }
   }
-
-  for (unsigned int i = 0; i < RuntimeOption::ThreadDocuments.size(); i++) {
-    m_serviceThreads.push_back(
-      std::make_shared<ServiceThread>(RuntimeOption::ThreadDocuments[i]));
-  }
-
-  for (unsigned int i = 0; i < RuntimeOption::ThreadLoopDocuments.size(); i++) {
-    m_serviceThreads.push_back(
-      std::make_shared<ServiceThread>(
-        RuntimeOption::ThreadLoopDocuments[i], true));
-  }
 }
 
 // Synchronously stop satellites and start danglings
@@ -267,13 +256,6 @@ void HttpServer::runOrExitProcess() {
   };
 
   m_watchDog.start();
-
-  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
-    m_serviceThreads[i]->start();
-  }
-  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
-    m_serviceThreads[i]->waitForStarted();
-  }
 
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
@@ -362,13 +344,6 @@ void HttpServer::runOrExitProcess() {
     m_danglings[i]->stop();
     Logger::Info("dangling server %s stopped",
                  m_danglings[i]->getName().c_str());
-  }
-
-  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
-    m_serviceThreads[i]->notifyStopped();
-  }
-  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
-    m_serviceThreads[i]->waitForEnd();
   }
 
   waitForServers();

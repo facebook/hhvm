@@ -238,8 +238,6 @@ std::string RuntimeOption::RequestInitFunction;
 std::string RuntimeOption::RequestInitDocument;
 std::string RuntimeOption::AutoPrependFile;
 std::string RuntimeOption::AutoAppendFile;
-std::vector<std::string> RuntimeOption::ThreadDocuments;
-std::vector<std::string> RuntimeOption::ThreadLoopDocuments;
 
 bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
@@ -1113,14 +1111,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(WarmupDocument, ini, server["WarmupDocument"]);
     Config::Bind(RequestInitFunction, ini, server["RequestInitFunction"]);
     Config::Bind(RequestInitDocument, ini, server["RequestInitDocument"]);
-    Config::Get(ini, server["ThreadDocuments"], ThreadDocuments);
-    for (unsigned int i = 0; i < ThreadDocuments.size(); i++) {
-      normalizePath(ThreadDocuments[i]);
-    }
-    Config::Get(ini, server["ThreadLoopDocuments"], ThreadLoopDocuments);
-    for (unsigned int i = 0; i < ThreadLoopDocuments.size(); i++) {
-      normalizePath(ThreadLoopDocuments[i]);
-    }
 
     Config::Bind(SafeFileAccess, ini, server["SafeFileAccess"]);
     Config::Get(ini, server["AllowedDirectories"], AllowedDirectories);

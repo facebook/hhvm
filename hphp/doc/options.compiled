@@ -162,14 +162,6 @@ flood error logs.
     StartupDocument = filename
     RequestInitFunction = function_name
     RequestInitDocument = filename
-    ThreadDocuments {
-      * = somedoc.php
-      * = another.php
-    }
-    ThreadLoopDocuments {
-      * = somedoc.php
-      * = another.php
-    }
     ErrorDocument404 = 404.php
     ErrorDocument500 = 500.php
     FatalErrorMessage = some string

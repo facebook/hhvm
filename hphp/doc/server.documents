@@ -12,17 +12,17 @@ This flow is implemented in hphp/runtime/server/http-server.cpp:
                             | StartupDocument |
                             +--------+--------+
                                      |
-                                     V
-                   +---------------------------------+
-                   |                                 |
-                   V                                 V
-    +============================+          +=================+
-    |       Worker Thread        |          | Service Threads |
-    |____________________________|          |_________________|
-    |                            |          |                 |
-    |  +-----------+             |          | ThreadDocuments |
-    |  |           |             |          |                 |
-    |  |           V             |          +=================+
+                                     |
+                   +-----------------+
+                   |
+                   V
+    +============================+
+    |       Worker Thread        |
+    |____________________________|
+    |                            |
+    |  +-----------+             |
+    |  |           |             |
+    |  |           V             |
     |  |   +----------------+    |
     |  |   |  RequestInit   |    |
     |  |   +----------------+    |
@@ -49,24 +49,7 @@ thread gets started but after APC is primed. Example use:
   * preparing parameters for service threads (see below): in this case, we have
     to use APC to pass those parameters into service threads.
 
-2. ThreadDocuments
-
-Each one of these files will be executed in its own thread, and they don't
-share variables with any other threads. Therefore, if we need to pass data
-between them, we have to use APC.
-
-There is a system function "hphp_service_thread_started" that needs to be
-called at certain point. This function tells the engine that this thread has
-finished any initialization sequences that have to happen before any HTTP
-request is handled. Even if a service thread doesn't have any work to do
-before HTTP requests, hphp_service_thread_started() is still needed for engine
-to proceed without infinite waiting for service threads to start.
-
-There is also another variant of these threads, called ThreadLoopDocuments, that
-differs from normal ThreadDocuments in that it executes the document in an
-infinite loop, and doesn't have any requirements of hphp_service_thread_started
-being called. It can be useful to recover memory after different execution of
-the document.
+2. This space intentionally left blank.
 
 3. RequestInitDocument and RequestInitFunction
 

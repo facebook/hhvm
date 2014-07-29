@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/ext/ext_thread.h"
-#include "hphp/runtime/server/service-thread.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/process.h"
@@ -26,26 +25,6 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(thread, NO_EXTENSION_VERSION_YET);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-bool f_hphp_is_service_thread() {
-  return ServiceThread::IsServiceThread();
-}
-
-void f_hphp_service_thread_started() {
-  if (!ServiceThread::IsServiceThread()) {
-    raise_error("hphp_service_thread_started called "
-                "from outside a service thread");
-  }
-  ServiceThread::GetThisThread()->notifyStarted();
-}
-
-bool f_hphp_service_thread_stopped(int timeout) {
-  if (!ServiceThread::IsServiceThread()) {
-    raise_error("hphp_service_thread_stopped called "
-                "from outside a service thread");
-  }
-  return ServiceThread::GetThisThread()->waitForStopped(timeout);
-}
 
 int64_t f_hphp_get_thread_id() {
   return  (unsigned long)Process::GetThreadId();

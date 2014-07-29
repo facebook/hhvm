@@ -25,9 +25,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_hphp_is_service_thread();
-void f_hphp_service_thread_started();
-bool f_hphp_service_thread_stopped(int timeout);
 int64_t f_hphp_get_thread_id();
 int64_t f_hphp_gettid();
 

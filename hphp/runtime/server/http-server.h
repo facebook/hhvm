@@ -62,9 +62,6 @@ public:
   void stopOnSignal(int sig);
 
 private:
-  static void startupFailure();
-
-private:
   bool m_stopped;
   bool m_killed;
   const char* m_stopReason;

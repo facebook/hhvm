@@ -110,10 +110,10 @@ and method_ = {
   m_body            : block                     ;
   m_user_attributes : Ast.user_attribute SMap.t ;
   m_ret             : hint option               ;
-  m_type            : fun_type                  ;
+  m_fun_kind        : fun_kind                  ;
 }
 
-and fun_type =
+and fun_kind =
   | FSync
   | FGenerator
   | FAsync
@@ -149,7 +149,7 @@ and fun_ = {
   f_variadic : fun_variadicity;
   f_params   : fun_param list;
   f_body     : block;
-  f_type     : fun_type;
+  f_fun_kind : fun_kind;
 }
 
 and typedef = tparam list * hint option * hint

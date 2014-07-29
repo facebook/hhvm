@@ -243,7 +243,7 @@ and func env f =
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;
   block env f.f_body;
-  CheckFunctionType.block f.f_type f.f_body
+  CheckFunctionType.block f.f_fun_kind f.f_body
 
 and hint env (p, h) =
   hint_ env p h
@@ -433,7 +433,7 @@ and method_ (env, is_static) m =
   liter fun_param env m.m_params;
   block env m.m_body;
   maybe hint env m.m_ret;
-  CheckFunctionType.block m.m_type m.m_body;
+  CheckFunctionType.block m.m_fun_kind m.m_body;
   if m.m_body <> [] && m.m_abstract
   then Errors.abstract_with_body m.m_name;
   if m.m_body = [] && not m.m_abstract

@@ -120,7 +120,7 @@ let rec fun_decl f =
 and fun_decl_in_env env f =
   let mandatory_init = true in
   let env, arity_min, params = make_params env mandatory_init 0 f.f_params in
-  let env, ret_ty = match f.f_ret, f.f_type with
+  let env, ret_ty = match f.f_ret, f.f_fun_kind with
     (* If there is no return type annotation, we clearly should make
      * it Tany but also want a witness so that we can point *somewhere*
      * in event of error. The function name itself isn't great, but is
@@ -303,7 +303,7 @@ and fun_def env _ f =
       let env, params =
         lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
       let env = List.fold_left2 bind_param env params f_params in
-      let env = fun_ env f.f_unsafe (f.f_ret <> None) hret (fst f.f_name) f.f_body f.f_type in
+      let env = fun_ env f.f_unsafe (f.f_ret <> None) hret (fst f.f_name) f.f_body f.f_fun_kind in
       let env = solve_todos env in
       if Env.is_strict env then begin
         List.iter2 (check_param env) f_params params;
@@ -324,7 +324,7 @@ and solve_todos env =
 and fun_ ?(abstract=false) env unsafe has_ret hret pos b fun_type =
   Env.with_return env begin fun env ->
     let env = Env.set_return env hret in
-    let env = Env.set_fn_type env fun_type in
+    let env = Env.set_fn_kind env fun_type in
     let env = block env b in
     let ret = Env.get_return env in
     if Nast_terminality.Terminal.block b || abstract || unsafe || !auto_complete
@@ -422,7 +422,7 @@ and stmt env = function
       end
       else LEnv.intersect env parent_lenv lenv1 lenv2
   | Return (p, None) ->
-      let rty = match Env.get_fn_type env with
+      let rty = match Env.get_fn_kind env with
         | FSync -> (Reason.Rwitness p, Tprim Tvoid)
         | FGenerator -> any (* Caught in NastCheck *)
         | FAsync -> (Reason.Rwitness p, Tapply ((p, "\\Awaitable"), [(Reason.Rwitness p, Toption (Env.fresh_type ()))])) in
@@ -433,7 +433,7 @@ and stmt env = function
   | Return (p, Some e) ->
       let pos = fst e in
       let env, rty = expr env e in
-      let rty = match Env.get_fn_type env with
+      let rty = match Env.get_fn_kind env with
         | FSync -> rty
         | FGenerator -> any (* Caught in NastCheck *)
         | FAsync -> (Reason.Rwitness p), Tapply ((p, "\\Awaitable"), [rty]) in
@@ -1146,12 +1146,12 @@ and anon_make anon_lenv p f =
           | None -> TUtils.in_var env (Reason.Rnone, Tunresolved [])
           | Some x -> Typing_hint.hint env x in
         let env = Env.set_return env hret in
-        let env = Env.set_fn_type env f.f_type in
+        let env = Env.set_fn_kind env f.f_fun_kind in
         let env = block env f.f_body in
         let env =
           if Nast_terminality.Terminal.block f.f_body || f.f_unsafe || !auto_complete
           then env
-          else fun_implicit_return env p hret f.f_body f.f_type
+          else fun_implicit_return env p hret f.f_body f.f_fun_kind
         in
         is_typing_self := false;
         env, hret
@@ -2911,7 +2911,7 @@ and method_def env m =
   end;
   let env  = List.fold_left2 bind_param env params m_params in
   let env = fun_ ~abstract:m.m_abstract env m.m_unsafe (m.m_ret <> None)
-      ret (fst m.m_name) m.m_body m.m_type in
+      ret (fst m.m_name) m.m_body m.m_fun_kind in
   let env = List.fold_left (fun env f -> f env) env (Env.get_todo env) in
   match m.m_ret with
     | None when Env.is_strict env && snd m.m_name <> "__destruct" ->

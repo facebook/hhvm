@@ -635,7 +635,7 @@ and visibility cid = function
 and method_decl c env m =
   let env, arity_min, params = Typing.make_params env true 0 m.m_params in
   let env, ret =
-    match m.m_ret, m.m_type with
+    match m.m_ret, m.m_fun_kind with
       | None, FGenerator (* XXX should we return Generator<Any,Any,Any> here? *)
       | None, FSync -> env, (Reason.Rwitness (fst m.m_name), Tany)
       | None, FAsync ->

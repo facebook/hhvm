@@ -149,7 +149,7 @@ type lenv = {
     (* The presence of "yield" in the function body changes the type of the
      * function into a generator, with no other syntactic indications
      * elsewhere. For the sanity of the typechecker, we flatten this out into
-     * fun_type, but need to track if we've seen a "yield" in order to do so.
+     * fun_kind, but need to track if we've seen a "yield" in order to do so.
      *)
     has_yield: bool ref;
   }
@@ -1168,7 +1168,7 @@ and fill_cvar kl ty x =
     | Protected -> { x with N.cv_visibility = N.Protected }
  ) x kl
 
-and fun_type env ft =
+and fun_kind env ft =
   match !((snd env).has_yield), ft with
   | false, Ast.FSync -> N.FSync
   | false, Ast.FAsync -> N.FAsync
@@ -1193,7 +1193,7 @@ and method_ env m =
         block env m.m_body
     | Ast.Mdecl -> [] in
   let attrs = m.m_user_attributes in
-  let method_type = fun_type env m.m_type in
+  let method_type = fun_kind env m.m_fun_kind in
   let ret = opt_map (hint ~allow_this:true env) m.m_ret in
   N.({ m_unsafe     = unsafe ;
        m_final      = final  ;
@@ -1206,7 +1206,7 @@ and method_ env m =
        m_user_attributes = attrs;
        m_ret        = ret    ;
        m_variadic   = variadicity;
-       m_type       = method_type;
+       m_fun_kind   = method_type;
      })
 
 and kind (final, abs, vis) = function
@@ -1275,7 +1275,7 @@ and fun_ genv f =
     | Ast.Mstrict | Ast.Mpartial -> block env f.f_body
     | Ast.Mdecl -> []
   in
-  let f_type = fun_type env f.f_type in
+  let kind = fun_kind env f.f_fun_kind in
   let fun_ =
     { N.f_unsafe = unsafe;
       f_mode = f.f_mode;
@@ -1285,7 +1285,7 @@ and fun_ genv f =
       f_params = paraml;
       f_body = body;
       f_variadic = variadicity;
-      f_type = f_type;
+      f_fun_kind = kind;
     } in
   fun_
 
@@ -1702,7 +1702,7 @@ and expr_lambda env f =
   let unsafe = List.mem Unsafe f.f_body in
   let variadicity, paraml = fun_paraml env f.f_params in
   let body = block env f.f_body in
-  let f_type = fun_type env f.f_type in
+  let f_kind = fun_kind env f.f_fun_kind in
   {
     N.f_unsafe = unsafe;
     f_mode = (fst env).in_mode;
@@ -1712,7 +1712,7 @@ and expr_lambda env f =
     f_tparams = [];
     f_body = body;
     f_variadic = variadicity;
-    f_type = f_type;
+    f_fun_kind = f_kind;
   }
 
 and make_class_id env cid =

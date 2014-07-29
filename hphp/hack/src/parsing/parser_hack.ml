@@ -703,7 +703,7 @@ and fun_ ~attr ~sync env =
     f_ret = ret;
     f_body = body;
     f_user_attributes = attr;
-    f_type = sync;
+    f_fun_kind = sync;
     f_mode = env.mode;
     f_mtime = 0.0;
     f_namespace = Namespace_env.empty;
@@ -1419,7 +1419,7 @@ and method_ env ~modifiers ~attrs ~sync pname =
     m_body = body;
     m_kind = modifiers;
     m_user_attributes = attrs;
-    m_type = sync;
+    m_fun_kind = sync;
   }
 
 (*****************************************************************************)
@@ -2211,7 +2211,7 @@ and lambda_body env params ret =
     f_ret = ret;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
-    f_type = FSync;
+    f_fun_kind = FSync;
     f_mode = env.mode;
     f_mtime = 0.0;
     f_namespace = Namespace_env.empty;
@@ -2575,7 +2575,7 @@ and expr_anon_fun env pos ~sync =
     f_ret = ret;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
-    f_type = sync;
+    f_fun_kind = sync;
     f_mode = env.mode;
     f_mtime = 0.0;
     f_namespace = Namespace_env.empty;

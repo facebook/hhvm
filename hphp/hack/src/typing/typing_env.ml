@@ -90,7 +90,7 @@ and genv = {
   self    : ty         ;
   static  : bool       ;
   allow_null_as_void : bool;
-  f_type  : Nast.fun_type;
+  fun_kind : Nast.fun_kind;
   anons   : anon IMap.t;
   droot   : Typing_deps.Dep.variant option  ;
   file    : string;
@@ -263,7 +263,7 @@ let empty file = {
     static  = false;
     parent  = Reason.none, Tany;
     allow_null_as_void = false;
-    f_type  = FSync;
+    fun_kind = FSync;
     anons   = IMap.empty;
     droot   = None;
     file    = file;
@@ -405,7 +405,7 @@ let get_self env = env.genv.self
 let get_self_id env = env.genv.self_id
 let get_parent env = env.genv.parent
 
-let get_fn_type env = env.genv.f_type
+let get_fn_kind env = env.genv.fun_kind
 
 let get_fun env x =
   let dep = Dep.Fun x in
@@ -417,9 +417,9 @@ let set_allow_null_as_void ?(allow=true) env =
   let genv = { genv with allow_null_as_void = allow } in
   { env with genv = genv }
 
-let set_fn_type env fn_type =
+let set_fn_kind env fn_type =
   let genv = env.genv in
-  let genv = { genv with f_type = fn_type } in
+  let genv = { genv with fun_kind = fn_type } in
   { env with genv = genv }
 
 let add_todo env x =
@@ -693,12 +693,12 @@ let anon anon_lenv env f =
   (* Setting up the environment. *)
   let old_lenv = env.lenv in
   let old_return = get_return env in
-  let outer_f_type = get_fn_type env in
+  let outer_fun_kind = get_fn_kind env in
   let env = { env with lenv = anon_lenv } in
   (* Typing *)
   let env, result = f env in
   (* Cleaning up the environment. *)
   let env = { env with lenv = old_lenv } in
   let env = set_return env old_return in
-  let env = set_fn_type env outer_f_type in
+  let env = set_fn_kind env outer_fun_kind in
   env, result

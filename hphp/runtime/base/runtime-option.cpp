@@ -329,7 +329,7 @@ bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableAspTags = false;
 bool RuntimeOption::EnableXHP = false;
-bool RuntimeOption::EnableObjDestructCall = false;
+bool RuntimeOption::EnableObjDestructCall = true;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::CheckSymLink = true;
@@ -816,7 +816,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     }
 
     Config::Bind(EnableObjDestructCall, ini, eval["EnableObjDestructCall"],
-                 false);
+                 true);
     Config::Bind(MaxUserFunctionId, ini, eval["MaxUserFunctionId"], 2 * 65536);
     Config::Bind(CheckSymLink, ini, eval["CheckSymLink"], true);
 

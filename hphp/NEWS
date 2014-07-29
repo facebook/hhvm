@@ -48,6 +48,7 @@ NEXT
  - Hack: improved support for Generators, including async generators
  - Documentation of PHP-level profiling in doc/profiling.md
  - Cleanup of PHP-level profilers
+ - Change default for Eval.EnableObjDestructCall to true
 
 "Outkast" 17-July 2014
   - PHP_VERSION is now 5.6

@@ -47,21 +47,13 @@ PHP outside of the __destruct method.
 Fatals thrown from destructors will log an error, and prevent further PHP code
 from executing as the fatal propagates. This includes other __destruct methods.
 
-(2) __destruct behavior at end of request
-
-Under PHP5, if an object is still live at the end of a request, its
-__destruct method is invoked. By default, HipHop VM does not do this.
-
-The EnableObjDestructCall runtime option can be used to make HipHop VM invoke
-the __destruct method for objects that are live at the end of the request.
-
-(3) Exceptions thrown from __toString()
+(2) Exceptions thrown from __toString()
 
 PHP5 does not allow exceptions to be thrown from __toString(). HipHop VM
 does. Also, PHP5 doesn't allow __toString() to return anything other than a
 string. HipHop VM will just convert return value to string.
 
-(4) __call/__callStatic() handling
+(3) __call/__callStatic() handling
 
 This example gives inconsistent results in PHP 5.5:
 
@@ -79,14 +71,14 @@ This example gives inconsistent results in PHP 5.5:
 
 Under HipHop VM, both checking and invocation of __call() happen on class G.
 
-(5) Object internal cursors
+(4) Object internal cursors
 
 Under PHP5, objects have an internal cursor (similar to the array internal
 cursor) that can be used to iterate over the object's properties. Under HipHop
 VM, objects do not have internal cursors, and the next(), prev(), current(),
 key(), reset(), end(), and each() builtin functions do not support objects.
 
-(6) Supressing errors for params to default constructors
+(5) Supressing errors for params to default constructors
 
 If a class doesn't define a constructor then you construct that object passing
 whatever you want, including things that would fatal the runtime. HHVM doesn't

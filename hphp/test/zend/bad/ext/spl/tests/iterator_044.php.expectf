@@ -58,7 +58,7 @@ int(0)
 bool(true)
 int(0)
 ===1===
-object(stdClass)#1 (0) {
+object(stdClass)#%d (0) {
 }
 
 Warning: %s
@@ -67,7 +67,7 @@ NULL
 Warning: %s
 NULL
 ===2===
-object(MyFoo)#2 (0) {
+object(MyFoo)#%d (0) {
 }
 bool(true)
 int(1)

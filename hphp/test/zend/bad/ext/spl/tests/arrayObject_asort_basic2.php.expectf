@@ -1,8 +1,8 @@
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
-object(ArrayObject)#2 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (4) {
+  object(C)#%d (4) {
     ["prop3":"C":private]=>
     string(1) "a"
     ["prop1"]=>
@@ -13,7 +13,7 @@ object(ArrayObject)#2 (1) {
     string(1) "z"
   }
 }
-object(C)#1 (4) {
+object(C)#%d (4) {
   ["prop3":"C":private]=>
   string(1) "a"
   ["prop1"]=>

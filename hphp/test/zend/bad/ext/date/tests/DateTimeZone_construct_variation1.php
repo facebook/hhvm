@@ -45,11 +45,9 @@ $inputs = array(
       'int 0' => 0,
       'int 1' => 1,
       'int 12345' => 12345,
-      'int -12345' => -12345,
 
       // float data
       'float 10.5' => 10.5,
-      'float -10.5' => -10.5,
       'float .5' => .5,
 
       // array data

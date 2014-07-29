@@ -1,8 +1,8 @@
-object(A)#1 (1) {
+object(A)#%d (1) {
   ["valid"]=>
   bool(false)
 }
-object(IntlTimeZone)#2 (4) {
+object(IntlTimeZone)#%d (4) {
   ["valid"]=>
   bool(true)
   ["id"]=>

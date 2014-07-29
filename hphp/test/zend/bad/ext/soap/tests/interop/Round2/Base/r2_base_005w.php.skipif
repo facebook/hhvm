@@ -1,0 +1,2 @@
+<?php require_once('skipif.inc'); ?>
+<?php if (!function_exists('utf8_encode')) die('skip utf8_encode() not available'); ?>

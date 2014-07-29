@@ -33,7 +33,7 @@ function date_timestamp_get($datetime) { }
 function date_timestamp_set($datetime, $timestamp) { }
 function date_timezone_get($object) { }
 function date_timezone_set($object, $timezone) { }
-function date($format, $timestamp = null): string { }
+function date($format, $timestamp = null)/*: string*/ { }
 function getdate($timestamp = null) { }
 function gettimeofday($return_float = false) { }
 function gmdate($format, $timestamp = null) { }

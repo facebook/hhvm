@@ -2249,11 +2249,9 @@ common_scalar:
     T_END_HEREDOC                      { $$.setText(""); _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $$);}
 ;
 
-static_scalar:
+static_expr:
     common_scalar                      { $$ = $1;}
   | namespace_string                   { _p->onConstantValue($$, $1);}
-  | '+' static_scalar                  { UEXP($$,$2,'+',1);}
-  | '-' static_scalar                  { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | '[' static_array_pair_list ']'     { _p->onArray($$,$2,T_ARRAY); }
@@ -2261,10 +2259,7 @@ static_scalar:
     static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
-;
 
-static_expr:
-    static_scalar                      { $$ = $1;}
   | '(' static_expr ')'                { $$ = $2;}
   | static_expr T_BOOLEAN_OR
     static_expr                        { BEXP($$,$1,$3,T_BOOLEAN_OR);}
@@ -2287,8 +2282,11 @@ static_expr:
   | static_expr '%' static_expr        { BEXP($$,$1,$3,'%');}
   | static_expr T_SL static_expr       { BEXP($$,$1,$3,T_SL);}
   | static_expr T_SR static_expr       { BEXP($$,$1,$3,T_SR);}
+  | static_expr T_POW static_expr      { BEXP($$,$1,$3,T_POW);}
   | '!' static_expr                    { UEXP($$,$2,'!',1);}
   | '~' static_expr                    { UEXP($$,$2,'~',1);}
+  | '+' static_expr                    { UEXP($$,$2,'+',1);}
+  | '-' static_expr                    { UEXP($$,$2,'-',1);}
   | static_expr T_IS_IDENTICAL
     static_expr                        { BEXP($$,$1,$3,T_IS_IDENTICAL);}
   | static_expr T_IS_NOT_IDENTICAL
@@ -2297,11 +2295,11 @@ static_expr:
     static_expr                        { BEXP($$,$1,$3,T_IS_EQUAL);}
   | static_expr T_IS_NOT_EQUAL
     static_expr                        { BEXP($$,$1,$3,T_IS_NOT_EQUAL);}
-  | static_expr '<' static_scalar      { BEXP($$,$1,$3,'<');}
+  | static_expr '<' static_expr        { BEXP($$,$1,$3,'<');}
   | static_expr T_IS_SMALLER_OR_EQUAL
     static_expr                        { BEXP($$,$1,$3,
                                               T_IS_SMALLER_OR_EQUAL);}
-  | static_expr '>' static_scalar      { BEXP($$,$1,$3,'>');}
+  | static_expr '>' static_expr        { BEXP($$,$1,$3,'>');}
   | static_expr
     T_IS_GREATER_OR_EQUAL
     static_expr                        { BEXP($$,$1,$3,

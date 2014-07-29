@@ -1,6 +1,4 @@
 <?php
-ini_set('allow_url_fopen', 1);
-
 require 'server.inc';
 
 function do_test($header) {

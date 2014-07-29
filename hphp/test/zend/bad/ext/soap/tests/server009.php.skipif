@@ -1,0 +1,6 @@
+<?php
+	require_once('skipif.inc');
+	if (!extension_loaded('session')) {
+		die('skip this test needs session extension');
+	}
+?>

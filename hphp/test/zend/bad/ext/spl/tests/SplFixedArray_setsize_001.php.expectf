@@ -1,4 +1,4 @@
-object(SplFixedArray)#1 (2) {
+object(SplFixedArray)#%d (2) {
   [0]=>
   %string|unicode%(3) "one"
   [1]=>

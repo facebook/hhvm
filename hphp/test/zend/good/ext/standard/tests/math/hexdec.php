@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 
 var_dump(hexdec("012345"));
 var_dump(hexdec("12345"));

@@ -1,0 +1,2 @@
+<?php if (!extension_loaded("session")) die("skip session extension not available"); ?>
+<?php unlink(__DIR__. '/sess_' .session_id()); ?>

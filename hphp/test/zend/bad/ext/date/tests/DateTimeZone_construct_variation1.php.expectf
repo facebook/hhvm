@@ -9,14 +9,8 @@ FAILED: DateTimeZone::__construct(): Unknown or bad timezone (1)
 -- int 12345 --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (12345)
 
--- int -12345 --
-FAILED: DateTimeZone::__construct(): Unknown or bad timezone (-12345)
-
 -- float 10.5 --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (10.5)
-
--- float -10.5 --
-FAILED: DateTimeZone::__construct(): Unknown or bad timezone (-10.5)
 
 -- float .5 --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (0.5)

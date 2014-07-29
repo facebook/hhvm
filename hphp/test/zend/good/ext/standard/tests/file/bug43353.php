@@ -1,6 +1,4 @@
 <?php
-ini_set('allow_url_fopen', 1);
-
 
 var_dump(is_dir('file:///datafoo:test'));
 var_dump(is_dir('datafoo:test'));

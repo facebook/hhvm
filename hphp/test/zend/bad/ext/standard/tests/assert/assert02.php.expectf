@@ -3,14 +3,14 @@ Notice: %s
 
 Warning: %s
 
-Parse error: %s error%sin %sassert02.php(14) : assert code on line 1
+Fatal error: %s
 in handler()
 %string|unicode%(%d) "assert(): Failure evaluating code: 
 aa=sd+as+safsafasfasafsaf"
 
 Warning: %s
 
-Parse error: %s error%sin %sassert02.php(19) : assert code on line 1
+Fatal error: %s
 in handler()
 %string|unicode%(%d) "assert(): Failure evaluating code: 
 aa=sd+as+safsafasfasafsaf"

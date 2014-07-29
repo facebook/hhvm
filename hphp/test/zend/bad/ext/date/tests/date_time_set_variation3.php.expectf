@@ -1,7 +1,7 @@
 *** Testing date_time_set() : usage variation -  unexpected values to third argument $minute***
 
 -- int 0 --
-object(DateTime)#3 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2009-01-31 10:00:45"
   ["timezone_type"]=>
@@ -11,7 +11,7 @@ object(DateTime)#3 (3) {
 }
 
 -- int 1 --
-object(DateTime)#3 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2009-01-31 10:01:45"
   ["timezone_type"]=>
@@ -21,7 +21,7 @@ object(DateTime)#3 (3) {
 }
 
 -- int 12345 --
-object(DateTime)#3 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2009-02-08 23:45:45"
   ["timezone_type"]=>
@@ -31,7 +31,7 @@ object(DateTime)#3 (3) {
 }
 
 -- int -12345 --
-object(DateTime)#3 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2009-01-30 20:15:45"
   ["timezone_type"]=>
@@ -41,7 +41,7 @@ object(DateTime)#3 (3) {
 }
 
 -- float 10.5 --
-object(DateTime)#3 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2009-01-30 10:10:45"
   ["timezone_type"]=>
@@ -51,7 +51,7 @@ object(DateTime)#3 (3) {
 }
 
 -- float -10.5 --
-object(DateTime)#3 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2009-01-30 09:50:45"
   ["timezone_type"]=>
@@ -61,7 +61,7 @@ object(DateTime)#3 (3) {
 }
 
 -- float .5 --
-object(DateTime)#3 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2009-01-30 10:00:45"
   ["timezone_type"]=>

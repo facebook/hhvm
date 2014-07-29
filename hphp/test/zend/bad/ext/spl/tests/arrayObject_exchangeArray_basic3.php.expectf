@@ -1,20 +1,20 @@
 --> exchangeArray() with objects:
-object(ArrayObject)#2 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#3 (2) {
+  object(C)#%d (2) {
     ["pub1"]=>
     string(7) "public1"
     ["addedToSwapIn"]=>
     string(16) "added To Swap-In"
   }
 }
-object(C)#1 (2) {
+object(C)#%d (2) {
   ["pub1"]=>
   string(7) "public1"
   ["addedToOriginal"]=>
   string(17) "added To Original"
 }
-object(C)#3 (2) {
+object(C)#%d (2) {
   ["pub1"]=>
   string(7) "public1"
   ["addedToSwapIn"]=>
@@ -31,16 +31,16 @@ array(2) {
 --> exchangeArray() with no arg:
 
 Warning: %s
-object(ArrayObject)#2 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#3 (2) {
+  object(C)#%d (2) {
     ["pub1"]=>
     string(7) "public1"
     ["addedToOriginal"]=>
     string(17) "added To Original"
   }
 }
-object(C)#3 (2) {
+object(C)#%d (2) {
   ["pub1"]=>
   string(7) "public1"
   ["addedToOriginal"]=>
@@ -58,16 +58,16 @@ array(2) {
 Exception:Passed variable is not an array or object, using empty array instead
 
 Notice: %s
-object(ArrayObject)#3 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#2 (2) {
+  object(C)#%d (2) {
     ["pub1"]=>
     string(7) "public1"
     ["addedToOriginal"]=>
     string(17) "added To Original"
   }
 }
-object(C)#2 (2) {
+object(C)#%d (2) {
   ["pub1"]=>
   string(7) "public1"
   ["addedToOriginal"]=>

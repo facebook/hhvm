@@ -4,7 +4,7 @@ getSize(): 5
 string(3) "foo"
 NULL
 int(42)
-object(stdClass)#4 (1) {
+object(stdClass)#%d (1) {
   ["prop"]=>
   string(5) "value"
 }

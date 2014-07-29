@@ -1,6 +1,6 @@
 array(4) {
   [0]=>
-  object(NumberFormatter)#1 (0) {
+  object(NumberFormatter)#%d (0) {
   }
   [1]=>
   float(-2147483649)

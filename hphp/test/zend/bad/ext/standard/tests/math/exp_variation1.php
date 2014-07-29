@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype  : float exp  ( float $arg  )
  * Description: Returns e raised to the power of arg.
  * Source code: ext/standard/math.c

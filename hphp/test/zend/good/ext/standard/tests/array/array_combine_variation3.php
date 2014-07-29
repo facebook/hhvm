@@ -6,7 +6,7 @@
 */
 
 /*
-* Passing different types of arrays to both $keys and $values arguments and testing whether
+* Passing different types of arrays to both $keys and $values arguments and testing whether 
 * array_combine() behaves in an expected way with the arguments passed to the function
 */
 

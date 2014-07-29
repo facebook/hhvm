@@ -1,6 +1,6 @@
 <?php
 $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchgrp.txt';
-$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchgrp_basic_symlink.txt';
+$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'symlink.txt';
 
 $gid = posix_getgid();
 
@@ -14,7 +14,7 @@ var_dump( filegroup( $symlink ) === $gid );
 <?php
 
 $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchgrp.txt';
-$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchgrp_basic_symlink.txt';
+$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'symlink.txt';
 unlink($filename);
 unlink($symlink);
 

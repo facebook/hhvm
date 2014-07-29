@@ -1,6 +1,4 @@
-<?php
-ini_set('serialize_precision', 100);
- 
+<?php 
 class t
 {
 	function t()

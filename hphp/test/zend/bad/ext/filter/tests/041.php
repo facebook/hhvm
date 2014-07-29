@@ -1,5 +1,6 @@
 <?php
 $_COOKIE = http_parse_cookie("abc=dir; def=true; abc=root; xyz="foo bar";");
+_filter_snapshot_globals();
  
 var_dump($_COOKIE);
 var_dump(filter_has_var(INPUT_COOKIE, "abc"));

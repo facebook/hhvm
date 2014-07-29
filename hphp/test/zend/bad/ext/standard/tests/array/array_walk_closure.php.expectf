@@ -60,15 +60,15 @@ bool(true)
 End result:int(48)
 
 closure with object
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(42)
 }
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(43)
 }
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(45)
 }
@@ -76,15 +76,15 @@ bool(true)
 End result:int(48)
 
 function with object
-object(stdClass)#2 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(42)
 }
-object(stdClass)#2 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(43)
 }
-object(stdClass)#2 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(45)
 }
@@ -141,7 +141,7 @@ array(2) {
         int(3)
       }
       [1]=>
-      object(Closure)#2 (1) {
+      object(Closure%s)#%d (1) {
         ["parameter"]=>
         array(2) {
           ["$v"]=>

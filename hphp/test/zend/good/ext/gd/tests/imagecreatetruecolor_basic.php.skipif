@@ -1,2 +1,4 @@
-<?php
-if (!gd_info()['PNG Support']) echo 'skip';
+<?php 
+	if (!extension_loaded("gd")) die("skip GD not present");
+	if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
+?>

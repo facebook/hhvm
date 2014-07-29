@@ -79,13 +79,14 @@ static inline bool dumpIREnabled(int level = 1) {
   return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level);
 }
 
-const int kIRLevel = 1;
-const int kCodeGenLevel = 2;
-const int kOptLevel = 3;
-const int kRegAllocLevel = 4;
-const int kRelocationLevel = 4;
-const int kExtraLevel = 6;
-const int kExtraExtraLevel = 7;
+constexpr int kIRLevel = 1;
+constexpr int kCodeGenLevel = 2;
+constexpr int kTraceletLevel = 3;
+constexpr int kOptLevel = 3;
+constexpr int kRegAllocLevel = 4;
+constexpr int kRelocationLevel = 4;
+constexpr int kExtraLevel = 6;
+constexpr int kExtraExtraLevel = 7;
 
 void printUnit(int level, const IRUnit&, const char* caption,
                const RegAllocInfo* regs = nullptr, AsmInfo* ai = nullptr,
@@ -96,6 +97,11 @@ inline std::ostream& operator<<(std::ostream& os, Type t) {
 }
 inline std::ostream& operator<<(std::ostream& os, TypeConstraint tc) {
   return os << tc.toString();
+}
+
+void disasmRange(std::ostream& os, TCA begin, TCA end);
+inline void disasmRange(std::ostream& os, TcaRange r) {
+  return disasmRange(os, r.begin(), r.end());
 }
 
 }}

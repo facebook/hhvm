@@ -1,24 +1,24 @@
 <?php
-/*
-  Prototype: mixed str_replace(mixed $search, mixed $replace,
+/* 
+  Prototype: mixed str_replace(mixed $search, mixed $replace, 
                                mixed $subject [, int &$count]);
-  Description: Replace all occurrences of the search string with
+  Description: Replace all occurrences of the search string with 
                the replacement string
 */
 
 
 echo "\n*** Testing Miscelleneous input data ***\n";
-/*  If replace has fewer values than search, then an empty
+/*  If replace has fewer values than search, then an empty 
     string is used for the rest of replacement values */
-var_dump( str_replace(array("a", "a", "b"),
-		      array("q", "q"),
+var_dump( str_replace(array("a", "a", "b"), 
+		      array("q", "q"), 
 		      "aaabb", $count
 		     )
 	);
 var_dump($count);
-var_dump( str_replace(array("a", "a", "b"),
-                      array("q", "q"),
-                      array("aaa", "bbb", "ccc"),
+var_dump( str_replace(array("a", "a", "b"), 
+                      array("q", "q"), 
+                      array("aaa", "bbb", "ccc"), 
                       $count
                      )
         );
@@ -30,7 +30,7 @@ echo "\n-- Testing objects --\n";
         to string" by default, when an object is passed instead of string:
 The error can be  avoided by choosing the __toString magix method as follows: */
 
-class subject
+class subject 
 {
   function __toString() {
     return "Hello, world";
@@ -38,7 +38,7 @@ class subject
 }
 $obj_subject = new subject;
 
-class search
+class search 
 {
   function __toString() {
     return "Hello, world";
@@ -46,7 +46,7 @@ class search
 }
 $obj_search = new search;
 
-class replace
+class replace 
 {
   function __toString() {
     return "Hello, world";
@@ -63,15 +63,15 @@ var_dump(str_replace(array("a", "a", "b"), "multi", "aaa", $count));
 var_dump($count);
 
 var_dump(str_replace( array("a", "a", "b"),
-                      array("q", "q", "c"),
+                      array("q", "q", "c"), 
                       "aaa", $count
                     )
 );
 var_dump($count);
 
 var_dump(str_replace( array("a", "a", "b"),
-                      array("q", "q", "c"),
-                      array("aaa", "bbb"),
+                      array("q", "q", "c"), 
+                      array("aaa", "bbb"), 
                       $count
                     )
 );
@@ -90,7 +90,7 @@ var_dump($count);
 echo "\n-- Testing Resources --\n";
 $resource1 = fopen( __FILE__, "r" );
 $resource2 = opendir( "." );
-var_dump(str_replace("stream", "FOUND", $resource1, $count));
+var_dump(str_replace("stream", "FOUND", $resource1, $count)); 
 var_dump($count);
 var_dump(str_replace("stream", "FOUND", $resource2, $count));
 var_dump($count);

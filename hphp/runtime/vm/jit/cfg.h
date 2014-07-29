@@ -93,6 +93,11 @@ DomChildren findDomChildren(const IRUnit&, const BlocksWithIds& blocks);
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
 
 /*
+ * Return true iff the CFG has a backedge.
+ */
+bool cfgHasLoop(const IRUnit&);
+
+/*
  * Visit basic blocks in a preorder traversal over the dominator tree.
  * The state argument is passed by value (copied) as we move down the tree,
  * so each child in the tree gets the state after the parent was processed.

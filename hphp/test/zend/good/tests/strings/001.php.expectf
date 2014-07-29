@@ -13,4 +13,5 @@ Testing ufirst: passed
 Testing strtr: passed
 Testing addslashes: passed
 Testing stripslashes: passed
-Testing uniqid: passed
+Testing uniqid(true): passed
+Testing uniqid(false): passed

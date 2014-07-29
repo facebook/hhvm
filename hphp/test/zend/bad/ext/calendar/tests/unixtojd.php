@@ -1,5 +1,6 @@
 <?php
 $_ENV[TZ] = UTC;
+_filter_snapshot_globals();
 
 // this line has no impact on test output on Windows
 putenv('TZ=UTC');

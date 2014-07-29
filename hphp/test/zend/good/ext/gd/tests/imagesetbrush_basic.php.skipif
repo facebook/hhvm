@@ -1,2 +1,5 @@
 <?php
-if (!gd_info()['PNG Support']) echo 'skip';
+if (!extension_loaded('gd')) {
+	die('skip gd extension is not loaded');
+}
+?>

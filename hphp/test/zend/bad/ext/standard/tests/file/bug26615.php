@@ -1,6 +1,4 @@
 <?php
-ini_set('variables_order', E);
-
 $out = array();
 $status = -1;
 if (substr(PHP_OS, 0, 3) != 'WIN') {

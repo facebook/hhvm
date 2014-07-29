@@ -1,6 +1,4 @@
-<?php
-ini_set('error_reporting', E_ALL&~E_STRICT&~E_DEPRECATED);
- 
+<?php 
 
 class TestX {
   var $i;

@@ -1,6 +1,4 @@
-<?php
-ini_set('serialize_precision', 100);
- 
+<?php 
 /* Prototype  : proto string serialize(mixed variable)
  * Description: Returns a string representation of variable (which can later be unserialized) 
  * Source code: ext/standard/var.c

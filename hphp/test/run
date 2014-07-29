@@ -482,7 +482,7 @@ class Status {
     array_push(self::$results, array(
       'name' => $test,
       'status' => 'failed',
-      'details' => (string)@file_get_contents("$test.diff")
+      'details' => self::utf8Sanitize(@file_get_contents("$test.diff")),
     ));
     self::send(self::MSG_TEST_FAIL, $test);
   }
@@ -525,7 +525,7 @@ class Status {
     $start = array('op' => 'start', 'test' => $test);
     $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
     if ($status == 'failed') {
-      $end['details'] = (string)@file_get_contents("$test.diff");
+      $end['details'] = self::utf8Sanitize(@file_get_contents("$test.diff"));
     }
     self::say($start, $end);
   }
@@ -545,6 +545,10 @@ class Status {
   public static function hasCursorControl() {
     return !getenv("TRAVIS")
       && !exec('stty -a | grep -e "\\berase = <undef>"');
+  }
+
+  public static function utf8Sanitize($str) {
+    return UConverter::transcode($str, 'UTF-8', 'UTF-8');
   }
 
   public static function jsonEncode($data) {

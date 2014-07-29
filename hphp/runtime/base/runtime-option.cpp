@@ -425,6 +425,15 @@ static const int kDefaultWarmupRequests = debug ? 1 : 11;
 static const int kDefaultJitPGOThreshold = debug ? 2 : 10;
 static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
 static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
+
+static const bool kJitTimerDefault =
+#ifdef ENABLE_JIT_TIMER_DEFAULT
+  true
+#else
+  false
+#endif
+;
+
 inline size_t maxUsageDef() {
   return RuntimeOption::EvalJitASize;
 }

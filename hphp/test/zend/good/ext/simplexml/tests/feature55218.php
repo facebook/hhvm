@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 $x = new SimpleXMLElement(
 '<?xml version="1.0" standalone="yes"?>

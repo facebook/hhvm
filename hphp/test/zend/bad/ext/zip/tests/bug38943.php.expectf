@@ -2,7 +2,7 @@ array(1) {
   [0]=>
   int(1)
 }
-object(myZip)#1 (%d) {
+object(myZip)#%d (%d) {
   ["test":"myZip":private]=>
   int(0)
   ["testp"]=>

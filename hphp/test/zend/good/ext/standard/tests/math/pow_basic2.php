@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 
 $large_exp = 20000;
 

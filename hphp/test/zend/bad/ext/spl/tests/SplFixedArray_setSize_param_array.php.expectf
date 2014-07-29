@@ -1,6 +1,6 @@
 
 Warning: %s
-object(SplFixedArray)#1 (2) {
+object(SplFixedArray)#%d (2) {
   [0]=>
   NULL
   [1]=>

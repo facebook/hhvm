@@ -1,6 +1,4 @@
 <?php
-ini_set('allow_url_fopen', 1);
-
 
 $streams = array(
 	'data://,;test',
@@ -18,6 +16,4 @@ foreach($streams as $stream)
 
 ?>
 ===DONE===
-<?php
-ini_set('allow_url_fopen', 1);
- exit(0); ?>
+<?php exit(0); ?>

@@ -1,0 +1,1 @@
+<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>

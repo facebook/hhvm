@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 $constants = array(
     "M_E",
     "M_LOG2E",

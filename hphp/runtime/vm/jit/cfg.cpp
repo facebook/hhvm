@@ -215,4 +215,37 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
   return false;
 }
 
+static bool loopVisit(const Block* b,
+                      boost::dynamic_bitset<>& visited,
+                      boost::dynamic_bitset<>& path) {
+  if (b == nullptr) return false;
+
+  auto const id = b->id();
+
+  // If we're revisiting a block in our current search, then we've
+  // found a backedge.
+  if (path.test(id)) return true;
+
+  // Otherwise if we're getting back to a block that's already been
+  // visited, but it hasn't been visited in this path, then we can
+  // prune this search.
+  if (visited.test(id)) return false;
+
+  visited.set(id);
+  path.set(id);
+
+  bool res = loopVisit(b->taken(), visited, path) ||
+             loopVisit(b->next(), visited, path);
+
+  path.set(id, false);
+
+  return res;
+}
+
+bool cfgHasLoop(const IRUnit& unit) {
+  boost::dynamic_bitset<> path(unit.numBlocks());
+  boost::dynamic_bitset<> visited(unit.numBlocks());
+  return loopVisit(unit.entry(), path, visited);
+}
+
 }}

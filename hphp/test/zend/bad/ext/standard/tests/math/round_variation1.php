@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype  : float round  ( float $val  [, int $precision  ] )
  * Description: Returns the rounded value of val  to specified precision (number of digits
  * after the decimal point)

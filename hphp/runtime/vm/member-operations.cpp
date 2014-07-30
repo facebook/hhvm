@@ -80,9 +80,8 @@ bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate /* = true */) {
   auto exists = objOffsetExists(base, offset);
 
-  // If offsetExists returns false, it's always right
-  if (!exists) {
-    return false;
+  if (exists) {
+    return true;
   }
 
   // If the object we're working with is an ArrayObject, then we need to check
@@ -91,15 +90,13 @@ bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
     TypedValue tvResult;
     tvWriteUninit(&tvResult);
 
-    // We can't call the offsetGet method on `base` because users aren't
-    // expecting offsetGet to be called for `isset(...)` expressions, so call
-    // the method on the base ArrayObject class.
     const Func* method =
-      SystemLib::s_ArrayObjectClass->lookupMethod(s_offsetGet.get());
+      SystemLib::s_ArrayObjectClass->lookupMethod(s_offsetExists.get());
     assert(method != nullptr);
     g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1,
                              offset.asCell());
-    exists = !(tvAsVariant(&tvResult).isNull());
+    tvCastToBooleanInPlace(&tvResult);
+    return bool(tvResult.m_data.num);
   }
 
   return exists;

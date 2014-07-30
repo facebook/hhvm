@@ -708,8 +708,15 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // unless it was just fromLoad in some branches.
       if (pair.second.inBlocks.size() < states.size()) {
         for (auto& inBlock : pair.second.inBlocks) {
-          always_assert(inBlock.value.realCount == 0 &&
-                        inBlock.value.optDelta() == 0);
+          always_assert_flog(
+            inBlock.value.realCount == 0 && inBlock.value.optDelta() == 0,
+            "While merging incoming states for B{}, value {} not provided by"
+            " all preds but has nontrivial state `{}' from B{}."
+            "\n\n{:-^80}\n{}{:-^80}\n",
+            m_block->id(), *pair.first->inst(),
+            show(inBlock.value), inBlock.from->id(),
+            " unit ", m_unit, ""
+          );
         }
       }
 

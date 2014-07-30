@@ -44,9 +44,6 @@ namespace HPHP {
 
 #define HAS_GDIMAGESETANTIALIASED
 
-//TODO:
-#define HAVE_LIBVPX
-
 #if defined(HAS_GDIMAGEANTIALIAS)
 
 #define SetAntiAliased(gd, flag) gdImageAntialias(gd, flag)

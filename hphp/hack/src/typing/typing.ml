@@ -121,11 +121,14 @@ and fun_decl_in_env env f =
   let mandatory_init = true in
   let env, arity_min, params = make_params env mandatory_init 0 f.f_params in
   let env, ret_ty = match f.f_ret, f.f_fun_kind with
+    (* The utility in making FAsync to always be Awaitable is the "unused
+     * awaitable" check, which doesn't apply to these. *)
+    | None, FGenerator
+    | None, FAsyncGenerator
     (* If there is no return type annotation, we clearly should make
      * it Tany but also want a witness so that we can point *somewhere*
      * in event of error. The function name itself isn't great, but is
      * better than nothing. *)
-    | None, FGenerator (* XXX should we return Generator<Any,Any,Any> here? *)
     | None, FSync -> env, (Reason.Rwitness (fst f.f_name), Tany)
     | None, FAsync ->
       let pos = fst f.f_name in
@@ -335,7 +338,8 @@ and fun_ ?(abstract=false) env unsafe has_ret hret pos b fun_type =
 and fun_implicit_return env pos ret b = function
   | FSync -> implicit_return_noasync pos env ret
   | FAsync -> implicit_return_async b pos env ret (Reason.Rno_return_async pos)
-  | FGenerator -> env
+  | FGenerator
+  | FAsyncGenerator -> env
 
 (* A function without a terminal block has an implicit return null *)
 and implicit_return_noasync p env ret =
@@ -424,7 +428,9 @@ and stmt env = function
   | Return (p, None) ->
       let rty = match Env.get_fn_kind env with
         | FSync -> (Reason.Rwitness p, Tprim Tvoid)
-        | FGenerator -> any (* Caught in NastCheck *)
+        (* Caught in NastCheck, TODO #4534682 allow this. *)
+        | FGenerator
+        | FAsyncGenerator -> any
         | FAsync -> (Reason.Rwitness p, Tapply ((p, "\\Awaitable"), [(Reason.Rwitness p, Toption (Env.fresh_type ()))])) in
       let expected_return = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
@@ -435,7 +441,8 @@ and stmt env = function
       let env, rty = expr env e in
       let rty = match Env.get_fn_kind env with
         | FSync -> rty
-        | FGenerator -> any (* Caught in NastCheck *)
+        | FGenerator
+        | FAsyncGenerator -> any (* Caught in NastCheck *)
         | FAsync -> (Reason.Rwitness p), Tapply ((p, "\\Awaitable"), [rty]) in
       let expected_return = Env.get_return env in
       (match snd (Env.expand_type env expected_return) with
@@ -618,8 +625,6 @@ and catch parent_lenv after_try env (ety, exn, b) =
   env, env.Env.lenv
 
 and as_expr env pe  = function
-    (* note that we don't call as_expr for arrays, so the only time
-       this happens should be for vectors *)
   | As_id e ->
       let ty = Env.fresh_type() in
       let tvector = Tapply ((pe, "\\Traversable"), [ty]) in
@@ -629,15 +634,26 @@ and as_expr env pe  = function
       let ty2 = Env.fresh_type() in
       let tmap = Tapply ((pe, "\\KeyedTraversable"), [ty1; ty2]) in
       env, (Reason.Rforeach pe, tmap)
+  | Await_as_id _ ->
+      let ty = Env.fresh_type() in
+      let tvector = Tapply ((pe, "\\AsyncIterator"), [ty]) in
+      env, (Reason.Rasyncforeach pe, tvector)
+  | Await_as_kv _ ->
+      let ty1 = Env.fresh_type() in
+      let ty2 = Env.fresh_type() in
+      let tmap = Tapply ((pe, "\\AsyncKeyedIterator"), [ty1; ty2]) in
+      env, (Reason.Rasyncforeach pe, tmap)
 
 and bind_as_expr env ty aexpr =
   let env, ety = Env.expand_type env ty in
   match ety with
   | _, Tapply ((p, class_id), [ty2]) ->
       (match aexpr with
-      | As_id (_, Lvar (_, x)) ->
+      | As_id (_, Lvar (_, x))
+      | Await_as_id (_, (_, Lvar (_, x))) ->
           Env.set_local env x ty2
-      | As_kv ((_, Lvar (_, x)), (_, Lvar (_, y))) ->
+      | As_kv ((_, Lvar (_, x)), (_, Lvar (_, y)))
+      | Await_as_kv (_, (_, Lvar (_, x)), (_, Lvar (_, y))) ->
           let env = Env.set_local env x (Reason.Rnone, Tmixed) in
           Env.set_local env y ty2
       | _ -> (* TODO Probably impossible, should check that *)
@@ -645,9 +661,11 @@ and bind_as_expr env ty aexpr =
       )
   | _, Tapply ((p, class_id), [ty1; ty2]) ->
       (match aexpr with
-      | As_id (_, Lvar (_, x)) ->
+      | As_id (_, Lvar (_, x))
+      | Await_as_id (_, (_, Lvar (_, x))) ->
           Env.set_local env x ty2
-      | As_kv ((_, Lvar (_, x)), (_, Lvar (_, y))) ->
+      | As_kv ((_, Lvar (_, x)), (_, Lvar (_, y)))
+      | Await_as_kv (_, (_, Lvar (_, x)), (_, Lvar (_, y))) ->
           let env = Env.set_local env x ty1 in
           Env.set_local env y ty2
       | _ -> (* TODO Probably impossible, should check that *)
@@ -1006,8 +1024,14 @@ and expr_ is_lvalue env (p, e) =
       let env, key = field_key env af in
       let env, value = field_value env af in
       let send = Env.fresh_type () in
-      let rty =
-        Reason.Ryield_gen p, Tapply ((p, "\\Generator"), [key; value; send]) in
+      let rty = match Env.get_fn_kind env with
+        | FGenerator ->
+            Reason.Ryield_gen p,
+            Tapply ((p, "\\Generator"), [key; value; send])
+        | FAsyncGenerator ->
+            Reason.Ryield_asyncgen p,
+            Tapply ((p, "\\AsyncGenerator"), [key; value; send])
+        | _ -> assert false in (* Naming should never allow this *)
       let env =
         Type.sub_type p (Reason.URyield) env (Env.get_return env) rty in
       let env = Env.forget_members env p in
@@ -1419,8 +1443,16 @@ and field_value env = function
   | Nast.AFkvalue (_, x) -> expr env x
 
 and field_key env = function
-  | Nast.AFvalue (p, _) -> env, (Reason.Rwitness p, Tprim Tint)
-  | Nast.AFkvalue (x, _) -> expr env x
+  | Nast.AFvalue (p, _) ->
+      env, (match Env.get_fn_kind env with
+        | FSync
+        | FAsync
+        | FGenerator ->
+            (Reason.Rwitness p, Tprim Tint)
+        | FAsyncGenerator ->
+            (Reason.Ryield_asyncnull p, Toption (Env.fresh_type ())))
+  | Nast.AFkvalue (x, _) ->
+      expr env x
 
 and check_parent_construct pos env el env_parent =
   let check_not_abstract = false in

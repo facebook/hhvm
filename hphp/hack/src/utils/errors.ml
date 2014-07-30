@@ -796,10 +796,6 @@ let return_in_finally p =
     ("Don't use return in a finally block;"^
      " there's nothing to receive the return value")
 
-let yield_in_async_function p =
-  add p
-    "Don't use yield in an async function"
-
 let await_in_sync_function p =
   add p
     "await can only be used inside async functions"

@@ -64,7 +64,14 @@ let builtins = "<?hh // decl\n"^
   "interface Stringish {public function __toString(): string {}}\n"^
   "interface XHPChild {}\n"^
   "function hh_show($val) {}\n"^
-  "interface Countable { public function count(): int; }\n"
+  "interface Countable { public function count(): int; }\n"^
+  "interface AsyncIterator<Tv> {}\n"^
+  "interface AsyncKeyedIterator<Tk, Tv> extends AsyncIterator<Tv> {}\n"^
+  "class AsyncGenerator<Tk, Tv, Ts> implements AsyncKeyedIterator<Tk, Tv> {\n"^
+  "  public function next(): Awaitable<?(Tk, Tv)> {}\n"^
+  "  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}\n"^
+  "  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}"^
+  "}\n"
 
 (*****************************************************************************)
 (* Helpers *)

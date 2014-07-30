@@ -1,2 +1,0 @@
-File "async_anon_function_forbids_yield.php", line 14, characters 5-9:
-Don't use yield in an async function

@@ -213,7 +213,7 @@ and stmt =
   | While of expr * block
   | For of expr * expr * expr * block
   | Switch of expr * case list
-  | Foreach of expr * as_expr * block
+  | Foreach of expr * Pos.t option (* await as *) * as_expr * block
   | Try of block * catch list * block
   | Noop
 

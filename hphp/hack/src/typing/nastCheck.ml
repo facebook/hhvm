@@ -37,7 +37,7 @@ module CheckFunctionType = struct
     | FAsync, Return (_, Some e) ->
         expr f_type e;
         ()
-    | FGenerator, Return (p, _) ->
+    | (FGenerator | FAsyncGenerator), Return (p, _) ->
         (* TODO #4534682 Support "return;" in generators *)
         Errors.return_in_gen p;
         ()
@@ -65,6 +65,9 @@ module CheckFunctionType = struct
         ()
     | _, Switch (_, cl) ->
         liter case f_type cl;
+        ()
+    | (FSync | FGenerator), Foreach (_, (Await_as_id (p, _) | Await_as_kv (p, _, _)), _) ->
+        Errors.await_in_sync_function p;
         ()
     | _, Foreach (_, _, b) ->
         block f_type b;
@@ -168,21 +171,23 @@ module CheckFunctionType = struct
         ()
     | _, Efun (f, _) -> ()
 
-    | FAsync, Yield_break
-    | FAsync, Yield _ -> Errors.yield_in_async_function p
+    | FGenerator, Yield_break
+    | FAsyncGenerator, Yield_break -> ()
+    | FGenerator, Yield af
+    | FAsyncGenerator, Yield af -> afield f_type af; ()
 
-    | FGenerator, Yield_break -> ()
-    | FGenerator, Yield af -> afield f_type af; ()
-
-    (* Should never happen, presence of either of these should force at least
-     * FGenerator. *)
+    (* Should never happen -- presence of yield should make us FGenerator or
+     * FAsyncGenerator. *)
     | FSync, Yield_break
-    | FSync, Yield _ -> assert false
+    | FAsync, Yield_break
+    | FSync, Yield _
+    | FAsync, Yield _ -> assert false
 
     | FGenerator, Await _
     | FSync, Await _ -> Errors.await_in_sync_function p
 
-    | FAsync, Await e -> expr f_type e; ()
+    | FAsync, Await e
+    | FAsyncGenerator, Await e -> expr f_type e; ()
 
     | _, Special_func func ->
       (match func with
@@ -508,8 +513,10 @@ and stmt env = function
       ()
 
 and as_expr env = function
-  | As_id e -> expr env e
-  | As_kv (e1, e2) ->
+  | As_id e
+  | Await_as_id (_, e) -> expr env e
+  | As_kv (e1, e2)
+  | Await_as_kv (_, e1, e2) ->
       expr env e1;
       expr env e2;
       ()

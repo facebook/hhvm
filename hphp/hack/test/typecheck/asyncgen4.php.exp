@@ -1,0 +1,10 @@
+X
+X
+X
+X
+File "asyncgen4.php", line 9, characters 3-7:
+Invalid yield
+File "asyncgen4.php", line 7, characters 21-29:
+This is an object of type Generator
+File "asyncgen4.php", line 9, characters 3-7:
+It is incompatible with an object of type AsyncGenerator (result of 'async function' with 'yield' in the body)

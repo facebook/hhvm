@@ -1855,10 +1855,14 @@ and for_last_expr env =
 and statement_foreach env =
   expect env Tlp;
   let e = expr env in
+  let await =
+    match L.token env.lb with
+    | Tword when Lexing.lexeme env.lb = "await" -> Some (Pos.make env.lb)
+    | _ -> L.back env.lb; None in
   expect_word env "as";
   let as_expr = foreach_as env in
   let st = statement env in
-  Foreach (e, as_expr, [st])
+  Foreach (e, await, as_expr, [st])
 
 and foreach_as env =
   let e1 = expr env in

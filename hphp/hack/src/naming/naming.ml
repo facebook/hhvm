@@ -1173,7 +1173,7 @@ and fun_kind env ft =
   | false, Ast.FSync -> N.FSync
   | false, Ast.FAsync -> N.FAsync
   | true, Ast.FSync -> N.FGenerator
-  | true, Ast.FAsync -> N.FAsync (* TODO #4534682 async generators *)
+  | true, Ast.FAsync -> N.FAsyncGenerator
 
 and method_ env m =
   let genv, lenv = env in
@@ -1314,7 +1314,7 @@ and stmt env st =
   | While (e, b)         -> while_stmt env e b
   | For (st1, e, st2, b) -> for_stmt env st1 e st2 b
   | Switch (e, cl)       -> switch_stmt env st e cl
-  | Foreach (e, ae, b)   -> foreach_stmt env e ae b
+  | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
   | Try (b, cl, fb)      -> try_stmt env st b cl fb
 
 and if_stmt env st e b1 b2 =
@@ -1367,32 +1367,43 @@ and switch_stmt env st e cl =
  Env.promote_pending env;
  result
 
-and foreach_stmt env e ae b =
+and foreach_stmt env e aw ae b =
   let e = expr env e in
   Env.scope env (
   fun env ->
     let _, lenv = env in
     let all_locals_copy = !(lenv.all_locals) in
-    let ae = as_expr env ae in
+    let ae = as_expr env aw ae in
     let all_locals, b = branch env b in
     lenv.all_locals := SMap.union all_locals all_locals_copy;
     N.Foreach (e, ae, b)
  )
 
-and as_expr env = function
+and as_expr env aw = function
   | As_id (p, Lvar x) ->
-      N.As_id (p, N.Lvar (Env.new_lvar env x))
+      let x = p, N.Lvar (Env.new_lvar env x) in
+      (match aw with
+        | None -> N.As_id x
+        | Some p -> N.Await_as_id (p, x))
   | As_id (p, _) ->
       Errors.expected_variable p;
-      N.As_id (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
+      let x = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
+      (match aw with
+        | None -> N.As_id x
+        | Some p -> N.Await_as_id (p, x))
   | As_kv ((p1, Lvar x1), (p2, Lvar x2)) ->
       let x1 = p1, N.Lvar (Env.new_lvar env x1) in
       let x2 = p2, N.Lvar (Env.new_lvar env x2) in
-      N.As_kv (x1, x2)
+      (match aw with
+        | None -> N.As_kv (x1, x2)
+        | Some p -> N.Await_as_kv (p, x1, x2))
   | As_kv ((p, _), _) ->
       Errors.expected_variable p;
-      N.As_kv ((p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder"))),
-               (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder"))))
+      let x1 = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
+      let x2 = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
+      (match aw with
+        | None -> N.As_kv (x1, x2)
+        | Some p -> N.Await_as_kv (p, x1, x2))
 
 and try_stmt env st b cl fb =
   let vars = Naming_ast_helpers.GetLocals.stmt SMap.empty st in

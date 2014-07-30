@@ -1240,6 +1240,9 @@ and new_object ~check_not_abstract p env c el =
       let obj_type = Reason.Rwitness p, Tapply (cname, params) in
       match c with
       | CIstatic ->
+        if not (snd class_.tc_construct) then
+          Errors.new_static_inconsistent p cname
+        else ();
         env, (Reason.Rwitness p, Tgeneric ("this", Some obj_type))
       | _ -> env, obj_type
   )

@@ -399,6 +399,13 @@ let new_static_outside_class p =
 let new_self_outside_class p =
   add p "Can't use new self() outside of a class"
 
+let new_static_inconsistent new_pos (cpos, cname) =
+  let name = Utils.strip_ns cname in
+  add_list [
+    new_pos, "Can't use new static() for "^name^"; __construct arguments are not guaranteed to be consistent in child classes";
+    cpos, ("This declaration neither defines an abstract/final __construct"
+           ^" nor uses <<ConsistentConstruct>> attribute")]
+
 let abstract_instantiate p cname =
   add p ("Can't instantiate " ^ Utils.strip_ns cname)
 

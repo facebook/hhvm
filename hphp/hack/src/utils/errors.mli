@@ -104,6 +104,7 @@ val array_cast : Pos.t -> unit
 val anonymous_recursive : Pos.t -> unit
 val new_static_outside_class : Pos.t -> unit
 val new_self_outside_class : Pos.t -> unit
+val new_static_inconsistent : Pos.t -> (Pos.t * string) -> unit
 val abstract_instantiate : Pos.t -> string -> unit
 val pair_arity : Pos.t -> unit
 val tuple_arity : Pos.t -> int -> Pos.t -> int -> unit

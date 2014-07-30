@@ -230,7 +230,9 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     }
     case StGbl: {
       auto const type = inst->src(1)->type().relaxToGuardable();
-      hook.setLocalType(inst->extra<StGbl>()->locId, type);
+      auto id = inst->extra<StGbl>()->locId;
+      hook.setLocalType(id, type);
+      hook.setLocalTypeSource(id, inst->src(1));
       break;
     }
 

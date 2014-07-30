@@ -498,9 +498,9 @@ or iframes at the same time.
 
 - Fiber Asynchronous Functions
 
-A "fiber" is a sub-thread of a request thread, mainly for implementing
-call_user_func_async(). This thread count specifies totally number of physical
-threads allocated for executing fiber asynchronous function calls.
+A "fiber" is a sub-thread of a request thread. This thread count specifies
+totally number of physical  threads allocated for executing fiber
+asynchronous function calls.
 
 = Proxy Server
 

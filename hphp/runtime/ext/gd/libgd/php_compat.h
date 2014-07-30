@@ -47,6 +47,7 @@ extern "C" {
 #define pefree(ptr, persistent)  ((persistent)?free(ptr):efree(ptr))
 #define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
 #define VCWD_GETCWD(buff, size) getcwd(buff, size)
+#define HAVE_LIBVPX
 
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset) {
   return nmemb * size + offset;

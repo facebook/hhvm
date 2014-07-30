@@ -105,7 +105,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	return im;
 }
 
-void gdImageWebpEx (gdImagePtr im, FILE * outFile, int quantization)
+void gdImageWebpEx (gdImagePtr im, FILE * outFile, int64_t quantization)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
 	gdImageWebpCtx(im, out, quantization);
@@ -130,7 +130,7 @@ void * gdImageWebpPtr (gdImagePtr im, int *size)
 	return rv;
 }
 
-void * gdImageWebpPtrEx (gdImagePtr im, int *size, int quantization)
+void * gdImageWebpPtrEx (gdImagePtr im, int *size, int64_t quantization)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
@@ -163,19 +163,19 @@ int mapQualityToVP8QP(int quality) {
  *  and in part on demo code from Chapter 15 of "PNG: The Definitive Guide"
  *  (http://www.cdrom.com/pub/png/pngbook.html).
  */
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
+void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int64_t quantization)
 {
-	int width = im->sx;
-	int height = im->sy;
+    int width = im->sx;
+    int height = im->sy;
 
-	int yuv_width, yuv_height, yuv_nbytes, ret;
-	int vp8_quality;
-	unsigned char *Y = NULL,
+    int yuv_width, yuv_height, yuv_nbytes, ret;
+    int vp8_quality;
+    unsigned char *Y = NULL,
 				  *U = NULL,
 				  *V = NULL;
-	unsigned char *filedata = NULL;
+    unsigned char *filedata = NULL;
 
-	/* Conversion to Y,U,V buffer */
+    /* Conversion to Y,U,V buffer */
     yuv_width = (width + 1) >> 1;
     yuv_height = (height + 1) >> 1;
     yuv_nbytes = width * height + 2 * yuv_width * yuv_height;
@@ -184,7 +184,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
     	php_gd_error("gd-webp error: cannot allocate Y buffer");
         return;
     }
-	vp8_quality = mapQualityToVP8QP(quantization);
+	vp8_quality = mapQualityToVP8QP(80);
 
     U = Y + width * height;
     V = U + yuv_width * yuv_height;

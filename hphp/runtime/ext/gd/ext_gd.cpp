@@ -44,6 +44,9 @@ namespace HPHP {
 
 #define HAS_GDIMAGESETANTIALIASED
 
+//TODO:
+#define HAVE_LIBVPX
+
 #if defined(HAS_GDIMAGEANTIALIAS)
 
 #define SetAntiAliased(gd, flag) gdImageAntialias(gd, flag)
@@ -1765,7 +1768,7 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
 #define PHP_GDIMG_TYPE_GD       8
 #define PHP_GDIMG_TYPE_GD2      9
 #define PHP_GDIMG_TYPE_GD2PART 10
-
+#define PHP_GDIMG_TYPE_WEBP    11
 #if HAVE_GD_BUNDLED
 #define PHP_GD_VERSION_STRING "bundled (2.0.34 compatible)"
 #elif HAVE_LIBGD20
@@ -1925,6 +1928,7 @@ static bool _php_image_output_ctx(const Resource& image,
 #define gdImageCreateFromJpegCtx    NULL
 #define gdImageCreateFromPngCtx     NULL
 #define gdImageCreateFromWBMPCtx    NULL
+#define gdImageCreateFromWebpCtx    NULL
 typedef FILE gdIOCtx;
 #define CTX_PUTC(c, fp) fputc(c, fp)
 #endif
@@ -2059,6 +2063,17 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
     }
     break;
 #endif /* HAVE_GD_PNG */
+
+#ifdef HAVE_LIBVPX
+  case PHP_GDIMG_TYPE_WEBP:
+    im_org = gdImageCreateFromWebp(org);
+    if (im_org == NULL) {
+      raise_warning("Unable to open '%s' Not a valid webp file",
+                      f_org.c_str());
+      return false;
+    }
+    break;
+#endif /* HAVE_LIBVPX */
 
   default:
     raise_warning("Format not supported");
@@ -3382,6 +3397,16 @@ Variant HHVM_FUNCTION(imagecreatefromstring, const String& data) {
 #endif
     break;
 
+  case PHP_GDIMG_TYPE_WEBP:
+#ifdef HAVE_LIBVPX
+    im = _php_image_create_from_string(data, "WEBP",
+      (gdImagePtr(*)())gdImageCreateFromWebpCtx);
+#else
+    raise_warning("No webp support (libvpx is needed)");
+    return false;
+#endif
+    break;
+
   case PHP_GDIMG_TYPE_GIF:
 #ifdef HAVE_GD_GIF_READ
     im = _php_image_create_from_string(data, "GIF",
@@ -3454,6 +3479,17 @@ Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
                            PHP_GDIMG_TYPE_PNG, "PNG",
                            (gdImagePtr(*)())gdImageCreateFromPng,
                            (gdImagePtr(*)())gdImageCreateFromPngCtx);
+  return Resource(new Image(im));
+}
+#endif
+
+#ifdef HAVE_LIBVPX
+Variant HHVM_FUNCTION(imagecreatefromwebp, const String& filename) {
+  gdImagePtr im =
+    _php_image_create_from(filename, -1, -1, -1, -1,
+                           PHP_GDIMG_TYPE_WEBP, "WEBP",
+                           (gdImagePtr(*)())gdImageCreateFromWebp,
+                           (gdImagePtr(*)())gdImageCreateFromWebpCtx);
   return Resource(new Image(im));
 }
 #endif
@@ -3538,13 +3574,28 @@ bool HHVM_FUNCTION(imagepng, const Resource& image,
     const String& filename /* = null_string */,
     int64_t quality /* = -1 */, int64_t filters /* = -1 */) {
 #ifdef USE_GD_IOCTX
-  return _php_image_output_ctx(image, filename, quality, filters,
+  return _php_image_output_ctx(image, filename, (int)quality, (int)filters,
                                PHP_GDIMG_TYPE_PNG, "PNG",
                                (void (*)())gdImagePngCtxEx);
 #else
-  return _php_image_output(image, filename, quality, filters,
+  return _php_image_output(image, filename, (int)quality, (int)filters,
                            PHP_GDIMG_TYPE_PNG, "PNG",
                            (void (*)())gdImagePng);
+#endif
+}
+#endif
+
+#ifdef HAVE_LIBVPX
+bool HHVM_FUNCTION(imagewebp, const Resource& image,
+    const String& filename /* = null_string */) {
+#ifdef USE_GD_IOCTX
+  return _php_image_output_ctx(image, filename, -1, -1,
+                               PHP_GDIMG_TYPE_WEBP, "WEBP",
+                               (void (*)())gdImageWebpCtx);
+#else
+  return _php_image_output(image, filename, -1, -1,
+                           PHP_GDIMG_TYPE_WEBP, "WEBP",
+                           (void (*)())gdImageWebp);
 #endif
 }
 #endif
@@ -8015,6 +8066,9 @@ class GdExtension : public Extension {
 #ifdef HAVE_GD_PNG
     HHVM_FE(imagecreatefrompng);
 #endif
+#ifdef HAVE_LIBVPX
+    HHVM_FE(imagecreatefromwebp);
+#endif
 #ifdef HAVE_LIBGD15
     HHVM_FE(imagecreatefromstring);
 #endif
@@ -8063,6 +8117,9 @@ class GdExtension : public Extension {
     HHVM_FE(imageloadfont);
 #ifdef HAVE_GD_PNG
     HHVM_FE(imagepng);
+#endif
+#ifdef HAVE_LIBVPX
+    HHVM_FE(imagewebp);
 #endif
     HHVM_FE(imagepolygon);
     HHVM_FE(imagerectangle);

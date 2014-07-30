@@ -230,6 +230,9 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
 }
 
 void DebuggerProxy::startDummySandbox() {
+  Lock lock(this);
+  if (m_stopped) return;
+
   TRACE(2, "DebuggerProxy::startDummySandbox\n");
   m_dummySandbox =
     new DummySandbox(this, RuntimeOption::DebuggerDefaultSandboxPath,
@@ -385,6 +388,9 @@ void DebuggerProxy::disableSignalPolling() {
 }
 
 void DebuggerProxy::startSignalThread() {
+  Lock lock(this);
+  if (m_stopped) return;
+
   TRACE(2, "DebuggerProxy::startSignalThread\n");
   m_signalThread.start();
 }
@@ -479,7 +485,7 @@ void DebuggerProxy::pollSignal() {
 // Grab the ip address and port of the client that is connected to this proxy.
 bool DebuggerProxy::getClientConnectionInfo(VRefParam address,
                                             VRefParam port) {
-  Resource s(getSocket().get());
+  Resource s(m_thrift.getSocket().get());
   return f_socket_getpeername(s, address, port);
 }
 

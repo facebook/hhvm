@@ -15,17 +15,21 @@
 */
 
 #include "hphp/runtime/debugger/debugger.h"
-#include <set>
-#include <stack>
-#include <vector>
+
 #include "hphp/runtime/debugger/debugger_server.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+
 #include "hphp/util/text-color.h"
 #include "hphp/util/logger.h"
+
+#include <memory>
+#include <set>
+#include <stack>
+#include <vector>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -453,7 +457,7 @@ DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
   TRACE(2, "Debugger::createProxy\n");
   // Creates a proxy and threads needed to handle it. At this point, there is
   // not enough information to attach a sandbox.
-  DebuggerProxyPtr proxy(new DebuggerProxy(socket, local));
+  auto proxy = std::make_shared<DebuggerProxy>(socket, local);
   {
     // Place this new proxy into the proxy map keyed on the dummy sandbox id.
     // This keeps the proxy alive in the server case, which drops the result of

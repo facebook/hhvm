@@ -66,10 +66,9 @@ public:
   static std::string MakePHP(const std::string &php);
   static std::string MakePHPReturn(const std::string &php);
 
-public:
   DebuggerProxy(SmartPtr<Socket> socket, bool local);
 
-  bool isLocal() const { return m_local;}
+  bool isLocal() const { return m_local; }
 
   const char *getThreadType() const;
   DSandboxInfo getSandbox();
@@ -128,7 +127,6 @@ private:
 
   DThreadInfoPtr createThreadInfo(const std::string &desc);
 
-  SmartPtr<Socket> getSocket() { return m_thrift.getSocket(); }
 
   bool m_stopped;
 

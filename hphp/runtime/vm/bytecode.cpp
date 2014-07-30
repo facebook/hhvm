@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <cinttypes>
 
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <libgen.h>
@@ -2242,7 +2243,49 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   enterVM(fp, StackArgsState::Untrimmed, resumable, exception);
 }
 
+namespace {
+
+std::atomic<bool> s_foundHHConfig(false);
+void checkHHConfig(const Unit* unit) {
+
+  if (!RuntimeOption::EvalAuthoritativeMode &&
+      RuntimeOption::LookForTypechecker &&
+      !s_foundHHConfig &&
+      unit->isHHFile()) {
+    const std::string &s = unit->filepath()->toCppString();
+    boost::filesystem::path p(s);
+
+    while (p != "/") {
+      p.remove_filename();
+      p /= ".hhconfig";
+
+      if (boost::filesystem::exists(p)) {
+        break;
+      }
+
+      p.remove_filename();
+    }
+
+    if (p == "/") {
+      raise_error(
+        "%s appears to be a Hack file, but you do not appear to be running "
+        "the Hack typechecker. See the documentation at %s for information on "
+        "getting it running. You can also set Hack.Lang.LookForTypechecker=0 "
+        "to disable this check (not recommended).",
+        s.c_str(),
+        "http://docs.hhvm.com/manual/en/install.hack.bootstrapping.php"
+      );
+    } else {
+      s_foundHHConfig = true;
+    }
+  }
+}
+
+}
+
 void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
+  checkHHConfig(unit);
+
   auto const func = unit->getMain();
   invokeFunc(retval, func, init_null_variant, nullptr, nullptr,
              m_globalVarEnv, nullptr, InvokePseudoMain);

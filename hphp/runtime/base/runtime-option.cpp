@@ -349,6 +349,7 @@ bool RuntimeOption::IntsOverflowToInts = false;
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
   RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF;
+bool RuntimeOption::LookForTypechecker = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -878,6 +879,10 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
       Config::Bind(DisallowDynamicVarEnvFuncs, ini,
                    lang["DisallowDynamicVarEnvFuncs"]);
+      // Defaults to EnableHHSyntax since, if you have that on, you are
+      // assumed to know what you're doing.
+      Config::Bind(LookForTypechecker, ini, lang["LookForTypechecker"],
+                   !EnableHipHopSyntax);
     }
     {
       Hdf repo = config["Repo"];

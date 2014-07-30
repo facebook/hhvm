@@ -346,6 +346,7 @@ public:
   const StringData* m_filepath{nullptr};
 
   bool m_mergeOnly{false};
+  bool m_isHHFile{false};
   bool m_returnSeen{false};
   TypedValue m_mainReturn;
 
@@ -468,6 +469,7 @@ struct UnitRepoProxy : public RepoProxy {
                 size_t bclen,
                 const TypedValue* mainReturn,
                 bool mergeOnly,
+                bool isHHFile,
                 const LineTable& lines,
                 const std::vector<TypeAlias>&);
   };

@@ -762,6 +762,12 @@ public:
    */
   void* replaceUnit() const;
 
+  /*
+   * Does this unit correspond to a file with "<?hh" at the top, irrespective of
+   * EnableHipHopSyntax?
+   */
+  bool isHHFile() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
@@ -823,6 +829,7 @@ private:
   NamedEntityPairTable m_namedInfo;
   std::vector<const ArrayData*> m_arrays;
   SourceLocTable m_sourceLocTable;
+  bool m_isHHFile{false};
 
   /*
    * Map from source lines to a collection of all the bytecode ranges the line

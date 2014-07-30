@@ -46,7 +46,7 @@ namespace HPHP {
 FileScope::FileScope(const string &fileName, int fileSize, const MD5 &md5)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
     m_size(fileSize), m_md5(md5), m_includeState(0), m_system(false),
-    m_fileName(fileName), m_redeclaredFunctions(0) {
+    m_isHHFile(false), m_fileName(fileName), m_redeclaredFunctions(0) {
   pushAttribute(); // for global scope
 }
 
@@ -71,6 +71,10 @@ void FileScope::setFileLevel(StatementListPtr stmtList) {
 void FileScope::setSystem() {
   m_fileName = "/:" + m_fileName;
   m_system = true;
+}
+
+void FileScope::setHHFile() {
+  m_isHHFile = true;
 }
 
 FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,

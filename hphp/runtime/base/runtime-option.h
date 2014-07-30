@@ -352,6 +352,7 @@ public:
   static bool IntsOverflowToInts;
   static HackStrictOption StrictArrayFillKeys;
   static HackStrictOption DisallowDynamicVarEnvFuncs;
+  static bool LookForTypechecker;
 
   static int GetScannerType();
 

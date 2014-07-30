@@ -312,7 +312,6 @@ private:
   };
 
 private:
-  static const StaticString s_amp;
   // system settings
   Transport *m_transport;
   String m_cwd;

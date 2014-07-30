@@ -201,6 +201,9 @@ bool Parser::parse() {
                                     "Parse error: %s",
                                     errString().c_str());
     }
+    if (scanner().isHHFile()) {
+      m_file->setHHFile();
+    }
     return true;
   } catch (const ParseTimeFatalException& e) {
     m_file->cleanupForError(m_ar);

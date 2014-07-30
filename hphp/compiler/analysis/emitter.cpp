@@ -21,7 +21,6 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
-#include <memory>
 #include <deque>
 #include <exception>
 #include <set>
@@ -2444,6 +2443,7 @@ void EmitterVisitor::assignFinallyVariableIds() {
 void EmitterVisitor::visit(FileScopePtr file) {
   const std::string& filename = file->getName();
   m_ue.m_filepath = makeStaticString(filename);
+  m_ue.m_isHHFile = file->isHHFile();
 
   FunctionScopePtr func(file->getPseudoMain());
   if (!func) return;

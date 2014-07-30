@@ -1952,6 +1952,12 @@ map_array_literal:
   | T_MSARRAY '(' map_array_init ')'    { _p->onMapArray($$,$3,T_MSARRAY);}
 ;
 
+static_map_array_literal:
+    T_MIARRAY '(' static_map_array_init ')'    { _p->onMapArray($$,$3,T_MIARRAY);}
+  | T_MSARRAY '(' static_map_array_init ')'    { _p->onMapArray($$,$3,T_MSARRAY);}
+;
+
+
 static_collection_literal:
     fully_qualified_class_name
     '{' static_collection_init '}'     { Token t;
@@ -2301,6 +2307,7 @@ static_expr:
     static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
+  | static_map_array_literal           { $$ = $1;}
 
   | '(' static_expr ')'                { $$ = $2;}
   | static_expr T_BOOLEAN_OR
@@ -2716,6 +2723,19 @@ non_empty_map_array_init:
     non_empty_map_array_init
     ',' expr T_DOUBLE_ARROW expr       { _p->onMapArrayPair($$,&$1,&$3,$5);}
   | expr T_DOUBLE_ARROW expr           { _p->onMapArrayPair($$,  0,&$1,$3);}
+;
+
+static_map_array_init:
+    non_empty_static_map_array_init
+    possible_comma                     { $$ = $1;}
+  |                                    { _p->onEmptyMapArray($$);}
+;
+non_empty_static_map_array_init:
+    non_empty_static_map_array_init
+    ',' static_expr T_DOUBLE_ARROW
+    static_expr                        { _p->onMapArrayPair($$,&$1,&$3,$5);}
+  | static_expr T_DOUBLE_ARROW
+    static_expr                        { _p->onMapArrayPair($$,  0,&$1,$3);}
 ;
 
 encaps_list:

@@ -5715,13 +5715,25 @@ void collectionDeepCopyTV(TypedValue* tv) {
 }
 
 ArrayData* collectionDeepCopyArray(ArrayData* arr) {
-  ArrayInit ai(arr->size(), ArrayInit::Mixed{});
-  for (ArrayIter iter(arr); iter; ++iter) {
-    Variant v = iter.secondRef();
-    collectionDeepCopyTV(v.asTypedValue());
-    ai.set(iter.first(), std::move(v));
+  if (arr->isIntMapArray() || arr->isStrMapArray()) {
+    auto deepCopy = arr->isIntMapArray()
+      ? MixedArray::MakeReserveIntMap(arr->size())
+      : MixedArray::MakeReserveStrMap(arr->size());
+    for (ArrayIter iter(arr); iter; ++iter) {
+      Variant v = iter.secondRef();
+      collectionDeepCopyTV(v.asTypedValue());
+      deepCopy->set(iter.first(), std::move(v), false);
+    }
+    return deepCopy;
+  } else {
+    ArrayInit ai(arr->size(), ArrayInit::Mixed{});
+    for (ArrayIter iter(arr); iter; ++iter) {
+      Variant v = iter.secondRef();
+      collectionDeepCopyTV(v.asTypedValue());
+      ai.set(iter.first(), std::move(v));
+    }
+    return ai.toArray().detach();
   }
-  return ai.toArray().detach();
 }
 
 template<typename TVector>

@@ -133,8 +133,6 @@ bool UnaryOpExpression::isScalar() const {
   case '@':
     return m_exp->isScalar();
   case T_ARRAY:
-  case T_MIARRAY:
-  case T_MSARRAY:
     return (!m_exp || m_exp->isScalar());
   default:
     break;
@@ -196,7 +194,7 @@ bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
 
 bool UnaryOpExpression::getScalarValue(Variant &value) {
   if (m_exp) {
-    if (m_op == T_ARRAY || m_op == T_MIARRAY || m_op == T_MSARRAY) {
+    if (m_op == T_ARRAY) {
       return m_exp->getScalarValue(value);
     }
     Variant t;

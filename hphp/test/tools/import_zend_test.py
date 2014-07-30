@@ -88,8 +88,8 @@ no_import = (
     '/ext/standard/versioning/php_sapi_name_variation001.phpt',
 )
 
-# For marking tests as always failing. Used to keep flaky tests in bad/.
-bad_tests = (
+# For marking tests as always failing. Used to keep flaky tests in flaky/.
+flaky_tests = (
     # line number is inconsistent on stack overflow
     '/Zend/tests/bug41633_3.php',
 
@@ -1434,13 +1434,17 @@ for test in results:
     filename = test['name']
     good_file = filename.replace('all', 'good', 1)
     bad_file = filename.replace('all', 'bad', 1)
+    flaky_file = filename.replace('all', 'flaky', 1)
     mkdir_p(os.path.dirname(good_file))
     mkdir_p(os.path.dirname(bad_file))
+    mkdir_p(os.path.dirname(flaky_file))
 
     good = (test['status'] == 'passed')
-    for test in bad_tests:
+    flaky_test = False
+    for test in flaky_tests:
         if test in filename:
             good = False
+            flaky_test = True
 
     needs_norepo = False
     if good:
@@ -1450,10 +1454,14 @@ for test in results:
         for test in norepo_tests:
             if test in filename:
                 needs_norepo = True
-    else:
+    elif not flaky_test:
         dest_file = bad_file
         delete_file = good_file
         subpath = 'bad'
+    else:
+        delete_file = bad_file
+        dest_file = flaky_file
+        subpath = 'flaky'
 
     exps = glob.glob(filename + '.expect*')
     if not exps:

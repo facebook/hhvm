@@ -73,97 +73,97 @@ let rec subtype_funs_generic ~check_return env r_super ft_super r_sub orig_ft_su
   env
 
 (**
- * Checks that ty2 is a subtype of ty1, and returns an env.
+ * Checks that ty_sub is a subtype of ty_super, and returns an env.
  *
  * E.g. sub_type env ?int int   => env
  *      sub_type env int alpha  => env where alpha==int
  *      sub_type env ?int alpha => env where alpha==?int
  *      sub_type env int string => error
  *)
-and sub_type env ty1 ty2 =
-  let env, ety1 = Env.expand_type env ty1 in
-  let env, ety2 = Env.expand_type env ty2 in
-  match ety1, ety2 with
+and sub_type env ty_super ty_sub =
+  let env, ety_super = Env.expand_type env ty_super in
+  let env, ety_sub = Env.expand_type env ty_sub in
+  match ety_super, ety_sub with
   | (r, Tapply ((_, x), argl)), _ when Typing_env.is_typedef env x ->
-      let env, ty1 = TDef.expand_typedef env r x argl in
-      sub_type env ty1 ty2
+      let env, ty_super = TDef.expand_typedef env r x argl in
+      sub_type env ty_super ty_sub
   | _, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
-      let env, ty2 = TDef.expand_typedef env r x argl in
-      sub_type env ty1 ty2
+      let env, ty_sub = TDef.expand_typedef env r x argl in
+      sub_type env ty_super ty_sub
   | (_, Tunresolved _), (_, Tunresolved _) ->
-      let env, _ = Unify.unify env ty1 ty2 in
+      let env, _ = Unify.unify env ty_super ty_sub in
       env
-  | (_, Tunresolved tyl), (r2, _) ->
-      let env, _ = Unify.unify env ty1 (r2, Tunresolved [ty2]) in
+  | (_, Tunresolved tyl), (r_sub, _) ->
+      let env, _ = Unify.unify env ty_super (r_sub, Tunresolved [ty_sub]) in
       env
   | (_, Tany), (_, Tunresolved _) ->
       (* This branch is necessary in the following case:
        * function foo<T as I>(T $x)
        * if I call foo with an intersection type, T is a Tvar,
-       * it's expanded version (ety1 in this case) is Tany and what
+       * it's expanded version (ety_super in this case) is Tany and what
        * we end up doing is unifying all the elements of the intersection
        * together ...
        * Thanks to this branch, the type variable unifies with the intersection
        * type.
        *)
-      fst (Unify.unify env ty1 ty2)
+      fst (Unify.unify env ty_super ty_sub)
   | _, (_, Tunresolved tyl) ->
-      List.fold_left (fun env x -> sub_type env ty1 x) env tyl
-  | (_, Tapply _), (r2, Tgeneric (x, Some ty2)) ->
+      List.fold_left (fun env x -> sub_type env ty_super x) env tyl
+  | (_, Tapply _), (r_sub, Tgeneric (x, Some ty_sub)) ->
       (Errors.try_
-         (fun () -> sub_type env ty1 ty2)
-         (fun l -> Reason.explain_generic_constraint r2 x l; env)
+         (fun () -> sub_type env ty_super ty_sub)
+         (fun l -> Reason.explain_generic_constraint r_sub x l; env)
       )
-  | (r1, Tgeneric ("this", Some ty1)), (r2, Tgeneric ("this", Some ty2)) ->
-      sub_type env ty1 ty2
-  | (_, Tgeneric (x1, _)), (r2, Tgeneric (x2, Some ty2)) ->
-      if x1 = x2 then env else
+  | (r_super, Tgeneric ("this", Some ty_super)), (r_sub, Tgeneric ("this", Some ty_sub)) ->
+      sub_type env ty_super ty_sub
+  | (_, Tgeneric (x_super, _)), (r_sub, Tgeneric (x_sub, Some ty_sub)) ->
+      if x_super = x_sub then env else
       (Errors.try_
-         (fun () -> sub_type env ty1 ty2)
-         (fun l -> Reason.explain_generic_constraint r2 x2 l; env)
+         (fun () -> sub_type env ty_super ty_sub)
+         (fun l -> Reason.explain_generic_constraint r_sub x_sub l; env)
       )
   (* Dirty covariance hacks *)
-  | (_, (Tapply ((_, "\\Awaitable"), [ty1]))),
-    (_, (Tapply ((_, "\\Awaitable"), [ty2]))) ->
+  | (_, (Tapply ((_, "\\Awaitable"), [ty_super]))),
+    (_, (Tapply ((_, "\\Awaitable"), [ty_sub]))) ->
       let old_allow_null_as_void = Env.allow_null_as_void env in
       let env = Env.set_allow_null_as_void env in
-      let env = sub_type env ty1 ty2 in
+      let env = sub_type env ty_super ty_sub in
       Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
-  | (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty1]))),
-    (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty2]))) ->
-      sub_type env ty1 ty2
-  | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty1; vty1]))),
-    (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty2; vty2]))) ->
-      let env = sub_type env kty1 kty2 in
-      sub_type env vty1 vty2
-  | (_, (Tapply ((_, "\\Generator"), [tk1; tv1; ts1]))),
-    (_, (Tapply ((_, "\\Generator"), [tk2; tv2; ts2]))) ->
+  | (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty_super]))),
+    (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty_sub]))) ->
+      sub_type env ty_super ty_sub
+  | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty_super; vty_super]))),
+    (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty_sub; vty_sub]))) ->
+      let env = sub_type env kty_super kty_sub in
+      sub_type env vty_super vty_sub
+  | (_, (Tapply ((_, "\\Generator"), [tk_super; tv_super; ts_super]))),
+    (_, (Tapply ((_, "\\Generator"), [tk_sub; tv_sub; ts_sub]))) ->
       (* Currently, we are only covariant in the type of the value yielded. I
        * think we could also be covariant in the type of the key yielded and
        * also *contravariant* in the type of the value sent in, but since this
        * code is new and no one is relying on those two yet, let's see if we can
        * get away with being invariant and if anyone complains we can
        * reconsider. TODO(#4534682) come back to this. *)
-      let env = sub_type env tv1 tv2 in
-      let env, _ = Unify.unify env tk1 tk2 in
-      let env, _ = Unify.unify env ts1 ts2 in
+      let env = sub_type env tv_super tv_sub in
+      let env, _ = Unify.unify env tk_super tk_sub in
+      let env, _ = Unify.unify env ts_super ts_sub in
       env
   (* Handle enums with subtyping constraints. *)
-  | _, (p2, (Tapply ((_, x), [])))
+  | _, (p_sub, (Tapply ((_, x), [])))
     when Typing_env.get_enum_constraint env x <> None ->
     (match Typing_env.get_enum_constraint env x with
       | Some base ->
         (* Handling is the same as abstracts with as *)
         Errors.try_
-          (fun () -> fst (Unify.unify env ty1 ty2))
-          (fun _ -> sub_type env ty1 base)
+          (fun () -> fst (Unify.unify env ty_super ty_sub))
+          (fun _ -> sub_type env ty_super base)
       | None -> assert false)
 
-  | (p1, (Tapply (x1, tyl1) as ty1_)), (p2, (Tapply (x2, tyl2) as ty2_)) ->
-    let cid1, cid2 = (snd x1), (snd x2) in
-    if cid1 = cid2 then fst (Unify.unify env ety1 ety2)
+  | (p_super, (Tapply (x_super, tyl_super) as ty_super_)), (p_sub, (Tapply (x_sub, tyl_sub) as ty_sub_)) ->
+    let cid_super, cid_sub = (snd x_super), (snd x_sub) in
+    if cid_super = cid_sub then fst (Unify.unify env ety_super ety_sub)
     else begin
-      let env, class_ = Env.get_class env cid2 in
+      let env, class_ = Env.get_class env cid_sub in
       (match class_ with
         | None -> env
         | Some class_ ->
@@ -178,7 +178,7 @@ and sub_type env ty1 ty2 =
                   | env, None ->
                     Errors.try_ begin fun () ->
                       let _, elt_ty = elt_type in
-                      env, Some (sub_type env ty1 (p2, elt_ty))
+                      env, Some (sub_type env ty_super (p_sub, elt_ty))
                     end (fun _ -> acc)
               end class_.tc_req_ancestors (env, None) in
               ret
@@ -186,24 +186,24 @@ and sub_type env ty1 ty2 =
           (match subtype_req_ancestor with
             | Some ret -> ret
             | None ->
-              let up_obj = SMap.get cid1 class_.tc_ancestors in
+              let up_obj = SMap.get cid_super class_.tc_ancestors in
               match up_obj with
                 | Some up_obj ->
                   (* We handle the case where a generic A<T> is used as A *)
-                  let tyl2 =
-                    if tyl2 = [] && not (Env.is_strict env)
-                    then List.map (fun _ -> (p2, Tany)) class_.tc_tparams
-                    else tyl2
+                  let tyl_sub =
+                    if tyl_sub = [] && not (Env.is_strict env)
+                    then List.map (fun _ -> (p_sub, Tany)) class_.tc_tparams
+                    else tyl_sub
                   in
-                  if List.length class_.tc_tparams <> List.length tyl2
+                  if List.length class_.tc_tparams <> List.length tyl_sub
                   then
                     Errors.expected_tparam
-                      (Reason.to_pos p2) (List.length class_.tc_tparams);
-                  let subst = Inst.make_subst class_.tc_tparams tyl2 in
+                      (Reason.to_pos p_sub) (List.length class_.tc_tparams);
+                  let subst = Inst.make_subst class_.tc_tparams tyl_sub in
                   let env, up_obj = Inst.instantiate subst env up_obj in
-                  sub_type env ty1 up_obj
+                  sub_type env ty_super up_obj
                 | None when class_.tc_members_fully_known ->
-                  TUtils.uerror p1 ty1_ p2 ty2_;
+                  TUtils.uerror p_super ty_super_ p_sub ty_sub_;
                   env
                 | _ -> env
           )
@@ -211,45 +211,45 @@ and sub_type env ty1 ty2 =
     end
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
-  | (_, Tapply ((_, "\\Traversable"), [ty2])), (r, Tarray (_, ty3, ty4))
-  | (_, Tapply ((_, "\\Container"), [ty2])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, "\\Traversable"), [ty_sub])), (r, Tarray (_, ty3, ty4))
+  | (_, Tapply ((_, "\\Container"), [ty_sub])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3, ty4 with
       | None, _ -> env
       | Some ty3, None ->
-          let env, _ = Unify.unify env ty2 ty3 in
+          let env, _ = Unify.unify env ty_sub ty3 in
           env
       | Some ty3, Some ty4 ->
-          let env, _ = Unify.unify env ty2 ty4 in
+          let env, _ = Unify.unify env ty_sub ty4 in
           env
       )
-  | (_, Tapply ((_, "\\KeyedTraversable"), [ty1; ty2])), (r, Tarray (_, ty3, ty4))
-  | (_, Tapply ((_, "\\KeyedContainer"), [ty1; ty2])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, "\\KeyedTraversable"), [ty_super; ty_sub])), (r, Tarray (_, ty3, ty4))
+  | (_, Tapply ((_, "\\KeyedContainer"), [ty_super; ty_sub])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3 with
       | None -> env
       | Some ty3 ->
           (match ty4 with
           | None ->
-              let env, _ = Unify.unify env ty1 (r, Tprim Nast.Tint) in
-              let env, _ = Unify.unify env ty2 ty3 in
+              let env, _ = Unify.unify env ty_super (r, Tprim Nast.Tint) in
+              let env, _ = Unify.unify env ty_sub ty3 in
               env
           | Some ty4 ->
-              let env, _ = Unify.unify env ty1 ty3 in
-              let env, _ = Unify.unify env ty2 ty4 in
+              let env, _ = Unify.unify env ty_super ty3 in
+              let env, _ = Unify.unify env ty_sub ty4 in
               env
           )
       )
-  | (_, Tapply ((_, "\\Indexish"), [ty1; ty2])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, "\\Indexish"), [ty_super; ty_sub])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3 with
       | None -> env
       | Some ty3 ->
           (match ty4 with
           | None ->
-              let env, _ = Unify.unify env ty1 (r, Tprim Nast.Tint) in
-              let env, _ = Unify.unify env ty2 ty3 in
+              let env, _ = Unify.unify env ty_super (r, Tprim Nast.Tint) in
+              let env, _ = Unify.unify env ty_sub ty3 in
               env
           | Some ty4 ->
-              let env, _ = Unify.unify env ty1 ty3 in
-              let env, _ = Unify.unify env ty2 ty4 in
+              let env, _ = Unify.unify env ty_super ty3 in
+              let env, _ = Unify.unify env ty_sub ty4 in
               env
           )
       )
@@ -259,44 +259,44 @@ and sub_type env ty1 ty2 =
   | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tfloat) -> env
   | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tstring) -> env
   | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tnum) -> env
-  | (_, (Tarray (_, Some ty1, None))), (_, (Tarray (_, Some ty2, None))) ->
-      sub_type env ty1 ty2
-  | (_, (Tarray (_, Some kty1, Some vty1))), (_, Tarray (_, Some kty2, Some vty2)) ->
-      let env = sub_type env kty1 kty2 in
-      sub_type env vty1 vty2
+  | (_, (Tarray (_, Some ty_super, None))), (_, (Tarray (_, Some ty_sub, None))) ->
+      sub_type env ty_super ty_sub
+  | (_, (Tarray (_, Some kty_super, Some vty_super))), (_, Tarray (_, Some kty_sub, Some vty_sub)) ->
+      let env = sub_type env kty_super kty_sub in
+      sub_type env vty_super vty_sub
   | (_, Tarray (_, Some _, Some _)), (reason, Tarray (is_local, Some elt_ty, None)) ->
       let int_reason = Reason.Ridx (Reason.to_pos reason) in
       let int_type = int_reason, Tprim Nast.Tint in
-      sub_type env ty1 (reason, Tarray (is_local, Some int_type, Some elt_ty))
+      sub_type env ty_super (reason, Tarray (is_local, Some int_type, Some elt_ty))
   | _, (_, Tany) -> env
-  | (_, Tany), _ -> fst (Unify.unify env ty1 ty2)
-  | (_, Toption ty1), (_, Toption ty2) ->
-      sub_type env ty1 ty2
-  | (_, Toption ty1), _ ->
-      sub_type env ty1 ty2
-  | (_, Ttuple tyl1), (_, Ttuple tyl2)
-    when List.length tyl1 = List.length tyl2 ->
-      wfold_left2 sub_type env tyl1 tyl2
-  | (r1, Tfun ft1), (r2, Tfun ft2) ->
-      subtype_funs_generic ~check_return:true env r1 ft1 r2 ft2
-  | (r1, Tshape fdm1), (r2, Tshape fdm2) ->
+  | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
+  | (_, Toption ty_super), (_, Toption ty_sub) ->
+      sub_type env ty_super ty_sub
+  | (_, Toption ty_super), _ ->
+      sub_type env ty_super ty_sub
+  | (_, Ttuple tyl_super), (_, Ttuple tyl_sub)
+    when List.length tyl_super = List.length tyl_sub ->
+    wfold_left2 sub_type env tyl_super tyl_sub
+  | (r_super, Tfun ft_super), (r_sub, Tfun ft_sub) ->
+      subtype_funs_generic ~check_return:true env r_super ft_super r_sub ft_sub
+  | (r_super, Tshape fdm_super), (r_sub, Tshape fdm_sub) ->
       ShapeMap.iter begin fun k _ ->
-        if not (ShapeMap.mem k fdm1)
+        if not (ShapeMap.mem k fdm_super)
         then
-          let p1 = Reason.to_pos r1 in
-          let p2 = Reason.to_pos r2 in
-          Errors.field_missing (TUtils.get_shape_field_name k) p1 p2
-      end fdm2;
-      TUtils.apply_shape sub_type env (r1, fdm1) (r2, fdm2)
+          let p_super = Reason.to_pos r_super in
+          let p_sub = Reason.to_pos r_sub in
+          Errors.field_missing (TUtils.get_shape_field_name k) p_super p_sub
+      end fdm_sub;
+      TUtils.apply_shape sub_type env (r_super, fdm_super) (r_sub, fdm_sub)
   | _, (_, Tabstract (_, _, Some x)) ->
       Errors.try_
-         (fun () -> fst (Unify.unify env ty1 ty2))
-         (fun _ -> sub_type env ty1 x)
-  | _ -> fst (Unify.unify env ty1 ty2)
+         (fun () -> fst (Unify.unify env ty_super ty_sub))
+         (fun _ -> sub_type env ty_super x)
+  | _ -> fst (Unify.unify env ty_super ty_sub)
 
-and is_sub_type env ty1 ty2 =
+and is_sub_type env ty_super ty_sub =
   Errors.try_
-    (fun () -> ignore(sub_type env ty1 ty2); true)
+    (fun () -> ignore(sub_type env ty_super ty_sub); true)
     (fun _ -> false)
 
 and sub_string p env ty2 =

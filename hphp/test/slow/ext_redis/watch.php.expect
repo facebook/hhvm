@@ -11,5 +11,5 @@ bool(true)
 string(4) "6379"
 array(1) {
   [0]=>
-  int(0)
+  int(1)
 }

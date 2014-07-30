@@ -1397,14 +1397,17 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
 
 Variant f_tempnam(const String& dir, const String& prefix) {
   CHECK_PATH(dir, 1);
-  String tmpdir = dir;
+  String tmpdir = dir, trailing_slash = "/";
   if (tmpdir.empty() || !f_is_dir(tmpdir) || !f_is_writable(tmpdir)) {
     tmpdir = HHVM_FN(sys_get_temp_dir)();
   }
   tmpdir = File::TranslatePath(tmpdir);
   String pbase = f_basename(prefix);
   if (pbase.size() > 64) pbase = pbase.substr(0, 63);
-  String templ = tmpdir + "/" + pbase + "XXXXXX";
+  if (tmpdir[tmpdir.length() - 1] == '/') {
+    trailing_slash = "";
+  }
+  String templ = tmpdir + trailing_slash + pbase + "XXXXXX";
   char buf[PATH_MAX + 1];
   strcpy(buf, templ.data());
   int fd = mkstemp(buf);

@@ -528,22 +528,32 @@ and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
   end
   else ()
 
-and constructor_decl env (pcstr, pcompat) class_ =
+and constructor_decl env (pcstr, pconsist) class_ =
+  (* constructors in children of class_ must be consistent? *)
+  let cconsist = class_.c_final || SMap.mem "ConsistentConstruct" class_.c_user_attributes
+  in
   match class_.c_constructor, pcstr with
-    | None, Some _ -> env, (pcstr, pcompat)
+    | None, Some _ -> env, (pcstr, cconsist || pconsist)
     | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
       Errors.override_final ~parent:(Reason.to_pos r) ~child:(fst method_.m_name);
-      let env, cstr = build_constructor env class_ method_ in
-      env, (cstr, pcompat)
+      let env, (cstr, mconsist) = build_constructor env class_ method_ in
+      env, (cstr, cconsist || mconsist || pconsist)
     | Some method_, _ ->
-      let env, cstr = build_constructor env class_ method_ in
-      env, (cstr, pcompat)
-    | None, _ -> env, (None, pcompat)
+      let env, (cstr, mconsist) = build_constructor env class_ method_ in
+      env, (cstr, cconsist || mconsist || pconsist)
+    | None, _ -> env, (None, cconsist || pconsist)
 
 and build_constructor env class_ method_ =
   let env, ty = method_decl class_ env method_ in
   let _, class_name = class_.c_name in
   let vis = visibility class_name method_.m_visibility in
+  let mconsist = method_.m_final || class_.c_kind == Ast.Cinterface in
+  (* due to the requirement of calling parent::__construct, a private
+   * constructor cannot be overridden *)
+  let mconsist = mconsist || method_.m_visibility == Private in
+  let mconsist = match ty with
+    | (_, Tfun ({ft_abstract = true; _})) -> true
+    | _ -> mconsist in
   let cstr = {
     ce_final = method_.m_final;
     ce_override = false;
@@ -552,7 +562,7 @@ and build_constructor env class_ method_ =
     ce_type = ty;
     ce_origin = class_name;
   } in
-  env, Some cstr
+  env, (Some cstr, mconsist)
 
 and class_const_decl c (env, acc) (h, id, e) =
   let env, ty =
@@ -567,16 +577,16 @@ and class_const_decl c (env, acc) (h, id, e) =
           | Float _
           | Array _ ->
             let _, ty = Typing.expr env e in
-              (* We don't want to keep the environment of the inference
-               * CAREFULL, right now, array is just Tarray, with no
-               * type variable, if we were to add parameters array<T>,
-               * we would have to: make a full expansion, that is,
-               * replace all the type variables in ty by their "true" type,
-               * because this feature doesn't exist, this isn't necessary
-               * right now. I am adding this tag "array", because I know
-               * I would search for it if I was changing the way arrays are
-               * typed.
-               *)
+            (* We don't want to keep the environment of the inference
+             * CAREFULL, right now, array is just Tarray, with no
+             * type variable, if we were to add parameters array<T>,
+             * we would have to: make a full expansion, that is,
+             * replace all the type variables in ty by their "true" type,
+             * because this feature doesn't exist, this isn't necessary
+             * right now. I am adding this tag "array", because I know
+             * I would search for it if I was changing the way arrays are
+             * typed.
+             *)
             env, ty
           | _ ->
             env, (Reason.Rwitness (fst id), Tany)

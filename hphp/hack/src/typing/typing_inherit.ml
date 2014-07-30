@@ -29,13 +29,13 @@ type env = Env.env
 (*****************************************************************************)
 
 type inherited = {
-    ih_cstr     : class_elt option * bool;
-    ih_consts   : class_elt SMap.t ;
-    ih_cvars    : class_elt SMap.t ;
-    ih_scvars   : class_elt SMap.t ;
-    ih_methods  : class_elt SMap.t ;
-    ih_smethods : class_elt SMap.t ;
-  }
+  ih_cstr     : class_elt option * bool (* consistency required *);
+  ih_consts   : class_elt SMap.t ;
+  ih_cvars    : class_elt SMap.t ;
+  ih_scvars   : class_elt SMap.t ;
+  ih_methods  : class_elt SMap.t ;
+  ih_smethods : class_elt SMap.t ;
+}
 
 let empty = {
   ih_cstr     = None, false;

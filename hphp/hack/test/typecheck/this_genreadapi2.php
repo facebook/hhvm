@@ -22,7 +22,7 @@ class Foo {
   }
 }
 
-class Bar extends Foo {
+final class Bar extends Foo {
   public static function make<Tk>(): GenReadApi<Tk, this> {
     return new GenReadApiClass(new static());
   }
@@ -42,6 +42,7 @@ class FooIdx {
   }
 }
 
+<<ConsistentConstruct>>
 class BarIdx extends FooIdx {
   public static function make<Tk>(): GenReadIdxApi<Tk, this> {
     return new GenReadIdxApiClass(new static());

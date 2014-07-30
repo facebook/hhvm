@@ -68,7 +68,8 @@ let check_members_implemented parent_reason reason parent_members members =
   end parent_members
 
 (* Check that overriding is correct *)
-let check_override env parent_class class_ parent_class_elt class_elt =
+let check_override env ?(ignore_fun_return = false)
+    parent_class class_ parent_class_elt class_elt =
   let class_known = if use_parent_for_known then parent_class.tc_members_fully_known
     else class_.tc_members_fully_known in
   let check_vis = class_known || check_partially_known_method_visibility in
@@ -82,14 +83,16 @@ let check_override env parent_class class_ parent_class_elt class_elt =
     let env, parent_ce_type =
       Inst.instantiate_this env parent_class_elt.ce_type this_ty in
     match parent_ce_type, class_elt.ce_type with
-      | (r1, Tfun ft1), (r2, Tfun ft2) ->
+      | (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->
         let subtype_funs =
-          if class_known || check_partially_known_method_returns then
-            SubType.subtype_funs else SubType.subtype_funs_no_return in
-        ignore (subtype_funs env r1 ft1 r2 ft2)
-      | fty1, fty2 ->
-        let pos = Reason.to_pos (fst fty2) in
-        ignore (unify pos Typing_reason.URnone env fty1 fty2)
+          if (not ignore_fun_return) &&
+            (class_known || check_partially_known_method_returns) then
+            SubType.subtype_funs
+          else SubType.subtype_funs_no_return in
+        ignore (subtype_funs env r_parent ft_parent r_child ft_child)
+      | fty_parent, fty_child ->
+        let pos = Reason.to_pos (fst fty_child) in
+        ignore (unify pos Typing_reason.URnone env fty_parent fty_child)
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
@@ -129,13 +132,9 @@ let make_all_members class_ = [
 ]
 
 (* When an interface defines a constructor, we check that they are compatible *)
-let check_constructors env parent_class class_ =
+let check_constructors env parent_class class_ psubst subst =
   if parent_class.tc_kind = Ast.Cinterface || (snd parent_class.tc_construct)
   then (
-    Utils.dn (
-      Printf.sprintf "check_constructors %s for parent %s"
-        class_.tc_name parent_class.tc_name
-    );
     match (fst parent_class.tc_construct), (fst class_.tc_construct) with
       | None, _ -> ()
       | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
@@ -143,7 +142,9 @@ let check_constructors env parent_class class_ =
         let pos = fst parent_cstr.ce_type in
         Errors.missing_constructor (Reason.to_pos pos)
       | Some parent_cstr, Some cstr ->
-        check_override env parent_class class_ parent_cstr cstr
+        let env, parent_cstr = Inst.instantiate_ce psubst env parent_cstr in
+        let env, cstr = Inst.instantiate_ce subst env cstr in
+        check_override env ~ignore_fun_return:true parent_class class_ parent_cstr cstr
   ) else ()
 
 let check_class_implements env parent_class class_ =
@@ -154,7 +155,7 @@ let check_class_implements env parent_class class_ =
   let subst = Inst.make_subst class_.tc_tparams tparaml in
   let pmemberl = make_all_members parent_class in
   let memberl = make_all_members class_ in
-  check_constructors env parent_class class_;
+  check_constructors env parent_class class_ psubst subst;
   let env, pmemberl = lfold (instantiate_members psubst) env pmemberl in
   let env, memberl = lfold (instantiate_members subst) env memberl in
   if not fully_known then () else

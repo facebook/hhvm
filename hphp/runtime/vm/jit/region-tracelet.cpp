@@ -44,7 +44,7 @@ namespace {
 struct RegionFormer {
   RegionFormer(const RegionContext& ctx,
                InterpSet& interp,
-               const InliningDecider& inl,
+               InliningDecider& inl,
                bool profiling);
 
   RegionDescPtr go();
@@ -64,7 +64,7 @@ private:
   RefDeps m_refDeps;
   uint32_t m_numJmps;
 
-  InliningDecider m_inl;
+  InliningDecider& m_inl;
   const bool m_profiling;
 
   const Func* curFunc() const;
@@ -83,7 +83,7 @@ private:
 
 RegionFormer::RegionFormer(const RegionContext& ctx,
                            InterpSet& interp,
-                           const InliningDecider& inl,
+                           InliningDecider& inl,
                            bool profiling)
   : m_ctx(ctx)
   , m_interp(interp)
@@ -551,6 +551,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
 
   while (!(region = RegionFormer(ctx, interp, inl, profiling).go())) {
     ++tries;
+    inl.resetState();
   }
 
   if (region->blocks.size() == 0 || region->blocks.front()->length() == 0) {

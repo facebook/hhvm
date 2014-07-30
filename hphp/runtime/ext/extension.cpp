@@ -193,9 +193,9 @@ void Extension::SortDependencies() {
 void Extension::LoadModules(const IniSetting::Map& ini, Hdf hdf) {
   // Load up any dynamic extensions
   std::string path = Config::GetString(ini, hdf["DynamicExtensionPath"], ".");
-  for (Hdf ext = hdf["DynamicExtensions"].firstChild();
-       ext.exists(); ext = ext.next()) {
-    std::string extLoc = Config::GetString(ini, ext);
+  std::vector<std::string> extensions;
+  Config::Get(ini, hdf["DynamicExtensions"], extensions);
+  for (auto& extLoc : extensions) {
     if (extLoc.empty()) {
       continue;
     }

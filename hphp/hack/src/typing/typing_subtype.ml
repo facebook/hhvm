@@ -312,9 +312,6 @@ and sub_string p env ty2 =
           Errors.object_string p (Reason.to_pos r2);
           env
       )
-  | (_, Tany) when Env.is_strict env ->
-      Errors.untyped_string p;
-      env
   | _, Tany ->
       env (* Unifies with anything *)
   | _, Tobject -> env

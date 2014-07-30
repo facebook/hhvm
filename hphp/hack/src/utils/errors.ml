@@ -606,9 +606,6 @@ let object_string p1 p2 =
   p1, "You cannot use this object as a string";
   p2, "This object doesn't implement __toString"]
 
-let untyped_string p =
-  add p "You cannot use this object as a string, it is an untyped value"
-
 let type_param_arity pos x n =
   add pos ("The type "^x^" expects "^n^" parameters")
 

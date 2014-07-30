@@ -61,7 +61,6 @@
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -6133,17 +6132,31 @@ void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
 
   if (constraintReg == InvalidReg) {
     if (objClassReg != InvalidReg) {
-      m_as.  cmpq(Immed64(constraint->clsVal()).l(), objClassReg);
+      auto constraintCls = constraint->clsVal();
+      auto constraintImm = Immed64(constraintCls);
+      if (constraintImm.fits(sz::dword)) {
+        m_as.cmpq(constraintImm.l(), objClassReg);
+      } else {
+        m_as.emitImmReg(constraintCls, m_rScratch);
+        m_as.cmpq(m_rScratch, objClassReg);
+      }
     } else {
       // Both constant.
       if (objClass->clsVal() == constraint->clsVal()) return;
       return cgCallNative(m_as, inst);
     }
   } else if (objClassReg != InvalidReg) {
-    m_as.  cmpq(constraintReg, objClassReg);
+    m_as.cmpq(constraintReg, objClassReg);
   } else {
     // Reverse the args because cmpq can only have a constant in the LHS.
-    m_as.  cmpq(Immed64(objClass->clsVal()).l(), constraintReg);
+    auto objCls = objClass->clsVal();
+    auto objImm = Immed64(objCls);
+    if (objImm.fits(sz::dword)) {
+      m_as.cmpq(objImm.l(), constraintReg);
+    } else {
+      m_as.emitImmReg(objCls, m_rScratch);
+      m_as.cmpq(m_rScratch, constraintReg);
+    }
   }
 
   // The native call for this instruction is the slow path that does

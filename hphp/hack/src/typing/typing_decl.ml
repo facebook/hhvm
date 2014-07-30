@@ -533,7 +533,7 @@ and constructor_decl env (pcstr, pconsist) class_ =
   let cconsist = class_.c_final || SMap.mem "ConsistentConstruct" class_.c_user_attributes
   in
   match class_.c_constructor, pcstr with
-    | None, Some _ -> env, (pcstr, cconsist || pconsist)
+    | None, _ -> env, (pcstr, cconsist || pconsist)
     | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
       Errors.override_final ~parent:(Reason.to_pos r) ~child:(fst method_.m_name);
       let env, (cstr, mconsist) = build_constructor env class_ method_ in
@@ -541,7 +541,6 @@ and constructor_decl env (pcstr, pconsist) class_ =
     | Some method_, _ ->
       let env, (cstr, mconsist) = build_constructor env class_ method_ in
       env, (cstr, cconsist || mconsist || pconsist)
-    | None, _ -> env, (None, cconsist || pconsist)
 
 and build_constructor env class_ method_ =
   let env, ty = method_decl class_ env method_ in

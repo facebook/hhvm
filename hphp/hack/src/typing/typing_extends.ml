@@ -131,12 +131,36 @@ let make_all_members class_ = [
   class_.tc_smethods;
 ]
 
+(* The phantom class element that represents the default constructor:
+ * public function __construct() {}
+ *
+ * It isn't added to the tc_construct only because that's used to
+ * determine whether a child class needs to call parent::__construct *)
+let default_constructor_ce class_ =
+  let pos, name = class_.tc_pos, class_.tc_name in
+  let r = Reason.Rwitness pos in (* reason doesn't get used in, e.g. arity checks *)
+  let ft = { ft_pos      = pos;
+             ft_unsafe   = false;
+             ft_abstract = false;
+             ft_arity    = Fstandard (0, 0);
+             ft_tparams  = [];
+             ft_params   = [];
+             ft_ret      = r, Tprim Nast.Tvoid;
+           }
+  in { ce_final       = false;
+       ce_override    = false;
+       ce_synthesized = true;
+       ce_visibility  = Vpublic;
+       ce_type        = r, Tfun ft;
+       ce_origin      = name;
+     }
+
 (* When an interface defines a constructor, we check that they are compatible *)
 let check_constructors env parent_class class_ psubst subst =
-  if parent_class.tc_kind = Ast.Cinterface || (snd parent_class.tc_construct)
+  let explicit_consistency = snd parent_class.tc_construct in
+  if parent_class.tc_kind = Ast.Cinterface || explicit_consistency
   then (
     match (fst parent_class.tc_construct), (fst class_.tc_construct) with
-      | None, _ -> ()
       | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
       | Some parent_cstr, None ->
         let pos = fst parent_cstr.ce_type in
@@ -145,6 +169,12 @@ let check_constructors env parent_class class_ psubst subst =
         let env, parent_cstr = Inst.instantiate_ce psubst env parent_cstr in
         let env, cstr = Inst.instantiate_ce subst env cstr in
         check_override env ~ignore_fun_return:true parent_class class_ parent_cstr cstr
+      | None, Some cstr when explicit_consistency ->
+        let parent_cstr = default_constructor_ce parent_class in
+        let env, parent_cstr = Inst.instantiate_ce psubst env parent_cstr in
+        let env, cstr = Inst.instantiate_ce subst env cstr in
+        check_override env ~ignore_fun_return:true parent_class class_ parent_cstr cstr
+      | None, _ -> ()
   ) else ()
 
 let check_class_implements env parent_class class_ =

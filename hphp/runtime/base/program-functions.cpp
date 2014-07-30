@@ -911,7 +911,6 @@ int execute_program(int argc, char **argv) {
   int ret_code = -1;
   try {
     initialize_repo();
-    init_thread_locals();
     ret_code = execute_program_impl(argc, argv);
   } catch (const Exception &e) {
     Logger::Error("Uncaught exception: %s", e.what());
@@ -1253,9 +1252,6 @@ static int execute_program_impl(int argc, char** argv) {
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
-  // Reload the thread local ini settings now that RuntimeOption is right
-  ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.threadInit();
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     HPHP::initTypeProfileStructure();
   }
@@ -1588,6 +1584,7 @@ void hphp_process_init() {
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
 
+  Process::InitProcessStatics();
   init_thread_locals();
 
   // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
@@ -1597,7 +1594,6 @@ void hphp_process_init() {
   k_PHP_SAPI = makeStaticString(RuntimeOption::ExecutionMode);
 
   ClassInfo::Load();
-  Process::InitProcessStatics();
 
   // reinitialize pcre table
   pcre_reinit();
@@ -1831,6 +1827,7 @@ void hphp_session_exit() {
   }
 
   ThreadInfo::s_threadInfo->onSessionExit();
+  assert(mm.empty());
 }
 
 void hphp_process_exit() {

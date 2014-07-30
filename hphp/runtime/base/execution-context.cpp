@@ -59,7 +59,6 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 ExecutionContext::ExecutionContext()
   : m_transport(nullptr)
-  , m_cwd(Process::CurrentWorkingDirectory)
   , m_out(nullptr)
   , m_implicitFlush(false)
   , m_protectedLevel(0)
@@ -78,15 +77,21 @@ ExecutionContext::ExecutionContext()
   , m_dbgNoBreak(false)
   , m_coverPrevLine(-1)
   , m_coverPrevUnit(nullptr)
-  , m_lastErrorPath("")
+  , m_lastErrorPath(staticEmptyString())
   , m_lastErrorLine(0)
   , m_executingSetprofileCallback(false)
 {
+  // We don't want a new execution context to cause any smart allocations
+  // (because it will cause us to hold a slab, even while idle)
+  static auto s_cwd = makeStaticString(Process::CurrentWorkingDirectory);
+  m_cwd = s_cwd;
+
   // We want this to run on every request, instead of just once per thread
-  auto hasSystemDefault = IniSetting::ResetSystemDefault("memory_limit");
+  std::string memory_limit = "memory_limit";
+  auto hasSystemDefault = IniSetting::ResetSystemDefault(memory_limit);
   if (!hasSystemDefault) {
     auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
-    IniSetting::SetUser("memory_limit", max_mem);
+    IniSetting::SetUser(memory_limit, max_mem, IniSetting::FollyDynamic());
   }
 
   // This one is hot so we don't want to go through the ini_set() machinery to

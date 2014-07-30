@@ -433,10 +433,21 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     Eval::Debugger::InterruptRequestEnded(transport->getUrl());
   }
 
-  transport->onSendEnd();
+  // If we have registered post-send shutdown functions, end the request before
+  // executing them. If we don't, be compatible with Zend by allowing usercode
+  // in hphp_context_shutdown to run before we end the request.
+  bool hasPostSend =
+    context->hasShutdownFunctions(ExecutionContext::ShutdownType::PostSend);
+  if (hasPostSend) {
+    transport->onSendEnd();
+  }
   context->onShutdownPostSend();
   Eval::Debugger::InterruptPSPEnded(transport->getUrl());
-  hphp_context_exit();
+  hphp_context_shutdown();
+  if (!hasPostSend) {
+    transport->onSendEnd();
+  }
+  hphp_context_exit(false);
   ServerStats::LogPage(file, code);
   return ret;
 }

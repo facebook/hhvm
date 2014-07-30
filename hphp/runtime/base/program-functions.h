@@ -91,7 +91,8 @@ bool hphp_invoke(ExecutionContext *context,
                  bool once,
                  bool warmupOnly,
                  bool richErrorMsg);
-void hphp_context_exit();
+void hphp_context_shutdown();
+void hphp_context_exit(bool shutdown = true);
 
 void hphp_thread_exit();
 void hphp_session_exit();

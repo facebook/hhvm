@@ -467,7 +467,7 @@ macro(hphp_link target)
   if (LIBUODBC_LIBRARIES)
     target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
   endif()
- 
+
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
@@ -484,10 +484,10 @@ macro(hphp_link target)
   else()
     target_link_libraries(${target} sqlite3)
   endif()
-  
+
   if (DOUBLE_CONVERSION_LIBRARY)
     target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
-  else() 
+  else()
     target_link_libraries(${target} double-conversion)
   endif()
 
@@ -496,7 +496,7 @@ macro(hphp_link target)
   else()
     target_link_libraries(${target} lz4)
   endif()
-  
+
   if (LIBZIP_LIBRARY)
     target_link_libraries(${target} ${LIBZIP_LIBRARY})
   else()

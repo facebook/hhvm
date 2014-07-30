@@ -15,11 +15,11 @@
 */
 #include "parser.h"
 
+#include "folly/Conv.h"
 #include "folly/Format.h"
 
 #include "hphp/util/hash.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace HPHP {
@@ -85,8 +85,8 @@ std::string ParserBase::getMessage(Location *loc,
   if (filename) {
     ret += std::string("File: ") + file() + ", ";
   }
-  ret += std::string("Line: ") + boost::lexical_cast<std::string>(line);
-  ret += ", Char: " + boost::lexical_cast<std::string>(column) + ")";
+  ret += std::string("Line: ") + folly::to<std::string>(line);
+  ret += ", Char: " + folly::to<std::string>(column) + ")";
   return ret;
 }
 

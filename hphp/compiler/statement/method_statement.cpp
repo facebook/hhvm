@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/statement/method_statement.h"
+#include "folly/Conv.h"
 #include <map>
 #include <set>
 #include "hphp/compiler/statement/return_statement.h"
@@ -171,7 +172,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
       if (names.find(param->getName()) != names.end()) {
         Compiler::Error(Compiler::RedundantParameter, param);
         for (int j = 0; j < 1000; j++) {
-          string name = param->getName() + lexical_cast<string>(j);
+          string name = param->getName() + folly::to<string>(j);
           if (names.find(name) == names.end() &&
               allDeclNames.find(name) == allDeclNames.end()) {
             param->rename(name);

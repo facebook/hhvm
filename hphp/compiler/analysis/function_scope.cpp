@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/function_scope.h"
+#include "folly/Conv.h"
 #include <utility>
 #include <vector>
 #include "hphp/compiler/analysis/analysis_result.h"
@@ -969,8 +970,7 @@ std::string FunctionScope::getDocName() const {
   if (m_redeclaring < 0) {
     return name;
   }
-  return name + Option::IdPrefix +
-    boost::lexical_cast<std::string>(m_redeclaring);
+  return name + Option::IdPrefix + folly::to<std::string>(m_redeclaring);
 }
 
 std::string FunctionScope::getDocFullName() const {

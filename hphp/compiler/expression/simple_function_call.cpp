@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/expression/simple_function_call.h"
+#include "folly/Conv.h"
 #include <map>
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -756,7 +757,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
               ExpressionPtr val(ap->getValue());
               if (!val->isScalar()) {
                 if (root_name.empty()) {
-                  root_name = "t" + lexical_cast<string>(
+                  root_name = "t" + folly::to<string>(
                     getFunctionScope()->nextInlineIndex());
                   SimpleVariablePtr rv(
                     new SimpleVariable(getScope(), getLocation(), root_name));

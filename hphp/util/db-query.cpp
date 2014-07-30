@@ -15,8 +15,8 @@
 */
 #include "hphp/util/db-query.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include "folly/Conv.h"
 
 #include "hphp/util/db-conn.h"
 #include "hphp/util/db-dataset.h"
@@ -102,9 +102,9 @@ void DBQuery::orderBy(const char *field, bool ascending /* = true */) {
 void DBQuery::limit(int count, int offset /* = 0 */) {
   m_limit = " LIMIT ";
   if (offset) {
-    m_limit += boost::lexical_cast<std::string>(offset) + ", ";
+    m_limit += folly::to<std::string>(offset) + ", ";
   }
-  m_limit += boost::lexical_cast<std::string>(count);
+  m_limit += folly::to<std::string>(count);
 }
 
 void DBQuery::insert(const char *fmt, ...) {
@@ -148,7 +148,7 @@ void DBQuery::setField(const char *fmt, const char *binary, int len) {
 }
 
 void DBQuery::setField(const char *fmt, int value) {
-  setField(fmt, boost::lexical_cast<std::string>(value).c_str());
+  setField(fmt, folly::to<std::string>(value).c_str());
 }
 
 void DBQuery::setField(const char *fmt, unsigned int value) {

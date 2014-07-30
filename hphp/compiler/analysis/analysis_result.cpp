@@ -16,6 +16,8 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 
+#include "folly/Conv.h"
+
 #include <iomanip>
 #include <algorithm>
 #include <sstream>
@@ -1297,10 +1299,7 @@ static inline void DumpScopeWithDeps(BlockScopeRawPtr scope) {
   for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
        end = ordered.end(); it != end; ++it) {
     BlockScopeRawPtrFlagsVec::value_type pf = *it;
-    string prefix = "    ";
-    prefix += "(";
-    prefix += boost::lexical_cast<string>(pf->second);
-    prefix += ") ";
+    auto prefix = folly::to<string>("    (", pf->second, ") ");
     DumpScope(pf->first, prefix.c_str());
   }
 }
@@ -1389,9 +1388,7 @@ AnalysisResult::processScopesParallel(const char *id,
         v.size() > 20 ? v.begin() + 20 : v.end();
       for (std::vector<BIPair>::const_iterator it = v.begin();
           it != end; ++it) {
-        string prefix;
-        prefix += boost::lexical_cast<string>((*it).second);
-        prefix += " times: ";
+        auto prefix = folly::to<string>((*it).second, " times: ");
         DumpScope((*it).first, prefix.c_str());
       }
       std::cout << "Number of global force reruns: "

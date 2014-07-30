@@ -9,7 +9,7 @@
 #define YYLEX_PARAM _p
 
 #include "hphp/compiler/parser/parser.h"
-#include <boost/lexical_cast.hpp>
+#include "folly/Conv.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 
@@ -113,7 +113,7 @@ static void scalar_num(Parser *_p, Token &out, const char *num) {
 
 static void scalar_num(Parser *_p, Token &out, int num) {
   Token t;
-  t.setText(boost::lexical_cast<std::string>(num));
+  t.setText(folly::to<std::string>(num));
   _p->onScalar(out, T_LNUMBER, t);
 }
 

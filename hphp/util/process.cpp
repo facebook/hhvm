@@ -15,8 +15,6 @@
 */
 #include "hphp/util/process.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
@@ -24,6 +22,7 @@
 #include <poll.h>
 #include <unistd.h>
 
+#include "folly/Conv.h"
 #include "folly/ScopeGuard.h"
 #include "folly/String.h"
 
@@ -372,7 +371,7 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
 }
 
 std::string Process::GetCommandLine(pid_t pid) {
-  string name = "/proc/" + boost::lexical_cast<string>(pid) + "/cmdline";
+  string name = "/proc/" + folly::to<string>(pid) + "/cmdline";
 
   string cmdline;
   FILE * f = fopen(name.c_str(), "r");
@@ -405,7 +404,7 @@ bool Process::IsUnderGDB() {
 }
 
 int64_t Process::GetProcessRSS(pid_t pid) {
-  string name = "/proc/" + boost::lexical_cast<string>(pid) + "/status";
+  string name = "/proc/" + folly::to<string>(pid) + "/status";
 
   string status;
   FILE * f = fopen(name.c_str(), "r");
@@ -448,7 +447,7 @@ size_t Process::GetCodeFootprint(pid_t pid) {
   //
   // Return (share + text), under the assumption that share consists only of
   // shared libraries.
-  string name = "/proc/" + boost::lexical_cast<string>(pid) + "/statm";
+  string name = "/proc/" + folly::to<string>(pid) + "/statm";
 
   string statm;
   FILE * f = fopen(name.c_str(), "r");

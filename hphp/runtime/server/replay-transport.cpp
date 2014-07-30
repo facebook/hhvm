@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/server/replay-transport.h"
 
-#include <boost/lexical_cast.hpp>
+#include "folly/Conv.h"
 
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -138,7 +138,7 @@ void ReplayTransport::sendImpl(const void *data, int size, int code,
   m_code = code;
 
   m_response = "HTTP/1.1 ";
-  m_response += boost::lexical_cast<std::string>(code);
+  m_response += folly::to<std::string>(code);
   m_response += " ";
   m_response += HttpProtocol::GetReasonString(m_code);
   m_response += "\r\n";

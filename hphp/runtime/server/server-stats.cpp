@@ -22,9 +22,8 @@
 #include <list>
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
-
 #include "folly/json.h"
+#include "folly/Conv.h"
 #include "folly/Range.h"
 #include "folly/String.h"
 
@@ -50,7 +49,6 @@ using std::set;
 using std::map;
 using std::ostream;
 using std::string;
-using boost::lexical_cast;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -243,7 +241,7 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
         if (agg != "code") {
           code = 0;
         }
-        PageStats &psDest = ts->m_pages[url + lexical_cast<string>(code)];
+        PageStats &psDest = ts->m_pages[url + folly::to<string>(code)];
         psDest.m_hit += ps.m_hit;
         psDest.m_url = url;
         psDest.m_code = code;
@@ -464,7 +462,7 @@ void ServerStats::Report(string &output, Writer::Format format,
         }
         if (ps.m_code) {
           key += "$";
-          key += lexical_cast<string>(ps.m_code);
+          key += folly::to<string>(ps.m_code);
         }
         if (!key.empty()) {
           key += ".";
@@ -546,18 +544,18 @@ static std::string format_duration(timeval &duration) {
     int hours = minutes / 60;
     minutes = minutes % 60;
     if (hours) {
-      ret += lexical_cast<string>(hours) + " hour";
+      ret += folly::to<string>(hours) + " hour";
       ret += (hours == 1) ? " " : "s ";
     }
     if (minutes || (hours && seconds)) {
-      ret += lexical_cast<string>(minutes) + " minute";
+      ret += folly::to<string>(minutes) + " minute";
       ret += (minutes == 1) ? " " : "s ";
     }
     if (seconds || minutes || hours) {
       char buf[7];
       snprintf(buf, sizeof(buf), "%.3f", seconds);
       buf[sizeof(buf) - 1] = '\0';
-      ret += lexical_cast<string>(buf) + " second";
+      ret += folly::to<string>(buf) + " second";
       ret += (seconds == 1) ? "" : "s";
     }
   } else {
@@ -790,7 +788,7 @@ void ServerStats::logPage(const string &url, int code) {
       ts.m_time = now;
       ts.m_pages.clear();
     }
-    PageStats &ps = ts.m_pages[url + lexical_cast<string>(code)];
+    PageStats &ps = ts.m_pages[url + folly::to<string>(code)];
     ps.m_url = url;
     ps.m_code = code;
     ps.m_hit++;
@@ -1032,7 +1030,7 @@ IOStatusHelper::IOStatusHelper(const char *name,
     }
     if (port) {
       msg += ":";
-      msg += boost::lexical_cast<std::string>(port);
+      msg += folly::to<std::string>(port);
     }
     ServerStats::SetThreadIOStatus(name, msg.c_str());
   }

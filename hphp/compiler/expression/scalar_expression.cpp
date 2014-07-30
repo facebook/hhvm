@@ -33,6 +33,8 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
+#include "folly/Conv.h"
+
 #include <sstream>
 #include <cmath>
 #include <limits.h>
@@ -130,7 +132,7 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
     switch (m_type) {
       case T_LINE:
         if (getLocation()) {
-          m_translated = lexical_cast<string>(getLocation()->line1);
+          m_translated = folly::to<string>(getLocation()->line1);
         } else {
           m_translated = "0";
         }

@@ -19,7 +19,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
+#include "folly/Conv.h"
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
@@ -56,7 +56,6 @@
 namespace HPHP {
 
 using std::endl;
-using boost::lexical_cast;
 using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -583,18 +582,18 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "check-load") {
     int count = HttpServer::Server->getPageServer()->getActiveWorker();
-    transport->sendString(boost::lexical_cast<std::string>(count));
+    transport->sendString(folly::to<std::string>(count));
     return true;
   }
   if (cmd == "check-ev") {
     int count =
       HttpServer::Server->getPageServer()->getLibEventConnectionCount();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(folly::to<string>(count));
     return true;
   }
   if (cmd == "check-queued") {
     int count = HttpServer::Server->getPageServer()->getQueuedJobs();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(folly::to<string>(count));
     return true;
   }
   if (cmd == "check-health") {
@@ -627,12 +626,12 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
   }
   if (cmd == "check-pl-load") {
     int count = PageletServer::GetActiveWorker();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(folly::to<string>(count));
     return true;
   }
   if (cmd == "check-pl-queued") {
     int count = PageletServer::GetQueuedJobs();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(folly::to<string>(count));
     return true;
   }
   if (cmd == "check-sat") {
@@ -796,8 +795,8 @@ bool AdminRequestHandler::handleProfileRequest(const std::string &cmd,
     string res = "[ ";
     for (std::map<ThreadInfo::Executing, int>::const_iterator iter =
            counts.begin(); iter != counts.end(); ++iter) {
-      res += lexical_cast<string>(iter->first) + ", " +
-        lexical_cast<string>(iter->second) + ", ";
+      res += folly::to<string>(iter->first) + ", " +
+        folly::to<string>(iter->second) + ", ";
     }
     res += "-1 ]";
     transport->sendString(res);

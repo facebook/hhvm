@@ -36,6 +36,7 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/parser/hphp.tab.hpp"
+#include "folly/Conv.h"
 
 using namespace HPHP;
 
@@ -490,7 +491,7 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
                           (i < nAct ? arg.get() : this)->getLocation(),
                           prefix + (param ?
                                     param->getName() :
-                                    lexical_cast<string>(i))));
+                                    folly::to<string>(i))));
     var->updateSymbol(SimpleVariablePtr());
     var->getSymbol()->setHidden();
     var->getSymbol()->setUsed();

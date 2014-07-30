@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/debugger/debugger_client.h"
 
-#include <boost/lexical_cast.hpp>
 #include <signal.h>
 #include <fstream>
 
@@ -35,6 +34,7 @@
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/config.h"
 #include <boost/scoped_ptr.hpp>
+#include "folly/Conv.h"
 
 #define USE_VARARGS
 #define PREFER_STDARG
@@ -1091,7 +1091,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
           cmd->is((DebuggerCommand::Type)expectedCmd)) {
         // For the nested cases, the caller has sent a cmd to the server and is
         // expecting a specific response. When we get it, return it.
-        usageLogEvent("command done", boost::lexical_cast<string>(expectedCmd));
+        usageLogEvent("command done", folly::to<string>(expectedCmd));
         m_machine->m_interrupting = true; // Machine is stopped
         m_inputState = TakingCommand;
         return cmd;

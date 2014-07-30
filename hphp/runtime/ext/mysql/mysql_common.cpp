@@ -16,14 +16,13 @@
 */
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <netinet/in.h>
 #include <netdb.h>
 #include <poll.h>
 #include <algorithm>
 #include <vector>
 
+#include "folly/Conv.h"
 #include "folly/ScopeGuard.h"
 #include "folly/String.h"
 
@@ -1412,7 +1411,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
             (new_conn, rconn->m_host.c_str(), rconn->m_username.c_str(),
              rconn->m_password.c_str(), nullptr, rconn->m_port, nullptr, 0);
           if (connected) {
-            string killsql = "KILL " + boost::lexical_cast<string>(tid);
+            string killsql = "KILL " + folly::to<string>(tid);
             if (mysql_real_query(connected, killsql.c_str(), killsql.size())) {
               raise_warning("Unable to kill thread %lu", tid);
             }

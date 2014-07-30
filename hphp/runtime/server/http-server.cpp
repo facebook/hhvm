@@ -40,9 +40,8 @@
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
 
-#include <folly/Format.h>
-
-#include <boost/lexical_cast.hpp>
+#include "folly/Conv.h"
+#include "folly/Format.h"
 
 #include <sys/types.h>
 #include <signal.h>
@@ -50,7 +49,6 @@
 namespace HPHP {
 extern InitFiniNode *extra_server_init, *extra_server_exit;
 
-using boost::lexical_cast;
 using std::string;
 
 
@@ -556,7 +554,7 @@ bool HttpServer::startServer(bool pageServer) {
         RuntimeOption::ServerIP;
       url += serverIp;
       url += ":";
-      url += boost::lexical_cast<std::string>(RuntimeOption::AdminServerPort);
+      url += folly::to<std::string>(RuntimeOption::AdminServerPort);
       url += "/stop";
       std::string auth;
 
@@ -647,7 +645,7 @@ bool HttpServer::startServer(bool pageServer) {
           }
 
           std::string cmd = "lsof -t -i :";
-          cmd += lexical_cast<std::string>(port);
+          cmd += folly::to<std::string>(port);
           cmd += " | xargs kill -9";
           FileUtil::ssystem(cmd.c_str());
         }

@@ -15,8 +15,9 @@
 */
 #include "hphp/runtime/debugger/break_point.h"
 
-#include <boost/lexical_cast.hpp>
 #include <vector>
+
+#include "folly/Conv.h"
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
@@ -32,7 +33,6 @@
 namespace HPHP { namespace Eval {
 
 using std::string;
-using boost::lexical_cast;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -72,7 +72,7 @@ std::string InterruptSite::desc() const {
   string file = getFile();
   int line0 = getLine0();
   if (line0) {
-    ret += " on line " + boost::lexical_cast<std::string>(line0);
+    ret += " on line " + folly::to<std::string>(line0);
     if (!file.empty()) {
       ret += " of " + file;
     }
@@ -502,7 +502,7 @@ std::string BreakPointInfo::site() const {
       preposition = "";
     }
     if (m_line1) {
-      ret += "on line " + lexical_cast<string>(m_line1);
+      ret += "on line " + folly::to<string>(m_line1);
       if (!m_file.empty()) {
         ret += " of " + m_file;
       }
@@ -528,12 +528,12 @@ std::string BreakPointInfo::descBreakPointReached() const {
     }
     if (m_line1 || m_line2) {
       if (m_line1 == m_line2) {
-        ret += "on line " + lexical_cast<string>(m_line1);
+        ret += "on line " + folly::to<string>(m_line1);
       } else if (m_line2 == -1) {
-        ret += "between line " + lexical_cast<string>(m_line1) + " and end";
+        ret += "between line " + folly::to<string>(m_line1) + " and end";
       } else {
-        ret += "between line " + lexical_cast<string>(m_line1) +
-          " and line " + lexical_cast<string>(m_line2);
+        ret += "between line " + folly::to<string>(m_line1) +
+          " and line " + folly::to<string>(m_line2);
       }
       if (!m_file.empty()) {
         ret += " of " + regex(m_file);

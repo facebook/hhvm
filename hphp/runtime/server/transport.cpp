@@ -828,6 +828,12 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
     assert(!compressed);
   }
 
+  // I don't think there is any need to send an empty chunk, other than sending
+  // out headers earlier, which seems to be a useless feature.
+  if (chunked && size == 0) {
+    return;
+  }
+
   if (!m_headerCallbackDone && !cellIsNull(&m_headerCallback)) {
     // We could use m_headerSent here, however it seems we can still
     // end up in an infinite loop when:

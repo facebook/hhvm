@@ -1,4 +1,4 @@
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
 option(ALWAYS_ASSERT "Enabled asserts in a release build" OFF)
 option(DEBUG_MEMORY_LEAK "Allow easier debugging of memory leaks" OFF)

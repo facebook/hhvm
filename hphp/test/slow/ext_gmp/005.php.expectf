@@ -1,0 +1,38 @@
+
+Warning: gmp_strval() expects at least 1 parameter, 0 given in %s on line %d
+NULL
+string(1) "0"
+
+Warning: gmp_strval() expects parameter 2 to be integer, string given in %s on line %d
+NULL
+
+Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s on line %d
+string(1) "0"
+
+Warning: gmp_strval() expects parameter 2 to be integer, string given in %s on line %d
+NULL
+string(1) "0"
+string(7) "9765456"
+
+Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s on line %d
+string(1) "0"
+
+Warning: gmp_strval(): Bad base for conversion: 100000 (should be between 2 and 62) in %s on line %d
+string(1) "0"
+string(7) "9765456"
+string(8) "-3373333"
+
+Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and 62) in %s on line %d
+string(1) "0"
+
+Warning: gmp_strval(): Bad base for conversion: 100000 (should be between 2 and 62) in %s on line %d
+string(1) "0"
+string(8) "-3373333"
+
+Warning: gmp_strval() expects parameter 2 to be integer, array given in %s on line %d
+NULL
+
+Warning: gmp_strval() expects parameter 2 to be integer, object given in %s on line %d
+NULL
+string(1) "0"
+string(1) "0"

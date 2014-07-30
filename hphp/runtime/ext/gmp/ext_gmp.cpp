@@ -1,4 +1,3 @@
-//#ifdef HAVE_LIBGMP
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
@@ -24,9 +23,82 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // header
 
-#define GMP_ROUND_ZERO 0
-#define GMP_ROUND_PLUSINF 1
-#define GMP_ROUND_MINUSINF 2
+#define GMP_ROUND_ZERO      0
+#define GMP_ROUND_PLUSINF   1
+#define GMP_ROUND_MINUSINF  2
+
+#define GMP_DEFAULT_BASE    10
+
+
+/* The maximum base for input and output conversions is 62 from GMP 4.2
+* onwards. */
+#if ((__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2))
+#  define GMP_MAX_BASE 62
+#else
+#  define GMP_MAX_BASE 36
+#endif
+
+const StaticString s_gmp_s("s");
+const StaticString s_gmp_t("t");
+const StaticString s_gmp_g("g");
+const StaticString s_gmp_0("0");
+const StaticString s_gmp_1("1");
+const StaticString s_GMP_MAX_BASE("GMP_MAX_BASE");
+const StaticString s_GMP_ROUND_ZERO("GMP_ROUND_ZERO");
+const StaticString s_GMP_ROUND_PLUSINF("GMP_ROUND_PLUSINF");
+const StaticString s_GMP_ROUND_MINUSINF("GMP_ROUND_MINUSINF");
+const StaticString s_GMP_VERSION("GMP_VERSION");
+const StaticString k_GMP_VERSION(gmp_version);
+
+const char* const cs_GMP_INVALID_TYPE                         = "%s(): Unable to convert variable to GMP - wrong type!";
+const char* const cs_GMP_INVALID_ROUNDING_MODE                = "%s(): Invalid rounding mode";
+const char* const cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO       = "%s(): Zero operand not allowed";
+const char* const cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE       = "%s(): Value operand not allowed";
+const char* const cs_GMP_INVALID_INDEX_IS_NEGATIVE            = "%s(): Index must be greater than or equal to zero";
+const char* const cs_GMP_INVALID_BASE_VALUE                   = "%s(): Bad base for conversion: %ld (should be between 2 and %d)";
+const char* const cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE    = "%s(): Exponent must not be positive negative";
+
+const char* const cs_GMP_FUNC_NAME_GMP_ABS                    = "gmp_abs";
+const char* const cs_GMP_FUNC_NAME_GMP_ADD                    = "gmp_add";
+const char* const cs_GMP_FUNC_NAME_GMP_AND                    = "gmp_add";
+const char* const cs_GMP_FUNC_NAME_GMP_CLRBIT                 = "gmp_clrbit";
+const char* const cs_GMP_FUNC_NAME_GMP_CMP                    = "gmp_cmp";
+const char* const cs_GMP_FUNC_NAME_GMP_COM                    = "gmp_com";
+const char* const cs_GMP_FUNC_NAME_GMP_DIV_Q                  = "gmp_div_q";
+const char* const cs_GMP_FUNC_NAME_GMP_DIV_R                  = "gmp_div_r";
+const char* const cs_GMP_FUNC_NAME_GMP_DIV_QR                 = "gmp_div_qr";
+const char* const cs_GMP_FUNC_NAME_GMP_DIVEXACT               = "gmp_divexact";
+const char* const cs_GMP_FUNC_NAME_GMP_FACT                   = "gmp_fact";
+const char* const cs_GMP_FUNC_NAME_GMP_GCD                    = "gmp_gcd";
+const char* const cs_GMP_FUNC_NAME_GMP_GCDEXCT                = "gmp_gcdexct";
+const char* const cs_GMP_FUNC_NAME_GMP_HAMDIST                = "gmp_hamdist";
+const char* const cs_GMP_FUNC_NAME_GMP_INIT                   = "gmp_init";
+const char* const cs_GMP_FUNC_NAME_GMP_INTVAL                 = "gmp_intval";
+const char* const cs_GMP_FUNC_NAME_GMP_INVERT                 = "gmp_invert";
+const char* const cs_GMP_FUNC_NAME_GMP_JACOBI                 = "gmp_jacobi";
+const char* const cs_GMP_FUNC_NAME_GMP_LEGENDRE               = "gmp_legendre";
+const char* const cs_GMP_FUNC_NAME_GMP_MOD                    = "gmp_mod";
+const char* const cs_GMP_FUNC_NAME_GMP_MUL                    = "gmp_mul";
+const char* const cs_GMP_FUNC_NAME_GMP_NEG                    = "gmp_neg";
+const char* const cs_GMP_FUNC_NAME_GMP_NEXTPRIME              = "gmp_nextprime";
+const char* const cs_GMP_FUNC_NAME_GMP_OR                     = "gmp_or";
+const char* const cs_GMP_FUNC_NAME_GMP_PERFECT_SQUARE         = "gmp_perfect_square";
+const char* const cs_GMP_FUNC_NAME_GMP_POPCOUNT               = "gmp_popcount";
+const char* const cs_GMP_FUNC_NAME_GMP_POW                    = "gmp_pow";
+const char* const cs_GMP_FUNC_NAME_GMP_POWM                   = "gmp_powm";
+const char* const cs_GMP_FUNC_NAME_GMP_PROB_PRIME             = "gmp_prob_prime";
+const char* const cs_GMP_FUNC_NAME_GMP_RANDOM                 = "gmp_random";
+const char* const cs_GMP_FUNC_NAME_GMP_SCAN0                  = "gmp_scan0";
+const char* const cs_GMP_FUNC_NAME_GMP_SCAN1                  = "gmp_scan1";
+const char* const cs_GMP_FUNC_NAME_GMP_SETBIT                 = "gmp_setbit";
+const char* const cs_GMP_FUNC_NAME_GMP_SIGN                   = "gmp_sign";
+const char* const cs_GMP_FUNC_NAME_GMP_SQRT                   = "gmp_sqrt";
+const char* const cs_GMP_FUNC_NAME_GMP_SQRTREM                = "gmp_sqrtrem";
+const char* const cs_GMP_FUNC_NAME_GMP_STRVAL                 = "gmp_strval";
+const char* const cs_GMP_FUNC_NAME_GMP_SUB                    = "gmp_sub";
+const char* const cs_GMP_FUNC_NAME_GMP_TESTBIT                = "gmp_testbit";
+const char* const cs_GMP_FUNC_NAME_GMP_XOR                    = "gmp_xor";
+
 
 class GMPResource : public SweepableResourceData {
 public:
@@ -37,12 +109,14 @@ public:
 public:
   explicit GMPResource(mpz_t data) { mpz_init_set(m_gmpMpz, data); }
   virtual ~GMPResource() { close(); }
-  void close() { mpz_clear(m_gmpMpz); }
-  mpz_t& getData() { return m_gmpMpz; }
+  void     close() { mpz_clear(m_gmpMpz); }
+  mpz_t&   getData() { return m_gmpMpz; }
 
 private:
-  mpz_t m_gmpMpz;
+  mpz_t    m_gmpMpz;
 };
+
+
 void GMPResource::sweep() { close(); }
 
 
@@ -50,14 +124,41 @@ void GMPResource::sweep() { close(); }
 // functions
 bool variantToGMPData(mpz_t gmpData,
                       const Variant& data,
-                      const int64_t base = 10) {
+                      const int64_t paramBase = -1) {
   if (data.isResource()) {
-    auto gmpRes = data.toResource().getTyped<GMPResource>();
+    auto gmpRes = data.toResource().getTyped<GMPResource>(false, true);
+    if (!gmpRes) {
+      return false;
+    }
     mpz_init_set(gmpData, gmpRes->getData());
   } else if (data.isString()) {
     String dataString = data.toString();
+    int64_t base = paramBase;
+    int strLength = dataString.length();
 
-    if (mpz_init_set_str(gmpData, dataString.toCppString().c_str(), base) != 0) {
+    //Figure out what Base to use based on the ~*data*~
+    if (strLength > 1 && dataString[0] == '0') {
+      if (strLength > 2) {
+        if (dataString[1] == 'x' || dataString[1] == 'X') {
+          base = 16;
+          dataString = dataString.substr(2);
+        } else if (base < 12 && (dataString[1] == 'b' || dataString[1] == 'B')) {
+          base = 2;
+          dataString = dataString.substr(2);
+        }
+      }
+      if (base == -1) {
+        base = 8;
+      }
+    } else if (strLength == 0) {
+      dataString = s_gmp_0.get();
+    }
+
+    if (base == -1) {
+      base = GMP_DEFAULT_BASE;
+    }
+
+    if (mpz_init_set_str(gmpData, dataString.c_str(), base) == -1) {
       mpz_clear(gmpData);
       return false;
     }
@@ -72,43 +173,49 @@ bool variantToGMPData(mpz_t gmpData,
 
 
 Variant HHVM_FUNCTION(gmp_abs,
-                     const Variant& data) {
-  mpz_t gmpData, gmpReturn;
+                      const Variant& data) {
+  mpz_t gmpReturn, gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_abs: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_ABS);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_abs(gmpReturn, gmpData);
-  mpz_clear(gmpData);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpReturn, gmpData, NULL);
+
+  return ret;
 }
 
 
 Variant HHVM_FUNCTION(gmp_add,
-                     const Variant& dataA,
-                     const Variant& dataB) {
+                      const Variant& dataA,
+                      const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_add: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_ADD);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_add: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_ADD);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_add(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
@@ -118,67 +225,87 @@ Variant HHVM_FUNCTION(gmp_and,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_and: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_AND);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_and: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_AND);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_and(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
 void HHVM_FUNCTION(gmp_clrbit,
-                   Resource& data,
+                   VRefParam& data,
                    int64_t index) {
-  auto gmpRes = data.getTyped<GMPResource>();
+
+  if (index < 0) {
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, cs_GMP_FUNC_NAME_GMP_CLRBIT);
+    return;
+  }
+
+  auto gmpRes = data.toResource().getTyped<GMPResource>();
+  if (!gmpRes) {
+    raise_warning("%s: Failed to clear bit", cs_GMP_FUNC_NAME_GMP_CLRBIT);
+    return;
+  }
+
   mpz_clrbit(gmpRes->getData(), index);
 }
 
 
 Variant HHVM_FUNCTION(gmp_cmp,
-                     const Variant& dataA,
-                     const Variant& dataB) {
+                      const Variant& dataA,
+                      const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB;
+
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_and: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_CMP);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_and: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_CMP);
     return false;
   }
 
   int64_t cmp = mpz_cmp(gmpDataA, gmpDataB);
+
   mpz_clears(gmpDataA, gmpDataB, NULL);
+
   return cmp;
 }
 
 
 Variant HHVM_FUNCTION(gmp_com,
-                     const Variant& data) {
-  mpz_t gmpData, gmpReturn;
+                      const Variant& data) {
+  mpz_t gmpReturn, gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_com: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_COM);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_com(gmpReturn, gmpData);
-  mpz_clear(gmpData);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpReturn, gmpData, NULL);
+
+  return ret;
 }
 
 
@@ -189,13 +316,20 @@ Variant HHVM_FUNCTION(gmp_div_q,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_div_q: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_DIV_Q);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_div_q: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_DIV_Q);
+    return false;
+  }
+
+  if (mpz_sgn(gmpDataB) == 0) {
+    mpz_clears(gmpDataA, gmpDataB, NULL);
+
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, cs_GMP_FUNC_NAME_GMP_DIV_Q);
     return false;
   }
 
@@ -205,21 +339,27 @@ Variant HHVM_FUNCTION(gmp_div_q,
     case GMP_ROUND_ZERO:
       mpz_tdiv_q(gmpReturn, gmpDataA, gmpDataB);
       break;
+
     case GMP_ROUND_PLUSINF:
       mpz_cdiv_q(gmpReturn, gmpDataA, gmpDataB);
       break;
+
     case GMP_ROUND_MINUSINF:
       mpz_fdiv_q(gmpReturn, gmpDataA, gmpDataB);
       break;
+
     default:
       mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
 
-      raise_warning("gmp_div_q: Invalid rounding mode");
+      raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_Q);
       return false;
   }
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
@@ -230,41 +370,52 @@ Variant HHVM_FUNCTION(gmp_div_qr,
   mpz_t gmpDataA, gmpDataB, gmpReturnQ, gmpReturnR;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_div_qr: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_DIV_QR);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_div_qr: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_DIV_QR);
     return false;
   }
 
-  mpz_inits(gmpReturnQ, gmpReturnR);
+  if (mpz_sgn(gmpDataB) == 0) {
+    mpz_clears(gmpDataA, gmpDataB, NULL);
+
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, cs_GMP_FUNC_NAME_GMP_DIV_QR);
+    return false;
+  }
+
+  mpz_inits(gmpReturnQ, gmpReturnR, NULL);
   switch (round)
   {
     case GMP_ROUND_ZERO:
       mpz_tdiv_qr(gmpReturnQ, gmpReturnR, gmpDataA, gmpDataB);
       break;
+
     case GMP_ROUND_PLUSINF:
       mpz_cdiv_qr(gmpReturnQ, gmpReturnR, gmpDataA, gmpDataB);
       break;
+
     case GMP_ROUND_MINUSINF:
       mpz_fdiv_qr(gmpReturnQ, gmpReturnR, gmpDataA, gmpDataB);
       break;
+
     default:
       mpz_clears(gmpDataA, gmpDataB, gmpReturnQ, gmpReturnR, NULL);
 
-      raise_warning("gmp_div_qr: Invalid rounding mode");
+      raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_QR);
       return false;
   }
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  Array returnArray = Array::Create();
-  returnArray.set(String("q"), NEWOBJ(GMPResource)(gmpReturnQ));
-  returnArray.set(String("r"), NEWOBJ(GMPResource)(gmpReturnR));
+  ArrayInit returnArray(2, ArrayInit::Map{});
+  returnArray.set(0, NEWOBJ(GMPResource)(gmpReturnQ));
+  returnArray.set(1, NEWOBJ(GMPResource)(gmpReturnR));
 
-  return returnArray;
+  mpz_clears(gmpDataA, gmpDataB, gmpReturnQ, gmpReturnR, NULL);
+
+  return returnArray.toVariant();
 }
 
 
@@ -275,37 +426,49 @@ Variant HHVM_FUNCTION(gmp_div_r,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_div_r: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_DIV_R);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_div_r: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_DIV_R);
+    return false;
+  }
+
+  if (mpz_sgn(gmpDataB) == 0) {
+    mpz_clears(gmpDataA, gmpDataB, NULL);
+
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, cs_GMP_FUNC_NAME_GMP_DIV_R);
     return false;
   }
 
   mpz_init(gmpReturn);
-  switch (round)
-  {
-    case GMP_ROUND_ZERO:
-      mpz_tdiv_r(gmpReturn, gmpDataA, gmpDataB);
-      break;
-    case GMP_ROUND_PLUSINF:
-      mpz_cdiv_r(gmpReturn, gmpDataA, gmpDataB);
-      break;
-    case GMP_ROUND_MINUSINF:
-      mpz_fdiv_r(gmpReturn, gmpDataA, gmpDataB);
-      break;
-    default:
-      mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  switch (round) {
+  case GMP_ROUND_ZERO:
+    mpz_tdiv_r(gmpReturn, gmpDataA, gmpDataB);
+    break;
 
-      raise_warning("gmp_div_r: Invalid rounding mode");
-      return false;
+  case GMP_ROUND_PLUSINF:
+    mpz_cdiv_r(gmpReturn, gmpDataA, gmpDataB);
+    break;
+
+  case GMP_ROUND_MINUSINF:
+    mpz_fdiv_r(gmpReturn, gmpDataA, gmpDataB);
+    break;
+
+  default:
+    mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_R);
+    return false;
   }
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
@@ -315,45 +478,51 @@ Variant HHVM_FUNCTION(gmp_divexact,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_divexact: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_DIVEXACT);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_divexact: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_DIVEXACT);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_divexact(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
 Variant HHVM_FUNCTION(gmp_fact,
                       const Variant& data) {
-  mpz_t gmpData, gmpReturn;
+  mpz_t gmpReturn, gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_fact: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_FACT);
     return false;
   }
 
   if (mpz_sgn(gmpData) < 0) {
     mpz_clear(gmpData);
 
-    raise_warning("gmp_fact: Number has to be greater than or equal to 0");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_FACT);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_fac_ui(gmpReturn, mpz_get_ui(gmpData));
-  mpz_clear(gmpData);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpReturn, gmpData, NULL);
+
+  return ret;
 }
 
 
@@ -363,21 +532,24 @@ Variant HHVM_FUNCTION(gmp_gcd,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_gcd: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_GCD);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_gcd: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_GCD);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_gcd(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
@@ -387,26 +559,27 @@ Variant HHVM_FUNCTION(gmp_gcdext,
   mpz_t gmpDataA, gmpDataB, gmpReturnG, gmpReturnS, gmpReturnT;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_gcdext: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_GCDEXCT);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_gcdext: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_GCDEXCT);
     return false;
   }
 
   mpz_inits(gmpReturnG, gmpReturnS, gmpReturnT, NULL);
   mpz_gcdext(gmpReturnG, gmpReturnS, gmpReturnT, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  Array returnArray = Array::Create();
-  returnArray.set(String("g"), NEWOBJ(GMPResource)(gmpReturnG));
-  returnArray.set(String("s"), NEWOBJ(GMPResource)(gmpReturnS));
-  returnArray.set(String("t"), NEWOBJ(GMPResource)(gmpReturnT));
+  ArrayInit returnArray(3, ArrayInit::Map{});
+  returnArray.set(s_gmp_g, NEWOBJ(GMPResource)(gmpReturnG));
+  returnArray.set(s_gmp_s, NEWOBJ(GMPResource)(gmpReturnS));
+  returnArray.set(s_gmp_t, NEWOBJ(GMPResource)(gmpReturnT));
 
-  return returnArray;
+  mpz_clears(gmpDataA, gmpDataB, gmpReturnG, gmpReturnS, gmpReturnT, NULL);
+
+  return returnArray.toVariant();
 }
 
 
@@ -416,42 +589,49 @@ Variant HHVM_FUNCTION(gmp_hamdist,
   mpz_t gmpDataA, gmpDataB;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_hamdist: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_HAMDIST);
     return false;
   }
   if (mpz_sgn(gmpDataA) < 0) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_hamdist: Number has to be greater than or equal to 0");
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE, cs_GMP_FUNC_NAME_GMP_HAMDIST);
     return false;
   }
 
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_hamdist: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_HAMDIST);
     return false;
   }
   if (mpz_sgn(gmpDataB) < 0) {
     mpz_clears(gmpDataA, gmpDataB, NULL);
 
-    raise_warning("gmp_hamdist: Number has to be greater than or equal to 0");
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE, cs_GMP_FUNC_NAME_GMP_HAMDIST);
     return false;
   }
 
   int64_t hamdist = mpz_hamdist(gmpDataA, gmpDataB);
+
   mpz_clears(gmpDataA, gmpDataB, NULL);
+
   return hamdist;
 }
 
 
 Variant HHVM_FUNCTION(gmp_init,
                       const Variant& data,
-                      const int64_t base = 0) {
+                      const int64_t base = -1) {
   mpz_t gmpData;
 
+  if (base < -1 || base == 0 || base == 1 || base > GMP_MAX_BASE) {
+    raise_warning(cs_GMP_INVALID_BASE_VALUE, cs_GMP_FUNC_NAME_GMP_INIT, base, GMP_MAX_BASE);
+    return false;
+  }
+
   if (!variantToGMPData(gmpData, data, base)) {
-    raise_warning("gmp_init: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_INIT);
     return false;
   }
 
@@ -464,11 +644,12 @@ Variant HHVM_FUNCTION(gmp_intval,
   mpz_t gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_intval: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_INTVAL);
     return false;
   }
 
   int64_t result = mpz_get_si(gmpData);
+
   mpz_clear(gmpData);
 
   return result;
@@ -481,21 +662,27 @@ Variant HHVM_FUNCTION(gmp_invert,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_invert: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_INVERT);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_invert: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_INVERT);
     return false;
   }
 
   mpz_init(gmpReturn);
-  mpz_invert(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
+  if (!mpz_invert(gmpReturn, gmpDataA, gmpDataB)) {
+    mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+    return false;
+  }
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
@@ -505,17 +692,18 @@ Variant HHVM_FUNCTION(gmp_jacobi,
   mpz_t gmpDataA, gmpDataB;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_jacobi: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_JACOBI);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_jacobi: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_JACOBI);
     return false;
   }
 
   int64_t result = mpz_jacobi(gmpDataA, gmpDataB);
+
   mpz_clears(gmpDataA, gmpDataB, NULL);
 
   return result;
@@ -528,17 +716,18 @@ Variant HHVM_FUNCTION(gmp_legendre,
   mpz_t gmpDataA, gmpDataB;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_legendre: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_LEGENDRE);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_legendre: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_LEGENDRE);
     return false;
   }
 
   int64_t result = mpz_legendre(gmpDataA, gmpDataB);
+
   mpz_clears(gmpDataA, gmpDataB, NULL);
 
   return result;
@@ -551,21 +740,24 @@ Variant HHVM_FUNCTION(gmp_mod,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_mod: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_MOD);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_mod: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_MOD);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_mod(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
@@ -575,55 +767,64 @@ Variant HHVM_FUNCTION(gmp_mul,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_mul: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_MUL);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_mul: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_MUL);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_mul(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
 Variant HHVM_FUNCTION(gmp_neg,
                       const Variant& data) {
-  mpz_t gmpData, gmpReturn;
+  mpz_t gmpReturn, gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_neg: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_NEG);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_neg(gmpReturn, gmpData);
-  mpz_clear(gmpData);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpReturn, gmpData, NULL);
+
+  return ret;
 }
 
 
 Variant HHVM_FUNCTION(gmp_nextprime,
                       const Variant& data) {
-  mpz_t gmpData, gmpReturn;
+  mpz_t gmpReturn, gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_nextprime: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_NEXTPRIME);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_nextprime(gmpReturn, gmpData);
-  mpz_clear(gmpData);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpReturn, gmpData, NULL);
+
+  return ret;
 }
 
 
@@ -633,21 +834,24 @@ Variant HHVM_FUNCTION(gmp_or,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_or: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_OR);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_or: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_OR);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_ior(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
@@ -656,11 +860,12 @@ bool HHVM_FUNCTION(gmp_perfect_square,
   mpz_t gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_perfect_square: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_PERFECT_SQUARE);
     return false;
   }
 
   bool isPerfectSquare = (mpz_perfect_square_p(gmpData) != 0);
+
   mpz_clear(gmpData);
 
   return isPerfectSquare;
@@ -672,7 +877,7 @@ Variant HHVM_FUNCTION(gmp_popcount,
   mpz_t gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_popcount: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_POPCOUNT);
     return false;
   }
 
@@ -686,77 +891,92 @@ Variant HHVM_FUNCTION(gmp_popcount,
 Variant HHVM_FUNCTION(gmp_pow,
                       const Variant& data,
                       int64_t exp) {
-  mpz_t gmpData, gmpReturn;
+  mpz_t gmpReturn, gmpData;
 
-  if (exp < 1) {
-    raise_warning("gmp_pow: Exponent must be positive number");
+  if (exp < 0) {
+    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE, cs_GMP_FUNC_NAME_GMP_POW);
     return false;
   }
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_pow: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_POW);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_pow_ui(gmpReturn, gmpData, exp);
-  mpz_clear(gmpData);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpReturn, gmpData, NULL);
+
+  return ret;
 }
 
 
 Variant HHVM_FUNCTION(gmp_powm,
-                     const Variant& dataA,
-                     const Variant& dataB,
-                     const Variant& dataC) {
+                      const Variant& dataA,
+                      const Variant& dataB,
+                      const Variant& dataC) {
   mpz_t gmpDataA, gmpDataB, gmpDataC, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_powm: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_POWM);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_powm: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_POWM);
     return false;
   }
+
+  if (mpz_sgn(gmpDataB) < 0) {
+    mpz_clears(gmpDataA, gmpDataB, NULL);
+
+    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE, cs_GMP_FUNC_NAME_GMP_POWM);
+    return false;
+  }
+
   if (!variantToGMPData(gmpDataC, dataC)) {
     mpz_clears(gmpDataA, gmpDataB, NULL);
 
-    raise_warning("gmp_powm: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_POWM);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_powm(gmpReturn, gmpDataA, gmpDataB, gmpDataC);
-  mpz_clears(gmpDataA, gmpDataB, gmpDataC, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpDataC, gmpReturn, NULL);
+
+  return ret;
 }
 
 
 Variant HHVM_FUNCTION(gmp_prob_prime,
                       const Variant& data,
-                      const Variant& reps = 10) {
-  mpz_t gmpData, gmpReps;
+                      int64_t reps = 10) {
+  mpz_t gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_prob_prime: Unable to convert variable to GMP - wrong type");
-    return false;
-  }
-  if (!variantToGMPData(gmpReps, reps)) {
-    mpz_clear(gmpData);
-
-    raise_warning("gmp_prob_prime: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_PROB_PRIME);
     return false;
   }
 
-  int64_t probPrime = mpz_probab_prime_p(gmpData, mpz_get_si(gmpReps));
-  mpz_clears(gmpData, gmpReps, NULL);
+  int64_t probPrime = mpz_probab_prime_p(gmpData, reps);
+
+  mpz_clear(gmpData);
 
   return probPrime;
+}
+
+
+void HHVM_FUNCTION(gmp_random,
+                   int64_t limiter) {
+  throw_not_implemented(cs_GMP_FUNC_NAME_GMP_RANDOM);
 }
 
 
@@ -766,11 +986,12 @@ Variant HHVM_FUNCTION(gmp_scan0,
   mpz_t gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_scan0: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_SCAN0);
     return false;
   }
 
   int64_t foundBit = mpz_scan0(gmpData, start);
+
   mpz_clear(gmpData);
 
   return foundBit;
@@ -783,11 +1004,12 @@ Variant HHVM_FUNCTION(gmp_scan1,
   mpz_t gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_scan1: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_SCAN1);
     return false;
   }
 
   int64_t foundBit = mpz_scan1(gmpData, start);
+
   mpz_clear(gmpData);
 
   return foundBit;
@@ -795,10 +1017,20 @@ Variant HHVM_FUNCTION(gmp_scan1,
 
 
 void HHVM_FUNCTION(gmp_setbit,
-                   Resource& data,
+                   VRefParam& data,
                    int64_t index,
                    bool bitOn = true) {
-  auto gmpRes = data.getTyped<GMPResource>();
+  if (index < 0) {
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, cs_GMP_FUNC_NAME_GMP_SETBIT);
+    return;
+  }
+
+  auto gmpRes = data.toResource().getTyped<GMPResource>();
+  if (!gmpRes) {
+    raise_warning("%s: Failed to alter bit", cs_GMP_FUNC_NAME_GMP_SETBIT);
+    return;
+  }
+
   if (bitOn) {
     mpz_setbit(gmpRes->getData(), index);
   } else {
@@ -812,11 +1044,12 @@ Variant HHVM_FUNCTION(gmp_sign,
   mpz_t gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_sign: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_SIGN);
     return false;
   }
 
   int64_t sign = mpz_sgn(gmpData);
+
   mpz_clear(gmpData);
 
   return sign;
@@ -825,18 +1058,21 @@ Variant HHVM_FUNCTION(gmp_sign,
 
 Variant HHVM_FUNCTION(gmp_sqrt,
                       const Variant& data) {
-  mpz_t gmpData, gmpReturn;
+  mpz_t gmpReturn, gmpData;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_sqrt: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_SQRT);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_sqrt(gmpReturn, gmpData);
-  mpz_clear(gmpData);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpReturn, gmpData, NULL);
+
+  return ret;
 }
 
 
@@ -845,19 +1081,20 @@ Variant HHVM_FUNCTION(gmp_sqrtrem,
   mpz_t gmpData, gmpSquareRoot, gmpRemainder;
 
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_sqrtrem: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_SQRTREM);
     return false;
   }
 
   mpz_inits(gmpSquareRoot, gmpRemainder, NULL);
   mpz_sqrtrem(gmpSquareRoot, gmpRemainder, gmpData);
-  mpz_clear(gmpData);
 
-  Array returnArray = Array::Create();
-  returnArray.add(0, NEWOBJ(GMPResource)(gmpSquareRoot));
-  returnArray.add(1, NEWOBJ(GMPResource)(gmpRemainder));
+  ArrayInit returnArray(2, ArrayInit::Map{});
+  returnArray.set(0, NEWOBJ(GMPResource)(gmpSquareRoot));
+  returnArray.set(1, NEWOBJ(GMPResource)(gmpRemainder));
 
-  return returnArray;
+  mpz_clears(gmpData, gmpSquareRoot, gmpRemainder, NULL);
+
+  return returnArray.toVariant();
 }
 
 
@@ -865,9 +1102,14 @@ String HHVM_FUNCTION(gmp_strval,
                      const Variant& data,
                      const int64_t base = 10) {
   mpz_t gmpData;
+
+  if (base < 1 || base > GMP_MAX_BASE) {
+    raise_warning(cs_GMP_INVALID_BASE_VALUE, cs_GMP_FUNC_NAME_GMP_STRVAL, base, GMP_MAX_BASE);
+    return s_gmp_0;
+  }
+
   if (!variantToGMPData(gmpData, data, base)) {
-    raise_warning("gmp_strval: Unable to convert variable to GMP - wrong type");
-    return "0";
+    return s_gmp_0;
   }
 
   int charLength = mpz_sizeinbase(gmpData, abs(base)) + 1;
@@ -875,50 +1117,59 @@ String HHVM_FUNCTION(gmp_strval,
     ++charLength;
   }
 
-  char *charArray = (char*) malloc(charLength);
-  if (charArray == NULL || !mpz_get_str(charArray, base, gmpData)) {
-    free(charArray);
+  char *charStr = (char*) smart_malloc(charLength);
+  if (!mpz_get_str(charStr, base, gmpData)) {
+    smart_free(charStr);
     mpz_clear(gmpData);
 
-    raise_warning("gmp_strval: Unable to convert convert to string");
-    return "0";
+    return s_gmp_0;
   }
 
+  String returnValue(charStr);
+
+  smart_free(charStr);
   mpz_clear(gmpData);
-  String returnValue(charArray);
-  free(charArray);
 
   return returnValue;
 }
 
 
 Variant HHVM_FUNCTION(gmp_sub,
-                     const Variant& dataA,
-                     const Variant& dataB) {
+                      const Variant& dataA,
+                      const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_sub: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_SUB);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_sub: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_SUB);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_sub(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
 bool HHVM_FUNCTION(gmp_testbit,
-                   Variant& data,
+                   const Variant& data,
                    int64_t index) {
+
+  if (index < 0) {
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, cs_GMP_FUNC_NAME_GMP_TESTBIT);
+    return false;
+  }
+
   if (data.isResource()) {
     auto gmpRes = data.toResource().getTyped<GMPResource>();
     return mpz_tstbit(gmpRes->getData(), index);
@@ -926,7 +1177,7 @@ bool HHVM_FUNCTION(gmp_testbit,
 
   mpz_t gmpData;
   if (!variantToGMPData(gmpData, data)) {
-    raise_warning("gmp_setbit: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_TESTBIT);
     return false;
   }
 
@@ -943,37 +1194,37 @@ Variant HHVM_FUNCTION(gmp_xor,
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
   if (!variantToGMPData(gmpDataA, dataA)) {
-    raise_warning("gmp_xor: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_XOR);
     return false;
   }
   if (!variantToGMPData(gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
 
-    raise_warning("gmp_xor: Unable to convert variable to GMP - wrong type");
+    raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_XOR);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_xor(gmpReturn, gmpDataA, gmpDataB);
-  mpz_clears(gmpDataA, gmpDataB, NULL);
 
-  return NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+
+  return ret;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension
 
-const StaticString s_GMP_ROUND_ZERO("GMP_ROUND_ZERO");
-const StaticString s_GMP_ROUND_PLUSINF("GMP_ROUND_PLUSINF");
-const StaticString s_GMP_ROUND_MINUSINF("GMP_ROUND_MINUSINF");
-const StaticString s_GMP_VERSION("GMP_VERSION");
-const StaticString k_GMP_VERSION(gmp_version);
-
 class GMPExtension : public Extension {
 public:
   GMPExtension() : Extension("gmp", "1.0.0-hhvm") { };
   virtual void moduleInit() {
+    Native::registerConstant<KindOfInt64>(
+      s_GMP_MAX_BASE.get(), GMP_MAX_BASE
+    );
     Native::registerConstant<KindOfInt64>(
       s_GMP_ROUND_ZERO.get(), GMP_ROUND_ZERO
     );
@@ -1017,6 +1268,7 @@ public:
     HHVM_FE(gmp_pow);
     HHVM_FE(gmp_powm);
     HHVM_FE(gmp_prob_prime);
+    HHVM_FE(gmp_random);
     HHVM_FE(gmp_scan0);
     HHVM_FE(gmp_scan1);
     HHVM_FE(gmp_setbit);
@@ -1035,5 +1287,3 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-//#endif

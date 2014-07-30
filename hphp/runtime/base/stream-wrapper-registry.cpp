@@ -182,25 +182,20 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
   return nullptr;
 }
 
-Wrapper* getWrapperFromURI(const String& uri,
-                           int* pathIndex /* = NULL */,
-                           bool warn /*= true */) {
-  const char *uri_string = uri.data();
-
+String getWrapperProtocol(const char* uri_string, int* pathIndex) {
   /* Special case for PHP4 Backward Compatability */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
-    return getWrapper(s_compress_zlib, warn);
+    return s_compress_zlib;
   }
 
   // data wrapper can come with or without a double forward slash
   if (!strncasecmp(uri_string, "data:", sizeof("data:") - 1)) {
-    return getWrapper(s_data, warn);
+    return s_data;
   }
 
   int n = 0;
   const char* p = uri_string;
-  while (*p && (isalnum((unsigned char)*p) ||
-         *p == '+' || *p == '-' || *p == '.')) {
+  while (*p && (isalnum(*p) || *p == '+' || *p == '-' || *p == '.')) {
     n++;
     p++;
   }
@@ -210,12 +205,18 @@ Wrapper* getWrapperFromURI(const String& uri,
   }
 
   if (!colon) {
-    return getWrapper(s_file, warn);
+    return s_file;
   }
 
   int len = colon - uri_string;
   if (pathIndex != nullptr) *pathIndex = len + sizeof("://") - 1;
-  return getWrapper(String(uri_string, len, CopyString), warn);
+  return String(uri_string, len, CopyString);
+}
+
+Wrapper* getWrapperFromURI(const String& uri,
+                           int* pathIndex /* = NULL */,
+                           bool warn /*= true */) {
+  return getWrapper(getWrapperProtocol(uri.data(), pathIndex), warn);
 }
 
 static FileStreamWrapper s_file_stream_wrapper;

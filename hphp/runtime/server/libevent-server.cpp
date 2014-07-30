@@ -377,7 +377,8 @@ void LibEventServer::stop() {
 
 bool LibEventServer::certHandler(const std::string &server_name,
                                  const std::string &key_file,
-                                 const std::string &crt_file) {
+                                 const std::string &crt_file,
+                                 bool duplicate) {
 #ifdef _EVENT_USE_OPENSSL
   // Create an SSL_CTX for this cert pair.
   struct ssl_config tmp_config;

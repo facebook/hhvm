@@ -67,6 +67,7 @@ struct Config {
                    const Hdf& config, const double defValue = 0);
   static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
                    const Hdf& config);
+
   static bool GetBool(const IniSettingMap &ini, const Hdf& config,
                       const bool defValue = false);
   static const char *Get(const IniSettingMap &ini, const Hdf& config,
@@ -100,12 +101,14 @@ struct Config {
     }
     auto key = IniName(config);
     auto* value = ini.get_ptr(key);
-    if (!value || !value->isArray()) {
+    if (!value) {
       return;
     }
-    for (auto &pair : value->items()) {
-      StringInsert(data, pair.first.asString().toStdString(),
-                         pair.second.asString().toStdString());
+    if (value->isArray() || value->isObject()) {
+      for (auto &pair : value->items()) {
+        StringInsert(data, pair.first.asString().toStdString(),
+                           pair.second.asString().toStdString());
+      }
     }
   }
 

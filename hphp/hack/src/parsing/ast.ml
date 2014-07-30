@@ -118,11 +118,11 @@ and class_attr =
   | CA_field of ca_field
 
 and ca_field = {
-    ca_type: ca_type;
-    ca_id: id;
-    ca_value: expr option;
-    ca_required: bool;
-  }
+  ca_type: ca_type;
+  ca_id: id;
+  ca_value: expr option;
+  ca_required: bool;
+}
 
 and ca_type =
   | CA_hint of hint
@@ -140,47 +140,47 @@ and kind =
 and class_var = id * expr option
 
 and method_ = {
-    m_kind: kind list ;
-    m_tparams: tparam list;
-    m_name: id;
-    m_params: fun_param list;
-    m_body: block;
-    m_user_attributes : user_attribute SMap.t;
-    m_ret: hint option;
-    m_type: fun_type;
-  }
+  m_kind: kind list ;
+  m_tparams: tparam list;
+  m_name: id;
+  m_params: fun_param list;
+  m_body: block;
+  m_user_attributes : user_attribute SMap.t;
+  m_ret: hint option;
+  m_fun_kind: fun_kind;
+}
 
 and is_reference = bool
 and is_variadic = bool
 
 and fun_param = {
-    param_hint : hint option;
-    param_is_reference : is_reference;
-    param_is_variadic : is_variadic;
-    param_id : id;
-    param_expr : expr option;
-   (* implicit field via constructor parameter.
-    * This is always None except for constructors and the modifier
-    * can be only Public or Protected or Private.
-    *)
-    param_modifier: kind option;
-    param_user_attributes: user_attribute SMap.t;
-  }
+  param_hint : hint option;
+  param_is_reference : is_reference;
+  param_is_variadic : is_variadic;
+  param_id : id;
+  param_expr : expr option;
+  (* implicit field via constructor parameter.
+   * This is always None except for constructors and the modifier
+   * can be only Public or Protected or Private.
+   *)
+  param_modifier: kind option;
+  param_user_attributes: user_attribute SMap.t;
+}
 
 and fun_ = {
-    f_mode            : mode;
-    f_tparams         : tparam list;
-    f_ret             : hint option;
-    f_name            : id;
-    f_params          : fun_param list;
-    f_body            : block;
-    f_user_attributes : user_attribute SMap.t;
-    f_mtime           : float;
-    f_type            : fun_type;
-    f_namespace       : Namespace_env.env;
-  }
+  f_mode            : mode;
+  f_tparams         : tparam list;
+  f_ret             : hint option;
+  f_name            : id;
+  f_params          : fun_param list;
+  f_body            : block;
+  f_user_attributes : user_attribute SMap.t;
+  f_mtime           : float;
+  f_fun_kind        : fun_kind;
+  f_namespace       : Namespace_env.env;
+}
 
-and fun_type =
+and fun_kind =
   | FAsync
   | FSync
 

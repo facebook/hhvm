@@ -448,7 +448,6 @@ public:
   ~EmitterVisitor();
 
   bool visit(ConstructPtr c);
-  bool visitImpl(ConstructPtr c);
   void visitKids(ConstructPtr c);
   void visit(FileScopePtr file);
   void assignLocalVariableIds(FunctionScopePtr fs);

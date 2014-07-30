@@ -144,7 +144,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
 }
 
 static Array get_frame_args_with_ref(const ActRec* ar) {
-  int numParams = ar->func()->numParams();
+  int numNonVariadic = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
 
   PackedArrayInit retArray(numArgs);
@@ -152,18 +152,30 @@ static Array get_frame_args_with_ref(const ActRec* ar) {
   auto local = reinterpret_cast<TypedValue*>(
     uintptr_t(ar) - sizeof(TypedValue)
   );
-  for (int i = 0; i < numArgs; ++i) {
-    if (i < numParams) {
-      // This corresponds to one of the function's formal parameters, so it's
-      // on the stack.
-      retArray.appendWithRef(tvAsCVarRef(local));
-      --local;
-    } else {
-      // This is not a formal parameter, so it's in the ExtraArgs.
-      retArray.appendWithRef(tvAsCVarRef(ar->getExtraArg(i - numParams)));
-    }
+  int i = 0;
+  // The function's formal parameters are on the stack
+  for (; i < numArgs && i < numNonVariadic; ++i) {
+    retArray.appendWithRef(tvAsCVarRef(local));
+    --local;
   }
 
+  if (i < numArgs) {
+    // If there are still args that haven't been accounted for, they have
+    // either been ... :
+    if (ar->func()->hasVariadicCaptureParam()) {
+      // ... shuffled into a packed array stored in the variadic capture
+      // param on the stack
+      for (ArrayIter iter(tvAsCVarRef(local)); iter; ++iter) {
+        retArray.appendWithRef(iter.secondRef());
+      }
+    } else {
+      // ... or moved into the ExtraArgs datastructure.
+      for (; i < numArgs; ++i) {
+        retArray.appendWithRef(
+          tvAsCVarRef(ar->getExtraArg(i - numNonVariadic)));
+      }
+    }
+  }
   return retArray.toArray();
 }
 

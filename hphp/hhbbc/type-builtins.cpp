@@ -13,13 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/hhbbc/type-builtins.h"
 
-#include "hphp/hhbbc/representation.h"
-
 #include "hphp/runtime/base/type-string.h"
-
+#include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -79,9 +76,11 @@ bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
 }
 
 Type native_function_return_type(borrowed_ptr<const php::Func> f) {
-  assert(f->nativeInfo);
   if (f->nativeInfo->returnType == KindOfInvalid) {
-    return TGen;
+    if (f->attrs & AttrReference) {
+      return TRef;
+    }
+    return TInitCell;
   }
   auto t = from_DataType(f->nativeInfo->returnType);
   // Regardless of ParamCoerceMode, native functions can return null if

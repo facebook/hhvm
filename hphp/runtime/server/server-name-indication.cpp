@@ -46,15 +46,16 @@ void ServerNameIndication::load(const std::string &cert_dir,
     s_path.append("/");
   }
 
-  std::vector<std::string> server_names;
+  std::vector<std::pair<std::string, bool>> server_names;
   find_server_names(s_path, server_names);
 
   for (auto it = server_names.begin(); it != server_names.end(); ++it) {
-    loadFromFile(*it, certHandlerFn);
+    loadFromFile(it->first, it->second, certHandlerFn);
   }
 }
 
 bool ServerNameIndication::loadFromFile(const std::string &server_name,
+                                        bool duplicate,
                                         CertHanlderFn certHandlerFn) {
   std::string key_file = s_path + server_name + key_ext;
   std::string crt_file = s_path + server_name + crt_ext;
@@ -63,7 +64,7 @@ bool ServerNameIndication::loadFromFile(const std::string &server_name,
     return false;
   }
 
-  return certHandlerFn(server_name, key_file, crt_file);
+  return certHandlerFn(server_name, key_file, crt_file, duplicate);
 }
 
 void ServerNameIndication::insertSNICtx(const std::string &server_name,
@@ -85,7 +86,7 @@ bool ServerNameIndication::fileIsValid(const std::string &filename) {
 
 void ServerNameIndication::find_server_names(
     const std::string &path,
-    std::vector<std::string> &server_names) {
+    std::vector<std::pair<std::string, bool>> &server_names) {
 
   hphp_string_map<bool> crt_files;
   hphp_string_map<bool> key_files;
@@ -107,11 +108,19 @@ void ServerNameIndication::find_server_names(
   }
 
   // Intersect key_files and crt_files to find valid pairs.
+  std::unordered_set<ino_t> crt_inodes;
   for (auto it = key_files.begin(); it != key_files.end(); ++it) {
-    if (crt_files.find(it->first) == crt_files.end()) {
+    auto crt_file_it = crt_files.find(it->first);
+    if (crt_file_it == crt_files.end()) {
       continue;
     }
-    server_names.push_back(it->first);
+    struct stat statbuf;
+    int rc = stat(crt_file_it->first.c_str(), &statbuf);
+    if (rc != 0) {
+      continue;
+    }
+    bool dup = crt_inodes.insert(statbuf.st_ino).second;
+    server_names.push_back({it->first, dup});
   }
 }
 
@@ -167,7 +176,7 @@ bool ServerNameIndication::setCTXFromMemory(SSL *ssl, const std::string &name) {
 
 bool ServerNameIndication::setCTXFromFile(SSL *ssl, const std::string &name) {
   return s_certHandlerFn &&
-    loadFromFile(name, s_certHandlerFn) && setCTXFromMemory(ssl, name);
+    loadFromFile(name, false, s_certHandlerFn) && setCTXFromMemory(ssl, name);
   return false;
 }
 

@@ -548,7 +548,50 @@ class Status {
   }
 
   public static function utf8Sanitize($str) {
-    return UConverter::transcode($str, 'UTF-8', 'UTF-8');
+    if (class_exists('UConverter')) {
+      return UConverter::transcode($str, 'UTF-8', 'UTF-8');
+    }
+
+    // UConverter is PHP5.5 or later
+    // Do the equivalent using a slower user-space implementation
+    $ret = '';
+    $len = strlen($str);
+    $pos = 0;
+    while ($pos < $len) {
+      $c = $str[$pos];
+      $co = ord($c);
+      if ($co < 0x80) {
+        // U+0000 - U+007F ASCII
+        $ret .= $c;
+        ++$pos;
+      } elseif ((($co & 0xE0) == 0xC0) &&
+                (($len - $pos) > 1) &&
+                ((ord($str[$pos+1]) & 0xC0) == 0x80)) {
+        // U+0080 - U+07FF Lower Basic Multilingual Plane
+        $ret .= substr($str, $pos, 2);
+        $pos += 2;
+      } elseif ((($co & 0xF0) == 0xE0) &&
+                (($len - $pos) > 2) &&
+                ((ord($str[$pos+1]) & 0xC0) == 0x80) &&
+                ((ord($str[$pos+2]) & 0xC0) == 0x80)) {
+        // U+0800 - U+FFFF Upper Basic Multilingual Plane
+        $ret .= substr($std, $pos, 3);
+        $pos += 3;
+      } elseif ((($co & 0xF8) == 0xF0) &&
+                (($len - $pos) > 3) &&
+                ((ord($str[$pos+1]) & 0xC0) == 0x80) &&
+                ((ord($str[$pos+2]) & 0xC0) == 0x80) &&
+                ((ord($str[$pos+3]) & 0xC0) == 0x80)) {
+        // U+010000 - U+10FFFF Supplementary Multilingual Planes
+        $ret .= substr($str, $pos, 4);
+        $pos += 4;
+      } else {
+        // Invalid UTF8
+        $ret .= "\xEF\xBF\xBD"; // U+FFFD REPLACEMENT CHARACTER
+        ++$pos;
+      }
+    }
+    return $ret;
   }
 
   public static function jsonEncode($data) {

@@ -25,13 +25,13 @@ module Dep = Typing_deps.Dep
 
 (* Module used to represent serialized classes *)
 module Class = struct
-  type t = class_type
+  type t = Typing_defs.class_type
   let prefix = Prefix.make()
 end
 
 (* a function type *)
 module Fun = struct
-  type t = fun_type
+  type t = Typing_defs.fun_type
   let prefix = Prefix.make()
 end
 
@@ -89,9 +89,8 @@ and genv = {
   self_id : string     ;
   self    : ty         ;
   static  : bool       ;
-  has_yield : bool     ;
   allow_null_as_void : bool;
-  f_type  : Ast.fun_type;
+  fun_kind : Nast.fun_kind;
   anons   : anon IMap.t;
   droot   : Typing_deps.Dep.variant option  ;
   file    : string;
@@ -263,9 +262,8 @@ let empty file = {
     self    = Reason.none, Tany;
     static  = false;
     parent  = Reason.none, Tany;
-    has_yield = false;
     allow_null_as_void = false;
-    f_type  = Ast.FSync;
+    fun_kind = FSync;
     anons   = IMap.empty;
     droot   = None;
     file    = file;
@@ -299,7 +297,7 @@ let add_wclass env x =
 (* When we want to type something with a fresh typing environment *)
 let fresh_tenv env f =
   let genv = env.genv in
-  let genv = { genv with has_yield = false; allow_null_as_void = false } in
+  let genv = { genv with allow_null_as_void = false } in
   f { env with todo = []; tenv = IMap.empty; genv = genv }
 
 let get_class env x =
@@ -401,31 +399,27 @@ let with_return env f =
   let env = f env in
   set_return env ret
 
-let has_yield env = env.genv.has_yield
 let allow_null_as_void env = env.genv.allow_null_as_void
 let is_static env = env.genv.static
 let get_self env = env.genv.self
 let get_self_id env = env.genv.self_id
 let get_parent env = env.genv.parent
 
-let get_fn_type env = env.genv.f_type
+let get_fn_kind env = env.genv.fun_kind
 
 let get_fun env x =
   let dep = Dep.Fun x in
   Typing_deps.add_idep env.genv.droot dep;
   env, Funs.get x
 
-let set_has_yield ?(value=true) env =
-  {env with genv = {env.genv with has_yield = value }}
-
 let set_allow_null_as_void ?(allow=true) env =
   let genv = env.genv in
   let genv = { genv with allow_null_as_void = allow } in
   { env with genv = genv }
 
-let set_fn_type env fn_type =
+let set_fn_kind env fn_type =
   let genv = env.genv in
-  let genv = { genv with f_type = fn_type } in
+  let genv = { genv with fun_kind = fn_type } in
   { env with genv = genv }
 
 let add_todo env x =
@@ -699,15 +693,12 @@ let anon anon_lenv env f =
   (* Setting up the environment. *)
   let old_lenv = env.lenv in
   let old_return = get_return env in
-  let old_has_yield = env.genv.has_yield in
-  let outer_f_type = get_fn_type env in
-  let env = set_has_yield ~value:false env in
+  let outer_fun_kind = get_fn_kind env in
   let env = { env with lenv = anon_lenv } in
   (* Typing *)
   let env, result = f env in
   (* Cleaning up the environment. *)
   let env = { env with lenv = old_lenv } in
-  let env = set_has_yield ~value:old_has_yield env in
   let env = set_return env old_return in
-  let env = set_fn_type env outer_f_type in
+  let env = set_fn_kind env outer_fun_kind in
   env, result

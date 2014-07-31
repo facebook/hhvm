@@ -22,6 +22,7 @@
 #include <curl/curl.h>
 #include <time.h>
 
+#include "hphp/util/health-monitor-types.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/shared-string.h"
@@ -65,6 +66,8 @@ public:
                            const char *vhost);
   static void SetThreadMode(ThreadMode mode);
   static void ReportStatus(std::string &out, Format format);
+
+  static void SetServerHealthLevel(HealthLevel new_health_level);
 
   // io status functions
   static void SetThreadIOStatusAddress(const char *name);
@@ -133,6 +136,9 @@ private:
   int64_t m_min;  // earliest timepoint
   int64_t m_max;  // latest timepoint
   CounterMap m_values;  // current page's name value pairs
+
+  // general health-level of local server
+  static HealthLevel m_ServerHealthLevel;
 
   void log(const std::string &name, int64_t value);
   int64_t get(const std::string &name);

@@ -27,6 +27,7 @@
 #include "hphp/util/atomic.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/exception.h"
+#include "hphp/util/health-monitor-types.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/synchronizable-multi.h"
@@ -93,12 +94,6 @@ namespace detail {
   struct NoDropCachePolicy { static void dropCache() {} };
 }
 
-struct IResourceProtected {
-  virtual ~IResourceProtected() { } // make compiler happy
-  virtual void setStatus(bool newStatus) = 0;
-  virtual bool getStatus() = 0;
-};
-
 struct IQueuedJobsReleaser {
   virtual ~IQueuedJobsReleaser() { }
   virtual int32_t numOfJobsToRelease() = 0;
@@ -133,13 +128,13 @@ public:
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
            int maxJobQueuingMs = -1, int numPriorities = 1, int groups = 1,
            int queuedJobsReleaseRate = 3,
-           IResourceProtected* dispatcher = nullptr)
+           IHostHealthObserver* healthStatus = nullptr)
       : SynchronizableMulti(threadRoundRobin ? 1 : threadCount, groups),
         m_jobCount(0), m_stopped(false), m_workerCount(0),
         m_dropCacheTimeout(dropCacheTimeout), m_dropStack(dropStack),
         m_lifoSwitchThreshold(lifoSwitchThreshold),
         m_maxJobQueuingMs(maxJobQueuingMs),
-        m_jobReaperId(-1), m_dispatcher(dispatcher),
+        m_jobReaperId(-1), m_healthStatus(healthStatus),
         m_queuedJobsReleaser(
             std::make_shared<SimpleReleaser>(queuedJobsReleaseRate)) {
     m_jobQueues.resize(numPriorities);
@@ -243,8 +238,8 @@ public:
     *expired = false;
     Lock lock(this);
     bool flushed = false;
-    bool ableToDeque = (m_dispatcher == nullptr ?
-        true : (m_dispatcher->getStatus()));
+    bool ableToDeque = (m_healthStatus == nullptr ?
+        true : (m_healthStatus->getStatus() != HealthLevel::BackOff));
 
     while (m_jobCount == 0 || !ableToDeque) {
 
@@ -351,8 +346,8 @@ public:
   const int m_lifoSwitchThreshold;
   const int m_maxJobQueuingMs;
   std::atomic<int> m_jobReaperId;
-  IResourceProtected* m_dispatcher; // the dispatcher responsible for this
-                                    // JobQueue
+  IHostHealthObserver* m_healthStatus;  // the dispatcher responsible for this
+                                        // JobQueue
   std::shared_ptr<IQueuedJobsReleaser> m_queuedJobsReleaser;
 };
 
@@ -362,7 +357,7 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
            int maxJobQueuingMs = -1, int numPriorities = 1,
            int groups = 1, int queuedJobsReleaseRate = 3,
-           IResourceProtected* dispatcher = nullptr) :
+           IHostHealthObserver* healthStatus = nullptr) :
     JobQueue<TJob,false,Policy>(threadCount,
                                 threadRoundRobin,
                                 dropCacheTimeout,
@@ -372,7 +367,7 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
                                 numPriorities,
                                 queuedJobsReleaseRate,
                                 groups,
-                                dispatcher) {
+                                healthStatus) {
     pthread_cond_init(&m_cond, nullptr);
   }
   ~JobQueue() {
@@ -504,7 +499,7 @@ private:
  * Driver class to push through the whole thing.
  */
 template<class TWorker>
-class JobQueueDispatcher : public IResourceProtected {
+class JobQueueDispatcher : public IHostHealthObserver {
 public:
   /**
    * Constructor.
@@ -515,8 +510,8 @@ public:
                      int lifoSwitchThreshold = INT_MAX,
                      int maxJobQueuingMs = -1, int numPriorities = 1,
                      int groups = 1, int queuedJobsReleaseRate = 3)
-      : m_stopped(true), m_mem_protected(true), m_id(0), m_context(context),
-        m_maxThreadCount(threadCount),
+      : m_stopped(true), m_healthStatus(HealthLevel::Bold), m_id(0),
+        m_context(context), m_maxThreadCount(threadCount),
         m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
                 lifoSwitchThreshold, maxJobQueuingMs, numPriorities, groups,
                 queuedJobsReleaseRate, this),
@@ -689,35 +684,23 @@ public:
     stop();
   }
 
-  void setStatus(bool newStatus) override {
-    if (m_mem_protected != newStatus) {
-      m_mem_protected = newStatus;
-
-      if (newStatus) {
-        // changing m_mem_protected flag from FALSE to TRUE
-        m_queue.releaseQueuedJobs();
-      } else {
-        // changing m_mem_protected flag from TRUE to FALSE
-        // do nothing?
-      }
-    } else {
-      if (newStatus) {
-        // flag stays on TRUE
-        m_queue.releaseQueuedJobs();
-      } else {
-        // flag stays on FALSE
-        // do nothing?
-      }
+  void notifyNewStatus(HealthLevel newStatus) override {
+    bool curStopDequeue = (newStatus == HealthLevel::BackOff);
+    if (!curStopDequeue) {
+      // release blocked requests in queue if any
+      m_queue.releaseQueuedJobs();
     }
+
+    m_healthStatus = newStatus;
   }
 
-  bool getStatus() override {
-    return m_mem_protected;
+  HealthLevel getStatus() override {
+    return m_healthStatus;
   }
 
 private:
   bool m_stopped;
-  bool m_mem_protected;
+  HealthLevel m_healthStatus;
   int m_id;
   typename TWorker::ContextType m_context;
   int m_maxThreadCount;

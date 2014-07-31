@@ -20,4 +20,4 @@ array(2) {
 }
 string(3) "bar"
 string(4) "boom"
-NULL
+bool(false)

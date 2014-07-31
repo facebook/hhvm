@@ -2,6 +2,6 @@ string(3) "bar"
 array(0) {
 }
 array(1) {
-  [0] =>
+  [0]=>
   string(3) "bar"
 }

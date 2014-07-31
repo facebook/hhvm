@@ -21,7 +21,7 @@ function NewRedisTestInstance($status = false) {
 }
 
 function GetTestKeyName($test, $rand = false) {
-  $name = 'REDIS_TEST:' . preg_replace('/[^a-zA-Z0-9]/', '-', $test);
-  if ($rand) $name .= ':' . rand(0,1000000);
-  return $name;
+  static $ts;
+  $ts = $ts ?: time();
+  return 'REDIS_TEST:' . md5( $test . $ts . ( $rand ? '' : rand(0,1000000) ) );
 }

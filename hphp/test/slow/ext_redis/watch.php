@@ -16,7 +16,7 @@ var_dump($r1->set($key1, $value)); //true
 var_dump($r1->watch($key1)); //true
 $checkValue = $r1->get($key1);
 var_dump($checkValue); //6379
-if ($checkValue !== null && $checkValue == $value) {
+if ($checkValue !== false && $checkValue == $value) {
   var_dump($r1->multi()->del($key1)->exec()); //[1]
 }
 
@@ -25,6 +25,6 @@ var_dump($r1->watch($key1));
 $checkValue = $r1->get($key1);
 var_dump($r2->set($key1, 'different value'));
 var_dump($checkValue);
-if ($checkValue !== null && $checkValue == $value) {
+if ($checkValue !== false && $checkValue == $value) {
   var_dump($r1->multi()->del($key1)->exec());
 }

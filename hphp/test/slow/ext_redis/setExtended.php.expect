@@ -5,11 +5,11 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-NULL
+bool(false)
 bool(true)
 bool(true)
-NULL
+bool(false)
 bool(true)
 string(2) "10"
-NULL
+bool(false)
 Redis Exception: Invalid set options: nx and xx may not be specified at the same time

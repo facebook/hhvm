@@ -1,8 +1,9 @@
 NEXT
  - Interface requirements (similar to trait requirements) enforced
  - Initial support for PHP5.6 argument unpacking: f($x, $y, ...$args)
- - hhi files are embedded in the hh_server binary
+ - Hack: hhi files are embedded in the hh_server binary
  - removed trampolines and the Eval.JitTrampolines option
+ - Hack: improved support for Generators, including async generators
 
 "Outkast" 17-July 2014
   - PHP_VERSION is now 5.6

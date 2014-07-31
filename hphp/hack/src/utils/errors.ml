@@ -788,7 +788,7 @@ let not_abstract_without_body (p, _) =
 
 let return_in_gen p =
   add p
-    ("Don't use return in a generator (a generator"^
+    ("You cannot return a value in a generator (a generator"^
      " is a function that uses yield)")
 
 let return_in_finally p =

@@ -428,9 +428,8 @@ and stmt env = function
   | Return (p, None) ->
       let rty = match Env.get_fn_kind env with
         | FSync -> (Reason.Rwitness p, Tprim Tvoid)
-        (* Caught in NastCheck, TODO #4534682 allow this. *)
         | FGenerator
-        | FAsyncGenerator -> any
+        | FAsyncGenerator -> any (* Return type checked against the "yield". *)
         | FAsync -> (Reason.Rwitness p, Tapply ((p, "\\Awaitable"), [(Reason.Rwitness p, Toption (Env.fresh_type ()))])) in
       let expected_return = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
@@ -442,7 +441,7 @@ and stmt env = function
       let rty = match Env.get_fn_kind env with
         | FSync -> rty
         | FGenerator
-        | FAsyncGenerator -> any (* Caught in NastCheck *)
+        | FAsyncGenerator -> any (* Is an error, but caught in NastCheck. *)
         | FAsync -> (Reason.Rwitness p), Tapply ((p, "\\Awaitable"), [rty]) in
       let expected_return = Env.get_return env in
       (match snd (Env.expand_type env expected_return) with

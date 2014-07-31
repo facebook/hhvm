@@ -37,9 +37,10 @@ module CheckFunctionType = struct
     | FAsync, Return (_, Some e) ->
         expr f_type e;
         ()
-    | (FGenerator | FAsyncGenerator), Return (p, _) ->
-        (* TODO #4534682 Support "return;" in generators *)
-        Errors.return_in_gen p;
+    | (FGenerator | FAsyncGenerator), Return (p, e) ->
+        (match e with
+        None -> ()
+        | Some _ -> Errors.return_in_gen p);
         ()
 
     | _, Throw (_, e)

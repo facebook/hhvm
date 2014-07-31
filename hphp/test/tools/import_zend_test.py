@@ -108,6 +108,8 @@ flaky_tests = (
     '/ext/sqlite3/tests/sqlite3_25_create_aggregate.php',
     '/ext/standard/tests/file/bug41655_2.php',
     '/ext/standard/tests/file/disk_free_space_basic.php',
+    '/ext/standard/tests/file/disk_total_space_basic.php',
+    '/ext/standard/tests/file/disk_total_space_variation.php',
     '/ext/standard/tests/file/fread_socket_variation1.php',
     '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation3.php',
     '/ext/standard/tests/network/fsockopen_variation1.php',

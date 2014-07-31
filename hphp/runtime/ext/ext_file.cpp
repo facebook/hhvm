@@ -1404,7 +1404,7 @@ Variant f_tempnam(const String& dir, const String& prefix) {
   tmpdir = File::TranslatePath(tmpdir);
   String pbase = f_basename(prefix);
   if (pbase.size() > 64) pbase = pbase.substr(0, 63);
-  if (tmpdir[tmpdir.length() - 1] == '/') {
+  if ((tmpdir.length() > 0) && (tmpdir[tmpdir.length() - 1] == '/')) {
     trailing_slash = "";
   }
   String templ = tmpdir + trailing_slash + pbase + "XXXXXX";

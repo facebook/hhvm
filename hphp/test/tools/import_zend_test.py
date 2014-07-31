@@ -164,6 +164,8 @@ flaky_tests = (
 
     # flaky: t3851970
     '/ext/session/tests/009.php',
+    '/ext/standard/tests/file/bug39538.php',
+    '/ext/standard/tests/file/bug53848.php',
     '/ext/standard/tests/general_functions/proc_open02.php',
     '/ext/ftp/tests/bug39458.php',
     '/ext/standard/tests/file/rename_variation3.php',

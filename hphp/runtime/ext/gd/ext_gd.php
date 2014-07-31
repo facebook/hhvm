@@ -704,7 +704,8 @@ function imagepng(resource $image,
  */
 <<__Native>>
 function imagewebp(resource $image,
-                  string $filename = ""): bool;
+                  string $filename = "",
+		  int $quality = 80): bool;
 
 /* imagepolygon() creates a polygon in the given image.
  */

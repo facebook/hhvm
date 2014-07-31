@@ -1882,6 +1882,9 @@ static bool _php_image_output_ctx(const Resource& image,
   case PHP_GDIMG_TYPE_PNG:
     ((void(*)(gdImagePtr, gdIOCtx *, int, int))(func_p))(im, ctx, q, f);
     break;
+  case PHP_GDIMG_TYPE_WEBP:
+    ((void(*)(gdImagePtr, gdIOCtx *, int64_t, int))(func_p))(im, ctx, q, f);
+    break;
   case PHP_GDIMG_TYPE_XBM:
   case PHP_GDIMG_TYPE_WBM:
     if (q == -1) { // argc < 3
@@ -3571,11 +3574,11 @@ bool HHVM_FUNCTION(imagepng, const Resource& image,
     const String& filename /* = null_string */,
     int64_t quality /* = -1 */, int64_t filters /* = -1 */) {
 #ifdef USE_GD_IOCTX
-  return _php_image_output_ctx(image, filename, (int)quality, (int)filters,
+  return _php_image_output_ctx(image, filename, quality, filters,
                                PHP_GDIMG_TYPE_PNG, "PNG",
                                (void (*)())gdImagePngCtxEx);
 #else
-  return _php_image_output(image, filename, (int)quality, (int)filters,
+  return _php_image_output(image, filename, quality, filters,
                            PHP_GDIMG_TYPE_PNG, "PNG",
                            (void (*)())gdImagePng);
 #endif
@@ -3584,13 +3587,14 @@ bool HHVM_FUNCTION(imagepng, const Resource& image,
 
 #ifdef HAVE_LIBVPX
 bool HHVM_FUNCTION(imagewebp, const Resource& image,
-    const String& filename /* = null_string */) {
+    const String& filename /* = null_string */,
+    int64_t quality /* = 80 */) {
 #ifdef USE_GD_IOCTX
-  return _php_image_output_ctx(image, filename, -1, -1,
+  return _php_image_output_ctx(image, filename, quality, -1,
                                PHP_GDIMG_TYPE_WEBP, "WEBP",
                                (void (*)())gdImageWebpCtx);
 #else
-  return _php_image_output(image, filename, -1, -1,
+  return _php_image_output(image, filename, quality, -1,
                            PHP_GDIMG_TYPE_WEBP, "WEBP",
                            (void (*)())gdImageWebp);
 #endif

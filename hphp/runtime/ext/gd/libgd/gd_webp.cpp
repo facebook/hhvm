@@ -152,7 +152,7 @@ int mapQualityToVP8QP(int quality) {
 	const float vp8qp =
 	scale * (MAX_QUALITY - quality) / (MAX_QUALITY - MIN_QUALITY) + MIN_VP8QP;
 	if (quality < MIN_QUALITY || quality > MAX_QUALITY) {
-		php_gd_error("Wrong quality value %d.", quality);
+		php_gd_error("Wrong quality value %i.", quality);
 		return -1;
 	}
 
@@ -184,7 +184,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int64_t quantization)
     	php_gd_error("gd-webp error: cannot allocate Y buffer");
         return;
     }
-	vp8_quality = mapQualityToVP8QP(80);
+	vp8_quality = mapQualityToVP8QP(quantization);
 
     U = Y + width * height;
     V = U + yuv_width * yuv_height;

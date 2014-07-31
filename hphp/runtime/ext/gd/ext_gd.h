@@ -206,7 +206,7 @@ bool HHVM_FUNCTION(imagepng,  const Resource& image,
 #endif
 #ifdef HAVE_LIBVPX
 bool HHVM_FUNCTION(imagewebp,  const Resource& image,
-  const String& filename = null_string);
+  const String& filename = null_string, int64_t quality = 80);
 #endif
 bool HHVM_FUNCTION(imagepolygon, const Resource& image,
   const Array& points, int64_t num_points, int64_t color);

@@ -46,10 +46,6 @@ testing and some alternative PHP implementation.
 - xbox_task_status
 - xbox_task_result
 
-- call_user_func_array_async
-- call_user_func_async
-- check_user_func_async
-- end_user_func_async
 - fb_call_user_func_array_safe
 - fb_call_user_func_safe
 - fb_call_user_func_safe_return

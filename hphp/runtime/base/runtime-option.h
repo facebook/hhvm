@@ -136,7 +136,6 @@ public:
   static int PageletServerQueueLimit;
   static bool PageletServerThreadDropStack;
 
-  static int FiberCount;
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
   static int64_t ServerMemoryHeadRoom;

@@ -136,7 +136,6 @@ bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::PageletServerQueueLimit = 0;
 bool RuntimeOption::PageletServerThreadDropStack = false;
-int RuntimeOption::FiberCount = Process::GetCPUCount();
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
 int64_t RuntimeOption::ServerMemoryHeadRoom = 0;
@@ -1256,10 +1255,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(PageletServerThreadDropCacheTimeoutSeconds, ini,
                  pagelet["ThreadDropCacheTimeoutSeconds"], 0);
     Config::Bind(PageletServerQueueLimit, ini, pagelet["QueueLimit"], 0);
-  }
-  {
-    Config::Bind(FiberCount, ini, config["Fiber.ThreadCount"],
-                 Process::GetCPUCount());
   }
   {
     Hdf content = config["StaticFile"];

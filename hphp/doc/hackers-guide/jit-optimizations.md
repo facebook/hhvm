@@ -21,7 +21,7 @@ There are two parts to guard relaxation: value constraining and the relaxation
 itself. Value constraining happens during the initial IR generation pass, and
 is managed by the [IRBuilder](../../runtime/vm/jit/trace-builder.h) class. The
 important methods in this process are `IRBuilder::constrainValue()`,
-`TraceBuidler::constrainLocal()`, and `IRBuilder::constrainStack()`. Whenever
+`IRBuilder::constrainLocal()`, and `IRBuilder::constrainStack()`. Whenever
 the behavior of a sequence of HHIR depends on the types of one or more values,
 the types of those values must be constrained using the constrain* methods
 previously mentioned. Each takes the value to be constrained and how it should

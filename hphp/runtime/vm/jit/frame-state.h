@@ -90,7 +90,7 @@ private:
 /*
  * LocalStateHook is used to separate the acts of determining which locals are
  * affected by an instruction and recording those changes. It allows consumers
- * of FrameState to get details about how an instruciton affects the locals
+ * of FrameState to get details about how an instruction affects the locals
  * without having to query the state of each local before and after having
  * FrameState process the instruction.
  */

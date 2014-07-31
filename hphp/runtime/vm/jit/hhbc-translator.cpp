@@ -3364,19 +3364,13 @@ SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {
   };
 
   if (numNonDefault == 0) return curName();
-
   assert(numNonDefault == 1);
 
   auto const val = topC(0);
-
   if (val->isA(Type::Null)) return curName();
 
-  // get_class($this) is just get_called_class().
-  if (val->inst()->is(LdThis)) return optimizedCallGetCalledClass();
+  if (val->isA(Type::Obj)) return gen(LdClsName, gen(LdObjClass, val));
 
-  auto const ty = val->type();
-  if (!(ty < Type::Obj)) return nullptr;
-  if (auto const exact = ty.getExactClass()) return cns(exact->name());
   return nullptr;
 }
 

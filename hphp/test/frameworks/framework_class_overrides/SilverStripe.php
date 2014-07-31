@@ -36,7 +36,7 @@ class SilverStripe extends Framework {
     verbose("Creating a _ss_environment file for setting SQLite adapter.\n");
 
     $contents = <<<'ENV_FILE'
-<?hh
+<?php
 define('SS_DATABASE_SERVER', 'localhost');
 define('SS_DATABASE_USERNAME', 'root');
 define('SS_DATABASE_PASSWORD', '');

@@ -124,7 +124,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
   transport->enableCompression();
 
-  ServerStatsHelper ssh("all", ServerStatsHelper::TRACK_MEMORY);
+  ServerStatsHelper ssh("all",
+                        ServerStatsHelper::TRACK_MEMORY |
+                        ServerStatsHelper::TRACK_HWINST);
   Logger::Verbose("receiving %s", transport->getCommand().c_str());
 
   // will clear all extra logging when this function goes out of scope

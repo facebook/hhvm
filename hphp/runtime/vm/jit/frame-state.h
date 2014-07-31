@@ -141,11 +141,13 @@ struct FrameState final : private LocalStateHook {
 
   void update(const IRInstruction* inst);
 
+  bool hasStateFor(Block* block) const;
+
   /*
    * Starts tracking state for a block and reloads any previously
    * saved state.
    */
-  void startBlock(Block*);
+  void startBlock(Block* block);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -165,7 +167,14 @@ struct FrameState final : private LocalStateHook {
   void clearBlock(Block*);
 
   /*
-   * Clear all tracked state.
+   * Clear the current state, but keeps the state associated with with
+   * block intact.
+   */
+  void clearCurrentState();
+
+  /*
+   * Clear all tracked state, including both the current state and the
+   * state associated with all blocks.
    */
   void clear();
 
@@ -174,7 +183,11 @@ struct FrameState final : private LocalStateHook {
    */
   void clearCse();
 
-  void clearCurrentLocals() { clearLocals(*this); }
+  /*
+   * Clears the current state and resets the current marker to the
+   * given value.
+   */
+  void resetCurrentState(const BCMarker& marker);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }

@@ -1156,34 +1156,30 @@ void IRBuilder::insertLocalPhis() {
   }
 }
 
-void IRBuilder::startBlock(Block* block) {
+void IRBuilder::startBlock(Block* block, const BCMarker& marker) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
-  if (block->empty()) {
-    if (block != m_curBlock) {
-      assert(m_curBlock);
-      m_state.pauseBlock(m_curBlock);
-      m_state.pauseBlock(block);
-      auto& prev = m_curBlock->back();
-      if (!prev.hasEdges()) {
-        gen(Jmp, block);
-      } else if (!prev.isTerminal()) {
-        prev.setNext(block);
-      }
-      m_curBlock = block;
-      m_state.startBlock(m_curBlock);
-      insertLocalPhis();
-      FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
-             show(m_state));
-    }
+  if (block == m_curBlock) return;
+
+  auto& lastInst = m_curBlock->back();
+  always_assert(lastInst.isBlockEnd());
+  always_assert(lastInst.isTerminal() || m_curBlock->next() != nullptr);
+
+  m_state.pauseBlock(m_curBlock);
+  m_curBlock = block;
+  if (m_state.hasStateFor(m_curBlock)) {
+    m_state.startBlock(m_curBlock);
+    insertLocalPhis();
+  } else {
+    m_state.resetCurrentState(marker);
   }
 
-  if (sp() == nullptr) {
-    gen(DefSP, StackOffset(spOffset() + evalStack().size() - stackDeficit()),
-        fp());
-  }
+  FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
+         show(m_state));
 
+  if (fp() == nullptr) gen(DefFP);
+  if (sp() == nullptr) gen(DefSP, StackOffset(spOffset()), fp());
 }
 
 void IRBuilder::clearBlockState(Block* block) {

@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -545,6 +546,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
         auto showFailure = [&]{
           std::string ret;
+          ret += show(*(mcg->tx().region())) + "\n";
           ret += folly::format("Unconsumed reference(s) leaving B{}\n",
                                block->id()).str();
           ret += show(m_state);

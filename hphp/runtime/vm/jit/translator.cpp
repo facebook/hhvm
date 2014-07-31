@@ -1629,6 +1629,9 @@ Translator::translateRegion(const RegionDesc& region,
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
+  m_region = &region;
+  SCOPE_EXIT { m_region = nullptr; };
+
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   IRBuilder& irb = ht.irBuilder();
   auto const startSk = region.blocks.front()->start();
@@ -1665,9 +1668,9 @@ Translator::translateRegion(const RegionDesc& region,
         always_assert(RuntimeOption::EvalJitLoops ||
                       RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
         irb.clearBlockState(irBlock);
-        irb.state().clearCurrentLocals();
       }
-      ht.irBuilder().startBlock(irBlock);
+      BCMarker marker(sk, block->initialSpOffset(), profTransId);
+      ht.irBuilder().startBlock(irBlock, marker);
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
     }
@@ -1804,6 +1807,8 @@ Translator::translateRegion(const RegionDesc& region,
         auto returnFuncOff = returnSk.offset() - block->func()->base();
         ht.beginInlining(inst.imm[0].u_IVA, callee, returnFuncOff,
                          doPrediction ? inst.outPred : Type::Gen);
+        // "Fallthrough" into the callee's first block
+        ht.endBlock(region.blocks[b + 1]->start().offset(), inst.nextIsMerge);
         continue;
       }
 
@@ -1893,6 +1898,9 @@ Translator::translateRegion(const RegionDesc& region,
             ht.prepareForSideExit();
           }
           ht.endBlock(nextOffset, inst.nextIsMerge);
+        } else if (isRet(inst.op()) || inst.op() == OpNativeImpl) {
+          // "Fallthrough" from inlined return to the next block
+          ht.endBlock(region.blocks[b + 1]->start().offset(), inst.nextIsMerge);
         }
         if (blockEndsRegion(blockId, region)) {
           ht.end();

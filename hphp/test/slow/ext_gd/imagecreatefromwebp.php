@@ -13,7 +13,7 @@ imagedestroy($im);
 $fp = fopen( "$filename.png", 'r');
 
 // We want to be sure that there really is a png file
-// with a reasonabl file size.
+// with a reasonable file size.
 echo floor(filesize($filename)/100)*100, "\n";
 $data = fread($fp, 4);
 echo preg_replace('/[[:^print:]]/', '?', $data); // remove non-ASCII chars

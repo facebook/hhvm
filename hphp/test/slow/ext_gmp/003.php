@@ -13,8 +13,8 @@ $test[] = gmp_init("0x4d2");
 $test[] = gmp_init("0x4d2", 16);
 $test[] = gmp_init("4d2");
 $test[] = gmp_init("4d2", 16);
- 
+
 for ($i = 0; $i < count($test); $i++)
 {
-	printf("%s\n", gmp_strval($test[$i]));
+  printf("%s\n", gmp_strval($test[$i]));
 }

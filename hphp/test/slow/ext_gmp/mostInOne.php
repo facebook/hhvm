@@ -48,7 +48,9 @@ echo gmp_strval($div5) . "\n";
 $a = gmp_init("0x41682179fbf5");
 $res = gmp_div_qr($a, "0xDEFE75");
 var_dump($res);
-printf("Result is: q - %s, r - %s" . PHP_EOL, gmp_strval($res[0]), gmp_strval($res[1]));
+printf("Result is: q - %s, r - %s" . PHP_EOL,
+        gmp_strval($res[0]),
+        gmp_strval($res[1]));
 
 //gmp_div_r
 $div = gmp_div_r("105", "20");
@@ -74,7 +76,6 @@ echo gmp_strval($fact2) . "\n";
 $gcd = gmp_gcd("12", "21");
 echo gmp_strval($gcd) . "\n";
 
-
 //gmp_gcdext
 $a = gmp_init(12);
 $b = gmp_init(21);
@@ -86,10 +87,15 @@ $eq_res = gmp_add(gmp_mul($a, $r['s']), gmp_mul($b, $r['t']));
 $check_res = (gmp_strval($g) == gmp_strval($eq_res));
 
 if ($check_gcd && $check_res) {
-	$fmt = "Solution: %d*%d + %d*%d = %d\n";
-	printf($fmt, gmp_strval($a), gmp_strval($r['s']), gmp_strval($b), gmp_strval($r['t']), gmp_strval($r['g']));
+  $fmt = "Solution: %d*%d + %d*%d = %d\n";
+  printf($fmt,
+         gmp_strval($a),
+         gmp_strval($r['s']),
+         gmp_strval($b),
+         gmp_strval($r['t']),
+         gmp_strval($r['g']));
 } else {
-	echo "Error while solving the equation\n";
+  echo "Error while solving the equation\n";
 }
 
 //gmp_hamdist
@@ -150,7 +156,8 @@ echo gmp_strval($or2, 16) . "\n";
 //gmp_perfect_square
 var_dump(gmp_perfect_square("9")); // 3 * 3, perfect square
 var_dump(gmp_perfect_square("7")); // not a perfect square
-var_dump(gmp_perfect_square("1524157875019052100")); // 1234567890 * 1234567890, perfect square
+// 1234567890 * 1234567890, perfect square
+var_dump(gmp_perfect_square("1524157875019052100"));
 
 //gmp_popcount
 $pop1 = gmp_init("10000101", 2); // 3 1's
@@ -179,15 +186,19 @@ echo gmp_prob_prime("11") . "\n"; // definitely a prime
 //gmp_random -- not implemented
 
 //gmp_scan0
-$s1 = gmp_init("10111", 2); // "0" bit is found at position 3. index starts at 0
+// "0" bit is found at position 3. index starts at 0
+$s1 = gmp_init("10111", 2);
 echo gmp_scan0($s1, 0) . "\n";
-$s2 = gmp_init("101110000", 2); // "0" bit is found at position 7. index starts at 5
+// "0" bit is found at position 7. index starts at 5
+$s2 = gmp_init("101110000", 2);
 echo gmp_scan0($s2, 5) . "\n";
 
 //gmp_scan1
-$s1 = gmp_init("01000", 2); // "0" bit is found at position 3. index starts at 0
+// "0" bit is found at position 3. index starts at 0
+$s1 = gmp_init("01000", 2);
 echo gmp_scan1($s1, 0) . "\n";
-$s2 = gmp_init("01000001111", 2); // "0" bit is found at position 7. index starts at 5
+// "0" bit is found at position 7. index starts at 5
+$s2 = gmp_init("01000001111", 2);
 echo gmp_scan1($s2, 5) . "\n";
 
 //gmp_setbit
@@ -227,7 +238,9 @@ echo gmp_strval($sqrt3) . ", " . gmp_strval($sqrt3rem) . "\n";
 
 //gmp_strval
 $a = gmp_init("0x41682179fbf5");
-printf("Decimal: %s, 36-based: %s" . PHP_EOL, gmp_strval($a), gmp_strval($a, 36));
+printf("Decimal: %s, 36-based: %s" . PHP_EOL,
+       gmp_strval($a),
+       gmp_strval($a, 36));
 
 //gmp_sub
 $sub = gmp_sub("281474976710656", "4294967296"); // 2^48 - 2^32
@@ -249,12 +262,16 @@ echo gmp_strval($xor3, 2) . "\n";
 //misc
 
 
-$someBigNumber = '5213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673'
-	       . '5188575272489122793818301194912983367336244065664308602139494639522473719070217986094370277'
-	       . '2931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012'
-	       . '6549585371050792279689258923542019956112129021960864034418159813629774771309960518707211349'
-	       . '7804995105973173281609631859502445945534690830264252230825334468503526193118817101000313783'
-	       . '5332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712';
+$someBigNumber =
+    '5213841469519415116094330572703657595919530921861173819326117'
+  . '9310511854807446237996274956735188575272489122793818301194912'
+  . '9833673362440656643086021394946395224737190702179860943702772'
+  . '9317675238467481846766940513200056812714526356082778577134275'
+  . '7789609173637178721468440901265495853710507922796892589235420'
+  . '1995611212902196086403441815981362977477130996051870721134978'
+  . '0499510597317328160963185950244594553469083026425223082533446'
+  . '8503526193118817101000313783533208381420617177669147303598253'
+  . '4904287554687311595628638823537875937519577818577805321712';
 $a = gmp_init($someBigNumber, 10);
 var_dump(gmp_strval($a) == $someBigNumber);
 var_dump(gmp_strval($a, 32));

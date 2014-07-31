@@ -29,10 +29,10 @@ namespace HPHP {
 
 #define GMP_DEFAULT_BASE    10
 
-
 /* The maximum base for input and output conversions is 62 from GMP 4.2
 * onwards. */
-#if ((__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2))
+#if ((__GNU_MP_VERSION >= 5) \
+    || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2))
 #  define GMP_MAX_BASE 62
 #else
 #  define GMP_MAX_BASE 36
@@ -50,54 +50,63 @@ const StaticString s_GMP_ROUND_MINUSINF("GMP_ROUND_MINUSINF");
 const StaticString s_GMP_VERSION("GMP_VERSION");
 const StaticString k_GMP_VERSION(gmp_version);
 
-const char* const cs_GMP_INVALID_TYPE                         = "%s(): Unable to convert variable to GMP - wrong type!";
-const char* const cs_GMP_INVALID_ROUNDING_MODE                = "%s(): Invalid rounding mode";
-const char* const cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO       = "%s(): Zero operand not allowed";
-const char* const cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE       = "%s(): Value operand not allowed";
-const char* const cs_GMP_INVALID_INDEX_IS_NEGATIVE            = "%s(): Index must be greater than or equal to zero";
-const char* const cs_GMP_INVALID_BASE_VALUE                   = "%s(): Bad base for conversion: %ld (should be between 2 and %d)";
-const char* const cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE    = "%s(): Exponent must not be positive negative";
+const char* const cs_GMP_INVALID_TYPE =
+  "%s(): Unable to convert variable to GMP - wrong type!";
+const char* const cs_GMP_INVALID_ROUNDING_MODE =
+  "%s(): Invalid rounding mode";
+const char* const cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO =
+  "%s(): Zero operand not allowed";
+const char* const cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE =
+  "%s(): Value operand not allowed";
+const char* const cs_GMP_INVALID_INDEX_IS_NEGATIVE =
+  "%s(): Index must be greater than or equal to zero";
+const char* const cs_GMP_INVALID_BASE_VALUE =
+  "%s(): Bad base for conversion: %ld (should be between 2 and %d)";
+const char* const cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE =
+  "%s(): Exponent must not be positive negative";
+const char* const cs_GMP_FAILED_TO_ALTER_BIT =
+  "%s(): Failed to alter bit";
 
-const char* const cs_GMP_FUNC_NAME_GMP_ABS                    = "gmp_abs";
-const char* const cs_GMP_FUNC_NAME_GMP_ADD                    = "gmp_add";
-const char* const cs_GMP_FUNC_NAME_GMP_AND                    = "gmp_add";
-const char* const cs_GMP_FUNC_NAME_GMP_CLRBIT                 = "gmp_clrbit";
-const char* const cs_GMP_FUNC_NAME_GMP_CMP                    = "gmp_cmp";
-const char* const cs_GMP_FUNC_NAME_GMP_COM                    = "gmp_com";
-const char* const cs_GMP_FUNC_NAME_GMP_DIV_Q                  = "gmp_div_q";
-const char* const cs_GMP_FUNC_NAME_GMP_DIV_R                  = "gmp_div_r";
-const char* const cs_GMP_FUNC_NAME_GMP_DIV_QR                 = "gmp_div_qr";
-const char* const cs_GMP_FUNC_NAME_GMP_DIVEXACT               = "gmp_divexact";
-const char* const cs_GMP_FUNC_NAME_GMP_FACT                   = "gmp_fact";
-const char* const cs_GMP_FUNC_NAME_GMP_GCD                    = "gmp_gcd";
-const char* const cs_GMP_FUNC_NAME_GMP_GCDEXCT                = "gmp_gcdexct";
-const char* const cs_GMP_FUNC_NAME_GMP_HAMDIST                = "gmp_hamdist";
-const char* const cs_GMP_FUNC_NAME_GMP_INIT                   = "gmp_init";
-const char* const cs_GMP_FUNC_NAME_GMP_INTVAL                 = "gmp_intval";
-const char* const cs_GMP_FUNC_NAME_GMP_INVERT                 = "gmp_invert";
-const char* const cs_GMP_FUNC_NAME_GMP_JACOBI                 = "gmp_jacobi";
-const char* const cs_GMP_FUNC_NAME_GMP_LEGENDRE               = "gmp_legendre";
-const char* const cs_GMP_FUNC_NAME_GMP_MOD                    = "gmp_mod";
-const char* const cs_GMP_FUNC_NAME_GMP_MUL                    = "gmp_mul";
-const char* const cs_GMP_FUNC_NAME_GMP_NEG                    = "gmp_neg";
-const char* const cs_GMP_FUNC_NAME_GMP_NEXTPRIME              = "gmp_nextprime";
-const char* const cs_GMP_FUNC_NAME_GMP_OR                     = "gmp_or";
-const char* const cs_GMP_FUNC_NAME_GMP_PERFECT_SQUARE         = "gmp_perfect_square";
-const char* const cs_GMP_FUNC_NAME_GMP_POPCOUNT               = "gmp_popcount";
-const char* const cs_GMP_FUNC_NAME_GMP_POW                    = "gmp_pow";
-const char* const cs_GMP_FUNC_NAME_GMP_POWM                   = "gmp_powm";
-const char* const cs_GMP_FUNC_NAME_GMP_PROB_PRIME             = "gmp_prob_prime";
-const char* const cs_GMP_FUNC_NAME_GMP_RANDOM                 = "gmp_random";
-const char* const cs_GMP_FUNC_NAME_GMP_SCAN0                  = "gmp_scan0";
-const char* const cs_GMP_FUNC_NAME_GMP_SCAN1                  = "gmp_scan1";
-const char* const cs_GMP_FUNC_NAME_GMP_SETBIT                 = "gmp_setbit";
-const char* const cs_GMP_FUNC_NAME_GMP_SIGN                   = "gmp_sign";
-const char* const cs_GMP_FUNC_NAME_GMP_SQRT                   = "gmp_sqrt";
-const char* const cs_GMP_FUNC_NAME_GMP_SQRTREM                = "gmp_sqrtrem";
-const char* const cs_GMP_FUNC_NAME_GMP_STRVAL                 = "gmp_strval";
-const char* const cs_GMP_FUNC_NAME_GMP_SUB                    = "gmp_sub";
-const char* const cs_GMP_FUNC_NAME_GMP_TESTBIT                = "gmp_testbit";
-const char* const cs_GMP_FUNC_NAME_GMP_XOR                    = "gmp_xor";
+const char* const cs_GMP_FUNC_NAME_GMP_ABS             = "gmp_abs";
+const char* const cs_GMP_FUNC_NAME_GMP_ADD             = "gmp_add";
+const char* const cs_GMP_FUNC_NAME_GMP_AND             = "gmp_add";
+const char* const cs_GMP_FUNC_NAME_GMP_CLRBIT          = "gmp_clrbit";
+const char* const cs_GMP_FUNC_NAME_GMP_CMP             = "gmp_cmp";
+const char* const cs_GMP_FUNC_NAME_GMP_COM             = "gmp_com";
+const char* const cs_GMP_FUNC_NAME_GMP_DIV_Q           = "gmp_div_q";
+const char* const cs_GMP_FUNC_NAME_GMP_DIV_R           = "gmp_div_r";
+const char* const cs_GMP_FUNC_NAME_GMP_DIV_QR          = "gmp_div_qr";
+const char* const cs_GMP_FUNC_NAME_GMP_DIVEXACT        = "gmp_divexact";
+const char* const cs_GMP_FUNC_NAME_GMP_FACT            = "gmp_fact";
+const char* const cs_GMP_FUNC_NAME_GMP_GCD             = "gmp_gcd";
+const char* const cs_GMP_FUNC_NAME_GMP_GCDEXCT         = "gmp_gcdexct";
+const char* const cs_GMP_FUNC_NAME_GMP_HAMDIST         = "gmp_hamdist";
+const char* const cs_GMP_FUNC_NAME_GMP_INIT            = "gmp_init";
+const char* const cs_GMP_FUNC_NAME_GMP_INTVAL          = "gmp_intval";
+const char* const cs_GMP_FUNC_NAME_GMP_INVERT          = "gmp_invert";
+const char* const cs_GMP_FUNC_NAME_GMP_JACOBI          = "gmp_jacobi";
+const char* const cs_GMP_FUNC_NAME_GMP_LEGENDRE        = "gmp_legendre";
+const char* const cs_GMP_FUNC_NAME_GMP_MOD             = "gmp_mod";
+const char* const cs_GMP_FUNC_NAME_GMP_MUL             = "gmp_mul";
+const char* const cs_GMP_FUNC_NAME_GMP_NEG             = "gmp_neg";
+const char* const cs_GMP_FUNC_NAME_GMP_NEXTPRIME       = "gmp_nextprime";
+const char* const cs_GMP_FUNC_NAME_GMP_OR              = "gmp_or";
+const char* const cs_GMP_FUNC_NAME_GMP_PERFECT_SQUARE  = "gmp_perfect_square";
+const char* const cs_GMP_FUNC_NAME_GMP_POPCOUNT        = "gmp_popcount";
+const char* const cs_GMP_FUNC_NAME_GMP_POW             = "gmp_pow";
+const char* const cs_GMP_FUNC_NAME_GMP_POWM            = "gmp_powm";
+const char* const cs_GMP_FUNC_NAME_GMP_PROB_PRIME      = "gmp_prob_prime";
+const char* const cs_GMP_FUNC_NAME_GMP_RANDOM          = "gmp_random";
+const char* const cs_GMP_FUNC_NAME_GMP_SCAN0           = "gmp_scan0";
+const char* const cs_GMP_FUNC_NAME_GMP_SCAN1           = "gmp_scan1";
+const char* const cs_GMP_FUNC_NAME_GMP_SETBIT          = "gmp_setbit";
+const char* const cs_GMP_FUNC_NAME_GMP_SIGN            = "gmp_sign";
+const char* const cs_GMP_FUNC_NAME_GMP_SQRT            = "gmp_sqrt";
+const char* const cs_GMP_FUNC_NAME_GMP_SQRTREM         = "gmp_sqrtrem";
+const char* const cs_GMP_FUNC_NAME_GMP_STRVAL          = "gmp_strval";
+const char* const cs_GMP_FUNC_NAME_GMP_SUB             = "gmp_sub";
+const char* const cs_GMP_FUNC_NAME_GMP_TESTBIT         = "gmp_testbit";
+const char* const cs_GMP_FUNC_NAME_GMP_XOR             = "gmp_xor";
 
 
 class GMPResource : public SweepableResourceData {
@@ -142,7 +151,8 @@ bool variantToGMPData(mpz_t gmpData,
         if (dataString[1] == 'x' || dataString[1] == 'X') {
           base = 16;
           dataString = dataString.substr(2);
-        } else if (base < 12 && (dataString[1] == 'b' || dataString[1] == 'B')) {
+        } else if (base < 12
+          && (dataString[1] == 'b' || dataString[1] == 'B')) {
           base = 2;
           dataString = dataString.substr(2);
         }
@@ -186,7 +196,7 @@ Variant HHVM_FUNCTION(gmp_abs,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpReturn, gmpData, NULL);
+  mpz_clears(gmpReturn, gmpData, nullptr);
 
   return ret;
 }
@@ -213,7 +223,7 @@ Variant HHVM_FUNCTION(gmp_add,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -240,7 +250,7 @@ Variant HHVM_FUNCTION(gmp_and,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -251,13 +261,14 @@ void HHVM_FUNCTION(gmp_clrbit,
                    int64_t index) {
 
   if (index < 0) {
-    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, cs_GMP_FUNC_NAME_GMP_CLRBIT);
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE,
+                  cs_GMP_FUNC_NAME_GMP_CLRBIT);
     return;
   }
 
   auto gmpRes = data.toResource().getTyped<GMPResource>();
   if (!gmpRes) {
-    raise_warning("%s: Failed to clear bit", cs_GMP_FUNC_NAME_GMP_CLRBIT);
+    raise_warning(cs_GMP_FAILED_TO_ALTER_BIT, cs_GMP_FUNC_NAME_GMP_CLRBIT);
     return;
   }
 
@@ -283,7 +294,7 @@ Variant HHVM_FUNCTION(gmp_cmp,
 
   int64_t cmp = mpz_cmp(gmpDataA, gmpDataB);
 
-  mpz_clears(gmpDataA, gmpDataB, NULL);
+  mpz_clears(gmpDataA, gmpDataB, nullptr);
 
   return cmp;
 }
@@ -303,7 +314,7 @@ Variant HHVM_FUNCTION(gmp_com,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpReturn, gmpData, NULL);
+  mpz_clears(gmpReturn, gmpData, nullptr);
 
   return ret;
 }
@@ -327,9 +338,10 @@ Variant HHVM_FUNCTION(gmp_div_q,
   }
 
   if (mpz_sgn(gmpDataB) == 0) {
-    mpz_clears(gmpDataA, gmpDataB, NULL);
+    mpz_clears(gmpDataA, gmpDataB, nullptr);
 
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, cs_GMP_FUNC_NAME_GMP_DIV_Q);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO,
+                  cs_GMP_FUNC_NAME_GMP_DIV_Q);
     return false;
   }
 
@@ -349,7 +361,7 @@ Variant HHVM_FUNCTION(gmp_div_q,
       break;
 
     default:
-      mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+      mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
       raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_Q);
       return false;
@@ -357,7 +369,7 @@ Variant HHVM_FUNCTION(gmp_div_q,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -381,13 +393,14 @@ Variant HHVM_FUNCTION(gmp_div_qr,
   }
 
   if (mpz_sgn(gmpDataB) == 0) {
-    mpz_clears(gmpDataA, gmpDataB, NULL);
+    mpz_clears(gmpDataA, gmpDataB, nullptr);
 
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, cs_GMP_FUNC_NAME_GMP_DIV_QR);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO,
+                  cs_GMP_FUNC_NAME_GMP_DIV_QR);
     return false;
   }
 
-  mpz_inits(gmpReturnQ, gmpReturnR, NULL);
+  mpz_inits(gmpReturnQ, gmpReturnR, nullptr);
   switch (round)
   {
     case GMP_ROUND_ZERO:
@@ -403,7 +416,7 @@ Variant HHVM_FUNCTION(gmp_div_qr,
       break;
 
     default:
-      mpz_clears(gmpDataA, gmpDataB, gmpReturnQ, gmpReturnR, NULL);
+      mpz_clears(gmpDataA, gmpDataB, gmpReturnQ, gmpReturnR, nullptr);
 
       raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_QR);
       return false;
@@ -413,7 +426,7 @@ Variant HHVM_FUNCTION(gmp_div_qr,
   returnArray.set(0, NEWOBJ(GMPResource)(gmpReturnQ));
   returnArray.set(1, NEWOBJ(GMPResource)(gmpReturnR));
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturnQ, gmpReturnR, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturnQ, gmpReturnR, nullptr);
 
   return returnArray.toVariant();
 }
@@ -437,9 +450,10 @@ Variant HHVM_FUNCTION(gmp_div_r,
   }
 
   if (mpz_sgn(gmpDataB) == 0) {
-    mpz_clears(gmpDataA, gmpDataB, NULL);
+    mpz_clears(gmpDataA, gmpDataB, nullptr);
 
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, cs_GMP_FUNC_NAME_GMP_DIV_R);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO,
+                  cs_GMP_FUNC_NAME_GMP_DIV_R);
     return false;
   }
 
@@ -458,7 +472,7 @@ Variant HHVM_FUNCTION(gmp_div_r,
     break;
 
   default:
-    mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+    mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
     raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_R);
     return false;
@@ -466,7 +480,7 @@ Variant HHVM_FUNCTION(gmp_div_r,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -493,7 +507,7 @@ Variant HHVM_FUNCTION(gmp_divexact,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -520,7 +534,7 @@ Variant HHVM_FUNCTION(gmp_fact,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpReturn, gmpData, NULL);
+  mpz_clears(gmpReturn, gmpData, nullptr);
 
   return ret;
 }
@@ -547,7 +561,7 @@ Variant HHVM_FUNCTION(gmp_gcd,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -569,7 +583,7 @@ Variant HHVM_FUNCTION(gmp_gcdext,
     return false;
   }
 
-  mpz_inits(gmpReturnG, gmpReturnS, gmpReturnT, NULL);
+  mpz_inits(gmpReturnG, gmpReturnS, gmpReturnT, nullptr);
   mpz_gcdext(gmpReturnG, gmpReturnS, gmpReturnT, gmpDataA, gmpDataB);
 
   ArrayInit returnArray(3, ArrayInit::Map{});
@@ -577,7 +591,7 @@ Variant HHVM_FUNCTION(gmp_gcdext,
   returnArray.set(s_gmp_s, NEWOBJ(GMPResource)(gmpReturnS));
   returnArray.set(s_gmp_t, NEWOBJ(GMPResource)(gmpReturnT));
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturnG, gmpReturnS, gmpReturnT, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturnG, gmpReturnS, gmpReturnT, nullptr);
 
   return returnArray.toVariant();
 }
@@ -595,7 +609,8 @@ Variant HHVM_FUNCTION(gmp_hamdist,
   if (mpz_sgn(gmpDataA) < 0) {
     mpz_clear(gmpDataA);
 
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE, cs_GMP_FUNC_NAME_GMP_HAMDIST);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE,
+                  cs_GMP_FUNC_NAME_GMP_HAMDIST);
     return false;
   }
 
@@ -606,15 +621,16 @@ Variant HHVM_FUNCTION(gmp_hamdist,
     return false;
   }
   if (mpz_sgn(gmpDataB) < 0) {
-    mpz_clears(gmpDataA, gmpDataB, NULL);
+    mpz_clears(gmpDataA, gmpDataB, nullptr);
 
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE, cs_GMP_FUNC_NAME_GMP_HAMDIST);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE,
+                  cs_GMP_FUNC_NAME_GMP_HAMDIST);
     return false;
   }
 
   int64_t hamdist = mpz_hamdist(gmpDataA, gmpDataB);
 
-  mpz_clears(gmpDataA, gmpDataB, NULL);
+  mpz_clears(gmpDataA, gmpDataB, nullptr);
 
   return hamdist;
 }
@@ -626,7 +642,10 @@ Variant HHVM_FUNCTION(gmp_init,
   mpz_t gmpData;
 
   if (base < -1 || base == 0 || base == 1 || base > GMP_MAX_BASE) {
-    raise_warning(cs_GMP_INVALID_BASE_VALUE, cs_GMP_FUNC_NAME_GMP_INIT, base, GMP_MAX_BASE);
+    raise_warning(cs_GMP_INVALID_BASE_VALUE,
+                  cs_GMP_FUNC_NAME_GMP_INIT,
+                  base,
+                  GMP_MAX_BASE);
     return false;
   }
 
@@ -674,13 +693,13 @@ Variant HHVM_FUNCTION(gmp_invert,
 
   mpz_init(gmpReturn);
   if (!mpz_invert(gmpReturn, gmpDataA, gmpDataB)) {
-    mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+    mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
     return false;
   }
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -704,7 +723,7 @@ Variant HHVM_FUNCTION(gmp_jacobi,
 
   int64_t result = mpz_jacobi(gmpDataA, gmpDataB);
 
-  mpz_clears(gmpDataA, gmpDataB, NULL);
+  mpz_clears(gmpDataA, gmpDataB, nullptr);
 
   return result;
 }
@@ -728,7 +747,7 @@ Variant HHVM_FUNCTION(gmp_legendre,
 
   int64_t result = mpz_legendre(gmpDataA, gmpDataB);
 
-  mpz_clears(gmpDataA, gmpDataB, NULL);
+  mpz_clears(gmpDataA, gmpDataB, nullptr);
 
   return result;
 }
@@ -755,7 +774,7 @@ Variant HHVM_FUNCTION(gmp_mod,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -782,7 +801,7 @@ Variant HHVM_FUNCTION(gmp_mul,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -802,7 +821,7 @@ Variant HHVM_FUNCTION(gmp_neg,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpReturn, gmpData, NULL);
+  mpz_clears(gmpReturn, gmpData, nullptr);
 
   return ret;
 }
@@ -822,7 +841,7 @@ Variant HHVM_FUNCTION(gmp_nextprime,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpReturn, gmpData, NULL);
+  mpz_clears(gmpReturn, gmpData, nullptr);
 
   return ret;
 }
@@ -849,7 +868,7 @@ Variant HHVM_FUNCTION(gmp_or,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -894,7 +913,8 @@ Variant HHVM_FUNCTION(gmp_pow,
   mpz_t gmpReturn, gmpData;
 
   if (exp < 0) {
-    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE, cs_GMP_FUNC_NAME_GMP_POW);
+    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE,
+                  cs_GMP_FUNC_NAME_GMP_POW);
     return false;
   }
 
@@ -908,7 +928,7 @@ Variant HHVM_FUNCTION(gmp_pow,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpReturn, gmpData, NULL);
+  mpz_clears(gmpReturn, gmpData, nullptr);
 
   return ret;
 }
@@ -932,14 +952,15 @@ Variant HHVM_FUNCTION(gmp_powm,
   }
 
   if (mpz_sgn(gmpDataB) < 0) {
-    mpz_clears(gmpDataA, gmpDataB, NULL);
+    mpz_clears(gmpDataA, gmpDataB, nullptr);
 
-    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE, cs_GMP_FUNC_NAME_GMP_POWM);
+    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE,
+                  cs_GMP_FUNC_NAME_GMP_POWM);
     return false;
   }
 
   if (!variantToGMPData(gmpDataC, dataC)) {
-    mpz_clears(gmpDataA, gmpDataB, NULL);
+    mpz_clears(gmpDataA, gmpDataB, nullptr);
 
     raise_warning(cs_GMP_INVALID_TYPE, cs_GMP_FUNC_NAME_GMP_POWM);
     return false;
@@ -950,7 +971,7 @@ Variant HHVM_FUNCTION(gmp_powm,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpDataC, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpDataC, gmpReturn, nullptr);
 
   return ret;
 }
@@ -1021,13 +1042,14 @@ void HHVM_FUNCTION(gmp_setbit,
                    int64_t index,
                    bool bitOn = true) {
   if (index < 0) {
-    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, cs_GMP_FUNC_NAME_GMP_SETBIT);
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE,
+                  cs_GMP_FUNC_NAME_GMP_SETBIT);
     return;
   }
 
   auto gmpRes = data.toResource().getTyped<GMPResource>();
   if (!gmpRes) {
-    raise_warning("%s: Failed to alter bit", cs_GMP_FUNC_NAME_GMP_SETBIT);
+    raise_warning(cs_GMP_FAILED_TO_ALTER_BIT, cs_GMP_FUNC_NAME_GMP_SETBIT);
     return;
   }
 
@@ -1070,7 +1092,7 @@ Variant HHVM_FUNCTION(gmp_sqrt,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpReturn, gmpData, NULL);
+  mpz_clears(gmpReturn, gmpData, nullptr);
 
   return ret;
 }
@@ -1085,14 +1107,14 @@ Variant HHVM_FUNCTION(gmp_sqrtrem,
     return false;
   }
 
-  mpz_inits(gmpSquareRoot, gmpRemainder, NULL);
+  mpz_inits(gmpSquareRoot, gmpRemainder, nullptr);
   mpz_sqrtrem(gmpSquareRoot, gmpRemainder, gmpData);
 
   ArrayInit returnArray(2, ArrayInit::Map{});
   returnArray.set(0, NEWOBJ(GMPResource)(gmpSquareRoot));
   returnArray.set(1, NEWOBJ(GMPResource)(gmpRemainder));
 
-  mpz_clears(gmpData, gmpSquareRoot, gmpRemainder, NULL);
+  mpz_clears(gmpData, gmpSquareRoot, gmpRemainder, nullptr);
 
   return returnArray.toVariant();
 }
@@ -1104,7 +1126,10 @@ String HHVM_FUNCTION(gmp_strval,
   mpz_t gmpData;
 
   if (base < 1 || base > GMP_MAX_BASE) {
-    raise_warning(cs_GMP_INVALID_BASE_VALUE, cs_GMP_FUNC_NAME_GMP_STRVAL, base, GMP_MAX_BASE);
+    raise_warning(cs_GMP_INVALID_BASE_VALUE,
+                  cs_GMP_FUNC_NAME_GMP_STRVAL,
+                  base,
+                  GMP_MAX_BASE);
     return s_gmp_0;
   }
 
@@ -1155,7 +1180,7 @@ Variant HHVM_FUNCTION(gmp_sub,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }
@@ -1166,7 +1191,8 @@ bool HHVM_FUNCTION(gmp_testbit,
                    int64_t index) {
 
   if (index < 0) {
-    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, cs_GMP_FUNC_NAME_GMP_TESTBIT);
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE,
+                  cs_GMP_FUNC_NAME_GMP_TESTBIT);
     return false;
   }
 
@@ -1209,7 +1235,7 @@ Variant HHVM_FUNCTION(gmp_xor,
 
   Variant ret = NEWOBJ(GMPResource)(gmpReturn);
 
-  mpz_clears(gmpDataA, gmpDataB, gmpReturn, NULL);
+  mpz_clears(gmpDataA, gmpDataB, gmpReturn, nullptr);
 
   return ret;
 }

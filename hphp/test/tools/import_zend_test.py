@@ -1435,12 +1435,15 @@ else:
 
 for test in results:
     filename = test['name']
+
     good_file = filename.replace('all', 'good', 1)
     bad_file = filename.replace('all', 'bad', 1)
     flaky_file = filename.replace('all', 'flaky', 1)
-    mkdir_p(os.path.dirname(good_file))
-    mkdir_p(os.path.dirname(bad_file))
-    mkdir_p(os.path.dirname(flaky_file))
+
+    all_files = [good_file, bad_file, flaky_file]
+
+    for test_file in all_files:
+        mkdir_p(os.path.dirname(test_file))
 
     good = (test['status'] == 'passed')
     flaky_test = False
@@ -1452,17 +1455,14 @@ for test in results:
     needs_norepo = False
     if good:
         dest_file = good_file
-        delete_file = bad_file
         subpath = 'good'
         for test in norepo_tests:
             if test in filename:
                 needs_norepo = True
     elif not flaky_test:
         dest_file = bad_file
-        delete_file = good_file
         subpath = 'bad'
     else:
-        delete_file = bad_file
         dest_file = flaky_file
         subpath = 'flaky'
 
@@ -1477,17 +1477,23 @@ for test in results:
     file(dest_file + dest_ext, 'w').write(
         file(source_file_exp).read().replace('/all', '/' + subpath)
     )
+
     if needs_norepo:
         file(dest_file + '.norepo', 'w')
     if os.path.exists(filename + '.skipif'):
         shutil.copyfile(filename + '.skipif', dest_file + '.skipif')
     if os.path.exists(filename + '.ini'):
         shutil.copyfile(filename + '.ini', dest_file + '.ini')
-    for f in glob.glob(delete_file + "*"):
-        if os.path.isfile(f):
-            os.unlink(f)
-        else:
-            shutil.rmtree(f)
+
+    for test_file in all_files:
+        if dest_file == test_file:
+            continue
+
+        for f in glob.glob(test_file + "*"):
+            if os.path.isfile(f):
+                os.unlink(f)
+            else:
+                shutil.rmtree(f)
 
 # extra random files needed for tests...
 for root, dirs, files in os.walk(all_dir):

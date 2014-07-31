@@ -1544,7 +1544,8 @@ static void findSuccOffsets(const RegionDesc&              region,
 static bool containsBothSuccs(const OffsetSet&             succOffsets,
                               const NormalizedInstruction& inst) {
   if (inst.breaksTracelet) return false;
-  Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
+  if (!instrHasConditionalBranch(inst.op())) return false;
+  Offset takenOffset      = inst.offset() + *instrJumpOffset((Op*)inst.pc());
   Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
   bool   takenIncluded    = succOffsets.count(takenOffset);
   bool   fallthruIncluded = succOffsets.count(fallthruOffset);
@@ -1584,16 +1585,23 @@ static bool blockHasUnprocessedPred(
 }
 
 /*
- * Returns whether the next instruction following inst (whether by
- * fallthrough or branch target) is a merge in region.
+ * Returns whether any instruction following inst (whether by fallthrough or
+ * branch target) is a merge in region.
  */
 static bool nextIsMerge(const NormalizedInstruction& inst,
                         const RegionDesc& region) {
-  Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
-  if (instrIsNonCallControlFlow(inst.op())) {
-    Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
-    return isMergePoint(takenOffset, region)
-        || isMergePoint(fallthruOffset, region);
+  Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
+  if (instrHasConditionalBranch(inst.op())) {
+    auto offsetPtr = instrJumpOffset((Op*)inst.pc());
+    Offset takenOffset = inst.offset() + *offsetPtr;
+    return fallthruOffset == takenOffset
+      || isMergePoint(takenOffset, region)
+      || isMergePoint(fallthruOffset, region);
+  }
+  if (isUnconditionalJmp(inst.op())) {
+    auto offsetPtr = instrJumpOffset((Op*)inst.pc());
+    Offset takenOffset = inst.offset() + *offsetPtr;
+    return isMergePoint(takenOffset, region);
   }
   return isMergePoint(fallthruOffset, region);
 }

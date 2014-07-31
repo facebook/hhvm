@@ -969,6 +969,7 @@ struct StackTransInfo {
 };
 
 bool instrIsNonCallControlFlow(Op opcode);
+bool instrHasConditionalBranch(Op opcode);
 bool instrAllowsFallThru(Op opcode);
 bool instrReadsCurrentFpi(Op opcode);
 

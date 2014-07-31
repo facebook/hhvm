@@ -148,6 +148,17 @@ and sub_type env ty1 ty2 =
       let env, _ = Unify.unify env tk1 tk2 in
       let env, _ = Unify.unify env ts1 ts2 in
       env
+  (* Handle enums with subtyping constraints. *)
+  | _, (p2, (Tapply ((_, x), [])))
+    when Typing_env.get_enum_constraint env x <> None ->
+    (match Typing_env.get_enum_constraint env x with
+      | Some base ->
+        (* Handling is the same as abstracts with as *)
+        Errors.try_
+          (fun () -> fst (Unify.unify env ty1 ty2))
+          (fun _ -> sub_type env ty1 base)
+      | None -> assert false)
+
   | (p1, (Tapply (x1, tyl1) as ty1_)), (p2, (Tapply (x2, tyl2) as ty2_)) ->
     let cid1, cid2 = (snd x1), (snd x2) in
     if cid1 = cid2 then fst (Unify.unify env ety1 ety2)

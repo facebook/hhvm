@@ -213,6 +213,7 @@ type ureason =
   | URclass_req
   | URclass_req_merge
   | URenum
+  | URenum_cstr
 
 let string_of_ureason = function
   | URnone -> "Typing error"
@@ -251,7 +252,9 @@ let string_of_ureason = function
   | URclass_req -> "Unable to satisfy trait/interface requirement"
   | URclass_req_merge -> "Incompatible trait/interface requirements"
   | URenum ->
-      "Constant does not match the type of the Enum it is in"
+      "Constant does not match the type of the enum it is in"
+  | URenum_cstr ->
+      "Invalid constraint on enum"
 
 let compare r1 r2 =
   match r1, r2 with

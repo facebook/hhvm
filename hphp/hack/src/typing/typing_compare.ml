@@ -77,6 +77,12 @@ module CompareTypes = struct
       acc
     with Not_found -> default
 
+  let cmp_opt f acc t1 t2 =
+    match t1, t2 with
+    | None, None -> acc
+    | Some t1, Some t2 -> f acc t1 t2
+    | _ -> default
+
   let rec ty acc (r1, x) (r2, y) =
     let acc = reason acc r1 r2 in
     let acc = ty_ acc x y in
@@ -134,11 +140,7 @@ module CompareTypes = struct
     then default
     else List.fold_left2 ty acc tyl1 tyl2
 
-  and ty_opt acc ty1 ty2 =
-    match ty1, ty2 with
-    | None, None -> acc
-    | Some ty1, Some ty2 -> ty acc ty1 ty2
-    | _ -> default
+  and ty_opt acc ty1 ty2 = cmp_opt ty acc ty1 ty2
 
   and fun_type acc ft1 ft2 =
     let acc = pos acc ft1.ft_pos ft2.ft_pos in
@@ -196,6 +198,11 @@ module CompareTypes = struct
 
   and ancestry acc imp1 imp2 = smap ty acc imp1 imp2
 
+  and enum_type acc et1 et2 =
+    let acc = ty acc et1.te_base et2.te_base in
+    let acc = ty_opt acc et1.te_constraint et2.te_constraint in
+    acc
+
   and class_ (subst, same) c1 c2 =
     let same =
       same &&
@@ -223,6 +230,7 @@ module CompareTypes = struct
       c1.tc_ancestors_checked_when_concrete
       c2.tc_ancestors_checked_when_concrete
     in
+    let acc = cmp_opt enum_type acc c1.tc_enum_type c2.tc_enum_type in
     acc
 
 end
@@ -352,6 +360,12 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_ancestors             = SMap.map ty tc.tc_ancestors          ;
       tc_ancestors_checked_when_concrete    = SMap.map ty tc.tc_ancestors_checked_when_concrete ;
       tc_user_attributes       = tc.tc_user_attributes                ;
+      tc_enum_type             = opt_map enum_type tc.tc_enum_type    ;
+    }
+
+  and enum_type te =
+    { te_base       = ty te.te_base           ;
+      te_constraint = ty_opt te.te_constraint ;
     }
 
   and typedef = function
@@ -480,7 +494,8 @@ let class_big_diff class1 class2 =
   SMap.compare class1.tc_ancestors_checked_when_concrete class2.tc_ancestors_checked_when_concrete <> 0 ||
   SMap.compare class1.tc_req_ancestors class2.tc_req_ancestors <> 0 ||
   SSet.compare class1.tc_req_ancestors_extends class2.tc_req_ancestors_extends <> 0 ||
-  SSet.compare class1.tc_extends class2.tc_extends <> 0
+  SSet.compare class1.tc_extends class2.tc_extends <> 0 ||
+  class1.tc_enum_type <> class2.tc_enum_type
 
 (*****************************************************************************)
 (* Given a class name adds all the subclasses, we need a "trace" to follow

@@ -200,6 +200,7 @@ let inherit_hack_class c env p class_name class_type argl =
         chown_privates (snd c.c_name) class_type
     | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface ->
         filter_privates class_type
+    | Ast.Cenum -> class_type
   in
   let env, consts   = instantiate env class_type.tc_consts in
   let env, cvars    = instantiate env class_type.tc_cvars in

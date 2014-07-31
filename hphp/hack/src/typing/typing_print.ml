@@ -250,6 +250,7 @@ module PrintClass = struct
     | Ast.Cnormal -> "Cnormal"
     | Ast.Cinterface -> "Cinterface"
     | Ast.Ctrait -> "Ctrait"
+    | Ast.Cenum -> "Cenum"
 
   let ty_opt = function
     | None -> ""

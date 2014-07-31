@@ -209,6 +209,7 @@ let merge_parent_class_reqs class_nast impls
           let req_ancestors_extends =
             SSet.union parent_type.tc_req_ancestors_extends req_ancestors_extends in
           env, req_ancestors, req_ancestors_extends
+        | Ast.Cenum -> assert false
 
 let declared_class_req class_nast impls (env, requirements, req_extends) hint =
   let env, req_ty = Typing_hint.hint env hint in
@@ -221,7 +222,7 @@ let declared_class_req class_nast impls (env, requirements, req_extends) hint =
    * are only going to be present in the ancestors of
    * implementing/using classes, so there's nothing to do *)
   let env = match class_nast.c_kind with
-    | Ast.Ctrait | Ast.Cinterface -> env
+    | Ast.Ctrait | Ast.Cinterface | Ast.Cenum -> env
     | Ast.Cnormal | Ast.Cabstract ->
       (match SMap.get req_name impls with
         | None ->
@@ -283,7 +284,7 @@ let get_class_requirements env class_nast impls =
       (* for a requirement-bearing construct, return the accumulated
        * list of direct and inherited requirements *)
       acc
-    | Ast.Cnormal | Ast.Cabstract ->
+    | Ast.Cnormal | Ast.Cabstract | Ast.Cenum ->
       (* for a non-requirement-bearing construct, requirements have
        * been checked, nothing to save *)
       env, SMap.empty, SSet.empty
@@ -379,7 +380,7 @@ and class_hint_decl class_env hint =
 
 and class_is_abstract c =
   match c.c_kind with
-    | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait -> true
+    | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
     | _ -> false
 
 and class_decl c =
@@ -437,6 +438,7 @@ and class_decl c =
     then DynamicYield.clean_dynamic_yield env m
     else env, m in
   let dy_check = match c.c_kind with
+    | Ast.Cenum -> false
     | Ast.Cabstract
     | Ast.Cnormal -> DynamicYield.contains_dynamic_yield extends
     | Ast.Cinterface
@@ -458,7 +460,16 @@ and class_decl c =
     else dimpl
   in
   let env, tparams = lfold Typing.type_param env c.c_tparams in
-  let consts = Typing_enum.enum_class_decl_rewrite env impl consts in
+  let env, enum = match c.c_enum with
+    | None -> env, None
+    | Some e ->
+      let env, base_hint = Typing_hint.hint env e.e_base in
+      let env, constraint_hint = opt Typing_hint.hint env e.e_constraint in
+      env, Some
+        { te_base       = base_hint;
+          te_constraint = constraint_hint } in
+  let consts = Typing_enum.enum_class_decl_rewrite
+    env c.c_name enum impl consts in
   let tc = {
     tc_final = c.c_final;
     tc_abstract = is_abstract;
@@ -481,6 +492,7 @@ and class_decl c =
     tc_req_ancestors = req_ancestors;
     tc_req_ancestors_extends = req_ancestors_extends;
     tc_user_attributes = c.c_user_attributes;
+    tc_enum_type = enum;
   } in
   if Ast.Cnormal = c.c_kind then
     SMap.iter (method_check_trait_overrides c) m

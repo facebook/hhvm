@@ -85,6 +85,12 @@ and class_ = {
   c_static_methods : method_ list     ;
   c_methods        : method_ list     ;
   c_user_attributes : Ast.user_attribute SMap.t;
+  c_enum           : enum_ option     ;
+}
+
+and enum_ = {
+  e_base       : hint;
+  e_constraint : hint option;
 }
 
 and tparam = sid * hint option

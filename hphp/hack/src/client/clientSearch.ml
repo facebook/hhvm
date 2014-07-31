@@ -18,7 +18,8 @@ let desc_string_from_type result_type =
           | Ast.Cabstract -> "abstract class"
           | Ast.Cnormal -> "class"
           | Ast.Cinterface -> "interface"
-          | Ast.Ctrait -> "trait")
+          | Ast.Ctrait -> "trait"
+          | Ast.Cenum -> "enum")
     | SS.Method (static, scope) ->
         if static
         then "static method in "^scope

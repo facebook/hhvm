@@ -281,6 +281,19 @@ let is_typedef env x =
   | None -> false
   | Some _ -> true
 
+let is_enum env x =
+  match Classes.get x with
+  | None -> false
+  | Some tc -> tc.tc_enum_type <> None
+
+let get_enum_constraint env x =
+  match Classes.get x with
+  | None -> None
+  | Some tc ->
+    match tc.tc_enum_type with
+      | None -> None
+      | Some e -> e.te_constraint
+
 let add_typedef_error x =
   Typedefs.add x Typedef.Error
 

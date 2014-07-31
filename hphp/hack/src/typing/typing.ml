@@ -2845,6 +2845,8 @@ and class_def_ env_up c tc =
     | Ast.Cinterface -> Errors.interface_final pos
     | Ast.Cabstract -> Errors.abstract_class_final pos
     | Ast.Ctrait -> Errors.trait_final pos
+    (* the parser won't let enums be final *)
+    | Ast.Cenum -> assert false
     | Ast.Cnormal -> assert false
   end;
   List.iter (class_implements env c) impl;

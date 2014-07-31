@@ -901,7 +901,7 @@ let enum_type_bad pos ty trail =
     trail
 
 let enum_type_typedef_mixed pos =
-  add pos "Can't use typedef that resolves to mixed in Enum"
+  add pos "Can't use typedef that resolves to mixed in enum"
 
 (*****************************************************************************)
 (* Shape checking *)

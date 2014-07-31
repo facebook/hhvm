@@ -568,6 +568,9 @@ and toplevel_word ~attr env = function
   | "interface" ->
       let class_ = class_ ~attr ~final:false ~kind:Cinterface env in
       [Class class_]
+  | "enum" ->
+      let class_ = enum_ ~attr env in
+      [Class class_]
   | "async" ->
       expect_word env "function";
       let fun_ = fun_ ~attr ~sync:FAsync env in
@@ -732,9 +735,66 @@ and class_ ~attr ~final ~kind env =
       c_extends         = cextends;
       c_body            = cbody;
       c_namespace       = Namespace_env.empty;
+      c_enum            = None;
     }
   in
   class_implicit_fields result
+
+(*****************************************************************************)
+(* Enums *)
+(*****************************************************************************)
+
+and enum_base_ty env =
+  expect env Tcolon;
+  let h = hint env in
+  h
+
+and enum_ ~attr env =
+  let cname       = identifier env in
+  let basety      = enum_base_ty env in
+  let constraint_ = typedef_constraint env in
+  let cbody       = enum_body env in
+  let result =
+    { c_mode            = env.mode;
+      c_final           = false;
+      c_kind            = Cenum;
+      c_is_xhp          = false;
+      c_implements      = [];
+      c_tparams         = [];
+      c_user_attributes = attr;
+      c_name            = cname;
+      c_extends         = [];
+      c_body            = cbody;
+      c_namespace       = Namespace_env.empty;
+      c_enum            = Some
+        { e_base       = basety;
+          e_constraint = constraint_;
+        }
+    }
+  in
+  result
+
+(* { ... *)
+and enum_body env =
+  expect env Tlcb;
+  enum_defs env
+
+and enum_defs env =
+  match peek env with
+  (* ... } *)
+  | Trcb ->
+      drop env;
+      []
+  | Tword ->
+    let const = class_const env in
+    let elem = Const (None, [const]) in
+    expect env Tsc;
+    let rest = enum_defs env in
+    elem :: rest
+  | _ ->
+    error_expect env "enum const declaration";
+    []
+
 
 (*****************************************************************************)
 (* Extends/Implements *)

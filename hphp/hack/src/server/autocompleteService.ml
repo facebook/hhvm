@@ -224,6 +224,7 @@ let compute_complete_global funs classes =
                     | Ast.Cnormal -> "class"
                     | Ast.Cinterface -> "interface"
                     | Ast.Ctrait -> "trait"
+                    | Ast.Cenum -> "enum"
                   in
                   let ty =
                     Typing_reason.Rwitness c.Typing_defs.tc_pos,

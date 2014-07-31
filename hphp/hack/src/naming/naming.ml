@@ -54,6 +54,9 @@ type genv = {
   (* are we in the body of a non-static member function? *)
   in_member_fun: bool;
 
+  (* are we in the body of an enum? *)
+  in_enum: bool;
+
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
@@ -222,6 +225,7 @@ module Env = struct
     in_mode       = Ast.Mstrict;
     in_try        = false;
     in_member_fun = false;
+    in_enum       = false;
     type_params   = SMap.empty;
     type_paraml   = [];
     classes       = ref env.iclasses;
@@ -238,6 +242,7 @@ module Env = struct
       (if !Autocomplete.auto_complete then Ast.Mpartial else c.c_mode);
     in_try        = false;
     in_member_fun = false;
+    in_enum       = c.c_kind = Cenum;
     type_params   = params;
     type_paraml   = List.map fst c.c_tparams;
     classes       = ref genv.iclasses;
@@ -259,6 +264,7 @@ module Env = struct
     in_mode       = (if !Ide.is_ide_mode then Ast.Mpartial else Ast.Mstrict);
     in_try        = false;
     in_member_fun = false;
+    in_enum       = false;
     type_params   = cstrs;
     type_paraml   = List.map fst tdef.t_tparams;
     classes       = ref genv.iclasses;
@@ -280,6 +286,7 @@ module Env = struct
     in_mode       = f.f_mode;
     in_try        = false;
     in_member_fun = false;
+    in_enum       = false;
     type_params   = params;
     type_paraml   = [];
     classes       = ref genv.iclasses;
@@ -295,6 +302,7 @@ module Env = struct
     in_mode       = cst.cst_mode;
     in_try        = false;
     in_member_fun = false;
+    in_enum       = false;
     type_params   = SMap.empty;
     type_paraml   = [];
     classes       = ref genv.iclasses;
@@ -916,6 +924,7 @@ and class_ genv c =
   let constructor, methods, smethods =
     interface c constructor methods smethods in
   let class_tparam_names = List.map (fun (x,_) -> x) c.c_tparams in
+  let enum = opt_map (enum_ env) c.c_enum in
   check_name_collision methods;
   check_tparams_shadow class_tparam_names methods;
   check_name_collision smethods;
@@ -938,6 +947,12 @@ and class_ genv c =
     N.c_static_methods = smethods;
     N.c_methods        = methods;
     N.c_user_attributes = c.c_user_attributes;
+    N.c_enum           = enum
+  }
+
+and enum_ env e =
+  { N.e_base       = hint env e.e_base;
+    N.e_constraint = opt_map (hint env) e.e_constraint;
   }
 
 and type_paraml env tparams =
@@ -1114,8 +1129,12 @@ and const_def h env (x, e) =
           | Array _ ->
               None, Env.new_const env x, expr env e
           | _ ->
-            Errors.missing_typehint (fst x);
-              None, Env.new_const env x, (fst e, N.Any)
+            (* Missing annotation fine if this is an enum. *)
+            if (fst env).in_enum then
+              (None, Env.new_const env x, expr env e)
+            else
+              (Errors.missing_typehint (fst x);
+               None, Env.new_const env x, (fst e, N.Any))
           )
       | Some h ->
           let h = Some (hint env h) in

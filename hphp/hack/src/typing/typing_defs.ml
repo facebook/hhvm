@@ -148,6 +148,12 @@ and class_type = {
   tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
   tc_user_attributes     : Ast.user_attribute SMap.t;
+  tc_enum_type           : enum_type option;
+}
+
+and enum_type = {
+  te_base       : ty;
+  te_constraint : ty option;
 }
 
 and tparam = Ast.id * ty option

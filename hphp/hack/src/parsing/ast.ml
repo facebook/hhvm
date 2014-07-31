@@ -90,7 +90,13 @@ and class_ = {
     c_implements: hint list;
     c_body: class_elt list;
     c_namespace: Namespace_env.env;
+    c_enum: enum_ option;
   }
+
+and enum_ = {
+  e_base       : hint;
+  e_constraint : hint option;
+}
 
 and user_attribute =
   expr list (* user attributes are restricted to scalar values *)
@@ -100,6 +106,7 @@ and class_kind =
   | Cnormal
   | Cinterface
   | Ctrait
+  | Cenum
 
 and trait_req_kind =
   | MustExtend
@@ -310,3 +317,4 @@ let string_of_class_kind = function
   | Cnormal -> "a class"
   | Cinterface -> "an interface"
   | Ctrait -> "a trait"
+  | Cenum -> "an enum"

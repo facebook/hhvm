@@ -1,0 +1,7 @@
+HHVM_EXT_OPTION(GMP LibGmp)
+if (GMP_INCLUDE_DIR)
+  HHVM_EXTENSION(gmp ext_gmp.cpp)
+  HHVM_SYSTEMLIB(gmp ext_gmp.php)
+  HHVM_LINK_LIBRARIES(gmp ${GMP_LIBRARY})
+  HHVM_ADD_INCLUDES(gmp ${GMP_INCLUDE_DIR})
+endif()

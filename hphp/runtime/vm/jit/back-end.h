@@ -170,10 +170,11 @@ class BackEnd {
    * relocated code). External code references continue to point to
    * the same address as before relocation.
    */
-  virtual void relocate(RelocationInfo& rel, CodeBlock& dest,
+  virtual size_t relocate(RelocationInfo& rel, CodeBlock& dest,
                         TCA start, TCA end,
                         CodeGenFixups& fixups) {
     always_assert(false);
+    return 0;
   }
 
   /*

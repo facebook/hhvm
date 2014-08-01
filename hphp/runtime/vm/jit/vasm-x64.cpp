@@ -82,14 +82,21 @@ Vtuple Vunit::makeTuple(const VregList& regs) {
   return Vtuple{i};
 }
 
+Vout& Vout::operator<<(Vinstr inst) {
+  assert(!closed());
+  inst.sk = m_sk;
+  m_unit.blocks[m_block].code.push_back(inst);
+  return *this;
+}
+
 Vout Vout::makeBlock() {
-  return {m_meta, m_unit, m_unit.makeBlock(m_area), m_area};
+  return {m_meta, m_unit, m_unit.makeBlock(m_area), m_area, m_sk};
 }
 
 Vout Vout::makeEntry() {
   auto label = m_unit.makeBlock(m_area);
   m_unit.roots.push_back(label); // save entry label
-  return {m_meta, m_unit, label, m_area};
+  return {m_meta, m_unit, label, m_area, m_sk};
 }
 
 // implicit cast to label for initializing branch instructions
@@ -112,9 +119,9 @@ struct Vgen {
     : unit(u)
     , backend(mcg->backEnd())
     , areas(areas)
-    , meta(meta) {
-    addrs.resize(u.blocks.size(), nullptr);
-  }
+    , meta(meta)
+    , addrs(u.blocks.size(), nullptr)
+  {}
   void emit(smart::vector<Vlabel>&);
 
 private:
@@ -128,7 +135,7 @@ private:
   void emit(bindjmp& i);
   void emit(callstub& i);
   void emit(contenter& i);
-  void emit(copy& i);
+  void emit(copy i);
   void emit(copy2& i);
   void emit(eagersync& i);
   void emit(copyargs& i) { /* lowered by vasm-xls */ }
@@ -285,20 +292,28 @@ private:
   void prep(Reg32 s, Reg32 d) { if (s != d) a->movl(s, d); }
   void prep(Reg64 s, Reg64 d) { if (s != d) a->movq(s, d); }
   void prep(RegXMM s, RegXMM d) { if (s != d) a->movdqa(s, d); }
-  AreaIndex area(Vlabel b) { return unit.blocks[b].area; }
+  CodeAddress start(Vlabel b) {
+    auto area = unit.blocks[b].area;
+    return areas[(int)area].start;
+  }
   bool check(Vblock& block);
-  CodeBlock& cold() { return areas[(unsigned)AreaIndex::Cold].code; }
-  CodeBlock& frozen() { return areas[(unsigned)AreaIndex::Frozen].code; }
+  CodeBlock& main() { return area(AreaIndex::Main).code; }
+  CodeBlock& cold() { return area(AreaIndex::Cold).code; }
+  CodeBlock& frozen() { return area(AreaIndex::Frozen).code; }
   template<class Inst> void unary(Inst& i) { prep(i.s, i.d); }
   template<class Inst> void binary(Inst& i) { prep(i.s1, i.d); }
   template<class Inst> void commute(Inst&);
   template<class Inst> void noncommute(Inst&);
 
 private:
-  struct LabelPatch { CodeAddress instr; Vlabel target; };
-  struct PointPatch { CodeAddress instr; Vpoint pos; };
+  Vasm::Area& area(AreaIndex i) {
+    assert((unsigned)i < areas.size());
+    return areas[(unsigned)i];
+  }
 
 private:
+  struct LabelPatch { CodeAddress instr; Vlabel target; };
+  struct PointPatch { CodeAddress instr; Vpoint pos; };
   Vunit& unit;
   BackEnd& backend;
   smart::vector<Vasm::Area>& areas;
@@ -372,7 +387,7 @@ void Vgen::emit(contenter& i) {
   // m_savedRip will point here.
 }
 
-void Vgen::emit(copy& i) {
+void Vgen::emit(copy i) {
   if (i.s == i.d) return;
   if (i.s.isGP()) {
     if (i.d.isGP()) {                 // GP => GP
@@ -394,18 +409,21 @@ void Vgen::emit(copy& i) {
 }
 
 void Vgen::emit(copy2& i) {
+  assert(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
   auto s0 = i.s0, s1 = i.s1, d0 = i.d0, d1 = i.d1;
   assert(d0 != d1);
   if (d0 == s1) {
     if (d1 == s0) {
       a->xchgq(d0, d1);
     } else {
-      a->movq(s1, d1); // save s1 first; d1 != s0
-      a->movq(s0, d0);
+      // could do this in a simplify pass
+      if (s1 != d1) a->movq(s1, d1); // save s1 first; d1 != s0
+      if (s0 != d0) a->movq(s0, d0);
     }
   } else {
-    a->movq(s0, d0);
-    a->movq(s1, d1);
+    // could do this in a simplify pass
+    if (s0 != d0) a->movq(s0, d0);
+    if (s1 != d1) a->movq(s1, d1);
   }
 }
 
@@ -421,7 +439,7 @@ void Vgen::emit(bindaddr& i) {
 }
 
 void Vgen::emit(bindcall& i) {
-  emitBindCall(a->code(), cold(), frozen(), i.sk, i.func, i.argc);
+  emitBindCall(a->code(), cold(), frozen(), i.sk, i.callee, i.argc);
 }
 
 void Vgen::emit(bindexit& i) {
@@ -500,21 +518,20 @@ void Vgen::emit(fixup& i) {
 }
 
 void Vgen::emit(ldimm& i) {
-  auto const killcc = false;
   auto val = i.s.q();
   if (i.d.isGP()) {
     if (val == 0) {
       Reg64 d = i.d;
-      if (killcc) {
-        a->xorl(r32(d), r32(d));
-      } else {
+      if (i.saveflags) {
         a->movl(0, r32(d));
+      } else {
+        a->xorl(r32(d), r32(d));
       }
     } else {
       a->emitImmReg(i.s, i.d);
     }
-  } else if (i.s.q() == 0 && killcc) {
-    a->pxor(i.d, i.d);
+  } else if (i.s.q() == 0) {
+    a->pxor(i.d, i.d); // does not modify flags
   } else {
     auto addr = mcg->allocLiteral(i.s.q());
     a->movsd(rip[(intptr_t)addr], i.d);
@@ -599,13 +616,16 @@ void Vgen::emit(eagersync& i) {
 
 // overall emitter
 void Vgen::emit(smart::vector<Vlabel>& labels) {
-  X64Assembler as{areas[0].code};
+  std::vector<TransBCMapping>* bcmap = nullptr;
+  if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
+    bcmap = &mcg->cgFixups().m_bcMap;
+  }
   smart::vector<smart::vector<TcaRange>> block_ranges(areas.size());
   for (auto& r : block_ranges) r.resize(unit.blocks.size());
   for (int i = 0, n = labels.size(); i < n; ++i) {
     auto b = labels[i];
     auto& block = unit.blocks[b];
-    X64Assembler as { areas[(unsigned)block.area].code };
+    X64Assembler as { area(block.area).code };
     a = &as;
     addrs[b] = a->frontier();
     for (int j = 0; j < areas.size(); j++) {
@@ -613,13 +633,25 @@ void Vgen::emit(smart::vector<Vlabel>& labels) {
     }
     {
       // Compute the next block we will emit into the current area.
+      auto cur_start = start(labels[i]);
       auto j = i + 1;
-      while (j < labels.size() && area(labels[j]) != area(labels[i])) {
+      while (j < labels.size() && cur_start != start(labels[j])) {
         j++;
       }
       next = j < labels.size() ? labels[j] : Vlabel(unit.blocks.size());
     }
     for (auto& inst : block.code) {
+      if (bcmap && inst.sk.valid() && (bcmap->empty() ||
+          bcmap->back().md5 != inst.sk.unit()->md5() ||
+          bcmap->back().bcStart != inst.sk.offset())) {
+        bcmap->push_back(TransBCMapping{
+          inst.sk.unit()->md5(),
+          inst.sk.offset(),
+          main().frontier(),
+          cold().frontier(),
+          frozen().frontier()
+        });
+      }
       switch (inst.op) {
 #define O(name, imms, uses, defs)\
         case Vinstr::name: emit(inst.name##_); break;
@@ -653,7 +685,7 @@ void Vgen::emit(smart::vector<Vlabel>& labels) {
     assert(deltaFits(d, sz::dword));
     ((int32_t*)after_lea)[-1] = d;
   }
-  if (dumpIREnabled(kCodeGenLevel)) {
+  if (dumpIREnabled(kCodeGenLevel+1)) {
     std::ostringstream str;
     for (auto b : labels) {
       str << "B" << size_t(b) << "\n";
@@ -699,7 +731,7 @@ void Vgen::emit(jmp i) {
 void Vgen::emit(lea& i) {
   // could do this in a simplify pass
   if (i.s.disp == 0 && i.s.base.isValid() && !i.s.index.isValid()) {
-    a->movq(i.s.base, i.d);
+    emit(copy{i.s.base, i.d});
   } else {
     a->lea(i.s, i.d);
   }
@@ -722,68 +754,49 @@ bool Vgen::check(Vblock& block) {
 }
 }
 
-Vout& Vasm::add(CodeBlock& cb) {
-  auto n = (AreaIndex)m_areas.size();
-  auto b = m_unit.makeBlock(n);
+Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
+  assert(size_t(area) == m_areas.size());
+  auto b = m_unit.makeBlock(area);
   if (size_t(b) == 0) m_unit.roots.push_back(b);
-  Vout v{m_meta, m_unit, b, n};
-  Area area{v, cb, cb.frontier()};
-  m_areas.push_back(area);
-  return out(n);
+  Vout v{m_meta, m_unit, b, area};
+  m_areas.push_back(Area{v, cb, cb.frontier()});
+  return m_areas.back().out;
+}
+
+// copy of layoutBlocks in layout.cpp
+smart::vector<Vlabel> layoutBlocks(Vunit& m_unit) {
+  auto blocks = sortBlocks(m_unit);
+  // partition into main/cold/frozen areas without changing relative order,
+  // and the end{} block will be last.
+  auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
+    [&](Vlabel b) {
+      return m_unit.blocks[b].area == AreaIndex::Main &&
+             m_unit.blocks[b].code.back().op != Vinstr::end;
+    });
+  std::stable_partition(coldIt, blocks.end(),
+    [&](Vlabel b) {
+      return m_unit.blocks[b].area == AreaIndex::Cold &&
+             m_unit.blocks[b].code.back().op != Vinstr::end;
+    });
+  return blocks;
 }
 
 void Vasm::finish(const Abi& abi) {
-  for (auto& area : m_areas) {
-    assert(area.start == area.code.frontier());
-    auto& v = area.out;
-    if (!v.closed()) v << end{};
+  if (m_unit.hasVrs()) {
+    allocateRegisters(m_unit, abi);
   }
-  // if both areas point to the same code, just make them all the same.
-  auto num_areas = m_areas.size();
-  for (int i = 0; i < num_areas; i++) {
-    for (int j = i+1; j < num_areas; j++) {
-      if (&m_areas[j].code == &m_areas[i].code) {
-        for (auto& block : m_unit.blocks) {
-          if (block.area == (AreaIndex)j) block.area = (AreaIndex)i;
-        }
-      }
-    }
-  }
-  allocateRegisters(m_unit, abi);
-  auto blocks = sortBlocks(m_unit);
-  smart::vector<Vlabel> lost;
-  for (size_t i = 0, n = m_unit.blocks.size(); i < n; ++i) {
-    auto& block = m_unit.blocks[i];
-    if (block.code.empty() || block.code.front().op == Vinstr::end) {
-      continue;
-    }
-    Vlabel b{i};
-    if (std::find(blocks.begin(), blocks.end(), b) == blocks.end()) {
-      lost.push_back(b);
-    }
-  }
-  if (dumpIREnabled(kRegAllocLevel) && !lost.empty()) {
-    HPHP::Trace::traceRelease("warning: found %ld unreachable vblocks: ",
-                              lost.size());
-    for (auto b : lost) {
-      HPHP::Trace::traceRelease("%lu ", size_t(b));
-    }
-    HPHP::Trace::traceRelease("\n");
-  }
+  auto blocks = layoutBlocks(m_unit);
   Vgen(m_unit, m_areas, m_meta).emit(blocks);
-  auto bcMap = &mcg->cgFixups().m_bcMap;
-  for (auto& m : m_unit.bcmaps) {
-    auto mainStart = m_meta->points[m.mainStart];
-    auto coldStart = m_meta->points[m.coldStart];
-    auto frozenStart = m_meta->points[m.frozenStart];
-    bcMap->push_back(TransBCMapping{m.md5, m.bcStart, mainStart,
-                                    coldStart, frozenStart});
-  }
 }
 
 Vauto::~Vauto() {
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
+      // found at least one nonempty block. finish up.
+      if (!main().closed()) main() << end{};
+      assert(m_areas.size() < 2 || cold().empty() || cold().closed());
+      assert(m_areas.size() < 3 || frozen().empty() || frozen().closed());
+      printUnit("after vasm-auto", unit());
       finish(vasm_abi);
       return;
     }

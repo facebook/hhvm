@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include <folly/Range.h>
+#include <iosfwd>
 
 namespace HPHP { namespace JIT {
 namespace X64 {
@@ -36,7 +37,6 @@ struct Vlabel {
 private:
   unsigned n; // index in Vunit::blocks
 };
-const Vlabel InvalidVlabel;
 
 // Vpoint is a handle to record or retreive a code address
 struct Vpoint {
@@ -58,15 +58,6 @@ private:
 
 enum class VregKind : uint8_t { Any, Gpr, Simd };
 
-// vasm proxy for TransBCMapping
-struct Vbcmap {
-  MD5 md5;
-  Offset bcStart;
-  Vpoint mainStart;
-  Vpoint coldStart;
-  Vpoint frozenStart;
-};
-
 // holds information generated while assembling final code;
 // designed to outlive instances of Vunit and Vasm.
 struct Vmeta {
@@ -84,6 +75,16 @@ void removeDeadCode(X64::Vunit&);
 folly::Range<Vlabel*> succs(X64::Vinstr& inst);
 folly::Range<Vlabel*> succs(X64::Vblock& block);
 smart::vector<Vlabel> sortBlocks(X64::Vunit& unit);
+std::string formatInstr(X64::Vunit& unit, X64::Vinstr& inst);
+void printBlock(std::ostream& out, X64::Vunit& unit, Vlabel b);
+
+// print a dot-compatible digraph of the blocks (without contents)
+void printCfg(X64::Vunit& unit, smart::vector<Vlabel>& blocks);
+void printCfg(std::ostream& out, X64::Vunit& unit,
+              smart::vector<Vlabel>& blocks);
+
+// print the cfg digraph followed by a code listing
+void printUnit(std::string caption, X64::Vunit& unit);
 
 }}
 #endif

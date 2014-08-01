@@ -270,7 +270,7 @@ struct BackEnd : public JIT::BackEnd {
     return true;
   }
 
-  void relocate(RelocationInfo& rel,
+  size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
                 CodeGenFixups& fixups) override {
@@ -279,10 +279,11 @@ struct BackEnd : public JIT::BackEnd {
     bool hasInternalRefs = false;
     bool internalRefsNeedUpdating = false;
     TCA destStart = destBlock.frontier();
-
+    size_t asm_count{0};
     while (src != end) {
       assert(src < end);
       DecodedInstruction di(src);
+      asm_count++;
 
       int destRange = 0;
       auto af = fixups.m_alignFixups.equal_range(src);
@@ -390,6 +391,7 @@ struct BackEnd : public JIT::BackEnd {
     }
 
     rel.recordRange(start, end, destStart, destBlock.frontier());
+    return asm_count;
   }
 
   template <typename T>

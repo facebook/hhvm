@@ -30,7 +30,6 @@
 //  - #3098685 Optimize lifetime splitting
 //  - #3098712 reuse spill slots
 //  - #3098739 new features now possible with XLS
-//  - #3099647 support loops
 
 TRACE_SET_MOD(xls);
 
@@ -42,139 +41,6 @@ using namespace X64;
 namespace {
 using namespace reg;
 using namespace Stats;
-
-template<class Visitor>
-void visit(Vinstr& inst, Visitor& visitor) {
-  switch (inst.op) {
-#define O(name, imms, uses, defs) \
-    case Vinstr::name: { \
-      auto& i = inst.name##_; (void)i; \
-      imms \
-      uses \
-      defs \
-      break; \
-    }
-#define I(f) visitor.imm(i.f);
-#define U(f) visitor.use(i.f);
-#define UA(f) visitor.across(i.f);
-#define D(f) visitor.def(i.f);
-#define Inone
-#define Un
-#define Dn
-    X64_OPCODES
-#undef Dn
-#undef Un
-#undef Inone
-#undef D
-#undef U
-#undef UA
-#undef I
-#undef O
-  }
-}
-
-// Visitor class to format the operands of a Vinstr. There are
-// imm() overloaded methods for each type of operand used by any Vinstr.
-// If we are missing an overload, the templated catch-all prints "?".
-struct FormatVisitor {
-  FormatVisitor(Vunit& unit, std::ostringstream& str)
-    : unit(unit), str(str)
-  {}
-  template<class T> void imm(T imm) {
-    str << sep() << "?";
-  }
-  void imm(ConditionCode cc) { str << sep() << cc_names[cc]; }
-  void imm(int i) { str << sep() << i; }
-  void imm(bool b) { str << sep() << (b ? 'T' : 'F'); }
-  void imm(Immed s) { str << sep() << s.l(); }
-  void imm(Immed64 s) {
-    str << sep();
-    if (s.fits(sz::byte)) str << s.l();
-    else str << folly::format("0x{:08x}", s.q());
-  }
-  void imm(TCA addr) { imm(Immed64(addr)); }
-  void imm(Vpoint p) { str << sep() << (size_t)p; }
-  void imm(RingBufferType t) { str << sep() << ringbufferName(t); }
-  void imm(SrcKey k) { str << sep() << showShort(k); }
-  void imm(Fixup fix) {
-    str << sep() << "pc:" << fix.m_pcOffset << " sp:" << fix.m_spOffset;
-  }
-  void imm(Stats::StatCounter c) { str << sep() << Stats::g_counterNames[c]; }
-  void imm(Vlabel b) { str << sep() << "B" << size_t(b); }
-  template<class R> void across(R r) { print(r); }
-  template<class R> void use(R r) { print(r); }
-  void use(Vptr& m) { print(m.base, m.index, m.scale, m.disp); }
-  void use(Vtuple uses) { print(uses); }
-
-  void defSep() {
-    if (!seen_def) {
-      if (comma) str << " => ";
-      else str << "=> ";
-      seen_def = true;
-      comma = false;
-    }
-  }
-  void def(Vtuple defs) { defSep(); print(defs); }
-  template<class R> void def(R r) { defSep(); print(r); }
-
-  std::string format(Vreg64 r) {
-    if (r.isPhys()) return reg::regname(r);
-    std::ostringstream str;
-    str << "%" << size_t(r);
-    return str.str();
-  }
-
-  void print(Vreg64 base, Vreg64 index, int scale, int disp) {
-    if (!index.isValid()) {
-      if (!base.isValid()) {
-        str << sep() << '[' << disp << ']';
-      } else {
-        str << sep() << '[' << format(base) <<
-               (disp >= 0 ? "+" : "") << disp << ']';
-      }
-    } else if (!base.isValid()) {
-      str << sep() << '[' << disp <<
-        '+' << format(index) << '*' << scale << ']';
-    } else {
-      str << sep() << '[' << format(base) <<
-             (disp >= 0 ? "+" : "") << disp <<
-             '+' << format(index) << '*' << scale << ']';
-    }
-  }
-
-  void print(Reg64 r) {
-    str << sep() << reg::regname(r);
-  }
-
-  void print(Vtuple t) {
-    for (auto r : unit.tuples[t]) print(r);
-  }
-
-  template<class R> void print(R r) {
-    str << sep();
-    if (r.isVirt()) str << "%" << size_t(r);
-    else str << name(r);
-  }
-  const char* name(Vreg64 r) { return reg::regname(r.asReg()); }
-  const char* name(Vreg32 r) { return reg::regname(r.asReg()); }
-  const char* name(Vreg8 r) { return reg::regname(r.asReg()); }
-  const char* name(VregXMM r) {
-    return reg::regname(r.asReg());
-  }
-  const char* name(Vreg r) {
-    if (r.isGP()) {
-      Reg64 tmp = r;
-      return reg::regname(tmp);
-    }
-    RegXMM tmp = r;
-    return reg::regname(tmp);
-  }
-  const char* sep() { return comma ? ", " : (comma = true, ""); }
-  const Vunit& unit;
-  std::ostringstream& str;
-  bool seen_def{false};
-  bool comma{false};
-};
 
 // Sort blocks in reverse postorder, and try to arrange fall-through
 // blocks in the same area to be close together.
@@ -502,6 +368,16 @@ Vxls::~Vxls() {
   }
 }
 
+bool is_nop(copy& i) { return i.s == i.d; }
+bool is_nop(movq& i) { return i.s == i.d; }
+bool is_nop(copy2& i) { return i.s0 == i.d0 && i.s1 == i.d1; }
+
+bool is_nop(lea& i) {
+  return i.s.disp == 0 && (
+         (i.s.base == i.d && !i.s.index.isValid()) ||
+         (!i.s.base.isValid() && i.s.index == i.d && i.s.scale == 1));
+}
+
 /*
  * Extended Linear Scan is based on Wimmer & Franz "Linear Scan Register
  * Allocation on SSA Form". As currently written, it also works on non-ssa
@@ -554,6 +430,7 @@ Vxls::~Vxls() {
 
 void Vxls::allocate() {
   blocks = sortBlocks(unit);
+  assert(check(unit));
   splitCritEdges();
   computePositions();
   analyzeRsp();
@@ -564,11 +441,22 @@ void Vxls::allocate() {
   resolveEdges();
   renameOperands();
   insertCopies();
+  // we're completely done. remove nop-copies
+  for (auto b : blocks) {
+    auto& code = unit.blocks[b].code;
+    auto end = std::remove_if(code.begin(), code.end(), [&](Vinstr& inst) {
+      return (inst.op == Vinstr::copy && is_nop(inst.copy_)) ||
+             (inst.op == Vinstr::copy2 && is_nop(inst.copy2_)) ||
+             (inst.op == Vinstr::movq && is_nop(inst.movq_)) ||
+             (inst.op == Vinstr::lea && is_nop(inst.lea_));
+    });
+    code.erase(end, code.end());
+  }
+  printUnit("after vasm-xls", unit);
 }
 
 void Vxls::splitCritEdges() {
-  smart::vector<unsigned> preds;
-  preds.resize(unit.blocks.size());
+  smart::vector<unsigned> preds(unit.blocks.size());
   for (auto pred : blocks) {
     auto succlist = succs(unit.blocks[pred]);
     for (auto succ : succlist) {
@@ -673,36 +561,38 @@ void Vxls::analyzeRsp() {
 
 struct DefVisitor {
   DefVisitor(LiveSet& live, Vxls& vxls, unsigned pos)
-    : intervals(vxls.intervals)
-    , tuples(vxls.unit.tuples)
-    , live(live)
-    , pos(pos)
+    : m_intervals(vxls.intervals)
+    , m_tuples(vxls.unit.tuples)
+    , m_live(live)
+    , m_pos(pos)
   {}
   template<class V> void imm(V&){} // skip immediates
   template<class V> void use(V&){} // skip uses
   template<class V> void across(V&){} // skip uses
   void def(Vtuple defs) {
-    for (auto& r : tuples[defs]) def(r);
+    for (auto& r : m_tuples[defs]) def(r);
   }
-  template<class V> void def(V r) {
-    auto ivl = intervals[r];
-    if (live.test(r)) {
-      live.reset(r);
-      ivl->ranges.back().start = pos;
+  template<class V> void def(V r) { def(r, r.kind); }
+  void def(Vreg r, VregKind kind) {
+    auto ivl = m_intervals[r];
+    if (m_live.test(r)) {
+      m_live.reset(r);
+      ivl->ranges.back().start = m_pos;
     } else {
       if (!ivl) {
-        ivl = intervals[r] = smart_new<Interval>(r);
+        ivl = m_intervals[r] = smart_new<Interval>(r);
       }
-      ivl->add({pos, pos+1});
+      ivl->add({m_pos, m_pos + 1});
     }
     if (!ivl->fixed()) {
-      ivl->uses.push_back({r.kind, true, pos});
+      ivl->uses.push_back(Use{kind, true, m_pos});
     }
   }
-  smart::vector<Interval*>& intervals;
-  smart::vector<VregList>& tuples;
-  LiveSet& live;
-  unsigned pos;
+private:
+  smart::vector<Interval*>& m_intervals;
+  smart::vector<VregList>& m_tuples;
+  LiveSet& m_live;
+  unsigned m_pos;
 };
 
 // this kinda sucks, but I can't use a lambda to handle Vreg and Vptr
@@ -777,6 +667,15 @@ void getEffects(const Abi& abi, const Vinstr& i, RegSet& uses, RegSet& defs) {
     case Vinstr::sarq:
       uses = RegSet(rcx);
       break;
+    case Vinstr::resume:
+    case Vinstr::retransopt:
+    case Vinstr::bindaddr:
+    case Vinstr::bindjcc1:
+    case Vinstr::bindjcc2:
+    case Vinstr::bindjmp:
+    case Vinstr::bindexit:
+      defs = RegSet(rAsm);
+      break;
     default:
       break;
   }
@@ -785,37 +684,60 @@ void getEffects(const Abi& abi, const Vinstr& i, RegSet& uses, RegSet& defs) {
 // Compute lifetime intervals and use positions of all intervals by walking
 // the code bottom-up once. Loops aren't handled yet.
 void Vxls::buildIntervals() {
+  if (dumpIREnabled(kRegAllocLevel)) {
+    printCfg(unit, blocks);
+  }
   livein.resize(unit.blocks.size());
   intervals.resize(unit.next_vr);
+  auto loops = false;
+  auto preds = computePreds(unit);
   for (auto blockIt = blocks.end(); blockIt != blocks.begin();) {
     auto vlabel = *--blockIt;
     auto& block = unit.blocks[vlabel];
+    // initial live set is the union of successor live sets.
     LiveSet live(unit.next_vr);
     for (auto s : succs(block)) {
-      if (!livein[s].empty()) live |= livein[s];
+      if (!livein[s].empty()) {
+        live |= livein[s];
+      } else {
+        loops = true;
+      }
     }
+    // add a range covering the whole block to every live interval
     auto& block_range = block_ranges[vlabel];
-    forEach(live, [&](Vreg vr) {
-      intervals[vr]->add(block_range);
+    forEach(live, [&](Vreg r) {
+      intervals[r]->add(block_range);
     });
+    // visit instructions bottom-up, adding uses & ranges
     auto pos = block_range.end;
     for (auto i = block.code.end(); i != block.code.begin();) {
       auto& inst = *--i;
       pos -= 2;
       DefVisitor dv(live, *this, pos);
-      visit(inst, dv);
+      visitOperands(inst, dv);
       RegSet implicit_uses, implicit_defs;
       getEffects(abi, inst, implicit_uses, implicit_defs);
       implicit_defs.forEach([&](Vreg r) {
         dv.def(r);
       });
       UseVisitor uv(live, *this, {block_range.start, pos});
-      visit(inst, uv);
+      visitOperands(inst, uv);
       implicit_uses.forEach([&](Vreg r) {
         uv.use(r);
       });
     }
+    // save live set so it can propagate to predecessors
     livein[vlabel] = live;
+    // add a loop-covering range to each interval live into a loop.
+    for (auto p: preds[vlabel]) {
+      auto pred_end = block_ranges[p].end;
+      if (pred_end > block_range.start) {
+        forEach(live, [&](Vreg r) {
+          auto ivl = intervals[r];
+          ivl->add(LiveRange{block_range.start, pred_end});
+        });
+      }
+    }
   }
   for (auto& c : unit.cpool) {
     auto ivl = intervals[c.second];
@@ -833,14 +755,14 @@ void Vxls::buildIntervals() {
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
   }
   if (dumpIREnabled(kRegAllocLevel)) {
+    if (loops) HPHP::Trace::traceRelease("vasm-loops\n");
     print("after building intervals");
   }
   // todo: t4764262 this should check each root, not just position 0.
   for (DEBUG_ONLY auto ivl : intervals) {
     // only constants and physical registers can be live at entry.
-    assert(!ivl || ivl->cns || ivl->vreg.isPhys() || ivl->start() > 0);
+    assert(!ivl || ivl->cns || ivl->fixed() || ivl->start() > 0);
   }
-  assert(check(unit));
 }
 
 void Vxls::walkIntervals() {
@@ -1139,7 +1061,7 @@ void Vxls::renameOperands() {
     pos += 2; // skip implied label
     for (auto& inst : unit.blocks[b].code) {
       Renamer renamer(*this, pos);
-      visit(inst, renamer);
+      visitOperands(inst, renamer);
       pos += 2;
     }
   }
@@ -1246,6 +1168,8 @@ void Vxls::resolveEdges() {
       auto b2 = succlist[i];
       auto p2 = block_ranges[b2].start;
       forEach(livein[b2], [&](Vreg vr) {
+        auto ivl = intervals[vr];
+        if (ivl->fixed()) return;
         Interval* i1 = nullptr;
         Interval* i2 = nullptr;
         for (auto ivl = intervals[vr]; ivl && !(i1 && i2); ivl = ivl->next) {
@@ -1356,7 +1280,7 @@ void Vxls::insertCopiesAt(smart::vector<Vinstr>& code, unsigned& j,
     if (ivl->reg != InvalidReg) {
       moves[dst] = ivl->reg;
     } else if (ivl->cns) {
-      loads.emplace_back(ldimm{ivl->val, dst});
+      loads.emplace_back(ldimm{ivl->val, dst, true});
     } else {
       assert(ivl->spilled());
       MemoryRef ptr{slots.r + PhysLoc::disp(ivl->slot)};
@@ -1462,7 +1386,7 @@ std::string Interval::toString() {
 void Vxls::dumpIntervals() {
   unsigned numSplits = 0;
   for (auto ivl : intervals) {
-    if (!ivl || ivl->vreg.isPhys()) continue;
+    if (!ivl || ivl->fixed()) continue;
     HPHP::Trace::traceRelease("%%%-2lu %s\n", size_t(ivl->vreg),
                               ivl->toString().c_str());
     for (ivl = ivl->next; ivl; ivl = ivl->next) {
@@ -1505,30 +1429,17 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
     return fixed_covers[p-pos];
   });
   if (pos == block_ranges[b].start) {
-    str << folly::format(" B{: <2}", size_t(b));
+    str << folly::format(" B{: <2} ", size_t(b));
   } else {
-    str << "    ";
+    str << "     ";
   }
   if (pos == block_ranges[b].start || pos > 0) {
-    str << folly::format(" {: <3}", pos);
+    str << folly::format(" {: <3} ", pos);
   } else {
-    str << "    ";
+    str << "     ";
   }
   if (inst) {
-    str << folly::format(" {: <10} ", vinst_names[inst->op]);
-    FormatVisitor pv(unit, str);
-    visit(*inst, pv);
-    auto labels = succs(*inst);
-    if (labels.size() == 1) {
-      str << pv.sep() << folly::format("B{}", size_t(labels[0]));
-    } else if (labels.size() == 2) {
-      str << pv.sep() << folly::format("B{}, else B{}", size_t(labels[1]),
-                                       size_t(labels[0]));
-    } else {
-      for (auto succ : succs(*inst)) {
-        str << folly::format("->B{} ", size_t(succ));
-      }
-    }
+    str << formatInstr(unit, *inst);
   }
   str << "\n";
 }

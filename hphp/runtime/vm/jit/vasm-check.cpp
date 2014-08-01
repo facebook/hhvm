@@ -27,12 +27,12 @@ namespace {
 typedef boost::dynamic_bitset<> Bits;
 bool checkSSA(Vunit& unit, smart::vector<Vlabel>& blocks) {
   using namespace reg;
-  smart::vector<Bits> block_defs; // index by [Vlabel]
-  Bits global_defs;
-  block_defs.resize(unit.blocks.size());
-  global_defs.resize(unit.next_vr);
+  smart::vector<Bits> block_defs(unit.blocks.size()); // index by [Vlabel]
+  Bits global_defs(unit.next_vr);
+  Bits consts(unit.next_vr);
   for (auto& c : unit.cpool) {
     global_defs.set(c.second);
+    consts.set(c.second);
   }
   for (auto b : blocks) {
     Bits local_defs;
@@ -51,6 +51,8 @@ bool checkSSA(Vunit& unit, smart::vector<Vlabel>& blocks) {
       });
       visitDefs(unit, inst, [&](Vreg v) {
         // TODO: t4779057: require SSA
+        assert_flog(!v.isVirt() || !consts.test(v),
+                    "%{} const defined in B{}", size_t(v), size_t(b));
         //assert_flog(!v.isVirt() || !local_defs[v],
         //            "%{} locally redefined in B{}", size_t(v), size_t(b));
         //assert_flog(!v.isVirt() || !global_defs[v],

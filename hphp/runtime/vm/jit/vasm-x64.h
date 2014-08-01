@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include <folly/Range.h>
+#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP { namespace JIT {
 namespace X64 {
@@ -62,8 +63,11 @@ struct Vreg {
     return RegXMM(rn - X0);
   }
   /* implicit */ operator PhysReg() const { return physReg(); }
-  bool isPhys() const { return rn >= G0 && rn < V0; }
-  bool isGP() const { assert(isPhys()); return rn >= G0 && rn < X0; }
+  bool isPhys() const {
+    static_assert(G0 == 0, "");
+    return rn < V0;
+  }
+  bool isGP() const { assert(isPhys()); return rn < X0; }
   bool isSIMD() const { assert(isPhys()); return rn >= X0 && rn < V0; }
   bool isVirt() const { return !isPhys(); }
   bool isValid() const { return rn < 0xffffffff; }
@@ -96,8 +100,14 @@ private:
 template<class Reg, VregKind k> struct Vr {
   static constexpr auto kind = k;
   explicit Vr(size_t rn) : rn(rn) {}
-  /* implicit */ Vr(Vreg r) : rn(int(r)) {}
-  /* implicit */ Vr(Reg r) : rn(int(r)) {}
+  /* implicit */ Vr(Vreg r) : rn(size_t(r)) {
+    if (kind == VregKind::Simd) {
+      assert(r.isVirt() || r.isSIMD() || !r.isValid());
+    } else if (kind == VregKind::Gpr) {
+      assert(r.isVirt() || r.isGP() || !r.isValid());
+    }
+  }
+  /* implicit */ Vr(Reg r) : Vr{Vreg(r)} {}
   /* implicit */ Vr(PhysReg pr) : Vr{Vreg(pr)} {}
   Reg asReg() const {
     assert(isPhys());
@@ -106,8 +116,11 @@ template<class Reg, VregKind k> struct Vr {
   /* implicit */ operator Reg() const { return asReg(); }
   /* implicit */ operator Vreg() const { return Vreg(rn); }
   /* implicit */ operator size_t() const { return rn; }
-  bool isPhys() const { return rn >= Vreg::G0 && rn < Vreg::V0; }
-  bool isGP() const { assert(isPhys());return rn >= Vreg::G0 && rn < Vreg::X0; }
+  bool isPhys() const {
+    static_assert(Vreg::G0 == 0, "");
+    return rn < Vreg::V0;
+  }
+  bool isGP() const { assert(isPhys()); return rn < Vreg::X0; }
   bool isSIMD() const { assert(isPhys());return rn>=Vreg::X0 && rn < Vreg::V0; }
   bool isVirt() const { return !isPhys(); }
   bool operator==(Vr<Reg,k> r) const { return rn == r.rn; }
@@ -315,7 +328,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   /*intrinsics*/\
   O(align, I(n), Un, Dn)\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
-  O(bindcall, I(sk) I(func) I(argc), Un, Dn)\
+  O(bindcall, I(sk) I(callee) I(argc), Un, Dn)\
   O(bindexit, I(cc) I(target), Un, Dn)\
   O(bindjcc1, I(cc) I(targets[0]) I(targets[1]), Un, Dn)\
   O(bindjcc2, I(cc) I(target), Un, Dn)\
@@ -327,7 +340,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(copyargs, Inone, U(s), D(d))\
   O(eagersync, I(pc), Un, Dn)\
   O(end, Inone, Un, Dn)\
-  O(ldimm, I(s), Un, D(d))\
+  O(ldimm, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), Un, Dn)\
   O(fallbackcc, I(cc) I(dest), Un, Dn)\
   O(fixupcatch, I(afterCall) I(catchStart), Un, Dn)\
@@ -476,7 +489,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
 // intrinsics
 struct align { size_t n{16}; };
 struct bindaddr { TCA* dest; SrcKey sk; };
-struct bindcall { SrcKey sk; const Func* func; unsigned argc; };
+struct bindcall { SrcKey sk; const Func* callee; unsigned argc; };
 struct bindexit { ConditionCode cc; SrcKey target; TransFlags trflags; };
 struct bindjcc1 { ConditionCode cc; Offset targets[2]; };
 struct bindjcc2 { ConditionCode cc; Offset target; };
@@ -488,7 +501,7 @@ struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
 struct eagersync { const Op* pc; };
 struct end {};
-struct ldimm { Immed64 s; Vreg d; };
+struct ldimm { Immed64 s; Vreg d; bool saveflags; };
 struct fixup { Fixup fix; };
 struct fixupcatch { Vpoint afterCall; Vpoint catchStart; };
 struct fallback { SrcKey dest; TransFlags trflags; };
@@ -661,12 +674,13 @@ struct Vinstr {
 
   Opcode op;
   unsigned pos;
+  SrcKey sk;
 #define O(name, imms, uses, defs) X64::name name##_;
   union { X64_OPCODES };
 #undef O
 };
 
-enum class AreaIndex: unsigned { Main, Cold, Frozen };
+enum class AreaIndex: unsigned { Main, Cold, Frozen, Max };
 
 struct Vblock {
   explicit Vblock(AreaIndex area) : area(area) {}
@@ -688,10 +702,10 @@ struct Vunit {
   Vreg makeConst(int32_t v) { return makeConst(int64_t(v)); }
   Vreg makeConst(DataType t) { return makeConst(uint64_t(t)); }
   Vreg makeConst(Immed64 v) { return makeConst(uint64_t(v.q())); }
+  bool hasVrs() const { return next_vr > Vreg::V0; }
   unsigned next_vr{Vreg::V0};
   smart::vector<Vblock> blocks;
   smart::vector<Vlabel> roots; // entry points
-  smart::vector<Vbcmap> bcmaps;
   smart::hash_map<uint64_t,Vreg> cpool;
   smart::vector<VregList> tuples;
 };
@@ -701,13 +715,18 @@ struct Vout {
   Vout(Vmeta* m, Vunit& u, Vlabel b, AreaIndex area)
     : m_meta(m), m_unit(u), m_block(b), m_area(area)
   {}
+  Vout(Vmeta* m, Vunit& u, Vlabel b, AreaIndex area, SrcKey sk)
+    : m_meta(m), m_unit(u), m_block(b), m_area(area), m_sk(sk)
+  {}
   Vout(const Vout& v)
     : m_meta(v.m_meta), m_unit(v.m_unit), m_block(v.m_block), m_area(v.m_area)
+    , m_sk(v.m_sk)
   {}
 
   Vout& operator=(const Vout& v) {
     assert(&v.m_unit == &m_unit && v.m_area == m_area);
     m_block = v.m_block;
+    m_sk = v.m_sk;
     return *this;
   }
 
@@ -720,19 +739,16 @@ struct Vout {
   Vout makeEntry(); // makeBlock() and add it to unit.roots
 
   // instruction emitter
-  Vout& operator<<(Vinstr inst) {
-    assert(!closed());
-    m_unit.blocks[m_block].code.push_back(inst);
-    return *this;
-  }
+  Vout& operator<<(Vinstr inst);
 
   Vpoint makePoint() { return m_meta->makePoint(); }
   Vmeta& meta() { return *m_meta; }
   Vunit& unit() { return m_unit; }
   template<class T> Vreg cns(T v) { return m_unit.makeConst(v); }
   void use(Vlabel b) { m_block = b; }
-
+  void setSrcKey(SrcKey sk) { m_sk = sk; }
   Vreg makeReg() { return m_unit.makeReg(); }
+  AreaIndex area() const { return m_area; }
 
 private:
   void add(Vinstr&);
@@ -742,6 +758,7 @@ private:
   Vunit& m_unit;
   Vlabel m_block;
   AreaIndex m_area;
+  SrcKey m_sk;
 };
 
 // Similar to X64Assembler, but buffers instructions as they
@@ -753,24 +770,36 @@ struct Vasm {
     CodeBlock& code;
     CodeAddress start;
   };
-  explicit Vasm(Vmeta* meta) : m_meta(meta) {}
+  explicit Vasm(Vmeta* meta) : m_meta(meta) {
+    m_areas.reserve(size_t(AreaIndex::Max));
+  }
   void finish(const Abi&);
 
-  Vout& out(AreaIndex area = AreaIndex::Main) {
-    assert(unsigned(area) < m_areas.size());
-    return m_areas[(int)area].out;
-  }
+  // get an existing area
+  Vout& main() { return area(AreaIndex::Main).out; }
+  Vout& cold() { return area(AreaIndex::Cold).out; }
+  Vout& frozen() { return area(AreaIndex::Frozen).out; }
 
-  Vout makeVout(Vlabel b, AreaIndex area) {
-    return {m_meta, m_unit, b, area};
-  }
-  Vout& add(CodeBlock& cb);
-  Vout& add(X64Assembler& a) { return add(a.code()); }
+  // create areas
+  Vout& main(CodeBlock& cb) { return add(cb, AreaIndex::Main); }
+  Vout& cold(CodeBlock& cb) { return add(cb, AreaIndex::Cold); }
+  Vout& frozen(CodeBlock& cb) { return add(cb, AreaIndex::Frozen); }
+  Vout& main(X64Assembler& a) { return main(a.code()); }
+  Vout& cold(X64Assembler& a) { return cold(a.code()); }
+  Vout& frozen(X64Assembler& a) { return frozen(a.code()); }
   Vunit& unit() { return m_unit; }
+
+private:
+  Vout& add(CodeBlock &cb, AreaIndex area);
+  Area& area(AreaIndex i) {
+    assert((unsigned)i < m_areas.size());
+    return m_areas[(unsigned)i];
+  }
 
 private:
   Vmeta* const m_meta;
   Vunit m_unit;
+protected:
   smart::vector<Area> m_areas; // indexed by AreaIndex
 };
 
@@ -829,6 +858,57 @@ void visitDefs(const Vunit& unit, Vinstr& inst, Def def) {
   }
 }
 
+template<class Visitor>
+void visitOperands(Vinstr& inst, Visitor& visitor) {
+  switch (inst.op) {
+#define O(name, imms, uses, defs) \
+    case Vinstr::name: { \
+      auto& i = inst.name##_; (void)i; \
+      imms \
+      uses \
+      defs \
+      break; \
+    }
+#define I(f) visitor.imm(i.f);
+#define U(f) visitor.use(i.f);
+#define UA(f) visitor.across(i.f);
+#define D(f) visitor.def(i.f);
+#define Inone
+#define Un
+#define Dn
+    X64_OPCODES
+#undef Dn
+#undef Un
+#undef Inone
+#undef D
+#undef U
+#undef UA
+#undef I
+#undef O
+  }
+}
+
+// visit reachable blocks in postorder, calling fn on each one.
+struct PostorderWalker {
+  template<class Fn> void dfs(Vlabel b, Fn fn) {
+    if (visited.test(b)) return;
+    visited.set(b);
+    for (auto s : succs(unit.blocks[b])) {
+      dfs(s, fn);
+    }
+    fn(b);
+  }
+  template<class Fn> void dfs(Fn fn) {
+    for (auto b : unit.roots) dfs(b, fn);
+  }
+  explicit PostorderWalker(Vunit& u)
+    : unit(u)
+    , visited(u.blocks.size())
+  {}
+  Vunit& unit;
+  boost::dynamic_bitset<> visited;
+};
+
 extern const char* vinst_names[];
 bool isBlockEnd(Vinstr& inst);
 std::string format(Vreg);
@@ -836,6 +916,9 @@ bool check(Vunit&);
 
 // search for the phidef in block b, then return its dest tuple
 Vtuple findDefs(const Vunit& unit, Vlabel b);
+
+typedef smart::vector<smart::vector<Vlabel>> PredVector;
+PredVector computePreds(Vunit& unit);
 
 }
 

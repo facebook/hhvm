@@ -65,7 +65,7 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
   return live_regs;
 }
 
-static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
+static size_t genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
                      CodeBlock& frozenCode,
                      CodegenState& state, Block* block,
                      std::vector<TransBCMapping>* bcMap) {
@@ -74,7 +74,9 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
                                                                     coldCode,
                                                                     frozenCode,
                                                                     state));
+  size_t hhir_count{0};
   for (IRInstruction& instr : *block) {
+    hhir_count++;
     IRInstruction* inst = &instr;
 
     if (instr.is(EndGuards)) state.pastGuards = true;
@@ -99,6 +101,7 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
       state.asmInfo->updateForInstruction(inst, start, cb.frontier());
     }
   }
+  return hhir_count;
 }
 
 static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
@@ -162,7 +165,7 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
   auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
   auto bcMap = &mcg->cgFixups().m_bcMap;
-
+  size_t hhir_count{0};
   {
     mcg->code.lock();
     mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
@@ -199,7 +202,8 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
         state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
       }
 
-      genBlock(unit, cb, coldCode, *frozenCode, state, block, bcMap);
+      auto hhir_count = genBlock(unit, cb, coldCode, *frozenCode, state,
+                                 block, bcMap);
       auto nextFlow = block->next();
       if (nextFlow && nextFlow != nextLinear) {
         mcg->backEnd().emitFwdJmp(cb, nextFlow, state);
@@ -216,6 +220,7 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
                                                         frozenCode->frontier());
         }
       }
+      return hhir_count;
     };
 
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -227,17 +232,17 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     for (auto it = linfo.blocks.begin(); it != linfo.acoldIt; ++it) {
       Block* nextLinear = boost::next(it) != linfo.acoldIt
         ? *boost::next(it) : nullptr;
-      emitBlock(mainCode, *it, nextLinear);
+      hhir_count += emitBlock(mainCode, *it, nextLinear);
     }
     for (auto it = linfo.acoldIt; it != linfo.afrozenIt; ++it) {
       Block* nextLinear = boost::next(it) != linfo.afrozenIt
         ? *boost::next(it) : nullptr;
-      emitBlock(coldCode, *it, nextLinear);
+      hhir_count += emitBlock(coldCode, *it, nextLinear);
     }
     for (auto it = linfo.afrozenIt; it != linfo.blocks.end(); ++it) {
       Block* nextLinear = boost::next(it) != linfo.blocks.end()
         ? *boost::next(it) : nullptr;
-      emitBlock(*frozenCode, *it, nextLinear);
+      hhir_count += emitBlock(*frozenCode, *it, nextLinear);
     }
 
     if (debug) {
@@ -257,13 +262,15 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
     auto& be = mcg->backEnd();
     RelocationInfo rel;
-    be.relocate(rel, mainCodeIn,
+    size_t asm_count{0};
+    asm_count += be.relocate(rel, mainCodeIn,
                 mainCode.base(), mainCode.frontier(),
                 mcg->cgFixups());
 
-    be.relocate(rel, coldCodeIn,
+    asm_count += be.relocate(rel, coldCodeIn,
                 coldCode.base(), coldCode.frontier(),
                 mcg->cgFixups());
+    TRACE(1, "hhir-inst-count %ld asm %ld\n", hhir_count, asm_count);
 
     if (frozenCode != &coldCode) {
       rel.recordRange(frozenStart, frozenCode->frontier(),

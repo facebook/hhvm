@@ -1,6 +1,7 @@
 <?php
 parse_str("x=2", $_GET);
 $_REQUEST = array_merge($_REQUEST, $_GET);
+_filter_snapshot_globals();
 
 $_x = "1\n";
 echo $_x;

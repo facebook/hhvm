@@ -1,0 +1,8 @@
+<?php
+if (!ini_get("zend.multibyte")) {
+  die("skip Requires zend.multibyte=1");
+}
+if (!extension_loaded("mbstring")) {
+  die("skip Requires ext/mbstring");
+}
+?>

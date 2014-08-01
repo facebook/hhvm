@@ -1,0 +1,10 @@
+BEGINNING: rows_fetched_from_client_ps_unbuffered = %d
+BEGINNING: rows_fetched_from_client_ps_buffered = %d
+BEGINNING: rows_fetched_from_client_ps_cursor = 0
+BUFFERED: rows_fetched_from_client_ps_unbuffered = %d
+BUFFERED: rows_fetched_from_client_ps_buffered = %d
+BUFFERED: rows_fetched_from_client_ps_cursor = 0
+UNBUFFERED: rows_fetched_from_client_ps_unbuffered = %d
+UNBUFFERED: rows_fetched_from_client_ps_buffered = %d
+UNBUFFERED: rows_fetched_from_client_ps_cursor = 0
+done!

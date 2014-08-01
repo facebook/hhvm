@@ -1,0 +1,60 @@
+array(1) refcount(2){
+  [0]=>
+  array(4) refcount(1){
+    [%u|b%"row_ref"]=>
+    &NULL refcount(2)
+    [%u|b%"row_copy"]=>
+    array(2) refcount(1){
+      [%u|b%"id"]=>
+      %unicode|string%(1) "1" refcount(2)
+      [%u|b%"label"]=>
+      %unicode|string%(1) "a" refcount(2)
+    }
+    [%u|b%"id_ref"]=>
+    %unicode|string%(1) "1" refcount(1)
+    [%u|b%"id_copy"]=>
+    %unicode|string%(1) "1" refcount(1)
+  }
+}
+array(2) refcount(2){
+  [0]=>
+  array(4) refcount(1){
+    [%u|b%"row_ref"]=>
+    &NULL refcount(2)
+    [%u|b%"row_copy"]=>
+    array(2) refcount(1){
+      [%u|b%"id"]=>
+      %unicode|string%(1) "1" refcount(1)
+      [%u|b%"label"]=>
+      %unicode|string%(1) "a" refcount(1)
+    }
+    [%u|b%"id_ref"]=>
+    %unicode|string%(1) "1" refcount(1)
+    [%u|b%"id_copy"]=>
+    %unicode|string%(1) "1" refcount(1)
+  }
+  [1]=>
+  array(5) refcount(1){
+    [%u|b%"row_ref"]=>
+    &array(2) refcount(2){
+      [%u|b%"id"]=>
+      &%unicode|string%(1) "2" refcount(2)
+      [%u|b%"label"]=>
+      %unicode|string%(1) "b" refcount(2)
+    }
+    [%u|b%"row_copy"]=>
+    array(2) refcount(1){
+      [%u|b%"id"]=>
+      %unicode|string%(1) "2" refcount(1)
+      [%u|b%"label"]=>
+      %unicode|string%(1) "b" refcount(2)
+    }
+    [%u|b%"id_ref"]=>
+    &%unicode|string%(1) "2" refcount(2)
+    [%u|b%"id_copy"]=>
+    %unicode|string%(1) "2" refcount(1)
+    [%u|b%"id_copy_mod"]=>
+    long(2) refcount(1)
+  }
+}
+done!

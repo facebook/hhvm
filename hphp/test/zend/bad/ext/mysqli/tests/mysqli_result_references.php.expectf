@@ -46,7 +46,7 @@ array(7) refcount(2){
     &long(4) refcount(2)
   }
   [6]=>
-  &object(mysqli_result)#2 (5) refcount(2){
+  &object(mysqli_result)#%d (5) refcount(2){
     [%u|b%"current_field"]=>
     NULL refcount(1)
     [%u|b%"field_count"]=>

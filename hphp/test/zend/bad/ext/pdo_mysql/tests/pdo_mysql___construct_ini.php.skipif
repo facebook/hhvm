@@ -1,0 +1,8 @@
+<?php
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::skip();
+/* TODO - fix this limitation */
+if (getenv('PDO_MYSQL_TEST_DSN') !== "mysql:dbname=phptest;unix_socket=/tmp/mysql.sock")
+	die("skip Fix test to run in other environments as well!");
+?>

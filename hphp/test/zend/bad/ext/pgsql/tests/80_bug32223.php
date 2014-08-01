@@ -1,6 +1,4 @@
 <?php
-ini_set('pgsql.ignore_notice', 0);
-
 
 require_once('config.inc');
 require_once('lcmess.inc');

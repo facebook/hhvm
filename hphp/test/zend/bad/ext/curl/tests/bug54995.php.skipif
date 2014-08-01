@@ -1,0 +1,11 @@
+<?php 
+if (!extension_loaded("curl")) {
+	exit("skip curl extension not loaded");
+}
+if ($curl_version['version_number'] > 0x070a08) {
+	exit("skip: tests works a versions of curl >= 7.10.8");
+}
+if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  {
+	exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
+}
+?>

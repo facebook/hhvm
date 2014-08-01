@@ -1,5 +1,5 @@
 <?php
-$fp = fopen('SplFileObject__fgetcsv5.csv', 'w+');
+$fp = fopen('SplFileObject__fgetcsv.csv', 'w+');
 fputcsv($fp, array(
 	'field1',
 	'field2',
@@ -8,9 +8,9 @@ fputcsv($fp, array(
 ), ',', '"');
 fclose($fp);
 
-$fo = new SplFileObject('SplFileObject__fgetcsv5.csv');
+$fo = new SplFileObject('SplFileObject__fgetcsv.csv');
 var_dump($fo->fgetcsv(',', 'invalid'));
 ?>
 <?php
-unlink('SplFileObject__fgetcsv5.csv');
+unlink('SplFileObject__fgetcsv.csv');
 ?>

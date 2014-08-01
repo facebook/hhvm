@@ -1,0 +1,10 @@
+<?php
+require_once('skipif.inc');
+require_once('skipifconnectfailure.inc');
+if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
+	die("skip Test doesn't work on Windows");
+}
+
+if (!($output = @exec("lsof -np " . getmypid())))
+	die("skip Test can't find command line tool lsof");
+?>

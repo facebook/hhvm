@@ -1,0 +1,7 @@
+<?php // vim600: syn=php
+include("skipif.inc");
+if(strtoupper("äöüß") != "ÄÖÜß")
+{
+	die("skip strtoupper on non-ascii not supported on this platform");
+}
+?>

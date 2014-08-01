@@ -1,0 +1,43 @@
+tsint:
+array(1) {
+  ["a"]=>
+  string(11) "-4294967297"
+}
+array(1) {
+  ["a"]=>
+  string(11) "-4294967295"
+}
+array(1) {
+  ["a"]=>
+  string(2) "42"
+}
+array(1) {
+  ["a"]=>
+  string(2) "43"
+}
+array(1) {
+  ["a"]=>
+  string(10) "4294967295"
+}
+array(1) {
+  ["a"]=>
+  string(10) "4294967297"
+}
+tuint:
+array(1) {
+  ["a"]=>
+  string(2) "42"
+}
+array(1) {
+  ["a"]=>
+  string(2) "43"
+}
+array(1) {
+  ["a"]=>
+  string(10) "4294967295"
+}
+array(1) {
+  ["a"]=>
+  string(10) "4294967297"
+}
+done

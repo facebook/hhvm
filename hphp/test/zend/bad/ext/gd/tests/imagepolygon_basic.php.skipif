@@ -1,0 +1,4 @@
+<?php 
+	if (!function_exists('imagepolygon')) die('skip imagepolygon() not available'); 
+	require_once('skipif_imagetype.inc');
+?>

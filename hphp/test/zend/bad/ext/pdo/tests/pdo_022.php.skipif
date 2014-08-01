@@ -1,0 +1,17 @@
+<?php # vim:ft=php
+die('skip this feature is not yet finalized, no test makes sense');
+if (!extension_loaded('pdo')) die('skip');
+$dir = getenv('REDIR_TEST_DIR');
+if (false == $dir) die('skip no driver');
+require_once $dir . 'pdo_test.inc';
+PDOTest::skip();
+/*
+ * Note well: meta information is a nightmare to handle portably.
+ * it's not really PDOs job.
+ * We've not yet defined exactly what makes sense for getColumnMeta,
+ * so no tests make any sense to anyone.  When they do, we can enable
+ * this test file.
+ * TODO: filter out driver dependent components from this common core
+ * test file.
+ */
+?>

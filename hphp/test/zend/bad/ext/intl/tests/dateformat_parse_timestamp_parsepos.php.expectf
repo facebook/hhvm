@@ -1,0 +1,80 @@
+------------
+
+Input text is : Sunday, September 18, 3039 4:06:40 PM PT
+------------
+Locale is : en_US_CA
+------------
+datetype = 0 ,timetype =0
+Parsed text is : 33756908800; Position = 40
+datetype = 1 ,timetype =1
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 2 ,timetype =2
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 3 ,timetype =3
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = -1 ,timetype =-1
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+------------
+
+Input text is : Thursday, December 18, 1969 8:49:59 AM PST
+------------
+Locale is : en_US_CA
+------------
+datetype = 0 ,timetype =0
+Parsed text is : -1149001; Position = 42
+datetype = 1 ,timetype =1
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 2 ,timetype =2
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 3 ,timetype =3
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = -1 ,timetype =-1
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+------------
+
+Input text is : 12/18/69 8:49 AM
+------------
+Locale is : en_US_CA
+------------
+datetype = 0 ,timetype =0
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 1 ,timetype =1
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 2 ,timetype =2
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 3 ,timetype =3
+Parsed text is : -1149060; Position = 16
+datetype = -1 ,timetype =-1
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+------------
+
+Input text is : 20111218 08:49 AM
+------------
+Locale is : en_US_CA
+------------
+datetype = 0 ,timetype =0
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 1 ,timetype =1
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 2 ,timetype =2
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 3 ,timetype =3
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 8
+datetype = -1 ,timetype =-1
+Parsed text is : 1324226940; Position = 17
+------------
+
+Input text is : 19691218 08:49 AM
+------------
+Locale is : en_US_CA
+------------
+datetype = 0 ,timetype =0
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 1 ,timetype =1
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 2 ,timetype =2
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 0
+datetype = 3 ,timetype =3
+Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'; Position = 8
+datetype = -1 ,timetype =-1
+Parsed text is : -1149060; Position = 17

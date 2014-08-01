@@ -1,0 +1,3 @@
+BEGINNING: implicit_free_result = %d
+END: implicit_free_result = %d
+done!

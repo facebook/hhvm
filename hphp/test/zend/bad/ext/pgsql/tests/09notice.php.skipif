@@ -1,0 +1,7 @@
+<?php
+
+include("skipif.inc");
+
+_skip_lc_messages();
+
+?>

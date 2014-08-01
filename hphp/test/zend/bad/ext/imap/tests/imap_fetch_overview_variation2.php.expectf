@@ -95,7 +95,7 @@ Syntax error in sequence
 -- Testing with second argument value: %string|unicode%(11) "hello world"
 Syntax error in sequence
 
--- Testing with second argument value: object(classA)#1 (0) {
+-- Testing with second argument value: object(classA)#%d (0) {
 }
 Syntax error in sequence
 

@@ -1,0 +1,2 @@
+<?php require_once('skipif.inc'); ?>
+<?php if (substr(PHP_OS, 0, 3) != 'WIN') {  die('skip only for Windows'); } ?>

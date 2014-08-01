@@ -1,7 +1,9 @@
 <?php
 $_ENV[TMP] = .;
+_filter_snapshot_globals();
 
 $_ENV[TEMP] = .;
+_filter_snapshot_globals();
 
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $p = new Phar($fname);

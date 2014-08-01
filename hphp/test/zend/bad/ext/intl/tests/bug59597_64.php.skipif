@@ -1,0 +1,2 @@
+<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK"; ?>

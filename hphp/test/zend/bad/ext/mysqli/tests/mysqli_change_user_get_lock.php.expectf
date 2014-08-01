@@ -1,0 +1,6 @@
+Testing GET_LOCK()...
+... lock 'phptest_%d' acquired by thread %d
+... calling IS_USED_LOCK() on 'phptest_%d' using thread '%d'
+... calling IS_FREE_LOCK() on 'phptest_%d' using thread '%d'
+... calling IS_USED_LOCK() on 'phptest_%d' using new connection with thread '%d'
+done!

@@ -1,0 +1,3 @@
+<?php
+	include "skip_mhash.inc";
+?>

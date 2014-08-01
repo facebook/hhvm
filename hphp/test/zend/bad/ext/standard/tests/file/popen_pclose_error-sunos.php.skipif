@@ -1,0 +1,4 @@
+<?php
+if( substr(PHP_OS, 0, 3) != 'Sun')
+  die("skip Only valid for Sun Solaris");
+?>

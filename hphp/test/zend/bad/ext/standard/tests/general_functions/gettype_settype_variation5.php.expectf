@@ -488,7 +488,7 @@ string(6) "double"
 string(6) "object"
 2: settype(): Cannot convert to resource type
 bool(false)
-object(point)#1 (2) {
+object(point)#%d (2) {
   ["x"]=>
   NULL
   ["y"]=>
@@ -499,7 +499,7 @@ string(6) "object"
 string(6) "object"
 2: settype(): Cannot convert to resource type
 bool(false)
-object(point)#2 (2) {
+object(point)#%d (2) {
   ["x"]=>
   float(2.5)
   ["y"]=>
@@ -510,7 +510,7 @@ string(6) "object"
 string(6) "object"
 2: settype(): Cannot convert to resource type
 bool(false)
-object(point)#3 (2) {
+object(point)#%d (2) {
   ["x"]=>
   int(0)
   ["y"]=>

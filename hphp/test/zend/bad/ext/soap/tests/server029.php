@@ -11,6 +11,7 @@ parse_str("<?xml version="1.0" encoding="ISO-8859-1"?>
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>", $_POST);
 $_REQUEST = array_merge($_REQUEST, $_POST);
+_filter_snapshot_globals();
 
 
 echo "INPUT: \n";

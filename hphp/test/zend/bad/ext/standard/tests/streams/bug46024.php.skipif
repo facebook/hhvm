@@ -1,0 +1,1 @@
+<?php if (!getenv('TEST_PHP_EXECUTABLE')) die("skip TEST_PHP_EXECUTABLE not defined"); ?>

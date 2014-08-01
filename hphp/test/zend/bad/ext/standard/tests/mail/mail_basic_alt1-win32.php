@@ -1,6 +1,4 @@
 <?php
-ini_set('max_execution_time ',  120);
-
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
  * Description: Send an email message 
  * Source code: ext/standard/mail.c
@@ -10,7 +8,7 @@ ini_set('max_execution_time ',  120);
 error_reporting(E_ALL & ~E_STRICT);
 ini_set("SMTP", "localhost");
 ini_set("smtp_port", 25);
-ini_set("sendmail_from", "user@company.com");
+ini_set("sendmail_from", "user@example.com");
 
 echo "*** Testing mail() : basic functionality ***\n";
 require_once(dirname(__FILE__).'/mail_include.inc');

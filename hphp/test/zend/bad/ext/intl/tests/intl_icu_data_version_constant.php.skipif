@@ -1,0 +1,1 @@
+<?php if( !extension_loaded( 'intl' ) || version_compare('INTL_ICU_VERSION', '4.4', '<') ) print 'skip'; ?>

@@ -38,4 +38,4 @@ echo "Done\n";
 ?>
 <?php
 rmdir(dirname(__FILE__)."/rename_basic_dir1");
-?>
+?>

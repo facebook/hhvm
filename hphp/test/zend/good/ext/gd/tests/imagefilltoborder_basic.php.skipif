@@ -1,2 +1,0 @@
-<?php
-if (!gd_info()['PNG Support']) echo 'skip';

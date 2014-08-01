@@ -1,0 +1,15 @@
+y
+y
+notdriveletter:file.txt
+hcd:c.txt
+some.txt
+f.txt
+g.txt
+g.txt
+world:somestream
+world:some.stream
+world:some.stream:$DATA
+world:my.stream:$DATA
+world:c:$DATA
+world:c:$DATA
+==DONE==

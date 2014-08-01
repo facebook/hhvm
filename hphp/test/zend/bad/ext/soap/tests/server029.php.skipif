@@ -1,0 +1,4 @@
+<?php 
+	if (php_sapi_name()=='cli') echo 'skip';
+	require_once('skipif.inc'); 
+?>

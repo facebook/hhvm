@@ -1,0 +1,26 @@
+
+Warning: %s
+ in %s on line %d
+
+Warning: %s
+ in %s on line %d
+
+Warning: %s
+ in %s on line %d
+[038] [2014] [Commands out of sync; you can't run this command now]
+[039] [0] []
+array(2) {
+  [%u|b%"id"]=>
+  int(1)
+  [%u|b%"label"]=>
+  %s(1) "a"
+}
+array(2) {
+  [%u|b%"id"]=>
+  int(2)
+  [%u|b%"label"]=>
+  %s(1) "b"
+}
+
+Warning: %s
+done!

@@ -1,15 +1,14 @@
 
 Warning: %s
 * About to connect() %a
-* Closing connection #%d
+* Closing connection %d
 Ok for CURLOPT_STDERR
 
 Warning: %s
 Ok for CURLOPT_WRITEHEADER
 
 Warning: %s
-%a
-Ok for CURLOPT_FILE
+%aOk for CURLOPT_FILE
 
 Warning: %s
 Ok for CURLOPT_INFILE

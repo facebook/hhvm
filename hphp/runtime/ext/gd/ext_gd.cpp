@@ -3612,6 +3612,17 @@ Variant HHVM_FUNCTION(imagecolorallocate,
   return ct;
 }
 
+Variant HHVM_FUNCTION(imagepalettecopy,
+    const Resource& dst,
+    const Resource& src) {
+  gdImagePtr dstim = dst.getTyped<Image>()->get();
+  gdImagePtr srcim = src.getTyped<Image>()->get();
+  if (!dstim || !srcim)
+    return false;
+  gdImagePaletteCopy(dstim, srcim);
+  return true;
+}
+
 Variant HHVM_FUNCTION(imagecolorat,
     const Resource& image, int64_t x, int64_t y) {
   gdImagePtr im = image.getTyped<Image>()->get();
@@ -8093,6 +8104,7 @@ class GdExtension : public Extension {
     HHVM_FE(jpeg2wbmp);
     HHVM_FE(png2wbmp);
 
+    HHVM_FE(imagepalettecopy);
     loadSystemlib();
   }
 } s_gd_extension;

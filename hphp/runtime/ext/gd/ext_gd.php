@@ -893,3 +893,9 @@ function png2wbmp(string $pngname,
                   int $dest_height,
                   int $dest_width,
                   int $threshold): bool;
+
+/* imagepalettecopy() copies the palette from the source image to the destination image.
+*/
+<<__Native>>
+function imagepalettecopy(resource $dst,
+                            resource $src): mixed;

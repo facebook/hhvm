@@ -254,7 +254,8 @@ Variant HHVM_FUNCTION(exif_tagname, int64_t index);
 Variant HHVM_FUNCTION(exif_thumbnail,
   const String& filename, VRefParam width = uninit_null(),
   VRefParam height = uninit_null(), VRefParam imagetype = uninit_null());
-
+Variant HHVM_FUNCTION(imagepalettecopy,
+  const Resource& dest, const Resource& src);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

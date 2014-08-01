@@ -705,7 +705,7 @@ and expr_ is_lvalue env (p, e) =
       check_consistent_fields x rl;
       let env, value = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
       let env, values =
-        fold_left_env (apply_for_env_fold field_value) env [] l in
+        fold_left_env (apply_for_env_fold array_field_value) env [] l in
       let has_unknown = List.exists (fun (_, ty) -> ty = Tany) values in
       let env, values =
         fold_left_env (apply_for_env_fold TUtils.unresolved) env [] values in
@@ -724,7 +724,7 @@ and expr_ is_lvalue env (p, e) =
       | Nast.AFkvalue _ ->
           let env, key = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
           let env, keys =
-            fold_left_env (apply_for_env_fold field_key) env [] l in
+            fold_left_env (apply_for_env_fold array_field_key) env [] l in
           let env, keys =
             fold_left_env (apply_for_env_fold TUtils.unresolved) env [] keys in
           let unify_key = Type.unify p Reason.URarray_key in
@@ -1033,8 +1033,8 @@ and expr_ is_lvalue env (p, e) =
   | Yield_break ->
       env, (Reason.Rwitness p, Tany)
   | Yield af ->
-      let env, key = field_key env af in
-      let env, value = field_value env af in
+      let env, key = yield_field_key env af in
+      let env, value = yield_field_value env af in
       let send = Env.fresh_type () in
       let rty = match Env.get_fn_kind env with
         | FGenerator ->
@@ -1450,15 +1450,23 @@ and assign_simple p env e1 ty2 =
   let env = Type.sub_type p (Reason.URassign) env ty1 ty2 in
   env, ty2
 
-and field_value env = function
+and array_field_value env = function
   | Nast.AFvalue x
   | Nast.AFkvalue (_, x) -> expr env x
 
-and field_key env = function
+and yield_field_value env x = array_field_value env x
+
+and array_field_key env = function
+  | Nast.AFvalue (p, _) ->
+      env, (Reason.Rwitness p, Tprim Tint)
+  | Nast.AFkvalue (x, _) ->
+      expr env x
+
+and yield_field_key env = function
   | Nast.AFvalue (p, _) ->
       env, (match Env.get_fn_kind env with
         | FSync
-        | FAsync
+        | FAsync -> assert false
         | FGenerator ->
             (Reason.Rwitness p, Tprim Tint)
         | FAsyncGenerator ->

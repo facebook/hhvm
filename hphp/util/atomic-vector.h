@@ -54,6 +54,8 @@ class AtomicVector {
   bool compare_exchange(size_t i, Value expect, const Value& val);
 
   Value get(size_t i) const;
+  template <typename F>
+  void foreach(F fun) const;
 
  private:
   static std::string typeName();
@@ -163,6 +165,18 @@ Value AtomicVector<Value>::get(size_t i) const {
 
   assert(m_next);
   return m_next.load(std::memory_order_acquire)->get(i - m_size);
+}
+
+template<typename Value>
+template<typename F>
+void AtomicVector<Value>::foreach(F fun) const {
+  auto size = m_size;
+
+  for (auto i = 0; i < size; i++) {
+    fun(m_vals[i].load(std::memory_order_acquire));
+  }
+  auto next = m_next.load(std::memory_order_acquire);
+  if (next) next->foreach(fun);
 }
 
 }

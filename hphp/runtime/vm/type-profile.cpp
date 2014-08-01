@@ -17,6 +17,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/util/atomic-vector.h"
+#include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
 
 #include "folly/String.h"
@@ -159,6 +161,54 @@ profileInit() {
 bool __thread profileOn = false;
 static int64_t numRequests;
 
+typedef std::pair<const Func*, uint32_t> FuncHotness;
+bool comp(const FuncHotness& a, const FuncHotness& b) {
+  return a.second > b.second;
+}
+
+/*
+ * Set AttrHot on hot functions. Sort all functions by
+ * their profile count, and set AttrHot to the top
+ * Eval.HotFuncCount functions.
+ */
+static Mutex syncLock;
+void setHotFuncAttr() {
+  static bool synced = false;
+  if (synced) return;
+
+  Lock lock(syncLock);
+  if (synced) return;
+
+  Func::s_treadmill = true;
+  SCOPE_EXIT {
+    Func::s_treadmill = false;
+  };
+
+  if (RuntimeOption::EvalHotFuncCount) {
+    std::priority_queue<FuncHotness,
+                        std::vector<FuncHotness>,
+                        bool(*)(const FuncHotness& a, const FuncHotness& b)>
+      queue(comp);
+
+    Func::getFuncVec().foreach([&](const Func* f) {
+        if (!f) return;
+        auto fh = FuncHotness(f, f->profCounter());
+        if (queue.size() >= RuntimeOption::EvalHotFuncCount) {
+          if (!comp(fh, queue.top())) return;
+          queue.pop();
+        }
+        queue.push(fh);
+      });
+
+    while (queue.size()) {
+      auto f = queue.top().first;
+      queue.pop();
+      const_cast<Func*>(f)->setHot();
+    }
+  }
+  synced = true;
+}
+
 int64_t requestCount() {
   return numRequests;
 }
@@ -179,6 +229,10 @@ void
 profileRequestStart() {
   bool p = profileThisRequest();
   if (p != profileOn) {
+    // If we are turning off profiling, set AttrHot on
+    // functions that are "hot".
+    if (!p) setHotFuncAttr();
+
     profileOn = p;
     if (!ThreadInfo::s_threadInfo.isNull()) {
       ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();

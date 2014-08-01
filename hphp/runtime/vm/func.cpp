@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -51,6 +52,7 @@ using JIT::mcg;
 
 const StringData* Func::s___call       = makeStaticString("__call");
 const StringData* Func::s___callStatic = makeStaticString("__callStatic");
+std::atomic<bool> Func::s_treadmill;
 
 /*
  * This size hint will create a ~6MB vector and is rarely hit in practice.
@@ -64,6 +66,9 @@ constexpr size_t kFuncVecSizeHint = 750000;
 static std::atomic<FuncId> s_nextFuncId(0);
 static AtomicVector<const Func*> s_funcVec(kFuncVecSizeHint, nullptr);
 
+const AtomicVector<const Func*>& Func::getFuncVec() {
+  return s_funcVec;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Creation and destruction.
@@ -84,10 +89,6 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2,
 Func::~Func() {
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
-  }
-  if (m_funcId != InvalidFuncId) {
-    DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, nullptr);
-    assert(oldVal == this);
   }
   int maxNumPrologues = getMaxNumPrologues(numParams());
   int numPrologues =
@@ -136,6 +137,16 @@ void* Func::allocFuncMem(
 }
 
 void Func::destroy(Func* func) {
+  if (func->m_funcId != InvalidFuncId) {
+    DEBUG_ONLY auto oldVal = s_funcVec.exchange(func->m_funcId, nullptr);
+    assert(oldVal == func);
+    func->m_funcId = InvalidFuncId;
+    if (s_treadmill.load(std::memory_order_acquire)) {
+      Treadmill::enqueue([func](){ destroy(func); });
+      return;
+    }
+  }
+
   /*
    * Funcs in PreClasses are just templates, and don't get used
    * until they are cloned so we don't put them in low memory.
@@ -851,11 +862,8 @@ bool Func::shouldPGO() const {
 }
 
 void Func::incProfCounter() {
-  if (m_attrs & AttrHot) return;
+  if (!shouldProfile()) return;
   __sync_fetch_and_add(&m_profCounter, 1);
-  if (m_profCounter >= RuntimeOption::EvalHotFuncThreshold) {
-    m_attrs = (Attr)(m_attrs | AttrHot);
-  }
 }
 
 bool Func::anyBlockEndsAt(Offset off) const {

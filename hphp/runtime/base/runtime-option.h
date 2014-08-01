@@ -471,7 +471,7 @@ public:
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
-  F(uint32_t, HotFuncThreshold,        80)                              \
+  F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \

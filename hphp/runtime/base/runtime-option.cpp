@@ -112,6 +112,10 @@ int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
+int64_t RuntimeOption::MemoryThreshold = 0;
+int RuntimeOption::MemProtectorWaitBeforeStart = 100000;
+int RuntimeOption::MemoryCheckFreq = 3000;
+bool RuntimeOption::EnableMemoryProtector = false;
 int RuntimeOption::ProdServerPort = 80;
 int RuntimeOption::QueuedJobsReleaseRate = 3;
 bool RuntimeOption::ServerThreadRoundRobin = false;
@@ -339,9 +343,6 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
-
-Hdf RuntimeOption::HealthMonitorConfig;
-
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
   RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF;
@@ -621,10 +622,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
   Config::Bind(PidFile, ini, config["PidFile"], "www.pid");
 
   Config::Get(ini, config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
-
-  {
-    HealthMonitorConfig = config["HealthMonitor"];
-  }
 
   {
     Hdf logger = config["Log"];
@@ -969,6 +966,17 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(ServerThreadCount, ini, server["ThreadCount"],
                  Process::GetCPUCount() * 2);
 
+    // for memory protector
+    Config::Bind(MemoryThreshold, ini,
+        server["MemoryThreshold"], 0);
+    Config::Bind(MemoryCheckFreq, ini,
+        server["MemoryCheckFreq"], 3000);
+    Config::Bind(QueuedJobsReleaseRate, ini,
+        server["QueuedJobsReleaseRate"], 3);
+    Config::Bind(EnableMemoryProtector, ini,
+        server["EnableMemoryProtector"], false);
+    Config::Bind(MemProtectorWaitBeforeStart, ini,
+        server["MemProtectorWaitBeforeStart"], 100000);
     Config::Bind(ProdServerPort, ini,
         server["ProdServerPort"], 80);
 

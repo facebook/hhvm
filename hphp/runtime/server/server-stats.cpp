@@ -144,7 +144,6 @@ void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
   allKeys.insert("load");
   allKeys.insert("idle");
   allKeys.insert("queued");
-  allKeys.insert("health_level");
 }
 
 void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
@@ -277,7 +276,6 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
   int load = HttpServer::Server->getPageServer()->getActiveWorker();
   int idle = RuntimeOption::ServerThreadCount - load;
   int queued = HttpServer::Server->getPageServer()->getQueuedJobs();
-  int health_level = (int)ServerStats::m_ServerHealthLevel;
 
   for (list<TimeSlot*>::const_iterator iter = slots.begin();
        iter != slots.end(); ++iter) {
@@ -301,10 +299,6 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
       }
       if (wantedKeys.find("queued") != wantedKeys.end()) {
         values["queued"] = queued;
-      }
-
-      if (wantedKeys.find("health_level") != wantedKeys.end()) {
-        values["health_level"] = health_level;
       }
 
       for (map<string, int>::const_iterator iter = udfKeys.begin();
@@ -635,7 +629,6 @@ private:
 Mutex ServerStats::s_lock;
 std::vector<ServerStats*> ServerStats::s_loggers;
 bool ServerStats::s_profile_network = false;
-HealthLevel ServerStats::m_ServerHealthLevel = HealthLevel::Bold;
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 
 void ServerStats::LogPage(const string &url, int code) {
@@ -661,10 +654,6 @@ void ServerStats::StartRequest(const char *url, const char *clientIP,
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     ServerStats::s_logger->startRequest(url, clientIP, vhost);
   }
-}
-
-void ServerStats::SetServerHealthLevel(HealthLevel new_health_level) {
-  ServerStats::m_ServerHealthLevel = new_health_level;
 }
 
 void ServerStats::SetThreadMode(ThreadMode mode) {

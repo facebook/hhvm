@@ -8121,6 +8121,7 @@ class GdExtension : public Extension {
 #endif
 #ifdef HAVE_LIBVPX
     HHVM_FE(imagewebp);
+    loadSystemlib("gd-webp");
 #endif
     HHVM_FE(imagepolygon);
     HHVM_FE(imagerectangle);

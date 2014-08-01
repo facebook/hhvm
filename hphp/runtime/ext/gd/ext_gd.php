@@ -434,8 +434,6 @@ function imagecreatefromjpeg(string $filename): mixed;
 <<__Native>>
 function imagecreatefrompng(string $filename): mixed;
 
-<<__Native>>
-function imagecreatefromwebp(string $filename): mixed;
 
 /* imagecreatefromstring() returns an image identifier representing the image
  * obtained from the given data. These types will be automatically detected if
@@ -700,13 +698,6 @@ function imagepng(resource $image,
                   int $quality = -1,
                   int $filters = -1): bool;
 
-/* Outputs or saves a webp image from the given image.
- */
-<<__Native>>
-function imagewebp(resource $image,
-                  string $filename = "",
-		  int $quality = 80): bool;
-
 /* imagepolygon() creates a polygon in the given image.
  */
 <<__Native>>
@@ -903,3 +894,4 @@ function png2wbmp(string $pngname,
                   int $dest_height,
                   int $dest_width,
                   int $threshold): bool;
+

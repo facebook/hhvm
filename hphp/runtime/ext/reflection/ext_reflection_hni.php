@@ -214,10 +214,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   private static function stripHHPrefix($str) {
     if (!is_string($str)) return $str;
     return str_ireplace(
-      array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
-            'HH\\resource', 'HH\\void', 'HH\\this'),
-      array('bool',     'int',     'float',     'string',     'num',
-            'resource',     'void',    'this'),
+      array('HH\\this'),
+      array('this'),
       $str
     );
   }

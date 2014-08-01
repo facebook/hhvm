@@ -264,7 +264,12 @@ class ReflectionParameter implements Reflector {
       'hh\bool' => 1,
       'hh\int' => 1,
       'hh\float' => 1,
+      'hh\num' => 1,
       'hh\string' => 1,
+      'hh\resource' => 1,
+      'hh\mixed' => 1,
+      'hh\void' => 1,
+      /* TODO Task #4813871: Add 'hh\this' to this list */
       'array' => 1,
       'callable' => 1,
     );
@@ -277,10 +282,8 @@ class ReflectionParameter implements Reflector {
   private static function stripHHPrefix($str) {
     if (!is_string($str)) return $str;
     return str_ireplace(
-      array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
-            'HH\\resource', 'HH\\void', 'HH\\this'),
-      array('bool',     'int',     'float',     'string',     'num',
-            'resource',     'void', 'this'),
+      array('HH\\this'),
+      array('this'),
       $str
     );
   }
@@ -847,10 +850,8 @@ class ReflectionProperty implements Reflector {
   private static function stripHHPrefix($str) {
     if (!is_string($str)) return $str;
     return str_ireplace(
-      array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
-            'HH\\resource', 'HH\\void', 'HH\\this'),
-      array('bool',     'int',     'float',     'string',     'num',
-            'resource',     'void', 'this'),
+      array('HH\\this'),
+      array('this'),
       $str
     );
   }

@@ -40,7 +40,6 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
 void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
                                              const String& prop, const Variant& value,
                                              bool force);
-bool HHVM_FUNCTION(hphp_scalar_typehints_enabled);
 
 class Reflection {
  public:

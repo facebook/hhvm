@@ -183,8 +183,8 @@ let collect_defs ast =
  * with 'Typing_env.Classes.get "Foo";;'
  *)
 let main_hack { filename; suggest; _ } =
+  ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
   SharedMem.init();
-  Typing.debug := true;
   Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
   let errors, () =
     Errors.do_ begin fun () ->

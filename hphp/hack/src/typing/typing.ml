@@ -36,7 +36,12 @@ module TGen         = Typing_generic
 (* Debugging *)
 (*****************************************************************************)
 
-let debug = ref false
+(* A guess as to the last position we were typechecking, for use in debugging,
+ * such as figuring out what a runaway hh_server thread is doing. Updated
+ * only best-effort -- it's an approximation to point debugging in the right
+ * direction, nothing more. *)
+let debug_last_pos = ref Pos.none
+let debug_print_last_pos _ = print_endline (Pos.string !debug_last_pos)
 
 (*****************************************************************************)
 (* Helpers *)
@@ -326,13 +331,20 @@ and solve_todos env =
 (*****************************************************************************)
 and fun_ ?(abstract=false) env unsafe has_ret hret pos b fun_type =
   Env.with_return env begin fun env ->
+    debug_last_pos := pos;
     let env = Env.set_return env hret in
     let env = Env.set_fn_kind env fun_type in
     let env = block env b in
     let ret = Env.get_return env in
-    if Nast_terminality.Terminal.block b || abstract || unsafe || !auto_complete
-    then env
-    else fun_implicit_return env pos ret b fun_type
+    let env =
+      if Nast_terminality.Terminal.block b ||
+        abstract ||
+        unsafe ||
+        !auto_complete
+      then env
+      else fun_implicit_return env pos ret b fun_type in
+    debug_last_pos := Pos.none;
+    env
   end
 
 and fun_implicit_return env pos ret b = function
@@ -673,6 +685,7 @@ and bind_as_expr env ty aexpr =
   | _ -> assert false
 
 and expr env e =
+  debug_last_pos := fst e;
   let env, ty = expr_ false env e in
   if !accumulate_types
   then begin
@@ -937,7 +950,7 @@ and expr_ is_lvalue env (p, e) =
       | r, ety ->
           TUtils.in_var env (r, ety)
       )
-  | Call (Cnormal, (_, Id (_, "\\hh_show")), [x]) when !debug ->
+  | Call (Cnormal, (_, Id (_, "\\hh_show")), [x]) ->
       let env, ty = expr env x in
       Env.debug env ty;
       env, Env.fresh_type()

@@ -191,6 +191,10 @@ module Program : Server.SERVER_PROGRAM = struct
         Printf.printf "Error: %s\n" (Printexc.to_string e);
         flush stdout
 
+  let preinit () = ignore (
+    Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos)
+  )
+
   let init genv env root =
     let next_files_hhi =
       match Hhi.get_hhi_root () with

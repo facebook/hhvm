@@ -1062,7 +1062,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("debug-port", value<int>(&po.debugger_options.port)->default_value(-1),
      "connect to debugger server at specified port")
     ("debug-extension", value<string>(&po.debugger_options.extension),
-     "PHP file that extends y command")
+     "PHP file that extends command 'arg'")
     ("debug-cmd", value<std::vector<std::string>>(
       &po.debugger_options.cmds)->composing(),
      "executes this debugger command and returns its output in stdout")
@@ -1072,7 +1072,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("user,u", value<string>(&po.user),
      "run server under this user account")
     ("file,f", value<string>(&po.file),
-     "executing specified file")
+     "execute specified file")
     ("lint,l", value<string>(&po.lint),
      "lint specified file")
     ("show,w", value<string>(&po.show),

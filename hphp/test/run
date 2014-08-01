@@ -475,7 +475,9 @@ class Status {
   }
 
   public static function skip($test, $reason = null) {
-    array_push(self::$results, array('name' => $test, 'status' => 'skipped'));
+    if (self::getMode() !== self::MODE_FBMAKE) {
+      array_push(self::$results, array('name' => $test, 'status' => 'skipped'));
+    }
     self::send(self::MSG_TEST_SKIP, [$test,$reason]);
   }
 

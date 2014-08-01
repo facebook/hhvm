@@ -1978,6 +1978,10 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   if (oldCap != 0) {
     // If an old capacity was specified, use that
     newCap = oldCap;
+    // .. unless the old capacity is too small, in which case we use the
+    // smallest capacity that is large enough to hold the current number
+    // of elements.
+    for (; newCap < m_size; newCap <<= 1) {}
     assert(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
   } else {
     if (m_size == 0 && nextKI() == 0) {

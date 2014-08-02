@@ -610,7 +610,7 @@ void *gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
 void gdImageJpeg(gdImagePtr im, FILE *out, int quality);
 void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization);
+void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int64_t quantization);
 
 /* Best to free this memory with gdFree(), not free() */
 void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);

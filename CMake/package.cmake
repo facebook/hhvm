@@ -55,7 +55,7 @@ if(CPACK_GENERATOR)
       "libjemalloc1 (>= 3.0.0), libjpeg8, libk5crypto3, libkeyutils1, "
       "libkrb5-3, libkrb5support0, libldap-2.4-2, libmagickwand5, libmcrypt4, "
       "libmemcached11, libmysqlclient18, libonig2, libp11-kit0, libpam0g, "
-      "libpcre3, libpng12-0, libsasl2-2, libsqlite3-0, libssl1.0.0, "
+      "libpcre3, libpng12-0, libvpx-dev, libvpx1, libsasl2-2, libsqlite3-0, libssl1.0.0, "
       "libstdc++6, libtasn1-6, libtbb2, libtinfo5, libunwind8, libx11-6, "
       "libxau6, libxcb1, libxdmcp6, libxml2, libxpm4, libxslt1.1, zlib1g")
     set(CPACK_DEBIAN_PACKAGE_SECTION "web")

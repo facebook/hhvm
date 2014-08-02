@@ -765,17 +765,17 @@ WebPResult WebPEncode(const uint8* Y,
 	  const int img_size_bytes  = *p_out_size_bytes - kRiffHeaderSize;
 	  const int chunk_size = (img_size_bytes + 1) & ~1;  /* make size even */
 	  const int riff_size = chunk_size + 12;
-	  const uint8_t kRiffHeader[20] = { 'R', 'I', 'F', 'F',
-										(riff_size >>  0) & 255,
-										(riff_size >>  8) & 255,
-										(riff_size >> 16) & 255,
-										(riff_size >> 24) & 255,
+	  const char kRiffHeader[20] = { 'R', 'I', 'F', 'F',
+										char((riff_size >>  0) & 255),
+										char((riff_size >>  8) & 255),
+										char((riff_size >> 16) & 255),
+										char((riff_size >> 24) & 255),
 										'W', 'E', 'B', 'P',
 										'V', 'P', '8', ' ',
-										(chunk_size >>  0) & 255,
-										(chunk_size >>  8) & 255,
-										(chunk_size >> 16) & 255,
-										(chunk_size >> 24) & 255 };
+										char((chunk_size >>  0) & 255),
+										char((chunk_size >>  8) & 255),
+										char((chunk_size >> 16) & 255),
+										char((chunk_size >> 24) & 255) };
 	  memcpy(*p_out, kRiffHeader, kRiffHeaderSize);
 
 	  if (psnr) {

@@ -1,0 +1,4 @@
+<?php
+if (!function_exists('imagecreatefromwebp')) {
+  echo 'skip';
+}

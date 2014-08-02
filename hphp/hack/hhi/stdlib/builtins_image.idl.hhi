@@ -80,6 +80,7 @@ function imageline($image, $x1, $y1, $x2, $y2, $color) { }
 function imageloadfont($file) { }
 function imagepalettecopy($destination, $source) { }
 function imagepng($image, $filename = null, $quality = -1, $filters = -1) { }
+function imagewebp($image, $filename = null, $quality = 80) { }
 function imagepolygon($image, $points, $num_points, $color) { }
 function imagepsbbox($text, $font, $size, $space = 0, $tightness = 0, $angle = 0.0) { }
 function imagepsencodefont($font_index, $encodingfile) { }

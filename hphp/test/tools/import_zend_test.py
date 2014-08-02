@@ -186,6 +186,9 @@ flaky_tests = (
     # flaky on Travis: t4088096
     '/ext/curl/tests/curl_copy_handle_basic_006.php',
     '/ext/curl/tests/curl_copy_handle_basic_007.php',
+
+    # a new process can crop up
+    '/ext/posix/tests/posix_kill_basic.php',
 )
 
 # Tests that work but not in repo mode

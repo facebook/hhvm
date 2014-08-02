@@ -434,6 +434,7 @@ function imagecreatefromjpeg(string $filename): mixed;
 <<__Native>>
 function imagecreatefrompng(string $filename): mixed;
 
+
 /* imagecreatefromstring() returns an image identifier representing the image
  * obtained from the given data. These types will be automatically detected if
  * your build of PHP supports them: JPEG, PNG, GIF, WBMP, and GD2.
@@ -893,3 +894,4 @@ function png2wbmp(string $pngname,
                   int $dest_height,
                   int $dest_width,
                   int $threshold): bool;
+

@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/container-functions.h"
 #include <tbb/concurrent_hash_map.h>
 #include <utility>
 
@@ -1187,7 +1188,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
   }
 
   int replace_count = 0;
-  if (!subject.is(KindOfArray)) {
+  if (!isContainer(subject)) {
     Variant ret = php_replace_in_subject(pattern, replacement,
                                          subject.toString(),
                                          limit, is_callable, &replace_count);

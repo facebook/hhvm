@@ -546,7 +546,7 @@ void ExecutionContext::onShutdownPostSend() {
       }
     } catch (...) {
       try {
-        bump_counter_and_rethrow();
+        bump_counter_and_rethrow(true /* isPsp */);
       } catch (const ExitException &e) {
         // do nothing
       } catch (const Exception &e) {

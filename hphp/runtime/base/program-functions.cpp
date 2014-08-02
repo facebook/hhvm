@@ -349,18 +349,31 @@ static void handle_exception_append_bt(std::string& errorMsg,
   }
 }
 
-void bump_counter_and_rethrow() {
+void bump_counter_and_rethrow(bool isPsp) {
   try {
     throw;
   } catch (const RequestTimeoutException& e) {
-    static auto requestTimeoutCounter = ServiceData::createTimeseries(
-      "requests_timed_out", {ServiceData::StatsType::COUNT});
-    requestTimeoutCounter->addValue(1);
+    if (isPsp) {
+      static auto requestTimeoutPSPCounter = ServiceData::createTimeseries(
+        "requests_timed_out_psp", {ServiceData::StatsType::COUNT});
+      requestTimeoutPSPCounter->addValue(1);
+    } else {
+      static auto requestTimeoutCounter = ServiceData::createTimeseries(
+        "requests_timed_out_non_psp", {ServiceData::StatsType::COUNT});
+      requestTimeoutCounter->addValue(1);
+    }
     throw;
   } catch (const RequestMemoryExceededException& e) {
-    static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
-      "requests_memory_exceeded", {ServiceData::StatsType::COUNT});
-    requestMemoryExceededCounter->addValue(1);
+    if (isPsp) {
+      static auto requestMemoryExceededPSPCounter =
+        ServiceData::createTimeseries(
+          "requests_memory_exceeded_psp", {ServiceData::StatsType::COUNT});
+      requestMemoryExceededPSPCounter->addValue(1);
+    } else {
+      static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
+        "requests_memory_exceeded_non_psp", {ServiceData::StatsType::COUNT});
+      requestMemoryExceededCounter->addValue(1);
+    }
 
 #ifdef USE_JEMALLOC
     // Capture a pprof (C++) dump when we OOM a request
@@ -379,7 +392,7 @@ static void handle_exception_helper(bool& ret,
                                     bool& error,
                                     bool richErrorMsg) {
   try {
-    bump_counter_and_rethrow();
+    bump_counter_and_rethrow(false /* isPsp */);
   } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {

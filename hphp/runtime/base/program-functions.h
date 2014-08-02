@@ -105,7 +105,7 @@ std::string get_systemlib(std::string* hhas = nullptr,
 extern const char* const kCompilerId;
 
 // Helper function for stats tracking with exceptions.
-void bump_counter_and_rethrow();
+void bump_counter_and_rethrow(bool isPsp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

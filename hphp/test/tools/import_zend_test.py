@@ -1450,6 +1450,7 @@ for test in results:
         mkdir_p(os.path.dirname(test_file))
 
     good = (test['status'] == 'passed')
+
     flaky_test = False
     for test in flaky_tests:
         if test in filename:
@@ -1457,12 +1458,13 @@ for test in results:
             flaky_test = True
 
     needs_norepo = False
+    for test in norepo_tests:
+        if test in filename:
+            needs_norepo = True
+
     if good:
         dest_file = good_file
         subpath = 'good'
-        for test in norepo_tests:
-            if test in filename:
-                needs_norepo = True
     elif not flaky_test:
         dest_file = bad_file
         subpath = 'bad'

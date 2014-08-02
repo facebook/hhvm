@@ -1102,6 +1102,7 @@ void raiseMissingArgument(const Func* func, int got) {
   const auto variadic = func->hasVariadicCaptureParam();
   const Func::ParamInfoVec& params = func->params();
   int expected = total;
+  // Subtract the number of Arguments with a default value from the expected arguments
   size_t i = 0;
   for (; i < total; ++i)
     if (params[i].hasDefaultValue())

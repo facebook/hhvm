@@ -11,7 +11,8 @@ echo "*** Testing readfile() : variation ***\n";
 // this doesn't create the include dirs in this directory
 // we change to this to ensure we are not part of the
 // include paths.
-$thisTestDir = "readfileVar6.dir";
+$thisTestDir = tempnam(sys_get_temp_dir(), 'rfv6');
+unlink($thisTestDir);
 mkdir($thisTestDir);
 chdir($thisTestDir);
 

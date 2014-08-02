@@ -111,7 +111,6 @@ flaky_tests = (
     '/ext/standard/tests/file/disk_total_space_basic.php',
     '/ext/standard/tests/file/disk_total_space_variation.php',
     '/ext/standard/tests/file/fread_socket_variation1.php',
-    '/ext/standard/tests/file/readfile_variation6.php',
     '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation3.php',
     '/ext/standard/tests/network/fsockopen_variation1.php',
     '/ext/standard/tests/network/shutdown.php',
@@ -1092,6 +1091,7 @@ def walk(filename, dest_subdir):
     if '/ext/standard/tests/file/file_get_contents_variation1.php' in full_dest_filename:
         test = test.replace('afile.txt', 'file_get_contents_variation1.txt')
     if '/ext/standard/tests/file/readfile_variation6.php' in full_dest_filename:
+        test = test.replace('"readfileVar6.dir"', "tempnam(sys_get_temp_dir(), 'rfv6');\nunlink($thisTestDir)")
         test = test.replace('afile.txt', 'readfile_variation6.txt')
     if '/ext/standard/tests/file/rename_variation' in full_dest_filename:
         test = test.replace('rename_variation_dir', dest_filename+'_dir')

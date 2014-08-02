@@ -500,9 +500,11 @@ void IniSetting::SystemParserCallback::onPopEntry(const std::string& key,
     // Find the highest index
     auto max = 0;
     for (auto &a : ptr->keys()) {
-      if (a.isInt() && a >= max) {
-        max = a.asInt() + 1;
-      }
+      try {
+        if (a.asInt() >= max) {
+          max = a.asInt() + 1;
+        }
+      } catch (std::range_error const& e) { /* not an int */ }
     }
     (*ptr)[std::to_string(max)] = value;
   }

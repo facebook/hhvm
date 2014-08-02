@@ -357,10 +357,12 @@ void bump_counter_and_rethrow(bool isPsp) {
       static auto requestTimeoutPSPCounter = ServiceData::createTimeseries(
         "requests_timed_out_psp", {ServiceData::StatsType::COUNT});
       requestTimeoutPSPCounter->addValue(1);
+      ServerStats::Log("request.timed_out.psp", 1);
     } else {
       static auto requestTimeoutCounter = ServiceData::createTimeseries(
         "requests_timed_out_non_psp", {ServiceData::StatsType::COUNT});
       requestTimeoutCounter->addValue(1);
+      ServerStats::Log("request.timed_out.non_psp", 1);
     }
     throw;
   } catch (const RequestMemoryExceededException& e) {
@@ -369,10 +371,12 @@ void bump_counter_and_rethrow(bool isPsp) {
         ServiceData::createTimeseries(
           "requests_memory_exceeded_psp", {ServiceData::StatsType::COUNT});
       requestMemoryExceededPSPCounter->addValue(1);
+      ServerStats::Log("request.memory_exceeded.psp", 1);
     } else {
       static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
         "requests_memory_exceeded_non_psp", {ServiceData::StatsType::COUNT});
       requestMemoryExceededCounter->addValue(1);
+      ServerStats::Log("request.memory_exceeded.non_psp", 1);
     }
 
 #ifdef USE_JEMALLOC

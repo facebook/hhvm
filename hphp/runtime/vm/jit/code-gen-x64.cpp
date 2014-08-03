@@ -4087,7 +4087,8 @@ void CodeGenerator::cgLdClsName(IRInstruction* inst) {
   auto const srcReg = srcLoc(0).reg();
 
   m_as.loadq(srcReg[Class::preClassOff()], dstReg);
-  m_as.loadq(dstReg[PreClass::nameOffset()], dstReg);
+  emitLdLowPtr(m_as, dstReg[PreClass::nameOffset()],
+               dstReg, sizeof(LowStringPtr));
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {

@@ -4,7 +4,7 @@
  */
 class CallbackFilterIterator extends FilterIterator {
 
-  private $callback;
+  protected $callback;
 
   /**
    * Creates a filtered iterator using the callback to determine which

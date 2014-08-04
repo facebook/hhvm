@@ -321,10 +321,8 @@
     test_find_mode: token
   laravel:
     url: https://github.com/laravel/framework.git
-    # Use the 4.1 branch instead of the 4.1.x tag because of pull request
-    # https://github.com/laravel/framework/pull/3563
-    branch: "4.1"
-    commit: 1faf4c8508378b0b102d148c53c322a8048b16dd
+    branch: "v4.2.8"
+    commit: e60ea917ab862254a6db37fa9cb8933138c1e73c
     install_root: laravel
     test_root: laravel
     flakey:

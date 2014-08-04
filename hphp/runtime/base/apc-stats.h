@@ -25,7 +25,6 @@ namespace HPHP {
 struct APCHandle;
 struct APCArray;
 struct APCObject;
-struct APCCollection;
 struct APCString;
 struct StringData;
 struct ArrayData;
@@ -43,7 +42,6 @@ struct ArrayData;
 size_t getMemSize(const APCHandle*);
 size_t getMemSize(const APCArray*);
 size_t getMemSize(const APCObject*);
-size_t getMemSize(const APCCollection*);
 size_t getMemSize(const ArrayData*);
 
 inline
@@ -110,8 +108,6 @@ private:
   ServiceData::ExportedCounter* m_serObject;
   // Number of APC objects
   ServiceData::ExportedCounter* m_apcObject;
-  // Number of APC collections
-  ServiceData::ExportedCounter* m_apcColl;
 
   /*
    * Operation counters.

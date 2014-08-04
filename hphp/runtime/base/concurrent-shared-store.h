@@ -87,7 +87,6 @@ struct EntryInfo {
     APCArray,
     APCObject,
     SerializedObject,
-    APCCollection,
   };
   static EntryType getAPCType(const APCHandle* handle);
 

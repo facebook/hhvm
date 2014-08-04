@@ -74,22 +74,19 @@ EntryInfo::EntryType EntryInfo::getAPCType(const APCHandle* handle) {
   }
   switch (type) {
   case KindOfString:
-    if (handle->isUncounted()) {
+    if (handle->getUncounted()) {
       return EntryInfo::EntryType::UncountedString;
     }
     return EntryInfo::EntryType::APCString;
   case KindOfArray:
-    if (handle->isUncounted()) {
+    if (handle->getUncounted()) {
       return EntryInfo::EntryType::UncountedArray;
-    } else if (handle->isSerializedArray()) {
+    } else if (handle->getSerializedArray()) {
       return EntryInfo::EntryType::SerializedArray;
     }
     return EntryInfo::EntryType::APCArray;
   case KindOfObject:
-    if (handle->isCollection()) {
-      return EntryInfo::EntryType::APCCollection;
-    }
-    if (handle->isObj()) {
+    if (handle->getIsObj()) {
       return EntryInfo::EntryType::APCObject;
     }
     return EntryInfo::EntryType::SerializedObject;
@@ -142,7 +139,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key,
           acc->second.size, acc->second.var,
           acc->second.expiry == 0, expired);
       if (expired && acc->second.expiry < oldestLive &&
-          acc->second.var->isUncounted()) {
+          acc->second.var->getUncounted()) {
         APCTypedValue::fromHandle(acc->second.var)->deleteUncounted();
       } else {
         acc->second.var->unreferenceRoot(acc->second.size);
@@ -234,7 +231,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
     APCHandle *sv = sval->var;
     // sv may not be same as svar here because some other thread may have
     // updated it already, check before updating
-    if (sv == svar && !sv->isObj()) {
+    if (sv == svar && !sv->getIsObj()) {
       sval->var = converted;
       APCStats::getAPCStats().updateAPCValue(
           converted, size, sv, sval->size, sval->expiry == 0, false);
@@ -302,7 +299,7 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
         }
 
         if (apcExtension::AllowObj && svar->is(KindOfObject) &&
-            !svar->objAttempted() && !svar->isObj()) {
+            !svar->getObjAttempted()) {
           // Hold ref here for later promoting the object
           svar->reference();
           promoteObj = true;

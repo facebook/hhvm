@@ -733,11 +733,6 @@ class HashCollection : public ExtCollectionObjectData {
     }
   }
 
-  // Initialize a HashCollection with an array by using the array
-  // directly. Subclasses are responsible to ensure the array was properly
-  // shaped in order to be used 'as-is".
-  void initWithArray(MixedArray* data, bool intLikeStrKeys);
-
  public:
   static const int32_t Empty           = MixedArray::Empty;
   static const int32_t Tombstone       = MixedArray::Tombstone;
@@ -770,6 +765,17 @@ class HashCollection : public ExtCollectionObjectData {
   inline Elm* data() { return m_data; }
   inline const Elm* data() const { return m_data; }
   inline int32_t* hashTab() const { return (int32_t*)(m_data + cap()); }
+
+  MixedArray* arrayData() {
+    auto* ret = getArrayFromMixedData(m_data);
+    assert(ret == staticEmptyMixedArray() || ret->isMixed());
+    return ret;
+  }
+  const MixedArray* arrayData() const {
+    auto* ret = getArrayFromMixedData(m_data);
+    assert(ret == staticEmptyMixedArray() || ret->isMixed());
+    return ret;
+  }
 
   void setSize(uint32_t sz) {
     assert(sz <= cap());
@@ -918,17 +924,6 @@ class HashCollection : public ExtCollectionObjectData {
     assert(IMPLIES(a != staticEmptyMixedArray() && b, m_immCopy.isNull()));
     assert(IMPLIES(!b, a->hasMultipleRefs()));
     return b;
-  }
-
-  MixedArray* arrayData() {
-    auto* ret = getArrayFromMixedData(m_data);
-    assert(ret == staticEmptyMixedArray() || ret->isMixed());
-    return ret;
-  }
-  const MixedArray* arrayData() const {
-    auto* ret = getArrayFromMixedData(m_data);
-    assert(ret == staticEmptyMixedArray() || ret->isMixed());
-    return ret;
   }
 
   static uint32_t sizeOffset() {
@@ -1815,7 +1810,6 @@ class BaseSet : public HashCollection {
   friend class c_Set;
   friend class c_Map;
   friend class ArrayIter;
-  friend class APCCollection;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field

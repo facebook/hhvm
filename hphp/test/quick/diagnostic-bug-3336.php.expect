@@ -1,0 +1,4 @@
+works
+
+Warning: foo() expects at least 2 parameters, 1 given in /opt/hhvm/hphp/test/quick/diagnostic-bug-3336.php on line 3
+fails

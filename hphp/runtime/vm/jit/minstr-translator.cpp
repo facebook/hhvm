@@ -1231,9 +1231,13 @@ static inline const TypedValue* elemArrayImpl(TypedValue* a,
   assert(a->m_type == KindOfArray);
   auto const ad = a->m_data.parr;
   if (converted) {
-    if (UNLIKELY(ad->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                            ArrayData::kIntMapKind);
+    if (UNLIKELY(ad->isVPackedArrayOrIntMapArray())) {
+      if (ad->isVPackedArray()) {
+        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
+      } else {
+        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                              ArrayData::kIntMapKind);
+      }
     }
   }
   auto const ret = checkForInt ? checkedGet(ad, key)
@@ -1739,9 +1743,13 @@ SSATmp* HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* base,
 template<KeyType keyType, bool checkForInt, bool converted>
 static inline TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   if (converted) {
-    if (UNLIKELY(a->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                            ArrayData::kIntMapKind);
+    if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
+      if (a->isVPackedArray()) {
+        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
+      } else {
+        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                              ArrayData::kIntMapKind);
+      }
     }
   }
   auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
@@ -2069,9 +2077,13 @@ static inline uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
   static_assert(!converted || keyType == KeyType::Int,
                 "Should have only been converted if KeyType is now an int");
   if (converted) {
-    if (UNLIKELY(a->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                            ArrayData::kIntMapKind);
+    if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
+      if (a->isVPackedArray()) {
+        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
+      } else {
+        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                              ArrayData::kIntMapKind);
+      }
     }
   }
   auto const value = checkForInt ? checkedGet(a, key) : a->nvGet(key);
@@ -2258,9 +2270,13 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : uncheckedSet(a, key, value, copy);
   if (converted) {
-    if (UNLIKELY(ret->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                            ArrayData::kIntMapKind);
+    if (UNLIKELY(ret->isVPackedArrayOrIntMapArray())) {
+      if (ret->isVPackedArray()) {
+        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
+      } else {
+        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                              ArrayData::kIntMapKind);
+      }
     }
   }
 
@@ -2353,7 +2369,7 @@ void setWithRefElemC(TypedValue* base, TypedValue key, TypedValue* val,
 
 void setWithRefNewElem(TypedValue* base, TypedValue* val,
                        MInstrState* mis) {
-  base = NewElem(mis->tvScratch, mis->tvRef, base);
+  base = NewElem<false>(mis->tvScratch, mis->tvRef, base);
   if (base != &mis->tvScratch) {
     tvDup(*val, *base);
   } else {

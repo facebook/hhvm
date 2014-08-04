@@ -3320,7 +3320,7 @@ OPTBLD_INLINE bool ExecutionContext::memberHelperPre(
     case MW:
       if (setMember) {
         assert(define);
-        result = NewElem(tvScratch, tvRef, base);
+        result = NewElem<reffy>(tvScratch, tvRef, base);
       } else {
         raise_error("Cannot use [] for reading");
         result = nullptr;

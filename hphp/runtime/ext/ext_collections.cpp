@@ -5715,7 +5715,7 @@ void collectionDeepCopyTV(TypedValue* tv) {
 }
 
 ArrayData* collectionDeepCopyArray(ArrayData* arr) {
-  if (arr->isIntMapArray() || arr->isStrMapArray()) {
+  if (arr->isStrMapArrayOrIntMapArray()) {
     auto deepCopy = arr->isIntMapArray()
       ? MixedArray::MakeReserveIntMap(arr->size())
       : MixedArray::MakeReserveStrMap(arr->size());

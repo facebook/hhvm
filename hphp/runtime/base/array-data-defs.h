@@ -234,6 +234,10 @@ inline ArrayData* ArrayData::lvalNew(Variant*& ret, bool copy) {
   return g_array_funcs.lvalNew[m_kind](this, ret, copy);
 }
 
+inline ArrayData* ArrayData::lvalNewRef(Variant*& ret, bool copy) {
+  return g_array_funcs.lvalNewRef[m_kind](this, ret, copy);
+}
+
 inline ArrayData* ArrayData::setRef(int64_t k, Variant& v, bool copy) {
   return g_array_funcs.setRefInt[m_kind](this, k, v, copy);
 }

@@ -142,7 +142,7 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);
-  assert(ad->m_packedCapCode == cap);
+  assert((ad->m_packedCapCode & 0xFFFFFFUL) == cap);
   assert(PackedArray::checkInvariants(ad));
   return { ad, &lval };
 }

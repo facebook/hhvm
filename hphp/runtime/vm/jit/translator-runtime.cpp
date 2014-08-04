@@ -155,7 +155,7 @@ TypedValue incDecElem(TypedValue* base, TypedValue key,
 }
 
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
-  base = HPHP::NewElem(mis->tvScratch, mis->tvRef, base);
+  base = HPHP::NewElem<true>(mis->tvScratch, mis->tvRef, base);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBindRef(val, base);
   }
@@ -395,9 +395,13 @@ ALWAYS_INLINE
 static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
-    if (UNLIKELY(arr->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                            ArrayData::kIntMapKind);
+    if (UNLIKELY(arr->isVPackedArrayOrIntMapArray())) {
+      if (arr->isVPackedArray()) {
+        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
+      } else {
+        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                              ArrayData::kIntMapKind);
+      }
     }
     return arr->exists(n);
   }
@@ -454,9 +458,13 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
 }
 
 TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
-  if (UNLIKELY(a->isIntMapArray())) {
-    MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                          ArrayData::kIntMapKind);
+  if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
+    if (a->isVPackedArray()) {
+      PackedArray::warnUsage(PackedArray::Reason::kNumericString);
+    } else {
+      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                            ArrayData::kIntMapKind);
+    }
   }
   return arrayIdxI(a, key, def);
 }

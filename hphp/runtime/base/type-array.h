@@ -287,9 +287,16 @@ public:
   const Variant operator[](const char*) const = delete; // use const String&
 
   /*
-   * Get an lval reference to a newly created element.
+   * Get an lval reference to a newly created element, with the intent
+   * of reading or writing to it as a Cell.
    */
   Variant& lvalAt();
+
+  /*
+   * Get an lval reference to a newly created element, with the intent
+   * of using binding assignment with the newly created element.
+   */
+  Variant& lvalAtRef();
 
   /*
    * Get an lval reference to an element.

@@ -95,45 +95,49 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 #define DISPATCH(entry)                         \
   { PackedArray::entry,                         \
     MixedArray::entry,                          \
-    APCLocalArray::entry,                       \
-    EmptyArray::entry,                          \
-    NameValueTableWrapper::entry,               \
-    ProxyArray::entry,                          \
     MixedArray::entry,                          \
-    MixedArray::entry                           \
+    MixedArray::entry,                          \
+    PackedArray::entry,                         \
+    EmptyArray::entry,                          \
+    APCLocalArray::entry,                       \
+    NameValueTableWrapper::entry,               \
+    ProxyArray::entry                           \
   },
 
 #define DISPATCH_INTMAP_SPECIALIZED(entry)      \
   { PackedArray::entry,                         \
     MixedArray::entry,                          \
-    APCLocalArray::entry,                       \
+    MixedArray::entry,                          \
+    MixedArray::entry##Impl<ArrayData::kIntMapKind>, \
+    PackedArray::entry,                         \
     EmptyArray::entry,                          \
+    APCLocalArray::entry,                       \
     NameValueTableWrapper::entry,               \
-    ProxyArray::entry,                          \
-    MixedArray::entry##Impl<ArrayData::kIntMapKind>,    \
-    MixedArray::entry                           \
+    ProxyArray::entry                           \
   },
 
 #define DISPATCH_STRMAP_SPECIALIZED(entry)      \
   { PackedArray::entry,                         \
     MixedArray::entry,                          \
-    APCLocalArray::entry,                       \
-    EmptyArray::entry,                          \
-    NameValueTableWrapper::entry,               \
-    ProxyArray::entry,                          \
+    MixedArray::entry##Impl<ArrayData::kStrMapKind>, \
     MixedArray::entry,                          \
-    MixedArray::entry##Impl<ArrayData::kStrMapKind>     \
+    PackedArray::entry,                         \
+    EmptyArray::entry,                          \
+    APCLocalArray::entry,                       \
+    NameValueTableWrapper::entry,               \
+    ProxyArray::entry                           \
   },
 
-#define DISPATCH_MAP_ARRAY_SPECIALIZED(entry)        \
+#define DISPATCH_MAP_ARRAY_SPECIALIZED(entry)   \
   { PackedArray::entry,                         \
     MixedArray::entry,                          \
-    APCLocalArray::entry,                       \
+    MixedArray::entry##Impl<ArrayData::kStrMapKind>, \
+    MixedArray::entry##Impl<ArrayData::kIntMapKind>, \
+    PackedArray::entry,                         \
     EmptyArray::entry,                          \
+    APCLocalArray::entry,                       \
     NameValueTableWrapper::entry,               \
-    ProxyArray::entry,                          \
-    MixedArray::entry##Impl<ArrayData::kIntMapKind>,    \
-    MixedArray::entry##Impl<ArrayData::kStrMapKind>     \
+    ProxyArray::entry                           \
   },
 
 /*
@@ -196,13 +200,14 @@ extern const ArrayFunctions g_array_funcs = {
   {
     PackedArray::NvGetInt,
     MixedArray::NvGetInt,
-    APCLocalArray::NvGetInt,
-    EmptyArray::NvGetInt,
-    NameValueTableWrapper::NvGetInt,
-    ProxyArray::NvGetInt,
+    MixedArray::NvGetIntImpl<ArrayData::kStrMapKind>,
     /* IntMapArray */
     MixedArray::NvGetIntConverted,
-    MixedArray::NvGetIntImpl<ArrayData::kStrMapKind>,
+    PackedArray::NvGetIntConverted,
+    EmptyArray::NvGetInt,
+    APCLocalArray::NvGetInt,
+    NameValueTableWrapper::NvGetInt,
+    ProxyArray::NvGetInt,
   },
 
   /*
@@ -240,13 +245,14 @@ extern const ArrayFunctions g_array_funcs = {
   {
     PackedArray::SetInt,
     MixedArray::SetInt,
-    APCLocalArray::SetInt,
-    EmptyArray::SetInt,
-    NameValueTableWrapper::SetInt,
-    ProxyArray::SetInt,
+    MixedArray::SetIntImpl<ArrayData::kStrMapKind>,
     /* IntMapArray */
     MixedArray::SetIntConverted,
-    MixedArray::SetIntImpl<ArrayData::kStrMapKind>,
+    PackedArray::SetIntConverted,
+    EmptyArray::SetInt,
+    APCLocalArray::SetInt,
+    NameValueTableWrapper::SetInt,
+    ProxyArray::SetInt,
   },
 
   /*
@@ -336,6 +342,22 @@ extern const ArrayFunctions g_array_funcs = {
    *   has copy/grow semantics.
    */
   DISPATCH_MAP_ARRAY_SPECIALIZED(LvalNew)
+
+  /*
+   * ArrayData* LvalNewRef(ArrayData*, Variant*& out, bool copy)
+   */
+  {
+    PackedArray::LvalNewRef,
+    MixedArray::LvalNew,
+    MixedArray::LvalNewImpl<ArrayData::kStrMapKind>,
+    /* IntMapArray */
+    MixedArray::LvalNewImpl<ArrayData::kIntMapKind>,
+    PackedArray::LvalNewRef,
+    EmptyArray::LvalNew,
+    APCLocalArray::LvalNew,
+    NameValueTableWrapper::LvalNew,
+    ProxyArray::LvalNew,
+  },
 
   /*
    * ArrayData* SetRefInt(ArrayData*, int64_t key, Variant& v, bool copy)
@@ -478,14 +500,15 @@ extern const ArrayFunctions g_array_funcs = {
   {
     PackedArray::Sort,
     MixedArray::Sort,
-    APCLocalArray::Sort,
-    EmptyArray::Sort,
-    NameValueTableWrapper::Sort,
-    ProxyArray::Sort,
-    /* IntMapArray */
-    MixedArray::WarnAndSort,
     /* StrMapArray */
     MixedArray::WarnAndSort,
+    /* IntMapArray */
+    MixedArray::WarnAndSort,
+    PackedArray::Sort,
+    EmptyArray::Sort,
+    APCLocalArray::Sort,
+    NameValueTableWrapper::Sort,
+    ProxyArray::Sort,
   },
 
   /*
@@ -516,14 +539,15 @@ extern const ArrayFunctions g_array_funcs = {
   {
     PackedArray::Usort,
     MixedArray::Usort,
-    APCLocalArray::Usort,
-    EmptyArray::Usort,
-    NameValueTableWrapper::Usort,
-    ProxyArray::Usort,
-    /* IntMapArray */
-    MixedArray::WarnAndUsort,
     /* StrMapArray */
     MixedArray::WarnAndUsort,
+    /* IntMapArray */
+    MixedArray::WarnAndUsort,
+    PackedArray::Usort,
+    EmptyArray::Usort,
+    APCLocalArray::Usort,
+    NameValueTableWrapper::Usort,
+    ProxyArray::Usort,
   },
 
   /*
@@ -679,30 +703,41 @@ extern const ArrayFunctions g_array_funcs = {
    *   These functions are part of the zend compat layer but their
    *   effects currently aren't documented.
    */
-  { &PackedArray::ZSetInt,
+  {
+    &PackedArray::ZSetInt,
     &MixedArray::ZSetInt,
+    &MixedArray::ZSetInt,
+    &MixedArray::ZSetInt,
+    &PackedArray::ZSetInt,
     &ZSetIntThrow,
     &ZSetIntThrow,
     &ZSetIntThrow,
     &ProxyArray::ZSetInt,
-    &MixedArray::ZSetInt,
-    &MixedArray::ZSetInt, },
-  { &PackedArray::ZSetStr,
+  },
+
+  {
+    &PackedArray::ZSetStr,
     &MixedArray::ZSetStr,
+    &MixedArray::ZSetStr,
+    &MixedArray::ZSetStr,
+    &PackedArray::ZSetStr,
     &ZSetStrThrow,
     &ZSetStrThrow,
     &ZSetStrThrow,
     &ProxyArray::ZSetStr,
-    &MixedArray::ZSetStr,
-    &MixedArray::ZSetStr, },
-  { &PackedArray::ZAppend,
+  },
+
+  {
+    &PackedArray::ZAppend,
     &MixedArray::ZAppend,
+    &MixedArray::ZAppend,
+    &MixedArray::ZAppend,
+    &PackedArray::ZAppend,
     &ZAppendThrow,
     &ZAppendThrow,
     &ZAppendThrow,
     &ProxyArray::ZAppend,
-    &MixedArray::ZAppend,
-    &MixedArray::ZAppend, },
+  },
 };
 
 #undef DISPATCH
@@ -947,15 +982,16 @@ const Variant& ArrayData::getNotFound(const Variant& k) {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,8> names = {{
+  std::array<const char*,9> names = {{
     "PackedKind",
     "MixedKind",
-    "SharedKind",
+    "StrMapKind",
+    "IntMapKind",
+    "VPackedKind",
     "EmptyKind",
+    "SharedKind",
     "NvtwKind",
     "ProxyKind",
-    "IntMapKind",
-    "StrMapKind",
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

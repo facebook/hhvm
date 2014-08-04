@@ -1061,7 +1061,7 @@ NEVER_INLINE MixedArray* MixedArray::resize() {
 }
 
 void MixedArray::downgradeAndWarn(ArrayData* ad, const Reason r) {
-  assert(ad->isIntMapArray() || ad->isStrMapArray());
+  assert(ad->isStrMapArrayOrIntMapArray());
   MixedArray::warnUsage(r, ad->m_kind);
   ad->m_kind = kMixedKind;
 }

@@ -40,16 +40,22 @@ struct ArrayData {
   //  - doing relational comparisons
   //  - using kind as an index
   //  - doing bit ops when storing in the union'd words below
+  //
+  // Beware if you change the order or the numerical values, as there are
+  // a few places in the code that depends on the order or the numeric
+  // values. Also, all of the values need to be continguous from 0 to =
+  // kNumKinds-1 since we use these values to index into a table.
   enum ArrayKind : uint8_t {
-    kPackedKind,  // MixedArray with keys in range [0..size)
-    kMixedKind,   // MixedArray arbitrary int or string keys, maybe holes
-    kSharedKind,  // SharedArray
-    kEmptyKind,   // The singleton static empty array
-    kNvtwKind,    // NameValueTableWrapper
-    kProxyKind,   // ProxyArray
-    kIntMapKind,  // IntMapArray, int keys, maybe holes, similar to MixedArray
-    kStrMapKind,  // StrMapArray, string keys, mixed values, like MixedArray
-    kNumKinds     // insert new values before kNumKinds.
+    kPackedKind = 0,  // PackedArray with keys in range [0..size)
+    kMixedKind = 1,   // MixedArray arbitrary int or string keys, maybe holes
+    kStrMapKind = 2,  // StrMapArray, string keys, mixed values, like MixedArray
+    kIntMapKind = 3,  // IntMapArray, int keys, maybe holes, like MixedArray
+    kVPackedKind = 4, // PackedArray with extra warnings for certain operations
+    kEmptyKind = 5,   // The singleton static empty array
+    kSharedKind = 6,  // SharedArray
+    kNvtwKind = 7,    // NameValueTableWrapper
+    kProxyKind = 8,   // ProxyArray
+    kNumKinds = 9     // insert new values before kNumKinds.
   };
 
 protected:
@@ -139,19 +145,62 @@ public:
   bool noCopyOnWrite() const;
 
   /*
-   * Specific kind querying operators.
+   * Returns true if this is a PackedArray or a varray
    */
-  bool isPacked() const { return m_kind == kPackedKind; }
-  // All logic should treat kMixedKind the same as kIntMapKind/kStrMapKind
-  // except for logic specific to kIntMapKind/kStrMapKind in which case
-  // you can use isIntMapArray() or isStrMapArray()
-  bool isMixed() const { return m_kind == kMixedKind || m_kind == kIntMapKind ||
-                                m_kind == kStrMapKind; }
+  bool isPacked() const {
+    bool b = !(m_kind & ~uint8_t{4});
+    assert(b == (m_kind == kPackedKind || m_kind == kVPackedKind));
+    return b;
+  }
+  /*
+   * Returns true if this is a MixedArray, msarray, or miarray
+   */
+  bool isMixed() const {
+    bool b = ((uint64_t{m_kind} - uint64_t{1}) <= uint64_t{2});
+    assert(b == (m_kind == kMixedKind || m_kind == kStrMapKind ||
+                 m_kind == kIntMapKind));
+    return b;
+  }
+
+  /*
+   * These three functions can be used to test if this array is a varray,
+   * msarray, or miarray respectively.
+   */
+  bool isVPackedArray() const { return m_kind == kVPackedKind; }
+  bool isStrMapArray() const { return m_kind == kStrMapKind; }
+  bool isIntMapArray() const { return m_kind == kIntMapKind; }
+
+  /*
+   * Returns true if this is any kind of "checked" array (varray, msarray,
+   * or miarray).
+   */
+  bool isCheckedArray() const {
+    bool b = ((uint64_t{m_kind} - uint64_t{2}) <= uint64_t{2});
+    assert(b == (m_kind == kStrMapKind || m_kind == kIntMapKind ||
+                 m_kind == kVPackedKind));
+    return b;
+  }
+
+  /*
+   * Returns true if this is a msarray or miarray.
+   */
+  bool isStrMapArrayOrIntMapArray() const {
+    bool b = ((uint64_t{m_kind} - uint64_t{2}) <= uint64_t{1});
+    assert(b == (m_kind == kStrMapKind || m_kind == kIntMapKind));
+    return b;
+  }
+  /*
+   * Returns true if this is a varray or miarray.
+   */
+  bool isVPackedArrayOrIntMapArray() const {
+    bool b = ((uint64_t{m_kind} - uint64_t{3}) <= uint64_t{1});
+    assert(b == (m_kind == kIntMapKind || m_kind == kVPackedKind));
+    return b;
+  }
+
   bool isSharedArray() const { return m_kind == kSharedKind; }
   bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
-  bool isIntMapArray() const { return m_kind == kIntMapKind; }
-  bool isStrMapArray() const { return m_kind == kStrMapKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -218,6 +267,7 @@ public:
    * the lval blackhole (see lvalBlackHole() for details).
    */
   ArrayData *lvalNew(Variant *&ret, bool copy);
+  ArrayData *lvalNewRef(Variant *&ret, bool copy);
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
@@ -497,6 +547,7 @@ struct ArrayFunctions {
   ArrayData* (*lvalStr[NK])(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
   ArrayData* (*lvalNew[NK])(ArrayData*, Variant *&ret, bool copy);
+  ArrayData* (*lvalNewRef[NK])(ArrayData*, Variant *&ret, bool copy);
   ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, Variant& v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);

@@ -73,7 +73,7 @@ uint32_t packedCapToCode(uint32_t cap) {
 
 ALWAYS_INLINE
 uint32_t packedCodeToCap(uint32_t capCode) {
-  assert(capCode <= 0xFFFFFFul);
+  capCode = (capCode & 0xFFFFFFul);
   if (UNLIKELY(capCode > kPackedCapCodeThreshold)) {
     auto const cap = (capCode - 0xFF00ul) << 8;
     assert(cap <= kMaxPackedCap && capCode <= cap);
@@ -96,7 +96,7 @@ uint32_t roundUpPackedCap(uint32_t cap) {
 
 ALWAYS_INLINE
 bool sizeLessThanPackedCapCode(uint32_t size, uint32_t packedCapCode) {
-  assert(packedCapCode <= 0xFFFFFFul);
+  packedCapCode = (packedCapCode & 0xFFFFFFul);
   // Try comparing against m_packedCapCode first so that we can
   // avoid computing the capacity in the common case
   if (LIKELY(size < packedCapCode)) {

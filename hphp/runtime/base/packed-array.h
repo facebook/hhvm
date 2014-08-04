@@ -52,11 +52,11 @@ struct MixedArray;
 struct PackedArray {
   static void Release(ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
-  static const TypedValue* NvGetStr(const ArrayData*, const StringData*) {
-    return nullptr;
-  }
+  static const TypedValue* NvGetIntConverted(const ArrayData*, int64_t ki);
+  static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
+  static ArrayData* SetIntConverted(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
@@ -64,13 +64,12 @@ struct PackedArray {
     return true;
   }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
-  static bool ExistsStr(const ArrayData*, const StringData*) {
-    return false;
-  }
+  static bool ExistsStr(const ArrayData*, const StringData*);
   static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
   static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static ArrayData* LvalNewRef(ArrayData*, Variant*& ret, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);
@@ -134,6 +133,25 @@ private:
   static ArrayData* CopyAndResizeIfNeededSlow(const ArrayData*);
   static ArrayData* CopyAndResizeIfNeeded(const ArrayData*);
   static ArrayData* ResizeIfNeeded(ArrayData*);
+
+public:
+  enum class Reason : uint8_t {
+    kForeachByRef,
+    kTakeByRef,
+    kSetRef,
+    kAppendRef,
+    kRemoveInt,
+    kRemoveStr,
+    kOutOfOrderIntKey,
+    kGetStr,
+    kSetStr,
+    kNumericString,
+    kPlusNotSupported,
+    kMergeNotSupported,
+    kSortNotSupported
+  };
+  static void downgradeAndWarn(ArrayData* ad, const Reason r);
+  static void warnUsage(const Reason r);
 };
 
 //////////////////////////////////////////////////////////////////////

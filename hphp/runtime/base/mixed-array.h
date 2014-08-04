@@ -116,6 +116,8 @@ public:
    */
   static ArrayData* MakeReserve(uint32_t capacity);
   static ArrayData* MakeReserveSlow(uint32_t capacity);
+  static ArrayData* MakeReserveVArray(uint32_t capacity);
+  static ArrayData* MakeReserveVArraySlow(uint32_t capacity);
 
   /*
    * Allocate a new, empty, request-local array in mixed mode, with

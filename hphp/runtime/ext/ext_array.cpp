@@ -2399,11 +2399,15 @@ Variant f_hphp_array_idx(const Variant& search, const Variant& key, const Varian
   if (!key.isNull()) {
     if (LIKELY(search.isArray())) {
       ArrayData *arr = search.getArrayData();
-      if (UNLIKELY(arr->isIntMapArray())) {
+      if (UNLIKELY(arr->isVPackedArrayOrIntMapArray())) {
         int64_t n;
         if (key.isString() && key.getStringData()->isStrictlyInteger(n)) {
-          MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                ArrayData::kIntMapKind);
+          if (arr->isVPackedArray()) {
+            PackedArray::warnUsage(PackedArray::Reason::kNumericString);
+          } else {
+            MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                                  ArrayData::kIntMapKind);
+          }
         }
       }
       VarNR index = key.toKey();

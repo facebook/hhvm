@@ -361,9 +361,17 @@ inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
 
   auto* result = ElemDArrayPre<keyType>(baseArr, key);
 
-  if (reffy && UNLIKELY(baseArr->isIntMapArray() || baseArr->isStrMapArray())) {
-    // Downgrade and warn after the operation in case we copied
-    MixedArray::downgradeAndWarn(baseArr.get(), MixedArray::Reason::kSetRef);
+  if (reffy) {
+    if (UNLIKELY(baseArr->isCheckedArray())) {
+      // Downgrade and warn after the operation in case we copied
+      if (baseArr->isVPackedArray()) {
+        PackedArray::downgradeAndWarn(baseArr.get(),
+                                      PackedArray::Reason::kSetRef);
+      } else {
+        MixedArray::downgradeAndWarn(baseArr.get(),
+                                     MixedArray::Reason::kSetRef);
+      }
+    }
   }
 
   if (warn) {
@@ -607,7 +615,12 @@ inline TypedValue* NewElemString(TypedValue& tvScratch, TypedValue* base) {
 /**
  * NewElem when base is an Array
  */
+template <bool reffy>
 inline TypedValue* NewElemArray(TypedValue* base) {
+  if (reffy) {
+    return const_cast<TypedValue*>(tvAsVariant(base).asArrRef().lvalAtRef()
+                                   .asTypedValue());
+  }
   return const_cast<TypedValue*>(tvAsVariant(base).asArrRef().lvalAt()
                                  .asTypedValue());
 }
@@ -626,6 +639,7 @@ inline TypedValue* NewElemObject(TypedValue& tvRef, TypedValue* base) {
 /**
  * $result = ($base[] = ...);
  */
+template <bool reffy>
 inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
                            TypedValue* base) {
   DataType type;
@@ -640,7 +654,7 @@ inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfString:
     return NewElemString(tvScratch, base);
   case KindOfArray:
-    return NewElemArray(base);
+    return NewElemArray<reffy>(base);
   case KindOfObject:
     return NewElemObject(tvRef, base);
   default:
@@ -1507,9 +1521,13 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
   if (!key->isStrictlyInteger(n)) {
     return a->remove(StrNR(key), copy);
   } else {
-    if (UNLIKELY(a->isIntMapArray())) {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                            ArrayData::kIntMapKind);
+    if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
+      if (a->isVPackedArray()) {
+        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
+      } else {
+        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                              ArrayData::kIntMapKind);
+      }
     }
     return a->remove(n, copy);
   }

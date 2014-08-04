@@ -471,7 +471,11 @@ void* MemoryManager::slabAlloc(size_t nbytes, unsigned index) {
 }
 
 inline void* MemoryManager::smartEnlist(SweepNode* n) {
-  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  // If we are using jemalloc, it is keeping track of allocations outside of
+  // the slabs and the usage so we should force this after an allocation that
+  // was too large for one of the existing slabs. When we're not using jemalloc
+  // this check won't do anything so avoid the extra overhead.
+  if (use_jemalloc || UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
   // link after m_sweep

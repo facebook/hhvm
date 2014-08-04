@@ -7,7 +7,7 @@ add_custom_command(
   COMMAND "${CMAKE_CURRENT_BINARY_DIR}/../tools/bootstrap/gen-class-map"
   ARGS "--system"
        "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
-       "${CMAKE_CURRENT_SOURCE_DIR}/constants.h"
+       "${CMAKE_CURRENT_BINARY_DIR}/constants.h"
        ${IDL_SRCS}
   COMMENT "Generating class_map.cpp and constants.h")
 

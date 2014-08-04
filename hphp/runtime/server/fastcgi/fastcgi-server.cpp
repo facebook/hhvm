@@ -119,11 +119,12 @@ void FastCGIConnection::readDataAvailable(size_t len) noexcept {
 }
 
 void FastCGIConnection::readEOF() noexcept {
+  m_session.onClose();
   close();
 }
 
 void FastCGIConnection::readError(const TTransportException& ex) noexcept {
-  close();
+  readEOF();
 }
 
 bool FastCGIConnection::hasReadDataAvailable() {

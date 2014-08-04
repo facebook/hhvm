@@ -146,6 +146,12 @@ void FastCGITransaction::onComplete() {
   m_session->handleComplete(m_requestId);
 }
 
+void FastCGITransaction::onClose() {
+  // Indicate to our handler that no more data will be coming in. This prevents
+  // PHP threads from waiting indefinitely for the rest of their POST data.
+  if (m_requestId != 0) m_handler->onBodyComplete();
+}
+
 bool FastCGITransaction::parseKeyValue(Cursor& cursor, size_t& available) {
   if (m_phase == Phase::READ_KEY_LENGTH) {
     if (parseKeyValueLength(cursor, available, m_keyLength)) {
@@ -276,6 +282,12 @@ size_t FastCGISession::onIngress(const IOBuf* chain) {
     }
   }
   return available - avail;
+}
+
+void FastCGISession::onClose() {
+  for (auto& pair : m_transactions) {
+    pair.second->onClose();
+  }
 }
 
 void FastCGISession::setMaxConns(int max_conns) {

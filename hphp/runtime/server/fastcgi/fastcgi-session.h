@@ -54,6 +54,12 @@ public:
   void onStdErr(std::unique_ptr<folly::IOBuf> chain) override;
   void onComplete() override;
 
+  /*
+   * Perform any cleanup necessary when the socket to the FastCGI client has
+   * closed.
+   */
+  void onClose();
+
 private:
   enum Phase {
     READ_KEY_LENGTH,
@@ -121,6 +127,12 @@ struct FastCGISession {
   virtual ~FastCGISession();
 
   size_t onIngress(const folly::IOBuf* chain);
+
+  /*
+   * Perform any cleanup necessary when the socket to the FastCGI client has
+   * closed.
+   */
+  void onClose();
 
   void setCallback(Callback* callback) {
     m_callback = callback;

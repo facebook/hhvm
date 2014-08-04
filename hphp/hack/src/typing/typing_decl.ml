@@ -530,8 +530,7 @@ and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
 
 and constructor_decl env (pcstr, pconsist) class_ =
   (* constructors in children of class_ must be consistent? *)
-  let cconsist = class_.c_final || SMap.mem "ConsistentConstruct" class_.c_user_attributes
-  in
+  let cconsist = class_.c_final || SMap.mem "ConsistentConstruct" class_.c_user_attributes in
   match class_.c_constructor, pcstr with
     | None, _ -> env, (pcstr, cconsist || pconsist)
     | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
@@ -553,9 +552,13 @@ and build_constructor env class_ method_ =
   let mconsist = match ty with
     | (_, Tfun ({ft_abstract = true; _})) -> true
     | _ -> mconsist in
+  (* the alternative to overriding <<ConsistentConstruct>> is marking
+   * the corresponding 'new static()' UNSAFE, potentially impacting the safety
+   * of a large type hierarchy. *)
+  let consist_override = SMap.mem "UNSAFE_Construct" method_.m_user_attributes in
   let cstr = {
     ce_final = method_.m_final;
-    ce_override = false;
+    ce_override = consist_override;
     ce_synthesized = false;
     ce_visibility = vis;
     ce_type = ty;

@@ -119,11 +119,11 @@ void FastCGIConnection::readDataAvailable(size_t len) noexcept {
 }
 
 void FastCGIConnection::readEOF() noexcept {
-  shutdownTransport();
+  close();
 }
 
 void FastCGIConnection::readError(const TTransportException& ex) noexcept {
-  shutdownTransport();
+  close();
 }
 
 bool FastCGIConnection::hasReadDataAvailable() {
@@ -160,7 +160,7 @@ void FastCGIConnection::onSessionError() {
 }
 
 void FastCGIConnection::onSessionClose() {
-  shutdownTransport();
+  close();
   m_shutdown = true;
   if (m_writeCount == 0) {
     delete this;

@@ -726,16 +726,17 @@ void FastCGISession::beginTransaction(RequestId request_id) {
   // TODO: Make transactions reusable for performance.
   assert(m_callback != nullptr);
   auto handler = m_callback->newSessionHandler(request_id);
-  m_transactions[request_id] = folly::make_unique<Transaction>(
-                                 this, request_id, handler);
+  m_transactions[request_id] =
+    folly::make_unique<FastCGITransaction>(this, request_id, handler);
 }
 
 bool FastCGISession::hasTransaction(RequestId request_id) {
   return m_transactions.count(request_id);
 }
 
-std::unique_ptr<FastCGISession::Transaction>& FastCGISession::getTransaction(
-                                                        RequestId request_id) {
+std::unique_ptr<FastCGITransaction>& FastCGISession::getTransaction(
+  RequestId request_id
+) {
   assert(m_transactions.count(request_id));
   return m_transactions[request_id];
 }

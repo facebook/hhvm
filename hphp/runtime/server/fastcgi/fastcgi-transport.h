@@ -37,6 +37,11 @@ class FastCGITransport;
 
 class FastCGIConnection;
 
+/*
+ * FastCGITransport is used to communicate between a PHP thread running a
+ * FastCGI request and the FastCGITransaction representing the connection to
+ * the client.
+ */
 class FastCGITransport
   : public Transport,
     public ProtocolSessionHandler {

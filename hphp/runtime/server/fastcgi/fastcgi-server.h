@@ -38,6 +38,10 @@ namespace HPHP {
 
 class FastCGIServer;
 
+/*
+ * FastCGIAcceptor accepts new connections from a listening socket, wrapping
+ * each one in a FastCGIConnection.
+ */
 class FastCGIAcceptor : public facebook::proxygen::Acceptor {
 public:
   explicit FastCGIAcceptor(
@@ -68,11 +72,17 @@ private:
 
 class FastCGITransport;
 
+/*
+ * FastCGIConnection represents a connection to a FastCGI client, usually a web
+ * server such as apache or nginx. It owns a single FastCGISession, which in
+ * turn is responsible for manging the many requests multiplexed through this
+ * connection.
+ */
 class FastCGIConnection
   : public SocketConnection,
     public apache::thrift::async::TAsyncTransport::ReadCallback,
     public apache::thrift::async::TAsyncTransport::WriteCallback,
-    public ProtocolSession::Callback {
+    public FastCGISession::Callback {
 friend class FastCGITransport;
 public:
   FastCGIConnection(
@@ -93,7 +103,7 @@ public:
     newSessionHandler(int handler_id) override;
   virtual void onSessionEgress(std::unique_ptr<folly::IOBuf> chain) override;
   virtual void writeError(size_t bytes,
-    const apache::thrift::transport::TTransportException& ex) 
+    const apache::thrift::transport::TTransportException& ex)
     noexcept override;
   virtual void writeSuccess() noexcept override;
   virtual void onSessionError() override;
@@ -122,7 +132,18 @@ private:
   uint32_t m_writeCount{0};
 };
 
-
+/*
+ * FastCGIServer uses a FastCGIAcceptor to listen for new connections from
+ * FastCGI clients. There are many different classes involved in serving
+ * FastCGI requests; here's an overview of the ownership hierarchy:
+ *
+ * FastCGIServer
+ *   FastCGIAcceptor
+ *     FastCGIConnection (1 Acceptor owns many Connections)
+ *       FastCGISession
+ *         FastCGITransaction (1 Session owns many Transactions)
+ *           FastCGITransport
+ */
 class FastCGIServer : public Server,
                       public apache::thrift::async::TAsyncTimeout {
 public:

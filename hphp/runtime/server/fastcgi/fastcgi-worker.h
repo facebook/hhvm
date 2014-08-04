@@ -28,6 +28,12 @@ namespace HPHP {
 class FastCGIServer;
 class FastCGITransportTraits;
 
+/*
+ * FastCGIJob is used by FastCGIServer to enqueue jobs once a request has
+ * received all of its headers. It holds a FastCGITransport, which is used by
+ * the thread executing the request to read headers and POST data, as well as
+ * send data back to the FastCGI client.
+ */
 class FastCGIJob : public ServerJob {
   friend class FastCGITransportTraits;
 public:

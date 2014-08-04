@@ -45,7 +45,7 @@ public:
   virtual void dumpConnectionState(uint8_t loglevel);
 
   virtual bool shouldShutdown() { return false; }
-  void shutdownTransport();
+  void close();
 
 protected:
   apache::thrift::transport::TSocketAddress m_localAddr;

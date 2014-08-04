@@ -301,8 +301,13 @@ void Class::releaseRefs() {
 Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
   if (Class *ourParent = m_parent.get()) {
     if (!parent) {
-      PreClass *ppcls = ourParent->m_preClass.get();
-      parent = Unit::getClass(ppcls->namedEntity(), ppcls->name(), tryAutoload);
+      if (!tryAutoload) {
+          PreClass *ppcls = ourParent->m_preClass.get();
+          parent = Unit::getClass(ppcls->namedEntity(), ppcls->name(), tryAutoload);
+      } else {
+          const StringData* parent_name_code = m_preClass->parent();
+          parent = Unit::getClass(Unit::GetNamedEntity(parent_name_code), parent_name_code, tryAutoload);
+      }
       if (!parent) {
         parent = ourParent;
         return Avail::Fail;

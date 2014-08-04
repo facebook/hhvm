@@ -298,9 +298,23 @@ function get_runtime_build(bool $use_php = false): string {
 }
 
 function error_and_exit(string $message): void {
-  $target = 'php://stderr';
-  file_put_contents($target, basename(__FILE__).": ".
-                    $message.PHP_EOL, FILE_APPEND);
+  if (Options::$output_format === OutputFormat::FBMAKE) {
+    fprintf(
+      STDERR,
+      "%s\n",
+      json_encode(
+        [
+          'op' => 'test_done',
+          'test' => 'framework test setup',
+          'status' => 'skipped',
+          'details' => 'ERROR: '.$message,
+        ],
+        /* assoc array = */ true,
+      )
+    );
+    exit(0);
+  }
+  fprintf(STDERR, "ERROR: %s\n", $message);
   exit(1);
 }
 

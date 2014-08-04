@@ -332,6 +332,8 @@ inline void itraceImpl(const char* fmtRaw, Args&&... args) {
   Trace::ftraceRelease(fmt, std::forward<Args>(args)...);
 }
 #define ITRACE(level, ...) ONTRACE((level), Trace::itraceImpl(__VA_ARGS__));
+#define ITRACE_MOD(mod, level, ...)                             \
+  ONTRACE_MOD(mod, level, Trace::itraceImpl(__VA_ARGS__));
 
 void trace(const char *, ...) ATTRIBUTE_PRINTF(1,2);
 void trace(const std::string&);

@@ -61,6 +61,7 @@ public:
              // mangling before call depending on TypedValue's layout.
     Imm,     // 64-bit Immediate
     Addr,    // Address (register plus 32-bit displacement)
+    IpRel,   // ip-relative address
     None,    // Nothing: register will contain garbage
   };
 
@@ -68,7 +69,10 @@ public:
   PhysReg srcReg() const { return m_srcReg; }
   Kind kind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
-  Immed64 imm() const { assert(m_kind == Kind::Imm); return m_imm64; }
+  Immed64 imm() const {
+    assert(m_kind == Kind::Imm || m_kind == Kind::IpRel);
+    return m_imm64;
+  }
   Immed disp() const { assert(m_kind == Kind::Addr); return m_disp32; }
   bool isZeroExtend() const { return m_zeroExtend; }
   bool done() const { return m_done; }
@@ -196,6 +200,12 @@ struct ArgGroup {
 
   ArgGroup& memberKeyS(int i) {
     return memberKeyImpl(i, false);
+  }
+
+  template<typename T>
+  ArgGroup& ipRel(const T* ptr) {
+    push_gp(ArgDesc(ArgDesc::Kind::IpRel, (uintptr_t)ptr));
+    return *this;
   }
 
 private:

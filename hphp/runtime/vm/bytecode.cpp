@@ -2102,7 +2102,11 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
 
   pushVMState(originalSP);
   SCOPE_EXIT {
-    assert(vmStack().top() == reentrySP);
+    assert_flog(
+      vmStack().top() == reentrySP,
+      "vmsp after reentry: {} doesn't match original vmsp: {}",
+      vmStack().top(), reentrySP
+    );
     popVMState();
   };
 

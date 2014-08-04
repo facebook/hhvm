@@ -1,0 +1,17 @@
+string(%d) "Function [ <user> function herp ] {
+  @@ %s/test/slow/reflection/whitespace_reflectionfunction.php 3 - 3
+
+  - Parameters [1] {
+    Parameter #0 [ <required> $derp ]
+  }
+}
+"
+string(%d) "Function [ <user> function foo ] {
+  @@ %s/test/slow/reflection/whitespace_reflectionfunction.php 4 - 4
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $bar ]
+    Parameter #1 [ <required> $baz ]
+  }
+}
+"

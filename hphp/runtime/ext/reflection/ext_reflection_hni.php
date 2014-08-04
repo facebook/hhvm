@@ -388,7 +388,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     $params = $this->getParameters();
     $ret .= "\n  - Parameters [" . count($params) . "] {\n  ";
     foreach ($params as $param) {
-      $ret .= '  ' . str_replace("\n", "\n  ", (string)$param);
+      $ret .= '  '.str_replace("\n", "\n  ", $param."\n");
     }
     $ret .= "}\n";
 

@@ -131,7 +131,7 @@ class ReflectionParameter implements Reflector {
     } else {
       $out .= '<required> '.$type.'$'.$this->getName();
     }
-    $out .= " ]\n";
+    $out .= ' ]';
     return $out;
   }
 

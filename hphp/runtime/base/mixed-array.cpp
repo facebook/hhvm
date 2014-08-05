@@ -934,7 +934,7 @@ template <ArrayData::ArrayKind aKind>
 ALWAYS_INLINE
 bool MixedArray::ExistsIntImpl(const ArrayData* ad, int64_t k) {
   if (aKind == kStrMapKind) {
-    MixedArray::warnUsage(Reason::kExistsInt, aKind);
+    MixedArray::warnUsage(Reason::kExistsInt, kStrMapKind);
   }
   auto a = asMixed(ad);
   return validPos(a->find(k));
@@ -950,8 +950,8 @@ bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 template <ArrayData::ArrayKind aKind>
 ALWAYS_INLINE
 bool MixedArray::ExistsStrImpl(const ArrayData* ad, const StringData* k) {
-  if (aKind != kMixedKind) {
-    MixedArray::warnUsage(Reason::kExistsStr, aKind);
+  if (aKind == kIntMapKind) {
+    MixedArray::warnUsage(Reason::kExistsStr, kIntMapKind);
   }
   auto a = asMixed(ad);
   return validPos(a->find(k, k->hash()));
@@ -1483,7 +1483,7 @@ ArrayData* MixedArray::LvalStrImpl(ArrayData* ad,
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
-  if (aKind != kMixedKind) {
+  if (aKind == kIntMapKind) {
     MixedArray::downgradeAndWarn(a, Reason::kSetStr);
   }
   return a->addLvalImpl(key, ret);
@@ -1554,7 +1554,7 @@ MixedArray::SetIntImpl<ArrayData::kStrMapKind>(ArrayData*, int64_t, Cell, bool);
 ArrayData* MixedArray::SetIntConverted(ArrayData* ad, int64_t k, Cell v,
                                        bool copy) {
   assert(ad->isIntMapArray());
-  MixedArray::warnUsage(Reason::kNumericString, ad->m_kind);
+  MixedArray::warnUsage(Reason::kNumericString, kIntMapKind);
   return MixedArray::SetInt(ad, k, v, copy);
 }
 
@@ -1569,7 +1569,7 @@ MixedArray::SetStrImpl(ArrayData* ad, StringData* k, Cell v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
-  if (aKind != kMixedKind) {
+  if (aKind == kIntMapKind) {
     MixedArray::downgradeAndWarn(a, Reason::kSetStr);
   }
   return a->update(k, v);
@@ -1650,7 +1650,7 @@ MixedArray::AddStrImpl(ArrayData* ad, StringData* k, Cell v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
-  if (aKind != kMixedKind) {
+  if (aKind == kIntMapKind) {
     MixedArray::downgradeAndWarn(a, Reason::kSetStr);
   }
   return a->addVal(k, v);
@@ -1740,7 +1740,7 @@ MixedArray::RemoveIntImpl(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
   if (aKind == kStrMapKind) {
-    MixedArray::warnUsage(Reason::kRemoveInt, aKind);
+    MixedArray::warnUsage(Reason::kRemoveInt, kStrMapKind);
   }
   auto pos = a->findForRemove(k, false);
   if (validPos(pos)) a->erase(pos);
@@ -1761,7 +1761,7 @@ ALWAYS_INLINE ArrayData*
 MixedArray::RemoveStrImpl(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
-  if (aKind != kMixedKind) {
+  if (aKind == kIntMapKind) {
     MixedArray::downgradeAndWarn(a, Reason::kRemoveStr);
   }
   auto pos = a->findForRemove(key, key->hash());
@@ -1797,8 +1797,8 @@ const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
 template <ArrayData::ArrayKind aKind>
 ALWAYS_INLINE
 const TypedValue* MixedArray::NvGetIntImpl(const ArrayData* ad, int64_t ki) {
-  if (aKind != kMixedKind) {
-    MixedArray::warnUsage(Reason::kNvGetInt, aKind);
+  if (aKind == kStrMapKind) {
+    MixedArray::warnUsage(Reason::kNvGetInt, kStrMapKind);
   }
   auto a = asMixed(ad);
   auto i = a->find(ki);
@@ -1824,8 +1824,8 @@ template <ArrayData::ArrayKind aKind>
 ALWAYS_INLINE
 const TypedValue* MixedArray::NvGetStrImpl(const ArrayData* ad,
                                            const StringData* k) {
-  if (aKind != kMixedKind) {
-    MixedArray::warnUsage(Reason::kNvGetStr, aKind);
+  if (aKind == kIntMapKind) {
+    MixedArray::warnUsage(Reason::kNvGetStr, kIntMapKind);
   }
   auto a = asMixed(ad);
   auto i = a->find(k, k->hash());

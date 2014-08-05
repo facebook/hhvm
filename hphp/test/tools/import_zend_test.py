@@ -136,6 +136,9 @@ flaky_tests = (
     '/ext/date/tests/timezone_abbreviations_list_basic1.php',
     '/ext/standard/tests/streams/bug61115-2.php',
 
+    # timing dependent
+    '/ext/date/tests/bug48187.php',
+
     # works in interp but fails in JIT
     '/ext/standard/tests/array/array_next_error2.php',
     '/ext/standard/tests/array/prev_error3.php',

@@ -197,6 +197,10 @@ TransID ProfData::curTransID() const {
   return numTrans();
 }
 
+bool ProfData::hasTransRec(TransID id) const {
+  return id < m_transRecs.size() && m_transRecs[id].get() != nullptr;
+}
+
 SrcKey ProfData::transSrcKey(TransID id) const {
   assert(id < m_transRecs.size());
   return m_transRecs[id]->srcKey();
@@ -385,7 +389,7 @@ TransID ProfData::addTransNonProf(TransKind kind, const SrcKey& sk) {
   assert(kind == TransKind::Anchor || kind == TransKind::Interp ||
          kind == TransKind::Live   || kind == TransKind::Optimize);
   TransID transId = m_numTrans++;
-  m_transRecs.emplace_back(new ProfTransRec(transId, kind, sk));
+  m_transRecs.emplace_back(nullptr);
   return transId;
 }
 
@@ -413,6 +417,22 @@ void ProfData::addPrologueGuardCaller(const Func* func, int nArgs, TCA caller) {
   PrologueCallersRec* prologueCallers = findPrologueCallersRec(func, nArgs);
   if (prologueCallers) {
     prologueCallers->addGuardCaller(caller);
+  }
+}
+
+void ProfData::freeFuncData(FuncId funcId) {
+  // Free ProfTransRecs for Profile translations.
+  for (TransID tid : funcProfTransIDs(funcId)) {
+    m_transRecs[tid].reset();
+  }
+
+  // Free ProfTransRecs for Proflogue translations.
+  const Func* func = Func::fromFuncId(funcId);
+  for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
+    TransID tid = prologueTransId(func, nArgs);
+    if (tid != kInvalidTransID) {
+      m_transRecs[tid].reset();
+    }
   }
 }
 

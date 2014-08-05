@@ -211,6 +211,8 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   SCOPE_EXIT { m_tx.setMode(TransKind::Invalid); };
 
+  if (!m_tx.profData()->hasTransRec(transId)) return nullptr;
+
   always_assert(m_tx.profData()->transRegion(transId) != nullptr);
 
   Func*       func = m_tx.profData()->transFunc(transId);
@@ -256,6 +258,9 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
       func->setPrologue(entryNumParams, regionStart);
     }
   }
+
+  m_tx.profData()->freeFuncData(funcId);
+
   assert(start);
   return start;
 }

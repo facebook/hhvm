@@ -1,8 +1,9 @@
 <?php
     error_reporting(-1);
-    mkdir("a");
-    file_put_contents("a/a.txt","test");
-    var_dump(file_exists("a/b/../a.txt"));
-    unlink("a/a.txt");
-    rmdir("a");
+    $dir = "hhvm_file_exists_test";
+    mkdir($dir);
+    file_put_contents($dir."/a.txt","test");
+    var_dump(file_exists($dir."/b/../a.txt"));
+    unlink($dir."/a.txt");
+    rmdir($dir);
 ?>

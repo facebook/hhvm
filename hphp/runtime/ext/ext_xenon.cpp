@@ -91,32 +91,34 @@ const StaticString
   s_asyncStack("asyncStack");
 
 static Array parsePhpStack(const Array& bt) {
-  Array stack;
+  PackedArrayInit stack(bt->size());
   for (ArrayIter it(bt); it; ++it) {
-    const Array& frame = it.second().toArray();
+    const auto& frame = it.second().toArray();
     if (frame.exists(s_function)) {
       if (frame.exists(s_class)) {
-        std::ostringstream ss;
-        ss << frame[s_class].toString().c_str()
-           << "::"
-           << frame[s_function].toString().c_str();
-        Array element;
-        element.set(s_function, ss.str(), true);
-        element.set(s_file, frame[s_file], true);
-        element.set(s_line, frame[s_line], true);
-        stack.append(element);
+        auto func = folly::to<std::string>(
+          frame[s_class].toString().c_str(),
+          "::",
+          frame[s_function].toString().c_str()
+        );
+        stack.append(make_map_array(
+          s_function, func,
+          s_file, frame[s_file],
+          s_line, frame[s_line]
+        ));
       } else {
-        Array element;
-        element.set(s_function, frame[s_function].toString().c_str(), true);
-        if (frame.exists(s_file) && frame.exists(s_line)) {
-          element.set(s_file, frame[s_file], true);
-          element.set(s_line, frame[s_line], true);
+        bool fileline = frame.exists(s_file) && frame.exists(s_line);
+        ArrayInit element(fileline ? 3 : 1, ArrayInit::Map{});
+        element.set(s_function, frame[s_function].toString());
+        if (fileline) {
+          element.set(s_file, frame[s_file]);
+          element.set(s_line, frame[s_line]);
         }
-        stack.append(element);
+        stack.append(element.toArray());
       }
     }
   }
-  return stack;
+  return stack.toArray();
 }
 
 static c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
@@ -245,66 +247,65 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 
 Array XenonRequestLocalData::logAsyncStack() {
   VMRegAnchor _;
-  Array bt;
 
   auto currentWaitHandle = c_ResumableWaitHandle::getRunning(vmfp());
   if (currentWaitHandle == nullptr) {
     // if we have a nullptr, then we have no async stack to store for this log
-    return bt;
+    return empty_array();
   }
-  Array depStack = currentWaitHandle->t_getdependencystack();
+  auto depStack = currentWaitHandle->t_getdependencystack();
+  PackedArrayInit bt(depStack->size());
 
   for (ArrayIter iter(depStack); iter; ++iter) {
-    Array frameData;
     if (iter.secondRef().isNull()) {
-      frameData.set(s_function, "<prep>", true);
+      bt.append(make_map_array(s_function, "<prep>"));
     } else {
       auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
-      frameData.set(s_function, wh->t_getname(), true);
+      Array frameData;
+      frameData.set(s_function, wh->t_getname());
       // Async function wait handles may have a source location to add.
       if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction) {
-        auto afwh = static_cast<c_AsyncFunctionWaitHandle*>(wh);
+        auto afwh = wh->asAsyncFunction();
         if (!afwh->isRunning()) {
           frameData.set(s_file, afwh->getFileName(), true);
           frameData.set(s_line, afwh->getLineNumber(), true);
         }
       }
+      bt.append(frameData);
     }
-    bt.append(frameData);
   }
-  return bt;
+  return bt.toArray();
 }
 
 // Creates an array to respond to the Xenon PHP extension;
 // builds the data into the format neeeded.
 Array XenonRequestLocalData::createResponse() {
-  Array stacks;
+  PackedArrayInit stacks(m_stackSnapshots.size());
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
-    Array frame = it.second().toArray();
-    Array element;
-    element.set(s_time, frame[s_time], true);
-    element.set(s_phpStack, parsePhpStack(frame[s_phpStack].toArray()), true);
-    element.set(s_asyncStack, frame[s_asyncStack], true);
-    element.set(s_isWait, frame[s_isWait], true);
-    stacks.append(element);
+    const auto& frame = it.second().toArray();
+    stacks.append(make_map_array(
+      s_time, frame[s_time],
+      s_phpStack, parsePhpStack(frame[s_phpStack].toArray()),
+      s_asyncStack, frame[s_asyncStack],
+      s_isWait, frame[s_isWait]
+    ));
   }
-  return stacks;
+  return stacks.toArray();
 }
 
 void XenonRequestLocalData::log(Xenon::SampleType t) {
   TRACE(1, "XenonRequestLocalData::log\n");
   time_t now = time(nullptr);
-  Array snapshot;
-  snapshot.set(s_time, now, true);
-  bool skipFirst = (t == Xenon::EnterSample) ? true : false;
-  Array bt = createBacktrace(BacktraceArgs()
-                             .skipTop(skipFirst)
+  auto bt = createBacktrace(BacktraceArgs()
+                             .skipTop(t == Xenon::EnterSample)
                              .withSelf()
                              .ignoreArgs());
-  snapshot.set(s_phpStack, bt, true);
-  snapshot.set(s_asyncStack, logAsyncStack(), true);
-  snapshot.set(s_isWait, (t == Xenon::IOWaitSample));
-  m_stackSnapshots.append(snapshot);
+  m_stackSnapshots.append(make_map_array(
+    s_time, now,
+    s_phpStack, bt,
+    s_asyncStack, logAsyncStack(),
+    s_isWait, (t == Xenon::IOWaitSample)
+  ));
 }
 
 void XenonRequestLocalData::requestInit() {

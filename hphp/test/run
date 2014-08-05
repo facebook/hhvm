@@ -158,6 +158,7 @@ function get_options($argv) {
     'color' => 'c',
     'no-fun' => '',
     'cores' => '',
+    'no-clean' => '',
   );
   $options = array();
   $files = array();
@@ -615,17 +616,43 @@ class Status {
   }
 }
 
+function clean_intermediate_files($test, $options) {
+  if (isset($options['no-clean'])) {
+    return;
+  }
+  $exts = array('out', 'diff', 'repo');
+  foreach ($exts as $ext) {
+    $file = "$test.$ext";
+    if (file_exists($file)) {
+      if (is_dir($file)) {
+        foreach(new RecursiveIteratorIterator(new
+            RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST) as $path) {
+          $path->isDir() ? rmdir($path->getPathname()) : unlink($path->getPathname());
+        }
+        rmdir($file);
+      } else {
+        unlink($file);
+      }
+    }
+  }
+}
+
 function run($options, $tests, $bad_test_file) {
   foreach ($tests as $test) {
     $status = run_and_lock_test($options, $test);
     if ($status === 'skip') {
       Status::skip($test);
+      clean_intermediate_files($test, $options);
     } else if ($status === 'skip-norepo') {
       Status::skip($test, 'norepo');
+      clean_intermediate_files($test, $options);
     } else if ($status === 'skip-onlyrepo') {
       Status::skip($test, 'onlyrepo');
+      clean_intermediate_files($test, $options);
     } else if ($status) {
       Status::pass($test, $status);
+      clean_intermediate_files($test, $options);
     } else {
       Status::fail($test);
     }

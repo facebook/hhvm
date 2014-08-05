@@ -686,11 +686,11 @@ Cell lookupCnsUHelper(const TypedValue* tv,
                    fallback->data(), fallback->data());
       c1.m_data.pstr = const_cast<StringData*>(fallback);
       c1.m_type = KindOfStaticString;
+      return c1;
     }
-  } else {
-    c1.m_type = cns->m_type;
-    c1.m_data = cns->m_data;
   }
+  c1.m_type = cns->m_type;
+  c1.m_data = cns->m_data;
   return c1;
 }
 

@@ -22,6 +22,14 @@
 
 #include "hphp/runtime/base/datatype.h"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
+#ifdef STRICT
+#undef STRICT
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

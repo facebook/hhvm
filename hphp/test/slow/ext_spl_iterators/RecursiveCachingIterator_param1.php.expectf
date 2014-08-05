@@ -1,0 +1,3 @@
+RecursiveCachingIterator::__construct() expects parameter 1 to be RecursiveIterator, object given
+
+Fatal error: Argument 1 passed to RecursiveCachingIterator::__construct() must implement interface Iterator, ArrayObject given in %s/RecursiveCachingIterator_param1.php on line %d

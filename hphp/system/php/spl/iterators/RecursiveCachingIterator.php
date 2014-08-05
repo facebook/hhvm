@@ -33,10 +33,15 @@ class RecursiveCachingIterator
    * @return     mixed   The RecursiveCachingIterator.
    */
   function __construct(
-    $iterator,
+    \Iterator $iterator,
     $flags = RecursiveCachingIterator::CALL_TOSTRING
   ) {
-    // TODO(emil): Check that $iterator is a RecursiveIterator
+    if (!($iterator instanceof RecursiveIterator)) {
+      throw new InvalidArgumentException(
+        __CLASS__ . "::__construct() expects parameter 1 to be RecursiveIterator, ".
+        gettype($iterator) . " given"
+      );
+    }
     parent::__construct($iterator, $flags);
   }
 

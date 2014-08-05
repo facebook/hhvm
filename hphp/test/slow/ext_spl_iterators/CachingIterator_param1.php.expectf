@@ -1,0 +1,2 @@
+
+Fatal error: Argument 1 passed to CachingIterator::__construct() must implement interface Iterator, ArrayObject given in %s/CachingIterator_param1.php on line %d

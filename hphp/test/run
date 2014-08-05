@@ -617,7 +617,7 @@ class Status {
 
 function run($options, $tests, $bad_test_file) {
   foreach ($tests as $test) {
-    $status = run_test($options, $test);
+    $status = run_and_lock_test($options, $test);
     if ($status === 'skip') {
       Status::skip($test);
     } else if ($status === 'skip-norepo') {
@@ -1009,6 +1009,14 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
   $outputs = run_config_cli($options, $test, $hhvm, $hhvm_env);
   if ($outputs === false) return false;
   return run_config_post($outputs, $test, $options);
+}
+
+function run_and_lock_test($options, $test) {
+  $lock = fopen($test, 'r');
+  if (!flock($lock, LOCK_EX)) return false;
+  $result = run_test($options, $test);
+  if (!flock($lock, LOCK_UN)) return false;
+  return $result;
 }
 
 function run_test($options, $test) {

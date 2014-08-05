@@ -43,6 +43,18 @@
 #define SET_AFFINITY(pid, size, mask)       \
         thread_policy_set(mach_thread_self(), THREAD_AFFINITY_POLICY, \
                           (int *)mask, THREAD_AFFINITY_POLICY_COUNT)
+
+#elif (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#include <windows.h>
+typedef DWORD_PTR cpu_set_t;
+
+#define CPU_SET(cpu_id, new_mask) (*(new_mask)) = (cpu_id + 1)
+#define CPU_ZERO(new_mask) (*(new_mask)) = 0
+#define SET_AFFINITY(pid, size, mask) \
+         SetProcessAffinityMask(GetCurrentProcess(), (DWORD_PTR)mask)
+#define GET_AFFINITY(pid, size, mask) DWORD_PTR s_mask; \
+         GetProcessAffinityMask(GetCurrentProcess(), mask, &s_mask)
+
 #else
 #include <sched.h>
 #define SET_AFFINITY(pid, size, mask) sched_setaffinity(0, size, mask)

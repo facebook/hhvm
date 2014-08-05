@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
+#include <sys/param.h> // MAXPATHLEN is here
 
 namespace HPHP {
 
@@ -417,9 +418,13 @@ Variant f_unpack(const String& format, const String& data) {
 }
 
 Array f_sys_getloadavg() {
+#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+  return make_packed_array(0, 0, 0);
+#else
   double load[3];
   getloadavg(load, 3);
   return make_packed_array(load[0], load[1], load[2]);
+#endif
 }
 
 // We want token IDs to remain stable regardless of how we change the

@@ -26,6 +26,8 @@
 #define LDAP_DEPRECATED 1
 #include <ldap.h>
 
+#include <sys/time.h>
+
 #define PHP_LD_FULL_ADD 0xff
 
 namespace HPHP {

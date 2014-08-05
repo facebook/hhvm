@@ -40,6 +40,11 @@
 #endif
 #endif
 
+#ifdef __CYGWIN__
+#include <cmath>
+#define isinf std::isinf
+#define isnan std::isnan
+#endif
 
 namespace HPHP {
 

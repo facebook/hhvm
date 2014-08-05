@@ -22,7 +22,9 @@
 #include <vector>
 
 #include <sys/mman.h>
+#ifndef __CYGWIN__
 #include <execinfo.h>
+#endif
 
 #include "folly/String.h"
 #include "folly/Hash.h"

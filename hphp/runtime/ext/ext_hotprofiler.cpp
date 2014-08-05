@@ -35,7 +35,6 @@
 
 #include <sys/time.h>
 #include <sys/resource.h>
-
 #include <iostream>
 #include <fstream>
 #include <zlib.h>
@@ -285,9 +284,11 @@ static inline uint64_t vtsc(int64_t MHz) {
     return rval;
   }
 #endif
+#ifdef syscall
   if (vtsc_syscall.num > 0) {
     return syscall(vtsc_syscall.num);
   }
+#endif
   struct rusage usage;
   getrusage(RUSAGE_SELF, &usage);
   return

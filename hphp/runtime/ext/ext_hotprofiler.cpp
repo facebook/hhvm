@@ -1422,34 +1422,34 @@ class MemoProfiler : public Profiler {
 ///////////////////////////////////////////////////////////////////////////////
 // ProfilerFactory
 
-bool ProfilerFactory::start(Level level,
+bool ProfilerFactory::start(ProfilerKind kind,
                             long flags,
                             bool beginFrame /* = true */) {
   if (m_profiler != nullptr) {
     return false;
   }
 
-  switch (level) {
-  case Simple:
+  switch (kind) {
+  case ProfilerKind::Simple:
     m_profiler = new SimpleProfiler();
     break;
-  case Hierarchical:
+  case ProfilerKind::Hierarchical:
     m_profiler = new HierarchicalProfiler(flags);
     break;
-  case Sample:
+  case ProfilerKind::Sample:
     m_profiler = new SampleProfiler();
     break;
-  case Trace:
+  case ProfilerKind::Trace:
     m_profiler = new TraceProfiler(flags);
     break;
-  case Memo:
+  case ProfilerKind::Memo:
     m_profiler = new MemoProfiler(flags);
     break;
-  case XDebug:
+  case ProfilerKind::XDebug:
     m_profiler = new XDebugProfiler();
     break;
   default:
-    throw_invalid_argument("level: %d", level);
+    throw_invalid_argument("level: %d", kind);
     return false;
   }
   if (m_profiler->m_successful) {
@@ -1489,16 +1489,17 @@ IMPLEMENT_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 ///////////////////////////////////////////////////////////////////////////////
 // main functions
 
-void f_hotprofiler_enable(int level) {
+void f_hotprofiler_enable(int ikind) {
+  auto kind = static_cast<ProfilerKind>(ikind);
   long flags = 0;
-  if (level == ProfilerFactory::Hierarchical) {
+  if (kind == ProfilerKind::Hierarchical) {
     flags = TrackBuiltins;
-  } else if (level == ProfilerFactory::Memory) {
-    level = ProfilerFactory::Hierarchical;
+  } else if (kind == ProfilerKind::Memory) {
+    kind = ProfilerKind::Hierarchical;
     flags = TrackBuiltins | TrackMemory;
   }
   if (RuntimeOption::EnableHotProfiler) {
-    s_profiler_factory->start((ProfilerFactory::Level)level, flags);
+    s_profiler_factory->start(kind, flags);
   }
 }
 
@@ -1508,7 +1509,7 @@ Variant f_hotprofiler_disable() {
 
 void f_phprof_enable(int flags /* = 0 */) {
   if (RuntimeOption::EnableHotProfiler) {
-    s_profiler_factory->start(ProfilerFactory::Hierarchical, flags);
+    s_profiler_factory->start(ProfilerKind::Hierarchical, flags);
   }
 }
 
@@ -1562,9 +1563,9 @@ void f_xhprof_enable(int flags/* = 0 */,
     flags |= TrackCPU;
   }
   if (flags & XhpTrace) {
-    s_profiler_factory->start(ProfilerFactory::Trace, flags);
+    s_profiler_factory->start(ProfilerKind::Trace, flags);
   } else {
-    s_profiler_factory->start(ProfilerFactory::Hierarchical, flags);
+    s_profiler_factory->start(ProfilerKind::Hierarchical, flags);
   }
 }
 
@@ -1582,7 +1583,7 @@ Variant f_xhprof_network_disable() {
 
 void f_xhprof_sample_enable() {
   if (RuntimeOption::EnableHotProfiler) {
-    s_profiler_factory->start(ProfilerFactory::Sample, 0);
+    s_profiler_factory->start(ProfilerKind::Sample, 0);
   } else {
     raise_warning("Cannot start the xhprof sampler when the hotprofiler is "
                   "disabled.");

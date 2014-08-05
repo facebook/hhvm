@@ -238,17 +238,17 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-struct ProfilerFactory final : RequestEventHandler {
-  enum Level {
-    Simple       = 1,
-    Hierarchical = 2,
-    Memory       = 3,
-    Trace        = 4,
-    Memo         = 5,
-    XDebug       = 6,
-    Sample       = 620002, // Rockfort's zip code
-  };
+enum class ProfilerKind {
+  Simple       = 1,
+  Hierarchical = 2,
+  Memory       = 3,
+  Trace        = 4,
+  Memo         = 5,
+  XDebug       = 6,
+  Sample       = 620002, // Rockfort's zip code
+};
 
+struct ProfilerFactory final : RequestEventHandler {
   static bool EnableNetworkProfiler;
 
 public:
@@ -274,7 +274,7 @@ public:
    * or false on failure. If beginFrame is true, Profiler::beginFrame is called
    * with "main()" as the symbol name.
    */
-  bool start(Level level, long flags, bool beginFrame = true);
+  bool start(ProfilerKind kind, long flags, bool beginFrame = true);
 
   /**
    * Will stop profiling if currently profiling, regardless of how it was

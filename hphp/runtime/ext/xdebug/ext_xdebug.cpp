@@ -298,7 +298,7 @@ static void start_profiling(XDebugProfiler* profiler) {
 // is not already attached. Raises an error on failure.
 static void attach_xdebug_profiler() {
   assert(!s_request->m_profiler_attached);
-  if (s_profiler_factory->start(ProfilerFactory::XDebug, 0, false)) {
+  if (s_profiler_factory->start(ProfilerKind::XDebug, 0, false)) {
     s_request->m_profiler_attached = true;
     // Enable profiling and tracing if we need to
     XDebugProfiler* profiler = xdebug_profiler();

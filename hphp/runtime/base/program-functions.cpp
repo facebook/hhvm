@@ -662,7 +662,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__CYGWIN__)
 const void* __hot_start = nullptr;
 const void* __hot_end = nullptr;
 #else

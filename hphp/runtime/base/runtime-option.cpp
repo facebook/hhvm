@@ -387,7 +387,7 @@ static inline bool loopsDefault() {
 }
 
 static inline bool evalJitDefault() {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__CYGWIN__)
   return false;
 #else
   return true;

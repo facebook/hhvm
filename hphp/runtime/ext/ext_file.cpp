@@ -358,7 +358,10 @@ Variant f_fgetss(const Resource& handle, int64_t length /* = 0 */,
 Variant f_fscanf(int _argc, const Resource& handle, const String& format,
                  const Array& _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
-  return f_sscanf(_argc, f->readLine(), format, _argv);
+  String line = f->readLine();
+  if (line.length() == 0)
+    return false;
+  return f_sscanf(_argc, line, format, _argv);
 }
 
 Variant f_fpassthru(const Resource& handle) {

@@ -1246,6 +1246,9 @@ and trait_require env =
 and xhp_format env =
   match L.token env.lb with
   | Tsc -> ()
+  | Teof ->
+      error_expect env "end of XHP category/attribute/children declaration";
+      ()
   | Tquote ->
       let pos = Pos.make env.lb in
       let abs_pos = env.lb.Lexing.lex_curr_pos in

@@ -1139,10 +1139,6 @@ void MixedArray::warnUsage(const Reason r, const ArrayKind kind) {
   case Reason::kNumericString:
     raise_warning("An integer-like string key used with a miarray");
     break;
-  case Reason::kRenumber:
-    raise_warning("Trying to renumber keys on a %s, converting to array",
-                  arrayName);
-    break;
   }
 }
 
@@ -2257,20 +2253,8 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
 }
 
 void MixedArray::Renumber(ArrayData* ad) {
-  return RenumberImpl<kMixedKind>(ad);
-}
-
-template <ArrayData::ArrayKind aKind>
-ALWAYS_INLINE
-void MixedArray::RenumberImpl(ArrayData* ad) {
-  if (aKind != kMixedKind) {
-    MixedArray::warnUsage(Reason::kRenumber, aKind);
-  }
   asMixed(ad)->compact(true);
 }
-
-template void MixedArray::RenumberImpl<ArrayData::kIntMapKind>(ArrayData*);
-template void MixedArray::RenumberImpl<ArrayData::kStrMapKind>(ArrayData*);
 
 void MixedArray::OnSetEvalScalar(ArrayData* ad) {
   auto a = asMixed(ad);

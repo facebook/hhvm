@@ -650,7 +650,7 @@ extern const ArrayFunctions g_array_funcs = {
    *
    *   Renumber integer keys on the array in place.
    */
-  DISPATCH_MAP_ARRAY_SPECIALIZED(Renumber)
+  DISPATCH(Renumber)
 
   /*
    * void OnSetEvalScalar(ArrayData*)

@@ -1,5 +1,5 @@
 <?php
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 touch($tempfile);
 $f = fopen($tempfile, "r");

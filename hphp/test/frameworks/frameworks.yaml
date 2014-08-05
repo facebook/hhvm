@@ -141,11 +141,9 @@
       # Depends on external resource (example.com), unreliable
       - guzzle/tests/Guzzle/Tests/Plugin/Async/AsyncPluginTest.php
   guzzle4:
-    # Slightly after 4.1.1, to include
-    # https://github.com/guzzle/guzzle/pull/701
-    url: https://github.com/fredemmott/guzzle.git
-    branch: change-port
-    commit: 4db19b75d9211e729ff277c238ef5de4bf658597
+    url: https://github.com/guzzle/guzzle.git
+    branch: 4.1.6
+    commit: e49ad58038b46a0d7739627a72f6d998cd92d3d6
     install_root: guzzle4
     test_root: guzzle4
     test_find_mode: token

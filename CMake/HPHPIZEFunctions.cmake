@@ -17,7 +17,7 @@ function(HHVM_EXTENSION EXTNAME)
   add_library(${EXTNAME} SHARED ${ARGN})
   set_target_properties(${EXTNAME} PROPERTIES PREFIX "")
   set_target_properties(${EXTNAME} PROPERTIES SUFFIX ".so")
-  install(TARGETS ${EXTNAME} DESTINATION "lib/hphp/extensions/${HHVM_API_VERSION}")
+  install(TARGETS ${EXTNAME} DESTINATION "${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_API_VERSION}")
 endfunction()
 
 # Add an extension that uses the Zend compatibility layer.

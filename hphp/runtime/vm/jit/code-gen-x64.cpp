@@ -4190,11 +4190,9 @@ void CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, MemoryRef base,
   if (label != NULL) {
     emitTypeCheck(type, refTVType(base), refTVData(base), label);
   }
-  if (dst->isA(Type::Null)) return; // these are constants
   auto dstReg = dstLoc.reg();
-  // if dstReg == InvalidReg then the value of this load is dead
+  // if dstReg == InvalidReg then there's nothing to load.
   if (dstReg == InvalidReg) return;
-
   if (type <= Type::Bool) {
     m_as.loadl(refTVData(base), toReg32(dstReg));
   } else {

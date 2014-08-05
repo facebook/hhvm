@@ -359,8 +359,9 @@ Variant f_fscanf(int _argc, const Resource& handle, const String& format,
                  const Array& _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   String line = f->readLine();
-  if (line.length() == 0)
+  if (line.length() == 0) {
     return false;
+  }
   return f_sscanf(_argc, line, format, _argv);
 }
 

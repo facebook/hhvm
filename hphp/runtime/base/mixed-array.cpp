@@ -1758,7 +1758,7 @@ MixedArray::RemoveStrImpl(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
   if (aKind == kIntMapKind) {
-    MixedArray::downgradeAndWarn(a, Reason::kRemoveStr);
+    MixedArray::warnUsage(Reason::kRemoveStr, kIntMapKind);
   }
   auto pos = a->findForRemove(key, key->hash());
   if (validPos(pos)) a->erase(pos);

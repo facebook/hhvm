@@ -570,8 +570,8 @@
     test_root: ratchet
   reactphp:
     url: https://github.com/reactphp/react.git
-    branch: v0.4.0
-    commit: 3a5d12166b38d059a96c232d809332e7f3e60d9d
+    branch: v0.4.1
+    commit: 17044db0ab6a9c145fb1ac40822c5c17d045dc36
     install_root: reactphp
     test_root: reactphp
     flakey:

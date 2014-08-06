@@ -494,6 +494,8 @@ React\Tests\Socket\ServerTest::testConnectionWithManyClients
 .
 React\Tests\Socket\ServerTest::testData
 .
+React\Tests\Socket\ServerTest::testDataSentFromPy
+.
 React\Tests\Socket\ServerTest::testDataWithNoData
 .
 React\Tests\Socket\ServerTest::testDisconnect
@@ -521,6 +523,8 @@ React\Tests\Stream\BufferTest::testWriteDetectsWhenOtherSideIsClosed
 React\Tests\Stream\BufferTest::testWriteReturnsFalseWhenBufferIsFull
 .
 React\Tests\Stream\BufferTest::testWritingToClosedBufferShouldNotWriteToStream
+.
+React\Tests\Stream\BufferTest::testWritingToClosedStream
 .
 React\Tests\Stream\BufferedSinkTest::closeTwiceShouldBeFine
 .

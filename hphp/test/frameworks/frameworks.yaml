@@ -359,6 +359,11 @@
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/
     config_file: mediawiki-core/tests/phpunit/suite.xml
+    flakey:
+      # randomized test data. if it happens to come up with a base-36 string
+      # starting with '0x', and gmp is available, it will error out saying it's
+      # an invalid conversion. Also true on php5.
+      - mediawiki-core/tests/phpunit/includes/GlobalFunctions/wfBaseConvertTest.php
   jshrink:
     url: https://github.com/tedivm/JShrink.git
     branch: master

@@ -39,4 +39,4 @@ $b = &$c->returnFunctionCallByRef('returnVariableByRef');
 $a++;
 var_dump($a, $b);
 
-?>
+?>

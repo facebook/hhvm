@@ -10,4 +10,4 @@ print(file_get_contents('phar://bug53872-phar.phar/third.txt'));
 ?>
 <?php
 unlink("bug53872-phar.phar");
-?>
+?>

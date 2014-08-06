@@ -5,4 +5,4 @@ if (!extension_loaded("curl")) {
 if (!getenv('PHP_CURL_HTTP_REMOTE_SERVER')) {
 	echo "skip need PHP_CURL_HTTP_REMOTE_SERVER environment variable";
 }
-?>
+?>

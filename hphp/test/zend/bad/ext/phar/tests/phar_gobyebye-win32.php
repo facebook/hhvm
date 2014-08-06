@@ -17,4 +17,4 @@ include $pname . '/foo/hi';
 ?>
 ===DONE===
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.php'); ?>
+<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.php'); ?>

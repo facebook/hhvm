@@ -11,4 +11,4 @@ imageellipse( $image, 50, 50, 50, 50, imagecolorallocate( $image, 0, 0, 0 ) );
 // Try to fill border
 imagefilltoborder( $image, 50, 50 );
 
-?> 
+?> 

@@ -7,4 +7,4 @@ if (is_uploaded_file($_FILES["file1"]["tmp_name"])) {
 if (is_uploaded_file($_FILES["file4"]["tmp_name"])) {
 	var_dump(file_get_contents($_FILES["file4"]["tmp_name"]));
 }
-?>
+?>

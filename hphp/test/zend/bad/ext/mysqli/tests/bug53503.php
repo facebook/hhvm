@@ -42,4 +42,4 @@ if (!$link->query($link, 'DROP TABLE IF EXISTS test_bug53503_table_1')) {
 $link->close();
 
 unlink('bug53503.data');
-?>
+?>

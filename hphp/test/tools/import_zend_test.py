@@ -1122,6 +1122,12 @@ def walk(filename, dest_subdir):
         test = test.replace('/parse.ini', '/bug46347.ini')
     if '/ext/standard/tests/file/parse_ini_file.php' in full_dest_filename:
         test = test.replace('/parse.ini', '/parse_ini_file.ini')
+    if '/ext/standard/tests/strings/sha1_file.php' in full_dest_filename:
+        test = test.replace('DataFile.txt', 'sha1_DataFile.txt')
+        test = test.replace('EmptyFile.txt', 'sha1_EmptyFile.txt')
+    if '/ext/standard/tests/strings/md5_file.php' in full_dest_filename:
+        test = test.replace('DataFile.txt', 'md5_DataFile.txt')
+        test = test.replace('EmptyFile.txt', 'md5_EmptyFile.txt')
     if '/Zend/tests/closure_016.php' in full_dest_filename:
         # undo closure% only for first two instances
         exp = exp.replace('Closure%s::', 'Closure::', 2)
@@ -1129,6 +1135,7 @@ def walk(filename, dest_subdir):
     if '/ext/json/tests/unsupported_type_error.php' in full_dest_filename:
         exp = exp.replace('resource(5)', 'resource(%d)')
         file(full_dest_filename + '.expectf', 'w').write(exp)
+
     if '/ext/mysqli/tests/' in full_dest_filename:
 
         (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))

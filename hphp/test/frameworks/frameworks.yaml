@@ -648,9 +648,3 @@
     commit: 45e0f801d896258022c6a70a7738b991cb19aafe
     install_root: html5php
     test_root: html5php      
-  twital:
-    url: https://github.com/goetas/twital.git
-    branch: master
-    commit: 9f5d2f66bea26fc590ec003f2488568b34bafe72
-    install_root: twital
-    test_root: twital

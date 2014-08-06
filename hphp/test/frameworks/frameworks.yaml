@@ -650,3 +650,4 @@
     commit: 9f5d2f66bea26fc590ec003f2488568b34bafe72
     install_root: twital
     test_root: twital
+    test_find_mode: token

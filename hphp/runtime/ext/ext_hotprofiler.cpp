@@ -173,35 +173,6 @@ static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
   return freqs;
 }
 
-class esyscall {
-public:
-  int num;
-
-  explicit esyscall(const char *syscall_name) {
-    num = -1;
-    char format[strlen(syscall_name) + sizeof(" %d")];
-    sprintf(format, "%s %%d", syscall_name);
-
-    std::ifstream syscalls("/proc/esyscall");
-    if (syscalls.fail()) {
-      return;
-    }
-    char line[MAX_LINELENGTH];
-    if (!syscalls.getline(line, sizeof(line))) {
-      return;
-    }
-    // perhaps we should check the format, but we're just going to assume
-    // Name Number
-    while (syscalls.getline(line, sizeof(line))) {
-      int number;
-      if (sscanf(line, format, &number) == 1) {
-        num = number;
-        return;
-      }
-    }
-  }
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Machine information that we collect just once.
 
@@ -275,18 +246,11 @@ to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
   return (cycles + MHz/2) / MHz;
 }
 
-static esyscall vtsc_syscall("vtsc");
-
-static inline uint64_t vtsc(int64_t MHz) {
+static inline uint64_t cpuTime(int64_t MHz) {
 #ifdef CLOCK_THREAD_CPUTIME_ID
   int64_t rval = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (rval >= 0) {
     return rval;
-  }
-#endif
-#ifdef syscall
-  if (vtsc_syscall.num > 0) {
-    return syscall(vtsc_syscall.num);
   }
 #endif
   struct rusage usage;
@@ -331,46 +295,46 @@ get_frees()
   return 0;
 }
 
-  size_t Frame::getName(char *result_buf, size_t result_len) {
-    if (result_len <= 1) {
-      return 0; // Insufficient result_bug. Bail!
-    }
-
-    // Add '@recurse_level' if required
-    // NOTE: Dont use snprintf's return val as it is compiler dependent
-    if (m_recursion) {
-      snprintf(result_buf, result_len, "%s@%d", m_name, m_recursion);
-    } else {
-      snprintf(result_buf, result_len, "%s", m_name);
-    }
-
-    // Force null-termination at MAX
-    result_buf[result_len - 1] = 0;
-    return strlen(result_buf);
+size_t Frame::getName(char *result_buf, size_t result_len) {
+  if (result_len <= 1) {
+    return 0; // Insufficient result_bug. Bail!
   }
 
-  size_t Frame::getStack(int level, char *result_buf, size_t result_len) {
-    // End recursion if we dont need deeper levels or
-    // we dont have any deeper levels
-    if (!m_parent || level <= 1) {
-      return getName(result_buf, result_len);
-    }
-
-    // Take care of all ancestors first
-    size_t len = m_parent->getStack(level - 1, result_buf, result_len);
-    if (result_len < (len + HP_STACK_DELIM_LEN)) {
-      return len; // Insufficient result_buf. Bail out!
-    }
-
-    // Add delimiter only if entry had ancestors
-    if (len) {
-      strncat(result_buf + len, HP_STACK_DELIM, result_len - len);
-      len += HP_STACK_DELIM_LEN;
-    }
-
-    // Append the current function name
-    return len + getName(result_buf + len, result_len - len);
+  // Add '@recurse_level' if required
+  // NOTE: Dont use snprintf's return val as it is compiler dependent
+  if (m_recursion) {
+    snprintf(result_buf, result_len, "%s@%d", m_name, m_recursion);
+  } else {
+    snprintf(result_buf, result_len, "%s", m_name);
   }
+
+  // Force null-termination at MAX
+  result_buf[result_len - 1] = 0;
+  return strlen(result_buf);
+}
+
+size_t Frame::getStack(int level, char *result_buf, size_t result_len) {
+  // End recursion if we dont need deeper levels or
+  // we dont have any deeper levels
+  if (!m_parent || level <= 1) {
+    return getName(result_buf, result_len);
+  }
+
+  // Take care of all ancestors first
+  size_t len = m_parent->getStack(level - 1, result_buf, result_len);
+  if (result_len < (len + HP_STACK_DELIM_LEN)) {
+    return len; // Insufficient result_buf. Bail out!
+  }
+
+  // Add delimiter only if entry had ancestors
+  if (len) {
+    strncat(result_buf + len, HP_STACK_DELIM, result_len - len);
+    len += HP_STACK_DELIM_LEN;
+  }
+
+  // Append the current function name
+  return len + getName(result_buf + len, result_len - len);
+}
 
 const StaticString
   s_ct("ct"),
@@ -532,7 +496,7 @@ public:
     m_stack->m_tsc_start = cpuCycles();
 
     if (m_flags & TrackCPU) {
-      m_stack->m_vtsc_start = vtsc(m_MHz);
+      m_stack->m_vtsc_start = cpuTime(m_MHz);
     }
 
     if (m_flags & TrackMemory) {
@@ -554,7 +518,7 @@ public:
     counts.wall_time += cpuCycles() - m_stack->m_tsc_start;
 
     if (m_flags & TrackCPU) {
-      counts.cpu += vtsc(m_MHz) - m_stack->m_vtsc_start;
+      counts.cpu += cpuTime(m_MHz) - m_stack->m_vtsc_start;
     }
 
     if (m_flags & TrackMemory) {
@@ -905,7 +869,7 @@ class TraceProfiler : public Profiler {
     te.wall_time = cpuCycles();
     te.cpu = 0;
     if (m_flags & TrackCPU) {
-      te.cpu = vtsc(m_MHz);
+      te.cpu = cpuTime(m_MHz);
     }
     if (m_flags & TrackMemory) {
       auto const& stats = MM().getStats();
@@ -1452,6 +1416,8 @@ void f_xhprof_frame_end() {
 void f_xhprof_enable(int flags/* = 0 */,
                      const Array& args /* = null_array */) {
   if (!RuntimeOption::EnableHotProfiler) {
+    raise_warning("The runtime option Stats.EnableHotProfiler must be on to "
+                  "use xhprof.");
     return;
   }
 #ifdef CLOCK_THREAD_CPUTIME_ID
@@ -1460,12 +1426,17 @@ void f_xhprof_enable(int flags/* = 0 */,
 #else
   bool missingClockGetTimeNS = true;
 #endif
-  if (vtsc_syscall.num <= 0 && missingClockGetTimeNS) {
+  if (missingClockGetTimeNS) {
+    // Both TrackVtsc and TrackCPU mean "do CPU time profiling".
+    //
+    // TrackVtsc means: require clock_gettime, or else no data.
+    // TrackCPU means: prefer clock_gettime, but fall back to getrusage.
     flags &= ~TrackVtsc;
   }
   if (flags & TrackVtsc) {
     flags |= TrackCPU;
   }
+
   if (flags & XhpTrace) {
     s_profiler_factory->start(ProfilerKind::Trace, flags);
   } else {
@@ -1489,8 +1460,8 @@ void f_xhprof_sample_enable() {
   if (RuntimeOption::EnableHotProfiler) {
     s_profiler_factory->start(ProfilerKind::Sample, 0);
   } else {
-    raise_warning("Cannot start the xhprof sampler when the hotprofiler is "
-                  "disabled.");
+    raise_warning("The runtime option Stats.EnableHotProfiler must be on to "
+                  "use xhprof.");
   }
 }
 

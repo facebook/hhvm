@@ -75,7 +75,7 @@
     url: https://github.com/composer/composer.git
     # master is the only available branch
     branch: master
-    commit: 8881cec1742cc7e56bfc0e33b08f785ae53b78dc
+    commit: 4ecdbf89c4a3d1e5dfe73c57e3202a5e2a18c87e
     install_root: composer
     test_root: composer
   doctrine2:

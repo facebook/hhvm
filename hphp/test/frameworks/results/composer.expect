@@ -1,4 +1,8 @@
+Composer\Repository\ArtifactRepositoryTest::testAbsoluteRepoUrlCreatesAbsoluteUrlPackages
+.
 Composer\Repository\ArtifactRepositoryTest::testExtractsConfigsFromZipArchives
+.
+Composer\Repository\ArtifactRepositoryTest::testRelativeRepoUrlCreatesRelativeUrlPackages
 .
 Composer\Repository\FilesystemRepositoryTest::testCorruptedRepositoryFile
 .
@@ -167,6 +171,8 @@ Composer\Test\ConfigTest::testAddPackagistRepository with data set "system confi
 Composer\Test\ConfigTest::testMergeGithubOauth
 .
 Composer\Test\ConfigTest::testOverrideGithubProtocols
+.
+Composer\Test\ConfigTest::testVarReplacement
 .
 Composer\Test\DependencyResolver\DefaultPolicyTest::testPreferNonReplacingFromSameRepo
 .
@@ -1984,7 +1990,25 @@ Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #211
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #212
 .
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #213
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #214
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #215
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #216
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #217
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #218
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #219
+.
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #22
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #220
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #221
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #23
 .

@@ -1029,6 +1029,10 @@ function run_config_post($outputs, $test, $options) {
     }
 
     return $passed;
+  } else {
+    file_put_contents("$test.diff", "No $test.expect, $test.expectf, ".
+      "nor $test.expectregex. Is $test even a test?");
+    return false;
   }
 }
 

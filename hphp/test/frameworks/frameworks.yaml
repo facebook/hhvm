@@ -668,10 +668,10 @@
       - zf2/tests/ZendTest/Code/Generator/ValueGeneratorTest.php
   html5php:
     url: https://github.com/Masterminds/html5-php.git
-    branch: master
-    commit: 45e0f801d896258022c6a70a7738b991cb19aafe
+    branch: "2.0.0"
+    commit: 2cad9c173f14eb390f78100dd74ef005f67e1fa5
     install_root: html5php
-    test_root: html5php      
+    test_root: html5php
   twital:
     url: https://github.com/goetas/twital.git
     branch: master

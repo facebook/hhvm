@@ -80,6 +80,8 @@ Masterminds\HTML5\Tests\Parser\DOMTreeBuilderTest::testCustomImplicitNamespaces
 .
 Masterminds\HTML5\Tests\Parser\DOMTreeBuilderTest::testDocument
 .
+Masterminds\HTML5\Tests\Parser\DOMTreeBuilderTest::testDocumentFakeAttrAbsence
+.
 Masterminds\HTML5\Tests\Parser\DOMTreeBuilderTest::testElements
 .
 Masterminds\HTML5\Tests\Parser\DOMTreeBuilderTest::testFoo
@@ -241,6 +243,22 @@ Masterminds\HTML5\Tests\Parser\TreeBuildingRulesTest::testHasRules
 Masterminds\HTML5\Tests\Parser\TreeBuildingRulesTest::testTable
 .
 Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testAttrs
+.
+Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testBooleanAttrs with data set #0
+.
+Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testBooleanAttrs with data set #1
+.
+Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testBooleanAttrs with data set #2
+.
+Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testBooleanAttrs with data set #3
+.
+Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testBooleanAttrs with data set #4
+.
+Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testBooleanAttrs with data set #5
+.
+Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testBooleanAttrs with data set #6
+.
+Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testBooleanAttrs with data set #7
 .
 Masterminds\HTML5\Tests\Serializer\OutputRulesTest::testCData
 .

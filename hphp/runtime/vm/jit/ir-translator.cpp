@@ -82,7 +82,7 @@ TRACE_SET_MOD(hhir);
 
 static JmpFlags instrJmpFlags(const NormalizedInstruction& ni) {
   JmpFlags flags = JmpFlagNone;
-  if (ni.breaksTracelet) {
+  if (ni.endsRegion) {
     flags = flags | JmpFlagBreakTracelet;
   }
   if (ni.nextIsMerge) {
@@ -179,26 +179,28 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
 
   Offset takenOffset    = i.offset() + i.imm[0].u_BA;
   Offset fallthruOffset = i.offset() + instrLen((Op*)(i.pc()));
-  assert(!i.includeBothPaths || !i.breaksTracelet);
+  assert(!i.includeBothPaths || !i.endsRegion);
 
   auto jmpFlags = instrJmpFlags(i);
-  if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
+
+  if (i.nextOffset == takenOffset) {
+    // invert the branch
     if (op == OpJmpZ) {
-      HHIR_EMIT(JmpZ,  takenOffset, jmpFlags);
+      HHIR_EMIT(JmpNZ, fallthruOffset, jmpFlags);
     } else {
-      HHIR_EMIT(JmpNZ, takenOffset, jmpFlags);
+      HHIR_EMIT(JmpZ,  fallthruOffset, jmpFlags);
+    }
+    if (i.nextOffset != takenOffset) {
+      always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
+      HHIR_EMIT(Jmp, takenOffset, jmpFlags);
     }
     return;
   }
-  // invert the branch
+
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpNZ, fallthruOffset, jmpFlags);
+    HHIR_EMIT(JmpZ,  takenOffset, jmpFlags);
   } else {
-    HHIR_EMIT(JmpZ,  fallthruOffset, jmpFlags);
-  }
-  if (i.nextOffset != takenOffset) {
-    always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
-    HHIR_EMIT(Jmp, takenOffset, jmpFlags);
+    HHIR_EMIT(JmpNZ, takenOffset, jmpFlags);
   }
 }
 
@@ -529,7 +531,7 @@ static Offset getBranchTarget(const NormalizedInstruction& i,
   Offset targetOffset = i.offset() + i.imm[1].u_BA;
   invertCond = false;
 
-  if (!i.breaksTracelet && i.nextOffset == targetOffset) {
+  if (!i.endsRegion && i.nextOffset == targetOffset) {
     invertCond = true;
     Offset fallthruOffset = i.offset() + instrLen((Op*)i.pc());
     targetOffset = fallthruOffset;
@@ -689,8 +691,8 @@ IRTranslator::translateWIterNextK(const NormalizedInstruction& i) {
 void
 IRTranslator::translateIterBreak(const NormalizedInstruction& i) {
 
-  assert(i.breaksTracelet);
-  HHIR_EMIT(IterBreak, i.immVec, i.offset() + i.imm[1].u_BA, i.breaksTracelet);
+  assert(i.endsRegion);
+  HHIR_EMIT(IterBreak, i.immVec, i.offset() + i.imm[1].u_BA, i.endsRegion);
 }
 
 void
@@ -913,7 +915,7 @@ static Type flavorToType(FlavorDesc f) {
 void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   auto& ht = m_hhbcTrans;
   ht.setBcOff(ni.source.offset(),
-              ni.breaksTracelet && !m_hhbcTrans.isInlining());
+              ni.endsRegion && !m_hhbcTrans.isInlining());
   FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
                                          ni.offset(), ni.toString(),
                                          ht.showStack()));

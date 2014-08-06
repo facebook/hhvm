@@ -192,7 +192,7 @@ RegionDescPtr RegionFormer::go() {
     // We successfully translated the instruction, so update m_sk.
     m_sk.advance(m_curBlock->unit());
 
-    auto const breakTracelet = m_inst.breaksTracelet ||
+    auto const breakTracelet = m_inst.endsRegion ||
       (m_profiling && instrBreaksProfileBB(&m_inst));
 
     if (breakTracelet) {
@@ -251,7 +251,7 @@ RegionDescPtr RegionFormer::go() {
 bool RegionFormer::prepareInstruction() {
   m_inst.~NormalizedInstruction();
   new (&m_inst) NormalizedInstruction(m_sk, curUnit());
-  m_inst.breaksTracelet = opcodeBreaksBB(m_inst.op()) ||
+  m_inst.endsRegion = opcodeBreaksBB(m_inst.op()) ||
                             (dontGuardAnyInputs(m_inst.op()) &&
                              opcodeChangesPC(m_inst.op()));
   m_inst.funcd = m_arStates.back().knownFunc();

@@ -917,7 +917,7 @@ int getStackDelta(const NormalizedInstruction& ni) {
 bool outputIsPredicted(NormalizedInstruction& inst) {
   auto const& iInfo = getInstrInfo(inst.op());
   auto doPrediction =
-    (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.breaksTracelet;
+    (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.endsRegion;
   if (doPrediction) {
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
@@ -1545,7 +1545,7 @@ static void findSuccOffsets(const RegionDesc&              region,
  */
 static bool containsBothSuccs(const OffsetSet&             succOffsets,
                               const NormalizedInstruction& inst) {
-  if (inst.breaksTracelet) return false;
+  if (inst.endsRegion) return false;
   if (!instrHasConditionalBranch(inst.op())) return false;
   Offset takenOffset      = inst.offset() + *instrJumpOffset((Op*)inst.pc());
   Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
@@ -1735,15 +1735,16 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
-      inst.breaksTracelet = (i == block->length() - 1 &&
-                             block == region.blocks.back());
       inst.funcd = topFunc;
-      if (instrIsNonCallControlFlow(inst.op()) && !inst.breaksTracelet) {
-        assert(b < region.blocks.size());
-        inst.nextOffset = region.blocks[b+1]->start().offset();
+      if (i == block->length() - 1) {
+        inst.endsRegion = blockEndsRegion(blockId, region);
+        inst.nextIsMerge = nextIsMerge(inst, region);
+        inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
+        if (instrIsNonCallControlFlow(inst.op()) &&
+            b < region.blocks.size() - 1) {
+          inst.nextOffset = region.blocks[b+1]->start().offset();
+        }
       }
-      inst.nextIsMerge = nextIsMerge(inst, region);
-      inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
 
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if

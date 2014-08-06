@@ -82,3 +82,4 @@ echo "*** Testing possible variations in path and suffix ***\n";
 check_basename( $file_path_variations );
 
 echo "Done\n";
+

@@ -14,3 +14,4 @@ var_dump($c->equals(1, 2));
 
 var_dump(intlcal_equals($c, array()));
 var_dump(intlcal_equals(1, $c));
+

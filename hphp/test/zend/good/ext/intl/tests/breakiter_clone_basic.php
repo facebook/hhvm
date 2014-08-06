@@ -10,3 +10,4 @@ $bi->setText('foobar');
 $bi_clone = clone $bi;
 var_dump(get_class($bi), get_class($bi_clone));
 var_dump($bi == $bi_clone);
+

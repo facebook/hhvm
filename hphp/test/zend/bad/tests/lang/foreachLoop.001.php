@@ -31,4 +31,4 @@ $a=array("a","b","c");
 foreach ($a as &$v);
 var_dump(current($a));
 
-?>
+?>

@@ -10,3 +10,4 @@ var_dump($bi->preceding(1, 2));
 var_dump($bi->preceding(array()));
 var_dump($bi->isBoundary(1, 2));
 var_dump($bi->isBoundary(array()));
+

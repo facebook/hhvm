@@ -75,4 +75,4 @@ for ($b1 = 0xF0; $b1 < 0xFF; $b1++) {
 			echo "Discordance for ".bin2hex($s),"\n";
 	}
 }
-echo "Done.\n";
+echo "Done.\n";

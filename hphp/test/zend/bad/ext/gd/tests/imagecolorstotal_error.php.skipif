@@ -5,4 +5,4 @@ if(!extension_loaded('gd')) {
 if(!function_exists('imagecolorstotal')) {
     die('skip imagecolorstotal function is not available');
 }
-?> 
+?>

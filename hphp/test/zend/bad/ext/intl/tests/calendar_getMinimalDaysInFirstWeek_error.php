@@ -7,3 +7,4 @@ var_dump($c->getMinimalDaysInFirstWeek(1));
 
 var_dump(intlcal_get_minimal_days_in_first_week($c, 1));
 var_dump(intlcal_get_minimal_days_in_first_week(1));
+

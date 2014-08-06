@@ -42,3 +42,4 @@ $enc = mb_internal_encoding();
 print "$enc\n";
 
 ?>
+

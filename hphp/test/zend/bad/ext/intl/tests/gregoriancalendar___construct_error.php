@@ -7,3 +7,4 @@ var_dump(intlgregcal_create_instance(1,2,3,4));
 var_dump(new IntlGregorianCalendar(1,2,NULL,4));
 var_dump(new IntlGregorianCalendar(1,2,3,4,NULL,array()));
 
+

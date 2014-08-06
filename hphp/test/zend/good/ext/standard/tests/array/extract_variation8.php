@@ -14,3 +14,4 @@ var_dump ( extract($var1));
 
 echo "\nDone";
 ?>
+

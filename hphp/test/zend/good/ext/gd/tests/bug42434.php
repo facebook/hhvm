@@ -12,4 +12,4 @@ if (imagecolorat($im, 9, 0) == 0x000000) {
 }
 
 imagedestroy($im);
-?>
+?>

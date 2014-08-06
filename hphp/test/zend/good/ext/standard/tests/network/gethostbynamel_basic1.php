@@ -7,4 +7,4 @@
 echo "*** Testing gethostbynamel() : basic functionality ***\n";
 var_dump(gethostbynamel("localhost"));
 ?>
-===DONE===
+===DONE===

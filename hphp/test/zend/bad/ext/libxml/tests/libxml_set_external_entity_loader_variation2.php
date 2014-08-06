@@ -26,6 +26,7 @@ file_put_contents(__DIR__ . "/foobar.dtd", $dtd);
 var_dump($dd->validate());
 
 echo "Done.\n";
+
 ?>
 <?php
 @unlink(__DIR__ . "/foobar.dtd");

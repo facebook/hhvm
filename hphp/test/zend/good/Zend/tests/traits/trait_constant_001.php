@@ -26,4 +26,4 @@ echo Direct::test()."\n";
 echo IndirectInheritance::test()."\n";
 echo Indirect::test()."\n";
 
-?>
+?>

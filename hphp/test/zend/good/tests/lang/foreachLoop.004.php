@@ -16,4 +16,4 @@ foreach($a as $k=>$v[0]) {
 }
 var_dump($a);
 var_dump($k, $v);
-?>
+?>

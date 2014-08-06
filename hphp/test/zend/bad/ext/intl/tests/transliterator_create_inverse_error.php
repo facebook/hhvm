@@ -7,3 +7,4 @@ $tr->createInverse(array());
 
 $tr = Transliterator::create("Katakana-Latin");
 transliterator_create_inverse("jj");
+

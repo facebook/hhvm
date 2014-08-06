@@ -35,4 +35,4 @@ $b = &$c->returnVariableByRef();
 $a++;
 var_dump($a, $b);
 
-?>
+?>

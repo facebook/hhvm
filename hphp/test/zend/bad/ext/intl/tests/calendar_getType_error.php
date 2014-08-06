@@ -7,3 +7,4 @@ var_dump($c->getType(1));
 
 var_dump(intlcal_get_type($c, 1));
 var_dump(intlcal_get_type(1));
+

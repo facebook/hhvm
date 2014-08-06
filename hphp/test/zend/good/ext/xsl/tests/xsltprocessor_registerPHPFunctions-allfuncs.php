@@ -12,3 +12,4 @@ var_dump($proc->transformToXml($dom));
 
 //var_dump($proc->registerPHPFunctions(array()));
 //var_dump($proc->transformToXml($dom));
+

@@ -20,3 +20,4 @@ ns3\ns1\bar();
 function bar() {
   echo __FUNCTION__,"\n";
 }
+

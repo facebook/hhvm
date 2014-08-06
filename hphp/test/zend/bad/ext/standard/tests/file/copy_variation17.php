@@ -42,6 +42,7 @@ foreach($src_file_names as $src_file_name) {
 
 echo "*** Done ***\n";
 ?>
+
 <?php
 unlink(dirname(__FILE__)."/copy_variation17.tmp");
 rmdir(dirname(__FILE__)."/copy_variation17");

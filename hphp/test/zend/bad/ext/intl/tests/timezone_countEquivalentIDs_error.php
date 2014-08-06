@@ -6,3 +6,4 @@ var_dump(IntlTimeZone::countEquivalentIDs(array()));
 var_dump(IntlTimeZone::countEquivalentIDs("foo\x80"));
 var_dump(IntlTimeZone::countEquivalentIDs("foo bar", 7));
 
+

@@ -106,3 +106,4 @@ foreach($inputs as $type => $input) {
 
 echo "Done";
 ?>
+

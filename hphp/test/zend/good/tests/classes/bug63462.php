@@ -44,3 +44,4 @@ $test->protectedProperty = 'value';
 $test->privateProperty   = 'value';
 
 ?>
+

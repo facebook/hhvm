@@ -13,3 +13,4 @@ class MyClass {
         A::bar insteadof B;
     }
 }
+

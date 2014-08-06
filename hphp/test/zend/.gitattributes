@@ -251,6 +251,7 @@ bad/ext/iconv/tests/translit-failure.php -diff
 bad/ext/iconv/tests/iconv_mime_encode.php -diff
 bad/ext/iconv/tests/ob_iconv_handler.php.expectf -diff
 bad/ext/iconv/tests/translit-utf8.php.expectf -diff
+bad/ext/json/tests/bug53946.php -diff
 bad/ext/mbstring/tests/bug26639.php -diff
 bad/ext/mbstring/tests/bug26639.php.expectf -diff
 bad/ext/mbstring/tests/common.inc -diff

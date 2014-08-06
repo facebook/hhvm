@@ -19,3 +19,4 @@ function apply_changed(&$input, $key) {
 }
 myfunc($data);
 var_dump($data);
+

@@ -60,3 +60,4 @@ var_dump($rao=assert_options(ASSERT_CALLBACK));
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n\n";
 var_dump($r2=assert($sa));
 echo"\n";
+

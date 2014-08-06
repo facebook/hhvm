@@ -122,3 +122,4 @@ echo $o->getPrivateProperty();
 echo "\n\n";
 
 ?>
+

@@ -7,3 +7,4 @@ var_dump($c->getFirstDayOfWeek(1));
 
 var_dump(intlcal_get_first_day_of_week($c, 1));
 var_dump(intlcal_get_first_day_of_week(1));
+

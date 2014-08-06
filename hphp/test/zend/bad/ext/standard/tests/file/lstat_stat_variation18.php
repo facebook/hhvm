@@ -42,6 +42,7 @@ var_dump( stat($dir_name->var_name) );
 
 echo "\n--- Done ---";
 ?>
+
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation18.tmp");

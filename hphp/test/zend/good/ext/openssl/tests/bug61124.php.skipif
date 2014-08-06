@@ -1,2 +1,2 @@
 <?php 
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip");

@@ -16,4 +16,4 @@ session_start();
     <br />
     <a href="/b2w/www/ru/adm/pages/?action=prev&rec_id=8&pid=2" style="font: normal 11pt Times New Roman">correct link</a>
   </body>
-</html>
+</html>

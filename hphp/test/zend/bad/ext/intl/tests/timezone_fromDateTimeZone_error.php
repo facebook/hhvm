@@ -9,3 +9,4 @@ $dt = new DateTime('2012-08-01 00:00:00 WEST');
 var_dump(IntlTimeZone::fromDateTimeZone($dt->getTimeZone()));
 
 var_dump(intltz_from_date_time_zone());
+

@@ -125,3 +125,4 @@ print("{$oo->s1}{$oo->s2}{$oo->s3}\n"); // Converted to EUC-JP
 
 
 ?>
+

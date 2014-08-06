@@ -9,3 +9,4 @@ var_dump($c->getWeekendTransition(0));
 
 var_dump(intlcal_get_weekend_transition($c));
 var_dump(intlcal_get_weekend_transition(1, 1));
+

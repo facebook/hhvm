@@ -9,3 +9,4 @@ var_dump($tz->getDisplayName(false, IntlTimeZone::DISPLAY_SHORT, array()));
 var_dump($tz->getDisplayName(false, IntlTimeZone::DISPLAY_SHORT, NULL, NULL));
 
 var_dump(intltz_get_display_name(null, IntlTimeZone::DISPLAY_SHORT, false, 'pt_PT'));
+

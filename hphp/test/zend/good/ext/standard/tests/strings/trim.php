@@ -19,3 +19,4 @@ $tests = <<<TESTS
 TESTS;
 
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+

@@ -33,6 +33,7 @@ var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys) );
 
 echo "\n--- Done ---";
 ?>
+
 <?php
 $file_path = dirname(__FILE__);
 rmdir("$file_path/lstat_stat_variation10");

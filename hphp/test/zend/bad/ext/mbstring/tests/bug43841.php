@@ -25,3 +25,4 @@ foreach ($offsets as $i) {
 	var_dump(strrpos(b'This is na English ta', b'a', $i));
 }
 ?>
+

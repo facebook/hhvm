@@ -6,3 +6,4 @@ var_dump(IntlTimeZone::createTimeZoneIDEnumeration(array()));
 var_dump(IntlTimeZone::createTimeZoneIDEnumeration(-1));
 var_dump(IntlTimeZone::createTimeZoneIDEnumeration(IntlTimeZone::TYPE_ANY, array()));
 var_dump(IntlTimeZone::createTimeZoneIDEnumeration(IntlTimeZone::TYPE_ANY, "PT", "a80"));
+

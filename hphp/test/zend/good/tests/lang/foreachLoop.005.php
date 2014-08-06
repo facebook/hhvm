@@ -13,4 +13,4 @@ foreach ($a as $k=>&$v){
 //After changing $a directly, $v@1 is: original.1
 //After changing $a directly, $v@2 is: original.2
 
-?>
+?>

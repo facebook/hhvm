@@ -8,3 +8,4 @@ var_dump($c->isWeekend("jhhk"));
 
 var_dump(intlcal_is_weekend($c, "jj"));
 var_dump(intlcal_is_weekend(1));
+

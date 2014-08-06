@@ -18,3 +18,4 @@ class CBroken {
 
 $o = new CBroken;
 $o->foo(1);
+

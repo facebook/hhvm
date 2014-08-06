@@ -1,0 +1,1 @@
+<?php Phar::unlinkArchive("/data/users/liranuna/fbcode/hphp/test/zend/bad/ext/phar/tests/phar_gobyebye.phar.php");

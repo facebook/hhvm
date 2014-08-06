@@ -31,6 +31,7 @@ chmod($dir, $old_perms);
 
 echo "*** Done ***\n";
 ?>
+
 <?php
 unlink(dirname(__FILE__)."/copy_variation15.tmp");
 rmdir(dirname(__FILE__)."/copy_variation15");

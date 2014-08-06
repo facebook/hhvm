@@ -33,3 +33,4 @@ session_set_save_handler($handler);
 session_start();
 
 var_dump(session_id(), $oldHandler, ini_get('session.save_handler'), $handler->i, $_SESSION);
+

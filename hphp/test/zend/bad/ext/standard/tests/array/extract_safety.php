@@ -12,3 +12,4 @@ debug_zval_dump($GLOBALS["str"]);
 
 echo "\nDone";
 ?>
+

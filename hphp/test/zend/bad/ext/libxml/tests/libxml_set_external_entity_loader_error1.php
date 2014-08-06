@@ -15,3 +15,4 @@ var_dump(libxml_set_external_entity_loader(function($a, $b, $c, $d) {}));
 var_dump($dd->validate());
 
 echo "Done.\n";
+

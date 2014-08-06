@@ -5,3 +5,4 @@ $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getDSTSavings(array()));
 
 var_dump(intltz_get_dst_savings(null));
+

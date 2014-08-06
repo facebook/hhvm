@@ -5,3 +5,4 @@ $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getRawOffset('foo'));
 
 intltz_get_raw_offset(null);
+

@@ -7,3 +7,4 @@ var_dump($c->inDaylightTime(1));
 
 var_dump(intlcal_in_daylight_time($c, 1));
 var_dump(intlcal_in_daylight_time(1));
+

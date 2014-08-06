@@ -12,3 +12,4 @@ var_dump($intlcal->getTimeZone()->getID());
 $pstdate = new DateTime('2012-01-01 00:00:00 +24:00');
 $intlcal->setTimeZone($pstdate->getTimeZone());
 var_dump($intlcal->getTimeZone()->getID());
+

@@ -11,3 +11,4 @@ trait TFoo {
 class C implements IFoo {
   use TFoo;
 }
+

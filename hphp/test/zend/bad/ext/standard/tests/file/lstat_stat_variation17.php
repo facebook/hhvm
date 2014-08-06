@@ -31,6 +31,7 @@ var_dump( compare_stats($old_stat, $new_stat, $affected_members, "!=") );
 
 echo "\n--- Done ---";
 ?>
+
 <?php
 $file_path = dirname(__FILE__);
 rmdir("$file_path/lstat_stat_variation17");

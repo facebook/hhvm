@@ -9,3 +9,4 @@ $u = clone $t;
 echo $u->id, ": ", $u->transliterate($str), "\n";
 
 echo "Done.\n";
+

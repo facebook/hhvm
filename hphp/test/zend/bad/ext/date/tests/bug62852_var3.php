@@ -15,3 +15,4 @@ try {
     unserialize( $s2 );
 } catch ( Exception $e ) {}
 var_dump( $foo );
+

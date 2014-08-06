@@ -16,3 +16,4 @@ var_dump($bi->setText(new A));
 } catch (Exception $e) {
 var_dump($e->getMessage());
 }
+

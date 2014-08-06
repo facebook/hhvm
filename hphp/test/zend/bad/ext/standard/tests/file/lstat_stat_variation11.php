@@ -34,6 +34,7 @@ clearstatcache();
 
 echo "\n--- Done ---";
 ?>
+
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation11.tmp");

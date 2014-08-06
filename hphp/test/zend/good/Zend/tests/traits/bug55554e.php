@@ -22,3 +22,4 @@ class ReportCollision {
 echo "ReportCollision: ";
 $o = new ReportCollision;
 
+

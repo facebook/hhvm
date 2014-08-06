@@ -13,4 +13,4 @@
 	$class = "A";
 	echo $class::test();
 
-?>
+?>

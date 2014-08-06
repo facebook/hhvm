@@ -93,14 +93,10 @@
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
-    # Stable is 7.26, but the test framework is lacking in 7.x
-    # 8.x has the real testing framework for our runner.
-    branch: 8.x
-    commit: 8b40554c5aa45ecf6dd11418ee8d48b379ff2a34
+    branch: 8.0-alpha13
+    commit: b4f282a55b7da8c883216392cb74bf795cad3ff7
     install_root: drupal
     test_root: drupal/core
-    clowns:
-      - drupal/core/modules/views/tests/Drupal/views/Tests/ViewsDataHelperTest.php
     flakey:
       # test has a race condition
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php

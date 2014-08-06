@@ -239,12 +239,11 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 enum class ProfilerKind {
-  Simple       = 1,
-  Hierarchical = 2,
-  Memory       = 3,
-  Trace        = 4,
-  Memo         = 5,
-  XDebug       = 6,
+  Hierarchical = 1,
+  Memory       = 2,
+  Trace        = 3,
+  Memo         = 4,
+  XDebug       = 5,
   Sample       = 620002, // Rockfort's zip code
 };
 

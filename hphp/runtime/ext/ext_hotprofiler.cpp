@@ -505,99 +505,6 @@ void Profiler::endFrame(const TypedValue *retval,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// SimpleProfiler
-
-/**
- * vtsc() based profiler, but simple enough to print basic information.
- *
- * When available, we now use the vtsc() call, which is relatively inexpensive
- * and accurate.  It's still a system call, but a cheap one.  If the call isn't
- * available, the comment below still applies.  --renglish
- *
- * COMMENT(cjiang): getrusage is very expensive and inaccurate. It is based
- * on sampling at the rate about once every 5 to 10 miliseconds. The sampling
- * error can be very significantly, especially given that we are
- * instrumenting at a very fine granularity. (every PHP function call will
- * lead to one invokation of getrusage.) Most PHP functions such as the
- * built-ins typically finish in microseconds. Thus the result we get from
- * getrusage is very likely going to be skewed. Also worth noting that
- * getrusage actually is a system call, which involves expensive swapping
- * between user-mode and kernel mode. I would suggest we remove collecting
- * CPU usage all together, as exclusive wall-time is very useful already.
- * Or at least we should make it an opt-in choice.
- *
- * See: http://ww2.cs.fsu.edu/~hines/present/timing_linux.pdf
- *
- * Above is a nice paper talking about the overhead and the inaccuracy problem
- * associated with getrusage.
- */
-class SimpleProfiler : public Profiler {
-private:
-  class CountMap {
-  public:
-    CountMap() : count(0), tsc(0), vtsc(0) {}
-
-    int64_t count;
-    int64_t tsc;
-    int64_t vtsc;
-  };
-  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
-  StatsMap m_stats; // outcome
-
-public:
-  SimpleProfiler() {
-    g_context->write("<div style='display:none'>");
-  }
-
-  ~SimpleProfiler() {
-    g_context->write("</div>");
-    print_output();
-  }
-
-  virtual void beginFrameEx(const char *symbol) override {
-    m_stack->m_tsc_start = cpuCycles();
-    m_stack->m_vtsc_start = vtsc(m_MHz);
-  }
-
-  virtual void endFrameEx(const TypedValue *retval,
-                          const char *symbol) override {
-    CountMap &counts = m_stats[m_stack->m_name];
-    counts.count++;
-    counts.tsc += cpuCycles() - m_stack->m_tsc_start;
-    counts.vtsc += vtsc(m_MHz) - m_stack->m_vtsc_start;
-  }
-
-private:
-  void print_output() {
-    g_context->write(
-          "<link rel='stylesheet' href='/css/hotprofiler.css' type='text/css'>"
-          "<script language='javascript' src='/js/hotprofiler.js'></script>"
-          "<p><center><h2>Hotprofiler Data</h2></center><br>"
-          "<div id='hotprofiler_stats'></div>"
-          "<script language='javascript'>hotprofiler_data = [");
-    for (StatsMap::const_iterator iter = m_stats.begin();
-         iter != m_stats.end(); ++iter) {
-      g_context->write("{\"fn\": \"");
-      g_context->write(iter->first.c_str());
-      g_context->write("\"");
-
-      const CountMap &counts = iter->second;
-
-      char buf[512];
-      snprintf(
-        buf, sizeof(buf),
-        ",\"ct\": %" PRId64 ",\"wt\": %" PRId64 ",\"ut\": %" PRId64 ",\"st\": 0",
-        counts.count, (int64_t)to_usec(counts.tsc, m_MHz),
-        (int64_t)to_usec(counts.vtsc, m_MHz, true));
-      g_context->write(buf);
-
-      g_context->write("},\n");
-    }
-    g_context->write("]; write_data('ut', false);</script><br><br>&nbsp;<br>");
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // HierarchicalProfiler
 
 class HierarchicalProfiler : public Profiler {
@@ -1430,9 +1337,6 @@ bool ProfilerFactory::start(ProfilerKind kind,
   }
 
   switch (kind) {
-  case ProfilerKind::Simple:
-    m_profiler = new SimpleProfiler();
-    break;
   case ProfilerKind::Hierarchical:
     m_profiler = new HierarchicalProfiler(flags);
     break;

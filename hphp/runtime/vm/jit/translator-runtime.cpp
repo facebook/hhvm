@@ -1103,7 +1103,7 @@ void raiseMissingArgument(const Func* func, int got) {
   const Func::ParamInfoVec& params = func->params();
   int expected = 0;
   // We subtract the number of parameters with default value at the end
-  for (size_t i = total-1; i >= 0; i--) {
+  for (size_t i = total; i--; ) {
     if (!params[i].hasDefaultValue()) {
       expected = i + 1;
       break;

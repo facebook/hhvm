@@ -34,13 +34,9 @@
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-int f_asio_get_current_context_idx();
-Object f_asio_get_running_in_context(int ctx_idx);
-Object f_asio_get_running();
+Object HHVM_FUNCTION(asio_get_running);
 
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_EXT_ASIO_H_

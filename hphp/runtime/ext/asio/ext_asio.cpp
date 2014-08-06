@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/systemlib.h"
@@ -26,11 +26,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-int f_asio_get_current_context_idx() {
+namespace {
+
+int HHVM_FUNCTION(asio_get_current_context_idx) {
   return AsioSession::Get()->getCurrentContextIdx();
 }
 
-Object f_asio_get_running_in_context(int ctx_idx) {
+Object HHVM_FUNCTION(asio_get_running_in_context, int ctx_idx) {
   auto session = AsioSession::Get();
 
   if (ctx_idx <= 0) {
@@ -53,10 +55,25 @@ Object f_asio_get_running_in_context(int ctx_idx) {
   }
 }
 
-Object f_asio_get_running() {
+}
+
+Object HHVM_FUNCTION(asio_get_running) {
   VMRegAnchor _;
   return c_ResumableWaitHandle::getRunning(vmfp());
 }
+
+class AsioExtension : public Extension {
+  public:
+   AsioExtension() : Extension("asio", "0.1") {}
+
+   void moduleInit() override {
+     HHVM_FE(asio_get_current_context_idx);
+     HHVM_FE(asio_get_running_in_context);
+     HHVM_FE(asio_get_running);
+     loadSystemlib();
+   }
+
+} s_asio_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

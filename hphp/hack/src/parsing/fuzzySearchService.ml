@@ -132,7 +132,7 @@ let term_lookup = Hashtbl.create 250000
 
 (* We take out special characters from the string for the query - they aren't
  * useful during searches *)
-let key_regex = Str.regexp "[^a-zA-Z_]"
+let key_regex = Str.regexp "[^a-zA-Z_:]"
 let strip_special_characters key =
   Str.global_replace key_regex "" key
 

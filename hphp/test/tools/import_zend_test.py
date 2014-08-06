@@ -1073,6 +1073,9 @@ def walk(filename, dest_subdir):
         test = test.replace("31337'", "'.$port")
     if '/ext/standard/tests/file/fputcsv.php' in full_dest_filename:
         test = test.replace("fgetcsv.csv", "fputcsv.csv")
+    if '/ext/spl/tests/SplFileObject_fgetcsv_' in full_dest_filename:
+        test = test.replace('SplFileObject__fgetcsv.csv',
+            os.path.basename(full_dest_filename).replace('.php', '.csv'))
     if '/ext/spl/tests/SplFileObject_fputcsv_' in full_dest_filename:
         test = test.replace('SplFileObject_fputcsv.csv',
             os.path.basename(full_dest_filename).replace('.php', '.csv'))

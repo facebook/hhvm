@@ -198,6 +198,9 @@ flaky_tests = (
 
     # a new process can crop up
     '/ext/posix/tests/posix_kill_basic.php',
+
+    # unsure why
+    '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation4.php',
 )
 
 # Tests that work but not in repo mode

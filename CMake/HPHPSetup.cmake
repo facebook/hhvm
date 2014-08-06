@@ -41,6 +41,9 @@ endif()
 
 set(HHVM_LINK_LIBRARIES
   ${HHVM_ANCHOR_SYMS}
+  -Wl,--wrap=pthread_create
+  -Wl,--wrap=pthread_exit
+  -Wl,--wrap=pthread_join
   hphp_analysis
   ext_hhvm_static
   hphp_system

@@ -543,4 +543,6 @@ macro(hphp_link target)
   if (LIBLLVM_LIBRARY)
     target_link_libraries(${target} ${LIBLLVM_LIBRARY})
   endif()
+
+  target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
 endmacro()

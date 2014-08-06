@@ -194,13 +194,13 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.peakIntervalAlloc = 0;
 #ifdef USE_JEMALLOC
     m_enableStatsSync = false;
-#endif
+  } else if (!m_enableStatsSync) {
+#else
   } else {
+#endif
     // This is only set by the jemalloc stats sync which we don't enable until
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
-    // We expect some thread local initialization to have been done already.
-    assert(m_slabs.size() > 0);
 #ifdef USE_JEMALLOC
     assert(m_stats.jemallocDebt >= m_stats.alloc);
 #endif
@@ -219,10 +219,6 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // for each thread.
     m_stats.totalAlloc = s_statsEnabled ? m_stats.jemallocDebt : 0;
 
-    // Ignore any attempt to sync jemalloc stats before this point since if we
-    // do before this it is impossible to tell what the former usage was before
-    // the sync.
-    assert(!m_enableStatsSync);
     m_enableStatsSync = s_statsEnabled;
 #else
     m_stats.totalAlloc = 0;

@@ -9,6 +9,6 @@
  *)
 
 let go query type_ oc =
-  let results = SearchService.MasterApi.query query type_ in
+  let results = HackSearchService.MasterApi.query query type_ in
   Marshal.to_channel oc results [];
   flush oc

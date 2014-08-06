@@ -8,7 +8,8 @@ SRC= ast.ml \
   namespace_env.ml namespaces.ml \
   lexing_modes.ml preprocessor.ml parser_heap.ml \
   lexer_hack.ml parser_hack.ml format_hack.ml \
-  fuzzySearchService.ml searchService.ml \
+  searchUtils.ml fuzzySearchService.ml trieSearchService.ml \
+  searchService.ml hackSearchService.ml \
   parsing_service.ml
 
 INCLUDEDIRS= $(TOP)/utils \

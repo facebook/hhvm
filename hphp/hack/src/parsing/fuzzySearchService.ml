@@ -10,36 +10,19 @@
 
 open Utils
 
-type search_result_type =
-  | Class of Ast.class_kind
-  | Method of bool * string
-  | ClassVar of bool * string
-  | Function
-  | Typedef
-  | Constant
+module Make(S : SearchUtils.Searchable) = struct
 
-let all_types = [Class Ast.Cnormal; Function; Constant; Typedef]
+module SUtils = SearchUtils.Make(S)
+open SUtils
+
+type search_result_type = S.t
+
+let all_types = S.fuzzy_types
 
 module TMap = MyMap(struct
   type t = search_result_type
-
-  let type_num = function
-    | Class _ -> 0
-    | Function -> 1
-    | Typedef -> 2
-    | Constant -> 3
-    | _ -> 4
-
-  let compare a b =
-    (type_num a) - (type_num b)
+  let compare = S.compare_result_type
 end)
-
-(* The results we'll return to the client *)
-type term = {
-  name: string;
-  pos: Pos.t;
-  result_type: search_result_type;
-}
 
 type type_to_key_to_term_list = term list SMap.t TMap.t
 type type_to_keyset = SSet.t TMap.t
@@ -100,10 +83,9 @@ end)
  *   ...
  * }
  *)
-let idx_terms_class = Hashtbl.create 30
-let idx_terms_function = Hashtbl.create 30
-let idx_terms_constant = Hashtbl.create 30
-let idx_terms_typedef = Hashtbl.create 30
+
+let term_indexes = ref TMap.empty
+
 
 (* Keeps a list of defs defined in files in the previous iteration.  It's a
  * direct copy of whatever was in SearchKeyToTermMap, so the format is the same
@@ -136,12 +118,8 @@ let key_regex = Str.regexp "[^a-zA-Z_:]"
 let strip_special_characters key =
   Str.global_replace key_regex "" key
 
-let get_index_for_type = function
-  | Class _ -> idx_terms_class
-  | Function -> idx_terms_function
-  | Constant -> idx_terms_constant
-  | Typedef -> idx_terms_typedef
-  | _ -> raise (Failure "get_index_for_type called on invalid type")
+let get_index_for_type type_ =
+  TMap.find_unsafe type_ !term_indexes
 
 (* Checks if `needle` matches the uppercase letters of `haystack` so we can
  * allow for something like 'bftc' to match 'BaseFacebookTestCase' *)
@@ -271,20 +249,9 @@ let update_term_lookup file add_terms remove_terms =
 
 (* Updates the keylist and defmap for a file (will be used to populate
  * SearchKeys and SearchKeyToTermMap respectively) *)
-let process_term id type_ type_to_keylist type_to_defmap =
-  let name = snd id in
-  let key = strip_ns name in
-
-  let existing_keylist =
-    try TMap.find_unsafe type_ type_to_keylist
-    with Not_found -> SSet.empty
-  in
-
-  let updated_keylist = SSet.add key existing_keylist in
-  let type_to_keylist = TMap.add type_ updated_keylist type_to_keylist in
-
+let process_term key name pos type_ defs_acc =
   let existing_defmap =
-    try TMap.find_unsafe type_ type_to_defmap
+    try TMap.find_unsafe type_ defs_acc
     with Not_found -> SMap.empty
   in
 
@@ -295,14 +262,30 @@ let process_term id type_ type_to_keylist type_to_defmap =
 
   let updated_defmap = SMap.add key ({
     name = name;
-    pos = fst id;
+    pos = pos;
     result_type = type_;
   } :: existing_def_list) existing_defmap in
-  let type_to_defmap = TMap.add type_ updated_defmap type_to_defmap in
-  type_to_keylist, type_to_defmap
+  TMap.add type_ updated_defmap defs_acc
+
+let update fn fuzzy_defs =
+  SearchKeyToTermMap.add fn fuzzy_defs;
+  let fuzzy_keys = TMap.fold begin fun key value acc ->
+    let terms_for_key = SMap.keys value in
+    let terms_for_key = List.fold_left begin fun acc x ->
+      SSet.add x acc
+    end SSet.empty terms_for_key in
+    TMap.add key terms_for_key acc
+  end fuzzy_defs TMap.empty in
+  SearchKeys.add fn fuzzy_keys
 
 (* Called from the main process, processes the results of the workers *)
 let index_files files =
+  if TMap.is_empty !term_indexes
+  then begin
+    term_indexes := List.fold_left begin fun acc x ->
+      TMap.add x (Hashtbl.create 30) acc
+    end TMap.empty all_types
+  end;
   SSet.iter begin fun file ->
     let new_terms = try SearchKeys.find_unsafe file
     with Not_found -> TMap.empty in
@@ -401,3 +384,5 @@ let query needle type_ =
   let res_terms = Utils.cut_after 50 terms in
   let res = get_terms_from_string_and_type res_terms in
   List.rev res
+
+end

@@ -97,7 +97,7 @@ let parse check_mode (acc, errorl, error_files, php_files) fn =
       Parser_hack.from_file fn
     end
   in
-  if not check_mode then SearchService.WorkerApi.update fn ast;
+  if not check_mode then HackSearchService.WorkerApi.update fn ast;
   if is_hh_file then begin
     AddDeps.program ast;
     let funs, classes, types, consts = get_defs ast in
@@ -152,5 +152,6 @@ let go workers check_mode files ~get_next =
   let fast, errorl, failed_parsing, php_files =
     parse_parallel workers check_mode get_next in
   if not check_mode
-  then SearchService.MasterApi.update_search_index (SMap.keys fast) php_files;
+  then
+    HackSearchService.MasterApi.update_search_index (SMap.keys fast) php_files;
   fast, errorl, failed_parsing

@@ -130,6 +130,12 @@ flaky_tests = (
     '/ext/standard/tests/file/bug38086.php',
     '/ext/standard/tests/file/stream_copy_to_stream.php',
 
+    # these all write to temp3.txt.gz
+    '/ext/zlib/tests/gzseek_basic2.php',
+    '/ext/zlib/tests/gzseek_variation1.php',
+    '/ext/zlib/tests/gzseek_variation4.php',
+    '/ext/zlib/tests/gzseek_variation5.php',
+
     # broken on ubuntu 12.04
     '/ext/date/tests/DateTimeZone_listAbbreviations_basic1.php',
     '/ext/date/tests/bug52290.php',

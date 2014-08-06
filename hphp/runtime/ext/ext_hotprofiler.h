@@ -115,9 +115,17 @@ enum Flag {
   MeasureXhprofDisable  = 0x20,
   Unused                = 0x40,
   TrackMalloc           = 0x80,
+
   // Allows profiling of multiple threads at the same time with TraceProfiler.
   // Requires a lot of memory.
   IHaveInfiniteMemory   = 0x100,
+
+  // A very slow profiler of function arguments and results
+  // to look for memoization opportunities.
+  Memo                  = 0x200,
+
+  // A hot profiler gotten through ProfilerHooks::getHotProfiler()
+  External              = 0x400,
 };
 
 /**
@@ -244,6 +252,7 @@ enum class ProfilerKind {
   Trace        = 3,
   Memo         = 4,
   XDebug       = 5,
+  External     = 7,
   Sample       = 620002, // Rockfort's zip code
 };
 

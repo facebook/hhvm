@@ -30,6 +30,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_system_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
@@ -1352,11 +1353,19 @@ bool ProfilerFactory::start(ProfilerKind kind,
   case ProfilerKind::XDebug:
     m_profiler = new XDebugProfiler();
     break;
+  case ProfilerKind::External:
+    if (g_system_profiler) {
+      m_profiler = g_system_profiler->getHotProfiler();
+    } else {
+      throw_invalid_argument("g_system_profiler not yet bound");
+      /* Control reaches here if !RuntimeOption::ThrowInvalidArguments. */
+    }
+    break;
   default:
     throw_invalid_argument("level: %d", kind);
     return false;
   }
-  if (m_profiler->m_successful) {
+  if (m_profiler && m_profiler->m_successful) {
     // This will be disabled automatically when the thread completes the request
     HPHP::EventHook::Enable();
     ThreadInfo::s_threadInfo->m_profiler = m_profiler;
@@ -1468,6 +1477,17 @@ void f_xhprof_enable(int flags/* = 0 */,
   }
   if (flags & XhpTrace) {
     s_profiler_factory->start(ProfilerKind::Trace, flags);
+  } else if (flags & Memo) {
+    flags = 0;  /* Flags are not used by MemoProfiler::MemoProfiler */
+    s_profiler_factory->start(ProfilerKind::Memo, flags);
+  } else if (flags & External) {
+    flags = TrackBuiltins | TrackCPU | TrackMemory;
+    for (ArrayIter iter(args); iter; ++iter) {
+      if (iter.first().toInt32() == 0) {
+         flags = iter.second().toInt32();
+      }
+    }
+    s_profiler_factory->start(ProfilerKind::External, flags);
   } else {
     s_profiler_factory->start(ProfilerKind::Hierarchical, flags);
   }

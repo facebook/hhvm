@@ -1,0 +1,2 @@
+Warning: fread(): Length parameter must be greater than 0 in %s/fread_length.php on line %d
+bool(false)

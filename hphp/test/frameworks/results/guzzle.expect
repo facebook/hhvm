@@ -1,3050 +1,1372 @@
-Guzzle\Tests\Batch\AbstractBatchDecoratorTest::testProxiesToWrappedObject
+GuzzleHttp\Tests\Adapter\Curl\BatchContextTest::testManagesHandles
+.
+GuzzleHttp\Tests\Adapter\Curl\BatchContextTest::testProvidesGetters
+.
+GuzzleHttp\Tests\Adapter\Curl\BatchContextTest::testReturnsPendingAsIteratorTypeObject
+.
+GuzzleHttp\Tests\Adapter\Curl\BatchContextTest::testThrowsWhenRemovingNonExistentTransaction
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testAddHistory
+GuzzleHttp\Tests\Adapter\Curl\BatchContextTest::testValidatesTransactionsAreNotAddedTwice
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testAddsAutoFlush
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testCanInterceptBeforeSending
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testAddsExceptionBuffering
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testCanSetMaxHandles
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testAddsNotify
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testCatchesErrorWhenPreparing
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testDivisorStrategyMustBeSet
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testDispatchesAfterSendEvent
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testDispatchesErrorEventAndRecovers
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testDoesNotSaveToWhenFailed
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testHandlesCurlErrors
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testFactoryCreatesInstance
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testReleasesAdditionalEasyHandles
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testSendsRequest
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testStripsFragmentFromHost
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testThrowsCurlErrors
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testTransferStrategyMustBeSet
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testAddsDebugInfoToBuffer
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testAddsProxyOptions
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testTransfersCommands
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testCanSendPayloadWithGet
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testClientUsesSslByDefault
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testConvertsConstantNameKeysToValues
 .
-Guzzle\Tests\Batch\BatchBuilderTest::testTransfersRequests
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testCreatesCurlHandle
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testDecodesGzippedResponses
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testDoesNotSendSizeTwice
 .
-Guzzle\Tests\Batch\BatchClosureDivisorTest::testDividesBatch
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testEnsuresCacertExists
+.
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testEnsuresCertExists
+.
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testEnsuresKeyExists
+.
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testSendsChunkedRequests
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testSendsHeadRequests
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testSendsPostRequestWithNoBody
+E
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testStripsFragment
+.
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testCanSetSelectTimeout
+.
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testCatchesErrorWhenPreparing
+.
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testChecksCurlMultiResult
+.
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testChecksForCurlException
+.
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testCreatesAndReleasesHandlesWhenNeeded
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testDispatchesAfterSendEvent
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testDispatchesErrorEventAndRecovers
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testEnsuresResponseWasSetForGet
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testRetriesRewindableStreamsWhenClosedConnectionErrors
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testSendsParallelRequestsFromQueue
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testSendsRequest
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testSendsSingleRequest
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testStripsFragmentFromHost
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testThrowsAndReleasesWhenErrorDuringCompleteEvent
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testThrowsWhenTheBodyCannotBeRewound
+E
+GuzzleHttp\Tests\Adapter\Curl\RequestMediatorTest::testCanUseResponseBody
 .
-Guzzle\Tests\Batch\BatchClosureDivisorTest::testEnsuresCallableIsCallable
+GuzzleHttp\Tests\Adapter\Curl\RequestMediatorTest::testEmitsHeadersEventForHeadRequest
+E
+GuzzleHttp\Tests\Adapter\Curl\RequestMediatorTest::testHandlesTransactionWithNoResponseWhenWritingBody
 .
-Guzzle\Tests\Batch\BatchClosureTransferTest::testEnsuresCallableIsCallable
+GuzzleHttp\Tests\Adapter\Curl\RequestMediatorTest::testReadsFromRequestBody
 .
-Guzzle\Tests\Batch\BatchClosureTransferTest::testTransferBailsOnEmptyBatch
+GuzzleHttp\Tests\Adapter\Curl\RequestMediatorTest::testSendsToNewBodyWhenNot2xxResponse
 .
-Guzzle\Tests\Batch\BatchClosureTransferTest::testTransfersBatch
+GuzzleHttp\Tests\Adapter\Curl\RequestMediatorTest::testSetsResponseBodyForDownload
 .
-Guzzle\Tests\Batch\BatchCommandTransferTest::testCreatesBatchesBasedOnClient
+GuzzleHttp\Tests\Adapter\Curl\RequestMediatorTest::testUsesDefaultBodyIfNoneSet
 .
-Guzzle\Tests\Batch\BatchCommandTransferTest::testDoesNotTransfersEmptyBatches
+GuzzleHttp\Tests\Adapter\FakeParallelAdapterTest::testSendsAllTransactions
 .
-Guzzle\Tests\Batch\BatchCommandTransferTest::testEnsuresAllCommandsUseTheSameClient
+GuzzleHttp\Tests\Adapter\MockAdapterTest::testEmitsHeadersEvent
 .
-Guzzle\Tests\Batch\BatchCommandTransferTest::testEnsuresAllItemsAreCommands
+GuzzleHttp\Tests\Adapter\MockAdapterTest::testHandlesErrors
 .
-Guzzle\Tests\Batch\BatchCommandTransferTest::testTransfersBatches
+GuzzleHttp\Tests\Adapter\MockAdapterTest::testMocksWithCallable
 .
-Guzzle\Tests\Batch\BatchRequestTransferTest::testCreatesBatchesBasedOnCurlMultiHandles
+GuzzleHttp\Tests\Adapter\MockAdapterTest::testReadsRequestBody
 .
-Guzzle\Tests\Batch\BatchRequestTransferTest::testDoesNotTransfersEmptyBatches
+GuzzleHttp\Tests\Adapter\MockAdapterTest::testThrowsUnhandledErrors
 .
-Guzzle\Tests\Batch\BatchRequestTransferTest::testEnsuresAllItemsAreRequests
+GuzzleHttp\Tests\Adapter\MockAdapterTest::testValidatesResponses
 .
-Guzzle\Tests\Batch\BatchRequestTransferTest::testTransfersBatches
+GuzzleHttp\Tests\Adapter\MockAdapterTest::testYieldsMockResponse
 .
-Guzzle\Tests\Batch\BatchSizeDivisorTest::testDividesBatch
-.
-Guzzle\Tests\Batch\BatchTest::testAddsItemsToQueue
-.
-Guzzle\Tests\Batch\BatchTest::testFlushReturnsItems
-.
-Guzzle\Tests\Batch\BatchTest::testThrowsExceptionContainingTheFailedBatch
-.
-Guzzle\Tests\Batch\ExceptionBufferingBatchTest::testFlushesEntireBatchWhileBufferingErroredBatches
-.
-Guzzle\Tests\Batch\FlushingBatchTest::testFlushesWhenSizeMeetsThreshold
-.
-Guzzle\Tests\Batch\HistoryBatchTest::testMaintainsHistoryOfItemsAddedToBatch
-.
-Guzzle\Tests\Batch\NotifyingBatchTest::testEnsuresCallableIsValid
-.
-Guzzle\Tests\Batch\NotifyingBatchTest::testNotifiesAfterFlush
-.
-Guzzle\Tests\Cache\CacheAdapterFactoryTest::testCreatesNullCacheAdapterByDefault with data set #0
-.
-Guzzle\Tests\Cache\CacheAdapterFactoryTest::testCreatesNullCacheAdapterByDefault with data set #1
-.
-Guzzle\Tests\Cache\CacheAdapterFactoryTest::testCreatesNullCacheAdapterByDefault with data set #2
-.
-Guzzle\Tests\Cache\CacheAdapterFactoryTest::testEnsuresConfigIsObject
-.
-Guzzle\Tests\Cache\CacheAdapterFactoryTest::testEnsuresKnownType
-.
-Guzzle\Tests\Cache\CacheAdapterTest::testContains
-.
-Guzzle\Tests\Cache\CacheAdapterTest::testDelete
-.
-Guzzle\Tests\Cache\CacheAdapterTest::testFetch
-.
-Guzzle\Tests\Cache\CacheAdapterTest::testGetCacheObject
-.
-Guzzle\Tests\Cache\CacheAdapterTest::testSave
-.
-Guzzle\Tests\Cache\ClosureCacheAdapterTest::testAllCallablesMustBePresent
-.
-Guzzle\Tests\Cache\ClosureCacheAdapterTest::testCachesDataUsingCallables
-.
-Guzzle\Tests\Cache\ClosureCacheAdapterTest::testChecksIfCacheContainsKeys
-.
-Guzzle\Tests\Cache\ClosureCacheAdapterTest::testDeletesFromCacheByKey
-.
-Guzzle\Tests\Cache\ClosureCacheAdapterTest::testEnsuresCallablesArePresent
-.
-Guzzle\Tests\Cache\Zf2CacheAdapterTest::testCachesDataUsingCallables
-.
-Guzzle\Tests\Cache\Zf2CacheAdapterTest::testChecksIfCacheContainsKeys
-.
-Guzzle\Tests\Cache\Zf2CacheAdapterTest::testDeletesFromCacheByKey
-.
-Guzzle\Tests\Common\AbstractHasAdapterTest::testAllowsDispatcherToBeInjected
-.
-Guzzle\Tests\Common\AbstractHasAdapterTest::testCreatesDefaultEventDispatcherIfNeeded
-.
-Guzzle\Tests\Common\AbstractHasAdapterTest::testDoesNotRequireRegisteredEvents
-.
-Guzzle\Tests\Common\AbstractHasAdapterTest::testHelperAttachesSubscribers
-.
-Guzzle\Tests\Common\AbstractHasAdapterTest::testHelperDispatchesEvents
-.
-Guzzle\Tests\Common\Cache\NullCacheAdapterTest::testNullCacheAdapter
-.
-Guzzle\Tests\Common\CollectionTest::testAddParamsByMerging
-.
-Guzzle\Tests\Common\CollectionTest::testAllowsFunctionalFilter
-.
-Guzzle\Tests\Common\CollectionTest::testAllowsFunctionalMapping
-.
-Guzzle\Tests\Common\CollectionTest::testCanAddValuesToExistingKeysByUsingArray
-.
-Guzzle\Tests\Common\CollectionTest::testCanClearAllDataOrSpecificKeys
-.
-Guzzle\Tests\Common\CollectionTest::testCanGetAllValuesByArray
-.
-Guzzle\Tests\Common\CollectionTest::testCanReplaceAllData
-.
-Guzzle\Tests\Common\CollectionTest::testCanSearchByKey
-.
-Guzzle\Tests\Common\CollectionTest::testCanSetNestedPathValueThatDoesNotExist
-.
-Guzzle\Tests\Common\CollectionTest::testCanSetNestedPathValueThatExists
-.
-Guzzle\Tests\Common\CollectionTest::testChecksIfHasKey
-.
-Guzzle\Tests\Common\CollectionTest::testChecksIfHasValue
-.
-Guzzle\Tests\Common\CollectionTest::testConstructorCanBeCalledWithNoParams
-.
-Guzzle\Tests\Common\CollectionTest::testConstructorCanBeCalledWithParams
-.
-Guzzle\Tests\Common\CollectionTest::testFalseyKeysStillDescend
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #0
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #1
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #10
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #11
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #12
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #13
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #14
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #15
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #2
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #3
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #4
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #5
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #6
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #7
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #8
-.
-Guzzle\Tests\Common\CollectionTest::testGetPath with data set #9
-.
-Guzzle\Tests\Common\CollectionTest::testGetsValuesByKey
-.
-Guzzle\Tests\Common\CollectionTest::testHandlesMergingInDisparateDataSources
-.
-Guzzle\Tests\Common\CollectionTest::testImplementsArrayAccess
-.
-Guzzle\Tests\Common\CollectionTest::testImplementsCount
-.
-Guzzle\Tests\Common\CollectionTest::testImplementsIteratorAggregate
-.
-Guzzle\Tests\Common\CollectionTest::testInjectsConfigData with data set #0
-.
-Guzzle\Tests\Common\CollectionTest::testInjectsConfigData with data set #1
-.
-Guzzle\Tests\Common\CollectionTest::testInjectsConfigData with data set #2
-.
-Guzzle\Tests\Common\CollectionTest::testInjectsConfigData with data set #3
-.
-Guzzle\Tests\Common\CollectionTest::testInjectsConfigData with data set #4
-.
-Guzzle\Tests\Common\CollectionTest::testOverridesSettings
-.
-Guzzle\Tests\Common\CollectionTest::testOverwriteWithCollection
-.
-Guzzle\Tests\Common\CollectionTest::testOverwriteWithTraversable
-.
-Guzzle\Tests\Common\CollectionTest::testPreparesFromConfig
-.
-Guzzle\Tests\Common\CollectionTest::testProvidesKeys
-.
-Guzzle\Tests\Common\CollectionTest::testRetrievesNestedKeysUsingPath
-.
-Guzzle\Tests\Common\CollectionTest::testReturnsCorrectData with data set #0
-.
-Guzzle\Tests\Common\CollectionTest::testReturnsCorrectData with data set #1
-.
-Guzzle\Tests\Common\CollectionTest::testReturnsCorrectData with data set #2
-.
-Guzzle\Tests\Common\CollectionTest::testReturnsCorrectData with data set #3
-.
-Guzzle\Tests\Common\CollectionTest::testReturnsCorrectData with data set #4
-.
-Guzzle\Tests\Common\CollectionTest::testUsesStaticWhenCreatingNew
-.
-Guzzle\Tests\Common\CollectionTest::testVerifiesNestedPathIsValidAtExactLevel
-.
-Guzzle\Tests\Common\CollectionTest::testVerifiesThatNestedPathIsValidAtAnyLevel
-.
-Guzzle\Tests\Common\EventTest::testAllowsParameterInjection
-.
-Guzzle\Tests\Common\EventTest::testConvertsToArray
-.
-Guzzle\Tests\Common\EventTest::testImplementsArrayAccess
-.
-Guzzle\Tests\Common\EventTest::testImplementsIteratorAggregate
-.
-Guzzle\Tests\Common\Exception\BatchTransferExceptionTest::testContainsBatch
-.
-Guzzle\Tests\Common\Exception\ExceptionCollectionTest::testActsAsArray
-.
-Guzzle\Tests\Common\Exception\ExceptionCollectionTest::testAggregatesExceptions
-.
-Guzzle\Tests\Common\Exception\ExceptionCollectionTest::testCanAddSelf
-.
-Guzzle\Tests\Common\Exception\ExceptionCollectionTest::testCanSetExceptions
-.
-Guzzle\Tests\Common\VersionTest::testCanSilenceWarnings
-.
-Guzzle\Tests\Common\VersionTest::testEmitsWarnings
-.
-Guzzle\Tests\Http\AbstractEntityBodyDecoratorTest::testDecoratesEntityBody
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testCanSeekToReadBytes
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testCannotSeekPastWhatHasBeenRead
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testCannotUseSeekEnd
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testChangingUnderlyingStreamUpdatesSizeAndStream
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testClosesBothStreams
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testDoesNotAllowRewindFunction
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testReadLinesFromBothStreams
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testRewindUsesSeek
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testSkipsOverwrittenBytes
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testUsesRemoteSizeIfPossible
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testWrapsContentEncoding
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testWrapsContentType
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testWrapsCustomData
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testWrapsMetadata
-.
-Guzzle\Tests\Http\CachingEntityBodyTest::testWritesToBufferStream
-.
-Guzzle\Tests\Http\ClientTest::testAcceptsConfig
-.
-Guzzle\Tests\Http\ClientTest::testAllowsConfigsToBeChangedAndInjectedInBaseUrl
-.
-Guzzle\Tests\Http\ClientTest::testAllowsCustomCurlMultiObjects
-.
-Guzzle\Tests\Http\ClientTest::testAllowsCustomVariablesWhenExpandingTemplates
-.
-Guzzle\Tests\Http\ClientTest::testAllowsDefaultHeaders
-.
-Guzzle\Tests\Http\ClientTest::testAllowsEmptyBaseUrl
-.
-Guzzle\Tests\Http\ClientTest::testAllowsUriTemplateInjection
-.
-Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #0
-.
-Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #1
-.
-Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #2
-.
-Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #3
-.
-Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #4
-.
-Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #5
-.
-Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #6
-.
-Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #7
-.
-Guzzle\Tests\Http\ClientTest::testCanSetDefaultRequestOptions
-.
-Guzzle\Tests\Http\ClientTest::testCanSetRelativeUrlStartingWithHttp
-.
-Guzzle\Tests\Http\ClientTest::testCanSetSetOptionsOnRequests
-.
-Guzzle\Tests\Http\ClientTest::testCanUseCollectionAsConfig
-.
-Guzzle\Tests\Http\ClientTest::testClientAddsCurlOptionsToRequests
-.
-Guzzle\Tests\Http\ClientTest::testClientAddsParamsToRequests
-.
-Guzzle\Tests\Http\ClientTest::testClientAllowsFineGrainedSslControlButIsSecureByDefault
-.
-Guzzle\Tests\Http\ClientTest::testClientAllowsSettingSpecificSslCaInfo
-.
-Guzzle\Tests\Http\ClientTest::testClientAllowsUnsafeOperationIfRequested
-.
-Guzzle\Tests\Http\ClientTest::testClientAttachersObserversToRequests
-.
-Guzzle\Tests\Http\ClientTest::testClientHasHelperMethodsForCreatingRequests
-.
-Guzzle\Tests\Http\ClientTest::testClientInjectsConfigsIntoUrls
-.
-Guzzle\Tests\Http\ClientTest::testClientPreventsInadvertentInsecureVerifyHostSetting
-.
-Guzzle\Tests\Http\ClientTest::testClientPreventsInvalidVerifyPeerSetting
-.
-Guzzle\Tests\Http\ClientTest::testClientReturnsValidBaseUrls
-.
-Guzzle\Tests\Http\ClientTest::testClientSendsMultipleRequests
-.
-Guzzle\Tests\Http\ClientTest::testClientSendsSingleRequest
-.
-Guzzle\Tests\Http\ClientTest::testClientThrowsExceptionForMultipleRequests
-.
-Guzzle\Tests\Http\ClientTest::testClientThrowsExceptionForSingleRequest
-.
-Guzzle\Tests\Http\ClientTest::testConfigSettingsControlSslConfiguration
-.
-Guzzle\Tests\Http\ClientTest::testConstructorCanAcceptConfig
-.
-Guzzle\Tests\Http\ClientTest::testCreatesRequestsWithDefaultValues
-.
-Guzzle\Tests\Http\ClientTest::testDescribesEvents
-.
-Guzzle\Tests\Http\ClientTest::testDontReuseCurlMulti
-.
-Guzzle\Tests\Http\ClientTest::testExpandsUriTemplatesUsingConfig
-.
-Guzzle\Tests\Http\ClientTest::testGetDefaultUserAgent
-.
-Guzzle\Tests\Http\ClientTest::testHasDefaultOptionsHelperMethods
-.
-Guzzle\Tests\Http\ClientTest::testHeadCanUseOptions
-.
-Guzzle\Tests\Http\ClientTest::testOverwritesUserAgent
-.
-Guzzle\Tests\Http\ClientTest::testQueryStringsAreNotDoubleEncoded
-.
-Guzzle\Tests\Http\ClientTest::testQueryStringsAreNotDoubleEncodedUsingAbsolutePaths
-.
-Guzzle\Tests\Http\ClientTest::testThrowsExceptionForInvalidCertificate
-.
-Guzzle\Tests\Http\ClientTest::testUriArrayAllowsCustomTemplateVariables
-.
-Guzzle\Tests\Http\ClientTest::testUsesDefaultUserAgent
-.
-Guzzle\Tests\Http\CommaAggregatorTest::testAggregates
-.
-Guzzle\Tests\Http\CommaAggregatorTest::testEncodes
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testAccountsForMissingStdErr
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testAddsCustomCurlOptions
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testAllowsCurloptEncodingToBeSet
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testAllowsWireTransferInfoToBeEnabled
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testCanSendBodyAsString
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testCanSendPostBodyAsString
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testConstructorExpectsCurlResource
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testConstructorExpectsProperOptions
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testConstructorInitializesObject
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testCurlConfigurationOptionsAreSet
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testDeterminesIfResourceIsAvailable
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testEnsuresRequestsHaveResponsesWhenUpdatingFromTransfer
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #0
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #1
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #10
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #11
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #12
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #13
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #14
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #15
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #16
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #2
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #3
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #4
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #5
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #6
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #7
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #8
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #9
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryUsesSpecifiedProtocol
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testGetInfoWithoutDebugMode
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testParseCurlConfigConvertsStringKeysToConstantKeys with data set #0
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testParseCurlConfigConvertsStringKeysToConstantKeys with data set #1
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testParseCurlConfigConvertsStringKeysToConstantKeys with data set #2
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSeeksToBeginningOfStreamWhenSending
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsExpectHeaderWhenSizeIsGreaterThanCutoff
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostFieldsForNonPostRequests
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostFilesForNonPostRequests
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostRequestsWithFields
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostRequestsWithFiles
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostUploadsWithContentDispositionHeaders
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsRequestsWithNoBodyUsingContentLengthZero with data set #0
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsRequestsWithNoBodyUsingContentLengthZero with data set #1
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsRequestsWithNoBodyUsingContentLengthZero with data set #2
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testSetsCurloptEncodingWhenAcceptEncodingHeaderIsSet
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testStoresCurlErrorNumber
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testStoresStdErr
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testUploadsPutData
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testUploadsPutDataUsingChunkedEncodingWhenForced
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testUploadsPutDataUsingChunkedEncodingWhenLengthCannotBeDetermined
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testWrapsCurlOptions
-.
-Guzzle\Tests\Http\Curl\CurlHandleTest::testWrapsErrorsAndInfo
-.
-Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testAddingRequestsAddsToQueue
-.
-Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testConstructorSetsMaxHandles
-.
-Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testConstructorSetsSelectTimeout
-.
-Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testResetClearsState
-.
-Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testSendWillSendQueuedRequestsFirst
-.
-Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testTrimsDownMaxHandleCount
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testCatchesExceptionsBeforeSendingMultipleRequests
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testCatchesExceptionsBeforeSendingSingleRequest
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testCatchesExceptionsWhenRemovingQueuedRequests
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testCatchesExceptionsWhenRemovingQueuedRequestsBeforeSending
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testConstructorCreateMultiHandle
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testCurlErrorsAreCaught
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testDestructorClosesMultiHandle
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testDoesNotCatchRandomExceptionsThrownDuringPerform
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testDoesNotSendRequestsDecliningToBeSent
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testDoesNotThrowExceptionsWhenRequestsRecoverWithRetry
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testDoesNotThrowExceptionsWhenRequestsRecoverWithSuccess
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testHardResetReopensMultiHandle
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testRemovesConflictingTransferEncodingHeader
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testRemovesQueuedRequests
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testRemovesQueuedRequestsAddedInTransit
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testRequestBeforeSendIncludesContentLengthHeaderIfEmptyBody
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testRequestsCanBeAddedAndCounted
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testRequestsCanBeRemoved
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testSendsRequestsThroughCurl
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testSendsThroughCurlAndAggregatesRequestExceptions
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testThrowsMeaningfulExceptionsForCurlMultiErrors
-.
-Guzzle\Tests\Http\Curl\CurlMultiTest::testsResetRemovesRequestsAndResetsState
-.
-Guzzle\Tests\Http\Curl\CurlVersionTest::testCachesCurlInfo
-.
-Guzzle\Tests\Http\Curl\CurlVersionTest::testIsSingleton
-.
-Guzzle\Tests\Http\Curl\RequestMediatorTest::testDoesNotUseRequestResponseBodyWhenNotCustom
-.
-Guzzle\Tests\Http\Curl\RequestMediatorTest::testEmitsEvents
-.
-Guzzle\Tests\Http\DuplicateAggregatorTest::testAggregates
-.
-Guzzle\Tests\Http\DuplicateAggregatorTest::testEncodes
-.
-Guzzle\Tests\Http\EntityBodyTest::testAllowsCustomRewind
-.
-Guzzle\Tests\Http\EntityBodyTest::testCreatesMd5Checksum
-.
-Guzzle\Tests\Http\EntityBodyTest::testCustomRewindFunctionMustBeCallable
-.
-Guzzle\Tests\Http\EntityBodyTest::testDeterminesContentType
-.
-Guzzle\Tests\Http\EntityBodyTest::testFactory
-.
-Guzzle\Tests\Http\EntityBodyTest::testFactoryCanCreateFromObject
-.
-Guzzle\Tests\Http\EntityBodyTest::testFactoryCreatesTempStreamByDefault
-.
-Guzzle\Tests\Http\EntityBodyTest::testFactoryEnsuresObjectsHaveToStringMethod
-.
-Guzzle\Tests\Http\EntityBodyTest::testFactoryThrowsException
-.
-Guzzle\Tests\Http\EntityBodyTest::testGetTypeFormBodyFactoring
-.
-Guzzle\Tests\Http\EntityBodyTest::testHandlesCompression
-.
-Guzzle\Tests\Http\EntityBodyTest::testSeeksToOriginalPosAfterMd5
-.
-Guzzle\Tests\Http\Exception\CurlExceptionTest::testStoresCurlError
-.
-Guzzle\Tests\Http\Exception\ExceptionTest::testBadResponseException
-.
-Guzzle\Tests\Http\Exception\ExceptionTest::testCreatesClientErrorExceptionOnClientError
-.
-Guzzle\Tests\Http\Exception\ExceptionTest::testCreatesGenericErrorExceptionOnError
-.
-Guzzle\Tests\Http\Exception\ExceptionTest::testCreatesServerErrorExceptionOnServerError
-.
-Guzzle\Tests\Http\Exception\ExceptionTest::testRequestException
-.
-Guzzle\Tests\Http\Exception\MultiTransferExceptionTest::testAssociatesExceptionsWithRequests
-.
-Guzzle\Tests\Http\Exception\MultiTransferExceptionTest::testCanSetRequests
-.
-Guzzle\Tests\Http\Exception\MultiTransferExceptionTest::testHasRequests
-.
-Guzzle\Tests\Http\IoEmittingEntityBodyTest::testEmitsReadEvents
-.
-Guzzle\Tests\Http\IoEmittingEntityBodyTest::testEmitsWriteEvents
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testAddHeaders
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testAddingHeadersPreservesOriginalHeaderCase
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testAllowsHeaderToSetAsHeader
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testCanSetCustomHeaderFactory
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testCanStoreEmptyHeaders
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testGetHeader
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testGetHeaderLinesUsesGlue
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testGetHeaders
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testGetParams
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testHasHeader
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testRemoveHeader
-.
-Guzzle\Tests\Http\Message\AbstractMessageTest::testReturnsNullWhenHeaderIsNotFound
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testAddsPostFieldsAndSetsContentLength
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testAddsPostFilesAndSetsContentType
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testAllowsAtPrefixWhenAddingPostFiles
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testAllowsContentDispositionFieldsInPostUploadsWhenSettingInBulk
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testAllowsContentTypeInPostUploads
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testAllowsEmptyFields
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testAllowsNestedPostData
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testCanDisableRedirects
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testCanSendMultipleRequestsUsingASingleRequestObject
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testCanSetBodyWithoutOverridingContentType
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testConstructorConfiguresRequest
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testDoesNotCloneBody
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testFailsOnInvalidFiles
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testGuessesContentTypeOfPostUpload
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testHandlesEmptyStrings
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testHoldsPostFiles
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testPostRequestsUseApplicationXwwwForUrlEncodedForArrays
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testPostRequestsUseMultipartFormDataWithFiles
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testProcessMethodAddsContentType
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testRemovingPostFieldRebuildsPostFields
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testRequestBodyAddsContentLength
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testRequestBodyContainsPostFiles
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testRequestBodyDoesNotUseContentLengthWhenChunked
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testRequestHasMutableBody
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testRequestIncludesBodyInMessage
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testRequestIncludesPostBodyInMessageOnlyWhenNoPostFiles
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testSetPostFields
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testSetPostFiles
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testSetPostFilesThrowsExceptionWhenFileIsNotFound
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testSetStateToTransferWithEmptyBodySetsContentLengthToZero
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testSetsContentTypeWhenSettingBodyByGuessingFromEntityBody
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testSettingExpectHeaderCutoffChangesRequest
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testStrictRedirectsCanBeSpecifiedOnEntityEnclosingRequests
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testThrowsExceptionWhenContentLengthCannotBeDeterminedAndUsingHttp1
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testThrowsExceptionWhenNonStringsAreAddedToPost
-.
-Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testUsesChunkedTransferWhenBodyLengthCannotBeDetermined
-.
-Guzzle\Tests\Http\Message\HeaderTest::testAllowsArrayInConstructor
-.
-Guzzle\Tests\Http\Message\HeaderTest::testAllowsFalseyValues
-.
-Guzzle\Tests\Http\Message\HeaderTest::testCanBeIterated
-.
-Guzzle\Tests\Http\Message\HeaderTest::testCanRemoveValues
-.
-Guzzle\Tests\Http\Message\HeaderTest::testCanSearchForValues
-.
-Guzzle\Tests\Http\Message\HeaderTest::testConvertsToString
-.
-Guzzle\Tests\Http\Message\HeaderTest::testIsCountable
-.
-Guzzle\Tests\Http\Message\HeaderTest::testNormalizesGluedHeaders
-.
-Guzzle\Tests\Http\Message\HeaderTest::testParseParams with data set #0
-.
-Guzzle\Tests\Http\Message\HeaderTest::testParseParams with data set #1
-.
-Guzzle\Tests\Http\Message\HeaderTest::testParseParams with data set #2
-.
-Guzzle\Tests\Http\Message\HeaderTest::testParseParams with data set #3
-.
-Guzzle\Tests\Http\Message\HeaderTest::testParseParams with data set #4
-.
-Guzzle\Tests\Http\Message\HeaderTest::testStoresHeaderName
-.
-Guzzle\Tests\Http\Message\Header\HeaderFactoryTest::testCreatesBasicHeaders
-.
-Guzzle\Tests\Http\Message\Header\HeaderFactoryTest::testCreatesSpecificHeaders
-.
-Guzzle\Tests\Http\Message\Header\LinkTest::testCanAddLink
-.
-Guzzle\Tests\Http\Message\Header\LinkTest::testCanParseLinksWithCommas
-.
-Guzzle\Tests\Http\Message\Header\LinkTest::testParsesLinks
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testBugPathIncorrectlyHandled
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCachesSingletonInstance
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddBasicAuth
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddCookies
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddDigestAuth
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddEvents
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddEventsWithPriority
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddPlugins
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddQueryString
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddRequestParams
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddSslCert
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddSslCertPassword
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddSslKey
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanAddSslKeyPassword
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanChangeSaveToLocation
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanDisableExceptions
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanDisableExceptionsWithErrorListener
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanDisableRedirects
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetBodyOption
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetConnectTimeoutOption
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetDebug
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetDefaultHeadersOptions
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetDefaultQueryString
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetHeadersOption
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetProxy
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetTimeoutOption
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetVerifyToOff
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetVerifyToOn
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetVerifyToPath
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testClonesRequestsWithMethodWithClient
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testClonesRequestsWithMethodWithClientWithEntityEnclosingChange
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testClonesRequestsWithMethodWithoutClient
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesBodyWithoutZeroString
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesFromMessage
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesFromParts
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesHeadAndDeleteRequests
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesHttpMessagesWithBodiesAndNormalizesLineEndings
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesNewGetRequests
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesNewPostRequestWithFields
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesNewPutRequestWithBody
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesNewTraceRequest
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesOptionsRequests
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesProperTransferEncodingRequests
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesPutRequests
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testHandlesChunkedTransferEncoding
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testProperlyDealsWithDuplicateHeaders
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testValidatesBodyOption
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testValidatesInput with data set #0
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testValidatesInput with data set #1
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testValidatesInput with data set #2
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testValidatesInput with data set #3
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testValidatesInput with data set #4
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testValidatesInput with data set #5
-.
-Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testValidatesInput with data set #6
-.
-Guzzle\Tests\Http\Message\PostFileTest::testCanChangeContentType
-.
-Guzzle\Tests\Http\Message\PostFileTest::testCanChangeFieldName
-.
-Guzzle\Tests\Http\Message\PostFileTest::testConstructorConfiguresPostFile
-.
-Guzzle\Tests\Http\Message\PostFileTest::testContentDispositionFilePathIsStripped
-.
-Guzzle\Tests\Http\Message\PostFileTest::testEnsuresFileIsReadable
-.
-Guzzle\Tests\Http\Message\PostFileTest::testRemovesLeadingAtSymbolFromPath
-.
-Guzzle\Tests\Http\Message\PostFileTest::testReturnsCurlValueString
-.
-Guzzle\Tests\Http\Message\PostFileTest::testReturnsCurlValueStringAndPostname
-.
-Guzzle\Tests\Http\Message\RequestTest::testAllowsFilenameForDownloadingContent
-.
-Guzzle\Tests\Http\Message\RequestTest::testCanChangePortThroughScheme
-.
-Guzzle\Tests\Http\Message\RequestTest::testCanOverrideUnsuccessfulResponses
-.
-Guzzle\Tests\Http\Message\RequestTest::testCanRetrieveUrlObject
-.
-Guzzle\Tests\Http\Message\RequestTest::testCanSendCustomRequests
-.
-Guzzle\Tests\Http\Message\RequestTest::testCanShortCircuitErrorHandling
-.
-Guzzle\Tests\Http\Message\RequestTest::testClonedRequestsUseNewInternalState
-.
-Guzzle\Tests\Http\Message\RequestTest::testConstructorBuildsRequestWithArrayHeaders
-.
-Guzzle\Tests\Http\Message\RequestTest::testConstructorBuildsRequestWithCollectionHeaders
-.
-Guzzle\Tests\Http\Message\RequestTest::testConstructorBuildsRequestWithNoHeaders
-.
-Guzzle\Tests\Http\Message\RequestTest::testConstructorHandlesNonBasicAuth
-.
-Guzzle\Tests\Http\Message\RequestTest::testDescribesEvents
-.
-Guzzle\Tests\Http\Message\RequestTest::testEnsuresFileCanBeCreated
-.
-Guzzle\Tests\Http\Message\RequestTest::testGetEventDispatcher
-.
-Guzzle\Tests\Http\Message\RequestTest::testGetResourceUri
-.
-Guzzle\Tests\Http\Message\RequestTest::testGetResponse
-.
-Guzzle\Tests\Http\Message\RequestTest::testHoldsCookies
-.
-Guzzle\Tests\Http\Message\RequestTest::testManagesQuery
-.
-Guzzle\Tests\Http\Message\RequestTest::testPermitsFalsyComponents
-.
-Guzzle\Tests\Http\Message\RequestTest::testRecognizesBasicAuthCredentialsInUrls
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestCanBeSentUsingCurl
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestCanHaveManuallySetResponseBody
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHandlesAuthorization
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHasHost
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHasMethod
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHasMutableUrl
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHasPath
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHasPort
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHasProtocol
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHasScheme
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestHasState
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestStringsIncludeAuth
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestThrowsExceptionOnBadResponse
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestThrowsExceptionWhenSetToCompleteWithNoResponse
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestsCanBeConvertedToRawMessageStrings
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestsManageClients
-.
-Guzzle\Tests\Http\Message\RequestTest::testRequestsRequireClients
-.
-Guzzle\Tests\Http\Message\RequestTest::testSend
-.
-Guzzle\Tests\Http\Message\RequestTest::testSetManualResponse
-.
-Guzzle\Tests\Http\Message\RequestTest::testThrowsExceptionsWhenUnsuccessfulResponseIsReceivedByDefault
-.
-Guzzle\Tests\Http\Message\RequestTest::testUnresolvedRedirectsReturnResponse
-.
-Guzzle\Tests\Http\Message\RequestTest::testUsesCustomResponseBodyWhenItIsCustom
-.
-Guzzle\Tests\Http\Message\RequestTest::testValidatesAuth
-.
-Guzzle\Tests\Http\MimetypesTest::testGetsFromCaseInsensitiveFilename
-.
-Guzzle\Tests\Http\MimetypesTest::testGetsFromExtension
-.
-Guzzle\Tests\Http\MimetypesTest::testGetsFromFilename
-.
-Guzzle\Tests\Http\MimetypesTest::testReturnsNullWhenNoMatchFound
-.
-Guzzle\Tests\Http\PhpAggregatorTest::testEncodes
-.
-Guzzle\Tests\Http\QueryStringTest::testAllowsBlankQueryStringValues
-.
-Guzzle\Tests\Http\QueryStringTest::testAllowsFalsyQueryStringValues
-.
-Guzzle\Tests\Http\QueryStringTest::testAllowsMultipleValuesPerKey
-.
-Guzzle\Tests\Http\QueryStringTest::testAllowsNestedQueryData
-.
-Guzzle\Tests\Http\QueryStringTest::testAllowsZeroValues
-.
-Guzzle\Tests\Http\QueryStringTest::testConvertsPlusSymbolsToSpaces
-.
-Guzzle\Tests\Http\QueryStringTest::testFromStringDoesntMangleZeroes
-.
-Guzzle\Tests\Http\QueryStringTest::testFromStringDoesntStripTrailingEquals
-.
-Guzzle\Tests\Http\QueryStringTest::testFromStringIgnoresQuestionMark
-.
-Guzzle\Tests\Http\QueryStringTest::testGetFieldSeparator
-.
-Guzzle\Tests\Http\QueryStringTest::testGetValueSeparator
-.
-Guzzle\Tests\Http\QueryStringTest::testGuessesIfDuplicateAggregatorShouldBeUsed
-.
-Guzzle\Tests\Http\QueryStringTest::testGuessesIfDuplicateAggregatorShouldBeUsedAndChecksForPhpStyle
-.
-Guzzle\Tests\Http\QueryStringTest::testIsUrlEncoding
-.
-Guzzle\Tests\Http\QueryStringTest::testParsesQueryStrings with data set #0
-.
-Guzzle\Tests\Http\QueryStringTest::testParsesQueryStrings with data set #1
-.
-Guzzle\Tests\Http\QueryStringTest::testParsesQueryStrings with data set #2
-.
-Guzzle\Tests\Http\QueryStringTest::testParsesQueryStrings with data set #3
-.
-Guzzle\Tests\Http\QueryStringTest::testParsesQueryStrings with data set #4
-.
-Guzzle\Tests\Http\QueryStringTest::testParsesQueryStrings with data set #5
-.
-Guzzle\Tests\Http\QueryStringTest::testProperlyDealsWithDuplicateQueryStringValues
-.
-Guzzle\Tests\Http\QueryStringTest::testSetFieldSeparator
-.
-Guzzle\Tests\Http\QueryStringTest::testSetValueSeparator
-.
-Guzzle\Tests\Http\QueryStringTest::testToString
-.
-Guzzle\Tests\Http\QueryStringTest::testUrlEncode
-.
-Guzzle\Tests\Http\ReadLimitEntityBodyTest::testAllowsBoundedSeek
-.
-Guzzle\Tests\Http\ReadLimitEntityBodyTest::testClaimsConsumedWhenReadLimitIsReached
-.
-Guzzle\Tests\Http\ReadLimitEntityBodyTest::testContentLengthIsBounded
-.
-Guzzle\Tests\Http\ReadLimitEntityBodyTest::testContentMd5IsBasedOnSubsection
-.
-Guzzle\Tests\Http\ReadLimitEntityBodyTest::testReadsOnlySubsetOfData
-.
-Guzzle\Tests\Http\ReadLimitEntityBodyTest::testReturnsSubsetOfEmptyBodyWhenCastToString
-.
-Guzzle\Tests\Http\ReadLimitEntityBodyTest::testReturnsSubsetWhenCastToString
-.
-Guzzle\Tests\Http\ReadLimitEntityBodyTest::testSeeksWhenConstructed
-.
-Guzzle\Tests\Http\UrlTest::testAddsQueryStringIfPresent
-.
-Guzzle\Tests\Http\UrlTest::testAddsToPath
-.
-Guzzle\Tests\Http\UrlTest::testAllowsFalsyUrlParts
-.
-Guzzle\Tests\Http\UrlTest::testBuildsRelativeUrlsWithFalsyParts
-.
-Guzzle\Tests\Http\UrlTest::testCloneCreatesNewInternalObjects
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #0
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #1
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #10
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #11
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #12
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #13
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #14
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #15
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #2
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #3
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #4
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #5
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #6
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #7
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #8
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrls with data set #9
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #0
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #1
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #10
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #11
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #12
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #13
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #14
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #15
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #16
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #17
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #18
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #19
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #2
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #20
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #21
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #3
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #4
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #5
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #6
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #7
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #8
-.
-Guzzle\Tests\Http\UrlTest::testCombinesUrlsUsingRfc3986 with data set #9
-.
-Guzzle\Tests\Http\UrlTest::testConvertsSpecialCharsInPathWhenCastingToString
-.
-Guzzle\Tests\Http\UrlTest::testEmptyUrl
-.
-Guzzle\Tests\Http\UrlTest::testHandlesPathsCorrectly
-.
-Guzzle\Tests\Http\UrlTest::testHasGettersAndSetters
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #0
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #1
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #10
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #11
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #12
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #13
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #14
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #15
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #2
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #3
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #4
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #5
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #6
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #7
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #8
-.
-Guzzle\Tests\Http\UrlTest::testNormalizesPaths with data set #9
-.
-Guzzle\Tests\Http\UrlTest::testPortIsDeterminedFromScheme
-.
-Guzzle\Tests\Http\UrlTest::testSetQueryAcceptsArray
-.
-Guzzle\Tests\Http\UrlTest::testSettingHostWithPortModifiesPort
-.
-Guzzle\Tests\Http\UrlTest::testUrlStoresParts
-.
-Guzzle\Tests\Http\UrlTest::testValidatesUrlCanBeParsed
-.
-Guzzle\Tests\Http\UrlTest::testValidatesUrlPartsInFactory
-.
-Guzzle\Tests\Inflection\InflectorTest::testCamel
-.
-Guzzle\Tests\Inflection\InflectorTest::testReturnsDefaultInstance
-.
-Guzzle\Tests\Inflection\InflectorTest::testSnake
-.
-Guzzle\Tests\Inflection\MemoizingInflectorTest::testProtectsAgainstCacheOverflow
-.
-Guzzle\Tests\Inflection\MemoizingInflectorTest::testUsesCache
-.
-Guzzle\Tests\Inflection\PreComputedInflectorTest::testMirrorsPrecomputedValues
-.
-Guzzle\Tests\Inflection\PreComputedInflectorTest::testMirrorsPrecomputedValuesByMerging
-.
-Guzzle\Tests\Inflection\PreComputedInflectorTest::testUsesPreComputedHash
-.
-Guzzle\Tests\Iterator\AppendIteratorTest::testTraversesIteratorsInOrder
-.
-Guzzle\Tests\Iterator\ChunkedIteratorTest::mustNotTerminateWithTraversable
-.
-Guzzle\Tests\Iterator\ChunkedIteratorTest::sizeLowerZeroThrowsException
-.
-Guzzle\Tests\Iterator\ChunkedIteratorTest::sizeOfZeroMakesIteratorInvalid
-.
-Guzzle\Tests\Iterator\ChunkedIteratorTest::testChunksIterator
-.
-Guzzle\Tests\Iterator\ChunkedIteratorTest::testChunksIteratorWithOddValues
-.
-Guzzle\Tests\Iterator\FilterIteratorTest::testFiltersValues
-.
-Guzzle\Tests\Iterator\FilterIteratorTest::testValidatesCallable
-.
-Guzzle\Tests\Iterator\MapIteratorTest::testFiltersValues
-.
-Guzzle\Tests\Iterator\MapIteratorTest::testValidatesCallable
-.
-Guzzle\Tests\Iterator\MethodProxyIteratorTest::testProxiesMagicCallsToInnermostIterator
-.
-Guzzle\Tests\Iterator\MethodProxyIteratorTest::testUsesInnerIterator
-.
-Guzzle\Tests\Log\ArrayLogAdapterTest::testClearLog
-.
-Guzzle\Tests\Log\ArrayLogAdapterTest::testLog
-.
-Guzzle\Tests\Log\ClosureLogAdapterTest::testClosure
-.
-Guzzle\Tests\Log\ClosureLogAdapterTest::testThrowsExceptionWhenNotCallable
-.
-Guzzle\Tests\Log\MessageFormatterTest::testAddsTimestamp
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #0
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #1
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #10
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #11
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #12
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #13
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #14
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #15
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #16
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #17
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #18
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #19
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #2
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #3
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #4
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #5
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #6
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #7
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #8
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsMessages with data set #9
-.
-Guzzle\Tests\Log\MessageFormatterTest::testFormatsRequestsAndResponses
-.
-Guzzle\Tests\Log\MessageFormatterTest::testInjectsTotalTime
-.
-Guzzle\Tests\Log\MessageFormatterTest::testUsesEmptyStringWhenNoHandleAndNoResponse
-.
-Guzzle\Tests\Log\MessageFormatterTest::testUsesResponseWhenNoHandleAndGettingCurlInformation
-.
-Guzzle\Tests\Log\PsrLogAdapterTest::testLogsMessagesToAdaptedObject
-.
-Guzzle\Tests\Log\Zf2LogAdapterTest::testExposesAdaptedLogObject
-.
-Guzzle\Tests\Log\Zf2LogAdapterTest::testLogsMessagesToAdaptedObject
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #0
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #1
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #10
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #2
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #3
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #4
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #5
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #6
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #7
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #8
-.
-Guzzle\Tests\Message\HeaderComparisonTest::testComparesHeaders with data set #9
-.
-Guzzle\Tests\Message\ResponseTest::testCalculatesAge
-.
-Guzzle\Tests\Message\ResponseTest::testCalculatesFreshness
-.
-Guzzle\Tests\Message\ResponseTest::testComparesContentType
-.
-Guzzle\Tests\Message\ResponseTest::testConstructor
-.
-Guzzle\Tests\Message\ResponseTest::testDeterminesIfItCanBeCached
-.
-Guzzle\Tests\Message\ResponseTest::testDeterminesIfItCanValidate
-.
-Guzzle\Tests\Message\ResponseTest::testDeterminesResponseMaxAge
-.
-Guzzle\Tests\Message\ResponseTest::testFactory
-.
-Guzzle\Tests\Message\ResponseTest::testFactoryCanCreateHeadResponses
-.
-Guzzle\Tests\Message\ResponseTest::testFactoryRequiresMessage
-.
-Guzzle\Tests\Message\ResponseTest::testGetAcceptRanges
-.
-Guzzle\Tests\Message\ResponseTest::testGetAllow
-.
-Guzzle\Tests\Message\ResponseTest::testGetBody
-.
-Guzzle\Tests\Message\ResponseTest::testGetCacheControl
-.
-Guzzle\Tests\Message\ResponseTest::testGetContentDisposition
-.
-Guzzle\Tests\Message\ResponseTest::testGetContentEncoding
-.
-Guzzle\Tests\Message\ResponseTest::testGetContentLanguage
-.
-Guzzle\Tests\Message\ResponseTest::testGetContentLength
-.
-Guzzle\Tests\Message\ResponseTest::testGetContentLocation
-.
-Guzzle\Tests\Message\ResponseTest::testGetContentMd5
-.
-Guzzle\Tests\Message\ResponseTest::testGetContentRange
-.
-Guzzle\Tests\Message\ResponseTest::testGetContentType
-.
-Guzzle\Tests\Message\ResponseTest::testGetDate
-.
-Guzzle\Tests\Message\ResponseTest::testGetEtag
-.
-Guzzle\Tests\Message\ResponseTest::testGetExpires
-.
-Guzzle\Tests\Message\ResponseTest::testGetLastModified
-.
-Guzzle\Tests\Message\ResponseTest::testGetLocation
-.
-Guzzle\Tests\Message\ResponseTest::testGetMessage
-.
-Guzzle\Tests\Message\ResponseTest::testGetMultipleSetCookie
-.
-Guzzle\Tests\Message\ResponseTest::testGetPragma
-.
-Guzzle\Tests\Message\ResponseTest::testGetProxyAuthenticate
-.
-Guzzle\Tests\Message\ResponseTest::testGetRawHeaders
-.
-Guzzle\Tests\Message\ResponseTest::testGetServer
-.
-Guzzle\Tests\Message\ResponseTest::testGetSetCookie
-.
-Guzzle\Tests\Message\ResponseTest::testGetSetCookieNormalizesHeaders
-.
-Guzzle\Tests\Message\ResponseTest::testGetTrailer
-.
-Guzzle\Tests\Message\ResponseTest::testGetTransferEncoding
-.
-Guzzle\Tests\Message\ResponseTest::testGetVary
-.
-Guzzle\Tests\Message\ResponseTest::testGetWarning
-.
-Guzzle\Tests\Message\ResponseTest::testHandlesProtocols
-.
-Guzzle\Tests\Message\ResponseTest::testHandlesStatusAndStatusCodes
-.
-Guzzle\Tests\Message\ResponseTest::testHasTransferInfo
-.
-Guzzle\Tests\Message\ResponseTest::testIsClientError
-.
-Guzzle\Tests\Message\ResponseTest::testIsError
-.
-Guzzle\Tests\Message\ResponseTest::testIsInformational
-.
-Guzzle\Tests\Message\ResponseTest::testIsRedirect
-.
-Guzzle\Tests\Message\ResponseTest::testIsServerError
-.
-Guzzle\Tests\Message\ResponseTest::testIsSuccessful
-.
-Guzzle\Tests\Message\ResponseTest::testManagesStatusCode
-.
-Guzzle\Tests\Message\ResponseTest::testParsesJsonResponses
-.
-Guzzle\Tests\Message\ResponseTest::testParsesXmlResponses
-.
-Guzzle\Tests\Message\ResponseTest::testPreventsComplexExternalEntities
-.
-Guzzle\Tests\Message\ResponseTest::testResponseDeterminesIfMethodIsAllowedBaseOnAllowHeader
-.
-Guzzle\Tests\Message\ResponseTest::testResponseIsSerializable
-.
-Guzzle\Tests\Message\ResponseTest::testReturnsConnectionHeader
-.
-Guzzle\Tests\Message\ResponseTest::testReturnsHeaders
-.
-Guzzle\Tests\Message\ResponseTest::testReturnsViaHeader
-.
-Guzzle\Tests\Message\ResponseTest::testReturnsWwwAuthenticateHeader
-.
-Guzzle\Tests\Message\ResponseTest::testThrowsExceptionWhenFailsToParseJsonResponse
-.
-Guzzle\Tests\Message\ResponseTest::testThrowsExceptionWhenFailsToParseXmlResponse
-.
-Guzzle\Tests\Message\ResponseTest::test__toString
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #0
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #1
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #10
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #11
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #12
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #13
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #14
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #15
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #16
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #2
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #3
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #4
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #5
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #6
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #7
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #8
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #9
-.
-Guzzle\Tests\Parser\Cookie\CookieParserTest::testUrlDecodesCookies
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesRequests with data set #0
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesRequests with data set #1
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesRequests with data set #2
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesRequests with data set #3
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesRequests with data set #4
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesRequests with data set #5
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesRequestsWithMissingProtocol
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesRequestsWithMissingVersion
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesResponses with data set #0
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesResponses with data set #1
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesResponses with data set #2
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesResponses with data set #3
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesResponses with data set #4
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesResponses with data set #5
-.
-Guzzle\Tests\Parser\Message\MessageParserTest::testParsesResponsesWithMissingReasonPhrase
-.
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesRequests with data set #0
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesRequests with data set #1
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesRequests with data set #2
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesRequests with data set #3
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesRequests with data set #4
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesRequests with data set #5
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesResponses with data set #0
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesResponses with data set #1
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesResponses with data set #2
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesResponses with data set #3
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesResponses with data set #4
-S
-Guzzle\Tests\Parser\Message\PeclHttpMessageParserTest::testParsesResponses with data set #5
-S
-Guzzle\Tests\Parser\ParserRegistryTest::testReturnsLazyLoadedDefault
-.
-Guzzle\Tests\Parser\ParserRegistryTest::testReturnsNullWhenNotFound
-.
-Guzzle\Tests\Parser\ParserRegistryTest::testStoresObjects
-.
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #0
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #1
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #10
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #11
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #12
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #13
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #14
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #15
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #16
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #17
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #18
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #19
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #2
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #20
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #21
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #22
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #23
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #24
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #25
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #26
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #27
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #28
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #29
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #3
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #30
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #31
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #32
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #33
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #34
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #35
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #36
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #37
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #38
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #39
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #4
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #40
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #41
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #42
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #43
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #44
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #45
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #46
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #47
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #48
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #49
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #5
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #50
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testAddsGzipFilterIfAcceptHeaderIsPresent
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testAddsProxy
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testAddsProxyByProtocol
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testAddsTimeout
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testCanHandleExceptionsUsingEvents
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testCanSetPasswordWhenSettingCert
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testDebugAttributeWritesStreamInfoToBuffer
 S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #51
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testDebugAttributeWritesStreamInfoToTempBufferByDefault
 S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #52
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #53
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #54
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #55
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #56
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #57
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #58
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #59
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #6
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #60
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #61
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #62
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #63
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #64
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #65
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #66
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #67
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #68
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #69
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #7
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #70
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #71
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #72
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #73
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #8
-S
-Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #9
-S
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testAllowsNestedArrayExpansion
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #0
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #1
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #10
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #11
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #12
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #13
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #14
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #15
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #16
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #17
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #18
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #19
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #2
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #20
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #21
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #22
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #23
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #24
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #25
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #26
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #27
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #28
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #29
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #3
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #30
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #31
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #32
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #33
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #34
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #35
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #36
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #37
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #38
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #39
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #4
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #40
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #41
-.
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #42
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testDrainsResponseIntoSaveToBody
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testDrainsResponseIntoSaveToBodyAtPath
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testDrainsResponseIntoTempStream
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testEmitsAfterSendEvent
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testEnsuresThatStreamContextIsAnArray
+F
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testEnsuresTheHttpProtocol
+F
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testHandlesMultipleHeadersOfSameName
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #43
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testPerformsShallowMergeOfCustomContextOptions
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testReturnsResponseForSuccessfulRequest
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testStreamAttributeKeepsStreamOpen
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testThrowsExceptionsCaughtDuringTransfer
+F
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testVerifiesCertIfValidPath
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #44
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testVerifiesVerifyIsValidIfPath
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #45
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testVerifyCanBeDisabled
+E
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testVerifyCanBeSetToPath
+E
+GuzzleHttp\Tests\Adapter\StreamingProxyAdapterTest::testSendsWithDefaultAdapter
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #46
+GuzzleHttp\Tests\Adapter\StreamingProxyAdapterTest::testSendsWithStreamingAdapter
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #47
+GuzzleHttp\Tests\Adapter\TransactionTest::testHasRequestAndClient
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #48
+GuzzleHttp\Tests\ClientTest::testAddsDefaultUserAgentHeaderWithDefaultOptions
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #49
+GuzzleHttp\Tests\ClientTest::testAddsDefaultUserAgentHeaderWithoutDefaultOptions
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #5
+GuzzleHttp\Tests\ClientTest::testCanDisableAuthPerRequest
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #50
+GuzzleHttp\Tests\ClientTest::testCanSetCustomParallelAdapter
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #51
+GuzzleHttp\Tests\ClientTest::testCanSetDefaultValues
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #52
+GuzzleHttp\Tests\ClientTest::testCanSetRelativeUrlStartingWithHttp
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #53
+GuzzleHttp\Tests\ClientTest::testCanSpecifyAdapter
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #54
+GuzzleHttp\Tests\ClientTest::testCanSpecifyBaseUrl
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #55
+GuzzleHttp\Tests\ClientTest::testCanSpecifyBaseUrlUriTemplate
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #56
+GuzzleHttp\Tests\ClientTest::testCanSpecifyEmitter
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #57
+GuzzleHttp\Tests\ClientTest::testCanSpecifyMessageFactory
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #58
+GuzzleHttp\Tests\ClientTest::testClientHandlesErrorsDuringBeforeSend
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #59
+GuzzleHttp\Tests\ClientTest::testClientHandlesErrorsDuringBeforeSendAndThrowsIfUnhandled
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #6
+GuzzleHttp\Tests\ClientTest::testClientMergesDefaultOptionsWithRequestOptions
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #60
+GuzzleHttp\Tests\ClientTest::testClientProvidesMethodShortcut with data set #0
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #61
+GuzzleHttp\Tests\ClientTest::testClientProvidesMethodShortcut with data set #1
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #62
+GuzzleHttp\Tests\ClientTest::testClientProvidesMethodShortcut with data set #2
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #63
+GuzzleHttp\Tests\ClientTest::testClientProvidesMethodShortcut with data set #3
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #64
+GuzzleHttp\Tests\ClientTest::testClientProvidesMethodShortcut with data set #4
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #65
+GuzzleHttp\Tests\ClientTest::testClientProvidesMethodShortcut with data set #5
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #66
+GuzzleHttp\Tests\ClientTest::testClientProvidesMethodShortcut with data set #6
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #67
+GuzzleHttp\Tests\ClientTest::testClientSendsRequests
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #68
+GuzzleHttp\Tests\ClientTest::testClientUsesDefaultAdapterWhenNoneIsSet
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #69
+GuzzleHttp\Tests\ClientTest::testClientWrapsExceptions
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #7
+GuzzleHttp\Tests\ClientTest::testEnsuresResponseIsPresentAfterSending
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #70
+GuzzleHttp\Tests\ClientTest::testHasDeprecatedGetEmitter
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #71
+GuzzleHttp\Tests\ClientTest::testProvidesDefaultUserAgent
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #72
+GuzzleHttp\Tests\ClientTest::testSendingRequestCanBeIntercepted
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #73
+GuzzleHttp\Tests\ClientTest::testSendsAllInParallel
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #8
+GuzzleHttp\Tests\ClientTest::testSettingAbsoluteUriTemplateOverridesBaseUrl
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #9
+GuzzleHttp\Tests\ClientTest::testSettingAbsoluteUrlOverridesBaseUrl
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testParsesExpressions with data set #0
+GuzzleHttp\Tests\ClientTest::testUsesBaseUrlCombinedWithProvidedUrl
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testParsesExpressions with data set #1
+GuzzleHttp\Tests\ClientTest::testUsesBaseUrlCombinedWithProvidedUrlViaUriTemplate
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testParsesExpressions with data set #2
+GuzzleHttp\Tests\ClientTest::testUsesBaseUrlWhenNoUrlIsSet
 .
-Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testSetRegex
+GuzzleHttp\Tests\ClientTest::testUsesDefaultDefaultOptions
 .
-Guzzle\Tests\Plugin\Backoff\AbstractBackoffStrategyTest::testHasNext
+GuzzleHttp\Tests\ClientTest::testUsesProvidedDefaultOptions
 .
-Guzzle\Tests\Plugin\Backoff\AbstractBackoffStrategyTest::testReturnsFalse
+GuzzleHttp\Tests\ClientTest::testUsesProxyEnvironmentVariables
 .
-Guzzle\Tests\Plugin\Backoff\AbstractBackoffStrategyTest::testReturnsFalseWhenNullAndNoNext
+GuzzleHttp\Tests\CollectionTest::testAddParamsByMerging
 .
-Guzzle\Tests\Plugin\Backoff\AbstractBackoffStrategyTest::testReturnsNextValueWhenNullOrTrue
+GuzzleHttp\Tests\CollectionTest::testAllowsFunctionalFilter
 .
-Guzzle\Tests\Plugin\Backoff\AbstractBackoffStrategyTest::testReturnsZeroWhenDecisionMakerReturnsTrueButNoFurtherStrategiesAreInTheChain
+GuzzleHttp\Tests\CollectionTest::testAllowsFunctionalMapping
 .
-Guzzle\Tests\Plugin\Backoff\AbstractBackoffStrategyTest::testReturnsZeroWhenNoNextAndGotNull
+GuzzleHttp\Tests\CollectionTest::testCanAddValuesToExistingKeysByUsingArray
 .
-Guzzle\Tests\Plugin\Backoff\AbstractBackoffStrategyTest::testSkipsOtherDecisionsInChainWhenOneReturnsTrue
+GuzzleHttp\Tests\CollectionTest::testCanAppendToNestedPathValues
 .
-Guzzle\Tests\Plugin\Backoff\BackoffLoggerTest::testCanSetTemplate
+GuzzleHttp\Tests\CollectionTest::testCanClearAllDataOrSpecificKeys
 .
-Guzzle\Tests\Plugin\Backoff\BackoffLoggerTest::testHasEventList
+GuzzleHttp\Tests\CollectionTest::testCanReplaceAllData
 .
-Guzzle\Tests\Plugin\Backoff\BackoffLoggerTest::testLogsEvents
+GuzzleHttp\Tests\CollectionTest::testCanSetNestedPathValueThatDoesNotExist
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testCreatesDefaultExponentialBackoffPlugin
+GuzzleHttp\Tests\CollectionTest::testCanSetNestedPathValueThatExists
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testDoesNotRetryUnlessStrategyReturnsNumber
+GuzzleHttp\Tests\CollectionTest::testChecksIfHasKey
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testDoesNotSeekOnRequestsWithNoBodyWhenRetrying
+GuzzleHttp\Tests\CollectionTest::testChecksIfHasValue
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testDoesNothingWhenNotRetryingAndPollingRequest
+GuzzleHttp\Tests\CollectionTest::testConstructorCanBeCalledWithNoParams
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testFailsOnTruncation
+GuzzleHttp\Tests\CollectionTest::testConstructorCanBeCalledWithParams
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testHasEventList
+GuzzleHttp\Tests\CollectionTest::testFalseyKeysStillDescend
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testRetriesPooledRequestsUsingDelayAndPollingEvent
+GuzzleHttp\Tests\CollectionTest::testGetPath with data set #0
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testRetriesRequests
+GuzzleHttp\Tests\CollectionTest::testGetPath with data set #1
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testRetriesRequestsWhenInParallel
+GuzzleHttp\Tests\CollectionTest::testGetPath with data set #2
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testSeeksToBeginningOfRequestBodyWhenRetrying
+GuzzleHttp\Tests\CollectionTest::testGetPath with data set #3
 .
-Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testUpdatesRequestForRetry
+GuzzleHttp\Tests\CollectionTest::testGetPath with data set #4
 .
-Guzzle\Tests\Plugin\Backoff\CallbackBackoffStrategyTest::testEnsuresIsCallable
+GuzzleHttp\Tests\CollectionTest::testGetPath with data set #5
 .
-Guzzle\Tests\Plugin\Backoff\CallbackBackoffStrategyTest::testRetriesWithCallable
+GuzzleHttp\Tests\CollectionTest::testGetPath with data set #6
 .
-Guzzle\Tests\Plugin\Backoff\ConstantBackoffStrategyTest::testRetriesWithConstantDelay
+GuzzleHttp\Tests\CollectionTest::testHandlesMergingInDisparateDataSources
 .
-Guzzle\Tests\Plugin\Backoff\CurlBackoffStrategyTest::testIgnoresNonErrors
+GuzzleHttp\Tests\CollectionTest::testImplementsArrayAccess
 .
-Guzzle\Tests\Plugin\Backoff\CurlBackoffStrategyTest::testRetriesWithExponentialDelay
+GuzzleHttp\Tests\CollectionTest::testImplementsCount
 .
-Guzzle\Tests\Plugin\Backoff\ExponentialBackoffStrategyTest::testRetriesWithExponentialDelay
+GuzzleHttp\Tests\CollectionTest::testImplementsIteratorAggregate
 .
-Guzzle\Tests\Plugin\Backoff\HttpBackoffStrategyTest::testAllowsCustomCodes
+GuzzleHttp\Tests\CollectionTest::testOverridesSettings
 .
-Guzzle\Tests\Plugin\Backoff\HttpBackoffStrategyTest::testIgnoresNonErrors
+GuzzleHttp\Tests\CollectionTest::testOverwriteWithCollection
 .
-Guzzle\Tests\Plugin\Backoff\HttpBackoffStrategyTest::testRetriesWhenCodeMatches
+GuzzleHttp\Tests\CollectionTest::testOverwriteWithTraversable
 .
-Guzzle\Tests\Plugin\Backoff\LinearBackoffStrategyTest::testRetriesWithLinearDelay
+GuzzleHttp\Tests\CollectionTest::testPreparesFromConfig
 .
-Guzzle\Tests\Plugin\Backoff\ReasonPhraseBackoffStrategyTest::testIgnoresNonErrors
+GuzzleHttp\Tests\CollectionTest::testProvidesKeys
 .
-Guzzle\Tests\Plugin\Backoff\ReasonPhraseBackoffStrategyTest::testRetriesWhenCodeMatches
+GuzzleHttp\Tests\CollectionTest::testRetrievesNestedKeysUsingPath
 .
-Guzzle\Tests\Plugin\Backoff\TruncatedBackoffStrategyTest::testRetriesWhenLessThanMax
+GuzzleHttp\Tests\CollectionTest::testReturnsCorrectData with data set #0
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testAddsCallbackCollaborators
+GuzzleHttp\Tests\CollectionTest::testReturnsCorrectData with data set #1
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testAddsDefaultCollaborators
+GuzzleHttp\Tests\CollectionTest::testReturnsCorrectData with data set #2
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testAddsDefaultStorage
+GuzzleHttp\Tests\CollectionTest::testReturnsCorrectData with data set #3
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testAutoPurgesRequests
+GuzzleHttp\Tests\CollectionTest::testReturnsCorrectData with data set #4
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testCachesResponsesWhenCacheable
+GuzzleHttp\Tests\CollectionTest::testVerifiesNestedPathIsValidAtExactLevel
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testCanPassCacheAsOnlyArgumentToConstructor
+GuzzleHttp\Tests\CollectionTest::testVerifiesThatNestedPathIsValidAtAnyLevel
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #0
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testAddsCookiesFromResponseWithRequest
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #1
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testCanConvertToAndLoadFromArray
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #2
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testCreatesFromArray
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #3
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testDeletesCookiesByName
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #4
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testDoesAddValidCookies
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #5
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testDoesNotAddIncompleteCookies
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #6
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testOverwritesCookiesThatAreOlderOrDiscardable
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #7
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testOverwritesCookiesThatHaveChanged
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyFailedRequest with data set #8
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testQuotesBadCookieValues
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyRequest with data set #0
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testRemovesSelectively
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyRequest with data set #1
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testRemovesTemporaryCookies
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyRequest with data set #2
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testReturnsCookiesMatchingRequests with data set #0
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyRequest with data set #3
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testReturnsCookiesMatchingRequests with data set #1
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyRequest with data set #4
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testReturnsCookiesMatchingRequests with data set #2
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testChecksIfResponseCanSatisfyRequest with data set #5
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testReturnsCookiesMatchingRequests with data set #3
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testDoesNotInjectUnsatisfiableResponsesOnError with data set #0
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testReturnsCookiesMatchingRequests with data set #4
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testDoesNotInjectUnsatisfiableResponsesOnError with data set #1
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testStoresAndRetrievesCookies
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testDoesNotInjectUnsatisfiableResponsesOnError with data set #2
+GuzzleHttp\Tests\CookieJar\CookieJarTest::testThrowsExceptionWithStrictMode
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testDoesNotInjectUnsatisfiableResponsesOnException with data set #0
+GuzzleHttp\Tests\CookieJar\FileCookieJarTest::testLoadsFromFileFile
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testDoesNotInjectUnsatisfiableResponsesOnException with data set #1
+GuzzleHttp\Tests\CookieJar\FileCookieJarTest::testPersistsToFileFile
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testDoesNotInjectUnsatisfiableResponsesOnException with data set #2
+GuzzleHttp\Tests\CookieJar\FileCookieJarTest::testValidatesCookieFile
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testDoesNothingWhenRequestIsNotCacheable
+GuzzleHttp\Tests\CookieJar\SessionCookieJarTest::testLoadsFromSession
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testInjectsSatisfiableResponses with data set #0
+GuzzleHttp\Tests\CookieJar\SessionCookieJarTest::testPersistsToSession
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testInjectsSatisfiableResponses with data set #1
+GuzzleHttp\Tests\CookieJar\SessionCookieJarTest::testValidatesCookieSession
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testInjectsSatisfiableResponsesOnError with data set #0
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testAddsExpiresBasedOnMaxAge
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testInjectsSatisfiableResponsesOnException with data set #0
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testConvertsDateTimeMaxAgeToUnixTimestamp
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testPurgesRequests
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testConvertsToString
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testUsesCreatedCacheStorage
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testDeterminesIfExpired
 .
-Guzzle\Tests\Plugin\Cache\CachePluginTest::testUsesProvidedOptions
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testDoesNotMatchIp
 .
-Guzzle\Tests\Plugin\Cache\CallbackCanCacheStrategyTest::testConstructorEnsuresCallbackIsCallable
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testHoldsValues
 .
-Guzzle\Tests\Plugin\Cache\CallbackCanCacheStrategyTest::testIntegrationWithCachePlugin
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testInitializesDefaultValues
 .
-Guzzle\Tests\Plugin\Cache\CallbackCanCacheStrategyTest::testUsesCallback
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testMatchesDomain
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testCachesMultipleRequestsWithVary
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testMatchesPath
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testCachesRequests
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #0
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testCanFilterCacheKeys
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #1
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testDeletesRequestItemsAndBody
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #10
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testEnsuresResponseIsStillPresent
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #2
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testFetchesResponse
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #3
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testPurgeRemovesAllMethodCaches
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #4
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testRemovesExpiredResponses
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #5
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testReturnsNullForCacheMiss
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #6
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testUsesStaleTimeDirectiveForTtd with data set #0
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #7
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testUsesStaleTimeDirectiveForTtd with data set #1
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #8
 .
-Guzzle\Tests\Plugin\Cache\DefaultCacheStorageTest::testUsesVaryToDetermineResult
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testParseCookie with data set #9
 .
-Guzzle\Tests\Plugin\Cache\DefaultCanCacheStrategyTest::testCanCacheResponse
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testValidatesCookies with data set #0
 .
-Guzzle\Tests\Plugin\Cache\DefaultCanCacheStrategyTest::testDoesNotCacheNoStore
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testValidatesCookies with data set #1
 .
-Guzzle\Tests\Plugin\Cache\DefaultCanCacheStrategyTest::testReturnsRequestcanCacheRequest
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testValidatesCookies with data set #2
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testCanHandleRevalidationFailures
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testValidatesCookies with data set #3
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testCanHandleStaleIfErrorWhenRevalidating
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testValidatesCookies with data set #4
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testCanRevalidateWithPlugin
+GuzzleHttp\Tests\CookieJar\SetCookieTest::testValidatesCookies with data set #5
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testDoesNotTouchClosureListeners
+GuzzleHttp\Tests\Event\AbstractEventTest::testStopsPropagation
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testHandles404RevalidationResponses
+GuzzleHttp\Tests\Event\AbstractRequestEventTest::testHasTransaction
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testRevalidatesResponsesAgainstOriginServer with data set #0
+GuzzleHttp\Tests\Event\AbstractRequestEventTest::testHasTransactionMethods
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testRevalidatesResponsesAgainstOriginServer with data set #1
+GuzzleHttp\Tests\Event\AbstractTransferEventTest::testHasStats
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testRevalidatesResponsesAgainstOriginServer with data set #2
+GuzzleHttp\Tests\Event\BeforeEventTest::testInterceptsWithEvent
 .
-Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testRevalidatesResponsesAgainstOriginServer with data set #3
+GuzzleHttp\Tests\Event\CompleteEventTest::testHasValues
 .
-Guzzle\Tests\Plugin\Cache\DenyRevalidationTest::testDeniesRequestRevalidation
+GuzzleHttp\Tests\Event\EmitterTest::testAddListener
 .
-Guzzle\Tests\Plugin\Cache\SkipRevalidationTest::testSkipsRequestRevalidation
+GuzzleHttp\Tests\Event\EmitterTest::testAddSubscriber
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testAddsCookiesFromResponseWithNoRequest
+GuzzleHttp\Tests\Event\EmitterTest::testAddSubscriberWithMultiple
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testAddsCookiesFromResponseWithRequest
+GuzzleHttp\Tests\Event\EmitterTest::testAddSubscriberWithPriorities
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testDoesAddValidCookies
+GuzzleHttp\Tests\Event\EmitterTest::testCanAddFirstAndLastListeners
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testDoesNotAddIncompleteCookies
+GuzzleHttp\Tests\Event\EmitterTest::testDispatch
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testIsSerializable
+GuzzleHttp\Tests\Event\EmitterTest::testDispatchByPriority
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testOverwritesCookiesThatAreOlderOrDiscardable
+GuzzleHttp\Tests\Event\EmitterTest::testDispatchForClosure
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testOverwritesCookiesThatHaveChanged
+GuzzleHttp\Tests\Event\EmitterTest::testEventReceivesEventNameAsArgument
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testRemoveExistingCookieIfEmpty
+GuzzleHttp\Tests\Event\EmitterTest::testGetAllListenersSortsByPriority
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testRemovesExpiredCookies
+GuzzleHttp\Tests\Event\EmitterTest::testGetListenersSortsByPriority
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testRemovesSelectively
+GuzzleHttp\Tests\Event\EmitterTest::testInitialState
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testRemovesTemporaryCookies
+GuzzleHttp\Tests\Event\EmitterTest::testRegistersEventsOnce
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testReturnsCookiesMatchingRequests with data set #0
+GuzzleHttp\Tests\Event\EmitterTest::testRemoveListener
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testReturnsCookiesMatchingRequests with data set #1
+GuzzleHttp\Tests\Event\EmitterTest::testReturnsEmptyArrayForNonExistentEvent
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testReturnsCookiesMatchingRequests with data set #2
+GuzzleHttp\Tests\Event\EmitterTest::testStopEventPropagation
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testReturnsCookiesMatchingRequests with data set #3
+GuzzleHttp\Tests\Event\EmitterTest::testWorkaroundForPhpBug62976
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testReturnsCookiesMatchingRequests with data set #4
+GuzzleHttp\Tests\Event\EmitterTest::testdetach
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testStoresAndRetrievesCookies
+GuzzleHttp\Tests\Event\EmitterTest::testdetachWithPriorities
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testThrowsExceptionWithStrictMode
+GuzzleHttp\Tests\Event\ErrorEventTest::testInterceptsWithEvent
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\FileCookieJarTest::testLoadsFromFileFile
+GuzzleHttp\Tests\Event\HasEmitterTraitTest::testHelperAttachesSubscribers
 .
-Guzzle\Tests\Plugin\Cookie\CookieJar\FileCookieJarTest::testPersistsToFileFile
+GuzzleHttp\Tests\Event\HeadersEventTest::testEnsuresResponseIsSet
 .
-Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testAddsCookiesToRequests
+GuzzleHttp\Tests\Event\HeadersEventTest::testHasValues
 .
-Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testCookiesAreExtractedFromRedirectResponses
+GuzzleHttp\Tests\Event\ListenerAttacherTraitTest::testRegistersEvents
 .
-Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testCookiesAreNotAddedWhenParamIsSet
+GuzzleHttp\Tests\Event\ListenerAttacherTraitTest::testRegistersEventsWithOnce
 .
-Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testEscapesCookieDomains
+GuzzleHttp\Tests\Event\ListenerAttacherTraitTest::testRegistersEventsWithPriorities
 .
-Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testExtractsAndStoresCookies
+GuzzleHttp\Tests\Event\ListenerAttacherTraitTest::testRegistersMultipleEvents
 .
-Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testProvidesCookieJar
+GuzzleHttp\Tests\Event\ListenerAttacherTraitTest::testValidatesEvents
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testAddsExpiresBasedOnMaxAge
+GuzzleHttp\Tests\Event\ParseExceptionTest::testHasResponse
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testConvertsDateTimeMaxAgeToUnixTimestamp
+GuzzleHttp\Tests\Event\RequestEventsTest::testBeforeSendEmitsErrorEvent
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testCreatesInvalidCharacterString
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #0
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testDeterminesIfExpired
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #1
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testHoldsValues
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #2
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testInitializesDefaultValues
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #3
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testMatchesDomain
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #4
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testMatchesPath
+GuzzleHttp\Tests\Event\RequestEventsTest::testDoesNotEmitErrorEventTwice
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testMatchesPorts
+GuzzleHttp\Tests\Event\RequestEventsTest::testEmitsAfterSendEvent
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #0
+GuzzleHttp\Tests\Event\RequestEventsTest::testEmitsAfterSendEventAndEmitsErrorIfNeeded
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #1
+GuzzleHttp\Tests\Event\RequestEventsTest::testEmitsErrorEventForRequestExceptionsThrownDuringBeforeThatHaveNotEmittedAnErrorEvent
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #2
+GuzzleHttp\Tests\Event\RequestEventsTest::testThrowsUnInterceptedErrors
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #3
+GuzzleHttp\Tests\Event\RequestExceptionTest::testCanSetAndRetrieveErrorEmitted
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #4
+GuzzleHttp\Tests\Event\RequestExceptionTest::testCannotSetEmittedErrorToFalse
 .
-Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #5
+GuzzleHttp\Tests\Event\RequestExceptionTest::testCreatesClientErrorResponseException
 .
-Guzzle\Tests\Plugin\CurlAuth\CurlAuthPluginTest::testAddsBasicAuthentication
+GuzzleHttp\Tests\Event\RequestExceptionTest::testCreatesGenerateException
 .
-Guzzle\Tests\Plugin\CurlAuth\CurlAuthPluginTest::testAddsDigestAuthentication
+GuzzleHttp\Tests\Event\RequestExceptionTest::testCreatesGenericErrorResponseException
 .
-Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testEnsuresErrorResponseExists
+GuzzleHttp\Tests\Event\RequestExceptionTest::testCreatesServerErrorResponseException
 .
-Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testEnsuresErrorResponseImplementsInterface
+GuzzleHttp\Tests\Event\RequestExceptionTest::testHasRequestAndResponse
 .
-Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testSkipsWhenErrorResponsesIsNotSet
+GuzzleHttp\Tests\Event\RequestExceptionTest::testHasStatusCodeAsExceptionCode
 .
-Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testSkipsWhenErrorResponsesIsNotSetAndAllowsSuccess
+GuzzleHttp\Tests\FunctionsTest::testBatchValidatesTheEventFormat
 .
-Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testSkipsWhenNoClassIsSet
+GuzzleHttp\Tests\FunctionsTest::testBatchesRequests
 .
-Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testSkipsWhenReasonDoesNotMatch
+GuzzleHttp\Tests\FunctionsTest::testExpandsTemplate
 .
-Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testThrowsSpecificErrorResponseOnMatch
+GuzzleHttp\Tests\FunctionsTest::testJsonDecodes
 .
-Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testThrowsWhenCodeAndPhraseMatch
+GuzzleHttp\Tests\FunctionsTest::testJsonDecodesWithErrorMessages
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testAddsRequests
+GuzzleHttp\Tests\FunctionsTest::testManagesDeprecatedMethods
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testCanCastToString
+GuzzleHttp\Tests\FunctionsTest::testManagesDeprecatedMethodsAndHandlesMissingMethods
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testClearsHistory
+GuzzleHttp\Tests\FunctionsTest::testSendsNoBody with data set #0
+E
+GuzzleHttp\Tests\FunctionsTest::testSendsNoBody with data set #1
+E
+GuzzleHttp\Tests\FunctionsTest::testSendsNoBody with data set #2
+E
+GuzzleHttp\Tests\FunctionsTest::testSendsOptionsRequest
+E
+GuzzleHttp\Tests\FunctionsTest::testSendsWithBody with data set #0
+E
+GuzzleHttp\Tests\FunctionsTest::testSendsWithBody with data set #1
+E
+GuzzleHttp\Tests\FunctionsTest::testSendsWithBody with data set #2
+E
+GuzzleHttp\Tests\Http\TransactionIteratorTest::testCanForeach
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testDescribesSubscribedEvents
+GuzzleHttp\Tests\Http\TransactionIteratorTest::testCreatesTransactions
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testMaintainsLimit
+GuzzleHttp\Tests\Http\TransactionIteratorTest::testValidatesConstructor
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testMaintainsLimitValue
+GuzzleHttp\Tests\Http\TransactionIteratorTest::testValidatesEachElement
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testReturnsLastRequest
+GuzzleHttp\Tests\Message\AbstractMessageTest::testAddsHeadersWhenNotPresent
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testReturnsLastResponse
+GuzzleHttp\Tests\Message\AbstractMessageTest::testAddsHeadersWhenPresentDifferentCase
 .
-Guzzle\Tests\Plugin\History\HistoryPluginTest::testUpdatesAddRequests
+GuzzleHttp\Tests\Message\AbstractMessageTest::testAddsHeadersWhenPresentSameCase
 .
-Guzzle\Tests\Plugin\Log\LogPluginTest::testHasHelpfulStaticFactoryMethod
+GuzzleHttp\Tests\Message\AbstractMessageTest::testAddsHeadersWithArray
 .
-Guzzle\Tests\Plugin\Log\LogPluginTest::testIgnoresCurlEventsWhenNotWiringBodies
+GuzzleHttp\Tests\Message\AbstractMessageTest::testAddsMultipleHeaders
 .
-Guzzle\Tests\Plugin\Log\LogPluginTest::testLogsWhenComplete
+GuzzleHttp\Tests\Message\AbstractMessageTest::testCanRemoveBodyBySettingToNullAndRemovesCommonBodyHeaders
 .
-Guzzle\Tests\Plugin\Log\LogPluginTest::testWiresBodiesWhenNeeded
+GuzzleHttp\Tests\Message\AbstractMessageTest::testCastsToString
 .
-Guzzle\Tests\Plugin\Md5\CommandContentMd5PluginTest::testAddsValidationToResponsesOfContentMd5
+GuzzleHttp\Tests\Message\AbstractMessageTest::testChecksIfCaseInsensitiveHeaderIsPresent
 .
-Guzzle\Tests\Plugin\Md5\CommandContentMd5PluginTest::testDoesNothingWhenNoPayloadExists
+GuzzleHttp\Tests\Message\AbstractMessageTest::testGetHeadersReturnsAnArrayOfOverTheWireHeaderValues
 .
-Guzzle\Tests\Plugin\Md5\CommandContentMd5PluginTest::testHasEvents
+GuzzleHttp\Tests\Message\AbstractMessageTest::testGetsResponseStartLine
 .
-Guzzle\Tests\Plugin\Md5\CommandContentMd5PluginTest::testIgnoresValidationWhenDisabled
+GuzzleHttp\Tests\Message\AbstractMessageTest::testHasBody
 .
-Guzzle\Tests\Plugin\Md5\CommandContentMd5PluginTest::testValidatesMd5WhenParamExists
+GuzzleHttp\Tests\Message\AbstractMessageTest::testHasHeaders
 .
-Guzzle\Tests\Plugin\Md5\Md5ValidatorPluginTest::testProperlyValidatesWhenUsingContentEncoding
+GuzzleHttp\Tests\Message\AbstractMessageTest::testHasProtocolVersion
 .
-Guzzle\Tests\Plugin\Md5\Md5ValidatorPluginTest::testSkipsWhenContentLengthIsTooLarge
+GuzzleHttp\Tests\Message\AbstractMessageTest::testInitializesMessageWithProtocolVersionOption
 .
-Guzzle\Tests\Plugin\Md5\Md5ValidatorPluginTest::testThrowsExceptionOnInvalidMd5
+GuzzleHttp\Tests\Message\AbstractMessageTest::testParseParams with data set #0
 .
-Guzzle\Tests\Plugin\Md5\Md5ValidatorPluginTest::testValidatesMd5
+GuzzleHttp\Tests\Message\AbstractMessageTest::testParseParams with data set #1
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testAddsMockResponseToRequestFromClient
+GuzzleHttp\Tests\Message\AbstractMessageTest::testParseParams with data set #2
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testAddsResponseFilesToQueue
+GuzzleHttp\Tests\Message\AbstractMessageTest::testParseParams with data set #3
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testAddsResponseObjectsToQueue
+GuzzleHttp\Tests\Message\AbstractMessageTest::testParseParams with data set #4
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testCanBeTemporary
+GuzzleHttp\Tests\Message\AbstractMessageTest::testRemovesHeaders
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testCanClearQueue
+GuzzleHttp\Tests\Message\AbstractMessageTest::testReturnsCorrectTypeWhenMissing
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testCanInspectQueue
+GuzzleHttp\Tests\Message\AbstractMessageTest::testSetHeaderOverwritesExistingValues
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testCanMockBadRequestExceptions
+GuzzleHttp\Tests\Message\AbstractMessageTest::testSetHeaderOverwritesExistingValuesUsingArray
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testDescribesEvents
+GuzzleHttp\Tests\Message\AbstractMessageTest::testSetHeaderOverwritesExistingValuesUsingHeaderArray
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testDescribesSubscribedEvents
+GuzzleHttp\Tests\Message\AbstractMessageTest::testSetHeadersOverwritesAllHeaders
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testDetachesTemporaryWhenEmpty
+GuzzleHttp\Tests\Message\AbstractMessageTest::testSetsIntegersAndFloatsAsHeaders
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testInvalidResponsesThrowAnException
+GuzzleHttp\Tests\Message\AbstractMessageTest::testThrowsExceptionWhenInvalidValueProvidedToAddHeader
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testIsCountable
+GuzzleHttp\Tests\Message\AbstractMessageTest::testThrowsExceptionWhenInvalidValueProvidedToSetHeader
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testLoadsResponsesFromConstructor
+GuzzleHttp\Tests\Message\AbstractMessageTest::testThrowsWhenMessageIsUnknown
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testReadsBodiesFromMockedRequests
+GuzzleHttp\Tests\Message\HttpErrorTest::testFullTransaction
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testRetrievesResponsesFromFiles
+GuzzleHttp\Tests\Message\HttpErrorTest::testIgnoreSuccessfulRequests
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testStoresMockedRequests
+GuzzleHttp\Tests\Message\HttpErrorTest::testThrowsClientExceptionOnFailure
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testThrowsExceptionWhenResponseFileIsNotFound
+GuzzleHttp\Tests\Message\HttpErrorTest::testThrowsServerExceptionOnFailure
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testUpdateThrowsExceptionWhenEmpty
+GuzzleHttp\Tests\Message\MessageFactoryTest::testAddsCookieFromCookieJar
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testAcceptsConfigurationData
+GuzzleHttp\Tests\Message\MessageFactoryTest::testAddsCookieUsingTrue
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testConvertsBooleansToStrings
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddBasicAuth
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testCreatesStringToSignFromPostRequest
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddCookiesFromHash
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testCreatesStringToSignFromPostRequestWithCustomContentType
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddDigestAuth
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testCreatesStringToSignFromPostRequestWithNullValues
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddEvents
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testCreatesStringToSignIgnoringPostFields
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddEventsOnce
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testDoesNotAddFalseyValuesToAuthorization
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddEventsWithPriority
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testInvalidArgumentExceptionOnMethodError
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddJsonData
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testMultiDimensionalArray
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddJsonDataAndNotOverwriteContentType
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testMultiDimensionalArrayWithNonDefaultQueryAggregator
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddJsonDataToAPostRequest
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testOptionalOauthParametersAreNotAutomaticallyAdded
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddQuery
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testSignsOauthQueryStringRequest
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddSslCert
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testSignsOauthRequests
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddSslCertPassword
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testSignsStrings
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddSslKey
 .
-Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testSubscribesToEvents
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddSslKeyPassword
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testCanLimitNumberOfRedirects
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanAddSubscribers
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testCanRedirectWithNoLeadingSlashAndQuery
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanChangeSaveToLocation
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testCanRedirectWithStrictRfcCompliance
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanCreateHeadResponses
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testDefaultBehaviorIsToRedirectWithGetForEntityEnclosingRequests
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanDisableAuth
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testHandlesRedirectsWithSpacesProperly
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanDisableExceptions
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirect303WithGet
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanDisableRedirects
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirect303WithGetWithStrictRfcCompliance
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanEnableStrictRedirectsAndSpecifyMax
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirectWithStrictRfc386Compliance
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetConnectTimeoutOption
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirectsCanBeDisabledPerRequest
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetCustomAuth
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirectsRequests
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetDebug
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testResetsHistoryEachSend
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetDefaultQuery
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRewindsStreamWhenRedirectingIfNeeded
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetDefaultQueryWithObject
 .
-Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testThrowsExceptionWhenStreamCannotBeRewound
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetHeaders
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testCanCreateStreamsUsingCustomFactory
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetHeadersOption
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testCanCreateStreamsUsingDefaultFactory
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetProtocolVersion
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testMountsClient
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetProxy
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testSendsRequests with data set #0
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetTimeoutOption
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testSendsRequests with data set #1
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetVerifyToOff
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testSendsRequests with data set #2
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetVerifyToOn
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testSendsRequests with data set #3
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanSetVerifyToPath
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testSendsRequests with data set #4
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCanUseCustomSubclassesWithMethods
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testSendsRequests with data set #5
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesBodyWithoutZeroString
 .
-Guzzle\Tests\Plugin\Redirect\StaticClientTest::testSendsRequests with data set #6
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesRequestFromMessage
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testCanCreateFromJson
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesRequestFromMessageWithBody
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testCanLoadArraysWithIncludes
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesRequestWithPostBody
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testCanRemoveAliases
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesRequestWithPostBodyAndPostFiles
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testDoesNotEnterInfiniteLoop
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesRequestWithPostBodyScalars
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testFileMustBeReadable
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesResponseFromMessage
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testJsonMustBeValue
+GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesResponses
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testLoadsPhpFileIncludes
+GuzzleHttp\Tests\Message\MessageFactoryTest::testDoesNotApplyPostBodyRightAway
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testMustBeSupportedExtension
+GuzzleHttp\Tests\Message\MessageFactoryTest::testFactoryRequiresMessageForRequest
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testOnlyLoadsSupportedTypes
+GuzzleHttp\Tests\Message\MessageFactoryTest::testOptionsAddsRequestOptions
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testPhpFilesMustReturnAnArray
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesCookies
 .
-Guzzle\Tests\Service\AbstractConfigLoaderTest::testUsesAliases
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesEventContainsFn
 .
-Guzzle\Tests\Service\Builder\ServiceBuilderLoaderTest::testAllowsGlobalParameterOverrides
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesEventIsArray
 .
-Guzzle\Tests\Service\Builder\ServiceBuilderLoaderTest::testBuildsServiceBuilders
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesInput with data set #0
 .
-Guzzle\Tests\Service\Builder\ServiceBuilderLoaderTest::testCombinesConfigs with data set #0
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesInput with data set #1
 .
-Guzzle\Tests\Service\Builder\ServiceBuilderLoaderTest::testCombinesConfigs with data set #1
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesInput with data set #2
 .
-Guzzle\Tests\Service\Builder\ServiceBuilderLoaderTest::testThrowsExceptionWhenExtendingNonExistentService
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesInput with data set #3
 .
-Guzzle\Tests\Service\CachingConfigLoaderTest::testDoesNotCacheArrays
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesOptionsAreImplemented
 .
-Guzzle\Tests\Service\CachingConfigLoaderTest::testLoadsPhpFileIncludes
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesQuery
 .
-Guzzle\Tests\Service\ClientTest::testAllowsCustomClientParameters
+GuzzleHttp\Tests\Message\MessageFactoryTest::testValidatesRedirects
 .
-Guzzle\Tests\Service\ClientTest::testClientAddsGlobalCommandOptions
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesRequests with data set #0
 .
-Guzzle\Tests\Service\ClientTest::testClientCreatesIterators
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesRequests with data set #1
 .
-Guzzle\Tests\Service\ClientTest::testClientCreatesIteratorsWithCommands
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesRequests with data set #2
 .
-Guzzle\Tests\Service\ClientTest::testClientCreatesIteratorsWithNoOptions
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesRequests with data set #3
 .
-Guzzle\Tests\Service\ClientTest::testClientHoldsInflector
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesRequests with data set #4
 .
-Guzzle\Tests\Service\ClientTest::testClientResetsRequestsBeforeExecutingCommands
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesRequests with data set #5
 .
-Guzzle\Tests\Service\ClientTest::testCreatesCommandsUsingCommandFactory
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesRequestsWithMissingProtocol
 .
-Guzzle\Tests\Service\ClientTest::testDescribesEvents
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesRequestsWithMissingVersion
 .
-Guzzle\Tests\Service\ClientTest::testExecutesCommands
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesResponses with data set #0
 .
-Guzzle\Tests\Service\ClientTest::testExecutesCommandsWithArray
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesResponses with data set #1
 .
-Guzzle\Tests\Service\ClientTest::testFactoryCreatesClient
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesResponses with data set #2
 .
-Guzzle\Tests\Service\ClientTest::testFactoryDoesNotRequireBaseUrl
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesResponses with data set #3
 .
-Guzzle\Tests\Service\ClientTest::testGetCommandAfterTwoSetDescriptions
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesResponses with data set #4
 .
-Guzzle\Tests\Service\ClientTest::testMergesDefaultCommandParamsCorrectly
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesResponses with data set #5
 .
-Guzzle\Tests\Service\ClientTest::testOwnsResourceIteratorFactory
+GuzzleHttp\Tests\Message\MessageParserTest::testParsesResponsesWithMissingReasonPhrase
 .
-Guzzle\Tests\Service\ClientTest::testOwnsServiceDescription
+GuzzleHttp\Tests\Message\PrepareTest::testAddsExpectHeaderBySize
 .
-Guzzle\Tests\Service\ClientTest::testSupportsServiceDescriptionBaseUrls
+GuzzleHttp\Tests\Message\PrepareTest::testAddsExpectHeaderForNonSeekable
 .
-Guzzle\Tests\Service\ClientTest::testThrowsExceptionWhenInvalidCommandIsExecuted
+GuzzleHttp\Tests\Message\PrepareTest::testAddsExpectHeaderWithTrue
 .
-Guzzle\Tests\Service\ClientTest::testThrowsExceptionWhenMissingCommand
+GuzzleHttp\Tests\Message\PrepareTest::testAppliesPostBody
 .
-Guzzle\Tests\Service\ClientTest::testWrapsMultipleCommandExceptions
+GuzzleHttp\Tests\Message\PrepareTest::testDoesAddExpectHeaderWhenSetToFalse
 .
-Guzzle\Tests\Service\ClientTest::testWrapsSingleCommandExceptions
+GuzzleHttp\Tests\Message\PrepareTest::testDoesNotAddExpectHeaderBySize
 .
-Guzzle\Tests\Service\Command\AliasFactoryTest::testAliasesCommands with data set #0
+GuzzleHttp\Tests\Message\PrepareTest::testDoesNotModifyExpectHeaderIfPresent
 .
-Guzzle\Tests\Service\Command\AliasFactoryTest::testAliasesCommands with data set #1
+GuzzleHttp\Tests\Message\PrepareTest::testDoesNotOverwriteExistingContentType
 .
-Guzzle\Tests\Service\Command\AliasFactoryTest::testAliasesCommands with data set #2
+GuzzleHttp\Tests\Message\PrepareTest::testIgnoresRequestsWithNoBody
 .
-Guzzle\Tests\Service\Command\AliasFactoryTest::testAliasesCommands with data set #3
+GuzzleHttp\Tests\Message\PrepareTest::testRemovesContentLengthWhenSendingWithChunked
 .
-Guzzle\Tests\Service\Command\AliasFactoryTest::testAliasesCommands with data set #4
+GuzzleHttp\Tests\Message\PrepareTest::testSetsContentLengthIfPossible
 .
-Guzzle\Tests\Service\Command\AliasFactoryTest::testAliasesCommands with data set #5
+GuzzleHttp\Tests\Message\PrepareTest::testSetsContentTypeIfPossibleFromStream
 .
-Guzzle\Tests\Service\Command\AliasFactoryTest::testAliasesCommands with data set #6
+GuzzleHttp\Tests\Message\PrepareTest::testSetsTransferEncodingChunkedIfNeeded
 .
-Guzzle\Tests\Service\Command\AliasFactoryTest::testAliasesCommands with data set #7
+GuzzleHttp\Tests\Message\PrepareTest::testUsesProvidedContentLengthAndRemovesXferEncoding
 .
-Guzzle\Tests\Service\Command\ClosureCommandTest::testConstructorValidatesClosure
+GuzzleHttp\Tests\Message\RequestTest::testCanChangeHost
 .
-Guzzle\Tests\Service\Command\ClosureCommandTest::testExecutesClosure
+GuzzleHttp\Tests\Message\RequestTest::testCanChangeMethod
 .
-Guzzle\Tests\Service\Command\ClosureCommandTest::testMustReturnRequest
+GuzzleHttp\Tests\Message\RequestTest::testCanChangePort
 .
-Guzzle\Tests\Service\Command\CommandTest::testAddsCurlOptionsToRequestsWhenPreparing
+GuzzleHttp\Tests\Message\RequestTest::testCanChangeScheme
 .
-Guzzle\Tests\Service\Command\CommandTest::testAllowsValidatorToBeInjected
+GuzzleHttp\Tests\Message\RequestTest::testCanChangeSchemeWithPort
 .
-Guzzle\Tests\Service\Command\CommandTest::testCanAccessValidationErrorsFromCommand
+GuzzleHttp\Tests\Message\RequestTest::testCastsToString
 .
-Guzzle\Tests\Service\Command\CommandTest::testCanChangeResponseBody
+GuzzleHttp\Tests\Message\RequestTest::testCloneIsDeep
 .
-Guzzle\Tests\Service\Command\CommandTest::testCanDisableValidation
+GuzzleHttp\Tests\Message\RequestTest::testConstructorInitializesMessage
 .
-Guzzle\Tests\Service\Command\CommandTest::testCanInitConfig
+GuzzleHttp\Tests\Message\RequestTest::testConstructorInitializesMessageWithEmitter
 .
-Guzzle\Tests\Service\Command\CommandTest::testCanSetResultManually
+GuzzleHttp\Tests\Message\RequestTest::testConstructorInitializesMessageWithProtocolVersion
 .
-Guzzle\Tests\Service\Command\CommandTest::testCloneMakesNewRequest
+GuzzleHttp\Tests\Message\RequestTest::testQueryCanChange
 .
-Guzzle\Tests\Service\Command\CommandTest::testCommandsAllowsCustomRequestHeaders
+GuzzleHttp\Tests\Message\RequestTest::testQueryIsMutable
 .
-Guzzle\Tests\Service\Command\CommandTest::testCommandsAllowsCustomRequestHeadersAsArray
+GuzzleHttp\Tests\Message\RequestTest::testSettingUrlOverridesHostHeaders
 .
-Guzzle\Tests\Service\Command\CommandTest::testCommandsUsesOperation
+GuzzleHttp\Tests\Message\ResponseTest::testCanProvideCustomStatusCodeAndReasonPhrase
 .
-Guzzle\Tests\Service\Command\CommandTest::testConstructorAddsDefaultParams
+GuzzleHttp\Tests\Message\ResponseTest::testConvertsToString
 .
-Guzzle\Tests\Service\Command\CommandTest::testConvertsInvalidJsonResponsesToArray
+GuzzleHttp\Tests\Message\ResponseTest::testConvertsToStringAndSeeksToByteZero
 .
-Guzzle\Tests\Service\Command\CommandTest::testConvertsJsonResponsesToArray
+GuzzleHttp\Tests\Message\ResponseTest::testHasEffectiveUrl
 .
-Guzzle\Tests\Service\Command\CommandTest::testCreatesDefaultOperation
+GuzzleHttp\Tests\Message\ResponseTest::testParsesJsonResponses
 .
-Guzzle\Tests\Service\Command\CommandTest::testDeterminesShortName
+GuzzleHttp\Tests\Message\ResponseTest::testParsesXmlResponses
 .
-Guzzle\Tests\Service\Command\CommandTest::testExecute
+GuzzleHttp\Tests\Message\ResponseTest::testPreventsComplexExternalEntities
 .
-Guzzle\Tests\Service\Command\CommandTest::testExecuteThrowsExceptionWhenNoClientIsSet
+GuzzleHttp\Tests\Message\ResponseTest::testThrowsExceptionWhenFailsToParseJsonResponse
 .
-Guzzle\Tests\Service\Command\CommandTest::testGetRequestThrowsExceptionBeforePreparation
+GuzzleHttp\Tests\Message\ResponseTest::testThrowsExceptionWhenFailsToParseXmlResponse
 .
-Guzzle\Tests\Service\Command\CommandTest::testGetResponseExecutesCommandsWhenNeeded
+GuzzleHttp\Tests\MimetypesTest::testGetsFromCaseInsensitiveFilename
 .
-Guzzle\Tests\Service\Command\CommandTest::testGetResultExecutesCommandsWhenNeeded
+GuzzleHttp\Tests\MimetypesTest::testGetsFromExtension
 .
-Guzzle\Tests\Service\Command\CommandTest::testHasOnCompleteMethod
+GuzzleHttp\Tests\MimetypesTest::testGetsFromFilename
 .
-Guzzle\Tests\Service\Command\CommandTest::testIsInvokable
+GuzzleHttp\Tests\MimetypesTest::testReturnsNullWhenNoMatchFound
 .
-Guzzle\Tests\Service\Command\CommandTest::testOnCompleteMustBeCallable
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testAddsRefererWhenPossible
 .
-Guzzle\Tests\Service\Command\CommandTest::testPrepareThrowsExceptionWhenNoClientIsSet
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testCanLimitNumberOfRedirects
 .
-Guzzle\Tests\Service\Command\CommandTest::testProcessResponseIsNotXml
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testCanRedirectWithNoLeadingSlashAndQuery
 .
-Guzzle\Tests\Service\Command\CommandTest::testSetClient
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testCanRedirectWithStrictRfcCompliance
 .
-Guzzle\Tests\Service\Command\CommandTest::testValidatesAdditionalParameters
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testDefaultBehaviorIsToRedirectWithGetForEntityEnclosingRequests
 .
-Guzzle\Tests\Service\Command\CommandTest::testValidatesCommandBeforeSending
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testDoesNotAddRefererWhenChangingProtocols
 .
-Guzzle\Tests\Service\Command\CommandTest::testValidatorDoesNotUpdateNonDefaultValues
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testHandlesRedirectsWithSpacesProperly
 .
-Guzzle\Tests\Service\Command\CommandTest::testValidatorUpdatesDefaultValues
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testRedirectsCanBeDisabledPerRequest
 .
-Guzzle\Tests\Service\Command\CompositeFactoryTest::testAddsFactoriesBeforeAndAtEnd
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testRedirectsRequests
 .
-Guzzle\Tests\Service\Command\CompositeFactoryTest::testAllowsRemovalOfFactories
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testRedirectsWithGetOn303
 .
-Guzzle\Tests\Service\Command\CompositeFactoryTest::testCreatesCommands
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testRewindsStreamWhenRedirectingIfNeeded
 .
-Guzzle\Tests\Service\Command\CompositeFactoryTest::testFindsFactories
+GuzzleHttp\Tests\Plugin\Redirect\RedirectTest::testThrowsExceptionWhenStreamCannotBeRewound
 .
-Guzzle\Tests\Service\Command\CompositeFactoryTest::testIsIterable
+GuzzleHttp\Tests\Post\MultipartBodyTest::testCalculatesSize
 .
-Guzzle\Tests\Service\Command\CompositeFactoryTest::testProvidesDefaultChainForClients
+GuzzleHttp\Tests\Post\MultipartBodyTest::testCalculatesSizeAndReturnsNullForUnknown
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #0
+GuzzleHttp\Tests\Post\MultipartBodyTest::testCanDetachFieldsAndFiles
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #1
+GuzzleHttp\Tests\Post\MultipartBodyTest::testConstructorAddsFieldsAndFiles
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #2
+GuzzleHttp\Tests\Post\MultipartBodyTest::testConstructorCanCreateBoundary
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #3
+GuzzleHttp\Tests\Post\MultipartBodyTest::testConstructorValidatesFiles
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #4
+GuzzleHttp\Tests\Post\MultipartBodyTest::testDoesNotModifyFieldFormat
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #5
+GuzzleHttp\Tests\Post\MultipartBodyTest::testGetContentsCanCap
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #6
+GuzzleHttp\Tests\Post\MultipartBodyTest::testIsSeekableReturnsTrueIfAllAreSeekable
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #7
+GuzzleHttp\Tests\Post\MultipartBodyTest::testReadsFromBuffer
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testCreatesConcreteCommands with data set #8
+GuzzleHttp\Tests\Post\MultipartBodyTest::testWrapsStreamMethods
 .
-Guzzle\Tests\Service\Command\ConcreteClassFactoryTest::testProvider
+GuzzleHttp\Tests\Post\PostBodyTest::testApplyingWithFieldsAddsMultipartUpload
 .
-Guzzle\Tests\Service\Command\DefaultRequestSerializerTest::testAllowsCustomFactory
+GuzzleHttp\Tests\Post\PostBodyTest::testApplyingWithFilesAddsMultipartUpload
 .
-Guzzle\Tests\Service\Command\DefaultRequestSerializerTest::testAllowsCustomVisitor
+GuzzleHttp\Tests\Post\PostBodyTest::testApplyingWithNothingDoesNothing
 .
-Guzzle\Tests\Service\Command\DefaultRequestSerializerTest::testMixedParams
+GuzzleHttp\Tests\Post\PostBodyTest::testCanForceMultipartUploadsWhenApplying
 .
-Guzzle\Tests\Service\Command\DefaultRequestSerializerTest::testUsesRelativePath
+GuzzleHttp\Tests\Post\PostBodyTest::testCanSpecifyQueryAggregator
 .
-Guzzle\Tests\Service\Command\DefaultRequestSerializerTest::testUsesRelativePathWithUriLocations
+GuzzleHttp\Tests\Post\PostBodyTest::testConvertsFieldsToQueryStyleBody
 .
-Guzzle\Tests\Service\Command\DefaultRequestSerializerTest::testValidatesAdditionalParameters
+GuzzleHttp\Tests\Post\PostBodyTest::testCountProvidesFieldsAndFiles
 .
-Guzzle\Tests\Service\Command\DefaultResponseParserTest::testAddsContentTypeWhenExpectsIsSetOnCommand
+GuzzleHttp\Tests\Post\PostBodyTest::testCreatesMultipartUploadWithMultiFields
 .
-Guzzle\Tests\Service\Command\DefaultResponseParserTest::testParsesJsonResponses
+GuzzleHttp\Tests\Post\PostBodyTest::testDetachesAndCloses
 .
-Guzzle\Tests\Service\Command\DefaultResponseParserTest::testParsesXmlResponses
-.
-Guzzle\Tests\Service\Command\DefaultResponseParserTest::testThrowsExceptionWhenParsingJsonFails
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\BodyVisitorTest::testAddsContentEncodingWhenSetOnBody
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\BodyVisitorTest::testAddsExpectHeaderWhenSetToTrue
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\BodyVisitorTest::testCanDisableExpectHeader
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\BodyVisitorTest::testCanSetExpectHeaderBasedOnSize
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\BodyVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\HeaderVisitorTest::testValidatesHeaderMapsAreArrays
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\HeaderVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\HeaderVisitorTest::testVisitsMappedPrefixHeaders
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\JsonVisitorTest::testAddsJsonHeader
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\JsonVisitorTest::testAppliesFiltersToAdditionalProperties
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\JsonVisitorTest::testAppliesFiltersToArrayItemValues
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\JsonVisitorTest::testRecursivelyBuildsJsonBodies
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\JsonVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\PostFieldVisitorTest::testRecursivelyBuildsPostFields
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\PostFieldVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\PostFileVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\PostFileVisitorTest::testVisitsLocationWithMultipleFiles
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\QueryVisitorTest::testFiltersAreAppliedToArrayParamType
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\QueryVisitorTest::testRecursivelyBuildsQueryStrings
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\QueryVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\ResponseBodyVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testAddsContentTypeAndTopLevelValues
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testAllowsSendingXmlPayloadIfNoXmlParamsWereSet
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testAllowsXmlEncoding
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testCanAddArrayOfSimpleTypes
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testCanAddMultipleNamespacesToRoot
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testCanChangeContentType
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #0
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #1
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #10
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #11
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #12
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #13
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #2
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #3
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #4
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #5
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #6
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #7
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #8
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #9
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSkipsNullValues
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testValuesAreFiltered
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\BodyVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\HeaderVisitorTest::testDiscardingUnknownHeaders
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\HeaderVisitorTest::testDiscardingUnknownPropertiesWithAliasing
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\HeaderVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\HeaderVisitorTest::testVisitsLocationWithFilters
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\HeaderVisitorTest::testVisitsMappedPrefixHeaders
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\JsonVisitorTest::testBeforeMethodParsesXml
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\JsonVisitorTest::testDiscardingUnknownProperties
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\JsonVisitorTest::testDiscardingUnknownPropertiesWithAliasing
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\JsonVisitorTest::testRenamesDoesNotFailForNonExistentKey
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\JsonVisitorTest::testRenamesTopLevelValues
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\JsonVisitorTest::testTraversesObjectsAndAppliesFilters
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\JsonVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\JsonVisitorTest::testWalksAdditionalProperties
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\ReasonPhraseVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\StatusCodeVisitorTest::testVisitsLocation
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testAddsEmptyArraysWhenValueIsMissing
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testBeforeMethodParsesNestedXml
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testBeforeMethodParsesXml
-.
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testBeforeMethodParsesXmlWithNamespace
-S
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testCanExtractAndRenameTopLevelXmlValues
+GuzzleHttp\Tests\Post\PostBodyTest::testHasFields
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testCanRenameAttributes
+GuzzleHttp\Tests\Post\PostBodyTest::testMultipartWithBase64Fields
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testCanRenameValues
+GuzzleHttp\Tests\Post\PostBodyTest::testMultipartWithNestedFields
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testDiscardingUnknownProperties
+GuzzleHttp\Tests\Post\PostBodyTest::testWrapsBasicStreamFunctionality
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testDiscardingUnknownPropertiesWithAliasing
+GuzzleHttp\Tests\Post\PostFileTest::testCanAddHeaders
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testEnsuresFlatArraysAreFlat
+GuzzleHttp\Tests\Post\PostFileTest::testCreatesFromMultipartFormData
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testEnsuresRepeatedArraysAreInCorrectLocations
+GuzzleHttp\Tests\Post\PostFileTest::testCreatesFromString
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testEnsuresWrappedArraysAreInCorrectLocations with data set #0
+GuzzleHttp\Tests\Post\PostFileTest::testDefaultsToNameWhenNoFilenameExists
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testEnsuresWrappedArraysAreInCorrectLocations with data set #1
+GuzzleHttp\Tests\Post\PostFileTest::testGetsFilenameFromMetadata
 .
-Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testEnsuresWrappedArraysAreInCorrectLocations with data set #2
+GuzzleHttp\Tests\QueryParserTest::testCanControlDecodingType
 .
-Guzzle\Tests\Service\Command\MapFactoryTest::testCreatesCommandsUsingMappings with data set #0
+GuzzleHttp\Tests\QueryParserTest::testConvertsPlusSymbolsToSpacesByDefault
 .
-Guzzle\Tests\Service\Command\MapFactoryTest::testCreatesCommandsUsingMappings with data set #1
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #0
 .
-Guzzle\Tests\Service\Command\MapFactoryTest::testCreatesCommandsUsingMappings with data set #2
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #1
 .
-Guzzle\Tests\Service\Command\OperationCommandTest::testAllowsRawResponses
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #10
 .
-Guzzle\Tests\Service\Command\OperationCommandTest::testHasRequestSerializer
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #11
 .
-Guzzle\Tests\Service\Command\OperationCommandTest::testParsesResponsesUsingModelParserWhenMatchingModelIsFound
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #12
 .
-Guzzle\Tests\Service\Command\OperationCommandTest::testParsesResponsesWithResponseParser
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #13
 .
-Guzzle\Tests\Service\Command\OperationCommandTest::testPreparesRequestUsingSerializer
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #14
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testAdditionalPropertiesDisabledDiscardsData
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #15
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testAdditionalPropertiesWithRefAreResolved
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #16
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testAllowsModelProcessingToBeDisabled
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #2
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testCanAddListenerToParseDomainObjects
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #3
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testCanInjectModelSchemaIntoModels
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #4
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testCreatesCustomResponseClassInterface
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #5
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testDoesNotParseXmlWhenNotUsingXmlVisitor
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #6
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testEnsuresResponseClassExists
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #7
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testEnsuresResponseClassImplementsResponseClassInterface
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #8
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testHasVisitors
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #9
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testSkipsUnkownModels
+GuzzleHttp\Tests\QueryTest::testAggregatesMultipleValues
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testUsesParentParser
+GuzzleHttp\Tests\QueryTest::testAllowsMultipleValuesPerKey
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testVisitsAdditionalProperties
+GuzzleHttp\Tests\QueryTest::testAllowsZeroValues
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testVisitsLocations
+GuzzleHttp\Tests\QueryTest::testCanCastToString
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testVisitsLocationsForJsonResponse
+GuzzleHttp\Tests\QueryTest::testCanChangeUrlEncodingDecodingToRfc1738
 .
-Guzzle\Tests\Service\Command\ServiceDescriptionFactoryTest::testCreatesCommandsUsingServiceDescriptions with data set #0
+GuzzleHttp\Tests\QueryTest::testCanChangeUrlEncodingDecodingToRfc3986
 .
-Guzzle\Tests\Service\Command\ServiceDescriptionFactoryTest::testCreatesCommandsUsingServiceDescriptions with data set #1
+GuzzleHttp\Tests\QueryTest::testCanDisableUrlEncoding
 .
-Guzzle\Tests\Service\Command\ServiceDescriptionFactoryTest::testCreatesCommandsUsingServiceDescriptions with data set #2
+GuzzleHttp\Tests\QueryTest::testCanDisableUrlEncodingDecoding
 .
-Guzzle\Tests\Service\Command\ServiceDescriptionFactoryTest::testProvider
+GuzzleHttp\Tests\QueryTest::testCanSetAggregator
 .
-Guzzle\Tests\Service\Command\ServiceDescriptionFactoryTest::testUsesInflectionIfNoExactMatch
+GuzzleHttp\Tests\QueryTest::testCanSpecifyRfc1783UrlEncodingType
 .
-Guzzle\Tests\Service\Command\ServiceDescriptionFactoryTest::testUsesUcFirstIfNoExactMatch
+GuzzleHttp\Tests\QueryTest::testCanSpecifyRfc3986UrlEncodingType
 .
-Guzzle\Tests\Service\Command\VisitorFlyweightTest::testAllowsAddingVisitors
+GuzzleHttp\Tests\QueryTest::testDuplicateEncodesNoNumericIndices
 .
-Guzzle\Tests\Service\Command\VisitorFlyweightTest::testCachesVisitors
+GuzzleHttp\Tests\QueryTest::testEncodesDuplicateAggregator
 .
-Guzzle\Tests\Service\Command\VisitorFlyweightTest::testCanUseCustomMappings
+GuzzleHttp\Tests\QueryTest::testEncodesPhpAggregator
 .
-Guzzle\Tests\Service\Command\VisitorFlyweightTest::testThrowsExceptionWhenRetrievingUnknownVisitor
+GuzzleHttp\Tests\QueryTest::testPhpEncodesNoNumericIndices
 .
-Guzzle\Tests\Service\Command\VisitorFlyweightTest::testUsesDefaultMappingsWithGetInstance
+GuzzleHttp\Tests\QueryTest::testValidatesEncodingType
 .
-Guzzle\Tests\Service\Description\OperationTest::testAddsNameToParametersIfNeeded
+GuzzleHttp\Tests\Subscriber\CookieTest::testCookiesAreExtractedFromRedirectResponses
 .
-Guzzle\Tests\Service\Description\OperationTest::testAllowsConcreteCommands
+GuzzleHttp\Tests\Subscriber\CookieTest::testExtractsAndStoresCookies
 .
-Guzzle\Tests\Service\Description\OperationTest::testCanBuildUpCommands
+GuzzleHttp\Tests\Subscriber\CookieTest::testProvidesCookieJar
 .
-Guzzle\Tests\Service\Description\OperationTest::testCanRemoveParams
+GuzzleHttp\Tests\Subscriber\HistoryTest::testAddsForErrorEvent
 .
-Guzzle\Tests\Service\Description\OperationTest::testContainsApiErrorInformation
+GuzzleHttp\Tests\Subscriber\HistoryTest::testCanCastToString
 .
-Guzzle\Tests\Service\Description\OperationTest::testConvertsToArray
+GuzzleHttp\Tests\Subscriber\HistoryTest::testClearsHistory
 .
-Guzzle\Tests\Service\Description\OperationTest::testDeterminesIfHasParam
+GuzzleHttp\Tests\Subscriber\HistoryTest::testMaintainsLimitValue
 .
-Guzzle\Tests\Service\Description\OperationTest::testHasAdditionalParameters
+GuzzleHttp\Tests\Subscriber\MockTest::testAddsMockResponseToRequestFromClient
 .
-Guzzle\Tests\Service\Description\OperationTest::testHasData
+GuzzleHttp\Tests\Subscriber\MockTest::testCanClearQueue
 .
-Guzzle\Tests\Service\Description\OperationTest::testHasNotes
+GuzzleHttp\Tests\Subscriber\MockTest::testCanMockBadRequestExceptions
 .
-Guzzle\Tests\Service\Description\OperationTest::testHasResponseType
+GuzzleHttp\Tests\Subscriber\MockTest::testDescribesSubscribedEvents
 .
-Guzzle\Tests\Service\Description\OperationTest::testHasServiceDescription
+GuzzleHttp\Tests\Subscriber\MockTest::testIsCountable
 .
-Guzzle\Tests\Service\Description\OperationTest::testInfersResponseType
+GuzzleHttp\Tests\Subscriber\MockTest::testReadsBodiesFromMockedRequests
 .
-Guzzle\Tests\Service\Description\OperationTest::testOperationIsDataObject
+GuzzleHttp\Tests\Subscriber\MockTest::testRetrievesResponsesFromFiles
 .
-Guzzle\Tests\Service\Description\OperationTest::testReturnsParamNames
+GuzzleHttp\Tests\Subscriber\MockTest::testThrowsExceptionWhenInvalidResponse
 .
-Guzzle\Tests\Service\Description\OperationTest::testValidatesResponseType
+GuzzleHttp\Tests\Subscriber\MockTest::testUpdateThrowsExceptionWhenEmpty
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAddsAdditionalProperties
+GuzzleHttp\Tests\UriTemplateTest::testAllowsNestedArrayExpansion
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAddsItems
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #0
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAllowsComplexFilters
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #1
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAllowsNestedShape
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #10
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAllowsSimpleLocationValue
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #11
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAppliesFormat with data set #0
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #12
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAppliesFormat with data set #1
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #13
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAppliesFormat with data set #2
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #14
 .
-Guzzle\Tests\Service\Description\ParameterTest::testAppliesFormat with data set #3
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #15
 .
-Guzzle\Tests\Service\Description\ParameterTest::testCanBuildUpParams
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #16
 .
-Guzzle\Tests\Service\Description\ParameterTest::testCanChangeParentOfNestedParameter
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #17
 .
-Guzzle\Tests\Service\Description\ParameterTest::testCanConvertToArray
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #18
 .
-Guzzle\Tests\Service\Description\ParameterTest::testCanRemoveFromNestedStructure
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #19
 .
-Guzzle\Tests\Service\Description\ParameterTest::testCanRetrieveKnownPropertiesUsingDataMethod
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #2
 .
-Guzzle\Tests\Service\Description\ParameterTest::testConvertsBooleans
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #20
 .
-Guzzle\Tests\Service\Description\ParameterTest::testCreatesParamFromArray
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #21
 .
-Guzzle\Tests\Service\Description\ParameterTest::testFiltersValues
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #22
 .
-Guzzle\Tests\Service\Description\ParameterTest::testHasEnum
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #23
 .
-Guzzle\Tests\Service\Description\ParameterTest::testHasExtraProperties
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #24
 .
-Guzzle\Tests\Service\Description\ParameterTest::testHasInstanceOf
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #25
 .
-Guzzle\Tests\Service\Description\ParameterTest::testHasKeyMethod
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #26
 .
-Guzzle\Tests\Service\Description\ParameterTest::testHasPattern
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #27
 .
-Guzzle\Tests\Service\Description\ParameterTest::testIncludesNameInToArrayWhenItemsAttributeHasName
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #28
 .
-Guzzle\Tests\Service\Description\ParameterTest::testParsesTypeValues
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #29
 .
-Guzzle\Tests\Service\Description\ParameterTest::testResolvesExtendsRecursively
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #3
 .
-Guzzle\Tests\Service\Description\ParameterTest::testResolvesRefKeysRecursively
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #30
 .
-Guzzle\Tests\Service\Description\ParameterTest::testReturnsYourValue
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #31
 .
-Guzzle\Tests\Service\Description\ParameterTest::testSerializesItems
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #32
 .
-Guzzle\Tests\Service\Description\ParameterTest::testUsesArrayByDefaultForFilters
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #33
 .
-Guzzle\Tests\Service\Description\ParameterTest::testUsesDefault
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #34
 .
-Guzzle\Tests\Service\Description\ParameterTest::testUsesStatic
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #35
 .
-Guzzle\Tests\Service\Description\ParameterTest::testValidatesComplexFilters
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #36
 .
-Guzzle\Tests\Service\Description\ParameterTest::testZeroValueDoesNotCauseDefaultToBeReturned
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #37
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testEnsuresTimestampsAreIntegers
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #38
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #0
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #39
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #1
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #4
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #10
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #40
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #11
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #41
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #12
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #42
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #13
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #43
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #14
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #44
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #15
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #45
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #2
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #46
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #3
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #47
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #4
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #48
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #5
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #49
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #6
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #5
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #7
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #50
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #8
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #51
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testFilters with data set #9
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #52
 .
-Guzzle\Tests\Service\Description\SchemaFormatterTest::testValidatesDateTimeInput
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #53
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testAddsDefaultValuesInLists
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #54
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testAllowsInstanceOf
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #55
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testAllowsUndefinedAdditionalProperties
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #56
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testChecksTypes
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #57
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testConvertsObjectsToArraysWhenToArrayInterface
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #58
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testCorrectlyConvertsParametersToArrayWhenArraysArePresent
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #59
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testEnforcesInstanceOfOnlyWhenObject
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #6
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testFailsWhenNullValuesInArraysWithNoDefaults
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #60
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testHandlesNullValuesInArraysWithDefaults
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #61
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testIntegersCastToStringWhenTypeMismatch
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #62
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testMergesDefaultValuesInLists
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #63
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testMergesValidationErrorsInPropertiesWithParent
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #64
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testRequiredMessageIncludesType
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #65
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testValidatesAdditionalProperties
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #66
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testValidatesAdditionalPropertiesThatArrayArrays
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #67
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testValidatesArrayListsAreNumericallyIndexed
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #68
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testValidatesArrayListsContainProperItems
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #69
 .
-Guzzle\Tests\Service\Description\SchemaValidatorTest::testValidatesFalseAdditionalProperties
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #7
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionLoaderTest::testAddsOtherFields
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #70
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionLoaderTest::testAllowsDeepNestedInheritance
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #71
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionLoaderTest::testAllowsExtraData
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #72
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionLoaderTest::testAllowsMultipleInheritance
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #73
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionLoaderTest::testCanLoadNestedExtends
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #8
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionLoaderTest::testThrowsExceptionWhenExtendingMissingCommand
+GuzzleHttp\Tests\UriTemplateTest::testExpandsUriTemplates with data set #9
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testAllowsForJsonBasedArrayParamsFunctionalTest
+GuzzleHttp\Tests\UriTemplateTest::testParsesExpressions with data set #0
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testCanAddModels
+GuzzleHttp\Tests\UriTemplateTest::testParsesExpressions with data set #1
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testCanAddOperations
+GuzzleHttp\Tests\UriTemplateTest::testParsesExpressions with data set #2
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testCanUseBasePath
+GuzzleHttp\Tests\UrlTest::testAddsQueryIfPresent
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testConstructor
+GuzzleHttp\Tests\UrlTest::testAddsToPath
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testContainsModels
+GuzzleHttp\Tests\UrlTest::testAllowsFalsyUrlParts
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testFactoryDelegatesToConcreteFactories
+GuzzleHttp\Tests\UrlTest::testBuildsRelativeUrlsWithFalsyParts
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testHasAttributes
+GuzzleHttp\Tests\UrlTest::testCloneCreatesNewInternalObjects
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testHasBaseUrl
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #0
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testHasToArray
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #1
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testIsSerializable
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #10
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testModelsHaveNames
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #11
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testPersistsCustomAttributes
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #12
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testReturnsNullWhenRetrievingMissingOperation
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #13
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testSerializesParameters
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #14
 .
-Guzzle\Tests\Service\Description\ServiceDescriptionTest::testValidatesOperationTypes
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #15
 .
-Guzzle\Tests\Service\Exception\CommandTransferExceptionTest::testAddsNonRequestExceptions
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #16
 .
-Guzzle\Tests\Service\Exception\CommandTransferExceptionTest::testCanRetrieveExceptionForCommand
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #17
 .
-Guzzle\Tests\Service\Exception\CommandTransferExceptionTest::testConvertsMultiExceptionIntoCommandTransfer
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #18
 .
-Guzzle\Tests\Service\Exception\CommandTransferExceptionTest::testStoresCommands
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #19
 .
-Guzzle\Tests\Service\Exception\InconsistentClientTransferExceptionTest::testStoresCommands
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #2
 .
-Guzzle\Tests\Service\Exception\ValidationExceptionTest::testCanSetAndRetrieveErrors
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #20
 .
-Guzzle\Tests\Service\Resource\CompositeResourceIteratorFactoryTest::testBuildsResourceIterators
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #21
 .
-Guzzle\Tests\Service\Resource\CompositeResourceIteratorFactoryTest::testEnsuresIteratorClassExists
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #22
 .
-Guzzle\Tests\Service\Resource\MapResourceIteratorFactoryTest::testBuildsResourceIterators
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #23
 .
-Guzzle\Tests\Service\Resource\MapResourceIteratorFactoryTest::testEnsuresIteratorClassExists
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #24
 .
-Guzzle\Tests\Service\Resource\MapResourceIteratorFactoryTest::testUsesWildcardMappings
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #25
 .
-Guzzle\Tests\Service\Resource\ModelTest::testAllowsFiltering
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #26
 .
-Guzzle\Tests\Service\Resource\ModelTest::testCanBeUsedWithoutStructure
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #27
 .
-Guzzle\Tests\Service\Resource\ModelTest::testDoesIncludeModelStructureInString
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #28
 .
-Guzzle\Tests\Service\Resource\ModelTest::testDoesNotIncludeEmptyStructureInString
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #29
 .
-Guzzle\Tests\Service\Resource\ModelTest::testOwnsStructure
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #3
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorClassFactoryTest::testBuildsResourceIterators
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #30
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorClassFactoryTest::testChecksIfCanBuild
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #31
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorClassFactoryTest::testEnsuresIteratorClassExists
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #32
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testBailsWhenSendReturnsNoResults
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #33
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testCalculatesPageSize
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #34
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testConstructorConfiguresDefaults
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #35
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testDescribesEvents
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #36
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testHoldsDataOptions
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #37
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testSendsRequestsForNextSetOfResources
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #38
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testSettingLimitOrPageSizeClearsData
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #39
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testUseAsArray
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #4
 .
-Guzzle\Tests\Service\Resource\ResourceIteratorTest::testWorksWithCustomAppendIterator
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #40
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testAddsGlobalPlugins
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #41
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testAllowsSerialization
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #42
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testBuilderAllowsReferencesBetweenClients
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #43
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testBuildersPassOptionsThroughToClients
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #44
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testCanAddGlobalParametersToServicesOnLoad
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #45
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testCanGetByAlias
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #46
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testCanGetData
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #47
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testCanOverwriteParametersForThrowawayClients
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #48
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testCanRegisterServiceData
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #49
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testCanUseArbitraryData
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #5
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testDelegatesFactoryMethodToAbstractFactory
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #50
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testEmitsEventsWhenClientsAreCreated
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #51
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testFactoryCanCreateFromArray
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #6
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testFactoryCanCreateFromJson
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #7
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testFactoryDoesNotRequireParams
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #8
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testGettingAThrowawayClientWithParametersDoesNotAffectGettingOtherClients
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #9
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testStoresClientCopy
+GuzzleHttp\Tests\UrlTest::testConvertsSpecialCharsInPathWhenCastingToString
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testThrowsExceptionWhenGettingInvalidClient
+GuzzleHttp\Tests\UrlTest::testEmptyUrl
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testUsedAsArray
+GuzzleHttp\Tests\UrlTest::testHandlesPathsCorrectly
 .
-Guzzle\Tests\Service\ServiceBuilderTest::testUsesTheDefaultBuilderWhenNoBuilderIsSpecified
+GuzzleHttp\Tests\UrlTest::testHasGettersAndSetters
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAddsBody
+GuzzleHttp\Tests\UrlTest::testPortIsDeterminedFromScheme
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAddsPostFields
+GuzzleHttp\Tests\UrlTest::testQueryMustBeValid
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAppliesProxySettings
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #0
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testBasicAuthAddsUserAndPassToUrl
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #1
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testCanCreateCustomStreamClass
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #10
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testCanDisableSslValidation
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #11
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testOpensValidStreamByCreatingContext
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #12
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testOpensValidStreamByPassingContextAndMerging
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #13
 .
-Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testUsesSslValidationByDefault
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #14
 .
-Guzzle\Tests\Stream\StreamTest::testAbstractsMetaData
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #15
 .
-Guzzle\Tests\Stream\StreamTest::testAllowsSettingManualSize
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #16
 .
-Guzzle\Tests\Stream\StreamTest::testCanDetachStream
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #2
 .
-Guzzle\Tests\Stream\StreamTest::testCanModifyStream
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #3
 .
-Guzzle\Tests\Stream\StreamTest::testConstructor
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #4
 .
-Guzzle\Tests\Stream\StreamTest::testConstructorThrowsExceptionOnInvalidArgument
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #5
 .
-Guzzle\Tests\Stream\StreamTest::testConvertsToString
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #6
 .
-Guzzle\Tests\Stream\StreamTest::testConvertsToStringAndRestoresCursorPos
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #7
 .
-Guzzle\Tests\Stream\StreamTest::testDoesNotAttemptToWriteToReadonlyStream
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #8
 .
-Guzzle\Tests\Stream\StreamTest::testEnsuresSizeIsConsistent
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #9
 .
-Guzzle\Tests\Stream\StreamTest::testGetSize
+GuzzleHttp\Tests\UrlTest::testRemovesDefaultPortWhenSettingScheme
 .
-Guzzle\Tests\Stream\StreamTest::testIsConsumed
+GuzzleHttp\Tests\UrlTest::testSetQueryAcceptsArray
 .
-Guzzle\Tests\Stream\StreamTest::testProvidesStreamPosition
+GuzzleHttp\Tests\UrlTest::testSettingHostWithPortModifiesPort
 .
-Guzzle\Tests\Stream\StreamTest::testRewindIsSeekZero
+GuzzleHttp\Tests\UrlTest::testUrlStoresParts
 .
-Guzzle\Tests\Stream\StreamTest::testStreamClosesHandleOnDestruct
+GuzzleHttp\Tests\UrlTest::testValidatesUrlCanBeParsed
 .
-Guzzle\Tests\Stream\StreamTest::testWrapsStream
+GuzzleHttp\Tests\UrlTest::testValidatesUrlPartsInFactory
 .

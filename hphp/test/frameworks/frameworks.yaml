@@ -128,26 +128,32 @@
     commit: 40c897afe69ed59582b30cb05f437e544ce46bdf
     install_root: fastroute
     test_root: fastroute
-  guzzle:
+  guzzle3:
     url: https://github.com/guzzle/guzzle3.git
     # Slightly after v3.8.1 - need:
     #   https://github.com/guzzle/guzzle3/pull/20
     #   https://github.com/guzzle/guzzle3/pull/22
     branch: master
     commit: fa0046309160ea52aeed51b5608adfd263dfa0a2
-    install_root: guzzle
-    test_root: guzzle
+    install_root: guzzle3
+    test_root: guzzle3
     flakey:
       # Depends on external resource (example.com), unreliable
-      - guzzle/tests/Guzzle/Tests/Plugin/Async/AsyncPluginTest.php
-  guzzle4:
+      - guzzle3/tests/Guzzle/Tests/Plugin/Async/AsyncPluginTest.php
+  guzzle:
     url: https://github.com/guzzle/guzzle.git
     branch: 4.1.6
     commit: e49ad58038b46a0d7739627a72f6d998cd92d3d6
-    install_root: guzzle4
-    test_root: guzzle4
+    install_root: guzzle
+    test_root: guzzle
     test_find_mode: token
     sequential: true
+  guzzle-streams:
+    url: https://github.com/guzzle/streams.git
+    branch: 1.4.0
+    commit: 3b761a328e5ed6ed519e960aded95d7acbe77894
+    install_root: guzzle-streams
+    test_root: guzzle-streams
   hhvmquicktests:
     do_not_install: true
     test_root: ../hhvm/quick

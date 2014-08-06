@@ -1047,6 +1047,7 @@ function run_and_lock_test($options, $test) {
   if (!flock($lock, LOCK_EX)) return false;
   $result = run_test($options, $test);
   if (!flock($lock, LOCK_UN)) return false;
+  fclose($lock);
   return $result;
 }
 

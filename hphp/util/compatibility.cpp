@@ -64,7 +64,10 @@ int dprintf(int fd, const char *format, ...) {
 #endif
 
 int gettime(clockid_t which_clock, struct timespec *tp) {
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__CYGWIN__)
+  // let's bypass trying to load vdso
+  return clock_gettime(which_clock, tp);
+#elif defined(__APPLE__) || defined(__FreeBSD__)
   // XXX: OSX doesn't support realtime so we ignore which_clock
   struct timeval tv;
   int ret = gettimeofday(&tv, nullptr);
@@ -93,6 +96,52 @@ int fadvise_dontneed(int fd, off_t len) {
   return posix_fadvise(fd, 0, len, POSIX_FADV_DONTNEED);
 #endif
 }
+
+#if defined(__CYGWIN__)
+#include <windows.h>
+#include <libintl.h>
+
+// since we only support win 7+
+// capturestackbacktrace is always available in kernel
+int backtrace (void **buffer, int size) {
+  USHORT frames;
+
+  if (size <= 0) {
+    return 0;
+  }
+
+  frames = CaptureStackBackTrace(0, (DWORD) size, buffer, nullptr);
+
+  return (int) frames;
+}
+
+int dladdr(const void *addr, Dl_info *info) {
+  MEMORY_BASIC_INFORMATION mem_info;
+  HMODULE module;
+  char moduleName[MAX_PATH];
+
+  if(!VirtualQuery(addr, &mem_info, sizeof(mem_info))) {
+    return 0;
+  }
+
+  if(!GetModuleFileNameA(module, moduleName, sizeof(moduleName))) {
+    return 0;
+  }
+
+  info->dli_fname = (char *)(malloc(strlen(moduleName) + 1));
+  strcpy((char *)info->dli_fname, moduleName);
+  info->dli_fbase = mem_info.BaseAddress;
+  info->dli_sname = nullptr;
+  info->dli_saddr = (void *) addr;
+
+  return 1;
+}
+
+// libbfd on cygwin is broken, stub dgettext to make linker unstupid
+char * libintl_dgettext(const char *domainname, const char *msgid) {
+  return dgettext(domainname, msgid);
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

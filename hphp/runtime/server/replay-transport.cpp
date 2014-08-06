@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
@@ -139,7 +140,7 @@ void ReplayTransport::sendImpl(const void *data, int size, int code,
   m_response = "HTTP/1.1 ";
   m_response += boost::lexical_cast<std::string>(code);
   m_response += " ";
-  m_response += (m_code == 200 ? "OK" : "Internal Server Error");
+  m_response += HttpProtocol::GetReasonString(m_code);
   m_response += "\r\n";
 
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();

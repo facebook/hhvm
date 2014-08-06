@@ -38,16 +38,8 @@ FrameState::FrameState(IRUnit& unit, BCMarker marker)
 FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
   : m_unit(unit)
   , m_curFunc(func)
-  , m_spValue(nullptr)
-  , m_fpValue(nullptr)
   , m_spOffset(initialSpOffset)
-  , m_thisAvailable(false)
-  , m_frameSpansCall(false)
-  , m_stackDeficit(0)
-  , m_evalStack()
   , m_locals(func ? func->numLocals() : 0)
-  , m_enableCse(false)
-  , m_snapshots()
 {
 }
 

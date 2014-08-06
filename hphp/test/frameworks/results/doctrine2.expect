@@ -1,5 +1,3 @@
-Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetCacheClassName
-.
 Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetCacheFactory
 .
 Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetCacheLogger
@@ -770,6 +768,8 @@ Doctrine\Tests\ORM\Functional\CompositePrimaryKeyTest::testSetParameterComposite
 .
 Doctrine\Tests\ORM\Functional\CompositePrimaryKeyTest::testSpecifyUnknownIdentifierPrimaryKeyFails
 .
+Doctrine\Tests\ORM\Functional\CustomFunctionsTest::testCustomFunctionDefinedWithCallback
+.
 Doctrine\Tests\ORM\Functional\CustomTreeWalkersTest::testSetUnknownQueryComponentThrowsException
 .
 Doctrine\Tests\ORM\Functional\CustomTreeWalkersTest::testSupportsQueriesWithMultipleConditionalExpressions
@@ -826,6 +826,10 @@ Doctrine\Tests\ORM\Functional\EntityListenersTest::testPreRemoveListeners
 .
 Doctrine\Tests\ORM\Functional\EntityListenersTest::testPreUpdateListeners
 .
+Doctrine\Tests\ORM\Functional\EntityRepositoryCriteriaTest::testCanContainsWithoutLoadingCollection
+.
+Doctrine\Tests\ORM\Functional\EntityRepositoryCriteriaTest::testCanCountWithoutLoadingCollection
+.
 Doctrine\Tests\ORM\Functional\EntityRepositoryCriteriaTest::testEqNullComparison
 .
 Doctrine\Tests\ORM\Functional\EntityRepositoryCriteriaTest::testIsNullComparison
@@ -866,6 +870,10 @@ Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindByFieldInjectionPrev
 .
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindByLimitOffset
 .
+Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindByNullValueInInCondition
+.
+Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindByNullValueInMultipleInCriteriaValues
+.
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindByOrderBy
 .
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindByOrderByAssociation
@@ -879,6 +887,8 @@ Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindFieldByMagicCallOrde
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindInjectionPrevented
 .
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindMagicCallByNullValue
+.
+Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindMultipleByNullValueInMultipleInCriteriaValues
 .
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testFindOneAssociationByMagicCall
 .
@@ -1220,7 +1230,9 @@ Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldSupportSimpleArithmetic
 .
 Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldSupportValueObjectNamespaceAlias
 .
-Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldSupportsBasicUsage
+Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldSupportsBasicUsage with data set #0
+.
+Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldSupportsBasicUsage with data set #1
 .
 Doctrine\Tests\ORM\Functional\NotifyPolicyTest::testChangeTracking
 .
@@ -1364,6 +1376,8 @@ Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data
 .
 Doctrine\Tests\ORM\Functional\PaginationTest::testQueryWalkerIsKept
 .
+Doctrine\Tests\ORM\Functional\PersistentCollectionCriteriaTest::testCanCountWithoutLoadingPersistentCollection
+.
 Doctrine\Tests\ORM\Functional\PersistentCollectionTest::testExtraLazyIsEmptyDoesNotInitializeCollection
 .
 Doctrine\Tests\ORM\Functional\PersistentCollectionTest::testPersist
@@ -1403,7 +1417,7 @@ Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testEntityWithIdentifier
 Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testFindWithProxyName
 .
 Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testPersistUpdate
-E
+.
 Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testProxyAsDqlParameterPersist
 .
 Doctrine\Tests\ORM\Functional\QueryCacheTest::testQueryCache_DependsOnFirstResult
@@ -1492,8 +1506,6 @@ Doctrine\Tests\ORM\Functional\QueryTest::testIterateResult_IterativelyBuildUpUni
 .
 Doctrine\Tests\ORM\Functional\QueryTest::testJoinQueries
 .
-Doctrine\Tests\ORM\Functional\QueryTest::testMismatchingParamExpectedParamCount
-.
 Doctrine\Tests\ORM\Functional\QueryTest::testModifiedLimitQuery
 .
 Doctrine\Tests\ORM\Functional\QueryTest::testMultipleJoinComponentsUsingInnerJoin
@@ -1519,6 +1531,10 @@ Doctrine\Tests\ORM\Functional\QueryTest::testSetParametersBackwardsCompatible
 Doctrine\Tests\ORM\Functional\QueryTest::testSimpleQueries
 .
 Doctrine\Tests\ORM\Functional\QueryTest::testSupportsQueriesWithEntityNamespaces
+.
+Doctrine\Tests\ORM\Functional\QueryTest::testTooFewParametersShouldThrowException
+.
+Doctrine\Tests\ORM\Functional\QueryTest::testTooManyParametersShouldThrowException
 .
 Doctrine\Tests\ORM\Functional\QueryTest::testUnexpectedResultException
 .
@@ -1711,6 +1727,8 @@ Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with da
 Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #12
 .
 Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #13
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #14
 .
 Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #2
 .
@@ -2240,6 +2258,8 @@ Doctrine\Tests\ORM\Functional\Ticket\DDC2494Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC2519Test::testIssue
 .
+Doctrine\Tests\ORM\Functional\Ticket\DDC2575Test::testHydrationIssue
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC2579Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC258Test::testIssue
@@ -2276,13 +2296,27 @@ Doctrine\Tests\ORM\Functional\Ticket\DDC2943Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC2943Test::testIssueNonFetchJoin
 .
+Doctrine\Tests\ORM\Functional\Ticket\DDC2984Test::testIssue
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC2996Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC3033Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC3042Test::testSQLGenerationDoesNotProvokeAliasCollisions
 .
+Doctrine\Tests\ORM\Functional\Ticket\DDC3068Test::testFindUsingAnArrayOfObjectAsPrimaryKey
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC309Test::testTwoIterateHydrations
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC3103Test::testIssue
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC3123Test::testIssue
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC3160Test::testNoUpdateOnInsert
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC3170Test::testIssue
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC3192Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC331Test::testSelectFieldOnRootEntity
 .
@@ -2472,6 +2506,8 @@ Doctrine\Tests\ORM\Functional\ValueObjectsTest::testEmbeddableWithinEmbeddable
 .
 Doctrine\Tests\ORM\Functional\ValueObjectsTest::testInlineEmbeddableEmptyPrefix
 .
+Doctrine\Tests\ORM\Functional\ValueObjectsTest::testInlineEmbeddableInMappedSuperClass
+.
 Doctrine\Tests\ORM\Functional\ValueObjectsTest::testInlineEmbeddablePrefixFalse
 .
 Doctrine\Tests\ORM\Functional\ValueObjectsTest::testInlineEmbeddableWithPrefix
@@ -2482,23 +2518,43 @@ Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with 
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #1
 .
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #2
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #3
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testEntityQueryCustomResultSetOrder
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #0
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #1
 .
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #2
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #3
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #0
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #1
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #2
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #3
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #0
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #1
 .
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #2
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #3
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #2
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #3
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin
 .
@@ -2508,6 +2564,10 @@ Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with da
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #1
 .
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #2
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #3
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testResultIteration
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testResultIterationWithAliasedUserEntity
@@ -2515,6 +2575,14 @@ Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testResultIterationWithAliasedUs
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleEntityQuery
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleEntityQueryWithAliasedUserEntity
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleEntityWithScalarQuery with data set #0
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleEntityWithScalarQuery with data set #1
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleEntityWithScalarQuery with data set #2
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleEntityWithScalarQuery with data set #3
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleMultipleRootEntityQuery
 .
@@ -2545,6 +2613,8 @@ Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with 
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #0
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #1
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testInvalidDiscriminatorValueException
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testManyToManyHydration
 .
@@ -2628,6 +2698,8 @@ Doctrine\Tests\ORM\Hydration\ScalarHydratorTest::testSkipUnknownColumns
 .
 Doctrine\Tests\ORM\Hydration\SimpleObjectHydratorTest::testExtraFieldInResultSetShouldBeIgnore
 .
+Doctrine\Tests\ORM\Hydration\SimpleObjectHydratorTest::testInvalidDiscriminatorValueException
+.
 Doctrine\Tests\ORM\Hydration\SimpleObjectHydratorTest::testMissingDiscriminatorColumnException
 .
 Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #0
@@ -2643,6 +2715,14 @@ Doctrine\Tests\ORM\Id\AssignedGeneratorTest::testCorrectIdGeneration
 Doctrine\Tests\ORM\Id\AssignedGeneratorTest::testThrowsExceptionIfIdNotAssigned
 .
 Doctrine\Tests\ORM\Id\SequenceGeneratorTest::testGeneration
+.
+Doctrine\Tests\ORM\LazyCriteriaCollectionTest::testCountIsCached
+.
+Doctrine\Tests\ORM\LazyCriteriaCollectionTest::testCountIsCachedEvenWithZeroResult
+.
+Doctrine\Tests\ORM\LazyCriteriaCollectionTest::testCountUsesWrappedCollectionWhenInitialized
+.
+Doctrine\Tests\ORM\LazyCriteriaCollectionTest::testMatchingUsesThePersisterOnlyOnce
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testAssociationOverridesMapping
 .
@@ -2663,6 +2743,8 @@ Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testDiscriminatorColumnDefaults
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testDiscriminatorColumnDefinition
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityCustomGenerator
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityIndexFlags
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityIndexes
 .
@@ -3070,6 +3152,8 @@ Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testDiscriminatorColumnDefiniti
 .
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testEntityCustomGenerator
 .
+Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testEntityIndexFlags
+.
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testEntityIndexes
 .
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testEntityListeners
@@ -3168,6 +3252,8 @@ Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testDiscriminatorColumnDe
 .
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testEntityCustomGenerator
 .
+Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testEntityIndexFlags
+.
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testEntityIndexes
 .
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testEntityListeners
@@ -3253,6 +3339,8 @@ Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEmbeddableMapping
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEmbeddedMapping
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityCustomGenerator
+.
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityIndexFlags
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityIndexes
 .
@@ -3364,6 +3452,8 @@ Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #3
 .
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #30
+.
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #4
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #5
@@ -3395,6 +3485,8 @@ Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testDiscriminatorColumnDefault
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testDiscriminatorColumnDefinition
 .
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testEntityCustomGenerator
+.
+Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testEntityIndexFlags
 .
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testEntityIndexes
 .
@@ -3474,6 +3566,10 @@ Doctrine\Tests\ORM\PersistentCollectionTest::testKeyInitializesCollection
 .
 Doctrine\Tests\ORM\PersistentCollectionTest::testNextInitializesCollection
 .
+Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testCountCondition
+.
+Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testCountEntities
+.
 Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testGetInsertSQLUsesTypeValuesSQL
 .
 Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testGetSelectConditionSQLUsesTypeValuesSQL
@@ -3483,6 +3579,8 @@ Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testSelectCo
 Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testSelectConditionStatementIsNull
 .
 Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testSelectConditionStatementNeqNull
+.
+Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testSelectConditionStatementWithMultipleValuesContainingNull
 .
 Doctrine\Tests\ORM\Persisters\BasicEntityPersisterTypeValueSqlTest::testStripNonAlphanumericCharactersFromSelectColumnListSQL
 .
@@ -3896,6 +3994,8 @@ Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testHavingSupportIsNullExpress
 .
 Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testHavingSupportLikeExpression
 .
+Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testHavingSupportResultVariableInNullComparisonExpression
+.
 Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testImplicitJoinInWhereOnCollectionValuedPathExpression
 .
 Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testImplicitJoinInWhereOnSingleValuedAssociationPathExpression
@@ -3955,6 +4055,8 @@ Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testMultipleParenthesisInSelec
 Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testNamedInputParameter
 .
 Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testNewLiteralExpression
+.
+Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testNewLiteralWithSubselectExpression
 .
 Doctrine\Tests\ORM\Query\LanguageRecognitionTest::testNotBetweenExpressionSupported
 .
@@ -4118,6 +4220,8 @@ Doctrine\Tests\ORM\Query\QueryTest::testClone
 .
 Doctrine\Tests\ORM\Query\QueryTest::testCollectionParameters
 .
+Doctrine\Tests\ORM\Query\QueryTest::testDefaultQueryHints
+.
 Doctrine\Tests\ORM\Query\QueryTest::testFluentQueryInterface
 .
 Doctrine\Tests\ORM\Query\QueryTest::testFree
@@ -4206,6 +4310,8 @@ Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testHavingSupportResultVariabl
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testHavingSupportResultVariableLikeExpression
 .
+Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testHavingSupportResultVariableNullComparisonExpression
+.
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testIdVariableResultVariableReuse
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testIdentityFunctionDoesNotAcceptStateField
@@ -4267,6 +4373,8 @@ Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testNestedExpressions3
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testNotExistsExpression
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testOrderByClauseShouldReplaceOrderByRelationMapping
+.
+Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testOrderByClauseSupportsFunction
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testOrderByClauseSupportsSimpleArithmeticExpression
 .
@@ -4408,6 +4516,8 @@ Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsJoinOnMultipleComp
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsMemberOfExpressionManyToMany
 .
+Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsMemberOfExpressionManyToManyParameterArray
+.
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsMemberOfExpressionOneToMany
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsMemberOfExpressionSelfReferencing
@@ -4546,7 +4656,11 @@ Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheQueryRegionCommandTest::testF
 .
 Doctrine\Tests\ORM\Tools\Console\Command\ConvertDoctrine1SchemaCommandTest::testExecution
 .
+Doctrine\Tests\ORM\Tools\Console\ConsoleRunnerTest::testCreateApplication
+.
 Doctrine\Tests\ORM\Tools\ConvertDoctrine1SchemaTest::testTest
+.
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testDoesNotRegenerateExistingMethodsWithDifferentCase
 .
 Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityExtendsStdClass
 .
@@ -4772,6 +4886,8 @@ Doctrine\Tests\ORM\Tools\Pagination\LimitSubqueryWalkerTest::testLimitSubquery
 .
 Doctrine\Tests\ORM\Tools\Pagination\LimitSubqueryWalkerTest::testLimitSubqueryWithSort
 .
+Doctrine\Tests\ORM\Tools\Pagination\LimitSubqueryWalkerTest::testLimitSubqueryWithSortOnAssociation
+.
 Doctrine\Tests\ORM\Tools\Pagination\WhereInWalkerTest::testCountQuery_MixedResultsWithName
 .
 Doctrine\Tests\ORM\Tools\Pagination\WhereInWalkerTest::testWhereInQuery_MultipleWhereWithAnd
@@ -4823,6 +4939,8 @@ Doctrine\Tests\ORM\Tools\SchemaValidatorTest::testValidOneToOneAsIdentifierSchem
 Doctrine\Tests\ORM\Tools\SetupTest::testAnnotationConfiguration
 .
 Doctrine\Tests\ORM\Tools\SetupTest::testConfigureCache
+.
+Doctrine\Tests\ORM\Tools\SetupTest::testConfigureCacheCustomInstance
 .
 Doctrine\Tests\ORM\Tools\SetupTest::testConfigureProxyDir
 .

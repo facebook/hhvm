@@ -128,6 +128,7 @@ size_t getMemSize(const ArrayData* arr) {
     return size;
   }
   case ArrayData::ArrayKind::kIntMapKind:
+  case ArrayData::ArrayKind::kStrMapKind:
   case ArrayData::ArrayKind::kMixedKind: {
     auto const mixed = MixedArray::asMixed(arr);
     auto size = sizeof(MixedArray) +

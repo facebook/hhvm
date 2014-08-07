@@ -1,7 +1,17 @@
-Warning: class_implements(): Class bbb does not exist in %s
+Warning: class_implements(): Class bbb does not exist in %s on line %d
 
-Warning: class_implements(): Class bbb does not exist and could not be loaded in %s
+Warning: class_implements(): Class bbb does not exist and could not be loaded in %s on line %d
 
-Warning: class_parents(): Class bbb does not exist in %s
+Warning: class_uses(): Class bbb does not exist in %s on line %d
 
-Warning: class_parents(): Class bbb does not exist and could not be loaded in %s
+Warning: class_uses(): Class bbb does not exist and could not be loaded in %s on line %d
+
+Warning: class_parents(): Class bbb does not exist in %s on line %d
+
+Warning: class_parents(): Class bbb does not exist and could not be loaded in %s on line %d
+
+Warning: class_implements(): object or string expected in %s on line %d
+
+Warning: class_parents(): object or string expected in %s on line %d
+
+Warning: class_uses(): object or string expected in %s on line %d

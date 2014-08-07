@@ -7,8 +7,8 @@ These zend extensions have these requirements:
 
 2. loaded into HHVM as a DSO;
 
-3. built independently from the main build tree, following the standard recipie for building
-  a zend extension for HHVM `hphpize && cmake . && make`
+3. be built independently from the main build tree, following the standard recipie for building
+a zend extension for HHVM, namely: `hphpize && cmake . && make`
 
 It is tempting to build the DSO as part of the main root-level
 all-encompassing cmake/make, but that doesn't provide an environment to

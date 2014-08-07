@@ -45,10 +45,10 @@ enum class IRGenMode {
 };
 
 enum JmpFlags {
-  JmpFlagNone          = 0,
-  JmpFlagBreakTracelet = 1,
-  JmpFlagNextIsMerge   = 2,
-  JmpFlagSurprise      = 4
+  JmpFlagNone        = 0,
+  JmpFlagEndsRegion  = 1,
+  JmpFlagNextIsMerge = 2,
+  JmpFlagSurprise    = 4
 };
 
 inline JmpFlags operator|(JmpFlags f1, JmpFlags f2) {
@@ -497,7 +497,7 @@ public:
   void emitDecodeCufIter(uint32_t iterId, int targetOffset,
                     JmpFlags jmpFlags);
   void emitCIterFree(uint32_t iterId);
-  void emitIterBreak(const ImmVector& iv, uint32_t offset, bool breakTracelet);
+  void emitIterBreak(const ImmVector& iv, uint32_t offset, bool endsRegion);
   void emitVerifyParamType(uint32_t paramId);
 
   // generators

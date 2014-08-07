@@ -1659,7 +1659,7 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset,
     emitJmpCondHelper(offset, true, jmpFlags, res);
   } else {
     gen(DecRef, src);
-    emitJmpImpl(offset, JmpFlagBreakTracelet, nullptr);
+    emitJmpImpl(offset, JmpFlagEndsRegion, nullptr);
   }
 }
 
@@ -1669,7 +1669,7 @@ void HhbcTranslator::emitCIterFree(uint32_t iterId) {
 
 void HhbcTranslator::emitIterBreak(const ImmVector& iv,
                                    uint32_t offset,
-                                   bool breakTracelet) {
+                                   bool endsRegion) {
   int iterIndex;
   for (iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
     IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
@@ -1681,7 +1681,7 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
     }
   }
 
-  if (!breakTracelet) return;
+  if (!endsRegion) return;
   gen(Jmp, makeExit(offset));
 }
 
@@ -2178,7 +2178,7 @@ void HhbcTranslator::emitJmpImpl(int32_t offset,
     gen(Jmp, target);
     return;
   }
-  if (!(flags & JmpFlagBreakTracelet)) return;
+  if (!(flags & JmpFlagEndsRegion)) return;
   gen(Jmp, makeExit(offset));
 }
 
@@ -2191,7 +2191,7 @@ void HhbcTranslator::emitJmpCondHelper(int32_t taken,
                                        bool negate,
                                        JmpFlags flags,
                                        SSATmp* src) {
-  if (flags & JmpFlagBreakTracelet) {
+  if (flags & JmpFlagEndsRegion) {
     spillStack();
   }
   if (genMode() == IRGenMode::CFG && (flags & JmpFlagNextIsMerge)) {

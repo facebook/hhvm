@@ -83,7 +83,7 @@ TRACE_SET_MOD(hhir);
 static JmpFlags instrJmpFlags(const NormalizedInstruction& ni) {
   JmpFlags flags = JmpFlagNone;
   if (ni.endsRegion) {
-    flags = flags | JmpFlagBreakTracelet;
+    flags = flags | JmpFlagEndsRegion;
   }
   if (ni.nextIsMerge) {
     flags = flags | JmpFlagNextIsMerge;

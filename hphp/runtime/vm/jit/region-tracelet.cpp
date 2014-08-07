@@ -192,10 +192,10 @@ RegionDescPtr RegionFormer::go() {
     // We successfully translated the instruction, so update m_sk.
     m_sk.advance(m_curBlock->unit());
 
-    auto const breakTracelet = m_inst.endsRegion ||
+    auto const endsRegion = m_inst.endsRegion ||
       (m_profiling && instrBreaksProfileBB(&m_inst));
 
-    if (breakTracelet) {
+    if (endsRegion) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
       break;
     } else {

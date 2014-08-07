@@ -76,10 +76,10 @@
     test_root: composer
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
-    # Stable is 2.4.2, but need master since we have pull requests.
+    # Stable is 2.4.4, but need master since we have pull requests.
     # e.g., https://github.com/doctrine/doctrine2/pull/928
     branch: master
-    commit: 73e5bbecbef311194085e30d8b7fd6516bc50425
+    commit: 723529ffff4880ab97499d03b23f90911db2e0b3
     install_root: doctrine2
     test_root: doctrine2
     clowns:
@@ -87,8 +87,6 @@
       - doctrine2/tests/Doctrine/Tests/ORM/Cache/FileLockRegionTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/XmlDriverTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
-      # Also fails on PHP5 - bad SQL
-      - doctrine2/tests/Doctrine/Tests/ORM/Functional/ProxiesLikeEntitiesTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
     # Stable is 7.26, but the test framework is lacking in 7.x

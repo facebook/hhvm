@@ -88,9 +88,6 @@ static JmpFlags instrJmpFlags(const NormalizedInstruction& ni) {
   if (ni.nextIsMerge) {
     flags = flags | JmpFlagNextIsMerge;
   }
-  if (ni.includeBothPaths) {
-    flags = flags | JmpFlagBothPaths;
-  }
   return flags;
 }
 
@@ -179,7 +176,6 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
 
   Offset takenOffset    = i.offset() + i.imm[0].u_BA;
   Offset fallthruOffset = i.offset() + instrLen((Op*)(i.pc()));
-  assert(!i.includeBothPaths || !i.endsRegion);
 
   auto jmpFlags = instrJmpFlags(i);
 

@@ -139,11 +139,6 @@ struct IRBuilder {
   Block* makeBlock(Offset offset);
 
   /*
-   * Block has been created and added to the offset map.
-   */
-  bool blockExists(Offset offset);
-
-  /*
    * Clear the map from bytecode offsets to Blocks.
    */
   void resetOffsetMapping();

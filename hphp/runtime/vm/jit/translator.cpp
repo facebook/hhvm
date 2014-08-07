@@ -1541,20 +1541,6 @@ static void findSuccOffsets(const RegionDesc&              region,
 }
 
 /*
- * Returns whether or not succOffsets contains both successors of inst.
- */
-static bool containsBothSuccs(const OffsetSet&             succOffsets,
-                              const NormalizedInstruction& inst) {
-  if (inst.endsRegion) return false;
-  if (!instrHasConditionalBranch(inst.op())) return false;
-  Offset takenOffset      = inst.offset() + *instrJumpOffset((Op*)inst.pc());
-  Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
-  bool   takenIncluded    = succOffsets.count(takenOffset);
-  bool   fallthruIncluded = succOffsets.count(fallthruOffset);
-  return takenIncluded && fallthruIncluded;
-}
-
-/*
  * Returns whether offset is a control-flow merge within region.
  */
 static bool isMergePoint(Offset offset, const RegionDesc& region) {
@@ -1739,7 +1725,6 @@ Translator::translateRegion(const RegionDesc& region,
       if (i == block->length() - 1) {
         inst.endsRegion = blockEndsRegion(blockId, region);
         inst.nextIsMerge = nextIsMerge(inst, region);
-        inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
         if (instrIsNonCallControlFlow(inst.op()) &&
             b < region.blocks.size() - 1) {
           inst.nextOffset = region.blocks[b+1]->start().offset();

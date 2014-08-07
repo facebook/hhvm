@@ -2173,8 +2173,7 @@ void HhbcTranslator::emitJmpImpl(int32_t offset,
     if (flags & JmpFlagNextIsMerge) {
       exceptionBarrier();
     }
-    auto target = m_irb->blockExists(offset) ? makeBlock(offset)
-                                             : makeExit(offset);
+    auto target = getBlock(offset);
     assert(target != nullptr);
     gen(Jmp, target);
     return;
@@ -2202,8 +2201,7 @@ void HhbcTranslator::emitJmpCondHelper(int32_t taken,
     // start with a DefSP to block SP-chain walking).
     exceptionBarrier();
   }
-  auto const target = (flags & JmpFlagBothPaths) ? makeBlock(taken)
-                                                 : makeExit(taken);
+  auto const target = getBlock(taken);
   assert(target != nullptr);
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
@@ -6238,10 +6236,17 @@ Block* HhbcTranslator::makeCatchNoSpill() {
 }
 
 /*
- * Create a block corresponding to bytecode control flow.
+ * Returns an IR block corresponding to the given offset.
  */
-Block* HhbcTranslator::makeBlock(Offset offset) {
-  return m_irb->makeBlock(offset);
+Block* HhbcTranslator::getBlock(Offset offset) {
+  // If hasBlock returns true, then IRUnit already has a block for
+  // that offset and makeBlock will just return it.  This will be the
+  // proper successor block set by Translator::setSuccIRBlocks.
+  // Otherwise, the given offset doesn't belong to the region, so we
+  // just create an exit block.
+
+  return m_irb->hasBlock(offset) ? m_irb->makeBlock(offset)
+                                 : makeExit(offset);
 }
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
@@ -6516,7 +6521,7 @@ void HhbcTranslator::end(Offset nextPc) {
 }
 
 void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
-  if (m_irb->blockExists(next)) {
+  if (m_irb->hasBlock(next)) {
     emitJmpImpl(next,
                 nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
                 nullptr);

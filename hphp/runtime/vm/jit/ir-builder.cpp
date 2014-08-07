@@ -1196,17 +1196,12 @@ Block* IRBuilder::makeBlock(Offset offset) {
   return it->second;
 }
 
-bool IRBuilder::blockExists(Offset offset) {
-  return m_offsetToBlockMap.count(offset);
-}
-
 void IRBuilder::resetOffsetMapping() {
   m_offsetToBlockMap.clear();
 }
 
 bool IRBuilder::hasBlock(Offset offset) const {
-  auto it = m_offsetToBlockMap.find(offset);
-  return it != m_offsetToBlockMap.end();
+  return m_offsetToBlockMap.count(offset);
 }
 
 void IRBuilder::setBlock(Offset offset, Block* block) {

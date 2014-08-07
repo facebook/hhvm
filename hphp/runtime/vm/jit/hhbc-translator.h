@@ -48,8 +48,7 @@ enum JmpFlags {
   JmpFlagNone          = 0,
   JmpFlagBreakTracelet = 1,
   JmpFlagNextIsMerge   = 2,
-  JmpFlagBothPaths     = 4,
-  JmpFlagSurprise      = 8
+  JmpFlagSurprise      = 4
 };
 
 inline JmpFlags operator|(JmpFlags f1, JmpFlags f2) {
@@ -850,9 +849,9 @@ private: // Exit trace creation routines.
   Block* makeCatchNoSpill();
 
   /*
-   * Create a block for a branch target that will be generated later.
+   * Returns an IR block corresponding to the given offset.
    */
-  Block* makeBlock(Offset offset);
+  Block* getBlock(Offset offset);
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,

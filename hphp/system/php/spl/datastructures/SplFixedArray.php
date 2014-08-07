@@ -106,6 +106,9 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
     if (!is_numeric($index)) {
       throw new RuntimeException("Index invalid or out of range");
     }
+    if ($index < 0) {
+      return false;
+    }
     return $index < count($this->data);
   }
 

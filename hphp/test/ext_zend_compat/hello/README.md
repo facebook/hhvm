@@ -2,6 +2,7 @@
 This is a simple hello zend extension, taken from
     http://devzone.zend.com/303/extension-writing-part-i-introduction-to-php-and-zend/
 
+```
 Build:
     bash ../../../tools/hphpize/hphpize
     cmake .
@@ -12,3 +13,4 @@ Examine products:
 
 Clean up build junk:
     bash ./clean.sh
+```

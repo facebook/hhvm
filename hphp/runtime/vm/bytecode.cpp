@@ -1802,24 +1802,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
   if (raiseMissingArgumentWarnings && !func->isCPPBuiltin()) {
     // need to sync vmpc() to pc for backtraces/re-entry
     SYNC();
-    const Func::ParamInfoVec& paramInfo = func->params();
-    for (int i = ar->numArgs(); i < nparams; ++i) {
-      Offset dvInitializer = paramInfo[i].funcletOff;
-      if (dvInitializer == InvalidAbsoluteOffset) {
-        const char* name = func->name()->data();
-        if (nparams == 1) {
-          raise_warning(
-            Strings::MISSING_ARGUMENT, name,
-            func->hasVariadicCaptureParam() ? "at least" : "exactly", i);
-        } else {
-          raise_warning(
-            Strings::MISSING_ARGUMENTS, name,
-            func->hasVariadicCaptureParam() ? "at least" : "exactly",
-            nparams, i);
-        }
-        break;
-      }
-    }
+    HPHP::JIT::raiseMissingArgument(func, ar->numArgs());
   }
 }
 

@@ -319,7 +319,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
           JIT::raiseMissingArgument((const Func*) nullptr, 0);
         }
         a.  emitImmReg((intptr_t)func, argNumToRegName[0]);
-        a.  emitImmReg(i, argNumToRegName[1]);
+        a.  emitImmReg(nPassed, argNumToRegName[1]);
         emitCall(a, TCA(JIT::raiseMissingArgument));
         mcg->recordSyncPoint(a.frontier(), fixup.m_pcOffset, fixup.m_spOffset);
         break;

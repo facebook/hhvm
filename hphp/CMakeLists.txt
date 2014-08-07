@@ -90,5 +90,16 @@ if (TEST_BIN)
   add_subdirectory(test)
 endif ()
 
-# Keep this last
+#
+# Keep this after "hhvm" and "test" have been built
+#
 add_subdirectory(tools/hphpize)
+
+#
+# Keep this after hphpize has been built.
+# The work done in this directory needs hphpize.
+# It builds standalone DSOs implementing loadable zend extensions.
+# These DSOs are then loaded as part of doing regression tests,
+# which are also found in (subdirectories of) test/ext_zend_compat
+#
+add_subdirectory(test/ext_zend_compat)

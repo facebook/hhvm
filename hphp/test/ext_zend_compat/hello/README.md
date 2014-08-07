@@ -1,4 +1,5 @@
-Simple hello zend extension, taken from
+## What
+This is a simple hello zend extension, taken from
   http://devzone.zend.com/303/extension-writing-part-i-introduction-to-php-and-zend/
 
 Build:

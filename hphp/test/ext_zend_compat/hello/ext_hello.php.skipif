@@ -1,0 +1,2 @@
+<?php
+die("You can't execute as a test any of the php files that specify the <<__Native>> interface");

@@ -7,6 +7,8 @@ rm -rf CMakeFiles
 rm -rf deps
 rm -f hello.so
 rm -f junk
+rm -f *.out
+rm -f *.diff
 
 #
 # Remove products from: test/run

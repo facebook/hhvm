@@ -48,6 +48,8 @@ function get_handles() {
   $arrays[] = array(0 => reschedule(), 2 => answer() );
   $arrays[] = array(0 => reschedule(), 'zero' => answer() );
   $arrays[] = array(reschedule(), answer());
+  $arrays[] = miarray(0 => reschedule(), 1 => answer());
+  $arrays[] = msarray('zero' => reschedule(), 'one' => answer());
 
   $a = array(0 => reschedule());
   $a[2] = answer();

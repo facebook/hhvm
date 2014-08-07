@@ -55,7 +55,8 @@ static void fail() {
 
 Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
   Array depCopy(inputDependencies->copy());
-  if (UNLIKELY(depCopy->kind() > ArrayData::kMixedKind) &&
+  if (UNLIKELY(depCopy->kind() > ArrayData::kMixedKind &&
+               depCopy->kind() < ArrayData::kIntMapKind) &&
       depCopy->kind() != ArrayData::kEmptyKind) {
     // The only array kind that can return a non-k{Packed,Mixed,Empty}Kind
     // from ->copy() is NameValueTableWrapper, which returns itself.
@@ -64,7 +65,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
     fail();
   }
   assert(depCopy->kind() == ArrayData::kPackedKind ||
-         depCopy->kind() == ArrayData::kMixedKind ||
+         depCopy->isMixed() ||
          depCopy->kind() == ArrayData::kEmptyKind);
 
   if (depCopy->kind() == ArrayData::kEmptyKind) {

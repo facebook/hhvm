@@ -963,9 +963,9 @@ pthread_mutex_t TraceProfiler::s_inUse = PTHREAD_MUTEX_INITIALIZER;
  */
 class SampleProfiler : public Profiler {
 private:
-  typedef hphp_hash_map<std::string, int64_t, string_hash> CountMap;
-  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
-  StatsMap m_stats; // outcome
+  typedef std::pair<int64_t, int64_t> Timestamp;
+  typedef smart::vector<std::pair<Timestamp, std::string>> SampleVec;
+  SampleVec m_samples; // outcome
 
 public:
   SampleProfiler() {
@@ -1003,15 +1003,13 @@ public:
   }
 
   virtual void writeStats(Array &ret) override {
-    for (StatsMap::const_iterator iter = m_stats.begin();
-         iter != m_stats.end(); ++iter) {
-      Array arr;
-      const CountMap &counts = iter->second;
-      for (CountMap::const_iterator iterCount = counts.begin();
-           iterCount != counts.end(); ++iterCount) {
-        arr.set(String(iterCount->first), iterCount->second);
-      }
-      ret.set(String(iter->first), arr);
+    for (auto const& sample : m_samples) {
+      auto const& time = sample.first;
+      char timestr[512];
+      snprintf(timestr, sizeof(timestr), "%" PRId64 ".%06" PRId64,
+               time.first, time.second);
+
+      ret.set(String(timestr), String(sample.second));
     }
   }
 
@@ -1031,14 +1029,12 @@ private:
    * @author veeve
    */
   void sample_stack() {
-    char key[512];
-    snprintf(key, sizeof(key), "%" PRId64 ".%06" PRId64,
-             (int64_t)m_last_sample_time.tv_sec,
-             (int64_t)m_last_sample_time.tv_usec);
-
     char symbol[5120];
     m_stack->getStack(INT_MAX, symbol, sizeof(symbol));
-    m_stats[key][symbol] = 1;
+
+    auto time = std::make_pair((int64_t)m_last_sample_time.tv_sec,
+                               (int64_t)m_last_sample_time.tv_usec);
+    m_samples.push_back(std::make_pair(time, symbol));
   }
 
   /**

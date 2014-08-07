@@ -120,3 +120,7 @@ module MasterApi = struct
     end php_files files in
     SS.MasterApi.update_search_index files
 end
+
+let attach_hooks () =
+  Parsing_hooks.attach_file_parsed_hook WorkerApi.update;
+  Parsing_hooks.attach_parse_task_completed_hook MasterApi.update_search_index

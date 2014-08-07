@@ -57,7 +57,7 @@ LIBS=$(INOTIFYLIB) $(FSEVENTSLIB)\
  dfind/lib.cma \
  globals/lib.cma \
  heap/heap.cma procs/lib.cma \
- deps/lib.cma parsing/lib.cma naming/lib.cma typing/lib.cma \
+ deps/lib.cma parsing/lib.cma search/lib.cma naming/lib.cma typing/lib.cma \
  socket/lib.cma \
  $(BUILD_CMAS) \
  server/lib.cma \
@@ -70,7 +70,7 @@ MAKESUBDIRS=$(INOTIFY) $(FSEVENTS) \
  globals \
  hhi \
  heap procs \
- deps parsing naming typing \
+ deps parsing search naming typing \
  server \
  socket \
  client \

@@ -224,7 +224,7 @@ let add_terms_to_index type_ terms =
 let remove_terms_from_index type_ terms =
   let defmap = get_index_for_type type_ in
   SSet.iter begin fun term ->
-    Hashtbl.iter begin fun k v ->
+    Hashtbl.iter begin fun _ v ->
       HashSet.remove v term;
     end defmap;
   end terms

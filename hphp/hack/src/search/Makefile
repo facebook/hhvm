@@ -4,15 +4,12 @@ TOP=..
 ##############################################################################
 TARGET=lib
 
-SRC= ast.ml \
-  namespace_env.ml namespaces.ml \
-  lexing_modes.ml preprocessor.ml parser_heap.ml \
-  lexer_hack.ml parser_hack.ml format_hack.ml \
-  parsing_hooks.ml parsing_service.ml
+SRC= searchUtils.ml fuzzySearchService.ml trieSearchService.ml \
+  searchService.ml hackSearchService.ml
 
 INCLUDEDIRS= $(TOP)/utils \
  $(TOP)/deps $(TOP)/globals \
- $(TOP)/heap $(TOP)/procs
+ $(TOP)/heap $(TOP)/procs $(TOP)/parsing
 
 ##############################################################################
 # Generic variables
@@ -31,9 +28,3 @@ $(TARGET).cma: $(OBJS)
 
 $(TARGET).cmxa: $(OBJS:.cmo=.cmx) $(LIBS:.cma=.cmxa)
 	$(OCAMLOPT) -a -o $@ $^
-
-lexer_hack.ml: lexer_hack.mll
-	$(OCAMLLEX) $<
-clean::
-	rm -f lexer_hack.ml
-beforedepend:: lexer_hack.ml

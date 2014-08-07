@@ -24,7 +24,7 @@ SRC= serverArgs.ml serverEnv.ml \
 INCLUDEDIRS=$(TOP)/utils \
  $(TOP)/hhi \
  $(TOP)/deps $(TOP)/globals \
- $(TOP)/parsing $(TOP)/naming $(TOP)/typing \
+ $(TOP)/parsing  $(TOP)/search $(TOP)/naming $(TOP)/typing \
  $(TOP)/procs $(TOP)/heap \
  $(TOP)/dfind $(TOP)/stubs \
  $(TOP)/socket

@@ -15,7 +15,7 @@ SRC= clientEnv.ml clientExceptions.ml  clientUtils.ml colorFile.ml \
 
 
 INCLUDEDIRS=$(TOP)/utils \
- $(TOP)/socket $(TOP)/typing $(TOP)/parsing $(TOP)/server
+ $(TOP)/socket $(TOP)/typing $(TOP)/parsing $(TOP)/search $(TOP)/server
 
 
 ##############################################################################

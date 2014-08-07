@@ -4113,6 +4113,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           }
         } else if (call->isCallToFunction("idx") &&
                    call->isOptimizable() &&
+                   systemlibDefinesIdx &&
                    !Option::JitEnableRenameFunction) {
           if (params && (params->getCount() == 2 || params->getCount() == 3)) {
             visit((*params)[0]);

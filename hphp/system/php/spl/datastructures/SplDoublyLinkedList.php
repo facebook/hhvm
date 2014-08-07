@@ -398,16 +398,12 @@ class SplDoublyLinkedList
     if (!is_int($index) && !is_numeric($index)) {
       throw new OutOfRangeException("Offset invalid or out of range");
     }
+    if ($index < 0 || $index >= $this->count()) {
+      throw new OutOfRangeException("Offset out of range");
+    }
     $node = $this->head;
     for ($i = 0; $i < $index; ++$i) {
-      if (!$node) {
-        throw new OutOfRangeException("Offset out of range");
-      }
       $node = $node->next;
-    }
-
-    if (!$node) {
-      throw new OutOfRangeException("Offset out of range");
     }
 
     --$this->count;

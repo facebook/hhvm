@@ -25,6 +25,20 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Globals
+const static StaticString
+  s_COOKIE("_COOOKIE"),
+  s_GET("_GET"),
+  s_POST("_POST");
+
+bool XDebugUtils::isTriggerSet(const String& trigger) {
+  const ArrayData* globals = get_global_variables()->asArrayData();
+  Array get = globals->get(s_GET).toArray();
+  Array post = globals->get(s_POST).toArray();
+  Array cookies = globals->get(s_COOKIE).toArray();
+  return cookies.exists(trigger) || get.exists(trigger) || post.exists(trigger);
+}
+
 // TODO(#4489053) Clean this up-- this was taken from php5 xdebug
 static char *xdebug_raw_url_encode(char const *s, int len, int *new_length,
                                    int skip_slash) {

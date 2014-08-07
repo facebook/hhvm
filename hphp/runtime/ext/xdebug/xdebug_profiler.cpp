@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
+#include "hphp/runtime/ext/xdebug/xdebug_utils.h"
+
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_hotprofiler.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -33,8 +35,8 @@ void XDebugProfiler::ensureBufferSpace() {
 
   // The initial buffer size is 0
   int64_t new_buf_size = (m_frameBufferSize == 0)?
-    XDebugExtension::FramebufSize :
-    m_frameBufferSize * XDebugExtension::FramebufExpansion;
+    XDEBUG_GLOBAL(FramebufSize) :
+    m_frameBufferSize * XDEBUG_GLOBAL(FramebufExpansion);
 
   try {
     int64_t new_buf_bytes = new_buf_size * sizeof(FrameData);
@@ -102,14 +104,14 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
 
   // If tracing is enabled, we may need to collect a serialized version of
   // the arguments or the return value.
-  if (m_tracingEnabled && is_func_begin && XDebugExtension::CollectParams > 0) {
+  if (m_tracingEnabled && is_func_begin && XDEBUG_GLOBAL(CollectParams) > 0) {
     // TODO(#4489053) This is either going to require a bunch of copied and
     //                pasted code or a refactor of debugBacktrace to pull the
     //                arguments list from the more general location.
     //                This relies on xdebug_var_dump anyways.
     throw_not_implemented("Tracing with collect_params enabled");
   } else if (m_tracingEnabled && !is_func_begin &&
-             XDebugExtension::CollectReturn) {
+             XDEBUG_GLOBAL(CollectReturn)) {
     // TODO(#4489053) This relies on xdebug_var_dump
     throw_not_implemented("Tracing with collect_return enabled");
   } else {
@@ -236,7 +238,7 @@ void XDebugProfiler::writeTracingResultsHeader() {
   switch (outputType) {
     case TraceOutputType::NORMAL:
       fprintf(m_tracingFile, "TRACE START");
-      fprintTimestamp(m_tracingFile);
+      XDebugUtils::fprintTimestamp(m_tracingFile);
       fprintf(m_tracingFile, "\n");
       break;
     default:
@@ -250,7 +252,7 @@ void XDebugProfiler::writeTracingResultsFooter() {
   switch (outputType) {
     case TraceOutputType::NORMAL:
       fprintf(m_tracingFile, "TRACE END");
-      fprintTimestamp(m_tracingFile);
+      XDebugUtils::fprintTimestamp(m_tracingFile);
       fprintf(m_tracingFile, "\n");
       break;
     default:
@@ -317,7 +319,7 @@ void XDebugProfiler::writeTracingMemory(int64_t memory) {
     case TraceOutputType::NORMAL:
       fprintf(m_tracingFile, "%10lu ", memory);
       // Delta Memory (since the last begin frame)
-      if (XDebugExtension::ShowMemDelta) {
+      if (XDEBUG_GLOBAL(ShowMemDelta)) {
         if (m_tracingPrevBegin != nullptr) {
           int64_t prev_usage = m_tracingPrevBegin->memory_usage;
           fprintf(m_tracingFile, "%+8ld", memory - prev_usage);

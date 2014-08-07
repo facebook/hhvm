@@ -15,39 +15,47 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_XDEBUG_UTILS_H_
-#define incl_HPHP_XDEBUG_UTILS_H_
+#ifndef incl_HPHP_XDEBUG_SERVER_H_
+#define incl_HPHP_XDEBUG_SERVER_H_
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
+#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
 
-#include "hphp/runtime/ext/ext_datetime.h"
+#define DBGP_VERSION "1.0"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-// Class containing generic utility routines used by xdebug. Similar to
-// xdebug's "usefulstuff.c"
-class XDebugUtils {
+class XDebugServer {
+////////////////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+
 public:
-  // Helper that writes a timestamp in the given file in the format used by
-  // xdebug
-  static void fprintTimestamp(FILE* f) {
-    DateTime now(time(nullptr));
-    fprintf(f, "[%d-%02d-%02d %02d:%02d:%02d]",
-            now.year(), now.month(), now.day(),
-            now.hour(), now.minute(), now.second());
-  }
+  enum class Mode {
+    REQ, // Server created during request init
+    JIT // Server created on demand
+  };
 
-  // Returns true iff the passed trigger is set as a cookie or as a GET/POST
-  // parameter
-  static bool isTriggerSet(const String& trigger);
+  // An XDebugServer is only valid if the constructor succeeds. An exception is
+  // thrown otherwise. The constructor is responsible for establishing a valid
+  // dbgp connection with the client
+  explicit XDebugServer(Mode mode);
+  ~XDebugServer();
 
-  // Translated from xdebug.
-  // xdebug desc: fake URI's per IETF RFC 1738 and 2396 format
-  static char* pathToUrl(char* fileurl);
+////////////////////////////////////////////////////////////////////////////////
+// Statics
+
+public:
+  // Request specific initialization
+  static void onRequestInit();
+
+  // Returns true if the xdebug server is needed by this thread. If remote_mode
+  // is "jit" then this always returns false as whether or not the server is
+  // needed is decided at runtime.
+  static bool isNeeded();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_XDEBUG_UTILS_H_
+#endif // incl_HPHP_XDEBUG_SERVER_H_

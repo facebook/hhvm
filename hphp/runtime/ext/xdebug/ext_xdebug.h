@@ -19,14 +19,20 @@
 #define incl_HPHP_EXT_XDEBUG_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/util/thread-local.h"
 
 using std::string;
+using std::map;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define XDEBUG_NAME "xdebug-not-done"
 #define XDEBUG_VERSION NO_EXTENSION_VERSION_YET
+#define XDEBUG_AUTHOR "HHVM"
+#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2013 by Derick Rethans"
+#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2013"
+#define XDEBUG_URL "http://hhvm.com/"
 
 // TODO(#4489053) Document these
 // Differences b/w xdebug:
@@ -49,6 +55,9 @@ namespace HPHP {
 //    time we have to resize. The previous size is multiplied by this number.
 //    By default this takes on the value 1.5 which is slightly higher than
 //    the internal trace profiler due to the decrease in initial buffer size.
+//  remote_timeout:
+//    Added option specifying the timeout to use for remote debugging, in
+//    seconds. By default, .2 (200ms).
 #define XDEBUG_CFG \
   XDEBUG_OPT(bool, "auto_trace", AutoTrace, false) \
   XDEBUG_OPT(int, "cli_color", CliColor, 0) \
@@ -86,6 +95,7 @@ namespace HPHP {
   XDEBUG_OPT(string, "remote_log", RemoteLog, "") \
   XDEBUG_OPT(string, "remote_mode", RemoteMode, "req") \
   XDEBUG_OPT(int, "remote_port", RemotePort, 9000) \
+  XDEBUG_OPT(double, "remote_timeout", RemoteTimeout, 0.2) \
   XDEBUG_OPT(bool, "scream", Scream, false) \
   XDEBUG_OPT(bool, "show_exception_trace", ShowExcptionTrace, false) \
   XDEBUG_OPT(bool, "show_local_vars", ShowLocalVars, false) \
@@ -99,6 +109,16 @@ namespace HPHP {
   XDEBUG_OPT(int, "var_display_max_data", VarDisplayMaxData, 512) \
   XDEBUG_OPT(int, "var_display_max_depth", VarDisplayMaxDepth, 3)
 
+// xdebug.dump.* settings
+#define XDEBUG_DUMP_CFG \
+  XDEBUG_OPT(string, "COOKIE", DumpCookie, "") \
+  XDEBUG_OPT(string, "FILES", DumpFiles, "") \
+  XDEBUG_OPT(string, "GET", DumpGet, "") \
+  XDEBUG_OPT(string, "POST", DumpPost, "") \
+  XDEBUG_OPT(string, "REQUEST", DumpRequest, "") \
+  XDEBUG_OPT(string, "SERVER", DumpServer, "") \
+  XDEBUG_OPT(string, "SESSION", DumpSession, "") \
+
 // Options that notify the profiler on change
 //  collect_memory, collect_time:
 //    Added options specifying whether or not we should collect memory
@@ -108,6 +128,13 @@ namespace HPHP {
 #define XDEBUG_PROF_CFG \
   XDEBUG_OPT(bool, "collect_memory", CollectMemory, false) \
   XDEBUG_OPT(bool, "collect_time", CollectTime, false)
+
+// TODO(#4489053) A lot of config options should not be thread local
+#define XDEBUG_GLOBAL(name) (*XDebugExtension::name)
+
+// Returns the ini name for the given hhvm configuration option.
+// TODO(#4489053) This should not be hhvm. Need to change tests.
+#define XDEBUG_INI(name) (("hhvm." XDEBUG_NAME ".") + string(name))
 
 // TODO(#4489053) Remove when xdebug fully implemented
 #define XDEBUG_NOTIMPLEMENTED  { throw_not_implemented(__FUNCTION__); }
@@ -126,49 +153,20 @@ class XDebugExtension : public Extension {
 public:
   XDebugExtension() : Extension(XDEBUG_NAME, XDEBUG_VERSION) { }
 
-  // Standard config options
-  #define XDEBUG_OPT(T, name, sym, val) static T sym;
-  XDEBUG_CFG
-  XDEBUG_PROF_CFG
-  #undef XDEBUG_OPT
-
-  // Config options that aren't bound or are other edge cases
-  static bool Enable;
-  static string DumpCookie;
-  static string DumpFiles;
-  static string DumpGet;
-  static string DumpPost;
-  static string DumpRequest;
-  static string DumpServer;
-  static string DumpSession;
-
-  // Returns true iff the passed trigger is set as a cookie or as a GET/POST
-  // parameter
-  static bool isTriggerSet(const String& trigger);
-
-  // Returns true if profiling is required by the extension settings or the
-  // environment
-  static inline bool isProfilingNeeded() {
-    return ProfilerEnable ||
-           (ProfilerEnableTrigger && isTriggerSet("XDEBUG_TRACE"));
-  }
-
-  // Returns true if tracing is required by the extension settings or the
-  // environment
-  static inline bool isTracingNeeded() {
-    return AutoTrace || (TraceEnableTrigger && isTriggerSet("XDEBUG_TRACE"));
-  }
-
-  // Returns true if a profiler should be attached to the current thread
-  static inline bool isProfilerNeeded() {
-    return CollectTime || CollectMemory || isProfilingNeeded() ||
-           isTracingNeeded();
-  }
-
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf);
   virtual void moduleInit();
   virtual void requestInit();
   virtual void requestShutdown();
+
+  // Standard config options
+  #define XDEBUG_OPT(T, name, sym, val) static DECLARE_THREAD_LOCAL(T, sym);
+  XDEBUG_CFG
+  XDEBUG_PROF_CFG
+  XDEBUG_DUMP_CFG
+  #undef XDEBUG_OPT
+
+  // Config options that aren't bound or are other edge cases
+  static bool Enable;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

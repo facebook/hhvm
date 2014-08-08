@@ -340,6 +340,16 @@ bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
 
+#ifdef HHVM_DYNAMIC_EXTENSION_DIR
+std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
+#else
+std::string RuntimeOption::ExtensionDir = "";
+#endif
+
+std::vector<std::string> RuntimeOption::Extensions;
+std::vector<std::string> RuntimeOption::DynamicExtensions;
+std::string RuntimeOption::DynamicExtensionPath = ".";
+
 std::vector<void(*)(const IniSettingMap&, const Hdf&)>*
   RuntimeOption::OptionHooks = nullptr;
 
@@ -1525,6 +1535,18 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "warning_frequency",
                    &RuntimeOption::WarningFrequency);
+
+  // Extensions
+  Config::Bind(RuntimeOption::ExtensionDir, ini, "extension_dir",
+               RuntimeOption::ExtensionDir);
+  Config::Bind(RuntimeOption::DynamicExtensionPath, ini,
+               config["DynamicExtensionPath"],
+               RuntimeOption::DynamicExtensionPath);
+  // there is no way to bind array ini/hdf settings.
+  Config::Get(ini, config["extensions"], RuntimeOption::Extensions);
+  Config::Get(ini, config["DynamicExtensions"],
+              RuntimeOption::DynamicExtensions);
+
 
   Extension::LoadModules(ini, config);
   SharedStores::Create();

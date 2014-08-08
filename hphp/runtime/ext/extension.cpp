@@ -118,7 +118,6 @@ Extension::Extension(litstr name, const char *version /* = "" */)
   }
   assert(s_registered_extensions->find(name) ==
          s_registered_extensions->end());
-  assert(!s_extensions_sorted);
   (*s_registered_extensions)[name] = this;
 }
 
@@ -191,36 +190,52 @@ void Extension::SortDependencies() {
 }
 
 void Extension::LoadModules(const IniSetting::Map& ini, Hdf hdf) {
-  // Load up any dynamic extensions
-  std::string path = Config::GetString(ini, hdf["DynamicExtensionPath"], ".");
-  std::vector<std::string> extensions;
-  Config::Get(ini, hdf["DynamicExtensions"], extensions);
-  for (auto& extLoc : extensions) {
+  std::set<std::string> extFiles;
+
+  // Load up any dynamic extensions from extension_dir
+  std::string extDir = RuntimeOption::ExtensionDir;
+  if (extDir != "") {
+    for (auto& extLoc : RuntimeOption::Extensions) {
+      if (extLoc.empty()) {
+        continue;
+      }
+      if (extLoc[0] != '/') {
+        if (extDir == "") {
+          continue;
+        }
+        extLoc = extDir + "/" + extLoc;
+      }
+
+      extFiles.insert(extLoc);
+    }
+  }
+
+  // Load up any dynamic extensions from dynamic extensions options
+  for (auto& extLoc : RuntimeOption::DynamicExtensions) {
     if (extLoc.empty()) {
       continue;
     }
     if (extLoc[0] != '/') {
-      extLoc = path + "/" + extLoc;
+      extLoc = RuntimeOption::DynamicExtensionPath + "/" + extLoc;
     }
 
-    if (s_extensions_sorted) {
-      // If we load a new extension, we need to invalidate the current sorting
-      s_ordered_extensions.clear();
-      s_extensions_sorted = false;
-    }
+    extFiles.insert(extLoc);
+  }
 
+
+  for (std::string extFile : extFiles) {
     // Extensions are self-registering,
     // so we bring in the SO then
     // throw away its handle.
-    void *ptr = dlopen(extLoc.c_str());
+    void *ptr = dlopen(extFile.c_str());
     if (!ptr) {
       throw Exception("Could not open extension %s: %s",
-                      extLoc.c_str(), dlerror());
+                      extFile.c_str(), dlerror());
     }
     auto getModule = (Extension *(*)())dlsym(ptr, "getModule");
     if (!getModule) {
       throw Exception("Could not load extension %s: %s (%s)",
-                      extLoc.c_str(),
+                      extFile.c_str(),
                       "getModule() symbol not defined.",
                       dlerror());
     }
@@ -229,17 +244,19 @@ void Extension::LoadModules(const IniSetting::Map& ini, Hdf hdf) {
       throw Exception("Could not use extension %s: "
                       "Compiled with HHVM API Version %" PRId64 ", "
                       "this version of HHVM expects %ld",
-                      extLoc.c_str(),
+                      extFile.c_str(),
                       mod->m_hhvmAPIVersion,
                       HHVM_API_VERSION);
     }
-    mod->setDSOName(extLoc);
+    mod->setDSOName(extFile);
   }
 
   // Invoke Extension::moduleLoad() callbacks
   assert(s_registered_extensions);
 
-  if (!s_extensions_sorted) SortDependencies();
+  if (extFiles.size() > 0 || !s_extensions_sorted) {
+    SortDependencies();
+  }
   assert(s_extensions_sorted);
 
   for (auto& ext : s_ordered_extensions) {

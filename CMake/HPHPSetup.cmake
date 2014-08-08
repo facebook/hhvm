@@ -58,6 +58,14 @@ if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "Build type not specified: cmake build type Release.")
 endif()
 
+if(HHVM_DYNAMIC_EXTENSION_DIR)
+  add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${HHVM_DYNAMIC_EXTENSION_DIR}")
+else()
+  if(UNIX)
+    add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/extensions")
+  endif()
+endif()
+
 # Look for the chrpath tool so we can warn if it's not there
 SET(FOUND_CHRPATH OFF)
 IF(UNIX AND NOT APPLE)

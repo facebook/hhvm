@@ -1,7 +1,9 @@
 <?php
 
+include 'server.inc';
+$host = curl_cli_server_start();
 // The URL to POST to
-$url = getenv('PHP_CURL_HTTP_REMOTE_SERVER') . '/get.php?test=post';
+$url = $host . '/get.php?test=post';
 
 // Create a temporary file to read the data from
 $tempname = tempnam(sys_get_temp_dir(), 'CURL_DATA');
@@ -26,3 +28,4 @@ curl_close($ch);
 
 // Clean the temporary file
 @unlink($tempname);
+

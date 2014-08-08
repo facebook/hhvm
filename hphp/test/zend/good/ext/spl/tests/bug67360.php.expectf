@@ -1,0 +1,20 @@
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(3) {
+    [""]=>
+    int(1)
+    [1]=>
+    int(2)
+    [3]=>
+    int(4)
+  }
+}
+bool(true)
+array(3) {
+  [""]=>
+  int(1)
+  [1]=>
+  int(2)
+  [3]=>
+  int(4)
+}

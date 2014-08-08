@@ -1,0 +1,14 @@
+bool(false)
+bool(true)
+string(5) "value"
+bool(true)
+string(0) ""
+bool(true)
+bool(false)
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
+Done

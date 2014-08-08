@@ -1,1 +1,2 @@
 <?php include('skipif.inc'); ?>
+<?php if (!extension_loaded('hash')) die('skip hash extension not available'); ?>

@@ -1,0 +1,2 @@
+<?php if (!extension_loaded("simplexml")) print "skip simplexml not available"; ?>
+<?php if (!extension_loaded("json")) print "skip json not available"; ?>

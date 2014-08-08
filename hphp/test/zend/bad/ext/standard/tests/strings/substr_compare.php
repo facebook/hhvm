@@ -1,5 +1,6 @@
 <?php
 
+var_dump(substr_compare("abcde", "df", -2) < 0);
 var_dump(substr_compare("abcde", "bc", 1, 2));
 var_dump(substr_compare("abcde", "bcg", 1, 2));
 var_dump(substr_compare("abcde", "BC", 1, 2, true));

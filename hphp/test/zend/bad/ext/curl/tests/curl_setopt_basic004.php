@@ -1,6 +1,7 @@
 <?php
 
-$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+include 'server.inc';
+$host = curl_cli_server_start();
 
 // start testing
 echo "*** curl_setopt() call with CURLOPT_RETURNTRANSFER set to 1\n";

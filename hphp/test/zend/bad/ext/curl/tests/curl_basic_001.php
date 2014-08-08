@@ -4,8 +4,8 @@
  * Source code: ext/curl/interface.c
  * Alias to functions: 
  */
-	
-  $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+  include 'server.inc';
+  $host = curl_cli_server_start();
 
   // start testing
   echo "*** Testing curl_exec() : basic functionality ***\n";

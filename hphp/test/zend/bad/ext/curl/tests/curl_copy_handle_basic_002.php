@@ -1,5 +1,6 @@
 <?php
-  $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+  include 'server.inc';
+  $host = curl_cli_server_start();
 
   echo '*** Testing curl copy handle with simple POST ***' . "\n";
 

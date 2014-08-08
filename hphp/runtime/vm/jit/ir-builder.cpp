@@ -1062,6 +1062,7 @@ void IRBuilder::insertLocalPhis() {
   if (m_curBlock->numPreds() < 2) return;
 
   smart::hash_map<Block*, smart::vector<SSATmp*>> blockToPhiTmpsMap;
+  smart::hash_map<Block*, smart::vector<SSATmp*>> blockToLdLocs;
   smart::vector<uint32_t> localIds;
 
   // Determine which SSATmps must receive a phi. To make some optimizations
@@ -1089,15 +1090,22 @@ void IRBuilder::insertLocalPhis() {
       Block* pred = e.inst()->block();
       auto& local = m_state.localsForBlock(pred)[i];
       if (missingPreds.count(&e)) {
-        // We need to insert a LdLoc in pred. It's safe to use the fpValue from
-        // m_curBlock since we currently require that all our preds share the
-        // same fp.
+        // We need to insert a LdLoc<i> on this incoming edge. It's safe to use
+        // the fpValue from m_curBlock since we currently require that all our
+        // preds share the same fp.
         auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
                                  local.type, LocalId(i), m_state.fp());
         if (shouldConstrainGuards()) {
           m_constraints.typeSrcs[ldLoc] = local.typeSource;
         }
-        pred->insert(pred->iteratorTo(e.inst()), ldLoc);
+
+        if (pred->numSuccs() > 1) {
+          // The edge is critical so don't insert the LdLoc until after
+          // splitting it.
+          blockToLdLocs[pred].push_back(ldLoc->dst());
+        } else {
+          pred->insert(pred->iteratorTo(e.inst()), ldLoc);
+        }
         blockToPhiTmpsMap[pred].push_back(ldLoc->dst());
       } else {
         blockToPhiTmpsMap[pred].push_back(local.value);
@@ -1108,24 +1116,32 @@ void IRBuilder::insertLocalPhis() {
   if (localIds.empty()) return;
   auto const numPhis = localIds.size();
 
-  // Split incoming critical edges.
-  bool again = true;
-  while (again) {
-    again = false;
-    for (auto& e : m_curBlock->preds()) {
-      IRInstruction* branch = e.inst();
-      Block* pred = branch->block();
-      if (pred->numSuccs() > 1) {
-        Block* middle = splitEdge(m_unit, pred, m_curBlock, m_state.marker());
-        auto& vec = blockToPhiTmpsMap[middle];
-        std::copy(blockToPhiTmpsMap[pred].begin(),
-                  blockToPhiTmpsMap[pred].end(),
-                  std::inserter(vec, vec.begin()));
-        again = true;
-        break;
+  // Split incoming critical edges so we can modify Jmp srcs of preds.
+repeat:
+  for (auto& e : m_curBlock->preds()) {
+    IRInstruction* branch = e.inst();
+    Block* pred = branch->block();
+    if (pred->numSuccs() > 1) {
+      Block* middle = splitEdge(m_unit, pred, m_curBlock, m_state.marker());
+
+      auto ldLocIt = blockToLdLocs.find(pred);
+      if (ldLocIt != blockToLdLocs.end()) {
+        // There are one or more LdLocs that need to be inserted on the
+        // newly-split edge.
+        for (auto tmp : ldLocIt->second) {
+          middle->insert(middle->backIter(), tmp->inst());
+        }
+        blockToLdLocs.erase(ldLocIt);
       }
+
+      auto& vec = blockToPhiTmpsMap[middle];
+      std::copy(blockToPhiTmpsMap[pred].begin(),
+                blockToPhiTmpsMap[pred].end(),
+                std::inserter(vec, vec.begin()));
+      goto repeat;
     }
   }
+  always_assert(blockToLdLocs.empty());
 
   // Modify the incoming Jmps to set the phi inputs.
   for (auto& e : m_curBlock->preds()) {

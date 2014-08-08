@@ -1787,7 +1787,10 @@ void MCGenerator::traceCodeGen() {
 
   finishPass(" after initial translation ", kIRLevel);
 
-  always_assert(IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops));
+  always_assert_flog(
+    IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops),
+    "IRUnit has loop but Eval.JitLoops=0:\n{}\n", unit
+  );
 
   // Task #4075847: enable optimizations with loops
   if (!(RuntimeOption::EvalJitLoops && m_tx.mode() == TransKind::Optimize)) {

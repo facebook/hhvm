@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/transport.h"
+#include "hphp/util/health-monitor-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,19 +85,25 @@ const StaticString
   s_max_clients("max_clients"),
   s_active_clients("active_clients"),
   s_queued_requests("queued_requests"),
-  s_child_status("child_status");
+  s_child_status("child_status"),
+  s_health_level("health_level");
+
+HealthLevel ApacheExtension::m_healthLevel(HealthLevel::Bold);
 
 Array HHVM_FUNCTION(apache_get_config) {
-  int workers = 0, queued = 0;
+  int workers = 0, queued = 0, health_level = 0;
   if (HttpServer::Server) {
     workers = HttpServer::Server->getPageServer()->getActiveWorker();
     queued = HttpServer::Server->getPageServer()->getQueuedJobs();
+    health_level = (int)(ApacheExtension::GetHealthLevel());
   }
+
   return make_map_array(
     s_restart_time, HttpServer::StartTime,
     s_max_clients, RuntimeOption::ServerThreadCount,
     s_active_clients, workers,
-    s_queued_requests, queued
+    s_queued_requests, queued,
+    s_health_level, health_level
   );
 }
 

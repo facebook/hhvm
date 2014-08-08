@@ -47,8 +47,18 @@ function get_paths(): Map<string,string> {
 }
 
 function determine_flags(OptionMap $opts): string {
-  $flags =
-    '-c /usr/local/hphpi/cli.hdf '.
+  $flags = '';
+
+  #
+  # The cli.hdf file is where Facebook puts its in-house
+  # default configuration information.
+  #
+  $facebook_cli_config_file_name = '/usr/local/hphpi/cli.hdf';
+  if (file_exists($facebook_cli_config_file_name)) {
+    $flags .= "-c $facebook_cli_config_file_name ";
+  }
+
+  $flags .=
     '-v Eval.EnableHipHopSyntax=true '.
     '-v Eval.EnableHipHopExperimentalSyntax=true '.
     '-v Eval.JitEnableRenameFunction=0 '.

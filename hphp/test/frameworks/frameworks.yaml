@@ -530,10 +530,9 @@
     test_find_mode: token
     sequential: true
   phpunit:
-    url: https://github.com/fredemmott/phpunit.git
-    # 4.2.x branch + https://github.com/sebastianbergmann/phpunit/pull/1288
-    branch: json-test-on-latest-hhvm
-    commit: 8fdf5ff0df202957eca6c1d875138c6e48108c17
+    url: https://github.com/sebastianbergmann/phpunit.git
+    branch: "4.2.0"
+    commit: 58db726aa45fe26bca93f692cb3d77e9a46b7830
     install_root: phpunit
     test_root: phpunit
   phpunit-mock-objects:

@@ -1167,6 +1167,9 @@ def walk(filename, dest_subdir):
     if '/ext/standard/tests/strings/md5_file.php' in full_dest_filename:
         test = test.replace('DataFile.txt', 'md5_DataFile.txt')
         test = test.replace('EmptyFile.txt', 'md5_EmptyFile.txt')
+    if '/ext/intl/tests/calendar_getNow_basic.php' in full_dest_filename:
+        test = test.replace('500)', '1000)')
+        test = test.replace('1000)', '2000)')
     if '/Zend/tests/closure_016.php' in full_dest_filename:
         # undo closure% only for first two instances
         exp = exp.replace('Closure%s::', 'Closure::', 2)

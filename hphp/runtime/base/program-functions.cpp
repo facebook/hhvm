@@ -1237,6 +1237,8 @@ static int execute_program_impl(int argc, char** argv) {
   // we need to initialize pcre cache table very early
   pcre_init();
 
+  MemoryManager::TlsWrapper::getCheck();
+
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   for (auto& c : po.config) {

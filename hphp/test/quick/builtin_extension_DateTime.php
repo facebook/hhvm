@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('America/Los_Angeles');
+
 class A_DateTime extends DateTime {
   public $___x;
   public function __clone() {

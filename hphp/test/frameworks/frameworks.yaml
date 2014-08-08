@@ -532,6 +532,12 @@
     commit: 8fdf5ff0df202957eca6c1d875138c6e48108c17
     install_root: phpunit
     test_root: phpunit
+  phpunit-mock-objects:
+    url: https://github.com/sebastianbergmann/phpunit-mock-objects.git
+    branch: "2.2.0"
+    commit: 42e589e08bc86e3e9bdf20d385e948347788505b
+    install_root: phpunit-mock-objects
+    test_root: phpunit-mock-objects
   proxymanager:
     url: https://github.com/Ocramius/ProxyManager.git
     branch: master

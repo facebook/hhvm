@@ -1,2 +1,1 @@
-
-Warning: password_hash(): Invalid bcrypt cost parameter specified: 3
+Warning: password_hash(): Invalid bcrypt cost parameter specified: 3 in %s/test/slow/password/invalid_bcrypt_cost_low.php on line 2

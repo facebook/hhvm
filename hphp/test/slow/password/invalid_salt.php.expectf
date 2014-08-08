@@ -1,2 +1,1 @@
-
-Warning: password_hash(): Non-string salt parameter supplied
+Warning: password_hash(): Non-string salt parameter supplied in %s/test/slow/password/invalid_salt.php on line 2

@@ -54,7 +54,7 @@ function _filter_var_array_single($value, $filter, $options = array()) {
 function filter_var_array($data, $definition = null, $add_empty = true) {
   if (!is_array($data)) {
     trigger_error('filter_var_array() expects parameter 1 to be array, '.
-      gettype($data).' given', E_USER_WARNING);
+      gettype($data).' given', E_WARNING);
     return null;
   }
 
@@ -82,7 +82,7 @@ function filter_var_array($data, $definition = null, $add_empty = true) {
       trigger_error(
         'filter_var_array(): Empty keys are not allowed in the '.
         'definition array',
-        E_USER_WARNING
+        E_WARNING
       );
       return false;
     }

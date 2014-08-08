@@ -24,19 +24,19 @@ function password_hash(string $password,
                        array $options = array()) : mixed {
   if (!function_exists('crypt')) {
     trigger_error("Crypt must be loaded for password_hash to function",
-                  E_USER_WARNING);
+                  E_WARNING);
     return null;
   }
   if (!is_string($password)) {
     trigger_error("password_hash(): Password must be a string",
-                  E_USER_WARNING);
+                  E_WARNING);
     return null;
   }
   if (!is_int($algo)) {
     $algo_type = gettype($algo);
     trigger_error(
       "password_hash() expects parameter 2 to be long, ".$algo_type." given",
-      E_USER_WARNING);
+      E_WARNING);
     return null;
   }
   switch ($algo) {
@@ -51,7 +51,7 @@ function password_hash(string $password,
             sprintf(
               "password_hash(): Invalid bcrypt cost parameter specified: %d",
               $cost),
-            E_USER_WARNING);
+            E_WARNING);
           return null;
         }
       }
@@ -66,7 +66,7 @@ function password_hash(string $password,
         sprintf(
           "password_hash(): Unknown password hashing algorithm: %s",
           $algo),
-        E_USER_WARNING);
+        E_WARNING);
       return null;
   }
   if (isset($options['salt'])) {
@@ -87,7 +87,7 @@ function password_hash(string $password,
       case 'resource':
       default:
         trigger_error('password_hash(): Non-string salt parameter supplied',
-                      E_USER_WARNING);
+                      E_WARNING);
         return null;
     }
     if (strlen($salt) < $required_salt_len) {
@@ -96,7 +96,7 @@ function password_hash(string $password,
           "password_hash(): Provided salt is too short: %d expecting %d",
           strlen($salt),
           $required_salt_len),
-        E_USER_WARNING);
+        E_WARNING);
       return null;
     } elseif (0 == preg_match('#^[a-zA-Z0-9./]+$#D', $salt)) {
       $salt = str_replace('+', '.', base64_encode($salt));
@@ -225,7 +225,7 @@ function password_needs_rehash(string $hash,
 function password_verify(string $password, string $hash) : boolean {
   if (!function_exists('crypt')) {
     trigger_error("Crypt must be loaded for password_verify to function",
-                  E_USER_WARNING);
+                  E_WARNING);
     return false;
   }
   $ret = crypt($password, $hash);

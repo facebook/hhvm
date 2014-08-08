@@ -1,2 +1,1 @@
-
-Warning: password_hash(): Provided salt is too short: 3 expecting 22
+Warning: password_hash(): Provided salt is too short: 3 expecting 22 in %s/test/slow/password/invalid_bcrypt_salt_short.php on line 2

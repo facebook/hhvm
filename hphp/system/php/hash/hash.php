@@ -88,11 +88,11 @@ function hash_hmac(?string $algo = null,
   $args = func_num_args();
   if ($args < 3) {
     trigger_error("hash_hmac() expects 3 parameters, $args given",
-      E_USER_WARNING);
+      E_WARNING);
     return null;
   } else if ($args > 4) {
     trigger_error("hash_hmac() expects at most 4 parameters, $args given",
-      E_USER_WARNING);
+      E_WARNING);
     return null;
   }
 
@@ -132,7 +132,7 @@ function hash_hmac_file(?string $algo = null,
   $args = func_num_args();
   if ($args < 3) {
     trigger_error("hash_hmac_file() expects 3 parameters, $args given",
-      E_USER_WARNING);
+      E_WARNING);
     return null;
   }
 

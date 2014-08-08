@@ -62,7 +62,7 @@ class mysqli {
         return $this->__get_error_list();
     }
 
-    trigger_error('Undefined property: mysqli::$'. $name, E_USER_NOTICE);
+    trigger_error('Undefined property: mysqli::$'. $name, E_NOTICE);
     return null;
   }
 
@@ -560,7 +560,7 @@ class mysqli {
                         int $resultmode = MYSQLI_STORE_RESULT): ?mixed {
     if ($resultmode !== MYSQLI_STORE_RESULT &&
         $resultmode !== MYSQLI_USE_RESULT) {
-      trigger_error("Invalid value for resultmode", E_USER_WARNING);
+      trigger_error("Invalid value for resultmode", E_WARNING);
       return false;
     }
 
@@ -940,7 +940,7 @@ class mysqli_driver {
         return $this->__report_mode;
     }
 
-    trigger_error('Undefined property: mysqli_driver::$'. $name, E_USER_NOTICE);
+    trigger_error('Undefined property: mysqli_driver::$'. $name, E_NOTICE);
     return null;
   }
 
@@ -955,7 +955,7 @@ class mysqli_driver {
       default:
         trigger_error(
           'Undefined property: mysqli_driver::$'. $name,
-          E_USER_NOTICE
+          E_NOTICE
         );
     }
   }
@@ -981,7 +981,7 @@ class mysqli_result {
   public function __get(string $name): mixed {
     if ($this->__result === null) {
       trigger_error("supplied argument is not a valid MySQL result resource",
-                    E_USER_WARNING);
+                    E_WARNING);
       return null;
     }
 
@@ -995,13 +995,13 @@ class mysqli_result {
       case 'num_rows':
         if ($this->__resulttype == MYSQLI_USE_RESULT && !$this->__done) {
           trigger_error("Function can not be used with MYSQL_USE_RESULT",
-                        E_USER_WARNING);
+                        E_WARNING);
           return 0;
         }
         return mysql_num_rows($this->__result);
     }
 
-    trigger_error('Undefined property: mysqli_result::$'. $name, E_USER_NOTICE);
+    trigger_error('Undefined property: mysqli_result::$'. $name, E_NOTICE);
     return null;
   }
 
@@ -1039,7 +1039,7 @@ class mysqli_result {
     }
 
     trigger_error('Mode can be only MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH',
-                  E_USER_WARNING);
+                  E_WARNING);
     return null;
   }
 
@@ -1305,7 +1305,7 @@ class mysqli_stmt {
         return $this->hh_sqlstate();
     }
 
-    trigger_error('Undefined property: mysqli_stmt::$'. $name, E_USER_NOTICE);
+    trigger_error('Undefined property: mysqli_stmt::$'. $name, E_NOTICE);
     return null;
   }
 

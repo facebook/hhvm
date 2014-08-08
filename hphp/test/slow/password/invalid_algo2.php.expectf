@@ -1,2 +1,1 @@
-
-Warning: password_hash(): Unknown password hashing algorithm: 2
+Warning: password_hash(): Unknown password hashing algorithm: 2 in %s/test/slow/password/invalid_algo2.php on line 2

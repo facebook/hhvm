@@ -33,7 +33,7 @@ class Exception {
 
   private function __check_init($context) {
     if (!isset($this->trace)) {
-      trigger_error($context.': exception object not initialized', E_USER_WARNING);
+      trigger_error($context.': exception object not initialized', E_WARNING);
       return false;
     } else {
       return true;

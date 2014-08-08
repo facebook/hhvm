@@ -21,7 +21,7 @@ not_array:
 bad_param2:
           String "array_filter() expects parameter 2 to be a valid callback"
           Jmp warning
-warning:  Cns "E_USER_WARNING"
+warning:  Cns "E_WARNING"
           FCallBuiltin 2 2 "trigger_error"
           PopR
           Null

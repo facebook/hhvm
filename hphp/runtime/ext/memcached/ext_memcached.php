@@ -85,21 +85,21 @@ class Memcached {
       if (!is_array($server)) {
         trigger_error(
           sprintf('Server list entry #%d is not an array', $i + 1),
-          E_USER_WARNING
+          E_WARNING
         );
         continue;
       }
       if (count($server) < 1) {
         trigger_error(
           sprintf('Could not get server host for entry #%d', $i + 1),
-          E_USER_WARNING
+          E_WARNING
         );
         continue;
       }
       if (count($server) < 2) {
         trigger_error(
           sprintf('Could not get server port for entry #%d', $i + 1),
-          E_USER_WARNING
+          E_WARNING
         );
         continue;
       }
@@ -115,7 +115,7 @@ class Memcached {
       if (!$this->addServer($host, $port, $weight)) {
         trigger_error(
           sprintf('Could not add entry #%d to the server list', $i + 1),
-          E_USER_WARNING
+          E_WARNING
         );
       }
     }
@@ -660,4 +660,3 @@ class Memcached {
 
 class MemcachedException {
 }
-

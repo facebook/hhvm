@@ -2,21 +2,21 @@ int(1)
 int(2)
 int(20)
 
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given
+Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 21
 int(42)
 
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 1 given
+Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 1 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 23
 int(42)
 int(4)
 
-Warning: ReflectionProperty::setValue() expects parameter 1 to be object, integer given
+Warning: ReflectionProperty::setValue() expects parameter 1 to be object, integer given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 27
 int(4)
 
-Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 0 given
+Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 0 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 29
 NULL
 
-Warning: ReflectionProperty::getValue() expects parameter 1 to be object, string given
+Warning: ReflectionProperty::getValue() expects parameter 1 to be object, string given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 30
 NULL
 
-Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 2 given
+Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 2 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 31
 NULL

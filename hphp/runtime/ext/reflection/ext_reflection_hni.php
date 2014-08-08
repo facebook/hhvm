@@ -469,9 +469,9 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     $static_cls = get_class($this);
     if (property_exists($static_cls, $name)) {
       // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_USER_ERROR);
+      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
     }
-    trigger_error("Undefined property $static_cls::$name", E_USER_NOTICE);
+    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
     return null;
   }
 
@@ -485,7 +485,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     if (property_exists(get_class($this), $name)) {
       // __set is called if the property is inaccessible
       trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_USER_ERROR);
+        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
     }
     $this->{$name} = $value;
   }
@@ -683,9 +683,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     $static_cls = get_class($this);
     if (property_exists($static_cls, $name)) {
       // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_USER_ERROR);
+      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
     }
-    trigger_error("Undefined property $static_cls::$name", E_USER_NOTICE);
+    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
     return null;
   }
 
@@ -699,7 +699,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     if (property_exists(get_class($this), $name)) {
       // __set is called if the property is inaccessible
       trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_USER_ERROR);
+        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
     }
     $this->{$name} = $value;
   }
@@ -987,7 +987,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       if (!$object) {
         trigger_error(
           'ReflectionMethod::getClosure() expects parameter 1'
-          . ' to be object, ' . gettype($object) . ' given', E_USER_WARNING);
+          . ' to be object, ' . gettype($object) . ' given', E_WARNING);
         return null;
       }
       $cls_name = $this->getDeclaringClassname();
@@ -1293,9 +1293,9 @@ class ReflectionClass implements Reflector, Serializable {
     $static_cls = get_class($this);
     if (property_exists($static_cls, $name)) {
       // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_USER_ERROR);
+      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
     }
-    trigger_error("Undefined property $static_cls::$name", E_USER_NOTICE);
+    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
     return null;
   }
 
@@ -1309,7 +1309,7 @@ class ReflectionClass implements Reflector, Serializable {
     if (property_exists(get_class($this), $name)) {
       // __set is called if the property is inaccessible
       trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_USER_ERROR);
+        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
     }
     $this->{$name} = $value;
   }

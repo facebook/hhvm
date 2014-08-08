@@ -16,7 +16,7 @@ function filter_has_var($type, $variable_name) {
   if (!is_int($type)) {
     trigger_error(
       'filter_has_var() expects parameter 1 to be long, '.
-      gettype($type).' given', E_USER_WARNING
+      gettype($type).' given', E_WARNING
     );
     return false;
   }

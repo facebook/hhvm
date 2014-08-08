@@ -745,13 +745,13 @@ class ReflectionProperty implements Reflector {
     // Can be removed once we support ParamCoerceMode in PHP
     if (func_num_args() != 1) {
       trigger_error('ReflectionProperty::getValue() expects exactly 1'
-        . ' parameter, ' . func_num_args() . ' given', E_USER_WARNING);
+        . ' parameter, ' . func_num_args() . ' given', E_WARNING);
       return null;
     }
     // Can be removed once we support ParamCoerceMode in PHP
     if (!is_object($obj)) {
       trigger_error('ReflectionProperty::getValue() expects parameter 1'
-         . ' to be object, ' . gettype($obj) . ' given', E_USER_WARNING);
+         . ' to be object, ' . gettype($obj) . ' given', E_WARNING);
       return null;
     }
     return hphp_get_property(
@@ -798,13 +798,13 @@ class ReflectionProperty implements Reflector {
       // Can be removed once we support ParamCoerceMode in PHP
       if (func_num_args() != 2) {
         trigger_error('ReflectionProperty::setValue() expects exactly 2'
-          . ' parameters, ' . func_num_args() . ' given', E_USER_WARNING);
+          . ' parameters, ' . func_num_args() . ' given', E_WARNING);
         return null;
       }
       // Can be removed once we support ParamCoerceMode in PHP
       if (!is_object($obj)) {
         trigger_error('ReflectionProperty::setValue() expects parameter 1'
-          . ' to be object, ' . gettype($obj) . ' given', E_USER_WARNING);
+          . ' to be object, ' . gettype($obj) . ' given', E_WARNING);
         return null;
       }
       hphp_set_property(

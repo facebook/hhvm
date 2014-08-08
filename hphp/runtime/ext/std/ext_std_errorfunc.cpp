@@ -252,8 +252,21 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
                        ExecutionContext::ErrorThrowMode::Never,
                        "\nDeprecated: ");
   } else {
+    ActRec* fp = g_context->getStackFrame();
+    if (fp->m_func->isBuiltin() && error_type == k_E_ERROR) {
+      raise_error_without_first_frame(msg);
+    } else if (fp->m_func->isBuiltin() && error_type == k_E_WARNING) {
+      raise_warning_without_first_frame(msg);
+    } else if (fp->m_func->isBuiltin() && error_type == k_E_NOTICE) {
+      raise_notice_without_first_frame(msg);
+    } else if (fp->m_func->isBuiltin() && error_type == k_E_DEPRECATED) {
+      raise_deprecated_without_first_frame(msg);
+    } else if (fp->m_func->isBuiltin() && error_type == k_E_RECOVERABLE_ERROR) {
+      raise_recoverable_error_without_first_frame(msg);
+    } else {
     raise_warning("Invalid error type specified");
     return false;
+    }
   }
   return true;
 }

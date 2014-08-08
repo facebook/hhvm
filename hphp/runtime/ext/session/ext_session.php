@@ -303,7 +303,7 @@ namespace {
       $path = (string)$path;
       if (strpos($path, "\0") !== false) {
         trigger_error('The save_path cannot contain NULL characters',
-                      E_USER_WARNING);
+                      E_WARNING);
         return false;
       }
       ini_set('session.save_path', $path);
@@ -337,7 +337,7 @@ namespace {
       trigger_error(sprintf(
         'Notice: Object of class %s could not be converted to int',
         get_class($lifetime)),
-      E_USER_NOTICE);
+      E_NOTICE);
       return;
     }
     if (ini_get('session.use_cookies')) {
@@ -442,7 +442,7 @@ namespace __SystemLib {
         $this->destroy = $this->validate($destroy, 5);
         $this->gc = $this->validate($gc, 6);
       } catch (\Exception $e) {
-        trigger_error($e->getMessage(), E_USER_WARNING);
+        trigger_error($e->getMessage(), E_WARNING);
         return false;
       }
     }

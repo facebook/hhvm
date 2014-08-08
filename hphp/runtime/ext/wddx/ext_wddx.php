@@ -31,7 +31,7 @@ function wddx_deserialize($packet) : mixed {
     $packet = strval(stream_get_contents($packet));
   } elseif (!is_string($packet)) {
     trigger_error("wddx_deserialize(): " .
-      "Expecting parameter 1 to be a string or a stream", E_USER_WARNING);
+      "Expecting parameter 1 to be a string or a stream", E_WARNING);
     return null;
   }
 
@@ -116,7 +116,7 @@ function _wddx_deserialize_recursive($node) {
                         "operate on was loaded _before_ unserialize()" .
                         " gets called or provide a __autoload() " .
                         "function to load the class definition " ,
-                        E_USER_ERROR);
+                        E_ERROR);
           break;
         }
         $reflect  = new ReflectionClass($inner);

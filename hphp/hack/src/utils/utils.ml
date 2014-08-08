@@ -108,7 +108,6 @@ module type HashSetSig = sig
 
   val create: int -> 'a t
   val clear: 'a t -> unit
-  val reset: 'a t -> unit
   val copy: 'a t -> 'a t
   val add: 'a t -> 'a -> unit
   val mem: 'a t -> 'a -> bool
@@ -123,7 +122,6 @@ module HashSet = (struct
 
   let create size = Hashtbl.create size
   let clear set = Hashtbl.clear set
-  let reset set = Hashtbl.reset set
   let copy set = Hashtbl.copy set
   let add set x = Hashtbl.replace set x ()
   let mem set x = Hashtbl.mem set x

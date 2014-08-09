@@ -200,7 +200,7 @@ abstract class SplHeap implements \HH\Iterator, Countable {
     $this->checkNotCorrupted();
     if ($this->isEmpty()) {
       throw new RuntimeException(
-        'Can\'t peak at an empty heap'
+        'Can\'t peek at an empty heap'
       );
     }
 

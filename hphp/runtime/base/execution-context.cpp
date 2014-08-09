@@ -703,9 +703,8 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     }
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
-      Array context = Array::Create();
       VarEnv* v = g_context->getVarEnv();
-      context = v ? v->getDefinedVariables() : empty_array();
+      Array context = v ? v->getDefinedVariables() : empty_array();
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_packed_array(errnum, String(e.getMessage()),

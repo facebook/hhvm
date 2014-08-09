@@ -313,7 +313,7 @@ const StaticString
   s_date("date"),
   s_timezone_type("timezone_type"),
   s_timezone("timezone"),
-  s_ISOformat("Y-m-d H:i:s");
+  s_ISOformat("Y-m-d H:i:s.u");
 
 Array c_DateTime::t___sleep() {
   int zoneType = m_dt->zoneType();

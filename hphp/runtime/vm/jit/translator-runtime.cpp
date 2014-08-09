@@ -1121,11 +1121,6 @@ RDS::Handle lookupClsRDSHandle(const StringData* name) {
   return NamedEntity::get(name)->getClassHandle();
 }
 
-void registerLiveObj(ObjectData* obj) {
-  assert(RuntimeOption::EnableObjDestructCall && obj->getVMClass()->getDtor());
-  g_context->m_liveBCObjs.insert(obj);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 uintptr_t tlsBaseNoInline() {

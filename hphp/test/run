@@ -307,7 +307,7 @@ function find_debug_config($test, $name) {
 function mode_cmd($options) {
   $repo_args = '';
   if (!isset($options['repo'])) {
-    // Set the non-repo-mode shared repo. 
+    // Set the non-repo-mode shared repo.
     // When in repo mode, we set our own central path.
     $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
   }
@@ -683,7 +683,7 @@ function skip_test($options, $test) {
   if (!$skipif_test) {
     return false;
   }
- 
+
   // For now, run the .skipif in non-repo since building a repo for it is hard
   $options_without_repo = $options;
   unset($options_without_repo['repo']);
@@ -943,7 +943,7 @@ function run_config_post($outputs, $test, $options) {
     $file = get_expect_file($test, 'expect', $options);
     $wanted = trim(file_get_contents($file));
     $passed = !strcmp($output, $wanted);
-    
+
     if (!$passed) {
       file_put_contents("$test.diff", generate_diff($wanted, null, $output));
     }
@@ -1023,7 +1023,7 @@ function run_config_post($outputs, $test, $options) {
     $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
 
     $passed = preg_match("/^$wanted_re\$/s", $output);
-    
+
     if (!$passed) {
       file_put_contents("$test.diff", generate_diff($wanted, $wanted_re, $output));
     }
@@ -1035,7 +1035,7 @@ function run_config_post($outputs, $test, $options) {
     $wanted_re = trim(file_get_contents($file));
 
     $passed = preg_match("/^$wanted_re\$/s", $output);
-    
+
     if (!$passed) {
       file_put_contents("$test.diff", generate_diff($wanted_re, $wanted_re, $output));
     }
@@ -1616,7 +1616,7 @@ function main($argv) {
       exit(run($options, $test_buckets[$i], $bad_test_file));
     }
   }
-  
+
   // Fork off a child to receive messages and print status, and have the parent
   // wait for all children to exit.
   $printer_pid = pcntl_fork();
@@ -1626,7 +1626,7 @@ function main($argv) {
     msg_loop(count($tests), $queue);
     return 0;
   }
-  
+
   // In case we exit in a crazy way, have the parent blow up the queue.
   // Do this here so no children inherit this.
   $kill_queue = function() { Status::killQueue(); };

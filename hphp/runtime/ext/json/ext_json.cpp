@@ -90,6 +90,8 @@ Variant HHVM_FUNCTION(json_encode, const Variant& value,
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
   VariableSerializer vs(VariableSerializer::Type::JSON, options);
+  vs.setDepthLimit(depth);
+
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
 
   if ((json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE &&

@@ -101,6 +101,7 @@ public:
    * Helpers.
    */
   void indent();
+  void setDepthLimit(size_t depthLimit) { m_maxDepth = depthLimit; }
   void setReferenced(bool referenced) { m_referenced = referenced;}
   void setRefCount(int count) { m_refCount = count;}
   void incMaxCount() { m_maxCount++; }
@@ -130,6 +131,8 @@ private:
   int m_maxCount;                // for max recursive levels
   int m_levelDebugger;           // keep track of levels for DebuggerSerialize
   int m_maxLevelDebugger;        // for max level of DebuggerSerialize
+  size_t m_currentDepth;         // current depth (nasted objects/arrays)
+  size_t m_maxDepth;             // max depth limit before an error (0 -> none)
 
   struct ArrayInfo {
     bool is_object;     // nested arrays or objects

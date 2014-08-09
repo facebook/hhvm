@@ -60,7 +60,6 @@ const NamedEntityPair& LitstrTable::lookupNamedEntityPairId(Id id) const {
 // Concurrency control.
 
 inline Mutex& LitstrTable::mutex() {
-  assert(!m_safeToRead);
   return m_mutex;
 }
 

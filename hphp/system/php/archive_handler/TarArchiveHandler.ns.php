@@ -62,7 +62,7 @@ namespace __SystemLib {
 
         switch ($type) {
           case 'L':
-            $next_file_name = $data;
+            $next_file_name = trim($data);
             break;
 
           case '0':

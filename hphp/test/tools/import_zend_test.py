@@ -1008,20 +1008,20 @@ def walk(filename, dest_subdir):
         return
 
     if 'INI' in sections:
-        exp = sections['INI']
+        ini = sections['INI']
 
         if '/tests/lang/bug24908.php' in full_dest_filename or \
            '/ext/spl/tests/spl_autoload_011.php' in full_dest_filename:
-            exp = exp + '\n' + 'hhvm.enable_obj_destruct_call = true'
+            ini = ini + '\n' + 'hhvm.enable_obj_destruct_call = true'
         if '/ext/calendar/tests/cal_info.php' in full_dest_filename or \
            '/ext/calendar/tests/easter_date.php' in full_dest_filename or \
            '/ext/calendar/tests/jdtounix.php' in full_dest_filename or \
            '/ext/date/tests/cal_days_in_month_invalid_date.php' in full_dest_filename or \
            '/ext/date/tests/cal_days_in_month_invalid_calendar.php' in full_dest_filename or \
            '/ext/soap/tests/bugs/bug36999.php' in full_dest_filename:
-            exp = exp + '\n' + 'hhvm.enable_zend_compat = true'
+            ini = ini + '\n' + 'hhvm.enable_zend_compat = true'
 
-        file(full_dest_filename+'.ini', 'w').write(exp)
+        file(full_dest_filename + '.ini', 'w').write(ini)
 
     if 'SKIPIF' in sections:
         skipif = sections['SKIPIF'].strip()
@@ -1183,6 +1183,11 @@ def walk(filename, dest_subdir):
         file(full_dest_filename + '.ini', 'w').write('hhvm.libxml.ext_entity_whitelist = "file"')
     if '/ext/xsl/tests/xslt008.php' in full_dest_filename:
         file(full_dest_filename + '.ini', 'w').write('hhvm.libxml.ext_entity_whitelist = "compress.zlib"')
+    if '/ext/standard/tests/file/realpath_basic' in full_dest_filename:
+        root_dest_filenname = os.path.splitext(dest_filename)[0]
+        test = test.replace('realpath_basic', root_dest_filenname)
+        exp = exp.replace('realpath_basic', root_dest_filenname)
+        file(full_dest_filename + '.expectf', 'w').write(exp)
     if '/ext/mysqli/tests/' in full_dest_filename:
 
         (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))

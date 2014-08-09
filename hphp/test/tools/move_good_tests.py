@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Searches for good tests in zend/bad and moves them to good
 """

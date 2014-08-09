@@ -1,0 +1,26 @@
+array(4) {
+  [0]=>
+  string(7) "GLOBALS"
+  [1]=>
+  string(9) "globalStr"
+  [2]=>
+  string(9) "globalArr"
+  [3]=>
+  string(7) "_SERVER"
+}
+array(4) {
+  [0]=>
+  string(6) "param1"
+  [1]=>
+  string(6) "param2"
+  [2]=>
+  string(5) "local"
+  [3]=>
+  string(9) "globalStr"
+}
+array(2) {
+  [0]=>
+  string(5) "local"
+  [1]=>
+  string(8) "cl_param"
+}

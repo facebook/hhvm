@@ -161,7 +161,7 @@ static String format_filename(String* dir,
       }
       // Timestamp (seconds)
       case 't': {
-        time_t sec = time(nullptr);
+        int64_t sec = (int64_t)time(nullptr);
         if (sec != -1) {
           buf.append(sec);
         }

@@ -29,10 +29,15 @@ struct NativeDataInfo {
   typedef void (*SweepFunc)(ObjectData *sweep);
 
   size_t sz;
+  uint16_t odattrs;
   InitFunc init; // new Object
   CopyFunc copy; // clone $obj
   DestroyFunc destroy; // unset($obj)
   SweepFunc sweep; // sweep $obj
+
+  void setObjectDataAttribute(uint16_t attr) {
+    odattrs |= attr;
+  }
 };
 
 NativeDataInfo* getNativeDataInfo(const StringData* name);
@@ -97,7 +102,8 @@ enum NDIFlags {
 };
 
 template<class T>
-void registerNativeDataInfo(const StringData* name, int64_t flags = 0) {
+void registerNativeDataInfo(const StringData* name,
+                            int64_t flags = 0) {
   registerNativeDataInfo(name, sizeof(T),
                          &nativeDataInfoInit<T>,
                          (flags & NDIFlags::NO_COPY)

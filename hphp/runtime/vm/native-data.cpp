@@ -33,6 +33,7 @@ void registerNativeDataInfo(const StringData* name,
   assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
   NativeDataInfo info;
   info.sz = sz;
+  info.odattrs = ObjectData::Attribute::HasNativeData;
   info.init = init;
   info.copy = copy;
   info.destroy = destroy;
@@ -130,7 +131,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
 
   void *ptr = MM().objMallocLogged(size);
   auto obj = new (static_cast<char*>(ptr) + nativeDataSize) ObjectData(cls);
-  obj->setAttribute(ObjectData::Attribute::HasNativeData);
+  obj->setAttribute(static_cast<ObjectData::Attribute>(ndi->odattrs));
   if (ndi->init) {
     ndi->init(obj);
   }

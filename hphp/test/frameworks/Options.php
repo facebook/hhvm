@@ -28,6 +28,7 @@ class Options {
   public static bool $all = false;
   public static bool $allexcept = false;
   public static bool $test_by_single_test = false;
+  public static bool $run_tests = true;
   public static string $results_root = __DIR__.'/results';
   public static string $script_errors_file = __DIR__.'/results/_script.errors';
   public static string $generated_ini_file = __DIR__.'/.generated.php.ini';
@@ -67,6 +68,11 @@ class Options {
       $framework_names->removeKey(0);
     } else if ($options->containsKey('allexcept')) {
       self::$allexcept = true;
+      $framework_names->removeKey(0);
+    }
+
+    if ($options->containsKey('install-only')) {
+      self::$run_tests = false;
       $framework_names->removeKey(0);
     }
 

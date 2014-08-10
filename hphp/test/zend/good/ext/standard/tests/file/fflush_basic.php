@@ -33,6 +33,7 @@ var_dump( is_bool($return_value) );
 fclose($file_handle);
 echo "\n*** Done ***";
 ?>
+
 <?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fflush_basic.tmp";

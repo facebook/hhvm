@@ -165,10 +165,12 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
         acc
 
   method on_as_expr acc = function
-   | As_id e ->
+   | As_id e
+   | Await_as_id (_, e) ->
        let acc = this#on_expr acc e in
        acc
-   | As_kv (e1, e2) ->
+   | As_kv (e1, e2)
+   | Await_as_kv (_, e1, e2) ->
        let acc = this#on_expr acc e1 in
        let acc = this#on_expr acc e2 in
        acc

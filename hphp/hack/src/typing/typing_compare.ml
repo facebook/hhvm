@@ -77,6 +77,12 @@ module CompareTypes = struct
       acc
     with Not_found -> default
 
+  let cmp_opt f acc t1 t2 =
+    match t1, t2 with
+    | None, None -> acc
+    | Some t1, Some t2 -> f acc t1 t2
+    | _ -> default
+
   let rec ty acc (r1, x) (r2, y) =
     let acc = reason acc r1 r2 in
     let acc = ty_ acc x y in
@@ -134,11 +140,7 @@ module CompareTypes = struct
     then default
     else List.fold_left2 ty acc tyl1 tyl2
 
-  and ty_opt acc ty1 ty2 =
-    match ty1, ty2 with
-    | None, None -> acc
-    | Some ty1, Some ty2 -> ty acc ty1 ty2
-    | _ -> default
+  and ty_opt acc ty1 ty2 = cmp_opt ty acc ty1 ty2
 
   and fun_type acc ft1 ft2 =
     let acc = pos acc ft1.ft_pos ft2.ft_pos in
@@ -190,11 +192,17 @@ module CompareTypes = struct
   and members acc m1 m2 = smap class_elt acc m1 m2
 
   and constructor acc c1 c2 =
-    match c1, c2 with
-    | Some x1, Some x2 -> class_elt acc x1 x2
-    | _ -> acc
+    let subst, same = match (fst c1), (fst c2) with
+      | Some x1, Some x2 -> class_elt acc x1 x2
+      | _ -> acc
+    in subst, same && (snd c1 = snd c2)
 
   and ancestry acc imp1 imp2 = smap ty acc imp1 imp2
+
+  and enum_type acc et1 et2 =
+    let acc = ty acc et1.te_base et2.te_base in
+    let acc = ty_opt acc et1.te_constraint et2.te_constraint in
+    acc
 
   and class_ (subst, same) c1 c2 =
     let same =
@@ -223,6 +231,7 @@ module CompareTypes = struct
       c1.tc_ancestors_checked_when_concrete
       c2.tc_ancestors_checked_when_concrete
     in
+    let acc = cmp_opt enum_type acc c1.tc_enum_type c2.tc_enum_type in
     acc
 
 end
@@ -245,6 +254,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rappend p              -> Rappend (pos p)
     | Rfield p               -> Rfield (pos p)
     | Rforeach p             -> Rforeach (pos p)
+    | Rasyncforeach p        -> Rasyncforeach (pos p)
     | Raccess p              -> Raccess (pos p)
     | Rcall p                -> Rcall (pos p)
     | Rarith p               -> Rarith (pos p)
@@ -269,6 +279,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rxhp p                 -> Rxhp (pos p)
     | Rret_div p             -> Rret_div (pos p)
     | Ryield_gen p           -> Ryield_gen (pos p)
+    | Ryield_asyncgen p      -> Ryield_asyncgen (pos p)
+    | Ryield_asyncnull p     -> Ryield_asyncnull (pos p)
     | Ryield_send p          -> Ryield_send (pos p)
     | Rlost_info (s, r1, p2) -> Rlost_info (s, reason r1, pos p2)
     | Rcoerced (p1, p2, x)   -> Rcoerced (pos p1, pos p2, x)
@@ -345,10 +357,16 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_scvars                = SMap.map class_elt tc.tc_scvars      ;
       tc_methods               = SMap.map class_elt tc.tc_methods     ;
       tc_smethods              = SMap.map class_elt tc.tc_smethods    ;
-      tc_construct             = opt_map class_elt tc.tc_construct    ;
+      tc_construct             = opt_map class_elt (fst tc.tc_construct), (snd tc.tc_construct);
       tc_ancestors             = SMap.map ty tc.tc_ancestors          ;
       tc_ancestors_checked_when_concrete    = SMap.map ty tc.tc_ancestors_checked_when_concrete ;
       tc_user_attributes       = tc.tc_user_attributes                ;
+      tc_enum_type             = opt_map enum_type tc.tc_enum_type    ;
+    }
+
+  and enum_type te =
+    { te_base       = ty te.te_base           ;
+      te_constraint = ty_opt te.te_constraint ;
     }
 
   and typedef = function
@@ -477,7 +495,8 @@ let class_big_diff class1 class2 =
   SMap.compare class1.tc_ancestors_checked_when_concrete class2.tc_ancestors_checked_when_concrete <> 0 ||
   SMap.compare class1.tc_req_ancestors class2.tc_req_ancestors <> 0 ||
   SSet.compare class1.tc_req_ancestors_extends class2.tc_req_ancestors_extends <> 0 ||
-  SSet.compare class1.tc_extends class2.tc_extends <> 0
+  SSet.compare class1.tc_extends class2.tc_extends <> 0 ||
+  class1.tc_enum_type <> class2.tc_enum_type
 
 (*****************************************************************************)
 (* Given a class name adds all the subclasses, we need a "trace" to follow

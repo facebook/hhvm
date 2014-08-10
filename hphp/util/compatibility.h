@@ -46,6 +46,24 @@ int64_t gettime_diff_us(const timespec &start, const timespec &end);
  */
 int fadvise_dontneed(int fd, off_t len);
 
+#ifdef __CYGWIN__
+
+typedef struct {
+  const char *dli_fname;
+  void *dli_fbase;
+  const char *dli_sname;
+  void *dli_saddr;
+} Dl_info;
+
+int dladdr(const void *addr, Dl_info *info);
+int backtrace (void **buffer, int size);
+
+// From sys/param.h
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
+#endif
+
 //////////////////////////////////////////////////////////////////////
 
 }

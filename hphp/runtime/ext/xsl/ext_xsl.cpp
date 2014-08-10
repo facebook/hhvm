@@ -469,6 +469,7 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
   if (doc) {
     data->m_stylesheet = xsltParseStylesheetDoc(doc);
     if (data->m_stylesheet == nullptr) {
+      xmlFreeDoc(doc);
       raise_error("Unable to import stylesheet");
     }
   }

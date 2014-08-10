@@ -5,15 +5,15 @@
  */
 
 /* Creating an empty file */
-if (($handle = fopen( "EmptyFile.txt", "w+")) == FALSE)
+if (($handle = fopen( "md5_EmptyFile.txt", "w+")) == FALSE)
 return false;
 
 /* Creating a data file */
-if (($handle2 = fopen( "DataFile.txt", "w+")) == FALSE)
+if (($handle2 = fopen( "md5_DataFile.txt", "w+")) == FALSE)
 return false;
 
 /* Writing into file */ 
-$filename = "DataFile.txt";
+$filename = "md5_DataFile.txt";
 $content = "Add this to the file\n";
 if (is_writable($filename)) {
   if (fwrite($handle2, $content) === FALSE) {
@@ -45,27 +45,27 @@ var_dump( md5_file(NULL) );
  var_dump ( md5_file() );
 
 /* More than valid number of arguments ( valid is 2)  */
-var_dump ( md5_file("EmptyFile.txt", true, NULL) );
+var_dump ( md5_file("md5_EmptyFile.txt", true, NULL) );
 
 /* Hexadecimal Output for Empty file as input */
 echo "\n*** Hexadecimal Output for Empty file as Argument ***\n";
-var_dump( md5_file("EmptyFile.txt") );
+var_dump( md5_file("md5_EmptyFile.txt") );
 
 /* Raw Binary Output for Empty file as input */
 echo "\n*** Raw Binary Output for Empty file as Argument ***\n";
-var_dump( md5_file("EmptyFile.txt", true) );
+var_dump( md5_file("md5_EmptyFile.txt", true) );
 
 /* Normal operation with hexadecimal output */
 echo "\n*** Hexadecimal Output for a valid file with some contents ***\n";
-var_dump( md5_file("DataFile.txt") );
+var_dump( md5_file("md5_DataFile.txt") );
 
 /* Normal operation with raw binary output */
 echo "\n*** Raw Binary Output for a valid file with some contents ***\n";
-var_dump ( md5_file("DataFile.txt", true) );
+var_dump ( md5_file("md5_DataFile.txt", true) );
 
 // remove temp files
-unlink("DataFile.txt");
-unlink("EmptyFile.txt");
+unlink("md5_DataFile.txt");
+unlink("md5_EmptyFile.txt");
 
 echo "\nDone";
 ?>

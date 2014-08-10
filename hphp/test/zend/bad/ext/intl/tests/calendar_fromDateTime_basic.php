@@ -28,3 +28,4 @@ var_dump(
 	strtotime('2012-01-01 00:00:00 +03:40') * 1000.,
 	$cal->getTimeZone()->getID()
 );
+

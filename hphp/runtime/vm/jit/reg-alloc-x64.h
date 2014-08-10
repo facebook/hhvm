@@ -20,6 +20,10 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 
+#ifdef VOID
+#undef VOID
+#endif
+
 namespace HPHP {  namespace JIT {
 
 using NativeCalls::CallMap;

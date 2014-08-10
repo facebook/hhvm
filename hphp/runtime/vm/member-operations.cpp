@@ -63,7 +63,14 @@ TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
   return result;
 }
 
-static bool objOffsetExists(ObjectData* base, const Variant& offset) {
+enum class OffsetExistsResult {
+  DoesNotExist = 0,
+  DefinitelyExists = 1,
+  IssetIfNonNull = 2
+};
+
+static OffsetExistsResult objOffsetExists(ObjectData* base,
+                                          const Variant& offset) {
   objArrayAccess(base);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
@@ -73,41 +80,39 @@ static bool objOffsetExists(ObjectData* base, const Variant& offset) {
   g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1,
                              offset.asCell());
   tvCastToBooleanInPlace(&tvResult);
-  return bool(tvResult.m_data.num);
+  if (!tvResult.m_data.num) return OffsetExistsResult::DoesNotExist;
+  return method->cls() == SystemLib::s_ArrayObjectClass ?
+    OffsetExistsResult::IssetIfNonNull : OffsetExistsResult::DefinitelyExists;
 }
 
 bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate /* = true */) {
   auto exists = objOffsetExists(base, offset);
 
-  // If offsetExists returns false, it's always right
-  if (!exists) {
-    return false;
+  // Unless we called ArrayObject::offsetExists, there's nothing more to do
+  if (exists != OffsetExistsResult::IssetIfNonNull) {
+    return (int)exists;
   }
 
-  // If the object we're working with is an ArrayObject, then we need to check
-  // the value at `offset`. If it's null, then we return false.
-  if (base->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
-    TypedValue tvResult;
-    tvWriteUninit(&tvResult);
+  // For ArrayObject::offsetExists, we need to check the value at `offset`.
+  // If it's null, then we return false.
+  TypedValue tvResult;
+  tvWriteUninit(&tvResult);
 
-    // We can't call the offsetGet method on `base` because users aren't
-    // expecting offsetGet to be called for `isset(...)` expressions, so call
-    // the method on the base ArrayObject class.
-    const Func* method =
-      SystemLib::s_ArrayObjectClass->lookupMethod(s_offsetGet.get());
-    assert(method != nullptr);
-    g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1,
-                             offset.asCell());
-    exists = !(tvAsVariant(&tvResult).isNull());
-  }
-
-  return exists;
+  // We can't call the offsetGet method on `base` because users aren't
+  // expecting offsetGet to be called for `isset(...)` expressions, so call
+  // the method on the base ArrayObject class.
+  const Func* method =
+    SystemLib::s_ArrayObjectClass->lookupMethod(s_offsetGet.get());
+  assert(method != nullptr);
+  g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1,
+                           offset.asCell());
+  return !(tvAsVariant(&tvResult).isNull());
 }
 
 bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate /* = true */) {
-  if (!objOffsetExists(base, offset)) {
+  if (objOffsetExists(base, offset) == OffsetExistsResult::DoesNotExist) {
     return true;
   }
   TypedValue* result = objOffsetGet(tvRef, base, offset, false);

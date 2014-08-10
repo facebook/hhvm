@@ -76,3 +76,4 @@ rmdir("$file_path/dir/subdir");
 rmdir("$file_path/dir");
 
 echo "\n*** Done ***";
+

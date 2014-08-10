@@ -675,32 +675,7 @@ void BaseVector::throwBadKeyType() {
   throw e;
 }
 
-static bool canUseArrayForVector(const Variant& t) {
-  if (!t.isArray()) return false;
-  auto array = t.getArrayData();
-  if (!array->isPacked()) return false;
-  if (array->isStatic() || array->isUncounted()) return true;
-  ArrayIter iter(array);
-  if (!iter) return false;
-  do {
-    if (iter.secondRefPlus().asTypedValue()->m_type == KindOfRef) {
-      return false;
-    }
-    ++iter;
-  } while (iter);
-  return true;
-}
-
 void BaseVector::init(const Variant& t) {
-  if (canUseArrayForVector(t)) {
-    ArrayData* arr = t.getArrayData();
-    arr->incRefCount();
-    m_data = packedData(arr);
-    m_size = arr->size();
-    m_capacity = arr->m_packedCapCode;
-    m_version = 0;
-    return;
-  }
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
   if (sz) { reserve(sz); }
@@ -1978,6 +1953,10 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   if (oldCap != 0) {
     // If an old capacity was specified, use that
     newCap = oldCap;
+    // .. unless the old capacity is too small, in which case we use the
+    // smallest capacity that is large enough to hold the current number
+    // of elements.
+    for (; newCap < m_size; newCap <<= 1) {}
     assert(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
   } else {
     if (m_size == 0 && nextKI() == 0) {
@@ -2089,36 +2068,7 @@ c_Map* c_Map::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_Map>(obj);
 }
 
-static bool canUseArrayForMap(const Variant& t, bool& setIntLikeStrKeys) {
-  if (!t.isArray()) return false;
-  auto array = t.getArrayData();
-  if(!array->isMixed()) return false;
-  bool noRefCheck = array->isStatic() || array->isUncounted();
-  ArrayIter iter(array);
-  if (!iter) return false;
-  do {
-    auto key = iter.first();
-    if (key.isString() && !setIntLikeStrKeys) {
-      int64_t ignore;
-      if (key.asCStrRef().get()->isStrictlyInteger(ignore)) {
-        setIntLikeStrKeys = true;
-      }
-    }
-    if (!noRefCheck &&
-        iter.secondRefPlus().asTypedValue()->m_type == KindOfRef) {
-      return false;
-    }
-    ++iter;
-  } while (iter);
-  return true;
-}
-
 void BaseMap::init(const Variant& t) {
-  bool intLikeStrKeys = false;
-  if (canUseArrayForMap(t, intLikeStrKeys)) {
-    initWithArray(MixedArray::asMixed(t.getArrayData()), intLikeStrKeys);
-    return;
-  }
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
   if (sz) {
@@ -3869,51 +3819,7 @@ void BaseSet::addAll(const Variant& t) {
   }
 }
 
-static bool canUseArrayForSet(const Variant& t, bool& setIntLikeStrKeys) {
-  if (!t.isArray()) return false;
-  auto array = t.getArrayData();
-  if(!array->isMixed()) return false;
-  bool noRefCheck = array->isStatic() || array->isUncounted();
-  ArrayIter iter(array);
-  if (!iter) return false;
-  do {
-    auto key = iter.first();
-    if (key.isString() && !setIntLikeStrKeys) {
-      int64_t ignore;
-      if (key.asCStrRef().get()->isStrictlyInteger(ignore)) {
-        setIntLikeStrKeys = true;
-      }
-    }
-    auto val = iter.secondRefPlus();
-    if (!noRefCheck && val.asTypedValue()->m_type == KindOfRef) {
-      return false;
-    }
-    if (key.asTypedValue()->m_type != val.asTypedValue()->m_type ||
-        (key.asTypedValue()->m_type != KindOfInt64 &&
-         key.asTypedValue()->m_type != KindOfString &&
-         key.asTypedValue()->m_type != KindOfStaticString)) {
-      // take care of the KindOfString vs KindOfStaticString case
-      if (!((key.asTypedValue()->m_type == KindOfString &&
-             val.asTypedValue()->m_type == KindOfStaticString) ||
-            (key.asTypedValue()->m_type == KindOfStaticString &&
-             val.asTypedValue()->m_type == KindOfString))) {
-        return false;
-      }
-    }
-    if (key.asTypedValue()->m_data.num != val.asTypedValue()->m_data.num) {
-      return false;
-    }
-    ++iter;
-  } while (iter);
-  return true;
-}
-
 void BaseSet::init(const Variant& t) {
-  bool intLikeStrKeys = false;
-  if (canUseArrayForSet(t, intLikeStrKeys)) {
-    initWithArray(MixedArray::asMixed(t.getArrayData()), intLikeStrKeys);
-    return;
-  }
   addAll(t);
 }
 
@@ -4685,14 +4591,6 @@ BaseSet::~BaseSet() {
   decRefArr(arrayData());
 }
 
-void HashCollection::initWithArray(MixedArray* data, bool intLikeStrKeys) {
-  data->incRefCount();
-  m_data = mixedData(data);
-  m_size = data->size();
-  m_version = 0;
-  if (intLikeStrKeys) setIntLikeStrKeys(true);
-}
-
 NEVER_INLINE
 void HashCollection::warnOnStrIntDup() const {
   smart::hash_set<int64_t> seenVals;
@@ -4746,7 +4644,7 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
 }
 
 void c_Set::t___construct(const Variant& iterable /* = null_variant */) {
-  init(iterable);
+  addAll(iterable);
 }
 
 Object c_Set::t_add(const Variant& val) {
@@ -5012,7 +4910,7 @@ c_Set* c_Set::Clone(ObjectData* obj) {
 // ImmSet
 
 void c_ImmSet::t___construct(const Variant& iterable /* = null_variant */) {
-  init(iterable);
+  addAll(iterable);
 }
 
 bool c_ImmSet::t_isempty() {
@@ -5817,13 +5715,25 @@ void collectionDeepCopyTV(TypedValue* tv) {
 }
 
 ArrayData* collectionDeepCopyArray(ArrayData* arr) {
-  ArrayInit ai(arr->size(), ArrayInit::Mixed{});
-  for (ArrayIter iter(arr); iter; ++iter) {
-    Variant v = iter.secondRef();
-    collectionDeepCopyTV(v.asTypedValue());
-    ai.set(iter.first(), std::move(v));
+  if (arr->isIntMapArray() || arr->isStrMapArray()) {
+    auto deepCopy = arr->isIntMapArray()
+      ? MixedArray::MakeReserveIntMap(arr->size())
+      : MixedArray::MakeReserveStrMap(arr->size());
+    for (ArrayIter iter(arr); iter; ++iter) {
+      Variant v = iter.secondRef();
+      collectionDeepCopyTV(v.asTypedValue());
+      deepCopy->set(iter.first(), std::move(v), false);
+    }
+    return deepCopy;
+  } else {
+    ArrayInit ai(arr->size(), ArrayInit::Mixed{});
+    for (ArrayIter iter(arr); iter; ++iter) {
+      Variant v = iter.secondRef();
+      collectionDeepCopyTV(v.asTypedValue());
+      ai.set(iter.first(), std::move(v));
+    }
+    return ai.toArray().detach();
   }
-  return ai.toArray().detach();
 }
 
 template<typename TVector>

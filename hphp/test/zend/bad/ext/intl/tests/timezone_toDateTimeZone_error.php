@@ -12,3 +12,4 @@ try {
 
 var_dump(intltz_to_date_time_zone());
 var_dump(intltz_to_date_time_zone(1));
+

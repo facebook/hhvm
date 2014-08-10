@@ -3,4 +3,4 @@ Invalid yield
 File "functional_generator.php", line 29, characters 20-25:
 This is an object of type Stream
 File "functional_generator.php", line 30, characters 3-7:
-It is incompatible with an object of type Generator because functions with "yield" implicitly return Generator
+It is incompatible with an object of type Generator (result of function with 'yield' in the body)

@@ -138,7 +138,14 @@ int HttpClient::request(const char* verb,
   curl_easy_setopt(cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
   curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,    0);
   curl_easy_setopt(cp, CURLOPT_SSL_CTX_FUNCTION, curl_tls_workarounds_cb);
-  curl_easy_setopt(cp, CURLOPT_SSL_CIPHER_LIST, "ALL");
+
+  /*
+   * cipher list varies according to SSL library, and "ALL" is for OpenSSL
+   */
+  curl_version_info_data *cver = curl_version_info(CURLVERSION_NOW);
+  if (cver && cver->ssl_version && strstr(cver->ssl_version, "OpenSSL")) {
+    curl_easy_setopt(cp, CURLOPT_SSL_CIPHER_LIST, "ALL");
+  }
 
   curl_easy_setopt(cp, CURLOPT_TIMEOUT,           m_timeout);
   if (m_maxRedirect > 1) {

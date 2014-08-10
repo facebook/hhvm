@@ -8,8 +8,9 @@
  *
  *)
 
-module SS = SearchService
+module SS = HackSearchService
 module Json = Hh_json
+module SUtils = HackSearchService.SUtils
 
 let desc_string_from_type result_type =
   match result_type with
@@ -18,7 +19,8 @@ let desc_string_from_type result_type =
           | Ast.Cabstract -> "abstract class"
           | Ast.Cnormal -> "class"
           | Ast.Cinterface -> "interface"
-          | Ast.Ctrait -> "trait")
+          | Ast.Ctrait -> "trait"
+          | Ast.Cenum -> "enum")
     | SS.Method (static, scope) ->
         if static
         then "static method in "^scope
@@ -39,19 +41,19 @@ let scope_string_from_type result_type =
 
 let print_results results =
   List.iter begin fun res ->
-    let pos_string = Pos.string res.SS.pos in
-    let desc_string = desc_string_from_type res.SS.result_type in
+    let pos_string = Pos.string res.SUtils.pos in
+    let desc_string = desc_string_from_type res.SUtils.result_type in
     print_endline
-      (pos_string^" "^(Utils.strip_ns res.SS.name)^", "^desc_string);
+      (pos_string^" "^(Utils.strip_ns res.SUtils.name)^", "^desc_string);
   end results
 
 let result_to_json res =
-  let desc_string = desc_string_from_type res.SS.result_type in
-  let scope_string = scope_string_from_type res.SS.result_type in
-  let p = res.SS.pos in
+  let desc_string = desc_string_from_type res.SUtils.result_type in
+  let scope_string = scope_string_from_type res.SUtils.result_type in
+  let p = res.SUtils.pos in
   let fn = Pos.filename p in
   let line, start, end_ = Pos.info_pos p in
-  Json.JAssoc [ "name", Json.JString (Utils.strip_ns res.SS.name);
+  Json.JAssoc [ "name", Json.JString (Utils.strip_ns res.SUtils.name);
                 "filename",  Json.JString fn;
                 "desc",  Json.JString desc_string;
                 "line",  Json.JInt line;

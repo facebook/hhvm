@@ -31,10 +31,8 @@ inline StringData* StringData::Make(const char* data) {
   return Make(data, CopyString);
 }
 
-inline StringData* StringData::Make(const char* data,
-                                    int len,
-                                    CopyStringMode) {
-  return Make(StringSlice(data, len), CopyString);
+inline StringData* StringData::Make(const char* data, CopyStringMode) {
+  return Make(data, strlen(data), CopyString);
 }
 
 inline StringData* StringData::Make(const StringData* s, CopyStringMode) {
@@ -46,13 +44,6 @@ inline StringData* StringData::Make(const StringData* s, CopyStringMode) {
 
 inline StringData* StringData::Make(char* data, AttachStringMode) {
   auto const sd = Make(data, CopyString);
-  free(data);
-  assert(sd->checkSane());
-  return sd;
-}
-
-inline StringData* StringData::Make(char* data, int len, AttachStringMode) {
-  auto const sd = Make(StringSlice(data, len), CopyString);
   free(data);
   assert(sd->checkSane());
   return sd;

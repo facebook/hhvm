@@ -399,6 +399,13 @@ let new_static_outside_class p =
 let new_self_outside_class p =
   add p "Can't use new self() outside of a class"
 
+let new_static_inconsistent new_pos (cpos, cname) =
+  let name = Utils.strip_ns cname in
+  add_list [
+    new_pos, "Can't use new static() for "^name^"; __construct arguments are not guaranteed to be consistent in child classes";
+    cpos, ("This declaration neither defines an abstract/final __construct"
+           ^" nor uses <<ConsistentConstruct>> attribute")]
+
 let abstract_instantiate p cname =
   add p ("Can't instantiate " ^ Utils.strip_ns cname)
 
@@ -606,9 +613,6 @@ let object_string p1 p2 =
   p1, "You cannot use this object as a string";
   p2, "This object doesn't implement __toString"]
 
-let untyped_string p =
-  add p "You cannot use this object as a string, it is an untyped value"
-
 let type_param_arity pos x n =
   add pos ("The type "^x^" expects "^n^" parameters")
 
@@ -791,17 +795,13 @@ let not_abstract_without_body (p, _) =
 
 let return_in_gen p =
   add p
-    ("Don't use return in a generator (a generator"^
+    ("You cannot return a value in a generator (a generator"^
      " is a function that uses yield)")
 
 let return_in_finally p =
   add p
     ("Don't use return in a finally block;"^
      " there's nothing to receive the return value")
-
-let yield_in_async_function p =
-  add p
-    "Don't use yield in an async function"
 
 let await_in_sync_function p =
   add p
@@ -908,7 +908,7 @@ let enum_type_bad pos ty trail =
     trail
 
 let enum_type_typedef_mixed pos =
-  add pos "Can't use typedef that resolves to mixed in Enum"
+  add pos "Can't use typedef that resolves to mixed in enum"
 
 (*****************************************************************************)
 (* Shape checking *)

@@ -19,3 +19,4 @@ for($pass=3; $pass<=5; $pass++)
 		$algo = sprintf('haval%d,%d',$bits,$pass);
 		echo $algo . ': ' . hash($algo,'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789') . "\n";
 	}
+

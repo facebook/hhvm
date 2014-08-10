@@ -188,6 +188,8 @@ CALL_OPCODE(LdArrFPushCuf)
 CALL_OPCODE(LdStrFPushCuf)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
+CALL_OPCODE(NewMIArray)
+CALL_OPCODE(NewMSArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
@@ -1801,13 +1803,10 @@ void CodeGenerator::emitLoad(Type type, PhysLoc dstLoc,
   if (label) {
     not_implemented();
   }
-  if (type <= Type::Null) return;
-
-  if (dstLoc.reg().isGP()) {
-    auto dstReg = x2a(dstLoc.reg());
-    if (!dstReg.IsValid()) return;
-
-    m_as.  Ldr  (dstReg, base[offset + TVOFF(m_data)]);
+  auto dst = dstLoc.reg();
+  if (dst == InvalidReg) return; // nothing to load.
+  if (dst.isGP()) {
+    m_as.  Ldr  (x2a(dst), base[offset + TVOFF(m_data)]);
   } else {
     assert(type <= Type::Dbl);
     m_as.  Ldr  (x2simd(dstLoc.reg()), base[offset + TVOFF(m_data)]);

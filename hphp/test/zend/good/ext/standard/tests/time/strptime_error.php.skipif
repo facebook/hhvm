@@ -2,4 +2,4 @@
 if (!function_exists('strptime')) {
 	echo "SKIP strptime function not available in build";
 }	 
-?> 
+?>

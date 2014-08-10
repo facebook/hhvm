@@ -96,7 +96,12 @@ typedef unsigned int UINT32;
 typedef unsigned short int UINT16;
 typedef short int INT16;
 typedef unsigned char UINT8;
+/* This was conflicting with a cygwin header definition */
+#ifdef __CYGWIN__
+typedef signed char INT8;
+#else
 typedef char INT8;
+#endif
 
 #ifndef MIN
 #define MIN(x,y)        (((x) < (y)) ? (x) : (y))

@@ -961,6 +961,10 @@ D:Cls = LdObjClass S0:Obj
 
   Load the class out of the object in S0 and put it in D.
 
+D:StaticStr = LdClsName S0:Cls
+
+  Load the name of the Class* in S0.
+
 D:Func = LdFunc S0:Str
 
   Loads the Func whose name is S0. Fatal if the named function is not defined,

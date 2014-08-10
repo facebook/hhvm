@@ -37,6 +37,7 @@ var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "=") );
 
 echo "\n--- Done ---";
 ?>
+
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation15_link.tmp");

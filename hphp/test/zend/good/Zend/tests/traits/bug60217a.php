@@ -18,3 +18,4 @@ class C {
 
 $o = new C;
 $o->foo();
+

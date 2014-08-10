@@ -112,11 +112,7 @@ public:
   static int ServerBacklog;
   static int ServerConnectionLimit;
   static int ServerThreadCount;
-  static bool EnableMemoryProtector;
   static int ProdServerPort;
-  static int64_t MemoryThreshold;
-  static int MemProtectorWaitBeforeStart;
-  static int MemoryCheckFreq;
   static int QueuedJobsReleaseRate;
   static int ServerWarmupThrottleRequestCount;
   static bool ServerThreadRoundRobin;
@@ -136,7 +132,6 @@ public:
   static int PageletServerQueueLimit;
   static bool PageletServerThreadDropStack;
 
-  static int FiberCount;
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
   static int64_t ServerMemoryHeadRoom;
@@ -238,8 +233,6 @@ public:
   static std::string RequestInitDocument;
   static std::string AutoPrependFile;
   static std::string AutoAppendFile;
-  static std::vector<std::string> ThreadDocuments;
-  static std::vector<std::string> ThreadLoopDocuments;
 
   static bool SafeFileAccess;
   static std::vector<std::string> AllowedDirectories;
@@ -352,6 +345,7 @@ public:
   static bool IntsOverflowToInts;
   static HackStrictOption StrictArrayFillKeys;
   static HackStrictOption DisallowDynamicVarEnvFuncs;
+  static bool LookForTypechecker;
 
   static int GetScannerType();
 
@@ -361,6 +355,12 @@ public:
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;
+
+  static std::string ExtensionDir;
+  static std::vector<std::string> Extensions;
+  static std::string DynamicExtensionPath;
+  static std::vector<std::string> DynamicExtensions;
+
 
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
@@ -588,6 +588,9 @@ public:
   // Xenon options
   static double XenonPeriodSeconds;
   static bool XenonForceAlwaysOn;
+
+  static std::vector<void(*)(const IniSettingMap&, const Hdf&)>* OptionHooks;
+  static void AddOptionHook(void(*)(const IniSettingMap& ini, const Hdf&));
 
   // Convenience switch to turn on/off code alternatives via command-line
   // Do not commit code guarded by this flag, for evaluation only.

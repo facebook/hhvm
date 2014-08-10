@@ -1,7 +1,8 @@
 #!/bin/sh
 
 HHVM_INSTALL_PREFIX="@CMAKE_INSTALL_PREFIX@"
-HHVM_LIB="$HHVM_INSTALL_PREFIX/lib/hphp"
+HHVM_INSTALL_LIBDIR="@CMAKE_INSTALL_LIBDIR@"
+HHVM_LIB="$HHVM_INSTALL_PREFIX/$HHVM_INSTALL_LIBDIR/hphp"
 
 if [ ! -f "config.cmake" ]; then
   echo "config.cmake not found" >&2

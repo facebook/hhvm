@@ -1,0 +1,9 @@
+int(12)
+
+Warning: Argument 1 to foo() must be of type @Foo, string given in %s on line 6
+string(2) "hi"
+string(3) "bar"
+int(100)
+
+Warning: Argument 1 to quux() must be of type @Quux, string given in %s on line 19
+string(2) "hi"

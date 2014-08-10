@@ -13,3 +13,4 @@ bar();
 function bar() {
   echo __FUNCTION__,"\n";
 }
+

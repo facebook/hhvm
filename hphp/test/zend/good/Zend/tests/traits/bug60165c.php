@@ -14,3 +14,4 @@ class MyClass {
         baz as foobar;
     }
 }
+

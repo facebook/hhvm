@@ -146,6 +146,12 @@ void FastCGITransaction::onComplete() {
   m_session->handleComplete(m_requestId);
 }
 
+void FastCGITransaction::onClose() {
+  // Indicate to our handler that no more data will be coming in. This prevents
+  // PHP threads from waiting indefinitely for the rest of their POST data.
+  if (m_requestId != 0) m_handler->onBodyComplete();
+}
+
 bool FastCGITransaction::parseKeyValue(Cursor& cursor, size_t& available) {
   if (m_phase == Phase::READ_KEY_LENGTH) {
     if (parseKeyValueLength(cursor, available, m_keyLength)) {
@@ -276,6 +282,12 @@ size_t FastCGISession::onIngress(const IOBuf* chain) {
     }
   }
   return available - avail;
+}
+
+void FastCGISession::onClose() {
+  for (auto& pair : m_transactions) {
+    pair.second->onClose();
+  }
 }
 
 void FastCGISession::setMaxConns(int max_conns) {
@@ -726,16 +738,17 @@ void FastCGISession::beginTransaction(RequestId request_id) {
   // TODO: Make transactions reusable for performance.
   assert(m_callback != nullptr);
   auto handler = m_callback->newSessionHandler(request_id);
-  m_transactions[request_id] = folly::make_unique<Transaction>(
-                                 this, request_id, handler);
+  m_transactions[request_id] =
+    folly::make_unique<FastCGITransaction>(this, request_id, handler);
 }
 
 bool FastCGISession::hasTransaction(RequestId request_id) {
   return m_transactions.count(request_id);
 }
 
-std::unique_ptr<FastCGISession::Transaction>& FastCGISession::getTransaction(
-                                                        RequestId request_id) {
+std::unique_ptr<FastCGITransaction>& FastCGISession::getTransaction(
+  RequestId request_id
+) {
   assert(m_transactions.count(request_id));
   return m_transactions[request_id];
 }

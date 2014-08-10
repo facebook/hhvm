@@ -19,6 +19,7 @@ type t =
   | Rappend          of Pos.t (* Used to append element to an array *)
   | Rfield           of Pos.t (* Array accessed with a static string index *)
   | Rforeach         of Pos.t (* Because it is iterated in a foreach loop *)
+  | Rasyncforeach    of Pos.t (* Because it is iterated "await as" in foreach *)
   | Raccess          of Pos.t
   | Rcall            of Pos.t
   | Rarith           of Pos.t
@@ -43,6 +44,8 @@ type t =
   | Rxhp             of Pos.t
   | Rret_div         of Pos.t
   | Ryield_gen       of Pos.t
+  | Ryield_asyncgen  of Pos.t
+  | Ryield_asyncnull of Pos.t
   | Ryield_send      of Pos.t
   | Rlost_info       of string * t * Pos.t
   | Rcoerced         of Pos.t * Pos.t * string
@@ -67,6 +70,7 @@ let rec to_string prefix r =
   | Rappend          _ -> [(p, prefix ^ " because a value is appended to it")]
   | Rfield           _ -> [(p, prefix ^ " because one of its field is accessed")]
   | Rforeach         _ -> [(p, prefix ^ " because this is used in a foreach statement")]
+  | Rasyncforeach    _ -> [(p, prefix ^ " because this is used in a foreach statement with \"await as\"")]
   | Raccess          _ -> [(p, prefix ^ " because one of its elements is accessed")]
   | Rcall            _ -> [(p, prefix ^ " because this is used as a function")]
   | Rarith           _ -> [(p, prefix ^ " because this is used in an arithmetic operation")]
@@ -90,7 +94,9 @@ let rec to_string prefix r =
   | Rattr            _ -> [(p, prefix ^ " because it is used in an attribute")]
   | Rxhp             _ -> [(p, prefix ^ " because it is used as an XML element")]
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
-  | Ryield_gen       _ -> [(p, prefix ^ " because functions with \"yield\" implicitly return Generator")]
+  | Ryield_gen       _ -> [(p, prefix ^ " (result of function with 'yield' in the body)")]
+  | Ryield_asyncgen  _ -> [(p, prefix ^ " (result of 'async function' with 'yield' in the body)")]
+  | Ryield_asyncnull _ -> [(p, prefix ^ " because \"yield x\" is equivalent to \"yield null => x\" in an async function")]
   | Ryield_send      _ -> [(p, prefix ^ " ($generator->send() can always send a null back to a \"yield\")")]
   | Rvar_param       _ -> [(p, prefix ^ " (variadic argument)")]
   | Rcoerced     (p1, p2, s)  ->
@@ -136,6 +142,7 @@ and to_pos = function
   | Rappend   p -> p
   | Rfield   p -> p
   | Rforeach     p -> p
+  | Rasyncforeach p -> p
   | Raccess   p -> p
   | Rcall        p -> p
   | Rarith       p -> p
@@ -160,6 +167,8 @@ and to_pos = function
   | Rxhp         p -> p
   | Rret_div     p -> p
   | Ryield_gen   p -> p
+  | Ryield_asyncgen p -> p
+  | Ryield_asyncnull p -> p
   | Ryield_send  p -> p
   | Rcoerced    (p, _, _) -> p
   | Rlost_info (_, r, _) -> to_pos r
@@ -204,6 +213,7 @@ type ureason =
   | URclass_req
   | URclass_req_merge
   | URenum
+  | URenum_cstr
 
 let string_of_ureason = function
   | URnone -> "Typing error"
@@ -242,7 +252,9 @@ let string_of_ureason = function
   | URclass_req -> "Unable to satisfy trait/interface requirement"
   | URclass_req_merge -> "Incompatible trait/interface requirements"
   | URenum ->
-      "Constant does not match the type of the Enum it is in"
+      "Constant does not match the type of the enum it is in"
+  | URenum_cstr ->
+      "Invalid constraint on enum"
 
 let compare r1 r2 =
   match r1, r2 with

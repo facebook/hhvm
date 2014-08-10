@@ -16,10 +16,9 @@
 
 #include "hphp/runtime/server/http-server.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/pprof-server.h"
@@ -35,11 +34,15 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
+
 #include "hphp/util/db-conn.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
-#include "hphp/runtime/base/file-util.h"
+
+#include <folly/Format.h>
+
+#include <boost/lexical_cast.hpp>
 
 #include <sys/types.h>
 #include <signal.h>
@@ -177,17 +180,6 @@ HttpServer::HttpServer()
       return;
     }
   }
-
-  for (unsigned int i = 0; i < RuntimeOption::ThreadDocuments.size(); i++) {
-    m_serviceThreads.push_back(
-      std::make_shared<ServiceThread>(RuntimeOption::ThreadDocuments[i]));
-  }
-
-  for (unsigned int i = 0; i < RuntimeOption::ThreadLoopDocuments.size(); i++) {
-    m_serviceThreads.push_back(
-      std::make_shared<ServiceThread>(
-        RuntimeOption::ThreadLoopDocuments[i], true));
-  }
 }
 
 // Synchronously stop satellites and start danglings
@@ -251,30 +243,23 @@ HttpServer::~HttpServer() {
   stop();
 }
 
-void HttpServer::startupFailure() {
-  Logger::Error("Shutting down due to failure(s) to bind in "
-                "HttpServer::run");
-  // Logger flushes itself---we don't need to run any atexit handlers
-  // (historically we've mostly just SEGV'd while trying) ...
-  _Exit(1);
-}
-
 void HttpServer::runOrExitProcess() {
   StartTime = time(0);
 
-  m_watchDog.start();
+  auto startupFailure = [] (const std::string& msg) {
+    Logger::Error(msg);
+    Logger::Error("Shutting down due to failure(s) to bind in "
+                  "HttpServer::runAndExitProcess");
+    // Logger flushes itself---we don't need to run any atexit handlers
+    // (historically we've mostly just SEGV'd while trying) ...
+    _Exit(1);
+  };
 
-  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
-    m_serviceThreads[i]->start();
-  }
-  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
-    m_serviceThreads[i]->waitForStarted();
-  }
+  m_watchDog.start();
 
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
-      Logger::Error("Unable to start page server");
-      startupFailure();
+      startupFailure("Unable to start page server");
       not_reached();
     }
     Logger::Info("page server started");
@@ -282,8 +267,7 @@ void HttpServer::runOrExitProcess() {
 
   if (RuntimeOption::AdminServerPort) {
     if (!startServer(false)) {
-      Logger::Error("Unable to start admin server");
-      startupFailure();
+      startupFailure("Unable to start admin server");
       not_reached();
     }
     Logger::Info("admin server started");
@@ -295,21 +279,26 @@ void HttpServer::runOrExitProcess() {
       m_satellites[i]->start();
       Logger::Info("satellite server %s started", name.c_str());
     } catch (Exception &e) {
-      Logger::Error("Unable to start satellite server %s: %s",
-                    name.c_str(), e.getMessage().c_str());
-      startupFailure();
+      startupFailure(
+        folly::format("Unable to start satellite server {}: {}",
+                      name, e.getMessage()).str()
+      );
       not_reached();
     }
   }
 
   if (RuntimeOption::HHProfServerEnabled) {
-    Logger::Info("Starting up profiling server");
-    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
+    try {
+      HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
+    } catch (FailedToListenException &e) {
+      startupFailure("Unable to start profiling server");
+      not_reached();
+    }
+    Logger::Info("profiling server started");
   }
 
   if (!Eval::Debugger::StartServer()) {
-    Logger::Error("Unable to start debugger server");
-    startupFailure();
+    startupFailure("Unable to start debugger server");
     not_reached();
   } else if (RuntimeOption::EnableDebuggerServer) {
     Logger::Info("debugger server started");
@@ -355,13 +344,6 @@ void HttpServer::runOrExitProcess() {
     m_danglings[i]->stop();
     Logger::Info("dangling server %s stopped",
                  m_danglings[i]->getName().c_str());
-  }
-
-  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
-    m_serviceThreads[i]->notifyStopped();
-  }
-  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
-    m_serviceThreads[i]->waitForEnd();
   }
 
   waitForServers();

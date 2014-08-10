@@ -138,9 +138,8 @@ var_dump(count($arr2) == 4);
 var_dump($arr2[0]);
 var_dump($arr2[1]);
 
-// TODO(#2512685): this behaves differently in the interpreter vs. jit
-// $ret = chunk_split("ABCD", 2);
-// var_dump($ret, "AB\r\nCD\r\n");
+$ret = chunk_split("ABCD", 2);
+var_dump($ret, "AB\r\nCD\r\n");
 
 $s = "This is\tan ";
 $tok = strtok($s, " \n\t");

@@ -20,3 +20,4 @@ var_dump( fileinode() );
 var_dump( fileinode(__FILE__, "string") );
 
 echo "\n*** Done ***";
+

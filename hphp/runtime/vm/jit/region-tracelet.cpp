@@ -44,7 +44,7 @@ namespace {
 struct RegionFormer {
   RegionFormer(const RegionContext& ctx,
                InterpSet& interp,
-               const InliningDecider& inl,
+               InliningDecider& inl,
                bool profiling);
 
   RegionDescPtr go();
@@ -64,7 +64,7 @@ private:
   RefDeps m_refDeps;
   uint32_t m_numJmps;
 
-  InliningDecider m_inl;
+  InliningDecider& m_inl;
   const bool m_profiling;
 
   const Func* curFunc() const;
@@ -83,7 +83,7 @@ private:
 
 RegionFormer::RegionFormer(const RegionContext& ctx,
                            InterpSet& interp,
-                           const InliningDecider& inl,
+                           InliningDecider& inl,
                            bool profiling)
   : m_ctx(ctx)
   , m_interp(interp)
@@ -192,10 +192,10 @@ RegionDescPtr RegionFormer::go() {
     // We successfully translated the instruction, so update m_sk.
     m_sk.advance(m_curBlock->unit());
 
-    auto const breakTracelet = m_inst.breaksTracelet ||
+    auto const endsRegion = m_inst.endsRegion ||
       (m_profiling && instrBreaksProfileBB(&m_inst));
 
-    if (breakTracelet) {
+    if (endsRegion) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
       break;
     } else {
@@ -215,8 +215,15 @@ RegionDescPtr RegionFormer::go() {
 
   // If we failed while trying to inline, trigger retry without inlining.
   if (m_region && !m_region->blocks.empty() && m_ht.isInlining()) {
-    FTRACE(2, "selectTracelet: Failed while inlining; retrying:\n{}\n{}",
-           show(*m_region), m_ht.unit());
+    // Abort in dbg builds. While we can recover from this situation just fine,
+    // it's more often than not indicative of a real bug somewhere else in the
+    // system.
+    assert_flog(
+      false,
+      "selectTracelet: Failed while inlining:\n{}\n{}",
+      show(*m_region), m_ht.unit()
+    );
+
     m_inl.disable();
     m_region.reset();
   }
@@ -244,7 +251,7 @@ RegionDescPtr RegionFormer::go() {
 bool RegionFormer::prepareInstruction() {
   m_inst.~NormalizedInstruction();
   new (&m_inst) NormalizedInstruction(m_sk, curUnit());
-  m_inst.breaksTracelet = opcodeBreaksBB(m_inst.op()) ||
+  m_inst.endsRegion = opcodeBreaksBB(m_inst.op()) ||
                             (dontGuardAnyInputs(m_inst.op()) &&
                              opcodeChangesPC(m_inst.op()));
   m_inst.funcd = m_arStates.back().knownFunc();
@@ -551,6 +558,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
 
   while (!(region = RegionFormer(ctx, interp, inl, profiling).go())) {
     ++tries;
+    inl.resetState();
   }
 
   if (region->blocks.size() == 0 || region->blocks.front()->length() == 0) {

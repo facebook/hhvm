@@ -22,3 +22,4 @@ $dtz = $dt->getTimeZone();
 var_dump($dtz->getName());
 $tz = IntlTimeZone::fromDateTimeZone($dtz);
 var_dump($tz->getID(), $tz->getRawOffset() /* (3*60+40)*60000 */);
+

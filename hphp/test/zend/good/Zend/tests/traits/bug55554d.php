@@ -22,3 +22,4 @@ class ReportCollision {
 }
 
 $o = new ReportCollision;
+

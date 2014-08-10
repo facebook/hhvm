@@ -131,13 +131,13 @@ struct APCHandle {
   // delayed release.
   //
   void reference() {
-    if (!isUncounted()) {
+    if (!getUncounted()) {
       realIncRef();
     }
   }
 
   void unreference() {
-    if (!isUncounted()) {
+    if (!getUncounted()) {
       realDecRef();
     }
   }
@@ -158,12 +158,11 @@ struct APCHandle {
   bool is(DataType d) const { return m_type == d; }
   DataType getType() const { return m_type; }
 
-  bool isObj() const { return m_flags & IsObj; }
-  bool objAttempted() const { return m_flags & ObjAttempted; }
-  bool isUncounted() const { return m_flags & Uncounted; }
-  bool isSerializedArray() const { return m_flags & SerializedArray; }
+  bool getIsObj() const { return m_flags & IsObj; }
+  bool getObjAttempted() const { return m_flags & ObjAttempted; }
+  bool getUncounted() const { return m_flags & Uncounted; }
+  bool getSerializedArray() const { return m_flags & SerializedArray; }
   bool isPacked() const { return m_flags & IsPacked; }
-  bool isCollection() const { return m_flags & IsCollection; }
 
 private:
   //
@@ -210,7 +209,6 @@ private:
   friend struct APCString;
   friend struct APCObject;
   friend struct APCArray;
-  friend struct APCCollection;
 
   const static uint8_t
     SerializedArray = (1<<0),
@@ -223,15 +221,13 @@ private:
     // that, if the format change is not possible (internal references), we do
     // not try to change the format over and over again.
     ObjAttempted = (1<<3),
-    Uncounted = (1<<4),
-    IsCollection = (1<<5);
+    Uncounted = (1<<4);
 
   void setSerializedArray() { m_flags |= SerializedArray; }
   void setPacked() { m_flags |= IsPacked; }
   void setIsObj() { m_flags |= IsObj; }
   void setObjAttempted() { m_flags |= ObjAttempted; }
   void setUncounted() { m_flags |= Uncounted; }
-  void setIsCollection() { m_flags |= IsCollection; }
 
 #if PACKED_TV
   bool m_shouldCache{false};

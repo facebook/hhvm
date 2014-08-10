@@ -13,8 +13,7 @@ Ok for CURLOPT_WRITEHEADER
 Warning: %s
 
 Warning: %s
-%A
-Ok for CURLOPT_FILE
+%AOk for CURLOPT_FILE
 
 Warning: %s
 

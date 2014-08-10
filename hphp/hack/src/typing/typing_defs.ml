@@ -137,7 +137,7 @@ and class_type = {
   tc_scvars              : class_elt SMap.t;
   tc_methods             : class_elt SMap.t;
   tc_smethods            : class_elt SMap.t;
-  tc_construct           : class_elt option ;
+  tc_construct           : class_elt option * bool;
   (* This includes all the classes, interfaces and traits this class is
    * using. *)
   tc_ancestors           : ty SMap.t ;
@@ -148,6 +148,12 @@ and class_type = {
   tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
   tc_user_attributes     : Ast.user_attribute SMap.t;
+  tc_enum_type           : enum_type option;
+}
+
+and enum_type = {
+  te_base       : ty;
+  te_constraint : ty option;
 }
 
 and tparam = Ast.id * ty option

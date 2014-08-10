@@ -43,14 +43,14 @@ SocketConnection::SocketConnection(
 
 SocketConnection::~SocketConnection() {
   assert(!m_sock->getReadCallback());
-  shutdownTransport();
+  close();
 }
 
 void SocketConnection::timeoutExpired() noexcept {
-  shutdownTransport();
+  close();
 }
 
-void SocketConnection::shutdownTransport() {
+void SocketConnection::close() {
   m_sock->close();
 }
 

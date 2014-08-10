@@ -807,6 +807,11 @@ public:
    */
   const Native::NativeDataInfo* getNativeDataInfo() const;
 
+  /*
+   * Get the underlying enum base type if this is an enum.
+   */
+  DataType enumBaseTy() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
@@ -913,6 +918,7 @@ private:
   void setClassVec();
   void setFuncVec(MethodMapBuilder& builder);
   void setRequirements();
+  void setEnumType();
   void checkRequirementConstraints() const;
   void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();
@@ -952,6 +958,8 @@ public:
   Class* m_nextClass{nullptr}; // used by NamedEntity
 
 private:
+  DataType m_enumBaseTy;
+
   // Objects with the <<__NativeData("T")>> UA are allocated with extra space
   // prior to the ObjectData structure itself.
   const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
@@ -1044,21 +1052,23 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Class kinds---classes, interfaces, and traits.
+ * Class kinds---classes, interfaces, traits, and enums.
  *
- * "Normal class" refers to any classes that are neither interfaces nor traits.
+ * "Normal class" refers to any classes that are not interfaces, traits, enums.
  */
 enum class ClassKind {
   Class = AttrNone,
   Interface = AttrInterface,
-  Trait = AttrTrait
+  Trait = AttrTrait,
+  Enum = AttrEnum
 };
 
 Attr classKindAsAttr(ClassKind kind);
 
 bool isTrait(const Class* cls);
 bool isInterface(const Class* cls);
-bool isNormalClass(const Class* cls );
+bool isEnum(const Class* cls);
+bool isNormalClass(const Class* cls);
 
 /*
  * Whether a class is persistent /and/ has a persistent RDS handle.  You

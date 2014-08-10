@@ -300,6 +300,11 @@ TEST(Type, SpecializedObjects) {
 
   EXPECT_FALSE(exactA <= exactB);
   EXPECT_FALSE(subA <= exactB);
+
+  EXPECT_EQ(exactA & subA, exactA);
+  EXPECT_EQ(subA & exactA, exactA);
+  EXPECT_EQ(exactB & subB, exactB);
+  EXPECT_EQ(subB & exactB, exactB);
 }
 
 TEST(Type, Const) {

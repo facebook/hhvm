@@ -39,3 +39,4 @@ $r = mb_preferred_mime_name('BAD_NAME');
 ($r === FALSE) ? print("OK_BAD_NAME\n") : print("NG_BAD_NAME\n");
 
 ?>
+

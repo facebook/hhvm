@@ -1,0 +1,7 @@
+Connection 1 - SELECT @pcondisabled -> 'Connection 1'
+Connection 2 (no reuse) - SELECT @pcondisabled -> ''
+Connection 2 (no reuse) - Thread ID -> '%d'
+Connection 2 - SELECT @pcondisabled -> 'Connection 2'
+Connection 2 (reuse) - SELECT @pcondisabled -> 'Connection 2'
+Connection 2 (reuse) - Thread ID -> '%d'
+done!

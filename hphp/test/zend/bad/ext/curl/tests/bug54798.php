@@ -35,10 +35,12 @@ $options_to_check = array(
     "CURLOPT_INFILE"
 );
 
-$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+include 'server.inc';
+$host = curl_cli_server_start();
 foreach($options_to_check as $option) {
 	checkForClosedFilePointer($host, constant($option), $option);
 }
 
 ?>
+===DONE===
 <?php @unlink(dirname(__FILE__) . '/bug54798.tmp'); ?>

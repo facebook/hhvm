@@ -234,7 +234,10 @@ public:
   }
   /**
    * Prefer to use this method whenever possible (the non-default one is ok
-   * too).
+   * too). Use Config::Bind if immediate access to the ini setting is
+   * necessary. For performance reasons, Config::Bind should only be used
+   * when access to the ini setting is needed prior to loading the rest of
+   * the ini settings.
    */
   template<class T>
   static void Bind(const Extension* extension, const Mode mode,

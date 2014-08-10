@@ -1,0 +1,18 @@
+array(2) {
+  [%u|b%"id"]=>
+  int(1)
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
+}
+NULL
+array(2) {
+  [%u|b%"id"]=>
+  int(1)
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
+}
+NULL
+[017] [2014] Commands out of sync; you can't run this command now
+
+Warning: %s
+done!

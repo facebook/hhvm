@@ -1,0 +1,17 @@
+string(%d) "Method [ <user> public method herp ] {
+  @@ %s/test/slow/reflection/whitespace_reflectionmethod.php 4 - 4
+
+  - Parameters [1] {
+    Parameter #0 [ <required> $derp ]
+  }
+}
+"
+string(%d) "Method [ <user> public method foo ] {
+  @@ %s/test/slow/reflection/whitespace_reflectionmethod.php 5 - 5
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $bar ]
+    Parameter #1 [ <required> $baz ]
+  }
+}
+"

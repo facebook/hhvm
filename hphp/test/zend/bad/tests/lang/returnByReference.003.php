@@ -32,4 +32,4 @@ $b = &returnVariableByRef();
 $a++;
 var_dump($a, $b);
 
-?>
+?>

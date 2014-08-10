@@ -35,6 +35,7 @@ print_r($data);
 
 $pid = getmypid();
 var_dump($data['control'][0]['data']['pid'] === $pid);
+
 ?>
 <?php
 $path = __DIR__ . "/unix_sock";

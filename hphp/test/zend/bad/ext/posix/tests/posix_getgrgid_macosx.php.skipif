@@ -1,0 +1,8 @@
+<?php
+if (!extension_loaded('posix')) {
+    die('SKIP The posix extension is not loaded.');
+}
+if (strtolower(PHP_OS) != 'darwin') {
+    die('SKIP This test requires MacOSX/Darwin.');
+}
+?>

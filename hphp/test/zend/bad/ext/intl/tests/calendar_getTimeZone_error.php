@@ -7,3 +7,4 @@ var_dump($c->getTimeZone(1));
 
 var_dump(intlcal_get_time_zone($c, 1));
 var_dump(intlcal_get_time_zone(1));
+

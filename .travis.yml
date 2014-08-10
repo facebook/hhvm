@@ -11,6 +11,7 @@ compiler:
 
 services:
   - memcached
+  - redis-server
 
 # Commands before installing prerequisites
 before_script:
@@ -28,6 +29,8 @@ before_script:
 # For PHP5 mysqli tests
   - export MYSQL_TEST_USER="travis"
   - export MYSQL_TEST_DB="hhvm"
+# For redis tests
+  - export REDIS_TEST_HOST="localhost"
 
 # The larger test suites (slow, zend) take longer than 50 minutes to run. Since
 # we have no way to change the timeout, we subdivide the jit/interp repo/normal

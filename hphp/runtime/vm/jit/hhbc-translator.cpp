@@ -627,6 +627,16 @@ void HhbcTranslator::emitNewMixedArray(int capacity) {
   }
 }
 
+void HhbcTranslator::emitNewMIArray(int capacity) {
+  // TODO(t4757263) staticEmptyArray() for IntMap
+  push(gen(NewMIArray, cns(capacity)));
+}
+
+void HhbcTranslator::emitNewMSArray(int capacity) {
+  // TODO(t4757263) staticEmptyArray() for StrMap
+  push(gen(NewMSArray, cns(capacity)));
+}
+
 void HhbcTranslator::emitNewLikeArrayL(int id, int capacity) {
   auto const ldrefExit = makeExit();
   auto const ldgblExit = makeExit();
@@ -1649,7 +1659,7 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset,
     emitJmpCondHelper(offset, true, jmpFlags, res);
   } else {
     gen(DecRef, src);
-    emitJmpImpl(offset, JmpFlagBreakTracelet, nullptr);
+    emitJmpImpl(offset, JmpFlagEndsRegion, nullptr);
   }
 }
 
@@ -1659,7 +1669,7 @@ void HhbcTranslator::emitCIterFree(uint32_t iterId) {
 
 void HhbcTranslator::emitIterBreak(const ImmVector& iv,
                                    uint32_t offset,
-                                   bool breakTracelet) {
+                                   bool endsRegion) {
   int iterIndex;
   for (iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
     IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
@@ -1671,7 +1681,7 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
     }
   }
 
-  if (!breakTracelet) return;
+  if (!endsRegion) return;
   gen(Jmp, makeExit(offset));
 }
 
@@ -2163,13 +2173,12 @@ void HhbcTranslator::emitJmpImpl(int32_t offset,
     if (flags & JmpFlagNextIsMerge) {
       exceptionBarrier();
     }
-    auto target = m_irb->blockExists(offset) ? makeBlock(offset)
-                                             : makeExit(offset);
+    auto target = getBlock(offset);
     assert(target != nullptr);
     gen(Jmp, target);
     return;
   }
-  if (!(flags & JmpFlagBreakTracelet)) return;
+  if (!(flags & JmpFlagEndsRegion)) return;
   gen(Jmp, makeExit(offset));
 }
 
@@ -2182,7 +2191,7 @@ void HhbcTranslator::emitJmpCondHelper(int32_t taken,
                                        bool negate,
                                        JmpFlags flags,
                                        SSATmp* src) {
-  if (flags & JmpFlagBreakTracelet) {
+  if (flags & JmpFlagEndsRegion) {
     spillStack();
   }
   if (genMode() == IRGenMode::CFG && (flags & JmpFlagNextIsMerge)) {
@@ -2192,8 +2201,7 @@ void HhbcTranslator::emitJmpCondHelper(int32_t taken,
     // start with a DefSP to block SP-chain walking).
     exceptionBarrier();
   }
-  auto const target = (flags & JmpFlagBothPaths) ? makeBlock(taken)
-                                                 : makeExit(taken);
+  auto const target = getBlock(taken);
   assert(target != nullptr);
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
@@ -3354,19 +3362,13 @@ SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {
   };
 
   if (numNonDefault == 0) return curName();
-
   assert(numNonDefault == 1);
 
   auto const val = topC(0);
-
   if (val->isA(Type::Null)) return curName();
 
-  // get_class($this) is just get_called_class().
-  if (val->inst()->is(LdThis)) return optimizedCallGetCalledClass();
+  if (val->isA(Type::Obj)) return gen(LdClsName, gen(LdObjClass, val));
 
-  auto const ty = val->type();
-  if (!(ty < Type::Obj)) return nullptr;
-  if (auto const exact = ty.getExactClass()) return cns(exact->name());
   return nullptr;
 }
 
@@ -6234,10 +6236,17 @@ Block* HhbcTranslator::makeCatchNoSpill() {
 }
 
 /*
- * Create a block corresponding to bytecode control flow.
+ * Returns an IR block corresponding to the given offset.
  */
-Block* HhbcTranslator::makeBlock(Offset offset) {
-  return m_irb->makeBlock(offset);
+Block* HhbcTranslator::getBlock(Offset offset) {
+  // If hasBlock returns true, then IRUnit already has a block for
+  // that offset and makeBlock will just return it.  This will be the
+  // proper successor block set by Translator::setSuccIRBlocks.
+  // Otherwise, the given offset doesn't belong to the region, so we
+  // just create an exit block.
+
+  return m_irb->hasBlock(offset) ? m_irb->makeBlock(offset)
+                                 : makeExit(offset);
 }
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
@@ -6462,15 +6471,7 @@ SSATmp* HhbcTranslator::pushStLoc(uint32_t id,
     incRefNew
   );
 
-  // Approximately mimic hhbc guard relaxation.  When RefcountOpts are
-  // enabled a SetL followed by a PopC will not touch the refcount,
-  // since the IncRef will be cancelled by the DecRef.
-  auto outputPopped = curSrcKey().advanced().op() == OpPopC &&
-    m_irb->localType(id, DataTypeGeneric).notBoxed() &&
-    RuntimeOption::EvalHHIRRefcountOpts;
-
-  auto const cat = outputPopped ? DataTypeGeneric : DataTypeCountness;
-  m_irb->constrainValue(ret, cat);
+  m_irb->constrainValue(ret, DataTypeCountness);
   return push(ret);
 }
 
@@ -6520,7 +6521,7 @@ void HhbcTranslator::end(Offset nextPc) {
 }
 
 void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
-  if (m_irb->blockExists(next)) {
+  if (m_irb->hasBlock(next)) {
     emitJmpImpl(next,
                 nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
                 nullptr);

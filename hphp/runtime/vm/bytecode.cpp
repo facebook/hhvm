@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <cinttypes>
 
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <libgen.h>
@@ -945,6 +946,8 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
         method = cls->getCtor();
         if (!Func::isSpecial(method->name())) break;
       }
+      // We didn't find any methods with the specified name in cls's method
+      // table, handle the failure as appropriate.
       if (raise) {
         raise_error("Call to undefined method %s::%s from %s%s",
                     cls->name()->data(),
@@ -963,9 +966,8 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
       !g_context->debuggerSettings.bypassCheck) {
     Class* baseClass = method->baseCls();
     assert(baseClass);
-    // If the context class is the same as the class that first
-    // declared this method, then we know we have the right method
-    // and we can stop here.
+    // If ctx is the class that first declared this method, then we know we
+    // have the right method and we can stop here.
     if (ctx == baseClass) {
       return method;
     }
@@ -982,28 +984,25 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
     }
     assert(ctx);
     if (method->attrs() & AttrPrivate) {
-      // The context class is not the same as the class that declared
-      // this private method, so this private method is not accessible.
-      // We need to keep going because the context class may define a
-      // private method with this name.
+      // ctx is not the class that declared this private method, so this
+      // private method is not accessible. We need to keep going because
+      // ctx might define a private method with this name.
       accessible = false;
     } else {
-      // If the context class is derived from the class that first
-      // declared this protected method, then we know this method is
-      // accessible and we know the context class cannot have a private
-      // method with the same name, so we're done.
+      // If ctx is derived from the class that first declared this protected
+      // method, then we know this method is accessible and thus (due to
+      // semantic checks) we know ctx cannot have a private method with the
+      // same name, so we're done.
       if (ctx->classof(baseClass)) {
         return method;
       }
       if (!baseClass->classof(ctx)) {
-        // The context class is not the same, an ancestor, or a descendent
-        // of the class that first declared this protected method, so
-        // this method is not accessible. Because the context class is
-        // not the same or an ancestor of the class which first declared
-        // the method, we know that the context class is not the same
-        // or an ancestor of cls, and therefore we don't need to check
-        // if the context class declares a private method with this name,
-        // so we can fail fast here.
+        // ctx is not related to the class that first declared this protected
+        // method, so this method is not accessible. Because ctx is not the
+        // same or an ancestor of the class which first declared the method,
+        // we know that ctx not the same or an ancestor of cls, and therefore
+        // we don't need to check if ctx declares a private method with this
+        // name, so we can fail fast here.
         if (raise) {
           raise_error("Call to protected method %s::%s from context %s",
                       cls->name()->data(),
@@ -1013,28 +1012,30 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
         return nullptr;
       }
       // We now know this protected method is accessible, but we need to
-      // keep going because the context class may define a private method
-      // with this name.
+      // keep going because ctx may define a private method with this name.
       assert(accessible && baseClass->classof(ctx));
     }
   }
   // If this is an ObjMethod call ("$obj->foo()") AND there is an ancestor
-  // of cls that declares a private method with this name AND the context
-  // class is an ancestor of cls, check if the context class declares a
-  // private method with this name.
+  // of cls that declares a private method with this name AND ctx is an
+  // ancestor of cls, we need to check if ctx declares a private method with
+  // this name.
   if (method->hasPrivateAncestor() && callType == CallType::ObjMethod &&
       ctx && cls->classof(ctx)) {
     const Func* ctxMethod = ctx->lookupMethod(methodName);
     if (ctxMethod && ctxMethod->cls() == ctx &&
         (ctxMethod->attrs() & AttrPrivate)) {
-      // For ObjMethod calls a private method from the context class
-      // trumps any other method we may have found.
+      // For ObjMethod calls, a private method declared by ctx trumps
+      // any other method we may have found.
       return ctxMethod;
     }
   }
+  // If we found an accessible method in cls's method table, return it.
   if (accessible) {
     return method;
   }
+  // If we reach here it means we've found an inaccessible private method
+  // in cls's method table, handle the failure as appropriate.
   if (raise) {
     raise_error("Call to private method %s::%s from %s%s",
                 method->baseCls()->name()->data(),
@@ -2101,7 +2102,11 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
 
   pushVMState(originalSP);
   SCOPE_EXIT {
-    assert(vmStack().top() == reentrySP);
+    assert_flog(
+      vmStack().top() == reentrySP,
+      "vmsp after reentry: {} doesn't match original vmsp: {}",
+      vmStack().top(), reentrySP
+    );
     popVMState();
   };
 
@@ -2242,7 +2247,49 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   enterVM(fp, StackArgsState::Untrimmed, resumable, exception);
 }
 
+namespace {
+
+std::atomic<bool> s_foundHHConfig(false);
+void checkHHConfig(const Unit* unit) {
+
+  if (!RuntimeOption::EvalAuthoritativeMode &&
+      RuntimeOption::LookForTypechecker &&
+      !s_foundHHConfig &&
+      unit->isHHFile()) {
+    const std::string &s = unit->filepath()->toCppString();
+    boost::filesystem::path p(s);
+
+    while (p != "/") {
+      p.remove_filename();
+      p /= ".hhconfig";
+
+      if (boost::filesystem::exists(p)) {
+        break;
+      }
+
+      p.remove_filename();
+    }
+
+    if (p == "/") {
+      raise_error(
+        "%s appears to be a Hack file, but you do not appear to be running "
+        "the Hack typechecker. See the documentation at %s for information on "
+        "getting it running. You can also set Hack.Lang.LookForTypechecker=0 "
+        "to disable this check (not recommended).",
+        s.c_str(),
+        "http://docs.hhvm.com/manual/en/install.hack.bootstrapping.php"
+      );
+    } else {
+      s_foundHHConfig = true;
+    }
+  }
+}
+
+}
+
 void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
+  checkHHConfig(unit);
+
   auto const func = unit->getMain();
   invokeFunc(retval, func, init_null_variant, nullptr, nullptr,
              m_globalVarEnv, nullptr, InvokePseudoMain);
@@ -2522,7 +2569,7 @@ ExecutionContext::pushLocalsAndIterators(const Func* func,
 }
 
 void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
-  assert(handle->isUncounted() && size > 0);
+  assert(handle->getUncounted() && size > 0);
   assert(handle->getType() == KindOfString ||
          handle->getType() == KindOfArray);
   m_apcHandles.m_handles.push_back(handle);
@@ -3530,6 +3577,20 @@ OPTBLD_INLINE void ExecutionContext::iopNewMixedArray(IOP_ARGS) {
   } else {
     vmStack().pushArrayNoRc(MixedArray::MakeReserveMixed(capacity));
   }
+}
+
+OPTBLD_INLINE void ExecutionContext::iopNewMIArray(IOP_ARGS) {
+  NEXT();
+  DECODE_IVA(capacity);
+  // TODO(t4757263) staticEmptyArray() for IntMap
+  vmStack().pushArrayNoRc(MixedArray::MakeReserveIntMap(capacity));
+}
+
+OPTBLD_INLINE void ExecutionContext::iopNewMSArray(IOP_ARGS) {
+  NEXT();
+  DECODE_IVA(capacity);
+  // TODO(t4757263) staticEmptyArray() for StrMap
+  vmStack().pushArrayNoRc(MixedArray::MakeReserveStrMap(capacity));
 }
 
 OPTBLD_INLINE void ExecutionContext::iopNewLikeArrayL(IOP_ARGS) {

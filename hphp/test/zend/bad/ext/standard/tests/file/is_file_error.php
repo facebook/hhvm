@@ -22,6 +22,7 @@ fclose($file_handle);
 
 echo "\n*** Done ***";
 ?>
+
 <?php
 $file_path = dirname(__FILE__);
 if(file_exists($file_path."/is_file_error.tmp")) {

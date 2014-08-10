@@ -12,3 +12,4 @@ $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->hasSameRules('foo'));
 
 var_dump(intltz_has_same_rules(null, $tz));
+

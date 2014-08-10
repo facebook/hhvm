@@ -18,6 +18,7 @@
 #ifndef incl_HPHP_EXT_IMAGE_H_
 #define incl_HPHP_EXT_IMAGE_H_
 
+
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/zend-php-config.h"
 #include "hphp/runtime/ext/gd/libgd/gd.h"
@@ -132,6 +133,9 @@ Variant HHVM_FUNCTION(imagecreatefromjpeg, const String& filename);
 #ifdef HAVE_GD_PNG
 Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename);
 #endif
+#ifdef HAVE_LIBVPX
+Variant HHVM_FUNCTION(imagecreatefromwebp, const String& filename);
+#endif
 #ifdef HAVE_LIBGD15
 Variant HHVM_FUNCTION(imagecreatefromstring, const String& data);
 #endif
@@ -200,6 +204,10 @@ bool HHVM_FUNCTION(imagepng,  const Resource& image,
   const String& filename = null_string, int64_t quality = -1,
   int64_t filters = -1);
 #endif
+#ifdef HAVE_LIBVPX
+bool HHVM_FUNCTION(imagewebp,  const Resource& image,
+  const String& filename = null_string, int64_t quality = 80);
+#endif
 bool HHVM_FUNCTION(imagepolygon, const Resource& image,
   const Array& points, int64_t num_points, int64_t color);
 bool HHVM_FUNCTION(imagerectangle, const Resource& image,
@@ -254,7 +262,8 @@ Variant HHVM_FUNCTION(exif_tagname, int64_t index);
 Variant HHVM_FUNCTION(exif_thumbnail,
   const String& filename, VRefParam width = uninit_null(),
   VRefParam height = uninit_null(), VRefParam imagetype = uninit_null());
-
+Variant HHVM_FUNCTION(imagepalettecopy,
+  const Resource& dest, const Resource& src);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

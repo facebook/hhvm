@@ -1,0 +1,3 @@
+Strict Standards: Declaration of b::test() should be compatible with a::test($arg = c::TESTCONSTANT) in %s/bug67436/b.php on line %d
+b::test()
+a::test(c::TESTCONSTANT)

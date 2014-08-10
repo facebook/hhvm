@@ -17,3 +17,4 @@ var_dump( mb_strtoupper($sourcestring, $encoding) );
 
 echo "Done";
 ?>
+

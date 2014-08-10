@@ -1,0 +1,18 @@
+Array
+(
+    [1] => bar
+    [2] => baz
+)
+Array
+(
+    [0] => foo
+)
+Array
+(
+    [bar] => 2
+    [baz] => 3
+)
+Array
+(
+    [foo] => 1
+)

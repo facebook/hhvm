@@ -35,7 +35,6 @@
 
 #include <sys/time.h>
 #include <sys/resource.h>
-
 #include <iostream>
 #include <fstream>
 #include <zlib.h>
@@ -174,35 +173,6 @@ static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
   return freqs;
 }
 
-class esyscall {
-public:
-  int num;
-
-  explicit esyscall(const char *syscall_name) {
-    num = -1;
-    char format[strlen(syscall_name) + sizeof(" %d")];
-    sprintf(format, "%s %%d", syscall_name);
-
-    std::ifstream syscalls("/proc/esyscall");
-    if (syscalls.fail()) {
-      return;
-    }
-    char line[MAX_LINELENGTH];
-    if (!syscalls.getline(line, sizeof(line))) {
-      return;
-    }
-    // perhaps we should check the format, but we're just going to assume
-    // Name Number
-    while (syscalls.getline(line, sizeof(line))) {
-      int number;
-      if (sscanf(line, format, &number) == 1) {
-        num = number;
-        return;
-      }
-    }
-  }
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Machine information that we collect just once.
 
@@ -276,18 +246,13 @@ to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
   return (cycles + MHz/2) / MHz;
 }
 
-static esyscall vtsc_syscall("vtsc");
-
-static inline uint64_t vtsc(int64_t MHz) {
+static inline uint64_t cpuTime(int64_t MHz) {
 #ifdef CLOCK_THREAD_CPUTIME_ID
   int64_t rval = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (rval >= 0) {
     return rval;
   }
 #endif
-  if (vtsc_syscall.num > 0) {
-    return syscall(vtsc_syscall.num);
-  }
   struct rusage usage;
   getrusage(RUSAGE_SELF, &usage);
   return
@@ -330,46 +295,46 @@ get_frees()
   return 0;
 }
 
-  size_t Frame::getName(char *result_buf, size_t result_len) {
-    if (result_len <= 1) {
-      return 0; // Insufficient result_bug. Bail!
-    }
-
-    // Add '@recurse_level' if required
-    // NOTE: Dont use snprintf's return val as it is compiler dependent
-    if (m_recursion) {
-      snprintf(result_buf, result_len, "%s@%d", m_name, m_recursion);
-    } else {
-      snprintf(result_buf, result_len, "%s", m_name);
-    }
-
-    // Force null-termination at MAX
-    result_buf[result_len - 1] = 0;
-    return strlen(result_buf);
+size_t Frame::getName(char *result_buf, size_t result_len) {
+  if (result_len <= 1) {
+    return 0; // Insufficient result_bug. Bail!
   }
 
-  size_t Frame::getStack(int level, char *result_buf, size_t result_len) {
-    // End recursion if we dont need deeper levels or
-    // we dont have any deeper levels
-    if (!m_parent || level <= 1) {
-      return getName(result_buf, result_len);
-    }
-
-    // Take care of all ancestors first
-    size_t len = m_parent->getStack(level - 1, result_buf, result_len);
-    if (result_len < (len + HP_STACK_DELIM_LEN)) {
-      return len; // Insufficient result_buf. Bail out!
-    }
-
-    // Add delimiter only if entry had ancestors
-    if (len) {
-      strncat(result_buf + len, HP_STACK_DELIM, result_len - len);
-      len += HP_STACK_DELIM_LEN;
-    }
-
-    // Append the current function name
-    return len + getName(result_buf + len, result_len - len);
+  // Add '@recurse_level' if required
+  // NOTE: Dont use snprintf's return val as it is compiler dependent
+  if (m_recursion) {
+    snprintf(result_buf, result_len, "%s@%d", m_name, m_recursion);
+  } else {
+    snprintf(result_buf, result_len, "%s", m_name);
   }
+
+  // Force null-termination at MAX
+  result_buf[result_len - 1] = 0;
+  return strlen(result_buf);
+}
+
+size_t Frame::getStack(int level, char *result_buf, size_t result_len) {
+  // End recursion if we dont need deeper levels or
+  // we dont have any deeper levels
+  if (!m_parent || level <= 1) {
+    return getName(result_buf, result_len);
+  }
+
+  // Take care of all ancestors first
+  size_t len = m_parent->getStack(level - 1, result_buf, result_len);
+  if (result_len < (len + HP_STACK_DELIM_LEN)) {
+    return len; // Insufficient result_buf. Bail out!
+  }
+
+  // Add delimiter only if entry had ancestors
+  if (len) {
+    strncat(result_buf + len, HP_STACK_DELIM, result_len - len);
+    len += HP_STACK_DELIM_LEN;
+  }
+
+  // Append the current function name
+  return len + getName(result_buf + len, result_len - len);
+}
 
 const StaticString
   s_ct("ct"),
@@ -504,99 +469,6 @@ void Profiler::endFrame(const TypedValue *retval,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// SimpleProfiler
-
-/**
- * vtsc() based profiler, but simple enough to print basic information.
- *
- * When available, we now use the vtsc() call, which is relatively inexpensive
- * and accurate.  It's still a system call, but a cheap one.  If the call isn't
- * available, the comment below still applies.  --renglish
- *
- * COMMENT(cjiang): getrusage is very expensive and inaccurate. It is based
- * on sampling at the rate about once every 5 to 10 miliseconds. The sampling
- * error can be very significantly, especially given that we are
- * instrumenting at a very fine granularity. (every PHP function call will
- * lead to one invokation of getrusage.) Most PHP functions such as the
- * built-ins typically finish in microseconds. Thus the result we get from
- * getrusage is very likely going to be skewed. Also worth noting that
- * getrusage actually is a system call, which involves expensive swapping
- * between user-mode and kernel mode. I would suggest we remove collecting
- * CPU usage all together, as exclusive wall-time is very useful already.
- * Or at least we should make it an opt-in choice.
- *
- * See: http://ww2.cs.fsu.edu/~hines/present/timing_linux.pdf
- *
- * Above is a nice paper talking about the overhead and the inaccuracy problem
- * associated with getrusage.
- */
-class SimpleProfiler : public Profiler {
-private:
-  class CountMap {
-  public:
-    CountMap() : count(0), tsc(0), vtsc(0) {}
-
-    int64_t count;
-    int64_t tsc;
-    int64_t vtsc;
-  };
-  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
-  StatsMap m_stats; // outcome
-
-public:
-  SimpleProfiler() {
-    g_context->write("<div style='display:none'>");
-  }
-
-  ~SimpleProfiler() {
-    g_context->write("</div>");
-    print_output();
-  }
-
-  virtual void beginFrameEx(const char *symbol) override {
-    m_stack->m_tsc_start = cpuCycles();
-    m_stack->m_vtsc_start = vtsc(m_MHz);
-  }
-
-  virtual void endFrameEx(const TypedValue *retval,
-                          const char *symbol) override {
-    CountMap &counts = m_stats[m_stack->m_name];
-    counts.count++;
-    counts.tsc += cpuCycles() - m_stack->m_tsc_start;
-    counts.vtsc += vtsc(m_MHz) - m_stack->m_vtsc_start;
-  }
-
-private:
-  void print_output() {
-    g_context->write(
-          "<link rel='stylesheet' href='/css/hotprofiler.css' type='text/css'>"
-          "<script language='javascript' src='/js/hotprofiler.js'></script>"
-          "<p><center><h2>Hotprofiler Data</h2></center><br>"
-          "<div id='hotprofiler_stats'></div>"
-          "<script language='javascript'>hotprofiler_data = [");
-    for (StatsMap::const_iterator iter = m_stats.begin();
-         iter != m_stats.end(); ++iter) {
-      g_context->write("{\"fn\": \"");
-      g_context->write(iter->first.c_str());
-      g_context->write("\"");
-
-      const CountMap &counts = iter->second;
-
-      char buf[512];
-      snprintf(
-        buf, sizeof(buf),
-        ",\"ct\": %" PRId64 ",\"wt\": %" PRId64 ",\"ut\": %" PRId64 ",\"st\": 0",
-        counts.count, (int64_t)to_usec(counts.tsc, m_MHz),
-        (int64_t)to_usec(counts.vtsc, m_MHz, true));
-      g_context->write(buf);
-
-      g_context->write("},\n");
-    }
-    g_context->write("]; write_data('ut', false);</script><br><br>&nbsp;<br>");
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // HierarchicalProfiler
 
 class HierarchicalProfiler : public Profiler {
@@ -624,7 +496,7 @@ public:
     m_stack->m_tsc_start = cpuCycles();
 
     if (m_flags & TrackCPU) {
-      m_stack->m_vtsc_start = vtsc(m_MHz);
+      m_stack->m_vtsc_start = cpuTime(m_MHz);
     }
 
     if (m_flags & TrackMemory) {
@@ -646,7 +518,7 @@ public:
     counts.wall_time += cpuCycles() - m_stack->m_tsc_start;
 
     if (m_flags & TrackCPU) {
-      counts.cpu += vtsc(m_MHz) - m_stack->m_vtsc_start;
+      counts.cpu += cpuTime(m_MHz) - m_stack->m_vtsc_start;
     }
 
     if (m_flags & TrackMemory) {
@@ -997,7 +869,7 @@ class TraceProfiler : public Profiler {
     te.wall_time = cpuCycles();
     te.cpu = 0;
     if (m_flags & TrackCPU) {
-      te.cpu = vtsc(m_MHz);
+      te.cpu = cpuTime(m_MHz);
     }
     if (m_flags & TrackMemory) {
       auto const& stats = MM().getStats();
@@ -1091,9 +963,9 @@ pthread_mutex_t TraceProfiler::s_inUse = PTHREAD_MUTEX_INITIALIZER;
  */
 class SampleProfiler : public Profiler {
 private:
-  typedef hphp_hash_map<std::string, int64_t, string_hash> CountMap;
-  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
-  StatsMap m_stats; // outcome
+  typedef std::pair<int64_t, int64_t> Timestamp;
+  typedef smart::vector<std::pair<Timestamp, std::string>> SampleVec;
+  SampleVec m_samples; // outcome
 
 public:
   SampleProfiler() {
@@ -1131,15 +1003,13 @@ public:
   }
 
   virtual void writeStats(Array &ret) override {
-    for (StatsMap::const_iterator iter = m_stats.begin();
-         iter != m_stats.end(); ++iter) {
-      Array arr;
-      const CountMap &counts = iter->second;
-      for (CountMap::const_iterator iterCount = counts.begin();
-           iterCount != counts.end(); ++iterCount) {
-        arr.set(String(iterCount->first), iterCount->second);
-      }
-      ret.set(String(iter->first), arr);
+    for (auto const& sample : m_samples) {
+      auto const& time = sample.first;
+      char timestr[512];
+      snprintf(timestr, sizeof(timestr), "%" PRId64 ".%06" PRId64,
+               time.first, time.second);
+
+      ret.set(String(timestr), String(sample.second));
     }
   }
 
@@ -1159,14 +1029,12 @@ private:
    * @author veeve
    */
   void sample_stack() {
-    char key[512];
-    snprintf(key, sizeof(key), "%" PRId64 ".%06" PRId64,
-             (int64_t)m_last_sample_time.tv_sec,
-             (int64_t)m_last_sample_time.tv_usec);
-
     char symbol[5120];
     m_stack->getStack(INT_MAX, symbol, sizeof(symbol));
-    m_stats[key][symbol] = 1;
+
+    auto time = std::make_pair((int64_t)m_last_sample_time.tv_sec,
+                               (int64_t)m_last_sample_time.tv_usec);
+    m_samples.push_back(std::make_pair(time, symbol));
   }
 
   /**
@@ -1421,34 +1289,31 @@ class MemoProfiler : public Profiler {
 ///////////////////////////////////////////////////////////////////////////////
 // ProfilerFactory
 
-bool ProfilerFactory::start(Level level,
+bool ProfilerFactory::start(ProfilerKind kind,
                             long flags,
                             bool beginFrame /* = true */) {
   if (m_profiler != nullptr) {
     return false;
   }
 
-  switch (level) {
-  case Simple:
-    m_profiler = new SimpleProfiler();
-    break;
-  case Hierarchical:
+  switch (kind) {
+  case ProfilerKind::Hierarchical:
     m_profiler = new HierarchicalProfiler(flags);
     break;
-  case Sample:
+  case ProfilerKind::Sample:
     m_profiler = new SampleProfiler();
     break;
-  case Trace:
+  case ProfilerKind::Trace:
     m_profiler = new TraceProfiler(flags);
     break;
-  case Memo:
+  case ProfilerKind::Memo:
     m_profiler = new MemoProfiler(flags);
     break;
-  case XDebug:
+  case ProfilerKind::XDebug:
     m_profiler = new XDebugProfiler();
     break;
   default:
-    throw_invalid_argument("level: %d", level);
+    throw_invalid_argument("level: %d", kind);
     return false;
   }
   if (m_profiler->m_successful) {
@@ -1488,16 +1353,17 @@ IMPLEMENT_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 ///////////////////////////////////////////////////////////////////////////////
 // main functions
 
-void f_hotprofiler_enable(int level) {
+void f_hotprofiler_enable(int ikind) {
+  auto kind = static_cast<ProfilerKind>(ikind);
   long flags = 0;
-  if (level == ProfilerFactory::Hierarchical) {
+  if (kind == ProfilerKind::Hierarchical) {
     flags = TrackBuiltins;
-  } else if (level == ProfilerFactory::Memory) {
-    level = ProfilerFactory::Hierarchical;
+  } else if (kind == ProfilerKind::Memory) {
+    kind = ProfilerKind::Hierarchical;
     flags = TrackBuiltins | TrackMemory;
   }
   if (RuntimeOption::EnableHotProfiler) {
-    s_profiler_factory->start((ProfilerFactory::Level)level, flags);
+    s_profiler_factory->start(kind, flags);
   }
 }
 
@@ -1507,7 +1373,7 @@ Variant f_hotprofiler_disable() {
 
 void f_phprof_enable(int flags /* = 0 */) {
   if (RuntimeOption::EnableHotProfiler) {
-    s_profiler_factory->start(ProfilerFactory::Hierarchical, flags);
+    s_profiler_factory->start(ProfilerKind::Hierarchical, flags);
   }
 }
 
@@ -1546,6 +1412,8 @@ void f_xhprof_frame_end() {
 void f_xhprof_enable(int flags/* = 0 */,
                      const Array& args /* = null_array */) {
   if (!RuntimeOption::EnableHotProfiler) {
+    raise_warning("The runtime option Stats.EnableHotProfiler must be on to "
+                  "use xhprof.");
     return;
   }
 #ifdef CLOCK_THREAD_CPUTIME_ID
@@ -1554,16 +1422,21 @@ void f_xhprof_enable(int flags/* = 0 */,
 #else
   bool missingClockGetTimeNS = true;
 #endif
-  if (vtsc_syscall.num <= 0 && missingClockGetTimeNS) {
+  if (missingClockGetTimeNS) {
+    // Both TrackVtsc and TrackCPU mean "do CPU time profiling".
+    //
+    // TrackVtsc means: require clock_gettime, or else no data.
+    // TrackCPU means: prefer clock_gettime, but fall back to getrusage.
     flags &= ~TrackVtsc;
   }
   if (flags & TrackVtsc) {
     flags |= TrackCPU;
   }
+
   if (flags & XhpTrace) {
-    s_profiler_factory->start(ProfilerFactory::Trace, flags);
+    s_profiler_factory->start(ProfilerKind::Trace, flags);
   } else {
-    s_profiler_factory->start(ProfilerFactory::Hierarchical, flags);
+    s_profiler_factory->start(ProfilerKind::Hierarchical, flags);
   }
 }
 
@@ -1581,10 +1454,10 @@ Variant f_xhprof_network_disable() {
 
 void f_xhprof_sample_enable() {
   if (RuntimeOption::EnableHotProfiler) {
-    s_profiler_factory->start(ProfilerFactory::Sample, 0);
+    s_profiler_factory->start(ProfilerKind::Sample, 0);
   } else {
-    raise_warning("Cannot start the xhprof sampler when the hotprofiler is "
-                  "disabled.");
+    raise_warning("The runtime option Stats.EnableHotProfiler must be on to "
+                  "use xhprof.");
   }
 }
 

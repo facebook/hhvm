@@ -118,13 +118,3 @@ function hphp_get_static_property(string $cls, string $prop,
 <<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_set_static_property(string $cls, string $prop, mixed $value,
                                   bool $force): void;
-
-/**
- * hphp_scalar_typehints_enabled() - Internally used by ReflectionClass for
- *                                   checking whether scalar typehints are
- *                                   enabled.
- *
- * @return bool - Whether or not scalar typehints are enabled
- */
-<<__Native("NoInjection"), __HipHopSpecific>>
-function hphp_scalar_typehints_enabled(): bool;

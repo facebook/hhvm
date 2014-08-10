@@ -44,6 +44,7 @@ hphp/system/php/spl/iterators/RecursiveFilterIterator.php
 hphp/system/php/spl/iterators/RegexIterator.php
 hphp/system/php/spl/iterators/RecursiveRegexIterator.php
 hphp/system/php/spl/iterators/ParentIterator.php
+hphp/system/php/spl/iterators/RecursiveCallbackFilterIterator.php
 
 hphp/system/php/spl/iterators/ArrayIterator.php
 hphp/system/php/spl/iterators/RecursiveArrayIterator.php
@@ -111,6 +112,7 @@ hphp/system/php/spl/iterators/InfiniteIterator.php
 hphp/system/php/spl/iterators/LimitIterator.php
 hphp/system/php/spl/iterators/NoRewindIterator.php
 hphp/system/php/spl/iterators/RecursiveIteratorIterator.php
+hphp/system/php/spl/iterators/RecursiveTreeIterator.php
 hphp/system/php/spl/miscellaneous/ArrayObject.php
 hphp/system/php/spl/miscellaneous/autoload.php
 

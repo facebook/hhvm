@@ -17,3 +17,4 @@ $str = mb_substr($euc_jp, -100, 10,'EUC-JP');
 ($str !== "") ? print "4 OK: ".bin2hex($str)."\n" : print "NG: ".bin2hex($str)."\n";
 
 ?>
+

@@ -81,7 +81,7 @@ type command =
 | METHOD_JUMP of (string * bool)
 | INFER_TYPE of file_input * int * int (* filename|content, line, char *)
 | REFACTOR of refactor_action
-| SEARCH of string
+| SEARCH of string * string
 | SUGGEST of string list
 | ARGUMENT_INFO of string * int * int
 

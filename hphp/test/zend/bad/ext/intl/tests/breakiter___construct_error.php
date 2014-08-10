@@ -7,3 +7,4 @@ var_dump(new IntlRuleBasedBreakIterator());
 var_dump(new IntlRuleBasedBreakIterator(1,2,3));
 var_dump(new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+;', array()));
 var_dump(new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+;', true));
+

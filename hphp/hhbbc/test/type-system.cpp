@@ -166,11 +166,11 @@ std::unique_ptr<php::Program> make_program() {
 
 //////////////////////////////////////////////////////////////////////
 
-auto const test_empty_array = folly::lazy([&] {
+auto const test_empty_array = folly::lazy([] {
   return staticEmptyArray();
 });
 
-auto const test_array_map_value = folly::lazy([&] {
+auto const test_array_map_value = folly::lazy([] {
   auto ar = make_map_array(
     s_A.get(), s_B.get(),
     s_test.get(), 12
@@ -178,7 +178,7 @@ auto const test_array_map_value = folly::lazy([&] {
   return ArrayData::GetScalarArray(ar.get());
 });
 
-auto const test_array_packed_value = folly::lazy([&] {
+auto const test_array_packed_value = folly::lazy([] {
   auto ar = make_packed_array(
     42,
     23,
@@ -187,7 +187,7 @@ auto const test_array_packed_value = folly::lazy([&] {
   return ArrayData::GetScalarArray(ar.get());
 });
 
-auto const test_array_packed_value2 = folly::lazy([&] {
+auto const test_array_packed_value2 = folly::lazy([] {
   auto ar = make_packed_array(
     42,
     23.0,
@@ -196,7 +196,7 @@ auto const test_array_packed_value2 = folly::lazy([&] {
   return ArrayData::GetScalarArray(ar.get());
 });
 
-auto const test_array_packed_value3 = folly::lazy([&] {
+auto const test_array_packed_value3 = folly::lazy([] {
   auto ar = make_packed_array(
     1,
     2,
@@ -207,7 +207,7 @@ auto const test_array_packed_value3 = folly::lazy([&] {
   return ArrayData::GetScalarArray(ar.get());
 });
 
-auto const with_data = folly::lazy([&] {
+auto const with_data = folly::lazy([] {
   return std::vector<Type> {
     ival(2),
     dval(2.0),
@@ -281,7 +281,7 @@ auto const non_opt_unions = {
 
 auto const all_unions = boost::join(optionals, non_opt_unions);
 
-auto const all = folly::lazy([&] {
+auto const all = folly::lazy([] {
   std::vector<Type> ret;
   auto const wdata = with_data();
   ret.insert(end(ret), begin(primitives), end(primitives));
@@ -303,7 +303,7 @@ std::vector<Type> all_with_waithandles(const Index& index) {
   return ret;
 }
 
-auto const specialized_array_examples = folly::lazy([&] {
+auto const specialized_array_examples = folly::lazy([] {
   auto ret = std::vector<Type>{};
 
   auto test_map_a          = StructMap{};

@@ -30,33 +30,6 @@ let is_private = function
   | _ -> false
 
 (*****************************************************************************)
-(* Errors *)
-(*****************************************************************************)
-
-module Error = struct
-
-  (* Incompatible visibilities *)
-  let visibility parent_class_elt class_elt =
-    let parent_pos = Reason.to_pos (fst parent_class_elt.ce_type) in
-    let pos = Reason.to_pos (fst class_elt.ce_type) in
-    let parent_vis = TUtils.string_of_visibility parent_class_elt.ce_visibility in
-    let vis = TUtils.string_of_visibility class_elt.ce_visibility in
-    Errors.visibility_extends vis pos parent_pos parent_vis
-
-  (* Method missing *)
-  let member_not_implemented member_name parent_pos pos defn_pos =
-    Errors.member_not_implemented member_name parent_pos pos defn_pos
-
-  (* Incompatible override *)
-  let override (parent_pos, parent_name) (pos, name) error_message_l =
-    Errors.override parent_pos parent_name pos name error_message_l
-
-  let missing_constructor pos =
-    Errors.missing_constructor pos
-
-end
-
-(*****************************************************************************)
 (* Given a map of members, check that the overriding is correct.
  * Please note that 'members' has a very general meaning here.
  * It can be class variables, methods, static methods etc ... The same logic
@@ -76,7 +49,12 @@ let check_visibility parent_class_elt class_elt =
   | Vprivate _   , Vprivate _
   | Vprotected _ , Vprotected _
   | Vprotected _ , Vpublic       -> ()
-  | _ -> Error.visibility parent_class_elt class_elt
+  | _ ->
+    let parent_pos = Reason.to_pos (fst parent_class_elt.ce_type) in
+    let pos = Reason.to_pos (fst class_elt.ce_type) in
+    let parent_vis = TUtils.string_of_visibility parent_class_elt.ce_visibility in
+    let vis = TUtils.string_of_visibility class_elt.ce_visibility in
+    Errors.visibility_extends vis pos parent_pos parent_vis
 
 (* Check that all the required members are implemented *)
 let check_members_implemented parent_reason reason parent_members members =
@@ -85,12 +63,13 @@ let check_members_implemented parent_reason reason parent_members members =
     | Vprivate _ -> ()
     | _ when not (SMap.mem member_name members) ->
         let defn_reason = Reason.to_pos (fst class_elt.ce_type) in
-        Error.member_not_implemented member_name parent_reason reason defn_reason
+        Errors.member_not_implemented member_name parent_reason reason defn_reason
     | _ -> ()
   end parent_members
 
 (* Check that overriding is correct *)
-let check_override env parent_class class_ parent_class_elt class_elt =
+let check_override env ?(ignore_fun_return = false)
+    parent_class class_ parent_class_elt class_elt =
   let class_known = if use_parent_for_known then parent_class.tc_members_fully_known
     else class_.tc_members_fully_known in
   let check_vis = class_known || check_partially_known_method_visibility in
@@ -104,14 +83,16 @@ let check_override env parent_class class_ parent_class_elt class_elt =
     let env, parent_ce_type =
       Inst.instantiate_this env parent_class_elt.ce_type this_ty in
     match parent_ce_type, class_elt.ce_type with
-      | (r1, Tfun ft1), (r2, Tfun ft2) ->
+      | (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->
         let subtype_funs =
-          if class_known || check_partially_known_method_returns then
-            SubType.subtype_funs else SubType.subtype_funs_no_return in
-        ignore (subtype_funs env r1 ft1 r2 ft2)
-      | fty1, fty2 ->
-        let pos = Reason.to_pos (fst fty2) in
-        ignore (unify pos Typing_reason.URnone env fty1 fty2)
+          if (not ignore_fun_return) &&
+            (class_known || check_partially_known_method_returns) then
+            SubType.subtype_funs
+          else SubType.subtype_funs_no_return in
+        ignore (subtype_funs env r_parent ft_parent r_child ft_child)
+      | fty_parent, fty_child ->
+        let pos = Reason.to_pos (fst fty_child) in
+        ignore (unify pos Typing_reason.URnone env fty_parent fty_child)
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
@@ -150,17 +131,53 @@ let make_all_members class_ = [
   class_.tc_smethods;
 ]
 
+(* The phantom class element that represents the default constructor:
+ * public function __construct() {}
+ *
+ * It isn't added to the tc_construct only because that's used to
+ * determine whether a child class needs to call parent::__construct *)
+let default_constructor_ce class_ =
+  let pos, name = class_.tc_pos, class_.tc_name in
+  let r = Reason.Rwitness pos in (* reason doesn't get used in, e.g. arity checks *)
+  let ft = { ft_pos      = pos;
+             ft_unsafe   = false;
+             ft_abstract = false;
+             ft_arity    = Fstandard (0, 0);
+             ft_tparams  = [];
+             ft_params   = [];
+             ft_ret      = r, Tprim Nast.Tvoid;
+           }
+  in { ce_final       = false;
+       ce_override    = false;
+       ce_synthesized = true;
+       ce_visibility  = Vpublic;
+       ce_type        = r, Tfun ft;
+       ce_origin      = name;
+     }
+
 (* When an interface defines a constructor, we check that they are compatible *)
-let check_constructors env parent_class class_ =
-  if parent_class.tc_kind <> Ast.Cinterface then () else
-  match parent_class.tc_construct, class_.tc_construct with
-  | None, _ -> ()
-  | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
-  | Some parent_cstr, None ->
-      let pos = fst parent_cstr.ce_type in
-      Error.missing_constructor (Reason.to_pos pos)
-  | Some parent_cstr, Some cstr ->
-      check_override env parent_class class_ parent_cstr cstr
+let check_constructors env parent_class class_ psubst subst =
+  let explicit_consistency = snd parent_class.tc_construct in
+  if parent_class.tc_kind = Ast.Cinterface || explicit_consistency
+  then (
+    match (fst parent_class.tc_construct), (fst class_.tc_construct) with
+      | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
+      | Some parent_cstr, None ->
+        let pos = fst parent_cstr.ce_type in
+        Errors.missing_constructor (Reason.to_pos pos)
+      | _, Some cstr when cstr.ce_override -> (* <<UNSAFE_Construct>> *)
+        ()
+      | Some parent_cstr, Some cstr ->
+        let env, parent_cstr = Inst.instantiate_ce psubst env parent_cstr in
+        let env, cstr = Inst.instantiate_ce subst env cstr in
+        check_override env ~ignore_fun_return:true parent_class class_ parent_cstr cstr
+      | None, Some cstr when explicit_consistency ->
+        let parent_cstr = default_constructor_ce parent_class in
+        let env, parent_cstr = Inst.instantiate_ce psubst env parent_cstr in
+        let env, cstr = Inst.instantiate_ce subst env cstr in
+        check_override env ~ignore_fun_return:true parent_class class_ parent_cstr cstr
+      | None, _ -> ()
+  ) else ()
 
 let check_class_implements env parent_class class_ =
   let parent_pos, parent_class, parent_tparaml = parent_class in
@@ -170,7 +187,7 @@ let check_class_implements env parent_class class_ =
   let subst = Inst.make_subst class_.tc_tparams tparaml in
   let pmemberl = make_all_members parent_class in
   let memberl = make_all_members class_ in
-  check_constructors env parent_class class_;
+  check_constructors env parent_class class_ psubst subst;
   let env, pmemberl = lfold (instantiate_members psubst) env pmemberl in
   let env, memberl = lfold (instantiate_members subst) env memberl in
   if not fully_known then () else
@@ -198,4 +215,7 @@ let check_implements env parent_type type_ =
       let class_ = pos, class_, tparaml in
       Errors.try_
         (fun () -> check_class_implements env parent_class class_)
-        (fun error -> Error.override parent_name name error)
+        (fun errorl ->
+          let p_name_pos, p_name_str = parent_name in
+          let name_pos, name_str = name in
+          Errors.override p_name_pos p_name_str name_pos name_str errorl)

@@ -25,3 +25,4 @@ RULES;
 $t = Transliterator::createFromRules($rules);
 echo intl_get_error_message(),"\n";
 echo "Done.\n";
+

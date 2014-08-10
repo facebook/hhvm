@@ -8,7 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-
+<<ConsistentConstruct>>
 abstract class A {
 
   public function foo(): void {
@@ -20,4 +20,3 @@ abstract class A {
     echo 'test';
   }
 }
-

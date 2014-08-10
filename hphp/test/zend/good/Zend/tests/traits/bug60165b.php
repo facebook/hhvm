@@ -9,3 +9,4 @@ class MyClass {
         A::nonExistent as barA;
     }
 }
+

@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
 
@@ -226,7 +227,10 @@ inline ObjectData*
 newInstance(Class* cls) {
   assert(cls);
   auto* inst = ObjectData::newInstance(cls);
-  if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
+  Stats::inc(cls->getDtor() ? Stats::ObjectData_new_dtor_yes
+                            : Stats::ObjectData_new_dtor_no);
+
+  if (UNLIKELY(RuntimeOption::EnableObjDestructCall && cls->getDtor())) {
     g_context->m_liveBCObjs.insert(inst);
   }
   return inst;

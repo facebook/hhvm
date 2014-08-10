@@ -2,4 +2,4 @@
 if (!extension_loaded("json")) {
  	die('skip JSON extension not available in this build');
 }	 
-?> 
+?>

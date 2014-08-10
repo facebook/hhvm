@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
+#include <sys/param.h> // MAXPATHLEN is here
 
 namespace HPHP {
 
@@ -417,9 +418,13 @@ Variant f_unpack(const String& format, const String& data) {
 }
 
 Array f_sys_getloadavg() {
+#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+  return make_packed_array(0, 0, 0);
+#else
   double load[3];
   getloadavg(load, 3);
   return make_packed_array(load[0], load[1], load[2]);
+#endif
 }
 
 // We want token IDs to remain stable regardless of how we change the
@@ -557,7 +562,7 @@ const int UserTokenId_T_XHP_ATTRIBUTE = 384;
 const int UserTokenId_T_XHP_CATEGORY = 385;
 const int UserTokenId_T_XHP_CATEGORY_LABEL = 386;
 const int UserTokenId_T_XHP_CHILDREN = 387;
-const int UserTokenId_T_XHP_ENUM = 388;
+const int UserTokenId_T_ENUM = 388;
 const int UserTokenId_T_XHP_REQUIRED = 389;
 const int UserTokenId_T_TRAIT = 390;
 const int UserTokenId_T_INSTEADOF = 391;
@@ -602,7 +607,9 @@ const int UserTokenId_T_CALLABLE = 430;
 const int UserTokenId_T_ONUMBER = 431;
 const int UserTokenId_T_POW = 432;
 const int UserTokenId_T_POW_EQUAL = 433;
-const int MaxUserTokenId = 434; // Marker, not a real user token ID
+const int UserTokenId_T_MIARRAY = 434;
+const int UserTokenId_T_MSARRAY = 435;
+const int MaxUserTokenId = 436; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP
@@ -696,7 +703,7 @@ static const char** getTokenNameTable() {
 #undef YYTOKEN
 #define YYTOKEN(num, name) table[get_user_token_id(num)] = #name;
 #define YYTOKEN_MAP
-#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp" // nolint
 #undef YYTOKEN_MAP
 #undef YYTOKEN
   return table;
@@ -730,7 +737,7 @@ String f_hphp_to_string(const Variant& v) {
   extern const int64_t k_##name = get_user_token_id(num);
 #define YYTOKEN_MAP namespace HPHP
 
-#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp" // nolint
 
 namespace HPHP {
 extern const int64_t k_T_PAAMAYIM_NEKUDOTAYIM = k_T_DOUBLE_COLON;

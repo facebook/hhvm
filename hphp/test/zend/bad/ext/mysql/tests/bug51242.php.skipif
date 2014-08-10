@@ -1,0 +1,15 @@
+<?php
+require_once('skipif.inc');
+require_once('skipifnotmysqlnd.inc');
+
+// Specific to this bug: we need to be able to connect via TCP. We'll use
+// 127.0.0.1:3306 as a (hopefully) moderately sensible default if the hostname
+// is actually specified as localhost.
+if ($host == 'localhost') {
+    $host = '127.0.0.1';
+}
+
+if (!@mysql_connect("$host:3306", $user, $passwd)) {
+    die("skip mysql not available at $host:3306");
+}
+?>

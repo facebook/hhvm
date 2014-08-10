@@ -203,9 +203,9 @@ let rec main args retries =
         let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SHOW classname);
         print_all ic
-    | MODE_SEARCH query ->
+    | MODE_SEARCH (query, type_) ->
         let ic, oc = connect args in
-        ServerMsg.cmd_to_channel oc (ServerMsg.SEARCH query);
+        ServerMsg.cmd_to_channel oc (ServerMsg.SEARCH (query, type_));
         let results = Marshal.from_channel ic in
         ClientSearch.go results args.output_json;
         exit 0

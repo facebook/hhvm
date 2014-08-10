@@ -13,7 +13,8 @@ $delim = ";";
 $enclosure ="\"";
 var_dump( $fo->fputcsv($fields, $delim, $enclosure, $fo) );
 
-echo "Done\n";?>
+echo "Done\n";
+?>
 <?php
 $file = __DIR__ . '/SplFileObject_fputcsv_error.csv';
 unlink($file);

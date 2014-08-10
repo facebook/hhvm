@@ -751,6 +751,7 @@ struct ClassKindData : IRExtraData {
       case ClassKind::Class:     return "cls";
       case ClassKind::Interface: return "interface";
       case ClassKind::Trait:     return "trait";
+      case ClassKind::Enum:      return "enum";
     }
     not_reached();
   }

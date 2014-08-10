@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
 
-#include "hphp/runtime/server/fastcgi/protocol-session.h"
+#include "hphp/runtime/server/fastcgi/protocol-session-handler.h"
 #include "folly/io/IOBuf.h"
 #include "folly/io/Cursor.h"
 #include <unordered_map>
@@ -29,6 +29,12 @@ namespace HPHP {
 class FastCGISession;
 class ProtocolSessionHandler;
 
+/*
+ * FastCGITransaction represents a single request, which may be one of many
+ * multiplexed in a single FastCGISession. It handles forwarding data between
+ * the connection to the web server (FastCGISession in m_session) and the
+ * thread executing the PHP for the request (FastCGITransport in m_handler).
+ */
 class FastCGITransaction
   : public ProtocolSessionHandler::Callback {
 public:
@@ -47,6 +53,12 @@ public:
   void onStdOut(std::unique_ptr<folly::IOBuf> chain) override;
   void onStdErr(std::unique_ptr<folly::IOBuf> chain) override;
   void onComplete() override;
+
+  /*
+   * Perform any cleanup necessary when the socket to the FastCGI client has
+   * closed.
+   */
+  void onClose();
 
 private:
   enum Phase {
@@ -89,17 +101,42 @@ private:
   std::shared_ptr<ProtocolSessionHandler> m_handler;
 };
 
+/*
+ * FastCGISession represents a long-lived session with a FastCGI client,
+ * usually a webserver. A single session may contain multiple live requests
+ * multiplexed through a single connection, with each request represented by a
+ * FastCGITransaction. It is primarily responsible for parsing each record from
+ * the client and dispatching it to the appropriate transaction.
+ */
+struct FastCGISession {
+  friend class FastCGITransaction;
 
-class FastCGISession : public ProtocolSession {
-friend class FastCGITransaction;
-public:
-  typedef FastCGITransaction Transaction;
-  typedef Transaction::RequestId RequestId;
+  struct Callback {
+    virtual ~Callback() {}
+
+    virtual std::shared_ptr<ProtocolSessionHandler>
+      newSessionHandler(int handler_id) = 0;
+    virtual void onSessionEgress(std::unique_ptr<folly::IOBuf> chain) = 0;
+    virtual void onSessionError() = 0;
+    virtual void onSessionClose() = 0;
+  };
+
+  typedef FastCGITransaction::RequestId RequestId;
 
   FastCGISession();
   virtual ~FastCGISession();
 
-  virtual size_t onIngress(const folly::IOBuf* chain) override;
+  size_t onIngress(const folly::IOBuf* chain);
+
+  /*
+   * Perform any cleanup necessary when the socket to the FastCGI client has
+   * closed.
+   */
+  void onClose();
+
+  void setCallback(Callback* callback) {
+    m_callback = callback;
+  }
 
   void setMaxConns(int max_conns);
   void setMaxRequests(int max_requets);
@@ -172,8 +209,8 @@ protected:
   static const std::string k_getValueMaxRequestsKey;
   static const std::string k_getValueMultiplexConnsKey;
 
-  typedef std::unordered_map<RequestId,
-                             std::unique_ptr<Transaction>> TransactionMap;
+  typedef std::unordered_map<RequestId, std::unique_ptr<FastCGITransaction>>
+    TransactionMap;
 
   bool parseRecordBegin(folly::io::Cursor& cursor, size_t& available);
   bool parseRecordBody(folly::io::Cursor& cursor, size_t& available);
@@ -238,7 +275,7 @@ protected:
 
   bool hasTransaction(RequestId request_id);
   void beginTransaction(RequestId request_id);
-  std::unique_ptr<Transaction>& getTransaction(RequestId request_id);
+  std::unique_ptr<FastCGITransaction>& getTransaction(RequestId request_id);
   void endTransaction(RequestId request_id);
 
   Phase m_phase;
@@ -252,6 +289,7 @@ protected:
   int m_maxConns;
   int m_maxRequests;
 
+  Callback* m_callback;
   TransactionMap m_transactions;
 };
 

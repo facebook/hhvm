@@ -158,6 +158,7 @@ function get_options($argv) {
     'color' => 'c',
     'no-fun' => '',
     'cores' => '',
+    'no-clean' => '',
   );
   $options = array();
   $files = array();
@@ -431,6 +432,7 @@ class Status {
   private static $use_color = false;
 
   private static $queue = null;
+  private static $killed = false;
   public static $key;
 
   const MODE_NORMAL = 0;
@@ -467,6 +469,14 @@ class Status {
     self::send(self::MSG_FINISHED, null);
   }
 
+  public static function killQueue() {
+    if (!self::$killed) {
+      msg_remove_queue(self::$queue);
+      self::$queue = null;
+      self::$killed = true;
+    }
+  }
+
   public static function pass($test, $detail) {
     array_push(self::$results, array('name' => $test, 'status' => 'passed'));
     $how = $detail === 'pass-server' ? self::PASS_SERVER :
@@ -475,6 +485,9 @@ class Status {
   }
 
   public static function skip($test, $reason = null) {
+    if (self::getMode() !== self::MODE_FBMAKE) {
+      array_push(self::$results, array('name' => $test, 'status' => 'skipped'));
+    }
     self::send(self::MSG_TEST_SKIP, [$test,$reason]);
   }
 
@@ -492,6 +505,9 @@ class Status {
   }
 
   private static function send($type, $msg) {
+    if (self::$killed) {
+      return;
+    }
     msg_send(self::getQueue(), $type, $msg);
   }
 
@@ -612,17 +628,43 @@ class Status {
   }
 }
 
+function clean_intermediate_files($test, $options) {
+  if (isset($options['no-clean'])) {
+    return;
+  }
+  $exts = array('out', 'diff', 'repo');
+  foreach ($exts as $ext) {
+    $file = "$test.$ext";
+    if (file_exists($file)) {
+      if (is_dir($file)) {
+        foreach(new RecursiveIteratorIterator(new
+            RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST) as $path) {
+          $path->isDir() ? rmdir($path->getPathname()) : unlink($path->getPathname());
+        }
+        rmdir($file);
+      } else {
+        unlink($file);
+      }
+    }
+  }
+}
+
 function run($options, $tests, $bad_test_file) {
   foreach ($tests as $test) {
-    $status = run_test($options, $test);
+    $status = run_and_lock_test($options, $test);
     if ($status === 'skip') {
       Status::skip($test);
+      clean_intermediate_files($test, $options);
     } else if ($status === 'skip-norepo') {
       Status::skip($test, 'norepo');
+      clean_intermediate_files($test, $options);
     } else if ($status === 'skip-onlyrepo') {
       Status::skip($test, 'onlyrepo');
+      clean_intermediate_files($test, $options);
     } else if ($status) {
       Status::pass($test, $status);
+      clean_intermediate_files($test, $options);
     } else {
       Status::fail($test);
     }
@@ -999,6 +1041,10 @@ function run_config_post($outputs, $test, $options) {
     }
 
     return $passed;
+  } else {
+    file_put_contents("$test.diff", "No $test.expect, $test.expectf, ".
+      "nor $test.expectregex. Is $test even a test?");
+    return false;
   }
 }
 
@@ -1006,6 +1052,14 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
   $outputs = run_config_cli($options, $test, $hhvm, $hhvm_env);
   if ($outputs === false) return false;
   return run_config_post($outputs, $test, $options);
+}
+
+function run_and_lock_test($options, $test) {
+  $lock = fopen($test, 'r');
+  if (!flock($lock, LOCK_EX)) return false;
+  $result = run_test($options, $test);
+  if (!flock($lock, LOCK_UN)) return false;
+  return $result;
 }
 
 function run_test($options, $test) {
@@ -1542,7 +1596,7 @@ function main($argv) {
   }
   Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
 
-  Status::$key = ftok(__FILE__, 't');
+  Status::$key = rand();
   $queue = Status::getQueue();
   drain_queue($queue);
 
@@ -1562,7 +1616,7 @@ function main($argv) {
       exit(run($options, $test_buckets[$i], $bad_test_file));
     }
   }
-
+  
   // Fork off a child to receive messages and print status, and have the parent
   // wait for all children to exit.
   $printer_pid = pcntl_fork();
@@ -1570,9 +1624,15 @@ function main($argv) {
     error("failed to fork");
   } else if ($printer_pid == 0) {
     msg_loop(count($tests), $queue);
-    msg_remove_queue($queue);
     return 0;
   }
+  
+  // In case we exit in a crazy way, have the parent blow up the queue.
+  // Do this here so no children inherit this.
+  $kill_queue = function() { Status::killQueue(); };
+  register_shutdown_function($kill_queue);
+  pcntl_signal(SIGTERM, $kill_queue);
+  pcntl_signal(SIGINT, $kill_queue);
 
   $return_value = 0;
   while (count($children) && $printer_pid != 0) {
@@ -1621,8 +1681,8 @@ function main($argv) {
     $json = json_decode(file_get_contents($bad_test_file), true);
     if (!is_array($json)) {
       error(
-        "No JSON output was received from a test thread. ".
-        "This might be a bug in the test script."
+        "\nNo JSON output was received from a test thread. ".
+        "Either you killed it, or it might be a bug in the test script."
       );
     }
     $results = array_merge($results, $json);

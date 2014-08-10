@@ -536,7 +536,7 @@ SSATmp* Simplifier::simplifyLdClsCtx(const IRInstruction* inst) {
 SSATmp* Simplifier::simplifyLdObjClass(const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
 
-  if (!(ty < Type::Obj)) return nullptr;
+  if (typeMightRelax(inst->src(0)) || !(ty < Type::Obj)) return nullptr;
 
   if (auto const exact = ty.getExactClass()) return cns(exact);
   return nullptr;

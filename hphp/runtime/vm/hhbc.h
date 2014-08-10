@@ -481,6 +481,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(Array,           ONE(AA),          NOV,             ONE(CV),    NF) \
   O(NewArray,        ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewMixedArray,   ONE(IVA),         NOV,             ONE(CV),    NF) \
+  O(NewMIArray,      ONE(IVA),         NOV,             ONE(CV),    NF) \
+  O(NewMSArray,      ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewLikeArrayL,   TWO(LA,IVA),      NOV,             ONE(CV),    NF) \
   O(NewPackedArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewStructArray,  ONE(VSA),         SMANY,           ONE(CV),    NF) \
@@ -969,6 +971,7 @@ struct StackTransInfo {
 };
 
 bool instrIsNonCallControlFlow(Op opcode);
+bool instrHasConditionalBranch(Op opcode);
 bool instrAllowsFallThru(Op opcode);
 bool instrReadsCurrentFpi(Op opcode);
 

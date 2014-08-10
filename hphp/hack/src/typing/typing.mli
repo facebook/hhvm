@@ -9,7 +9,8 @@
  *)
 open Utils
 
-val debug: bool ref
+val debug_print_last_pos:
+  'a -> unit
 
 val fun_decl:
   Nast.fun_ -> unit

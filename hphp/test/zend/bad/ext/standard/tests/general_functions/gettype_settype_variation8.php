@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype: string gettype ( mixed $var );
    Description: Returns the type of the PHP variable var
 

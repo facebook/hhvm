@@ -10,3 +10,4 @@ var_dump(intlcal_get_skipped_wall_time_option($c, 1));
 var_dump(intlcal_get_repeated_wall_time_option($c, 1));
 
 var_dump(intlcal_get_skipped_wall_time_option(1));
+

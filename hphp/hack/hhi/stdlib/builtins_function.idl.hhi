@@ -13,10 +13,6 @@ function function_exists(string $function_name, $autoload = true): bool;
 function is_callable($v, $syntax = false, &$name = null): bool;
 function call_user_func_array<T>($function, Container<T> $params);
 function call_user_func($function, ...);
-function call_user_func_array_async<T>($function, Container<T> $params);
-function call_user_func_async($function, ...);
-function check_user_func_async($handles, $timeout = -1);
-function end_user_func_async($handle, $default_strategy = GLOBAL_STATE_IGNORE, $additional_strategies = null);
 function forward_static_call_array<T>($function, Container<T> $params);
 function forward_static_call($function, ...);
 function get_called_class(): string; // false if called from outside class

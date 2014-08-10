@@ -18,4 +18,4 @@ $a = "original";
 $b =& returnRef();
 $b = "changed";
 var_dump($a); //expecting "changed" 
-?>
+?>

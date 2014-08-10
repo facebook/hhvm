@@ -1,0 +1,8 @@
+Test 8: Stream Wrapper Includes 
+Warning: Protocol 'compress.zlib' for external XML entity 'compress.zlib://xslt.xsl.gz' is disabled for security reasons. This may be changed using the hhvm.libxml.ext_entity_whitelist ini setting. in %s/tests/xslt008-disabled.php on line 11
+
+Warning: compilation error: file %s/streamsinclude.xsl line 5 element include in %s/xslt008-disabled.php on line 11
+
+Warning: xsl:include : unable to load compress.zlib://xslt.xsl.gz in %s/xslt008-disabled.php on line 11
+
+Fatal error: Unable to import stylesheet in %s/xslt008-disabled.php on line 11

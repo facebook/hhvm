@@ -17,4 +17,4 @@ $recItIt = new MyRecursiveIteratorIterator($recArrIt, RecursiveIteratorIterator:
 
 foreach ($recItIt as $key => $val) echo "$key\n";
 
-?>
+?>

@@ -84,7 +84,7 @@ static_assert(sizeof(ObjectData) == use_lowptr ? 16 : 32,
 //////////////////////////////////////////////////////////////////////
 
 bool ObjectData::destruct() {
-  if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
+  if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
     g_context->m_liveBCObjs.erase(this);
   }
   if (!noDestruct()) {
@@ -1720,7 +1720,8 @@ void ObjectData::raiseAbstractClassError(Class* cls) {
   Attr attrs = cls->attrs();
   raise_error("Cannot instantiate %s %s",
               (attrs & AttrInterface) ? "interface" :
-              (attrs & AttrTrait)     ? "trait" : "abstract class",
+              (attrs & AttrTrait)     ? "trait" :
+              (attrs & AttrEnum)      ? "enum" : "abstract class",
               cls->preClass()->name()->data());
 }
 

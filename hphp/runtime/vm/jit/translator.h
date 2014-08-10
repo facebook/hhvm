@@ -270,6 +270,11 @@ struct Translator {
   SrcRec* getSrcRec(const SrcKey& sk);
 
 
+  /*
+   * Current region being translated, if any.
+   */
+  const RegionDesc* region() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Configuration.
 
@@ -409,6 +414,7 @@ private:
   int64_t m_createdTime;
 
   TransKind m_mode;
+  const RegionDesc* m_region{nullptr};
   std::unique_ptr<ProfData> m_profData;
   bool m_useAHot;
 

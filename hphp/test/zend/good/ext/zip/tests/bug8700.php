@@ -17,3 +17,4 @@ if ($contents_from_idx != "=)" || $contents_from_name != "=)") {
 $zip->close();
 echo "status: " . $zip->status . "\n";
 echo "\n";
+

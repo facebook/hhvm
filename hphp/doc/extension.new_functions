@@ -11,7 +11,6 @@ testing and some alternative PHP implementation.
 - hphp_output_global_state
 - hphp_set_error_page
 
-- hphp_service_thread_started
 - hphp_thread_is_warmup_enabled
 - hphp_thread_set_warmup_enabled
 - hphp_get_thread_id
@@ -47,10 +46,6 @@ testing and some alternative PHP implementation.
 - xbox_task_status
 - xbox_task_result
 
-- call_user_func_array_async
-- call_user_func_async
-- check_user_func_async
-- end_user_func_async
 - fb_call_user_func_array_safe
 - fb_call_user_func_safe
 - fb_call_user_func_safe_return

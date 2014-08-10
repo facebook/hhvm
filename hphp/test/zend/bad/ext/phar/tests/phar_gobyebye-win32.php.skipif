@@ -1,0 +1,3 @@
+<?php if (!extension_loaded("phar")) die("skip");
+if (strpos(PHP_OS, 'WIN') === false) die("skip Extra warning on Windows.");
+?>

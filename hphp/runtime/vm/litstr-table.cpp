@@ -29,6 +29,7 @@ LitstrTable* LitstrTable::s_litstrTable = nullptr;
 
 Id LitstrTable::mergeLitstr(const StringData* litstr) {
   mutex().lock();
+  assert(!m_safeToRead);
   auto it = m_litstr2id.find(litstr);
 
   if (it == m_litstr2id.end()) {

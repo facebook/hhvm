@@ -8,4 +8,4 @@ $tests = array(
 foreach ($tests as $t) {
     echo bin2hex(utf8_decode($t)), "\n";
 }
-echo "Done.\n";
+echo "Done.\n";

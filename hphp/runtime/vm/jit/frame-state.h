@@ -78,7 +78,7 @@ struct EvalStack {
   int  size()  const { return m_vector.size(); }
   void clear()       { m_vector.clear(); }
 
-  void swap(std::vector<SSATmp*> &vector) {
+  void swap(std::vector<SSATmp*>& vector) {
     m_vector.swap(vector);
   }
 private:
@@ -90,7 +90,7 @@ private:
 /*
  * LocalStateHook is used to separate the acts of determining which locals are
  * affected by an instruction and recording those changes. It allows consumers
- * of FrameState to get details about how an instruciton affects the locals
+ * of FrameState to get details about how an instruction affects the locals
  * without having to query the state of each local before and after having
  * FrameState process the instruction.
  */
@@ -141,11 +141,13 @@ struct FrameState final : private LocalStateHook {
 
   void update(const IRInstruction* inst);
 
+  bool hasStateFor(Block* block) const;
+
   /*
    * Starts tracking state for a block and reloads any previously
    * saved state.
    */
-  void startBlock(Block*);
+  void startBlock(Block* block);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -160,12 +162,19 @@ struct FrameState final : private LocalStateHook {
   void pauseBlock(Block*);
 
   /*
-   * Clear state associate with the given block.
+   * Clear state associated with the given block.
    */
   void clearBlock(Block*);
 
   /*
-   * Clear all tracked state.
+   * Clear the current state, but keeps the state associated with all
+   * other blocks intact.
+   */
+  void clearCurrentState();
+
+  /*
+   * Clear all tracked state, including both the current state and the
+   * state associated with all blocks.
    */
   void clear();
 
@@ -174,7 +183,11 @@ struct FrameState final : private LocalStateHook {
    */
   void clearCse();
 
-  void clearCurrentLocals() { clearLocals(*this); }
+  /*
+   * Clears the current state and resets the current marker to the
+   * given value.
+   */
+  void resetCurrentState(const BCMarker& marker);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }
@@ -218,26 +231,29 @@ struct FrameState final : private LocalStateHook {
    * LocalState stores information about a local in the current function.
    */
   struct LocalState {
-    LocalState()
-      : value(nullptr)
-      , type(Type::Gen)
-      , typeSource(nullptr)
-    {}
+    /*
+     * The current value of the local. nullptr if unknown.
+     */
+    SSATmp* value{nullptr};
 
-    SSATmp* value; // The current value of the local. nullptr if unknown
-    Type type;     // The current type of the local.
-    SSATmp* typeSource; // The source of the currently known type: either the
-                        // current value, a FramePtr with a guard, or nullptr
-                        // if the value is new and unknown.
+    /*
+     * The current type of the local.
+     */
+    Type type{Type::Gen};
+
+    /*
+     * The source of the currently known type: either the
+     * current value, a FramePtr with a guard, or nullptr
+     * if the value is new and unknown.
+     */
+    SSATmp* typeSource{nullptr};
 
     bool operator==(const LocalState& b) const {
-      return value == b.value &&
-        type == b.type &&
-        typeSource == b.typeSource;
+      return value == b.value && type == b.type && typeSource == b.typeSource;
     }
   };
 
-  typedef smart::vector<LocalState> LocalVec;
+  using LocalVec = smart::vector<LocalState>;
 
   const LocalVec& localsForBlock(Block* b) const;
 
@@ -319,8 +335,8 @@ struct FrameState final : private LocalStateHook {
    * fp, and bytecode position.
    */
   const Func* m_curFunc;
-  SSATmp* m_spValue;
-  SSATmp* m_fpValue;
+  SSATmp* m_spValue{nullptr};
+  SSATmp* m_fpValue{nullptr};
   int32_t m_spOffset;
   BCMarker m_marker;
 
@@ -328,19 +344,19 @@ struct FrameState final : private LocalStateHook {
    * m_thisAvailable tracks whether the current frame is known to have a
    * non-null $this pointer.
    */
-  bool m_thisAvailable;
+  bool m_thisAvailable{false};
 
   /*
    * m_frameSpansCall is true iff a Call instruction has been seen since the
    * definition of the current frame pointer.
    */
-  bool m_frameSpansCall;
+  bool m_frameSpansCall{false};
 
   /*
    * m_building is true if we're using FrameState to build the IR,
    * since some state updates are conditional in that case.
    */
-  bool m_building = false;
+  bool m_building{false};
 
   /*
    * Tracking of the state of the virtual execution stack:
@@ -355,7 +371,7 @@ struct FrameState final : private LocalStateHook {
    *   m_stackDeficit represents the number of cells we've popped off
    *   the virtual stack since the last sync.
    */
-  uint32_t m_stackDeficit;
+  uint32_t m_stackDeficit{0};
   EvalStack m_evalStack;
 
   /*
@@ -374,7 +390,7 @@ struct FrameState final : private LocalStateHook {
    * values eligible for CSE.
    */
   CSEHash m_cseHash;
-  bool m_enableCse;
+  bool m_enableCse{false};
 
   /*
    * Saved snapshots of the incoming state for Blocks.

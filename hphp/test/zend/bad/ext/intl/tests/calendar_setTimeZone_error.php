@@ -15,3 +15,4 @@ var_dump($c->setTimeZone());
 
 var_dump(intlcal_set_time_zone($c, 1, 2));
 var_dump(intlcal_set_time_zone(1, $gmt));
+

@@ -1,6 +1,4 @@
 <?php
-ini_set('max_execution_time ',  120);
-
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
  * Description: Send an email message 
  * Source code: ext/standard/mail.c

@@ -24,3 +24,4 @@ var_dump(stream_set_write_buffer($fd, 50));
 var_dump(stream_set_chunk_size($fd, 42));
 
 var_dump(fwrite($fd, str_repeat('0', 70)));
+

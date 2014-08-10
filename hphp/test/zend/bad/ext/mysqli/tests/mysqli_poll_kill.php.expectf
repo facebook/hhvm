@@ -1,0 +1,23 @@
+array(1) {
+  [%u|b%"processed before killed"]=>
+  %unicode|string%(1) "1"
+}
+Fetching from thread %d...
+array(1) {
+  [1]=>
+  %unicode|string%(1) "1"
+}
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+[018] Error: %d/%s
+done!

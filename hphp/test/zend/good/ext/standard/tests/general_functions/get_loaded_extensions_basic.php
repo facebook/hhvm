@@ -10,4 +10,4 @@ echo "Get loaded extensions\n";
 var_dump(get_loaded_extensions());
 
 ?>
-===DONE===
+===DONE===

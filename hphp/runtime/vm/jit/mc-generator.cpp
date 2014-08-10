@@ -211,6 +211,8 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   SCOPE_EXIT { m_tx.setMode(TransKind::Invalid); };
 
+  if (!m_tx.profData()->hasTransRec(transId)) return nullptr;
+
   always_assert(m_tx.profData()->transRegion(transId) != nullptr);
 
   Func*       func = m_tx.profData()->transFunc(transId);
@@ -256,6 +258,9 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
       func->setPrologue(entryNumParams, regionStart);
     }
   }
+
+  m_tx.profData()->freeFuncData(funcId);
+
   assert(start);
   return start;
 }
@@ -1472,6 +1477,15 @@ MCGenerator::recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff) {
     PendingFixup(frontier, Fixup(pcOff, spOff)));
 }
 
+/*
+ * Equivalent to container.clear(), but guarantees to free
+ * any memory associated with the container (eg clear
+ * doesn't affect std::vector's capacity).
+ */
+template <typename T> void ClearContainer(T& container) {
+  T().swap(container);
+}
+
 void
 CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
   for (uint i = 0; i < m_pendingFixups.size(); i++) {
@@ -1479,20 +1493,20 @@ CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
     assert(mcg->isValidCodeAddress(tca));
     mcg->fixupMap().recordFixup(tca, m_pendingFixups[i].m_fixup);
   }
-  m_pendingFixups.clear();
+  ClearContainer(m_pendingFixups);
 
   for (auto const& pair : m_pendingCatchTraces) {
     mcg->catchTraceMap().insert(pair.first, pair.second);
   }
-  m_pendingCatchTraces.clear();
+  ClearContainer(m_pendingCatchTraces);
 
   for (auto const& elm : m_pendingJmpTransIDs) {
     mcg->getJmpToTransIDMap().insert(elm);
   }
-  m_pendingJmpTransIDs.clear();
+  ClearContainer(m_pendingJmpTransIDs);
 
   mcg->literals().insert(m_literals.begin(), m_literals.end());
-  m_literals.clear();
+  ClearContainer(m_literals);
 
   /*
    * Currently these are only used by the relocator,
@@ -1501,11 +1515,11 @@ CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
    * Once we try to relocate live code, we'll need to
    * store compact forms of these for later.
    */
-  m_reusedStubs.clear();
-  m_addressImmediates.clear();
-  m_codePointers.clear();
-  m_bcMap.clear();
-  m_alignFixups.clear();
+  ClearContainer(m_reusedStubs);
+  ClearContainer(m_addressImmediates);
+  ClearContainer(m_codePointers);
+  ClearContainer(m_bcMap);
+  ClearContainer(m_alignFixups);
 
   if (inProgressTailBranches) {
     m_inProgressTailJumps.swap(*inProgressTailBranches);
@@ -1515,16 +1529,16 @@ CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
 }
 
 void CodeGenFixups::clear() {
-  m_pendingFixups.clear();
-  m_pendingCatchTraces.clear();
-  m_pendingJmpTransIDs.clear();
-  m_reusedStubs.clear();
-  m_addressImmediates.clear();
-  m_codePointers.clear();
-  m_bcMap.clear();
-  m_alignFixups.clear();
-  m_inProgressTailJumps.clear();
-  m_literals.clear();
+  ClearContainer(m_pendingFixups);
+  ClearContainer(m_pendingCatchTraces);
+  ClearContainer(m_pendingJmpTransIDs);
+  ClearContainer(m_reusedStubs);
+  ClearContainer(m_addressImmediates);
+  ClearContainer(m_codePointers);
+  ClearContainer(m_bcMap);
+  ClearContainer(m_alignFixups);
+  ClearContainer(m_inProgressTailJumps);
+  ClearContainer(m_literals);
 }
 
 bool CodeGenFixups::empty() const {
@@ -1773,7 +1787,10 @@ void MCGenerator::traceCodeGen() {
 
   finishPass(" after initial translation ", kIRLevel);
 
-  always_assert(IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops));
+  always_assert_flog(
+    IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops),
+    "IRUnit has loop but Eval.JitLoops=0:\n{}\n", unit
+  );
 
   // Task #4075847: enable optimizations with loops
   if (!(RuntimeOption::EvalJitLoops && m_tx.mode() == TransKind::Optimize)) {

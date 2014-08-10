@@ -1,0 +1,3 @@
+BEFORE: rows_skipped_normal = %d
+AFTER: rows_skipped_normal = %d
+done!

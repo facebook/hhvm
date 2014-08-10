@@ -4841,7 +4841,7 @@
             "type": "Int64"
         },
         {
-            "name": "T_XHP_ENUM",
+            "name": "T_ENUM",
             "type": "Int64"
         },
         {

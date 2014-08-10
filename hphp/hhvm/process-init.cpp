@@ -32,6 +32,8 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 
+#include <folly/experimental/Singleton.h>
+
 #include <libgen.h> // For dirname(3).
 #include <string>
 
@@ -171,6 +173,8 @@ void ProcessInit() {
   RuntimeOption::EvalDumpBytecode = db;
   RuntimeOption::EvalAllowHhas = ah;
   Option::WholeProgram = wp;
+
+  folly::SingletonVault::singleton()->registrationComplete();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

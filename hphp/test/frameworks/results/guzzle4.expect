@@ -18,6 +18,8 @@ GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testDispatchesAfterSendEvent
 E
 GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testDispatchesErrorEventAndRecovers
 E
+GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testDoesNotSaveToWhenFailed
+E
 GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testHandlesCurlErrors
 .
 GuzzleHttp\Tests\Adapter\Curl\CurlAdapterTest::testReleasesAdditionalEasyHandles
@@ -32,6 +34,8 @@ GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testAddsDebugInfoToBuffer
 E
 GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testAddsProxyOptions
 .
+GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testCanSendPayloadWithGet
+E
 GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testClientUsesSslByDefault
 E
 GuzzleHttp\Tests\Adapter\Curl\CurlFactoryTest::testConvertsConstantNameKeysToValues
@@ -70,6 +74,10 @@ GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testDispatchesAfterSendEvent
 E
 GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testDispatchesErrorEventAndRecovers
 E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testEnsuresResponseWasSetForGet
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testRetriesRewindableStreamsWhenClosedConnectionErrors
+E
 GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testSendsParallelRequestsFromQueue
 E
 GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testSendsRequest
@@ -79,6 +87,8 @@ E
 GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testStripsFragmentFromHost
 E
 GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testThrowsAndReleasesWhenErrorDuringCompleteEvent
+E
+GuzzleHttp\Tests\Adapter\Curl\MultiAdapterTest::testThrowsWhenTheBodyCannotBeRewound
 E
 GuzzleHttp\Tests\Adapter\Curl\RequestMediatorTest::testCanUseResponseBody
 .
@@ -138,6 +148,8 @@ GuzzleHttp\Tests\Adapter\StreamAdapterTest::testEnsuresThatStreamContextIsAnArra
 F
 GuzzleHttp\Tests\Adapter\StreamAdapterTest::testEnsuresTheHttpProtocol
 F
+GuzzleHttp\Tests\Adapter\StreamAdapterTest::testHandlesMultipleHeadersOfSameName
+.
 GuzzleHttp\Tests\Adapter\StreamAdapterTest::testPerformsShallowMergeOfCustomContextOptions
 E
 GuzzleHttp\Tests\Adapter\StreamAdapterTest::testReturnsResponseForSuccessfulRequest
@@ -426,6 +438,8 @@ GuzzleHttp\Tests\Event\EmitterTest::testAddListener
 .
 GuzzleHttp\Tests\Event\EmitterTest::testAddSubscriber
 .
+GuzzleHttp\Tests\Event\EmitterTest::testAddSubscriberWithMultiple
+.
 GuzzleHttp\Tests\Event\EmitterTest::testAddSubscriberWithPriorities
 .
 GuzzleHttp\Tests\Event\EmitterTest::testCanAddFirstAndLastListeners
@@ -479,6 +493,16 @@ GuzzleHttp\Tests\Event\ListenerAttacherTraitTest::testValidatesEvents
 GuzzleHttp\Tests\Event\ParseExceptionTest::testHasResponse
 .
 GuzzleHttp\Tests\Event\RequestEventsTest::testBeforeSendEmitsErrorEvent
+.
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #0
+.
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #1
+.
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #2
+.
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #3
+.
+GuzzleHttp\Tests\Event\RequestEventsTest::testConvertsEventArrays with data set #4
 .
 GuzzleHttp\Tests\Event\RequestEventsTest::testDoesNotEmitErrorEventTwice
 .
@@ -560,6 +584,8 @@ GuzzleHttp\Tests\Message\AbstractMessageTest::testChecksIfCaseInsensitiveHeaderI
 .
 GuzzleHttp\Tests\Message\AbstractMessageTest::testGetHeadersReturnsAnArrayOfOverTheWireHeaderValues
 .
+GuzzleHttp\Tests\Message\AbstractMessageTest::testGetsResponseStartLine
+.
 GuzzleHttp\Tests\Message\AbstractMessageTest::testHasBody
 .
 GuzzleHttp\Tests\Message\AbstractMessageTest::testHasHeaders
@@ -595,6 +621,8 @@ GuzzleHttp\Tests\Message\AbstractMessageTest::testSetsIntegersAndFloatsAsHeaders
 GuzzleHttp\Tests\Message\AbstractMessageTest::testThrowsExceptionWhenInvalidValueProvidedToAddHeader
 .
 GuzzleHttp\Tests\Message\AbstractMessageTest::testThrowsExceptionWhenInvalidValueProvidedToSetHeader
+.
+GuzzleHttp\Tests\Message\AbstractMessageTest::testThrowsWhenMessageIsUnknown
 .
 GuzzleHttp\Tests\Message\HttpErrorTest::testFullTransaction
 .
@@ -693,6 +721,8 @@ GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesRequestWithPostBodyScala
 GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesResponseFromMessage
 .
 GuzzleHttp\Tests\Message\MessageFactoryTest::testCreatesResponses
+.
+GuzzleHttp\Tests\Message\MessageFactoryTest::testDoesNotApplyPostBodyRightAway
 .
 GuzzleHttp\Tests\Message\MessageFactoryTest::testFactoryRequiresMessageForRequest
 .
@@ -858,21 +888,19 @@ GuzzleHttp\Tests\Post\MultipartBodyTest::testCalculatesSizeAndReturnsNullForUnkn
 .
 GuzzleHttp\Tests\Post\MultipartBodyTest::testCanDetachFieldsAndFiles
 .
-GuzzleHttp\Tests\Post\MultipartBodyTest::testCanOnlySeekTo0
-.
 GuzzleHttp\Tests\Post\MultipartBodyTest::testConstructorAddsFieldsAndFiles
 .
 GuzzleHttp\Tests\Post\MultipartBodyTest::testConstructorCanCreateBoundary
 .
 GuzzleHttp\Tests\Post\MultipartBodyTest::testConstructorValidatesFiles
 .
+GuzzleHttp\Tests\Post\MultipartBodyTest::testDoesNotModifyFieldFormat
+.
 GuzzleHttp\Tests\Post\MultipartBodyTest::testGetContentsCanCap
 .
 GuzzleHttp\Tests\Post\MultipartBodyTest::testIsSeekableReturnsTrueIfAllAreSeekable
 .
 GuzzleHttp\Tests\Post\MultipartBodyTest::testReadsFromBuffer
-.
-GuzzleHttp\Tests\Post\MultipartBodyTest::testThrowsExceptionWhenStreamFailsToRewind
 .
 GuzzleHttp\Tests\Post\MultipartBodyTest::testWrapsStreamMethods
 .
@@ -896,6 +924,8 @@ GuzzleHttp\Tests\Post\PostBodyTest::testDetachesAndCloses
 .
 GuzzleHttp\Tests\Post\PostBodyTest::testHasFields
 .
+GuzzleHttp\Tests\Post\PostBodyTest::testMultipartWithBase64Fields
+.
 GuzzleHttp\Tests\Post\PostBodyTest::testMultipartWithNestedFields
 .
 GuzzleHttp\Tests\Post\PostBodyTest::testWrapsBasicStreamFunctionality
@@ -910,19 +940,59 @@ GuzzleHttp\Tests\Post\PostFileTest::testDefaultsToNameWhenNoFilenameExists
 .
 GuzzleHttp\Tests\Post\PostFileTest::testGetsFilenameFromMetadata
 .
+GuzzleHttp\Tests\QueryParserTest::testCanControlDecodingType
+.
+GuzzleHttp\Tests\QueryParserTest::testConvertsPlusSymbolsToSpacesByDefault
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #0
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #1
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #10
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #11
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #12
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #13
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #14
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #15
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #16
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #2
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #3
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #4
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #5
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #6
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #7
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #8
+.
+GuzzleHttp\Tests\QueryParserTest::testParsesQueries with data set #9
+.
 GuzzleHttp\Tests\QueryTest::testAggregatesMultipleValues
 .
-GuzzleHttp\Tests\QueryTest::testAllowsFalsyQueryValues
-.
 GuzzleHttp\Tests\QueryTest::testAllowsMultipleValuesPerKey
-.
-GuzzleHttp\Tests\QueryTest::testAllowsNullQueryValues
 .
 GuzzleHttp\Tests\QueryTest::testAllowsZeroValues
 .
 GuzzleHttp\Tests\QueryTest::testCanCastToString
 .
+GuzzleHttp\Tests\QueryTest::testCanChangeUrlEncodingDecodingToRfc1738
+.
+GuzzleHttp\Tests\QueryTest::testCanChangeUrlEncodingDecodingToRfc3986
+.
 GuzzleHttp\Tests\QueryTest::testCanDisableUrlEncoding
+.
+GuzzleHttp\Tests\QueryTest::testCanDisableUrlEncodingDecoding
 .
 GuzzleHttp\Tests\QueryTest::testCanSetAggregator
 .
@@ -930,39 +1000,13 @@ GuzzleHttp\Tests\QueryTest::testCanSpecifyRfc1783UrlEncodingType
 .
 GuzzleHttp\Tests\QueryTest::testCanSpecifyRfc3986UrlEncodingType
 .
-GuzzleHttp\Tests\QueryTest::testCastingToAndCreatingFromStringWithEmptyValuesIsFast
-.
-GuzzleHttp\Tests\QueryTest::testConvertsPlusSymbolsToSpaces
-.
 GuzzleHttp\Tests\QueryTest::testDuplicateEncodesNoNumericIndices
 .
 GuzzleHttp\Tests\QueryTest::testEncodesDuplicateAggregator
 .
 GuzzleHttp\Tests\QueryTest::testEncodesPhpAggregator
 .
-GuzzleHttp\Tests\QueryTest::testFromStringDoesntMangleZeroes
-.
-GuzzleHttp\Tests\QueryTest::testFromStringDoesntStripTrailingEquals
-.
-GuzzleHttp\Tests\QueryTest::testGuessesIfDuplicateAggregatorShouldBeUsed
-.
-GuzzleHttp\Tests\QueryTest::testGuessesIfDuplicateAggregatorShouldBeUsedAndChecksForPhpStyle
-.
-GuzzleHttp\Tests\QueryTest::testParsesQueries with data set #0
-.
-GuzzleHttp\Tests\QueryTest::testParsesQueries with data set #1
-.
-GuzzleHttp\Tests\QueryTest::testParsesQueries with data set #2
-.
-GuzzleHttp\Tests\QueryTest::testParsesQueries with data set #3
-.
-GuzzleHttp\Tests\QueryTest::testParsesQueries with data set #4
-.
-GuzzleHttp\Tests\QueryTest::testParsesQueries with data set #5
-.
 GuzzleHttp\Tests\QueryTest::testPhpEncodesNoNumericIndices
-.
-GuzzleHttp\Tests\QueryTest::testProperlyDealsWithDuplicateQueryValues
 .
 GuzzleHttp\Tests\QueryTest::testValidatesEncodingType
 .
@@ -1252,7 +1296,13 @@ GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #47
 .
 GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #48
 .
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #49
+.
 GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #5
+.
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #50
+.
+GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #51
 .
 GuzzleHttp\Tests\UrlTest::testCombinesUrls with data set #6
 .
@@ -1289,6 +1339,8 @@ GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #13
 GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #14
 .
 GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #15
+.
+GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #16
 .
 GuzzleHttp\Tests\UrlTest::testRemoveDotSegments with data set #2
 .

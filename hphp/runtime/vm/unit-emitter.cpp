@@ -446,8 +446,8 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     {
       auto lines = createLineTable(m_sourceLocTab, m_bclen);
       urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
-                                    &m_mainReturn, m_mergeOnly, lines,
-                                    m_typeAliases);
+                                    &m_mainReturn, m_mergeOnly, m_isHHFile,
+                                    lines, m_typeAliases);
     }
     int64_t usn = m_sn;
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
@@ -531,6 +531,7 @@ Unit* UnitEmitter::create() {
   u->m_filepath = m_filepath;
   u->m_mainReturn = m_mainReturn;
   u->m_mergeOnly = m_mergeOnly;
+  u->m_isHHFile = m_isHHFile;
   {
     const std::string& dirname = FileUtil::safe_dirname(m_filepath->data(),
                                                         m_filepath->size());
@@ -798,7 +799,7 @@ void UnitRepoProxy::InsertUnitStmt
                   ::insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
                            const unsigned char* bc, size_t bclen,
                            const TypedValue* mainReturn, bool mergeOnly,
-                           const LineTable& lines,
+                           bool isHHFile, const LineTable& lines,
                            const std::vector<TypeAlias>& typeAliases) {
   BlobEncoder dataBlob;
 
@@ -813,6 +814,7 @@ void UnitRepoProxy::InsertUnitStmt
   query.bindBlob("@bc", (const void*)bc, bclen);
   dataBlob(*mainReturn)
           (mergeOnly)
+          (isHHFile)
           (lines)
           (typeAliases);
   query.bindBlob("@data", dataBlob, /* static */ true);
@@ -847,15 +849,18 @@ bool UnitRepoProxy::GetUnitStmt
 
     TypedValue mainReturn;
     bool mergeOnly;
+    bool isHHFile;
     LineTable lines;
 
     dataBlob(mainReturn)
             (mergeOnly)
+            (isHHFile)
             (lines)
             (ue.m_typeAliases);
 
     ue.m_mainReturn = mainReturn;
     ue.m_mergeOnly = mergeOnly;
+    ue.m_isHHFile = isHHFile;
     ue.m_lineTable = lines;
 
     txn.commit();

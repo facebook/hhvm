@@ -15,3 +15,4 @@ $handler = new SessionHandler;
 session_set_save_handler($handler);
 
 session_start();
+

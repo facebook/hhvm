@@ -1398,14 +1398,6 @@ Doctrine\Tests\ORM\Functional\PostLoadEventTest::testLoadedProxyEntityShouldTrig
 .
 Doctrine\Tests\ORM\Functional\PostLoadEventTest::testLoadedProxyPartialShouldTriggerEvent
 .
-Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testEntityWithIdentifier
-.
-Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testFindWithProxyName
-.
-Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testPersistUpdate
-E
-Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testProxyAsDqlParameterPersist
-.
 Doctrine\Tests\ORM\Functional\QueryCacheTest::testQueryCache_DependsOnFirstResult
 .
 Doctrine\Tests\ORM\Functional\QueryCacheTest::testQueryCache_DependsOnHints

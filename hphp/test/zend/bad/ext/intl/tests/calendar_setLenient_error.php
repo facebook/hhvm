@@ -9,3 +9,4 @@ var_dump($c->setLenient(1, 2));
 
 var_dump(intlcal_set_lenient($c, array()));
 var_dump(intlcal_set_lenient(1, false));
+

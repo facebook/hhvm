@@ -6,3 +6,4 @@ var_dump(IntlTimeZone::getCanonicalID(array()));
 var_dump(IntlTimeZone::getCanonicalID("foo\x81"));
 var_dump(IntlTimeZone::getCanonicalID('foobar', null));
 
+

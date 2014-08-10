@@ -1,0 +1,51 @@
+
+Warning: %s
+
+Notice: %s
+object(stdClass)#%d (0) {
+}
+object(MyClass)#%d (0) {
+}
+object(MyClassSer)#%d (0) {
+}
+object(MyClassSer2)#%d (0) {
+}
+
+Warning: %s
+
+Notice: %s
+bool(false)
+
+Warning: %s
+
+Notice: %s
+bool(false)
+object(SplObjectStorage)#%d (1) {
+  ["storage":"SplObjectStorage":private]=>
+  array(0) {
+  }
+}
+object(__PHP_Incomplete_Class)#%d (1) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(6) "FooBar"
+}
+
+Warning: %s
+
+Notice: %s
+bool(false)
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(0) {
+  }
+}
+object(MyArrayObject)#%d (2) {
+  ["a"]=>
+  int(1)
+  ["storage":"ArrayObject":private]=>
+  array(0) {
+  }
+}
+object(Directory)#%d (0) {
+}
+===DONE==

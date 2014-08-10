@@ -46,7 +46,8 @@ clearstatcache();
 unlink($file);  //Deleting the file
 fclose( fopen($file, "w+b") );  //Opening the non-existing file in "w+b" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; ?>
+echo "*** Done ***\n"; 
+?>
 <?php
 unlink(dirname(__FILE__)."/007_variation20.tmp");
 ?>

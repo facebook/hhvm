@@ -1178,6 +1178,29 @@ bool instrIsNonCallControlFlow(Op opcode) {
   }
 }
 
+bool instrHasConditionalBranch(Op opcode) {
+  switch (opcode) {
+    case OpJmpZ:
+    case OpJmpNZ:
+    case OpIterInit:
+    case OpMIterInit:
+    case OpWIterInit:
+    case OpIterInitK:
+    case OpMIterInitK:
+    case OpWIterInitK:
+    case OpIterNext:
+    case OpMIterNext:
+    case OpWIterNext:
+    case OpIterNextK:
+    case OpMIterNextK:
+    case OpWIterNextK:
+    case OpDecodeCufIter:
+      return true;
+    default:
+      return false;
+  }
+}
+
 bool instrAllowsFallThru(Op opcode) {
   InstrFlags opFlags = instrFlags(opcode);
   return (opFlags & TF) == 0;

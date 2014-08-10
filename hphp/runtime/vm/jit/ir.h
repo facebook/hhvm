@@ -508,7 +508,7 @@ O(CheckInitSProps,                  ND, NA,                              B|E) \
 O(InitSProps,                       ND, NA,                           E|Er|N) \
 O(NewInstanceRaw,            DAllocObj, NA,                              NNT) \
 O(InitObjProps,                     ND, S(Obj),                        E|NNT) \
-O(CustomInstanceInit,        DAllocObj, S(Obj),                         Er|N) \
+O(CustomInstanceInit,          DofS(0), S(Obj),                         Er|N) \
                                                                               \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(LdClsName,              D(StaticStr), S(Cls),                            C) \
@@ -518,6 +518,8 @@ O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                      NNT|PRc) \
 O(NewLikeArray,                 D(Arr), S(Arr) C(Int),               NNT|PRc) \
 O(NewMixedArray,                D(Arr), C(Int),                      NNT|PRc) \
+O(NewMIArray,                   D(Arr), C(Int),                      NNT|PRc) \
+O(NewMSArray,                   D(Arr), C(Int),                      NNT|PRc) \
 O(NewPackedArray,           DArrPacked, C(Int) S(StkPtr),      E|NNT|PRc|CRc) \
 O(NewStructArray,               D(Arr), S(StkPtr),             E|NNT|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),               NNT|PRc) \

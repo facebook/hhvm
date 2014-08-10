@@ -185,7 +185,7 @@ let get_constructor_ty c env =
   let pos = c.Typing_defs.tc_pos in
   let reason = Typing_reason.Rwitness pos in
   let return_ty = reason, Typing_defs.Tapply ((pos, c.Typing_defs.tc_name), []) in
-  match c.Typing_defs.tc_construct with
+  match (fst c.Typing_defs.tc_construct) with
     | Some elt ->
         begin match elt.ce_type with
           | (_ as r, Tfun fun_) ->
@@ -224,6 +224,7 @@ let compute_complete_global funs classes =
                     | Ast.Cnormal -> "class"
                     | Ast.Cinterface -> "interface"
                     | Ast.Ctrait -> "trait"
+                    | Ast.Cenum -> "enum"
                   in
                   let ty =
                     Typing_reason.Rwitness c.Typing_defs.tc_pos,

@@ -23,4 +23,4 @@ echo "===NEXT LOOP===\n";
 
 foreach ($recItIt2 as $val) echo "$val\n";
 
-?>
+?>

@@ -329,8 +329,6 @@ public:
   static ArrayData* DequeueImpl(ArrayData* adInput, Variant& value);
 
   template <ArrayKind aKind>
-  static void RenumberImpl(ArrayData*);
-  template <ArrayKind aKind>
   static bool AdvanceMArrayIterImpl(ArrayData*, MArrayIter& fp);
 
 private:
@@ -427,7 +425,6 @@ public:
     kSort,
     kUsort,
     kNumericString,
-    kRenumber,
   };
   static void downgradeAndWarn(ArrayData* ad, const Reason r);
   static void warnUsage(const Reason r, const ArrayKind kind);

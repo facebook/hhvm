@@ -5,26 +5,38 @@ class SilverStripe extends Framework {
   public function __construct(string $name) {
     parent::__construct($name);
   }
+
+  protected function installDependencies(): void {
+    $composer_json_path = find_first_file_recursive(
+      Set {'composer.json'},
+      nullthrows($this->getInstallRoot()),
+      true
+    );
+    if ($composer_json_path !== null) {
+      $composer_config = json_decode(
+        file_get_contents($composer_json_path.'/composer.json'),
+        /* assoc = */ true
+      );
+      // Add in SQLite module
+      $composer_config['require']['silverstripe/sqlite3'] = '1.3.x-dev';
+      // Change existing dependencies to the wanted tag
+      $composer_config['require']['silverstripe/cms'] = '3.1.5';
+      $composer_config['require']['silverstripe/framework'] = '3.1.5';
+      file_put_contents(
+        $composer_json_path.'/composer.json',
+        json_encode($composer_config)
+      );
+    }
+    parent::installDependencies();
+  }
+
   protected function install(): void {
     parent::install();
-    verbose("Installing dependencies.\n");
-
-    $dependencies_install_cmd = get_runtime_build()." ".__DIR__.
-      "/../composer.phar require silverstripe/sqlite3 dev-master";
-    $install_ret = run_install($dependencies_install_cmd,
-                               nullthrows($this->getInstallRoot()),
-                               ProxyInformation::$proxies);
-
-    if ($install_ret !== 0) {
-      remove_dir_recursive(nullthrows($this->getInstallRoot()));
-      error_and_exit("Couldn't download dependencies for ".$this->getName().
-                     ". Removing framework. \n");
-    }
 
     verbose("Creating a _ss_environment file for setting SQLite adapter.\n");
 
     $contents = <<<'ENV_FILE'
-<?hh
+<?php
 define('SS_DATABASE_SERVER', 'localhost');
 define('SS_DATABASE_USERNAME', 'root');
 define('SS_DATABASE_PASSWORD', '');

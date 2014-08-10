@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -28,6 +27,10 @@
 #include <unordered_set>
 #include <algorithm>
 #include <utility>
+
+#ifdef VOID
+#undef VOID
+#endif
 
 // TODO
 //  - #3098109 dests of branch instructions start in next block

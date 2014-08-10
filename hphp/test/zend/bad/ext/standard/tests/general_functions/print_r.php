@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype: bool print_r ( mixed $expression [, bool $return] );
    Description: Prints human-readable information about a variable
 */

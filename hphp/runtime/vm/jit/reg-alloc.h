@@ -22,6 +22,10 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
+#ifdef VOID
+#undef VOID
+#endif
+
 namespace HPHP {  namespace JIT {
 
 class IRUnit;

@@ -1,7 +1,7 @@
 
 Warning: %s
  in %s on line %d
-object(stdClass)#5 (13) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"
   [%u|b%"orgname"]=>

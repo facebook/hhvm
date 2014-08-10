@@ -38,16 +38,8 @@ FrameState::FrameState(IRUnit& unit, BCMarker marker)
 FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
   : m_unit(unit)
   , m_curFunc(func)
-  , m_spValue(nullptr)
-  , m_fpValue(nullptr)
   , m_spOffset(initialSpOffset)
-  , m_thisAvailable(false)
-  , m_frameSpansCall(false)
-  , m_stackDeficit(0)
-  , m_evalStack()
   , m_locals(func ? func->numLocals() : 0)
-  , m_enableCse(false)
-  , m_snapshots()
 {
 }
 
@@ -230,7 +222,9 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     }
     case StGbl: {
       auto const type = inst->src(1)->type().relaxToGuardable();
-      hook.setLocalType(inst->extra<StGbl>()->locId, type);
+      auto id = inst->extra<StGbl>()->locId;
+      hook.setLocalType(id, type);
+      hook.setLocalTypeSource(id, inst->src(1));
       break;
     }
 
@@ -421,6 +415,11 @@ void FrameState::dropLocalRefsInnerTypes(LocalStateHook& hook) const {
 }
 
 ///// Methods for managing and merge block state /////
+
+bool FrameState::hasStateFor(Block* block) const {
+  return m_snapshots.count(block);
+}
+
 void FrameState::startBlock(Block* block) {
   auto const it = m_snapshots.find(block);
   DEBUG_ONLY auto const predsAllowed =
@@ -656,16 +655,29 @@ void FrameState::clear() {
   while (inlineDepth()) {
     trackInlineReturn();
   }
-
+  clearCurrentState();
   clearCse();
-  clearLocals(*this);
-  m_frameSpansCall = false;
-  m_spValue = m_fpValue = nullptr;
-  m_spOffset = 0;
-  m_thisAvailable = false;
-  m_marker = BCMarker();
   m_snapshots.clear();
   assert(m_inlineSavedStates.empty());
+}
+
+void FrameState::clearCurrentState() {
+  m_spValue        = nullptr;
+  m_fpValue        = nullptr;
+  m_spOffset       = 0;
+  m_marker         = BCMarker();
+  m_thisAvailable  = false;
+  m_frameSpansCall = false;
+  m_stackDeficit   = 0;
+  m_evalStack      = EvalStack();
+  clearLocals(*this);
+}
+
+void FrameState::resetCurrentState(const BCMarker& marker) {
+  clearCurrentState();
+  m_marker   = marker;
+  m_spOffset = marker.spOff();
+  m_curFunc  = marker.func();
 }
 
 SSATmp* FrameState::localValue(uint32_t id) const {

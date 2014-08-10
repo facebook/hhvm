@@ -30,6 +30,10 @@ inline ProfData* Translator::profData() const {
   return m_profData.get();
 }
 
+inline const RegionDesc* Translator::region() const {
+  return m_region;
+}
+
 inline const SrcDB& Translator::getSrcDB() const {
   return m_srcDB;
 }

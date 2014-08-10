@@ -1,0 +1,4 @@
+<?php
+if( (substr(PHP_OS, 0, 3) != "WIN") || (setlocale(LC_CTYPE, "") != "English_United States.1252") )
+  die('skip Run only on Windows with locale as "English_United States.1252"');
+?>

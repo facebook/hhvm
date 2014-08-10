@@ -671,7 +671,9 @@ void Expression::computeLocalExprAltered() {
 
 bool Expression::isArray() const {
   if (is(KindOfUnaryOpExpression)) {
-    return static_cast<const UnaryOpExpression*>(this)->getOp() == T_ARRAY;
+    return static_cast<const UnaryOpExpression*>(this)->getOp() == T_ARRAY ||
+      static_cast<const UnaryOpExpression*>(this)->getOp() == T_MIARRAY ||
+      static_cast<const UnaryOpExpression*>(this)->getOp() == T_MSARRAY;
   }
   return false;
 }

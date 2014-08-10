@@ -21,7 +21,6 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
-#include <memory>
 #include <deque>
 #include <exception>
 #include <set>
@@ -2444,6 +2443,7 @@ void EmitterVisitor::assignFinallyVariableIds() {
 void EmitterVisitor::visit(FileScopePtr file) {
   const std::string& filename = file->getName();
   m_ue.m_filepath = makeStaticString(filename);
+  m_ue.m_isHHFile = file->isHHFile();
 
   FunctionScopePtr func(file->getPseudoMain());
   if (!func) return;
@@ -3531,6 +3531,29 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             visit(ex);
           }
           return true;
+        } else if (op == T_MIARRAY || op == T_MSARRAY) {
+          assert(m_staticArrays.empty());
+          auto capacityHint = MixedArray::SmallSize;
+
+          ExpressionPtr ex = u->getExpression();
+          if (ex->getKindOf() == Expression::KindOfExpressionList) {
+            auto el = static_pointer_cast<ExpressionList>(ex);
+
+            int capacity = el->getCount();
+            if (capacity > 0) {
+              capacityHint = capacity;
+            }
+          }
+
+          if (op == T_MIARRAY) {
+            e.NewMIArray(capacityHint);
+          } else {
+            assert(op == T_MSARRAY);
+            e.NewMSArray(capacityHint);
+          }
+          visit(ex);
+
+          return true;
         } else if (op == T_ISSET) {
           ExpressionListPtr list =
             dynamic_pointer_cast<ExpressionList>(u->getExpression());
@@ -4090,6 +4113,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           }
         } else if (call->isCallToFunction("idx") &&
                    call->isOptimizable() &&
+                   systemlibDefinesIdx &&
                    !Option::JitEnableRenameFunction) {
           if (params && (params->getCount() == 2 || params->getCount() == 3)) {
             visit((*params)[0]);
@@ -7341,6 +7365,7 @@ void EmitterVisitor::emitClass(Emitter& e,
               cNode->isTrait()     ? AttrTrait     :
               cNode->isAbstract()  ? AttrAbstract  :
               cNode->isFinal()     ? AttrFinal     :
+              cNode->isEnum()      ? AttrEnum      :
                                      AttrNone;
   if (Option::WholeProgram) {
     if (!cNode->isRedeclaring() &&
@@ -7376,6 +7401,7 @@ void EmitterVisitor::emitClass(Emitter& e,
           || cNode->getUsedTraitNames().size()
           || cNode->getClassRequiredExtends().size()
           || cNode->getClassRequiredImplements().size()
+          || cNode->isEnum()
          ) {
         hoistable = PreClass::Mergeable;
       } else if (firstInterface &&
@@ -7596,6 +7622,14 @@ void EmitterVisitor::emitClass(Emitter& e,
     bool added UNUSED = pce->addMethod(fe);
     assert(added);
     postponeCinit(is, fe, nonScalarConstVec);
+  }
+
+  // If this is an enum, get its type constraint.
+  if (cNode->isEnum()) {
+    ClassStatementPtr cs = static_pointer_cast<ClassStatement>(is);
+    auto const typeConstraint =
+      determine_type_constraint_from_annot(cs->getEnumBaseTy(), true);
+    pce->setEnumBaseTy(typeConstraint);
   }
 }
 

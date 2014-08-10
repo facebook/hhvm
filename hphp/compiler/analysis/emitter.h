@@ -629,6 +629,14 @@ private:
 
 private:
   static const size_t kMinStringSwitchCases = 8;
+  static const bool systemlibDefinesIdx =
+#ifdef FACEBOOK
+    true
+#else
+    false
+#endif
+    ;
+
   UnitEmitter& m_ue;
   FuncEmitter* m_curFunc;
   FileScopePtr m_file;

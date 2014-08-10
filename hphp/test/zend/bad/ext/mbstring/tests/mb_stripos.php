@@ -108,3 +108,4 @@ $r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING');
 
 
 ?>
+

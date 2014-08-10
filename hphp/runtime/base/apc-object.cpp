@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
-#include "hphp/runtime/base/apc-collection.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -42,25 +41,6 @@ Either<const Class*,const StringData*> make_class(const Class* c) {
   return c->preClass()->name();
 }
 
-inline
-bool canOptimize(ObjectData* obj) {
-  if (obj->instanceof(SystemLib::s_SerializableClass)) {
-    return false;
-  }
-  auto cls = obj->getVMClass();
-  // cannot optimize any form of extension
-  return !cls->instanceCtor() || obj->isCollection();
-}
-
-inline
-bool chekVisited(PointerSet& visited, void* pvar) {
-  if (visited.find(pvar) != visited.end()) {
-    return true;
-  }
-  visited.insert(pvar);
-  return false;
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -71,57 +51,8 @@ APCObject::APCObject(ObjectData* obj, uint32_t propCount)
   , m_cls{make_class(obj->getVMClass())}
   , m_propCount{propCount}
 {
-  m_handle.setObjAttempted();
   m_handle.setIsObj();
   m_handle.mustCache();
-}
-
-APCHandle* APCObject::MakeShared(
-    ObjectData* objectData, size_t& size, bool inner, bool createFromSer) {
-  if (!canOptimize(objectData)) {
-    return createFromSer ? MakeShared(apc_serialize(objectData), size) :
-        nullptr;
-  }
-
-  if (objectData->isCollection()) {
-    return APCCollection::MakeShared(objectData, size, inner);
-  }
-
-  bool serialize = false;
-  if (!inner) {
-    PointerSet visited;
-    visited.insert(reinterpret_cast<void*>(objectData));
-    traverseDataRecursive(objectData,
-        [&](const Variant& var) {
-          if (var.isReferenced()) {
-            Variant *pvar = var.getRefData();
-            if (chekVisited(visited, pvar)) {
-              serialize = true;
-              return true;
-            }
-          }
-
-          DataType type = var.getType();
-          if (type == KindOfObject) {
-            auto data = var.getObjectData();
-            if (chekVisited(visited, reinterpret_cast<void*>(data))) {
-              serialize = true;
-              return true;
-            }
-          } else if (type == KindOfResource) {
-            serialize = true;
-            return true;
-          }
-          return false;
-        }
-    );
-  }
-
-  if (serialize) {
-    return createFromSer ? MakeShared(apc_serialize(objectData), size) :
-                           nullptr;
-  }
-  return Construct(objectData, size);
 }
 
 APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
@@ -129,11 +60,6 @@ APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
   // have no internal references and do not implement the serializable
   // interface.
   assert(!objectData->instanceof(SystemLib::s_SerializableClass));
-  assert(!objectData->isCollection() || apcExtension::OptimizeSerialization);
-
-  if (objectData->isCollection() && apcExtension::OptimizeSerialization) {
-    return APCCollection::MakeShared(objectData, size, false);
-  }
 
   Array odProps;
   objectData->o_getArray(odProps, false);
@@ -186,16 +112,13 @@ APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
 ALWAYS_INLINE
 APCObject::~APCObject() {
   for (auto i = uint32_t{0}; i < m_propCount; ++i) {
-    if (props()[i].val) props()[i].val->unreferenceRoot(0);
+    if (props()[i].val) props()[i].val->unreference();
     assert(props()[i].name->isStatic());
   }
 }
 
 void APCObject::Delete(APCHandle* handle) {
-  if (handle->isCollection()) {
-    return APCCollection::Delete(handle);
-  }
-  if (!handle->isObj()) {
+  if (!handle->getIsObj()) {
     delete APCString::fromHandle(handle);
     return;
   }
@@ -210,14 +133,11 @@ void APCObject::Delete(APCHandle* handle) {
 
 APCHandle* APCObject::MakeAPCObject(
     APCHandle* obj, size_t& size, const Variant& value) {
-  if (!value.is(KindOfObject) || obj->objAttempted()) {
+  if (!value.is(KindOfObject) || obj->getObjAttempted()) {
     return nullptr;
   }
   obj->setObjAttempted();
   ObjectData *o = value.getObjectData();
-  if (apcExtension::OptimizeSerialization) {
-    return MakeShared(o, size, false, false);
-  }
   DataWalker walker(DataWalker::LookupFeature::DetectSerializable);
   DataWalker::DataFeature features = walker.traverseData(o);
   if (features.isCircular() ||
@@ -231,10 +151,7 @@ APCHandle* APCObject::MakeAPCObject(
 }
 
 Variant APCObject::MakeObject(APCHandle* handle) {
-  if (handle->isCollection()) {
-    return APCCollection::MakeObject(handle);
-  }
-  if (handle->isObj()) {
+  if (handle->getIsObj()) {
     return APCObject::fromHandle(handle)->createObject();
   }
   StringData* serObj = APCString::fromHandle(handle)->getStringData();

@@ -447,10 +447,6 @@ String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   return cls->nameStr();
 }
 
-bool HHVM_FUNCTION(hphp_scalar_typehints_enabled) {
-  return RuntimeOption::EnableHipHopSyntax;
-}
-
 ObjectData* Reflection::AllocReflectionExceptionObject(const Variant& message) {
   ObjectData* inst = ObjectData::newInstance(s_ReflectionExceptionClass);
   TypedValue ret;
@@ -1298,7 +1294,6 @@ class ReflectionExtension : public Extension {
     HHVM_FE(hphp_get_static_property);
     HHVM_FE(hphp_invoke);
     HHVM_FE(hphp_invoke_method);
-    HHVM_FE(hphp_scalar_typehints_enabled);
     HHVM_FE(hphp_set_property);
     HHVM_FE(hphp_set_static_property);
 

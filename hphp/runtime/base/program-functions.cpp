@@ -349,18 +349,35 @@ static void handle_exception_append_bt(std::string& errorMsg,
   }
 }
 
-void bump_counter_and_rethrow() {
+void bump_counter_and_rethrow(bool isPsp) {
   try {
     throw;
   } catch (const RequestTimeoutException& e) {
-    static auto requestTimeoutCounter = ServiceData::createTimeseries(
-      "requests_timed_out", {ServiceData::StatsType::COUNT});
-    requestTimeoutCounter->addValue(1);
+    if (isPsp) {
+      static auto requestTimeoutPSPCounter = ServiceData::createTimeseries(
+        "requests_timed_out_psp", {ServiceData::StatsType::COUNT});
+      requestTimeoutPSPCounter->addValue(1);
+      ServerStats::Log("request.timed_out.psp", 1);
+    } else {
+      static auto requestTimeoutCounter = ServiceData::createTimeseries(
+        "requests_timed_out_non_psp", {ServiceData::StatsType::COUNT});
+      requestTimeoutCounter->addValue(1);
+      ServerStats::Log("request.timed_out.non_psp", 1);
+    }
     throw;
   } catch (const RequestMemoryExceededException& e) {
-    static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
-      "requests_memory_exceeded", {ServiceData::StatsType::COUNT});
-    requestMemoryExceededCounter->addValue(1);
+    if (isPsp) {
+      static auto requestMemoryExceededPSPCounter =
+        ServiceData::createTimeseries(
+          "requests_memory_exceeded_psp", {ServiceData::StatsType::COUNT});
+      requestMemoryExceededPSPCounter->addValue(1);
+      ServerStats::Log("request.memory_exceeded.psp", 1);
+    } else {
+      static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
+        "requests_memory_exceeded_non_psp", {ServiceData::StatsType::COUNT});
+      requestMemoryExceededCounter->addValue(1);
+      ServerStats::Log("request.memory_exceeded.non_psp", 1);
+    }
 
 #ifdef USE_JEMALLOC
     // Capture a pprof (C++) dump when we OOM a request
@@ -379,7 +396,7 @@ static void handle_exception_helper(bool& ret,
                                     bool& error,
                                     bool richErrorMsg) {
   try {
-    bump_counter_and_rethrow();
+    bump_counter_and_rethrow(false /* isPsp */);
   } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {
@@ -645,7 +662,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__CYGWIN__)
 const void* __hot_start = nullptr;
 const void* __hot_end = nullptr;
 #else
@@ -894,7 +911,6 @@ int execute_program(int argc, char **argv) {
   int ret_code = -1;
   try {
     initialize_repo();
-    init_thread_locals();
     ret_code = execute_program_impl(argc, argv);
   } catch (const Exception &e) {
     Logger::Error("Uncaught exception: %s", e.what());
@@ -1062,7 +1078,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("debug-port", value<int>(&po.debugger_options.port)->default_value(-1),
      "connect to debugger server at specified port")
     ("debug-extension", value<string>(&po.debugger_options.extension),
-     "PHP file that extends y command")
+     "PHP file that extends command 'arg'")
     ("debug-cmd", value<std::vector<std::string>>(
       &po.debugger_options.cmds)->composing(),
      "executes this debugger command and returns its output in stdout")
@@ -1072,7 +1088,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("user,u", value<string>(&po.user),
      "run server under this user account")
     ("file,f", value<string>(&po.file),
-     "executing specified file")
+     "execute specified file")
     ("lint,l", value<string>(&po.lint),
      "lint specified file")
     ("show,w", value<string>(&po.show),
@@ -1188,6 +1204,7 @@ static int execute_program_impl(int argc, char** argv) {
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
+    cout << "Extension API: " << std::to_string(HHVM_API_VERSION) << "\n";
     return 0;
   }
   if (vm.count("compiler-id")) {
@@ -1220,6 +1237,8 @@ static int execute_program_impl(int argc, char** argv) {
   // we need to initialize pcre cache table very early
   pcre_init();
 
+  MemoryManager::TlsWrapper::getCheck();
+
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   for (auto& c : po.config) {
@@ -1235,9 +1254,6 @@ static int execute_program_impl(int argc, char** argv) {
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
-  // Reload the thread local ini settings now that RuntimeOption is right
-  ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.threadInit();
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     HPHP::initTypeProfileStructure();
   }
@@ -1570,6 +1586,7 @@ void hphp_process_init() {
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
 
+  Process::InitProcessStatics();
   init_thread_locals();
 
   // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
@@ -1579,7 +1596,6 @@ void hphp_process_init() {
   k_PHP_SAPI = makeStaticString(RuntimeOption::ExecutionMode);
 
   ClassInfo::Load();
-  Process::InitProcessStatics();
 
   // reinitialize pcre table
   pcre_reinit();
@@ -1755,17 +1771,23 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   return ret;
 }
 
-void hphp_context_exit() {
-  auto const context = g_context.getNoCheck();
-
+void hphp_context_shutdown() {
   // Run shutdown handlers. This may cause user code to run.
+  auto const context = g_context.getNoCheck();
   context->destructObjects();
   context->onRequestShutdown();
 
   // Extensions could have shutdown handlers
   Extension::RequestShutdownModules();
+}
+
+void hphp_context_exit(bool shutdown /* = true */) {
+  if (shutdown) {
+    hphp_context_shutdown();
+  }
 
   // Clean up a bunch of request state. No user code after this point.
+  auto const context = g_context.getNoCheck();
   context->requestExit();
   context->obProtect(false);
   context->obEndAll();
@@ -1807,6 +1829,7 @@ void hphp_session_exit() {
   }
 
   ThreadInfo::s_threadInfo->onSessionExit();
+  assert(mm.empty());
 }
 
 void hphp_process_exit() {

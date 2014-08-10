@@ -102,7 +102,7 @@ void TestProtocolHandler::onHeadersComplete() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestSessionCallback : public ProtocolSession::Callback {
+class TestSessionCallback : public FastCGISession::Callback {
 public:
   TestSessionCallback();
   virtual ~TestSessionCallback() {}

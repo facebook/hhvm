@@ -1,0 +1,4 @@
+<?php
+	if (!extension_loaded('openssl')) die("skip openssl extension not available");
+	if (!getenv('SNI_TESTS')) die("skip Set SNI_TESTS to enable this test (uses remote resources)");
+?>

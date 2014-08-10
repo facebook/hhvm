@@ -42,4 +42,4 @@ if (!mysql_query($link, 'DROP TABLE IF EXISTS test', $link)) {
 mysql_close($link);
 
 unlink('bug53649.data');
-?>
+?>

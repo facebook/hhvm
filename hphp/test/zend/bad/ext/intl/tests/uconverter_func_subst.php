@@ -14,3 +14,4 @@ foreach(array('?','','??') as $subst) {
     var_dump($ret);
   }
 }
+

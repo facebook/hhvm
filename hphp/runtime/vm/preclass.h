@@ -25,11 +25,10 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
-
-#include "hphp/runtime/base/type-string.h"
 
 #include <type_traits>
 
@@ -86,6 +85,8 @@ using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
  *      - It uses no traits.  (It may however *be* a trait.)
  *
  *      - It implements no interfaces.  (It may however *be* an interface.)
+ *
+ *      - It is not an enum.
  *
  *      - It has no parent OR
  *           The parent is hoistable and defined earlier in the unit OR
@@ -295,6 +296,7 @@ public:
   const StringData* parent()       const { return m_parent; }
   const StringData* docComment()   const { return m_docComment; }
   Hoistable         hoistability() const { return m_hoistable; }
+  const TypeConstraint& enumBaseTy()   const { return m_enumBaseTy; }
 
   /*
    * For a builtin class c_Foo:
@@ -422,6 +424,7 @@ private:
   LowStringPtr m_name;
   LowStringPtr m_parent;
   LowStringPtr m_docComment;
+  TypeConstraint m_enumBaseTy;
   BuiltinCtorFunction m_instanceCtor{nullptr};
   BuiltinDtorFunction m_instanceDtor{nullptr};
   InterfaceVec m_interfaces;

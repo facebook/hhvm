@@ -1,0 +1,3 @@
+if (strtolower(PHP_OS) == 'darwin') {
+    die('SKIP OSX does weird things with -0 so this test doesn't work there');
+}

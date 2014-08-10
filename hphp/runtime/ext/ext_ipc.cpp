@@ -31,6 +31,15 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
+/* these are missing from cygwin ipc headers */
+#ifdef __CYGWIN__
+struct msgbuf {
+    long mtype;
+    char mtext[1];
+};
+#define MSG_EXCEPT 02000
+#endif
+
 #if defined(__APPLE__) || defined(__FreeBSD__)
 # include <sys/msgbuf.h>
 #include <set>
@@ -162,7 +171,7 @@ Array f_msg_stat_queue(const Resource& queue) {
     Array data;
     data.set(s_msg_perm_uid,  (int64_t)stat.msg_perm.uid);
     data.set(s_msg_perm_gid,  (int64_t)stat.msg_perm.gid);
-    data.set(s_msg_perm_mode, stat.msg_perm.mode);
+    data.set(s_msg_perm_mode, (int32_t)stat.msg_perm.mode);
     data.set(s_msg_stime,     (int64_t)stat.msg_stime);
     data.set(s_msg_rtime,     (int64_t)stat.msg_rtime);
     data.set(s_msg_ctime,     (int64_t)stat.msg_ctime);

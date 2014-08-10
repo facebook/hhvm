@@ -115,6 +115,7 @@ var_dump( end($null_array) );
 echo "Done\n";
 
 ?>
+
 /* cleaning resource handles */
 fclose( $file_handle );  //file resource handle deleted
 closedir( $dir_handle );  //dir resource handle deleted

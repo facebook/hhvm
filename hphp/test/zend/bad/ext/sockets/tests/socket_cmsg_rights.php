@@ -37,7 +37,8 @@ $data = [
 ];
 var_dump($data);
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
-print_r($data);?>
+print_r($data);
+?>
 <?php
 $path = __DIR__ . "/unix_sock";
 @unlink($path);

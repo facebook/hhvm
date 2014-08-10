@@ -168,22 +168,12 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
          cu.devId != s.st_dev;
 }
 
-folly::Optional<String> readFileAsString(const StringData* path,
-                                         off_t fileSize) {
-  if (fileSize > StringData::MaxSize) {
-    throw FatalErrorException(0, "file %s is too big", path->data());
-  }
-
+folly::Optional<String> readFileAsString(const StringData* path) {
   auto const fd = open(path->data(), O_RDONLY);
   if (!fd) return folly::none;
-  SCOPE_EXIT { close(fd); };
 
-  String str(fileSize, ReserveString);
-  auto const input = str.bufferSlice().ptr;
-  auto const nbytes = read(fd, input, fileSize);
-  str.setSize(fileSize);
-  if (nbytes != fileSize) return folly::none;
-  return str;
+  PlainFile file(fd);
+  return file.read();
 }
 
 CachedUnit createUnitFromString(const char* path,
@@ -209,8 +199,8 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
   return createUnitFromString(requestedPath->data(), sb.detach());
 }
 
-CachedUnit createUnitFromFile(StringData* const path, off_t fileSize) {
-  auto const contents = readFileAsString(path, fileSize);
+CachedUnit createUnitFromFile(StringData* const path) {
+  auto const contents = readFileAsString(path);
   return contents ? createUnitFromString(path->data(), *contents)
                   : CachedUnit{};
 }
@@ -261,7 +251,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
    * Treadmill for eventual reclaimation.  We can't delete it immediately
    * because other requests may still be using it.
    */
-  auto const cu = createUnitFromFile(path, statInfo.st_size);
+  auto const cu = createUnitFromFile(path);
   if (auto const oldUnit = acc->second.cachedUnit.unit) {
     Treadmill::enqueue([oldUnit] { reclaimUnit(oldUnit); });
   }

@@ -38,3 +38,4 @@ $r = mb_detect_order($a);
 print implode(', ', mb_detect_order()) . "\n";
 
 ?>
+

@@ -62,3 +62,4 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
+

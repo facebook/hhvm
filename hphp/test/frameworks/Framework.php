@@ -792,7 +792,7 @@ class Framework {
     return $updated_tests;
   }
 
-  private function installDependencies(): void {
+  protected function installDependencies(): void {
     $composer_json_path = find_first_file_recursive(
       Set {"composer.json"},
       nullthrows($this->install_root),

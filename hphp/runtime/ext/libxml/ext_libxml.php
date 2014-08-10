@@ -30,3 +30,7 @@ function libxml_use_internal_errors(bool $use_errors = false): bool;
 /* Disable/enable the ability to load external entities. */
 <<__Native>>
 function libxml_disable_entity_loader(bool $disable = true): bool;
+
+/* Set the streams context for the next libxml document load or write */
+<<__Native>>
+function libxml_set_streams_context(resource $context): void;

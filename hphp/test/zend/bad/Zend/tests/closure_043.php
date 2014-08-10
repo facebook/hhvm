@@ -35,3 +35,4 @@ $d = $staticUnscoped->bindTo(new A, 'A'); $d(); echo "\n";
 $d = $staticScoped->bindTo(new A, 'A'); $d(); echo "\n";
 
 echo "Done.\n";
+

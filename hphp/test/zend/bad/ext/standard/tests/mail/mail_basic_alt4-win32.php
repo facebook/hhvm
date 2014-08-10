@@ -1,6 +1,4 @@
 <?php
-ini_set('max_execution_time ',  120);
-
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
  * Description: Send an email message 
  * Source code: ext/standard/mail.c
@@ -21,7 +19,7 @@ bool mail ( string \$to , string \$subject , string \$message [, string \$additi
 Send an email message
 HERE;
 
-$extra_headers = "from: user@company.com";
+$extra_headers = "from: user@example.com";
 $extra_parameters = "addons"; // should be ignored
 
 $res = mail($to, $subject, $message, $extra_headers, $extra_parameters);

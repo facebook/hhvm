@@ -1,7 +1,7 @@
-string(14) "HH\Vector<int>"
-string(3) "int"
+string(17) "HH\Vector<HH\int>"
+string(6) "HH\int"
 bool(false)
-string(6) "string"
-string(6) "string"
+string(9) "HH\string"
+string(9) "HH\string"
 string(1) "T"
 string(1) "C"

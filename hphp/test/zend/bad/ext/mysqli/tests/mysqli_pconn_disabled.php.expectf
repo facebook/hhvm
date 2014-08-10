@@ -1,0 +1,7 @@
+
+Warning: %s
+
+Warning: %s
+Connecction 1 - SELECT @pcondisabled -> 'Connection 1'
+Connecction 2 - SELECT @pcondisabled -> ''
+done!

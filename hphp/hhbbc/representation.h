@@ -505,6 +505,11 @@ struct Class {
    * User attributes for this class declaration.
    */
   UserAttributeMap userAttributes;
+
+  /*
+   * The underlying base type, if this is an enum
+   */
+  TypeConstraint enumBaseTy;
 };
 
 //////////////////////////////////////////////////////////////////////

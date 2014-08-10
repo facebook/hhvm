@@ -1,0 +1,8 @@
+NULL
+[017] [1792] %s
+[018] invalid_flag = %d [%d]%A
+
+Warning: %s
+[019] [%d]%A
+[020] [%d]%A
+done!

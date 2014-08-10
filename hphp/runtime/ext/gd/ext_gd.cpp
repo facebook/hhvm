@@ -1765,7 +1765,7 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
 #define PHP_GDIMG_TYPE_GD       8
 #define PHP_GDIMG_TYPE_GD2      9
 #define PHP_GDIMG_TYPE_GD2PART 10
-
+#define PHP_GDIMG_TYPE_WEBP    11
 #if HAVE_GD_BUNDLED
 #define PHP_GD_VERSION_STRING "bundled (2.0.34 compatible)"
 #elif HAVE_LIBGD20
@@ -1882,6 +1882,9 @@ static bool _php_image_output_ctx(const Resource& image,
   case PHP_GDIMG_TYPE_PNG:
     ((void(*)(gdImagePtr, gdIOCtx *, int, int))(func_p))(im, ctx, q, f);
     break;
+  case PHP_GDIMG_TYPE_WEBP:
+    ((void(*)(gdImagePtr, gdIOCtx *, int64_t, int))(func_p))(im, ctx, q, f);
+    break;
   case PHP_GDIMG_TYPE_XBM:
   case PHP_GDIMG_TYPE_WBM:
     if (q == -1) { // argc < 3
@@ -1918,13 +1921,14 @@ static bool _php_image_output_ctx(const Resource& image,
   return true;
 }
 #else
-#define gdImageCreateFromGdCtx      NULL
-#define gdImageCreateFromGd2Ctx     NULL
-#define gdImageCreateFromGd2partCtx NULL
-#define gdImageCreateFromGifCtx     NULL
-#define gdImageCreateFromJpegCtx    NULL
-#define gdImageCreateFromPngCtx     NULL
-#define gdImageCreateFromWBMPCtx    NULL
+#define gdImageCreateFromGdCtx      nullptr
+#define gdImageCreateFromGd2Ctx     nullptr
+#define gdImageCreateFromGd2partCtx nullptr
+#define gdImageCreateFromGifCtx     nullptr
+#define gdImageCreateFromJpegCtx    nullptr
+#define gdImageCreateFromPngCtx     nullptr
+#define gdImageCreateFromWBMPCtx    nullptr
+#define gdImageCreateFromWebpCtx    nullptr
 typedef FILE gdIOCtx;
 #define CTX_PUTC(c, fp) fputc(c, fp)
 #endif
@@ -2059,6 +2063,17 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
     }
     break;
 #endif /* HAVE_GD_PNG */
+
+#ifdef HAVE_LIBVPX
+  case PHP_GDIMG_TYPE_WEBP:
+    im_org = gdImageCreateFromWebp(org);
+    if (im_org == nullptr) {
+      raise_warning("Unable to open '%s' Not a valid webp file",
+                      f_org.c_str());
+      return false;
+    }
+    break;
+#endif /* HAVE_LIBVPX */
 
   default:
     raise_warning("Format not supported");
@@ -3382,6 +3397,16 @@ Variant HHVM_FUNCTION(imagecreatefromstring, const String& data) {
 #endif
     break;
 
+  case PHP_GDIMG_TYPE_WEBP:
+#ifdef HAVE_LIBVPX
+    im = _php_image_create_from_string(data, "WEBP",
+      (gdImagePtr(*)())gdImageCreateFromWebpCtx);
+#else
+    raise_warning("No webp support (libvpx is needed)");
+    return false;
+#endif
+    break;
+
   case PHP_GDIMG_TYPE_GIF:
 #ifdef HAVE_GD_GIF_READ
     im = _php_image_create_from_string(data, "GIF",
@@ -3454,6 +3479,17 @@ Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
                            PHP_GDIMG_TYPE_PNG, "PNG",
                            (gdImagePtr(*)())gdImageCreateFromPng,
                            (gdImagePtr(*)())gdImageCreateFromPngCtx);
+  return Resource(new Image(im));
+}
+#endif
+
+#ifdef HAVE_LIBVPX
+Variant HHVM_FUNCTION(imagecreatefromwebp, const String& filename) {
+  gdImagePtr im =
+    _php_image_create_from(filename, -1, -1, -1, -1,
+                           PHP_GDIMG_TYPE_WEBP, "WEBP",
+                           (gdImagePtr(*)())gdImageCreateFromWebp,
+                           (gdImagePtr(*)())gdImageCreateFromWebpCtx);
   return Resource(new Image(im));
 }
 #endif
@@ -3549,6 +3585,22 @@ bool HHVM_FUNCTION(imagepng, const Resource& image,
 }
 #endif
 
+#ifdef HAVE_LIBVPX
+bool HHVM_FUNCTION(imagewebp, const Resource& image,
+    const String& filename /* = null_string */,
+    int64_t quality /* = 80 */) {
+#ifdef USE_GD_IOCTX
+  return _php_image_output_ctx(image, filename, quality, -1,
+                               PHP_GDIMG_TYPE_WEBP, "WEBP",
+                               (void (*)())gdImageWebpCtx);
+#else
+  return _php_image_output(image, filename, quality, -1,
+                           PHP_GDIMG_TYPE_WEBP, "WEBP",
+                           (void (*)())gdImageWebp);
+#endif
+}
+#endif
+
 #ifdef HAVE_GD_JPG
 bool HHVM_FUNCTION(imagejpeg, const Resource& image,
     const String& filename /* = null_string */, int64_t quality /* = -1 */) {
@@ -3610,6 +3662,17 @@ Variant HHVM_FUNCTION(imagecolorallocate,
     return false;
   }
   return ct;
+}
+
+Variant HHVM_FUNCTION(imagepalettecopy,
+    const Resource& dst,
+    const Resource& src) {
+  gdImagePtr dstim = dst.getTyped<Image>()->get();
+  gdImagePtr srcim = src.getTyped<Image>()->get();
+  if (!dstim || !srcim)
+    return false;
+  gdImagePaletteCopy(dstim, srcim);
+  return true;
 }
 
 Variant HHVM_FUNCTION(imagecolorat,
@@ -8015,6 +8078,9 @@ class GdExtension : public Extension {
 #ifdef HAVE_GD_PNG
     HHVM_FE(imagecreatefrompng);
 #endif
+#ifdef HAVE_LIBVPX
+    HHVM_FE(imagecreatefromwebp);
+#endif
 #ifdef HAVE_LIBGD15
     HHVM_FE(imagecreatefromstring);
 #endif
@@ -8064,6 +8130,9 @@ class GdExtension : public Extension {
 #ifdef HAVE_GD_PNG
     HHVM_FE(imagepng);
 #endif
+#ifdef HAVE_LIBVPX
+    HHVM_FE(imagewebp);
+#endif
     HHVM_FE(imagepolygon);
     HHVM_FE(imagerectangle);
     HHVM_FE(imagerotate);
@@ -8093,6 +8162,7 @@ class GdExtension : public Extension {
     HHVM_FE(jpeg2wbmp);
     HHVM_FE(png2wbmp);
 
+    HHVM_FE(imagepalettecopy);
     loadSystemlib();
   }
 } s_gd_extension;

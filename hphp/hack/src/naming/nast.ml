@@ -85,6 +85,12 @@ and class_ = {
   c_static_methods : method_ list     ;
   c_methods        : method_ list     ;
   c_user_attributes : Ast.user_attribute SMap.t;
+  c_enum           : enum_ option     ;
+}
+
+and enum_ = {
+  e_base       : hint;
+  e_constraint : hint option;
 }
 
 and tparam = sid * hint option
@@ -110,14 +116,14 @@ and method_ = {
   m_body            : block                     ;
   m_user_attributes : Ast.user_attribute SMap.t ;
   m_ret             : hint option               ;
-  m_type            : fun_type                  ;
+  m_fun_kind        : fun_kind                  ;
 }
 
-and fun_type =
+and fun_kind =
   | FSync
   | FGenerator
   | FAsync
-  (* TODO #4534682 Support AsyncGenerator *)
+  | FAsyncGenerator
 
 and visibility =
   | Private
@@ -149,7 +155,7 @@ and fun_ = {
   f_variadic : fun_variadicity;
   f_params   : fun_param list;
   f_body     : block;
-  f_type     : fun_type;
+  f_fun_kind : fun_kind;
 }
 
 and typedef = tparam list * hint option * hint
@@ -181,6 +187,8 @@ and stmt =
 and as_expr =
   | As_id of expr
   | As_kv of expr * expr
+  | Await_as_id of Pos.t * expr
+  | Await_as_kv of Pos.t * expr * expr
 
 and block = stmt list
 

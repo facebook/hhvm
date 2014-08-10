@@ -9,6 +9,7 @@
  *
  */
 
+<<ConsistentConstruct>>
 abstract class A {
 
   public function foo(): void {
@@ -19,4 +20,3 @@ abstract class A {
     $x->xxx();
   }
 }
-

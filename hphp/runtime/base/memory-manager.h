@@ -418,6 +418,11 @@ public:
   void sweep();
 
   /*
+   * Returns true if there are no allocated slabs
+   */
+  bool empty() const { return m_slabs.empty(); }
+
+  /*
    * Release all the request-local allocations.  Zeros all the free
    * lists and may return some underlying storage to the system
    * allocator. This also resets all internally-stored memory usage stats.

@@ -61,7 +61,6 @@
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -227,7 +226,6 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
 
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
-NOOP_OPCODE(DefSP)
 NOOP_OPCODE(TrackLoc)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(AssertStk)
@@ -288,6 +286,8 @@ CALL_OPCODE(AFWHPrepareChild)
 CALL_OPCODE(ABCUnblock)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
+CALL_OPCODE(NewMIArray)
+CALL_OPCODE(NewMSArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
@@ -551,6 +551,16 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
 
   mcg->setJmpTransID(a.frontier());
   a.    jmp    (jccStub);
+}
+
+void CodeGenerator::cgDefSP(IRInstruction* inst) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts && !inst->marker().resumed()) {
+    // Verify that rbx == rbp - spOff
+    m_as.lea(rbp[-cellsToBytes(inst->extra<StackOffset>()->offset)],
+             m_rScratch);
+    m_as.cmpq(m_rScratch, rbx);
+    ifBlock(CC_NE, [](Asm& a) { a.ud2(); });
+  }
 }
 
 void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
@@ -829,6 +839,11 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
         a.    push(rTmp);
         break;
 
+      case ArgDesc::Kind::IpRel:
+        a.    lea (rip[arg.imm().q()], rTmp);
+        a.    push(rTmp);
+        break;
+
       case ArgDesc::Kind::None:
         a.    push(rax);
         if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -905,6 +920,8 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
       }
     } else if (kind == ArgDesc::Kind::Addr) {
       a.    addq   (arg.disp(), dst);
+    } else if (kind == ArgDesc::Kind::IpRel) {
+      a.    lea (rip[arg.imm().q()], dst);
     } else if (arg.isZeroExtend()) {
       a.    movzbl (rbyte(dst), r32(dst));
     } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
@@ -2633,7 +2650,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == mcg->tx().uniqueStubs.callToExit) {
     return;
   }
-  checkFrame(fp, sp, /*checkLocals*/ false);
+  checkFrame(fp, sp, /*fullCheck*/ false, 0);
   assert(sp <= (Cell*)fp || fp->resumed());
   // check return value if stack not empty
   if (sp < (Cell*)fp) assertTv(sp);
@@ -4070,7 +4087,8 @@ void CodeGenerator::cgLdClsName(IRInstruction* inst) {
   auto const srcReg = srcLoc(0).reg();
 
   m_as.loadq(srcReg[Class::preClassOff()], dstReg);
-  m_as.loadq(dstReg[PreClass::nameOffset()], dstReg);
+  emitLdLowPtr(m_as, dstReg[PreClass::nameOffset()],
+               dstReg, sizeof(LowStringPtr));
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
@@ -4172,11 +4190,9 @@ void CodeGenerator::cgLoad(SSATmp* dst, PhysLoc dstLoc, MemoryRef base,
   if (label != NULL) {
     emitTypeCheck(type, refTVType(base), refTVData(base), label);
   }
-  if (dst->isA(Type::Null)) return; // these are constants
   auto dstReg = dstLoc.reg();
-  // if dstReg == InvalidReg then the value of this load is dead
+  // if dstReg == InvalidReg then there's nothing to load.
   if (dstReg == InvalidReg) return;
-
   if (type <= Type::Bool) {
     m_as.loadl(refTVData(base), toReg32(dstReg));
   } else {
@@ -6133,17 +6149,31 @@ void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
 
   if (constraintReg == InvalidReg) {
     if (objClassReg != InvalidReg) {
-      m_as.  cmpq(Immed64(constraint->clsVal()).l(), objClassReg);
+      auto constraintCls = constraint->clsVal();
+      auto constraintImm = Immed64(constraintCls);
+      if (constraintImm.fits(sz::dword)) {
+        m_as.cmpq(constraintImm.l(), objClassReg);
+      } else {
+        m_as.emitImmReg(constraintCls, m_rScratch);
+        m_as.cmpq(m_rScratch, objClassReg);
+      }
     } else {
       // Both constant.
       if (objClass->clsVal() == constraint->clsVal()) return;
       return cgCallNative(m_as, inst);
     }
   } else if (objClassReg != InvalidReg) {
-    m_as.  cmpq(constraintReg, objClassReg);
+    m_as.cmpq(constraintReg, objClassReg);
   } else {
     // Reverse the args because cmpq can only have a constant in the LHS.
-    m_as.  cmpq(Immed64(objClass->clsVal()).l(), constraintReg);
+    auto objCls = objClass->clsVal();
+    auto objImm = Immed64(objCls);
+    if (objImm.fits(sz::dword)) {
+      m_as.cmpq(objImm.l(), constraintReg);
+    } else {
+      m_as.emitImmReg(objCls, m_rScratch);
+      m_as.cmpq(m_rScratch, constraintReg);
+    }
   }
 
   // The native call for this instruction is the slow path that does
@@ -6176,7 +6206,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
     auto const sk = extra.sk;
     args.imm(extra.type);
     args.imm(sk.toAtomicInt());
-    args.immPtr(m_as.frontier());
+    args.ipRel(m_as.frontier());
     helper = (TCA)Trace::ringbufferEntry;
   }
 

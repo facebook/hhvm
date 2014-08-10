@@ -42,6 +42,10 @@ enum Attr {
   AttrProtected            = (1 <<  2), //       |    X     |    X    //
   AttrPrivate              = (1 <<  3), //       |    X     |    X    //
                                         //       |          |         //
+  // N.B.: AttrEnum and AttrStatic overlap! But they can't be set on the
+  // same things.
+  // Is this class an enum?
+  AttrEnum                 = (1 <<  4), //    X  |          |         //
   // Was this declared static, abstract, or final?          |         //
   AttrStatic               = (1 <<  4), //       |    X     |    X    //
   AttrAbstract             = (1 <<  5), //    X  |          |    X    //

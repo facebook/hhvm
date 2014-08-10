@@ -910,6 +910,8 @@ void emit_class(EmitUnitState& state,
       cconst.phpCode
     );
   }
+
+  pce->setEnumBaseTy(cls.enumBaseTy);
 }
 
 //////////////////////////////////////////////////////////////////////

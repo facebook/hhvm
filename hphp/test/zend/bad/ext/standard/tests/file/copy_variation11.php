@@ -41,6 +41,7 @@ var_dump( filesize($dir) );   //size of destination after copy
 
 echo "*** Done ***\n";
 ?>
+
 <?php
 unlink(dirname(__FILE__)."/copy_variation11.tmp");
 rmdir(dirname(__FILE__)."/copy_variation11");

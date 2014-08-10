@@ -42,9 +42,12 @@ SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 ADD_SUBDIRECTORY(third-party)
 ADD_SUBDIRECTORY(hphp)
 
+# use GNU install dirs (e.g. lib64 instead of lib)
+INCLUDE(GNUInstallDirs)
+
 # modules / depends
 FILE(GLOB HHVM_CMAKE_FILES "CMake/*.cmake")
 INSTALL(
   FILES ${HHVM_CMAKE_FILES}
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/hphp/CMake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/hhvm/CMake"
   COMPONENT dev)

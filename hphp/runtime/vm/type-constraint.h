@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/functional.h"
 
@@ -145,6 +144,12 @@ struct TypeConstraint {
   DataType underlyingDataType() const { return m_type.dt; }
 
   /*
+   * Returns the underlying DataType for this TypeConstraint,
+   * chasing down type aliases.
+   */
+  DataType underlyingDataTypeResolved() const;
+
+  /*
    * Predicates for various properties of the type constraint.
    */
   bool isNullable() const { return m_flags & Nullable; }
@@ -193,34 +198,7 @@ struct TypeConstraint {
    * required for PHP inheritance where a method with parameter
    * typehints is overridden.
    */
-  bool compat(const TypeConstraint& other) const {
-    if (other.isExtended() || isExtended()) {
-      /*
-       * Rely on the ahead of time typechecker---checking here can
-       * make it harder to convert a base class or interface to <?hh,
-       * because derived classes that are still <?php would all need
-       * to be modified.
-       */
-      return true;
-    }
-
-    if (m_typeName == other.m_typeName) {
-      return true;
-    }
-
-    if (m_typeName && other.m_typeName) {
-      if (m_typeName->isame(other.m_typeName)) {
-        return true;
-      }
-
-      const Class* cls = Unit::lookupClass(m_typeName);
-      const Class* otherCls = Unit::lookupClass(other.m_typeName);
-
-      return cls && otherCls && cls == otherCls;
-    }
-
-    return false;
-  }
+  bool compat(const TypeConstraint& other) const;
 
   // General check for any constraint.
   bool check(TypedValue* tv, const Func* func) const;

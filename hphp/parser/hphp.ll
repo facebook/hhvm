@@ -159,7 +159,7 @@ static int getNextTokenType(int t) {
     case T_STRING:
     case T_XHP_CHILDREN:
     case T_XHP_REQUIRED:
-    case T_XHP_ENUM:
+    case T_ENUM:
     case T_ARRAY:
     case T_FROM:
     case T_IN:
@@ -299,11 +299,11 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"insteadof"            { RETTOKEN(T_INSTEADOF);}
 <ST_IN_SCRIPTING>"extends"              { RETTOKEN(T_EXTENDS);}
 <ST_IN_SCRIPTING>"implements"           { RETTOKEN(T_IMPLEMENTS);}
+<ST_IN_SCRIPTING>"enum"                 { XHP_ONLY_KEYWORD(T_ENUM); }
 <ST_IN_SCRIPTING>"attribute"            { XHP_ONLY_KEYWORD(T_XHP_ATTRIBUTE); }
 <ST_IN_SCRIPTING>"category"             { XHP_ONLY_KEYWORD(T_XHP_CATEGORY); }
 <ST_IN_SCRIPTING>"children"             { XHP_ONLY_KEYWORD(T_XHP_CHILDREN); }
 <ST_IN_SCRIPTING>"required"             { XHP_ONLY_KEYWORD(T_XHP_REQUIRED); }
-<ST_IN_SCRIPTING>"enum"                 { XHP_ONLY_KEYWORD(T_XHP_ENUM); }
 
 <ST_IN_SCRIPTING>"->" {
         STEPPOS(T_OBJECT_OPERATOR);
@@ -445,6 +445,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"<<"                 { RETSTEP(T_SL);}
 
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
+<ST_IN_SCRIPTING>"miarray"            { HH_ONLY_KEYWORD(T_MIARRAY); }
+<ST_IN_SCRIPTING>"msarray"            { HH_ONLY_KEYWORD(T_MSARRAY); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}

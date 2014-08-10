@@ -28,3 +28,4 @@ fclose($fp);
 echo $data."\n";
 
 @unlink($secretfile);
+

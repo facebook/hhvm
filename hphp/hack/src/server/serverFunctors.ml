@@ -25,6 +25,7 @@ type program_ret =
   | Exit of int
 
 module type SERVER_PROGRAM = sig
+  val preinit : ServerArgs.options -> unit
   val init : genv -> env -> Path.path -> program_ret
   val recheck: genv -> env -> (SSet.t * SSet.t) -> string list ref -> program_ret
   val infer: (ServerMsg.file_input * int * int) -> out_channel -> unit
@@ -107,6 +108,7 @@ end = struct
   * we look if env.modified changed.
   *)
   let main options =
+    Program.preinit options;
     SharedMem.init();
     (* this is to transform SIGPIPE in an exception. A SIGPIPE can happen when
     * someone C-c the client.

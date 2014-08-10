@@ -6,4 +6,4 @@
 	}
 	var_dump(soundex(mysqli_stat($link)) === soundex($link->stat));
 	echo "done!";
-?>
+?>

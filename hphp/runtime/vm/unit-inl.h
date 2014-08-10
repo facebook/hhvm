@@ -319,5 +319,9 @@ inline void Unit::setInterpretOnly() {
   m_interpretOnly = true;
 }
 
+inline bool Unit::isHHFile() const {
+  return m_isHHFile;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

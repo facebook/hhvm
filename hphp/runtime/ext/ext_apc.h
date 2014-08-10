@@ -62,7 +62,6 @@ class apcExtension : public Extension {
   static bool UseUncounted;
   static bool Stat;
   static bool EnableCLI;
-  static bool OptimizeSerialization;
 
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf config);
   virtual void moduleInit();

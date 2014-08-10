@@ -54,6 +54,9 @@ type genv = {
   (* are we in the body of a non-static member function? *)
   in_member_fun: bool;
 
+  (* are we in the body of an enum? *)
+  in_enum: bool;
+
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
@@ -149,7 +152,7 @@ type lenv = {
     (* The presence of "yield" in the function body changes the type of the
      * function into a generator, with no other syntactic indications
      * elsewhere. For the sanity of the typechecker, we flatten this out into
-     * fun_type, but need to track if we've seen a "yield" in order to do so.
+     * fun_kind, but need to track if we've seen a "yield" in order to do so.
      *)
     has_yield: bool ref;
   }
@@ -222,6 +225,7 @@ module Env = struct
     in_mode       = Ast.Mstrict;
     in_try        = false;
     in_member_fun = false;
+    in_enum       = false;
     type_params   = SMap.empty;
     type_paraml   = [];
     classes       = ref env.iclasses;
@@ -238,6 +242,7 @@ module Env = struct
       (if !Autocomplete.auto_complete then Ast.Mpartial else c.c_mode);
     in_try        = false;
     in_member_fun = false;
+    in_enum       = c.c_kind = Cenum;
     type_params   = params;
     type_paraml   = List.map fst c.c_tparams;
     classes       = ref genv.iclasses;
@@ -259,6 +264,7 @@ module Env = struct
     in_mode       = (if !Ide.is_ide_mode then Ast.Mpartial else Ast.Mstrict);
     in_try        = false;
     in_member_fun = false;
+    in_enum       = false;
     type_params   = cstrs;
     type_paraml   = List.map fst tdef.t_tparams;
     classes       = ref genv.iclasses;
@@ -280,6 +286,7 @@ module Env = struct
     in_mode       = f.f_mode;
     in_try        = false;
     in_member_fun = false;
+    in_enum       = false;
     type_params   = params;
     type_paraml   = [];
     classes       = ref genv.iclasses;
@@ -295,6 +302,7 @@ module Env = struct
     in_mode       = cst.cst_mode;
     in_try        = false;
     in_member_fun = false;
+    in_enum       = false;
     type_params   = SMap.empty;
     type_paraml   = [];
     classes       = ref genv.iclasses;
@@ -916,6 +924,7 @@ and class_ genv c =
   let constructor, methods, smethods =
     interface c constructor methods smethods in
   let class_tparam_names = List.map (fun (x,_) -> x) c.c_tparams in
+  let enum = opt_map (enum_ env) c.c_enum in
   check_name_collision methods;
   check_tparams_shadow class_tparam_names methods;
   check_name_collision smethods;
@@ -938,6 +947,12 @@ and class_ genv c =
     N.c_static_methods = smethods;
     N.c_methods        = methods;
     N.c_user_attributes = c.c_user_attributes;
+    N.c_enum           = enum
+  }
+
+and enum_ env e =
+  { N.e_base       = hint env e.e_base;
+    N.e_constraint = opt_map (hint env) e.e_constraint;
   }
 
 and type_paraml env tparams =
@@ -1114,8 +1129,12 @@ and const_def h env (x, e) =
           | Array _ ->
               None, Env.new_const env x, expr env e
           | _ ->
-            Errors.missing_typehint (fst x);
-              None, Env.new_const env x, (fst e, N.Any)
+            (* Missing annotation fine if this is an enum. *)
+            if (fst env).in_enum then
+              (None, Env.new_const env x, expr env e)
+            else
+              (Errors.missing_typehint (fst x);
+               None, Env.new_const env x, (fst e, N.Any))
           )
       | Some h ->
           let h = Some (hint env h) in
@@ -1168,12 +1187,12 @@ and fill_cvar kl ty x =
     | Protected -> { x with N.cv_visibility = N.Protected }
  ) x kl
 
-and fun_type env ft =
+and fun_kind env ft =
   match !((snd env).has_yield), ft with
   | false, Ast.FSync -> N.FSync
   | false, Ast.FAsync -> N.FAsync
   | true, Ast.FSync -> N.FGenerator
-  | true, Ast.FAsync -> N.FAsync (* TODO #4534682 async generators *)
+  | true, Ast.FAsync -> N.FAsyncGenerator
 
 and method_ env m =
   let genv, lenv = env in
@@ -1193,7 +1212,7 @@ and method_ env m =
         block env m.m_body
     | Ast.Mdecl -> [] in
   let attrs = m.m_user_attributes in
-  let method_type = fun_type env m.m_type in
+  let method_type = fun_kind env m.m_fun_kind in
   let ret = opt_map (hint ~allow_this:true env) m.m_ret in
   N.({ m_unsafe     = unsafe ;
        m_final      = final  ;
@@ -1206,7 +1225,7 @@ and method_ env m =
        m_user_attributes = attrs;
        m_ret        = ret    ;
        m_variadic   = variadicity;
-       m_type       = method_type;
+       m_fun_kind   = method_type;
      })
 
 and kind (final, abs, vis) = function
@@ -1275,7 +1294,7 @@ and fun_ genv f =
     | Ast.Mstrict | Ast.Mpartial -> block env f.f_body
     | Ast.Mdecl -> []
   in
-  let f_type = fun_type env f.f_type in
+  let kind = fun_kind env f.f_fun_kind in
   let fun_ =
     { N.f_unsafe = unsafe;
       f_mode = f.f_mode;
@@ -1285,7 +1304,7 @@ and fun_ genv f =
       f_params = paraml;
       f_body = body;
       f_variadic = variadicity;
-      f_type = f_type;
+      f_fun_kind = kind;
     } in
   fun_
 
@@ -1314,7 +1333,7 @@ and stmt env st =
   | While (e, b)         -> while_stmt env e b
   | For (st1, e, st2, b) -> for_stmt env st1 e st2 b
   | Switch (e, cl)       -> switch_stmt env st e cl
-  | Foreach (e, ae, b)   -> foreach_stmt env e ae b
+  | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
   | Try (b, cl, fb)      -> try_stmt env st b cl fb
 
 and if_stmt env st e b1 b2 =
@@ -1367,32 +1386,43 @@ and switch_stmt env st e cl =
  Env.promote_pending env;
  result
 
-and foreach_stmt env e ae b =
+and foreach_stmt env e aw ae b =
   let e = expr env e in
   Env.scope env (
   fun env ->
     let _, lenv = env in
     let all_locals_copy = !(lenv.all_locals) in
-    let ae = as_expr env ae in
+    let ae = as_expr env aw ae in
     let all_locals, b = branch env b in
     lenv.all_locals := SMap.union all_locals all_locals_copy;
     N.Foreach (e, ae, b)
  )
 
-and as_expr env = function
+and as_expr env aw = function
   | As_id (p, Lvar x) ->
-      N.As_id (p, N.Lvar (Env.new_lvar env x))
+      let x = p, N.Lvar (Env.new_lvar env x) in
+      (match aw with
+        | None -> N.As_id x
+        | Some p -> N.Await_as_id (p, x))
   | As_id (p, _) ->
       Errors.expected_variable p;
-      N.As_id (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
+      let x = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
+      (match aw with
+        | None -> N.As_id x
+        | Some p -> N.Await_as_id (p, x))
   | As_kv ((p1, Lvar x1), (p2, Lvar x2)) ->
       let x1 = p1, N.Lvar (Env.new_lvar env x1) in
       let x2 = p2, N.Lvar (Env.new_lvar env x2) in
-      N.As_kv (x1, x2)
+      (match aw with
+        | None -> N.As_kv (x1, x2)
+        | Some p -> N.Await_as_kv (p, x1, x2))
   | As_kv ((p, _), _) ->
       Errors.expected_variable p;
-      N.As_kv ((p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder"))),
-               (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder"))))
+      let x1 = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
+      let x2 = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
+      (match aw with
+        | None -> N.As_kv (x1, x2)
+        | Some p -> N.Await_as_kv (p, x1, x2))
 
 and try_stmt env st b cl fb =
   let vars = Naming_ast_helpers.GetLocals.stmt SMap.empty st in
@@ -1702,7 +1732,7 @@ and expr_lambda env f =
   let unsafe = List.mem Unsafe f.f_body in
   let variadicity, paraml = fun_paraml env f.f_params in
   let body = block env f.f_body in
-  let f_type = fun_type env f.f_type in
+  let f_kind = fun_kind env f.f_fun_kind in
   {
     N.f_unsafe = unsafe;
     f_mode = (fst env).in_mode;
@@ -1712,7 +1742,7 @@ and expr_lambda env f =
     f_tparams = [];
     f_body = body;
     f_variadic = variadicity;
-    f_type = f_type;
+    f_fun_kind = f_kind;
   }
 
 and make_class_id env cid =

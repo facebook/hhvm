@@ -20,3 +20,4 @@ if ($zip->open($file) !== TRUE) {
 
 $a = $zip->extractTo('teststream://test');
 var_dump($a);
+

@@ -33,4 +33,4 @@ if (strcmp($str, $decode) == 0) {
 	echo "Strings unequal : TEST FAILED\n"; 
 }
 ?>
-===DONE===
+===DONE===

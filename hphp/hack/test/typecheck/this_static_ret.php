@@ -9,6 +9,7 @@
  *
  */
 
+<<ConsistentConstruct>>
 class Foo {
   public static function get(): this {
     return new static();

@@ -5,3 +5,4 @@ $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getErrorCode(array()));
 
 var_dump(intltz_get_error_code(null));
+

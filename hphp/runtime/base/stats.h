@@ -192,6 +192,9 @@ namespace Stats {
   STAT(ArrayGet_Mono) \
   STAT(ArrayGet_Packed) \
   STAT(ArrayGet_Mixed) \
+  /* ObjectData construction */ \
+  STAT(ObjectData_new_dtor_yes) \
+  STAT(ObjectData_new_dtor_no) \
 
 enum StatCounter {
 #define STAT(name) \

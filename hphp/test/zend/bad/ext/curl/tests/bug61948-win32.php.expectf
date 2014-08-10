@@ -1,7 +1,5 @@
 %a
-
-Warning: %s
-bool(false)
+bool(true)
 
 Warning: %s
 bool(false)

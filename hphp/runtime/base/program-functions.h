@@ -91,7 +91,8 @@ bool hphp_invoke(ExecutionContext *context,
                  bool once,
                  bool warmupOnly,
                  bool richErrorMsg);
-void hphp_context_exit();
+void hphp_context_shutdown();
+void hphp_context_exit(bool shutdown = true);
 
 void hphp_thread_exit();
 void hphp_session_exit();
@@ -104,7 +105,7 @@ std::string get_systemlib(std::string* hhas = nullptr,
 extern const char* const kCompilerId;
 
 // Helper function for stats tracking with exceptions.
-void bump_counter_and_rethrow();
+void bump_counter_and_rethrow(bool isPsp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

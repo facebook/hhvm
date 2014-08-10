@@ -17,3 +17,4 @@ $str = mb_strcut($euc_jp, -100, 10,'EUC-JP');
 
 
 ?>
+

@@ -1,0 +1,68 @@
+Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s on line %d
+NULL
+
+Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s on line %d
+NULL
+array(2) {
+  ["0"]=>
+Resource => '0'
+  ["1"]=>
+Resource => '0'
+}
+array(2) {
+  ["0"]=>
+Resource => '-1'
+  ["1"]=>
+Resource => '0'
+}
+array(2) {
+  ["0"]=>
+Resource => '0'
+  ["1"]=>
+Resource => '12653'
+}
+
+Warning: gmp_div_qr(): Invalid rounding mode in %s on line %d
+bool(false)
+array(2) {
+  ["0"]=>
+Resource => '9131'
+  ["1"]=>
+Resource => '10'
+}
+array(2) {
+  ["0"]=>
+Resource => '9132'
+  ["1"]=>
+Resource => '-113'
+}
+array(2) {
+  ["0"]=>
+Resource => '9131'
+  ["1"]=>
+Resource => '10'
+}
+array(2) {
+  ["0"]=>
+Resource => '9131'
+  ["1"]=>
+Resource => '10'
+}
+array(2) {
+  ["0"]=>
+Resource => '9132'
+  ["1"]=>
+Resource => '-113'
+}
+array(2) {
+  ["0"]=>
+Resource => '9131'
+  ["1"]=>
+Resource => '10'
+}
+
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type! in %s on line %d
+bool(false)
+
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type! in %s on line %d
+bool(false)

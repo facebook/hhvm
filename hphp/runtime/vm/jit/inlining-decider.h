@@ -72,6 +72,17 @@ struct InliningDecider {
   }
 
   /*
+   * Reset inlining state.
+   *
+   * Forget all current information about inlining cost and depth, preserving
+   * only m_topFunc and m_disabled.
+   */
+  void resetState() {
+    m_cost = m_callDepth = m_stackDepth = 0;
+    m_costStack.clear();
+  }
+
+  /*
    * Getters for depth and disabled status.
    */
   bool disabled() const { return m_disabled; }

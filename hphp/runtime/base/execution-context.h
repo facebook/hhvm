@@ -239,6 +239,7 @@ public:
   void registerShutdownFunction(const Variant& function, Array arguments,
                                 ShutdownType type);
   bool removeShutdownFunction(const Variant& function, ShutdownType type);
+  bool hasShutdownFunctions(ShutdownType type);
   void onRequestShutdown();
   void onShutdownPreSend();
   void onShutdownPostSend();
@@ -311,7 +312,6 @@ private:
   };
 
 private:
-  static const StaticString s_amp;
   // system settings
   Transport *m_transport;
   String m_cwd;

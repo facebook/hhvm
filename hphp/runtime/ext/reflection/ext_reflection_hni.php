@@ -214,10 +214,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   private static function stripHHPrefix($str) {
     if (!is_string($str)) return $str;
     return str_ireplace(
-      array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
-            'HH\\resource', 'HH\\void', 'HH\\this'),
-      array('bool',     'int',     'float',     'string',     'num',
-            'resource',     'void',    'this'),
+      array('HH\\this'),
+      array('this'),
       $str
     );
   }
@@ -238,9 +236,13 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
 
-  abstract public function getAttributesRecursive(): array;
+  public function getAttributesRecursive(): array {
+    return $this->getAttributes();
+  }
 
-  abstract public function getAttributeRecursive($name);
+  public function getAttributeRecursive($name) {
+    return $this->getAttribute($name);
+  }
 
   <<__Native>>
   public function getNumberOfParameters(): int;
@@ -386,7 +388,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     $params = $this->getParameters();
     $ret .= "\n  - Parameters [" . count($params) . "] {\n  ";
     foreach ($params as $param) {
-      $ret .= '  ' . str_replace("\n", "\n  ", (string)$param);
+      $ret .= '  '.str_replace("\n", "\n  ", $param."\n");
     }
     $ret .= "}\n";
 
@@ -614,14 +616,6 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       return new ReflectionClass($cls);
     }
     return null;
-  }
-
-  public function getAttributesRecursive(): array {
-    return $this->getAttributes();
-  }
-
-  public function getAttributeRecursive($name) {
-    return $this->getAttribute($name);
   }
 }
 

@@ -35,7 +35,7 @@
  * env TRACE=mcg:1,bcinterp:3,tmp0:1 ./hhvm/hhvm ...
  *
  * In a source file, select the compilation unit's module by calling the
- * TRACE_SET_MODE macro. E.g.,
+ * TRACE_SET_MOD macro. E.g.,
  *
  *   TRACE_SET_MOD(mcg);
  *
@@ -118,6 +118,7 @@ namespace Trace {
       TM(intercept)     \
       TM(interpOne)     \
       TM(jittime)       \
+      TM(libxml)        \
       TM(mcg)           \
       TM(mcgstats)      \
       TM(minstr)        \
@@ -332,6 +333,8 @@ inline void itraceImpl(const char* fmtRaw, Args&&... args) {
   Trace::ftraceRelease(fmt, std::forward<Args>(args)...);
 }
 #define ITRACE(level, ...) ONTRACE((level), Trace::itraceImpl(__VA_ARGS__));
+#define ITRACE_MOD(mod, level, ...)                             \
+  ONTRACE_MOD(mod, level, Trace::itraceImpl(__VA_ARGS__));
 
 void trace(const char *, ...) ATTRIBUTE_PRINTF(1,2);
 void trace(const std::string&);

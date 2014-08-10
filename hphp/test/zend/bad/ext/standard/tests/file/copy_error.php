@@ -17,3 +17,4 @@ var_dump( copy(__FILE__, "file1", "file1") );
 
 echo "*** Done ***\n";
 ?>
+

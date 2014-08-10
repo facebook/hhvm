@@ -1,0 +1,22 @@
+int(0)
+int(1)
+int(-1)
+int(-1)
+int(-2349828)
+int(2342344)
+int(12345678)
+
+Warning: gmp_intval(): Unable to convert variable to GMP - wrong type! in %s on line %d
+bool(false)
+
+Warning: Too many arguments for gmp_intval(), expected 1 in %s on line %d
+NULL
+
+Warning: gmp_intval(): Unable to convert variable to GMP - wrong type! in %s on line %d
+bool(false)
+
+Warning: gmp_intval(): Unable to convert variable to GMP - wrong type! in %s on line %d
+bool(false)
+
+Warning: gmp_intval(): Unable to convert variable to GMP - wrong type! in %s on line %d
+bool(false)

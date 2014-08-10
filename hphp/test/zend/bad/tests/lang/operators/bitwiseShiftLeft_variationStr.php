@@ -13,7 +13,6 @@ foreach ($strVals as $strVal) {
       var_dump(bin2hex($strVal<<$otherVal));
    }
 }
-
    
 ?>
-===DONE===
+===DONE===

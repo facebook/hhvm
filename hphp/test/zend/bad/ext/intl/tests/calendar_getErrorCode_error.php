@@ -6,3 +6,4 @@ $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 var_dump($c->getErrorCode(array()));
 
 var_dump(intlcal_get_error_code(null));
+

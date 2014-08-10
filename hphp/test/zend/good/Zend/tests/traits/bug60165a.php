@@ -9,3 +9,4 @@ class MyClass {
         nonExistent as barA;
     }
 }
+

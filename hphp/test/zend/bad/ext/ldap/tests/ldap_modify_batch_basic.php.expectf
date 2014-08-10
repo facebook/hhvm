@@ -1,0 +1,60 @@
+bool(true)
+array(2) {
+  ["count"]=>
+  int(1)
+  [0]=>
+  array(12) {
+    ["objectclass"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(6) "person"
+    }
+    [0]=>
+    string(11) "objectclass"
+    ["cn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(5) "userA"
+    }
+    [1]=>
+    string(2) "cn"
+    ["userpassword"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(4) "oops"
+    }
+    [2]=>
+    string(12) "userpassword"
+    ["telephonenumber"]=>
+    array(3) {
+      ["count"]=>
+      int(2)
+      [0]=>
+      string(14) "xx-xx-xx-xx-xx"
+      [1]=>
+      string(14) "+1 555 5551717"
+    }
+    [3]=>
+    string(15) "telephonenumber"
+    ["sn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(11) "Brown-Smith"
+    }
+    [4]=>
+    string(2) "sn"
+    ["count"]=>
+    int(5)
+    ["dn"]=>
+    string(28) "cn=userA,dc=my-domain,dc=com"
+  }
+}
+===DONE===

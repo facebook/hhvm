@@ -7,11 +7,11 @@ echo "\n*** Testing basic functions of realpath() with files ***\n";
 
 /* creating directories and files */
 $file_path = dirname(__FILE__);
-mkdir("$file_path/realpath_basic/home/test/", 0777, true);
+mkdir("$file_path/realpath_basic3/home/test/", 0777, true);
 
-$file_handle1 = fopen("$file_path/realpath_basic/home/test/realpath_basic.tmp", "w");
-$file_handle2 = fopen("$file_path/realpath_basic/home/realpath_basic.tmp", "w");
-$file_handle3 = fopen("$file_path/realpath_basic/realpath_basic.tmp", "w");
+$file_handle1 = fopen("$file_path/realpath_basic3/home/test/realpath_basic3.tmp", "w");
+$file_handle2 = fopen("$file_path/realpath_basic3/home/realpath_basic3.tmp", "w");
+$file_handle3 = fopen("$file_path/realpath_basic3/realpath_basic3.tmp", "w");
 fclose($file_handle1);
 fclose($file_handle2);
 fclose($file_handle3);
@@ -19,17 +19,17 @@ fclose($file_handle3);
 echo "\n*** Testing realpath() on filenames ***\n";
 $filenames = array (
   /* filenames resulting in valid paths */
-  "./realpath_basic/home/realpath_basic.tmp",
-  "./realpath_basic/realpath_basic.tmp",
-  "./realpath_basic//home/test//../test/./realpath_basic.tmp",
-  "./realpath_basic/home//../././realpath_basic.tmp",
+  "./realpath_basic3/home/realpath_basic3.tmp",
+  "./realpath_basic3/realpath_basic3.tmp",
+  "./realpath_basic3//home/test//../test/./realpath_basic3.tmp",
+  "./realpath_basic3/home//../././realpath_basic3.tmp",
 
   /* filenames with invalid path */
   // checking for binary safe
-  "./realpath_basicx000/home/realpath_basic.tmp",
+  "./realpath_basic3x000/home/realpath_basic3.tmp",
 
-  ".///realpath_basic/home//..//././test//realpath_basic.tmp",
-  "./realpath_basic/home/../home/../test/..realpath_basic.tmp"
+  ".///realpath_basic3/home//..//././test//realpath_basic3.tmp",
+  "./realpath_basic3/home/../home/../test/..realpath_basic3.tmp"
 );
 
 chdir("$file_path/..");
@@ -46,10 +46,10 @@ foreach($filenames as $file) {
 echo "Done\n";
 ?>
 <?php
-$name_prefix = dirname(__FILE__)."/realpath_basic";
-unlink("$name_prefix/home/test/realpath_basic.tmp");
-unlink("$name_prefix/home/realpath_basic.tmp");
-unlink("$name_prefix/realpath_basic.tmp");
+$name_prefix = dirname(__FILE__)."/realpath_basic3";
+unlink("$name_prefix/home/test/realpath_basic3.tmp");
+unlink("$name_prefix/home/realpath_basic3.tmp");
+unlink("$name_prefix/realpath_basic3.tmp");
 rmdir("$name_prefix/home/test/");
 rmdir("$name_prefix/home/");
 rmdir("$name_prefix/");

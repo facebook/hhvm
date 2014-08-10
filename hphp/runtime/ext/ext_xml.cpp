@@ -717,8 +717,8 @@ int64_t f_xml_parse(const Resource& parser, const String& data, bool is_final /*
 
 int64_t f_xml_parse_into_struct(const Resource& parser, const String& data, VRefParam values,
                             VRefParam index /* = null */) {
+  SYNC_VM_REGS_SCOPED();
   int ret;
-  VMRegAnchor _;
   XmlParser * p = parser.getTyped<XmlParser>();
   values = Array::Create();
   p->data.assignRef(values);
@@ -928,7 +928,7 @@ String f_utf8_decode(const String& data) {
 }
 
 String f_utf8_encode(const String& data) {
-  const auto maxSize = data.size() * 4;
+  auto const maxSize = safe_cast<size_t>(data.size()) * 4;
   String str = String(maxSize, ReserveString);
   char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;

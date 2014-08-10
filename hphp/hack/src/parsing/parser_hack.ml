@@ -568,6 +568,9 @@ and toplevel_word ~attr env = function
   | "interface" ->
       let class_ = class_ ~attr ~final:false ~kind:Cinterface env in
       [Class class_]
+  | "enum" ->
+      let class_ = enum_ ~attr env in
+      [Class class_]
   | "async" ->
       expect_word env "function";
       let fun_ = fun_ ~attr ~sync:FAsync env in
@@ -703,7 +706,7 @@ and fun_ ~attr ~sync env =
     f_ret = ret;
     f_body = body;
     f_user_attributes = attr;
-    f_type = sync;
+    f_fun_kind = sync;
     f_mode = env.mode;
     f_mtime = 0.0;
     f_namespace = Namespace_env.empty;
@@ -732,9 +735,66 @@ and class_ ~attr ~final ~kind env =
       c_extends         = cextends;
       c_body            = cbody;
       c_namespace       = Namespace_env.empty;
+      c_enum            = None;
     }
   in
   class_implicit_fields result
+
+(*****************************************************************************)
+(* Enums *)
+(*****************************************************************************)
+
+and enum_base_ty env =
+  expect env Tcolon;
+  let h = hint env in
+  h
+
+and enum_ ~attr env =
+  let cname       = identifier env in
+  let basety      = enum_base_ty env in
+  let constraint_ = typedef_constraint env in
+  let cbody       = enum_body env in
+  let result =
+    { c_mode            = env.mode;
+      c_final           = false;
+      c_kind            = Cenum;
+      c_is_xhp          = false;
+      c_implements      = [];
+      c_tparams         = [];
+      c_user_attributes = attr;
+      c_name            = cname;
+      c_extends         = [];
+      c_body            = cbody;
+      c_namespace       = Namespace_env.empty;
+      c_enum            = Some
+        { e_base       = basety;
+          e_constraint = constraint_;
+        }
+    }
+  in
+  result
+
+(* { ... *)
+and enum_body env =
+  expect env Tlcb;
+  enum_defs env
+
+and enum_defs env =
+  match peek env with
+  (* ... } *)
+  | Trcb ->
+      drop env;
+      []
+  | Tword ->
+    let const = class_const env in
+    let elem = Const (None, [const]) in
+    expect env Tsc;
+    let rest = enum_defs env in
+    elem :: rest
+  | _ ->
+    error_expect env "enum const declaration";
+    []
+
 
 (*****************************************************************************)
 (* Extends/Implements *)
@@ -1186,6 +1246,9 @@ and trait_require env =
 and xhp_format env =
   match L.token env.lb with
   | Tsc -> ()
+  | Teof ->
+      error_expect env "end of XHP category/attribute/children declaration";
+      ()
   | Tquote ->
       let pos = Pos.make env.lb in
       let abs_pos = env.lb.Lexing.lex_curr_pos in
@@ -1419,7 +1482,7 @@ and method_ env ~modifiers ~attrs ~sync pname =
     m_body = body;
     m_kind = modifiers;
     m_user_attributes = attrs;
-    m_type = sync;
+    m_fun_kind = sync;
   }
 
 (*****************************************************************************)
@@ -1855,10 +1918,14 @@ and for_last_expr env =
 and statement_foreach env =
   expect env Tlp;
   let e = expr env in
+  let await =
+    match L.token env.lb with
+    | Tword when Lexing.lexeme env.lb = "await" -> Some (Pos.make env.lb)
+    | _ -> L.back env.lb; None in
   expect_word env "as";
   let as_expr = foreach_as env in
   let st = statement env in
-  Foreach (e, as_expr, [st])
+  Foreach (e, await, as_expr, [st])
 
 and foreach_as env =
   let e1 = expr env in
@@ -2211,7 +2278,7 @@ and lambda_body env params ret =
     f_ret = ret;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
-    f_type = FSync;
+    f_fun_kind = FSync;
     f_mode = env.mode;
     f_mtime = 0.0;
     f_namespace = Namespace_env.empty;
@@ -2575,7 +2642,7 @@ and expr_anon_fun env pos ~sync =
     f_ret = ret;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
-    f_type = sync;
+    f_fun_kind = sync;
     f_mode = env.mode;
     f_mtime = 0.0;
     f_namespace = Namespace_env.empty;

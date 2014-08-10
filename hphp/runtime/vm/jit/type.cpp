@@ -247,7 +247,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
 // operations on both Class and ArrayKind specializations.
 struct Type::ClassOps {
   static bool subtypeOf(ClassInfo a, ClassInfo b) {
-    return a.get()->classof(b.get());
+    return a == b || (a.get()->classof(b.get()) && !b.isExact());
   }
 
   static folly::Optional<ClassInfo> commonAncestor(ClassInfo a,
@@ -261,6 +261,8 @@ struct Type::ClassOps {
   }
 
   static folly::Optional<ClassInfo> intersect(ClassInfo a, ClassInfo b) {
+    // There shouldn't be any cases we could cover here that aren't already
+    // handled by the subtype checks.
     return folly::none;
   }
 };
@@ -395,12 +397,13 @@ struct Type::Intersect {
       // When a and b are the same, keep the specialization.
       if (a == b)        return Type(bits, a);
 
-      if (auto info = Ops::intersect(a, b)) return Type(bits, *info);
-
       // If one is a subtype of the other, their intersection is the most
       // specific of the two.
       if (Ops::subtypeOf(a, b)) return Type(bits, a);
       if (Ops::subtypeOf(b, a)) return Type(bits, b);
+
+      // If we can intersect the specializations, use that.
+      if (auto info = Ops::intersect(a, b)) return Type(bits, *info);
 
       // a and b are unrelated so we have to remove the specialized type. This
       // means dropping the specialization and the bits that correspond to the
@@ -648,10 +651,12 @@ Type liveTVType(const TypedValue* tv) {
 
   if (tv->m_type == KindOfObject) {
     Class* cls = tv->m_data.pobj->getVMClass();
+
     // We only allow specialization on classes that can't be
-    // overridden for now.
+    // overridden for now. If this changes, then this will need to
+    // specialize on sub object types instead.
     if (cls && !(cls->attrs() & AttrNoOverride)) cls = nullptr;
-    return Type::Obj.specialize(cls);
+    return Type::Obj.specializeExact(cls);
   }
   if (tv->m_type == KindOfArray) {
     return Type::Arr.specialize(tv->m_data.parr->kind());
@@ -747,13 +752,15 @@ Type allocObjReturn(const IRInstruction* inst) {
   switch (inst->op()) {
     case ConstructInstance:
       return Type::Obj.specialize(inst->extra<ConstructInstance>()->cls);
+
     case NewInstanceRaw:
-      return Type::Obj.specialize(inst->extra<NewInstanceRaw>()->cls);
-    case CustomInstanceInit:
+      return Type::Obj.specializeExact(inst->extra<NewInstanceRaw>()->cls);
+
     case AllocObj:
       return inst->src(0)->isConst()
         ? Type::Obj.specializeExact(inst->src(0)->clsVal())
         : Type::Obj;
+
     default:
       always_assert(false && "Invalid opcode returning AllocObj");
   }

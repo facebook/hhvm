@@ -41,3 +41,4 @@ var_dump(array_diff($arr2, $arr1));
 
 echo "Done";
 ?>
+

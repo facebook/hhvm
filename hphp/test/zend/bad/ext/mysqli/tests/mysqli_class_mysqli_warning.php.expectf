@@ -1,0 +1,37 @@
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+ in %s on line %d
+
+Warning: %s
+ in %s on line %d
+
+Warning: %s
+
+Warning: %s
+Parent class:
+bool(false)
+
+Methods:
+ok
+
+Class variables:
+
+Object variables:
+
+Magic, magic properties:
+warning->message = ''
+warning->sqlstate= ''
+warning->errno = ''
+
+Access to undefined properties:
+
+warning->unknown = ''
+done!

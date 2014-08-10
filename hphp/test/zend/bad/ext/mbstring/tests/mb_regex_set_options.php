@@ -5,3 +5,4 @@
 	mb_regex_set_options( '' );
 	print mb_ereg_replace(' -', '+', '- - - - -' );
 ?>
+

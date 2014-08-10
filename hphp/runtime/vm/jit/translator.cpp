@@ -474,6 +474,8 @@ static const struct {
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpNewMixedArray,  {None,          Stack1,       OutArray,          1 }},
+  { OpNewMIArray,  {None,             Stack1,       OutArray,          1 }},
+  { OpNewMSArray,  {None,             Stack1,       OutArray,          1 }},
   { OpNewLikeArrayL,  {None,          Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
@@ -915,7 +917,7 @@ int getStackDelta(const NormalizedInstruction& ni) {
 bool outputIsPredicted(NormalizedInstruction& inst) {
   auto const& iInfo = getInstrInfo(inst.op());
   auto doPrediction =
-    (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.breaksTracelet;
+    (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.endsRegion;
   if (doPrediction) {
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
@@ -1539,19 +1541,6 @@ static void findSuccOffsets(const RegionDesc&              region,
 }
 
 /*
- * Returns whether or not succOffsets contains both successors of inst.
- */
-static bool containsBothSuccs(const OffsetSet&             succOffsets,
-                              const NormalizedInstruction& inst) {
-  if (inst.breaksTracelet) return false;
-  Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
-  Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
-  bool   takenIncluded    = succOffsets.count(takenOffset);
-  bool   fallthruIncluded = succOffsets.count(fallthruOffset);
-  return takenIncluded && fallthruIncluded;
-}
-
-/*
  * Returns whether offset is a control-flow merge within region.
  */
 static bool isMergePoint(Offset offset, const RegionDesc& region) {
@@ -1584,16 +1573,23 @@ static bool blockHasUnprocessedPred(
 }
 
 /*
- * Returns whether the next instruction following inst (whether by
- * fallthrough or branch target) is a merge in region.
+ * Returns whether any instruction following inst (whether by fallthrough or
+ * branch target) is a merge in region.
  */
 static bool nextIsMerge(const NormalizedInstruction& inst,
                         const RegionDesc& region) {
-  Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
-  if (instrIsNonCallControlFlow(inst.op())) {
-    Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
-    return isMergePoint(takenOffset, region)
-        || isMergePoint(fallthruOffset, region);
+  Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
+  if (instrHasConditionalBranch(inst.op())) {
+    auto offsetPtr = instrJumpOffset((Op*)inst.pc());
+    Offset takenOffset = inst.offset() + *offsetPtr;
+    return fallthruOffset == takenOffset
+      || isMergePoint(takenOffset, region)
+      || isMergePoint(fallthruOffset, region);
+  }
+  if (isUnconditionalJmp(inst.op())) {
+    auto offsetPtr = instrJumpOffset((Op*)inst.pc());
+    Offset takenOffset = inst.offset() + *offsetPtr;
+    return isMergePoint(takenOffset, region);
   }
   return isMergePoint(fallthruOffset, region);
 }
@@ -1618,6 +1614,9 @@ Translator::translateRegion(const RegionDesc& region,
 
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
+
+  m_region = &region;
+  SCOPE_EXIT { m_region = nullptr; };
 
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   IRBuilder& irb = ht.irBuilder();
@@ -1655,9 +1654,9 @@ Translator::translateRegion(const RegionDesc& region,
         always_assert(RuntimeOption::EvalJitLoops ||
                       RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
         irb.clearBlockState(irBlock);
-        irb.state().clearCurrentLocals();
       }
-      ht.irBuilder().startBlock(irBlock);
+      BCMarker marker(sk, block->initialSpOffset(), profTransId);
+      ht.irBuilder().startBlock(irBlock, marker);
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
     }
@@ -1722,15 +1721,15 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
-      inst.breaksTracelet = (i == block->length() - 1 &&
-                             block == region.blocks.back());
       inst.funcd = topFunc;
-      if (instrIsNonCallControlFlow(inst.op()) && !inst.breaksTracelet) {
-        assert(b < region.blocks.size());
-        inst.nextOffset = region.blocks[b+1]->start().offset();
+      if (i == block->length() - 1) {
+        inst.endsRegion = blockEndsRegion(blockId, region);
+        inst.nextIsMerge = nextIsMerge(inst, region);
+        if (instrIsNonCallControlFlow(inst.op()) &&
+            b < region.blocks.size() - 1) {
+          inst.nextOffset = region.blocks[b+1]->start().offset();
+        }
       }
-      inst.nextIsMerge = nextIsMerge(inst, region);
-      inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
 
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if
@@ -1794,6 +1793,8 @@ Translator::translateRegion(const RegionDesc& region,
         auto returnFuncOff = returnSk.offset() - block->func()->base();
         ht.beginInlining(inst.imm[0].u_IVA, callee, returnFuncOff,
                          doPrediction ? inst.outPred : Type::Gen);
+        // "Fallthrough" into the callee's first block
+        ht.endBlock(region.blocks[b + 1]->start().offset(), inst.nextIsMerge);
         continue;
       }
 
@@ -1883,6 +1884,9 @@ Translator::translateRegion(const RegionDesc& region,
             ht.prepareForSideExit();
           }
           ht.endBlock(nextOffset, inst.nextIsMerge);
+        } else if (isRet(inst.op()) || inst.op() == OpNativeImpl) {
+          // "Fallthrough" from inlined return to the next block
+          ht.endBlock(region.blocks[b + 1]->start().offset(), inst.nextIsMerge);
         }
         if (blockEndsRegion(blockId, region)) {
           ht.end();

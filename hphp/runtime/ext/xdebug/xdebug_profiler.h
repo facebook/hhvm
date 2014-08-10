@@ -19,9 +19,9 @@
 #define incl_HPHP_XDEBUG_PROFILER_H_
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
-#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/ext_hotprofiler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +54,33 @@ public:
       disableTracing();
     }
     smart_free(m_frameBuffer);
+  }
+
+  // Returns true if profiling is required by the extension settings or the
+  // environment
+  static inline bool isProfilingNeeded() {
+    return
+      XDEBUG_GLOBAL(ProfilerEnable) ||
+      (XDEBUG_GLOBAL(ProfilerEnableTrigger) &&
+       XDebugUtils::isTriggerSet("XDEBUG_TRACE"));
+  }
+
+  // Returns true if tracing is required by the extension settings or the
+  // environment
+  static inline bool isTracingNeeded() {
+    return
+      XDEBUG_GLOBAL(AutoTrace) ||
+      (XDEBUG_GLOBAL(TraceEnableTrigger) &&
+       XDebugUtils::isTriggerSet("XDEBUG_TRACE"));
+  }
+
+  // Returns true if a profiler should be attached to the current thread
+  static inline bool isNeeded() {
+    return
+      XDEBUG_GLOBAL(CollectTime) ||
+      XDEBUG_GLOBAL(CollectMemory) ||
+      isProfilingNeeded() ||
+      isTracingNeeded();
   }
 
   // Set the time to use a base when computing time elapsed
@@ -117,15 +144,6 @@ private:
   // uses: microseconds since request init, as a double
   inline double timeSinceBase(int64_t time) {
     return (time - m_baseTime) * 1.0e-6;
-  }
-
-  // Helper that writes a timestamp in the given file in the format used by
-  // xdebug
-  inline void fprintTimestamp(FILE* f) {
-    DateTime now(time(nullptr));
-    fprintf(f, "[%d-%02d-%02d %02d:%02d:%02d]",
-            now.year(), now.month(), now.day(),
-            now.hour(), now.minute(), now.second());
   }
 
   // The different types of tracefile output

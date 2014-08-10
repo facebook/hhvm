@@ -23,3 +23,4 @@ var_dump((bool)$retval_3["l_onoff"] === (bool)$options["l_onoff"]);
 
 socket_close($socket);
 ?>
+

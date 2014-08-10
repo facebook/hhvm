@@ -150,24 +150,20 @@ Variant HHVM_FUNCTION(spliti, const String& pattern, const String& str,
 }
 
 String HHVM_FUNCTION(sql_regcase, const String& str) {
-  unsigned char c;
-  register int i, j;
-
-  char *tmp = (char*)malloc(str.size() * 4 + 1);
-  for (i = j = 0; i < str.size(); i++) {
-    c = (unsigned char)str.charAt(i);
+  StringBuffer out(str.size());
+  for (int i = 0; i < str.size(); i++) {
+    unsigned char c = (unsigned char)str.charAt(i);
     if (isalpha(c)) {
-      tmp[j++] = '[';
-      tmp[j++] = toupper(c);
-      tmp[j++] = tolower(c);
-      tmp[j++] = ']';
+      out.append('[');
+      out.append((unsigned char)toupper(c));
+      out.append((unsigned char)tolower(c));
+      out.append(']');
     } else {
-      tmp[j++] = c;
+      out.append(c);
     }
   }
-  tmp[j] = 0;
 
-  return String(tmp, j, AttachString);
+  return out.detach();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

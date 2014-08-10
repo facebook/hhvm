@@ -1,0 +1,25 @@
+array(2) {
+  [%u|b%"id"]=>
+  int(1)
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
+}
+NULL
+bool(false)
+bool(false)
+id
+label
+_id
+_label
+_null
+_label_concat
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+done!

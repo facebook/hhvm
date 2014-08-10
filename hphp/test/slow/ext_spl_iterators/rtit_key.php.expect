@@ -1,0 +1,30 @@
+string(1) "a"
+int(0)
+string(1) "b"
+int(0)
+int(1)
+string(1) "c"
+string(1) "d"
+int(0)
+int(2)
+int(3)
+int(1)
+int(2)
+int(3)
+int(0)
+int(1)
+string(3) "|-a"
+string(3) "|-0"
+string(3) "|-b"
+string(5) "| |-0"
+string(5) "| |-1"
+string(5) "| |-c"
+string(7) "| | |-d"
+string(7) "| | \-0"
+string(5) "| |-2"
+string(5) "| \-3"
+string(3) "|-1"
+string(3) "|-2"
+string(3) "\-3"
+string(5) "  |-0"
+string(5) "  \-1"

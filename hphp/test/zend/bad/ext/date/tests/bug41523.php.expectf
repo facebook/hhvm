@@ -29,7 +29,7 @@ array(12) {
   bool(false)
 }
 bool(false)
-object(DateTime)#1 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(20) "-0001-11-30 00:00:00"
   ["timezone_type"]=>

@@ -1,24 +1,26 @@
 GET_DIRECTORY_PROPERTY(SOURCE_INCLUDE_DIRS INCLUDE_DIRECTORIES)
 
-set(HHVM_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
+set(HHVM_INCLUDE_DIRS "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 
 foreach(dir ${SOURCE_INCLUDE_DIRS})
   if(dir STREQUAL "${HPHP_HOME}/third-party/folly")
     # omit: PREFIX/third-party is a suitable path
   elseif(dir STREQUAL "${HPHP_HOME}/third-party/double-conversion/src")
     # omit: PREFIX/third-party is a suitable path
+  elseif(dir STREQUAL "${HPHP_HOME}")
+    # omit: base dir should not be included
   else()
-    # map HPHP_HOME/hphp to PREFIX/include/hphp
+    # map HPHP_HOME/hphp to CMAKE_INSTALL_FULL_INCLUDEDIR/hphp
     string(REPLACE
       "${HPHP_HOME}/hphp" # match string
-      "${CMAKE_INSTALL_PREFIX}/include/hphp" # replace string
+      "${CMAKE_INSTALL_FULL_INCLUDEDIR}/hphp" # replace string
       dir # output variable
       ${dir}) # input
 
-    # map HPHP_HOME/third-party to PREFIX/include/hphp/third-party
+    # map HPHP_HOME/third-party to CMAKE_INSTALL_FULL_INCLUDEDIR/hphp/third-party
     string(REPLACE
       "${HPHP_HOME}/third-party" # match string
-      "${CMAKE_INSTALL_PREFIX}/include/hphp/third-party" # replace string
+      "${CMAKE_INSTALL_FULL_INCLUDEDIR}/hphp/third-party" # replace string
       dir # output variable
       ${dir}) # input
 
@@ -41,5 +43,5 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/hphpize
   DESTINATION bin
   COMPONENT dev)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hphpize.cmake
-  DESTINATION "lib/hphp/hphpize"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/hhvm/hphpize"
   COMPONENT dev)

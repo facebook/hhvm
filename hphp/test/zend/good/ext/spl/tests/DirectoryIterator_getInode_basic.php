@@ -8,4 +8,4 @@ var_dump(decoct($dirIterator->getInode()));
 ?>
 <?php
 rmdir('test_dir_ptfi');
-?>
+?>

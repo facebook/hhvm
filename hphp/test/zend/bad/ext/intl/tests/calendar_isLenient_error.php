@@ -7,3 +7,4 @@ var_dump($c->isLenient(1));
 
 var_dump(intlcal_is_lenient($c, 1));
 var_dump(intlcal_is_lenient(1));
+

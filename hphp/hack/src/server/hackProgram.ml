@@ -158,8 +158,8 @@ module Program : Server.SERVER_PROGRAM = struct
        *)
       output_string oc ("PROLOG_READY:" ^path);
       flush oc
-    | ServerMsg.SEARCH query ->
-        ServerSearch.go query oc
+    | ServerMsg.SEARCH (query, type_) ->
+        ServerSearch.go query type_ oc
 
   let handle_connection_ genv env socket =
     let cli, _ = Unix.accept socket in
@@ -190,6 +190,13 @@ module Program : Server.SERVER_PROGRAM = struct
     | e ->
         Printf.printf "Error: %s\n" (Printexc.to_string e);
         flush stdout
+
+  let preinit options =
+    if not (ServerArgs.check_mode options)
+    then HackSearchService.attach_hooks ();
+    ignore (
+      Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos)
+    )
 
   let init genv env root =
     let next_files_hhi =

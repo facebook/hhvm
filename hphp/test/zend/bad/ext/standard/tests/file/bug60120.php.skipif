@@ -1,0 +1,9 @@
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only for Windows');
+}
+$php = getenv('TEST_PHP_EXECUTABLE');
+if (!$php) {
+	die("No php executable defined\n");
+}
+?>

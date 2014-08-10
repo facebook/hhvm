@@ -9,4 +9,4 @@ var_dump($fileInfo->getPerms() == 0100557);
 ?>
 <?php
 unlink('SplFileInfo_getPerms_basic.txt');
-?>
+?>

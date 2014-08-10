@@ -369,7 +369,7 @@ class Redis {
   /* Sets ---------------------------------------------------------------- */
 
   public function sRandMember($key, $count = null) {
-    $args = [$key];
+    $args = [$this->prefix($key)];
     if ($count !== null) {
        $args[] = $count;
     }
@@ -1220,8 +1220,11 @@ class Redis {
   protected function processSerializedResponse() {
     if ($this->mode === self::ATOMIC) {
       $resp = $this->sockReadData($type);
+      if ($resp === null) {
+        return false;
+      }
       return (($type === self::TYPE_LINE) OR ($type === self::TYPE_BULK))
-             ? $this->unserialize($resp) : null;
+             ? $this->unserialize($resp) : false;
     }
     $this->multiHandler[] = [ 'cb' => [$this,'processSerializedResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
@@ -1307,7 +1310,7 @@ class Redis {
       if ($unser AND (($lineNo % $unser) == 0)) {
         $val = $this->unserialize($val);
       }
-      $ret[] = $val;
+      $ret[] = $val !== null ? $val : false;
     }
     return $ret;
   }
@@ -1370,7 +1373,7 @@ class Redis {
       if ($unser_val) {
         $val = $this->unserialize($val);
       }
-      $ret[$key] = $val;
+      $ret[$key] = $val !== null ? $val : false;
     }
     return $ret;
   }

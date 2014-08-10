@@ -27,8 +27,9 @@ type client_mode =
 | MODE_METHOD_JUMP_ANCESTORS of string
 | MODE_REFACTOR
 | MODE_FIND_CLASS_REFS of string
-| MODE_SEARCH of string
 | MODE_ARGUMENT_INFO of string
+(* TODO figure out why we can't reference FuzzySearchService from here *)
+| MODE_SEARCH of string * string
 
 type client_check_env = {
   mode: client_mode;

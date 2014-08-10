@@ -5,7 +5,7 @@ myclass::serialize()
 
 Unserializing the previously serialized object...
 myclass::unserialize('Data from serialize')
-object(myclass)#4 (1) {
+object(myclass)#%d (1) {
   [%u|b%"myprotected":protected]=>
   %unicode|string%(19) "a protected propery"
 }

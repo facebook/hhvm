@@ -87,6 +87,8 @@
       - doctrine2/tests/Doctrine/Tests/ORM/Cache/FileLockRegionTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/XmlDriverTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
+      # Also fails on PHP5 - bad SQL
+      - doctrine2/tests/Doctrine/Tests/ORM/Functional/ProxiesLikeEntitiesTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
     # Stable is 7.26, but the test framework is lacking in 7.x
@@ -141,11 +143,9 @@
       # Depends on external resource (example.com), unreliable
       - guzzle/tests/Guzzle/Tests/Plugin/Async/AsyncPluginTest.php
   guzzle4:
-    # Slightly after 4.1.1, to include
-    # https://github.com/guzzle/guzzle/pull/701
-    url: https://github.com/fredemmott/guzzle.git
-    branch: change-port
-    commit: 4db19b75d9211e729ff277c238ef5de4bf658597
+    url: https://github.com/guzzle/guzzle.git
+    branch: 4.1.6
+    commit: e49ad58038b46a0d7739627a72f6d998cd92d3d6
     install_root: guzzle4
     test_root: guzzle4
     test_find_mode: token
@@ -321,10 +321,8 @@
     test_find_mode: token
   laravel:
     url: https://github.com/laravel/framework.git
-    # Use the 4.1 branch instead of the 4.1.x tag because of pull request
-    # https://github.com/laravel/framework/pull/3563
-    branch: "4.1"
-    commit: 1faf4c8508378b0b102d148c53c322a8048b16dd
+    branch: "v4.2.8"
+    commit: e60ea917ab862254a6db37fa9cb8933138c1e73c
     install_root: laravel
     test_root: laravel
     flakey:
@@ -363,6 +361,11 @@
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/
     config_file: mediawiki-core/tests/phpunit/suite.xml
+    flakey:
+      # randomized test data. if it happens to come up with a base-36 string
+      # starting with '0x', and gmp is available, it will error out saying it's
+      # an invalid conversion. Also true on php5.
+      - mediawiki-core/tests/phpunit/includes/GlobalFunctions/wfBaseConvertTest.php
   jshrink:
     url: https://github.com/tedivm/JShrink.git
     branch: master
@@ -556,11 +559,8 @@
       - reactphp/tests/EventLoop/StreamSelectLoopTest.php
   silverstripe:
     url: https://github.com/silverstripe/silverstripe-installer.git
-    # Needed to go beyond the most likely stable 3.1.2 in order
-    # to pull request code added.
-    # https://github.com/silverstripe/silverstripe-framework/pull/2819
-    branch: master
-    commit: 3b3cda59d2d8a1618ed66c5d9fd1d76395040ddd
+    branch: "3.1.5"
+    commit: b3acbcfa5f3637c412bd36113e41dcf48b564fc5
     install_root: silverstripe
     test_root: silverstripe
     flakey:
@@ -657,3 +657,4 @@
     commit: 9f5d2f66bea26fc590ec003f2488568b34bafe72
     install_root: twital
     test_root: twital
+    test_find_mode: token

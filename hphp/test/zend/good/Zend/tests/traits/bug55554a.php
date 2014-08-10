@@ -25,3 +25,4 @@ $o = new NewConstructor;
 
 echo "Legacy constructor: ";
 $o = new LegacyConstructor;
+

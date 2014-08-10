@@ -25,4 +25,4 @@ var_dump (testReturnVarByRef());
 echo "\n---> 2. Return a value by reference -> Warning:\n";
 
 var_dump (testReturnValByRef());
-
+

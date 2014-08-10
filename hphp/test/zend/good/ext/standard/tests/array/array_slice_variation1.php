@@ -17,3 +17,4 @@ var_dump(array_slice(range(1, 3), 0, $a));
 var_dump($a);
 
 ?>
+

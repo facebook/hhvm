@@ -20,7 +20,6 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/util/async-func.h"
-#include "hphp/runtime/server/service-thread.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,9 +61,6 @@ public:
   void stopOnSignal(int sig);
 
 private:
-  static void startupFailure();
-
-private:
   bool m_stopped;
   bool m_killed;
   const char* m_stopReason;
@@ -74,7 +70,6 @@ private:
   std::vector<std::unique_ptr<SatelliteServer>> m_satellites;
   std::vector<std::unique_ptr<SatelliteServer>> m_danglings;
   AsyncFunc<HttpServer> m_watchDog;
-  std::vector<std::shared_ptr<ServiceThread>> m_serviceThreads;
 
   bool startServer(bool pageServer);
   void onServerShutdown();

@@ -65,3 +65,4 @@ namespace HTML
     $o = new HTMLHelper6;
     echo 'Done';
 }
+

@@ -1,17 +1,9 @@
 <h2>Inconsistencies between PHP5 and HipHop VM</h2>
 
 
-1. Arithmetic, arrays, and foreach loops
+1. Arrays and foreach loops
 
-(1) Arithmetic
-
-Under PHP5, the addition, subtraction, or multiplication of two integers
-will produce a floating-point value if the result overflows the integer type.
-Under HipHop VM, the addition, subtraction, or multiplication of two integers
-will always produce an integer value; if the result overflows the integer type,
-the high bits of the result will be discarded ("wrap-around").
-
-(2) Next free integer key for arrays
+(1) Next free integer key for arrays
 
 Arrays contain a hidden field called the "NextFreeElement" field that tracks
 what integer key should be used when a new element is appended. Under PHP5,
@@ -20,7 +12,7 @@ recomputed based on the keys it currently contains. Under HipHop VM, when an
 array is copied the new array's NextFreeElement field is set to the same value
 as the original array's NextFreeElement field.
 
-(3) Array internal cursors
+(2) Array internal cursors
 
 Under PHP5, if an array's internal cursor points to the position past the
 last element and then a copy of the array is made, the copy will have its
@@ -28,13 +20,13 @@ internal cursor reset to point at the first element. Under HipHop VM, when a
 copy of an array is made, the copy's internal cursor will always point to the
 same position that the original array's internal cursor pointed to.
 
-(4) Foreach by value
+(3) Foreach by value
 
 Under PHP5, foreach by value will modify the array's internal cursor under
 certain circumstances. Under HipHop VM, foreach by value will never modify the
 array's internal cursor.
 
-(5) Foreach by reference
+(4) Foreach by reference
 
 Under PHP5, the behavior of a foreach by reference loop can be
 unpredictable if during iteration the next element of the array is unset, or if
@@ -157,3 +149,8 @@ conversion inside the condition of an if statement or similar.
 
 (7) All fatals prevent further PHP code from executing, including __destruct
 methods. N.B.: exit() is a fatal.
+
+(8) Loading of external entities in the libxml extension is disabled by default
+for security reasons. It can be re-enabled on a per-protocol basis (file, http,
+compress.zlib, etc...) with a comma-separated list in the ini setting
+hhvm.libxml.ext_entity_whitelist.

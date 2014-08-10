@@ -40,3 +40,4 @@ var_dump( htmlentities("\x84\x91",ENT_QUOTES, 'cp1252', "test1") );
 
 echo "Done\n";
 ?>
+

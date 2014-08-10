@@ -3,4 +3,4 @@ Invalid yield
 File "continuation_is_not_awaitable2.php", line 12, characters 17-25:
 This is an object of type Awaitable
 File "continuation_is_not_awaitable2.php", line 13, characters 3-7:
-It is incompatible with an object of type Generator because functions with "yield" implicitly return Generator
+It is incompatible with an object of type Generator (result of function with 'yield' in the body)

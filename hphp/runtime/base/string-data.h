@@ -93,7 +93,7 @@ struct StringData {
    */
   static StringData* Make(const char* data);
   static StringData* Make(const char* data, CopyStringMode);
-  static StringData* Make(const char* data, int len, CopyStringMode);
+  static StringData* Make(const char* data, size_t len, CopyStringMode);
   static StringData* Make(const StringData* s, CopyStringMode);
   static StringData* Make(StringSlice r1, CopyStringMode);
 
@@ -104,7 +104,7 @@ struct StringData {
    * except that it will also free `data'.
    */
   static StringData* Make(char* data, AttachStringMode);
-  static StringData* Make(char* data, int len, AttachStringMode);
+  static StringData* Make(char* data, size_t len, AttachStringMode);
 
   /*
    * Create a new request-local string by concatenating two existing
@@ -124,7 +124,7 @@ struct StringData {
    * Create a new request-local empty string big enough to hold
    * strings of length `reserve' (not counting the \0 terminator).
    */
-  static StringData* Make(int reserve);
+  static StringData* Make(size_t reserve);
 
   /*
    * Create a request-local StringData that wraps an APCString
@@ -147,7 +147,7 @@ struct StringData {
    * below are marked by saying they require the string to be request
    * local.
    */
-  static StringData* MakeMalloced(const char* data, int len);
+  static StringData* MakeMalloced(const char* data, size_t len);
 
   /*
    * Allocate a string with malloc, using the low-memory allocator if
@@ -233,7 +233,7 @@ struct StringData {
    * Returns: possibly a new StringData, if we had to reallocate.  The
    * returned pointer is not yet incref'd.
    */
-  StringData* reserve(int maxLen);
+  StringData* reserve(size_t maxLen);
 
   /*
    * Shrink a string down to length `len` (not counting null terminator).
@@ -244,7 +244,7 @@ struct StringData {
    * Returns: possibly a new StringData, if we decided to reallocate. The
    * returned pointer is not yet incref'd.
    */
-  StringData* shrink(int len);
+  StringData* shrink(size_t len);
 
   /*
    * Returns a slice with extents sized to the *string* that this
@@ -465,7 +465,7 @@ private:
 
   void releaseDataSlowPath();
   int numericCompare(const StringData *v2) const;
-  StringData* escalate(uint32_t cap);
+  StringData* escalate(size_t cap);
   void enlist();
   void delist();
   void incrementHelper();

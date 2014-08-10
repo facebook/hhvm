@@ -13,6 +13,7 @@ class Gen<T> {
   public function __construct(public T $data) {}
 }
 
+<<ConsistentConstruct>>
 class Base<T> {
   public function __construct(private Gen<T> $data) {}
   public function get(): T {
@@ -33,7 +34,7 @@ class Base<T> {
 class X {}
 class Child extends Base<X> {}
 
-class Another<T> {
+final class Another<T> {
   private ?Gen<T> $data;
   public function set(Gen<T> $data): this {
     $this->data = $data;

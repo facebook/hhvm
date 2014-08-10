@@ -43,6 +43,18 @@
 #define SET_AFFINITY(pid, size, mask)       \
         thread_policy_set(mach_thread_self(), THREAD_AFFINITY_POLICY, \
                           (int *)mask, THREAD_AFFINITY_POLICY_COUNT)
+
+#elif (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#include <windows.h>
+typedef DWORD_PTR cpu_set_t;
+
+#define CPU_SET(cpu_id, new_mask) (*(new_mask)) = (cpu_id + 1)
+#define CPU_ZERO(new_mask) (*(new_mask)) = 0
+#define SET_AFFINITY(pid, size, mask) \
+         SetProcessAffinityMask(GetCurrentProcess(), (DWORD_PTR)mask)
+#define GET_AFFINITY(pid, size, mask) DWORD_PTR s_mask; \
+         GetProcessAffinityMask(GetCurrentProcess(), mask, &s_mask)
+
 #else
 #include <sched.h>
 #define SET_AFFINITY(pid, size, mask) sched_setaffinity(0, size, mask)
@@ -226,17 +238,16 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-struct ProfilerFactory final : RequestEventHandler {
-  enum Level {
-    Simple       = 1,
-    Hierarchical = 2,
-    Memory       = 3,
-    Trace        = 4,
-    Memo         = 5,
-    XDebug       = 6,
-    Sample       = 620002, // Rockfort's zip code
-  };
+enum class ProfilerKind {
+  Hierarchical = 1,
+  Memory       = 2,
+  Trace        = 3,
+  Memo         = 4,
+  XDebug       = 5,
+  Sample       = 620002, // Rockfort's zip code
+};
 
+struct ProfilerFactory final : RequestEventHandler {
   static bool EnableNetworkProfiler;
 
 public:
@@ -262,7 +273,7 @@ public:
    * or false on failure. If beginFrame is true, Profiler::beginFrame is called
    * with "main()" as the symbol name.
    */
-  bool start(Level level, long flags, bool beginFrame = true);
+  bool start(ProfilerKind kind, long flags, bool beginFrame = true);
 
   /**
    * Will stop profiling if currently profiling, regardless of how it was

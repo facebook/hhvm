@@ -15,3 +15,4 @@ $i === $j
 TESTS;
 
 include(dirname(__FILE__) . '/../quicktester.inc');
+

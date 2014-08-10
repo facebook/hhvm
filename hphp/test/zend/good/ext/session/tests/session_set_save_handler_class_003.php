@@ -54,3 +54,4 @@ session_write_close();
 session_unset();
 
 var_dump(session_id(), $_SESSION, $handler->i);
+

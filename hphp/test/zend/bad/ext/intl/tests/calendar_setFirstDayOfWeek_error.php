@@ -9,3 +9,4 @@ var_dump($c->setFirstDayOfWeek(0));
 
 var_dump(intlcal_set_first_day_of_week($c, 0));
 var_dump(intlcal_set_first_day_of_week(1, 2));
+

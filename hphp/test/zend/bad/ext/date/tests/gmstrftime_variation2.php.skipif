@@ -1,0 +1,5 @@
+<?php
+if(PHP_INT_SIZE != 4 ) {
+  die("skip Test is not valid for 64-bit");
+}
+?>

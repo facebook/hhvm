@@ -104,6 +104,7 @@ val array_cast : Pos.t -> unit
 val anonymous_recursive : Pos.t -> unit
 val new_static_outside_class : Pos.t -> unit
 val new_self_outside_class : Pos.t -> unit
+val new_static_inconsistent : Pos.t -> (Pos.t * string) -> unit
 val abstract_instantiate : Pos.t -> string -> unit
 val pair_arity : Pos.t -> unit
 val tuple_arity : Pos.t -> int -> Pos.t -> int -> unit
@@ -169,7 +170,6 @@ val fun_variadicity_hh_vs_php56 : Pos.t -> Pos.t -> unit
 val expected_tparam : Pos.t -> int -> unit
 val field_missing : string -> Pos.t -> Pos.t -> unit
 val object_string : Pos.t -> Pos.t -> unit
-val untyped_string : Pos.t -> unit
 val type_param_arity : Pos.t -> string -> string -> unit
 val cyclic_typedef : Pos.t -> unit
 val type_arity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
@@ -204,7 +204,6 @@ val abstract_with_body : Pos.t * 'a -> unit
 val not_abstract_without_body : Pos.t * 'a -> unit
 val return_in_gen : Pos.t -> unit
 val return_in_finally : Pos.t -> unit
-val yield_in_async_function : Pos.t -> unit
 val await_in_sync_function : Pos.t -> unit
 val magic : Pos.t * string -> unit
 val non_interface : Pos.t -> string -> string -> unit

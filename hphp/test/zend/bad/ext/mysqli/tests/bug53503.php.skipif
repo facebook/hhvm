@@ -11,4 +11,4 @@ if ($msg = check_local_infile_support($link, $engine))
 
 mysqli_close($link);
 
-?>
+?>

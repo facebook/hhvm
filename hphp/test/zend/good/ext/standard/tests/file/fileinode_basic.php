@@ -18,7 +18,8 @@ print( fileinode(__FILE__) )."\n";
 print( fileinode(".") )."\n";
 print( fileinode("./..") )."\n";
 
-echo "\n*** Done ***";?>
+echo "\n*** Done ***";
+?>
 <?php
 unlink (dirname(__FILE__)."/inode.tmp");
 ?>

@@ -209,6 +209,7 @@ let merge_parent_class_reqs class_nast impls
           let req_ancestors_extends =
             SSet.union parent_type.tc_req_ancestors_extends req_ancestors_extends in
           env, req_ancestors, req_ancestors_extends
+        | Ast.Cenum -> assert false
 
 let declared_class_req class_nast impls (env, requirements, req_extends) hint =
   let env, req_ty = Typing_hint.hint env hint in
@@ -221,7 +222,7 @@ let declared_class_req class_nast impls (env, requirements, req_extends) hint =
    * are only going to be present in the ancestors of
    * implementing/using classes, so there's nothing to do *)
   let env = match class_nast.c_kind with
-    | Ast.Ctrait | Ast.Cinterface -> env
+    | Ast.Ctrait | Ast.Cinterface | Ast.Cenum -> env
     | Ast.Cnormal | Ast.Cabstract ->
       (match SMap.get req_name impls with
         | None ->
@@ -283,7 +284,7 @@ let get_class_requirements env class_nast impls =
       (* for a requirement-bearing construct, return the accumulated
        * list of direct and inherited requirements *)
       acc
-    | Ast.Cnormal | Ast.Cabstract ->
+    | Ast.Cnormal | Ast.Cabstract | Ast.Cenum ->
       (* for a non-requirement-bearing construct, requirements have
        * been checked, nothing to save *)
       env, SMap.empty, SSet.empty
@@ -379,7 +380,7 @@ and class_hint_decl class_env hint =
 
 and class_is_abstract c =
   match c.c_kind with
-    | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait -> true
+    | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
     | _ -> false
 
 and class_decl c =
@@ -406,7 +407,7 @@ and class_decl c =
   SMap.iter (check_static_method m) sm;
   let parent_cstr = inherited.Typing_inherit.ih_cstr in
   let env, cstr = constructor_decl env parent_cstr c in
-  let need_init = match cstr with
+  let need_init = match (fst cstr) with
     | None
     | Some {ce_type = (_, Tfun ({ft_abstract = true; _})); _} -> false
     | _ -> true in
@@ -437,6 +438,7 @@ and class_decl c =
     then DynamicYield.clean_dynamic_yield env m
     else env, m in
   let dy_check = match c.c_kind with
+    | Ast.Cenum -> false
     | Ast.Cabstract
     | Ast.Cnormal -> DynamicYield.contains_dynamic_yield extends
     | Ast.Cinterface
@@ -458,7 +460,16 @@ and class_decl c =
     else dimpl
   in
   let env, tparams = lfold Typing.type_param env c.c_tparams in
-  let consts = Typing_enum.enum_class_decl_rewrite env impl consts in
+  let env, enum = match c.c_enum with
+    | None -> env, None
+    | Some e ->
+      let env, base_hint = Typing_hint.hint env e.e_base in
+      let env, constraint_hint = opt Typing_hint.hint env e.e_constraint in
+      env, Some
+        { te_base       = base_hint;
+          te_constraint = constraint_hint } in
+  let consts = Typing_enum.enum_class_decl_rewrite
+    env c.c_name enum impl consts in
   let tc = {
     tc_final = c.c_final;
     tc_abstract = is_abstract;
@@ -481,6 +492,7 @@ and class_decl c =
     tc_req_ancestors = req_ancestors;
     tc_req_ancestors_extends = req_ancestors_extends;
     tc_user_attributes = c.c_user_attributes;
+    tc_enum_type = enum;
   } in
   if Ast.Cnormal = c.c_kind then
     SMap.iter (method_check_trait_overrides c) m
@@ -516,31 +528,43 @@ and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
   end
   else ()
 
-and constructor_decl env pcstr class_ =
+and constructor_decl env (pcstr, pconsist) class_ =
+  (* constructors in children of class_ must be consistent? *)
+  let cconsist = class_.c_final || SMap.mem "ConsistentConstruct" class_.c_user_attributes in
   match class_.c_constructor, pcstr with
-    | None, Some cstr ->
-        env, Some cstr
-    | Some method_, Some { ce_final = true; ce_type = (r, _); _ } ->
+    | None, _ -> env, (pcstr, cconsist || pconsist)
+    | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
       Errors.override_final ~parent:(Reason.to_pos r) ~child:(fst method_.m_name);
-      build_constructor env class_ method_
+      let env, (cstr, mconsist) = build_constructor env class_ method_ in
+      env, (cstr, cconsist || mconsist || pconsist)
     | Some method_, _ ->
-      build_constructor env class_ method_
-    | None, _ ->
-        env, None
+      let env, (cstr, mconsist) = build_constructor env class_ method_ in
+      env, (cstr, cconsist || mconsist || pconsist)
 
 and build_constructor env class_ method_ =
   let env, ty = method_decl class_ env method_ in
   let _, class_name = class_.c_name in
   let vis = visibility class_name method_.m_visibility in
+  let mconsist = method_.m_final || class_.c_kind == Ast.Cinterface in
+  (* due to the requirement of calling parent::__construct, a private
+   * constructor cannot be overridden *)
+  let mconsist = mconsist || method_.m_visibility == Private in
+  let mconsist = match ty with
+    | (_, Tfun ({ft_abstract = true; _})) -> true
+    | _ -> mconsist in
+  (* the alternative to overriding <<ConsistentConstruct>> is marking
+   * the corresponding 'new static()' UNSAFE, potentially impacting the safety
+   * of a large type hierarchy. *)
+  let consist_override = SMap.mem "UNSAFE_Construct" method_.m_user_attributes in
   let cstr = {
     ce_final = method_.m_final;
-    ce_override = false ;
+    ce_override = consist_override;
     ce_synthesized = false;
     ce_visibility = vis;
     ce_type = ty;
     ce_origin = class_name;
   } in
-  env, Some cstr
+  env, (Some cstr, mconsist)
 
 and class_const_decl c (env, acc) (h, id, e) =
   let env, ty =
@@ -555,16 +579,16 @@ and class_const_decl c (env, acc) (h, id, e) =
           | Float _
           | Array _ ->
             let _, ty = Typing.expr env e in
-              (* We don't want to keep the environment of the inference
-               * CAREFULL, right now, array is just Tarray, with no
-               * type variable, if we were to add parameters array<T>,
-               * we would have to: make a full expansion, that is,
-               * replace all the type variables in ty by their "true" type,
-               * because this feature doesn't exist, this isn't necessary
-               * right now. I am adding this tag "array", because I know
-               * I would search for it if I was changing the way arrays are
-               * typed.
-               *)
+            (* We don't want to keep the environment of the inference
+             * CAREFULL, right now, array is just Tarray, with no
+             * type variable, if we were to add parameters array<T>,
+             * we would have to: make a full expansion, that is,
+             * replace all the type variables in ty by their "true" type,
+             * because this feature doesn't exist, this isn't necessary
+             * right now. I am adding this tag "array", because I know
+             * I would search for it if I was changing the way arrays are
+             * typed.
+             *)
             env, ty
           | _ ->
             env, (Reason.Rwitness (fst id), Tany)
@@ -635,8 +659,9 @@ and visibility cid = function
 and method_decl c env m =
   let env, arity_min, params = Typing.make_params env true 0 m.m_params in
   let env, ret =
-    match m.m_ret, m.m_type with
-      | None, FGenerator (* XXX should we return Generator<Any,Any,Any> here? *)
+    match m.m_ret, m.m_fun_kind with
+      | None, FGenerator
+      | None, FAsyncGenerator
       | None, FSync -> env, (Reason.Rwitness (fst m.m_name), Tany)
       | None, FAsync ->
         let pos = fst m.m_name in

@@ -183,6 +183,9 @@ public:
                    bool ref);
   void onEmptyCollection(Token &out);
   void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
+  void onEmptyMapArray(Token &out);
+  void onMapArrayPair(Token &out, Token *pairs, Token *name, Token &value);
+  void onMapArray(Token &out, Token &pairs, int op);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void onClassClass(Token &out, Token &cls, Token &name, bool text);
@@ -197,9 +200,12 @@ public:
                bool ref, Token *defValue, Token *attr, Token *modifier);
   void onClassStart(int type, Token &name);
   void onClass(Token &out, int type, Token &name, Token &base,
-               Token &baseInterface, Token &stmt, Token *attr);
+               Token &baseInterface, Token &stmt, Token *attr,
+               Token *enumTy);
   void onInterface(Token &out, Token &name, Token &base, Token &stmt,
                    Token *attr);
+  void onEnum(Token &out, Token &name, Token &baseTy,
+              Token &stmt, Token *attr);
   void onInterfaceName(Token &out, Token *names, Token &name);
   void onClassRequire(Token &out, Token &name, bool isClass);
   void onTraitUse(Token &out, Token &traits, Token &rules);

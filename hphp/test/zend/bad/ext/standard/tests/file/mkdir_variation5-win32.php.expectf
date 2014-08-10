@@ -1,0 +1,33 @@
+*** Testing mkdir() : variation ***
+-- creating mkdirVar5.tmp\aSubDir --
+Directory created
+-- creating .\mkdirVar5.tmp\aSubDir --
+Directory created
+-- creating mkdirVar5.tmp\..\mkdirVar5.tmp\aSubDir --
+Directory created
+-- creating mkdirVar5.tmp\..\BADDIR\aSubDir --
+
+Warning: %s
+-- creating BADDIR\aSubDir --
+
+Warning: %s
+-- creating %s\mkdirVar5.tmp\aSubDir --
+Directory created
+-- creating %s\.\mkdirVar5.tmp\aSubDir --
+Directory created
+-- creating %s\mkdirVar5.tmp\..\mkdirVar5.tmp\aSubDir --
+Directory created
+-- creating %s\BADDIR\aSubDir --
+
+Warning: %s
+-- creating mkdirVar5.tmp\aSubDir\ --
+Directory created
+-- creating %s\mkdirVar5.tmp\aSubDir\ --
+Directory created
+-- creating mkdirVar5.tmp\\aSubDir --
+Directory created
+-- creating %s\\mkdirVar5.tmp\\aSubDir --
+Directory created
+-- creating /%s/mkdirVar5.tmp/aSubDir --
+Directory created
+===DONE===

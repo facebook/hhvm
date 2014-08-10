@@ -98,7 +98,38 @@ module SMap = MyMap(String)
 module IMap = MyMap(Ident)
 module ISet = Set.Make(Ident)
 module SSet = Set.Make(String)
+module CSet = Set.Make(Char)
 module Map = struct end
+
+(* HashSet is just a HashTable where the keys are actually the values, and we
+ * ignore the actual values inside the HashTable. *)
+module type HashSetSig = sig
+  type 'a t
+
+  val create: int -> 'a t
+  val clear: 'a t -> unit
+  val copy: 'a t -> 'a t
+  val add: 'a t -> 'a -> unit
+  val mem: 'a t -> 'a -> bool
+  val remove: 'a t -> 'a -> unit
+  val iter: ('a -> unit) -> 'a t -> unit
+  val fold: ('a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+  val length: 'a t -> int
+end
+
+module HashSet = (struct
+  type 'a t = ('a, unit) Hashtbl.t
+
+  let create size = Hashtbl.create size
+  let clear set = Hashtbl.clear set
+  let copy set = Hashtbl.copy set
+  let add set x = Hashtbl.replace set x ()
+  let mem set x = Hashtbl.mem set x
+  let remove set x = Hashtbl.remove set x
+  let iter f set = Hashtbl.iter (fun k _ -> f k) set
+  let fold f set acc = Hashtbl.fold (fun k _ acc -> f k acc) set acc
+  let length set = Hashtbl.length set
+end : HashSetSig)
 
 let spf = Printf.sprintf
 

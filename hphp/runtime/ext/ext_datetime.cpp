@@ -38,6 +38,24 @@ static int check_id_allowed(const String& id, long bf) {
   return 0;
 }
 
+const StaticString
+  s_formatOffset("P"),
+  s_formatID("e"),
+  s_formatAbbr("T");
+
+static String zone_type_to_string(int zoneType, SmartResource<DateTime> dt) {
+  switch (zoneType) {
+    case TIMELIB_ZONETYPE_OFFSET:
+      return dt->toString(s_formatOffset);
+    case TIMELIB_ZONETYPE_ID:
+      return dt->toString(s_formatID);
+    case TIMELIB_ZONETYPE_ABBR:
+      return dt->toString(s_formatAbbr);
+  }
+
+  always_assert(!"Bad zone type");
+}
+
 struct DateGlobals {
   double default_latitude;
   double default_longitude;
@@ -292,30 +310,38 @@ Object c_DateTime::t_sub(const Object& interval) {
 }
 
 const StaticString
-  s_c("c"),
-  s__date_time("_date_time");
-
-Array c_DateTime::t___sleep() {
-  o_set(s__date_time, t_format(s_c));
-  return make_packed_array(s__date_time);
-}
-
-void c_DateTime::t___wakeup() {
-  t___construct(o_get(s__date_time));
-  unsetProp(getVMClass(), s__date_time.get());
-}
-
-const StaticString
   s_date("date"),
   s_timezone_type("timezone_type"),
   s_timezone("timezone"),
-  s_ISOformat("Y-m-d H:i:s");
+  s_ISOformat("Y-m-d H:i:s.u");
+
+Array c_DateTime::t___sleep() {
+  int zoneType = m_dt->zoneType();
+
+  o_set(s_date, t_format(s_ISOformat));
+  o_set(s_timezone_type, zoneType);
+  o_set(s_timezone, zone_type_to_string(zoneType, m_dt));
+  return make_packed_array(s_date, s_timezone_type, s_timezone);
+}
+
+void c_DateTime::t___wakeup() {
+  c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
+  Object timezone(ctz);
+  ctz->t___construct(o_get(s_timezone).toString());
+
+  t___construct(o_get(s_date).toString(), timezone);
+
+  // cleanup
+  unsetProp(getVMClass(), s_date.get());
+  unsetProp(getVMClass(), s_timezone_type.get());
+  unsetProp(getVMClass(), s_timezone.get());
+}
 
 Array c_DateTime::t___debuginfo() {
   return make_map_array(
     s_date, t_format(s_ISOformat),
     s_timezone_type, m_dt->zoneType(),
-    s_timezone, m_dt->timezone()->name()
+    s_timezone, zone_type_to_string(m_dt->zoneType(), m_dt)
   );
 }
 

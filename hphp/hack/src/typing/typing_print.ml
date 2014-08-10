@@ -250,6 +250,7 @@ module PrintClass = struct
     | Ast.Cnormal -> "Cnormal"
     | Ast.Cinterface -> "Cinterface"
     | Ast.Ctrait -> "Ctrait"
+    | Ast.Cenum -> "Cenum"
 
   let ty_opt = function
     | None -> ""
@@ -306,9 +307,12 @@ module PrintClass = struct
       "("^field^": expr) "^acc
     end m ""
 
-  let class_elt_option = function
-    | None -> ""
-    | Some ce -> class_elt ce
+  let constructor (ce_opt, consist) =
+    let consist_str = if consist then " (consistent in hierarchy)" else "" in
+    let ce_str = match ce_opt with
+      | None -> ""
+      | Some ce -> class_elt ce
+    in ce_str^consist_str
 
   let class_type c =
     let tc_need_init = bool c.tc_need_init in
@@ -323,7 +327,7 @@ module PrintClass = struct
     let tc_scvars = class_elt_smap c.tc_scvars in
     let tc_methods = class_elt_smap_with_breaks c.tc_methods in
     let tc_smethods = class_elt_smap_with_breaks c.tc_smethods in
-    let tc_construct = class_elt_option c.tc_construct in
+    let tc_construct = constructor c.tc_construct in
     let tc_ancestors = ancestors_smap c.tc_ancestors in
     let tc_ancestors_checked_when_concrete =
       ancestors_smap c.tc_ancestors_checked_when_concrete in

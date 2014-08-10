@@ -20,6 +20,7 @@
 #include "hphp/compiler/statement/interface_statement.h"
 #include <vector>
 #include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/type_annotation.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,8 @@ public:
                  const std::string &parent, ExpressionListPtr base,
                  const std::string &docComment,
                  StatementListPtr stmt,
-                 ExpressionListPtr attrList);
+                 ExpressionListPtr attrList,
+                 TypeAnnotationPtr enumBaseTy);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasDecl() const { return true; }
@@ -54,12 +56,15 @@ public:
   void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
   StatementPtr addClone(StatementPtr origStmt);
 
+  TypeAnnotationPtr getEnumBaseTy() { return m_enumBaseTy; }
+
 private:
   int m_type;
   int m_promotedParameterCount;
   std::string m_parent;
   std::string m_originalParent;
   bool m_ignored;
+  TypeAnnotationPtr m_enumBaseTy;
 
   static void GetCtorAndInitInfo(
       StatementPtr s, bool &needsCppCtor, bool &needsInit);

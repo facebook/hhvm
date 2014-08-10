@@ -256,7 +256,8 @@ function get_subclasses_of(string $parent): Vector {
 }
 
 function get_runtime_build(bool $use_php = false): string {
-  $build = "";
+  $executable = '';
+  $command = '';
 
   // FIX: Should we try to install a vanilla php binary here instead of
   // relying on user to specify a path? Should we try to determine if php
@@ -266,14 +267,15 @@ function get_runtime_build(bool $use_php = false): string {
       error_and_exit("PHP build does not exists. Are you sure your path is ".
                      "right?");
     }
-    $build = Options::$php_path;
+    $executable = Options::$php_path;
+    $command = $executable;
   } else {
     $fbcode_root_dir = __DIR__.'/../../..';
     $oss_root_dir = __DIR__.'/../..';
     // See if we are using an internal development build
     if ((file_exists($fbcode_root_dir."/_bin"))) {
-      $build .= $fbcode_root_dir;
-      $build .= $use_php ? "/_bin/hphp/hhvm/php" : "/_bin/hphp/hhvm/hhvm";
+      $executable = $fbcode_root_dir;
+      $executable .= $use_php ? "/_bin/hphp/hhvm/php" : "/_bin/hphp/hhvm/hhvm";
     // Maybe we are in OSS land trying this script
     } else if (file_exists($oss_root_dir."/hhvm")) {
       // Pear won't run correctly unless a 'php' executable exists.
@@ -282,25 +284,48 @@ function get_runtime_build(bool $use_php = false): string {
       // a php symlink to hhvm
       symlink($oss_root_dir."/hhvm/hhvm", $oss_root_dir."/hhvm/php");
 
-      $build .= $oss_root_dir."/hhvm";
-      $build .= $use_php ? "/php" : "/hhvm";
+      $executable = $oss_root_dir."/hhvm";
+      $executable .= $use_php ? "/php" : "/hhvm";
     } else {
       error_and_exit("HHVM build doesn't exist. Did you build yet?");
     }
+    $command = $executable;
     if (!$use_php) {
       $repo_loc = tempnam('/tmp', 'framework-test');
       $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
-      $build .= $repo_args.
+      $command .= $repo_args.
         " --config ".__DIR__."/php.ini";
     }
   }
-  return nullthrows($build);
+  invariant(
+    file_exists($executable),
+    $executable.' does not exist'
+  );
+  invariant(
+    is_executable($executable),
+    $executable.' is not executable'
+  );
+  return nullthrows($command);
 }
 
 function error_and_exit(string $message): void {
-  $target = 'php://stderr';
-  file_put_contents($target, basename(__FILE__).": ".
-                    $message.PHP_EOL, FILE_APPEND);
+  if (Options::$output_format === OutputFormat::FBMAKE) {
+    fprintf(
+      STDERR,
+      "%s\n",
+      json_encode(
+        [
+          'op' => 'test_done',
+          'test' => 'framework test setup',
+          'status' => 'skipped',
+          'details' => 'ERROR: '.$message,
+        ],
+        /* assoc array = */ true,
+      )
+    );
+    exit(0);
+  }
+  fprintf(STDERR, "ERROR: %s\n", $message);
   exit(1);
 }
 

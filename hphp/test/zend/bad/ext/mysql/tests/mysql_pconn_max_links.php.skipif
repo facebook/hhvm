@@ -1,0 +1,56 @@
+<?php
+	require_once('skipif.inc');
+	require_once('skipifconnectfailure.inc');
+	require_once('table.inc');
+
+	if ($socket)
+		$host = sprintf("%s:%s", $host, $socket);
+	else if ($port)
+		$host = sprintf("%s:%s", $host, $port);
+
+	// we need a second DB user to test for a possible flaw in the ext/mysql[i] code
+	if (!$link = mysql_connect($host, $user, $passwd, true))
+		die(sprintf("skip Cannot connect [%d] %s", mysql_errno(), mysql_error()));
+
+	if (!mysql_select_db($db, $link))
+		die(sprintf("skip [%d] %s", mysql_errno($link), mysql_error($link)));
+
+	if (!$res = mysql_query('SHOW VARIABLES LIKE "old_passwords"', $link)) {
+		die(sprintf("skip [%d] %s", mysql_errno($link), mysql_error($link)));
+	}
+
+	if (mysql_num_rows($res) != 1) {
+		die(sprintf("skip Can't check if old_passwords = ON"));
+	}
+
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	if ($row['Value'] == "ON")
+		die(sprintf("skip Test will fail because old_passwords = ON. Hint: old passwords are insecure!"));
+
+	if (!$res = mysql_query("SELECT CURRENT_USER() AS _user", $link))
+		die(sprintf("skip [%d] %s", mysql_errno($link), mysql_error($link)));
+
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	$host = substr($row['_user'], strrpos($row['_user'], "@") + 1, strlen($row['_user']));
+
+	mysql_query('DROP USER pcontest', $link);
+	mysql_query(sprintf('DROP USER pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
+	if (!mysql_query(sprintf('CREATE USER pcontest@"%s" IDENTIFIED BY "pcontest"', mysql_real_escape_string($host, $link)), $link)) {
+		printf("skip Cannot create second DB user [%d] %s", mysql_errno($link), mysql_error($link));
+		mysql_close($link);
+		die();
+	}
+
+	// we might be able to specify the host using CURRENT_USER(), but...
+	if (!mysql_query(sprintf('GRANT SELECT ON TABLE %s.test TO pcontest@"%s"', $db, mysql_real_escape_string($host, $link)), $link)) {
+		printf("skip Cannot GRANT SELECT to second DB user [%d] %s", mysql_errno($link), mysql_error($link));
+		mysql_query(sprintf('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
+		mysql_query(sprintf('DROP USER pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
+		mysql_close($link);
+		die();
+	}
+
+	mysql_close($link);
+?>

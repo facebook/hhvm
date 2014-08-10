@@ -29,15 +29,19 @@ namespace HPHP {
 
 struct Unit;
 
-// Variable-size immediates are implemented as follows. To determine which size
-// the immediate is, examine the first byte where the immediate is expected, and
-// examine its low-order bit. If it is zero, it's a 1-byte immediate; otherwise,
-// it's 4 bytes. The immediate has to be logical-shifted to the right by one to
-// get rid of the flag bit.
-
-// The types in this macro for MA, BLA, and SLA are meaningless since
-// they are never read out of ArgUnion (they use ImmVector and
-// ImmVectorO).
+/*
+ * Variable-size immediates are implemented as follows: To determine which size
+ * the immediate is, examine the first byte where the immediate is expected,
+ * and examine its low-order bit.  If it is zero, it's a 1-byte immediate;
+ * otherwise, it's 4 bytes.  The immediate has to be logical-shifted to the
+ * right by one to get rid of the flag bit.
+ *
+ * The types in this macro for MA, BLA, and SLA are meaningless since they are
+ * never read out of ArgUnion (they use ImmVector and ImmVectorO).
+ *
+ * ArgTypes and their various decoding helpers should be kept in sync with the
+ * `hhx' bytecode inspection GDB command.
+ */
 #define ARGTYPES                                                          \
   ARGTYPE(NA,     void*)         /* unused */                             \
   ARGTYPEVEC(MA,  int32_t)       /* Member vector immediate */            \

@@ -1,0 +1,1 @@
+Fatal error: apc_delete(): apc_delete object argument must be instance of APCIterator in %s/apc_delete.php on line %d

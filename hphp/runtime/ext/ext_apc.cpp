@@ -43,6 +43,9 @@ using HPHP::ScopedMem;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_delete("delete");
+
 extern void const_load();
 
 typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
@@ -306,6 +309,17 @@ Variant f_apc_delete(const Variant& key, int64_t cache_id /* = 0 */) {
       }
     }
     return init.create();
+  } else if(key.is(KindOfObject)) {
+    if (!key.getObjectData()->getVMClass()->
+         classof(SystemLib::s_APCIteratorClass)) {
+      raise_error(
+        "apc_delete(): apc_delete object argument must be instance"
+        " of APCIterator"
+      );
+      return false;
+    }
+    Variant ret = key.toObject()->o_invoke_few_args(s_delete, 0);
+    return ret;
   }
 
   return s_apc_store[cache_id].erase(key.toString());

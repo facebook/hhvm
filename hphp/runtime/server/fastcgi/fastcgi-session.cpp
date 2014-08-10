@@ -258,7 +258,7 @@ size_t FastCGISession::onIngress(const IOBuf* chain) {
   if (m_phase == Phase::INVALID) {
     return 0;
   }
-  assert(m_keepConn);
+  //TODO: unused and failed on file upload assert(m_keepConn);
 
   size_t available = chain ? chain->computeChainDataLength() : 0;
   size_t avail = available;

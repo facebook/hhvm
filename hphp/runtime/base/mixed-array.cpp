@@ -1089,12 +1089,9 @@ void MixedArray::warnUsage(const Reason r, const ArrayKind kind) {
   case Reason::kPop:
     raise_warning("Using array_pop on a %s, converting to array", arrayName);
     break;
-  case Reason::kTakeByRef:
-    raise_warning("Taking an element by reference from a %s, "
-                  "converting to array", arrayName);
-    break;
   case Reason::kSetRef:
-    raise_warning("Adding a reference to a %s, converting to array", arrayName);
+    raise_warning("Adding a reference to or taking an element by reference "
+                  "from a %s, converting to array", arrayName);
     break;
   case Reason::kAppendRef:
     raise_warning("Appending a reference to a %s, converting to array",
@@ -1103,17 +1100,13 @@ void MixedArray::warnUsage(const Reason r, const ArrayKind kind) {
   case Reason::kAppend:
     raise_warning("Appending to a %s, converting to array", arrayName);
     break;
-  case Reason::kNvGetInt:
-    raise_warning("Reading int key from a msarray, converting to array");
-    break;
-  case Reason::kNvGetStr:
-    raise_warning("Reading string key from a miarray, converting to array");
-    break;
+  case Reason::kNvGetInt: // FALLTHROUGH
   case Reason::kExistsInt:
-    raise_warning("Reading int key from a msarray, converting to array");
+    raise_warning("Trying to read an int key from a msarray");
     break;
+  case Reason::kNvGetStr: // FALLTHROUGH
   case Reason::kExistsStr:
-    raise_warning("Reading string key from a miarray, converting to array");
+    raise_warning("Trying to read a string key from a miarray");
     break;
   case Reason::kSetInt:
     raise_warning("Adding an int key to a msarray, converting to array");
@@ -1122,10 +1115,10 @@ void MixedArray::warnUsage(const Reason r, const ArrayKind kind) {
     raise_warning("Adding a string key to a miarray, converting to array");
     break;
   case Reason::kRemoveInt:
-    raise_warning("Removing an int key from a msarray, converting to array");
+    raise_warning("Trying to remove an int key from a msarray");
     break;
   case Reason::kRemoveStr:
-    raise_warning("Removing a string key from a miarray, converting to array");
+    raise_warning("Trying to remove a string key from a miarray");
     break;
   case Reason::kDequeue:
     raise_warning("Using array_shift on a %s, converting to array", arrayName);

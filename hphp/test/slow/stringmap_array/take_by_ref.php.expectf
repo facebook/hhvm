@@ -1,6 +1,6 @@
-Warning: Adding a reference to or taking an element by reference from a miarray, converting to array in %s/IntMap_elementByRef.php on line 7
+Warning: Adding a reference to or taking an element by reference from a msarray, converting to array in %s/take_by_ref.php on line 7
 array(2) {
-  [0]=>
+  ["a"]=>
   &array(5) {
     [0]=>
     int(0)
@@ -13,7 +13,7 @@ array(2) {
     [4]=>
     int(4)
   }
-  [1]=>
+  ["b"]=>
   &array(5) {
     [0]=>
     int(5)

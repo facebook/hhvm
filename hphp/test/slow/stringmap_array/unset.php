@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 function cow_unset($arr) {
   unset($arr[10]);
 }
 
 function main() {
-  $a = hphp_msarray();
+  $a = msarray();
   $a['foo'] = 1;
   $a['bar'] = 2;
   unset($a['foo']);
@@ -13,7 +13,7 @@ function main() {
 
   unset($a[10]); // warning
 
-  $a = hphp_msarray();
+  $a = msarray();
   cow_unset($a);
   $a[] = "warning";
 }

@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_miarray();
+  $a = miarray();
   $a[1] = 1;
   $a[200] = 0;
   usort($a,

@@ -409,7 +409,6 @@ public:
     kForeachByRef,
     kPrepend,
     kPop,
-    kTakeByRef,
     kSetRef,
     kAppendRef,
     kAppend,

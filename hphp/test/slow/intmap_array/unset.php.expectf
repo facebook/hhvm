@@ -1,10 +1,10 @@
-Warning: Removing a string key from a miarray, converting to array in %s/unset.php on line 7
+Warning: Trying to remove a string key from a miarray in %s/unset.php on line 7
 array(1) {
   [1]=>
   int(2)
 }
 
-Warning: Removing a string key from a miarray, converting to array in %s/unset.php on line 9
+Warning: Trying to remove a string key from a miarray in %s/unset.php on line 9
 array(1) {
   [1]=>
   int(2)

@@ -16,7 +16,7 @@ Warning: Appending to a miarray, converting to array in %s/IntMap_cow.php on lin
 
 Warning: Appending to a miarray, converting to array in %s/IntMap_cow.php on line 57
 
-Warning: Adding a reference to a miarray, converting to array in %s/IntMap_cow.php on line 25
+Warning: Adding a reference to or taking an element by reference from a miarray, converting to array in %s/IntMap_cow.php on line 25
 
 Warning: Appending to a miarray, converting to array in %s/IntMap_cow.php on line 62
 

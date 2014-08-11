@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_msarray();
+  $a = msarray();
   idx($a, "no warning");
   idx($a, 10); // warning
 }

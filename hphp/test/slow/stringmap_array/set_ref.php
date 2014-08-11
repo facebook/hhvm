@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cow_setRef($arr) {
   $foo = array();
@@ -7,10 +7,10 @@ function cow_setRef($arr) {
 
 function main() {
   $foo = array();
-  $a = hphp_msarray();
+  $a = msarray();
   $a['foo'] = &$foo; // warning
 
-  $a = hphp_msarray();
+  $a = msarray();
   cow_setRef($a);
   $a[] = "warning"; // warning
 }

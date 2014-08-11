@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_miarray();
+  $a = miarray();
   $a[0] = "efgh";
   $a[1] = "abcd";
   var_dump($a);

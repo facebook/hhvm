@@ -1,18 +1,36 @@
-<?php
+<?hh
 
 function cow_usort($arr) {
-  usort($arr, ($x, $y) ==> ($x === $y) ? 0 : ($x < $y ? -1 : 1));
+  usort($arr,
+        function($x, $y) {
+          if ($x === $y) {
+            return 0;
+          } else if ($x < $y) {
+            return -1;
+          } else {
+            return 1;
+          }
+        });
 }
 
 function main() {
-  $a = hphp_msarray();
+  $a = msarray();
   $a['foo'] = 1;
   $a['bar'] = 2;
 
-  usort($a, ($x, $y) ==> ($x === $y) ? 0 : ($x < $y ? -1 : 1));
+  usort($a,
+        function ($x, $y) {
+          if ($x === $y) {
+            return 0;
+          } else if ($x < $y) {
+            return -1;
+          } else {
+            return 1;
+          }
+        });
   $a[] = 'no warning';
 
-  $a = hphp_msarray();
+  $a = msarray();
   $a['foo'] = 1;
   $a['bar'] = 2;
   cow_usort($a);

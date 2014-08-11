@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cow_unset($arr) {
   foreach ($arr as $key => $val) {
@@ -12,36 +12,36 @@ function cow_unset($arr) {
 }
 
 function main() {
-  $a = hphp_miarray();
+  $a = miarray();
   $a[1] = "moo";
   unset($a["1"]);
 
-  $a = hphp_miarray();
+  $a = miarray();
   $a[1] = "moo";
   unset($a[1]);
   var_dump($a);
 
-  $a = hphp_miarray();
+  $a = miarray();
   $a[1] = "moo";
   unset($a["foo"]);
 
-  $a = hphp_miarray();
+  $a = miarray();
   $key = "1";
   $a[1] = "moo";
   unset($a[$key]);
 
-  $a = hphp_miarray();
+  $a = miarray();
   $key = 1;
   $a[1] = "moo";
   unset($a[$key]);
   var_dump($a);
 
-  $a = hphp_miarray();
+  $a = miarray();
   $key = "foo";
   $a[1] = "moo";
   unset($a[$key]);
 
-  $a = hphp_miarray();
+  $a = miarray();
   $a[1] = true;
   $a[2] = false;
   $b = cow_unset($a);

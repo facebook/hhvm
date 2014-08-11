@@ -2,13 +2,13 @@ Warning: An integer-like string key used with a miarray in %s/IntMap_unset.php o
 array(0) {
 }
 
-Warning: Removing a string key from a miarray, converting to array in %s/IntMap_unset.php on line 26
+Warning: Trying to remove a string key from a miarray in %s/IntMap_unset.php on line 26
 
 Warning: An integer-like string key used with a miarray in %s/IntMap_unset.php on line 31
 array(0) {
 }
 
-Warning: Removing a string key from a miarray, converting to array in %s/IntMap_unset.php on line 42
+Warning: Trying to remove a string key from a miarray in %s/IntMap_unset.php on line 42
 
 Warning: An integer-like string key used with a miarray in %s/IntMap_unset.php on line 8
 

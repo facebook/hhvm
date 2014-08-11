@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cow_str($arr) {
   $arr["string"] = "cow";
@@ -37,37 +37,37 @@ function cow_foreachByRef($arr) {
 }
 
 function main() {
-  $a = hphp_miarray();
+  $a = miarray();
   $b = cow_str($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_miarray();
+  $a = miarray();
   $b = cow_numericStr($a);
   $a[] = "warning";
   $b[] = "warning";
 
-  $a = hphp_miarray();
+  $a = miarray();
   $b = cow_append($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_miarray();
+  $a = miarray();
   $b = cow_appendRef($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_miarray();
+  $a = miarray();
   $b = cow_refInt($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_miarray();
+  $a = miarray();
   $b = cow_refStr($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_miarray();
+  $a = miarray();
   $a[100000] = "non-empty";
   $b = cow_foreachByRef($a);
   $a[] = "warning";

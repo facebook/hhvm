@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_msarray();
+  $a = msarray();
   $a['field1'] = 10;
   $a['field2'] = 'url';
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function numeric_cow($copy) {
   $copy['123'] = 10;
@@ -6,18 +6,18 @@ function numeric_cow($copy) {
 }
 
 function main() {
-  $a = hphp_miarray();
+  $a = miarray();
   $a["123"] = 10;
   $a["456"] = 20;
   var_dump($a);
 
-  $a = hphp_miarray();
+  $a = miarray();
   $foo = "123";
   $a[$foo] = 10;
   $a[$foo] = 20;
   var_dump($a);
 
-  $a = hphp_miarray();
+  $a = miarray();
   $b = numeric_cow($a);
   var_dump($b);
   $a[] = "warning";

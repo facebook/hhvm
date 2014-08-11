@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cowPlusEq($arr) {
   $arr += array(0,1,2,3);
@@ -6,27 +6,27 @@ function cowPlusEq($arr) {
 }
 
 function main() {
-  $a = hphp_miarray();
+  $a = miarray();
   $a[1] = "abcd";
   $a[0] = "efgh";
   $a += array("foo" => "bar");
 
-  $b = hphp_miarray();
-  $c = hphp_miarray();
+  $b = miarray();
+  $c = miarray();
   $b[0] = 0;
   $c[1] = 1;
   $b += $c;
 
-  $d = hphp_miarray();
+  $d = miarray();
   $e = array("foo" => "bar");
   $d[1] = "foo";
   $e += $d;
 
-  $f = hphp_miarray();
+  $f = miarray();
   $f[100] = "sup";
   $f += array(0 => 1);
 
-  $g = hphp_miarray();
+  $g = miarray();
   cowPlusEq($g);
   $g += array(0,1,2,3);
   var_dump($g);

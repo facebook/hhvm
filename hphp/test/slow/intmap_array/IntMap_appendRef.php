@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_miarray();
+  $a = miarray();
   $foo = array(1,2,3,4);
   $a[] = &$foo; // Should warn
   $foo[] = "sup";

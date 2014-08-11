@@ -1,1 +1,5 @@
-Fatal error: syntax error, unexpected ',' in %s/usort.php on line 4
+Warning: Using usort on a msarray, converting to array in %s/usort.php on line 30
+
+Warning: Using usort on a msarray, converting to array in %s/usort.php on line 13
+
+Warning: Appending to a msarray, converting to array in %s/usort.php on line 37

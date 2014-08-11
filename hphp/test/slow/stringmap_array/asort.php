@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_msarray();
+  $a = msarray();
   $a['foo'] = 2;
   $a['bar'] = 1;
 

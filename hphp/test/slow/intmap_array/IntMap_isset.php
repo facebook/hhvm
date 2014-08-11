@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cow_isset($arr) {
   $a = isset($arr['123']);
@@ -11,7 +11,7 @@ function cow_isset($arr) {
 }
 
 function main() {
-  $a = hphp_miarray();
+  $a = miarray();
   $b = isset($a["string"]);
   if (!$b) {
     $b = isset($a["string"]);
@@ -19,7 +19,7 @@ function main() {
     var_dump($b);
   }
 
-  $a = hphp_miarray();
+  $a = miarray();
   $key = "stringKey";
   $b = isset($a[$key]);
   if (!$b) {
@@ -28,7 +28,7 @@ function main() {
     var_dump($b);
   }
 
-  $a = hphp_miarray();
+  $a = miarray();
   $a[123] = 100;
   var_dump(cow_isset($a));
   $a[] = "warning";

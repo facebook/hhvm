@@ -202,6 +202,10 @@ flaky_tests = (
 
     # unsure why
     '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation4.php',
+
+    # don't use the internet in tests...
+    '/ext/standard/tests/network/gethostbyname_error004.php',
+    '/ext/standard/tests/network/getmxrr.php'
 )
 
 # Tests that work but not in repo mode
@@ -1188,6 +1192,9 @@ def walk(filename, dest_subdir):
         test = test.replace('realpath_basic', root_dest_filenname)
         exp = exp.replace('realpath_basic', root_dest_filenname)
         file(full_dest_filename + '.expectf', 'w').write(exp)
+    if '/ext/standard/tests/network/bug20134.php' in full_dest_filename:
+        test = test.replace("<?php", "<?php\n$port = rand(1025, 65535);")
+        test = test.replace("65534", "$port")
     if '/ext/mysqli/tests/' in full_dest_filename:
 
         (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))

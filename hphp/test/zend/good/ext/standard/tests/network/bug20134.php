@@ -1,6 +1,7 @@
 <?php
+$port = rand(1025, 65535);
 # vim600:syn=php:
-$fp = fsockopen("udp://localhost", 65534, $errno, $errstr);
+$fp = fsockopen("udp://localhost", $port, $errno, $errstr);
 if (!$fp) {
 	/* UDP will never cause a connection error, as it is
 	 * a connection-LESS protocol */

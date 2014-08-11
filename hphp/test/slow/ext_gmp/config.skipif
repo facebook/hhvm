@@ -1,6 +1,5 @@
 <?php
-
 if (!extension_loaded('gmp'))
 {
-	print 'skip';
+  print 'skip';
 }

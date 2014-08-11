@@ -1,7 +1,7 @@
 <?php
 function fact($x) {
   if($x <= 1) {
-        return 1;
+    return 1;
   }
 
   return gmp_mul($x, fact($x-1));

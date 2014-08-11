@@ -1,0 +1,2 @@
+Warning: Using shuffle on a miarray, converting to array in %s/shuffle.php on line 11
+bool(true)

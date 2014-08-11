@@ -1135,6 +1135,9 @@ void MixedArray::warnUsage(const Reason r, const ArrayKind kind) {
   case Reason::kArraySplice:
     raise_warning("Using array_splice on a %s, converting to array", arrayName);
     break;
+  case Reason::kShuffle:
+    raise_warning("Using shuffle on a %s, converting to array", arrayName);
+    break;
   }
 }
 

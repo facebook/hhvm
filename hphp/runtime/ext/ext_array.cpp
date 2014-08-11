@@ -1082,6 +1082,13 @@ bool f_shuffle(VRefParam array) {
     throw_expected_array_exception();
     return false;
   }
+  if (array.toArray()->isIntMapArray()) {
+    // ArrayUtil::Shuffle will overwrite array, so just raise warning
+    MixedArray::warnUsage(MixedArray::Reason::kShuffle, ArrayData::kIntMapKind);
+  } else if (array.toArray()->isStrMapArray()) {
+    MixedArray::warnUsage(MixedArray::Reason::kShuffle, ArrayData::kStrMapKind);
+  }
+
   array = ArrayUtil::Shuffle(array);
   return true;
 }

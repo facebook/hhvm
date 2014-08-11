@@ -13,16 +13,16 @@
 
 #include "hphp/runtime/vm/jit/reserved-stack.h"
 
-#ifndef __APPLE__
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
 #define CFI(x)         .cfi_##x
 #define CFI2(x, y)     .cfi_##x y
 #define CFI3C(x, y, z) .cfi_##x y##, z
 #define ETCH_ALIGNMENT .align 16
 #define ETCH_SECTION   .section .text.enterTCHelper
-#define ETCH_SIZE      .size enterTCHelper, .-enterTCHelper
+#define ETCH_SIZE      /* Not used with PE/COFF on windows */
 #define ETCH_NAME(x)   x
 #define ETCH_LABEL(x)  .L##x
-#else
+#elif defined(__APPLE__)
 #define CFI(x)         /* not used on OSX */
 #define CFI2(x, y)     /* not used on OSX */
 #define CFI3C(x, y, z) /* not used on OSX */
@@ -31,6 +31,15 @@
 #define ETCH_SIZE      /* not used on OSX */
 #define ETCH_NAME(x)   _##x
 #define ETCH_LABEL(x)  .L##_##x
+#else
+#define CFI(x)         .cfi_##x
+#define CFI2(x, y)     .cfi_##x y
+#define CFI3C(x, y, z) .cfi_##x y##, z
+#define ETCH_ALIGNMENT .align 16
+#define ETCH_SECTION   .section .text.enterTCHelper
+#define ETCH_SIZE      .size enterTCHelper, .-enterTCHelper
+#define ETCH_NAME(x)   x
+#define ETCH_LABEL(x)  .L##x
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

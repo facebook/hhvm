@@ -19,6 +19,18 @@
 
 #include <pthread.h>
 #include <time.h>
+
+// This fixes a bug in tbb headers
+// make sure these aren't defined on cygwin
+#ifdef __CYGWIN__
+# ifdef _WIN32
+#  undef _WIN32
+# endif
+# ifdef _WIN64
+#  undef _WIN64
+# endif
+#endif
+
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/portability.h"

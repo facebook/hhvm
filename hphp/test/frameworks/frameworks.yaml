@@ -152,6 +152,12 @@
     test_root: guzzle4
     test_find_mode: token
     sequential: true
+  guzzle-streams:
+    url: https://github.com/guzzle/streams.git
+    branch: 1.4.0
+    commit: 3b761a328e5ed6ed519e960aded95d7acbe77894
+    install_root: guzzle-streams
+    test_root: guzzle-streams
   hhvmquicktests:
     do_not_install: true
     test_root: ../hhvm/quick

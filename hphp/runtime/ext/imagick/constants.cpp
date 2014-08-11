@@ -263,6 +263,7 @@ static const StaticString
   s_IMGTYPE_COLORSEPARATIONMATTE("IMGTYPE_COLORSEPARATIONMATTE"),
   s_IMGTYPE_OPTIMIZE("IMGTYPE_OPTIMIZE"),
   s_IMGTYPE_PALETTEBILEVELMATTE("IMGTYPE_PALETTEBILEVELMATTE"),
+  s_IMGTYPE_PALETTE("IMGTYPE_PALETTE"),
 
   // RESOLUTION constants
   s_RESOLUTION_UNDEFINED("RESOLUTION_UNDEFINED"),
@@ -836,6 +837,7 @@ void loadImagickConstants() {
   registerImagickConstants(s_IMGTYPE_OPTIMIZE, OptimizeType);
   registerImagickConstants(s_IMGTYPE_PALETTEBILEVELMATTE,
                            PaletteBilevelMatteType);
+  registerImagickConstants(s_IMGTYPE_PALETTE, PaletteType);
 
   // RESOLUTION constants
   registerImagickConstants(s_RESOLUTION_UNDEFINED, UndefinedResolution);

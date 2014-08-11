@@ -1,0 +1,25 @@
+In constructor of class A
+In constructor of class A
+object(A)#%d (0) {
+}
+object(A)#%d (0) {
+}
+
+Warning: %s
+
+Warning: %s
+
+Notice: %s
+
+Notice: %s
+In constructor of class B with args , 
+In constructor of class B with args x, 123
+object(B)#%d (0) {
+}
+object(B)#%d (0) {
+}
+Access to non-public constructor of class C
+Access to non-public constructor of class D
+object(E)#%d (0) {
+}
+Class E does not have a constructor, so you cannot pass any constructor arguments

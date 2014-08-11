@@ -1,0 +1,37 @@
+Is Traversable iterable? bool(false)
+Is Iterator iterable? bool(false)
+Is IteratorAggregate iterable? bool(false)
+Is ExtendsIterator iterable? bool(false)
+Is ExtendsIteratorAggregate iterable? bool(false)
+Is IteratorImpl iterable? bool(true)
+Is IterarorAggregateImpl iterable? bool(true)
+Is ExtendsIteratorImpl iterable? bool(true)
+Is ExtendsIteratorAggregateImpl iterable? bool(true)
+Is A iterable? bool(false)
+
+Test invalid params:
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Test static invocation:
+
+Fatal error: %s

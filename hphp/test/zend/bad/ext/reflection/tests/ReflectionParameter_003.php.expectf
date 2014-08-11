@@ -1,0 +1,33 @@
+hello from test
+third is jack
+
+Notice: %s
+parameter names from staticMethod method:
+
+object(ReflectionParameter)#%d (1) {
+  ["name"]=>
+  string(8) "paramOne"
+}
+this parameter is not optional
+this parameter has no default value
+
+object(ReflectionParameter)#%d (1) {
+  ["name"]=>
+  string(12) "anotherParam"
+}
+this parameter is optional
+this parameter has a default value
+
+object(ReflectionParameter)#%d (1) {
+  ["name"]=>
+  string(10) "thirdParam"
+}
+this parameter is optional
+this parameter has a default value
+
+object(ReflectionParameter)#%d (1) {
+  ["name"]=>
+  string(10) "arrayParam"
+}
+this parameter is optional
+this parameter has a default value

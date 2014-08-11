@@ -1,0 +1,40 @@
+---> Doc comment for class A:
+string(%d) "/**
+
+
+		My
+Doc 
+		* Comment 
+for A
+
+* */"
+
+
+---> Doc comment for class B:
+string(26) "/** My DocComment for B */"
+
+
+---> Doc comment for class C:
+bool(false)
+
+
+---> Doc comment for class D:
+bool(false)
+
+
+---> Doc comment for class E:
+bool(false)
+
+
+---> Doc comment for class F:
+bool(false)
+
+
+---> Doc comment for class G:
+string(27) "/**	** Doc comment for G */"
+
+
+---> Doc comment for class I:
+string(%d) "/**
+ * Interface doc comment
+ */"

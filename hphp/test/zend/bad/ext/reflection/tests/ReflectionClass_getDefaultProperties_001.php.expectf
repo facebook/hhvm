@@ -1,0 +1,118 @@
+---- Static properties in A ----
+Array
+(
+    [statPubC] => stat pubC in A
+    [statProtC] => stat protC in A
+    [statPrivC] => stat privC in A
+    [statPubA] => stat pubA in A
+    [statProtA] => stat protA in A
+    [statPrivA] => stat privA in A
+)
+
+
+---- Default properties in A ----
+Array
+(
+    [statPubC] => stat pubC in A
+    [statProtC] => stat protC in A
+    [statPrivC] => stat privC in A
+    [statPubA] => stat pubA in A
+    [statProtA] => stat protA in A
+    [statPrivA] => stat privA in A
+    [pubC] => pubC in A
+    [protC] => protC in A
+    [privC] => privC in A
+    [pubA] => pubA in A
+    [protA] => protA in A
+    [privA] => privA in A
+)
+
+
+---- Static properties in B ----
+Array
+(
+    [statPubC] => stat pubC in B
+    [statProtC] => stat protC in B
+    [statPrivC] => stat privC in B
+    [statPubB] => stat pubB in B
+    [statProtB] => stat protB in B
+    [statPrivB] => stat privB in B
+    [statPubA] => stat pubA in A
+    [statProtA] => stat protA in A
+)
+
+
+---- Default properties in B ----
+Array
+(
+    [statPubC] => stat pubC in B
+    [statProtC] => stat protC in B
+    [statPrivC] => stat privC in B
+    [statPubB] => stat pubB in B
+    [statProtB] => stat protB in B
+    [statPrivB] => stat privB in B
+    [statPubA] => stat pubA in A
+    [statProtA] => stat protA in A
+    [pubC] => pubC in B
+    [protC] => protC in B
+    [privC] => privC in B
+    [pubB] => pubB in B
+    [protB] => protB in B
+    [privB] => privB in B
+    [pubA] => pubA in A
+    [protA] => protA in A
+)
+
+
+---- Static properties in C ----
+Array
+(
+    [statPubC] => stat pubC in C
+    [statProtC] => stat protC in C
+    [statPrivC] => stat privC in C
+    [statPubB] => stat pubB in B
+    [statProtB] => stat protB in B
+    [statPubA] => stat pubA in A
+    [statProtA] => stat protA in A
+)
+
+
+---- Default properties in C ----
+Array
+(
+    [statPubC] => stat pubC in C
+    [statProtC] => stat protC in C
+    [statPrivC] => stat privC in C
+    [statPubB] => stat pubB in B
+    [statProtB] => stat protB in B
+    [statPubA] => stat pubA in A
+    [statProtA] => stat protA in A
+    [pubC] => pubC in C
+    [protC] => protC in C
+    [privC] => privC in C
+    [pubB] => pubB in B
+    [protB] => protB in B
+    [pubA] => pubA in A
+    [protA] => protA in A
+)
+
+
+---- Static properties in X ----
+Array
+(
+    [statPubC] => stat pubC in X
+    [statProtC] => stat protC in X
+    [statPrivC] => stat privC in X
+)
+
+
+---- Default properties in X ----
+Array
+(
+    [statPubC] => stat pubC in X
+    [statProtC] => stat protC in X
+    [statPrivC] => stat privC in X
+    [pubC] => pubC in X
+    [protC] => protC in X
+    [privC] => privC in X
+)

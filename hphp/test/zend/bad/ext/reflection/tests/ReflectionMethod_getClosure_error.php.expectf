@@ -1,0 +1,18 @@
+*** Testing ReflectionMethod::getClosure%s() : error conditions ***
+
+-- Testing ReflectionMethod::getClosure%s() function with more than expected no. of arguments --
+object(Closure%s)#%d (0) {
+}
+object(Closure%s)#%d (0) {
+}
+
+Warning: %s
+NULL
+
+-- Testing ReflectionMethod::getClosure%s() function with Zero arguments --
+
+Warning: %s
+
+-- Testing ReflectionMethod::getClosure%s() function with Zero arguments --
+string(72) "Given object is not an instance of the class this method was declared in"
+===DONE===

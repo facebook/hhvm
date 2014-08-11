@@ -1,0 +1,25 @@
+Class [ <user> class bar extends foo ] {
+  @@ %s %s
+
+  - Constants [0] {
+  }
+
+  - Static properties [0] {
+  }
+
+  - Static methods [0] {
+  }
+
+  - Properties [0] {
+  }
+
+  - Methods [2] {
+    Method [ <user> private method foobar ] {
+      @@ %s %d - %d
+    }
+
+    Method [ <user, inherits foo> protected method test3 ] {
+      @@ %s %d - %d
+    }
+  }
+}

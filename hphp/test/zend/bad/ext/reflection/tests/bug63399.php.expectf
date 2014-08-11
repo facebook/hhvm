@@ -1,0 +1,18 @@
+Array
+(
+    [execute] => Trait1::run
+    [talk] => Trait2::say
+)
+Array
+(
+    [Trait1] => ReflectionClass Object
+        (
+            [name] => Trait1
+        )
+
+    [Trait2] => ReflectionClass Object
+        (
+            [name] => Trait2
+        )
+
+)

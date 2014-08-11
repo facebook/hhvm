@@ -1,0 +1,24 @@
+Parameters from twoArgMethod:
+
+object(ReflectionParameter)#%i (1) {
+  ["name"]=>
+  string(12) "theIncrement"
+}
+
+object(ReflectionParameter)#%i (1) {
+  ["name"]=>
+  string(12) "anotherParam"
+}
+
+Parameters from oneArgNonStatic:
+
+object(ReflectionParameter)#%i (1) {
+  ["name"]=>
+  string(8) "theParam"
+}
+
+Parameters from noArgs:
+
+array(0) {
+}
+done

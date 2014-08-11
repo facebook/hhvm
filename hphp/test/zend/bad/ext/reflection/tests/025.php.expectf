@@ -1,0 +1,64 @@
+/**
+hoho
+*/
+Function [ <user> function test ] {
+  @@ %s 6 - 8
+
+  - Parameters [3] {
+    Parameter #0 [ <required> $a ]
+    Parameter #1 [ <optional> $b = 1 ]
+    Parameter #2 [ <optional> $c = '' ]
+  }
+}
+
+NULL
+--getName--
+string(4) "test"
+--isInternal--
+bool(false)
+--isUserDefined--
+bool(true)
+--getFilename--
+string(%d) "%s025.php"
+--getStartline--
+int(6)
+--getEndline--
+int(8)
+--getDocComment--
+string(11) "/**
+hoho
+*/"
+--getStaticVariables--
+array(1) {
+  ["var"]=>
+  int(1)
+}
+--invoke--
+NULL
+--invokeArgs--
+NULL
+--returnsReference--
+bool(false)
+--getParameters--
+array(3) {
+  [0]=>
+  &object(ReflectionParameter)#%d (1) {
+    ["name"]=>
+    string(1) "a"
+  }
+  [1]=>
+  &object(ReflectionParameter)#%d (1) {
+    ["name"]=>
+    string(1) "b"
+  }
+  [2]=>
+  &object(ReflectionParameter)#%d (1) {
+    ["name"]=>
+    string(1) "c"
+  }
+}
+--getNumberOfParameters--
+int(3)
+--getNumberOfRequiredParameters--
+int(1)
+Done

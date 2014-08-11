@@ -1,0 +1,24 @@
+bool(true)
+bool(true)
+bool(true)
+object(ReflectionMethod)#%d (2) {
+  ["name"]=>
+  string(8) "__invoke"
+  ["class"]=>
+  string(%d) "Closure%s"
+}
+string(17) "Closure%s::__invoke"
+object(ReflectionMethod)#%d (2) {
+  ["name"]=>
+  string(8) "__invoke"
+  ["class"]=>
+  string(%d) "Closure%s"
+}
+string(17) "Closure%s::__invoke"
+object(ReflectionMethod)#%d (2) {
+  ["name"]=>
+  string(8) "__invoke"
+  ["class"]=>
+  string(%d) "Closure%s"
+}
+string(17) "Closure%s::__invoke"

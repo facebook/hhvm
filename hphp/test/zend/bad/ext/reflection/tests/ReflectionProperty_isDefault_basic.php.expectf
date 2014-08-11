@@ -1,0 +1,31 @@
+**********************************
+Reflecting on property TestClass::pub
+
+isDefault():
+bool(true)
+
+**********************************
+**********************************
+Reflecting on property TestClass::stat
+
+isDefault():
+bool(true)
+
+**********************************
+**********************************
+Reflecting on property TestClass::prot
+
+isDefault():
+bool(true)
+
+**********************************
+**********************************
+Reflecting on property TestClass::priv
+
+isDefault():
+bool(true)
+
+**********************************
+Wrong number of params:
+
+Warning: %s

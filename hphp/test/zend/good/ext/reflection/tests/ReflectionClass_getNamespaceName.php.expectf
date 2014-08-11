@@ -1,0 +1,8 @@
+bool(false)
+string(8) "stdClass"
+string(0) ""
+string(8) "stdClass"
+bool(true)
+string(7) "A\B\Foo"
+string(3) "A\B"
+string(3) "Foo"

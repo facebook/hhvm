@@ -1,0 +1,10 @@
+base::show(2)
+derived::show(2)
+base::inc()
+base::show(3)
+derived::show(2)
+derived::inc()
+base::show(3)
+derived::show(3)
+Number of properties: 1
+Done

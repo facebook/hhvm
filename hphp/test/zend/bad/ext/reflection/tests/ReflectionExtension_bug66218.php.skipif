@@ -1,0 +1,5 @@
+<?php
+if (!extension_loaded('reflection')) print 'skip missing reflection extension';
+if (PHP_SAPI != "cli") die("skip CLI only test");
+if (!function_exists("dl")) die("skip need dl");
+?>

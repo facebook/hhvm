@@ -1,0 +1,27 @@
+string(3) "foo"
+bool(false)
+bool(true)
+int(6)
+int(11)
+array(3) {
+  ["c"]=>
+  NULL
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  string(5) "hello"
+}
+string(3) "bar"
+bool(false)
+bool(true)
+int(16)
+int(16)
+array(0) {
+}
+string(7) "extract"
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+array(0) {
+}

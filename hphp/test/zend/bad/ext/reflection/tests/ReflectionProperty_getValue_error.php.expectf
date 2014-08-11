@@ -1,0 +1,28 @@
+Too few args:
+
+Warning: %s
+NULL
+
+Too many args:
+
+Warning: %s
+NULL
+
+Wrong type of arg:
+
+Warning: %s
+NULL
+
+Instance without property:
+
+Static property / too many args:
+string(15) "static property"
+
+Static property / wrong type of arg:
+string(15) "static property"
+
+Protected property:
+Cannot access non-public member TestClass::prot
+
+Instance without property:
+NULL

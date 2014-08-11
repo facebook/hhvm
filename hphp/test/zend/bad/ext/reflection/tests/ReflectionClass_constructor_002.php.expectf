@@ -1,0 +1,19 @@
+
+Warning: %s
+object(ReflectionClass)#%d (1) {
+  ["name"]=>
+  string(0) ""
+}
+Class  does not exist
+Class 1 does not exist
+Class 1 does not exist
+
+Notice: %s
+Class Array does not exist
+
+Warning: %s
+object(ReflectionClass)#%d (1) {
+  ["name"]=>
+  string(0) ""
+}
+Class X does not exist

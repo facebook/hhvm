@@ -1,0 +1,19 @@
+Function [ <user> function ReflectionParameterTest ] {
+  @@ %s.php %d - %d
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $test ]
+    Parameter #1 [ <optional> $test2 = NULL ]
+  }
+}
+
+Function [ <user> function ReflectionParameterTest ] {
+  @@ %s.php %d - %d
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $test ]
+    Parameter #1 [ <optional> $test2 = NULL ]
+  }
+}
+
+==DONE==

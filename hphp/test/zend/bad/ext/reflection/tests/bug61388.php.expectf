@@ -1,0 +1,18 @@
+Array
+(
+    [0] => ReflectionProperty Object
+        (
+            [name] => test
+            [class] => ArrayObject
+        )
+
+)
+Array
+(
+    [0] => ReflectionProperty Object
+        (
+            [name] => oo
+            [class] => stdClass
+        )
+
+)

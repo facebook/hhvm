@@ -1,0 +1,16 @@
+object(ReflectionClass)#%d (1) {
+  ["name"]=>
+  string(1) "A"
+}
+bool(false)
+
+Test bad params:
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL

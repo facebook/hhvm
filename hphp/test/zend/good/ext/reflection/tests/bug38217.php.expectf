@@ -1,0 +1,13 @@
+object(Object)#%d (0) {
+}
+
+Warning: %s
+
+Notice: %s
+NULL
+object(Object1)#%d (0) {
+}
+string(4) "test"
+object(Object1)#%d (0) {
+}
+Done

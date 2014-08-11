@@ -1,0 +1,15 @@
+From global scope:
+Bar::y($a = 2)
+Bar::y($b = 3)
+Bar::y($c = 99)
+Foo::x($a = 1)
+Foo::x($b = 3)
+Foo::x($c = 99)
+
+From class context:
+Bar::y($a = 2)
+Bar::y($b = 3)
+Bar::y($c = 99)
+Foo::x($a = 1)
+Foo::x($b = 3)
+Foo::x($c = 99)

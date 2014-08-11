@@ -1,0 +1,17 @@
+User class
+bool(true)
+bool(true)
+User class - private __clone
+bool(false)
+bool(false)
+Closure%s
+bool(true)
+bool(true)
+Internal class - SimpleXMLElement
+bool(true)
+bool(true)
+Internal class - XMLWriter
+bool(false)
+bool(false)
+
+Fatal error: %s

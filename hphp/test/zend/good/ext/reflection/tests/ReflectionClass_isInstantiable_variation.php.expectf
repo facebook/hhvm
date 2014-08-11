@@ -1,0 +1,7 @@
+Is noCtor instantiable?  bool(true)
+Is publicCtorNew instantiable?  bool(true)
+Is protectedCtorNew instantiable?  bool(false)
+Is privateCtorNew instantiable?  bool(false)
+Is publicCtorOld instantiable?  bool(true)
+Is protectedCtorOld instantiable?  bool(false)
+Is privateCtorOld instantiable?  bool(false)

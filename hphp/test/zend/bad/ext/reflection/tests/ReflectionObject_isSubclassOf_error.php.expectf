@@ -1,0 +1,12 @@
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Fatal error: %s
+Stack trace:
+#0 %s(7): ReflectionClass->isSubclassOf('X')
+#1 {main}
+  thrown in %s on line 7

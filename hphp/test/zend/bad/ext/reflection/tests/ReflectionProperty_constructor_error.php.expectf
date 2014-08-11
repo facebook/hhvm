@@ -1,0 +1,8 @@
+Non-existent class:
+Class NonExistentClass does not exist
+
+Wrong property parameter type:
+The parameter class is expected to be either a string or an object
+
+Non-existent property:
+Property TestClass::$nonExistentProperty does not exist

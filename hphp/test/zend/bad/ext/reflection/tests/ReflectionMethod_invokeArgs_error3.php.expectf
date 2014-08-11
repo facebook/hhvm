@@ -1,0 +1,39 @@
+Wrong number of parameters:
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Non-instance:
+string(72) "Given object is not an instance of the class this method was declared in"
+
+Non-object:
+
+Warning: %s
+NULL
+
+Static method:
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+Called staticMethod()
+
+Notice: %s
+NULL
+NULL
+
+Private method:
+string(86) "Trying to invoke private method TestClass::privateMethod() from scope ReflectionMethod"
+
+Abstract method:
+string(53) "Trying to invoke abstract method AbstractClass::foo()"
+
+Warning: %s

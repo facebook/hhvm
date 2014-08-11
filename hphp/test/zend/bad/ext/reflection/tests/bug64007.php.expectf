@@ -1,0 +1,3 @@
+string(97) "Class Generator is an internal class that cannot be instantiated without invoking its constructor"
+
+Fatal error: %s

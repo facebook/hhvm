@@ -1,0 +1,33 @@
+Array
+(
+    [I6] => ReflectionClass Object
+        (
+            [name] => I6
+        )
+
+    [I2] => ReflectionClass Object
+        (
+            [name] => I2
+        )
+
+    [I1] => ReflectionClass Object
+        (
+            [name] => I1
+        )
+
+    [I4] => ReflectionClass Object
+        (
+            [name] => I4
+        )
+
+    [I3] => ReflectionClass Object
+        (
+            [name] => I3
+        )
+
+    [I5] => ReflectionClass Object
+        (
+            [name] => I5
+        )
+
+)

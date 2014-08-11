@@ -1,0 +1,11 @@
+Method with args:
+
+Warning: %s
+
+Warning: %s
+
+Notice: %s
+
+Notice: %s
+Called methodWithArgs(, )
+NULL

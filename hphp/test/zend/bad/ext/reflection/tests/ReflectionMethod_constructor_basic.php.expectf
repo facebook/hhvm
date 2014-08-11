@@ -1,0 +1,30 @@
+Strict Standards: Redefining already defined constructor for class OldAndNewCtor in %s on line %d
+New-style constructor:
+bool(true)
+
+Inherited new-style constructor
+bool(true)
+
+Old-style constructor:
+bool(true)
+
+Inherited old-style constructor:
+bool(true)
+
+Not a constructor:
+bool(false)
+
+Inherited method of the same name as the class:
+bool(false)
+
+Old-style constructor:
+bool(false)
+
+Redefined constructor:
+bool(true)
+
+New-style constructor:
+bool(true)
+
+Redefined old-style constructor:
+bool(false)

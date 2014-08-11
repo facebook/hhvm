@@ -1,0 +1,17 @@
+Check invalid params:
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+Method  does not exist
+Method 1 does not exist
+Method 1.5 does not exist
+Method 1 does not exist
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL

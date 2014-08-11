@@ -1,0 +1,7 @@
+array(2) {
+  ["libxml"]=>
+  %s(8) "Required"
+  ["domxml"]=>
+  %s(9) "Conflicts"
+}
+==DONE==

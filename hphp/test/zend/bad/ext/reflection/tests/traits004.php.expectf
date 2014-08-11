@@ -1,0 +1,38 @@
+class C1:
+array(0) {
+}
+array(0) {
+}
+
+class C2:
+array(1) {
+  [0]=>
+  string(2) "T1"
+}
+array(1) {
+  ["T1"]=>
+  &object(ReflectionClass)#%d (1) {
+    ["name"]=>
+    string(2) "T1"
+  }
+}
+
+class C3:
+array(2) {
+  [0]=>
+  string(2) "T1"
+  [1]=>
+  string(2) "T2"
+}
+array(2) {
+  ["T1"]=>
+  &object(ReflectionClass)#%d (1) {
+    ["name"]=>
+    string(2) "T1"
+  }
+  ["T2"]=>
+  &object(ReflectionClass)#%d (1) {
+    ["name"]=>
+    string(2) "T2"
+  }
+}

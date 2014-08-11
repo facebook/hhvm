@@ -1,0 +1,10 @@
+object(Foo)#%d (0) {
+}
+object(stdClass)#%d (0) {
+}
+
+Fatal error: %s
+Stack trace:
+#0 %sReflectionClass_newInstanceWithoutConstructor.php(%d): ReflectionClass->newInstanceWithoutConstructor()
+#1 {main}
+  thrown in %sReflectionClass_newInstanceWithoutConstructor.php on line %d

@@ -1,0 +1,12 @@
+string(9) "x.changed"
+
+Warning: %s
+
+Warning: %s
+string(10) "x.original"
+
+Warning: %s
+
+Warning: %s
+string(10) "x.original"
+Done

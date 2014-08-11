@@ -1,0 +1,10 @@
+Test bad arguments:
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+Parameter one must either be a string or a ReflectionClass object
+Class ThisClassDoesNotExist does not exist
+Parameter one must either be a string or a ReflectionClass object

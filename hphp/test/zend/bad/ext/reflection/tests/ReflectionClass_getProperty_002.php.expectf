@@ -1,0 +1,17 @@
+Check invalid params:
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+Property  does not exist
+Property 1 does not exist
+Property 1.5 does not exist
+Property 1 does not exist
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL

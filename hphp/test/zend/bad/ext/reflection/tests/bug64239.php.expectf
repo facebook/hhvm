@@ -1,0 +1,22 @@
+Array
+(
+    [0] => ReflectionMethod Object
+        (
+            [name] => Bmethod
+            [class] => A
+        )
+
+    [1] => ReflectionMethod Object
+        (
+            [name] => t2method
+            [class] => A
+        )
+
+)
+ReflectionMethod Object
+(
+    [name] => Bmethod
+    [class] => A
+)
+string(7) "Bmethod"
+string(7) "Bmethod"

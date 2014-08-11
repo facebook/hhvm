@@ -1,0 +1,13 @@
+string(3) "123"
+string(2) "8j"
+string(2) "8b"
+string(2) "83"
+
+Warning: gmp_init(): Unable to convert variable to GMP - wrong type! in %s/test/slow/ext_gmp/implicit_hex_conversion.php on line 7
+string(1) "0"
+
+Warning: gmp_init(): Unable to convert variable to GMP - wrong type! in %s/test/slow/ext_gmp/implicit_hex_conversion.php on line 7
+string(1) "0"
+
+Warning: gmp_init(): Unable to convert variable to GMP - wrong type! in %s/test/slow/ext_gmp/implicit_hex_conversion.php on line 7
+string(1) "0"

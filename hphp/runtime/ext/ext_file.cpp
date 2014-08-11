@@ -1467,7 +1467,7 @@ Variant f_getcwd() {
 bool f_chdir(const String& directory) {
   CHECK_PATH_FALSE(directory, 1);
   if (f_is_dir(directory)) {
-    g_context->setCwd(File::TranslatePath(directory));
+    g_context->setCwd(f_realpath(directory));
     return true;
   }
   raise_warning("No such file or directory (errno 2)");

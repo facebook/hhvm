@@ -1,0 +1,11 @@
+*** Testing token_get_all() : error conditions ***
+
+-- Testing token_get_all() function with zero arguments --
+
+Warning: %s
+NULL
+-- Testing token_get_all() function with more than expected no. of arguments --
+
+Warning: %s
+NULL
+Done

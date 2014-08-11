@@ -871,6 +871,10 @@ Variant f_array_splice(VRefParam input, int offset,
   getCheckedArray(input);
   Array ret(Array::Create());
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
+  if (arr_input->isIntMapArray() || arr_input->isStrMapArray()) {
+    MixedArray::downgradeAndWarn(arr_input.get(),
+                                 MixedArray::Reason::kArraySplice);
+  }
   input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
   return ret;
 }

@@ -424,6 +424,7 @@ public:
     kSort,
     kUsort,
     kNumericString,
+    kArraySplice,
   };
   static void downgradeAndWarn(ArrayData* ad, const Reason r);
   static void warnUsage(const Reason r, const ArrayKind kind);

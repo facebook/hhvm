@@ -1132,6 +1132,9 @@ void MixedArray::warnUsage(const Reason r, const ArrayKind kind) {
   case Reason::kNumericString:
     raise_warning("An integer-like string key used with a miarray");
     break;
+  case Reason::kArraySplice:
+    raise_warning("Using array_splice on a %s, converting to array", arrayName);
+    break;
   }
 }
 

@@ -602,7 +602,7 @@
     commit: 8ce37115802e257a984a82d38254884085060024
     install_root: twig
     test_root: twig
-    flakey:
+    clowns:
 	  # Dependent on system language settings.
       - twig/test/Twig/Tests/CompilerTest.php
   vfsstream:

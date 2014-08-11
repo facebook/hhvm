@@ -115,19 +115,6 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   uniqueStubs.add("resumeHelpers", uniqueStubs.resumeHelper);
 }
 
-void emitDefClsHelper(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.main() };
-  uniqueStubs.defClsHelper = a.frontier();
-
-  void (*helper)(PreClass*) = defClsHelper;
-  a.   storeq (rVmFp, rVmTl[RDS::kVmfpOff]);
-  a.   storeq (argNumToRegName[1], rVmTl[RDS::kVmpcOff]);
-  a.   storeq (rax, rVmTl[RDS::kVmspOff]);
-  a.   jmp    (TCA(helper));
-
-  uniqueStubs.add("defClsHelper", uniqueStubs.defClsHelper);
-}
-
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.cold() };
 
@@ -465,7 +452,6 @@ UniqueStubs emitUniqueStubs() {
     emitReturnHelpers,
     emitResumeHelpers,
     emitStackOverflowHelper,
-    emitDefClsHelper,
     emitFreeLocalsHelpers,
     emitFuncPrologueRedispatch,
     emitFCallArrayHelper,

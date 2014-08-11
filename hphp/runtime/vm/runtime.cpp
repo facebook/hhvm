@@ -262,22 +262,6 @@ void raiseArrayIndexNotice(const int64_t index) {
   raise_notice("Undefined index: %" PRId64, index);
 }
 
-void defClsHelper(PreClass* preClass) {
-  using namespace JIT;
-
-  assert(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-  Unit::defClass(preClass);
-
-  /*
-   * UniqueStubs::defClsHelper sync'd the registers for us already.
-   * This means if an exception propagates we want to leave things as
-   * VMRegState::CLEAN, since we're still in sync.  Only set it to
-   * dirty if we are actually returning to run in the TC again.
-   */
-  tl_regState = VMRegState::DIRTY;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 const StaticString

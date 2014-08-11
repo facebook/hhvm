@@ -92,16 +92,6 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   us.add("stackOverflowHelper", us.stackOverflowHelper);
 }
 
-
-void emitDefClsHelper(UniqueStubs& us) {
-  MacroAssembler a { mcg->code.main() };
-
-  us.defClsHelper = a.frontier();
-  a.   Brk   (0);
-
-  us.add("defClsHelper", us.defClsHelper);
-}
-
 void emitFreeLocalsHelpers(UniqueStubs& us) {
   MacroAssembler a { mcg->code.main() };
 
@@ -267,7 +257,6 @@ UniqueStubs emitUniqueStubs() {
     emitReturnHelpers,
     emitResumeHelpers,
     emitStackOverflowHelper,
-    emitDefClsHelper,
     emitFreeLocalsHelpers,
     emitFuncPrologueRedispatch,
     emitFCallArrayHelper,

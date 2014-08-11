@@ -65,11 +65,6 @@ struct UniqueStubs {
   TCA resumeHelper;
 
   /*
-   * A helper routine for implementing the DefCls opcode.
-   */
-  TCA defClsHelper;
-
-  /*
    * Helper stubs for doing generic decrefs on a function return.  The
    * stub is a partially-unrolled loop with kNumFreeLocalsHelpers
    * points to call to.  The freeManyLocalsHelper entry point should

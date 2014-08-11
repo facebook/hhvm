@@ -598,10 +598,13 @@
       - symfony/src/Symfony/Component/ClassLoader/Tests/ApcUniversalClassLoaderTest.php
   twig:
     url: https://github.com/fabpot/Twig.git
-    branch: v1.15.1
-    commit: 1fb5784662f438d7d96a541e305e28b812e2eeed
+    branch: v1.16.0
+    commit: 8ce37115802e257a984a82d38254884085060024
     install_root: twig
     test_root: twig
+    clowns:
+	  # Dependent on system language settings.
+      - twig/test/Twig/Tests/CompilerTest.php
   vfsstream:
     url: https://github.com/mikey179/vfsStream.git
     branch: v1.2.0

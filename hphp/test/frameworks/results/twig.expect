@@ -26,8 +26,6 @@ Twig_Test_EscapingTest::testUrlEscapingConvertsSpecialChars
 .
 Twig_Tests_AutoloaderTest::testAutoload
 .
-Twig_Tests_CompilerTest::testReprNumericValueWithLocale
-.
 Twig_Tests_EnvironmentTest::testAddExtension
 .
 Twig_Tests_EnvironmentTest::testAutoescapeOption
@@ -418,7 +416,27 @@ Twig_Tests_IntegrationTest::testIntegration with data set #210
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #211
 .
+Twig_Tests_IntegrationTest::testIntegration with data set #212
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #213
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #214
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #215
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #216
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #217
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #218
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #219
+.
 Twig_Tests_IntegrationTest::testIntegration with data set #22
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #220
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #221
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #23
 .

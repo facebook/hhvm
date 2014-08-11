@@ -1,0 +1,20 @@
+resource(%d) of type (GMP integer)
+string(8) "98765678"
+
+Warning: %s
+
+Warning: %s
+bool(false)
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+bool(false)
+bool(false)
+bool(false)
+string(1) "0"
+Done

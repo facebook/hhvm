@@ -1,0 +1,21 @@
+
+Warning: %s
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+
+Warning: %s
+bool(false)
+bool(false)
+bool(true)
+string(7) "1000002"
+bool(true)
+string(7) "1000034"
+bool(false)
+bool(true)
+string(30) "238462734628347239571823641266"
+bool(false)
+string(30) "238462734628347239571823641234"
+Done

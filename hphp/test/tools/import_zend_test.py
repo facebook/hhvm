@@ -52,7 +52,6 @@ no_import = (
     '/ext/dom',
     '/ext/enchant',
     '/ext/ereg',
-    '/ext/gmp',
     '/ext/interbase',
     '/ext/mssql',
     '/ext/mysqlnd',

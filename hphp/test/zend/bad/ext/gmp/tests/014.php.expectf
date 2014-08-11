@@ -1,0 +1,27 @@
+string(1) "1"
+string(1) "1"
+string(1) "1"
+
+Warning: %s
+string(1) "0"
+
+Warning: %s
+string(1) "0"
+string(1) "1"
+string(19) "2432902008176640000"
+string(65) "30414093201713378043612608166064768844377641568960512000000000000"
+string(7) "3628800"
+string(1) "1"
+string(11) "87178291200"
+
+Warning: %s
+string(1) "0"
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+resource(%d) of type (GMP integer)
+string(1) "1"
+Done

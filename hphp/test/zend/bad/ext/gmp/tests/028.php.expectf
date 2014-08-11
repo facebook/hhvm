@@ -1,0 +1,19 @@
+string(%d) "%d"
+string(%d) "%d"
+string(1) "%d"
+string(%d) "%d"
+string(%d) "%d"
+string(%d) "%d"
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+Done

@@ -1,0 +1,17 @@
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+bool(false)
+int(0)
+resource(%d) of type (GMP integer)
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
+resource(%d) of type (GMP integer)
+Done

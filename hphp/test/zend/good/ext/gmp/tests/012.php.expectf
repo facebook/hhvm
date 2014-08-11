@@ -1,0 +1,18 @@
+int(0)
+int(-1)
+int(1)
+int(1)
+int(0)
+int(0)
+int(0)
+string(21) "-12345678901234567890"
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+bool(false)
+Done

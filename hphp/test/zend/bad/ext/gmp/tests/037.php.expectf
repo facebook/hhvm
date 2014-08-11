@@ -1,0 +1,18 @@
+
+Warning: %s
+bool(false)
+int(2)
+int(0)
+int(5)
+int(200)
+int(13)
+
+Warning: %s
+bool(false)
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+Done

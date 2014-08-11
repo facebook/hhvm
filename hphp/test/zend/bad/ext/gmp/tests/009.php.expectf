@@ -1,0 +1,36 @@
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+resource(%d) of type (GMP integer)
+string(1) "0"
+
+Warning: %s
+bool(false)
+resource(%d) of type (GMP integer)
+string(1) "0"
+NULL
+
+Warning: %s
+bool(false)
+resource(%d) of type (GMP integer)
+string(4) "9131"
+resource(%d) of type (GMP integer)
+string(4) "9132"
+resource(%d) of type (GMP integer)
+string(4) "9131"
+resource(%d) of type (GMP integer)
+string(4) "9131"
+resource(%d) of type (GMP integer)
+string(4) "9132"
+resource(%d) of type (GMP integer)
+string(4) "9131"
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
+Done

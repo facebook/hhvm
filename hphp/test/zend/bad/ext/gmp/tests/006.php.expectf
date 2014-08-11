@@ -1,0 +1,26 @@
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+bool(false)
+
+Warning: %s
+NULL
+
+Warning: %s
+bool(false)
+resource(%d) of type (GMP integer)
+string(2) "-1"
+resource(%d) of type (GMP integer)
+string(5) "10001"
+
+Warning: %s
+bool(false)
+string(1) "0"
+
+Warning: %s
+bool(false)
+string(1) "0"
+Done

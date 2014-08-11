@@ -1,3 +1,51 @@
+FastRoute\Dispatcher\CharCountBasedTest::testDuplicateStaticRoute
+.
+FastRoute\Dispatcher\CharCountBasedTest::testDuplicateVariableNameError
+.
+FastRoute\Dispatcher\CharCountBasedTest::testDuplicateVariableRoute
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #0
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #1
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #10
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #2
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #3
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #4
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #5
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #6
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #7
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #8
+.
+FastRoute\Dispatcher\CharCountBasedTest::testFoundDispatches with data set #9
+.
+FastRoute\Dispatcher\CharCountBasedTest::testMethodNotAllowedDispatches with data set #0
+.
+FastRoute\Dispatcher\CharCountBasedTest::testMethodNotAllowedDispatches with data set #1
+.
+FastRoute\Dispatcher\CharCountBasedTest::testMethodNotAllowedDispatches with data set #2
+.
+FastRoute\Dispatcher\CharCountBasedTest::testNotFoundDispatches with data set #0
+.
+FastRoute\Dispatcher\CharCountBasedTest::testNotFoundDispatches with data set #1
+.
+FastRoute\Dispatcher\CharCountBasedTest::testNotFoundDispatches with data set #2
+.
+FastRoute\Dispatcher\CharCountBasedTest::testNotFoundDispatches with data set #3
+.
+FastRoute\Dispatcher\CharCountBasedTest::testNotFoundDispatches with data set #4
+.
+FastRoute\Dispatcher\CharCountBasedTest::testNotFoundDispatches with data set #5
+.
+FastRoute\Dispatcher\CharCountBasedTest::testShadowedStaticRoute
+.
 FastRoute\Dispatcher\GroupCountBasedTest::testDuplicateStaticRoute
 .
 FastRoute\Dispatcher\GroupCountBasedTest::testDuplicateVariableNameError
@@ -93,4 +141,52 @@ FastRoute\Dispatcher\GroupPosBasedTest::testNotFoundDispatches with data set #4
 FastRoute\Dispatcher\GroupPosBasedTest::testNotFoundDispatches with data set #5
 .
 FastRoute\Dispatcher\GroupPosBasedTest::testShadowedStaticRoute
+.
+FastRoute\Dispatcher\MarkBasedTest::testDuplicateStaticRoute
+.
+FastRoute\Dispatcher\MarkBasedTest::testDuplicateVariableNameError
+.
+FastRoute\Dispatcher\MarkBasedTest::testDuplicateVariableRoute
+.
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #0
+.
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #1
+.
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #10
+.
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #2
+E
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #3
+E
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #4
+E
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #5
+E
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #6
+E
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #7
+E
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #8
+E
+FastRoute\Dispatcher\MarkBasedTest::testFoundDispatches with data set #9
+.
+FastRoute\Dispatcher\MarkBasedTest::testMethodNotAllowedDispatches with data set #0
+.
+FastRoute\Dispatcher\MarkBasedTest::testMethodNotAllowedDispatches with data set #1
+.
+FastRoute\Dispatcher\MarkBasedTest::testMethodNotAllowedDispatches with data set #2
+E
+FastRoute\Dispatcher\MarkBasedTest::testNotFoundDispatches with data set #0
+.
+FastRoute\Dispatcher\MarkBasedTest::testNotFoundDispatches with data set #1
+.
+FastRoute\Dispatcher\MarkBasedTest::testNotFoundDispatches with data set #2
+.
+FastRoute\Dispatcher\MarkBasedTest::testNotFoundDispatches with data set #3
+.
+FastRoute\Dispatcher\MarkBasedTest::testNotFoundDispatches with data set #4
+.
+FastRoute\Dispatcher\MarkBasedTest::testNotFoundDispatches with data set #5
+.
+FastRoute\Dispatcher\MarkBasedTest::testShadowedStaticRoute
 .

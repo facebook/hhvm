@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 
 namespace HPHP {
 
@@ -341,7 +342,7 @@ void RequestInjectionData::resetTimer(int seconds /* = 0 */) {
 void RequestInjectionData::reset() {
   getConditionFlags()->store(0);
   m_coverage = RuntimeOption::RecordCodeCoverage;
-  m_debugger = false;
+  m_debuggerAttached = false;
   m_debuggerIntr = false;
   updateJit();
   while (!interrupts.empty()) interrupts.pop();
@@ -349,7 +350,7 @@ void RequestInjectionData::reset() {
 
 void RequestInjectionData::updateJit() {
   m_jit = RuntimeOption::EvalJit &&
-    !(RuntimeOption::EvalJitDisabledByHphpd && m_debugger) &&
+    !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_debuggerIntr &&
     !m_coverage &&
     !shouldProfile();

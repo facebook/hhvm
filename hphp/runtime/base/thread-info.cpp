@@ -58,6 +58,7 @@ ThreadInfo::ThreadInfo()
   m_profiler = nullptr;
   m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
+  m_debugHookHandler = nullptr;
 
   RDS::threadInit();
   onSessionInit();
@@ -153,7 +154,7 @@ ssize_t check_request_surprise(ThreadInfo* info) {
 
   ssize_t flags = p.fetchAndClearFlags();
   do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
-    !p.getDebugger();
+    !p.getDebuggerAttached();
   do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
   do_signaled = (flags & RequestInjectionData::SignaledFlag);
 

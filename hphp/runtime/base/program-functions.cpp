@@ -56,6 +56,7 @@
 #include "hphp/runtime/ext/ext_xenon.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
+#include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -1437,7 +1438,7 @@ static int execute_program_impl(int argc, char** argv) {
           }
           // Systemlib.php is not loaded again, so we need this if we
           // are to hit any breakpoints in systemlib.
-          phpSetBreakPoints(localProxy.get());
+          proxySetBreakPoints(localProxy.get());
           restart = true;
         } catch (const Eval::DebuggerClientExitException &e) {
           execute_command_line_end(0, false, nullptr);

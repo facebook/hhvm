@@ -19,6 +19,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -66,8 +67,7 @@ struct CLISession : private boost::noncopyable {
   ~CLISession() {
     TRACE(2, "CLISession::~CLISession\n");
     Debugger::UnregisterSandbox(g_context->getSandboxId());
-    ThreadInfo::s_threadInfo.getNoCheck()->
-      m_reqInjectionData.setDebugger(false);
+    DebugHookHandler::detach();
     execute_command_line_end(0, false, nullptr);
   }
 };
@@ -125,7 +125,7 @@ void DummySandbox::run() {
         g_context->setSandboxId(m_proxy->getDummyInfo().id());
       }
 
-      ti->m_reqInjectionData.setDebugger(true);
+      DebugHookHandler::attach<DebuggerHookHandler>(ti);
       {
         DebuggerDummyEnv dde;
         // This is really the entire point of having the dummy sandbox. This

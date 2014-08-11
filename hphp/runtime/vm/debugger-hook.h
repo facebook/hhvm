@@ -24,8 +24,6 @@
 #include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
 #include "hphp/runtime/base/thread-info.h"
 
-namespace HPHP { namespace Eval { struct DebuggerProxy; } }
-
 ///////////////////////////////////////////////////////////////////////////////
 // This is a set of functions which are primarily called from the VM to notify
 // the debugger about various events. Some of the implementations also interact
@@ -39,6 +37,77 @@ struct Func;
 struct Unit;
 struct ObjectData;
 
+// Is this thread being debugged?
+inline bool isDebuggerAttached(ThreadInfo* ti = nullptr) {
+  ti = (ti != nullptr) ? ti : ThreadInfo::s_threadInfo.getNoCheck();
+  return ti->m_reqInjectionData.getDebuggerAttached();
+}
+
+// A handler for debugger events. Any extension can subclass this class and
+// attach it to the thread in order to receive debugging events.
+class DebugHookHandler {
+public:
+  DebugHookHandler() {}
+  virtual ~DebugHookHandler() {}
+
+  // Attempts to attach an instance of the given debug hook handler to the
+  // passed thread. If no thread info is passed, the current one is used.
+  // The template parameter should be an instance of DebugHookHandler.
+  // Returns true on success, false on failure (for instance, if another debug
+  // hook handler is already attached).
+  template<class HandlerClass>
+  static bool attach(ThreadInfo* ti = nullptr) {
+    ti = (ti != nullptr) ? ti : ThreadInfo::s_threadInfo.getNoCheck();
+    if (isDebuggerAttached(ti)) {
+      return false;
+    }
+
+    s_numAttached++;
+    ti->m_reqInjectionData.setDebuggerAttached(true);
+    ti->m_debugHookHandler = new HandlerClass();
+    return true;
+  }
+
+  // If a handler is attached to the thread, detaches it
+  static void detach(ThreadInfo* ti = nullptr);
+
+  // Debugger events. Subclasses can override these methods to receive
+  // events.
+  virtual void onOpcode(const unsigned char* pc) {}
+  virtual void onExceptionThrown(ObjectData* exception) {}
+  virtual void onExceptionHandle() {}
+  virtual void onError(const std::string& message) {}
+  virtual void onEval(const Func* f) {}
+  virtual void onFileLoad(Unit* efile) {}
+  virtual void onDefClass(const Class* cls) {}
+  virtual void onDefFunc(const Func* func) {}
+
+  // The number of DebugHookHandlers that are currently attached to the process.
+  static std::atomic_int s_numAttached;
+};
+
+// Returns the current hook handler
+inline DebugHookHandler* getHookHandler() {
+  return ThreadInfo::s_threadInfo.getNoCheck()->m_debugHookHandler;
+}
+
+// Is this process being debugged?
+inline bool isDebuggerAttachedProcess() {
+  return DebugHookHandler::s_numAttached > 0;
+}
+
+#define DEBUGGER_ATTACHED_ONLY(code) do {                             \
+  if (isDebuggerAttached()) {                                         \
+    code;                                                             \
+  }                                                                   \
+} while(0)                                                            \
+
+// This flag ensures two things: first, that we stay in the interpreter and
+// out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
+// debugger interrupts for every opcode executed (modulo filters.)
+#define DEBUGGER_FORCE_INTR  \
+  (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.getDebuggerIntr())
+
 // "Hooks" called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
 // execution indefinitely within one of these hooks.
@@ -51,33 +120,12 @@ void phpDebuggerFileLoadHook(Unit* efile);
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
 
-void phpSetBreakPoints(Eval::DebuggerProxy* proxy);
-
-// Add/remove breakpoints at a specific offset.
+// Add/remove breakpoints
 void phpAddBreakPoint(const Unit* unit, Offset offset);
+void phpAddBreakPointRange(const Unit* unit, OffsetRangeVec& offsets);
+void phpAddBreakPointFuncEntry(const Func* f);
 void phpRemoveBreakPoint(const Unit* unit, Offset offset);
 bool phpHasBreakpoint(const Unit* unit, Offset offset);
-
-// Is this thread being debugged?
-inline bool isDebuggerAttached() {
-  return ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.getDebugger();
-}
-
-#define DEBUGGER_ATTACHED_ONLY(code) do {                             \
-  if (isDebuggerAttached()) {                                         \
-    code;                                                             \
-  }                                                                   \
-} while(0)                                                            \
-
-// Is this process being debugged?
-bool isDebuggerAttachedProcess();
-
-// This flag ensures two things: first, that we stay in the interpreter and
-// out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
-// debugger interrupts for every opcode executed (modulo filters.)
-#define DEBUGGER_FORCE_INTR  \
-  (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.getDebuggerIntr())
 
 // Map which holds a set of PCs and supports reasonably fast addition and
 // lookup. Used by the debugger to decide if a given PC falls within an

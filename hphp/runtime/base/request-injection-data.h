@@ -54,7 +54,7 @@ struct RequestInjectionData {
         m_timeoutSeconds(0), // no timeout by default
         m_hasTimer(false),
         m_timerActive(false),
-        m_debugger(false),
+        m_debuggerAttached(false),
         m_debuggerIntr(false),
         m_coverage(false),
         m_jit(false) {
@@ -75,17 +75,17 @@ struct RequestInjectionData {
 
  private:
 #ifndef __APPLE__
-  timer_t m_timer_id;    // id of our timer
+  timer_t m_timer_id;      // id of our timer
 #endif
-  int m_timeoutSeconds;  // how many seconds to timeout
-  bool m_hasTimer;       // Whether we've created our timer yet
+  int m_timeoutSeconds;    // how many seconds to timeout
+  bool m_hasTimer;         // Whether we've created our timer yet
   std::atomic<bool> m_timerActive;
-                         // Set true when we activate a timer,
-                         // cleared when the signal handler runs
-  bool m_debugger;       // whether there is a DebuggerProxy attached to me
-  bool m_debuggerIntr;   // indicating we should force interrupt for debugger
-  bool m_coverage;       // is coverage being collected
-  bool m_jit;            // is the jit enabled
+                           // Set true when we activate a timer,
+                           // cleared when the signal handler runs
+  bool m_debuggerAttached; // whether there is a debugger attached.
+  bool m_debuggerIntr;     // indicating we should force interrupt for debugger
+  bool m_coverage;         // is coverage being collected
+  bool m_jit;              // is the jit enabled
 
   // Things corresponding to user setable INI settings
   std::string m_maxMemory;
@@ -111,13 +111,14 @@ struct RequestInjectionData {
   void resetTimer(int seconds = 0);
   void onTimeout();
   bool getJit() const { return m_jit; }
-  bool getDebugger() const { return m_debugger; }
-  void setDebugger(bool d) {
-    m_debugger = d;
+  bool getDebuggerAttached() { return m_debuggerAttached; }
+  // Should only be set by DebuggerHookHandler::attach
+  void setDebuggerAttached(bool d) {
+    m_debuggerAttached = d;
     updateJit();
   }
   static constexpr uint32_t debuggerReadOnlyOffset() {
-    return offsetof(RequestInjectionData, m_debugger);
+    return offsetof(RequestInjectionData, m_debuggerAttached);
   }
   bool getDebuggerIntr() const { return m_debuggerIntr; }
   void setDebuggerIntr(bool d) {

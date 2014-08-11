@@ -29,6 +29,7 @@ namespace HPHP {
 struct MemoryManager;
 struct Profiler;
 struct CodeCoverage;
+struct DebugHookHandler;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -66,6 +67,7 @@ struct ThreadInfo {
   // This pointer is set by ProfilerFactory
   Profiler *m_profiler;
   CodeCoverage *m_coverage;
+  DebugHookHandler *m_debugHookHandler; // set by DebugHookHandler::attach()
 
   Executing m_executing;
 

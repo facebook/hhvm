@@ -1,0 +1,11 @@
+Comment Length: 42
+New Comment Length: 15
+New Comment Data: Updated comment
+Substring: <>&"
+New Substring: <>&'
+Comment Value: instructions
+New Comment Value: some more instructions
+Updated Comment Value: some more comment strings
+Whole Text: some text characters
+Split text:  characters
+Is Whitespace?: YES

@@ -1,0 +1,8 @@
+validateOnParse set to FALSE: 
+No Error Report Above
+validateOnParse set to TRUE: 
+
+Warning: %s
+
+Warning: %s
+Error Report Above

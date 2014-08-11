@@ -1,0 +1,4 @@
+bool(true)
+--- child 0 ---
+DOMComment
+string(14) " Hello World! "

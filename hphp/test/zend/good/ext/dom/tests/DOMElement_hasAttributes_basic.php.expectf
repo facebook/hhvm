@@ -1,0 +1,11 @@
+Verify that we have a DOMElement object:
+DOMElement
+
+Element should have attributes:
+bool(true)
+
+Verify that we have a DOMElement object:
+DOMElement
+
+Element should have no attributes:
+bool(false)

@@ -1,0 +1,12 @@
+Load document
+See if strictErrorChecking is on
+bool(true)
+Should throw DOMException when strictErrorChecking is on
+GOOD. DOMException thrown
+Invalid Character Error
+Turn strictErrorChecking off
+See if strictErrorChecking is off
+bool(false)
+Should raise PHP error because strictErrorChecking is off
+
+Warning: %s

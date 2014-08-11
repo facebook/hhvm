@@ -1,0 +1,70 @@
+1 DOMDocument::createElement('valid')
+valid
+ 2 DOMDocument::createElement('-invalid')
+Invalid Character Error
+ 3 DOMDocument::createElement(' ')
+Invalid Character Error
+ 4 DOMDocument::createElement('prefix:valid')
+valid
+ 5 DOMDocument::createElementNS('http://valid.com', 'valid')
+valid
+ 6 DOMDocument::createElementNS('http://valid.com', 'prefix:valid')
+valid
+ 7 DOMDocument::createElementNS('http://valid.com', '-invalid')
+Namespace Error
+ 8 DOMDocument::createElementNS('http://valid.com', 'prefix:-invalid')
+Namespace Error
+ 9 DOMDocument::createElementNS('', 'prefix:invalid')
+Namespace Error
+10 DOMDocument::createElementNS('http://valid.com', 'prefix:valid:invalid')
+Namespace Error
+11 DOMDocument::createElementNS('http://valid.com', '-prefix:valid')
+Namespace Error
+12 DOMDocument::createElementNS('-', 'prefix:valid')
+valid
+13 DOMElement::__construct('valid')
+valid
+14 DOMElement::__construct('-invalid')
+Invalid Character Error
+15 DOMElement::__construct(' ')
+Invalid Character Error
+16 DOMElement::__construct('prefix:valid')
+Namespace Error
+17 DOMElement::__construct('valid', '', 'http://valid.com')
+valid
+18 DOMElement::__construct('prefix:valid', '', 'http://valid.com')
+valid
+19 DOMElement::__construct('-invalid', '', 'http://valid.com')
+Invalid Character Error
+20 DOMElement::__construct('prefix:-invalid', '', 'http://valid.com')
+Namespace Error
+21 DOMElement::__construct('prefix:invalid', '', '')
+Namespace Error
+22 DOMElement::__construct('prefix:valid:invalid', '', 'http://valid.com')
+Namespace Error
+23 DOMElement::__construct('-prefix:valid', '', 'http://valid.com')
+Invalid Character Error
+24 DOMElement::__construct('prefix:valid', '', '-')
+valid
+25 DOMDocument::createElementNS('', 'prefix:valid')
+Namespace Error
+26 DOMDocument::createElementNS('http://wrong.namespaceURI.com', 'xml:valid')
+Namespace Error
+27 DOMElement::__construct('xml:valid', '', 'http://wrong.namespaceURI.com')
+Namespace Error
+28 DOMDocument::createElementNS('http://www.w3.org/XML/1998/namespace', 'xml:valid')
+valid
+29 DOMElement::__construct('xml:valid', '', 'http://www.w3.org/XML/1998/namespace')
+Namespace Error
+30 DOMDocument::createElementNS('http://wrong.namespaceURI.com', 'xmlns:valid')
+Namespace Error
+31 DOMElement::__construct('xmlns:valid', '', 'http://wrong.namespaceURI.com')
+Namespace Error
+32 DOMDocument::createElementNS('http://www.w3.org/2000/xmlns/', 'xmlns:valid')
+valid
+33 DOMElement::__construct('xmlns:valid', '', 'http://www.w3.org/2000/xmlns/')
+valid
+34 DOMDocument::createElementNS('http://www.w3.org/2000/xmlns/', 'wrongprefix:valid')
+Namespace Error
+35 DOMElement::__construct('wrongprefix:valid', '', 'http://www.w3.org/2000/xmlns/')
+Namespace Error

@@ -1,0 +1,3 @@
+<?php
+$attr = new DOMAttr();
+?>

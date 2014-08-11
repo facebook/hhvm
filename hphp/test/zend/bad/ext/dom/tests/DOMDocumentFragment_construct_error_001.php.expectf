@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): DOMDocumentFragment->__construct('root')
+#1 {main}
+  thrown in %s on line %d

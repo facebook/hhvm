@@ -1,0 +1,17 @@
+string(19) "<!ELEMENT a EMPTY>
+"
+string(38) "<!ELEMENT a EMPTY>
+<!ELEMENT b EMPTY>
+"
+NULL
+string(277) "<!ENTITY % incent SYSTEM "dom.ent">
+<!ENTITY amp "&#38;#38;">
+<!ENTITY gt "&#62;">
+<!ENTITY % coreattrs "title CDATA #IMPLIED">
+<!ENTITY % attrs "%coreattrs;">
+<!ATTLIST foo bar CDATA #IMPLIED>
+<!ELEMENT foo (#PCDATA)>
+<!ELEMENT root (foo)+>
+<!ATTLIST th title CDATA #IMPLIED>
+"
+===DONE===

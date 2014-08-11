@@ -1,0 +1,6 @@
+DOMDocument with external entities created
+Read initial resolveExternals:
+bool(false)
+Set resolveExternals to TRUE, reading again:
+bool(true)
+Done

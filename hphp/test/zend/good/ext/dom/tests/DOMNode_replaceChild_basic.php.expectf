@@ -1,0 +1,11 @@
+New child replaces old child:
+<?xml version="1.0" encoding="utf-8"?>
+<root><foo><qux/><baz/></foo><spam><eggs/><eggs/></spam></root>
+Old child is returned:
+bar
+Existing child is removed from tree:
+<?xml version="1.0" encoding="utf-8"?>
+<root><foo><baz/></foo><spam><qux/><eggs/></spam></root>
+Children are inserted in order:
+<?xml version="1.0" encoding="utf-8"?>
+<root><foo><spam><qux/><eggs/></spam></foo></root>

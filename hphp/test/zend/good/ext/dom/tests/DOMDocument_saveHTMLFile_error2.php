@@ -1,0 +1,3 @@
+<?php
+DOMDocument::saveHTMLFile();
+?>

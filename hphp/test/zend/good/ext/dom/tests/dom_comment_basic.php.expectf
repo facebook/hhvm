@@ -1,0 +1,12 @@
+bool(true)
+--- child 0 ---
+DOMText
+string(2) "
+	"
+--- child 1 ---
+DOMComment
+string(14) " Hello World! "
+--- child 2 ---
+DOMText
+string(1) "
+"

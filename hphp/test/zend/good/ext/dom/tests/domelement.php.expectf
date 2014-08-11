@@ -1,0 +1,26 @@
+Tag Name: chapter
+Chapter: 1
+Attribute num exists?: Yes
+Chapter: 
+Attribute num exists?: No
+Language: en
+Language: en-US
+Language: 
+
+-- xml:lang --
+Language: en
+Attribute xml:lang exists?: Yes
+Language: 
+Attribute xml:lang exists?: No
+Language: en-GB
+Language: en-GB
+
+-- Elements --
+Row Count: 3
+myelements Count: 2
+
+-- IDs --
+Element Name: chapter
+Element Name: Not Found
+Element Name: newns2:myelement
+Element Name: Not Found

@@ -1,0 +1,6 @@
+Comment Length (one append): 4
+Comment Length (two appends): 8
+Comment Content: data><&"
+
+<?xml version="1.0"?>
+<root><comment><!--data><&"--></comment></root>

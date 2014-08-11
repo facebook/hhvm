@@ -1,0 +1,43 @@
+DOMDocument Object
+(
+    [dynamicProperty] => stdClass Object
+        (
+        )
+
+    [doctype] => 
+    [implementation] => (object value omitted)
+    [documentElement] => (object value omitted)
+    [actualEncoding] => 
+    [encoding] => 
+    [xmlEncoding] => 
+    [standalone] => 1
+    [xmlStandalone] => 1
+    [version] => 1.0
+    [xmlVersion] => 1.0
+    [strictErrorChecking] => 1
+    [documentURI] => %s
+    [config] => 
+    [formatOutput] => 
+    [validateOnParse] => 
+    [resolveExternals] => 
+    [preserveWhiteSpace] => 1
+    [recover] => 
+    [substituteEntities] => 
+    [nodeName] => #document
+    [nodeValue] => 
+    [nodeType] => 9
+    [parentNode] => 
+    [childNodes] => (object value omitted)
+    [firstChild] => (object value omitted)
+    [lastChild] => (object value omitted)
+    [previousSibling] => 
+    [attributes] => 
+    [ownerDocument] => 
+    [namespaceURI] => 
+    [prefix] => 
+    [localName] => 
+    [baseURI] => %s
+    [textContent] => 
+	foobar
+
+)

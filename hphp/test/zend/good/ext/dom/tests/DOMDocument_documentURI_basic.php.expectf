@@ -1,0 +1,6 @@
+DOMDocument created
+Read initial documentURI:
+%s
+Set documentURI to a URL, reading again:
+string(34) "http://dom.example.org/example.xml"
+Done

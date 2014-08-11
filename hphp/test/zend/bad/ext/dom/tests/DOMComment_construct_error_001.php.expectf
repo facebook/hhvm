@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): DOMComment->__construct('comment1', 'comment2')
+#1 {main}
+  thrown in %s on line %d

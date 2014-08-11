@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<root><first/><newsecond/><newthird/><newfourth/></root>
+
+<?xml version="1.0"?>
+<root><first/><second/><third/><fourth/></root>
+
+<?xml version="1.0"?>
+<root><second/><third/><fourth/></root>

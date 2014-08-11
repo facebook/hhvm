@@ -1,0 +1,31 @@
+Start cloneNode test
+node 0
+Course: new title3:DOMElement
+~string(24) "
+		
+			c1n1
+			c1n2
+		
+	"
+node 1
+Course: two:DOMElement
+~string(24) "
+		
+			c2n1
+			c2n2
+		
+	"
+node 2
+Course: new title default:DOMElement
+~string(0) ""
+node 3
+Course: new title true:DOMElement
+~string(24) "
+		
+			c1n1
+			c1n2
+		
+	"
+node 4
+Course: new title false:DOMElement
+~string(0) ""

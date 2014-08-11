@@ -1,0 +1,4 @@
+Text: This is an "example" of using DOM splitText
+splitText (ASCII): DOM
+Text: This is an ‘example’ of using DOM splitText
+splitText (UTF-8): DOM

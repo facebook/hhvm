@@ -67,6 +67,10 @@
     clowns:
       # Errors + fails with PHP5
       - codeigniter/tests/codeigniter/core/URI_test.php
+    flakey:
+      # Assumes that calculating the current time in seconds twice will give
+      # the same result. Not true if you're unlucky.
+      - codeigniter/tests/codeigniter/helpers/date_helper_test.php
   composer:
     url: https://github.com/composer/composer.git
     # master is the only available branch

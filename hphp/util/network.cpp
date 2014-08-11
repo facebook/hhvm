@@ -54,7 +54,11 @@ std::string safe_inet_ntoa(struct in_addr &in) {
 }
 
 bool safe_gethostbyname(const char *address, HostEnt &result) {
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW__) || \
+    defined(_MSC_VER)
+  // NOTE: on windows gethostbyname is "thread safe"
+  // the hostent is allocated once per thread by winsock2
+  // and cleaned up by winsock when the thread ends
   struct hostent *hp = gethostbyname(address);
 
   if (!hp) {
@@ -62,7 +66,9 @@ bool safe_gethostbyname(const char *address, HostEnt &result) {
   }
 
   result.hostbuf = *hp;
+#ifdef __APPLE__
   freehostent(hp);
+#endif
   return true;
 #else
   struct hostent *hp;

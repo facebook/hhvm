@@ -42,6 +42,21 @@ public:
   explicit XDebugServer(Mode mode);
   ~XDebugServer();
 
+private:
+  // Closes the logfile
+  void closeLog();
+
+  // Looks up the given hostname and stores the results in "in". Returns true on
+  // success, false on failure
+  bool lookupHostname(const char* hostname, struct in_addr& in);
+
+  // Initializes and connects to the client, defined by the given hostname:port
+  // Returns the socket fd, or -1 on connection error, or -2 on timeout error
+  int createSocket(const char* hostname, int port);
+
+  // Destroys the current socket
+  void destroySocket();
+
 ////////////////////////////////////////////////////////////////////////////////
 // Statics
 
@@ -53,6 +68,123 @@ public:
   // is "jit" then this always returns false as whether or not the server is
   // needed is decided at runtime.
   static bool isNeeded();
+
+///////////////////////////////////////////////////////////////////////////////
+// Dbgp
+
+private:
+
+  // Called in construction. Helper for initializing the dbgp protocol with the
+  // client.
+  void initDbgp();
+
+  // Called on destruction. Helper for shutting down the dbgp protocol
+  void deinitDbgp();
+
+  // Helpers adding various attributes to the passed node
+  void addXmnls(xdebug_xml_node& node);
+  void addCmdAndTrans(xdebug_xml_node& node);
+  void addStatus(xdebug_xml_node& node);
+
+  // Sends the passed xml messaeg to the client
+  void sendMessage(xdebug_xml_node& xml);
+
+  // Last transaction id sent by the client
+  char* m_lastTransactionId = nullptr;
+
+/////////////////////////////////////////////////////////////////////////////
+// Commands
+
+public:
+  enum class Command {
+    // TODO(#4489053) Implement this
+    NONE
+  };
+
+  // Blocks waiting for commands from the client
+  const char* getCommandStr(Command command) {
+    // TODO(#4489053) Implement this
+    return nullptr;
+  }
+
+private:
+  // Blocks waiting for commands from the client
+  void doCommandLoop();
+
+  // Reads the input from the client until a null character is received.
+  void readInput();
+
+  Command m_lastCommand = Command::NONE;
+  char* m_buffer = nullptr;
+  size_t m_bufferSize = 0;
+
+////////////////////////////////////////////////////////////////////////////////
+// Logging
+
+private:
+  // Logs the string defined by the passed format string to the logfile, if the
+  // logfile exists.
+  inline void log(const char* format, ...) {
+    if (m_logFile == nullptr) {
+      return;
+    }
+
+    va_list args;
+    va_start(args, format);
+    vfprintf(m_logFile, format, args);
+    va_end(args);
+  }
+
+  // Flushes the logfile if it exists
+  inline void logFlush() {
+    if (m_logFile != nullptr) {
+      fflush(m_logFile);
+    }
+  }
+
+  FILE* m_logFile = nullptr;
+
+////////////////////////////////////////////////////////////////////////////////
+// Server Status
+
+private:
+  enum class Status {
+    STARTING,
+    STOPPING,
+    STOPPED,
+    RUNNING,
+    BREAK,
+    DETACHED
+  };
+
+  // Reason for the current state
+  enum class Reason {
+    OK,
+    ERROR,
+    ABORTED,
+    EXCEPTION
+  };
+
+  // Sets the status of the webserver
+  void setStatus(Status status, Reason reason) {
+    m_status = status;
+    m_reason = reason;
+  }
+
+  // Corresponding string for status/reason
+  const char* getStatusString(Status status);
+  const char* getReasonString(Reason reason);
+
+  // Set on dbgp init
+  Status m_status = Status::DETACHED;
+  Reason m_reason = Reason::OK;
+
+////////////////////////////////////////////////////////////////////////////////
+// Misc Data Members
+
+private:
+  Mode m_mode; // Set by constructor
+  int m_socket = -1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

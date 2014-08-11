@@ -28,6 +28,7 @@ target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES})
 if(CYGWIN)
   target_link_libraries(hhvm crypt)
   target_link_libraries(hhvm intl)
+  target_link_libraries(hhvm dbghelp)
 endif()
 
 embed_all_systemlibs(hhvm "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/hhvm")

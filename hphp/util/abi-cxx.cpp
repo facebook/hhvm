@@ -25,8 +25,11 @@
 #include <unordered_map>
 
 #include <cxxabi.h>
-#if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(__MSC_VER))
-#include <execinfo.h>
+#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(__MSC_VER))
+# include <windows.h>
+# include <dbghelp.h>
+#else
+# include <execinfo.h>
 #endif
 
 #include "folly/Format.h"
@@ -54,10 +57,37 @@ std::string getNativeFunctionName(void* codeAddr) {
     auto it = nameCache.find(codeAddr);
     if (it != end(nameCache)) return it->second;
   }
+  std::string functionName;
 
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(__MSC_VER)
+  HANDLE process = GetCurrentProcess();
+  SYMBOL_INFO *symbol;
+  DWORD64 addr_disp = 0;
+
+  // symintialize and symcleanup should really be once per process
+  SymInitialize(process, nullptr, TRUE);
+
+  symbol = (SYMBOL_INFO *)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+  symbol->MaxNameLen = 255;
+  symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
+  if(SymFromAddr(process, (DWORD64) codeAddr, &addr_disp, symbol)) {
+    functionName.assign(symbol->Name);
+
+    int status;
+    char* demangledName = abi::__cxa_demangle(functionName.c_str(),
+                                              0, 0, &status);
+    SCOPE_EXIT { free(demangledName); };
+    if (status == 0) functionName.assign(demangledName);
+
+  }
+  free(symbol);
+
+  SymCleanup(process);
+#else
   void* buf[1] = {codeAddr};
   char** symbols = backtrace_symbols(buf, 1);
-  std::string functionName;
+
   if (symbols != nullptr) {
     //
     // the output from backtrace_symbols looks like this:
@@ -92,6 +122,8 @@ std::string getNativeFunctionName(void* codeAddr) {
   // backtrace_symbols requires that we free the array of strings but not the
   // strings themselves.
   free(symbols);
+#endif
+
   if (functionName.empty()) functionName = folly::format("{}", codeAddr).str();
 
   G g(nameCacheLock);

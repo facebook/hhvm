@@ -50,7 +50,6 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   HMODULE moduleHandle = GetModuleHandle(nullptr);
   HGLOBAL loadedResource;
   HRSRC   resourceInfo;
-  char *  resourceData;
   DWORD   resourceSize;
 
   resourceInfo = FindResource(moduleHandle, section, RT_RCDATA);

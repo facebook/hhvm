@@ -905,6 +905,10 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
   for (unsigned int k = 0; k < data.size(); k++) {
     SortData &opaque = data[k];
     const Array& arr = *opaque.array;
+    if (renumber && (opaque.original->getArrayData()->isIntMapArray())) {
+      MixedArray::downgradeAndWarn(opaque.original->getArrayData(),
+                                   MixedArray::Reason::kSort);
+    }
 
     Array sorted;
     for (int i = 0; i < count; i++) {

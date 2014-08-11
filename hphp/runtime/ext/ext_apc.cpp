@@ -167,7 +167,7 @@ Variant f_apc_store(const Variant& key_or_array,
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
-    PackedArrayInit errors(valuesArr.size());
+    ArrayInit errors(valuesArr.size(), ArrayInit::Map{});
 
     for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
@@ -177,7 +177,7 @@ Variant f_apc_store(const Variant& key_or_array,
       }
       Variant v = iter.second();
       if (!(s_apc_store[cache_id].store(key.toString(), v, ttl))) {
-        errors.append(key);
+        errors.add(key, -1);
       }
     }
     return errors.toVariant();
@@ -221,7 +221,7 @@ Variant f_apc_add(const Variant& key_or_array,
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
-    PackedArrayInit errors(valuesArr.size());
+    ArrayInit errors(valuesArr.size(), ArrayInit::Map{});
 
     for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
@@ -231,7 +231,7 @@ Variant f_apc_add(const Variant& key_or_array,
       }
       Variant v = iter.second();
       if (!(s_apc_store[cache_id].store(key.toString(), v, ttl, false))) {
-        errors.append(key);
+        errors.add(key, -1);
       }
     }
     return errors.create();

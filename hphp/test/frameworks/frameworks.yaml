@@ -540,6 +540,12 @@
     commit: 8fdf5ff0df202957eca6c1d875138c6e48108c17
     install_root: phpunit
     test_root: phpunit
+  predis:
+    url: https://github.com/nrk/predis.git
+    branch: "v1.0.0"
+    commit: d4be306d0aca28b5633b96adef03b29fea569c2f
+    install_root: predis
+    test_root: predis
   proxymanager:
     url: https://github.com/Ocramius/ProxyManager.git
     branch: master

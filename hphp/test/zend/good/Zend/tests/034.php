@@ -13,9 +13,6 @@ switch (1) {
 	default:
 		print 2;
 		break;
-	default:
-		print 3;
-		break;
 }
 
 ?>

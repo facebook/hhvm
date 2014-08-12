@@ -3232,9 +3232,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
               }
               e.Eq();
               e.JmpNZ(caseLabels[i]);
-            } else {
-              // Default clause. The last one wins.
+            } else if (LIKELY(defI == -1)) {
+              // Default clause.
               defI = i;
+            } else {
+              throw IncludeTimeFatalException(
+                c, "Switch statements may only contain one default: clause");
             }
           }
           if (defI != -1) {
@@ -5947,9 +5950,12 @@ DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
         // case to appear in the source text
         state.nonZeroI = i;
       }
-    } else {
-      // Last 'default:' wins
+    } else if (LIKELY(state.defI == -1)) {
       state.defI = i;
+    } else {
+      // Multiple defaults are not allowed
+      throw IncludeTimeFatalException(
+        c, "Switch statements may only contain one default: clause");
     }
   }
 

@@ -1,0 +1,2 @@
+Fatal error: Switch statements may only contain one default: clause in %s/switch-default-multiple.php on line 8
+

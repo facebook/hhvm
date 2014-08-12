@@ -1,1 +1,1 @@
-3
+Fatal error: Switch statements may only contain one default: clause in %s on line %d

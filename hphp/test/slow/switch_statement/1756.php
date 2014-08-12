@@ -2,23 +2,20 @@
 
 function f($x) {
   switch ($x) {
-  default:
-    print "default-0";
   case "foo":
     print "foo-0";
   case "3":
     print "3-0";
-  default:
-    print "default-1";
   case "3":
     print "3-1";
   case "foo":
     print "foo-1";
   default:
-    print "default-2";
+    print "default";
   case "bar":
     print "bar";
   }
+  print "\n";
 }
 function g($x) {
   switch ($x) {

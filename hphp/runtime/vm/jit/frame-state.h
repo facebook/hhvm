@@ -139,15 +139,21 @@ struct FrameState final : private LocalStateHook {
 
   FrameState(FrameState&&) = default;
 
-  void update(const IRInstruction* inst);
+  /*
+   * Update state by computing the effects of an instruction.
+   */
+  void update(const IRInstruction*);
 
-  bool hasStateFor(Block* block) const;
+  /*
+   * Whether we have state saved for the given block.
+   */
+  bool hasStateFor(Block*) const;
 
   /*
    * Starts tracking state for a block and reloads any previously
    * saved state.
    */
-  void startBlock(Block* block);
+  void startBlock(Block*);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -187,7 +193,7 @@ struct FrameState final : private LocalStateHook {
    * Clears the current state and resets the current marker to the
    * given value.
    */
-  void resetCurrentState(const BCMarker& marker);
+  void resetCurrentState(const BCMarker&);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }
@@ -255,7 +261,7 @@ struct FrameState final : private LocalStateHook {
 
   using LocalVec = smart::vector<LocalState>;
 
-  const LocalVec& localsForBlock(Block* b) const;
+  const LocalVec& localsForBlock(Block*) const;
 
  private:
   /*

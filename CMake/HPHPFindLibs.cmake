@@ -336,6 +336,13 @@ if (PAM_INCLUDE_PATH)
   include_directories(${PAM_INCLUDE_PATH})
 endif()
 
+# LLVM
+find_package(LLVM)
+if (LIBLLVM_INCLUDE_DIR)
+  include_directories(LIBLLVM_INCLUDE_DIR)
+  add_definitions("-DUSE_LLVM")
+endif()
+
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
   FIND_LIBRARY (RT_LIB rt)
@@ -526,4 +533,8 @@ macro(hphp_link target)
 
   target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
   target_link_libraries(${target} ${LIBELF_LIBRARIES})
+
+  if (LIBLLVM_LIBRARY)
+    target_link_libraries(${target} ${LIBLLVM_LIBRARY})
+  endif()
 endmacro()

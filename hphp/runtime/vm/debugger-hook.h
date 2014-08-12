@@ -76,7 +76,7 @@ public:
   virtual void onOpcode(const unsigned char* pc) {}
   virtual void onExceptionThrown(ObjectData* exception) {}
   virtual void onExceptionHandle() {}
-  virtual void onError(const std::string& message) {}
+  virtual void onError(const ExtendedException &ee, int errnum, const std::string& message) {}
   virtual void onEval(const Func* f) {}
   virtual void onFileLoad(Unit* efile) {}
   virtual void onDefClass(const Class* cls) {}
@@ -114,7 +114,7 @@ inline bool isDebuggerAttachedProcess() {
 void phpDebuggerOpcodeHook(const unsigned char* pc);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
 void phpDebuggerExceptionHandlerHook();
-void phpDebuggerErrorHook(const std::string& message);
+void phpDebuggerErrorHook(const ExtendedException &ee, int errnum, const std::string& message);
 void phpDebuggerEvalHook(const Func* f);
 void phpDebuggerFileLoadHook(Unit* efile);
 void phpDebuggerDefClassHook(const Class* cls);

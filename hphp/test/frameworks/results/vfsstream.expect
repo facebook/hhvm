@@ -1,3 +1,27 @@
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIteration with data set #0
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIteration with data set #1
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIterationShouldBeIndependent with data set #0
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIterationShouldBeIndependent with data set #1
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIterationWithDot with data set #0
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIterationWithDot with data set #1
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIterationWithOpenDir_Bug_2 with data set #0
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIterationWithOpenDir_Bug_2 with data set #1
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIteration_Bug_4 with data set #0
+.
+org\bovigo\vfs\DirectoryIterationTestCase::directoryIteration_Bug_4 with data set #1
+.
+org\bovigo\vfs\DirectoryIterationTestCase::recursiveDirectoryIterationWithDotsDisabled
+.
+org\bovigo\vfs\DirectoryIterationTestCase::recursiveDirectoryIterationWithDotsEnabled
+.
 org\bovigo\vfs\PermissionsTestCase::canNotChangeGroupWhenDirectoryNotWriteable
 .
 org\bovigo\vfs\PermissionsTestCase::canNotChangeGroupWhenFileNotOwned
@@ -25,6 +49,82 @@ org\bovigo\vfs\QuotaTestCase::unlimitedQuotaIsNotLimited
 org\bovigo\vfs\UnlinkTestCase::canNotRemoveWritableFileFromNonWritableDirectory
 .
 org\bovigo\vfs\UnlinkTestCase::canRemoveNonWritableFileFromWritableDirectory
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::contentIsFilledUpWithSpacesIfNoDataWritten
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::createInstanceWithGigabytes
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::createInstanceWithKilobytes
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::createInstanceWithMegabytes
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::hasSizeOriginallyGiven
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::readReturnsContentFilledWithSpaces
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::readReturnsSpacesWhenNothingWrittenAtOffset
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::truncateReducesSize
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::truncateRemovesWrittenContentAfterOffset
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::writeDataAfterLastOffsetIncreasesSize
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::writeDataAtStartDoesNotIncreaseSize
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::writeDataInBetweenDoesNotIncreaseSize
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::writeDataOverLastOffsetIncreasesSize
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::writesDataAfterEndWhenOffsetAfterEnd
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::writesDataAtOffsetWhenOffsetMoved
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::writesDataAtStartWhenOffsetNotMoved
+.
+org\bovigo\vfs\content\LargeFileContentTestCase::writesDataOverEndWhenOffsetAndDataLengthLargerThanSize
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::canSeekFromCurrentOffset
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::canSeekToEnd
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::canSeekToGivenOffset
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::hasContentOriginallySet
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::hasNotReachedEofAfterCreation
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::reaMoreThanSizeReturnsWholeContent
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::readAfterEndReturnsEmptyString
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::readDoesNotChangeSize
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::readLessThenSizeDoesNotReachEof
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::readMoreThanSizeReachesEof
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::readMovesOffset
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::readReturnsSubstringWithRequestedLength
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::readSizeReachesEof
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::seekWithInvalidOptionReturnsFalse
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::sizeEqualsLengthOfGivenString
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::truncateDecreasesSize
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::truncateRemovesSuperflouosContent
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::truncateToGreaterSizeAddsZeroBytes
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::truncateToGreaterSizeIncreasesSize
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::writeAppendsContentWhenOffsetAtEof
+.
+org\bovigo\vfs\content\StringBasedFileContentTestCase::writeOverwritesExistingContentWhenOffsetNotAtEof
 .
 org\bovigo\vfs\vfsStreamAbstractContentTestCase::allPermissionsForGroup
 .
@@ -70,7 +170,9 @@ org\bovigo\vfs\vfsStreamAbstractContentTestCase::writePermissionsForOther
 .
 org\bovigo\vfs\vfsStreamAbstractContentTestCase::writePermissionsForUser
 .
-org\bovigo\vfs\vfsStreamContainerIteratorTestCase::iteration
+org\bovigo\vfs\vfsStreamContainerIteratorTestCase::iteration with data set #0
+.
+org\bovigo\vfs\vfsStreamContainerIteratorTestCase::iteration with data set #1
 .
 org\bovigo\vfs\vfsStreamDirectoryIssue18TestCase::shouldContainSubdirectoryApp1
 .
@@ -145,6 +247,10 @@ org\bovigo\vfs\vfsStreamFileTestCase::seekRead
 org\bovigo\vfs\vfsStreamFileTestCase::truncateRemovesSuperflouosContent
 .
 org\bovigo\vfs\vfsStreamFileTestCase::truncateToGreaterSizeAddsZeroBytes
+.
+org\bovigo\vfs\vfsStreamFileTestCase::withContentAcceptsAnyFileContentInstance
+.
+org\bovigo\vfs\vfsStreamFileTestCase::withContentThrowsInvalidArgumentExceptionWhenContentIsNoStringAndNoFileContent
 .
 org\bovigo\vfs\vfsStreamFileTestCase::write
 .
@@ -267,6 +373,8 @@ org\bovigo\vfs\vfsStreamUmaskTestCase::umaskSettingShouldBeRespectedBySetup
 org\bovigo\vfs\vfsStreamWrapperAlreadyRegisteredTestCase::registerOverAnotherStreamWrapper
 .
 org\bovigo\vfs\vfsStreamWrapperDirSeparatorTestCase::directoryCanBeCreatedUsingWinDirSeparator
+.
+org\bovigo\vfs\vfsStreamWrapperDirSeparatorTestCase::directoryExitsTestUsingTrailingWinDirSeparator
 .
 org\bovigo\vfs\vfsStreamWrapperDirSeparatorTestCase::fileCanBeAccessedUsingWinDirSeparator
 .
@@ -410,6 +518,12 @@ org\bovigo\vfs\vfsStreamWrapperFlockTestCase::removesSharedLockOnStreamClose
 F
 org\bovigo\vfs\vfsStreamWrapperFlockTestCase::streamIsNotLockedByDefault
 .
+org\bovigo\vfs\vfsStreamWrapperLargeFileTestCase::canReadFromLargeFile
+.
+org\bovigo\vfs\vfsStreamWrapperLargeFileTestCase::canWriteIntoLargeFile
+.
+org\bovigo\vfs\vfsStreamWrapperLargeFileTestCase::hasLargeFileSize
+.
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::accessWithDoubleDotReturnsCorrectContent
 .
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::canCreateFolderOfSameNameAsParentFolder
@@ -419,16 +533,6 @@ org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::canNotIterateOverNonReadableDirect
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::canNotUnlinkDirectoryWithoutRoot
 .
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::canRetrieveFolderOfSameNameAsParentFolder
-.
-org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::directoryIteration
-.
-org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::directoryIterationShouldBeIndependent
-.
-org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::directoryIterationWithDot
-.
-org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::directoryIterationWithOpenDir_Bug_2
-E
-org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::directoryIteration_Bug_4
 .
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::is_dir
 E
@@ -586,9 +690,9 @@ org\bovigo\vfs\vfsStreamWrapperTestCase::touchChangesAccessAndModificationTimeFo
 F
 org\bovigo\vfs\vfsStreamWrapperTestCase::touchChangesAccessAndModificationTimeForFile
 F
-org\bovigo\vfs\vfsStreamWrapperTestCase::touchCreatesNonExistingFile
+org\bovigo\vfs\vfsStreamWrapperTestCase::touchChangesTimesToCurrentTimestampWhenNoTimesGiven
 F
-org\bovigo\vfs\vfsStreamWrapperTestCase::touchDoesNotChangeTimesWhenNoTimesGiven
+org\bovigo\vfs\vfsStreamWrapperTestCase::touchCreatesNonExistingFile
 F
 org\bovigo\vfs\vfsStreamWrapperTestCase::touchWithModifiedTimeChangesAccessAndModifiedTime
 F

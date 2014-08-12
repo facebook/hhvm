@@ -622,9 +622,11 @@
 	  # Dependent on system language settings.
       - twig/test/Twig/Tests/CompilerTest.php
   vfsstream:
-    url: https://github.com/mikey179/vfsStream.git
-    branch: v1.2.0
-    commit: 063fb10633f10c5ccbcac26227e94f46d9336f90
+    # We're using Graham's fork to unskip a couple of tests
+    # The latest stable is v1.3.0 - the fork is slightly ahead
+    url: https://github.com/GrahamCampbell/vfsStream.git
+    branch: hhvm
+    commit: 00f21956ccf6cdff6201f28e598ff3ab5ccbd3c6
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist

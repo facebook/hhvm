@@ -251,7 +251,7 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   unsigned i = smartSize2Index(bytes);
   void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
-    p = slabAlloc(debugAddExtra(MemoryManager::smartSizeClass(bytes)), i);
+    p = slabAlloc(bytes, i);
   }
   assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
 
@@ -264,6 +264,9 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   assert(bytes <= kMaxSmartSize + kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmartSizeAlignMask) == 0);
 
+  if (UNLIKELY(m_profctx.flag)) {
+    return smartFreeSizeBig(ptr, bytes);
+  }
   unsigned i = smartSize2Index(bytes);
   m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
   m_stats.usage -= bytes;

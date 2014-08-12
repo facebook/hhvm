@@ -28,7 +28,10 @@
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
+
 #include "hphp/runtime/base/memory-usage-stats.h"
+#include "hphp/runtime/base/request-event-handler.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -339,16 +342,6 @@ struct MemoryManager {
   static bool sweeping();
 
   /*
-   * Size class helpers.
-   */
-private:
-  static uint32_t bsr(uint32_t x);
-  static uint8_t smartSize2IndexCompute(uint32_t size);
-  static uint8_t smartSize2IndexLookup(uint32_t size);
-  static uint8_t smartSize2Index(uint32_t size);
-public:
-
-  /*
    * Return the smart size class for a given requested allocation
    * size.
    *
@@ -563,6 +556,34 @@ public:
   iterator objects_begin() { return m_instances.begin(); }
   iterator objects_end() { return m_instances.end(); }
 
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Request profiling.
+
+  /*
+   * Trigger heap profiling in the next request.
+   *
+   * Allocate the s_trigger atomic so that the next request can consume it.  If
+   * an unconsumed trigger exists, do nothing and return false; else return
+   * true.
+   */
+  static bool triggerProfiling(const std::string& filename);
+
+  /*
+   * Do per-request initialization.
+   *
+   * Attempt to consume the profiling trigger, and copy it to m_profctx if we
+   * are successful.  Also enable jemalloc heap profiling.
+   */
+  static void requestInit();
+
+  /*
+   * Do per-request shutdown.
+   *
+   * Dump a jemalloc heap profiling, then reset the profiler.
+   */
+  static void requestShutdown();
+
 private:
   friend void* smart_malloc(size_t nbytes);
   friend void* smart_calloc(size_t count, size_t bytes);
@@ -575,7 +596,15 @@ private:
     FreeNode* head = nullptr;
   };
 
-  static void* TlsInitSetup;
+  /*
+   * Request-local heap profiling context.
+   */
+  struct ReqProfContext {
+    bool flag{false};
+    bool prof_active{false};
+    bool thread_prof_active{false};
+    std::string filename;
+  };
 
 private:
   MemoryManager();
@@ -583,7 +612,7 @@ private:
   MemoryManager& operator=(const MemoryManager&) = delete;
 
 private:
-  void* slabAlloc(size_t nbytes, unsigned index);
+  void* slabAlloc(uint32_t bytes, unsigned index);
   void* newSlab(size_t nbytes);
   void* smartEnlist(BigNode*);
   void* smartMallocBig(size_t nbytes);
@@ -592,16 +621,24 @@ private:
   void* smartMalloc(size_t nbytes);
   void* smartRealloc(void* ptr, size_t nbytes);
   void  smartFree(void* ptr);
+
+  static uint32_t bsr(uint32_t x);
+  static uint8_t smartSize2IndexCompute(uint32_t size);
+  static uint8_t smartSize2IndexLookup(uint32_t size);
+  static uint8_t smartSize2Index(uint32_t size);
+
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&, size_t*&, size_t&);
   void refreshStats();
   template<bool live> void refreshStatsImpl(MemoryUsageStats& stats);
   void refreshStatsHelperExceeded();
+
 #ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
   template<bool callerSavesActualSize>
   void* smartMallocSizeBigHelper(void*&, size_t&, size_t);
 #endif
+
   void resetStatsImpl(bool isInternalCall);
   bool checkPreFree(DebugHeader*, size_t, size_t) const;
   template<class SizeT> static SizeT debugAddExtra(SizeT);
@@ -624,6 +661,18 @@ private:
   std::vector<void*> m_slabs;
   std::vector<NativeNode*> m_natives;
 
+  bool m_sweeping;
+  bool m_trackingInstances;
+  std::unordered_set<void*> m_instances;
+
+  bool m_statsIntervalActive;
+  bool m_couldOOM{true};
+
+  ReqProfContext m_profctx;
+  static std::atomic<ReqProfContext*> s_trigger;
+
+  static void* TlsInitSetup;
+
 #ifdef USE_JEMALLOC
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
@@ -635,13 +684,6 @@ private:
   static size_t s_cactiveLimitCeiling;
   bool m_enableStatsSync;
 #endif
-  bool m_statsIntervalActive;
-  bool m_couldOOM{true};
-
-private:
-  bool m_sweeping;
-  bool m_trackingInstances;
-  std::unordered_set<void*> m_instances;
 };
 
 //////////////////////////////////////////////////////////////////////

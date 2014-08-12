@@ -13,50 +13,54 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/server/admin-request-handler.h"
+
+#include "hphp/runtime/base/apc-file-storage.h"
+#include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-hooks.h"
+#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/repo.h"
+
+#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/array-tracer/ext_array_tracer.h"
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/mysql/mysql_stats.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/memory-stats.h"
+#include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/server-stats.h"
+
+#include "hphp/util/alloc.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/process.h"
+#include "hphp/util/repo-schema.h"
+#include "hphp/util/stacktrace-profiler.h"
+#include "hphp/util/timer.h"
+
+#include <folly/Conv.h>
+
+#include <boost/lexical_cast.hpp>
 
 #include <string>
 #include <sstream>
 #include <iomanip>
 
-#include "folly/Conv.h"
-
 #include <unistd.h>
-#include <boost/lexical_cast.hpp>
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
 #include "hphp/runtime/base/file-util.h"
 #endif
-
-#include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/server/http-server.h"
-#include "hphp/runtime/server/pagelet-server.h"
-#include "hphp/runtime/base/http-client.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/memory-stats.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/preg.h"
-#include "hphp/util/process.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/mutex.h"
-#include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/apc-file-storage.h"
-#include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/base/thread-hooks.h"
-#include "hphp/runtime/ext/array-tracer/ext_array_tracer.h"
-#include "hphp/runtime/ext/mysql/mysql_stats.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/util/alloc.h"
-#include "hphp/util/timer.h"
-#include "hphp/util/repo-schema.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
 
@@ -243,7 +247,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
               "/free-mem:        ask tcmalloc to release memory to system\n"
               "/tcmalloc-stats:  get internal tcmalloc stats\n"
               "/tcmalloc-set-tc: set max mem tcmalloc thread-cache can use\n"
-              );
+          );
         }
 #endif
 
@@ -261,7 +265,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
               "/jemalloc-prof-dump:\n"
               "                  dump heap profile\n"
               "    file          optional, filesystem path\n"
-              );
+              "/jemalloc-prof-request:\n"
+              "                  dump thread-local heap profile in\n"
+              "                  the next request that runs\n"
+              "    file          optional, filesystem path\n"
+          );
         }
 #endif
 
@@ -616,6 +624,17 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
           break;
         }
         transport->sendString("OK\n");
+        break;
+      }
+      if (cmd == "jemalloc-prof-request") {
+        auto f = transport->getParam("file");
+        bool success = MemoryManager::triggerProfiling(f);
+
+        if (success) {
+          transport->sendString("OK\n");
+        } else {
+          transport->sendString("Request profiling already triggered\n");
+        }
         break;
       }
     }

@@ -124,10 +124,13 @@ void HttpRequestHandler::logToAccessLog(Transport* transport) {
 }
 
 void HttpRequestHandler::setupRequest(Transport* transport) {
+  MemoryManager::requestInit();
+
   g_context.getCheck();
   GetAccessLog().onNewRequest();
-  // set current virtual host
-  (void)HttpProtocol::GetVirtualHost(transport);
+
+  // Set current virtual host.
+  HttpProtocol::GetVirtualHost(transport);
 }
 
 void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
@@ -140,7 +143,10 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   // hashtable after writing the log entry.
   ServerStats::Reset();
   m_sourceRootInfo.clear();
+
   hphp_session_exit();
+
+  MemoryManager::requestShutdown();
 }
 
 void HttpRequestHandler::handleRequest(Transport *transport) {
@@ -346,7 +352,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
-void HttpRequestHandler::abortRequest(Transport *transport) {
+void HttpRequestHandler::abortRequest(Transport* transport) {
   // TODO: t5284137 add some tests for abortRequest
   transport->sendString("Service Unavailable", 503);
   transport->onSendEnd();

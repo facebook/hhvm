@@ -19,18 +19,21 @@
 #include <cstdint>
 #include <limits>
 
-#include "hphp/runtime/base/sweepable.h"
-#include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stack-logger.h"
-#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/native-data.h"
+
+#include "hphp/runtime/server/http-server.h"
+
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
+
 #include "folly/ScopeGuard.h"
 
 namespace HPHP {
@@ -38,6 +41,9 @@ namespace HPHP {
 TRACE_SET_MOD(smartalloc);
 
 //////////////////////////////////////////////////////////////////////
+
+std::atomic<MemoryManager::ReqProfContext*>
+  MemoryManager::s_trigger{nullptr};
 
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
@@ -576,11 +582,22 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   return slab;
 }
 
-// allocate nbytes from the current slab, aligned to kSmartSizeAlign
-void* MemoryManager::slabAlloc(size_t nbytes, unsigned index) {
+/*
+ * Allocate `bytes' from the current slab, aligned to kSmartSizeAlign.
+ */
+void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
+  size_t nbytes = debugAddExtra(smartSizeClass(bytes));
+
   assert(nbytes <= kSlabSize);
   assert((nbytes & kSmartSizeAlignMask) == 0);
   assert((uintptr_t(m_front) & kSmartSizeAlignMask) == 0);
+
+  if (UNLIKELY(m_profctx.flag)) {
+    // Stats correction; smartMallocSizeBig() pulls stats from jemalloc.
+    m_stats.usage -= bytes;
+    return smartMallocSizeBig<false>(nbytes).first;
+  }
+
   void* ptr = m_front;
   {
     void* next = (void*)(uintptr_t(ptr) + nbytes);
@@ -815,6 +832,83 @@ void MemoryManager::resetCouldOOM(bool state) {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_reqInjectionData.clearMemExceededFlag();
   m_couldOOM = state;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Request profiling.
+
+bool MemoryManager::triggerProfiling(const std::string& filename) {
+  auto trigger = new ReqProfContext();
+  trigger->flag = true;
+  trigger->filename = filename;
+
+  ReqProfContext* expected = nullptr;
+
+  if (!s_trigger.compare_exchange_strong(expected, trigger)) {
+    delete trigger;
+    return false;
+  }
+  return true;
+}
+
+void MemoryManager::requestInit() {
+  auto trigger = s_trigger.exchange(nullptr);
+
+  // If the trigger has already been claimed, do nothing.
+  if (trigger == nullptr) return;
+
+  always_assert(MM().empty());
+
+  // Initialize the request-local context from the trigger.
+  auto& profctx = MM().m_profctx;
+  assert(!profctx.flag);
+
+  profctx = *trigger;
+  delete trigger;
+
+#ifdef USE_JEMALLOC
+  bool active = true;
+  size_t boolsz = sizeof(bool);
+
+  // Reset jemalloc stats.
+  if (mallctl("prof.reset", nullptr, nullptr, nullptr, 0)) {
+    return;
+  }
+
+  // Enable jemalloc thread-local heap dumps.
+  if (mallctl("prof.active",
+              &profctx.prof_active, &boolsz,
+              &active, sizeof(bool))) {
+    profctx = ReqProfContext{};
+    return;
+  }
+  if (mallctl("thread.prof.active",
+              &profctx.thread_prof_active, &boolsz,
+              &active, sizeof(bool))) {
+    mallctl("prof.active", nullptr, nullptr,
+            &profctx.prof_active, sizeof(bool));
+    profctx = ReqProfContext{};
+    return;
+  }
+#endif
+}
+
+void MemoryManager::requestShutdown() {
+  auto& profctx = MM().m_profctx;
+
+  if (!profctx.flag) return;
+
+#ifdef USE_JEMALLOC
+  jemalloc_pprof_dump(profctx.filename, true);
+
+  mallctl("thread.prof.active", nullptr, nullptr,
+          &profctx.thread_prof_active, sizeof(bool));
+  mallctl("prof.active", nullptr, nullptr,
+          &profctx.prof_active, sizeof(bool));
+#endif
+
+  profctx = ReqProfContext{};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

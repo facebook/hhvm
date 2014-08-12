@@ -15,4 +15,6 @@ if sys.path[0] != localdir:
     sys.path.insert(0, localdir)
 
 import hhbc
+import lookup
 import pretty
+import unit

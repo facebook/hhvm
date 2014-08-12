@@ -5,6 +5,8 @@ GDB commands for inspecting HHVM bytecode.
 
 import gdb
 from gdbutils import *
+from lookup import lookup_litstr
+from unit import curunit
 
 
 #------------------------------------------------------------------------------
@@ -75,7 +77,7 @@ class HHBC:
         """Return the type of the arg'th immediate for HPHP::Op `op'."""
 
         table_fmt = 'HPHP::immType(HPHP::Op, int)::arg%dTypes'
-        immtype = op_table(table_fmt % (arg))[as_idx(op)]
+        immtype = op_table(table_fmt % arg)[as_idx(op)]
         return immtype.cast(T('HPHP::ArgType'))
 
     @staticmethod
@@ -133,6 +135,11 @@ class HHBC:
 
                 info['size'] = size
                 info['value'] = au['u_' + str(immtype)[6:]]
+
+                # Try to print out literal strings.
+                if immtype == V('HPHP::SA') and curunit is not None:
+                    litstr = lookup_litstr(info['value'], curunit)
+                    info['value'] = litstr['m_data']
             else:
                 info['size'] = 0
                 info['value'] = None
@@ -163,7 +170,7 @@ class HHBC:
 
 
 #------------------------------------------------------------------------------
-# hhx command.
+# `hhx' command.
 
 class HHXCommand(gdb.Command):
     """Print $arg1 bytecodes starting from $arg0.
@@ -200,16 +207,22 @@ left off.
         bctype = gdb.lookup_type('HPHP::Op').const().pointer()
         self.bcpos = self.bcpos.cast(bctype)
 
+        bcstart = self.bcpos - self.bcoff
+
         op_names = gdb.parse_and_eval(
             "(char **)*(uint32_t*)('HPHP::opcodeToName(HPHP::Op)' + 10)")
 
         for i in xrange(0, self.count):
             instr = HHBC.instr_info(self.bcpos)
+            name = op_names[as_idx(self.bcpos.dereference())].string()
 
-            idx = as_idx(self.bcpos.dereference())
-            out = "[%d] %s" % (self.bcoff, op_names[idx].string())
+            out = "%s+%d: %s" % (str(bcstart), self.bcoff, name)
             for imm in instr['imms']:
-                out += ' <' + str(imm) + '>'
+                if imm.type == T('uint8_t'):
+                    imm = imm.cast(T('uint32_t'))
+                if imm.type == T('char').pointer():
+                    imm = '"' + imm.string() + '"'
+                out += ' ' + str(imm)
             print out
 
             self.bcpos += instr['len']

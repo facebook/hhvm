@@ -256,35 +256,29 @@ static void genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
 
     auto& be = mcg->backEnd();
-    RelocationInfo mainRel(mainCode.base(), mainCode.frontier());
-    be.relocate(mainRel, mainCodeIn, mcg->cgFixups());
+    RelocationInfo rel;
+    be.relocate(rel, mainCodeIn,
+                mainCode.base(), mainCode.frontier(),
+                mcg->cgFixups());
 
-    RelocationInfo coldRel(coldCode.base(), coldCode.frontier());
+    be.relocate(rel, coldCodeIn,
+                coldCode.base(), coldCode.frontier(),
+                mcg->cgFixups());
 
-    be.relocate(coldRel, coldCodeIn, mcg->cgFixups());
-
-    be.adjustForRelocation(mainRel.dest(),
-                           mainRel.dest() + mainRel.destSize(),
-                           coldRel, mcg->cgFixups());
-    be.adjustForRelocation(coldRel.dest(),
-                           coldRel.dest() + coldRel.destSize(),
-                           mainRel, mcg->cgFixups());
     if (frozenCode != &coldCode) {
-      be.adjustForRelocation(frozenStart, frozenCode->frontier(),
-                             coldRel, mcg->cgFixups());
-      be.adjustForRelocation(frozenStart, frozenCode->frontier(),
-                             mainRel, mcg->cgFixups());
+      rel.recordRange(frozenStart, frozenCode->frontier(),
+                      frozenStart, frozenCode->frontier());
     }
-    be.adjustForRelocation(asmInfo, coldRel, mcg->cgFixups());
-    be.adjustForRelocation(asmInfo, mainRel, mcg->cgFixups());
+    be.adjustForRelocation(rel, mcg->cgFixups());
+    be.adjustForRelocation(rel, asmInfo, mcg->cgFixups());
 
     if (asmInfo) {
       static int64_t mainDeltaTot = 0, coldDeltaTot = 0;
       int64_t mainDelta =
-        mainRel.destSize() -
+        (mainCodeIn.frontier() - mainStart) -
         (mainCode.frontier() - mainCode.base());
       int64_t coldDelta =
-        coldRel.destSize() -
+        (coldCodeIn.frontier() - coldStart) -
         (coldCode.frontier() - coldCode.base());
 
       mainDeltaTot += mainDelta;

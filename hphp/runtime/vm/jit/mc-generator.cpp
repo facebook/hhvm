@@ -2203,23 +2203,17 @@ void MCGenerator::setJmpTransID(TCA jmp) {
   m_fixups.m_pendingJmpTransIDs.emplace_back(jmp, transId);
 }
 
+void RelocationInfo::recordRange(TCA start, TCA end,
+                                 TCA destStart, TCA destEnd) {
+  m_srcRanges.emplace_back(start, end);
+  m_dstRanges.emplace_back(destStart, destEnd);
+}
+
 void RelocationInfo::recordAddress(TCA src, TCA dest, int range) {
-  if (!m_dest) {
-    assert(m_destSize == size_t(-1));
-    m_dest = dest;
-    m_destSize = range;
-  } else {
-    assert(dest - m_dest + range >= m_destSize);
-    m_destSize = dest - m_dest + range;
-  }
   m_adjustedAddresses.emplace(src, std::make_pair(dest, range));
 }
 
 TCA RelocationInfo::adjustedAddressAfter(TCA addr) const {
-  if (size_t(addr - m_start) > size_t(m_end - m_start)) {
-    return nullptr;
-  }
-
   auto it = m_adjustedAddresses.find(addr);
   if (it == m_adjustedAddresses.end()) return nullptr;
 
@@ -2227,10 +2221,6 @@ TCA RelocationInfo::adjustedAddressAfter(TCA addr) const {
 }
 
 TCA RelocationInfo::adjustedAddressBefore(TCA addr) const {
-  if (size_t(addr - m_start) > size_t(m_end - m_start)) {
-    return nullptr;
-  }
-
   auto it = m_adjustedAddresses.find(addr);
   if (it == m_adjustedAddresses.end()) return nullptr;
 

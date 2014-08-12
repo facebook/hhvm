@@ -270,15 +270,18 @@ struct BackEnd : public JIT::BackEnd {
     return true;
   }
 
-  size_t relocate(RelocationInfo& rel, CodeBlock& destBlock,
-                  CodeGenFixups& fixups) override {
-    TCA src = rel.start();
-    size_t range = rel.end() - src;
+  void relocate(RelocationInfo& rel,
+                CodeBlock& destBlock,
+                TCA start, TCA end,
+                CodeGenFixups& fixups) override {
+    TCA src = start;
+    size_t range = end - src;
     bool hasInternalRefs = false;
     bool internalRefsNeedUpdating = false;
+    TCA destStart = destBlock.frontier();
 
-    while (src != rel.end()) {
-      assert(src < rel.end());
+    while (src != end) {
+      assert(src < end);
       DecodedInstruction di(src);
 
       int destRange = 0;
@@ -303,7 +306,7 @@ struct BackEnd : public JIT::BackEnd {
          * being moved need to be adjusted so they continue
          * to point at the right thing
          */
-        if (size_t(di.picAddress() - rel.start()) > range) {
+        if (size_t(di.picAddress() - start) > range) {
           bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
           assert(success);
         } else {
@@ -315,7 +318,7 @@ struct BackEnd : public JIT::BackEnd {
       }
       if (di.hasImmediate()) {
         if (fixups.m_addressImmediates.count(src)) {
-          if (size_t(di.immediate() - (uint64_t)rel.start()) <= range) {
+          if (size_t(di.immediate() - (uint64_t)start) <= range) {
             hasInternalRefs = internalRefsNeedUpdating = true;
           }
         } else {
@@ -333,7 +336,7 @@ struct BackEnd : public JIT::BackEnd {
            * fixups.m_addressImmediates. But it could just happen by bad
            * luck, so just log it.
            */
-          if (size_t(di.immediate() - (uint64_t)rel.start()) <= range) {
+          if (size_t(di.immediate() - (uint64_t)start) <= range) {
             FTRACE(3,
                    "relocate: instruction at {} has immediate 0x{:x}"
                    "which looks like an address that needs relocating\n",
@@ -356,18 +359,18 @@ struct BackEnd : public JIT::BackEnd {
     rel.recordAddress(src, destBlock.frontier(), 0);
 
     if (hasInternalRefs && internalRefsNeedUpdating) {
-      src = rel.start();
-      while (src != rel.end()) {
+      src = start;
+      while (src != end) {
         DecodedInstruction di(src);
         TCA newPicAddress = nullptr;
         int64_t newImmediate = 0;
         if (di.hasPicOffset() &&
-            size_t(di.picAddress() - rel.start()) <= range) {
+            size_t(di.picAddress() - start) <= range) {
           newPicAddress = rel.adjustedAddressAfter(di.picAddress());
           always_assert(newPicAddress);
         }
         if (di.hasImmediate() &&
-            size_t((TCA)di.immediate() - rel.start()) <= range &&
+            size_t((TCA)di.immediate() - start) <= range &&
             fixups.m_addressImmediates.count(src)) {
           newImmediate = (int64_t)rel.adjustedAddressAfter((TCA)di.immediate());
           always_assert(newImmediate);
@@ -386,46 +389,7 @@ struct BackEnd : public JIT::BackEnd {
       }
     }
 
-    return rel.destSize();
-  }
-
-  void adjustForRelocation(TCA start, TCA end,
-                           RelocationInfo& rel,
-                           CodeGenFixups& fixups) override {
-    assert(rel.relocated());
-    while (start != end) {
-      assert(start < end);
-      DecodedInstruction di(start);
-
-      if (di.hasPicOffset()) {
-        /*
-         * A pointer into something that has been relocated needs to be
-         * updated.
-         */
-        if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
-          di.setPicAddress(adjusted);
-        }
-      }
-
-      if (di.hasImmediate()) {
-        /*
-         * Similarly for addressImmediates - and see comment above
-         * for non-address immediates.
-         */
-        if (TCA adjusted = rel.adjustedAddressAfter((TCA)di.immediate())) {
-          if (fixups.m_addressImmediates.count(start)) {
-            di.setImmediate((int64_t)adjusted);
-          } else {
-            FTRACE(3,
-                   "relocate: instruction at {} has immediate 0x{:x}"
-                   "which looks like an address that needs relocating\n",
-                   start, di.immediate());
-          }
-        }
-      }
-
-      start += di.size();
-    }
+    rel.recordRange(start, end, destStart, destBlock.frontier());
   }
 
   template <typename T>
@@ -443,11 +407,50 @@ struct BackEnd : public JIT::BackEnd {
     }
   }
 
-  void adjustForRelocation(AsmInfo* asmInfo,
-                           RelocationInfo& rel,
+  void adjustForRelocation(RelocationInfo& rel,
                            CodeGenFixups& fixups) override {
-    assert(rel.relocated());
+    for (const auto& range : rel) {
+      auto start = range.first;
+      auto end = range.second;
+      while (start != end) {
+        assert(start < end);
+        DecodedInstruction di(start);
 
+        if (di.hasPicOffset()) {
+          /*
+           * A pointer into something that has been relocated needs to be
+           * updated.
+           */
+          if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
+            di.setPicAddress(adjusted);
+          }
+        }
+
+        if (di.hasImmediate()) {
+          /*
+           * Similarly for addressImmediates - and see comment above
+           * for non-address immediates.
+           */
+          if (TCA adjusted = rel.adjustedAddressAfter((TCA)di.immediate())) {
+            if (fixups.m_addressImmediates.count(start)) {
+              di.setImmediate((int64_t)adjusted);
+            } else {
+              FTRACE(3,
+                     "relocate: instruction at {} has immediate 0x{:x}"
+                     "which looks like an address that needs relocating\n",
+                     start, di.immediate());
+            }
+          }
+        }
+
+        start += di.size();
+      }
+    }
+  }
+
+  void adjustForRelocation(RelocationInfo& rel,
+                           AsmInfo* asmInfo,
+                           CodeGenFixups& fixups) override {
     auto& ip = fixups.m_inProgressTailJumps;
     for (size_t i = 0; i < ip.size(); ++i) {
       IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);

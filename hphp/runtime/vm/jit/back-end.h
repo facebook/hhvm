@@ -163,30 +163,34 @@ class BackEnd {
   virtual bool supportsRelocation() const { return false; }
 
   /*
-   * Relocate the code block described by rel to its ultimate destination,
-   * and return the size of the relocated code (which may be different
-   * due to alignment padding, or shrinking branches etc
+   * Relocate code in the range start, end into dest, and record
+   * information about what was done to rel.
+   * On exit, internal references (references into the source range)
+   * will have been adjusted (ie they are still references into the
+   * relocated code). External code references continue to point to
+   * the same address as before relocation.
    */
-  virtual size_t relocate(RelocationInfo& rel, CodeBlock& dest,
-                          CodeGenFixups& fixups) {
+  virtual void relocate(RelocationInfo& rel, CodeBlock& dest,
+                        TCA start, TCA end,
+                        CodeGenFixups& fixups) {
     always_assert(false);
   }
+
   /*
-   * Adjust the offsets/immediates for any instructions in the range start, end
-   * based on the relocation already performed on rel.
-   * Explicit pc-relative offsets, and immediates identified by
-   * fixups.m_addressImmediates will be adjusted.
+   * This should be called after calling relocate on all relevant ranges. It
+   * will adjust all references into the original src ranges to point into the
+   * corresponding relocated ranges.
    */
-  virtual void adjustForRelocation(TCA start, TCA end,
-                                   RelocationInfo& rel, CodeGenFixups& fixups) {
+  virtual void adjustForRelocation(RelocationInfo& rel, CodeGenFixups& fixups) {
     always_assert(false);
   }
+
   /*
-   * Adjust the contents of fixups, sr, and asmInfo based on the relocation
+   * Adjust the contents of fixups and asmInfo based on the relocation
    * already performed on rel.
    */
-  virtual void adjustForRelocation(AsmInfo* asmInfo,
-                                   RelocationInfo& rel, CodeGenFixups& fixups) {
+  virtual void adjustForRelocation(RelocationInfo& rel,
+                                   AsmInfo* asmInfo, CodeGenFixups& fixups) {
     always_assert(false);
   }
 };

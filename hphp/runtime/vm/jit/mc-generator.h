@@ -111,14 +111,10 @@ struct CodeGenFixups {
 };
 
 struct RelocationInfo {
-  RelocationInfo(TCA start, TCA end) :
-      m_start(start), m_end(end) {}
+  RelocationInfo() {}
 
-  TCA start() const { return m_start; }
-  TCA end() const { return m_end; }
-  TCA dest() const { return m_dest; }
-  bool relocated() { return m_destSize != size_t(-1); }
-  size_t destSize() const { return m_destSize; }
+  void recordRange(TCA start, TCA end,
+                   TCA destStart, TCA destEnd);
   void recordAddress(TCA src, TCA dest, int range);
   TCA adjustedAddressAfter(TCA addr) const;
   TCA adjustedAddressBefore(TCA addr) const;
@@ -128,11 +124,12 @@ struct RelocationInfo {
   CTCA adjustedAddressBefore(CTCA addr) const {
     return adjustedAddressBefore(const_cast<TCA>(addr));
   }
+  typedef std::vector<std::pair<TCA,TCA>> RangeVec;
+  RangeVec::iterator begin() { return m_dstRanges.begin(); }
+  RangeVec::iterator end() { return m_dstRanges.end(); }
  private:
-  TCA m_start;
-  TCA m_end;
-  TCA m_dest{nullptr};
-  size_t m_destSize{size_t(-1)};
+  RangeVec m_srcRanges;
+  RangeVec m_dstRanges;
   /*
    * maps from src address, to range of destination addresse
    * This is because we could insert nops before the instruction

@@ -1106,14 +1106,24 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE
 
 void raiseMissingArgument(const Func* func, int got) {
-  const auto expected = func->numNonVariadicParams();
+  const auto total = func->numNonVariadicParams();
   const auto variadic = func->hasVariadicCaptureParam();
+  const Func::ParamInfoVec& params = func->params();
+  int expected = 0;
+  // We subtract the number of parameters with default value at the end
+  for (size_t i = total; i--; ) {
+    if (!params[i].hasDefaultValue()) {
+      expected = i + 1;
+      break;
+    }
+  }
+  bool lessNeeded = (variadic || expected < total);
   if (expected == 1) {
     raise_warning(Strings::MISSING_ARGUMENT, func->name()->data(),
-                  variadic ? "at least" : "exactly", got);
+                  lessNeeded ? "at least" : "exactly", got);
   } else {
     raise_warning(Strings::MISSING_ARGUMENTS, func->name()->data(),
-                  variadic ? "at least" : "exactly", expected, got);
+                  lessNeeded ? "at least" : "exactly", expected, got);
   }
 }
 

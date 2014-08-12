@@ -1,0 +1,24 @@
+
+Warning: foo() expects at least 2 parameters, 0 given in %s on line 3
+
+Notice: Undefined variable: a in %s on line 4
+
+
+Warning: foo() expects at least 2 parameters, 1 given in %s on line 3
+does
+this
+really
+work
+
+Warning: bar() expects at least 3 parameters, 0 given in %s on line 8
+
+Notice: Undefined variable: a in %s on line 9
+
+
+Warning: bar() expects at least 3 parameters, 1 given in %s on line 8
+does
+
+Warning: bar() expects at least 3 parameters, 2 given in %s on line 8
+this
+really
+work

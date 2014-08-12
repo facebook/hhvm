@@ -250,7 +250,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     for (auto i = nPassed; i < numNonVariadicParams; ++i) {
       if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
         a.  Mov  (argReg(0), func);
-        a.  Mov  (argReg(1), i);
+        a.  Mov  (argReg(1), nPassed);
         auto fixupAddr = emitCall(a,
           CppCall::direct(JIT::raiseMissingArgument));
         mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);

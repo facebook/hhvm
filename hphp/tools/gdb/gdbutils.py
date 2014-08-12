@@ -27,6 +27,13 @@ def memoized(func):
 
 
 #------------------------------------------------------------------------------
+# General-purpose helpers.
+
+def parse_argv(args):
+    return [gdb.parse_and_eval(arg) for arg in gdb.string_to_argv(args)]
+
+
+#------------------------------------------------------------------------------
 # Caching lookups.
 
 @memoized

@@ -3,13 +3,6 @@ GDB commands for inspecting HHVM bytecode.
 """
 # @lint-avoid-python-3-compatibility-imports
 
-from os import sys, path
-
-# GDB and Python modules don't play well together.
-_localdir = path.dirname(path.realpath(path.expanduser(__file__)))
-if sys.path[0] != _localdir:
-    sys.path.insert(0, _localdir)
-
 import gdb
 from gdbutils import *
 
@@ -186,7 +179,7 @@ left off.
         self.bcpos = None
 
     def invoke(self, args, from_tty):
-        argv = [gdb.parse_and_eval(arg) for arg in gdb.string_to_argv(args)]
+        argv = parse_argv(args)
 
         if len(argv) == 0:
             if not self.bcpos:

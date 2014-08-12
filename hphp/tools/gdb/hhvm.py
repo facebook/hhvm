@@ -16,5 +16,6 @@ if sys.path[0] != localdir:
 
 import hhbc
 import lookup
+import stack
 import pretty
 import unit

@@ -41,7 +41,8 @@
 let () =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   let command = ClientArgs.parse_args () in
-  EventLogger.client_startup command;
+  let log_cmd = ClientLogCommandUtils.log_command_of_command command in
+  EventLogger.client_startup log_cmd;
   begin match command with
     | ClientCommand.CCheck check_env ->
         ClientCheck.main check_env check_env.ClientEnv.retries;
@@ -52,5 +53,5 @@ let () =
     | ClientCommand.CBuild env -> ClientBuild.main env
     | ClientCommand.CProlog env -> ClientProlog.main env
   end;
-  EventLogger.client_finish command;
+  EventLogger.client_finish log_cmd;
   ()

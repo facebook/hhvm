@@ -262,6 +262,12 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
         }
         ok = true;
       }
+    } catch (ExitException& e) {
+      throw;
+    } catch (RequestTimeoutException& e) {
+      throw;
+    } catch (RequestMemoryExceededException& e) {
+      throw;
     } catch (ExtendedException& ee) {
       auto fileAndLine = ee.getFileAndLine();
       err = (fileAndLine.first.empty()) ? ee.getMessage()

@@ -822,7 +822,7 @@ class Redis {
     'lpushx' => [ 'format' => 'kl', 'return' => 'Long' ],
     'lrange' => [ 'format' => 'kll', 'return' => 'Vector', 'retargs' => [1] ],
     'lgetrange' => [ 'alias' => 'lrange' ],
-    'lrem' => [ 'format' => 'kvl', 'return' => 'Long' ],
+    'lrem' => [ 'format' => 'kvs', 'return' => 'Long' ],
     'lremove' => [ 'alias' => 'lrem' ],
     'lset' => [ 'format' => 'klv', 'return' => 'Boolean' ],
     'ltrim' => [ 'format' => 'kll', 'return' => 'Boolean' ],

@@ -4,7 +4,7 @@ GDB commands for various HHVM ID lookups.
 # @lint-avoid-python-3-compatibility-imports
 
 import gdb
-import stl
+import idx
 from gdbutils import *
 from unit import curunit
 
@@ -59,11 +59,14 @@ def lookup_litstr(litstr_id, unit):
         litstr_id -= gloff
         unit = V('HPHP::LitstrTable::s_litstrTable')
 
-    return stl.vector_at(unit['m_namedInfo'], litstr_id)['first']
+    return idx.vector_at(unit['m_namedInfo'], litstr_id)['first']
 
 
 class LookupLitstrCommand(gdb.Command):
-    """Lookup a litstr StringData* by its Unit* and Id."""
+    """Lookup a litstr StringData* by its Id and Unit*.
+
+If no Unit is given, the current unit (set by `unit') is used.
+"""
 
     def __init__(self):
         super(LookupLitstrCommand, self).__init__('lookup litstr',

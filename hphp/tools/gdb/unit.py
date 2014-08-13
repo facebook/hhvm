@@ -14,8 +14,8 @@ curunit = None
 class UnitCommand(gdb.Command):
     """Set the current translation unit.
 
-Use `unit none' to unset.
-    """
+Use `unit none` to unset.  Just `unit` displays the current Unit.
+"""
 
     def __init__(self):
         super(UnitCommand, self).__init__('unit', gdb.COMMAND_DATA,

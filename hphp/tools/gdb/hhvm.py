@@ -15,6 +15,7 @@ if sys.path[0] != localdir:
     sys.path.insert(0, localdir)
 
 import hhbc
+import idx
 import lookup
 import stack
 import pretty

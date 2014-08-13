@@ -179,7 +179,7 @@ If only one argument is provided, if it's in the range for bytecode
 allocations (i.e., > 0xffffffff), print the bytecode at $arg0.  Otherwise,
 print $arg0 bytecodes starting from wherever the previous call to `hhx'
 left off.
-    """
+"""
 
     def __init__(self):
         super(HHXCommand, self).__init__('hhx', gdb.COMMAND_DATA)

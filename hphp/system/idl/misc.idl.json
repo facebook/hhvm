@@ -352,6 +352,7 @@
             "name": "token_name",
             "desc": "token_name() gets the symbolic name for a PHP token value.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "String",

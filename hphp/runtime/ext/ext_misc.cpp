@@ -712,11 +712,6 @@ static const char** getTokenNameTable() {
 // Converts a user token ID to a token name
 String f_token_name(int64_t token) {
   static const char** table = getTokenNameTable();
-  // For compatibility with parser packages expecting veneration of the
-  // lexer's Hebrew roots.
-  if (token == k_T_DOUBLE_COLON) {
-    return "T_PAAMAYIM_NEKUDOTAYIM";
-  }
   if (token >= 0 && token < MaxUserTokenId) {
     return table[token];
   }

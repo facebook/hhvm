@@ -162,11 +162,19 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   Exception* pendingException = info->m_pendingException;
   info->m_pendingException = nullptr;
 
-  if (do_timedout && !pendingException) {
-    pendingException = generate_request_timeout_exception();
+  if (do_timedout) {
+    if (pendingException) {
+      p.setTimedOutFlag();
+    } else {
+      pendingException = generate_request_timeout_exception();
+    }
   }
-  if (do_memExceeded && !pendingException) {
-    pendingException = generate_memory_exceeded_exception();
+  if (do_memExceeded) {
+    if (pendingException) {
+      p.setMemExceededFlag();
+    } else {
+      pendingException = generate_memory_exceeded_exception();
+    }
   }
   if (do_signaled) {
     extern bool f_pcntl_signal_dispatch();

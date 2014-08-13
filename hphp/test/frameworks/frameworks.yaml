@@ -637,9 +637,9 @@
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master
-    # Stable is 1.1.14, but pull requests require master
+    # Stable is 1.1.15, but pull requests require master
     # e.g., https://github.com/yiisoft/yii/pull/3211
-    commit: ff72f51b9c46a3580df39d634c60eb8fc4687457
+    commit: 28f8e98757f4faa560e0801a0b8057459ed9cc6e
     install_root: yii
     test_root: yii/tests
     clowns:

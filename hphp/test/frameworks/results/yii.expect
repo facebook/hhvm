@@ -442,6 +442,38 @@ CCookieCollectionTest::testGetRequest
 .
 CCookieCollectionTest::testRemove
 .
+CCubrid2Test::testAddColumn
+S
+CCubrid2Test::testAddForeignKey
+S
+CCubrid2Test::testAlterColumn
+S
+CCubrid2Test::testCreateIndex
+S
+CCubrid2Test::testCreateTable
+S
+CCubrid2Test::testDropColumn
+S
+CCubrid2Test::testDropForeignKey
+S
+CCubrid2Test::testDropIndex
+S
+CCubrid2Test::testDropTable
+S
+CCubrid2Test::testRenameColumn
+S
+CCubrid2Test::testRenameTable
+S
+CCubridTest::testColumn
+S
+CCubridTest::testCommandBuilder
+S
+CCubridTest::testResetSequence
+S
+CCubridTest::testSchema
+S
+CCubridTest::testTable
+S
 CDataProviderIteratorTest::testInitWithDisabledPagination with data set #0
 .
 CDataProviderIteratorTest::testInitWithDisabledPagination with data set #1
@@ -672,6 +704,8 @@ CDbConnectionTest::testLastInsertID
 .
 CDbConnectionTest::testNullConversion
 .
+CDbConnectionTest::testOdbc
+S
 CDbConnectionTest::testQuoteValue
 .
 CDbCriteriaTest::testAddBetweenCondition
@@ -795,6 +829,10 @@ CFileHelperTest::testFindFiles_relativePaths
 CFileHelperTest::testGetMimeTypeByExtension
 .
 CFileHelperTest::testRemoveDirectory
+.
+CFileHelperTest::testRemoveDirectorySymlinks1
+.
+CFileHelperTest::testRemoveDirectorySymlinks2
 .
 CFileValidatorTest::testSizeToBytes with data set #0
 .
@@ -1097,6 +1135,8 @@ CHtmlTest::testScriptFileWithHtmlOptions with data set #2
 CHtmlTest::testScriptWithHtmlOptions with data set #0
 .
 CHtmlTest::testScriptWithHtmlOptions with data set #1
+.
+CHtmlTest::testScriptWithHtmlOptions with data set #2
 .
 CHtmlTest::testStatefulForm with data set #0
 .

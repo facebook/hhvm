@@ -335,6 +335,7 @@
             "name": "token_get_all",
             "desc": "token_get_all() parses the given source string into PHP language tokens using the Zend engine's lexical scanner.\n\nFor a list of parser tokens, see List of Parser Tokens, or use token_name() to translate a token value into its string representation.",
             "flags": [
+                "ParamCoerceModeNull"
             ],
             "return": {
                 "type": "VariantMap",

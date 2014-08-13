@@ -638,7 +638,7 @@ Array f_token_get_all(const String& source) {
   ScannerToken tok;
   Location loc;
   int tokid;
-  Array res;
+  Array res = Array::Create();
   while ((tokid = scanner.getNextToken(tok, loc))) {
 loop_start: // For after seeing a T_INLINE_HTML, see below
     if (tokid < 256) {

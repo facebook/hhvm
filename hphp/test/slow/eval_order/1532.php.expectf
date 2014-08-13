@@ -1,3 +1,4 @@
+Warning: class_uses(): Class A does not exist in %s on line %d
 bool(false)
 string(1) "A"
 array(1) {

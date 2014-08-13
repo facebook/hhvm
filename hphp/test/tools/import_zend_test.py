@@ -13,6 +13,12 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
+import urllib2
+
+# The version that we will be importing the tests from.
+# Must be a valid, released version from php download site
+zend_version = "5.5.15"
 
 # Don't even pull these into the repo.
 # We want running the bad tests to still complete.
@@ -844,13 +850,6 @@ other_files = (
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-z",
-    "--zend_path",
-    type=str,
-    required=True,
-    help="zend path to import tests from. git clone https://github.com/php/php-src"
-)
-parser.add_argument(
     "-o",
     "--only",
     type=str,
@@ -1475,9 +1474,27 @@ def should_import(filename):
     return True
 
 script_dir = os.path.dirname(__file__)
-all_dir = os.path.join(script_dir, '../zend/all')
+zend_dir = os.path.normpath(os.path.join(script_dir, '../zend'))
+all_dir = os.path.join(zend_dir, 'all')
 
-for root, dirs, files in os.walk(args.zend_path):
+zend_release_name = "php-" + zend_version
+zend_release_filename = zend_release_name + ".tar.gz"
+zend_release_archive = os.path.join(zend_dir, zend_release_filename)
+zend_release_path = os.path.join(zend_dir, zend_release_name)
+
+if not os.path.isfile(zend_release_archive):
+    print 'Downloading ' + zend_release_name + '...'
+    zend_release_url = "http://php.net/get/" + zend_release_filename + "/from/this/mirror"
+    zend_release_request = urllib2.Request(zend_release_url)
+    zend_release_response = urllib2.urlopen(zend_release_request)
+    file(zend_release_archive, 'wb').write(zend_release_response.read())
+
+if not os.path.isdir(zend_release_path):
+    print 'Extracting ' + zend_release_name + '...'
+    zend_release_tar = tarfile.open(zend_release_archive, 'r:gz')
+    zend_release_tar.extractall(zend_dir)
+
+for root, dirs, files in os.walk(zend_release_path):
     for filename in files:
         full_file = os.path.join(root, filename)
 
@@ -1495,7 +1512,7 @@ for root, dirs, files in os.walk(args.zend_path):
         if matches(args.only) and should_import(full_file):
             walk(
                 full_file,
-                os.path.join(all_dir, os.path.relpath(root, args.zend_path))
+                os.path.join(all_dir, os.path.relpath(root, zend_release_path))
             )
 
 if not os.path.isdir(all_dir):

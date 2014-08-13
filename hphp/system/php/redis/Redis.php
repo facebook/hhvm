@@ -1542,6 +1542,18 @@ class Redis {
           } break;
       }
     }
+    if ($func['cmd'] == "LREM") {
+      //
+      // The PHP interface has arguments in one order:
+      //   https://github.com/nicolasff/phpredis#lrem-lremove
+      // But the server wants them in another:
+      //   http://redis.io/commands/lrem
+      // So just swap them prior to marshalling them out.
+      //
+      $tmp = $args[1];
+      $args[1] = $args[2];
+      $args[2] = $tmp;
+    }
     $this->processArrayCommand($func['cmd'], $args);
     if (empty($func['handler'])) {
       return null;

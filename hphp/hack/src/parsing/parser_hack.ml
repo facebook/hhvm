@@ -215,7 +215,7 @@ let check_toplevel env pos =
 (*****************************************************************************)
 
 let rec check_lvalue env = function
-  | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _) -> ()
+  | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _ | Unsafeexpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _) ->
       error_at env pos
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
@@ -2382,6 +2382,10 @@ and expr_atomic ?(allow_class=false) env  =
       error env ("A valid variable name starts with a letter or underscore,"^
         "followed by any number of letters, numbers, or underscores");
       expr env
+  | Tunsafeexpr ->
+      let e = expr env in
+      let end_ = Pos.make env.lb in
+      Pos.btw pos end_, Unsafeexpr e
   | _ ->
       error_expect env "expression";
       pos, Null

@@ -1084,7 +1084,7 @@ and class_method env sids cv_ids x acc =
 
 and check_constant_expr (pos, e) =
   match e with
-  | Id _ | Null | True | False | Int _
+  | Unsafeexpr _ | Id _ | Null | True | False | Int _
   | Float _ | String _
   | String2 ([], _) -> ()
   | Class_const ((_, cls), _) when cls <> "static" -> ()
@@ -1726,6 +1726,8 @@ and expr_ env = function
         ShapeMap.add name (expr env value) fdm
       end ShapeMap.empty fdl
       end
+  | Unsafeexpr _ ->
+      N.Any
 
 and expr_lambda env f =
   let h = opt_map (hint ~allow_this:true env) f.f_ret in

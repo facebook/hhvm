@@ -1973,14 +1973,14 @@ std::string MCGenerator::getUsage() {
   size_t totalBlockCapacity = 0;
 
   auto addRow = [&](const std::string& name, size_t used, size_t capacity) {
-    totalBlockSize += used;
-    totalBlockCapacity += capacity;
     auto percent = capacity ? 100 * used / capacity : 0;
     usage += folly::format("mcg: {:9} bytes ({}%) in {}\n",
                            used, percent, name).str();
   };
   code.forEachBlock([&](const char* name, const CodeBlock& a) {
     addRow(std::string("code.") + name, a.used(), a.capacity());
+    totalBlockSize += a.used();
+    totalBlockCapacity += a.capacity();
   });
   // Report code.stubs usage = code.cold + code.frozen usage, so
   // ODS doesn't break.
@@ -1988,7 +1988,6 @@ std::string MCGenerator::getUsage() {
   auto const stubsCapacity = code.realCold().capacity() +
     code.realFrozen().capacity();
   addRow(std::string("code.stubs"), stubsUsed, stubsCapacity);
-
   addRow("data", code.data().used(), code.data().capacity());
   addRow("RDS", RDS::usedBytes(),
          RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
@@ -1997,10 +1996,10 @@ std::string MCGenerator::getUsage() {
   addRow("persistentRDS", RDS::usedPersistentBytes(),
          RuntimeOption::EvalJitTargetCacheSize / 4);
   addRow("total",
-         totalBlockSize + code.data().used() +
-         RDS::usedBytes() + RDS::usedPersistentBytes(),
-         totalBlockCapacity + code.data().capacity() +
-         RuntimeOption::EvalJitTargetCacheSize);
+          totalBlockSize + code.data().used()
+          + RDS::usedPersistentBytes(),
+          totalBlockCapacity + code.data().capacity()
+          + (RuntimeOption::EvalJitTargetCacheSize / 4));
 
   return usage;
 }

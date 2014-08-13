@@ -57,17 +57,17 @@ function timezone_open($timezone) { }
 function timezone_transitions_get($object) { }
 function timezone_version_get() { }
 class DateTime {
-  const ATOM = 0;
-  const COOKIE = 0;
-  const ISO8601 = 0;
-  const RFC822 = 0;
-  const RFC850 = 0;
-  const RFC1036 = 0;
-  const RFC1123 = 0;
-  const RFC2822 = 0;
-  const RFC3339 = 0;
-  const RSS = 0;
-  const W3C = 0;
+  const ATOM = '';
+  const COOKIE = '';
+  const ISO8601 = '';
+  const RFC822 = '';
+  const RFC850 = '';
+  const RFC1036 = '';
+  const RFC1123 = '';
+  const RFC2822 = '';
+  const RFC3339 = '';
+  const RSS = '';
+  const W3C = '';
   public function add($interval) { }
   public function __construct($time = "now", $timezone = null_object) { }
   static public function createFromFormat($format, $time, $timezone = null_object) { }

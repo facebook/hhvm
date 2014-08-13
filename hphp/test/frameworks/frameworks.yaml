@@ -600,8 +600,8 @@
     test_root: stash
   symfony:
     url: https://github.com/symfony/symfony.git
-    branch: v2.4.3
-    commit: 3199b2e0d194f71fe2e13c95768b2ef22206682b
+    branch: v2.4.8
+    commit: 3da923989cce41c149c6f20b7723c052ac251b16
     install_root: symfony
     test_root: symfony
     blacklist:

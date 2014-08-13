@@ -32,6 +32,26 @@ void c_Closure::t___construct() {
   raise_error("Can't create a Closure directly");
 }
 
+Variant c_Closure::t___get(Variant member) {
+  raise_recoverable_error("Closure object cannot have properties");
+  return init_null();
+}
+
+Variant c_Closure::t___set(Variant member, Variant value) {
+  raise_recoverable_error("Closure object cannot have properties");
+  return init_null();
+}
+
+bool c_Closure::t___isset(Variant name) {
+  raise_recoverable_error("Closure object cannot have properties");
+  return false;
+}
+
+Variant c_Closure::t___unset(Variant name) {
+  raise_recoverable_error("Closure object cannot have properties");
+  return init_null();
+}
+
 static StaticString
   s_this("this"),
   s_varprefix("$"),

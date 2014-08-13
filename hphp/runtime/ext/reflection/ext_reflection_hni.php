@@ -342,7 +342,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   }
 
   // Implementation of __toString
-  final protected function toString(
+  final protected function __toStringHelper(
     $type,
     array $preAttrs = [],
     array $funcAttrs = [],
@@ -505,7 +505,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    * @return     string  A representation of this ReflectionFunction.
    */
   public function __toString(): string {
-    return $this->toString($this->isClosure() ? 'Closure' : 'Function');
+    return $this->__toStringHelper($this->isClosure() ? 'Closure' : 'Function');
   }
 
   /**
@@ -747,7 +747,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       $funcAttrs[] = 'public';
     }
 
-    return $this->toString('Method', $preAttrs, $funcAttrs);
+    return $this->__toStringHelper('Method', $preAttrs, $funcAttrs);
   }
 
   /**

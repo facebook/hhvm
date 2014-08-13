@@ -107,35 +107,38 @@ bool removeUnreachable(IRUnit& unit) {
   ITRACE(2, "removing unreachable blocks\n");
   Trace::Indent _i;
 
-  smart::hash_set<Block*, pointer_hash<Block>> visited;
-  smart::stack<Block*> stack;
-  stack.push(unit.entry());
+  boost::dynamic_bitset<> visited(unit.numBlocks());
+  smart::vector<Block*> blocks;
+  smart::vector<Block*> stack;
+  blocks.reserve(unit.numBlocks());
+  stack.reserve(unit.numBlocks());
 
   // Find all blocks reachable from the entry block.
+  stack.push_back(unit.entry());
   while (!stack.empty()) {
-    auto* b = stack.top();
-    stack.pop();
-    if (visited.count(b)) continue;
-
-    visited.insert(b);
+    auto* b = stack.back();
+    stack.pop_back();
+    if (visited.test(b->id())) continue;
+    visited.set(b->id());
+    blocks.push_back(b);
     if (auto* taken = b->taken()) {
-      if (!visited.count(taken)) stack.push(taken);
+      if (!visited.test(taken->id())) stack.push_back(taken);
     }
     if (auto* next = b->next()) {
-      if (!visited.count(next)) stack.push(next);
+      if (!visited.test(next->id())) stack.push_back(next);
     }
   }
 
   // Walk through the reachable blocks and erase any preds that weren't
   // found.
   bool modified = false;
-  for (auto* block : visited) {
+  for (auto* block: blocks) {
     auto& preds = block->preds();
     for (auto it = preds.begin(); it != preds.end(); ) {
       auto* inst = it->inst();
       ++it;
 
-      if (!visited.count(inst->block())) {
+      if (!visited.test(inst->block()->id())) {
         ITRACE(3, "removing unreachable B{}\n", inst->block()->id());
         inst->setNext(nullptr);
         inst->setTaken(nullptr);

@@ -1792,9 +1792,11 @@ void MCGenerator::traceCodeGen() {
     "IRUnit has loop but Eval.JitLoops=0:\n{}\n", unit
   );
 
-  optimize(unit, ht.irBuilder(), m_tx.mode());
-  finishPass(" after optimizing ", kOptLevel);
-
+  // Task #4075847: enable optimizations with loops
+  if (!(RuntimeOption::EvalJitLoops && m_tx.mode() == TransKind::Optimize)) {
+    optimize(unit, ht.irBuilder(), m_tx.mode());
+    finishPass(" after optimizing ", kOptLevel);
+  }
   if (m_tx.mode() == TransKind::Profile &&
       RuntimeOption::EvalJitPGOUsePostConditions) {
     unit.collectPostConditions();

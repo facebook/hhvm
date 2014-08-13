@@ -93,9 +93,6 @@ struct IRBuilder {
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
 
-  void setRegionTopoOrder(bool b) { m_regionTopoOrder = b; }
-  bool regionTopoOrder() const { return m_regionTopoOrder; }
-
   /*
    * Support for guard relaxation. Whenever the semantics of an hhir operation
    * depends on the type of one of its input values, that value's type must be
@@ -477,9 +474,6 @@ private:
 
   bool m_enableSimplification;
   bool m_constrainGuards;
-
-  // TODO(#4075847) Used to disable optimizations for loops.
-  bool m_regionTopoOrder{true};
 
   GuardConstraints m_constraints;
 

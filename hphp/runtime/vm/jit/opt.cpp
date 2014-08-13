@@ -129,8 +129,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   };
 
   auto const doReoptimize = RuntimeOption::EvalHHIRExtraOptPass &&
-    (RuntimeOption::EvalHHIRCse || RuntimeOption::EvalHHIRSimplification) &&
-    irBuilder.regionTopoOrder();
+    (RuntimeOption::EvalHHIRCse || RuntimeOption::EvalHHIRSimplification);
 
   if (shouldHHIRRelaxGuards()) {
     /*
@@ -163,11 +162,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   }
 
   if (RuntimeOption::EvalHHIRRefcountOpts) {
-    // TODO(#4075847) Optimizations with loops.
-    if (irBuilder.regionTopoOrder()) {
-      optimizeRefcounts(unit, FrameState{unit, unit.entry()->front().marker()});
-      finishPass("refcount opts");
-    }
+    optimizeRefcounts(unit, FrameState{unit, unit.entry()->front().marker()});
+    finishPass("refcount opts");
   }
 
   dce("initial");

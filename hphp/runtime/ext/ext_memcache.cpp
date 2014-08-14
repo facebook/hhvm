@@ -76,7 +76,7 @@ static bool ini_on_update_hash_strategy(const std::string& value) {
   } else if (!strncasecmp(value.data(), "consistent", sizeof("consistent"))) {
     MEMCACHEG(hash_strategy) = "consistent";
   }
-  return false;
+  return true;
 }
 
 static bool ini_on_update_hash_function(const std::string& value) {
@@ -85,7 +85,7 @@ static bool ini_on_update_hash_function(const std::string& value) {
   } else if (!strncasecmp(value.data(), "fnv", sizeof("fnv"))) {
     MEMCACHEG(hash_function) = "fnv";
   }
-  return false;
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

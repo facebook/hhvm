@@ -32,7 +32,12 @@ def moveAllFiles(old, new):
     ]
     for filesuffix in files:
         if os.path.isfile(old + filesuffix):
-            shutil.move(old + filesuffix, new + filesuffix)
+            old_file = old + filesuffix
+            new_file = new + filesuffix
+            if args.git_mv:
+                os.system("git mv %s %s " % (old_file, new_file))
+            else:
+                shutil.move(old_file, new_file)
 
 def moveTests(tests):
     for test in tests:
@@ -70,6 +75,13 @@ parser.add_argument(
     action="store_true"
 )
 
+parser.add_argument(
+    "--git-mv",
+    "-g",
+    help="Use git mv command to move.",
+    action="store_true"
+)
+
 
 args = parser.parse_args()
 
@@ -97,5 +109,8 @@ if args.verbose or args.no_move:
         print test.replace(os.path.realpath(zend_dir), '')
 
 if not args.no_move:
-    print "\nMoving tests"
-    moveTests(good_tests)
+    if len(good_tests) == 0:
+        print "\nNo good tests found"
+    else:
+        print "\nMoving %d tests" % len(good_tests)
+        moveTests(good_tests)

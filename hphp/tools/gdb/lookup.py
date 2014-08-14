@@ -5,8 +5,8 @@ GDB commands for various HHVM ID lookups.
 
 import gdb
 import idx
+import unit
 from gdbutils import *
-from unit import curunit
 
 
 #------------------------------------------------------------------------------
@@ -51,15 +51,15 @@ LookupFuncCommand()
 #------------------------------------------------------------------------------
 # `lookup litstr' command.
 
-def lookup_litstr(litstr_id, unit):
+def lookup_litstr(litstr_id, u):
     table = None
     gloff = V('HPHP::kGlobalLitstrOffset')
 
     if litstr_id >= gloff:
         litstr_id -= gloff
-        unit = V('HPHP::LitstrTable::s_litstrTable')
+        u = V('HPHP::LitstrTable::s_litstrTable')
 
-    return idx.vector_at(unit['m_namedInfo'], litstr_id)['first']
+    return idx.vector_at(u['m_namedInfo'], litstr_id)['first']
 
 
 class LookupLitstrCommand(gdb.Command):
@@ -80,14 +80,14 @@ If no Unit is given, the current unit (set by `unit') is used.
             return
 
         if len(argv) == 1:
-            if curunit is None:
+            if unit.curunit is None:
                 print 'lookup litstr: No Unit set or provided.'
-            unit = curunit
+            u = curunit
 
-        unit = argv[0].cast(T('HPHP::Unit').pointer())
+        u = argv[0].cast(T('HPHP::Unit').pointer())
         litstr_id = argv[1].cast(T('HPHP::Id'))
 
-        litstr = lookup_litstr(litstr_id, unit)
+        litstr = lookup_litstr(litstr_id, u)
         gdb.execute('print (%s)%s' % (str(litstr.type), str(litstr)))
 
 LookupLitstrCommand()

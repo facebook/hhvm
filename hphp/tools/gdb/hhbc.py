@@ -4,9 +4,9 @@ GDB commands for inspecting HHVM bytecode.
 # @lint-avoid-python-3-compatibility-imports
 
 import gdb
+import unit
 from gdbutils import *
 from lookup import lookup_litstr
-from unit import curunit
 
 
 #------------------------------------------------------------------------------
@@ -137,8 +137,8 @@ class HHBC:
                 info['value'] = au['u_' + str(immtype)[6:]]
 
                 # Try to print out literal strings.
-                if immtype == V('HPHP::SA') and curunit is not None:
-                    litstr = lookup_litstr(info['value'], curunit)
+                if immtype == V('HPHP::SA') and unit.curunit is not None:
+                    litstr = lookup_litstr(info['value'], unit.curunit)
                     info['value'] = litstr['m_data']
             else:
                 info['size'] = 0
@@ -173,12 +173,17 @@ class HHBC:
 # `hhx' command.
 
 class HHXCommand(gdb.Command):
-    """Print $arg1 bytecodes starting from $arg0.
+    """Print an HHBC stream.
 
-If only one argument is provided, if it's in the range for bytecode
-allocations (i.e., > 0xffffffff), print the bytecode at $arg0.  Otherwise,
-print $arg0 bytecodes starting from wherever the previous call to `hhx'
-left off.
+If two arguments are provided, the first is interpreted as the start PC, and
+the second, as the number of opcodes to print.  Subsequent calls to `hhx' may
+omit these argument to print the same number of opcodes starting wherever the
+previous call left off.
+
+If only a single argument is provided, if it is in the range for bytecode
+allocations (i.e., > 0xffffffff), it replaces the saved PC and defaults
+the count to 1 before printing.  Otherwise, it replaces the count and the PC
+remains where it left off after the previous call.
 """
 
     def __init__(self):

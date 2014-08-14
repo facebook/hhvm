@@ -10,13 +10,25 @@ from hashes import hash_of
 
 
 #------------------------------------------------------------------------------
-# Accessors.
+# STL accessors.
+#
+# These are only designed to work for gcc-4.8.1.
 
 def atomic_get(atomic):
     return atomic['_M_b']['_M_p']
 
+
 def vector_at(vec, idx):
-    return vec['_M_impl']['_M_start'][idx]
+    vec = vec['_M_impl']
+
+    if idx >= vec['_M_finish'] - vec['_M_start']:
+        return None
+    else:
+        return vec['_M_start'][idx]
+
+
+#------------------------------------------------------------------------------
+# HHVM accessors.
 
 def thm_at(thm, key):
     table = atomic_get(thm['m_table'])
@@ -28,12 +40,10 @@ def thm_at(thm, key):
         entry = table['entries'][idx]
         probe = atomic_get(entry['first'])
 
-        vp_type = entry['second'].type.pointer()
-
         if probe == key:
-            return entry['second'].address.cast(vp_type)
+            return entry['second']
         if probe == 0:
-            return gdb.Value(0).cast(vp_type)
+            return None
 
         idx += 1
         if idx == capac:
@@ -101,6 +111,10 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
             except:
                 print 'idx: Unrecognized container.'
                 return
+
+        if value is None:
+            print 'idx: Element not found.'
+            return
 
         value_str = unicode(value)
         true_type = value.type.strip_typedefs()

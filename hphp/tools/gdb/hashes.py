@@ -25,7 +25,9 @@ def hash_of(value):
     t = value.type
 
     for (htype, hfunc) in hashes.iteritems():
-        if t == T(htype):
-            return hfunc(value)
+        try:  # Skip over nonexistent types.
+            if t == T(htype):
+                return hfunc(value)
+        except: pass
 
-    return value
+    return value.cast(T('size_t'))

@@ -124,8 +124,8 @@
     sequential: true
   fastroute:
     url: https://github.com/nikic/FastRoute.git
-    branch: master
-    commit: 40c897afe69ed59582b30cb05f437e544ce46bdf
+    branch: v0.2.0
+    commit: 7dc9a43cb856debc22fe158a1144018e16f7a637
     install_root: fastroute
     test_root: fastroute
   guzzle:

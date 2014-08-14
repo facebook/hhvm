@@ -274,7 +274,7 @@ struct Input {
       }
     }
     error("EOF in string literal");
-    NOT_REACHED();
+    not_reached();
     return false;
   }
 
@@ -322,7 +322,7 @@ struct Input {
       buffer.push_back(c);
     }
     error("EOF in \"\"\"-string literal");
-    NOT_REACHED();
+    not_reached();
     return false;
   }
 
@@ -831,7 +831,7 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   } catch (boost::bad_lexical_cast&) {
     as.error("couldn't convert input argument (" + strVal + ") to "
              "proper type");
-    NOT_REACHED();
+    not_reached();
   }
 }
 
@@ -842,7 +842,7 @@ uint8_t read_subop(AsmState& as) {
     return static_cast<uint8_t>(*ty);
   }
   as.error("unknown subop name");
-  NOT_REACHED();
+  not_reached();
 }
 
 const StringData* read_litstr(AsmState& as) {

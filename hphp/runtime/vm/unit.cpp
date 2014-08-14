@@ -1424,7 +1424,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         return;
     }
     // Normal cases should continue, KindDone returns
-    NOT_REACHED();
+    not_reached();
   } while (true);
 }
 

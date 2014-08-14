@@ -106,7 +106,7 @@ void popRank(Rank rank) {
     }
   }
   // If you hit this, you popped a rank that was never pushed.
-  NOT_REACHED();
+  not_reached();
 }
 #endif
 

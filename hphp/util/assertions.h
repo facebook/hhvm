@@ -45,8 +45,6 @@ T bad_value() {
   not_reached();
 }
 
-#define NOT_REACHED not_reached
-
 #define not_implemented() do {                   \
   fprintf(stderr, "not implemented: %s:%d %s\n", \
           __FILE__, __LINE__, __FUNCTION__);     \

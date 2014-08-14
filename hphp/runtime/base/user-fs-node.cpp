@@ -103,7 +103,7 @@ Variant UserFSNode::invoke(const Func* func, const String& name,
       return uninit_null();
   }
 
-  NOT_REACHED();
+  not_reached();
   return uninit_null();
 }
 

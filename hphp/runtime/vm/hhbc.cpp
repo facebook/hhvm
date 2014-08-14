@@ -1294,7 +1294,7 @@ const uint8_t* ImmVector::findLastMember() const {
     assert(vec - m_start < m_length);
   }
 
-  NOT_REACHED();
+  not_reached();
 }
 
 bool ImmVector::decodeLastMember(const Unit* u,

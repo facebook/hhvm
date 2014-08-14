@@ -147,7 +147,7 @@ CppCall MCGenerator::getDtorCall(DataType type) {
     return CppCall::method(&RefData::release);
   default:
     assert(false);
-    NOT_REACHED();
+    not_reached();
   }
 }
 
@@ -1265,7 +1265,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
       vmpc() = liveUnit()->at(fe->m_fcallOff);
       assert(isFCallStar(*reinterpret_cast<const Op*>(vmpc())));
       raise_error("Stack overflow");
-      NOT_REACHED();
+      not_reached();
     } else {
       /*
        * We were called via re-entry

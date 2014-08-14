@@ -557,7 +557,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 
 // Emitting RATAs isn't supported here right now.  (They're only
 // created in hhbbc.)
-#define IMPL_RATA(var) NOT_REACHED()
+#define IMPL_RATA(var) not_reached()
 #define IMPL1_RATA IMPL_RATA(a1)
 #define IMPL2_RATA IMPL_RATA(a2)
 #define IMPL3_RATA IMPL_RATA(a3)
@@ -999,7 +999,7 @@ int SymbolicStack::getActualPos(int vpos) const {
       return j;
     }
   }
-  NOT_REACHED();
+  not_reached();
 }
 
 char SymbolicStack::getActual(int index) const {

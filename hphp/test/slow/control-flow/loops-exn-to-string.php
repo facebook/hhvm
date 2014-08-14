@@ -8,18 +8,25 @@
 class C {
   private ?C $next = null;
 
-  public function iter() {
-    $elem = $this;
+  public function __construct(?C $next) {
+    $this->next = $next;
+  }
 
-    while ($elem !== null) {
-      $elem = $elem->next;
+  public function iter(): void {
+    // Add a preheader to the loop to get interesting behavior.
+    if ($this->next === null) return;
+
+    $obj = $this;
+    while ($obj !== null) {
+      $obj = $obj->next;
     }
   }
 }
 
-function main() {
-  $c = new C();
+function main(): void {
+  $c = new C(new C(new C(null)));
 
+  $c->iter();
   $c->iter();
   $c->iter();
   $c->iter();

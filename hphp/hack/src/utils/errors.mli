@@ -225,6 +225,11 @@ val missing_constructor : Pos.t -> unit
 val enum_constant_type_bad : Pos.t -> Pos.t -> string -> Pos.t list -> unit
 val enum_type_bad : Pos.t -> string -> Pos.t list -> unit
 val enum_type_typedef_mixed : Pos.t -> unit
+val enum_switch_redundant : string -> Pos.t -> Pos.t -> unit
+val enum_switch_nonexhaustive : Pos.t -> string list -> Pos.t -> unit
+val enum_switch_redundant_default : Pos.t -> Pos.t -> unit
+val enum_switch_not_const : Pos.t -> unit
+val enum_switch_wrong_class : Pos.t -> string -> string -> unit
 val invalid_shape_field_name : Pos.t -> unit
 val invalid_shape_field_type : Pos.t -> Pos.t -> string -> Pos.t list -> unit
 val invalid_shape_field_literal : Pos.t -> Pos.t -> unit

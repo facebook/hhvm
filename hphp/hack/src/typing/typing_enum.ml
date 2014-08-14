@@ -112,3 +112,33 @@ let enum_class_decl_rewrite env name enum ancestors consts =
       SMap.mapi (function k -> function c ->
                  if k = "class" then c else {c with ce_type = ty})
         consts
+
+let get_constant tc (seen, has_default) = function
+  | Default _ -> (seen, true)
+  | Case ((pos, Class_const (CI (_, cls), (_, const))), _) ->
+    if cls <> tc.tc_name then
+      (Errors.enum_switch_wrong_class pos (strip_ns tc.tc_name) (strip_ns cls);
+       (seen, has_default))
+    else
+      (match SMap.get const seen with
+        | None -> (SMap.add const pos seen, has_default)
+        | Some old_pos ->
+          Errors.enum_switch_redundant const old_pos pos;
+          (seen, has_default))
+  | Case ((pos, _), _) ->
+    Errors.enum_switch_not_const pos;
+    (seen, has_default)
+
+let check_enum_exhaustiveness env pos tc caselist =
+  let (seen, has_default) =
+    List.fold_left (get_constant tc) (SMap.empty, false) caselist in
+  let consts = SMap.remove "class" tc.tc_consts in
+  let all_cases_handled = SMap.cardinal seen = SMap.cardinal consts in
+  match (all_cases_handled, has_default) with
+    | false, false ->
+      let const_list = SMap.keys consts in
+      let unhandled =
+        List.filter (function k -> not (SMap.mem k seen)) const_list in
+      Errors.enum_switch_nonexhaustive pos unhandled tc.tc_pos
+    | true, true -> Errors.enum_switch_redundant_default pos tc.tc_pos
+    | _ -> ()

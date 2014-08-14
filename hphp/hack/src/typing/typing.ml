@@ -531,7 +531,8 @@ and stmt env = function
       condition env false e2
   | Switch (e, cl) ->
       Nast_terminality.SafeCase.check (fst e) cl;
-      let env, ty = expr env e in
+      let denv, ty = expr env e in
+      let env = check_exhaustiveness env (fst e) ty cl in
       let parent_lenv = env.Env.lenv in
       let env, cl = case_list parent_lenv ty env cl in
       let terml, lenvl = List.split cl in
@@ -572,6 +573,20 @@ and stmt env = function
     Type.sub_type p (Reason.URthrow) env exn_ty ty
   | Continue
   | Break -> env
+
+and check_exhaustiveness env pos (r, ty) caselist =
+  (* Right now we only do exhaustiveness checking for enums. *)
+  match ty with
+    | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+      let env, ty = Typing_tdef.expand_typedef env r x argl in
+      check_exhaustiveness env pos ty caselist
+
+    | Tapply ((_, id), _) ->
+      (match Typing_env.get_enum env id with
+        | Some tc -> Typing_enum.check_enum_exhaustiveness env pos tc caselist
+        | None -> ());
+      env
+    | _ -> env
 
 and case_list parent_lenv ty env cl =
   let env = { env with Env.lenv = parent_lenv } in

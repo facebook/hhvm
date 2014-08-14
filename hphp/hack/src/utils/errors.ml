@@ -910,6 +910,34 @@ let enum_type_bad pos ty trail =
 let enum_type_typedef_mixed pos =
   add pos "Can't use typedef that resolves to mixed in enum"
 
+
+let enum_switch_redundant const first_pos second_pos =
+  add_list [
+    second_pos, "Redundant case statement";
+    first_pos, const ^ " already handled here"
+  ]
+
+let enum_switch_nonexhaustive pos missing enum_pos =
+  add_list [
+    pos, "Switch statement nonexhaustive; the following cases are missing: " ^
+            String.concat ", " missing;
+    enum_pos, "Enum declared here"
+  ]
+
+let enum_switch_redundant_default pos enum_pos =
+  add_list [
+    pos, "All cases already covered; a redundant default case prevents "^
+         "detecting future errors";
+    enum_pos, "Enum declared here"
+  ]
+
+let enum_switch_not_const pos =
+  add pos "Case in switch on enum is not an enum constant"
+
+let enum_switch_wrong_class pos expected got =
+  add pos ("Switching on enum " ^ expected ^ " but using constant from " ^ got)
+
+
 (*****************************************************************************)
 (* Shape checking *)
 (*****************************************************************************)

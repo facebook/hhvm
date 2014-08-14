@@ -281,10 +281,12 @@ let is_typedef env x =
   | None -> false
   | Some _ -> true
 
-let is_enum env x =
+let get_enum env x =
   match Classes.get x with
-  | None -> false
-  | Some tc -> tc.tc_enum_type <> None
+    | Some tc when tc.tc_enum_type <> None -> Some tc
+    | _ -> None
+
+let is_enum env x = get_enum env x <> None
 
 let get_enum_constraint env x =
   match Classes.get x with

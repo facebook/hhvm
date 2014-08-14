@@ -66,8 +66,8 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return folly::format("Spent {}us in the JIT.", jittime.total / 1000).str();
   }
 
-  if (shouldProfile()) {
-    return "Warmup profiling is still enabled.";
+  if (!isStandardRequest()) {
+    return "Warmup is still in progress.";
   }
 
   if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {

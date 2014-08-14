@@ -4130,7 +4130,7 @@ OPTBLD_INLINE void ExecutionContext::iopInstanceOf(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopInstanceOfD(IOP_ARGS) {
   NEXT();
   DECODE(Id, id);
-  if (shouldProfile()) {
+  if (isProfileRequest()) {
     InstanceBits::profile(vmfp()->m_func->unit()->lookupLitstrId(id));
   }
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
@@ -4450,7 +4450,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     cellCopy(make_tv<KindOfObject>(waitHandle), retval);
   }
 
-  if (shouldProfile()) {
+  if (isProfileRequest()) {
     auto f = const_cast<Func*>(vmfp()->func());
     f->incProfCounter();
     if (!(f->isPseudoMain() || f->isClosureBody() || f->isMagic() ||
@@ -4697,7 +4697,7 @@ OPTBLD_INLINE void ExecutionContext::iopCGetG(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopCGetS(IOP_ARGS) {
   StringData* name;
   GETS(false);
-  if (shouldProfile() && name && name->isStatic()) {
+  if (isProfileRequest() && name && name->isStatic()) {
     recordType(TypeProfileKey(TypeProfileKey::StaticPropName, name),
                vmStack().top()->m_type);
   }

@@ -862,7 +862,7 @@ bool Func::shouldPGO() const {
 }
 
 void Func::incProfCounter() {
-  if (!shouldProfile()) return;
+  assert(isProfileRequest());
   __sync_fetch_and_add(&m_profCounter, 1);
 }
 

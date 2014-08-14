@@ -322,7 +322,7 @@ TypeConstraint::check(TypedValue* tv, const Func* func) const {
     // Perfect match seems common enough to be worth skipping the hash
     // table lookup.
     if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
-      if (shouldProfile()) InstanceBits::profile(m_typeName);
+      if (isProfileRequest()) InstanceBits::profile(m_typeName);
       return true;
     }
     const Class *c = nullptr;
@@ -342,7 +342,7 @@ TypeConstraint::check(TypedValue* tv, const Func* func) const {
       assert(m_namedEntity);
       c = Unit::lookupClass(m_namedEntity);
     }
-    if (shouldProfile() && c) {
+    if (isProfileRequest() && c) {
       InstanceBits::profile(c->preClass()->name());
     }
     if (c && tv->m_data.pobj->instanceof(c)) {

@@ -42,6 +42,8 @@ struct TypeProfileKey {
 
 // These are both best-effort, and return noisy results.
 void profileInit();
+void profileWarmupStart();
+void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
 void recordType(TypeProfileKey sk, DataType dt);
@@ -49,8 +51,13 @@ std::pair<DataType, double> predictType(TypeProfileKey key);
 int64_t requestCount();
 
 extern __thread bool profileOn;
-inline bool shouldProfile() {
+inline bool isProfileRequest() {
   return profileOn;
+}
+
+extern __thread bool standardRequest;
+inline bool isStandardRequest() {
+  return standardRequest;
 }
 
 }

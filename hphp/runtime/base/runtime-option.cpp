@@ -440,7 +440,7 @@ const uint64_t kEvalVMStackElmsDefault =
 #endif
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
-static const int kDefaultWarmupRequests = debug ? 1 : 11;
+static const int kDefaultProfileInterpRequests = debug ? 1 : 11;
 static const int kDefaultJitPGOThreshold = debug ? 2 : 10;
 static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
 static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;

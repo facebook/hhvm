@@ -839,29 +839,33 @@ static int start_server(const std::string &username) {
 
   // If we have any warmup requests, replay them before listening for
   // real connections
-  for (auto& file : RuntimeOption::ServerWarmupRequests) {
-    HttpRequestHandler handler(0);
-    ReplayTransport rt;
-    timespec start;
-    Timer::GetMonotonicTime(start);
-    std::string error;
-    Logger::Info("Replaying warmup request %s", file.c_str());
+  {
+    profileWarmupStart();
+    SCOPE_EXIT { profileWarmupEnd(); };
+    for (auto& file : RuntimeOption::ServerWarmupRequests) {
+      HttpRequestHandler handler(0);
+      ReplayTransport rt;
+      timespec start;
+      Timer::GetMonotonicTime(start);
+      std::string error;
+      Logger::Info("Replaying warmup request %s", file.c_str());
 
-    try {
-      rt.onRequestStart(start);
-      rt.replayInput(Hdf(file));
-      handler.handleRequest(&rt);
+      try {
+        rt.onRequestStart(start);
+        rt.replayInput(Hdf(file));
+        handler.handleRequest(&rt);
 
-      timespec stop;
-      Timer::GetMonotonicTime(stop);
-      Logger::Info("Finished successfully in %ld seconds",
-                   stop.tv_sec - start.tv_sec);
-    } catch (std::exception& e) {
-      error = e.what();
-    }
+        timespec stop;
+        Timer::GetMonotonicTime(stop);
+        Logger::Info("Finished successfully in %ld seconds",
+                     stop.tv_sec - start.tv_sec);
+      } catch (std::exception& e) {
+        error = e.what();
+      }
 
-    if (error.size()) {
-      Logger::Info("Got exception during warmup: %s", error.c_str());
+      if (error.size()) {
+        Logger::Info("Got exception during warmup: %s", error.c_str());
+      }
     }
   }
 
@@ -870,7 +874,6 @@ static int start_server(const std::string &username) {
     mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
 #endif
     enable_numa(RuntimeOption::EvalEnableNumaLocal);
-
   }
 
   HttpServer::Server->runOrExitProcess();

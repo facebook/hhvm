@@ -27,6 +27,29 @@ def vector_at(vec, idx):
         return vec['_M_start'][idx]
 
 
+def unordered_map_at(umap, idx):
+    h = umap['_M_h']
+
+    bucket = h['_M_buckets'][hash_of(idx) % h['_M_bucket_count']]
+    if bucket == 0x0:
+        return None
+
+    node = bucket['_M_nxt']
+
+    value_type = T(str(umap.type) + '::value_type').pointer()
+
+    while node != 0x0:
+        # Hashtable nodes contain only a pointer to the next node in the
+        # bucket, but are always immediately followed by the value pair.
+        value = (node + 1).cast(value_type)
+        if idx == value['first']:
+            return value['second']
+
+        node = node['_M_nxt']
+
+    return None
+
+
 #------------------------------------------------------------------------------
 # HHVM accessors.
 
@@ -75,6 +98,7 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
 
         self.accessors = {
             'std::vector':          vector_at,
+            'std::unordered_map':   unordered_map_at,
             'HPHP::TreadHashMap':   thm_at,
         }
 

@@ -194,20 +194,18 @@ void Extension::LoadModules(const IniSetting::Map& ini, Hdf hdf) {
 
   // Load up any dynamic extensions from extension_dir
   std::string extDir = RuntimeOption::ExtensionDir;
-  if (extDir != "") {
-    for (auto& extLoc : RuntimeOption::Extensions) {
-      if (extLoc.empty()) {
+  for (auto& extLoc : RuntimeOption::Extensions) {
+    if (extLoc.empty()) {
+      continue;
+    }
+    if (extLoc[0] != '/') {
+      if (extDir == "") {
         continue;
       }
-      if (extLoc[0] != '/') {
-        if (extDir == "") {
-          continue;
-        }
-        extLoc = extDir + "/" + extLoc;
-      }
-
-      extFiles.insert(extLoc);
+      extLoc = extDir + "/" + extLoc;
     }
+ 
+    extFiles.insert(extLoc);
   }
 
   // Load up any dynamic extensions from dynamic extensions options

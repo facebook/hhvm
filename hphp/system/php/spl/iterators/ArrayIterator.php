@@ -101,7 +101,6 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * @return     mixed   The current array entry.
    */
   public function current() {
-    $current = current($this->storage);
     return (key($this->storage) === null) ? null : current($this->storage);
   }
 

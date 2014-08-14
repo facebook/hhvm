@@ -6,12 +6,45 @@ Helpers for accessing C++ STL containers in GDB.
 import gdb
 import re
 from gdbutils import *
+from hashes import hash_of
 
 
 #------------------------------------------------------------------------------
+# Accessors.
+
+def atomic_get(atomic):
+    return atomic['_M_b']['_M_p']
 
 def vector_at(vec, idx):
     return vec['_M_impl']['_M_start'][idx]
+
+def thm_at(thm, key):
+    table = atomic_get(thm['m_table'])
+    capac = table['capac']
+
+    idx = (hash_of(key) & (capac - 1)).cast(T('size_t'))
+
+    while True:
+        entry = table['entries'][idx]
+        probe = atomic_get(entry['first'])
+
+        vp_type = entry['second'].type.pointer()
+
+        if probe == key:
+            return entry['second'].address.cast(vp_type)
+        if probe == 0:
+            return gdb.Value(0).cast(vp_type)
+
+        idx += 1
+        if idx == capac:
+            idx = 0
+
+
+#------------------------------------------------------------------------------
+# Helpers.
+
+def template_type(t):
+    return str(t).split('<')[0]
 
 
 #------------------------------------------------------------------------------
@@ -29,6 +62,11 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
 
     def __init__(self):
         super(IdxCommand, self).__init__('idx', gdb.COMMAND_DATA)
+
+        self.accessors = {
+            'std::vector':          vector_at,
+            'HPHP::TreadHashMap':   thm_at,
+        }
 
         # We need to convert stringified gdb.Values with struct types into a
         # form that the gdb `print` command accepts.
@@ -50,19 +88,19 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
         idx = argv[1]
         value = None
 
-        container_type = str(argv[0].type).split('<')[0]
+        container_type = template_type(argv[0].type)
+        true_type = template_type(argv[0].type.strip_typedefs())
 
-        if container_type == 'std::vector':
-            value = vector_at(container, idx)
-
-        # Objects are just containers for data members, right?
-        if value is None:
-            try: value = container[idx]
-            except: pass
-
-        if value is None:
-            print 'idx: Unrecognized container.'
-            return
+        if container_type in self.accessors:
+            value = self.accessors[container_type](container, idx)
+        elif true_type in self.accessors:
+            value = self.accessors[true_type](container, idx)
+        else:
+            try:
+                value = container[idx]
+            except:
+                print 'idx: Unrecognized container.'
+                return
 
         value_str = unicode(value)
         true_type = value.type.strip_typedefs()

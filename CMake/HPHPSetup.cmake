@@ -88,15 +88,24 @@ include(HPHPCompiler)
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
-# check for weak symbols
-CHECK_CXX_SOURCE_COMPILES("
-    extern \"C\" void configure_link_extern_weak_test() __attribute__((weak));
-    int main(int argc, char** argv) {
-        return configure_link_extern_weak_test == nullptr;
-    }
-"
-    FOLLY_HAVE_WEAK_SYMBOLS
-)
+# Weak linking on Linux, Windows, and OS X all work somewhat differently. The following test
+# works well on Linux and Windows, but fails for annoying reasons on OS X, and even works
+# differently on different releases of OS X, cf. http://glandium.org/blog/?p=2764. Getting
+# the test to work properly on OS X would require an APPLE check anyways, so just hardcode
+# OS X as "we know weak linking works".
+if(APPLE)
+  set(FOLLY_HAVE_WEAK_SYMBOLS 1)
+else()
+  # check for weak symbols
+  CHECK_CXX_SOURCE_COMPILES("
+      extern \"C\" void configure_link_extern_weak_test() __attribute__((weak));
+      int main(int argc, char** argv) {
+          return configure_link_extern_weak_test == nullptr;
+      }
+  "
+      FOLLY_HAVE_WEAK_SYMBOLS
+  )
+endif()
 
 if(FOLLY_HAVE_WEAK_SYMBOLS)
   add_definitions(-DFOLLY_HAVE_WEAK_SYMBOLS=1)

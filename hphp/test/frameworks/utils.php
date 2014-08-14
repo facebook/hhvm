@@ -5,7 +5,9 @@ require_once __DIR__.'/Options.php';
 class TimeoutException extends Exception {
 }
 
-const INSTALL_TIMEOUT_SECS = 600;
+# There's an outer timeout of 300s; this number must be less than that (with
+# fudge factor)
+const INSTALL_TIMEOUT_SECS = 240;
 const NETWORK_RETRIES = 3;
 
 // For determining number of processes

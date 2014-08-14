@@ -33,6 +33,25 @@ def parse_argv(args):
     return [gdb.parse_and_eval(arg) for arg in gdb.string_to_argv(args)]
 
 
+def vstr(value):
+    """Stringify a value without pretty-printing."""
+
+    for pp in gdb.pretty_printers:
+        try:
+            pp.saved = pp.enabled
+        except AttributeError:
+            pp.saved = True
+
+        pp.enabled = False
+
+    ret = unicode(value)
+
+    for pp in gdb.pretty_printers:
+        pp.enabled = pp.saved
+
+    return ret
+
+
 #------------------------------------------------------------------------------
 # Caching lookups.
 

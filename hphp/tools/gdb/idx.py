@@ -97,6 +97,9 @@ class IdxCommand(gdb.Command):
 
     Usage: idx <container> <index>
 
+GDB `print` is called on the address of the value, and then the value itself is
+printed.
+
 If `container' is of a recognized type (e.g., native arrays, std::vector),
 `idx' will index according to operator[].  Otherwise, it will attempt to treat
 `container' as an object with data member `index'.
@@ -111,15 +114,6 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
             'HPHP::FixedVector':    fixed_vector_at,
             'HPHP::TreadHashMap':   thm_at,
         }
-
-        # We need to convert stringified gdb.Values with struct types into a
-        # form that the gdb `print` command accepts.
-        self.regexes = [re.compile(pat) for pat in [
-            '\s*',                  # whitespace
-            '\w*=',                 # member names
-            '"(?:.(?!\\\\"))*"',    # string prints
-            "'(?:.(?!\\\\'))*'",    # char prints
-        ]]
 
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
@@ -150,13 +144,9 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
             print 'idx: Element not found.'
             return
 
-        value_str = unicode(value)
-        true_type = value.type.strip_typedefs()
+        gdb.execute('print (%s)%s' % (
+            str(value.type.pointer()), value.address))
 
-        if true_type.code == gdb.TYPE_CODE_STRUCT:
-            for regex in self.regexes:
-                value_str = regex.sub('', value_str)
-
-        gdb.execute('print (%s)%s' % (str(value.type), value_str))
+        print vstr(value)
 
 IdxCommand()

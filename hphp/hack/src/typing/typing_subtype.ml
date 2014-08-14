@@ -129,11 +129,11 @@ and sub_type env ty_super ty_sub =
       let env = Env.set_allow_null_as_void env in
       let env = sub_type env ty_super ty_sub in
       Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
-  | (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty_super]))),
-    (_, (Tapply ((_, ("\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase")), [ty_sub]))) ->
+  | (_, (Tapply ((_, ("\\ImmVector" | "\\ConstVector" | "\\ImmSet" | "\\ConstSet" | "\\PrivacyPolicyBase")), [ty_super]))),
+    (_, (Tapply ((_, ("\\ImmVector" | "\\ConstVector" | "\\ImmSet" | "\\ConstSet" | "\\PrivacyPolicyBase")), [ty_sub]))) ->
       sub_type env ty_super ty_sub
-  | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty_super; vty_super]))),
-    (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty_sub; vty_sub]))) ->
+  | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\ConstMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty_super; vty_super]))),
+    (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\ConstMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty_sub; vty_sub]))) ->
       let env = sub_type env kty_super kty_sub in
       sub_type env vty_super vty_sub
   | (_, (Tapply ((_, "\\Generator"), [tk_super; tv_super; ts_super]))),

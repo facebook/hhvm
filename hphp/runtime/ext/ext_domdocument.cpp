@@ -379,7 +379,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
     if (arr.exists(s_namespaces)) {
       Variant tmp = arr.rvalAt(s_namespaces);
       if (tmp.isArray()) {
-        for (ArrayIter it = tmp.toArray().begin(); !it; ++it) {
+        for (ArrayIter it = tmp.toArray().begin(); it; ++it) {
           Variant prefix = it.first();
           Variant tmpns = it.second();
           if (prefix.isString() || tmpns.isString()) {
@@ -406,7 +406,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       int nscount = 0;
       inclusive_ns_prefixes = (xmlChar**)malloc
         ((ns_prefixes.toArray().size()+1) * sizeof(xmlChar *));
-      for (ArrayIter it = ns_prefixes.toArray().begin(); !it; ++it) {
+      for (ArrayIter it = ns_prefixes.toArray().begin(); it; ++it) {
         Variant tmpns = it.second();
         if (tmpns.isString()) {
           inclusive_ns_prefixes[nscount++] = (xmlChar*)tmpns.toString().data();
@@ -415,7 +415,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       inclusive_ns_prefixes[nscount] = NULL;
     } else {
       raise_notice("Inclusive namespace prefixes only allowed in "
-                   "exlcusive mode.");
+                   "exclusive mode.");
     }
   }
   if (mode == 1) {

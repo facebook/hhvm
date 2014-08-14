@@ -53,6 +53,15 @@ def unordered_map_at(umap, idx):
 #------------------------------------------------------------------------------
 # HHVM accessors.
 
+def compact_ptr_get(csp):
+    value_type = T(str(csp.type).split('<', 1)[1][:-1])
+    return (csp['m_data'] & 0xffffffffffff).cast(value_type.pointer())
+
+
+def fixed_vector_at(fv, idx):
+    return compact_ptr_get(fv['m_sp'])[idx]
+
+
 def thm_at(thm, key):
     table = atomic_get(thm['m_table'])
     capac = table['capac']
@@ -99,6 +108,7 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
         self.accessors = {
             'std::vector':          vector_at,
             'std::unordered_map':   unordered_map_at,
+            'HPHP::FixedVector':    fixed_vector_at,
             'HPHP::TreadHashMap':   thm_at,
         }
 

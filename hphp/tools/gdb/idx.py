@@ -119,7 +119,7 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
         argv = parse_argv(args)
 
         if len(argv) != 2:
-            print 'Usage: idx <container> <index>'
+            print('Usage: idx <container> <index>')
             return
 
         container = argv[0]
@@ -137,16 +137,16 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
             try:
                 value = container[idx]
             except:
-                print 'idx: Unrecognized container.'
+                print('idx: Unrecognized container.')
                 return
 
         if value is None:
-            print 'idx: Element not found.'
+            print('idx: Element not found.')
             return
 
         gdb.execute('print (%s)%s' % (
             str(value.type.pointer()), value.address))
 
-        print vstr(value)
+        print(vstr(value))
 
 IdxCommand()

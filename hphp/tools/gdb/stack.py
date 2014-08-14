@@ -28,7 +28,7 @@ Filename and line number information is only included for C++ functions.
         argv = parse_argv(args)
 
         if len(argv) > 2:
-            print 'Usage: walkstk [sp] [rip]'
+            print('Usage: walkstk [sp] [rip]')
 
         # Set sp = $rbp.
         sp_type = T('uintptr_t').pointer()
@@ -91,7 +91,7 @@ Filename and line number information is only included for C++ functions.
 
                 out += ' at ' + filename + ':' + str(loc.line)
 
-            print out
+            print(out)
 
             rip = sp[1]
             sp = sp[0].cast(sp_type)

@@ -36,7 +36,7 @@ class LookupFuncCommand(gdb.Command):
         argv = parse_argv(args)
 
         if len(argv) != 1:
-            print 'Usage: lookup func <FuncId>'
+            print('Usage: lookup func <FuncId>')
             return
 
         funcid = argv[0].cast(T('HPHP::FuncId'))
@@ -76,12 +76,12 @@ If no Unit is given, the current unit (set by `unit') is used.
         argv = parse_argv(args)
 
         if len(argv) == 0 or len(argv) > 2:
-            print 'Usage: lookup litstr <Id> [Unit*]'
+            print('Usage: lookup litstr <Id> [Unit*]')
             return
 
         if len(argv) == 1:
             if unit.curunit is None:
-                print 'lookup litstr: No Unit set or provided.'
+                print('lookup litstr: No Unit set or provided.')
             u = curunit
 
         u = argv[0].cast(T('HPHP::Unit').pointer())

@@ -152,7 +152,7 @@ class HHBC:
         op = bc.dereference()
 
         if op <= V('HPHP::OpLowInvalid') or op >= V('HPHP::OpHighInvalid'):
-            print "Invalid Op %d @ %p" % (op, bc)
+            print('Invalid Op %d @ %p' % (op, bc))
             return 1
 
         instrlen = 1
@@ -195,7 +195,7 @@ remains where it left off after the previous call.
 
         if len(argv) == 0:
             if not self.bcpos:
-                print 'hhx: No bytecode specified.'
+                print('hhx: No bytecode specified.')
                 return
         elif len(argv) == 1:
             if argv[0] > 0xffffffff:
@@ -228,7 +228,7 @@ remains where it left off after the previous call.
                 if imm.type == T('char').pointer():
                     imm = '"' + imm.string() + '"'
                 out += ' ' + str(imm)
-            print out
+            print(out)
 
             self.bcpos += instr['len']
             self.bcoff += instr['len']

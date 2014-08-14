@@ -208,6 +208,11 @@ flaky_tests = (
     # don't use the internet in tests...
     '/ext/standard/tests/network/gethostbyname_error004.php',
     '/ext/standard/tests/network/getmxrr.php'
+
+    # php coderz are so l33t
+    '/ext/sockets/tests/ipv6loop.php',
+    '/ext/sockets/tests/socket_getpeername_ipv4loop.php',
+    '/ext/standard/tests/network/fsockopen_variation2.php',
 )
 
 # Tests that work but not in repo mode

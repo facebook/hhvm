@@ -1399,23 +1399,21 @@ and foreach_stmt env e aw ae b =
  )
 
 and as_expr env aw = function
-  | As_id (p, Lvar x) ->
-      let x = p, N.Lvar (Env.new_lvar env x) in
+  | As_v ev ->
+      let vars = Naming_ast_helpers.GetLocals.lvalue SMap.empty ev in
+      SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
+      let ev = expr env ev in
       (match aw with
-        | None -> N.As_id x
-        | Some p -> N.Await_as_id (p, x))
-  | As_id (p, _) ->
-      Errors.expected_variable p;
-      let x = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
+        | None -> N.As_v ev
+        | Some p -> N.Await_as_v (p, ev))
+  | As_kv ((p1, Lvar k), ev) ->
+      let k = p1, N.Lvar (Env.new_lvar env k) in
+      let vars = Naming_ast_helpers.GetLocals.lvalue SMap.empty ev in
+      SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
+      let ev = expr env ev in
       (match aw with
-        | None -> N.As_id x
-        | Some p -> N.Await_as_id (p, x))
-  | As_kv ((p1, Lvar x1), (p2, Lvar x2)) ->
-      let x1 = p1, N.Lvar (Env.new_lvar env x1) in
-      let x2 = p2, N.Lvar (Env.new_lvar env x2) in
-      (match aw with
-        | None -> N.As_kv (x1, x2)
-        | Some p -> N.Await_as_kv (p, x1, x2))
+        | None -> N.As_kv (k, ev)
+        | Some p -> N.Await_as_kv (p, k, ev))
   | As_kv ((p, _), _) ->
       Errors.expected_variable p;
       let x1 = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in

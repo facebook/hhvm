@@ -185,9 +185,9 @@ and stmt =
   | Fallthrough
 
 and as_expr =
-  | As_id of expr
+  | As_v of expr
   | As_kv of expr * expr
-  | Await_as_id of Pos.t * expr
+  | Await_as_v of Pos.t * expr
   | Await_as_kv of Pos.t * expr * expr
 
 and block = stmt list

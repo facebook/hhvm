@@ -636,7 +636,7 @@ and catch parent_lenv after_try env (ety, exn, b) =
   env, env.Env.lenv
 
 and as_expr env pe  = function
-  | As_id e ->
+  | As_v e ->
       let ty = Env.fresh_type() in
       let tvector = Tapply ((pe, "\\Traversable"), [ty]) in
       env, (Reason.Rforeach pe, tvector)
@@ -645,7 +645,7 @@ and as_expr env pe  = function
       let ty2 = Env.fresh_type() in
       let tmap = Tapply ((pe, "\\KeyedTraversable"), [ty1; ty2]) in
       env, (Reason.Rforeach pe, tmap)
-  | Await_as_id _ ->
+  | Await_as_v _ ->
       let ty = Env.fresh_type() in
       let tvector = Tapply ((pe, "\\AsyncIterator"), [ty]) in
       env, (Reason.Rasyncforeach pe, tvector)
@@ -660,25 +660,23 @@ and bind_as_expr env ty aexpr =
   match ety with
   | _, Tapply ((p, class_id), [ty2]) ->
       (match aexpr with
-      | As_id (_, Lvar (_, x))
-      | Await_as_id (_, (_, Lvar (_, x))) ->
-          Env.set_local env x ty2
-      | As_kv ((_, Lvar (_, x)), (_, Lvar (_, y)))
-      | Await_as_kv (_, (_, Lvar (_, x)), (_, Lvar (_, y))) ->
-          let env = Env.set_local env x (Reason.Rnone, Tmixed) in
-          Env.set_local env y ty2
+      | As_v ev
+      | Await_as_v (_, ev) -> fst (assign p env ev ty2)
+      | As_kv ((_, Lvar (_, k)), ev)
+      | Await_as_kv (_, (_, Lvar (_, k)), ev) ->
+          let env = Env.set_local env k (Reason.Rnone, Tmixed) in
+          fst (assign p env ev ty2)
       | _ -> (* TODO Probably impossible, should check that *)
           env
       )
   | _, Tapply ((p, class_id), [ty1; ty2]) ->
       (match aexpr with
-      | As_id (_, Lvar (_, x))
-      | Await_as_id (_, (_, Lvar (_, x))) ->
-          Env.set_local env x ty2
-      | As_kv ((_, Lvar (_, x)), (_, Lvar (_, y)))
-      | Await_as_kv (_, (_, Lvar (_, x)), (_, Lvar (_, y))) ->
-          let env = Env.set_local env x ty1 in
-          Env.set_local env y ty2
+      | As_v ev
+      | Await_as_v (_, ev) -> fst (assign p env ev ty2)
+      | As_kv ((_, Lvar (_, k)), ev)
+      | Await_as_kv (_, (_, Lvar (_, k)), ev) ->
+          let env = Env.set_local env k ty1 in
+          fst (assign p env ev ty2)
       | _ -> (* TODO Probably impossible, should check that *)
           env
       )

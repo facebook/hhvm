@@ -1932,13 +1932,15 @@ and foreach_as env =
   match L.token env.lb with
   | Tsarrow ->
       let e2 = expr env in
+      check_lvalue env e2;
       expect env Trp;
       As_kv (e1, e2)
   | Trp ->
-      As_id e1
+      check_lvalue env e1;
+      As_v e1
   | _ ->
       error_expect env ")";
-      As_id e1
+      As_v e1
 
 (*****************************************************************************)
 (* Try statement *)

@@ -299,7 +299,7 @@ module GetLocals = struct
         List.fold_left catch acc cl
 
   and as_expr acc = function
-    | As_id e -> expr acc e
+    | As_v e -> expr acc e
     | As_kv (e1, e2) -> expr (expr acc e1) e2
 
   and expr acc (_, e) =
@@ -953,7 +953,7 @@ and stmtgen last o = function
         local_id o obj; o#outnl ")) { ";
         o#scope begin fun () ->
           (match ae with
-          | As_id (_, Lvar (_, v)) ->
+          | As_v (_, Lvar (_, v)) ->
               o#spaces();
               o#out "var ";
               local_id o v;
@@ -970,7 +970,7 @@ and stmtgen last o = function
               local_id o v;
               o#out " = "; local_id o obj;
               o#out ".hhdynamic.hhf_current("; local_id o obj; o#outnl ");";
-          | _ -> assert false
+          | _ -> failwith "TODO Javascript jsGen.ml: foreach not finished"
           );
           stmtgen loop_last o b;
         end;
@@ -1148,13 +1148,13 @@ and stmt_ ?(semi = true) o = function
         | _ -> failwith "TODO Javascript jsGen.ml: foreach not finished"
       in
       (match ae with
-      | As_id (_, Lvar (_, v)) ->
+      | As_v (_, Lvar (_, v)) ->
           o#out "hhforeachv("; local_id o obj; o#out ", function(";
           local_id o v;
       | As_kv ((_, Lvar (_, k)), (_, Lvar (_, v))) ->
           o#out "hhforeach("; local_id o obj; o#out ", function(";
           list local_id o [k;v];
-      | _ -> assert false
+      | _ -> failwith "TODO Javascript jsGen.ml: foreach not finished"
       );
       o#out ") ";
       block o b;

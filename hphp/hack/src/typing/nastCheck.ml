@@ -67,7 +67,7 @@ module CheckFunctionType = struct
     | _, Switch (_, cl) ->
         liter case f_type cl;
         ()
-    | (FSync | FGenerator), Foreach (_, (Await_as_id (p, _) | Await_as_kv (p, _, _)), _) ->
+    | (FSync | FGenerator), Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
         Errors.await_in_sync_function p;
         ()
     | _, Foreach (_, _, b) ->
@@ -514,8 +514,8 @@ and stmt env = function
       ()
 
 and as_expr env = function
-  | As_id e
-  | Await_as_id (_, e) -> expr env e
+  | As_v e
+  | Await_as_v (_, e) -> expr env e
   | As_kv (e1, e2)
   | Await_as_kv (_, e1, e2) ->
       expr env e1;

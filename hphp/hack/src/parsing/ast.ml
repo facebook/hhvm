@@ -225,7 +225,7 @@ and stmt =
   | Noop
 
 and as_expr =
-  | As_id of expr
+  | As_v of expr
   | As_kv of expr * expr
 
 and block = stmt list

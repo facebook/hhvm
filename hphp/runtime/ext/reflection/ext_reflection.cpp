@@ -221,7 +221,7 @@ static void set_doc_comment(Array& ret,
                             bool isBuiltin) {
   if (comment == nullptr || comment->empty()) {
     set_empty_doc_comment(ret);
-  } else if (isBuiltin && !f_hphp_debugger_attached()) {
+  } else if (isBuiltin && !HHVM_FUNCTION(hphp_debugger_attached)) {
     set_empty_doc_comment(ret);
   } else {
     ret.set(s_doc, VarNR(comment));
@@ -486,7 +486,7 @@ static Variant HHVM_METHOD(ReflectionFunctionAbstract, getDocComment) {
   auto const comment = func->docComment();
   if (comment == nullptr || comment->empty()) {
     return false_varNR;
-  } else if (func->isBuiltin() && !f_hphp_debugger_attached()) {
+  } else if (func->isBuiltin() && !HHVM_FUNCTION(hphp_debugger_attached)) {
     return false_varNR;
   } else {
     auto ret = const_cast<StringData*>(comment);
@@ -929,7 +929,7 @@ static Variant HHVM_METHOD(ReflectionClass, getDocComment) {
   auto const comment = pcls->docComment();
   if (comment == nullptr || comment->empty()) {
     return false_varNR;
-  } else if (pcls->isBuiltin() && !f_hphp_debugger_attached()) {
+  } else if (pcls->isBuiltin() && !HHVM_FUNCTION(hphp_debugger_attached)) {
     return false_varNR;
   } else {
     auto ret = const_cast<StringData*>(comment);

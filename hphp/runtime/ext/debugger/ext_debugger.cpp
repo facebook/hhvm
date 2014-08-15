@@ -33,13 +33,15 @@ class DebuggerExtension : public Extension {
   DebuggerExtension() : Extension("debugger", NO_EXTENSION_VERSION_YET) {}
   virtual void moduleInit() override {
     HHVM_NAMED_FE(__SystemLib\\debugger_get_info, HHVM_FN(debugger_get_info));
+    HHVM_FE(hphpd_break);
+    HHVM_FE(hphp_debugger_attached);
     loadSystemlib();
   }
 } s_debugger_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_hphpd_break(bool condition /* = true */) {
+void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
   TRACE(5, "in f_hphpd_break()\n");
   if (!RuntimeOption::EnableDebugger || !condition ||
       g_context->m_dbgNoBreak) {
@@ -57,7 +59,7 @@ void f_hphpd_break(bool condition /* = true */) {
 }
 
 // Quickly determine if a debugger is attached to the current thread.
-bool f_hphp_debugger_attached() {
+bool HHVM_FUNCTION(hphp_debugger_attached) {
   return (RuntimeOption::EnableDebugger && (Debugger::GetProxy() != nullptr));
 }
 

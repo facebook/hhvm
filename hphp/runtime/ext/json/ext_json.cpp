@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
@@ -123,16 +124,18 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
     return z;
   }
 
-  if (json.size() == 4) {
-    if (!strcasecmp(json.data(), "null")) {
+  String trimmed = f_trim(json, "\t\n\r ");
+
+  if (trimmed.size() == 4) {
+    if (!strcasecmp(trimmed.data(), "null")) {
       json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
       return init_null();
     }
-    if (!strcasecmp(json.data(), "true")) {
+    if (!strcasecmp(trimmed.data(), "true")) {
       json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
       return true;
     }
-  } else if (json.size() == 5 && !strcasecmp(json.data(), "false")) {
+  } else if (trimmed.size() == 5 && !strcasecmp(trimmed.data(), "false")) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return false;
   }

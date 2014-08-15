@@ -125,6 +125,7 @@ flaky_tests = (
     '/ext/spl/tests/SplFileObject_setCsvControl_error002.php',
     '/ext/spl/tests/SplFileObject_setCsvControl_error003.php',
     '/ext/phar/tests/019.php',
+    '/ext/spl/tests/dit_006.php',
 
     # these tests use each other's data
     '/ext/standard/tests/file/bug38086.php',

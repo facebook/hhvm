@@ -1206,6 +1206,10 @@ def walk(filename, dest_subdir):
     if '/ext/standard/tests/network/bug20134.php' in full_dest_filename:
         test = test.replace("<?php", "<?php\n$port = rand(1025, 65535);")
         test = test.replace("65534", "$port")
+    if '/ext/dom/tests/DOMDocument_saveHTMLFile_basic.php' in full_dest_filename:
+        test = test.replace('tmp_savehtmlfile', 'DOMDocument_saveHTMLFile_basic')
+    if '/ext/dom/tests/DOMDocument_saveHTMLFile_formatOutput.php' in full_dest_filename:
+        test = test.replace('tmp_savehtmlfile', 'DOMDocument_saveHTMLFile_formatOutput')
     if '/ext/mysqli/tests/' in full_dest_filename:
 
         (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))

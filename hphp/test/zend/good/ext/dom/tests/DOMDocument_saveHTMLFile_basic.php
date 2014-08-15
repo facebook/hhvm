@@ -1,5 +1,5 @@
 <?php
-$filename = dirname(__FILE__)."/tmp_savehtmlfile".time().".html";
+$filename = dirname(__FILE__)."/DOMDocument_saveHTMLFile_basic".time().".html";
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');
 $root = $doc->appendChild($root);

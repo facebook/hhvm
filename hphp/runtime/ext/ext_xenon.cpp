@@ -98,7 +98,7 @@ static Array parsePhpStack(const Array& bt) {
       if (frame.exists(s_class)) {
         std::ostringstream ss;
         ss << frame[s_class].toString().c_str()
-           << frame[s_type].toString().c_str()
+           << "::"
            << frame[s_function].toString().c_str();
         Array element;
         element.set(s_function, ss.str(), true);

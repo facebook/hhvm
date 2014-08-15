@@ -45,7 +45,9 @@ public:
     Debugger::InterruptVMHook(ExceptionHandler);
   }
 
-  virtual void onError(const std::string& message) override {
+  virtual void onError(const ExtendedException &ee,
+                       int errnum,
+                       const std::string& message) override {
     Debugger::InterruptVMHook(ExceptionThrown, String(message));
   }
 

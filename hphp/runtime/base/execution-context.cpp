@@ -654,7 +654,7 @@ void ExecutionContext::handleError(const std::string& msg,
   }
   if (mode == ErrorThrowMode::Always ||
       (mode == ErrorThrowMode::IfUnhandled && !handled)) {
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(msg));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee, errnum, msg));
     auto exn = FatalErrorException(msg, ee.getBacktrace());
     exn.setSilent(!errorNeedsLogging(errnum));
     throw exn;
@@ -683,7 +683,7 @@ void ExecutionContext::handleError(const std::string& msg,
     }
 
     if (errorNeedsLogging(errnum)) {
-      DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee.getMessage()));
+      DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee, errnum, ee.getMessage()));
       auto fileAndLine = ee.getFileAndLine();
       Logger::Log(Logger::LogError, prefix.c_str(), ee,
                   fileAndLine.first.c_str(), fileAndLine.second);

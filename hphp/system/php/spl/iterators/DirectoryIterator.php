@@ -100,6 +100,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator {
    * @return     mixed   No value is returned.
    */
   public function seek($position) {
+    $this->rewind();
     for ($i = $this->index; $i < $position; $i++) {
       $this->next();
     }

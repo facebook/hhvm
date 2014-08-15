@@ -1521,15 +1521,19 @@ and expr_ env = function
   | Id x ->
     (match snd x with
       | "__LINE__" -> N.Int x
-      | "__CLASS__" ->
+      | "__CLASS__" | "__TRAIT__" ->
         (match (fst env).cclass with
-          | None ->
-              Errors.illegal_CLASS (fst x);
-              N.Any
-          | Some c -> N.String c)
+          | None -> Errors.illegal_CLASS (fst x); N.Any
+          | Some c ->
+            (* this isn't quite correct when inside a trait, as
+             * __CLASS__ is replaced by the using class, but it's
+             * sufficient for typechecking purposes (we require
+             * subclass to be compatible with the trait member/method
+             * declarations) *)
+            N.String c)
       | "__FILE__" | "__DIR__"
       (* could actually check that we are in a function, method, etc *)
-      | "__FUNCTION__" | "__METHOD__" | "__TRAIT__"
+      | "__FUNCTION__" | "__METHOD__"
       | "__NAMESPACE__"
         -> N.String x
       | _ -> N.Id (Env.global_const env x)
@@ -1610,9 +1614,12 @@ and expr_ env = function
           | (_, N.String cl), (_, N.String meth)
           | (_, N.Class_const (N.CI cl, (_, "class"))), (_, N.String meth) ->
             N.Smethod_id (Env.class_name env cl, meth)
-          | (p, _), (_) ->
-            Errors.illegal_class_meth p;
-            N.Any
+          | (p, N.Class_const ((N.CIself|N.CIstatic), (_, "class"))),
+            (_, N.String meth) ->
+            (match (fst env).cclass with
+              | Some cl -> N.Smethod_id (cl, meth)
+              | None -> Errors.illegal_class_meth p; N.Any)
+          | (p, _), (_) -> Errors.illegal_class_meth p; N.Any
           )
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )

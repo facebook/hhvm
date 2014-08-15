@@ -29,11 +29,22 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/member-operations.h"
 
+// on cygwin in 64 bit/SEH adding frame information needs to be
+// handled with rtladdfunctiontable and rtldeletefunctiontable
+// or use the rtlinstallfunctiontablecallback
+// register_frame and deregister_frame do not exist
+// this is a temp solution that provides empty placeholders for linking
+#ifdef __CYGWIN__
+void __register_frame(const void*) {}
+void __deregister_frame(const void*) {}
+#else
+
 // libgcc exports this for registering eh information for
 // dynamically-loaded objects.  The pointer is to data in the format
 // you find in a .eh_frame section.
 extern "C" void __register_frame(const void*);
 extern "C" void __deregister_frame(const void*);
+#endif
 
 TRACE_SET_MOD(unwind);
 

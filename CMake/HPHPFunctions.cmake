@@ -121,7 +121,7 @@ function(embed_systemlibs TARGET DEST)
   if (APPLE)
     target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
   elseif(CYGWIN OR MSVC OR MINGW)
-    set_source_files_properties(embed.rc PROPERTIES GENERATED TRUE)
+    # nothing to do
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"

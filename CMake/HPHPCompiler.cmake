@@ -60,9 +60,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # this switches binutils to use the pe+ format
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wa,-mbig-obj")
     # stack limit is set at compile time on windows
-    # code expects a minimum of 8 * 1024 * 1024
+    # code expects a minimum of 8 * 1024 * 1024 + 8 for a buffer
     # the default is 2 mb
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--stack,8388608")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--stack,8388616")
   endif()
 # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")

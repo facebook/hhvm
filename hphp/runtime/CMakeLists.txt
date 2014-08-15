@@ -42,3 +42,9 @@ HHVM_PUBLIC_HEADERS(runtime ${HEADER_SOURCES})
 if (ENABLE_COTIRE)
   cotire(hphp_runtime_static)
 endif()
+
+if(CYGWIN AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/vm/jit/hhbc-translator.cpp
+    PROPERTIES COMPILE_FLAGS -Og)
+endif()

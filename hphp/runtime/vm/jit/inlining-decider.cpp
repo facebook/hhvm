@@ -287,6 +287,12 @@ bool isInlinableCPPBuiltin(const Func* f) {
     }
   }
 
+  // Static methods need to be passed their class, which we don't
+  // support yet.
+  if (f->isMethod() && (f->attrs() & AttrStatic)) {
+    return false;
+  }
+
   return true;
 }
 

@@ -123,6 +123,8 @@ struct ProgramOptions {
              config;
   std::vector<std::string>
              confStrings;
+  std::vector<std::string>
+             iniStrings;
   int        port;
   int        portfd;
   int        sslportfd;
@@ -203,21 +205,25 @@ void process_env_variables(Array& variables) {
   }
 }
 
-void process_ini_settings(const std::string& name) {
-  if (name.empty()) {
+void process_ini_file(const std::string& filename) {
+  if (filename.empty()) {
     return;
   }
-  std::ifstream ifs(name);
+  std::ifstream ifs(filename);
   const std::string str((std::istreambuf_iterator<char>(ifs)),
                         std::istreambuf_iterator<char>());
-  auto settings = IniSetting::FromStringAsMap(str, name);
+  process_ini_settings(str, filename);
+}
+
+void process_ini_settings(const std::string& ini_str,
+                          const std::string& filename /* = "" */) {
+  auto settings = IniSetting::FromStringAsMap(ini_str, filename);
 
   for (auto& item : settings.items()) {
     IniSetting::Set(item.first.data(), item.second,
                     IniSetting::FollyDynamic());
   }
 }
-
 // Handle adding a variable to an array, supporting keys that look
 // like array expressions (like 'FOO[][key1][k2]').
 void register_variable(Array& variables, char *name, const Variant& value,
@@ -639,7 +645,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   // out as 0 in the previous pass. Lets re-import the ini files. We could be
   // more clever, but that would be harder and this works.
   for (auto& c : config) {
-    process_ini_settings(c);
+    process_ini_file(c);
   }
 }
 
@@ -1059,9 +1065,13 @@ static int execute_program_impl(int argc, char** argv) {
     ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
     ("config,c", value<vector<string> >(&po.config)->composing(),
      "load specified config file")
-    ("config-value,v", value<std::vector<std::string>>(&po.confStrings)->composing(),
+    ("config-value,v",
+     value<std::vector<std::string>>(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
      "name can be any valid configuration for a config file")
+    ("define,d", value<std::vector<std::string>>(&po.iniStrings)->composing(),
+     "define an ini setting in the same format ( foo[=bar] ) as provided in a "
+     ".ini file")
     ("no-config", "don't use the default php.ini")
     ("port,p", value<int>(&po.port)->default_value(-1),
      "start an HTTP server at specified port")
@@ -1081,7 +1091,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("debug-extension", value<string>(&po.debugger_options.extension),
      "PHP file that extends command 'arg'")
     ("debug-cmd", value<std::vector<std::string>>(
-      &po.debugger_options.cmds)->composing(),
+     &po.debugger_options.cmds)->composing(),
      "executes this debugger command and returns its output in stdout")
     ("debug-sandbox",
      value<string>(&po.debugger_options.sandbox)->default_value("default"),
@@ -1247,7 +1257,10 @@ static int execute_program_impl(int argc, char** argv) {
   }
   RuntimeOption::Load(ini, config, &po.confStrings);
   for (auto& c : po.config) {
-    process_ini_settings(c);
+    process_ini_file(c);
+  }
+  for (auto& istr : po.iniStrings) {
+    process_ini_settings(istr, "");
   }
 
   vector<string> badnodes;

@@ -1,0 +1,2 @@
+-d hhvm.log.level=Warning
+-d this.should.not.work=Bogus

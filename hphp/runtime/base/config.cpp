@@ -74,7 +74,6 @@ void Config::Parse(const std::string &config, IniSetting::Map &ini, Hdf &hdf) {
   }
 }
 
-
 const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
                          const char *defValue /* = nullptr */) {
   auto* value = ini.get_ptr(IniName(config));

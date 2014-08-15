@@ -80,6 +80,10 @@ These are the options you can specify to the HHVM executable.
   * `--count` arg (=1):
     how many times to repeat execution
 
+  * `-d`, `--define` arg:
+    define an ini setting in the same format ( foo[=bar] ) as provided in a
+    .ini file
+
   * `--debug-cmd` arg:
     executes this debugger command and returns its output in stdout
 

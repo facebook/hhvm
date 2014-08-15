@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
@@ -71,6 +72,7 @@ struct CompilerOptions {
   vector<string> config;
   string configDir;
   vector<string> confStrings;
+  vector<string> iniStrings;
   string inputDir;
   vector<string> inputs;
   string inputList;
@@ -294,6 +296,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("config-value,v", value<vector<string> >(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
      "name can be any valid configuration for a config file")
+    ("define,d", value<vector<string>>(&po.iniStrings)->composing(),
+     "define an ini setting in the same format ( foo[=bar] ) as provided in a "
+     ".ini file")
     ("log,l",
      value<int>(&po.logLevel)->default_value(-1),
      "-1: (default); 0: no logging; 1: errors only; 2: warnings and errors; "
@@ -387,6 +392,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   IniSetting::Map iniR = IniSetting::Map::object;
   Hdf runtime = config["Runtime"];
   RuntimeOption::Load(iniR, runtime);
+  for (unsigned int i = 0; i < po.iniStrings.size(); i++) {
+    process_ini_settings(po.iniStrings[i].c_str(), "");
+  }
   initialize_repo();
 
   vector<string> badnodes;

@@ -31,6 +31,12 @@ This sets a configuration option on the command line. STRING should be
 a line of HDF, e.g. Section.Name=Value. The options settable are the same
 as those set by --config.
 
+= -d, --define=STRING
+
+This sets an ini option on the command line. STRING should be a line in the
+format expected by ini, e.g. hhvm.option=value. The options settable are the
+same as those set by --config, when providing an .ini file.
+
 = -p, --port
 
 Which port to start HTTP server on.

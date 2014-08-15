@@ -2,6 +2,7 @@
 // Put the proxy information in its own "struct-like" class for easy access
 // in case folks outside this proxy wall need to change them.
 class ProxyInformation {
+  const FACEBOOK_PROXY = 'http://fwdproxy:8080';
 
   public static ?Map<string, string> $proxies = null;
 
@@ -14,10 +15,10 @@ class ProxyInformation {
       self::$proxies =
         Map {
           "HOME" => getenv("HOME"),
-          "http_proxy" => "http://fwdproxy.any.facebook.com:8080",
-          "https_proxy" => "http://fwdproxy.any.facebook.com:8080",
-          "HTTPS_PROXY" => "http://fwdproxy.any.facebook.com:8080",
-          "HTTP_PROXY" => "http://fwdproxy.any.facebook.com:8080",
+          "http_proxy" => self::FACEBOOK_PROXY,
+          "https_proxy" => self::FACEBOOK_PROXY,
+          "HTTPS_PROXY" => self::FACEBOOK_PROXY,
+          "HTTP_PROXY" => self::FACEBOOK_PROXY,
           "HTTP_PROXY_REQUEST_FULLURI" => "true",
           "no_proxy" => "facebook.com,fbcdn.net,localhost,127.0.0.1",
           "NO_PROXY" => "facebook.com,fbcdn.net,localhost,127.0.0.1",

@@ -1303,6 +1303,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
 void Parser::onEnum(Token &out, Token &name, Token &baseTy,
                     Token &stmt, Token *attr) {
   Token dummyBase, dummyInterface;
+  dummyBase.setText("HH\\BuiltinEnum");
   onClass(out, T_ENUM, name, dummyBase, dummyInterface, stmt, attr, &baseTy);
 }
 

@@ -1,0 +1,70 @@
+Some basic tests on Foo
+array(4) {
+  ["WAT"]=>
+  int(0)
+  ["FOO"]=>
+  int(1)
+  ["BAR"]=>
+  int(2)
+  ["BAZ"]=>
+  int(3)
+}
+array(4) {
+  [0]=>
+  string(3) "WAT"
+  [1]=>
+  string(3) "FOO"
+  [2]=>
+  string(3) "BAR"
+  [3]=>
+  string(3) "BAZ"
+}
+bool(true)
+bool(false)
+bool(false)
+getValues/getNames tests on Bar
+array(3) {
+  ["FOO"]=>
+  string(3) "foo"
+  ["BAR"]=>
+  string(3) "bar"
+  ["BAZ"]=>
+  string(2) "10"
+}
+array(3) {
+  ["foo"]=>
+  string(3) "FOO"
+  ["bar"]=>
+  string(3) "BAR"
+  [10]=>
+  string(3) "BAZ"
+}
+coerce() on Foo
+int(1)
+int(2)
+int(3)
+NULL
+falsey coerce() on Foo
+int(0)
+NULL
+NULL
+NULL
+coerce() on Bar
+string(3) "bar"
+string(2) "10"
+NULL
+string(3) "foo"
+NULL
+Stringish doesn't count
+NULL
+some valid assert()s
+int(1)
+int(1)
+string(2) "10"
+string(3) "foo"
+a broken assert()
+
+Fatal error: Uncaught exception 'UnexpectedValueException' with message 'welp is not a valid value for Bar' in :
+Stack trace:
+#0 %s(70): HH\BuiltinEnum::assert()
+#1 {main}

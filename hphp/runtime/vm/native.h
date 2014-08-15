@@ -80,6 +80,14 @@ class Object;
  *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
  *     Native::registerBuiltinFunction(s_sum.get(), (void*)my_sum_function);
  *   }
+ *
+ ****************************************************************************
+ *
+ * The macros HHVM_FALIAS, HHVM_MALIAS, and HHVM_STATIC_MALIAS allow
+ * giving different names to the C++ implementation and the exported
+ * C++ function. This ca be useful for creating multiple names for one
+ * function or for registering functions that live in a namespace.
+ *
  */
 #define HHVM_FN(fn) f_ ## fn
 #define HHVM_FUNCTION(fn, ...) \
@@ -105,6 +113,8 @@ class Object;
                           makeStaticString(#cn "->" #fn), \
                           mimpl)
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
+#define HHVM_MALIAS(cn,fn,calias,falias) \
+  HHVM_NAMED_ME(cn,fn,HHVM_MN(calias,falias))
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class static methods.
@@ -122,6 +132,8 @@ class Object;
                           makeStaticString(#cn "::" #fn), \
                           mimpl)
 #define HHVM_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(cn,fn))
+#define HHVM_STATIC_MALIAS(cn,fn,calias,falias) \
+  HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(calias,falias))
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////

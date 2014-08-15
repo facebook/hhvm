@@ -22,30 +22,35 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // initialize the cache
-static EnumCache cache;
+static EnumCache s_cache;
 
-const StaticString enumName("Enum");
+const StaticString s_enumName("Enum");
 
 const EnumCache::EnumValues* EnumCache::getValues(const Class* klass,
                                                   bool recurse) {
   if (UNLIKELY(klass->classVecLen() == 1 ||
-               !enumName.get()->same(klass->classVec()[0]->name()))) {
+               !s_enumName.get()->same(klass->classVec()[0]->name()))) {
     std::string msg;
     msg += klass->name()->data();
     msg += " must derive from Enum";
     EnumCache::failLookup(msg);
   }
-  return cache.getEnumValues(klass, recurse);
+  return s_cache.getEnumValues(klass, recurse);
+}
+
+const EnumCache::EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
+  assert(isEnum(klass));
+  return s_cache.getEnumValues(klass, false);
 }
 
 void EnumCache::deleteValues(const Class* klass) {
   // it's unlikely a class is in the cache so check first
   // without write lock
-  if (cache.getEnumValuesIfDefined(getKey(klass, false)) != nullptr) {
-    cache.deleteEnumValues(getKey(klass, false));
+  if (s_cache.getEnumValuesIfDefined(getKey(klass, false)) != nullptr) {
+    s_cache.deleteEnumValues(getKey(klass, false));
   }
-  if (cache.getEnumValuesIfDefined(getKey(klass, true)) != nullptr) {
-    cache.deleteEnumValues(getKey(klass, true));
+  if (s_cache.getEnumValuesIfDefined(getKey(klass, true)) != nullptr) {
+    s_cache.deleteEnumValues(getKey(klass, true));
   }
 }
 

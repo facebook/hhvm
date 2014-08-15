@@ -6386,6 +6386,19 @@ void EmitterVisitor::emitPostponedMeths() {
     fe->isAsync = funcScope->isAsync();
     fe->isGenerator = funcScope->isGenerator();
 
+    if (funcScope->userAttributes().count("__Memoize")) {
+      TypedValue tvNull;
+      tvWriteNull(&tvNull);
+      auto const str = makeStaticString(
+        folly::sformat("{}$memoize_cache", fe->name->data()));
+      fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
+                             &tvNull, RepoAuthType{});
+      fe->name = makeStaticString(
+        folly::sformat("{}$memoize_impl", fe->name->data()));
+      throw IncludeTimeFatalException(meth,
+        "<<__Memoize>> is in development. It's not ready for actual usage");
+    }
+
     if (funcScope->isNative()) {
       bindNativeFunc(meth, fe);
     } else {

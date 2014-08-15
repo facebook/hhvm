@@ -1038,7 +1038,7 @@ Type outputType(const IRInstruction*, int dstId = 0);
 /*
  * Assert that an instruction has operands of allowed types.
  */
-void assertOperandTypes(const IRInstruction*);
+void assertOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
 
 
 int minstrBaseIdx(Opcode opc);

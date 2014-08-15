@@ -289,7 +289,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
       state.setMarker(inst.marker());
       copyProp(&inst);
       visitLoad(&inst, state);
-      retypeDests(&inst);
+      retypeDests(&inst, &unit);
       state.update(&inst);
     }
 

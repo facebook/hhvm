@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -1000,14 +1001,13 @@ Type buildUnion(Type t, Args... ts) {
  * increments curSrc, and at the end we can check that the argument
  * count was also correct.
  */
-void assertOperandTypes(const IRInstruction* inst) {
-  if (!debug) return;
-
+void assertOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   int curSrc = 0;
 
   auto bail = [&] (const std::string& msg) {
     FTRACE(1, "{}", msg);
     fprintf(stderr, "%s\n", msg.c_str());
+    if (unit) print(*unit);
     always_assert(false && "instruction operand type check failure");
   };
 
@@ -1156,7 +1156,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 
   switch (inst->op()) {
     IR_OPCODES
-  default: assert(0);
+  default: always_assert(0);
   }
 
 #undef O

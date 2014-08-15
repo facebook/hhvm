@@ -141,7 +141,7 @@ private:
 
   // Finally we end up here.
   Ret stop(IRInstruction* inst) {
-    if (debug) assertOperandTypes(inst);
+    assertOperandTypes(inst);
     return func(inst);
   }
 

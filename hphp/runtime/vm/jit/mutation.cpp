@@ -120,7 +120,7 @@ void retypeDst(IRInstruction* inst, int num) {
 }
 }
 
-void retypeDests(IRInstruction* inst) {
+void retypeDests(IRInstruction* inst, const IRUnit* unit) {
   for (int i = 0; i < inst->numDsts(); ++i) {
     auto const ssa = inst->dst(i);
     auto const oldType = ssa->type();
@@ -131,7 +131,7 @@ void retypeDests(IRInstruction* inst) {
     }
   }
 
-  assertOperandTypes(inst);
+  assertOperandTypes(inst, unit);
 }
 
 /*
@@ -153,7 +153,7 @@ void reflowTypes(IRUnit& unit) {
     again = false;
     for (auto* block : blocklist.blocks) {
       FTRACE(5, "reflowTypes: visiting block {}\n", block->id());
-      for (auto& inst : *block) retypeDests(&inst);
+      for (auto& inst : *block) retypeDests(&inst, &unit);
       auto& jmp = block->back();
       auto n = jmp.numSrcs();
       if (!again && jmp.is(Jmp) && n > 0 && isBackEdge(block, jmp.taken())) {

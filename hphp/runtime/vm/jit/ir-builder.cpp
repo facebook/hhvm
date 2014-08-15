@@ -1164,7 +1164,7 @@ repeat:
   IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker(),
                                          smart::vector<unsigned>(numPhis, 1));
   m_curBlock->prepend(label);
-  retypeDests(label);
+  retypeDests(label, &m_unit);
 
   // Add TrackLoc's to update local state.
   for (unsigned i = 0; i < numPhis; ++i) {

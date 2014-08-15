@@ -33,7 +33,6 @@ public:
   virtual void onClient(DebuggerClient &client);
 
   Array fetchStackTrace(DebuggerClient &client); // client side
-  void removeArgs(); // server side
 
 protected:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);

@@ -47,7 +47,7 @@ struct BacktraceArgs {
   }
 
   /**
-   * Return the object associated with the each frame.
+   * Return the object associated with each frame.
    */
   BacktraceArgs& withThis(bool withThis = true) {
     m_withThis = withThis;

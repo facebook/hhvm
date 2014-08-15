@@ -32,10 +32,7 @@ namespace HPHP {
  */
 
 void raise_error(const std::string &msg) {
-  auto const errnum = static_cast<int>(ErrorConstants::ErrorModes::ERROR);
-  g_context->handleError(msg, errnum, false,
-                         ExecutionContext::ErrorThrowMode::Always,
-                         "\nFatal error: ");
+  raise_message(ErrorConstants::ErrorModes::ERROR, msg);
 }
 
 void raise_error(const char *fmt, ...) {
@@ -47,6 +44,10 @@ void raise_error(const char *fmt, ...) {
   raise_error(msg);
 }
 
+/*
+ * This does not call raise_message because the mode of the error differs
+ * depending on the runtime option unlike the regular raise_error.
+ */
 void raise_error_without_first_frame(const std::string &msg) {
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::ERROR);
   g_context->handleError(msg, errnum, false,
@@ -58,10 +59,7 @@ void raise_error_without_first_frame(const std::string &msg) {
 }
 
 void raise_recoverable_error(const std::string &msg) {
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
-  g_context->handleError(msg, errnum, true,
-                         ExecutionContext::ErrorThrowMode::IfUnhandled,
-                         "\nCatchable Fatal error: ");
+  raise_message(ErrorConstants::ErrorModes::RECOVERABLE_ERROR, msg);
 }
 
 void raise_typehint_error(const std::string& msg) {
@@ -93,75 +91,31 @@ void raise_recoverable_error(const char *fmt, ...) {
 static int64_t g_notice_counter = 0;
 
 void raise_strict_warning(const std::string &msg) {
-  if (RuntimeOption::NoticeFrequency <= 0 ||
-      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
-    return;
-  }
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::STRICT);
-  if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::ErrorThrowMode::Never)) {
-    return;
-  }
-  g_context->handleError(msg, errnum, true,
-                         ExecutionContext::ErrorThrowMode::Never,
-                         "\nStrict Warning: ");
+  raise_message(ErrorConstants::ErrorModes::STRICT, msg);
 }
 
 void raise_strict_warning(const char *fmt, ...) {
-  if (RuntimeOption::NoticeFrequency <= 0 ||
-      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
-    return;
-  }
   std::string msg;
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::STRICT);
-  if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::ErrorThrowMode::Never)) {
-    return;
-  }
   va_list ap;
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-  g_context->handleError(msg, errnum, true,
-                         ExecutionContext::ErrorThrowMode::Never,
-                         "\nStrict Warning: ");
+  raise_strict_warning(msg);
 }
 
 static int64_t g_warning_counter = 0;
 
 void raise_warning(const std::string &msg) {
-  if (RuntimeOption::WarningFrequency <= 0 ||
-      (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
-    return;
-  }
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
-  if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::ErrorThrowMode::Never)) {
-    return;
-  }
-  g_context->handleError(msg, errnum, true,
-                         ExecutionContext::ErrorThrowMode::Never,
-                         "\nWarning: ");
+  raise_message(ErrorConstants::ErrorModes::WARNING, msg);
 }
 
 void raise_warning(const char *fmt, ...) {
-  if (RuntimeOption::WarningFrequency <= 0 ||
-      (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
-    return;
-  }
   std::string msg;
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
-  if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::ErrorThrowMode::Never)) {
-    return;
-  }
   va_list ap;
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-  g_context->handleError(msg, errnum, true,
-                         ExecutionContext::ErrorThrowMode::Never,
-                         "\nWarning: ");
+  raise_warning(msg);
 }
 
 /**
@@ -202,12 +156,7 @@ void raise_debugging(const std::string &msg) {
       RuntimeOption::RaiseDebuggingFrequency != 0) {
     return;
   }
-
-  g_context->handleError(msg,
-                         static_cast<int>(ErrorConstants::ErrorModes::WARNING),
-                         true,
-                         ExecutionContext::ErrorThrowMode::Never,
-                         "\nWarning: ");
+  raise_message(ErrorConstants::ErrorModes::WARNING, msg);
 }
 
 void raise_debugging(const char *fmt, ...) {
@@ -229,7 +178,7 @@ void raise_notice(const char *fmt, ...) {
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-  raise_message(ErrorConstants::ErrorModes::NOTICE, msg);
+  raise_notice(msg);
 }
 
 void raise_deprecated(const std::string &msg) {
@@ -286,42 +235,44 @@ void raise_message(ErrorConstants::ErrorModes mode,
   raise_message(mode, msg);
 }
 
+#define HANDLE_ERROR(userHandle, mode, str)                             \
+  g_context->handleError(msg, errnum, userHandle,                       \
+                         ExecutionContext::ErrorThrowMode::mode,        \
+                         str)
+
 void raise_message(ErrorConstants::ErrorModes mode, const std::string &msg) {
-  switch (mode) {
-    case ErrorConstants::ErrorModes::ERROR:
-      raise_error(msg);
-      break;
-    case ErrorConstants::ErrorModes::WARNING:
-      raise_warning(msg);
-      break;
-    case ErrorConstants::ErrorModes::NOTICE:
-    case ErrorConstants::ErrorModes::PHP_DEPRECATED: {
-        // This is here rather than in the individual functions to reduce the
-        // copy+paste
-        if (RuntimeOption::NoticeFrequency <= 0 ||
-            (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
-          break;
-        }
-        int errnum = static_cast<int>(mode);
-        if (!g_context->errorNeedsHandling(errnum, true,
-                                      ExecutionContext::ErrorThrowMode::Never)) {
-          return;
-        }
-        if (mode == ErrorConstants::ErrorModes::NOTICE) {
-          g_context->handleError(msg, errnum, true,
-                                 ExecutionContext::ErrorThrowMode::Never,
-                                 "\nNotice: ");
-        } else {
-          g_context->handleError(msg, errnum, true,
-                                 ExecutionContext::ErrorThrowMode::Never,
-                                 "\nDeprecated: ");
-        }
-      }
-      break;
-    default:
-      always_assert(!"Unhandled type of error");
+  int errnum = static_cast<int>(mode);
+  if (mode == ErrorConstants::ErrorModes::ERROR) {
+    HANDLE_ERROR(false, Always, "\nFatal error: ");
+  } else if (mode == ErrorConstants::ErrorModes::RECOVERABLE_ERROR) {
+    HANDLE_ERROR(true, IfUnhandled, "\nCatchable Fatal error: ");
+  } else if (!g_context->errorNeedsHandling(errnum, true,
+                              ExecutionContext::ErrorThrowMode::Never)) {
+    return;
+  } else if (mode == ErrorConstants::ErrorModes::WARNING) {
+    if (RuntimeOption::WarningFrequency <= 0 ||
+        (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
+      return;
+    }
+    HANDLE_ERROR(true, Never, "\nWarning: ");
+  } else if (RuntimeOption::NoticeFrequency <= 0 ||
+             (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
+    return;
+  } else {
+    switch (mode) {
+      case ErrorConstants::ErrorModes::STRICT:
+        HANDLE_ERROR(true, Never, "\nStrict Warning: ");
+        break;
+      case ErrorConstants::ErrorModes::NOTICE:
+        HANDLE_ERROR(true, Never, "\nNotice: ");
+        break;
+      case ErrorConstants::ErrorModes::PHP_DEPRECATED:
+        HANDLE_ERROR(true, Never, "\nDeprecated: ");
+        break;
+      default:
+        always_assert(!"Unhandled type of error");
+    }
   }
 }
-
 ///////////////////////////////////////////////////////////////////////////////
 }

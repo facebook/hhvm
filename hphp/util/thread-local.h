@@ -59,14 +59,18 @@ inline uintptr_t tlsBase() {
 // assembler warnings of unknown importance about incorrect section
 // types
 //
+// __thread on cygwin and mingw uses pthreads emulation not native tls so
+// the emulation for thread local must be used as well
+//
 // So we use __thread on gcc, icc and clang, unless we are on OSX. On OSX, we
 // use our own emulation. Use the DECLARE_THREAD_LOCAL() and
 // IMPLEMENT_THREAD_LOCAL() macros to access either __thread or the emulation
 // as appropriate.
 
-#if !defined(NO_TLS) && !defined(__APPLE__) &&                  \
-  ((__llvm__ && __clang__) ||                                   \
-   __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||     \
+#if !defined(NO_TLS) && !defined(__APPLE__) &&                \
+    !defined(__CYGWIN__) && !defined(__MINGW__) &&            \
+   ((__llvm__ && __clang__) ||                                \
+   __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||   \
    __INTEL_COMPILER)
 #define USE_GCC_FAST_TLS
 #endif

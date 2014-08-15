@@ -1,0 +1,2 @@
+
+Fatal error: <<__Memoize>> cannot be used on methods that return by reference in %s/test/quick/memoize_refreturn.php on line 4

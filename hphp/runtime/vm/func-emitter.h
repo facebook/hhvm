@@ -283,6 +283,7 @@ public:
   bool isAsync;
   bool isGenerator;
   bool isPairGenerator;
+  bool isMemoizeImpl;
   bool containsCalls;
 
   LowStringPtr docComment;

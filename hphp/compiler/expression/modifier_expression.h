@@ -32,6 +32,7 @@ public:
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   void add(int modifier);
+  void remove(int modifier);
   int getCount() const { return m_modifiers.size();}
   int operator[](int index);
 

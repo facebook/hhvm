@@ -1,0 +1,2 @@
+
+Fatal error: <<__Memoize>> currently only supports methods with zero args in %s/test/quick/memoize_args.php on line 4

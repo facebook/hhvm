@@ -6282,6 +6282,13 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     attrs = attrs | AttrPublic;
   }
 
+  // Coerce memoized methods to private. This is needed for code that uses
+  // parent:: to call through to the correct underlying function
+  if (meth->is(Statement::KindOfMethodStatement) && fe->isMemoizeImpl) {
+    attrs = static_cast<Attr>(attrs & ~(AttrPublic | AttrProtected));
+    attrs = attrs | AttrPrivate;
+  }
+
   parseUserAttributes(fe, attrs);
   // Not supported except in __Native functions
   attrs = static_cast<Attr>(
@@ -6387,16 +6394,39 @@ void EmitterVisitor::emitPostponedMeths() {
     fe->isGenerator = funcScope->isGenerator();
 
     if (funcScope->userAttributes().count("__Memoize")) {
+      if (meth->is(Statement::KindOfFunctionStatement)) {
+        throw IncludeTimeFatalException(meth,
+          "<<__Memoize>> does not support top-level functions yet");
+      }
+
+      PreClassEmitter *pce = fe->pce();
+
+      // Add a property to hold the memoized results
+      auto const propName = makeStaticString(
+        folly::sformat("{}$memoize_cache", fe->name->data()));
       TypedValue tvNull;
       tvWriteNull(&tvNull);
-      auto const str = makeStaticString(
-        folly::sformat("{}$memoize_cache", fe->name->data()));
-      fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
-                             &tvNull, RepoAuthType{});
-      fe->name = makeStaticString(
+      pce->addProperty(propName, AttrPrivate, nullptr, nullptr,
+                       &tvNull, RepoAuthType{});
+
+      // Rename the method and create a new method with the original name
+      auto const originalName = fe->name;
+      auto const rewrittenName = makeStaticString(
         folly::sformat("{}$memoize_impl", fe->name->data()));
-      throw IncludeTimeFatalException(meth,
-        "<<__Memoize>> is in development. It's not ready for actual usage");
+      pce->renameMethod(originalName, rewrittenName);
+      FuncEmitter* memoizeFe = m_ue.newMethodEmitter(originalName, pce);
+      bool added UNUSED = pce->addMethod(memoizeFe);
+      assert(added);
+
+      // Emit the new method that handles the memoization
+      m_curFunc = memoizeFe;
+      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+      emitMemoizeMethod(meth, rewrittenName, propName);
+
+      // Switch back to the original method and mark it as a memoize
+      // implementation
+      m_curFunc = fe;
+      m_curFunc->isMemoizeImpl = true;
     }
 
     if (funcScope->isNative()) {
@@ -6750,6 +6780,64 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
     }
   }
   if (hasOptional) e.JmpNS(topOfBody);
+}
+
+void EmitterVisitor::emitMemoizeProp(Emitter &e, const StringData *propName) {
+  m_evalStack.push(StackSym::H);
+  m_evalStack.setKnownCls(m_curFunc->pce()->name(), false);
+  m_evalStack.push(StackSym::T);
+  m_evalStack.setString(propName);
+  markProp(e);
+}
+
+void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
+                                       const StringData *methName,
+                                       const StringData *propName) {
+  if (meth->getParams() && meth->getParams()->getCount() != 0) {
+    throw IncludeTimeFatalException(meth,
+      "<<__Memoize>> currently only supports methods with zero args");
+  }
+  if (meth->getFunctionScope()->isStatic()) {
+    throw IncludeTimeFatalException(meth,
+      "<<__Memoize>> cannot be used on static methods yet");
+  }
+  if (meth->getFunctionScope()->isRefReturn()) {
+    throw IncludeTimeFatalException(meth,
+      "<<__Memoize>> cannot be used on methods that return by reference");
+  }
+
+  auto region = createRegion(meth, Region::Kind::FuncBody);
+  enterRegion(region);
+  SCOPE_EXIT { leaveRegion(region); };
+
+  Emitter e(meth, m_ue, *this);
+  Label topOfBody(e);
+  Label cacheMiss;
+
+  emitMethodPrologue(e, meth);
+
+  // If the cache var is non-null return it
+  e.CheckThis();
+  emitMemoizeProp(e, propName);
+  emitCGet(e);
+  e.IsTypeC(IsTypeOp::Null);
+  e.JmpNZ(cacheMiss);
+  emitMemoizeProp(e, propName);
+  emitCGet(e);
+  e.RetC();
+
+  // Otherwise, call the memoized func, store the result, and return it
+  cacheMiss.set(e);
+  emitMemoizeProp(e, propName);
+  e.This();
+  emitConstMethodCallNoParams(e, methName->toCppString());
+  emitSet(e);
+  e.RetC();
+
+  assert(m_evalStack.size() == 0);
+
+  FuncFinisher ff(this, e, m_curFunc);
+  emitMethodDVInitializers(e, meth, topOfBody);
 }
 
 void EmitterVisitor::emitPostponedCtors() {

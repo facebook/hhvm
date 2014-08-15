@@ -161,6 +161,7 @@ class PreClassEmitter {
     return m_interfaces;
   }
   bool addMethod(FuncEmitter* method);
+  void renameMethod(const StringData* oldName, const StringData *newName);
   bool addProperty(const StringData* n,
                    Attr attrs,
                    const StringData* typeConstraint,

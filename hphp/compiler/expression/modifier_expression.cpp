@@ -41,6 +41,12 @@ void ModifierExpression::add(int modifier) {
   m_modifiers.push_back(modifier);
 }
 
+void ModifierExpression::remove(int modifier) {
+  m_modifiers.erase(
+    std::remove(m_modifiers.begin(), m_modifiers.end(), modifier),
+    m_modifiers.end());
+}
+
 int ModifierExpression::operator[](int index) {
   assert(index >= 0 && index < getCount());
   return m_modifiers[index];

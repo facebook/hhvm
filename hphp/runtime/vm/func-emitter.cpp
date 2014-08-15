@@ -87,6 +87,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , isAsync(false)
   , isGenerator(false)
   , isPairGenerator(false)
+  , isMemoizeImpl(false)
   , containsCalls(false)
   , docComment(nullptr)
   , originalFilename(nullptr)

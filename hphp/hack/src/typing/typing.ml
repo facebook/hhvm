@@ -1257,6 +1257,12 @@ and new_object ~check_not_abstract p env c el =
           Errors.new_static_inconsistent p cname
         else ();
         env, (Reason.Rwitness p, Tgeneric ("this", Some obj_type))
+      | CIparent ->
+        (match (fst class_.tc_construct) with
+          | Some ce ->
+            ignore (check_abstract_parent_meth "__construct" p ce.ce_type)
+          | None -> ());
+        env, obj_type
       | _ -> env, obj_type
   )
 
@@ -1522,6 +1528,15 @@ and call_parent_construct pos env el =
         | _ ->
           Errors.parent_outside_class pos; default
 
+(* parent::method() in a class definition invokes the specific parent
+ * version of the method ... it better be callable *)
+and check_abstract_parent_meth mname pos fty =
+  (match fty with
+    | r, Tfun { ft_abstract = true; _ } ->
+      Errors.parent_abstract_call mname pos (Reason.to_pos r)
+    | _ -> ());
+  fty
+
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
  *)
@@ -1549,6 +1564,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
         let env, fty = class_get ~is_method:true ~is_const:false env ty1 m CIparent in
         let env, fty = Env.expand_type env fty in
         let env, fty = Inst.instantiate_fun env fty el in
+        let fty = check_abstract_parent_meth (snd m) p fty in
         call p env fty el
       end
       else begin
@@ -1566,14 +1582,16 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
             let env, method_, _ = obj_get_ true env ty1 m begin fun (env, fty, _) ->
               let env, fty = Env.expand_type env fty in
               let env, fty = Inst.instantiate_fun env fty el in
+              let fty = check_abstract_parent_meth (snd m) p fty in
               let env, method_ = call p env fty el in
               env, method_, None
             end k_lhs in
             env, method_
-        | Some _ ->
+          | Some _ ->
             let env, fty = class_get ~is_method:true ~is_const:false env ty1 m CIparent in
             let env, fty = Env.expand_type env fty in
             let env, fty = Inst.instantiate_fun env fty el in
+            let fty = check_abstract_parent_meth (snd m) p fty in
             call p env fty el
         )
       end

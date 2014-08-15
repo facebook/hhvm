@@ -111,6 +111,7 @@ val tuple_arity : Pos.t -> int -> Pos.t -> int -> unit
 val undefined_parent : Pos.t -> unit
 val parent_construct_in_trait : Pos.t -> unit
 val parent_outside_class : Pos.t -> unit
+val parent_abstract_call : string -> Pos.t -> Pos.t -> unit
 val dont_use_isset : Pos.t -> unit
 val array_get_arity : Pos.t -> string -> Pos.t -> unit
 val static_overflow : Pos.t -> unit

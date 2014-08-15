@@ -426,6 +426,12 @@ let parent_construct_in_trait pos =
 let parent_outside_class pos =
   add pos "parent is undefined outside of a class"
 
+let parent_abstract_call meth_name call_pos parent_pos =
+  add_list [
+    call_pos, ("Cannot call parent::"^meth_name^"(); it is abstract");
+    parent_pos, "Declaration is here"
+  ]
+
 let dont_use_isset p =
   add p "Don't use isset!"
 

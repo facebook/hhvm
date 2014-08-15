@@ -598,7 +598,7 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
     return;
   }
   if (cmax >= 0 && count > cmax) {
-    throw_toomany_arguments_nr(fn, cmax, level);
+    throw_missing_arguments_nr(fn, cmax, count, level);
     return;
   }
   assert(false);

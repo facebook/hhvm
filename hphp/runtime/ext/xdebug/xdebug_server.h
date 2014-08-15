@@ -21,6 +21,10 @@
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 #define DBGP_VERSION "1.0"
 
 namespace HPHP {

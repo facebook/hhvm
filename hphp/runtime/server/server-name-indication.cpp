@@ -115,11 +115,16 @@ void ServerNameIndication::find_server_names(
       continue;
     }
     struct stat statbuf;
-    int rc = stat(crt_file_it->first.c_str(), &statbuf);
-    if (rc != 0) {
-      continue;
+    std::string crt_path = folly::to<std::string>(path, crt_file_it->first,
+                                                  crt_ext);
+    int rc = stat(crt_path.c_str(), &statbuf);
+    bool dup = false;
+    if (rc == 0) {
+      dup = !crt_inodes.insert(statbuf.st_ino).second;
+    } else {
+      Logger::Warning("Stat '%s' failed with errno=%d", crt_path.c_str(),
+                      errno);
     }
-    bool dup = crt_inodes.insert(statbuf.st_ino).second;
     server_names.push_back({it->first, dup});
   }
 }

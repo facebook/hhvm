@@ -14,7 +14,7 @@ SRC= clientEnv.ml clientExceptions.ml  clientUtils.ml colorFile.ml \
   clientAutocomplete.ml clientMethodJumps.ml clientSearch.ml clientCheck.ml \
   clientLogCommand.ml clientLogCommandUtils.ml
 
-INCLUDEDIRS=$(TOP)/utils \
+INCLUDEDIRS=$(TOP)/utils $(TOP)/stubs \
  $(TOP)/socket $(TOP)/typing $(TOP)/parsing $(TOP)/search $(TOP)/server
 
 

@@ -64,6 +64,8 @@ let rec main_ env retries =
     main_ env (retries - 1)
   | ServerMsg.PONG -> (* successful case *)
     begin
+      EventLogger.client_begin_work (
+        ClientLogCommand.LCBuild env.ServerMsg.root);
       try
         while true do
           print_endline (input_line ic)

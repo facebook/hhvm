@@ -436,7 +436,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     m_buf->append("\";");
     break;
   case Type::JSON: {
-    if (m_option & k_JSON_NUMERIC_CHECK) {
+    if ((m_option & k_JSON_NUMERIC_CHECK) && !isArrayKey) {
       int64_t lval; double dval;
       switch (is_numeric_string(v, len, &lval, &dval, 0)) {
         case KindOfInt64:
@@ -891,7 +891,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
           k++;
           len -= 2;
         }
-        write(k, len);
+        write(k, len, true);
       } else {
         m_buf->append('"');
         m_buf->append(keyCell->m_data.num);

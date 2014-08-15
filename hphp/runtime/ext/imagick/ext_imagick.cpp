@@ -221,18 +221,16 @@ void imagickWriteOp(MagickWand* wand,
 //////////////////////////////////////////////////////////////////////////////
 // Common Helper
 void raiseDeprecated(const char* className, const char* methodName) {
-  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED,
-                "%s::%s method is deprecated and it's use should be avoided",
-                className, methodName);
+  raise_deprecated("%s::%s method is deprecated and it's use should be avoided",
+                   className, methodName);
 }
 
 void raiseDeprecated(const char* className,
                      const char* methodName,
                      const char* newClass,
                      const char* newMethod) {
-  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED,
-                "%s::%s is deprecated. %s::%s should be used instead",
-                className, methodName, newClass, newMethod);
+  raise_deprecated("%s::%s is deprecated. %s::%s should be used instead",
+                   className, methodName, newClass, newMethod);
 }
 
 String convertMagickString(char* &&str) {

@@ -75,14 +75,19 @@ void raise_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_error_without_first_frame(const std::string &msg);
 void raise_recoverable_error(const std::string &msg);
 void raise_recoverable_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_recoverable_error_without_first_frame(const std::string &msg);
 void raise_strict_warning(const std::string &msg);
 void raise_strict_warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_strict_warning_without_first_frame(const std::string &msg);
 void raise_warning(const std::string &msg);
 void raise_warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_warning_without_first_frame(const std::string &msg);
 void raise_notice(const std::string &msg);
 void raise_notice(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_notice_without_first_frame(const std::string &msg);
 void raise_deprecated(const std::string &msg);
 void raise_deprecated(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_deprecated_without_first_frame(const std::string &msg);
 void raise_debugging(const std::string &msg);
 void raise_debugging(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_message(ErrorConstants::ErrorModes mode,
@@ -91,7 +96,9 @@ void raise_message(ErrorConstants::ErrorModes mode,
 void raise_message(ErrorConstants::ErrorModes mode,
                    const char *fmt,
                    ...) ATTRIBUTE_PRINTF(2, 3);
-void raise_message(ErrorConstants::ErrorModes mode, const std::string &msg);
+void raise_message(ErrorConstants::ErrorModes mode,
+                   bool skipTop,
+                   const std::string &msg);
 void raise_param_type_warning(
     const char* func_name,
     int param_num,

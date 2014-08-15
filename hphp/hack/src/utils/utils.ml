@@ -328,6 +328,14 @@ let str_starts_with long short =
   with Invalid_argument _ ->
     false
 
+let str_ends_with long short =
+  try
+    let len = String.length short in
+    let long = String.sub long (String.length long - len) len in
+    long = short
+  with Invalid_argument _ ->
+    false
+
 (*****************************************************************************)
 (* Same as List.iter2, except that we only iterate as far as the shortest
  * of both lists.

@@ -507,7 +507,13 @@ module Env = struct
 
   let class_name (genv, _) x =
     let x = Namespaces.elaborate_id genv.namespace x in
-    canonicalize genv genv.classes x
+    let pos, name = canonicalize genv genv.classes x in
+    (* Don't let people use strictly internal classes
+     * (except when they are being declared in .hhi files) *)
+    if name = "\\HH\\BuiltinEnum" &&
+      not (str_ends_with (Pos.filename pos) ".hhi") then
+      Errors.using_internal_class pos (strip_ns name);
+    pos, name
 
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_fallback

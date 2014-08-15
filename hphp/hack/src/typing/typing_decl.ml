@@ -59,6 +59,7 @@ let check_extend_kind env parent_pos parent_kind child_pos child_kind c =
   match parent_kind, child_kind with
     (* What is allowed *)
   | (Ast.Cabstract | Ast.Cnormal), (Ast.Cabstract | Ast.Cnormal)
+  | Ast.Cabstract, Ast.Cenum (* enums extend BuiltinEnum under the hood *)
   | Ast.Ctrait, Ast.Ctrait
   | Ast.Cinterface, Ast.Cinterface ->
       ()

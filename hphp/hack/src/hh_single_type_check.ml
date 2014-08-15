@@ -71,6 +71,16 @@ let builtins = "<?hh // decl\n"^
   "  public function next(): Awaitable<?(Tk, Tv)> {}\n"^
   "  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}\n"^
   "  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}"^
+  "}\n"^
+  "namespace HH {\n"^
+  "abstract class BuiltinEnum<T> {\n"^
+  "  final public static function getValues(): array<string, T>;\n"^
+  "  final public static function getNames(): array<T, string>;\n"^
+  "  final public static function coerce(mixed $value): ?T;\n"^
+  "  final public static function assert(mixed $value): T;\n"^
+  "  final public static function isValid(mixed $value): bool;\n"^
+  "  final public static function assertAll(Traversable<mixed> $values): Container<T>;\n"^
+  "}\n"^
   "}\n"
 
 (*****************************************************************************)
@@ -220,4 +230,3 @@ let _ =
   else
     let options = parse_options () in
     main_hack options
-

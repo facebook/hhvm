@@ -686,6 +686,10 @@ let null_container p null_witness =
 let option_mixed pos =
   add pos "?mixed is a redundant typehint - just use mixed"
 
+let using_internal_class pos name =
+  add pos
+  (name ^ " is an implementation internal class that can not be used directly")
+
 (*****************************************************************************)
 (* Typing decl errors *)
 (*****************************************************************************)

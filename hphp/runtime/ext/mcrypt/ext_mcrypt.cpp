@@ -131,15 +131,15 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
   if (mcrypt_enc_mode_has_iv(td) == 1) {
     if (!iv.empty()) {
       if (iv_size != iv.size()) {
-        raise_warning("mcrypt_encrypt(): The IV parameter must be as long as "
-                      "the blocksize");
+        raise_warning("%s(): The IV parameter must be as long as "
+                      "the blocksize", name);
       } else {
         iv_s = (char*)malloc(iv_size + 1);
         memcpy(iv_s, iv.data(), iv_size);
       }
     } else {
-      raise_warning("mcrypt_encrypt(): The IV parameter must be as long as "
-                    "the blocksize");
+      raise_warning("%s(): The IV parameter must be as long as "
+                    "the blocksize", name);
       iv_s = (char*)malloc(iv_size + 1);
       memset(iv_s, 0, iv_size + 1);
     }

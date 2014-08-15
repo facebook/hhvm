@@ -571,8 +571,8 @@ and stmt env = function
     let env, ty = expr env e in
     let exn_ty = Reason.Rthrow p, Tapply ((p, "\\Exception"), []) in
     Type.sub_type p (Reason.URthrow) env exn_ty ty
-  | Continue
-  | Break -> env
+  | Continue _
+  | Break _ -> env
 
 and check_exhaustiveness env pos (r, ty) caselist =
   (* Right now we only do exhaustiveness checking for enums. *)

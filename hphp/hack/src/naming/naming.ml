@@ -1328,8 +1328,8 @@ and stmt env st =
   | Fallthrough          -> N.Fallthrough
   | Noop                 -> N.Noop
   | Expr e               -> N.Expr (expr env e)
-  | Break                -> N.Break
-  | Continue             -> N.Continue
+  | Break p              -> N.Break p
+  | Continue p           -> N.Continue p
   | Throw e              -> let terminal = not (fst env).in_try in
                             N.Throw (terminal, expr env e)
   | Return (p, e)        -> N.Return (p, oexpr env e)

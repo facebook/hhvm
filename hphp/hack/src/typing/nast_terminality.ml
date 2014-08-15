@@ -23,8 +23,8 @@ end = struct
     List.iter (terminal_ inside_case) stl
 
   and terminal_ inside_case = function
-    | Break -> if inside_case then () else raise Exit
-    | Continue
+    | Break _ -> if inside_case then () else raise Exit
+    | Continue _
     | Throw _
     | Return _
     | Expr (_, Yield_break)
@@ -75,7 +75,7 @@ end = struct
       (try
          terminal true b;
           (* TODO check this *)
-         if List.exists (function Break -> true | _ -> false) b
+         if List.exists (function Break _ -> true | _ -> false) b
          then ()
          else raise Exit
        with Exit -> terminal_cl rl)
@@ -104,8 +104,8 @@ end = struct
 
   and terminal_ = function
     | Fallthrough
-    | Break
-    | Continue
+    | Break _
+    | Continue _
     | Throw _
     | Return _
     | Expr (_, Yield_break)
@@ -149,7 +149,7 @@ end = struct
       (try
          terminal b;
           (* TODO check this *)
-         if List.exists (function Break -> true | _ -> false) b
+         if List.exists (function Break _ -> true | _ -> false) b
          then ()
          else raise Exit
        with Exit -> terminal_cl rl)

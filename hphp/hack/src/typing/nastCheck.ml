@@ -13,6 +13,7 @@
    Basically any check that doesn't fall in the typing category. *)
 (* Check of type application arity *)
 (* Check no `new AbstractClass` (or trait, or interface) *)
+(* Check no top-level break / continue *)
 
 (* NOTE: since the typing environment does not generally contain
    information about non-Hack code, some of these checks can
@@ -49,7 +50,7 @@ module CheckFunctionType = struct
         ()
     | _, Noop
     | _, Fallthrough
-    | _, Break | _, Continue -> ()
+    | _, Break _ | _, Continue _ -> ()
     | _, Static_var _ -> ()
     | _, If (_, b1, b2) ->
         block f_type b1;
@@ -216,10 +217,16 @@ module CheckFunctionType = struct
 
 end
 
+type control_context =
+  | Toplevel
+  | LoopContext
+  | SwitchContext
+
 type env = {
   t_is_finally: bool ref;
   class_name: string option;
   class_kind: Ast.class_kind option;
+  imm_ctrl_ctx: control_context;
   tenv: Env.env;
 }
 
@@ -240,6 +247,7 @@ let rec fun_ tenv f =
   let tenv = Typing_env.set_root tenv (Dep.Fun (snd f.f_name)) in
   let env = { t_is_finally = ref false;
               class_name = None; class_kind = None;
+              imm_ctrl_ctx = Toplevel;
               tenv = tenv } in
   func env f
   end
@@ -304,6 +312,7 @@ and class_ tenv c =
   let env = { t_is_finally = ref false;
               class_name = cname;
               class_kind = Some c.c_kind;
+              imm_ctrl_ctx = Toplevel;
               tenv = tenv } in
   let env = { env with tenv = Env.set_mode env.tenv c.c_mode } in
   if c.c_kind = Ast.Cinterface then begin
@@ -469,8 +478,18 @@ and stmt env = function
     Errors.return_in_finally p; ()
   | Return (_, None)
   | Noop
-  | Fallthrough
-  | Break | Continue -> ()
+  | Fallthrough -> ()
+  | Break p -> begin
+    match env.imm_ctrl_ctx with
+      | Toplevel -> Errors.toplevel_break p
+      | _ -> ()
+    end
+  | Continue p -> begin
+    match env.imm_ctrl_ctx with
+      | Toplevel -> Errors.toplevel_continue p
+      | SwitchContext -> Errors.continue_in_switch p
+      | LoopContext -> ()
+    end
   | Return (_, Some e)
   | Expr e | Throw (_, e) ->
     expr env e
@@ -482,27 +501,27 @@ and stmt env = function
     block env b2;
     ()
   | Do (b, e) ->
-    block env b;
+    block { env with imm_ctrl_ctx = LoopContext } b;
     expr env e;
     ()
   | While (e, b) ->
       expr env e;
-      block env b;
+      block { env with imm_ctrl_ctx = LoopContext } b;
       ()
   | For (e1, e2, e3, b) ->
       expr env e1;
       expr env e2;
       expr env e3;
-      block env b;
+      block { env with imm_ctrl_ctx = LoopContext } b;
       ()
   | Switch (e, cl) ->
       expr env e;
-      liter case env cl;
+      liter case { env with imm_ctrl_ctx = SwitchContext } cl;
       ()
   | Foreach (e1, ae, b) ->
       expr env e1;
       as_expr env ae;
-      block env b;
+      block { env with imm_ctrl_ctx = LoopContext } b;
       ()
   | Try (b, cl, fb) ->
       block env b;
@@ -662,6 +681,7 @@ and attribute env (_, e) =
 let typedef tenv name (_, params, h) =
   let env = { t_is_finally = ref false;
               class_name = None; class_kind = None;
+              imm_ctrl_ctx = Toplevel;
               tenv = tenv } in
   hint env h;
   let tenv, ty = Typing_hint.hint tenv h in

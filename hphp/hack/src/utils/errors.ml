@@ -807,6 +807,19 @@ let return_in_finally p =
     ("Don't use return in a finally block;"^
      " there's nothing to receive the return value")
 
+let toplevel_break p =
+  add p
+    "break can only be used inside loops or switch statements"
+
+let toplevel_continue p =
+  add p
+    "continue can only be used inside loops"
+
+let continue_in_switch p =
+  add p
+    ("In PHP, 'continue;' inside a switch statement is equivalent to 'break;'."^
+     " Hack does not support this; use 'break' if that is what you meant.")
+
 let await_in_sync_function p =
   add p
     "await can only be used inside async functions"

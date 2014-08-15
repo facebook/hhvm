@@ -210,8 +210,8 @@ and stmt =
   | Fallthrough
   | Expr of expr
   | Block of stmt list
-  | Break
-  | Continue
+  | Break of Pos.t
+  | Continue of Pos.t
   | Throw of expr
   | Return of Pos.t * expr option
   | Static_var of expr list

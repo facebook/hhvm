@@ -1662,16 +1662,18 @@ and statement_word env = function
 (*****************************************************************************)
 
 and statement_break env =
+  let stmt = Break (Pos.make env.lb) in
   check_continue env;
-  Break
+  stmt
 
 (*****************************************************************************)
 (* Continue statement *)
 (*****************************************************************************)
 
 and statement_continue env =
+  let stmt = Continue (Pos.make env.lb) in
   check_continue env;
-  Continue;
+  stmt
 
 and check_continue env =
   match L.token env.lb with

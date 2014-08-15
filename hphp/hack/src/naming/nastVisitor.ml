@@ -23,10 +23,10 @@ open Nast
 
 class type ['a] nast_visitor_type = object
   method on_block : 'a -> Nast.block -> 'a
-  method on_break : 'a -> 'a
+  method on_break : 'a -> Pos.t -> 'a
   method on_case : 'a -> Nast.case -> 'a
   method on_catch : 'a -> Nast.catch -> 'a
-  method on_continue : 'a -> 'a
+  method on_continue : 'a -> Pos.t -> 'a
   method on_do : 'a -> Nast.block -> Nast.expr -> 'a
   method on_expr : 'a -> Nast.expr -> 'a
   method on_expr_ : 'a -> Nast.expr_ -> 'a
@@ -96,8 +96,8 @@ end
 
 class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
 
-  method on_break acc = acc
-  method on_continue acc = acc
+  method on_break acc _ = acc
+  method on_continue acc _ = acc
   method on_noop acc = acc
   method on_fallthrough acc = acc
 
@@ -179,8 +179,8 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
 
   method on_stmt acc = function
     | Expr e                  -> this#on_expr acc e
-    | Break                   -> this#on_break acc
-    | Continue                -> this#on_continue acc
+    | Break p                 -> this#on_break acc p
+    | Continue p              -> this#on_continue acc p
     | Throw   (is_term, e)    -> this#on_throw acc is_term e
     | Return  (p, eopt)       -> this#on_return acc p eopt
     | If      (e, b1, b2)     -> this#on_if acc e b1 b2
@@ -419,7 +419,7 @@ end = struct
     object
       inherit [bool] nast_visitor
       method on_expr acc _ = acc
-      method on_continue _ = true
+      method on_continue _ _ = true
     end
 
   let block b = visitor#on_block false b

@@ -169,8 +169,8 @@ and gconst = {
 
 and stmt =
   | Expr of expr
-  | Break
-  | Continue
+  | Break of Pos.t
+  | Continue of Pos.t
   | Throw of is_terminal * expr
   | Return of Pos.t * expr option
   | Static_var of expr list

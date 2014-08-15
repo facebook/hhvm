@@ -212,8 +212,8 @@ and stmt env acc st =
       let acc = List.fold_left expr acc el in
       assign env acc parent_init_cvar
     | Expr e -> expr acc e
-    | Break -> acc
-    | Continue -> acc
+    | Break _ -> acc
+    | Continue _ -> acc
     | Throw (_, e) -> expr acc e
     | Return (p, None) ->
       if are_all_init env acc

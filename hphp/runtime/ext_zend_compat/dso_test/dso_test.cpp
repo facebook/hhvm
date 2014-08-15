@@ -1,14 +1,8 @@
 /*
- * From http://devzone.zend.com/303/extension-writing-part-i-introduction-to-php-and-zend/
- *
+ * From
+ *  http://devzone.zend.com/303/
  * "hello" was renamed to "dso_test".
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include "php.h"
-#include "php_ini.h"
-
 #include "dso_test.h"
 
 int dso_test_php_post_deactivate(void)
@@ -56,8 +50,11 @@ static PHP_INI_MH(dso_test_greeting_mh)
 }
 
 PHP_INI_BEGIN()
-  PHP_INI_ENTRY("dso_test.greeting", "Hello World", PHP_INI_ALL, dso_test_greeting_mh)
-  STD_PHP_INI_ENTRY("dso_test.direction", "1", PHP_INI_ALL, OnUpdateBool, direction, zend_dso_test_globals, dso_test_globals)
+  PHP_INI_ENTRY("dso_test.greeting",
+    "Hello World", PHP_INI_ALL, dso_test_greeting_mh)
+  STD_PHP_INI_ENTRY("dso_test.direction",
+    "1", PHP_INI_ALL, OnUpdateBool, direction,
+    zend_dso_test_globals, dso_test_globals)
 PHP_INI_END()
 
 static void php_dso_test_init_globals(zend_dso_test_globals *dso_test_globals)

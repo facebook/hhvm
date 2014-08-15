@@ -71,8 +71,8 @@ hphp_link(hphp_ext_zend_compat)
 HHVM_PUBLIC_HEADERS(ext_zend_compat ${HEADER_SOURCES})
 
 #
-# Build a DSO in dso_test, only to be used for testing on linux of zend extensions
-# loaded dynamically through a DSO.
+# Build a DSO in dso_test, only to be used for testing
+# on linux of zend extensions loaded dynamically through a DSO.
 #
 # See http://www.cmake.org/cmake/help/v3.0/command/add_custom_command.html
 # See http://www.cmake.org/cmake/help/v3.0/command/add_custom_target.html
@@ -80,9 +80,6 @@ HHVM_PUBLIC_HEADERS(ext_zend_compat ${HEADER_SOURCES})
 set(HPHPIZE_EXE "../../tools/hphpize/hphpize")
 
 if (LINUX)
-  #
-  # See http://www.cmake.org/Wiki/CMake_FAQ#How_do_I_generate_an_executable.2C_then_use_the_executable_to_generate_a_file.3F
-  #
   add_custom_target(
     build_test_zend_dso
     ALL

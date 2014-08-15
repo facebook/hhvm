@@ -1,10 +1,10 @@
 ## Purpose of dso_test
 This is a simple zend extension solely for testing, taken from
-    http://devzone.zend.com/303/extension-writing-part-i-introduction-to-php-and-zend/
+    http://devzone.zend.com/303
 and renamed "dso_test".
 
-This extension is intended to be compiled as a DSO, not statically linked into hhvm,
-and then loaded into hhvm using the hhvm extensions mechanism.
+This extension is intended to be compiled as a DSO, not statically linked
+into hhvm, and then loaded into hhvm using the hhvm extensions mechanism.
 
 ## Zend Extensions for Testing DSOs
 This zend extension has these requirements:
@@ -13,7 +13,8 @@ This zend extension has these requirements:
 
 2. It is to be loaded into HHVM as a DSO;
 
-3. It is to be built independently from the main build tree, following the standard recipie for building
+3. It is to be built independently from the main build tree,
+following the standard recipie for building
 a zend extension for HHVM, namely: `hphpize && cmake . && make`
 
 It is tempting (and easy) to build the DSO as part of the main root-level

@@ -1,9 +1,19 @@
-/* From http://devzone.zend.com/303/extension-writing-part-i-introduction-to-php-and-zend/ */
+/*
+ * From
+ *  http://devzone.zend.com/303/
+ */
 #ifndef PHP_DSO_TEST_H
 #define PHP_DSO_TEST_H 1
+
 #ifdef ZTS
-#include "TSRM.h"
+  #include "TSRM.h"
 #endif
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+#include "php.h"
+#include "php_ini.h"
 
 ZEND_BEGIN_MODULE_GLOBALS(dso_test)
     long counter;

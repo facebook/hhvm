@@ -720,7 +720,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
       if (func.minNumParams() == 0) {
         cpp << in << "throw_toomany_arguments_nr(\""
             << escapeCpp(func.getPrettyName())
-            << "\", " << func.numParams() << ", 1, rv);\n";
+            << "\", " << func.numParams() << ", count, 1, rv);\n";
       } else {
         cpp << in << "throw_wrong_arguments_nr(\""
             << escapeCpp(func.getPrettyName())

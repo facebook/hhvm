@@ -5,7 +5,7 @@ array(1) {
   NULL
 }
 
-Warning: Too many arguments for sort(), expected 3 in %s/test/slow/bad_function_calls/1716.php on line 9
+Warning: sort() expects at most 3 parameters, 9 given in %s/test/slow/bad_function_calls/1716.php on line 9
 array(1) {
   [0]=>
   NULL

@@ -1,5 +1,5 @@
 
-Warning: Too many arguments for array_chunk(), expected 3 in %s/test/slow/bad_function_calls/1715.php on line 8
+Warning: array_chunk() expects at most 3 parameters, 4 given in %s/test/slow/bad_function_calls/1715.php on line 8
 int(1)
 int(2)
 int(3)

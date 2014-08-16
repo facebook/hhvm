@@ -56,10 +56,6 @@ const char* const MISSING_ARGUMENT =
   "%s() expects %s 1 parameter, %d given";
 const char* const MISSING_ARGUMENTS =
   "%s() expects %s %d parameters, %d given";
-const char* const MISSING_MIN_ARGUMENT =
- "%s() expects at least 1 parameter, %d given";
-const char* const MISSING_MIN_ARGUMENTS =
- "%s() expects at least %d parameters, %d given";
 const char* const CANT_UNSET_STRING =
   "Cannot unset string offsets";
 const char* const OP_NOT_SUPPORTED_STRING =

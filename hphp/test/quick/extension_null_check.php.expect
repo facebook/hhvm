@@ -9,7 +9,7 @@ array(1) {
   bool(false)
 }
 
-Warning: Too many arguments for get_called_class(), expected 0
+Warning: get_called_class() expects exactly 0 parameters, 1 given
 array(1) {
   [0]=>
   NULL
@@ -19,13 +19,13 @@ array(1) {
   string(12) "func_get_arg"
 }
 
-Warning: Too many arguments for func_get_args(), expected 0
+Warning: func_get_args() expects exactly 0 parameters, 1 given
 array(1) {
   [0]=>
   NULL
 }
 
-Warning: Too many arguments for func_num_args(), expected 0
+Warning: func_num_args() expects exactly 0 parameters, 1 given
 array(1) {
   [0]=>
   NULL

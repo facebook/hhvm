@@ -525,7 +525,8 @@ void pause_forever() {
   for (;;) sleep(300);
 }
 
-void throw_missing_min_arguments_nr(const char *fn, int expected, int got,
+void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
+                                   const char *expectDesc,
                                    int level /* = 0 */,
                                    TypedValue *rv /* = nullptr */) {
   if (rv != nullptr) {
@@ -534,15 +535,15 @@ void throw_missing_min_arguments_nr(const char *fn, int expected, int got,
   }
   if (level == 2) {
     if (expected == 1) {
-      raise_error(Strings::MISSING_MIN_ARGUMENT, fn, got);
+      raise_error(Strings::MISSING_ARGUMENT, fn, expectDesc, got);
     } else {
-      raise_error(Strings::MISSING_MIN_ARGUMENTS, fn, expected, got);
+      raise_error(Strings::MISSING_ARGUMENTS, fn, expectDesc, expected, got);
     }
   } else {
     if (expected == 1) {
-      raise_warning(Strings::MISSING_MIN_ARGUMENT, fn, got);
+      raise_warning(Strings::MISSING_ARGUMENT, fn, expectDesc, got);
     } else {
-      raise_warning(Strings::MISSING_MIN_ARGUMENTS, fn, expected, got);
+      raise_warning(Strings::MISSING_ARGUMENTS, fn, expectDesc, expected, got);
     }
   }
 }
@@ -550,56 +551,37 @@ void throw_missing_min_arguments_nr(const char *fn, int expected, int got,
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
                                 int level /* = 0 */,
                                 TypedValue *rv /* = nullptr */) {
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
-  }
-  if (level == 2) {
-    if (expected == 1) {
-      raise_error(Strings::MISSING_ARGUMENT, fn, "exactly", got);
-    } else {
-      raise_error(Strings::MISSING_ARGUMENTS, fn, "exactly", expected, got);
-    }
-  } else {
-    if (expected == 1) {
-      raise_warning(Strings::MISSING_ARGUMENT, fn, "exactly", got);
-    } else {
-      raise_warning(Strings::MISSING_ARGUMENTS, fn, "exactly", expected, got);
-    }
-  }
+  throw_wrong_argument_count_nr(fn, expected, got, "exactly", level, rv);
 }
 
-void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */,
+void throw_toomany_arguments_nr(const char *fn, int expected, int got,
+                                int level /* = 0 */,
                                 TypedValue *rv /* = nullptr */) {
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
-  }
-  if (level == 2) {
-    raise_error("Too many arguments for %s(), expected %d", fn, num);
-  } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
-    raise_warning("Too many arguments for %s(), expected %d", fn, num);
-  }
+  throw_wrong_argument_count_nr(fn, expected, got, "exactly", level, rv);
 }
 
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
                               int level /* = 0 */,
                               TypedValue *rv /* = nullptr */) {
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
-  }
-  if (cmin >= 0 && count < cmin && cmin != cmax) {
-    throw_missing_min_arguments_nr(fn, cmin, count, level);
-    return;
-  }
   if (cmin >= 0 && count < cmin) {
-    throw_missing_arguments_nr(fn, cmin, count, level);
+    if (cmin != cmax) {
+      throw_wrong_argument_count_nr(fn, cmin, count, "at least", level, rv);
+    } else {
+      throw_wrong_argument_count_nr(fn, cmin, count, "exactly", level, rv);
+    }
     return;
   }
   if (cmax >= 0 && count > cmax) {
-    throw_toomany_arguments_nr(fn, cmax, level);
+    if (cmin != cmax) {
+      throw_wrong_argument_count_nr(fn, cmax, count, "at most", level, rv);
+    } else {
+      throw_wrong_argument_count_nr(fn, cmax, count, "exactly", level, rv);
+    }
     return;
+  }
+  if (rv != nullptr) {
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
   }
   assert(false);
 }

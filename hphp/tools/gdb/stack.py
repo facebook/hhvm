@@ -24,6 +24,23 @@ Filename and line number information is only included for C++ functions.
     def __init__(self):
         super(WalkstkCommand, self).__init__('walkstk', gdb.COMMAND_STACK)
 
+    def print_frame(self, i, sp, rip, func, loc):
+        out = '#%-2d %s @ 0x%x: %s' % (i, str(sp), int(str(rip)), func)
+
+        # Munge and print the code location if we have one.
+        if loc is not None and loc.symtab is not None:
+            filename = loc.symtab.filename
+
+            if 'hphp' in filename:
+                head, base = os.path.split(filename)
+                _, basedir = os.path.split(head)
+                filename = 'hphp/.../' + basedir + '/' + base
+
+            out += ' at ' + filename + ':' + str(loc.line)
+
+        print(out)
+
+
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 
@@ -54,9 +71,11 @@ Filename and line number information is only included for C++ functions.
             func = '<unknown>'
             loc = None
 
+            in_tc = rip >= tc_base and rip < tc_end
+
             # Try to get the PHP function name from the ActRec at %sp if we're
             # executing in the TC.
-            if rip >= tc_base and rip < tc_end:
+            if in_tc:
                 ar_type = T('HPHP::ActRec').pointer()
                 sd_type = T('HPHP::StringData').pointer()
                 try:
@@ -70,28 +89,22 @@ Filename and line number information is only included for C++ functions.
 
             # Pop native frames until we find our current %sp.
             else:
+                inlines = 0
+
                 while (native_frame is not None
                        and rip != native_frame.pc()):
+                    if inlines > 0 and native_frame.name() is not None:
+                        self.print_frame(i, '{inline frame}', rip,
+                                         native_frame.name(),
+                                         native_frame.find_sal())
                     i += 1
+                    inlines += 1
                     native_frame = native_frame.older()
 
                 func = native_frame.name() + '()'
                 loc = native_frame.find_sal()
 
-            out = '#%-2d %s @ 0x%x: %s' % (i, str(sp), int(str(rip)), func)
-
-            # Munge and print the code location if we have one.
-            if loc is not None and loc.symtab is not None:
-                filename = loc.symtab.filename
-
-                if 'hphp' in filename:
-                    head, base = os.path.split(filename)
-                    _, basedir = os.path.split(head)
-                    filename = 'hphp/.../' + basedir + '/' + base
-
-                out += ' at ' + filename + ':' + str(loc.line)
-
-            print(out)
+            self.print_frame(i + 1 if in_tc else i, sp, rip, func, loc)
 
             rip = sp[1]
             sp = sp[0].cast(sp_type)

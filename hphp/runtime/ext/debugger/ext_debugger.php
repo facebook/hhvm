@@ -19,7 +19,7 @@ namespace {
    * attached, it will not do anything.
    * @param bool $condition - If true, break, otherwise, continue.
    */
-  <<__HipHopSpecific, __Native>>
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
   function hphpd_break(bool $condition = true): void;
 
 
@@ -27,7 +27,7 @@ namespace {
    * to debug this thread.
    * @return bool - TRUE if a debugger is attached, FALSE if not.
    */
-  <<__HipHopSpecific, __Native>>
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
   function hphp_debugger_attached(): bool;
 
 }

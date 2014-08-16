@@ -1585,7 +1585,8 @@ static void on_timeout(int sig, siginfo_t* info, void* context) {
 
 void hphp_process_init() {
   pthread_attr_t attr;
-#if defined(_GNU_SOURCE) && defined(__linux__) // Linux+GNU extension
+// Linux+GNU extension
+#if defined(_GNU_SOURCE) && (defined(__linux__) || defined(__CYGWIN__))
   pthread_getattr_np(pthread_self(), &attr);
 #else
   pthread_attr_init(&attr);

@@ -165,7 +165,7 @@ asm_label(a, release);
   });
   a.    ret    ();
 asm_label(a, doRelease);
-  jumpDestructor(a, PhysReg(rType), rax);
+  a.    jmp    (lookupDestructor(a, PhysReg(rType)));
 
   moveToAlign(mcg->code.main(), kJmpTargetAlign);
   uniqueStubs.freeManyLocalsHelper = a.frontier();

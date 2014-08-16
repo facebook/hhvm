@@ -1060,6 +1060,7 @@ static void shuffleArgs(vixl::MacroAssembler& a,
     case CppCall::Kind::Direct:
     case CppCall::Kind::Virtual:
     case CppCall::Kind::ArrayVirt:
+    case CppCall::Kind::Destructor:
       break;
     }
   }

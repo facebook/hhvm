@@ -192,45 +192,37 @@ void jccBlock(Asm& a, Lambda body) {
  *     - scratch is destoyed.
  */
 
-inline MemoryRef lookupDestructor(X64Assembler& a, PhysReg typeReg,
-                                  PhysReg scratch) {
-  assert(typeReg != argNumToRegName[0]);
-  assert(scratch != argNumToRegName[0]);
-
+inline MemoryRef lookupDestructor(X64Assembler& a, PhysReg typeReg) {
+  auto const table = reinterpret_cast<intptr_t>(g_destructors);
+  always_assert_flog(deltaFits(table, sz::dword),
+    "Destructor function table is expected to be in the data "
+    "segment, with addresses less than 2^31"
+  );
   static_assert((KindOfString        >> kShiftDataTypeToDestrIndex == 1) &&
                 (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
                 (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
                 (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
                 (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
                 "lookup of destructors depends on KindOf* values");
-
   a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
-  a.    movq   (&g_destructors, scratch);
-  return scratch[typeReg * 8];
+  return baseless(typeReg*8 + table);
 }
 
-inline void callDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
-  a.    call   (lookupDestructor(a, typeReg, scratch));
-}
-
-inline void jumpDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
-  a.    jmp    (lookupDestructor(a, typeReg, scratch));
-}
-
-inline void loadDestructorFunc(Vout& v, PhysReg typeReg, PhysReg dstReg) {
+inline MemoryRef lookupDestructor(Vout& v, PhysReg typeReg) {
+  auto const table = reinterpret_cast<intptr_t>(g_destructors);
+  always_assert_flog(deltaFits(table, sz::dword),
+    "Destructor function table is expected to be in the data "
+    "segment, with addresses less than 2^31"
+  );
   static_assert((KindOfString        >> kShiftDataTypeToDestrIndex == 1) &&
                 (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
                 (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
                 (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
                 (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
                 "lookup of destructors depends on KindOf* values");
-
-  v << movsbl{typeReg, typeReg};
   v << shrli{kShiftDataTypeToDestrIndex, typeReg, typeReg};
-  v << ldimm{&g_destructors, dstReg}; // XXX can this use baseless?
-  v << loadq{dstReg[typeReg * 8], dstReg};
+  return baseless(typeReg*8 + table);
 }
-
 
 //////////////////////////////////////////////////////////////////////
 

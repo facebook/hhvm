@@ -284,7 +284,14 @@ void emitCall(Vout& v, CppCall target) {
     v << loadzbl{rdi[ArrayData::offsetofKind()], eax};
     v << callm{baseless(rax*8 + addr)};
     return;
-  }}
+  }
+  case CppCall::Kind::Destructor:
+    // this movzbl is only needed because callers aren't
+    // required to zero-extend the type.
+    v << movzbl{target.reg(), target.reg()};
+    v << callm{lookupDestructor(v, target.reg())};
+    return;
+  }
   not_reached();
 }
 

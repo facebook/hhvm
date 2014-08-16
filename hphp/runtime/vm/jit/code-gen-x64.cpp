@@ -859,6 +859,7 @@ static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
     case CppCall::Kind::Direct:
     case CppCall::Kind::Virtual:
     case CppCall::Kind::ArrayVirt:
+    case CppCall::Kind::Destructor:
       break;
     }
   }
@@ -3559,15 +3560,13 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
   // Emit check for UncountedValue or StaticValue and the actual DecRef
   if (genZeroCheck) {
       cgCheckStaticBitAndDecRef(v, done, Type::Cell, dataReg, [&] (Vout& v) {
-          // load destructor fptr
-          loadDestructorFunc(v, typeReg, m_rScratch);
           // Emit call to release in m_acold
-          cgCallHelper(v,
-                       CppCall::indirect(m_rScratch),
+          cgCallHelper(v, CppCall::destruct(argNumToRegName[1]),
                        kVoidDest,
                        SyncOptions::kSyncPoint,
                        argGroup()
-                       .reg(dataReg));
+                       .reg(dataReg)
+                       .reg(typeReg));
         });
   } else {
     cgCheckStaticBitAndDecRef(v, done, Type::Cell, dataReg);

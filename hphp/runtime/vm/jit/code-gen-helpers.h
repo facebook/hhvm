@@ -53,6 +53,11 @@ struct CppCall {
      * by array kind.
      */
     ArrayVirt,
+    /*
+     * Call Destructor function using DataType as an index; expect
+     * the type in rsi, which we will destroy
+     */
+    Destructor,
   };
 
   CppCall() = delete;
@@ -116,6 +121,13 @@ struct CppCall {
   }
 
   /*
+   * Call destructor using r as function table index
+   */
+  static CppCall destruct(PhysReg r) {
+    return CppCall { Kind::Destructor, r };
+  }
+
+  /*
    * Return the type tag.
    */
   Kind kind() const { return m_kind; }
@@ -133,7 +145,7 @@ struct CppCall {
     return m_u.vtableOffset;
   }
   PhysReg reg() const {
-    assert(m_kind == Kind::Indirect);
+    assert(m_kind == Kind::Indirect || m_kind == Kind::Destructor);
     return m_u.reg;
   }
   void* arrayTable() const {

@@ -58,6 +58,7 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
     always_assert(0);
     break;
   case CppCall::Kind::ArrayVirt:
+  case CppCall::Kind::Destructor:
     not_implemented();
     always_assert(0);
     break;

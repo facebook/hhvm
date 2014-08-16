@@ -19,6 +19,24 @@ def getGoodTests(tests):
             good.append(test['name'])
     return good
 
+def runGoodTestsRepo(tests):
+    results = getResults("-r", tests)
+    return getGoodTests(results)
+
+def getResults(flags, folder):
+    run = subprocess.Popen(
+        [
+            os.path.join(script_dir, "../run"),
+            '--fbmake',
+            flags
+        ] + folder,  # It needs every file separate, not a string
+                     # else ./run barfs
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    ).communicate()[0]
+    last_line = run.strip().split("\n")[-1]
+    return json.loads(last_line)['results']
+
 def moveAllFiles(old, new):
     files = [
         '',  # original file
@@ -28,7 +46,8 @@ def moveAllFiles(old, new):
         '.opts',
         '.noserver',
         '.norepo',
-        '.ini'
+        '.ini',
+        '.skipif'
     ]
     for filesuffix in files:
         if os.path.isfile(old + filesuffix):
@@ -75,21 +94,11 @@ args = parser.parse_args()
 
 print "Searching in ", os.path.realpath(args.folder)
 
-run = subprocess.Popen(
-  [
-      os.path.join(script_dir, "../run"),
-      '--fbmake',
-      args.folder
-  ],
-  stdout=subprocess.PIPE,
-  stderr=subprocess.STDOUT
-).communicate()[0]
 
-last_line = run.strip().split("\n")[-1]
-results = json.loads(last_line)['results']
-
-
+results = getResults("", [args.folder])
 good_tests = getGoodTests(results)
+good_tests = runGoodTestsRepo(good_tests)
+
 
 if args.verbose or args.no_move:
     print "\nGood tests:"

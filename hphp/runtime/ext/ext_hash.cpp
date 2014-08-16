@@ -54,6 +54,7 @@ static class HashExtension : public Extension {
     HHVM_FE(hash_init);
     HHVM_FE(hash_update);
     HHVM_FE(hash_copy);
+    HHVM_FE(hash_equals);
     HHVM_FE(furchash_hphp_ext);
     HHVM_FE(hphp_murmurhash);
   }
@@ -351,6 +352,31 @@ Resource HHVM_FUNCTION(hash_copy, const Resource& context) {
   HashContext *oldhash = context.getTyped<HashContext>();
   auto const hash = new HashContext(oldhash);
   return Resource(hash);
+}
+
+/**
+ * It is important that the run time of this function is dependent
+ * only on the length of the user-supplied string.
+ *
+ * The only branch in the code below *should* result in non-branching
+ * machine code.
+ *
+ * Do not try to optimize this function.
+ */
+bool HHVM_FUNCTION(hash_equals, const String& known, const String& user) {
+  const auto known_len = known.size();
+  const auto known_limit = known_len - 1;
+  const auto user_len = user.size();
+  int64_t result = known_len ^ user_len;
+
+  int64_t ki = 0;
+  for (int64_t ui = 0; ui < user_len; ++ui) {
+    result |= user[ui] ^ known[ki];
+    if (ki < known_limit) {
+      ++ki;
+    }
+  }
+  return (result == 0);
 }
 
 int64_t HHVM_FUNCTION(furchash_hphp_ext, const String& key,

@@ -659,6 +659,8 @@
     install_root: zf2
     test_root: zf2/tests
     test_find_mode: token
+    flakey:
+      - zf2/tests/ZendTest/Authentication/Adapter/Http/AuthTest.php
     blacklist:
       - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php

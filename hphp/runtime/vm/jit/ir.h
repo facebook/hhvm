@@ -518,6 +518,7 @@ O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                      NNT|PRc) \
 O(NewLikeArray,                 D(Arr), S(Arr) C(Int),               NNT|PRc) \
 O(NewMixedArray,                D(Arr), C(Int),                      NNT|PRc) \
+O(NewVArray,                    D(Arr), C(Int),                      NNT|PRc) \
 O(NewMIArray,                   D(Arr), C(Int),                      NNT|PRc) \
 O(NewMSArray,                   D(Arr), C(Int),                      NNT|PRc) \
 O(NewPackedArray,           DArrPacked, C(Int) S(StkPtr),      E|NNT|PRc|CRc) \

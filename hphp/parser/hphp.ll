@@ -446,6 +446,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"<<"                 { RETSTEP(T_SL);}
 
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
+<ST_IN_SCRIPTING>"varray"             { HH_ONLY_KEYWORD(T_VARRAY); }
 <ST_IN_SCRIPTING>"miarray"            { HH_ONLY_KEYWORD(T_MIARRAY); }
 <ST_IN_SCRIPTING>"msarray"            { HH_ONLY_KEYWORD(T_MSARRAY); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }

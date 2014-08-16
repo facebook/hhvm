@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_varray();
+  $a = varray();
   $foo = array(1,2,3,4);
   $a[0] = &$foo; // Should warn
   $foo[] = "sup";

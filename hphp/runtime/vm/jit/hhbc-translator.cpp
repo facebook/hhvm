@@ -627,6 +627,11 @@ void HhbcTranslator::emitNewMixedArray(int capacity) {
   }
 }
 
+void HhbcTranslator::emitNewVArray(int capacity) {
+  // TODO(t4757263) staticEmptyArray() for VArray
+  push(gen(NewVArray, cns(capacity)));
+}
+
 void HhbcTranslator::emitNewMIArray(int capacity) {
   // TODO(t4757263) staticEmptyArray() for IntMap
   push(gen(NewMIArray, cns(capacity)));

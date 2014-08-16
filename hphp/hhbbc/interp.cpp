@@ -240,6 +240,10 @@ void in(ISS& env, const bc::NewMixedArray& op) {
   push(env, op.arg1 == 0 ? aempty() : counted_aempty());
 }
 
+void in(ISS& env, const bc::NewVArray& op) {
+  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
+}
+
 void in(ISS& env, const bc::NewMIArray& op) {
   push(env, op.arg1 == 0 ? aempty() : counted_aempty());
 }

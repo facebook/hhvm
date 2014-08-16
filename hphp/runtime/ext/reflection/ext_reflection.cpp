@@ -160,12 +160,6 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
   return ret;
 }
 
-// TODO Remove this in favor of having the parser recognize "varray"
-Array HHVM_FUNCTION(hphp_varray) {
-  auto ad = MixedArray::MakeReserveVArray(10);
-  return Array::attach(ad);
-}
-
 int get_modifiers(Attr attrs, bool cls) {
   int php_modifier = 0;
   if (attrs & AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
@@ -1282,7 +1276,6 @@ class ReflectionExtension : public Extension {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);
     HHVM_FE(hphp_get_extension_info);
-    HHVM_FE(hphp_varray);
     HHVM_FE(hphp_get_original_class_name);
     HHVM_FE(hphp_get_property);
     HHVM_FE(hphp_get_static_property);

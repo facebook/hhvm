@@ -3579,6 +3579,13 @@ OPTBLD_INLINE void ExecutionContext::iopNewMixedArray(IOP_ARGS) {
   }
 }
 
+OPTBLD_INLINE void ExecutionContext::iopNewVArray(IOP_ARGS) {
+  NEXT();
+  DECODE_IVA(capacity);
+  // TODO(t4757263) staticEmptyArray() for VArray
+  vmStack().pushArrayNoRc(MixedArray::MakeReserveVArray(capacity));
+}
+
 OPTBLD_INLINE void ExecutionContext::iopNewMIArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(capacity);

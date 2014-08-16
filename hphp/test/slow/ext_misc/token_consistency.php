@@ -26,6 +26,7 @@ $expected_exceptions = array(
   'T_UNRESOLVED_LT' => true,
   'T_COLLECTION' => true,
   'T_SHAPE' => true,
+  'T_VARRAY' => true,
   'T_MIARRAY' => true,
   'T_MSARRAY' => true,
   'T_TYPE' => true,

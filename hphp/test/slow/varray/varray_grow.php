@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_varray();
+  $a = varray();
   for ($i = 0; $i < 10000; $i++) {
     $a[$i] = $i + 1;
   }
@@ -12,7 +12,7 @@ function main() {
 }
 
 function build() {
-  $a = hphp_varray();
+  $a = varray();
   for ($i = 0; $i < 10000; $i++) {
     $a[$i] = $i + 1;
   }

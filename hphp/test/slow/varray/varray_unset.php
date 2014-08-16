@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 function cow_unset($arr) {
   unset($arr[0]);
 }
 
 function main() {
-  $a = hphp_varray();
+  $a = varray();
   $a[0] = 1;
   $a[1] = 2;
   unset($a[0]); // warning
@@ -13,7 +13,7 @@ function main() {
   unset($a[1]); // no warning
   var_dump($a);
 
-  $a = hphp_varray();
+  $a = varray();
   $a[0] = 1;
   $a[1] = 2;
   cow_unset($a); // warning

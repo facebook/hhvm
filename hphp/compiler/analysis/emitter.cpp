@@ -3534,7 +3534,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             visit(ex);
           }
           return true;
-        } else if (op == T_MIARRAY || op == T_MSARRAY) {
+        } else if (op == T_VARRAY || op == T_MIARRAY || op == T_MSARRAY) {
           assert(m_staticArrays.empty());
           auto capacityHint = MixedArray::SmallSize;
 
@@ -3548,7 +3548,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             }
           }
 
-          if (op == T_MIARRAY) {
+          if (op == T_VARRAY) {
+            e.NewVArray(capacityHint);
+          } else if (op == T_MIARRAY) {
             e.NewMIArray(capacityHint);
           } else {
             assert(op == T_MSARRAY);

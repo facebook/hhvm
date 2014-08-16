@@ -398,10 +398,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 }
 
 
-<<__Native>>
-function hphp_varray(): array;
-
-
 /**
  * ( excerpt from http://php.net/manual/en/class.reflectionfunction.php )
  *

@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function main() {
-  $a = hphp_varray();
+  $a = varray();
   $a[0] = "abcd";
   $a[1] = "efgh";
   var_dump($a);
@@ -10,8 +10,8 @@ function main() {
   $b = array("foo" => "bar") + $a;
   var_dump($b);
 
-  $c = hphp_varray();
-  $d = hphp_varray();
+  $c = varray();
+  $d = varray();
   $c[0] = 0;
   $d[1] = 1;
   $e = $c + $d;

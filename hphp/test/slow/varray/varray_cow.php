@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cow_str($arr) {
   $arr["string"] = "cow";
@@ -27,27 +27,27 @@ function cow_foreachByRef($arr) {
 }
 
 function main() {
-  $a = hphp_varray();
+  $a = varray();
   $b = cow_str($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_varray();
+  $a = varray();
   $b = cow_appendRef($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_varray();
+  $a = varray();
   $b = cow_refInt($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_varray();
+  $a = varray();
   $b = cow_refStr($a);
   $a[] = "warning";
   $b[] = "no warning";
 
-  $a = hphp_varray();
+  $a = varray();
   $a[100000] = "non-empty";
   $b = cow_foreachByRef($a);
   $a[] = "warning";

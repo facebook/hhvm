@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/pc-filter.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -44,6 +45,7 @@ void DebugHookHandler::detach(ThreadInfo* ti /* = nullptr */) {
   ti->m_debugHookHandler = nullptr;
   ti->m_reqInjectionData.setDebuggerAttached(false);
   s_numAttached--;
+  EventHook::DisableDebug();
 }
 
 std::atomic_int DebugHookHandler::s_numAttached(0);
@@ -116,16 +118,68 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
       return;
     }
-    TRACE_RB(5, "DEBUGGER_FORCE_INTR\n");
+    TRACE_RB(5, "DEBUGGER_FORCE_INTR or DEBUGGER_ACTIVE_LINE_BREAKS\n");
   }
-  getHookHandler()->onOpcode(pc);
+
+  // Notify the hook handler. This is necessary for compatibility with hphpd
+  DebugHookHandler* handler = getHookHandler();
+  handler->onOpcode(pc);
+
+  // Try to grab needed context information
+  const ActRec* fp = g_context->getStackFrame();
+  const Func* func = fp != nullptr ? fp->func() : nullptr;
+  const Unit* unit = func != nullptr ? func->unit() : nullptr;
+  if (UNLIKELY(func == nullptr)) {
+    TRACE(5, "Could not grab stack information\n");
+    return;
+  }
+
+  // If we are no longer on the active line breakpoint, clear it
+  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  int active_line = req_data.getActiveLineBreak();
+  int line = unit->getLineNumber(unit->offsetOf(pc));
+  if (UNLIKELY(active_line != -1 && active_line != line)) {
+    req_data.setActiveLineBreak(-1);
+  }
+
+  // Check if we are hitting a call breakpoint
+  if (UNLIKELY(g_context->m_callBreakPointFilter.checkPC(pc))) {
+    handler->onFuncEntryBreak(func);
+  }
+
+  // Check if we are hitting a return breakpoint
+  if (UNLIKELY(g_context->m_retBreakPointFilter.checkPC(pc))) {
+    handler->onFuncExitBreak(func);
+  }
+
+  // Check if we are hitting a line breakpoint. Also ensure the current line
+  // hasn't already been set as the active line breakpoint.
+  if (UNLIKELY(g_context->m_lineBreakPointFilter.checkPC(pc) &&
+               active_line != line)) {
+    req_data.setActiveLineBreak(line);
+    handler->onLineBreak(unit, line);
+  }
+
   TRACE(5, "out phpDebuggerOpcodeHook()\n");
+}
+
+// Hook called on function entry. Since function entry breakpoints are handled
+// by onOpcode, this just handles pushing the active line breakpoint
+void phpDebuggerFuncEntryHook(const ActRec* ar) {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.pushActiveLineBreak(-1);
+}
+
+// Hook called on function exit. onOpcode handles function exit breakpoints,
+// this just handles popping the active line breakpoint. This handles returns,
+// suspends, and exceptions.
+void phpDebuggerFuncExitHook(const ActRec* ar) {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.popActiveLineBreak();
 }
 
 // Hook called from iopThrow to signal that we are about to throw an exception.
 void phpDebuggerExceptionThrownHook(ObjectData* exception) {
-  TRACE(5, "in phpDebuggerExceptionThrownHook()\n");
-  if (UNLIKELY(g_context->m_dbgNoBreak)) {
+TRACE(5, "in phpDebuggerExceptionThrownHook()\n");
+if (UNLIKELY(g_context->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
@@ -216,7 +270,12 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
   TRACE(5, "func() break %s : unit %p offset %d ==> pc %p)\n",
         f->fullName()->data(), f->unit(), base, pc);
+
+  // Add to the breakpoint filter and the func entry filter
   getBreakPointFilter()->addPC(pc);
+  g_context->m_callBreakPointFilter.addPC(pc);
+
+  // Blacklist the location
   if (RuntimeOption::EvalJit) {
     if (mcg->tx().addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
@@ -225,6 +284,41 @@ void phpAddBreakPointFuncEntry(const Func* f) {
       }
     }
   }
+}
+
+void phpAddBreakPointFuncExit(const Func* f) {
+  // Iterate through the function's opcodes and place breakpoints on each RetC
+  const Unit* unit = f->unit();
+  for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
+       pc += instrLen((Op*) pc)) {
+    if (*reinterpret_cast<const Op*>(pc) != OpRetC) {
+      continue;
+    }
+
+    // Add pc to the breakpoint filter and the func exit filter
+    getBreakPointFilter()->addPC(pc);
+    g_context->m_retBreakPointFilter.addPC(pc);
+
+    // Blacklist the location
+    if (RuntimeOption::EvalJit && mcg->tx().addDbgBLPC(pc)) {
+      if (!mcg->addDbgGuard(f, unit->offsetOf(pc), false)) {
+        Logger::Warning("Failed to set breakpoints in Jitted code");
+      }
+    }
+  }
+}
+
+bool phpAddBreakPointLine(const Unit* unit, int line) {
+  // Grab the unit offsets
+  OffsetRangeVec offsets;
+  if (!unit->getOffsetRanges(line, offsets)) {
+    return false;
+  }
+
+  // Add to the breakpoint filter and the line filter
+  phpAddBreakPointRange(unit, offsets);
+  g_context->m_lineBreakPointFilter.addRanges(unit, offsets);
+  return true;
 }
 
 void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
@@ -242,103 +336,5 @@ bool phpHasBreakpoint(const Unit* unit, Offset offset) {
   return false;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
-struct PCFilter::PtrMapNode {
-  void **m_entries;
-  void clearImpl(unsigned short bits);
-};
-
-void PCFilter::PtrMapNode::clearImpl(unsigned short bits) {
-  // clear all the sub levels and mark all slots NULL
-  if (bits <= PTRMAP_LEVEL_BITS) {
-    assert(bits == PTRMAP_LEVEL_BITS);
-    // On bottom level, pointers are not PtrMapNode*
-    memset(m_entries, 0, sizeof(void*) * PTRMAP_LEVEL_ENTRIES);
-    return;
-  }
-  for (int i = 0; i < PTRMAP_LEVEL_ENTRIES; i++) {
-    if (m_entries[i]) {
-      ((PCFilter::PtrMapNode*)m_entries[i])->clearImpl(bits -
-                                                       PTRMAP_LEVEL_BITS);
-      free(((PCFilter::PtrMapNode*)m_entries[i])->m_entries);
-      free(m_entries[i]);
-      m_entries[i] = nullptr;
-    }
-  }
-}
-
-PCFilter::PtrMapNode* PCFilter::PtrMap::MakeNode() {
-  PtrMapNode* node = (PtrMapNode*)malloc(sizeof(PtrMapNode));
-  node->m_entries =
-    (void**)calloc(1, PTRMAP_LEVEL_ENTRIES * sizeof(void*));
-  return node;
-}
-
-PCFilter::PtrMap::~PtrMap() {
-  clear();
-  free(m_root->m_entries);
-  free(m_root);
-}
-
-void* PCFilter::PtrMap::getPointer(void* ptr) {
-  PtrMapNode* current = m_root;
-  unsigned short cursor = PTRMAP_PTR_SIZE;
-  while (current && cursor) {
-    cursor -= PTRMAP_LEVEL_BITS;
-    unsigned long index = ((PTRMAP_LEVEL_MASK << cursor) & (unsigned long)ptr)
-                          >> cursor;
-    assert(index < PTRMAP_LEVEL_ENTRIES);
-    current = (PtrMapNode*)(current->m_entries[index]);
-  }
-  return (void*)current;
-}
-
-void PCFilter::PtrMap::setPointer(void* ptr, void* val) {
-  PtrMapNode* current = m_root;
-  unsigned short cursor = PTRMAP_PTR_SIZE;
-  while (true) {
-    cursor -= PTRMAP_LEVEL_BITS;
-    unsigned long index = ((PTRMAP_LEVEL_MASK << cursor) & (unsigned long)ptr)
-                          >> cursor;
-    assert(index < PTRMAP_LEVEL_ENTRIES);
-    if (!cursor) {
-      current->m_entries[index] = val;
-      break;
-    }
-    if (!current->m_entries[index])  {
-      current->m_entries[index] = (void*) MakeNode();
-    }
-    current = (PtrMapNode*)(current->m_entries[index]);
-  }
-}
-
-void PCFilter::PtrMap::clear() {
-  m_root->clearImpl(PTRMAP_PTR_SIZE);
-}
-
-// Adds a range of PCs to the filter given a collection of offset ranges.
-// Omit PCs which have opcodes that don't pass the given opcode filter.
-void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
-                         OpcodeFilter isOpcodeAllowed) {
-  for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
-    TRACE(3, "\toffsets [%d, %d)\n", range->m_base, range->m_past);
-    for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
-         pc += instrLen((Op*)pc)) {
-      if (isOpcodeAllowed(*reinterpret_cast<const Op*>(pc))) {
-        TRACE(3, "\t\tpc %p\n", pc);
-        addPC(pc);
-      } else {
-        TRACE(3, "\t\tpc %p -- skipping (offset %d)\n", pc,
-          unit->offsetOf(pc));
-      }
-    }
-  }
-}
-
-void PCFilter::removeOffset(const Unit* unit, Offset offset) {
-  removePC(unit->at(offset));
-}
-
-//////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 }

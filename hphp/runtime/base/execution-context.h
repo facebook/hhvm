@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/pc-filter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
 
@@ -41,7 +42,6 @@ namespace vixl { class Simulator; }
 namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
-struct PCFilter;
 struct Resumable;
 struct PhpFile;
 namespace JIT { struct Translator; }
@@ -551,8 +551,11 @@ public:
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
-  PCFilter* m_breakPointFilter;
-  PCFilter* m_lastLocFilter;
+  PCFilter* m_breakPointFilter; // Lazily initialized as they are performance
+  PCFilter* m_lastLocFilter;    // sensitive (nullptr => no breakpoints)
+  PCFilter m_lineBreakPointFilter;
+  PCFilter m_callBreakPointFilter;
+  PCFilter m_retBreakPointFilter;
   bool m_dbgNoBreak;
   bool doFCall(ActRec* ar, PC& pc);
   bool doFCallArrayTC(PC pc);

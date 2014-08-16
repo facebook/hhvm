@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
 #include "hphp/runtime/base/thread-info.h"
@@ -55,6 +56,7 @@ public:
   // The template parameter should be an instance of DebugHookHandler.
   // Returns true on success, false on failure (for instance, if another debug
   // hook handler is already attached).
+  // TODO(#4489053) This should create the pc filters
   template<class HandlerClass>
   static bool attach(ThreadInfo* ti = nullptr) {
     ti = (ti != nullptr) ? ti : ThreadInfo::s_threadInfo.getNoCheck();
@@ -65,15 +67,25 @@ public:
     s_numAttached++;
     ti->m_reqInjectionData.setDebuggerAttached(true);
     ti->m_debugHookHandler = new HandlerClass();
+
+    // Event hooks need to be enabled to receive function entry and exit events.
+    // This comes at the cost of a small bit of performance, however, it makes
+    // the code dealing with line breakpoints much easier. Essentially the
+    // problem is ensuring we only break on a line breakpoint once. We can't
+    // just disable the breakpoint until we leave the site because some opcode
+    // in the site could recurse to the site. So a disable must be attached to
+    // a stack depth. This will be disabled on call to detach().
+    EventHook::EnableDebug();
+
     return true;
   }
 
   // If a handler is attached to the thread, detaches it
+  // TODO(#4489053) This should clear the pc filters
   static void detach(ThreadInfo* ti = nullptr);
 
   // Debugger events. Subclasses can override these methods to receive
   // events.
-  virtual void onOpcode(const unsigned char* pc) {}
   virtual void onExceptionThrown(ObjectData* exception) {}
   virtual void onExceptionHandle() {}
   virtual void onError(const ExtendedException &ee,
@@ -84,6 +96,22 @@ public:
   virtual void onDefClass(const Class* cls) {}
   virtual void onDefFunc(const Func* func) {}
 
+  // Called whenever the program counter is at a location that could be
+  // interesting to a debugger. Such as when have hit a registered breakpoint
+  // (regardless of type), when interrupt forcing is enabled, or when the pc is
+  // over an active line breakpoint
+  virtual void onOpcode(const unsigned char* pc) {}
+
+  // Called when we have hit a registered function entry breakpoint
+  virtual void onFuncEntryBreak(const Func* f) {}
+
+  // Called when we have hit a registered function exit breakpoint
+  virtual void onFuncExitBreak(const Func* f) {}
+
+  // Called when we have hit a registered line breakpoint. Even though a line
+  // spans multiple opcodes, this will only be called once per hit.
+  virtual void onLineBreak(const Unit* unit, int line) {}
+
   // The number of DebugHookHandlers that are currently attached to the process.
   static std::atomic_int s_numAttached;
 };
@@ -93,7 +121,8 @@ inline DebugHookHandler* getHookHandler() {
   return ThreadInfo::s_threadInfo.getNoCheck()->m_debugHookHandler;
 }
 
-// Is this process being debugged?
+// Is this process being debugged? Since this is across all threads, this cannot
+// be counted on to be accurate.
 inline bool isDebuggerAttachedProcess() {
   return DebugHookHandler::s_numAttached > 0;
 }
@@ -104,16 +133,26 @@ inline bool isDebuggerAttachedProcess() {
   }                                                                   \
 } while(0)                                                            \
 
+// Flag that can be set by the client to force interrupts
+#define DEBUGGER_INTR \
+  (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerIntr())
+
+// Whether or not there we are over an active line break
+#define DEBUGGER_ACTIVE_LINE_BREAK \
+  (ThreadInfo::s_threadInfo->m_reqInjectionData.getActiveLineBreak() != -1)
+
 // This flag ensures two things: first, that we stay in the interpreter and
 // out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
 // debugger interrupts for every opcode executed (modulo filters.)
-#define DEBUGGER_FORCE_INTR  \
-  (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.getDebuggerIntr())
+#define DEBUGGER_FORCE_INTR \
+  (DEBUGGER_INTR || DEBUGGER_ACTIVE_LINE_BREAK)
 
 // "Hooks" called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
 // execution indefinitely within one of these hooks.
 void phpDebuggerOpcodeHook(const unsigned char* pc);
+void phpDebuggerFuncEntryHook(const ActRec* ar);
+void phpDebuggerFuncExitHook(const ActRec* ar);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
 void phpDebuggerExceptionHandlerHook();
 void phpDebuggerErrorHook(const ExtendedException &ee,
@@ -124,71 +163,21 @@ void phpDebuggerFileLoadHook(Unit* efile);
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
 
-// Add/remove breakpoints
+// Add breakpoints of various types
 void phpAddBreakPoint(const Unit* unit, Offset offset);
 void phpAddBreakPointRange(const Unit* unit, OffsetRangeVec& offsets);
 void phpAddBreakPointFuncEntry(const Func* f);
+void phpAddBreakPointFuncExit(const Func* f);
+// Returns false if the line is invalid
+bool phpAddBreakPointLine(const Unit* unit, int line);
+
+// FIXME: Internally, there is no distinction between the types of breakpoints,
+// so there is no good way to remove added breakpoints. Furthermore, there is
+// no exposed undoing of the JIT opcode blacklisting, so there is little benefit
+// to removal (as opposed to debug hook handlers ignoring deleted breakpoints).
 void phpRemoveBreakPoint(const Unit* unit, Offset offset);
+
 bool phpHasBreakpoint(const Unit* unit, Offset offset);
-
-// Map which holds a set of PCs and supports reasonably fast addition and
-// lookup. Used by the debugger to decide if a given PC falls within an
-// interesting area, e.g., for breakpoints and stepping.
-class PCFilter {
-private:
-  // Radix-tree implementation of pointer map
-  struct PtrMapNode;
-  class PtrMap {
-#define PTRMAP_PTR_SIZE       (sizeof(void*) * 8)
-#define PTRMAP_LEVEL_BITS     8LL
-#define PTRMAP_LEVEL_ENTRIES  (1LL << PTRMAP_LEVEL_BITS)
-#define PTRMAP_LEVEL_MASK     (PTRMAP_LEVEL_ENTRIES - 1LL)
-
-  public:
-    PtrMap() {
-      static_assert(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0,
-                    "PTRMAP_PTR_SIZE must be a multiple of PTRMAP_LEVEL_BITS");
-      m_root = MakeNode();
-    }
-    ~PtrMap();
-    void setPointer(void* ptr, void* val);
-    void* getPointer(void* ptr);
-    void clear();
-
-  private:
-    PtrMapNode* m_root;
-    static PtrMapNode* MakeNode();
-  };
-
-  PtrMap m_map;
-
-public:
-  PCFilter() {}
-
-  // Filter function to exclude opcodes when adding ranges.
-  typedef std::function<bool(Op)> OpcodeFilter;
-
-  // Add/remove offsets, either individually or by range. By default allow all
-  // opcodes.
-  void addRanges(const Unit* unit, const OffsetRangeVec& offsets,
-                 OpcodeFilter isOpcodeAllowed = [] (Op) { return true; });
-  void removeOffset(const Unit* unit, Offset offset);
-
-  // Add/remove/check explicit PCs.
-  void addPC(const unsigned char* pc) {
-    m_map.setPointer((void*)pc, (void*)pc);
-  }
-  void removePC(const unsigned char* pc) {
-    m_map.setPointer((void*)pc, nullptr);
-  }
-  bool checkPC(const unsigned char* pc) {
-    return m_map.getPointer((void*)pc) == (void*)pc;
-  }
-
-  void clear() {
-    m_map.clear();
-  }
-};
 
 }
 

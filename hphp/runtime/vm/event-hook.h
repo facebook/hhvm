@@ -55,6 +55,8 @@ class EventHook {
   static void Disable();
   static void EnableAsync();
   static void DisableAsync();
+  static void EnableDebug();
+  static void DisableDebug();
   static void EnableIntercept();
   static void DisableIntercept();
   static ssize_t CheckSurprise();

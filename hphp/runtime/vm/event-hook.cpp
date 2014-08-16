@@ -60,6 +60,14 @@ void EventHook::DisableAsync() {
   ThreadInfo::s_threadInfo->m_reqInjectionData.clearAsyncEventHookFlag();
 }
 
+void EventHook::EnableDebug() {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerHookFlag();
+}
+
+void EventHook::DisableDebug() {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.clearDebuggerHookFlag();
+}
+
 void EventHook::EnableIntercept() {
   ThreadInfo::s_threadInfo->m_reqInjectionData.setInterceptFlag();
 }
@@ -289,6 +297,11 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
                            GetFunctionNameForProfiler(ar->func(), funcType));
     }
   }
+
+  // Debugger hook
+  if (flags & RequestInjectionData::DebuggerHookFlag) {
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncEntryHook(ar));
+  }
 }
 
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
@@ -298,13 +311,15 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     Xenon::getInstance().log(Xenon::ExitSample);
   }
 
-  // User profiler
-  //
   // Inlined calls normally skip the function enter and exit events. If we
-  // side exit in an inlined callee, we want to make sure to skip the exit
-  // event to avoid unbalancing the call stack.
-  if ((flags & RequestInjectionData::EventHookFlag) &&
-      (JIT::TCA)ar->m_savedRip != JIT::mcg->tx().uniqueStubs.retInlHelper) {
+  // side exit in an inlined callee, we short-circuit here in order to skip
+  // exit events that could unbalance the call stack.
+  if ((JIT::TCA) ar->m_savedRip == JIT::mcg->tx().uniqueStubs.retInlHelper) {
+    return;
+  }
+
+  // User profiler
+  if (flags & RequestInjectionData::EventHookFlag) {
     Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr) {
       // NB: we don't have a function type flag to match what we got in
@@ -327,6 +342,11 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
         // Avoid running PHP code when unwinding C++ exception.
       }
     }
+  }
+
+  // Debugger hook
+  if (flags & RequestInjectionData::DebuggerHookFlag) {
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncExitHook(ar));
   }
 }
 

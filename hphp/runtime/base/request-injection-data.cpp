@@ -353,7 +353,8 @@ void RequestInjectionData::updateJit() {
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_debuggerIntr &&
     !m_coverage &&
-    !shouldProfile();
+    !shouldProfile() &&
+    getActiveLineBreak() == -1;
 }
 
 void RequestInjectionData::setMemExceededFlag() {
@@ -378,6 +379,14 @@ void RequestInjectionData::setAsyncEventHookFlag() {
 
 void RequestInjectionData::clearAsyncEventHookFlag() {
   getConditionFlags()->fetch_and(~RequestInjectionData::AsyncEventHookFlag);
+}
+
+void RequestInjectionData::setDebuggerHookFlag() {
+  getConditionFlags()->fetch_or(RequestInjectionData::DebuggerHookFlag);
+}
+
+void RequestInjectionData::clearDebuggerHookFlag() {
+  getConditionFlags()->fetch_and(~RequestInjectionData::DebuggerHookFlag);
 }
 
 void RequestInjectionData::setEventHookFlag() {

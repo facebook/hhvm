@@ -1364,14 +1364,19 @@ Translator::isSrcKeyInBL(const SrcKey& sk) {
   if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
     return true;
   }
-  for (PC pc = unit->at(sk.offset());
-      !opcodeBreaksBB(*reinterpret_cast<const Op*>(pc));
-      pc += instrLen((Op*)pc)) {
+
+  // Loop until the end of the basic block inclusively. This is useful for
+  // function exit breakpoints, which are implemented by blacklisting the RetC
+  // opcodes.
+  PC pc = nullptr;
+  do {
+    pc = (pc == nullptr) ?
+      unit->at(sk.offset()) : pc + instrLen((Op*) pc);
     if (m_dbgBLPC.checkPC(pc)) {
       m_dbgBLSrcKey.insert(sk);
       return true;
     }
-  }
+  } while (!opcodeBreaksBB(*reinterpret_cast<const Op*>(pc)));
   return false;
 }
 

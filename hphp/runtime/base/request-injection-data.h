@@ -40,11 +40,14 @@ struct RequestInjectionData {
   static const ssize_t AsyncEventHookFlag   = 1 << 7;
   // Set by the debugger to break out of loops in translated code.
   static const ssize_t DebuggerSignalFlag   = 1 << 8;
-  static const ssize_t LastFlag             = DebuggerSignalFlag;
+  // Set by the debugger hook handler to force function entry/exit events
+  static const ssize_t DebuggerHookFlag     = 1 << 9;
+  static const ssize_t LastFlag             = DebuggerHookFlag;
   // flags that shouldn't be cleared by fetchAndClearFlags, because:
   // fetchAndClearFlags is only supposed to touch flags related to PHP-visible
   // signals/exceptions and resource limits
   static const ssize_t StickyFlags = RequestInjectionData::AsyncEventHookFlag |
+                                     RequestInjectionData::DebuggerHookFlag |
                                      RequestInjectionData::EventHookFlag |
                                      RequestInjectionData::InterceptFlag |
                                      RequestInjectionData::XenonSignalFlag;
@@ -87,6 +90,11 @@ struct RequestInjectionData {
   bool m_coverage;         // is coverage being collected
   bool m_jit;              // is the jit enabled
 
+  // When the PC is currently over a line that has been registered for a line
+  // break, the top element is the line. Otherwise the top element is -1.
+  // On function entry we push -1, on function exit, we pop.
+  std::stack<int> m_activeLineBreaks;
+
   // Things corresponding to user setable INI settings
   std::string m_maxMemory;
   std::string m_argSeparatorOutput;
@@ -125,6 +133,22 @@ struct RequestInjectionData {
     m_debuggerIntr = d;
     updateJit();
   }
+  int getActiveLineBreak() const {
+    return m_activeLineBreaks.size() == 0 ? -1 : m_activeLineBreaks.top();
+  }
+  void setActiveLineBreak(int line) {
+    int& top = m_activeLineBreaks.top();
+    top = line;
+    updateJit();
+  }
+  void popActiveLineBreak() {
+    m_activeLineBreaks.pop();
+    updateJit();
+  }
+  void pushActiveLineBreak(int line) {
+    m_activeLineBreaks.push(line);
+    updateJit();
+  }
   bool getCoverage() const { return m_coverage; }
   void setCoverage(bool flag) {
     m_coverage = flag;
@@ -157,6 +181,8 @@ struct RequestInjectionData {
   void setSignaledFlag();
   void setAsyncEventHookFlag();
   void clearAsyncEventHookFlag();
+  void setDebuggerHookFlag();
+  void clearDebuggerHookFlag();
   void setEventHookFlag();
   void clearEventHookFlag();
   void setPendingExceptionFlag();

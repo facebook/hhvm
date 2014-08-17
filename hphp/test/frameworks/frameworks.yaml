@@ -51,9 +51,9 @@
       - assetic/tests/Assetic/Test/Asset/HttpAssetTest.php
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
-    url: https://github.com/cakephp/cakephp
-    branch: 3.0
-    commit: 542eddbc8fdf0f56dbf283ae57015974d3276fa7
+    url: https://github.com/cakephp/cakephp.git
+    branch: "3.0.0-alpha2"
+    commit: 9054d6414a1d767b4742728319447f625b2e31fb
     install_root: cakephp3
     test_root: cakephp3
   codeigniter:

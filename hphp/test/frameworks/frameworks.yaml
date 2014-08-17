@@ -122,6 +122,12 @@
     test_file_regex: /.*(tests\.php)$/
     test_find_mode: token
     sequential: true
+  factory-muffin:
+    url: https://github.com/thephpleague/factory-muffin.git
+    branch: master
+    commit: 3ce9084dfc2a98a8ff347ab56c61f3bd8d541a09
+    install_root: factory-muffin
+    test_root: factory-muffin
   fastroute:
     url: https://github.com/nikic/FastRoute.git
     branch: v0.2.0

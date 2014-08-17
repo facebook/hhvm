@@ -43,21 +43,21 @@ void delete_AwaitAllWaitHandle(ObjectData* od, const Class*) {
 namespace {
   StaticString s_awaitAll("<await-all>");
 
-  NEVER_INLINE __attribute__((noreturn))
+  NEVER_INLINE __attribute__((__noreturn__))
   void failArray() {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an array of WaitHandle instances"));
     throw e;
   }
 
-  NEVER_INLINE __attribute__((noreturn))
+  NEVER_INLINE __attribute__((__noreturn__))
   void failMap() {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be a Map of WaitHandle instances"));
     throw e;
   }
 
-  NEVER_INLINE __attribute__((noreturn))
+  NEVER_INLINE __attribute__((__noreturn__))
   void failVector() {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be a Vector of WaitHandle instances"));

@@ -1,8 +1,8 @@
 /* @generated */
 
 #if defined(__GNUC__) && __GNUC__ >= 4
-# define ZEND_API __attribute__ ((visibility("default")))
-# define ZEND_DLEXPORT __attribute__ ((visibility("default")))
+# define ZEND_API __attribute__ ((__visibility__("default")))
+# define ZEND_DLEXPORT __attribute__ ((__visibility__("default")))
 #else
 # define ZEND_API
 # define ZEND_DLEXPORT

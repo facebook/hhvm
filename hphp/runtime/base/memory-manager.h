@@ -199,7 +199,7 @@ struct DebugHeader {
 #  error Need SMART_SIZES definition for specified LG_SMART_SIZES_PER_DOUBLING
 #endif
 
-__attribute__((aligned(64)))
+__attribute__((__aligned__(64)))
 constexpr uint8_t kSmartSize2Index[] = {
 #define S2I_16(i)  i,
 #define S2I_32(i)  S2I_16(i) S2I_16(i)

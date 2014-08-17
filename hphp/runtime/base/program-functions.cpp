@@ -677,8 +677,8 @@ const void* __hot_start = nullptr;
 const void* __hot_end = nullptr;
 #else
 extern "C" {
-void __attribute__((weak)) __hot_start();
-void __attribute__((weak)) __hot_end();
+void __attribute__((__weak__)) __hot_start();
+void __attribute__((__weak__)) __hot_end();
 }
 #endif
 
@@ -688,7 +688,7 @@ void __attribute__((weak)) __hot_end();
 # define AT_END_OF_TEXT
 #endif
 
-static void NEVER_INLINE AT_END_OF_TEXT __attribute__((optimize("2")))
+static void NEVER_INLINE AT_END_OF_TEXT __attribute__((__optimize__("2")))
 hugifyText(char* from, char* to) {
 #if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {

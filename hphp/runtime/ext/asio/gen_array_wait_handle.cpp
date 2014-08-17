@@ -46,7 +46,7 @@ void c_GenArrayWaitHandle::ti_setoncreatecallback(const Variant& callback) {
   AsioSession::Get()->setOnGenArrayCreateCallback(callback);
 }
 
-NEVER_INLINE __attribute__((noreturn))
+NEVER_INLINE __attribute__((__noreturn__))
 static void fail() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
     "Expected dependencies to be an array of WaitHandle instances"));

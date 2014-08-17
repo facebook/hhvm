@@ -458,7 +458,7 @@ private:
   mutable RefCount m_count;
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif
-} __attribute__((aligned(16)));
+} __attribute__((__aligned__(16)));
 
 typedef GlobalNameValueTableWrapper GlobalVariables;
 

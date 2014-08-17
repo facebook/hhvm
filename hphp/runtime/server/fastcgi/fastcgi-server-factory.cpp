@@ -37,7 +37,7 @@ extern "C" {
 /*
  * Automatically register FastCGIServerFactory on program start
  */
-void register_fastcgi_server() __attribute__((constructor));
+void register_fastcgi_server() __attribute__((__constructor__));
 void register_fastcgi_server() {
   auto registry = HPHP::ServerFactoryRegistry::getInstance();
   auto factory = std::make_shared<HPHP::FastCGIServerFactory>();

@@ -92,7 +92,7 @@ class ResourceData {
   // Counter to keep track of the number of references to this resource
   // (i.e. the resource's "refcount")
   mutable RefCount m_count;
-} __attribute__((aligned(16)));
+} __attribute__((__aligned__(16)));
 
 /**
  * Rules to avoid memory problems/leaks from ResourceData classes

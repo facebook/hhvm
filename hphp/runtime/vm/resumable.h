@@ -131,7 +131,7 @@ private:
 
   // Size of the smart allocated memory that includes this resumable.
   int32_t m_size;
-} __attribute__((aligned(16)));
+} __attribute__((__aligned__(16)));
 
 static_assert(Resumable::arOff() == 0,
               "ActRec must be in the beginning of Resumable");

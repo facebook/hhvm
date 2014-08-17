@@ -667,7 +667,7 @@ private:
     MArrayIter maiter;
     CufIter cufiter;
   } m_u;
-} __attribute__ ((aligned(16)));
+} __attribute__ ((__aligned__(16)));
 
 //////////////////////////////////////////////////////////////////////
 

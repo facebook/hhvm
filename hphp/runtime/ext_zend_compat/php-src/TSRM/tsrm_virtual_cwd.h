@@ -125,7 +125,7 @@ typedef unsigned short mode_t;
 #    define CWD_API __declspec(dllimport)
 #  endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
-#  define CWD_API __attribute__ ((visibility("default")))
+#  define CWD_API __attribute__ ((__visibility__("default")))
 #else
 #  define CWD_API
 #endif

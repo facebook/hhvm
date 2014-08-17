@@ -152,27 +152,27 @@ char *alloca ();
 #endif
 
 #if ZEND_GCC_VERSION >= 4003 || __has_attribute(alloc_size)
-# define ZEND_ATTRIBUTE_ALLOC_SIZE(X) __attribute__ ((alloc_size(X)))
-# define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y) __attribute__ ((alloc_size(X,Y)))
+# define ZEND_ATTRIBUTE_ALLOC_SIZE(X) __attribute__ ((__alloc_size__(X)))
+# define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y) __attribute__ ((__alloc_size__(X,Y)))
 #else
 # define ZEND_ATTRIBUTE_ALLOC_SIZE(X)
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
 #if ZEND_GCC_VERSION >= 2007
-# define ZEND_ATTRIBUTE_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
+# define ZEND_ATTRIBUTE_FORMAT(type, idx, first) __attribute__ ((__format__(type, idx, first)))
 #else
 # define ZEND_ATTRIBUTE_FORMAT(type, idx, first)
 #endif
 
 #if ZEND_GCC_VERSION >= 3001 && !defined(__INTEL_COMPILER)
-# define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
+# define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first) __attribute__ ((__format__(type, idx, first)))
 #else
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
 #endif
 
 #if ZEND_GCC_VERSION >= 3001
-# define ZEND_ATTRIBUTE_DEPRECATED  __attribute__((deprecated))
+# define ZEND_ATTRIBUTE_DEPRECATED  __attribute__((__deprecated__))
 #elif defined(ZEND_WIN32) && defined(_MSC_VER) && _MSC_VER >= 1300
 # define ZEND_ATTRIBUTE_DEPRECATED  __declspec(deprecated)
 #else
@@ -180,7 +180,7 @@ char *alloca ();
 #endif
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
-# define ZEND_FASTCALL __attribute__((fastcall))
+# define ZEND_FASTCALL __attribute__((__fastcall__))
 #elif defined(_MSC_VER) && defined(_M_IX86)
 # define ZEND_FASTCALL __fastcall
 #else
@@ -291,7 +291,7 @@ typedef enum {
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, return_value_ptr, this_ptr, return_value_used TSRMLS_CC
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
-void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
+void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((__noreturn__));
 #else
 #  define zend_error_noreturn zend_error
 #endif
@@ -370,8 +370,8 @@ struct _zval_struct {
 #else
 #if defined(__GNUC__)
 #if __GNUC__ >= 3
-#define zend_always_inline inline __attribute__((always_inline))
-#define zend_never_inline __attribute__((noinline))
+#define zend_always_inline inline __attribute__((__always_inline__))
+#define zend_never_inline __attribute__((__noinline__))
 #else
 #define zend_always_inline inline
 #define zend_never_inline

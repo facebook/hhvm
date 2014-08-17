@@ -212,7 +212,7 @@ const StaticString s_include("include");
 
 #define NEXT() pc++
 #define DECODE_JMP(type, var)                                                 \
-  type var __attribute__((unused)) = *(type*)pc;                              \
+  type var __attribute__((__unused__)) = *(type*)pc;                              \
   ONTRACE(2,                                                                  \
           Trace::trace("decode:     Immediate %s %" PRIi64"\n", #type,        \
                        (int64_t)var));

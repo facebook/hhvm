@@ -65,7 +65,7 @@ namespace HPHP {
 void assert_fail(const char* exp,
                  const char* file,
                  unsigned int line,
-                 const char* func) __attribute__((noreturn));
+                 const char* func) __attribute__((__noreturn__));
 
 void assert_fail_log(const char* title, const std::string& msg);
 typedef std::function<void(const char*, const std::string&)> AssertFailLogger;

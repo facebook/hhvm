@@ -41,7 +41,7 @@
 #    define SAPI_API __declspec(dllimport) 
 #  endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
-#  define SAPI_API __attribute__ ((visibility("default")))
+#  define SAPI_API __attribute__ ((__visibility__("default")))
 #else
 #  define SAPI_API
 #endif

@@ -21,4 +21,4 @@
  * and optimizes away the call. This prevents gdb from trapping updates to
  * the DWARF files emitted by HHVM */
 
-void __attribute__((noinline)) __jit_debug_register_code() { };
+void __attribute__((__noinline__)) __jit_debug_register_code() { };

@@ -56,7 +56,7 @@
 #  define PHP_EOL "\r\n"
 #else
 #  if defined(__GNUC__) && __GNUC__ >= 4
-#    define PHPAPI __attribute__ ((visibility("default")))
+#    define PHPAPI __attribute__ ((__visibility__("default")))
 #  else
 #    define PHPAPI
 #  endif

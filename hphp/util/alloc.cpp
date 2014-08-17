@@ -369,7 +369,7 @@ struct JEMallocInitializer {
 // Construct this object before any others.
 // 101 is the highest priority allowed by the init_priority attribute.
 // http://gcc.gnu.org/onlinedocs/gcc-4.0.4/gcc/C_002b_002b-Attributes.html
-#define MAX_CONSTRUCTOR_PRIORITY __attribute__((init_priority(101)))
+#define MAX_CONSTRUCTOR_PRIORITY __attribute__((__init_priority__(101)))
 #else
 // init_priority is a gcc extension, so we can't use it on other compilers.
 // However, since constructor ordering is only known to be an issue with

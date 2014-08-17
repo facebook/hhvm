@@ -93,7 +93,7 @@
 #    if defined _M_X64 || defined _M_AMD64 || defined __x86_64__
 #      define CDECL /* not actual on x86_64 platform */
 #    else  /* _M_X64 || _M_AMD64 || __x86_64__ */
-#      define CDECL __attribute__ ((cdecl))
+#      define CDECL __attribute__ ((__cdecl__))
 #    endif /* _M_X64 || _M_AMD64 || __x86_64__ */
 #  endif /* ITT_PLATFORM==ITT_PLATFORM_WIN */
 #endif /* CDECL */
@@ -105,7 +105,7 @@
 #    if defined _M_X64 || defined _M_AMD64 || defined __x86_64__
 #      define STDCALL /* not supported on x86_64 platform */
 #    else  /* _M_X64 || _M_AMD64 || __x86_64__ */
-#      define STDCALL __attribute__ ((stdcall))
+#      define STDCALL __attribute__ ((__stdcall__))
 #    endif /* _M_X64 || _M_AMD64 || __x86_64__ */
 #  endif /* ITT_PLATFORM==ITT_PLATFORM_WIN */
 #endif /* STDCALL */
@@ -132,7 +132,7 @@
 #else  /* __STRICT_ANSI__ */
 #define ITT_INLINE           static inline
 #endif /* __STRICT_ANSI__ */
-#define ITT_INLINE_ATTRIBUTE __attribute__ ((always_inline))
+#define ITT_INLINE_ATTRIBUTE __attribute__ ((__always_inline__))
 #endif /* ITT_PLATFORM==ITT_PLATFORM_WIN */
 /** @endcond */
 
@@ -208,7 +208,7 @@ typedef pthread_t         TIDT;
 typedef pthread_mutex_t   mutex_t;
 #define MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 #define _strong_alias(name, aliasname) \
-            extern __typeof (name) aliasname __attribute__ ((alias (#name)));
+            extern __typeof (name) aliasname __attribute__ ((__alias__ (#name)));
 #define strong_alias(name, aliasname) _strong_alias(name, aliasname)
 #endif /* ITT_PLATFORM==ITT_PLATFORM_WIN */
 

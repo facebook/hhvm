@@ -63,20 +63,20 @@
 extern "C" {
 #ifdef USE_TCMALLOC
 #define MallocExtensionInstance _ZN15MallocExtension8instanceEv
-  MallocExtension* MallocExtensionInstance() __attribute__((weak));
+  MallocExtension* MallocExtensionInstance() __attribute__((__weak__));
 #endif
 
 #ifdef USE_JEMALLOC
 
   int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
-              size_t newlen) __attribute__((weak));
+              size_t newlen) __attribute__((__weak__));
   int mallctlnametomib(const char *name, size_t* mibp, size_t*miblenp)
-              __attribute__((weak));
+              __attribute__((__weak__));
   int mallctlbymib(const size_t* mibp, size_t miblen, void *oldp,
-              size_t *oldlenp, void *newp, size_t newlen) __attribute__((weak));
+              size_t *oldlenp, void *newp, size_t newlen) __attribute__((__weak__));
   void malloc_stats_print(void (*write_cb)(void *, const char *),
                           void *cbopaque, const char *opts)
-    __attribute__((weak));
+    __attribute__((__weak__));
 #endif
 }
 

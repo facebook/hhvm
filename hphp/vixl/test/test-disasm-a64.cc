@@ -35,7 +35,7 @@
 #define INSTR_SIZE (1024)
 #define SETUP_CLASS(ASMCLASS)                                                  \
   byte* buf = static_cast<byte*>(malloc(INSTR_SIZE));                          \
-  __attribute__((unused)) uint32_t encoding = 0;                               \
+  __attribute__((__unused__)) uint32_t encoding = 0;                               \
   HPHP::CodeBlock cb;                                                          \
   cb.init(buf, INSTR_SIZE, "test");                                            \
   ASMCLASS* masm = new ASMCLASS(cb);                                           \

@@ -10,7 +10,7 @@ extern zend_module_entry ezc_test_module_entry;
 #ifdef PHP_WIN32
 #  define PHP_EZC_TEST_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
-#  define PHP_EZC_TEST_API __attribute__ ((visibility("default")))
+#  define PHP_EZC_TEST_API __attribute__ ((__visibility__("default")))
 #else
 #  define PHP_EZC_TEST_API
 #endif

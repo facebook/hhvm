@@ -146,16 +146,16 @@ Object create_object(const String& s, const Array &params, bool init = true);
 void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
                                    const char *expectDesc, int level = 0,
                                    TypedValue *rv = nullptr)
-  __attribute__((cold));
+  __attribute__((__cold__));
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
                                 int level = 0, TypedValue *rv = nullptr)
-  __attribute__((cold));
+  __attribute__((__cold__));
 void throw_toomany_arguments_nr(const char *fn, int expected, int got,
                                 int level = 0, TypedValue *rv = nullptr)
-  __attribute__((cold));
+  __attribute__((__cold__));
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
                               int level = 0, TypedValue *rv = nullptr)
-  __attribute__((cold));
+  __attribute__((__cold__));
 
 /**
  * Handler for exceptions thrown from user functions that we don't
@@ -174,7 +174,7 @@ void throw_bad_type_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 void throw_expected_array_exception();
 void throw_expected_array_or_collection_exception();
 void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2)
-   __attribute__((cold));
+   __attribute__((__cold__));
 
 /**
  * Unsetting ClassName::StaticProperty.

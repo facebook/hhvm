@@ -445,7 +445,7 @@ String libxml_get_valid_file_path(const String& source) {
     }
   }
 
-  if (!isUri || url.scheme.empty() || isFileUri) {
+  if (url.scheme.empty() && (!isUri || isFileUri)) {
     file_dest = File::TranslatePath(file_dest);
   }
   return file_dest;

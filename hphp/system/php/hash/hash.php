@@ -340,5 +340,5 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
  * @return bool - Whether $known == $user
  */
 <<__Native>>
-function hash_equals(string $known, string $user): bool;
+function hash_equals(mixed $known, mixed $user): bool;
 

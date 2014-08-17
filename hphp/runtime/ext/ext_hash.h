@@ -35,7 +35,7 @@ Variant HHVM_FUNCTION(hash_file, const String& algo, const String& filename,
 String HHVM_FUNCTION(hash_final, const Resource& context, bool raw_output = false);
 bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data);
 Resource HHVM_FUNCTION(hash_copy, const Resource& context);
-bool HHVM_FUNCTION(hash_equals, const String& known, const String& user);
+bool HHVM_FUNCTION(hash_equals, const Variant& known, const Variant& user);
 int64_t HHVM_FUNCTION(furchash_hphp_ext, const String& key,
                                          int64_t len, int64_t nPart);
 int64_t HHVM_FUNCTION(hphp_murmurhash, const String& key,

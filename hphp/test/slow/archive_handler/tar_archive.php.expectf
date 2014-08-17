@@ -1,0 +1,6 @@
+object(HH\Vector)#%d (2) {
+  [0]=>
+  string(13) "././@LongLink"
+  [1]=>
+  string(110) "framework_thirdparty_zend_translate_railsyaml_library_Translate_Adapter_thirdparty_sfYaml_lib_sfYamlParser.txt"
+}

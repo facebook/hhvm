@@ -23,8 +23,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_hphpd_break(bool condition = true);
-bool f_hphp_debugger_attached();
+void HHVM_FUNCTION(hphpd_break, bool condition = true);
+bool HHVM_FUNCTION(hphp_debugger_attached);
 Array HHVM_FUNCTION(debugger_get_info);
 
 ///////////////////////////////////////////////////////////////////////////////

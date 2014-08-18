@@ -115,11 +115,13 @@ const StaticString
   s_zero(LITSTR_INIT("\0")),
   s_space(" ");
 
-bool HHVM_FUNCTION(mail, const String& to,
-            const String& subject,
-            const String& message,
-            const String& additional_headers /* = null_string */,
-            const String& additional_parameters /* = null_string */) {
+bool HHVM_FUNCTION(mail,
+                   const String& to,
+                   const String& subject,
+                   const String& message,
+                   const String& additional_headers /* = null_string */,
+                   const String& additional_parameters /* = null_string */) {
+
   // replace \0 with spaces
   String to2 = string_replace(to, s_zero, s_space);
   String subject2 = string_replace(subject, s_zero, s_space);
@@ -185,29 +187,33 @@ Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
   return ret;
 }
 
-bool HHVM_FUNCTION(mailparse_msg_parse, const Resource& mimemail, const String& data) {
+bool HHVM_FUNCTION(mailparse_msg_parse,
+                   const Resource& mimemail,
+                   const String& data) {
   return mimemail.getTyped<MimePart>()->parse(data.data(), data.size());
 }
 
-Variant HHVM_FUNCTION(mailparse_msg_extract_part_file, const Resource& mimemail,
-                                          const Variant& filename,
-                                          const Variant& callbackfunc /* = "" */) {
+Variant HHVM_FUNCTION(mailparse_msg_extract_part_file,
+                      const Resource& mimemail,
+                      const Variant& filename,
+                      const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, true);
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_extract_whole_part_file,
-                                                const Resource& mimemail,
-                                                const Variant& filename,
-                                                const Variant& callbackfunc /* = "" */) {
+                      const Resource& mimemail,
+                      const Variant& filename,
+                      const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc, MimePart::DecodeNone, true);
 }
 
-Variant HHVM_FUNCTION(mailparse_msg_extract_part, const Resource& mimemail,
-                                     const Variant& msgbody,
-                                     const Variant& callbackfunc /* = "" */) {
+Variant HHVM_FUNCTION(mailparse_msg_extract_part,
+                      const Resource& mimemail,
+                      const Variant& msgbody,
+                      const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(msgbody, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, false);
@@ -218,8 +224,8 @@ Array HHVM_FUNCTION(mailparse_msg_get_part_data, const Resource& mimemail) {
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_get_part,
-                                     const Resource& mimemail,
-                                     const String& mimesection) {
+                      const Resource& mimemail,
+                      const String& mimesection) {
   Resource part =
     mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
   if (part.isNull()) {
@@ -239,7 +245,7 @@ const StaticString
   s_is_group("is_group");
 
 Array HHVM_FUNCTION(mailparse_rfc822_parse_addresses,
-                                     const String& addresses) {
+                    const String& addresses) {
   php_rfc822_tokenized_t *toks =
     php_mailparse_rfc822_tokenize(addresses.data(), 1);
   php_rfc822_addresses_t *addrs = php_rfc822_parse_address_tokens(toks);
@@ -272,9 +278,10 @@ static int mailparse_stream_flush(void *stream) {
   return ((File*)stream)->flush() ? 1 : 0;
 }
 
-bool HHVM_FUNCTION(mailparse_stream_encode, const Resource& sourcefp,
-                               const Resource& destfp,
-                               const String& encoding) {
+bool HHVM_FUNCTION(mailparse_stream_encode,
+                   const Resource& sourcefp,
+                   const Resource& destfp,
+                   const String& encoding) {
   File *srcstream = sourcefp.getTyped<File>(true, true);
   File *deststream = destfp.getTyped<File>(true, true);
   if (srcstream == NULL || deststream == NULL) {
@@ -453,7 +460,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 }
 
 Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
-                                const Resource& fp) {
+                      const Resource& fp) {
   File *stream = fp.getTyped<File>();
   stream->rewind();
 

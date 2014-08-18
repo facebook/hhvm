@@ -44,190 +44,6 @@ eZ\Bundle\EzPublishCoreBundle\Tests\ApiLoader\StorageRepositoryProviderTest::tes
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\ApiLoader\StorageRepositoryProviderTest::testGetRepositoryConfigUndefinedRepository
 .
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #0
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #1
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #10
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #11
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #12
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #13
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #14
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #15
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #16
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #17
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #18
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #19
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #2
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #20
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #21
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #22
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #23
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #24
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #25
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #26
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #27
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #28
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #29
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #3
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #30
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #31
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #32
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #33
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #34
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #35
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #36
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #37
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #38
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #39
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #4
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #40
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #41
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #42
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #43
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #44
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #45
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #46
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #47
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #48
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #49
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #5
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #50
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #51
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #52
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #53
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #54
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #55
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #56
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #57
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #58
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #59
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #6
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #60
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #61
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #62
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #63
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #64
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #65
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #66
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #67
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #68
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #69
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #7
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #70
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #71
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #72
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #73
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #74
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #75
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #76
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #77
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #78
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #79
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #8
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #80
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #81
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #82
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #83
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #84
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #85
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #86
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #87
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #88
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #89
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #9
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #90
-.
-eZ\Bundle\EzPublishCoreBundle\Tests\ArraySettingsMergeTest::testArrayMerge with data set #91
-.
 eZ\Bundle\EzPublishCoreBundle\Tests\Cache\Http\InstantCachePurgerTest::testClear
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\Cache\Http\InstantCachePurgerTest::testPurge
@@ -522,6 +338,18 @@ eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Compiler\XmlTextConverte
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Compiler\XmlTextConverterPassTest::testProcess
 .
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\ConfigParserTest::testAddSemanticConfig
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\ConfigParserTest::testConstruct
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\ConfigParserTest::testConstructWrongInnerParser
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\ConfigParserTest::testGetSetInnerParsers
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\ConfigParserTest::testMapConfig
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\ConfigParserTest::testPrePostMap
+.
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\CommonTest::testDatabaseSingleSiteaccess
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\CommonTest::testDatabaseSiteaccessGroup
@@ -563,15 +391,15 @@ eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\Con
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\ContentTest::testDefaultContentSettings
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\ImageTest::testPrePostParameters with data set #0
-.
+S
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\ImageTest::testPrePostParameters with data set #1
-.
+S
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\ImageTest::testPrePostParameters with data set #2
-.
+S
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\ImageTest::testPrePostParameters with data set #3
-.
+S
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\ImageTest::testVariations
-.
+S
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\LanguagesTest::testLanguagesSingleSiteaccess
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\LanguagesTest::testLanguagesSiteaccessGroup
@@ -594,6 +422,236 @@ eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\Vie
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\Parser\ViewTest::testLocationView
 .
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessorTest::testConstruct
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessorTest::testGetSetContextualizer
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessorTest::testMapConfigArray
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessorTest::testMapConfigClosure
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessorTest::testMapConfigHookableMapperObject
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessorTest::testMapConfigMapperObject
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessorTest::testMapConfigWrongMapper
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessorTest::testMapSetting
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #0
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #1
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #10
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #11
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #12
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #13
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #14
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #15
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #16
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #17
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #18
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #19
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #2
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #20
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #21
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #22
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #23
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #24
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #25
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #26
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #27
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #28
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #29
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #3
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #30
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #31
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #32
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #33
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #34
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #35
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #36
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #37
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #38
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #39
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #4
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #40
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #41
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #42
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #43
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #44
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #45
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #46
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #47
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #48
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #49
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #5
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #50
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #51
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #52
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #53
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #54
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #55
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #56
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #57
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #58
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #59
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #6
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #60
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #61
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #62
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #63
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #64
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #65
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #66
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #67
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #68
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #69
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #7
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #70
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #71
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #72
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #73
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #74
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #75
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #76
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #77
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #78
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #79
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #8
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #80
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #81
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #82
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #83
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #84
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #85
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #86
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #87
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #88
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #89
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #9
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #90
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testFullMapConfigArray with data set #91
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testGetSetAvailableSiteAccesses
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testGetSetContainer
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testGetSetGroupsBySA
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testGetSetNamespace
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testGetSetSANodeName
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testMapConfigArray
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testMapConfigArraySecondLevel
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testMapConfigArrayUnique
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testMapSetting
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testSetContextualParameter with data set #0
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testSetContextualParameter with data set #1
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testSetContextualParameter with data set #2
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testSetContextualParameter with data set #3
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testSetContextualParameter with data set #4
+.
+eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\Configuration\SiteAccessAware\ContextualizerTest::testSetContextualParameter with data set #5
+.
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\EzPublishCoreExtensionTest::testCacheConfiguration with data set #0
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\EzPublishCoreExtensionTest::testCacheConfiguration with data set #1
@@ -609,9 +667,9 @@ eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\EzPublishCoreExtensionTe
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\EzPublishCoreExtensionTest::testEzPageConfiguration
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\EzPublishCoreExtensionTest::testImageMagickConfigurationBasic
-.
+S
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\EzPublishCoreExtensionTest::testImageMagickConfigurationFilters
-.
+S
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\EzPublishCoreExtensionTest::testLocaleConfiguration
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\DependencyInjection\EzPublishCoreExtensionTest::testRelatedSiteAccesses
@@ -1000,28 +1058,6 @@ eZ\Bundle\EzPublishCoreBundle\Tests\SiteAccess\MatcherBuilderTest::testBuildMatc
 .
 eZ\Bundle\EzPublishCoreBundle\Tests\SiteAccess\MatcherBuilderTest::testBuildMatcherServiceWrongInterface
 .
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testGetSubscribedEvents
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnKernelBuilt
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnKernelBuiltDisabled
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnKernelBuiltNotWebBasedHandler
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnKernelBuiltWithLegacyMode
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #0
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #1
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #2
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #3
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #4
-.
-eZ\Bundle\EzPublishLegacyBundle\LegacyMapper\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuildLegacyMode
-.
 eZ\Bundle\EzPublishLegacyBundle\Tests\Cache\PersistenceCachePurgerTest::testClearAll
 .
 eZ\Bundle\EzPublishLegacyBundle\Tests\Cache\PersistenceCachePurgerTest::testClearAllContent
@@ -1082,6 +1118,16 @@ eZ\Bundle\EzPublishLegacyBundle\Tests\DependencyInjection\Compiler\AddFieldTypeP
 .
 eZ\Bundle\EzPublishLegacyBundle\Tests\DependencyInjection\Compiler\AddFieldTypePassTest::testCompilerPass
 .
+eZ\Bundle\EzPublishLegacyBundle\Tests\DependencyInjection\EzPublishLegacyExtensionTest::testBundleNotEnabled
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\DependencyInjection\EzPublishLegacyExtensionTest::testDefaultConfigValues
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\DependencyInjection\EzPublishLegacyExtensionTest::testGlobalLayout
+E
+eZ\Bundle\EzPublishLegacyBundle\Tests\DependencyInjection\EzPublishLegacyExtensionTest::testViewLayout
+E
+eZ\Bundle\EzPublishLegacyBundle\Tests\DependencyInjection\EzPublishLegacyExtensionTest::testWrongRootDir
+.
 eZ\Bundle\EzPublishLegacyBundle\Tests\EventListener\ConfigScopeListenerTest::testGetSubscribedEvents
 .
 eZ\Bundle\EzPublishLegacyBundle\Tests\EventListener\ConfigScopeListenerTest::testOnConfigScopeChange
@@ -1141,6 +1187,30 @@ eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyBundles\LegacyExtensionsLocatorTest:
 eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyBundles\LegacyExtensionsLocatorTest::testGetExtensionDirectoriesNoLegacy
 E
 eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyBundles\LegacyExtensionsLocatorTest::testGetExtensionsNames
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testGetSubscribedEvents
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnKerneBuiltNotAuthenticated
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnKernelBuilt
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnKernelBuiltDisabled
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnKernelBuiltNotWebBasedHandler
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnKernelBuiltWithLegacyMode
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #0
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #1
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #2
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #3
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuild with data set #4
+.
+eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SecurityTest::testOnLegacyKernelWebBuildLegacyMode
 .
 eZ\Bundle\EzPublishLegacyBundle\Tests\LegacyMapper\SessionTest::testGetSubscribedEvents
 .
@@ -2315,6 +2385,8 @@ eZ\Publish\Core\FieldType\Tests\ImageTest::testAcceptValue with data set #2
 eZ\Publish\Core\FieldType\Tests\ImageTest::testAcceptValue with data set #3
 .
 eZ\Publish\Core\FieldType\Tests\ImageTest::testAcceptValue with data set #4
+.
+eZ\Publish\Core\FieldType\Tests\ImageTest::testAcceptValue with data set #5
 .
 eZ\Publish\Core\FieldType\Tests\ImageTest::testAcceptValueFailsOnInvalidValues with data set #0
 .
@@ -4287,7 +4359,7 @@ S
 eZ\Publish\Core\IO\Tests\Handler\FilesystemTest::testConstructDirectoryNotFound
 .
 eZ\Publish\Core\IO\Tests\Handler\FilesystemTest::testConstructDirectoryNotWritable
-.
+F
 eZ\Publish\Core\IO\Tests\Handler\FilesystemTest::testCreate
 .
 eZ\Publish\Core\IO\Tests\Handler\FilesystemTest::testCreatePathExists
@@ -5750,6 +5822,8 @@ eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUri with d
 .
 eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUri with data set #3
 .
+eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUri with data set #4
+.
 eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUriStandard with data set #0
 .
 eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUriStandard with data set #1
@@ -5757,6 +5831,8 @@ eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUriStandar
 eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUriStandard with data set #2
 .
 eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUriStandard with data set #3
+.
+eZ\Publish\Core\MVC\Symfony\Security\Tests\HttpUtilsTest::testGenerateUriStandard with data set #4
 .
 eZ\Publish\Core\MVC\Symfony\Security\Tests\InteractiveLoginTokenTest::testConstruct
 .
@@ -7358,6 +7434,14 @@ eZ\Publish\Core\Pagination\Tests\ContentSearchHitAdapterTest::testGetNbResults
 .
 eZ\Publish\Core\Pagination\Tests\ContentSearchHitAdapterTest::testGetSlice
 .
+eZ\Publish\Core\Pagination\Tests\LocationSearchAdapterTest::testGetNbResults
+.
+eZ\Publish\Core\Pagination\Tests\LocationSearchAdapterTest::testGetSlice
+.
+eZ\Publish\Core\Pagination\Tests\LocationSearchHitAdapterTest::testGetNbResults
+.
+eZ\Publish\Core\Pagination\Tests\LocationSearchHitAdapterTest::testGetSlice
+.
 eZ\Publish\Core\Persistence\Cache\Tests\ContentHandlerTest::testDeleteContent
 .
 eZ\Publish\Core\Persistence\Cache\Tests\ContentHandlerTest::testDeleteVersion
@@ -7379,8 +7463,6 @@ eZ\Publish\Core\Persistence\Cache\Tests\ContentHandlerTest::testSetStatusPublish
 eZ\Publish\Core\Persistence\Cache\Tests\ContentHandlerTest::testUnCachedMethods with data set #0
 .
 eZ\Publish\Core\Persistence\Cache\Tests\ContentHandlerTest::testUnCachedMethods with data set #1
-.
-eZ\Publish\Core\Persistence\Cache\Tests\ContentHandlerTest::testUnCachedMethods with data set #10
 .
 eZ\Publish\Core\Persistence\Cache\Tests\ContentHandlerTest::testUnCachedMethods with data set #2
 .
@@ -15177,6 +15259,8 @@ eZ\Publish\SPI\Tests\FieldType\ImageIntegrationTest::testContentTypeField
 eZ\Publish\SPI\Tests\FieldType\ImageIntegrationTest::testCreateContent
 .
 eZ\Publish\SPI\Tests\FieldType\ImageIntegrationTest::testCreateContentType
+.
+eZ\Publish\SPI\Tests\FieldType\ImageIntegrationTest::testCreateContentUsingIdPropertyWorksAndThrowsWarning
 .
 eZ\Publish\SPI\Tests\FieldType\ImageIntegrationTest::testCreatedFieldType
 .

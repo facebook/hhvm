@@ -6408,7 +6408,9 @@ void EmitterVisitor::emitPostponedMeths() {
         folly::sformat("{}$memoize_cache", fe->name->data()));
       TypedValue tvNull;
       tvWriteNull(&tvNull);
-      pce->addProperty(propName, AttrPrivate, nullptr, nullptr,
+      Attr attrs = AttrPrivate;
+      attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
+      pce->addProperty(propName, attrs, nullptr, nullptr,
                        &tvNull, RepoAuthType{});
 
       // Rename the method and create a new method with the original name
@@ -6784,12 +6786,21 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
   if (hasOptional) e.JmpNS(topOfBody);
 }
 
-void EmitterVisitor::emitMemoizeProp(Emitter &e, const StringData *propName) {
-  m_evalStack.push(StackSym::H);
-  m_evalStack.setKnownCls(m_curFunc->pce()->name(), false);
-  m_evalStack.push(StackSym::T);
-  m_evalStack.setString(propName);
-  markProp(e);
+void EmitterVisitor::emitMemoizeProp(Emitter &e,
+                                     MethodStatementPtr meth,
+                                     const StringData *propName) {
+  if (meth->getFunctionScope()->isStatic()) {
+    m_evalStack.push(StackSym::K);
+    m_evalStack.setClsBaseType(SymbolicStack::CLS_SELF);
+    e.String(propName);
+    markSProp(e);
+  } else {
+    m_evalStack.push(StackSym::H);
+    m_evalStack.setKnownCls(m_curFunc->pce()->name(), false);
+    m_evalStack.push(StackSym::T);
+    m_evalStack.setString(propName);
+    markProp(e);
+  }
 }
 
 void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
@@ -6798,10 +6809,6 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   if (meth->getParams() && meth->getParams()->getCount() != 0) {
     throw IncludeTimeFatalException(meth,
       "<<__Memoize>> currently only supports methods with zero args");
-  }
-  if (meth->getFunctionScope()->isStatic()) {
-    throw IncludeTimeFatalException(meth,
-      "<<__Memoize>> cannot be used on static methods yet");
   }
   if (meth->getFunctionScope()->isRefReturn()) {
     throw IncludeTimeFatalException(meth,
@@ -6819,20 +6826,31 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   emitMethodPrologue(e, meth);
 
   // If the cache var is non-null return it
-  e.CheckThis();
-  emitMemoizeProp(e, propName);
+  if (!meth->getFunctionScope()->isStatic()) {
+    e.CheckThis();
+  }
+  emitMemoizeProp(e, meth, propName);
   emitCGet(e);
   e.IsTypeC(IsTypeOp::Null);
   e.JmpNZ(cacheMiss);
-  emitMemoizeProp(e, propName);
+  emitMemoizeProp(e, meth, propName);
   emitCGet(e);
   e.RetC();
 
   // Otherwise, call the memoized func, store the result, and return it
   cacheMiss.set(e);
-  emitMemoizeProp(e, propName);
-  e.This();
-  emitConstMethodCallNoParams(e, methName->toCppString());
+  emitMemoizeProp(e, meth, propName);
+  if (meth->getFunctionScope()->isStatic()) {
+    emitClsIfSPropBase(e);
+    auto fpiStart = m_ue.bcPos();
+    e.FPushClsMethodD(0, methName, m_curFunc->pce()->name());
+    { FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart); }
+    e.FCall(0);
+    emitConvertToCell(e);
+  } else {
+    e.This();
+    emitConstMethodCallNoParams(e, methName->toCppString());
+  }
   emitSet(e);
   e.RetC();
 

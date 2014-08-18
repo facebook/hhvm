@@ -759,7 +759,8 @@ public:
                              bool coerce_params = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  void emitMemoizeProp(Emitter &e, const StringData *propName);
+  void emitMemoizeProp(Emitter &e, MethodStatementPtr meth,
+                       const StringData *propName);
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData *methName,
                          const StringData *propName);
   void emitConstMethodCallNoParams(Emitter& e, string name);

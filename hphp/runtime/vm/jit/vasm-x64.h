@@ -326,7 +326,6 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
 
 #define X64_OPCODES\
   /*intrinsics*/\
-  O(align, I(n), Un, Dn)\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(sk) I(callee) I(argc), Un, Dn)\
   O(bindexit, I(cc) I(target), Un, Dn)\
@@ -487,7 +486,6 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(xorqi, I(s0), U(s1), D(d))\
 
 // intrinsics
-struct align { size_t n{16}; };
 struct bindaddr { TCA* dest; SrcKey sk; };
 struct bindcall { SrcKey sk; const Func* callee; unsigned argc; };
 struct bindexit { ConditionCode cc; SrcKey target; TransFlags trflags; };

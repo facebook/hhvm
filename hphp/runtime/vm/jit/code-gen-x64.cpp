@@ -1455,9 +1455,6 @@ void CodeGenerator::cgAddIntO(IRInstruction* inst) {
   emitFwdJcc(m_as, CC_O, inst->taken());
 }
 
-// r1 = r0 - r1
-// r1 = -r1 + r0
-
 void CodeGenerator::cgSubIntO(IRInstruction* inst) {
   assert(inst->taken() != nullptr);
   auto src1 = inst->src(0);
@@ -2425,22 +2422,21 @@ asm_label(a, out);
 }
 
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
-  Vout& vmain = this->vmain();
-  Vout& vcold = this->vcold();
-
   auto src = inst->src(0);
-  auto srcReg = prepXMM(vmain, src, srcLoc(0));
   auto dstReg = dstLoc(0).reg();
+  auto& v = vmain();
+
+  auto srcReg = prepXMM(v, src, srcLoc(0));
 
   constexpr uint64_t maxULongAsDouble  = 0x43F0000000000000LL;
   constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
 
-  auto rIndef = vmain.makeReg();
-  vmain << ldimm{0x8000000000000000LL, rIndef};
-  vmain << cvttsd2siq{srcReg, dstReg};
-  vmain << cmpq{rIndef, dstReg};
+  auto rIndef = v.makeReg();
+  v << ldimm{0x8000000000000000LL, rIndef};
+  v << cvttsd2siq{srcReg, dstReg};
+  v << cmpq{rIndef, dstReg};
 
-  unlikelyIfBlock(vmain, vcold, CC_E, [&] (Vout& v) {
+  unlikelyIfBlock(v, vcold(), CC_E, [&] (Vout& v) {
     // result > max signed int or unordered
     auto tmp = v.makeReg();
     v << ldimm{0, tmp};
@@ -3422,7 +3418,7 @@ struct CheckValid<void(*)(Vout&)> {
 template <typename F>
 void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done,
                                               Type type, PhysReg dataReg,
-                                               F destroyImpl) {
+                                              F destroyImpl) {
   always_assert(type.maybeCounted());
   bool hasDestroy = CheckValid<F>::valid(destroyImpl);
 

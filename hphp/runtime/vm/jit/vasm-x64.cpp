@@ -126,7 +126,6 @@ struct Vgen {
 
 private:
   // intrinsics
-  void emit(align& i) { moveToAlign(a->code(), i.n); }
   void emit(bindaddr& i);
   void emit(bindcall& i);
   void emit(bindexit& i);

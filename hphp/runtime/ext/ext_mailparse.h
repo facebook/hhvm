@@ -23,29 +23,36 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_mail(
+bool HHVM_FUNCTION(mail,
   const String& to, const String& subject, const String& message,
   const String& additional_headers = null_string,
   const String& additional_parameters = null_string);
-int64_t f_ezmlm_hash(const String& addr);
-Resource f_mailparse_msg_create();
-bool f_mailparse_msg_free(const Resource& mimemail);
-Variant f_mailparse_msg_parse_file(const String& filename);
-bool f_mailparse_msg_parse(const Resource& mimemail, const String& data);
-Variant f_mailparse_msg_extract_part_file(
-  const Resource& mimemail, const Variant& filename, const Variant& callbackfunc = "");
-Variant f_mailparse_msg_extract_whole_part_file(
-  const Resource& mimemail, const Variant& filename, const Variant& callbackfunc = "");
-Variant f_mailparse_msg_extract_part(
-  const Resource& mimemail, const Variant& msgbody, const Variant& callbackfunc = "");
-Array f_mailparse_msg_get_part_data(const Resource& mimemail);
-Variant f_mailparse_msg_get_part(const Resource& mimemail, const String& mimesection);
-Array f_mailparse_msg_get_structure(const Resource& mimemail);
-Array f_mailparse_rfc822_parse_addresses(const String& addresses);
-bool f_mailparse_stream_encode(
+int64_t HHVM_FUNCTION(ezmlm_hash, const String& addr);
+Resource HHVM_FUNCTION(mailparse_msg_create);
+bool HHVM_FUNCTION(mailparse_msg_free, const Resource& mimemail);
+Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename);
+bool HHVM_FUNCTION(mailparse_msg_parse, const Resource& mimemail,
+  const String& data);
+Variant HHVM_FUNCTION(mailparse_msg_extract_part_file,
+  const Resource& mimemail, const Variant& filename,
+  const Variant& callbackfunc = "");
+Variant HHVM_FUNCTION(mailparse_msg_extract_whole_part_file,
+  const Resource& mimemail, const Variant& filename,
+  const Variant& callbackfunc = "");
+Variant HHVM_FUNCTION(mailparse_msg_extract_part,
+  const Resource& mimemail, const Variant& msgbody,
+  const Variant& callbackfunc = "");
+Array HHVM_FUNCTION(mailparse_msg_get_part_data,
+  const Resource& mimemail);
+Variant HHVM_FUNCTION(mailparse_msg_get_part, const Resource& mimemail,
+  const String& mimesection);
+Array HHVM_FUNCTION(mailparse_msg_get_structure, const Resource& mimemail);
+Array HHVM_FUNCTION(mailparse_rfc822_parse_addresses, const String& addresses);
+bool HHVM_FUNCTION(mailparse_stream_encode,
   const Resource& sourcefp, const Resource& destfp, const String& encoding);
-Variant f_mailparse_uudecode_all(const Resource& fp);
-Variant f_mailparse_determine_best_xfer_encoding(const Resource& fp);
+Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp);
+Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
+  const Resource& fp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -25,6 +25,31 @@
 #include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {
+
+class MailparseExtension : public Extension {
+ public:
+  MailparseExtension() : Extension("mailparse") { }
+  void moduleInit() {
+    HHVM_FE(mail);
+    HHVM_FE(ezmlm_hash);
+    HHVM_FE(mailparse_msg_create);
+    HHVM_FE(mailparse_msg_free);
+    HHVM_FE(mailparse_msg_parse_file);
+    HHVM_FE(mailparse_msg_parse);
+    HHVM_FE(mailparse_msg_extract_part_file);
+    HHVM_FE(mailparse_msg_extract_whole_part_file);
+    HHVM_FE(mailparse_msg_extract_part);
+    HHVM_FE(mailparse_msg_get_part_data);
+    HHVM_FE(mailparse_msg_get_part);
+    HHVM_FE(mailparse_msg_get_structure);
+    HHVM_FE(mailparse_rfc822_parse_addresses);
+    HHVM_FE(mailparse_stream_encode);
+    HHVM_FE(mailparse_uudecode_all);
+    HHVM_FE(mailparse_determine_best_xfer_encoding);
+    loadSystemlib();
+  }
+} s_mailparse_extension;
+
 ///////////////////////////////////////////////////////////////////////////////
 // utility functions
 
@@ -90,9 +115,13 @@ const StaticString
   s_zero(LITSTR_INIT("\0")),
   s_space(" ");
 
-bool f_mail(const String& to, const String& subject, const String& message,
-            const String& additional_headers /* = null_string */,
-            const String& additional_parameters /* = null_string */) {
+bool HHVM_FUNCTION(mail,
+                   const String& to,
+                   const String& subject,
+                   const String& message,
+                   const String& additional_headers /* = null_string */,
+                   const String& additional_parameters /* = null_string */) {
+
   // replace \0 with spaces
   String to2 = string_replace(to, s_zero, s_space);
   String subject2 = string_replace(subject, s_zero, s_space);
@@ -118,29 +147,29 @@ bool f_mail(const String& to, const String& subject, const String& message,
   return php_mail(to2, subject2, message2, headers2, params2);
 }
 
-int64_t f_ezmlm_hash(const String& addr) {
-  unsigned long h = 5381L;
+int64_t HHVM_FUNCTION(ezmlm_hash, const String& addr) {
+  unsigned int h = 5381;
   int str_len = addr.length();
   for (int i = 0; i < str_len; i++) {
     h = (h + (h << 5)) ^
-        ((unsigned long)(unsigned char)tolower(addr.charAt(i)));
+        ((unsigned long)tolower(addr.charAt(i)));
   }
   h = (h % 53);
-  return (int)h;
+  return (int64_t)h;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // mailparse
 
-Resource f_mailparse_msg_create() {
+Resource HHVM_FUNCTION(mailparse_msg_create) {
   return NEWOBJ(MimePart)();
 }
 
-bool f_mailparse_msg_free(const Resource& mimemail) {
+bool HHVM_FUNCTION(mailparse_msg_free, const Resource& mimemail) {
   return true;
 }
 
-Variant f_mailparse_msg_parse_file(const String& filename) {
+Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
   Resource resource = File::Open(filename, "rb");
   File *f = resource.getTyped<File>(true);
   if (!f) return false;
@@ -158,36 +187,45 @@ Variant f_mailparse_msg_parse_file(const String& filename) {
   return ret;
 }
 
-bool f_mailparse_msg_parse(const Resource& mimemail, const String& data) {
+bool HHVM_FUNCTION(mailparse_msg_parse,
+                   const Resource& mimemail,
+                   const String& data) {
   return mimemail.getTyped<MimePart>()->parse(data.data(), data.size());
 }
 
-Variant f_mailparse_msg_extract_part_file(const Resource& mimemail, const Variant& filename,
-                                          const Variant& callbackfunc /* = "" */) {
+Variant HHVM_FUNCTION(mailparse_msg_extract_part_file,
+                      const Resource& mimemail,
+                      const Variant& filename,
+                      const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, true);
 }
 
-Variant f_mailparse_msg_extract_whole_part_file(const Resource& mimemail,
-                                                const Variant& filename,
-                                                const Variant& callbackfunc /* = "" */) {
+Variant HHVM_FUNCTION(mailparse_msg_extract_whole_part_file,
+                      const Resource& mimemail,
+                      const Variant& filename,
+                      const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc, MimePart::DecodeNone, true);
 }
 
-Variant f_mailparse_msg_extract_part(const Resource& mimemail, const Variant& msgbody,
-                                     const Variant& callbackfunc /* = "" */) {
+Variant HHVM_FUNCTION(mailparse_msg_extract_part,
+                      const Resource& mimemail,
+                      const Variant& msgbody,
+                      const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(msgbody, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, false);
 }
 
-Array f_mailparse_msg_get_part_data(const Resource& mimemail) {
+Array HHVM_FUNCTION(mailparse_msg_get_part_data, const Resource& mimemail) {
   return mimemail.getTyped<MimePart>()->getPartData().toArray();
 }
 
-Variant f_mailparse_msg_get_part(const Resource& mimemail, const String& mimesection) {
+Variant HHVM_FUNCTION(mailparse_msg_get_part,
+                      const Resource& mimemail,
+                      const String& mimesection) {
   Resource part =
     mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
   if (part.isNull()) {
@@ -197,7 +235,7 @@ Variant f_mailparse_msg_get_part(const Resource& mimemail, const String& mimesec
   return part;
 }
 
-Array f_mailparse_msg_get_structure(const Resource& mimemail) {
+Array HHVM_FUNCTION(mailparse_msg_get_structure, const Resource& mimemail) {
   return mimemail.getTyped<MimePart>()->getStructure();
 }
 
@@ -206,7 +244,8 @@ const StaticString
   s_address("address"),
   s_is_group("is_group");
 
-Array f_mailparse_rfc822_parse_addresses(const String& addresses) {
+Array HHVM_FUNCTION(mailparse_rfc822_parse_addresses,
+                    const String& addresses) {
   php_rfc822_tokenized_t *toks =
     php_mailparse_rfc822_tokenize(addresses.data(), 1);
   php_rfc822_addresses_t *addrs = php_rfc822_parse_address_tokens(toks);
@@ -239,8 +278,10 @@ static int mailparse_stream_flush(void *stream) {
   return ((File*)stream)->flush() ? 1 : 0;
 }
 
-bool f_mailparse_stream_encode(const Resource& sourcefp, const Resource& destfp,
-                               const String& encoding) {
+bool HHVM_FUNCTION(mailparse_stream_encode,
+                   const Resource& sourcefp,
+                   const Resource& destfp,
+                   const String& encoding) {
   File *srcstream = sourcefp.getTyped<File>(true, true);
   File *deststream = destfp.getTyped<File>(true, true);
   if (srcstream == NULL || deststream == NULL) {
@@ -355,7 +396,7 @@ const StaticString
   s_filename("filename"),
   s_origfilename("origfilename");
 
-Variant f_mailparse_uudecode_all(const Resource& fp) {
+Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
   File *instream = fp.getTyped<File>();
   instream->rewind();
 
@@ -418,7 +459,8 @@ Variant f_mailparse_uudecode_all(const Resource& fp) {
   return return_value;
 }
 
-Variant f_mailparse_determine_best_xfer_encoding(const Resource& fp) {
+Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
+                      const Resource& fp) {
   File *stream = fp.getTyped<File>();
   stream->rewind();
 

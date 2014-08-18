@@ -16,6 +16,10 @@ class A {
     return $i++;
   }
 
+  <<__Memoize>>
+  public function testNotMemoizedOverride() { static $i = 150; return $i++; }
+  public function testMemoizedOverride() { static $i = 160; return $i++; }
+
   public function testA() {
     // Show that after the first run we're returning the cached result
     echo $this->testPublic().' ';
@@ -36,6 +40,10 @@ class B extends A {
   protected function testProtected() { static $i = 210; return $i++; }
   <<__Memoize>>
   private function testPrivate() { static $i = 220; return $i++; }
+
+  public function testNotMemoizedOverride() { static $i = 230; return $i++; }
+  <<__Memoize>>
+  public function testMemoizedOverride() { static $i = 240; return $i++; }
 
   public function testB() {
     // Show that after the first run we're returning the cached result
@@ -66,3 +74,10 @@ echo $a->testAsync()->join()."\n";
 $b = new B();
 $b->testA();
 $b->testB();
+
+// Test what happens when you override a non-memoized method with a memoized one
+// and visa-versa
+echo $b->testNotMemoizedOverride().' ';
+echo $b->testNotMemoizedOverride().' ';
+echo $b->testMemoizedOverride().' ';
+echo $b->testMemoizedOverride()."\n";

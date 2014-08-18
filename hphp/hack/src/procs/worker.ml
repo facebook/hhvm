@@ -244,6 +244,8 @@ module MakeWorker = struct
                 exit 1
             | e ->
                 Printf.printf "Exception: %s\n" (Printexc.to_string e);
+                print_endline "Potential backtrace:";
+                Printexc.print_backtrace stdout;
                 exit 2
             )
         | pid ->

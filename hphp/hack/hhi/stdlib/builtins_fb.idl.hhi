@@ -64,6 +64,7 @@ function fb_setprofile($callback) { }
 function fb_gc_collect_cycles() { }
 function fb_gc_detect_cycles($filename) { }
 function fb_get_method_param_default_info(mixed $cls, string $name, bool $prohibitStatic = false): array<int,mixed> { }
+function fb_unsafe_openssl_pkcs7_verify_ignore_cert_expiration($filename, $flags, $outfilename = null, $cainfo = null, $extracerts = null, $content = null) { }
 
 namespace HH {
 

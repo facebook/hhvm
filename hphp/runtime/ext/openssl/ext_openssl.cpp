@@ -1596,11 +1596,33 @@ bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
   return ret;
 }
 
-Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int flags,
-                               const Variant& voutfilename /* = null_string */,
-                               const Variant& vcainfo /* = null_array */,
-                               const Variant& vextracerts /* = null_string */,
-                               const Variant& vcontent /* = null_string */) {
+static int pkcs7_ignore_expiration(int ok, X509_STORE_CTX *ctx) {
+  if (ok) {
+    return ok;
+  }
+  int error = X509_STORE_CTX_get_error(ctx);
+  if (error == X509_V_ERR_CERT_HAS_EXPIRED) {
+    // ignore cert expirations
+    Logger::Verbose("Ignoring cert expiration");
+    return 1;
+  }
+  return ok;
+}
+
+/**
+ *  NOTE: when ignore_cert_expiration is true, a custom certificate validation
+ *  callback is set up. Please be aware of this if you modify the function to
+ *  allow other certificate validation behaviors
+ */
+Variant openssl_pkcs7_verify_core(
+  const String& filename,
+  int flags,
+  const Variant& voutfilename /* = null_string */,
+  const Variant& vcainfo /* = null_array */,
+  const Variant& vextracerts /* = null_string */,
+  const Variant& vcontent /* = null_string */,
+  bool ignore_cert_expiration
+) {
   Variant ret = -1;
   X509_STORE *store = NULL;
   BIO *in = NULL;
@@ -1626,7 +1648,12 @@ Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int flags,
   if (!store) {
     goto clean_exit;
   }
-
+  if (ignore_cert_expiration) {
+    // make sure no other callback is specified
+    assert(!store->verify_cb);
+    // ignore expired certs
+    X509_STORE_set_verify_cb(store, pkcs7_ignore_expiration);
+  }
   in = BIO_new_file(filename.data(), (flags & PKCS7_BINARY) ? "rb" : "r");
   if (in == NULL) {
     raise_warning("error opening the file, %s", filename.data());
@@ -1678,6 +1705,15 @@ Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int flags,
   sk_X509_free(others);
 
   return ret;
+}
+
+Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int flags,
+                               const Variant& voutfilename /* = null_string */,
+                               const Variant& vcainfo /* = null_array */,
+                               const Variant& vextracerts /* = null_string */,
+                               const Variant& vcontent /* = null_string */) {
+  return openssl_pkcs7_verify_core(filename, flags, voutfilename, vcainfo,
+                                   vextracerts, vcontent, false);
 }
 
 static bool openssl_pkey_export_impl(const Variant& key, BIO *bio_out,

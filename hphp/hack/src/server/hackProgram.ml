@@ -194,6 +194,9 @@ module Program : Server.SERVER_PROGRAM = struct
   let preinit options =
     if not (ServerArgs.check_mode options)
     then HackSearchService.attach_hooks ();
+    (* Force hhi files to be extracted and their location saved before workers
+     * fork, so everyone can know about the same hhi path. *)
+    ignore (Hhi.get_hhi_root());
     ignore (
       Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos)
     )

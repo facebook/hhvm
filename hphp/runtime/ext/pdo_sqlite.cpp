@@ -375,6 +375,7 @@ bool PDOSqliteStatement::executer() {
 }
 
 bool PDOSqliteStatement::fetcher(PDOFetchOrientation ori, long offset) {
+  SYNC_VM_REGS_SCOPED();
   if (!m_stmt) {
     return false;
   }

@@ -19,6 +19,10 @@
 
 #include <set>
 
+#if defined(__CYGWIN__) && defined(WIN32)
+#undef WIN32
+#endif
+
 #include <curl/curl.h>
 #include <time.h>
 

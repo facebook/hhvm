@@ -637,9 +637,9 @@ class CufIter {
   }
   void setName(StringData* name) { m_name = name; }
 
-  static uint32_t funcOff() { return offsetof(CufIter, m_func); }
-  static uint32_t ctxOff()  { return offsetof(CufIter, m_ctx); }
-  static uint32_t nameOff() { return offsetof(CufIter, m_name); }
+  static constexpr uint32_t funcOff() { return offsetof(CufIter, m_func); }
+  static constexpr uint32_t ctxOff()  { return offsetof(CufIter, m_ctx); }
+  static constexpr uint32_t nameOff() { return offsetof(CufIter, m_name); }
  private:
   const Func* m_func;
   void* m_ctx;

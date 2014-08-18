@@ -50,9 +50,9 @@ typedef int32_t RefCount;
 
 // UNCOUNT and STATIC imply negative values so this bit check is valid
 constexpr size_t UncountedBitPos = 31;
-const int32_t UncountedValue = UNCOUNTED;
-const int32_t StaticValue = STATIC; // implies UncountedValue
-const int32_t RefCountMaxRealistic = (1 << 30) - 1;
+constexpr int32_t UncountedValue = UNCOUNTED;
+constexpr int32_t StaticValue = STATIC; // implies UncountedValue
+constexpr int32_t RefCountMaxRealistic = (1 << 30) - 1;
 
 static_assert((uint32_t)UncountedValue & (1uL << UncountedBitPos),
               "Check UncountedValue and UncountedBitPos");
@@ -67,7 +67,7 @@ static_assert((uint32_t)StaticValue & (1uL << UncountedBitPos),
  * Other refcounted types (ArrayData, StringData, and ObjectData)
  * have small fields that are packed into the same space.
  */
-const size_t FAST_REFCOUNT_OFFSET = 12;
+constexpr size_t FAST_REFCOUNT_OFFSET = 12;
 
 /*
  * Real count values should always be less than or equal to

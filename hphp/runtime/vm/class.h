@@ -171,7 +171,7 @@ struct Class : AtomicCountable {
      */
     static PropInitVec* allocWithSmartAllocator(const PropInitVec& src);
 
-    static size_t dataOff() {
+    static constexpr size_t dataOff() {
       return offsetof(PropInitVec, m_data);
     }
 

@@ -44,7 +44,9 @@ struct FixedStringMap {
   ExtraType& extra() { return m_extra; }
   const ExtraType& extra() const { return m_extra; }
 
-  static ptrdiff_t tableOff() { return offsetof(FixedStringMap, m_table); }
+  static constexpr ptrdiff_t tableOff() {
+    return offsetof(FixedStringMap, m_table);
+  }
   ExtraType size() const { return m_extra; }
 
 private:

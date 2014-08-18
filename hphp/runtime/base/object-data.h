@@ -426,9 +426,13 @@ class ObjectData {
   static void raiseAbstractClassError(Class* cls);
   void raiseUndefProp(const StringData* name);
 
-  static ptrdiff_t getVMClassOffset() { return offsetof(ObjectData, m_cls); }
-  static ptrdiff_t attributeOff() { return offsetof(ObjectData, o_attribute); }
-  static ptrdiff_t whStateOffset() {
+  static constexpr ptrdiff_t getVMClassOffset() {
+    return offsetof(ObjectData, m_cls);
+  }
+  static constexpr ptrdiff_t attributeOff() {
+    return offsetof(ObjectData, o_attribute);
+  }
+  static constexpr ptrdiff_t whStateOffset() {
     return offsetof(ObjectData, o_subclassData.u8[0]);
   }
 

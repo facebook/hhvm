@@ -230,11 +230,11 @@ const int kNumSIMDRegisterArgs = sizeof(argNumToSIMDRegName) / sizeof(PhysReg);
  * JIT'd code "reverse calls" the enterTC routine by returning to it,
  * with a service request number and arguments.
  */
-const PhysReg serviceReqArgRegs[] = {
+constexpr PhysReg serviceReqArgRegs[] = {
   // rdi: contains request number
   reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
 };
-const int kNumServiceReqArgRegs =
+constexpr int kNumServiceReqArgRegs =
   sizeof(serviceReqArgRegs) / sizeof(PhysReg);
 
 /*

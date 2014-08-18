@@ -43,12 +43,18 @@ struct APCString {
   }
 
   static APCString* fromHandle(APCHandle* handle) {
-    assert(offsetof(APCString, m_handle) == 0);
+    static_assert(
+      offsetof(APCString, m_handle) == 0,
+      "m_handle must appear first in APCString"
+    );
     return reinterpret_cast<APCString*>(handle);
   }
 
   static const APCString* fromHandle(const APCHandle* handle) {
-    assert(offsetof(APCString, m_handle) == 0);
+    static_assert(
+      offsetof(APCString, m_handle) == 0,
+      "m_handle must appear first in APCString"
+    );
     return reinterpret_cast<const APCString*>(handle);
   }
 

@@ -257,7 +257,7 @@ ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
 // Helper function for checking if a type is KindOfString or KindOfStaticString.
 static_assert(KindOfStaticString == 0x0C, "");
 static_assert(KindOfString       == 0x14, "");
-inline bool IS_STRING_TYPE(DataType t) {
+constexpr bool IS_STRING_TYPE(DataType t) {
   return (t & ~0x18) == KindOfStringBit;
 }
 
@@ -269,7 +269,7 @@ inline bool IS_STRING_TYPE(DataType t) {
 #define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
 
-inline bool IS_INT_KEY_TYPE(DataType t) {
+constexpr bool IS_INT_KEY_TYPE(DataType t) {
   return t <= KindOfInt64;
 }
 
@@ -280,7 +280,7 @@ inline bool typeReentersOnRelease(DataType type) {
   return IS_REFCOUNTED_TYPE(type) && type != KindOfString;
 }
 
-inline DataType typeInitNull(DataType t) {
+constexpr DataType typeInitNull(DataType t) {
   return t == KindOfUninit ? KindOfNull : t;
 }
 
@@ -292,7 +292,7 @@ inline DataType typeInitNull(DataType t) {
  * Pre: t1 and t2 must both be DataTypes that represent php-types.
  * (Non-internal KindOfs.)
  */
-inline bool equivDataTypes(DataType t1, DataType t2) {
+constexpr bool equivDataTypes(DataType t1, DataType t2) {
   return
     (t1 == t2) ||
     (IS_STRING_TYPE(t1) && IS_STRING_TYPE(t2)) ||

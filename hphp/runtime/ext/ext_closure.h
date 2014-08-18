@@ -80,8 +80,8 @@ public:
   void setClass(Class* cls) { m_thisOrClass = ActRec::encodeClass(cls); }
   bool hasClass() { return getClass() != nullptr; }
 
-  static size_t funcOffset() { return offsetof(c_Closure, m_func); }
-  static size_t ctxOffset() { return offsetof(c_Closure, m_thisOrClass); }
+  static constexpr size_t funcOffset() { return offsetof(c_Closure, m_func); }
+  static constexpr size_t ctxOffset() { return offsetof(c_Closure, m_thisOrClass); }
 
   static c_Closure* Clone(ObjectData* obj);
 

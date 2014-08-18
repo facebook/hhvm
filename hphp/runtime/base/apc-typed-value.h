@@ -62,20 +62,16 @@ public:
 
   static APCTypedValue* fromHandle(APCHandle* handle) {
 #if PACKED_TV
-    assert(offsetof(APCTypedValue, m_handle) == 0);
     return reinterpret_cast<APCTypedValue*>(handle);
 #else
-    assert(offsetof(APCTypedValue, m_handle) == sizeof(SharedData));
     return reinterpret_cast<APCTypedValue*>(handle - 1);
 #endif
   }
 
   static const APCTypedValue* fromHandle(const APCHandle* handle) {
 #if PACKED_TV
-    assert(offsetof(APCTypedValue, m_handle) == 0);
     return reinterpret_cast<const APCTypedValue*>(handle);
 #else
-    assert(offsetof(APCTypedValue, m_handle) == sizeof(SharedData));
     return reinterpret_cast<const APCTypedValue*>(handle - 1);
 #endif
   }
@@ -153,6 +149,17 @@ private:
 #endif
 
   static void compileTimeAssertions() {
+#if PACKED_TV
+    static_assert(
+      offsetof(APCTypedValue, m_handle) == 0,
+      "m_handle must appear first in PACKED_TV"
+    );
+#else
+    static_assert(
+      offsetof(APCTypedValue, m_handle) == sizeof(SharedData),
+      "m_handle must come after SharedData in !PACKED_TV"
+    );
+#endif
     static_assert(
         offsetof(APCTypedValue, m_data) == offsetof(TypedValue, m_data),
         "Offset of m_data must be equal in APCHandle and TypedValue");

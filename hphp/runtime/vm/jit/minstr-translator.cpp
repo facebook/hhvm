@@ -2713,7 +2713,7 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
   // or two such scratch objects, in the case of a Set the first of which will
   // always be tvRef2, in all other cases if only one scratch value is present
   // it will be stored in tvRef.
-  static const size_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
+  static constexpr size_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(), 2U); ++i) {
     IRInstruction* inst = m_unit.gen(DecRefMem, m_marker, Type::Gen, m_misBase,
                                     cns(refOffs[m_failedSetBlock ? 1 - i : i]));

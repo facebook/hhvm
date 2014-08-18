@@ -112,8 +112,8 @@ struct TypedValue {
 // Check that TypedValue's size is a power of 2 (16bytes currently)
 static_assert((sizeof(TypedValue) & (sizeof(TypedValue)-1)) == 0,
               "TypedValue's size is expected to be a power of 2");
-const size_t kTypedValueAlignMask = sizeof(TypedValue) - 1;
-inline size_t alignTypedValue(size_t sz) {
+constexpr size_t kTypedValueAlignMask = sizeof(TypedValue) - 1;
+constexpr size_t alignTypedValue(size_t sz) {
   return (sz + kTypedValueAlignMask) & ~kTypedValueAlignMask;
 }
 
@@ -124,7 +124,7 @@ inline size_t alignTypedValue(size_t sz) {
  * TODO: t1100154 phase this out completely.
  */
 struct TypedValueAux : TypedValue {
-  static const size_t auxOffset = offsetof(TypedValue, m_aux);
+  static constexpr size_t auxOffset = offsetof(TypedValue, m_aux);
   static const size_t auxSize = sizeof(m_aux);
   int32_t& hash() { return m_aux.u_hash; }
   const int32_t& hash() const { return m_aux.u_hash; }

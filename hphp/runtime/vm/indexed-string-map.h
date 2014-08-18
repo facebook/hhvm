@@ -117,7 +117,7 @@ struct IndexedStringMap {
     return (*const_cast<IndexedStringMap*>(this))[index];
   }
 
-  static ptrdiff_t vecOff() {
+  static constexpr ptrdiff_t vecOff() {
     return offsetof(IndexedStringMap, m_map) +
       FixedStringMap<Index,CaseSensitive,Index>::tableOff();
   }

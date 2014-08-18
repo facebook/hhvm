@@ -83,6 +83,7 @@ class ExecutionContext;
 
 void pcre_init();
 void pcre_reinit();
+void pcre_session_exit();
 void hphp_process_init();
 void hphp_session_init();
 

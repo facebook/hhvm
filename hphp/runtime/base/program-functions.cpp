@@ -1854,6 +1854,9 @@ void hphp_session_exit() {
     // reinitialize g_context here.
     g_context.getCheck();
 
+    // Clean up pcre state at the end of the request.
+    pcre_session_exit();
+
     mm.sweep();
 
     // Destroy g_context again because ExecutionContext has

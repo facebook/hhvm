@@ -70,6 +70,7 @@ public:
   PCREglobals() { }
   ~PCREglobals();
   void cleanupOnRequestEnd(const pcre_cache_entry* ent);
+  void onSessionExit();
   // pcre ini_settings
   int64_t m_preg_backtrace_limit;
   int64_t m_preg_recursion_limit;

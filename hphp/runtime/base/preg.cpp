@@ -58,8 +58,19 @@ pcre_cache_entry::~pcre_cache_entry() {
   pcre_free(re);
 }
 
+void PCREglobals::onSessionExit() {
+  for (auto entry: m_overflow) {
+    delete entry;
+  }
+  smart::vector<const pcre_cache_entry*>().swap(m_overflow);
+}
+
 PCREglobals::~PCREglobals() {
-  m_overflow.clear();
+  onSessionExit();
+}
+
+void pcre_session_exit() {
+  s_pcre_globals->onSessionExit();
 }
 
 void PCREglobals::cleanupOnRequestEnd(const pcre_cache_entry* ent) {

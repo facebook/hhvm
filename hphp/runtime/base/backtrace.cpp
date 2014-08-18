@@ -35,6 +35,40 @@ const StaticString s_object("object");
 const StaticString s_type("type");
 const StaticString s_include("include");
 
+static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
+  ActRec* prevFp;
+  if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
+    c_BlockableWaitHandle* currentWaitHandle = frame_afwh(fp);
+    auto const contextIdx = currentWaitHandle->getContextIdx();
+    while (currentWaitHandle != nullptr) {
+      if (currentWaitHandle->isFinished()) {
+        /*
+         * is possible in very rare cases (it will returned a truancated stack):
+         * 1) async function which WaitHandle is not referenced by anything
+         *      else finishes
+         * 2) its return value is an object with destructor
+         * 3) this destructor gets called as part of destruction of the
+         *      WaitHandleobject, which happens right before FP is adjusted
+        */
+        break;
+      }
+      auto waitHandle = currentWaitHandle;
+      auto p = waitHandle->getParentChain().firstInContext(contextIdx);
+      if (p == nullptr) {
+        break;
+      } else if (p->getKind() == c_WaitHandle::Kind::AsyncFunction) {
+        auto wh = p->asAsyncFunction();
+        prevFp = wh->actRec();
+        *prevPc = wh->resumable()->resumeOffset();
+        return prevFp;
+      }
+      currentWaitHandle = p;
+    }
+    *prevPc = 0;
+    return AsioSession::Get()->getContext(contextIdx)->getSavedFP();
+  }
+  return g_context->getPrevVMState(fp, prevPc);
+}
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
   Array bt = Array::Create();
@@ -63,7 +97,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   // Get the fp and pc of the top frame (possibly skipping one frame)
   {
     if (btArgs.m_skipTop) {
-      fp = g_context->getPrevVMState(vmfp(), &pc);
+      fp = getPrevActRec(vmfp(), &pc);
       if (!fp) {
         // We skipped over the only VM frame, we're done
         return bt;
@@ -98,10 +132,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   }
   // Handle the subsequent VM frames
   Offset prevPc = 0;
-  for (ActRec* prevFp = g_context->getPrevVMState(fp, &prevPc);
+  for (ActRec* prevFp = getPrevActRec(fp, &prevPc);
        fp != nullptr && (btArgs.m_limit == 0 || depth < btArgs.m_limit);
        fp = prevFp, pc = prevPc,
-         prevFp = g_context->getPrevVMState(fp, &prevPc)) {
+         prevFp = getPrevActRec(fp, &prevPc)) {
     // do not capture frame for HPHP only functions
     if (fp->m_func->isNoInjection()) {
       continue;
@@ -117,7 +151,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       fp->localsDecRefd();
 
     // Builtins and generators don't have a file and line number
-    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->resumed()) {
+    if (prevFp && !prevFp->m_func->isBuiltin()) {
       auto const prevUnit = prevFp->m_func->unit();
       auto prevFile = prevUnit->filepath();
       if (prevFp->m_func->originalFilename()) {

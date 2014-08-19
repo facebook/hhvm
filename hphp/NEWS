@@ -1,3 +1,45 @@
+"Queen Latifah" 14-Aug-2014
+ - Implement RecursiveCallbackFilterIterator
+ - cmake installations should no longer put files in hphp and now put them in hhvm
+ - Fix error for (Recursive)CachingIterator::ctor's param 1
+ - Force OOM check on large smart allocations
+ - Support stream wrappers in XML parser extensions, add external entity loader
+ - Fix LowPtr load in codegen
+ - Fix race condition in DebuggerProxy start/stop
+ - Log per request if oom or timeout triggered in dynostats
+ - Break out hhvm request timeout / memout counters for psp vs non-psp
+ - Support collections for third parameter of preg_replace() and friends
+ - Added functions imagewebp and imagecreatefromwebp
+ - Fix mb_convert_case when encoding set other than default
+ - Added function imagepalettecopy to ext_gd
+ - Remove reflection hacks for primitive typehints
+ - Fixed tempnam() creates paths with '//'
+ - Add LibGMP extension
+ - Fix heap overflow in sql_regcase() for input >1GB
+ - Add HHVM hookups for folly::Singleton
+ - Fix isset on classes extending ArrayObject
+ - Only track live objects that actually have destructors
+ - Specify ssl cipher list for curl with OpenSSL only
+ - Remove support for "service threads"
+ - PDO MySQL's getCode() didn't match errorInfo
+ - Run usercode before ending the request
+ - Make DynamicExtensions work in ini
+ - Provide backup utf8 sanitizer when UConverter is unavailable
+ - Pass duplicate flag to SNI Initial Handler Callback
+ - fb_intercept now accounts for variadic functions
+ - Add variadic function to fb_intercept test
+ - Implemented basic xdebug tracing
+ - Rename snappy methods
+ - Add sort_flags to ArrayObject::asort
+ - Changed CRYPT_BLOWFISH to 1 because apparently it is available
+ - Convert ext/mysql to HNI
+ - Add log when memory usage reached the MaxRSS
+ - Fix http headers parsing + Remove unused code + Fix indentation
+ - Fixed error output for json_encode
+ - Corrected the var_dump output for Exception class
+ - Relax restrictions on the typing of class constant shape field names.
+ - Fix file:// URL decoding in libxml functions and elsewhere
+
 NEXT
  - Interface requirements (similar to trait requirements) enforced
  - Initial support for PHP5.6 argument unpacking: f($x, $y, ...$args)

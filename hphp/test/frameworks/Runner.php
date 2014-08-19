@@ -159,7 +159,7 @@ class Runner {
         continue;
       }
     } while (!feof($this->pipes[1]) &&
-           preg_match(PHPUnitPatterns::$status_code_pattern,
+           preg_match(PHPUnitPatterns::STATUS_CODE_PATTERN,
                       $status) === 0);
     // Test names should have all characters before and including __DIR__
     // removed, so that specific user info is not added
@@ -281,13 +281,13 @@ class Runner {
       // There was 1 failure:  <---- Don't print
       // <blank line>
       // 1) Assetic\Test\Asset\HttpAssetTest::testGetLastModified <---- print
-      if (preg_match(PHPUnitPatterns::$tests_ok_skipped_inc_pattern,
+      if (preg_match(PHPUnitPatterns::TESTS_OK_SKIPPED_INC_PATTERN,
                      $line) === 1 ||
-          preg_match(PHPUnitPatterns::$num_errors_failures_pattern,
+          preg_match(PHPUnitPatterns::NUM_ERRORS_FAILURES_PATTERN,
                      $line) === 1 ||
-          preg_match(PHPUnitPatterns::$failures_header_pattern,
+          preg_match(PHPUnitPatterns::FAILURES_HEADER_PATTERN,
                      $line) === 1 ||
-          preg_match(PHPUnitPatterns::$num_skips_inc_pattern,
+          preg_match(PHPUnitPatterns::NUM_SKIPS_INC_PATTERN,
                      $line) === 1) {
         do {
           // throw out any blank lines after these pattern
@@ -303,9 +303,9 @@ class Runner {
       // stat information is part of the information provided for a
       // given test error -- or -- we have hit a fatal at the very end of
       // running PHPUnit. For that fatal case, we handle that a bit differently.
-      if (preg_match(PHPUnitPatterns::$tests_ok_pattern, $line) === 1 ||
-          preg_match(PHPUnitPatterns::$tests_failure_pattern, $line) === 1 ||
-          preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
+      if (preg_match(PHPUnitPatterns::TESTS_OK_PATTERN, $line) === 1 ||
+          preg_match(PHPUnitPatterns::TESTS_FAILURE_PATTERN, $line) === 1 ||
+          preg_match(PHPUnitPatterns::NO_TESTS_EXECUTED_PATTERN,
                      $line) === 1) {
         $prev_line = $line;
         $line = $this->getLine();
@@ -380,7 +380,7 @@ class Runner {
     $this->stat_information = $this->name.PHP_EOL;
     if ($final_stats === null) {
       $this->stat_information .= Statuses::FATAL.PHP_EOL;
-    } else if (preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
+    } else if (preg_match(PHPUnitPatterns::NO_TESTS_EXECUTED_PATTERN,
                           $final_stats) === 1) {
       $this->stat_information .= Statuses::SKIP.PHP_EOL;
     } else {
@@ -389,13 +389,13 @@ class Runner {
   }
 
   private function isStop(string $line) {
-    return preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line) === 1;
+    return preg_match(PHPUnitPatterns::STOP_PARSING_PATTERN, $line) === 1;
   }
 
   private function isPrologue(string $line) {
-    return preg_match(PHPUnitPatterns::$header_pattern, $line) === 1 ||
-        preg_match(PHPUnitPatterns::$config_file_pattern, $line) === 1 ||
-        preg_match(PHPUnitPatterns::$xdebug_pattern, $line) === 1;
+    return preg_match(PHPUnitPatterns::HEADER_PATTERN, $line) === 1 ||
+        preg_match(PHPUnitPatterns::CONFIG_FILE_PATTERN, $line) === 1 ||
+        preg_match(PHPUnitPatterns::XDEBUG_PATTERN, $line) === 1;
   }
 
   private function isBlankLine(string $line): bool {

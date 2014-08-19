@@ -190,8 +190,8 @@ function run_tests(Vector $frameworks): void {
     $framework->clean();
     if (file_exists($framework->getExpectFile())) {
       $framework->prepareCurrentTestStatuses(
-                                        PHPUnitPatterns::$status_code_pattern,
-                                        PHPUnitPatterns::$stop_parsing_pattern);
+                                        PHPUnitPatterns::STATUS_CODE_PATTERN,
+                                        PHPUnitPatterns::STOP_PARSING_PATTERN);
       human(Colors::YELLOW.$framework->getName().Colors::NONE.": running. ".
             "Comparing against ".count($framework->getCurrentTestStatuses()).
             " tests\n");

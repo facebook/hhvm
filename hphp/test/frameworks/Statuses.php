@@ -8,6 +8,7 @@ class Statuses {
   const Status ERROR = "E";
   const Status INCOMPLETE = "I";
   const Status SKIP = "S";
+  const Status RISKY = "R";
   const Status TIMEOUT = "TIMEOUT";
   const Status BLACKLIST = "BLACKLIST";
   const Status CLOWNY = "CLOWNY";

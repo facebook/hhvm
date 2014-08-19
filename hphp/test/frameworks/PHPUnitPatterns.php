@@ -8,7 +8,7 @@ class PHPUnitPatterns {
   // before a resulting " or (
   // Four \\\\ needed to match one \
   // stackoverflow.com/questions/4025482/cant-escape-the-backslash-with-regex
-  static string $test_name_pattern =
+  const string TEST_NAME_PATTERN =
   "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\".*?\"|#[0-9]+))?/";
 
   // Matches:
@@ -17,37 +17,37 @@ class PHPUnitPatterns {
   //    .  252 / 364 ( 69%)
   //    .\nWarning
   // That last example happened in Magento
-  static string $status_code_pattern =
-  "/^[\.SFEI]$|^S+$|^[\.SFEI](HipHop)|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
+  const string STATUS_CHAR_GROUP = '[\.SFEIR]';
+  const string STATUS_CODE_PATTERN = '/^'.self::STATUS_CHAR_GROUP.'$|^S+$|^'.self::STATUS_CHAR_GROUP.'(HipHop)|^'.self::STATUS_CHAR_GROUP.'[ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/';
 
   // Don't want to parse any more test names after the Time line in the
   // results. Any test names after that line are probably detailed error
   // information.
-  static string $stop_parsing_pattern =
+  const string STOP_PARSING_PATTERN =
  "/^Time: \d+(\.\d+)? (second[s]?|ms|minute[s]?|hour[s]?), Memory: \d+(\.\d+)/";
 
-  static string $tests_ok_pattern = "/^OK \(\d+ test[s]?, \d+ assertion[s]?\)/";
-  static string $tests_failure_pattern = "/^Tests: \d+, Assertions: \d+.*[.]/";
+  const string TESTS_OK_PATTERN = "/^OK \(\d+ test[s]?, \d+ assertion[s]?\)/";
+  const string TESTS_FAILURE_PATTERN = "/^Tests: \d+, Assertions: \d+.*[.]/";
 
-  static string $header_pattern =
+  const string HEADER_PATTERN =
                 "/^PHPUnit \d+.[0-9a-zA-Z\-\.]*( by Sebastian Bergmann.)?/";
 
-  static string $config_file_pattern = "/^Configuration read from/";
+  const string CONFIG_FILE_PATTERN = "/^Configuration read from/";
 
-  static string $xdebug_pattern = "/^The Xdebug extension is not loaded./";
+  const string XDEBUG_PATTERN = "/^The Xdebug extension is not loaded./";
 
   // Paris and Idiorm have tests with ending digits (e.g. Test53.php)
-  static string $test_file_pattern =
+  const string TEST_FILE_PATTERN =
                 "/.*(\.phpt|Test[\d]*\.php|test[\d]*\.php)$/";
 
-  static string $tests_ok_skipped_inc_pattern =
+  const string TESTS_OK_SKIPPED_INC_PATTERN =
                "/^OK, but incomplete, skipped, or risky tests!/";
-  static string $num_errors_failures_pattern =
+  const string NUM_ERRORS_FAILURES_PATTERN =
                "/^There (was|were) \d+ (failure|error)[s]?\:/";
-  static string $num_skips_inc_pattern =
+  const string NUM_SKIPS_INC_PATTERN =
                "/^There (was|were) \d+ (skipped|incomplete) test[s]?\:/";
-  static string $failures_header_pattern = "/^FAILURES!/";
-  static string $no_tests_executed_pattern = "/^No tests executed!/";
+  const string FAILURES_HEADER_PATTERN = "/^FAILURES!/";
+  const string NO_TESTS_EXECUTED_PATTERN = "/^No tests executed!/";
 
   static string $hhvm_warning_pattern =
                                      "/^(HipHop|HHVM|hhvm) (Warning|Notice)/";
@@ -56,5 +56,5 @@ class PHPUnitPatterns {
 
   static string $phpunit_exception_with_hhvm_warning =
     "/^PHPUnit_Framework_Exception: (HipHop|HHVM|hhvm) (Warning|Notice)/";
-  static string $test_method_name_pattern = "/public function test|\@test/";
+  const string TEST_METHOD_NAME_PATTERN = "/public function test|\@test/";
 }

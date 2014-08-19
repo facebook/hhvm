@@ -304,7 +304,7 @@ class Framework {
     // Test name pattern can be different depending on the framework,
     // although most follow the default.
     $this->test_name_pattern = $test_name_pattern === null
-                             ? PHPUnitPatterns::$test_name_pattern
+                             ? PHPUnitPatterns::TEST_NAME_PATTERN
                              : $test_name_pattern;
   }
 
@@ -336,7 +336,7 @@ class Framework {
   private function setTestFilePattern(?string $test_file_pattern = null):
                                         void {
     $this->test_file_pattern = $test_file_pattern === null
-                             ? PHPUnitPatterns::$test_file_pattern
+                             ? PHPUnitPatterns::TEST_FILE_PATTERN
                              : $test_file_pattern;
   }
 
@@ -411,13 +411,13 @@ class Framework {
     if ($handle) {
       while (($line = fgets($handle)) !== false) {
         $line = rtrim($line, PHP_EOL);
-        if (preg_match(PHPUnitPatterns::$tests_ok_pattern,
+        if (preg_match(PHPUnitPatterns::TESTS_OK_PATTERN,
                        $line, $match) === 1) {
           // We have ths pattern: OK (364 tests, 590 assertions)
           // We want the first match of digits
           preg_match("/[0-9]+(?= )/", $line, $match);
           $num_tests += (int) $match[0];
-        } else if (preg_match(PHPUnitPatterns::$tests_failure_pattern,
+        } else if (preg_match(PHPUnitPatterns::TESTS_FAILURE_PATTERN,
                        $line, $match) === 1) {
           // We have this pattern: Tests: 364, Assertions: 585, Errors: 5.
           // Break out each type into an array
@@ -912,7 +912,7 @@ class Framework {
     }
     $contents = file_get_contents($testfile);
     $matches = null;
-    return preg_match_all(PHPUnitPatterns::$test_method_name_pattern,
+    return preg_match_all(PHPUnitPatterns::TEST_METHOD_NAME_PATTERN,
                           $contents, $matches);
   }
 }

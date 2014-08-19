@@ -717,6 +717,30 @@ void BaseVector::mutateImpl() {
   oldAd->decRefCount();
 }
 
+template<class TVector>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, TVector*>::type
+BaseVector::Clone(ObjectData* obj) {
+  auto thiz = static_cast<TVector*>(obj);
+  auto target = static_cast<TVector*>(obj->cloneImpl());
+  if (!thiz->m_size) {
+    return target;
+  }
+  thiz->arrayData()->incRefCount();
+  target->m_data = thiz->m_data;
+  target->m_size = thiz->m_size;
+  target->m_capacity = thiz->m_capacity;
+  return target;
+}
+
+c_Vector* c_Vector::Clone(ObjectData* obj) {
+  return BaseVector::Clone<c_Vector>(obj);
+}
+
+c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
+  return BaseVector::Clone<c_ImmVector>(obj);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
@@ -1380,11 +1404,22 @@ Object c_ImmVector::t_toset() { return materializeImpl<c_Set>(this); }
 Object c_ImmVector::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
 Object c_ImmVector::t_immutable() { return this; }
 
-c_VectorIterator::c_VectorIterator(Class* cls
-    /*= c_VectorIterator::classof()*/) : ExtObjectData(cls) {
+c_VectorIterator::c_VectorIterator(
+  Class* cls /*= c_VectorIterator::classof()*/
+) : ExtObjectDataFlags<ObjectData::IsCppBuiltin |
+                       ObjectData::HasClone>(cls) {
 }
 
 c_VectorIterator::~c_VectorIterator() {
+}
+
+c_VectorIterator* c_VectorIterator::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_VectorIterator*>(obj);
+  auto target = static_cast<c_VectorIterator*>(obj->cloneImpl());
+  target->m_obj = thiz->m_obj;
+  target->m_pos = thiz->m_pos;
+  target->m_version = thiz->m_version;
+  return target;
 }
 
 void c_VectorIterator::t___construct() {
@@ -3700,9 +3735,22 @@ Object c_ImmMap::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_MapIterator::c_MapIterator(Class* cb) : ExtObjectData(cb) {}
+c_MapIterator::c_MapIterator(
+  Class* cls /*= c_MapIterator::classof()*/
+) : ExtObjectDataFlags<ObjectData::IsCppBuiltin |
+                       ObjectData::HasClone>(cls) {
+}
 
 c_MapIterator::~c_MapIterator() {
+}
+
+c_MapIterator* c_MapIterator::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_MapIterator*>(obj);
+  auto target = static_cast<c_MapIterator*>(obj->cloneImpl());
+  target->m_obj = thiz->m_obj;
+  target->m_pos = thiz->m_pos;
+  target->m_version = thiz->m_version;
+  return target;
 }
 
 void c_MapIterator::t___construct() {
@@ -5004,10 +5052,22 @@ Object c_ImmSet::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SetIterator::c_SetIterator(Class* cb) : ExtObjectData(cb) {
+c_SetIterator::c_SetIterator(
+  Class* cls /*= c_SetIterator::classof()*/
+) : ExtObjectDataFlags<ObjectData::IsCppBuiltin |
+                       ObjectData::HasClone>(cls) {
 }
 
 c_SetIterator::~c_SetIterator() {
+}
+
+c_SetIterator* c_SetIterator::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_SetIterator*>(obj);
+  auto target = static_cast<c_SetIterator*>(obj->cloneImpl());
+  target->m_obj = thiz->m_obj;
+  target->m_pos = thiz->m_pos;
+  target->m_version = thiz->m_version;
+  return target;
 }
 
 void c_SetIterator::t___construct() {
@@ -5547,11 +5607,21 @@ Object c_Pair::t_toset() { return materializeImpl<c_Set>(this); }
 Object c_Pair::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
 Object c_Pair::t_immutable() { return this; }
 
-c_PairIterator::c_PairIterator(Class* cb) :
-    ExtObjectData(cb) {
+c_PairIterator::c_PairIterator(
+  Class* cls /*= c_PairIterator::classof()*/
+) : ExtObjectDataFlags<ObjectData::IsCppBuiltin |
+                       ObjectData::HasClone>(cls) {
 }
 
 c_PairIterator::~c_PairIterator() {
+}
+
+c_PairIterator* c_PairIterator::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_PairIterator*>(obj);
+  auto target = static_cast<c_PairIterator*>(obj->cloneImpl());
+  target->m_obj = thiz->m_obj;
+  target->m_pos = thiz->m_pos;
+  return target;
 }
 
 void c_PairIterator::t___construct() {

@@ -190,18 +190,7 @@ class BaseVector : public ExtCollectionObjectData {
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, TVector*>::type
-  static Clone(ObjectData* obj) {
-    auto thiz = static_cast<TVector*>(obj);
-    auto target = static_cast<TVector*>(obj->cloneImpl());
-    if (!thiz->m_size) {
-      return target;
-    }
-    thiz->arrayData()->incRefCount();
-    target->m_data = thiz->m_data;
-    target->m_size = thiz->m_size;
-    target->m_capacity = thiz->m_capacity;
-    return target;
-  }
+  static Clone(ObjectData* obj);
 
  public:
 
@@ -488,6 +477,8 @@ class c_Vector : public BaseVector {
  public:
   explicit c_Vector(Class* cls = c_Vector::classof());
 
+  static c_Vector* Clone(ObjectData* obj);
+
   void t___construct(const Variant& iterable = null_variant);
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
@@ -548,10 +539,6 @@ class c_Vector : public BaseVector {
   void sort(int sort_flags, bool ascending);
   bool usort(const Variant& cmp_function);
 
-  static c_Vector* Clone(ObjectData* obj) {
-    return BaseVector::Clone<c_Vector>(obj);
-  }
-
   static void OffsetSet(ObjectData* obj, const TypedValue* key,
                         const TypedValue* val);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
@@ -584,13 +571,15 @@ class c_Vector : public BaseVector {
 // class VectorIterator
 
 FORWARD_DECLARE_CLASS(VectorIterator);
-class c_VectorIterator : public ExtObjectData {
+class c_VectorIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
+                                                   ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(VectorIterator)
 
  public:
   explicit c_VectorIterator(Class* cls = c_VectorIterator::classof());
   ~c_VectorIterator();
+  static c_VectorIterator* Clone(ObjectData* obj);
   void t___construct();
   Variant t_current();
   Variant t_key();
@@ -660,10 +649,6 @@ class c_ImmVector : public BaseVector {
 
   Object t_immutable();
 
-  static c_ImmVector* Clone(ObjectData* obj) {
-    return BaseVector::Clone<c_ImmVector>(obj);
-  }
-
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromkeysof(const Variant& container);
 
@@ -671,6 +656,8 @@ class c_ImmVector : public BaseVector {
 
  public:
   explicit c_ImmVector(Class* cls = c_ImmVector::classof());
+
+  static c_ImmVector* Clone(ObjectData* obj);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type) {
@@ -1597,13 +1584,15 @@ class c_ImmMap : public BaseMap {
 // class MapIterator
 
 FORWARD_DECLARE_CLASS(MapIterator);
-class c_MapIterator : public ExtObjectData {
+class c_MapIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
+                                                ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(MapIterator)
 
  public:
   explicit c_MapIterator(Class* cls = c_MapIterator::classof());
   ~c_MapIterator();
+  static c_MapIterator* Clone(ObjectData* obj);
   void t___construct();
   Variant t_current();
   Variant t_key();
@@ -1941,13 +1930,15 @@ class c_ImmSet : public BaseSet {
 // class SetIterator
 
 FORWARD_DECLARE_CLASS(SetIterator);
-class c_SetIterator : public ExtObjectData {
+class c_SetIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
+                                                ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(SetIterator)
 
  public:
   explicit c_SetIterator(Class* cls = c_SetIterator::classof());
   ~c_SetIterator();
+  static c_SetIterator* Clone(ObjectData* obj);
   void t___construct();
   Variant t_current();
   Variant t_key();
@@ -2108,13 +2099,15 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
 // class PairIterator
 
 FORWARD_DECLARE_CLASS(PairIterator);
-class c_PairIterator : public ExtObjectData {
+class c_PairIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
+                                                 ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(PairIterator)
 
  public:
   explicit c_PairIterator(Class* cls = c_PairIterator::classof());
   ~c_PairIterator();
+  static c_PairIterator* Clone(ObjectData* obj);
   void t___construct();
   Variant t_current();
   Variant t_key();

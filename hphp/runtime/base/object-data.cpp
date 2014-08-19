@@ -925,6 +925,14 @@ ObjectData* ObjectData::clone() {
       return c_Closure::Clone(this);
     } else if (instanceof(c_Generator::classof())) {
       return c_Generator::Clone(this);
+    } else if (instanceof(c_VectorIterator::classof())) {
+      return c_VectorIterator::Clone(this);
+    } else if (instanceof(c_MapIterator::classof())) {
+      return c_MapIterator::Clone(this);
+    } else if (instanceof(c_SetIterator::classof())) {
+      return c_SetIterator::Clone(this);
+    } else if (instanceof(c_PairIterator::classof())) {
+      return c_PairIterator::Clone(this);
     } else if (instanceof(c_DateTime::classof())) {
       return c_DateTime::Clone(this);
     } else if (instanceof(c_DateTimeZone::classof())) {

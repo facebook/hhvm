@@ -171,8 +171,7 @@
     test_root: idiorm
   json_schema:
     url: https://github.com/justinrainbow/json-schema.git
-    branch: master
-    # Version 1.3.6
+    branch: 1.3.6
     commit: d97cf3ce890fe80f247fc08594a1c8a1029fc7ed
     install_root: json_schema
     test_root: json_schema

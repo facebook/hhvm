@@ -1,0 +1,2 @@
+garbanzo beans
+Fatal error: ob_start(): Cannot use output buffering in output buffering display handlers in %s on line %d

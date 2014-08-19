@@ -319,6 +319,7 @@ private:
   // output buffering
   StringBuffer *m_out;                // current output buffer
   std::list<OutputBuffer*> m_buffers; // a stack of output buffers
+  bool m_insideOBHandler{false};
   bool m_implicitFlush;
   int m_protectedLevel;
   PFUNC_STDOUT m_stdout;

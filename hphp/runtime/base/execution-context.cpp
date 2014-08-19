@@ -226,6 +226,10 @@ void ExecutionContext::obProtect(bool on) {
 }
 
 void ExecutionContext::obStart(const Variant& handler /* = null */) {
+  if (m_insideOBHandler) {
+    raise_error("ob_start(): Cannot use output buffering "
+                "in output buffering display handlers");
+  }
   OutputBuffer *ob = new OutputBuffer();
   ob->handler = handler;
   m_buffers.push_back(ob);
@@ -263,6 +267,8 @@ void ExecutionContext::obClean(int handler_flag) {
   if (!m_buffers.empty()) {
     OutputBuffer *last = m_buffers.back();
     if (!last->handler.isNull()) {
+      m_insideOBHandler = true;
+      SCOPE_EXIT { m_insideOBHandler = false; };
       vm_call_user_func(last->handler,
                         make_packed_array(last->oss.detach(), handler_flag));
     }
@@ -272,45 +278,61 @@ void ExecutionContext::obClean(int handler_flag) {
 
 bool ExecutionContext::obFlush() {
   assert(m_protectedLevel >= 0);
-  if ((int)m_buffers.size() > m_protectedLevel) {
-    std::list<OutputBuffer*>::const_iterator iter = m_buffers.end();
-    OutputBuffer *last = *(--iter);
-    const int flag = k_PHP_OUTPUT_HANDLER_START | k_PHP_OUTPUT_HANDLER_END;
-    if (iter != m_buffers.begin()) {
-      OutputBuffer *prev = *(--iter);
-      if (last->handler.isNull()) {
-        prev->oss.absorb(last->oss);
-      } else {
-        try {
-          Variant tout = vm_call_user_func(
-            last->handler, make_packed_array(last->oss.detach(), flag)
-          );
-          prev->oss.append(tout.toString());
-          last->oss.clear();
-        } catch (...) {
-          prev->oss.absorb(last->oss);
-        }
-      }
-      return true;
-    }
 
-    if (!last->handler.isNull()) {
+  if ((int)m_buffers.size() <= m_protectedLevel) {
+    return false;
+  }
+
+  auto iter = m_buffers.end();
+  OutputBuffer* last = *(--iter);
+
+  const int flag = k_PHP_OUTPUT_HANDLER_START | k_PHP_OUTPUT_HANDLER_END;
+
+  if (iter != m_buffers.begin()) {
+    OutputBuffer *prev = *(--iter);
+    if (last->handler.isNull()) {
+      prev->oss.absorb(last->oss);
+    } else {
+      auto str = last->oss.detach();
       try {
-        Variant tout = vm_call_user_func(
-          last->handler, make_packed_array(last->oss.detach(), flag)
-        );
-        String sout = tout.toString();
-        writeStdout(sout.data(), sout.size());
-        last->oss.clear();
-        return true;
-      } catch (...) {}
+        Variant tout;
+        {
+          m_insideOBHandler = true;
+          SCOPE_EXIT { m_insideOBHandler = false; };
+          tout = vm_call_user_func(
+            last->handler, make_packed_array(str, flag)
+          );
+        }
+        prev->oss.append(tout.toString());
+      } catch (...) {
+        prev->oss.append(str);
+        throw;
+      }
     }
-
-    writeStdout(last->oss.data(), last->oss.size());
-    last->oss.clear();
     return true;
   }
-  return false;
+
+  auto str = last->oss.detach();
+
+  if (!last->handler.isNull()) {
+    try {
+      Variant tout;
+      {
+        m_insideOBHandler = true;
+        SCOPE_EXIT { m_insideOBHandler = false; };
+        tout = vm_call_user_func(
+          last->handler, make_packed_array(str, flag)
+        );
+      }
+      str = tout.toString();
+    } catch (...) {
+      writeStdout(str.data(), str.size());
+      throw;
+    }
+  }
+
+  writeStdout(str.data(), str.size());
+  return true;
 }
 
 void ExecutionContext::obFlushAll() {

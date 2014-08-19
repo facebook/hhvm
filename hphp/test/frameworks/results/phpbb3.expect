@@ -1554,12 +1554,6 @@ phpbb_lock_db_test::test_expire_lock
 S
 phpbb_lock_db_test::test_new_lock
 S
-phpbb_lock_flock_test::test_concurrent_locking
-.
-phpbb_lock_flock_test::test_consecutive_locking
-.
-phpbb_lock_flock_test::test_lock
-.
 phpbb_log_add_test::test_log_add
 S
 phpbb_log_add_test::test_log_enabled

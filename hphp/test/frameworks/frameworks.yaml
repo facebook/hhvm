@@ -525,6 +525,8 @@
       - phpbb3/tests/template/template_test.php
       - phpbb3/tests/template/template_test_case.php
       - phpbb3/tests/template/template_test_case_with_tree.php
+      # race condition - https://github.com/phpbb/phpbb/pull/2890
+      - phpbb3/tests/lock/flock_test.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git
     # Stable is RELEASE_4_1_9 but we have many pull requests in master

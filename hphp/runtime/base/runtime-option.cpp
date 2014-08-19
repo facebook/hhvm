@@ -828,33 +828,10 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(CheckSymLink, ini, eval["CheckSymLink"], true);
 
     Config::Bind(EnableAlternative, ini, eval["EnableAlternative"], 0);
-
-#define get_double GetDouble
-#define get_bool GetBool
-#define get_string GetString
-#define get_int16 GetInt16
-#define get_int32 GetInt32
-#define get_int32_t GetInt32
-#define get_int64 GetInt64
-#define get_uint16 GetUInt16
-#define get_uint32 GetUInt32
-#define get_uint32_t GetUInt32
-#define get_uint64 GetUInt64
-#define get_uint64_t GetUInt64
 #define F(type, name, defaultVal) \
-    Eval ## name = Config::get_ ##type(ini, eval[#name], defaultVal);
+    Config::Bind(Eval ## name, ini, eval[#name], defaultVal);
     EVALFLAGS()
 #undef F
-#undef get_double
-#undef get_bool
-#undef get_string
-#undef get_int16
-#undef get_int32
-#undef get_int64
-#undef get_uint16
-#undef get_uint32
-#undef get_uint32_t
-#undef get_uint64
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     Config::Bind(EnableEmitSwitch, ini, eval["EnableEmitSwitch"], true);
     Config::Bind(EnableEmitterStats, ini, eval["EnableEmitterStats"],

@@ -357,19 +357,19 @@ Kohana_Config_GroupTest::test_to_string_serializes_array_output
 Kohana_Config_GroupTest::test_writes_changes_to_config
 .
 Kohana_CookieTest::test_delete with data set #0
-F
+S
 Kohana_CookieTest::test_get with data set #0
-.
+S
 Kohana_CookieTest::test_get with data set #1
-.
+S
 Kohana_CookieTest::test_get with data set #2
-.
+S
 Kohana_CookieTest::test_salt with data set #0
 .
 Kohana_CookieTest::test_set with data set #0
-F
+S
 Kohana_CookieTest::test_set with data set #1
-F
+S
 Kohana_CoreTest::test_cache with data set #0
 .
 Kohana_CoreTest::test_cache with data set #1
@@ -719,7 +719,7 @@ Kohana_ExceptionTest::test_constructor with data set #9
 Kohana_ExceptionTest::test_text with data set #0
 .
 Kohana_FeedTest::test_create with data set #0
-.
+E
 Kohana_FeedTest::test_parse with data set #0
 S
 Kohana_FileTest::test_mime with data set #0
@@ -729,17 +729,17 @@ S
 Kohana_FileTest::test_split_join with data set #0
 .
 Kohana_FormTest::test_check with data set #0
-.
+E
 Kohana_FormTest::test_check with data set #1
-.
+E
 Kohana_FormTest::test_check with data set #2
-.
+E
 Kohana_FormTest::test_check with data set #3
-.
+E
 Kohana_FormTest::test_check with data set #4
-.
+E
 Kohana_FormTest::test_check with data set #5
-.
+E
 Kohana_FormTest::test_close
 .
 Kohana_FormTest::test_file with data set #0
@@ -747,13 +747,13 @@ Kohana_FormTest::test_file with data set #0
 Kohana_FormTest::test_image with data set #0
 .
 Kohana_FormTest::test_input with data set #0
-.
+E
 Kohana_FormTest::test_input with data set #1
-.
+E
 Kohana_FormTest::test_input with data set #2
-.
+E
 Kohana_FormTest::test_input with data set #3
-.
+E
 Kohana_FormTest::test_label with data set #0
 .
 Kohana_FormTest::test_label with data set #1
@@ -767,13 +767,13 @@ Kohana_FormTest::test_label with data set #4
 Kohana_FormTest::test_label with data set #5
 .
 Kohana_FormTest::test_open with data set #0
-.
+E
 Kohana_FormTest::test_open with data set #1
-.
+E
 Kohana_FormTest::test_open with data set #2
-.
+E
 Kohana_FormTest::test_open with data set #3
-.
+E
 Kohana_FormTest::test_select with data set #0
 .
 Kohana_FormTest::test_select with data set #1
@@ -787,17 +787,17 @@ Kohana_FormTest::test_select with data set #4
 Kohana_FormTest::test_select with data set #5
 .
 Kohana_FormTest::test_submit with data set #0
-.
+E
 Kohana_FormTest::test_text with data set #0
-.
+E
 Kohana_FormTest::test_text with data set #1
-.
+E
 Kohana_FormTest::test_text with data set #2
-.
+E
 Kohana_FormTest::test_text with data set #3
-.
+E
 Kohana_FormTest::test_text with data set #4
-.
+E
 Kohana_HTMLTest::test_anchor with data set #0
 .
 Kohana_HTMLTest::test_anchor with data set #1
@@ -1387,7 +1387,7 @@ Kohana_Request_Client_ExternalTest::test_options with data set #2
 Kohana_Request_Client_ExternalTest::test_options with data set #3
 .
 Kohana_Request_Client_InternalTest::test_response_failure_status with data set #0
-FATAL
+F
 Kohana_ResponseTest::test_body with data set #0
 .
 Kohana_ResponseTest::test_body with data set #1
@@ -1407,7 +1407,7 @@ Kohana_ResponseTest::test_cookie_set with data set #0
 Kohana_ResponseTest::test_cookie_set with data set #1
 .
 Kohana_ResponseTest::test_send_headers_cli
-.
+S
 Kohana_RouteTest::test_all_returns_all_defined_routes
 .
 Kohana_RouteTest::test_cache_append_routes
@@ -1423,21 +1423,21 @@ Kohana_RouteTest::test_constructor_returns_if_uri_is_null
 Kohana_RouteTest::test_get_throws_exception_if_route_dnx
 .
 Kohana_RouteTest::test_matches_returns_false_on_failure with data set #0
-FATAL
+F
 Kohana_RouteTest::test_name_returns_routes_name_or_false_if_dnx
 .
 Kohana_RouteTest::test_route_uses_custom_regex_passed_to_constructor
 .
 Kohana_SecurityTest::test_csrf_token with data set #0
-.
+S
 Kohana_SecurityTest::test_csrf_token with data set #1
-.
+S
 Kohana_SecurityTest::test_csrf_token with data set #2
-.
+S
 Kohana_SecurityTest::test_csrf_token with data set #3
-.
+S
 Kohana_SecurityTest::test_csrf_token with data set #4
-.
+S
 Kohana_SecurityTest::test_encode_php_tags with data set #0
 .
 Kohana_SecurityTest::test_strip_image_tags with data set #0
@@ -1563,9 +1563,9 @@ Kohana_TextTest::test_auto_link_urls with data set #8
 Kohana_TextTest::test_auto_link_urls with data set #9
 .
 Kohana_TextTest::test_auto_para_does_not_enclose_html_tags_in_paragraphs with data set #0
-.
+E
 Kohana_TextTest::test_auto_para_does_not_enclose_html_tags_in_paragraphs with data set #1
-.
+E
 Kohana_TextTest::test_auto_para_encloses_slot_in_paragraph
 .
 Kohana_TextTest::test_auto_para_replaces_multiple_newlines_with_paragraph
@@ -1664,6 +1664,12 @@ Kohana_URLTest::test_base with data set #0
 .
 Kohana_URLTest::test_base with data set #1
 .
+Kohana_URLTest::test_base with data set #10
+.
+Kohana_URLTest::test_base with data set #11
+.
+Kohana_URLTest::test_base with data set #12
+.
 Kohana_URLTest::test_base with data set #2
 .
 Kohana_URLTest::test_base with data set #3
@@ -1673,6 +1679,100 @@ Kohana_URLTest::test_base with data set #4
 Kohana_URLTest::test_base with data set #5
 .
 Kohana_URLTest::test_base with data set #6
+.
+Kohana_URLTest::test_base with data set #7
+.
+Kohana_URLTest::test_base with data set #8
+.
+Kohana_URLTest::test_base with data set #9
+.
+Kohana_URLTest::test_query with data set #0
+.
+Kohana_URLTest::test_query with data set #1
+.
+Kohana_URLTest::test_query with data set #10
+.
+Kohana_URLTest::test_query with data set #11
+.
+Kohana_URLTest::test_query with data set #2
+.
+Kohana_URLTest::test_query with data set #3
+.
+Kohana_URLTest::test_query with data set #4
+.
+Kohana_URLTest::test_query with data set #5
+.
+Kohana_URLTest::test_query with data set #6
+.
+Kohana_URLTest::test_query with data set #7
+.
+Kohana_URLTest::test_query with data set #8
+.
+Kohana_URLTest::test_query with data set #9
+.
+Kohana_URLTest::test_site with data set #0
+.
+Kohana_URLTest::test_site with data set #1
+.
+Kohana_URLTest::test_site with data set #10
+.
+Kohana_URLTest::test_site with data set #11
+.
+Kohana_URLTest::test_site with data set #12
+.
+Kohana_URLTest::test_site with data set #13
+.
+Kohana_URLTest::test_site with data set #14
+.
+Kohana_URLTest::test_site with data set #15
+.
+Kohana_URLTest::test_site with data set #2
+.
+Kohana_URLTest::test_site with data set #3
+.
+Kohana_URLTest::test_site with data set #4
+.
+Kohana_URLTest::test_site with data set #5
+.
+Kohana_URLTest::test_site with data set #6
+.
+Kohana_URLTest::test_site with data set #7
+.
+Kohana_URLTest::test_site with data set #8
+.
+Kohana_URLTest::test_site with data set #9
+.
+Kohana_URLTest::test_site_url_encode_uri with data set #0
+.
+Kohana_URLTest::test_site_url_encode_uri with data set #1
+.
+Kohana_URLTest::test_site_url_encode_uri with data set #2
+.
+Kohana_URLTest::test_site_url_encode_uri with data set #3
+.
+Kohana_URLTest::test_title with data set #0
+.
+Kohana_URLTest::test_title with data set #1
+.
+Kohana_URLTest::test_title with data set #10
+.
+Kohana_URLTest::test_title with data set #11
+.
+Kohana_URLTest::test_title with data set #2
+.
+Kohana_URLTest::test_title with data set #3
+.
+Kohana_URLTest::test_title with data set #4
+.
+Kohana_URLTest::test_title with data set #5
+.
+Kohana_URLTest::test_title with data set #6
+.
+Kohana_URLTest::test_title with data set #7
+.
+Kohana_URLTest::test_title with data set #8
+.
+Kohana_URLTest::test_title with data set #9
 .
 Kohana_UTF8Test::test_clean with data set #0
 .
@@ -2063,15 +2163,15 @@ Kohana_ValidTest::test_email with data set #8
 Kohana_ValidTest::test_email with data set #9
 .
 Kohana_ValidTest::test_email_domain with data set #0
-S
+.
 Kohana_ValidTest::test_email_domain with data set #1
-S
+.
 Kohana_ValidTest::test_email_domain with data set #2
-S
+.
 Kohana_ValidTest::test_email_domain with data set #3
-S
+.
 Kohana_ValidTest::test_email_domain with data set #4
-S
+.
 Kohana_ValidTest::test_equals with data set #0
 .
 Kohana_ValidTest::test_equals with data set #1

@@ -25,32 +25,28 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t f_connection_aborted();
-int64_t f_connection_status();
-int64_t f_connection_timeout();
-Variant f_constant(const String& name);
-bool f_define(const String& name, const Variant& value, bool case_insensitive = false);
-bool f_defined(const String& name, bool autoload = true);
-Variant f_die(const Variant& status = null_variant);
-Variant f_exit(const Variant& status = null_variant);
-void f___halt_compiler();
-int64_t f_ignore_user_abort(bool setting = false);
-Variant f_pack(int _argc, const String& format, const Array& _argv = null_array);
-int64_t f_sleep(int seconds);
-void f_usleep(int micro_seconds);
-Variant f_time_nanosleep(int seconds, int nanoseconds);
-bool f_time_sleep_until(double timestamp);
-String f_uniqid(const String& prefix = null_string, bool more_entropy = false);
-Variant f_unpack(const String& format, const String& data);
-Array f_sys_getloadavg();
-Array f_token_get_all(const String& source);
-String f_token_name(int64_t token);
-String f_hphp_to_string(const Variant& v);
+int64_t HHVM_FUNCTION(connection_aborted);
+int64_t HHVM_FUNCTION(connection_status);
+int64_t HHVM_FUNCTION(connection_timeout);
+Variant HHVM_FUNCTION(constant, const String& name);
+bool HHVM_FUNCTION(define, const String& name, const Variant& value,
+                   bool case_insensitive = false);
+bool HHVM_FUNCTION(defined, const String& name, bool autoload = true);
+int64_t HHVM_FUNCTION(ignore_user_abort, bool setting = false);
+TypedValue* HHVM_FUNCTION(pack, ActRec* ar);
+int64_t HHVM_FUNCTION(sleep, int seconds);
+void HHVM_FUNCTION(usleep, int micro_seconds);
+Variant HHVM_FUNCTION(time_nanosleep, int seconds, int nanoseconds);
+bool HHVM_FUNCTION(time_sleep_until, double timestamp);
+String HHVM_FUNCTION(uniqid, const String& prefix = null_string,
+                     bool more_entropy = false);
+Variant HHVM_FUNCTION(unpack, const String& format, const String& data);
+Array HHVM_FUNCTION(sys_getloadavg);
+Array HHVM_FUNCTION(token_get_all, const String& source);
+String HHVM_FUNCTION(token_name, int64_t token);
+String HHVM_FUNCTION(hphp_to_string, const Variant& v);
 extern const double k_INF;
 extern const double k_NAN;
-extern const bool k_PHP_DEBUG;
-extern const int64_t k_PHP_MAXPATHLEN;
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

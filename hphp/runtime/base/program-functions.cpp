@@ -511,6 +511,16 @@ static bool hphp_chdir_file(const string filename) {
   return ret;
 }
 
+static void handle_resource_exceeded_exception() {
+  try {
+    throw;
+  } catch (RequestTimeoutException&) {
+    ThreadInfo::s_threadInfo->m_reqInjectionData.setTimedOutFlag();
+  } catch (RequestMemoryExceededException&) {
+    ThreadInfo::s_threadInfo->m_reqInjectionData.setMemExceededFlag();
+  } catch (...) {}
+}
+
 void handle_destructor_exception(const char* situation) {
   string errorMsg;
 
@@ -527,6 +537,7 @@ void handle_destructor_exception(const char* situation) {
     try {
       errorMsg += e.toString().data();
     } catch (...) {
+      handle_resource_exceeded_exception();
       errorMsg += "(unable to call toString())";
     }
   } catch (Exception &e) {
@@ -544,8 +555,7 @@ void handle_destructor_exception(const char* situation) {
   try {
     raise_debugging("%s", errorMsg.c_str());
   } catch (...) {
-    // TODO(#4557954): if the error handler raised a request time out here we
-    // should re-set the pending exception in s_threadInfo.
+    handle_resource_exceeded_exception();
 
     // The user error handler fataled or threw an exception,
     // print out the error message directly to the log

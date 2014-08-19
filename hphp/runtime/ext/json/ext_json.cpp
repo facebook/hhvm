@@ -95,8 +95,7 @@ Variant HHVM_FUNCTION(json_encode, const Variant& value,
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
 
-  if ((json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE &&
-      (json_get_last_error_code() != json_error_codes::JSON_ERROR_UTF8)) &&
+  if ((json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE) &&
       !(options & k_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
     return false;
   }

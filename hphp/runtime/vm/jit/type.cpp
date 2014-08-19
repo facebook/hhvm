@@ -29,6 +29,8 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -910,8 +912,12 @@ Type refineType(Type oldType, Type newType) {
   }
 
   auto const result = oldType & newType;
+
+  auto const& unit = mcg->tx().irTrans()->hhbcTrans().unit();
   always_assert_flog(result != Type::Bottom,
-                     "refineType({}, {}) failed", oldType, newType);
+                     "refineType({}, {}) failed"
+                     "\n\n{:-^80}\n{}{:-^80}\n",
+                     oldType, newType, " unit ", unit, "");
   return result;
 }
 

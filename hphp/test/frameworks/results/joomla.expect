@@ -207,7 +207,7 @@ ImageFilterContrastTest::testExecuteInvalidArgument
 ImageFilterEdgedetectTest::testExecute
 .
 ImageFilterTest::testConstructorInvalidArgument
-F
+FATAL
 ImageTest::testConstructor
 .
 ImageTest::testCrop with data set #0

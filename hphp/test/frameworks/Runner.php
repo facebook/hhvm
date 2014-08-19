@@ -475,12 +475,12 @@ class Runner {
   }
 
   private function checkForFatals(string $line): bool {
-    return preg_match(PHPUnitPatterns::$hhvm_fatal_pattern, $line) === 1;
+    return preg_match(PHPUnitPatterns::FATAL_PATTERN, $line) === 1;
   }
 
   private function checkForWarnings(string $line): bool {
-    return preg_match(PHPUnitPatterns::$hhvm_warning_pattern, $line) === 1 ||
-      preg_match(PHPUnitPatterns::$phpunit_exception_with_hhvm_warning,
+    return preg_match(PHPUnitPatterns::WARNING_PATTERN, $line) === 1 ||
+      preg_match(PHPUnitPatterns::PHPUNIT_EXCEPTION_WITH_WARNING,
                  $line) === 1;
   }
 

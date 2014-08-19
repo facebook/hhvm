@@ -49,12 +49,11 @@ class PHPUnitPatterns {
   const string FAILURES_HEADER_PATTERN = "/^FAILURES!/";
   const string NO_TESTS_EXECUTED_PATTERN = "/^No tests executed!/";
 
-  static string $hhvm_warning_pattern =
-                                     "/^(HipHop|HHVM|hhvm) (Warning|Notice)/";
-  static string $hhvm_fatal_pattern =
-  "/(^(HipHop|HHVM|hhvm) Fatal)|(^hhvm:)|(^Core dumped: Segmentation fault)/";
+  const string WARNING_PATTERN = "/^(Warning|Notice)/";
+  const string FATAL_PATTERN =
+    "/(^Fatal)|(^hhvm:)|(^Core dumped: Segmentation fault)/";
 
-  static string $phpunit_exception_with_hhvm_warning =
-    "/^PHPUnit_Framework_Exception: (HipHop|HHVM|hhvm) (Warning|Notice)/";
+  const string PHPUNIT_EXCEPTION_WITH_WARNING =
+    "/^PHPUnit_Framework_Exception: (Warning|Notice)/";
   const string TEST_METHOD_NAME_PATTERN = "/public function test|\@test/";
 }

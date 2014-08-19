@@ -2,9 +2,14 @@
 find_package(PkgConfig)
 pkg_check_modules(PC_FREETYPE QUIET freetype2)
 
-find_path(FREETYPE_INCLUDE_DIRS NAMES freetype/config/ftheader.h
-  HINTS ${PC_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDE_DIRS}
-  PATH_SUFFIXES freetype2)
+find_path(FREETYPE_INCLUDE_DIRS
+          NAMES freetype/config/ftheader.h freetype2/config/ftheader.h
+          HINTS ${PC_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDE_DIRS}
+          PATH_SUFFIXES freetype2)
+if(FREETYPE_INCLUDE_DIRS AND
+    NOT EXISTS "${FREETYPE_INCLUDE_DIRS}/freetype/config/ftheader.h")
+  add_definitions(-DFREETYPE_PATH_FREETYPE2)
+endif()
 
 if(NOT FREETYPE_INCLUDE_DIRS)
  find_path(FREETYPE_INCLUDE_DIR_FT2BUILD NAMES ft2build.h

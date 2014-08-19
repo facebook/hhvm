@@ -62,11 +62,17 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 
 #include "gdcache.h"
 
-#ifndef HAVE_FT2BUILD
-# include <freetype/config/ftheader.h>
-#else
-# include <ft2build.h>
-#endif
+#ifdef HHVM
+# ifdef HAVE_FT2BUILD
+#  include <ft2build.h>
+# else
+#  ifdef FREETYPE_PATH_FREETYPE2
+#   include <freetype2/config/ftheader.h>
+#  else
+#   include <freetype/config/ftheader.h>
+#  endif
+# endif
+#endif // HHVM
 
 #include FT_FREETYPE_H
 #include FT_GLYPH_H

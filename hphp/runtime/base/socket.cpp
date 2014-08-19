@@ -197,7 +197,7 @@ int64_t Socket::readImpl(char *buffer, int64_t length) {
   }
 
   int64_t ret = recv(m_fd, buffer, length, recvFlags);
-  if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK)) {
+  if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR)) {
     m_eof = true;
   }
   return (ret < 0) ? 0 : ret;

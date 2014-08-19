@@ -136,11 +136,8 @@
     test_root: fastroute
   guzzle:
     url: https://github.com/guzzle/guzzle3.git
-    # Slightly after v3.8.1 - need:
-    #   https://github.com/guzzle/guzzle3/pull/20
-    #   https://github.com/guzzle/guzzle3/pull/22
-    branch: master
-    commit: fa0046309160ea52aeed51b5608adfd263dfa0a2
+    branch: v3.9.2
+    commit: 54991459675c1a2924122afbb0e5609ade581155
     install_root: guzzle
     test_root: guzzle
     flakey:
@@ -148,16 +145,16 @@
       - guzzle/tests/Guzzle/Tests/Plugin/Async/AsyncPluginTest.php
   guzzle4:
     url: https://github.com/guzzle/guzzle.git
-    branch: 4.1.6
-    commit: e49ad58038b46a0d7739627a72f6d998cd92d3d6
+    branch: 4.2.0
+    commit: cc79aa76054e3e5e45dfd87f7b0f61f54b3a759d
     install_root: guzzle4
     test_root: guzzle4
     test_find_mode: token
     sequential: true
   guzzle-streams:
     url: https://github.com/guzzle/streams.git
-    branch: 1.4.0
-    commit: 3b761a328e5ed6ed519e960aded95d7acbe77894
+    branch: 2.1.0
+    commit: f91b721d73f0e561410903b3b3c90a5d0e40b534
     install_root: guzzle-streams
     test_root: guzzle-streams
   hhvmquicktests:

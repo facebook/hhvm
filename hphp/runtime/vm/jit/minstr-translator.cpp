@@ -1794,7 +1794,7 @@ const StaticString s_PackedArray("PackedArray");
 
 void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
   TargetProfile<NonPackedArrayProfile> prof(m_ht.m_context,
-                                            m_irb.state().marker(),
+                                            m_irb.marker(),
                                             s_PackedArray.get());
   if (prof.profiling()) {
     gen(ProfileArray, RDSHandleData { prof.handle() }, m_base);

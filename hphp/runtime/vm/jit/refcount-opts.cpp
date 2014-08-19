@@ -521,7 +521,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       Indent _i;
 
       m_block = block;
-      m_frameState.startBlock(block);
+      m_frameState.startBlock(block, block->front().marker());
 
       if (block != m_blocks.front()) {
         assert(m_savedStates.count(block) == 1);

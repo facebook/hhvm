@@ -40,6 +40,7 @@ FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
   , m_curFunc(func)
   , m_spOffset(initialSpOffset)
   , m_locals(func ? func->numLocals() : 0)
+  , m_visited(unit.numBlocks())
 {
 }
 
@@ -420,7 +421,7 @@ bool FrameState::hasStateFor(Block* block) const {
   return m_snapshots.count(block);
 }
 
-void FrameState::startBlock(Block* block) {
+void FrameState::startBlock(Block* block, BCMarker marker) {
   auto const it = m_snapshots.find(block);
   DEBUG_ONLY auto const predsAllowed =
     it != m_snapshots.end() || block->isEntry() || RuntimeOption::EvalJitLoops;
@@ -432,6 +433,20 @@ void FrameState::startBlock(Block* block) {
     m_inlineSavedStates = it->second.inlineSavedStates;
     m_snapshots.erase(it);
   }
+
+  // Reset state if the block has an unprocessed predecessor.
+  for (auto const& edge : block->preds()) {
+    auto const pred = edge.inst()->block();
+    if (!isVisited(pred)) {
+      Indent _;
+      ITRACE(4, "B{} has unprocessed predecessor B{}, resetting state\n",
+             block->id(), pred->id());
+      resetCurrentState(marker);
+      break;
+    }
+  }
+
+  markVisited(block);
 }
 
 void FrameState::finishBlock(Block* block) {
@@ -658,6 +673,7 @@ void FrameState::clear() {
   clearCurrentState();
   clearCse();
   m_snapshots.clear();
+  m_visited.clear();
   assert(m_inlineSavedStates.empty());
 }
 
@@ -673,7 +689,7 @@ void FrameState::clearCurrentState() {
   clearLocals(*this);
 }
 
-void FrameState::resetCurrentState(const BCMarker& marker) {
+void FrameState::resetCurrentState(BCMarker marker) {
   clearCurrentState();
   m_marker   = marker;
   m_spOffset = marker.spOff();
@@ -775,6 +791,19 @@ void FrameState::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {
   auto& local = locals(inlineIdx)[id];
   assert(local.type.isBoxed());
   local.type = Type::BoxedInitCell;
+}
+
+void FrameState::markVisited(const Block* b) {
+  // The number of blocks in the unit can change over time.
+  if (b->id() >= m_visited.size()) {
+    m_visited.resize(b->id() + 1);
+  }
+
+  m_visited.set(b->id());
+}
+
+bool FrameState::isVisited(const Block* b) const {
+  return b->id() < m_visited.size() && m_visited.test(b->id());
 }
 
 std::string show(const FrameState& state) {

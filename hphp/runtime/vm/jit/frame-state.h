@@ -17,8 +17,9 @@
 #ifndef incl_HPHP_RUNTIME_VM_JIT_FRAME_STATE_H_
 #define incl_HPHP_RUNTIME_VM_JIT_FRAME_STATE_H_
 
-#include <vector>
+#include <boost/dynamic_bitset.hpp>
 #include <memory>
+#include <vector>
 
 #include "folly/Optional.h"
 
@@ -153,7 +154,7 @@ struct FrameState final : private LocalStateHook {
    * Starts tracking state for a block and reloads any previously
    * saved state.
    */
-  void startBlock(Block*);
+  void startBlock(Block*, BCMarker);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -193,7 +194,7 @@ struct FrameState final : private LocalStateHook {
    * Clears the current state and resets the current marker to the
    * given value.
    */
-  void resetCurrentState(const BCMarker&);
+  void resetCurrentState(BCMarker);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }
@@ -262,6 +263,12 @@ struct FrameState final : private LocalStateHook {
   using LocalVec = smart::vector<LocalState>;
 
   const LocalVec& localsForBlock(Block*) const;
+
+  /*
+   * Marks a block as visited in the current iteration. FrameState::startBlock
+   * does this automatically.
+   */
+  void markVisited(const Block*);
 
  private:
   /*
@@ -333,6 +340,11 @@ struct FrameState final : private LocalStateHook {
   void load(Snapshot& state);
   void merge(Snapshot& s1);
 
+  /*
+   * Whether a block has been visited in the current iteration.
+   */
+  bool isVisited(const Block*) const;
+
  private:
   IRUnit& m_unit;
 
@@ -402,6 +414,11 @@ struct FrameState final : private LocalStateHook {
    * Saved snapshots of the incoming state for Blocks.
    */
   smart::hash_map<Block*, Snapshot> m_snapshots;
+
+  /*
+   * Set of visited blocks during the traversal of the unit.
+   */
+  boost::dynamic_bitset<> m_visited;
 };
 
 /*

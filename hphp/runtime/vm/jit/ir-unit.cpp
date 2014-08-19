@@ -121,7 +121,7 @@ void IRUnit::collectPostConditions() {
   Trace::Indent _i;
 
   for (auto* block : rpoSortCfg(*this)) {
-    state.startBlock(block);
+    state.startBlock(block, block->front().marker());
 
     for (auto& inst : *block) {
       state.setMarker(inst.marker());

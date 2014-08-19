@@ -61,6 +61,11 @@ IRBuilder::IRBuilder(Offset initialSpOffsetFromFp,
     m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
+
+  // Need to preemptively mark the entry block as visited. This is because we
+  // don't always call IRBuilder::startBlock when starting to emit IR, namely
+  // in selectTracelet.
+  m_state.markVisited(m_curBlock);
 }
 
 IRBuilder::~IRBuilder() {
@@ -72,8 +77,7 @@ IRBuilder::~IRBuilder() {
  * checked.
  */
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
-  if (!shouldConstrainGuards()) return false;
-  return JIT::typeMightRelax(tmp);
+  return shouldConstrainGuards() && JIT::typeMightRelax(tmp);
 }
 
 SSATmp* IRBuilder::genPtrToInitNull() {
@@ -113,6 +117,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
       // start a new block
       m_state.pauseBlock(m_curBlock);
       m_curBlock = m_unit.defBlock();
+      m_state.startBlock(m_curBlock, inst->marker());
       where = m_curBlock->begin();
       FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
       if (!prev.isTerminal()) {
@@ -150,7 +155,7 @@ void IRBuilder::appendBlock(Block* block) {
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block);
+  m_state.startBlock(block, m_state.marker());
   m_curBlock = block;
 }
 
@@ -677,7 +682,7 @@ void IRBuilder::reoptimize() {
     ITRACE(5, "reoptimize entering block: {}\n", block->id());
     Indent _i;
 
-    m_state.startBlock(block);
+    m_state.startBlock(block, block->front().marker());
     m_curBlock = block;
 
     auto nextBlock = block->next();
@@ -1138,6 +1143,11 @@ repeat:
       std::copy(blockToPhiTmpsMap[pred].begin(),
                 blockToPhiTmpsMap[pred].end(),
                 std::inserter(vec, vec.begin()));
+
+      // Mark the new block as visited so FrameState doesn't see an
+      // unprocessed predecessor for the join point.
+      m_state.markVisited(middle);
+
       goto repeat;
     }
   }
@@ -1184,8 +1194,9 @@ void IRBuilder::startBlock(Block* block, const BCMarker& marker) {
 
   m_state.pauseBlock(m_curBlock);
   m_curBlock = block;
+
   if (m_state.hasStateFor(m_curBlock)) {
-    m_state.startBlock(m_curBlock);
+    m_state.startBlock(m_curBlock, marker);
     insertLocalPhis();
   } else {
     m_state.resetCurrentState(marker);
@@ -1225,7 +1236,6 @@ void IRBuilder::setBlock(Offset offset, Block* block) {
   m_offsetToBlockMap[offset] = block;
 }
 
-
 void IRBuilder::pushBlock(BCMarker marker, Block* b,
                           const folly::Optional<Block::iterator>& where) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
@@ -1235,7 +1245,7 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b,
   m_savedBlocks.push_back(
     BlockState{ m_curBlock, m_state.marker(), m_curWhere });
   m_state.pauseBlock(m_curBlock);
-  m_state.startBlock(b);
+  m_state.startBlock(b, marker);
   m_curBlock = b;
   setMarker(marker);
   m_curWhere = where ? where : b->end();
@@ -1255,7 +1265,7 @@ void IRBuilder::popBlock() {
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
          m_curBlock, m_state.marker().show(), top.block, top.marker.show());
   m_state.pauseBlock(m_curBlock);
-  m_state.startBlock(top.block);
+  m_state.startBlock(top.block, top.marker);
   m_curBlock = top.block;
   setMarker(top.marker);
   m_curWhere = top.where;

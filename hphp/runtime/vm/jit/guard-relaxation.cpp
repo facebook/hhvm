@@ -295,7 +295,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   for (auto* block : blocks) {
     ITRACE(2, "relaxGuards reflow entering B{}\n", block->id());
     Indent _i;
-    state.startBlock(block);
+    state.startBlock(block, block->front().marker());
 
     for (auto& inst : *block) {
       state.setMarker(inst.marker());

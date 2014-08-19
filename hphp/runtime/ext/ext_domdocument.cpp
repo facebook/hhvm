@@ -2777,11 +2777,15 @@ bool c_DOMText::t_iswhitespaceinelementcontent() {
   return xmlIsBlankNode(m_node);
 }
 
+bool c_DOMText::t_iselementcontentwhitespace() {
+  return xmlIsBlankNode(m_node);
+}
+
 Variant c_DOMText::t_splittext(int64_t offset) {
   xmlNodePtr node = m_node;
   xmlChar *cur, *first, *second;
   xmlNodePtr nnode;
-  if (node->type != XML_TEXT_NODE) {
+  if (node->type != XML_TEXT_NODE && node->type != XML_CDATA_SECTION_NODE) {
     return false;
   }
   cur = xmlNodeGetContent(node);
@@ -2811,7 +2815,9 @@ Variant c_DOMText::t_splittext(int64_t offset) {
   c_DOMText *ret = NEWOBJ(c_DOMText)();
   ret->m_doc = doc();
   ret->m_node = nnode;
-  appendOrphan(*doc()->m_orphans, nnode);
+  if (doc().get()) {
+    appendOrphan(*doc()->m_orphans, nnode);
+  }
   return ret;
 }
 

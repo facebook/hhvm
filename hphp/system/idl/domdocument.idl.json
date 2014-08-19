@@ -2196,6 +2196,18 @@
                     ]
                 },
                 {
+                    "name": "isElementContentWhitespace",
+                    "desc": "Indicates whether this text node contains whitespace. The text node is determined to contain whitespace in element content during the load of the document.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "splitText",
                     "desc": "Breaks this node into two nodes at the specified offset, keeping both in the tree as siblings.\n\nAfter being split, this node will contain all the content up to the offset. If the original node had a parent node, the new node is inserted as the next sibling of the original node. When the offset is equal to the length of this node, the new node has no data.",
                     "flags": [

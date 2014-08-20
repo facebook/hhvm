@@ -33,7 +33,7 @@ if (apc_fetch("f") !== "facebook") {
 }
 
 apc_add("texp", "TestString", 1);
-sleep(1);
+sleep(2);
 if (apc_fetch("texp") !== false) {
   echo "no5\n";
 }

@@ -808,8 +808,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(EnableShortTags, ini, eval["EnableShortTags"], true);
     Config::Bind(EnableAspTags, ini, eval["EnableAspTags"]);
     Config::Bind(EnableXHP, ini, eval["EnableXHP"], false);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.eval.enable_xhp", &EnableXHP);
     Config::Bind(EnableZendCompat, ini, eval["EnableZendCompat"], false);
     Config::Bind(EnableZendSorting, ini, eval["EnableZendSorting"], false);
     Config::Bind(TimeoutsUseWallTime, ini, eval["TimeoutsUseWallTime"], true);
@@ -1477,10 +1475,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                      []() { return "1"; }));
 
   // HPHP specific
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
-                   "hhvm.eval.jit", &EvalJit);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
-                   "hhvm.eval.jit_pseudomain", &EvalJitPseudomain);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_id",
                    IniSetting::SetAndGet<std::string>(

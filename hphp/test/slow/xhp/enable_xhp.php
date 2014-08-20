@@ -1,6 +1,6 @@
 <?php
 
-var_dump(ini_get('hhvm.eval.enable_xhp'));
+var_dump(ini_get('hhvm.enable_xhp'));
 
 class :foo {
   public function __toString() {

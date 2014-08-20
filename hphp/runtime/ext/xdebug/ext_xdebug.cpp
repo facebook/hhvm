@@ -803,8 +803,7 @@ void XDebugExtension::requestShutdown() {
     detach_xdebug_profiler();
   }
   if (XDebugServer::isAttached()) {
-    delete XDEBUG_GLOBAL(Server);
-    XDEBUG_GLOBAL(Server) = nullptr;
+    XDebugServer::detach();
   }
 }
 

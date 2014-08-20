@@ -30,6 +30,8 @@
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
+struct XDebugCommand;
+
 class XDebugServer {
 ////////////////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -83,52 +85,71 @@ public:
   // be written to the remote debugging log
   static void attach(Mode mode);
 
+  // Assumes an xdebug server is attached to the thread and attempts to detach
+  // it.
+  static void detach() {
+    assert(XDEBUG_GLOBAL(Server) != nullptr);
+    delete XDEBUG_GLOBAL(Server);
+    XDEBUG_GLOBAL(Server) = nullptr;
+  }
+
 ///////////////////////////////////////////////////////////////////////////////
 // Dbgp
 
-private:
+public:
+  // adds the status of the server to the given node
+  void addStatus(xdebug_xml_node& node);
 
+  // Adds the passed command to the given node
+  void addCommand(xdebug_xml_node& node, const XDebugCommand& cmd);
+
+private:
   // Called in construction. Helper for initializing the dbgp protocol with the
-  // client.
-  void initDbgp();
+  // client. Returns true on success. False on failure.
+  bool initDbgp();
 
   // Called on destruction. Helper for shutting down the dbgp protocol
   void deinitDbgp();
 
-  // Helpers adding various attributes to the passed node
+  // Adds the xdebug xmlns to the node
   void addXmnls(xdebug_xml_node& node);
-  void addCmdAndTrans(xdebug_xml_node& node);
-  void addStatus(xdebug_xml_node& node);
+
+  // Add the error with the passed error code to the given node
+  void addError(xdebug_xml_node& node, int code);
 
   // Sends the passed xml messaeg to the client
   void sendMessage(xdebug_xml_node& xml);
 
-  // Last transaction id sent by the client
-  char* m_lastTransactionId = nullptr;
-
 /////////////////////////////////////////////////////////////////////////////
 // Commands
 
-public:
-  enum class Command {
-    // TODO(#4489053) Implement this
-    NONE
+private:
+  // Blocks waiting for commands from the client. Returns false if there was
+  // an error. True otherwise.
+  bool doCommandLoop();
+
+  // Reads the input from the client until a null character is received. Returns
+  // true on success. false on failure.
+  bool readInput();
+
+  int parseCommand(const XDebugCommand*& cmd);
+
+  // Valid states of the input parsing state machine
+  enum class ParseState {
+    NORMAL,
+    QUOTED,
+    OPT_FOLLOWS,
+    SEP_FOLLOWS,
+    VALUE_FOLLOWS_FIRST_CHAR,
+    VALUE_FOLLOWS,
+    SKIP_CHAR
   };
 
-  // Blocks waiting for commands from the client
-  const char* getCommandStr(Command command) {
-    // TODO(#4489053) Implement this
-    return nullptr;
-  }
+  // Parse m_buffer- grab the command and an array of arguments. This was taken
+  // and translated from php5 xdebug in order match parsing behavior
+  int parseInput(String& cmd, Array& args);
 
-private:
-  // Blocks waiting for commands from the client
-  void doCommandLoop();
-
-  // Reads the input from the client until a null character is received.
-  void readInput();
-
-  Command m_lastCommand = Command::NONE;
+  const XDebugCommand* m_lastCommand = nullptr;
   char* m_buffer = nullptr;
   size_t m_bufferSize = 0;
 
@@ -161,7 +182,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // Server Status
 
-private:
+public:
   enum class Status {
     STARTING,
     STOPPING,
@@ -185,10 +206,13 @@ private:
     m_reason = reason;
   }
 
-  // Corresponding string for status/reason
-  const char* getStatusString(Status status);
-  const char* getReasonString(Reason reason);
+  // Store the status and its reason in the passed arguments
+  void getStatus(Status& status, Reason& reason) {
+    status = m_status;
+    reason = m_reason;
+  }
 
+private:
   // Set on dbgp init
   Status m_status = Status::DETACHED;
   Reason m_reason = Reason::OK;

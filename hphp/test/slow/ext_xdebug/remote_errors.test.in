@@ -1,0 +1,6 @@
+invalid_command
+status parse_error
+status -i 0 extra_arg
+status 
+run -i 0
+run -i 1

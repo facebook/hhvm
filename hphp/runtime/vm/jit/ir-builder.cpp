@@ -1066,17 +1066,17 @@ void IRBuilder::setMarker(BCMarker marker) {
 void IRBuilder::insertLocalPhis() {
   if (m_curBlock->numPreds() < 2) return;
 
-  smart::hash_map<Block*, smart::vector<SSATmp*>> blockToPhiTmpsMap;
-  smart::hash_map<Block*, smart::vector<SSATmp*>> blockToLdLocs;
-  smart::vector<uint32_t> localIds;
+  jit::hash_map<Block*, jit::vector<SSATmp*>> blockToPhiTmpsMap;
+  jit::hash_map<Block*, jit::vector<SSATmp*>> blockToLdLocs;
+  jit::vector<uint32_t> localIds;
 
   // Determine which SSATmps must receive a phi. To make some optimizations
   // simpler, we require that an SSATmp for a local is either provided in no
   // incoming branches, or all incoming branches. Sometimes we have to insert
   // LdLocs in our preds to make this true.
   for (int i = 0; i < m_state.func()->numLocals(); i++) {
-    smart::hash_set<Edge*> missingPreds;
-    smart::hash_set<SSATmp*> incomingValues;
+    jit::hash_set<Edge*> missingPreds;
+    jit::hash_set<SSATmp*> incomingValues;
 
     for (auto& e : m_curBlock->preds()) {
       Block* pred = e.inst()->block();
@@ -1156,7 +1156,7 @@ repeat:
   // Modify the incoming Jmps to set the phi inputs.
   for (auto& e : m_curBlock->preds()) {
     Block* pred = e.inst()->block();
-    smart::vector<SSATmp*>& tmpVec = blockToPhiTmpsMap[pred];
+    jit::vector<SSATmp*>& tmpVec = blockToPhiTmpsMap[pred];
     auto& jmp = pred->back();
     always_assert_log(
       jmp.is(Jmp),
@@ -1172,7 +1172,7 @@ repeat:
   // for the producedRefs argument to defLabel since each local owns a single
   // reference to its value.
   IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker(),
-                                         smart::vector<unsigned>(numPhis, 1));
+                                         jit::vector<unsigned>(numPhis, 1));
   m_curBlock->prepend(label);
   retypeDests(label, &m_unit);
 

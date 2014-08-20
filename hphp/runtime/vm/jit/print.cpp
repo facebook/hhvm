@@ -18,7 +18,7 @@
 
 #include "hphp/util/text-color.h"
 #include "hphp/util/abi-cxx.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/layout.h"

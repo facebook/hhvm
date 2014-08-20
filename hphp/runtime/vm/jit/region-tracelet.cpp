@@ -60,7 +60,7 @@ private:
   bool m_blockFinished;
   IRTranslator m_irTrans;
   HhbcTranslator& m_ht;
-  smart::vector<ActRecState> m_arStates;
+  jit::vector<ActRecState> m_arStates;
   RefDeps m_refDeps;
   uint32_t m_numJmps;
 

@@ -467,7 +467,7 @@ private:
     BCMarker marker;
     folly::Optional<Block::iterator> where;
   };
-  smart::vector<BlockState> m_savedBlocks;
+  jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
   folly::Optional<Block::iterator> m_curWhere;
 
@@ -480,7 +480,7 @@ private:
   //
   // TODO(t3730559): Offset is used here since it's passed from
   // emitJmp*, but SrcKey might be better in case of inlining.
-  smart::flat_map<Offset,Block*> m_offsetToBlockMap;
+  jit::flat_map<Offset,Block*> m_offsetToBlockMap;
 };
 
 /*

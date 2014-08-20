@@ -20,8 +20,8 @@
 #include <type_traits>
 #include <limits>
 
-#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -221,8 +221,8 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   not_reached();
 }
 
-smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {
-  smart::vector<SSATmp*> ret;
+jit::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {
+  jit::vector<SSATmp*> ret;
   ret.reserve(stackDepth);
   for (uint32_t i = 0; i < stackDepth; ++i) {
     auto const value = getStackValue(sp, i).value;

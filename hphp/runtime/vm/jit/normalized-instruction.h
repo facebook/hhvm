@@ -20,7 +20,7 @@
 #include <memory>
 #include <vector>
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -92,12 +92,12 @@ struct NormalizedInstruction {
   template<typename... Args>
   DynLocation* newDynLoc(Args&&... args) {
     m_dynLocs.push_back(
-      smart::make_unique<DynLocation>(std::forward<Args>(args)...));
+      jit::make_unique<DynLocation>(std::forward<Args>(args)...));
     return m_dynLocs.back().get();
   }
 
  private:
-  smart::vector<smart::unique_ptr<DynLocation>> m_dynLocs;
+  jit::vector<jit::unique_ptr<DynLocation>> m_dynLocs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

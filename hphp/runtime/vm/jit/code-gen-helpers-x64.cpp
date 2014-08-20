@@ -310,8 +310,13 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   }
 }
 
-void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref) {
-  emitImmStoreq(Vauto().main(as), imm, ref);
+void emitImmStoreq(Asm& a, Immed64 imm, MemoryRef ref) {
+  if (imm.fits(sz::dword)) {
+    a.storeq(imm.l(), ref);
+  } else {
+    a.storel(int32_t(imm.q()), ref);
+    a.storel(int32_t(imm.q() >> 32), MemoryRef(ref.r + 4));
+  }
 }
 
 void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
@@ -348,7 +353,9 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff) {
 }
 
 void emitTestSurpriseFlags(Asm& a) {
-  emitTestSurpriseFlags(Vauto().main(a));
+  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
+                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  a.testl(-1, rVmTl[RDS::kConditionFlagsOff]);
 }
 
 void emitTestSurpriseFlags(Vout& v) {

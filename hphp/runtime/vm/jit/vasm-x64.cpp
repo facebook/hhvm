@@ -116,14 +116,14 @@ bool Vout::closed() const {
 
 namespace {
 struct Vgen {
-  Vgen(Vunit& u, smart::vector<Vasm::Area>& areas, Vmeta* meta)
+  Vgen(Vunit& u, jit::vector<Vasm::Area>& areas, Vmeta* meta)
     : unit(u)
     , backend(mcg->backEnd())
     , areas(areas)
     , meta(meta)
     , addrs(u.blocks.size(), nullptr)
   {}
-  void emit(smart::vector<Vlabel>&);
+  void emit(jit::vector<Vlabel>&);
 
 private:
   // intrinsics
@@ -313,14 +313,14 @@ private:
   struct PointPatch { CodeAddress instr; Vpoint pos; };
   Vunit& unit;
   BackEnd& backend;
-  smart::vector<Vasm::Area>& areas;
+  jit::vector<Vasm::Area>& areas;
   Vmeta* meta;
   X64Assembler* a;
   Vlabel next{0}; // in linear order
-  smart::vector<CodeAddress> addrs;
-  smart::vector<LabelPatch> jccs, jmps, calls, catches;
-  smart::vector<PointPatch> ldpoints;
-  smart::hash_map<uint64_t,uint64_t*> cpool;
+  jit::vector<CodeAddress> addrs;
+  jit::vector<LabelPatch> jccs, jmps, calls, catches;
+  jit::vector<PointPatch> ldpoints;
+  jit::hash_map<uint64_t,uint64_t*> cpool;
 };
 
 // prepare a binary op that is not commutative.  s0 must be a different
@@ -599,12 +599,12 @@ void Vgen::emit(unwind& i) {
 }
 
 // overall emitter
-void Vgen::emit(smart::vector<Vlabel>& labels) {
+void Vgen::emit(jit::vector<Vlabel>& labels) {
   std::vector<TransBCMapping>* bcmap = nullptr;
   if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
     bcmap = &mcg->cgFixups().m_bcMap;
   }
-  smart::vector<smart::vector<TcaRange>> block_ranges(areas.size());
+  jit::vector<jit::vector<TcaRange>> block_ranges(areas.size());
   for (auto& r : block_ranges) r.resize(unit.blocks.size());
   for (int i = 0, n = labels.size(); i < n; ++i) {
     assert(check(unit.blocks[labels[i]]));
@@ -749,7 +749,7 @@ Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
 }
 
 // copy of layoutBlocks in layout.cpp
-smart::vector<Vlabel> layoutBlocks(Vunit& m_unit) {
+jit::vector<Vlabel> layoutBlocks(Vunit& m_unit) {
   auto blocks = sortBlocks(m_unit);
   // partition into main/cold/frozen areas without changing relative order,
   // and the end{} block will be last.

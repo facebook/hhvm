@@ -22,11 +22,9 @@ TRACE_SET_MOD(hhir);
 
 namespace HPHP { namespace JIT {
 using namespace X64;
-using smart::vector;
-using boost::dynamic_bitset;
 
 namespace {
-typedef dynamic_bitset<> LiveSet;
+typedef boost::dynamic_bitset<> LiveSet;
 bool effectful(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::copy:
@@ -120,7 +118,7 @@ bool effectful(Vinstr& inst) {
 // be forwarded to the nearest useful post-dominator.
 void removeDeadCode(Vunit& unit) {
   auto blocks = sortBlocks(unit);
-  vector<LiveSet> livein(unit.blocks.size());
+  jit::vector<LiveSet> livein(unit.blocks.size());
   LiveSet live(unit.next_vr);
   auto pass = [&](bool mutate) {
     bool changed = false;

@@ -108,8 +108,8 @@ bool removeUnreachable(IRUnit& unit) {
   Trace::Indent _i;
 
   boost::dynamic_bitset<> visited(unit.numBlocks());
-  smart::vector<Block*> blocks;
-  smart::vector<Block*> stack;
+  jit::vector<Block*> blocks;
+  jit::vector<Block*> stack;
   blocks.reserve(unit.numBlocks());
   stack.reserve(unit.numBlocks());
 

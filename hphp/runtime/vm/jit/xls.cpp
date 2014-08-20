@@ -145,8 +145,8 @@ public:
   SSATmp* tmp { nullptr };
   Interval* parent { nullptr }; // if this is a split-off child
   Interval* next { nullptr }; // next split child or nullptr
-  smart::vector<LiveRange> ranges;
-  smart::vector<Use> uses;
+  jit::vector<LiveRange> ranges;
+  jit::vector<Use> uses;
   PhysLoc loc;  // current location assigned to this interval
   PhysLoc spill; // spill location (parent only)
 };
@@ -155,7 +155,7 @@ public:
 // data structures we use during the algorithm so we don't have
 // to pass them around everywhere.
 struct XLS {
-  typedef smart::vector<Interval*> IntervalList;
+  typedef jit::vector<Interval*> IntervalList;
   XLS(IRUnit& unit, RegAllocInfo& regs, const Abi&);
   ~XLS();
   void allocate();
@@ -198,12 +198,12 @@ private:
   RegAllocInfo& m_regs;
   const Abi& m_abi;
   StateVector<IRInstruction, unsigned> m_posns;
-  smart::vector<IRInstruction*> m_insts;
+  jit::vector<IRInstruction*> m_insts;
   BlockList m_blocks;
   PhysReg::Map<Interval> m_scratch;
   PhysReg::Map<Interval> m_blocked;
   StateVector<Block,LiveSet> m_liveIn;
-  smart::priority_queue<Interval*,Compare> m_pending;
+  jit::priority_queue<Interval*,Compare> m_pending;
   IntervalList m_active;
   IntervalList m_inactive;
   StateVector<Block,std::pair<IRInstruction*,IRInstruction*>> m_edgeCopies;
@@ -324,7 +324,7 @@ unsigned Interval::nextIntersect(Interval* ivl) const {
 Interval* Interval::split(unsigned pos, bool keep_uses) {
   assert(pos > start() && pos < end());
   auto leader = this->leader();
-  Interval* child = smart_new<Interval>(leader);
+  Interval* child = jit::make<Interval>(leader);
   child->next = next;
   next = child;
   // advance r1 to the first range we want in child; maybe split a range.
@@ -408,7 +408,7 @@ XLS::~XLS() {
   for (auto ivl : m_intervals) {
     for (Interval* next; ivl; ivl = next) {
       next = ivl->next;
-      smart_delete(ivl);
+      jit::destroy(ivl);
     }
   }
 }
@@ -542,7 +542,7 @@ void XLS::buildIntervals() {
           if (constraint & Constraint::VOID) {
             continue; // unused dest will be InvalidReg
           }
-          m_intervals[d] = dest = smart_new<Interval>();
+          m_intervals[d] = dest = jit::make<Interval>();
           dest->add(LiveRange(pos, pos + 1));
           dest->tmp = d;
           dest->need = d->numWords();
@@ -599,7 +599,7 @@ void XLS::buildIntervals() {
           continue;
         }
         auto src = m_intervals[s];
-        if (!src) m_intervals[s] = src = smart_new<Interval>();
+        if (!src) m_intervals[s] = src = jit::make<Interval>();
         src->add(LiveRange(blockStart, pos));
         auto hint = backend.precolorSrc(inst, i);
         if (hint.first != InvalidReg) {

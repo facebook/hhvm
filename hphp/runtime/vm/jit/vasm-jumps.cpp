@@ -45,7 +45,7 @@ void optimizeJmps(Vunit& unit) {
   };
   bool changed = false;
   bool ever_changed = false;
-  smart::vector<int> npreds(unit.blocks.size(), 0);
+  jit::vector<int> npreds(unit.blocks.size(), 0);
   do {
     if (changed) {
       fill(npreds.begin(), npreds.end(), 0);

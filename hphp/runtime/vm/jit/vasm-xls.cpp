@@ -71,7 +71,7 @@ struct BlockSorter {
     blocks.push_back(b);
   }
   Vunit& unit;
-  smart::vector<Vlabel> blocks;
+  jit::vector<Vlabel> blocks;
   boost::dynamic_bitset<> visited;
 };
 
@@ -132,8 +132,8 @@ struct Interval {
 public:
   Interval* const parent;
   Interval* next{nullptr};
-  smart::vector<LiveRange> ranges;
-  smart::vector<Use> uses;
+  jit::vector<LiveRange> ranges;
+  jit::vector<Use> uses;
   const Vreg vreg;
   int slot{-1};
   PhysReg reg;
@@ -185,9 +185,9 @@ struct Vxls {
   void spillAfter(Interval* ivl, unsigned pos);
   void spillOthers(Interval* current, PhysReg r);
   void assignSpill(Interval* ivl);
-  void insertCopiesAt(smart::vector<Vinstr>& code, unsigned& j,
+  void insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
                       const CopyPlan&, MemoryRef slots, unsigned pos);
-  void insertSpillsAt(smart::vector<Vinstr>& code, unsigned& j,
+  void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
                       const CopyPlan&, MemoryRef slots, unsigned pos);
   // debugging
   void print(const char* caption);
@@ -198,16 +198,16 @@ public:
 public:
   Vunit& unit;
   Abi abi;
-  smart::vector<Vlabel> blocks;          // sorted blocks
-  smart::vector<LiveRange> block_ranges; // [start,end) position of each block
-  smart::vector<int> spill_offsets;      // per-block rsp[offset] to spill-slots
-  smart::vector<LiveSet> livein;         // per-block live-in sets
-  smart::vector<Interval*> intervals;    // parent intervals, null if unused
-  smart::priority_queue<Interval*,Compare> pending; // sorted by Interval start
-  smart::vector<Interval*> active, inactive; // intervals that overlap
-  smart::hash_map<unsigned,CopyPlan> copies; // where to insert copies
-  smart::hash_map<unsigned,CopyPlan> spills; // where to insert spills
-  smart::hash_map<EdgeKey,CopyPlan,EdgeHasher> edge_copies; // copies on edges
+  jit::vector<Vlabel> blocks;          // sorted blocks
+  jit::vector<LiveRange> block_ranges; // [start,end) position of each block
+  jit::vector<int> spill_offsets;      // per-block rsp[offset] to spill-slots
+  jit::vector<LiveSet> livein;         // per-block live-in sets
+  jit::vector<Interval*> intervals;    // parent intervals, null if unused
+  jit::priority_queue<Interval*,Compare> pending; // sorted by Interval start
+  jit::vector<Interval*> active, inactive; // intervals that overlap
+  jit::hash_map<unsigned,CopyPlan> copies; // where to insert copies
+  jit::hash_map<unsigned,CopyPlan> spills; // where to insert spills
+  jit::hash_map<EdgeKey,CopyPlan,EdgeHasher> edge_copies; // copies on edges
   unsigned m_nextSlot{0}; // next available spill slot
 };
 
@@ -332,7 +332,7 @@ unsigned Interval::firstUse() const {
 Interval* Interval::split(unsigned pos, bool keep_uses) {
   assert(pos > start() && pos < end()); // both parts will be non-empty
   auto leader = this->leader();
-  Interval* child = smart_new<Interval>(leader);
+  Interval* child = jit::make<Interval>(leader);
   child->next = next;
   next = child;
   // advance r1 to the first range we want in child; maybe split a range.
@@ -363,7 +363,7 @@ Vxls::~Vxls() {
   for (auto ivl : intervals) {
     for (Interval* next; ivl; ivl = next) {
       next = ivl->next;
-      smart_delete(ivl);
+      jit::destroy(ivl);
     }
   }
 }
@@ -458,7 +458,7 @@ void Vxls::allocate() {
 }
 
 void Vxls::splitCritEdges() {
-  smart::vector<unsigned> preds(unit.blocks.size());
+  jit::vector<unsigned> preds(unit.blocks.size());
   for (auto pred : blocks) {
     auto succlist = succs(unit.blocks[pred]);
     for (auto succ : succlist) {
@@ -582,7 +582,7 @@ struct DefVisitor {
       ivl->ranges.back().start = m_pos;
     } else {
       if (!ivl) {
-        ivl = m_intervals[r] = smart_new<Interval>(r);
+        ivl = m_intervals[r] = jit::make<Interval>(r);
       }
       ivl->add({m_pos, m_pos + 1});
     }
@@ -591,8 +591,8 @@ struct DefVisitor {
     }
   }
 private:
-  smart::vector<Interval*>& m_intervals;
-  smart::vector<VregList>& m_tuples;
+  jit::vector<Interval*>& m_intervals;
+  jit::vector<VregList>& m_tuples;
   LiveSet& m_live;
   unsigned m_pos;
 };
@@ -626,15 +626,15 @@ struct UseVisitor {
   void use(Vreg r, VregKind kind, unsigned end) {
     m_live.set(r);
     auto ivl = m_intervals[r];
-    if (!ivl) ivl = m_intervals[r] = smart_new<Interval>(r);
+    if (!ivl) ivl = m_intervals[r] = jit::make<Interval>(r);
     ivl->add({m_range.start, end});
     if (!ivl->fixed()) {
       ivl->uses.push_back({kind, false, m_range.end});
     }
   }
 private:
-  smart::vector<Interval*>& m_intervals;
-  smart::vector<VregList>& m_tuples;
+  jit::vector<Interval*>& m_intervals;
+  jit::vector<VregList>& m_tuples;
   LiveSet& m_live;
   const LiveRange m_range;
 };
@@ -786,8 +786,7 @@ void Vxls::walkIntervals() {
   }
 }
 
-void erase(smart::vector<Interval*>& list,
-           smart::vector<Interval*>::iterator i) {
+void erase(jit::vector<Interval*>& list, jit::vector<Interval*>::iterator i) {
   *i = list.back();
   list.pop_back();
 }
@@ -1246,10 +1245,10 @@ void Vxls::insertCopies() {
   }
 }
 
-void Vxls::insertSpillsAt(smart::vector<Vinstr>& code, unsigned& j,
+void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
                           const CopyPlan& spills, MemoryRef slots,
                           unsigned pos) {
-  smart::vector<Vinstr> stores;
+  jit::vector<Vinstr> stores;
   for (auto src : spills) {
     auto ivl = spills[src];
     if (!ivl) continue;
@@ -1270,12 +1269,12 @@ void Vxls::insertSpillsAt(smart::vector<Vinstr>& code, unsigned& j,
   }
 }
 
-void Vxls::insertCopiesAt(smart::vector<Vinstr>& code, unsigned& j,
+void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
                           const CopyPlan& copies, MemoryRef slots,
                           unsigned pos) {
   MovePlan moves;
-  smart::vector<Vinstr> loads;
-  smart::hash_map<uint64_t,uint64_t*> cpool;
+  jit::vector<Vinstr> loads;
+  jit::hash_map<uint64_t,uint64_t*> cpool;
   for (auto dst : copies) {
     auto ivl = copies[dst];
     if (!ivl) continue;
@@ -1324,7 +1323,7 @@ Vlabel Vxls::findBlock(unsigned pos) {
 }
 
 template<class F>
-void forEachInterval(smart::vector<Interval*>& intervals, F f) {
+void forEachInterval(jit::vector<Interval*>& intervals, F f) {
   for (auto ivl : intervals) {
     if (ivl) f(ivl);
   }
@@ -1472,7 +1471,7 @@ void Vxls::print(const char* caption) {
 
 }
 
-smart::vector<Vlabel> sortBlocks(Vunit& unit) {
+jit::vector<Vlabel> sortBlocks(Vunit& unit) {
   BlockSorter s(unit);
   for (auto it = unit.roots.end(); it != unit.roots.begin();) {
     s.dfs(*--it);

@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/arena.h"
-#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 

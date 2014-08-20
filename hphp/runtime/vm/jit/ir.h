@@ -33,7 +33,7 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -1077,17 +1077,17 @@ struct GuardConstraints {
   /* guards maps from guard instructions (GuardLoc, CheckLoc, GuardStk, etc...)
    * to TypeConstraints. The TypeConstraints for a guard start out fully
    * generic and are tightened appropriately when a value's type is used. */
-  smart::hash_map<const IRInstruction*, TypeConstraint> guards;
+  jit::hash_map<const IRInstruction*, TypeConstraint> guards;
 
   /* typeSrcs maps from certain instructions dealing with locals to the source
    * of the local's type coming into the instruction: usually either a guard or
    * the current value of the local. */
-  smart::hash_map<const IRInstruction*, SSATmp*> typeSrcs;
+  jit::hash_map<const IRInstruction*, SSATmp*> typeSrcs;
 
   /* prevtypes maps from AssertLoc/CheckLoc instructions to the type of the
    * local coming into the instruction. It is needed to compute the type of the
    * local after the guard. */
-  smart::hash_map<const IRInstruction*, Type> prevTypes;
+  jit::hash_map<const IRInstruction*, Type> prevTypes;
 };
 
 /*

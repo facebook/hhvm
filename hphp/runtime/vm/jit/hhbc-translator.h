@@ -783,7 +783,7 @@ private:
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,
                                          folly::Optional<Type>&) const;
-  smart::vector<InterpOneData::LocalType>
+  jit::vector<InterpOneData::LocalType>
   interpOutputLocals(const NormalizedInstruction&, bool& smashAll,
                      folly::Optional<Type> pushedType);
 

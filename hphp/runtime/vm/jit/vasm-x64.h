@@ -17,10 +17,7 @@
 #ifndef incl_HPHP_JIT_VASM_X64_H_
 #define incl_HPHP_JIT_VASM_X64_H_
 
-#include "hphp/util/asm-x64.h"
-#include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -28,6 +25,9 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/util/asm-x64.h"
 #include <folly/Range.h>
 #include <boost/dynamic_bitset.hpp>
 
@@ -677,10 +677,10 @@ enum class AreaIndex: unsigned { Main, Cold, Frozen, Max };
 struct Vblock {
   explicit Vblock(AreaIndex area) : area(area) {}
   AreaIndex area;
-  smart::vector<Vinstr> code;
+  jit::vector<Vinstr> code;
 };
 
-typedef smart::vector<Vreg> VregList;
+typedef jit::vector<Vreg> VregList;
 
 // all the assets that make up a vasm compilation unit
 struct Vunit {
@@ -696,10 +696,10 @@ struct Vunit {
   Vreg makeConst(Immed64 v) { return makeConst(uint64_t(v.q())); }
   bool hasVrs() const { return next_vr > Vreg::V0; }
   unsigned next_vr{Vreg::V0};
-  smart::vector<Vblock> blocks;
-  smart::vector<Vlabel> roots; // entry points
-  smart::hash_map<uint64_t,Vreg> cpool;
-  smart::vector<VregList> tuples;
+  jit::vector<Vblock> blocks;
+  jit::vector<Vlabel> roots; // entry points
+  jit::hash_map<uint64_t,Vreg> cpool;
+  jit::vector<VregList> tuples;
 };
 
 // writer stream to add instructions to a block
@@ -792,7 +792,7 @@ private:
   Vmeta* const m_meta;
   Vunit m_unit;
 protected:
-  smart::vector<Area> m_areas; // indexed by AreaIndex
+  jit::vector<Area> m_areas; // indexed by AreaIndex
 };
 
 struct Vauto : Vasm {
@@ -909,7 +909,7 @@ bool check(Vunit&);
 // search for the phidef in block b, then return its dest tuple
 Vtuple findDefs(const Vunit& unit, Vlabel b);
 
-typedef smart::vector<smart::vector<Vlabel>> PredVector;
+typedef jit::vector<jit::vector<Vlabel>> PredVector;
 PredVector computePreds(Vunit& unit);
 
 }

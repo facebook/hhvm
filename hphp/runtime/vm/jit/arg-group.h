@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_JIT_ARG_GROUP_H
 #define incl_HPHP_JIT_ARG_GROUP_H
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-loc.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
@@ -335,7 +335,7 @@ private:
  *   assert(args.size() == 3);
  */
 struct ArgGroup {
-  typedef smart::vector<ArgDesc> ArgVec;
+  typedef jit::vector<ArgDesc> ArgVec;
 
   explicit ArgGroup(const IRInstruction* inst, const RegAllocInfo::RegMap& regs)
     : m_inst(inst), m_regs(regs), m_override(nullptr)

@@ -24,21 +24,17 @@
 
 #include "folly/Format.h"
 
-#include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace JIT {
 
 struct MCGenerator;
 struct ProfData;
 struct TransCFG;
-
-using boost::container::flat_map;
-using boost::container::flat_multimap;
-using boost::container::flat_set;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -68,7 +64,7 @@ struct RegionDesc {
   //   - Negative numbers are used for other blocks, which correspond
   //     to blocks created by inlining and which don't correspond to
   //     the beginning of a profiling translation.
-  typedef flat_set<BlockId>     BlockIdSet;
+  typedef boost::container::flat_set<BlockId> BlockIdSet;
   typedef std::vector<BlockPtr> BlockVec;
 
   bool              empty() const;
@@ -235,10 +231,10 @@ inline bool operator==(const RegionDesc::ReffinessPred& a,
  * at various execution points, including at entry to the block.
  */
 class RegionDesc::Block {
-  typedef flat_multimap<SrcKey, TypePred> TypePredMap;
-  typedef flat_map<SrcKey, bool> ParamByRefMap;
-  typedef flat_multimap<SrcKey, ReffinessPred> RefPredMap;
-  typedef flat_map<SrcKey, const Func*> KnownFuncMap;
+  typedef boost::container::flat_multimap<SrcKey, TypePred> TypePredMap;
+  typedef boost::container::flat_map<SrcKey, bool> ParamByRefMap;
+  typedef boost::container::flat_multimap<SrcKey, ReffinessPred> RefPredMap;
+  typedef boost::container::flat_map<SrcKey, const Func*> KnownFuncMap;
 
 public:
   explicit Block(const Func* func, bool resumed, Offset start, int length,
@@ -372,8 +368,8 @@ struct RegionContext {
   Offset bcOffset;
   Offset spOffset;
   bool resumed;
-  smart::vector<LiveType> liveTypes;
-  smart::vector<PreLiveAR> preLiveARs;
+  jit::vector<LiveType> liveTypes;
+  jit::vector<PreLiveAR> preLiveARs;
 };
 
 /*

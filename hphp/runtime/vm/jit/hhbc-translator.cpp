@@ -3545,9 +3545,9 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
   // Collect the parameter locals---we'll need them later.  Also
   // determine which ones will need to be passed through the eval
   // stack.
-  smart::vector<SSATmp*> paramSSAs(numArgs);
-  smart::vector<bool> paramThroughStack(numArgs);
-  smart::vector<bool> paramNeedsConversion(numArgs);
+  jit::vector<SSATmp*> paramSSAs(numArgs);
+  jit::vector<bool> paramThroughStack(numArgs);
+  jit::vector<bool> paramNeedsConversion(numArgs);
   auto numParamsThroughStack = uint32_t{0};
   for (auto i = uint32_t{0}; i < numArgs; ++i) {
     // Fill in paramSSAs in reverse, since they may come from popC's.
@@ -5723,14 +5723,14 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
   not_reached();
 }
 
-smart::vector<InterpOneData::LocalType>
+jit::vector<InterpOneData::LocalType>
 HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
                                    bool& smashesAllLocals,
                                    folly::Optional<Type> pushedType) {
   using namespace JIT::InstrFlags;
   if (!(getInstrInfo(inst.op()).out & Local)) return {};
 
-  smart::vector<InterpOneData::LocalType> locals;
+  jit::vector<InterpOneData::LocalType> locals;
   auto setLocType = [&](uint32_t id, Type t) {
     // Relax the type for pseudomains so that we can actually guard on it.
     auto const type = inPseudoMain() ? t.relaxToGuardable() : t;

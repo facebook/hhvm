@@ -87,8 +87,8 @@ static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
 // DCE state indexed by instr->id().
 typedef StateVector<IRInstruction, DceFlags> DceState;
-typedef smart::hash_map<SSATmp*, uint32_t> UseCounts;
-typedef smart::list<const IRInstruction*> WorkList;
+typedef jit::hash_map<SSATmp*, uint32_t> UseCounts;
+typedef jit::list<const IRInstruction*> WorkList;
 
 void removeDeadInstructions(IRUnit& unit, const DceState& state) {
   postorderWalk(unit, [&](Block* block) {
@@ -214,7 +214,7 @@ bool findWeakActRecUses(const BlockList& blocks,
    * now.  The limit to 1 is just because we have tested or
    * investigated the more-than-one case.
    */
-  smart::flat_map<const IRInstruction*,uint32_t> callCounts;
+  jit::flat_map<const IRInstruction*,uint32_t> callCounts;
 
   forEachInst(blocks, [&] (IRInstruction* inst) {
     if (state[inst].isDead()) return;

@@ -260,7 +260,7 @@ struct FrameState final : private LocalStateHook {
     }
   };
 
-  using LocalVec = smart::vector<LocalState>;
+  using LocalVec = jit::vector<LocalState>;
 
   const LocalVec& localsForBlock(Block*) const;
 
@@ -286,7 +286,7 @@ struct FrameState final : private LocalStateHook {
     LocalVec locals;
     bool frameSpansCall;
     BCMarker curMarker;
-    smart::vector<Snapshot> inlineSavedStates;
+    jit::vector<Snapshot> inlineSavedStates;
 
     bool operator==(const Snapshot& b) const {
       return spValue == b.spValue &&
@@ -401,7 +401,7 @@ struct FrameState final : private LocalStateHook {
    * m_inlineSavedStates holds snapshots of the caller(s)'s state while in an
    * inlined callee.
    */
-  smart::vector<Snapshot> m_inlineSavedStates;
+  jit::vector<Snapshot> m_inlineSavedStates;
 
   /*
    * m_cseHash holds the destination of all tracked instructions that produced
@@ -413,7 +413,7 @@ struct FrameState final : private LocalStateHook {
   /*
    * Saved snapshots of the incoming state for Blocks.
    */
-  smart::hash_map<Block*, Snapshot> m_snapshots;
+  jit::hash_map<Block*, Snapshot> m_snapshots;
 
   /*
    * Set of visited blocks during the traversal of the unit.

@@ -27,7 +27,7 @@
 #include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"

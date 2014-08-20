@@ -19,7 +19,7 @@
 
 #include <vector>
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
@@ -47,8 +47,8 @@ struct MoveInfo {
 };
 
 typedef PhysReg::Map<PhysReg> MovePlan;
-smart::vector<VMoveInfo> doVregMoves(X64::Vunit&, MovePlan& moves);
-smart::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
+jit::vector<VMoveInfo> doVregMoves(X64::Vunit&, MovePlan& moves);
+jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 
 }}
 

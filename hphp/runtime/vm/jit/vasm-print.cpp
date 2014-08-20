@@ -180,7 +180,7 @@ void printBlock(std::ostream& out, Vunit& unit, PredVector& preds, Vlabel b) {
   }
 }
 
-void printCfg(std::ostream& out, Vunit& unit, smart::vector<Vlabel>& blocks) {
+void printCfg(std::ostream& out, Vunit& unit, jit::vector<Vlabel>& blocks) {
   out << "digraph G {\n";
   for (auto b: blocks) {
     auto& block = unit.blocks[b];
@@ -196,7 +196,7 @@ void printCfg(std::ostream& out, Vunit& unit, smart::vector<Vlabel>& blocks) {
   out << "}\n";
 }
 
-void printCfg(Vunit& unit, smart::vector<Vlabel>& blocks) {
+void printCfg(Vunit& unit, jit::vector<Vlabel>& blocks) {
   std::ostringstream out;
   out << "vunit cfg\n";
   printCfg(out, unit, blocks);

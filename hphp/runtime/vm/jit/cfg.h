@@ -19,7 +19,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/state-vector.h"

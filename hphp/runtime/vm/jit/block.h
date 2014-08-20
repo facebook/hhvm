@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_BLOCK_H_
 #define incl_HPHP_VM_BLOCK_H_
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include <algorithm>
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/edge.h"
@@ -177,7 +177,7 @@ struct Block : boost::noncopyable {
   Hint m_hint;              // execution frequency hint
 };
 
-typedef smart::vector<Block*> BlockList;
+typedef jit::vector<Block*> BlockList;
 
 inline Block::reference Block::front() {
   assert(!m_instrs.empty());

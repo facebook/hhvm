@@ -22,8 +22,7 @@
 #include "folly/Optional.h"
 #include "folly/MapUtil.h"
 
-#include "hphp/runtime/base/smart-containers.h"
-#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
@@ -37,6 +36,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP { namespace JIT {
 
@@ -83,7 +83,7 @@ struct IdMap {
 
  private:
   StateVector<IRInstruction, Point> m_ids;
-  smart::vector<IRInstruction*> m_insts;
+  jit::vector<IRInstruction*> m_insts;
 };
 
 /*
@@ -92,7 +92,7 @@ struct IdMap {
  * just a single id because it's possible for the same pending reference to
  * come from different instructions in different control flow paths.
  */
-typedef smart::flat_set<Point> IncSet;
+typedef jit::flat_set<Point> IncSet;
 std::string show(const IncSet& incs, const IdMap& ids) {
   std::string ret;
   auto* separator = "";
@@ -219,7 +219,7 @@ struct Value {
   /* pendingIncs contains ids of IncRef instructions that have yet to be placed
    * before an observer. The size of pendingIncs represents the delta between
    * the real count and the optimized count. */
-  smart::vector<IncSet> pendingIncs;
+  jit::vector<IncSet> pendingIncs;
 };
 
 std::string show(const Value& state) {
@@ -326,18 +326,18 @@ struct FrameStack {
   }
 
   /* Map from the instruction defining the frame to a Frame object. */
-  smart::flat_map<const IRInstruction*, Frame> live;
+  jit::flat_map<const IRInstruction*, Frame> live;
 
   /* Similar to live, but for frames that have been popped. We keep track of
    * these because we often refer to a LdThis from an inlined function after
    * it's returned. */
-  smart::flat_map<const IRInstruction*, Frame> dead;
+  jit::flat_map<const IRInstruction*, Frame> dead;
 
   /* Frames that have been pushed but not activated. */
-  smart::vector<Frame> preLive;
+  jit::vector<Frame> preLive;
 };
 
-typedef smart::flat_map<SSATmp*, SSATmp*> CanonMap;
+typedef jit::flat_map<SSATmp*, SSATmp*> CanonMap;
 
 /*
  * State holds all the information we care about during the analysis pass, and
@@ -346,7 +346,7 @@ typedef smart::flat_map<SSATmp*, SSATmp*> CanonMap;
 struct State {
   /* values maps from live SSATmps to the currently known state about the
    * value. */
-  smart::flat_map<SSATmp*, Value> values;
+  jit::flat_map<SSATmp*, Value> values;
 
   /* canon keeps track of values that have been through passthrough
    * instructions, like CheckType and AssertType. */
@@ -409,8 +409,8 @@ struct IncomingState {
   const Block* from;
   State state;
 };
-typedef smart::vector<IncomingState> IncomingStateVec;
-typedef smart::hash_map<const Block*, IncomingStateVec> SavedStates;
+typedef jit::vector<IncomingState> IncomingStateVec;
+typedef jit::hash_map<const Block*, IncomingStateVec> SavedStates;
 
 /*
  * One SinkPoint exists for each optimizable IncRef in each control flow path
@@ -439,16 +439,16 @@ struct SinkPoint {
   SSATmp* value;
 };
 
-typedef smart::flat_multimap<IncSet, SinkPoint> SinkPoints;
+typedef jit::flat_multimap<IncSet, SinkPoint> SinkPoints;
 
 struct SinkPointsMap {
   // Maps values to SinkPoints for their IncRefs
-  smart::hash_map<SSATmp*, SinkPoints> points;
+  jit::hash_map<SSATmp*, SinkPoints> points;
 
   // Maps ids of DecRef instructions to the incoming lower bound of the object's
   // refcount. Only DecRefs that cannot go to zero are in this map, so there
   // will be no entries with a value of less than 2.
-  smart::hash_map<Point, int> decRefs;
+  jit::hash_map<Point, int> decRefs;
 };
 
 /*
@@ -592,7 +592,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
   };
   struct IncomingValue {
     Value value;
-    smart::vector<IncomingBranch> inBlocks;
+    jit::vector<IncomingBranch> inBlocks;
   };
 
   State mergeStates(IncomingStateVec&& states) {
@@ -672,7 +672,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     // Now, we build a map from values to their merged incoming state and which
     // blocks provide information about the value.
-    smart::hash_map<SSATmp*, IncomingValue> mergedValues;
+    jit::hash_map<SSATmp*, IncomingValue> mergedValues;
     for (auto const& inState : states) {
       if (inState.state.frames != firstFrames) {
         if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
@@ -782,7 +782,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     // First, build a map from canonical values to the values they map to and
     // how many incoming branches have the mapped value available.
-    smart::flat_map<SSATmp*, smart::flat_map<SSATmp*, int>> mergedCanon;
+    jit::flat_map<SSATmp*, jit::flat_map<SSATmp*, int>> mergedCanon;
 
     for (auto const& inState : states) {
       for (auto const& pair : inState.state.canon) {
@@ -797,7 +797,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto* trueRoot = pair.first;
       // Build a list of versions of this value that exist in all incoming
       // branches.
-      smart::flat_set<SSATmp*> tmps;
+      jit::flat_set<SSATmp*> tmps;
       for (auto const& countPair : pair.second) {
         if (countPair.first != trueRoot && countPair.second == states.size()) {
           tmps.insert(countPair.first);
@@ -818,7 +818,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // We found more than one value coming in from all branches, so find the
       // most derived one. This is the one temp that doesn't appear as an
       // ancestor of any of the others.
-      smart::flat_set<SSATmp*> ancestors;
+      jit::flat_set<SSATmp*> ancestors;
       for (auto* val : tmps) {
         // trueRoot shouldn't be in the set
         assert(val->inst()->isPassthrough());
@@ -1513,8 +1513,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
 };
 
 ////////// Refcount validation pass //////////
-typedef smart::hash_map<SSATmp*, double> TmpDelta;
-typedef smart::hash_map<Block*, TmpDelta> BlockMap;
+typedef jit::hash_map<SSATmp*, double> TmpDelta;
+typedef jit::hash_map<Block*, TmpDelta> BlockMap;
 
 /*
  * Simulate the effect of block b on refcounts of SSATmps.
@@ -1599,7 +1599,7 @@ std::string show(const SinkPointsMap& sinkPoints, const IdMap& ids) {
   std::string ret;
 
   typedef std::pair<SSATmp*, SinkPoints> SinkPair;
-  smart::vector<SinkPair> sortedPoints(
+  jit::vector<SinkPair> sortedPoints(
     sinkPoints.points.begin(), sinkPoints.points.end());
   std::sort(sortedPoints.begin(), sortedPoints.end(),
             [&](const SinkPair& a, const SinkPair& b) {
@@ -1629,7 +1629,7 @@ std::string show(const SinkPointsMap& sinkPoints, const IdMap& ids) {
   }
 
   typedef std::pair<Point, int> DecRefPair;
-  smart::vector<DecRefPair> sortedDecs(
+  jit::vector<DecRefPair> sortedDecs(
     sinkPoints.decRefs.begin(), sinkPoints.decRefs.end());
   std::sort(sortedDecs.begin(), sortedDecs.end(),
             [](const DecRefPair& a, const DecRefPair& b) {

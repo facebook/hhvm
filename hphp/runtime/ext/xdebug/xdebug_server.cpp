@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
+#include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
 #include "hphp/runtime/base/thread-info.h"
@@ -238,8 +239,11 @@ void XDebugServer::onRequestInit() {
   // TODO(#4489053) Enable this when debugger internals have been refactored
   // Need to turn on debugging regardless of the remote mode in order to
   // capture exceptions/errors
-  // ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  // ti->m_reqInjectionData.setDebugger(true);
+  if (!DebugHookHandler::attach<XDebugHookHandler>()) {
+    raise_warning("Could not attach xdebug remote debugger to the current "
+                  "thread. A debugger is already attached.");
+    return;
+  }
 
   // Grab $_GET, $_COOKIE, and the transport
   const ArrayData* globals = get_global_variables()->asArrayData();
@@ -284,6 +288,17 @@ bool XDebugServer::isNeeded() {
     return !cookie[s_SESSION].isNull();
   }
 }
+
+void XDebugServer::attach(Mode mode) {
+  assert(XDEBUG_GLOBAL(Server) == nullptr);
+  try {
+    XDEBUG_GLOBAL(Server) = new XDebugServer(mode);
+  } catch (...) {
+    raise_warning("Could not start xdebug server. Check the remote debugging "
+                  "log for details");
+  }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Dbgp

@@ -31,29 +31,6 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Request Local Data
-
-struct XDebugRequestData  {
-  void requestInit() {
-    m_init_time = Timer::GetCurrentTimeMicros();
-    m_profiler_attached = false; // set by attach_xdebug_profiler
-    m_server = nullptr; // set by attach_xdebug_server
-  }
-
-  void requestShutdown() {
-    m_init_time = 0;
-    m_profiler_attached = false;
-    m_server = nullptr;
-  }
-
-  bool m_profiler_attached;
-  int64_t m_init_time;
-  XDebugServer* m_server;
-};
-
-IMPLEMENT_THREAD_LOCAL(XDebugRequestData, s_request);
-
-///////////////////////////////////////////////////////////////////////////////
 // Helpers
 
 // Globals
@@ -247,7 +224,7 @@ DECLARE_EXTERN_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 
 // Returns the attached xdebug profiler. Requires one is attached.
 static inline XDebugProfiler* xdebug_profiler() {
-  assert(s_request->m_profiler_attached);
+  assert(XDEBUG_GLOBAL(ProfilerAttached));
   return (XDebugProfiler*) s_profiler_factory->getProfiler();
 }
 
@@ -299,9 +276,9 @@ static void start_profiling(XDebugProfiler* profiler) {
 // Attempts to attach the xdebug profiler to the current thread. Assumes it
 // is not already attached. Raises an error on failure.
 static void attach_xdebug_profiler() {
-  assert(!s_request->m_profiler_attached);
+  assert(!XDEBUG_GLOBAL(ProfilerAttached));
   if (s_profiler_factory->start(ProfilerKind::XDebug, 0, false)) {
-    s_request->m_profiler_attached = true;
+    XDEBUG_GLOBAL(ProfilerAttached) = true;
     // Enable profiling and tracing if we need to
     XDebugProfiler* profiler = xdebug_profiler();
     if (XDebugProfiler::isProfilingNeeded()) {
@@ -312,7 +289,6 @@ static void attach_xdebug_profiler() {
     }
     profiler->setCollectMemory(XDEBUG_GLOBAL(CollectMemory));
     profiler->setCollectTime(XDEBUG_GLOBAL(CollectTime));
-    profiler->setBaseTime(s_request->m_init_time);
   } else {
     raise_error("Could not start xdebug profiler. Another profiler is "
                 "likely already attached to this thread.");
@@ -321,37 +297,18 @@ static void attach_xdebug_profiler() {
 
 // Detaches the xdebug profiler from the current thread
 static void detach_xdebug_profiler() {
-  assert(s_request->m_profiler_attached);
+  assert(XDEBUG_GLOBAL(ProfilerAttached));
   s_profiler_factory->stop();
-  s_request->m_profiler_attached = false;
+  XDEBUG_GLOBAL(ProfilerAttached) = false;
 }
 
 // Detaches the xdebug profiler if it's no longer needed
 static void detach_xdebug_profiler_if_needed() {
-  assert(s_request->m_profiler_attached);
+  assert(XDEBUG_GLOBAL(ProfilerAttached));
   XDebugProfiler* profiler = xdebug_profiler();
   if (!profiler->isCollecting()) {
     detach_xdebug_profiler();
   }
-}
-
-// Attempts to attach the xdebug server to the current thread. Assumes it
-// is not already attached. Raises a warning on failure. The actual error will
-// be written to the remote debugging log
-static void attach_xdebug_server(XDebugServer::Mode mode) {
-  assert(s_request->m_server == nullptr);
-  try {
-    s_request->m_server = new XDebugServer(mode);
-  } catch (...) {
-    raise_warning("Could not start xdebug server. Check the remote debugging "
-                  "log for details");
-  }
-}
-
-static void detach_xdebug_server() {
-  assert(s_request->m_server != nullptr);
-  delete s_request->m_server;
-  s_request->m_server = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -480,7 +437,7 @@ static Array HHVM_FUNCTION(xdebug_get_headers)
   XDEBUG_NOTIMPLEMENTED
 
 static Variant HHVM_FUNCTION(xdebug_get_profiler_filename) {
-  if (!s_request->m_profiler_attached) {
+  if (!XDEBUG_GLOBAL(ProfilerAttached)) {
     return false;
   }
 
@@ -496,7 +453,7 @@ static int64_t HHVM_FUNCTION(xdebug_get_stack_depth)
   XDEBUG_NOTIMPLEMENTED
 
 static Variant HHVM_FUNCTION(xdebug_get_tracefile_name) {
-  if (s_request->m_profiler_attached) {
+  if (XDEBUG_GLOBAL(ProfilerAttached)) {
     XDebugProfiler* profiler = xdebug_profiler();
     if (profiler->isTracing()) {
       return profiler->getTracingFilename();
@@ -559,7 +516,7 @@ static Variant HHVM_FUNCTION(xdebug_start_trace,
   String* traceFile = traceFileVar.isString()? &traceFileStr : nullptr;
 
   // Initialize the profiler if it isn't already
-  if (!s_request->m_profiler_attached) {
+  if (!XDEBUG_GLOBAL(ProfilerAttached)) {
     attach_xdebug_profiler();
   }
 
@@ -588,7 +545,7 @@ static void HHVM_FUNCTION(xdebug_stop_error_collection)
   XDEBUG_NOTIMPLEMENTED
 
 static Variant HHVM_FUNCTION(xdebug_stop_trace) {
-  if (!s_request->m_profiler_attached) {
+  if (!XDEBUG_GLOBAL(ProfilerAttached)) {
     return false;
   }
 
@@ -606,7 +563,7 @@ static Variant HHVM_FUNCTION(xdebug_stop_trace) {
 }
 
 static double HHVM_FUNCTION(xdebug_time_index) {
-  int64_t micro = Timer::GetCurrentTimeMicros() - s_request->m_init_time;
+  int64_t micro = Timer::GetCurrentTimeMicros() - XDEBUG_GLOBAL(InitTime);
   return micro * 1.0e-6;
 }
 
@@ -616,7 +573,7 @@ static TypedValue* HHVM_FN(xdebug_var_dump)(ActRec* ar)
 static void HHVM_FUNCTION(_xdebug_check_trigger_vars) {
   if (XDebugExtension::Enable &&
       XDebugProfiler::isNeeded() &&
-      !s_request->m_profiler_attached) {
+      !XDEBUG_GLOBAL(ProfilerAttached)) {
     attach_xdebug_profiler();
   }
 }
@@ -787,7 +744,7 @@ void XDebugExtension::requestInit() {
   loadIdeKey(env_cfg);
   loadEnvConfig(env_cfg);
 
-  // Standard config options
+  // Thread local config options
   #define XDEBUG_OPT(T, name, sym, val) { \
     XDEBUG_GLOBAL(sym) = xdebug_init_opt<T>(name, val, env_cfg); \
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL, \
@@ -810,7 +767,7 @@ void XDebugExtension::requestInit() {
     XDEBUG_GLOBAL(sym) = xdebug_init_opt<T>(name, def, env_cfg); \
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL, XDEBUG_INI(name), \
                      IniSetting::SetAndGet<T>([](const T& val) { \
-                       if (s_request->m_profiler_attached) { \
+                       if (XDEBUG_GLOBAL(ProfilerAttached)) { \
                          xdebug_profiler()->set##sym(val); \
                          detach_xdebug_profiler_if_needed(); \
                        } \
@@ -819,8 +776,12 @@ void XDebugExtension::requestInit() {
   XDEBUG_PROF_CFG
   #undef XDEBUG_OPT
 
-  // Initialize the request data and then hand off to the server
-  s_request->requestInit();
+  // Custom request local globals
+  #define XDEBUG_OPT(T, name, sym, val) XDEBUG_GLOBAL(sym) = val;
+  XDEBUG_CUSTOM_GLOBALS
+  #undef XDEBUG_OPT
+
+  // Let the server do initialization
   XDebugServer::onRequestInit();
 
   // Potentially attach the xdebug server and profiler
@@ -828,7 +789,7 @@ void XDebugExtension::requestInit() {
     attach_xdebug_profiler();
   }
   if (XDebugServer::isNeeded()) {
-    attach_xdebug_server(XDebugServer::Mode::REQ);
+    XDebugServer::attach(XDebugServer::Mode::REQ);
   }
 }
 
@@ -838,15 +799,13 @@ void XDebugExtension::requestShutdown() {
   }
 
   // Potentially kill the profiler and server
-  if (s_request->m_profiler_attached) {
+  if (XDEBUG_GLOBAL(ProfilerAttached)) {
     detach_xdebug_profiler();
   }
-  if (s_request->m_server != nullptr) {
-    detach_xdebug_server();
+  if (XDebugServer::isAttached()) {
+    delete XDEBUG_GLOBAL(Server);
+    XDEBUG_GLOBAL(Server) = nullptr;
   }
-
-  // Destroy the request data
-  s_request->requestShutdown();
 }
 
 // Non-bind config options and edge-cases
@@ -858,6 +817,7 @@ bool XDebugExtension::Enable = false;
 XDEBUG_CFG
 XDEBUG_DUMP_CFG
 XDEBUG_PROF_CFG
+XDEBUG_CUSTOM_GLOBALS
 #undef XDEBUG_OPT
 
 static XDebugExtension s_xdebug_extension;

@@ -25,6 +25,9 @@ using std::string;
 using std::map;
 
 namespace HPHP {
+
+struct XDebugServer;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define XDEBUG_NAME "xdebug-not-done"
@@ -35,6 +38,8 @@ namespace HPHP {
 #define XDEBUG_URL "http://hhvm.com/"
 
 // TODO(#4489053) Document these
+// TODO(#4489053) Not all of these should be thread local
+// Request Local ini config settings
 // Differences b/w xdebug:
 //  extended_info, coverage_enable:
 //    unused because enabling/disabling these would have no effect on hhvm
@@ -129,7 +134,13 @@ namespace HPHP {
   XDEBUG_OPT(bool, "collect_memory", CollectMemory, false) \
   XDEBUG_OPT(bool, "collect_time", CollectTime, false)
 
-// TODO(#4489053) A lot of config options should not be thread local
+// These aren't settable via ini, but are request local globals
+#define XDEBUG_CUSTOM_GLOBALS \
+  XDEBUG_OPT(bool, nullptr, ProfilerAttached, false) \
+  XDEBUG_OPT(int64_t, nullptr, InitTime, Timer::GetCurrentTimeMicros()) \
+  XDEBUG_OPT(XDebugServer*, nullptr, Server, nullptr)
+
+// Retrieves the value of the given xdebug global
 #define XDEBUG_GLOBAL(name) (*XDebugExtension::name)
 
 // Returns the ini name for the given hhvm configuration option.
@@ -163,6 +174,7 @@ public:
   XDEBUG_CFG
   XDEBUG_PROF_CFG
   XDEBUG_DUMP_CFG
+  XDEBUG_CUSTOM_GLOBALS
   #undef XDEBUG_OPT
 
   // Config options that aren't bound or are other edge cases

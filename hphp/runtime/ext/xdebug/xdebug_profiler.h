@@ -83,11 +83,6 @@ public:
       isTracingNeeded();
   }
 
-  // Set the time to use a base when computing time elapsed
-  void setBaseTime(int64_t baseTime) {
-    m_baseTime = baseTime;
-  }
-
   // Whether or not the profiler is collecting data
   inline bool isCollecting() {
     return m_profilingEnabled || m_tracingEnabled || m_collectMemory ||
@@ -143,7 +138,7 @@ private:
   // Helper used to convert a microseconds since epoch into the format xdebug
   // uses: microseconds since request init, as a double
   inline double timeSinceBase(int64_t time) {
-    return (time - m_baseTime) * 1.0e-6;
+    return (time - XDEBUG_GLOBAL(InitTime)) * 1.0e-6;
   }
 
   // The different types of tracefile output
@@ -220,7 +215,6 @@ private:
   FrameData* m_frameBuffer = nullptr;
   int64_t m_frameBufferSize = 0;
   int64_t m_nextFrameIdx = 0;
-  int64_t m_baseTime = 0;
 
   bool m_collectMemory = false;
   bool m_collectTime = false;

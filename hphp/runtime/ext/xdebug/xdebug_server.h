@@ -73,6 +73,16 @@ public:
   // needed is decided at runtime.
   static bool isNeeded();
 
+  // Returns true if the xdebug server is attached to the current thread
+  static inline bool isAttached() {
+    return XDEBUG_GLOBAL(Server) != nullptr;
+  }
+
+  // Attempts to attach the xdebug server to the current thread. Assumes it
+  // is not already attached. Raises a warning on failure. The actual error will
+  // be written to the remote debugging log
+  static void attach(Mode mode);
+
 ///////////////////////////////////////////////////////////////////////////////
 // Dbgp
 

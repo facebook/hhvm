@@ -31,6 +31,7 @@
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/process.h"
@@ -151,6 +152,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/status.xml:      show server status in XML\n"
         "/status.json:     show server status in JSON\n"
         "/status.html:     show server status in HTML\n"
+
+        "/memory.xml:      show memory status in XML\n"
+        "/memory.json:     show memory status in JSON\n"
+        "/memory.html:     show memory status in HTML\n"
 
         "/stats-on:        main switch: enable server stats\n"
         "/stats-off:       main switch: disable server stats\n"
@@ -319,6 +324,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "status", 6) == 0 &&
         handleStatusRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(),"memory", 6) == 0 &&
+        handleMemoryRequest(cmd, transport)) {
       break;
     }
     if (strncmp(cmd.c_str(), "stats", 5) == 0 &&
@@ -540,7 +549,7 @@ static bool toggle_switch(Transport *transport, bool &setting) {
   return true;
 }
 
-static bool send_report(Transport *transport, ServerStats::Format format,
+static bool send_report(Transport *transport, Writer::Format format,
                         const char *mime) {
   int64_t  from   = transport->getInt64Param ("from");
   int64_t  to     = transport->getInt64Param ("to");
@@ -558,7 +567,7 @@ static bool send_report(Transport *transport, ServerStats::Format format,
   return true;
 }
 
-static bool send_status(Transport *transport, ServerStats::Format format,
+static bool send_status(Transport *transport, Writer::Format format,
                         const char *mime) {
   string out;
   ServerStats::ReportStatus(out, format);
@@ -657,14 +666,38 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
 bool AdminRequestHandler::handleStatusRequest(const std::string &cmd,
                                               Transport *transport) {
   if (cmd == "status.xml") {
-    return send_status(transport, ServerStats::Format::XML, "application/xml");
+    return send_status(transport, Writer::Format::XML, "application/xml");
   }
   if (cmd == "status.json") {
-    return send_status(transport, ServerStats::Format::JSON,
+    return send_status(transport, Writer::Format::JSON,
                        "application/json");
   }
   if (cmd == "status.html" || cmd == "status.htm") {
-    return send_status(transport, ServerStats::Format::HTML, "text/html");
+    return send_status(transport, Writer::Format::HTML, "text/html");
+  }
+  return false;
+}
+
+bool AdminRequestHandler::handleMemoryRequest(const std::string &cmd,
+                                              Transport *transport){
+  std::string out;
+  if (cmd == "memory.xml") {
+      MemoryStats::ReportMemory(out, Writer::Format::XML);
+      transport->addHeader("Content-Type","application/xml");
+      transport->sendString(out);
+      return true;
+  }
+  if (cmd == "memory.json") {
+      MemoryStats::ReportMemory(out, Writer::Format::JSON);
+      transport->addHeader("Content-Type","application/json");
+      transport->sendString(out);
+      return true;
+  }
+  if (cmd == "memory.html" || cmd == "memory.htm") {
+      MemoryStats::ReportMemory(out, Writer::Format::XML);
+      transport->addHeader("Content-Type","application/html");
+      transport->sendString(out);
+      return true;
   }
   return false;
 }
@@ -717,17 +750,17 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "stats.xml") {
-    return send_report(transport, ServerStats::Format::XML, "application/xml");
+    return send_report(transport, Writer::Format::XML, "application/xml");
   }
   if (cmd == "stats.json") {
-    return send_report(transport, ServerStats::Format::JSON,
+    return send_report(transport, Writer::Format::JSON,
                        "application/json");
   }
   if (cmd == "stats.kvp") {
-    return send_report(transport, ServerStats::Format::KVP, "text/plain");
+    return send_report(transport, Writer::Format::KVP, "text/plain");
   }
   if (cmd == "stats.html" || cmd == "stats.htm") {
-    return send_report(transport, ServerStats::Format::HTML, "text/html");
+    return send_report(transport, Writer::Format::HTML, "text/html");
   }
 
   if (cmd == "stats.xsl") {

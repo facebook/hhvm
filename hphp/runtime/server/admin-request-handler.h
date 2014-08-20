@@ -36,6 +36,7 @@ public:
 private:
   bool handleCheckRequest  (const std::string &cmd, Transport *transport);
   bool handleStatusRequest (const std::string &cmd, Transport *transport);
+  bool handleMemoryRequest (const std::string &cmd, Transport *transport);
   bool handleStatsRequest  (const std::string &cmd, Transport *transport);
   bool handleProfileRequest(const std::string &cmd, Transport *transport);
   bool handleDumpCacheRequest (const std::string &cmd, Transport *transport);

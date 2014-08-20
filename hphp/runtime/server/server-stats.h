@@ -32,18 +32,13 @@
 #include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/execution-profiler.h"
+#include "hphp/runtime/server/writer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ServerStats {
 public:
-  enum class Format {
-    XML,
-    JSON,
-    KVP,
-    HTML
-  };
 
   enum class ThreadMode {
     Idling,
@@ -59,7 +54,8 @@ public:
   static void Reset();
   static void Clear();
   static void GetKeys(std::string &out, int64_t from, int64_t to);
-  static void Report(std::string &out, Format format, int64_t from, int64_t to,
+  static void Report(std::string &out, Writer::Format format,
+                     int64_t from, int64_t to,
                      const std::string &agg, const std::string &keys,
                      const std::string &url, int code,
                      const std::string &prefix);
@@ -69,7 +65,7 @@ public:
   static void StartRequest(const char *url, const char *clientIP,
                            const char *vhost);
   static void SetThreadMode(ThreadMode mode);
-  static void ReportStatus(std::string &out, Format format);
+  static void ReportStatus(std::string &out, Writer::Format format);
 
   static void SetServerHealthLevel(HealthLevel new_health_level);
 
@@ -130,7 +126,7 @@ private:
 
   static void GetAllKeys(std::set<std::string> &allKeys,
                          const std::list<TimeSlot*> &slots);
-  static void Report(std::string &out, Format format,
+  static void Report(std::string &out, Writer::Format format,
                      const std::list<TimeSlot*> &slots,
                      const std::string &prefix);
 

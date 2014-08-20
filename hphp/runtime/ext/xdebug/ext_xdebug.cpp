@@ -784,12 +784,9 @@ void XDebugExtension::requestInit() {
   // Let the server do initialization
   XDebugServer::onRequestInit();
 
-  // Potentially attach the xdebug server and profiler
+  // Potentially attach the xdebug profiler
   if (XDebugProfiler::isNeeded()) {
     attach_xdebug_profiler();
-  }
-  if (XDebugServer::isNeeded()) {
-    XDebugServer::attach(XDebugServer::Mode::REQ);
   }
 }
 
@@ -798,12 +795,9 @@ void XDebugExtension::requestShutdown() {
     return;
   }
 
-  // Potentially kill the profiler and server
+  // Potentially kill the profiler
   if (XDEBUG_GLOBAL(ProfilerAttached)) {
     detach_xdebug_profiler();
-  }
-  if (XDebugServer::isAttached()) {
-    XDebugServer::detach();
   }
 }
 

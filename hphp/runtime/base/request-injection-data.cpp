@@ -344,6 +344,12 @@ void RequestInjectionData::reset() {
   m_coverage = RuntimeOption::RecordCodeCoverage;
   m_debuggerAttached = false;
   m_debuggerIntr = false;
+  m_debuggerStepIn = false;
+  m_debuggerStepOut = false;
+  m_debuggerNext = false;
+  while (!m_activeLineBreaks.empty()) {
+    m_activeLineBreaks.pop();
+  }
   updateJit();
   while (!interrupts.empty()) interrupts.pop();
 }
@@ -352,6 +358,9 @@ void RequestInjectionData::updateJit() {
   m_jit = RuntimeOption::EvalJit &&
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_debuggerIntr &&
+    !m_debuggerStepIn &&
+    !m_debuggerStepOut &&
+    !m_debuggerNext &&
     !m_coverage &&
     !shouldProfile() &&
     getActiveLineBreak() == -1;

@@ -73,7 +73,7 @@ ExecutionContext::ExecutionContext()
   , m_lambdaCounter(0)
   , m_nesting(0)
   , m_breakPointFilter(nullptr)
-  , m_lastLocFilter(nullptr)
+  , m_flowFilter(nullptr)
   , m_dbgNoBreak(false)
   , m_coverPrevLine(-1)
   , m_coverPrevUnit(nullptr)
@@ -115,7 +115,7 @@ ExecutionContext::~ExecutionContext() {
   for (auto& v : m_createdFuncs) delete v;
 
   delete m_breakPointFilter;
-  delete m_lastLocFilter;
+  delete m_flowFilter;
   obFlushAll();
   for (auto& b : m_buffers) delete b;
 }

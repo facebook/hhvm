@@ -102,6 +102,15 @@ public:
   // over an active line breakpoint
   virtual void onOpcode(const unsigned char* pc) {}
 
+  // Called right before top-level pseudo-main enters and right after it
+  // exits. This is useful for debuggers to initialize and shutdown separate
+  // from an extension as they can assume other extensions are initialized.
+  virtual void onRequestInit() {}
+  virtual void onRequestShutdown() {}
+
+  // Called whenever we are breaking due to completion of a step in.
+  virtual void onStepInBreak(const Unit* unit, int line) {}
+
   // Called when we have hit a registered function entry breakpoint
   virtual void onFuncEntryBreak(const Func* f) {}
 
@@ -141,16 +150,25 @@ inline bool isDebuggerAttachedProcess() {
 #define DEBUGGER_ACTIVE_LINE_BREAK \
   (ThreadInfo::s_threadInfo->m_reqInjectionData.getActiveLineBreak() != -1)
 
+// This flag is true if we are currently executing a flow command such as step
+// in, step out, or next.
+#define DEBUGGER_FLOW \
+  (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerStepIn() || \
+   ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerStepOut() || \
+   ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerNext())
+
 // This flag ensures two things: first, that we stay in the interpreter and
 // out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
 // debugger interrupts for every opcode executed (modulo filters.)
 #define DEBUGGER_FORCE_INTR \
-  (DEBUGGER_INTR || DEBUGGER_ACTIVE_LINE_BREAK)
+  (DEBUGGER_INTR || DEBUGGER_ACTIVE_LINE_BREAK || DEBUGGER_FLOW)
 
 // "Hooks" called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
 // execution indefinitely within one of these hooks.
 void phpDebuggerOpcodeHook(const unsigned char* pc);
+void phpDebuggerRequestInitHook();
+void phpDebuggerRequestShutdownHook();
 void phpDebuggerFuncEntryHook(const ActRec* ar);
 void phpDebuggerFuncExitHook(const ActRec* ar);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
@@ -162,6 +180,10 @@ void phpDebuggerEvalHook(const Func* f);
 void phpDebuggerFileLoadHook(Unit* efile);
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
+
+// Steps a single line, stepping into functions if necessary. If the current
+// site is invalid, the break will occur on the next valid opcode.
+void phpDebuggerStepIn();
 
 // Add breakpoints of various types
 void phpAddBreakPoint(const Unit* unit, Offset offset);

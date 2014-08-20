@@ -647,6 +647,9 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   for (auto& c : config) {
     process_ini_file(c);
   }
+
+  // Initialize the debugger
+  DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -1791,6 +1794,9 @@ void hphp_context_shutdown() {
   auto const context = g_context.getNoCheck();
   context->destructObjects();
   context->onRequestShutdown();
+
+  // Shutdown the debugger
+  DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestShutdownHook());
 
   // Extensions could have shutdown handlers
   Extension::RequestShutdownModules();

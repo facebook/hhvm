@@ -568,8 +568,10 @@ const static StaticString
   s_FILE("file"),
   s_LINE("line");
 
-bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
-                              const char* message_str /* = nullptr */) {
+bool XDebugServer::breakpoint(const Variant& filename,
+                              const Variant& exception,
+                              const Variant& message,
+                              int line) {
   setStatus(Status::BREAK, Reason::OK);
 
   // Initialize the response node
@@ -580,46 +582,26 @@ bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
     addCommand(*response, *m_lastCommand);
   }
 
-  // Initialize the breakpoint message node
-  // TODO(#4489053) Check if file is evaled
-  xdebug_xml_node* msg = xdebug_xml_node_init("xdebug:message");
-  switch (bp.type) {
-    // Add the file/line # for line breakpoints
-    case XDebugBreakpoint::Type::LINE: {
-      char* line = xdebug_sprintf("%d", bp.line);
-      char* filename = bp.fileName.get()->mutableData();
-      xdebug_xml_add_attribute_ex(msg, "lineno", line, 0, 1);
-      xdebug_xml_add_attribute_ex(msg, "filename", filename, 0, 0);
-      break;
-    }
-    // Add the exception type and the current line # for exception breakpoints
-    case XDebugBreakpoint::Type::EXCEPTION: {
-      char* line = xdebug_sprintf("%d", g_context->getLine());
-      char* exception_name = bp.exceptionName.get()->mutableData();
-      xdebug_xml_add_attribute_ex(msg, "lineno", line, 0, 1);
-      xdebug_xml_add_attribute_ex(msg, "exception", exception_name, 0, 0);
-      break;
-    }
-    // Grab the callsite
-    case XDebugBreakpoint::Type::CALL:
-    case XDebugBreakpoint::Type::RETURN: {
-      Array callsite = g_context->getCallerInfo();
-      if (!callsite[s_FILE].isNull()) {
-        char* filename = xdstrdup(callsite[s_FILE].toString().data());
-        xdebug_xml_add_attribute_ex(msg, "filename", filename, 0, 1);
-      }
-      if (!callsite[s_LINE].isNull()) {
-        char* line = xdebug_sprintf("%d", callsite[s_LINE].toInt32());
-        xdebug_xml_add_attribute_ex(msg, "lineno", line, 0, 1);
-      }
-      break;
-    }
-  }
+  // Grab the c strings
+  char* filename_str = filename.isNull() ?
+    nullptr : filename.toString().get()->mutableData();
+  char* exception_str = exception.isNull() ?
+    nullptr : exception.toString().get()->mutableData();
+  char* message_str = message.isNull() ?
+    nullptr : message.toString().get()->mutableData();
+  char* line_str = xdebug_sprintf("%d", line);
 
-  // If a message string was passed, add it to the message
+  // Create the message node
+  xdebug_xml_node* msg = xdebug_xml_node_init("xdebug:message");
+  xdebug_xml_add_attribute_ex(msg, "lineno", line_str, 0, 1);
+  if (filename_str != nullptr) {
+    xdebug_xml_add_attribute_ex(msg, "filename", filename_str, 0, 0);
+  }
+  if (exception_str != nullptr) {
+    xdebug_xml_add_attribute_ex(msg, "exception", exception_str, 0, 0);
+  }
   if (message_str != nullptr) {
-    // TODO(#4489053) Remove const cast when xml framework refactored
-    xdebug_xml_add_text(msg, const_cast<char*>(message_str), 0);
+    xdebug_xml_add_text(msg, message_str, 0);
   }
 
   // Add the message node then send the response
@@ -629,6 +611,30 @@ bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
 
   // Wait for a resonse from the user
   return doCommandLoop();
+}
+
+bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
+                              const Variant& message) {
+  // Initialize the breakpoint message node
+  // TODO(#4489053) Check if file is evaled
+  switch (bp.type) {
+    // Add the file/line # for line breakpoints
+    case XDebugBreakpoint::Type::LINE:
+      return breakpoint(bp.fileName, init_null(), message, bp.line);
+    // Add the exception type and the current line # for exception breakpoints
+    case XDebugBreakpoint::Type::EXCEPTION:
+      return breakpoint(init_null(), bp.exceptionName,
+                        message, g_context->getLine());
+    // Grab the callsite
+    case XDebugBreakpoint::Type::CALL:
+    case XDebugBreakpoint::Type::RETURN: {
+      Array callsite = g_context->getCallerInfo();
+      return breakpoint(callsite[s_FILE], init_null(),
+                        message, callsite[s_LINE].toInt32());
+    }
+    default:
+      throw Exception("Invalid breakpoint type");
+  }
 }
 
 // Initial size of the input buffer + how much to expand it

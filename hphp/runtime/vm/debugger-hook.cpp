@@ -89,6 +89,13 @@ static PCFilter* getBreakPointFilter() {
   return g_context->m_breakPointFilter;
 }
 
+static PCFilter* getFlowFilter() {
+  if (g_context->m_flowFilter == nullptr) {
+    g_context->m_flowFilter = new PCFilter();
+  }
+  return g_context->m_flowFilter;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Hooks
 
@@ -106,8 +113,8 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   }
   // Short-circuit for cases where we're executing a line of code that we know
   // we don't need an interrupt for, e.g., stepping over a line of code.
-  if (UNLIKELY(g_context->m_lastLocFilter != nullptr) &&
-      g_context->m_lastLocFilter->checkPC(pc)) {
+  if (UNLIKELY(g_context->m_flowFilter != nullptr) &&
+      g_context->m_flowFilter->checkPC(pc)) {
     TRACE_RB(5, "Location filter hit at pc %p\n", pc);
     return;
   }
@@ -129,7 +136,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   const ActRec* fp = g_context->getStackFrame();
   const Func* func = fp != nullptr ? fp->func() : nullptr;
   const Unit* unit = func != nullptr ? func->unit() : nullptr;
-  if (UNLIKELY(func == nullptr)) {
+  if (UNLIKELY(unit == nullptr)) {
     TRACE(5, "Could not grab stack information\n");
     return;
   }
@@ -140,6 +147,13 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   int line = unit->getLineNumber(unit->offsetOf(pc));
   if (UNLIKELY(active_line != -1 && active_line != line)) {
     req_data.setActiveLineBreak(-1);
+  }
+
+  // If we got here and we we're stepping in, we've hit a step in breakpoint. We
+  // special case builtins as the site is meaningless to the user.
+  if (UNLIKELY(req_data.getDebuggerStepIn() && !func->isBuiltin())) {
+    ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerStepIn(false);
+    handler->onStepInBreak(unit, line);
   }
 
   // Check if we are hitting a call breakpoint
@@ -161,6 +175,16 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   }
 
   TRACE(5, "out phpDebuggerOpcodeHook()\n");
+}
+
+// Hook called on request start before main() is invoked
+void phpDebuggerRequestInitHook() {
+  getHookHandler()->onRequestInit();
+}
+
+// Hook called on request shutdown after main() exits
+void phpDebuggerRequestShutdownHook() {
+  getHookHandler()->onRequestShutdown();
 }
 
 // Hook called on function entry. Since function entry breakpoints are handled
@@ -232,6 +256,72 @@ void phpDebuggerDefClassHook(const Class* cls) {
 // Called by the VM when a function definition is loaded.
 void phpDebuggerDefFuncHook(const Func* func) {
   getHookHandler()->onDefFunc(func);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Flow Control
+
+void phpDebuggerStepIn() {
+  // If this is called in the middle of a flow command we short-circuit the
+  // other commands
+  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerStepIn(true);
+  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerStepOut(false);
+  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerNext(false);
+
+  // Ensure the flow filter is fresh
+  PCFilter* flow_filter = getFlowFilter();
+  flow_filter->clear();
+
+  // Check if the site is valid.
+  VMRegAnchor _;
+  ActRec* fp = vmfp();
+  PC pc = vmpc();
+  if (fp == nullptr || pc == nullptr) {
+    TRACE(5, "Could not grab stack or program counter\n");
+    return;
+  }
+
+  // Try to get needed context info. Bail if we can't
+  const Func* func = fp->func();
+  const Unit* unit = func != nullptr ? func->unit() : nullptr;
+  if (func == nullptr || func == nullptr) {
+    TRACE(5, "Could not grab the current unit or function\n");
+    return;
+  }
+
+  // We use line1 here because it works better than line0 in our
+  // bytecode-source mapping.
+  int line;
+  SourceLoc source_loc;
+  if (unit->getSourceLoc(unit->offsetOf(pc), source_loc)) {
+    line = source_loc.line1;
+  } else {
+    TRACE(5, "Could not grab the current line number\n");
+    return;
+  }
+
+  TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
+        unit->filepath()->data(), line, unit);
+
+  // Get offset ranges for the whole line.
+  OffsetRangeVec ranges;
+  if (!unit->getOffsetRanges(line, ranges)) {
+    ranges.clear();
+  }
+
+  // In resumable functions, we end the step on exit points
+  if (func->isResumable()) {
+    auto exclude_exits = [] (Op op) {
+      return (op != OpYield) &&
+             (op != OpYieldK) &&
+             (op != OpAwait) &&
+             (op != OpRetC);
+    };
+    flow_filter->addRanges(unit, ranges, exclude_exits);
+  } else {
+    flow_filter->addRanges(unit, ranges);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////

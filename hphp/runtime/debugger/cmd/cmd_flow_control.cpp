@@ -77,7 +77,7 @@ bool CmdFlowControl::onServer(DebuggerProxy &proxy) {
   return true;
 }
 
-// Setup the last location filter on the VM context for all offsets covered by
+// Setup the flow filter on the VM context for all offsets covered by
 // the current source line. This will short-circuit the work done in
 // phpDebuggerOpcodeHook() and ensure we don't interrupt on this source line.
 // We exclude continuation opcodes which transfer control out of the function,
@@ -86,10 +86,10 @@ bool CmdFlowControl::onServer(DebuggerProxy &proxy) {
 void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   // We may be stopped at a place with no source info.
   if (!site || !site->valid()) return;
-  if (g_context->m_lastLocFilter) {
-    g_context->m_lastLocFilter->clear();
+  if (g_context->m_flowFilter) {
+    g_context->m_flowFilter->clear();
   } else {
-    g_context->m_lastLocFilter = new PCFilter();
+    g_context->m_flowFilter = new PCFilter();
   }
   TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
         site->getFile(), site->getLine0(), site->getUnit());
@@ -117,17 +117,17 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
              (op != OpAwait) &&
              (op != OpRetC);
     };
-    g_context->m_lastLocFilter->addRanges(unit, ranges,
+    g_context->m_flowFilter->addRanges(unit, ranges,
                                           excludeResumableReturns);
   } else {
-    g_context->m_lastLocFilter->addRanges(unit, ranges);
+    g_context->m_flowFilter->addRanges(unit, ranges);
   }
 }
 
 void CmdFlowControl::removeLocationFilter() {
-  if (g_context->m_lastLocFilter) {
-    delete g_context->m_lastLocFilter;
-    g_context->m_lastLocFilter = nullptr;
+  if (g_context->m_flowFilter) {
+    delete g_context->m_flowFilter;
+    g_context->m_flowFilter = nullptr;
   }
 }
 

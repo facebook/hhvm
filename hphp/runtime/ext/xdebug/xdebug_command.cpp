@@ -88,6 +88,16 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~RunCmd() {}
 
+  // run never responds immediately
+  bool shouldRespond() const override { return false; }
+
+  bool isValidInStatus(Status status) const override {
+    return
+      status == Status::STARTING ||
+      status == Status::STOPPING ||
+      status == Status::BREAK;
+  }
+
   bool handleImpl(xdebug_xml_node& xml) const override {
     // Get the server status
     Status status;
@@ -108,17 +118,32 @@ public:
     }
     return true;
   }
+};
 
-  // run never responds immediatly
-  bool shouldRespond() const override {
-    return false;
-  }
+////////////////////////////////////////////////////////////////////////////////
+// step_into -i #
+// steps to the next statement, if there is a function call involved it will
+// break on the first statement in that function
+
+class StepIntoCmd : public XDebugCommand {
+public:
+  StepIntoCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~StepIntoCmd() {}
+
+  // Respond on step break
+  bool shouldRespond() const override { return false; }
 
   bool isValidInStatus(Status status) const override {
     return
       status == Status::STARTING ||
       status == Status::STOPPING ||
       status == Status::BREAK;
+  }
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    phpDebuggerStepIn();
+    return true;
   }
 };
 
@@ -317,12 +342,13 @@ const XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
     cmd = new RunCmd(server, cmdStr, args);
   } else if (cmdStr == s_CMD_BREAKPOINT_SET) {
     cmd = new BreakpointSetCmd(server, cmdStr, args);
+  } else if (cmdStr == s_CMD_STEP_INTO) {
+    cmd = new StepIntoCmd(server, cmdStr, args);
   } else {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 
-  // Ensure this command is valid in the given server status. We can't do this
-  // in the constructor because virtuals are not yet initialized
+  // Ensure this command is valid in the given server status
   Status status; Reason reason;
   server.getStatus(status, reason);
   if (!cmd->isValidInStatus(status)) {

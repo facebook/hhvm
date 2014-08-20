@@ -120,6 +120,20 @@ extern DECLARE_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 
 class XDebugHookHandler : public DebugHookHandler {
 public:
+  // Starting the server on request init
+  void onRequestInit() override {
+    if (XDebugServer::isNeeded()) {
+      XDebugServer::attach(XDebugServer::Mode::REQ);
+    }
+  }
+
+  // Stopping the server on request shutdown
+  void onRequestShutdown() override {
+    if (XDebugServer::isAttached()) {
+      XDebugServer::detach();
+    }
+  }
+
   // Information possibly passed during a breakpoint
   union BreakInfo {
     // Function enter/exit breakpoint
@@ -170,6 +184,9 @@ public:
     bi.exception = exception;
     onBreak<XDebugBreakpoint::Type::EXCEPTION>(bi);
   }
+
+  // Flow control
+  void onStepInBreak(const Unit* unit, int line) override;
 
   // Handle loading unmatched breakpoints
   void onFileLoad(Unit* efile) override;

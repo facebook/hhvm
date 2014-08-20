@@ -59,6 +59,9 @@ struct RequestInjectionData {
         m_timerActive(false),
         m_debuggerAttached(false),
         m_debuggerIntr(false),
+        m_debuggerStepIn(false),
+        m_debuggerStepOut(false),
+        m_debuggerNext(false),
         m_coverage(false),
         m_jit(false) {
     threadInit();
@@ -87,6 +90,9 @@ struct RequestInjectionData {
                            // cleared when the signal handler runs
   bool m_debuggerAttached; // whether there is a debugger attached.
   bool m_debuggerIntr;     // indicating we should force interrupt for debugger
+  bool m_debuggerStepIn;   // These indicate whether or not the debugger is
+  bool m_debuggerStepOut;  // currently stepping in, stepping out, or stepping
+  bool m_debuggerNext;     // to the next line
   bool m_coverage;         // is coverage being collected
   bool m_jit;              // is the jit enabled
 
@@ -133,12 +139,26 @@ struct RequestInjectionData {
     m_debuggerIntr = d;
     updateJit();
   }
+  bool getDebuggerStepIn() const { return m_debuggerStepIn; }
+  void setDebuggerStepIn(bool d) {
+    m_debuggerStepIn = d;
+    updateJit();
+  }
+  bool getDebuggerStepOut() const { return m_debuggerStepOut; }
+  void setDebuggerStepOut(bool d) {
+    m_debuggerStepOut = d;
+    updateJit();
+  }
+  bool getDebuggerNext() const { return m_debuggerNext; }
+  void setDebuggerNext(bool d) {
+    m_debuggerNext = d;
+    updateJit();
+  }
   int getActiveLineBreak() const {
     return m_activeLineBreaks.size() == 0 ? -1 : m_activeLineBreaks.top();
   }
   void setActiveLineBreak(int line) {
-    int& top = m_activeLineBreaks.top();
-    top = line;
+    m_activeLineBreaks.top() = line;
     updateJit();
   }
   void popActiveLineBreak() {

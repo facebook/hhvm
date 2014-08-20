@@ -1,0 +1,12 @@
+<?php
+
+function foo($i) {
+  if ($i == 0) return;
+  var_dump(__FUNCTION__);
+  foo($i - 1);
+}
+
+var_dump("Hello World 1");
+var_dump("Hello World 2");
+foo(1);
+var_dump("Hello World 3");

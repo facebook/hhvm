@@ -161,12 +161,17 @@ private:
 // Commands
 
 public:
-  // Performs a breakpoint using the passed breakpoint info. If a message string
-  // is passed, it is passed in the breakpoint message to the client. This
-  // method blocks until the breakpoint has finished. True is returned on
-  // success, false on failure (such as the client disconnecting)
-  bool breakpoint(const XDebugBreakpoint& bp,
-                  const char* message_str = nullptr);
+  // Performs a breakpoint, sending the passed info to the client. This method
+  // blocks until the breakpoint has finished. True is returned on success,
+  // false on failure (for instance, if the client disconnects)
+  bool breakpoint(const Variant& filename,
+                  const Variant& exception,
+                  const Variant& message,
+                  int line);
+
+  // Grabs the appropriate breakpoint info from the passed breakpoint and calls
+  // breakpoint(filename, exception, message, line)
+  bool breakpoint(const XDebugBreakpoint& bp, const Variant& message);
 
 private:
   // Blocks waiting for commands from the client. Returns false if there was

@@ -273,13 +273,13 @@ static const StaticString s_GET_MESSAGE("getMessage");
 
 // Returns the message from the given breakpoint info
 template<BreakType type>
-const String get_breakpoint_message(const BreakInfo& bi) {
+const Variant get_breakpoint_message(const BreakInfo& bi) {
   // In php5 xdebug, only messages have a string. But this could be extended to
   // be more useful.
   if (type == BreakType::EXCEPTION) {
-    return bi.exception->o_invoke(s_GET_MESSAGE, init_null(), false).toString();
+    return bi.exception->o_invoke(s_GET_MESSAGE, init_null(), false);
   }
-  return empty_string();
+  return init_null();
 }
 
 template<BreakType type>
@@ -302,13 +302,12 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
       continue;
     }
 
-    // Grab the breakpoint message
-    const String message_str = get_breakpoint_message<type>(bi);
-    const char* msg = message_str.empty() ? nullptr : message_str.data();
-
     // We only break once per location
     if (!have_broken) {
       have_broken = true;
+
+      // Grab the breakpoint message and do the break
+      const Variant msg = get_breakpoint_message<type>(bi);
       if (!XDEBUG_GLOBAL(Server)->breakpoint(bp, msg)) {
         XDebugServer::detach(); // Kill the server if there's an error
         return;
@@ -319,6 +318,16 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
     if (bp.temporary) {
       XDEBUG_REMOVE_BREAKPOINT(id);
     }
+  }
+}
+
+void XDebugHookHandler::onStepInBreak(const Unit* unit, int line) {
+  if (XDEBUG_GLOBAL(Server) != nullptr) {
+    // Translate the unit filepath and then break
+    const String filepath = String(unit->filepath()->data(), CopyString);
+    const String transpath = File::TranslatePath(filepath);
+    XDEBUG_GLOBAL(Server)->breakpoint(transpath, init_null(),
+                                      init_null(), line);
   }
 }
 

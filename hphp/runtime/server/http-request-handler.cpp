@@ -35,6 +35,7 @@
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/service-data.h"
 
@@ -366,6 +367,9 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   int code;
   bool ret = true;
 
+  // Let the debugger initialize.
+  // FIXME: hphpd can be initialized this way as well
+  DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
   if (RuntimeOption::EnableDebugger) {
     Eval::Debugger::InterruptRequestStarted(transport->getUrl());
   }

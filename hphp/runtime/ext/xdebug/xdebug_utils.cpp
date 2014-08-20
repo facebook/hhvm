@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,6 +115,33 @@ char* XDebugUtils::pathToUrl(char* fileurl) {
   }
   xdfree(encoded_fileurl); // Needs to be free
   return tmp;
+}
+
+String XDebugUtils::pathFromUrl(const String& fileurl) {
+  // Decode the url.
+  String decoded = HHVM_FN(rawurldecode)(fileurl);
+
+  // We want to remove "file://" if it exists. If it doesn't
+  // just return fileurl
+  int loc = decoded.find("file://");
+  if (loc < 0) {
+    return String(fileurl.data(), CopyString);
+  }
+
+  // php5 special cases this.
+  loc += sizeof("file://") - 1;
+  if (decoded[loc] == '/' && decoded[loc + 2] == ':') {
+    loc++;
+  }
+  return decoded.substr(loc, decoded.size() - loc);
+}
+
+int XDebugUtils::stackDepth() {
+  int depth = 0;
+  for (ActRec* fp = g_context->getStackFrame();
+      (fp = g_context->getPrevVMState(fp)) != nullptr;
+      depth++) {}
+  return depth;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

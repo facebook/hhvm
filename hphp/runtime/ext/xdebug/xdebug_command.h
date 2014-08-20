@@ -31,21 +31,11 @@ public:
   static const XDebugCommand* fromString(XDebugServer& server,
                                          const String& cmdStr,
                                          const Array& args);
-
-  // internal constructor used by fromString
+  // internal constructor used by fromString. It should never be
+  // called explicitly. This is where arguments should be parsed. Note
+  // that php5 xdebug doesn't actually raise an error on extra/invalid args.
   XDebugCommand(XDebugServer& server, const String& cmdStr, const Array& args);
   virtual ~XDebugCommand() {}
-
-  // Command errors that will be thrown on construction if the corresponding
-  // error occurs. enum classes are used to allow catching on different errors
-  enum class InvalidArgs { InvalidArgs };
-  enum class InvalidCommandString { InvalidCommandString };
-  enum class InvalidStatus { InvalidStatus };
-
-  // Called for each option passed to this command. Returns false if the option
-  // is unrecognized. Commands with custom options should override addOptImpl.
-  bool addOpt(char opt, const String& val);
-  virtual bool addOptImpl(char opt, const String& val) { return false; }
 
   // Perform the command, outputting data to the passed xml node. This case
   // class automatically adds standard info to the response, the subclass

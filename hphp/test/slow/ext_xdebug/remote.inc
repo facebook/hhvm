@@ -19,13 +19,13 @@ function bind_random_port($socket) {
 function start_server($file, $port, $socket) {
   $hhvm = PHP_BINARY;
   $env =  $_ENV + ["XDEBUG_CONFIG" => "remote_port=$port"];
-  $opts = explode(" ", "-c $file.ini $file");
+  $opts = [__DIR__, $hhvm, "-c", "$file.ini", $file];
 
   // Fork and start the server
   $pid = pcntl_fork();
   if ($pid === 0) {
     socket_close($socket);
-    pcntl_exec($hhvm, $opts, $env);
+    pcntl_exec(__DIR__."/remote.sh", $opts, $env);
   } else {
     echo "Started server process $pid\n";
     return $pid;
@@ -73,7 +73,9 @@ function test($filename) {
 
   // Accept a connection
   echo "Accepting connections...\n";
-  $fd = socket_accept($socket);
+  do {
+    $fd = @socket_accept($socket);
+  } while ($fd === false);
   socket_close($socket);
   echo "Connection established\n";
 

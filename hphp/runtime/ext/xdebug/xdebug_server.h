@@ -31,6 +31,7 @@ namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct XDebugCommand;
+struct XDebugBreakpoint;
 
 class XDebugServer {
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,6 +94,42 @@ public:
     XDEBUG_GLOBAL(Server) = nullptr;
   }
 
+/////////////////////////////////////////////////////////////////////////////
+// Error Codes
+
+public:
+  // See http://xdebug.org/docs-dbgp.php#error-codes
+  enum ErrorCode {
+    ERROR_OK = 0,
+    ERROR_PARSE = 1,
+    ERROR_DUP_ARG = 2,
+    ERROR_INVALID_ARGS = 3,
+    ERROR_UNIMPLEMENTED = 4,
+    ERROR_COMMAND_UNAVAILABLE = 5,
+
+    ERROR_CANT_OPEN_FILE = 100,
+    ERROR_STREAM_REDIRECT_FAILED = 101,
+
+    ERROR_BREAKPOINT_NOT_SET = 200,
+    ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED = 201,
+    ERROR_BREAKPOINT_INVALID = 202,
+    ERROR_BREAKPOINT_NO_CODE = 203,
+    ERROR_BREAKPOINT_INVALID_STATE = 204,
+    ERROR_NO_SUCH_BREAKPOINT = 205,
+    ERROR_EVALUATING_CODE = 206,
+    ERROR_INVALID_EXPRESSION = 207,
+
+    ERROR_PROPERTY_NON_EXISTANT = 300,
+    ERROR_STACK_DEPTH_INVALID = 301,
+    ERROR_CONTEXT_INVALID = 302,
+
+    ERROR_PROFILING_NOT_STARTED = 800,
+
+    ERROR_ENCODING_NOT_SUPPORTED = 900,
+    ERROR_INTERNAL = 998,
+    ERROR_UNKNOWN = 999
+  };
+
 ///////////////////////////////////////////////////////////////////////////////
 // Dbgp
 
@@ -115,13 +152,21 @@ private:
   void addXmnls(xdebug_xml_node& node);
 
   // Add the error with the passed error code to the given node
-  void addError(xdebug_xml_node& node, int code);
+  void addError(xdebug_xml_node& node, ErrorCode code);
 
   // Sends the passed xml messaeg to the client
   void sendMessage(xdebug_xml_node& xml);
 
 /////////////////////////////////////////////////////////////////////////////
 // Commands
+
+public:
+  // Performs a breakpoint using the passed breakpoint info. If a message string
+  // is passed, it is passed in the breakpoint message to the client. This
+  // method blocks until the breakpoint has finished. True is returned on
+  // success, false on failure (such as the client disconnecting)
+  bool breakpoint(const XDebugBreakpoint& bp,
+                  const char* message_str = nullptr);
 
 private:
   // Blocks waiting for commands from the client. Returns false if there was
@@ -132,7 +177,9 @@ private:
   // true on success. false on failure.
   bool readInput();
 
-  int parseCommand(const XDebugCommand*& cmd);
+  // Parses the input from the buffer and returns an instance of the
+  // corresponding command. Throws an ErrorCode on failure.
+  const XDebugCommand* parseCommand();
 
   // Valid states of the input parsing state machine
   enum class ParseState {
@@ -146,8 +193,9 @@ private:
   };
 
   // Parse m_buffer- grab the command and an array of arguments. This was taken
-  // and translated from php5 xdebug in order match parsing behavior
-  int parseInput(String& cmd, Array& args);
+  // and translated from php5 xdebug in order match parsing behavior. Throws
+  // an ErrorCode on failure.
+  void parseInput(String& cmd, Array& args);
 
   const XDebugCommand* m_lastCommand = nullptr;
   char* m_buffer = nullptr;

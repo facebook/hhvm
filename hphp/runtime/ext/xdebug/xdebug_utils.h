@@ -45,6 +45,13 @@ public:
   // Translated from xdebug.
   // xdebug desc: fake URI's per IETF RFC 1738 and 2396 format
   static char* pathToUrl(char* fileurl);
+
+  // Decodes the given url into a file path. Translated from php5 xdebug
+  static String pathFromUrl(const String& fileurl);
+
+  // Returns the current stack depth. Top-level pseudo-main has a stack depth
+  // of 0.
+  static int stackDepth();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

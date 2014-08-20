@@ -16,6 +16,10 @@
 */
 
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
+#include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
+#include "hphp/runtime/ext/xdebug/xdebug_utils.h"
+
+#include "hphp/runtime/ext/url/ext_url.h"
 
 namespace HPHP {
 
@@ -119,6 +123,172 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// breakpoint_set -i # [-t TYPE] [-s STATE] [-f FILENAME] [-n LINENO]
+//                     [-m FUNCTION] [-x EXCEPTION] [-h HIT_VALUE]
+//                     [-o HIT_CONDITION] [-r 0|1] [-- EXPRESSION]
+// Adds a breakpoint
+
+// Valid breakpoint strings
+static const StaticString
+  s_LINE("line"),
+  s_CONDITIONAL("conditional"),
+  s_CALL("call"),
+  s_RETURN("return"),
+  s_EXCEPTION("exception"),
+  s_WATCH("watch"),
+  s_ENABLED("enabled"),
+  s_DISABLED("disabled"),
+  s_GREATER_OR_EQUAL(">="),
+  s_EQUAL("=="),
+  s_MOD("%");
+
+class BreakpointSetCmd : public XDebugCommand {
+public:
+  BreakpointSetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {
+    XDebugBreakpoint& bp = m_breakpoint;
+
+    // Type is required
+    if (args['t'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+
+    // Type: line|call|return|exception|conditional
+    String typeName = args['t'].toString();
+    if (typeName == s_LINE || typeName == s_CONDITIONAL) {
+      // Despite spec, line and conditional are the same in php5 xdebug
+      bp.type = XDebugBreakpoint::Type::LINE;
+    } else if (typeName == s_CALL) {
+      bp.type = XDebugBreakpoint::Type::CALL;
+    } else if (typeName == s_RETURN) {
+      bp.type = XDebugBreakpoint::Type::RETURN;
+    } else if (typeName == s_EXCEPTION) {
+      bp.type = XDebugBreakpoint::Type::EXCEPTION;
+    } else if (typeName == s_WATCH) {
+      throw XDebugServer::ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED;
+    } else {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+
+    // State: enabled|disabled
+    if (!args['s'].isNull()) {
+      String state = args['s'].toString();
+      if (state == s_ENABLED) {
+        bp.enabled = true;
+      } else if (state == s_DISABLED) {
+        bp.enabled = false;
+      } else {
+        throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+    }
+
+    // Hit condition and value. php5 xdebug does not throw an error if only
+    // one of the two are provided
+    if (!args['h'].isNull() && !args['o'].isNull()) {
+      String condition = args['o'].toString();
+      String val = args['h'].toString();
+      if (condition == s_GREATER_OR_EQUAL) {
+        bp.hitCondition = XDebugBreakpoint::HitCondition::GREATER_OR_EQUAL;
+      } else if (condition == s_EQUAL) {
+        bp.hitCondition = XDebugBreakpoint::HitCondition::EQUAL;
+      } else if (condition == s_MOD) {
+        bp.hitCondition = XDebugBreakpoint::HitCondition::MULTIPLE;
+      } else {
+        throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+      bp.hitValue = strtol(val.data(), nullptr, 10);
+    }
+
+    // Temporary: 0|1 -- xdebug actually just throws the passed in data into
+    // strtol.
+    if (!args['r'].isNull()) {
+      String temp = args['r'].toString();
+      m_breakpoint.temporary = (bool) strtol(temp.data(), nullptr, 10);
+    }
+
+    // Initialize line breakpoint
+    if (bp.type == XDebugBreakpoint::Type::LINE) {
+      // Grab the line #
+      if (args['n'].isNull()) {
+        throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+      bp.line = strtol(args['n'].toString().data(), nullptr, 10);
+
+      // Grab the file, use the current if none provided
+      if (args['f'].isNull()) {
+        StringData* filename = g_context->getContainingFileName();
+        if (filename == staticEmptyString()) {
+          throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+        }
+        bp.fileName = String(filename);
+      } else {
+        bp.fileName = XDebugUtils::pathFromUrl(args['f'].toString());
+      }
+
+      // Ensure consistency between filenames
+      bp.fileName = File::TranslatePath(bp.fileName);
+
+      // Grab the condition string if one was provided
+      if (!args['-'].isNull()) {
+        Variant cond_var = HHVM_FN(base64_decode)(args['-'].toString(), false);
+        if (cond_var.isString()) {
+          bp.condition = cond_var.toString();
+        }
+      }
+    }
+
+    // Call and return type
+    if (bp.type == XDebugBreakpoint::Type::CALL ||
+        bp.type == XDebugBreakpoint::Type::RETURN) {
+      if (args['m'].isNull()) {
+        throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+      bp.funcName = args['m'].toString();
+
+      // This is in php5 xdebug, but not in the spec. If 'a' is passed, the
+      // value is expected to be a class name that will be prepended to the
+      // passed method name.
+      if (!args['a'].isNull()) {
+        bp.className = args['a'];
+      }
+
+      // Precompute full function name
+      bp.fullFuncName = bp.className.isNull() ?
+        bp.funcName : (bp.className.toString() + "::" + bp.funcName);
+    }
+
+    // Exception type
+    if (bp.type == XDebugBreakpoint::Type::EXCEPTION) {
+      if (args['x'].isNull()) {
+        throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+      bp.exceptionName = args['x'].toString();
+      return;
+    }
+  }
+
+  ~BreakpointSetCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    // Add the breakpoint, write out the id
+    int id = XDEBUG_ADD_BREAKPOINT(m_breakpoint);
+    xdebug_xml_add_attribute_ex(&xml, "id", xdebug_sprintf("%d", id), 0, 1);
+
+    // Add the breakpoint state
+    if (m_breakpoint.enabled) {
+      xdebug_xml_add_attribute(&xml, "state", "enabled");
+    } else {
+      xdebug_xml_add_attribute(&xml, "state", "disabled");
+    }
+    return false;
+  }
+
+private:
+  // Breakpoint manipulated by addopt
+  XDebugBreakpoint m_breakpoint;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // XDebugCommand implementation
 
 XDebugCommand::XDebugCommand(XDebugServer& server,
@@ -127,27 +297,9 @@ XDebugCommand::XDebugCommand(XDebugServer& server,
   : m_server(server), m_commandStr(cmd) {
   // A transaction id must be provided
   if (args['i'].isNull()) {
-    throw InvalidArgs::InvalidArgs;
+    throw XDebugServer::ERROR_INVALID_ARGS;
   }
-
-  // Add each option
-  for (ArrayIter iter(args); iter; ++iter) {
-    char opt = iter.first().toByte();
-    const String val = iter.second().toString();
-    if (!addOpt(opt, val)) {
-      throw InvalidArgs::InvalidArgs;
-    }
-  }
-}
-
-bool XDebugCommand::addOpt(char opt, const String& val) {
-  switch (opt) {
-    case 'i':
-      m_transactionId = val;
-      return true;
-    default:
-      return addOptImpl(opt, val);
-  }
+  m_transactionId = args['i'].toString();
 }
 
 bool XDebugCommand::handle(xdebug_xml_node& response) const {
@@ -158,13 +310,15 @@ bool XDebugCommand::handle(xdebug_xml_node& response) const {
 const XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
                                                const String& cmdStr,
                                                const Array& args) {
-  const XDebugCommand* cmd;
+  XDebugCommand* cmd;
   if (cmdStr == s_CMD_STATUS) {
     cmd = new StatusCmd(server, cmdStr, args);
   } else if (cmdStr == s_CMD_RUN) {
     cmd = new RunCmd(server, cmdStr, args);
+  } else if (cmdStr == s_CMD_BREAKPOINT_SET) {
+    cmd = new BreakpointSetCmd(server, cmdStr, args);
   } else {
-    throw InvalidCommandString::InvalidCommandString;
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 
   // Ensure this command is valid in the given server status. We can't do this
@@ -173,9 +327,8 @@ const XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
   server.getStatus(status, reason);
   if (!cmd->isValidInStatus(status)) {
     delete cmd;
-    throw InvalidStatus::InvalidStatus;
+    throw XDebugServer::ERROR_COMMAND_UNAVAILABLE;
   }
-
   return cmd;
 }
 

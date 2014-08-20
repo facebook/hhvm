@@ -269,7 +269,7 @@ JApplicationCliTest::testSet
 JApplicationCliTest::test__construct
 .
 JApplicationCliTest::test__constructDependancyInjection
-.
+S
 JApplicationCmsTest::testExecuteWithDocument
 .
 JApplicationCmsTest::testExecuteWithoutDocument
@@ -309,7 +309,7 @@ JApplicationCmsTest::testRender
 JApplicationCmsTest::test__construct
 .
 JApplicationCmsTest::test__constructDependancyInjection
-.
+S
 JApplicationDaemonTest::testChangeIdentity
 I
 JApplicationDaemonTest::testDaemonize
@@ -907,7 +907,7 @@ JApplicationWebTest::testSetHeader
 JApplicationWebTest::test__construct
 .
 JApplicationWebTest::test__constructDependancyInjection
-.
+S
 JArchiveBzip2Test::testExtract
 .
 JArchiveBzip2Test::testExtractWithStreams
@@ -1898,6 +1898,10 @@ JDatabaseDriverMysqliTest::testEscape with data set #1
 S
 JDatabaseDriverMysqliTest::testExecute
 S
+JDatabaseDriverMysqliTest::testExecuteWithLimitsInQuery
+S
+JDatabaseDriverMysqliTest::testExecuteWithLimitsInSetQuery
+S
 JDatabaseDriverMysqliTest::testGetAffectedRows
 S
 JDatabaseDriverMysqliTest::testGetCollation
@@ -2828,7 +2832,7 @@ JDateTest::testFormat with data set "mmddyyGMT"
 .
 JDateTest::testGetInstance
 .
-JDateTest::testGetOffsetFromGMT with data set " /Hours"
+JDateTest::testGetOffsetFromGMT with data set "	/Hours"
 .
 JDateTest::testGetOffsetFromGMT with data set "Atlantic/Azores"
 .
@@ -2976,8 +2980,14 @@ JDocumentJSONTest::testGetAndSetName
 .
 JDocumentJSONTest::testRender
 .
+JDocumentOpensearchTest::testAddImage
+I
+JDocumentOpensearchTest::testAddItem
+I
 JDocumentOpensearchTest::testRender
 F
+JDocumentOpensearchTest::testSetShortName
+I
 JDocumentRAWTest::testRender
 .
 JDocumentRendererAtomTest::testRender
@@ -2989,7 +2999,7 @@ I
 JDocumentRendererHeadTest::testRender
 I
 JDocumentRendererMessageTest::testRender
-.
+E
 JDocumentRendererModuleTest::testRender
 I
 JDocumentRendererModulesTest::testRender
@@ -3913,7 +3923,7 @@ JFactoryTest::testGetDateUTC2
 JFactoryTest::testGetDateUnchanged
 .
 JFactoryTest::testGetDocument
-.
+E
 JFactoryTest::testGetLanguage
 .
 JFactoryTest::testGetUri
@@ -4113,9 +4123,9 @@ JFeedTest::testMagicSetUpdatedDateJDateObject
 JFeedTest::testMagicSetUpdatedDateString
 .
 JFeedTest::testOffsetExists
-.
+S
 JFeedTest::testOffsetGet
-.
+S
 JFeedTest::testOffsetSet
 .
 JFeedTest::testOffsetSetWithString
@@ -6823,13 +6833,13 @@ I
 JHtmlAccessTest::testUsergroups
 I
 JHtmlBatchTest::testAccess
-.
+E
 JHtmlBatchTest::testItem
-.
+E
 JHtmlBatchTest::testLanguage
-.
+E
 JHtmlBatchTest::testUser
-.
+E
 JHtmlBehaviorTest::testCalendar
 .
 JHtmlBehaviorTest::testCaption with data set #0
@@ -6995,7 +7005,7 @@ I
 JHtmlGridTest::testState
 I
 JHtmlIconsTest::testButtons
-F
+.
 JHtmlJGridTest::testCheckedout
 I
 JHtmlJGridTest::testPublished
@@ -7013,9 +7023,9 @@ I
 JHtmlListTest::testOrdering
 I
 JHtmlListTest::testPositions
-.
+E
 JHtmlListTest::testUsers
-.
+E
 JHtmlMenuTest::testLinkoptions
 I
 JHtmlMenuTest::testMenuitemlist
@@ -7219,11 +7229,11 @@ JHtmlTest::testLink with data set #1
 JHtmlTest::testRegister
 .
 JHtmlTest::testScript
-.
+E
 JHtmlTest::testSetFormatOptions
 I
 JHtmlTest::testStylesheet
-.
+E
 JHtmlTest::testTooltip
 .
 JHtmlTest::testTooltipText
@@ -7985,7 +7995,7 @@ JLogEntryTest::testBadPriorityValues
 JLogEntryTest::testCategorySanitization
 .
 JLogEntryTest::testDefaultValues
-.
+F
 JLogLoggerCallbackTest::testAddEntry
 .
 JLogLoggerCallbackTest::testConstructor01
@@ -8790,6 +8800,8 @@ JPaginationObjectTest::testConstructor with data set #0
 .
 JPaginationObjectTest::testConstructor with data set #1
 .
+JPaginationTest::testBuildDataObject with data set #0
+E
 JPaginationTest::testConstructor with data set #0
 .
 JPaginationTest::testConstructor with data set #1
@@ -8800,11 +8812,51 @@ JPaginationTest::testConstructor with data set #3
 .
 JPaginationTest::testConstructor with data set #4
 .
+JPaginationTest::testGet with data set #0
+.
+JPaginationTest::testGet with data set #1
+.
+JPaginationTest::testGet with data set #2
+.
+JPaginationTest::testGet with data set #3
+.
 JPaginationTest::testGetAdditionalUrlParam
 .
 JPaginationTest::testGetData with data set #0
-F
+E
+JPaginationTest::testGetLimitBox with data set #0
+.
+JPaginationTest::testGetPagesCounter with data set #0
+.
+JPaginationTest::testGetPagesCounter with data set #1
+.
+JPaginationTest::testGetPagesLinks with data set #0
+E
 JPaginationTest::testGetRowOffset
+.
+JPaginationTest::testItemActive with data set #0
+E
+JPaginationTest::testItemInactive with data set #0
+.
+JPaginationTest::testListRender with data set #0
+.
+JPaginationTest::testOrderDownIcon with data set #0
+.
+JPaginationTest::testOrderDownIcon with data set #1
+.
+JPaginationTest::testOrderDownIcon with data set #2
+.
+JPaginationTest::testOrderUpIcon with data set #0
+.
+JPaginationTest::testOrderUpIcon with data set #1
+.
+JPaginationTest::testOrderUpIcon with data set #2
+.
+JPaginationTest::testSet with data set #0
+.
+JPaginationTest::testSet with data set #1
+.
+JPaginationTest::testSet with data set #2
 .
 JPaginationTest::testSetAdditionalUrlParam
 .
@@ -10749,7 +10801,7 @@ JUcmContentTest::test__construct
 JUcmTypeTest::testGetType
 .
 JUcmTypeTest::testGetTypeByAlias
-S
+.
 JUcmTypeTest::testGetTypeId
 .
 JUcmTypeTest::test__construct
@@ -10912,57 +10964,31 @@ JVersionTest::testGetUserAgent_maskTrue
 .
 JVersionTest::testIsCompatible
 .
+JViewBaseTest::testEscape
+.
 JViewBaseTest::test__construct
-F
+.
+JViewHtmlTest::testEscape
+.
+JViewHtmlTest::testGetLayout
+.
+JViewHtmlTest::testGetPath
+.
+JViewHtmlTest::testGetPaths
+.
+JViewHtmlTest::testLoadPaths
+.
+JViewHtmlTest::testRender
+.
+JViewHtmlTest::testRender_exception
+.
+JViewHtmlTest::testSetLayout
+.
+JViewHtmlTest::testSetPaths
+.
 JViewHtmlTest::test__construct
-F
-JViewLegacyTest::testAddHelperPath
 .
-JViewLegacyTest::testAddTemplatePath
-.
-JViewLegacyTest::testAssign
-I
-JViewLegacyTest::testAssignRef
-I
-JViewLegacyTest::testDisplay
-I
-JViewLegacyTest::testEscape
-I
-JViewLegacyTest::testGet
-.
-JViewLegacyTest::testGetLayout
-.
-JViewLegacyTest::testGetLayoutTemplate
-.
-JViewLegacyTest::testGetModel
-.
-JViewLegacyTest::testGetName
-.
-JViewLegacyTest::testGetNameCamelCase
-.
-JViewLegacyTest::testGetNameFormat
-.
-JViewLegacyTest::testGetNameMultiLevelCamelCase
-.
-JViewLegacyTest::testGetNameMultipleUppercase
-.
-JViewLegacyTest::testLoadHelper
-I
-JViewLegacyTest::testLoadTemplate
-I
-JViewLegacyTest::testSetEscape
-.
-JViewLegacyTest::testSetLayout
-.
-JViewLegacyTest::testSetLayoutExt
-.
-JViewLegacyTest::testSetModel
+JViewHtmlTest::test__toString
 .
 JViewLegacyTest::test__Construct
-I
-JViewLegacyTest::test_addPath
-.
-JViewLegacyTest::test_createFileName
-I
-JViewLegacyTest::test_setPath
-I
+F

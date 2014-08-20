@@ -171,9 +171,7 @@
     test_root: json_schema
   joomla:
     url: https://github.com/joomla/joomla-framework.git
-    # Stable is 2.4.2, but need master since we have pull requests.
-    # e.g., https://github.com/joomla/joomla-framework/pull/314
-    branch: master
+    branch: 1.1.0
     commit: f8a2343d3147f595d43e735b89b11c277520f141
     install_root: joomla-framework
     test_root: joomla-framework
@@ -238,7 +236,7 @@
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
     branch: "3.4-dev"
-    commit: 11b927eb40b6646733ead7a9e3cd5f2e68a289b8
+    commit: 7689d922ca373989e7328f510e94aa2fc541e272
     install_root: joomla-cms
     test_root: joomla-cms
     test_find_mode: token

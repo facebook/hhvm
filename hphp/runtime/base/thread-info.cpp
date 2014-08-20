@@ -187,6 +187,16 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   return flags;
 }
 
+ssize_t check_request_surprise_unlikely() {
+  auto info = ThreadInfo::s_threadInfo.getNoCheck();
+  auto flags = info->m_reqInjectionData.getConditionFlags()->load();
+
+  if (UNLIKELY(flags & ~RequestInjectionData::StickyFlags)) {
+    check_request_surprise(info);
+  }
+  return flags;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -15,22 +15,30 @@
 */
 
 #include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/base/complex-types.h"
+
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/util/exception.h"
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/array-util.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/array-util.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/zend-qsort.h"
+#include "hphp/runtime/base/zend-string.h"
+
+#include "hphp/parser/hphp.tab.hpp"
+
+#include "hphp/util/exception.h"
+
 #include <unicode/coll.h> // icu
 #include <vector>
-#include "hphp/parser/hphp.tab.hpp"
 
 namespace HPHP {
 
@@ -779,8 +787,19 @@ void Array::unserialize(VariableUnserializer *uns) {
   if (size == 0) {
     operator=(Create());
   } else {
-    // Pre-allocate an ArrayData of the given size, to avoid escalation in
-    // the middle, which breaks references.
+    constexpr size_t kArrUnserializeCheckSize = 10000;
+
+    auto const cmret = computeCapAndMask(size);
+    auto const allocsz = computeAllocBytes(cmret.first, cmret.second);
+
+    // For large arrays, do a naive pre-check for OOM.
+    if (UNLIKELY(allocsz > kArrUnserializeCheckSize &&
+                 MM().wouldOOM(allocsz))) {
+      check_request_surprise_unlikely();
+    }
+
+    // Pre-allocate an ArrayData of the given size, to avoid escalation in the
+    // middle, which breaks references.
     operator=(ArrayInit(size, ArrayInit::Mixed{}).toArray());
     for (int64_t i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
@@ -794,6 +813,8 @@ void Array::unserialize(VariableUnserializer *uns) {
       value.unserialize(uns);
     }
   }
+
+  check_request_surprise_unlikely();
 
   sep = uns->readChar();
   if (sep != '}') {

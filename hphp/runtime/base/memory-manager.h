@@ -473,10 +473,22 @@ public:
   bool stopStatsInterval();
 
   /*
+   * Whether an allocation of `size' would run the request out of memory.
+   *
+   * This behaves just like the OOM check in refreshStatsImpl().  If the
+   * m_couldOOM flag is already unset, we return false, but if otherwise we
+   * would exceed the limit, we unset the flag and register an OOM fatal
+   * (though we do not modify the MM's stats).
+   */
+  bool wouldOOM(int64_t size);
+
+  /*
    * Reset whether or not we should raise an OOM fatal if we exceed the memory
-   * limit for the request.  After an OOM fatal, the memory manager refuses to
-   * raise another OOM error until this flag has been reset, to try to avoid
-   * getting OOMs during the initial OOM processing.
+   * limit for the request.
+   *
+   * After an OOM fatal, the memory manager refuses to raise another OOM error
+   * until this flag has been reset, to try to avoid getting OOMs during the
+   * initial OOM processing.
    */
   void resetCouldOOM();
 

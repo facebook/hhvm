@@ -513,6 +513,14 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   }
 }
 
+inline bool MemoryManager::wouldOOM(int64_t size) {
+  if (m_couldOOM && m_stats.usage + size > m_stats.maxBytes) {
+    refreshStatsHelperExceeded();
+    return true;
+  }
+  return false;
+}
+
 inline void MemoryManager::resetCouldOOM() { m_couldOOM = true; }
 
 inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }

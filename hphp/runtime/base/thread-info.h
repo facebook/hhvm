@@ -104,6 +104,7 @@ inline void check_recursion(const ThreadInfo* info) {
 }
 
 ssize_t check_request_surprise(ThreadInfo *info);
+ssize_t check_request_surprise_unlikely();
 
 //////////////////////////////////////////////////////////////////////
 

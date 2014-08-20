@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -1068,6 +1069,9 @@ void Variant::unserialize(VariableUnserializer *uns,
       }
 
       obj->invokeWakeup();
+
+      check_request_surprise_unlikely();
+
       return; // object has '}' terminating
     }
     break;

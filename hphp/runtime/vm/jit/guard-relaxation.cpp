@@ -265,19 +265,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
       simplifyCategory(constraint.innerCat);
 
       auto const oldType = inst.typeParam();
-      auto const newType = relaxType(oldType, constraint);
-
-      // BoxedCell gets relaxed to BoxedInitCell. This is weird but it's legal
-      // for now.
-      auto const boxedCell =
-        oldType == Type::BoxedCell && newType == Type::BoxedInitCell;
-
-      always_assert_flog(
-        oldType <= newType || boxedCell,
-        "relaxType({}, {}) produced invalid result {}"
-        "\n\n{:-^80}\n{}{:-^80}\n",
-        oldType, constraint, newType, " unit ", unit, ""
-      );
+      auto newType = relaxType(oldType, constraint);
 
       if (oldType != newType) {
         ITRACE(1, "relaxGuards changing {}'s type to {}\n", inst, newType);

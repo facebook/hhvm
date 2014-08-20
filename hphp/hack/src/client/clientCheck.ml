@@ -266,6 +266,17 @@ let rec main args retries =
         Printf.fprintf stderr "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n%!";
         exit 6;
       end
+  | Server_out_of_date ->
+      if args.autostart
+      then begin
+        Unix.sleep(1);
+        (* Don't decrement retries -- the server is definitely not running, so
+         * the next time round will hit Server_missing above, *but* before that
+         * will actually start the server -- we need to make sure that happens.
+         *)
+        main args retries
+      end else
+        exit 6
   | Server_directory_mismatch ->
       if retries > 1
       then begin

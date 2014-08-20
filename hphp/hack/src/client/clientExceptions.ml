@@ -10,6 +10,7 @@
 
 exception Server_cant_connect
 exception Server_busy
+exception Server_out_of_date
 exception Server_missing
 exception Server_initializing
 exception Server_directory_mismatch

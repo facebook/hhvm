@@ -71,7 +71,7 @@ let check_status connect (args:client_check_env) =
     then Printf.printf "%s is outdated, going to launch a new one.\n" name
     else Printf.printf "%s is outdated, killing it.\n" name;
     flush stdout;
-    raise Server_missing
+    raise Server_out_of_date
   | ServerMsg.NO_ERRORS ->
     ServerError.print_errorl args.output_json [] stdout;
     exit 0
